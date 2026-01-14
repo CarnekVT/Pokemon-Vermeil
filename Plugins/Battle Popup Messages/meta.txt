@@ -1,0 +1,6 @@
+Name         = Battle Popup Messages
+Version      = 1.0
+Essentials   = 21.1
+Requires     = [DBK] Enhanced Battle UI,2.0.0
+Link         = nein
+Credits      = Zhec, Nononever
