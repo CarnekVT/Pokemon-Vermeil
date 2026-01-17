@@ -1,0 +1,13 @@
+﻿# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+[TYPHLOSION,2]
+FormName = Mega Typhlosion
+MegaStone = TYPHLOSIONITE
+Types = FIRE,ELECTRIC
+Abilities = ELECTRICSURGE
+HiddenAbilities = ELECTRICSURGE
+BaseStats = 78,132,84,130,120,90
+Height = 1.0
+Weight = 25.0
+Pokedex = Mega Evolution has ignited its fur with static electricity. Typhlosion releases discharges to scorch the ground with every step.
+Generation = 9

@@ -1215,7 +1215,7 @@ MidbattleHandlers.add(:midbattle_triggers, "battlerStats",
       showAnim = true
       last_change = 0
       rand_stats = []
-      GameData::Stat.each_battle do |s| 
+      GameData::Stat.each_battle do |s|
         next if params.include?(s.id)
         rand_stats.push(s.id)
       end

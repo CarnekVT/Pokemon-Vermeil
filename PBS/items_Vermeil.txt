@@ -1,0 +1,10 @@
+﻿# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+[TYPHLOSIONITE]
+Name = Typhlosionite
+NamePlural = Typhlosionites
+Pocket = 1
+Price = 0
+BPPrice = 50
+Flags = MegaStone,Fling_80
+Description = One of a variety of mysterious Mega Stones. Have Typhlosion hold it, and it will be able to Mega Evolve.
