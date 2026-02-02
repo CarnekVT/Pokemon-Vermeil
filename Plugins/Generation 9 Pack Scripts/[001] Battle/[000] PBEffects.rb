@@ -6,23 +6,26 @@
 
 
 module PBEffects
-  AllySwitch      = 400 # Used to determine if Ally Switch should fail.
-  BoosterEnergy   = 401 # Used to flag whether or not ParadoxStat should persist due to Booster Energy.
-  Commander       = 402 # Used for storing data related to Commander.
-  CudChew         = 403 # Used to count the remaining rounds until Cud Chew triggers.
-  DoubleShock     = 404 # Used for removing the user's Electric typing after using Double Shock.
-  GlaiveRush      = 405 # Used to count the remaining rounds until vulnerability from Glaive Rush wares off.
-  ParadoxStat     = 406 # Used to reference which stat is being boosted by Protosynthesis/Quark Drive.
-  OneUseAbility   = 407 # Used to flag a battler's ability to only trigger once per switch-in.
-  SaltCure        = 408 # Used to flag a battler as under the effects of Salt Cure.
-  SilkTrap        = 409 # Used to flag a battler as under the protection effects of Silk Trap.
-  Splinters       = 410 # Used to flag a battler as under the splinters effect.
-  SplintersType   = 411 # Used to determine the type effectiveness of splinters damage.
-  SuccessiveMove  = 412 # Used to flag a move as unselectable by a battler on consecutive turns.
-  SupremeOverlord = 413 # Used to trigger the effects of the Supreme Overlord ability.
-  Syrupy          = 414 # Used to track the remaining number of turns until Syrup Bomb's effect wares off.
-  SyrupyUser      = 415 # Used to track the Syrup Bomb user so the effect ends if they leave the field.
-  BurningBulwark  = 416 # Used for the effect of Burning Bulwark.
+  AllySwitch                 = 400 # Used to determine if Ally Switch should fail.
+  BoosterEnergy              = 401 # Used to flag whether or not ParadoxStat should persist due to Booster Energy.
+  Commander                  = 402 # Used for storing data related to Commander.
+  CudChew                    = 403 # Used to count the remaining rounds until Cud Chew triggers.
+  DoubleShock                = 404 # Used for removing the user's Electric typing after using Double Shock.
+  GlaiveRush                 = 405 # Used to count the remaining rounds until vulnerability from Glaive Rush wares off.
+  ParadoxStat                = 406 # Used to reference which stat is being boosted by Protosynthesis/Quark Drive.
+  OneUseAbility              = 407 # Used to flag a battler's ability to only trigger once per switch-in.
+  SaltCure                   = 408 # Used to flag a battler as under the effects of Salt Cure.
+  SilkTrap                   = 409 # Used to flag a battler as under the protection effects of Silk Trap.
+  Splinters                  = 410 # Used to flag a battler as under the splinters effect.
+  SplintersType              = 411 # Used to determine the type effectiveness of splinters damage.
+  SuccessiveMove             = 412 # Used to flag a move as unselectable by a battler on consecutive turns.
+  SupremeOverlord            = 413 # Used to trigger the effects of the Supreme Overlord ability.
+  Syrupy                     = 414 # Used to track the remaining number of turns until Syrup Bomb's effect wares off.
+  SyrupyUser                 = 415 # Used to track the Syrup Bomb user so the effect ends if they leave the field.
+  BurningBulwark             = 416 # Used for the effect of Burning Bulwark.
+  DecorativeWeather          = 1001 # Current decorative weather type
+  DecorativeWeatherStrength  = 1002 # Decorative weather intensity
+  DecorativeWeatherDuration  = 1003 # Decorative weather duration
 end
 
 #-------------------------------------------------------------------------------
@@ -43,4 +46,8 @@ module Battle::DebugVariables
   BATTLER_EFFECTS[PBEffects::Syrupy]          = { name: "Syrupy turns remaining",                        default: 0 }
   BATTLER_EFFECTS[PBEffects::SyrupyUser]      = { name: "Battler syruped self",                          default: -1 }
   BATTLER_EFFECTS[PBEffects::BurningBulwark]  = { name: "Burning Bulwark applies this round",            default: false }
+  
+  FIELD_EFFECTS[PBEffects::DecorativeWeather]         = { name: "Decorative weather type",                     default: nil, type: :weather }
+  FIELD_EFFECTS[PBEffects::DecorativeWeatherStrength] = { name: "Decorative weather strength (0-40)",          default: 0, max: 40 }
+  FIELD_EFFECTS[PBEffects::DecorativeWeatherDuration] = { name: "Decorative weather duration (rounds)",        default: 0, max: 99 }
 end

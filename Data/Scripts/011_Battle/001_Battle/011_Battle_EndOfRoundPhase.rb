@@ -282,7 +282,8 @@ class Battle
     :MAGMASTORM  => "MagmaStorm",
     :SANDTOMB    => "SandTomb",
     :WRAP        => "Wrap",
-    :INFESTATION => "Infestation"
+    :INFESTATION => "Infestation",
+    :OBSIDIANSHELL => "Wrap"  # Usamos la animación de Wrap para los splinters
   }
 
   def pbEORTrappingDamage(battler)

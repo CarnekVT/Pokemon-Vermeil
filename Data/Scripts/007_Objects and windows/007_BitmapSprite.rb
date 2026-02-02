@@ -222,6 +222,8 @@ class ChangelingSprite < Sprite
     @bitmaps[key]&.dispose
     @bitmaps[key] = AnimatedBitmap.new(path)
   end
+  
+  alias add_bitmap addBitmap
 
   def changeBitmap(key)
     @currentBitmap = @bitmaps[key]

@@ -826,15 +826,25 @@ class Battle::Scene
             end
             desc = _INTL("The Pokémon loses {1} HP at the end of each turn.", data)
           #---------------------------------------------------------------------
-          when :Splinters
-            name = _INTL("Splinters")
-            tick = sprintf("%d/%d", value, 3)
-            if battler.effects[PBEffects::SplintersType]
-              desc = _INTL("The Pokémon takes {1} type damage at the end of each turn.", 
-              GameData::Type.get(battler.effects[PBEffects::SplintersType]).name)
-            else
-              desc = _INTL("The Pokémon takes damage at the end of each turn.")
-            end
+           when :Splinters
+             name = _INTL("Splinters")
+             tick = sprintf("%d/%d", value, 3)
+             if battler.effects[PBEffects::SplintersType]
+               desc = _INTL("The Pokémon takes {1} type damage at the end of each turn.", 
+               GameData::Type.get(battler.effects[PBEffects::SplintersType]).name)
+             else
+               desc = _INTL("The Pokémon takes damage at the end of each turn.")
+             end
+           #---------------------------------------------------------------------
+             when :BurningRampage
+               next unless battler.hasActiveAbility?(:BURNINGRAMPAGE)
+               name = _INTL("Burning Rampage")
+               value ||= 0
+               tick = sprintf("%d/5", value)
+               bonus = value * 10
+               desc = _INTL("Fire type moves deal {1}% more damage.", bonus)
+             #---------------------------------------------------------------------
+
           ######################################################################
           #
           # BATTLER EFFECTS - MOVE/ATTRIBUTE BLOCKING

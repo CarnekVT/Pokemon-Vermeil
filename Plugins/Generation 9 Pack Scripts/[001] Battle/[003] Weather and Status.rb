@@ -83,7 +83,7 @@ class Battle
   #-----------------------------------------------------------------------------
   # Edited to display the correct start messages for overworld weather/terrain.
   #-----------------------------------------------------------------------------
-  def pbStartBattleCore
+  def pbStartBattleCore(battle_loop = true)
     sendOuts = pbSetUpSides
     @battleAI.create_ai_objects
     @scene.pbStartBattle(self)
@@ -91,8 +91,6 @@ class Battle
     weather_data = GameData::BattleWeather.try_get(@field.weather)
     pbCommonAnimation(weather_data.animation) if weather_data
     pbWeatherStartMessage
-    terrain_data = GameData::BattleTerrain.try_get(@field.terrain)
-    pbCommonAnimation(terrain_data.animation) if terrain_data
     pbTerrainStartMessage
     pbOnAllBattlersEnteringBattle
     pbBattleLoop

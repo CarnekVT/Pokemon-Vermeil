@@ -1,5 +1,6 @@
 module GameData
   class Type
+    
     attr_reader :id
     attr_reader :real_name
     attr_reader :icon_position   # Where this type's icon is within types.png

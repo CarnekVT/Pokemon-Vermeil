@@ -791,8 +791,6 @@ class Battle
                                                             duration, user, self)
     end
     @field.terrainDuration = duration
-    terrain_data = GameData::BattleTerrain.try_get(@field.terrain)
-    pbCommonAnimation(terrain_data.animation) if terrain_data
     pbHideAbilitySplash(user) if user
     case @field.terrain
     when :Electric

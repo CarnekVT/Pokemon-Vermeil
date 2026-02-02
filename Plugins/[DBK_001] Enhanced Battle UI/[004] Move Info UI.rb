@@ -83,7 +83,8 @@ class Battle::Scene
         category = move.calcCategory
       end
     when "CategoryDependsOnHigherDamagePoisonTarget",        # Shell Side Arm
-         "CategoryDependsOnHigherDamageIgnoreTargetAbility"  # Photon Geyser
+         "CategoryDependsOnHigherDamageIgnoreTargetAbility",  # Photon Geyser
+         "ReactiveThorn"                                       # Reactive Thorn
       move.pbOnStartUse(battler, [battler.pbDirectOpposing])
       category = move.calcCategory
     end

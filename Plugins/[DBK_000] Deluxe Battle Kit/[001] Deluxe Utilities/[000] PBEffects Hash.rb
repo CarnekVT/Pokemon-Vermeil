@@ -160,7 +160,8 @@ $DELUXE_PBEFFECTS = {
       :HyperBeam,
       :Yawn,
       :PerishSong,
-      :SlowStart
+      :SlowStart,
+      :BurningRampage
     ]
   }
 }

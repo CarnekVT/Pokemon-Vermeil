@@ -1,0 +1,43 @@
+﻿# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+# Magcargo
+#-------------------------------
+[OBSIDIANSHELL]
+Name = Obsidian Shell
+Description = Reduces damage from Water and Ground type moves. When hit, sharp splinters are dug around the foe, and boosts Defense and Sp.Defense.
+#-------------------------------
+# Throgre
+#-------------------------------
+[BURNINGRAMPAGE]
+Name = Burning Rampage
+Description = Each time the Pokémon is hit, its Fire type moves gain 10% cumulative power per hit (max 50%). Immune to freezing.
+#-------------------------------
+# Sawni
+#-------------------------------
+[FROSTEDGE]
+Name = Frost Edge
+Description = Slicing and contact moves have a 20% chance to freeze the target if it has any lowered stats. Also, increases the Pokémon's Speed by 20% during the hailstorm.
+#-------------------------------
+# Mega Meganium
+#-------------------------------
+[REACTIVEPOLLEN]
+Name = Reactive Pollen
+Description = When hit by a Physical attack, releases spores that lower the attacker's Attack and Speed. If hit by a Special attack, lowers their Sp. Atk and Speed.
+#-------------------------------
+# Mega Emboar
+#-------------------------------
+[BLAZINGVANGUARD]
+Name = Blazing Vanguard
+Description = Protects the Pokémon from recoil damage and reduces damage from physical moves. It also boosts its Attack upon entering battle.
+#-------------------------------
+# Johtonian Wimpod
+#-------------------------------
+[SQUIRESWILL]
+Name = Squire's Will
+Description = When HP drops to half or less, Defense and Sp. Def sharply rise, and Attack, Sp. Atk and Speed rises. While HP is low, prevents flinching and being forced out of battle.
+#-------------------------------
+# Johtonian Golisopod
+#-------------------------------
+[WARLORDSGAZE]
+Name = Warlord's Gaze
+Description = Intimidates foes upon entry, lowering their Attack. Ruthlessly strikes any opponent that attempts to flee from battle.

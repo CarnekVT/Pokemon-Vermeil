@@ -281,6 +281,7 @@ class Battle::Move::StartElectricTerrain < Battle::Move
 
   def pbEffectGeneral(user)
     @battle.pbStartTerrain(user, :Electric)
+    @battle.scene.update_hazard_sprites if @battle.scene.respond_to?(:update_hazard_sprites)
   end
 end
 
@@ -300,6 +301,7 @@ class Battle::Move::StartGrassyTerrain < Battle::Move
 
   def pbEffectGeneral(user)
     @battle.pbStartTerrain(user, :Grassy)
+    @battle.scene.update_hazard_sprites if @battle.scene.respond_to?(:update_hazard_sprites)
   end
 end
 
@@ -319,6 +321,7 @@ class Battle::Move::StartMistyTerrain < Battle::Move
 
   def pbEffectGeneral(user)
     @battle.pbStartTerrain(user, :Misty)
+    @battle.scene.update_hazard_sprites if @battle.scene.respond_to?(:update_hazard_sprites)
   end
 end
 
@@ -338,6 +341,7 @@ class Battle::Move::StartPsychicTerrain < Battle::Move
 
   def pbEffectGeneral(user)
     @battle.pbStartTerrain(user, :Psychic)
+    @battle.scene.update_hazard_sprites if @battle.scene.respond_to?(:update_hazard_sprites)
   end
 end
 
@@ -366,6 +370,7 @@ class Battle::Move::RemoveTerrain < Battle::Move
       @battle.pbDisplay(_INTL("The weirdness disappeared from the battlefield."))
     end
     @battle.field.terrain = :None
+    @battle.scene.update_hazard_sprites if @battle.scene.respond_to?(:update_hazard_sprites)
   end
 end
 

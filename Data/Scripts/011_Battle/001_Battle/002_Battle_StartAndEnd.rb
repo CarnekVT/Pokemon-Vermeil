@@ -284,6 +284,17 @@ class Battle
     @scene.pbStartBattle(self)
     # Show trainers on both sides sending out Pokémon
     pbStartBattleSendOut(sendOuts)
+    # Apply decorative weather
+    if $game_variables && $game_variables[DecorativeWeather::DECORATIVE_WEATHER_VAR] && !$game_variables[DecorativeWeather::DECORATIVE_WEATHER_VAR].empty?
+      weather_id = $game_variables[DecorativeWeather::DECORATIVE_WEATHER_VAR].to_sym
+      strength = $game_variables[DecorativeWeather::DECORATIVE_WEATHER_STRENGTH_VAR]
+      duration = $game_variables[DecorativeWeather::DECORATIVE_WEATHER_DURATION_VAR]
+      if DecorativeWeather::DECORATIVE_WEATHERS.include?(weather_id)
+        DecorativeWeather.set_decorative_weather(self, weather_id, strength, duration)
+      elsif weather_id == DecorativeWeather::THUNDERSTORM_WEATHER
+        self.pbStartWeather(nil, :HeavyRain, false, true)
+      end
+    end
     # Weather announcement
     weather_data = GameData::BattleWeather.try_get(@field.weather)
     pbCommonAnimation(weather_data.animation) if weather_data

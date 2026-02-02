@@ -200,6 +200,7 @@ class Battle
         tMoney *= 2 if @field.effects[PBEffects::AmuletCoin]
         tMoney *= 2 if @field.effects[PBEffects::HappyHour]
         tMoney *= plush_mult
+        tMoney = tMoney.to_i
         oldMoney = pbPlayer.money
         pbPlayer.money += tMoney
         moneyGained = pbPlayer.money - oldMoney
@@ -213,8 +214,9 @@ class Battle
         @field.effects[PBEffects::PayDay] *= 2 if @field.effects[PBEffects::AmuletCoin]
         @field.effects[PBEffects::PayDay] *= 2 if @field.effects[PBEffects::HappyHour]
         @field.effects[PBEffects::PayDay] *= plush_mult
+        payDayMoney = @field.effects[PBEffects::PayDay].to_i
         oldMoney = pbPlayer.money
-        pbPlayer.money += @field.effects[PBEffects::PayDay]
+        pbPlayer.money += payDayMoney
         moneyGained = pbPlayer.money - oldMoney
         if moneyGained > 0
           $stats.battle_money_gained += moneyGained

@@ -1,5 +1,6 @@
 module GameData
   class Move
+    
     attr_reader :id
     attr_reader :real_name
     attr_reader :type

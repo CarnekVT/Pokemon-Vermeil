@@ -116,3 +116,10 @@ Pokemon = CHARIZARD,63
     Item = SITRUSBERRY
 Pokemon = BLASTOISE,63
     Item = SITRUSBERRY
+#-------------------------------
+[AROMALADY,Testing]
+LoseText = ...
+Pokemon = BULBASAUR,10
+    Moves = UTURN
+Pokemon = VENUSAUR,10
+    Moves = UTURN

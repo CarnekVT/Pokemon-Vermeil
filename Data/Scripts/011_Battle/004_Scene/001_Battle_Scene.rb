@@ -363,6 +363,8 @@ class Battle::Scene
   def pbEndBattle(_result)
     @abortable = false
     pbShowWindow(BLANK)
+    # Stop terrain animation before fading out
+    pbStopTerrainAnimation if respond_to?(:pbStopTerrainAnimation)
     # Fade out all sprites
     pbBGMFade(1.0)
     pbFadeOutAndHide(@sprites)

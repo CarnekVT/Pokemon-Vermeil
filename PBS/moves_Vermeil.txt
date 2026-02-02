@@ -1,0 +1,45 @@
+# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+# Throgre Exclusive Move
+#-------------------------------
+[BLAZINGCLUB]
+Name = Blazing Club
+Type = FIRE
+Category = Physical
+Power = 70
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = IgnoreScreensIfUserBurningRampageFull
+Flags = Contact,CanProtect,CanMirrorMove,HighCriticalHitRate
+EffectChance = 100
+Description = The user attacks with a blazing club. Has a high critical-hit ratio. If Burning Rampage is fully charged, this move ignores screens.
+#-------------------------------
+# Sawni Exclusive Move
+#-------------------------------
+[ICICLESLASH]
+Name = Icicle Slash
+Type = ICE
+Category = Physical
+Power = 70
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = LowerTargetSpeed1
+Flags = Contact,CanProtect,CanMirrorMove,Slicing
+EffectChance = 100
+Description = The user slashes at the target with a sharp icicle. This also lowers the target's Speed stat.
+#-----------------------------------------------
+# Reactive Thorn - Grass Starters Move 
+#-----------------------------------------------
+[REACTIVETHORN]
+Name = Reactive Thorn
+Type = GRASS
+Category = Physical
+Power = 50
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = ReactiveThorn
+Flags = Contact,CanProtect,CanMirrorMove
+Description = Attacks with adaptive spines using the higher offensive stat. Super effective against Flying and Bug types.
