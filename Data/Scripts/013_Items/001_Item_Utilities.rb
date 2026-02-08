@@ -600,7 +600,7 @@ def pbLearnMove(pkmn, move, ignore_if_known = false, by_machine = false, &block)
     return true
   end
   pbMessage(_INTL("{1} wants to learn {2}, but it already knows {3} moves.",
-                  pkmn_name, move_name, pkmn.numMoves.to_word) + "\1", &block)
+                   pkmn_name, move_name, pkmn.numMoves.to_word), &block)
   if pbConfirmMessage(_INTL("Should {1} forget a move to learn {2}?", pkmn_name, move_name), &block)
     loop do
       move_index = pbForgetMove(pkmn, move)
@@ -611,8 +611,8 @@ def pbLearnMove(pkmn, move, ignore_if_known = false, by_machine = false, &block)
         if by_machine && Settings::TAUGHT_MACHINES_KEEP_OLD_PP
           pkmn.moves[move_index].pp = [oldmovepp, pkmn.moves[move_index].total_pp].min
         end
-        pbMessage(_INTL("1, 2, and...\\wt[16] ...\\wt[16] ...\\wt[16] Ta-da!") + "\\se[Battle ball drop]\1", &block)
-        pbMessage(_INTL("{1} forgot how to use {2}.\\nAnd..." + "\1", pkmn_name, old_move_name), &block)
+        pbMessage(_INTL("Unforgetable exchange!\\n1, 2, and...\\wt[16] ...\\wt[16] ...\\wt[16] Ta-da!") + "\\se[Battle ball drop]", &block)
+        pbMessage(_INTL("{1} forgot how to use {2}.\\nAnd...", pkmn_name, old_move_name), &block)
         pbMessage("\\se[]" + _INTL("{1} learned {2}!", pkmn_name, move_name) + "\\se[Pkmn move learnt]", &block)
         pkmn.changeHappiness("machine") if by_machine
         return true

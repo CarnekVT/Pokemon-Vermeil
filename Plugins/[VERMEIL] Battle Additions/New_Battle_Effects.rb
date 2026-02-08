@@ -73,3 +73,17 @@ class Battle::Move::ReactiveThorn < Battle::Move
     return super
   end
 end
+
+#-------------------------------------------------------------------------------
+# Custom FunctionCode: Warlord's Crush
+# Deals double damage if the target's Attack is lowered.
+#-------------------------------------------------------------------------------
+class Battle::Move::WarlordsCrush < Battle::Move
+  def pbBaseDamage(baseDmg, user, target)
+    if target.stages[:ATTACK] < 0
+      PBDebug.log("[Warlord's Crush] Target Attack is lowered, doubling damage.")
+      return baseDmg * 2
+    end
+    return baseDmg
+  end
+end

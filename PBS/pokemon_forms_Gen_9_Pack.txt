@@ -576,6 +576,7 @@ Generation = 9
 [EMBOAR,1]
 FormName = Mega Emboar
 MegaStone = EMBOARITE
+Abilities = BLAZINGVANGUARD
 BaseStats = 110,148,75,110,110,75
 Height = 1.8
 Weight = 180.3

@@ -10,8 +10,8 @@ module OWShadowSettings
   # If an event name contains one of these words, it will not have a shadow.
   SHADOWLESS_EVENT_NAME     = [
     "door", "FlechaSalida", "nurse", "Enfermera", "Healing balls", "Balls curativas", "Mart","Tendero", "SmashRock", "RocaRompible", "StrengthBoulder", "PiedraFuerza",
-    "CutTree", "ArbolCorte", "HeadbuttTree", "ArbolGolpeCabeza", "BerryPlant", "Planta Bayas", ".shadowless", ".noshadow", ".sl", "Entrada Mazmorra Bosque", "Entrada Cueva", "Relic Stone",
-    "Escalera", "Puerta"
+    "CutTree", "ArbolCorte", "HeadbuttTree", "ArbolGolpeCabeza", "BerryPlant", "Planta Bayas", ".shadowless", ".noshadow", "Entrada Mazmorra Bosque", "Entrada Cueva", "Relic Stone",
+    "Escalera", "Puerta","Windmill"
   ]
 
   # If the character file and event uses contains one of these words in its filename, it will not have a shadow.

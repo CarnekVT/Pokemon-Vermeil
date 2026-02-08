@@ -58,7 +58,7 @@ module CustomWeather
     TYPE_ROSE_PETALS => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.2, opacity: -1 },
     TYPE_FEATHERS => { behavior: :flutter, battle_weather: :None, delta_x: -0.5, delta_y: 0.8, opacity: -1 },
     TYPE_AUTUMN_LEAVES_FALLING => { behavior: :flutter, battle_weather: :None, delta_x: -2.0, delta_y: 1.5, opacity: -2 },
-    TYPE_GREEN_LEAVES => { behavior: :flutter, battle_weather: :None, delta_x: -2.0, delta_y: 2.0, opacity: -3 },
+    TYPE_GREEN_LEAVES => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.0, opacity: -1 },
     TYPE_AUTUMN_LEAVES_BLOWING => { behavior: :spin, battle_weather: :None, delta_x: -12.0, delta_y: 2.0, opacity: -5 },
     TYPE_AUTUMN_LEAVES_WHIRLING => { behavior: :whirl, battle_weather: :None, delta_x: 0, delta_y: 0, opacity: -4 },
     TYPE_SPARKS => { behavior: :rise, battle_weather: :None, delta_x: 0, delta_y: -2.0, opacity: -6 },
@@ -70,7 +70,7 @@ module CustomWeather
     TYPE_ROSE_PETALS_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.2, opacity: -1 },
     TYPE_FEATHERS_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -0.5, delta_y: 0.8, opacity: -1 },
     TYPE_AUTUMN_FALLING_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -2.0, delta_y: 1.5, opacity: -2 },
-    TYPE_GREEN_LEAVES_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -2.0, delta_y: 2.0, opacity: -3 },
+    TYPE_GREEN_LEAVES_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.0, opacity: -1 },
     TYPE_AUTUMN_BLOWING_PRESENT_COLOR => { behavior: :spin, battle_weather: :None, delta_x: -12.0, delta_y: 2.0, opacity: -5 },
     TYPE_AUTUMN_WHIRLING_PRESENT_COLOR => { behavior: :whirl, battle_weather: :None, delta_x: 0, delta_y: 0, opacity: -4 },
     TYPE_SPARKS_PRESENT_COLOR => { behavior: :rise, battle_weather: :None, delta_x: 0, delta_y: -2.0, opacity: -6 }
@@ -140,7 +140,7 @@ module CustomWeather
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_green),
           graphics: [["green_leaf"], []],
-          particle_delta_x: -2, particle_delta_y: 2, particle_delta_opacity: -3 },
+          particle_delta_x: -1.5, particle_delta_y: 1.2, particle_delta_opacity: -2 },
           
         { id: TYPE_SAKURA_PETALS, id_number: 14, category: :Rain,
           battle_weather: :None,
@@ -207,7 +207,7 @@ module CustomWeather
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_none),
           graphics: [["green_leaf"], []],
-          particle_delta_x: -2, particle_delta_y: 2, particle_delta_opacity: -3 },
+          particle_delta_x: -1.5, particle_delta_y: 1.2, particle_delta_opacity: -2 },
 
         { id: TYPE_ROSE_PETALS_PRESENT_COLOR, id_number: 25, category: :Rain,
           battle_weather: :None,
@@ -511,6 +511,9 @@ end
 
 def pbSetCustomWeather(type, max = 40, duration = 20)
   return unless $game_map && $game_map.weather
+  if type == CustomWeather::TYPE_GREEN_LEAVES
+    max = [(max * 0.9).round, 6].max
+  end
   weather_type = GameData::Weather.get(type).id
   $game_map.weather.fade_in(weather_type, max, duration)
 end

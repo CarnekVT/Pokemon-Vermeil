@@ -10,31 +10,44 @@ class Battle::Scene::Animation::Intro < Battle::Scene::Animation
   def createProcesses
     appearTime = 20   # This is in 1/20 seconds
     # Background
-    if @sprites["battle_bg2"]
-      makeSlideSprite("battle_bg", 0.5, appearTime)
-      makeSlideSprite("battle_bg2", 0.5, appearTime)
+    disable_bg_slide = true
+    if !disable_bg_slide
+      if @sprites["battle_bg2"]
+        makeSlideSprite("battle_bg", 0.5, appearTime)
+        makeSlideSprite("battle_bg2", 0.5, appearTime)
+      else
+        makeSlideSprite("battle_bg", 0.5, appearTime)
+      end
     end
     # Bases
-    makeSlideSprite("base_0", 1, appearTime, PictureOrigin::BOTTOM)
-    makeSlideSprite("base_1", -1, appearTime, PictureOrigin::CENTER)
+    if !disable_bg_slide
+      makeSlideSprite("base_0", 1, appearTime, PictureOrigin::BOTTOM)
+      makeSlideSprite("base_1", -1, appearTime, PictureOrigin::CENTER)
+    end
     # Player sprite, partner trainer sprite
-    @battle.player.each_with_index do |_p, i|
-      makeSlideSprite("player_#{i + 1}", 1, appearTime, PictureOrigin::BOTTOM)
+    if !disable_bg_slide
+      @battle.player.each_with_index do |_p, i|
+        makeSlideSprite("player_#{i + 1}", 1, appearTime, PictureOrigin::BOTTOM)
+      end
     end
     # Opposing trainer sprite(s) or wild Pokémon sprite(s)
-    if @battle.trainerBattle?
-      @battle.opponent.each_with_index do |_p, i|
-        makeSlideSprite("trainer_#{i + 1}", -1, appearTime, PictureOrigin::BOTTOM)
-      end
-    else   # Wild battle
-      @battle.pbParty(1).each_with_index do |_pkmn, i|
-        idxBattler = (2 * i) + 1
-        makeSlideSprite("pokemon_#{idxBattler}", -1, appearTime, PictureOrigin::BOTTOM)
+    if !disable_bg_slide
+      if @battle.trainerBattle?
+        @battle.opponent.each_with_index do |_p, i|
+          makeSlideSprite("trainer_#{i + 1}", -1, appearTime, PictureOrigin::BOTTOM)
+        end
+      else   # Wild battle
+        @battle.pbParty(1).each_with_index do |_pkmn, i|
+          idxBattler = (2 * i) + 1
+          makeSlideSprite("pokemon_#{idxBattler}", -1, appearTime, PictureOrigin::BOTTOM)
+        end
       end
     end
     # Shadows
-    @battle.battlers.length.times do |i|
-      makeSlideSprite("shadow_#{i}", (i.even?) ? 1 : -1, appearTime, PictureOrigin::CENTER)
+    if !disable_bg_slide
+      @battle.battlers.length.times do |i|
+        makeSlideSprite("shadow_#{i}", (i.even?) ? 1 : -1, appearTime, PictureOrigin::CENTER)
+      end
     end
     # Fading blackness over whole screen
     blackScreen = addNewSprite(0, 0, "Graphics/Battle animations/black_screen")

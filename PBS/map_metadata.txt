@@ -5,11 +5,12 @@ Name = Intro
 #-------------------------------
 [032]   # Test
 Name = Test
-Weather = Blizzard,100
+Weather = SakuraPetals,100
 #-------------------------------
 [042]   # New Bark Town
 Name = New Bark Town
 ShowArea = true
 Weather = GreenLeavesPresentColor,100
 SnapEdges = true
+BattleBack = NewBark
 Environment = Grass

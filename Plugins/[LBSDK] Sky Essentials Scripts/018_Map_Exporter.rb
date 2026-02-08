@@ -17,6 +17,96 @@
 # If this file already exists, it is overwritten.
 EXPORTEDMAPBASENAME = "MapExporter/MAP_EXPORTED_"
 
+unless 0.respond_to?(:to_digits)
+  class Integer
+    def to_digits
+      format("%03d", self)
+    end
+  end
+end
+
+unless defined?(pbGetActiveEventPage)
+  def pbGetActiveEventPage(event, map_id)
+    return nil if !event || !event.pages
+    event.pages.reverse_each do |page|
+      c = page.condition
+      next if c.switch1_valid && !pbMapExporterSwitchIsOn?(c.switch1_id)
+      next if c.switch2_valid && !pbMapExporterSwitchIsOn?(c.switch2_id)
+      next if c.variable_valid && $game_variables[c.variable_id] < c.variable_value
+      if c.self_switch_valid
+        key = [map_id, event.id, c.self_switch_ch]
+        next if $game_self_switches[key] != true
+      end
+      return page
+    end
+    return nil
+  end
+end
+
+unless defined?(pbMapExporterSwitchIsOn?)
+  def pbMapExporterSwitchIsOn?(id)
+    switchname = $data_system.switches[id]
+    return false if !switchname
+    if switchname[/^s\:/]
+      return eval($~.post_match)
+    end
+    return $game_switches[id]
+  end
+end
+
+unless defined?(pbMapExporterSavePng)
+  def pbMapExporterSavePng(bitmap, filename)
+    if bitmap.respond_to?(:save_to_png)
+      bitmap.save_to_png(filename)
+    elsif bitmap.respond_to?(:save_png)
+      bitmap.save_png(filename)
+    elsif bitmap.respond_to?(:save_to_file)
+      bitmap.save_to_file(filename)
+    elsif bitmap.respond_to?(:get_pixel)
+      pbMapExporterWritePng(bitmap, filename)
+    else
+      raise NoMethodError, "Bitmap missing save_to_png/save_png/save_to_file"
+    end
+  end
+end
+
+unless defined?(pbMapExporterWritePng)
+  def pbMapExporterWritePng(bitmap, filename)
+    require "zlib"
+    width = bitmap.width
+    height = bitmap.height
+    raw = String.new.b
+    height.times do |y|
+      raw << 0.chr
+      width.times do |x|
+        c = bitmap.get_pixel(x, y)
+        r = [[c.red.to_i, 0].max, 255].min
+        g = [[c.green.to_i, 0].max, 255].min
+        b = [[c.blue.to_i, 0].max, 255].min
+        a = [[c.alpha.to_i, 0].max, 255].min
+        raw << r.chr << g.chr << b.chr << a.chr
+      end
+    end
+    compressed = Zlib::Deflate.deflate(raw)
+    File.open(filename, "wb") do |f|
+      f.write "\x89PNG\r\n\x1a\n"
+      ihdr = [width, height, 8, 6, 0, 0, 0].pack("NNCCCCC")
+      pbMapExporterWriteChunk(f, "IHDR", ihdr)
+      pbMapExporterWriteChunk(f, "IDAT", compressed)
+      pbMapExporterWriteChunk(f, "IEND", "")
+    end
+  end
+end
+
+unless defined?(pbMapExporterWriteChunk)
+  def pbMapExporterWriteChunk(io, type, data)
+    io.write [data.bytesize].pack("N")
+    io.write type
+    io.write data
+    io.write [Zlib.crc32(type + data)].pack("N")
+  end
+end
+
 
 def pbExportMap(id = nil, options = [])
   mapExporter = MarinMapExporter.new(id, options)
@@ -144,7 +234,7 @@ class MarinMapExporter
     end
     @exported_file = "#{EXPORTEDMAPBASENAME}#{Time.now.strftime('%d_%m_%YT%H_%M_%S')}.png"  
     Dir.mkdir("MapExporter") if !Dir.exists?("MapExporter")
-    @result.save_to_png(@exported_file)
+    pbMapExporterSavePng(@result, @exported_file)
     Input.update
   end
   

@@ -532,15 +532,16 @@ end
 # Edited to allow the opponent's sprite to slide on screen in various ways.
 #===============================================================================
 class Battle::Scene::Animation::Intro < Battle::Scene::Animation
-  def makeSlideSprite(spriteName, deltaMult, appearTime, origin = nil)
-    return if !@sprites[spriteName]
-    s = addSprite(@sprites[spriteName], origin)
-    style = (pbInSafari?) ? nil : @battle.slideSpriteStyle
-    if !style.nil? && deltaMult < 0
-      style = style.split("_")
-      base = spriteName.include?("base_") || spriteName.include?("shadow_")
-      hideBase = style[1] == "hideBase"
-      case style[0]
+    def makeSlideSprite(spriteName, deltaMult, appearTime, origin = nil)
+      return if !@sprites[spriteName]
+      s = addSprite(@sprites[spriteName], origin)
+      return # Forzar detención inmediata
+      style = (pbInSafari?) ? nil : @battle.slideSpriteStyle
+      if !style.nil? && deltaMult < 0
+        style = style.split("_")
+        base = spriteName.include?("base_") || spriteName.include?("shadow_")
+        hideBase = style[1] == "hideBase"
+        case style[0]
       #-------------------------------------------------------------------------
       when "still"  # Sprite doesn't slide in.
         s.setVisible(0, false) if base && hideBase
@@ -591,13 +592,13 @@ class Battle::Scene::Animation::Intro < Battle::Scene::Animation
           end
         end
       end
+      else
       #-------------------------------------------------------------------------
-    else
       s.setDelta(0, (Graphics.width * deltaMult).floor, 0)
       s.moveDelta(0, appearTime, (-Graphics.width * deltaMult).floor, 0)
+      end
     end
   end
-end
 
 def findTop(bitmap)
   return 0 if !bitmap

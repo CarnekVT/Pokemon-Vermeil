@@ -4,6 +4,7 @@
 class AnimatedBitmap
   def initialize(file, hue = 0)
     raise "Filename is nil (missing graphic)." if file.nil?
+    puts "DEBUG: AnimatedBitmap - Initializing with file: #{file}"
     path     = file
     filename = ""
     if file.last != "/"   # Isn't just a directory
@@ -11,11 +12,11 @@ class AnimatedBitmap
       filename = split_file.pop
       path = split_file.join("/") + "/"
     end
-    if filename[/^\[\d+(?:,\d+)?\]/]   # Starts with 1 or 2 numbers in square brackets
-      @bitmap = PngAnimatedBitmap.new(path, filename, hue)
-    else
-      @bitmap = GifBitmap.new(path, filename, hue)
-    end
+    puts "DEBUG: AnimatedBitmap - Split path: #{path}, filename: #{filename}"
+    # Ignore [W,H] prefix in filename for animated bitmap detection
+    base_filename = filename.gsub(/^\[\d+(?:,\d+)?\]/, '')
+    puts "DEBUG: AnimatedBitmap - Base filename (without prefix): #{base_filename}"
+    @bitmap = GifBitmap.new(path, filename, hue)
   end
 
   def [](index);    @bitmap[index];                     end
@@ -41,11 +42,13 @@ class PngAnimatedBitmap
 
   # Creates an animated bitmap from a PNG file.
   def initialize(dir, filename, hue = 0)
+    puts "DEBUG: PngAnimatedBitmap - Initializing with dir: #{dir}, filename: #{filename}"
     @frames       = []
     @currentFrame = 0
     @timer_start  = System.uptime
     panorama = RPG::Cache.load_bitmap(dir, filename, hue)
-    if filename[/^\[(\d+)(?:,(\d+))?\]/]   # Starts with 1 or 2 numbers in brackets
+    puts "DEBUG: PngAnimatedBitmap - Loaded bitmap with dimensions: #{panorama.width}x#{panorama.height}"
+    if filename[/\[(\d+)(?:,(\d+))?\]/]   # Contains 1 or 2 numbers in brackets
       # File has a frame count
       numFrames = $1.to_i
       duration  = $2.to_i

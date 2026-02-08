@@ -141,13 +141,14 @@ module NameBox
   # If USE_TEXT_WINDOW_SKIN_FOR_NAMEBOX is false, then the following skins will be used for NPCs
   NAMEBOX_WINDOW_SKINS_FOR_NPC = {
     "Prof. Oak" => "speech hgss 2",
-    "Candela" => "speech hgss 1"
+    "Candela" => "speech hgss 1",
+    "Miguel" => "speech hgss 1"
   }
 
   # If USE_TEXT_WINDOW_SKIN_FOR_NAMEBOX is false, and the NPC is not found in the NAMEBOX_WINDOW_SKINS_FOR_NPC hash,
   # It checks if the following constant is true, it will use the Text Box skin by default as the NameBox skin
   # If it is false, the skin defined in the DEFAULT_NAMEBOXWINSKIN constant will be used
-  USE_TEXT_WINDOW_SKIN_AS_DEFAULT = true
+  USE_TEXT_WINDOW_SKIN_AS_DEFAULT = false
 
   # Name of the skin for the box in "Graphics/Windowskins"
   DEFAULT_NAMEBOXWINSKIN = "speech hgss 2"
@@ -184,7 +185,12 @@ module NameBox
              NAMEBOX_WINDOW_SKINS_FOR_NPC[@currentName] ||
                (USE_TEXT_WINDOW_SKIN_AS_DEFAULT ? MessageConfig.pbGetSpeechFrame : DEFAULT_NAMEBOXWINSKIN)
            end
-    @namebox.setSkin("Graphics/Windowskins/#{skin}")
+    if skin && skin.start_with?("Graphics/Windowskins/")
+        @namebox.setSkin(skin)
+    else
+        @namebox.setSkin("Graphics/Windowskins/#{skin}")
+    end
+
 
     @namebox.resizeToFit(@namebox.text, Graphics.width)
     @namebox.x = NAMEBOX_X

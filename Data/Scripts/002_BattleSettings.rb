@@ -17,6 +17,9 @@ module Settings
   # damage and have 5 stages as in Gen 5 (false). Also determines whether
   # critical hit rate can be copied by Transform/Psych Up.
   NEW_CRITICAL_HIT_RATE_MECHANICS             = (MECHANICS_GENERATION >= 6)
+  # Whether the battle background slides in at the start of battle.
+  # If true, the background will not slide (bases/trainers/Pokémon still do).
+  DISABLE_SLIDING_BACKGROUND                  = true
 
   #=============================================================================
 

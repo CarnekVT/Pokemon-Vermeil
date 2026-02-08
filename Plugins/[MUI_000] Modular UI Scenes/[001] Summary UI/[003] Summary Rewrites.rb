@@ -3,6 +3,97 @@
 #===============================================================================
 class PokemonSummary_Scene
   #-----------------------------------------------------------------------------
+  # Returns the display label for the configured SPECIAL key.
+  #-----------------------------------------------------------------------------
+  def pbSummarySpecialKeyName
+    special_value = Input::SPECIAL
+    # Try engine-provided key name helpers first (if any)
+    helper_methods = [
+      :getKeyName, :get_key_name,
+      :getInputName, :get_input_name,
+      :keyName, :key_name,
+      :buttonName, :button_name,
+      :getButtonName, :get_button_name
+    ]
+    helper_methods.each do |meth|
+      next unless Input.respond_to?(meth)
+      begin
+        name = Input.send(meth, special_value)
+        clean = name.to_s.strip
+        if !clean.empty?
+          next if clean.casecmp("special") == 0
+          return clean
+        end
+      rescue StandardError
+        next
+      end
+    end
+
+    # Fallback: read mkxp keybindings to find the actual key bound to SPECIAL.
+    begin
+      data_dir = System.data_directory
+      kb_path = data_dir ? File.join(data_dir, "keybindings.mkxp1") : nil
+      if kb_path && File.file?(kb_path)
+        bytes = File.binread(kb_path)
+        ints = bytes.unpack("l<*")
+        records = ints.each_slice(4).to_a
+        matches = records.select { |rec| rec && rec.length == 4 && rec[2] == special_value }
+        if !matches.empty?
+          # Prefer the most recently set binding (slot 2 when present)
+          matches.sort_by! { |rec| rec[3] || 0 }
+          matches.reverse!
+          keycode = matches[0][0]
+          label = pbKeycodeToLabel(keycode)
+          return label if label && !label.empty?
+        end
+      end
+    rescue StandardError
+    end
+    return "[SPECIAL]"
+  end
+
+  #-----------------------------------------------------------------------------
+  # Converts mkxp/SDL scancodes to display labels.
+  #-----------------------------------------------------------------------------
+  def pbKeycodeToLabel(code)
+    return "" if code.nil?
+    # Letters A-Z
+    if code >= 4 && code <= 29
+      return (65 + (code - 4)).chr
+    end
+    # Numbers 1-9,0
+    if code >= 30 && code <= 38
+      return (code - 29).to_s
+    elsif code == 39
+      return "0"
+    end
+    # Function keys
+    if code >= 58 && code <= 69
+      return "F#{code - 57}"
+    end
+    # Arrow keys
+    return "RIGHT" if code == 79
+    return "LEFT"  if code == 80
+    return "DOWN"  if code == 81
+    return "UP"    if code == 82
+    # Common keys
+    return "ENTER"     if code == 40
+    return "ESC"       if code == 41
+    return "BACKSPACE" if code == 42
+    return "TAB"       if code == 43
+    return "SPACE"     if code == 44
+    return "LSHIFT"    if code == 225
+    return "RSHIFT"    if code == 229
+    return "LCTRL"     if code == 224
+    return "RCTRL"     if code == 228
+    return "LALT"      if code == 226
+    return "RALT"      if code == 230
+    return "LGUI"      if code == 227
+    return "RGUI"      if code == 231
+    return ""
+  end
+
+  #-----------------------------------------------------------------------------
   # Rewritten for the display of modular pages.
   #-----------------------------------------------------------------------------
   def drawPage(page)
@@ -254,6 +345,9 @@ class PokemonSummary_Scene
         else
           @sprites["pokemon"].setPokemonBitmap(@pokemon, @show_back)
         end
+      elsif Input.trigger?(Input::SPECIAL) && !@pokemon.egg? && @page_id == :page_skills
+        showAbilityDescription(@pokemon)
+        dorefresh = true
       elsif Input.trigger?(Input::BACK)
         pbPlayCloseMenuSE
         break
@@ -334,5 +428,105 @@ class PokemonSummary_Scene
       drawPage(@page) if dorefresh
     end
     return @partyindex
+  end
+
+  #-----------------------------------------------------------------------------
+  # Shows an extended Ability description page.
+  #-----------------------------------------------------------------------------
+  def showAbilityDescription(pokemon)
+    overlay = @sprites["overlay"].bitmap
+    overlay.clear
+    @sprites["background"].setBitmap("Graphics/UI/Summary/bgability_extender")
+    imagepos = []
+    ballimage = sprintf("Graphics/UI/Summary/icon_ball_%s", @pokemon.poke_ball)
+    imagepos.push([ballimage, 14, 60, 0, 0, -1, -1])
+    pbDrawImagePositions(overlay, imagepos)
+    base = Color.new(248, 248, 248)
+    shadow = Color.new(176, 176, 176)
+    shadow2 = Color.new(104, 104, 104)
+    pbSetSystemFont(overlay)
+    abilityname = pokemon.ability.name
+    abilitydesc = pokemon.ability.description
+    pokename = @pokemon.name
+    textpos = [
+      [_INTL("INFORMATION"), 26, 22, 0, base, shadow2],
+      [pokename, 46, 68, 0, base, shadow2],
+      [pokemon.level.to_s, 46, 98, 0, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Ability:"), 230, 22, 0, base, shadow2],
+      [abilityname, 336, 22, 0, base, shadow2],
+      [_INTL("Item"), 66, 324, 0, base, shadow2]
+    ]
+    if @pokemon.hasItem?
+      textpos.push([@pokemon.item.name, 16, 358, 0, Color.new(64, 64, 64), Color.new(176, 176, 176)])
+    else
+      textpos.push([_INTL("None"), 16, 358, 0, Color.new(192, 200, 208), Color.new(208, 216, 224)])
+    end
+    if @pokemon.male?
+      textpos.push([_INTL("â™‚"), 178, 68, 0, Color.new(24, 112, 216), Color.new(136, 168, 208)])
+    elsif @pokemon.female?
+      textpos.push([_INTL("â™€"), 178, 68, 0, Color.new(248, 56, 32), Color.new(224, 152, 144)])
+    end
+    pbDrawTextPositions(overlay, textpos)
+    drawMarkings(overlay, 84, 292)
+    pbDrawTextPositions(overlay, textpos)
+    drawTextEx(overlay, 240, 85, 230, 10, abilitydesc, Color.new(64, 64, 64), shadow)
+    loop do
+      Graphics.update
+      Input.update
+      pbUpdate
+      if Input.trigger?(Input::BACK) || Input.trigger?(Input::SPECIAL)
+        Input.update
+        drawPage(@page)
+        break
+      end
+    end
+  end
+
+  #-----------------------------------------------------------------------------
+  # Rewritten Skills page to show only the Ability hint.
+  #-----------------------------------------------------------------------------
+  def drawPageThree
+    overlay = @sprites["overlay"].bitmap
+    base   = Color.new(248, 248, 248)
+    shadow = Color.new(104, 104, 104)
+    # Determine which stats are boosted and lowered by the Pokemon's nature
+    statshadows = {}
+    GameData::Stat.each_main { |s| statshadows[s.id] = shadow }
+    if !@pokemon.shadowPokemon? || @pokemon.heartStage <= 3
+      @pokemon.nature_for_stats.stat_changes.each do |change|
+        statshadows[change[0]] = Color.new(136, 96, 72) if change[1] > 0
+        statshadows[change[0]] = Color.new(64, 120, 152) if change[1] < 0
+      end
+    end
+    textpos = [
+      [_INTL("HP"), 292, 82, :center, base, statshadows[:HP]],
+      [sprintf("%d/%d", @pokemon.hp, @pokemon.totalhp), 462, 82, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Attack"), 248, 126, :left, base, statshadows[:ATTACK]],
+      [@pokemon.attack.to_s, 456, 126, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Defense"), 248, 158, :left, base, statshadows[:DEFENSE]],
+      [@pokemon.defense.to_s, 456, 158, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Sp. Atk"), 248, 190, :left, base, statshadows[:SPECIAL_ATTACK]],
+      [@pokemon.spatk.to_s, 456, 190, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Sp. Def"), 248, 222, :left, base, statshadows[:SPECIAL_DEFENSE]],
+      [@pokemon.spdef.to_s, 456, 222, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)],
+      [_INTL("Speed"), 248, 254, :left, base, statshadows[:SPEED]],
+      [@pokemon.speed.to_s, 456, 254, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)]
+    ]
+    special_key = pbSummarySpecialKeyName
+    textpos.push([_INTL("Ability:"), 224, 290, :left, base, shadow])
+    textpos.push([_INTL("{1} for more details", special_key), 224, 322, :left, Color.new(64, 64, 64), Color.new(176, 176, 176)])
+    pbDrawTextPositions(overlay, textpos)
+    if @pokemon.hp > 0
+      w = @pokemon.hp * 96 / @pokemon.totalhp.to_f
+      w = 1 if w < 1
+      w = ((w / 2).round) * 2
+      hpzone = 0
+      hpzone = 1 if @pokemon.hp <= (@pokemon.totalhp / 2).floor
+      hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
+      imagepos = [
+        ["Graphics/UI/Summary/overlay_hp", 360, 110, 0, hpzone * 6, w, 6]
+      ]
+      pbDrawImagePositions(overlay, imagepos)
+    end
   end
 end

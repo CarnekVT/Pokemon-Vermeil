@@ -41,3 +41,9 @@ Description = When HP drops to half or less, Defense and Sp. Def sharply rise, a
 [WARLORDSGAZE]
 Name = Warlord's Gaze
 Description = Intimidates foes upon entry, lowering their Attack. Ruthlessly strikes any opponent that attempts to flee from battle.
+#-------------------------------
+# Tsurigo
+#-------------------------------
+[FOLDEDGUARD]
+Name = Folded Guard
+Description = The first time this Pokemon is hit in battle, the damage is halved.

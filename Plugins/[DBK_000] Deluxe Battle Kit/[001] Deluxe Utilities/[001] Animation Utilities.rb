@@ -872,6 +872,12 @@ class Battle
         end
       end
     end
+    if !pbResolveBitmap(sprintf("Graphics/Battlebacks/" + baseFilename + "_base1"))
+      defaultBase = Battle.const_defined?(:DEFAULT_BATTLEBACK_BASE) ? Battle::DEFAULT_BATTLEBACK_BASE : "indoor1"
+      if defaultBase && pbResolveBitmap(sprintf("Graphics/Battlebacks/" + defaultBase + "_base1"))
+        baseFilename = defaultBase
+      end
+    end
     return backdropFilename, baseFilename
   end
 end

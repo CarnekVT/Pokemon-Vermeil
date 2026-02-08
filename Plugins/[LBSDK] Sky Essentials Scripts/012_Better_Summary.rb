@@ -26,8 +26,8 @@ class PokemonSummary_Scene
   P4_SEL_POWER_LABEL_Y = 160
   P4_SEL_ACCURACY_LABEL_X = 20
   P4_SEL_ACCURACY_LABEL_Y = 192
-  P4_LEARN_DATA_LABEL_X = 20
-  P4_LEARN_DATA_LABEL_Y = 224
+  P4_LEARN_DATA_LABEL_X = 280      # Posición X de "DATA" (ajustado a la derecha)
+  P4_LEARN_DATA_LABEL_Y = 224      # Posición Y de "DATA"
   P4_MOVE_LIST_Y = 104
   P4_TYPE_ICON_X = 248
   P4_TYPE_ICON_OFFSET_Y = -4
@@ -37,10 +37,10 @@ class PokemonSummary_Scene
   P4_PP_NUM_X = 460
   P4_PP_NUM_OFFSET_Y = 32
   P4_MOVE_OFFSET_Y = 64
-  P4_LEARN_BOX_X = 0  # Default, adjust if needed
-  P4_LEARN_BOX_Y = 0  # Default, adjust if needed
-  P4_LEARN_ACTION_KEY_X = 0  # Default, adjust if needed
-  P4_LEARN_ACTION_KEY_Y = 0  # Default, adjust if needed
+  P4_LEARN_BOX_X = 280      # Posición X del recuadro de aprendizaje (ajustado a la derecha)
+  P4_LEARN_BOX_Y = 246      # Posición Y del recuadro de aprendizaje
+  P4_LEARN_ACTION_KEY_X = 308      # Posición X de la tecla de acción (ajustado a la derecha)
+  P4_LEARN_ACTION_KEY_Y = 260      # Posición Y de la tecla de acción
   def pbStartScene(party, partyindex, inbattle = false, page=1, allow_learn_moves = true)
       @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
       @viewport.z = 99999
@@ -207,8 +207,8 @@ class PokemonSummary_Scene
         [_INTL("ACCURACY"), P4_SEL_ACCURACY_LABEL_X, P4_SEL_ACCURACY_LABEL_Y, :left, base, shadow],
         
       ]
-      # Use constants for "DATA"
-      textpos.push([_INTL("DATA"), P4_LEARN_DATA_LABEL_X, P4_LEARN_DATA_LABEL_Y, :left, base, shadow]) if move_to_learn
+      # Use constants for "DATA" - COMENTADO: Ocultar el texto "DATA"
+      # textpos.push([_INTL("DATA"), P4_LEARN_DATA_LABEL_X, P4_LEARN_DATA_LABEL_Y, :left, base, shadow]) if move_to_learn
       imagepos = []
       # Write move names, types and PP amounts for each known move
       yPos = P4_MOVE_LIST_Y
@@ -243,9 +243,9 @@ class PokemonSummary_Scene
           textpos.push(["--", P4_PP_NUM_X - 18, yPos + P4_PP_NUM_OFFSET_Y, :right, moveBase, moveShadow])
         end
         yPos += P4_MOVE_OFFSET_Y
-        # Use constants for BetterMoveSummary
-        imagepos.push([_INTL("Graphics/UI/BetterMoveSummary/recuadro"), P4_LEARN_BOX_X, P4_LEARN_BOX_Y]) if move_to_learn
-        imagepos.push([_INTL("Graphics/UI/BetterMoveSummary/help_actionkey"), P4_LEARN_ACTION_KEY_X, P4_LEARN_ACTION_KEY_Y]) if move_to_learn
+        # COMENTADO: Ocultar recuadro y botón de acción
+        # imagepos.push([_INTL("Graphics/UI/BetterMoveSummary/recuadro"), P4_LEARN_BOX_X, P4_LEARN_BOX_Y]) if move_to_learn
+        # imagepos.push([_INTL("Graphics/UI/BetterMoveSummary/help_actionkey"), P4_LEARN_ACTION_KEY_X, P4_LEARN_ACTION_KEY_Y]) if move_to_learn
         # Draw all text and images
         pbDrawImagePositions(overlay, imagepos)
         pbDrawTextPositions(overlay, textpos)

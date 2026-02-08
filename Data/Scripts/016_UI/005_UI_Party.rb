@@ -476,6 +476,113 @@ end
 # Pokémon party visuals
 #===============================================================================
 class PokemonParty_Scene
+  #-----------------------------------------------------------------------------
+  # Returns the display label for the configured SPECIAL key.
+  #-----------------------------------------------------------------------------
+  def pbPartySpecialKeyName
+    # Debug: check available Input methods
+    puts "Available Input methods: #{Input.methods(false)}"
+    
+    # Use the same method as Bag plugin to get the actual key name
+    default_map = {
+      Input::USE     => "C",
+      Input::BACK    => "X", 
+      Input::ACTION  => "Z",
+      Input::SPECIAL => "D"
+    }
+    # Try engine-provided key name helpers first (if any)
+    helper_methods = [
+      :getKeyName, :get_key_name,
+      :getInputName, :get_input_name,
+      :keyName, :key_name,
+      :buttonName, :button_name,
+      :getButtonName, :get_button_name
+    ]
+    helper_methods.each do |meth|
+      next unless Input.respond_to?(meth)
+      begin
+        puts "Trying method: #{meth}"
+        name = Input.send(meth, Input::SPECIAL)
+        puts "Method returned: #{name.inspect}"
+        clean = name.to_s.strip
+        if !clean.empty?
+          next if clean.casecmp("special") == 0
+          return clean
+        end
+      rescue StandardError => e
+        puts "Error with method #{meth}: #{e}"
+        next
+      end
+    end
+    # Fallback: read mkxp keybindings to find the actual key bound to SPECIAL
+    begin
+      data_dir = System.data_directory
+      kb_path = data_dir ? File.join(data_dir, "keybindings.mkxp1") : nil
+      puts "Looking for keybindings file: #{kb_path}"
+      if kb_path && File.file?(kb_path)
+        bytes = File.binread(kb_path)
+        ints = bytes.unpack("l<*")
+        records = ints.each_slice(4).to_a
+        matches = records.select { |rec| rec && rec.length == 4 && rec[2] == Input::SPECIAL }
+        puts "Found #{matches.length} matches for SPECIAL key"
+        if !matches.empty?
+          matches.sort_by! { |rec| rec[3] || 0 }
+          matches.reverse!
+          keycode = matches[0][0]
+          label = pbKeycodeToLabel(keycode)
+          puts "Keycode: #{keycode}, Label: #{label}"
+          return label if label && !label.empty?
+        end
+      end
+    rescue StandardError => e
+      puts "Error reading keybindings: #{e}"
+    end
+    # Final fallback: use default map
+    puts "Using default map"
+    return default_map[Input::SPECIAL] || "SPECIAL"
+  end
+
+  #-----------------------------------------------------------------------------
+  # Converts mkxp/SDL scancodes to display labels.
+  #-----------------------------------------------------------------------------
+  def pbKeycodeToLabel(code)
+    return "" if code.nil?
+    # Letters A-Z
+    if code >= 4 && code <= 29
+      return (65 + (code - 4)).chr
+    end
+    # Numbers 1-9,0
+    if code >= 30 && code <= 38
+      return (code - 29).to_s
+    elsif code == 39
+      return "0"
+    end
+    # Function keys
+    if code >= 58 && code <= 69
+      return "F#{code - 57}"
+    end
+    # Arrow keys
+    return "RIGHT" if code == 79
+    return "LEFT"  if code == 80
+    return "DOWN"  if code == 81
+    return "UP"    if code == 82
+    # Common keys
+    return "ENTER"     if code == 40
+    return "ESC"       if code == 41
+    return "BACKSPACE" if code == 42
+    return "TAB"       if code == 43
+    return "SPACE"     if code == 44
+    return "LSHIFT"    if code == 225
+    return "RSHIFT"    if code == 229
+    return "LCTRL"     if code == 224
+    return "RCTRL"     if code == 228
+    return "LALT"      if code == 226
+    return "RALT"      if code == 230
+    return "LGUI"      if code == 227
+    return "RGUI"      if code == 231
+    return ""
+  end
+
   def pbStartScene(party, starthelptext, annotations = nil, multiselect = false, can_access_storage = false)
     @sprites = {}
     @party = party
@@ -490,8 +597,9 @@ class PokemonParty_Scene
     @sprites["messagebox"].visible        = false
     @sprites["messagebox"].letterbyletter = true
     pbBottomLeftLines(@sprites["messagebox"], 2)
+    special_key = pbPartySpecialKeyName
     @sprites["storagetext"] = Window_UnformattedTextPokemon.new(
-      @can_access_storage ? _INTL("[Special]: To Boxes") : ""
+      @can_access_storage ? _INTL("[{1}]: To Boxes", special_key) : ""
     )
     @sprites["storagetext"].x           = 32
     @sprites["storagetext"].y           = Graphics.height - @sprites["messagebox"].height - 16

@@ -67,6 +67,8 @@ class Sprite_Character < RPG::Sprite
     @character    = character
     @oldbushdepth = 0
     @spriteoffset = false
+    @tile_animation_timer = 0
+    @tile_current_frame = 0
     if !character || character == $game_player || (character.name[/reflection/i] rescue false)
       @reflection = Sprite_Reflection.new(self, viewport)
     end
@@ -111,6 +113,8 @@ class Sprite_Character < RPG::Sprite
     @charbitmap = nil
     @bushbitmap&.dispose
     @bushbitmap = nil
+    @tile_animation_timer = 0
+    @tile_current_frame = 0
     if @tile_id >= 384
       @charbitmap = pbGetTileBitmap(@character.map.tileset_name, @tile_id,
                                     @character_hue, @character.width, @character.height)
@@ -121,15 +125,64 @@ class Sprite_Character < RPG::Sprite
       self.src_rect.set(0, 0, @cw, @ch)
       self.ox = @cw / 2
       self.oy = @ch
-    elsif @character_name != ""
-      @charbitmap = AnimatedBitmap.new(
-        "Graphics/Characters/" + @character_name, @character_hue
-      )
-      RPG::Cache.retain("Graphics/Characters/", @character_name, @character_hue) if @character == $game_player
-      @charbitmapAnimated = true
-      @spriteoffset = @character_name[/offset/i]
-      @cw = @charbitmap.width / 4
-      @ch = @charbitmap.height / 4
+     elsif @character_name != ""
+        puts "DEBUG: Sprite_Character - Attempting to load: Graphics/Characters/#{@character_name}"
+        begin
+          @charbitmap = AnimatedBitmap.new(
+            "Graphics/Characters/" + @character_name, @character_hue
+          )
+          puts "DEBUG: Sprite_Character - Successfully loaded AnimatedBitmap"
+        rescue => e
+          puts "DEBUG: Sprite_Character - Error loading AnimatedBitmap: #{e.message}"
+          puts "DEBUG: Sprite_Character - Error backtrace: #{e.backtrace}"
+        end
+       RPG::Cache.retain("Graphics/Characters/", @character_name, @character_hue) if @character == $game_player
+       @charbitmapAnimated = true
+       @spriteoffset = @character_name[/offset/i]
+       puts "DEBUG: Sprite_Character - AnimatedBitmap loaded successfully"
+       puts "DEBUG: Sprite_Character - charbitmap.length: #{@charbitmap.length}"
+        # For custom animated sprites, check if event defines frame size
+        if @character.respond_to?(:frame_width) && @character.respond_to?(:frame_height) &&
+           @character.frame_width > 0 && @character.frame_height > 0
+          @cw = @character.frame_width
+          @ch = @character.frame_height
+          puts "DEBUG: Sprite_Character - Using custom frame size: #{@cw}x#{@ch}"
+        # For custom animated sprites (like windmill), check if the filename indicates animation
+        # and use appropriate dimensions
+        elsif @character_name[/AnimatedTiles/i] || @charbitmap.length > 1
+          # For animated tiles, use full height and calculate width based on frame count
+          @ch = @charbitmap.height
+          @cw = @charbitmap.width
+          # If it's a PNG animated sprite with frame count in filename, use that to calculate width
+          if @character_name[/\[(\d+),?\d*\]/]
+            frame_count = $1.to_i
+            @cw = @charbitmap.width / frame_count if frame_count > 1
+          end
+          puts "DEBUG: Sprite_Character - Using calculated frame size: #{@cw}x#{@ch}"
+          puts "DEBUG: Sprite_Character - Bitmap dimensions: #{@charbitmap.width}x#{@charbitmap.height}"
+          # For animated tiles, if it's a PngAnimatedBitmap, each frame already has correct dimensions
+          if @charbitmap.length > 1
+            @ch = @charbitmap.height
+            @cw = @charbitmap.width
+            puts "DEBUG: Sprite_Character - Using PngAnimatedBitmap frame size: #{@cw}x#{@ch}"
+            puts "DEBUG: Sprite_Character - Number of frames: #{@charbitmap.length}"
+          else
+            # For single-frame bitmaps with multiple frames in a strip
+            @ch = @charbitmap.height
+            @cw = @charbitmap.width
+            if @character_name[/\[(\d+),?\d*\]/]
+              frame_count = $1.to_i
+              @cw = @charbitmap.width / frame_count if frame_count > 1
+            end
+            puts "DEBUG: Sprite_Character - Using single bitmap frame size: #{@cw}x#{@ch}"
+            puts "DEBUG: Sprite_Character - Bitmap dimensions: #{@charbitmap.width}x#{@charbitmap.height}"
+          end
+      else
+        # For standard character sprites, use 4x4 grid
+        @cw = @charbitmap.width / 4
+        @ch = @charbitmap.height / 4
+        puts "DEBUG: Sprite_Character - Using standard 4x4 grid size: #{@cw}x#{@ch}"
+      end
       self.ox = @cw / 2
     else
       self.bitmap = nil
@@ -153,12 +206,34 @@ class Sprite_Character < RPG::Sprite
       self.bitmap = @bushbitmap.bitmap
     end
     self.visible = !@character.transparent
-    if @tile_id == 0
-      sx = @character.pattern * @cw
-      sy = ((@character.direction - 2) / 2) * @ch
-      self.src_rect.set(sx, sy, @cw, @ch)
-      self.oy = (@spriteoffset rescue false) ? @ch - 16 : @ch
-      self.oy -= @character.bob_height
+      if @tile_id == 0
+       # For custom animated sprites, show full frame
+       if @character_name[/AnimatedTiles/i] || @charbitmap.length > 1
+         # Check if we have a single bitmap with custom frame size
+         if @cw > 0 && @charbitmap.width > @cw
+           total_frames = @charbitmap.width / @cw
+           wait_frames = 5
+           if @character_name[/\[\d+,(\d+)\]/]
+             wait_frames = $1.to_i
+           end
+           @tile_animation_timer += 1
+           if @tile_animation_timer >= wait_frames
+             @tile_animation_timer = 0
+             @tile_current_frame = (@tile_current_frame + 1) % total_frames
+           end
+           self.src_rect.set(@tile_current_frame * @cw, 0, @cw, @ch)
+         else
+           self.src_rect.set(0, 0, @cw, @ch)
+         end
+         self.oy = @ch  # Set to bottom of sprite
+      else
+        # For standard character sprites
+        sx = @character.pattern * @cw
+        sy = ((@character.direction - 2) / 2) * @ch
+        self.src_rect.set(sx, sy, @cw, @ch)
+        self.oy = (@spriteoffset rescue false) ? @ch - 16 : @ch
+        self.oy -= @character.bob_height
+      end
     end
     if self.visible
       if @character.is_a?(Game_Event) && @character.name[/regulartone/i]

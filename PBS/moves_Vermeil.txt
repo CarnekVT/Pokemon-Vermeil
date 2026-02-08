@@ -43,3 +43,17 @@ Target = NearOther
 FunctionCode = ReactiveThorn
 Flags = Contact,CanProtect,CanMirrorMove
 Description = Attacks with adaptive spines using the higher offensive stat. Super effective against Flying and Bug types.
+#-----------------------------------------------
+# Warlord's Crush - Johtonian Golisopod Move
+#-----------------------------------------------
+[WARLORDSCRUSH]
+Name = Warlord's Crush
+Type = GROUND
+Category = Physical
+Power = 80
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = WarlordsCrush
+Flags = Contact,CanProtect,CanMirrorMove
+Description = The user ruthlessly crushes the foe with terracotta claws. Deals double damage if the target's Attack stat is lowered.

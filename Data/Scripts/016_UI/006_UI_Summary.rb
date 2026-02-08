@@ -637,6 +637,20 @@ class PokemonSummary_Scene
     drawFormattedTextEx(overlay, 232, 86, 268, memo)
   end
 
+  def pbSummarySpecialKeyName
+    mapping = {
+      Input::A => "A",
+      Input::B => "B",
+      Input::C => "C",
+      Input::X => "X",
+      Input::Y => "Y",
+      Input::Z => "Z",
+      Input::L => "L",
+      Input::R => "R"
+    }
+    return mapping[Input::SPECIAL] || "SPECIAL"
+  end
+
   def drawPageThree
     overlay = @sprites["overlay"].bitmap
     base   = Color.new(248, 248, 248)
@@ -663,15 +677,11 @@ class PokemonSummary_Scene
       [_INTL("Sp. Def"), 248, 222, :left, base, statshadows[:SPECIAL_DEFENSE]],
       [@pokemon.spdef.to_s, 456, 222, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)],
       [_INTL("Speed"), 248, 254, :left, base, statshadows[:SPEED]],
-      [@pokemon.speed.to_s, 456, 254, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)],
-      [_INTL("Ability"), 224, 290, :left, base, shadow]
+      [@pokemon.speed.to_s, 456, 254, :right, Color.new(64, 64, 64), Color.new(176, 176, 176)]
     ]
-    # Draw ability name and description
-    ability = @pokemon.ability
-    if ability
-      textpos.push([ability.name, 362, 290, :left, Color.new(64, 64, 64), Color.new(176, 176, 176)])
-      drawTextEx(overlay, 224, 322, 282, 2, ability.description, Color.new(64, 64, 64), Color.new(176, 176, 176))
-    end
+    # Show only the access hint for extended Ability info
+    special_key = pbSummarySpecialKeyName
+    textpos.push([_INTL("Ability: {1} for details", special_key), 224, 290, :left, base, shadow])
     # Draw all text
     pbDrawTextPositions(overlay, textpos)
     # Draw HP bar

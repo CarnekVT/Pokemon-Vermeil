@@ -1,0 +1,4 @@
+Name         = [LBSDK] Skip Text
+Version      = 1.0
+Essentials   = 21.1
+Credits      = Luka S.J., Marin, DP, Skyflyer, wrigty12, KRLW890, Zik, various contributors

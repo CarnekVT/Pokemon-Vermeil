@@ -644,6 +644,96 @@ class PokemonBag_Scene
   POCKETNAMEOUTLINECOLOR = Color.new(78, 83, 100)
   ITEMSVISIBLE           = 6
 
+  #-----------------------------------------------------------------------------
+  # Returns the display label for a configured input key.
+  #-----------------------------------------------------------------------------
+  def pbInputKeyName(input_value, fallback_label)
+    default_map = {
+      Input::USE     => "C",
+      Input::BACK    => "X",
+      Input::ACTION  => "Z",
+      Input::SPECIAL => "D"
+    }
+    # Try engine-provided key name helpers first (if any)
+    helper_methods = [
+      :getKeyName, :get_key_name,
+      :getInputName, :get_input_name,
+      :keyName, :key_name,
+      :buttonName, :button_name,
+      :getButtonName, :get_button_name
+    ]
+    helper_methods.each do |meth|
+      next unless Input.respond_to?(meth)
+      begin
+        name = Input.send(meth, input_value)
+        return name.to_s.strip if name && !name.to_s.strip.empty?
+      rescue StandardError
+        next
+      end
+    end
+    # Fallback: read mkxp keybindings to find the actual key bound to this input.
+    begin
+      data_dir = System.data_directory
+      kb_path = data_dir ? File.join(data_dir, "keybindings.mkxp1") : nil
+      if kb_path && File.file?(kb_path)
+        bytes = File.binread(kb_path)
+        ints = bytes.unpack("l<*")
+        records = ints.each_slice(4).to_a
+        matches = records.select { |rec| rec && rec.length == 4 && rec[2] == input_value }
+        if !matches.empty?
+          matches.sort_by! { |rec| rec[3] || 0 }
+          matches.reverse!
+          keycode = matches[0][0]
+          label = pbKeycodeToLabel(keycode)
+          return label if label && !label.empty?
+        end
+      end
+    rescue StandardError
+    end
+    return default_map[input_value] || fallback_label
+  end
+
+  #-----------------------------------------------------------------------------
+  # Converts mkxp/SDL scancodes to display labels.
+  #-----------------------------------------------------------------------------
+  def pbKeycodeToLabel(code)
+    return "" if code.nil?
+    # Letters A-Z
+    if code >= 4 && code <= 29
+      return (65 + (code - 4)).chr
+    end
+    # Numbers 1-9,0
+    if code >= 30 && code <= 38
+      return (code - 29).to_s
+    elsif code == 39
+      return "0"
+    end
+    # Function keys
+    if code >= 58 && code <= 69
+      return "F#{code - 57}"
+    end
+    # Arrow keys
+    return "RIGHT" if code == 79
+    return "LEFT"  if code == 80
+    return "DOWN"  if code == 81
+    return "UP"    if code == 82
+    # Common keys
+    return "ENTER"     if code == 40
+    return "ESC"       if code == 41
+    return "BACKSPACE" if code == 42
+    return "TAB"       if code == 43
+    return "SPACE"     if code == 44
+    return "LSHIFT"    if code == 225
+    return "RSHIFT"    if code == 229
+    return "LCTRL"     if code == 224
+    return "RCTRL"     if code == 228
+    return "LALT"      if code == 226
+    return "RALT"      if code == 230
+    return "LGUI"      if code == 227
+    return "RGUI"      if code == 231
+    return ""
+  end
+
   def pbUpdate
     pbUpdateSpriteHash(@sprites)
     @sprites["panorama"].x  = 0 if @sprites["panorama"].x == - 56
@@ -766,7 +856,9 @@ class PokemonBag_Scene
     overlay_aux = @sprites["overlay_aux"].bitmap
     pbSetSmallFont(overlay_aux)
     search_order_icon = AnimatedBitmap.new("Graphics/UI/Bag Screen with Party/Search_Order_Icon")
-    # Search: D + icon
+    # Search: key + icon
+    search_key = pbInputKeyName(Input::SPECIAL, "[SPECIAL]")
+    search_label = _INTL("{1}: ", search_key)
     if BagScreenWiInParty::SEARCH_TEXT_SCALE != 1.0
       # Save current font size
       old_font_size = overlay_aux.font.size
@@ -775,7 +867,7 @@ class PokemonBag_Scene
     end
     pbDrawTextPositions(
       overlay_aux,
-      [[_INTL("D: "), BagScreenWiInParty::SEARCH_TEXT_X, BagScreenWiInParty::SEARCH_TEXT_Y, nil, POCKETNAMEBASECOLOR, POCKETNAMEOUTLINECOLOR, :outline, Graphics.width]]
+      [[search_label, BagScreenWiInParty::SEARCH_TEXT_X, BagScreenWiInParty::SEARCH_TEXT_Y, nil, POCKETNAMEBASECOLOR, POCKETNAMEOUTLINECOLOR, :outline, Graphics.width]]
     )
     # Restore font size if needed
     if BagScreenWiInParty::SEARCH_TEXT_SCALE != 1.0
@@ -786,13 +878,15 @@ class PokemonBag_Scene
       # Scale the icon
       scaled_icon = Bitmap.new(28 * BagScreenWiInParty::SEARCH_ICON_SCALE, 28 * BagScreenWiInParty::SEARCH_ICON_SCALE)
       scaled_icon.stretch_blt(Rect.new(0, 0, scaled_icon.width, scaled_icon.height), search_order_icon.bitmap, Rect.new(0, 0, 28, 28))
-      overlay_aux.blt(BagScreenWiInParty::SEARCH_ICON_X + overlay_aux.text_size(_INTL("D: ")).width, BagScreenWiInParty::SEARCH_ICON_Y, scaled_icon, Rect.new(0, 0, scaled_icon.width, scaled_icon.height))
+      overlay_aux.blt(BagScreenWiInParty::SEARCH_ICON_X + overlay_aux.text_size(search_label).width, BagScreenWiInParty::SEARCH_ICON_Y, scaled_icon, Rect.new(0, 0, scaled_icon.width, scaled_icon.height))
       scaled_icon.dispose
     else
       # Draw icon at normal size
-      overlay_aux.blt(BagScreenWiInParty::SEARCH_ICON_X + overlay_aux.text_size(_INTL("D: ")).width, BagScreenWiInParty::SEARCH_ICON_Y, search_order_icon.bitmap, Rect.new(0, 0, 28, 28))
+      overlay_aux.blt(BagScreenWiInParty::SEARCH_ICON_X + overlay_aux.text_size(search_label).width, BagScreenWiInParty::SEARCH_ICON_Y, search_order_icon.bitmap, Rect.new(0, 0, 28, 28))
     end
-    # Sort: Z + icon
+    # Sort: key + icon
+    sort_key = pbInputKeyName(Input::ACTION, "[ACTION]")
+    sort_label = _INTL("{1}: ", sort_key)
     if BagScreenWiInParty::SORT_TEXT_SCALE != 1.0
       # Save current font size
       old_font_size = overlay_aux.font.size
@@ -801,7 +895,7 @@ class PokemonBag_Scene
     end
     pbDrawTextPositions(
       overlay_aux,
-      [[_INTL("Z: "), BagScreenWiInParty::SORT_TEXT_X, BagScreenWiInParty::SORT_TEXT_Y, nil, POCKETNAMEBASECOLOR, POCKETNAMEOUTLINECOLOR, :outline, Graphics.width]]
+      [[sort_label, BagScreenWiInParty::SORT_TEXT_X, BagScreenWiInParty::SORT_TEXT_Y, nil, POCKETNAMEBASECOLOR, POCKETNAMEOUTLINECOLOR, :outline, Graphics.width]]
     )
     # Restore font size if needed
     if BagScreenWiInParty::SORT_TEXT_SCALE != 1.0
@@ -812,11 +906,11 @@ class PokemonBag_Scene
       # Scale the icon
       scaled_icon = Bitmap.new(28 * BagScreenWiInParty::SORT_ICON_SCALE, 28 * BagScreenWiInParty::SORT_ICON_SCALE)
       scaled_icon.stretch_blt(Rect.new(0, 0, scaled_icon.width, scaled_icon.height), search_order_icon.bitmap, Rect.new(28, 0, 28, 28))
-      overlay_aux.blt(BagScreenWiInParty::SORT_ICON_X + overlay_aux.text_size(_INTL("Z: ")).width, BagScreenWiInParty::SORT_ICON_Y, scaled_icon, Rect.new(0, 0, scaled_icon.width, scaled_icon.height))
+      overlay_aux.blt(BagScreenWiInParty::SORT_ICON_X + overlay_aux.text_size(sort_label).width, BagScreenWiInParty::SORT_ICON_Y, scaled_icon, Rect.new(0, 0, scaled_icon.width, scaled_icon.height))
       scaled_icon.dispose
     else
       # Draw icon at normal size
-      overlay_aux.blt(BagScreenWiInParty::SORT_ICON_X + overlay_aux.text_size(_INTL("Z: ")).width, BagScreenWiInParty::SORT_ICON_Y, search_order_icon.bitmap, Rect.new(28, 0, 28, 28))
+      overlay_aux.blt(BagScreenWiInParty::SORT_ICON_X + overlay_aux.text_size(sort_label).width, BagScreenWiInParty::SORT_ICON_Y, search_order_icon.bitmap, Rect.new(28, 0, 28, 28))
     end
     pbUpdateAnnotation
     pbDeactivateWindows(@sprites)

@@ -1,23 +1,32 @@
 #====================================================================================
-# Events Utilities
+# Events Utilities - Versión Completa para Essentials v21.1
 # Créditos: Zik
-#
+#====================================================================================
 # Extiende la funcionalidad de los eventos mediante comentarios o nombre del 
 # evento a modo de comandos.
-#====================================================================================
 #
-# Comandos soportados como parte del nombre de evento:
-#   sizeblock(x,y)                -> Define un área de colisión en el evento sin
-#                                    necesidad de asignar un gráfico.
+# Comandos en NOMBRE de evento:
+#   sizeblock(x,y)                -> Área de colisión sólida (ej: sizeblock(2,1))
 #
-# Comandos soportados como Comentarios:
-#   s:Hitbox/Rx,Ry               -> Define un radio de colisión alrededor del evento
-#                                   e igualmente permite la interacción con él.
-#   s:Offset/X,Y                 -> Desplaza el gráfico visualmente (en píxeles).
-#   s:Float                      -> Activa una animación de levitación suave.
-#   s:pokemon_event/Nombre       -> Cambiará el gráfico al del Pokémon especificado.
-#   s:pokemon_event_shiny/Nombre -> Lo mismo, pero su versión Shiny.
-#                                   Ambos inlcuyen que al interactuar suene su cry.
+# Comandos en COMENTARIOS:
+#   s:Hitbox/Rx,Ry                -> Radio de interacción/colisión.
+#   s:Offset/X,Y                  -> Desplazar el gráfico (píxeles).
+#   s:Offset_shadow/X,Y           -> Desplazar la sombra (píxeles).
+#   s:Float                       -> Animación de levitación.
+#   s:doppelganger                -> Copia el gráfico del jugador.
+#   s:pokemon_event/Nombre        -> Gráfico de Pokémon + Cry al interactuar.
+#   s:pokemon_event_shiny/Nombre  -> Versión Shiny del anterior.
+#   s:Custom/RUTA                 -> Carga gráfico desde Graphics/ (ej: Pictures/molino)
+#   s:FrameSize/W,H               -> Tamaño de UN frame (arregla el error del video).
+#   s:NoPause                     -> El evento siempre se actualiza (ignora anti-lag/pausa).
+#   s:Custom_full/RUTA            -> Carga un gráfico en específico para el ow usando
+#                                   una ruta dentro de Graphics. La imagen será 
+#                                   cargada de forma completa.
+#                                   Ejemplo: s:Custom_full/Pictures/introBoy
+#   s:Spritesheet_FRAMES_VEL/RUTA -> Carga un gráfico en específico para el ow usando
+#                                   una ruta dentro de Graphics. Esta imagen será 
+#                                   tomada como un spritesheet horizontal.
+#                                   Ejemplo: s:Spritesheet_8_4/Pictures/molino
 #====================================================================================
 
 class Game_Event < Game_Character
@@ -26,6 +35,12 @@ class Game_Event < Game_Character
   attr_accessor :visual_offset_x, :visual_offset_y
   attr_accessor :is_floating
   attr_accessor :cry_species
+  attr_reader :float_offset
+  attr_accessor :shadow_offset_x, :shadow_offset_y
+  attr_reader :frame_width, :frame_height
+  attr_accessor :always_update
+  attr_accessor :is_full_image
+  attr_accessor :custom_frames, :current_spritesheet_frame, :custom_speed
 
   #-----------------------------------------------------------------------------
   # PROTECCIÓN DE ALIAS
@@ -61,7 +76,18 @@ class Game_Event < Game_Character
     @visual_offset_x = 0
     @visual_offset_y = 0
     @is_floating = false
+    @float_offset = 0
+    @shadow_offset_x = 0
+    @shadow_offset_y = 0
     @cry_species = nil
+    @frame_width = 0
+    @frame_height = 0
+    @always_update = false
+    @is_full_image = false
+    @custom_frames = 0
+    @custom_speed = 0
+    @current_spritesheet_frame = 0
+    @spritesheet_timer = 0
     zik_ext_initialize(map_id, event, map)
   end
 
@@ -95,7 +121,16 @@ class Game_Event < Game_Character
     @visual_offset_x = 0
     @visual_offset_y = 0
     @is_floating = false
+    @float_offset = 0
+    @shadow_offset_x = 0
+    @shadow_offset_y = 0
     @cry_species = nil
+    @frame_width = 0
+    @frame_height = 0
+    @always_update = false
+    @is_full_image = false
+    @custom_frames = 0
+    @custom_speed = 0
 
     return unless @page && @list
 
@@ -115,6 +150,11 @@ class Game_Event < Game_Character
         @visual_offset_x = $1.to_i
         @visual_offset_y = $2.to_i
 
+      # --- OFFSET SHADOW ---
+      elsif cmd_text.match(/^s:Offset_shadow\/([-\d]+),([-\d]+)/i)
+        @shadow_offset_x = $1.to_i
+        @shadow_offset_y = $2.to_i
+
       # --- FLOAT ---
       elsif cmd_text.match(/^s:Float/i)
         @is_floating = true
@@ -129,6 +169,47 @@ class Game_Event < Game_Character
         filename = $1.strip
         @character_name = "Followers/#{filename}"
         @cry_species = filename
+
+      #---- DOPPELGANGER ---
+      elsif cmd_text.match(/^s:doppelganger/i)
+        @character_name = $game_player.character_name
+      
+      # --- CUSTOM ---
+      elsif cmd_text.match(/^s:Custom\/(.+)/i)
+        filename = $1.strip
+        puts "DEBUG: Game_Event - Raw filename from command: #{filename}"
+        if filename.downcase.start_with?("graphics/")
+          @character_name = "../#{filename[9..-1]}"
+        else
+          @character_name = filename
+        end
+        puts "DEBUG: Game_Event - Set character name to: #{@character_name}"
+      
+      # --- FRAME SIZE ---
+      elsif cmd_text.match(/^s:FrameSize\/(\d+),(\d+)/i)
+        @frame_width = $1.to_i
+        @frame_height = $2.to_i
+
+      # --- NO PAUSE / ALWAYS UPDATE ---
+      elsif cmd_text.match(/^s:NoPause/i) || cmd_text.match(/^s:AlwaysUpdate/i)
+        @always_update = true
+
+      # --- CUSTOM FULL ---  
+      elsif cmd_text.match(/^s:Custom_full\/(.+)/i)
+        filename = $1.strip
+        @character_name = "../#{filename}"
+        @is_full_image = true
+        @direction_fix = true
+        @step_anime = false 
+        
+      # --- SPRITESHEET ---
+      elsif cmd_text.match(/^s:Spritesheet_(\d+)(?:_(\d+))?\/(.+)/i)
+        @custom_frames = $1.to_i
+        @custom_speed = $2 ? $2.to_i : 0 
+        filename = $3.strip       
+        @character_name = "../#{filename}"
+        @step_anime = true
+        @direction_fix = true
       end
     end
   end
@@ -138,9 +219,10 @@ class Game_Event < Game_Character
   #-----------------------------------------------------------------------------
   def start
     if @cry_species && ![@trigger == 3, @trigger == 4].include?(true)
-      Pokemon.play_cry(@cry_species) rescue nil
+      # Corregido para v21.1: Uso de GameData::Species
+      specie_data = GameData::Species.try_get(@cry_species)
+      GameData::Species.play_cry(specie_data.id) if specie_data rescue nil
     end
-    
     zik_ext_start
   end
 
@@ -148,7 +230,7 @@ class Game_Event < Game_Character
   # Lógica Visual y Física
   #-----------------------------------------------------------------------------
   def should_update?(recalc = false)
-    return true if @is_floating
+    return true if @is_floating || @always_update
     return zik_ext_should_update?(recalc)
   end
 
@@ -158,32 +240,64 @@ class Game_Event < Game_Character
 
   def screen_y
     y = zik_ext_screen_y + @visual_offset_y
-    
     if @is_floating
       timer = Graphics.frame_count + (@id * 7)
-      offset = (Math.sin(timer / 15.0) * 5).round
-      y -= offset 
+      @float_offset = (Math.sin(timer / 15.0) * 5).round
+      y -= @float_offset 
+    else
+      @float_offset = 0
     end
-    
     return y
   end
 
   def at_coordinate?(x, y)
-    # Prioridad 1: HITBOX
     if @hitbox_rx > 0 || @hitbox_ry > 0
       return x.between?(@x - @hitbox_rx, @x + @hitbox_rx) &&
              y.between?(@y - @hitbox_ry, @y + @hitbox_ry)
     end
-  
-    # Prioridad 2: SIZEBLOCK
-    if @block_width > 1 || @block_height > 1
-      bw = @block_width || 1
-      bh = @block_height || 1
-      return x.between?(@x, @x + bw - 1) &&
-             y.between?(@y - bh + 1, @y)
+    effective_width = (@block_width > 1) ? @block_width : (@width || 1)
+    effective_height = (@block_height > 1) ? @block_height : (@height || 1)
+    return x.between?(@x, @x + effective_width - 1) &&
+           y.between?(@y - effective_height + 1, @y)
+  end
+end
+
+#===============================================================================
+# Parche para Sprite_Character
+#===============================================================================
+class Sprite_Character
+  alias_method :zik_full_update, :update unless method_defined?(:zik_full_update)
+
+  def update
+    zik_full_update
+
+    bmp = (@charbitmapAnimated && @charbitmap) ? @charbitmap.bitmap : @charbitmap
+    return unless bmp
+
+    # IMAGEN COMPLETA
+    if @character.respond_to?(:is_full_image) && @character.is_full_image
+      self.src_rect.set(0, 0, bmp.width, bmp.height)
+      self.ox = bmp.width / 2
+      self.oy = bmp.height
+
+    # SPRITESHEET
+    elsif @character.respond_to?(:custom_frames) && @character.custom_frames > 0
+      cw = bmp.width / @character.custom_frames
+      ch = bmp.height
+
+      if @character.custom_speed > 0
+        target_frames = @character.custom_speed
+      else
+        target_frames = (7 - @character.move_speed) * 3
+        target_frames = 4 if target_frames <= 0
+      end
+
+      duration_per_frame = target_frames / 60.0
+      current_frame = (System.uptime / duration_per_frame).to_i % @character.custom_frames 
+      sx = current_frame * cw
+      self.src_rect.set(sx, 0, cw, ch)
+      self.ox = cw / 2
+      self.oy = ch
     end
-  
-    # Prioridad 3: Método vanilla
-    return x.between?(@x, @x + (@width || 1) - 1) && y.between?(@y - (@height || 1) + 1, @y)
   end
 end

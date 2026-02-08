@@ -243,6 +243,11 @@ class Battle::Scene::Animation::BattlerMegaEvolve < Battle::Scene::Animation
     backdropFilename, baseFilename = @battle.pbGetBattlefieldFiles
     @bg_file   = "Graphics/Battlebacks/" + backdropFilename + "_bg"
     @base_file = "Graphics/Battlebacks/" + baseFilename + "_base1"
+    if !pbResolveBitmap(@base_file)
+      default_base = Battle.const_defined?(:DEFAULT_BATTLEBACK_BASE) ? Battle::DEFAULT_BATTLEBACK_BASE : "field"
+      fallback = "Graphics/Battlebacks/" + default_base + "_base1"
+      @base_file = fallback if pbResolveBitmap(fallback)
+    end
     super(sprites, viewport)
   end
   
