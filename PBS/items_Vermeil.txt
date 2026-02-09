@@ -8,3 +8,20 @@ Price = 0
 BPPrice = 50
 Flags = MegaStone,Fling_80
 Description = One of a variety of mysterious Mega Stones. Have Typhlosion hold it, and it will be able to Mega Evolve.
+#-------------------------------
+[SLEEPINGBAG]
+Name = Sleeping Bag
+NamePlural = Sleeping Bags
+Pocket = 8
+Price = 0
+Flags = KeyItem,Fling_0
+Description = A sleeping bag that allows you to rest and advance time to a specific time of day.
+#-------------------------------
+[RADAR]
+Name = Encounter Radar
+NamePlural = Encounter Radars
+Pocket = 8
+Price = 0
+FieldUse = Direct
+Flags = KeyItem,Fling_0
+Description = A device that displays the encounter list for the current area.

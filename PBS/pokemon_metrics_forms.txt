@@ -174,7 +174,7 @@ FrontSprite = -2,7
 ShadowSprite = 0,5,2
 #-------------------------------
 [ALAKAZAM,1]
-BackSprite = 0,44
+BackSprite = 12,33
 FrontSprite = 0,14
 ShadowSprite = 3,10,12
 AnimationSpeed = 1
@@ -282,15 +282,15 @@ ShadowSprite = 4,19,21
 AnimationSpeed = 3,2
 #-------------------------------
 [AERODACTYL,1]
-BackSprite = 0,33
+BackSprite = 0,20
 FrontSprite = 0,8
 ShadowSize = -2
 ShadowSprite = 6,26,16
 AnimationSpeed = 2,1
 #-------------------------------
 [ARTICUNO,1]
-BackSprite = 3,42
-FrontSprite = -6,2
+BackSprite = 3,31
+FrontSprite = -6,7
 ShadowSize = -2
 ShadowSprite = 4,19,21
 #-------------------------------
@@ -324,7 +324,7 @@ ShadowSprite = 2,9,5
 AnimationSpeed = 1
 #-------------------------------
 [AMPHAROS,1]
-BackSprite = -1,41
+BackSprite = 4,35
 FrontSprite = 0,19
 ShadowSprite = 3,0,-1
 #-------------------------------
@@ -405,7 +405,7 @@ FrontSprite = -10,15
 ShadowSprite = 0,2,1
 #-------------------------------
 [AGGRON,1]
-BackSprite = 12,50
+BackSprite = 12,30
 FrontSprite = 0,17
 ShadowSprite = 2,4,3
 #-------------------------------
@@ -431,7 +431,7 @@ FrontSprite = 1,21
 ShadowSprite = 2,0,0
 #-------------------------------
 [ALTARIA,1]
-BackSprite = 9,58
+BackSprite = 9,45
 FrontSprite = 0,25
 ShadowSize = -2
 ShadowSprite = 4,13,9
@@ -559,7 +559,7 @@ FrontSprite = 0,19
 ShadowSprite = 0,-1,-2
 #-------------------------------
 [ABOMASNOW,1]
-BackSprite = 0,45
+BackSprite = 0,31
 FrontSprite = 0,9
 ShadowSprite = 0,7,4
 #-------------------------------
@@ -606,7 +606,7 @@ FrontSprite = -2,4
 ShadowSprite = 0,10,6
 #-------------------------------
 [AUDINO,1]
-BackSprite = -2,46
+BackSprite = 3,42
 FrontSprite = 0,19
 ShadowSprite = 4,-1,-1
 #-------------------------------
@@ -767,7 +767,7 @@ FrontSprite = 7,6
 ShadowSprite = 1,3,6
 #-------------------------------
 [AEGISLASH,1]
-BackSprite = 0,49
+BackSprite = 0,30
 FrontSprite = 0,9
 ShadowSize = -1
 ShadowSprite = 7,11,12

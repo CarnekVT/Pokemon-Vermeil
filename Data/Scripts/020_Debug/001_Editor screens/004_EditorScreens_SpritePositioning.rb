@@ -60,14 +60,21 @@ class SpritePositioner
     @sprites["base_0"].x -= @sprites["base_0"].bitmap.width / 2 if @sprites["base_0"].bitmap
     @sprites["base_0"].y -= @sprites["base_0"].bitmap.height if @sprites["base_0"].bitmap
     @sprites["base_0"].z = 1
+    @sprites["base_0"].visible = false
     baseX, baseY = Battle::Scene.pbBattlerPosition(1)
     @sprites["base_1"] = IconSprite.new(baseX, baseY, @viewport)
     @sprites["base_1"].setBitmap(enemybase)
     @sprites["base_1"].x -= @sprites["base_1"].bitmap.width / 2 if @sprites["base_1"].bitmap
     @sprites["base_1"].y -= @sprites["base_1"].bitmap.height / 2 if @sprites["base_1"].bitmap
     @sprites["base_1"].z = 1
-    @sprites["messageBox"] = IconSprite.new(0, Graphics.height - 96, @viewport)
-    @sprites["messageBox"].setBitmap("Graphics/UI/Debug/battle_message")
+    @sprites["base_1"].visible = false
+    @sprites["messageBox"] = Window_AdvancedTextPokemon.new("")
+    @sprites["messageBox"].viewport       = @viewport
+    @sprites["messageBox"].visible        = false
+    @sprites["messageBox"].letterbyletter = false
+    @sprites["messageBox"].back_opacity   = MessageConfig::WINDOW_OPACITY
+    pbBottomLeftLines(@sprites["messageBox"], 2)
+    @sprites["messageBox"].setSkin(MessageConfig.pbGetSpeechFrame)
     @sprites["messageBox"].z = 2
     @sprites["shadow_1"] = IconSprite.new(0, 0, @viewport)
     @sprites["shadow_1"].z = 3

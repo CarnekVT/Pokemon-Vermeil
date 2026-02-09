@@ -39,6 +39,22 @@ module CustomWeather
   TYPE_FEATHERS_PRESENT_COLOR = :FeathersPresentColor
   TYPE_SPARKS_PRESENT_COLOR = :SparksPresentColor
 
+  # --- Climas con caÃ­da diagonal consistente ---
+  FALLING_DIAG_TYPES = [
+    TYPE_GREEN_LEAVES,
+    TYPE_AUTUMN_LEAVES_FALLING,
+    TYPE_SAKURA_PETALS,
+    TYPE_ROSE_PETALS,
+    TYPE_FEATHERS,
+    TYPE_GREEN_LEAVES_PRESENT_COLOR,
+    TYPE_AUTUMN_FALLING_PRESENT_COLOR,
+    TYPE_SAKURA_PRESENT_COLOR,
+    TYPE_ROSE_PETALS_PRESENT_COLOR,
+    TYPE_FEATHERS_PRESENT_COLOR
+  ]
+
+  FALLING_DIAG_MAX = 1
+
   # Global settings
   $CUSTOM_WEATHER_UPDATE = false
   $CUSTOM_WEATHER_IMAGES = []
@@ -54,11 +70,11 @@ module CustomWeather
     # --- Estándar ---
     TYPE_THUNDERSTORM => { behavior: :storm, battle_weather: :HeavyRain, delta_x: -24, delta_y: 24, opacity: -10 },
     TYPE_BLOOD_RAIN => { behavior: :storm, battle_weather: :Rain, delta_x: -20, delta_y: 20, opacity: -8 },
-    TYPE_SAKURA_PETALS => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.0, opacity: -1 },
-    TYPE_ROSE_PETALS => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.2, opacity: -1 },
-    TYPE_FEATHERS => { behavior: :flutter, battle_weather: :None, delta_x: -0.5, delta_y: 0.8, opacity: -1 },
-    TYPE_AUTUMN_LEAVES_FALLING => { behavior: :flutter, battle_weather: :None, delta_x: -2.0, delta_y: 1.5, opacity: -2 },
-    TYPE_GREEN_LEAVES => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.0, opacity: -1 },
+    TYPE_SAKURA_PETALS => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -1 },
+    TYPE_ROSE_PETALS => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -1 },
+    TYPE_FEATHERS => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -1 },
+    TYPE_AUTUMN_LEAVES_FALLING => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -2 },
+    TYPE_GREEN_LEAVES => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -1 },
     TYPE_AUTUMN_LEAVES_BLOWING => { behavior: :spin, battle_weather: :None, delta_x: -12.0, delta_y: 2.0, opacity: -5 },
     TYPE_AUTUMN_LEAVES_WHIRLING => { behavior: :whirl, battle_weather: :None, delta_x: 0, delta_y: 0, opacity: -4 },
     TYPE_SPARKS => { behavior: :rise, battle_weather: :None, delta_x: 0, delta_y: -2.0, opacity: -6 },
@@ -66,11 +82,11 @@ module CustomWeather
 
     # --- Variantes PresentColor ---
     TYPE_THUNDERSTORM_PRESENT_COLOR => { behavior: :storm, battle_weather: :HeavyRain, delta_x: -24, delta_y: 24, opacity: -10 },
-    TYPE_SAKURA_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.0, opacity: -1 },
-    TYPE_ROSE_PETALS_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.2, opacity: -1 },
-    TYPE_FEATHERS_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -0.5, delta_y: 0.8, opacity: -1 },
-    TYPE_AUTUMN_FALLING_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -2.0, delta_y: 1.5, opacity: -2 },
-    TYPE_GREEN_LEAVES_PRESENT_COLOR => { behavior: :flutter, battle_weather: :None, delta_x: -1.5, delta_y: 1.0, opacity: -1 },
+    TYPE_SAKURA_PRESENT_COLOR => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -1 },
+    TYPE_ROSE_PETALS_PRESENT_COLOR => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -1 },
+    TYPE_FEATHERS_PRESENT_COLOR => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -1 },
+    TYPE_AUTUMN_FALLING_PRESENT_COLOR => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -2 },
+    TYPE_GREEN_LEAVES_PRESENT_COLOR => { behavior: :storm, battle_weather: :None, delta_x: -1.8, delta_y: 2.4, opacity: -1 },
     TYPE_AUTUMN_BLOWING_PRESENT_COLOR => { behavior: :spin, battle_weather: :None, delta_x: -12.0, delta_y: 2.0, opacity: -5 },
     TYPE_AUTUMN_WHIRLING_PRESENT_COLOR => { behavior: :whirl, battle_weather: :None, delta_x: 0, delta_y: 0, opacity: -4 },
     TYPE_SPARKS_PRESENT_COLOR => { behavior: :rise, battle_weather: :None, delta_x: 0, delta_y: -2.0, opacity: -6 }
@@ -122,7 +138,7 @@ module CustomWeather
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_autumn),
           graphics: [["autumn_leaf"], []],
-          particle_delta_x: -2, particle_delta_y: 1.5, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
           
         { id: TYPE_AUTUMN_LEAVES_BLOWING, id_number: 11, category: :Rain,
           battle_weather: :None,
@@ -140,25 +156,25 @@ module CustomWeather
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_green),
           graphics: [["green_leaf"], []],
-          particle_delta_x: -1.5, particle_delta_y: 1.2, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
           
         { id: TYPE_SAKURA_PETALS, id_number: 14, category: :Rain,
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_sakura),
           graphics: [["sakura_petal"], []],
-          particle_delta_x: -1.5, particle_delta_y: 1.2, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
           
         { id: TYPE_ROSE_PETALS, id_number: 15, category: :Rain,
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_rose),
           graphics: [["rose_petal"], []],
-          particle_delta_x: -1.5, particle_delta_y: 1.2, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
           
         { id: TYPE_FEATHERS, id_number: 16, category: :Rain,
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_feather),
           graphics: [["feather"], []],
-          particle_delta_x: 1, particle_delta_y: 0.8, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
           
         { id: TYPE_BLOOD_RAIN, id_number: 17, category: :Rain,
           battle_weather: :Rain,
@@ -183,13 +199,13 @@ module CustomWeather
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_none),
           graphics: [["sakura_petal"], []],
-          particle_delta_x: -1.5, particle_delta_y: 1.2, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
 
         { id: TYPE_AUTUMN_FALLING_PRESENT_COLOR, id_number: 21, category: :Rain,
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_none),
           graphics: [["autumn_leaf"], []],
-          particle_delta_x: -2, particle_delta_y: 1.5, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
 
         { id: TYPE_AUTUMN_BLOWING_PRESENT_COLOR, id_number: 22, category: :Rain,
           battle_weather: :None,
@@ -207,19 +223,19 @@ module CustomWeather
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_none),
           graphics: [["green_leaf"], []],
-          particle_delta_x: -1.5, particle_delta_y: 1.2, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
 
         { id: TYPE_ROSE_PETALS_PRESENT_COLOR, id_number: 25, category: :Rain,
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_none),
           graphics: [["rose_petal"], []],
-          particle_delta_x: -1.5, particle_delta_y: 1.2, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
 
         { id: TYPE_FEATHERS_PRESENT_COLOR, id_number: 26, category: :Rain,
           battle_weather: :None,
           tone_proc: wrap_tone_logic(tone_none),
           graphics: [["feather"], []],
-          particle_delta_x: 1, particle_delta_y: 0.8, particle_delta_opacity: -2 },
+          particle_delta_x: -1.8, particle_delta_y: 2.4, particle_delta_opacity: -2 },
 
         { id: TYPE_SPARKS_PRESENT_COLOR, id_number: 27, category: :Rain,
           battle_weather: :None,
@@ -251,6 +267,7 @@ class RPG::Weather
   alias_method :custom_weather_original_set_sprite_bitmap, :set_sprite_bitmap unless method_defined?(:custom_weather_original_set_sprite_bitmap)
   alias_method :custom_weather_original_prepare_bitmaps, :prepare_bitmaps unless method_defined?(:custom_weather_original_prepare_bitmaps)
   alias_method :custom_weather_original_update, :update unless method_defined?(:custom_weather_original_update)
+  alias_method :custom_weather_original_reset_sprite_position, :reset_sprite_position unless method_defined?(:custom_weather_original_reset_sprite_position)
 
   #-----------------------------------------------------------------------------
   # GLOBAL UPDATE OVERRIDE (Forcing Filter on :None)
@@ -296,7 +313,7 @@ class RPG::Weather
       weatherBitmaps = @weatherTypes[weather_type][1]
       sprite.bitmap = weatherBitmaps[0]
       if CustomWeather::PROPERTIES.key?(weather_type)
-        sprite.angle = rand(360) 
+        sprite.angle = CustomWeather::FALLING_DIAG_TYPES.include?(weather_type) ? 0 : rand(360)
       end
     else
       custom_weather_original_set_sprite_bitmap(sprite, index, weather_type)
@@ -379,7 +396,15 @@ class RPG::Weather
     return unless data
     sprite.x += data.particle_delta_x
     sprite.y += data.particle_delta_y
-    sprite.opacity = 200 
+    if CustomWeather::FALLING_DIAG_TYPES.include?(weather_type)
+      # Natural fall: slight horizontal sway, gentle vertical variance, fade out
+      t = (Graphics.frame_count + index * 7) / 50.0
+      sprite.x += Math.sin(t) * 0.4 + ((rand * 0.3) - 0.15)
+      sprite.y += (rand * 0.4) - 0.1
+      sprite.opacity -= 2
+    else
+      sprite.opacity = 200 
+    end
     is_thunder = weather_type.to_s.include?("Thunderstorm")
     if is_thunder && rand(500) == 0
        @viewport.flash(Color.new(255, 255, 255, 200), 5)
@@ -434,6 +459,33 @@ class RPG::Weather
     if sprite.opacity < 10 || x < -100 || x > Graphics.width + 100 || y < -100 || y > Graphics.height + 100
       reset_sprite_position(sprite, index, is_new_sprite)
     end
+  end
+
+  def reset_sprite_position(sprite, index, is_new_sprite = false)
+    weather_type = (is_new_sprite) ? @target_type : @type
+    if CustomWeather::FALLING_DIAG_TYPES.include?(weather_type)
+      return if !sprite || !sprite.bitmap
+      if index < (is_new_sprite ? @new_max : @max)
+        sprite.visible = true
+      else
+        sprite.visible = false
+        return
+      end
+      ensure_safe_offsets
+      # Spawn dispersed along top or right edge for consistent density
+      if rand < 0.65
+        # Top edge
+        sprite.x = @ox + @ox_offset - sprite.bitmap.width + rand(Graphics.width + sprite.bitmap.width)
+        sprite.y = @oy + @oy_offset - sprite.bitmap.height - rand((Graphics.height * 0.4).to_i + 1)
+      else
+        # Right edge
+        sprite.x = @ox + @ox_offset + Graphics.width + rand((Graphics.width * 0.4).to_i + 1)
+        sprite.y = @oy + @oy_offset - sprite.bitmap.height + rand((Graphics.height * 0.9).to_i + 1)
+      end
+      sprite.opacity = 255
+      return
+    end
+    custom_weather_original_reset_sprite_position(sprite, index, is_new_sprite)
   end
 end
 
@@ -511,7 +563,9 @@ end
 
 def pbSetCustomWeather(type, max = 40, duration = 20)
   return unless $game_map && $game_map.weather
-  if type == CustomWeather::TYPE_GREEN_LEAVES
+  if CustomWeather::FALLING_DIAG_TYPES.include?(type)
+    max = CustomWeather::FALLING_DIAG_MAX
+  elsif type == CustomWeather::TYPE_GREEN_LEAVES
     max = [(max * 0.9).round, 6].max
   end
   weather_type = GameData::Weather.get(type).id

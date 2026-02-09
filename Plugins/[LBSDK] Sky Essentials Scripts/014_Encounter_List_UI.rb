@@ -39,12 +39,13 @@ USER_DEFINED_NAMES = {
 :WaterEvening => "Surfing (Evening)",
 :OldRod => "Fishing (Old Rod)",
 :GoodRod => "Fishing (Good Rod)",
-:SuperRod => "Fishing (Super Rod)",
+:SuperRod => "Fishing",
 :RockSmash => "Rock Smash",
 :HeadbuttLow => "Headbutt (Rare)",
-:HeadbuttHigh => "Headbutt (Common)",
+:HeadbuttHigh => "Headbutt",
 :BugContest => "Bug Contest",
-:PokeRadar => "PokéRadar"
+:PokeRadar => "PokéRadar",
+:HoneyTree => "Honey Tree"
 }
 
 # Remove the '#' from this line to use default encounter type names

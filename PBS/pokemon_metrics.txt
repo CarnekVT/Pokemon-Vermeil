@@ -122,7 +122,7 @@ FrontSprite = 10,12
 ShadowSprite = 1,2,-2
 #-------------------------------
 [ARBOK]
-BackSprite = 18,34
+BackSprite = 18,30
 FrontSprite = -10,10
 ShadowSize = 2
 ShadowSprite = 0,4,5
@@ -303,7 +303,7 @@ FrontSprite = 2,8
 ShadowSprite = -1,2,-1
 #-------------------------------
 [ARCANINE]
-BackSprite = -10,38
+BackSprite = -5,31
 FrontSprite = 4,12
 ShadowSprite = 3,1,1
 #-------------------------------
@@ -333,7 +333,7 @@ FrontSprite = -1,15
 ShadowSprite = 2,-1,-1
 #-------------------------------
 [ALAKAZAM]
-BackSprite = 2,38
+BackSprite = 10,29
 FrontSprite = -3,24
 ShadowSprite = 6,3,-5
 #-------------------------------
@@ -721,7 +721,7 @@ FrontSprite = -5,8
 ShadowSprite = 1,0,2
 #-------------------------------
 [AERODACTYL]
-BackSprite = 0,37
+BackSprite = 0,20
 FrontSprite = 0,4
 ShadowSize = -2
 ShadowSprite = 6,19,18
@@ -732,7 +732,7 @@ FrontSprite = -3,6
 ShadowSprite = 2,12,7
 #-------------------------------
 [ARTICUNO]
-BackSprite = 6,30
+BackSprite = 15,18
 FrontSprite = 6,6
 ShadowSprite = 3,13,6
 #-------------------------------
@@ -860,7 +860,7 @@ FrontSprite = 1,14
 ShadowSprite = 2,-3,-5
 #-------------------------------
 [ARIADOS]
-BackSprite = 0,21
+BackSprite = 10,26
 FrontSprite = 2,13
 ShadowSprite = 2,-4,-1
 #-------------------------------
@@ -928,7 +928,7 @@ FrontSprite = 5,1
 ShadowSprite = 1,9,6
 #-------------------------------
 [AMPHAROS]
-BackSprite = -5,23
+BackSprite = 2,18
 FrontSprite = 3,6
 ShadowSprite = 3,9,5
 #-------------------------------
@@ -944,7 +944,7 @@ FrontSprite = 8,12
 ShadowSprite = 1,-3,-2
 #-------------------------------
 [AZUMARILL]
-BackSprite = -3,31
+BackSprite = 4,31
 FrontSprite = 2,10
 ShadowSprite = 3,2,3
 #-------------------------------
@@ -1533,7 +1533,7 @@ FrontSprite = 8,13
 ShadowSprite = 1,7,-1
 #-------------------------------
 [AZURILL]
-BackSprite = -8,14
+BackSprite = 3,14
 FrontSprite = 7,1
 ShadowSprite = 2,12,8
 #-------------------------------
@@ -1563,7 +1563,7 @@ FrontSprite = -15,18
 ShadowSprite = 2,-7,-4
 #-------------------------------
 [ARON]
-BackSprite = 3,9
+BackSprite = 15,14
 FrontSprite = -1,4
 ShadowSprite = 3,2,1
 #-------------------------------
@@ -1573,7 +1573,7 @@ FrontSprite = -1,14
 ShadowSprite = 2,-2,-4
 #-------------------------------
 [AGGRON]
-BackSprite = 0,35
+BackSprite = 10,20
 FrontSprite = -6,9
 ShadowSprite = 5,10,5
 #-------------------------------
@@ -1719,10 +1719,10 @@ ShadowSize = -1
 ShadowSprite = 4,22,12
 #-------------------------------
 [ALTARIA]
-BackSprite = 0,23
-FrontSprite = 0,-9
+BackSprite = 0,20
+FrontSprite = 0,9
 ShadowSize = -1
-ShadowSprite = 0,27,24
+ShadowSprite = 8,27,4
 AnimationSpeed = 1
 #-------------------------------
 [ZANGOOSE]
@@ -1794,7 +1794,7 @@ FrontSprite = 0,8
 ShadowSprite = 5,12,5
 #-------------------------------
 [ARMALDO]
-BackSprite = 0,31
+BackSprite = 4,24
 FrontSprite = 7,14
 ShadowSprite = 2,7,2
 #-------------------------------
@@ -1913,7 +1913,7 @@ FrontSprite = -4,-15
 ShadowSprite = 4,36,22
 #-------------------------------
 [BAGON]
-BackSprite = 12,10
+BackSprite = 20,10
 FrontSprite = -8,3
 ShadowSprite = 4,8,3
 #-------------------------------
@@ -2374,7 +2374,7 @@ FrontSprite = 0,13
 ShadowSprite = 1,-1,-1
 #-------------------------------
 [ABOMASNOW]
-BackSprite = 0,48
+BackSprite = 0,34
 FrontSprite = 2,17
 ShadowSprite = 0,3,2
 #-------------------------------
@@ -2546,7 +2546,7 @@ FrontSprite = 0,3
 ShadowSprite = 1,2,3
 #-------------------------------
 [ARCEUS]
-BackSprite = 0,23
+BackSprite = 1,19
 FrontSprite = 5,6
 ShadowSprite = 1,12,9
 AnimationSpeed = 2,3
@@ -2582,8 +2582,8 @@ FrontSprite = 3,3
 ShadowSprite = 2,9,7
 #-------------------------------
 [EMBOAR]
-BackSprite = 0,39
-FrontSprite = 5,12
+BackSprite = 0,28
+FrontSprite = 5,14
 ShadowSprite = 1,5,3
 #-------------------------------
 [OSHAWOTT]
@@ -2739,7 +2739,7 @@ FrontSprite = 2,20
 ShadowSprite = 0,-6,-4
 #-------------------------------
 [AUDINO]
-BackSprite = 3,18
+BackSprite = 13,18
 FrontSprite = 1,4
 ShadowSprite = 4,9,6
 #-------------------------------
@@ -2917,15 +2917,16 @@ FrontSprite = -3,18
 ShadowSprite = 2,-6,-2
 #-------------------------------
 [ARCHEN]
-BackSprite = 0,21
-FrontSprite = 4,11
-ShadowSprite = 1,0,0
+BackSprite = 6,24
+FrontSprite = 4,14
+ShadowSprite = 1,0,-2
 #-------------------------------
 [ARCHEOPS]
-BackSprite = 17,30
+BackSprite = 17,14
 FrontSprite = 2,-6
 ShadowSize = -1
 ShadowSprite = 4,31,26
+AnimationSpeed = 1
 #-------------------------------
 [TRUBBISH]
 BackSprite = 3,23
@@ -3046,7 +3047,7 @@ FrontSprite = 1,2
 ShadowSprite = 2,3,3
 #-------------------------------
 [AMOONGUSS]
-BackSprite = 0,21
+BackSprite = 12,21
 FrontSprite = 0,8
 ShadowSprite = -1,8,5
 #-------------------------------
@@ -3063,8 +3064,8 @@ ShadowSize = -1
 ShadowSprite = 0,38,20
 #-------------------------------
 [ALOMOMOLA]
-BackSprite = 0,26
-FrontSprite = 0,-4
+BackSprite = 10,10
+FrontSprite = -2,-4
 ShadowSprite = 0,30,25
 #-------------------------------
 [JOLTIK]
@@ -3145,7 +3146,7 @@ ShadowSize = -1
 ShadowSprite = 2,33,15
 #-------------------------------
 [AXEW]
-BackSprite = -2,5
+BackSprite = 8,10
 FrontSprite = -1,2
 ShadowSize = 2
 ShadowSprite = 3,6,4
@@ -3182,7 +3183,7 @@ FrontSprite = 1,7
 ShadowSprite = -1,3,2
 #-------------------------------
 [ACCELGOR]
-BackSprite = -15,23
+BackSprite = -15,15
 FrontSprite = 20,3
 ShadowSprite = 6,15,8
 #-------------------------------
@@ -3523,7 +3524,7 @@ ShadowSize = -1
 ShadowSprite = 4,13,12
 #-------------------------------
 [AEGISLASH]
-BackSprite = 0,41
+BackSprite = 0,30
 FrontSprite = 0,24
 ShadowSize = -1
 ShadowSprite = 2,12,4
@@ -3535,7 +3536,7 @@ ShadowSprite = 0,2,2
 AnimationSpeed = 1
 #-------------------------------
 [AROMATISSE]
-BackSprite = 0,27
+BackSprite = 5,19
 FrontSprite = 0,5
 ShadowSize = 2
 ShadowSprite = 2,14,9
@@ -3617,13 +3618,13 @@ FrontSprite = 2,16
 ShadowSprite = 0,4,1
 #-------------------------------
 [AMAURA]
-BackSprite = 0,41
+BackSprite = 14,45
 FrontSprite = 0,24
 ShadowSprite = 1,-8,-5
 AnimationSpeed = 1
 #-------------------------------
 [AURORUS]
-BackSprite = -10,48
+BackSprite = -6,31
 FrontSprite = 6,8
 ShadowSprite = 5,7,8
 AnimationSpeed = 3,2
@@ -3699,7 +3700,7 @@ ShadowSprite = 2,5,4
 AnimationSpeed = 1
 #-------------------------------
 [AVALUGG]
-BackSprite = 6,70
+BackSprite = 8,54
 FrontSprite = -1,32
 ShadowSprite = 2,-20,-12
 #-------------------------------
@@ -3907,7 +3908,7 @@ FrontSprite = -1,1
 ShadowSprite = 1,5,4
 #-------------------------------
 [ARAQUANID]
-BackSprite = 0,40
+BackSprite = 13,36
 FrontSprite = -4,19
 ShadowSprite = 2,-4,-5
 #-------------------------------
@@ -4376,10 +4377,10 @@ FrontSprite = 5,7
 ShadowSprite = 0,11,6
 #-------------------------------
 [APPLIN]
-BackSprite = 0,11
-FrontSprite = 0,1
+BackSprite = 4,14
+FrontSprite = 0,5
 ShadowSize = 2
-ShadowSprite = 3,7,5
+ShadowSprite = 5,7,3
 #-------------------------------
 [FLAPPLE]
 BackSprite = 0,41
@@ -4388,8 +4389,8 @@ ShadowSize = -1
 ShadowSprite = 0,20,19
 #-------------------------------
 [APPLETUN]
-BackSprite = 0,39
-FrontSprite = 0,17
+BackSprite = 6,35
+FrontSprite = 0,20
 ShadowSprite = 4,1,2
 #-------------------------------
 [SILICOBRA]
@@ -4591,8 +4592,8 @@ FrontSprite = 5,11
 ShadowSprite = 4,1,3
 #-------------------------------
 [ARCTOZOLT]
-BackSprite = 3,44
-FrontSprite = 5,16
+BackSprite = 3,29
+FrontSprite = 1,16
 ShadowSprite = 1,4,1
 AnimationSpeed = 2,1
 #-------------------------------
@@ -4602,7 +4603,7 @@ FrontSprite = -2,6
 ShadowSprite = 1,11,5
 #-------------------------------
 [ARCTOVISH]
-BackSprite = -5,51
+BackSprite = -5,36
 FrontSprite = -2,4
 ShadowSize = -1
 ShadowSprite = 6,9,15
@@ -4700,3 +4701,26 @@ BackSprite = 0,26
 FrontSprite = 0,14
 ShadowSprite = 0,0,0
 SuperShinyHue = -46
+#-------------------------------
+[EMBOAR,1]
+BackSprite = 4,32
+FrontSprite = 0,16
+ShadowSprite = 1,5,3
+#-------------------------------
+[ARCEUS,1]
+BackSprite = 1,19
+FrontSprite = 5,6
+ShadowSprite = 1,12,9
+AnimationSpeed = 2,3
+#-------------------------------
+[ARCEUS,10]
+BackSprite = 1,19
+FrontSprite = 5,6
+ShadowSprite = 1,12,9
+AnimationSpeed = 2,3
+#-------------------------------
+[ARCEUS,11]
+BackSprite = 1,19
+FrontSprite = 5,6
+ShadowSprite = 1,12,9
+AnimationSpeed = 2,3

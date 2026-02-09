@@ -3,14 +3,24 @@
 [001]   # Intro
 Name = Intro
 #-------------------------------
+[002]   # Route 29
+Name = Route 29
+Outdoor = true
+ShowArea = true
+Weather = GreenLeavesPresentColor,100
+SnapEdges = true
+BattleBack = RouteField
+#-------------------------------
 [032]   # Test
 Name = Test
 Weather = SakuraPetals,100
 #-------------------------------
 [042]   # New Bark Town
 Name = New Bark Town
+Outdoor = true
 ShowArea = true
 Weather = GreenLeavesPresentColor,100
 SnapEdges = true
 BattleBack = NewBark
+WildBattleBGM = HGSS Wild Pokemon Pokestir
 Environment = Grass
