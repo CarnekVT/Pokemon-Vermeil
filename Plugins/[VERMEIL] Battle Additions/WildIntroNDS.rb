@@ -17,6 +17,23 @@ module VermeilWildIntroNDS
     # 101, 202
   ]
 
+  # Overrides por tipo de encounter (GameData::EncounterType ID).
+  # Valores posibles: :tag, :se, :visual, :drift
+  #   :se     => "Anim/Wind8" o ["Anim/Wind8", vol, pitch]
+  #   :visual => "Graphics/Transitions/GrassIntro"
+  #   :drift  => [dx, dy]
+  INTRO_BY_ENCOUNTER_ID = {
+    # :OldRod => { :tag => :fish, :visual => "Graphics/Transitions/FishIntro" }
+    :HoneyTree  => { :tag => :grass },
+    :HeadbuttLow  => { :tag => :grass },
+    :HeadbuttHigh => { :tag => :grass }
+  }
+
+  # Overrides por ID de mapa.
+  INTRO_BY_MAP_ID = {
+    # 42 => { :tag => :special, :visual => "Graphics/Transitions/SpecialIntro" }
+  }
+
   # Backdrop water por zona (usa Map Metadata -> battle_background).
   # Se espera que los archivos sigan este formato:
   #   Base_bg_water_bg
@@ -138,6 +155,41 @@ module VermeilWildIntroNDS
     return DRIFT_BY_TAG[tag] || DRIFT_BY_TAG[:other] || [-6, 2]
   end
 
+  def self.intro_config_for(battle)
+    tag = encounter_tag(battle)
+    visual_base = nil
+    se = nil
+    drift = nil
+
+    enc_id = $game_temp&.encounter_type
+    if enc_id && INTRO_BY_ENCOUNTER_ID[enc_id]
+      cfg = INTRO_BY_ENCOUNTER_ID[enc_id]
+      tag = cfg[:tag] if cfg[:tag]
+      visual_base = cfg[:visual] if cfg[:visual]
+      se = cfg[:se] if cfg[:se]
+      drift = cfg[:drift] if cfg[:drift]
+    end
+
+    map_id = $game_map&.map_id
+    if map_id && INTRO_BY_MAP_ID[map_id]
+      cfg = INTRO_BY_MAP_ID[map_id]
+      tag = cfg[:tag] if cfg[:tag]
+      visual_base = cfg[:visual] if cfg[:visual]
+      se = cfg[:se] if cfg[:se]
+      drift = cfg[:drift] if cfg[:drift]
+    end
+
+    time = battle&.time || 0
+    visual_base ||= VISUAL_BY_TAG[tag] || VISUAL_BY_TAG[:other]
+    visual = resolve_visual_name(visual_base, time)
+    if !visual && tag != :other
+      visual = resolve_visual_name(VISUAL_BY_TAG[:other], time)
+    end
+    se ||= intro_se_for(tag)
+    drift ||= intro_drift_for(tag)
+    return { :tag => tag, :visual => visual, :se => se, :drift => drift }
+  end
+
   def self.water_encounter?(battle)
     return true if $PokemonGlobal&.surfing
     enc_id = $game_temp&.encounter_type
@@ -208,6 +260,170 @@ module BattleCreationHelperMethods
     if !VermeilWildIntroNDS.valid_backdrop?(battle.backdrop)
       battle.backdrop = "indoor1" if VermeilWildIntroNDS.valid_backdrop?("indoor1")
     end
+  end
+end
+
+class Battle::Scene::Animation::TrainerIntroReveal < Battle::Scene::Animation
+  def initialize(sprites, viewport, battle)
+    @battle = battle
+    super(sprites, viewport)
+  end
+
+  def createProcesses
+    fadeTime = 8
+    holdTime = VermeilWildIntroNDS::HOLD_TIME
+    moveTime = VermeilWildIntroNDS::MOVE_TIME
+    revealSpeed = VermeilWildIntroNDS::REVEAL_SPEED
+    zoomMoveTime = [(moveTime / revealSpeed.to_f).round, 1].max
+    totalTime = holdTime + moveTime
+
+    centerX = Graphics.width / 2
+    centerY = Graphics.height / 2
+
+    zoomStart = 200
+    zoomEnd = 100
+
+    focusX = centerX
+    focusY = centerY
+    if @sprites["trainer_1"]
+      focusX = @sprites["trainer_1"].x
+      focusY = @sprites["trainer_1"].y
+    end
+
+    if @sprites["battle_bg2"]
+      @sprites["battle_bg2"].visible = false
+    end
+
+    if @sprites["battle_bg"]
+      bg = @sprites["battle_bg"]
+      bg.visible = false
+
+      tempBG = Sprite.new(@viewport)
+      tempBG.bitmap = bg.bitmap
+      tempBG.x = centerX
+      tempBG.y = centerY
+      tempBG.ox = tempBG.bitmap.width / 2
+      tempBG.oy = tempBG.bitmap.height / 2
+      tempBG.z = 0
+      tempBG.mirror = bg.mirror
+      tempBG.visible = false
+      @tempSprites << tempBG
+
+      bgStartX = centerX + (centerX - focusX) * (zoomStart / 100.0)
+      bgStartY = centerY + (centerY - focusY) * (zoomStart / 100.0)
+      if tempBG.bitmap
+        w_scaled = tempBG.bitmap.width * (zoomStart / 100.0)
+        h_scaled = tempBG.bitmap.height * (zoomStart / 100.0)
+        minX = Graphics.width - (w_scaled / 2.0)
+        maxX = w_scaled / 2.0
+        minY = Graphics.height - (h_scaled / 2.0)
+        maxY = h_scaled / 2.0
+        bgStartX = [[bgStartX, minX].max, maxX].min
+        bgStartY = [[bgStartY, minY].max, maxY].min
+      end
+
+      bgAnim = addSprite(tempBG, PictureOrigin::CENTER)
+      bgAnim.setVisible(0, true)
+      bgAnim.setXY(0, bgStartX, bgStartY)
+      bgAnim.moveXY(holdTime, zoomMoveTime, centerX, centerY)
+      bgAnim.setZoom(0, zoomStart)
+      bgAnim.moveZoom(holdTime, zoomMoveTime, zoomEnd)
+      bgAnim.setCallback(totalTime, proc { bg.visible = true })
+    end
+
+    intro_cfg = VermeilWildIntroNDS.intro_config_for(@battle)
+    intro_name = intro_cfg[:visual]
+    if intro_name
+      intro = addNewSprite(0, 0, intro_name)
+      se = intro_cfg[:se]
+      if se
+        if se.is_a?(Array)
+          intro.setSE(0, se[0], se[1], se[2])
+        else
+          intro.setSE(0, se)
+        end
+      end
+      intro.setZ(0, 9000)
+      intro.setOpacity(0, 255)
+      drift = intro_cfg[:drift]
+      drift_dx = drift[0]
+      drift_dy = drift[1]
+      end_x_hold = drift_dx * holdTime
+      end_x_final = end_x_hold + (drift_dx * moveTime * revealSpeed)
+      end_y_final = drift_dy * moveTime * revealSpeed
+      intro.setXY(0, 0, 0)
+      intro.moveXY(0, holdTime, end_x_hold, 0)
+      intro.moveXY(holdTime, moveTime, end_x_final, end_y_final)
+      intro.moveOpacity(holdTime, (moveTime / 2.0).ceil, 0)
+    end
+
+    ["base_0", "base_1"].each do |baseName|
+      next if !@sprites[baseName]
+      base = @sprites[baseName]
+      base.visible = false
+
+      tempBase = Sprite.new(@viewport)
+      tempBase.bitmap = base.bitmap
+      tempBase.ox = base.ox
+      tempBase.oy = base.oy
+      tempBase.z = base.z
+      tempBase.x = base.x
+      tempBase.y = base.y
+      tempBase.visible = false
+      @tempSprites << tempBase
+
+      endX = base.x
+      endY = base.y
+      startX = centerX + (endX - focusX) * (zoomStart / 100.0)
+      startY = centerY + (endY - focusY) * (zoomStart / 100.0)
+
+      origin = (baseName == "base_0") ? PictureOrigin::BOTTOM : PictureOrigin::CENTER
+      baseAnim = addSprite(tempBase, origin)
+      baseAnim.setVisible(0, true)
+      baseAnim.setXY(0, startX, startY)
+      baseAnim.moveXY(holdTime, moveTime, endX, endY)
+      baseAnim.setZoom(0, zoomStart)
+      baseAnim.moveZoom(holdTime, zoomMoveTime, zoomEnd)
+      baseAnim.setCallback(totalTime, proc { base.visible = true })
+    end
+
+    idx = 1
+    while @sprites["trainer_#{idx}"]
+      trainer_sprite = @sprites["trainer_#{idx}"]
+      trainer_sprite.visible = false
+
+      temp = Sprite.new(@viewport)
+      temp.bitmap = trainer_sprite.bitmap
+      temp.ox = trainer_sprite.ox
+      temp.oy = trainer_sprite.oy
+      temp.z = trainer_sprite.z
+      temp.x = trainer_sprite.x
+      temp.y = trainer_sprite.y
+      temp.visible = false
+      @tempSprites << temp
+
+      endX = trainer_sprite.x - trainer_sprite.ox
+      endY = trainer_sprite.y - trainer_sprite.oy
+
+      trainer = addSprite(temp, PictureOrigin::TOP_LEFT)
+      trainer.setVisible(0, true)
+      trainer.setXY(0, endX, endY)
+      trainer.setOpacity(0, 0)
+      trainer.moveOpacity(holdTime, 4, 255)
+      trainer.setCallback(totalTime, proc { trainer_sprite.visible = true })
+      idx += 1
+    end
+
+    blackScreen = addNewSprite(0, 0, "Graphics/Battle animations/black_screen")
+    blackScreen.setZ(0, 9999)
+    blackScreen.setOpacity(0, 255)
+    blackScreen.moveOpacity(0, fadeTime, 0)
+
+    whiteScreen = addNewSprite(0, 0, "Graphics/Battle animations/white_screen")
+    whiteScreen.setZ(0, 1010)
+    whiteScreen.setOpacity(0, 0)
+    whiteScreen.moveOpacity(holdTime, 2, 160)
+    whiteScreen.moveOpacity(holdTime + 2, 6, 0)
   end
 end
 
@@ -358,11 +574,12 @@ class Battle::Scene::Animation::WildIntroReveal < Battle::Scene::Animation
     end
 
     # 0.5 Intro visual + SE segun el tipo de encounter
-    tag = VermeilWildIntroNDS.encounter_tag(@battle)
-    intro_name = VermeilWildIntroNDS.intro_visual_for(tag, @battle)
+    intro_cfg = VermeilWildIntroNDS.intro_config_for(@battle)
+    tag = intro_cfg[:tag]
+    intro_name = intro_cfg[:visual]
     if intro_name
       intro = addNewSprite(0, 0, intro_name)
-      se = VermeilWildIntroNDS.intro_se_for(tag)
+      se = intro_cfg[:se]
       if se
         if se.is_a?(Array)
           intro.setSE(0, se[0], se[1], se[2])
@@ -373,7 +590,7 @@ class Battle::Scene::Animation::WildIntroReveal < Battle::Scene::Animation
       intro.setZ(0, 9000)
       intro.setOpacity(0, 255)
       # Parallax-like drift (similar to Bag panorama) + fade while moving down
-      drift = VermeilWildIntroNDS.intro_drift_for(tag)
+      drift = intro_cfg[:drift]
       drift_dx = drift[0]
       drift_dy = drift[1]
       end_x_hold = drift_dx * holdTime
@@ -483,7 +700,35 @@ class Battle::Scene
 
   def pbBattleIntroAnimation
     return vermeil_pbBattleIntroAnimation if !VermeilWildIntroNDS.enabled?
-    return vermeil_pbBattleIntroAnimation if !@battle.wildBattle?
+    return vermeil_pbBattleIntroAnimation if !@battle.wildBattle? && !@battle.trainerBattle?
+
+    if @battle.trainerBattle?
+      # Ocultar PokÃ©mon enemigos y barras de vida para evitar spoilers
+      @battle.sideSizes[1].times do |i|
+        idxBattler = (2 * i) + 1
+        @sprites["pokemon_#{idxBattler}"]&.visible = false
+        @sprites["shadow_#{idxBattler}"]&.visible = false
+        @sprites["dataBox_#{idxBattler}"]&.visible = false
+      end
+      # Ocultar entrenadores para revelarlos con la intro
+      i = 1
+      while @sprites["trainer_#{i}"]
+        @sprites["trainer_#{i}"].visible = false
+        i += 1
+      end
+
+      revealAnim = Animation::TrainerIntroReveal.new(@sprites, @viewport, @battle)
+      @animations.push(revealAnim)
+
+      wait_frames = VermeilWildIntroNDS.reveal_wait_frames
+      wait_frames.times do
+        pbUpdate
+      end
+
+      pbShowPartyLineup(0, true)
+      pbShowPartyLineup(1, true)
+      return
+    end
 
     # --- PASO 1: Transición de cuadrados ---
     # Ocultamos enemigos para que no se vean "debajo" de los cuadrados

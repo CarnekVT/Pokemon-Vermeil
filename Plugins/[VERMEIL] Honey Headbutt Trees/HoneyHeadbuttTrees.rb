@@ -31,6 +31,11 @@ if !GameData::TerrainTag.exists?(HoneyHeadbuttTrees::TREE_TERRAIN_TAG)
   })
 end
 
+def pbHoneyTreeObtainText
+  map_name = ($game_map) ? $game_map.name : ""
+  return _INTL("Honey Tree - {1}", map_name)
+end
+
 def pbFacingHoneyHeadbuttTree?
   tag = $game_player.pbFacingTerrainTag
   return true if tag && tag.id == HoneyHeadbuttTrees::TREE_TERRAIN_TAG
@@ -66,6 +71,9 @@ def pbUseHeadbuttOnTree(event = nil)
   pbSEPlay("Headbutt")
   $game_screen.start_shake(3, 4, 12)
   pbWait(1.0)
+  if $game_temp
+    $game_temp.instance_variable_set(:@honey_headbutt_tree_obtain_text, pbHoneyTreeObtainText)
+  end
   if pbEncounter(HoneyHeadbuttTrees::HEADBUTT_ENCOUNTER_TYPE)
     $stats.headbutt_battles += 1 if $stats
   else
@@ -83,6 +91,9 @@ def pbUseHoneyOnTree(event = nil)
   pbMessage(_INTL("You slathered some Honey on the tree."))
   pbHoneyTreeScentAnimation
   $bag.remove(item)
+  if $game_temp
+    $game_temp.instance_variable_set(:@honey_headbutt_tree_obtain_text, pbHoneyTreeObtainText)
+  end
   if !pbEncounter(HoneyHeadbuttTrees::HONEY_ENCOUNTER_TYPE)
     pbMessage(_INTL("Nothing appeared..."))
   end
@@ -160,10 +171,37 @@ HiddenMoveHandlers::CanUseMove.add(:HEADBUTT, proc { |move, pkmn, showmsg|
 })
 
 HiddenMoveHandlers::UseMove.add(:HEADBUTT, proc { |move, pokemon|
-  if !pbHiddenMoveAnimation(pokemon)
-    pbMessage(_INTL("{1} used {2}!", pokemon.name, GameData::Move.get(move).name))
+  if pbFacingHoneyHeadbuttTree?
+    pbUseHeadbuttOnTree($game_player.pbFacingEvent)
+  else
+    if !pbHiddenMoveAnimation(pokemon)
+      pbMessage(_INTL("{1} used {2}!", pokemon.name, GameData::Move.get(move).name))
+    end
+    $stats.headbutt_count += 1 if $stats
+    facing_event = $game_player.pbFacingEvent
+    pbHeadbuttEffect(facing_event)
   end
-  $stats.headbutt_count += 1 if $stats
-  facing_event = $game_player.pbFacingEvent
-  pbHeadbuttEffect(facing_event)
+  next true
 })
+
+module Battle::CatchAndStoreMixin
+  if method_defined?(:pbRecordAndStoreCaughtPokemon) &&
+     !method_defined?(:__honey_headbutt__pbRecordAndStoreCaughtPokemon)
+    alias __honey_headbutt__pbRecordAndStoreCaughtPokemon pbRecordAndStoreCaughtPokemon
+  end
+
+  def pbRecordAndStoreCaughtPokemon
+    if $game_temp && $game_temp.instance_variable_defined?(:@honey_headbutt_tree_obtain_text)
+      obtain_text = $game_temp.instance_variable_get(:@honey_headbutt_tree_obtain_text)
+      @caughtPokemon.each do |pkmn|
+        pkmn.obtain_text = obtain_text
+      end
+    end
+    __honey_headbutt__pbRecordAndStoreCaughtPokemon
+  ensure
+    if $game_temp
+      $game_temp.remove_instance_variable(:@honey_headbutt_tree_obtain_text) if
+        $game_temp.instance_variable_defined?(:@honey_headbutt_tree_obtain_text)
+    end
+  end
+end

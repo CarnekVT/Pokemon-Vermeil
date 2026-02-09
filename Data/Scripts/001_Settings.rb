@@ -350,6 +350,9 @@ module Settings
   # is on the map (for new plant growth mechanics only).
   PLANT_SPARKLE_ANIMATION_ID   = 7
 
+  # Whether the "Player bump" sound effect plays when walking into something.
+  PLAY_BUMP_SOUND              = false
+
   #=============================================================================
 
   # The default screen width (at a scale of 1.0).
