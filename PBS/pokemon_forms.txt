@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+# See the documentation on the wiki to learn how to edit this file.
 #-------------------------------
 [VENUSAUR,1]
 FormName = Mega Venusaur
@@ -156,7 +156,7 @@ Moves = 1,POWDERSNOW,1,TAILWHIP,4,DISABLE,8,ICESHARD,12,SPITE,16,ICYWIND,20,CONF
 TutorMoves = AGILITY,BATONPASS,BLIZZARD,BODYSLAM,CHARM,CHILLINGWATER,CONFUSERAY,DARKPULSE,DAZZLINGGLEAM,DIG,DISARMINGVOICE,DOUBLEEDGE,DRAININGKISS,ENCORE,ENDURE,FACADE,FAKETEARS,FOULPLAY,HELPINGHAND,HEX,ICEBEAM,ICICLESPEAR,ICYWIND,IMPRISON,MISTYTERRAIN,NASTYPLOT,PAINSPLIT,PLAYROUGH,PROTECT,PSYCHUP,RAINDANCE,REST,ROAR,SLEEPTALK,SNOWSCAPE,SPITE,STOREDPOWER,SUBSTITUTE,SWIFT,TAKEDOWN,WEATHERBALL,ZENHEADBUTT
 EggMoves = BABYDOLLEYES,FLAIL,HOWL,HYPNOSIS,MOONBLAST,ROAR
 Color = White
-Pokedex = In hot weather, this Pokémon makes ice shards with its six tails and sprays them around to cool itself off.
+Pokedex = In hot weather, this Pok�mon makes ice shards with its six tails and sprays them around to cool itself off.
 Generation = 7
 Flags = InheritFormWithEverStone
 WildItemUncommon = SNOWBALL
@@ -228,7 +228,7 @@ EggMoves = COVET,CURSE,DOUBLEEDGE,FLAIL,NIGHTSLASH,SPITE
 Weight = 7.5
 Color = Brown
 Shape = BipedalTail
-Pokedex = Living with a savage, seafaring people has toughened this Pokémon's body so much that parts of it have turned to iron.
+Pokedex = Living with a savage, seafaring people has toughened this Pok�mon's body so much that parts of it have turned to iron.
 Generation = 8
 Flags = InheritFormWithEverStone
 Evolutions = PERRSERKER,Level,28
@@ -314,7 +314,7 @@ Height = 0.8
 Weight = 24.0
 Color = White
 Category = Unique Horn
-Pokedex = Its small horn hides a healing power. With a few rubs from this Pokémon's horn, any slight wound you have will be healed.
+Pokedex = Its small horn hides a healing power. With a few rubs from this Pok�mon's horn, any slight wound you have will be healed.
 Generation = 8
 Flags = InheritFormWithEverStone
 #-------------------------------
@@ -328,7 +328,7 @@ TutorMoves = AGILITY,ALLYSWITCH,ATTRACT,BATONPASS,BODYSLAM,BOUNCE,CALMMIND,CAPTI
 Weight = 80.0
 Color = White
 Category = Unique Horn
-Pokedex = Little can stand up to its psycho cut. Unleashed from this Pokémon's horn, the move will punch a hole right through a thick metal sheet.
+Pokedex = Little can stand up to its psycho cut. Unleashed from this Pok�mon's horn, the move will punch a hole right through a thick metal sheet.
 Generation = 8
 Flags = InheritFormWithEverStone
 #-------------------------------
@@ -337,7 +337,7 @@ FormName = Galarian
 Types = PSYCHIC
 Abilities = GLUTTONY,OWNTEMPO
 Moves = 1,CURSE,1,TACKLE,3,GROWL,6,ACID,9,YAWN,12,CONFUSION,15,DISABLE,18,WATERPULSE,21,HEADBUTT,24,ZENHEADBUTT,27,AMNESIA,30,SURF,33,SLACKOFF,36,PSYCHIC,39,PSYCHUP,42,RAINDANCE,45,HEALPULSE
-Pokedex = Although this Pokémon is normally zoned out, its expression abruptly sharpens on occasion. The cause for this seems to lie in Slowpoke's diet.
+Pokedex = Although this Pok�mon is normally zoned out, its expression abruptly sharpens on occasion. The cause for this seems to lie in Slowpoke's diet.
 Generation = 8
 Flags = InheritFormWithEverStone
 Evolutions = SLOWBRO,Item,GALARICACUFF,SLOWKING,Item,GALARICAWREATH
@@ -350,7 +350,7 @@ Abilities = QUICKDRAW,OWNTEMPO
 Moves = 0,SHELLSIDEARM,1,TACKLE,1,GROWL,1,ACID,1,WITHDRAW,1,CURSE,9,YAWN,12,CONFUSION,15,DISABLE,18,WATERPULSE,21,HEADBUTT,24,ZENHEADBUTT,27,AMNESIA,30,SURF,33,SLACKOFF,36,PSYCHIC,39,PSYCHUP,42,RAINDANCE,45,HEALPULSE
 TutorMoves = ACIDSPRAY,AMNESIA,AVALANCHE,BLIZZARD,BODYPRESS,BODYSLAM,BRICKBREAK,BULLDOZE,CALMMIND,CHILLINGWATER,CURSE,DIG,DOUBLEEDGE,DRAINPUNCH,EARTHQUAKE,ENDURE,EXPANDINGFORCE,FACADE,FIREBLAST,FLAMETHROWER,FLING,FOCUSBLAST,FOULPLAY,GIGAIMPACT,GRASSKNOT,GUNKSHOT,HAZE,HELPINGHAND,HYDROPUMP,HYPERBEAM,ICEBEAM,ICEFANG,ICEPUNCH,ICYWIND,IMPRISON,IRONDEFENSE,LIGHTSCREEN,LIQUIDATION,METRONOME,MUDDYWATER,MUDSHOT,NASTYPLOT,POISONJAB,POWERGEM,PROTECT,PSYBEAM,PSYCHIC,PSYCHICTERRAIN,PSYCHUP,PSYSHOCK,RAINDANCE,REST,ROCKBLAST,SANDSTORM,SCARYFACE,SHADOWBALL,SKILLSWAP,SLEEPTALK,SLUDGEBOMB,SLUDGEWAVE,SMACKDOWN,SNOWSCAPE,STOREDPOWER,SUBSTITUTE,SUNNYDAY,SURF,SWIFT,TAKEDOWN,THUNDERWAVE,TOXIC,TRICK,TRICKROOM,VENOSHOCK,WATERFALL,WATERPULSE,WEATHERBALL,WHIRLPOOL,ZENHEADBUTT
 Weight = 70.5
-Pokedex = If this Pokémon squeezes the tongue of the Shellder biting it, the Shellder will launch a toxic liquid from the tip of its shell.
+Pokedex = If this Pok�mon squeezes the tongue of the Shellder biting it, the Shellder will launch a toxic liquid from the tip of its shell.
 Generation = 8
 Flags = InheritFormWithEverStone
 #-------------------------------
@@ -373,7 +373,7 @@ Types = FIGHTING
 BaseStats = 52,95,55,55,58,62
 Abilities = STEADFAST
 HiddenAbilities = SCRAPPY
-Moves = 1,SANDATTACK,1,PECK,5,LEER,10,FURYCUTTER,15,ROCKSMASH,20,BRUTALSWING,25,DETECT,30,KNOCKOFF,35,DEFOG,40,BRICKBREAK,45,SWORDSDANCE,50,SLAM,55,LEAFBLADE,60,FINALGAMBIT,65,BRAVEBIRD
+Moves = 1,STALKCUTTER,1,SANDATTACK,1,PECK,5,LEER,10,FURYCUTTER,12,WORKUP,15,BULBBASH,19,BRUTALSWING,25,DETECT,30,KNOCKOFF,35,DEFOG,40,BRICKBREAK,45,SWORDSDANCE,50,SLAM,55,LEAFBLADE,60,FINALGAMBIT,65,BRAVEBIRD
 TutorMoves = ASSURANCE,ATTRACT,BODYSLAM,BRAVEBIRD,BRICKBREAK,BRUTALSWING,CAPTIVATE,CLOSECOMBAT,CONFIDE,DOUBLEEDGE,DOUBLETEAM,DUALWINGBEAT,ENDURE,FACADE,FOCUSENERGY,FRUSTRATION,HELPINGHAND,HIDDENPOWER,LEAFBLADE,MIMIC,NATURALGIFT,POISONJAB,PROTECT,REST,RETALIATE,RETURN,REVENGE,ROUND,SECRETPOWER,SLEEPTALK,SNORE,SOLARBLADE,STEELWING,SUBSTITUTE,SUNNYDAY,SUPERPOWER,SWAGGER,SWORDSDANCE,THROATCHOP,WORKUP
 EggMoves = COUNTER,COVET,CURSE,DOUBLEEDGE,FEINT,FLAIL,NIGHTSLASH,QUICKATTACK,QUICKGUARD,SIMPLEBEAM,SKYATTACK
 Weight = 42.0
@@ -460,7 +460,7 @@ TutorMoves = ACIDSPRAY,BODYSLAM,CURSE,DARKPULSE,DAZZLINGGLEAM,DOUBLEEDGE,ENDURE,
 Height = 3.0
 Weight = 16.0
 Color = Gray
-Pokedex = This Pokémon consumes particles that contaminate the air. Instead of leaving droppings, it expels clean air.
+Pokedex = This Pok�mon consumes particles that contaminate the air. Instead of leaving droppings, it expels clean air.
 Generation = 8
 WildItemUncommon = MISTYSEED
 #-------------------------------
@@ -488,7 +488,7 @@ Height = 1.4
 Weight = 56.8
 Color = White
 Category = Dancing
-Pokedex = Its talent is tap-dancing. It can also manipulate temperatures to create a floor of ice, which this Pokémon can kick up to use as a barrier.
+Pokedex = Its talent is tap-dancing. It can also manipulate temperatures to create a floor of ice, which this Pok�mon can kick up to use as a barrier.
 Generation = 8
 Flags = InheritFormWithEverStone
 Evolutions = MRRIME,Level,42
@@ -557,7 +557,7 @@ Moves = 1,FOCUSENERGY,1,PECK,5,ROCKSMASH,10,LIGHTSCREEN,15,PLUCK,20,AGILITY,25,A
 TutorMoves = ACROBATICS,AERIALACE,AGILITY,BRAVEBIRD,BRICKBREAK,BULKUP,CLOSECOMBAT,COACHING,DOUBLEEDGE,DUALWINGBEAT,ENDEAVOR,ENDURE,FACADE,FLY,GIGAIMPACT,HELPINGHAND,HURRICANE,HYPERBEAM,KNOCKOFF,LIGHTSCREEN,LOWKICK,LOWSWEEP,PROTECT,RAINDANCE,REST,REVERSAL,SANDSTORM,SCARYFACE,SLEEPTALK,STOMPINGTANTRUM,SUBSTITUTE,SUNNYDAY,SWIFT,TAILWIND,TAKEDOWN,TAUNT,THROATCHOP,TRAILBLAZE,UTURN
 Weight = 58.2
 Category = Strong Legs
-Pokedex = When its feathers rub together, they produce a crackling sound like the zapping of electricity. That's why this Pokémon is called Zapdos.
+Pokedex = When its feathers rub together, they produce a crackling sound like the zapping of electricity. That's why this Pok�mon is called Zapdos.
 Generation = 8
 #-------------------------------
 [MOLTRES,1]
@@ -572,7 +572,7 @@ TutorMoves = ACROBATICS,AERIALACE,AGILITY,AIRSLASH,BRAVEBIRD,DARKPULSE,DUALWINGB
 Weight = 66.0
 Color = Red
 Category = Malevolent
-Pokedex = This Pokémon's sinister, flame-like aura will consume the spirit of any creature it hits. Victims become burned-out shadows of themselves.
+Pokedex = This Pok�mon's sinister, flame-like aura will consume the spirit of any creature it hits. Victims become burned-out shadows of themselves.
 Generation = 8
 #-------------------------------
 [MEWTWO,1]
@@ -625,7 +625,7 @@ Moves = 0,FUTURESIGHT,0,CHILLYRECEPTION,0,TOXIC,0,EERIESPELL,1,NASTYPLOT,1,POWER
 TutorMoves = ACIDSPRAY,AMNESIA,AVALANCHE,BLIZZARD,BODYSLAM,BRICKBREAK,BULLDOZE,CALMMIND,CHILLINGWATER,CURSE,DIG,DRAINPUNCH,EARTHQUAKE,ENDURE,EXPANDINGFORCE,FACADE,FIREBLAST,FIREPUNCH,FLAMETHROWER,FLING,FOCUSBLAST,FOULPLAY,FUTURESIGHT,GIGAIMPACT,GRASSKNOT,GUNKSHOT,HELPINGHAND,HEX,HYDROPUMP,HYPERBEAM,ICEBEAM,ICYWIND,IMPRISON,IRONDEFENSE,LIGHTSCREEN,LIQUIDATION,LOWSWEEP,METRONOME,MUDDYWATER,MUDSHOT,NASTYPLOT,POISONJAB,POWERGEM,PROTECT,PSYBEAM,PSYCHIC,PSYCHICNOISE,PSYCHICTERRAIN,PSYCHUP,PSYSHOCK,RAINDANCE,REST,SCARYFACE,SHADOWBALL,SKILLSWAP,SLEEPTALK,SLUDGEBOMB,SLUDGEWAVE,SNARL,SNOWSCAPE,STOMPINGTANTRUM,STOREDPOWER,SUBSTITUTE,SUNNYDAY,SURF,SWIFT,TAKEDOWN,TAUNT,THUNDERPUNCH,THUNDERWAVE,TOXIC,TOXICSPIKES,TRICK,TRICKROOM,VENOSHOCK,WATERFALL,WATERPULSE,WEATHERBALL,WHIRLPOOL,ZENHEADBUTT
 Height = 1.8
 Category = Hexpert
-Pokedex = While chanting strange spells, this Pokémon combines its internal toxins with what it's eaten, creating strange potions.
+Pokedex = While chanting strange spells, this Pok�mon combines its internal toxins with what it's eaten, creating strange potions.
 Generation = 8
 Flags = InheritFormWithEverStone
 #-------------------------------
@@ -758,7 +758,7 @@ TutorMoves = AMNESIA,ATTRACT,BLIZZARD,BODYSLAM,BRINE,BULLDOZE,CALMMIND,CAPTIVATE
 EggMoves = CONFUSERAY,DESTINYBOND,HAZE,HEADSMASH,NATUREPOWER,WATERPULSE
 Weight = 0.5
 Color = White
-Pokedex = Sudden climate change wiped out this ancient kind of Corsola. This Pokémon absorbs others' life-force through its branches.
+Pokedex = Sudden climate change wiped out this ancient kind of Corsola. This Pok�mon absorbs others' life-force through its branches.
 Generation = 8
 Flags = InheritFormWithEverStone
 Evolutions = CURSOLA,Level,38
@@ -783,7 +783,7 @@ BaseExp = 350
 HiddenAbilities = SANDSTREAM
 Height = 2.5
 Weight = 255.0
-Pokedex = Due to the colossal power poured into it, this Pokémon's back split right open. Its destructive instincts are the only thing keeping it moving.
+Pokedex = Due to the colossal power poured into it, this Pok�mon's back split right open. Its destructive instincts are the only thing keeping it moving.
 Generation = 6
 #-------------------------------
 [SCEPTILE,1]
@@ -824,7 +824,7 @@ Moves = 1,LEER,1,TACKLE,3,SANDATTACK,6,LICK,9,SNARL,12,HEADBUTT,15,BABYDOLLEYES,
 TutorMoves = ASSURANCE,ATTRACT,BLIZZARD,BODYSLAM,CAPTIVATE,CONFIDE,DIG,DOUBLEEDGE,DOUBLETEAM,ENDURE,FACADE,FAKETEARS,FLING,FRUSTRATION,GRASSKNOT,GUNKSHOT,HELPINGHAND,HIDDENPOWER,HYPERVOICE,ICEBEAM,ICYWIND,IRONTAIL,LASHOUT,MIMIC,MUDSHOT,NATURALGIFT,PAYBACK,PINMISSILE,PROTECT,RAINDANCE,REST,RETALIATE,RETURN,ROUND,SCARYFACE,SCREECH,SECRETPOWER,SEEDBOMB,SHADOWBALL,SLEEPTALK,SNARL,SNORE,SUBSTITUTE,SUNNYDAY,SURF,SWAGGER,SWIFT,TAUNT,THIEF,THUNDER,THUNDERBOLT,THUNDERWAVE,TRICK,WHIRLPOOL,WORKUP
 EggMoves = KNOCKOFF,PARTINGSHOT,QUICKGUARD
 Color = White
-Pokedex = Its restlessness has it constantly running around. If it sees another Pokémon, it will purposely run into them in order to start a fight.
+Pokedex = Its restlessness has it constantly running around. If it sees another Pok�mon, it will purposely run into them in order to start a fight.
 Generation = 8
 Flags = InheritFormWithEverStone
 #-------------------------------
@@ -833,7 +833,7 @@ FormName = Galarian
 Types = DARK,NORMAL
 Moves = 0,NIGHTSLASH,1,SWITCHEROO,1,PINMISSILE,1,BABYDOLLEYES,1,TACKLE,1,LEER,1,SANDATTACK,1,LICK,9,SNARL,12,HEADBUTT,15,HONECLAWS,18,FURYSWIPES,23,REST,28,TAKEDOWN,33,SCARYFACE,38,COUNTER,43,TAUNT,48,DOUBLEEDGE
 TutorMoves = ASSURANCE,ATTRACT,BLIZZARD,BODYPRESS,BODYSLAM,CAPTIVATE,CONFIDE,DIG,DOUBLEEDGE,DOUBLETEAM,ENDURE,FACADE,FAKETEARS,FLING,FRUSTRATION,GIGAIMPACT,GRASSKNOT,GUNKSHOT,HELPINGHAND,HIDDENPOWER,HYPERBEAM,HYPERVOICE,ICEBEAM,ICYWIND,IRONTAIL,LASHOUT,MIMIC,MUDSHOT,NATURALGIFT,PAYBACK,PINMISSILE,PROTECT,RAINDANCE,REST,RETALIATE,RETURN,ROUND,SCARYFACE,SCREECH,SECRETPOWER,SEEDBOMB,SHADOWBALL,SHADOWCLAW,SLEEPTALK,SNARL,SNORE,STOMPINGTANTRUM,SUBSTITUTE,SUNNYDAY,SURF,SWAGGER,SWIFT,TAUNT,THIEF,THROATCHOP,THUNDER,THUNDERBOLT,THUNDERWAVE,TRICK,WHIRLPOOL,WORKUP
-Pokedex = It uses its long tongue to taunt opponents. Once the opposition is enraged, this Pokémon hurls itself at the opponent, tackling them forcefully.
+Pokedex = It uses its long tongue to taunt opponents. Once the opposition is enraged, this Pok�mon hurls itself at the opponent, tackling them forcefully.
 Generation = 8
 Flags = InheritFormWithEverStone
 Evolutions = OBSTAGOON,LevelNight,35
@@ -973,7 +973,7 @@ BaseExp = 198
 Abilities = MAGICBOUNCE
 HiddenAbilities = MAGICBOUNCE
 Weight = 49.0
-Pokedex = When this Pokémon whips the winglike fur on its back as though beating its wings, it sends an intimidating aura flying at its opponents.
+Pokedex = When this Pok�mon whips the winglike fur on its back as though beating its wings, it sends an intimidating aura flying at its opponents.
 Generation = 6
 #-------------------------------
 [GLALIE,1]
@@ -1379,7 +1379,7 @@ Height = 1.7
 Weight = 120.0
 Color = White
 Category = Zen Charm
-Pokedex = Anger has reignited its atrophied flame sac. This Pokémon spews fire everywhere as it rampages indiscriminately.
+Pokedex = Anger has reignited its atrophied flame sac. This Pok�mon spews fire everywhere as it rampages indiscriminately.
 Generation = 8
 Flags = DefaultForm_2
 #-------------------------------
@@ -1467,7 +1467,7 @@ EVs = SPECIAL_ATTACK,3
 Abilities = TURBOBLAZE
 Moves = 1,DRAGONRAGE,1,ICYWIND,8,IMPRISON,15,ANCIENTPOWER,22,ICEBEAM,29,DRAGONBREATH,36,SLASH,43,FUSIONFLARE,50,ICEBURN,57,DRAGONPULSE,64,NOBLEROAR,71,ENDEAVOR,78,BLIZZARD,85,OUTRAGE,92,HYPERVOICE
 Height = 3.6
-Pokedex = It has foreseen that a world of truth will arrive for people and Pokémon. It strives to protect that future.
+Pokedex = It has foreseen that a world of truth will arrive for people and Pok�mon. It strives to protect that future.
 #-------------------------------
 [KYUREM,2]
 FormName = Black Kyurem
@@ -1477,7 +1477,7 @@ EVs = ATTACK,3
 Abilities = TERAVOLT
 Moves = 1,DRAGONRAGE,1,ICYWIND,8,IMPRISON,15,ANCIENTPOWER,22,ICEBEAM,29,DRAGONBREATH,36,SLASH,43,FUSIONBOLT,50,FREEZESHOCK,57,DRAGONPULSE,64,NOBLEROAR,71,ENDEAVOR,78,BLIZZARD,85,OUTRAGE,92,HYPERVOICE
 Height = 3.3
-Pokedex = It's said that this Pokémon battles in order to protect the ideal world that will exist in the future for people and Pokémon.
+Pokedex = It's said that this Pok�mon battles in order to protect the ideal world that will exist in the future for people and Pok�mon.
 #-------------------------------
 [KYUREM,3]
 PokedexForm = 1
@@ -1587,7 +1587,7 @@ FormName = Tundra Pattern
 FormName = Fancy Pattern
 #-------------------------------
 [VIVILLON,19]
-FormName = Poké Ball Pattern
+FormName = Pok� Ball Pattern
 #-------------------------------
 [FLABEBE,1]
 FormName = Yellow Flower
@@ -1673,7 +1673,7 @@ Pokedex = Females are a bit more selfish and aggressive than males. If they don'
 FormName = Blade Forme
 BaseStats = 60,140,50,60,140,50
 EVs = ATTACK,2,SPECIAL_ATTACK,1
-Pokedex = Once upon a time, a king with an Aegislash reigned over the land. His Pokémon eventually drained him of life, and his kingdom fell with him.
+Pokedex = Once upon a time, a king with an Aegislash reigned over the land. His Pok�mon eventually drained him of life, and his kingdom fell with him.
 #-------------------------------
 [PUMPKABOO,1]
 FormName = Average Size
@@ -1922,7 +1922,7 @@ BaseExp = 175
 EVs = ATTACK,1,SPECIAL_ATTACK,1
 Weight = 0.3
 Color = Red
-Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Poké Ball quickly enough.
+Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Pok� Ball quickly enough.
 Flags = InheritFormFromMother
 #-------------------------------
 [MINIOR,8]
@@ -1932,7 +1932,7 @@ BaseExp = 175
 EVs = ATTACK,1,SPECIAL_ATTACK,1
 Weight = 0.3
 Color = Red
-Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Poké Ball quickly enough.
+Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Pok� Ball quickly enough.
 Flags = InheritFormFromMother
 #-------------------------------
 [MINIOR,9]
@@ -1942,7 +1942,7 @@ BaseExp = 175
 EVs = ATTACK,1,SPECIAL_ATTACK,1
 Weight = 0.3
 Color = Yellow
-Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Poké Ball quickly enough.
+Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Pok� Ball quickly enough.
 Flags = InheritFormFromMother
 #-------------------------------
 [MINIOR,10]
@@ -1952,7 +1952,7 @@ BaseExp = 175
 EVs = ATTACK,1,SPECIAL_ATTACK,1
 Weight = 0.3
 Color = Green
-Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Poké Ball quickly enough.
+Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Pok� Ball quickly enough.
 Flags = InheritFormFromMother
 #-------------------------------
 [MINIOR,11]
@@ -1962,7 +1962,7 @@ BaseExp = 175
 EVs = ATTACK,1,SPECIAL_ATTACK,1
 Weight = 0.3
 Color = Blue
-Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Poké Ball quickly enough.
+Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Pok� Ball quickly enough.
 Flags = InheritFormFromMother
 #-------------------------------
 [MINIOR,12]
@@ -1972,7 +1972,7 @@ BaseExp = 175
 EVs = ATTACK,1,SPECIAL_ATTACK,1
 Weight = 0.3
 Color = Blue
-Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Poké Ball quickly enough.
+Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Pok� Ball quickly enough.
 Flags = InheritFormFromMother
 #-------------------------------
 [MINIOR,13]
@@ -1982,7 +1982,7 @@ BaseExp = 175
 EVs = ATTACK,1,SPECIAL_ATTACK,1
 Weight = 0.3
 Color = Purple
-Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Poké Ball quickly enough.
+Pokedex = If its core stays exposed, it will soon die off. It's possible that it may survive if it's put into a Pok� Ball quickly enough.
 Flags = InheritFormFromMother
 #-------------------------------
 [MIMIKYU,1]
@@ -2052,11 +2052,11 @@ Pokedex = This Cramorant has accidentally gotten a Pikachu lodged in its gullet.
 FormName = Low Key Form
 Abilities = PUNKROCK,MINUS
 Moves = 0,SPARK,1,LEER,1,GROWL,1,ACID,1,THUNDERSHOCK,1,NUZZLE,1,NOBLEROAR,1,FLAIL,1,BELCH,1,TEARFULLOOK,1,ACIDSPRAY,4,CHARGE,8,SHOCKWAVE,12,SCARYFACE,16,TAUNT,24,SCREECH,28,SWAGGER,32,TOXIC,36,DISCHARGE,40,POISONJAB,44,OVERDRIVE,48,BOOMBURST,52,MAGNETICFLUX
-Pokedex = Capable of generating 15,000 volts of electricity, this Pokémon looks down on all that would challenge it.
+Pokedex = Capable of generating 15,000 volts of electricity, this Pok�mon looks down on all that would challenge it.
 #-------------------------------
 [SINISTEA,1]
 FormName = Antique Form
-Pokedex = The swirl pattern in this Pokémon's body is its weakness. If it gets stirred, the swirl loses its shape, and Sinistea gets dizzy.
+Pokedex = The swirl pattern in this Pok�mon's body is its weakness. If it gets stirred, the swirl loses its shape, and Sinistea gets dizzy.
 Evolutions = POLTEAGEIST,Item,CHIPPEDPOT
 #-------------------------------
 [POLTEAGEIST,1]
@@ -2248,7 +2248,7 @@ PokedexForm = 56
 [EISCUE,1]
 FormName = Noice Face
 BaseStats = 75,80,70,130,65,50
-Pokedex = The ice covering this Pokémon's face has shattered, revealing a slightly worried expression that many people are enamored with.
+Pokedex = The ice covering this Pok�mon's face has shattered, revealing a slightly worried expression that many people are enamored with.
 #-------------------------------
 [INDEEDEE,1]
 FormName = Female
@@ -2258,7 +2258,7 @@ Abilities = OWNTEMPO,SYNCHRONIZE
 Moves = 1,PLAYNICE,1,STOREDPOWER,5,BATONPASS,10,DISARMINGVOICE,15,PSYBEAM,20,HELPINGHAND,25,FOLLOWME,30,HEALINGWISH,35,PSYCHIC,40,CALMMIND,45,GUARDSPLIT,50,PSYCHICTERRAIN
 TutorMoves = ALLURINGVOICE,BATONPASS,BODYSLAM,CALMMIND,CHARM,DAZZLINGGLEAM,DISARMINGVOICE,DRAININGKISS,DRAINPUNCH,ENDURE,ENERGYBALL,FACADE,HELPINGHAND,HYPERVOICE,IMPRISON,LIGHTSCREEN,MAGICALLEAF,METRONOME,PLAYROUGH,PROTECT,PSYBEAM,PSYCHIC,PSYCHICTERRAIN,PSYCHUP,PSYSHOCK,REFLECT,REST,SHADOWBALL,SKILLSWAP,SLEEPTALK,STOREDPOWER,SUBSTITUTE,SWIFT,TAKEDOWN,TRICK,TRICKROOM,ZENHEADBUTT
 EggMoves = FAKEOUT,HEALPULSE,PSYCHUP
-Pokedex = They diligently serve people and Pokémon so they can gather feelings of gratitude. The females are particularly good at babysitting.
+Pokedex = They diligently serve people and Pok�mon so they can gather feelings of gratitude. The females are particularly good at babysitting.
 #-------------------------------
 [MORPEKO,1]
 FormName = Hangry Mode
@@ -2286,7 +2286,7 @@ FormName = Rapid Strike Style
 Types = FIGHTING,WATER
 Moves = 0,SURGINGSTRIKES,1,AQUAJET,1,ROCKSMASH,1,LEER,1,FOCUSENERGY,1,ENDURE,12,AERIALACE,16,SCARYFACE,20,HEADBUTT,24,BRICKBREAK,28,DETECT,32,BULKUP,36,IRONHEAD,40,DYNAMICPUNCH,44,COUNTER,48,CLOSECOMBAT,52,FOCUSPUNCH
 TutorMoves = ACROBATICS,AERIALACE,AURASPHERE,BODYPRESS,BODYSLAM,BRICKBREAK,BULKUP,CHILLINGWATER,CLOSECOMBAT,COACHING,DIG,DOUBLEEDGE,DRAINPUNCH,ENDURE,FACADE,FALSESWIPE,FIREPUNCH,FLING,FOCUSBLAST,FOCUSPUNCH,GIGAIMPACT,HELPINGHAND,ICEPUNCH,ICESPINNER,IRONDEFENSE,IRONHEAD,LIQUIDATION,LOWKICK,LOWSWEEP,POISONJAB,PROTECT,RAINDANCE,REST,REVERSAL,ROCKSLIDE,ROCKTOMB,SCARYFACE,SLEEPTALK,STONEEDGE,SUBSTITUTE,SWIFT,SWORDSDANCE,TAKEDOWN,TAUNT,THUNDERPUNCH,TRAILBLAZE,UTURN,WATERFALL,WHIRLPOOL,ZENHEADBUTT
-Pokedex = It's believed that this Pokémon modeled its fighting style on the flow of a river—sometimes rapid, sometimes calm.
+Pokedex = It's believed that this Pok�mon modeled its fighting style on the flow of a river�sometimes rapid, sometimes calm.
 #-------------------------------
 [CALYREX,1]
 FormName = Ice Rider
@@ -2302,7 +2302,7 @@ Weight = 809.1
 Color = White
 Shape = Quadruped
 Category = High King
-Pokedex = According to lore, this Pokémon showed no mercy to those who got in its way, yet it would heal its opponents' wounds after battle.
+Pokedex = According to lore, this Pok�mon showed no mercy to those who got in its way, yet it would heal its opponents' wounds after battle.
 #-------------------------------
 [CALYREX,2]
 FormName = Shadow Rider
@@ -2318,4 +2318,4 @@ Weight = 53.6
 Color = Black
 Shape = Quadruped
 Category = High King
-Pokedex = Legend says that by using its power to see all events from past to future, this Pokémon saved the creatures of a forest from a meteorite strike.
+Pokedex = Legend says that by using its power to see all events from past to future, this Pok�mon saved the creatures of a forest from a meteorite strike.

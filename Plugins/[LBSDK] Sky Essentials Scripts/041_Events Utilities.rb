@@ -161,12 +161,22 @@ class Game_Event < Game_Character
 
       # --- POKÉMON EVENT ---
       elsif cmd_text.match(/^s:pokemon_event_shiny\/(.+)/i)
-        filename = $1.strip
+        params = $1.strip.split(",")
+        filename = params[0].strip
+        if params[1]
+          dir = params[1].to_i
+          @direction = dir if [2, 4, 6, 8].include?(dir)
+        end
         @character_name = "Followers shiny/#{filename}"
         @cry_species = filename
 
       elsif cmd_text.match(/^s:pokemon_event\/(.+)/i)
-        filename = $1.strip
+        params = $1.strip.split(",")
+        filename = params[0].strip
+        if params[1]
+          dir = params[1].to_i
+          @direction = dir if [2, 4, 6, 8].include?(dir)
+        end
         @character_name = "Followers/#{filename}"
         @cry_species = filename
 

@@ -57,3 +57,30 @@ Target = NearOther
 FunctionCode = WarlordsCrush
 Flags = Contact,CanProtect,CanMirrorMove
 Description = The user ruthlessly crushes the foe with terracotta claws. Deals double damage if the target's Attack stat is lowered.
+#-------------------------------
+# Naussitch'd Exclusive Moves
+#-------------------------------
+[BULBBASH]
+Name = Bulb Bash
+Type = FIGHTING
+Category = Physical
+Power = 60
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = LowerTargetSpeed1
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 30
+Description = The user strikes with the thick bulb. This may lower the target's Speed.
+#-------------------------------
+[STALKCUTTER]
+Name = Stalk Cutter
+Type = FLYING
+Category = Physical
+Power = 55
+Accuracy = 95
+TotalPP = 15
+Target = NearOther
+FunctionCode = None
+Flags = Contact,CanProtect,CanMirrorMove,HighCriticalHitRate,Slicing
+Description = The user slices at weak points with a sharp stalk. It has a high critical-hit ratio.

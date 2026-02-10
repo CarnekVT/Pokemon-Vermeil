@@ -6,9 +6,9 @@ StartItemStorage = POTION
 Home = 3,7,5,8
 StorageCreator = Bill
 WildBattleBGM = HGSS Wild Pokemon Pokestir
-TrainerBattleBGM = Battle trainer
-WildVictoryBGM = Battle victory wild
-TrainerVictoryBGM = Battle victory trainer
+TrainerBattleBGM = HGSS Pokemon Trainer Pokestir
+WildVictoryBGM = Battle Victory Wild Kunning Fox
+TrainerVictoryBGM = Battle Victory Trainer Nintendo Midi Music
 SurfBGM = Surfing
 BicycleBGM = Bicycle
 #-------------------------------

@@ -599,7 +599,7 @@ class PokemonParty_Scene
     pbBottomLeftLines(@sprites["messagebox"], 2)
     special_key = pbPartySpecialKeyName
     @sprites["storagetext"] = Window_UnformattedTextPokemon.new(
-      @can_access_storage ? _INTL("[{1}]: To Boxes", special_key) : ""
+      @can_access_storage ? _INTL("{1}: To Boxes", special_key) : ""
     )
     @sprites["storagetext"].x           = 32
     @sprites["storagetext"].y           = Graphics.height - @sprites["messagebox"].height - 16

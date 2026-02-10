@@ -17,13 +17,13 @@ FrontSprite = -1,8
 ShadowSprite = 4,10,8
 #-------------------------------
 [BLASTOISE,1]
-BackSprite = 9,33
-FrontSprite = -9,10
+BackSprite = 15,23
+FrontSprite = -7,10
 ShadowSprite = 2,12,6
 AnimationSpeed = 1,2
 #-------------------------------
 [BEEDRILL,1]
-BackSprite = 0,25
+BackSprite = 4,10
 FrontSprite = -4,5
 ShadowSize = -1
 ShadowSprite = 4,32,18
@@ -370,7 +370,7 @@ FrontSprite = -11,16
 ShadowSprite = 0,-2,2
 #-------------------------------
 [BLAZIKEN,1]
-BackSprite = -15,36
+BackSprite = -8,16
 FrontSprite = 17,7
 ShadowSprite = 1,16,13
 #-------------------------------
@@ -455,9 +455,10 @@ ShadowSize = -1
 ShadowSprite = 2,30,16
 #-------------------------------
 [BANETTE,1]
-BackSprite = 0,43
-FrontSprite = -2,14
-ShadowSprite = 2,-1,4
+BackSprite = 13,37
+FrontSprite = 0,20
+ShadowSprite = 1,-1,0
+SuperShinyHue = -215
 #-------------------------------
 [ABSOL,1]
 BackSprite = 5,46

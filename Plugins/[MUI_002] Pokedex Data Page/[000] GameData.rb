@@ -298,6 +298,8 @@ GameData::Evolution.each do |evo|
   when :DayHoldItem                            then evo.description = _INTL("in the day while it holds {1}")
   when :NightHoldItem                          then evo.description = _INTL("at night while it holds {1}")
   when :HasMove                                then evo.description = _INTL("while it knows the move {1}")
+  when :HasMoveRandomNaussitchd                then evo.description = _INTL("while it knows the move {1}")
+  when :HasMoveTurnForm1                        then evo.description = _INTL("while it knows the move {1}")
   when :HasMoveType                            then evo.description = _INTL("while it knows {1}-type move")
   when :HasInParty                             then evo.description = _INTL("while {1} is in the party")
   when :Location                               then evo.description = _INTL("while located in {1}")
