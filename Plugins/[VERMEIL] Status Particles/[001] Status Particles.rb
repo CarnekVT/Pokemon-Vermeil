@@ -372,8 +372,11 @@ class StatusParticles::Emitter
       sprite.opacity = @battler_sprite.opacity * alpha
     when :burn_embers
       t = data[:age]
-      x = anchor_x + Math.sin((t + data[:seed]) * 0.12) * 12
-      y = center_y + 12 - (t * 0.8 % 60)
+      radius = data[:radius]
+      angle = data[:angle] + (t * 0.05)
+      x = anchor_x + Math.cos(angle) * radius
+      y = center_y + Math.sin(angle) * radius * 0.8
+      y -= t * 0.5
       sprite.x = x
       sprite.y = y
       sprite.opacity = @battler_sprite.opacity * alpha
