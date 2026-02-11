@@ -221,9 +221,9 @@ ShadowSprite = 0,8,8
 AnimationSpeed = 3
 #-------------------------------
 [FARFETCHD,1]
-BackSprite = -15,11
-FrontSprite = 10,7
-ShadowSprite = 0,15,7
+BackSprite = -10,42
+FrontSprite = 10,27
+ShadowSprite = 2,15,-6
 AnimationSpeed = 1
 #-------------------------------
 [GRIMER,1]

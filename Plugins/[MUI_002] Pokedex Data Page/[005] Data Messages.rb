@@ -366,7 +366,17 @@ class PokemonPokedexInfo_Scene
           text << "Use various " + t[2] + "Sweets" + t[0] + " on #{name}."
         else
           index = 0
-          prevo_data.get_evolutions(true).each do |evo|
+          evo_methods = prevo_data.get_evolutions(true)
+          # Naussitch'd has dual Farfetch'd outcomes; prioritize the method
+          # that matches the currently viewed Farfetch'd form.
+          if species.species == :FARFETCHD
+            if species.form == 1
+              evo_methods = evo_methods.sort_by { |evo| (evo[1] == :HasMoveTurnForm1) ? 0 : 1 }
+            else
+              evo_methods = evo_methods.sort_by { |evo| (evo[1] == :HasMoveRandomNaussitchd) ? 0 : 1 }
+            end
+          end
+          evo_methods.each do |evo|
             next if evo[0] != species.species
             next if evo[1] == :None
             if species.species == :URSHIFU && evo[1] == :Item
@@ -376,6 +386,7 @@ class PokemonPokedexInfo_Scene
             data = GameData::Evolution.get(evo[1])
             text << " " if index > 0
             text << data.description(spec, evo[0], evo[2], nil_or_empty?(text), true, t)
+            break if species.species == :FARFETCHD
             break if index > 0
             index += 1
           end
