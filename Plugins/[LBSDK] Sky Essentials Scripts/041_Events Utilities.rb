@@ -14,8 +14,8 @@
 #   s:Offset_shadow/X,Y           -> Desplazar la sombra (píxeles).
 #   s:Float                       -> Animación de levitación.
 #   s:doppelganger                -> Copia el gráfico del jugador.
-#   s:pokemon_event/Nombre        -> Gráfico de Pokémon + Cry al interactuar.
-#   s:pokemon_event_shiny/Nombre  -> Versión Shiny del anterior.
+#   s:pokemon_event/Nombre,Dir    -> Gráfico de Pokémon + Cry. (Dir: 2=Abajo, 4=Izq, 6=Der, 8=Arriba)
+#   s:pokemon_event_shiny/Nombre,Dir -> Versión Shiny. (Dir: 2=Abajo, 4=Izq, 6=Der, 8=Arriba)
 #   s:Custom/RUTA                 -> Carga gráfico desde Graphics/ (ej: Pictures/molino)
 #   s:FrameSize/W,H               -> Tamaño de UN frame (arregla el error del video).
 #   s:NoPause                     -> El evento siempre se actualiza (ignora anti-lag/pausa).

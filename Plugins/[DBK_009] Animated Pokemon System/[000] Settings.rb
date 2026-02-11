@@ -29,6 +29,11 @@ module Settings
   # When true, sprites will be constricted in the Summary/Storage/Pokedex UI's.
   #-----------------------------------------------------------------------------
   CONSTRICT_POKEMON_SPRITES = true
+
+  #-----------------------------------------------------------------------------
+  # When true, battlers in battle can display status particles/icons.
+  #-----------------------------------------------------------------------------
+  SHOW_STATUS_PARTICLES = true
   
   #-----------------------------------------------------------------------------
   # Y-coordinate metrics for the Substitute doll's back/front sprites, respectively.

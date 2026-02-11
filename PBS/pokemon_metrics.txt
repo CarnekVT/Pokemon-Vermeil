@@ -16,17 +16,17 @@ FrontSprite = 3,18
 ShadowSprite = 0,-6,0
 #-------------------------------
 [CHARMANDER]
-BackSprite = 3,4
-FrontSprite = 3,2
+BackSprite = 7,10
+FrontSprite = 1,4
 ShadowSprite = 4,7,5
 #-------------------------------
 [CHARMELEON]
-BackSprite = -9,23
+BackSprite = -5,21
 FrontSprite = 16,11
 ShadowSprite = 2,5,0
 #-------------------------------
 [CHARIZARD]
-BackSprite = -9,41
+BackSprite = -9,30
 FrontSprite = 5,7
 ShadowSprite = 4,5,9
 #-------------------------------
@@ -46,7 +46,7 @@ FrontSprite = -3,11
 ShadowSprite = 4,8,2
 #-------------------------------
 [CATERPIE]
-BackSprite = 7,4
+BackSprite = 12,11
 FrontSprite = 3,1
 ShadowSize = 2
 ShadowSprite = 2,4,3
@@ -57,7 +57,7 @@ FrontSprite = 0,1
 ShadowSprite = 1,8,4
 #-------------------------------
 [BUTTERFREE]
-BackSprite = 0,8
+BackSprite = 8,-3
 FrontSprite = 0,-10
 ShadowSize = -1
 ShadowSprite = 2,34,25
@@ -575,8 +575,8 @@ FrontSprite = 2,11
 ShadowSprite = 1,3,3
 #-------------------------------
 [CHANSEY]
-BackSprite = 6,30
-FrontSprite = 1,10
+BackSprite = 10,30
+FrontSprite = 1,13
 ShadowSprite = 2,-1,1
 #-------------------------------
 [TANGELA]
@@ -1287,7 +1287,7 @@ ShadowSprite = 0,16,24
 AnimationSpeed = 3
 #-------------------------------
 [CELEBI]
-BackSprite = 0,-1
+BackSprite = 9,-9
 FrontSprite = 0,-13
 ShadowSize = -2
 ShadowSprite = 2,40,26
@@ -1376,7 +1376,7 @@ ShadowSize = -2
 ShadowSprite = 0,29,21
 #-------------------------------
 [CASCOON]
-BackSprite = 0,25
+BackSprite = 11,26
 FrontSprite = 0,15
 ShadowSize = 2
 ShadowSprite = 0,-3,-4
@@ -1635,7 +1635,7 @@ FrontSprite = -1,8
 ShadowSprite = 2,5,3
 #-------------------------------
 [CARVANHA]
-BackSprite = 7,15
+BackSprite = 7,3
 FrontSprite = -3,-2
 ShadowSize = -1
 ShadowSprite = 4,23,16
@@ -1662,7 +1662,7 @@ FrontSprite = -6,4
 ShadowSprite = 2,3,3
 #-------------------------------
 [CAMERUPT]
-BackSprite = 7,38
+BackSprite = 11,32
 FrontSprite = 0,17
 ShadowSprite = 2,1,0
 #-------------------------------
@@ -1703,12 +1703,12 @@ ShadowSize = -1
 ShadowSprite = 2,22,10
 #-------------------------------
 [CACNEA]
-BackSprite = 2,17
-FrontSprite = -1,11
+BackSprite = 10,23
+FrontSprite = -2,11
 ShadowSprite = 1,0,0
 #-------------------------------
 [CACTURNE]
-BackSprite = 4,26
+BackSprite = 7,15
 FrontSprite = 0,5
 ShadowSprite = 2,12,8
 #-------------------------------
@@ -1809,7 +1809,7 @@ FrontSprite = 12,11
 ShadowSprite = 0,7,6
 #-------------------------------
 [CASTFORM]
-BackSprite = 6,4
+BackSprite = 6,-12
 FrontSprite = -3,-8
 ShadowSize = -1
 ShadowSprite = 2,34,16
@@ -2126,7 +2126,7 @@ ShadowSize = 3
 ShadowSprite = 3,1,0
 #-------------------------------
 [BURMY]
-BackSprite = 0,8
+BackSprite = 5,0
 FrontSprite = 5,1
 ShadowSprite = 0,26,12
 #-------------------------------
@@ -2169,13 +2169,13 @@ FrontSprite = 8,5
 ShadowSprite = 0,10,6
 #-------------------------------
 [CHERUBI]
-BackSprite = 7,7
-FrontSprite = 10,5
+BackSprite = 7,13
+FrontSprite = 9,7
 ShadowSprite = 0,5,3
 #-------------------------------
 [CHERRIM]
-BackSprite = 3,8
-FrontSprite = 2,2
+BackSprite = 8,12
+FrontSprite = 1,5
 ShadowSprite = 0,9,5
 #-------------------------------
 [SHELLOS]
@@ -2205,7 +2205,7 @@ FrontSprite = 1,-6
 ShadowSprite = 0,26,22
 #-------------------------------
 [BUNEARY]
-BackSprite = 19,11
+BackSprite = 12,11
 FrontSprite = -4,3
 ShadowSprite = 1,11,8
 #-------------------------------
@@ -2279,7 +2279,7 @@ FrontSprite = 0,1
 ShadowSprite = 0,8,5
 #-------------------------------
 [CHATOT]
-BackSprite = 1,6
+BackSprite = 5,13
 FrontSprite = 5,2
 ShadowSprite = 4,7,5
 #-------------------------------
@@ -2349,7 +2349,7 @@ FrontSprite = -1,7
 ShadowSprite = 0,3,3
 #-------------------------------
 [CARNIVINE]
-BackSprite = 15,44
+BackSprite = 15,33
 FrontSprite = 3,8
 ShadowSize = -2
 ShadowSprite = 2,5,13
@@ -2913,7 +2913,7 @@ FrontSprite = 0,6
 ShadowSprite = 4,10,7
 #-------------------------------
 [CARRACOSTA]
-BackSprite = 10,54
+BackSprite = 14,41
 FrontSprite = -3,18
 ShadowSprite = 2,-6,-2
 #-------------------------------
@@ -3141,7 +3141,7 @@ FrontSprite = 0,8
 ShadowSprite = 4,13,8
 #-------------------------------
 [CHANDELURE]
-BackSprite = -1,20
+BackSprite = 10,3
 FrontSprite = 0,3
 ShadowSize = -1
 ShadowSprite = 2,33,15
@@ -3356,7 +3356,7 @@ FrontSprite = -7,6
 ShadowSprite = 0,7,5
 #-------------------------------
 [CHESPIN]
-BackSprite = 7,6
+BackSprite = 12,14
 FrontSprite = 2,2
 ShadowSprite = 2,15,5
 #-------------------------------
@@ -3366,7 +3366,7 @@ FrontSprite = -4,6
 ShadowSprite = 0,5,4
 #-------------------------------
 [CHESNAUGHT]
-BackSprite = 4,44
+BackSprite = 9,28
 FrontSprite = 2,8
 ShadowSprite = 1,3,8
 #-------------------------------
@@ -3405,8 +3405,8 @@ ShadowSprite = -1,7,2
 AnimationSpeed = 1
 #-------------------------------
 [BUNNELBY]
-BackSprite = 2,11
-FrontSprite = 0,5
+BackSprite = 3,11
+FrontSprite = -1,6
 ShadowSprite = 1,15,10
 #-------------------------------
 [DIGGERSBY]
@@ -3647,7 +3647,7 @@ FrontSprite = -3,32
 ShadowSprite = 0,-17,-11
 #-------------------------------
 [CARBINK]
-BackSprite = 0,46
+BackSprite = 8,38
 FrontSprite = 0,22
 ShadowSize = -2
 ShadowSprite = 0,6,1
@@ -3831,7 +3831,7 @@ FrontSprite = -4,39
 ShadowSprite = 0,-24,-16
 #-------------------------------
 [CHARJABUG]
-BackSprite = 0,57
+BackSprite = 7,63
 FrontSprite = 2,38
 ShadowSprite = 2,-20,-13
 #-------------------------------
@@ -4138,8 +4138,8 @@ FrontSprite = -4,5
 ShadowSprite = 4,28,16
 #-------------------------------
 [BUZZWOLE]
-BackSprite = 4,53
-FrontSprite = 0,8
+BackSprite = 8,31
+FrontSprite = 0,6
 ShadowSprite = 1,4,10
 AnimationSpeed = 2,1
 #-------------------------------
@@ -4154,8 +4154,8 @@ FrontSprite = -2,7
 ShadowSprite = 0,8,6
 #-------------------------------
 [CELESTEELA]
-BackSprite = 0,44
-FrontSprite = 3,10
+BackSprite = 9,30
+FrontSprite = 0,10
 ShadowSize = -1
 ShadowSprite = 2,13,15
 #-------------------------------
@@ -4344,7 +4344,7 @@ FrontSprite = 0,6
 ShadowSprite = 0,8,5
 #-------------------------------
 [CHEWTLE]
-BackSprite = 12,3
+BackSprite = 17,9
 FrontSprite = -6,2
 ShadowSize = 2
 ShadowSprite = 2,6,4
@@ -4370,8 +4370,8 @@ FrontSprite = 2,6
 ShadowSprite = 1,2,8
 #-------------------------------
 [CARKOL]
-BackSprite = 0,23
-FrontSprite = -2,6
+BackSprite = 5,19
+FrontSprite = -2,8
 ShadowSprite = 1,8,5
 #-------------------------------
 [COALOSSAL]
@@ -4439,8 +4439,8 @@ FrontSprite = 0,35
 ShadowSprite = 7,-15,-13
 #-------------------------------
 [CENTISKORCH]
-BackSprite = -10,46
-FrontSprite = 6,30
+BackSprite = -3,35
+FrontSprite = 5,30
 ShadowSprite = 2,0,-4
 #-------------------------------
 [CLOBBOPUS]
@@ -4688,9 +4688,9 @@ FrontSprite = 2,14
 ShadowSprite = 2,4,1
 #-------------------------------
 [CALYREX]
-BackSprite = 0,60
-FrontSprite = 3,11
-ShadowSprite = 2,-2,8
+BackSprite = 0,16
+FrontSprite = 3,2
+ShadowSprite = 2,-2,25
 #-------------------------------
 [TYPHLOSION,2]
 BackSprite = -12,40
@@ -4714,3 +4714,8 @@ ShadowSprite = 1,5,3
 BackSprite = 19,45
 FrontSprite = -4,14
 ShadowSprite = 4,5,4
+#-------------------------------
+[CAMERUPT,1,female]
+BackSprite = 11,39
+FrontSprite = -1,21
+ShadowSprite = 2,1,0

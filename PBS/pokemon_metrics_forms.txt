@@ -6,13 +6,13 @@ FrontSprite = 4,15
 ShadowSprite = 0,8,2
 #-------------------------------
 [CHARIZARD,1]
-BackSprite = -7,32
+BackSprite = -7,19
 FrontSprite = 2,12
 ShadowSprite = 4,14,5
 AnimationSpeed = 1,2
 #-------------------------------
 [CHARIZARD,2]
-BackSprite = -3,30
+BackSprite = 0,22
 FrontSprite = -1,8
 ShadowSprite = 4,10,8
 #-------------------------------
@@ -426,8 +426,8 @@ FrontSprite = -2,0
 ShadowSprite = 4,32,19
 #-------------------------------
 [CAMERUPT,1]
-BackSprite = 10,48
-FrontSprite = 1,21
+BackSprite = 11,39
+FrontSprite = -1,21
 ShadowSprite = 2,0,0
 #-------------------------------
 [ALTARIA,1]
@@ -437,19 +437,19 @@ ShadowSize = -2
 ShadowSprite = 4,13,9
 #-------------------------------
 [CASTFORM,1]
-BackSprite = 6,10
+BackSprite = 6,-12
 FrontSprite = 0,-3
 ShadowSize = -1
 ShadowSprite = 2,30,16
 #-------------------------------
 [CASTFORM,2]
-BackSprite = 2,3
+BackSprite = 6,-10
 FrontSprite = 0,-5
 ShadowSize = -1
 ShadowSprite = 2,34,16
 #-------------------------------
 [CASTFORM,3]
-BackSprite = 6,14
+BackSprite = 6,-12
 FrontSprite = 0,1
 ShadowSize = -1
 ShadowSprite = 2,30,16
@@ -528,17 +528,17 @@ FrontSprite = 0,17
 ShadowSprite = 0,2,0
 #-------------------------------
 [BURMY,1]
-BackSprite = 0,8
+BackSprite = 5,-5
 FrontSprite = 2,-3
 ShadowSprite = 0,26,14
 #-------------------------------
 [BURMY,2]
-BackSprite = 0,8
+BackSprite = 5,0
 FrontSprite = 0,0
 ShadowSprite = 0,26,13
 #-------------------------------
 [CHERRIM,1]
-BackSprite = 12,6
+BackSprite = 16,16
 FrontSprite = 1,2
 ShadowSprite = 0,3,5
 #-------------------------------
@@ -947,11 +947,11 @@ FrontSprite = -1,11
 ShadowSprite = 1,-10,3
 #-------------------------------
 [CALYREX,1]
-BackSprite = -1,37
+BackSprite = 6,19
 FrontSprite = 0,7
 ShadowSprite = 4,11,7
 #-------------------------------
 [CALYREX,2]
-BackSprite = -3,47
+BackSprite = 2,24
 FrontSprite = 0,15
 ShadowSprite = 3,4,3

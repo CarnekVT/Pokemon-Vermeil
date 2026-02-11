@@ -350,7 +350,7 @@ FrontSprite = 0,14
 ShadowSprite = 4,4,7
 #-------------------------------
 [CHARCADET]
-BackSprite = 0,15
+BackSprite = 8,24
 FrontSprite = 0,33
 ShadowSprite = 1,7,-11
 #-------------------------------
@@ -360,7 +360,7 @@ FrontSprite = 0,7
 ShadowSprite = 0,13,7
 #-------------------------------
 [CERULEDGE]
-BackSprite = 2,46
+BackSprite = 2,23
 FrontSprite = 2,16
 ShadowSprite = 0,11,4
 #-------------------------------
@@ -437,8 +437,8 @@ ShadowSprite = 0,-18,1
 AnimationSpeed = 2,1
 #-------------------------------
 [CAPSAKID]
-BackSprite = 5,31
-FrontSprite = -1,2
+BackSprite = 8,31
+FrontSprite = -3,4
 ShadowSprite = 0,-3,11
 #-------------------------------
 [SCOVILLAIN]
@@ -567,14 +567,14 @@ ShadowSprite = 1,4,3
 AnimationSpeed = 2,1
 #-------------------------------
 [CETODDLE]
-BackSprite = 0,25
+BackSprite = 10,32
 FrontSprite = 2,10
 ShadowSize = 2
 ShadowSprite = 2,-4,4
 #-------------------------------
 [CETITAN]
-BackSprite = -17,51
-FrontSprite = 3,8
+BackSprite = -12,45
+FrontSprite = 3,10
 ShadowSize = 2
 ShadowSprite = 4,-8,7
 #-------------------------------
