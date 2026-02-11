@@ -2,18 +2,109 @@
 # Location signpost
 #===============================================================================
 class LocationWindow
-  APPEAR_TIME = 0.4   # In seconds; is also the disappear time
-  LINGER_TIME = 1.6   # In seconds; time during which self is fully visible
+  APPEAR_TIME = 0.5   # In seconds; is also the disappear time
+  LINGER_TIME = 1.9   # In seconds; time during which self is fully visible
 
-  def initialize(name)
+  def initialize(name, graphic_name = nil, animate = true, viewport = nil, speed_multiplier = 1.0)
+    @animate = animate
+    @dismissing = false
+    speed_multiplier = 1.0 if speed_multiplier.to_f <= 0
+    @appear_time = APPEAR_TIME / speed_multiplier.to_f
+    @linger_time = LINGER_TIME
+    initialize_viewport(viewport)
+    initialize_graphic(graphic_name)
+    initialize_text_window(name)
+    apply_style(graphic_name)
+    cache_base_opacities
+    @current_map = $game_map.map_id
+    @timer_start = System.uptime
+    @delayed = !$game_temp.fly_destination.nil?
+    set_opacity((@animate) ? 0 : 255)
+    sync_screen_tone
+  end
+
+  def initialize_viewport(viewport)
+    if viewport
+      @viewport = viewport
+      @owns_viewport = false
+      return
+    end
+    @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
+    @viewport.z = 99999
+    @owns_viewport = true
+  end
+
+  def initialize_graphic(graphic_name)
+    return if graphic_name.nil? || !pbResolveBitmap("Graphics/UI/Location/#{graphic_name}")
+    @graphic = Sprite.new(@viewport)
+    @graphic.bitmap = RPG::Cache.ui("Location/#{graphic_name}")
+    @graphic.x = 0
+    @graphic.y = (@animate) ? -@graphic.height : 0
+  end
+
+  def initialize_text_window(name)
     @window = Window_AdvancedTextPokemon.new(name)
     @window.resizeToFit(name, Graphics.width)
     @window.x        = 0
-    @window.y        = -@window.height
-    @window.viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
-    @window.viewport.z = 99999
-    @currentmap = $game_map.map_id
-    @timer_start = System.uptime
+    @window.y        = (@animate) ? -@window.height : 0
+    @window.z        = 1
+    @window.viewport = @viewport
+  end
+
+  def apply_style(graphic_name)
+    @graphic_offset = [0, 0]
+    @window_offset = [0, 0]
+    @y_distance = @window.height
+    return if graphic_name.nil?
+    style = :none
+    base_color = nil
+    shadow_color = nil
+    Settings::LOCATION_SIGN_GRAPHIC_STYLES.each_pair do |val, filenames|
+      filenames.each do |filename|
+        if filename.is_a?(Array)
+          next if filename[0] != graphic_name
+          base_color = filename[1]
+          shadow_color = filename[2]
+        else
+          next if filename != graphic_name
+        end
+        style = val
+        break
+      end
+      break if style != :none
+    end
+    return if style == :none
+    @y_distance = @graphic&.height || @window.height
+    @window.back_opacity = 0
+    case style
+    when :dp
+      @window.baseColor = base_color if base_color
+      @window.shadowColor = shadow_color if shadow_color
+      @window.text = @window.text
+      @window_offset = [8, -10]
+      @graphic&.dispose
+      @graphic = Window_AdvancedTextPokemon.new("")
+      @graphic.setSkin("Graphics/UI/Location/#{graphic_name}")
+      @graphic.width    = @window.width + (@window_offset[0] * 2) - 4
+      @graphic.height   = 48
+      @graphic.x        = 0
+      @graphic.y        = (@animate) ? -@graphic.height : @graphic_offset[1]
+      @graphic.z        = 0
+      @graphic.viewport = @viewport
+      @y_distance = @graphic.height
+    when :hgss
+      @window.baseColor = base_color if base_color
+      @window.shadowColor = shadow_color if shadow_color
+      @window.width = @graphic.width
+      @window.text = "<ac>" + @window.text
+    when :platinum
+      @window.baseColor = base_color || Color.black
+      @window.shadowColor = shadow_color || Color.new(144, 144, 160)
+      @window.text = @window.text
+      @window_offset = [10, 16]
+    end
+    @window.x = @window_offset[0]
+    @window.y = @window_offset[1] if !@animate
   end
 
   def disposed?
@@ -21,22 +112,112 @@ class LocationWindow
   end
 
   def dispose
+    @graphic&.dispose
     @window.dispose
+    @viewport.dispose if @owns_viewport && @viewport && !@viewport.disposed?
   end
 
   def update
-    return if @window.disposed?
+    return if disposed? || $game_temp.fly_destination
+    sync_screen_tone
+    if @delayed
+      @timer_start = System.uptime
+      @delayed = false
+    end
+    @graphic&.update
     @window.update
-    if $game_temp.message_window_showing || @currentmap != $game_map.map_id
-      @window.dispose
+    return if !@animate
+    dismiss if $game_temp.message_window_showing
+    if @current_map != $game_map.map_id
+      dispose
       return
     end
-    if System.uptime - @timer_start >= APPEAR_TIME + LINGER_TIME
-      @window.y = lerp(0, -@window.height, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, System.uptime)
-      @window.dispose if @window.y + @window.height <= 0
+    elapsed = System.uptime - @timer_start
+    if elapsed < @appear_time
+      # Entrance uses the same curve as exit.
+      progress = ease_in_cubic(elapsed / @appear_time)
+      y_pos = lerp(-@y_distance, 0, progress)
+      set_opacity((255 * progress).round)
+    elsif elapsed < @appear_time + @linger_time
+      y_pos = 0
+      set_opacity(255)
     else
-      @window.y = lerp(-@window.height, 0, APPEAR_TIME, @timer_start, System.uptime)
+      # Smooth exit.
+      progress = ease_in_cubic((elapsed - @appear_time - @linger_time) / @appear_time)
+      y_pos = lerp(0, -@y_distance, progress)
+      set_opacity((255 * (1.0 - progress)).round)
+      if progress >= 1.0
+        dispose
+        return
+      end
     end
+    @window.y = y_pos + @window_offset[1]
+    @graphic.y = y_pos + @graphic_offset[1] if @graphic && !@graphic.disposed?
+  end
+
+  private
+
+  def sync_screen_tone
+    return if !@owns_viewport || !@viewport || @viewport.disposed? || !$game_screen
+    return if !@viewport.respond_to?(:tone) || !$game_screen.respond_to?(:tone) || !$game_screen.tone
+    @viewport.tone.set($game_screen.tone.red,
+                       $game_screen.tone.green,
+                       $game_screen.tone.blue,
+                       $game_screen.tone.gray)
+  end
+
+  def dismiss(exit_speed_multiplier = 1.0)
+    return if disposed? || @dismissing
+    @dismissing = true
+    exit_speed_multiplier = [exit_speed_multiplier.to_f, 1.0].max
+    @appear_time = [@appear_time / exit_speed_multiplier, 0.06].max
+    # If this sign was static (pause menu), enable animation just for the exit.
+    @animate = true
+    # Jump to the start of the exit phase.
+    @timer_start = System.uptime - (@appear_time + @linger_time)
+  end
+
+  def cache_base_opacities
+    @window_base_opacity = (@window.respond_to?(:opacity) ? @window.opacity : 255)
+    @window_base_back_opacity = (@window.respond_to?(:back_opacity) ? @window.back_opacity : 255)
+    @graphic_base_opacity = (@graphic&.respond_to?(:opacity) ? @graphic.opacity : 255)
+    @graphic_base_back_opacity = (@graphic&.respond_to?(:back_opacity) ? @graphic.back_opacity : 255)
+  end
+
+  def lerp(start_pos, end_pos, t)
+    t = [[t, 0.0].max, 1.0].min
+    return start_pos + ((end_pos - start_pos) * t)
+  end
+
+  def ease_out_cubic(t)
+    t = [[t, 0.0].max, 1.0].min
+    return 1.0 - ((1.0 - t)**3)
+  end
+
+  def ease_in_cubic(t)
+    t = [[t, 0.0].max, 1.0].min
+    return t**3
+  end
+
+  def set_opacity(value)
+    value = [[value, 0].max, 255].min
+    ratio = value / 255.0
+    if @window
+      @window.contents_opacity = value if @window.respond_to?(:contents_opacity=)
+      @window.opacity = (@window_base_opacity * ratio).round if @window.respond_to?(:opacity=)
+      @window.back_opacity = (@window_base_back_opacity * ratio).round if @window.respond_to?(:back_opacity=)
+    end
+    if @graphic
+      @graphic.contents_opacity = value if @graphic.respond_to?(:contents_opacity=)
+      @graphic.opacity = (@graphic_base_opacity * ratio).round if @graphic.respond_to?(:opacity=)
+      @graphic.back_opacity = (@graphic_base_back_opacity * ratio).round if @graphic.respond_to?(:back_opacity=)
+    end
+  end
+
+  public
+
+  def pbStartExit(exit_speed_multiplier = 1.0)
+    dismiss(exit_speed_multiplier)
   end
 end
 

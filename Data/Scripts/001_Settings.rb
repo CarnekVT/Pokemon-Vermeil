@@ -263,15 +263,48 @@ module Settings
   # allowed if the player can use Fly normally.
   CAN_FLY_FROM_TOWN_MAP = true
 
-  #=============================================================================
+  #-----------------------------------------------------------------------------
+  # Location signpost.
+  #-----------------------------------------------------------------------------
 
-  # Pairs of map IDs, where the location signpost isn't shown when moving from
+  # Set this to true to disable location signs entirely.
+  DISABLE_LOCATION_SIGNS = false
+
+  # Set this to true if the location sign should also be shown in the pause menu.
+  SHOW_LOCATION_SIGN_IN_PAUSE_MENU = true
+
+  # Pairs of map IDs, where the location sign isn't shown when moving from
   # one of the maps in a pair to the other (and vice versa). Useful for single
   # long routes/towns that are spread over multiple maps.
   #   e.g. [4,5,16,17,42,43] will be map pairs 4,5 and 16,17 and 42,43.
   # Moving between two maps that have the exact same name won't show the
-  # location signpost anyway, so you don't need to list those maps here.
-  NO_SIGNPOSTS = []
+  # location sign anyway, so you don't need to list those maps here.
+  NO_LOCATION_SIGNS = []
+
+  # Backwards-compatible alias.
+  NO_SIGNPOSTS = NO_LOCATION_SIGNS
+
+  # Filename of a location sign graphic that will be used if map metadata
+  # doesn't define one. Set this to nil to use the default menu windowskin.
+  DEFAULT_LOCATION_SIGN_GRAPHIC = "HGSS default"
+
+  # Maps location sign graphics to text styles. The :none style is reserved for
+  # the no-graphic style. A filename can instead be an array of
+  # [filename, text base color, text shadow color].
+  LOCATION_SIGN_GRAPHIC_STYLES = {
+    :dp       => [["DP", Color.new(72, 80, 72), Color.new(144, 160, 160)]],
+    :hgss     => [["HGSS cave",    Color.new(232, 232, 232), Color.new(120, 144, 160)],
+                  ["HGSS city",    Color.new(56, 64, 72),    Color.new(152, 152, 144)],
+                  ["HGSS default", Color.new(48, 64, 72),    Color.new(144, 144, 96)],
+                  ["HGSS forest",  Color.new(232, 232, 232), Color.new(120, 176, 144)],
+                  ["HGSS lake",    Color.new(40, 48, 56),    Color.new(104, 144, 192)],
+                  ["HGSS park",    Color.new(40, 48, 56),    Color.new(120, 136, 152)],
+                  ["HGSS route",   Color.new(48, 64, 72),    Color.new(136, 136, 104)],
+                  ["HGSS sea",     Color.new(216, 240, 248), Color.new(24, 96, 144)],
+                  ["HGSS town",    Color.new(48, 56, 64),    Color.new(144, 120, 80)]],
+    :platinum => ["Pt cave", "Pt city", "Pt default", "Pt forest", "Pt lake",
+                  "Pt park", "Pt route", "Pt sea", "Pt town"]
+  }
 
   #=============================================================================
 

@@ -45,6 +45,36 @@ class PokemonPauseMenu_Scene
     @sprites["helpwindow"].visible = false
   end
 
+  def pbShowLocationSign
+    return if Settings::DISABLE_LOCATION_SIGNS
+    return if !Settings::SHOW_LOCATION_SIGN_IN_PAUSE_MENU
+    @existing_map_location_sign = nil
+    active_map_sign = nil
+    if $scene && $scene.respond_to?(:spriteset) && $scene.spriteset
+      $scene.spriteset.usersprites.each do |sprite|
+        next if !sprite.is_a?(LocationWindow) || sprite.disposed?
+        active_map_sign = sprite
+        break
+      end
+    end
+    if active_map_sign
+      @existing_map_location_sign = active_map_sign
+      return
+    end
+    map_name = $game_map.name
+    location_sign_graphic = $game_map.metadata&.location_sign || Settings::DEFAULT_LOCATION_SIGN_GRAPHIC
+    # Faster entrance in pause so it doesn't feel delayed.
+    @sprites["location"] = LocationWindow.new(map_name, location_sign_graphic, true, @viewport, 2.8)
+    $scene.spriteset.usersprites.each do |sprite|
+      next if !sprite.is_a?(LocationWindow)
+      if sprite.respond_to?(:pbStartExit)
+        sprite.pbStartExit
+      else
+        sprite.dispose
+      end
+    end
+  end
+
   def pbShowCommands(commands)
     ret = -1
     cmdwindow = @sprites["cmdwindow"]
@@ -56,6 +86,7 @@ class PokemonPauseMenu_Scene
     cmdwindow.visible  = true
     loop do
       cmdwindow.update
+      @sprites["location"]&.update
       Graphics.update
       Input.update
       pbUpdateSceneMap
@@ -72,6 +103,22 @@ class PokemonPauseMenu_Scene
   end
 
   def pbEndScene
+    if @existing_map_location_sign && !@existing_map_location_sign.disposed?
+      if @existing_map_location_sign.respond_to?(:pbStartExit)
+        @existing_map_location_sign.pbStartExit(3.5)
+      else
+        @existing_map_location_sign.dispose
+      end
+    end
+    # Spawn an independent exit animation on the map, so the menu can close
+    # immediately while the sign finishes animating out.
+    if @sprites["location"] && !@sprites["location"].disposed?
+      map_name = $game_map.name
+      location_sign_graphic = $game_map.metadata&.location_sign || Settings::DEFAULT_LOCATION_SIGN_GRAPHIC
+      exit_sign = LocationWindow.new(map_name, location_sign_graphic, true, nil, 2.8)
+      exit_sign.pbStartExit if exit_sign.respond_to?(:pbStartExit)
+      $scene.spriteset.addUserSprite(exit_sign) if $scene && $scene.respond_to?(:spriteset) && $scene.spriteset
+    end
     pbDisposeSpriteHash(@sprites)
     @viewport.dispose
   end
@@ -94,6 +141,8 @@ class PokemonPauseMenu
 
   def pbShowInfo; end
 
+  def pbShowLocationSign; end
+
   def pbStartPokemonMenu
     if !$player
       if $DEBUG
@@ -105,6 +154,7 @@ class PokemonPauseMenu
     @scene.pbStartScene
     # Show extra info window if relevant
     pbShowInfo
+    @scene.pbShowLocationSign
     # Get all commands
     command_list = []
     commands = []

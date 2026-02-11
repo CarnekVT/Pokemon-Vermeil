@@ -6,6 +6,7 @@ Name = Intro
 [002]   # Route 29
 Name = Route 29
 Outdoor = true
+LocationSign = HGSS route
 ShowArea = true
 Weather = GreenLeavesPresentColor,100
 SnapEdges = true
@@ -18,6 +19,7 @@ Weather = SakuraPetals,100
 [042]   # New Bark Town
 Name = New Bark Town
 Outdoor = true
+LocationSign = HGSS town
 ShowArea = true
 Weather = GreenLeavesPresentColor,100
 SnapEdges = true
