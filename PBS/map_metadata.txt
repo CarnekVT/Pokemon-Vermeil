@@ -9,6 +9,7 @@ Outdoor = true
 LocationSign = HGSS route
 ShowArea = true
 Weather = GreenLeavesPresentColor,100
+MapPosition = 0,18,17
 SnapEdges = true
 BattleBack = RouteField
 #-------------------------------
@@ -21,7 +22,9 @@ Name = New Bark Town
 Outdoor = true
 LocationSign = HGSS town
 ShowArea = true
+HealingSpot = 42,32,16
 Weather = GreenLeavesPresentColor,100
+MapPosition = 0,20,17
 SnapEdges = true
 BattleBack = NewBark
 WildBattleBGM = HGSS Wild Pokemon Pokestir

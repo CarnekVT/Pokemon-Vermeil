@@ -25,3 +25,13 @@ Price = 0
 FieldUse = Direct
 Flags = KeyItem,Fling_0
 Description = A device that displays the encounter list for the current area.
+#-------------------------------
+[CHANGEDEX]
+Name = Change Dex
+NamePlural = Change Dexes
+Pocket = 8
+Price = 0
+FieldUse = Direct
+Flags = KeyItem,Fling_0
+Description = A record of canon and Vermeil changes for existing species, including typing, stats, abilities and newly learned moves.
+

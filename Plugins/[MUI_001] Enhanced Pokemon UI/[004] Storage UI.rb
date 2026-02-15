@@ -2,7 +2,60 @@
 # Storage UI edits.
 #===============================================================================
 class PokemonStorageScene
+  alias mui_storage_ui_pbStartBox pbStartBox
+  def pbStartBox(screen, command)
+    mui_storage_ui_pbStartBox(screen, command)
+    # Keep the hand cursor viewport above box/UI layers in this custom layout.
+    if @arrowviewport && @boxsidesviewport
+      @arrowviewport.z = [@arrowviewport.z, @boxsidesviewport.z + 1].max
+    end
+    if @sprites && @sprites["arrow"] && !@sprites["arrow"].disposed?
+      @sprites["arrow"].z = [@sprites["arrow"].z, 50].max
+      @sprites["arrow"].visible = true
+    end
+    sync_arrow_fallback
+  end
+
+  alias mui_storage_ui_update update
+  def update
+    mui_storage_ui_update
+    sync_arrow_fallback
+  end
+
+  def sync_arrow_fallback
+    return if !@sprites
+    arrow = @sprites["arrow"]
+    fallback = @sprites["arrow_fallback"]
+    return if !fallback || fallback.disposed?
+    if !arrow || arrow.disposed?
+      fallback.visible = false
+      return
+    end
+    fallback.visible = arrow.visible
+    fallback.x = arrow.x
+    fallback.y = arrow.y
+    fallback.opacity = arrow.opacity
+    fallback.color = arrow.color
+    # Idle animation (point 1/2) to mimic vanilla cursor.
+    key = ((System.uptime / 0.5).to_i.even?) ? "point1" : "point2"
+    if @arrow_fallback_key != key
+      fallback.changeBitmap(key)
+      @arrow_fallback_key = key
+    end
+  end
+
   def pbUpdateOverlay(selection, party = nil)
+    # Fallback cursor layer: create it before the scene fade-in so it is
+    # visible immediately when the Storage UI appears.
+    if @sprites && !@sprites["arrow_fallback"] && @arrowviewport
+      @sprites["arrow_fallback"] = ChangelingSprite.new(0, 0, @arrowviewport)
+      @sprites["arrow_fallback"].addBitmap("point1", "Graphics/UI/Storage/cursor_point_1")
+      @sprites["arrow_fallback"].addBitmap("point2", "Graphics/UI/Storage/cursor_point_2")
+      @sprites["arrow_fallback"].changeBitmap("point1")
+      @sprites["arrow_fallback"].z = 999
+      @arrow_fallback_key = "point1"
+      sync_arrow_fallback
+    end
     if !@sprites["plugin_overlay"]
       @sprites["plugin_overlay"] = BitmapSprite.new(Graphics.width, Graphics.height, @boxsidesviewport)
       pbSetSystemFont(@sprites["plugin_overlay"].bitmap)

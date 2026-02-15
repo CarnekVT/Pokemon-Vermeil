@@ -4719,3 +4719,10 @@ ShadowSprite = 4,5,4
 BackSprite = 11,39
 FrontSprite = -1,21
 ShadowSprite = 2,1,0
+#-------------------------------
+[NAUSSITCHD]
+BackSprite = 9,40
+FrontSprite = 0,23
+ShadowSprite = 5,0,-3
+AnimationSpeed = 1
+SuperShinyHue = -35

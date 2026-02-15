@@ -2,12 +2,13 @@
 # Location signpost
 #===============================================================================
 class LocationWindow
-  APPEAR_TIME = 0.5   # In seconds; is also the disappear time
+  APPEAR_TIME = 0.62  # In seconds; is also the disappear time
   LINGER_TIME = 1.9   # In seconds; time during which self is fully visible
 
-  def initialize(name, graphic_name = nil, animate = true, viewport = nil, speed_multiplier = 1.0)
+  def initialize(name, graphic_name = nil, animate = true, viewport = nil, speed_multiplier = 1.0, hold_open = false)
     @animate = animate
     @dismissing = false
+    @hold_open = hold_open
     speed_multiplier = 1.0 if speed_multiplier.to_f <= 0
     @appear_time = APPEAR_TIME / speed_multiplier.to_f
     @linger_time = LINGER_TIME
@@ -15,6 +16,7 @@ class LocationWindow
     initialize_graphic(graphic_name)
     initialize_text_window(name)
     apply_style(graphic_name)
+    setup_initial_positions
     cache_base_opacities
     @current_map = $game_map.map_id
     @timer_start = System.uptime
@@ -39,14 +41,14 @@ class LocationWindow
     @graphic = Sprite.new(@viewport)
     @graphic.bitmap = RPG::Cache.ui("Location/#{graphic_name}")
     @graphic.x = 0
-    @graphic.y = (@animate) ? -@graphic.height : 0
+    @graphic.y = 0
   end
 
   def initialize_text_window(name)
     @window = Window_AdvancedTextPokemon.new(name)
     @window.resizeToFit(name, Graphics.width)
     @window.x        = 0
-    @window.y        = (@animate) ? -@window.height : 0
+    @window.y        = 0
     @window.z        = 1
     @window.viewport = @viewport
   end
@@ -59,9 +61,21 @@ class LocationWindow
     style = :none
     base_color = nil
     shadow_color = nil
+    zoom_x = 1
+    zoom_y = 1
+    center_text = false
     Settings::LOCATION_SIGN_GRAPHIC_STYLES.each_pair do |val, filenames|
       filenames.each do |filename|
-        if filename.is_a?(Array)
+        if filename.is_a?(Hash)
+          next if !filename.key?(:graphic) || filename[:graphic] != graphic_name
+          base_color = filename[:text_color] if filename.key?(:text_color)
+          shadow_color = filename[:shadow_color] if filename.key?(:shadow_color)
+          zoom_x = filename[:zoomx] || 1
+          zoom_y = filename[:zoomy] || 1
+          @window_offset = filename[:text_offset] || [0, 0]
+          @graphic_offset = filename[:graphic_offset] || [0, 0]
+          center_text = filename[:center_text] || false
+        elsif filename.is_a?(Array)
           next if filename[0] != graphic_name
           base_color = filename[1]
           shadow_color = filename[2]
@@ -76,35 +90,56 @@ class LocationWindow
     return if style == :none
     @y_distance = @graphic&.height || @window.height
     @window.back_opacity = 0
+    @graphic.zoom_x = zoom_x if @graphic
+    @graphic.zoom_y = zoom_y if @graphic
     case style
     when :dp
       @window.baseColor = base_color if base_color
       @window.shadowColor = shadow_color if shadow_color
       @window.text = @window.text
-      @window_offset = [8, -10]
+      @window_offset = [8, -10] if @window_offset == [0, 0]
       @graphic&.dispose
       @graphic = Window_AdvancedTextPokemon.new("")
       @graphic.setSkin("Graphics/UI/Location/#{graphic_name}")
       @graphic.width    = @window.width + (@window_offset[0] * 2) - 4
       @graphic.height   = 48
       @graphic.x        = 0
-      @graphic.y        = (@animate) ? -@graphic.height : @graphic_offset[1]
+      @graphic.y        = 0
       @graphic.z        = 0
+      @graphic.zoom_x   = zoom_x
+      @graphic.zoom_y   = zoom_y
       @graphic.viewport = @viewport
       @y_distance = @graphic.height
     when :hgss
       @window.baseColor = base_color if base_color
       @window.shadowColor = shadow_color if shadow_color
       @window.width = @graphic.width
-      @window.text = "<ac>" + @window.text
     when :platinum
       @window.baseColor = base_color || Color.black
       @window.shadowColor = shadow_color || Color.new(144, 144, 160)
       @window.text = @window.text
-      @window_offset = [10, 16]
+      @window_offset = [10, 16] if @window_offset == [0, 0]
+    when :oras
+      @window.baseColor = base_color || Color.white
+      @window.shadowColor = shadow_color || Color.new(0, 0, 0, 128)
+    when :xy
+      @window.baseColor = base_color || Color.white
+      @window.shadowColor = shadow_color || Color.new(0, 0, 0, 128)
     end
-    @window.x = @window_offset[0]
-    @window.y = @window_offset[1] if !@animate
+    @window.text = @window.text
+    @window.text = "<ac>" + @window.text if center_text
+  end
+
+  def setup_initial_positions
+    ref_y = @graphic_offset[1] || 0
+    @animate_from_bottom = (ref_y > Graphics.height / 2)
+    initial_y_offset = (@animate) ? animation_start_offset : 0
+    if @graphic
+      @graphic.x = @graphic_offset[0]
+      @graphic.y = @graphic_offset[1] + initial_y_offset
+    end
+    @window.x = @graphic_offset[0] + @window_offset[0]
+    @window.y = @graphic_offset[1] + @window_offset[1] + initial_y_offset
   end
 
   def disposed?
@@ -134,28 +169,36 @@ class LocationWindow
     end
     elapsed = System.uptime - @timer_start
     if elapsed < @appear_time
-      # Entrance uses the same curve as exit.
-      progress = ease_in_cubic(elapsed / @appear_time)
-      y_pos = lerp(-@y_distance, 0, progress)
+      # Pause signs should feel responsive while still animated.
+      progress = (@hold_open) ? ease_out_cubic(elapsed / @appear_time) : ease_in_cubic(elapsed / @appear_time)
+      y_pos = lerp(animation_start_offset, 0, progress)
       set_opacity((255 * progress).round)
-    elsif elapsed < @appear_time + @linger_time
+    elsif @hold_open || elapsed < @appear_time + @linger_time
       y_pos = 0
       set_opacity(255)
     else
       # Smooth exit.
       progress = ease_in_cubic((elapsed - @appear_time - @linger_time) / @appear_time)
-      y_pos = lerp(0, -@y_distance, progress)
+      y_pos = lerp(0, animation_start_offset, progress)
       set_opacity((255 * (1.0 - progress)).round)
       if progress >= 1.0
         dispose
         return
       end
     end
-    @window.y = y_pos + @window_offset[1]
-    @graphic.y = y_pos + @graphic_offset[1] if @graphic && !@graphic.disposed?
+    @window.x = @graphic_offset[0] + @window_offset[0]
+    @window.y = @graphic_offset[1] + @window_offset[1] + y_pos
+    if @graphic && !@graphic.disposed?
+      @graphic.x = @graphic_offset[0]
+      @graphic.y = @graphic_offset[1] + y_pos
+    end
   end
 
   private
+
+  def animation_start_offset
+    return (@animate_from_bottom) ? @y_distance : -@y_distance
+  end
 
   def sync_screen_tone
     return if !@owns_viewport || !@viewport || @viewport.disposed? || !$game_screen
@@ -215,6 +258,10 @@ class LocationWindow
   end
 
   public
+
+  def pbHoldOpen(value = true)
+    @hold_open = value
+  end
 
   def pbStartExit(exit_speed_multiplier = 1.0)
     dismiss(exit_speed_multiplier)

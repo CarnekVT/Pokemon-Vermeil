@@ -1,0 +1,16 @@
+Name       = HGSS Multi-Save
+Version    = 2.0
+Essentials = 21.1
+Requires   = v21.1 Hotfixes,1.0.9
+Optional   = Elite Battle: DX,1.4.7.1
+Credits    = Maruno, http404error, ChromeValiant
+Website    = https://github.com/ChromeValiant/HGSS-MultiSave
+
+
+# Change logs
+#############################################
+# 2.0
+#############################################
+# - New Load UI screen appears correctly when running outside of Debug mode
+# - Compatibility with Elite Battle: DX
+# - Re-Organized Settings / Configuration file

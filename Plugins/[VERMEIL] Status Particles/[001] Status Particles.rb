@@ -44,6 +44,7 @@ module StatusParticles
     :CONFUSION  => "confusion",
     :INFATUATION => "infatuation"
   }
+  PARALYSIS_FRAMES = ["paralysis", "paralysis2", "paralysis3"]
 
   STYLE_BY_STATUS = {
     :SLEEP       => :sleep_z,
@@ -142,6 +143,7 @@ class StatusParticles::Emitter
     @style = :confusion_orbit
     @bitmap = nil
     @bitmap_name = nil
+    @anim_bitmaps = nil
   end
 
   def dispose
@@ -197,7 +199,13 @@ class StatusParticles::Emitter
     return if name == @bitmap_name
     dispose_bitmap
     @bitmap_name = name
-    if name
+    if @status_key == :PARALYSIS
+      @anim_bitmaps = StatusParticles::PARALYSIS_FRAMES.map do |frame_name|
+        path = pbResolveBitmap("#{StatusParticles::ASSET_DIR}#{frame_name}")
+        path ? Bitmap.new(path) : build_fallback_bitmap(:PARALYSIS)
+      end
+      @bitmap = @anim_bitmaps[0]
+    elsif name
       path = pbResolveBitmap("#{StatusParticles::ASSET_DIR}#{name}")
       @bitmap = path ? Bitmap.new(path) : build_fallback_bitmap(@status_key)
     else
@@ -212,6 +220,10 @@ class StatusParticles::Emitter
   end
 
   def dispose_bitmap
+    if @anim_bitmaps
+      @anim_bitmaps.each { |b| b.dispose if b && !b.disposed? }
+      @anim_bitmaps = nil
+    end
     if @bitmap && !@bitmap.disposed?
       @bitmap.dispose
     end
@@ -256,11 +268,13 @@ class StatusParticles::Emitter
   end
 
   def reset_particles
-    @particle_data = @sprites.map do
+    count = [@sprites.length, 1].max
+    @particle_data = @sprites.each_with_index.map do |_, i|
+      base_angle = (2.0 * Math::PI * i) / count
       {
-        :angle  => rand * Math::PI * 2,
-        :radius => (@style == :confusion_orbit) ? rand(30..45) : rand(PARTICLE_RADIUS_MIN..PARTICLE_RADIUS_MAX),
-        :speed  => (rand * 0.03) + 0.02,
+        :angle  => (@style == :confusion_orbit) ? base_angle : rand * Math::PI * 2,
+        :radius => (@style == :confusion_orbit) ? 38 : rand(PARTICLE_RADIUS_MIN..PARTICLE_RADIUS_MAX),
+        :speed  => (@style == :confusion_orbit) ? 0.03 : (rand * 0.03) + 0.02,
         :seed   => rand(0.0..10.0),
         :life   => (@style == :paralysis_sparks) ? rand(40..60) : rand(50..90),
         :age    => rand(0..40),
@@ -329,31 +343,34 @@ class StatusParticles::Emitter
 
   def update_style_particle(sprite, i, anchor_x, anchor_y, center_y, frame)
     data = @particle_data[i]
-    data[:age] += 1
-    life = data[:life]
-    if data[:age] >= life
-      data[:age] = 0
-      
-      if @style == :paralysis_sparks
-        data[:life] = rand(40..60)
-        data[:side_toggle] = !data[:side_toggle]
-        # Alternate sides: 0 (Right) or PI (Left)
-        data[:angle] = data[:side_toggle] ? 0 : Math::PI
-      else
-        data[:life] = rand(50..90)
-        data[:angle] = rand * Math::PI * 2
+    alpha = 1.0
+    if @style != :confusion_orbit
+      data[:age] += 1
+      life = data[:life]
+      if data[:age] >= life
+        data[:age] = 0
+        
+        if @style == :paralysis_sparks
+          data[:life] = rand(40..60)
+          data[:side_toggle] = !data[:side_toggle]
+          # Alternate sides: 0 (Right) or PI (Left)
+          data[:angle] = data[:side_toggle] ? 0 : Math::PI
+        else
+          data[:life] = rand(50..90)
+          data[:angle] = rand * Math::PI * 2
+        end
+        
+        data[:seed] = rand(0.0..10.0)
       end
-      
-      data[:seed] = rand(0.0..10.0)
+      alpha = particle_alpha(data[:age], data[:life])
     end
-    alpha = particle_alpha(data[:age], data[:life])
     case @style
     when :confusion_orbit
       data[:angle] += data[:speed]
       sprite.x = anchor_x + Math.cos(data[:angle]) * data[:radius]
       sprite.y = anchor_y + Math.sin(data[:angle]) * data[:radius] * 0.6
       sprite.y += Math.sin(frame * PARTICLE_BOB_RATE + i) * PARTICLE_BOB_AMT
-      sprite.opacity = @battler_sprite.opacity * alpha
+      sprite.opacity = @battler_sprite.opacity
     when :sleep_z
       t = data[:age]
       x = anchor_x + Math.sin((t + data[:seed]) * 0.08) * 10 + (i * 8)
@@ -389,6 +406,7 @@ class StatusParticles::Emitter
       sprite.y = y
       sprite.opacity = @battler_sprite.opacity * (alpha * 0.9)
     when :paralysis_sparks
+      # Keep previous movement, but animate bitmap as 1->2->3 then a short off gap.
       radius = 24
       angle = data[:angle]
       direction = data[:side_toggle] ? 1 : -1
@@ -396,7 +414,26 @@ class StatusParticles::Emitter
       sprite.x = anchor_x + Math.cos(angle) * radius + (direction * data[:age] * 0.2)
       sprite.y = center_y + Math.sin(angle) * radius * 0.4 + (data[:side_toggle] ? -curve : curve)
       sprite.mirror = !data[:side_toggle]
-      sprite.opacity = @battler_sprite.opacity * alpha
+      frame_step = data[:age] % 16
+      frame_idx = case frame_step
+                  when 0..2 then 0
+                  when 3..5 then 1
+                  when 6..8 then 2
+                  else nil
+                  end
+      if frame_idx.nil?
+        sprite.visible = false
+      else
+        sprite.visible = true
+        sprite.bitmap = @anim_bitmaps[frame_idx] if @anim_bitmaps && @anim_bitmaps[frame_idx]
+        # Keep the same motion; only fade during frame 3 to imply energy discharge.
+        fade = 1.0
+        if frame_idx == 2
+          fade = 1.0 - ((frame_step - 6) / 3.0)
+          fade = 0.0 if fade < 0.0
+        end
+        sprite.opacity = @battler_sprite.opacity * alpha * fade
+      end
     when :infatuation_hearts
       t = data[:age]
       side_offset = (i.even? ? -1 : 1) * 28

@@ -30,6 +30,8 @@ class Game_Temp
   attr_accessor :cue_bgm
   attr_accessor :cue_bgm_timer_start
   attr_accessor :cue_bgm_delay
+  attr_accessor :last_location_sign_map
+  attr_accessor :force_location_sign_on_load
 end
 
 def pbBatteryLow?
@@ -60,6 +62,32 @@ EventHandlers.add(:on_frame_update, :cue_bgm_after_delay,
     next if System.uptime - $game_temp.cue_bgm_timer_start < $game_temp.cue_bgm_delay
     $game_temp.cue_bgm_delay = nil
     pbBGMPlay($game_temp.cue_bgm) if $game_system.getPlayingBGM.nil?
+  }
+)
+
+# Fallback for loading/continuing a save: show the location sign as soon as the
+# map scene/spriteset is fully available.
+EventHandlers.add(:on_frame_update, :show_location_sign_after_load,
+  proc {
+    next if Settings::DISABLE_LOCATION_SIGNS
+    next if !$scene.is_a?(Scene_Map) || !$scene.spriteset
+    next if !$game_map
+    forced_show = $game_temp.force_location_sign_on_load
+    first_map_load = $game_temp.last_location_sign_map.nil?
+    next if !forced_show && !first_map_load
+    if first_map_load && !$game_map.metadata&.announce_location
+      $game_temp.last_location_sign_map = $game_map.map_id
+      $game_temp.force_location_sign_on_load = false
+      next
+    end
+    next if !$game_map.metadata&.announce_location
+    next if $game_temp.message_window_showing
+    next if $scene.spriteset.usersprites.any? { |s| s.is_a?(LocationWindow) && !s.disposed? }
+    map_name = $game_map.name
+    location_sign_graphic = $game_map.metadata&.location_sign || Settings::DEFAULT_LOCATION_SIGN_GRAPHIC
+    $scene.spriteset.addUserSprite(LocationWindow.new(map_name, location_sign_graphic))
+    $game_temp.last_location_sign_map = $game_map.map_id
+    $game_temp.force_location_sign_on_load = false
   }
 )
 
@@ -264,6 +292,16 @@ EventHandlers.add(:on_enter_map, :add_to_trail,
   }
 )
 
+# Request showing the location sign once when loading/continuing a save.
+EventHandlers.add(:on_enter_map, :queue_location_sign_on_load,
+  proc { |old_map_id|
+    next if old_map_id != 0
+    next if Settings::DISABLE_LOCATION_SIGNS
+    next if !$game_map.metadata&.announce_location
+    $game_temp.force_location_sign_on_load = true
+  }
+)
+
 # Force cycling/walking.
 EventHandlers.add(:on_enter_map, :force_cycling,
   proc { |_old_map_id|
@@ -298,10 +336,13 @@ EventHandlers.add(:on_map_or_spriteset_change, :show_darkness,
 EventHandlers.add(:on_map_or_spriteset_change, :show_location_sign,
   proc { |scene, map_changed|
     next if !scene || !scene.spriteset
-    next if !map_changed || !$game_map.metadata&.announce_location
+    next if !$game_map.metadata&.announce_location
+    force_on_load = $game_temp.force_location_sign_on_load
+    show_on_initial_load = (!map_changed && $game_temp.last_location_sign_map.nil?)
+    next if !map_changed && !show_on_initial_load && !force_on_load
     next if Settings::DISABLE_LOCATION_SIGNS
     no_sign = false
-    if $PokemonGlobal.mapTrail[1]
+    if !force_on_load && $PokemonGlobal.mapTrail[1]
       (Settings::NO_LOCATION_SIGNS.length / 2).times do |i|
         no_sign = true if Settings::NO_LOCATION_SIGNS[2 * i] == $PokemonGlobal.mapTrail[1] &&
                           Settings::NO_LOCATION_SIGNS[(2 * i) + 1] == $game_map.map_id
@@ -315,6 +356,8 @@ EventHandlers.add(:on_map_or_spriteset_change, :show_location_sign,
     map_name = $game_map.name
     location_sign_graphic = $game_map.metadata&.location_sign || Settings::DEFAULT_LOCATION_SIGN_GRAPHIC
     scene.spriteset.addUserSprite(LocationWindow.new(map_name, location_sign_graphic))
+    $game_temp.last_location_sign_map = $game_map.map_id
+    $game_temp.force_location_sign_on_load = false
   }
 )
 

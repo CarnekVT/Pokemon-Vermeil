@@ -84,3 +84,128 @@ Target = NearOther
 FunctionCode = None
 Flags = Contact,CanProtect,CanMirrorMove,HighCriticalHitRate,Slicing
 Description = The user slices at weak points with a sharp stalk. It has a high critical-hit ratio.
+#-------------------------------
+# Kalosian Avalugg
+#-------------------------------
+[BERGMITESORTIE]
+Name = Bergmite Sortie
+Type = ICE
+Category = Physical
+Power = 20
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = BergmiteSortie
+Flags = CanProtect,CanMirrorMove
+EffectChance = 10
+Description = Hits 2-5 times. Each hit may lower the target's Speed.
+#-------------------------------
+# Hisuian Avalugg
+#-------------------------------
+[GLACIERCRUNCH]
+Name = Glacier Crunch
+Type = ROCK
+Category = Physical
+Power = 85
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = GlacierCrunch
+Flags = Contact,CanProtect,CanMirrorMove,Biting
+Description = A permafrost bite. Treated as a biting move and is super effective against Steel.
+#-------------------------------
+# Mega Meganium
+#-------------------------------
+[ANCIENTVIGOR]
+Name = Ancient Vigor
+Type = FAIRY
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = AncientVigor
+Flags = CanProtect,CanMirrorMove
+EffectChance = 30
+Description = Restores half the damage dealt and may raise the user's Defense and Sp. Def.
+#-------------------------------
+# Mega Emboar
+#-------------------------------
+[SERPENTFLARE]
+Name = Serpent Flare
+Type = FIRE
+Category = Physical
+Power = 25
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = SerpentFlare
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 10
+Description = Hits 2-5 times. Each hit may burn the target.
+#-------------------------------
+# Mega Feraligatr
+#-------------------------------
+[DYNASTICFANG]
+Name = Dynastic Fang
+Type = DRAGON
+Category = Physical
+Power = 85
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = DynasticFang
+Flags = Contact,CanProtect,CanMirrorMove,Biting
+Description = A biting strike. Gets +1 priority if the target has less than half HP.
+#-------------------------------
+# Flying Type Trailblaze/Flame Charge
+#-------------------------------
+[SPIRALSTRIKE]
+Name = Spiral Strike
+Type = FLYING
+Category = Physical
+Power = 50
+Accuracy = 100
+TotalPP = 20
+Target = NearOther
+FunctionCode = RaiseUserSpeed1
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 100
+Description = A spiraling burst that strikes the target and raises the user's Speed.
+#-------------------------------
+[AUREOLAFLARE]
+Name = Aureola Flare
+Type = FIRE
+Category = Special
+Power = 100
+Accuracy = 95
+TotalPP = 10
+Target = NearOther
+FunctionCode = BurnTarget30Percent
+Flags = CanProtect,CanMirrorMove,Bullet
+EffectChance = 30
+Description = The user unleashes a blast of divine solar heat. High chance to burn the target.
+#-------------------------------
+[SHADOWDECREE]
+Name = Shadow Decree
+Type = DARK
+Category = Physical
+Power = 85
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = IgnoreTargetDefSpDefEvaStatStages
+Flags = CanProtect,CanMirrorMove,Contact,HighCriticalHitRate
+Description = A definitive strike delivered with the authority of the eclipse. High critical hit ratio and ignores stat changes.
+#-------------------------------
+[STALAGMITEFALL]
+Name = Stalagmite Fall
+Type = ROCK
+Category = Physical
+Power = 100
+Accuracy = 95
+TotalPP = 10
+Target = NearOther
+FunctionCode = StalagmiteFall
+Flags = Contact,CanProtect,CanMirrorMove
+Description = A crushing cave strike. It may flinch the target or lower its Defense.

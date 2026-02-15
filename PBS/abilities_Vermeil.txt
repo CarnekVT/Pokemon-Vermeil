@@ -47,3 +47,56 @@ Description = Intimidates foes upon entry, lowering their Attack. Ruthlessly str
 [FOLDEDGUARD]
 Name = Folded Guard
 Description = The first time this Pokemon is hit in battle, the damage is halved.
+#-------------------------------
+# Kalosian Avalugg
+#-------------------------------
+[HABBAKUKHULL]
+Name = Habbakuk Hull
+Description = Halves damage from Fire, Fighting, and Rock moves. Allies take 25% less damage from spread attacks.
+#-------------------------------
+# Hisuian Avalugg
+#-------------------------------
+[PERMAFROSTJAW]
+Name = Permafrost Jaw
+Description = Powers up biting moves and lets them ignore the target's defensive Ability effects.
+#-------------------------------
+# Mega Feraligatr
+#-------------------------------
+[DELTAPLATING]
+Name = Delta Plating
+Description = Halves damage from super-effective moves. Raises Speed by 2 stages when hit by a critical hit.
+#-------------------------------
+# Tenkifetch'd
+#-------------------------------
+[PRIMALTOUGH]
+Name = Primal Tough
+Description = Reduces damage taken from Rock-type moves, but makes Ice-type moves deal more damage.
+#-------------------------------
+# Tenkifetch'd, Tinkaton, Throgre
+#-------------------------------
+[HAMMERMASTER]
+Name = Hammer Master
+Description = Powers up hammer and club moves by 50%.
+#-------------------------------
+# Ledian
+#-------------------------------
+[STARRYREACH]
+Name = Starry Reach
+Description = Status and punching moves gain +1 priority. Punching moves have doubled secondary effect chance.
+#-------------------------------
+# Suncorona
+#-------------------------------
+[BLESSEDCORONA]
+Name = Blessed Corona
+Description = Damages foes every turn. Allies are immune to freezing and their Fire moves are empowered.
+#-------------------------------
+# Eclipsora
+#-------------------------------
+[UMBRAVEIL]
+Name = Umbral Veil
+Description = Envelops the field in eclipse fog for 5 turns. Foes lose accuracy against the protected side, allies are immune to critical hits and stat drops.
+#-------------------------------
+[MINERALDRIP]
+Name = Mineral Drip
+Description = Restores HP each turn. In a sandstorm, the healing is stronger.
+#-------------------------------

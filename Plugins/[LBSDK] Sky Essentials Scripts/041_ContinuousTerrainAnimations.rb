@@ -47,6 +47,22 @@ module ContinuousTerrainSettings
       :delay => 8,
       :color => Color.new(255, 0, 255, 150),
       :image => "terrain_psychic"
+    },
+    :Eclipse => {
+      :sprites => 0,
+      :speed => 0,
+      :fade_speed => 1,
+      :direction => :diagonal,
+      :animation_frames => 1,
+      :delay => 0,
+      :color => Color.new(255, 255, 255, 255),
+      :weather_image => "fog_tile_3",
+      :fog_tiled => true,
+      :tile_speed_x => -10,
+      :tile_speed_y => 4,
+      :tile_opacity => 92,
+      :bg_opacity => 152,
+      :tile_z => 90
     }
   }
 end
@@ -88,6 +104,10 @@ class Battle::Scene
     @currentTerrainType = :None
     @terrainActive = false
     @terrainBitmaps = {}
+    @terrainTileX = 0.0
+    @terrainTileY = 0.0
+    @terrainTilesWide = 0
+    @terrainTilesTall = 0
     
     # Create sprite pool (reusable sprites)
     200.times do
@@ -116,7 +136,7 @@ class Battle::Scene
     return if battleTerrain == @currentTerrainType
     
     # Stop any existing terrain first
-    pbStopTerrainAnimation if @terrainActive
+    pbStopTerrainAnimation(true) if @terrainActive
     
     # Check if terrain settings exist
     terrain_settings = ContinuousTerrainSettings::TERRAIN_SETTINGS[battleTerrain]
@@ -127,7 +147,13 @@ class Battle::Scene
     @terrainSettings = terrain_settings
     
     # Load terrain bitmap for particles
-    if terrain_settings[:image]
+    if terrain_settings[:weather_image]
+      begin
+        @terrainBitmaps[battleTerrain] = RPG::Cache.load_bitmap("Graphics/Weather/", terrain_settings[:weather_image])
+      rescue
+        @terrainBitmaps[battleTerrain] = nil
+      end
+    elsif terrain_settings[:image]
       begin
         @terrainBitmaps[battleTerrain] = RPG::Cache.picture(terrain_settings[:image])
       rescue
@@ -141,6 +167,7 @@ class Battle::Scene
                        when :Grassy then "terrain_grass_bg"
                        when :Misty then "terrain_mist_bg"
                        when :Psychic then "terrain_psychic_bg"
+                       when :Eclipse then "terrain_eclipse_bg"
                        else nil
                        end
     if terrain_background
@@ -155,20 +182,31 @@ class Battle::Scene
     activate_terrain_sprites
   end
 
-  def pbStopTerrainAnimation
+  def pbStopTerrainAnimation(instant = false)
     return if !ContinuousTerrainSettings::ENABLED
     return if !@terrainActive
 
     @terrainActive = false
     @currentTerrainType = :None
-    
-    # Fade out and dispose terrain background sprite
-    if @sprites["terrain_bg"]
-      while @sprites["terrain_bg"].opacity > 0
-        @sprites["terrain_bg"].opacity -= 8
+
+    # Fade out terrain visuals before disabling them (except instant mode).
+    if !instant
+      14.times do
+        if @sprites["terrain_bg"]
+          @sprites["terrain_bg"].opacity = [@sprites["terrain_bg"].opacity - 12, 0].max
+        end
+        @terrainSprites.each do |sprite|
+          next if !sprite || !sprite.visible
+          sprite.opacity = [sprite.opacity - 10, 0].max
+        end
         pbUpdate
       end
+    end
+
+    # Dispose terrain background sprite
+    if @sprites["terrain_bg"]
       @sprites["terrain_bg"].visible = false
+      @sprites["terrain_bg"].opacity = 0
       @sprites["terrain_bg"].dispose
       @sprites.delete("terrain_bg")
     end
@@ -192,10 +230,6 @@ class Battle::Scene
     return if !@terrainActive || !@terrainSettings
     return if !@terrainSprites
     
-    # Calculate number of active sprites
-    active_sprites = @terrainSettings[:sprites]
-    active_sprites = [active_sprites, @terrainSprites.size].min
-    
     # Load particle bitmap
     particle_bitmap = @terrainBitmaps[@currentTerrainType]
     
@@ -205,6 +239,7 @@ class Battle::Scene
                        when :Grassy then "Graphics/Pictures/terrain_grass_bg"
                        when :Misty then "Graphics/Pictures/terrain_mist_bg"
                        when :Psychic then "Graphics/Pictures/terrain_psychic_bg"
+                       when :Eclipse then "Graphics/Pictures/terrain_eclipse_bg"
                        else nil
                        end
     if terrain_background
@@ -226,55 +261,89 @@ class Battle::Scene
       end
     end
     
-    # Initialize particle sprites (starting from index 0)
-    (0...active_sprites).each do |i|
-      sprite = @terrainSprites[i]
-      next unless sprite
-      
-      sprite.visible = true
-      sprite.opacity = 0
-      sprite.bitmap = particle_bitmap if particle_bitmap
-      
-      # Set random position within battle area
-      x = rand(Graphics.width)
-      y = rand(Graphics.height)
-      
-      # Determine direction and speed
-      direction = @terrainSettings[:direction]
-      speed = @terrainSettings[:speed]
-      case direction
-      when :down_right
-        vx = speed
-        vy = speed
-      when :down_left
-        vx = -speed
-        vy = speed
-      when :up_right
-        vx = speed
-        vy = -speed
-      when :up_left
-        vx = -speed
-        vy = -speed
-      when :diagonal
-        vx = (rand > 0.5 ? 1 : -1) * speed
-        vy = (rand > 0.5 ? 1 : -1) * speed
-      else
-        vx = 0
-        vy = speed
+    if @terrainSettings[:fog_tiled] && particle_bitmap
+      tile_w = [particle_bitmap.width, 1].max
+      tile_h = [particle_bitmap.height, 1].max
+      @terrainTilesWide = (Graphics.width.to_f / tile_w).ceil + 2
+      @terrainTilesTall = (Graphics.height.to_f / tile_h).ceil + 2
+      @terrainTileX = 0.0
+      @terrainTileY = 0.0
+      active_sprites = [@terrainTilesWide * @terrainTilesTall, @terrainSprites.size].min
+      (0...active_sprites).each do |i|
+        sprite = @terrainSprites[i]
+        next unless sprite
+        sprite.visible = true
+        sprite.opacity = 0
+        sprite.bitmap = particle_bitmap
+        sprite.z = @terrainSettings[:tile_z] || 45
+        sprite.color = Color.new(255, 255, 255, 255)
+        @terrainSpriteInfo[i] = {
+          :x => 0, :y => 0, :vx => 0, :vy => 0, :opacity => 0,
+          :max_opacity => @terrainSettings[:tile_opacity] || 96,
+          :fade_speed => 2, :delay => 0
+        }
+        @terrainSpriteTimers[i] = 0
       end
-      
-      @terrainSpriteInfo[i] = {
-        :x => x,
-        :y => y,
-        :vx => vx,
-        :vy => vy,
-        :opacity => 0,
-        :max_opacity => @terrainSettings[:color].alpha,
-        :fade_speed => @terrainSettings[:fade_speed],
-        :delay => rand(30)  # Random delay before sprite starts moving
-      }
-      
-      @terrainSpriteTimers[i] = 0
+      (active_sprites...@terrainSprites.size).each do |i|
+        next unless @terrainSprites[i]
+        @terrainSprites[i].visible = false
+        @terrainSprites[i].opacity = 0
+        @terrainSprites[i].bitmap = nil
+      end
+    else
+      # Calculate number of active sprites
+      active_sprites = @terrainSettings[:sprites]
+      active_sprites = [active_sprites, @terrainSprites.size].min
+      # Initialize particle sprites (starting from index 0)
+      (0...active_sprites).each do |i|
+        sprite = @terrainSprites[i]
+        next unless sprite
+        
+        sprite.visible = true
+        sprite.opacity = 0
+        sprite.bitmap = particle_bitmap if particle_bitmap
+        
+        # Set random position within battle area
+        x = rand(Graphics.width)
+        y = rand(Graphics.height)
+        
+        # Determine direction and speed
+        direction = @terrainSettings[:direction]
+        speed = @terrainSettings[:speed]
+        case direction
+        when :down_right
+          vx = speed
+          vy = speed
+        when :down_left
+          vx = -speed
+          vy = speed
+        when :up_right
+          vx = speed
+          vy = -speed
+        when :up_left
+          vx = -speed
+          vy = -speed
+        when :diagonal
+          vx = (rand > 0.5 ? 1 : -1) * speed
+          vy = (rand > 0.5 ? 1 : -1) * speed
+        else
+          vx = 0
+          vy = speed
+        end
+        
+        @terrainSpriteInfo[i] = {
+          :x => x,
+          :y => y,
+          :vx => vx,
+          :vy => vy,
+          :opacity => 0,
+          :max_opacity => @terrainSettings[:color].alpha,
+          :fade_speed => @terrainSettings[:fade_speed],
+          :delay => rand(30)  # Random delay before sprite starts moving
+        }
+        
+        @terrainSpriteTimers[i] = 0
+      end
     end
   end
 
@@ -284,80 +353,120 @@ class Battle::Scene
     # Update terrain background sprite
     if @sprites["terrain_bg"]
       bg_sprite = @sprites["terrain_bg"]
-      if bg_sprite.opacity < 128
+      max_bg_opacity = (@terrainSettings && @terrainSettings[:bg_opacity]) ? @terrainSettings[:bg_opacity] : 128
+      if bg_sprite.opacity < max_bg_opacity
         bg_sprite.opacity += 8
-        bg_sprite.opacity = [bg_sprite.opacity, 128].min
+        bg_sprite.opacity = [bg_sprite.opacity, max_bg_opacity].min
       end
     end
     
     # Get current terrain bitmaps
     particle_bitmap = @terrainBitmaps[@currentTerrainType]
     
-    # Update particle sprites
-    @terrainSprites.each_with_index do |sprite, i|
-      # Check if sprite should be active based on terrain settings
-      is_active = (i < @terrainSettings[:sprites])
-      
-      if is_active && !sprite.visible
-        sprite.visible = true
-      elsif !is_active && sprite.visible
-        sprite.visible = false
-        sprite.opacity = 0
-        sprite.bitmap = nil
-        next
+    if @terrainSettings[:fog_tiled] && particle_bitmap
+      tile_w = [particle_bitmap.width, 1].max
+      tile_h = [particle_bitmap.height, 1].max
+      @terrainTileX += (@terrainSettings[:tile_speed_x] || -8) * Graphics.delta
+      @terrainTileY += (@terrainSettings[:tile_speed_y] || 3) * Graphics.delta
+      while @terrainTileX < -tile_w
+        @terrainTileX += tile_w
       end
-      
-      info = @terrainSpriteInfo[i]
-      timer = @terrainSpriteTimers[i]
-      
-      # Handle delay before sprite starts
-      if timer < info[:delay]
-        @terrainSpriteTimers[i] += 1
-        next
+      while @terrainTileX > 0
+        @terrainTileX -= tile_w
       end
-      
-      # Update opacity (fading in)
-      if info[:opacity] < info[:max_opacity]
-        info[:opacity] += info[:fade_speed]
-        info[:opacity] = [info[:opacity], info[:max_opacity]].min
+      while @terrainTileY < -tile_h
+        @terrainTileY += tile_h
       end
-      
-      # Move sprite
-      info[:x] += info[:vx]
-      info[:y] += info[:vy]
-      
-      # Check if sprite is out of bounds
-      if info[:x] < -50 || info[:x] > Graphics.width + 50 ||
-         info[:y] < -50 || info[:y] > Graphics.height + 50
-        # Reset sprite position
-        info[:x] = rand(Graphics.width)
-        info[:y] = rand(Graphics.height)
-        info[:opacity] = 0
+      while @terrainTileY > 0
+        @terrainTileY -= tile_h
       end
-      
-      # Update sprite properties
-      sprite.x = info[:x]
-      sprite.y = info[:y]
-      sprite.opacity = info[:opacity]
-      
-      if particle_bitmap
-        # If we have a bitmap, use it with color tint
-        sprite.bitmap = particle_bitmap
-        sprite.color = @terrainSettings[:color]
-      else
-        # If no bitmap, create a simple colored square
-        if !sprite.bitmap || sprite.bitmap.width != 8
-          sprite.bitmap = Bitmap.new(8, 8)
-          sprite.bitmap.fill_rect(0, 0, 8, 8, @terrainSettings[:color])
+      active_count = [@terrainTilesWide * @terrainTilesTall, @terrainSprites.size].min
+      (0...active_count).each do |i|
+        sprite = @terrainSprites[i]
+        next if !sprite
+        info = @terrainSpriteInfo[i]
+        if info[:opacity] < info[:max_opacity]
+          info[:opacity] = [info[:opacity] + info[:fade_speed], info[:max_opacity]].min
         end
+        col = i % @terrainTilesWide
+        row = i / @terrainTilesWide
+        sprite.x = @terrainTileX.round + (col * tile_w)
+        sprite.y = @terrainTileY.round + (row * tile_h)
+        sprite.opacity = info[:opacity]
+        sprite.visible = true
       end
-      
-      # Simple animation by changing scale slightly
-      scale = 0.8 + (Math.sin(timer * 0.1) * 0.2)
-      sprite.zoom_x = scale
-      sprite.zoom_y = scale
-      
-      @terrainSpriteTimers[i] += 1
+      (active_count...@terrainSprites.size).each do |i|
+        next if !@terrainSprites[i]
+        @terrainSprites[i].visible = false
+        @terrainSprites[i].opacity = 0
+      end
+    else
+      # Update particle sprites
+      @terrainSprites.each_with_index do |sprite, i|
+        # Check if sprite should be active based on terrain settings
+        is_active = (i < @terrainSettings[:sprites])
+        
+        if is_active && !sprite.visible
+          sprite.visible = true
+        elsif !is_active && sprite.visible
+          sprite.visible = false
+          sprite.opacity = 0
+          sprite.bitmap = nil
+          next
+        end
+        
+        info = @terrainSpriteInfo[i]
+        timer = @terrainSpriteTimers[i]
+        
+        # Handle delay before sprite starts
+        if timer < info[:delay]
+          @terrainSpriteTimers[i] += 1
+          next
+        end
+        
+        # Update opacity (fading in)
+        if info[:opacity] < info[:max_opacity]
+          info[:opacity] += info[:fade_speed]
+          info[:opacity] = [info[:opacity], info[:max_opacity]].min
+        end
+        
+        # Move sprite
+        info[:x] += info[:vx]
+        info[:y] += info[:vy]
+        
+        # Check if sprite is out of bounds
+        if info[:x] < -50 || info[:x] > Graphics.width + 50 ||
+           info[:y] < -50 || info[:y] > Graphics.height + 50
+          # Reset sprite position
+          info[:x] = rand(Graphics.width)
+          info[:y] = rand(Graphics.height)
+          info[:opacity] = 0
+        end
+        
+        # Update sprite properties
+        sprite.x = info[:x]
+        sprite.y = info[:y]
+        sprite.opacity = info[:opacity]
+        
+        if particle_bitmap
+          # If we have a bitmap, use it with color tint
+          sprite.bitmap = particle_bitmap
+          sprite.color = @terrainSettings[:color]
+        else
+          # If no bitmap, create a simple colored square
+          if !sprite.bitmap || sprite.bitmap.width != 8
+            sprite.bitmap = Bitmap.new(8, 8)
+            sprite.bitmap.fill_rect(0, 0, 8, 8, @terrainSettings[:color])
+          end
+        end
+        
+        # Simple animation by changing scale slightly
+        scale = 0.8 + (Math.sin(timer * 0.1) * 0.2)
+        sprite.zoom_x = scale
+        sprite.zoom_y = scale
+        
+        @terrainSpriteTimers[i] += 1
+      end
     end
   end
 

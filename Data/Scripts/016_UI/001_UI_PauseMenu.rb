@@ -2,6 +2,8 @@
 #
 #===============================================================================
 class PokemonPauseMenu_Scene
+  LOCATION_SIGN_PAUSE_SPEED = 3.0
+
   def pbStartScene
     @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
     @viewport.z = 99999
@@ -59,12 +61,13 @@ class PokemonPauseMenu_Scene
     end
     if active_map_sign
       @existing_map_location_sign = active_map_sign
+      @existing_map_location_sign.pbHoldOpen(true) if @existing_map_location_sign.respond_to?(:pbHoldOpen)
       return
     end
     map_name = $game_map.name
     location_sign_graphic = $game_map.metadata&.location_sign || Settings::DEFAULT_LOCATION_SIGN_GRAPHIC
-    # Faster entrance in pause so it doesn't feel delayed.
-    @sprites["location"] = LocationWindow.new(map_name, location_sign_graphic, true, @viewport, 2.8)
+    # In pause menu, animate in but keep visible while menu is open.
+    @sprites["location"] = LocationWindow.new(map_name, location_sign_graphic, true, @viewport, LOCATION_SIGN_PAUSE_SPEED, true)
     $scene.spriteset.usersprites.each do |sprite|
       next if !sprite.is_a?(LocationWindow)
       if sprite.respond_to?(:pbStartExit)
@@ -104,8 +107,9 @@ class PokemonPauseMenu_Scene
 
   def pbEndScene
     if @existing_map_location_sign && !@existing_map_location_sign.disposed?
+      @existing_map_location_sign.pbHoldOpen(false) if @existing_map_location_sign.respond_to?(:pbHoldOpen)
       if @existing_map_location_sign.respond_to?(:pbStartExit)
-        @existing_map_location_sign.pbStartExit(3.5)
+        @existing_map_location_sign.pbStartExit(LOCATION_SIGN_PAUSE_SPEED)
       else
         @existing_map_location_sign.dispose
       end
@@ -115,7 +119,7 @@ class PokemonPauseMenu_Scene
     if @sprites["location"] && !@sprites["location"].disposed?
       map_name = $game_map.name
       location_sign_graphic = $game_map.metadata&.location_sign || Settings::DEFAULT_LOCATION_SIGN_GRAPHIC
-      exit_sign = LocationWindow.new(map_name, location_sign_graphic, true, nil, 2.8)
+      exit_sign = LocationWindow.new(map_name, location_sign_graphic, true, nil, LOCATION_SIGN_PAUSE_SPEED)
       exit_sign.pbStartExit if exit_sign.respond_to?(:pbStartExit)
       $scene.spriteset.addUserSprite(exit_sign) if $scene && $scene.respond_to?(:spriteset) && $scene.spriteset
     end

@@ -87,3 +87,83 @@ class Battle::Move::WarlordsCrush < Battle::Move
     return baseDmg
   end
 end
+
+#-------------------------------------------------------------------------------
+# Custom FunctionCode: Bergmite Sortie
+# Hits 2-5 times and may lower target's Speed each hit.
+#-------------------------------------------------------------------------------
+class Battle::Move::BergmiteSortie < Battle::Move::LowerTargetSpeed1
+  def multiHitMove?; return true; end
+
+  def pbNumHits(user, targets)
+    hitChances = [
+      2, 2, 2, 2, 2, 2, 2,
+      3, 3, 3, 3, 3, 3, 3,
+      4, 4, 4,
+      5, 5, 5
+    ]
+    r = @battle.pbRandom(hitChances.length)
+    r = hitChances.length - 1 if user.hasActiveAbility?(:SKILLLINK)
+    return hitChances[r]
+  end
+end
+
+#-------------------------------------------------------------------------------
+# Custom FunctionCode: Glacier Crunch
+# Biting move that is super effective against Steel.
+#-------------------------------------------------------------------------------
+class Battle::Move::GlacierCrunch < Battle::Move
+  def pbCalcTypeModSingle(moveType, defType, user, target)
+    return Effectiveness::SUPER_EFFECTIVE_MULTIPLIER if defType == :STEEL
+    return super
+  end
+end
+
+#-------------------------------------------------------------------------------
+# Custom FunctionCode: Ancient Vigor
+# Drains HP (1/2 damage dealt) and may raise user's Def and SpDef.
+#-------------------------------------------------------------------------------
+class Battle::Move::AncientVigor < Battle::Move::HealUserByHalfOfDamageDone
+  def pbAdditionalEffect(user, target)
+    user.pbRaiseStatStage(:DEFENSE, 1, user) if user.pbCanRaiseStatStage?(:DEFENSE, user, self)
+    user.pbRaiseStatStage(:SPECIAL_DEFENSE, 1, user) if user.pbCanRaiseStatStage?(:SPECIAL_DEFENSE, user, self)
+  end
+end
+
+#-------------------------------------------------------------------------------
+# Custom FunctionCode: Serpent Flare
+# Hits 2-5 times and may burn target each hit.
+#-------------------------------------------------------------------------------
+class Battle::Move::SerpentFlare < Battle::Move::BurnTarget
+  def multiHitMove?; return true; end
+
+  def pbNumHits(user, targets)
+    hitChances = [
+      2, 2, 2, 2, 2, 2, 2,
+      3, 3, 3, 3, 3, 3, 3,
+      4, 4, 4,
+      5, 5, 5
+    ]
+    r = @battle.pbRandom(hitChances.length)
+    r = hitChances.length - 1 if user.hasActiveAbility?(:SKILLLINK)
+    return hitChances[r]
+  end
+end
+
+#-------------------------------------------------------------------------------
+# Custom FunctionCode: Dynastic Fang
+# Biting move with +1 priority if target is below 50% HP.
+#-------------------------------------------------------------------------------
+class Battle::Move::DynasticFang < Battle::Move
+  def pbPriority(user)
+    ret = super
+    target_idx = @battle.choices[user.index][3]
+    if target_idx && target_idx >= 0
+      target = @battle.battlers[target_idx]
+      if target && !target.fainted? && (target.hp * 2 < target.totalhp)
+        ret += 1
+      end
+    end
+    return ret
+  end
+end

@@ -289,21 +289,41 @@ module Settings
   DEFAULT_LOCATION_SIGN_GRAPHIC = "HGSS default"
 
   # Maps location sign graphics to text styles. The :none style is reserved for
-  # the no-graphic style. A filename can instead be an array of
-  # [filename, text base color, text shadow color].
+  # the no-graphic style.
+  # A style entry can be either:
+  #   * String/Array legacy formats.
+  #   * A Hash with optional customization:
+  #       :graphic       => filename in Graphics/UI/Location (required)
+  #       :text_color    => base text color
+  #       :shadow_color  => shadow text color
+  #       :zoomx/:zoomy  => graphic zoom
+  #       :graphic_offset => [x, y]
+  #       :text_offset    => [x, y] (relative to graphic_offset)
+  #       :center_text    => true/false
   LOCATION_SIGN_GRAPHIC_STYLES = {
-    :dp       => [["DP", Color.new(72, 80, 72), Color.new(144, 160, 160)]],
-    :hgss     => [["HGSS cave",    Color.new(232, 232, 232), Color.new(120, 144, 160)],
-                  ["HGSS city",    Color.new(56, 64, 72),    Color.new(152, 152, 144)],
-                  ["HGSS default", Color.new(48, 64, 72),    Color.new(144, 144, 96)],
-                  ["HGSS forest",  Color.new(232, 232, 232), Color.new(120, 176, 144)],
-                  ["HGSS lake",    Color.new(40, 48, 56),    Color.new(104, 144, 192)],
-                  ["HGSS park",    Color.new(40, 48, 56),    Color.new(120, 136, 152)],
-                  ["HGSS route",   Color.new(48, 64, 72),    Color.new(136, 136, 104)],
-                  ["HGSS sea",     Color.new(216, 240, 248), Color.new(24, 96, 144)],
-                  ["HGSS town",    Color.new(48, 56, 64),    Color.new(144, 120, 80)]],
+    :dp       => [{ :graphic => "DP",
+                    :text_color => Color.new(72, 80, 72), :shadow_color => Color.new(144, 160, 160),
+                    :text_offset => [8, -10] }],
+    :hgss     => [{ :graphic => "HGSS cave",    :text_color => Color.new(232, 232, 232), :shadow_color => Color.new(120, 144, 160), :center_text => true },
+                  { :graphic => "HGSS city",    :text_color => Color.new(56, 64, 72),    :shadow_color => Color.new(152, 152, 144), :center_text => true },
+                  { :graphic => "HGSS default", :text_color => Color.new(48, 64, 72),    :shadow_color => Color.new(144, 144, 96),  :center_text => true },
+                  { :graphic => "HGSS forest",  :text_color => Color.new(232, 232, 232), :shadow_color => Color.new(120, 176, 144), :center_text => true },
+                  { :graphic => "HGSS lake",    :text_color => Color.new(40, 48, 56),    :shadow_color => Color.new(104, 144, 192), :center_text => true },
+                  { :graphic => "HGSS park",    :text_color => Color.new(40, 48, 56),    :shadow_color => Color.new(120, 136, 152), :center_text => true },
+                  { :graphic => "HGSS route",   :text_color => Color.new(48, 64, 72),    :shadow_color => Color.new(136, 136, 104), :center_text => true },
+                  { :graphic => "HGSS sea",     :text_color => Color.new(216, 240, 248), :shadow_color => Color.new(24, 96, 144),   :center_text => true },
+                  { :graphic => "HGSS town",    :text_color => Color.new(48, 56, 64),    :shadow_color => Color.new(144, 120, 80),  :center_text => true }],
     :platinum => ["Pt cave", "Pt city", "Pt default", "Pt forest", "Pt lake",
-                  "Pt park", "Pt route", "Pt sea", "Pt town"]
+                  "Pt park", "Pt route", "Pt sea", "Pt town"],
+    :oras     => [{ :graphic => "ORAS",
+                    :text_color => Color.new(255, 255, 255), :shadow_color => Color.new(0, 0, 0, 128),
+                    :zoomx => 2, :zoomy => 2, :center_text => true }],
+    :xy       => [{ :graphic => "XY",
+                    :text_color => Color.new(255, 255, 255), :shadow_color => Color.new(0, 0, 0, 128),
+                    :text_offset => [60, 10],
+                    :graphic_offset => [(((defined?(Graphics) && Graphics.respond_to?(:width)) ? Graphics.width : 512) / 4) - 20,
+                                        ((defined?(Graphics) && Graphics.respond_to?(:height)) ? Graphics.height : 384) - 100],
+                    :zoomx => 2, :zoomy => 2, :center_text => true }]
   }
 
   #=============================================================================

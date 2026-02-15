@@ -236,7 +236,7 @@ class Game_Player < Game_Character
     speed = $game_temp.camera_speed * 0.2
 
     # Fancy Mode
-    fancy_mode_active = $game_switches && $game_switches[CAMERA_FANCY]
+    fancy_mode_active = true
     if fancy_mode_active
       snap_threshold = 1.0
     else

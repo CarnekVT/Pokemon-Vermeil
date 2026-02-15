@@ -218,6 +218,12 @@ class Battle::Scene
     flagY = ypos + 35
     icons = 0
     flags = move.flags.clone
+    # Compatibility: show custom Hammer flag for moves affected by Hammer Master.
+    if defined?(Battle::AbilityEffects) &&
+       Battle::AbilityEffects.respond_to?(:hammer_master_move?) &&
+       Battle::AbilityEffects.hammer_master_move?(move.id)
+      flags.push("Hammer") if !flags.any? { |f| f[/^Hammer$/i] }
+    end
     if GameData::Target.get(move.target).targets_foe
       flags.push("NoProtect")      if !flags.include?("CanProtect")
       flags.push("NoMirrorMove")   if !flags.include?("CanMirrorMove")

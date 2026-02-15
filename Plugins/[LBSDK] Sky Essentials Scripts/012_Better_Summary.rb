@@ -390,7 +390,7 @@ class PokemonSummary_Scene
            [pokename,46,68,0,base,shadow2],
            [pokemon.level.to_s,46, 98, 0, Color.new(64, 64, 64), Color.new(176, 176, 176)],
            [_INTL("Ability:"),230,22,0,base,shadow2],
-           [abilityname,336,22,0,base,shadow2],
+           [abilityname,314,22,0,base,shadow2],
            [_INTL("Item"), 66, 324, 0, base, shadow2]
           ] 
         if @pokemon.hasItem?

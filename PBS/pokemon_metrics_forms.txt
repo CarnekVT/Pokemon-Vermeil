@@ -222,9 +222,10 @@ AnimationSpeed = 3
 #-------------------------------
 [FARFETCHD,1]
 BackSprite = -10,42
-FrontSprite = 10,27
-ShadowSprite = 2,15,-6
+FrontSprite = -2,27
+ShadowSprite = 7,15,-7
 AnimationSpeed = 1
+SuperShinyHue = -50
 #-------------------------------
 [GRIMER,1]
 BackSprite = 0,21

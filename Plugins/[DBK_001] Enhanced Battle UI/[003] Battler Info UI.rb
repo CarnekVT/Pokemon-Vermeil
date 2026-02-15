@@ -511,6 +511,19 @@ class Battle::Scene
       display_effects.push([name, tick, desc])
     end
     #---------------------------------------------------------------------------
+    # Executioner's Shadow pseudo-terrain.
+    if @battle.respond_to?(:pbExecutionerShadowActive?) && @battle.pbExecutionerShadowActive?
+      turns = @battle.instance_variable_get(:@exec_shadow_turns).to_i
+      side  = @battle.instance_variable_get(:@exec_shadow_side)
+      tick  = (turns > 0) ? sprintf("%d/%d", turns, 5) : "--"
+      if !side.nil? && battler.idxOwnSide == side
+        desc = _INTL("The eclipse protects this side and hinders incoming attacks.")
+      else
+        desc = _INTL("The battlefield is shrouded by an eclipse fog.")
+      end
+      display_effects.push([_INTL("Eclipse"), tick, desc])
+    end
+    #---------------------------------------------------------------------------
     # All eligible PBEffects.
     $DELUXE_PBEFFECTS.each do |key, key_hash|
       key_hash.each do |type, effects|
