@@ -365,7 +365,7 @@ module Settings
   #=============================================================================
   # Status Settings (Frostbite)
   #=============================================================================
-  FREEZE_EFFECTS_CAUSE_FROSTBITE = false
+  FREEZE_EFFECTS_CAUSE_FROSTBITE = true
   
   ENABLE_SKIP_TEXT = false
   DISABLE_BUMP_SOUND = false

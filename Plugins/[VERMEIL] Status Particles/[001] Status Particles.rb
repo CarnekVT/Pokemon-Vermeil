@@ -532,7 +532,7 @@ module StatusParticles
           alias_method :status_particles_pbCommonAnimation, :pbCommonAnimation
           def pbCommonAnimation(*args)
             # Desactivar animaciones comunes de estado para evitar superposición con partículas
-            if ["Sleep", "Frozen", "Burn", "Poison", "Toxic", "Paralysis", "Confusion", "Attract"].include?(args[0])
+            if ["Sleep", "Drowsy", "Frozen", "Frostbite", "Burn", "Poison", "Toxic", "Paralysis", "Confusion", "Attract"].include?(args[0])
               return
             end
             # return status_particles_pbCommonAnimation(*args) if StatusParticles.suppressed?

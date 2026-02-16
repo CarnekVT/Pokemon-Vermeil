@@ -2,6 +2,12 @@
 # Move Info UI
 #===============================================================================
 class Battle::Scene  
+  KICKING_MOVE_IDS = [
+    :DOUBLEKICK, :JUMPKICK, :HIJUMPKICK, :MEGAKICK, :LOWKICK,
+    :ROLLINGKICK, :TRIPLEKICK, :BLAZEKICK, :TROPKICK, :THUNDEROUSKICK,
+    :AXEKICK, :LOWSWEEP, :STOMP, :HIGHHORSEPOWER, :STOMPINGTANTRUM
+  ]
+
   #-----------------------------------------------------------------------------
   # Toggles the visibility of the Move Info UI.
   #-----------------------------------------------------------------------------
@@ -205,6 +211,20 @@ class Battle::Scene
       [displayChance,   xpos + 484, ypos + 12, :center, effBase,    effShadow]
     )
     textPos.push([bonus[0], xpos + 8, ypos + 132, :left, bonus[1], bonus[2], :outline]) if bonus
+    # Visual marker for Vermeil Light Moves.
+    light_move = false
+    if defined?(VermeilAbilityReworks) && VermeilAbilityReworks.respond_to?(:light_move?)
+      light_move = VermeilAbilityReworks.light_move?(move)
+    end
+    if !light_move && defined?(Battle::AbilityEffects::VermeilLightMoves)
+      light_move = Battle::AbilityEffects::VermeilLightMoves.light_move_id?(move.id)
+    end
+    eclipse_active = @battle &&
+                     @battle.respond_to?(:pbExecutionerShadowActive?) &&
+                     @battle.pbExecutionerShadowActive?
+    if light_move && eclipse_active
+      textPos.push([_INTL("SMOTHERED"), xpos + 394, ypos + 132, :left, BASE_LOWERED, SHADOW_LOWERED])
+    end
     pbDrawTextPositions(@enhancedUIOverlay, textPos)
     drawTextEx(@enhancedUIOverlay, xpos + 8, ypos + 74, Graphics.width - 12, 2, 
       GameData::Move.get(move.id).description, BASE_LIGHT, SHADOW_LIGHT)
@@ -223,6 +243,27 @@ class Battle::Scene
        Battle::AbilityEffects.respond_to?(:hammer_master_move?) &&
        Battle::AbilityEffects.hammer_master_move?(move.id)
       flags.push("Hammer") if !flags.any? { |f| f[/^Hammer$/i] }
+    end
+    # Compatibility: show custom Kicking flag for moves affected by Striker.
+    if defined?(Battle::AbilityEffects) &&
+       Battle::AbilityEffects.respond_to?(:striker_kick_move?) &&
+       Battle::AbilityEffects.striker_kick_move?(move)
+      flags.push("Kicking") if !flags.any? { |f| f[/^Kicking$/i] }
+    elsif defined?(VermeilStriker) &&
+          VermeilStriker.respond_to?(:kick_move?) &&
+          VermeilStriker.kick_move?(move)
+      flags.push("Kicking") if !flags.any? { |f| f[/^Kicking$/i] }
+    end
+    move_id = (move.respond_to?(:id) ? move.id : nil)
+    if move_id && KICKING_MOVE_IDS.include?(move_id.to_sym)
+      flags.push("Kicking") if !flags.any? { |f| f[/^Kicking$/i] }
+    end
+    if defined?(VermeilAbilityReworks) && VermeilAbilityReworks.respond_to?(:light_move?) &&
+       VermeilAbilityReworks.light_move?(move)
+      flags.push("Light") if !flags.any? { |f| f[/^Light$/i] }
+    elsif defined?(Battle::AbilityEffects::VermeilLightMoves) &&
+          Battle::AbilityEffects::VermeilLightMoves.light_move_id?(move.id)
+      flags.push("Light") if !flags.any? { |f| f[/^Light$/i] }
     end
     if GameData::Target.get(move.target).targets_foe
       flags.push("NoProtect")      if !flags.include?("CanProtect")

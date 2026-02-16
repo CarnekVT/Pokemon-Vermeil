@@ -24,7 +24,7 @@ module Battle::AbilityEffects
   end
 
   # 50% power boost to hammer-style moves.
-  DamageCalcFromUser.add(:HAMMERMASTER,
+  DamageCalcFromUser.add(:BLUDGEONMASTER,
     proc { |ability, user, target, move, mults, power, type|
       next if !Battle::AbilityEffects.hammer_master_move?(move.id)
       mults[:power_multiplier] *= 1.5
@@ -36,7 +36,7 @@ module Battle::AbilityEffects
     proc { |ability, user, target, c|
       choice = user.battle.choices[user.index]
       move = (choice) ? choice[2] : nil
-      if user.hasActiveAbility?(:HAMMERMASTER) &&
+      if user.hasActiveAbility?(:BLUDGEONMASTER) &&
          move &&
          Battle::AbilityEffects.hammer_master_move?(move.id)
         next c
@@ -50,7 +50,7 @@ module Battle::AbilityEffects
     proc { |ability, user, target, c|
       choice = user.battle.choices[user.index]
       move = (choice) ? choice[2] : nil
-      if user.hasActiveAbility?(:HAMMERMASTER) &&
+      if user.hasActiveAbility?(:BLUDGEONMASTER) &&
          move &&
          Battle::AbilityEffects.hammer_master_move?(move.id)
         next c

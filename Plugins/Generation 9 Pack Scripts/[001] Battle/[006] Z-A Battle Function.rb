@@ -229,7 +229,9 @@ class Battle
   #=============================================================================
   # Calculate how many shakes a thrown Poké Ball will make (4 = capture)
   #=============================================================================
-  alias za_pbCaptureCalc pbCaptureCalc
+  if !method_defined?(:za_pbCaptureCalc_canari)
+    alias za_pbCaptureCalc_canari pbCaptureCalc
+  end
   def pbCaptureCalc(pkmn, battler, catch_rate, ball)
     return 4 if $DEBUG && Input.press?(Input::CTRL)
     # Get a catch rate if one wasn't provided
@@ -242,6 +244,6 @@ class Battle
       catch_rate = catch_rate * [1.35, 1.20, 1.10][i]
       break
     end
-    return za_pbCaptureCalc(pkmn, battler, catch_rate, ball)
+    return za_pbCaptureCalc_canari(pkmn, battler, catch_rate, ball)
   end
 end

@@ -74,9 +74,9 @@ Description = Reduces damage taken from Rock-type moves, but makes Ice-type move
 #-------------------------------
 # Tenkifetch'd, Tinkaton, Throgre
 #-------------------------------
-[HAMMERMASTER]
-Name = Hammer Master
-Description = Powers up hammer and club moves by 50%.
+[BLUDGEONMASTER]
+Name = Bludgeon Master
+Description = Powers up hammer moves by 50%.
 #-------------------------------
 # Ledian
 #-------------------------------
@@ -93,10 +93,48 @@ Description = Damages foes every turn. Allies are immune to freezing and their F
 # Eclipsora
 #-------------------------------
 [UMBRAVEIL]
-Name = Umbral Veil
-Description = Envelops the field in eclipse fog for 5 turns. Foes lose accuracy against the protected side, allies are immune to critical hits and stat drops.
+Name = Umbra Veil
+Description = Envelops the field in eclipse fog for 5 turns. Allies are immune to critical hits and stat drops, and Light Moves are smothered while the veil lasts.
+#-------------------------------
+# Stalactree
 #-------------------------------
 [MINERALDRIP]
 Name = Mineral Drip
 Description = Restores HP each turn. In a sandstorm, the healing is stronger.
+#-------------------------------
+# Morturne
+#-------------------------------
+[SKYSNARE]
+Name = Sky Snare
+Description = Traps Flying-type foes and halves damage from Flying-type moves.
+#-------------------------------
+# Special Intimidate
+#-------------------------------
+[OVERAWE]
+Name = Overawe
+Description = Intimidates opposing Pokemon on entry, lowering their Sp. Atk.
+#-------------------------------
+# Kick Moves Iron Fist
+#-------------------------------
+[STRIKER]
+Name = Striker
+Description = Powers up kicking moves by 50%.
+#-------------------------------
+# Mega Chesnaught
+#-------------------------------
+[IRONCLAD]
+Name = Ironclad
+Description = Halves physical damage taken. Uses Defense instead of Attack for the user's physical moves.
+#-------------------------------
+# Mega Delphox
+#-------------------------------
+[PRECOGNITION]
+Name = Precognition
+Description = Immune to priority moves. Fire and Psychic moves always hit and ignore Protect and screens.
+#-------------------------------
+# Mega Greninja
+#-------------------------------
+[HIDDENARSENAL]
+Name = Hidden Arsenal
+Description = Multi-hit moves always strike the maximum number of times. Priority moves are boosted by 50%.
 #-------------------------------

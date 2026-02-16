@@ -3,6 +3,27 @@
 #===============================================================================
 
 module Battle::AbilityEffects
+  module VermeilLightMoves
+    FALLBACK_LIGHT_MOVES = [
+      :FLASH, :FLASHCANNON, :LUMINACRASH, :MORNINGSUN, :MOONLIGHT, :SYNTHESIS,
+      :SWIFT, :REFLECT, :LIGHTSCREEN, :AURORAVEIL, :AURORABEAM, :MIRRORCOAT,
+      :SPOTLIGHT, :PHOTONGEYSER, :PRISMATICLASER, :LIGHTOFRUIN, :DAZZLINGGLEAM,
+      :LUSTERPURGE, :FLASHSTRIKE, :MAGICSPARK, :MAGICPHOTON, :POWERGEM,
+      :SOLARBEAM, :SOLARBLADE, :MINDBLOWN, :SIGNALBEAM, :CONFUSERAY,
+      :SUNSTEELSTRIKE, :MOONGEISTBEAM, :FLEURCANNON, :FLAMEBURST
+    ]
+
+    def self.light_move_id?(move_or_id)
+      id = move_or_id
+      id = move_or_id.id if move_or_id.respond_to?(:id)
+      return false if id.nil?
+      if defined?(VermeilAbilityReworks) && VermeilAbilityReworks.const_defined?(:LIGHT_MOVES)
+        return VermeilAbilityReworks::LIGHT_MOVES.include?(id)
+      end
+      return FALLBACK_LIGHT_MOVES.include?(id)
+    end
+  end
+
   #---------------------------------------------------------------------------
   # Helpers
   #---------------------------------------------------------------------------
@@ -125,11 +146,13 @@ class Battle
   end
 
   def pbExecutionerShadowProtectsSide?(side)
-    return pbExecutionerShadowActive?
+    return false if !pbExecutionerShadowActive? || @exec_shadow_side.nil?
+    return side == @exec_shadow_side
   end
 
   def pbExecutionerShadowOpposes?(battler)
-    return pbExecutionerShadowActive?
+    return false if !battler || !pbExecutionerShadowActive? || @exec_shadow_side.nil?
+    return battler.idxOwnSide != @exec_shadow_side
   end
 
   def pbExecutionerShadowInvokerSide?(battler)
@@ -343,6 +366,21 @@ class Battle::Move
     return if user.pbHasType?(:DARK) || user.pbHasType?(:GHOST)
     return if user.hasActiveAbility?(:ILLUMINATE)
     modifiers[:accuracy_multiplier] *= 0.9
+  end
+
+  if !method_defined?(:exec_shadow_light_pbMoveFailed_original)
+    alias exec_shadow_light_pbMoveFailed_original pbMoveFailed?
+  end
+
+  # Under Umbral Veil, Light Moves from the opposing side are smothered.
+  def pbMoveFailed?(user, targets)
+    if user && user.battle &&
+       Battle::AbilityEffects.exec_shadow_active?(user.battle) &&
+       Battle::AbilityEffects::VermeilLightMoves.light_move_id?(@id)
+      @battle.pbDisplay(_INTL("The eclipse fog smothered the light!"))
+      return true
+    end
+    return exec_shadow_light_pbMoveFailed_original(user, targets)
   end
 
   if !method_defined?(:exec_shadow_pbAccuracyCheck_original)

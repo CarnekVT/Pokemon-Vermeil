@@ -120,6 +120,17 @@ class Battle::Move::GlacierCrunch < Battle::Move
 end
 
 #-------------------------------------------------------------------------------
+# Custom FunctionCode: Spiky Grasp
+# Grounds targets and is super effective against Flying.
+#-------------------------------------------------------------------------------
+class Battle::Move::SpikyGrasp < Battle::Move::HitsTargetInSkyGroundsTarget
+  def pbCalcTypeModSingle(moveType, defType, user, target)
+    return Effectiveness::SUPER_EFFECTIVE_MULTIPLIER if defType == :FLYING
+    return super
+  end
+end
+
+#-------------------------------------------------------------------------------
 # Custom FunctionCode: Ancient Vigor
 # Drains HP (1/2 damage dealt) and may raise user's Def and SpDef.
 #-------------------------------------------------------------------------------

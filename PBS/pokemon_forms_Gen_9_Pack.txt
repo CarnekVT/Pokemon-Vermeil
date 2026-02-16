@@ -106,7 +106,8 @@ Flags = InheritFormWithEverStone
 FormName = Hisuian
 Types = FIRE,GHOST
 BaseStats = 73,84,78,95,119,85
-HiddenAbilities = FRISK
+Abilities = BLAZE,FRISK
+HiddenAbilities = UMBRAVEIL
 Moves = 0,INFERNALPARADE,1,GYROBALL,1,ERUPTION,1,SMOKESCREEN,1,TACKLE,1,EMBER,1,LEER,1,DOUBLEEDGE,13,QUICKATTACK,20,FLAMEWHEEL,24,DEFENSECURL,31,SWIFT,35,FLAMECHARGE,43,LAVAPLUME,48,FLAMETHROWER,56,INFERNO,61,ROLLOUT,74,OVERHEAT
 TutorMoves = AERIALACE,BLASTBURN,BODYSLAM,BRICKBREAK,BULLDOZE,BURNINGJEALOUSY,CALMMIND,CONFUSERAY,CURSE,DIG,DOUBLEEDGE,EARTHQUAKE,ENDEAVOR,ENDURE,FACADE,FIREBLAST,FIREFANG,FIREPLEDGE,FIREPUNCH,FIRESPIN,FLAMECHARGE,FLAMETHROWER,FLAREBLITZ,FOCUSBLAST,FOCUSPUNCH,GIGAIMPACT,GYROBALL,HEATWAVE,HEX,HYPERBEAM,IRONHEAD,LOWKICK,NIGHTSHADE,OVERHEAT,PLAYROUGH,POLTERGEIST,PROTECT,REST,REVERSAL,ROAR,ROCKSLIDE,SHADOWBALL,SHADOWCLAW,SLEEPTALK,SOLARBEAM,SPITE,STOMPINGTANTRUM,SUBSTITUTE,SUNNYDAY,SWIFT,TAKEDOWN,TEMPERFLARE,THUNDERPUNCH,WILDCHARGE,WILLOWISP,ZENHEADBUTT
 Height = 1.6
@@ -133,7 +134,7 @@ Evolutions = CLODSIRE,Level,20
 [QWILFISH,1]
 FormName = Hisuian
 Types = DARK,POISON
-Moves = 1,POISONSTING,1,TACKLE,4,HARDEN,8,BITE,12,FELLSTINGER,16,MINIMIZE,20,SPIKES,24,BRINE,28,BARBBARRAGE,32,PINMISSILE,36,TOXICSPIKES,40,SPITUP,40,STOCKPILE,44,TOXIC,48,CRUNCH,52,ACUPRESSURE,56,DESTINYBOND
+Moves = 1,POISONSTING,1,TACKLE,4,HARDEN,8,BITE,12,FELLSTINGER,16,MINIMIZE,20,SPIKES,24,BRINE,28,BARBBARRAGE,32,PINMISSILE,36,TOXICSPIKES,40,SPITUP,40,STOCKPILE,44,TOXIC,48,CRUNCH,52,NOXIOUSTORQUE,56,DESTINYBOND
 TutorMoves = ACIDSPRAY,AGILITY,BLIZZARD,CHILLINGWATER,CRUNCH,CURSE,DARKPULSE,DOUBLEEDGE,ENDURE,FACADE,GIGAIMPACT,GUNKSHOT,GYROBALL,HAZE,HEX,HYDROPUMP,ICEBEAM,ICYWIND,LASHOUT,LIQUIDATION,MUDSHOT,PAINSPLIT,POISONJAB,POISONTAIL,PROTECT,RAINDANCE,REST,REVERSAL,SCALESHOT,SCARYFACE,SHADOWBALL,SLEEPTALK,SLUDGEBOMB,SPIKES,SPITE,SUBSTITUTE,SURF,SWIFT,SWORDSDANCE,TAKEDOWN,TAUNT,THROATCHOP,TOXIC,TOXICSPIKES,VENOSHOCK,WATERFALL,WATERPULSE
 EggMoves = ACIDSPRAY,AQUAJET,AQUATAIL,ASTONISH,BUBBLEBEAM,FLAIL,HAZE,SELFDESTRUCT,SUPERSONIC,WATERPULSE
 Pokedex = Fishers detest this troublesome Pokémon because it sprays poison from its spines, getting it everywhere. A different form of Qwilfish lives in other regions.
@@ -202,7 +203,7 @@ Moves = 1,WATERGUN,1,TAILWHIP,4,TACKLE,8,FLAIL,12,AQUAJET,16,BITE,20,SCARYFACE,2
 TutorMoves = AGILITY,BLIZZARD,CHILLINGWATER,CRUNCH,DOUBLEEDGE,ENDEAVOR,ENDURE,FACADE,FLIPTURN,HYDROPUMP,ICEBEAM,ICEFANG,ICYWIND,LIQUIDATION,MUDDYWATER,MUDSHOT,PROTECT,PSYCHICFANGS,RAINDANCE,REST,SCALESHOT,SCARYFACE,SLEEPTALK,SNOWSCAPE,SUBSTITUTE,SURF,SWIFT,TAKEDOWN,UPROAR,WATERFALL,WATERPULSE,WHIRLPOOL,ZENHEADBUTT
 EggMoves = ENDEAVOR,LASTRESPECTS
 Category = Mellow
-Pokedex = Though it differs from other Basculin in several respects, including demeanor—this one is gentle—people have categorized it as a regional form given the vast array of shared qualities.
+Pokedex = Though it differs from other Basculin in several respects, including demeanor this one is gentle people have categorized it as a regional form given the vast array of shared qualities.
 Generation = 8
 Flags = InheritFormWithEverStone
 Evolutions = BASCULEGION,LevelRecoilDamage,294
@@ -239,7 +240,7 @@ BaseStats = 110,83,70,65,112,70
 EVs = SPECIAL_ATTACK,2
 HiddenAbilities = TINTEDLENS
 Moves = 0,ESPERWING,1,SUPERPOWER,1,LEER,1,WINGATTACK,1,HONECLAWS,1,SKYATTACK,1,PECK,18,TAILWIND,24,SCARYFACE,30,AERIALACE,36,SLASH,42,WHIRLWIND,48,CRUSHCLAW,57,AIRSLASH,64,DEFOG,72,THRASH,80,HURRICANE
-TutorMoves = ACROBATICS,AERIALACE,AGILITY,AIRCUTTER,AIRSLASH,BODYSLAM,BRAVEBIRD,BULKUP,CALMMIND,CLOSECOMBAT,CONFUSERAY,DAZZLINGGLEAM,DOUBLEEDGE,DUALWINGBEAT,ENDURE,EXPANDINGFORCE,FACADE,FEATHERDANCE,FLY,FUTURESIGHT,GIGAIMPACT,HEATWAVE,HELPINGHAND,HURRICANE,HYPERBEAM,HYPERVOICE,ICYWIND,METALCLAW,NIGHTSHADE,PROTECT,PSYBEAM,PSYCHIC,PSYCHICNOISE,PSYCHICTERRAIN,PSYCHUP,PSYSHOCK,RAINDANCE,REST,REVERSAL,ROCKSLIDE,ROCKTOMB,SCARYFACE,SHADOWBALL,SHADOWCLAW,SLEEPTALK,SNARL,STOREDPOWER,SUBSTITUTE,SUNNYDAY,SWIFT,TAILWIND,TAKEDOWN,UTURN,VACUUMWAVE,ZENHEADBUTT
+TutorMoves = ACROBATICS,AERIALACE,AGILITY,AIRCUTTER,AIRSLASH,BODYSLAM,BRAVEBIRD,BULKUP,CALMMIND,CLOSECOMBAT,CONFUSERAY,DAZZLINGGLEAM,DOUBLEEDGE,DUALWINGBEAT,ENDURE,EXPANDINGFORCE,FACADE,FEATHERDANCE,FLY,FUTURESIGHT,GIGAIMPACT,HEATWAVE,HELPINGHAND,HURRICANE,HYPERBEAM,HYPERVOICE,ICYWIND,METALCLAW,NIGHTSHADE,PROTECT,PSYBEAM,PSYCHIC,PSYCHICNOISE,PSYCHICTERRAIN,PSYCHUP,PSYSHOCK,RAINDANCE,REST,REVERSAL,ROCKSLIDE,ROCKTOMB,SCARYFACE,SHADOWBALL,SHADOWCLAW,SLEEPTALK,SNARL,STOREDPOWER,SUBSTITUTE,SUNNYDAY,SWIFT,TAILWIND,TAKEDOWN,UTURN,VACUUMWAVE,ZENHEADBUTT,SPIRALSTRIKE
 Height = 1.7
 Weight = 43.4
 Color = White
@@ -270,7 +271,7 @@ TutorMoves = ACIDSPRAY,BLIZZARD,BODYPRESS,BODYSLAM,BREAKINGSWIPE,BULLDOZE,CHARM,
 Height = 1.7
 Weight = 334.1
 Category = Shell Bunker
-Pokedex = Able to freely control the hardness of its metallic shell. It loathes solitude and is extremely clingy—it will fume and run riot if those dearest to it ever leave its side.
+Pokedex = Able to freely control the hardness of its metallic shell. It loathes solitude and is extremely clingy it will fume and run riot if those dearest to it ever leave its side.
 Generation = 8
 #-------------------------------
 [AVALUGG,1]
@@ -296,9 +297,10 @@ Flags = InheritFormWithEverStone
 FormName = Hisuian
 Types = GRASS,FIGHTING
 BaseStats = 88,112,80,60,95,95
-HiddenAbilities = SCRAPPY
+Abilities = OVERGROW,SCRAPPY
+HiddenAbilities = SNIPER
 Moves = 0,TRIPLEARROWS,1,LEAFSTORM,1,LEAFAGE,1,TACKLE,1,GROWL,1,UTURN,9,PECK,12,SHADOWSNEAK,15,RAZORLEAF,20,SYNTHESIS,25,PLUCK,30,BULKUP,37,SUCKERPUNCH,44,LEAFBLADE,51,FEATHERDANCE,58,BRAVEBIRD
-TutorMoves = AERIALACE,AIRCUTTER,AIRSLASH,AURASPHERE,BATONPASS,BRAVEBIRD,BRICKBREAK,BULKUP,BULLETSEED,CLOSECOMBAT,COACHING,CONFUSERAY,DUALWINGBEAT,ENDURE,ENERGYBALL,FACADE,FALSESWIPE,FEATHERDANCE,FOCUSBLAST,FOCUSPUNCH,FRENZYPLANT,GIGADRAIN,GIGAIMPACT,GRASSKNOT,GRASSPLEDGE,GRASSYGLIDE,GRASSYTERRAIN,HAZE,HELPINGHAND,HYPERBEAM,KNOCKOFF,LEAFSTORM,LIGHTSCREEN,LOWKICK,LOWSWEEP,MAGICALLEAF,NASTYPLOT,NIGHTSHADE,PROTECT,RAINDANCE,REST,REVERSAL,ROCKTOMB,SCARYFACE,SEEDBOMB,SHADOWCLAW,SLEEPTALK,SMACKDOWN,SOLARBEAM,SUBSTITUTE,SUNNYDAY,SWIFT,SWORDSDANCE,TAILWIND,TAKEDOWN,TAUNT,TRAILBLAZE,UPPERHAND,UTURN
+TutorMoves = SPIRALSTRIKE,AERIALACE,AIRCUTTER,AIRSLASH,AURASPHERE,BATONPASS,BRAVEBIRD,BRICKBREAK,BULKUP,BULLETSEED,CLOSECOMBAT,COACHING,CONFUSERAY,DUALWINGBEAT,ENDURE,ENERGYBALL,FACADE,FALSESWIPE,FEATHERDANCE,FOCUSBLAST,FOCUSPUNCH,FRENZYPLANT,GIGADRAIN,GIGAIMPACT,GRASSKNOT,GRASSPLEDGE,GRASSYGLIDE,GRASSYTERRAIN,HAZE,HELPINGHAND,HYPERBEAM,KNOCKOFF,LEAFSTORM,LIGHTSCREEN,LOWKICK,LOWSWEEP,MAGICALLEAF,NASTYPLOT,NIGHTSHADE,PROTECT,RAINDANCE,REST,REVERSAL,ROCKTOMB,SCARYFACE,SEEDBOMB,SHADOWCLAW,SLEEPTALK,SMACKDOWN,SOLARBEAM,SUBSTITUTE,SUNNYDAY,SWIFT,SWORDSDANCE,TAILWIND,TAKEDOWN,TAUNT,TRAILBLAZE,UPPERHAND,UTURN
 Weight = 37.0
 Pokedex = The air stored inside the rachises of Decidueye's feathers insulates the Pokémon against Hisui's extreme cold. This is firm proof that evolution can be influenced by environment.
 Generation = 8
@@ -338,6 +340,7 @@ FormName = Three-Segment Form
 Height = 4.5
 Weight = 47.4
 #-------------------------------
+TutorMoves = SPIRALSTRIKE
 [PALAFIN,1]
 FormName = Hero Form
 BaseStats = 100,160,97,100,106,87
@@ -373,30 +376,33 @@ Abilities = INTIMIDATE
 [TATSUGIRI,1]
 FormName = Droopy Form
 Color = Red
-Pokedex = This species’ differing colors and patterns are apparently the result of Tatsugiri changing itself to suit the preferences of the prey it lures in.
+Pokedex = This species' differing colors and patterns are apparently the result of Tatsugiri changing itself to suit the preferences of the prey it lures in.
 #-------------------------------
 [TATSUGIRI,2]
 FormName = Stretchy Form
 Color = Yellow
-Pokedex = Bird Pokémon are its main prey. This Pokémon knows it’s weak, so it hunts with a partner.
+Pokedex = Bird Pokémon are its main prey. This Pokémon knows it's weak, so it hunts with a partner.
 #-------------------------------
 [SQUAWKABILLY,1]
 FormName = Blue Plumage
 Color = Blue
 Pokedex = Blue-feathered Squawkabilly view their green- feathered counterparts as rivals, since the latter make up the largest, most powerful groups.
 #-------------------------------
+TutorMoves = SPIRALSTRIKE
 [SQUAWKABILLY,2]
 FormName = Yellow Plumage
 HiddenAbilities = SHEERFORCE
 Color = Yellow
 Pokedex = The yellow Squawkabilly are especially fierce. They've even been known to drive other bird Pokémon out of town.
 #-------------------------------
+TutorMoves = SPIRALSTRIKE
 [SQUAWKABILLY,3]
 FormName = White Plumage
 HiddenAbilities = SHEERFORCE
 Color = White
 Pokedex = Though these Squawkabilly are the fewest in number, they have no trouble living in towns since they blend in with the white buildings.
 #-------------------------------
+TutorMoves = SPIRALSTRIKE
 [GIMMIGHOUL,1]
 FormName = Roaming Form
 CatchRate = 0
@@ -502,7 +508,7 @@ Abilities = TERASHELL
 Height = 0.3
 Weight = 16.0
 Shape = Head
-Pokedex = The shell is made of crystallized Terastal energy. When struck by a move, this shell absorbs the move’s energy and transfers it to Terapagos.
+Pokedex = The shell is made of crystallized Terastal energy. When struck by a move, this shell absorbs the move's energy and transfers it to Terapagos.
 #-------------------------------
 [TERAPAGOS,2]
 FormName = Stellar Form
@@ -583,6 +589,7 @@ Weight = 40.4
 Pokedex = It flies faster than the speed of sound. After whipping up shock waves to send enemies flying, it finishes them off with its talons.
 Generation = 9
 #-------------------------------
+TutorMoves = SPIRALSTRIKE
 [FROSLASS,1]
 FormName = Mega Froslass
 MegaStone = CLEFABLITE
@@ -650,6 +657,8 @@ Generation = 9
 [CHESNAUGHT,1]
 FormName = Mega Chesnaught
 MegaStone = CHESNAUGHTITE
+Abilities = IRONCLAD
+HiddenAbilities = IRONCLAD
 BaseStats = 88,137,172,44,74,115
 Pokedex = It has fortified armor and a will to defend at all costs. Both are absurdly strong.
 Generation = 9
@@ -657,6 +666,8 @@ Generation = 9
 [DELPHOX,1]
 FormName = Mega Delphox
 MegaStone = DELPHOXITE
+Abilities = PRECOGNITION
+HiddenAbilities = PRECOGNITION
 BaseStats = 75,69,72,134,159,125
 Pokedex = It wields flaming branches to dazzle its opponents before incinerating them with a huge fireball.
 Generation = 9
@@ -664,13 +675,17 @@ Generation = 9
 [GRENINJA,3]
 FormName = Mega Greninja
 MegaStone = GRENINJITE
+Abilities = HIDDENARSENAL
+HiddenAbilities = HIDDENARSENAL
 BaseStats = 72,125,77,142,133,81
 Pokedex = This Pokémon spins a giant shuriken at high speed to make it float, then clings to it upside down to catch opponents unawares.
 Generation = 9
 #-------------------------------
 [PYROAR,1]
-FormName = Mega PYROAR
+FormName = Mega Pyroar
 MegaStone = PYROARITE
+Abilities = ADAPTABILITY
+HiddenAbilities = ADAPTABILITY
 BaseStats = 86,88,92,126,129,86
 Weight = 93.3
 Pokedex = This Pokémon spews flames hotter than 18,000 degrees Fahrenheit. It swings around its grand, blazing mane as it protects its allies.
@@ -691,10 +706,12 @@ Generation = 9
 [MALAMAR,1]
 FormName = Mega Malamar
 MegaStone = MALAMARITE
+Abilities = NEUROFORCE
+HiddenAbilities =  NEUROFORCE
 BaseStats = 86,102,88,88,98,120
 Height = 2.9
 Weight = 69.8
-Pokedex = It uses its colorful lights to overwrite the personalities and memories of others—and to control them.
+Pokedex = It uses its colorful lights to overwrite the personalities and memories of others and to control them.
 Generation = 9
 #-------------------------------
 [BARBARACLE,1]
@@ -725,6 +742,7 @@ Weight = 25.0
 Pokedex = Mega Evolution has pumped up all its muscles. Hawlucha flexes to show off its strength.
 Generation = 9
 #-------------------------------
+TutorMoves = SPIRALSTRIKE
 [ZYGARDE,4]
 FormName = Mega Zygarde
 MegaStone = ZYGARDITE
@@ -820,6 +838,7 @@ Weight = 50.0
 Pokedex = Mega Staraptor is a top-class flier. It can easily soar through the sky while gripping a Steelix that weighs more than 880 lbs.
 Generation = 9
 #-------------------------------
+TutorMoves = SPIRALSTRIKE
 [GARCHOMP,2]
 FormName = Mega Garchomp Z
 MegaStone = GARCHOMPITEZ
@@ -860,10 +879,13 @@ Generation = 9
 FormName = Mega Golurk
 MegaStone = GOLURKITE
 BaseStats = 89,159,105,55,70,105
+Abilities = NOGUARD
+HiddenAbilities = NOGUARD
 Height = 4.0
 Pokedex = The energy within Golurk has been stimulated by Mega Evolution. The Pokémon could explode at any moment.
 Generation = 9
 #-------------------------------
+TutorMoves = SPIRALSTRIKE
 [MEOWSTIC,2]
 FormName = Mega Meowstic
 MegaStone = MEOWSTICITE

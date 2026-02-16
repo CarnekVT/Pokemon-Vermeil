@@ -138,7 +138,7 @@ Description = Boosts the Pokémon's Speed in sunshine.
 #-------------------------------
 [ILLUMINATE]
 Name = Illuminate
-Description = Prevents accuracy loss and boosts Electric/Light moves by 20%.
+Description = Prevents other Pokémon from lowering accuracy.
 #-------------------------------
 [TRACE]
 Name = Trace
@@ -376,7 +376,7 @@ Description = Heals status problems if it is raining.
 #-------------------------------
 [SOLARPOWER]
 Name = Solar Power
-Description = In sunshine, Sp. Atk is boosted.
+Description = In sunshine, Sp. Atk is boosted but HP decreases.
 #-------------------------------
 [QUICKFEET]
 Name = Quick Feet
@@ -384,7 +384,7 @@ Description = Boosts Speed if there is a status problem.
 #-------------------------------
 [NORMALIZE]
 Name = Normalize
-Description = While active, all Pokémon on the field become Normal-type.
+Description = All the Pokémon's moves become the Normal type.
 #-------------------------------
 [SNIPER]
 Name = Sniper
@@ -460,7 +460,7 @@ Description = Draws in all Water-type moves to up Sp. Attack.
 #-------------------------------
 [ICEBODY]
 Name = Ice Body
-Description = Contact with the Pokémon may freeze the attacker.
+Description = The Pokémon gradually regains HP in a hailstorm.
 #-------------------------------
 [SOLIDROCK]
 Name = Solid Rock
@@ -684,7 +684,7 @@ Description = Steals the held item of a Pokémon it hits.
 #-------------------------------
 [BULLETPROOF]
 Name = Bulletproof
-Description = Protects from ball, bomb and explosive self-KO moves.
+Description = Protects the Pokémon from some ball and bomb moves.
 #-------------------------------
 [COMPETITIVE]
 Name = Competitive
@@ -848,7 +848,7 @@ Description = Changes with other Cells if HP becomes half or less.
 #-------------------------------
 [CORROSION]
 Name = Corrosion
-Description = Can poison any target, and Poison-type moves hit Steel-types.
+Description = It can poison Steel- and Poison-type targets.
 #-------------------------------
 [COMATOSE]
 Name = Comatose

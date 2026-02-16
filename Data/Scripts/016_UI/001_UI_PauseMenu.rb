@@ -4,6 +4,12 @@
 class PokemonPauseMenu_Scene
   LOCATION_SIGN_PAUSE_SPEED = 3.0
 
+  # Compatibility shim for plugins that expect a `visuals` accessor
+  # on pause menu scenes (e.g., HGSS Multi-Save integrations).
+  def visuals
+    return self
+  end
+
   def pbStartScene
     @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
     @viewport.z = 99999

@@ -1678,7 +1678,6 @@ Pokedex = Once upon a time, a king with an Aegislash reigned over the land. His 
 [PUMPKABOO,1]
 FormName = Average Size
 BaseStats = 49,66,70,51,44,55
-HiddenAbilities = INSOMNIA
 Height = 0.4
 Weight = 5.0
 Pokedex = Spirits that wander this world are placed into Pumpkaboo's body. They're then moved on to the afterlife.
@@ -1693,7 +1692,6 @@ Pokedex = When taking spirits to the afterlife, large Pumpkaboo prefer the spiri
 [PUMPKABOO,3]
 FormName = Super Size
 BaseStats = 59,66,70,41,44,55
-HiddenAbilities = INSOMNIA
 Height = 0.8
 Weight = 15.0
 Pokedex = Massive Pumpkaboo are said to be the product of areas where a great number of lost souls lingered.
@@ -1704,7 +1702,6 @@ WildItemRare = MIRACLESEED
 [GOURGEIST,1]
 FormName = Average Size
 BaseStats = 65,90,122,84,58,75
-HiddenAbilities = INSOMNIA
 Height = 0.9
 Weight = 12.5
 Pokedex = Eerie cries emanate from its body in the dead of night. The sounds are said to be the wails of spirits who are suffering in the afterlife.
@@ -1719,7 +1716,6 @@ Pokedex = Large Gourgeist put on the guise of adults, taking the hands of childr
 [GOURGEIST,3]
 FormName = Super Size
 BaseStats = 85,100,122,54,58,75
-HiddenAbilities = INSOMNIA
 Height = 1.7
 Weight = 39.0
 Pokedex = Supersized Gourgeist aren't picky. They will forcefully drag anyone off to the afterlife.

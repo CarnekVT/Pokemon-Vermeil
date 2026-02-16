@@ -370,7 +370,7 @@ Target = NearOther
 FunctionCode = StarmobileBurnTarget
 Flags = CanProtect,CannotMetronome
 EffectChance = 30
-Description = The user delivers a spinning attack encased in flames. This may also leave the target with a burn.
+Description = This move is only used by a Starmobile. It may leave the target with a burn.
 #-------------------------------
 [CHILLINGWATER]
 Name = Chilling Water
@@ -419,7 +419,7 @@ Target = NearOther
 FunctionCode = StarmobileParalyzeTarget
 Flags = CanProtect,CannotMetronome
 EffectChance = 30
-Description = The user drives into the target while spinning with immense force. This may also paralyze the target.
+Description = This move is only used by a Starmobile. It may paralyze the target.
 #-------------------------------
 [COMEUPPANCE]
 Name = Comeuppance
@@ -600,7 +600,7 @@ Target = NearOther
 FunctionCode = StarmobileConfuseTarget
 Flags = CanProtect,CannotMetronome
 EffectChance = 30
-Description = The user attacks by spinning while scattering mysterious magic. This may also confuse the target.
+Description = This move is only used by a Starmobile. It may confuse the target.
 #-------------------------------
 [MAKEITRAIN]
 Name = Make It Rain
@@ -638,7 +638,7 @@ Target = NearOther
 FunctionCode = StarmobilePoisonTarget
 Flags = CanProtect,CannotMetronome
 EffectChance = 30
-Description = The user attacks by spinning while scattering toxic sludge. This may also poison the target.
+Description = This move is only used by a Starmobile. It may poison the target.
 #-------------------------------
 [ORDERUP]
 Name = Order Up
@@ -868,7 +868,7 @@ Target = NearOther
 FunctionCode = StarmobileSleepTarget
 Flags = CanProtect,CannotMetronome
 EffectChance = 10
-Description = The user attacks by spinning while scattering dark energy. This may also make the target fall asleep.
+Description = This move is only used by a Starmobile. It may put the target to sleep.
 #-------------------------------
 [HYDROSTEAM]
 Name = Hydro Steam

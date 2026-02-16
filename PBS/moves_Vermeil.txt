@@ -173,6 +173,8 @@ Flags = Contact,CanProtect,CanMirrorMove
 EffectChance = 100
 Description = A spiraling burst that strikes the target and raises the user's Speed.
 #-------------------------------
+# Suncorona
+#-------------------------------
 [AUREOLAFLARE]
 Name = Aureola Flare
 Type = FIRE
@@ -186,6 +188,8 @@ Flags = CanProtect,CanMirrorMove,Bullet
 EffectChance = 30
 Description = The user unleashes a blast of divine solar heat. High chance to burn the target.
 #-------------------------------
+# Eclipsora
+#-------------------------------
 [SHADOWDECREE]
 Name = Shadow Decree
 Type = DARK
@@ -198,6 +202,8 @@ FunctionCode = IgnoreTargetDefSpDefEvaStatStages
 Flags = CanProtect,CanMirrorMove,Contact,HighCriticalHitRate
 Description = A definitive strike delivered with the authority of the eclipse. High critical hit ratio and ignores stat changes.
 #-------------------------------
+# Stalactree
+#-------------------------------
 [STALAGMITEFALL]
 Name = Stalagmite Fall
 Type = ROCK
@@ -209,3 +215,17 @@ Target = NearOther
 FunctionCode = StalagmiteFall
 Flags = Contact,CanProtect,CanMirrorMove
 Description = A crushing cave strike. It may flinch the target or lower its Defense.
+#-------------------------------
+# Morturne
+#-------------------------------
+[SPIKYGRASP]
+Name = Spiky Grasp
+Type = GRASS
+Category = Physical
+Power = 80
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = SpikyGrasp
+Flags = CanProtect,CanMirrorMove
+Description = The user strikes with a thorny claw that drags the target down. It is super effective against Flying types.
