@@ -299,7 +299,7 @@ Types = GRASS,FIGHTING
 BaseStats = 88,112,80,60,95,95
 Abilities = OVERGROW,SCRAPPY
 HiddenAbilities = SNIPER
-Moves = 0,TRIPLEARROWS,1,LEAFSTORM,1,LEAFAGE,1,TACKLE,1,GROWL,1,UTURN,9,PECK,12,SHADOWSNEAK,15,RAZORLEAF,20,SYNTHESIS,25,PLUCK,30,BULKUP,37,SUCKERPUNCH,44,LEAFBLADE,51,FEATHERDANCE,58,BRAVEBIRD
+Moves = 0,TRIPLEARROWS,1,SPIRITSHACKLE,1,LEAFSTORM,1,LEAFAGE,1,TACKLE,1,GROWL,1,UTURN,9,PECK,12,SHADOWSNEAK,15,RAZORLEAF,20,SYNTHESIS,25,PLUCK,30,BULKUP,37,SUCKERPUNCH,44,LEAFBLADE,51,FEATHERDANCE,58,BRAVEBIRD
 TutorMoves = SPIRALSTRIKE,AERIALACE,AIRCUTTER,AIRSLASH,AURASPHERE,BATONPASS,BRAVEBIRD,BRICKBREAK,BULKUP,BULLETSEED,CLOSECOMBAT,COACHING,CONFUSERAY,DUALWINGBEAT,ENDURE,ENERGYBALL,FACADE,FALSESWIPE,FEATHERDANCE,FOCUSBLAST,FOCUSPUNCH,FRENZYPLANT,GIGADRAIN,GIGAIMPACT,GRASSKNOT,GRASSPLEDGE,GRASSYGLIDE,GRASSYTERRAIN,HAZE,HELPINGHAND,HYPERBEAM,KNOCKOFF,LEAFSTORM,LIGHTSCREEN,LOWKICK,LOWSWEEP,MAGICALLEAF,NASTYPLOT,NIGHTSHADE,PROTECT,RAINDANCE,REST,REVERSAL,ROCKTOMB,SCARYFACE,SEEDBOMB,SHADOWCLAW,SLEEPTALK,SMACKDOWN,SOLARBEAM,SUBSTITUTE,SUNNYDAY,SWIFT,SWORDSDANCE,TAILWIND,TAKEDOWN,TAUNT,TRAILBLAZE,UPPERHAND,UTURN
 Weight = 37.0
 Pokedex = The air stored inside the rachises of Decidueye's feathers insulates the Pokémon against Hisui's extreme cold. This is firm proof that evolution can be influenced by environment.
@@ -340,7 +340,6 @@ FormName = Three-Segment Form
 Height = 4.5
 Weight = 47.4
 #-------------------------------
-TutorMoves = SPIRALSTRIKE
 [PALAFIN,1]
 FormName = Hero Form
 BaseStats = 100,160,97,100,106,87
@@ -388,21 +387,18 @@ FormName = Blue Plumage
 Color = Blue
 Pokedex = Blue-feathered Squawkabilly view their green- feathered counterparts as rivals, since the latter make up the largest, most powerful groups.
 #-------------------------------
-TutorMoves = SPIRALSTRIKE
 [SQUAWKABILLY,2]
 FormName = Yellow Plumage
 HiddenAbilities = SHEERFORCE
 Color = Yellow
 Pokedex = The yellow Squawkabilly are especially fierce. They've even been known to drive other bird Pokémon out of town.
 #-------------------------------
-TutorMoves = SPIRALSTRIKE
 [SQUAWKABILLY,3]
 FormName = White Plumage
 HiddenAbilities = SHEERFORCE
 Color = White
 Pokedex = Though these Squawkabilly are the fewest in number, they have no trouble living in towns since they blend in with the white buildings.
 #-------------------------------
-TutorMoves = SPIRALSTRIKE
 [GIMMIGHOUL,1]
 FormName = Roaming Form
 CatchRate = 0
@@ -534,6 +530,8 @@ Generation = 9
 FormName = Mega Victreebel
 MegaStone = VICTREEBELITE
 BaseStats = 80,125,85,70,135,95
+Abilities = CORROSION
+HiddenAbilities = CORROSION
 Height = 4.5
 Weight = 125.5
 Pokedex = The volume of this Pokémon's acid has increased and filling its mouth. If it's not careful, it will overflow and spill out.
@@ -589,7 +587,6 @@ Weight = 40.4
 Pokedex = It flies faster than the speed of sound. After whipping up shock waves to send enemies flying, it finishes them off with its talons.
 Generation = 9
 #-------------------------------
-TutorMoves = SPIRALSTRIKE
 [FROSLASS,1]
 FormName = Mega Froslass
 MegaStone = CLEFABLITE
@@ -684,8 +681,8 @@ Generation = 9
 [PYROAR,1]
 FormName = Mega Pyroar
 MegaStone = PYROARITE
-Abilities = ADAPTABILITY
-HiddenAbilities = ADAPTABILITY
+Abilities = PRIDE
+HiddenAbilities = PRIDE
 BaseStats = 86,88,92,126,129,86
 Weight = 93.3
 Pokedex = This Pokémon spews flames hotter than 18,000 degrees Fahrenheit. It swings around its grand, blazing mane as it protects its allies.
@@ -742,7 +739,6 @@ Weight = 25.0
 Pokedex = Mega Evolution has pumped up all its muscles. Hawlucha flexes to show off its strength.
 Generation = 9
 #-------------------------------
-TutorMoves = SPIRALSTRIKE
 [ZYGARDE,4]
 FormName = Mega Zygarde
 MegaStone = ZYGARDITE
@@ -838,7 +834,6 @@ Weight = 50.0
 Pokedex = Mega Staraptor is a top-class flier. It can easily soar through the sky while gripping a Steelix that weighs more than 880 lbs.
 Generation = 9
 #-------------------------------
-TutorMoves = SPIRALSTRIKE
 [GARCHOMP,2]
 FormName = Mega Garchomp Z
 MegaStone = GARCHOMPITEZ
@@ -885,7 +880,6 @@ Height = 4.0
 Pokedex = The energy within Golurk has been stimulated by Mega Evolution. The Pokémon could explode at any moment.
 Generation = 9
 #-------------------------------
-TutorMoves = SPIRALSTRIKE
 [MEOWSTIC,2]
 FormName = Mega Meowstic
 MegaStone = MEOWSTICITE

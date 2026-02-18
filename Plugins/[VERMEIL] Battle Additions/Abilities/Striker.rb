@@ -6,7 +6,7 @@ module VermeilStriker
   KICK_MOVES = [
     :DOUBLEKICK,
     :JUMPKICK,
-    :HIJUMPKICK,
+    :HIGHJUMPKICK,
     :MEGAKICK,
     :LOWKICK,
     :ROLLINGKICK,
@@ -18,7 +18,8 @@ module VermeilStriker
     :LOWSWEEP,
     :STOMP,
     :HIGHHORSEPOWER,
-    :STOMPINGTANTRUM
+    :STOMPINGTANTRUM,
+    :CLOSECOMBAT
   ]
 
   def self.kick_move?(move)

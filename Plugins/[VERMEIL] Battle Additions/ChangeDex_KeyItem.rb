@@ -37,6 +37,7 @@ module VermeilChangeDex
   }
 
   @canon_cache = {}
+  @canon_move_data = nil
   @custom_move_ids = nil
   @custom_ability_ids = nil
   @detect_cache = nil
@@ -148,6 +149,48 @@ module VermeilChangeDex
     return pool.compact.reject { |a| a == :NONE }.uniq
   end
 
+  def self.load_canon_move_data
+    return if !@canon_move_data.nil?
+    @canon_move_data = {}
+    ["CanonData/moves.txt", "CanonData/moves_Gen_9_Pack.txt"].each do |path|
+      resolved = resolve_existing_path(path)
+      next if !resolved
+      current_id = nil
+      File.open(resolved, "r:utf-8") do |f|
+        f.each_line do |line|
+          clean = line.to_s.strip.split("#")[0]
+          next if clean.nil? || clean.empty?
+          if clean[/^\[([^\]]+)\]$/]
+            current_id = $1.strip.to_sym
+            @canon_move_data[current_id] ||= { :type => nil, :flags => [] }
+            next
+          end
+          next if current_id.nil?
+          if clean[/^Type\s*=\s*(.*)$/i]
+            @canon_move_data[current_id][:type] = $1.strip.to_sym
+          elsif clean[/^Flags\s*=\s*(.*)$/i]
+            flags = $1.to_s.split(",").map { |s| s.to_s.strip }.reject { |s| s.empty? }
+            @canon_move_data[current_id][:flags] = flags
+          end
+        end
+      end
+    end
+  end
+
+  def self.canon_move_type(move_id)
+    load_canon_move_data
+    data = @canon_move_data[move_id]
+    return nil if !data
+    return data[:type]
+  end
+
+  def self.canon_move_flags(move_id)
+    load_canon_move_data
+    data = @canon_move_data[move_id]
+    return [] if !data
+    return data[:flags] || []
+  end
+
   def self.resolve_existing_path(path)
     candidates = [
       path,
@@ -219,6 +262,7 @@ module VermeilChangeDex
       @typebitmap = AnimatedBitmap.new(_INTL("Graphics/UI/types"))
       @action_key_name = resolve_input_name(Input::ACTION, "Z")
       @filter_key_name = resolve_input_name(Input::SPECIAL, "Special")
+      @use_key_name = resolve_input_name(Input::USE, "C")
       @jump_up_input = defined?(Input::JUMPUP) ? Input::JUMPUP : nil
       @jump_down_input = defined?(Input::JUMPDOWN) ? Input::JUMPDOWN : nil
       @category = :pokemon_changes
@@ -237,6 +281,18 @@ module VermeilChangeDex
       @carrier_popup_page = 0
       @carrier_popup_entry = nil
       @carrier_mark_base_y = {}
+      @ability_moves_popup_open = false
+      @ability_moves_popup_page = 0
+      @ability_moves_popup_lines = []
+      @ability_moves_popup_title = "Boosted Moves"
+      @detail_form_options = [0]
+      @detail_form_option_index = 0
+      @detail_action_menu_open = false
+      @detail_action_menu_index = 0
+      @detail_action_menu_options = []
+      @detail_variant_menu_open = false
+      @detail_variant_menu_index = 0
+      @detail_variant_menu_options = []
       @moves_popup_open = false
       @moves_popup_page = 0
       @detail_move_popup_lines = []
@@ -669,6 +725,13 @@ module VermeilChangeDex
       return species == :SILVALLY || species == :GENESECT
     end
 
+    def greninja_ash_form?(species, form)
+      return false if species != :GRENINJA || form <= 0
+      s_data = GameData::Species.get_species_form(species, form)
+      return false if !s_data
+      return s_data.form_name.to_s.downcase.include?("ash")
+    end
+
     def unown_alt_form?(species, form)
       return false if form <= 0
       return species == :UNOWN
@@ -689,6 +752,7 @@ module VermeilChangeDex
 
     def excluded_from_move_categories?(species, form)
       return true if mega_form?(species, form)
+      return true if greninja_ash_form?(species, form)
       return true if pumpkaboo_alt_form?(species, form)
       return true if arceus_alt_form?(species, form)
       return true if type_memory_alt_form?(species, form)
@@ -1256,6 +1320,219 @@ module VermeilChangeDex
       end
     end
 
+    def ability_move_name(move_id)
+      move = GameData::Move.try_get(move_id)
+      return move_id.to_s if !move
+      return move.name
+    end
+
+    def moves_with_flag(flag_name)
+      ids = []
+      GameData::Move.each do |m|
+        next if !m || !m.id
+        flags = (m.flags || [])
+        next if flags.empty?
+        ids << m.id if flags.any? { |f| f.to_s =~ /^#{Regexp.escape(flag_name)}$/i }
+      end
+      return ids.uniq
+    end
+
+    def moves_with_type(type_sym)
+      ids = []
+      GameData::Move.each do |m|
+        next if !m || !m.id
+        ids << m.id if m.type == type_sym
+      end
+      return ids.uniq
+    end
+
+    def ability_boost_sections(ability_id)
+      sections = []
+      case ability_id
+      when :IRONFIST
+        sections << { :label => "Punching moves", :moves => moves_with_flag("Punching") }
+      when :STRONGJAW
+        sections << { :label => "Biting moves", :moves => moves_with_flag("Biting") }
+      when :MEGALAUNCHER
+        sections << { :label => "Pulse moves", :moves => moves_with_flag("Pulse") }
+      when :SHARPNESS
+        sections << { :label => "Slicing moves", :moves => moves_with_flag("Slicing") }
+      when :BLUDGEONMASTER
+        hammer_ids = if defined?(Battle::AbilityEffects) && Battle::AbilityEffects.const_defined?(:HAMMER_MASTER_MOVES)
+                       Battle::AbilityEffects::HAMMER_MASTER_MOVES
+                     else
+                       [:ICEHAMMER, :CRABHAMMER, :HAMMERARM, :WOODHAMMER, :GIGATONHAMMER, :DRAGONHAMMER]
+                     end
+        sections << { :label => "Hammer moves", :moves => hammer_ids }
+      when :STRIKER
+        kick_ids = if defined?(VermeilStriker) && VermeilStriker.const_defined?(:KICK_MOVES)
+                     VermeilStriker::KICK_MOVES
+                   else
+                     [:DOUBLEKICK, :JUMPKICK, :HIJUMPKICK, :MEGAKICK, :LOWKICK, :ROLLINGKICK, :TRIPLEKICK, :BLAZEKICK, :TROPKICK, :THUNDEROUSKICK, :AXEKICK]
+                   end
+        sections << { :label => "Kicking moves", :moves => kick_ids }
+      when :ILLUMINATE
+        light_ids = if defined?(VermeilAbilityReworks) && VermeilAbilityReworks.const_defined?(:LIGHT_MOVES)
+                      VermeilAbilityReworks::LIGHT_MOVES
+                    else
+                      []
+                    end
+        sections << { :label => "Light moves", :moves => light_ids } if !light_ids.empty?
+      end
+      return sections
+    end
+
+    def wrap_colored_tokens(bmp, tokens, max_w)
+      lines = []
+      line = []
+      line_w = 0
+      tokens.each do |tok|
+        if tok == :newline
+          lines << line if !line.empty?
+          line = []
+          line_w = 0
+          next
+        end
+        text = tok[0].to_s
+        next if text.empty?
+        color = tok[1] || COLOR_TEXT_MAIN
+        token_w = bmp.text_size(text).width
+        if line_w + token_w > max_w && !line.empty?
+          lines << line
+          line = []
+          line_w = 0
+        end
+        line << [text, color]
+        line_w += token_w
+      end
+      lines << line if !line.empty?
+      return lines
+    end
+
+    def draw_colored_token_line(bmp, token_line, x, y)
+      xx = x
+      (token_line || []).each do |tok|
+        text = tok[0].to_s
+        color = tok[1] || COLOR_TEXT_MAIN
+        pbDrawTextPositions(bmp, [[text, xx, y, :left, color, Color.new(0, 0, 0, 120)]])
+        xx += bmp.text_size(text).width
+      end
+    end
+
+    def ability_newly_boosted_move?(ability_id, move_id)
+      move_data = GameData::Move.try_get(move_id)
+      return false if !move_data
+      now_type = move_data.type
+      now_flags = (move_data.flags || []).map { |f| f.to_s }
+      canon_type = VermeilChangeDex.canon_move_type(move_id)
+      canon_flags = (VermeilChangeDex.canon_move_flags(move_id) || []).map { |f| f.to_s }
+      has_now_flag = proc { |name| now_flags.any? { |f| f =~ /^#{Regexp.escape(name)}$/i } }
+      had_canon_flag = proc { |name| canon_flags.any? { |f| f =~ /^#{Regexp.escape(name)}$/i } }
+      case ability_id
+      when :IRONFIST
+        return has_now_flag.call("Punching") && !had_canon_flag.call("Punching")
+      when :STRONGJAW
+        return has_now_flag.call("Biting") && !had_canon_flag.call("Biting")
+      when :MEGALAUNCHER
+        return has_now_flag.call("Pulse") && !had_canon_flag.call("Pulse")
+      when :SHARPNESS
+        return has_now_flag.call("Slicing") && !had_canon_flag.call("Slicing")
+      end
+      return false
+    end
+
+    def ability_boost_popup_lines(ability_id, bmp)
+      sections = ability_boost_sections(ability_id)
+      return [] if sections.empty?
+      canonical_ability = !(VermeilChangeDex.custom_ability_ids || []).include?(ability_id)
+      custom_move_lookup = {}
+      (VermeilChangeDex.custom_move_ids || []).each { |mid| custom_move_lookup[mid] = true }
+      tokens = []
+      sections.each_with_index do |sec, idx|
+        tokens << :newline if idx > 0
+        if sec[:general]
+          tokens << ["#{sec[:label]}: ", COLOR_CANON]
+          tokens << [sec[:general].to_s, COLOR_TEXT_MAIN]
+          next
+        end
+        move_ids = (sec[:moves] || []).compact.uniq
+        next if move_ids.empty?
+        tokens << ["#{sec[:label]}: ", COLOR_CANON]
+        move_ids.each_with_index do |move_id, i|
+          move_name = ability_move_name(move_id)
+          highlight = canonical_ability && (custom_move_lookup[move_id] || ability_newly_boosted_move?(ability_id, move_id))
+          col = highlight ? COLOR_DIFF : COLOR_TEXT_MAIN
+          tokens << [move_name, col]
+          tokens << [", ", COLOR_TEXT_MAIN] if i < move_ids.length - 1
+        end
+      end
+      return wrap_colored_tokens(bmp, tokens, 404)
+    end
+
+    def ability_moves_popup_page_size
+      return 6
+    end
+
+    def show_ability_moves_popup(entry)
+      return if !entry || !entry[:id]
+      bmp = @sprites["overlay"]&.bitmap
+      return if !bmp
+      lines = ability_boost_popup_lines(entry[:id], bmp)
+      if lines.empty?
+        pbPlayBuzzerSE
+        return
+      end
+      @ability_moves_popup_lines = lines
+      @ability_moves_popup_page = 0
+      @ability_moves_popup_title = _INTL("Boosted Moves")
+      redraw_ability_moves_popup
+      @ability_moves_popup_open = true
+    end
+
+    def redraw_ability_moves_popup
+      hide_ability_moves_popup(false)
+      return if @ability_moves_popup_lines.nil? || @ability_moves_popup_lines.empty?
+      @sprites["ability_moves_popup"] = BitmapSprite.new(SCREEN_W, SCREEN_H, @viewport)
+      @sprites["ability_moves_popup"].z = 260
+      bmp = @sprites["ability_moves_popup"].bitmap
+      pbSetSystemFont(bmp)
+      panel_x = 38
+      panel_y = 86
+      panel_w = SCREEN_W - 76
+      panel_h = 210
+      bmp.fill_rect(panel_x, panel_y, panel_w, panel_h, Color.new(20, 28, 40, 235))
+      bmp.fill_rect(panel_x, panel_y, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y + panel_h - 1, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x + panel_w - 1, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      pbDrawTextPositions(bmp, [[@ability_moves_popup_title, panel_x + 12, panel_y + 8, :left, COLOR_HIGHLIGHT, Color.new(0,0,0,120)]])
+      per_page = ability_moves_popup_page_size
+      total_pages = [(@ability_moves_popup_lines.length.to_f / per_page).ceil, 1].max
+      @ability_moves_popup_page = [[@ability_moves_popup_page, 0].max, total_pages - 1].min
+      start_idx = @ability_moves_popup_page * per_page
+      page_lines = @ability_moves_popup_lines[start_idx, per_page] || []
+      y = panel_y + 36
+      page_lines.each do |line|
+        draw_colored_token_line(bmp, line, panel_x + 12, y)
+        y += 22
+      end
+      controls = _INTL("L/R: Page  {1}/{2}: Close", @filter_key_name, "X")
+      page_txt = _INTL("Page {1}/{2}", @ability_moves_popup_page + 1, total_pages)
+      pbDrawTextPositions(bmp, [[controls, panel_x + 12, panel_y + panel_h - 24, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      pbDrawTextPositions(bmp, [[page_txt, panel_x + panel_w - 12, panel_y + panel_h - 24, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      @ability_moves_popup_open = true
+    end
+
+    def hide_ability_moves_popup(clear_lines = true)
+      @ability_moves_popup_open = false
+      @ability_moves_popup_page = 0 if clear_lines
+      @ability_moves_popup_lines = [] if clear_lines
+      if @sprites["ability_moves_popup"]
+        @sprites["ability_moves_popup"].dispose
+        @sprites.delete("ability_moves_popup")
+      end
+    end
+
     def move_popup_lines_per_page
       return 6
     end
@@ -1298,6 +1575,7 @@ module VermeilChangeDex
       page_txt = _INTL("Page {1}/{2}", @moves_popup_page + 1, total_pages)
       pbDrawTextPositions(bmp, [[controls, panel_x + 12, panel_y + panel_h - 24, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
       pbDrawTextPositions(bmp, [[page_txt, panel_x + panel_w - 12, panel_y + panel_h - 24, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      @moves_popup_open = true
     end
 
     def hide_new_moves_popup(clear_lines = true)
@@ -1595,7 +1873,13 @@ module VermeilChangeDex
       if !pokemon_category?
         old_idx = @index
         step = (dy != 0) ? dy : dx
-        @index = [[@index + step, 0].max, @entries.length - 1].min
+        if step < 0 && @index <= 0
+          @index = @entries.length - 1
+        elsif step > 0 && @index >= @entries.length - 1
+          @index = 0
+        else
+          @index = [[@index + step, 0].max, @entries.length - 1].min
+        end
         return if @index == old_idx
         pbPlayCursorSE
         draw_grid_interface
@@ -1607,21 +1891,33 @@ module VermeilChangeDex
       if dy != 0 && dx == 0
         col = in_page % GRID_COLS
         row = in_page / GRID_COLS
-        if dy > 0 && row >= (GRID_ACTIVE_ROWS - 1)
+        page_start = page * GRID_PAGE_SIZE
+        page_count = [GRID_PAGE_SIZE, @entries.length - page_start].min
+        last_visible_row = [[(page_count - 1) / GRID_COLS, 0].max, GRID_ACTIVE_ROWS - 1].min
+        if dy > 0 && row >= last_visible_row
           # From last active row, moving down pages forward.
           target_page = page + 1
           target_idx = (target_page * GRID_PAGE_SIZE) + col
           if target_idx >= @entries.length
-            # Fallback to nearest valid slot in next page.
-            page_start = target_page * GRID_PAGE_SIZE
-            return if page_start >= @entries.length
-            target_idx = [page_start + GRID_COLS - 1, @entries.length - 1].min
+            # Wrap to first page when moving down from the last page.
+            target_idx = [col, @entries.length - 1].min
           end
         elsif dy < 0 && row <= 0
           # From first active row, moving up pages backward.
           target_page = page - 1
-          return if target_page < 0
-          target_idx = (target_page * GRID_PAGE_SIZE) + ((GRID_ACTIVE_ROWS - 1) * GRID_COLS) + col
+          if target_page < 0
+            target_page = (@entries.length - 1) / GRID_PAGE_SIZE
+          end
+          page_start = target_page * GRID_PAGE_SIZE
+          target_idx = nil
+          (GRID_ACTIVE_ROWS - 1).downto(0) do |r|
+            cand = page_start + (r * GRID_COLS) + col
+            if cand >= 0 && cand < @entries.length
+              target_idx = cand
+              break
+            end
+          end
+          target_idx = [@entries.length - 1, page_start].max if target_idx.nil?
           if target_idx >= @entries.length
             target_idx = @entries.length - 1
           end
@@ -1667,6 +1963,225 @@ module VermeilChangeDex
       return base_name if form <= 0 || form_name.empty?
       return form_name if form_name.downcase.include?(base_name.downcase)
       return "#{form_name} #{base_name}"
+    end
+
+    def hidden_form_has_changes?(species, form)
+      return false if form <= 0
+      base = GameData::Species.get_species_form(species, 0)
+      alt = GameData::Species.get_species_form(species, form)
+      return false if !base || !alt
+      return true if species_stats_array(base) != species_stats_array(alt)
+      return true if (base.types || []).to_a != (alt.types || []).to_a
+      base_abil = (base.abilities + base.hidden_abilities).compact.reject { |a| a == :NONE }.uniq.sort
+      alt_abil = (alt.abilities + alt.hidden_abilities).compact.reject { |a| a == :NONE }.uniq.sort
+      return true if base_abil != alt_abil
+      base_moves = (base.moves || []).map { |m| m[1] }.compact.uniq
+      alt_moves = (alt.moves || []).map { |m| m[1] }.compact.uniq
+      return true if base_moves != alt_moves
+      base_evos = base.get_evolutions(true) rescue []
+      alt_evos = alt.get_evolutions(true) rescue []
+      return true if base_evos != alt_evos
+      return false
+    end
+
+    def hidden_variant_forms_for(species)
+      forms = []
+      GameData::Species.each do |s|
+        next if s.species != species || s.form <= 0
+        next if mega_form?(species, s.form)
+        f_name = s.form_name.to_s.strip
+        # Hidden-variant selector is only for implicit forms (no FormName),
+        # such as Cubone-style regional evolution routing.
+        next if !f_name.empty?
+        next if !hidden_form_has_changes?(species, s.form)
+        forms << s.form
+      end
+      return forms.uniq.sort
+    end
+
+    def inferred_variant_name(species, form)
+      return "Normal" if form <= 0
+      s_data = GameData::Species.get_species_form(species, form)
+      f_name = s_data.form_name.to_s.strip
+      return f_name if !f_name.empty?
+      evos = s_data.get_evolutions(true) rescue []
+      evos.each do |evo|
+        evo_species = evo[0]
+        begin
+          evo_data = GameData::Species.get_species_form(evo_species, form)
+          evo_form_name = evo_data.form_name.to_s.strip
+          return evo_form_name if !evo_form_name.empty?
+        rescue StandardError
+        end
+      end
+      return "Form #{form}"
+    end
+
+    def detail_variant_label(species, form)
+      base_name = begin
+        GameData::Species.get(species).name.to_s
+      rescue StandardError
+        species.to_s
+      end
+      return base_name if form <= 0
+      variant = inferred_variant_name(species, form).to_s
+      return variant if variant.downcase.include?(base_name.downcase)
+      return "#{variant} #{base_name}"
+    end
+
+    def prepare_detail_form_options(species, current_form)
+      if mega_form?(species, current_form)
+        @detail_form_options = [current_form]
+        @detail_form_option_index = 0
+        return
+      end
+      if current_form > 0
+        s_data = GameData::Species.get_species_form(species, current_form)
+        if s_data && !s_data.form_name.to_s.strip.empty?
+          # Visible named forms (e.g. Alolan Ninetales) shouldn't use the
+          # hidden-variant toggle flow.
+          @detail_form_options = [current_form]
+          @detail_form_option_index = 0
+          return
+        end
+      end
+      forms = [0]
+      forms.concat(hidden_variant_forms_for(species))
+      forms = forms.uniq.sort
+      @detail_form_options = forms
+      @detail_form_option_index = forms.include?(current_form) ? forms.index(current_form) : 0
+    end
+
+    def cycle_detail_variant
+      return false if !pokemon_category?
+      return false if !@detail_form_options || @detail_form_options.length <= 1
+      @detail_form_option_index += 1
+      @detail_form_option_index = 0 if @detail_form_option_index >= @detail_form_options.length
+      @detail_form = @detail_form_options[@detail_form_option_index]
+      draw_detail_view(@detail_species, @detail_form)
+      return true
+    end
+
+    def detail_action_options
+      opts = []
+      if pokemon_category?
+        opts << [:evo_methods, "Evo Methods"] if @detail_has_evo_method_changes
+        opts << [:variant, "Variant"] if @detail_form_options && @detail_form_options.length > 1
+      end
+      return opts
+    end
+
+    def perform_detail_action(option_sym)
+      case option_sym
+      when :evo_methods
+        show_evolution_method_window(@detail_species, @detail_form)
+        return true
+      when :variant
+        # If there are multiple alternate variants, let user choose directly.
+        alt_count = (@detail_form_options ? @detail_form_options.length - 1 : 0)
+        if alt_count > 1
+          return open_detail_variant_menu
+        end
+        return cycle_detail_variant
+      end
+      return false
+    end
+
+    def open_detail_action_menu
+      opts = detail_action_options
+      return false if opts.empty?
+      if opts.length == 1
+        return perform_detail_action(opts[0][0])
+      end
+      close_detail_action_menu
+      @detail_action_menu_options = opts
+      @detail_action_menu_index = 0
+      @detail_action_menu_open = true
+      draw_detail_action_menu
+      return true
+    end
+
+    def close_detail_action_menu
+      @detail_action_menu_open = false
+      @detail_action_menu_options = []
+      @detail_action_menu_index = 0
+      @sprites["detail_action_menu"]&.dispose
+      @sprites.delete("detail_action_menu")
+    end
+
+    def open_detail_variant_menu
+      return false if !pokemon_category?
+      return false if !@detail_form_options || @detail_form_options.length <= 1
+      close_detail_variant_menu
+      @detail_variant_menu_options = @detail_form_options.map do |f|
+        [f, detail_variant_label(@detail_species, f)]
+      end
+      @detail_variant_menu_index = [@detail_form_options.index(@detail_form) || 0, 0].max
+      @detail_variant_menu_open = true
+      draw_detail_variant_menu
+      return true
+    end
+
+    def close_detail_variant_menu
+      @detail_variant_menu_open = false
+      @detail_variant_menu_options = []
+      @detail_variant_menu_index = 0
+      @sprites["detail_variant_menu"]&.dispose
+      @sprites.delete("detail_variant_menu")
+    end
+
+    def draw_detail_variant_menu
+      @sprites["detail_variant_menu"]&.dispose
+      @sprites.delete("detail_variant_menu")
+      @sprites["detail_variant_menu"] = BitmapSprite.new(SCREEN_W, SCREEN_H, @viewport)
+      @sprites["detail_variant_menu"].z = 261
+      bmp = @sprites["detail_variant_menu"].bitmap
+      pbSetSystemFont(bmp)
+      panel_w = 240
+      panel_h = 32 + (@detail_variant_menu_options.length * 28) + 28
+      panel_x = SCREEN_W - panel_w - 12
+      panel_y = 50
+      bmp.fill_rect(panel_x, panel_y, panel_w, panel_h, Color.new(20, 28, 40, 236))
+      bmp.fill_rect(panel_x, panel_y, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y + panel_h - 1, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x + panel_w - 1, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      pbDrawTextPositions(bmp, [["Choose Variant", panel_x + 10, panel_y + 8, :left, COLOR_HIGHLIGHT, Color.new(0,0,0,120)]])
+      @detail_variant_menu_options.each_with_index do |opt, i|
+        y = panel_y + 34 + (i * 28)
+        if i == @detail_variant_menu_index
+          bmp.fill_rect(panel_x + 8, y - 2, panel_w - 16, 24, Color.new(98, 44, 56, 210))
+        end
+        pbDrawTextPositions(bmp, [[opt[1], panel_x + 14, y, :left, COLOR_TEXT_MAIN, Color.new(0,0,0,120)]])
+      end
+      pbDrawTextPositions(bmp, [[_INTL("{1}: Select  {2}: Back", @action_key_name, "X"), panel_x + 10, panel_y + panel_h - 24, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+    end
+
+    def draw_detail_action_menu
+      @sprites["detail_action_menu"]&.dispose
+      @sprites.delete("detail_action_menu")
+      @sprites["detail_action_menu"] = BitmapSprite.new(SCREEN_W, SCREEN_H, @viewport)
+      @sprites["detail_action_menu"].z = 260
+      bmp = @sprites["detail_action_menu"].bitmap
+      pbSetSystemFont(bmp)
+      panel_w = 210
+      panel_h = 32 + (@detail_action_menu_options.length * 28) + 28
+      panel_x = SCREEN_W - panel_w - 12
+      panel_y = 50
+      bmp.fill_rect(panel_x, panel_y, panel_w, panel_h, Color.new(20, 28, 40, 236))
+      bmp.fill_rect(panel_x, panel_y, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y + panel_h - 1, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x + panel_w - 1, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      pbDrawTextPositions(bmp, [["Select Action", panel_x + 10, panel_y + 8, :left, COLOR_HIGHLIGHT, Color.new(0,0,0,120)]])
+      @detail_action_menu_options.each_with_index do |opt, i|
+        y = panel_y + 34 + (i * 28)
+        if i == @detail_action_menu_index
+          bmp.fill_rect(panel_x + 8, y - 2, panel_w - 16, 24, Color.new(98, 44, 56, 210))
+        end
+        pbDrawTextPositions(bmp, [[opt[1], panel_x + 14, y, :left, COLOR_TEXT_MAIN, Color.new(0,0,0,120)]])
+      end
+      pbDrawTextPositions(bmp, [[_INTL("{1}: Select  {2}: Back", @action_key_name, "X"), panel_x + 10, panel_y + panel_h - 24, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
     end
 
     def refresh_cursor
@@ -1715,16 +2230,22 @@ module VermeilChangeDex
           v.visible = false
         end
       end
-      draw_detail_view(@entries[@index][0], @entries[@index][1])
+      sp = @entries[@index][0]
+      form = @entries[@index][1]
+      prepare_detail_form_options(sp, form)
+      draw_detail_view(sp, @detail_form_options[@detail_form_option_index] || form)
     end
 
     def switch_to_grid
       @mode = :grid
       @sprites["grid_bg"].visible = true if @sprites["grid_bg"] && !@sprites["grid_bg"].disposed?
+      hide_ability_moves_popup
       hide_new_moves_popup
       hide_carrier_popup
+      close_detail_action_menu
+      close_detail_variant_menu
       clear_entry_detail_carrier_icons
-      ["big_icon", "evo_label_overlay", "evo_method_popup", "new_moves_popup"].each do |k|
+      ["big_icon", "evo_label_overlay", "evo_method_popup", "new_moves_popup", "ability_moves_popup", "detail_action_menu", "detail_variant_menu"].each do |k|
         next if !@sprites[k]
         @sprites[k].dispose
         @sprites.delete(k)
@@ -1816,6 +2337,9 @@ module VermeilChangeDex
         end
       end
       draw_carrier_icon_window(bmp, entry)
+      if (@category == :ability_changes || @category == :new_abilities) && !ability_boost_sections(entry[:id]).empty?
+        pbDrawTextPositions(bmp, [[_INTL("{1}: Boosted Moves", @filter_key_name), SCREEN_W - 20, 352, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      end
       if !pokemon_category? && (entry[:all_users] || []).length > 0
         pbDrawTextPositions(bmp, [[_INTL("{1}: Carriers", @action_key_name), SCREEN_W / 2, 12, :center, Color.new(255,255,255), Color.new(0,0,0,120)]])
       end
@@ -1981,9 +2505,32 @@ module VermeilChangeDex
     def draw_detail_view(species, form)
       hide_new_moves_popup
       bmp = @sprites["overlay"].bitmap; bmp.clear; canon = VermeilChangeDex.get_canon_info(species, form)
+      canon ||= VermeilChangeDex.get_canon_info(species, 0)
       @detail_species = species
       @detail_form = form
-      vermeil = GameData::Species.get_species_form(species, form); draw_header("COMPARISON", changedex_display_name(species, form))
+      vermeil = GameData::Species.get_species_form(species, form)
+      base_species_name = begin
+        GameData::Species.get(species).name.to_s
+      rescue StandardError
+        changedex_display_name(species, form)
+      end
+      form_name = vermeil.form_name.to_s.strip
+      if form > 0 && !form_name.empty?
+        # Visible named forms (e.g. Alolan Meowth): show form name directly.
+        draw_header("COMPARISON", changedex_display_name(species, form))
+      else
+        # Hidden forms (e.g. Cubone/Koffing-style): keep base name and show
+        # inferred variant tag in muted color beside it.
+        draw_header("COMPARISON", base_species_name)
+        if form > 0
+          variant_tag = inferred_variant_name(species, form).to_s.strip
+          if !variant_tag.empty? && !variant_tag.downcase.start_with?(base_species_name.downcase)
+            base_w = @sprites["overlay"].bitmap.text_size(base_species_name).width
+            tag_x = SCREEN_W - 22 - base_w - 8
+            pbDrawTextPositions(@sprites["overlay"].bitmap, [[variant_tag, tag_x, 12, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+          end
+        end
+      end
       @detail_has_evo_method_changes = has_evolution_method_changes?(vermeil, canon)
       # Block panels for clearer visual hierarchy.
       draw_panel(bmp, 10, 52, 150, 170)   # Left: sprite + typing
@@ -2049,8 +2596,10 @@ module VermeilChangeDex
       moves_header_y = [296, abilities_end_y + 6].max
       draw_panel(bmp, 10, moves_header_y - 6, 492, 126)
       draw_move_change_section(bmp, level_added_names, tutor_added_names, moves_header_y)
-      if @detail_has_evo_method_changes
-        pbDrawTextPositions(bmp, [[_INTL("{1}: Evo Methods", @action_key_name), SCREEN_W / 2, 12, :center, Color.new(255,255,255), Color.new(0,0,0,120)]])
+      action_opts = detail_action_options
+      if !action_opts.empty?
+        header_hint = action_opts.length > 1 ? _INTL("{1}: Options", @action_key_name) : _INTL("{1}: {2}", @action_key_name, action_opts[0][1])
+        pbDrawTextPositions(bmp, [[header_hint, SCREEN_W / 2, 12, :center, Color.new(255,255,255), Color.new(0,0,0,120)]])
       end
     end
 
@@ -2402,6 +2951,84 @@ module VermeilChangeDex
             next
           end
         else
+          if @detail_variant_menu_open
+            if Input.repeat?(Input::UP)
+              @detail_variant_menu_index = [@detail_variant_menu_index - 1, 0].max
+              pbPlayCursorSE
+              draw_detail_variant_menu
+              next
+            end
+            if Input.repeat?(Input::DOWN)
+              @detail_variant_menu_index = [@detail_variant_menu_index + 1, @detail_variant_menu_options.length - 1].min
+              pbPlayCursorSE
+              draw_detail_variant_menu
+              next
+            end
+            if Input.trigger?(Input::ACTION) || Input.trigger?(Input::USE)
+              sel = @detail_variant_menu_options[@detail_variant_menu_index]
+              close_detail_variant_menu
+              if sel
+                chosen_form = sel[0]
+                if @detail_form_options.include?(chosen_form)
+                  @detail_form_option_index = @detail_form_options.index(chosen_form) || 0
+                  @detail_form = chosen_form
+                  draw_detail_view(@detail_species, @detail_form)
+                  pbPlayCursorSE
+                else
+                  pbPlayBuzzerSE
+                end
+              else
+                pbPlayBuzzerSE
+              end
+              next
+            end
+            if Input.trigger?(Input::BACK) || Input.trigger?(Input::SPECIAL)
+              close_detail_variant_menu
+              pbPlayCancelSE
+              next
+            end
+          end
+          if @detail_action_menu_open
+            if Input.repeat?(Input::UP)
+              @detail_action_menu_index = [@detail_action_menu_index - 1, 0].max
+              pbPlayCursorSE
+              draw_detail_action_menu
+              next
+            end
+            if Input.repeat?(Input::DOWN)
+              @detail_action_menu_index = [@detail_action_menu_index + 1, @detail_action_menu_options.length - 1].min
+              pbPlayCursorSE
+              draw_detail_action_menu
+              next
+            end
+            if Input.trigger?(Input::ACTION) || Input.trigger?(Input::USE)
+              sel = @detail_action_menu_options[@detail_action_menu_index]
+              close_detail_action_menu
+              if sel && perform_detail_action(sel[0])
+                pbPlayCursorSE
+              else
+                pbPlayBuzzerSE
+              end
+              next
+            end
+            if Input.trigger?(Input::BACK) || Input.trigger?(Input::SPECIAL)
+              close_detail_action_menu
+              pbPlayCancelSE
+              next
+            end
+          end
+          if @ability_moves_popup_open
+            if Input.repeat?(Input::LEFT)
+              @ability_moves_popup_page -= 1
+              redraw_ability_moves_popup
+            elsif Input.repeat?(Input::RIGHT)
+              @ability_moves_popup_page += 1
+              redraw_ability_moves_popup
+            elsif Input.trigger?(Input::ACTION) || Input.trigger?(Input::BACK) || Input.trigger?(Input::USE) || Input.trigger?(Input::SPECIAL)
+              hide_ability_moves_popup(false)
+            end
+            next
+          end
           if @moves_popup_open
             if Input.repeat?(Input::LEFT)
               @moves_popup_page -= 1
@@ -2437,14 +3064,20 @@ module VermeilChangeDex
           if Input.trigger?(Input::SPECIAL)
             if pokemon_category? && @detail_moves_truncated
               show_new_moves_popup
+            elsif @category == :ability_changes || @category == :new_abilities
+              show_ability_moves_popup(@entries[@index])
             else
               pbPlayBuzzerSE
             end
             next
           end
           if Input.trigger?(Input::ACTION)
-            if pokemon_category? && @detail_has_evo_method_changes
-              show_evolution_method_window(@detail_species, @detail_form)
+            if pokemon_category?
+              if open_detail_action_menu
+                pbPlayCursorSE
+              else
+                pbPlayBuzzerSE
+              end
             elsif !pokemon_category?
               entry = @entries[@index]
               users = entry ? (entry[:all_users] || []) : []
@@ -2488,11 +3121,17 @@ module VermeilChangeDex
       return if @index == old_idx
       pbPlayCursorSE
       if pokemon_category?
+        close_detail_action_menu if @detail_action_menu_open
+        close_detail_variant_menu if @detail_variant_menu_open
         clear_evolution_method_popup if @evo_popup_open
         hide_new_moves_popup if @moves_popup_open
-        draw_detail_view(@entries[@index][0], @entries[@index][1])
+        sp = @entries[@index][0]
+        form = @entries[@index][1]
+        prepare_detail_form_options(sp, form)
+        draw_detail_view(sp, @detail_form_options[@detail_form_option_index] || form)
       else
         hide_carrier_popup if @carrier_popup_open
+        hide_ability_moves_popup if @ability_moves_popup_open
         draw_entry_detail(@entries[@index])
       end
     end

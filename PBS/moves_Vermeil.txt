@@ -229,3 +229,19 @@ Target = NearOther
 FunctionCode = SpikyGrasp
 Flags = CanProtect,CanMirrorMove
 Description = The user strikes with a thorny claw that drags the target down. It is super effective against Flying types.
+#-------------------------------
+# Bug Type Bulldoze
+#-------------------------------
+[WEBSHOOTER]
+Name = Webshooter
+Type = BUG
+Category = Physical
+Power = 60
+Accuracy = 100
+TotalPP = 20
+Target = AllNearFoes
+FunctionCode = LowerTargetSpeed1
+Flags = CanProtect,Mirror,CanKingRock
+EffectChance = 100
+Description = The user attacks opposing Pokémon by shooting sticky webs. This also lowers their Speed stats.
+#-------------------------------

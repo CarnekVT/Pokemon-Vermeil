@@ -138,3 +138,9 @@ Description = Immune to priority moves. Fire and Psychic moves always hit and ig
 Name = Hidden Arsenal
 Description = Multi-hit moves always strike the maximum number of times. Priority moves are boosted by 50%.
 #-------------------------------
+# Pride (Special Moxie)
+#-------------------------------
+[PRIDE]
+Name = Pride
+Description = Boosts Sp. Atk each time the Pokémon knocks out a foe.
+#-------------------------------

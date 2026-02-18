@@ -330,7 +330,7 @@ Accuracy = 100
 TotalPP = 5
 Target = NearOther
 FunctionCode = LowerUserDefSpDef1
-Flags = CanProtect,CanMirrorMove,CannotMetronome
+Flags = CanProtect,CanMirrorMove,CannotMetronome,Pulse
 EffectChance = 100
 Description = The user shoots its own armor out as blazing projectiles. This lowers the user’s Defense and Sp. Def.
 #-------------------------------

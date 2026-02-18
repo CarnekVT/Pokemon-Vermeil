@@ -516,7 +516,7 @@ TotalPP = 5
 Target = NearOther
 Priority = 1
 FunctionCode = FailsIfTargetActed
-Flags = Contact,CanProtect,CanMirrorMove
+Flags = Contact,CanProtect,CanMirrorMove,Punching
 Description = This move enables the user to attack first. It fails if the target is not readying an attack, however.
 #-------------------------------
 [KNOCKOFF]
@@ -946,7 +946,7 @@ Accuracy = 100
 TotalPP = 5
 Target = NearOther
 FunctionCode = None
-Flags = CanProtect,CannotMetronome
+Flags = CanProtect,CannotMetronome,Pulse
 Description = The user unleashes a strong beam from its core.
 #-------------------------------
 [SPACIALREND]
@@ -1154,7 +1154,7 @@ Accuracy = 50
 TotalPP = 5
 Target = NearOther
 FunctionCode = ParalyzeTarget
-Flags = CanProtect,CanMirrorMove,Bomb
+Flags = CanProtect,CanMirrorMove,Bomb,Pulse
 EffectChance = 100
 Description = The user fires an electric blast like a cannon to inflict damage and cause paralysis.
 #-------------------------------
@@ -1551,7 +1551,7 @@ Accuracy = 90
 TotalPP = 5
 Target = NearOther
 FunctionCode = LowerUserSpAtk2
-Flags = CanProtect,CanMirrorMove,CannotMetronome
+Flags = CanProtect,CanMirrorMove,CannotMetronome,Pulse
 Description = The user unleashes a strong beam. The attack's recoil harshly lowers the user's Sp. Atk stat.
 #-------------------------------
 [MISTYEXPLOSION]
@@ -1852,7 +1852,7 @@ Accuracy = 100
 TotalPP = 5
 Target = NearOther
 FunctionCode = LowerUserDefSpDef1
-Flags = Contact,CanProtect,CanMirrorMove
+Flags = Contact,CanProtect,CanMirrorMove,Punching
 Description = The user fights the foe up close without guarding itself. It also cuts the user's Defense and Sp. Def.
 #-------------------------------
 [FOCUSBLAST]
@@ -1864,7 +1864,7 @@ Accuracy = 70
 TotalPP = 5
 Target = NearOther
 FunctionCode = LowerTargetSpDef1
-Flags = CanProtect,CanMirrorMove,Bomb
+Flags = CanProtect,CanMirrorMove,Bomb,Pulse
 EffectChance = 10
 Description = The user heightens its mental focus and unleashes its power. It may also lower the target's Sp. Def.
 #-------------------------------
@@ -3242,7 +3242,7 @@ Accuracy = 100
 TotalPP = 15
 Target = NearOther
 FunctionCode = LowerTargetSpDef1
-Flags = CanProtect,CanMirrorMove,Bomb
+Flags = CanProtect,CanMirrorMove,Bomb,Pulse
 EffectChance = 20
 Description = The user hurls a shadowy blob at the target. It may also lower the target's Sp. Def stat.
 #-------------------------------
@@ -3539,7 +3539,7 @@ Accuracy = 100
 TotalPP = 10
 Target = NearOther
 FunctionCode = LowerTargetSpDef1
-Flags = CanProtect,CanMirrorMove,Bomb
+Flags = CanProtect,CanMirrorMove,Bomb,Pulse
 EffectChance = 10
 Description = The user draws power from nature and fires it at the target. It may also lower the target's Sp. Def.
 #-------------------------------
@@ -3713,7 +3713,7 @@ Accuracy = 100
 TotalPP = 15
 Target = NearOther
 FunctionCode = FlinchTarget
-Flags = Contact,CanProtect,CanMirrorMove
+Flags = Contact,CanProtect,CanMirrorMove,Punching
 EffectChance = 30
 Description = The user attacks by wildly swinging its thorny arms. It may also make the target flinch.
 #-------------------------------
@@ -4657,7 +4657,7 @@ Accuracy = 90
 TotalPP = 5
 Target = NearOther
 FunctionCode = AttackAndSkipNextTurn
-Flags = CanProtect,CanMirrorMove
+Flags = CanProtect,CanMirrorMove,Pulse
 Description = The foe is attacked with a powerful beam. The user must rest on the next turn to regain its energy.
 #-------------------------------
 [BOOMBURST]
@@ -5222,7 +5222,7 @@ Accuracy = 100
 TotalPP = 10
 Target = NearOther
 FunctionCode = TypeAndPowerDependOnWeather
-Flags = CanProtect,CanMirrorMove,Bomb
+Flags = CanProtect,CanMirrorMove,Bomb,Pulse
 Description = An attack move that varies in power and type depending on the weather.
 #-------------------------------
 [ECHOEDVOICE]
@@ -5394,7 +5394,7 @@ Accuracy = 100
 TotalPP = 15
 Target = NearOther
 FunctionCode = HitTwoToFiveTimes
-Flags = CanProtect,CanMirrorMove
+Flags = CanProtect,CanMirrorMove,Pulse
 Description = Sharp spikes are shot at the target in rapid succession. They hit two to five times in a row.
 #-------------------------------
 [COMETPUNCH]
@@ -6703,7 +6703,7 @@ Power = 90
 Accuracy = 100
 TotalPP = 10
 Target = NearOther
-FunctionCode = CategoryDependsOnHigherDamagePoisonTarget
+FunctionCode = CategoryDependsOnHigherDamagePoisonTarget,Pulse
 Flags = CanProtect,CanMirrorMove
 EffectChance = 20
 Description = Inflicts physical or special damage, whichever will be more effective. May also poison the target.
@@ -6730,7 +6730,7 @@ Accuracy = 100
 TotalPP = 20
 Target = NearOther
 FunctionCode = PoisonTarget
-Flags = Contact,CanProtect,CanMirrorMove
+Flags = Contact,CanProtect,CanMirrorMove,Punching
 EffectChance = 30
 Description = The target is stabbed with a tentacle or arm seeped with poison. It may also poison the target.
 #-------------------------------
@@ -7750,7 +7750,7 @@ Accuracy = 90
 TotalPP = 10
 Target = NearOther
 FunctionCode = TwoTurnAttackChargeRaiseUserSpAtk1
-Flags = CanProtect,CanMirrorMove
+Flags = CanProtect,CanMirrorMove,Pulse
 Description = Gathers space power and boosts its Sp. Atk stat on the first turn, attacks on the next turn.
 #-------------------------------
 [DIAMONDSTORM]
@@ -8062,7 +8062,7 @@ Accuracy = 100
 TotalPP = 10
 Target = NearOther
 FunctionCode = LowerTargetSpDef1
-Flags = CanProtect,CanMirrorMove
+Flags = CanProtect,CanMirrorMove,Pulse
 EffectChance = 10
 Description = The user gathers all its light energy and releases it at once. It may also lower the target's Sp. Def stat.
 #-------------------------------
@@ -8287,7 +8287,7 @@ Accuracy = 90
 TotalPP = 5
 Target = NearOther
 FunctionCode = AttackAndSkipNextTurn
-Flags = CanProtect,CanMirrorMove
+Flags = CanProtect,CanMirrorMove,Pulse
 Description = The target is hit with a watery blast. The user must rest on the next turn, however.
 #-------------------------------
 [WATERSPOUT]
@@ -8311,7 +8311,7 @@ Accuracy = 80
 TotalPP = 5
 Target = NearOther
 FunctionCode = None
-Flags = CanProtect,CanMirrorMove
+Flags = CanProtect,CanMirrorMove,Pulse
 Description = The target is blasted by a huge volume of water launched under great pressure.
 #-------------------------------
 [ORIGINPULSE]
@@ -8460,7 +8460,7 @@ Accuracy = 100
 TotalPP = 15
 Target = NearOther
 FunctionCode = CannotBeRedirected
-Flags = CanProtect,CanMirrorMove,HighCriticalHitRate
+Flags = CanProtect,CanMirrorMove,HighCriticalHitRate,Pulse
 Description = The user ignores any effects that redirect moves, allowing this move to hit the chosen target.
 #-------------------------------
 [WATERPLEDGE]
@@ -8535,7 +8535,7 @@ Accuracy = 85
 TotalPP = 10
 Target = NearOther
 FunctionCode = LowerTargetAccuracy1
-Flags = CanProtect,CanMirrorMove,Bomb
+Flags = CanProtect,CanMirrorMove,Bomb,Pulse
 EffectChance = 50
 Description = The user attacks by spraying ink in the foe's face or eyes. It may also lower the target's accuracy.
 #-------------------------------

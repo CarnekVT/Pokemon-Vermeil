@@ -216,7 +216,8 @@ class Battle
           pbDisplay(_INTL("{1} draws strength from the Eclipse!", b.pbThis))
         else
           next if !b.takesIndirectDamage?(Battle::Scene::USE_ABILITY_SPLASH)
-          b.pbTakeEffectDamage(amount) do
+          @scene.pbDamageAnimation(b) if @scene && @scene.respond_to?(:pbDamageAnimation)
+          b.pbTakeEffectDamage(amount, false) do
             pbDisplay(_INTL("{1} is worn down by the Eclipse fog!", b.pbThis))
           end
         end
@@ -311,7 +312,7 @@ class Battle::Scene
   def pbUpdateExecutionerShadowFog
     pbEnsureExecutionerShadowFogTiles
     return if @exec_shadow_fog_tiles.empty?
-    target_alpha = @exec_shadow_fog_target ? 104 : 0
+    target_alpha = @exec_shadow_fog_target ? 128 : 0
     if @exec_shadow_fog_alpha < target_alpha
       @exec_shadow_fog_alpha = [@exec_shadow_fog_alpha + 4, target_alpha].min
     elsif @exec_shadow_fog_alpha > target_alpha
@@ -398,12 +399,14 @@ class Battle::Move
     source = battle.allSameSideBattlers(user.index).find { |b| b && !b.fainted? && b.hasActiveAbility?(:UMBRAVEIL) }
     if source
       battle.pbShowAbilitySplash(source)
-      target.pbTakeEffectDamage([(target.totalhp / 16.0).floor, 1].max) do
+      battle.scene.pbDamageAnimation(target) if battle.scene && battle.scene.respond_to?(:pbDamageAnimation)
+      target.pbTakeEffectDamage([(target.totalhp / 16.0).floor, 1].max, false) do
         battle.pbDisplay(_INTL("{1} strikes from the shadows!", source.pbThis))
       end
       battle.pbHideAbilitySplash(source)
     else
-      target.pbTakeEffectDamage([(target.totalhp / 16.0).floor, 1].max) do
+      battle.scene.pbDamageAnimation(target) if battle.scene && battle.scene.respond_to?(:pbDamageAnimation)
+      target.pbTakeEffectDamage([(target.totalhp / 16.0).floor, 1].max, false) do
         battle.pbDisplay(_INTL("The eclipse veil strikes from the shadows!"))
       end
     end
