@@ -550,7 +550,7 @@ Battle::AI::Handlers::MoveFailureCheck.add("UseRandomUserMoveIfAsleep",
 #===============================================================================
 Battle::AI::Handlers::MoveEffectScore.add("BounceBackProblemCausingStatusMoves",
   proc { |score, move, user, ai, battle|
-    next Battle::AI::MOVE_USELESS_SCORE if user.has_active_ability?(:MAGICBOUNCE)
+    next Battle::AI::MOVE_USELESS_SCORE if user.has_active_ability?(:MAGICBOUNCE) || user.has_active_ability?(:CRYSTALORBIT)
     useless = true
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?

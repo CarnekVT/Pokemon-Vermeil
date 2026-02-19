@@ -25,8 +25,32 @@ module VermeilChangeDex
   COLOR_VERMEIL      = Color.new(255, 100, 100)
   COLOR_DIFF         = Color.new(255, 215, 0)
   COLOR_MOVES_NEW    = Color.new(100, 255, 120)
+  SHOW_DETAIL_VARIANT_ACTION = false
+  FORCE_VISIBLE_HIDDEN_VARIANT_SPECIES = [
+    :PIKACHU, :PICHU, :KOFFING, :PETILIL, :OSHAWOTT, :ROWLETT, :CYNDAQUIL,
+    :DEWOTT, :QUILAVA, :DARTRIX, :GOOMY, :RUFFLET, :BERGMITE
+  ]
   REWORKED_ABILITIES = [:NORMALIZE, :ICEBODY, :BULLETPROOF, :SOLARPOWER, :ILLUMINATE, :CORROSION]
   TORQUE_MOVE_IDS = [:BLAZINGTORQUE, :NOXIOUSTORQUE, :COMBATTORQUE, :MAGICALTORQUE, :WICKEDTORQUE]
+  LETSGO_EXCLUSIVE_MOVE_IDS = [:ZIPPYZAP, :SPLISHYSPLASH, :FLOATYFALL, :BOUNCYBUBBLE, :BUZZYBUZZ,
+                               :SIZZLYSLIDE, :GLITZYGLOW, :BADDYBAD, :SAPPYSEED, :FREEZYFROST,
+                               :SPARKLYSWIRL]
+  EXCLUSIVE_GLOBALIZED_FILTER_EXCLUDED_IDS = [
+    :AROMATHERAPY, :ASSIST, :BARRAGE, :BARRIER, :BESTOW, :BIDE, :BUBBLE, :CAMOUFLAGE,
+    :CAPTIVATE, :CHIPAWAY, :CLAMP, :COMETPUNCH, :CONSTRICT, :DIZZYPUNCH, :DOUBLESLAP,
+    :DRAGONRAGE, :DUALCHOP, :EGGBOMB, :EMBARGO, :FEINTATTACK, :FLAMEBURST, :FLASH,
+    :FLOWERSHIELD, :FORESIGHT, :FRUSTRATION, :GRASSWHISTLE, :HAIL, :HEALBLOCK,
+    :HIDDENPOWER, :IONDELUGE, :JUMPKICK, :KARATECHOP, :LOVELYKISS, :LUCKYCHANT,
+    :MAGICCOAT, :MAGNETBOMB, :MAGNITUDE, :MEDITATE, :MEFIRST, :MINDREADER, :MIRACLEEYE,
+    :MIRRORMOVE, :MIRRORSHOT, :MUDSPORT, :NATURALGIFT, :NIGHTMARE, :ODORSLEUTH,
+    :OMINOUSWIND, :PLAYNICE, :PSYCHOSHIFT, :PSYWAVE, :PUNISHMENT, :PURSUIT, :RAGE,
+    :RAZORWIND, :REFRESH, :RETURN, :ROCKCLIMB, :ROLLINGKICK, :ROTOTILLER, :SECRETPOWER,
+    :SHARPEN, :SIGNALBEAM, :SILVERWIND, :SKYDROP, :SKYUPPERCUT, :SMELLINGSALTS,
+    :SNATCH, :SONICBOOM, :SPIDERWEB, :SPIKECANNON, :SPOTLIGHT, :STEAMROLLER,
+    :SUBMISSION, :SYNCHRONOISE, :TELEKINESIS, :TRUMPCARD, :VITALTHROW, :WAKEUPSLAP,
+    :WATERSPORT, :WRINGOUT,
+    :BONECLUB, :TWINEEDLE, :NEEDLEARM, :MATBLOCK, :VOLTTACKLE
+  ]
   REWORKED_ABILITY_BEFORE_TEXT = {
     :NORMALIZE   => "All the Pokemon's moves become the Normal type.",
     :ICEBODY     => "The Pokemon gradually regains HP in a hailstorm.",
@@ -41,7 +65,7 @@ module VermeilChangeDex
   @custom_move_ids = nil
   @custom_ability_ids = nil
   @detect_cache = nil
-  DETECT_CACHE_VERSION = 10
+  DETECT_CACHE_VERSION = 14
 
   def self.detect_cache
     return @detect_cache
@@ -152,7 +176,11 @@ module VermeilChangeDex
   def self.load_canon_move_data
     return if !@canon_move_data.nil?
     @canon_move_data = {}
-    ["CanonData/moves.txt", "CanonData/moves_Gen_9_Pack.txt"].each do |path|
+    canon_move_paths = []
+    canon_move_paths.concat(Dir.glob("CanonData/moves*.txt"))
+    canon_move_paths.concat(["CanonData/moves.txt", "CanonData/moves_Gen_9_Pack.txt", "CanonData/moves_LetsGo.txt"])
+    canon_move_paths = canon_move_paths.compact.uniq
+    canon_move_paths.each do |path|
       resolved = resolve_existing_path(path)
       next if !resolved
       current_id = nil
@@ -162,12 +190,36 @@ module VermeilChangeDex
           next if clean.nil? || clean.empty?
           if clean[/^\[([^\]]+)\]$/]
             current_id = $1.strip.to_sym
-            @canon_move_data[current_id] ||= { :type => nil, :flags => [] }
+            @canon_move_data[current_id] ||= {
+              :type => nil,
+              :dmg_class => nil,
+              :power => nil,
+              :accuracy => nil,
+              :total_pp => nil,
+              :priority => nil,
+              :function => nil,
+              :effect_chance => nil,
+              :flags => []
+            }
             next
           end
           next if current_id.nil?
           if clean[/^Type\s*=\s*(.*)$/i]
             @canon_move_data[current_id][:type] = $1.strip.to_sym
+          elsif clean[/^Category\s*=\s*(.*)$/i]
+            @canon_move_data[current_id][:dmg_class] = $1.to_s.strip.downcase.to_sym
+          elsif clean[/^Power\s*=\s*(.*)$/i]
+            @canon_move_data[current_id][:power] = $1.to_s.strip.to_i
+          elsif clean[/^Accuracy\s*=\s*(.*)$/i]
+            @canon_move_data[current_id][:accuracy] = $1.to_s.strip.to_i
+          elsif clean[/^TotalPP\s*=\s*(.*)$/i]
+            @canon_move_data[current_id][:total_pp] = $1.to_s.strip.to_i
+          elsif clean[/^Priority\s*=\s*(.*)$/i]
+            @canon_move_data[current_id][:priority] = $1.to_s.strip.to_i
+          elsif clean[/^FunctionCode\s*=\s*(.*)$/i]
+            @canon_move_data[current_id][:function] = $1.to_s.strip
+          elsif clean[/^EffectChance\s*=\s*(.*)$/i]
+            @canon_move_data[current_id][:effect_chance] = $1.to_s.strip.to_i
           elsif clean[/^Flags\s*=\s*(.*)$/i]
             flags = $1.to_s.split(",").map { |s| s.to_s.strip }.reject { |s| s.empty? }
             @canon_move_data[current_id][:flags] = flags
@@ -182,6 +234,11 @@ module VermeilChangeDex
     data = @canon_move_data[move_id]
     return nil if !data
     return data[:type]
+  end
+
+  def self.canon_move_entry(move_id)
+    load_canon_move_data
+    return @canon_move_data[move_id]
   end
 
   def self.canon_move_flags(move_id)
@@ -252,6 +309,7 @@ module VermeilChangeDex
 
   def self.reworked_move_before_text(move_id)
     return "Starmobile-exclusive move." if torque_move?(move_id)
+    return "Let's Go-exclusive move." if LETSGO_EXCLUSIVE_MOVE_IDS.include?(move_id)
     return nil
   end
 
@@ -272,6 +330,7 @@ module VermeilChangeDex
       @entry_sort_mode = :az
       @entry_type_filter = :all
       @entry_damage_filter = :all
+      @entry_exclusive_filter = :all
       @category_panel_open = false
       @category_panel_index = 0
       @startup_category_selection = true
@@ -281,10 +340,15 @@ module VermeilChangeDex
       @carrier_popup_page = 0
       @carrier_popup_entry = nil
       @carrier_mark_base_y = {}
+      @variant_mark_base_y = {}
+      @detail_variant_mark_base_y = nil
       @ability_moves_popup_open = false
       @ability_moves_popup_page = 0
       @ability_moves_popup_lines = []
       @ability_moves_popup_title = "Boosted Moves"
+      @move_rework_popup_open = false
+      @move_rework_popup_page = 0
+      @move_rework_popup_lines = []
       @detail_form_options = [0]
       @detail_form_option_index = 0
       @detail_action_menu_open = false
@@ -406,7 +470,7 @@ module VermeilChangeDex
         @dex_order[base_species.species] = dex_idx
       end
       GameData::Species.each do |s|
-        next if s.form > 0 && (s.form_name.nil? || s.form_name.empty?)
+        next if excluded_from_pokemon_changes?(s.species, s.form)
         # Collapse specific form families in Pokemon Changes:
         # - Always base form only for listed species.
         # - For Minior, show shell (form 0) and only first core form if core stats changed.
@@ -423,6 +487,10 @@ module VermeilChangeDex
         # Carriers view uses full learnset (level + tutor + egg).
         @species_learnset_cache[key] = species_all_learnable_moves(s)
         canon = VermeilChangeDex.get_canon_info(s.species, s.form)
+        # Forced hidden-variant entries compare against base form canon.
+        if canon.nil? && force_visible_hidden_variant?(s.species, s.form)
+          canon = VermeilChangeDex.get_canon_info(s.species, 0)
+        end
         # Treat Unown alternate forms as base-form canon unless that form has its own
         # explicit canon block, to avoid counting every letter as a separate change.
         if canon.nil? && s.species == :UNOWN && s.form > 0
@@ -460,7 +528,8 @@ module VermeilChangeDex
           (canon_has_types && v_types != c_types) ||
           (canon_has_moves && !new_moves.empty?) ||
           !new_tutor_moves.empty? ||
-          !gained_evos.empty?
+          !gained_evos.empty? ||
+          force_visible_hidden_variant?(s.species, s.form)
         if has_change
           @entries.push(key)
           @entry_gained_evos[key] = gained_evos
@@ -498,6 +567,7 @@ module VermeilChangeDex
           :name => e[:name],
           :type => e[:type],
           :dmg_class => e[:dmg_class],
+          :canon_user_count => e[:canon_user_count],
           :added_users => (e[:added_users] || []).map { |k| [k[0], k[1]] },
           :added_users_comparable => (e[:added_users_comparable] || []).map { |k| [k[0], k[1]] },
           :removed_users => (e[:removed_users] || []).map { |k| [k[0], k[1]] },
@@ -548,14 +618,25 @@ module VermeilChangeDex
       ability_index = {}
       all_move_users = {}
       all_ability_users = {}
+      canon_move_users = {}
       GameData::Species.each do |s|
-        next if s.form > 0 && (s.form_name.nil? || s.form_name.empty?)
         key = [s.species, s.form]
         learnset = (@species_learnset_cache && @species_learnset_cache[key]) || species_all_learnable_moves(s)
         if !excluded_from_move_categories?(s.species, s.form)
           learnset.each do |move_id|
             all_move_users[move_id] ||= []
             all_move_users[move_id] << key unless all_move_users[move_id].include?(key)
+          end
+        end
+        canon = VermeilChangeDex.get_canon_info(s.species, s.form)
+        if canon.nil? && s.species == :UNOWN && s.form > 0
+          canon = VermeilChangeDex.get_canon_info(s.species, 0)
+        end
+        if canon && !excluded_from_move_categories?(s.species, s.form)
+          canon_pool = ((canon[:level_moves] || []) + (canon[:tutor_moves] || []) + (canon[:egg_moves] || [])).uniq
+          canon_pool.each do |move_id|
+            canon_move_users[move_id] ||= []
+            canon_move_users[move_id] << key unless canon_move_users[move_id].include?(key)
           end
         end
         if !excluded_from_ability_categories?(s.species, s.form)
@@ -590,6 +671,7 @@ module VermeilChangeDex
         entry[:name] = m_data.name
         entry[:type] = m_data.type
         entry[:dmg_class] = move_damage_class(m_data)
+        entry[:canon_user_count] = (canon_move_users[entry[:id]] || []).length
         entry[:added_users_comparable] = (entry[:added_users] || []).reject { |k| @noncanon_species_entries && @noncanon_species_entries[k] }
         entry[:all_users] = (all_move_users[entry[:id]] || []).sort_by { |k| [@dex_order[k[0]] || 999_999, k[1]] }
         @move_entries_all << entry
@@ -737,6 +819,26 @@ module VermeilChangeDex
       return species == :UNOWN
     end
 
+    def starmobile_form?(species, form)
+      return false if form <= 0
+      s_data = GameData::Species.get_species_form(species, form)
+      return false if !s_data
+      return s_data.form_name.to_s.downcase.include?("starmobile")
+    end
+
+    def excluded_from_pokemon_changes?(species, form)
+      return true if starmobile_form?(species, form)
+      return false
+    end
+
+    def force_visible_hidden_variant?(species, form)
+      return false if form <= 0
+      return false if !FORCE_VISIBLE_HIDDEN_VARIANT_SPECIES.include?(species)
+      s_data = GameData::Species.get_species_form(species, form) rescue nil
+      return false if !s_data
+      return s_data.form_name.to_s.strip.empty?
+    end
+
     def form_has_any_changed_data?(species, form)
       key = [species, form]
       move_delta = (@species_move_delta || {})[key]
@@ -808,6 +910,7 @@ module VermeilChangeDex
     def apply_filters
       list = (@all_entries || []).clone
       list.reject! { |sp, f| locked_new_mega?(sp, f) }
+      list.reject! { |sp, f| excluded_from_pokemon_changes?(sp, f) }
       case @type_filter
       when :mega
         list.select! { |sp, f| mega_form?(sp, f) }
@@ -887,6 +990,16 @@ module VermeilChangeDex
         if @entry_damage_filter != :all
           list.select! do |e|
             e[:dmg_class] == @entry_damage_filter
+          end
+        end
+        if @entry_exclusive_filter == :globalized
+          list.select! do |e|
+            next false if EXCLUSIVE_GLOBALIZED_FILTER_EXCLUDED_IDS.include?(e[:id])
+            has_explicit_before = !VermeilChangeDex.reworked_move_before_text(e[:id]).nil?
+            canon_count = (e[:canon_user_count] || 0)
+            was_exclusive_carrier = canon_count <= 1
+            has_comparable_gain = !(e[:added_users_comparable] || []).empty?
+            has_explicit_before || (was_exclusive_carrier && has_comparable_gain)
           end
         end
       end
@@ -991,6 +1104,7 @@ module VermeilChangeDex
       grid_bmp.clear
       @sprites.keys.each do |k|
         if k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k == "cursor" ||
+           k.to_s.include?("variant_mark_") ||
            k == "scroll_up" || k == "scroll_down"
           @sprites[k].dispose
           @sprites.delete(k)
@@ -1081,9 +1195,10 @@ module VermeilChangeDex
     def open_non_pokemon_filter_menu
       if @category == :move_changes || @category == :new_moves
         type_names = GameData::Type.keys.sort_by { |t| GameData::Type.get(t).name }
-        commands = ["Sort: A-Z", "Sort: Z-A", "Sort: +Users", "Sort: -Users", "Filter: Type", "Filter: Physical", "Filter: Special", "Filter: Status", "Clear Filters", "Cancel"]
+        exclusive_label = (@entry_exclusive_filter == :globalized) ? "Filter: Exclusive->Globalized [ON]" : "Filter: Exclusive->Globalized [OFF]"
+        commands = ["Sort: A-Z", "Sort: Z-A", "Sort: +Users", "Sort: -Users", "Filter: Type", "Filter: Physical", "Filter: Special", "Filter: Status", exclusive_label, "Clear Filters", "Cancel"]
         chosen = pbShowCommands(nil, commands, -1)
-        return if chosen < 0 || chosen == 9
+        return if chosen < 0 || chosen == 10
         case chosen
         when 0 then @entry_sort_mode = :az
         when 1 then @entry_sort_mode = :za
@@ -1098,9 +1213,12 @@ module VermeilChangeDex
         when 6 then @entry_damage_filter = :special
         when 7 then @entry_damage_filter = :status
         when 8
+          @entry_exclusive_filter = (@entry_exclusive_filter == :globalized) ? :all : :globalized
+        when 9
           @entry_sort_mode = :az
           @entry_type_filter = :all
           @entry_damage_filter = :all
+          @entry_exclusive_filter = :all
         end
       else
         commands = ["Sort: A-Z", "Sort: Z-A", "Sort: +Users", "Sort: -Users", "Clear Filters", "Cancel"]
@@ -1194,6 +1312,7 @@ module VermeilChangeDex
 
     def canon_evolution_data(canon)
       data = []
+      return data if canon.nil? || !canon.is_a?(Hash)
       (canon[:evolutions] || []).each do |e|
         species = e[0]
         method = (e[1] || :None).to_sym
@@ -1239,6 +1358,7 @@ module VermeilChangeDex
     def show_evolution_method_window(species, form)
       return if species.nil?
       canon = VermeilChangeDex.get_canon_info(species, form)
+      canon ||= VermeilChangeDex.get_canon_info(species, 0)
       species_data = GameData::Species.get_species_form(species, form)
       evo_data = evolution_method_change_data(species_data, canon)
       return if evo_data[:new].empty? && evo_data[:changed].empty?
@@ -1533,6 +1653,290 @@ module VermeilChangeDex
       end
     end
 
+    def move_rework_popup_page_size
+      return 7
+    end
+
+    def move_display_accuracy(value)
+      return "-" if value.to_i <= 0
+      return value.to_i.to_s
+    end
+
+    def move_display_power(value)
+      return "-" if value.to_i <= 0
+      return value.to_i.to_s
+    end
+
+    def move_display_dmg_class(sym)
+      return "Status" if !sym
+      return sym.to_s.capitalize
+    end
+
+    def normalized_flag_list(flags)
+      return [] if !flags
+      return flags.map { |f| f.to_s.strip }.reject { |f| f.empty? }.uniq
+    end
+
+    def move_extra_category_tags(move_id)
+      tags = []
+      if defined?(VermeilStriker) && VermeilStriker.const_defined?(:KICK_MOVES)
+        tags << "Kicking" if VermeilStriker::KICK_MOVES.include?(move_id)
+      end
+      if defined?(VermeilAbilityReworks) && VermeilAbilityReworks.const_defined?(:LIGHT_MOVES)
+        tags << "Light" if VermeilAbilityReworks::LIGHT_MOVES.include?(move_id)
+      end
+      if defined?(Battle::AbilityEffects) && Battle::AbilityEffects.const_defined?(:HAMMER_MASTER_MOVES)
+        tags << "Hammer" if Battle::AbilityEffects::HAMMER_MASTER_MOVES.include?(move_id)
+      end
+      return tags.uniq
+    end
+
+    def normalized_move_tag_list(move_id, flags)
+      tags = normalized_flag_list(flags)
+      tags.concat(move_extra_category_tags(move_id))
+      return tags.uniq
+    end
+
+    def titleize_flag(flag_name)
+      txt = flag_name.to_s.dup
+      txt.gsub!(/([a-z])([A-Z])/, '\1 \2')
+      txt = txt.tr("_", " ")
+      return txt.split.map { |w| w[0] ? w[0].upcase + w[1..-1].to_s.downcase : w }.join(" ")
+    end
+
+    def friendly_function_effect(code)
+      code_s = code.to_s
+      map = {
+        "AlwaysCriticalHit"          => "Critical hit",
+        "RaiseUserEvasion1"          => "Evasion up",
+        "ParalyzeTarget"             => "May paralyze",
+        "FlinchTarget"               => "May flinch",
+        "BurnTarget"                 => "May burn",
+        "StartLightScreen"           => "Sets up Light Screen",
+        "StartReflect"               => "Sets up Reflect",
+        "StartLeechSeedTarget"       => "Seeds target (HP drain)",
+        "ResetAllBattlersStatChanges"=> "Resets all stat changes",
+        "CureUserPartyStatus"        => "Cures party status",
+        "HealUserByHalfOfDamageDone" => "Heals user (50% damage dealt)",
+        "PowerHigherWithUserHappiness" => "Power scales with friendship"
+      }
+      return map[code_s] if map[code_s]
+      human = code_s.gsub(/([a-z])([A-Z])/, '\1 \2').tr("_", " ").strip
+      return human.empty? ? "Special effect changed" : human.downcase.capitalize
+    end
+
+    def flag_synergy_descriptions(flag_names)
+      map = {
+        "Punching" => "Iron Fist",
+        "Biting"   => "Strong Jaw",
+        "Pulse"    => "Mega Launcher",
+        "Slicing"  => "Sharpness",
+        "Kicking"  => "Striker",
+        "Light"    => "Illuminate",
+        "Hammer"   => "Bludgeon Master"
+      }
+      out = []
+      (flag_names || []).each do |flag|
+        ability = map[flag]
+        next if !ability
+        out << ability
+      end
+      return out.uniq
+    end
+
+    def move_change_lines(entry)
+      return [] if !entry || !entry[:id]
+      move_id = entry[:id]
+      move_data = GameData::Move.try_get(move_id)
+      canon = VermeilChangeDex.canon_move_entry(move_id)
+      return [] if !move_data
+      diffs = []
+      canon_type = canon ? canon[:type] : nil
+      now_type = move_data.type
+      if canon_type && canon_type != now_type
+        before = (GameData::Type.get(canon_type).name rescue canon_type.to_s)
+        after = (GameData::Type.get(now_type).name rescue now_type.to_s)
+        diffs << _INTL("Type: {1} -> {2}", before, after)
+      end
+      canon_class = canon ? canon[:dmg_class] : nil
+      now_class = move_damage_class(move_data)
+      if canon_class && canon_class != now_class
+        diffs << _INTL("Class: {1} -> {2}", move_display_dmg_class(canon_class), move_display_dmg_class(now_class))
+      end
+      canon_power = canon ? canon[:power] : nil
+      now_power = move_data.respond_to?(:power) ? move_data.power.to_i : 0
+      if !canon_power.nil? && canon_power.to_i != now_power.to_i
+        diffs << _INTL("Power: {1} -> {2}", move_display_power(canon_power), move_display_power(now_power))
+      end
+      canon_acc = canon ? canon[:accuracy] : nil
+      now_acc = move_data.accuracy.to_i
+      if !canon_acc.nil? && canon_acc.to_i != now_acc.to_i
+        diffs << _INTL("Acc: {1} -> {2}", move_display_accuracy(canon_acc), move_display_accuracy(now_acc))
+      end
+      canon_pp = canon ? canon[:total_pp] : nil
+      now_pp = move_data.total_pp.to_i
+      if !canon_pp.nil? && canon_pp.to_i != now_pp.to_i
+        diffs << _INTL("PP: {1} -> {2}", canon_pp.to_i, now_pp.to_i)
+      end
+      canon_priority = canon ? canon[:priority] : nil
+      now_priority = move_data.priority.to_i
+      if !canon_priority.nil? && canon_priority.to_i != now_priority.to_i
+        diffs << _INTL("Priority: {1} -> {2}", canon_priority.to_i, now_priority.to_i)
+      end
+      canon_func = canon ? canon[:function].to_s : ""
+      now_func = move_data.function_code.to_s
+      if !canon_func.empty? && canon_func != now_func
+        diffs << _INTL("Effect: {1} -> {2}", friendly_function_effect(canon_func), friendly_function_effect(now_func))
+      end
+      canon_eff = canon ? canon[:effect_chance] : nil
+      now_eff = move_data.effect_chance.to_i
+      if !canon_eff.nil? && canon_eff.to_i != now_eff.to_i
+        diffs << _INTL("Effect chance: {1}% -> {2}%", canon_eff.to_i, now_eff.to_i)
+      end
+      # Canon only has raw move flags, while Vermeil may additionally classify
+      # moves via curated tag lists (Kicking/Light/Hammer). Compare against
+      # canonical raw flags so those new categories appear as gained tags.
+      canon_flags = normalized_flag_list(canon ? canon[:flags] : [])
+      now_flags = normalized_move_tag_list(move_id, move_data.flags || [])
+      canon_lookup = {}
+      canon_flags.each { |f| canon_lookup[f.downcase] = f }
+      now_lookup = {}
+      now_flags.each { |f| now_lookup[f.downcase] = f }
+      gained_flags = now_flags.select { |f| !canon_lookup[f.downcase] }
+      removed_flags = canon_flags.select { |f| !now_lookup[f.downcase] }
+      if !gained_flags.empty?
+        diffs << _INTL("Now counts as: {1}", gained_flags.map { |f| titleize_flag(f) }.join(", "))
+        synergies = flag_synergy_descriptions(gained_flags)
+        if !synergies.empty?
+          diffs << _INTL("Boosted by: {1}", synergies.join(", "))
+        end
+      end
+      if !removed_flags.empty?
+        diffs << _INTL("No longer counts as: {1}", removed_flags.map { |f| titleize_flag(f) }.join(", "))
+      end
+      return diffs
+    end
+
+    def push_wrapped_colored_text(tokens, text, color)
+      words = text.to_s.split(/\s+/)
+      return if words.empty?
+      words.each_with_index do |word, i|
+        tokens << [word, color]
+        tokens << [" ", color] if i < words.length - 1
+      end
+    end
+
+    def wrap_plain_lines(bmp, text, max_w)
+      words = text.to_s.split(/\s+/)
+      return [] if words.empty?
+      lines = []
+      line = ""
+      words.each do |w|
+        candidate = line.empty? ? w : "#{line} #{w}"
+        if bmp.text_size(candidate).width > max_w && !line.empty?
+          lines << line
+          line = w
+        else
+          line = candidate
+        end
+      end
+      lines << line if !line.empty?
+      return lines
+    end
+
+    def move_rework_popup_lines(entry, bmp)
+      move_id = entry[:id]
+      before_txt = VermeilChangeDex.reworked_move_before_text(move_id)
+      diff_lines = move_change_lines(entry)
+      return [] if diff_lines.empty?
+      max_w = 372
+      lines = []
+      if before_txt && !before_txt.empty?
+        before_prefix = "Before: "
+        wrapped_before = wrap_plain_lines(bmp, before_txt, max_w - bmp.text_size(before_prefix).width)
+        if wrapped_before.empty?
+          lines << [[before_prefix, COLOR_CANON]]
+        else
+          lines << [[before_prefix, COLOR_CANON], [wrapped_before[0], COLOR_TEXT_MAIN]]
+          cont_indent = " " * before_prefix.length
+          wrapped_before[1..-1].to_a.each do |seg|
+            lines << [[cont_indent, COLOR_CANON], [seg, COLOR_TEXT_MAIN]]
+          end
+        end
+      end
+      lines << [["After:", COLOR_VERMEIL]]
+      diff_lines.each do |line|
+        bullet = "- "
+        indent = "  "
+        wrapped = wrap_plain_lines(bmp, line, max_w - bmp.text_size(bullet).width)
+        next if wrapped.empty?
+        lines << [[bullet, COLOR_TEXT_GRAY], [wrapped[0], COLOR_DIFF]]
+        wrapped[1..-1].to_a.each do |seg|
+          lines << [[indent, COLOR_TEXT_GRAY], [seg, COLOR_DIFF]]
+        end
+      end
+      return lines
+    end
+
+    def show_move_rework_popup(entry)
+      return if !entry || !entry[:id]
+      bmp = @sprites["overlay"]&.bitmap
+      return if !bmp
+      lines = move_rework_popup_lines(entry, bmp)
+      if lines.empty?
+        pbPlayBuzzerSE
+        return
+      end
+      @move_rework_popup_lines = lines
+      @move_rework_popup_page = 0
+      redraw_move_rework_popup
+      @move_rework_popup_open = true
+    end
+
+    def redraw_move_rework_popup
+      hide_move_rework_popup(false)
+      return if @move_rework_popup_lines.nil? || @move_rework_popup_lines.empty?
+      @sprites["move_rework_popup"] = BitmapSprite.new(SCREEN_W, SCREEN_H, @viewport)
+      @sprites["move_rework_popup"].z = 260
+      bmp = @sprites["move_rework_popup"].bitmap
+      pbSetSystemFont(bmp)
+      panel_x = 38
+      panel_y = 78
+      panel_w = SCREEN_W - 76
+      panel_h = 226
+      bmp.fill_rect(panel_x, panel_y, panel_w, panel_h, Color.new(20, 28, 40, 235))
+      bmp.fill_rect(panel_x, panel_y, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y + panel_h - 1, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x + panel_w - 1, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      pbDrawTextPositions(bmp, [[_INTL("Before / After"), panel_x + 12, panel_y + 8, :left, COLOR_HIGHLIGHT, Color.new(0,0,0,120)]])
+      per_page = move_rework_popup_page_size
+      total_pages = [(@move_rework_popup_lines.length.to_f / per_page).ceil, 1].max
+      @move_rework_popup_page = [[@move_rework_popup_page, 0].max, total_pages - 1].min
+      start_idx = @move_rework_popup_page * per_page
+      page_lines = @move_rework_popup_lines[start_idx, per_page] || []
+      y = panel_y + 36
+      page_lines.each do |line|
+        draw_colored_token_line(bmp, line, panel_x + 12, y)
+        y += 22
+      end
+      controls = _INTL("L/R: Page  {1}/{2}: Close", @filter_key_name, "X")
+      page_txt = _INTL("Page {1}/{2}", @move_rework_popup_page + 1, total_pages)
+      pbDrawTextPositions(bmp, [[controls, panel_x + 12, panel_y + panel_h - 24, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      pbDrawTextPositions(bmp, [[page_txt, panel_x + panel_w - 12, panel_y + panel_h - 24, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      @move_rework_popup_open = true
+    end
+
+    def hide_move_rework_popup(clear_lines = true)
+      @move_rework_popup_open = false
+      @move_rework_popup_page = 0 if clear_lines
+      @move_rework_popup_lines = [] if clear_lines
+      if @sprites["move_rework_popup"]
+        @sprites["move_rework_popup"].dispose
+        @sprites.delete("move_rework_popup")
+      end
+    end
+
     def move_popup_lines_per_page
       return 6
     end
@@ -1699,8 +2103,9 @@ module VermeilChangeDex
       @sprites["overlay"].bitmap.fill_rect(0, 338, SCREEN_W, 2, COLOR_HIGHLIGHT)
       @sprites["overlay"].bitmap.fill_rect((SCREEN_W / 2) - 112, 342, 224, 38, Color.new(12, 16, 24, 210))
       @evo_mark_base_y = {}
+      @variant_mark_base_y = {}
       @sprites.keys.each do |k|
-        if k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k == "cursor" ||
+        if k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k.to_s.include?("variant_mark_") || k == "cursor" ||
            k == "scroll_up" || k == "scroll_down"
           @sprites[k].dispose
           @sprites.delete(k)
@@ -1723,6 +2128,18 @@ module VermeilChangeDex
         # Force true center origin in grid cells (default CENTER uses 5/8 y-origin).
         s.ox = s.src_rect.width / 2
         s.oy = s.src_rect.height / 2
+        frame = hidden_variant_icon_frame(sp, f)
+        if !frame.nil?
+          mark = IconSprite.new(0, 0, @viewport)
+          mark.setBitmap("Graphics/UI/RegionalVariantIcon")
+          mark.src_rect.set(frame * 32, 0, 32, 32)
+          mark.x = s.x - 40
+          mark.y = s.y - 40
+          mark.z = 131
+          key = "variant_mark_#{real_idx}"
+          @sprites[key] = mark
+          @variant_mark_base_y[key] = mark.y
+        end
         if @entry_gained_evos[[sp, f]] && !@entry_gained_evos[[sp, f]].empty?
           mark = IconSprite.new(0, 0, @viewport)
           mark.setBitmap("Graphics/UI/EvoIcon")
@@ -1746,6 +2163,19 @@ module VermeilChangeDex
         s.ox = s.src_rect.width / 2
         s.oy = s.src_rect.height / 2
         s.opacity = 130
+        frame = hidden_variant_icon_frame(sp, f)
+        if !frame.nil?
+          mark = IconSprite.new(0, 0, @viewport)
+          mark.setBitmap("Graphics/UI/RegionalVariantIcon")
+          mark.src_rect.set(frame * 32, 0, 32, 32)
+          mark.x = s.x - 40
+          mark.y = s.y - 40
+          mark.z = 121
+          mark.opacity = 150
+          key = "variant_mark_#{real_idx}"
+          @sprites[key] = mark
+          @variant_mark_base_y[key] = mark.y
+        end
       end
       draw_grid_scroll_hints
       refresh_cursor
@@ -1758,7 +2188,7 @@ module VermeilChangeDex
       grid_bmp = @sprites["grid_bg"].bitmap
       grid_bmp.clear
       @sprites.keys.each do |k|
-        if k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k == "cursor" ||
+        if k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k.to_s.include?("variant_mark_") || k == "cursor" ||
            k == "scroll_up" || k == "scroll_down"
           @sprites[k].dispose
           @sprites.delete(k)
@@ -1800,9 +2230,11 @@ module VermeilChangeDex
       bmp.fill_rect(0, 340, SCREEN_W, 44, Color.new(0, 0, 0, 236))
       bmp.fill_rect(0, 338, SCREEN_W, 2, COLOR_HIGHLIGHT)
       label = @entries.empty? ? "No entries" : ((@category == :ability_changes || @category == :new_abilities) ? ability_entry_name(@entries[@index]) : move_entry_name(@entries[@index]))
-      pbDrawTextPositions(bmp, [[label, SCREEN_W / 2, 350, :center, COLOR_TEXT_MAIN, Color.new(0,0,0,160)],
-                                [_INTL("{1}: Search", @action_key_name), 8, 350, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,160)],
-                                [_INTL("{1}: Filter", @filter_key_name), SCREEN_W - 8, 350, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,160)]])
+      right_hint = _INTL("{1}: Filter", @filter_key_name)
+      text_positions = [[label, SCREEN_W / 2, 350, :center, COLOR_TEXT_MAIN, Color.new(0,0,0,160)],
+                        [_INTL("{1}: Search", @action_key_name), 8, 350, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,160)]]
+      text_positions << [right_hint, SCREEN_W - 8, 350, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,160)] if right_hint && !right_hint.empty?
+      pbDrawTextPositions(bmp, text_positions)
       draw_category_panel
     end
 
@@ -1862,6 +2294,16 @@ module VermeilChangeDex
       return if !@evo_mark_base_y || @evo_mark_base_y.empty?
       bob = Math.sin(System.uptime * 6.0) * 2.0
       @evo_mark_base_y.each do |k, base_y|
+        spr = @sprites[k]
+        next if !spr || spr.disposed?
+        spr.y = (base_y + bob).round
+      end
+    end
+
+    def update_variant_mark_animation
+      return if !@variant_mark_base_y || @variant_mark_base_y.empty?
+      bob = Math.sin(System.uptime * 6.0) * 2.0
+      @variant_mark_base_y.each do |k, base_y|
         spr = @sprites[k]
         next if !spr || spr.disposed?
         spr.y = (base_y + bob).round
@@ -2017,6 +2459,17 @@ module VermeilChangeDex
       return "Form #{form}"
     end
 
+    def hidden_variant_icon_frame(species, form)
+      return nil if form <= 0
+      s_data = GameData::Species.get_species_form(species, form)
+      return nil if !s_data.form_name.to_s.strip.empty?   # Only hidden variants.
+      variant = inferred_variant_name(species, form).to_s.downcase
+      return 0 if variant.include?("alolan") || variant.include?("alola")
+      return 1 if variant.include?("galarian") || variant.include?("galar")
+      return 2 if variant.include?("hisuian") || variant.include?("hisui")
+      return nil
+    end
+
     def detail_variant_label(species, form)
       base_name = begin
         GameData::Species.get(species).name.to_s
@@ -2066,7 +2519,9 @@ module VermeilChangeDex
       opts = []
       if pokemon_category?
         opts << [:evo_methods, "Evo Methods"] if @detail_has_evo_method_changes
-        opts << [:variant, "Variant"] if @detail_form_options && @detail_form_options.length > 1
+        if SHOW_DETAIL_VARIANT_ACTION
+          opts << [:variant, "Variant"] if @detail_form_options && @detail_form_options.length > 1
+        end
       end
       return opts
     end
@@ -2226,7 +2681,7 @@ module VermeilChangeDex
       end
       @sprites["grid_bg"].visible = false if @sprites["grid_bg"] && !@sprites["grid_bg"].disposed?
       @sprites.each do |k, v|
-        if (k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k == "cursor") && !v.disposed?
+        if (k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k.to_s.include?("variant_mark_") || k == "cursor") && !v.disposed?
           v.visible = false
         end
       end
@@ -2240,12 +2695,13 @@ module VermeilChangeDex
       @mode = :grid
       @sprites["grid_bg"].visible = true if @sprites["grid_bg"] && !@sprites["grid_bg"].disposed?
       hide_ability_moves_popup
+      hide_move_rework_popup
       hide_new_moves_popup
       hide_carrier_popup
       close_detail_action_menu
       close_detail_variant_menu
       clear_entry_detail_carrier_icons
-      ["big_icon", "evo_label_overlay", "evo_method_popup", "new_moves_popup", "ability_moves_popup", "detail_action_menu", "detail_variant_menu"].each do |k|
+      ["big_icon", "detail_variant_mark", "evo_label_overlay", "evo_method_popup", "new_moves_popup", "ability_moves_popup", "move_rework_popup", "detail_action_menu", "detail_variant_menu"].each do |k|
         next if !@sprites[k]
         @sprites[k].dispose
         @sprites.delete(k)
@@ -2258,7 +2714,7 @@ module VermeilChangeDex
         @sprites.delete(k)
       end
       @sprites.each do |k, v|
-        if !v.nil? && !v.disposed? && (k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k == "cursor")
+        if !v.nil? && !v.disposed? && (k.to_s.include?("icon_") || k.to_s.include?("evo_mark_") || k.to_s.include?("variant_mark_") || k == "cursor")
           v.visible = true
         end
       end
@@ -2270,6 +2726,10 @@ module VermeilChangeDex
       f = key[1]
       if should_mask_species_name?(sp, f)
         return "???"
+      end
+      s_data = GameData::Species.get_species_form(sp, f) rescue nil
+      if f > 0 && s_data && s_data.form_name.to_s.strip.empty?
+        return detail_variant_label(sp, f)
       end
       return changedex_display_name(sp, f)
     end
@@ -2299,29 +2759,25 @@ module VermeilChangeDex
       if @category == :move_changes || @category == :new_moves
         move_data = GameData::Move.try_get(entry[:id])
         return if !move_data
+        canon = VermeilChangeDex.canon_move_entry(entry[:id])
         dmg = move_damage_class(move_data).to_s.capitalize
         type_name = GameData::Type.get(move_data.type).name rescue move_data.type.to_s
         move_power = move_data.respond_to?(:power) ? move_data.power.to_i : move_data.base_damage.to_i
         power_txt = (move_power <= 0) ? "-" : move_power.to_s
         acc_txt = (move_data.accuracy.to_i <= 0) ? "-" : move_data.accuracy.to_i.to_s
         pp_txt = move_data.total_pp.to_i.to_s
-        pbDrawTextPositions(bmp, [["Type: #{type_name}", 20, y, :left, COLOR_CANON],
-                                  ["Class: #{dmg}", 190, y, :left, COLOR_VERMEIL],
-                                  ["Power: #{power_txt}", 340, y, :left, COLOR_TEXT_MAIN]])
-        pbDrawTextPositions(bmp, [["Acc: #{acc_txt}", 20, y + 28, :left, COLOR_TEXT_GRAY],
-                                  ["PP: #{pp_txt}", 190, y + 28, :left, COLOR_TEXT_GRAY]])
+        type_changed = @category == :move_changes && canon && canon[:type] && canon[:type] != move_data.type
+        class_changed = @category == :move_changes && canon && canon[:dmg_class] && canon[:dmg_class] != move_damage_class(move_data)
+        power_changed = @category == :move_changes && canon && !canon[:power].nil? && canon[:power].to_i != move_power.to_i
+        acc_changed = @category == :move_changes && canon && !canon[:accuracy].nil? && canon[:accuracy].to_i != move_data.accuracy.to_i
+        pp_changed = @category == :move_changes && canon && !canon[:total_pp].nil? && canon[:total_pp].to_i != move_data.total_pp.to_i
+        pbDrawTextPositions(bmp, [["Type: #{type_name}", 20, y, :left, (type_changed ? COLOR_DIFF : COLOR_CANON)],
+                                  ["Class: #{dmg}", 190, y, :left, (class_changed ? COLOR_DIFF : COLOR_VERMEIL)],
+                                  ["Power: #{power_txt}", 340, y, :left, (power_changed ? COLOR_DIFF : COLOR_TEXT_MAIN)]])
+        pbDrawTextPositions(bmp, [["Acc: #{acc_txt}", 20, y + 28, :left, (acc_changed ? COLOR_DIFF : COLOR_TEXT_GRAY)],
+                                  ["PP: #{pp_txt}", 190, y + 28, :left, (pp_changed ? COLOR_DIFF : COLOR_TEXT_GRAY)]])
         desc = move_data.description.to_s
-        before_txt = VermeilChangeDex.reworked_move_before_text(entry[:id])
-        if before_txt && @category == :move_changes
-          before_line = _INTL("Before: {1}", before_txt.to_s)
-          pbDrawTextPositions(bmp, [[before_line, 20, y + 54, :left, COLOR_CANON]])
-          now_y = y + 76
-          pbDrawTextPositions(bmp, [["Now:", 20, now_y, :left, COLOR_VERMEIL]])
-          # Use full panel width and more lines, but keep content contained in top panel.
-          draw_wrapped_text(bmp, _INTL("Global move. {1}", desc), 20, now_y + 22, 468, COLOR_TEXT_MAIN, 20, 5)
-        else
-          draw_wrapped_text(bmp, desc, 20, y + 58, 468, COLOR_TEXT_GRAY, 22, 3)
-        end
+        draw_wrapped_text(bmp, desc, 20, y + 58, 468, COLOR_TEXT_GRAY, 22, 3)
       else
         a_data = GameData::Ability.try_get(entry[:id])
         return if !a_data
@@ -2337,6 +2793,9 @@ module VermeilChangeDex
         end
       end
       draw_carrier_icon_window(bmp, entry)
+      if @category == :move_changes && !move_change_lines(entry).empty?
+        pbDrawTextPositions(bmp, [[_INTL("{1}: Before/After", @filter_key_name), SCREEN_W - 20, 352, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      end
       if (@category == :ability_changes || @category == :new_abilities) && !ability_boost_sections(entry[:id]).empty?
         pbDrawTextPositions(bmp, [[_INTL("{1}: Boosted Moves", @filter_key_name), SCREEN_W - 20, 352, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
       end
@@ -2349,6 +2808,7 @@ module VermeilChangeDex
       @sprites.keys.each do |k|
         ks = k.to_s
         next if ks != "big_icon" &&
+                ks != "detail_variant_mark" &&
                 ks != "evo_label_overlay" &&
                 ks != "evo_method_popup" &&
                 ks != "new_moves_popup" &&
@@ -2362,7 +2822,8 @@ module VermeilChangeDex
       @sprites.keys.each do |k|
         next if !k.to_s.start_with?("carrier_detail_") &&
                 !k.to_s.start_with?("carrier_popup_") &&
-                !k.to_s.start_with?("carrier_mark_")
+                !k.to_s.start_with?("carrier_mark_") &&
+                !k.to_s.start_with?("carrier_variant_mark_")
         @sprites[k].dispose
         @sprites.delete(k)
       end
@@ -2456,6 +2917,18 @@ module VermeilChangeDex
           @sprites[mark_key] = mark
           @carrier_mark_base_y[mark_key] = mark.y
         end
+        vframe = hidden_variant_icon_frame(sp, f)
+        if !vframe.nil?
+          vmark = IconSprite.new(0, 0, @viewport)
+          vmark.setBitmap("Graphics/UI/RegionalVariantIcon")
+          vmark.src_rect.set(vframe * 32, 0, 32, 32)
+          vmark.x = spr.x - 32
+          vmark.y = spr.y - 36
+          vmark.z = 274
+          vkey = "carrier_variant_mark_#{i}"
+          @sprites[vkey] = vmark
+          @carrier_mark_base_y[vkey] = vmark.y
+        end
       end
       page_txt = _INTL("Page {1}/{2}", @carrier_popup_page + 1, total_pages)
       pbDrawTextPositions(bmp, [[page_txt, panel_x + panel_w - 12, panel_y + panel_h - 28, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
@@ -2502,6 +2975,14 @@ module VermeilChangeDex
       end
     end
 
+    def update_detail_variant_mark_animation
+      return if !@detail_variant_mark_base_y
+      spr = @sprites["detail_variant_mark"]
+      return if !spr || spr.disposed?
+      bob = Math.sin(System.uptime * 6.0) * 2.0
+      spr.y = (@detail_variant_mark_base_y + bob).round
+    end
+
     def draw_detail_view(species, form)
       hide_new_moves_popup
       bmp = @sprites["overlay"].bitmap; bmp.clear; canon = VermeilChangeDex.get_canon_info(species, form)
@@ -2538,9 +3019,25 @@ module VermeilChangeDex
       if @sprites["big_icon"] && !@sprites["big_icon"].disposed?
         @sprites["big_icon"].dispose
       end
+      if @sprites["detail_variant_mark"] && !@sprites["detail_variant_mark"].disposed?
+        @sprites["detail_variant_mark"].dispose
+        @sprites.delete("detail_variant_mark")
+      end
+      @detail_variant_mark_base_y = nil
       @sprites["big_icon"] = PokemonSpeciesIconSprite.new(nil, @viewport)
       @sprites["big_icon"].setOffset(PictureOrigin::CENTER); @sprites["big_icon"].x, @sprites["big_icon"].y = LEFT_PANEL_CENTER_X, 92
       @sprites["big_icon"].z = 210; @sprites["big_icon"].pbSetParams(species, 0, form, false)
+      vframe = hidden_variant_icon_frame(species, form)
+      if !vframe.nil?
+        mark = IconSprite.new(0, 0, @viewport)
+        mark.setBitmap("Graphics/UI/RegionalVariantIcon")
+        mark.src_rect.set(vframe * 32, 0, 32, 32)
+        mark.x = LEFT_PANEL_CENTER_X - 40
+        mark.y = 52
+        mark.z = 212
+        @sprites["detail_variant_mark"] = mark
+        @detail_variant_mark_base_y = mark.y
+      end
       
       # TYPE ICONS
       c_types = (canon[:types] || []).to_a; v_types = (vermeil.types || []).to_a; type_y = 126; type_center_x = LEFT_PANEL_CENTER_X
@@ -2876,6 +3373,18 @@ module VermeilChangeDex
       loop do
         Graphics.update; Input.update; pbUpdate
         if @mode == :grid
+          if @move_rework_popup_open
+            if Input.repeat?(Input::LEFT)
+              @move_rework_popup_page -= 1
+              redraw_move_rework_popup
+            elsif Input.repeat?(Input::RIGHT)
+              @move_rework_popup_page += 1
+              redraw_move_rework_popup
+            elsif Input.trigger?(Input::ACTION) || Input.trigger?(Input::BACK) || Input.trigger?(Input::USE) || Input.trigger?(Input::SPECIAL)
+              hide_move_rework_popup(false)
+            end
+            next
+          end
           if @category_panel_open
             if Input.repeat?(Input::UP)
               @category_panel_index = [@category_panel_index - 1, 0].max
@@ -3029,6 +3538,18 @@ module VermeilChangeDex
             end
             next
           end
+          if @move_rework_popup_open
+            if Input.repeat?(Input::LEFT)
+              @move_rework_popup_page -= 1
+              redraw_move_rework_popup
+            elsif Input.repeat?(Input::RIGHT)
+              @move_rework_popup_page += 1
+              redraw_move_rework_popup
+            elsif Input.trigger?(Input::ACTION) || Input.trigger?(Input::BACK) || Input.trigger?(Input::USE) || Input.trigger?(Input::SPECIAL)
+              hide_move_rework_popup(false)
+            end
+            next
+          end
           if @moves_popup_open
             if Input.repeat?(Input::LEFT)
               @moves_popup_page -= 1
@@ -3062,7 +3583,9 @@ module VermeilChangeDex
             next
           end
           if Input.trigger?(Input::SPECIAL)
-            if pokemon_category? && @detail_moves_truncated
+            if @category == :move_changes
+              show_move_rework_popup(@entries[@index])
+            elsif pokemon_category? && @detail_moves_truncated
               show_new_moves_popup
             elsif @category == :ability_changes || @category == :new_abilities
               show_ability_moves_popup(@entries[@index])
@@ -3139,8 +3662,10 @@ module VermeilChangeDex
     def pbUpdate
       pbUpdateSpriteHash(@sprites)
       update_evo_mark_animation if @mode == :grid
+      update_variant_mark_animation if @mode == :grid
       update_scroll_arrow_animation if @mode == :grid
       update_carrier_mark_animation
+      update_detail_variant_mark_animation if @mode == :detail
     end
     def pbEndScene
       pbFadeOutIn do

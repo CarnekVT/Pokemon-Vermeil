@@ -1,0 +1,164 @@
+#-------------------------------
+# Let's Go Moves
+#-------------------------------
+[ZIPPYZAP]
+Name = Zippy Zap
+Type = ELECTRIC
+Category = Physical
+Power = 50
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+Priority = 2
+FunctionCode = AlwaysCriticalHit
+Flags = Contact,CanProtect,CanMirrorMove
+Description = The user attacks the target with bursts of electricity at high speed. This move always lands a critical hit.
+#-------------------------------
+[SPLISHYSPLASH]
+Name = Splishy Splash
+Type = WATER
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = AllNearFoes
+FunctionCode = ParalyzeTarget
+Flags = CanProtect,CanMirrorMove
+EffectChance = 30
+Description = The user attacks by conjuring a huge, electrified wave. This may also leave the target with paralysis.
+#-------------------------------
+[FLOATYFALL]
+Name = Floaty Fall
+Type = FLYING
+Category = Physical
+Power = 90
+Accuracy = 95
+TotalPP = 15
+Target = NearOther
+FunctionCode = FlinchTarget
+Flags = Contact,CanProtect,CanMirrorMove,CanUseInGravity
+EffectChance = 30
+Description = The user floats in the air, then dives at a steep angle to attack the target. This may also make the target flinch.
+#-------------------------------
+[PIKAPAPOW]
+Name = Pika Papow
+Type = ELECTRIC
+Category = Special
+Power = 0
+Accuracy = 0
+TotalPP = 20
+Target = NearOther
+FunctionCode = PowerHigherWithUserHappiness
+Flags = Contact,CanProtect,CanMirrorMove
+Description = The more Pikachu loves its Trainer, the greater the power of this move. It never misses.
+#-------------------------------
+[VEEVEEVOLLEY]
+Name = Veevee Volley
+Type = NORMAL
+Category = Physical
+Power = 0
+Accuracy = 0
+TotalPP = 20
+Target = NearOther
+FunctionCode = PowerHigherWithUserHappiness
+Flags = Contact,CanProtect,CanMirrorMove
+Description = The more Eevee loves its Trainer, the greater the power of this move. It never misses.
+#-------------------------------
+[BOUNCYBUBBLE]
+Name = Bouncy Bubble
+Type = WATER
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = HealUserByHalfOfDamageDone
+Flags = CanProtect,CanMirrorMove
+Description = The user attacks by shooting water bubbles at the target. The user then absorbs water and restores its HP by half the damage taken by the target.
+#-------------------------------
+[BUZZYBUZZ]
+Name = Buzzy Buzz
+Type = ELECTRIC
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = ParalyzeTarget
+Flags = CanProtect,CanMirrorMove
+EffectChance = 100
+Description = The user shoots a jolt of electricity to attack the target. This also leaves the target with paralysis.
+#-------------------------------
+[SIZZLYSLIDE]
+Name = Sizzly Slide
+Type = FIRE
+Category = Physical
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = BurnTarget
+Flags = Contact,CanProtect,CanMirrorMove,ThawsUser
+EffectChance = 100
+Description = The user cloaks itself in fire and charges at the target. This also leaves the target with a burn.
+#-------------------------------
+[GLITZYGLOW]
+Name = Glitzy Glow
+Type = PSYCHIC
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = StartLightScreen
+Flags = CanProtect,CanMirrorMove
+Description = The user bombards the target with telekinetic force. A wondrous wall of light is put up to reduce damage from special attacks for five turns.
+#-------------------------------
+[BADDYBAD]
+Name = Baddy Bad
+Type = DARK
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = StartReflect
+Flags = CanProtect,CanMirrorMove
+Description = The user acts bad and attacks the target. A wondrous wall of light is put up to reduce damage from physical attacks for five turns.
+#-------------------------------
+[SAPPYSEED]
+Name = Sappy Seed
+Type = GRASS
+Category = Physical
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = StartLeechSeedTarget
+Flags = CanProtect,CanMirrorMove
+Description = The user grows a giant stalk that scatters seeds to attack the target. The seeds drain the target's HP every turn.
+#-------------------------------
+[FREEZYFROST]
+Name = Freezy Frost
+Type = ICE
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = ResetAllBattlersStatChanges
+Flags = CanProtect,CanMirrorMove
+Description = The user attacks with a crystal made of cold frozen haze. It eliminates all stat changes.
+#-------------------------------
+[SPARKLYSWIRL]
+Name = Sparkly Swirl
+Type = FAIRY
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = CureUserPartyStatus
+Flags = CanProtect,CanMirrorMove
+Description = The user attacks the target by wrapping it in a whirlwind of scent. This also heals all status conditions of the user's party.
+#-------------------------------

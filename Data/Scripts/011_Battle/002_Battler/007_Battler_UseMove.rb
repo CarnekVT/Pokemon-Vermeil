@@ -392,7 +392,7 @@ class Battle::Battler
             magicCoater = b.index
             b.effects[PBEffects::MagicCoat] = false
             break
-          elsif b.hasActiveAbility?(:MAGICBOUNCE) && !@battle.moldBreaker &&
+          elsif (b.hasActiveAbility?(:MAGICBOUNCE) || b.hasActiveAbility?(:CRYSTALORBIT)) && !@battle.moldBreaker &&
                 !b.effects[PBEffects::MagicBounce]
             magicBouncer = b.index
             b.effects[PBEffects::MagicBounce] = true

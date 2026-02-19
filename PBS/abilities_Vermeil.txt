@@ -144,3 +144,13 @@ Description = Multi-hit moves always strike the maximum number of times. Priorit
 Name = Pride
 Description = Boosts Sp. Atk each time the Pokémon knocks out a foe.
 #-------------------------------
+# Overcharge
+#-------------------------------
+[OVERCHARGE]
+Name = Overcharge
+Description = Raises Attack after landing a contact move or a recoil move.
+#-------------------------------
+[CRYSTALORBIT]
+Name = Crystal Orbit
+Description = Its rotating petals reflect status moves and scatter poisonous spikes when hit by physical attacks.
+#-------------------------------

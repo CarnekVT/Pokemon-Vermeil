@@ -245,3 +245,15 @@ Flags = CanProtect,Mirror,CanKingRock
 EffectChance = 100
 Description = The user attacks opposing Pokémon by shooting sticky webs. This also lowers their Speed stats.
 #-------------------------------
+[TOGEBEAM]
+Name = Togebeam
+Type = FAIRY
+Category = Special
+Power = 1
+Accuracy = 0
+TotalPP = 20
+Target = NearOther
+FunctionCode = PowerHigherWithUserHappiness
+Flags = CanProtect,CanMirrorMove
+Description = The more Togepi loves its Trainer, the greater the power of this move. It never misses.
+#-------------------------------
