@@ -346,6 +346,10 @@ module VermeilChangeDex
       @ability_moves_popup_page = 0
       @ability_moves_popup_lines = []
       @ability_moves_popup_title = "Boosted Moves"
+      @ability_rework_popup_open = false
+      @ability_rework_popup_page = 0
+      @ability_rework_popup_lines = []
+      @ability_rework_popup_title = "Before / After"
       @move_rework_popup_open = false
       @move_rework_popup_page = 0
       @move_rework_popup_lines = []
@@ -1653,6 +1657,150 @@ module VermeilChangeDex
       end
     end
 
+    def ability_rework_popup_page_size
+      return 7
+    end
+
+    def pokemon_ability_before_after_lines(species, form, bmp)
+      canon = VermeilChangeDex.get_canon_info(species, form)
+      canon ||= VermeilChangeDex.get_canon_info(species, 0)
+      return [] if !canon
+      vermeil = GameData::Species.get_species_form(species, form) rescue nil
+      return [] if !vermeil
+      c_slots = build_ability_slots(canon[:abilities], canon[:hidden_abilities], true)
+      v_slots = build_ability_slots(vermeil.abilities, vermeil.hidden_abilities, false)
+      labels = (c_slots.keys + v_slots.keys).uniq.sort_by { |k| ability_slot_sort_key(k) }
+      max_w = 372
+      before_entries = []
+      after_entries = []
+      labels.each do |slot|
+        before = c_slots[slot].to_s.strip
+        after = v_slots[slot].to_s.strip
+        before_entries << "#{before}(#{slot.gsub(/[()]/, '')})" if !before.empty?
+        after_entries << "#{after}(#{slot.gsub(/[()]/, '')})" if !after.empty?
+      end
+      return [] if before_entries == after_entries
+      lines = []
+      lines << [["Before:", COLOR_CANON]]
+      wrap_plain_lines(bmp, before_entries.empty? ? "-" : before_entries.join(", "), max_w).each do |seg|
+        lines << [[seg, COLOR_TEXT_MAIN]]
+      end
+      lines << [["After:", COLOR_VERMEIL]]
+      wrap_plain_lines(bmp, after_entries.empty? ? "-" : after_entries.join(", "), max_w).each do |seg|
+        lines << [[seg, COLOR_DIFF]]
+      end
+      return lines
+    end
+
+    def pokemon_ability_before_after_available?
+      return false if !pokemon_category?
+      return false if !@detail_species
+      bmp = @sprites["overlay"]&.bitmap
+      return false if !bmp
+      lines = pokemon_ability_before_after_lines(@detail_species, @detail_form, bmp)
+      return !lines.empty?
+    end
+
+    def show_pokemon_ability_rework_popup
+      return if !pokemon_category? || !@detail_species
+      bmp = @sprites["overlay"]&.bitmap
+      return if !bmp
+      lines = pokemon_ability_before_after_lines(@detail_species, @detail_form, bmp)
+      if lines.empty?
+        pbPlayBuzzerSE
+        return
+      end
+      @ability_rework_popup_lines = lines
+      @ability_rework_popup_title = _INTL("Abilities: Before / After")
+      @ability_rework_popup_page = 0
+      redraw_ability_rework_popup
+      @ability_rework_popup_open = true
+    end
+
+    def ability_before_after_lines(entry, bmp)
+      return [] if !entry || !entry[:id]
+      ability_id = entry[:id]
+      ability_data = GameData::Ability.try_get(ability_id)
+      return [] if !ability_data
+      before_txt = VermeilChangeDex.reworked_ability_before_text(ability_id).to_s.strip
+      after_txt = ability_data.description.to_s.strip
+      return [] if before_txt.empty? || after_txt.empty?
+      return [] if before_txt == after_txt
+      max_w = 372
+      lines = []
+      lines << [["Before:", COLOR_CANON]]
+      wrap_plain_lines(bmp, before_txt, max_w).each do |seg|
+        lines << [[seg, COLOR_TEXT_MAIN]]
+      end
+      lines << [["After:", COLOR_VERMEIL]]
+      wrap_plain_lines(bmp, after_txt, max_w).each do |seg|
+        lines << [[seg, COLOR_TEXT_MAIN]]
+      end
+      return lines
+    end
+
+    def show_ability_rework_popup(entry)
+      return if !entry || !entry[:id]
+      bmp = @sprites["overlay"]&.bitmap
+      return if !bmp
+      lines = ability_before_after_lines(entry, bmp)
+      if lines.empty?
+        pbPlayBuzzerSE
+        return
+      end
+      @ability_rework_popup_lines = lines
+      @ability_rework_popup_title = _INTL("Before / After")
+      @ability_rework_popup_page = 0
+      redraw_ability_rework_popup
+      @ability_rework_popup_open = true
+    end
+
+    def redraw_ability_rework_popup
+      hide_ability_rework_popup(false)
+      return if @ability_rework_popup_lines.nil? || @ability_rework_popup_lines.empty?
+      @sprites["ability_rework_popup"] = BitmapSprite.new(SCREEN_W, SCREEN_H, @viewport)
+      @sprites["ability_rework_popup"].z = 260
+      bmp = @sprites["ability_rework_popup"].bitmap
+      pbSetSystemFont(bmp)
+      panel_x = 38
+      panel_y = 78
+      panel_w = SCREEN_W - 76
+      panel_h = 226
+      bmp.fill_rect(panel_x, panel_y, panel_w, panel_h, Color.new(20, 28, 40, 235))
+      bmp.fill_rect(panel_x, panel_y, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y + panel_h - 1, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x + panel_w - 1, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      title = (@ability_rework_popup_title && !@ability_rework_popup_title.empty?) ? @ability_rework_popup_title : _INTL("Before / After")
+      pbDrawTextPositions(bmp, [[title, panel_x + 12, panel_y + 8, :left, COLOR_HIGHLIGHT, Color.new(0,0,0,120)]])
+      per_page = ability_rework_popup_page_size
+      total_pages = [(@ability_rework_popup_lines.length.to_f / per_page).ceil, 1].max
+      @ability_rework_popup_page = [[@ability_rework_popup_page, 0].max, total_pages - 1].min
+      start_idx = @ability_rework_popup_page * per_page
+      page_lines = @ability_rework_popup_lines[start_idx, per_page] || []
+      y = panel_y + 36
+      page_lines.each do |line|
+        draw_colored_token_line(bmp, line, panel_x + 12, y)
+        y += 22
+      end
+      controls = _INTL("L/R: Page  {1}/{2}: Close", @action_key_name, "X")
+      page_txt = _INTL("Page {1}/{2}", @ability_rework_popup_page + 1, total_pages)
+      pbDrawTextPositions(bmp, [[controls, panel_x + 12, panel_y + panel_h - 24, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      pbDrawTextPositions(bmp, [[page_txt, panel_x + panel_w - 12, panel_y + panel_h - 24, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      @ability_rework_popup_open = true
+    end
+
+    def hide_ability_rework_popup(clear_lines = true)
+      @ability_rework_popup_open = false
+      @ability_rework_popup_page = 0 if clear_lines
+      @ability_rework_popup_lines = [] if clear_lines
+      @ability_rework_popup_title = "Before / After" if clear_lines
+      if @sprites["ability_rework_popup"]
+        @sprites["ability_rework_popup"].dispose
+        @sprites.delete("ability_rework_popup")
+      end
+    end
+
     def move_rework_popup_page_size
       return 7
     end
@@ -2133,8 +2281,8 @@ module VermeilChangeDex
           mark = IconSprite.new(0, 0, @viewport)
           mark.setBitmap("Graphics/UI/RegionalVariantIcon")
           mark.src_rect.set(frame * 32, 0, 32, 32)
-          mark.x = s.x - 40
-          mark.y = s.y - 40
+          mark.x = s.x - 32
+          mark.y = s.y - 32
           mark.z = 131
           key = "variant_mark_#{real_idx}"
           @sprites[key] = mark
@@ -2168,8 +2316,8 @@ module VermeilChangeDex
           mark = IconSprite.new(0, 0, @viewport)
           mark.setBitmap("Graphics/UI/RegionalVariantIcon")
           mark.src_rect.set(frame * 32, 0, 32, 32)
-          mark.x = s.x - 40
-          mark.y = s.y - 40
+          mark.x = s.x - 32
+          mark.y = s.y - 32
           mark.z = 121
           mark.opacity = 150
           key = "variant_mark_#{real_idx}"
@@ -2443,17 +2591,20 @@ module VermeilChangeDex
 
     def inferred_variant_name(species, form)
       return "Normal" if form <= 0
-      s_data = GameData::Species.get_species_form(species, form)
-      f_name = s_data.form_name.to_s.strip
-      return f_name if !f_name.empty?
-      evos = s_data.get_evolutions(true) rescue []
-      evos.each do |evo|
-        evo_species = evo[0]
-        begin
-          evo_data = GameData::Species.get_species_form(evo_species, form)
-          evo_form_name = evo_data.form_name.to_s.strip
-          return evo_form_name if !evo_form_name.empty?
-        rescue StandardError
+      visited = {}
+      queue = [[species, form]]
+      while !queue.empty?
+        sp, f = queue.shift
+        next if visited[[sp, f]]
+        visited[[sp, f]] = true
+        s_data = GameData::Species.get_species_form(sp, f) rescue nil
+        next if !s_data
+        f_name = s_data.form_name.to_s.strip
+        return f_name if !f_name.empty?
+        evos = s_data.get_evolutions(true) rescue []
+        evos.each do |evo|
+          evo_species = evo[0]
+          queue << [evo_species, f]
         end
       end
       return "Form #{form}"
@@ -2519,6 +2670,7 @@ module VermeilChangeDex
       opts = []
       if pokemon_category?
         opts << [:evo_methods, "Evo Methods"] if @detail_has_evo_method_changes
+        opts << [:pokemon_ability_before_after, "Ability B/A"] if pokemon_ability_before_after_available?
         if SHOW_DETAIL_VARIANT_ACTION
           opts << [:variant, "Variant"] if @detail_form_options && @detail_form_options.length > 1
         end
@@ -2538,6 +2690,10 @@ module VermeilChangeDex
           return open_detail_variant_menu
         end
         return cycle_detail_variant
+      when :pokemon_ability_before_after
+        return false if !pokemon_category?
+        show_pokemon_ability_rework_popup
+        return true
       end
       return false
     end
@@ -2695,13 +2851,14 @@ module VermeilChangeDex
       @mode = :grid
       @sprites["grid_bg"].visible = true if @sprites["grid_bg"] && !@sprites["grid_bg"].disposed?
       hide_ability_moves_popup
+      hide_ability_rework_popup
       hide_move_rework_popup
       hide_new_moves_popup
       hide_carrier_popup
       close_detail_action_menu
       close_detail_variant_menu
       clear_entry_detail_carrier_icons
-      ["big_icon", "detail_variant_mark", "evo_label_overlay", "evo_method_popup", "new_moves_popup", "ability_moves_popup", "move_rework_popup", "detail_action_menu", "detail_variant_menu"].each do |k|
+      ["big_icon", "detail_variant_mark", "evo_label_overlay", "evo_method_popup", "new_moves_popup", "ability_moves_popup", "ability_rework_popup", "move_rework_popup", "detail_action_menu", "detail_variant_menu"].each do |k|
         next if !@sprites[k]
         @sprites[k].dispose
         @sprites.delete(k)
@@ -2781,26 +2938,25 @@ module VermeilChangeDex
       else
         a_data = GameData::Ability.try_get(entry[:id])
         return if !a_data
-        before_txt = VermeilChangeDex.reworked_ability_before_text(entry[:id])
-        if before_txt && @category == :ability_changes
-          pbDrawTextPositions(bmp, [["Before:", 20, y, :left, COLOR_CANON]])
-          lines_before = draw_wrapped_text(bmp, before_txt.to_s, 98, y, 390, COLOR_TEXT_GRAY, 22, 2)
-          after_y = y + (lines_before * 22) + 6
-          pbDrawTextPositions(bmp, [["After:", 20, after_y, :left, COLOR_VERMEIL]])
-          draw_wrapped_text(bmp, a_data.description.to_s, 98, after_y, 390, COLOR_TEXT_MAIN, 22, 3)
-        else
-          draw_wrapped_text(bmp, a_data.description.to_s, 20, y, 468, COLOR_TEXT_GRAY, 22, 5)
-        end
+        draw_wrapped_text(bmp, a_data.description.to_s, 20, y, 468, COLOR_TEXT_GRAY, 22, 5)
       end
       draw_carrier_icon_window(bmp, entry)
       if @category == :move_changes && !move_change_lines(entry).empty?
         pbDrawTextPositions(bmp, [[_INTL("{1}: Before/After", @filter_key_name), SCREEN_W - 20, 352, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
       end
-      if (@category == :ability_changes || @category == :new_abilities) && !ability_boost_sections(entry[:id]).empty?
-        pbDrawTextPositions(bmp, [[_INTL("{1}: Boosted Moves", @filter_key_name), SCREEN_W - 20, 352, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      if (@category == :ability_changes || @category == :new_abilities)
+        if !ability_before_after_lines(entry, @sprites["overlay"].bitmap).empty?
+          pbDrawTextPositions(bmp, [[_INTL("{1}: Before/After", @filter_key_name), SCREEN_W - 20, 352, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+        elsif !ability_boost_sections(entry[:id]).empty?
+          pbDrawTextPositions(bmp, [[_INTL("{1}: Boosted Moves", @filter_key_name), SCREEN_W - 20, 352, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+        end
       end
-      if !pokemon_category? && (entry[:all_users] || []).length > 0
-        pbDrawTextPositions(bmp, [[_INTL("{1}: Carriers", @action_key_name), SCREEN_W / 2, 12, :center, Color.new(255,255,255), Color.new(0,0,0,120)]])
+      if !pokemon_category?
+        action_opts = detail_action_options
+        if !action_opts.empty?
+          header_hint = action_opts.length > 1 ? _INTL("{1}: Options", @action_key_name) : _INTL("{1}: {2}", @action_key_name, action_opts[0][1])
+          pbDrawTextPositions(bmp, [[header_hint, SCREEN_W / 2, 12, :center, Color.new(255,255,255), Color.new(0,0,0,120)]])
+        end
       end
     end
 
@@ -3096,7 +3252,7 @@ module VermeilChangeDex
       action_opts = detail_action_options
       if !action_opts.empty?
         header_hint = action_opts.length > 1 ? _INTL("{1}: Options", @action_key_name) : _INTL("{1}: {2}", @action_key_name, action_opts[0][1])
-        pbDrawTextPositions(bmp, [[header_hint, SCREEN_W / 2, 12, :center, Color.new(255,255,255), Color.new(0,0,0,120)]])
+        pbDrawTextPositions(bmp, [[header_hint, (SCREEN_W / 2) - 28, 12, :center, Color.new(255,255,255), Color.new(0,0,0,120)]])
       end
     end
 
@@ -3120,7 +3276,7 @@ module VermeilChangeDex
       @detail_move_popup_lines = []
       @detail_moves_truncated = false
       if !combined.empty?
-        @detail_move_popup_lines = wrapped_text_lines(bmp, combined.join(", "), move_popup_usable_width)
+        @detail_move_popup_lines = wrapped_move_list_lines(bmp, combined, move_popup_usable_width)
         @detail_moves_truncated = @detail_move_popup_lines.length > 2
       end
       pbDrawTextPositions(bmp, [["New Moves:", 20, y, :left, COLOR_HIGHLIGHT]])
@@ -3135,6 +3291,29 @@ module VermeilChangeDex
         full_text = combined.join(", ")
         draw_wrapped_text(bmp, full_text, 20, y, 470, COLOR_MOVES_NEW, 22, 2)
       end
+    end
+
+    def wrapped_move_list_lines(bmp, move_names, max_w)
+      names = (move_names || []).map { |m| m.to_s.strip }.reject { |m| m.empty? }
+      return [] if names.empty?
+      lines = []
+      line = ""
+      names.each_with_index do |name, i|
+        token = (i == names.length - 1) ? name : "#{name}, "
+        if line.empty?
+          line = token
+          next
+        end
+        candidate = line + token
+        if bmp.text_size(candidate).width > max_w
+          lines << line.sub(/,\s*$/, "")
+          line = token
+        else
+          line = candidate
+        end
+      end
+      lines << line.sub(/,\s*$/, "") if !line.empty?
+      return lines
     end
 
     def wrapped_text_lines(bmp, text, max_w)
@@ -3538,6 +3717,18 @@ module VermeilChangeDex
             end
             next
           end
+          if @ability_rework_popup_open
+            if Input.repeat?(Input::LEFT)
+              @ability_rework_popup_page -= 1
+              redraw_ability_rework_popup
+            elsif Input.repeat?(Input::RIGHT)
+              @ability_rework_popup_page += 1
+              redraw_ability_rework_popup
+            elsif Input.trigger?(Input::ACTION) || Input.trigger?(Input::BACK) || Input.trigger?(Input::USE) || Input.trigger?(Input::SPECIAL)
+              hide_ability_rework_popup(false)
+            end
+            next
+          end
           if @move_rework_popup_open
             if Input.repeat?(Input::LEFT)
               @move_rework_popup_page -= 1
@@ -3588,7 +3779,14 @@ module VermeilChangeDex
             elsif pokemon_category? && @detail_moves_truncated
               show_new_moves_popup
             elsif @category == :ability_changes || @category == :new_abilities
-              show_ability_moves_popup(@entries[@index])
+              entry = @entries[@index]
+              if !ability_before_after_lines(entry, @sprites["overlay"].bitmap).empty?
+                show_ability_rework_popup(entry)
+              elsif !ability_boost_sections(entry[:id]).empty?
+                show_ability_moves_popup(entry)
+              else
+                pbPlayBuzzerSE
+              end
             else
               pbPlayBuzzerSE
             end
@@ -3601,7 +3799,7 @@ module VermeilChangeDex
               else
                 pbPlayBuzzerSE
               end
-            elsif !pokemon_category?
+            else
               entry = @entries[@index]
               users = entry ? (entry[:all_users] || []) : []
               if users.empty?
@@ -3609,8 +3807,6 @@ module VermeilChangeDex
               else
                 show_carrier_popup(entry)
               end
-            else
-              pbPlayBuzzerSE
             end
             next
           end
@@ -3655,6 +3851,8 @@ module VermeilChangeDex
       else
         hide_carrier_popup if @carrier_popup_open
         hide_ability_moves_popup if @ability_moves_popup_open
+        hide_ability_rework_popup if @ability_rework_popup_open
+        hide_move_rework_popup if @move_rework_popup_open
         draw_entry_detail(@entries[@index])
       end
     end

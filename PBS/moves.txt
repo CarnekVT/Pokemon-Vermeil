@@ -4627,8 +4627,8 @@ Description = The user explodes to inflict damage on those around it. The user f
 [SELFDESTRUCT]
 Name = Self-Destruct
 Type = NORMAL
-Category = Physical
-Power = 200
+Category = Special
+Power = 250
 Accuracy = 100
 TotalPP = 5
 Target = AllNearOthers

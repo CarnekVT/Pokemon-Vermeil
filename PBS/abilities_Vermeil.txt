@@ -144,13 +144,33 @@ Description = Multi-hit moves always strike the maximum number of times. Priorit
 Name = Pride
 Description = Boosts Sp. Atk each time the Pokémon knocks out a foe.
 #-------------------------------
-# Overcharge
+# Mega Raichu X
 #-------------------------------
 [OVERCHARGE]
 Name = Overcharge
 Description = Raises Attack after landing a contact move or a recoil move.
 #-------------------------------
+# Mega Glimmora
+#-------------------------------
 [CRYSTALORBIT]
 Name = Crystal Orbit
 Description = Its rotating petals reflect status moves and scatter poisonous spikes when hit by physical attacks.
+#-------------------------------
+# Mega Seperior
+#-------------------------------
+[FLEURDEMAL]
+Name = Fleur de Mal
+Description = Draining moves heal more HP. If the target is poisoned, draining moves deal more damage.
+#-------------------------------
+# Mega Typhlosion
+#-------------------------------
+[THERMALFRONT]
+Name = Thermal Front
+Description = Gives immunity to Ground-type moves. Electric-type moves can hit Ground-type Pokémon.
+#-------------------------------
+# Mega Samurott
+#-------------------------------
+[FEUDALWARD]
+Name = Feudal Ward
+Description = Reduces damage at full HP. Its regal presence blocks priority moves.
 #-------------------------------

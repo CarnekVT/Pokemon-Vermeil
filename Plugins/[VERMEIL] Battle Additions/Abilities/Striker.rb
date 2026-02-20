@@ -19,7 +19,8 @@ module VermeilStriker
     :STOMP,
     :HIGHHORSEPOWER,
     :STOMPINGTANTRUM,
-    :CLOSECOMBAT
+    :CLOSECOMBAT,
+    :BEDROCKKICK
   ]
 
   def self.kick_move?(move)
