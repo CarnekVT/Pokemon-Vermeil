@@ -1,42 +1,21 @@
 #===============================================================================
 # [VERMEIL] BattleAnimations
-# [003] Toxic Spikes Cast Animation
+# [004] Spikes Cast Animation
 #===============================================================================
 
 module VermeilBattleAnimations
   module_function
 
-  TOXIC_SPIKES_ASSETS = [
-    "Graphics/UI/Battle/hazards/toxic_spikes",
-    "Graphics/UI/Battle/hazards/toxic-spikes"
+  SPIKES_ASSETS = [
+    "Graphics/UI/Battle/hazards/spikes",
+    "Graphics/UI/Battle/hazards/spike"
   ]
 
-  TOXIC_PARTICLE_ASSETS = [
-    "Graphics/Pictures/StatusParticles/toxic",
-    "Graphics/Pictures/StatusParticles/poison",
-    "Graphics/Pictures/statusparticles/toxic",
-    "Graphics/Pictures/statusparticles/poison",
-    "Graphics/Animations/poison",
-    "Graphics/Animations/poison2"
-  ]
-
-  TOXIC_SPIKES_SE_THROW = "Anim/PRSFX- Toxic Spikes1"
-  TOXIC_SPIKES_SE_LAND  = "Anim/PRSFX- Toxic Spikes2"
-
-  def resolve_move_id(move)
-    return move.id if move.respond_to?(:id)
-    data = GameData::Move.try_get(move)
-    return data.id if data
-    return move
-  end
-
-  def first_existing_asset(paths)
-    paths.each { |path| return path if pbResolveBitmap(path) }
-    return nil
-  end
+  SPIKES_SE_THROW = "Anim/PRSFX- Low Kick"
+  SPIKES_SE_LAND  = "Anim/PRSFX- Spikes2"
 end
 
-class Battle::Scene::Animation::VermeilToxicSpikesCast < Battle::Scene::Animation
+class Battle::Scene::Animation::VermeilSpikesCast < Battle::Scene::Animation
   def initialize(sprites, viewport, user, anchor_x, anchor_y, side_index)
     @user       = user
     @anchor_x   = anchor_x
@@ -49,116 +28,61 @@ class Battle::Scene::Animation::VermeilToxicSpikesCast < Battle::Scene::Animatio
     return if !@user
     user_sprite = @sprites["pokemon_#{@user.index}"]
     return if !user_sprite
-
-    spike_asset = VermeilBattleAnimations.first_existing_asset(VermeilBattleAnimations::TOXIC_SPIKES_ASSETS)
+    spike_asset = VermeilBattleAnimations.first_existing_asset(VermeilBattleAnimations::SPIKES_ASSETS)
     return if !spike_asset
-    particle_asset = VermeilBattleAnimations.first_existing_asset(VermeilBattleAnimations::TOXIC_PARTICLE_ASSETS)
-    @vermeil_effect_pics = []
 
+    @vermeil_effect_pics = []
     user_pic = addSprite(user_sprite, PictureOrigin::BOTTOM)
     forward_dir = (@user.index & 1) == 0 ? 1 : -1
-    travel_scale = (@side_index == 0) ? 1.15 : 1.0
+    travel_scale = (@side_index == 0) ? 1.12 : 1.0
 
-    user_pic.setSE(2, VermeilBattleAnimations::TOXIC_SPIKES_SE_THROW, 82, 105)
+    user_pic.setSE(2, VermeilBattleAnimations::SPIKES_SE_THROW, 80, 100)
     user_pic.moveDelta(0, 5, 10 * forward_dir, -8)
     user_pic.moveDelta(5, 5, -10 * forward_dir, 8)
 
-    offsets = [[-58, 8], [-36, 2], [-14, 10], [10, 1], [34, 9], [56, 4]]
+    offsets = [[-52, 8], [-30, 4], [-8, 10], [16, 5], [38, 9]]
     offsets.each_with_index do |(ox, oy), i|
       spike = addNewSprite(user_sprite.x, user_sprite.y - 56, spike_asset, PictureOrigin::CENTER)
       @vermeil_effect_pics << spike
-      # Keep below textbox/UI layers.
       spike.setZ(0, 96 + i)
       spike.setOpacity(0, 0)
       spike.setVisible(0, false)
-      spike.setZoom(0, 78 + (@side_index == 0 ? 20 : 0))
+      spike.setZoom(0, 74 + (@side_index == 0 ? 16 : 0))
 
       start_t = 4 + (i * 2)
-      peak_x = (@anchor_x + (ox * 0.4)).round
-      peak_y = @anchor_y - 86 - ((i % 2) * 8)
+      peak_x = (@anchor_x + (ox * 0.45)).round
+      peak_y = @anchor_y - 76 - ((i % 2) * 6)
       land_x = (@anchor_x + (ox * travel_scale)).round
       land_y = @anchor_y + oy
 
       spike.setVisible(start_t, true)
       spike.moveOpacity(start_t, 2, 255)
-      spike.moveXY(start_t, 9, peak_x, peak_y)
-      spike.moveXY(start_t + 9, 10, land_x, land_y)
-      spike.moveAngle(start_t, 19, (forward_dir * 540) + (i * 30))
-
-      # Quick bounce and settle.
-      spike.moveDelta(start_t + 19, 2, 0, -8)
-      spike.moveDelta(start_t + 21, 3, 0, 8)
-      spike.moveDelta(start_t + 24, 2, 0, -3)
-      spike.moveDelta(start_t + 26, 2, 0, 3)
-      spike.setSE(start_t + 20, VermeilBattleAnimations::TOXIC_SPIKES_SE_LAND, 90, 98) if i == 2
-
-      # Fade out quickly after landing; hazard icon display is separate.
-      spike.moveOpacity(start_t + 28, 10, 0)
-      spike.setVisible(start_t + 39, false)
-    end
-
-    if particle_asset
-      4.times do |i|
-        p = addNewSprite(@anchor_x + ((i - 2) * 14), @anchor_y - 10, particle_asset, PictureOrigin::CENTER)
-        @vermeil_effect_pics << p
-        # Keep below textbox/UI layers.
-        p.setZ(0, 104 + i)
-        p.setVisible(0, false)
-        p.setOpacity(0, 0)
-        p.setZoom(0, 56 + (i % 2) * 6)
-        t = 30 + i
-        p.setVisible(t, true)
-        p.moveOpacity(t, 2, 150)
-        p.moveDelta(t, 7, (i.even? ? -7 : 7), -18 - (i % 2) * 4)
-        p.moveOpacity(t + 3, 6, 0)
-        p.setVisible(t + 10, false)
-      end
-
+      spike.moveXY(start_t, 8, peak_x, peak_y)
+      spike.moveXY(start_t + 8, 9, land_x, land_y)
+      spike.moveAngle(start_t, 17, (forward_dir * 500) + (i * 28))
+      spike.moveDelta(start_t + 17, 2, 0, -6)
+      spike.moveDelta(start_t + 19, 3, 0, 6)
+      spike.setSE(start_t + 18, VermeilBattleAnimations::SPIKES_SE_LAND, 88, 98) if i == 2
+      spike.moveOpacity(start_t + 26, 10, 0)
+      spike.setVisible(start_t + 37, false)
     end
   end
 end
 
 class Battle::Scene
-  def vermeil_hazard_cast_text_lead_in(frames = 12)
-    return if frames <= 0
-    frames.times { pbUpdate }
-    # If the "used move" brief message already finished typing, close it silently
-    # so the next hazard text can appear immediately (skip pbWaitMessage linger).
-    cw = (@sprites && @sprites["messageWindow"]) ? @sprites["messageWindow"] : nil
-    return if !cw
-    begin
-      cw.skipAhead if cw.respond_to?(:busy?) && cw.busy? && cw.respond_to?(:skipAhead)
-      if cw.respond_to?(:busy?) && !cw.busy?
-        cw.text = "" if cw.respond_to?(:text=)
-        cw.visible = false if cw.respond_to?(:visible=)
-        @briefMessage = false
-      end
-    rescue StandardError
-    end
-  end
-
-  def vermeil_hazard_anchor_for_side(side_index)
-    if defined?(HazardSettings)
-      return [HazardSettings::PLAYER_SIDE_HAZARD_X, HazardSettings::PLAYER_SIDE_HAZARD_Y] if side_index == 0
-      return [HazardSettings::FOE_SIDE_HAZARD_X, HazardSettings::FOE_SIDE_HAZARD_Y]
-    end
-    return [(Graphics.width * 0.30).round, (Graphics.height * 0.72).round] if side_index == 0
-    return [(Graphics.width * 0.70).round, (Graphics.height * 0.44).round]
-  end
-
-  def pbPlayVermeilToxicSpikesCast(user, side_index)
+  def pbPlayVermeilSpikesCast(user, side_index)
     return false if !user
-    spike_asset = VermeilBattleAnimations.first_existing_asset(VermeilBattleAnimations::TOXIC_SPIKES_ASSETS)
+    spike_asset = VermeilBattleAnimations.first_existing_asset(VermeilBattleAnimations::SPIKES_ASSETS)
     return false if !spike_asset
+    return false if !respond_to?(:vermeil_hazard_anchor_for_side)
 
     ax, ay = vermeil_hazard_anchor_for_side(side_index)
-    vermeil_hazard_cast_text_lead_in(12)
-    pbHazardsSuspend(:vermeil_toxicspikes_cast) if respond_to?(:pbHazardsSuspend)
+    vermeil_hazard_cast_text_lead_in(12) if respond_to?(:vermeil_hazard_cast_text_lead_in)
+    pbHazardsSuspend(:vermeil_spikes_cast) if respond_to?(:pbHazardsSuspend)
     hidden_ui_keys = []
     ui_opacity = {}
 
     begin
-      # Prepare UI list (all non-battler, non-background sprites).
       @sprites.each do |key, sprite|
         next if !sprite || !sprite.respond_to?(:visible=)
         k = key.to_s
@@ -169,10 +93,9 @@ class Battle::Scene
         ui_opacity[key] = sprite.respond_to?(:opacity) ? sprite.opacity : nil
       end
 
-      anim = Animation::VermeilToxicSpikesCast.new(@sprites, @viewport, user, ax, ay, side_index)
-      # Keep timing unchanged; apply UI fades inside this same timeline.
+      anim = Animation::VermeilSpikesCast.new(@sprites, @viewport, user, ax, ay, side_index)
       cast_end_frame = 200
-      min_play_frames = 56
+      min_play_frames = 52
       fade_frames = 20
       force_fade_start_frame = 182
       active_opacity_threshold = 24
@@ -182,7 +105,6 @@ class Battle::Scene
       frame = 0
       loop do
         anim.update
-        # Smooth UI fade-out at cast start.
         if frame < fade_frames
           hidden_ui_keys.each do |key|
             s = @sprites[key] rescue nil
@@ -197,7 +119,6 @@ class Battle::Scene
             end
           end
         end
-        # Detect visual inactivity of cast effects (PictureEx has no disposed? method).
         if frame >= min_play_frames
           pics = anim.instance_variable_get(:@vermeil_effect_pics) rescue nil
           active = false
@@ -217,14 +138,11 @@ class Battle::Scene
             ui_fade_started = true
             ui_fade_step = 0
           end
-          # Fail-safe: keep total cap at 200 but don't stall waiting for residual PictureEx state.
           if !ui_fade_started && frame >= force_fade_start_frame
             ui_fade_started = true
             ui_fade_step = 0
           end
         end
-
-        # Smooth UI fade-in once cast visuals are done.
         if ui_fade_started
           ui_fade_step += 1
           if ui_fade_step == 1
@@ -255,18 +173,18 @@ class Battle::Scene
         s.visible = true if s.respond_to?(:visible=)
         s.opacity = (ui_opacity[key] || 255) if s.respond_to?(:opacity=)
       end
-      pbHazardsResume(:vermeil_toxicspikes_cast, false) if respond_to?(:pbHazardsResume)
+      pbHazardsResume(:vermeil_spikes_cast, false) if respond_to?(:pbHazardsResume)
     end
     return true
   end
 end
 
 class Battle
-  alias_method :vermeil_toxicspikes_cast_pbAnimation, :pbAnimation unless method_defined?(:vermeil_toxicspikes_cast_pbAnimation)
+  alias_method :vermeil_spikes_cast_pbAnimation, :pbAnimation unless method_defined?(:vermeil_spikes_cast_pbAnimation)
 
   def pbAnimation(move, user, targets, hitNum = 0)
     move_id = VermeilBattleAnimations.resolve_move_id(move)
-    if @showAnims && move_id == :TOXICSPIKES && @scene.respond_to?(:pbPlayVermeilToxicSpikesCast)
+    if @showAnims && move_id == :SPIKES && @scene.respond_to?(:pbPlayVermeilSpikesCast)
       anim_user = user
       if !anim_user || anim_user.fainted? || anim_user.hp <= 0
         alt = nil
@@ -283,11 +201,9 @@ class Battle
       end
       if anim_user
         side_index = anim_user.respond_to?(:idxOwnSide) ? (anim_user.idxOwnSide ^ 1) : ((anim_user.index & 1) ^ 1)
-        if @scene.pbPlayVermeilToxicSpikesCast(anim_user, side_index)
-          return
-        end
+        return if @scene.pbPlayVermeilSpikesCast(anim_user, side_index)
       end
     end
-    vermeil_toxicspikes_cast_pbAnimation(move, user, targets, hitNum)
+    vermeil_spikes_cast_pbAnimation(move, user, targets, hitNum)
   end
 end

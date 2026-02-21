@@ -152,6 +152,8 @@ class Battle::Scene
   def pbStopWeatherAnimationInstantly
     return if !ContinuousWeatherSettings::ENABLED
     
+    # Guard against cases where the weather system was already disposed or not created
+    return if !@weatherSystem
     @weatherSystem.type = :None
     @weatherSystem.max = 0
     

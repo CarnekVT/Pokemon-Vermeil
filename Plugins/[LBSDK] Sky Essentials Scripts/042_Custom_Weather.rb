@@ -507,7 +507,7 @@ class Battle
 
   # Set initial battle weather based on overworld custom weather
   alias_method :custom_weather_original_pbStartBattleCore, :pbStartBattleCore unless method_defined?(:custom_weather_original_pbStartBattleCore)
-  def pbStartBattleCore
+  def pbStartBattleCore(*args)
     # Check if overworld has a decorative custom weather BEFORE running original code
     overworld_weather = $game_screen ? $game_screen.weather_type : :None
     has_decorative_weather = false
@@ -525,7 +525,7 @@ class Battle
     end
     
     # Run original initialization
-    custom_weather_original_pbStartBattleCore
+    custom_weather_original_pbStartBattleCore(*args)
     
     # Force weather to None if decorative custom weather is active (override defaultWeather copy)
     if has_decorative_weather
