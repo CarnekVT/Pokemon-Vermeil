@@ -8,8 +8,8 @@ module VermeilBattleUIRedux
 
   PLAYER_DATABOX_X = 0
   PLAYER_DATABOX_BOTTOM_MARGIN = 2
-  FIGHT_LIST_X = Graphics.width - 225
-  FIGHT_LIST_Y = Graphics.height - 238
+  FIGHT_LIST_X = 287
+  FIGHT_LIST_Y = 146
   FIGHT_LIST_W = 204
   FIGHT_ROW_H = 38
   FIGHT_ROW_GAP = 8
@@ -36,6 +36,14 @@ module VermeilBattleUIRedux
     [0, 11, 1, 9],  # 7 launch+cancel
     [0, 11, 1, 4]   # 8 launch+call
   ]
+
+  def fight_list_x
+    return Graphics.width - 225
+  end
+
+  def fight_list_y
+    return Graphics.height - 238
+  end
 
   def action_key_label
     default_map = {
@@ -131,7 +139,7 @@ module VermeilBattleUIRedux
       bmp.clear
 
       labels = [texts[1], texts[2], texts[3], texts[4]]
-      base_x = (viewport_left + viewport_width - 186) + @offset_x
+      base_x = (Graphics.width - 186) + @offset_x
       base_y = Graphics.height - 166
       main_w = 164
       main_h = 58
@@ -244,8 +252,8 @@ module VermeilBattleUIRedux
     private
 
     def draw_move_list(bmp, battler, names, selected, offset_x = 0)
-      x = (viewport_left + viewport_width - 225) + offset_x
-      y = VermeilBattleUIRedux::FIGHT_LIST_Y
+      x = VermeilBattleUIRedux.fight_list_x + offset_x
+      y = VermeilBattleUIRedux.fight_list_y
       w = VermeilBattleUIRedux::FIGHT_LIST_W
       h = VermeilBattleUIRedux::FIGHT_ROW_H
       text_pos = []
@@ -281,8 +289,8 @@ module VermeilBattleUIRedux
     end
 
     def draw_type_pp(bmp, battler, move, type_name, pp_text, offset_x = 0)
-      base_x = (viewport_left + viewport_width - 225) + 8 + offset_x
-      base_y = VermeilBattleUIRedux::FIGHT_LIST_Y + (4 * (VermeilBattleUIRedux::FIGHT_ROW_H + VermeilBattleUIRedux::FIGHT_ROW_GAP)) + 14
+      base_x = VermeilBattleUIRedux.fight_list_x + 8 + offset_x
+      base_y = VermeilBattleUIRedux.fight_list_y + (4 * (VermeilBattleUIRedux::FIGHT_ROW_H + VermeilBattleUIRedux::FIGHT_ROW_GAP)) + 14
       # Type icon (existing asset)
       if @type_bitmap && @type_bitmap.bitmap && move && move.id
         begin
@@ -314,8 +322,8 @@ module VermeilBattleUIRedux
     end
 
     def draw_action_hint(bmp, action_symbol, active, pulse, action_text, offset_x = 0)
-      x = (viewport_left + viewport_width - 225) - 82 + offset_x
-      y = VermeilBattleUIRedux::FIGHT_LIST_Y + (2 * (VermeilBattleUIRedux::FIGHT_ROW_H + VermeilBattleUIRedux::FIGHT_ROW_GAP)) + VermeilBattleUIRedux::ACTION_HINT_Y_OFFSET
+      x = VermeilBattleUIRedux.fight_list_x - 82 + offset_x
+      y = VermeilBattleUIRedux.fight_list_y + (2 * (VermeilBattleUIRedux::FIGHT_ROW_H + VermeilBattleUIRedux::FIGHT_ROW_GAP)) + VermeilBattleUIRedux::ACTION_HINT_Y_OFFSET
       if @mega_bitmap && @mega_bitmap.bitmap && action_symbol == :mega
         src = @mega_bitmap.bitmap
         bmp.stretch_blt(Rect.new(x, y, 72, 32), src, Rect.new(0, 0, src.width, src.height))

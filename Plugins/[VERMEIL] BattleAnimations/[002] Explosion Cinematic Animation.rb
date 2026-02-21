@@ -442,7 +442,22 @@ class Battle::Scene::Animation::VermeilCinematicExplosion < Battle::Scene::Anima
   def apply_sheet_frame(picture, asset_path, style = :default)
     return if !picture || !asset_path
     src_x, src_y, src_w, src_h = VermeilBattleAnimations.preferred_sheet_frame(asset_path, style)
+    info = VermeilBattleAnimations.sheet_frame_info(asset_path)
     return if src_w <= 0 || src_h <= 0
+    if info
+      full_w = info[:width]
+      full_h = info[:height]
+      full_frame = (src_x == 0 && src_y == 0 && src_w == full_w && src_h == full_h)
+      oversize = (src_w > 192 || src_h > 192)
+      if full_frame || oversize
+        crop = [full_w, full_h, 192].min
+        crop = [crop, 1].max
+        src_w = crop
+        src_h = crop
+        src_x = ((full_w - src_w) / 2.0).round
+        src_y = ((full_h - src_h) / 2.0).round
+      end
+    end
     picture.setSrc(0, src_x, src_y)
     picture.setSrcSize(0, src_w, src_h)
     picture.setOrigin(0, PictureOrigin::CENTER)
