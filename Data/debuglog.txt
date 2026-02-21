@@ -1496,3 +1496,691 @@ Section401:44:in `<main>'
 
 "You got away safely!"
 [Burning Rampage] OnSwitchOut - Contador actual: 1
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Houndour appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Houndour (1)
+
+===== Round 1 =====
+
+[AI] Houndour (1) is considering using Ember against Glimmora (0)...
+[AI] Houndour (1) is considering using Leer...
+[AI] Move choices for Houndour (1):
+   *  33.3% to use Ember (target 0): score 100
+   *  33.3% to use Leer: score 100
+   *  33.3% to use Leer: score 100
+   => will use Leer
+
+[Round order] Glimmora (0), the wild Houndour (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+[ToxicSpikes Anim] pbShowAnimation id: :TOXICSPIKES
+[ToxicSpikes Anim] Custom animation played, returning
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Houndour (1) used Leer
+"The wild Houndour used Leer!"
+[ToxicSpikes Anim] Battle.pbAnimation called with m_id: :LEER
+[ToxicSpikes Anim] Battle.pbAnimation: Calling super
+[Stat change] Glimmora's Defense changed by -1 (0 -> -1)
+"Glimmora's Defense fell!"
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (153 -> 144)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+[AI] Houndour (1) is considering using Ember against Glimmora (0)...
+[AI] Houndour (1) is considering using Leer...
+[AI] Move choices for Houndour (1):
+   *  33.3% to use Ember (target 0): score 100
+   *  33.3% to use Leer: score 100
+   *  33.3% to use Leer: score 100
+   => will use Ember (target 0)
+
+[Round order] Glimmora (0), the wild Houndour (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+[ToxicSpikes Anim] pbShowAnimation id: :TOXICSPIKES
+[ToxicSpikes Anim] Custom animation played, returning
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Houndour (1) used Ember
+"The wild Houndour used Ember!"
+[ToxicSpikes Anim] Battle.pbAnimation called with m_id: :EMBER
+[ToxicSpikes Anim] Battle.pbAnimation: Calling super
+[HP change] Glimmora lost 2 HP (144 -> 142)
+"It's not very effective..."
+
+[End of round 2]
+[HP change] Glimmora lost 9 HP (142 -> 133)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 3 =====
+
+"You got away safely!"
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Ledyba appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Ledyba (1)
+
+===== Round 1 =====
+
+[AI] Ledyba (1) is considering using Tackle against Glimmora (0)...
+[AI] Ledyba (1) is considering using Supersonic against Glimmora (0)...
+[AI] Move choices for Ledyba (1):
+   *  33.3% to use Tackle (target 0): score 100
+   *  33.3% to use Tackle (target 0): score 100
+   *  33.3% to use Supersonic (target 0): score 100
+   => will use Tackle (target 0)
+
+[Round order] Glimmora (0), the wild Ledyba (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+[ToxicSpikes Anim] pbShowAnimation id: :TOXICSPIKES
+[ToxicSpikes Anim] Custom animation played, returning
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Ledyba (1) used Tackle
+"The wild Ledyba used Tackle!"
+[ToxicSpikes Anim] Battle.pbAnimation called with m_id: :TACKLE
+[ToxicSpikes Anim] Battle.pbAnimation: Calling super
+[HP change] Glimmora lost 1 HP (133 -> 132)
+"It's not very effective..."
+[Ability triggered] Glimmora's Toxic Debris
+[ToxicSpikes Anim] Battle.pbAnimation called with m_id: :TOXICSPIKES
+[ToxicSpikes Anim] Battle.pbAnimation: Custom animation played, returning
+"Poison spikes were scattered on the ground all around the opposing team!"
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (132 -> 123)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Hoppip appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Hoppip (1)
+
+===== Round 1 =====
+
+[AI] Hoppip (1) is considering using Splash...
+[AI] Hoppip (1) is considering using Absorb against Glimmora (0)...
+[AI] Move choices for Hoppip (1):
+   *  33.3% to use Splash: score 100
+   *  33.3% to use Splash: score 100
+   *  33.3% to use Absorb (target 0): score 100
+   => will use Splash
+
+[Round order] Glimmora (0), the wild Hoppip (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+[ToxicSpikes Anim] pbShowAnimation id: :TOXICSPIKES
+[ToxicSpikes Anim] Custom animation played, returning
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Hoppip (1) used Splash
+"The wild Hoppip used Splash!"
+[ToxicSpikes Anim] Battle.pbAnimation called with m_id: :SPLASH
+[ToxicSpikes Anim] Battle.pbAnimation: Calling super
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Hoothoot appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Hoothoot (1)
+
+===== Round 1 =====
+
+[AI] Hoothoot (1) is considering using Hypnosis against Glimmora (0)...
+[AI] Hoothoot (1) is considering using Foresight against Glimmora (0)...
+[AI] Hoothoot (1) is considering using Peck against Glimmora (0)...
+[AI] Move choices for Hoothoot (1):
+   *  25.0% to use Hypnosis (target 0): score 100
+   *  25.0% to use Foresight (target 0): score 100
+   *  25.0% to use Peck (target 0): score 100
+   *  25.0% to use Peck (target 0): score 100
+   => will use Hypnosis (target 0)
+
+[Round order] Glimmora (0), the wild Hoothoot (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+[ToxicSpikes Anim] pbShowAnimation id: :TOXICSPIKES
+[ToxicSpikes Anim] Custom animation played, returning
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Hoothoot (1) used Hypnosis
+"The wild Hoothoot used Hypnosis!"
+"It doesn't affect Glimmora..."
+[Move failed] In function code SleepTarget's def pbFailsAgainstTarget?
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (153 -> 144)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Maschiff appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+===== Round 1 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Leer
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+[ToxicSpikes Anim] pbShowAnimation id: :TOXICSPIKES
+[ToxicSpikes Anim] Custom animation played, returning
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Maschiff (1) used Leer
+"The wild Maschiff used Leer!"
+[Stat change] Glimmora's Defense changed by -1 (0 -> -1)
+"Glimmora's Defense fell!"
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (153 -> 144)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Leer
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Explosion
+"Glimmora used Explosion!"
+[HP change] The wild Maschiff lost 14 HP (14 -> 0)
+[HP change] Glimmora lost 144 HP (144 -> 0)
+"Glimmora fainted!"
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Ledyba appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Ledyba (1)
+
+===== Round 1 =====
+
+[AI] Ledyba (1) is considering using Tackle against Glimmora (0)...
+[AI] Ledyba (1) is considering using Supersonic against Glimmora (0)...
+[AI] Move choices for Ledyba (1):
+   *  33.3% to use Tackle (target 0): score 100
+   *  33.3% to use Tackle (target 0): score 100
+   *  33.3% to use Supersonic (target 0): score 100
+   => will use Supersonic (target 0)
+
+[Round order] Glimmora (0), the wild Ledyba (1)
+
+[Use move] Glimmora (0) used Explosion
+"Glimmora used Explosion!"
+[HP change] The wild Ledyba lost 16 HP (16 -> 0)
+[HP change] Glimmora lost 153 HP (153 -> 0)
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Hoppip appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Hoppip (1)
+
+===== Round 1 =====
+
+[AI] Hoppip (1) is considering using Splash...
+[AI] Hoppip (1) is considering using Absorb against Glimmora (0)...
+[AI] Move choices for Hoppip (1):
+   *  33.3% to use Splash: score 100
+   *  33.3% to use Splash: score 100
+   *  33.3% to use Absorb (target 0): score 100
+   => will use Absorb (target 0)
+
+[Round order] Glimmora (0), the wild Hoppip (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+[ToxicSpikes Anim] pbShowAnimation id: :TOXICSPIKES
+[ToxicSpikes Anim] Custom animation played, returning
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Hoppip (1) used Absorb
+"The wild Hoppip used Absorb!"
+[HP change] Glimmora lost 4 HP (153 -> 149)
+"A critical hit!"
+"Glimmora had its energy drained!"
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (149 -> 140)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+[AI] Hoppip (1) is considering using Splash...
+[AI] Hoppip (1) is considering using Absorb against Glimmora (0)...
+[AI] Move choices for Hoppip (1):
+   *  33.3% to use Splash: score 100
+   *  33.3% to use Splash: score 100
+   *  33.3% to use Absorb (target 0): score 100
+   => will use Splash
+
+[Round order] Glimmora (0), the wild Hoppip (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+[ToxicSpikes Anim] pbShowAnimation id: :TOXICSPIKES
+[ToxicSpikes Anim] Custom animation played, returning
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Hoppip (1) used Splash
+"The wild Hoppip used Splash!"
+"But nothing happened!"
+
+[End of round 2]
+[HP change] Glimmora lost 9 HP (140 -> 131)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 3 =====
+
+"You got away safely!"
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Maschiff appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Maschiff (1)
+[Ability triggered] The wild Maschiff's Intimidate
+[Stat change] Glimmora's Attack changed by -1 (0 -> -1)
+"Glimmora's Attack fell!"
+
+===== Round 1 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Leer
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Acid Armor
+"Glimmora used Acid Armor!"
+[Stat change] Glimmora's Defense changed by +2 (0 -> 2)
+"Glimmora's Defense rose sharply!"
+[Use move] The wild Maschiff (1) used Leer
+"The wild Maschiff used Leer!"
+[Stat change] Glimmora's Defense changed by -1 (2 -> 1)
+"Glimmora's Defense fell!"
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (131 -> 122)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Leer
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Acid Armor
+"Glimmora used Acid Armor!"
+[Stat change] Glimmora's Defense changed by +2 (1 -> 3)
+"Glimmora's Defense rose sharply!"
+[Use move] The wild Maschiff (1) used Leer
+"The wild Maschiff used Leer!"
+[Stat change] Glimmora's Defense changed by -1 (3 -> 2)
+"Glimmora's Defense fell!"
+
+[End of round 2]
+[HP change] Glimmora lost 9 HP (122 -> 113)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 3 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Leer
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Acid Armor
+"Glimmora used Acid Armor!"
+[Stat change] Glimmora's Defense changed by +2 (2 -> 4)
+"Glimmora's Defense rose sharply!"
+[Use move] The wild Maschiff (1) used Leer
+"The wild Maschiff used Leer!"
+[Stat change] Glimmora's Defense changed by -1 (4 -> 3)
+"Glimmora's Defense fell!"
+
+[End of round 3]
+[HP change] Glimmora lost 9 HP (113 -> 104)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 4 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Scary Face (target 0)
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Acid Armor
+"Glimmora used Acid Armor!"
+[Stat change] Glimmora's Defense changed by +2 (3 -> 5)
+"Glimmora's Defense rose sharply!"
+[Use move] The wild Maschiff (1) used Scary Face
+"The wild Maschiff used Scary Face!"
+[Stat change] Glimmora's Speed changed by -2 (0 -> -2)
+"Glimmora's Speed harshly fell!"
+
+[End of round 4]
+[HP change] Glimmora lost 9 HP (104 -> 95)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 5 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Tackle (target 0)
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Acid Armor
+"Glimmora used Acid Armor!"
+[Stat change] Glimmora's Defense changed by +1 (5 -> 6)
+"Glimmora's Defense rose!"
+[Use move] The wild Maschiff (1) used Tackle
+"The wild Maschiff used Tackle!"
+[HP change] Glimmora lost 1 HP (95 -> 94)
+"It's not very effective..."
+[Ability triggered] Glimmora's Toxic Debris
+"Poison spikes were scattered on the ground all around the opposing team!"
+
+[End of round 5]
+[HP change] Glimmora lost 9 HP (94 -> 85)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 6 =====
+
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Spinarak appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Spinarak (1)
+
+===== Round 1 =====
+
+[AI] Spinarak (1) is considering using String Shot...
+[AI] Spinarak (1) is considering using Poison Sting against Glimmora (0)...
+[AI] Move choices for Spinarak (1):
+   *  33.3% to use String Shot: score 100
+   *  33.3% to use Poison Sting (target 0): score 100
+   *  33.3% to use Poison Sting (target 0): score 100
+   => will use Poison Sting (target 0)
+
+[Round order] Glimmora (0), the wild Spinarak (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Spinarak (1) used Poison Sting
+"The wild Spinarak used Poison Sting!"
+[HP change] Glimmora lost 1 HP (153 -> 152)
+"It's not very effective..."
+[Ability triggered] Glimmora's Toxic Debris
+"Poison spikes were scattered on the ground all around the opposing team!"
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (152 -> 143)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+"You got away safely!"
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Hoothoot appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Hoothoot (1)
+
+===== Round 1 =====
+
+[AI] Hoothoot (1) is considering using Hypnosis against Glimmora (0)...
+[AI] Hoothoot (1) is considering using Foresight against Glimmora (0)...
+[AI] Hoothoot (1) is considering using Peck against Glimmora (0)...
+[AI] Move choices for Hoothoot (1):
+   *  25.0% to use Hypnosis (target 0): score 100
+   *  25.0% to use Foresight (target 0): score 100
+   *  25.0% to use Foresight (target 0): score 100
+   *  25.0% to use Peck (target 0): score 100
+   => will use Hypnosis (target 0)
+
+[Round order] Glimmora (0), the wild Hoothoot (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Hoothoot (1) used Hypnosis
+"The wild Hoothoot used Hypnosis!"
+"It doesn't affect Glimmora..."
+[Move failed] In function code SleepTarget's def pbFailsAgainstTarget?
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (153 -> 144)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+[AI] Hoothoot (1) is considering using Hypnosis against Glimmora (0)...
+[AI] Hoothoot (1) is considering using Foresight against Glimmora (0)...
+[AI] Hoothoot (1) is considering using Peck against Glimmora (0)...
+[AI] Move choices for Hoothoot (1):
+   *  25.0% to use Hypnosis (target 0): score 100
+   *  25.0% to use Foresight (target 0): score 100
+   *  25.0% to use Foresight (target 0): score 100
+   *  25.0% to use Peck (target 0): score 100
+   => will use Foresight (target 0)
+
+[Round order] Glimmora (0), the wild Hoothoot (1)
+
+[Use move] Glimmora (0) used Acid Armor
+"Glimmora used Acid Armor!"
+[Stat change] Glimmora's Defense changed by +2 (0 -> 2)
+"Glimmora's Defense rose sharply!"
+[Use move] The wild Hoothoot (1) used Foresight
+"The wild Hoothoot used Foresight!"
+"Glimmora was identified!"
+
+[End of round 2]
+[HP change] Glimmora lost 9 HP (144 -> 135)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 3 =====
+
+[AI] Hoothoot (1) is considering using Hypnosis against Glimmora (0)...
+[AI] Hoothoot (1) is considering using Foresight against Glimmora (0)...
+[AI] Hoothoot (1) is considering using Peck against Glimmora (0)...
+[AI] Move choices for Hoothoot (1):
+   *  25.0% to use Hypnosis (target 0): score 100
+   *  25.0% to use Foresight (target 0): score 100
+   *  25.0% to use Foresight (target 0): score 100
+   *  25.0% to use Peck (target 0): score 100
+   => will use Peck (target 0)
+
+[Round order] Glimmora (0), the wild Hoothoot (1)
+
+[Use move] Glimmora (0) used Acid Armor
+"Glimmora used Acid Armor!"
+[Stat change] Glimmora's Defense changed by +2 (2 -> 4)
+"Glimmora's Defense rose sharply!"
+[Use move] The wild Hoothoot (1) used Peck
+"The wild Hoothoot used Peck!"
+[HP change] Glimmora lost 1 HP (135 -> 134)
+"It's not very effective..."
+[Ability triggered] Glimmora's Toxic Debris
+"Poison spikes were scattered on the ground all around the opposing team!"
+
+[End of round 3]
+[HP change] Glimmora lost 9 HP (134 -> 125)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 4 =====
+
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Bonsly appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Bonsly (1)
+
+===== Round 1 =====
+
+[AI] Bonsly (1) is considering using Copycat...
+[AI] Bonsly (1) is considering using Fake Tears against Glimmora (0)...
+[AI] Bonsly (1) is considering using Flail against Glimmora (0)...
+[AI] Move choices for Bonsly (1):
+   *  25.0% to use Copycat: score 100
+   *  25.0% to use Copycat: score 100
+   *  25.0% to use Fake Tears (target 0): score 100
+   *  25.0% to use Flail (target 0): score 100
+   => will use Flail (target 0)
+
+[Round order] Glimmora (0), the wild Bonsly (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Bonsly (1) used Flail
+"The wild Bonsly used Flail!"
+[HP change] Glimmora lost 1 HP (153 -> 152)
+"It's not very effective..."
+[Ability triggered] Glimmora's Toxic Debris
+"Poison spikes were scattered on the ground all around the opposing team!"
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (152 -> 143)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Maschiff appeared!"
+"Go! Glimmora!"
+[Round order] Glimmora (0), the wild Maschiff (1)
+[Ability triggered] The wild Maschiff's Intimidate
+[Stat change] Glimmora's Attack changed by -1 (0 -> -1)
+"Glimmora's Attack fell!"
+
+===== Round 1 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Scary Face (target 0)
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+"Poison spikes were scattered all around the opposing team's feet!"
+[Use move] The wild Maschiff (1) used Scary Face
+"The wild Maschiff used Scary Face!"
+[Stat change] Glimmora's Speed changed by -2 (0 -> -2)
+"Glimmora's Speed harshly fell!"
+
+[End of round 1]
+[HP change] Glimmora lost 9 HP (153 -> 144)
+"Glimmora was hurt by its frostbite!"
+
+===== Round 2 =====
+
+[AI] Maschiff (1) is considering using Tackle against Glimmora (0)...
+[AI] Maschiff (1) is considering using Leer...
+[AI] Maschiff (1) is considering using Scary Face against Glimmora (0)...
+[AI] Move choices for Maschiff (1):
+   *  25.0% to use Tackle (target 0): score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Leer: score 100
+   *  25.0% to use Scary Face (target 0): score 100
+   => will use Leer
+
+[Round order] Glimmora (0), the wild Maschiff (1)
+
+[Use move] Glimmora (0) used Toxic Spikes
+"Glimmora used Toxic Spikes!"
+"Poison spikes were scattered all around the opposing team's feet!"
