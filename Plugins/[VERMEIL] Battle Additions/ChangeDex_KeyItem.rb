@@ -825,6 +825,9 @@ module VermeilChangeDex
 
     def starmobile_form?(species, form)
       return false if form <= 0
+      # Team Star Starmobile forms from Gen 9 Pack are REVAVROOM forms 1..5
+      # and are usually defined without FormName.
+      return true if species == :REVAVROOM && form >= 1 && form <= 5
       s_data = GameData::Species.get_species_form(species, form)
       return false if !s_data
       return s_data.form_name.to_s.downcase.include?("starmobile")

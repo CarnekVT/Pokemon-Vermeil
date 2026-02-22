@@ -169,7 +169,7 @@ end
 class Battle::Move
   alias legacy_pbEffectivenessMessage pbEffectivenessMessage
   def pbEffectivenessMessage(user, target, numTargets = 1)
-    legacy_pbEffectivenessMessage(user, target, numTargets = 1)
+    legacy_pbEffectivenessMessage(user, target, numTargets)
     return if self.is_a?(Battle::Move::FixedDamageMove)
     return if target.damageState.disguise || target.damageState.iceFace
     if Effectiveness.super_effective?(target.damageState.typeMod)
@@ -182,7 +182,7 @@ class Battle::Move
 #-------------------------------------------------------------------------------
   alias legacy_pbHitEffectivenessMessages pbHitEffectivenessMessages
   def pbHitEffectivenessMessages(user, target, numTargets = 1)
-    legacy_pbHitEffectivenessMessages(user, target, numTargets = 1)
+    legacy_pbHitEffectivenessMessages(user, target, numTargets)
     return if target.damageState.disguise || target.damageState.iceFace
     if target.damageState.critical
       user.pokemon.legacy_data[:critical_count] += 1

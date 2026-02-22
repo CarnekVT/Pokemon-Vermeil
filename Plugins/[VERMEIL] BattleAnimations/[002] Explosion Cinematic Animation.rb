@@ -638,6 +638,35 @@ class Battle::Scene
     return state
   end
 
+  def vermeil_capture_message_visibility
+    state = {}
+    @sprites.each do |key, sprite|
+      next if !sprite || !sprite.respond_to?(:visible)
+      k = key.to_s.downcase
+      next if !k.include?("message") && !k.include?("msgwindow") && !k.include?("textbox")
+      state[key] = sprite.visible
+    end
+    return state
+  end
+
+  def vermeil_set_message_visibility(val_or_state)
+    return if !@sprites
+    if val_or_state.is_a?(Hash)
+      val_or_state.each do |key, vis|
+        next if !@sprites[key] || !@sprites[key].respond_to?(:visible=)
+        @sprites[key].visible = vis
+      end
+    else
+      show = !!val_or_state
+      @sprites.each do |key, sprite|
+        next if !sprite || !sprite.respond_to?(:visible=)
+        k = key.to_s.downcase
+        next if !k.include?("message") && !k.include?("msgwindow") && !k.include?("textbox")
+        sprite.visible = show
+      end
+    end
+  end
+
   def vermeil_hide_ui_for_cinematic
     @sprites.each do |key, sprite|
       next if !sprite || !sprite.respond_to?(:visible=)
@@ -656,9 +685,29 @@ class Battle::Scene
     end
   end
 
+  def vermeil_wait_for_hp_animations(max_frames = 180)
+    return if !@sprites
+    waited = 0
+    loop do
+      animating = false
+      @sprites.each do |key, sprite|
+        next if !sprite
+        next if !key.to_s.start_with?("dataBox_")
+        if sprite.respond_to?(:animating_hp?) && sprite.animating_hp?
+          animating = true
+          break
+        end
+      end
+      break if !animating || waited >= max_frames
+      pbUpdate
+      waited += 1
+    end
+  end
+
   def pbPlayCinematicExplosionAnimation(user, _targets)
     return if !user
     ui_state = vermeil_capture_ui_visibility
+    message_ui_state = vermeil_capture_message_visibility
     white_overlay = nil
 
     user_sprite = @sprites["pokemon_#{user.index}"]
@@ -736,14 +785,20 @@ class Battle::Scene
         next if !k.start_with?("databox")
         sprite.visible = true
       end
+      # Keep text box hidden while HP/damage visuals resolve.
+      vermeil_set_message_visibility(false)
       vermeil_sync_shadows_after_cinematic
-      # Give UI time to reappear before HP/damage visuals continue.
-      20.times { pbUpdate }
+      # Wait for real HP animations to finish (instead of fixed frame delay).
+      vermeil_wait_for_hp_animations(210)
+      # Small settle buffer for databox state changes (e.g. faint/remove).
+      8.times { pbUpdate }
       vermeil_sync_shadows_after_cinematic
       # Keep full white for a moment while all restored elements settle.
       vermeil_white_overlay_hold(white_overlay, 12)
       vermeil_white_overlay_out(white_overlay)
       vermeil_dispose_overlay(white_overlay)
+      # Restore battle text UI after cinematic and HP visibility window.
+      vermeil_set_message_visibility(message_ui_state)
     end
   end
 end

@@ -153,6 +153,7 @@ class Battle::Scene
   def vermeil_play_cinematic_explosion_variant(user, anim_class, in_frames: 6, hold_frames: 12, out_frames: 16)
     return if !user
     ui_state = vermeil_capture_ui_visibility
+    message_ui_state = respond_to?(:vermeil_capture_message_visibility) ? vermeil_capture_message_visibility : nil
     white_overlay = nil
     user_sprite = @sprites["pokemon_#{user.index}"]
     old_vis = user_sprite&.visible
@@ -221,12 +222,27 @@ class Battle::Scene
         next if !k.start_with?("databox")
         sprite.visible = true
       end
+      if respond_to?(:vermeil_set_message_visibility)
+        vermeil_set_message_visibility(false)
+      end
       vermeil_sync_shadows_after_cinematic
-      20.times { pbUpdate }
+      if respond_to?(:vermeil_wait_for_hp_animations)
+        vermeil_wait_for_hp_animations(210)
+      else
+        20.times { pbUpdate }
+      end
+      8.times { pbUpdate }
       vermeil_sync_shadows_after_cinematic
       vermeil_white_overlay_hold(white_overlay, hold_frames)
       vermeil_white_overlay_out(white_overlay, out_frames)
       vermeil_dispose_overlay(white_overlay)
+      if respond_to?(:vermeil_set_message_visibility)
+        if message_ui_state
+          vermeil_set_message_visibility(message_ui_state)
+        else
+          vermeil_set_message_visibility(true)
+        end
+      end
     end
   end
 

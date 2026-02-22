@@ -5,6 +5,10 @@ module StatusParticles
   @@emitters = []
   @@suppressed = false
   @@suppress_depth = 0
+  BLOCKED_COMMON_ANIMATIONS = [
+    :sleep, :drowsy, :frozen, :frostbite, :burn, :poison, :toxic,
+    :paralysis, :confusion, :attract, :infatuation
+  ]
 
   def self.suppressed?
     return @@suppressed
@@ -115,6 +119,22 @@ module StatusParticles
 
   def self.asset_name(status_key)
     return ICON_FILES[status_key]
+  end
+
+  def self.block_common_animation?(anim_id)
+    raw = anim_id.to_s.strip.downcase
+    key = raw.to_sym
+    return true if BLOCKED_COMMON_ANIMATIONS.include?(key)
+    # Failsafe for variant IDs after reload/plugin aliases (e.g. "Poison2", "Paralyze").
+    return true if raw.include?("sleep")
+    return true if raw.include?("drows")
+    return true if raw.include?("froz") || raw.include?("frost")
+    return true if raw.include?("burn")
+    return true if raw.include?("poison") || raw.include?("toxic")
+    return true if raw.include?("paraly")
+    return true if raw.include?("confus")
+    return true if raw.include?("attract") || raw.include?("infatu")
+    return false
   end
 end
 
@@ -479,6 +499,7 @@ module StatusParticles
     end
 
     def update
+      status_particles_ensure_emitters if respond_to?(:status_particles_ensure_emitters)
       super
       @status_particle_emitters&.each { |e| e.update }
     end
@@ -493,16 +514,22 @@ module StatusParticles
         return @battler
       end
 
+      def status_particles_ensure_emitters
+        @status_particle_emitters ||= []
+        return if !@status_particle_emitters.empty?
+        [:main, :confusion, :attraction].each do |type|
+          emitter = StatusParticles::Emitter.new(self.viewport, self, type)
+          @status_particle_emitters << emitter
+          StatusParticles.register_emitter(emitter)
+        end
+      end
+
       unless method_defined?(:status_particles_initialize)
         alias_method :status_particles_initialize, :initialize
         def initialize(*args)
           status_particles_initialize(*args)
           @status_particle_emitters = []
-          [:main, :confusion, :attraction].each do |type|
-            emitter = StatusParticles::Emitter.new(self.viewport, self, type)
-            @status_particle_emitters << emitter
-            StatusParticles.register_emitter(emitter)
-          end
+          status_particles_ensure_emitters
         end
       end
     end
@@ -532,12 +559,21 @@ module StatusParticles
           alias_method :status_particles_pbCommonAnimation, :pbCommonAnimation
           def pbCommonAnimation(*args)
             # Desactivar animaciones comunes de estado para evitar superposición con partículas
-            if ["Sleep", "Drowsy", "Frozen", "Frostbite", "Burn", "Poison", "Toxic", "Paralysis", "Confusion", "Attract"].include?(args[0])
-              return
-            end
+            return if StatusParticles.block_common_animation?(args[0])
             # return status_particles_pbCommonAnimation(*args) if StatusParticles.suppressed?
             # StatusParticles.with_suppressed { status_particles_pbCommonAnimation(*args) }
             status_particles_pbCommonAnimation(*args)
+          end
+        end
+      end
+    end
+    if defined?(Battle)
+      Battle.class_eval do
+        unless method_defined?(:status_particles_battle_pbCommonAnimation)
+          alias_method :status_particles_battle_pbCommonAnimation, :pbCommonAnimation
+          def pbCommonAnimation(animName, user = nil, targets = nil)
+            return if StatusParticles.block_common_animation?(animName)
+            status_particles_battle_pbCommonAnimation(animName, user, targets)
           end
         end
       end
@@ -547,10 +583,6 @@ module StatusParticles
 end
 
 StatusParticles.install
-TracePoint.new(:class) do |tp|
-  StatusParticles.install
-  tp.disable if StatusParticles.instance_variable_get(:@installed)
-end.enable
 
 EventHandlers.add(:on_end_battle, :status_particles_cleanup,
   proc { StatusParticles.dispose_all }

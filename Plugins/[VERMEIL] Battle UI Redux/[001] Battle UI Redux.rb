@@ -17,6 +17,19 @@ module VermeilBattleUIRedux
   ACTION_HINT_Y_OFFSET = -8
   FIGHT_SLIDE_DISTANCE = 220
   COMMAND_SLIDE_DISTANCE = 220
+  DEFAULT_MESSAGE_ASSET = "Graphics/UI/Battle/overlay_message"
+  TRANSPARENT_MESSAGE_ASSET = "Graphics/UI/Battle/transparent_message"
+  TRANSPARENT_MESSAGE_X = 0
+  TRANSPARENT_MESSAGE_Y = Graphics.height - 96
+  TRANSPARENT_TEXT_X = 16
+  TRANSPARENT_TEXT_Y = Graphics.height - 94
+  TRANSPARENT_TEXT_W = Graphics.width - 32
+  TRANSPARENT_TEXT_H = 96
+  # Visual-only mode: keep command/fight overlays + databox visuals only.
+  # Disables message/animation/display rewrites from this plugin.
+  VISUAL_ONLY_MODE = true
+  FORCE_VANILLA_UI_OVERRIDE = true
+  STEP0_BYPASS_CUSTOM_SHOWWINDOW = true
 
   SECONDARY_LAYOUT = {
     0 => [1, 3, 2],
@@ -104,9 +117,14 @@ module VermeilBattleUIRedux
   end
 
   class CommandOverlay
-    def initialize(viewport)
+    def initialize(viewport, scene = nil)
+      @scene = scene
       @sprite = BitmapSprite.new(Graphics.width, Graphics.height, viewport)
       @sprite.z = VermeilBattleUIRedux::REDUX_OVERLAY_Z
+      if @scene && @scene.instance_variable_defined?(:@sprites)
+        sprites = @scene.instance_variable_get(:@sprites)
+        sprites["vermeil_overlay_command"] = @sprite if sprites.is_a?(Hash)
+      end
       pbSetNarrowFont(@sprite.bitmap)
       @button_bitmap = nil
       @button_bitmap = AnimatedBitmap.new(_INTL("Graphics/UI/Battle/cursor_command")) rescue nil
@@ -192,9 +210,14 @@ module VermeilBattleUIRedux
   end
 
   class FightOverlay
-    def initialize(viewport)
+    def initialize(viewport, scene = nil)
+      @scene = scene
       @sprite = BitmapSprite.new(Graphics.width, Graphics.height, viewport)
       @sprite.z = VermeilBattleUIRedux::REDUX_OVERLAY_Z
+      if @scene && @scene.instance_variable_defined?(:@sprites)
+        sprites = @scene.instance_variable_get(:@sprites)
+        sprites["vermeil_overlay_fight"] = @sprite if sprites.is_a?(Hash)
+      end
       pbSetNarrowFont(@sprite.bitmap)
       @button_bitmap = nil
       @button_bitmap = AnimatedBitmap.new(_INTL("Graphics/UI/Battle/cursor_fight")) rescue nil
@@ -348,6 +371,188 @@ module VermeilBattleUIRedux
 end
 
 module VermeilBattleUIRedux
+  module MessageBoxLayoutOverride
+    MESSAGE_TEXT_PADDING_X = 16
+    MESSAGE_TEXT_PADDING_Y = 2
+    MESSAGE_TRANSITION_FRAMES = 0
+    MESSAGE_TRANSITION_DROP_Y = 0
+
+    def vermeil_redux_message_box_rect
+      resolved = pbResolveBitmap(VermeilBattleUIRedux::DEFAULT_MESSAGE_ASSET)
+      w = Graphics.width
+      h = 96
+      if resolved
+        bmp = nil
+        begin
+          bmp = Bitmap.new(resolved)
+          w = bmp.width if bmp && !bmp.disposed?
+          h = bmp.height if bmp && !bmp.disposed?
+        ensure
+          bmp.dispose if bmp && !bmp.disposed?
+        end
+      end
+      x = 0
+      y = Graphics.height - h
+      return [x, y, w, h]
+    end
+
+    def vermeil_redux_apply_message_layout
+      return if !@sprites
+      msg_box = @sprites["messageBox"]
+      msg_win = @sprites["messageWindow"]
+      return if !msg_box || !msg_win
+      x, y, w, h = vermeil_redux_message_box_rect
+      msg_box.x = x if msg_box.respond_to?(:x=)
+      msg_box.y = y if msg_box.respond_to?(:y=)
+      if msg_win.respond_to?(:x=) && msg_win.respond_to?(:y=)
+        msg_win.x = x + MESSAGE_TEXT_PADDING_X
+        msg_win.y = y + MESSAGE_TEXT_PADDING_Y
+      end
+      if msg_win.respond_to?(:width=) && msg_win.respond_to?(:height=)
+        msg_win.width = [w - (MESSAGE_TEXT_PADDING_X * 2), 32].max
+        msg_win.height = h
+      end
+      # No window background; overlay graphic is the only box.
+      msg_win.opacity = 0 if msg_win.respond_to?(:opacity=)
+      msg_win.back_opacity = 0 if msg_win.respond_to?(:back_opacity=)
+      msg_win.contents_opacity = 255 if msg_win.respond_to?(:contents_opacity=)
+      if msg_win.respond_to?(:baseColor=)
+        msg_win.baseColor = defined?(Battle::Scene::BASE_DARK) ? Battle::Scene::BASE_DARK : Color.new(56, 56, 56)
+      end
+      if msg_win.respond_to?(:shadowColor=)
+        msg_win.shadowColor = defined?(Battle::Scene::SHADOW_DARK) ? Battle::Scene::SHADOW_DARK : Color.new(184, 184, 184)
+      end
+      @vermeil_redux_msg_base_x = x
+      @vermeil_redux_msg_base_y = y
+    end
+
+    def vermeil_redux_start_message_transition(show)
+      # STEP 3 (disabled): transition helper is currently unused and can
+      # interfere with message visibility state tracking.
+      # Re-enable only if you want animated message box transitions again.
+      return
+    end
+
+    def vermeil_redux_set_message_box_skin(use_transparent = false)
+      return if !@sprites
+      msg_box = @sprites["messageBox"]
+      return if !msg_box || !msg_box.respond_to?(:setBitmap)
+      asset = use_transparent ? VermeilBattleUIRedux::TRANSPARENT_MESSAGE_ASSET : VermeilBattleUIRedux::DEFAULT_MESSAGE_ASSET
+      return if !pbResolveBitmap(asset)
+      msg_box.setBitmap(asset)
+      vermeil_redux_apply_message_layout
+    end
+
+    def vermeil_redux_force_message_state(show)
+      return if !@sprites
+      msg_box = @sprites["messageBox"]
+      msg_win = @sprites["messageWindow"]
+      return if !msg_box || !msg_win
+      vermeil_redux_apply_message_layout
+      if show
+        msg_box.visible = true if msg_box.respond_to?(:visible=)
+        msg_win.visible = true if msg_win.respond_to?(:visible=)
+        msg_box.opacity = 255 if msg_box.respond_to?(:opacity=)
+        msg_win.contents_opacity = 255 if msg_win.respond_to?(:contents_opacity=)
+      else
+        msg_box.visible = false if msg_box.respond_to?(:visible=)
+        msg_win.visible = false if msg_win.respond_to?(:visible=)
+      end
+    end
+
+    def pbShowWindow(windowType)
+      if defined?(VermeilBattleUIRedux::VISUAL_ONLY_MODE) &&
+         VermeilBattleUIRedux::VISUAL_ONLY_MODE
+        # Visual-only safety path: avoid super-chain recursion with other
+        # plugins that alias/prepend pbShowWindow.
+        if @sprites
+          msg_box_const = (defined?(Battle::Scene::MESSAGE_BOX) ? Battle::Scene::MESSAGE_BOX : 1)
+          cmd_box_const = (defined?(Battle::Scene::COMMAND_BOX) ? Battle::Scene::COMMAND_BOX : 2)
+          fight_box_const = (defined?(Battle::Scene::FIGHT_BOX) ? Battle::Scene::FIGHT_BOX : 3)
+          target_box_const = (defined?(Battle::Scene::TARGET_BOX) ? Battle::Scene::TARGET_BOX : 4)
+          @sprites["messageBox"].visible = (windowType == msg_box_const) if @sprites["messageBox"] && @sprites["messageBox"].respond_to?(:visible=)
+          @sprites["messageWindow"].visible = (windowType == msg_box_const) if @sprites["messageWindow"] && @sprites["messageWindow"].respond_to?(:visible=)
+          @sprites["commandWindow"].visible = (windowType == cmd_box_const) if @sprites["commandWindow"] && @sprites["commandWindow"].respond_to?(:visible=)
+          @sprites["fightWindow"].visible = (windowType == fight_box_const) if @sprites["fightWindow"] && @sprites["fightWindow"].respond_to?(:visible=)
+          @sprites["targetWindow"].visible = (windowType == target_box_const) if @sprites["targetWindow"] && @sprites["targetWindow"].respond_to?(:visible=)
+        end
+        return
+      end
+      if @vermeil_redux_showwindow_guard
+        # Fallback on re-entry: apply vanilla visibility state to avoid partial UI.
+        if @sprites
+          msg_box_const = (defined?(Battle::Scene::MESSAGE_BOX) ? Battle::Scene::MESSAGE_BOX : 1)
+          cmd_box_const = (defined?(Battle::Scene::COMMAND_BOX) ? Battle::Scene::COMMAND_BOX : 2)
+          fight_box_const = (defined?(Battle::Scene::FIGHT_BOX) ? Battle::Scene::FIGHT_BOX : 3)
+          target_box_const = (defined?(Battle::Scene::TARGET_BOX) ? Battle::Scene::TARGET_BOX : 4)
+          @sprites["messageBox"].visible = (windowType == msg_box_const) if @sprites["messageBox"] && @sprites["messageBox"].respond_to?(:visible=)
+          @sprites["messageWindow"].visible = (windowType == msg_box_const) if @sprites["messageWindow"] && @sprites["messageWindow"].respond_to?(:visible=)
+          @sprites["commandWindow"].visible = (windowType == cmd_box_const) if @sprites["commandWindow"] && @sprites["commandWindow"].respond_to?(:visible=)
+          @sprites["fightWindow"].visible = (windowType == fight_box_const) if @sprites["fightWindow"] && @sprites["fightWindow"].respond_to?(:visible=)
+          @sprites["targetWindow"].visible = (windowType == target_box_const) if @sprites["targetWindow"] && @sprites["targetWindow"].respond_to?(:visible=)
+          want_show = (windowType == msg_box_const)
+          @vermeil_redux_msg_target_visible = want_show
+          @vermeil_redux_msg_transition = nil
+          vermeil_redux_force_message_state(want_show)
+        end
+        return
+      end
+      @vermeil_redux_showwindow_guard = true
+      msg_box_const = (defined?(Battle::Scene::MESSAGE_BOX) ? Battle::Scene::MESSAGE_BOX : 1)
+      cmd_box_const = (defined?(Battle::Scene::COMMAND_BOX) ? Battle::Scene::COMMAND_BOX : 2)
+      fight_box_const = (defined?(Battle::Scene::FIGHT_BOX) ? Battle::Scene::FIGHT_BOX : 3)
+      target_box_const = (defined?(Battle::Scene::TARGET_BOX) ? Battle::Scene::TARGET_BOX : 4)
+      if !(defined?(VermeilBattleUIRedux::FORCE_VANILLA_UI_OVERRIDE) && VermeilBattleUIRedux::FORCE_VANILLA_UI_OVERRIDE)
+        super
+      elsif @sprites
+        # Hard override mode: Redux controls visibility and ignores vanilla window toggles.
+        @sprites["messageBox"].visible   = (windowType == msg_box_const)   if @sprites["messageBox"] && @sprites["messageBox"].respond_to?(:visible=)
+        @sprites["messageWindow"].visible = (windowType == msg_box_const)  if @sprites["messageWindow"] && @sprites["messageWindow"].respond_to?(:visible=)
+        @sprites["commandWindow"].visible = (windowType == cmd_box_const)  if @sprites["commandWindow"] && @sprites["commandWindow"].respond_to?(:visible=)
+        @sprites["fightWindow"].visible   = (windowType == fight_box_const) if @sprites["fightWindow"] && @sprites["fightWindow"].respond_to?(:visible=)
+        @sprites["targetWindow"].visible  = (windowType == target_box_const) if @sprites["targetWindow"] && @sprites["targetWindow"].respond_to?(:visible=)
+      end
+      if @sprites
+        if windowType == msg_box_const
+          if @vermeil_redux_command_overlay && @vermeil_redux_command_overlay.respond_to?(:visible=)
+            @vermeil_redux_command_overlay.visible = false
+          end
+          if @vermeil_redux_fight_overlay && @vermeil_redux_fight_overlay.respond_to?(:visible=)
+            @vermeil_redux_fight_overlay.visible = false
+          end
+          @sprites.each_value do |s|
+            next if !s || !s.respond_to?(:visible=)
+            if s.is_a?(VermeilBattleUIRedux::CommandOverlay) || s.is_a?(VermeilBattleUIRedux::FightOverlay)
+              s.visible = false
+            end
+          end
+        end
+      end
+      vermeil_redux_apply_message_layout
+      # Keep message UI instant (no transition), to avoid state bugs in flee/turn swaps.
+      msg_box_const = (defined?(Battle::Scene::MESSAGE_BOX) ? Battle::Scene::MESSAGE_BOX : 1)
+      want_show = (windowType == msg_box_const)
+      if @vermeil_redux_msg_target_visible.nil?
+        current_vis = (@sprites && @sprites["messageBox"] && @sprites["messageBox"].respond_to?(:visible)) ? @sprites["messageBox"].visible : false
+        @vermeil_redux_msg_target_visible = current_vis
+      end
+      @vermeil_redux_msg_target_visible = want_show
+      @vermeil_redux_msg_transition = nil
+      vermeil_redux_force_message_state(want_show)
+    ensure
+      @vermeil_redux_showwindow_guard = false
+    end
+
+    def pbUpdate(*args)
+      super
+      return if !@sprites
+      # STEP 1 (disabled): per-frame visibility enforcement can fight with
+      # Essentials/other plugins and cause flicker/overlap race conditions.
+      # Re-enable later if needed.
+      return
+    end
+  end
+
   module DataboxPositionOverride
     def set_style_properties(sideSize)
       super
@@ -371,6 +576,30 @@ end
 Battle::Scene::PokemonDataBox.prepend(VermeilBattleUIRedux::DataboxPositionOverride) if
   defined?(Battle::Scene::PokemonDataBox) &&
   !Battle::Scene::PokemonDataBox.ancestors.include?(VermeilBattleUIRedux::DataboxPositionOverride)
+
+module VermeilBattleUIRedux
+  module DataBoxSwitchRefreshOverride
+    def battler=(b)
+      super
+      # On switch-in, kill stale HP/EXP tween state from previous occupant.
+      @anim_hp_start = nil
+      @anim_hp_end = nil
+      @anim_hp_timer_start = nil
+      @anim_hp_current = nil
+      @anim_exp_start = nil
+      @anim_exp_end = nil
+      @anim_exp_range = nil
+      @anim_exp_duration_mult = nil
+      @anim_exp_current = nil
+      @anim_exp_timer_start = nil
+      refresh if @battler && respond_to?(:refresh)
+    end
+  end
+end
+
+Battle::Scene::PokemonDataBox.prepend(VermeilBattleUIRedux::DataBoxSwitchRefreshOverride) if
+  defined?(Battle::Scene::PokemonDataBox) &&
+  !Battle::Scene::PokemonDataBox.ancestors.include?(VermeilBattleUIRedux::DataBoxSwitchRefreshOverride)
 
 module VermeilBattleUIRedux
   module FightMenuOverride
@@ -402,8 +631,11 @@ module VermeilBattleUIRedux
       cw.setIndexAndMode(move_index, mode)
       pbSetSpecialActionModes(idxBattler, specialAction, cw) if respond_to?(:pbSetSpecialActionModes)
       cw.refresh if cw.respond_to?(:refresh)
+      @sprites["messageBox"].visible = false if @sprites["messageBox"]
+      @sprites["messageWindow"].visible = false if @sprites["messageWindow"]
 
-      overlay = VermeilBattleUIRedux::FightOverlay.new(@viewport)
+      overlay = VermeilBattleUIRedux::FightOverlay.new(@viewport, self)
+      @vermeil_redux_fight_overlay = overlay
       cw.visible = false if cw.respond_to?(:visible=)
       enter_frames = 6
       overlay.opacity = 0
@@ -434,6 +666,8 @@ module VermeilBattleUIRedux
         if need_full_refresh
           pbShowWindow(Battle::Scene::FIGHT_BOX)
           cw.visible = false if cw.respond_to?(:visible=)
+          @sprites["messageBox"].visible = false if @sprites["messageBox"]
+          @sprites["messageWindow"].visible = false if @sprites["messageWindow"]
           pbSelectBattler(idxBattler)
           need_full_refresh = false
         end
@@ -468,10 +702,12 @@ module VermeilBattleUIRedux
         end
 
         if Input.trigger?(Input::USE)
+          overlay.visible = false if overlay.respond_to?(:visible=)
           pbPlayDecisionSE
           cmd = respond_to?(:pbFightMenu_Confirm) ? pbFightMenu_Confirm(battler, specialAction, cw) : cw.index
           accepted = yield cmd
           break if accepted
+          overlay.visible = true if overlay.respond_to?(:visible=)
           need_full_refresh = true
           need_refresh = true
         elsif Input.trigger?(Input::BACK)
@@ -507,6 +743,10 @@ module VermeilBattleUIRedux
       pbFightMenu_End(battler, specialAction, cw) if respond_to?(:pbFightMenu_End)
       @lastMove[idxBattler] = cw.index
     ensure
+      if @sprites
+        @sprites.delete("vermeil_overlay_fight")
+      end
+      @vermeil_redux_fight_overlay = nil
       overlay.dispose if overlay
       cw.visible = false if cw && cw.respond_to?(:visible=)
       pbHideInfoUI if respond_to?(:pbHideInfoUI)
@@ -521,8 +761,11 @@ module VermeilBattleUIRedux
     cw.setTexts(texts)
     cw.setIndexAndMode(@lastCmd[idxBattler], mode)
     pbSelectBattler(idxBattler)
+    @sprites["messageBox"].visible = false if @sprites["messageBox"]
+    @sprites["messageWindow"].visible = false if @sprites["messageWindow"]
 
-    overlay = VermeilBattleUIRedux::CommandOverlay.new(@viewport)
+    overlay = VermeilBattleUIRedux::CommandOverlay.new(@viewport, self)
+    @vermeil_redux_command_overlay = overlay
     cw.visible = false if cw.respond_to?(:visible=)
     overlay.offset_x = VermeilBattleUIRedux::COMMAND_SLIDE_DISTANCE
     overlay.draw(texts, cw.index, cw.mode)
@@ -584,6 +827,7 @@ module VermeilBattleUIRedux
       end
 
       if Input.trigger?(Input::USE)
+        overlay.visible = false if overlay.respond_to?(:visible=)
         pbPlayDecisionSE
         ret = cw.index
         @lastCmd[idxBattler] = ret
@@ -613,6 +857,10 @@ module VermeilBattleUIRedux
     end
     return ret
   ensure
+    if @sprites
+      @sprites.delete("vermeil_overlay_command")
+    end
+    @vermeil_redux_command_overlay = nil
     overlay.dispose if overlay
     cw.visible = false if cw && cw.respond_to?(:visible=)
   end
@@ -643,15 +891,48 @@ module VermeilBattleUIRedux
     end
 
     def pbBeginAttackPhase(*args)
-      vermeil_redux_force_hide_enhanced_ui
+      # STEP 2a (disabled): hide call during attack phase.
+      # vermeil_redux_force_hide_enhanced_ui
       super(*args)
     end
 
     def pbAnimation(*args)
-      vermeil_redux_force_hide_enhanced_ui
+      # STEP 2b (disabled): animation-time UI/skin manipulation can re-enter
+      # message flow and cause duplicate/overlap behavior.
+      # vermeil_redux_force_hide_enhanced_ui
+      # vermeil_redux_set_message_box_skin(true) if respond_to?(:vermeil_redux_set_message_box_skin)
       super(*args)
+    ensure
+      # vermeil_redux_set_message_box_skin(false) if respond_to?(:vermeil_redux_set_message_box_skin)
     end
 
+  end
+end
+
+module VermeilBattleUIRedux
+  module DataBoxSlideDirectionAppear
+    def createProcesses
+      return if !@sprites["dataBox_#{@idxBox}"]
+      box = addSprite(@sprites["dataBox_#{@idxBox}"])
+      box.setVisible(0, true)
+      # Player data box enters left -> right.
+      dir = (@idxBox.even?) ? -1 : 1
+      box.setDelta(0, dir * Graphics.width / 2, 0)
+      box.moveDelta(0, 8, -dir * Graphics.width / 2, 0)
+    end
+  end
+
+  module DataBoxSlideDirectionDisappear
+    def createProcesses
+      return if !@sprites["dataBox_#{@idxBox}"] || !@sprites["dataBox_#{@idxBox}"].visible
+      box = addSprite(@sprites["dataBox_#{@idxBox}"])
+      # Player exits to left with gentle fade.
+      dir = (@idxBox.even?) ? -1 : 1
+      box.setOpacity(0, 255) if box.respond_to?(:setOpacity)
+      box.moveDelta(0, 8, dir * Graphics.width / 2, 0)
+      box.moveOpacity(0, 8, 0) if box.respond_to?(:moveOpacity)
+      box.setVisible(8, false)
+    end
   end
 end
 
@@ -662,4 +943,173 @@ Battle::Scene.prepend(VermeilBattleUIRedux::CommandMenuOverride) if
   !Battle::Scene.ancestors.include?(VermeilBattleUIRedux::CommandMenuOverride)
 
 Battle::Scene.prepend(VermeilBattleUIRedux::AnimationVisibilityOverride) if
+  !VermeilBattleUIRedux::VISUAL_ONLY_MODE &&
   !Battle::Scene.ancestors.include?(VermeilBattleUIRedux::AnimationVisibilityOverride)
+
+Battle::Scene.prepend(VermeilBattleUIRedux::MessageBoxLayoutOverride) if
+  !VermeilBattleUIRedux::VISUAL_ONLY_MODE &&
+  !Battle::Scene.ancestors.include?(VermeilBattleUIRedux::MessageBoxLayoutOverride)
+
+if !VermeilBattleUIRedux::VISUAL_ONLY_MODE
+  class Battle::Scene
+    alias_method :vermeil_redux_pbInitSprites, :pbInitSprites
+
+    def pbInitSprites
+      return vermeil_redux_pbInitSprites if @vermeil_redux_msglayout_init_guard
+      @vermeil_redux_msglayout_init_guard = true
+      vermeil_redux_pbInitSprites
+      return if !@sprites
+      msg_box = @sprites["messageBox"]
+      msg_win = @sprites["messageWindow"]
+      return if !msg_box || !msg_win
+      vermeil_redux_set_message_box_skin(false)
+      msg_box.x = VermeilBattleUIRedux::TRANSPARENT_MESSAGE_X if msg_box.respond_to?(:x=)
+      msg_box.y = VermeilBattleUIRedux::TRANSPARENT_MESSAGE_Y if msg_box.respond_to?(:y=)
+      msg_win.x = VermeilBattleUIRedux::TRANSPARENT_TEXT_X if msg_win.respond_to?(:x=)
+      msg_win.y = VermeilBattleUIRedux::TRANSPARENT_TEXT_Y if msg_win.respond_to?(:y=)
+      if msg_win.respond_to?(:width=) && msg_win.respond_to?(:height=)
+        msg_win.width = VermeilBattleUIRedux::TRANSPARENT_TEXT_W
+        msg_win.height = VermeilBattleUIRedux::TRANSPARENT_TEXT_H
+      end
+      # Keep message window body transparent so overlay_message is the only panel.
+      msg_win.opacity = 0 if msg_win.respond_to?(:opacity=)
+      msg_win.contents_opacity = 255 if msg_win.respond_to?(:contents_opacity=)
+      msg_win.back_opacity = 0 if msg_win.respond_to?(:back_opacity=)
+      if msg_win.respond_to?(:baseColor=)
+        msg_win.baseColor = defined?(Battle::Scene::BASE_DARK) ? Battle::Scene::BASE_DARK : Color.new(56, 56, 56)
+      end
+      if msg_win.respond_to?(:shadowColor=)
+        msg_win.shadowColor = defined?(Battle::Scene::SHADOW_DARK) ? Battle::Scene::SHADOW_DARK : Color.new(184, 184, 184)
+      end
+      msg_win.z = 999 if msg_win.respond_to?(:z=)
+      msg_box.z = 998 if msg_box.respond_to?(:z=)
+    ensure
+      @vermeil_redux_msglayout_init_guard = false
+    end
+  end
+end
+
+if defined?(Battle::Scene::Animation::DataBoxAppear) &&
+   !Battle::Scene::Animation::DataBoxAppear.ancestors.include?(VermeilBattleUIRedux::DataBoxSlideDirectionAppear)
+  Battle::Scene::Animation::DataBoxAppear.prepend(VermeilBattleUIRedux::DataBoxSlideDirectionAppear)
+end
+
+if defined?(Battle::Scene::Animation::DataBoxDisappear) &&
+   !Battle::Scene::Animation::DataBoxDisappear.ancestors.include?(VermeilBattleUIRedux::DataBoxSlideDirectionDisappear)
+  Battle::Scene::Animation::DataBoxDisappear.prepend(VermeilBattleUIRedux::DataBoxSlideDirectionDisappear)
+end
+
+#-----------------------------------------------------------------------------
+# Visual-only message skin fix
+# Keeps the vanilla message window body transparent so overlay_message remains
+# the only visible panel, without overriding pbShowWindow.
+#-----------------------------------------------------------------------------
+if VermeilBattleUIRedux::VISUAL_ONLY_MODE
+  module VermeilBattleUIRedux
+    module VisualOnlyMessageSkinFix
+      def vermeil_redux_apply_visual_message_skin
+        return if !@sprites
+        msg_box = @sprites["messageBox"]
+        msg_win = @sprites["messageWindow"]
+        return if !msg_box || !msg_win
+        msg_win.opacity = 0 if msg_win.respond_to?(:opacity=)
+        msg_win.back_opacity = 0 if msg_win.respond_to?(:back_opacity=)
+        msg_win.contents_opacity = 255 if msg_win.respond_to?(:contents_opacity=)
+        msg_win.z = 999 if msg_win.respond_to?(:z=)
+        msg_box.z = 998 if msg_box.respond_to?(:z=)
+      end
+
+      def pbUpdate(*args)
+        super(*args)
+        vermeil_redux_apply_visual_message_skin
+      end
+
+      def pbSendOutBattlers(sendOuts, startBattle = false)
+        super
+        return if !@sprites || !sendOuts
+        sendOuts.each do |entry|
+          next if !entry || !entry[0]
+          idx = entry[0]
+          box = @sprites["dataBox_#{idx}"]
+          next if !box
+          if box.respond_to?(:battler=) && @battle && @battle.battlers[idx]
+            box.battler = @battle.battlers[idx]
+          end
+          # Hard-fix: ensure the player's databox is visible immediately after switch.
+          if idx.even?
+            box.visible = true if box.respond_to?(:visible=)
+            box.opacity = 255 if box.respond_to?(:opacity=)
+          end
+          pbRefreshOne(idx) if respond_to?(:pbRefreshOne)
+          box.refresh if box.respond_to?(:refresh)
+          box.update_positions if idx.even? && box.respond_to?(:update_positions)
+        end
+      end
+    end
+  end
+
+  Battle::Scene.prepend(VermeilBattleUIRedux::VisualOnlyMessageSkinFix) if
+    !Battle::Scene.ancestors.include?(VermeilBattleUIRedux::VisualOnlyMessageSkinFix)
+end
+
+module VermeilBattleUIRedux
+  module MessageDedupeOverride
+    DEDUPE_WINDOW_SECONDS = 2.5
+
+    # Lógica de dedupe compartida — devuelve true si debe suprimirse
+    def vermeil_should_suppress_used_msg?(msg)
+      text = msg.to_s.strip
+      normalized = text.downcase.gsub(/\s+/, " ")
+      return false if normalized.empty?
+      return false unless normalized =~ /\A.+ used .+!\z/
+      now = System.uptime
+      if @vermeil_redux_last_used_normalized == normalized &&
+         @vermeil_redux_last_used_line_time &&
+         (now - @vermeil_redux_last_used_line_time) < DEDUPE_WINDOW_SECONDS
+        return true
+      end
+      @vermeil_redux_last_used_normalized = normalized
+      @vermeil_redux_last_used_line_time = now
+      return false
+    end
+
+    def vermeil_hide_battle_overlays
+      if @sprites
+        ["vermeil_overlay_command", "vermeil_overlay_fight"].each do |key|
+          spr = @sprites[key]
+          spr.visible = false if spr && spr.respond_to?(:visible=)
+        end
+        @sprites["commandWindow"].visible = false if @sprites["commandWindow"] && @sprites["commandWindow"].respond_to?(:visible=)
+        @sprites["fightWindow"].visible = false if @sprites["fightWindow"] && @sprites["fightWindow"].respond_to?(:visible=)
+      end
+      @vermeil_redux_command_overlay.visible = false if defined?(@vermeil_redux_command_overlay) && @vermeil_redux_command_overlay && @vermeil_redux_command_overlay.respond_to?(:visible=)
+      @vermeil_redux_fight_overlay.visible = false if defined?(@vermeil_redux_fight_overlay) && @vermeil_redux_fight_overlay && @vermeil_redux_fight_overlay.respond_to?(:visible=)
+    end
+
+    # Debug test: disable display hooks to verify whether duplication comes from
+    # pbDisplayMessage/pbDisplayBrief/pbDisplayPaused interception itself.
+    #
+    # def pbDisplayMessage(msg, brief = false)
+    #   vermeil_hide_battle_overlays
+    #   return if vermeil_should_suppress_used_msg?(msg)
+    #   super(msg, brief)
+    # end
+    #
+    # def pbDisplayBrief(msg)
+    #   vermeil_hide_battle_overlays
+    #   return if vermeil_should_suppress_used_msg?(msg)
+    #   super(msg)
+    # end
+    #
+    # def pbDisplayPaused(msg)
+    #   vermeil_hide_battle_overlays
+    #   return if vermeil_should_suppress_used_msg?(msg)
+    #   super(msg)
+    # end
+  end
+end
+
+# UI isolation test: disable text dedupe hooks entirely to verify the issue is
+# not caused by message interception.
+# Battle::Scene.prepend(VermeilBattleUIRedux::MessageDedupeOverride) if
+#   !Battle::Scene.ancestors.include?(VermeilBattleUIRedux::MessageDedupeOverride)

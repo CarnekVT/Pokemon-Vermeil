@@ -2184,3 +2184,152 @@ Section401:44:in `<main>'
 [Use move] Glimmora (0) used Toxic Spikes
 "Glimmora used Toxic Spikes!"
 "Poison spikes were scattered all around the opposing team's feet!"
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Gastly appeared!"
+"Go! Corviknight!"
+[Round order] Corviknight (0), the wild Gastly (1)
+
+===== Round 1 =====
+
+[AI] Gastly (1) is considering using Lick against Corviknight (0)...
+[AI] Gastly (1) is considering using Confuse Ray against Corviknight (0)...
+[AI] Gastly (1) is considering using Hypnosis against Corviknight (0)...
+[AI] Move choices for Gastly (1):
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Confuse Ray (target 0): score 100
+   *  25.0% to use Hypnosis (target 0): score 100
+   => will use Hypnosis (target 0)
+
+[Round order] Corviknight (0), the wild Gastly (1)
+
+[Use move] Corviknight (0) used Tackle
+"Corviknight used Tackle!"
+[Target immune] The wild Gastly's type immunity
+"It doesn't affect the wild Gastly..."
+[Use move] The wild Gastly (1) used Hypnosis
+"The wild Gastly used Hypnosis!"
+"Corviknight grew drowsy!
+It may be too sleepy to move!"
+[Status change] Corviknight's drowsy count is 2
+
+[End of round 1]
+
+===== Round 2 =====
+
+[AI] Gastly (1) is considering using Lick against Corviknight (0)...
+[AI] Gastly (1) is considering using Confuse Ray against Corviknight (0)...
+[AI] Gastly (1) is considering using Hypnosis against Corviknight (0)...
+[AI] Move choices for Gastly (1):
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Confuse Ray (target 0): score 100
+   *  25.0% to use Hypnosis (target 0): score 100
+   => will use Lick (target 0)
+
+[Round order] Corviknight (0), the wild Gastly (1)
+
+[Use move] Corviknight (0) used Tackle
+"Corviknight is too drowsy to move!"
+[Status continues] Corviknight's drowsy count is 1
+[Use move] The wild Gastly (1) used Lick
+"The wild Gastly used Lick!"
+[HP change] Corviknight lost 4 HP (168 -> 164)
+
+[End of round 2]
+
+===== Round 3 =====
+
+[AI] Gastly (1) is considering using Lick against Corviknight (0)...
+[AI] Gastly (1) is considering using Confuse Ray against Corviknight (0)...
+[AI] Gastly (1) is considering using Hypnosis against Corviknight (0)...
+[AI] Move choices for Gastly (1):
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Confuse Ray (target 0): score 100
+   *  25.0% to use Hypnosis (target 0): score 100
+   => will use Hypnosis (target 0)
+
+[Round order] Corviknight (0), the wild Gastly (1)
+
+[Use move] Corviknight (0) used Tackle
+"Corviknight became alert again."
+"Corviknight used Tackle!"
+[Target immune] The wild Gastly's type immunity
+"It doesn't affect the wild Gastly..."
+[Use move] The wild Gastly (1) used Hypnosis
+"The wild Gastly used Hypnosis!"
+"Corviknight grew drowsy!
+It may be too sleepy to move!"
+[Status change] Corviknight's drowsy count is 3
+
+[End of round 3]
+
+===== Round 4 =====
+
+[AI] Gastly (1) is considering using Lick against Corviknight (0)...
+[AI] Gastly (1) is considering using Confuse Ray against Corviknight (0)...
+[AI] Gastly (1) is considering using Hypnosis against Corviknight (0)...
+[AI] Move choices for Gastly (1):
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Confuse Ray (target 0): score 100
+   *  25.0% to use Hypnosis (target 0): score 100
+   => will use Lick (target 0)
+
+[Round order] Corviknight (0), the wild Gastly (1)
+
+[Use move] Corviknight (0) used Tackle
+"Corviknight used Tackle!"
+[Target immune] The wild Gastly's type immunity
+"It doesn't affect the wild Gastly..."
+[Use move] The wild Gastly (1) used Lick
+"The wild Gastly used Lick!"
+[HP change] Corviknight lost 4 HP (164 -> 160)
+
+[End of round 4]
+
+===== Round 5 =====
+
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Gastly appeared!"
+"Go! Corviknight!"
+[Round order] Corviknight (0), the wild Gastly (1)
+
+===== Round 1 =====
+
+[AI] Gastly (1) is considering using Lick against Corviknight (0)...
+[AI] Gastly (1) is considering using Confuse Ray against Corviknight (0)...
+[AI] Gastly (1) is considering using Hypnosis against Corviknight (0)...
+[AI] Move choices for Gastly (1):
+   *  25.0% to use Lick (target 0): score 100
+   *  25.0% to use Confuse Ray (target 0): score 100
+   *  25.0% to use Hypnosis (target 0): score 100
+   *  25.0% to use Hypnosis (target 0): score 100
+   => will use Confuse Ray (target 0)
+
+[Round order] Corviknight (0), the wild Gastly (1)
+
+[Use move] Corviknight (0) used Tackle
+"Corviknight used Tackle!"
+[Target immune] The wild Gastly's type immunity
+"It doesn't affect the wild Gastly..."
+[Use move] The wild Gastly (1) used Confuse Ray
+"The wild Gastly used Confuse Ray!"
+"Corviknight became confused!"
+[Lingering effect] Corviknight's confusion count is 5
+
+[End of round 1]
+
+===== Round 2 =====
+
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
