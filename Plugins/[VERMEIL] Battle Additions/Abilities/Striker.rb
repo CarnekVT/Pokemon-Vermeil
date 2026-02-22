@@ -20,7 +20,8 @@ module VermeilStriker
     :HIGHHORSEPOWER,
     :STOMPINGTANTRUM,
     :CLOSECOMBAT,
-    :BEDROCKKICK
+    :BEDROCKKICK,
+    :TRIPLEARROWS
   ]
 
   def self.kick_move?(move)

@@ -16,7 +16,7 @@ module VermeilBattleAnimations
   ]
 
   WATER_SHURIKEN_SE_THROW  = "Anim/PRSFX- Water Shurkein"
-  WATER_SHURIKEN_SE_IMPACT = "Anim/PRSFX- Water Pulse2"
+  WATER_SHURIKEN_SE_IMPACT = "Anim/Water3"
 end
 
 class Battle::Scene::Animation::VermeilWaterShuriken < Battle::Scene::Animation
@@ -472,11 +472,11 @@ class Battle::Scene
     end
   end
 
-  if false && !method_defined?(:vermeil_ws_pbUpdate_cleanup)
+  unless method_defined?(:vermeil_ws_pbUpdate_cleanup)
     alias_method :vermeil_ws_pbUpdate_cleanup, :pbUpdate
     def pbUpdate(*args)
       vermeil_ws_pbUpdate_cleanup(*args)
-      # Failsafe: avoid stuck sequence/text if final line wasn't emitted.
+      # Failsafe: avoid stuck sequence/text if final line wasn't emitted (one-hit KO)
       if @vermeil_ws_sequence_active && !@vermeil_ws_anim_active
         deadline = (@vermeil_ws_msg_filter_until || 0) + 0.45
         if System.uptime > deadline
@@ -593,7 +593,7 @@ class Battle
       return if @scene.pbPlayVermeilWaterShuriken(user, targets, hitNum)
     end
 
-    # Cleanup if sequence got stuck (no "Hit N times" message)
+    # Cleanup if sequence got stuck (no "Hit N times" message or one-hit KO)
     if @scene
       @scene.instance_variable_set(:@vermeil_ws_sequence_active, false)
       @scene.instance_variable_set(:@vermeil_ws_sequence_done,   false)

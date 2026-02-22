@@ -119,8 +119,8 @@ Pokemon = BLASTOISE,63
 #-------------------------------
 [AROMALADY,Testing]
 LoseText = ...
-Pokemon = TENKIFETCHD,10
-    Moves = STICKYWEB,STEALTHROCK,SPIKES,TOXICSPIKES
+Pokemon = TENKIFETCHD,40
+    Moves = SNIPESHOT
     Ability = UMBRAVEIL
 Pokemon = VENUSAUR,10
     Moves = UTURN
