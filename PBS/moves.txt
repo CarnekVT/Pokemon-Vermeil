@@ -5399,10 +5399,10 @@ Description = Sharp spikes are shot at the target in rapid succession. They hit 
 #-------------------------------
 [COMETPUNCH]
 Name = Comet Punch
-Type = NORMAL
+Type = BUG
 Category = Physical
-Power = 18
-Accuracy = 85
+Power = 25
+Accuracy = 100
 TotalPP = 15
 Target = NearOther
 FunctionCode = HitTwoToFiveTimes
