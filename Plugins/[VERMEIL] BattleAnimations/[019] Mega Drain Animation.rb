@@ -97,14 +97,13 @@ class Battle::Scene; unless method_defined?(:pbPlayVermeilMegaDrain)
     target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
     return false if !user || !target
     @vermeil_ss_anim_active = true; vermeil_ss_set_message_skin(true) rescue nil; vermeil_ss_clear_message_window! rescue nil
-    pbToggleDataboxes if respond_to?(:pbToggleDataboxes)
     begin
       anim = Animation::VermeilCinematicMegaDrain.new(@sprites, @viewport, user, target)
       loop do anim.update; pbUpdate; break if anim.animDone? end; anim.dispose
     ensure
       us, ts = @sprites["pokemon_#{user.index}"], @sprites["pokemon_#{target.index}"]
       us.visible = true if us; ts.visible = true if ts; @vermeil_ss_anim_active = false
-      vermeil_ss_set_message_skin(false) rescue nil; pbToggleDataboxes(true) if respond_to?(:pbToggleDataboxes); pbRefresh if respond_to?(:pbRefresh)
+      vermeil_ss_set_message_skin(false) rescue nil; pbRefresh if respond_to?(:pbRefresh)
     end; return true
   end
 end; end

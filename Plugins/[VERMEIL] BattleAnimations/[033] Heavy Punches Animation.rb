@@ -238,9 +238,17 @@ class Battle::Scene::Animation::VermeilHeavyPunches < Battle::Scene::Animation
       tp.setSE(t_imp, "Anim/PRSFX- Focus Punch2", 100, 90)
       tp.moveColor(t_imp, 2, Color.new(255, 255, 255, 255)); tp.moveColor(t_imp + 6, 6, Color.new(0,0,0,0))
       
+# 1. Empuje inicial violento por el impacto
       tp.moveXY(t_imp, 2, orig_tx + (80 * f_dir), orig_ty) 
-      tp.moveXY(t_imp + 2, 8, orig_tx, orig_ty)
-      10.times { |i| tp.moveDelta(t_imp + i, 1, (i.even? ? 10 : -10) * f_dir, 0) }
+      
+      # 2. Temblor mientras está empujado (Separado del movimiento de regreso)
+      8.times { |i| tp.moveDelta(t_imp + 2 + i, 1, (i.even? ? 14 : -14) * f_dir, 0) }
+      
+      # 3. Regreso rápido y fluido a la posición original
+      tp.moveXY(t_imp + 10, 4, orig_tx, orig_ty)
+      
+      # 4. Failsafe: Ancla absoluta para garantizar que el sprite no quede desfasado ni 1 píxel
+      tp.setXY(t_imp + 14, orig_tx, orig_ty)
 
       up.setTone(t_imp + 10, Tone.new(0,0,0,0))
       up.moveXY(t_imp + 10, 6, orig_ux, orig_uy)

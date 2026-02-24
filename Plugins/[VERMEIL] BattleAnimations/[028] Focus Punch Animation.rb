@@ -139,7 +139,7 @@ class Battle::Scene
     @vermeil_ss_anim_active = true
     vermeil_ss_set_message_skin(true) rescue nil
     vermeil_ss_clear_message_window! rescue nil
-    pbToggleDataboxes if respond_to?(:pbToggleDataboxes)
+    
     
     begin
       if is_charging
@@ -159,7 +159,6 @@ class Battle::Scene
       
       @vermeil_ss_anim_active = false
       vermeil_ss_set_message_skin(false) rescue nil
-      pbToggleDataboxes(true) if respond_to?(:pbToggleDataboxes)
       pbRefresh if respond_to?(:pbRefresh)
     end
     return true

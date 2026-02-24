@@ -1,27 +1,15 @@
 #===============================================================================
-# Status Particles (Battle)
+# [VERMEIL] Status Particles (Pure Particle Emitter System)
+# 100% Compatible with Cinematic Engine (No UI Interference)
 #===============================================================================
+
 module StatusParticles
   @@emitters = []
-  @@suppressed = false
-  @@suppress_depth = 0
+  
   BLOCKED_COMMON_ANIMATIONS = [
     :sleep, :drowsy, :frozen, :frostbite, :burn, :poison, :toxic,
     :paralysis, :confusion, :attract, :infatuation
   ]
-
-  def self.suppressed?
-    return @@suppressed
-  end
-
-  def self.with_suppressed
-    @@suppress_depth += 1
-    @@suppressed = true
-    yield
-  ensure
-    @@suppress_depth -= 1
-    @@suppressed = (@@suppress_depth > 0)
-  end
 
   def self.register_emitter(emitter)
     @@emitters << emitter
@@ -62,7 +50,7 @@ module StatusParticles
   }
 
   PARTICLE_COUNTS = {
-    :sleep_z          => 2,
+    :sleep_z           => 2,
     :freeze_flakes    => 3,
     :burn_embers      => 3,
     :poison_bubbles   => 2,
@@ -71,16 +59,6 @@ module StatusParticles
     :confusion_orbit  => 3,
     :infatuation_hearts => 2
   }
-
-  # Stored for future use (not displayed right now).
-  FUTURE_EFFECTS = [
-    :CURSE, :LEECHSEED, :NIGHTMARE, :TRAP, :BIND, :TAUNT, :ENCORE, :TORMENT,
-    :DISABLE, :HEALBLOCK, :PERISH, :YAWN, :INGRAIN, :CHARGE, :MIST,
-    :REFLECT, :LIGHTSCREEN, :AURORA_VEIL
-  ]
-
-  # These are intentionally excluded from future storage.
-  IGNORED_EFFECTS = [:PROTECT, :AQUA_RING, :RAGE, :SAFEGUARD]
 
   def self.status_key(battler, type = :main)
     return nil if !battler || battler.fainted?
@@ -125,22 +103,15 @@ module StatusParticles
     raw = anim_id.to_s.strip.downcase
     key = raw.to_sym
     return true if BLOCKED_COMMON_ANIMATIONS.include?(key)
-    # Failsafe for variant IDs after reload/plugin aliases (e.g. "Poison2", "Paralyze").
-    return true if raw.include?("sleep")
-    return true if raw.include?("drows")
+    return true if raw.include?("sleep") || raw.include?("drows")
     return true if raw.include?("froz") || raw.include?("frost")
-    return true if raw.include?("burn")
-    return true if raw.include?("poison") || raw.include?("toxic")
-    return true if raw.include?("paraly")
-    return true if raw.include?("confus")
+    return true if raw.include?("burn") || raw.include?("poison") || raw.include?("toxic")
+    return true if raw.include?("paraly") || raw.include?("confus")
     return true if raw.include?("attract") || raw.include?("infatu")
     return false
   end
 end
 
-#===============================================================================
-# Status particles emitter
-#===============================================================================
 class StatusParticles::Emitter
   ICON_BOB_RATE       = 0.12
   ICON_BOB_AMT        = 4
@@ -175,10 +146,6 @@ class StatusParticles::Emitter
 
   def update
     refresh_status
-    if StatusParticles.suppressed?
-      hide_all
-      return
-    end
     update_particles
   end
 
@@ -311,7 +278,6 @@ class StatusParticles::Emitter
     end
     anchor_x, anchor_y = anchor_position
     
-    # Calculate center Y for centering particles on the battler
     bm = @battler_sprite.bitmap
     if bm
       visual_top = @battler_sprite.y - (@battler_sprite.oy * @battler_sprite.zoom_y)
@@ -321,7 +287,6 @@ class StatusParticles::Emitter
       center_y = @battler_sprite.y - 32
     end
 
-    # Player side scaling (x1.5)
     is_player = @battler_sprite.index && @battler_sprite.index.even?
     scale = is_player ? 1.5 : 1.0
 
@@ -369,21 +334,19 @@ class StatusParticles::Emitter
       life = data[:life]
       if data[:age] >= life
         data[:age] = 0
-        
         if @style == :paralysis_sparks
           data[:life] = rand(40..60)
           data[:side_toggle] = !data[:side_toggle]
-          # Alternate sides: 0 (Right) or PI (Left)
           data[:angle] = data[:side_toggle] ? 0 : Math::PI
         else
           data[:life] = rand(50..90)
           data[:angle] = rand * Math::PI * 2
         end
-        
         data[:seed] = rand(0.0..10.0)
       end
       alpha = particle_alpha(data[:age], data[:life])
     end
+    
     case @style
     when :confusion_orbit
       data[:angle] += data[:speed]
@@ -426,7 +389,6 @@ class StatusParticles::Emitter
       sprite.y = y
       sprite.opacity = @battler_sprite.opacity * (alpha * 0.9)
     when :paralysis_sparks
-      # Keep previous movement, but animate bitmap as 1->2->3 then a short off gap.
       radius = 24
       angle = data[:angle]
       direction = data[:side_toggle] ? 1 : -1
@@ -446,7 +408,6 @@ class StatusParticles::Emitter
       else
         sprite.visible = true
         sprite.bitmap = @anim_bitmaps[frame_idx] if @anim_bitmaps && @anim_bitmaps[frame_idx]
-        # Keep the same motion; only fade during frame 3 to imply energy discharge.
         fade = 1.0
         if frame_idx == 2
           fade = 1.0 - ((frame_step - 6) / 3.0)
@@ -482,9 +443,6 @@ class StatusParticles::Emitter
   end
 end
 
-#===============================================================================
-# Battler sprite hooks (order-independent)
-#===============================================================================
 module StatusParticles
   module PrependHooks
     def dispose
@@ -546,27 +504,16 @@ module StatusParticles
           end
         end
 
-        unless method_defined?(:status_particles_pbAnimationCore)
-          alias_method :status_particles_pbAnimationCore, :pbAnimationCore
-          def pbAnimationCore(*args)
-            # return status_particles_pbAnimationCore(*args) if StatusParticles.suppressed?
-            # StatusParticles.with_suppressed { status_particles_pbAnimationCore(*args) }
-            status_particles_pbAnimationCore(*args)
-          end
-        end
-
         unless method_defined?(:status_particles_pbCommonAnimation)
           alias_method :status_particles_pbCommonAnimation, :pbCommonAnimation
           def pbCommonAnimation(*args)
-            # Desactivar animaciones comunes de estado para evitar superposición con partículas
             return if StatusParticles.block_common_animation?(args[0])
-            # return status_particles_pbCommonAnimation(*args) if StatusParticles.suppressed?
-            # StatusParticles.with_suppressed { status_particles_pbCommonAnimation(*args) }
             status_particles_pbCommonAnimation(*args)
           end
         end
       end
     end
+
     if defined?(Battle)
       Battle.class_eval do
         unless method_defined?(:status_particles_battle_pbCommonAnimation)

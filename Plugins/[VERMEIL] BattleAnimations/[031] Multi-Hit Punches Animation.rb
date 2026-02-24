@@ -329,7 +329,7 @@ class Battle::Scene
     
     vermeil_mh_set_message_skin(true) if @vermeil_mh_sequence_active
     vermeil_mh_clear_message_window! if @vermeil_mh_sequence_active
-    pbToggleDataboxes if respond_to?(:pbToggleDataboxes) && !@vermeil_mh_sequence_active
+    
     
     begin
       anim = Animation::VermeilMultiHitPunches.new(@sprites, @viewport, user, target, mid, hit_num)
@@ -338,7 +338,6 @@ class Battle::Scene
       us, ts = @sprites["pokemon_#{user.index}"], @sprites["pokemon_#{target.index}"]
       us.visible = true if us; ts.visible = true if ts; @vermeil_mh_anim_active = false
       vermeil_mh_set_message_skin(false) if !@vermeil_mh_sequence_active
-      pbToggleDataboxes(true) if respond_to?(:pbToggleDataboxes) && !@vermeil_mh_sequence_active
       pbRefresh if respond_to?(:pbRefresh)
     end
     return true

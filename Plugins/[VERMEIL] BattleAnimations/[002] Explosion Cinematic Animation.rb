@@ -731,7 +731,6 @@ class Battle::Scene
           14.times { pbUpdate }
         end
 
-        pbToggleDataboxes if respond_to?(:pbToggleDataboxes)
         vermeil_hide_ui_for_cinematic
         user_sprite.visible = false if user_sprite
         # Hide all other battlers before revealing the cinematic layer.
@@ -778,7 +777,6 @@ class Battle::Scene
       # Restore generic UI first, then force databoxes visible at the very end.
       vermeil_restore_ui_visibility(ui_state)
       pbRefresh if respond_to?(:pbRefresh)
-      pbToggleDataboxes(true) if respond_to?(:pbToggleDataboxes)
       @sprites.each do |key, sprite|
         next if !sprite || !sprite.respond_to?(:visible=)
         k = key.to_s.downcase

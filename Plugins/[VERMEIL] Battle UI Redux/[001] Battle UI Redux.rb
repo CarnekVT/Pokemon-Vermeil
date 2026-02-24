@@ -6,30 +6,99 @@
 module VermeilBattleUIRedux
   module_function
 
+  #=============================================================================
+  # COORDINATES MASTER CONTROL - All position values in one place
+  #=============================================================================
+  
+  # --- Databox Coordinates ---
   PLAYER_DATABOX_X = 0
   PLAYER_DATABOX_BOTTOM_MARGIN = 2
+  ENEMY_DATABOX_X = 0  # Typically auto-calculated based on screen width
+  ENEMY_DATABOX_TOP_MARGIN = 0
+  
+  # --- Fight Menu (Move List) Coordinates ---
   FIGHT_LIST_X = 287
-  FIGHT_LIST_Y = 146
-  FIGHT_LIST_W = 204
-  FIGHT_ROW_H = 38
+  FIGHT_LIST_Y = 120  # Moved up more
+  FIGHT_LIST_W = 192  # Normal width
+  FIGHT_ROW_H = 46    # Normal height
   FIGHT_ROW_GAP = 8
-  REDUX_OVERLAY_Z = 250
+  FIGHT_TYPE_ICON_X_OFFSET = 8
+  FIGHT_PP_X_OFFSET = 74
+  
+  # --- Command Menu (Fight/Bag/Run/Pokemon) Coordinates ---
+  COMMAND_LIST_X = 0  # Auto-calculated from Graphics.width
+  COMMAND_LIST_Y = 0  # Auto-calculated from Graphics.height
+  COMMAND_MAIN_BTN_W = 130  # Normal width
+  COMMAND_MAIN_BTN_H = 46   # Normal height
+  
+  # Moviendo todo el menú más a la izquierda
+  COMMAND_MAIN_BTN_X_OFFSET = -190  
+  COMMAND_MAIN_BTN_Y_OFFSET = 10  # Normal position
+  
+  COMMAND_SMALL_BTN_W = 64
+  COMMAND_SMALL_BTN_H = 30
+  
+  # SEPARACIÓN VERTICAL PERFECTA (Más espacio debajo del botón principal)
+  COMMAND_SMALL_BTN_Y_OFFSET_1 = 62  # Empujado hacia abajo para separar del grande (antes 54)
+  COMMAND_SMALL_BTN_Y_OFFSET_2 = 98  # Empujado hacia abajo para mantener el rombo (antes 92)
+  
+  # SEPARACIÓN HORIZONTAL DEL ROMBO
+  COMMAND_SMALL_BTN_X_OFFSET_1 = -16  # Expande a la izquierda
+  COMMAND_SMALL_BTN_X_OFFSET_2 = 82   # Expande a la derecha
+  COMMAND_SMALL_BTN_X_OFFSET_3 = 33   # Centro inferior
+  
+  # --- Command Arrows ---
+  COMMAND_ARROW_SIZE = 16
+  
+  # --- Action Hint (Mega/Shift) Coordinates ---
+  ACTION_HINT_X_OFFSET = -82
   ACTION_HINT_Y_OFFSET = -8
+  ACTION_HINT_W = 72
+  ACTION_HINT_H = 32
+  
+  # --- Message Box Coordinates ---
+  MESSAGE_BOX_X = 0
+  MESSAGE_BOX_Y = 0  # Auto-calculated from Graphics.height - height
+  MESSAGE_TEXT_PADDING_X = 16
+  MESSAGE_TEXT_PADDING_Y = 2
+  MESSAGE_TEXT_X = 0  # Auto-calculated from MESSAGE_BOX_X + MESSAGE_TEXT_PADDING_X
+  MESSAGE_TEXT_Y = 0  # Auto-calculated from MESSAGE_BOX_Y + MESSAGE_TEXT_PADDING_Y
+  MESSAGE_TEXT_W = 0  # Auto-calculated from screen width - 32
+  MESSAGE_TEXT_H = 96
+  
+  # --- Overlay Z-Order ---
+  REDUX_OVERLAY_Z = 250
+  
+  # --- Animation Distances ---
   FIGHT_SLIDE_DISTANCE = 220
   COMMAND_SLIDE_DISTANCE = 220
+  
+  # --- Visual Assets ---
   DEFAULT_MESSAGE_ASSET = "Graphics/UI/Battle/overlay_message"
   TRANSPARENT_MESSAGE_ASSET = "Graphics/UI/Battle/transparent_message"
+  
+  # --- Legacy/Backward Compatibility Aliases ---
+  # (These maintain compatibility with older code that uses old constant names)
   TRANSPARENT_MESSAGE_X = 0
   TRANSPARENT_MESSAGE_Y = Graphics.height - 96
   TRANSPARENT_TEXT_X = 16
   TRANSPARENT_TEXT_Y = Graphics.height - 94
   TRANSPARENT_TEXT_W = Graphics.width - 32
   TRANSPARENT_TEXT_H = 96
+  
+  # --- Configuration Flags ---
   # Visual-only mode: keep command/fight overlays + databox visuals only.
   # Disables message/animation/display rewrites from this plugin.
   VISUAL_ONLY_MODE = true
   FORCE_VANILLA_UI_OVERRIDE = true
   STEP0_BYPASS_CUSTOM_SHOWWINDOW = true
+  
+  # Databox animation: true = slide from left (custom), false = default pop animation
+  USE_SLIDE_DATABOX_ANIMATION = true
+
+  #=============================================================================
+  # SECONDARY LAYOUT & COMMAND MODES
+  #=============================================================================
 
   SECONDARY_LAYOUT = {
     0 => [1, 3, 2],
@@ -50,12 +119,40 @@ module VermeilBattleUIRedux
     [0, 11, 1, 4]   # 8 launch+call
   ]
 
+  #=============================================================================
+  # HELPER METHODS FOR DYNAMIC COORDINATES
+  #=============================================================================
+
   def fight_list_x
     return Graphics.width - 225
   end
 
   def fight_list_y
-    return Graphics.height - 238
+    return Graphics.height - 212  # Moved up more
+  end
+
+  def command_list_base_x
+    return Graphics.width - 186
+  end
+
+  def command_list_base_y
+    return Graphics.height - 166
+  end
+
+  def message_box_y
+    return Graphics.height - 96
+  end
+
+  def transparent_text_x
+    return 16
+  end
+
+  def transparent_text_y
+    return Graphics.height - 94
+  end
+
+  def transparent_text_w
+    return Graphics.width - 32
   end
 
   def action_key_label
@@ -128,12 +225,18 @@ module VermeilBattleUIRedux
       pbSetNarrowFont(@sprite.bitmap)
       @button_bitmap = nil
       @button_bitmap = AnimatedBitmap.new(_INTL("Graphics/UI/Battle/cursor_command")) rescue nil
+      @arrow_bitmap = nil
+      @arrow_bitmap = AnimatedBitmap.new(_INTL("Graphics/UI/left_arrow")) rescue nil
+      @right_arrow_bitmap = nil
+      @right_arrow_bitmap = AnimatedBitmap.new(_INTL("Graphics/UI/right_arrow")) rescue nil
       @last_state = nil
       @offset_x = 0
     end
 
     def dispose
       @button_bitmap&.dispose
+      @arrow_bitmap&.dispose
+      @right_arrow_bitmap&.dispose
       @sprite.dispose if @sprite && !@sprite.disposed?
     end
 
@@ -156,21 +259,26 @@ module VermeilBattleUIRedux
       bmp = @sprite.bitmap
       bmp.clear
 
-      labels = [texts[1], texts[2], texts[3], texts[4]]
-      base_x = (Graphics.width - 186) + @offset_x
-      base_y = Graphics.height - 166
-      main_w = 164
-      main_h = 58
+      lbl_pkmn = texts[3].to_s.include?("Pok") ? "PKMN" : texts[3]
+      labels = [texts[1], texts[2], lbl_pkmn, texts[4]]
+      base_x = (Graphics.width + VermeilBattleUIRedux::COMMAND_MAIN_BTN_X_OFFSET) + @offset_x
+      base_y = Graphics.height - 166  # Adjusted to fit with databox
+      main_w = 130  # Normal width
+      main_h = 46   # Normal height
       small_w = 64
       small_h = 30
 
-      draw_arrows(bmp, base_x + 34, base_y + 6, 96)
-      draw_button(bmp, base_x, base_y + 20, main_w, main_h, index, labels[index], true, mode)
-
+      # Dibujar PRIMERO los botones secundarios para que queden por debajo del principal (Efecto Capas 3D)
       secondary = VermeilBattleUIRedux::SECONDARY_LAYOUT[index]
-      draw_button(bmp, base_x + 6,  base_y + 90, small_w, small_h, secondary[0], "", false, mode)
-      draw_button(bmp, base_x + 94, base_y + 90, small_w, small_h, secondary[1], "", false, mode)
-      draw_button(bmp, base_x + 50, base_y + 126, small_w, small_h, secondary[2], "", false, mode)
+      draw_button(bmp, base_x + VermeilBattleUIRedux::COMMAND_SMALL_BTN_X_OFFSET_1,  base_y + VermeilBattleUIRedux::COMMAND_SMALL_BTN_Y_OFFSET_1, small_w, small_h, secondary[0], "", false, mode)
+      draw_button(bmp, base_x + VermeilBattleUIRedux::COMMAND_SMALL_BTN_X_OFFSET_2, base_y + VermeilBattleUIRedux::COMMAND_SMALL_BTN_Y_OFFSET_1, small_w, small_h, secondary[1], "", false, mode)
+      draw_button(bmp, base_x + VermeilBattleUIRedux::COMMAND_SMALL_BTN_X_OFFSET_3, base_y + VermeilBattleUIRedux::COMMAND_SMALL_BTN_Y_OFFSET_2, small_w, small_h, secondary[2], "", false, mode)
+
+      # Dibujar Flechas
+      draw_command_arrows(bmp, base_x, base_y + VermeilBattleUIRedux::COMMAND_MAIN_BTN_Y_OFFSET, main_w, main_h)
+
+      # Dibujar el botón PRINCIPAL al final para que superponga a los pequeños
+      draw_button(bmp, base_x, base_y + VermeilBattleUIRedux::COMMAND_MAIN_BTN_Y_OFFSET, main_w, main_h, index, labels[index], true, mode)
     end
 
     private
@@ -190,6 +298,41 @@ module VermeilBattleUIRedux
       bmp.fill_rect(x + width - 14, y + 5, 14, 9, color)
     end
 
+    def draw_command_arrows(bmp, x, y, w, h)
+      # Each arrow spritesheet frame is 40x28
+      arrow_w = 40
+      arrow_h = 28
+      center_y = y + (h / 2) - (arrow_h / 2)
+      
+      # Draw left arrow (first frame only: 40x28) - attached to left side
+      if @arrow_bitmap && @arrow_bitmap.bitmap && !@arrow_bitmap.bitmap.disposed?
+        src = Rect.new(0, 0, arrow_w, arrow_h)
+        dest = Rect.new(x - arrow_w - 2, center_y, arrow_w, arrow_h)  # Closer offset
+        bmp.blt(dest.x, dest.y, @arrow_bitmap.bitmap, src)
+      else
+        # Fallback: draw left triangle - attached
+        arrow_color = Color.new(24, 24, 24)
+        bx = x - 16
+        by = center_y + 8
+        bmp.fill_rect(bx, by + 4, 12, 8, arrow_color)
+        bmp.fill_rect(bx + 10, by + 6, 6, 4, arrow_color)
+      end
+      
+      # Draw right arrow (first frame only: 40x28) - attached to right side
+      if @right_arrow_bitmap && @right_arrow_bitmap.bitmap && !@right_arrow_bitmap.bitmap.disposed?
+        src = Rect.new(0, 0, arrow_w, arrow_h)
+        dest = Rect.new(x + w + 2, center_y, arrow_w, arrow_h)  # Closer offset
+        bmp.blt(dest.x, dest.y, @right_arrow_bitmap.bitmap, src)
+      else
+        # Fallback: draw right triangle - attached
+        arrow_color = Color.new(24, 24, 24)
+        bx = x + w + 4
+        by = center_y + 8
+        bmp.fill_rect(bx, by + 4, 12, 8, arrow_color)
+        bmp.fill_rect(bx, by + 6, 6, 4, arrow_color)
+      end
+    end
+
     def draw_button(bmp, x, y, w, h, idx, text, large, mode)
       row = (VermeilBattleUIRedux::COMMAND_MODES[mode] || VermeilBattleUIRedux::COMMAND_MODES[0])[idx]
       if @button_bitmap && @button_bitmap.bitmap
@@ -205,7 +348,8 @@ module VermeilBattleUIRedux
         bmp.fill_rect(x, y, w, h, edge)
         bmp.fill_rect(x + 2, y + 2, w - 4, h - 4, fill)
       end
-      bmp.draw_text(x + 6, y + 4, w - 10, h - 8, text.to_s, 1) if large
+      # x + 16 da margen izquierdo, w - 46 evita pisar el icono, 0 lo alinea a la izquierda
+      bmp.draw_text(x + 16, y + 12, w - 46, h - 20, text.to_s, 0) if large
     end
   end
 
@@ -313,7 +457,10 @@ module VermeilBattleUIRedux
 
     def draw_type_pp(bmp, battler, move, type_name, pp_text, offset_x = 0)
       base_x = VermeilBattleUIRedux.fight_list_x + 8 + offset_x
-      base_y = VermeilBattleUIRedux.fight_list_y + (4 * (VermeilBattleUIRedux::FIGHT_ROW_H + VermeilBattleUIRedux::FIGHT_ROW_GAP)) + 14
+      
+      # [MODIFICADO]: Ahora el Y se resta para que el Type y PP queden ENCIMA de los ataques
+      base_y = VermeilBattleUIRedux.fight_list_y - 38 
+      
       # Type icon (existing asset)
       if @type_bitmap && @type_bitmap.bitmap && move && move.id
         begin
@@ -344,20 +491,31 @@ module VermeilBattleUIRedux
       pbDrawTextPositions(bmp, [[pp_text, px + 8, py + 5, :left, pp_base, pp_shadow]])
     end
 
-    def draw_action_hint(bmp, action_symbol, active, pulse, action_text, offset_x = 0)
-      x = VermeilBattleUIRedux.fight_list_x - 82 + offset_x
-      y = VermeilBattleUIRedux.fight_list_y + (2 * (VermeilBattleUIRedux::FIGHT_ROW_H + VermeilBattleUIRedux::FIGHT_ROW_GAP)) + VermeilBattleUIRedux::ACTION_HINT_Y_OFFSET
-      if @mega_bitmap && @mega_bitmap.bitmap && action_symbol == :mega
-        src = @mega_bitmap.bitmap
-        bmp.stretch_blt(Rect.new(x, y, 72, 32), src, Rect.new(0, 0, src.width, src.height))
-      else
-        bmp.fill_rect(x, y, 72, 32, Color.new(170, 110, 80))
+def draw_action_hint(bmp, action_symbol, active, pulse, action_text, offset_x = 0)
+      # 1. Movido más a la derecha (Cambiamos el -104 por -76)
+      x = VermeilBattleUIRedux.fight_list_x - 76 + offset_x
+      y = VermeilBattleUIRedux.fight_list_y + (1 * (VermeilBattleUIRedux::FIGHT_ROW_H + VermeilBattleUIRedux::FIGHT_ROW_GAP)) + VermeilBattleUIRedux::ACTION_HINT_Y_OFFSET
+      
+      mega_w = 28
+      mega_h = 28
+
+      if @mega_bitmap && @mega_bitmap.bitmap && !@mega_bitmap.bitmap.disposed? && action_symbol == :mega
+        
+        # 2. Dibujamos SIEMPRE la piedra apagada como base (Frame 0)
+        src_base = Rect.new(0, 0, mega_w, mega_h)
+        bmp.blt(x, y, @mega_bitmap.bitmap, src_base)
+        
+        # 3. BRILLO PERFECTO: Superponemos la piedra brillante (Frame 1) 
+        # Como usamos 'blt' (Block Transfer), detecta el espacio nulo automáticamente.
+        if active
+          stone_opacity = (pulse == 0) ? 255 : 120 # Palpita entre 100% y 50% de opacidad
+          src_active = Rect.new(mega_w, 0, mega_w, mega_h)
+          bmp.blt(x, y, @mega_bitmap.bitmap, src_active, stone_opacity)
+        end
       end
-      if active
-        glow = (pulse == 0) ? 96 : 48
-        bmp.fill_rect(x - 2, y - 2, 76, 36, Color.new(120, 220, 255, glow))
-      end
-      pbDrawTextPositions(bmp, [[action_text, x + 36, y + 34, :center, Color.new(248, 248, 248), Color.new(0, 0, 0), :outline]])
+      
+      # 4. Letra de Input (Ej. 'Z') centrada debajo de la piedra
+      pbDrawTextPositions(bmp, [[action_text, x + 14, y + 36, :center, Color.new(248, 248, 248), Color.new(0, 0, 0), :outline]])
     end
 
     def viewport_left
@@ -618,6 +776,22 @@ module VermeilBattleUIRedux
       return indices[(pos + step) % indices.length]
     end
 
+# [MODIFICADO]: Desplazar la caja de Move Info al tope de la pantalla
+    def pbUpdateMoveInfoWindow(*args)
+      super(*args) if defined?(super)
+      offset_y = -72 # Ajustado para dejar respirar el primer movimiento
+      
+      if @sprites && @sprites["enhancedUI"]
+        @sprites["enhancedUI"].y = offset_y
+      end
+    end
+    def pbHideInfoUI(*args)
+      if @sprites && @sprites["enhancedUI"]
+        @sprites["enhancedUI"].y = 0 
+      end
+      super(*args) if defined?(super)
+    end
+
     def pbFightMenu(idxBattler, specialAction = nil)
       battler = @battle.battlers[idxBattler]
       cw = @sprites["fightWindow"]
@@ -715,6 +889,9 @@ module VermeilBattleUIRedux
              respond_to?(:pbHideInfoUI)
             pbPlayCancelSE
             pbHideInfoUI
+            # [MODIFICADO]: Reactivar el Prompt original al ocultar Move Info
+            @enhancedUIToggle = nil 
+            pbRefreshUIPrompt(idxBattler, Battle::Scene::FIGHT_BOX) if respond_to?(:pbRefreshUIPrompt)
             need_refresh = true
             next
           end
@@ -805,10 +982,6 @@ module VermeilBattleUIRedux
         cw.index = (cw.index - 1) & 3
       elsif Input.trigger?(Input::RIGHT)
         cw.index = (cw.index + 1) & 3
-      elsif Input.trigger?(Input::UP)
-        cw.index = (cw.index - 1) & 3
-      elsif Input.trigger?(Input::DOWN)
-        cw.index = (cw.index + 1) & 3
       end
 
       if cw.index != old_index
@@ -827,11 +1000,11 @@ module VermeilBattleUIRedux
       end
 
       if Input.trigger?(Input::USE)
-        overlay.visible = false if overlay.respond_to?(:visible=)
         pbPlayDecisionSE
         ret = cw.index
         @lastCmd[idxBattler] = ret
         command_exit_anim.call
+        overlay.visible = false if overlay.respond_to?(:visible=)
         break
       elsif Input.trigger?(Input::BACK) && mode > 0
         pbPlayCancelSE
@@ -915,10 +1088,11 @@ module VermeilBattleUIRedux
       return if !@sprites["dataBox_#{@idxBox}"]
       box = addSprite(@sprites["dataBox_#{@idxBox}"])
       box.setVisible(0, true)
-      # Player data box enters left -> right.
-      dir = (@idxBox.even?) ? -1 : 1
-      box.setDelta(0, dir * Graphics.width / 2, 0)
-      box.moveDelta(0, 8, -dir * Graphics.width / 2, 0)
+      box.setOpacity(0, 0) if box.respond_to?(:setOpacity)
+      # Both databoxes enter from the LEFT side with fade in
+      box.setDelta(0, -Graphics.width / 2, 0)
+      box.moveDelta(0, 8, Graphics.width / 2, 0)
+      box.moveOpacity(0, 8, 255) if box.respond_to?(:moveOpacity)
     end
   end
 
@@ -926,10 +1100,9 @@ module VermeilBattleUIRedux
     def createProcesses
       return if !@sprites["dataBox_#{@idxBox}"] || !@sprites["dataBox_#{@idxBox}"].visible
       box = addSprite(@sprites["dataBox_#{@idxBox}"])
-      # Player exits to left with gentle fade.
-      dir = (@idxBox.even?) ? -1 : 1
+      # Both databoxes exit to the LEFT
       box.setOpacity(0, 255) if box.respond_to?(:setOpacity)
-      box.moveDelta(0, 8, dir * Graphics.width / 2, 0)
+      box.moveDelta(0, 8, -Graphics.width / 2, 0)
       box.moveOpacity(0, 8, 0) if box.respond_to?(:moveOpacity)
       box.setVisible(8, false)
     end
@@ -990,12 +1163,14 @@ if !VermeilBattleUIRedux::VISUAL_ONLY_MODE
 end
 
 if defined?(Battle::Scene::Animation::DataBoxAppear) &&
-   !Battle::Scene::Animation::DataBoxAppear.ancestors.include?(VermeilBattleUIRedux::DataBoxSlideDirectionAppear)
+   !Battle::Scene::Animation::DataBoxAppear.ancestors.include?(VermeilBattleUIRedux::DataBoxSlideDirectionAppear) &&
+   VermeilBattleUIRedux::USE_SLIDE_DATABOX_ANIMATION
   Battle::Scene::Animation::DataBoxAppear.prepend(VermeilBattleUIRedux::DataBoxSlideDirectionAppear)
 end
 
 if defined?(Battle::Scene::Animation::DataBoxDisappear) &&
-   !Battle::Scene::Animation::DataBoxDisappear.ancestors.include?(VermeilBattleUIRedux::DataBoxSlideDirectionDisappear)
+   !Battle::Scene::Animation::DataBoxDisappear.ancestors.include?(VermeilBattleUIRedux::DataBoxSlideDirectionDisappear) &&
+   VermeilBattleUIRedux::USE_SLIDE_DATABOX_ANIMATION
   Battle::Scene::Animation::DataBoxDisappear.prepend(VermeilBattleUIRedux::DataBoxSlideDirectionDisappear)
 end
 
@@ -1027,22 +1202,22 @@ if VermeilBattleUIRedux::VISUAL_ONLY_MODE
       def pbSendOutBattlers(sendOuts, startBattle = false)
         super
         return if !@sprites || !sendOuts
+        # Ensure databoxes are visible after switch (but let animation handle position)
         sendOuts.each do |entry|
           next if !entry || !entry[0]
           idx = entry[0]
           box = @sprites["dataBox_#{idx}"]
           next if !box
+          # Set battler data
           if box.respond_to?(:battler=) && @battle && @battle.battlers[idx]
             box.battler = @battle.battlers[idx]
           end
-          # Hard-fix: ensure the player's databox is visible immediately after switch.
-          if idx.even?
-            box.visible = true if box.respond_to?(:visible=)
-            box.opacity = 255 if box.respond_to?(:opacity=)
-          end
+          # Ensure visibility
+          box.visible = true if box.respond_to?(:visible=)
+          box.opacity = 255 if box.respond_to?(:opacity=)
+          # Refresh the box
           pbRefreshOne(idx) if respond_to?(:pbRefreshOne)
           box.refresh if box.respond_to?(:refresh)
-          box.update_positions if idx.even? && box.respond_to?(:update_positions)
         end
       end
     end
@@ -1050,6 +1225,34 @@ if VermeilBattleUIRedux::VISUAL_ONLY_MODE
 
   Battle::Scene.prepend(VermeilBattleUIRedux::VisualOnlyMessageSkinFix) if
     !Battle::Scene.ancestors.include?(VermeilBattleUIRedux::VisualOnlyMessageSkinFix)
+end
+
+# Visual-only mode databox positioning
+if VermeilBattleUIRedux::VISUAL_ONLY_MODE
+  module VermeilBattleUIRedux
+    module VisualOnlyDataboxPosition
+      def pbInitSprites
+        super
+        return if !@sprites
+        # Reposition databoxes after initialization
+        2.times do |idx|
+          box = @sprites["dataBox_#{idx}"]
+          next if !box
+          if idx.even?
+            # Player: bottom left
+            box.y = Graphics.height - 96 if box.respond_to?(:y=)
+          else
+            # Opponent: top - ensure higher Z to appear in front of battlers
+            box.y = VermeilBattleUIRedux::ENEMY_DATABOX_TOP_MARGIN if box.respond_to?(:y=)
+            box.z = 100 if box.respond_to?(:z=)  # Higher Z for opponent databox
+          end
+        end
+      end
+    end
+  end
+
+  Battle::Scene.prepend(VermeilBattleUIRedux::VisualOnlyDataboxPosition) if
+    !Battle::Scene.ancestors.include?(VermeilBattleUIRedux::VisualOnlyDataboxPosition)
 end
 
 module VermeilBattleUIRedux
@@ -1085,31 +1288,5 @@ module VermeilBattleUIRedux
       @vermeil_redux_command_overlay.visible = false if defined?(@vermeil_redux_command_overlay) && @vermeil_redux_command_overlay && @vermeil_redux_command_overlay.respond_to?(:visible=)
       @vermeil_redux_fight_overlay.visible = false if defined?(@vermeil_redux_fight_overlay) && @vermeil_redux_fight_overlay && @vermeil_redux_fight_overlay.respond_to?(:visible=)
     end
-
-    # Debug test: disable display hooks to verify whether duplication comes from
-    # pbDisplayMessage/pbDisplayBrief/pbDisplayPaused interception itself.
-    #
-    # def pbDisplayMessage(msg, brief = false)
-    #   vermeil_hide_battle_overlays
-    #   return if vermeil_should_suppress_used_msg?(msg)
-    #   super(msg, brief)
-    # end
-    #
-    # def pbDisplayBrief(msg)
-    #   vermeil_hide_battle_overlays
-    #   return if vermeil_should_suppress_used_msg?(msg)
-    #   super(msg)
-    # end
-    #
-    # def pbDisplayPaused(msg)
-    #   vermeil_hide_battle_overlays
-    #   return if vermeil_should_suppress_used_msg?(msg)
-    #   super(msg)
-    # end
   end
 end
-
-# UI isolation test: disable text dedupe hooks entirely to verify the issue is
-# not caused by message interception.
-# Battle::Scene.prepend(VermeilBattleUIRedux::MessageDedupeOverride) if
-#   !Battle::Scene.ancestors.include?(VermeilBattleUIRedux::MessageDedupeOverride)

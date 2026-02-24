@@ -216,11 +216,6 @@ class Battle::Scene
     old_target_x = target_sprite&.x
     old_target_y = target_sprite&.y
     pbSaveShadows do
-      if defined?(Settings::HIDE_DATABOXES_DURING_MOVES) &&
-         Settings::HIDE_DATABOXES_DURING_MOVES &&
-         respond_to?(:pbToggleDataboxes)
-        pbToggleDataboxes
-      end
       custom_anim = Animation::BedrockKick.new(@sprites, @viewport, user, target)
       loop do
         custom_anim.update
@@ -228,11 +223,6 @@ class Battle::Scene
         break if custom_anim.animDone?
       end
       custom_anim.dispose
-      if defined?(Settings::HIDE_DATABOXES_DURING_MOVES) &&
-         Settings::HIDE_DATABOXES_DURING_MOVES &&
-         respond_to?(:pbToggleDataboxes)
-        pbToggleDataboxes(true)
-      end
     end
     # Prevent cumulative sprite drift between repeated uses of this move,
     # but do it smoothly to avoid a visible snap.

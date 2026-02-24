@@ -128,7 +128,7 @@ class Battle::Scene
       @vermeil_ss_anim_active = true if respond_to?(:vermeil_ss_set_message_skin)
       vermeil_ss_set_message_skin(true) if respond_to?(:vermeil_ss_set_message_skin)
       vermeil_ss_clear_message_window! if respond_to?(:vermeil_ss_clear_message_window!)
-      pbToggleDataboxes if respond_to?(:pbToggleDataboxes)
+      
 
       begin
         anim = Animation::VermeilCinematicEmber.new(@sprites, @viewport, user, target)
@@ -141,7 +141,6 @@ class Battle::Scene
           @vermeil_ss_sequence_done = true
           vermeil_ss_set_message_skin(false)
         end
-        pbToggleDataboxes(true) if respond_to?(:pbToggleDataboxes)
         pbRefresh if respond_to?(:pbRefresh)
       end
       return true

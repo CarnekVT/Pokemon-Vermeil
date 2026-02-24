@@ -1,60 +1,81 @@
 #===============================================================================
 # [VERMEIL] Cinematic Engine & Overlay Controller
-# MOTOR UNIVERSAL: Cubre todos los movimientos (Custom y por Defecto de Essentials).
+# THE PERFECT CUT - UNIVERSAL HIDE, FADE DATABOXES, NO GHOST TEXT, NO DELAYS
 #===============================================================================
 
 module VermeilCinematicEngine
-  # 1. DICCIONARIO PARA ANIMACIONES CUSTOM EN RUBY (Hechas a mano)
-  ANIMATIONS = {
-    :SURGINGSTRIKES => Battle::Scene::Animation::VermeilMultiHitPunches,
-    :DOUBLEHIT      => Battle::Scene::Animation::VermeilMultiHitPunches,
-    :FLURRYPUNCH    => Battle::Scene::Animation::VermeilMultiHitPunches,
-    :COMETPUNCH     => Battle::Scene::Animation::VermeilMultiHitPunches,
-    
-    :MACHPUNCH      => Battle::Scene::Animation::VermeilPriorityPunches,
-    :BULLETPUNCH    => Battle::Scene::Animation::VermeilPriorityPunches,
-    :JETPUNCH       => Battle::Scene::Animation::VermeilPriorityPunches,
-
-    :HAMMERARM      => Battle::Scene::Animation::VermeilHeavyPunches,
-    :ICEHAMMER      => Battle::Scene::Animation::VermeilHeavyPunches,
-    :CRABHAMMER     => Battle::Scene::Animation::VermeilHeavyPunches,
-    :DYNAMICPUNCH   => Battle::Scene::Animation::VermeilHeavyPunches,
-    :MEGAPUNCH      => Battle::Scene::Animation::VermeilHeavyPunches,
-
-    :SNIPESHOT      => Battle::Scene::Animation::VermeilCinematicSnipeShot,
-    :EMBER          => Battle::Scene::Animation::VermeilCinematicEmber,
-    :VINEWHIP       => Battle::Scene::Animation::VermeilCinematicVineWhip,
-    :WATERGUN       => Battle::Scene::Animation::VermeilCinematicWaterGun,
-    :STALKCUTTER    => Battle::Scene::Animation::VermeilCinematicStalkCutter,
-    :BULBBASH       => Battle::Scene::Animation::VermeilCinematicBulbBash,
-    :SUPERSONIC     => Battle::Scene::Animation::VermeilCinematicSupersonic,
-    :VOLTTACKLE     => Battle::Scene::Animation::VermeilCinematicVoltTackle,
-
-    :TOXICSPIKES    => Battle::Scene::Animation::VermeilToxicSpikesCast,
-    :SPIKES         => Battle::Scene::Animation::VermeilSpikesCast,
-    :STEALTHROCK    => Battle::Scene::Animation::VermeilStealthRockCast
-  }
-
-  # 2. DICCIONARIO DE COMPORTAMIENTOS PARA LAS CUSTOM
-  BEHAVIORS = {
-    Battle::Scene::Animation::VermeilMultiHitPunches    => :multihit,
-    Battle::Scene::Animation::VermeilToxicSpikesCast    => :hazard,
-    Battle::Scene::Animation::VermeilSpikesCast         => :hazard,
-    Battle::Scene::Animation::VermeilStealthRockCast    => :hazard
-  }
-
   def self.get_anim_class(move_id)
-    return ANIMATIONS[move_id]
+    # Convertimos a símbolo por seguridad
+    mid = move_id.respond_to?(:to_sym) ? move_id.to_sym : move_id
+    
+    # 1. DICCIONARIO MAESTRO (100% a prueba de fallos)
+    map = {
+      :SURGINGSTRIKES => "VermeilMultiHitPunches",
+      :DOUBLEHIT      => "VermeilMultiHitPunches",
+      :FLURRYPUNCH    => "VermeilMultiHitPunches",
+      :COMETPUNCH     => "VermeilMultiHitPunches",
+      
+      :MACHPUNCH      => "VermeilPriorityPunches",
+      :BULLETPUNCH    => "VermeilPriorityPunches",
+      :JETPUNCH       => "VermeilPriorityPunches",
+
+      :HAMMERARM      => "VermeilHeavyPunches",
+      :ICEHAMMER      => "VermeilHeavyPunches",
+      :CRABHAMMER     => "VermeilHeavyPunches",
+      :DYNAMICPUNCH   => "VermeilHeavyPunches",
+      :MEGAPUNCH      => "VermeilHeavyPunches",
+
+      # ---> PUÑOS ESPECTRALES / OSCUROS <---
+      :SHADOWPUNCH    => "VermeilEtherealPunches",
+      :RAGEFIST       => "VermeilEtherealPunches",
+      :WICKEDBLOW     => "VermeilEtherealPunches",
+      :SUCKERPUNCH    => "VermeilEtherealPunches",
+
+      :SNIPESHOT      => "VermeilCinematicSnipeShot",
+      :EMBER          => "VermeilCinematicEmber",
+      :VINEWHIP       => "VermeilCinematicVineWhip",
+      :WATERGUN       => "VermeilCinematicWaterGun",
+      :STALKCUTTER    => "VermeilCinematicStalkCutter",
+      :BULBBASH       => "VermeilCinematicBulbBash",
+      :SUPERSONIC     => "VermeilCinematicSupersonic",
+      :VOLTTACKLE     => "VermeilCinematicVoltTackle",
+
+      :TOXICSPIKES    => "VermeilToxicSpikesCast",
+      :SPIKES         => "VermeilSpikesCast",
+      :STEALTHROCK    => "VermeilStealthRockCast",
+      :STICKYWEB      => "VermeilStickyWebCast"
+    }
+    
+    # 2. AUTO-DETECCIÓN INTELIGENTE
+    # Si creas una clase llamada "Vermeil_NOMBREDELMOVE" la detectará automáticamente
+    direct_name = "Vermeil_#{mid}"
+    if Battle::Scene::Animation.const_defined?(direct_name)
+      return Battle::Scene::Animation.const_get(direct_name)
+    end
+    
+    cname = map[mid]
+    return nil if !cname
+    
+    if Battle::Scene::Animation.const_defined?(cname)
+      return Battle::Scene::Animation.const_get(cname)
+    end
+    return nil 
   end
 
   def self.get_behavior(anim_class)
-    return BEHAVIORS[anim_class] || :cinematic
+    return :cinematic if !anim_class
+    name = anim_class.name.split("::").last
+    map = {
+      "VermeilMultiHitPunches" => :multihit,
+      "VermeilToxicSpikesCast" => :hazard,
+      "VermeilSpikesCast"      => :hazard,
+      "VermeilStealthRockCast" => :hazard,
+      "VermeilStickyWebCast"   => :hazard
+    }
+    return map[name] || :cinematic
   end
 end
 
-#===============================================================================
-# MÉTODOS DE LA ESCENA (CONTROL DE UI)
-#===============================================================================
 class Battle::Scene
   def vermeil_start_sequence
     @vermeil_sequence_active = true
@@ -62,14 +83,9 @@ class Battle::Scene
     vermeil_engine_clear_message_window!
   end
 
-  def vermeil_update_sequence_timer
-    @vermeil_msg_filter_until = System.uptime + 0.80
-  end
-
   def vermeil_end_sequence
     @vermeil_sequence_active = false
     vermeil_engine_set_message_skin(false)
-    pbRefresh if respond_to?(:pbRefresh)
   end
 
   def vermeil_engine_set_message_skin(use_transparent)
@@ -82,20 +98,82 @@ class Battle::Scene
     end
   end
 
+  # =========================================================================
+  # BARRIDO MAESTRO: Limpia textos para evitar parpadeos post-animación
+  # =========================================================================
   def vermeil_engine_clear_message_window!
     return if !@sprites
     msg_win = @sprites["messageWindow"]
+    if msg_win && msg_win.respond_to?(:text=)
+      msg_win.text = "" 
+    end
     msg_box = @sprites["messageBox"]
-    if msg_win; msg_win.text = "" if msg_win.respond_to?(:text=); msg_win.visible = false if msg_win.respond_to?(:visible=); end
-    if msg_box; msg_box.visible = false if msg_box.respond_to?(:visible=); end
+    if msg_box && msg_box.respond_to?(:opacity=)
+      msg_box.opacity = 0
+      msg_box.visible = false if msg_box.respond_to?(:visible=)
+    end
   end
 
-  def vermeil_engine_show_message_window!
+  # =========================================================================
+  # DESVANECIMIENTO FLUIDO DE DATABOXES (Para TODOS los movimientos)
+  # =========================================================================
+  def vermeil_slide_databoxes_out
     return if !@sprites
-    msg_win = @sprites["messageWindow"]
-    msg_box = @sprites["messageBox"]
-    if msg_box; msg_box.visible = true if msg_box.respond_to?(:visible=); msg_box.opacity = 255 if msg_box.respond_to?(:opacity=); end
-    if msg_win; msg_win.visible = true if msg_win.respond_to?(:visible=); msg_win.contents_opacity = 255 if msg_win.respond_to?(:contents_opacity=); end
+    vermeil_engine_clear_message_window!
+    
+    if respond_to?(:pbHideInfoUI)
+      pbHideInfoUI
+    elsif respond_to?(:pbToggleDataboxes)
+      pbToggleDataboxes
+    end
+    
+    # Efecto Fade Out forzado a las databoxes para asegurar que se oculten
+    8.times do
+      @sprites.each do |k, v|
+        if k.to_s.start_with?("dataBox_") && v.respond_to?(:opacity)
+          v.opacity -= 32
+        end
+      end
+      pbUpdate
+    end
+    
+    @sprites.each do |k, v|
+      if k.to_s.start_with?("dataBox_") && v.respond_to?(:visible=)
+        v.visible = false
+      end
+    end
+  end
+
+  def vermeil_slide_databoxes_in
+    return if !@sprites
+    if respond_to?(:pbShowInfoUI)
+      pbShowInfoUI
+    elsif respond_to?(:pbToggleDataboxes)
+      pbToggleDataboxes(true)
+    end
+    
+    @sprites.each do |k, v|
+      if k.to_s.start_with?("dataBox_") && v.respond_to?(:visible=)
+        v.visible = true
+      end
+    end
+    
+    # Efecto Fade In forzado
+    8.times do
+      @sprites.each do |k, v|
+        if k.to_s.start_with?("dataBox_") && v.respond_to?(:opacity)
+          v.opacity += 32
+        end
+      end
+      pbUpdate
+    end
+  end
+
+  def vermeil_force_instant_box
+    if @sprites && @sprites["messageBox"] && @sprites["messageWindow"]
+      @sprites["messageBox"].x = 0
+      @sprites["messageWindow"].x = 16
+    end
   end
 
   def vermeil_hazard_anchor_for_side(side_index)
@@ -111,6 +189,11 @@ class Battle::Scene
     is_mh  = (behavior == :multihit)
     is_cin = (behavior == :cinematic)
     is_haz = (behavior == :hazard)
+
+    if is_cin
+      target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
+      return false if !user || !target
+    end
 
     target = nil; anim_user = user; side_index = 0; ax = 0; ay = 0
 
@@ -137,21 +220,12 @@ class Battle::Scene
 
     @vermeil_anim_is_playing = true
     
-    if is_mh && @vermeil_sequence_active
-      vermeil_engine_set_message_skin(true)
-      vermeil_engine_clear_message_window!
-    elsif is_cin || is_haz
-      vermeil_engine_clear_message_window! 
-    end
-    
-    pbToggleDataboxes if !is_mh || !@vermeil_sequence_active
-    
     begin
       pbHazardsSuspend(:vermeil_hazard_cast) if is_haz && respond_to?(:pbHazardsSuspend)
 
       if is_haz
         anim = anim_class.new(@sprites, @viewport, anim_user, ax, ay, side_index)
-      elsif anim_class == Battle::Scene::Animation::VermeilMultiHitPunches
+      elsif is_mh
         anim = anim_class.new(@sprites, @viewport, user, target, mid, hit_num)
       elsif anim_class.instance_method(:initialize).arity.abs == 4
         anim = anim_class.new(@sprites, @viewport, user, target)
@@ -171,125 +245,108 @@ class Battle::Scene
       us.visible = true if us; ts.visible = true if ts && target
       
       @vermeil_anim_is_playing = false
-      if !is_mh || !@vermeil_sequence_active
-        vermeil_engine_set_message_skin(false)
-        pbToggleDataboxes(true) if respond_to?(:pbToggleDataboxes)
-        pbRefresh if respond_to?(:pbRefresh)
-      end
+      @vermeil_skip_slide_in = true 
+
+      vermeil_end_sequence if @vermeil_sequence_active
     end
     return true
   end
 end
 
 #===============================================================================
-# ENRUTADOR GLOBAL UNIVERSAL (PREPEND)
+# BATTLE OVERRIDE - ANIQUILADOR DE DELAYS Y ENRUTADOR DE ANIMACIONES
 #===============================================================================
 module VermeilCinematicEngineBattleOverride
   def pbAnimation(move, user, targets, hitNum = 0)
     mid = move.respond_to?(:id) ? move.id : move
     anim_class = VermeilCinematicEngine.get_anim_class(mid)
-
-    # 1. SI ES UNA ANIMACIÓN CUSTOMIZADA EN RUBY (Las que hemos estado haciendo)
+    behavior = anim_class ? VermeilCinematicEngine.get_behavior(anim_class) : :none
+    
+    # 1. Limpiar textos fantasma y Ocultar Databoxes para TODOS los movimientos
+    @scene.vermeil_engine_clear_message_window!
+    if behavior != :multihit || hitNum.to_i <= 0
+      @scene.vermeil_slide_databoxes_out
+    end
+    
+    # 2. Reproducir animación Custom (Ofensivos / Hazards)
     if @showAnims && anim_class && @scene.respond_to?(:pbPlayVermeilCinematic)
-      behavior = VermeilCinematicEngine.get_behavior(anim_class)
-      
       if behavior == :multihit
         @scene.vermeil_start_sequence if hitNum.to_i <= 0
-        @scene.vermeil_update_sequence_timer
       end
       
       played = @scene.pbPlayVermeilCinematic(anim_class, user, targets, mid, hitNum, behavior)
-      return if played
+      if played
+        # Flag para aniquilar el molesto pbWait de Essentials que causa 2 seg de delay
+        @vermeil_just_finished_anim = true
+        
+        # Mostrar databoxes si no es un multihit en medio de su secuencia
+        if behavior != :multihit
+          @scene.vermeil_slide_databoxes_in
+        end
+        return
+      end
     end
 
-    # 2. SISTEMA UNIVERSAL PARA TODOS LOS MOVIMIENTOS EXISTENTES E INVENTADOS (Vanilla y Editor)
+    # 3. Reproducir animación Vainilla
     if @showAnims && @scene
-      behavior = :cinematic
-      move_data = GameData::Move.try_get(mid)
-      
-      if move_data
-        func = move_data.function_code
-        # Códigos de Multigolpe nativos de Essentials
-        if ["02D", "02E", "02F", "030", "031", "032", "0B0"].include?(func) || hitNum > 0
-          behavior = :multihit
-        # Códigos de Trampas nativas de Essentials
-        elsif ["04A", "04B", "04C", "101", "169"].include?(func)
-          behavior = :hazard
-        end
-      end
-
-      is_mh  = (behavior == :multihit)
-      is_haz = (behavior == :hazard)
-
-      if is_mh
-        @scene.vermeil_start_sequence if hitNum.to_i <= 0
-        @scene.vermeil_update_sequence_timer
-      end
-
       @scene.instance_variable_set(:@vermeil_anim_is_playing, true)
-
-      if is_mh && @scene.instance_variable_get(:@vermeil_sequence_active)
-        @scene.vermeil_engine_set_message_skin(true)
-        @scene.vermeil_engine_clear_message_window!
-      else
-        @scene.vermeil_engine_clear_message_window!
-      end
-      
-      # Ocultar UI e inmersión
-      @scene.pbToggleDataboxes if !is_mh || !@scene.instance_variable_get(:@vermeil_sequence_active)
-      @scene.pbHazardsSuspend(:vermeil_hazard_cast) if is_haz && @scene.respond_to?(:pbHazardsSuspend)
-
-      # --- REPRODUCIR LA ANIMACIÓN POR DEFECTO ---
       super(move, user, targets, hitNum)
-
-      # Restaurar el estado del campo
       @scene.instance_variable_set(:@vermeil_anim_is_playing, false)
-      @scene.pbHazardsResume(:vermeil_hazard_cast, false) if is_haz && @scene.respond_to?(:pbHazardsResume)
+      @scene.instance_variable_set(:@vermeil_skip_slide_in, true) if @scene.respond_to?(:vermeil_skip_slide_in)
       
-      if !is_mh || !@scene.instance_variable_get(:@vermeil_sequence_active)
-        @scene.vermeil_engine_set_message_skin(false)
-        @scene.pbToggleDataboxes(true) if @scene.respond_to?(:pbToggleDataboxes)
-        @scene.pbRefresh if @scene.respond_to?(:pbRefresh)
-      end
-
+      @vermeil_just_finished_anim = true
+      @scene.vermeil_slide_databoxes_in
       return
     end
     
     super(move, user, targets, hitNum)
+    @vermeil_just_finished_anim = true
+    @scene.vermeil_slide_databoxes_in
+  end
+
+  #=============================================================================
+  # ANIMACIONES COMUNES (Habilidades como Intimidate o Toxic Debris)
+  #=============================================================================
+  def pbCommonAnimation(animName, user = nil, targets = nil)
+    @scene.vermeil_engine_clear_message_window!
+    super(animName, user, targets)
+    
+    # Flag para aniquilar el delay de 1 segundo post-habilidad
+    @vermeil_just_finished_anim = true
+  end
+
+  #=============================================================================
+  # EL ANIQUILADOR DE DELAYS
+  # Intercepta el tiempo muerto de Essentials justo después de las animaciones
+  #=============================================================================
+  def pbWait(frames, *args)
+    if @vermeil_just_finished_anim
+      @vermeil_just_finished_anim = false
+      return # Salta la pausa y empalma directo al texto
+    end
+    super
   end
 end
 
+#===============================================================================
+# MATRIZ INTELIGENTE DE VISIBILIDAD
+#===============================================================================
 module VermeilCinematicEngineSceneOverride
+  def pbDisplayBrief(msg)
+    return if @vermeil_sequence_active
+    super(msg)
+  end
+
   def pbDisplayMessage(msg, brief = false)
-    if @vermeil_sequence_active
-      text = msg.to_s.downcase
-      if text.include?("used")
-        vermeil_engine_clear_message_window!
-        return
-      end
-      if text.include?("critical")
-        vermeil_engine_set_message_skin(true)
-        vermeil_engine_show_message_window!
-        pbRefresh
-        super(msg, brief) 
-        vermeil_engine_clear_message_window!
-        return
-      end
-      if text.include?("super effective") || text.include?("not very effective") || text.include?("had no effect") || (text.include?(" hit ") && (text.include?(" time") || text.include?(" times!")))
-        vermeil_end_sequence
-        vermeil_engine_show_message_window!
-        pbRefresh
-        super(msg, brief)
-        return
-      end
-      if @vermeil_msg_filter_until && System.uptime < @vermeil_msg_filter_until
-        vermeil_engine_clear_message_window!
-        return
-      end
+    if @vermeil_sequence_active && msg.to_s.downcase.include?("used")
+      vermeil_engine_clear_message_window!
+      return
     end
-    
-    if @vermeil_anim_is_playing && !@vermeil_sequence_active
-      return 
+
+    # Saltar retraso de slide-in nativo
+    if @vermeil_sequence_active || @vermeil_skip_slide_in || @vermeil_is_eor
+      vermeil_force_instant_box
+      @vermeil_skip_slide_in = false
     end
 
     super(msg, brief)
@@ -297,11 +354,24 @@ module VermeilCinematicEngineSceneOverride
 
   def pbUpdate(*args)
     super(*args) 
-    if @vermeil_sequence_active && !@vermeil_anim_is_playing
-      deadline = (@vermeil_msg_filter_until || 0) + 0.45
-      if System.uptime > deadline
-        vermeil_end_sequence
-        vermeil_engine_clear_message_window!
+
+    msg_win = @sprites["messageWindow"] rescue nil
+    msg_box = @sprites["messageBox"] rescue nil
+
+    if msg_win && msg_box
+      msg_win.opacity = 0 if msg_win.respond_to?(:opacity=)
+      msg_win.back_opacity = 0 if msg_win.respond_to?(:back_opacity=)
+      
+      text_empty = (!msg_win.respond_to?(:text) || msg_win.text.nil? || msg_win.text == "")
+      
+      should_hide = text_empty
+
+      if should_hide
+        msg_box.visible = false if msg_box.respond_to?(:visible=)
+        msg_box.opacity = 0 if msg_box.respond_to?(:opacity=)
+      else
+        msg_box.visible = true if msg_box.respond_to?(:visible=)
+        msg_box.opacity = 255 if msg_box.respond_to?(:opacity=)
       end
     end
   end

@@ -419,7 +419,7 @@ class Battle::Scene
       vermeil_ss_clear_message_window!
       
       # Hide databoxes (HP bars) during animation
-      pbToggleDataboxes if respond_to?(:pbToggleDataboxes)
+      
 
       begin
         anim = Animation::VermeilCinematicSnipeShot.new(@sprites, @viewport, user, target)
@@ -435,7 +435,6 @@ class Battle::Scene
         @vermeil_ss_sequence_done = true
         vermeil_ss_set_message_skin(false)
         # Show databoxes (HP bars) at end to display damage
-        pbToggleDataboxes(true) if respond_to?(:pbToggleDataboxes)
         pbRefresh if respond_to?(:pbRefresh)
       end
       return true

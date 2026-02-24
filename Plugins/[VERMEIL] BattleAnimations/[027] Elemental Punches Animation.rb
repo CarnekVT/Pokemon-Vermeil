@@ -105,7 +105,6 @@ class Battle::Scene
     @vermeil_ss_anim_active = true
     vermeil_ss_set_message_skin(true) rescue nil
     vermeil_ss_clear_message_window! rescue nil
-    pbToggleDataboxes if respond_to?(:pbToggleDataboxes)
     begin
       anim = Animation::VermeilElementalPunches.new(@sprites, @viewport, user, target, mid)
       loop do anim.update; pbUpdate; break if anim.animDone? end; anim.dispose
@@ -114,7 +113,6 @@ class Battle::Scene
       us.visible = true if us; ts.visible = true if ts
       @vermeil_ss_anim_active = false
       vermeil_ss_set_message_skin(false) rescue nil
-      pbToggleDataboxes(true) if respond_to?(:pbToggleDataboxes)
       pbRefresh if respond_to?(:pbRefresh)
     end
     return true
