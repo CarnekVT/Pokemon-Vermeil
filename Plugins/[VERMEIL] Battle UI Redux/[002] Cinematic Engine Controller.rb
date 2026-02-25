@@ -4,6 +4,40 @@
 #===============================================================================
 
 module VermeilCinematicEngine
+  # Get base priority for cinematic animations based on position in triple battles
+  # Player side: index 0=LOW(3), 1=MEDIUM(2), 2=HIGH(1)
+  # Foe side: index 0=HIGH(1), 1=MEDIUM(2), 2=LOW(3)
+  # This creates a Z-pattern that covers all positions properly
+  # NOTE: Player always has higher priority than Foe regardless of position
+  def self.get_base_priority(battler_index, is_foe)
+    pos_idx = battler_index % 3  # Position within the side (0,1,2)
+    base_priority = if is_foe
+      # Foe side: center first (HIGH), then edges outward (LOW)
+      pos_idx == 0 ? 1 : (pos_idx == 1 ? 2 : 3)
+    else
+      # Player side: center last (LOW), edges first (HIGH)
+      pos_idx == 2 ? 1 : (pos_idx == 1 ? 2 : 3)
+    end
+    # Player always gets higher effective priority (lower number) than foe
+    return is_foe ? (base_priority + 10) : base_priority
+  end
+
+  # Get animation priority for a specific user battler
+  # Animations can call this to get their priority based on the user
+  def self.get_animation_priority(user)
+    return 5 if !user || !user.respond_to?(:index)
+    idx = user.index
+    is_foe = idx >= 3
+    return get_base_priority(idx, is_foe)
+  end
+
+  # Check if animation uses Z-writing (affects all Pokemon in triple battles)
+  # Animations should define Z_WRITE = true if they modify Z positions globally
+  def self.uses_z_write?(anim_class)
+    return false if !anim_class || !anim_class.is_a?(Class)
+    return anim_class.const_defined?(:Z_WRITE) && anim_class::Z_WRITE
+  end
+
   def self.get_anim_class(move_id)
     mid = move_id.respond_to?(:to_sym) ? move_id.to_sym : move_id
     
@@ -73,6 +107,10 @@ module VermeilCinematicEngine
       "VermeilStealthRockCast" => :hazard,
       "VermeilStickyWebCast"   => :hazard
     }
+    # Check for Z_WRITE flag in animation class
+    if anim_class.const_defined?(:Z_WRITE) && anim_class::Z_WRITE
+      return :zwrite
+    end
     return map[name] || :cinematic
   end
 end
@@ -182,8 +220,9 @@ class Battle::Scene
     is_mh  = (behavior == :multihit)
     is_cin = (behavior == :cinematic)
     is_haz = (behavior == :hazard)
+    is_zwrite = (behavior == :zwrite)
 
-    if is_cin
+    if is_cin || is_zwrite
       target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
       return false if !user || !target
     end
@@ -243,6 +282,35 @@ class Battle::Scene
       vermeil_end_sequence if @vermeil_sequence_active
     end
     return true
+  end
+
+  # Get priority for a battler in triple battle Z-pattern
+  # Player side: positions 0,1,2 -> priorities 3,2,1 (center=LOW, edges=HIGH)
+  # Foe side: positions 0,1,2 -> priorities 1,2,3 (center=HIGH, edges=LOW)
+  # NOTE: Player always has higher priority (lower number) than Foe
+  def vermeil_get_battler_priority(battler)
+    return 2 if !battler || !battler.respond_to?(:index)
+    
+    idx = battler.index
+    is_foe = idx >= 3
+    pos = is_foe ? (idx - 3) : idx  # Position within side (0=center, 1=mid, 2=far)
+    
+    base_priority = if is_foe
+      # Foe: center first (HIGH), then edges outward (LOW)
+      pos == 0 ? 1 : (pos == 1 ? 2 : 3)
+    else
+      # Player: center last (LOW), edges first (HIGH)
+      pos == 2 ? 1 : (pos == 1 ? 2 : 3)
+    end
+    
+    # Player always gets higher effective priority (lower number) than foe
+    return is_foe ? (base_priority + 10) : base_priority
+  end
+
+  # Convenience method to get animation priority from scene
+  # Usage in animation: priority = scene.vermeil_get_animation_priority(user)
+  def vermeil_get_animation_priority(user)
+    VermeilCinematicEngine.get_animation_priority(user)
   end
 end
 

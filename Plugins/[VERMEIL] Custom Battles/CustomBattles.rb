@@ -84,16 +84,24 @@ module CustomBattles
   }
 end
 
-  def Battle_HOOHBOSS
-    setBattleRule("databoxStyle", [:Long, "The legendary {1}"])
-    setBattleRule("editWildPokemon", {
-      "moves" => [:SACREDFIRE, :AIRSLASH, :ANCIENTPOWER, :EXTRASENSORY],
-      "ivs" => { :HP => 31, :ATTACK => 31, :DEFENSE => 31, :SPECIAL_ATTACK => 31, :SPECIAL_DEFENSE => 31, :SPEED => 31 },
-      "evs" => { :HP => 6, :SPECIAL_ATTACK => 252, :SPEED => 252 },
-      "nature" => :MODEST,
-      "ability" => :REGENERATOR
-    })
-    setBattleRule("battleIntroText", "Ho-Oh accepts your challenge!")
-    setBattleRule("midbattleScript", CustomBattles::WildBosses[:HOOH_BOSS])
-    WildBattle.start(:HOOH, 60)
-  end
+# Battle rule methods - lowercase to avoid constant interpretation
+def start_hooh_battle
+  setBattleRule("databoxStyle", [:Long, "The legendary {1}"])
+  setBattleRule("editWildPokemon", {
+    "moves" => [:SACREDFIRE, :AIRSLASH, :ANCIENTPOWER, :EXTRASENSORY],
+    "ivs" => { :HP => 31, :ATTACK => 31, :DEFENSE => 31, :SPECIAL_ATTACK => 31, :SPECIAL_DEFENSE => 31, :SPEED => 31 },
+    "evs" => { :HP => 6, :SPECIAL_ATTACK => 252, :SPEED => 252 },
+    "nature" => :MODEST,
+    "ability" => :REGENERATOR
+  })
+  setBattleRule("battleIntroText", "Ho-Oh accepts your challenge!")
+  setBattleRule("midbattleScript", CustomBattles::WildBosses[:HOOH_BOSS])
+  WildBattle.start(:HOOH, 60)
+end
+
+def start_test_cinematic
+  setBattleRule("editWildPokemon", {
+    "moves" => [:SYRUPBOMB]
+  })
+  WildBattle.start(:DIPPLIN, 100)
+end
