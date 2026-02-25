@@ -1,6 +1,7 @@
 #===============================================================================
 # [VERMEIL] BattleAnimations - Plasma Fists (Zeraora Signature)
-# Concept: Lightning background overlay and massive blue electric explosion.
+# Concept: SwSh Accurate. Ground punch eruption, Freeze-frame dash, Nuclear impact.
+# Update: Fixed Z-Index Bug (Opponent becoming invisible behind the background).
 #===============================================================================
 
 class Battle::Scene::Animation::VermeilPlasmaFists < Battle::Scene::Animation
@@ -31,6 +32,13 @@ class Battle::Scene::Animation::VermeilPlasmaFists < Battle::Scene::Animation
     @tempSprites << clone; return clone
   end
 
+  def make_black_sprite
+    bmp = Bitmap.new(Graphics.width, Graphics.height)
+    bmp.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
+    s = Sprite.new(@viewport); s.bitmap = bmp
+    @tempSprites << s; s
+  end
+
   def createProcesses
     us, ts = @sprites["pokemon_#{@user.index}"], @sprites["pokemon_#{@target.index}"]
     return if !us || !ts
@@ -46,87 +54,125 @@ class Battle::Scene::Animation::VermeilPlasmaFists < Battle::Scene::Animation
     uh = us.bitmap ? (us.bitmap.height / 2.0) : 40; th = ts.bitmap ? (ts.bitmap.height / 2.0) : 40
     i_x = ts.x; i_y = ts.y - th; orig_ux = us.x; orig_uy = us.y; orig_tx = ts.x; orig_ty = ts.y
 
-    @end_frame = 55
-    t_imp = 12
+    @end_frame = 70
+    t_eruption = 6
+    t_dash = 16
+    t_imp = 20
 
     plasma_bg = "Graphics/Animations/PRAS- Plasma Fist BG.png"
     plasma_fx = "Graphics/Animations/PRAS- Plasma Fist.png"
 
-    # 1. FONDO ELÉCTRICO OSCURO
+    dist_x = (f_dir == 1) ? 50 : 100 
+    dist_y = (f_dir == 1) ? 10 : -15 
+    dash_x = orig_tx - (dist_x * f_dir)
+    dash_y = orig_ty + dist_y
+    zoom_target = (f_dir == 1) ? 75 : 130 
+
+    # 1. FONDO ELÉCTRICO OSCURO (Enviado al Z -20 para que no tape al oponente)
     if pbResolveBitmap(plasma_bg)
       bg = addNewSprite(Graphics.width/2, Graphics.height/2, plasma_bg, PictureOrigin::CENTER)
-      bg.setZ(0, target_z - 5); bg.setOpacity(0, 0); bg.setZoom(0, 150)
+      bg.setZ(0, target_z - 20); bg.setOpacity(0, 0); bg.setZoom(0, 150)
       bg.moveOpacity(0, 6, 255) 
-      bg.moveOpacity(t_imp + 10, 8, 0)
+      bg.moveOpacity(t_imp + 25, 15, 0)
     end
 
-    # 2. CARGA DE ENERGÍA (Vibración y rayos alrededor del usuario)
-    up.setSE(0, "Anim/Thunder2", 100, 150)
-    up.moveTone(0, 6, Tone.new(0, 100, 255, 100))
-    8.times { |i| up.moveDelta(i, 1, (i.even? ? 4 : -4), 0) }
+    # 2. WINDUP
+    up.setSE(0, "Anim/Wind1", 100, 120)
+    up.moveXY(0, 4, orig_ux, orig_uy - 40) 
+    up.moveXY(4, 2, orig_ux, orig_uy + 10) 
+    
+    # 3. ERUPCIÓN DE PLASMA DESDE EL SUELO
+    up.setSE(t_eruption, "Anim/Thunder2", 100, 100)
+    up.setSE(t_eruption, "Anim/Earth1", 100, 150)
+    up.moveTone(t_eruption, 4, Tone.new(0, 150, 255, 150))
+    8.times { |i| up.moveDelta(t_eruption + i, 1, (i.even? ? 6 : -6), 0) }
 
     if pbResolveBitmap(plasma_fx)
-      4.times do |i|
+      pillar = addNewSprite(orig_ux, orig_uy, plasma_fx, PictureOrigin::BOTTOM)
+      pillar.setZ(0, user_z - 5)
+      apply_pras_frame(pillar, plasma_fx, 0, 0, 0) 
+      pillar.setBlendType(0, 1)
+      pillar.setVisible(0, false); pillar.setVisible(t_eruption, true)
+      pillar.setZoomXY(0, 100, 0)
+      pillar.moveZoomXY(t_eruption, 4, 150, 200)
+      pillar.moveOpacity(t_eruption + 8, 4, 0)
+
+      6.times do |i|
         bolt = addNewSprite(orig_ux, orig_uy - (uh/2), plasma_fx, PictureOrigin::CENTER)
         bolt.setZ(0, user_z + 5)
-        apply_pras_frame(bolt, plasma_fx, rand(5), 1, 0) # Rayos de la Fila 1
+        apply_pras_frame(bolt, plasma_fx, rand(5), 1, 0) 
         bolt.setAngle(0, rand(360)); bolt.setBlendType(0, 1)
-        bolt.setVisible(0, false); bolt.setVisible(i * 2, true)
-        bolt.setZoom(0, 80 + rand(40)); bolt.moveOpacity((i * 2) + 4, 3, 0)
+        bolt.setVisible(0, false); bolt.setVisible(t_eruption + i, true)
+        bolt.setZoom(0, 100 + rand(50)); bolt.moveOpacity(t_eruption + i + 4, 3, 0)
       end
     end
 
-    # 3. DASH
-    up.setSE(8, "Anim/Wind1", 100, 180)
-    up.moveXY(8, 4, orig_ux + (20 * f_dir), orig_uy)
+    # 4. DASH HIPERVELOZ (Z-Index del oponente seteado a -2 para estar delante del fondo)
+    up.setSE(t_dash, "Anim/Wind1", 100, 200)
+    
+    up.setZ(t_dash, target_z - 2) if f_dir == -1 
+    
+    up.moveXY(t_dash, 2, dash_x, dash_y)
+    up.moveZoom(t_dash, 2, zoom_target)
 
-    # 4. PUÑO DE PLASMA (Fila 0, Columna 3)
+    # 5. PUÑO Y FREEZE-FRAME
     if pbResolveBitmap(plasma_fx)
-      fist = addNewSprite(orig_ux + (20 * f_dir), i_y, plasma_fx, PictureOrigin::CENTER); fist.setZ(0, target_z + 15)
+      fist = addNewSprite(dash_x + (20 * f_dir), i_y, plasma_fx, PictureOrigin::CENTER); fist.setZ(0, target_z + 15)
       apply_pras_frame(fist, plasma_fx, 3, 0, 0) 
       fist.setAngle(0, f_dir == 1 ? 0 : 180)
-      fist.setVisible(0, false); fist.setVisible(8, true); fist.setZoom(0, 200)
-      fist.moveXY(8, 4, i_x, i_y); fist.moveOpacity(t_imp + 4, 4, 0)
+      fist.setVisible(0, false); fist.setVisible(t_dash + 2, true); fist.setZoom(0, 250)
+      fist.moveXY(t_dash + 2, 2, i_x, i_y); fist.moveOpacity(t_imp + 4, 4, 0)
     end
-
-    # 5. IMPACTO EXPLOSIVO (Fila 2 - Ondas expansivas y destello azul)
-    tp.setSE(t_imp, "Anim/Thunder3", 100, 90)
-    tp.setSE(t_imp + 2, "Anim/Super Damage", 100, 120)
     
-    tp.moveColor(t_imp, 2, Color.new(100, 200, 255, 255)); tp.moveColor(t_imp + 6, 6, Color.new(0,0,0,0))
-    tp.moveXY(t_imp, 2, orig_tx + (60 * f_dir), orig_ty) 
-    8.times { |i| tp.moveDelta(t_imp + 2 + i, 1, (i.even? ? 15 : -15) * f_dir, 0) }
-    tp.moveXY(t_imp + 10, 4, orig_tx, orig_ty)
+    t_nuke = t_imp + 2 
+
+    # 6. EXPLOSIÓN NUCLEAR ELÉCTRICA
+    tp.setSE(t_nuke, "Anim/Thunder3", 100, 80)
+    tp.setSE(t_nuke + 2, "Anim/Super Damage", 100, 100)
+    tp.setSE(t_nuke + 6, "Anim/Thunder1", 100, 90)
+    
+    flash = addSprite(make_black_sprite, PictureOrigin::TOP_LEFT)
+    flash.setZ(0, 999); flash.setTone(0, Tone.new(255, 255, 255, 0))
+    flash.setOpacity(0, 0); flash.moveOpacity(t_nuke, 1, 255); flash.moveOpacity(t_nuke + 4, 10, 0)
+
+    tp.moveColor(t_nuke, 2, Color.new(0, 255, 255, 255)); tp.moveColor(t_nuke + 8, 8, Color.new(0,0,0,0))
+    tp.moveXY(t_nuke, 2, orig_tx + (70 * f_dir), orig_ty) 
+    16.times { |i| tp.moveDelta(t_nuke + i, 1, (i.even? ? 20 : -20) * f_dir, 0) } 
+    tp.moveXY(t_nuke + 16, 6, orig_tx, orig_ty)
 
     if pbResolveBitmap(plasma_fx)
-      # Núcleo de la explosión
       boom = addNewSprite(i_x, i_y, plasma_fx, PictureOrigin::CENTER); boom.setZ(0, target_z + 16)
-      apply_pras_frame(boom, plasma_fx, 0, 2, 0) # Inicio Fila 2
+      apply_pras_frame(boom, plasma_fx, 0, 2, 0) 
       boom.setBlendType(0, 1)
-      boom.setVisible(0, false); boom.setVisible(t_imp, true); boom.setZoom(0, 150)
+      boom.setVisible(0, false); boom.setVisible(t_nuke, true); boom.setZoom(0, 200)
       
-      # Animamos la fila 2 de explosiones
-      5.times { |f| apply_pras_frame(boom, plasma_fx, f, 2, t_imp + (f * 2)) }
-      boom.moveZoom(t_imp, 8, 350); boom.moveOpacity(t_imp + 8, 4, 0)
+      5.times { |f| apply_pras_frame(boom, plasma_fx, f, 2, t_nuke + (f * 2)) }
+      boom.moveZoom(t_nuke, 10, 500); boom.moveOpacity(t_nuke + 10, 6, 0) 
 
-      # Relámpagos residuales
-      6.times do |i|
+      10.times do |i|
         r_bolt = addNewSprite(i_x, i_y, plasma_fx, PictureOrigin::CENTER); r_bolt.setZ(0, target_z + 17)
         apply_pras_frame(r_bolt, plasma_fx, rand(5), 1, 0) 
         r_bolt.setBlendType(0, 1); r_bolt.setAngle(0, rand(360))
-        r_bolt.setVisible(0, false); r_bolt.setVisible(t_imp, true)
-        r_bolt.setZoom(0, 50); r_bolt.moveZoom(t_imp, 6, 150 + rand(100))
-        r_bolt.moveXY(t_imp, 6, i_x + (rand(160)-80), i_y + (rand(160)-80))
-        r_bolt.moveOpacity(t_imp + 4, 4, 0)
+        r_bolt.setVisible(0, false); r_bolt.setVisible(t_nuke + rand(4), true)
+        r_bolt.setZoom(0, 80); r_bolt.moveZoom(t_nuke, 8, 200 + rand(150))
+        r_bolt.moveXY(t_nuke, 8, i_x + (rand(240)-120), i_y + (rand(240)-120))
+        r_bolt.moveOpacity(t_nuke + 6, 4, 0)
       end
     end
 
     # Reset
-    up.moveTone(t_imp + 8, 6, Tone.new(0,0,0,0))
-    up.moveXY(t_imp + 8, 6, orig_ux, orig_uy)
+    up.moveTone(t_nuke + 10, 8, Tone.new(0,0,0,0))
+    up.moveXY(t_nuke + 10, 8, orig_ux, orig_uy)
+    up.moveZoom(t_nuke + 10, 8, 100)
+    up.setZ(t_nuke + 10, user_z)
 
+    # Failsafes
     up.setXY(@end_frame - 1, orig_ux, orig_uy)
+    up.setZoom(@end_frame - 1, 100)
+    up.setZ(@end_frame - 1, user_z)
+    
     tp.setXY(@end_frame - 1, orig_tx, orig_ty)
+    tp.setZoom(@end_frame - 1, 100)
     up.setCallback(@end_frame, proc { us.visible = true; ts.visible = true })
   end
 end

@@ -275,11 +275,9 @@ module VermeilCinematicEngineBattleOverride
         @vermeil_in_sequence = true if behavior == :multihit || behavior == :hazard
         
         # For multihit: show databoxes between hits to display damage
-        if behavior == :multihit && hitNum.to_i > 0
-          # Show databoxes between hits
+        if behavior == :multihit
+          # Show databoxes after animation for ALL hits (including hit 1)
           @scene.vermeil_slide_databoxes_in
-        elsif behavior == :multihit
-          # First hit: keep UI hidden
         else
           # Non-multihit: show databoxes after animation
           @scene.vermeil_slide_databoxes_in
