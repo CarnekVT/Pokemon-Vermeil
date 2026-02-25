@@ -371,6 +371,26 @@ end
 
 # Fixes Camera problem with ENLS Fancy Camera plugin :D
 def pbWait(duration)
+  # Skip wait if a Vermeil cinematic animation just finished (to avoid delay after animations)
+  battle_obj = nil
+  
+  # Try to find the Battle object from different contexts
+  if self.is_a?(Battle)
+    battle_obj = self
+  elsif defined?(@battle) && @battle && @battle.is_a?(Battle)
+    battle_obj = @battle
+  elsif defined?($battle) && $battle && $battle.is_a?(Battle)
+    battle_obj = $battle
+  end
+  
+  if battle_obj && battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim)
+    if battle_obj.instance_variable_get(:@vermeil_just_finished_anim)
+      battle_obj.instance_variable_set(:@vermeil_just_finished_anim, false)
+      return # Skip the wait
+    end
+  end
+  
+  # Original implementation
   timer_start = System.uptime
   until System.uptime - timer_start >= duration
     yield System.uptime - timer_start if block_given?

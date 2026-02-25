@@ -73,9 +73,30 @@ class Battle::Scene::Animation::VermeilCinematicMegaDrain < Battle::Scene::Anima
       lf.moveAngle(t_s, 12, 360)
     end
 
-    # 4. CURACIÓN BRILLANTE
-    up.moveColor(T_DRAIN + 15, 6, Color.new(50, 255, 50, 140))
-    up.moveColor(T_DRAIN + 25, 12, Color.new(0, 0, 0, 0))
+    # 4. CURACIÓN BRILLANTE CON ESTRELLAS
+    t_heal = T_DRAIN + 15
+    up.moveColor(t_heal, 6, Color.new(50, 255, 50, 140))
+    up.moveColor(t_heal + 10, 12, Color.new(0, 0, 0, 0))
+
+    status = "Graphics/Animations/PRAS- Status.png"
+    if pbResolveBitmap(status)
+      6.times do |i|
+        t_s = t_heal + (i * 2)
+        start_x = us.x + (rand(60) - 30)
+        start_y = us.y - rand(uh)
+        
+        s = addNewSprite(start_x, start_y, status, PictureOrigin::CENTER)
+        s.setZ(0, 760)
+        apply_pras_frame(s, 4, 4, 0)
+        s.setTone(0, Tone.new(0, 255, 100, 0))
+        s.setVisible(0, false); s.setVisible(t_s, true)
+        s.setZoom(0, 50 + rand(40))
+        
+        s.moveXY(t_s, 8, start_x, start_y - 50 - rand(20))
+        s.moveOpacity(t_s + 4, 4, 0)
+      end
+    end
+
     tp.moveTone(T_END - 12, 12, Tone.new(0,0,0,0))
     up.setCallback(T_END, proc { us.visible = true; ts.visible = true })
   end

@@ -1,8 +1,6 @@
 #===============================================================================
 # [VERMEIL] BattleAnimations - Multi-Hit & Flow Punches
-# Fix: WaterSplashShot off-center bug (time=0 src_rect initialization).
-# Surging Strikes arc now starts from attacker's hand perfectly.
-# Maintenance: Full code structure preserved (>395 lines) for UI stability.
+# Fix: Added individual user jolts, swing SFX and hit SFX for each strike in barrages.
 #===============================================================================
 
 class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animation
@@ -58,6 +56,10 @@ class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animatio
       if pbResolveBitmap(punches)
         delays = [5, 8, 11]
         delays.each_with_index do |t_s, idx|
+          # Sacudida y sonido de viento INDIVIDUAL para cada puñetazo
+          up.setSE(t_s - 1, "Anim/Wind1", 80, 120 + rand(30))
+          up.moveDelta(t_s - 1, 1, 6 * f_dir, 0); up.moveDelta(t_s, 1, -6 * f_dir, 0)
+
           r_x = (rand(60) - 30); r_y = (rand(60) - 30)
           start_f_x = i_x - (80 * f_dir); start_f_y = i_y + r_y
           end_f_x = i_x + r_x; end_f_y = i_y + r_y
@@ -65,6 +67,7 @@ class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animatio
           apply_pras_frame(fist, punches, 0, 0, 0); fist.setAngle(0, f_dir == 1 ? 0 : 180); fist.setZoom(0, 100 + rand(30))
           fist.setVisible(0, false); fist.setVisible(t_s, true)
           fist.moveXY(t_s, 2, end_f_x, end_f_y); fist.moveOpacity(t_s + 2, 2, 0)
+          
           if pbResolveBitmap(spark)
             4.times do |k|
               tr = addNewSprite(0, 0, spark, PictureOrigin::CENTER); tr.setZ(0, target_z + 15)
@@ -74,8 +77,10 @@ class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animatio
               tr.setZoom(0, 30 + rand(30)); tr.moveOpacity(t_s + 1 + rand(2), 2, 0)
             end
           end
-          tp.setSE(t_s + 1, "Anim/Hit1", 100, 100 + rand(20))
-          tp.moveDelta(t_s + 1, 1, 8 * f_dir, 0); tp.moveDelta(t_s + 2, 1, -8 * f_dir, 0)
+          
+          # Sonido de impacto y temblor INDIVIDUAL
+          tp.setSE(t_s, "Anim/PRSFX- Tackle", 100, 100 + rand(20))
+          tp.moveDelta(t_s, 1, 8 * f_dir, 0); tp.moveDelta(t_s + 1, 1, -8 * f_dir, 0)
         end
       end
       up.moveXY(16, 4, orig_ux, orig_uy)
@@ -85,12 +90,14 @@ class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animatio
       punches = "Graphics/Animations/punches.png"
       swift = pbResolveBitmap("Graphics/Animations/PRAS- Swift.png") ? "Graphics/Animations/PRAS- Swift.png" : "Graphics/Animations/PRAS- Meteor Mash.png"
       start_c_x = lunge_x + (20 * f_dir); start_c_y = orig_uy - uh
+      
       if pbResolveBitmap(punches)
         fist = addNewSprite(start_c_x, start_c_y, punches, PictureOrigin::CENTER); fist.setZ(0, user_z + 6)
         apply_pras_frame(fist, punches, 1, 0, 0); fist.setTone(0, Tone.new(0, 100, 255, 50)) 
         fist.setVisible(0, false); fist.setVisible(5, true); fist.setZoom(0, 120)
         fist.setAngle(0, f_dir == 1 ? 0 : 180); fist.moveXY(5, 3, i_x, i_y); fist.moveOpacity(8, 2, 0)
       end
+      
       if pbResolveBitmap(swift)
         5.times do |k|
           tr = addNewSprite(0, 0, swift, PictureOrigin::CENTER); tr.setZ(0, user_z + 5)
@@ -100,34 +107,36 @@ class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animatio
           tr.setVisible(0, false); tr.setVisible(5, true); tr.setZoom(0, 40 + rand(30)); tr.moveOpacity(7 + rand(2), 2, 0)
         end
       end
-      tp.setSE(8, "Anim/Hit2", 100, 110)
+      
+      tp.setSE(8, "Anim/PRSFX- Tackle", 100, 110)
       tp.moveColor(8, 2, Color.new(255, 255, 200, 200)); tp.moveColor(10, 3, Color.new(0,0,0,0))
       4.times { |i| tp.moveDelta(8 + i, 1, (i.even? ? 10 : -10) * f_dir, 0) }
+      
       if pbResolveBitmap(swift)
         8.times do |i|
           s = addNewSprite(i_x, i_y, swift, PictureOrigin::CENTER); s.setZ(0, target_z + 15)
           apply_pras_frame(s, swift, rand(4), 0, 0); s.setBlendType(0, 1)
           s.setVisible(0, false); s.setVisible(8, true); s.setZoom(0, 40 + rand(30))
-          s.moveXY(8, 4 + rand(4), i_x + (rand(120)-60), i_y + (rand(120)-60)); s.moveOpacity(11, 4, 0)
+          dur = 4 + rand(4)
+          s.moveXY(8, dur, i_x + (rand(120)-60), i_y + (rand(120)-60)); s.moveOpacity(11, 4, 0)
+          
+          # Cascadas de impactos individuales por cada estrella que golpea
+          tp.setSE(8 + dur, "Anim/PRSFX- Tackle", 70, 130 + rand(30))
         end
       end
       up.moveXY(13, 4, orig_ux, orig_uy)
 
     when :SURGINGSTRIKES
-      # AZOTE TORRENCIAL - CANONICAL FLUID ARCS & ANIMATED SPLASH
-      @end_frame = 28 # Damos margen para asegurar que el overlay no se corte prematuramente
+      @end_frame = 28 
       splash_asset = "Graphics/BattleParticlesAnimations/WaterSplashShot"
       drops_asset  = "Graphics/BattleParticlesAnimations/Bubbles-Drops"
 
-      # Centramos el nacimiento del arco directamente en el atacante
       c_x = orig_ux + (40 * f_dir)
       c_y = orig_uy - uh
-
       y_off = (rand(80) - 40)
       start_f_x = c_x
       start_f_y = c_y
       
-      # 1. Generar el arco de agua (Drops con gravedad atenuada)
       if pbResolveBitmap(drops_asset)
         14.times do |k|
           tr = addNewSprite(0, 0, drops_asset, PictureOrigin::CENTER)
@@ -141,36 +150,27 @@ class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animatio
           
           tr.setVisible(0, false); tr.setVisible(5 + (k/1.2).floor, true)
           tr.setZoom(0, 60 + rand(40))
-          # Inercia de Snipe Shot: Caen levemente sin cruzar el suelo
           tr.moveDelta(5 + (k/1.2).floor, 10, rand(25) * -f_dir, 30 + rand(20))
           tr.moveOpacity(5 + (k/1.2).floor, 12, 0)
         end
       end
 
-      # Reacción de impacto en el objetivo
       tp.setSE(8, "Anim/Water3", 100, 110)
       tp.moveColor(8, 2, Color.new(150, 255, 255, 200)); tp.moveColor(10, 4, Color.new(0, 0, 0, 0))
       4.times { |i| tp.moveDelta(8 + i, 1, (i.even? ? 12 : -12) * f_dir, 0) }
 
-      # 2. Impacto ANIMADO (Recorre los frames de WaterSplashShot centrado en el rival)
       if pbResolveBitmap(splash_asset)
         splash = addNewSprite(i_x, i_y + y_off, splash_asset, PictureOrigin::CENTER)
         splash.setZ(0, target_z + 22)
-        
-        # ¡FIX CLAVE! Inicializar el frame a tiempo 0 para ajustar el PictureOrigin de la imagen
         apply_pras_frame(splash, splash_asset, 0, 0, 0, 64, 64)
-        
-        # Sincronizamos la animación de la hoja de sprites
         5.times do |f_idx|
           apply_pras_frame(splash, splash_asset, f_idx, 0, 8 + (f_idx * 2), 64, 64)
         end
-        
         splash.setBlendType(0, 1)
         splash.setVisible(0, false); splash.setVisible(8, true)
         splash.setZoom(0, 140); splash.moveZoom(8, 6, 260); splash.moveOpacity(16, 6, 0)
       end
 
-      # 3. Dispersión radial (Gotas finales)
       if pbResolveBitmap(drops_asset)
         18.times do |i|
           sp = addNewSprite(i_x, i_y + y_off, drops_asset, PictureOrigin::CENTER); sp.setZ(0, target_z + 25)
@@ -204,7 +204,7 @@ class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animatio
           tr.setZoom(0, 40 + rand(40)); tr.moveOpacity(5 + rand(2), 2, 0)
         end
       end
-      tp.setSE(4, "Anim/Hit1", 100, 100)
+      tp.setSE(4, "Anim/PRSFX- Tackle", 100, 100)
       tp.moveColor(4, 2, Color.new(255, 255, 255, 180)); tp.moveColor(6, 4, Color.new(0, 0, 0, 0))
       shake_dir = is_even ? 15 : -15
       tp.moveDelta(4, 1, shake_dir, 0); tp.moveDelta(5, 2, -shake_dir, 0); tp.moveDelta(7, 1, 0, 0)

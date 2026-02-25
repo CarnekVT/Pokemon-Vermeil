@@ -1,8 +1,7 @@
 #===============================================================================
 # [VERMEIL] BattleAnimations - Priority Punches
 # Includes: Mach Punch, Bullet Punch, Jet Punch
-# Fix: Removed weird Mach Punch line. Bullet Punch is bluish-gray. 
-# Jet Punch is now a fast, heavy, high-pressure water strike.
+# Fix: Added individual user jolts, swing SFX and hit SFX for barrage strikes.
 #===============================================================================
 
 class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animation
@@ -48,16 +47,13 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
 
     case @move_id
     when :MACHPUNCH
-      # 💥 SPEED OF SOUND BLINK-STRIKE (Instant, single heavy hit)
       t_imp = 4
       punches = pbResolveBitmap("Graphics/Animations/PRAS- Pummeling.png") ? "Graphics/Animations/PRAS- Pummeling.png" : "Graphics/Animations/punches.png"
       spark   = "Graphics/Animations/PRAS- Strike.png"
 
-      # Blink instantáneo (Desaparece limpio, sin líneas raras)
       up.setSE(0, "Anim/Wind1", 100, 180)
       up.moveOpacity(0, 2, 0)
       
-      # Puño naranja brillante
       if pbResolveBitmap(punches)
         fist = addNewSprite(i_x - (60 * f_dir), i_y, punches, PictureOrigin::CENTER); fist.setZ(0, target_z + 15)
         apply_pras_frame(fist, punches, 0, 0, 0)
@@ -66,7 +62,6 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
         fist.moveXY(t_imp, 2, i_x, i_y); fist.moveOpacity(t_imp + 2, 3, 0)
       end
 
-      # Chispa de pelea
       if pbResolveBitmap(spark)
         sp = addNewSprite(i_x, i_y, spark, PictureOrigin::CENTER); sp.setZ(0, target_z + 16)
         apply_pras_frame(sp, spark, 0, 0, 0)
@@ -75,7 +70,7 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
         sp.setZoom(0, 80); sp.moveZoom(t_imp, 3, 200); sp.moveOpacity(t_imp + 2, 3, 0)
       end
 
-      tp.setSE(t_imp, "Anim/Hit1", 100, 100)
+      tp.setSE(t_imp, "Anim/PRSFX- Tackle", 100, 100)
       tp.moveColor(t_imp, 2, Color.new(255, 255, 255, 200)); tp.moveColor(t_imp + 2, 4, Color.new(0, 0, 0, 0))
       tp.moveXY(t_imp, 2, orig_tx + (30 * f_dir), orig_ty); tp.moveXY(t_imp + 2, 4, orig_tx, orig_ty)
       
@@ -83,7 +78,6 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
       up.moveOpacity(t_imp + 12, 3, 255)
 
     when :BULLETPUNCH
-      # ⚙️ METALLIC ORA ORA BARRAGE (Gris Azulado Intenso)
       t_imp = 2
       punches = pbResolveBitmap("Graphics/Animations/PRAS- Pummeling.png") ? "Graphics/Animations/PRAS- Pummeling.png" : "Graphics/Animations/punches.png"
       spark   = "Graphics/Animations/PRAS- Strike.png"
@@ -91,16 +85,19 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
       up.setSE(0, "Anim/Wind1", 100, 180)
       up.moveOpacity(0, 2, 0)
 
-      # Ráfaga de puños metálicos
       if pbResolveBitmap(punches)
         7.times do |i|
           t_s = t_imp + (i * 2)
+          
+          # Sacudida y sonido de viento INDIVIDUAL para cada golpe en la ráfaga
+          up.setSE(t_s - 1, "Anim/Wind1", 80, 140 + rand(30))
+          up.moveDelta(t_s - 1, 1, 6 * f_dir, 0); up.moveDelta(t_s, 1, -6 * f_dir, 0)
+
           r_x = (rand(60) - 30); r_y = (rand(60) - 30)
           
           fist = addNewSprite(i_x - (50 * f_dir), i_y + r_y, punches, PictureOrigin::CENTER)
           fist.setZ(0, target_z + 15 + i)
           apply_pras_frame(fist, punches, 0, 0, 0) 
-          # Tinte gris azulado pesado para eliminar lo amarillo
           fist.setTone(0, Tone.new(-80, -50, 100, 150))
           fist.setAngle(0, f_dir == 1 ? 0 : 180); fist.setZoom(0, 100 + rand(40))
           fist.setVisible(0, false); fist.setVisible(t_s, true)
@@ -111,12 +108,13 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
             sp = addNewSprite(i_x + r_x, i_y + r_y, spark, PictureOrigin::CENTER)
             sp.setZ(0, target_z + 20 + i)
             apply_pras_frame(sp, spark, rand(3), 0, 0)
-            sp.setBlendType(0, 1); sp.setTone(0, Tone.new(-100, -50, 150, 100)) # Chispas metálicas
+            sp.setBlendType(0, 1); sp.setTone(0, Tone.new(-100, -50, 150, 100)) 
             sp.setVisible(0, false); sp.setVisible(t_s, true)
             sp.setZoom(0, 60 + rand(40)); sp.moveOpacity(t_s + 2, 3, 0)
           end
           
-          tp.setSE(t_s, "Anim/Hit2", 90, 90 + rand(30)) 
+          # Sonido de impacto y temblor INDIVIDUAL
+          tp.setSE(t_s, "Anim/PRSFX- Tackle", 90, 90 + rand(30)) 
           tp.moveDelta(t_s, 1, 8 * f_dir, 0); tp.moveDelta(t_s + 1, 1, -8 * f_dir, 0)
         end
       end
@@ -128,7 +126,6 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
       up.moveOpacity(t_imp + 16, 3, 255)
 
     when :JETPUNCH
-      # 🌊 FLUID HEAVY WATER PUNCH (Instant fast strike)
       t_imp = 4
       punches      = pbResolveBitmap("Graphics/Animations/PRAS- Pummeling.png") ? "Graphics/Animations/PRAS- Pummeling.png" : "Graphics/Animations/punches.png"
       splash_asset = "Graphics/BattleParticlesAnimations/WaterSplashShot"
@@ -137,11 +134,9 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
       up.setSE(0, "Anim/Wind1", 100, 180)
       up.moveOpacity(0, 2, 0)
 
-      # Centramos el impacto en el objetivo (Como en Surging Strikes)
       imp_x = orig_tx
       imp_y = orig_ty - th
 
-      # Puño Torpedo Acuático (Directo a la cara)
       if pbResolveBitmap(punches)
         fist = addNewSprite(imp_x - (80 * f_dir), imp_y, punches, PictureOrigin::CENTER)
         fist.setZ(0, target_z + 15)
@@ -151,14 +146,10 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
         fist.moveXY(t_imp, 2, imp_x, imp_y); fist.moveOpacity(t_imp + 2, 3, 0)
       end
 
-      # Impacto animado de alta presión 
       tp.setSE(t_imp, "Anim/Water3", 100, 110)
       if pbResolveBitmap(splash_asset)
         splash = addNewSprite(imp_x, imp_y, splash_asset, PictureOrigin::CENTER); splash.setZ(0, target_z + 20)
-        
-        # Inicializamos en frame 0 para evitar descuadres de sprite
         apply_pras_frame(splash, splash_asset, 0, 0, 0, 64, 64)
-        
         5.times do |f_idx|
           apply_pras_frame(splash, splash_asset, f_idx, 0, t_imp + (f_idx * 2), 64, 64)
         end
@@ -166,7 +157,6 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
         splash.setZoom(0, 120); splash.moveZoom(t_imp, 5, 250); splash.moveOpacity(t_imp + 6, 4, 0)
       end
 
-      # Explosión violenta de gotas
       if pbResolveBitmap(drops_asset)
         15.times do |i|
           sp = addNewSprite(imp_x, imp_y, drops_asset, PictureOrigin::CENTER); sp.setZ(0, target_z + 25)

@@ -3300,7 +3300,7 @@ Description = The user blasts the target with a gust of repulsive wind. It may a
 Name = Shadow Punch
 Type = GHOST
 Category = Physical
-Power = 60
+Power = 75
 Accuracy = 0
 TotalPP = 20
 Target = NearOther
@@ -4993,9 +4993,9 @@ Description = Seeking an opening, the user strikes continually. The foe's stat c
 #-------------------------------
 [DIZZYPUNCH]
 Name = Dizzy Punch
-Type = NORMAL
+Type = PSYCHIC
 Category = Physical
-Power = 70
+Power = 75
 Accuracy = 100
 TotalPP = 10
 Target = NearOther

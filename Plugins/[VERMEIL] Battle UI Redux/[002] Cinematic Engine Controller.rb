@@ -5,32 +5,35 @@
 
 module VermeilCinematicEngine
   def self.get_anim_class(move_id)
-    # Convertimos a símbolo por seguridad
     mid = move_id.respond_to?(:to_sym) ? move_id.to_sym : move_id
     
-    # 1. DICCIONARIO MAESTRO (100% a prueba de fallos)
+    # AUTO-DETECCIÓN INTELIGENTE (Busca clases con HANDLED_MOVES)
+    Battle::Scene::Animation.constants.each do |c|
+      next unless c.to_s.start_with?("Vermeil")
+      klass = Battle::Scene::Animation.const_get(c)
+      if klass.is_a?(Class) && klass.const_defined?(:HANDLED_MOVES)
+        return klass if klass::HANDLED_MOVES.include?(mid)
+      end
+    end
+    
+    # DICCIONARIO MAESTRO
     map = {
       :SURGINGSTRIKES => "VermeilMultiHitPunches",
       :DOUBLEHIT      => "VermeilMultiHitPunches",
       :FLURRYPUNCH    => "VermeilMultiHitPunches",
       :COMETPUNCH     => "VermeilMultiHitPunches",
-      
       :MACHPUNCH      => "VermeilPriorityPunches",
       :BULLETPUNCH    => "VermeilPriorityPunches",
       :JETPUNCH       => "VermeilPriorityPunches",
-
       :HAMMERARM      => "VermeilHeavyPunches",
       :ICEHAMMER      => "VermeilHeavyPunches",
       :CRABHAMMER     => "VermeilHeavyPunches",
       :DYNAMICPUNCH   => "VermeilHeavyPunches",
       :MEGAPUNCH      => "VermeilHeavyPunches",
-
-      # ---> PUÑOS ESPECTRALES / OSCUROS <---
       :SHADOWPUNCH    => "VermeilEtherealPunches",
       :RAGEFIST       => "VermeilEtherealPunches",
       :WICKEDBLOW     => "VermeilEtherealPunches",
       :SUCKERPUNCH    => "VermeilEtherealPunches",
-
       :SNIPESHOT      => "VermeilCinematicSnipeShot",
       :EMBER          => "VermeilCinematicEmber",
       :VINEWHIP       => "VermeilCinematicVineWhip",
@@ -39,15 +42,13 @@ module VermeilCinematicEngine
       :BULBBASH       => "VermeilCinematicBulbBash",
       :SUPERSONIC     => "VermeilCinematicSupersonic",
       :VOLTTACKLE     => "VermeilCinematicVoltTackle",
-
       :TOXICSPIKES    => "VermeilToxicSpikesCast",
       :SPIKES         => "VermeilSpikesCast",
       :STEALTHROCK    => "VermeilStealthRockCast",
       :STICKYWEB      => "VermeilStickyWebCast"
     }
     
-    # 2. AUTO-DETECCIÓN INTELIGENTE
-    # Si creas una clase llamada "Vermeil_NOMBREDELMOVE" la detectará automáticamente
+    # Búsqueda por nombre directo
     direct_name = "Vermeil_#{mid}"
     if Battle::Scene::Animation.const_defined?(direct_name)
       return Battle::Scene::Animation.const_get(direct_name)
@@ -98,9 +99,6 @@ class Battle::Scene
     end
   end
 
-  # =========================================================================
-  # BARRIDO MAESTRO: Limpia textos para evitar parpadeos post-animación
-  # =========================================================================
   def vermeil_engine_clear_message_window!
     return if !@sprites
     msg_win = @sprites["messageWindow"]
@@ -114,9 +112,6 @@ class Battle::Scene
     end
   end
 
-  # =========================================================================
-  # DESVANECIMIENTO FLUIDO DE DATABOXES (Para TODOS los movimientos)
-  # =========================================================================
   def vermeil_slide_databoxes_out
     return if !@sprites
     vermeil_engine_clear_message_window!
@@ -127,7 +122,6 @@ class Battle::Scene
       pbToggleDataboxes
     end
     
-    # Efecto Fade Out forzado a las databoxes para asegurar que se oculten
     8.times do
       @sprites.each do |k, v|
         if k.to_s.start_with?("dataBox_") && v.respond_to?(:opacity)
@@ -158,7 +152,6 @@ class Battle::Scene
       end
     end
     
-    # Efecto Fade In forzado
     8.times do
       @sprites.each do |k, v|
         if k.to_s.start_with?("dataBox_") && v.respond_to?(:opacity)
@@ -253,41 +246,48 @@ class Battle::Scene
   end
 end
 
-#===============================================================================
-# BATTLE OVERRIDE - ANIQUILADOR DE DELAYS Y ENRUTADOR DE ANIMACIONES
-#===============================================================================
 module VermeilCinematicEngineBattleOverride
   def pbAnimation(move, user, targets, hitNum = 0)
     mid = move.respond_to?(:id) ? move.id : move
     anim_class = VermeilCinematicEngine.get_anim_class(mid)
     behavior = anim_class ? VermeilCinematicEngine.get_behavior(anim_class) : :none
     
-    # 1. Limpiar textos fantasma y Ocultar Databoxes para TODOS los movimientos
     @scene.vermeil_engine_clear_message_window!
-    if behavior != :multihit || hitNum.to_i <= 0
+    # Hide databoxes BEFORE animation for multihit (after damage message from previous hit)
+    if behavior == :multihit
+      @scene.vermeil_slide_databoxes_out
+    elsif behavior != :multihit || hitNum.to_i <= 0
       @scene.vermeil_slide_databoxes_out
     end
     
-    # 2. Reproducir animación Custom (Ofensivos / Hazards)
     if @showAnims && anim_class && @scene.respond_to?(:pbPlayVermeilCinematic)
+      # Start sequence for multihit and hazards
       if behavior == :multihit
         @scene.vermeil_start_sequence if hitNum.to_i <= 0
+      elsif behavior == :hazard
+        @scene.vermeil_start_sequence
       end
       
       played = @scene.pbPlayVermeilCinematic(anim_class, user, targets, mid, hitNum, behavior)
       if played
-        # Flag para aniquilar el molesto pbWait de Essentials que causa 2 seg de delay
         @vermeil_just_finished_anim = true
+        # Keep flag for sequence to skip delay in follow-up messages
+        @vermeil_in_sequence = true if behavior == :multihit || behavior == :hazard
         
-        # Mostrar databoxes si no es un multihit en medio de su secuencia
-        if behavior != :multihit
+        # For multihit: show databoxes between hits to display damage
+        if behavior == :multihit && hitNum.to_i > 0
+          # Show databoxes between hits
+          @scene.vermeil_slide_databoxes_in
+        elsif behavior == :multihit
+          # First hit: keep UI hidden
+        else
+          # Non-multihit: show databoxes after animation
           @scene.vermeil_slide_databoxes_in
         end
         return
       end
     end
 
-    # 3. Reproducir animación Vainilla
     if @showAnims && @scene
       @scene.instance_variable_set(:@vermeil_anim_is_playing, true)
       super(move, user, targets, hitNum)
@@ -304,34 +304,53 @@ module VermeilCinematicEngineBattleOverride
     @scene.vermeil_slide_databoxes_in
   end
 
-  #=============================================================================
-  # ANIMACIONES COMUNES (Habilidades como Intimidate o Toxic Debris)
-  #=============================================================================
   def pbCommonAnimation(animName, user = nil, targets = nil)
     @scene.vermeil_engine_clear_message_window!
     super(animName, user, targets)
-    
-    # Flag para aniquilar el delay de 1 segundo post-habilidad
     @vermeil_just_finished_anim = true
   end
 
-  #=============================================================================
-  # EL ANIQUILADOR DE DELAYS
-  # Intercepta el tiempo muerto de Essentials justo después de las animaciones
-  #=============================================================================
   def pbWait(frames, *args)
     if @vermeil_just_finished_anim
       @vermeil_just_finished_anim = false
-      return # Salta la pausa y empalma directo al texto
+      return
     end
     super
   end
 end
 
-#===============================================================================
-# MATRIZ INTELIGENTE DE VISIBILIDAD
-#===============================================================================
 module VermeilCinematicEngineSceneOverride
+  # Fix delay for v21.1 Hotfix
+  def pbWaitMessage
+    battle_obj = nil
+    if defined?(@battle) && @battle && @battle.is_a?(Battle)
+      battle_obj = @battle
+    end
+    
+    # Check if we're in a sequence (for multihit/hazard follow-up messages)
+    in_sequence = false
+    if battle_obj && battle_obj.instance_variable_defined?(:@vermeil_in_sequence)
+      in_sequence = battle_obj.instance_variable_get(:@vermeil_in_sequence)
+    end
+    
+    # Check single-use flag from Battle
+    just_finished = battle_obj && battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim) && 
+                    battle_obj.instance_variable_get(:@vermeil_just_finished_anim) rescue false
+    
+    if just_finished || in_sequence
+      if just_finished
+        battle_obj.instance_variable_set(:@vermeil_just_finished_anim, false)
+      end
+      # Show message window via sprite access
+      if @sprites && @sprites["messageWindow"]
+        @sprites["messageWindow"].visible = true
+      end
+      return
+    end
+    
+    super
+  end
+
   def pbDisplayBrief(msg)
     return if @vermeil_sequence_active
     super(msg)
@@ -343,7 +362,6 @@ module VermeilCinematicEngineSceneOverride
       return
     end
 
-    # Saltar retraso de slide-in nativo
     if @vermeil_sequence_active || @vermeil_skip_slide_in || @vermeil_is_eor
       vermeil_force_instant_box
       @vermeil_skip_slide_in = false

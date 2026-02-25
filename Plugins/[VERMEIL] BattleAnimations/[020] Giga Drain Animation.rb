@@ -85,9 +85,30 @@ class Battle::Scene::Animation::VermeilCinematicGigaDrain < Battle::Scene::Anima
       lf.moveAngle(t_s, 18, 360)
     end
     
-    # 4. CURACIÓN EXPLOSIVA
-    up.moveColor(T_DRAIN + 15, 6, Color.new(50, 255, 50, 180)) 
-    up.moveColor(T_DRAIN + 30, 15, Color.new(0, 0, 0, 0))
+    # 4. CURACIÓN EXPLOSIVA CON ESTRELLAS
+    t_heal = T_DRAIN + 15
+    up.moveColor(t_heal, 6, Color.new(50, 255, 50, 180)) 
+    up.moveColor(t_heal + 15, 15, Color.new(0, 0, 0, 0))
+
+    status = "Graphics/Animations/PRAS- Status.png"
+    if pbResolveBitmap(status)
+      8.times do |i|
+        t_s = t_heal + (i * 2)
+        start_x = us.x + (rand(70) - 35)
+        start_y = us.y - rand(uh)
+        
+        s = addNewSprite(start_x, start_y, status, PictureOrigin::CENTER)
+        s.setZ(0, 760)
+        apply_pras_frame(s, 4, 4, 0)
+        s.setTone(0, Tone.new(0, 255, 100, 0))
+        s.setVisible(0, false); s.setVisible(t_s, true)
+        s.setZoom(0, 60 + rand(50))
+        
+        s.moveXY(t_s, 8, start_x, start_y - 60 - rand(30))
+        s.moveOpacity(t_s + 4, 4, 0)
+      end
+    end
+
     tp.moveTone(T_END - 15, 15, Tone.new(0,0,0,0))
     up.setCallback(T_END, proc { us.visible = true; ts.visible = true })
   end

@@ -582,7 +582,7 @@ WildItemUncommon = SHARPBEAK
 #-------------------------------
 [EKANS]
 Name = Ekans
-Types = POISON
+Types = POISON,DARK
 BaseStats = 35,60,44,55,40,54
 GenderRatio = Female50Percent
 GrowthRate = Medium
@@ -609,7 +609,7 @@ Evolutions = ARBOK,Level,22
 #-------------------------------
 [ARBOK]
 Name = Arbok
-Types = POISON
+Types = POISON,DARK
 BaseStats = 60,95,69,80,65,79
 GenderRatio = Female50Percent
 GrowthRate = Medium
@@ -3124,7 +3124,7 @@ Evolutions = KINGDRA,TradeItem,DRAGONSCALE
 #-------------------------------
 [GOLDEEN]
 Name = Goldeen
-Types = WATER
+Types = WATER,FAIRY
 BaseStats = 45,67,60,63,35,50
 GenderRatio = Female50Percent
 GrowthRate = Medium
@@ -3153,7 +3153,7 @@ Evolutions = SEAKING,Level,33
 #-------------------------------
 [SEAKING]
 Name = Seaking
-Types = WATER
+Types = WATER,FAIRY
 BaseStats = 80,92,65,68,65,80
 GenderRatio = Female50Percent
 GrowthRate = Medium
@@ -7960,7 +7960,7 @@ Evolutions = PROBOPASS,LocationFlag,Magnetic,PROBOPASS,Item,THUNDERSTONE
 #-------------------------------
 [SKITTY]
 Name = Skitty
-Types = NORMAL
+Types = NORMAL,FAIRY
 BaseStats = 50,45,45,50,35,35
 GenderRatio = Female75Percent
 GrowthRate = Fast
@@ -7987,7 +7987,7 @@ Evolutions = DELCATTY,Item,MOONSTONE
 #-------------------------------
 [DELCATTY]
 Name = Delcatty
-Types = NORMAL
+Types = NORMAL,FAIRY
 BaseStats = 70,65,65,90,55,55
 GenderRatio = Female75Percent
 GrowthRate = Fast
@@ -9615,7 +9615,7 @@ Evolutions = GLALIE,Level,42,FROSLASS,ItemFemale,DAWNSTONE
 #-------------------------------
 [GLALIE]
 Name = Glalie
-Types = ICE
+Types = ICE,ROCK
 BaseStats = 80,80,80,80,80,80
 GenderRatio = Female50Percent
 GrowthRate = Medium

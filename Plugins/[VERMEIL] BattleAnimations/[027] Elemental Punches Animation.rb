@@ -38,7 +38,7 @@ class Battle::Scene::Animation::VermeilElementalPunches < Battle::Scene::Animati
     punches = "Graphics/Animations/punches.png"
     elem_bg = "Graphics/Animations/GEN8- Elemental Punch.png"
     
-    c_fist = 0; r_fist = 0; r_spark = 0; tone = Tone.new(0,0,0,0); se_hit = "Anim/Hit1"
+    c_fist = 0; r_fist = 0; r_spark = 0; tone = Tone.new(0,0,0,0); se_hit = "Anim/PRSFX- Tackle"
     case @move_id
     when :FIREPUNCH;    c_fist = 0; r_fist = 0; r_spark = 0; tone = Tone.new(255,50,0,0); se_hit = "Anim/Fire2"
     when :ICEPUNCH;     c_fist = 1; r_fist = 1; r_spark = 1; tone = Tone.new(0,200,255,0); se_hit = "Anim/Ice1"
