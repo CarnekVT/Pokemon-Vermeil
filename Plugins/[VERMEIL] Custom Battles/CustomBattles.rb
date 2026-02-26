@@ -101,7 +101,7 @@ end
 
 def start_test_cinematic
   setBattleRule("editWildPokemon", {
-    "moves" => [:SYRUPBOMB]
+    "moves" => [:TACKLE]
   })
-  WildBattle.start(:DIPPLIN, 100)
+  WildBattle.start(:RAICHU, 100)
 end

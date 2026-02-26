@@ -59,7 +59,7 @@ class Battle::Scene::Animation::VermeilHeavyPunches < Battle::Scene::Animation
 
     case @move_id
     when :HAMMERARM, :ICEHAMMER
-      # 🔨 MACHADA Y MARTILLO HIELO (Salto Vertical Físico y Realista)
+      # HAMMER ARM & ICE HAMMER
       t_imp = 8 
       
       # Salto parabólico (Sube y cae con fuerza)
@@ -115,7 +115,7 @@ class Battle::Scene::Animation::VermeilHeavyPunches < Battle::Scene::Animation
       up.setTone(t_imp + 12, Tone.new(0,0,0,0))
 
     when :CRABHAMMER
-      # 🦀 MARTILLAZO (Retroceso + Paso firme hacia adelante)
+      # CRABHAMMER
       t_imp = 12
       splash_asset = "Graphics/BattleParticlesAnimations/WaterSplashShot"
       drops_asset  = "Graphics/BattleParticlesAnimations/Bubbles-Drops"
@@ -149,7 +149,7 @@ class Battle::Scene::Animation::VermeilHeavyPunches < Battle::Scene::Animation
       up.moveXY(t_imp + 15, 6, orig_ux, orig_uy)
 
     when :DYNAMICPUNCH
-      # 🌀 PUÑO DINÁMICO (Vibe B2W2 - Focus Punch + Impacto Pesado Horizontal)
+      # DYNAMIC PUNCH
       t_imp = 16
       
       # Fondo Oscuro (Focus Punch vibe)
@@ -217,7 +217,7 @@ class Battle::Scene::Animation::VermeilHeavyPunches < Battle::Scene::Animation
       up.moveXY(t_imp + 15, 6, orig_ux, orig_uy)
 
     when :MEGAPUNCH
-      # 🥊 MEGAPUÑO (Straight punch devastador puro)
+      # MEGA PUNCH
       t_imp = 12
       
       up.setSE(0, "Anim/Wind2", 100, 100)

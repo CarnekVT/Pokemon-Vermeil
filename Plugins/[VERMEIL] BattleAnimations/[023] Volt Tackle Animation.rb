@@ -66,6 +66,9 @@ class Battle::Scene::Animation::VermeilCinematicVoltTackle < Battle::Scene::Anim
 
     up = addSprite(create_battler_clone(us), PictureOrigin::BOTTOM); up.setZ(0, 600)
     tp = addSprite(create_battler_clone(ts), PictureOrigin::BOTTOM); tp.setZ(0, 600)
+    
+    target_z = (ts.z rescue 300) + 10
+    user_z   = target_z + 40
     us.visible = false; ts.visible = false
 
     uh = us.bitmap ? (us.bitmap.height / 2.0) : 40; th = ts.bitmap ? (ts.bitmap.height / 2.0) : 40
@@ -88,8 +91,18 @@ class Battle::Scene::Animation::VermeilCinematicVoltTackle < Battle::Scene::Anim
     end
 
     # 2. DASH INICIAL (El usuario choca y "desaparece" para iniciar el combo)
+    # Zoom y control de Z-Index similar a Sucker Punch
+    zoom_target = (f_dir == 1) ? 66 : 150
+    
+    # Si el oponente ataca, lo forzamos detrás del jugador
+    if f_dir == -1
+      up.setZ(T_DASH, target_z - 5)
+    end
+    
     up.setSE(T_DASH, VermeilBattleAnimations::VT_SE_DASH, 100, 110)
     up.moveXY(T_DASH, 4, i_x - (30 * f_dir), i_y + uh)
+    up.setZoom(T_DASH, 100)
+    up.moveZoom(T_DASH, 4, zoom_target)
     aura.moveXY(T_DASH, 4, i_x - (30 * f_dir), i_y) if aura_asset
     
     # Se hace invisible para que los clones de estela tomen el control
@@ -158,6 +171,8 @@ class Battle::Scene::Animation::VermeilCinematicVoltTackle < Battle::Scene::Anim
     up.setXY(T_FINAL, i_x - (20 * f_dir), i_y + uh)
     up.setOpacity(T_FINAL, 255)
     up.setColor(T_FINAL, Color.new(255, 255, 0, 200))
+    up.setZoom(T_FINAL, zoom_target)
+    up.moveZoom(T_FINAL, 2, 100)
     
     if aura_asset
       aura.setXY(T_FINAL, i_x - (20 * f_dir), i_y)
@@ -203,6 +218,7 @@ class Battle::Scene::Animation::VermeilCinematicVoltTackle < Battle::Scene::Anim
     up.moveXY(T_RECOIL, 5, orig_ux - (60 * f_dir), orig_uy - 60) # Vuela hacia atrás (Arco)
     up.moveXY(T_RECOIL + 5, 5, orig_ux - (90 * f_dir), orig_uy) # Aterriza
     up.moveColor(T_RECOIL + 5, 8, Color.new(0, 0, 0, 0))
+    up.setZoom(T_RECOIL, 100)
 
     # 6. REGRESO SUAVE A POSICIONES ORIGINALES
     up.moveXY(T_END - 10, 8, orig_ux, orig_uy)

@@ -42,8 +42,8 @@ FrontSprite = -2,8
 ShadowSprite = 1,4,0
 #-------------------------------
 [COMBUSKEN,,female]
-BackSprite = 4,25
-FrontSprite = 2,12
+BackSprite = 4,23
+FrontSprite = 0,12
 ShadowSprite = 0,2,0
 AnimationSpeed = 2,1
 #-------------------------------

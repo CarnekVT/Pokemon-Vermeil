@@ -283,6 +283,7 @@ class Battle
     :SANDTOMB    => "SandTomb",
     :WRAP        => "Wrap",
     :INFESTATION => "Infestation",
+    :SNAPTRAP    => "SnapTrap",
     :OBSIDIANSHELL => "Wrap"  # Usamos la animación de Wrap para los splinters
   }
 

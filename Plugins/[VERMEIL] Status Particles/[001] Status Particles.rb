@@ -5,6 +5,7 @@
 
 module StatusParticles
   @@emitters = []
+  @@cinematic_mode = false  # Flag for cinematic animations
   
   BLOCKED_COMMON_ANIMATIONS = [
     :sleep, :drowsy, :frozen, :frostbite, :burn, :poison, :toxic,
@@ -22,6 +23,20 @@ module StatusParticles
   def self.dispose_all
     @@emitters.each { |e| e.dispose }
     @@emitters.clear
+  end
+
+  # Enable/disable cinematic mode - particles will show even when sprite opacity is 0
+  def self.cinematic_mode=(value)
+    @@cinematic_mode = value
+  end
+
+  def self.cinematic_mode?
+    return @@cinematic_mode
+  end
+
+  def self.set_cinematic_mode_all(value)
+    @@cinematic_mode = value
+    @@emitters.each { |e| e.cinematic_mode = value if e.respond_to?(:cinematic_mode=) }
   end
 
   ASSET_DIR = "Graphics/Pictures/StatusParticles/"
@@ -124,6 +139,8 @@ class StatusParticles::Emitter
   FADE_IN_FRAMES      = 10
   FADE_OUT_FRAMES     = 10
 
+  attr_accessor :cinematic_mode
+
   def initialize(viewport, battler_sprite, type = :main)
     @viewport = viewport
     @battler_sprite = battler_sprite
@@ -135,6 +152,7 @@ class StatusParticles::Emitter
     @bitmap = nil
     @bitmap_name = nil
     @anim_bitmaps = nil
+    @cinematic_mode = false
   end
 
   def dispose
@@ -305,6 +323,8 @@ class StatusParticles::Emitter
     return false if !@battler_sprite || @battler_sprite.disposed?
     return false if @battler_sprite.vanishMode && @battler_sprite.vanishMode > 0
     return false if !@battler_sprite.visible
+    # In cinematic mode, show particles even if sprite opacity is 0
+    return true if @cinematic_mode || StatusParticles.cinematic_mode?
     return false if @battler_sprite.opacity <= 0
     return true
   end

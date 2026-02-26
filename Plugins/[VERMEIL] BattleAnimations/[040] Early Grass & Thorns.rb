@@ -75,7 +75,7 @@ class Battle::Scene::Animation::VermeilEarlyGrass < Battle::Scene::Animation
 
     case @move_id
     when :REACTIVETHORN
-      # 🎯 ESPINA REACTIVA
+      # REACTIVE THORN
       user_atk = @user.respond_to?(:attack) ? @user.attack : 0
       user_spatk = @user.respond_to?(:spatk) ? @user.spatk : 0
       is_physical = user_atk >= user_spatk
@@ -310,7 +310,7 @@ class Battle::Scene::Animation::VermeilEarlyGrass < Battle::Scene::Animation
       end
 
     when :RAZORLEAF
-      # 🍃 HOJA AFILADA
+      # RAZOR LEAF
       t_spawn = 4
       t_launch = 14
       @end_frame = 45
@@ -360,7 +360,7 @@ class Battle::Scene::Animation::VermeilEarlyGrass < Battle::Scene::Animation
       tp.moveXY(t_launch + 16, 2, orig_tx, orig_ty)
 
     when :BULLETSEED
-      # 🌱 SEMILLADORA 
+      # BULLET SEED 
       @end_frame = 35
       t_start = 2
       seed_count = 6 
@@ -420,7 +420,7 @@ class Battle::Scene::Animation::VermeilEarlyGrass < Battle::Scene::Animation
       tp.moveXY(t_reset, 4, orig_tx, orig_ty)
 
     when :MAGICALLEAF
-      # 🌟 HOJA MÁGICA
+      # MAGICAL LEAF
       t_spawn = 4
       t_shoot = 14
       @end_frame = 45

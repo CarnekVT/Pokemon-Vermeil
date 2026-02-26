@@ -351,8 +351,8 @@ FrontSprite = 0,15
 ShadowSprite = 2,7,2
 #-------------------------------
 [CORSOLA,1]
-BackSprite = 0,8
-FrontSprite = 0,7
+BackSprite = 0,14
+FrontSprite = 0,8
 ShadowSprite = 0,0,2
 #-------------------------------
 [HOUNDOOM,1]
@@ -514,17 +514,17 @@ ShadowSprite = 0,41,16
 AnimationSpeed = 3
 #-------------------------------
 [DEOXYS,1]
-BackSprite = 5,54
+BackSprite = 8,30
 FrontSprite = 1,7
 ShadowSprite = 2,1,7
 #-------------------------------
 [DEOXYS,2]
-BackSprite = 7,43
+BackSprite = 11,24
 FrontSprite = 3,12
 ShadowSprite = 2,6,3
 #-------------------------------
 [DEOXYS,3]
-BackSprite = 3,50
+BackSprite = 11,26
 FrontSprite = 0,17
 ShadowSprite = 0,2,0
 #-------------------------------
@@ -618,10 +618,10 @@ FrontSprite = 3,22
 ShadowSprite = 0,-16,-3
 #-------------------------------
 [DARMANITAN,1]
-BackSprite = 4,10
-FrontSprite = 3,6
+BackSprite = 8,17
+FrontSprite = 3,9
 ShadowSize = 2
-ShadowSprite = 2,6,3
+ShadowSprite = 8,6,2
 #-------------------------------
 [DARMANITAN,2]
 BackSprite = 4,55
@@ -629,9 +629,9 @@ FrontSprite = -2,27
 ShadowSprite = 2,-16,-9
 #-------------------------------
 [DARMANITAN,3]
-BackSprite = 6,15
-FrontSprite = 0,1
-ShadowSprite = 1,12,9
+BackSprite = 11,15
+FrontSprite = 0,6
+ShadowSprite = 9,12,7
 #-------------------------------
 [YAMASK,1]
 BackSprite = 0,36
@@ -903,13 +903,13 @@ ShadowSize = -1
 ShadowSprite = 0,38,14
 #-------------------------------
 [CRAMORANT,1]
-BackSprite = 0,40
-FrontSprite = -1,19
+BackSprite = 12,22
+FrontSprite = 0,20
 ShadowSprite = 0,9,2
 #-------------------------------
 [CRAMORANT,2]
-BackSprite = 0,51
-FrontSprite = -10,3
+BackSprite = 12,32
+FrontSprite = -10,4
 ShadowSprite = 0,1,11
 #-------------------------------
 [TOXTRICITY,1]

@@ -611,8 +611,8 @@ ShadowSprite = 0,9,0
 AnimationSpeed = 2,1
 #-------------------------------
 [CLODSIRE]
-BackSprite = -3,36
-FrontSprite = 3,16
+BackSprite = -3,37
+FrontSprite = 1,16
 ShadowSprite = 0,-6,2
 #-------------------------------
 [FARIGIRAF]
@@ -738,9 +738,10 @@ FrontSprite = 2,7
 ShadowSprite = 1,6,10
 #-------------------------------
 [CHIENPAO]
-BackSprite = 18,56
-FrontSprite = -8,14
-ShadowSprite = 1,-12,0
+BackSprite = 18,48
+FrontSprite = -7,16
+ShadowSprite = 5,-12,0
+AnimationSpeed = 1
 #-------------------------------
 [TINGLU]
 BackSprite = 8,45
@@ -748,11 +749,10 @@ FrontSprite = -18,11
 ShadowSprite = 0,6,3
 #-------------------------------
 [CHIYU]
-BackSprite = -2,9
-FrontSprite = 0,4
+BackSprite = 5,-2
+FrontSprite = -1,-2
 ShadowSize = -1
-ShadowSprite = 2,31,11
-AnimationSpeed = 3
+ShadowSprite = 2,31,15
 #-------------------------------
 [ROARINGMOON]
 BackSprite = 7,93

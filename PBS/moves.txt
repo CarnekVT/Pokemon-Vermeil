@@ -3781,12 +3781,12 @@ Description = A nutrient-draining attack. The user's HP is restored by half the 
 Name = Snap Trap
 Type = GRASS
 Category = Physical
-Power = 35
+Power = 65
 Accuracy = 100
 TotalPP = 15
 Target = NearOther
 FunctionCode = BindTarget
-Flags = Contact,CanProtect,CanMirrorMove,CannotMetronome
+Flags = Contact,CanProtect,CanMirrorMove,CannotMetronome,Biting
 Description = The user snares the target in a snap trap for four to five turns.
 #-------------------------------
 [BULLETSEED]
@@ -5972,7 +5972,7 @@ Description = The user growls in an endearing way, making the foe less wary. The
 #-------------------------------
 [GROWTH]
 Name = Growth
-Type = NORMAL
+Type = GRASS
 Category = Status
 Accuracy = 0
 TotalPP = 20

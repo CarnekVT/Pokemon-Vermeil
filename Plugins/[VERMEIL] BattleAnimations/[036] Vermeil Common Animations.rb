@@ -51,7 +51,7 @@ class Battle::Scene::Animation::VermeilCommonAnimations < Battle::Scene::Animati
 
     case @anim_name
     when "StatUp"
-      # 📈 STAT UP
+      # STAT UP
       tp.setSE(0, "Anim/PRSFX- Stat Up", 100, 100)
       tp.moveTone(0, 4, Tone.new(60, 10, -50, 20)); tp.moveTone(12, 6, Tone.new(0,0,0,0))
       
@@ -89,7 +89,7 @@ class Battle::Scene::Animation::VermeilCommonAnimations < Battle::Scene::Animati
       end
 
     when "StatDown"
-      # 📉 STAT DOWN 
+      # STAT DOWN 
       tp.setSE(0, "Anim/PRSFX- Stat Down", 100, 100) rescue tp.setSE(0, "Anim/Wind1", 100, 80)
       tp.moveTone(0, 4, Tone.new(-150, -100, 40, 80)); tp.moveTone(12, 6, Tone.new(0,0,0,0))
       
@@ -128,7 +128,7 @@ class Battle::Scene::Animation::VermeilCommonAnimations < Battle::Scene::Animati
       end
 
     when "HealthUp"
-      # 💚 HEALTH UP 
+      # HEALTH UP 
       tp.setSE(0, "Anim/PRSFX- Healing Pulse", 100, 100)
       tp.moveColor(0, 4, Color.new(50, 255, 50, 80)); tp.moveColor(10, 6, Color.new(0,0,0,0))
 
@@ -150,7 +150,7 @@ class Battle::Scene::Animation::VermeilCommonAnimations < Battle::Scene::Animati
       end
 
     when "HealthDown"
-      # 💔 HEALTH DOWN 
+      # HEALTH DOWN 
       tp.setSE(0, "Anim/Poison1", 100, 100)
       tp.moveColor(0, 4, Color.new(120, 0, 150, 80)); tp.moveColor(10, 6, Color.new(0,0,0,0))
 
@@ -170,8 +170,173 @@ class Battle::Scene::Animation::VermeilCommonAnimations < Battle::Scene::Animati
           s.moveOpacity(t_s + (dur - 3), 3, 0)
         end
       end
+
+    when "SnapTrap"
+      # SNAP TRAP (common residual de atrapado)
+      fangs = "Graphics/Animations/PRAS- Elemental Fangs.png"
+      return if !pbResolveBitmap(fangs)
+      @end_frame = 30
+      i_y = orig_ty - th
+      t_spawn = 1
+      t_snap  = 7
+      bot_x = orig_tx
+
+      jaw_top = addNewSprite(orig_tx, i_y - 72, fangs, PictureOrigin::CENTER)
+      jaw_top.setZ(0, target_z + 20)
+      apply_pras_frame(jaw_top, fangs, 0, 0, 0)
+      jaw_top.setVisible(0, false); jaw_top.setVisible(t_spawn, true); jaw_top.setZoom(0, 125)
+
+      jaw_bot = addNewSprite(bot_x, i_y + 74, fangs, PictureOrigin::CENTER)
+      jaw_bot.setZ(0, target_z + 21)
+      apply_pras_frame(jaw_bot, fangs, 0, 0, 0)
+      jaw_bot.setVisible(0, false); jaw_bot.setVisible(t_spawn, true); jaw_bot.setZoomXY(0, 125, -125)
+
+      tp.setSE(t_snap, "Anim/PRSFX- Bite", 100, 120)
+      jaw_top.moveXY(t_snap, 2, orig_tx, i_y - 18)
+      jaw_bot.moveXY(t_snap, 2, bot_x, i_y + 18)
+
+      2.times do |i|
+        t_chew = t_snap + 2 + (i * 4)
+        tp.setSE(t_chew, "Anim/PRSFX- Cut", 100, 140)
+        jaw_top.moveXY(t_chew, 2, orig_tx, i_y - 40)
+        jaw_bot.moveXY(t_chew, 2, bot_x, i_y + 40)
+        jaw_top.moveXY(t_chew + 2, 2, orig_tx, i_y - 12)
+        jaw_bot.moveXY(t_chew + 2, 2, bot_x, i_y + 12)
+        tp.moveColor(t_chew + 1, 2, Color.new(255, 50, 50, 190))
+        tp.moveColor(t_chew + 3, 2, Color.new(0, 0, 0, 0))
+      end
+
+      jaw_top.moveOpacity(t_snap + 12, 4, 0)
+      jaw_bot.moveOpacity(t_snap + 12, 4, 0)
+
+    when "SpikyShield"
+      # SPIKY SHIELD (common residual de protegido)
+      protect = "Graphics/Animations/PRAS- Protect.png"
+      spikes = "Graphics/Animations/PRAS- Spike Cannon.png"
+      return if !pbResolveBitmap(protect)
+      @end_frame = 20
+      i_y = orig_ty - th
+      t_start = 1
+      
+      # Sonido de Spiky Shield
+      tp.setSE(t_start, "Anim/PRSFX- Spiky Shield2", 100, 120)
+      
+      # Escudo un poco más arriba
+      shield_y = i_y - 20
+      
+      shield = addNewSprite(orig_tx, shield_y, protect, PictureOrigin::CENTER)
+      shield.setZ(0, target_z + 20)
+      apply_pras_frame(shield, protect, 0, 0, 0)
+      shield.setTone(0, Tone.new(-100, 150, -100, 0))
+      shield.setVisible(0, false); shield.setVisible(t_start, true)
+      shield.setZoom(0, 50); shield.moveZoom(t_start, 4, 180)
+      
+      5.times do |i|
+         apply_pras_frame(shield, protect, i, 0, t_start + (i*2))
+      end
+      shield.moveOpacity(t_start + 20, 8, 0)
+      
+      # 8 púas cardinales
+      if pbResolveBitmap(spikes)
+        8.times do |i|
+          spike = addNewSprite(orig_tx, shield_y, spikes, PictureOrigin::CENTER)
+          spike.setZ(0, target_z + 25)
+          apply_pras_frame(spike, spikes, 0, 0, 0)
+          spike.setVisible(0, false); spike.setVisible(t_start + 2, true)
+          
+          ang = (i * 45)
+          spike.setAngle(0, ang)
+          spike.setZoom(0, 150)
+          
+          rad = 120
+          dest_x = orig_tx + Math.cos(ang * 3.14159 / 180) * rad
+          dest_y = shield_y + Math.sin(ang * 3.14159 / 180) * rad
+          
+          spike.moveXY(t_start + 2, 6, dest_x, dest_y)
+          spike.moveOpacity(t_start + 10, 4, 0)
+        end
+      end
+      
+      tp.moveTone(t_start, 4, Tone.new(-50, 100, -50, 50))
+      tp.moveTone(t_start + 10, 6, Tone.new(0,0,0,0))
+    when "LeechSeed"
+      # LEECH SEED (Common residual de drenado)
+      magic = "Graphics/Animations/PRAS- Magical Leaf.png"
+      return if !pbResolveBitmap(magic)
+      @end_frame = 40
+      i_y = orig_ty - th
+      t_start = 1
+      t_hit = 10
+      
+      # Sonido de Leech Seed
+      tp.setSE(t_hit, "Anim/PRSFX- Leech Seed", 100, 120)
+      tp.setSE(t_hit, "Anim/Absorb2", 100, 100)
+      
+      # Semilla volando
+      seed = addNewSprite(orig_tx, orig_ty - th - 30, magic, PictureOrigin::CENTER)
+      seed.setZ(0, target_z + 20)
+      apply_pras_frame(seed, magic, 0, 0, 0)
+      seed.setTone(0, Tone.new(100, 50, -50, 0))
+      seed.setVisible(0, false); seed.setVisible(t_start, true)
+      seed.setZoom(0, 50)
+      
+      # Trayectoria hacia el objetivo
+      seed.moveXY(t_start, t_hit - t_start, orig_tx, orig_ty - 20)
+      seed.moveOpacity(t_hit, 1, 0)
+      
+      # Raíces brotando en el objetivo
+      frenzy = "Graphics/Animations/PRAS- Frenzy Plant.png"
+      if pbResolveBitmap(frenzy)
+        root1 = addNewSprite(orig_tx - 20, orig_ty, frenzy, PictureOrigin::BOTTOM)
+        root2 = addNewSprite(orig_tx + 20, orig_ty, frenzy, PictureOrigin::BOTTOM)
+        root1.setZ(0, target_z + 15); root2.setZ(0, target_z + 16)
+        
+        apply_pras_frame(root1, frenzy, 0, 3, 0)
+        apply_pras_frame(root2, frenzy, 0, 3, 0)
+        root2.setZoomXY(0, -100, 100)
+        
+        root1.setTone(0, Tone.new(-30, 50, -30, 0))
+        root2.setTone(0, Tone.new(-30, 50, -30, 0))
+        
+        root1.setVisible(0, false); root1.setVisible(t_hit, true)
+        root2.setVisible(0, false); root2.setVisible(t_hit, true)
+        
+        4.times do |i|
+          apply_pras_frame(root1, frenzy, i, 3, t_hit + (i*2))
+          apply_pras_frame(root2, frenzy, i, 3, t_hit + (i*2))
+        end
+        
+        # Efecto de drenado (Energy1 hacia quien usa leech seed)
+        drain_energy = "Graphics/BattleParticlesAnimations/Energy1"
+        if pbResolveBitmap(drain_energy)
+          15.times do |i|
+            t_s = t_hit + 4 + i
+            p = addNewSprite(orig_tx, orig_ty - th/2, drain_energy, PictureOrigin::CENTER)
+            p.setZ(0, target_z + 25)
+            p.setTone(0, Tone.new(-50, 150, -50, 0))
+            p.setVisible(0, false); p.setVisible(t_s, true); p.setZoom(t_s, 20 + rand(20))
+            
+            # Sale del objetivo
+            pop_x = orig_tx + (rand(80) - 40); pop_y = orig_ty + (rand(80) - 40)
+            p.moveXY(t_s, 4, pop_x, pop_y)
+            
+            # Hacia arriba (simulando drenado al cielo/early grass)
+            p.moveXY(t_s + 4, 8, pop_x, pop_y - 100)
+            p.moveZoom(t_s + 4, 8, 10)
+            p.moveOpacity(t_s + 10, 3, 0)
+          end
+        end
+        
+        # Color del objetivo se vuelve verde
+        tp.moveColor(t_hit, 6, Color.new(50, 200, 50, 150))
+        tp.moveColor(t_hit + 15, 8, Color.new(0, 0, 0, 0))
+        
+        root1.moveOpacity(t_hit + 18, 6, 0)
+        root2.moveOpacity(t_hit + 18, 6, 0)
+      end
     end
 
+    # Restore sprite at end
     tp.setXY(@end_frame - 1, orig_tx, orig_ty)
     tp.setCallback(@end_frame, proc { ts.visible = true })
   end
@@ -187,14 +352,16 @@ class Battle::Scene
   end
 
   def pbCommonAnimation(animName, user = nil, targets = nil)
-    custom_anims = ["StatUp", "StatDown", "HealthUp", "HealthDown"]
+    custom_anims = ["StatUp", "StatDown", "HealthUp", "HealthDown", "SnapTrap", "SpikyShield", "LeechSeed"]
     
     if custom_anims.include?(animName)
       target = user || (targets.is_a?(Array) ? targets[0] : targets)
       return if !target
+      need_slide_ui = (animName == "SnapTrap")
       
       # Evitar que los textos parpadeen y ocultar databoxes temporalmente
       vermeil_engine_clear_message_window! if respond_to?(:vermeil_engine_clear_message_window!)
+      vermeil_slide_databoxes_out if need_slide_ui && respond_to?(:vermeil_slide_databoxes_out)
       
       begin
         anim = Battle::Scene::Animation::VermeilCommonAnimations.new(@sprites, @viewport, target, animName)
@@ -207,6 +374,7 @@ class Battle::Scene
       ensure
         ts = @sprites["pokemon_#{target.index}"] rescue nil
         ts.visible = true if ts
+        vermeil_slide_databoxes_in if need_slide_ui && respond_to?(:vermeil_slide_databoxes_in)
       end
       return
     end

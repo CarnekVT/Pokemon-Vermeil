@@ -1,29 +1,19 @@
 #===============================================================================
-# [VERMEIL] Cinematic Engine & Overlay Controller
+# [VERMEIL] Cinematic Engine & Overlay Controller (v8.1 STABLE + TYPO FIX)
 # THE PERFECT CUT - UNIVERSAL HIDE, FADE DATABOXES, NO GHOST TEXT, NO DELAYS
 #===============================================================================
 
 module VermeilCinematicEngine
-  # Get base priority for cinematic animations based on position in triple battles
-  # Player side: index 0=LOW(3), 1=MEDIUM(2), 2=HIGH(1)
-  # Foe side: index 0=HIGH(1), 1=MEDIUM(2), 2=LOW(3)
-  # This creates a Z-pattern that covers all positions properly
-  # NOTE: Player always has higher priority than Foe regardless of position
   def self.get_base_priority(battler_index, is_foe)
-    pos_idx = battler_index % 3  # Position within the side (0,1,2)
+    pos_idx = battler_index % 3
     base_priority = if is_foe
-      # Foe side: center first (HIGH), then edges outward (LOW)
       pos_idx == 0 ? 1 : (pos_idx == 1 ? 2 : 3)
     else
-      # Player side: center last (LOW), edges first (HIGH)
       pos_idx == 2 ? 1 : (pos_idx == 1 ? 2 : 3)
     end
-    # Player always gets higher effective priority (lower number) than foe
     return is_foe ? (base_priority + 10) : base_priority
   end
 
-  # Get animation priority for a specific user battler
-  # Animations can call this to get their priority based on the user
   def self.get_animation_priority(user)
     return 5 if !user || !user.respond_to?(:index)
     idx = user.index
@@ -31,8 +21,6 @@ module VermeilCinematicEngine
     return get_base_priority(idx, is_foe)
   end
 
-  # Check if animation uses Z-writing (affects all Pokemon in triple battles)
-  # Animations should define Z_WRITE = true if they modify Z positions globally
   def self.uses_z_write?(anim_class)
     return false if !anim_class || !anim_class.is_a?(Class)
     return anim_class.const_defined?(:Z_WRITE) && anim_class::Z_WRITE
@@ -41,7 +29,6 @@ module VermeilCinematicEngine
   def self.get_anim_class(move_id)
     mid = move_id.respond_to?(:to_sym) ? move_id.to_sym : move_id
     
-    # AUTO-DETECCIÓN INTELIGENTE (Busca clases con HANDLED_MOVES)
     Battle::Scene::Animation.constants.each do |c|
       next unless c.to_s.start_with?("Vermeil")
       klass = Battle::Scene::Animation.const_get(c)
@@ -50,7 +37,6 @@ module VermeilCinematicEngine
       end
     end
     
-    # DICCIONARIO MAESTRO
     map = {
       :SURGINGSTRIKES => "VermeilMultiHitPunches",
       :DOUBLEHIT      => "VermeilMultiHitPunches",
@@ -82,7 +68,6 @@ module VermeilCinematicEngine
       :STICKYWEB      => "VermeilStickyWebCast"
     }
     
-    # Búsqueda por nombre directo
     direct_name = "Vermeil_#{mid}"
     if Battle::Scene::Animation.const_defined?(direct_name)
       return Battle::Scene::Animation.const_get(direct_name)
@@ -99,15 +84,18 @@ module VermeilCinematicEngine
 
   def self.get_behavior(anim_class)
     return :cinematic if !anim_class
+    return anim_class::BEHAVIOR if anim_class.const_defined?(:BEHAVIOR)
+    
     name = anim_class.name.split("::").last
     map = {
       "VermeilMultiHitPunches" => :multihit,
       "VermeilToxicSpikesCast" => :hazard,
       "VermeilSpikesCast"      => :hazard,
       "VermeilStealthRockCast" => :hazard,
-      "VermeilStickyWebCast"   => :hazard
+      "VermeilStickyWebCast"   => :hazard,
+      "VermeilSelfTargetGrass" => :self_targeting,
+      "VermeilGrassStatus"     => :self_targeting
     }
-    # Check for Z_WRITE flag in animation class
     if anim_class.const_defined?(:Z_WRITE) && anim_class::Z_WRITE
       return :zwrite
     end
@@ -218,19 +206,17 @@ class Battle::Scene
 
   def pbPlayVermeilCinematic(anim_class, user, targets, mid, hit_num, behavior)
     is_mh  = (behavior == :multihit)
-    is_cin = (behavior == :cinematic)
     is_haz = (behavior == :hazard)
-    is_zwrite = (behavior == :zwrite)
+    is_self = (behavior == :self_targeting)
 
-    if is_cin || is_zwrite
-      target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
-      return false if !user || !target
-    end
+    target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
+    target = user if target.nil? || is_self
 
-    target = nil; anim_user = user; side_index = 0; ax = 0; ay = 0
+    return false if !user || !target
+
+    anim_user = user; side_index = 0; ax = 0; ay = 0
 
     if is_haz
-      return false if !user
       if !anim_user || anim_user.fainted? || anim_user.hp <= 0
         if targets.respond_to?(:each)
           targets.each do |t|
@@ -245,9 +231,6 @@ class Battle::Scene
       end
       side_index = anim_user.respond_to?(:idxOwnSide) ? (anim_user.idxOwnSide ^ 1) : ((anim_user.index & 1) ^ 1)
       ax, ay = vermeil_hazard_anchor_for_side(side_index)
-    else
-      target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
-      return false if !user || !target
     end
 
     @vermeil_anim_is_playing = true
@@ -284,31 +267,19 @@ class Battle::Scene
     return true
   end
 
-  # Get priority for a battler in triple battle Z-pattern
-  # Player side: positions 0,1,2 -> priorities 3,2,1 (center=LOW, edges=HIGH)
-  # Foe side: positions 0,1,2 -> priorities 1,2,3 (center=HIGH, edges=LOW)
-  # NOTE: Player always has higher priority (lower number) than Foe
   def vermeil_get_battler_priority(battler)
     return 2 if !battler || !battler.respond_to?(:index)
-    
     idx = battler.index
     is_foe = idx >= 3
-    pos = is_foe ? (idx - 3) : idx  # Position within side (0=center, 1=mid, 2=far)
-    
+    pos = is_foe ? (idx - 3) : idx  
     base_priority = if is_foe
-      # Foe: center first (HIGH), then edges outward (LOW)
       pos == 0 ? 1 : (pos == 1 ? 2 : 3)
     else
-      # Player: center last (LOW), edges first (HIGH)
       pos == 2 ? 1 : (pos == 1 ? 2 : 3)
     end
-    
-    # Player always gets higher effective priority (lower number) than foe
     return is_foe ? (base_priority + 10) : base_priority
   end
 
-  # Convenience method to get animation priority from scene
-  # Usage in animation: priority = scene.vermeil_get_animation_priority(user)
   def vermeil_get_animation_priority(user)
     VermeilCinematicEngine.get_animation_priority(user)
   end
@@ -321,35 +292,28 @@ module VermeilCinematicEngineBattleOverride
     behavior = anim_class ? VermeilCinematicEngine.get_behavior(anim_class) : :none
     
     @scene.vermeil_engine_clear_message_window!
-    # Hide databoxes BEFORE animation for multihit (after damage message from previous hit)
+    
     if behavior == :multihit
-      @scene.vermeil_slide_databoxes_out
-    elsif behavior != :multihit || hitNum.to_i <= 0
+      @scene.vermeil_slide_databoxes_out if hitNum.to_i <= 0
+    else
       @scene.vermeil_slide_databoxes_out
     end
     
     if @showAnims && anim_class && @scene.respond_to?(:pbPlayVermeilCinematic)
-      # Start sequence for multihit and hazards
+      
       if behavior == :multihit
         @scene.vermeil_start_sequence if hitNum.to_i <= 0
-      elsif behavior == :hazard
+      elsif behavior == :hazard || behavior == :self_targeting
         @scene.vermeil_start_sequence
       end
       
+      # CORRECCIÓN DE TYPO AQUÍ: Usamos hitNum en vez de hit_num
       played = @scene.pbPlayVermeilCinematic(anim_class, user, targets, mid, hitNum, behavior)
       if played
         @vermeil_just_finished_anim = true
-        # Keep flag for sequence to skip delay in follow-up messages
-        @vermeil_in_sequence = true if behavior == :multihit || behavior == :hazard
+        @vermeil_in_sequence = true if behavior == :multihit || behavior == :hazard || behavior == :self_targeting
         
-        # For multihit: show databoxes between hits to display damage
-        if behavior == :multihit
-          # Show databoxes after animation for ALL hits (including hit 1)
-          @scene.vermeil_slide_databoxes_in
-        else
-          # Non-multihit: show databoxes after animation
-          @scene.vermeil_slide_databoxes_in
-        end
+        @scene.vermeil_slide_databoxes_in
         return
       end
     end
@@ -386,20 +350,17 @@ module VermeilCinematicEngineBattleOverride
 end
 
 module VermeilCinematicEngineSceneOverride
-  # Fix delay for v21.1 Hotfix
   def pbWaitMessage
     battle_obj = nil
     if defined?(@battle) && @battle && @battle.is_a?(Battle)
       battle_obj = @battle
     end
     
-    # Check if we're in a sequence (for multihit/hazard follow-up messages)
     in_sequence = false
     if battle_obj && battle_obj.instance_variable_defined?(:@vermeil_in_sequence)
       in_sequence = battle_obj.instance_variable_get(:@vermeil_in_sequence)
     end
     
-    # Check single-use flag from Battle
     just_finished = battle_obj && battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim) && 
                     battle_obj.instance_variable_get(:@vermeil_just_finished_anim) rescue false
     
@@ -407,7 +368,6 @@ module VermeilCinematicEngineSceneOverride
       if just_finished
         battle_obj.instance_variable_set(:@vermeil_just_finished_anim, false)
       end
-      # Show message window via sprite access
       if @sprites && @sprites["messageWindow"]
         @sprites["messageWindow"].visible = true
       end

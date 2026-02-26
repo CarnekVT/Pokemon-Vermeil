@@ -171,7 +171,7 @@ class Battle::Scene::Animation::VermeilSignatureHammers < Battle::Scene::Animati
       up.setZ(t_imp + 12, orig_uz)
 
     when :GIGATONHAMMER
-      # 🛠️ MARTILLO GIGATÓN
+      # GIGATON HAMMER
       bg = addSprite(make_black_sprite, PictureOrigin::TOP_LEFT)
       bg.setZ(0, bg_z); bg.setOpacity(0, 0); bg.moveOpacity(0, 6, 200)
 

@@ -64,7 +64,7 @@ class Battle::Scene::Animation::VermeilEtherealPunches < Battle::Scene::Animatio
 
     case @move_id
     when :SHADOWPUNCH
-      # 👻 SHADOW PUNCH (Hundimiento en las sombras y golpe horizontal frontal)
+      # SHADOW PUNCH
       t_imp = 12
       
       up.setSE(0, "Anim/PRSFX- Shadow Sneak2", 100, 100)
