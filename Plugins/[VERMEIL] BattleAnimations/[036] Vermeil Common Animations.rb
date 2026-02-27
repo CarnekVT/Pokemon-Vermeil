@@ -260,10 +260,10 @@ class Battle::Scene::Animation::VermeilCommonAnimations < Battle::Scene::Animati
       tp.moveTone(t_start, 4, Tone.new(-50, 100, -50, 50))
       tp.moveTone(t_start + 10, 6, Tone.new(0,0,0,0))
     when "LeechSeed"
-      # LEECH SEED (Common residual de drenado)
+      # LEECH SEED (Common residual de drenado) - velocidad optimizada
       magic = "Graphics/Animations/PRAS- Magical Leaf.png"
       return if !pbResolveBitmap(magic)
-      @end_frame = 40
+      @end_frame = 20
       i_y = orig_ty - th
       t_start = 1
       t_hit = 10
@@ -378,6 +378,9 @@ class Battle::Scene
         ts.visible = true if ts
         vermeil_slide_databoxes_in if need_slide_ui && respond_to?(:vermeil_slide_databoxes_in)
       end
+      # IMPORTANTE: Establecer el flag para evitar delay de 1 segundo en mensajes
+      battle = defined?(@battle) ? @battle : nil
+      battle.instance_variable_set(:@vermeil_just_finished_anim, true) if battle && battle.is_a?(Battle)
       return
     end
     

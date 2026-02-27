@@ -527,7 +527,8 @@ module StatusParticles
         unless method_defined?(:status_particles_pbCommonAnimation)
           alias_method :status_particles_pbCommonAnimation, :pbCommonAnimation
           def pbCommonAnimation(*args)
-            return if StatusParticles.block_common_animation?(args[0])
+            anim_name = args[0]
+            return if StatusParticles.block_common_animation?(anim_name)
             status_particles_pbCommonAnimation(*args)
           end
         end
@@ -539,7 +540,11 @@ module StatusParticles
         unless method_defined?(:status_particles_battle_pbCommonAnimation)
           alias_method :status_particles_battle_pbCommonAnimation, :pbCommonAnimation
           def pbCommonAnimation(animName, user = nil, targets = nil)
-            return if StatusParticles.block_common_animation?(animName)
+            # DEBUG: Show what animation is being called from Battle
+            echo("StatusParticles Battle pbCommonAnimation: #{animName}\n")
+            blocked = StatusParticles.block_common_animation?(animName)
+            echo("StatusParticles Battle: #{animName} blocked=#{blocked}\n")
+            return if blocked
             status_particles_battle_pbCommonAnimation(animName, user, targets)
           end
         end

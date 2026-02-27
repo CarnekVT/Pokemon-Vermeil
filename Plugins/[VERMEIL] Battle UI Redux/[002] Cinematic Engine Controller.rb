@@ -335,15 +335,36 @@ module VermeilCinematicEngineBattleOverride
   end
 
   def pbCommonAnimation(animName, user = nil, targets = nil)
-    @scene.vermeil_engine_clear_message_window!
+    # Para animaciones personalizadas, el flag debe estar setiado ANTES de que se muestre el mensaje
+    custom_anims = ["StatUp", "StatDown", "HealthUp", "HealthDown", "SnapTrap", "SpikyShield", "LeechSeed"]
+    is_custom = custom_anims.include?(animName)
+    
+    if is_custom
+      # Para animaciones personalizadas, llamar directamente al método del Scene
+      # Esto asegura que se use la animación personalizada de [036]
+      @scene.pbCommonAnimation(animName, user, targets)
+      # El flag ya se establece en el método del Scene
+      @vermeil_just_finished_anim = true
+      
+      if @scene.respond_to?(:vermeil_slide_databoxes_in)
+        @scene.vermeil_slide_databoxes_in
+      end
+      if @scene.respond_to?(:vermeil_force_instant_box)
+        @scene.vermeil_force_instant_box
+      end
+      return
+    end
+    
+    @scene.vermeil_engine_clear_message_window! if !is_custom
     super(animName, user, targets)
-    # Asegurar que el flag se establece después de cualquier animación
+    
+    # El flag se establece DESPUÉS de que la animación termina
+    # Esto permite que el delay se evite cuando se muestra el siguiente mensaje
     @vermeil_just_finished_anim = true
-    # Restaurar message box después de la animación
+    
     if @scene.respond_to?(:vermeil_slide_databoxes_in)
       @scene.vermeil_slide_databoxes_in
     end
-    # Forzar visibilidad del message window
     if @scene.respond_to?(:vermeil_force_instant_box)
       @scene.vermeil_force_instant_box
     end

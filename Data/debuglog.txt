@@ -2333,3 +2333,57 @@ It may be too sleepy to move!"
 ================================================================
 
 [Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+
+================================================================
+
+[Started battle] Single wild battle (1 trainer(s) vs. 1 wild Pokémon)
+"Oh! A wild Raichu appeared!"
+"Go! Sceptile!"
+[Round order] Sceptile (0), the wild Raichu (1)
+
+===== Round 1 =====
+
+[AI] Raichu (1) is considering using Tackle against Sceptile (0)...
+[AI] Move choices for Raichu (1):
+   *  50.0% to use Tackle (target 0): score 100
+   *  50.0% to use Tackle (target 0): score 100
+   => will use Tackle (target 0)
+
+[Round order] Sceptile (0), the wild Raichu (1)
+
+[Use move] Sceptile (0) used Leech Seed
+"Sceptile used Leech Seed!"
+"The wild Raichu was seeded!"
+[Use move] The wild Raichu (1) used Tackle
+"The wild Raichu used Tackle!"
+[HP change] Sceptile lost 52 HP (185 -> 133)
+
+[End of round 1]
+[HP change] The wild Raichu lost 29 HP (237 -> 208)
+"The wild Raichu's health is sapped by Leech Seed!"
+[HP change] Sceptile gained 29 HP (133 -> 162)
+
+===== Round 2 =====
+
+[AI] Raichu (1) is considering using Tackle against Sceptile (0)...
+[AI] Move choices for Raichu (1):
+   *  50.0% to use Tackle (target 0): score 100
+   *  50.0% to use Tackle (target 0): score 100
+   => will use Tackle (target 0)
+
+[Round order] Sceptile (0), the wild Raichu (1)
+
+[Use move] Sceptile (0) used Forest's Curse
+"Sceptile used Forest's Curse!"
+"The wild Raichu transformed into the Grass type!"
+[Use move] The wild Raichu (1) used Tackle
+"The wild Raichu used Tackle!"
+[HP change] Sceptile lost 50 HP (162 -> 112)
+
+[End of round 2]
+[HP change] The wild Raichu lost 29 HP (208 -> 179)
+"The wild Raichu's health is sapped by Leech Seed!"
+[HP change] Sceptile gained 29 HP (112 -> 141)
+
+===== Round 3 =====
+

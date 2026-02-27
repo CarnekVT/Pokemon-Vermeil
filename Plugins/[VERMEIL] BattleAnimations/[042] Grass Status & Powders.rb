@@ -12,7 +12,7 @@ class Battle::Scene::Animation::VermeilGrassStatus < Battle::Scene::Animation
                    :JUNGLEHEALING, :LEECHSEED, :SPORE, :COTTONSPORE, 
                    :STUNSPORE, :SPICYEXTRACT, :GRASSWHISTLE, :SLEEPPOWDER, 
                    :POISONPOWDER]
-  BEHAVIOR = :cinematic
+  BEHAVIOR = :self_targeting
 
   def initialize(sprites, viewport, user, target, move_id)
     @user = user; @target = target; @move_id = move_id
@@ -356,46 +356,46 @@ when :FORESTSCURSE
         end
       end
 
-    when :LEECHSEED
-      # LEECH SEED (Lanza semilla, brotan raices en target)
-      t_toss = 2; t_hit = 12; @end_frame = 40
-      up.setSE(0, "Anim/Wind1", 100, 150)
+
+when :LEECHSEED
+      # LEECH SEED
+      t_shoot = 4; t_hit = 12; @end_frame = 35
+      up.setSE(0, "Anim/Wind1", 100, 120)
       
       if pbResolveBitmap(magic_asset)
-        seed = addNewSprite(orig_ux, orig_uy - (uh/2), magic_asset, PictureOrigin::CENTER)
-        seed.setZ(0, target_z + 20); apply_pras_frame(seed, magic_asset, 0, 0, 0)
-        seed.setTone(0, Tone.new(150, 100, -50, 0))
-        seed.setVisible(0, false); seed.setVisible(t_toss, true); seed.setZoom(0, 50)
-        
-        seed.moveXY(t_toss, t_hit - t_toss, orig_tx, orig_ty)
-        seed.moveOpacity(t_hit, 1, 0)
+        seed = addNewSprite(orig_ux + (20*f_dir), orig_uy - (uh/2), magic_asset, PictureOrigin::CENTER)
+        seed.setZ(0, target_z + 20)
+        apply_pras_frame(seed, magic_asset, 0, 0, 0)
+        seed.setTone(0, Tone.new(50, 200, 50, 0))
+        seed.setVisible(0, false); seed.setVisible(t_shoot, true)
+        seed.setZoom(0, 50)
+        seed.moveXY(t_shoot, t_hit - t_shoot, i_x, orig_ty + (th * 0.3))
+        seed.moveOpacity(t_hit, 2, 0)
       end
       
-      if pbResolveBitmap(leaf_asset)
-        tp.setSE(t_hit, "Anim/PRSFX- Pound", 100, 160)
-        # Efectos en el suelo (base del Pokémon)
-        ground_y = orig_ty + (th * 0.3)
-        root1 = addNewSprite(orig_tx - 20, ground_y, leaf_asset, PictureOrigin::BOTTOM)
-        root2 = addNewSprite(orig_tx + 20, ground_y, leaf_asset, PictureOrigin::BOTTOM)
+      if pbResolveBitmap(frenzy_asset)
+        root_y = orig_ty + (th * 0.3)
+        root1 = addNewSprite(orig_tx - 20, root_y, frenzy_asset, PictureOrigin::BOTTOM)
+        root2 = addNewSprite(orig_tx + 20, root_y, frenzy_asset, PictureOrigin::BOTTOM)
         root1.setZ(0, target_z + 15); root2.setZ(0, target_z + 16)
-        
-        apply_pras_frame(root1, leaf_asset, 0, 5, 0)
-        apply_pras_frame(root2, leaf_asset, 0, 5, 0); root2.setZoomXY(0, -100, 100)
-        
+        apply_pras_frame(root1, frenzy_asset, 0, 3, 0)
+        apply_pras_frame(root2, frenzy_asset, 0, 3, 0)
+        root2.setZoomXY(0, -100, 100)
+        root1.setTone(0, Tone.new(-30, 50, -30, 0))
+        root2.setTone(0, Tone.new(-30, 50, -30, 0))
         root1.setVisible(0, false); root1.setVisible(t_hit, true)
         root2.setVisible(0, false); root2.setVisible(t_hit, true)
-        
-        3.times do |i|
-          apply_pras_frame(root1, leaf_asset, i, 5, t_hit + (i*3))
-          apply_pras_frame(root2, leaf_asset, i, 5, t_hit + (i*3))
+        4.times do |i|
+          apply_pras_frame(root1, frenzy_asset, i, 3, t_hit + (i*2))
+          apply_pras_frame(root2, frenzy_asset, i, 3, t_hit + (i*2))
         end
-        
-        tp.moveColor(t_hit, 4, Color.new(100, 255, 100, 150))
-        tp.moveColor(t_hit + 6, 4, Color.new(0,0,0,0))
-        
-        root1.moveOpacity(t_hit + 12, 6, 0)
-        root2.moveOpacity(t_hit + 12, 6, 0)
+        root1.moveOpacity(t_hit + 20, 6, 0)
+        root2.moveOpacity(t_hit + 20, 6, 0)
       end
+      
+      tp.setSE(t_hit, "Anim/PRSFX- Leech Seed", 100, 120)
+      tp.moveColor(t_hit, 4, Color.new(50, 200, 50, 150))
+      tp.moveColor(t_hit + 8, 6, Color.new(0, 0, 0, 0))
 
 when :SPICYEXTRACT
       # SPICY EXTRACT (Salpicadura roja picante SIN BUG Z-Icon)
