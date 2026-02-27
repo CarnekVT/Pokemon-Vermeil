@@ -57,7 +57,6 @@ class Battle::Scene::Animation::VermeilSelfTargetGrass < Battle::Scene::Animatio
 
     case @move_id
     when :SYNTHESIS
-      # SYNTHESIS (Tiempo de espera reducido al mínimo)
       t_start = 0; @end_frame = 15
       up.setSE(0, "Anim/Recovery", 100, 130)
       up.moveColor(t_start, 4, Color.new(200, 255, 100, 180))

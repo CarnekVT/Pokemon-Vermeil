@@ -63,7 +63,6 @@ class Battle::Scene::Animation::VermeilGrassStatus < Battle::Scene::Animation
 
     @end_frame = 50
 
-    # ASSETS
     magic_asset  = "Graphics/Animations/PRAS- Magical Leaf.png"
     leaf_asset   = "Graphics/Animations/PRAS- Grass.png"
     frenzy_asset = "Graphics/Animations/PRAS- Frenzy Plant.png"
