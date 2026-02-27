@@ -103,5 +103,5 @@ def start_test_cinematic
   setBattleRule("editWildPokemon", {
     "moves" => [:TACKLE]
   })
-  WildBattle.start(:RAICHU, 100)
+  WildBattle.start(:CORVIKNIGHT, 100)
 end
