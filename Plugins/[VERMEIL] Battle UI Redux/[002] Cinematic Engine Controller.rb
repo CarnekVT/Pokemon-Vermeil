@@ -1,34 +1,13 @@
 #===============================================================================
-# [VERMEIL] Cinematic Engine & Overlay Controller (v8.1 STABLE + TYPO FIX)
+# [VERMEIL] Cinematic Engine & Overlay Controller
 # THE PERFECT CUT - UNIVERSAL HIDE, FADE DATABOXES, NO GHOST TEXT, NO DELAYS
 #===============================================================================
 
 module VermeilCinematicEngine
-  def self.get_base_priority(battler_index, is_foe)
-    pos_idx = battler_index % 3
-    base_priority = if is_foe
-      pos_idx == 0 ? 1 : (pos_idx == 1 ? 2 : 3)
-    else
-      pos_idx == 2 ? 1 : (pos_idx == 1 ? 2 : 3)
-    end
-    return is_foe ? (base_priority + 10) : base_priority
-  end
-
-  def self.get_animation_priority(user)
-    return 5 if !user || !user.respond_to?(:index)
-    idx = user.index
-    is_foe = idx >= 3
-    return get_base_priority(idx, is_foe)
-  end
-
-  def self.uses_z_write?(anim_class)
-    return false if !anim_class || !anim_class.is_a?(Class)
-    return anim_class.const_defined?(:Z_WRITE) && anim_class::Z_WRITE
-  end
-
   def self.get_anim_class(move_id)
     mid = move_id.respond_to?(:to_sym) ? move_id.to_sym : move_id
     
+    # AUTO-DETECCIÓN INTELIGENTE (Busca clases con HANDLED_MOVES)
     Battle::Scene::Animation.constants.each do |c|
       next unless c.to_s.start_with?("Vermeil")
       klass = Battle::Scene::Animation.const_get(c)
@@ -37,6 +16,7 @@ module VermeilCinematicEngine
       end
     end
     
+    # DICCIONARIO MAESTRO
     map = {
       :SURGINGSTRIKES => "VermeilMultiHitPunches",
       :DOUBLEHIT      => "VermeilMultiHitPunches",
@@ -68,6 +48,7 @@ module VermeilCinematicEngine
       :STICKYWEB      => "VermeilStickyWebCast"
     }
     
+    # Búsqueda por nombre directo
     direct_name = "Vermeil_#{mid}"
     if Battle::Scene::Animation.const_defined?(direct_name)
       return Battle::Scene::Animation.const_get(direct_name)
@@ -92,13 +73,8 @@ module VermeilCinematicEngine
       "VermeilToxicSpikesCast" => :hazard,
       "VermeilSpikesCast"      => :hazard,
       "VermeilStealthRockCast" => :hazard,
-      "VermeilStickyWebCast"   => :hazard,
-      "VermeilSelfTargetGrass" => :self_targeting,
-      "VermeilGrassStatus"     => :self_targeting
+      "VermeilStickyWebCast"   => :hazard
     }
-    if anim_class.const_defined?(:Z_WRITE) && anim_class::Z_WRITE
-      return :zwrite
-    end
     return map[name] || :cinematic
   end
 end
@@ -206,17 +182,21 @@ class Battle::Scene
 
   def pbPlayVermeilCinematic(anim_class, user, targets, mid, hit_num, behavior)
     is_mh  = (behavior == :multihit)
+    is_cin = (behavior == :cinematic)
     is_haz = (behavior == :hazard)
     is_self = (behavior == :self_targeting)
 
-    target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
-    target = user if target.nil? || is_self
+    if is_cin || is_self
+      target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
+      # Para self_targeting, si no hay target, usar el usuario
+      target = user if is_self && !target
+      return false if !user || !target
+    end
 
-    return false if !user || !target
-
-    anim_user = user; side_index = 0; ax = 0; ay = 0
+    target = nil; anim_user = user; side_index = 0; ax = 0; ay = 0
 
     if is_haz
+      return false if !user
       if !anim_user || anim_user.fainted? || anim_user.hp <= 0
         if targets.respond_to?(:each)
           targets.each do |t|
@@ -231,6 +211,10 @@ class Battle::Scene
       end
       side_index = anim_user.respond_to?(:idxOwnSide) ? (anim_user.idxOwnSide ^ 1) : ((anim_user.index & 1) ^ 1)
       ax, ay = vermeil_hazard_anchor_for_side(side_index)
+    else
+      target = targets.is_a?(Array) ? targets.find { |t| t && !t.fainted? && t.hp > 0 } : targets
+      target = user if is_self && !target
+      return false if !user || !target
     end
 
     @vermeil_anim_is_playing = true
@@ -266,23 +250,6 @@ class Battle::Scene
     end
     return true
   end
-
-  def vermeil_get_battler_priority(battler)
-    return 2 if !battler || !battler.respond_to?(:index)
-    idx = battler.index
-    is_foe = idx >= 3
-    pos = is_foe ? (idx - 3) : idx  
-    base_priority = if is_foe
-      pos == 0 ? 1 : (pos == 1 ? 2 : 3)
-    else
-      pos == 2 ? 1 : (pos == 1 ? 2 : 3)
-    end
-    return is_foe ? (base_priority + 10) : base_priority
-  end
-
-  def vermeil_get_animation_priority(user)
-    VermeilCinematicEngine.get_animation_priority(user)
-  end
 end
 
 module VermeilCinematicEngineBattleOverride
@@ -292,28 +259,37 @@ module VermeilCinematicEngineBattleOverride
     behavior = anim_class ? VermeilCinematicEngine.get_behavior(anim_class) : :none
     
     @scene.vermeil_engine_clear_message_window!
-    
+    # Hide databoxes BEFORE animation for multihit (after damage message from previous hit)
     if behavior == :multihit
-      @scene.vermeil_slide_databoxes_out if hitNum.to_i <= 0
-    else
+      @scene.vermeil_slide_databoxes_out
+    elsif behavior != :multihit || hitNum.to_i <= 0
       @scene.vermeil_slide_databoxes_out
     end
     
     if @showAnims && anim_class && @scene.respond_to?(:pbPlayVermeilCinematic)
-      
+      # Start sequence for multihit, hazards and self-targeting
       if behavior == :multihit
         @scene.vermeil_start_sequence if hitNum.to_i <= 0
       elsif behavior == :hazard || behavior == :self_targeting
         @scene.vermeil_start_sequence
       end
       
-      # CORRECCIÓN DE TYPO AQUÍ: Usamos hitNum en vez de hit_num
       played = @scene.pbPlayVermeilCinematic(anim_class, user, targets, mid, hitNum, behavior)
       if played
         @vermeil_just_finished_anim = true
+        # Keep flag for sequence to skip delay in follow-up messages
         @vermeil_in_sequence = true if behavior == :multihit || behavior == :hazard || behavior == :self_targeting
         
-        @scene.vermeil_slide_databoxes_in
+        # For multihit: show databoxes between hits to display damage
+        if behavior == :multihit && hitNum.to_i > 0
+          # Show databoxes between hits
+          @scene.vermeil_slide_databoxes_in
+        elsif behavior == :multihit
+          # First hit: keep UI hidden
+        else
+          # Non-multihit: show databoxes after animation
+          @scene.vermeil_slide_databoxes_in
+        end
         return
       end
     end
@@ -335,58 +311,14 @@ module VermeilCinematicEngineBattleOverride
   end
 
   def pbCommonAnimation(animName, user = nil, targets = nil)
-    # Para animaciones personalizadas, el flag debe estar setiado ANTES de que se muestre el mensaje
-    custom_anims = ["StatUp", "StatDown", "HealthUp", "HealthDown", "SnapTrap", "SpikyShield", "LeechSeed"]
-    is_custom = custom_anims.include?(animName)
-    
-    if is_custom
-      # Para animaciones personalizadas, llamar directamente al método del Scene
-      # Esto asegura que se use la animación personalizada de [036]
-      @scene.pbCommonAnimation(animName, user, targets)
-      # El flag ya se establece en el método del Scene
-      @vermeil_just_finished_anim = true
-      
-      if @scene.respond_to?(:vermeil_slide_databoxes_in)
-        @scene.vermeil_slide_databoxes_in
-      end
-      if @scene.respond_to?(:vermeil_force_instant_box)
-        @scene.vermeil_force_instant_box
-      end
-      return
-    end
-    
-    @scene.vermeil_engine_clear_message_window! if !is_custom
+    @scene.vermeil_engine_clear_message_window!
     super(animName, user, targets)
-    
-    # El flag se establece DESPUÉS de que la animación termina
-    # Esto permite que el delay se evite cuando se muestra el siguiente mensaje
     @vermeil_just_finished_anim = true
-    
-    if @scene.respond_to?(:vermeil_slide_databoxes_in)
-      @scene.vermeil_slide_databoxes_in
-    end
-    if @scene.respond_to?(:vermeil_force_instant_box)
-      @scene.vermeil_force_instant_box
-    end
   end
 
   def pbWait(frames, *args)
-    # Saltar espera si hay una animación terminada o si el flag no está inicializado (inicio de batalla)
-    begin
-      should_skip = false
-      if !instance_variable_defined?(:@vermeil_just_finished_anim)
-        should_skip = true
-      elsif @vermeil_just_finished_anim.nil?
-        should_skip = true
-      elsif @vermeil_just_finished_anim
-        should_skip = true
-      end
-      
-      if should_skip
-        # No restablecer el flag aquí, hacerlo en pbWaitMessage
-        return
-      end
-    rescue
+    if @vermeil_just_finished_anim
+      @vermeil_just_finished_anim = false
       return
     end
     super
@@ -394,46 +326,40 @@ module VermeilCinematicEngineBattleOverride
 end
 
 module VermeilCinematicEngineSceneOverride
+  # Fix delay for v21.1 Hotfix
   def pbWaitMessage
     battle_obj = nil
     if defined?(@battle) && @battle && @battle.is_a?(Battle)
       battle_obj = @battle
     end
     
+    # Check if we're in a sequence (for multihit/hazard follow-up messages)
     in_sequence = false
     if battle_obj && battle_obj.instance_variable_defined?(:@vermeil_in_sequence)
       in_sequence = battle_obj.instance_variable_get(:@vermeil_in_sequence)
     end
     
-    # Comprobar si hay una animación terminada
+    # Check single-use flag from Battle
     just_finished = false
-    if battle_obj
-      begin
-        if !battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim)
-          # Flag no existe - tratar como si hubiera animación reciente
-          just_finished = true
-        else
-          just_finished = battle_obj.instance_variable_get(:@vermeil_just_finished_anim) rescue false
-        end
-      rescue
-        just_finished = false
+    begin
+      if battle_obj && battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim)
+        just_finished = battle_obj.instance_variable_get(:@vermeil_just_finished_anim) rescue false
       end
+    rescue
+      just_finished = false
     end
     
     if just_finished || in_sequence
-      # Restaurar el flag
-      if just_finished && battle_obj
-        battle_obj.instance_variable_set(:@vermeil_just_finished_anim, false)
+      if just_finished
+        battle_obj.instance_variable_set(:@vermeil_just_finished_anim, false) rescue nil
       end
-      # Forzar visibilidad del message window
+      # Show message window via sprite access
       if @sprites && @sprites["messageWindow"]
         @sprites["messageWindow"].visible = true
       end
-      # No llamar a super - evitar el delay de 1 segundo
       return
     end
     
-    # Solo llamar a super si no hay animación reciente
     super
   end
 
@@ -452,21 +378,7 @@ module VermeilCinematicEngineSceneOverride
       vermeil_force_instant_box
       @vermeil_skip_slide_in = false
     end
-    
-    # Si hubo una animación reciente, saltar el delay del mensaje
-    begin
-      if @vermeil_just_finished_anim
-        @vermeil_just_finished_anim = false
-        # Forzar que el mensaje se muestre inmediatamente sin esperar
-        cw = @sprites["messageWindow"]
-        if cw
-          cw.visible = true
-        end
-      end
-    rescue
-      # Ignorar errores
-    end
-    
+
     super(msg, brief)
   end
 
