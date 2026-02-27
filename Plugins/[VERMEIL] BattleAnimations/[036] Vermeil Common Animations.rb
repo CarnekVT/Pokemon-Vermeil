@@ -280,15 +280,17 @@ class Battle::Scene::Animation::VermeilCommonAnimations < Battle::Scene::Animati
       seed.setVisible(0, false); seed.setVisible(t_start, true)
       seed.setZoom(0, 50)
       
-      # Trayectoria hacia el objetivo
-      seed.moveXY(t_start, t_hit - t_start, orig_tx, orig_ty - 20)
+      # Trayectoria hacia el objetivo - corregir para que vaya a la base (suelo)
+      seed.moveXY(t_start, t_hit - t_start, orig_tx, orig_ty + (th * 0.3))
       seed.moveOpacity(t_hit, 1, 0)
       
-      # Raíces brotando en el objetivo
+      # Raíces brotando en el objetivo - corregir para que aparezca en el suelo
       frenzy = "Graphics/Animations/PRAS- Frenzy Plant.png"
       if pbResolveBitmap(frenzy)
-        root1 = addNewSprite(orig_tx - 20, orig_ty, frenzy, PictureOrigin::BOTTOM)
-        root2 = addNewSprite(orig_tx + 20, orig_ty, frenzy, PictureOrigin::BOTTOM)
+        # Efectos en el suelo (base del Pokémon)
+        root_y = orig_ty + (th * 0.3)
+        root1 = addNewSprite(orig_tx - 20, root_y, frenzy, PictureOrigin::BOTTOM)
+        root2 = addNewSprite(orig_tx + 20, root_y, frenzy, PictureOrigin::BOTTOM)
         root1.setZ(0, target_z + 15); root2.setZ(0, target_z + 16)
         
         apply_pras_frame(root1, frenzy, 0, 3, 0)

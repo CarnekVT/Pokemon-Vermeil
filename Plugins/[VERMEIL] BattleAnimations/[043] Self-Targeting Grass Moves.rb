@@ -85,8 +85,8 @@ class Battle::Scene::Animation::VermeilSelfTargetGrass < Battle::Scene::Animatio
       end
       
     when :SPIKYSHIELD
-      # SPIKY SHIELD: END FRAME 10 (Súper veloz, cero demoras de texto)
-      t_start = 0; @end_frame = 10
+      # SPIKY SHIELD: END FRAME 20 (balanced speed)
+      t_start = 0; @end_frame = 20
       up.setSE(t_start, "Anim/PRSFX- Spiky Shield2", 100, 120)
       
       if pbResolveBitmap(protect_asset)
@@ -188,8 +188,11 @@ class Battle::Scene::Animation::VermeilSelfTargetGrass < Battle::Scene::Animatio
       real_ing_asset = pbResolveBitmap(ing_asset) ? ing_asset : frenzy_asset
       
       if pbResolveBitmap(real_ing_asset)
-        root1 = addNewSprite(orig_ux - 20, orig_uy, real_ing_asset, PictureOrigin::BOTTOM)
-        root2 = addNewSprite(orig_ux + 20, orig_uy, real_ing_asset, PictureOrigin::BOTTOM)
+        # Efectos en el suelo (base del Pokémon) - calcular posición de los pies
+        ground_y = orig_uy + (uh * 0.5)
+        
+        root1 = addNewSprite(orig_ux - 20, ground_y, real_ing_asset, PictureOrigin::BOTTOM)
+        root2 = addNewSprite(orig_ux + 20, ground_y, real_ing_asset, PictureOrigin::BOTTOM)
         
         root1.setZ(0, user_z + 100); root2.setZ(0, user_z + 101)
         

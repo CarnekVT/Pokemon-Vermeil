@@ -337,12 +337,35 @@ module VermeilCinematicEngineBattleOverride
   def pbCommonAnimation(animName, user = nil, targets = nil)
     @scene.vermeil_engine_clear_message_window!
     super(animName, user, targets)
+    # Asegurar que el flag se establece después de cualquier animación
     @vermeil_just_finished_anim = true
+    # Restaurar message box después de la animación
+    if @scene.respond_to?(:vermeil_slide_databoxes_in)
+      @scene.vermeil_slide_databoxes_in
+    end
+    # Forzar visibilidad del message window
+    if @scene.respond_to?(:vermeil_force_instant_box)
+      @scene.vermeil_force_instant_box
+    end
   end
 
   def pbWait(frames, *args)
-    if @vermeil_just_finished_anim
-      @vermeil_just_finished_anim = false
+    # Saltar espera si hay una animación terminada o si el flag no está inicializado (inicio de batalla)
+    begin
+      should_skip = false
+      if !instance_variable_defined?(:@vermeil_just_finished_anim)
+        should_skip = true
+      elsif @vermeil_just_finished_anim.nil?
+        should_skip = true
+      elsif @vermeil_just_finished_anim
+        should_skip = true
+      end
+      
+      if should_skip
+        # No restablecer el flag aquí, hacerlo en pbWaitMessage
+        return
+      end
+    rescue
       return
     end
     super
@@ -361,19 +384,35 @@ module VermeilCinematicEngineSceneOverride
       in_sequence = battle_obj.instance_variable_get(:@vermeil_in_sequence)
     end
     
-    just_finished = battle_obj && battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim) && 
-                    battle_obj.instance_variable_get(:@vermeil_just_finished_anim) rescue false
+    # Comprobar si hay una animación terminada
+    just_finished = false
+    if battle_obj
+      begin
+        if !battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim)
+          # Flag no existe - tratar como si hubiera animación reciente
+          just_finished = true
+        else
+          just_finished = battle_obj.instance_variable_get(:@vermeil_just_finished_anim) rescue false
+        end
+      rescue
+        just_finished = false
+      end
+    end
     
     if just_finished || in_sequence
-      if just_finished
+      # Restaurar el flag
+      if just_finished && battle_obj
         battle_obj.instance_variable_set(:@vermeil_just_finished_anim, false)
       end
+      # Forzar visibilidad del message window
       if @sprites && @sprites["messageWindow"]
         @sprites["messageWindow"].visible = true
       end
+      # No llamar a super - evitar el delay de 1 segundo
       return
     end
     
+    # Solo llamar a super si no hay animación reciente
     super
   end
 
@@ -392,7 +431,21 @@ module VermeilCinematicEngineSceneOverride
       vermeil_force_instant_box
       @vermeil_skip_slide_in = false
     end
-
+    
+    # Si hubo una animación reciente, saltar el delay del mensaje
+    begin
+      if @vermeil_just_finished_anim
+        @vermeil_just_finished_anim = false
+        # Forzar que el mensaje se muestre inmediatamente sin esperar
+        cw = @sprites["messageWindow"]
+        if cw
+          cw.visible = true
+        end
+      end
+    rescue
+      # Ignorar errores
+    end
+    
     super(msg, brief)
   end
 

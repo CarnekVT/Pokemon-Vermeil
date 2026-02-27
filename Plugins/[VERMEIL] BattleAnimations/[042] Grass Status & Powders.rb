@@ -286,10 +286,10 @@ when :FORESTSCURSE
       
       if pbResolveBitmap(frenzy_asset)
         # Position at base of target (bottom of sprite, using orig_ty which is the feet position)
-        # The roots should appear at the feet level
-        base_y = orig_ty  # This is already at the feet/base level
-        curse_l = addNewSprite(orig_tx - 25, base_y, frenzy_asset, PictureOrigin::BOTTOM)
-        curse_r = addNewSprite(orig_tx + 25, base_y, frenzy_asset, PictureOrigin::BOTTOM)
+        # Efectos en el suelo (base del Pokémon)
+        ground_y = orig_ty + (th * 0.3)
+        curse_l = addNewSprite(orig_tx - 25, ground_y, frenzy_asset, PictureOrigin::BOTTOM)
+        curse_r = addNewSprite(orig_tx + 25, ground_y, frenzy_asset, PictureOrigin::BOTTOM)
         curse_l.setZ(0, target_z + 15); curse_r.setZ(0, target_z + 16)
         
         apply_pras_frame(curse_l, frenzy_asset, 0, 3, 0)
@@ -367,14 +367,16 @@ when :FORESTSCURSE
         seed.setTone(0, Tone.new(150, 100, -50, 0))
         seed.setVisible(0, false); seed.setVisible(t_toss, true); seed.setZoom(0, 50)
         
-        seed.moveXY(t_toss, t_hit - t_toss, orig_tx, orig_ty - 10)
+        seed.moveXY(t_toss, t_hit - t_toss, orig_tx, orig_ty)
         seed.moveOpacity(t_hit, 1, 0)
       end
       
       if pbResolveBitmap(leaf_asset)
         tp.setSE(t_hit, "Anim/PRSFX- Pound", 100, 160)
-        root1 = addNewSprite(orig_tx - 20, orig_ty, leaf_asset, PictureOrigin::BOTTOM)
-        root2 = addNewSprite(orig_tx + 20, orig_ty, leaf_asset, PictureOrigin::BOTTOM)
+        # Efectos en el suelo (base del Pokémon)
+        ground_y = orig_ty + (th * 0.3)
+        root1 = addNewSprite(orig_tx - 20, ground_y, leaf_asset, PictureOrigin::BOTTOM)
+        root2 = addNewSprite(orig_tx + 20, ground_y, leaf_asset, PictureOrigin::BOTTOM)
         root1.setZ(0, target_z + 15); root2.setZ(0, target_z + 16)
         
         apply_pras_frame(root1, leaf_asset, 0, 5, 0)

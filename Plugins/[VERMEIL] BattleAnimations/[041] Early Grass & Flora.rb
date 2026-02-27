@@ -11,7 +11,7 @@
 class Battle::Scene::Animation::VermeilEarlyGrassFlora < Battle::Scene::Animation
   
   HANDLED_MOVES = [:GRASSKNOT, :LEAFTORNADO, :BRANCHPOKE, :TRAILBLAZE, :LEAFAGE, 
-                   :SNAPTRAP, :SYRUPBOMB, :GRASSYGLIDE, :NEEDLEARM, :SPIKYSHIELD]
+                   :SNAPTRAP, :SYRUPBOMB, :GRASSYGLIDE, :NEEDLEARM]
   BEHAVIOR = :cinematic
 
   def initialize(sprites, viewport, user, target, move_id)
