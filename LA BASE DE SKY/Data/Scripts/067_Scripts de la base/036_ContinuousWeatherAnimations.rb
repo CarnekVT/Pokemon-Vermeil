@@ -130,6 +130,14 @@ class Battle::Scene
     # Update the current animation player
     if @weatherAnimationPlayer && !@weatherAnimationPlayer.animDone?
       @weatherAnimationPlayer.update
+      # Clear background/foreground overlay sprites after every update.
+      # With turbo enabled, System.uptime runs faster causing frame skipping
+      # in PBAnimationPlayerX. The playTiming method uses (i.frame == frame)
+      # for immediate events (types 1, 3) that clear overlay opacity, but
+      # skipped frames cause these events to be missed, leaving the overlay
+      # stuck at non-zero opacity (grey tint). The actual weather visual
+      # effect comes from the animation cel sprites, not from these overlays.
+      @weatherAnimationPlayer.clear_overlays
     end
     
     # Check if we need to restart the animation
@@ -186,4 +194,19 @@ class Battle
     end
   end
 
+end
+
+#===============================================================================
+# Allow clearing overlay sprites on the animation player
+#===============================================================================
+class PBAnimationPlayerX
+  # Resets background/foreground color and graphic overlays to fully transparent.
+  # This prevents the grey tint caused by turbo frame-skipping missing the
+  # playTiming events that would normally clear these overlays.
+  def clear_overlays
+    @bgColor.opacity = 0 if @bgColor && !@bgColor.disposed?
+    @foColor.opacity = 0 if @foColor && !@foColor.disposed?
+    @bgGraphic.opacity = 0 if @bgGraphic && !@bgGraphic.disposed?
+    @foGraphic.opacity = 0 if @foGraphic && !@foGraphic.disposed?
+  end
 end
