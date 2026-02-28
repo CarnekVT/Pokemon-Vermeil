@@ -2417,7 +2417,7 @@ Battle::AbilityEffects::OnDealingHit.add(:POISONTOUCH,
     next if !move.pbContactMove?(user)
     next if !target.affectedByAdditionalEffects?
     next if !target.pbCanPoison?(user, false)
-    next if target.hasActiveAbility?(:SHIELDDUST) && !target.being_mold_broken?
+    next if target.hasActiveAbility?(:SHIELDDUST) && !target.beingMoldBroken?
     next if battle.pbRandom(100) >= 30
     battle.pbShowAbilitySplash(user)
     msg = nil
@@ -2433,7 +2433,7 @@ Battle::AbilityEffects::OnDealingHit.add(:TOXICCHAIN,
   proc { |ability, user, target, move, battle|
     next if !target.affectedByAdditionalEffects?
     next if !target.pbCanPoison?(user, false)
-    next if target.hasActiveAbility?(:SHIELDDUST) && !target.being_mold_broken?
+    next if target.hasActiveAbility?(:SHIELDDUST) && !target.beingMoldBroken?
     next if battle.pbRandom(100) >= 30
     battle.pbShowAbilitySplash(user)
     msg = nil

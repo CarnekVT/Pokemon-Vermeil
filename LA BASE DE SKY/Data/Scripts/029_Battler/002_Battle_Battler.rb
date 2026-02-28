@@ -661,6 +661,7 @@ class Battle::Battler
     return false if hasActiveItem?(:ABILITYSHIELD)
     return @battle.moldBreaker
   end
+  alias being_mold_broken? beingMoldBroken?
 
   def airborne?
     return false if hasActiveItem?(:IRONBALL)

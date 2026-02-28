@@ -391,7 +391,7 @@ class Color
         hex = args.first.to_s(16)
       when String
         try_rgb_format = args.first.split(",")
-        init_original(*try_rgb_format.map(&:to_i)) if try_rgb_format.length.between?(3, 4)
+        return init_original(*try_rgb_format.map(&:to_i)) if try_rgb_format.length.between?(3, 4)
         hex = args.first.delete("#")
       end
       pbPrintException("¡Tipo de argumento incorrecto!") if !hex
@@ -401,8 +401,8 @@ class Color
     when 3
       r, g, b = *args
     end
-    init_original(r, g, b) if r && g && b
-    init_original(*args)
+    return init_original(r, g, b) if r && g && b
+    return init_original(*args)
   end
 
   def self.new_from_rgb(param)
