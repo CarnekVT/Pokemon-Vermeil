@@ -300,6 +300,8 @@ class UI::OptionsVisualsList < Window_DrawableCommand
 
   def initialize(x, y, width, height, viewport)
     @input_icons_bitmap = AnimatedBitmap.new(UI::OptionsVisuals::UI_FOLDER + "input_icons")
+    @left_arrow_bmp = Bitmap.new("Graphics/UI/left_arrow") rescue nil
+    @right_arrow_bmp = Bitmap.new("Graphics/UI/right_arrow") rescue nil
     super(x, y, width, height, viewport)
     @index = -1
   end
@@ -307,6 +309,8 @@ class UI::OptionsVisualsList < Window_DrawableCommand
   def dispose
     super
     @input_icons_bitmap.dispose
+    @left_arrow_bmp&.dispose
+    @right_arrow_bmp&.dispose
   end
 
   #-----------------------------------------------------------------------------
@@ -357,7 +361,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
         val = val - lowest if val
       end
       # For array, store selected index and scroll offset
-      if [:array, :array_one].include?(option[:type])
+      if [:array, :array_one, :arrow_option].include?(option[:type])
         selected = val.is_a?(Integer) ? val : 0
         val = { selected: selected, scroll: 0 }
       end
@@ -535,13 +539,12 @@ class UI::OptionsVisualsList < Window_DrawableCommand
   def previous_value(this_index)
     option = @options[this_index]
     case option[:type]
-    when :array, :array_one
+    when :array, :array_one, :arrow_option
       current_selected = @values[this_index][:selected]
       current_scroll = @values[this_index][:scroll]
-      # Wrap around if at start
       new_selected = current_selected - 1
       if new_selected < 0
-        new_selected = option[:parameters].length - 1
+        new_selected = (option[:type] == :arrow_option) ? 0 : option[:parameters].length - 1
       end
       return { selected: new_selected, scroll: current_scroll }
     when :multiselect
@@ -591,13 +594,12 @@ class UI::OptionsVisualsList < Window_DrawableCommand
   def next_value(this_index)
     option = @options[this_index]
     case option[:type]
-    when :array, :array_one
+    when :array, :array_one, :arrow_option
       current_selected = @values[this_index][:selected]
       current_scroll = @values[this_index][:scroll]
-      # Wrap around if at end
       new_selected = current_selected + 1
       if new_selected >= option[:parameters].length
-        new_selected = 0
+        new_selected = (option[:type] == :arrow_option) ? option[:parameters].length - 1 : 0
       end
       return { selected: new_selected, scroll: current_scroll }
     when :multiselect
@@ -654,7 +656,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
       val = val + lowest if val
     end
     # For array, return only the selected index
-    if [:array, :array_one].include?(option[:type])
+    if [:array, :array_one, :arrow_option].include?(option[:type])
       val = val[:selected] if val.is_a?(Hash)
     end
     # For multiselect, return only the selections array
@@ -823,6 +825,43 @@ class UI::OptionsVisualsList < Window_DrawableCommand
                            " >", self.baseColor, self.shadowColor)
         end
       end
+    when :arrow_option
+      items = option[:parameters]
+      selected = @values[this_index][:selected]
+      value_text = items[selected]
+      
+      width_area = option_width - rect.x
+      center_x = option_start_x + (width_area / 2)
+      
+      # Dibujar texto centrado (align = 1)
+      pbDrawShadowText(self.contents, option_start_x, rect.y, width_area, rect.height,
+                       value_text,
+                       (this_index == self.index) ? self.selectedColor : self.baseColor,
+                       (this_index == self.index) ? self.selectedShadowColor : self.shadowColor,
+                       1)
+                       
+      # Dibujar flechas animadas si está seleccionado
+      if this_index == self.index
+        total_frames = 8
+        current_frame = (System.uptime * 10).to_i % total_frames
+        arrow_padding = 70
+        
+        if @right_arrow_bmp && selected < items.length - 1
+          frame_height = @right_arrow_bmp.height / total_frames
+          frame_width  = @right_arrow_bmp.width
+          src_rect = Rect.new(0, current_frame * frame_height, frame_width, frame_height)
+          y_pos = rect.y + (rect.height - frame_height) / 2
+          self.contents.blt(center_x + arrow_padding, y_pos, @right_arrow_bmp, src_rect)
+        end
+        
+        if @left_arrow_bmp && selected > 0
+          frame_height = @left_arrow_bmp.height / total_frames
+          frame_width  = @left_arrow_bmp.width
+          src_rect = Rect.new(0, current_frame * frame_height, frame_width, frame_height)
+          y_pos = rect.y + (rect.height - frame_height) / 2
+          self.contents.blt(center_x - arrow_padding - frame_width, y_pos, @left_arrow_bmp, src_rect)
+        end
+      end  
     when :number_type
       lowest = lowest_value(option)
       highest = highest_value(option)
@@ -1054,7 +1093,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
     end
     need_refresh = (self.index != old_index)
     if self.index < @options.length &&
-       [:array, :array_one, :number_type, :number_slider, :multiselect].include?(@options[self.index][:type])
+       [:array, :array_one, :number_type, :number_slider, :multiselect, :arrow_option].include?(@options[self.index][:type])
       old_value = self.value
       cursor_moved = false
       if Input.repeat?(Input::LEFT)
@@ -1090,6 +1129,10 @@ class UI::OptionsVisualsList < Window_DrawableCommand
         fix_scroll(self.index) if [:array, :array_one, :multiselect].include?(@options[self.index][:type])
       end
     end
+    if self.index >= 0 && self.index < @options.length && @options[self.index][:type] == :arrow_option
+      need_refresh = true
+    end
+    
     refresh if need_refresh
   end
 end
@@ -1552,7 +1595,8 @@ class UI::Options < UI::BaseScreen
     "SliderOption" => :number_slider,
     "EnumOption"   => :array,
     "NumberOption" => :number_type,
-    "ButtonOption" => :use
+    "ButtonOption" => :use,
+    "ArrowOption"  => :arrow_option
   }.freeze
 
   # Convert old option type classes to new format symbols
@@ -1821,8 +1865,8 @@ if Settings::USE_NEW_OPTIONS_UI
     "page"        => :graphics,
     "name"        => _INTL("Tamaño de ventana"),
     "order"       => 50,
-    "type"        => :array,
-    "parameters"  => proc { [_INTL("S"), _INTL("M"), _INTL("L"), _INTL("XL"), _INTL("Completa")] },
+    "type"        => :arrow_option,
+    "parameters"  => proc { [_INTL("Pequeña"), _INTL("Mediana"), _INTL("Grande"), _INTL("Extra Grande"), _INTL("Completa")] },
     "description" => _INTL("Elije el tamaño de la ventana del juego."),
     "get_proc"    => proc { next [$PokemonSystem.screensize, 4].min },
     "set_proc"    => proc { |value, _screen| $PokemonSystem.screensize = value }

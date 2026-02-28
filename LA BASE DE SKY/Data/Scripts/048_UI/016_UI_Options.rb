@@ -182,6 +182,12 @@ end
 #===============================================================================
 #
 #===============================================================================
+class ArrowOption < EnumOption
+end
+
+#===============================================================================
+#
+#===============================================================================
 class NumberOption
   include PropertyMixin
   attr_reader :lowest_value
@@ -308,7 +314,15 @@ if !Settings::USE_NEW_OPTIONS_UI
       @options.length.times { |i| @values[i] = 0 }
       @value_changed = false
       @is_sub_menu = is_sub_menu
+      @left_arrow_bmp = Bitmap.new("Graphics/UI/left_arrow") rescue nil
+      @right_arrow_bmp = Bitmap.new("Graphics/UI/right_arrow") rescue nil
       super(x, y, width, height)
+    end
+
+    def dispose
+      @left_arrow_bmp&.dispose
+      @right_arrow_bmp&.dispose
+      super
     end
 
     def [](i)
@@ -340,6 +354,41 @@ if !Settings::USE_NEW_OPTIONS_UI
       return if index == @options.length
       # Draw option's values
       case @options[index]
+      when ArrowOption
+        value_text = @options[index].values[self[index]]
+        x_start = rect.x + optionwidth
+        width_area = rect.width - x_start
+        center_x = x_start + (width_area / 2)
+        
+        pbDrawShadowText(self.contents, x_start, rect.y, width_area, rect.height, value_text,
+                         (index == sel_index) ? SEL_VALUE_BASE_COLOR : self.baseColor,
+                         (index == sel_index) ? SEL_VALUE_SHADOW_COLOR : self.shadowColor,
+                         1)
+
+        if index == sel_index
+          total_frames = 8
+          current_frame = (System.uptime * 10).to_i % total_frames
+          arrow_padding = 70
+          
+          current_val_index = self[index]
+          max_val_index = @options[index].values.length - 1
+          
+          if @right_arrow_bmp && current_val_index < max_val_index
+            frame_height = @right_arrow_bmp.height / total_frames
+            frame_width  = @right_arrow_bmp.width
+            src_rect = Rect.new(0, current_frame * frame_height, frame_width, frame_height)
+            y_pos = rect.y + (rect.height - frame_height) / 2
+            self.contents.blt(center_x + arrow_padding, y_pos, @right_arrow_bmp, src_rect)
+          end
+          
+          if @left_arrow_bmp && current_val_index > 0
+            frame_height = @left_arrow_bmp.height / total_frames
+            frame_width  = @left_arrow_bmp.width
+            src_rect = Rect.new(0, current_frame * frame_height, frame_width, frame_height)
+            y_pos = rect.y + (rect.height - frame_height) / 2
+            self.contents.blt(center_x - arrow_padding - frame_width, y_pos, @left_arrow_bmp, src_rect)
+          end
+        end
       when EnumOption
         if @options[index].values.length > 1
           totalwidth = 0
@@ -414,6 +463,9 @@ if !Settings::USE_NEW_OPTIONS_UI
             @value_changed = true
           end
         end
+      end
+      if self.index >= 0 && self.index < @options.length && @options[self.index].is_a?(ArrowOption)
+        dorefresh = true
       end
       refresh if dorefresh
     end
@@ -750,9 +802,9 @@ if !Settings::USE_NEW_OPTIONS_UI
   MenuHandlers.add(:options_menu, :screen_size, {
     "name"        => _INTL("Tamaño Pantalla"),
     "order"       => 120,
-    "type"        => EnumOption,
+    "type"        => ArrowOption,
     "condition"   => proc { next !$joiplay },
-    "parameters"  => [_INTL("S"), _INTL("M"), _INTL("L"), _INTL("XL"), _INTL("Full")],
+    "parameters"  => proc { [_INTL("Pequeña"), _INTL("Mediana"), _INTL("Grande"), _INTL("Extra Grande"), _INTL("Completa")] },
     "description" => _INTL("Elige el tamaño de la ventana de juego."),
     "get_proc"    => proc { next [$PokemonSystem.screensize, 4].min },
     "set_proc"    => proc { |value, _scene|
