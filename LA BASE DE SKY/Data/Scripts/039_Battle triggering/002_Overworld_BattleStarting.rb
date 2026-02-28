@@ -211,7 +211,7 @@ module BattleCreationHelperMethods
   # Sets up various battle parameters and applies special rules.
   def prepare_battle(battle)
     battleRules = $game_temp.battle_rules
-    battle.rules = battleRules
+    battle.rules = battleRules.clone
     # Set default values for some rules
     battleRules[:no_switch_style] = ($PokemonSystem.battlestyle == 1) if battleRules[:no_switch_style].nil?
     battleRules[:no_battle_animations] = ($PokemonSystem.battlescene == 1) if battleRules[:no_battle_animations].nil?
