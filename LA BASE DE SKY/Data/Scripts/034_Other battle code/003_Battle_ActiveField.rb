@@ -32,6 +32,10 @@ class Battle::ActiveField
     @terrain         = :None
     @terrainDuration = 0
   end
+
+  def pbWeather
+    return @weather
+  end
 end
 
 #===============================================================================

@@ -3247,8 +3247,14 @@ Battle::AbilityEffects::OnSwitchIn.add(:GRASSYSURGE,
 
 Battle::AbilityEffects::OnSwitchIn.add(:HADRONENGINE,
   proc { |ability, battler, battle, switch_in|
-    battle.pbStartTerrainAbility(:Electric, battler,
-       _INTL("¡{1} Electrificó el terreno, para energizar su motor futurista!", battler.pbThis))
+    if battle.field.terrain == :Electric
+      battle.pbShowAbilitySplash(battler)
+      battle.pbDisplay(_INTL("¡{1} usó el Terreno Eléctrico para energizar su motor futurista!", battler.pbThis))
+      battle.pbHideAbilitySplash(battler)
+    elsif battle.pbCanStartTerrain?(:Electric)
+      battle.pbStartTerrainAbility(:Electric, battler,
+        _INTL("¡{1} Electrificó el terreno, para energizar su motor futurista!", battler.pbThis))
+    end
   }
 )
 
@@ -3381,9 +3387,14 @@ Battle::AbilityEffects::OnSwitchIn.add(:NEUTRALIZINGGAS,
 
 Battle::AbilityEffects::OnSwitchIn.add(:ORICHALCUMPULSE,
   proc { |ability, battler, battle, switch_in|
-    next if !battle.pbCanStartWeather?(:Sun)
-    battle.pbStartWeatherAbility(:Sun, battler, false,
-       _INTL("¡{1} invocó el sol, incrementando su ataque!", battler.pbThis))
+    if [:Sun, :HarshSun].include?(battle.field.weather)
+      battle.pbShowAbilitySplash(battler)
+      battle.pbDisplay(_INTL("¡{1} aprovecha la luz del sol, enviando su pulso antiguo a un frenesí!", battler.pbThis))
+      battle.pbHideAbilitySplash(battler)
+    elsif battle.pbCanStartWeather?(:Sun)
+      battle.pbStartWeatherAbility(:Sun, battler, false,
+        _INTL("¡{1} invocó el sol, incrementando su ataque!", battler.pbThis))
+    end
   }
 )
 
