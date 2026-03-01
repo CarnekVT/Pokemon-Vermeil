@@ -11,7 +11,13 @@ module ContinuousWeatherSettings
   # Weather types that should NOT use continuous animation (keep original end-of-turn behavior)
   EXCLUDED_WEATHER_TYPES = []
 
-  VOLUME = 50 # Volume for weather sound effects (0-100)
+  # Volume for weather sound effects (0-100)
+  DEFAULT_VOLUME = 50 
+
+  # Optional specific volume levels for certain weather types (overrides DEFAULT_VOLUME)
+  VOLUME_PER_WEATHER = {
+    :Sun => 20,
+  }
 end
 
 class Battle::Scene
@@ -114,7 +120,8 @@ class Battle::Scene
     @weatherAnimationPlayer&.dispose
     
     # Create animation player using the scene (same as original approach)
-    animation.volume = ContinuousWeatherSettings::VOLUME if ContinuousWeatherSettings::VOLUME
+    animation.volume = ContinuousWeatherSettings::DEFAULT_VOLUME if ContinuousWeatherSettings::DEFAULT_VOLUME
+    animation.volume = ContinuousWeatherSettings::VOLUME_PER_WEATHER.fetch(@currentWeatherType, ContinuousWeatherSettings::DEFAULT_VOLUME) if ContinuousWeatherSettings::VOLUME_PER_WEATHER 
     @weatherAnimationPlayer = PBAnimationPlayerX.new(animation, nil, nil, self, false)
     
     # Start the animation
@@ -130,14 +137,6 @@ class Battle::Scene
     # Update the current animation player
     if @weatherAnimationPlayer && !@weatherAnimationPlayer.animDone?
       @weatherAnimationPlayer.update
-      # Clear background/foreground overlay sprites after every update.
-      # With turbo enabled, System.uptime runs faster causing frame skipping
-      # in PBAnimationPlayerX. The playTiming method uses (i.frame == frame)
-      # for immediate events (types 1, 3) that clear overlay opacity, but
-      # skipped frames cause these events to be missed, leaving the overlay
-      # stuck at non-zero opacity (grey tint). The actual weather visual
-      # effect comes from the animation cel sprites, not from these overlays.
-      @weatherAnimationPlayer.clear_overlays
     end
     
     # Check if we need to restart the animation
@@ -194,19 +193,4 @@ class Battle
     end
   end
 
-end
-
-#===============================================================================
-# Allow clearing overlay sprites on the animation player
-#===============================================================================
-class PBAnimationPlayerX
-  # Resets background/foreground color and graphic overlays to fully transparent.
-  # This prevents the grey tint caused by turbo frame-skipping missing the
-  # playTiming events that would normally clear these overlays.
-  def clear_overlays
-    @bgColor.opacity = 0 if @bgColor && !@bgColor.disposed?
-    @foColor.opacity = 0 if @foColor && !@foColor.disposed?
-    @bgGraphic.opacity = 0 if @bgGraphic && !@bgGraphic.disposed?
-    @foGraphic.opacity = 0 if @foGraphic && !@foGraphic.disposed?
-  end
 end
