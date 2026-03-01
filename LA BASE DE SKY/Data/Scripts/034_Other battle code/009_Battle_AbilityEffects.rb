@@ -3687,7 +3687,7 @@ Battle::AbilityEffects::OnWeatherChange.add(:PROTOSYNTHESIS,
       best = nil
       [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
         value = battler.stat_with_stages(stat)
-        best = [stat, value] if !value || value > stat[1]
+        best = [stat, value] if !best || value > best[1]
       end
       battler.effects[PBEffects::ProtosynthesisStat] = best[0]
       battle.pbShowAbilitySplash(battler)
