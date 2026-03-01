@@ -1879,11 +1879,11 @@ Battle::ItemEffects::OnWeatherChange.add(:BOOSTERENERGY,
     next false if battler.effects[PBEffects::ProtosynthesisStat]
     next false if battler.effects[PBEffects::BoosterEnergy]
     next false if !battler.hasActiveAbility?(:PROTOSYNTHESIS)
-    next false if ![:Sun, :HarshSun].include?(battle.field.pbWeather)
+    next false if ![:Sun, :HarshSun].include?(battle.field.weather)
     best = nil
     [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
       value = battler.stat_with_stages(stat)
-      best = [stat, value] if !value || value > stat[1]
+      best = [stat, value] if !best || value > best[1]
     end
     battler.effects[PBEffects::ProtosynthesisStat] = best[0]
     battler.effects[PBEffects::BoosterEnergy] = true
@@ -1913,7 +1913,7 @@ Battle::ItemEffects::OnTerrainChange.add(:BOOSTERENERGY,
     best = nil
     [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
       value = battler.stat_with_stages(stat)
-      best = [stat, value] if !value || value > stat[1]
+      best = [stat, value] if !best || value > best[1]
     end
     battler.effects[PBEffects::ProtosynthesisStat] = best[0]
     battler.effects[PBEffects::BoosterEnergy] = true
