@@ -1880,11 +1880,7 @@ Battle::ItemEffects::OnWeatherChange.add(:BOOSTERENERGY,
     next false if battler.effects[PBEffects::BoosterEnergy]
     next false if !battler.hasActiveAbility?(:PROTOSYNTHESIS)
     next false if ![:Sun, :HarshSun].include?(battle.field.weather)
-    best = nil
-    [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-      value = battler.stat_with_stages(stat)
-      best = [stat, value] if !best || value > best[1]
-    end
+    best = battler.highest_stat_including_stages
     battler.effects[PBEffects::ProtosynthesisStat] = best[0]
     battler.effects[PBEffects::BoosterEnergy] = true
     battle.pbCommonAnimation("UseItem", battler)
@@ -1910,11 +1906,7 @@ Battle::ItemEffects::OnTerrainChange.add(:BOOSTERENERGY,
     next false if battler.effects[PBEffects::BoosterEnergy]
     next false if !battler.hasActiveAbility?(:QUARKDRIVE)
     next false if battle.field.terrain != :Electric
-    best = nil
-    [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-      value = battler.stat_with_stages(stat)
-      best = [stat, value] if !best || value > best[1]
-    end
+    best = battler.highest_stat_including_stages
     battler.effects[PBEffects::ProtosynthesisStat] = best[0]
     battler.effects[PBEffects::BoosterEnergy] = true
     battle.pbCommonAnimation("UseItem", battler)
@@ -2081,11 +2073,7 @@ Battle::ItemEffects::OnSwitchIn.add(:BOOSTERENERGY, proc { |item, battler, battl
   next false if !battler.hasActiveAbility?(:PROTOSYNTHESIS) && !battler.hasActiveAbility?(:QUARKDRIVE)
   next false if battler.hasActiveAbility?(:PROTOSYNTHESIS) && [:Sun, :HarshSun].include?(battle.field.weather)
   next false if battler.hasActiveAbility?(:QUARKDRIVE) && battle.field.terrain == :Electric
-  best = nil
-  [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-    value = battler.stat_with_stages(stat)
-    best = [stat, value] if !best || value > best[1]
-  end
+  best = battler.highest_stat_including_stages
   battler.effects[PBEffects::ProtosynthesisStat] = best[0]
   battler.effects[PBEffects::BoosterEnergy] = true
   battle.pbCommonAnimation("UseItem", battler)

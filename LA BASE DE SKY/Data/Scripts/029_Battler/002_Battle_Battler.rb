@@ -284,6 +284,15 @@ class Battle::Battler
     return (stat_value.to_f * STAT_STAGE_MULTIPLIERS[stage] / STAT_STAGE_DIVISORS[stage]).floor
   end
 
+  def highest_stat_including_stages
+    best = nil
+    [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
+      value = stat_with_stages(stat)
+      best = [stat, value] if !best || value > best[1]
+    end
+    return best
+  end
+
   def pbSpeed
     return 1 if fainted?
     speed = stat_with_stages(:SPEED)

@@ -3684,11 +3684,7 @@ Battle::AbilityEffects::OnWeatherChange.add(:PROTOSYNTHESIS,
   proc { |ability, battler, battle, old_weather, ability_changed|
     next if battler.effects[PBEffects::BoosterEnergy]
     if [:Sun, :HarshSun].include?(battle.field.weather) && !battler.effects[PBEffects::Transform]
-      best = nil
-      [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-        value = battler.stat_with_stages(stat)
-        best = [stat, value] if !best || value > best[1]
-      end
+      best = battler.highest_stat_including_stages
       battler.effects[PBEffects::ProtosynthesisStat] = best[0]
       battle.pbShowAbilitySplash(battler)
       battle.pbDisplay(_INTL("El sol activó la {1} de {2}!", battler.abilityName, battler.pbThis(true)))
@@ -3741,13 +3737,7 @@ Battle::AbilityEffects::OnTerrainChange.add(:QUARKDRIVE,
   proc { |ability, battler, battle, old_terrain, ability_changed|
     next if battler.effects[PBEffects::BoosterEnergy]
     if battle.field.terrain == :Electric && !battler.effects[PBEffects::Transform]
-      best = nil
-      [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-        value = battler.stat_with_stages(stat)
-        if !best || value > best[1]
-          best = [stat, value]
-        end
-      end
+      best = battler.highest_stat_including_stages
       if best
         battler.effects[PBEffects::ProtosynthesisStat] = best[0]
         battle.pbShowAbilitySplash(battler)
