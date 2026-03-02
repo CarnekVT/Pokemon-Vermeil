@@ -421,3 +421,40 @@ FunctionCode = HealUserByHalfOfDamageDone
 Flags = CanProtect,CanMirrorMove,Heal
 Description = The user drains the target's life force with a corrupt, royal curse. The user's HP is restored by half the damage taken by the target.
 #-------------------------------
+[SKYSPLITTER]
+Name = Sky Splitter
+Type = ELECTRIC
+Category = Physical
+Power = 100
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = LowerTargetSpeed1RaiseUserDef1InWeather
+Flags = CanProtect,CanMirrorMove
+Description = The user summons a bolt from the heavens. This lowers the target's Speed and may raise the user's Defense in snow or rain.
+#-------------------------------
+[SURREALMIME]
+Name = Surreal Mime
+Type = PSYCHIC
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = RandomTheaterEffect
+Flags = CanProtect,CanMirrorMove
+Description = A chaotic performance that traps the target and forces them to follow a nonsensical script.
+#-------------------------------
+[MOLTENSLAG]
+Name = Molten Slag
+Type = STEEL
+Category = Physical
+Power = 95
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = SuperEffectiveAgainstSteelBurn30
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 30
+Description = The user spits molten slag and tar. It is super effective against Steel-type Pokémon and may cause a burn.
+#-------------------------------

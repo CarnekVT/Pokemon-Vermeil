@@ -174,3 +174,23 @@ Description = Gives immunity to Ground-type moves. Electric-type moves can hit G
 Name = Feudal Ward
 Description = Reduces damage at full HP. Its regal presence blocks priority moves.
 #-------------------------------
+# Thudartic
+#-------------------------------
+[STORMLORD]
+Name = Storm Lord
+Description = Contact may paralyze. Under snow or rain, physical moves also restore HP.
+#-------------------------------
+# Mimality
+#-------------------------------
+[TOONLOGIC]
+Name = Toon Logic
+Description = Reality warps when hit. Triggers a random theatrical prank that disrupts the battle.
+#-------------------------------
+# Ardentar
+#-------------------------------
+[INCANDESCENCE]
+Name = Incandescence
+Description = Boosts Def and Sp. Atk in sun or when hit by a Fire move. May burn attackers on contact.
+#-------------------------------
+
+

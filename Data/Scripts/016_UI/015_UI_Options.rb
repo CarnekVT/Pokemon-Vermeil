@@ -5,6 +5,7 @@ class PokemonSystem
   attr_accessor :textspeed
   attr_accessor :battlescene
   attr_accessor :battlestyle
+  attr_accessor :damagenumbers
   attr_accessor :sendtoboxes
   attr_accessor :givenicknames
   attr_accessor :frame
@@ -20,6 +21,7 @@ class PokemonSystem
     @textspeed     = 1     # Text speed (0=slow, 1=medium, 2=fast, 3=instant)
     @battlescene   = 0     # Battle effects (animations) (0=on, 1=off)
     @battlestyle   = 0     # Battle style (0=switch, 1=set)
+    @damagenumbers = 0     # Damage numbers (0=Real, 1=Raw, 2=Off)
     @sendtoboxes   = 0     # Send to Boxes (0=manual, 1=automatic)
     @givenicknames = 0     # Give nicknames (0=give, 1=don't give)
     @frame         = 0     # Default window frame (see also Settings::MENU_WINDOWSKINS)
@@ -445,6 +447,16 @@ MenuHandlers.add(:options_menu, :battle_animations, {
   "description" => _INTL("Choose whether you wish to see move animations in battle."),
   "get_proc"    => proc { next $PokemonSystem.battlescene },
   "set_proc"    => proc { |value, _scene| $PokemonSystem.battlescene = value }
+})
+
+MenuHandlers.add(:options_menu, :damage_numbers, {
+  "name"        => _INTL("Damage Numbers"),
+  "order"       => 45,
+  "type"        => EnumOption,
+  "parameters"  => [_INTL("Real"), _INTL("Raw"), _INTL("Off")],
+  "description" => _INTL("Choose whether to show damage numbers in battle. Real shows HP lost, Raw shows damage calculated."),
+  "get_proc"    => proc { next $PokemonSystem.damagenumbers },
+  "set_proc"    => proc { |value, _scene| $PokemonSystem.damagenumbers = value }
 })
 
 MenuHandlers.add(:options_menu, :battle_style, {

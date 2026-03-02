@@ -101,7 +101,7 @@ end
 
 def start_test_cinematic
   setBattleRule("editWildPokemon", {
-    "moves" => [:TACKLE]
+    "moves" => [:APPLEACID, :GRAVAPPLE, :MATCHAGOTCHA, :SEEDFLARE],
   })
   WildBattle.start(:CORVIKNIGHT, 100)
 end

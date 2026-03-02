@@ -365,6 +365,9 @@ module VermeilChangeDex
       @moves_popup_page = 0
       @detail_move_popup_lines = []
       @detail_moves_truncated = false
+      @level_movepool_popup_open = false
+      @level_movepool_popup_page = 0
+      @level_movepool_popup_lines = []
       @data_ready = false
     end
 
@@ -1674,14 +1677,8 @@ module VermeilChangeDex
       v_slots = build_ability_slots(vermeil.abilities, vermeil.hidden_abilities, false)
       labels = (c_slots.keys + v_slots.keys).uniq.sort_by { |k| ability_slot_sort_key(k) }
       max_w = 372
-      before_entries = []
-      after_entries = []
-      labels.each do |slot|
-        before = c_slots[slot].to_s.strip
-        after = v_slots[slot].to_s.strip
-        before_entries << "#{before}(#{slot.gsub(/[()]/, '')})" if !before.empty?
-        after_entries << "#{after}(#{slot.gsub(/[()]/, '')})" if !after.empty?
-      end
+      before_entries = compact_ability_entries(c_slots, labels)
+      after_entries = compact_ability_entries(v_slots, labels)
       return [] if before_entries == after_entries
       lines = []
       lines << [["Before:", COLOR_CANON]]
@@ -1693,6 +1690,33 @@ module VermeilChangeDex
         lines << [[seg, COLOR_DIFF]]
       end
       return lines
+    end
+
+    def compact_ability_entries(slot_hash, ordered_labels = nil)
+      labels = ordered_labels || slot_hash.keys.sort_by { |k| ability_slot_sort_key(k) }
+      grouped = {}
+      order = []
+      labels.each do |slot|
+        name = slot_hash[slot].to_s.strip
+        next if name.empty?
+        key = name.downcase
+        if !grouped[key]
+          grouped[key] = { name: name, slots: [] }
+          order << key
+        end
+        grouped[key][:slots] << slot.gsub(/[()]/, "")
+      end
+      out = []
+      order.each do |k|
+        item = grouped[k]
+        slots = item[:slots].uniq
+        if slots.length > 1
+          out << "#{item[:name]}[#{slots.join('/')}]"
+        else
+          out << item[:name]
+        end
+      end
+      return out
     end
 
     def pokemon_ability_before_after_available?
@@ -2140,6 +2164,130 @@ module VermeilChangeDex
       if @sprites["new_moves_popup"]
         @sprites["new_moves_popup"].dispose
         @sprites.delete("new_moves_popup")
+      end
+    end
+
+    def level_movepool_popup_page_size
+      return 8
+    end
+
+    def pokemon_level_movepool_lines(species, form)
+      canon = VermeilChangeDex.get_canon_info(species, form)
+      canon ||= VermeilChangeDex.get_canon_info(species, 0)
+      canon_lookup = {}
+      (canon ? (canon[:level_moves] || []) : []).each { |mid| canon_lookup[mid] = true }
+      s_data = GameData::Species.get_species_form(species, form) rescue nil
+      return [] if !s_data
+      pairs = []
+      seen = {}
+      (s_data.moves || []).each do |entry|
+        next if !entry || entry.length < 2
+        lvl = entry[0].to_i
+        mid = entry[1]
+        next if !mid || mid == :NONE
+        key = [lvl, mid]
+        next if seen[key]
+        seen[key] = true
+        pairs << key
+      end
+      pairs.sort_by! { |lvl, mid| [lvl, (GameData::Move.get(mid).name rescue mid.to_s)] }
+      lines = []
+      pairs.each do |lvl, mid|
+        name = (GameData::Move.get(mid).name rescue mid.to_s)
+        lvl_txt = if lvl > 0
+                    _INTL("Lv {1}: ", lvl)
+                  elsif lvl == 0
+                    _INTL("Evolve: ")
+                  elsif lvl < 0
+                    _INTL("Tutor: ")
+                  else
+                    _INTL("Lv ?: ")
+                  end
+        lines << [[lvl_txt, COLOR_TEXT_GRAY], [name, (canon_lookup[mid] ? COLOR_TEXT_MAIN : COLOR_DIFF)]]
+      end
+      return lines
+    end
+
+    def wrapped_level_movepool_lines(bmp, token_lines, max_w)
+      return [] if !token_lines || token_lines.empty?
+      out = []
+      token_lines.each do |line|
+        prefix = (line[0] && line[0][0]) ? line[0][0].to_s : ""
+        prefix_col = (line[0] && line[0][1]) ? line[0][1] : COLOR_TEXT_GRAY
+        name = (line[1] && line[1][0]) ? line[1][0].to_s : ""
+        name_col = (line[1] && line[1][1]) ? line[1][1] : COLOR_TEXT_MAIN
+        avail = [max_w - bmp.text_size(prefix).width, 40].max
+        name_wrapped = wrap_plain_lines(bmp, name, avail)
+        if name_wrapped.empty?
+          out << [[prefix, prefix_col]]
+          next
+        end
+        out << [[prefix, prefix_col], [name_wrapped[0], name_col]]
+        cont_indent = " " * [prefix.length, 2].max
+        name_wrapped[1..-1].to_a.each do |seg|
+          out << [[cont_indent, prefix_col], [seg, name_col]]
+        end
+      end
+      return out
+    end
+
+    def show_level_movepool_popup
+      return if !pokemon_category? || !@detail_species
+      lines = pokemon_level_movepool_lines(@detail_species, @detail_form)
+      if lines.empty?
+        pbPlayBuzzerSE
+        return
+      end
+      @level_movepool_popup_lines = lines
+      @level_movepool_popup_page = 0
+      redraw_level_movepool_popup
+      @level_movepool_popup_open = true
+    end
+
+    def redraw_level_movepool_popup
+      hide_level_movepool_popup(false)
+      return if @level_movepool_popup_lines.nil? || @level_movepool_popup_lines.empty?
+      @sprites["level_movepool_popup"] = BitmapSprite.new(SCREEN_W, SCREEN_H, @viewport)
+      @sprites["level_movepool_popup"].z = 320
+      bmp = @sprites["level_movepool_popup"].bitmap
+      pbSetSystemFont(bmp)
+      panel_x = 30
+      panel_y = 60
+      panel_w = SCREEN_W - 60
+      panel_h = 274
+      bmp.fill_rect(panel_x, panel_y, panel_w, panel_h, Color.new(16, 22, 34, 246))
+      bmp.fill_rect(panel_x, panel_y, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y + panel_h - 1, panel_w, 1, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      bmp.fill_rect(panel_x + panel_w - 1, panel_y, 1, panel_h, Color.new(88, 106, 138, 210))
+      pbDrawTextPositions(bmp, [[_INTL("Level Movepool"), panel_x + 12, panel_y + 8, :left, COLOR_HIGHLIGHT, Color.new(0,0,0,120)]])
+      pbDrawTextPositions(bmp, [[_INTL("New moves are highlighted in yellow"), panel_x + 12, panel_y + 28, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      wrapped = wrapped_level_movepool_lines(bmp, @level_movepool_popup_lines, panel_w - 28)
+      # Keep a safe bottom margin so the last move line never overlaps controls.
+      per_page = level_movepool_popup_page_size
+      total_pages = [(wrapped.length.to_f / per_page).ceil, 1].max
+      @level_movepool_popup_page = [[@level_movepool_popup_page, 0].max, total_pages - 1].min
+      start_idx = @level_movepool_popup_page * per_page
+      page_lines = wrapped[start_idx, per_page] || []
+      y = panel_y + 56
+      page_lines.each do |line|
+        draw_colored_token_line(bmp, line, panel_x + 12, y)
+        y += 20
+      end
+      controls = _INTL("L/R: Page  {1}/{2}: Close", @action_key_name, "X")
+      page_txt = _INTL("Page {1}/{2}", @level_movepool_popup_page + 1, total_pages)
+      pbDrawTextPositions(bmp, [[controls, panel_x + 12, panel_y + panel_h - 20, :left, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      pbDrawTextPositions(bmp, [[page_txt, panel_x + panel_w - 12, panel_y + panel_h - 20, :right, COLOR_TEXT_GRAY, Color.new(0,0,0,120)]])
+      @level_movepool_popup_open = true
+    end
+
+    def hide_level_movepool_popup(clear_lines = true)
+      @level_movepool_popup_open = false
+      @level_movepool_popup_page = 0 if clear_lines
+      @level_movepool_popup_lines = [] if clear_lines
+      if @sprites["level_movepool_popup"]
+        @sprites["level_movepool_popup"].dispose
+        @sprites.delete("level_movepool_popup")
       end
     end
 
@@ -2674,9 +2822,14 @@ module VermeilChangeDex
       if pokemon_category?
         opts << [:evo_methods, "Evo Methods"] if @detail_has_evo_method_changes
         opts << [:pokemon_ability_before_after, "Ability B/A"] if pokemon_ability_before_after_available?
+        opts << [:level_movepool, "Lv Movepool"]
         if SHOW_DETAIL_VARIANT_ACTION
           opts << [:variant, "Variant"] if @detail_form_options && @detail_form_options.length > 1
         end
+      else
+        entry = (@entries && @entries[@index]) ? @entries[@index] : nil
+        users = entry ? (entry[:all_users] || []) : []
+        opts << [:carriers, "Carriers"] if !users.empty?
       end
       return opts
     end
@@ -2696,6 +2849,16 @@ module VermeilChangeDex
       when :pokemon_ability_before_after
         return false if !pokemon_category?
         show_pokemon_ability_rework_popup
+        return true
+      when :level_movepool
+        return false if !pokemon_category?
+        show_level_movepool_popup
+        return true
+      when :carriers
+        return false if pokemon_category?
+        entry = (@entries && @entries[@index]) ? @entries[@index] : nil
+        return false if !entry
+        show_carrier_popup(entry)
         return true
       end
       return false
@@ -2857,17 +3020,19 @@ module VermeilChangeDex
       hide_ability_rework_popup
       hide_move_rework_popup
       hide_new_moves_popup
+      hide_level_movepool_popup
       hide_carrier_popup
       close_detail_action_menu
       close_detail_variant_menu
       clear_entry_detail_carrier_icons
-      ["big_icon", "detail_variant_mark", "evo_label_overlay", "evo_method_popup", "new_moves_popup", "ability_moves_popup", "ability_rework_popup", "move_rework_popup", "detail_action_menu", "detail_variant_menu"].each do |k|
+      ["big_icon", "detail_variant_mark", "evo_label_overlay", "evo_method_popup", "new_moves_popup", "ability_moves_popup", "ability_rework_popup", "move_rework_popup", "level_movepool_popup", "detail_action_menu", "detail_variant_menu"].each do |k|
         next if !@sprites[k]
         @sprites[k].dispose
         @sprites.delete(k)
       end
       @evo_popup_open = false
       @moves_popup_open = false
+      @level_movepool_popup_open = false
       @sprites.keys.each do |k|
         next if !k.to_s.start_with?("evo_detail_")
         @sprites[k].dispose
@@ -3758,6 +3923,18 @@ module VermeilChangeDex
             end
             next
           end
+          if @level_movepool_popup_open
+            if Input.repeat?(Input::LEFT)
+              @level_movepool_popup_page -= 1
+              redraw_level_movepool_popup
+            elsif Input.repeat?(Input::RIGHT)
+              @level_movepool_popup_page += 1
+              redraw_level_movepool_popup
+            elsif Input.trigger?(Input::ACTION) || Input.trigger?(Input::BACK) || Input.trigger?(Input::USE) || Input.trigger?(Input::SPECIAL)
+              hide_level_movepool_popup(false)
+            end
+            next
+          end
           if @carrier_popup_open
             if Input.repeat?(Input::LEFT)
               @carrier_popup_page -= 1
@@ -3847,6 +4024,7 @@ module VermeilChangeDex
         close_detail_variant_menu if @detail_variant_menu_open
         clear_evolution_method_popup if @evo_popup_open
         hide_new_moves_popup if @moves_popup_open
+        hide_level_movepool_popup if @level_movepool_popup_open
         sp = @entries[@index][0]
         form = @entries[@index][1]
         prepare_detail_form_options(sp, form)
@@ -3856,6 +4034,7 @@ module VermeilChangeDex
         hide_ability_moves_popup if @ability_moves_popup_open
         hide_ability_rework_popup if @ability_rework_popup_open
         hide_move_rework_popup if @move_rework_popup_open
+        hide_level_movepool_popup if @level_movepool_popup_open
         draw_entry_detail(@entries[@index])
       end
     end

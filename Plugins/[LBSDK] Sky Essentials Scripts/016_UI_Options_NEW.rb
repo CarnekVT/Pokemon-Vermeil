@@ -60,12 +60,18 @@ end
 class PokemonSystem
   attr_accessor :main_volume
   attr_accessor :pokemon_cry_volume
+  attr_accessor :damagenumbers
+  attr_accessor :vsync
+  attr_accessor :autotile_animations
 
   alias sky_options_initialize initialize
   def initialize
     sky_options_initialize
     @main_volume = 100
     @pokemon_cry_volume = 100
+    @damagenumbers = 0     # Damage numbers (0=Real, 1=Raw, 2=Off)
+    @vsync = 1
+    @autotile_animations = 0
   end
 
   def main_volume
@@ -621,6 +627,17 @@ MenuHandlers.add(:options_menu, :battle_style, {
   "description" => _INTL("Choose whether you can switch Pokémon when an opponent's Pokémon faints."),
   "get_proc"    => proc { next $PokemonSystem.battlestyle },
   "set_proc"    => proc { |value, _scene| $PokemonSystem.battlestyle = value }
+})
+
+MenuHandlers.add(:options_menu, :damage_numbers, {
+  "name"        => _INTL("Damage Numbers"),
+  "page"        => :gameplay,
+  "order"       => 25,
+  "type"        => EnumOption,
+  "parameters"  => [_INTL("Real"), _INTL("Raw"), _INTL("Off")],
+  "description" => _INTL("Choose whether to show damage numbers in battle. Real shows HP lost, Raw shows damage calculated."),
+  "get_proc"    => proc { next $PokemonSystem.damagenumbers },
+  "set_proc"    => proc { |value, _scene| $PokemonSystem.damagenumbers = value }
 })
 
 MenuHandlers.add(:options_menu, :movement_style, {
