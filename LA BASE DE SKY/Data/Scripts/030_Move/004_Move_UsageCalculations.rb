@@ -329,20 +329,20 @@ class Battle::Move
         multipliers[:power_multiplier] *= 4 / 3.0
       end
     end
-    if all_abilities.include?(:TABLETSOFRUIN) && user.ability_id != :TABLETSOFRUIN
+    if all_abilities.include?(:TABLETSOFRUIN) && target.ability_id != :TABLETSOFRUIN
       multipliers[:power_multiplier] *= 3 / 4.0 if physicalMove?
     end
-    if all_abilities.include?(:VESSELOFRUIN) && user.ability_id != :VESSELOFRUIN
+    if all_abilities.include?(:VESSELOFRUIN) && target.ability_id != :VESSELOFRUIN
       multipliers[:power_multiplier] *= 3 / 4.0 if specialMove?
     end
-    if all_abilities.include?(:SWORDOFRUIN) && user.ability_id != :SWORDOFRUIN
+    if all_abilities.include?(:SWORDOFRUIN) && target.ability_id != :SWORDOFRUIN
       if @battle.field.effects[PBEffects::WonderRoom] > 0
         multipliers[:defense_multiplier] *= 3 / 4.0 if specialMove?
       else
         multipliers[:defense_multiplier] *= 3 / 4.0 if physicalMove?
       end
     end
-    if all_abilities.include?(:BEADSOFRUIN) && user.ability_id != :BEADSOFRUIN
+    if all_abilities.include?(:BEADSOFRUIN) && target.ability_id != :BEADSOFRUIN
       if @battle.field.effects[PBEffects::WonderRoom] > 0
         multipliers[:defense_multiplier] *= 3 / 4.0 if physicalMove?
       else
