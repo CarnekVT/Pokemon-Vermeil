@@ -175,15 +175,31 @@ class Battle
     # "Want to battle" messages
     if wildBattle?
       foeParty = pbParty(1)
+      names = foeParty.map { |pkmn| pkmn.name }      
       case foeParty.length
       when 1
-        pbDisplayPaused(_INTL("¡Un {1} salvaje te corta el paso!", foeParty[0].name))
+        pbDisplayPaused(_INTL("¡Un {1} salvaje te corta el paso!", names[0]))
+      
       when 2
-        pbDisplayPaused(_INTL("¡Un {1} y un {2} salvajes te cortan el paso!", foeParty[0].name,
-                              foeParty[1].name))
+        if names[0] == names[1]
+          pbDisplayPaused(_INTL("¡Dos {1} salvajes te cortan el paso!", names[0]))
+        else
+          pbDisplayPaused(_INTL("¡Un {1} y un {2} salvajes te cortan el paso!", names[0], names[1]))
+        end      
       when 3
-        pbDisplayPaused(_INTL("¡Un {1} , un {2} y un {3} salvajes te cortan el paso!", foeParty[0].name,
-                              foeParty[1].name, foeParty[2].name))
+        counts = names.tally        
+        if counts.size == 1
+          pbDisplayPaused(_INTL("¡Tres {1} salvajes te cortan el paso!", names[0]))
+          
+        elsif counts.size == 3
+          pbDisplayPaused(_INTL("¡Un {1}, un {2} y un {3} salvajes te cortan el paso!", 
+                                names[0], names[1], names[2]))                                
+        else
+          double_name = counts.find { |name, count| count == 2 }.first
+          single_name = counts.find { |name, count| count == 1 }.first
+          pbDisplayPaused(_INTL("¡Dos {1} y un {2} salvajes te cortan el paso!", 
+                                double_name, single_name))
+        end
       end
     else   # Trainer battle
       case @opponent.length
