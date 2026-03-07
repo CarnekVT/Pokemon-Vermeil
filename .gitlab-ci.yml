@@ -26,12 +26,22 @@ notify-discord:
       if [ "${CI_COMMIT_BEFORE_SHA}" = "${ZERO_SHA}" ]; then
         # First push to branch — just show the HEAD commit
         COMMIT_LIST=$(git log -1 --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s")
+        TITLE_URL="${COMMIT_URL}"
       else
         COMMIT_LIST=$(git log --reverse --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s" "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}")
+        TITLE_URL="${CI_PROJECT_URL}/-/compare/${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA}"
       fi
 
       # Truncate to 4096 chars (Discord embed description limit)
       COMMIT_LIST=$(echo "$COMMIT_LIST" | head -c 4000)
+
+      # Set title based on number of commits
+      COMMIT_COUNT=$(echo "$COMMIT_LIST" | wc -l)
+      if [ "$COMMIT_COUNT" -gt 1 ]; then
+        TITLE="🔧 ${COMMIT_COUNT} nuevos commits en dev"
+      else
+        TITLE="🔧 Nuevo commit en dev"
+      fi
 
       # Escape special JSON characters in the commit list
       COMMIT_LIST_ESCAPED=$(printf '%s' "$COMMIT_LIST" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read())[1:-1])' 2>/dev/null || \
@@ -40,8 +50,8 @@ notify-discord:
       DISCORD_PAYLOAD=$(cat <<EOF
       {
         "embeds": [{
-          "title": "🔧 Nuevo push en dev",
-          "url": "${COMMIT_URL}",
+          "title": "${TITLE}",
+          "url": "${TITLE_URL}",
           "description": "${COMMIT_LIST_ESCAPED}",
           "color": 3447003,
           "fields": [
