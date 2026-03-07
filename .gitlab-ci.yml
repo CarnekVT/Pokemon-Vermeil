@@ -32,7 +32,7 @@ notify-discord:
           "fields": [
             {
               "name": "Autor",
-              "value": "${CI_COMMIT_AUTHOR}",
+              "value": "${GITLAB_USER_LOGIN}",
               "inline": true
             },
             {
