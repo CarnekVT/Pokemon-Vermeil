@@ -3,6 +3,7 @@
 # procedimiento puede suscribirse a un evento agregándose a él. Entonces, se 
 # llamará cada vez que ocurra el evento. Los eventos existentes son:
 #-------------------------------------------------------------------------------------------------------------
+#   :on_game_initialize                - Cuando arranca el juego.
 #   :on_new_game                       - Cuando se inicia una nueva partida.
 #   :on_game_load                      - Cuando se carga un juego guardado.
 #-------------------------------------------------------------------------------------------------------------

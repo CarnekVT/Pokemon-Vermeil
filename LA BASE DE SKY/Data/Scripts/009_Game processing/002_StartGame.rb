@@ -14,6 +14,7 @@ module Game
     if $data_system.start_map_id == 0 || !pbRgssExists?(map_file)
       raise _INTL("No se estableció una posición de inicio en el editor de mapas.")
     end
+    EventHandlers.trigger(:on_game_initialize)
   end
 
   # Loads bootup data from save file (if it exists) or creates bootup data (if

@@ -145,6 +145,35 @@ EventHandlers.add(:on_end_battle, :stop_speedup, proc {
   end
 })
 
+# Desactivar en el Editor de Metrics (DBK / Vanilla)
+EventHandlers.add(:on_game_initialize, :turbo_metrics_fix, proc {
+  if defined?(SpritePositionerScreen)
+    SpritePositionerScreen.class_eval do      
+      unless method_defined?(:turbo_metrics_pbStart)
+        alias_method :turbo_metrics_pbStart, :pbStart        
+        def pbStart
+          previous_toggle = $CanToggle
+          previous_speed  = $GameSpeed          
+          $CanToggle = false
+          if $GameSpeed != 0
+            $GameSpeed = 0
+            $RefreshEventsForTurbo = true
+          end
+          begin
+            turbo_metrics_pbStart
+          ensure
+            $CanToggle = previous_toggle
+            if $GameSpeed != previous_speed
+              $GameSpeed = previous_speed
+              $RefreshEventsForTurbo = true
+            end
+          end
+        end
+      end
+    end
+  end
+})
+
 #===============================================================================
 # 5. Fixes Visuales.
 #===============================================================================
