@@ -3,7 +3,7 @@
 #                         Script : Repartir Exp 5.5                             #
 #                             Selfish - Público                                 #
 #                         Rescrito para Essentials 21 por DPertierra            #
-#                         Remember to give Credits!				                #
+#                         Remember to give Credits!				                      #
 #-------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------#
 #                  Creado para RPG Maker XP con base Essentials                 #
@@ -28,7 +28,15 @@ end
 
 if Settings::USE_NEW_EXP_SHARE
 	class PokemonSystem
-		attr_accessor :expshareon
+		attr_reader :expshareon
+
+		def expshareon=(value)
+			@expshareon = value
+		end
+
+		def expshareon
+			@expshareon ||= 0
+		end
 	end
 
 	MenuHandlers.add(:options_menu, :expshareon, {
