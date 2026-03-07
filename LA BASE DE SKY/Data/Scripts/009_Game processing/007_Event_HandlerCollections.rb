@@ -1,56 +1,59 @@
-#===============================================================================
+#=============================================================================================================
 # Este módulo almacena eventos que pueden ocurrir durante el juego. Un 
 # procedimiento puede suscribirse a un evento agregándose a él. Entonces, se 
 # llamará cada vez que ocurra el evento. Los eventos existentes son:
-#-------------------------------------------------------------------------------
-#   :on_game_map_setup - Cuando se configura un Game_Map. Cambia típicamente 
-#                      datos de mapa.
-#   :on_new_spriteset_map - Cuando se crea un Spriteset_Map. Agrega más cosas 
-#                      para mostrar en el overworld.
-#   :on_frame_update - Una vez por fotograma. Contadores varios de fotogramas/
-#                      tiempo.
-#   :on_leave_map - Al salir de un mapa. Finaliza efectos de clima y efectos
-#                      expirados.
-#   :on_enter_map - Al entrar en un nuevo mapa. Configura nuevos efectos, 
-#                      finaliza efectos expirados.
-#   :on_map_or_spriteset_change - Al entrar en un nuevo mapa o cuando se creó 
-#                      el spriteset. Muestra cosas en pantalla.
-#-------------------------------------------------------------------------------
-#   :on_player_change_direction - Cuando el jugador se gira en una dirección 
-#                      diferente.
-#   :on_leave_tile - Cuando cualquier evento o el jugador comienza a moverse 
-#                      desde una casilla.
-#   :on_step_taken - Cuando cualquier evento o el jugador termina de dar un paso.
-#   :on_player_step_taken - Cuando el jugador termina un paso/termina de surfear,
-#                      excepto como parte de una ruta de movimiento. Contadores 
-#                      basados en pasos.
+#-------------------------------------------------------------------------------------------------------------
+#   :on_new_game                       - Cuando se inicia una nueva partida.
+#   :on_game_load                      - Cuando se carga un juego guardado.
+#-------------------------------------------------------------------------------------------------------------
+#   :on_game_map_setup                 - Cuando se configura un Game_Map. Cambia típicamente 
+#                                        datos de mapa.
+#   :on_new_spriteset_map              - Cuando se crea un Spriteset_Map. Agrega más cosas 
+#                                        para mostrar en el overworld.
+#   :on_frame_update                   - Una vez por fotograma. Contadores varios de fotogramas/
+#                                        tiempo.
+#   :on_leave_map                      - Al salir de un mapa. Finaliza efectos de clima y efectos
+#                                        expirados.
+#   :on_enter_map                      - Al entrar en un nuevo mapa. Configura nuevos efectos, 
+#                                        finaliza efectos expirados.
+#   :on_map_or_spriteset_change        - Al entrar en un nuevo mapa o cuando se creó 
+#                                        el spriteset. Muestra cosas en pantalla.
+#-------------------------------------------------------------------------------------------------------------
+#   :on_player_change_direction        - Cuando el jugador se gira en una dirección 
+#                                        diferente.
+#   :on_leave_tile                     - Cuando cualquier evento o el jugador comienza a moverse 
+#                                        desde una casilla.
+#   :on_step_taken                     - Cuando cualquier evento o el jugador termina de dar un paso.
+#   :on_player_step_taken              - Cuando el jugador termina un paso/termina de surfear,
+#                                        excepto como parte de una ruta de movimiento. Contadores 
+#                                        basados en pasos.
 #   :on_player_step_taken_can_transfer - Cuando el jugador termina de dar un paso/
-#                      termina de surfear, excepto como parte de una ruta de 
-#                      movimiento. Efectos basados en pasos que pueden transferir 
-#                      al jugador a otro lugar.
-#   :on_player_interact - Cuando el jugador presiona el botón de Usar en el 
-#                      overworld.
-#-------------------------------------------------------------------------------
-#   :on_trainer_load - Cuando se genera un NPCTrainer (para luchar contra él o 
-#                      como compañero acompañante). Varias modificaciones a ese 
-#                      entrenador y sus Pokémon.
-#   :on_wild_species_chosen - Cuando se elige una especie/nivel para un encuentro
-#                      salvaje. Cambia la especie/nivel (por ejemplo, errante, 
-#                      cadena del Poké Radar).
-#   :on_wild_pokemon_created - Cuando se ha creado un Pokémon como "objeto" para 
-#                      un encuentro salvaje. Varias modificaciones a ese Pokémon.
-#   :on_calling_wild_battle - Cuando se llama a una batalla salvaje. Evita esa 
-#                      batalla salvaje y en su lugar inicia un tipo de batalla 
-#                      diferente (por ejemplo, Zona Safari).
-#   :on_start_battle - Justo antes de que comience una batalla. Memoriza/
-#                      restablece información sobre los Pokémon del grupo, que 
-#                      se utiliza después de la batalla para comprobaciones de 
-#                      evolución.
-#   :on_end_battle - Justo después de que termina una batalla. Comprobaciones de
-#                      evolución, Recogida/Recogida de miel, desmayo.
-#   :on_wild_battle_end - Después de una batalla salvaje. Actualiza la 
-#                      información de la cadena del Poké Radar.
-#===============================================================================
+#                                        termina de surfear, excepto como parte de una ruta de 
+#                                        movimiento. Efectos basados en pasos que pueden transferir 
+#                                        al jugador a otro lugar.
+#   :on_player_interact                - Cuando el jugador presiona el botón de Usar en el 
+#                                        overworld.
+#-------------------------------------------------------------------------------------------------------------
+#   :on_trainer_load                   - Cuando se genera un NPCTrainer (para luchar contra él o 
+#                                        como compañero acompañante). Varias modificaciones a ese 
+#                                        entrenador y sus Pokémon.
+#   :on_wild_species_chosen            - Cuando se elige una especie/nivel para un encuentro
+#                                        salvaje. Cambia la especie/nivel (por ejemplo, errante, 
+#                                        cadena del Poké Radar).
+#   :on_wild_pokemon_created           - Cuando se ha creado un Pokémon como "objeto" para 
+#                                         un encuentro salvaje. Varias modificaciones a ese Pokémon.
+#   :on_calling_wild_battle            - Cuando se llama a una batalla salvaje. Evita esa 
+#                                        batalla salvaje y en su lugar inicia un tipo de batalla 
+#                                        diferente (por ejemplo, Zona Safari).
+#   :on_start_battle                   - Justo antes de que comience una batalla. Memoriza/
+#                                        restablece información sobre los Pokémon del grupo, que 
+#                                        se utiliza después de la batalla para comprobaciones de 
+#                                        evolución.
+#   :on_end_battle                     - Justo después de que termina una batalla. Comprobaciones de
+#                                        evolución, Recogida/Recogida de miel, desmayo.
+#   :on_wild_battle_end                - Después de una batalla salvaje. Actualiza la 
+#                                        información de la cadena del Poké Radar.
+#============================================================================================================
 
 module EventHandlers
   @@events = {}

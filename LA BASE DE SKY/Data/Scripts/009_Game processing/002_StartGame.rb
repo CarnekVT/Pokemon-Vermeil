@@ -55,6 +55,7 @@ module Game
     $PokemonEncounters.setup($game_map.map_id)
     $game_map.autoplay
     $game_map.update
+    EventHandlers.trigger(:on_new_game)
   end
 
   # Loads the game from the given save data and starts the map scene.
@@ -71,6 +72,7 @@ module Game
     $PokemonMap.updateMap
     $PokemonStorage.check_max_boxes_changed
     $scene = Scene_Map.new
+    EventHandlers.trigger(:on_game_load)
   end
 
   # Loads and validates the map. Called when loading a saved game.
