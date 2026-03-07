@@ -1720,7 +1720,7 @@ if Settings::USE_NEW_OPTIONS_UI
     "name"        => _INTL("Escritura"),
     "order"       => 60,
     "type"        => :array,
-    "parameters"  => proc { [_INTL("Cursor"), _INTL("Teclado")] },
+    "parameters"  => proc { [_INTL("Teclado"), _INTL("Cursor")] },
     "description" => _INTL("Elige el método de escritura."),
     "get_proc"    => proc { next $PokemonSystem.textinput },
     "set_proc"    => proc { |value, _screen| $PokemonSystem.textinput = value }
