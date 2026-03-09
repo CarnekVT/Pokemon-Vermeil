@@ -6,6 +6,33 @@
 
 ### [DESCARGAR BASE](https://skyfangames.blogspot.com/2024/01/base-de-sky.html)
 
+### AÑADIDOS V 1.2.0.1
+
+- Corrige un error con las tiendas.
+
+### AÑADIDOS V 1.2.0
+
+- Componentes de UIs para mayor compatibilidad con Essentials 22
+- Nuevo menú de opciones customizable con paginas
+- Cambios en la implementación de ataques, habilidades, objetos de 9na en base a los cambios de Maruno para Essentials 22
+- Se agregaron constantes para el posicionamiento en las UIs para mayor facilidad en edición de UIs
+- Agrega la opcion de hacer show choices con imagenes
+- Agrega las megas del Z-A
+- Mejoras y correcciones para el script de turbo
+- Mejoras para los buscadores en los menus de debug y en la dex
+- Actualizaciones de plugins propios de la base como el MUI o la Dex Avanzada
+- Agrega buscador en el posicionador de Sprites
+- Agrega script para exportar informacion de utilizacion de variables y switches en eventos
+- Hace que la nevada pueda ser su propio clima y no que pise el Granizo
+- Agrega una constante para que sea más fácil editar la velocidad por defecto del jugador
+- Agrega más colores posibles para los textos
+- Al hacer un golpe crítico ahora sale el texto en naranja
+- Agrega muchos INTL que faltaban y correcciones de textos
+- Agrega script para modo de Minimal Grinding (sin EVs/IVs)
+- Agrega funcionalidad de carteles de ciudades y rutas customizable (Reemplaza la necesidad del plugin de letreros de Jess)
+- Agrega funcionalidad del Plugin de escaleras laterales dentro de la base
+- Mejoras varias en scripts (rendimiento y legibilidad de código)
+
 ### AÑADIDOS V 1.1.2
 
 - Refactor del BetterMoveRelearner.
