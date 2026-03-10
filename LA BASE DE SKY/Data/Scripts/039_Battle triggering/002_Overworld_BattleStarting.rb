@@ -213,9 +213,9 @@ module BattleCreationHelperMethods
     battleRules = $game_temp.battle_rules
     battle.rules = battleRules.clone
     # Set default values for some rules
-    battleRules[:no_switch_style] = ($PokemonSystem.battlestyle == 1) if battleRules[:no_switch_style].nil?
-    battleRules[:no_battle_animations] = ($PokemonSystem.battlescene == 1) if battleRules[:no_battle_animations].nil?
-    battleRules[:certain_capture] = $game_map.metadata&.has_flag?("CertainCaptures") if battleRules[:certain_capture].nil?
+    battle.rules[:no_switch_style] = ($PokemonSystem.battlestyle == 1) if battleRules[:no_switch_style].nil?
+    battle.rules[:no_battle_animations] = ($PokemonSystem.battlescene == 1) if battleRules[:no_battle_animations].nil?
+    battle.rules[:certain_capture] = $game_map.metadata&.has_flag?("CertainCaptures") if battleRules[:certain_capture].nil?
     # The size of the battle, i.e. how many Pokémon on each side (default: "single")
     battle.setBattleMode(battleRules[:side_sizes]) if battleRules[:side_sizes]
     # Whether all attempts to capture Pokémon this battle will succeed
