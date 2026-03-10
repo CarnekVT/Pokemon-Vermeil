@@ -1951,13 +1951,13 @@ Battle::AbilityEffects::DamageCalcFromTargetAlly.add(:FRIENDGUARD,
 #===============================================================================
 
 Battle::AbilityEffects::CriticalCalcFromUser.add(:MERCILESS,
-  proc { |ability, user, target, move, c|
+  proc { |ability, user, target, c, move|
     next 99 if target.poisoned?
   }
 )
 
 Battle::AbilityEffects::CriticalCalcFromUser.add(:SUPERLUCK,
-  proc { |ability, user, target, move, c|
+  proc { |ability, user, target, c, move|
     next c + 1
   }
 )
@@ -1967,7 +1967,7 @@ Battle::AbilityEffects::CriticalCalcFromUser.add(:SUPERLUCK,
 #===============================================================================
 
 Battle::AbilityEffects::CriticalCalcFromTarget.add(:BATTLEARMOR,
-  proc { |ability, user, target, move, c|
+  proc { |ability, user, target, c, move|
     next -1
   }
 )
