@@ -375,6 +375,9 @@ module PluginManager
   #     0 si v1 es igual a v2
   #     -1 si v1 es menor que v2
   def self.compare_versions(v1, v2)
+    return 0 if v1 == v2
+    return 1 if v1.nil? || v1.empty?
+    return -1 if v2.nil? || v2.empty?
     version_chunks1 = v1.split(".")
     version_chunks1.each_with_index do |val, i|
       next if val != ""
