@@ -88,6 +88,45 @@ class Game_Map
     @side_stairs[map_id] << event if event.is_stair_event?
   end
 
+  def check_stair_zones(char_x, char_y)
+    return nil if @side_stairs.nil? || @side_stairs[@map_id].nil?
+    
+    @side_stairs[@map_id].each do |event|
+      data = event.get_stair_data
+      next if data[0] == :none
+      
+      type = data[0]
+      
+      if type == :slope
+        _, xincline, yincline, ypos_base, yheight, offset = data
+        next if xincline == 0 && yincline == 0 
+        
+        if char_x == event.x && char_y <= event.y && char_y > event.y - yheight
+          ypos_current = event.y - char_y
+          return[:slope, event, xincline, yincline, ypos_current, yheight, offset, :start]
+        end
+        
+        end_x = event.x + xincline
+        end_y = event.y + yincline
+        if char_x == end_x && char_y <= end_y && char_y > end_y - yheight
+          ypos_current = end_y - char_y
+          return[:slope, event, -xincline, -yincline, ypos_current, yheight, offset, :end]
+        end
+        
+      elsif type == :spiral
+        _, c, h, _, _, _ = data
+        next if h == 0
+        if char_x == event.x && char_y == event.y
+          return[:spiral, event, c, h, :start]
+        end
+        if char_x == event.x && char_y == event.y - h
+          return [:spiral, event, c, h, :end]
+        end
+      end
+    end
+    return nil
+  end
+
   def updateTileset
     tileset = $data_tilesets[@map.tileset_id]
     return if !tileset
@@ -357,6 +396,7 @@ class Game_Map
   end
 
   def scroll_up(distance)
+    return if $DisableScrollCounter == 1
     self.display_y -= distance
   end
 

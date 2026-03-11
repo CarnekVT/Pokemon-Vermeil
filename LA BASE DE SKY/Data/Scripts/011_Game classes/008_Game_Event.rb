@@ -45,7 +45,17 @@ class Game_Event < Game_Character
 
   def start
     if is_stair_event?
-      $game_player.slope(*self.get_stair_data)
+      data = self.get_stair_data
+      
+      if data[0] == :slope
+        $game_player.slope(data[1], data[2], data[3], data[4], data[5])       
+      elsif data[0] == :spiral
+        if $game_player.y == self.y
+          $game_player.set_spiral_data(data[1], data[2], :ascending)
+        elsif $game_player.y == self.y - data[2]
+          $game_player.set_spiral_data(data[1], data[2], :descending)
+        end
+      end
     else
       @starting = true if @list.size > 1
     end
@@ -148,50 +158,80 @@ class Game_Event < Game_Character
     return STAIR_EVENT_NAMES.include?(self.name)
   end
 
-  def mss_check_events
-    return if !($game_map && $game_map.events)
-    return if self.is_stair_event?
-    map_id = $game_map.map_id
-    $game_map&.side_stairs ||= {}
-    $game_map&.side_stairs[map_id] ||= []
-    side_stairs = $game_map&.side_stairs[map_id]
-    return if side_stairs.nil?
-    for event in side_stairs
-      if !on_stair? && (@real_x / Game_Map::REAL_RES_X).round == event.x &&
-          (@real_y / Game_Map::REAL_RES_Y).round == event.y
-        if event.is_stair_event?
-          next if $game_player.x == event.x && $game_player.y == event.y
-          self.slope(*event.get_stair_data)        
-          return
-        end
+  def check_stair_zones(char_x, char_y)
+    return nil if @side_stairs.nil? || @side_stairs[@map_id].nil?    
+    @side_stairs[@map_id].each do |event|
+      data = event.get_stair_data
+      next unless data
+      xincline, yincline, ypos_base, yheight, offset = data
+      if char_x == event.x && char_y <= event.y && char_y > event.y - yheight
+        ypos_current = event.y - char_y
+        return[event, xincline, yincline, ypos_current, yheight, offset, :start]
+      end
+      end_x = event.x + xincline
+      end_y = event.y + yincline      
+      if char_x == end_x && char_y <= end_y && char_y > end_y - yheight
+        ypos_current = end_y - char_y
+        return[event, -xincline, -yincline, ypos_current, yheight, offset, :end]
       end
     end
+    
+    return nil
+  end
+
+  def mss_check_events
+    return
   end
 
   def get_stair_data
-    return if !is_stair_event?
-    return if !@list
-    for cmd in @list
-      if cmd.code == 108
-        if cmd.parameters[0] =~ /Slope: (\d+)x(\d+)/
-          xincline, yincline = $1.to_i, $2.to_i
-        elsif cmd.parameters[0] =~ /Slope: -(\d+)x(\d+)/
-          xincline, yincline = -$1.to_i, $2.to_i
-        elsif cmd.parameters[0] =~ /Slope: (\d+)x-(\d+)/
-          xincline, yincline = $1.to_i, -$2.to_i
-        elsif cmd.parameters[0] =~ /Slope: -(\d+)x-(\d+)/
-          xincline, yincline = -$1.to_i, -$2.to_i
-        elsif cmd.parameters[0] =~ /Width: (\d+)\/(\d+)/
-          ypos, yheight = $1.to_i, $2.to_i
-        elsif cmd.parameters[0] =~ /Offset: (\d+)px/
-          offset = $1.to_i
-        end
-      end
-      if xincline && yincline && ypos && yheight && offset
-        return [xincline, yincline, ypos, yheight, offset]
+    return [:none, 0, 0, 0, 0, 0] unless is_stair_event? && @list
+    xincline = 0
+    yincline = 0
+    ypos     = 0
+    yheight  = 1
+    offset   = 16
+    is_spiral = false
+    c = 0
+    h = 0
+
+    @list.each do |cmd|
+      next unless cmd.code == 108 || cmd.code == 408
+      comment = cmd.parameters[0]
+      next unless comment
+
+      # --- SPIRAL ---
+      if comment =~ /Spiral:\s*([+-]?)\s*c:\s*(\d+)\s*\/\s*([+-]?)\s*h:\s*(\d+)/i
+        c_sign, c_val = $1, $2.to_i
+        h_sign, h_val = $3, $4.to_i
+        c = (c_sign == '-') ? -c_val : c_val
+        h = (h_sign == '-') ? -h_val : h_val
+        is_spiral = true
+
+      # --- SLOPE AREA ---
+      elsif comment =~ /SlopeArea:\s*([+-]?)\s*w:\s*(\d+)\s*\/\s*([+-]?)\s*h:\s*(\d+)(?::(\d+))?/i
+        w_sign, w_val = $1, $2.to_i
+        h_sign, h_val = $3, $4.to_i
+        h_ext = $5
+        xincline = (w_sign == '-') ? -w_val : w_val
+        yincline = (h_sign == '-') ? h_val : -h_val
+        yheight  = h_ext ? h_ext.to_i : 1
+        
+      # --- SLOPE ---
+      elsif comment =~ /Slope:\s*(-?\d+)\s*x\s*(-?\d+)/i
+        xincline, yincline = $1.to_i, $2.to_i
+        
+      # --- PARÁMETROS EXTRA ---
+      elsif comment =~ /Width:\s*(\d+)\s*\/\s*(\d+)/i
+        ypos, yheight = $1.to_i, $2.to_i
+      elsif comment =~ /Offset:\s*(\d+)\s*px/i
+        offset = $1.to_i
       end
     end
-    return [xincline, yincline, ypos, yheight, 16]
+    if is_spiral
+      return [:spiral, c, h, 0, 0, 0]
+    else
+      return [:slope, xincline, yincline, ypos, yheight, offset]
+    end
   end
 
   def over_trigger?
@@ -205,7 +245,7 @@ class Game_Event < Game_Character
   end
 
   def check_event_trigger_touch(dir)
-    return if on_stair?
+    return if on_stair? || on_spiral?
     return if @map_id != $game_player.map_id
     return if @trigger != 2   # Event touch
     return if $game_system.map_interpreter.running?
@@ -253,8 +293,7 @@ class Game_Event < Game_Character
   end
 
   def check_event_trigger_auto
-    mss_check_events
-    return if on_stair? || $game_player.on_stair?
+    return if on_stair? || on_spiral? || ($game_player && ($game_player.on_stair? || $game_player.on_spiral?))
     case @trigger
     when 2   # Event touch
       if at_coordinate?($game_player.x, $game_player.y) && !jumping? && over_trigger?

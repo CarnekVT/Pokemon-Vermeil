@@ -154,13 +154,47 @@ class Game_Player < Game_Character
     $stats.distance_slid_on_ice += distance if $PokemonGlobal.ice_sliding
   end
 
+  def clear_stair_data
+    super
+    $DisableScrollCounter = 0 if defined?($DisableScrollCounter)
+  end
+
   def move_generic(dir, turn_enabled = true)
     turn_generic(dir, true) if turn_enabled
+    
+    # --- SMART ZONES LOGIC ---
+    is_debug_through = ($DEBUG && Input.press?(Input::CTRL))
+    
+    if !on_stair? && !on_spiral? && !@through && !is_debug_through && $game_map
+      stair_data = $game_map.check_stair_zones(@x, @y)
+      if stair_data
+        type = stair_data[0]
+        
+        if type == :slope
+          _, event, xinc, yinc, ypos, yheight, offset, zone = stair_data
+          stair_dir = xinc > 0 ? 6 : (xinc < 0 ? 4 : 0)
+          if dir == stair_dir
+            self.slope(xinc, yinc, ypos, yheight, offset)
+            return
+          end
+          
+        elsif type == :spiral
+          _, event, c, h, zone = stair_data
+          if zone == :start && dir == 8
+            self.set_spiral_data(c, h, :ascending)
+          elsif zone == :end && dir == 2
+            self.set_spiral_data(c, h, :descending)
+          end
+        end
+      end
+    end
+    # -------------------------
+
     if !$game_temp.encounter_triggered
       if can_move_in_direction?(dir)
         x_offset = (dir == 4) ? -1 : (dir == 6) ? 1 : 0
         y_offset = (dir == 8) ? -1 : (dir == 2) ? 1 : 0
-        # Jump over ledges
+        
         if pbFacingTerrainTag.ledge
           if jumpForward(2)
             pbSEPlay("Player jump")
@@ -172,11 +206,12 @@ class Game_Player < Game_Character
           $game_player.through = true
           $stats.waterfalls_descended += 1
         end
-        # Jumping out of surfing back onto land
+        
         return if pbEndSurf(x_offset, y_offset)
-        # General movement
+        
         turn_generic(dir, true)
         yield if block_given?
+        
         if !$game_temp.encounter_triggered
           @move_initial_x = @x
           @move_initial_y = @y
@@ -385,12 +420,11 @@ class Game_Player < Game_Character
     result = false
     # If event is running
     return result if $game_system.map_interpreter.running?
-    # All event loops
     $game_map.events.each_value do |event|
       # If event coordinates and triggers are consistent
-      next if !event.at_coordinate?(@x, @y)
       next if !triggers.include?(event.trigger)
-      # If starting determinant is same position event (other than jumping)
+      next if event.is_stair_event?
+      next if !is_event_at_target?(event, @x, @y)
       next if event.jumping? || !event.over_trigger?
       event.start
       result = true if event.starting
@@ -401,37 +435,26 @@ class Game_Player < Game_Character
   # Front Event Starting Determinant
   def check_event_trigger_there(triggers)
     result = false
-
-    # Player is in side stairs event
-    return result if on_stair?
-    # If event is running
     return result if $game_system.map_interpreter.running?
-    # Calculate front event coordinates
     new_x = @x + (@direction == 6 ? 1 : @direction == 4 ? -1 : 0)
     new_y = @y + (@direction == 2 ? 1 : @direction == 8 ? -1 : 0)
     return false if !$game_map.valid?(new_x, new_y)
-    # All event loops
     $game_map.events.each_value do |event|
       next if !triggers.include?(event.trigger)
-      # If event coordinates and triggers are consistent
-      next if !event.at_coordinate?(new_x, new_y)
-      # If starting determinant is front event (other than jumping)
+      next if event.is_stair_event?
+      next if !is_event_at_target?(event, new_x, new_y)
       next if event.jumping? || event.over_trigger?
       event.start
       result = true if event.starting
     end
-    # If fitting event is not found
     if result == false && $game_map.counter?(new_x, new_y)
-      # Calculate coordinates of 1 tile further away
       new_x += (@direction == 6 ? 1 : @direction == 4 ? -1 : 0)
       new_y += (@direction == 2 ? 1 : @direction == 8 ? -1 : 0)
       return false if !$game_map.valid?(new_x, new_y)
-      # All event loops
       $game_map.events.each_value do |event|
         next if !triggers.include?(event.trigger)
-        # If event coordinates and triggers are consistent
-        next if !event.at_coordinate?(new_x, new_y)
-        # If starting determinant is front event (other than jumping)
+        next if event.is_stair_event?
+        next if !is_event_at_target?(event, new_x, new_y)
         next if event.jumping? || event.over_trigger?
         event.start
         result = true if event.starting
@@ -440,26 +463,22 @@ class Game_Player < Game_Character
     return result
   end
 
-  # Touch Event Starting Determinant
   def check_event_trigger_touch(dir)
     result = false
-    return result if on_stair?
-    return result if $game_system.map_interpreter.running?
-    # All event loops
+    return result if $game_system.map_interpreter.running?    
     x_offset = (dir == 4) ? -1 : (dir == 6) ? 1 : 0
     y_offset = (dir == 8) ? -1 : (dir == 2) ? 1 : 0
     $game_map.events.each_value do |event|
-      next if ![1, 2].include?(event.trigger)   # Player touch, event touch
-      # If event coordinates and triggers are consistent
-      next if !event.at_coordinate?(@x + x_offset, @y + y_offset)
+      next if ![1, 2].include?(event.trigger)
+      next if event.is_stair_event?
+      next if !is_event_at_target?(event, @x + x_offset, @y + y_offset)
       if event.name[/(?:sight|trainer)\((\d+)\)/i]
         distance = $~[1].to_i
         next if !pbEventCanReachPlayer?(event, self, distance)
       elsif event.name[/counter\((\d+)\)/i]
         distance = $~[1].to_i
         next if !pbEventFacesPlayer?(event, self, distance)
-      end
-      # If starting determinant is front event (other than jumping)
+      end     
       next if event.jumping? || event.over_trigger?
       event.start
       result = true if event.starting
