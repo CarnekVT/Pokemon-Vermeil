@@ -341,7 +341,7 @@ module PluginManager
     return @@Plugins.keys
   end
 
-  def self.get(plugin_name)
+  def self.get_installed(plugin_name)
     return if !installed?(plugin_name)
     return if !@@Plugins || !@@Plugins[plugin_name]
     return @@Plugins[plugin_name]
@@ -349,21 +349,21 @@ module PluginManager
 
   # Devuelve la versión instalada del plugin especificado.
   def self.version(plugin_name)
-    plugin = self.get(plugin_name)
+    plugin = self.get_installed(plugin_name)
     return if !plugin
     return plugin[:version]
   end
 
   # Devuelve el enlace del plugin especificado.
   def self.link(plugin_name)
-    plugin = self.get(plugin_name)
+    plugin = self.get_installed(plugin_name)
     return if !plugin
     return plugin[:link]
   end
 
   # Devuelve los créditos del plugin especificado.
   def self.credits(plugin_name)
-    plugin = self.get(plugin_name)
+    plugin = self.get_installed(plugin_name)
     return if !plugin
     return plugin[:credits]
   end
