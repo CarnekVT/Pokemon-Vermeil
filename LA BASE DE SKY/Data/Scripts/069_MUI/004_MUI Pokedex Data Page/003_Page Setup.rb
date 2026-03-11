@@ -7,7 +7,7 @@ module Settings
   #-----------------------------------------------------------------------------
   # Stores the path name for the graphics utilized by this plugin.
   #-----------------------------------------------------------------------------
-  POKEDEX_DATA_PAGE_GRAPHICS_PATH = "Graphics/Plugins/Pokedex Data Page/"
+  POKEDEX_DATA_PAGE_GRAPHICS_PATH = "Graphics/UI/Pokedex Data Page/"
   
   #-----------------------------------------------------------------------------
   # The switch number used to unlock the Data page in the Pokedex.

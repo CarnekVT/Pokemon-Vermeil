@@ -137,7 +137,7 @@ module Settings
   # Ruta de gráficos para la página de datos de la Pokédex.
   #-----------------------------------------------------------------------------
   # Almacena la ruta para los gráficos utilizados por este plugin.
-  POKEDEX_DATA_PAGE_GRAPHICS_PATH = "Graphics/Plugins/Pokedex Data Page/"
+  POKEDEX_DATA_PAGE_GRAPHICS_PATH = "Graphics/UI/Pokedex Data Page/"
   
   # # Interruptor que activa la página de datos de la Pokédex.
   # Esto se ha eliminado, ya que no creo que alguien quiera desactivar la Pokédex
@@ -174,7 +174,7 @@ module Settings
   ################################################################################
   # Ruta de gráficos
   # Almacena la ruta para los gráficos utilizados por este plugin.
-  POKEMON_UI_GRAPHICS_PATH = "Graphics/Plugins/Enhanced Pokemon UI/"
+  POKEMON_UI_GRAPHICS_PATH = "Graphics/UI/Enhanced Pokemon UI/"
   
   # Party Ball
   # Habilita la visualización de iconos de Poké Ball que coinciden con la Poké Ball
