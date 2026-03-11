@@ -111,8 +111,9 @@ module PluginManager
   # Contiene todos los datos registrados de los plugins.
   @@Plugins = {}
 
-  EXCLUDED_REQUIRES = ["v21.1 Hotfixes", "Modular UI Scenes", "Luka's Scripting Utilities", "Marin's Scripting Utilities", 
-                       "Tileset Rearranger", "DP Scripting Utilities", "Easy Mouse", "Event Reporting"]
+  EXCLUDED_REQUIRES = ["v21.1 Hotfixes", "Modular UI Scenes", "[MUI] Enhanced Pokemon UI", "[MUI] Pokedex Data Page",
+                       "Lin's IV EV Summary Screen", "Luka's Scripting Utilities", "Marin's Scripting Utilities", 
+                       "Tileset Rearranger", "Box Auto-Sort", "DP Scripting Utilities", "Easy Mouse", "Event Reporting"]
 
   # Registra un plugin y prueba sus dependencias e incompatibilidades.
   def self.register(options)
@@ -659,6 +660,11 @@ module PluginManager
       meta[:dir] = dir
       # generar error si no se define un nombre para el plugin
       self.error("No se ha definido metadatos 'Name' para el plugin ubicado en '#{dir}'.") if !meta[:name]
+      # generar error si el plugin ya está incluido en La Base De Sky
+      if EXCLUDED_REQUIRES.include?(meta[:name])
+        self.error("El plugin '#{meta[:name]}' ya está incluido por defecto en La Base De Sky V#{LBDSKY::VERSION}. " +
+                   "Por favor, elimina la carpeta '#{dir}' para evitar conflictos.")
+      end
       # generar error si no se define un script para el plugin
       self.error("No se han definido metadatos 'Scripts' para el plugin ubicado en '#{dir}'.") if !meta[:scripts]
       plugins[meta[:name]] = meta
