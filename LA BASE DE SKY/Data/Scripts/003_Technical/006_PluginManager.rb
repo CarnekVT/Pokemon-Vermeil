@@ -341,22 +341,31 @@ module PluginManager
     return @@Plugins.keys
   end
 
+  def self.get(plugin_name)
+    return if !installed?(plugin_name)
+    return if !@@Plugins || !@@Plugins[plugin_name]
+    return @@Plugins[plugin_name]
+  end
+
   # Devuelve la versión instalada del plugin especificado.
   def self.version(plugin_name)
-    return if !installed?(plugin_name)
-    return @@Plugins[plugin_name][:version]
+    plugin = self.get(plugin_name)
+    return if !plugin
+    return plugin[:version]
   end
 
   # Devuelve el enlace del plugin especificado.
   def self.link(plugin_name)
-    return if !installed?(plugin_name)
-    return @@Plugins[plugin_name][:link]
+    plugin = self.get(plugin_name)
+    return if !plugin
+    return plugin[:link]
   end
 
   # Devuelve los créditos del plugin especificado.
   def self.credits(plugin_name)
-    return if !installed?(plugin_name)
-    return @@Plugins[plugin_name][:credits]
+    plugin = self.get(plugin_name)
+    return if !plugin
+    return plugin[:credits]
   end
 
   # Compara dos versiones dadas en forma de cadena. v1 debería ser la versión del plugin
