@@ -1202,5 +1202,9 @@ class Battle
   def disablePokeBalls
     return @rules[:disable_poke_balls]
   end
+
+  def disablePokeBalls=(value)
+    @rules[:disable_poke_balls] = value
+  end
 end
 
