@@ -110,6 +110,7 @@ class Battle
   attr_reader   :struggle         # The Struggle move
   attr_accessor :adjust_levels
   attr_accessor :adjust_levels_reset_moves
+  attr_accessor :used_items   # Items consumed by player's Pokémon during battle (for restore feature)
   def pbRandom(x); return rand(x); end
 
   #=============================================================================
@@ -188,6 +189,7 @@ class Battle
     @battleAI          = AI.new(self)
     @adjust_levels   = false
     @adjust_levels_reset_moves   = false
+    @used_items        = []   # For RestoreItemsAfterBattle feature
   end
 
   def decided?

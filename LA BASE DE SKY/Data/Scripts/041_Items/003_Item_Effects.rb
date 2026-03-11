@@ -48,6 +48,28 @@ ItemHandlers::UseInField.add(:MAXREPEL, proc { |item|
   next pbRepel(item, 250)
 })
 
+def pbToggleInfiniteRepel
+  $PokemonGlobal.infRepel ||= false
+  if !$PokemonGlobal.infRepel
+    pbMessage(_INTL("Se activó el repelente infinito."))
+    $bag.replace_item(:INFREPELOFF, :INFREPEL)
+    $bag.replace_registered(:INFREPELOFF, :INFREPEL)
+  else
+    pbMessage(_INTL("Se desactivó el repelente infinito."))
+    $bag.replace_item(:INFREPEL, :INFREPELOFF)
+    $bag.replace_registered(:INFREPEL, :INFREPELOFF)
+  end
+  $PokemonGlobal.infRepel = !$PokemonGlobal.infRepel
+  return 0
+end
+
+ItemHandlers::UseFromBag.add(:INFREPEL, proc { |item| pbToggleInfiniteRepel })
+ItemHandlers::UseFromBag.add(:INFREPELOFF, proc { |item| pbToggleInfiniteRepel })
+ItemHandlers::UseInField.add(:INFREPEL, proc { |item| pbToggleInfiniteRepel })
+ItemHandlers::UseInField.add(:INFREPELOFF, proc { |item| pbToggleInfiniteRepel })
+ItemHandlers::UseText.add(:INFREPEL, proc { |item| next _INTL("Desactivar") })
+ItemHandlers::UseText.add(:INFREPELOFF, proc { |item| next _INTL("Activar") })
+
 EventHandlers.add(:on_player_step_taken, :repel_counter,
   proc {
     next if $PokemonGlobal.repel <= 0 || $game_player.terrain_tag.ice   # Shouldn't count down if on ice

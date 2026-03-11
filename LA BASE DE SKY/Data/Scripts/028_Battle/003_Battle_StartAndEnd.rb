@@ -579,9 +579,22 @@ class Battle
         $player.party[0], $player.party[new_lead_index] = $player.party[new_lead_index], $player.party[0]
       end
     end
-    
+    # Restore consumed items (RestoreItemsAfterBattle feature)
+    pbRestoreUsedItems if Settings::RESTORE_HELD_ITEMS_AFTER_BATTLE
 
     return @decision
+  end
+
+  # Restores items consumed during battle to the Pokémon that used them
+  def pbRestoreUsedItems
+    return if !@used_items || @used_items.empty?
+    @used_items.each do |obj|
+      pokemon = obj[0]
+      item_id = obj[1]
+      next if !pokemon || !pokemon.item.nil?
+      next if Settings::RESTORE_HELD_ITEMS_BLACKLIST.include?(item_id)
+      pokemon.item = item_id
+    end
   end
 
   #=============================================================================

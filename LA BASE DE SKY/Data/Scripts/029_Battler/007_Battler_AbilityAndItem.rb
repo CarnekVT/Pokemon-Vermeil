@@ -314,6 +314,10 @@ class Battle::Battler
 
   def pbConsumeItem(recoverable = true, symbiosis = true, belch = true)
     PBDebug.log("[Item consumed] #{pbThis} consumed its held #{itemName}")
+    # Track consumed items for RestoreItemsAfterBattle feature
+    if Settings::RESTORE_HELD_ITEMS_AFTER_BATTLE && @battle.used_items && pbOwnedByPlayer?
+      @battle.used_items << [self.pokemon, @item_id]
+    end
     if recoverable
       setRecycleItem(@item_id)
       @effects[PBEffects::PickupItem] = @item_id

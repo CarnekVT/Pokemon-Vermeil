@@ -2,11 +2,11 @@
 # Infinite Repel by dpertierra
 # https://github.com/Pokemon-Fan-Games/InifiniteRepel
 # https://twitter.com/dpertierra
+#
+# NOTA: La lógica de infRepel está integrada en:
+# - 037_Overworld/003_Overworld_Metadata.rb (attr_accessor :infRepel)
+# - 037_Overworld/002_Overworld.rb (repel_active incluye infRepel)
 #===============================================================================
-class PokemonGlobalMetadata
-  attr_accessor :infRepel
-  attr_accessor :repel
-end
 
 def pbToggleInfiniteRepel()
   $PokemonGlobal.infRepel ||= false
@@ -29,10 +29,3 @@ ItemHandlers::UseInField.add(:INFREPEL,proc{|item| pbToggleInfiniteRepel() })
 ItemHandlers::UseInField.add(:INFREPELOFF,proc{|item| pbToggleInfiniteRepel() })
 ItemHandlers::UseText.add(:INFREPEL, proc { |item| next _INTL("Desactivar")})
 ItemHandlers::UseText.add(:INFREPELOFF, proc { |item| next _INTL("Activar")})
-
-alias pbBattleOnStepTakenOverride pbBattleOnStepTaken 
-def pbBattleOnStepTaken(repel_active)
-  $PokemonGlobal.infRepel ||= false
-  repel = ($PokemonGlobal.infRepel || $PokemonGlobal.repel > 0 || repel_active) ? true : false
-  pbBattleOnStepTakenOverride(repel)
-end

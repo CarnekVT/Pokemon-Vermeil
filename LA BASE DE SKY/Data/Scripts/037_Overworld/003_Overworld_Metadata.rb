@@ -37,6 +37,8 @@ class PokemonGlobalMetadata
   # Affecting the map
   attr_accessor :bridge
   attr_accessor :repel, :repel_item
+  attr_accessor :infRepel
+  attr_accessor :minimal_grinding
   attr_accessor :flashUsed
   attr_reader   :encounter_version
   # Map transfers
@@ -92,6 +94,8 @@ class PokemonGlobalMetadata
     # Affecting the map
     @bridge               = 0
     @repel                = 0
+    @infRepel             = false
+    @minimal_grinding     = false
     @flashused            = false
     @encounter_version    = 0
     # Map transfers

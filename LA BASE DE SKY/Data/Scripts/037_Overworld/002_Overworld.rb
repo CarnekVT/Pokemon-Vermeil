@@ -206,7 +206,7 @@ def pbOnStepTaken(eventTriggered)
   $PokemonGlobal.stepcount = 0 if !$PokemonGlobal.stepcount
   $PokemonGlobal.stepcount += 1
   $PokemonGlobal.stepcount &= 0x7FFFFFFF
-  repel_active = ($PokemonGlobal.repel > 0)
+  repel_active = ($PokemonGlobal.repel > 0 || $PokemonGlobal.infRepel)
   EventHandlers.trigger(:on_player_step_taken)
   handled = [nil]
   EventHandlers.trigger(:on_player_step_taken_can_transfer, handled)
@@ -218,7 +218,7 @@ end
 # Start wild encounters while turning on the spot
 EventHandlers.add(:on_player_change_direction, :trigger_encounter,
   proc {
-    repel_active = ($PokemonGlobal.repel > 0)
+    repel_active = ($PokemonGlobal.repel > 0 || $PokemonGlobal.infRepel)
     pbBattleOnStepTaken(repel_active) if !$game_temp.in_menu
   }
 )
