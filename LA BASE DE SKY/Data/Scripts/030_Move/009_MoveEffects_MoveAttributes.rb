@@ -435,7 +435,7 @@ end
 #===============================================================================
 class Battle::Move::IncreasePowerInElectricTerrain < Battle::Move
   def pbBasePower(base_power, user, target)
-    base_power = (base_power * 1.5).floor if @battle.field.terrain == :Electric && target.affectedByTerrain?
+    base_power = (base_power * 1.5).floor if @battle.field.terrain == :Electric
     return base_power
   end
 end

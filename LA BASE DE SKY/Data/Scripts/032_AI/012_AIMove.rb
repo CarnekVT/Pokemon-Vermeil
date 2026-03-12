@@ -390,6 +390,10 @@ class Battle::AI::AIMove
           else
             multipliers[:final_damage_multiplier] /= 2
           end
+        else
+          if function_code == "IncreasePowerInSun" && [:Sun, :HarshSun].include?(user.battler.effectiveWeather)
+            multipliers[:final_damage_multiplier] *= 1.5
+          end
         end
       when :Rain, :HeavyRain
         case calc_type

@@ -329,10 +329,10 @@ class Battle::Move
         multipliers[:power_multiplier] *= 4 / 3.0
       end
     end
-    if all_abilities.include?(:TABLETSOFRUIN) && target.ability_id != :TABLETSOFRUIN
+    if all_abilities.include?(:TABLETSOFRUIN) && user.ability_id != :TABLETSOFRUIN
       multipliers[:power_multiplier] *= 3 / 4.0 if physicalMove?
     end
-    if all_abilities.include?(:VESSELOFRUIN) && target.ability_id != :VESSELOFRUIN
+    if all_abilities.include?(:VESSELOFRUIN) && user.ability_id != :VESSELOFRUIN
       multipliers[:power_multiplier] *= 3 / 4.0 if specialMove?
     end
     if all_abilities.include?(:SWORDOFRUIN) && target.ability_id != :SWORDOFRUIN
@@ -479,6 +479,10 @@ class Battle::Move
           multipliers[:final_damage_multiplier] *= 1.5
         else
           multipliers[:final_damage_multiplier] /= 2
+        end
+      else
+        if @function_code == "IncreasePowerInSun" && [:Sun, :HarshSun].include?(user.effectiveWeather)
+          multipliers[:final_damage_multiplier] *= 1.5
         end
       end
     when :Rain, :HeavyRain
