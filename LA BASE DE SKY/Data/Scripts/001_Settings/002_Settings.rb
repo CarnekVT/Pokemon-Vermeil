@@ -338,7 +338,7 @@ module Settings
   # mismo orden que las que hay arriba, salvo la Nacional, que es -1). Todas las
   # diferentes Pokédex que pongas aquí empezarán su número en 0 en lugar de en
   # 1 (como pasa en Teselia con Victini, que es el nº 0 de la Pokédex).
-  DEXES_WITH_OFFSETS  = []
+  DEXES_WITH_OFFSETS  = [4]
 
   #-----------------------------------------------------------------------------
   # Pokémon summary.
