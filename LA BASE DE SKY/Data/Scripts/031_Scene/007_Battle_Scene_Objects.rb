@@ -523,6 +523,7 @@ class Battle::Scene::AbilitySplashBar < Sprite
   TEXT_X_MARGIN   = 8
   ABILITY_NAME_Y  = 8
   POKEMON_NAME_Y  = 38
+  BAR_Z = 300
 
   def initialize(side, viewport = nil)
     super(viewport)
@@ -541,7 +542,7 @@ class Battle::Scene::AbilitySplashBar < Sprite
     # Position the bar
     self.x       = (side == 0) ? -Graphics.width / 2 : Graphics.width
     self.y       = (side == 0) ? PLAYER_Y : FOE_Y
-    self.z       = 120
+    self.z       = BAR_Z
     self.visible = false
   end
 
