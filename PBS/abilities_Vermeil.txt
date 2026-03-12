@@ -192,5 +192,11 @@ Description = Reality warps when hit. Triggers a random theatrical prank that di
 Name = Incandescence
 Description = Boosts Def and Sp. Atk in sun or when hit by a Fire move. May burn attackers on contact.
 #-------------------------------
+# Fire Knock
+#-------------------------------
+[FIREKNOCK]
+Name = Fire Knock
+Description = May burn the target when making contact.
+#-------------------------------
 
 

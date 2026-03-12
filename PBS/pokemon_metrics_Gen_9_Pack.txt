@@ -822,27 +822,27 @@ FrontSprite = -2,16
 ShadowSprite = 1,12,1
 #-------------------------------
 [OGERPON]
-BackSprite = 0,34
+BackSprite = 8,16
 FrontSprite = 13,3
 ShadowSprite = 0,11,7
 #-------------------------------
 [OGERPON,8]
-BackSprite = 5,70
+BackSprite = 15,16
 FrontSprite = 9,8
 ShadowSprite = 2,0,6
 #-------------------------------
 [OGERPON,9]
-BackSprite = 5,70
+BackSprite = 21,17
 FrontSprite = 10,8
 ShadowSprite = 2,0,6
 #-------------------------------
 [OGERPON,10]
-BackSprite = 0,70
+BackSprite = 8,16
 FrontSprite = 6,3
 ShadowSprite = 2,0,10
 #-------------------------------
 [OGERPON,11]
-BackSprite = 12,70
+BackSprite = 30,16
 FrontSprite = 4,3
 ShadowSprite = 2,0,9
 #-------------------------------

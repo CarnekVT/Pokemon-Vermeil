@@ -4726,3 +4726,8 @@ FrontSprite = 0,23
 ShadowSprite = 5,0,-3
 AnimationSpeed = 1
 SuperShinyHue = -35
+#-------------------------------
+[OGERPON,1]
+BackSprite = 8,16
+FrontSprite = 13,3
+ShadowSprite = 0,11,7

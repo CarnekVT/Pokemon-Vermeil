@@ -1,7 +1,9 @@
 #===============================================================================
-# [VERMEIL] BattleAnimations - Grass Cannons & Pledges v3.0 (FINAL)
+# [VERMEIL] BattleAnimations - Grass Cannons & Pledges v5.0 (FINAL)
 # Includes: Energy Ball, Chloroblast, Grass Pledge
-# Fix: Elevated Energy Ball center, Solar-Beam style Chloroblast, 3-Tornado Pledge.
+# Fix: Natural SolarCharge-style suction for Energy Ball.
+#      SolarBeam-style devastating orb torrent for Chloroblast.
+#      Significantly sped up Grass Pledge duration.
 #===============================================================================
 
 class Battle::Scene::Animation::VermeilGrassCannons < Battle::Scene::Animation
@@ -57,21 +59,20 @@ class Battle::Scene::Animation::VermeilGrassCannons < Battle::Scene::Animation
     i_x = ts.x; i_y = ts.y - th
 
     # CENTRO VISUAL ELEVADO (A la altura de la cara/boca)
-    c_uy = orig_uy - uh + 15
+    c_uy = orig_uy - uh - 35
     c_ty = orig_ty - th + 15
 
     orbs_asset    = "Graphics/Animations/PRAS- Orbs.png"
-    bomb_asset    = "Graphics/Animations/PRAS- Seed Bomb.png"
     strike_asset  = "Graphics/Animations/PRAS- Strike.png"
     tornado_asset = "Graphics/Animations/PRAS- Leaf Tornado.png"
 
     case @move_id
     when :ENERGYBALL
-      # ENERGY BALL - Centrado en la boca, orbe concentrado
-      t_charge = 2; t_fire = 16; t_hit = 22; @end_frame = 45
+      # ENERGY BALL - Carga natural estilo Solar Charge
+      t_charge = 2; t_fire = 18; t_hit = 24; @end_frame = 45
       up.setSE(t_charge, "Anim/PRSFX- Focus Energy", 100, 120)
       
-      c_ux = orig_ux + (20 * f_dir)
+      c_ux = orig_ux + (30 * f_dir)
       
       if pbResolveBitmap(orbs_asset)
         core = addNewSprite(c_ux, c_uy, orbs_asset, PictureOrigin::CENTER)
@@ -79,92 +80,85 @@ class Battle::Scene::Animation::VermeilGrassCannons < Battle::Scene::Animation
         apply_pras_frame(core, orbs_asset, 2, 0, 0)
         core.setTone(0, Tone.new(-100, 150, -100, 0)); core.setBlendType(0, 1)
         core.setVisible(0, false); core.setVisible(t_charge, true)
-        core.setZoom(0, 10); core.moveZoom(t_charge, 10, 120)
+        core.setZoom(0, 10); core.moveZoom(t_charge, 12, 120)
         
-        # Las partículas de carga empiezan más abajo y suben al centro de la boca
-        20.times do |i|
-          start_x = orig_ux + (rand(160) - 80)
-          start_y = orig_uy + (rand(80)) # Suelo/Pies
+        # Succión suave y natural (idéntico a Solar Charge)
+        30.times do |i|
+          t_s = t_charge + rand(12)
+          start_x = c_ux + (rand(260) - 130)
+          start_y = c_uy + (rand(260) - 130)
           
           p = addNewSprite(start_x, start_y, orbs_asset, PictureOrigin::CENTER)
-          p.setZ(0, user_z + 10); apply_pras_frame(p, orbs_asset, 2, 0, 0)
+          p.setZ(0, user_z + 10); apply_pras_frame(p, orbs_asset, rand(2) * 2, 0, 0)
           p.setTone(0, Tone.new(-100, 150, -100, 0)); p.setBlendType(0, 1)
-          p.setVisible(0, false); p.setVisible(t_charge, true)
-          p.setZoom(0, 30 + rand(30))
-          p.moveXY(t_charge, 8, c_ux, c_uy)
-          p.moveOpacity(t_charge + 6, 2, 0)
+          p.setVisible(0, false); p.setVisible(t_s, true)
+          p.setZoom(0, 40 + rand(40))
+          
+          p.moveXY(t_s, 6, c_ux, c_uy)
+          p.moveZoom(t_s, 6, 10)
+          p.moveOpacity(t_s + 4, 2, 0)
         end
         
-        up.setSE(t_fire, "Anim/Wind2", 100, 150)
-        core.moveXY(t_fire, 6, orig_tx, c_ty)
+        up.setSE(t_fire, "Anim/Wind1", 100, 150)
+        core.moveXY(t_fire, 6, orig_tx, i_y)
         core.moveOpacity(t_hit, 2, 0)
       end
       
-      tp.setSE(t_hit, "Anim/PRSFX- Sludge Bomb", 100, 120)
+      tp.setSE(t_hit, "Anim/PRSFX- Poison", 100, 120)
       tp.moveColor(t_hit, 3, Color.new(100, 255, 100, 200))
       tp.moveColor(t_hit + 4, 4, Color.new(0,0,0,0))
       8.times { |i| tp.moveXY(t_hit + i, 1, orig_tx + (i.even? ? 8 : -8), orig_ty) }
       tp.moveXY(t_hit + 8, 1, orig_tx, orig_ty)
       
       if pbResolveBitmap(orbs_asset)
-        12.times do |i|
-          sp = addNewSprite(orig_tx, c_ty, orbs_asset, PictureOrigin::CENTER)
+        15.times do |i|
+          sp = addNewSprite(orig_tx, i_y, orbs_asset, PictureOrigin::CENTER)
           sp.setZ(0, target_z + 20); apply_pras_frame(sp, orbs_asset, 2, 0, 0)
           sp.setTone(0, Tone.new(-100, 150, -100, 0)); sp.setBlendType(0, 1)
           sp.setVisible(0, false); sp.setVisible(t_hit, true); sp.setZoom(0, 60 + rand(50))
-          sp.moveXY(t_hit, 6, orig_tx + (rand(160)-80), c_ty + (rand(160)-80))
+          sp.moveXY(t_hit, 6, orig_tx + (rand(160)-80), i_y + (rand(160)-80))
           sp.moveOpacity(t_hit + 3, 3, 0)
         end
       end
 
     when :CHLOROBLAST
-      # CHLOROBLAST - Láser Devastador (Estilo Solar Beam) y Recoil Masivo
+      # CHLOROBLAST - Láser Masivo Destructor estilo Solar Beam
       t_charge = 2; t_fire = 16; t_hit = 18; @end_frame = 55
       
-      # Oscurecer la pantalla para dramatismo
       bg_dim = addSprite(make_black_sprite, PictureOrigin::TOP_LEFT)
       bg_dim.setZ(0, target_z - 10)
       bg_dim.setOpacity(0, 0)
       bg_dim.moveOpacity(t_charge, 8, 200)
-      bg_dim.moveOpacity(t_hit + 10, 6, 0)
+      bg_dim.moveOpacity(t_hit + 15, 6, 0)
       
       up.setSE(t_charge, "Anim/Absorb2", 100, 150)
-      up.setSE(t_charge + 4, "Anim/Thunder1", 100, 180) # Inestabilidad eléctrica
+      up.setSE(t_charge + 4, "Anim/Thunder1", 100, 180)
       up.moveColor(t_charge, 8, Color.new(150, 255, 50, 180))
       
+      # Centro del cañón (pecho)
       c_ux = orig_ux + (20 * f_dir)
+      # Un poco más abajo que energy ball, simulando el cuerpo entero forzando el disparo
+      c_uy2 = orig_uy - (uh * 0.7) 
       
-      # Carga inestable
-      if pbResolveBitmap(strike_asset)
-        15.times do |i|
-          t_s = t_charge + rand(10)
-          spark = addNewSprite(c_ux + (rand(160)-80), c_uy + (rand(160)-80), strike_asset, PictureOrigin::CENTER)
-          spark.setZ(0, user_z + 10); apply_pras_frame(spark, strike_asset, 3, 0, 0)
-          spark.setTone(0, Tone.new(-50, 200, -100, 0)); spark.setBlendType(0, 1)
-          spark.setVisible(0, false); spark.setVisible(t_s, true); spark.setZoom(0, 100)
-          spark.moveXY(t_s, 4, c_ux, c_uy)
-          spark.moveOpacity(t_s + 3, 1, 0)
-        end
-      end
-      
-      # Disparo y Recoil Brutal
+      # Disparo - Setting de daño por retroceso (Recoil)
       up.setSE(t_fire, "Anim/Explosion", 90, 120)
       
-      # Recoil Visual: Fogonazo rojo y retroceso extremo
+      # El usuario se pone en rojo por el dolor del ataque
       up.moveColor(t_fire, 2, Color.new(255, 50, 50, 200))
-      up.moveColor(t_fire + 2, 8, Color.new(0,0,0,0))
+      up.moveColor(t_fire + 2, 10, Color.new(0,0,0,0))
       
+      # Sacudida brutal hacia atrás
       up.moveXY(t_fire, 2, orig_ux - (40 * f_dir), orig_uy)
       12.times { |i| up.moveXY(t_fire + 2 + i, 1, orig_ux - (40 * f_dir) + (i.even? ? 10 : -10), orig_uy) }
       up.moveXY(t_fire + 14, 6, orig_ux, orig_uy)
       
-      # EL LÁSER DEVASTADOR (Torrente de orbes de energía inestable)
+      # EL LÁSER DEVASTADOR (Torrente de orbes de energía estilo Solar Beam, pero inestable)
       if pbResolveBitmap(orbs_asset)
-        angle = Math.atan2(c_ty - c_uy, orig_tx - orig_ux) * 180 / Math::PI
+        angle = Math.atan2(i_y - c_uy2, orig_tx - orig_ux) * 180 / Math::PI
         
         25.times do |i|
           t_l = t_fire + (i / 2)
-          orb_beam = addNewSprite(c_ux, c_uy, orbs_asset, PictureOrigin::CENTER)
+          orb_beam = addNewSprite(c_ux, c_uy2, orbs_asset, PictureOrigin::CENTER)
           orb_beam.setZ(0, target_z + 24 + i)
           raw_orb = @pictureSprites.last; raw_orb.ox = 96; raw_orb.oy = 96 if raw_orb
           
@@ -172,17 +166,17 @@ class Battle::Scene::Animation::VermeilGrassCannons < Battle::Scene::Animation
           orb_beam.setTone(0, Tone.new(-50, 200, -100, 0)); orb_beam.setBlendType(0, 1)
           orb_beam.setVisible(0, false); orb_beam.setVisible(t_l, true)
           
-          # Orbes masivos y caóticos
-          orb_beam.setZoom(0, 250 + rand(80)) 
+          # Orbes masivos (Zoom gigantesco)
+          orb_beam.setZoom(0, 250 + rand(100)) 
           orb_beam.setAngle(0, angle)
           
-          orb_beam.moveXY(t_l, 3, orig_tx, c_ty)
+          orb_beam.moveXY(t_l, 3, orig_tx, i_y)
           orb_beam.moveOpacity(t_l + 2, 2, 0)
         end
       end
       
-      # Impacto Nuclear
-      tp.setSE(t_hit, "Anim/Super Damage", 100, 100)
+      # Impacto
+      tp.setSE(t_hit, "Anim/PRSFX- Focus Punch2", 100, 100)
       tp.moveColor(t_hit, 3, Color.new(200, 255, 150, 255))
       tp.moveColor(t_hit + 5, 5, Color.new(0,0,0,0))
       14.times { |i| tp.moveXY(t_hit + i, 1, orig_tx + (i.even? ? 25 : -25), orig_ty) }
@@ -191,52 +185,52 @@ class Battle::Scene::Animation::VermeilGrassCannons < Battle::Scene::Animation
       if pbResolveBitmap(strike_asset)
         15.times do |i|
           t_s = t_hit + rand(6)
-          sp = addNewSprite(orig_tx, c_ty, strike_asset, PictureOrigin::CENTER)
+          sp = addNewSprite(orig_tx, i_y, strike_asset, PictureOrigin::CENTER)
           sp.setZ(0, target_z + 30); apply_pras_frame(sp, strike_asset, 3, 0, 0)
           sp.setTone(0, Tone.new(-50, 200, -100, 0)); sp.setBlendType(0, 1)
           sp.setVisible(0, false); sp.setVisible(t_s, true); sp.setZoom(0, 150 + rand(150))
           sp.setAngle(0, rand(360))
-          sp.moveXY(t_s, 6, orig_tx + (rand(300)-150), c_ty + (rand(300)-150))
+          sp.moveXY(t_s, 6, orig_tx + (rand(300)-150), i_y + (rand(300)-150))
           sp.moveOpacity(t_s + 3, 3, 0)
         end
       end
 
     when :GRASSPLEDGE
-      # GRASS PLEDGE - 3 Tornados de Hojas Secuenciales (Centro, Izq, Der) con lógica Leaf Tornado
-      t_start = 2; @end_frame = 55
+      # GRASS PLEDGE - Ultra Rápido
+      t_start = 2; @end_frame = 40
       
-      up.setSE(t_start, "Anim/Earthquake", 100, 100)
+      up.setSE(t_start, "Anim/PRSFX- Grass Pledge2", 100, 100)
       up.moveColor(t_start, 4, Color.new(100, 255, 100, 150))
       up.moveColor(t_start + 4, 6, Color.new(0,0,0,0))
       
       if pbResolveBitmap(tornado_asset)
-        # 3 Columnas [Offset X, Delay]
+        # 3 Columnas [Offset X, Delay] (Tiempos mucho más cortos)
         columns = [
-          [0, 0],               # Centro (En el Target)
-          [-(60 * f_dir), 6],   # Lado Izquierdo
-          [(60 * f_dir), 12]    # Lado Derecho
+          [-(60 * f_dir), 0],   
+          [0, 3],               
+          [(60 * f_dir), 6]    
         ]
         
         columns.each do |col|
-          t_col = t_start + 4 + col[1]
+          t_col = t_start + col[1]
           col_x = orig_tx + col[0]
           
-          up.setSE(t_col, "Anim/Wind1", 100, 120)
+          up.setSE(t_col, "Anim/Wind1", 100, 140)
           
-          # 1. Base del Tornado (Fila 5)
+          # Base del Tornado (Mitad de tiempo de vida)
           tornado = addNewSprite(col_x, orig_ty - 10, tornado_asset, PictureOrigin::BOTTOM)
           tornado.setZ(0, target_z + 15)
           apply_pras_frame(tornado, tornado_asset, 0, 5, 0)
           tornado.setVisible(0, false); tornado.setVisible(t_col, true)
           tornado.setZoom(0, 160)
           
-          30.times do |f|
+          15.times do |f|
             apply_pras_frame(tornado, tornado_asset, f % 4, 5, t_col + f)
           end
-          tornado.moveOpacity(t_col + 25, 5, 0)
+          tornado.moveOpacity(t_col + 15, 4, 0)
 
-          # 2. Hojas girando en espiral hacia arriba (Fila 0, 1, 2)
-          15.times do |i|
+          # Hojas subiendo
+          10.times do |i|
             leaf = addNewSprite(col_x, orig_ty - 10, tornado_asset, PictureOrigin::CENTER)
             leaf.setZ(0, target_z + 20 + i)
             apply_pras_frame(leaf, tornado_asset, rand(3), 0, 0)
@@ -245,18 +239,18 @@ class Battle::Scene::Animation::VermeilGrassCannons < Battle::Scene::Animation
             delay = t_col + i
             leaf.setVisible(delay, true); leaf.setZoom(0, 100 + rand(50))
             
-            start_x = col_x + (rand(2) == 0 ? 80 : -80)
+            start_x = col_x + (rand(2)==0 ? 100 : -100)
             leaf.setXY(delay, start_x, orig_ty - 10)
-            leaf.moveXY(delay, 12, col_x - (start_x - col_x), orig_ty - 200)
-            leaf.moveAngle(delay, 12, rand(1440) * f_dir) 
-            leaf.moveOpacity(delay + 8, 4, 0)
+            # Sube más rápido (8 fotogramas)
+            leaf.moveXY(delay, 8, col_x - (start_x - col_x), orig_ty - 200)
+            leaf.moveAngle(delay, 8, rand(1080) * f_dir) 
+            leaf.moveOpacity(delay + 6, 2, 0)
           end
         end
       end
       
-      # Impacto Final tras el último tornado
-      t_hit = t_start + 20
-      tp.setSE(t_hit, "Anim/Super Damage", 100, 100)
+      t_hit = t_start + 12
+      tp.setSE(t_hit, "Anim/PRSFX- Focus Punch2", 100, 100)
       tp.moveColor(t_hit, 4, Color.new(100, 255, 100, 200))
       tp.moveColor(t_hit + 4, 6, Color.new(0,0,0,0))
       12.times { |i| tp.moveXY(t_hit + i, 1, orig_tx + (i.even? ? 15 : -15), orig_ty) }
