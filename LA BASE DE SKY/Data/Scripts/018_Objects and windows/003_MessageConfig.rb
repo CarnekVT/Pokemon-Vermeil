@@ -794,9 +794,9 @@ end
 # _background_ is a filename within the Graphics/UI/ folder and can be
 #     an animated image.
 # _viewport_ is a viewport to place the background in.
-def addBackgroundPlane(sprites, planename, background, viewport = nil)
+def addBackgroundPlane(sprites, planename, background, viewport = nil, folder = "UI")
   sprites[planename] = AnimatedPlane.new(viewport)
-  bitmapName = pbResolveBitmap("Graphics/UI/#{background}")
+  bitmapName = pbResolveBitmap(File.join("Graphics", folder, background))
   if bitmapName.nil?
     # Plane should exist in any case
     sprites[planename].bitmap = nil
@@ -815,8 +815,8 @@ end
 #       an animated image.
 # _color_ is the color to use if the background can't be found.
 # _viewport_ is a viewport to place the background in.
-def addBackgroundOrColoredPlane(sprites, planename, background, color, viewport = nil)
-  bitmapName = pbResolveBitmap("Graphics/UI/#{background}")
+def addBackgroundOrColoredPlane(sprites, planename, background, color, viewport = nil, folder = "UI")
+  bitmapName = pbResolveBitmap(File.join("Graphics", folder, background))
   if bitmapName.nil?
     # Plane should exist in any case
     sprites[planename] = ColoredPlane.new(color, viewport)
