@@ -208,6 +208,7 @@ class PokemonPokedexInfo_Scene
       next if sp.species != @species
       next if sp.form != 0 && (!sp.real_form_name || sp.real_form_name.empty?)
       next if sp.pokedex_form != sp.form
+      next if sp.hide_from_dex?
       multiple_forms = true if sp.form > 0
       if sp.single_gendered?
         real_gender = (sp.gender_ratio == :AlwaysFemale) ? 1 : 0

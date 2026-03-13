@@ -52,9 +52,8 @@ class PokedexSearcher < BaseSearcher
   # @return [Integer] The dex number minus 1.
   def on_search_complete(index)
     return false unless index
-    dex_number = @dexlist[index][:number] - 1
-    refresh_display(dex_number)
-    dex_number
+    refresh_display(index)
+    index
   end
 
   # Customized search prompt for Pokédex.

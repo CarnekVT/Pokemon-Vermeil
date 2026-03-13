@@ -41,6 +41,7 @@ module GameData
     attr_reader :unmega_form
     attr_reader :mega_message
     attr_reader :pbs_file_suffix
+    attr_reader :hide_from_dex
 
     DATA = {}
     DATA_FILENAME = "species.dat"
@@ -107,6 +108,7 @@ module GameData
         ret["Evolutions"]     = [:evolutions,         "*ses", nil, :Evolution]
         ret["Evolution"]      = [:evolutions,         "^seS", nil, :Evolution]
       end
+      ret["HideFromDex"]      = [:hide_from_dex,      "b"]
       return ret
     end
 
@@ -144,7 +146,8 @@ module GameData
         ["WildItemCommon",    GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) comúnmente llevado(s) por Pokémon salvajes de esta especie.")],
         ["WildItemUncommon",  GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) raramente llevado(s) por Pokémon salvajes de esta especie.")],
         ["WildItemRare",      GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) muy raramente llevado(s) por Pokémon salvajes de esta especie.")],
-        ["Evolutions",        EvolutionsProperty.new,             _INTL("Caminos evolutivos de esta especie.")]
+        ["Evolutions",        EvolutionsProperty.new,             _INTL("Caminos evolutivos de esta especie.")],
+        ["HideFromDex",       BooleanProperty.new,                _INTL("Indica si esta especie debe estar oculta en la Pokédex.")]
       ]
     end
 
@@ -239,6 +242,7 @@ module GameData
       @unmega_form        = hash[:unmega_form]        || -2
       @mega_message       = hash[:mega_message]       || 0
       @pbs_file_suffix    = hash[:pbs_file_suffix]    || ""
+      @hide_from_dex      = hash[:hide_from_dex]      || false
     end
 
     # @return [String] the translated name of this species
@@ -287,6 +291,10 @@ module GameData
 
     def has_flag?(flag)
       return @flags.any? { |f| f.downcase == flag.downcase }
+    end
+
+    def hide_from_dex?
+      return @hide_from_dex
     end
 
     def apply_metrics_to_sprite(sprite, index, shadow = false)

@@ -555,6 +555,8 @@ class PokemonPokedex_Scene
     regionalSpecies.each_with_index do |species, i|
       next if !species
       next if !pbCanAddForModeList?($PokemonGlobal.pokedexMode, species)
+      next if !GameData::Species.exists?(species)
+      next if GameData::Species.get(species).hide_from_dex?
       _gender, form, _shiny = $player.pokedex.last_form_seen(species)
       species_data = GameData::Species.get_species_form(species, form)
       ret.push({
@@ -622,14 +624,14 @@ class PokemonPokedex_Scene
       item = @dexlist[i]
       next if !$player.seen?(item[:species])
       next if item[:shift] && !$player.seen?(item[:species])
-      return pbRefreshDexList(item[:number] - 1) if item[:name].downcase.include?(text.downcase)
+      return pbRefreshDexList(i) if item[:name].downcase.include?(text.downcase)
     end
     if current_index > 0
       for i in 0...current_index
         item = @dexlist[i]
         next if !$player.seen?(item[:species])
         next if item[:shift] && !$player.seen?(item[:species])
-        return pbRefreshDexList(item[:number] - 1) if item[:name].downcase.include?(text.downcase)
+        return pbRefreshDexList(i) if item[:name].downcase.include?(text.downcase)
       end
     end
     return false
@@ -955,6 +957,9 @@ class PokemonPokedex_Scene
   def setIconBitmap(species)
     if species && $player.seen?(species)
       gender, form, shiny = $player.pokedex.last_form_seen(species)
+      if GameData::Species.get_species_form(species, form).hide_from_dex?
+        gender, form, shiny = 0, 0, false
+      end
     else
       gender, form, shiny = 0, 0, false
     end
