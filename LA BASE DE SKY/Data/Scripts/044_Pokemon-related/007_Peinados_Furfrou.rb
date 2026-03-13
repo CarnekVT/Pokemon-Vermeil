@@ -109,10 +109,10 @@ def peluquero_furfrou
 	new_form = get_haircut_choice(chosen_furfrou)
 
 	if is_cancel_choice?(new_form)
-			pbMessage(_INTL("De acuerdo, será en otra ocasión."))
+		pbMessage(_INTL("De acuerdo, será en otra ocasión."))
 	elsif has_same_haircut?(chosen_furfrou, new_form)
-			pbMessage(_INTL("{1} ya tiene ese peinado.", chosen_furfrou.name))
+		pbMessage(_INTL("{1} ya tiene ese peinado.", chosen_furfrou.name))
 	else
-			apply_haircut(chosen_furfrou, new_form)
+		apply_haircut(chosen_furfrou, new_form)
 	end
 end
