@@ -19,18 +19,18 @@ HAIRCUTS = [
 ]
 
 HAIRCUTS_TEXTS = [
-	"¡{1} ahora tiene un adorable corte en forma de corazón!",
-	"¡{1} brilla con su nuevo corte estrella!",
-	"¡{1} luce elegante con su corte rombo!",
-	"¡{1} se ve encantadora con su corte señorita!",
-	"¡{1} irradia elegancia con su corte dama!",
-	"¡{1} se ve distinguido con su corte caballero!",
-	"¡{1} luce majestuoso con su corte aristocrático!",
-	"¡{1} se ve espectacular con su corte kabuki!",
-	"¡{1} luce majestuoso con su corte faraónico!"
+	_INTL("¡{1} ahora tiene un adorable corte en forma de corazón!"),
+	_INTL("¡{1} brilla con su nuevo corte estrella!"),
+	_INTL("¡{1} luce elegante con su corte rombo!"),
+	_INTL("¡{1} se ve encantadora con su corte señorita!"),
+	_INTL("¡{1} irradia elegancia con su corte dama!"),
+	_INTL("¡{1} se ve distinguido con su corte caballero!"),
+	_INTL("¡{1} luce majestuoso con su corte aristocrático!"),
+	_INTL("¡{1} se ve espectacular con su corte kabuki!"),
+	_INTL("¡{1} luce majestuoso con su corte faraónico!")
 ]
-# Helper methods for better code organization
 
+# Helper methods for better code organization
 def select_furfrou_from_party
 	pbChoosePokemon(POKEMON_VARIABLE_INDEX, POKEMON_STORAGE_INDEX, proc { |pkmn|
 		next pkmn.isSpecies?(:FURFROU) && pkmn.able?
