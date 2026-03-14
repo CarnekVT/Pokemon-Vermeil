@@ -2,6 +2,7 @@ MenuHandlers.add(:debug_menu, :event_report_menu, {
   "name"        => _INTL("Reportes de eventos..."),
   "parent"      => :main,
   "description" => _INTL("Generar reportes para localizar eventos con información específica."),
+  "order"       => 9999,
   "always_show" => false
 })
 
