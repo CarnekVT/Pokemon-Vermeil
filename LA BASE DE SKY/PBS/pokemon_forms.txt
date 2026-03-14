@@ -84,7 +84,7 @@ Pokedex = Comienza su actividad cuando se pone el sol. Recorre la ciudad en pos 
 Generation = 7
 Flags = InheritFormWithEverStone
 WildItemUncommon = PECHABERRY
-Evolutions = RATICATE,LevelNight,20
+Evolution = RATICATE,LevelNight,20
 #-------------------------------
 [RATICATE,1]
 FormName = Forma Alola
@@ -104,77 +104,77 @@ WildItemUncommon = PECHABERRY
 FormName = Forma Coqueta
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,3]
 FormName = Forma Aristócrata
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,4]
 FormName = Forma Enmascarada
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,5]
 FormName = Forma Erudita
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,6]
 FormName = Forma Superstar
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,7]
 FormName = Forma Roquera
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,8]
 FormName = Forma Gorra Original
 GenderRatio = AlwaysMale
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,9]
 FormName = Forma Gorra Hoenn
 GenderRatio = AlwaysMale
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,10]
 FormName = Forma Gorra Sinnoh
 GenderRatio = AlwaysMale
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,11]
 FormName = Forma Gorra Teselia
 GenderRatio = AlwaysMale
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,12]
 FormName = Forma Gorra Kalos
 GenderRatio = AlwaysMale
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,13]
 FormName = Forma Gorra Alola
 GenderRatio = AlwaysMale
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,14]
 FormName = Forma Gorra Compañero
 GenderRatio = AlwaysMale
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,15]
 FormName = Forma Gorra Trotamundos
 GenderRatio = AlwaysMale
-Evolutions = RAICHU,None,
+Evolution = RAICHU,None,
 #-------------------------------
 [RAICHU,1]
 FormName = Forma Alola
@@ -227,7 +227,7 @@ Color = White
 Pokedex = Vive en montañas nevadas. Su caparazón de acero es muy resistente, pero tiene tal dureza que no le permite enrollarse del todo.
 Generation = 7
 Flags = InheritFormWithEverStone
-Evolutions = SANDSLASH,Item,ICESTONE
+Evolution = SANDSLASH,Item,ICESTONE
 #-------------------------------
 [SANDSLASH,1]
 FormName = Forma Alola
@@ -269,7 +269,7 @@ Pokedex = Cuando hace calor, crea rocas de hielo con sus seis colas y las disemi
 Generation = 7
 Flags = InheritFormWithEverStone
 WildItemUncommon = SNOWBALL
-Evolutions = NINETALES,Item,ICESTONE
+Evolution = NINETALES,Item,ICESTONE
 #-------------------------------
 [NINETALES,1]
 FormName = Forma Alola
@@ -324,7 +324,7 @@ Color = Blue
 Pokedex = Es un Pokémon muy orgulloso e inteligente. Se vale de su astucia en combate para atacar los puntos débiles de sus enemigos con obstinación.
 Generation = 7
 Flags = InheritFormWithEverStone
-Evolutions = PERSIAN,Happiness,
+Evolution = PERSIAN,Happiness,
 #-------------------------------
 [MEOWTH,2]
 FormName = Forma Galar
@@ -340,7 +340,7 @@ Shape = BipedalTail
 Pokedex = Cuanto más oscura es la moneda de su frente, mayor respeto inspira en sus congéneres. Es muy osado y no conoce el miedo.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = PERRSERKER,Level,28
+Evolution = PERRSERKER,Level,28
 #-------------------------------
 [PERSIAN,1]
 FormName = Forma Alola
@@ -492,7 +492,8 @@ EggMoves = BELCH,BELLYDRUM,BLOCK,STOMP
 Pokedex = Siempre está distraído, pero, de vez en cuando, muestra un extraño rictus en el rostro, tal vez debido a su alimentación.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = SLOWBRO,Item,GALARICACUFF,SLOWKING,Item,GALARICAWREATH
+Evolution = SLOWBRO,Item,GALARICACUFF
+Evolution = SLOWKING,Item,GALARICAWREATH
 #-------------------------------
 [SLOWBRO,1]
 FormName = Forma Galar
@@ -533,7 +534,7 @@ Pokedex = Este es el aspecto de los Farfetch'd que habitan en Galar. Son guerrer
 Generation = 8
 Flags = InheritFormWithEverStone
 WildItemCommon = LEEK
-Evolutions = SIRFETCHD,AfterBattleCounter,3
+Evolution = SIRFETCHD,AfterBattleCounter,3
 #-------------------------------
 [GRIMER,1]
 FormName = Forma Alola
@@ -587,7 +588,7 @@ Category = Esfera
 Pokedex = Curioso ejemplar que guarda cierta similitud con una Poké Ball. Cuanto más se altera, mayor es la descarga eléctrica que libera, a la que sigue una carcajada.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = ELECTRODE,Item,LEAFSTONE
+Evolution = ELECTRODE,Item,LEAFSTONE
 #-------------------------------
 [ELECTRODE,1]
 FormName = Forma Hisui
@@ -618,7 +619,7 @@ Generation = 7
 #-------------------------------
 [CUBONE,1]
 Generation = 7
-Evolutions = MAROWAK,LevelNight,28
+Evolution = MAROWAK,LevelNight,28
 #-------------------------------
 [MAROWAK,1]
 FormName = Forma Alola
@@ -683,7 +684,7 @@ Category = Danza
 Pokedex = El claqué es su especialidad. Genera una capa de hielo bajo sus pies, sobre la que taconea para crear barreras con las que protegerse.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = MRRIME,Level,42
+Evolution = MRRIME,Level,42
 #-------------------------------
 [PINSIR,1]
 FormName = Mega Pinsir
@@ -893,7 +894,7 @@ Generation = 9
 [PICHU,2]
 FormName = Forma Picoreja
 Generation = 4
-Evolutions = PIKACHU,None,
+Evolution = PIKACHU,None,
 #-------------------------------
 [AMPHAROS,1]
 FormName = Mega Ampharos
@@ -919,7 +920,7 @@ Category = Pez Veneno
 Pokedex = Ante el riesgo que le supone desplazarse solo, forma filas de tres o cuatro individuos que cuidan unos de otros mientras recorren los pantanos.
 Generation = 9
 Flags = InheritFormWithEverStone
-Evolutions = CLODSIRE,Level,20
+Evolution = CLODSIRE,Level,20
 #-------------------------------
 [SLOWKING,1]
 FormName = Forma Galar
@@ -1038,7 +1039,7 @@ EggMoves = ACIDSPRAY,AQUAJET,AQUATAIL,ASTONISH,BUBBLEBEAM,FLAIL,HAZE,SELFDESTRUC
 Pokedex = Segrega veneno a través de las agujas, razón por la que los pescadores lo odian. Los ejemplares de otras regiones presentan una forma diferente.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = OVERQWIL,HasMove,BARBBARRAGE
+Evolution = OVERQWIL,HasMove,BARBBARRAGE
 #-------------------------------
 [SCIZOR,1]
 FormName = Mega Scizor
@@ -1076,7 +1077,7 @@ Habitat = Mountain
 Pokedex = Sus robustas garras son ideales para moverse por los riscos más escarpados. De sus puntas rezuma un veneno que daña los nervios de las presas que captura.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = SNEASLER,DayHoldItem,RAZORCLAW
+Evolution = SNEASLER,DayHoldItem,RAZORCLAW
 #-------------------------------
 [CORSOLA,1]
 FormName = Forma Galar
@@ -1092,7 +1093,7 @@ Color = White
 Pokedex = Es habitual hallarlos en lo que antaño fueron lechos oceánicos. Maldice a aquellos que le dan un puntapié confundiéndolo con un pedrusco.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = CURSOLA,Level,38
+Evolution = CURSOLA,Level,38
 #-------------------------------
 [SKARMORY,1]
 FormName = Mega Skarmory
@@ -1181,7 +1182,7 @@ TutorMoves = ASSURANCE,ATTRACT,BLIZZARD,BODYPRESS,BODYSLAM,CAPTIVATE,CONFIDE,DIG
 Pokedex = Posee un carácter beligerante y temerario. Hace frente impávidamente a oponentes mucho más fuertes que él.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = OBSTAGOON,LevelNight,35
+Evolution = OBSTAGOON,LevelNight,35
 #-------------------------------
 [GARDEVOIR,1]
 FormName = Mega Gardevoir
@@ -1873,7 +1874,7 @@ Pokedex = Los Basculin con la raya roja y aquellos con la raya azul se llevan fa
 Generation = 5
 WildItemUncommon = DEEPSEATOOTH
 Flags = InheritFormFromMother
-Evolutions = BASCULEGION,None,
+Evolution = BASCULEGION,None,
 #-------------------------------
 [BASCULIN,3]
 FormName = Forma Raya Azul
@@ -1886,7 +1887,7 @@ Pokedex = Los Basculin con la raya roja y aquellos con la raya azul se llevan fa
 Generation = 5
 WildItemUncommon = DEEPSEASCALE
 Flags = InheritFormFromMother
-Evolutions = BASCULEGION,None,
+Evolution = BASCULEGION,None,
 #-------------------------------
 [DARUMAKA,2]
 FormName = Forma Galar
@@ -1900,7 +1901,7 @@ Color = White
 Pokedex = La adaptación a entornos nevados ha atrofiado y congelado su saca de fuego, pero ha propiciado el desarrollo de un órgano generador de frío.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = DARMANITAN,Item,ICESTONE
+Evolution = DARMANITAN,Item,ICESTONE
 #-------------------------------
 [DARMANITAN,1]
 FormName = Forma Daruma
@@ -1963,7 +1964,8 @@ EggMoves = MEMENTO
 Pokedex = Yamask ha sido poseído por una tabla de arcilla sobre la que pesa una maldición. Se dice que absorbe y se nutre de rencor e inquina.
 Generation = 8
 Flags = InheritFormWithEverStone
-Evolutions = RUNERIGUS,AfterBattleCounterMakeReady,49,RUNERIGUS,EventReady,2
+Evolution = RUNERIGUS,AfterBattleCounterMakeReady,49
+Evolution = RUNERIGUS,EventReady,2
 #-------------------------------
 [ZORUA,1]
 FormName = Forma Hisui
@@ -2315,7 +2317,7 @@ BaseExp = 243
 Moves = 1,TACKLE,1,VINEWHIP,1,FAIRYWIND,6,FAIRYWIND,10,LUCKYCHANT,15,RAZORLEAF,20,WISH,25,MAGICALLEAF,27,GRASSYTERRAIN,33,PETALBLIZZARD,38,AROMATHERAPY,43,MISTYTERRAIN,46,MOONBLAST,50,LIGHTOFRUIN,51,PETALDANCE,58,SOLARBEAM
 EggGroups = Undiscovered
 Pokedex = Hoy en día, la flor que lleva ya no se ve en la naturaleza. Se cree que alberga un temible poder.
-Evolutions = FLORGES,None,
+Evolution = FLORGES,None,
 #-------------------------------
 [FLOETTE,6]
 FormName = Mega Floette
@@ -2662,7 +2664,7 @@ Pokedex = Convoca a los muertos con su danza de ensueño. De su malicia extrae p
 Abilities = OWNTEMPO
 HiddenAbilities = OWNTEMPO
 Flags = InheritFormFromMother
-Evolutions = LYCANROC,LevelEvening,25
+Evolution = LYCANROC,LevelEvening,25
 #-------------------------------
 [LYCANROC,1]
 FormName = Forma Nocturna
@@ -2971,7 +2973,7 @@ Pokedex = Puede liberar descargas eléctricas de hasta 15.000 V. Se enfrenta a c
 [SINISTEA,1]
 FormName = Forma Genuina
 Pokedex = Espera a que algún incauto intente bebérselo para absorber su energía vital, pero suelen escupirlo enseguida debido a su mal sabor.
-Evolutions = POLTEAGEIST,Item,CHIPPEDPOT
+Evolution = POLTEAGEIST,Item,CHIPPEDPOT
 #-------------------------------
 [POLTEAGEIST,1]
 FormName = Forma Genuina
@@ -3544,7 +3546,7 @@ Pokedex = Vaga con una moneda cargada a la espalda. Para sobrevivir, absorbe la 
 [POLTCHAGEIST,1]
 FormName = Forma Opulenta
 Pokedex = Absorbe la energía vital de aquellos que prueban un bocado de cualquier comida condimentada con el polvo que conforma su cuerpo.
-Evolutions = SINISTCHA,Item,MASTERPIECETEACUP
+Evolution = SINISTCHA,Item,MASTERPIECETEACUP
 #-------------------------------
 [SINISTCHA,1]
 FormName = Forma Exquisita

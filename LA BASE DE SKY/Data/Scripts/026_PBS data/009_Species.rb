@@ -494,6 +494,7 @@ module GameData
       when "Habitat"
         ret = nil if ret == :None
       when "Evolutions", "Evolution"
+        return nil if key == "Evolutions"   # Already written by "Evolution"
         if ret
           ret = ret.reject { |evo| evo[3] }   # Remove prevolutions
           ret.each do |evo|
