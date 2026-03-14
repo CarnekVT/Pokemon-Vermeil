@@ -83,6 +83,7 @@ MenuHandlers.add(:debug_menu,:exportmap, {
   "parent"      => :field_menu,
   "name"        => _INTL("Exporta un Mapa"),
   "description" => _INTL("Elige un mapa para exportarlo como PNG."),
+  "order"       => 9999,
   "effect"      => proc { |sprites, viewport|
     pbExportAMap
   }
