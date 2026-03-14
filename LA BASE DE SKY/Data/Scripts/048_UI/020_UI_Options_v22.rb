@@ -709,7 +709,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
     option_width = rect.x + rect.width - option_start_x
     option = @options[this_index]
     case option[:type]
-    when :array
+    when :array, :array_one
       items = option[:parameters]
       scroll = @values[this_index][:scroll]
       selected = @values[this_index][:selected]
