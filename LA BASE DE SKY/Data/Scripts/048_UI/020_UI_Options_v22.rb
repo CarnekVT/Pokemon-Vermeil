@@ -1653,7 +1653,7 @@ if Settings::USE_NEW_OPTIONS_UI
     "page"        => :gameplay,
     "name"        => _INTL("Velocidad de texto"),
     "order"       => 10,
-    "type"        => :array,
+    "type"        => :arrow_option,
     "parameters"  => proc { [_INTL("Lento"), _INTL("Medio"), _INTL("Rápido"), _INTL("Instantáneo")] },
     "description" => _INTL("Elige la velocidad a la que aparece el texto."),
     "on_select"   => proc { |screen| screen.sprites[:speech_box].letterbyletter = true },
