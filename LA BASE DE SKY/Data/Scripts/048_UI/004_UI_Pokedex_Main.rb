@@ -665,6 +665,9 @@ class PokemonPokedex_Scene
       textpos.push([_INTL("Capturados:"), CAPTURED_TEXT_X, CAPTURED_TEXT_Y, :left, base, shadow])
       textpos.push([$player.pokedex.owned_count(pbGetPokedexRegion).to_s, CAPTURED_NUMBER_X, CAPTURED_NUMBER_Y, :left, base, shadow])
     end
+    # Teclas dinámicas para filtrar y buscar (arriba del fondo)
+    textpos.push([_INTL("[{1}]: Filtrar", KeybindingReader.key_name(:ACTION)), 8, 8, :left, Color.new(248, 248, 248), Color.black])
+    textpos.push([_INTL("[{1}]:", KeybindingReader.key_name(:SPECIAL)), Graphics.width - 44, 8, :right, Color.new(248, 248, 248), Color.black])
     # Draw all text
     pbDrawTextPositions(overlay, textpos)
     # Set Pokémon sprite

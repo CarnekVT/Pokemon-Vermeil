@@ -549,7 +549,7 @@ class PokemonParty_Scene
     @sprites["messagebox"].letterbyletter = true
     pbBottomLeftLines(@sprites["messagebox"], 2)
     @sprites["storagetext"] = Window_UnformattedTextPokemon.new(
-      @can_access_storage ? _INTL("[D]: Cajas del PC") : ""
+      @can_access_storage ? _INTL("[{1}]: Cajas del PC", KeybindingReader.key_name(:SPECIAL)) : ""
     )
     @sprites["storagetext"].x           = 0
     @sprites["storagetext"].y           = Graphics.height - @sprites["messagebox"].height - 16

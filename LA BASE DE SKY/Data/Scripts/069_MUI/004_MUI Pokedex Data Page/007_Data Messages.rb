@@ -179,10 +179,10 @@ class PokemonPokedexInfo_Scene
         drawFormattedTextEx(overlay, valueX, 324, 52, _INTL("{1}", values))
       end
       pbDrawTextPositions(overlay, [
-        [_INTL("[D]: Cambios"), Graphics.width/2-13, 292, :center, Color.new(0, 112, 248), Color.new(120, 184, 232)]
+        [_INTL("[{1}]: Cambios", KeybindingReader.key_name(:SPECIAL)), Graphics.width/2-13, 292, :center, Color.new(0, 112, 248), Color.new(120, 184, 232)]
       ]) if Settings::SHOW_STAT_CHANGES_WITH_POKEAPI
       pbDrawTextPositions(overlay, [
-        [_INTL("[C]: Similares"), Graphics.width - 34, 292, :right, Color.new(0, 112, 248), Color.new(120, 184, 232)]
+        [_INTL("[{1}]: Similares", KeybindingReader.key_name(:USE)), Graphics.width - 34, 292, :right, Color.new(0, 112, 248), Color.new(120, 184, 232)]
       ]) if !s2 && !@data_hash[:stats].empty?
     else
       text << _INTL("\nDesconocido.")
