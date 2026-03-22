@@ -307,6 +307,12 @@ module GameData
       return metrics_data.shows_shadow?
     end
 
+    def self.all_species
+      keys = []
+      GameData::Species.each { |species| keys.push(species.id) if species.form == 0 }
+      return keys
+    end
+
     def get_evolutions(exclude_invalid = false)
       ret = []
       @evolutions.each do |evo|

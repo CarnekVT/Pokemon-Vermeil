@@ -97,7 +97,7 @@ end
 
 # Modified pbChoosePokemon method
 class PokemonStorageScreen
-  def pbChoosePokemonFromPC(wanted, form, ableProc)
+  def pbChoosePokemonFromPC(wanted, form = -1, ableProc = nil)
     $game_temp.in_storage = true
     @heldpkmn = nil
     @scene.pbStartBox(self, 0)
@@ -129,7 +129,11 @@ class PokemonStorageScreen
         command = pbShowCommands(helptext, commands)
         case command
         when 0   # Select
-          if pokemon.species == wanted && (form == -1 || pokemon.form == form)
+          if ableProc && !ableProc.call(pokemon)
+            pbMessage(_INTL("¡Este Pokémon no puede ser intercambiado!"))
+            next
+          end
+          if !wanted || (pokemon.species == wanted && (form == -1 || pokemon.form == form))
             retval = selected
             break
           else
