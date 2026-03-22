@@ -3709,8 +3709,8 @@ Flags = Fling_30,Vitamin
 Description = Nutritiva bebida que aumenta la Defensa Especial de un Pokémon.
 #-------------------------------
 [CARBOS]
-Name = Carburante
-NamePlural = Carburantes
+Name = Carbohidratos
+NamePlural = Carbohidratos
 Pocket = 2
 Price = 10000
 FieldUse = OnPokemon

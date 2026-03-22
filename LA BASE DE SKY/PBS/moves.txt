@@ -3976,7 +3976,7 @@ Flags = CanProtect,CanMirrorMove,Powder
 Description = Esparce polvo que paraliza al objetivo.
 #-------------------------------
 [SYNTHESIS]
-Name = Síntesis
+Name = Fotosíntesis
 Type = GRASS
 Category = Status
 Accuracy = 0
@@ -6551,7 +6551,7 @@ Flags = Dance
 Description = Baile frenético que aumenta mucho el Ataque.
 #-------------------------------
 [TAILWHIP]
-Name = Látigo
+Name = Agitacola
 Type = NORMAL
 Category = Status
 Accuracy = 100
@@ -8054,7 +8054,7 @@ EffectChance = 100
 Description = Ataca lanzando un ancla al oponente, que queda atrapado y no puede huir.
 #-------------------------------
 [FLASHCANNON]
-Name = Foco Resplandor
+Name = Cañón Resplandor
 Type = STEEL
 Category = Special
 Power = 80
