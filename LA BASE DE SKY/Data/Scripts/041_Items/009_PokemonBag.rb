@@ -179,13 +179,12 @@ class PokemonBag
   # Useful for items that are toggled on/off for example the infinite repel.
   def replace_registered(old_item, new_item)
     return unless GameData::Item.exists?(old_item) && GameData::Item.exists?(new_item)
-    if registered?(old_item)
-      if registered?(new_item)
-        @registered_items.delete(old_item)
-      else
-        index = @registered_items.index(old_item)
-        @registered_items[index] = new_item
-      end
+    return unless registered?(old_item)
+    if registered?(new_item)
+      @registered_items.delete(old_item)
+    else
+      index = @registered_items.index(old_item)
+      @registered_items[index] = new_item
     end
   end
 
