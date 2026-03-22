@@ -127,6 +127,12 @@ class Spriteset_Map
     @@viewport3.color = $game_screen.flash_color
     @@viewport1.update
     @@viewport3.update
+    # Only update events that are on-screen
+    for sprite in @character_sprites
+      if sprite.character.is_a?(Game_Event)
+        sprite.update_footsteps
+      end
+    end
   end
 end
 

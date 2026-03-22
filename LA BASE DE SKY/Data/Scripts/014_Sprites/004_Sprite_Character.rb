@@ -61,6 +61,8 @@ end
 #===============================================================================
 class Sprite_Character < RPG::Sprite
   attr_accessor :character
+  attr_accessor :steps
+  attr_reader :follower
 
   def initialize(viewport, character = nil)
     super(viewport)
@@ -74,9 +76,17 @@ class Sprite_Character < RPG::Sprite
     self.zoom_x = TilemapRenderer::ZOOM_X
     self.zoom_y = TilemapRenderer::ZOOM_Y
     update
+    if $PokemonTemp && $PokemonTemp.respond_to?(:followers) &&
+       $game_temp.followers && $game_temp.followers.respond_to?(:realEvents) &&
+       $game_temp.followers.realEvents.is_a?(Array) &&
+       $game_temp.followers.realEvents.include?(@character)
+      @follower = true
+    end
+    @steps = []
   end
 
   def dispose
+    @steps.each { |e| e[0].dispose }
     @bushbitmap&.dispose
     @bushbitmap = nil
     @charbitmap&.dispose
@@ -206,6 +216,73 @@ class Sprite_Character < RPG::Sprite
     start_pending_animation
     # Update child graphics
     update_child_graphics
+    update_footsteps_aux
+    update_footsteps
+  end
+
+  def update_footsteps_aux
+    @old_x ||= @character.x
+    @old_y ||= @character.y
+    if (@character.x != @old_x || @character.y != @old_y) && !["", "nil"].include?(@character.character_name)
+      if @character == $game_player && $game_temp.followers &&
+         $game_temp.followers.respond_to?(:realEvents) &&
+         $game_temp.followers.realEvents.select { |e| !["", "nil"].include?(e.character_name) }.size > 0 &&
+         !FootprintsSettings::DUPLICATE_FOOTSTEPS_WITH_FOLLOWER
+        if !FootprintsSettings::EVENTNAME_MAY_NOT_INCLUDE.include?($game_temp.followers.realEvents[0].name) &&
+           !FootprintsSettings::FILENAME_MAY_NOT_INCLUDE.include?($game_temp.followers.realEvents[0].character_name)
+          make_steps = false
+        else
+          make_steps = true
+        end
+      elsif (!@character.respond_to?(:name) || !FootprintsSettings::EVENTNAME_MAY_NOT_INCLUDE.include?(@character.name)) &&
+             !FootprintsSettings::FILENAME_MAY_NOT_INCLUDE.include?(@character.character_name)
+        tilesetid = @character.map.instance_eval { @map.tileset_id }
+        make_steps = [2,1,0].any? do |e|
+          tile_id = @character.map.data[@old_x, @old_y, e]
+          next false if tile_id.nil?
+          next $data_tilesets[tilesetid].terrain_tags[tile_id] == 3
+        end
+      end
+      if make_steps
+        fstep = Sprite.new(self.viewport)
+        fstep.z = 0
+        dirs = [nil,"DownLeft","Down","DownRight","Left","Still","Right","UpLeft", "Up", "UpRight"]
+        if @character == $game_player && $PokemonGlobal.bicycle
+          fstep.bmp(File.join("Graphics", "Characters", "steps#{dirs[@character.direction]}Bike"))
+        else
+          fstep.bmp(File.join("Graphics", "Characters", "steps#{dirs[@character.direction]}"))
+        end
+        @steps ||= []
+        if @character == $game_player && $PokemonGlobal.bicycle
+          x = FootprintsSettings::BIKE_X_OFFSET
+          y = FootprintsSettings::BIKE_Y_OFFSET
+        else
+          x = FootprintsSettings::WALK_X_OFFSET
+          y = FootprintsSettings::WALK_Y_OFFSET
+        end
+        @steps << [fstep, @character.map, @old_x + x / Game_Map::TILE_WIDTH.to_f, @old_y + y / Game_Map::TILE_HEIGHT.to_f]
+      end
+    end
+    @old_x = @character.x
+    @old_y = @character.y
+  end
+
+  def update_footsteps
+    if @steps
+      for i in 0...@steps.size
+        next unless @steps[i]
+        sprite, map, x, y, ox = @steps[i]
+        sprite.x = -map.display_x / Game_Map::X_SUBPIXELS + x * Game_Map::TILE_WIDTH
+        sprite.y = -map.display_y / Game_Map::Y_SUBPIXELS + (y + 1) * Game_Map::TILE_HEIGHT
+        sprite.y -= Game_Map::TILE_HEIGHT
+        sprite.opacity -= FootprintsSettings::FADE_OUT_SPEED
+        if sprite.opacity <= 0
+          sprite.dispose
+          @steps[i] = nil
+        end
+      end
+      @steps.compact!
+    end
   end
 
   #-----------------------------------------------------------------------------
