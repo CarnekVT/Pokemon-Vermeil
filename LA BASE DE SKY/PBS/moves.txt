@@ -5972,7 +5972,7 @@ Description = Dulce gruñido que reduce el Ataque del contrincante.
 #-------------------------------
 [GROWTH]
 Name = Desarrollo
-Type = NORMAL
+Type = GRASS
 Category = Status
 Accuracy = 0
 TotalPP = 20
