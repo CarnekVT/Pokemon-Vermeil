@@ -150,6 +150,7 @@ class PokemonBag
       item[0] = new_id
       ret = true
     end
+    replace_registered(old_id, new_id) if ret
     return ret
   end
 
@@ -179,8 +180,12 @@ class PokemonBag
   def replace_registered(old_item, new_item)
     return unless GameData::Item.exists?(old_item) && GameData::Item.exists?(new_item)
     if registered?(old_item)
-      index = @registered_items.index(old_item)
-      @registered_items[index] = new_item
+      if registered?(new_item)
+        @registered_items.delete(old_item)
+      else
+        index = @registered_items.index(old_item)
+        @registered_items[index] = new_item
+      end
     end
   end
 
