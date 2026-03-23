@@ -151,6 +151,7 @@ class PokemonPokedexInfo_Scene
       @api_data = PokeAPI.get_data(species) if !s2 && !@api_data && Settings::SHOW_STAT_CHANGES_WITH_POKEAPI
       s2 = s2.base_stats if s2
       stats_order = [[:HP, :SPECIAL_ATTACK], [:ATTACK, :SPECIAL_DEFENSE], [:DEFENSE, :SPEED]]
+      has_changes = nil
       stats_order.each_with_index do |st, i|
         names = values = ""
         st.each_with_index do |s, j|
@@ -161,8 +162,10 @@ class PokemonPokedexInfo_Scene
             case
             when s1[s] > @api_data["stats"][s]
               color = t[3]
+              has_changes = true if has_changes.nil?
             when s1[s] < @api_data["stats"][s]
               color = t[1]
+              has_changes = true if has_changes.nil?
             else
               color = t[0]
             end
@@ -180,7 +183,7 @@ class PokemonPokedexInfo_Scene
       end
       pbDrawTextPositions(overlay, [
         [_INTL("[{1}]: Cambios", KeybindingReader.key_name(:SPECIAL)), Graphics.width/2-13, 292, :center, Color.new(0, 112, 248), Color.new(120, 184, 232)]
-      ]) if Settings::SHOW_STAT_CHANGES_WITH_POKEAPI
+      ]) if Settings::SHOW_STAT_CHANGES_WITH_POKEAPI && has_changes
       pbDrawTextPositions(overlay, [
         [_INTL("[{1}]: Similares", KeybindingReader.key_name(:USE)), Graphics.width - 34, 292, :right, Color.new(0, 112, 248), Color.new(120, 184, 232)]
       ]) if !s2 && !@data_hash[:stats].empty?
