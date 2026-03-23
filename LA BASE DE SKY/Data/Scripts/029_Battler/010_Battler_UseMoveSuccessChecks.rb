@@ -276,7 +276,7 @@ class Battle::Battler
       @effects[PBEffects::Confusion] -= 1
       if @effects[PBEffects::Confusion] <= 0
         pbCureConfusion
-        @battle.pbDisplay(_INTL("¡{1} ya no está confuso.", pbThis))
+        @battle.pbDisplay(_INTL("¡{1} ya no está confuso!", pbThis))
       else
         @battle.pbCommonAnimation("Confusion", self)
         @battle.pbDisplay(_INTL("¡{1} está confuso!", pbThis))
