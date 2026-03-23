@@ -143,10 +143,11 @@ class PokemonPokedexInfo_Scene
     t = DATA_TEXT_TAGS
     pbDrawImagePositions(overlay, [[path, 0, 90, 0, 56, 222, 188]])
     owned = $player.owned?(@species)
-    text = t[0] + _INTL("Estadísticas") 
+    # text = t[0] + _INTL("Estadísticas")+ "-"
+    text = ""
     if owned
       nt = (s2 && s2.base_stat_total == species.base_stat_total) ? t[2] : t[1]
-      text << " - " + nt + _ISPRINTF("Total: {1:3d}", species.base_stat_total)
+      text << nt + _ISPRINTF("Total BST: {1:3d}", species.base_stat_total)
       s1 = species.base_stats
       @api_data = PokeAPI.get_data(species) if !s2 && !@api_data && Settings::SHOW_STAT_CHANGES_WITH_POKEAPI
       s2 = s2.base_stats if s2
@@ -182,10 +183,10 @@ class PokemonPokedexInfo_Scene
         drawFormattedTextEx(overlay, valueX, 324, 52, _INTL("{1}", values))
       end
       pbDrawTextPositions(overlay, [
-        [_INTL("[{1}]: Cambios", KeybindingReader.key_name(:SPECIAL)), Graphics.width/2-13, 292, :center, Color.new(0, 112, 248), Color.new(120, 184, 232)]
+        [_INTL("[{1}]: Cambios", KeybindingReader.key_name(:SPECIAL)), Graphics.width/2 - 4, 292, :center, Color.new(0, 112, 248), Color.new(120, 184, 232)]
       ]) if Settings::SHOW_STAT_CHANGES_WITH_POKEAPI && has_changes
       pbDrawTextPositions(overlay, [
-        [_INTL("[{1}]: Similares", KeybindingReader.key_name(:USE)), Graphics.width - 34, 292, :right, Color.new(0, 112, 248), Color.new(120, 184, 232)]
+        [_INTL("[{1}]: Similares", KeybindingReader.key_name(:USE)), Graphics.width - 43, 292, :right, Color.new(0, 112, 248), Color.new(120, 184, 232)]
       ]) if !s2 && !@data_hash[:stats].empty?
     else
       text << _INTL("\nDesconocido.")
