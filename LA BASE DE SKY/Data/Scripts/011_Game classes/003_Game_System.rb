@@ -189,7 +189,7 @@ class Game_System
       if FileTest.audio_exist?(filename)
         vol = me.volume
         vol *= $PokemonSystem.main_volume / 100.0
-        vol *= $PokemonSystem.bgmvolume / 100.0
+        vol *= $PokemonSystem.sevolume / 100.0
         vol = vol.to_i
         Audio.me_play(filename, vol, me.pitch)
       end
