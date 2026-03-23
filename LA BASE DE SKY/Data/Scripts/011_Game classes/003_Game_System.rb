@@ -96,8 +96,8 @@ class Game_System
       @playing_bgm = bgm&.clone
     end
     if bgm && bgm.name != ""
-      if !@defaultBGM && FileTest.audio_exist?("Audio/BGM/" + bgm.name)
-        bgm_play_internal2("Audio/BGM/" + bgm.name, bgm.volume, bgm.pitch, @bgm_position, track)
+      if !@defaultBGM && FileTest.audio_exist?(File.join("Audio", "BGM", bgm.name))
+        bgm_play_internal2(File.join("Audio", "BGM", bgm.name), bgm.volume, bgm.pitch, @bgm_position, track)
       end
     else
       if !track || track == 0
@@ -107,7 +107,7 @@ class Game_System
       Audio.bgm_stop(track) if !@defaultBGM
     end
     if @defaultBGM
-      bgm_play_internal2("Audio/BGM/" + @defaultBGM.name,
+      bgm_play_internal2(File.join("Audio", "BGM", @defaultBGM.name),
                          @defaultBGM.volume, @defaultBGM.pitch, @bgm_position, track)
     end
     Graphics.frame_reset
@@ -184,12 +184,12 @@ class Game_System
   def me_play(me)
     me = RPG::AudioFile.new(me) if me.is_a?(String)
     if me && me.name != ""
-      if FileTest.audio_exist?("Audio/ME/" + me.name)
+      if FileTest.audio_exist?(File.join("Audio", "ME", me.name))
         vol = me.volume
         vol *= $PokemonSystem.main_volume / 100.0
         vol *= $PokemonSystem.bgmvolume / 100.0
         vol = vol.to_i
-        Audio.me_play("Audio/ME/" + me.name, vol, me.pitch)
+        Audio.me_play(File.join("Audio", "ME", me.name), vol, me.pitch)
       end
     else
       Audio.me_stop
@@ -202,12 +202,12 @@ class Game_System
   def bgs_play(bgs)
     @playing_bgs = (bgs.nil?) ? nil : bgs.clone
     if bgs && bgs.name != ""
-      if FileTest.audio_exist?("Audio/BGS/" + bgs.name)
+      if FileTest.audio_exist?(File.join("Audio", "BGS", bgs.name))
         vol = bgs.volume
         vol *= $PokemonSystem.main_volume / 100.0
         vol *= $PokemonSystem.sevolume / 100.0
         vol = vol.to_i
-        Audio.bgs_play("Audio/BGS/" + bgs.name, vol, bgs.pitch)
+        Audio.bgs_play(File.join("Audio", "BGS", bgs.name), vol, bgs.pitch)
       end
     else
       @bgs_position = 0
@@ -269,23 +269,23 @@ class Game_System
 
   def se_play(se)
     se = RPG::AudioFile.new(se) if se.is_a?(String)
-    if se && se.name != "" && FileTest.audio_exist?("Audio/SE/" + se.name)
+    if se && se.name != "" && FileTest.audio_exist?(File.join("Audio", "SE", se.name))
       vol = se.volume
       vol *= $PokemonSystem.main_volume / 100.0
       vol *= $PokemonSystem.sevolume / 100.0
       vol = vol.to_i
-      Audio.se_play("Audio/SE/" + se.name, vol, se.pitch)
+      Audio.se_play(File.join("Audio", "SE", se.name), vol, se.pitch)
     end
   end
 
   def pokemon_cry_play(se)
     se = RPG::AudioFile.new(se) if se.is_a?(String)
-    if se && se.name != "" && FileTest.audio_exist?("Audio/SE/" + se.name)
+    if se && se.name != "" && FileTest.audio_exist?(File.join("Audio", "SE", se.name))
       vol = se.volume
       vol *= $PokemonSystem.main_volume / 100.0
       vol *= $PokemonSystem.pokemon_cry_volume / 100.0
       vol = vol.to_i
-      Audio.se_play("Audio/SE/" + se.name, vol, se.pitch)
+      Audio.se_play(File.join("Audio", "SE", se.name), vol, se.pitch)
     end
   end
 
