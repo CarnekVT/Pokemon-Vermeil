@@ -42,6 +42,7 @@ module GameData
     attr_reader :mega_message
     attr_reader :pbs_file_suffix
     attr_reader :hide_from_dex
+    attr_reader :region
 
     DATA = {}
     DATA_FILENAME = "species.dat"
@@ -61,6 +62,7 @@ module GameData
       ret["FormName"]         = [:real_form_name,     "q"]
       if compiling_forms
         ret["PokedexForm"]    = [:pokedex_form,       "u"]
+        ret["Region"]         = [:region,             "q"]
         ret["MegaStone"]      = [:mega_stone,         "e", :Item]
         ret["MegaMove"]       = [:mega_move,          "e", :Move]
         ret["UnmegaForm"]     = [:unmega_form,        "i"]
@@ -147,7 +149,8 @@ module GameData
         ["WildItemUncommon",  GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) raramente llevado(s) por Pokémon salvajes de esta especie.")],
         ["WildItemRare",      GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) muy raramente llevado(s) por Pokémon salvajes de esta especie.")],
         ["Evolutions",        EvolutionsProperty.new,             _INTL("Caminos evolutivos de esta especie.")],
-        ["HideFromDex",       BooleanProperty.new,                _INTL("Indica si esta especie debe estar oculta en la Pokédex.")]
+        ["HideFromDex",       BooleanProperty.new,                _INTL("Indica si esta especie debe estar oculta en la Pokédex.")],
+        ["Region",            StringProperty,                     _INTL("Nombre de la región en la que debutó el Pokémon pensado para las formas regionales.")]
       ]
     end
 
@@ -241,8 +244,9 @@ module GameData
       @mega_move          = hash[:mega_move]
       @unmega_form        = hash[:unmega_form]        || -2
       @mega_message       = hash[:mega_message]       || 0
-      @pbs_file_suffix    = hash[:pbs_file_suffix]    || ""
       @hide_from_dex      = hash[:hide_from_dex]      || false
+      @region             = hash[:region]             || ""
+      @pbs_file_suffix    = hash[:pbs_file_suffix]    || ""
     end
 
     # @return [String] the translated name of this species
@@ -263,6 +267,10 @@ module GameData
     # @return [String] the translated Pokédex entry of this species
     def pokedex_entry
       return pbGetMessageFromHash(MessageTypes::POKEDEX_ENTRIES, @real_pokedex_entry)
+    end
+
+    def region
+      return @region
     end
 
     def default_form
