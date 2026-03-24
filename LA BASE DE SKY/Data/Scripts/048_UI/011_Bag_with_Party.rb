@@ -609,12 +609,11 @@ class PokemonBagPartyPanel < Sprite
             w = @pokemon.hp * 94 / @pokemon.totalhp.to_f
             w = 1 if w < 1
             w = ((w / 2).round) * 2
-            hpzone = 0
-            hpzone = 1 if @pokemon.hp <= (@pokemon.totalhp / 2).floor
-            hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 3).floor
-            hpzone = 3 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
-            hprect = Rect.new(0, hpzone * 8, w, 8)
-            @overlaysprite.bitmap.blt(HP_BAR_DRAW_X, HP_BAR_DRAW_Y, @hpbar.bitmap, hprect)
+            color_index, next_color_index, blend_alpha = pbHPBarZoneInfo(@pokemon.hp, @pokemon.totalhp, 4)
+            @overlaysprite.bitmap.blt(HP_BAR_DRAW_X, HP_BAR_DRAW_Y, @hpbar.bitmap, Rect.new(0, color_index * 8, w, 8))
+            if blend_alpha > 0 && color_index != next_color_index
+              @overlaysprite.bitmap.blt(HP_BAR_DRAW_X, HP_BAR_DRAW_Y, @hpbar.bitmap, Rect.new(0, next_color_index * 8, w, 8), blend_alpha)
+            end
           end
           # Draw status
           status = -1

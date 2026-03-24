@@ -289,14 +289,18 @@ class PokemonSummary_Scene
       w = @pokemon.hp * HP_BAR_MAX_WIDTH / @pokemon.totalhp.to_f
       w = HP_BAR_MIN_WIDTH if w < HP_BAR_MIN_WIDTH
       w = ((w / HP_BAR_WIDTH_ROUND_UNIT).round) * HP_BAR_WIDTH_ROUND_UNIT
-      hpzone = 0
-      hpzone = 1 if @pokemon.hp <= (@pokemon.totalhp / 2).floor
-      hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 3).floor
-      hpzone = 3 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
-      imagepos = [
-        [HP_BAR_IMAGE, 360, 110, 0, hpzone * HP_BAR_HEIGHT, w, HP_BAR_HEIGHT]
-      ]
-      pbDrawImagePositions(overlay, imagepos)
+      color_index, next_color_index, blend_alpha = pbHPBarZoneInfo(@pokemon.hp, @pokemon.totalhp, 4)
+      if blend_alpha > 0 && color_index != next_color_index
+        hp_bmp = AnimatedBitmap.new(HP_BAR_IMAGE)
+        overlay.blt(360, 110, hp_bmp.bitmap, Rect.new(0, color_index * HP_BAR_HEIGHT, w, HP_BAR_HEIGHT))
+        overlay.blt(360, 110, hp_bmp.bitmap, Rect.new(0, next_color_index * HP_BAR_HEIGHT, w, HP_BAR_HEIGHT), blend_alpha)
+        hp_bmp.dispose
+      else
+        imagepos = [
+          [HP_BAR_IMAGE, 360, 110, 0, color_index * HP_BAR_HEIGHT, w, HP_BAR_HEIGHT]
+        ]
+        pbDrawImagePositions(overlay, imagepos)
+      end
     end
     hiddenpower = pbHiddenPower(@pokemon)
     type_number = GameData::Type.get(hiddenpower[0]).icon_position

@@ -177,6 +177,12 @@ module Settings
     # Agrega el porcentaje de vida restante del Pokémon enemigo debajo de la barra de vida.
     SHOW_ENEMY_HP_PERCENTAGE = true
 
+    # Modo de color de la barra de HP.
+    #   :gradient     - Degradado suave entre colores adyacentes
+    #   :classic      - 3 colores fijos (verde >50%, amarillo 50-25%, rojo <25%)
+    #   :four_colors  - 4 colores fijos (verde >75%, amarillo 75-50%, naranja 50-25%, rojo <25%)
+    HP_BAR_COLOR_MODE = :gradient
+
     # Muestra los peligros de entrada (púas, trampa rocas, tela de araña) en la pantalla de batalla.
     SHOW_HAZARDS_IN_BATTLE = false
 
