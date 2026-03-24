@@ -1701,7 +1701,7 @@ end
 #===============================================================================
 class Battle::Move::TypeAndPowerDependOnWeather < Battle::Move
   def pbBasePower(base_power, user, target)
-    base_power *= 2 if user.effectiveWeather != :None
+    base_power *= 2 if user.effectiveWeather != :None || user.hasActiveAbility?(:MEGASOL)
     return base_power
   end
 

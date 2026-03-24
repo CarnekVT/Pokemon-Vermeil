@@ -385,22 +385,22 @@ class Battle::AI::AIMove
         when :FIRE
           multipliers[:final_damage_multiplier] *= 1.5
         when :WATER
-          if function_code == "IncreasePowerInSun" && ([:Sun, :HarshSun].include?(user.battler.effectiveWeather) || user.has_active_ability?(:MEGASOL))
+          if function_code == "IncreasePowerInSun" && [:Sun, :HarshSun].include?(user.battler.effectiveWeather)
             multipliers[:final_damage_multiplier] *= 1.5
           else
             multipliers[:final_damage_multiplier] /= 2
           end
         else
-          if function_code == "IncreasePowerInSun" && ([:Sun, :HarshSun].include?(user.battler.effectiveWeather) || user.has_active_ability?(:MEGASOL))
+          if function_code == "IncreasePowerInSun" && [:Sun, :HarshSun].include?(user.battler.effectiveWeather)
             multipliers[:final_damage_multiplier] *= 1.5
           end
         end
       when :Rain, :HeavyRain
         case calc_type
         when :FIRE
-          multipliers[:final_damage_multiplier] /= 2 if !user.has_active_ability?(:MEGASOL)
+          multipliers[:final_damage_multiplier] /= 2 
         when :WATER
-          multipliers[:final_damage_multiplier] *= 1.5 if !user.has_active_ability?(:MEGASOL)
+          multipliers[:final_damage_multiplier] *= 1.5
         end
       when :Sandstorm
         if target.has_type?(:ROCK) && specialMove?(calc_type) &&
@@ -413,18 +413,6 @@ class Battle::AI::AIMove
         if target.pbHasType?(:ICE) &&
             (physicalMove?(calc_type) || function_code == "UseTargetDefenseInsteadOfTargetSpDef")
           multipliers[:defense_multiplier] *= 1.5
-        end
-      end
-    end
-    if ![:Sun, :HarshSun].include?(target.battler.effectiveWeather) && user.has_active_ability?(:MEGASOL)
-      case calc_type
-      when :FIRE
-        multipliers[:final_damage_multiplier] *= 1.5
-      when :WATER
-        multipliers[:final_damage_multiplier] /= 2
-      else
-        if function_code == "IncreasePowerInSun"
-          multipliers[:final_damage_multiplier] *= 1.5
         end
       end
     end

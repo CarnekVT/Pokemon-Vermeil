@@ -1793,6 +1793,28 @@ Battle::AbilityEffects::DamageCalcFromAlly.add(:STEELYSPIRIT,
   }
 )
 
+Battle::AbilityEffects::DamageCalcFromUser.add(:MEGASOL,
+  proc { |ability, user, target, move, mults, power, type|
+    if ![:Sun, :HarshSun].include?(user.effectiveWeather)
+      case move.type
+      when :FIRE
+        mults[:final_damage_multiplier] *= 1.5
+      when :WATER
+        if move.function_code == "IncreasePowerInSun" 
+          mults[:final_damage_multiplier] *= 1.5 
+        else
+          mults[:final_damage_multiplier] /= 2
+        end
+      else
+        if move.function_code == "IncreasePowerInSun"
+          mults[:final_damage_multiplier] *= 1.5
+        end
+      end
+    end
+  }
+)
+
+
 #===============================================================================
 # DamageCalcFromTarget handlers
 #===============================================================================

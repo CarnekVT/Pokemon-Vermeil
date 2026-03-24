@@ -475,13 +475,13 @@ class Battle::Move
       when :FIRE
         multipliers[:final_damage_multiplier] *= 1.5
       when :WATER
-        if @function_code == "IncreasePowerInSun" && ([:Sun, :HarshSun].include?(user.effectiveWeather) || user.hasActiveAbility?(:MEGASOL))
+        if @function_code == "IncreasePowerInSun" && [:Sun, :HarshSun].include?(user.effectiveWeather)
           multipliers[:final_damage_multiplier] *= 1.5
         else
           multipliers[:final_damage_multiplier] /= 2
         end
       else
-        if @function_code == "IncreasePowerInSun" && ([:Sun, :HarshSun].include?(user.effectiveWeather) || user.hasActiveAbility?(:MEGASOL))
+        if @function_code == "IncreasePowerInSun" && [:Sun, :HarshSun].include?(user.effectiveWeather)
           multipliers[:final_damage_multiplier] *= 1.5
         end
       end
@@ -502,24 +502,6 @@ class Battle::Move
       if target.pbHasType?(:ICE) && 
          (physicalMove? || @function_code == "UseTargetDefenseInsteadOfTargetSpDef")
         multipliers[:defense_multiplier] *= 1.5
-      end
-    end
-
-    # Mega Sol cuando no hay clima soleado
-    if ![:Sun, :HarshSun].include?(target.effectiveWeather) && user.hasActiveAbility?(:MEGASOL)
-      case type
-      when :FIRE
-        multipliers[:final_damage_multiplier] *= 1.5 
-      when :WATER
-        if @function_code == "IncreasePowerInSun"
-          multipliers[:final_damage_multiplier] *= 2 
-        else
-          multipliers[:final_damage_multiplier] /= 2
-        end
-      else
-        if @function_code == "IncreasePowerInSun"
-          multipliers[:final_damage_multiplier] *= 1.5
-        end
       end
     end
 
