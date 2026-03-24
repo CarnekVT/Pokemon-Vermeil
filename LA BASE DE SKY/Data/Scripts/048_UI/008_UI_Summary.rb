@@ -914,7 +914,8 @@ class PokemonSummary_Scene
       w = ((w / 2).round) * 2
       hpzone = 0
       hpzone = 1 if @pokemon.hp <= (@pokemon.totalhp / 2).floor
-      hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
+      hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 3).floor
+      hpzone = 3 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
       imagepos = [
         ["Graphics/UI/Summary/overlay_hp", P3_HP_BAR_X, P3_HP_BAR_Y, 0, hpzone * 6, w, 6]
         #["Graphics/UI/Controls help/help_specialkey", 395, 322]

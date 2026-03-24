@@ -83,6 +83,8 @@ class Battle::Scene::PokemonDataBox < Sprite
   HP_NUM_MAX_X      = 70
   HP_NUM_MAX_Y      = 2
 
+  HP_COLOR_COUNT = 4   # Number of different HP bar colors (green, yellow, orange, red)
+
   def initialize(battler, sideSize, viewport = nil)
     super(viewport)
     @battler         = battler
@@ -162,7 +164,7 @@ class Battle::Scene::PokemonDataBox < Sprite
     # Create sprite wrapper that displays HP bar
     @hpBar = Sprite.new(viewport)
     @hpBar.bitmap = @hpBarBitmap.bitmap
-    @hpBar.src_rect.height = @hpBarBitmap.height / 3
+    @hpBar.src_rect.height = @hpBarBitmap.height / HP_COLOR_COUNT
     @sprites["hpBar"] = @hpBar
     # Create sprite wrapper that displays Exp bar
     @expBar = Sprite.new(viewport)
@@ -414,8 +416,10 @@ class Battle::Scene::PokemonDataBox < Sprite
     @hpBar.src_rect.width = w
     hpColor = 0                                      # Green bar
     hpColor = 1 if self.hp <= @battler.totalhp / 2   # Yellow bar
-    hpColor = 2 if self.hp <= @battler.totalhp / 4   # Red bar
-    @hpBar.src_rect.y = hpColor * @hpBarBitmap.height / 3
+    hpColor = 2 if self.hp <= @battler.totalhp / 3   # Orange bar
+    hpColor = 3 if self.hp <= @battler.totalhp / 4   # Red bar
+    echoln "HP: #{self.hp}/#{@battler.totalhp} (Color: #{hpColor})"
+    @hpBar.src_rect.y = hpColor * @hpBarBitmap.height / HP_COLOR_COUNT
   end
 
   def refresh_exp

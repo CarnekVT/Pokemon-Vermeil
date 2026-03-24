@@ -291,7 +291,8 @@ class PokemonSummary_Scene
       w = ((w / HP_BAR_WIDTH_ROUND_UNIT).round) * HP_BAR_WIDTH_ROUND_UNIT
       hpzone = 0
       hpzone = 1 if @pokemon.hp <= (@pokemon.totalhp / 2).floor
-      hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
+      hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 3).floor
+      hpzone = 3 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
       imagepos = [
         [HP_BAR_IMAGE, 360, 110, 0, hpzone * HP_BAR_HEIGHT, w, HP_BAR_HEIGHT]
       ]

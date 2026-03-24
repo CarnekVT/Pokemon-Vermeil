@@ -611,7 +611,8 @@ class PokemonBagPartyPanel < Sprite
             w = ((w / 2).round) * 2
             hpzone = 0
             hpzone = 1 if @pokemon.hp <= (@pokemon.totalhp / 2).floor
-            hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
+            hpzone = 2 if @pokemon.hp <= (@pokemon.totalhp / 3).floor
+            hpzone = 3 if @pokemon.hp <= (@pokemon.totalhp / 4).floor
             hprect = Rect.new(0, hpzone * 8, w, 8)
             @overlaysprite.bitmap.blt(HP_BAR_DRAW_X, HP_BAR_DRAW_Y, @hpbar.bitmap, hprect)
           end
