@@ -680,7 +680,7 @@ module Settings
   # Los créditos de los Plugins y del motor de Essentials se añaden de forma
   # automática al final de los créditos.
   def self.game_credits
-    return [
+    base_credits = [
     
       " PON AQUÍ TUS CRÉDITOS ",
       "",
@@ -688,9 +688,9 @@ module Settings
       "LA BASE DE SKY",
       _INTL("Creada por:"),
       "Skyflyer<s>DPertierra",
+      "ZikSanchez",
       "",
       _INTL("Colaboraciones:"),
-      "ZikSanchez",
       "DarmanInigo<s>Nieves1236",
       "deNombreTuri<s>Pokepachito",
       "Ebaru",
@@ -741,8 +741,6 @@ module Settings
       "",_INTL("Pokédex regionales:"),
       "HeddyGames",
       "",
-      "",_INTL("Incubadora:"),
-      "Kyu",
       "",
       "",
       "",_INTL("Huellas de Pokémon"),
@@ -760,6 +758,19 @@ module Settings
       "Joe Dan<s>Nick Nayme",
       "Sue Donnim<s>"
     ]
+    return base_credits + read_credits_from_file
+  end
+
+  def self.read_credits_from_file(filename="credits.txt")
+    credits = []
+    if File.exist?(filename)
+      File.open(filename, "r") do |f|
+        f.each_line do |line|
+          credits.push(line.chomp)
+        end
+      end
+    end
+    return credits.uniq
   end
 end
 
