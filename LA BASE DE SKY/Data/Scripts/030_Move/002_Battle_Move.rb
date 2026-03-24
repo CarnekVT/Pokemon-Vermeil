@@ -50,7 +50,7 @@ class Battle::Move
     @priority      = move.priority
     @flags         = move.flags.clone
     @addlEffect    = move.effect_chance
-    @powerBoost    = false   # For Aerilate, Pixilate, Refrigerate, Galvanize
+    @powerBoost    = false   # For Aerilate, Pixilate, Refrigerate, Galvanize, Dragonize
     @snatched      = false
   end
 

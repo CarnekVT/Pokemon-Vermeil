@@ -1255,3 +1255,7 @@ Description = Su caparazón encierra energía de todos los tipos. Gracias a ello
 [TERAFORMZERO]
 Name = Teracaparazón
 Description = Cuando Terapagos adopta la Forma Astral, anula todos los efectos del tiempo atmosférico y de los campos que haya en el terreno gracias a su poder oculto.
+#-------------------------------
+[DRAGONIZE]
+Name = Piel Dragontina
+Description = Convierte los movimientos de tipo Normal en tipo Dragón y aumenta su potencia en un 20%.

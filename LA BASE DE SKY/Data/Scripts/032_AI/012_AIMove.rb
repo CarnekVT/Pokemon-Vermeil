@@ -222,7 +222,7 @@ class Battle::AI::AIMove
     # Ability effects that alter damage
     if user.ability_active?
       case user.ability_id
-      when :AERILATE, :GALVANIZE, :PIXILATE, :REFRIGERATE
+      when :AERILATE, :GALVANIZE, :PIXILATE, :REFRIGERATE, :DRAGONIZE
         multipliers[:power_multiplier] *= 1.2 if self.type == :NORMAL   # NOTE: Not calc_type.
       when :ANALYTIC
         if rough_priority(user) <= 0
