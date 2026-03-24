@@ -435,22 +435,22 @@ class PokemonPokedex_Scene
   # For modes 3 and 4 (height/weight) the values for :xgap and :cols are
   # computed dynamically because they depend on `cmds.length`.
   DEXSEARCH_PARAM_LAYOUTS = {
-        :default => { xstart: 46,  ystart: 128, xgap: 236, ygap: 64,  halfwidth: 92, cols: 2, selbuttony: 0,   selbuttonheight: 44,
-            top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        0 => { xstart: 46,  ystart: 128, xgap: 236, ygap: 64,  halfwidth: 92, cols: 2, selbuttony: 0,   selbuttonheight: 44,
+      :default => { xstart: 46,  ystart: 128, xgap: 236, ygap: 64,  halfwidth: 92, cols: 2, selbuttony: 0,   selbuttonheight: 44,
           top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        1 => { xstart: 78,  ystart: 114, xgap: 52,  ygap: 52,  halfwidth: 22, cols: 7, selbuttony: 156, selbuttonheight: 44,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        2 => { xstart: 8,   ystart: 104, xgap: 124, ygap: 44,  halfwidth: 62, cols: 4, selbuttony: 44,  selbuttonheight: 44,
-          top_text_x_base: 298, top_blt_x_base: 250, top_spacing: 128, top_text_y: 66, top_blt_y: 58 },
-        3 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        4 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        5 => { xstart: 62,  ystart: 114, xgap: 132, ygap: 52,  halfwidth: 62, cols: 3, selbuttony: 44,  selbuttonheight: 44,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 0,   top_text_y: 66, top_blt_y: 50 },
-        6 => { xstart: 82,  ystart: 116, xgap: 70,  ygap: 70,  halfwidth: 0,  cols: 5, selbuttony: 88,  selbuttonheight: 68,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 0,   top_text_y: 66, top_blt_y: 50 }
+      0 => { xstart: 46,  ystart: 128, xgap: 236, ygap: 64,  halfwidth: 92, cols: 2, selbuttony: 0,   selbuttonheight: 44,
+        top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
+      1 => { xstart: 78,  ystart: 114, xgap: 52,  ygap: 52,  halfwidth: 22, cols: 7, selbuttony: 156, selbuttonheight: 44,
+        top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
+      2 => { xstart: 8,   ystart: 104, xgap: 124, ygap: 44,  halfwidth: 62, cols: 4, selbuttony: 44,  selbuttonheight: 44,
+        top_text_x_base: 298, top_blt_x_base: 250, top_spacing: 128, top_text_y: 66, top_blt_y: 58 },
+      3 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
+        top_text_x_base: 295, top_blt_x_base: 250, top_spacing: 128, top_text_y: 66, top_blt_y: 44 },
+      4 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
+        top_text_x_base: 295, top_blt_x_base: 430, top_spacing: 128, top_text_y: 66, top_blt_y: 52 },
+      5 => { xstart: 62,  ystart: 114, xgap: 132, ygap: 52,  halfwidth: 62, cols: 3, selbuttony: 44,  selbuttonheight: 44,
+        top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 0,   top_text_y: 66, top_blt_y: 44 },
+      6 => { xstart: 82,  ystart: 116, xgap: 70,  ygap: 70,  halfwidth: 0,  cols: 5, selbuttony: 88,  selbuttonheight: 68,
+        top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 0,   top_text_y: 66, top_blt_y: 50 }
   }
 
 
