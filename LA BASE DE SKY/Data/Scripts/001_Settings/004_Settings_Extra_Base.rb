@@ -412,3 +412,54 @@ module FootprintsSettings
     # Aquí se pueden añadir más textos si es necesario
   ]
 end
+
+
+
+module DamageNumberSettings
+  ACTIVE     = true
+  SHOW_HEAL  = true
+  
+  # Debug
+  DEBUG_LOGS = false 
+
+  # Visual General
+  FONT_SIZE  = 32
+  FONT_BOLD  = true
+
+  # Si es verdadero, los números de daño mostrarán un signo delante del número.
+  DAMAGE_SYMBOLS = true 
+  
+  #-----------------------------------------------------------------------------
+  # Configuración de Colores por Categoría (R, G, B)
+  #-----------------------------------------------------------------------------
+  COLORS = {
+    :physical => { # Daño normal
+      :base   => Color.new(255, 168, 168), 
+      :border => Color.new(180, 0, 0)
+    },
+    :critical => { # Golpe Crítico
+      :base   => Color.new(255, 240, 0),
+      :border => Color.new(220, 40, 0)
+    },
+    :heal => {     # Curación
+      :base   => Color.new(80, 255, 80),
+      :border => Color.new(0, 100, 0)
+    },
+    :poison => {   # Veneno
+      :base   => Color.new(200, 100, 255),
+      :border => Color.new(80, 0, 120)
+    },
+    :burn => {     # Quemadura
+      :base   => Color.new(255, 140, 60),
+      :border => Color.new(140, 40, 0)
+    },
+    :passive => {  # Clima, Trampas, Retroceso
+      :base   => Color.new(220, 220, 220),
+      :border => Color.new(60, 60, 60)
+    }
+  }
+  
+  # Animación
+  DURATION    = 50
+  FLOAT_DIST  = 60
+end
