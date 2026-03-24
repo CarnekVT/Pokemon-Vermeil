@@ -257,7 +257,74 @@ class Interpreter
   def pbRefreshWaitCount
     @wait_count = 0
     @wait_start = System.uptime
-  end  
+    @wait_start_real = System.unscaled_uptime
+  end
+  
+  # Override del comando Wait para usar tiempo REAL
+  # Esto evita que el wait termine antes que los fades de Graphics
+  alias turbo_original_command_106 command_106
+  def command_106
+    @wait_count = @parameters[0] / 20.0
+    @wait_start = System.uptime
+    @wait_start_real = System.unscaled_uptime  # Guardar tiempo real también
+    return true
+  end
+end
+
+# Parche para que el Interpreter verifique el wait con tiempo REAL
+class Interpreter
+  alias turbo_original_update update unless method_defined?(:turbo_original_update)
+  
+  def update
+    # Si hay un wait activo, verificar con tiempo REAL
+    if @wait_count && @wait_count > 0 && @wait_start_real
+      # Usar tiempo real para el wait
+      real_elapsed = System.unscaled_uptime - @wait_start_real
+      if real_elapsed < @wait_count
+        # Actualizar @wait_start para que el check original también funcione
+        # cuando el wait termine
+        return
+      else
+        @wait_count = 0
+        @wait_start = nil
+        @wait_start_real = nil
+      end
+    end
+    turbo_original_update
+  end
+end
+
+# También parchar Game_Character para que sus waits usen tiempo real
+class Game_Character
+  alias turbo_original_update_command update_command unless method_defined?(:turbo_original_update_command)
+  
+  def update_command
+    # Si hay un wait activo, verificar con tiempo real en lugar de tiempo escalado
+    if @wait_count && @wait_count > 0
+      # Inicializar wait_start_real si no existe
+      @wait_start_real ||= System.unscaled_uptime
+      
+      # Verificar con tiempo real
+      real_elapsed = System.unscaled_uptime - @wait_start_real
+      if real_elapsed < @wait_count
+        return  # El wait no ha terminado (en tiempo real)
+      end
+      
+      # El wait terminó - limpiar
+      @wait_count = 0
+      @wait_start = nil
+      @wait_start_real = nil
+    end
+    
+    # Llamar al método original con @wait_count en 0
+    # para que no vuelva a verificar el wait (ya lo hicimos)
+    turbo_original_update_command
+    
+    # Si el original estableció un nuevo wait, inicializar el tiempo real
+    if @wait_count && @wait_count > 0 && !@wait_start_real
+      @wait_start_real = System.unscaled_uptime
+    end
+  end
 end  
 
 class Window_AdvancedTextPokemon < SpriteWindow_Base
@@ -366,3 +433,136 @@ EventHandlers.add(:on_enter_map, :fix_turbo_collision, proc { |_map_id|
     end
   end
 })
+
+#===============================================================================
+# 9. Fix de Fades
+#===============================================================================
+# Los fades deben usar tiempo REAL para que su duración visual sea consistente
+# independientemente de la velocidad del turbo.
+
+# Función auxiliar para lerp con tiempo real (no escalado)
+def turbo_real_lerp(start_val, end_val, duration, timer_start_real)
+  now_real = System.unscaled_uptime
+  elapsed = now_real - timer_start_real
+  return end_val if elapsed >= duration
+  return start_val + (end_val - start_val) * (elapsed / duration)
+end
+
+# Reemplazar pbFadeOutIn para usar tiempo real
+alias turbo_original_pbFadeOutIn pbFadeOutIn
+def pbFadeOutIn(z = 99999, nofadeout = false)
+  duration = 0.4   # En segundos REALES
+  col = Color.new(0, 0, 0, 0)
+  viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
+  viewport.z = z
+  timer_start_real = System.unscaled_uptime
+  loop do
+    col.set(0, 0, 0, turbo_real_lerp(0, 255, duration, timer_start_real))
+    viewport.color = col
+    Graphics.update
+    Input.update
+    break if col.alpha == 255
+  end
+  pbPushFade
+  begin
+    val = 0
+    val = yield if block_given?
+    nofadeout = true if val == 99999
+  ensure
+    pbPopFade
+    if !nofadeout
+      timer_start_real = System.unscaled_uptime
+      loop do
+        col.set(0, 0, 0, turbo_real_lerp(255, 0, duration, timer_start_real))
+        viewport.color = col
+        Graphics.update
+        Input.update
+        break if col.alpha == 0
+      end
+    end
+    viewport.dispose
+  end
+end
+
+# Reemplazar pbFadeOutAndHide para usar tiempo real
+alias turbo_original_pbFadeOutAndHide pbFadeOutAndHide
+def pbFadeOutAndHide(sprites)
+  duration = 0.4   # En segundos REALES
+  col = Color.new(0, 0, 0, 0)
+  visiblesprites = {}
+  pbDeactivateWindows(sprites) do
+    timer_start_real = System.unscaled_uptime
+    loop do
+      col.alpha = turbo_real_lerp(0, 255, duration, timer_start_real)
+      pbSetSpritesToColor(sprites, col)
+      (block_given?) ? yield : pbUpdateSpriteHash(sprites)
+      break if col.alpha == 255
+    end
+  end
+  sprites.each do |i|
+    next if !i[1]
+    next if pbDisposed?(i[1])
+    visiblesprites[i[0]] = true if i[1].visible
+    i[1].visible = false
+  end
+  return visiblesprites
+end
+
+# Reemplazar pbFadeInAndShow para usar tiempo real
+alias turbo_original_pbFadeInAndShow pbFadeInAndShow
+def pbFadeInAndShow(sprites, visiblesprites = nil)
+  duration = 0.4   # En segundos REALES
+  col = Color.new(0, 0, 0, 0)
+  if visiblesprites
+    visiblesprites.each do |i|
+      if i[1] && sprites[i[0]] && !pbDisposed?(sprites[i[0]])
+        sprites[i[0]].visible = true
+      end
+    end
+  end
+  pbDeactivateWindows(sprites) do
+    timer_start_real = System.unscaled_uptime
+    loop do
+      col.alpha = turbo_real_lerp(255, 0, duration, timer_start_real)
+      pbSetSpritesToColor(sprites, col)
+      (block_given?) ? yield : pbUpdateSpriteHash(sprites)
+      break if col.alpha == 0
+    end
+  end
+end
+
+# Reemplazar pbFadeOutInWithUpdate para usar tiempo real
+alias turbo_original_pbFadeOutInWithUpdate pbFadeOutInWithUpdate
+def pbFadeOutInWithUpdate(sprites, z = 99999, nofadeout = false)
+  duration = 0.4   # En segundos REALES
+  col = Color.new(0, 0, 0, 0)
+  viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
+  viewport.z = z
+  timer_start_real = System.unscaled_uptime
+  loop do
+    col.set(0, 0, 0, turbo_real_lerp(0, 255, duration, timer_start_real))
+    viewport.color = col
+    pbUpdateSpriteHash(sprites)
+    Graphics.update
+    Input.update
+    break if col.alpha == 255
+  end
+  pbPushFade
+  begin
+    yield if block_given?
+  ensure
+    pbPopFade
+    if !nofadeout
+      timer_start_real = System.unscaled_uptime
+      loop do
+        col.set(0, 0, 0, turbo_real_lerp(255, 0, duration, timer_start_real))
+        viewport.color = col
+        pbUpdateSpriteHash(sprites)
+        Graphics.update
+        Input.update
+        break if col.alpha == 0
+      end
+    end
+    viewport.dispose
+  end
+end
