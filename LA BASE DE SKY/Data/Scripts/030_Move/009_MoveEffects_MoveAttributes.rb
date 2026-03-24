@@ -1719,6 +1719,9 @@ class Battle::Move::TypeAndPowerDependOnWeather < Battle::Move
     when :ShadowSky
       ret = :NONE
     end
+    if user.hasActiveAbility?(:MEGASOL)
+      ret = :FIRE if GameData::Type.exists?(:FIRE)
+    end
     return ret
   end
 

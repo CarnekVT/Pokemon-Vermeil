@@ -457,7 +457,7 @@ class Battle::Move::RaiseUserAtkSpAtk1Or2InSun < Battle::Move::MultiStatUpMove
 
   def pbOnStartUse(user, targets)
     increment = 1
-    increment = 2 if [:Sun, :HarshSun].include?(user.effectiveWeather)
+    increment = 2 if [:Sun, :HarshSun].include?(user.effectiveWeather) || user.hasActiveAbility?(:MEGASOL)
     @statUp[1] = @statUp[3] = increment
   end
 end

@@ -67,6 +67,9 @@ Battle::AI::Handlers::MoveEffectScore.add("HealUserDependingOnWeather",
     else
       score -= 10
     end
+    if ![:Sun, :HarshSun].include?(user.battler.effectiveWeather) && user.has_active_ability?(:MEGASOL)
+      score += 5
+    end
     next score
   }
 )

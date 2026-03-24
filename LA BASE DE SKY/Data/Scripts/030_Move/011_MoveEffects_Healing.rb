@@ -45,6 +45,9 @@ class Battle::Move::HealUserDependingOnWeather < Battle::Move::HealingMove
     else
       @healAmount = (user.totalhp / 4.0).round
     end
+    if user.hasActiveAbility?(:MEGASOL)
+      @healAmount = (user.totalhp * 2 / 3.0).round 
+    end
   end
 
   def pbHealAmount(user)

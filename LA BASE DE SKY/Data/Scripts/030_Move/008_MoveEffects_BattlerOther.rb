@@ -249,6 +249,9 @@ class Battle::Move::ParalyzeTargetAlwaysHitsInRainHitsDecreasesInSunTargetInSky 
     when :Rain, :HeavyRain
       return 0
     end
+    if user.hasActiveAbility?(:MEGASOL)
+      return 50
+    end
     return super
   end
 end
@@ -752,6 +755,9 @@ class Battle::Move::ConfuseTargetAlwaysHitsInRainHitsTargetInSky < Battle::Move:
       return 50
     when :Rain, :HeavyRain
       return 0
+    end
+    if user.hasActiveAbility?(:MEGASOL)
+      return 50
     end
     return super
   end

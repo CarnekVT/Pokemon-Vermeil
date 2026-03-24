@@ -1259,3 +1259,7 @@ Description = Cuando Terapagos adopta la Forma Astral, anula todos los efectos d
 [DRAGONIZE]
 Name = Piel Dragontina
 Description = Convierte los movimientos de tipo Normal en tipo Dragón y aumenta su potencia en un 20%.
+#-------------------------------
+[MEGASOL]
+Name = Megasolar
+Description = Cualquier movimiento que el Pokémon haga actua como si hubiera clima soleado.

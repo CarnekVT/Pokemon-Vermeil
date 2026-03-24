@@ -1173,6 +1173,10 @@ class Battle
       multipliers[:final_damage_multiplier] *= 1.5 if type == :WATER
       multipliers[:final_damage_multiplier] /= 2   if type == :FIRE
     end
+    if !user.effectiveWeather.include?([:Sun, :HarshSun]) && user.activeAbility?(:MEGASOL)
+      multipliers[:final_damage_multiplier] *= 1.5 if type == :FIRE
+      multipliers[:final_damage_multiplier] /= 2   if type == :WATER
+    end
   end
   
   #-----------------------------------------------------------------------------

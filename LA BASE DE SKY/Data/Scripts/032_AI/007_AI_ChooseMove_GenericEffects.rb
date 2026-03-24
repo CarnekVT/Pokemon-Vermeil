@@ -651,6 +651,17 @@ class Battle::AI
           ret += (b.opposes?(move_user)) ? 10 : -10
         end
       end
+
+      if move_user.has_active_ability?(:MEGASOL) 
+        # Check for Fire/Water moves
+        if b.has_damaging_move_of_type?(:FIRE)
+          ret += (b.opposes?(move_user)) ? +10 : -10
+        end
+        if b.has_damaging_move_of_type?(:WATER)
+          ret += (b.opposes?(move_user)) ? -10 : +10
+        end
+      end
+
       # Check each battler's abilities/other moves affected by the new weather
       if @trainer.medium_skill? && !b.has_active_item?(:UTILITYUMBRELLA)
         beneficial_abilities = {
