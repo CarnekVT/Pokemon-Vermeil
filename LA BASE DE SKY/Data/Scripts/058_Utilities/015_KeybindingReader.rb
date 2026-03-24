@@ -113,6 +113,12 @@ module KeybindingReader
   # Scancodes de modificadores (Ctrl, Shift, Alt) — se usan como tecla secundaria
   MODIFIER_SCANCODES = [224, 225, 226, 227, 228, 229, 230, 231]
 
+  # Scancodes de letras (A-Z) — prioridad alta al mostrar
+  LETTER_SCANCODES = (4..29).to_a
+
+  # Scancodes de números (0-9) — prioridad media al mostrar
+  NUMBER_SCANCODES = (30..39).to_a
+
   # Cache
   @keybindings_cache = nil
   @cache_time = nil
@@ -229,10 +235,17 @@ module KeybindingReader
       kbd[btn_name] << input_code
     end
 
-    # Elegir la mejor tecla por botón: primero no-modificador, luego la primera
+    # Elegir la mejor tecla por botón con prioridad:
+    # 1. Letras (A-Z) - más legibles y fáciles de recordar
+    # 2. Números (0-9)
+    # 3. Cualquier otra tecla que no sea modificador
+    # 4. La primera tecla disponible
     result = {}
     kbd.each do |btn_name, scancodes|
-      sc  = scancodes.find { |c| !MODIFIER_SCANCODES.include?(c) } || scancodes.first
+      sc = scancodes.find { |c| LETTER_SCANCODES.include?(c) } ||
+           scancodes.find { |c| NUMBER_SCANCODES.include?(c) } ||
+           scancodes.find { |c| !MODIFIER_SCANCODES.include?(c) } ||
+           scancodes.first
       key = SDL_SCANCODE_NAMES[sc]
       result[btn_name] = key if key
       echoln("[KeybindingReader] #{btn_name} => #{key.inspect} (scancodes: #{scancodes.inspect})") if DEBUG
