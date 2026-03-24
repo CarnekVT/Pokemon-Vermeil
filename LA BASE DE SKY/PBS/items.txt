@@ -507,16 +507,16 @@ Flags = Fling_30
 Description = Fragmento de un cometa caído al suelo al atravesar la atmósfera. Muy valorado por los coleccionistas.
 #-------------------------------
 [NUGGET]
-Name = Pepita
-NamePlural = Pepitas
+Name = Pepita de Oro
+NamePlural = Pepitas de Oro
 Pocket = 1
 Price = 10000
 Flags = Fling_30
 Description = Pepita de oro puro que desprende un brillo espectacular. Puede venderse muy cara en las tiendas.
 #-------------------------------
 [BIGNUGGET]
-Name = Maxipepita
-NamePlural = Maxipepitas
+Name = Maxipepita de Oro
+NamePlural = Maxipepitas de Oro
 Pocket = 1
 Price = 40000
 Flags = Fling_30
@@ -571,7 +571,7 @@ Description = Moneda de oro de más de tres mil años de antigüedad. Muy valora
 #-------------------------------
 [RELICVASE]
 Name = Ánfora Antigua
-NamePlural = Ánforas
+NamePlural = Ánforas Antiguas
 Pocket = 1
 Price = 0
 Flags = Fling_30
@@ -842,8 +842,8 @@ Flags = Fling_10
 Description = En combate, esta concha desechada sirve para que un Pokémon se cambie por otro que no esté combatiendo.
 #-------------------------------
 [SMOKEBALL]
-Name = Bola Humo
-NamePlural = Bolas Humo
+Name = Bola de Humo
+NamePlural = Bolas de humo
 Pocket = 1
 Price = 3000
 SellPrice = 2000
@@ -890,7 +890,7 @@ Pocket = 1
 Price = 4000
 BPPrice = 15
 Flags = Fling_10
-Description = Una campana con un tañido calmante que reconforta al Pokémon que la lleva y lo vuelve más amistoso.
+Description = Un cascabel con un tañido calmante que reconforta al Pokémon que la lleva y lo vuelve más amistoso.
 #-------------------------------
 [CLEANSETAG]
 Name = Amuleto
@@ -1191,8 +1191,8 @@ Flags = Fling_30
 Description = Potencia los movimientos, pero consume PS con cada ataque un 30%. Debe llevarla un Pokémon.
 #-------------------------------
 [EXPERTBELT]
-Name = Cinta Experto
-NamePlural = Cintas Experto
+Name = Cinturón de Experto
+NamePlural = Cinturones de Experto
 Pocket = 1
 Price = 4000
 BPPrice = 25
@@ -1539,8 +1539,8 @@ Flags = Fling_30
 Description = Debe llevarla un Pokémon. La vitalidad de la semilla fortalece los ataques de tipo Planta.
 #-------------------------------
 [NEVERMELTICE]
-Name = Antiderretir
-NamePlural = Antiderretires
+Name = Hielo Perpetuo
+NamePlural = Hielos Perpetuos
 Pocket = 1
 Price = 3000
 SellPrice = 500
@@ -1953,8 +1953,8 @@ Flags = TypeGem
 Description = Joya de un solo uso que potencia los movimientos de tipo Normal. Debe llevarla un Pokémon.
 #-------------------------------
 [LIGHTBALL]
-Name = Bolaluminosa
-NamePlural = Bolaluminosas
+Name = Bola Luminosa
+NamePlural = Bolas Luminosas
 Pocket = 1
 Price = 1000
 Flags = Fling_30
@@ -2246,8 +2246,8 @@ Flags = Fling_30
 Description = El Pokémon que lleve esta piedra mágica no evolucionará.
 #-------------------------------
 [DRAGONSCALE]
-Name = Escamadragón
-NamePlural = Escamadragones
+Name = Escama de Dragón
+NamePlural = Escamas de Dragones
 Pocket = 1
 Price = 3000
 SellPrice = 1000
@@ -6371,8 +6371,8 @@ Flags = Fling_30,XItem
 Description = Aumenta 3 niveles el índice de golpe crítico en combate. Al cambiar de Pokémon, el efecto desaparece.
 #-------------------------------
 [GUARDSPEC]
-Name = Prot. Especial
-NamePlural = Prot. Especiales
+Name = Protección X
+NamePlural = Protecciones X
 Pocket = 7
 Price = 1500
 BattleUse = Direct
