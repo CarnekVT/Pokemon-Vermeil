@@ -48,10 +48,10 @@ class DamageNumberSprite < Sprite
     
     # Prefijos/Sufijos según categoría
     case @category
-    when :heal     then (text = "+" + text) if DamageNumberSettings::DAMAGE_SYMBOLS
+    when :heal     then (text = "+ " + text) if DamageNumberSettings::DAMAGE_SYMBOLS
     when :critical then text = "¡" + text + "!"
     when :physical, :poison, :burn, :passive
-      then (text = "-" + text) if DamageNumberSettings::DAMAGE_SYMBOLS
+      then (text = "- " + text) if DamageNumberSettings::DAMAGE_SYMBOLS
     end
 
     # Colores de la configuración
