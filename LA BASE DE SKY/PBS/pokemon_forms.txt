@@ -595,7 +595,7 @@ BaseExp = 300
 Abilities = SHADOWTAG
 HiddenAbilities = SHADOWTAG
 Height = 1.4
-Pokedex =  Puede pasar de una dimensión a otra y aparecer donde quiera. Una vez causó gran revuelo al mostrar tan solo una pata a través de una pared.
+Pokedex = Puede pasar de una dimensión a otra y aparecer donde quiera. Una vez causó gran revuelo al mostrar tan solo una pata a través de una pared.
 Generation = 6
 #-------------------------------
 [VOLTORB,1]
@@ -681,7 +681,7 @@ BaseExp = 207
 Abilities = PARENTALBOND
 HiddenAbilities = PARENTALBOND
 Weight = 100.0
-Pokedex =  La energía de la megaevolución hace crecer de golpe a la cría, que coordina a la perfección sus movimientos con los de su madre.
+Pokedex = La energía de la megaevolución hace crecer de golpe a la cría, que coordina a la perfección sus movimientos con los de su madre.
 Generation = 6
 #-------------------------------
 [STARMIE,1]
@@ -779,7 +779,7 @@ BaseExp = 224
 Abilities = MOLDBREAKER
 HiddenAbilities = MOLDBREAKER
 Weight = 305.0
-Pokedex =  Expulsa agua a presión por las agallas de sus costados para así poder volar sobre la superficie del agua a una velocidad supersónica.
+Pokedex = Expulsa agua a presión por las agallas de sus costados para así poder volar sobre la superficie del agua a una velocidad supersónica.
 Generation = 6
 #-------------------------------
 [AERODACTYL,1]
@@ -1097,7 +1097,7 @@ Abilities = SKILLLINK
 HiddenAbilities = SKILLLINK
 Height = 1.7
 Weight = 62.5
-Pokedex =  Es capaz de encajar entre sus dos cuernos objetos que superen su peso 500 veces y levantarlos sin problema.
+Pokedex = Es capaz de encajar entre sus dos cuernos objetos que superen su peso 500 veces y levantarlos sin problema.
 Generation = 6
 #-------------------------------
 [SNEASEL,1]
@@ -1650,7 +1650,7 @@ Abilities = SNOWWARNING
 HiddenAbilities = SNOWWARNING
 Height = 2.6
 Weight = 29.6
-Pokedex =  Con su extraño aliento gélido, imbuido de energía fantasmal, puede congelar incluso elementos inmateriales como las llamas o el viento.
+Pokedex = Con su extraño aliento gélido, imbuido de energía fantasmal, puede congelar incluso elementos inmateriales como las llamas o el viento.
 Generation = 9
 #-------------------------------
 [ROTOM,1]
@@ -3524,7 +3524,7 @@ FormName = Forma Recta
 Color = Yellow
 Pokedex = Se alimenta principalmente de Pokémon pájaro. Es consciente de que es débil, por lo que caza junto a un compañero.
 #-------------------------------
-[TATSUGIRI, 3]
+[TATSUGIRI,3]
 FormName = Mega Tatsugiri Forma Curvada
 MegaStone = TATSUGIRINITE
 BaseStats = 68,65,90,92,135,125
@@ -3537,7 +3537,7 @@ UnmegaForm = 0
 Pokedex = La megaevolución ha estimulado su cerebro y lo ha vuelto aún más astuto. En combate, crea y controla réplicas de sí mismo.
 Generation = 9
 #-------------------------------
-[TATSUGIRI, 4]
+[TATSUGIRI,4]
 FormName = Mega Tatsugiri Forma Lánguida
 Color = Red 
 MegaStone = TATSUGIRINITE
@@ -3551,7 +3551,7 @@ UnmegaForm = 1
 Pokedex = La megaevolución le permite solidificar la energía de la transformación, liberando esferas que explotan al mínimo contacto.
 Generation = 9
 #-------------------------------
-[TATSUGIRI, 5]
+[TATSUGIRI,5]
 FormName = Mega Tatsugiri Forma Recta
 Color = Yellow
 MegaStone = TATSUGIRINITE
