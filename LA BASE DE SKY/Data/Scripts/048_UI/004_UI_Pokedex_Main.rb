@@ -444,7 +444,7 @@ class PokemonPokedex_Scene
       2 => { xstart: 8,   ystart: 104, xgap: 124, ygap: 44,  halfwidth: 62, cols: 4, selbuttony: 44,  selbuttonheight: 44,
         top_text_x_base: 298, top_blt_x_base: 250, top_spacing: 128, top_text_y: 66, top_blt_y: 58 },
       3 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
-        top_text_x_base: 295, top_blt_x_base: 250, top_spacing: 128, top_text_y: 66, top_blt_y: 44 },
+        top_text_x_base: 295, top_blt_x_base: 464, top_spacing: 128, top_text_y: 66, top_blt_y: 54 },
       4 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
         top_text_x_base: 295, top_blt_x_base: 430, top_spacing: 128, top_text_y: 66, top_blt_y: 52 },
       5 => { xstart: 62,  ystart: 114, xgap: 132, ygap: 52,  halfwidth: 62, cols: 3, selbuttony: 44,  selbuttonheight: 44,
