@@ -146,10 +146,16 @@ class PokemonPokedexInfo_Scene
     # text = t[0] + _INTL("Estadísticas")+ "-"
     text = ""
     if owned
-      nt = (s2 && s2.base_stat_total == species.base_stat_total) ? t[2] : t[1]
-      text << nt + _ISPRINTF("Total BST: {1:3d}", species.base_stat_total)
       s1 = species.base_stats
-      @api_data = PokeAPI.get_data(species) if !s2 && !@api_data && Settings::SHOW_STAT_CHANGES_WITH_POKEAPI
+      @api_data = PokeAPI.get_data(species) if Settings::SHOW_STAT_CHANGES_WITH_POKEAPI && (!@api_data || !s2 || @api_data["species"] != species.species || @api_data["form"] != species.form)
+      if Settings::SHOW_STAT_CHANGES_WITH_POKEAPI
+        api_bst = @api_data["stats"].values.sum
+        s1_bst = s1.values.sum
+        nt = s1_bst > api_bst ? t[3] : s1_bst < api_bst ? t[1] : t[0] 
+      else
+        nt = (s2 && s2.base_stat_total == species.base_stat_total) ? t[2] : t[1]
+      end
+      text << nt + _ISPRINTF("Total BST: {1:3d}", species.base_stat_total)
       s2 = s2.base_stats if s2
       stats_order = [[:HP, :SPECIAL_ATTACK], [:ATTACK, :SPECIAL_DEFENSE], [:DEFENSE, :SPEED]]
       has_changes = nil
