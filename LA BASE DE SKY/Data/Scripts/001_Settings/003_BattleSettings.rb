@@ -188,9 +188,10 @@ module Settings
     #   YELLOW_THRESHOLD: verde -> amarillo
     #   ORANGE_THRESHOLD: amarillo -> naranja
     #   RED_THRESHOLD:    naranja -> rojo
-    HP_BAR_YELLOW_THRESHOLD = 0.75
-    HP_BAR_ORANGE_THRESHOLD = 0.50
-    HP_BAR_RED_THRESHOLD    = 0.25
+    HP_BAR_GREEN_THRESHOLD  = 0.55
+    HP_BAR_YELLOW_THRESHOLD = 0.40
+    HP_BAR_ORANGE_THRESHOLD = 0.25
+    HP_BAR_RED_THRESHOLD    = 0.10
 
     # Muestra los peligros de entrada (púas, trampa rocas, tela de araña) en la pantalla de batalla.
     SHOW_HAZARDS_IN_BATTLE = false
