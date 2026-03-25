@@ -4,28 +4,31 @@
 #===============================================================================
 def pbHPBarZoneInfo(hp, totalhp, zone_count = 4)
   hp_fraction = (hp > 0 && totalhp > 0) ? hp.to_f / totalhp : 0.0
+  t1 = Settings::HP_BAR_YELLOW_THRESHOLD
+  t2 = Settings::HP_BAR_ORANGE_THRESHOLD
+  t3 = Settings::HP_BAR_RED_THRESHOLD
   case Settings::HP_BAR_COLOR_MODE
   when :gradient
     if zone_count >= 4
-      if hp_fraction > 0.5
+      if hp_fraction > t1
         color_index = 0; next_color_index = 1
-        blend = 1.0 - (hp_fraction - 0.5) / 0.5
-      elsif hp_fraction > 1.0 / 3.0
+        blend = 1.0 - (hp_fraction - t1) / (1.0 - t1)
+      elsif hp_fraction > t2
         color_index = 1; next_color_index = 2
-        blend = 1.0 - (hp_fraction - 1.0 / 3.0) / (0.5 - 1.0 / 3.0)
-      elsif hp_fraction > 0.25
+        blend = 1.0 - (hp_fraction - t2) / (t1 - t2)
+      elsif hp_fraction > t3
         color_index = 2; next_color_index = 3
-        blend = 1.0 - (hp_fraction - 0.25) / (1.0 / 3.0 - 0.25)
+        blend = 1.0 - (hp_fraction - t3) / (t2 - t3)
       else
         color_index = 3; next_color_index = 3; blend = 0
       end
     else
-      if hp_fraction > 0.5
+      if hp_fraction > t1
         color_index = 0; next_color_index = 1
-        blend = 1.0 - (hp_fraction - 0.5) / 0.5
-      elsif hp_fraction > 0.25
+        blend = 1.0 - (hp_fraction - t1) / (1.0 - t1)
+      elsif hp_fraction > t3
         color_index = 1; next_color_index = 2
-        blend = 1.0 - (hp_fraction - 0.25) / 0.25
+        blend = 1.0 - (hp_fraction - t3) / (t1 - t3)
       else
         color_index = zone_count - 1; next_color_index = color_index; blend = 0
       end
@@ -40,13 +43,13 @@ def pbHPBarZoneInfo(hp, totalhp, zone_count = 4)
   when :four_colors
     if zone_count >= 4
       color_index = 0
-      color_index = 1 if hp_fraction <= 0.75
-      color_index = 2 if hp_fraction <= 0.5
-      color_index = 3 if hp_fraction <= 0.25
+      color_index = 1 if hp_fraction <= t1
+      color_index = 2 if hp_fraction <= t2
+      color_index = 3 if hp_fraction <= t3
     else
       color_index = 0
-      color_index = 1 if hp_fraction <= 0.5
-      color_index = zone_count - 1 if hp_fraction <= 0.25
+      color_index = 1 if hp_fraction <= t1
+      color_index = zone_count - 1 if hp_fraction <= t3
     end
     return [color_index, color_index, 0]
   else

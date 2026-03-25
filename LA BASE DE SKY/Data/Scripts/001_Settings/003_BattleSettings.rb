@@ -178,10 +178,19 @@ module Settings
     SHOW_ENEMY_HP_PERCENTAGE = true
 
     # Modo de color de la barra de HP.
-    #   :gradient     - Degradado suave entre colores adyacentes
+    #   :gradient     - Degradado suave entre colores adyacentes (usa los umbrales de abajo)
     #   :classic      - 3 colores fijos (verde >50%, amarillo 50-25%, rojo <25%)
-    #   :four_colors  - 4 colores fijos (verde >75%, amarillo 75-50%, naranja 50-25%, rojo <25%)
+    #   :four_colors  - 4 colores fijos (usa los umbrales de abajo)
     HP_BAR_COLOR_MODE = :gradient
+
+    # Umbrales para los modos :four_colors y :gradient (valores de 0.0 a 1.0).
+    # Cada umbral indica el porcentaje de HP en el que cambia al siguiente color.
+    #   YELLOW_THRESHOLD: verde -> amarillo
+    #   ORANGE_THRESHOLD: amarillo -> naranja
+    #   RED_THRESHOLD:    naranja -> rojo
+    HP_BAR_YELLOW_THRESHOLD = 0.75
+    HP_BAR_ORANGE_THRESHOLD = 0.50
+    HP_BAR_RED_THRESHOLD    = 0.25
 
     # Muestra los peligros de entrada (púas, trampa rocas, tela de araña) en la pantalla de batalla.
     SHOW_HAZARDS_IN_BATTLE = false
