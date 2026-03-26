@@ -6,6 +6,8 @@
 
 ### [DESCARGAR BASE](https://skyfangames.blogspot.com/2024/01/base-de-sky.html)
 
+### [WIKI DE LA BASE](https://la-base-de-sky-wiki-1070f3.gitlab.io/)
+
 ### AÑADIDOS V 1.2.0.1
 
 - Corrige un error con las tiendas.
