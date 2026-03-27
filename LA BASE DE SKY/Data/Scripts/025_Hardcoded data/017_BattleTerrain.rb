@@ -41,13 +41,13 @@ GameData::BattleTerrain.register({
 
 GameData::BattleTerrain.register({
   :id        => :Grassy,
-  :name      => _INTL("de Planta"),
+  :name      => _INTL("Planta"),
   :animation => "GrassyTerrain"
 })
 
 GameData::BattleTerrain.register({
   :id        => :Misty,
-  :name      => _INTL("de Niebla"),
+  :name      => _INTL("Niebla"),
   :animation => "MistyTerrain"
 })
 
