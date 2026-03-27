@@ -269,6 +269,18 @@ class Battle::Battler
     return ret
   end
 
+  def stat_multiplier_from_stage(stat)
+    return 1.0 if stat.nil?
+    stage = @stages[stat]
+    return 1.0 if stage.nil?
+    stage += STAT_STAGE_MAXIMUM
+    stage = [[stage, 0].max, (STAT_STAGE_MAXIMUM * 2)].min
+    if stat == :ACCURACY || stat == :EVASION
+      return ACC_EVA_STAGE_MULTIPLIERS[stage].to_f / ACC_EVA_STAGE_DIVISORS[stage]
+    end
+    return STAT_STAGE_MULTIPLIERS[stage].to_f / STAT_STAGE_DIVISORS[stage]
+  end
+
   def stat_with_stages(stat)
     stat_value = 0
     case stat
