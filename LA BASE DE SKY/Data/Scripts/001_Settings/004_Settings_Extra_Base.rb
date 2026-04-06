@@ -237,6 +237,9 @@ module Settings
   # Es el número de switch que usa la Fancy Camera. Debes encender este switch
   # para activar la cámara fancy.
   CAMERA_FANCY = 59
+
+  # Elige si quieres que al aprender un ataque nuevo y olvidar otro salga el texto de "1, 2 y puf".
+  MENSAJE_CUENTA_MOVIMIENTOS = true
 end
 
 

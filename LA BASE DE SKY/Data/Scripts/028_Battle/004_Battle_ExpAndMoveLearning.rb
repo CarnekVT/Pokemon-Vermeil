@@ -261,9 +261,13 @@ class Battle
           oldMoveName = pkmn.moves[forgetMove].name
           pkmn.moves[forgetMove] = Pokemon::Move.new(newMove)   # Replaces current/total PP
           battler.moves[forgetMove] = Move.from_pokemon_move(self, pkmn.moves[forgetMove]) if battler
-          pbDisplayPaused(_INTL("1, 2, y... ... ... ¡Puf!") + "\\se[Battle ball drop]\\wtnp[10]")
-          pbDisplayPaused(_INTL("{1} olvidó como usar {2}. Y...", pkmnName, oldMoveName))
-          pbDisplay(_INTL("¡{1} aprendió {2}!", pkmnName, moveName) + "\\se[Pkmn move learnt]\\wtnp[30]")
+          if Settings::MENSAJE_CUENTA_MOVIMIENTOS
+            pbDisplayPaused(_INTL("1, 2, y... ... ... ¡Puf!") + "\\se[Battle ball drop]\\wtnp[10]")
+            pbDisplayPaused(_INTL("{1} olvidó como usar {2}. Y...", pkmnName, oldMoveName))
+            pbDisplay(_INTL("¡{1} aprendió {2}!", pkmnName, moveName) + "\\se[Pkmn move learnt]\\wtnp[30]")
+          else
+            pbDisplay(_INTL("¡{1} olvidó {2} y aprendió {3}!", pkmnName, oldMoveName, moveName) + "\\se[Pkmn move learnt]\\wtnp[30]")
+          end
           battler&.pbCheckFormOnMovesetChange
           $PokemonGlobal.add_seen_move(pkmn.species, newMove)
           break
