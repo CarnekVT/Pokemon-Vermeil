@@ -250,9 +250,9 @@ module GameData
       # Determines the full description by combining method-specific details.
       if !nil_or_empty?(@description)
         desc2 = _INTL(@description, param_name, param_name2)
-        full_desc = _INTL("{1} {2}", desc, desc2)
+        full_desc = _INTL("{1} {2}.", desc, desc2)
       else
-        full_desc = _INTL("{1}", desc)
+        full_desc = _INTL("{1}.", desc)
       end
       return full_desc
     end
