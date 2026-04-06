@@ -889,6 +889,22 @@ class Battle::Battler
     @battle.belch[@index & 1][@pokemonIndex] = true
   end
 
+  def used_protect_move?(move, user)
+    return false if !move.canProtectAgainst?
+    return true  if self.effects[PBEffects::Protect]
+    return true  if self.pbOwnSide.effects[PBEffects::MatBlock] && move.damagingMove?
+    return true  if self.effects[PBEffects::KingsShield] && move.damagingMove?
+    return true  if self.effects[PBEffects::Obstruct] && move.damagingMove?
+    return true  if self.effects[PBEffects::SilkTrap] && move.damagingMove?
+    return true  if self.effects[PBEffects::SpikyShield]
+    return true  if self.effects[PBEffects::BanefulBunker]
+    return true  if self.effects[PBEffects::BurningBulwark]
+    return true  if self.pbOwnSide.effects[PBEffects::WideGuard] && user.index != self.index && move.pbTarget(user).num_targets > 1 &&
+                    (Settings::MECHANICS_GENERATION >= 7 || move.damagingMove?)
+    return true  if self.pbOwnSide.effects[PBEffects::QuickGuard] && @battle.choices[user.index][4] > 0   # Move priority saved from pbCalculatePriority
+    return false
+  end
+
   #-----------------------------------------------------------------------------
   # Methods relating to this battler's position on the battlefield.
   #-----------------------------------------------------------------------------

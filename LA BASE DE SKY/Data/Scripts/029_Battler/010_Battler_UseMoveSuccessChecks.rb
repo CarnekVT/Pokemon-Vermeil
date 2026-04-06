@@ -351,6 +351,11 @@ class Battle::Battler
       @battle.successStates[user.index].protected = true
       return false
     end
+    if user.hasActiveAbility?(:PIERCINGDRILL) && move.pbContactMove?(user) && target.used_protect_move?(move, user)
+      @battle.successStates[user.index].protected = true
+      target.damageState.protected = true
+      return true
+    end
     if !(user.hasActiveAbility?(:UNSEENFIST) && move.pbContactMove?(user))
       # Wide Guard
       if target.pbOwnSide.effects[PBEffects::WideGuard] && user.index != target.index &&

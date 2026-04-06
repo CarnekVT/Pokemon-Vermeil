@@ -1762,6 +1762,14 @@ Battle::AbilityEffects::DamageCalcFromUser.add(:WATERBUBBLE,
   }
 )
 
+Battle::AbilityEffects::DamageCalcFromUser.add(:PIERCINGDRILL,
+  proc { |ability, user, target, move, mults, power, type|
+    if move.pbContactMove?(user) && target.damageState.protected
+      mults[:final_damage_multiplier] *= 0.25
+    end 
+  }
+)
+
 #===============================================================================
 # DamageCalcFromAlly handlers
 #===============================================================================

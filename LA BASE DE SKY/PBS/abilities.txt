@@ -1267,3 +1267,7 @@ Description = Cualquier movimiento que el Pokémon haga actua como si hubiera cl
 [SPICYSPRAY]
 Name = Salpicante
 Description = Si un Pokémon lo ataca, resulta quemado.
+#-------------------------------
+[PIERCINGDRILL]
+Name = Turbotaladro
+Description = Si usa un movimiento de contacto, puede infligir daño 1/4 del daño original, al objetivo, aunque este se proteja.
