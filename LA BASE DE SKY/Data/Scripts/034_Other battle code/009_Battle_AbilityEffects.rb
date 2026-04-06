@@ -2175,6 +2175,19 @@ Battle::AbilityEffects::OnBeingHit.add(:FLAMEBODY,
   }
 )
 
+Battle::AbilityEffects::OnBeingHit.add(:SPICYSPRAY,
+  proc { |ability, user, target, move, battle|
+    next if user.burned? || !user.pbCanBurn?(target, false)
+    battle.pbShowAbilitySplash(target)
+    msg = nil
+    if !Battle::Scene::USE_ABILITY_SPLASH
+      msg = _INTL("¡{1} de {2} quemó a {3}!", target.pbThis, target.abilityName, user.pbThis(true))
+    end
+    user.pbBurn(target, msg)
+    battle.pbHideAbilitySplash(target)
+  }
+)
+
 Battle::AbilityEffects::OnBeingHit.add(:GOOEY,
   proc { |ability, user, target, move, battle|
     next if !move.pbContactMove?(user)
