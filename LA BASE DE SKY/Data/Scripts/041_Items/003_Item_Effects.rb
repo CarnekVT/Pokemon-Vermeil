@@ -151,7 +151,7 @@ ItemHandlers::UseFromBag.add(:ESCAPEROPE, proc { |item, bag_screen|
   pbMessage(_INTL("No puede usarse aquí."))
   next 0
 })
-ItemHandlers::ConfirmUseInField.add(:ESCAPEROPE, proc { |item|   # Called from Ready Menu
+ItemHandlers::UseInField.add(:ESCAPEROPE, proc { |item|
   escape = ($PokemonGlobal.escapePoint rescue nil)
   if !escape || escape == []
     pbMessage(_INTL("Aquí no se puede usar."))
