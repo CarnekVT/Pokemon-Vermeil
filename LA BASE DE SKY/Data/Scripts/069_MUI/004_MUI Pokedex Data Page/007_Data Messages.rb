@@ -506,7 +506,7 @@ class PokemonPokedexInfo_Scene
       elsif form_name.include?(base_data.name)
         spname = form_name
       else
-        spname = form_name + " " + base_data.name
+        spname = base_data.name + " " + form_name
       end
       case special_form
       #-------------------------------------------------------------------------
