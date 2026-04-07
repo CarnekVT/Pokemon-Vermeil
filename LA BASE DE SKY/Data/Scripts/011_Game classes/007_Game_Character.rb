@@ -188,9 +188,11 @@ class Game_Character
 
   def lock
     return if @locked
+    current_direction = @direction
     @prelock_direction = 0   # Was @direction but disabled
     turn_toward_player
     @locked = true
+    @prelock_direction = current_direction
   end
 
   def minilock
