@@ -240,6 +240,9 @@ module Settings
 
   # Elige si quieres que al aprender un ataque nuevo y olvidar otro salga el texto de "1, 2 y puf".
   MENSAJE_CUENTA_MOVIMIENTOS = true
+
+  # Elige si quieres que después de hablar con un NPC, este vuelva a su dirección de origen.
+  RESTORE_EVENT_DIRECTION = false
 end
 
 

@@ -192,7 +192,9 @@ class Game_Character
     @prelock_direction = 0   # Was @direction but disabled
     turn_toward_player
     @locked = true
-    @prelock_direction = current_direction
+    if Settings::RESTORE_EVENT_DIRECTION
+      @prelock_direction = current_direction
+    end
   end
 
   def minilock
