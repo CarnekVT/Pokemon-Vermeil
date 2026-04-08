@@ -144,7 +144,7 @@ class PokemonSummary_Scene
     # Opens move selection if on the moves page and no options are available.
     #---------------------------------------------------------------------------
     if @page_id == :page_moves
-      if commands.empty? || @inbattle
+      if commands.empty? || @inbattle || !Settings::ALLOW_CHANGING_MOVES_IN_SUMMARY_SCREEN
         pbMoveSelection
         @sprites["pokemon"].visible = true
         @sprites["pokeicon"].visible = false
