@@ -1700,7 +1700,7 @@ Battle::ItemEffects::AfterMoveUseFromUser.add(:THROATSPRAY,
     next if !move.soundMove? || numHits == 0
     next if !user.pbCanRaiseStatStage?(:SPECIAL_ATTACK, user)
     battle.pbCommonAnimation("UseItem", user)
-    user.pbRaiseStatStage(:SPECIAL_ATTACK, 1, user)
+    user.pbRaiseStatStageByCause(:SPECIAL_ATTACK, 1, user, user.itemName)
     user.pbConsumeItem
   }
 )
