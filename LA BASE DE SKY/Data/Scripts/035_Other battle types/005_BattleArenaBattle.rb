@@ -60,6 +60,7 @@ class BattleArenaBattle < Battle
     return if !favorDraws && decided?
     pbJudge
     return if decided?
+    changed = false
     2.times do |side|
       next if !@battlers[side].fainted?
       next if @partyindexes[side] + 1 >= self.pbParty(side).length
@@ -68,6 +69,11 @@ class BattleArenaBattle < Battle
       pbMessagesOnReplace(side, newpoke)
       pbReplace(side, newpoke)
       pbOnBattlerEnteringBattle(side)
+      changed = true
+    end
+    if changed
+      @battlersChanged = true
+      2.times { |side| @starthp[side] = @battlers[side].hp }
     end
   end
 
@@ -113,6 +119,10 @@ class BattleArenaBattle < Battle
       @scene.pbBattleArenaBattlers(@battlers[0], @battlers[1])
       @battlersChanged = false
       @count = 0
+      2.times do |side|
+        @mind[side]  = 0
+        @skill[side] = 0
+      end
     end
     super
     return if decided?
@@ -127,6 +137,9 @@ class BattleArenaBattle < Battle
   def pbEndOfRoundPhase
     super
     return if decided?
+    # Si un Pokémon se debilitó en combate, el nuevo enfrentamiento empieza en el
+    # siguiente turno de comandos; no actualizar puntuaciones ni juzgar ahora.
+    return if @battlersChanged
     # Update skill rating
     2.times do |side|
       @skill[side] += self.successStates[side].skill
@@ -260,7 +273,7 @@ class Battle::Scene
 
   def pbBattleArenaBattlers(battler1, battler2)
     pbMessage(_INTL("ÁRBITRO: ¡{1} VS {2}!\n¡Comienza la batalla!",
-                    battler1.name, battler2.name) + "\\wtnp[10]") { pbBattleArenaUpdate }
+                    battler1.name, battler2.name)) { pbBattleArenaUpdate }
   end
 
   def pbBattleArenaJudgment(battler1, battler2, ratings1, ratings2)
@@ -271,7 +284,7 @@ class Battle::Scene
       msgwindow = pbCreateMessageWindow
       dimmingvp = Viewport.new(0, 0, Graphics.width, Graphics.height - msgwindow.height)
       pbMessageDisplay(msgwindow,
-                       _INTL("ÁRBITRO: ¡Se acabó! ¡Pasamos ahora a las valoraciones para decidir quién es el ganador!") + "\\wtnp[10]") do
+                       _INTL("ÁRBITRO: ¡Se acabó! ¡Pasamos ahora a las valoraciones para decidir quién es el ganador!")) do
         pbBattleArenaUpdate
         dimmingvp.update
       end
@@ -303,21 +316,21 @@ class Battle::Scene
       end
       updateJudgment(infowindow, 1, battler1, battler2, ratings1, ratings2)
       pbMessageDisplay(msgwindow,
-                       _INTL("ÁRBITRO: ¡Juzgando la categoría 1, Mente!\n¡El Pokémon que ha mostrado más agallas!") + "\\wtnp[20]") do
+                       _INTL("ÁRBITRO: ¡Juzgando la categoría 1, Mente!\n¡El Pokémon que ha mostrado más agallas!")) do
         pbBattleArenaUpdate
         dimmingvp.update
         infowindow.update
       end
       updateJudgment(infowindow, 2, battler1, battler2, ratings1, ratings2)
       pbMessageDisplay(msgwindow,
-                       _INTL("ÁRBITRO: ¡Juzgando la categoría 2, Habilidad!\n¡El Pokémon que mejor ha usado movimientos!") + "\\wtnp[20]") do
+                       _INTL("ÁRBITRO: ¡Juzgando la categoría 2, Habilidad!\n¡El Pokémon que mejor ha usado movimientos!")) do
         pbBattleArenaUpdate
         dimmingvp.update
         infowindow.update
       end
       updateJudgment(infowindow, 3, battler1, battler2, ratings1, ratings2)
       pbMessageDisplay(msgwindow,
-                       _INTL("ÁRBITRO: ¡Juzgando la categoría 3, Cuerpo!\n¡El Pokémon con más vitalidad!") + "\\wtnp[20]") do
+                       _INTL("ÁRBITRO: ¡Juzgando la categoría 3, Cuerpo!\n¡El Pokémon con más vitalidad!")) do
         pbBattleArenaUpdate
         dimmingvp.update
         infowindow.update
@@ -330,15 +343,15 @@ class Battle::Scene
       end
       if total1 == total2
         pbMessageDisplay(msgwindow,
-                         _INTL("ÁRBITRO: ¡Juicio: {1} a {2}!\n¡Tenemos un empate!", total1, total2) + "\\wtnp[20]") do
+                         _INTL("ÁRBITRO: ¡Juicio: {1} a {2}!\n¡Tenemos un empate!", total1, total2)) do
           pbBattleArenaUpdate
           dimmingvp.update
           infowindow.update
         end
       elsif total1 > total2
         pbMessageDisplay(msgwindow,
-                         _INTL("ÁRBITRO: ¡Juicio: ¡{1} a {2}!\n¡El ganador es {3}'s {4}!",
-                               total1, total2, @battle.pbGetOwnerName(battler1.index), battler1.name) + "\\wtnp[20]") do
+                         _INTL("ÁRBITRO: ¡Juicio: {1} a {2}!\n¡El ganador es {3} de {4}!",
+                               total1, total2, battler1.name, @battle.pbGetOwnerName(battler1.index))) do
           pbBattleArenaUpdate
           dimmingvp.update
           infowindow.update
@@ -346,7 +359,7 @@ class Battle::Scene
       else
         pbMessageDisplay(msgwindow,
                          _INTL("ÁRBITRO: ¡Juicio: {1} a {2}!\n¡El ganador es {3}!",
-                               total1, total2, battler2.name) + "\\wtnp[20]") do
+                               total1, total2, battler2.name)) do
           pbBattleArenaUpdate
           dimmingvp.update
           infowindow.update
@@ -365,7 +378,7 @@ class Battle::Scene
       end
     ensure
       pbDisposeMessageWindow(msgwindow)
-      dimmingvp.dispose
+      dimmingvp&.dispose
       infowindow&.contents&.dispose
       infowindow&.dispose
     end
