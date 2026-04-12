@@ -551,12 +551,12 @@ class Battle
     end
     # Terrain continues
     terrain_data = GameData::BattleTerrain.try_get(@field.terrain)
-    pbCommonAnimation(terrain_data.animation) if terrain_data
+    # pbCommonAnimation(terrain_data.animation) if terrain_data
     case @field.terrain
-    when :Electric then pbDisplay(_INTL("¡Se ha formado un campo de corriente eléctrica en el terreno de combate!"))
-    when :Grassy then pbDisplay(_INTL("¡El terreno de combate se ha cubierto de hierba!"))
-    when :Misty then pbDisplay(_INTL("¡La niebla ha envuelto el terreno de combate!"))
-    when :Psychic then pbDisplay(_INTL("¡El terreno de combate se ha vuelto muy extraño!"))
+    when :Electric then pbDisplay(_INTL("¡El terreno de combate sigue envuelto por una corriente eléctrica!"))
+    when :Grassy then pbDisplay(_INTL("¡El terreno de combate sigue cubierto de hierba!"))
+    when :Misty then pbDisplay(_INTL("¡La niebla sigue envolviendo el terreno de combate!"))
+    when :Psychic then pbDisplay(_INTL("¡El terreno de combate se sigue sintiendo extraño!"))
     end
   end
 
