@@ -3656,26 +3656,26 @@ Flags = Legendary,TeraType_ROCK
 #-------------------------------
 [OGERPON,8]
 FormName = Máscara Turquesa teracristalizado
-Abilities = EMBODYASPECT
+Abilities = EMBODYASPECTSPEED
 #-------------------------------
 [OGERPON,9]
 FormName = Máscara Fuente teracristalizado
 Types = GRASS,WATER
-Abilities = EMBODYASPECT_1
+Abilities = EMBODYASPECTSPDEF
 Color = Blue
 Flags = Legendary,TeraType_WATER
 #-------------------------------
 [OGERPON,10]
 FormName = Máscara Horno teracristalizado
 Types = GRASS,FIRE
-Abilities = EMBODYASPECT_2
+Abilities = EMBODYASPECTATTACK
 Color = Red
 Flags = Legendary,TeraType_FIRE
 #-------------------------------
 [OGERPON,11]
 FormName = Máscara Cimiento teracristalizado
 Types = GRASS,ROCK
-Abilities = EMBODYASPECT_3
+Abilities = EMBODYASPECTDEFENSE
 Color = Gray
 Flags = Legendary,TeraType_ROCK
 #-------------------------------

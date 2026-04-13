@@ -236,6 +236,7 @@ class Battle::Scene
   def pbBattleArenaUpdate
     Graphics.update
     pbGraphicsUpdate
+    pbFrameUpdate
   end
 
   def updateJudgment(window, phase, battler1, battler2, ratings1, ratings2)
