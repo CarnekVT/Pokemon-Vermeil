@@ -3209,7 +3209,7 @@ Battle::AbilityEffects::OnSwitchIn.add(:EMBODYASPECTSPEED,
   proc { |ability, battler, battle, switch_in|
     next if battler.abilityUsedOnce?
     next if !battler.isSpecies?(:OGERPON) || battler.effects[PBEffects::Transform]
-    battle.pbDisplay(_INTL("¡La {1} usada por {2} brilló fuertemente!", battler.itemName, battler.pbThis(true)))
+    battle.pbDisplay(_INTL("¡La Máscara Turquesa usada por {1} brilló fuertemente!", battler.pbThis(true)))
     battler.pbRaiseStatStageByAbility(:SPEED, 1, battler)
     battler.markAbilityUsedOnce if Settings::MECHANICS_GENERATION >= 9
   }
