@@ -1224,19 +1224,19 @@ Description = Gracias al poder de su cadena impregnada de toxinas, puede envenen
 Name = Ojo Mental
 Description = Alcanza a Pokémon de tipo Fantasma con movimientos de tipo Normal o Lucha. Su Precisión no se puede reducir e ignora los cambios en la Evasión del objetivo.
 #-------------------------------
-[EMBODYASPECT]
+[EMBODYASPECTSPEED]
 Name = Evocarrecuerdos
 Description = Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Turquesa y aumenta su Velocidad.
 #-------------------------------
-[EMBODYASPECT_1]
-Name = Evocarrecuerdos
-Description = Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Horno y aumenta su Ataque.
-#-------------------------------
-[EMBODYASPECT_2]
+[EMBODYASPECTSPDEF]
 Name = Evocarrecuerdos
 Description = Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Fuente y aumenta su Defensa Especial.
 #-------------------------------
-[EMBODYASPECT_3]
+[EMBODYASPECTATTACK]
+Name = Evocarrecuerdos
+Description = Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Horno y aumenta su Ataque.
+#-------------------------------
+[EMBODYASPECTDEFENSE]
 Name = Evocarrecuerdos
 Description = Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Cimiento y aumenta su Defensa.
 #-------------------------------

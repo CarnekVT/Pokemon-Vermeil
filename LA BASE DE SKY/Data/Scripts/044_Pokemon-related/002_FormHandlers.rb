@@ -840,6 +840,18 @@ MultipleForms.register(:OGERPON, {
     next 2 if pkmn.hasItem?(:HEARTHFLAMEMASK)
     next 3 if pkmn.hasItem?(:CORNERSTONEMASK)
     next 0
+  },
+  "getTerastalForm" => proc { |pkmn|
+    # Formas base 0-3 van a formas tera 8-11
+    next pkmn.form + 8 if pkmn.form <= 3
+    # Si ya está en forma tera (8-11), devuelve la forma actual
+    next pkmn.form if pkmn.form >= 8 && pkmn.form <= 11
+    next nil
+  },
+  "getUnTerastalForm" => proc { |pkmn|
+    # Formas tera 8-11 vuelven a formas base 0-3
+    next pkmn.form - 8 if pkmn.form >= 8
+    next nil
   }
 })
 
