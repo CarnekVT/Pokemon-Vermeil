@@ -404,13 +404,13 @@ class WildBattle
     # Set various other properties in the battle class
     setBattleRule("#{foe_party.length}v#{foe_party.length}") if $game_temp.battle_rules[:side_sizes].nil?
     BattleCreationHelperMethods.prepare_battle(battle)
-    $game_temp.clear_battle_rules
     # Perform the battle itself
     outcome = Battle::Outcome::UNDECIDED
     pbBattleAnimation(pbGetWildBattleBGM(foe_party), (foe_party.length == 1) ? 0 : 2, foe_party) do
       pbSceneStandby { outcome = battle.pbStartBattle }
       BattleCreationHelperMethods.after_battle(outcome, can_lose)
     end
+    $game_temp.clear_battle_rules
     Input.update
     # Save the result of the battle in a Game Variable (1 by default)
     BattleCreationHelperMethods.set_outcome(outcome, outcome_variable)
@@ -524,13 +524,13 @@ class TrainerBattle
     # Set various other properties in the battle class
     setBattleRule("#{foe_trainers.length}v#{foe_trainers.length}") if $game_temp.battle_rules[:side_sizes].nil?
     BattleCreationHelperMethods.prepare_battle(battle)
-    $game_temp.clear_battle_rules
     # Perform the battle itself
     outcome = Battle::Outcome::UNDECIDED
     pbBattleAnimation(pbGetTrainerBattleBGM(foe_trainers), (battle.singleBattle?) ? 1 : 3, foe_trainers) do
       pbSceneStandby { outcome = battle.pbStartBattle }
       BattleCreationHelperMethods.after_battle(outcome, can_lose)
     end
+    $game_temp.clear_battle_rules
     Input.update
     # Save the result of the battle in a Game Variable (1 by default)
     BattleCreationHelperMethods.set_outcome(outcome, outcome_variable, true)
