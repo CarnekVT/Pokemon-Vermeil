@@ -31,7 +31,5 @@ rakefile
 check-ruby-syntax-local.ps1
 ruby-style-suggestions.ps1
 PRE-COMMIT-SETUP-GUIDE.md
-.rubocop.yml
-rubocop.yml
 .ruby-version
 LA BASE DE SKY/luts_log.txt

@@ -318,11 +318,16 @@ module Settings
   # en la que se encuentre el jugador.
   def self.pokedex_names
     [
-      [_INTL('Pokédex de Kanto'),   0], [_INTL('Pokédex de Johto'),   1],
-      [_INTL('Pokédex de Hoenn'),   2], [_INTL('Pokédex de Sinnoh'),  3],
-      [_INTL('Pokédex de Teselia'), 4], [_INTL('Pokédex de Kalos'),   5],
-      [_INTL('Pokédex de Alola'),   6], [_INTL('Pokédex de Galar'),   7],
-      [_INTL('Pokédex de Paldea'),  8], _INTL('Pokédex Nacional')
+      [_INTL('Pokédex de Kanto'),   0],
+      [_INTL('Pokédex de Johto'),   1],
+      [_INTL('Pokédex de Hoenn'),   2],
+      [_INTL('Pokédex de Sinnoh'),  3],
+      [_INTL('Pokédex de Teselia'), 4],
+      [_INTL('Pokédex de Kalos'),   5],
+      [_INTL('Pokédex de Alola'),   6],
+      [_INTL('Pokédex de Galar'),   7],
+      [_INTL('Pokédex de Paldea'),  8],
+      _INTL('Pokédex Nacional')
     ]
   end
   # Si todas las formas de una especie de Pokémon concreto se pueden ver en la
