@@ -156,7 +156,7 @@ class Game_Player < Game_Character
 
   def clear_stair_data
     super
-    $DisableScrollCounter = 0 if defined?($DisableScrollCounter)
+    $disable_scroll_counter = 0 if defined?($disable_scroll_counter)
   end
 
   def move_generic(dir, turn_enabled = true)

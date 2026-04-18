@@ -520,9 +520,9 @@ class Game_Character
   #-----------------------------------------------------------------------------
 
   def moving?
-    if self == $game_player && defined?($DisableScrollCounter) && $DisableScrollCounter == 1
+    if self == $game_player && defined?($disable_scroll_counter) && $disable_scroll_counter == 1
       # New Game_Player#update scroll method
-      $DisableScrollCounter = 0
+      $disable_scroll_counter = 0
       @view_offset_x ||= 0
       @view_offset_y ||= 0
       self.center(
@@ -1270,7 +1270,7 @@ class Game_Character
 
   def update
     if self == $game_player && defined?(SMOOTH_SCROLLING) && SMOOTH_SCROLLING && on_stair?
-      $DisableScrollCounter = 2
+      $disable_scroll_counter = 2
     end
     return if $game_temp.in_menu
     time_now = System.uptime
@@ -1403,8 +1403,8 @@ class Game_Character
   end
 
   def update_pattern
-    if self == $game_player && defined?($DisableScrollCounter) && $DisableScrollCounter == 2
-      $DisableScrollCounter = 1
+    if self == $game_player && defined?($disable_scroll_counter) && $disable_scroll_counter == 2
+      $disable_scroll_counter = 1
     end
     return if @lock_pattern
     # return if @jumping_on_spot   # Don't animate if jumping on the spot

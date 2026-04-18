@@ -396,22 +396,22 @@ class Game_Map
   end
 
   def scroll_up(distance)
-    return if $DisableScrollCounter == 1
+    return if $disable_scroll_counter == 1
     self.display_y -= distance
   end
 
   def scroll_down(distance)
-    return if $DisableScrollCounter == 1
+    return if $disable_scroll_counter == 1
     self.display_y += distance
   end
 
   def scroll_left(distance)
-    return if $DisableScrollCounter == 1
+    return if $disable_scroll_counter == 1
     self.display_x -= distance
   end
 
   def scroll_right(distance)
-    return if $DisableScrollCounter == 1  
+    return if $disable_scroll_counter == 1
     self.display_x += distance
   end
 
