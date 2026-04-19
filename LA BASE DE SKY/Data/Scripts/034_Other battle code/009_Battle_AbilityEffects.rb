@@ -3408,6 +3408,11 @@ Battle::AbilityEffects::OnSwitchIn.add(:NEUTRALIZINGGAS,
     battle.pbHideAbilitySplash(battler)
     battle.pbDisplay(_INTL("¡Un gas reactivo se propaga por toda la zona!"))
     battle.allBattlers(true).each do |b|
+	    if b.hasActiveItem?(:ABILITYSHIELD)
+		    itemname = GameData::Item.get(b.item).name
+		    battle.pbDisplay(_INTL("¡La habilidad de {1} está protegida por los efectos de su {2}!", b.pbThis(true), itemname))
+		    next
+	    end
       # Slow Start - end all turn counts
       b.effects[PBEffects::SlowStart] = 0
       # Truant - let b move on its first turn after Neutralizing Gas disappears
