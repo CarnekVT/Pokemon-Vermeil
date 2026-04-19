@@ -352,13 +352,15 @@ class Battle
       pbCommonAnimation("Octolock", battler)
       battler.pbLowerStatStage(:DEFENSE, 1, nil) if battler.pbCanLowerStatStage?(:DEFENSE)
       battler.pbLowerStatStage(:SPECIAL_DEFENSE, 1, nil) if battler.pbCanLowerStatStage?(:SPECIAL_DEFENSE)
-      battler.pbItemOnStatDropped
+      battler.pbItemStatRestoreCheck # White Herb
+      battler.pbItemOnStatDropped # Eject Pack
     end
     # Syrup Bomb
     if !battler.fainted? && battler.effects[PBEffects::SyrupBomb] > 0
       pbCommonAnimation("SyrupBomb", battler)
       battler.pbLowerStatStage(:SPEED, 1, nil) if battler.pbCanLowerStatStage?(:SPEED)
-      battler.pbItemOnStatDropped
+      battler.pbItemStatRestoreCheck # White Herb
+      battler.pbItemOnStatDropped # Eject Pack
       battler.effects[PBEffects::SyrupBomb] -= 1
     end
   end

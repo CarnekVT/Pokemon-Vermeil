@@ -2882,8 +2882,8 @@ Battle::AbilityEffects::EndOfRoundEffect.add(:MOODY,
       battler.pbLowerStatStageByAbility(randomDown[down_idx], 1, battler, false)
     end
     battle.pbHideAbilitySplash(battler)
-    battler.pbItemStatRestoreCheck if randomDown.length > 0
-    battler.pbItemOnStatDropped
+    battler.pbItemStatRestoreCheck if randomDown.length > 0 # White Herb
+    battler.pbItemOnStatDropped # Eject Pack
   }
 )
 

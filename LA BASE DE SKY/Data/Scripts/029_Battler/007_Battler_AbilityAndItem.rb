@@ -438,7 +438,7 @@ class Battle::Battler
     itm = item_to_use || self.item
     if Battle::ItemEffects.triggerOnEndOfUsingMove(itm, self, @battle, !item_to_use.nil?)
       pbHeldItemTriggered(itm, item_to_use.nil?, fling)
-    elsif Battle::ItemEffects.triggerOnEndOfUsingMoveStatRestore(itm, self, @battle, !item_to_use.nil?)
+    elsif Battle::ItemEffects.triggerOnEndOfUsingMoveStatRestore(itm, self, @battle, !item_to_use.nil?) # White Herb
       pbHeldItemTriggered(itm, item_to_use.nil?, fling)
     end
   end
