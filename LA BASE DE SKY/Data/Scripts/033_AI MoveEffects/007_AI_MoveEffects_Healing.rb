@@ -60,15 +60,16 @@ Battle::AI::Handlers::MoveEffectScore.add("HealUserDependingOnWeather",
     # Consider how much HP will be restored
     score = Battle::AI::Handlers.apply_move_effect_score("HealUserHalfOfTotalHP",
        score, move, user, ai, battle)
-    case user.battler.effectiveWeather
-    when :Sun, :HarshSun
-      score += 5
-    when :None, :StrongWinds
+    if user.has_active_ability?(:MEGASOL)
+	    score += 5
     else
-      score -= 10
-    end
-    if ![:Sun, :HarshSun].include?(user.battler.effectiveWeather) && user.has_active_ability?(:MEGASOL)
-      score += 5
+	    case user.battler.effectiveWeather
+	    when :Sun, :HarshSun
+	      score += 5
+	    when :None, :StrongWinds
+	    else
+	      score -= 10
+	    end
     end
     next score
   }

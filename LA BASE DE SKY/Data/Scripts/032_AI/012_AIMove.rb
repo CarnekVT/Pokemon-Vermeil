@@ -379,13 +379,15 @@ class Battle::AI::AIMove
     end
     # Weather
     if @ai.trainer.medium_skill?
-      case target.battler.effectiveWeather
+      weather_type = target.battler.effectiveWeather
+      weather_type = :Sun if user.has_active_ability?(:MEGASOL)
+      case weather_type
       when :Sun, :HarshSun
         case calc_type
         when :FIRE
           multipliers[:final_damage_multiplier] *= 1.5
         when :WATER
-          if function_code == "IncreasePowerInSun" && [:Sun, :HarshSun].include?(user.battler.effectiveWeather)
+          if function_code == "IncreasePowerInSun" && ([:Sun, :HarshSun].include?(user.battler.effectiveWeather) || user.has_active_ability?(:MEGASOL))
             multipliers[:final_damage_multiplier] *= 1.5
           else
             multipliers[:final_damage_multiplier] /= 2

@@ -235,7 +235,8 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("TwoTurnAttack",
       score -= 10 if user.hp < user.totalhp / 2
     end
     # Don't prefer if target has a protecting move
-    if ai.trainer.high_skill? && !(user.has_active_ability?(:UNSEENFIST) && move.move.pbContactMove?(user.battler))
+    if ai.trainer.high_skill? && !((user.has_active_ability?(:UNSEENFIST) || user.has_active_ability?(:PIERCINGDRILL)) &&
+	       move.move.pbContactMove?(user.battler))
       has_protect_move = false
       if move.pbTarget(user).num_targets > 1 &&
          (Settings::MECHANICS_GENERATION >= 7 || move.damagingMove?)
@@ -283,7 +284,8 @@ Battle::AI::Handlers::MoveBasePower.add("TwoTurnAttackOneTurnInSun",
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("TwoTurnAttackOneTurnInSun",
   proc { |score, move, user, target, ai, battle|
     # In sunny weather this a 1 turn move, the same as a move with no effect
-    next score if [:Sun, :HarshSun].include?(user.battler.effectiveWeather) || user.has_active_ability?(:MEGASOL)
+    next score if [:Sun, :HarshSun].include?(user.battler.effectiveWeather)
+    next score if user.has_active_ability?(:MEGASOL)
     # Score for being a two turn attack
     next Battle::AI::Handlers.apply_move_effect_against_target_score("TwoTurnAttack",
        score, move, user, target, ai, battle)
@@ -396,7 +398,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("TwoTurnAttackChargeRaise
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("TwoTurnAttackOneTurnInRainChargeRaiseUserSpAtk1",
   proc { |score, move, user, target, ai, battle|
     # Score for being a two turn attack
-    if ![:Rain, :HeavyRain].include?(user.battler.effectiveWeather)
+    if ![:Rain, :HeavyRain].include?(user.battler.effectiveWeather) || user.has_active_ability?(:MEGASOL)
       score = Battle::AI::Handlers.apply_move_effect_against_target_score("TwoTurnAttack",
          score, move, user, target, ai, battle)
       next score if score == Battle::AI::MOVE_USELESS_SCORE

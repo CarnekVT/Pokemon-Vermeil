@@ -230,7 +230,7 @@ end
 #===============================================================================
 class Battle::Move::ParalyzeTargetAlwaysHitsInRain < Battle::Move::ParalyzeTarget
   def pbBaseAccuracy(user, target)
-    return 0 if [:Rain, :HeavyRain].include?(target.effectiveWeather)
+    return 0 if [:Rain, :HeavyRain].include?(target.effectiveWeather) && !user.hasActiveAbility?(:MEGASOL)
     return super
   end
 end
@@ -243,15 +243,15 @@ class Battle::Move::ParalyzeTargetAlwaysHitsInRainHitsDecreasesInSunTargetInSky 
   def hitsFlyingTargets?; return true; end
 
   def pbBaseAccuracy(user, target)
+    return 50 if user.hasActiveAbility?(:MEGASOL)
+
     case target.effectiveWeather
     when :Sun, :HarshSun
       return 50
     when :Rain, :HeavyRain
       return 0
     end
-    if user.hasActiveAbility?(:MEGASOL)
-      return 50
-    end
+
     return super
   end
 end
@@ -302,7 +302,7 @@ end
 #===============================================================================
 class Battle::Move::BurnTargetAlwaysHitsInRain < Battle::Move::BurnTarget
   def pbBaseAccuracy(user, target)
-    return 0 if [:Rain, :HeavyRain].include?(target.effectiveWeather)
+    return 0 if [:Rain, :HeavyRain].include?(target.effectiveWeather) && !user.hasActiveAbility?(:MEGASOL)
     return super
   end
 end
@@ -392,7 +392,7 @@ end
 #===============================================================================
 class Battle::Move::FreezeTargetAlwaysHitsInHail < Battle::Move::FreezeTarget
   def pbBaseAccuracy(user, target)
-    return 0 if [:Hail, :Snowstorm].include?(target.effectiveWeather)
+    return 0 if [:Hail, :Snowstorm].include?(target.effectiveWeather) && !user.hasActiveAbility?(:MEGASOL)
     return super
   end
 end
@@ -750,15 +750,15 @@ class Battle::Move::ConfuseTargetAlwaysHitsInRainHitsTargetInSky < Battle::Move:
   def hitsFlyingTargets?; return true; end
 
   def pbBaseAccuracy(user, target)
+    return 50 if user.hasActiveAbility?(:MEGASOL)
+
     case target.effectiveWeather
     when :Sun, :HarshSun
       return 50
     when :Rain, :HeavyRain
       return 0
     end
-    if user.hasActiveAbility?(:MEGASOL)
-      return 50
-    end
+
     return super
   end
 end
@@ -1255,7 +1255,7 @@ class Battle::Move::SetUserAndAlliesAbilityToTargetAbility < Battle::Move
       @battle.pbDisplay(_INTL("But it failed!")) if show_message
       return true
     end
-    
+
     if target.ungainableAbility? ||
        [:HADRONENGINE, :ORICHALCUMPULSE].include?(target.ability_id)
       @battle.pbDisplay(_INTL("¡Pero ha fallado!")) if show_message
@@ -1355,7 +1355,7 @@ class Battle::Move::UserTargetSwapAbilities < Battle::Move
       @battle.pbDisplay(_INTL("¡Pero ha fallado!")) if show_message
       return true
     end
-    
+
     if target.ungainableAbility? ||
        [:HADRONENGINE, :ORICHALCUMPULSE].include?(target.ability_id)
       @battle.pbDisplay(_INTL("¡Pero ha fallado!")) if show_message

@@ -1707,22 +1707,23 @@ class Battle::Move::TypeAndPowerDependOnWeather < Battle::Move
 
   def pbBaseType(user)
     ret = :NORMAL
-    case user.effectiveWeather
-    when :Sun, :HarshSun
-      ret = :FIRE if GameData::Type.exists?(:FIRE)
-    when :Rain, :HeavyRain
-      ret = :WATER if GameData::Type.exists?(:WATER)
-    when :Sandstorm
-      ret = :ROCK if GameData::Type.exists?(:ROCK)
-    when :Hail, :Snowstorm
-      ret = :ICE if GameData::Type.exists?(:ICE)
-    when :ShadowSky
-      ret = :NONE
-    end
     if user.hasActiveAbility?(:MEGASOL)
       ret = :FIRE if GameData::Type.exists?(:FIRE)
+    else
+      case user.effectiveWeather
+      when :Sun, :HarshSun
+        ret = :FIRE if GameData::Type.exists?(:FIRE)
+      when :Rain, :HeavyRain
+        ret = :WATER if GameData::Type.exists?(:WATER)
+      when :Sandstorm
+        ret = :ROCK if GameData::Type.exists?(:ROCK)
+      when :Hail, :Snowstorm
+        ret = :ICE if GameData::Type.exists?(:ICE)
+      when :ShadowSky
+        ret = :NONE
+      end
     end
-    return ret
+    ret
   end
 
   def pbShowAnimation(id, user, targets, hitNum = 0, showAnimation = true)

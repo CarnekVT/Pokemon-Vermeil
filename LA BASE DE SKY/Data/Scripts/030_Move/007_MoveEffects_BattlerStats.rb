@@ -1413,7 +1413,7 @@ end
 #===============================================================================
 class Battle::Move::LowerTargetSpeed1AlwaysHitsInRain < Battle::Move::LowerTargetSpeed1
   def pbBaseAccuracy(user, target)
-    return 0 if [:Rain, :HeavyRain].include?(target.effectiveWeather)
+    return 0 if [:Rain, :HeavyRain].include?(target.effectiveWeather) && !user.hasActiveAbility?(:MEGASOL)
     return super
   end
 end
@@ -2348,7 +2348,7 @@ class Battle::Move::AddMoneyGainedFromBattleLowerUserSpAtk1 < Battle::Move
     super
     @statDown = [:SPECIAL_ATTACK, 1]
   end
-  
+
   def pbEndOfMoveUsageEffect(user, targets, numHits, switchedBattlers)
     return if @battle.pbAllFainted?(user.idxOpposingSide)
     hit_target = false
@@ -2386,7 +2386,7 @@ class Battle::Move::RaiseUserStat1Commander < Battle::Move
       end
     end
   end
-  
+
   def pbShowAnimation(id, user, targets, hitNum = 0, showAnimation = true)
     hitNum = user.effects[PBEffects::Commander][1] + 1 if user.isCommanderHost? # Different animation based on Tatsugiri's form
     super
@@ -2411,7 +2411,7 @@ class Battle::Move::RaiseTargetAtkLowerTargetDef2 < Battle::Move
 
   def pbFailsAgainstTarget?(user, target, show_message)
     return false if damagingMove?
-    failed = !target.pbCanRaiseStatStage?(@statUp[0], user, self) && 
+    failed = !target.pbCanRaiseStatStage?(@statUp[0], user, self) &&
              !target.pbCanLowerStatStage?(@statDown[0], user, self)
     if failed
       @battle.pbDisplay(_INTL("¡Las estadísticas de {1} no pueden cambiar más!", target.pbThis(true))) if show_message
@@ -2442,7 +2442,7 @@ class Battle::Move::RaiseUserAtkSpd1RemoveHazardsSubstitutes < Battle::Move::Mul
     super
     @statUp = [:ATTACK, 1, :SPEED, 1]
   end
-  
+
   def pbMoveFailed?(user, targets)
     failed = true
     2.times do |i|

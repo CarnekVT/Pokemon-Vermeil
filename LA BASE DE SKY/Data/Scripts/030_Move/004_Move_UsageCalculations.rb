@@ -423,41 +423,26 @@ class Battle::Move
   def pbCalcDamageMultipliersLingeringEffects(user, target, numTargets, type, baseDmg, multipliers)
     # Parental Bond's second attack
     if user.effects[PBEffects::ParentalBond] == 1
-      multipliers[:power_multiplier] /= (Settings::MECHANICS_GENERATION >= 7) ? 4 : 2
+      multipliers[:power_multiplier] /= Settings::MECHANICS_GENERATION >= 7 ? 4 : 2
     end
     # Other
-    if user.effects[PBEffects::MeFirst]
-      multipliers[:power_multiplier] *= 1.5
-    end
-    if user.effects[PBEffects::HelpingHand]
-      multipliers[:power_multiplier] *= 1.5
-    end
-    if user.effects[PBEffects::Charge] > 0 && type == :ELECTRIC
-      multipliers[:power_multiplier] *= 2
-    end
-    if target.effects[PBEffects::Vulnerable]
-      multipliers[:final_damage_multiplier] *= 2
-    end
+    multipliers[:power_multiplier] *= 1.5 if user.effects[PBEffects::MeFirst]
+    multipliers[:power_multiplier] *= 1.5 if user.effects[PBEffects::HelpingHand]
+    multipliers[:power_multiplier] *= 2 if user.effects[PBEffects::Charge].positive? && type == :ELECTRIC
+    multipliers[:final_damage_multiplier] *= 2 if target.effects[PBEffects::Vulnerable]
+
     # Mud Sport
     if type == :ELECTRIC
-      if @battle.allBattlers.any? { |b| b.effects[PBEffects::MudSport] }
-        multipliers[:power_multiplier] /= 3
-      end
-      if @battle.field.effects[PBEffects::MudSportField] > 0
-        multipliers[:power_multiplier] /= 3
-      end
+      multipliers[:power_multiplier] /= 3 if @battle.allBattlers.any? { |b| b.effects[PBEffects::MudSport] }
+      multipliers[:power_multiplier] /= 3 if @battle.field.effects[PBEffects::MudSportField].positive?
     end
     # Water Sport
     if type == :FIRE
-      if @battle.allBattlers.any? { |b| b.effects[PBEffects::WaterSport] }
-        multipliers[:power_multiplier] /= 3
-      end
-      if @battle.field.effects[PBEffects::WaterSportField] > 0
-        multipliers[:power_multiplier] /= 3
-      end
+      multipliers[:power_multiplier] /= 3 if @battle.allBattlers.any? { |b| b.effects[PBEffects::WaterSport] }
+      multipliers[:power_multiplier] /= 3 if @battle.field.effects[PBEffects::WaterSportField].positive?
     end
     # Terrain moves
-    terrain_multiplier = (Settings::MECHANICS_GENERATION >= 8) ? 1.3 : 1.5
+    terrain_multiplier = Settings::MECHANICS_GENERATION >= 8 ? 1.3 : 1.5
     case @battle.field.terrain
     when :Electric
       multipliers[:power_multiplier] *= terrain_multiplier if type == :ELECTRIC && user.affectedByTerrain?
@@ -469,13 +454,15 @@ class Battle::Move
       multipliers[:power_multiplier] /= 2 if type == :DRAGON && target.affectedByTerrain?
     end
     # Weather
-    case target.effectiveWeather
+    weather_type = target.effectiveWeather
+    weather_type = :Sun if user.hasActiveAbility?(:MEGASOL)
+    case weather_type
     when :Sun, :HarshSun
       case type
       when :FIRE
         multipliers[:final_damage_multiplier] *= 1.5
       when :WATER
-        if @function_code == "IncreasePowerInSun" && [:Sun, :HarshSun].include?(user.effectiveWeather)
+        if @function_code == "IncreasePowerInSun" && ([:Sun, :HarshSun].include?(user.effectiveWeather) || user.hasActiveAbility?(:MEGASOL))
           multipliers[:final_damage_multiplier] *= 1.5
         else
           multipliers[:final_damage_multiplier] /= 2
@@ -499,7 +486,7 @@ class Battle::Move
     when :ShadowSky
       multipliers[:final_damage_multiplier] *= 1.5 if type == :SHADOW
     when :Snowstorm
-      if target.pbHasType?(:ICE) && 
+      if target.pbHasType?(:ICE) &&
          (physicalMove? || @function_code == "UseTargetDefenseInsteadOfTargetSpDef")
         multipliers[:defense_multiplier] *= 1.5
       end
