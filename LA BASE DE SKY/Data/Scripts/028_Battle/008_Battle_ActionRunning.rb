@@ -89,7 +89,7 @@ class Battle
         end
       elsif pbDisplayConfirm(_INTL("¿Quieres perder el combate y abandonar ahora?"))
         pbSEPlay("Battle flee")
-        pbDisplay(_INTL("{1} perdió el combate!", self.pbPlayer.name))
+        pbDisplay(_INTL("¡{1} perdió el combate!", self.pbPlayer.name))
         @decision = Outcome::FLEE
         return 1
       end
