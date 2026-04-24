@@ -764,7 +764,7 @@ class Pokemon
     first_move_index = 0 if first_move_index < 0
     (first_move_index...knowable_moves.length).each do |i|
       @moves.push(Pokemon::Move.new(knowable_moves[i]))
-      $PokemonGlobal.add_seen_move(self.species, knowable_moves[i])
+      $PokemonGlobal&.add_seen_move(self.species, knowable_moves[i])
     end
   end
 
