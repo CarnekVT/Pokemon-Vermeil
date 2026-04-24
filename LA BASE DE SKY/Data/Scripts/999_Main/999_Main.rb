@@ -1,5 +1,5 @@
 module LBDSKY
-  VERSION = "1.2.0.1" # No modificar esto
+  VERSION = "1.2.1" # No modificar esto
 end
 
 class Scene_DebugIntro
