@@ -39,6 +39,11 @@ module Battle::CatchAndStoreMixin
           send_pkmn.statusCount = 0 if send_pkmn.status == :POISON   # Bad poison becomes regular
           send_pkmn.makeUnmega
           send_pkmn.makeUnprimal
+          if send_pkmn.item && pbConfirmMessage(_INTL("{1} tiene equipado {2}. ¿Quieres guardar el objeto en la mochila?", send_pkmn.name, send_pkmn.item.name))
+            item = send_pkmn.item
+            $bag.add(item)
+            send_pkmn.item = nil
+          end
           # Send chosen Pokémon to storage
           stored_box = @peer.pbStorePokemon(pbPlayer, send_pkmn)
           pbPlayer.party.delete_at(party_index)
