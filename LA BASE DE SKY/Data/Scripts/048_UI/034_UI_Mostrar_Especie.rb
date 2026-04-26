@@ -42,20 +42,21 @@ class MostrarPokemonAnimado
   ]
 
   BASE_Y_CORRECTION = -10
-  
+  UI_Z = 999999
+  FADE_SPEED = 15
+
   def initialize(pokemon, bg = false, ox = 0, oy = 0, zoom_x = 1, zoom_y = 1)
     @viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
-    @viewport.z = 99999
+    @viewport.z = UI_Z
     @sprites = {}
     @pokemon = pokemon
     @bg = bg
     @estado = :normal
-    @fade_speed = 15 #*2
+    @fade_speed = FADE_SPEED #*2
     @ox = ox
     @oy = oy
     @zoom_x = zoom_x
     @zoom_y = zoom_y
-    # mostrar_poke_animado
     @opacity = 0
   end
 
@@ -67,11 +68,16 @@ class MostrarPokemonAnimado
     end
     pokemon_obj = @pokemon.is_a?(Pokemon) ? @pokemon : Pokemon.new(@pokemon, 1)
     if @bg
-      @sprites["bg"] = Sprite.new(@viewport)
       # Hacemos que el bg dependa del primer tipo del Pokémon
       type = defined?(MonotypeChallenge) && MonotypeChallenge.enabled? ? MonotypeChallenge.type : pokemon_obj.types[0]
-      @sprites["bg"].bitmap = Bitmap.new("Graphics/Pictures/fondo_poke_#{type.to_s.downcase}")
-      @sprites["bg"].opacity = 0
+      bg_path = pbResolveBitmap("Graphics/Pictures/fondo_poke_#{type.to_s.downcase}")
+      if bg_path
+        @sprites["bg"] = Sprite.new(@viewport)
+        @sprites["bg"].bitmap = Bitmap.new(bg_path)
+        @sprites["bg"].z = UI_Z - 1
+        @sprites["bg"].visible = true
+        @sprites["bg"].opacity = 0
+      end
     end
 
     # Verificar si el Pokémon tiene una corrección de sprite
@@ -79,27 +85,52 @@ class MostrarPokemonAnimado
     x_corr = correccion ? correccion[1] : 0
     y_corr = correccion ? correccion[2] : 0
 
+    base_x = @ox + x_corr
+    base_y = @oy + y_corr + BASE_Y_CORRECTION
 
     @sprites["poke_sprite"] = PokemonSprite.new(@viewport)
+    @sprites["poke_sprite"].display_values = [base_x, base_y]
     @sprites["poke_sprite"].setPokemonBitmap(pokemon_obj)
-    @sprites["poke_sprite"].setOffset(PictureOrigin::CENTER)
-    @sprites["poke_sprite"].z = 99999
-    @sprites["poke_sprite"].x = @ox + x_corr
-    @sprites["poke_sprite"].y = @oy + y_corr + BASE_Y_CORRECTION
+    if !@sprites["poke_sprite"].bitmap
+      @sprites["poke_sprite"].setSpeciesBitmap(
+        pokemon_obj.species,
+        pokemon_obj.gender,
+        pokemon_obj.form,
+        pokemon_obj.shiny?,
+        pokemon_obj.shadowPokemon?,
+        false,
+        pokemon_obj.egg?
+      )
+    end
     @sprites["poke_sprite"].zoom_x = @zoom_x
     @sprites["poke_sprite"].zoom_y = @zoom_y
-    @sprites["poke_sprite"].opacity = 0
+    if @sprites["poke_sprite"].bitmap
+      @sprites["poke_sprite"].pbSetDisplay if @sprites["poke_sprite"].respond_to?(:pbSetDisplay)
+    else
+      @sprites["poke_sprite"].setOffset(PictureOrigin::BOTTOM)
+      @sprites["poke_sprite"].x = base_x
+      @sprites["poke_sprite"].y = base_y
+    end
+    @sprites["poke_sprite"].z = UI_Z
+    @sprites["poke_sprite"].visible = true
+    @sprites["poke_sprite"].opacity = @opacity
+    @sprites["poke_sprite"].update
 
     @estado = :fadein
   end
 
   def update
     return if disposed?
+    
     case @estado
     when :fadein
       terminado = true
       @sprites.each_value do |s|
+        next if s.disposed?
+
+        s.update if s.respond_to?(:update)
         next unless s.respond_to?(:opacity)
+
         s.opacity += @fade_speed
         terminado = false if s.opacity < 255
       end
@@ -109,18 +140,21 @@ class MostrarPokemonAnimado
       @sprites.each_value do |s|
         next if s.disposed?
         next unless s.respond_to?(:opacity)
+
         s.opacity -= @fade_speed
-        terminado = false if s.opacity > 0
+        terminado = false if s.opacity.positive?
       end
       if terminado
         @estado = :disposed
         dispose
+        $poke_animado = nil if $poke_animado.equal?(self)
       end
     else
-        @sprites.each_value do |s|
+      @sprites.each_value do |s|
         next if s.disposed?
+
         s.update if s.respond_to?(:update)
-        end
+      end
     end
   end
 
@@ -133,28 +167,33 @@ class MostrarPokemonAnimado
   end
 
   def dispose
-    @sprites.each_value(&:dispose)
-    @viewport.dispose
+    @estado = :disposed
+    @sprites.each_value { |sprite| sprite.dispose if sprite && !sprite.disposed? }
+    @viewport.dispose if @viewport && !@viewport.disposed?
   end
 end
 
-module Graphics
-  class << self
-    alias _update_poke_animado update
-    def update
-      _update_poke_animado
-      $poke_animado.update if defined?($poke_animado) && $poke_animado
-    end
+module PokeAnimadoUpdater
+  def self.update
+    return if !defined?($poke_animado) || !$poke_animado || $poke_animado.disposed?
+    $poke_animado.update
   end
 end
+
+EventHandlers.add(:on_frame_update, :poke_animado_overlay,
+                  proc { PokeAnimadoUpdater.update })
 
 
 # FUNCIONES PARA USARLO
 def pbMostrarPkmnAnimado(pokemon, bg = false, ox = 0, oy = 0, zoom_x = 1, zoom_y = 1)
+  if defined?($poke_animado) && $poke_animado && !$poke_animado.disposed?
+    $poke_animado.dispose
+    $poke_animado = nil
+  end
   $poke_animado = MostrarPokemonAnimado.new(pokemon, bg, ox, oy, zoom_x, zoom_y)
   $poke_animado.mostrar_poke_animado
 end
 
 def pbTermninarPkmnAnimado
-  $poke_animado.start_fade_out if $poke_animado
+  $poke_animado&.start_fade_out
 end
