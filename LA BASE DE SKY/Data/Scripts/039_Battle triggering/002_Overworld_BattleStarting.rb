@@ -25,43 +25,100 @@ class Game_Temp
     self.battle_rules.clear
   end
 
+
+  BATTLE_RULES = {
+    # Side sizes
+    "single" => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "single" }],
+    "1v1"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "1v1" }],
+    "1v2"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "1v2" }],
+    "2v1"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "2v1" }],
+    "1v3"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "1v3" }],
+    "3v1"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "3v1" }],
+    "double" => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "double" }],
+    "2v2"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "2v2" }],
+    "2v3"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "2v3" }],
+    "3v2"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "3v2" }],
+    "triple" => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "triple" }],
+    "3v3"    => [:side_sizes, proc { |rules, _var| rules[:side_sizes] = "3v3" }],
+    # Visuals
+    "backdrop"   => [:backdrop_name,        proc { |rules, var| rules[:backdrop_name]         = var }],
+    "battleback" => [:backdrop_name,        proc { |rules, var| rules[:backdrop_name]         = var }],
+    "base"       => [:base_name,            proc { |rules, var| rules[:base_name]             = var }],
+    "anims"      => [:no_battle_animations, proc { |rules, _var| rules[:no_battle_animations] = false }],
+    "noanims"    => [:no_battle_animations, proc { |rules, _var| rules[:no_battle_animations] = true }],
+    # Environment, weather, terrain
+    "environment" => [:environment,     proc { |rules, var| rules[:environment]     = GameData::Environment.try_get(var)&.id }],
+    "environ"     => [:environment,     proc { |rules, var| rules[:environment]     = GameData::Environment.try_get(var)&.id }],
+    "weather"     => [:default_weather, proc { |rules, var| rules[:default_weather] = GameData::BattleWeather.try_get(var)&.id }],
+    "terrain"     => [:default_terrain, proc { |rules, var| rules[:default_terrain] = GameData::BattleTerrain.try_get(var)&.id }],
+    # Available actions/partner
+    "canrun"           => [:cannot_run,         proc { |rules, _var| rules[:cannot_run]         = false }],
+    "cannotrun"        => [:cannot_run,         proc { |rules, _var| rules[:cannot_run]         = true }],
+    "canswitch"        => [:cannot_switch,      proc { |rules, _var| rules[:cannot_switch]      = false }],
+    "cannotswitch"     => [:cannot_switch,      proc { |rules, _var| rules[:cannot_switch]      = true }],
+    "switchstyle"      => [:no_switch_style,    proc { |rules, _var| rules[:no_switch_style]    = false }],
+    "setstyle"         => [:no_switch_style,    proc { |rules, _var| rules[:no_switch_style]    = true }],
+    "disablebag"       => [:disable_bag,        proc { |rules, _var| rules[:disable_bag]        = true }],
+    "disablepokeballs" => [:disable_poke_balls, proc { |rules, _var| rules[:disable_poke_balls] = true }],
+    "autobattle"       => [:auto_battle,        proc { |rules, _var| rules[:auto_battle]        = true }],
+    "nopartner"        => [:no_partner_trainer, proc { |rules, _var| rules[:no_partner_trainer] = true }],
+    # Roaming Pokémon
+    "roamerflees"  => [:roamer_flees, proc { |rules, _var| rules[:roamer_flees] = true }],
+    # Captures
+    "certaincapture"      => [:certain_capture,        proc { |rules, _var| rules[:certain_capture]        = true }],
+    "forcecatchintoparty" => [:force_catch_into_party, proc { |rules, _var| rules[:force_catch_into_party] = true }],
+    # Outcome
+    "canlose"    => [:continue_if_lose, proc { |rules, _var| rules[:continue_if_lose] = true }],
+    "cannotlose" => [:continue_if_lose, proc { |rules, _var| rules[:continue_if_lose] = false }],
+    "outcome"    => [:outcome_variable, proc { |rules, var| rules[:outcome_variable]  = var }],
+    "outcomevar" => [:outcome_variable, proc { |rules, var| rules[:outcome_variable]  = var }],
+    # Earnings
+    "noexp"   => [:no_exp_gain,   proc { |rules, _var| rules[:no_exp_gain]   = true }],
+    "nomoney" => [:no_money_gain, proc { |rules, _var| rules[:no_money_gain] = true }]
+  }
+
   def add_battle_rule(rule, var = nil)
     rules = self.battle_rules
-    case rule.to_s.downcase
-    when "single", "1v1", "1v2", "2v1", "1v3", "3v1",
-         "double", "2v2", "2v3", "3v2", "triple", "3v3"
-      rules[:side_sizes] = rule.to_s.downcase
-    when "canlose"                then rules[:continue_if_lose]       = true
-    when "cannotlose"             then rules[:continue_if_lose]       = false
-    when "canrun"                 then rules[:cannot_run]             = false
-    when "cannotrun"              then rules[:cannot_run]             = true
-    when "canswitch"              then rules[:cannot_switch]          = false
-    when "cannotswitch"           then rules[:cannot_switch]          = true
-    when "roamerflees"            then rules[:roamer_flees]           = true
-    when "noexp"                  then rules[:no_exp_gain]            = true
-    when "nomoney"                then rules[:no_money_gain]          = true
-    when "disablepokeballs"       then rules[:disable_poke_balls]     = true
-    when "certaincapture"         then rules[:certain_capture]        = true
-    when "forcecatchintoparty"    then rules[:force_catch_into_party] = true
-    when "switchstyle"            then rules[:no_switch_style]        = false
-    when "setstyle"               then rules[:no_switch_style]        = true
-    when "anims"                  then rules[:no_battle_animations]   = false
-    when "noanims"                then rules[:no_battle_animations]   = true
-    when "environment", "environ"
-      rules[:environment] = GameData::Environment.try_get(var)&.id
-    when "weather"
-      rules[:default_weather] = GameData::BattleWeather.try_get(var)&.id
-    when "terrain"
-      rules[:default_terrain] = GameData::BattleTerrain.try_get(var)&.id
-    when "backdrop", "battleback" then rules[:backdrop_name]          = var
-    when "base"                   then rules[:base_name]              = var
-    when "outcome", "outcomevar"  then rules[:outcome_variable]       = var
-    when "nopartner"              then rules[:no_partner_trainer]     = true
-    when "adjustlevels"           then rules[:adjust_levels]           = true
-    when "adjustlevelsresetmoves" then rules[:adjust_levels_reset_moves] = true
+    if BATTLE_RULES.keys.include?(rule.to_s.downcase)
+      BATTLE_RULES[rule.to_s.downcase][1].call(rules, var)
     else
-      raise _INTL("Battle rule \"{1}\" does not exist.", rule)
+      raise _INTL("La regla de combate \"{1}\" no existe.", rule)
     end
+    # case rule.to_s.downcase
+    # when "single", "1v1", "1v2", "2v1", "1v3", "3v1",
+    #      "double", "2v2", "2v3", "3v2", "triple", "3v3"
+    #   rules[:side_sizes] = rule.to_s.downcase
+    # when "canlose"                then rules[:continue_if_lose]       = true
+    # when "cannotlose"             then rules[:continue_if_lose]       = false
+    # when "canrun"                 then rules[:cannot_run]             = false
+    # when "cannotrun"              then rules[:cannot_run]             = true
+    # when "canswitch"              then rules[:cannot_switch]          = false
+    # when "cannotswitch"           then rules[:cannot_switch]          = true
+    # when "roamerflees"            then rules[:roamer_flees]           = true
+    # when "noexp"                  then rules[:no_exp_gain]            = true
+    # when "nomoney"                then rules[:no_money_gain]          = true
+    # when "disablepokeballs"       then rules[:disable_poke_balls]     = true
+    # when "certaincapture"         then rules[:certain_capture]        = true
+    # when "forcecatchintoparty"    then rules[:force_catch_into_party] = true
+    # when "switchstyle"            then rules[:no_switch_style]        = false
+    # when "setstyle"               then rules[:no_switch_style]        = true
+    # when "anims"                  then rules[:no_battle_animations]   = false
+    # when "noanims"                then rules[:no_battle_animations]   = true
+    # when "environment", "environ"
+    #   rules[:environment] = GameData::Environment.try_get(var)&.id
+    # when "weather"
+    #   rules[:default_weather] = GameData::BattleWeather.try_get(var)&.id
+    # when "terrain"
+    #   rules[:default_terrain] = GameData::BattleTerrain.try_get(var)&.id
+    # when "backdrop", "battleback" then rules[:backdrop_name]          = var
+    # when "base"                   then rules[:base_name]              = var
+    # when "outcome", "outcomevar"  then rules[:outcome_variable]       = var
+    # when "nopartner"              then rules[:no_partner_trainer]     = true
+    # when "adjustlevels"           then rules[:adjust_levels]           = true
+    # when "adjustlevelsresetmoves" then rules[:adjust_levels_reset_moves] = true
+    # else
+    #   raise _INTL("Battle rule \"{1}\" does not exist.", rule)
+    # end
   end
 end
 
@@ -218,7 +275,10 @@ module BattleCreationHelperMethods
     battle.rules[:certain_capture] = $game_map.metadata&.has_flag?("CertainCaptures") if battleRules[:certain_capture].nil?
     # The size of the battle, i.e. how many Pokémon on each side (default: "single")
     battle.setBattleMode(battleRules[:side_sizes]) if battleRules[:side_sizes]
+    # Whether the AI will control the player's Pokémon
+    battle.controlPlayer = true if battleRules[:auto_battle]
     # Whether all attempts to capture Pokémon this battle will succeed
+    battleRules[:certain_capture] = $game_map.metadata&.has_flag?("CertainCaptures") if battleRules[:certain_capture].nil?
     # Whether the player is asked what to do with a new Pokémon when their party is full
     battle.sendToBoxes = $PokemonSystem.sendtoboxes if Settings::NEW_CAPTURE_CAN_REPLACE_PARTY_MEMBER
     battle.sendToBoxes = 2 if battleRules[:force_catch_into_party]

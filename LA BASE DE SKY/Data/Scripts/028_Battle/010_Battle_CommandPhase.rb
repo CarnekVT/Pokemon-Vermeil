@@ -99,7 +99,7 @@ class Battle
   end
 
   def pbItemMenu(idxBattler, firstAction)
-    if !@internalBattle
+    if !@internalBattle || @rules[:disable_bag]
       pbDisplay(_INTL("Aquí no se pueden usar objetos."))
       return false
     end

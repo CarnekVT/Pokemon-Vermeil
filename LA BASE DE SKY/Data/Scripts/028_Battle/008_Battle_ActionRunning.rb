@@ -87,13 +87,13 @@ class Battle
         else
           pbDisplayPaused(_INTL("¡No puedes huir de un combate contra un Entrenador!"))
         end
+        return 0
       elsif pbDisplayConfirm(_INTL("¿Quieres perder el combate y abandonar ahora?"))
         pbSEPlay("Battle flee")
         pbDisplay(_INTL("¡{1} perdió el combate!", self.pbPlayer.name))
         @decision = Outcome::FLEE
         return 1
       end
-      return 0
     end
     if @rules[:cannot_run]
       pbDisplayPaused(_INTL("¡No puedes escapar!"))
