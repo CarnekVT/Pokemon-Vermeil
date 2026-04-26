@@ -477,6 +477,134 @@ MenuHandlers.add(:debug_menu, :test_trainer_battle_advanced, {
   }
 })
 
+MenuHandlers.add(:debug_menu, :set_battle_rules, {
+  "name"        => _INTL("Elige las reglas del próximo combate"),
+  "parent"      => :battle_menu,
+  "description" => _INTL("Elige las reglas que se aplicarán al próximo combate."),
+  "effect"      => proc {
+    applied_rules = $game_temp.battle_rules
+    duplicate_rules = ["battleback", "environ", "outcomevar"]
+    cmd = 0
+    loop do
+      # Create list of rules to display
+      rules = [_INTL("[Clear all]")]
+      rules_syms = [[:clear_all], [nil]]
+      Game_Temp::BATTLE_RULES.each_key do |rule|
+        next if duplicate_rules.include?(rule)
+        rule_sym = Game_Temp::BATTLE_RULES[rule][0]
+        case rule_sym
+        when :side_sizes
+          next if rules_syms[0].include?(rule_sym)
+          rules.push(_INTL("Side sizes: {1}", applied_rules[rule_sym] || "-"))
+        when :backdrop_name, :base_name, :outcome_variable
+          rules.push(_INTL("{1}: {2}", rule.to_s, applied_rules[rule_sym] || "-"))
+        when :environment
+          rules.push(_INTL("{1}: {2}", rule.to_s, GameData::Environment.try_get(applied_rules[rule_sym])&.name || "-"))
+        when :default_weather
+          rules.push(_INTL("{1}: {2}", rule.to_s, GameData::BattleWeather.try_get(applied_rules[rule_sym])&.name || "-"))
+        when :default_terrain
+          rules.push(_INTL("{1}: {2}", rule.to_s, GameData::BattleTerrain.try_get(applied_rules[rule_sym])&.name || "-"))
+        else
+          ticked = applied_rules[rule_sym]
+          ticked = !ticked if ["anims", "canrun", "canswitch", "switchstyle", "cannotlose"].include?(rule) && !applied_rules[rule_sym].nil?
+          rules.push((ticked ? "[Y]" : "[  ]") + " " + rule.to_s)
+        end
+        rules_syms[0].push(rule_sym)
+        rules_syms[1].push(rule)
+      end
+      # Show rules and choose one
+      cmd = pbShowCommands(nil, rules, -1, cmd)
+      break if cmd < 0
+      # Toggle/set rule
+      rule_sym = rules_syms[0][cmd]
+      rule = rules_syms[1][cmd]
+      case rule_sym
+      when :clear_all
+        applied_rules.clear
+      when :side_sizes
+        side_sizes = Game_Temp::BATTLE_RULES.keys.select { |key| Game_Temp::BATTLE_RULES[key][0] == :side_sizes }
+        side_sizes.map! { |val| val.dup }
+        side_sizes.prepend(_INTL("[Not set]"))
+        size_cmd = side_sizes.index(applied_rules[rule_sym]) || 0
+        size_cmd = pbShowCommands(nil, side_sizes, -1, size_cmd)
+        if size_cmd >= 0
+          applied_rules[rule_sym] = (size_cmd == 0) ? nil : side_sizes[size_cmd]
+        end
+      when :backdrop_name, :base_name
+        text = pbMessageFreeText(_INTL("Ingresa el valor para la regla de combate \"{1}\".", rule),
+                                    applied_rules[rule_sym] || "", false, 100, Graphics.width)
+        applied_rules[rule_sym] = (text && text != "") ? text : nil
+      when :outcome_variable
+        params = ChooseNumberParams.new
+        params.setRange(1, 99)
+        params.setInitialValue(applied_rules[rule_sym] || 1)
+        params.setCancelValue(-1)
+        value = pbMessageChooseNumber(_INTL("Elige la variable de juego para almacenar el resultado del combate."), params)
+        applied_rules[rule_sym] = (value > 0) ? value : nil
+      when :environment, :default_weather, :default_terrain
+        data_class = {
+          :environment     => GameData::Environment,
+          :default_weather => GameData::BattleWeather,
+          :default_terrain => GameData::BattleTerrain
+        }[rule_sym]
+        data_cmds = [_INTL("[Not set]")]
+        data_syms = [nil]
+        data_class.each do |entry|
+          data_cmds.push(entry.name)
+          data_syms.push(entry.id)
+        end
+        data_cmd = data_syms.index(applied_rules[rule_sym]) || 0
+        data_cmd = pbShowCommands(nil, data_cmds, -1, data_cmd)
+        applied_rules[rule_sym] = data_syms[data_cmd] if data_cmd >= 0
+      when :no_battle_animations, :cannot_run, :cannot_switch, :no_switch_style,
+           :continue_if_lose
+        if ["anims", "canrun", "canswitch", "switchstyle", "cannotlose"].include?(rule)
+          case applied_rules[rule_sym]
+          when true  then applied_rules[rule_sym] = nil
+          when false then applied_rules[rule_sym] = true
+          when nil   then applied_rules[rule_sym] = false
+          end
+        else
+          case applied_rules[rule_sym]
+          when true  then applied_rules[rule_sym] = false
+          when false then applied_rules[rule_sym] = nil
+          when nil   then applied_rules[rule_sym] = true
+          end
+        end
+      else
+        applied_rules[rule_sym] = (applied_rules[rule_sym]) ? nil : true
+      end
+    end
+  }
+})
+
+
+MenuHandlers.add(:debug_menu, :partner_trainer, {
+  "name"        => _INTL("Elegir entrenador compañero"),
+  "parent"      => :battle_menu,
+  "description" => _INTL("Elige un entrenador para luchar junto a ti en los combates."),
+  "effect"      => proc {
+    if $PokemonGlobal.partner
+      partner_name = sprintf("%s %s",
+                             GameData::TrainerType.get($PokemonGlobal.partner[0]).name,
+                             $PokemonGlobal.partner[1])
+      if pbConfirmMessage(_INTL("Tu entrenador compañero es {1}. ¿Deseas eliminarlo?", partner_name))
+        pbDeregisterPartner
+        pbMessage(_INTL("Tu entrenador compañero ha sido eliminado."))
+      end
+    else
+      if pbConfirmMessage(_INTL("No tienes un entrenador compañero. ¿Deseas uno?"))
+        chosen = pbListScreen(_INTL("Elige un entrenador compañero"), TrainerBattleLister.new(0, false))
+        if chosen
+          pbRegisterPartner(chosen[0], chosen[1], chosen[2])
+          pbMessage(_INTL("Has conseguido un entrenador compañero."))
+        end
+      end
+    end
+  }
+})
+
+
 MenuHandlers.add(:debug_menu, :encounter_version, {
   "name"        => _INTL("Elegir la versión de encuentros salvajes"),
   "parent"      => :battle_menu,
