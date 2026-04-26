@@ -10,14 +10,14 @@ class LocationWindow
     @graphic_offset = [0, 0]
     @window_offset = [0, 0]
     @center_text = false
+    @animate = animate
+    @current_map = $game_map.map_id
+    @timer_start = System.uptime
+    @delayed = !$game_temp.fly_destination.nil?
     initialize_graphic(graphic_name)
     initialize_text_window(name)
     apply_style(graphic_name)
     setup_initial_positions
-    @current_map = $game_map.map_id
-    @timer_start = System.uptime
-    @delayed = !$game_temp.fly_destination.nil?
-    @animate = animate
   end
 
   def initialize_viewport(viewport)
@@ -74,8 +74,8 @@ class LocationWindow
           @window_offset = filename[:text_offset] || [0, 0]
           @graphic_offset = filename[:graphic_offset] || [0, 0]
           center_text = filename[:center_text] || false
-        else
-          next if filename != graphic_name
+        elsif filename != graphic_name
+          next
         end
         style = val
         break
@@ -95,8 +95,8 @@ class LocationWindow
       @window.baseColor = base_color if base_color
       @window.shadowColor = shadow_color if shadow_color
       @graphic&.dispose
-      @graphic = Window_AdvancedTextPokemon.new("")
-      @graphic.setSkin("Graphics/UI/Location/#{graphic_name}")
+      @graphic = Window_AdvancedTextPokemon.new('')
+      @graphic.setSkin(File.join('Graphics', 'UI', 'Location', graphic_name))
       @graphic.width    = @window.width + (@window_offset[0] * 2) - 4
       @graphic.height   = 48
       @graphic.x        = 0
@@ -128,7 +128,7 @@ class LocationWindow
 
       @window_offset = [10, 16] if @window_offset == [0, 0]
     end
-    @window.text = @window.text   # Because the text colors were changed
+    @window.text = @window.text # Because the text colors were changed
     @window.text = "<ac>#{@window.text}" if center_text
   end
 
@@ -142,6 +142,15 @@ class LocationWindow
     return 0 if !@graphic
 
     return (@graphic.height * (@graphic.zoom_y || 1)).round
+  end
+
+  def appear_distance
+    sign_height = [graphic_display_height, @window.height].max
+    extra_margin = 16
+    if @animate_from_bottom
+      return (Graphics.height - @graphic_offset[1]) + extra_margin
+    end
+    return @graphic_offset[1] + sign_height + extra_margin
   end
 
   def position_window(y_offset)
@@ -159,11 +168,7 @@ class LocationWindow
     @animate_from_bottom = @graphic && (@graphic_offset[1] > Graphics.height / 2)
 
     initial_y_offset = if @animate
-                         if @animate_from_bottom
-                           @y_distance
-                         else
-                           -@y_distance
-                         end
+                         @animate_from_bottom ? appear_distance : -appear_distance
                        else
                          0
                        end
@@ -208,14 +213,14 @@ class LocationWindow
     if System.uptime - @timer_start >= APPEAR_TIME + LINGER_TIME
       # Disappearing
       if @animate_from_bottom
-        y_offset = lerp(0, @y_distance, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, System.uptime)
-        if y_offset >= @y_distance
+        y_offset = lerp(0, appear_distance, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, System.uptime)
+        if y_offset >= appear_distance
           dispose
           return
         end
       else
-        y_offset = lerp(0, -@y_distance, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, System.uptime)
-        if y_offset <= -@y_distance
+        y_offset = lerp(0, -appear_distance, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, System.uptime)
+        if y_offset <= -appear_distance
           dispose
           return
         end
@@ -223,9 +228,9 @@ class LocationWindow
     else
       # Appearing
       y_offset = if @animate_from_bottom
-                   lerp(@y_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
+                   lerp(appear_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
                  else
-                   lerp(-@y_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
+                   lerp(-appear_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
                  end
     end
 
@@ -307,7 +312,7 @@ class LightEffect
     if !nil_or_empty?(filename) && pbResolveBitmap("Graphics/Pictures/#{filename}")
       @light.setBitmap("Graphics/Pictures/#{filename}")
     else
-      @light.setBitmap("Graphics/Pictures/LE")
+      @light.setBitmap('Graphics/Pictures/LE')
     end
     @light.z = 1000
     @event = event
@@ -336,7 +341,7 @@ end
 #===============================================================================
 class LightEffect_Lamp < LightEffect
   def initialize(event, viewport = nil, map = nil)
-    lamp = AnimatedBitmap.new("Graphics/Pictures/LE")
+    lamp = AnimatedBitmap.new('Graphics/Pictures/LE')
     @light = Sprite.new(viewport)
     @light.bitmap = Bitmap.new(128, 64)
     src_rect = Rect.new(0, 0, 64, 64)
@@ -393,9 +398,9 @@ class LightEffect_DayNight < LightEffect
 
     super
     shade = PBDayNight.getShade
-    shade = if shade >= 144   # If light enough, call it fully day
+    shade = if shade >= 144 # If light enough, call it fully day
               255
-            elsif shade <= 64   # If dark enough, call it fully night
+            elsif shade <= 64 # If dark enough, call it fully night
               0
             else
               255 - (255 * (144 - shade) / (144 - 64))
@@ -424,7 +429,7 @@ end
 #===============================================================================
 EventHandlers.add(:on_new_spriteset_map, :add_light_effects,
                   proc { |spriteset, viewport|
-                    map = spriteset.map   # Map associated with the spriteset (not necessarily the current map)
+                    map = spriteset.map # Map associated with the spriteset (not necessarily the current map)
                     map.events.each_key do |i|
                       if map.events[i].name[/^outdoorlight\((\w+)\)$/i]
                         filename = $~[1].to_s
