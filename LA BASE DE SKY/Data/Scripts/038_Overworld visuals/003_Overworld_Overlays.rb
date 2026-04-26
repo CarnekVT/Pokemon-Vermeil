@@ -9,6 +9,7 @@ class LocationWindow
     initialize_viewport(viewport)
     @graphic_offset = [0, 0]
     @window_offset = [0, 0]
+    @center_text = false
     initialize_graphic(graphic_name)
     initialize_text_window(name)
     apply_style(graphic_name)
@@ -30,6 +31,7 @@ class LocationWindow
 
   def initialize_graphic(graphic_name)
     return if graphic_name.nil? || !pbResolveBitmap("Graphics/UI/Location/#{graphic_name}")
+
     @graphic = Sprite.new(@viewport)
     @graphic.bitmap = RPG::Cache.ui("Location/#{graphic_name}")
     @graphic.x = 0
@@ -49,8 +51,10 @@ class LocationWindow
     # Set up values to be used elsewhere
     @graphic_offset = [0, 0]
     @window_offset = [0, 0]
+    @center_text = false
     @y_distance = @window.height
     return if graphic_name.nil?
+
     # Determine the style and base/shadow colors
     style = :none
     base_color = nil
@@ -62,9 +66,10 @@ class LocationWindow
       filenames.each do |filename|
         if filename.is_a?(Hash)
           next if !filename.key?(:graphic) || filename[:graphic] != graphic_name
+
           base_color = filename[:text_color] if filename.key?(:text_color)
           shadow_color = filename[:shadow_color] if filename.key?(:shadow_color)
-          zoom_x = filename[:zoomx] || 1 
+          zoom_x = filename[:zoomx] || 1
           zoom_y = filename[:zoomy] || 1
           @window_offset = filename[:text_offset] || [0, 0]
           @graphic_offset = filename[:graphic_offset] || [0, 0]
@@ -78,7 +83,9 @@ class LocationWindow
       break if style != :none
     end
     return if style == :none
+
     # Apply the style
+    @center_text = center_text
     @y_distance = @graphic&.height || @window.height
     @window.back_opacity = 0
     @graphic.zoom_x = zoom_x if zoom_x
@@ -93,7 +100,7 @@ class LocationWindow
       @graphic.width    = @window.width + (@window_offset[0] * 2) - 4
       @graphic.height   = 48
       @graphic.x        = 0
-      @graphic.y        = (@animate) ? -@graphic.height : @graphic_offset[1]
+      @graphic.y        = @animate ? -@graphic.height : @graphic_offset[1]
       @graphic.z        = 0
       @graphic.zoom_x = zoom_x if zoom_x
       @graphic.zoom_y = zoom_y if zoom_y
@@ -113,34 +120,62 @@ class LocationWindow
     when :xy
       @window.baseColor = base_color || Color.white
       @window.shadowColor = shadow_color || Color.new(0, 0, 0, 128)
+    when :letsgo
+      @window.baseColor = base_color || Color.white
+      @window.shadowColor = shadow_color || Color.new(0, 0, 0, 128)
+      @graphic.zoom_x = zoom_x if zoom_x
+      @graphic.zoom_y = zoom_y if zoom_y
+
+      @window_offset = [10, 16] if @window_offset == [0, 0]
     end
     @window.text = @window.text   # Because the text colors were changed
-    @window.text = "<ac>" + @window.text if center_text
+    @window.text = "<ac>#{@window.text}" if center_text
+  end
+
+  def graphic_display_width
+    return 0 if !@graphic
+
+    return (@graphic.width * (@graphic.zoom_x || 1)).round
+  end
+
+  def graphic_display_height
+    return 0 if !@graphic
+
+    return (@graphic.height * (@graphic.zoom_y || 1)).round
+  end
+
+  def position_window(y_offset)
+    if @center_text && @graphic
+      @window.x = @graphic_offset[0] + ((graphic_display_width - @window.width) / 2.0).round + @window_offset[0]
+      @window.y = @graphic_offset[1] + ((graphic_display_height - @window.height) / 2.0).round + @window_offset[1] + y_offset
+    else
+      @window.x = @graphic_offset[0] + @window_offset[0]
+      @window.y = @graphic_offset[1] + @window_offset[1] + y_offset
+    end
   end
 
   def setup_initial_positions
     # Determine animation direction based on graphic position
     @animate_from_bottom = @graphic && (@graphic_offset[1] > Graphics.height / 2)
-    
-    if @animate
-      if @animate_from_bottom
-        initial_y_offset = @y_distance
-      else
-        initial_y_offset = -@y_distance
-      end
-    else
-      initial_y_offset = 0
-    end
-    
+
+    initial_y_offset = if @animate
+                         if @animate_from_bottom
+                           @y_distance
+                         else
+                           -@y_distance
+                         end
+                       else
+                         0
+                       end
+
     # Position graphic
     if @graphic
       @graphic.x = @graphic_offset[0]
       @graphic.y = @graphic_offset[1] + initial_y_offset
     end
-    
+
     # Position window relative to graphic (text_offset is relative to graphic_offset)
-    @window.x = @graphic_offset[0] + @window_offset[0]
-    @window.y = @graphic_offset[1] + @window_offset[1] + initial_y_offset
+    position_window(initial_y_offset)
   end
 
   def disposed?
@@ -155,6 +190,7 @@ class LocationWindow
 
   def update
     return if disposed? || $game_temp.fly_destination
+
     if @delayed
       @timer_start = System.uptime
       @delayed = false
@@ -162,11 +198,12 @@ class LocationWindow
     @graphic&.update
     @window.update
     return if !@animate
+
     if $game_temp.message_window_showing || @current_map != $game_map.map_id
       dispose
       return
     end
-    
+
     # Calculate animation offset
     if System.uptime - @timer_start >= APPEAR_TIME + LINGER_TIME
       # Disappearing
@@ -185,20 +222,19 @@ class LocationWindow
       end
     else
       # Appearing
-      if @animate_from_bottom
-        y_offset = lerp(@y_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
-      else
-        y_offset = lerp(-@y_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
-      end
+      y_offset = if @animate_from_bottom
+                   lerp(@y_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
+                 else
+                   lerp(-@y_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
+                 end
     end
-    
+
     # Apply positions (text is positioned relative to graphic)
     if @graphic
       @graphic.x = @graphic_offset[0]
       @graphic.y = @graphic_offset[1] + y_offset
     end
-    @window.x = @graphic_offset[0] + @window_offset[0]
-    @window.y = @graphic_offset[1] + @window_offset[1] + y_offset
+    position_window(y_offset)
   end
 end
 
@@ -231,13 +267,13 @@ class DarknessSprite < Sprite
   # Before using Flash.
   def radiusMin
     ret = 64
-    return (PIXELLATE_CIRCLE) ? ret / 2 : ret
+    return PIXELLATE_CIRCLE ? ret / 2 : ret
   end
 
   # After using Flash.
   def radiusMax
     ret = 176
-    return (PIXELLATE_CIRCLE) ? ret / 2 : ret
+    return PIXELLATE_CIRCLE ? ret / 2 : ret
   end
 
   def radius=(value)
@@ -268,14 +304,14 @@ end
 class LightEffect
   def initialize(event, viewport = nil, map = nil, filename = nil)
     @light = IconSprite.new(0, 0, viewport)
-    if !nil_or_empty?(filename) && pbResolveBitmap("Graphics/Pictures/" + filename)
-      @light.setBitmap("Graphics/Pictures/" + filename)
+    if !nil_or_empty?(filename) && pbResolveBitmap("Graphics/Pictures/#{filename}")
+      @light.setBitmap("Graphics/Pictures/#{filename}")
     else
       @light.setBitmap("Graphics/Pictures/LE")
     end
     @light.z = 1000
     @event = event
-    @map = (map) ? map : $game_map
+    @map = map ? map : $game_map
     @disposed = false
   end
 
@@ -309,7 +345,7 @@ class LightEffect_Lamp < LightEffect
     @light.visible = true
     @light.z       = 1000
     lamp.dispose
-    @map = (map) ? map : $game_map
+    @map = map ? map : $game_map
     @event = event
   end
 end
@@ -327,6 +363,7 @@ class LightEffect_Basic < LightEffect
 
   def update
     return if !@light || !@event
+
     super
     if (Object.const_defined?(:ScreenPosHelper) rescue false)
       @light.x      = ScreenPosHelper.pbScreenX(@event)
@@ -353,15 +390,16 @@ class LightEffect_DayNight < LightEffect
 
   def update
     return if !@light || !@event
+
     super
     shade = PBDayNight.getShade
-    if shade >= 144   # If light enough, call it fully day
-      shade = 255
-    elsif shade <= 64   # If dark enough, call it fully night
-      shade = 0
-    else
-      shade = 255 - (255 * (144 - shade) / (144 - 64))
-    end
+    shade = if shade >= 144   # If light enough, call it fully day
+              255
+            elsif shade <= 64   # If dark enough, call it fully night
+              0
+            else
+              255 - (255 * (144 - shade) / (144 - 64))
+            end
     @light.opacity = 255 - shade
     if @light.opacity > 0
       if (Object.const_defined?(:ScreenPosHelper) rescue false)
@@ -385,20 +423,20 @@ end
 #
 #===============================================================================
 EventHandlers.add(:on_new_spriteset_map, :add_light_effects,
-  proc { |spriteset, viewport|
-    map = spriteset.map   # Map associated with the spriteset (not necessarily the current map)
-    map.events.each_key do |i|
-      if map.events[i].name[/^outdoorlight\((\w+)\)$/i]
-        filename = $~[1].to_s
-        spriteset.addUserSprite(LightEffect_DayNight.new(map.events[i], viewport, map, filename))
-      elsif map.events[i].name[/^outdoorlight$/i]
-        spriteset.addUserSprite(LightEffect_DayNight.new(map.events[i], viewport, map))
-      elsif map.events[i].name[/^light\((\w+)\)$/i]
-        filename = $~[1].to_s
-        spriteset.addUserSprite(LightEffect_Basic.new(map.events[i], viewport, map, filename))
-      elsif map.events[i].name[/^light$/i]
-        spriteset.addUserSprite(LightEffect_Basic.new(map.events[i], viewport, map))
-      end
-    end
-  }
+                  proc { |spriteset, viewport|
+                    map = spriteset.map   # Map associated with the spriteset (not necessarily the current map)
+                    map.events.each_key do |i|
+                      if map.events[i].name[/^outdoorlight\((\w+)\)$/i]
+                        filename = $~[1].to_s
+                        spriteset.addUserSprite(LightEffect_DayNight.new(map.events[i], viewport, map, filename))
+                      elsif map.events[i].name[/^outdoorlight$/i]
+                        spriteset.addUserSprite(LightEffect_DayNight.new(map.events[i], viewport, map))
+                      elsif map.events[i].name[/^light\((\w+)\)$/i]
+                        filename = $~[1].to_s
+                        spriteset.addUserSprite(LightEffect_Basic.new(map.events[i], viewport, map, filename))
+                      elsif map.events[i].name[/^light$/i]
+                        spriteset.addUserSprite(LightEffect_Basic.new(map.events[i], viewport, map))
+                      end
+                    end
+                  }
 )

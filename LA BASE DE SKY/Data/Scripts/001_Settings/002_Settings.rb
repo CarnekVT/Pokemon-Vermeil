@@ -421,7 +421,9 @@ module Settings
   #   :zoomy => zoom vertical (int o float),  -- OPCIONAL, por defecto 1
   #   :graphic_offset => desplazamiento del gráfico (array [x, y]), -- OPCIONAL, por defecto [0, 0]
   #   :text_offset => desplazamiento del texto con respecto al grafico (array [x, y]), -- OPCIONAL, por defecto [0, 0]
-  #   :center_text => centrar el texto (boolean true / false) -- OPCIONAL, por defecto false
+  #                    si :center_text es true, este desplazamiento se aplica como ajuste fino
+  #                    adicional después de centrar el texto horizontal y verticalmente.
+  #   :center_text => centrar el texto respecto al gráfico (boolean true / false) -- OPCIONAL, por defecto false
   # }
   # Tambien podria ser un array de nombres de archivo, en cuyo caso se usaría el mismo estilo de texto para todos los gráficos de ese estilo.
   # Los valores para los estilos en los que solo se ingresa el grafico están definidos en la clase LocationWindow, y se pueden modificar editando esa clase.
@@ -444,8 +446,21 @@ module Settings
              text_offset: [0, 0], graphic_offset: [0, 0], zoomx: 2, zoomy: 2,
              center_text: true }],
     xy: [{ graphic: 'XY', text_color: Color.new(255, 255, 255), shadow_color: Color.new(0, 0, 0, 128),
-           text_offset: [60, 10], graphic_offset: [Settings::SCREEN_WIDTH / 4 - 20, Settings::SCREEN_HEIGHT - 100],
-           zoomx: 2, zoomy: 2, center_text: true }]
+           text_offset: [0, 0], graphic_offset: [Settings::SCREEN_WIDTH / 4 - 20, Settings::SCREEN_HEIGHT - 100],
+           zoomx: 2, zoomy: 2, center_text: true }],
+    letsgo: [{ graphic: 'LETSGO town', text_color: Color.new(255, 255, 255), shadow_color: Color.new(0, 0, 0, 128),
+               text_offset: [0, -1], graphic_offset: [Settings::SCREEN_WIDTH / 4 - 40, Settings::SCREEN_HEIGHT - 100],
+               zoomx: 2, zoomy: 2, center_text: true },
+             { graphic: 'LETSGO route', text_color: Color.new(255, 255, 255), shadow_color: Color.new(0, 0, 0, 128),
+               text_offset: [0, -1], graphic_offset: [Settings::SCREEN_WIDTH / 4 - 40, Settings::SCREEN_HEIGHT - 100],
+               zoomx: 2, zoomy: 2, center_text: true },
+             { graphic: 'LETSGO mountain', text_color: Color.new(255, 255, 255), shadow_color: Color.new(0, 0, 0, 128),
+               text_offset: [0, -1], graphic_offset: [Settings::SCREEN_WIDTH / 4 - 40, Settings::SCREEN_HEIGHT - 100],
+               zoomx: 2, zoomy: 2, center_text: true },
+             { graphic: 'LETSGO valley', text_color: Color.new(255, 255, 255), shadow_color: Color.new(0, 0, 0, 128),
+               text_offset: [0, -1], graphic_offset: [Settings::SCREEN_WIDTH / 4 - 40, Settings::SCREEN_HEIGHT - 100],
+               zoomx: 2, zoomy: 2, center_text: true }
+            ]
   }
 
 
