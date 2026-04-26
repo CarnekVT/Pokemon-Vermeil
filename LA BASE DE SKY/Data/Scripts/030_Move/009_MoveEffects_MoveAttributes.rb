@@ -520,10 +520,7 @@ end
 #===============================================================================
 class Battle::Move::DoublePowerIfTargetPoisoned < Battle::Move
   def pbBasePower(base_power, user, target)
-    if target.poisoned? &&
-       (target.effects[PBEffects::Substitute] == 0 || ignoresSubstitute?(user))
-      base_power *= 2
-    end
+    base_power *= 2 if target.poisoned?
     return base_power
   end
 end
@@ -534,10 +531,7 @@ end
 #===============================================================================
 class Battle::Move::DoublePowerIfTargetPoisonedPoisonTarget < Battle::Move::PoisonTarget
   def pbBasePower(base_power, user, target)
-    if target.poisoned? &&
-       (target.effects[PBEffects::Substitute] == 0 || ignoresSubstitute?(user))
-      base_power *= 2
-    end
+    base_power *= 2 if target.poisoned?
     return base_power
   end
 end
@@ -548,10 +542,7 @@ end
 #===============================================================================
 class Battle::Move::DoublePowerIfTargetParalyzedCureTarget < Battle::Move
   def pbBasePower(base_power, user, target)
-    if target.paralyzed? &&
-       (target.effects[PBEffects::Substitute] == 0 || ignoresSubstitute?(user))
-      base_power *= 2
-    end
+    base_power *= 2 if target.paralyzed?
     return base_power
   end
 
@@ -568,10 +559,7 @@ end
 #===============================================================================
 class Battle::Move::DoublePowerIfTargetStatusProblem < Battle::Move
   def pbBasePower(base_power, user, target)
-    if target.pbHasAnyStatus? &&
-       (target.effects[PBEffects::Substitute] == 0 || ignoresSubstitute?(user))
-      base_power *= 2
-    end
+    base_power *= 2 if target.pbHasAnyStatus?
     return base_power
   end
 end
@@ -582,10 +570,7 @@ end
 #===============================================================================
 class Battle::Move::DoublePowerIfTargetStatusProblemBurnTarget < Battle::Move::BurnTarget
   def pbBasePower(base_power, user, target)
-    if target.pbHasAnyStatus? &&
-       (target.effects[PBEffects::Substitute] == 0 || ignoresSubstitute?(user))
-      base_power *= 2
-    end
+    base_power *= 2 if target.pbHasAnyStatus?
     return base_power
   end
 end
