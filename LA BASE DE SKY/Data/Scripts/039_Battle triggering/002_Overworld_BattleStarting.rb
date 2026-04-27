@@ -362,7 +362,7 @@ module BattleCreationHelperMethods
     end
   end
 
-  def after_battle(outcome, continue_if_lose)
+  def after_battle(outcome, continue_if_lose, battle)
     $player.party.each do |pkmn|
       pkmn.statusCount = 0 if pkmn.status == :POISON   # Bad poison becomes regular
       pkmn.makeUnmega
@@ -384,7 +384,7 @@ module BattleCreationHelperMethods
         Graphics.update
       end
     end
-    EventHandlers.trigger(:on_end_battle, outcome, continue_if_lose)
+    EventHandlers.trigger(:on_end_battle, outcome, continue_if_lose, battle)
     $game_player.straighten
   end
 
@@ -468,7 +468,7 @@ class WildBattle
     outcome = Battle::Outcome::UNDECIDED
     pbBattleAnimation(pbGetWildBattleBGM(foe_party), (foe_party.length == 1) ? 0 : 2, foe_party) do
       pbSceneStandby { outcome = battle.pbStartBattle }
-      BattleCreationHelperMethods.after_battle(outcome, can_lose)
+      BattleCreationHelperMethods.after_battle(outcome, can_lose, battle)
     end
     $game_temp.clear_battle_rules
     Input.update
@@ -588,7 +588,7 @@ class TrainerBattle
     outcome = Battle::Outcome::UNDECIDED
     pbBattleAnimation(pbGetTrainerBattleBGM(foe_trainers), (battle.singleBattle?) ? 1 : 3, foe_trainers) do
       pbSceneStandby { outcome = battle.pbStartBattle }
-      BattleCreationHelperMethods.after_battle(outcome, can_lose)
+      BattleCreationHelperMethods.after_battle(outcome, can_lose, battle)
     end
     $game_temp.clear_battle_rules
     Input.update
@@ -675,7 +675,7 @@ end
 # After battles
 #===============================================================================
 EventHandlers.add(:on_end_battle, :evolve_and_black_out,
-  proc { |outcome, canLose|
+  proc { |outcome, canLose, battle|
     # Check for evolutions
     pbEvolutionCheck if Settings::CHECK_EVOLUTION_AFTER_ALL_BATTLES ||
                         !Battle::Outcome.should_black_out?(outcome)
