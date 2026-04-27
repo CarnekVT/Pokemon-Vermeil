@@ -186,8 +186,7 @@ class PokemonPokedexInfo_Scene
 
   def pbUpdateDummyPokemon
     @species = @dexlist[@index][:species]
-    @gender, @form, _shiny = $player.pokedex.last_form_seen(@species)
-    @shiny = false
+    @gender, @form, @shiny = $player.pokedex.last_form_seen(@species)
     metrics_data = GameData::SpeciesMetrics.get_species_form(@species, @form)
     @sprites["infosprite"].setSpeciesBitmap(@species, @gender, @form, @shiny)
     @sprites["formfront"]&.setSpeciesBitmap(@species, @gender, @form, @shiny)
@@ -462,10 +461,19 @@ class PokemonPokedexInfo_Scene
     shadow = Color.new(168, 184, 184)
     # Write species and form name
     formname = ""
-    @available.each do |i|
-      if i[1] == @gender && i[2] == @form
-        formname = i[0]
-        break
+    if @shiny
+      @available_shiny.each do |i|
+        if i[1] == @gender && i[2] == @form
+          formname = i[0]
+          break
+        end
+      end
+    else
+      @available.each do |i|
+        if i[1] == @gender && i[2] == @form
+          formname = i[0]
+          break
+        end
       end
     end
     textpos = [
@@ -500,31 +508,61 @@ class PokemonPokedexInfo_Scene
 
   def pbChooseForm
     index = 0
-    @available.length.times do |i|
-      if @available[i][1] == @gender && @available[i][2] == @form
+    @availablePokedex = @available.length > 0 ? @available : @available_shiny
+    @availablePokedex.length.times do |i|
+      if @availablePokedex[i][1] == @gender && @availablePokedex[i][2] == @form
         index = i
         break
       end
     end
     oldindex = -1
+    shiny = @shiny
+    old_shiny = !shiny
+
+    @sprites["leftarrow"] = AnimatedSprite.new("Graphics/UI/left_arrow", 8, 40, 28, 2, @viewport)
+    @sprites["leftarrow"].x = 172
+    @sprites["leftarrow"].y = 308
+    @sprites["leftarrow"].play
+    @sprites["leftarrow"].visible = false
+    @sprites["rightarrow"] = AnimatedSprite.new("Graphics/UI/right_arrow", 8, 40, 28, 2, @viewport)
+    @sprites["rightarrow"].x = 312
+    @sprites["rightarrow"].y = 308
+    @sprites["rightarrow"].play
+    @sprites["rightarrow"].visible = false
     loop do
-      if oldindex != index
-        $player.pokedex.set_last_form_seen(@species, @available[index][1], @available[index][2])
+      @availablePokedex = shiny ? @available_shiny : @available
+      if oldindex != index || old_shiny != shiny
+        $player.pokedex.set_last_form_seen(@species, @availablePokedex[index][1], @availablePokedex[index][2], shiny)
         pbUpdateDummyPokemon
         drawPage(@page)
         @sprites["uparrow"].visible   = (index > 0)
-        @sprites["downarrow"].visible = (index < @available.length - 1)
+        @sprites["downarrow"].visible = (index < @availablePokedex.length - 1)
+        @sprites["rightarrow"].visible = !shiny && (@available_shiny.length > 0)
+        @sprites["leftarrow"].visible = shiny && (@available.length > 0)
         oldindex = index
+        old_shiny = shiny
       end
       Graphics.update
       Input.update
       pbUpdate
       if Input.trigger?(Input::UP)
         pbPlayCursorSE
-        index = (index + @available.length - 1) % @available.length
+        index = (index != 0) ? index - 1 : 0
       elsif Input.trigger?(Input::DOWN)
         pbPlayCursorSE
-        index = (index + 1) % @available.length
+        index = (index != @availablePokedex.length - 1) ? index + 1 : @availablePokedex.length - 1
+      elsif Input.trigger?(Input::RIGHT)
+        pbPlayCursorSE
+        if @available_shiny.length > 0
+          shiny = true
+          index = (index < @available_shiny.length) ? index : @available_shiny.length - 1
+        end
+      elsif Input.trigger?(Input::LEFT)
+        pbPlayCursorSE
+        if @available.length > 0
+          shiny = false
+          index = (index < @available.length) ? index : @available.length - 1
+        end
       elsif Input.trigger?(Input::BACK)
         pbPlayCancelSE
         break
@@ -535,6 +573,9 @@ class PokemonPokedexInfo_Scene
     end
     @sprites["uparrow"].visible   = false
     @sprites["downarrow"].visible = false
+    @sprites["rightarrow"].visible = false
+    @sprites["leftarrow"].visible = false
+    #$player.pokedex.set_last_form_seen(@species, 0, 0, false)
   end
 
   def pbScene
