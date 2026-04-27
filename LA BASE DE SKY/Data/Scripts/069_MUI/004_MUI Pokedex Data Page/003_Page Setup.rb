@@ -174,7 +174,7 @@ class PokemonPokedexInfo_Scene
   #-----------------------------------------------------------------------------
   # Rewritten to allow for forms with gender differences to appear.
   #-----------------------------------------------------------------------------
-  def pbGetAvailableForms
+  def pbGetAvailableForms(shiny = nil)
     ret = []
     multiple_forms = false
     GameData::Species.each do |sp|
@@ -185,22 +185,22 @@ class PokemonPokedexInfo_Scene
       multiple_forms = true if sp.form > 0
       if sp.single_gendered?
         real_gender = (sp.gender_ratio == :AlwaysFemale) ? 1 : 0
-        next if !$player.pokedex.seen_form?(@species, real_gender, sp.form) && !Settings::DEX_SHOWS_ALL_FORMS
+        next if !$player.pokedex.seen_form?(@species, real_gender, sp.form, shiny) && !Settings::DEX_SHOWS_ALL_FORMS
         real_gender = 2 if sp.gender_ratio == :Genderless
         ret.push([sp.form_name, real_gender, sp.form])
       elsif !gender_difference?(sp.form)
         2.times do |real_gndr|
-          next if !$player.pokedex.seen_form?(@species, real_gndr, sp.form) && !Settings::DEX_SHOWS_ALL_FORMS
+          next if !$player.pokedex.seen_form?(@species, real_gndr, sp.form, shiny) && !Settings::DEX_SHOWS_ALL_FORMS
           ret.push([sp.form_name || _INTL("Forma Normal"), 0, sp.form])
           break
         end
       elsif sp.form_name == _INTL("Macho") || sp.form_name == _INTL("Hembra")
-        next if !$player.pokedex.seen_form?(@species, sp.form, sp.form) && !Settings::DEX_SHOWS_ALL_FORMS
+        next if !$player.pokedex.seen_form?(@species, sp.form, sp.form, shiny) && !Settings::DEX_SHOWS_ALL_FORMS
         ret.push([sp.form_name, sp.form, sp.form])
       else
         g = [_INTL("Macho"), _INTL("Hembra")]
         2.times do |real_gndr|
-          next if !$player.pokedex.seen_form?(@species, real_gndr, sp.form) && !Settings::DEX_SHOWS_ALL_FORMS
+          next if !$player.pokedex.seen_form?(@species, real_gndr, sp.form, shiny) && !Settings::DEX_SHOWS_ALL_FORMS
           form_name = (sp.form_name) ? sp.form_name + " " + g[real_gndr] : g[real_gndr]
           ret.push([form_name, real_gndr, sp.form]) 
         end

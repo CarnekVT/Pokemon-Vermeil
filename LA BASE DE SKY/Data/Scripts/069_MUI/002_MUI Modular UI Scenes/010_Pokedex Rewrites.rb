@@ -118,6 +118,8 @@ class PokemonPokedexInfo_Scene
   # The USE key now varies in function based on @page_id instead of @page number.
   #-----------------------------------------------------------------------------
   def pbScene
+    @available = pbGetAvailableForms(false)
+    @available_shiny = pbGetAvailableForms(true)
     Pokemon.play_cry(@species, @form)
     loop do
       Graphics.update
@@ -139,7 +141,7 @@ class PokemonPokedexInfo_Scene
             @show_battled_count = !@show_battled_count
             dorefresh = true
           when :page_forms
-            if @available.length > 1
+            if @available.length + @available_shiny.length > 1
               pbPlayDecisionSE
               pbChooseForm
               dorefresh = true
@@ -153,7 +155,8 @@ class PokemonPokedexInfo_Scene
         pbGoToPrevious
         if @index != oldindex
           pbUpdateDummyPokemon
-          @available = pbGetAvailableForms
+          @available = pbGetAvailableForms(false)
+          @available_shiny = pbGetAvailableForms(true)
           pbSEStop
           (@page == 1) ? Pokemon.play_cry(@species, @form) : pbPlayCursorSE
           dorefresh = true
@@ -163,7 +166,8 @@ class PokemonPokedexInfo_Scene
         pbGoToNext
         if @index != oldindex
           pbUpdateDummyPokemon
-          @available = pbGetAvailableForms
+          @available = pbGetAvailableForms(false)
+          @available_shiny = pbGetAvailableForms(true)
           pbSEStop
           (@page == 1) ? Pokemon.play_cry(@species, @form) : pbPlayCursorSE
           dorefresh = true
