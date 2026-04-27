@@ -1246,11 +1246,21 @@ class Pokemon
   # @return [Hash<Integer>] hash containing this Pokémon's effective IVs
   def calcIV
     this_ivs = self.iv
+    unless this_ivs
+      fill_ivs
+      this_ivs = self.iv
+    end
     ret = {}
     GameData::Stat.each_main do |s|
       ret[s.id] = (@ivMaxed[s.id]) ? IV_STAT_LIMIT : this_ivs[s.id]
     end
     return ret
+  end
+
+  def fill_ivs
+    GameData::Stat.each_main do |s|
+      @iv[s.id] = rand(IV_STAT_LIMIT + 1)
+    end
   end
 
   # @return [Integer] the maximum HP of this Pokémon
