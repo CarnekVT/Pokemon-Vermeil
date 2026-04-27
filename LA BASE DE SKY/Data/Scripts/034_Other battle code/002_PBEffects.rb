@@ -139,6 +139,7 @@ module PBEffects
   WaterSport          = 130
   WeightChange        = 131
   Yawn                = 132
+  SupremeOverlord     = 133 
 
   #-----------------------------------------------------------------------------
   # These effects apply to a battler position.
