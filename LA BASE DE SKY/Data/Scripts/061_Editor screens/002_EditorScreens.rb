@@ -349,7 +349,7 @@ def pbTrainerTypeEditor
     if tr_type
       case button
       when Input::ACTION
-        if tr_type.is_a?(Symbol) && pbConfirmMessageSerious("¿Eliminar este tipo de Entrenador?")
+        if tr_type.is_a?(Symbol) && pbConfirmMessageSerious(_INTL("¿Eliminar este tipo de Entrenador?"))
           GameData::TrainerType::DATA.delete(tr_type)
           GameData::TrainerType.save
           pbConvertTrainerData
@@ -483,7 +483,7 @@ def pbTrainerBattleEditor
     if trainer_id
       case button
       when Input::ACTION
-        if trainer_id.is_a?(Array) && pbConfirmMessageSerious("¿Eliminar esta batalla de Entrenador?")
+        if trainer_id.is_a?(Array) && pbConfirmMessageSerious(_INTL("¿Eliminar esta batalla de Entrenador?"))
           tr_data = GameData::Trainer::DATA[trainer_id]
           GameData::Trainer::DATA.delete(trainer_id)
           modified = true
@@ -500,7 +500,7 @@ def pbTrainerBattleEditor
             tr_data.real_name,
             tr_data.version,
             tr_data.real_lose_text,
-            tr_data.real_lose_text_f
+            tr_data.real_lose_text_f != tr_data.real_lose_text ? tr_data.real_lose_text_f : ''
           ]
           Settings::MAX_PARTY_SIZE.times do |i|
             data.push(tr_data.pokemon[i])
@@ -533,7 +533,7 @@ def pbTrainerBattleEditor
                 :real_name        => data[1],
                 :version          => data[2],
                 :real_lose_text   => data[3],
-                :real_lose_text_f => data[4] && !data[4].empty? ? data[4] : data[3], 
+                :real_lose_text_f => data[4] && !data[4].empty? ? data[4] : nil, 
                 :pokemon          => party,
                 :items            => items,
                 :pbs_file_suffix  => tr_data.pbs_file_suffix
@@ -608,81 +608,72 @@ end
 # Trainer Pokémon editor
 #===============================================================================
 module TrainerPokemonProperty
-  def self.set(settingname, initsetting)
-    initsetting = {:species => nil, :level => 10} if !initsetting
-    oldsetting = [
-      initsetting[:species],
-      initsetting[:level],
-      initsetting[:real_name],
-      initsetting[:form],
-      initsetting[:gender],
-      initsetting[:shininess],
-      initsetting[:super_shininess],
-      initsetting[:shadowness]
-    ]
-    Pokemon::MAX_MOVES.times do |i|
-      oldsetting.push((initsetting[:moves]) ? initsetting[:moves][i] : nil)
-    end
-    oldsetting.concat([initsetting[:ability],
-                       initsetting[:ability_index],
-                       initsetting[:item],
-                       initsetting[:nature],
-                       initsetting[:iv],
-                       initsetting[:ev],
-                       initsetting[:happiness],
-                       initsetting[:poke_ball]])
+  def self.editor_properties
     max_level = GameData::GrowthRate.max_level
-    pkmn_properties = [
-      [_INTL("Especie"),         SpeciesProperty,                      _INTL("Especie del Pokémon.")],
-      [_INTL("Nivel"),           NonzeroLimitProperty.new(max_level),  _INTL("Nivel del Pokémon (1-{1}).", max_level)],
-      [_INTL("Nombre"),          StringProperty,                       _INTL("Mote del Pokémon.")],
-      [_INTL("Forma"),           LimitProperty2.new(999),              _INTL("Forma del Pokémon.")],
-      [_INTL("Género"),          GenderProperty,                       _INTL("Género del Pokémon.")],
-      [_INTL("Variocolor"),      BooleanProperty2,                     _INTL("Si está en true, el Pokémon es de otro color.")],
-      [_INTL("SuperVariocolor"), BooleanProperty2,                     _INTL("Si el Pokémon es Súper Shiny (variocolor con una animación especial).")],
-      [_INTL("Oscuro"),          BooleanProperty2,                     _INTL("Si está en true, el Pokémon es un Pokémon Oscuro.")]
+    # NOTE: :species must be listed before :moves.
+    return [
+      [:species,         _INTL("Especie"),             SpeciesProperty,                             _INTL("Especie del Pokémon.")],
+      [:level,           _INTL("Nivel"),               NonzeroLimitProperty.new(max_level),         _INTL("Nivel del Pokémon (1-{1}).", max_level)],
+      [:real_name,       _INTL("Nombre"),              StringProperty,                              _INTL("Mote del Pokémon.")],
+      [:form,            _INTL("Forma"),               LimitProperty2.new(999),                     _INTL("Forma del Pokémon.")],
+      [:gender,          _INTL("Género"),              GenderProperty,                              _INTL("Género del Pokémon.")],
+      [:shininess,       _INTL("Variocolor"),          BooleanProperty2,                            _INTL("Si está en true, el Pokémon es de otro color.")],
+      [:super_shininess, _INTL("SuperVariocolor"),     BooleanProperty2,                            _INTL("Si el Pokémon es Súper Shiny (variocolor con una animación especial).")],
+      [:shadowness,      _INTL("Oscuro"),              BooleanProperty2,                            _INTL("Si está en true, el Pokémon es un Pokémon Oscuro.")],
+      [:moves,           _INTL("Movimiento"),          MovePropertyForSpecies.new,                  _INTL("Un movimiento que conoce el Pokémon. Dejar todos los movs. en blanco (usa la tecla Z para eliminar) para un moveset de Pokémon salvaje.")],
+      [:ability,         _INTL("Habilidad"),           AbilityProperty,                             _INTL("Habilidad del Pokémon. Sobrescribe el índice de la habilidad.")],
+      [:ability_index,   _INTL("Índice de habilidad"), LimitProperty2.new(99),                      _INTL("Índice de la habilidad. 0=primera habilidad, 1=segunda habilidad, 2+=habilidad oculta.")],
+      [:item,            _INTL("Objeto equipado"),     ItemProperty,                                _INTL("Objeto que lleva equipado el Pokémon.")],
+      [:nature,          _INTL("Naturaleza"),          GameDataProperty.new(:Nature),               _INTL("Naturaleza del Pokémon.")],
+      [:iv,              _INTL("IVs"),                 IVsProperty.new(Pokemon::IV_STAT_LIMIT),     _INTL("Valores individuales para cada estadística del Pokémon.")],
+      [:ev,              _INTL("EVs"),                 EVsProperty.new(Pokemon::EV_STAT_LIMIT),     _INTL("Puntos de esfuerzo para cada estadística del Pokémon.")],
+      [:happiness,       _INTL("Felicidad"),           LimitProperty2.new(Settings::MAX_HAPPINESS), _INTL("Felicidad del Pokémon (0-255).")],
+      [:poke_ball,       _INTL("Poké Ball"),           BallProperty.new,                            _INTL("El tipo de Poké Ball en la que el Pokémon está capturado.")]
     ]
-    Pokemon::MAX_MOVES.times do |i|
-      pkmn_properties.push([_INTL("Movimiento {1}", i + 1),
-                            MovePropertyForSpecies.new(oldsetting), _INTL("Un movimiento que conoce el Pokémon. Dejar todos los movs. en blanco (usa la tecla Z para eliminar) para un moveset de Pokémon salvaje.")])
+  end
+
+  def self.set(settingname, init_setting)
+    init_setting = {:species => nil, :level => 10} if !init_setting
+    old_setting = []
+    pkmn_properties = []
+    idx_species = -1
+    properties = []
+    editor_properties.each do |property|
+      idx_species = old_setting.length if property[0] == :species
+      properties.push(property[0])
+      case property[0]
+      when :moves
+        Pokemon::MAX_MOVES.times do |i|
+          old_setting.push((init_setting[property[0]]) ? init_setting[property[0]][i] : nil)
+          pkmn_properties.push([property[1] + " " + (i + 1).to_s, property[2], property[3]])
+          pkmn_properties.last[1].species = old_setting[properties.index(:species)]
+        end
+      else
+        old_setting.push(init_setting[property[0]])
+        pkmn_properties.push([property[1], property[2], property[3]])
+      end
     end
-    pkmn_properties.concat(
-      [[_INTL("Habilidad"),           AbilityProperty,                         _INTL("Habilidad del Pokémon. Sobrescribe el índice de la habilidad.")],
-       [_INTL("Índice de habilidad"), LimitProperty2.new(99),                  _INTL("Índice de la habilidad. 0=primera habilidad, 1=segunda habilidad, 2+=habilidad oculta.")],
-       [_INTL("Objeto equipado"),     ItemProperty,                            _INTL("Objeto que lleva equipado el Pokémon.")],
-       [_INTL("Naturaleza"),          GameDataProperty.new(:Nature),           _INTL("Naturaleza del Pokémon.")],
-       [_INTL("IVs"),                 IVsProperty.new(Pokemon::IV_STAT_LIMIT), _INTL("Valores individuales para cada estadística del Pokémon.")],
-       [_INTL("EVs"),                 EVsProperty.new(Pokemon::EV_STAT_LIMIT), _INTL("Puntos de esfuerzo para cada estadística del Pokémon.")],
-       [_INTL("Felicidad"),           LimitProperty2.new(255),                 _INTL("Felicidad del Pokémon (0-255).")],
-       [_INTL("Poké Ball"),           BallProperty.new(oldsetting),            _INTL("El tipo de Poké Ball en la que el Pokémon está capturado.")]]
-    )
-    pbPropertyList(settingname, oldsetting, pkmn_properties, false)
-    return nil if !oldsetting[0]   # Species is nil
-    ret = {
-      :species         => oldsetting[0],
-      :level           => oldsetting[1],
-      :real_name       => oldsetting[2],
-      :form            => oldsetting[3],
-      :gender          => oldsetting[4],
-      :shininess       => oldsetting[5],
-      :super_shininess => oldsetting[6],
-      :shadowness      => oldsetting[7],
-      :ability         => oldsetting[8 + Pokemon::MAX_MOVES],
-      :ability_index   => oldsetting[9 + Pokemon::MAX_MOVES],
-      :item            => oldsetting[10 + Pokemon::MAX_MOVES],
-      :nature          => oldsetting[11 + Pokemon::MAX_MOVES],
-      :iv              => oldsetting[12 + Pokemon::MAX_MOVES],
-      :ev              => oldsetting[13 + Pokemon::MAX_MOVES],
-      :happiness       => oldsetting[14 + Pokemon::MAX_MOVES],
-      :poke_ball       => oldsetting[15 + Pokemon::MAX_MOVES]
-    }
-    moves = []
-    Pokemon::MAX_MOVES.times do |i|
-      moves.push(oldsetting[8 + i])
+    pbPropertyList(settingname, old_setting, pkmn_properties, false)
+    return nil if !old_setting[idx_species]   # Species is nil
+    ret = {}
+    i = 0
+    properties.each do |property|
+      case property
+      when :moves
+        ret[property] ||= []
+        Pokemon::MAX_MOVES.times do
+          ret[property].push(old_setting[i])
+          i += 1
+        end
+      else
+        ret[property] = old_setting[i]
+        i += 1
+      end
     end
-    moves.uniq!
-    moves.compact!
-    ret[:moves] = moves
+    if ret[:moves]
+      ret[:moves].uniq!
+      ret[:moves].compact!
+    end
     return ret
   end
 
