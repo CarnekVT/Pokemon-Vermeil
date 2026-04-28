@@ -326,7 +326,8 @@ class PokemonLoadScreen
   end
 
   def pbStartLoadScreen
-    check_for_updates() if defined?(check_for_updates) # Required for PokéUpdater to check for gameupdates.
+    # Required for PokéUpdater to check for gameupdates.
+    PokeUpdater.check_for_updates() if defined?(PokeUpdater) && defined?(PokeUpdater.check_for_updates)
     commands = []
     cmd_continue     = -1
     cmd_new_game     = -1
@@ -346,7 +347,7 @@ class PokemonLoadScreen
     commands[cmd_new_game = commands.length]  = _INTL("Nueva partida")
     commands[cmd_options = commands.length]   = _INTL("Opciones")
     commands[cmd_language = commands.length]  = _INTL("Idioma") if Settings::LANGUAGES.length >= 2
-    commands[cmd_update=commands.length]      = _INTL("Buscar actualizaciones") if PluginManager.installed?("Pokemon Essentials Game Updater")
+    commands[cmd_update=commands.length]      = _INTL("Buscar actualizaciones") if defined?(PokeUpdater) && defined?(PokeUpdater.validate_game_version_and_update)
     commands[cmd_debug = commands.length]     = _INTL("Debug") if $DEBUG
     commands[cmd_quit = commands.length]      = _INTL("Cerrar Juego")
     map_id = show_continue ? @save_data[:map_factory].map.map_id : 0
@@ -390,7 +391,7 @@ class PokemonLoadScreen
       when cmd_debug
         pbFadeOutIn { pbDebugMenu(false) }
       when cmd_update
-        validate_game_version_and_update(true) if defined?(validate_game_version_and_update)   
+        PokeUpdater.validate_game_version_and_update(true) if defined?(PokeUpdater) && defined?(PokeUpdater.validate_game_version_and_update)
       when cmd_quit
         pbPlayCloseMenuSE
         @scene.pbEndScene
