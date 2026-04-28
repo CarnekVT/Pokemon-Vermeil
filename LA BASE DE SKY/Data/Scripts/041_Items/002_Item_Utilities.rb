@@ -913,7 +913,7 @@ def pbLearnMove(pkmn, move, ignore_if_known = false, by_machine = false, relearn
   if pbConfirmMessage(_INTL("¿Quieres que {1} olvide un movimiento y aprenda {2}?", pkmn_name, move_name), &block)
     loop do
       move_index = pbForgetMove(pkmn, move)
-      if move_index >= 0
+      if move_index >= 0 && pkmn.moves[move_index]
         old_move_name = pkmn.moves[move_index].name
         oldmovepp = pkmn.moves[move_index].pp
         pkmn.moves[move_index] = Pokemon::Move.new(move)   # Replaces current/total PP
@@ -947,6 +947,7 @@ def pbForgetMove(pkmn, moveToLearn)
     screen = PokemonSummaryScreen.new(scene)
     ret = screen.pbStartForgetScreen([pkmn], 0, moveToLearn)
   end
+  return -1 if ret >= pkmn.numMoves
   return ret
 end
 
