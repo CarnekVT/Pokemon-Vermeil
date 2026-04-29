@@ -89,7 +89,8 @@ class MostrarPokemonAnimado
     base_y = @oy + y_corr + BASE_Y_CORRECTION
 
     @sprites["poke_sprite"] = PokemonSprite.new(@viewport)
-    @sprites["poke_sprite"].display_values = [base_x, base_y]
+    @sprites["poke_sprite"].x = base_x
+    @sprites["poke_sprite"].y = base_y
     @sprites["poke_sprite"].setPokemonBitmap(pokemon_obj)
     if !@sprites["poke_sprite"].bitmap
       @sprites["poke_sprite"].setSpeciesBitmap(
