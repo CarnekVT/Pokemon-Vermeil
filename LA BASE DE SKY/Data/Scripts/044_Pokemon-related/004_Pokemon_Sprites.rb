@@ -6,12 +6,32 @@ class PokemonSprite < Sprite
     super(viewport)
     @_iconbitmap = nil
     @should_be_grey = false
+    @tone_lock = false
+  end
+
+  def tone_lock?
+    return @tone_lock == true
+  end
+
+  def tone_lock=(value)
+    @tone_lock = (value == true)
+  end
+
+  def refresh_tone
+    return if tone_lock?
+    self.tone = if @show_as_silhouette
+                  Tone.new(-255, -255, -255, 255)
+                elsif @should_be_grey
+                  Tone.new(0, 0, 0, 255)
+                else
+                  Tone.new(0, 0, 0, 0)
+                end
   end
 
   def dispose
     @_iconbitmap&.dispose
     @_iconbitmap = nil
-    self.bitmap = nil if !self.disposed?
+    self.bitmap = nil unless disposed?
     super
   end
 
@@ -27,63 +47,64 @@ class PokemonSprite < Sprite
   end
 
   def changeOrigin
-    return if !self.bitmap
-    @offset = PictureOrigin::CENTER if !@offset
+    return unless bitmap
+
+    @offset ||= PictureOrigin::CENTER
     case @offset
     when PictureOrigin::TOP_LEFT, PictureOrigin::LEFT, PictureOrigin::BOTTOM_LEFT
       self.ox = 0
     when PictureOrigin::TOP, PictureOrigin::CENTER, PictureOrigin::BOTTOM
-      self.ox = self.bitmap.width / 2
+      self.ox = bitmap.width / 2
     when PictureOrigin::TOP_RIGHT, PictureOrigin::RIGHT, PictureOrigin::BOTTOM_RIGHT
-      self.ox = self.bitmap.width
+      self.ox = bitmap.width
     end
     case @offset
     when PictureOrigin::TOP_LEFT, PictureOrigin::TOP, PictureOrigin::TOP_RIGHT
       self.oy = 0
     when PictureOrigin::LEFT, PictureOrigin::CENTER, PictureOrigin::RIGHT
-      self.oy = self.bitmap.height / 2
+      self.oy = bitmap.height / 2
     when PictureOrigin::BOTTOM_LEFT, PictureOrigin::BOTTOM, PictureOrigin::BOTTOM_RIGHT
-      self.oy = self.bitmap.height
+      self.oy = bitmap.height
     end
   end
 
   def setPokemonBitmap(pokemon, back = false)
     @_iconbitmap&.dispose
-    @_iconbitmap = (pokemon) ? GameData::Species.sprite_bitmap_from_pokemon(pokemon, back) : nil
-    self.bitmap = (@_iconbitmap) ? @_iconbitmap.bitmap : nil
+    @_iconbitmap = pokemon ? GameData::Species.sprite_bitmap_from_pokemon(pokemon, back) : nil
+    self.bitmap = @_iconbitmap&.bitmap
     self.color = Color.new(0, 0, 0, 0)
-    self.make_grey_if_fainted = pokemon.fainted?
+    self.make_grey_if_fainted = pokemon.perma_faint
+    refresh_tone
     changeOrigin
   end
 
   def setPokemonBitmapSpecies(pokemon, species, back = false)
     @_iconbitmap&.dispose
-    @_iconbitmap = (pokemon) ? GameData::Species.sprite_bitmap_from_pokemon(pokemon, back, species) : nil
-    self.bitmap = (@_iconbitmap) ? @_iconbitmap.bitmap : nil
-    self.make_grey_if_fainted = pokemon.fainted?
+    @_iconbitmap = pokemon ? GameData::Species.sprite_bitmap_from_pokemon(pokemon, back, species) : nil
+    self.bitmap = @_iconbitmap&.bitmap
+    self.make_grey_if_fainted = pokemon.perma_faint
+    refresh_tone
     changeOrigin
   end
 
   def setSpeciesBitmap(species, gender = 0, form = 0, shiny = false, shadow = false, back = false, egg = false)
     @_iconbitmap&.dispose
     @_iconbitmap = GameData::Species.sprite_bitmap(species, form, gender, shiny, shadow, back, egg)
-    self.bitmap = (@_iconbitmap) ? @_iconbitmap.bitmap : nil
+    self.bitmap = @_iconbitmap&.bitmap
+    refresh_tone
     changeOrigin
   end
 
   def make_grey_if_fainted=(value)
-    return if !Settings::GREY_OUT_FAINTED
+    return unless Settings::GREY_OUT_FAINTED
+
     @should_be_grey = value
+    refresh_tone
   end
 
   def show_as_silhouette=(value)
     @show_as_silhouette = value
-    # Aplicar el tono inmediatamente al cambiar el valor
-    if @show_as_silhouette
-      self.tone = Tone.new(-255, -255, -255, 255)
-    else
-      self.tone = Tone.new(0, 0, 0, 0) unless @should_be_grey
-    end
+    refresh_tone
   end
 
   def update
@@ -92,6 +113,7 @@ class PokemonSprite < Sprite
       @_iconbitmap.update
       self.bitmap = @_iconbitmap.bitmap
     end
+    refresh_tone
   end
 end
 
@@ -141,7 +163,8 @@ class PokemonIconSprite < Sprite
   end
 
   def make_grey_if_fainted=(value)
-    return if !Settings::GREY_OUT_FAINTED
+    return unless Settings::GREY_OUT_FAINTED
+
     @should_be_grey = value
   end
 
@@ -160,22 +183,23 @@ class PokemonIconSprite < Sprite
       }
     end
     return if @pokemon_values == new_values
+
     @pokemon_values = new_values
     # Reload the bitmap
     @animBitmap&.dispose
     @animBitmap = nil
-    if !@pokemon
+    unless @pokemon
       self.bitmap = nil
       @current_frame = 0
       return
     end
     @animBitmap = AnimatedBitmap.new(GameData::Species.icon_filename_from_pokemon(value))
     self.bitmap = @animBitmap.bitmap
-    self.src_rect.width  = @animBitmap.height
-    self.src_rect.height = @animBitmap.height
+    src_rect.width  = @animBitmap.height
+    src_rect.height = @animBitmap.height
     @frames_count = @animBitmap.width / @animBitmap.height
     @current_frame = 0 if @current_frame >= @frames_count
-    self.make_grey_if_fainted = value.fainted?
+    self.make_grey_if_fainted = value.perma_faint
     changeOrigin
   end
 
@@ -185,15 +209,16 @@ class PokemonIconSprite < Sprite
   end
 
   def changeOrigin
-    return if !self.bitmap
-    @offset = PictureOrigin::TOP_LEFT if !@offset
+    return unless bitmap
+
+    @offset ||= PictureOrigin::TOP_LEFT
     case @offset
     when PictureOrigin::TOP_LEFT, PictureOrigin::LEFT, PictureOrigin::BOTTOM_LEFT
       self.ox = 0
     when PictureOrigin::TOP, PictureOrigin::CENTER, PictureOrigin::BOTTOM
-      self.ox = self.src_rect.width / 2
+      self.ox = src_rect.width / 2
     when PictureOrigin::TOP_RIGHT, PictureOrigin::RIGHT, PictureOrigin::BOTTOM_RIGHT
-      self.ox = self.src_rect.width
+      self.ox = src_rect.width
     end
     case @offset
     when PictureOrigin::TOP_LEFT, PictureOrigin::TOP, PictureOrigin::TOP_RIGHT
@@ -201,9 +226,9 @@ class PokemonIconSprite < Sprite
     when PictureOrigin::LEFT, PictureOrigin::CENTER, PictureOrigin::RIGHT
       # NOTE: This assumes the top quarter of the icon is blank, so oy is placed
       #       in the middle of the lower three quarters of the image.
-      self.oy = self.src_rect.height * 5 / 8
+      self.oy = src_rect.height * 5 / 8
     when PictureOrigin::BOTTOM_LEFT, PictureOrigin::BOTTOM, PictureOrigin::BOTTOM_RIGHT
-      self.oy = self.src_rect.height
+      self.oy = src_rect.height
     end
   end
 
@@ -222,13 +247,14 @@ class PokemonIconSprite < Sprite
   end
 
   def update
-    return if !@animBitmap
+    return unless @animBitmap
+
     super
     @animBitmap.update
     self.bitmap = @animBitmap.bitmap
     # Update animation
     update_frame
-    self.src_rect.x = self.src_rect.width * @current_frame
+    src_rect.x = src_rect.width * @current_frame
     # Update "jumping" animation (used in party screen)
     if @selected
       @adjusted_x = 4
@@ -237,14 +263,14 @@ class PokemonIconSprite < Sprite
       @adjusted_x = 0
       @adjusted_y = 0
     end
-    self.x = self.x
-    self.y = self.y
+    self.x = x
+    self.y = y
     # Apply tone after any bitmap changes
-    if @should_be_grey
-      self.tone = Tone.new(0, 0, 0, 255)
-    else
-      self.tone = Tone.new(0, 0, 0, 0)
-    end
+    self.tone = if @should_be_grey
+                  Tone.new(0, 0, 0, 255)
+                else
+                  Tone.new(0, 0, 0, 0)
+                end
   end
 end
 
@@ -310,15 +336,16 @@ class PokemonSpeciesIconSprite < Sprite
   end
 
   def changeOrigin
-    return if !self.bitmap
-    @offset = PictureOrigin::TOP_LEFT if !@offset
+    return unless bitmap
+
+    @offset ||= PictureOrigin::TOP_LEFT
     case @offset
     when PictureOrigin::TOP_LEFT, PictureOrigin::LEFT, PictureOrigin::BOTTOM_LEFT
       self.ox = 0
     when PictureOrigin::TOP, PictureOrigin::CENTER, PictureOrigin::BOTTOM
-      self.ox = self.src_rect.width / 2
+      self.ox = src_rect.width / 2
     when PictureOrigin::TOP_RIGHT, PictureOrigin::RIGHT, PictureOrigin::BOTTOM_RIGHT
-      self.ox = self.src_rect.width
+      self.ox = src_rect.width
     end
     case @offset
     when PictureOrigin::TOP_LEFT, PictureOrigin::TOP, PictureOrigin::TOP_RIGHT
@@ -326,9 +353,9 @@ class PokemonSpeciesIconSprite < Sprite
     when PictureOrigin::LEFT, PictureOrigin::CENTER, PictureOrigin::RIGHT
       # NOTE: This assumes the top quarter of the icon is blank, so oy is placed
       #       in the middle of the lower three quarters of the image.
-      self.oy = self.src_rect.height * 5 / 8
+      self.oy = src_rect.height * 5 / 8
     when PictureOrigin::BOTTOM_LEFT, PictureOrigin::BOTTOM, PictureOrigin::BOTTOM_RIGHT
-      self.oy = self.src_rect.height
+      self.oy = src_rect.height
     end
   end
 
@@ -336,11 +363,12 @@ class PokemonSpeciesIconSprite < Sprite
     @animBitmap&.dispose
     @animBitmap = nil
     bitmapFileName = GameData::Species.icon_filename(@species, @form, @gender, @shiny)
-    return if !bitmapFileName
+    return unless bitmapFileName
+
     @animBitmap = AnimatedBitmap.new(bitmapFileName)
     self.bitmap = @animBitmap.bitmap
-    self.src_rect.width  = @animBitmap.height
-    self.src_rect.height = @animBitmap.height
+    src_rect.width  = @animBitmap.height
+    src_rect.height = @animBitmap.height
     @frames_count = @animBitmap.width / @animBitmap.height
     @current_frame = 0 if @current_frame >= @frames_count
     changeOrigin
@@ -351,12 +379,13 @@ class PokemonSpeciesIconSprite < Sprite
   end
 
   def update
-    return if !@animBitmap
+    return unless @animBitmap
+
     super
     @animBitmap.update
     self.bitmap = @animBitmap.bitmap
     # Update animation
     update_frame
-    self.src_rect.x = self.src_rect.width * @current_frame
+    src_rect.x = src_rect.width * @current_frame
   end
 end
