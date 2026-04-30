@@ -100,6 +100,32 @@ class Battle::Battler
     @effects[PBEffects::GigatonHammer] = false if move_failed
   end
 
+
+  def pbRestoreBattlerSprite
+    scene = @battle.scene
+    return if !scene
+
+    sprite = scene.sprites["pokemon_#{self.index}"]
+    return if !sprite
+
+    sprite.visible = true
+    sprite.opacity = 255
+    sprite.pbSetPosition
+  end
+
+  def pbHideBattlerSprite
+    scene = @battle.scene
+    return if !scene
+
+    sprite = scene.sprites["pokemon_#{self.index}"]
+    return if !sprite
+
+    sprite.visible = false
+    sprite.opacity = 0
+    sprite.pbSetPosition
+  end
+
+
   def pbEndTurn(choice)
     @lastRoundMoved = @battle.turnCount   # Done something this round
     if !@effects[PBEffects::ChoiceBand] &&
@@ -121,6 +147,7 @@ class Battle::Battler
     @effects[PBEffects::GemConsumed] = nil
     @effects[PBEffects::ShellTrap] = false
     @battle.allBattlers(true).each { |b| b.pbContinualAbilityChecks }   # Trace, end primordial weathers
+    pbRestoreBattlerSprite if !(semiInvulnerable? || @effects[PBEffects::SkyDrop] >= 0)
   end
 
   def pbConfusionDamage(msg)
