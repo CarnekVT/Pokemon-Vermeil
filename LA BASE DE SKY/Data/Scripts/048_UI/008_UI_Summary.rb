@@ -91,6 +91,7 @@ class RibbonSelectionSprite < MoveSelectionSprite
   end
 
   def refresh
+    return unless Settings::GREY_OUT_FAINTED
     w = @movesel.width
     h = @movesel.height / 2
     self.x = CURSOR_BASE_X + ((self.index % COLUMNS_PER_ROW) * CURSOR_OFFSET_X)
@@ -333,8 +334,10 @@ class PokemonSummary_Scene
     pbUpdateSpriteHash(@sprites)
   end
 
-  def gray_out_fainted_pokemon
-    @sprites["pokeicon"].make_grey_if_fainted = @pokemon.fainted?
+  def gray_out_fainted_pokemon(sprite_name)
+    return unless Settings::GREY_OUT_FAINTED
+    @sprites[sprite_name].make_grey_if_fainted = @pokemon.fainted?
+    pbUpdate
   end
 
   def pbStartScene(party, partyindex, inbattle = false, page=1, allow_learn_moves = true)
@@ -351,14 +354,14 @@ class PokemonSummary_Scene
     @sprites = {}
     @sprites["background"] = IconSprite.new(0, 0, @viewport)
     @sprites["pokemon"] = PokemonSprite.new(@viewport)
-    @sprites["pokemon"].make_grey_if_fainted = @pokemon.fainted?
+    gray_out_fainted_pokemon("pokemon")
     @sprites["pokemon"].setOffset(PictureOrigin::CENTER)
     @sprites["pokemon"].x = UI_POKEMON_SPRITE_X
     @sprites["pokemon"].y = UI_POKEMON_SPRITE_Y
     @sprites["pokemon"].setPokemonBitmap(@pokemon)
     @sprites["pokeicon"] = PokemonIconSprite.new(@pokemon, @viewport)
     @sprites["pokeicon"].setOffset(PictureOrigin::CENTER)
-    @sprites["pokeicon"].make_grey_if_fainted = @pokemon.fainted?
+    gray_out_fainted_pokemon("pokeicon")
     @sprites["pokeicon"].x       = UI_POKEICON_X
     @sprites["pokeicon"].y       = UI_POKEICON_Y
     @sprites["pokeicon"].visible = false
@@ -421,7 +424,7 @@ class PokemonSummary_Scene
     pbSetSystemFont(@sprites["overlay"].bitmap)
     @sprites["pokeicon"] = PokemonIconSprite.new(@pokemon, @viewport)
     @sprites["pokeicon"].setOffset(PictureOrigin::CENTER)
-    @sprites["pokeicon"].make_grey_if_fainted = @pokemon.fainted?
+    gray_out_fainted_pokemon("pokeicon")
     @sprites["pokeicon"].x       = UI_POKEICON_X
     @sprites["pokeicon"].y       = UI_POKEICON_Y
     @sprites["movesel"] = MoveSelectionSprite.new(@viewport, !move_to_learn.nil?)
@@ -533,9 +536,9 @@ class PokemonSummary_Scene
       return
     end
     @sprites["pokemon"].setPokemonBitmap(@pokemon)
-    @sprites["pokemon"].make_grey_if_fainted = @pokemon.fainted?
+    gray_out_fainted_pokemon("pokemon")
     @sprites["pokeicon"].pokemon = @pokemon
-    @sprites["pokeicon"].make_grey_if_fainted = @pokemon.fainted?
+    gray_out_fainted_pokemon("pokeicon")
     @sprites["itemicon"].item = @pokemon.item_id
     overlay = @sprites["overlay"].bitmap
     overlay.clear
