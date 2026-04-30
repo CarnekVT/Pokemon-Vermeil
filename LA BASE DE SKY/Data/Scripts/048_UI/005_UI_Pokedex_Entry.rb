@@ -8,7 +8,7 @@ class PokemonPokedexInfo_Scene
   FORM_FRONT_X      = 130
   FORM_FRONT_Y      = 158
   FORM_BACK_X       = 382
-  FORM_BACK_Y       = 256
+  FORM_BACK_Y       = 160
   FORM_ICON_X       = 82
   FORM_ICON_Y       = 328
   UP_ARROW_X        = 242
