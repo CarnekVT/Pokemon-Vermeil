@@ -26,6 +26,9 @@ module Game
     else
       SaveData.load_bootup_values(save_data)
     end
+    if Settings::FORCE_SCREEN_SCALE_ON_BOOT || (defined?($DEBUG) && $DEBUG)
+      $PokemonSystem.instance_variable_set(:@screensize, Settings.screensize_index_from_screen_scale)
+    end
     # Set resize factor
     pbSetResizeFactor([$PokemonSystem.screensize, 4].min)
     # Set language (and choose language if there is no save file)

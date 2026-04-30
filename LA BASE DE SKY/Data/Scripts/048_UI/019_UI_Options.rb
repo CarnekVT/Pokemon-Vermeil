@@ -33,7 +33,7 @@ if !Settings::USE_NEW_OPTIONS_UI
       @skip_move_learning  = 1  # Skip move learning (0=Sí, 1=No)
       @frame               = 0  # Default window frame (see also Settings::MENU_WINDOWSKINS)
       @textskin            = 0  # Speech frame
-      @screensize          = (Settings::SCREEN_SCALE * 2).floor - 1   # 0=half size, 1=full size, 2=full-and-a-half size, 3=double size
+      @screensize          = Settings.screensize_index_from_screen_scale
       @language            = 0     # Language (see also Settings::LANGUAGES in script PokemonSystem)
       @runstyle            = 0     # Default movement speed (0=walk, 1=run)
       @main_volume         = 100   # Main volume control

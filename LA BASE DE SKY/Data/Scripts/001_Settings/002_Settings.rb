@@ -17,6 +17,20 @@ module Settings
   # El tamaño de la pantalla por defecto.
   #   * Posibles valores: 0.5, 1.0, 1.5 y 2.0.
   SCREEN_SCALE  = 1.0
+  # Si es true (o bien estás en modo test con $DEBUG), al arrancar se aplica este
+  # SCREEN_SCALE y se ignorará el tamaño guardado en la partida para esa sesión de arranque.
+  # Déjalo en false en builds finales si quieres que la opción "Tamaño de ventana"
+  # y el archivo de guardado sigan mandando después del primer lanzamiento.
+  FORCE_SCREEN_SCALE_ON_BOOT = false
+
+  # Índice 0–4 ligado al multiplicador lógico (p. ej. 1.5 → opción Grande).
+  # Debe coincidir con PokemonSystem por defecto y con pbSetResizeFactor.
+  def self.screensize_index_from_screen_scale
+    idx = (SCREEN_SCALE * 2).floor - 1
+    return 0 if idx < 0
+    return 4 if idx > 4
+    return idx
+  end
 
   # Esto indica de qué generación son las mecánicas que se apliquen en tu juego.
   # Esto se usa en batallas, scripts y otras secciones que son usadas dentro y

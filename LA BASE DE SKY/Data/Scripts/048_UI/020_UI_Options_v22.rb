@@ -47,7 +47,7 @@ class PokemonSystem
     @battlescene         = 0     # Battle effects (animations) (0=on, 1=off)
     @textskin            = 0     # Speech frame
     @frame               = 0     # Default window frame (see also Settings::MENU_WINDOWSKINS)
-    @screensize          = (Settings::SCREEN_SCALE * 2).floor - 1   # 0=half size, 1=full size, 2=full-and-a-half size, 3=double size
+    @screensize          = Settings.screensize_index_from_screen_scale
     @vsync               = vsync_initial_value?
     @autotile_animations = 0
   end

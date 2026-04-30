@@ -22,7 +22,7 @@ Encoding.default_internal = Encoding::UTF_8
 Encoding.default_external = Encoding::UTF_8
 
 # Inicializar el tamaño de pantalla correcto desde el inicio
-Graphics.resize_screen(Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
+# Graphics.resize_screen(Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
 
 def pbSetWindowText(string)
   System.set_window_title(string || System.game_title)
