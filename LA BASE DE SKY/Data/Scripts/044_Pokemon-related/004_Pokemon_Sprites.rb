@@ -73,7 +73,7 @@ class PokemonSprite < Sprite
     @_iconbitmap = pokemon ? GameData::Species.sprite_bitmap_from_pokemon(pokemon, back) : nil
     self.bitmap = @_iconbitmap&.bitmap
     self.color = Color.new(0, 0, 0, 0)
-    self.make_grey_if_fainted = pokemon.perma_faint
+    self.make_grey_if_fainted = pokemon.fainted?
     refresh_tone
     changeOrigin
   end
@@ -82,7 +82,7 @@ class PokemonSprite < Sprite
     @_iconbitmap&.dispose
     @_iconbitmap = pokemon ? GameData::Species.sprite_bitmap_from_pokemon(pokemon, back, species) : nil
     self.bitmap = @_iconbitmap&.bitmap
-    self.make_grey_if_fainted = pokemon.perma_faint
+    self.make_grey_if_fainted = pokemon.fainted?
     refresh_tone
     changeOrigin
   end
@@ -199,7 +199,7 @@ class PokemonIconSprite < Sprite
     src_rect.height = @animBitmap.height
     @frames_count = @animBitmap.width / @animBitmap.height
     @current_frame = 0 if @current_frame >= @frames_count
-    self.make_grey_if_fainted = value.perma_faint
+    self.make_grey_if_fainted = value.fainted?
     changeOrigin
   end
 
