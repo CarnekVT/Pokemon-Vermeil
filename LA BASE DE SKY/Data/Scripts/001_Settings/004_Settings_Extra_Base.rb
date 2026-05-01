@@ -453,7 +453,8 @@ module DamageNumberSettings
   }
 
   # Animación
-  DURATION    = 50
+  DURATION    = 110
+  FADE_START  = 1.20
   FLOAT_DIST  = 60
 end
 
