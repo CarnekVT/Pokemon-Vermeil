@@ -516,7 +516,7 @@ class Game_Player < Game_Character
     return if pbMapInterpreterRunning? || $game_temp.message_window_showing ||
               $game_temp.in_mini_update || $game_temp.in_menu
     # Move player in the direction the directional button is being pressed
-    if @moved_last_frame ||
+    if @moved_last_frame || @direction_fix ||
        (dir == direction && (!@last_input_time || System.uptime - @last_input_time >= 0.075))
       case dir
       when 2 then move_down

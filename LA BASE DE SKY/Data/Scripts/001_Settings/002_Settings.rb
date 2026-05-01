@@ -593,8 +593,8 @@ module Settings
 
   # Posibles marcos de texto. Los gráficos están en "Graphics/Windowskins/".
   SPEECH_WINDOWSKINS = [
-    'speech hgss 2',
     'speech hgss 1',
+    'speech hgss 2',
     'speech hgss 3',
     'speech hgss 4',
     'speech hgss 5',
