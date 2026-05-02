@@ -134,6 +134,53 @@ class PokemonBag
     return remove(item, qty)
   end
 
+  # Deletes qty copies of item from any pocket without looking up GameData::Item.
+  # Use when an item ID was removed from the game but old saves still have it,
+  # e.g. in SaveData.register_conversion blocks: $bag.remove_orphaned_item(:OLDITEM).
+  # Does not call rearrange (unknown IDs would crash there until purged).
+  # Returns whether the full qty was removed, same semantics as ItemStorageHelper.remove.
+  def remove_orphaned_item(item, qty = 1)
+    raise "Invalid value for qty: #{qty}" if qty < 0
+    return true if qty == 0
+    item_data = GameData::Item.try_get(item)
+    item_id = item_data ? item_data.id : item
+    return false if item_id.nil? || item_id == 0
+    ret = false
+    @pockets.each do |pocket|
+      next if !pocket
+      pocket.each_with_index do |slot, i|
+        next if !slot || slot[0] != item_id
+        amount = [qty, slot[1]].min
+        slot[1] -= amount
+        qty -= amount
+        pocket[i] = nil if slot[1] == 0
+        if qty == 0
+          ret = true
+          break
+        end
+      end
+      break if qty == 0
+    end
+    @pockets.each { |pk| pk.compact! if pk }
+    still_have = false
+    @pockets.each do |pocket|
+      next if !pocket
+      pocket.each do |slot|
+        if slot && slot[0] == item_id && slot[1].to_i > 0
+          still_have = true
+          break
+        end
+      end
+      break if still_have
+    end
+    unless still_have
+      @registered_items.delete(item_id)
+      (@favourite_items ||= []).delete(item_id)
+      (@new_items ||= []).delete(item_id)
+    end
+    return ret
+  end
+
   # This only works if the old and new items are in the same pocket. Used for
   # switching on/off certain Key Items. Replaces all old_item in its pocket with
   # new_item.
