@@ -200,5 +200,18 @@ module Settings
   # para que el primer Pokémon del equipo sea el que terminó la batalla (si no está debilitado).
   UPDATE_PARTY_LEAD_BATTLE_END = false
 
+  # Activa o desactiva el cambio de tono (Hue) para los Pokémon Super Shiny.
+  SUPER_SHINY_HUE_SHIFT = false
+  
+  # Valores de tono (Hue) disponibles para la asignación aleatoria.
+  # NOTA: Puedes usar SuperShinyHue = VALOR en los PBS de pokemon para asignar un valor
+  # especifico. Pede ser un valor individual (SuperShinyHue = 20) o multiples
+  # (SuperShinyHue = 20, 120, 85). Esto le dice al sitema que ignore esto y use
+  # los que asignes.
+  SUPER_SHINY_HUES = [75, 90, 105, 120, 135, 150, 165, 180]
+  
+  # Si es true, todos los Pokémon de la misma especie tendrán el mismo tono.
+  # Si es false, el tono será único por cada Pokémon.
+  SUPER_SHINY_HUE_BY_SPECIES = true
 end
 

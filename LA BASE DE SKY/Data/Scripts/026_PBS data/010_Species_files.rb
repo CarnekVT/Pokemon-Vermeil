@@ -58,11 +58,19 @@ module GameData
       pbResolveBitmap(sprintf("%s%s%s", path, baby_species, suffix))
     end
 
-    def self.front_sprite_filename(species, form = 0, gender = 0, shiny = false, shadow = false)
+    def self.front_sprite_filename(species, form = 0, gender = 0, shiny = false, shadow = false, super_shiny = false)
+      if super_shiny
+        ret = self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Front supershiny")
+        return ret if ret
+      end
       return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, shiny, shadow, "Front")
     end
 
-    def self.back_sprite_filename(species, form = 0, gender = 0, shiny = false, shadow = false)
+    def self.back_sprite_filename(species, form = 0, gender = 0, shiny = false, shadow = false, super_shiny = false)
+      if super_shiny
+        ret = self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Back supershiny")
+        return ret if ret
+      end
       return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, shiny, shadow, "Back")
     end
 
@@ -76,10 +84,10 @@ module GameData
       return (ret) ? ret : pbResolveBitmap("Graphics/Pokemon/Eggs/000_cracks")
     end
 
-    def self.sprite_filename(species, form = 0, gender = 0, shiny = false, shadow = false, back = false, egg = false)
+    def self.sprite_filename(species, form = 0, gender = 0, shiny = false, shadow = false, back = false, egg = false, super_shiny = false)
       return self.egg_sprite_filename(species, form) if egg
-      return self.back_sprite_filename(species, form, gender, shiny, shadow) if back
-      return self.front_sprite_filename(species, form, gender, shiny, shadow)
+      return self.back_sprite_filename(species, form, gender, shiny, shadow, super_shiny) if back
+      return self.front_sprite_filename(species, form, gender, shiny, shadow, super_shiny)
     end
 
     def self.front_sprite_bitmap(species, form = 0, gender = 0, shiny = false, shadow = false)
@@ -106,12 +114,23 @@ module GameData
     def self.sprite_bitmap_from_pokemon(pkmn, back = false, species = nil)
       species = pkmn.species if !species
       species = GameData::Species.get(species).species   # Just to be sure it's a symbol
-      return self.egg_sprite_bitmap(species, pkmn.form) if pkmn.egg?
+      return self.egg_sprite_bitmap(species, pkmn.form) if pkmn.egg?     
       if back
-        ret = self.back_sprite_bitmap(species, pkmn.form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?)
+        filename = self.back_sprite_filename(species, pkmn.form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?, pkmn.super_shiny?)
       else
-        ret = self.front_sprite_bitmap(species, pkmn.form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?)
+        filename = self.front_sprite_filename(species, pkmn.form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?, pkmn.super_shiny?)
+      end     
+      ret = (filename) ? AnimatedBitmap.new(filename) : nil
+      if ret && pkmn.super_shiny? && !(filename && filename.include?("supershiny"))
+        hue = pkmn.super_shiny_hue
+        if hue != 0
+          new_ret = ret.copy
+          ret.dispose
+          new_ret.bitmap.apply_super_shiny_hue(hue)
+          ret = new_ret
+        end
       end
+      
       alter_bitmap_function = MultipleForms.getFunction(species, "alterBitmap")
       if ret && alter_bitmap_function
         new_ret = ret.copy
@@ -129,13 +148,17 @@ module GameData
       return (ret) ? ret : pbResolveBitmap("Graphics/Pokemon/Eggs/000_icon")
     end
 
-    def self.icon_filename(species, form = 0, gender = 0, shiny = false, shadow = false, egg = false)
+    def self.icon_filename(species, form = 0, gender = 0, shiny = false, shadow = false, egg = false, super_shiny = false)
       return self.egg_icon_filename(species, form) if egg
+      if super_shiny
+        ret = self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Icons supershiny")
+        return ret if ret
+      end
       return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, shiny, shadow, "Icons")
     end
 
     def self.icon_filename_from_pokemon(pkmn)
-      return self.icon_filename(pkmn.species, pkmn.form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?, pkmn.egg?)
+      return self.icon_filename(pkmn.species, pkmn.form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?, pkmn.egg?, pkmn.super_shiny?)
     end
 
     def self.egg_icon_bitmap(species, form)

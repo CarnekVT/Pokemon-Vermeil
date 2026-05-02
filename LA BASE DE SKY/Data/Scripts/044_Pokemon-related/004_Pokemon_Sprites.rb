@@ -193,7 +193,20 @@ class PokemonIconSprite < Sprite
       @current_frame = 0
       return
     end
-    @animBitmap = AnimatedBitmap.new(GameData::Species.icon_filename_from_pokemon(value))
+    
+    filename = GameData::Species.icon_filename_from_pokemon(value)
+    @animBitmap = AnimatedBitmap.new(filename)
+    
+    if value.super_shiny? && !(filename && filename.include?("supershiny"))
+      hue = value.super_shiny_hue
+      if hue != 0
+        new_anim = @animBitmap.copy
+        @animBitmap.dispose
+        new_anim.bitmap.apply_super_shiny_hue(hue)
+        @animBitmap = new_anim
+      end
+    end
+    
     self.bitmap = @animBitmap.bitmap
     src_rect.width  = @animBitmap.height
     src_rect.height = @animBitmap.height

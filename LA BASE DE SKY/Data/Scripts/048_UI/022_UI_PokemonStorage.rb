@@ -7,6 +7,7 @@ class PokemonBoxIcon < IconSprite
     @pokemon = pokemon
     @release_timer_start = nil
     @should_be_grey = @pokemon&.fainted? && Settings::GREY_OUT_FAINTED
+    @custom_anim = nil
     refresh
   end
 
@@ -33,8 +34,22 @@ class PokemonBoxIcon < IconSprite
 
   def refresh
     return if !@pokemon
-    self.setBitmap(GameData::Species.icon_filename_from_pokemon(@pokemon))
-    self.src_rect = Rect.new(0, 0, self.bitmap.height, self.bitmap.height)
+    filename = GameData::Species.icon_filename_from_pokemon(@pokemon)
+    
+    @custom_anim&.dispose
+    @custom_anim = AnimatedBitmap.new(filename)
+    if @pokemon.super_shiny? && !(filename && filename.include?("supershiny"))
+      hue = @pokemon.super_shiny_hue
+      if hue != 0
+        new_anim = @custom_anim.copy
+        @custom_anim.dispose
+        new_anim.bitmap.apply_super_shiny_hue(hue)
+        @custom_anim = new_anim
+      end
+    end
+
+    self.bitmap = @custom_anim.bitmap
+    self.src_rect = Rect.new(0, 0, self.bitmap.height, self.bitmap.height) if self.bitmap
   end
 
   def update
@@ -55,6 +70,11 @@ class PokemonBoxIcon < IconSprite
         dispose
       end
     end
+  end
+  
+  def dispose
+    @custom_anim&.dispose
+    super
   end
 end
 

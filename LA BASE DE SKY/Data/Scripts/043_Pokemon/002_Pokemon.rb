@@ -535,6 +535,26 @@ class Pokemon
     @shiny = true if @super_shiny
   end
 
+  def super_shiny_hue
+    return 0 if !Settings::SUPER_SHINY_HUE_SHIFT || !super_shiny?    
+    sp_data = GameData::Species.get_species_form(@species, @form)    
+    hue_pool = sp_data.super_shiny_hue
+    hue_pool = Settings::SUPER_SHINY_HUES if hue_pool.nil? || hue_pool.empty?    
+    return 0 if hue_pool.empty?
+    return hue_pool[0] if hue_pool.length == 1    
+    if Settings::SUPER_SHINY_HUE_BY_SPECIES
+      baby_species = GameData::Species.get(@species).get_baby_species.to_s
+      seed = 0
+      baby_species.each_byte { |b| seed = (seed * 31) + b }
+    else
+      seed = @personalID
+    end    
+    srand(seed)
+    hue = hue_pool[rand(hue_pool.length)]
+    srand  
+    return hue
+  end
+
   # Makes this Pokémon not shiny.
   def no_shinyness
     @shiny = false
