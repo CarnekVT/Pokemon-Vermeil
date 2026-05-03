@@ -739,7 +739,7 @@ module Compiler
   #=============================================================================
   # Write values to a file using a schema
   #=============================================================================
-    def pbWriteCsvRecord(record, file, schema)
+  def pbWriteCsvRecord(record, file, schema)
     rec = (record.is_a?(Array)) ? record.flatten : [record]
     start = (["*", "^"].include?(schema[1][0, 1])) ? 1 : 0
     index = -1

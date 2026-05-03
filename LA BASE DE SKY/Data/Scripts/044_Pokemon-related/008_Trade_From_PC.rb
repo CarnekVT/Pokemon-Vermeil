@@ -9,18 +9,18 @@ class Pokemon
   
   def tradingCharmStatsIncreased?
 	  if @tradingCharmStatsIncreased.nil?
-	  @tradingCharmStatsIncreased = false
-	  return tradingCharmStatsIncreased
+	    @tradingCharmStatsIncreased = false
+	    return @tradingCharmStatsIncreased
 	  end
   end
 end
 
 def pbChoosePokemonForTradePC(wanted, form = -1)
-variableNumber = 1
-nameVarNumber = 2
-  wanted = GameData::Species.get(wanted).species
-  @chosen = pbChooseTradablePokemonPC(variableNumber, nameVarNumber, wanted, form, proc { |pkmn, wanted_species|
-  })
+  variableNumber = 1
+  nameVarNumber = 2
+    wanted = GameData::Species.get(wanted).species
+    @chosen = pbChooseTradablePokemonPC(variableNumber, nameVarNumber, wanted, form, proc { |pkmn, wanted_species|
+    })
 end
 
 def pbChooseTradablePokemonPC(variableNumber, nameVarNumber, wanted, form, ableProc = nil, allowIneligible = false)

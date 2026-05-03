@@ -1272,12 +1272,13 @@ class Pokemon
     end
     ret = {}
     GameData::Stat.each_main do |s|
-      ret[s.id] = (@ivMaxed[s.id]) ? IV_STAT_LIMIT : this_ivs[s.id]
+      ret[s.id] = @ivMaxed && @ivMaxed[s.id] ? IV_STAT_LIMIT : this_ivs[s.id]
     end
     return ret
   end
 
   def fill_ivs
+    @iv ||= {}
     GameData::Stat.each_main do |s|
       @iv[s.id] = rand(IV_STAT_LIMIT + 1)
     end
@@ -1305,9 +1306,7 @@ class Pokemon
     nature_mod = {}
     GameData::Stat.each_main { |s| nature_mod[s.id] = 100 }
     this_nature = self.nature_for_stats
-    if this_nature
-      this_nature.stat_changes.each { |change| nature_mod[change[0]] += change[1] }
-    end
+    this_nature&.stat_changes&.each { |change| nature_mod[change[0]] += change[1] }
     # Calculate stats
     stats = {}
     GameData::Stat.each_main do |s|
@@ -1351,7 +1350,7 @@ class Pokemon
     return ret
   end
 
-   #-----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # Move count evolution utilities.
   #-----------------------------------------------------------------------------
   def init_evo_move_count(move)
@@ -1403,7 +1402,7 @@ class Pokemon
   end
   
   def set_evo_crest_count(item, value)
-    init_crest_count(item)
+    init_evo_crest_count(item)
     @evo_crest_count[item] = value
   end
   
