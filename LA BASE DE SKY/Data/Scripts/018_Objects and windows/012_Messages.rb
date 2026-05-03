@@ -468,7 +468,7 @@ end
 
 def pbDisplayBattlePointsWindow(msgwindow)
   pointsString = ($player) ? $player.battle_points.to_s_formatted : "0"
-  pointswindow = Window_AdvancedTextPokemon.new(_INTL("Battle Points:\n<ar>{1}</ar>", pointsString))
+  pointswindow = Window_AdvancedTextPokemon.new(_INTL("Puntos Batalla:\n<ar>{1}</ar>", pointsString))
   pointswindow.setSkin("Graphics/Windowskins/goldskin")
   pointswindow.resizeToFit(pointswindow.text, Graphics.width)
   pointswindow.width = 160 if pointswindow.width <= 160
