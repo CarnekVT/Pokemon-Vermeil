@@ -271,6 +271,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
   attr_accessor :selectedColor, :selectedShadowColor
   attr_accessor :unsetColor, :unsetShadowColor
   attr_reader   :value_changed
+  attr_reader   :options
 
   # Offset vertical al dibujar el icono de entrada (input) dentro del rect
   OPTION_ICON_BLT_Y_OFFSET = 2
@@ -350,6 +351,38 @@ class UI::OptionsVisualsList < Window_DrawableCommand
     end
     @multiselect_second_value_x += ARRAY_SPACING
     refresh
+  end
+
+  def update_options_dynamically(new_options, current_option_id)
+    @options = new_options
+    get_values
+    
+    @array_second_value_x = 0
+    @options.each do |option|
+      next if option[:type] != :array || option[:parameters].length != 2
+      text_width = self.contents.text_size(option[:parameters][0]).width
+      @array_second_value_x = text_width if @array_second_value_x < text_width
+    end
+    @array_second_value_x += ARRAY_SPACING
+    
+    @multiselect_second_value_x = 0
+    @options.each do |option|
+      next if option[:type] != :multiselect
+      items = get_multiselect_items(option)
+      next if items.length != 2
+      fixed_checkbox = get_checkbox_text(false)
+      text_width = self.contents.text_size(fixed_checkbox + items[0]).width
+      @multiselect_second_value_x = text_width if @multiselect_second_value_x < text_width
+    end
+    @multiselect_second_value_x += ARRAY_SPACING
+    
+    new_index = @options.index { |o| o[:option] == current_option_id }
+    if new_index && !@options[new_index][:disabled_proc]&.call
+      self.index = new_index
+    else
+      first_enabled = @options.index { |o| !o[:disabled_proc]&.call }
+      self.index = first_enabled || 0
+    end
   end
 
   def get_values
@@ -539,6 +572,8 @@ class UI::OptionsVisualsList < Window_DrawableCommand
   def previous_value(this_index)
     option = @options[this_index]
     case option[:type]
+    when :toggle
+      return (@values[this_index] == 0) ? 1 : 0  
     when :array, :array_one, :arrow_option
       current_selected = @values[this_index][:selected]
       current_scroll = @values[this_index][:scroll]
@@ -594,6 +629,8 @@ class UI::OptionsVisualsList < Window_DrawableCommand
   def next_value(this_index)
     option = @options[this_index]
     case option[:type]
+    when :toggle
+      return (@values[this_index] == 0) ? 1 : 0  
     when :array, :array_one, :arrow_option
       current_selected = @values[this_index][:selected]
       current_scroll = @values[this_index][:scroll]
@@ -688,7 +725,14 @@ class UI::OptionsVisualsList < Window_DrawableCommand
     option = @options[this_index]
     option_name = option[:name]
     option_name_x = rect.x
-    option_colors = [self.optionColor, self.optionShadowColor]
+    
+    is_disabled = option[:disabled_proc]&.call
+    c_base   = is_disabled ? self.unsetColor : self.baseColor
+    c_shadow = is_disabled ? self.unsetShadowColor : self.shadowColor
+    c_opt    = is_disabled ? self.unsetColor : self.optionColor
+    c_opt_sh = is_disabled ? self.unsetShadowColor : self.optionShadowColor
+
+    option_colors = [c_opt, c_opt_sh]
     case option[:type]
     when :control
       # Draw icon
@@ -699,7 +743,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
       # Adjust text position
       option_name_x += @input_icons_bitmap.height + OPTION_ICON_TEXT_GAP
     when :use
-      option_colors = [self.baseColor, self.shadowColor]
+      option_colors = [c_base, c_shadow]
     end
     pbDrawShadowText(self.contents, option_name_x, rect.y, option_start_x, rect.height,
                      option_name, *option_colors)
@@ -708,6 +752,13 @@ class UI::OptionsVisualsList < Window_DrawableCommand
   def draw_option_values(this_index, rect, option_start_x)
     option_width = rect.x + rect.width - option_start_x
     option = @options[this_index]
+
+    is_disabled = option[:disabled_proc]&.call
+    c_base   = is_disabled ? self.unsetColor : self.baseColor
+    c_shadow = is_disabled ? self.unsetShadowColor : self.shadowColor
+    c_sel    = is_disabled ? self.unsetColor : self.selectedColor
+    c_sel_sh = is_disabled ? self.unsetShadowColor : self.selectedShadowColor
+
     case option[:type]
     when :array, :array_one
       items = option[:parameters]
@@ -735,8 +786,8 @@ class UI::OptionsVisualsList < Window_DrawableCommand
         items.each_with_index do |value, i|
           pbDrawShadowText(self.contents, x_pos, rect.y, option_width, rect.height,
                            value,
-                           (i == selected) ? self.selectedColor : self.baseColor,
-                           (i == selected) ? self.selectedShadowColor : self.shadowColor)
+                           (i == selected) ? c_sel : c_base,
+                           (i == selected) ? c_sel_sh : c_shadow)
           # Use special spacing for 2-item arrays
           if items.length == 2 && i == 0
             x_pos += @array_second_value_x
@@ -802,7 +853,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
         # Draw left arrow if there are previous items
         if has_previous
           pbDrawShadowText(self.contents, x_pos, rect.y, option_width, rect.height,
-                           "< ", self.baseColor, self.shadowColor)
+                           "< ", c_base, c_shadow)
           x_pos += left_arrow_width
         end
         
@@ -813,8 +864,8 @@ class UI::OptionsVisualsList < Window_DrawableCommand
           
           pbDrawShadowText(self.contents, x_pos, rect.y, option_width, rect.height,
                            value,
-                           is_selected ? self.selectedColor : self.baseColor,
-                           is_selected ? self.selectedShadowColor : self.shadowColor)
+                           is_selected ? c_sel : c_base,
+                           is_selected ? c_sel_sh : c_shadow)
           x_pos += self.contents.text_size(value).width
           x_pos += visible_spacing if i < visible_end - 1
         end
@@ -822,7 +873,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
         # Draw right arrow if there are more items
         if has_next
           pbDrawShadowText(self.contents, x_pos, rect.y, option_width, rect.height,
-                           " >", self.baseColor, self.shadowColor)
+                           " >", c_base, c_shadow)
         end
       end
     when :arrow_option
@@ -836,8 +887,8 @@ class UI::OptionsVisualsList < Window_DrawableCommand
       # Dibujar texto centrado (align = 1)
       pbDrawShadowText(self.contents, option_start_x, rect.y, width_area, rect.height,
                        value_text,
-                       (this_index == self.index) ? self.selectedColor : self.baseColor,
-                       (this_index == self.index) ? self.selectedShadowColor : self.shadowColor,
+                       (this_index == self.index) ? c_sel : c_base,
+                       (this_index == self.index) ? c_sel_sh : c_shadow,
                        1)
                        
       # Dibujar flechas animadas si está seleccionado
@@ -867,7 +918,7 @@ class UI::OptionsVisualsList < Window_DrawableCommand
       highest = highest_value(option)
       value = _INTL("Tipo {1}/{2}", lowest + @values[this_index], highest - lowest + 1)
       pbDrawShadowText(self.contents, option_start_x, rect.y, option_width, rect.height,
-                       value, self.baseColor, self.shadowColor)
+                       value, c_base, c_shadow)
     when :number_slider
       lowest = lowest_value(option)
       highest = highest_value(option)
@@ -880,19 +931,19 @@ class UI::OptionsVisualsList < Window_DrawableCommand
       self.contents.fill_rect(
         x_pos + ((slider_length - SLIDER_NOTCH_WIDTH) * @values[this_index] / (highest - lowest)),
         rect.y + (rect.height / 2) - (SLIDER_NOTCH_HEIGHT / 2),
-        SLIDER_NOTCH_WIDTH, SLIDER_NOTCH_HEIGHT, self.selectedColor
+        SLIDER_NOTCH_WIDTH, SLIDER_NOTCH_HEIGHT, c_sel
       )
       # Draw text
       value = (lowest + @values[this_index]).to_s
       pbDrawShadowText(self.contents, x_pos - rect.x + 2, rect.y - 2, option_width, rect.height,
-                       value, self.selectedColor, self.selectedShadowColor, SLIDER_NUMBER_TEXT_PADDING)
+                       value, c_sel, c_sel_sh, SLIDER_NUMBER_TEXT_PADDING)
     when :control
       x_pos = option_start_x
       spacing = option_width / 2
       @values[this_index].each_with_index do |value, i|
         if value
           text = Input.input_name(value, (i == 0) ? :keyboard : :gamepad)
-          text_colors = [self.baseColor, self.shadowColor]
+          text_colors = [c_base, c_shadow]
         else
           text = "---"
           text_colors = [self.unsetColor, self.unsetShadowColor]
@@ -901,8 +952,109 @@ class UI::OptionsVisualsList < Window_DrawableCommand
                          text, *text_colors)
         x_pos += spacing
       end
+    when :toggle
+      val = @values[this_index] || 0
+      is_on = (val == 0) 
+      is_disabled = option[:disabled_proc]&.call
+      
+      if option[:parameters].is_a?(Array) && option[:parameters].length >= 2
+        text_val = option[:parameters][val].to_s
+        if option[:parameters][0].to_s.match?(/^(no|off|apagado|falso|false)$/i)
+          is_on = (val == 1)
+        end
+      else
+        text_val = is_on ? _INTL("ON") : _INTL("OFF")
+      end
+      
+      toggle_w = 42
+      toggle_h = 22
+      x_pos = option_start_x
+      y_pos = rect.y + (rect.height - toggle_h) / 2
+      knob_size = 18
+      
+      # Posiciones extremas del botón
+      knob_off_x = x_pos + 2
+      knob_on_x  = x_pos + toggle_w - knob_size - 2
+      
+      if is_disabled
+        border_color = Color.new(80, 80, 80)
+        bg_off       = Color.new(120, 120, 120)
+        bg_on        = Color.new(120, 120, 120)
+        knob_base    = Color.new(180, 180, 180)
+        knob_shadow  = Color.new(150, 150, 150)
+        text_color   = self.unsetColor
+        text_shadow  = self.unsetShadowColor
+      else
+        border_color = Color.new(50, 50, 58)
+        bg_off       = Color.new(100, 100, 110)
+        bg_on        = Color.new(46, 204, 113)
+        knob_base    = Color.new(245, 245, 245)
+        knob_shadow  = Color.new(180, 180, 190)
+        text_color   = is_on ? self.selectedColor : self.baseColor
+        text_shadow  = is_on ? self.selectedShadowColor : self.shadowColor
+      end
+      
+      # --- LÓGICA DE ANIMACIÓN ---
+      @toggle_animations ||= {}
+      anim = @toggle_animations[this_index]
+      
+      # state_progress va de 0.0 (Totalmente OFF) a 1.0 (Totalmente ON)
+      state_progress = is_on ? 1.0 : 0.0
+      
+      if anim && (System.uptime - anim[:start] < anim[:duration]) && !is_disabled
+        anim_progress = (System.uptime - anim[:start]) / anim[:duration]
+        anim_progress = 1.0 - (1.0 - anim_progress)**3 # Ease-out cubic
+        
+        start_is_on = (anim[:from] == 0)
+        end_is_on   = (anim[:to] == 0)
+        
+        if option[:parameters].is_a?(Array) && option[:parameters].length >= 2
+          if option[:parameters][0].to_s.match?(/^(no|off|apagado|falso|false)$/i)
+            start_is_on = (anim[:from] == 1)
+            end_is_on   = (anim[:to] == 1)
+          end
+        end
+        
+        if start_is_on && !end_is_on
+          state_progress = 1.0 - anim_progress # Se está apagando
+        elsif !start_is_on && end_is_on
+          state_progress = anim_progress       # Se está encendiendo
+        end
+      end
+      
+      # Calcular posición X del botón basada en el progreso
+      knob_x = knob_off_x + (knob_on_x - knob_off_x) * state_progress
+      # -----------------------------------------
+      
+      # Dibujar Borde
+      self.contents.fill_rect(x_pos + 1, y_pos, toggle_w - 2, toggle_h, border_color)
+      self.contents.fill_rect(x_pos, y_pos + 1, toggle_w, toggle_h - 2, border_color)
+      
+      # Dibujar Fondo Gris
+      self.contents.fill_rect(x_pos + 2, y_pos + 2, toggle_w - 4, toggle_h - 4, bg_off)
+      
+      # Dibujar Fondo Verde
+      green_w = ((toggle_w - 4) * state_progress).round
+      if green_w > 0
+        self.contents.fill_rect(x_pos + 2, y_pos + 2, green_w, toggle_h - 4, bg_on)
+      end
+      
+      # Dibujar Botón
+      knob_y = y_pos + 2
+      self.contents.fill_rect(knob_x, knob_y, knob_size, knob_size, knob_shadow)
+      self.contents.fill_rect(knob_x, knob_y, knob_size - 1, knob_size - 1, knob_base)
+      
+      # Dibujar Texto
+      text_x = x_pos + toggle_w + 10
+      pbDrawShadowText(self.contents, text_x, rect.y, option_width, rect.height,
+                       text_val, text_color, text_shadow)
     when :use
       # Draw nothing
+    when :submenu
+      color = (this_index == self.index) ? c_sel : c_base
+      shadow = (this_index == self.index) ? c_sel_sh : c_shadow
+      pbDrawShadowText(self.contents, option_start_x, rect.y, option_width, rect.height,
+                       ">", color, shadow, 1)
     when :multiselect
       items = get_multiselect_items(option)
       scroll = @values[this_index][:scroll]
@@ -1057,9 +1209,14 @@ class UI::OptionsVisualsList < Window_DrawableCommand
         end
       end
     else
-      value = option[:parameters][@values[this_index]]
+      val_index = @values[this_index] || 0
+      if option[:parameters].is_a?(Array) && val_index.is_a?(Integer) && val_index < option[:parameters].length
+        value = option[:parameters][val_index].to_s
+      else
+        value = ""
+      end
       pbDrawShadowText(self.contents, option_start_x, rect.y, option_width, rect.height,
-                       value, self.baseColor, self.shadowColor)
+                       value, c_base, c_shadow)
     end
   end
 
@@ -1085,41 +1242,121 @@ class UI::OptionsVisualsList < Window_DrawableCommand
     end
     old_index = self.index
     @value_changed = false
+
+    # --- SALTO DE OPCIONES DESHABILITADAS ---
+    if @index >= 0 && @options.length > 0
+      if Input.repeat?(Input::UP)
+        new_index = @index
+        loop do
+          new_index -= 1
+          new_index = @options.length - 1 if new_index < 0
+          break if !@options[new_index][:disabled_proc]&.call || new_index == @index
+        end
+        if new_index != @index
+          pbPlayCursorSE
+          self.index = new_index
+          @ignore_input = true
+        end
+      elsif Input.repeat?(Input::DOWN)
+        new_index = @index
+        loop do
+          new_index += 1
+          new_index = 0 if new_index >= @options.length
+          break if !@options[new_index][:disabled_proc]&.call || new_index == @index
+        end
+        if new_index != @index
+          pbPlayCursorSE
+          self.index = new_index
+          @ignore_input = true
+        end
+      end
+    end
+    # ----------------------------------------
+
     super
     # Hide up/down arrows when in tab selection mode (also after super call)
+    @ignore_input = false    
     if self.index < 0
       @uparrow.visible = false if @uparrow
       @downarrow.visible = false if @downarrow
     end
+    
     need_refresh = (self.index != old_index)
-    if self.index < @options.length &&
-       [:array, :array_one, :number_type, :number_slider, :multiselect, :arrow_option].include?(@options[self.index][:type])
-      old_value = self.value
-      cursor_moved = false
-      if Input.repeat?(Input::LEFT)
-        @values[self.index] = previous_value(self.index)
-        cursor_moved = true
-      elsif Input.repeat?(Input::RIGHT)
-        @values[self.index] = next_value(self.index)
-        cursor_moved = true
-      end
-      # Handle toggling for multiselect
-      if @options[self.index][:type] == :multiselect && Input.trigger?(Input::USE)
-        cursor_pos = @values[self.index][:cursor]
-        scroll_pos = @values[self.index][:scroll]
-        selections = @values[self.index][:selections].clone
-        if selections.include?(cursor_pos)
-          selections.delete(cursor_pos)
-        else
-          selections.push(cursor_pos)
-        end
-        # Preserve the full hash structure with scroll
-        @values[self.index] = { cursor: cursor_pos, selections: selections, scroll: scroll_pos }
-        pbPlayDecisionSE
+    
+    # --- CONTROL DE ANIMACIONES DEL TOGGLE ---
+    @toggle_animations ||= {}
+    animating = false
+    @toggle_animations.each_key do |idx|
+      if System.uptime - @toggle_animations[idx][:start] < @toggle_animations[idx][:duration]
+        animating = true
+      else
+        @toggle_animations.delete(idx)
         need_refresh = true
-        @value_changed = true
       end
+    end
+    need_refresh = true if animating
+    # -----------------------------------------
+
+    if self.index < @options.length &&
+       [:array, :array_one, :number_type, :number_slider, :multiselect, :arrow_option, :toggle].include?(@options[self.index][:type])
+      
+      is_disabled = @options[self.index][:disabled_proc]&.call
+      old_value = self.value
+      old_raw_value = @values[self.index]
+      cursor_moved = false
+      
+      if Input.repeat?(Input::LEFT)
+        if is_disabled
+          pbPlayBuzzerSE
+        else
+          @values[self.index] = previous_value(self.index)
+          cursor_moved = true
+        end
+      elsif Input.repeat?(Input::RIGHT)
+        if is_disabled
+          pbPlayBuzzerSE
+        else
+          @values[self.index] = next_value(self.index)
+          cursor_moved = true
+        end
+      end
+      
+      if (@options[self.index][:type] == :multiselect || @options[self.index][:type] == :toggle) && Input.trigger?(Input::USE)
+        if is_disabled
+          pbPlayBuzzerSE
+        else
+          if @options[self.index][:type] == :toggle
+            @values[self.index] = (@values[self.index] == 0) ? 1 : 0
+          else
+            cursor_pos = @values[self.index][:cursor]
+            scroll_pos = @values[self.index][:scroll]
+            selections = @values[self.index][:selections].clone
+            if selections.include?(cursor_pos)
+              selections.delete(cursor_pos)
+            else
+              selections.push(cursor_pos)
+            end
+            # Preserve the full hash structure with scroll
+            @values[self.index] = { cursor: cursor_pos, selections: selections, scroll: scroll_pos }
+          end
+          pbPlayDecisionSE
+          need_refresh = true
+          @value_changed = true
+        end
+      end
+      
       if self.value != old_value
+        # --- REGISTRAR ANIMACIÓN SI ES UN TOGGLE ---
+        if @options[self.index][:type] == :toggle
+          @toggle_animations[self.index] = {
+            start: System.uptime,
+            duration: 0.15,
+            from: old_raw_value,
+            to: @values[self.index]
+          }
+        end
+        # -------------------------------------------
+        
         pbPlayCursorSE if selected_option[:type] != :number_slider
         need_refresh = true
         @value_changed = true
@@ -1169,6 +1406,7 @@ class UI::OptionsVisuals < UI::BaseVisuals
     @menu           = menu
     @page           = all_pages.first
     @tab_scroll     = 0   # Track which tab is the leftmost visible
+    @is_submenu     = false
     super()
   end
 
@@ -1297,7 +1535,11 @@ class UI::OptionsVisuals < UI::BaseVisuals
   end
 
   def options_for_page(this_page)
-    return @options.filter { |option| option[:page] == this_page }
+    return @options.filter do |option|
+      next false if option[:page] != this_page
+      next false if option[:visible_proc] && !option[:visible_proc].call
+      next true
+    end
   end
 
   def selected_option
@@ -1331,12 +1573,22 @@ class UI::OptionsVisuals < UI::BaseVisuals
     visible_start = @tab_scroll
     visible_end = [@tab_scroll + MAX_VISIBLE_TABS, pages.length].min
     
+    # Determinar qué pestaña principal debe estar iluminada
+    active_main_page = @page
+    if @is_submenu && @submenu_stack && !@submenu_stack.empty?
+      # Si estamos en un submenú, la pestaña principal es la primera que guardamos en la pila
+      active_main_page = @submenu_stack.first[:page]
+    end
+    
     # Draw only visible tabs
     (visible_start...visible_end).each do |i|
       this_page = pages[i]
       tab_x = (i - @tab_scroll) * ((@bitmaps[:page_icons].width / 2) + PAGE_TAB_SPACING)
+      is_active = (this_page == active_main_page)
+      src_x = is_active ? @bitmaps[:page_icons].width / 2 : 0
+      
       draw_image(@bitmaps[:page_icons], tab_x, 0,
-                 (this_page == @page) ? @bitmaps[:page_icons].width / 2 : 0, 0,
+                 src_x, 0,
                  @bitmaps[:page_icons].width / 2, @bitmaps[:page_icons].height, overlay: :page_icons)
       page_handler = PageHandlers.call(@menu, this_page)
       page_name = page_handler[:name].call
@@ -1362,10 +1614,15 @@ class UI::OptionsVisuals < UI::BaseVisuals
   end
 
   def refresh_page_cursor
-    @sprites[:page_cursor].visible = (index < 0)
+    if @is_submenu || index >= 0
+      @sprites[:page_cursor].visible = false
+      return
+    end
+    @sprites[:page_cursor].visible = true
     @sprites[:page_cursor].x = @sprites[:page_icons].x - 2
     page_index = all_pages.index(@page)
     # Calculate position relative to scroll
+    return if !page_index
     visible_position = page_index - @tab_scroll
     @sprites[:page_cursor].x += visible_position * ((@bitmaps[:page_icons].width / 2) + PAGE_TAB_SPACING)
   end
@@ -1385,7 +1642,7 @@ class UI::OptionsVisuals < UI::BaseVisuals
     # Set descriptive text
     description = ""
     option = selected_option
-    if index < 0   # Selecting a tab
+    if index < 0 && !@is_submenu   # Selecting a tab
       page_handler = PageHandlers.call(@menu, @page)
       if page_handler && page_handler[:description].is_a?(Proc)
         # If the description proc expects arguments, pass the page and visuals
@@ -1410,6 +1667,13 @@ class UI::OptionsVisuals < UI::BaseVisuals
     else   # Back
       description = _INTL("Atrás.")
     end
+    
+    # Añadir aviso de restablecer si hay opciones con valores por defecto en esta página
+    has_defaults = @sprites[:options_list].options.any? { |opt| !opt[:default_value].nil? }
+    if has_defaults && index >= 0
+      description += _INTL("\n[Z] Restablecer valores.")
+    end
+    
     @sprites[:speech_box].text = description
   end
 
@@ -1439,22 +1703,92 @@ class UI::OptionsVisuals < UI::BaseVisuals
     return nil
   end
 
+  def open_submenu(submenu_page)
+    @submenu_stack ||= []
+    @is_submenu    ||= false
+
+    @submenu_stack.push({
+      page: @page,
+      index: @sprites[:options_list].index,
+      is_submenu: @is_submenu
+    })
+    @is_submenu = true
+    @page = submenu_page
+    @sprites[:options_list].options = options_for_page(@page)
+    first_enabled = @sprites[:options_list].options.index { |o| !o[:disabled_proc]&.call }
+    @sprites[:options_list].index = first_enabled || 0
+    refresh
+  end
+
+  def close_submenu
+    @submenu_stack ||= []
+    state = @submenu_stack.pop
+    return if !state
+
+    @page = state[:page]
+    @is_submenu = state[:is_submenu]
+    @sprites[:options_list].options = options_for_page(@page)
+    @sprites[:options_list].index = state[:index]
+    refresh
+  end
+
   def update_input
     # Update value change
     if @sprites[:options_list].value_changed
       selected_option[:set_proc].call(@sprites[:options_list].value, self)
+      current_option_id = selected_option[:option]
+      new_options = options_for_page(@page)
+      if @sprites[:options_list].options.length != new_options.length || 
+         @sprites[:options_list].options.map{|o| o[:option]} != new_options.map{|o| o[:option]}
+        @sprites[:options_list].update_options_dynamically(new_options, current_option_id)
+        refresh
+      end
     end
     # Do page selection
-    return update_input_tabs if @sprites[:options_list].index < 0
+    return update_input_tabs if @sprites[:options_list].index < 0 && !@is_submenu
     # Check for interaction
     if Input.trigger?(Input::USE)
-      if selected_option && selected_option[:use_proc]
-        pbPlayDecisionSE
-        return :use_option
+      if selected_option
+        if selected_option[:type] == :submenu
+          pbPlayDecisionSE
+          open_submenu(selected_option[:parameters])
+        elsif selected_option[:use_proc]
+          pbPlayDecisionSE
+          return :use_option
+        end
+      else
+        pbPlayCancelSE
+        if @is_submenu
+          close_submenu
+        else
+          set_index(-1)
+        end
       end
     elsif Input.trigger?(Input::BACK)
       pbPlayCancelSE
-      set_index(-1)
+      if @is_submenu
+        close_submenu
+      else
+        set_index(-1)
+      end
+    elsif Input.trigger?(Input::ACTION)
+      # Restablecer valores predeterminados
+      pbPlayDecisionSE
+      if pbConfirmMessage(_INTL("¿Restablecer las opciones de esta página a sus valores por defecto?"))
+        current_option_id = selected_option ? selected_option[:option] : nil
+        
+        # Aplicar los valores por defecto a todas las opciones de la página actual
+        @options.each do |opt|
+          if opt[:page] == @page && !opt[:default_value].nil?
+            opt[:set_proc].call(opt[:default_value], self)
+          end
+        end
+        
+        # Recalcular visibilidad dinámica por si algún valor por defecto ocultó/mostró opciones
+        new_options = options_for_page(@page)
+        @sprites[:options_list].update_options_dynamically(new_options, current_option_id)
+        refresh
+      end
     end
     return nil
   end
@@ -1559,6 +1893,9 @@ class UI::Options < UI::BaseScreen
         :description => description,
         :type        => type,
         :parameters  => final_params,
+        :default_value => hash["default_value"],
+        :visible_proc  => hash["visible_proc"],
+        :disabled_proc => hash["disabled_proc"],
         :on_select   => hash["on_select"],
         :get_proc    => hash["get_proc"],
         :set_proc    => hash["set_proc"],
@@ -1592,11 +1929,13 @@ class UI::Options < UI::BaseScreen
 
   # Hash lookup for converting old option type class names to new format symbols
   OPTION_TYPE_MAP = {
-    "SliderOption" => :number_slider,
-    "EnumOption"   => :array,
-    "NumberOption" => :number_type,
-    "ButtonOption" => :use,
-    "ArrowOption"  => :arrow_option
+    "SliderOption"  => :number_slider,
+    "EnumOption"    => :array,
+    "NumberOption"  => :number_type,
+    "ButtonOption"  => :use,
+    "ArrowOption"   => :arrow_option,
+    "SubmenuOption" => :submenu,
+    "ToggleOption"  => :toggle
   }.freeze
 
   # Convert old option type classes to new format symbols
@@ -1653,7 +1992,7 @@ if Settings::USE_NEW_OPTIONS_UI
     "page"        => :gameplay,
     "name"        => _INTL("Velocidad de texto"),
     "order"       => 10,
-    "type"        => :arrow_option,
+    "type"        => :array,
     "parameters"  => proc { [_INTL("Lento"), _INTL("Medio"), _INTL("Rápido"), _INTL("Instantáneo")] },
     "description" => _INTL("Elige la velocidad a la que aparece el texto."),
     "on_select"   => proc { |screen| screen.sprites[:speech_box].letterbyletter = true },
