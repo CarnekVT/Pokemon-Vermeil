@@ -1404,9 +1404,11 @@ class UI::OptionsVisuals < UI::BaseVisuals
     @options        = options
     @in_load_screen = in_load_screen
     @menu           = menu
-    @page           = all_pages.first
-    @tab_scroll     = 0   # Track which tab is the leftmost visible
-    @is_submenu     = false
+    @page               = all_pages.first
+    @tab_scroll         = 0   # Track which tab is the leftmost visible
+    @is_submenu         = false
+    @submenu_pages      = nil  # Non-nil when the active submenu has its own tab set
+    @submenu_tab_scroll = 0
     super()
   end
 
@@ -1428,10 +1430,10 @@ class UI::OptionsVisuals < UI::BaseVisuals
   end
 
   def initialize_page_tabs
-    # Use max visible tabs or actual tab count, whichever is smaller
-    visible_tabs = [all_pages.length, MAX_VISIBLE_TABS].min
+    # Always allocate the maximum number of tab slots so submenu tabs (which may
+    # exceed the number of main-menu tabs) have enough room to render.
     add_overlay(:page_icons,
-                visible_tabs * ((@bitmaps[:page_icons].width / 2) + PAGE_TAB_SPACING),
+                MAX_VISIBLE_TABS * ((@bitmaps[:page_icons].width / 2) + PAGE_TAB_SPACING),
                 @bitmaps[:page_icons].height + 16)  # Extra height for page dots
     # @sprites[:page_icons].x = Graphics.width - @sprites[:page_icons].width
     @sprites[:page_icons].x = PAGE_DOTS_X
@@ -1569,44 +1571,38 @@ class UI::OptionsVisuals < UI::BaseVisuals
 
   def refresh_page_tabs
     @sprites[:page_icons].bitmap.clear
-    pages = all_pages
-    visible_start = @tab_scroll
-    visible_end = [@tab_scroll + MAX_VISIBLE_TABS, pages.length].min
-    
-    # Determinar qué pestaña principal debe estar iluminada
+    if @is_submenu && @submenu_pages
+      draw_page_tabs(@submenu_pages, @submenu_tab_scroll, @page)
+      return
+    end
+    # Determine which main tab should be highlighted when inside a plain submenu
     active_main_page = @page
     if @is_submenu && @submenu_stack && !@submenu_stack.empty?
-      # Si estamos en un submenú, la pestaña principal es la primera que guardamos en la pila
       active_main_page = @submenu_stack.first[:page]
     end
-    
-    # Draw only visible tabs
+    draw_page_tabs(all_pages, @tab_scroll, active_main_page)
+  end
+
+  # Shared rendering used by both the main tab bar and any submenu tab bar.
+  def draw_page_tabs(pages, tab_scroll, active_page)
+    visible_start = tab_scroll
+    visible_end   = [tab_scroll + MAX_VISIBLE_TABS, pages.length].min
     (visible_start...visible_end).each do |i|
       this_page = pages[i]
-      tab_x = (i - @tab_scroll) * ((@bitmaps[:page_icons].width / 2) + PAGE_TAB_SPACING)
-      is_active = (this_page == active_main_page)
-      src_x = is_active ? @bitmaps[:page_icons].width / 2 : 0
-      
+      tab_x  = (i - tab_scroll) * ((@bitmaps[:page_icons].width / 2) + PAGE_TAB_SPACING)
+      src_x  = (this_page == active_page) ? @bitmaps[:page_icons].width / 2 : 0
       draw_image(@bitmaps[:page_icons], tab_x, 0,
                  src_x, 0,
                  @bitmaps[:page_icons].width / 2, @bitmaps[:page_icons].height, overlay: :page_icons)
       page_handler = PageHandlers.call(@menu, this_page)
-      page_name = page_handler[:name].call
+      page_name    = page_handler[:name].call
       draw_text(page_name, tab_x + (@bitmaps[:page_icons].width / 4), PAGE_NAME_Y,
                 align: :center, theme: :page_name, overlay: :page_icons)
     end
-    
-    # Draw page indicators if there are multiple pages of tabs
     total_pages = (pages.length.to_f / MAX_VISIBLE_TABS).ceil
     if total_pages > 1
-      current_page = (@tab_scroll / MAX_VISIBLE_TABS) + 1
-      # Draw page dots at the bottom of the tab area
-      dots_text = ""
-      (1..total_pages).each do |page_num|
-        dots_text += (page_num == current_page) ? "●" : "○"
-        dots_text += " " if page_num < total_pages
-      end
-      # Center the dots below the tabs
+      current_page = (tab_scroll / MAX_VISIBLE_TABS) + 1
+      dots_text = (1..total_pages).map { |n| n == current_page ? "●" : "○" }.join(" ")
       dots_x = @sprites[:page_icons].bitmap.width - 50
       draw_text(dots_text, dots_x, @bitmaps[:page_icons].height + 2,
                 align: :center, theme: :page_name, overlay: :page_icons)
@@ -1614,14 +1610,33 @@ class UI::OptionsVisuals < UI::BaseVisuals
   end
 
   def refresh_page_cursor
-    if @is_submenu || index >= 0
+    # Hide cursor whenever an option (not a tab) is selected
+    if index >= 0
       @sprites[:page_cursor].visible = false
       return
     end
+    # Submenu with its own tab bar: show cursor on the active submenu tab
+    if @is_submenu && @submenu_pages
+      page_index = @submenu_pages.index(@page)
+      if page_index
+        @sprites[:page_cursor].visible = true
+        @sprites[:page_cursor].x = @sprites[:page_icons].x - 2
+        visible_position = page_index - @submenu_tab_scroll
+        @sprites[:page_cursor].x += visible_position * ((@bitmaps[:page_icons].width / 2) + PAGE_TAB_SPACING)
+      else
+        @sprites[:page_cursor].visible = false
+      end
+      return
+    end
+    # Plain submenu (no tabs): hide cursor
+    if @is_submenu
+      @sprites[:page_cursor].visible = false
+      return
+    end
+    # Normal main-menu tab mode
     @sprites[:page_cursor].visible = true
     @sprites[:page_cursor].x = @sprites[:page_icons].x - 2
     page_index = all_pages.index(@page)
-    # Calculate position relative to scroll
     return if !page_index
     visible_position = page_index - @tab_scroll
     @sprites[:page_cursor].x += visible_position * ((@bitmaps[:page_icons].width / 2) + PAGE_TAB_SPACING)
@@ -1642,7 +1657,7 @@ class UI::OptionsVisuals < UI::BaseVisuals
     # Set descriptive text
     description = ""
     option = selected_option
-    if index < 0 && !@is_submenu   # Selecting a tab
+    if index < 0 && (!@is_submenu || (@is_submenu && @submenu_pages))   # Selecting a tab (main or submenu)
       page_handler = PageHandlers.call(@menu, @page)
       if page_handler && page_handler[:description].is_a?(Proc)
         # If the description proc expects arguments, pass the page and visuals
@@ -1703,16 +1718,87 @@ class UI::OptionsVisuals < UI::BaseVisuals
     return nil
   end
 
-  def open_submenu(submenu_page)
+  # Tab-bar navigation used when inside a submenu that has its own page set.
+  # Mirrors update_input_tabs but BACK closes the submenu level instead of quitting.
+  def update_input_submenu_tabs
+    if Input.repeat?(Input::DOWN)
+      pbPlayCursorSE
+      set_index(0)
+    elsif Input.repeat?(Input::LEFT)
+      go_to_previous_submenu_page
+    elsif Input.repeat?(Input::RIGHT)
+      go_to_next_submenu_page
+    end
+    if Input.trigger?(Input::USE)
+      pbPlayCursorSE
+      set_index(0)
+    elsif Input.trigger?(Input::BACK)
+      pbPlayCancelSE
+      close_submenu
+    end
+    return nil
+  end
+
+  def go_to_next_submenu_page
+    pages = @submenu_pages
+    return unless pages
+    page_number = pages.index(@page)
+    return unless page_number
+    new_page = pages[(page_number + 1) % pages.length]
+    return if new_page == @page
+    pbPlayCursorSE
+    @page = new_page
+    update_submenu_tab_scroll
+    @sprites[:options_list].options = options_for_page(@page)
+    @sprites[:options_list].index = -1
+    refresh
+  end
+
+  def go_to_previous_submenu_page
+    pages = @submenu_pages
+    return unless pages
+    page_number = pages.index(@page)
+    return unless page_number
+    new_page = pages[(page_number - 1) % pages.length]
+    return if new_page == @page
+    pbPlayCursorSE
+    @page = new_page
+    update_submenu_tab_scroll
+    @sprites[:options_list].options = options_for_page(@page)
+    @sprites[:options_list].index = -1
+    refresh
+  end
+
+  def update_submenu_tab_scroll
+    return unless @submenu_pages
+    page_index = @submenu_pages.index(@page)
+    return unless page_index
+    pages_length = @submenu_pages.length
+    return if pages_length <= MAX_VISIBLE_TABS
+    current_page_start = @submenu_tab_scroll
+    current_page_end   = @submenu_tab_scroll + MAX_VISIBLE_TABS
+    if page_index < current_page_start || page_index >= current_page_end
+      tab_page_number     = page_index / MAX_VISIBLE_TABS
+      @submenu_tab_scroll = tab_page_number * MAX_VISIBLE_TABS
+      max_scroll          = ((pages_length - 1) / MAX_VISIBLE_TABS) * MAX_VISIBLE_TABS
+      @submenu_tab_scroll = [@submenu_tab_scroll, max_scroll].min
+    end
+  end
+
+  def open_submenu(submenu_page, submenu_pages = nil)
     @submenu_stack ||= []
     @is_submenu    ||= false
 
     @submenu_stack.push({
-      page: @page,
-      index: @sprites[:options_list].index,
-      is_submenu: @is_submenu
+      page:               @page,
+      index:              @sprites[:options_list].index,
+      is_submenu:         @is_submenu,
+      submenu_pages:      @submenu_pages,
+      submenu_tab_scroll: @submenu_tab_scroll
     })
-    @is_submenu = true
+    @is_submenu         = true
+    @submenu_pages      = submenu_pages
+    @submenu_tab_scroll = 0
     @page = submenu_page
     @sprites[:options_list].options = options_for_page(@page)
     first_enabled = @sprites[:options_list].options.index { |o| !o[:disabled_proc]&.call }
@@ -1725,8 +1811,10 @@ class UI::OptionsVisuals < UI::BaseVisuals
     state = @submenu_stack.pop
     return if !state
 
-    @page = state[:page]
-    @is_submenu = state[:is_submenu]
+    @page               = state[:page]
+    @is_submenu         = state[:is_submenu]
+    @submenu_pages      = state[:submenu_pages]
+    @submenu_tab_scroll = state[:submenu_tab_scroll] || 0
     @sprites[:options_list].options = options_for_page(@page)
     @sprites[:options_list].index = state[:index]
     refresh
@@ -1745,13 +1833,16 @@ class UI::OptionsVisuals < UI::BaseVisuals
       end
     end
     # Do page selection
-    return update_input_tabs if @sprites[:options_list].index < 0 && !@is_submenu
+    if @sprites[:options_list].index < 0
+      return update_input_submenu_tabs if @is_submenu && @submenu_pages
+      return update_input_tabs         if !@is_submenu
+    end
     # Check for interaction
     if Input.trigger?(Input::USE)
       if selected_option
         if selected_option[:type] == :submenu
           pbPlayDecisionSE
-          open_submenu(selected_option[:parameters])
+          open_submenu(selected_option[:parameters], selected_option[:submenu_pages])
         elsif selected_option[:use_proc]
           pbPlayDecisionSE
           return :use_option
@@ -1766,7 +1857,10 @@ class UI::OptionsVisuals < UI::BaseVisuals
       end
     elsif Input.trigger?(Input::BACK)
       pbPlayCancelSE
-      if @is_submenu
+      if @is_submenu && @submenu_pages && index >= 0
+        # First BACK from options goes to the submenu tab bar (mirrors normal menu)
+        set_index(-1)
+      elsif @is_submenu
         close_submenu
       else
         set_index(-1)
@@ -1897,9 +1991,10 @@ class UI::Options < UI::BaseScreen
         :visible_proc  => hash["visible_proc"],
         :disabled_proc => hash["disabled_proc"],
         :on_select   => hash["on_select"],
-        :get_proc    => hash["get_proc"],
-        :set_proc    => hash["set_proc"],
-        :use_proc    => hash["use_proc"]
+        :get_proc      => hash["get_proc"],
+        :set_proc      => hash["set_proc"],
+        :use_proc      => hash["use_proc"],
+        :submenu_pages => hash["submenu_pages"]
       }
       option_data[:parameters].map! { |val| _INTL(val) } if option_data[:type] == :array
       
