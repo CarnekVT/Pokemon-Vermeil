@@ -147,7 +147,7 @@ class Battle::Battler
     @effects[PBEffects::GemConsumed] = nil
     @effects[PBEffects::ShellTrap] = false
     @battle.allBattlers(true).each { |b| b.pbContinualAbilityChecks }   # Trace, end primordial weathers
-    pbRestoreBattlerSprite if !(semiInvulnerable? || @effects[PBEffects::SkyDrop] >= 0)
+    pbRestoreBattlerSprite if !(semiInvulnerable? || @effects[PBEffects::SkyDrop] >= 0) && !fainted?
   end
 
   def pbConfusionDamage(msg)
