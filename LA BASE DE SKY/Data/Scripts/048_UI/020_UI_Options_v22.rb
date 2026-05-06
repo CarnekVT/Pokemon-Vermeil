@@ -2111,7 +2111,10 @@ if Settings::USE_NEW_OPTIONS_UI
     "parameters"  => [0, 100, 5],   # [minimum_value, maximum_value, interval]
     "description" => _INTL("Ajusta el volumen de todos los audio en el juego."),
     "get_proc"    => proc { next $PokemonSystem.main_volume },
-    "set_proc"    => proc { |value, screen| $PokemonSystem.main_volume = value }
+    "set_proc"    => proc { |value, screen| 
+      $PokemonSystem.main_volume = value 
+      screen.refresh 
+    }
   })
 
   MenuHandlers.add(:options_menu, :bgm_volume, {
@@ -2122,7 +2125,11 @@ if Settings::USE_NEW_OPTIONS_UI
     "parameters"  => [0, 100, 5],   # [minimum_value, maximum_value, interval]
     "description" => _INTL("Ajusta el volumen de la música de fondo."),
     "get_proc"    => proc { next $PokemonSystem.bgmvolume },
-    "set_proc"    => proc { |value, screen| $PokemonSystem.bgmvolume = value }
+    "set_proc"    => proc { |value, screen| 
+      $PokemonSystem.bgmvolume = value 
+      screen.refresh 
+    },
+    "disabled_proc" => proc { next $PokemonSystem.main_volume <= 0 }
   })
 
   MenuHandlers.add(:options_menu, :se_volume, {
@@ -2137,7 +2144,8 @@ if Settings::USE_NEW_OPTIONS_UI
       next if $PokemonSystem.sevolume == value
       $PokemonSystem.sevolume = value
       pbPlayCursorSE
-    }
+    },
+    "disabled_proc" => proc { next $PokemonSystem.main_volume <= 0 }
   })
 
   MenuHandlers.add(:options_menu, :pokemon_cry_volume, {
@@ -2152,7 +2160,8 @@ if Settings::USE_NEW_OPTIONS_UI
       next if $PokemonSystem.pokemon_cry_volume == value
       $PokemonSystem.pokemon_cry_volume = value
       pbPlayCursorSE
-    }
+    },
+    "disabled_proc" => proc { next $PokemonSystem.main_volume <= 0 }
   })
 
   #-------------------------------------------------------------------------------
