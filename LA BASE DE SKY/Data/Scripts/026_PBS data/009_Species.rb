@@ -325,6 +325,16 @@ module GameData
       return keys
     end
 
+    # Returns true if the given form of a species is a mega form unlocked by the given item.
+    def self.form_is_mega_with_item?(species, form, item)
+      return false if !item
+      GameData::Species.each do |data|
+        next if data.species != species || data.unmega_form != form
+        return true if data.mega_stone == item
+      end
+      return false
+    end
+
     def get_evolutions(exclude_invalid = false)
       ret = []
       @evolutions.each do |evo|
