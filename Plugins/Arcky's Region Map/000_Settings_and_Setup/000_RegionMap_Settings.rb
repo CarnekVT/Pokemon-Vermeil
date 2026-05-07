@@ -169,7 +169,7 @@
         ]
 
         # Link a switch ID to each District (if used). This switch will be turned ON once it's at 100%.
-        # You'll need to add a script command containing switchesForDistricts in an event before checking if any switches are turned ON.
+        # You'll need to add a script command containing ARMUtils.switchesForDistricts in an event before checking if any switches are turned ON.
         ProgressSwitches = {
 
         }
@@ -736,3 +736,4 @@
 
   end
 #======================================= The End ======================================#
+

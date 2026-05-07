@@ -56,8 +56,8 @@ class PokemonRegionMap_Scene
         end
         if @locObject[:icon]
           iconImage = findUsableUI("LocationPreview/MiniMaps/map#{@locObject[:icon]}")
-          iconWidth = getBitmapWidth(iconImage)
-          iconHeight = getBitmapHeight(iconImage)
+          iconWidth = ARMUtils.getBitmapWidth(iconImage)
+          iconHeight = ARMUtils.getBitmapHeight(iconImage)
           xIcon = (spriteBox.width - (20 + iconWidth)) + ARMSettings::IconOffsetX
           #spriteIcon.setBitmap(findUsableUI("LocationPreview/MiniMaps/map#{@locObject[:icon]}"))
           locDescrWidth = xIcon - (spriteBox.x + 20)
@@ -84,7 +84,7 @@ class PokemonRegionMap_Scene
           end
           if @locObject.key?(key) && name != ""
             name += ' ' * ARMSettings::LocationDirectionSpaces
-            dirWidths << (getBitmapWidth("Graphics/Icons/#{dir.to_s}") + spriteText.bitmap.text_size(name.to_s).width)
+            dirWidths << (ARMUtils.getBitmapWidth("Graphics/Icons/#{dir.to_s}") + spriteText.bitmap.text_size(name.to_s).width)
             getDir << "<icon=#{dir.to_s}>#{name}"
           end
         end
@@ -150,8 +150,8 @@ class PokemonRegionMap_Scene
         if ARMSettings::DrawDashImages
           @useAlt = "" if ARMSettings::DirectionHeightSpacing != 0
           dashImage = findUsableUI("LocationPreview/mapLocDash")
-          dashWidth = getBitmapWidth("#{dashImage}")
-          dashHeight = getBitmapHeight("#{dashImage}")
+          dashWidth = ARMUtils.getBitmapWidth("#{dashImage}")
+          dashHeight = ARMUtils.getBitmapHeight("#{dashImage}")
           xDash = 12 + ARMSettings::DashOffsetX
           yDash = (((yDescr + @totalHeight) - (dashHeight / 2))) + 2 + ARMSettings::DashOffsetY
           @totalHeight += ARMSettings::DirectionHeightSpacing
@@ -197,3 +197,4 @@ class PokemonRegionMap_Scene
     return chars
   end
 end
+

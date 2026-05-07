@@ -71,7 +71,7 @@ class Battle::Scene::Animation::VermeilGrassStatus < Battle::Scene::Animation
     case @move_id
     when :SPORE, :COTTONSPORE, :STUNSPORE, :SLEEPPOWDER, :POISONPOWDER
       # POWDERS (Parábola curva perfecta, desvanecimiento y caída en cono)
-      t_lob = 2; t_hit = 12; @end_frame = 30
+      t_lob = 2; t_hit = 12; @end_frame = 20
       up.setSE(0, "Anim/Wind1", 100, 150)
       
       p_tone = Tone.new(0,0,0,0)
@@ -128,7 +128,7 @@ class Battle::Scene::Animation::VermeilGrassStatus < Battle::Scene::Animation
 
     when :WORRYSEED
       # WORRY SEED (Disparo recto y sacudida)
-      t_shoot = 4; t_hit = 10; @end_frame = 30
+      t_shoot = 4; t_hit = 10; @end_frame = 20
       up.setSE(0, "Anim/Wind1", 100, 120)
       
       if pbResolveBitmap(magic_asset)
@@ -150,9 +150,7 @@ class Battle::Scene::Animation::VermeilGrassStatus < Battle::Scene::Animation
 
 when :STRENGTHSAP
       # STRENGTH SAP (Energy1 partículas + iluminación verde + healing)
-      t_drain = 4; t_heal = 25; @end_frame = 65
-      up.setSE(t_drain, "Anim/Absorb2", 100, 100)
-      
+      t_drain = 4; t_heal = 25; @end_frame = 45
       if pbResolveBitmap(frenzy_asset)
         # Roots land on ground at target position (base of battler)
         root1 = addNewSprite(orig_tx - 20, orig_ty, frenzy_asset, PictureOrigin::BOTTOM)
@@ -245,7 +243,7 @@ when :STRENGTHSAP
 
     when :AROMATHERAPY
       # AROMATHERAPY (Brisa de hojas pequeñas con Z global)
-      t_start = 2; @end_frame = 45
+      t_start = 2; @end_frame = 42
       up.setSE(0, "Anim/Recovery", 100, 150)
       
       bg_asset = "Graphics/Animations/PRAS- Aromatherapy FG.png"
@@ -280,9 +278,7 @@ when :STRENGTHSAP
 
 when :FORESTSCURSE
       # FOREST'S CURSE (Raíces en la base del battler)
-      t_start = 4; @end_frame = 40
-      up.setSE(t_start, "Anim/PRSFX- Nightmare", 100, 100)
-      
+      t_start = 4; @end_frame = 30
       if pbResolveBitmap(frenzy_asset)
         # Position at base of target (bottom of sprite, using orig_ty which is the feet position)
         # Efectos en el suelo (base del Pokémon)
@@ -317,7 +313,7 @@ when :FORESTSCURSE
 
     when :JUNGLEHEALING
       # JUNGLE HEALING (Pulsos expansivos curativos tipo Healing Wish)
-      t_start = 4; @end_frame = 40
+      t_start = 4; @end_frame = 20
       up.setSE(0, "Anim/Recovery", 100, 100)
       up.moveColor(t_start, 6, Color.new(100, 255, 100, 180))
       up.moveColor(t_start + 12, 6, Color.new(0,0,0,0))
@@ -398,9 +394,7 @@ when :LEECHSEED
 
 when :SPICYEXTRACT
       # SPICY EXTRACT (Salpicadura roja picante SIN BUG Z-Icon)
-      t_splash = 4; t_hit = 14; @end_frame = 40
-      up.setSE(0, "Anim/Wind1", 100, 150)
-      
+      t_splash = 4; t_hit = 14; @end_frame = 20
       if pbResolveBitmap(magic_asset)
         10.times do |i|
           drop = addNewSprite(orig_ux + (20*f_dir), orig_uy - (uh/2), magic_asset, PictureOrigin::CENTER)
@@ -423,7 +417,7 @@ when :SPICYEXTRACT
 
     when :GRASSWHISTLE
       # GRASS WHISTLE (Notas musicales + hojas)
-      t_start = 2; @end_frame = 45
+      t_start = 2; @end_frame = 30
       up.setSE(0, "Anim/PRSFX- Sing", 100, 100)
       
       # Notas musicales que viajan directamente al objetivo (desde arriba del usuario)

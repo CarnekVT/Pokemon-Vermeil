@@ -49,41 +49,41 @@ class Battle::Scene::Animation::VermeilMultiHitPunches < Battle::Scene::Animatio
     @end_frame = 25
 
     case @move_id
-    when :FLURRYPUNCH
-      @end_frame = 22
-      punches = pbResolveBitmap("Graphics/Animations/PRAS- Pummeling.png") ? "Graphics/Animations/PRAS- Pummeling.png" : "Graphics/Animations/punches.png"
-      spark   = "Graphics/Animations/PRAS- Strike.png"
-      if pbResolveBitmap(punches)
-        delays = [5, 8, 11]
-        delays.each_with_index do |t_s, idx|
-          # Sacudida y sonido de viento INDIVIDUAL para cada puñetazo
-          up.setSE(t_s - 1, "Anim/Wind1", 80, 120 + rand(30))
-          up.moveDelta(t_s - 1, 1, 6 * f_dir, 0); up.moveDelta(t_s, 1, -6 * f_dir, 0)
+    # when :FLURRYPUNCH
+    #   @end_frame = 22
+    #   punches = pbResolveBitmap("Graphics/Animations/PRAS- Pummeling.png") ? "Graphics/Animations/PRAS- Pummeling.png" : "Graphics/Animations/punches.png"
+    #   spark   = "Graphics/Animations/PRAS- Strike.png"
+    #   if pbResolveBitmap(punches)
+    #     delays = [5, 8, 11]
+    #     delays.each_with_index do |t_s, idx|
+    #       # Sacudida y sonido de viento INDIVIDUAL para cada puñetazo
+    #       up.setSE(t_s - 1, "Anim/Wind1", 80, 120 + rand(30))
+    #       up.moveDelta(t_s - 1, 1, 6 * f_dir, 0); up.moveDelta(t_s, 1, -6 * f_dir, 0)
 
-          r_x = (rand(60) - 30); r_y = (rand(60) - 30)
-          start_f_x = i_x - (80 * f_dir); start_f_y = i_y + r_y
-          end_f_x = i_x + r_x; end_f_y = i_y + r_y
-          fist = addNewSprite(start_f_x, start_f_y, punches, PictureOrigin::CENTER); fist.setZ(0, target_z + 16)
-          apply_pras_frame(fist, punches, 0, 0, 0); fist.setAngle(0, f_dir == 1 ? 0 : 180); fist.setZoom(0, 100 + rand(30))
-          fist.setVisible(0, false); fist.setVisible(t_s, true)
-          fist.moveXY(t_s, 2, end_f_x, end_f_y); fist.moveOpacity(t_s + 2, 2, 0)
+    #       r_x = (rand(60) - 30); r_y = (rand(60) - 30)
+    #       start_f_x = i_x - (80 * f_dir); start_f_y = i_y + r_y
+    #       end_f_x = i_x + r_x; end_f_y = i_y + r_y
+    #       fist = addNewSprite(start_f_x, start_f_y, punches, PictureOrigin::CENTER); fist.setZ(0, target_z + 16)
+    #       apply_pras_frame(fist, punches, 0, 0, 0); fist.setAngle(0, f_dir == 1 ? 0 : 180); fist.setZoom(0, 100 + rand(30))
+    #       fist.setVisible(0, false); fist.setVisible(t_s, true)
+    #       fist.moveXY(t_s, 2, end_f_x, end_f_y); fist.moveOpacity(t_s + 2, 2, 0)
           
-          if pbResolveBitmap(spark)
-            4.times do |k|
-              tr = addNewSprite(0, 0, spark, PictureOrigin::CENTER); tr.setZ(0, target_z + 15)
-              apply_pras_frame(tr, spark, rand(3), 0, 0); tr.setBlendType(0, 1)
-              tr_x = start_f_x + (end_f_x - start_f_x) * (k / 3.0)
-              tr.setXY(0, tr_x, start_f_y + (rand(20)-10)); tr.setVisible(0, false); tr.setVisible(t_s, true)
-              tr.setZoom(0, 30 + rand(30)); tr.moveOpacity(t_s + 1 + rand(2), 2, 0)
-            end
-          end
+    #       if pbResolveBitmap(spark)
+    #         4.times do |k|
+    #           tr = addNewSprite(0, 0, spark, PictureOrigin::CENTER); tr.setZ(0, target_z + 15)
+    #           apply_pras_frame(tr, spark, rand(3), 0, 0); tr.setBlendType(0, 1)
+    #           tr_x = start_f_x + (end_f_x - start_f_x) * (k / 3.0)
+    #           tr.setXY(0, tr_x, start_f_y + (rand(20)-10)); tr.setVisible(0, false); tr.setVisible(t_s, true)
+    #           tr.setZoom(0, 30 + rand(30)); tr.moveOpacity(t_s + 1 + rand(2), 2, 0)
+    #         end
+    #       end
           
-          # Sonido de impacto y temblor INDIVIDUAL
-          tp.setSE(t_s, "Anim/PRSFX- Tackle", 100, 100 + rand(20))
-          tp.moveDelta(t_s, 1, 8 * f_dir, 0); tp.moveDelta(t_s + 1, 1, -8 * f_dir, 0)
-        end
-      end
-      up.moveXY(16, 4, orig_ux, orig_uy)
+    #       # Sonido de impacto y temblor INDIVIDUAL
+    #       tp.setSE(t_s, "Anim/PRSFX- Tackle", 100, 100 + rand(20))
+    #       tp.moveDelta(t_s, 1, 8 * f_dir, 0); tp.moveDelta(t_s + 1, 1, -8 * f_dir, 0)
+    #     end
+    #   end
+    #   up.moveXY(16, 4, orig_ux, orig_uy)
 
     when :COMETPUNCH
       @end_frame = 20
@@ -223,7 +223,7 @@ class Battle
   
   def pbAnimation(move, user, targets, hitNum = 0)
     mid = move.respond_to?(:id) ? move.id : move
-    multi_hit_punches = [:FLURRYPUNCH, :COMETPUNCH, :DOUBLEHIT, :SURGINGSTRIKES]
+    multi_hit_punches = [:COMETPUNCH, :DOUBLEHIT, :SURGINGSTRIKES]
 
     if @showAnims && multi_hit_punches.include?(mid) && @scene.respond_to?(:pbPlayVermeilMultiHitPunches)
       if hitNum.to_i <= 0

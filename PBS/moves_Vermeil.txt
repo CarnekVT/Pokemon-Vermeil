@@ -245,6 +245,8 @@ Flags = CanProtect,Mirror,CanKingRock
 EffectChance = 100
 Description = The user attacks opposing Pokémon by shooting sticky webs. This also lowers their Speed stats.
 #-------------------------------
+# Let's Go Togepi Move
+#-------------------------------
 [TOGEBEAM]
 Name = Togebeam
 Type = FAIRY
@@ -257,6 +259,8 @@ FunctionCode = PowerHigherWithUserHappiness
 Flags = CanProtect,CanMirrorMove
 Description = The more Togepi loves its Trainer, the greater the power of this move. It never misses.
 #-------------------------------
+# Electric Explosion
+#-------------------------------
 [VOLTBURST]
 Name = Volt Burst
 Type = ELECTRIC
@@ -268,6 +272,8 @@ Target = AllNearOthers
 FunctionCode = UserFaintsExplosive
 Flags = CanProtect,CanMirrorMove
 Description = The user overloads its body with electricity until it bursts, damaging all around it. The user faints.
+#-------------------------------
+# Rock Type Physical Air Slash
 #-------------------------------
 [CRAGSMASH]
 Name = Crag Smash
@@ -282,6 +288,8 @@ Flags = Contact,CanProtect,CanMirrorMove
 EffectChance = 20
 Description = The user violently smashes the target with a hardened crag. This may also make the target flinch.
 #-------------------------------
+# Electric Close Combat
+#-------------------------------
 [LIGHTNINGRUSH]
 Name = Lightning Rush
 Type = ELECTRIC
@@ -293,6 +301,8 @@ Target = NearOther
 FunctionCode = LowerUserDefSpDef1
 Flags = Contact,CanProtect,CanMirrorMove
 Description = The user electrifies its body and rushes the target without guarding. This lowers the user's Defense and Sp. Def stats.
+#-------------------------------
+# Alolan Golem
 #-------------------------------
 [IONPULSE]
 Name = Ion Pulse
@@ -307,6 +317,8 @@ Flags = CanProtect,CanMirrorMove,Pulse
 EffectChance = 100
 Description = The user attacks with a highly charged pulse of ionized energy. This also leaves the target with a burn.
 #-------------------------------
+# Fairy Type New Physical Move
+#-------------------------------
 [PIXIESMASH]
 Name = Pixie Smash
 Type = FAIRY
@@ -320,17 +332,7 @@ Flags = Contact,CanProtect,CanMirrorMove
 EffectChance = 30
 Description = The user delivers a massive, magically charged strike to the target. This may also make the target flinch.
 #-------------------------------
-[FLURRYPUNCH]
-Name = Flurry Punch
-Type = FIGHTING
-Category = Physical
-Power = 20
-Accuracy = 100
-TotalPP = 20
-Target = NearOther
-FunctionCode = HitTwoToFiveTimes
-Flags = Contact,CanProtect,CanMirrorMove,Punching
-Description = The user violently pummels the target with a flurry of consecutive punches. It hits two to five times in a row.
+# Rock Type New Special Move
 #-------------------------------
 [CRYSTALRAIN]
 Name = Crystal Rain
@@ -345,6 +347,8 @@ Flags = CanProtect,CanMirrorMove
 EffectChance = 20
 Description = The user summons a heavy rain of glowing crystals. This may also lower the Sp. Def stats of opposing Pokémon.
 #-------------------------------
+# Ground Type Punch Move
+#-------------------------------
 [TREMORPUNCH]
 Name = Tremor Punch
 Type = GROUND
@@ -358,6 +362,8 @@ Flags = Contact,CanProtect,CanMirrorMove,Punching
 EffectChance = 20
 Description = The user punches the ground, sending a localized tremor into the target. This may also lower the target's Defense.
 #-------------------------------
+# Rock Type Kick Move
+#-------------------------------
 [BEDROCKKICK]
 Name = Bedrock Kick
 Type = ROCK
@@ -370,18 +376,7 @@ FunctionCode = None
 Flags = Contact,CanProtect,CanMirrorMove
 Description = The target is attacked by a kick delivered with the incredible force of bedrock.
 #-------------------------------
-[ABYSSALTHRUST]
-Name = Abyssal Thrust
-Type = DARK
-Category = Physical
-Power = 80
-Accuracy = 100
-TotalPP = 15
-Target = NearOther
-FunctionCode = LowerTargetDef1
-Flags = Contact,CanProtect,CanMirrorMove,Slicing
-EffectChance = 30
-Description = The user brutally thrusts an abyssal blade into the target. This may also lower the target's Defense stat.
+# Mega Samurott
 #-------------------------------
 [SPECTRALSLASH]
 Name = Spectral Slash
@@ -396,6 +391,8 @@ Flags = Contact,CanProtect,CanMirrorMove,Slicing
 EffectChance = 30
 Description = The user slashes the target with a chilling, spectral blade. This may also lower the target's Defense stat.
 #-------------------------------
+# Mega Typhlosion
+#-------------------------------
 [PYROCLASM]
 Name = Pyroclasm
 Type = ELECTRIC
@@ -409,6 +406,8 @@ Flags = CanProtect,CanMirrorMove
 EffectChance = 30
 Description = The user fires a devastating bolt of superheated volcanic ash. This may also leave the target with a burn.
 #-------------------------------
+# Mega Serperior
+#-------------------------------
 [ROYALBLIGHT]
 Name = Royal Blight
 Type = POISON
@@ -420,6 +419,8 @@ Target = NearOther
 FunctionCode = HealUserByHalfOfDamageDone
 Flags = CanProtect,CanMirrorMove,Heal
 Description = The user drains the target's life force with a corrupt, royal curse. The user's HP is restored by half the damage taken by the target.
+#-------------------------------
+# Thundartic
 #-------------------------------
 [SKYSPLITTER]
 Name = Sky Splitter
@@ -433,6 +434,8 @@ FunctionCode = LowerTargetSpeed1RaiseUserDef1InWeather
 Flags = CanProtect,CanMirrorMove
 Description = The user summons a bolt from the heavens. This lowers the target's Speed and may raise the user's Defense in snow or rain.
 #-------------------------------
+# Mimality
+#-------------------------------
 [SURREALMIME]
 Name = Surreal Mime
 Type = PSYCHIC
@@ -444,6 +447,8 @@ Target = NearOther
 FunctionCode = RandomTheaterEffect
 Flags = CanProtect,CanMirrorMove
 Description = A chaotic performance that traps the target and forces them to follow a nonsensical script.
+#-------------------------------
+# Ardentar
 #-------------------------------
 [MOLTENSLAG]
 Name = Molten Slag

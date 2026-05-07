@@ -58,7 +58,7 @@ class Battle::Scene::Animation::VermeilTacticalPunches < Battle::Scene::Animatio
     case @move_id
     when :DRAINPUNCH
       t_imp = 6
-      @end_frame = 60
+      @end_frame = 40
       
       up.setSE(0, "Anim/Wind2", 100, 120)
       up.moveXY(0, t_imp, orig_ux + (20 * f_dir), orig_uy)
@@ -119,7 +119,7 @@ class Battle::Scene::Animation::VermeilTacticalPunches < Battle::Scene::Animatio
 
     when :POWERUPPUNCH
       t_imp = 6
-      @end_frame = 45
+      @end_frame = 30
       
       up.setSE(0, "Anim/Wind1", 100, 100)
       up.moveXY(0, t_imp, orig_ux + (20 * f_dir), orig_uy)
@@ -179,7 +179,7 @@ class Battle::Scene::Animation::VermeilTacticalPunches < Battle::Scene::Animatio
     when :DIZZYPUNCH
       t1 = 4
       t2 = t1 + 5
-      @end_frame = 45
+      @end_frame = 25
       
       # Primer golpe con sacudida individual
       up.setSE(t1 - 1, "Anim/Wind1", 100, 150)

@@ -60,7 +60,7 @@ class Battle::Scene::Animation::VermeilCinematicSupersonic < Battle::Scene::Anim
     t_emission = 2
     t_travel = 8
     t_impact = t_emission + t_travel
-    @end_frame = t_impact + 20
+    @end_frame = t_impact + 15
 
     user_pic.setSE(0, "Anim/PRSFX- Supersonic", 100, 100)
     user_pic.moveDelta(0, 4, -4 * f_dir, 0)

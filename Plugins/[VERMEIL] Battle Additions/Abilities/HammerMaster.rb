@@ -16,7 +16,7 @@ module Battle::AbilityEffects
     :SHADOWBONE,     # Shadow Bone
     :BONEMERANG,     # Bonemerang
     :BULBBASH,       # Bulb Bash
-    :BLAZINGCLUB     # Existing custom club move
+    :BLAZINGCLUB     # Blazing Club
   ]
 
   def self.hammer_master_move?(move_id)

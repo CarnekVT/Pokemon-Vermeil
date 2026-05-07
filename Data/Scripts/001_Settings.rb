@@ -121,6 +121,21 @@ module Settings
   USE_MULTIPLE_STAT_ITEMS_AT_ONCE      = (MECHANICS_GENERATION >= 8)
 
   #=============================================================================
+  # LBSDK Exp Share Settings (from Sky Base)
+  #=============================================================================
+
+  # Whether the new Exp Share system from La Base de Sky is enabled.
+  # This allows individual Pokémon to have Exp Share enabled/disabled separately.
+  USE_NEW_EXP_SHARE                    = true
+  # Whether Exp Share is enabled by default for all Pokémon in the party.
+  EXPSHARE_ENABLED                     = true
+  # Whether to show a single message for all Pokémon gaining EXP (true)
+  # or individual messages for each (false).
+  GROUP_EXP_SHARE_MESSAGE              = false
+  # Whether to use the new Options UI with arrays instead of EnumOption.
+  USE_NEW_OPTIONS_UI                   = true
+
+  #=============================================================================
 
   # Whether Repel uses the level of the first Pokémon in the party regardless of
   # its HP (true), or it uses the level of the first unfainted Pokémon (false).

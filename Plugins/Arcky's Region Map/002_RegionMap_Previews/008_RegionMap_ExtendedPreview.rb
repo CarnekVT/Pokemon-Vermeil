@@ -88,13 +88,13 @@ class PokemonRegionMap_Scene
       end
       next unless $PokemonGlobal.visitedMaps[map.id] || (!ARMSettings::NoUnvistedMapInfo && ARMSettings::CanViewInfoUnvisitedMaps )
       totalWild, seen, caught, battled, wildText = getWildInfo(map, gameMap)
-      district = getDistrictName(map)
+      district = ARMUtils.getDistrictName(map)
       totalTrainers, trainers, defeated, trainerText = getTrainerInfo(map, district)
       totalItems, items, found, itemText = getItemInfo(map, district)
-      percentage[:progress] = [seen, caught, battled, defeated, found].each { |value| toNumber(value) }.sum
+      percentage[:progress] = [seen, caught, battled, defeated, found].each { |value| ARMUtils.toNumber(value) }.sum
       percentage[:total] = [(totalWild || 0), (totalTrainers || 0), (totalItems || 0)].sum
       unless percentage[:total] == 0
-        progress = !ARMSettings::DisableExtendedPreviewPercentage ? "- #{convertIntegerOrFloat(((percentage[:progress].to_f / percentage[:total]) * 100).round(1))}%" : ""
+        progress = !ARMSettings::DisableExtendedPreviewPercentage ? "- #{ARMUtils.convertIntegerOrFloat(((percentage[:progress].to_f / percentage[:total]) * 100).round(1))}%" : ""
       end
       if ARMSettings::ExcludeMapsWithNoData
         next if [wildText, trainerText, itemText].all? { |text| text[0][0..1] == "No" } && !map.has_flag?("EnExtPrev")
@@ -129,7 +129,7 @@ class PokemonRegionMap_Scene
       gameMaps << gameMap.id
       map = gameMap if map.nil?
     end
-    mapPosArray = getValidMapPositions(map)
+    mapPosArray = ARMUtils.getValidMapPositions(map)
     ARMSettings::LinkPoiToMap.each do |name, id|
       break if map.nil?
       mapToAdd = GameData::MapMetadata.try_get(id)
@@ -165,7 +165,7 @@ class PokemonRegionMap_Scene
   def getTrainerInfo(map, district)
     return 0, 0, 0, ["Disabled"] if !ARMSettings::ProgressCountTrainers || !ARMSettings::ProgressCounter
     totalTrainers = @globalCounter[:gameMaps][:trainers][map.id]
-    trainers = $ArckyGlobal.trainerTracker&.dig(district, :maps, map.id) unless $ArckyGlobal.trainerTracker&.dig(district, :maps)&.empty?
+    trainers = ARMUtils.global.trainerTracker&.dig(district, :maps, map.id) unless ARMUtils.global.trainerTracker&.dig(district, :maps)&.empty?
     defeated = trainers.nil? ? 0 : trainers[:defeated]
     if totalTrainers == 0
       trainerText = ["No Trainers to defeat."]
@@ -182,13 +182,13 @@ class PokemonRegionMap_Scene
   def getItemInfo(map, district)
     return 0, 0, 0, ["Disabled"] if !ARMSettings::ProgressCountItems || !ARMSettings::ProgressCounter
     totalItems = @globalCounter[:gameMaps][:items][map.id] || 0
-    items = $ArckyGlobal.itemTracker&.dig(district, :maps, map.id) unless $ArckyGlobal.itemTracker&.dig(district, :maps)&.empty?
+    items = ARMUtils.global.itemTracker&.dig(district, :maps, map.id) unless ARMUtils.global.itemTracker&.dig(district, :maps)&.empty?
     found = items.nil? ? 0 : items[:found]
     ARMSettings::CountItemsToMainMap.each do |main|
       if main[0] == map.id
         main[1].each do |id|
           totalItems += @globalCounter[:gameMaps][:items][id]
-          item = $ArckyGlobal.itemTracker&.dig(district, :maps, id) unless $ArckyGlobal.itemTracker&.dig(district, :maps)&.empty?
+          item = ARMUtils.global.itemTracker&.dig(district, :maps, id) unless ARMUtils.global.itemTracker&.dig(district, :maps)&.empty?
           found += item[:found] unless item.nil?
         end
       end
@@ -311,7 +311,7 @@ class PokemonRegionMap_Scene
         Console.echoln_li _INTL("Encounter Type '#{type}' has not been added to EncounterTypes in 000_RegionMap_Settings.rb")
         next
       end
-      data = getEncChances(enc, encType)
+      data = ARMUtils.getEncChances(enc, encType)
       encounters = enc.map { |enc| enc[1] }.uniq
       tableData[encType] = data
     end
@@ -430,13 +430,13 @@ class PokemonRegionMap_Scene
         unseen << species
       end
     end
-    seen = seen.sort_by { |species| getSpeciesDexNumber(species, @region) }
-    unseen = unseen.sort_by { |species| getSpeciesDexNumber(species, @region) }
+    seen = seen.sort_by { |species| ARMUtils.getSpeciesDexNumber(species, @region) }
+    unseen = unseen.sort_by { |species| ARMUtils.getSpeciesDexNumber(species, @region) }
     @list = seen + unseen
     @rowList = []
     @list.each_slice(@rowLength) { |array| @rowList << array }
     @countSpecies = updateSpeciesCount
-    @typeProgress = !ARMSettings::DisableExtendedPreviewPercentage ? "- #{convertIntegerOrFloat(((@countSpecies.to_f / (@list.length * 3)) * 100).round(1))}%" : ""
+    @typeProgress = !ARMSettings::DisableExtendedPreviewPercentage ? "- #{ARMUtils.convertIntegerOrFloat(((@countSpecies.to_f / (@list.length * 3)) * 100).round(1))}%" : ""
     @totalPages = @rowList.length - 1
     @totalPages = 1 if @totalPages <= 0 # making the minimum 1
     @sprites["EncounterBoxes"].bitmap.clear if @sprites["EncounterBoxes"]
@@ -459,9 +459,9 @@ class PokemonRegionMap_Scene
         @encSprites[index] = PokemonSpeciesIconSprite.new(nil, @viewport)
         formChange = MultipleForms.hasFunction?(species, "getFormOnCreation")
         if formChange
-          data = $ArckyGlobal.lastSeenSpeciesForm[speciesData.species]
+          data = ARMUtils.global.lastSeenSpeciesForm[speciesData.species]
         else
-          date = $ArckyGlobal.lastSeenSpeciesForm&.dig(speciesData.species, speciesData.form)
+          date = ARMUtils.global.lastSeenSpeciesForm&.dig(speciesData.species, speciesData.form)
         end
         if !data.nil?
           speciesGender = data[0]
@@ -520,11 +520,11 @@ class PokemonRegionMap_Scene
     revealAllSeen = @revealAllSeen if revealAllSeen.nil?
     seen = false
     if revealAllSeen
-      if $ArckyGlobal.countSeenSpecies(species, 0, form) > 0 || $ArckyGlobal.countSeenSpecies(species, 1, form) > 0
+      if ARMUtils.countSeenSpecies(species, 0, form) > 0 || ARMUtils.countSeenSpecies(species, 1, form) > 0
         seen = true
       end
     else
-      if $ArckyGlobal.countSeenSpeciesMap(mapID, species, 0, form) > 0 || $ArckyGlobal.countSeenSpeciesMap(mapID, species, 1, form) > 0
+      if ARMUtils.countSeenSpeciesMap(mapID, species, 0, form) > 0 || ARMUtils.countSeenSpeciesMap(mapID, species, 1, form) > 0
         seen = true
       end
     end
@@ -533,7 +533,7 @@ class PokemonRegionMap_Scene
 
   def caughtFormAnyGender(mapID, species, form)
     caught = false
-    if $ArckyGlobal.countCaughtSpecies(species, 0, form) > 0 || $ArckyGlobal.countCaughtSpecies(species, 1, form) > 0
+    if ARMUtils.countCaughtSpecies(species, 0, form) > 0 || ARMUtils.countCaughtSpecies(species, 1, form) > 0
       caught = true
     end
     return caught
@@ -541,7 +541,7 @@ class PokemonRegionMap_Scene
 
   def defeatedFormAnyGender(mapID, species, form)
     defeated = false
-    if $ArckyGlobal.countDefeatedSpeciesMap(mapID, species, 0, form) > 0 || $ArckyGlobal.countDefeatedSpeciesMap(mapID, species, 1, form) > 0
+    if ARMUtils.countDefeatedSpeciesMap(mapID, species, 0, form) > 0 || ARMUtils.countDefeatedSpeciesMap(mapID, species, 1, form) > 0
       defeated = true
     end
     return defeated
@@ -654,14 +654,14 @@ class PokemonRegionMap_Scene
     extra = @sprites["extendedText"].bitmap.text_size(' - ').width
     entryData[:entries].each do |data|
       levelRange = data[:level][:min] == data[:level][:max] ? "#{data[:level][:min]}" : "#{data[:level][:min]} - #{data[:level][:max]}"
-      txt = "#{convertIntegerOrFloat(data[:chance])}% (lv. #{levelRange})"
+      txt = "#{ARMUtils.convertIntegerOrFloat(data[:chance])}% (lv. #{levelRange})"
       array << txt
       widths << @sprites["extendedText"].bitmap.text_size(txt).width
     end
     if SpecialUI
-      array = textToLines(widths, array, extra, (@boxWidth - 12))
+      array = ARMUtils.textToLines(widths, array, extra, (@boxWidth - 12))
     else
-      array = textToLines(widths, array, extra, @extWidth - 32)
+      array = ARMUtils.textToLines(widths, array, extra, @extWidth - 32)
     end
     y += @lineHeight + offsetY
     output = []
@@ -688,19 +688,19 @@ class PokemonRegionMap_Scene
     form = !speciesData.flags.empty? ? speciesData.form : nil
 
     # Get all Seen Counters.
-    seen = $ArckyGlobal.countSeenSpeciesMap(mapID, species, nil, form)
-    totalSeen = $ArckyGlobal.countSeenSpecies(species, nil, form)
-    formsSeen = form.nil? && !speciesData.form_name.nil? ? $ArckyGlobal.countSeenSpeciesForms(species, nil, form) : ""
+    seen = ARMUtils.countSeenSpeciesMap(mapID, species, nil, form)
+    totalSeen = ARMUtils.countSeenSpecies(species, nil, form)
+    formsSeen = form.nil? && !speciesData.form_name.nil? ? ARMUtils.countSeenSpeciesForms(species, nil, form) : ""
 
     # Get all Caught Counters.
-    caught = $ArckyGlobal.countCaughtSpeciesMap(mapID, species, nil, form)
-    totalCaught = $ArckyGlobal.countCaughtSpecies(species, nil, form)
-    formsCaught = form.nil? && !speciesData.form_name.nil? ? $ArckyGlobal.countCaughtSpeciesForms(species, nil, form) : ""
+    caught = ARMUtils.countCaughtSpeciesMap(mapID, species, nil, form)
+    totalCaught = ARMUtils.countCaughtSpecies(species, nil, form)
+    formsCaught = form.nil? && !speciesData.form_name.nil? ? ARMUtils.countCaughtSpeciesForms(species, nil, form) : ""
 
     # Get all Defeated Counters.
-    defeated = $ArckyGlobal.countDefeatedSpeciesMap(mapID, species, nil, form)
-    totalDefeated = $ArckyGlobal.countDefeatedSpecies(species, nil, form)
-    formsDefeated = form.nil? && !speciesData.form_name.nil? ? $ArckyGlobal.countDefeatedSpeciesForms(species, nil, form) : ""
+    defeated = ARMUtils.countDefeatedSpeciesMap(mapID, species, nil, form)
+    totalDefeated = ARMUtils.countDefeatedSpecies(species, nil, form)
+    formsDefeated = form.nil? && !speciesData.form_name.nil? ? ARMUtils.countDefeatedSpeciesForms(species, nil, form) : ""
 
     # Draw text "Forms".
     y = @rasterY + 2
@@ -960,3 +960,5 @@ class ExtendedState
     return @state == :subTwo
   end
 end
+
+

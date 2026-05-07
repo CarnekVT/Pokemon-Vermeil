@@ -43,7 +43,7 @@ class Battle::Scene::Animation::VermeilPriorityPunches < Battle::Scene::Animatio
     uh = us.bitmap ? (us.bitmap.height / 2.0) : 40; th = ts.bitmap ? (ts.bitmap.height / 2.0) : 40
     i_x = ts.x; i_y = ts.y - th; orig_ux = us.x; orig_uy = us.y; orig_tx = ts.x; orig_ty = ts.y
 
-    @end_frame = 35
+    @end_frame = 22
 
     case @move_id
     when :MACHPUNCH

@@ -18,7 +18,7 @@ class PokemonRegionMap_Scene
       # check if the gameMap has a town map position and if it's equal to the current region ID.
       next if gameMap.town_map_position.nil? || gameMap.town_map_position[0] != @region
       # get the district name.
-      district = getDistrictName(gameMap.town_map_position, @map)
+      district = ARMUtils.getDistrictName(gameMap.town_map_position, @map)
       # get the encounter table for the current gameMap
       encounterData = GameData::Encounter.get(gameMap.id, $PokemonGlobal.encounter_version)
       unless encounterData.nil?
@@ -116,11 +116,11 @@ class PokemonRegionMap_Scene
     # Create the total count for each district and overall.
     progressCount = totalCount = 0
     districtCounters.each do |district, counters|
-      if !$ArckyGlobal.itemTracker.nil?
-        districtCounters[district][:items][:found] = $ArckyGlobal.itemTracker[district][:total] if $ArckyGlobal.itemTracker[district]
+      if !ARMUtils.global.itemTracker.nil?
+        districtCounters[district][:items][:found] = ARMUtils.global.itemTracker[district][:total] if ARMUtils.global.itemTracker[district]
       end
-      if !$ArckyGlobal.trainerTracker.nil?
-        districtCounters[district][:trainers][:defeated] = $ArckyGlobal.trainerTracker[district][:total] if $ArckyGlobal.trainerTracker[district]
+      if !ARMUtils.global.trainerTracker.nil?
+        districtCounters[district][:trainers][:defeated] = ARMUtils.global.trainerTracker[district][:total] if ARMUtils.global.trainerTracker[district]
       end
       total = progress = 0
       counters.each do |key, hash|
@@ -135,6 +135,7 @@ class PokemonRegionMap_Scene
       totalCount += total
     end
     @globalCounter = { progress: progressCount, total: totalCount, districts: districtCounters, gameMaps: gameMaps }
-    $ArckyGlobal.globalCounter = convertToRegularHash(@globalCounter)
+    ARMUtils.global.globalCounter = ARMUtils.convertToRegularHash(@globalCounter)
   end
 end
+

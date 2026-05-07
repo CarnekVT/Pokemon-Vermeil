@@ -488,10 +488,10 @@ def expshare_enabled?
 end
 
 class PokemonGlobalMetadata
-    attr_accessor :expshare_enabled
-    alias initialize_expshare initialize
+    attr_accessor :expshare_enabled unless method_defined?(:expshare_enabled)
+    alias initialize_sky_expshare_global_old initialize unless method_defined?(:initialize_sky_expshare_global_old)
     def initialize
-        initialize_expshare
+        initialize_sky_expshare_global_old
         @expshare_enabled = Settings::EXPSHARE_ENABLED
     end
 end
@@ -530,19 +530,19 @@ if Settings::USE_NEW_EXP_SHARE
     end
     
     class Pokemon
-        attr_accessor(:expshare)
-        alias initialize_old initialize
+        attr_accessor :expshare unless method_defined?(:expshare)
+        alias initialize_sky_expshare_pokemon_old initialize unless method_defined?(:initialize_sky_expshare_pokemon_old)
         def initialize(species, level, player = $player, withMoves = true, recheck_form = true)
-            initialize_old(species, level, player, withMoves)
+            initialize_sky_expshare_pokemon_old(species, level, player, withMoves)
             $PokemonSystem.expshareon ||= 0
             @expshare = expshare_enabled? && $PokemonSystem.expshareon == 0
         end 
     end
     
     class PokemonPartyPanel < Sprite
-        alias initialize_old initialize
+        alias initialize_sky_expshare_panel_old initialize unless method_defined?(:initialize_sky_expshare_panel_old)
         def initialize(pokemon,index,viewport=nil)
-            initialize_old(pokemon,index,viewport)
+            initialize_sky_expshare_panel_old(pokemon,index,viewport)
             if @pokemon.expshare && !@pokemon.egg?
                 @expicon = ChangelingSprite.new(0, 0, viewport)
                 @expicon.add_bitmap(:expicon,"Graphics/Pictures/expicon")
@@ -550,9 +550,9 @@ if Settings::USE_NEW_EXP_SHARE
             end
         end
 
-        alias refresh_overlay_information_old refresh_overlay_information
+        alias refresh_overlay_information_sky_old refresh_overlay_information unless method_defined?(:refresh_overlay_information_sky_old)
         def refresh_overlay_information
-            refresh_overlay_information_old
+            refresh_overlay_information_sky_old
             draw_exp_icon
         end
 

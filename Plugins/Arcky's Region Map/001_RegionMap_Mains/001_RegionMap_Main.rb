@@ -259,7 +259,7 @@ class PokemonRegionMap_Scene
   def pbMapScene
     cursor = createObject
     map    = createObject
-    opacityBox = convertOpacity(ARMSettings::ButtonBoxOpacity)
+    opacityBox = ARMUtils.convertOpacity(ARMSettings::ButtonBoxOpacity)
     choice   = nil
     lastChoiceLocation = 0
     lastChoiceFly = 0
@@ -527,3 +527,4 @@ class PokemonRegionMap_Scene
     stopFade
   end
 end
+

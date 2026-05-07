@@ -225,8 +225,8 @@ class Battle::Scene::Animation::UseItem < Battle::Scene::Animation
     [pulse, pulse2].each_with_index do |p, i|
       p.setSE(delay, "Battle item") if i == 0
       p.moveOpacity(delay, 4, 255)
-      p.moveZoom(delay, 8, 0)
-      delay += 2
+      p.moveZoom(delay, 16, 0)
+      delay += 4
     end
   end
 end

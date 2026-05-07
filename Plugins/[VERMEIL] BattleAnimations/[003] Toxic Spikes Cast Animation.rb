@@ -45,8 +45,8 @@ class Battle::Scene::Animation::VermeilToxicSpikesCast < Battle::Scene::Animatio
     user_pic.moveDelta(0, 5, 10 * f_dir, -8)
     user_pic.moveDelta(5, 5, -10 * f_dir, 8)
 
-    # Tiempo ajustado para que las partículas terminen de flotar (antes 40)
-    @end_frame = 45
+    # Tiempo ajustado para que las partículas terminen de flotar
+    @end_frame = 40
 
     offsets = [[-58, 8], [-36, 2], [-14, 10], [10, 1], [34, 9], [56, 4]]
     offsets.each_with_index do |(ox, oy), i|

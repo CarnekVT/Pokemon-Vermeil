@@ -32,9 +32,9 @@ end
 
 class PokemonGlobalMetadata
   attr_accessor :eggs
-  alias old_initialize initialize
+  alias initialize_egg_hatcher_old initialize unless method_defined?(:initialize_egg_hatcher_old)
   def initialize
-    old_initialize
+    initialize_egg_hatcher_old
     @eggs ||= [nil,nil,nil,nil,nil,nil]
   end
 end

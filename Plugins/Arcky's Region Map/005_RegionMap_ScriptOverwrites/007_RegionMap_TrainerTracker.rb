@@ -7,15 +7,15 @@ if ARMSettings::ProgressCounter && ARMSettings::ProgressCountTrainers
           unless pbMapInterpreter.get_self.nil?
             eventID = pbMapInterpreter.get_self.id
             if map.events[eventID].name[/trainer/i]
-              district = getDistrictName(map.metadata)
-              $ArckyGlobal.trainerTracker[district] ||= { :total => 0 }
-              $ArckyGlobal.trainerTracker[district][:maps] ||= {}
-              $ArckyGlobal.trainerTracker[district][:maps][map.map_id] ||= {:defeated => 0}
-              $ArckyGlobal.trainerTracker[district][:maps][map.map_id][eventID] ||= { :defeated => 0 }
-              unless $ArckyGlobal.trainerTracker[district][:maps][map.map_id][eventID][:defeated] != 0
-                $ArckyGlobal.trainerTracker[district][:maps][map.map_id][eventID][:defeated] += $ArckyGlobal.trainerTracker[:trainers]
-                $ArckyGlobal.trainerTracker[district][:total] += $ArckyGlobal.trainerTracker[:trainers]
-                $ArckyGlobal.trainerTracker[district][:maps][map.map_id][:defeated] += $ArckyGlobal.trainerTracker[:trainers]
+              district = ARMUtils.getDistrictName(map.metadata)
+              ARMUtils.global.trainerTracker[district] ||= { :total => 0 }
+              ARMUtils.global.trainerTracker[district][:maps] ||= {}
+              ARMUtils.global.trainerTracker[district][:maps][map.map_id] ||= {:defeated => 0}
+              ARMUtils.global.trainerTracker[district][:maps][map.map_id][eventID] ||= { :defeated => 0 }
+              unless ARMUtils.global.trainerTracker[district][:maps][map.map_id][eventID][:defeated] != 0
+                ARMUtils.global.trainerTracker[district][:maps][map.map_id][eventID][:defeated] += ARMUtils.global.trainerTracker[:trainers]
+                ARMUtils.global.trainerTracker[district][:total] += ARMUtils.global.trainerTracker[:trainers]
+                ARMUtils.global.trainerTracker[district][:maps][map.map_id][:defeated] += ARMUtils.global.trainerTracker[:trainers]
               end
             end
           end
@@ -37,8 +37,8 @@ if ARMSettings::ProgressCounter && ARMSettings::ProgressCountTrainers
       EventHandlers.trigger(:on_start_battle)
       # Generate information for the foes
       foe_trainers, foe_items, foe_party, foe_party_starts = TrainerBattle.generate_foes(*args)
-      $ArckyGlobal.trainerTracker[:trainers] ||= 0
-      $ArckyGlobal.trainerTracker[:trainers] = foe_trainers.length
+      ARMUtils.global.trainerTracker[:trainers] ||= 0
+      ARMUtils.global.trainerTracker[:trainers] = foe_trainers.length
       # Generate information for the player and partner trainer(s)
       player_trainers, ally_items, player_party, player_party_starts = BattleCreationHelperMethods.set_up_player_trainers(foe_party)
       # Create the battle scene (the visual side of it)
@@ -66,3 +66,4 @@ if ARMSettings::ProgressCounter && ARMSettings::ProgressCountTrainers
     end
   end
 end
+

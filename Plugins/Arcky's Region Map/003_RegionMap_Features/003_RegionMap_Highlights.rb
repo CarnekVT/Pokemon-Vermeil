@@ -31,8 +31,9 @@ class PokemonRegionMap_Scene
     @spritesMap["highlight"] = BitmapSprite.new(@mapWidth, @mapHeight, @viewportMap)
     @spritesMap["highlight"].x = @spritesMap["map"].x
     @spritesMap["highlight"].y = @spritesMap["map"].y
-    @spritesMap["highlight"].opacity = convertOpacity(ARMSettings::HighlightOpacity)
+    @spritesMap["highlight"].opacity = ARMUtils.convertOpacity(ARMSettings::HighlightOpacity)
     @spritesMap["highlight"].visible = true
     @spritesMap["highlight"].z = 20
   end
 end
+

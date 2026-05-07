@@ -20,7 +20,7 @@ module VermeilCinematicEngine
     map = {
       :SURGINGSTRIKES => "VermeilMultiHitPunches",
       :DOUBLEHIT      => "VermeilMultiHitPunches",
-      :FLURRYPUNCH    => "VermeilMultiHitPunches",
+      # :FLURRYPUNCH    => "VermeilMultiHitPunches",
       :COMETPUNCH     => "VermeilMultiHitPunches",
       :MACHPUNCH      => "VermeilPriorityPunches",
       :BULLETPUNCH    => "VermeilPriorityPunches",
@@ -312,14 +312,20 @@ module VermeilCinematicEngineBattleOverride
 
   def pbCommonAnimation(animName, user = nil, targets = nil)
     @scene.vermeil_engine_clear_message_window!
-    super(animName, user, targets)
+    # ESTABLECER FLAG AL INICIO para evitar delay de 1 segundo
     @vermeil_just_finished_anim = true
+    super(animName, user, targets)
   end
 
   def pbWait(frames, *args)
     if @vermeil_just_finished_anim
+      puts "[DEBUG] pbWait skipping wait due to @vermeil_just_finished_anim flag (value=#{@vermeil_just_finished_anim})" if $DEBUG
       @vermeil_just_finished_anim = false
       return
+    end
+    # Debug: also check if flag exists but is false
+    if $DEBUG && defined?(@vermeil_just_finished_anim)
+      puts "[DEBUG] pbWait NOT skipping - flag is #{@vermeil_just_finished_anim.inspect}"
     end
     super
   end
@@ -333,13 +339,7 @@ module VermeilCinematicEngineSceneOverride
       battle_obj = @battle
     end
     
-    # Check if we're in a sequence (for multihit/hazard follow-up messages)
-    in_sequence = false
-    if battle_obj && battle_obj.instance_variable_defined?(:@vermeil_in_sequence)
-      in_sequence = battle_obj.instance_variable_get(:@vermeil_in_sequence)
-    end
-    
-    # Check single-use flag from Battle
+    # Debug: Check what's happening
     just_finished = false
     begin
       if battle_obj && battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim)
@@ -349,7 +349,14 @@ module VermeilCinematicEngineSceneOverride
       just_finished = false
     end
     
-    if just_finished || in_sequence
+    # Debug output
+    if $DEBUG && battle_obj
+      has_flag = battle_obj.instance_variable_defined?(:@vermeil_just_finished_anim)
+      flag_val = battle_obj.instance_variable_get(:@vermeil_just_finished_anim) rescue nil
+      puts "[DEBUG pbWaitMessage] just_finished=#{just_finished}, flag defined=#{has_flag}, flag value=#{flag_val.inspect}"
+    end
+    
+    if just_finished
       if just_finished
         battle_obj.instance_variable_set(:@vermeil_just_finished_anim, false) rescue nil
       end

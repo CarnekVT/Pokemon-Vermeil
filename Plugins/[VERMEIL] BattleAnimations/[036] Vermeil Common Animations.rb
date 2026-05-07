@@ -175,7 +175,7 @@ class Battle::Scene::Animation::VermeilCommonAnimations < Battle::Scene::Animati
       # SNAP TRAP (common residual de atrapado)
       fangs = "Graphics/Animations/PRAS- Elemental Fangs.png"
       return if !pbResolveBitmap(fangs)
-      @end_frame = 30
+      @end_frame = 20
       i_y = orig_ty - th
       t_spawn = 1
       t_snap  = 7
@@ -361,6 +361,16 @@ class Battle::Scene
       return if !target
       need_slide_ui = (animName == "SnapTrap")
       
+      # Sincronizar el flag en Scene y Battle para que tanto pbWait como
+      # pbWaitMessage salten la pausa posterior a common animations usadas
+      # por ítems de stats (X Attack, X Defense, etc.).
+      battle = defined?(@battle) ? @battle : nil
+      @vermeil_just_finished_anim = true
+      if battle && battle.is_a?(Battle)
+        battle.instance_variable_set(:@vermeil_just_finished_anim, true)
+        puts "[DEBUG] VermeilCommonAnim Set flag at START for #{animName}" if $DEBUG
+      end
+      
       # Evitar que los textos parpadeen y ocultar databoxes temporalmente
       vermeil_engine_clear_message_window! if respond_to?(:vermeil_engine_clear_message_window!)
       vermeil_slide_databoxes_out if need_slide_ui && respond_to?(:vermeil_slide_databoxes_out)
@@ -377,10 +387,9 @@ class Battle::Scene
         ts = @sprites["pokemon_#{target.index}"] rescue nil
         ts.visible = true if ts
         vermeil_slide_databoxes_in if need_slide_ui && respond_to?(:vermeil_slide_databoxes_in)
+        @vermeil_just_finished_anim = true
+        battle.instance_variable_set(:@vermeil_just_finished_anim, true) if battle && battle.is_a?(Battle)
       end
-      # IMPORTANTE: Establecer el flag para evitar delay de 1 segundo en mensajes
-      battle = defined?(@battle) ? @battle : nil
-      battle.instance_variable_set(:@vermeil_just_finished_anim, true) if battle && battle.is_a?(Battle)
       return
     end
     

@@ -82,16 +82,17 @@ if ARMSettings::ProgressCounter && ARMSettings::ProgressCountItems
     eventID = pbMapInterpreter.get_self.id
     return if map.nil? || !map.events[eventID].name[/item/i]
     map = GameData::MapMetadata.try_get(mapID)
-    district = getDistrictName(map)
-    $ArckyGlobal.itemTracker[district] ||= { :total => 0 }
-    $ArckyGlobal.itemTracker[district][:maps] ||= {}
-    $ArckyGlobal.itemTracker[district][:maps][mapID] ||= { :found => 0}
-    $ArckyGlobal.itemTracker[district][:maps][mapID][eventID] ||= { :found => 0, :items => [] }
-    unless $ArckyGlobal.itemTracker[district][:maps][mapID][eventID][:items].include?(itemInfo[:item])
-      $ArckyGlobal.itemTracker[district][:maps][mapID][eventID][:items] += [itemInfo[:item]]
-      $ArckyGlobal.itemTracker[district][:maps][mapID][eventID][:found] += itemInfo[:quantity]
-      $ArckyGlobal.itemTracker[district][:total] += itemInfo[:quantity]
-      $ArckyGlobal.itemTracker[district][:maps][mapID][:found] += itemInfo[:quantity]
+    district = ARMUtils.getDistrictName(map)
+    ARMUtils.global.itemTracker[district] ||= { :total => 0 }
+    ARMUtils.global.itemTracker[district][:maps] ||= {}
+    ARMUtils.global.itemTracker[district][:maps][mapID] ||= { :found => 0}
+    ARMUtils.global.itemTracker[district][:maps][mapID][eventID] ||= { :found => 0, :items => [] }
+    unless ARMUtils.global.itemTracker[district][:maps][mapID][eventID][:items].include?(itemInfo[:item])
+      ARMUtils.global.itemTracker[district][:maps][mapID][eventID][:items] += [itemInfo[:item]]
+      ARMUtils.global.itemTracker[district][:maps][mapID][eventID][:found] += itemInfo[:quantity]
+      ARMUtils.global.itemTracker[district][:total] += itemInfo[:quantity]
+      ARMUtils.global.itemTracker[district][:maps][mapID][:found] += itemInfo[:quantity]
     end
   end
 end
+

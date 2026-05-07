@@ -103,13 +103,13 @@ class PokemonRegionMap_Scene
   end
 
   def getMapName(x, y)
-    district = getDistrictName([@region, adjustPosX(x), adjustPosY(y)], @map)
+    district = ARMUtils.getDistrictName([@region, adjustPosX(x), adjustPosY(y)], @map)
     if ARMSettings::ProgressCounter && !@globalCounter[:districts].empty? && !ARMSettings::DisableProgressCounterPercentage
       if (district == pbGetMessageFromHash(RegionNames, @map.name.to_s))
-        district = "#{district} - #{convertIntegerOrFloat((@globalCounter[:progress].to_f / @globalCounter[:total] * 100).round(1))}%" if @mode == 0
+        district = "#{district} - #{ARMUtils.convertIntegerOrFloat((@globalCounter[:progress].to_f / @globalCounter[:total] * 100).round(1))}%" if @mode == 0
       else
         districtData = @globalCounter[:districts][district]
-        district = "#{district} - #{convertIntegerOrFloat((districtData[:progress].to_f / districtData[:total] * 100).round(1))}%" if districtData && districtData[:total] != 0 && @mode == 0
+        district = "#{district} - #{ARMUtils.convertIntegerOrFloat((districtData[:progress].to_f / districtData[:total] * 100).round(1))}%" if districtData && districtData[:total] != 0 && @mode == 0
       end
     end
     return district
@@ -159,3 +159,4 @@ class PokemonRegionMap_Scene
     return @map.point
   end
 end
+

@@ -57,7 +57,7 @@ class Battle::Scene::Animation::VermeilSelfTargetGrass < Battle::Scene::Animatio
 
     case @move_id
     when :SYNTHESIS
-      t_start = 0; @end_frame = 15
+      t_start = 0; @end_frame = 8
       up.setSE(0, "Anim/Recovery", 100, 130)
       up.moveColor(t_start, 4, Color.new(200, 255, 100, 180))
       up.moveColor(t_start + 6, 4, Color.new(0,0,0,0))
@@ -84,8 +84,8 @@ class Battle::Scene::Animation::VermeilSelfTargetGrass < Battle::Scene::Animatio
       end
       
     when :SPIKYSHIELD
-      # SPIKY SHIELD: END FRAME 20 (balanced speed)
-      t_start = 0; @end_frame = 20
+      # SPIKY SHIELD: shorter end frame to avoid dead time
+      t_start = 0; @end_frame = 10
       up.setSE(t_start, "Anim/PRSFX- Spiky Shield2", 100, 120)
       
       if pbResolveBitmap(protect_asset)
@@ -126,7 +126,7 @@ class Battle::Scene::Animation::VermeilSelfTargetGrass < Battle::Scene::Animatio
       up.moveTone(t_start + 4, 2, Tone.new(0,0,0,0))
 
     when :GROWTH
-      t_start = 0; t_absorb = 6; t_burst = 10; @end_frame = 20
+      t_start = 0; t_absorb = 6; t_burst = 10; @end_frame = 14
       up.setSE(0, "Anim/PRSFX- Focus Energy", 100, 150)
       
       if pbResolveBitmap(orbs_asset)
@@ -177,7 +177,7 @@ class Battle::Scene::Animation::VermeilSelfTargetGrass < Battle::Scene::Animatio
       end
 
     when :INGRAIN
-      t_start = 0; @end_frame = 18
+      t_start = 0; @end_frame = 14
       up.setSE(t_start, "Anim/PRSFX- Wrap", 100, 120)
       
       up.moveTone(t_start, 3, Tone.new(-50, 100, -50, 50))

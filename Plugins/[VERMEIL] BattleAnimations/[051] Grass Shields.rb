@@ -53,7 +53,7 @@ class Battle::Scene::Animation::VermeilGrassShields < Battle::Scene::Animation
 
     case @move_id
     when :FLOWERSHIELD
-      t_start = 2; @end_frame = 35
+      t_start = 2; @end_frame = 30
       up.setSE(t_start, "Anim/PRSFX- Focus Energy", 100, 150)
       
       shield_y = orig_uy - (uh/2)

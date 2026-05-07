@@ -755,6 +755,7 @@ class Battle::Move
   alias dx_pbEffectivenessMessage pbEffectivenessMessage
   def pbEffectivenessMessage(user, target, numTargets = 1)
     return if target.damageState.disguise || target.damageState.iceFace
+    @battler_triggers ||= { :user => [], :targ => [] }
     dx_pbEffectivenessMessage(user, target, numTargets)
     return if target.damageState.substitute || target.fainted?
     @battler_triggers[:user].push("UserDealtDamage", @id, @type, user.species)

@@ -3,7 +3,7 @@ class Battle
     return if !battler || !@internalBattle
     if battler.is_a?(Battler)
       pbPlayer.pokedex.register(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?)
-      registerSpeciesSeen(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? && battler.index.odd?
+      ARMUtils.registerSpeciesSeen(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? && battler.index.odd?
     else
       pbPlayer.pokedex.register(battler.species)
     end
@@ -13,10 +13,10 @@ class Battle
     return if !battler || !@internalBattle
     if battler.is_a?(Battler)
       pbPlayer.pokedex.register_caught(battler.displaySpecies)
-      registerSpeciesCaught(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? && battler.index.odd?
+      ARMUtils.registerSpeciesCaught(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? && battler.index.odd?
     else
       pbPlayer.pokedex.register_caught(battler.species)
-      registerSpeciesCaught(battler.species, battler.gender, battler.form, battler.shiny?) if wildBattle?
+      ARMUtils.registerSpeciesCaught(battler.species, battler.gender, battler.form, battler.shiny?) if wildBattle?
     end
   end
 
@@ -24,7 +24,7 @@ class Battle
     return if !battler || !@internalBattle
     if battler.is_a?(Battler)
       pbPlayer.pokedex.register_defeated(battler.displaySpecies)
-      registerSpeciesDefeated(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? && battler.index.odd?
+      ARMUtils.registerSpeciesDefeated(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? && battler.index.odd?
     else
       pbPlayer.pokedex.register_defeated(battler.species)
     end
@@ -36,10 +36,10 @@ class SafariBattle
     return if !battler
     if battler.is_a?(Battle::Battler)
       pbPlayer.pokedex.register(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?)
-      registerSpeciesSeen(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? #&& battler.index.odd?
+      ARMUtils.registerSpeciesSeen(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? #&& battler.index.odd?
     else
       pbPlayer.pokedex.register(battler.species)
-      registerSpeciesSeen(battler.species, battler.gender, battler.form, battler.shiny?) if wildBattle? #&& battler.index.odd?
+      ARMUtils.registerSpeciesSeen(battler.species, battler.gender, battler.form, battler.shiny?) if wildBattle? #&& battler.index.odd?
     end
   end
 
@@ -47,10 +47,11 @@ class SafariBattle
     return if !battler
     if battler.is_a?(Battle::Battler)
       pbPlayer.pokedex.register_caught(battler.displaySpecies)
-      registerSpeciesCaught(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? #&& battler.index.odd?
+      ARMUtils.registerSpeciesCaught(battler.displaySpecies, battler.displayGender, battler.displayForm, battler.shiny?) if wildBattle? #&& battler.index.odd?
     else
       pbPlayer.pokedex.register_caught(battler.species)
-      registerSpeciesCaught(battler.species, battler.gender, battler.form, battler.shiny?) if wildBattle? #&& battler.index.odd?
+      ARMUtils.registerSpeciesCaught(battler.species, battler.gender, battler.form, battler.shiny?) if wildBattle? #&& battler.index.odd?
     end
   end
 end 
+
