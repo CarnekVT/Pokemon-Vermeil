@@ -1,7 +1,0 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
-#-------------------------------
-[0]
-Name = Kanto & Johto
-Filename = mapRegion0.png
-Point = 20,17,New Bark Town,
-Point = 18,17,Route 29,
