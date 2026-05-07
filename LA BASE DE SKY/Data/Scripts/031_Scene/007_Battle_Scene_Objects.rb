@@ -103,6 +103,8 @@ class Battle::Scene::PokemonDataBox < Sprite
   FOE_BOX_Y           = 36
   FOE_BASE_X          = 16
   DATABOX_BASE_Z      = 150
+  CONTENT_WRAPPER_EXTRA_WIDTH = 0
+  CONTENT_WRAPPER_EXTRA_HEIGHT = 10
 
   # Side size offsets
   SIDE_2_X_OFFSETS          = [-12, 12, 0, 0]
@@ -243,7 +245,7 @@ class Battle::Scene::PokemonDataBox < Sprite
     @expBar.bitmap = @expBarBitmap.bitmap
     @sprites["expBar"] = @expBar
     # Create sprite wrapper that displays everything except the above
-    @contents = Bitmap.new(@databoxBitmap.width, @databoxBitmap.height)
+    @contents = Bitmap.new(@databoxBitmap.width + CONTENT_WRAPPER_EXTRA_WIDTH, @databoxBitmap.height + CONTENT_WRAPPER_EXTRA_HEIGHT)
     self.bitmap  = @contents
     self.visible = false
     self.z       = DATABOX_BASE_Z + ((@battler.index / 2) * 5)
