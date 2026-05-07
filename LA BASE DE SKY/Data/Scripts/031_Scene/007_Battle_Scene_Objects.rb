@@ -1,0 +1,886 @@
+#===============================================================================
+# Helper: returns HP bar zone info based on Settings::HP_BAR_COLOR_MODE
+# Returns [base_zone, blend_zone, blend_opacity (0-255)]
+#===============================================================================
+def pbHPBarZoneInfo(hp, totalhp, zone_count = 4)
+  hp_fraction = (hp > 0 && totalhp > 0) ? hp.to_f / totalhp : 0.0
+  t1 = Settings::HP_BAR_GREEN_THRESHOLD
+  t2 = Settings::HP_BAR_YELLOW_THRESHOLD
+  t3 = Settings::HP_BAR_ORANGE_THRESHOLD
+  t4 = Settings::HP_BAR_RED_THRESHOLD
+  case Settings::HP_BAR_COLOR_MODE
+  when :gradient
+    if zone_count >= 4
+      if t1 < hp_fraction
+        # no hace nada
+        color_index = 0; next_color_index = 0; blend = 0
+      elsif hp_fraction > t2
+        color_index = 0; next_color_index = 1
+        blend = 1.0 - (hp_fraction - t2) / (1.0 - t2)
+      elsif hp_fraction > t3
+        color_index = 1; next_color_index = 2
+        blend = 1.0 - (hp_fraction - t3) / (t2 - t3)
+      elsif hp_fraction > t4
+        color_index = 2; next_color_index = 3
+        blend = 1.0 - (hp_fraction - t4) / (t3 - t4)
+      else
+        color_index = 3; next_color_index = 3; blend = 0
+      end
+    else
+      if hp_fraction > t2
+        color_index = 0; next_color_index = 1
+        blend = 1.0 - (hp_fraction - t2) / (1.0 - t2)
+      elsif hp_fraction > t4
+        color_index = 1; next_color_index = 2
+        blend = 1.0 - (hp_fraction - t4) / (t2 - t4)
+      else
+        color_index = zone_count - 1; next_color_index = color_index; blend = 0
+      end
+    end
+    return [color_index, next_color_index, (blend * 255).to_i]
+  when :classic
+    last = zone_count - 1
+    color_index = 0
+    color_index = 1 if hp_fraction <= 0.5
+    color_index = last if hp_fraction <= 0.25
+    return [color_index, color_index, 0]
+  when :four_colors
+    if zone_count >= 4
+      color_index = 0
+      color_index = 1 if hp_fraction <= t2
+      color_index = 2 if hp_fraction <= t3
+      color_index = 3 if hp_fraction <= t4
+    else
+      color_index = 0
+      color_index = 1 if hp_fraction <= t2
+      color_index = zone_count - 1 if hp_fraction <= t4
+    end
+    return [color_index, color_index, 0]
+  else
+    color_index = 0
+    color_index = 1 if hp_fraction <= 0.5
+    if zone_count >= 4
+      color_index = 2 if hp_fraction <= 1.0 / 3.0
+      color_index = 3 if hp_fraction <= 0.25
+    else
+      color_index = zone_count - 1 if hp_fraction <= 0.25
+    end
+    return [color_index, color_index, 0]
+  end
+end
+
+#===============================================================================
+# Data box for regular battles
+#===============================================================================
+class Battle::Scene::PokemonDataBox < Sprite
+  attr_reader   :battler
+  attr_accessor :selected
+
+  # Time in seconds to fully fill the Exp bar (from empty).
+  EXP_BAR_FILL_TIME = 1.75
+  # Time in seconds for this data box to flash when the Exp fully fills.
+  EXP_FULL_FLASH_DURATION = 0.2
+  # Maximum time in seconds to make a change to the HP bar.
+  HP_BAR_CHANGE_TIME = 1.0
+  # Time (in seconds) for one complete sprite bob cycle (up and down) while
+  # choosing a command for this battler or when this battler is being chosen as
+  # a target. Set to nil to prevent bobbing.
+  BOBBING_DURATION = 0.6
+  # Height in pixels of a status icon
+  STATUS_ICON_HEIGHT = 16
+  # Text colors
+  NAME_BASE_COLOR         = Color.new(72, 72, 72)
+  NAME_SHADOW_COLOR       = Color.new(184, 184, 184)
+  MALE_BASE_COLOR         = Color.new(48, 96, 216)
+  MALE_SHADOW_COLOR       = NAME_SHADOW_COLOR
+  FEMALE_BASE_COLOR       = Color.new(248, 88, 40)
+  FEMALE_SHADOW_COLOR     = NAME_SHADOW_COLOR
+  # Layout constants
+  PLAYER_BOX_X_OFFSET = 244
+  PLAYER_BOX_Y_OFFSET = 192
+  PLAYER_BASE_X       = 34
+  FOE_BOX_X           = -16
+  FOE_BOX_Y           = 36
+  FOE_BASE_X          = 16
+  DATABOX_BASE_Z      = 150
+  CONTENT_WRAPPER_EXTRA_WIDTH = 0
+  CONTENT_WRAPPER_EXTRA_HEIGHT = 10
+
+  # Side size offsets
+  SIDE_2_X_OFFSETS          = [-12, 12, 0, 0]
+  SIDE_2_Y_OFFSETS_PERCENT  = [-20, -34, 34, 45]
+  SIDE_2_Y_OFFSETS_NORMAL   = [-20, -34, 34, 20]
+  SIDE_3_X_OFFSETS          = [-12, 12, -6, 6, 0, 0]
+  SIDE_3_Y_OFFSETS          = [-42, -46, 4, 0, 50, 46]
+  
+  # Component relative positions
+  HP_BAR_X          = 102
+  HP_BAR_Y          = 40
+  EXP_BAR_X         = 6
+  EXP_BAR_Y         = 74
+  HP_NUMBERS_X      = 80
+  HP_NUMBERS_Y      = 52
+  HP_NUMBERS_WIDTH  = 124
+  HP_NUMBERS_HEIGHT = 16
+  HP_PERCENT_X      = 131
+  HP_PERCENT_Y      = 61
+  HP_PERCENT_WIDTH  = 124
+  HP_PERCENT_HEIGHT = 16 
+  # Drawing coordinates
+  NAME_X            = 8
+  NAME_Y            = 12
+  NAME_MAX_WIDTH    = 116
+  LEVEL_ICON_X      = 140
+  LEVEL_ICON_Y      = 16
+  LEVEL_NUMBER_X    = 162
+  LEVEL_NUMBER_Y    = 16
+  GENDER_X          = 126
+  GENDER_Y          = 12
+  STATUS_ICON_X     = 24
+  STATUS_ICON_Y     = 36
+  SHINY_ICON_FOE_X  = 206
+  SHINY_ICON_PLYR_X = -6
+  SHINY_ICON_Y      = 36
+  OWNED_ICON_X      = 8
+  OWNED_ICON_Y      = 36
+  MEGA_ICON_FOE_X   = 212
+  MEGA_ICON_FOE_Y   = 8
+  MEGA_ICON_PLYR_X  = -28
+  MEGA_ICON_PLYR_Y  = 8
+  PRIMAL_FOE_X      = 210
+  PRIMAL_PLYR_X     = -30
+  PRIMAL_ICON_Y     = 4
+  # HP Number drawing
+  HP_NUM_CURRENT_X  = 54
+  HP_NUM_CURRENT_Y  = 2
+  HP_NUM_MAX_X      = 70
+  HP_NUM_MAX_Y      = 2
+
+  # Number of different HP bar colors (green, yellow, orange, red)
+  HP_COLOR_COUNT = 4
+
+  def initialize(battler, sideSize, viewport = nil)
+    super(viewport)
+    @battler         = battler
+    @sprites         = {}
+    @spriteX         = 0
+    @spriteY         = 0
+    @spriteBaseX     = 0
+    @selected        = 0
+    @show_hp_numbers = false
+    @show_hp_percent = false
+    @show_exp_bar    = false
+    initializeDataBoxGraphic(sideSize)
+    initializeOtherGraphics(viewport)
+    refresh
+  end
+
+  def initializeDataBoxGraphic(sideSize)
+    onPlayerSide = @battler.index.even?
+    # Get the data box graphic and set whether the HP numbers/Exp bar are shown
+    if sideSize == 1   # One Pokémon on side, use the regular dara box BG
+      if onPlayerSide
+        @show_hp_numbers = true
+        @show_exp_bar    = true
+      else
+        @show_hp_percent = Settings::SHOW_ENEMY_HP_PERCENTAGE
+        foe_bitmap = @show_hp_percent ? _INTL("Graphics/UI/Battle/databox_normal_foe_percent") : _INTL("Graphics/UI/Battle/databox_normal_foe")
+      end
+
+      bgFilename = [_INTL("Graphics/UI/Battle/databox_normal"),
+                    foe_bitmap][@battler.index % 2]
+
+    else   # Multiple Pokémon on side, use the thin dara box BG
+      foe_bitmap = Settings::SHOW_ENEMY_HP_PERCENTAGE && sideSize < 3 ? _INTL("Graphics/UI/Battle/databox_thin_foe_percent") : _INTL("Graphics/UI/Battle/databox_thin_foe")
+      bgFilename = [_INTL("Graphics/UI/Battle/databox_thin"),
+                    foe_bitmap][@battler.index % 2]
+    end
+    @databoxBitmap&.dispose
+    @databoxBitmap = AnimatedBitmap.new(bgFilename)
+    # Determine the co-ordinates of the data box and the left edge padding width
+    if onPlayerSide
+      @spriteX = Graphics.width - PLAYER_BOX_X_OFFSET
+      @spriteY = Graphics.height - PLAYER_BOX_Y_OFFSET
+      @spriteBaseX = PLAYER_BASE_X
+    else
+      @spriteX = FOE_BOX_X
+      @spriteY = FOE_BOX_Y
+      @spriteBaseX = FOE_BASE_X
+      @show_hp_percent = Settings::SHOW_ENEMY_HP_PERCENTAGE && sideSize < 3
+    end
+    case sideSize
+    when 2
+      @spriteX += SIDE_2_X_OFFSETS[@battler.index]
+      if @show_hp_percent
+        @spriteY += SIDE_2_Y_OFFSETS_PERCENT[@battler.index]
+      else
+        @spriteY += SIDE_2_Y_OFFSETS_NORMAL[@battler.index]  
+      end
+    when 3
+      @spriteX += SIDE_3_X_OFFSETS[@battler.index]
+      @spriteY += SIDE_3_Y_OFFSETS[@battler.index]
+    end
+  end
+
+  def initializeOtherGraphics(viewport)
+    # Create other bitmaps
+    @numbersBitmap = AnimatedBitmap.new("Graphics/UI/Battle/icon_numbers")
+    @hpBarBitmap   = AnimatedBitmap.new("Graphics/UI/Battle/overlay_hp")
+    @expBarBitmap  = AnimatedBitmap.new("Graphics/UI/Battle/overlay_exp")
+    # Create sprite to draw HP numbers on
+    @hpNumbers = BitmapSprite.new(HP_NUMBERS_WIDTH, HP_NUMBERS_HEIGHT, viewport)
+    # pbSetSmallFont(@hpNumbers.bitmap)
+    @sprites["hpNumbers"] = @hpNumbers
+
+    @hpPercent = BitmapSprite.new(HP_PERCENT_WIDTH, HP_PERCENT_HEIGHT, viewport)
+    pbSetSmallFont(@hpPercent.bitmap)
+    @sprites["hpPercent"] = @hpPercent
+    # Create sprite wrapper that displays HP bar
+    @hpBar = Sprite.new(viewport)
+    @hpBarDisplay = Bitmap.new(@hpBarBitmap.width, @hpBarBitmap.height / HP_COLOR_COUNT)
+    @hpBar.bitmap = @hpBarDisplay
+    @sprites["hpBar"] = @hpBar
+    # Create sprite wrapper that displays Exp bar
+    @expBar = Sprite.new(viewport)
+    @expBar.bitmap = @expBarBitmap.bitmap
+    @sprites["expBar"] = @expBar
+    # Create sprite wrapper that displays everything except the above
+    @contents = Bitmap.new(@databoxBitmap.width + CONTENT_WRAPPER_EXTRA_WIDTH, @databoxBitmap.height + CONTENT_WRAPPER_EXTRA_HEIGHT)
+    self.bitmap  = @contents
+    self.visible = false
+    self.z       = DATABOX_BASE_Z + ((@battler.index / 2) * 5)
+    pbSetSystemFont(self.bitmap)
+  end
+
+  def dispose
+    pbDisposeSpriteHash(@sprites)
+    @databoxBitmap.dispose
+    @numbersBitmap.dispose
+    @hpBarBitmap.dispose
+    @hpBarDisplay.dispose
+    @hpPercent&.dispose
+    @expBarBitmap.dispose
+    @contents.dispose
+    super
+  end
+
+  def x=(value)
+    super
+    @hpBar.x     = value + @spriteBaseX + HP_BAR_X
+    @expBar.x    = value + @spriteBaseX + EXP_BAR_X
+    @hpNumbers.x = value + @spriteBaseX + HP_NUMBERS_X
+    @hpPercent&.x = value + @spriteBaseX + HP_PERCENT_X
+  end
+
+  def y=(value)
+    super
+    @hpBar.y     = value + HP_BAR_Y
+    @expBar.y    = value + EXP_BAR_Y
+    @hpNumbers.y = value + HP_NUMBERS_Y
+    @hpPercent&.y = value + HP_PERCENT_Y  
+  end
+
+  def z=(value)
+    super
+    @hpBar.z     = value + 1
+    @expBar.z    = value + 1
+    @hpNumbers.z = value + 2
+    @hpPercent&.z = value + 2
+  end
+
+  def opacity=(value)
+    super
+    @sprites.each do |i|
+      i[1].opacity = value if !i[1].disposed?
+    end
+  end
+
+  def visible=(value)
+    super
+    @sprites.each do |i|
+      i[1].visible = value if !i[1].disposed?
+    end
+    @expBar.visible = (value && @show_exp_bar)
+  end
+
+  def color=(value)
+    super
+    @sprites.each do |i|
+      i[1].color = value if !i[1].disposed?
+    end
+  end
+
+  def battler=(b)
+    @battler = b
+    self.visible = (@battler && !@battler.fainted?)
+  end
+
+  def hp
+    return (animating_hp?) ? @anim_hp_current : @battler.hp
+  end
+
+  def exp_fraction
+    if animating_exp?
+      return 0.0 if @anim_exp_range == 0
+      return @anim_exp_current.to_f / @anim_exp_range
+    end
+    return @battler.pokemon.exp_fraction
+  end
+
+  # NOTE: A change in HP takes the same amount of time to animate, no matter how
+  #       big a change it is.
+  def animate_hp(old_val, new_val)
+    return if old_val == new_val
+    @anim_hp_start = old_val
+    @anim_hp_end = new_val
+    @anim_hp_current = old_val
+    @anim_hp_timer_start = System.uptime
+  end
+
+  def animating_hp?
+    return @anim_hp_timer_start != nil
+  end
+
+  # NOTE: Filling the Exp bar from empty to full takes EXP_BAR_FILL_TIME seconds
+  #       no matter what. Filling half of it takes half as long, etc.
+  def animate_exp(old_val, new_val, range)
+    return if old_val == new_val || range == 0 || !@show_exp_bar
+    @anim_exp_start = old_val
+    @anim_exp_end = new_val
+    @anim_exp_range = range
+    @anim_exp_duration_mult = (new_val - old_val).abs / range.to_f
+    @anim_exp_current = old_val
+    @anim_exp_timer_start = System.uptime
+    pbSEPlay("Pkmn exp gain") if @show_exp_bar
+  end
+
+  def animating_exp?
+    return @anim_exp_timer_start != nil
+  end
+
+  def pbDrawNumber(number, btmp, startX, startY, align = :left)
+    # -1 means draw the / character
+    # -2 means draw the % character
+    n = case number
+    when -1
+      [10]
+    when -2
+      [11]
+    else
+      number.to_i.digits.reverse
+    end
+    # n = (number == -1) ? [10] : number.to_i.digits.reverse
+    charWidth  = @numbersBitmap.width / 12
+    charHeight = @numbersBitmap.height
+    startX -= charWidth * n.length if align == :right
+    n.each do |i|
+      btmp.blt(startX, startY, @numbersBitmap.bitmap, Rect.new(i * charWidth, 0, charWidth, charHeight))
+      startX += charWidth
+    end
+  end
+
+  def draw_background
+    self.bitmap.blt(0, 0, @databoxBitmap.bitmap, Rect.new(0, 0, @databoxBitmap.width, @databoxBitmap.height))
+  end
+
+  def draw_name
+    nameWidth = self.bitmap.text_size(@battler.name).width
+    nameOffset = 0
+    nameOffset = nameWidth - NAME_MAX_WIDTH if nameWidth > NAME_MAX_WIDTH
+    pbDrawTextPositions(self.bitmap, [[@battler.name, @spriteBaseX + NAME_X - nameOffset, NAME_Y, :left,
+                                       NAME_BASE_COLOR, NAME_SHADOW_COLOR]]
+    )
+  end
+
+  def draw_level
+    # "Lv" graphic
+    pbDrawImagePositions(self.bitmap, [[_INTL("Graphics/UI/Battle/overlay_lv"), @spriteBaseX + LEVEL_ICON_X, LEVEL_ICON_Y]])
+    # Level number
+    pbDrawNumber(@battler.level, self.bitmap, @spriteBaseX + LEVEL_NUMBER_X, LEVEL_NUMBER_Y)
+  end
+
+  def draw_gender
+    gender = @battler.displayGender
+    return if ![0, 1].include?(gender)
+    gender_text  = (gender == 0) ? _INTL("♂") : _INTL("♀")
+    base_color   = (gender == 0) ? MALE_BASE_COLOR : FEMALE_BASE_COLOR
+    shadow_color = (gender == 0) ? MALE_SHADOW_COLOR : FEMALE_SHADOW_COLOR
+    pbDrawTextPositions(self.bitmap, [[gender_text, @spriteBaseX + GENDER_X, GENDER_Y, :left, base_color, shadow_color]])
+  end
+
+  def draw_status
+    return if @battler.status == :NONE
+    if @battler.status == :POISON && @battler.statusCount > 0   # Badly poisoned
+      s = GameData::Status.count - 1
+    else
+      s = GameData::Status.get(@battler.status).icon_position
+    end
+    return if s < 0
+    pbDrawImagePositions(self.bitmap, [[_INTL("Graphics/UI/Battle/icon_statuses"), @spriteBaseX + STATUS_ICON_X, STATUS_ICON_Y,
+                                        0, s * STATUS_ICON_HEIGHT, -1, STATUS_ICON_HEIGHT]])
+  end
+
+  def draw_shiny_icon
+    return if !@battler.shiny?
+    shiny_x = (@battler.opposes?(0)) ? SHINY_ICON_FOE_X : SHINY_ICON_PLYR_X   # Foe's/player's
+    pbDrawImagePositions(self.bitmap, [["Graphics/UI/shiny", @spriteBaseX + shiny_x, SHINY_ICON_Y]])
+  end
+
+  def draw_special_form_icon
+    # Mega Evolution/Primal Reversion icon
+    if @battler.mega?
+      mega_x = (@battler.opposes?(0)) ? MEGA_ICON_FOE_X : MEGA_ICON_PLYR_X
+      mega_y = (@battler.opposes?(0)) ? MEGA_ICON_FOE_Y  : MEGA_ICON_PLYR_Y
+      pbDrawImagePositions(self.bitmap, [["Graphics/UI/Battle/icon_mega", @spriteBaseX + mega_x, mega_y]])
+    elsif @battler.primal?
+      filename = nil
+      if @battler.isSpecies?(:GROUDON)
+        filename = "Graphics/UI/Battle/icon_primal_Groudon"
+      elsif @battler.isSpecies?(:KYOGRE)
+        filename = "Graphics/UI/Battle/icon_primal_Kyogre"
+      end
+      primalX = (@battler.opposes?) ? PRIMAL_FOE_X : PRIMAL_PLYR_X   # Foe's/player's
+      pbDrawImagePositions(self.bitmap, [[filename, @spriteBaseX + primalX, PRIMAL_ICON_Y]]) if filename
+    end
+  end
+
+  def draw_owned_icon
+    return if !@battler.owned? || !@battler.opposes?(0)   # Draw for foe Pokémon only
+    pbDrawImagePositions(self.bitmap, [["Graphics/UI/Battle/icon_own", @spriteBaseX + OWNED_ICON_X, OWNED_ICON_Y]])
+  end
+
+  def refresh
+    self.bitmap.clear
+    return if !@battler.pokemon
+    draw_background
+    draw_name
+    draw_level
+    draw_gender
+    draw_status
+    draw_shiny_icon
+    draw_special_form_icon
+    draw_owned_icon
+    refresh_hp
+    refresh_exp
+  end
+
+  def refresh_hp
+    @hpNumbers.bitmap.clear
+    @hpPercent.bitmap.clear
+    return if !@battler.pokemon
+    # Show HP numbers
+    if @show_hp_numbers
+      pbDrawNumber(self.hp, @hpNumbers.bitmap, HP_NUM_CURRENT_X, HP_NUM_CURRENT_Y, :right)
+      pbDrawNumber(-1, @hpNumbers.bitmap, HP_NUM_CURRENT_X, HP_NUM_CURRENT_Y)   # / char
+      pbDrawNumber(@battler.totalhp, @hpNumbers.bitmap, HP_NUM_MAX_X, HP_NUM_MAX_Y)
+    end
+    if @show_hp_percent
+      hp_percent_value = ((self.hp / @battler.totalhp.to_f) * 100).ceil.to_i
+      pbDrawNumber(hp_percent_value, @hpPercent.bitmap, HP_NUM_CURRENT_X, HP_NUM_CURRENT_Y, :right)
+      pbDrawNumber(-2, @hpPercent.bitmap, HP_NUM_CURRENT_X, HP_NUM_CURRENT_Y)   # % char
+    end
+    # Resize HP bar
+    w = 0
+    if self.hp > 0
+      w = @hpBarBitmap.width.to_f * self.hp / @battler.totalhp
+      w = 1 if w < 1
+      # NOTE: The line below snaps the bar's width to the nearest 2 pixels, to
+      #       fit in with the rest of the graphics which are doubled in size.
+      w = ((w / 2.0).round) * 2
+    end
+    @hpBar.src_rect.width = w
+    # HP bar color based on Settings::HP_BAR_COLOR_MODE
+    bar_h = @hpBarBitmap.height / HP_COLOR_COUNT
+    @hpBarDisplay.clear
+    color_index, next_color_index, blend_alpha = pbHPBarZoneInfo(self.hp, @battler.totalhp, HP_COLOR_COUNT)
+    @hpBarDisplay.blt(0, 0, @hpBarBitmap.bitmap, Rect.new(0, color_index * bar_h, @hpBarBitmap.width, bar_h))
+    if blend_alpha > 0 && color_index != next_color_index
+      @hpBarDisplay.blt(0, 0, @hpBarBitmap.bitmap, Rect.new(0, next_color_index * bar_h, @hpBarBitmap.width, bar_h), blend_alpha)
+    end
+  end
+
+  def refresh_exp
+    return if !@show_exp_bar
+    w = exp_fraction * @expBarBitmap.width
+    # NOTE: The line below snaps the bar's width to the nearest 2 pixels, to
+    #       fit in with the rest of the graphics which are doubled in size.
+    w = ((w / 2).round) * 2
+    @expBar.src_rect.width = w
+  end
+
+  def update_hp_animation
+    return if !animating_hp?
+    @anim_hp_current = lerp(@anim_hp_start, @anim_hp_end, HP_BAR_CHANGE_TIME,
+                            @anim_hp_timer_start, System.uptime)
+    # Refresh the HP bar/numbers
+    refresh_hp
+    # End the HP bar filling animation
+    if @anim_hp_current == @anim_hp_end
+      @anim_hp_start = nil
+      @anim_hp_end = nil
+      @anim_hp_timer_start = nil
+      @anim_hp_current = nil
+    end
+  end
+
+  def update_exp_animation
+    return if !animating_exp?
+    if !@show_exp_bar   # Not showing the Exp bar, no need to waste time animating it
+      @anim_exp_timer_start = nil
+      return
+    end
+    duration = EXP_BAR_FILL_TIME * @anim_exp_duration_mult
+    @anim_exp_current = lerp(@anim_exp_start, @anim_exp_end, duration,
+                             @anim_exp_timer_start, System.uptime)
+    # Refresh the Exp bar
+    refresh_exp
+    return if @anim_exp_current != @anim_exp_end   # Exp bar still has more to animate
+    # End the Exp bar filling animation
+    if @anim_exp_current >= @anim_exp_range
+      if @anim_exp_flash_timer_start
+        # Waiting for Exp full flash to finish
+        return if System.uptime - @anim_exp_flash_timer_start < EXP_FULL_FLASH_DURATION
+      else
+        # Show the Exp full flash
+        @anim_exp_flash_timer_start = System.uptime
+        pbSEStop
+        pbSEPlay("Pkmn exp full")
+        flash_duration = EXP_FULL_FLASH_DURATION * Graphics.frame_rate   # Must be in frames, not seconds
+        self.flash(Color.new(64, 200, 248, 192), flash_duration)
+        @sprites.each do |i|
+          i[1].flash(Color.new(64, 200, 248, 192), flash_duration) if !i[1].disposed?
+        end
+        return
+      end
+    end
+    pbSEStop if !@anim_exp_flash_timer_start
+    @anim_exp_start = nil
+    @anim_exp_end = nil
+    @anim_exp_duration_mult = nil
+    @anim_exp_current = nil
+    @anim_exp_timer_start = nil
+    @anim_exp_flash_timer_start = nil
+  end
+
+  def update_positions
+    self.x = @spriteX
+    self.y = @spriteY
+    # Data box bobbing while Pokémon is selected
+    if (@selected == 1 || @selected == 2) && BOBBING_DURATION   # Choosing commands/targeted
+      bob_delta = System.uptime % BOBBING_DURATION   # 0-BOBBING_DURATION
+      bob_frame = (4 * bob_delta / BOBBING_DURATION).floor
+      case bob_frame
+      when 1 then self.y = @spriteY - 2
+      when 3 then self.y = @spriteY + 2
+      end
+    end
+  end
+
+  def update
+    super
+    # Animate HP bar
+    update_hp_animation
+    # Animate Exp bar
+    update_exp_animation
+    # Update coordinates of the data box
+    update_positions
+    pbUpdateSpriteHash(@sprites)
+  end
+end
+
+#===============================================================================
+# Splash bar to announce a triggered ability
+#===============================================================================
+class Battle::Scene::AbilitySplashBar < Sprite
+  attr_reader :battler
+
+  TEXT_BASE_COLOR   = Color.new(0, 0, 0)
+  TEXT_SHADOW_COLOR = Color.new(248, 248, 248)
+
+  # Layout Ability
+  PLAYER_Y        = 180
+  FOE_Y           = 80
+  TEXT_X_OFFSET   = 10
+  TEXT_X_MARGIN   = 8
+  ABILITY_NAME_Y  = 8
+  POKEMON_NAME_Y  = 38
+  BAR_Z = 300
+
+  def initialize(side, viewport = nil)
+    super(viewport)
+    @side    = side
+    @battler = nil
+    # Create sprite wrapper that displays background graphic
+    @bgBitmap = AnimatedBitmap.new("Graphics/UI/Battle/ability_bar")
+    @bgSprite = Sprite.new(viewport)
+    @bgSprite.bitmap = @bgBitmap.bitmap
+    @bgSprite.src_rect.y      = (side == 0) ? 0 : @bgBitmap.height / 2
+    @bgSprite.src_rect.height = @bgBitmap.height / 2
+    # Create bitmap that displays the text
+    @contents = Bitmap.new(@bgBitmap.width, @bgBitmap.height / 2)
+    self.bitmap = @contents
+    pbSetSystemFont(self.bitmap)
+    # Position the bar
+    self.x       = (side == 0) ? -Graphics.width / 2 : Graphics.width
+    self.y       = (side == 0) ? PLAYER_Y : FOE_Y
+    self.z       = BAR_Z
+    self.visible = false
+  end
+
+  def dispose
+    @bgSprite.dispose
+    @bgBitmap.dispose
+    @contents.dispose
+    super
+  end
+
+  def x=(value)
+    super
+    @bgSprite.x = value
+  end
+
+  def y=(value)
+    super
+    @bgSprite.y = value
+  end
+
+  def z=(value)
+    super
+    @bgSprite.z = value - 1
+  end
+
+  def opacity=(value)
+    super
+    @bgSprite.opacity = value
+  end
+
+  def visible=(value)
+    super
+    @bgSprite.visible = value
+  end
+
+  def color=(value)
+    super
+    @bgSprite.color = value
+  end
+
+  def battler=(value)
+    @battler = value
+    refresh
+  end
+
+  def refresh
+    self.bitmap.clear
+    return if !@battler
+    textPos = []
+    textX = (@side == 0) ? TEXT_X_OFFSET : self.bitmap.width - TEXT_X_MARGIN
+    align = (@side == 0) ? :left : :right
+    # Draw Pokémon's ability
+    textPos.push([@battler.abilityName, textX, ABILITY_NAME_Y, align,
+                  TEXT_BASE_COLOR, TEXT_SHADOW_COLOR, :outline])
+    # Draw Pokémon's name
+    textPos.push([_INTL("de {1}", @battler.name), textX, POKEMON_NAME_Y, align,
+                  TEXT_BASE_COLOR, TEXT_SHADOW_COLOR, :outline])
+    pbDrawTextPositions(self.bitmap, textPos)
+  end
+
+  def update
+    super
+    @bgSprite.update
+  end
+end
+
+#===============================================================================
+# Pokémon sprite (used in battle)
+#===============================================================================
+class Battle::Scene::BattlerSprite < RPG::Sprite
+  attr_reader   :pkmn
+  attr_accessor :index
+  attr_accessor :selected
+  attr_reader   :sideSize
+
+  # Time (in seconds) for one complete sprite bob cycle (up and down) while
+  # choosing a command for this battler. Set to nil to prevent bobbing.
+  COMMAND_BOBBING_DURATION = 0.6
+  # Time (in seconds) for one complete blinking cycle while this battler is
+  # being chosen as a target. Set to nil to prevent blinking.
+  TARGET_BLINKING_DURATION = 0.3
+
+  BATTLER_BASE_Z = 50
+
+  def initialize(viewport, sideSize, index, battleAnimations)
+    super(viewport)
+    @pkmn             = nil
+    @sideSize         = sideSize
+    @index            = index
+    @battleAnimations = battleAnimations
+    # @selected: 0 = not selected, 1 = choosing action bobbing for this Pokémon,
+    #            2 = flashing when targeted
+    @selected         = 0
+    @updating         = false
+    @spriteX          = 0   # Actual x coordinate
+    @spriteY          = 0   # Actual y coordinate
+    @spriteXExtra     = 0   # Offset due to "bobbing" animation
+    @spriteYExtra     = 0   # Offset due to "bobbing" animation
+    @_iconBitmap      = nil
+    self.visible      = false
+  end
+
+  def dispose
+    @_iconBitmap&.dispose
+    @_iconBitmap = nil
+    self.bitmap = nil if !self.disposed?
+    super
+  end
+
+  def x; return @spriteX; end
+  def y; return @spriteY; end
+
+  def x=(value)
+    @spriteX = value
+    super(value + @spriteXExtra)
+  end
+
+  def y=(value)
+    @spriteY = value
+    super(value + @spriteYExtra)
+  end
+
+  def width;  return (self.bitmap) ? self.bitmap.width : 0;  end
+  def height; return (self.bitmap) ? self.bitmap.height : 0; end
+
+  def visible=(value)
+    @spriteVisible = value if !@updating   # For selection/targeting flashing
+    super
+  end
+
+  # Set sprite's origin to bottom middle
+  def pbSetOrigin
+    return if !@_iconBitmap
+    self.ox = @_iconBitmap.width / 2
+    self.oy = @_iconBitmap.height
+  end
+
+  def pbSetPosition
+    return if !@_iconBitmap
+    pbSetOrigin
+    if @index.even?
+      self.z = BATTLER_BASE_Z + (5 * @index / 2)
+    else
+      self.z = BATTLER_BASE_Z - (5 * (@index + 1) / 2)
+    end
+    # Set original position
+    p = Battle::Scene.pbBattlerPosition(@index, @sideSize)
+    @spriteX = p[0]
+    @spriteY = p[1]
+    # Apply metrics
+    @pkmn.species_data.apply_metrics_to_sprite(self, @index)
+  end
+
+  def setPokemonBitmap(pkmn, back = false)
+    @pkmn = pkmn
+    @_iconBitmap&.dispose
+    @_iconBitmap = GameData::Species.sprite_bitmap_from_pokemon(@pkmn, back)
+    self.bitmap = (@_iconBitmap) ? @_iconBitmap.bitmap : nil
+    pbSetPosition
+  end
+
+  # This method plays the battle entrance animation of a Pokémon. By default
+  # this is just playing the Pokémon's cry, but you can expand on it. The
+  # recommendation is to create a PictureEx animation and push it into
+  # the @battleAnimations array.
+  def pbPlayIntroAnimation(pictureEx = nil)
+    @pkmn&.play_cry
+  end
+
+  def update
+    return if !@_iconBitmap
+    @updating = true
+    # Update bitmap
+    @_iconBitmap.update
+    self.bitmap = @_iconBitmap.bitmap
+    # Pokémon sprite bobbing while Pokémon is selected
+    @spriteYExtra = 0
+    if @selected == 1 && COMMAND_BOBBING_DURATION    # When choosing commands for this Pokémon
+      bob_delta = System.uptime % COMMAND_BOBBING_DURATION   # 0-COMMAND_BOBBING_DURATION
+      bob_frame = (4 * bob_delta / COMMAND_BOBBING_DURATION).floor
+      case bob_frame
+      when 1 then @spriteYExtra = 2
+      when 3 then @spriteYExtra = -2
+      end
+    end
+    self.x       = self.x
+    self.y       = self.y
+    self.visible = @spriteVisible
+    # Pokémon sprite blinking when targeted
+    if @selected == 2 && @spriteVisible && TARGET_BLINKING_DURATION
+      blink_delta = System.uptime % TARGET_BLINKING_DURATION   # 0-TARGET_BLINKING_DURATION
+      blink_frame = (3 * blink_delta / TARGET_BLINKING_DURATION).floor
+      self.visible = (blink_frame != 0)
+    end
+    @updating = false
+  end
+end
+
+#===============================================================================
+# Shadow sprite for Pokémon (used in battle)
+#===============================================================================
+class Battle::Scene::BattlerShadowSprite < RPG::Sprite
+  attr_reader   :pkmn
+  attr_accessor :index
+  attr_accessor :selected
+
+  def initialize(viewport, sideSize, index)
+    super(viewport)
+    @pkmn        = nil
+    @sideSize    = sideSize
+    @index       = index
+    @_iconBitmap = nil
+    self.visible = false
+  end
+
+  def dispose
+    @_iconBitmap&.dispose
+    @_iconBitmap = nil
+    self.bitmap = nil if !self.disposed?
+    super
+  end
+
+  def width;  return (self.bitmap) ? self.bitmap.width : 0;  end
+  def height; return (self.bitmap) ? self.bitmap.height : 0; end
+
+  # Set sprite's origin to centre
+  def pbSetOrigin
+    return if !@_iconBitmap
+    self.ox = @_iconBitmap.width / 2
+    self.oy = @_iconBitmap.height / 2
+  end
+
+  def pbSetPosition
+    return if !@_iconBitmap
+    pbSetOrigin
+    self.z = 3
+    # Set original position
+    p = Battle::Scene.pbBattlerPosition(@index, @sideSize)
+    self.x = p[0]
+    self.y = p[1]
+    # Apply metrics
+    @pkmn.species_data.apply_metrics_to_sprite(self, @index, true)
+  end
+
+  def setPokemonBitmap(pkmn)
+    @pkmn = pkmn
+    @_iconBitmap&.dispose
+    @_iconBitmap = GameData::Species.shadow_bitmap_from_pokemon(@pkmn)
+    self.bitmap = (@_iconBitmap) ? @_iconBitmap.bitmap : nil
+    pbSetPosition
+  end
+
+  def update
+    return if !@_iconBitmap
+    # Update bitmap
+    @_iconBitmap.update
+    self.bitmap = @_iconBitmap.bitmap
+  end
+end
+

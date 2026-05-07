@@ -1,0 +1,35 @@
+.idea
+.ruby-lsp
+*/.ruby-lsp
+LA BASE DE SKY/Data/Enemies.rxdata
+LA BASE DE SKY/Data/Actors.rxdata
+LA BASE DE SKY/Data/Armors.rxdata
+LA BASE DE SKY/Data/Skills.rxdata
+LA BASE DE SKY/Data/States.rxdata
+LA BASE DE SKY/Data/Weapons.rxdata
+LA BASE DE SKY/rgss-compiler.json
+LA BASE DE SKY/Data/Animations.rxdata
+Scripts.code-workspace
+**/*.dat
+LA BASE DE SKY\Data\*.dat
+LA BASE DE SKY/Data/PluginScripts.rxdata
+LA BASE DE SKY/Data/Weapons.rxdata
+LA BASE DE SKY/Data/Tilesets.rxdata
+LA BASE DE SKY/Data/System.rxdata
+LA BASE DE SKY/Data/States.rxdata
+LA BASE DE SKY/Data/Skills.rxdata
+LA BASE DE SKY/Data/Weapons.rxdata
+LA BASE DE SKY/Data/Tilesets.rxdata
+LA BASE DE SKY/Data/System.rxdata
+LA BASE DE SKY/Data/States.rxdata
+LA BASE DE SKY/Data/Skills.rxdata
+Gemfile
+Gemfile.lock
+rakefile
+# Pre-commit configuration (personal use only)
+.pre-commit-config.yaml
+check-ruby-syntax-local.ps1
+ruby-style-suggestions.ps1
+PRE-COMMIT-SETUP-GUIDE.md
+.ruby-version
+LA BASE DE SKY/luts_log.txt
