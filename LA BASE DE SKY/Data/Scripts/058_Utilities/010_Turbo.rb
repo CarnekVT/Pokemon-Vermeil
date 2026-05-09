@@ -8,12 +8,61 @@
 module TurboConfig
   # Velocidades: [Normal, x1.5, x2.0]
   SPEED_STAGES = [1.0, 1.5, 2.0]
-  
-  # Teclas para activar
+
+  # Teclas para activar (al pulsar avanzan al siguiente nivel).
   TOGGLE_KEYS = [Input::ALT, Input::AUX1]
-  
+
   # Duración del icono en pantalla (frames)
   ICON_DURATION = 150
+
+  # Duración real (en segundos) de los fades. NO se acelera con el turbo.
+  REAL_FADE_DURATION = 0.4
+
+  # Helper: multiplicador actual del turbo, con clamping defensivo por si
+  # $GameSpeed se sale de rango (cambios en caliente, saves antiguos, etc.).
+  def self.multiplier
+    idx = $GameSpeed || 0
+    idx = 0 if idx < 0 || idx >= SPEED_STAGES.size
+    return SPEED_STAGES[idx]
+  end
+end
+
+# API pública para usar desde otros scripts/eventos.
+module Turbo
+  module_function
+
+  # ¿Está el turbo actualmente acelerando el juego?
+  def active?
+    TurboConfig.multiplier > 1.0
+  end
+
+  # Multiplicador de velocidad actual (1.0, 1.5, 2.0…).
+  def multiplier
+    TurboConfig.multiplier
+  end
+
+  # Índice actual de velocidad.
+  def speed
+    $GameSpeed || 0
+  end
+
+  # Fuerza la velocidad a un índice concreto, ajustando $SpeedDifference
+  # para que System.uptime sea continuo.
+  def set_speed(idx)
+    idx = 0 if idx < 0 || idx >= TurboConfig::SPEED_STAGES.size
+    real_now = System.unscaled_uptime
+    virtual_now = System.uptime
+    $GameSpeed = idx
+    $SpeedDifference = virtual_now - (real_now * TurboConfig.multiplier)
+    $RefreshEventsForTurbo = true
+    $buttonframes = 0
+  end
+
+  # Reinicia el turbo a velocidad normal (útil al cargar partidas o al
+  # detectar estados inconsistentes).
+  def reset!
+    set_speed(0)
+  end
 end
 
 # Variables globales
@@ -42,7 +91,7 @@ module System
 
   def self.uptime
     # (Tiempo Real * Velocidad) + Diferencia acumulada
-    return (unscaled_uptime * TurboConfig::SPEED_STAGES[$GameSpeed]) + $SpeedDifference
+    return (unscaled_uptime * TurboConfig.multiplier) + $SpeedDifference
   end
 end
 
@@ -56,22 +105,13 @@ module Input
 
   def self.update
     turbo_update
-    
+
     # Detectar teclas de Turbo
     if $CanToggle && TurboConfig::TOGGLE_KEYS.any? { |key| trigger?(key) } && ( !Input.text_input || !trigger?(Input::AUX1) )
-      # Guardar tiempo actual antes del cambio
-      real_now = System.unscaled_uptime
-      virtual_now = System.uptime
-      
-      # Cambiar velocidad
-      $GameSpeed += 1
-      $GameSpeed = 0 if $GameSpeed >= TurboConfig::SPEED_STAGES.size
-      
-      # Calcular nueva diferencia para que no haya saltos bruscos de tiempo
-      new_mult = TurboConfig::SPEED_STAGES[$GameSpeed]
-      $SpeedDifference = virtual_now - (real_now * new_mult)
-      $RefreshEventsForTurbo = true
-      $buttonframes = 0
+      # Avanzar al siguiente nivel de velocidad.
+      new_idx = ($GameSpeed || 0) + 1
+      new_idx = 0 if new_idx >= TurboConfig::SPEED_STAGES.size
+      Turbo.set_speed(new_idx)
     end
   end
 end
@@ -101,6 +141,9 @@ module Game
     if $PokemonSystem
       $CanToggle = ($PokemonSystem.only_speedup_battles == 0)
     end
+    # Al cargar, partir siempre de velocidad normal para evitar arrastrar
+    # estados raros entre partidas (saves antiguos, índices fuera de rango).
+    Turbo.reset!
   end
 end
 
@@ -132,16 +175,14 @@ end
 EventHandlers.add(:on_start_battle, :start_speedup, proc {
   if $PokemonSystem&.only_speedup_battles == 1
     $CanToggle = true
-    $GameSpeed = TurboConfig::SPEED_STAGES.size - 1
-    $RefreshEventsForTurbo = true
+    Turbo.set_speed(TurboConfig::SPEED_STAGES.size - 1)
   end
 })
 
 EventHandlers.add(:on_end_battle, :stop_speedup, proc {
   if $PokemonSystem&.only_speedup_battles == 1
-    $GameSpeed = 0
+    Turbo.reset!
     $CanToggle = false
-    $RefreshEventsForTurbo = true
   end
 })
 
@@ -181,13 +222,18 @@ class Game_Map
   alias_method :original_update, :update unless method_defined?(:original_update)
 
   def update
-    # Si se activó el turbo, actualizamos temporizadores de eventos
+    # Si se activó el turbo, sólo refrescamos el contador de la ventana de
+    # mensajes (que usa su propio timing). NO tocamos los waits de los
+    # eventos: System.uptime ya es continuo entre cambios de velocidad
+    # gracias a $SpeedDifference, así que los waits siguen funcionando
+    # correctamente y, al usar tiempo escalado, se aceleran con el turbo.
+    #
+    # (Resetear los waits de TODOS los eventos al cambiar de velocidad
+    # provocaba que eventos paralelos con Set Move Route en curso se
+    # reiniciaran y desplazaran al evento poco a poco.)
     if $RefreshEventsForTurbo
-      if $game_map&.events
-        $game_map.events.each_value { |event| event.pbResetInterpreterWaitCount if event }
-      end
       if $game_temp.respond_to?(:message_window_showing) && $game_temp.message_window_showing && $CurrentMsgWindow
-        $CurrentMsgWindow.pbResetWaitCounter 
+        $CurrentMsgWindow.pbResetWaitCounter
       end
       $RefreshEventsForTurbo = false
     end
@@ -202,8 +248,10 @@ class Game_Map
   def update_fog
     uptime_now = System.unscaled_uptime
     @fog_scroll_last_update_timer = uptime_now unless @fog_scroll_last_update_timer
-    speedup_mult = ($PokemonSystem&.only_speedup_battles == 1) ? 1 : TurboConfig::SPEED_STAGES[$GameSpeed]
-    
+    # Si el turbo SOLO se aplica en batalla, fuera de batalla la niebla
+    # mantiene su velocidad real; si no, escala con el turbo.
+    speedup_mult = ($PokemonSystem&.only_speedup_battles == 1) ? 1 : TurboConfig.multiplier
+
     scroll_mult = (uptime_now - @fog_scroll_last_update_timer) * 5 * speedup_mult
     @fog_ox -= @fog_sx * scroll_mult
     @fog_oy -= @fog_sy * scroll_mult
@@ -238,94 +286,141 @@ class SpriteAnimation
   end
 end
 
+#-------------------------------------------------------------------------------
+# Game_Screen: tone / flash / shake usan System.uptime (escalado por turbo) en
+# lugar de $stats.play_time (tiempo real).
+#
+# Con la implementación original, los `Change Screen Color Tone`, `Flash` y
+# `Shake` mantenían su duración en tiempo real, pero los `Wait` del intérprete
+# se aceleran con el turbo. Eso descoordinaba ambas cosas: el Wait que
+# venía después de un Change Tone terminaba antes de que el tono hubiera
+# acabado de aplicarse, y se veía el mapa "a medio oscurecer" un instante
+# antes de la transición.
+#
+# Aquí hacemos que estos efectos también usen el reloj escalado, así su
+# duración va sincronizada con los Wait del evento.
+#-------------------------------------------------------------------------------
+class Game_Screen
+  def start_tone_change(tone, duration)
+    if duration == 0
+      @tone = tone.clone
+      return
+    end
+    @tone_initial     = @tone.clone
+    @tone_target      = tone.clone
+    @tone_duration    = duration / 20.0
+    @tone_timer_start = System.uptime
+  end
+
+  def start_flash(color, duration)
+    @flash_color         = color.clone
+    @flash_initial_alpha = @flash_color.alpha
+    @flash_duration      = duration / 20.0
+    @flash_timer_start   = System.uptime
+  end
+
+  def start_shake(power, speed, duration)
+    @shake_power       = power
+    @shake_speed       = speed
+    @shake_duration    = duration / 20.0
+    @shake_timer_start = System.uptime
+  end
+
+  alias_method :turbo_original_update_screen, :update unless method_defined?(:turbo_original_update_screen)
+  def update
+    # Sustituimos $stats.play_time por System.uptime usando una variable
+    # local "now" antes de delegar al método original, pero como el método
+    # original usa $stats.play_time directamente, reescribimos la parte de
+    # tone/flash/shake aquí.
+    now = System.uptime
+    if @tone_timer_start
+      @tone.red = lerp(@tone_initial.red, @tone_target.red, @tone_duration, @tone_timer_start, now)
+      @tone.green = lerp(@tone_initial.green, @tone_target.green, @tone_duration, @tone_timer_start, now)
+      @tone.blue = lerp(@tone_initial.blue, @tone_target.blue, @tone_duration, @tone_timer_start, now)
+      @tone.gray = lerp(@tone_initial.gray, @tone_target.gray, @tone_duration, @tone_timer_start, now)
+      if now - @tone_timer_start >= @tone_duration
+        @tone_initial = nil
+        @tone_timer_start = nil
+      end
+    end
+    if @flash_timer_start
+      @flash_color.alpha = lerp(@flash_initial_alpha, 0, @flash_duration, @flash_timer_start, now)
+      if now - @flash_timer_start >= @flash_duration
+        @flash_initial_alpha = nil
+        @flash_timer_start = nil
+      end
+    end
+    if @shake_timer_start
+      delta_t = now - @shake_timer_start
+      movement_per_second = @shake_power * @shake_speed * 4
+      limit = @shake_power * 2.5
+      phase = (delta_t * movement_per_second / limit).to_i % 4
+      case phase
+      when 0, 2
+        @shake = (movement_per_second * delta_t) % limit
+        @shake *= -1 if phase == 2
+      else
+        @shake = limit - ((movement_per_second * delta_t) % limit)
+        @shake *= -1 if phase == 3
+      end
+      if delta_t >= @shake_duration
+        @shake_phase = phase if !@shake_phase || phase == 1 || phase == 3
+        if phase != @shake_phase || @shake < 2
+          @shake_timer_start = nil
+          @shake = 0
+        end
+      end
+    end
+    # Pictures y weather los seguimos delegando al original (no usan
+    # $stats.play_time para sus duraciones críticas).
+    if $game_temp.in_battle
+      (51..100).each { |i| @pictures[i].update }
+    else
+      (1..50).each { |i|  @pictures[i].update }
+    end
+  end
+end
+
 #===============================================================================
 # 6. Fixes de Estabilidad
 #===============================================================================
-alias :original_pbBattleOnStepTaken :pbBattleOnStepTaken
-def pbBattleOnStepTaken(repel_active)
-  return if $game_temp.in_battle
-  original_pbBattleOnStepTaken(repel_active)
+# Guarda contra recargas en caliente: si ya está aliasado, no volver a hacerlo
+# (provocaría recursión infinita).
+unless defined?(turbo_original_pbBattleOnStepTaken)
+  alias turbo_original_pbBattleOnStepTaken pbBattleOnStepTaken
+  def pbBattleOnStepTaken(repel_active)
+    return if $game_temp.in_battle
+    turbo_original_pbBattleOnStepTaken(repel_active)
+  end
 end
 
 class Game_Event < Game_Character
   def pbResetInterpreterWaitCount
+    # Defensa: si el evento está ejecutando un move route forzado, NO tocamos
+    # su intérprete. Resetear el wait en mitad de un Set Move Route hace que
+    # el evento paralelo que lo lanzó vuelva a relanzarlo desde la posición
+    # actual del evento (bug del puño desplazándose al pulsar turbo).
+    return if @move_route_forcing
     @interpreter.pbRefreshWaitCount if @interpreter
   end
-end  
+end
 
 class Interpreter
   def pbRefreshWaitCount
     @wait_count = 0
     @wait_start = System.uptime
-    @wait_start_real = System.unscaled_uptime
-  end
-  
-  # Override del comando Wait para usar tiempo REAL
-  # Esto evita que el wait termine antes que los fades de Graphics
-  alias turbo_original_command_106 command_106
-  def command_106
-    @wait_count = @parameters[0] / 20.0
-    @wait_start = System.uptime
-    @wait_start_real = System.unscaled_uptime  # Guardar tiempo real también
-    return true
   end
 end
 
-# Parche para que el Interpreter verifique el wait con tiempo REAL
-class Interpreter
-  alias turbo_original_update update unless method_defined?(:turbo_original_update)
-  
-  def update
-    # Si hay un wait activo, verificar con tiempo REAL
-    if @wait_count && @wait_count > 0 && @wait_start_real
-      # Usar tiempo real para el wait
-      real_elapsed = System.unscaled_uptime - @wait_start_real
-      if real_elapsed < @wait_count
-        # Actualizar @wait_start para que el check original también funcione
-        # cuando el wait termine
-        return
-      else
-        @wait_count = 0
-        @wait_start = nil
-        @wait_start_real = nil
-      end
-    end
-    turbo_original_update
-  end
-end
-
-# También parchar Game_Character para que sus waits usen tiempo real
-class Game_Character
-  alias turbo_original_update_command update_command unless method_defined?(:turbo_original_update_command)
-  
-  def update_command
-    # Si hay un wait activo, verificar con tiempo real en lugar de tiempo escalado
-    if @wait_count && @wait_count > 0
-      # Inicializar wait_start_real si no existe
-      @wait_start_real ||= System.unscaled_uptime
-      
-      # Verificar con tiempo real
-      real_elapsed = System.unscaled_uptime - @wait_start_real
-      if real_elapsed < @wait_count
-        return  # El wait no ha terminado (en tiempo real)
-      end
-      
-      # El wait terminó - limpiar
-      @wait_count = 0
-      @wait_start = nil
-      @wait_start_real = nil
-    end
-    
-    # Llamar al método original con @wait_count en 0
-    # para que no vuelva a verificar el wait (ya lo hicimos)
-    turbo_original_update_command
-    
-    # Si el original estableció un nuevo wait, inicializar el tiempo real
-    if @wait_count && @wait_count > 0 && !@wait_start_real
-      @wait_start_real = System.unscaled_uptime
-    end
-  end
-end  
+# Nota: no se sobrescriben command_106 (Wait), Interpreter#update ni
+# Game_Character#update_command. La implementación original de Essentials usa
+# `System.uptime`, que aquí está escalado por el turbo, así que los Waits ya
+# se aceleran automáticamente con la velocidad. Forzarlos a tiempo real (como
+# hacían los parches anteriores) hacía que los Waits NO se acelerasen.
+#
+# Para los fades y otros elementos que necesitan tiempo real (no acelerable),
+# se usa explícitamente `System.unscaled_uptime` en sus implementaciones más
+# abajo (sección 9. Fix de Fades).
 
 class Window_AdvancedTextPokemon < SpriteWindow_Base
   def pbResetWaitCounter
@@ -335,25 +430,38 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
   end  
 end  
 
-# Variable global para rastrear la ventana de mensaje activa
-$CurrentMsgWindow = nil;
-def pbMessage(message, commands = nil, cmdIfCancel = 0, skin = nil, defaultCmd = 0, &block)
-  ret = 0
-  msgwindow = pbCreateMessageWindow(nil, skin)
-  $CurrentMsgWindow = msgwindow
+# Variable global para rastrear la ventana de mensaje activa.
+# Se aliasan pbCreateMessageWindow / pbDisposeMessageWindow (en lugar de
+# reescribir pbMessage entero) para no pisar a otros plugins, y se usa una
+# pila para soportar mensajes anidados sin que $CurrentMsgWindow quede a nil
+# antes de tiempo.
+$CurrentMsgWindow = nil
+$_TurboMsgWindowStack ||= []
 
-  if commands
-    ret = pbMessageDisplay(msgwindow, message, true,
-                           proc { |msgwndw|
-                             next Kernel.pbShowCommands(msgwndw, commands, cmdIfCancel, defaultCmd, &block)
-                           }, &block)
-  else
-    pbMessageDisplay(msgwindow, message, &block)
+class Object
+  unless private_method_defined?(:turbo_original_pbCreateMessageWindow)
+    alias_method :turbo_original_pbCreateMessageWindow, :pbCreateMessageWindow
+    private :turbo_original_pbCreateMessageWindow
   end
-  pbDisposeMessageWindow(msgwindow)
-  $CurrentMsgWindow = nil
-  Input.update
-  return ret
+
+  def pbCreateMessageWindow(*args)
+    window = turbo_original_pbCreateMessageWindow(*args)
+    $_TurboMsgWindowStack.push($CurrentMsgWindow)
+    $CurrentMsgWindow = window
+    window
+  end
+  private :pbCreateMessageWindow
+
+  unless private_method_defined?(:turbo_original_pbDisposeMessageWindow)
+    alias_method :turbo_original_pbDisposeMessageWindow, :pbDisposeMessageWindow
+    private :turbo_original_pbDisposeMessageWindow
+  end
+
+  def pbDisposeMessageWindow(*args)
+    turbo_original_pbDisposeMessageWindow(*args)
+    $CurrentMsgWindow = $_TurboMsgWindowStack.pop
+  end
+  private :pbDisposeMessageWindow
 end
 
 #===============================================================================
@@ -361,77 +469,80 @@ end
 #===============================================================================
 module Graphics
   class << self
-    alias _old_update_turbo update
-    
+    unless method_defined?(:_old_update_turbo)
+      alias _old_update_turbo update
+    end
+
     def update
       _old_update_turbo
       $buttonframes = TurboConfig::ICON_DURATION if !$buttonframes
-      
-      # Mostrar icono si el contador está activo
+
+      # Mostrar icono si el contador está activo.
       if $buttonframes < TurboConfig::ICON_DURATION
         if !@boton_turbo || @boton_turbo.disposed?
           @boton_turbo = Sprite.new
           @boton_turbo.z = 999999
           @boton_turbo.x = 8
           @boton_turbo.y = 8
-          set_turbo_bitmap
-        elsif @boton_turbo
-          set_turbo_bitmap
+          @last_turbo_speed = nil   # Forzar carga del bitmap.
         end
-        
+        set_turbo_bitmap
+
         $buttonframes += 1
         if $buttonframes >= TurboConfig::ICON_DURATION
+          # Limpieza completa al ocultar el icono (evita fuga de memoria).
+          @boton_turbo.bitmap.dispose if @boton_turbo.bitmap && !@boton_turbo.bitmap.disposed?
           @boton_turbo.dispose
+          @boton_turbo = nil
+          @last_turbo_speed = nil
         end
       end
     end
 
-    # Helper para cargar la imagen correcta
+    # Helper para cargar la imagen correcta. Dispone del bitmap previo si lo
+    # hubiera para evitar fugas de memoria al cambiar de velocidad.
     def set_turbo_bitmap
+      return if @last_turbo_speed == $GameSpeed
       bmp_name = "Graphics/Pictures/Turbo#{$GameSpeed}"
-      return if @last_turbo_speed == $GameSpeed && @boton_turbo.bitmap
-      
+      old_bmp = @boton_turbo.bitmap
       if defined?(pbResolveBitmap) && pbResolveBitmap(bmp_name)
         @boton_turbo.bitmap = Bitmap.new(bmp_name)
-      else
-        # Fallback
-        @boton_turbo.bitmap = Bitmap.new(32, 32) unless @boton_turbo.bitmap
+      elsif !@boton_turbo.bitmap
+        # Fallback solo la primera vez (placeholder transparente).
+        @boton_turbo.bitmap = Bitmap.new(32, 32)
       end
-      
+      old_bmp.dispose if old_bmp && old_bmp != @boton_turbo.bitmap && !old_bmp.disposed?
       @last_turbo_speed = $GameSpeed
     end
   end
 end
 
 #===============================================================================
-# 8. Fix de Colisiones
+# 8. Fix de Colisiones (defensa contra estados rotos)
 #===============================================================================
-
-# Asegura que al cambiar de mapa, el jugador vuelva a tener colisiones.
+# Si por alguna razón al cambiar de mapa el jugador queda con `through = true`
+# o `always_on_top = true` y NO viene de una transición legítima (cinemática,
+# evento), restaurarlo. Esto es una red de seguridad ante crashes/exceptions
+# que puedan dejar al jugador en estado inconsistente. Sólo actúa si el
+# jugador NO está dentro de un evento ni de una ruta forzada.
 EventHandlers.add(:on_enter_map, :fix_turbo_collision, proc { |_map_id|
-  # Solo forzamos la colisión si NO estamos presionando CTRL en modo Debug.
-  unless $DEBUG && Input.press?(Input::CTRL)
-    if $game_player
-      # Verificar si el jugador tiene through activado
-      if $game_player.through
-        player_x = $game_player.x
-        player_y = $game_player.y
-        
-        # Verificar si la posición actual será transitable después de desactivar through
-        unless $game_player.passable?(player_x, player_y, 0)
-          # Buscar la posición transitable más cercana
-          passable_x, passable_y = $game_player.find_nearest_passable_spot(player_x, player_y)
-          if passable_x && passable_y
-            $game_player.moveto(passable_x, passable_y)
-            $game_player.through = false
-          end
-        else
-          $game_player.through = false
-        end
+  next unless $game_player
+  next if pbMapInterpreterRunning?
+  next if $game_player.move_route_forcing
+  next if $DEBUG && Input.press?(Input::CTRL)
+
+  if $game_player.through
+    if $game_player.passable?($game_player.x, $game_player.y, 0)
+      $game_player.through = false
+    elsif $game_player.respond_to?(:find_nearest_passable_spot)
+      passable_x, passable_y = $game_player.find_nearest_passable_spot($game_player.x, $game_player.y)
+      if passable_x && passable_y
+        $game_player.moveto(passable_x, passable_y)
+        $game_player.through = false
       end
-      $game_player.always_on_top = false
     end
   end
+  $game_player.always_on_top = false if $game_player.always_on_top
 })
 
 #===============================================================================
@@ -448,10 +559,10 @@ def turbo_real_lerp(start_val, end_val, duration, timer_start_real)
   return start_val + (end_val - start_val) * (elapsed / duration)
 end
 
-# Reemplazar pbFadeOutIn para usar tiempo real
-alias turbo_original_pbFadeOutIn pbFadeOutIn
+# Reemplazar pbFadeOutIn para usar tiempo real (idempotente).
+alias turbo_original_pbFadeOutIn pbFadeOutIn unless defined?(turbo_original_pbFadeOutIn)
 def pbFadeOutIn(z = 99999, nofadeout = false)
-  duration = 0.4   # En segundos REALES
+  duration = TurboConfig::REAL_FADE_DURATION   # Segundos REALES
   col = Color.new(0, 0, 0, 0)
   viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
   viewport.z = z
@@ -484,10 +595,10 @@ def pbFadeOutIn(z = 99999, nofadeout = false)
   end
 end
 
-# Reemplazar pbFadeOutAndHide para usar tiempo real
-alias turbo_original_pbFadeOutAndHide pbFadeOutAndHide
+# Reemplazar pbFadeOutAndHide para usar tiempo real (idempotente).
+alias turbo_original_pbFadeOutAndHide pbFadeOutAndHide unless defined?(turbo_original_pbFadeOutAndHide)
 def pbFadeOutAndHide(sprites)
-  duration = 0.4   # En segundos REALES
+  duration = TurboConfig::REAL_FADE_DURATION   # Segundos REALES
   col = Color.new(0, 0, 0, 0)
   visiblesprites = {}
   pbDeactivateWindows(sprites) do
@@ -508,10 +619,10 @@ def pbFadeOutAndHide(sprites)
   return visiblesprites
 end
 
-# Reemplazar pbFadeInAndShow para usar tiempo real
-alias turbo_original_pbFadeInAndShow pbFadeInAndShow
+# Reemplazar pbFadeInAndShow para usar tiempo real (idempotente).
+alias turbo_original_pbFadeInAndShow pbFadeInAndShow unless defined?(turbo_original_pbFadeInAndShow)
 def pbFadeInAndShow(sprites, visiblesprites = nil)
-  duration = 0.4   # En segundos REALES
+  duration = TurboConfig::REAL_FADE_DURATION   # Segundos REALES
   col = Color.new(0, 0, 0, 0)
   if visiblesprites
     visiblesprites.each do |i|
@@ -531,10 +642,10 @@ def pbFadeInAndShow(sprites, visiblesprites = nil)
   end
 end
 
-# Reemplazar pbFadeOutInWithUpdate para usar tiempo real
-alias turbo_original_pbFadeOutInWithUpdate pbFadeOutInWithUpdate
+# Reemplazar pbFadeOutInWithUpdate para usar tiempo real (idempotente).
+alias turbo_original_pbFadeOutInWithUpdate pbFadeOutInWithUpdate unless defined?(turbo_original_pbFadeOutInWithUpdate)
 def pbFadeOutInWithUpdate(sprites, z = 99999, nofadeout = false)
-  duration = 0.4   # En segundos REALES
+  duration = TurboConfig::REAL_FADE_DURATION   # Segundos REALES
   col = Color.new(0, 0, 0, 0)
   viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
   viewport.z = z
