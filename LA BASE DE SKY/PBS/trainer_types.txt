@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [POKEMONTRAINER_Red]
 Name = Entrenador Pokémon
@@ -399,7 +399,7 @@ Gender = Male
 BaseMoney = 100
 BattleBGM = Battle Champion
 VictoryBGM = Battle victory leader
-#---------------------------------
+#-------------------------------
 [Doppelganger]
 Name = Doppelganger
 Gender = Male

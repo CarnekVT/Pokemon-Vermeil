@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [CAMPER,Liam]
 LoseText = ¡Qué gran combate!
@@ -9,17 +9,15 @@ Pokemon = BONSLY,11
 Items = FULLRESTORE,FULLRESTORE
 LoseText = ¡Muy bien hecho!
 Pokemon = GEODUDE,12
+    Form = 1
     Moves = DEFENSECURL,HEADSMASH,ROCKPOLISH,ROCKTHROW
     AbilityIndex = 0
-    Gender = male
-	Form = 1
     IV = 20,20,20,20,20,20
 Pokemon = ONIX,14
     Name = Rocky
     Moves = HEADSMASH,ROCKTHROW,RAGE,ROCKTOMB
     AbilityIndex = 0
     Item = SITRUSBERRY
-    Gender = male
     IV = 20,20,20,20,20,20
     Shiny = true
     Ball = HEAVYBALL
@@ -117,3 +115,8 @@ Pokemon = CHARIZARD,63
     Item = SITRUSBERRY
 Pokemon = BLASTOISE,63
     Item = SITRUSBERRY
+#-------------------------------
+[TEAMROCKET_F,Waosa]
+LoseText = ...
+Pokemon = GRENINJA,10
+    Moves = WATERSHURIKEN
