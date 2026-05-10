@@ -1,340 +1,575 @@
-#-------------------------------
 [Move,VOLTBURST]
 Name = PRAS Voltburst
 <User>
-    MoveTone = 20,3,+FF+FF+FF+00
-    MoveTone = 23,3,+00+00+00+00
-    MoveTone = 27,3,+C8+C8+C8+00
-    MoveTone = 30,3,+00+00+00+00
-    MoveTone = 34,3,+FF+FF+FF+00
-    MoveTone = 37,3,+00+00+00+00
-    MoveTone = 44,2,+FF+FF+FF+00
-    MoveOpacity = 46,2,0
-    SetVisible = 46,false
-    SetX = 42,-6
-    SetX = 43,12
-    SetX = 44,-8
-    SetTone = 0,+C8+C8+FF+32
+    MoveTone = 0,2,+255+255+0+00,Linear
+    MoveTone = 2,2,+00+255+255+00,Linear
+    MoveTone = 4,2,+255+255+0+00,Linear
+    MoveTone = 6,2,+00+255+255+00,Linear
+    MoveTone = 8,2,+255+255+0+00,Linear
+    MoveTone = 10,2,+00+00+00+00,Linear
+    MoveTone = 15,2,+255+255+0+00,Linear
 <Target>
-    SetX = 45,-15
-    SetX = 47,15
-    SetX = 49,-15
-    SetX = 51,15
-    SetX = 53,-10
-    SetX = 55,10
-    SetX = 57,0
+    MoveX = 20,2,24,EaseOut
+    MoveX = 22,3,0,EaseIn
 <SE>
-    Play = 20,Anim/PRSFX- Focus Punch1
-    Play = 30,Anim/PRSFX- Focus Punch2
-    Play = 44,Anim/PRSFX- Thunder1
-    Play = 45,Anim/PRSFX- Rock Wrecker1
+    Play = 2,PRSFX- Focus Punch1
+    Play = 10,PRSFX- Focus Punch2
+    Play = 20,PRSFX- Thunder1
+    Play = 21,PRSFX- Rock Wrecker1
 <Particle 1>
     Graphic = black_screen
     Focus = Background
     SetVisible = 0,true
     SetOpacity = 0,0
-    MoveOpacity = 0,4,160
-    SetVisible = 46,false
+    MoveOpacity = 0,4,160,Linear
+    SetVisible = 35,false
 <Particle 2>
-    Graphic = white_screen
-    Focus = Foreground
-    SetVisible = 0,true
-    SetOpacity = 0,0
-    MoveOpacity = 43,2,255
-    MoveOpacity = 65,10,0
-    SetVisible = 76,false
-<Particle 3>
     Graphic = terrain_electric_bg
     Focus = Background
     SetVisible = 0,false
     SetOpacity = 0,0
-    SetVisible = 44,true
-    SetOpacity = 44,255
-    MoveOpacity = 65,10,0
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveOpacity = 35,10,0,Linear
+
+<Particle 3>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,24
+    SetZoomY = 0,24
+    SetTone = 0,+255+255+150+00
+    SetY = 0,16
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveZoomX = 20,4,700,EaseOut
+    MoveZoomY = 20,4,700,EaseOut
+    MoveOpacity = 23,10,0,Linear
+
 <Particle 4>
-    Graphic = Energy2
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,179
+    SetTone = 0,+255+255+0+00
+    SetX = 5,197
+    SetY = 5,-124
+    SetVisible = 5,true
+    MoveOpacity = 5,2,255,Linear
+    MoveX = 5,15,0,Linear
+    MoveY = 5,15,16,Linear
+    SetVisible = 20,false
+<Particle 5>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,41
+    SetTone = 0,+255+255+0+00
+    SetX = 14,-209
+    SetY = 14,216
+    SetVisible = 14,true
+    MoveOpacity = 14,2,255,Linear
+    MoveX = 14,6,0,Linear
+    MoveY = 14,6,16,Linear
+    SetVisible = 20,false
+<Particle 6>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,117
+    SetTone = 0,+255+255+0+00
+    SetX = 15,-147
+    SetY = 15,-132
+    SetVisible = 15,true
+    MoveOpacity = 15,2,255,Linear
+    MoveX = 15,5,0,Linear
+    MoveY = 15,5,16,Linear
+    SetVisible = 20,false
+<Particle 7>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,177
+    SetTone = 0,+255+255+0+00
+    SetX = 10,-132
+    SetY = 10,116
+    SetVisible = 10,true
+    MoveOpacity = 10,2,255,Linear
+    MoveX = 10,10,0,Linear
+    MoveY = 10,10,16,Linear
+    SetVisible = 20,false
+<Particle 8>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,284
+    SetTone = 0,+255+255+0+00
+    SetX = 12,-184
+    SetY = 12,-183
+    SetVisible = 12,true
+    MoveOpacity = 12,2,255,Linear
+    MoveX = 12,8,0,Linear
+    MoveY = 12,8,16,Linear
+    SetVisible = 20,false
+<Particle 9>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,2
+    SetTone = 0,+255+255+0+00
+    SetX = 9,-176
+    SetY = 9,111
+    SetVisible = 9,true
+    MoveOpacity = 9,2,255,Linear
+    MoveX = 9,11,0,Linear
+    MoveY = 9,11,16,Linear
+    SetVisible = 20,false
+<Particle 10>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,13
+    SetTone = 0,+255+255+0+00
+    SetX = 13,-117
+    SetY = 13,129
+    SetVisible = 13,true
+    MoveOpacity = 13,2,255,Linear
+    MoveX = 13,7,0,Linear
+    MoveY = 13,7,16,Linear
+    SetVisible = 20,false
+<Particle 11>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,311
+    SetTone = 0,+255+255+0+00
+    SetX = 8,194
+    SetY = 8,112
+    SetVisible = 8,true
+    MoveOpacity = 8,2,255,Linear
+    MoveX = 8,12,0,Linear
+    MoveY = 8,12,16,Linear
+    SetVisible = 20,false
+<Particle 12>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,277
+    SetTone = 0,+255+255+0+00
+    SetX = 8,209
+    SetY = 8,-166
+    SetVisible = 8,true
+    MoveOpacity = 8,2,255,Linear
+    MoveX = 8,12,0,Linear
+    MoveY = 8,12,16,Linear
+    SetVisible = 20,false
+<Particle 13>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,153
+    SetTone = 0,+255+255+0+00
+    SetX = 12,203
+    SetY = 12,95
+    SetVisible = 12,true
+    MoveOpacity = 12,2,255,Linear
+    MoveX = 12,8,0,Linear
+    MoveY = 12,8,16,Linear
+    SetVisible = 20,false
+<Particle 14>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,298
+    SetTone = 0,+255+255+0+00
+    SetX = 14,-144
+    SetY = 14,-191
+    SetVisible = 14,true
+    MoveOpacity = 14,2,255,Linear
+    MoveX = 14,6,0,Linear
+    MoveY = 14,6,16,Linear
+    SetVisible = 20,false
+<Particle 15>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,27
+    SetTone = 0,+255+255+0+00
+    SetX = 9,-117
+    SetY = 9,163
+    SetVisible = 9,true
+    MoveOpacity = 9,2,255,Linear
+    MoveX = 9,11,0,Linear
+    MoveY = 9,11,16,Linear
+    SetVisible = 20,false
+<Particle 16>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,268
+    SetTone = 0,+255+255+0+00
+    SetX = 9,-110
+    SetY = 9,-136
+    SetVisible = 9,true
+    MoveOpacity = 9,2,255,Linear
+    MoveX = 9,11,0,Linear
+    MoveY = 9,11,16,Linear
+    SetVisible = 20,false
+<Particle 17>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,353
+    SetTone = 0,+255+255+0+00
+    SetX = 7,171
+    SetY = 7,196
+    SetVisible = 7,true
+    MoveOpacity = 7,2,255,Linear
+    MoveX = 7,13,0,Linear
+    MoveY = 7,13,16,Linear
+    SetVisible = 20,false
+
+[OppMove,VOLTBURST]
+Name = PRAS Voltburst
+<User>
+    MoveTone = 0,2,+255+255+0+00,Linear
+    MoveTone = 2,2,+00+255+255+00,Linear
+    MoveTone = 4,2,+255+255+0+00,Linear
+    MoveTone = 6,2,+00+255+255+00,Linear
+    MoveTone = 8,2,+255+255+0+00,Linear
+    MoveTone = 10,2,+00+00+00+00,Linear
+    MoveTone = 15,2,+255+255+0+00,Linear
+<Target>
+    MoveX = 20,2,-24,EaseOut
+    MoveX = 22,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Focus Punch1
+    Play = 10,PRSFX- Focus Punch2
+    Play = 20,PRSFX- Thunder1
+    Play = 21,PRSFX- Rock Wrecker1
+<Particle 1>
+    Graphic = black_screen
+    Focus = Background
+    SetVisible = 0,true
+    SetOpacity = 0,0
+    MoveOpacity = 0,4,160,Linear
+    SetVisible = 35,false
+<Particle 2>
+    Graphic = terrain_electric_bg
     Focus = Background
     SetVisible = 0,false
     SetOpacity = 0,0
-    SetVisible = 44,true
-    SetOpacity = 44,230
-    MoveX = 44,1,10
-    MoveX = 45,1,-20
-    MoveX = 46,1,14
-    MoveX = 47,1,-4
-    MoveOpacity = 65,10,0
-<Particle 5>
-    Graphic = Volt
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,24
-    SetZoomY = 0,24
-    SetY = 0,-16
-    SetVisible = 46,true
-    MoveOpacity = 46,1,255
-    MoveZoomX = 46,5,200
-    MoveZoomY = 46,5,200
-    MoveOpacity = 47,6,0
-    
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveOpacity = 35,10,0,Linear
 
-<Particle 6>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 14,-92
-    SetY = 14,-16
-    SetVisible = 14,true
-    MoveOpacity = 14,3,200
-    MoveX = 14,10,0
-    MoveY = 14,10,-16
-    MoveZoomX = 14,10,62
-    MoveZoomY = 14,10,62
-    MoveOpacity = 21,4,0
-    SetVisible = 26,false
-<Particle 7>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 17,92
-    SetY = 17,-16
-    SetVisible = 17,true
-    MoveOpacity = 17,3,200
-    MoveX = 17,10,0
-    MoveY = 17,10,-16
-    MoveZoomX = 17,10,62
-    MoveZoomY = 17,10,62
-    MoveOpacity = 24,4,0
-    SetVisible = 29,false
-<Particle 8>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 20,0
-    SetY = 20,-108
-    SetVisible = 20,true
-    MoveOpacity = 20,3,200
-    MoveX = 20,10,0
-    MoveY = 20,10,-16
-    MoveZoomX = 20,10,62
-    MoveZoomY = 20,10,62
-    MoveOpacity = 27,4,0
-    SetVisible = 32,false
-<Particle 9>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 23,0
-    SetY = 23,76
-    SetVisible = 23,true
-    MoveOpacity = 23,3,200
-    MoveX = 23,10,0
-    MoveY = 23,10,-16
-    MoveZoomX = 23,10,62
-    MoveZoomY = 23,10,62
-    MoveOpacity = 30,4,0
-    SetVisible = 35,false
-<Particle 10>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 26,-64
-    SetY = 26,-80
-    SetVisible = 26,true
-    MoveOpacity = 26,3,200
-    MoveX = 26,10,0
-    MoveY = 26,10,-16
-    MoveZoomX = 26,10,62
-    MoveZoomY = 26,10,62
-    MoveOpacity = 33,4,0
-    SetVisible = 38,false
-<Particle 11>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 29,64
-    SetY = 29,-80
-    SetVisible = 29,true
-    MoveOpacity = 29,3,200
-    MoveX = 29,10,0
-    MoveY = 29,10,-16
-    MoveZoomX = 29,10,62
-    MoveZoomY = 29,10,62
-    MoveOpacity = 36,4,0
-    SetVisible = 41,false
-<Particle 12>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 14,-74
-    SetY = 14,58
-    SetVisible = 14,true
-    MoveOpacity = 14,3,200
-    MoveX = 14,10,0
-    MoveY = 14,10,-16
-    MoveZoomX = 14,10,62
-    MoveZoomY = 14,10,62
-    MoveOpacity = 21,4,0
-    SetVisible = 26,false
-<Particle 13>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 17,74
-    SetY = 17,58
-    SetVisible = 17,true
-    MoveOpacity = 17,3,200
-    MoveX = 17,10,0
-    MoveY = 17,10,-16
-    MoveZoomX = 17,10,62
-    MoveZoomY = 17,10,62
-    MoveOpacity = 24,4,0
-    SetVisible = 29,false
-<Particle 14>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 20,-42
-    SetY = 20,-122
-    SetVisible = 20,true
-    MoveOpacity = 20,3,200
-    MoveX = 20,10,0
-    MoveY = 20,10,-16
-    MoveZoomX = 20,10,62
-    MoveZoomY = 20,10,62
-    MoveOpacity = 27,4,0
-    SetVisible = 32,false
-<Particle 15>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 23,42
-    SetY = 23,-122
-    SetVisible = 23,true
-    MoveOpacity = 23,3,200
-    MoveX = 23,10,0
-    MoveY = 23,10,-16
-    MoveZoomX = 23,10,62
-    MoveZoomY = 23,10,62
-    MoveOpacity = 30,4,0
-    SetVisible = 35,false
-<Particle 16>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 26,-106
-    SetY = 26,26
-    SetVisible = 26,true
-    MoveOpacity = 26,3,200
-    MoveX = 26,10,0
-    MoveY = 26,10,-16
-    MoveZoomX = 26,10,62
-    MoveZoomY = 26,10,62
-    MoveOpacity = 33,4,0
-    SetVisible = 38,false
-<Particle 17>
-    Graphic = Energy2
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 29,106
-    SetY = 29,26
-    SetVisible = 29,true
-    MoveOpacity = 29,3,200
-    MoveX = 29,10,0
-    MoveY = 29,10,-16
-    MoveZoomX = 29,10,62
-    MoveZoomY = 29,10,62
-    MoveOpacity = 36,4,0
-    SetVisible = 41,false
-<Particle 18>
-    Graphic = ballBurst_ring1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,12
-    SetZoomY = 0,12
-    SetY = 0,-16
-    SetVisible = 46,true
-    MoveOpacity = 46,1,255
-    MoveZoomX = 46,8,250
-    MoveZoomY = 46,8,250
-    MoveOpacity = 47,8,0
-    SetVisible = 56,false
-<Particle 19>
-    Graphic = ballBurst_ring1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,16
-    SetZoomY = 0,16
-    SetY = 0,-16
-    SetVisible = 47,true
-    MoveOpacity = 47,1,255
-    MoveZoomX = 47,8,340
-    MoveZoomY = 47,8,340
-    MoveOpacity = 48,8,0
-    SetVisible = 57,false
-<Particle 20>
-    Graphic = ballBurst_ring1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,20
-    SetZoomY = 0,20
-    SetY = 0,-16
-    SetVisible = 48,true
-    MoveOpacity = 48,1,255
-    MoveZoomX = 48,8,430
-    MoveZoomY = 48,8,430
-    MoveOpacity = 49,8,0
-    SetVisible = 58,false
-<Particle 21>
-    Graphic = ballBurst_ring1
+<Particle 3>
+    Graphic = spark
     Focus = User
     SetVisible = 0,false
     SetOpacity = 0,0
     SetZoomX = 0,24
     SetZoomY = 0,24
+    SetTone = 0,+255+255+150+00
     SetY = 0,-16
-    SetVisible = 49,true
-    MoveOpacity = 49,1,255
-    MoveZoomX = 49,8,520
-    MoveZoomY = 49,8,520
-    MoveOpacity = 50,8,0
-    SetVisible = 59,false
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveZoomX = 20,4,700,EaseOut
+    MoveZoomY = 20,4,700,EaseOut
+    MoveOpacity = 23,10,0,Linear
+
+<Particle 4>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,339
+    SetTone = 0,+255+255+0+00
+    SetX = 7,-218
+    SetY = 7,-199
+    SetVisible = 7,true
+    MoveOpacity = 7,2,255,Linear
+    MoveX = 7,13,0,Linear
+    MoveY = 7,13,-16,Linear
+    SetVisible = 20,false
+<Particle 5>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,168
+    SetTone = 0,+255+255+0+00
+    SetX = 7,-136
+    SetY = 7,-204
+    SetVisible = 7,true
+    MoveOpacity = 7,2,255,Linear
+    MoveX = 7,13,0,Linear
+    MoveY = 7,13,-16,Linear
+    SetVisible = 20,false
+<Particle 6>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,45
+    SetTone = 0,+255+255+0+00
+    SetX = 15,-98
+    SetY = 15,-129
+    SetVisible = 15,true
+    MoveOpacity = 15,2,255,Linear
+    MoveX = 15,5,0,Linear
+    MoveY = 15,5,-16,Linear
+    SetVisible = 20,false
+<Particle 7>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,166
+    SetTone = 0,+255+255+0+00
+    SetX = 15,-217
+    SetY = 15,129
+    SetVisible = 15,true
+    MoveOpacity = 15,2,255,Linear
+    MoveX = 15,5,0,Linear
+    MoveY = 15,5,-16,Linear
+    SetVisible = 20,false
+<Particle 8>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,220
+    SetTone = 0,+255+255+0+00
+    SetX = 8,-183
+    SetY = 8,-133
+    SetVisible = 8,true
+    MoveOpacity = 8,2,255,Linear
+    MoveX = 8,12,0,Linear
+    MoveY = 8,12,-16,Linear
+    SetVisible = 20,false
+<Particle 9>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,340
+    SetTone = 0,+255+255+0+00
+    SetX = 15,157
+    SetY = 15,108
+    SetVisible = 15,true
+    MoveOpacity = 15,2,255,Linear
+    MoveX = 15,5,0,Linear
+    MoveY = 15,5,-16,Linear
+    SetVisible = 20,false
+<Particle 10>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,39
+    SetTone = 0,+255+255+0+00
+    SetX = 9,-181
+    SetY = 9,138
+    SetVisible = 9,true
+    MoveOpacity = 9,2,255,Linear
+    MoveX = 9,11,0,Linear
+    MoveY = 9,11,-16,Linear
+    SetVisible = 20,false
+<Particle 11>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,273
+    SetTone = 0,+255+255+0+00
+    SetX = 13,187
+    SetY = 13,-198
+    SetVisible = 13,true
+    MoveOpacity = 13,2,255,Linear
+    MoveX = 13,7,0,Linear
+    MoveY = 13,7,-16,Linear
+    SetVisible = 20,false
+<Particle 12>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,4
+    SetTone = 0,+255+255+0+00
+    SetX = 4,168
+    SetY = 4,174
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,16,0,Linear
+    MoveY = 4,16,-16,Linear
+    SetVisible = 20,false
+<Particle 13>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,142
+    SetTone = 0,+255+255+0+00
+    SetX = 9,119
+    SetY = 9,-190
+    SetVisible = 9,true
+    MoveOpacity = 9,2,255,Linear
+    MoveX = 9,11,0,Linear
+    MoveY = 9,11,-16,Linear
+    SetVisible = 20,false
+<Particle 14>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,85
+    SetTone = 0,+255+255+0+00
+    SetX = 3,-118
+    SetY = 3,172
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,17,0,Linear
+    MoveY = 3,17,-16,Linear
+    SetVisible = 20,false
+<Particle 15>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,43
+    SetTone = 0,+255+255+0+00
+    SetX = 16,-210
+    SetY = 16,-126
+    SetVisible = 16,true
+    MoveOpacity = 16,2,255,Linear
+    MoveX = 16,4,0,Linear
+    MoveY = 16,4,-16,Linear
+    SetVisible = 20,false
+<Particle 16>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,60
+    SetTone = 0,+255+255+0+00
+    SetX = 3,-88
+    SetY = 3,216
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,17,0,Linear
+    MoveY = 3,17,-16,Linear
+    SetVisible = 20,false
+<Particle 17>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Estirar la chispa para que parezca un rayo errático
+    SetZoomX = 0,10
+    SetZoomY = 0,180
+    SetAngle = 0,71
+    SetTone = 0,+255+255+0+00
+    SetX = 15,115
+    SetY = 15,131
+    SetVisible = 15,true
+    MoveOpacity = 15,2,255,Linear
+    MoveX = 15,5,0,Linear
+    MoveY = 15,5,-16,Linear
+    SetVisible = 20,false

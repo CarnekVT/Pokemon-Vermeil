@@ -1,340 +1,605 @@
-#-------------------------------
 [Move,MISTYEXPLOSION]
 Name = PRAS Misty Explosion
 <User>
-    MoveTone = 20,3,+FF+FF+FF+00
-    MoveTone = 23,3,+00+00+00+00
-    MoveTone = 27,3,+C8+C8+C8+00
-    MoveTone = 30,3,+00+00+00+00
-    MoveTone = 34,3,+FF+FF+FF+00
-    MoveTone = 37,3,+00+00+00+00
-    MoveTone = 44,2,+FF+FF+FF+00
-    MoveOpacity = 46,2,0
-    SetVisible = 46,false
-    SetX = 42,-6
-    SetX = 43,12
-    SetX = 44,-8
-    
+    MoveTone = 0,2,+255+100+255+00,Linear
+    MoveTone = 2,2,+00+00+00+00,Linear
+    MoveTone = 8,2,+255+100+255+00,Linear
+    MoveTone = 10,2,+00+00+00+00,Linear
 <Target>
-    SetX = 45,-15
-    SetX = 47,15
-    SetX = 49,-15
-    SetX = 51,15
-    SetX = 53,-10
-    SetX = 55,10
-    SetX = 57,0
+    MoveX = 20,2,24,EaseOut
+    MoveX = 22,3,0,EaseIn
 <SE>
-    Play = 20,Anim/PRSFX- Focus Punch1
-    Play = 30,Anim/PRSFX- Focus Punch2
-    Play = 44,Anim/Explosion1
-    Play = 45,Anim/PRSFX- Rock Wrecker1
+    Play = 2,PRSFX- Focus Punch1
+    Play = 10,PRSFX- Focus Punch2
+    Play = 20,Explosion1
+    Play = 21,PRSFX- Rock Wrecker1
 <Particle 1>
     Graphic = black_screen
     Focus = Background
     SetVisible = 0,true
     SetOpacity = 0,0
-    MoveOpacity = 0,4,160
-    SetVisible = 46,false
+    MoveOpacity = 0,4,160,Linear
+    SetVisible = 35,false
 <Particle 2>
-    Graphic = white_screen
-    Focus = Foreground
-    SetVisible = 0,true
-    SetOpacity = 0,0
-    MoveOpacity = 43,2,255
-    MoveOpacity = 65,10,0
-    SetVisible = 76,false
-<Particle 3>
     Graphic = terrain_mist_bg
     Focus = Background
     SetVisible = 0,false
     SetOpacity = 0,0
-    SetVisible = 44,true
-    SetOpacity = 44,255
-    MoveOpacity = 65,10,0
-<Particle 4>
-    Graphic = terrain_mist
-    Focus = Background
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetVisible = 44,true
-    SetOpacity = 44,230
-    MoveX = 44,1,10
-    MoveX = 45,1,-20
-    MoveX = 46,1,14
-    MoveX = 47,1,-4
-    MoveOpacity = 65,10,0
-<Particle 5>
-    Graphic = Explosion1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,24
-    SetZoomY = 0,24
-    SetY = 0,-16
-    SetVisible = 46,true
-    MoveOpacity = 46,1,255
-    MoveZoomX = 46,5,250
-    MoveZoomY = 46,5,250
-    MoveOpacity = 47,6,0
-    SetTone = 46,+96+32+96+00
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveOpacity = 35,10,0,Linear
 
-<Particle 6>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 14,-92
-    SetY = 14,-16
-    SetVisible = 14,true
-    MoveOpacity = 14,3,200
-    MoveX = 14,10,0
-    MoveY = 14,10,-16
-    MoveZoomX = 14,10,62
-    MoveZoomY = 14,10,62
-    MoveOpacity = 21,4,0
-    SetVisible = 26,false
-<Particle 7>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 17,92
-    SetY = 17,-16
-    SetVisible = 17,true
-    MoveOpacity = 17,3,200
-    MoveX = 17,10,0
-    MoveY = 17,10,-16
-    MoveZoomX = 17,10,62
-    MoveZoomY = 17,10,62
-    MoveOpacity = 24,4,0
-    SetVisible = 29,false
-<Particle 8>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 20,0
-    SetY = 20,-108
-    SetVisible = 20,true
-    MoveOpacity = 20,3,200
-    MoveX = 20,10,0
-    MoveY = 20,10,-16
-    MoveZoomX = 20,10,62
-    MoveZoomY = 20,10,62
-    MoveOpacity = 27,4,0
-    SetVisible = 32,false
-<Particle 9>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 23,0
-    SetY = 23,76
-    SetVisible = 23,true
-    MoveOpacity = 23,3,200
-    MoveX = 23,10,0
-    MoveY = 23,10,-16
-    MoveZoomX = 23,10,62
-    MoveZoomY = 23,10,62
-    MoveOpacity = 30,4,0
-    SetVisible = 35,false
-<Particle 10>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 26,-64
-    SetY = 26,-80
-    SetVisible = 26,true
-    MoveOpacity = 26,3,200
-    MoveX = 26,10,0
-    MoveY = 26,10,-16
-    MoveZoomX = 26,10,62
-    MoveZoomY = 26,10,62
-    MoveOpacity = 33,4,0
-    SetVisible = 38,false
-<Particle 11>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 29,64
-    SetY = 29,-80
-    SetVisible = 29,true
-    MoveOpacity = 29,3,200
-    MoveX = 29,10,0
-    MoveY = 29,10,-16
-    MoveZoomX = 29,10,62
-    MoveZoomY = 29,10,62
-    MoveOpacity = 36,4,0
-    SetVisible = 41,false
-<Particle 12>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 14,-74
-    SetY = 14,58
-    SetVisible = 14,true
-    MoveOpacity = 14,3,200
-    MoveX = 14,10,0
-    MoveY = 14,10,-16
-    MoveZoomX = 14,10,62
-    MoveZoomY = 14,10,62
-    MoveOpacity = 21,4,0
-    SetVisible = 26,false
-<Particle 13>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 17,74
-    SetY = 17,58
-    SetVisible = 17,true
-    MoveOpacity = 17,3,200
-    MoveX = 17,10,0
-    MoveY = 17,10,-16
-    MoveZoomX = 17,10,62
-    MoveZoomY = 17,10,62
-    MoveOpacity = 24,4,0
-    SetVisible = 29,false
-<Particle 14>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 20,-42
-    SetY = 20,-122
-    SetVisible = 20,true
-    MoveOpacity = 20,3,200
-    MoveX = 20,10,0
-    MoveY = 20,10,-16
-    MoveZoomX = 20,10,62
-    MoveZoomY = 20,10,62
-    MoveOpacity = 27,4,0
-    SetVisible = 32,false
-<Particle 15>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 23,42
-    SetY = 23,-122
-    SetVisible = 23,true
-    MoveOpacity = 23,3,200
-    MoveX = 23,10,0
-    MoveY = 23,10,-16
-    MoveZoomX = 23,10,62
-    MoveZoomY = 23,10,62
-    MoveOpacity = 30,4,0
-    SetVisible = 35,false
-<Particle 16>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 26,-106
-    SetY = 26,26
-    SetVisible = 26,true
-    MoveOpacity = 26,3,200
-    MoveX = 26,10,0
-    MoveY = 26,10,-16
-    MoveZoomX = 26,10,62
-    MoveZoomY = 26,10,62
-    MoveOpacity = 33,4,0
-    SetVisible = 38,false
-<Particle 17>
-    Graphic = Energy1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,34
-    SetZoomY = 0,34
-    SetX = 29,106
-    SetY = 29,26
-    SetVisible = 29,true
-    MoveOpacity = 29,3,200
-    MoveX = 29,10,0
-    MoveY = 29,10,-16
-    MoveZoomX = 29,10,62
-    MoveZoomY = 29,10,62
-    MoveOpacity = 36,4,0
-    SetVisible = 41,false
-<Particle 18>
-    Graphic = ballBurst_ring1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,12
-    SetZoomY = 0,12
-    SetY = 0,-16
-    SetVisible = 46,true
-    MoveOpacity = 46,1,255
-    MoveZoomX = 46,8,250
-    MoveZoomY = 46,8,250
-    MoveOpacity = 47,8,0
-    SetVisible = 56,false
-<Particle 19>
-    Graphic = ballBurst_ring1
-    Focus = User
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,16
-    SetZoomY = 0,16
-    SetY = 0,-16
-    SetVisible = 47,true
-    MoveOpacity = 47,1,255
-    MoveZoomX = 47,8,340
-    MoveZoomY = 47,8,340
-    MoveOpacity = 48,8,0
-    SetVisible = 57,false
-<Particle 20>
-    Graphic = ballBurst_ring1
+<Particle 3>
+    Graphic = spark
     Focus = User
     SetVisible = 0,false
     SetOpacity = 0,0
     SetZoomX = 0,20
     SetZoomY = 0,20
-    SetY = 0,-16
-    SetVisible = 48,true
-    MoveOpacity = 48,1,255
-    MoveZoomX = 48,8,430
-    MoveZoomY = 48,8,430
-    MoveOpacity = 49,8,0
-    SetVisible = 58,false
-<Particle 21>
-    Graphic = ballBurst_ring1
+    SetTone = 0,+255+100+255+00
+    SetY = 0,16
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveZoomX = 20,6,900,EaseOut
+    MoveZoomY = 20,6,900,EaseOut
+    MoveOpacity = 24,12,0,Linear
+
+<Particle 4>
+    Graphic = spark
     Focus = User
     SetVisible = 0,false
     SetOpacity = 0,0
-    SetZoomX = 0,24
-    SetZoomY = 0,24
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,61
+    SetZoomY = 0,116
+    SetTone = 0,+255+140+255+00
+    SetX = 2,-152
+    SetY = 2,-136
+    SetVisible = 2,true
+    MoveOpacity = 2,3,255,Linear
+    MoveX = 2,18,0,Linear
+    MoveY = 2,18,16,Linear
+    SetVisible = 20,false
+<Particle 5>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,118
+    SetZoomY = 0,89
+    SetTone = 0,+255+74+255+00
+    SetX = 6,104
+    SetY = 6,-171
+    SetVisible = 6,true
+    MoveOpacity = 6,3,255,Linear
+    MoveX = 6,14,0,Linear
+    MoveY = 6,14,16,Linear
+    SetVisible = 20,false
+<Particle 6>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,119
+    SetZoomY = 0,115
+    SetTone = 0,+255+79+255+00
+    SetX = 4,176
+    SetY = 4,189
+    SetVisible = 4,true
+    MoveOpacity = 4,3,255,Linear
+    MoveX = 4,16,0,Linear
+    MoveY = 4,16,16,Linear
+    SetVisible = 20,false
+<Particle 7>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,121
+    SetZoomY = 0,122
+    SetTone = 0,+255+70+255+00
+    SetX = 16,-175
+    SetY = 16,135
+    SetVisible = 16,true
+    MoveOpacity = 16,3,255,Linear
+    MoveX = 16,4,0,Linear
+    MoveY = 16,4,16,Linear
+    SetVisible = 20,false
+<Particle 8>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,130
+    SetZoomY = 0,101
+    SetTone = 0,+255+65+255+00
+    SetX = 7,198
+    SetY = 7,128
+    SetVisible = 7,true
+    MoveOpacity = 7,3,255,Linear
+    MoveX = 7,13,0,Linear
+    MoveY = 7,13,16,Linear
+    SetVisible = 20,false
+<Particle 9>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,81
+    SetZoomY = 0,120
+    SetTone = 0,+255+109+255+00
+    SetX = 5,-238
+    SetY = 5,-111
+    SetVisible = 5,true
+    MoveOpacity = 5,3,255,Linear
+    MoveX = 5,15,0,Linear
+    MoveY = 5,15,16,Linear
+    SetVisible = 20,false
+<Particle 10>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,100
+    SetZoomY = 0,92
+    SetTone = 0,+255+121+255+00
+    SetX = 10,-172
+    SetY = 10,127
+    SetVisible = 10,true
+    MoveOpacity = 10,3,255,Linear
+    MoveX = 10,10,0,Linear
+    MoveY = 10,10,16,Linear
+    SetVisible = 20,false
+<Particle 11>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,125
+    SetZoomY = 0,60
+    SetTone = 0,+255+67+255+00
+    SetX = 12,116
+    SetY = 12,-231
+    SetVisible = 12,true
+    MoveOpacity = 12,3,255,Linear
+    MoveX = 12,8,0,Linear
+    MoveY = 12,8,16,Linear
+    SetVisible = 20,false
+<Particle 12>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,100
+    SetZoomY = 0,75
+    SetTone = 0,+255+89+255+00
+    SetX = 7,-178
+    SetY = 7,-105
+    SetVisible = 7,true
+    MoveOpacity = 7,3,255,Linear
+    MoveX = 7,13,0,Linear
+    MoveY = 7,13,16,Linear
+    SetVisible = 20,false
+<Particle 13>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,72
+    SetZoomY = 0,91
+    SetTone = 0,+255+53+255+00
+    SetX = 12,103
+    SetY = 12,-192
+    SetVisible = 12,true
+    MoveOpacity = 12,3,255,Linear
+    MoveX = 12,8,0,Linear
+    MoveY = 12,8,16,Linear
+    SetVisible = 20,false
+<Particle 14>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,65
+    SetZoomY = 0,85
+    SetTone = 0,+255+115+255+00
+    SetX = 14,154
+    SetY = 14,222
+    SetVisible = 14,true
+    MoveOpacity = 14,3,255,Linear
+    MoveX = 14,6,0,Linear
+    MoveY = 14,6,16,Linear
+    SetVisible = 20,false
+<Particle 15>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,63
+    SetZoomY = 0,61
+    SetTone = 0,+255+88+255+00
+    SetX = 15,117
+    SetY = 15,200
+    SetVisible = 15,true
+    MoveOpacity = 15,3,255,Linear
+    MoveX = 15,5,0,Linear
+    MoveY = 15,5,16,Linear
+    SetVisible = 20,false
+<Particle 16>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,61
+    SetZoomY = 0,118
+    SetTone = 0,+255+73+255+00
+    SetX = 2,-165
+    SetY = 2,-135
+    SetVisible = 2,true
+    MoveOpacity = 2,3,255,Linear
+    MoveX = 2,18,0,Linear
+    MoveY = 2,18,16,Linear
+    SetVisible = 20,false
+<Particle 17>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,133
+    SetZoomY = 0,126
+    SetTone = 0,+255+126+255+00
+    SetX = 1,206
+    SetY = 1,-157
+    SetVisible = 1,true
+    MoveOpacity = 1,3,255,Linear
+    MoveX = 1,19,0,Linear
+    MoveY = 1,19,16,Linear
+    SetVisible = 20,false
+<Particle 18>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,116
+    SetZoomY = 0,66
+    SetTone = 0,+255+143+255+00
+    SetX = 7,-134
+    SetY = 7,-125
+    SetVisible = 7,true
+    MoveOpacity = 7,3,255,Linear
+    MoveX = 7,13,0,Linear
+    MoveY = 7,13,16,Linear
+    SetVisible = 20,false
+<Particle 19>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,112
+    SetZoomY = 0,123
+    SetTone = 0,+255+55+255+00
+    SetX = 4,-105
+    SetY = 4,149
+    SetVisible = 4,true
+    MoveOpacity = 4,3,255,Linear
+    MoveX = 4,16,0,Linear
+    MoveY = 4,16,16,Linear
+    SetVisible = 20,false
+
+[OppMove,MISTYEXPLOSION]
+Name = PRAS Misty Explosion
+<User>
+    MoveTone = 0,2,+255+100+255+00,Linear
+    MoveTone = 2,2,+00+00+00+00,Linear
+    MoveTone = 8,2,+255+100+255+00,Linear
+    MoveTone = 10,2,+00+00+00+00,Linear
+<Target>
+    MoveX = 20,2,-24,EaseOut
+    MoveX = 22,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Focus Punch1
+    Play = 10,PRSFX- Focus Punch2
+    Play = 20,Explosion1
+    Play = 21,PRSFX- Rock Wrecker1
+<Particle 1>
+    Graphic = black_screen
+    Focus = Background
+    SetVisible = 0,true
+    SetOpacity = 0,0
+    MoveOpacity = 0,4,160,Linear
+    SetVisible = 35,false
+<Particle 2>
+    Graphic = terrain_mist_bg
+    Focus = Background
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveOpacity = 35,10,0,Linear
+
+<Particle 3>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,20
+    SetZoomY = 0,20
+    SetTone = 0,+255+100+255+00
     SetY = 0,-16
-    SetVisible = 49,true
-    MoveOpacity = 49,1,255
-    MoveZoomX = 49,8,520
-    MoveZoomY = 49,8,520
-    MoveOpacity = 50,8,0
-    SetVisible = 59,false
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveZoomX = 20,6,900,EaseOut
+    MoveZoomY = 20,6,900,EaseOut
+    MoveOpacity = 24,12,0,Linear
+
+<Particle 4>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,101
+    SetZoomY = 0,120
+    SetTone = 0,+255+129+255+00
+    SetX = 3,-183
+    SetY = 3,100
+    SetVisible = 3,true
+    MoveOpacity = 3,3,255,Linear
+    MoveX = 3,17,0,Linear
+    MoveY = 3,17,-16,Linear
+    SetVisible = 20,false
+<Particle 5>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,132
+    SetZoomY = 0,121
+    SetTone = 0,+255+57+255+00
+    SetX = 9,-215
+    SetY = 9,-221
+    SetVisible = 9,true
+    MoveOpacity = 9,3,255,Linear
+    MoveX = 9,11,0,Linear
+    MoveY = 9,11,-16,Linear
+    SetVisible = 20,false
+<Particle 6>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,73
+    SetZoomY = 0,90
+    SetTone = 0,+255+121+255+00
+    SetX = 8,155
+    SetY = 8,103
+    SetVisible = 8,true
+    MoveOpacity = 8,3,255,Linear
+    MoveX = 8,12,0,Linear
+    MoveY = 8,12,-16,Linear
+    SetVisible = 20,false
+<Particle 7>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,112
+    SetZoomY = 0,124
+    SetTone = 0,+255+118+255+00
+    SetX = 9,-146
+    SetY = 9,-107
+    SetVisible = 9,true
+    MoveOpacity = 9,3,255,Linear
+    MoveX = 9,11,0,Linear
+    MoveY = 9,11,-16,Linear
+    SetVisible = 20,false
+<Particle 8>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,131
+    SetZoomY = 0,108
+    SetTone = 0,+255+74+255+00
+    SetX = 10,224
+    SetY = 10,179
+    SetVisible = 10,true
+    MoveOpacity = 10,3,255,Linear
+    MoveX = 10,10,0,Linear
+    MoveY = 10,10,-16,Linear
+    SetVisible = 20,false
+<Particle 9>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,94
+    SetZoomY = 0,61
+    SetTone = 0,+255+75+255+00
+    SetX = 1,-205
+    SetY = 1,110
+    SetVisible = 1,true
+    MoveOpacity = 1,3,255,Linear
+    MoveX = 1,19,0,Linear
+    MoveY = 1,19,-16,Linear
+    SetVisible = 20,false
+<Particle 10>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,92
+    SetZoomY = 0,135
+    SetTone = 0,+255+130+255+00
+    SetX = 14,135
+    SetY = 14,-229
+    SetVisible = 14,true
+    MoveOpacity = 14,3,255,Linear
+    MoveX = 14,6,0,Linear
+    MoveY = 14,6,-16,Linear
+    SetVisible = 20,false
+<Particle 11>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,98
+    SetZoomY = 0,135
+    SetTone = 0,+255+54+255+00
+    SetX = 11,-127
+    SetY = 11,-187
+    SetVisible = 11,true
+    MoveOpacity = 11,3,255,Linear
+    MoveX = 11,9,0,Linear
+    MoveY = 11,9,-16,Linear
+    SetVisible = 20,false
+<Particle 12>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,69
+    SetZoomY = 0,107
+    SetTone = 0,+255+115+255+00
+    SetX = 6,-225
+    SetY = 6,-174
+    SetVisible = 6,true
+    MoveOpacity = 6,3,255,Linear
+    MoveX = 6,14,0,Linear
+    MoveY = 6,14,-16,Linear
+    SetVisible = 20,false
+<Particle 13>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,122
+    SetZoomY = 0,117
+    SetTone = 0,+255+50+255+00
+    SetX = 6,119
+    SetY = 6,109
+    SetVisible = 6,true
+    MoveOpacity = 6,3,255,Linear
+    MoveX = 6,14,0,Linear
+    MoveY = 6,14,-16,Linear
+    SetVisible = 20,false
+<Particle 14>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,104
+    SetZoomY = 0,112
+    SetTone = 0,+255+71+255+00
+    SetX = 2,-156
+    SetY = 2,218
+    SetVisible = 2,true
+    MoveOpacity = 2,3,255,Linear
+    MoveX = 2,18,0,Linear
+    MoveY = 2,18,-16,Linear
+    SetVisible = 20,false
+<Particle 15>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,87
+    SetZoomY = 0,102
+    SetTone = 0,+255+50+255+00
+    SetX = 2,-141
+    SetY = 2,-105
+    SetVisible = 2,true
+    MoveOpacity = 2,3,255,Linear
+    MoveX = 2,18,0,Linear
+    MoveY = 2,18,-16,Linear
+    SetVisible = 20,false
+<Particle 16>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,86
+    SetZoomY = 0,99
+    SetTone = 0,+255+114+255+00
+    SetX = 12,211
+    SetY = 12,101
+    SetVisible = 12,true
+    MoveOpacity = 12,3,255,Linear
+    MoveX = 12,8,0,Linear
+    MoveY = 12,8,-16,Linear
+    SetVisible = 20,false
+<Particle 17>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,118
+    SetZoomY = 0,90
+    SetTone = 0,+255+104+255+00
+    SetX = 2,208
+    SetY = 2,147
+    SetVisible = 2,true
+    MoveOpacity = 2,3,255,Linear
+    MoveX = 2,18,0,Linear
+    MoveY = 2,18,-16,Linear
+    SetVisible = 20,false
+<Particle 18>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,125
+    SetZoomY = 0,128
+    SetTone = 0,+255+58+255+00
+    SetX = 5,163
+    SetY = 5,-144
+    SetVisible = 5,true
+    MoveOpacity = 5,3,255,Linear
+    MoveX = 5,15,0,Linear
+    MoveY = 5,15,-16,Linear
+    SetVisible = 20,false
+<Particle 19>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    # Escalar masivamente la chispa para que la bruma sea muy visible
+    SetZoomX = 0,105
+    SetZoomY = 0,125
+    SetTone = 0,+255+89+255+00
+    SetX = 5,-239
+    SetY = 5,142
+    SetVisible = 5,true
+    MoveOpacity = 5,3,255,Linear
+    MoveX = 5,15,0,Linear
+    MoveY = 5,15,-16,Linear
+    SetVisible = 20,false

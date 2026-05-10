@@ -1,13 +1,13 @@
 [Move,SPIKES]
 Name = PRAS Spikes
 <User>
-    MoveX = 0,5,10
-    MoveY = 0,5,-8
-    MoveX = 5,5,-10
-    MoveY = 5,5,8
+    MoveX = 0,3,-10,EaseOut
+    MoveY = 0,3,4,EaseOut
+    MoveX = 3,3,0,EaseIn
+    MoveY = 3,3,0,EaseIn
 <SE>
-    Play = 2,Anim/PRSFX- Low Kick,80,100
-    Play = 26,Anim/PRSFX- Spikes2,88,98
+    Play = 2,PRSFX- Low Kick,80,100
+    Play = 12,PRSFX- Spikes2,88,98
 <Particle 1>
     Graphic = spikes
     Focus = Target
@@ -15,18 +15,18 @@ Name = PRAS Spikes
     SetOpacity = 0,0
     SetZoomX = 0,74
     SetZoomY = 0,74
-    SetVisible = 4,true
-    MoveOpacity = 4,2,255
-    SetX = 4,0
-    SetY = 4,-56
-    MoveX = 4,8,-23
-    MoveY = 4,8,-76
-    MoveX = 12,9,-52
-    MoveY = 12,9,8
-    MoveAngle = 4,17,500
-    MoveY = 21,2,2
-    MoveY = 23,3,14
-    MoveOpacity = 26,6,0
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,-52,Linear
+    MoveY = 2,5,-40,EaseOut
+    MoveY = 7,5,32,EaseIn
+    MoveAngle = 2,10,500,Linear
+    # Rebote
+    MoveY = 12,3,17,EaseOut
+    MoveY = 15,3,32,EaseIn
+    MoveOpacity = 24,6,0,Linear
 <Particle 2>
     Graphic = spikes
     Focus = Target
@@ -34,18 +34,18 @@ Name = PRAS Spikes
     SetOpacity = 0,0
     SetZoomX = 0,74
     SetZoomY = 0,74
-    SetVisible = 6,true
-    MoveOpacity = 6,2,255
-    SetX = 6,0
-    SetY = 6,-56
-    MoveX = 6,8,-13
-    MoveY = 6,8,-76
-    MoveX = 14,9,-30
-    MoveY = 14,9,4
-    MoveAngle = 6,17,528
-    MoveY = 23,2,-2
-    MoveY = 25,3,10
-    MoveOpacity = 28,6,0
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,-30,Linear
+    MoveY = 3,5,-40,EaseOut
+    MoveY = 8,5,36,EaseIn
+    MoveAngle = 3,10,528,Linear
+    # Rebote
+    MoveY = 13,3,21,EaseOut
+    MoveY = 16,3,36,EaseIn
+    MoveOpacity = 25,6,0,Linear
 <Particle 3>
     Graphic = spikes
     Focus = Target
@@ -53,18 +53,18 @@ Name = PRAS Spikes
     SetOpacity = 0,0
     SetZoomX = 0,74
     SetZoomY = 0,74
-    SetVisible = 8,true
-    MoveOpacity = 8,2,255
-    SetX = 8,0
-    SetY = 8,-56
-    MoveX = 8,8,-3
-    MoveY = 8,8,-76
-    MoveX = 16,9,-8
-    MoveY = 16,9,10
-    MoveAngle = 8,17,556
-    MoveY = 25,2,4
-    MoveY = 27,3,16
-    MoveOpacity = 30,6,0
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,-8,Linear
+    MoveY = 4,5,-40,EaseOut
+    MoveY = 9,5,30,EaseIn
+    MoveAngle = 4,10,556,Linear
+    # Rebote
+    MoveY = 14,3,15,EaseOut
+    MoveY = 17,3,30,EaseIn
+    MoveOpacity = 26,6,0,Linear
 <Particle 4>
     Graphic = spikes
     Focus = Target
@@ -72,18 +72,18 @@ Name = PRAS Spikes
     SetOpacity = 0,0
     SetZoomX = 0,74
     SetZoomY = 0,74
-    SetVisible = 10,true
-    MoveOpacity = 10,2,255
-    SetX = 10,0
-    SetY = 10,-56
-    MoveX = 10,8,7
-    MoveY = 10,8,-76
-    MoveX = 18,9,16
-    MoveY = 18,9,5
-    MoveAngle = 10,17,584
-    MoveY = 27,2,-1
-    MoveY = 29,3,11
-    MoveOpacity = 32,6,0
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,16,Linear
+    MoveY = 2,5,-40,EaseOut
+    MoveY = 7,5,35,EaseIn
+    MoveAngle = 2,10,584,Linear
+    # Rebote
+    MoveY = 12,3,20,EaseOut
+    MoveY = 15,3,35,EaseIn
+    MoveOpacity = 24,6,0,Linear
 <Particle 5>
     Graphic = spikes
     Focus = Target
@@ -91,15 +91,121 @@ Name = PRAS Spikes
     SetOpacity = 0,0
     SetZoomX = 0,74
     SetZoomY = 0,74
-    SetVisible = 12,true
-    MoveOpacity = 12,2,255
-    SetX = 12,0
-    SetY = 12,-56
-    MoveX = 12,8,17
-    MoveY = 12,8,-76
-    MoveX = 20,9,38
-    MoveY = 20,9,9
-    MoveAngle = 12,17,612
-    MoveY = 29,2,3
-    MoveY = 31,3,15
-    MoveOpacity = 34,6,0
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,38,Linear
+    MoveY = 3,5,-40,EaseOut
+    MoveY = 8,5,31,EaseIn
+    MoveAngle = 3,10,612,Linear
+    # Rebote
+    MoveY = 13,3,16,EaseOut
+    MoveY = 16,3,31,EaseIn
+    MoveOpacity = 25,6,0,Linear
+
+[OppMove,SPIKES]
+Name = PRAS Spikes
+<User>
+    MoveX = 0,3,10,EaseOut
+    MoveY = 0,3,-4,EaseOut
+    MoveX = 3,3,0,EaseIn
+    MoveY = 3,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Low Kick,80,100
+    Play = 12,PRSFX- Spikes2,88,98
+<Particle 1>
+    Graphic = spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,74
+    SetZoomY = 0,74
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,52,Linear
+    MoveY = 2,5,-160,EaseOut
+    MoveY = 7,5,48,EaseIn
+    MoveAngle = 2,10,-500,Linear
+    # Rebote
+    MoveY = 12,3,33,EaseOut
+    MoveY = 15,3,48,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 2>
+    Graphic = spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,74
+    SetZoomY = 0,74
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,30,Linear
+    MoveY = 3,5,-160,EaseOut
+    MoveY = 8,5,44,EaseIn
+    MoveAngle = 3,10,-528,Linear
+    # Rebote
+    MoveY = 13,3,29,EaseOut
+    MoveY = 16,3,44,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 3>
+    Graphic = spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,74
+    SetZoomY = 0,74
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,8,Linear
+    MoveY = 4,5,-160,EaseOut
+    MoveY = 9,5,50,EaseIn
+    MoveAngle = 4,10,-556,Linear
+    # Rebote
+    MoveY = 14,3,35,EaseOut
+    MoveY = 17,3,50,EaseIn
+    MoveOpacity = 26,6,0,Linear
+<Particle 4>
+    Graphic = spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,74
+    SetZoomY = 0,74
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,-16,Linear
+    MoveY = 2,5,-160,EaseOut
+    MoveY = 7,5,45,EaseIn
+    MoveAngle = 2,10,-584,Linear
+    # Rebote
+    MoveY = 12,3,30,EaseOut
+    MoveY = 15,3,45,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 5>
+    Graphic = spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,74
+    SetZoomY = 0,74
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,-38,Linear
+    MoveY = 3,5,-160,EaseOut
+    MoveY = 8,5,49,EaseIn
+    MoveAngle = 3,10,-612,Linear
+    # Rebote
+    MoveY = 13,3,34,EaseOut
+    MoveY = 16,3,49,EaseIn
+    MoveOpacity = 25,6,0,Linear
