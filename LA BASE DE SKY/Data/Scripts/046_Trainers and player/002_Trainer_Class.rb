@@ -233,6 +233,13 @@ class Trainer
     all ? pokemon_party.find_all { |p| p&.hasType?(type) } : pokemon_party.find { |p| p&.hasType?(type) }
   end
 
+  def find_pokemon_of_species(species)
+    return false unless GameData::Species.exists?(species)
+
+    species = GameData::Species.get(species).id
+    pokemon_party.find { |p| p&.isSpecies?(species) && !p.egg? }
+  end
+
   def has_pokemon_with_ability?(ability)
     return false unless GameData::Ability.exists?(ability)
     return pokemon_party.any? { |pkmn| pkmn&.hasAbility?(ability) }
