@@ -1028,7 +1028,7 @@ class Battle::Move::RaiseTargetAtk2LowerTargetDef2 < Battle::Move
 
   def pbMoveFailed?(user, targets)
     failed = true
-    targets.each do |b|
+    targets.each do |target|
       (@statUp.length / 2).times do |i|
         next if !target.pbCanRaiseStatStage?(@statUp[i * 2], user, self)
         failed = false
@@ -2318,25 +2318,6 @@ class Battle::Move::StartSwapAllBattlersBaseDefensiveStats < Battle::Move
   end
 end
 
-#===============================================================================
-# Last Respects
-#===============================================================================
-# Power is increased by 50 for each time a teammate fainted this battle.
-#-------------------------------------------------------------------------------
-class Battle::Move::IncreasePowerEachFaintedAlly < Battle::Move
-  def pbBaseDamage(baseDmg, user, target)
-    numFainted = user.num_fainted_allies
-    return baseDmg if numFainted <= 0
-    baseDmg += 50 * numFainted
-    return baseDmg
-  end
-end
-
-#===============================================================================
-# Make it Rain
-#===============================================================================
-# Lowers the user's Sp.Atk by 1 stage. Also scatters coins to be picked up.
-#-------------------------------------------------------------------------------
 #===============================================================================
 # Make it Rain
 #===============================================================================
