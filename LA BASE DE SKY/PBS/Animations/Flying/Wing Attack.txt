@@ -1,0 +1,88 @@
+﻿# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+[Move,WINGATTACK]
+Name = DB Animation
+NoUser = true
+Credit = Dawn Bronze
+<Target>
+    MoveX = 3,1,5
+    MoveX = 4,2,-5
+    MoveX = 6,2,5
+    MoveX = 8,2,-5
+    MoveX = 10,2,5
+    MoveX = 12,2,-5
+    MoveX = 14,2,5
+    MoveX = 16,1,0
+<Hit>
+    Graphic = hit
+    Focus = TargetPosition
+    SetY = 0,10
+    SetOpacity = 0,0
+    SetColor = 0,FFD0007C
+    MoveOpacity = 0,3,255
+    MoveY = 0,7,-110
+    MoveOpacity = 6,4,0
+<Hit afterimage>
+    Graphic = hit
+    Focus = TargetPosition
+    SetOpacity = 0,0
+    SetColor = 0,FFD0987C
+    SetY = 2,-24
+    MoveOpacity = 2,1,170
+    MoveY = 4,7,-110
+    MoveOpacity = 5,7,0
+<Feather Emiter Major>
+    Graphic = feather
+    Focus = TargetPosition
+    Emitter = Projectile
+    EmitterRate = 23
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZ = 4,10
+    SetZoomX = 4,90
+    SetZoomY = 4,90
+    SetAngle = 4,-40
+    SetOpacity = 4,0
+    SetColor = 4,ECD00084
+    SetEmitting = 4,true
+    SetEmitXRange = 4,45
+    SetEmitY = 4,-101
+    SetEmitYRange = 4,20
+    SetEmitSpeed = 4,225
+    SetEmitAngle = 4,90
+    SetEmitAngleRange = 4,15
+    SetEmitGravity = 4,650
+    SetEmitGravityRange = 4,100
+    MoveOpacity = 4,2,255
+    MoveAngle = 4,14,15
+    MoveZoomY = 4,15,85
+    SetEmitting = 7,false
+    MoveOpacity = 15,5,0
+<Feather Emiter Minor>
+    Graphic = feather
+    Focus = TargetPosition
+    Emitter = Projectile
+    EmitterRate = 10
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZ = 4,10
+    SetZoomX = 4,70
+    SetZoomY = 4,70
+    SetAngle = 4,-40
+    SetOpacity = 4,0
+    SetColor = 4,ECD00084
+    SetEmitting = 4,true
+    SetEmitXRange = 4,45
+    SetEmitY = 4,-52
+    SetEmitYRange = 4,20
+    SetEmitSpeed = 4,225
+    SetEmitAngle = 4,90
+    SetEmitAngleRange = 4,15
+    SetEmitGravity = 4,575
+    MoveOpacity = 4,2,255
+    MoveAngle = 4,14,15
+    MoveZoomY = 4,15,65
+    SetEmitting = 7,false
+    MoveOpacity = 15,5,0
+<SE>
+    Play = 1,Flying/Wing Attack

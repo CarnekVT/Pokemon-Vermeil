@@ -1,5 +1,8 @@
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
+#-------------------------------
 [Move,STICKYWEB]
 Name = PRAS Sticky Web
+Credit = Anon
 <User>
     MoveX = 0,3,-10,EaseOut
     MoveY = 0,3,4,EaseOut
@@ -11,102 +14,97 @@ Name = PRAS Sticky Web
 <Particle 1>
     Graphic = spark
     Focus = Target
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,30
-    SetZoomY = 0,30
-    # Tono verde-amarillento para la bola
-    SetTone = 0,+80+C8-80+00
     SetX = 0,-160
     SetY = 0,80
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetTone = 0,+80+C8-80+00
     SetVisible = 2,true
     SetOpacity = 2,255
-    MoveX = 2,10,-70,Linear
     MoveY = 2,5,-40,EaseOut
+    MoveX = 2,10,-70
     MoveY = 7,5,40,EaseIn
     SetVisible = 12,false
 <Particle 2>
     Graphic = sticky_web
     Focus = Target
-    SetVisible = 0,false
-    SetTone = 0,+C8+C8+C8+14
     SetX = 0,-70
     SetY = 0,40
-    SetVisible = 12,true
     SetZoomX = 0,40
     SetZoomY = 0,40
+    SetVisible = 0,false
+    SetTone = 0,+00+48-FF+FF
+    SetVisible = 12,true
     MoveZoomX = 12,4,100,EaseOut
     MoveZoomY = 12,4,100,EaseOut
-    # Desaparición mucho más rápida
-    MoveOpacity = 18,5,0,Linear
+    MoveOpacity = 18,5,0
     SetVisible = 23,false
 <Particle 3>
     Graphic = spark
     Focus = Target
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,30
-    SetZoomY = 0,30
-    # Tono verde-amarillento para la bola
-    SetTone = 0,+80+C8-80+00
     SetX = 0,-160
     SetY = 0,80
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetTone = 0,+80+C8-80+00
     SetVisible = 5,true
     SetOpacity = 5,255
-    MoveX = 5,10,0,Linear
     MoveY = 5,5,-40,EaseOut
+    MoveX = 5,10,0
     MoveY = 10,5,40,EaseIn
     SetVisible = 15,false
 <Particle 4>
     Graphic = sticky_web
     Focus = Target
-    SetVisible = 0,false
-    SetTone = 0,+C8+C8+C8+14
-    SetX = 0,0
     SetY = 0,40
-    SetVisible = 15,true
     SetZoomX = 0,40
     SetZoomY = 0,40
+    SetVisible = 0,false
+    SetTone = 0,+00+48-80+FF
+    SetVisible = 15,true
     MoveZoomX = 15,4,100,EaseOut
     MoveZoomY = 15,4,100,EaseOut
-    # Desaparición mucho más rápida
-    MoveOpacity = 21,5,0,Linear
+    MoveOpacity = 21,5,0
     SetVisible = 26,false
 <Particle 5>
     Graphic = spark
     Focus = Target
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,30
-    SetZoomY = 0,30
-    # Tono verde-amarillento para la bola
-    SetTone = 0,+80+C8-80+00
     SetX = 0,-160
     SetY = 0,80
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetTone = 0,+80+C8-80+00
     SetVisible = 8,true
     SetOpacity = 8,255
-    MoveX = 8,10,70,Linear
     MoveY = 8,5,-40,EaseOut
+    MoveX = 8,10,70
     MoveY = 13,5,40,EaseIn
     SetVisible = 18,false
 <Particle 6>
     Graphic = sticky_web
     Focus = Target
-    SetVisible = 0,false
-    SetTone = 0,+C8+C8+C8+14
     SetX = 0,70
     SetY = 0,40
-    SetVisible = 18,true
     SetZoomX = 0,40
     SetZoomY = 0,40
+    SetVisible = 0,false
+    SetTone = 0,+00+48-80+FF
+    SetVisible = 18,true
     MoveZoomX = 18,4,100,EaseOut
     MoveZoomY = 18,4,100,EaseOut
-    # Desaparición mucho más rápida
-    MoveOpacity = 24,5,0,Linear
+    MoveOpacity = 24,5,0
     SetVisible = 29,false
-
+<Target>
+#-------------------------------
 [OppMove,STICKYWEB]
 Name = PRAS Sticky Web
+Credit = Anon
 <User>
     MoveX = 0,3,10,EaseOut
     MoveY = 0,3,-4,EaseOut
@@ -118,96 +116,90 @@ Name = PRAS Sticky Web
 <Particle 1>
     Graphic = spark
     Focus = Target
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,30
-    SetZoomY = 0,30
-    # Tono verde-amarillento para la bola
-    SetTone = 0,+80+C8-80+00
     SetX = 0,160
     SetY = 0,-80
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetTone = 0,+80+C8-80+00
     SetVisible = 2,true
     SetOpacity = 2,255
-    MoveX = 2,10,70,Linear
     MoveY = 2,5,-160,EaseOut
+    MoveX = 2,10,70
     MoveY = 7,5,40,EaseIn
     SetVisible = 12,false
 <Particle 2>
     Graphic = sticky_web
     Focus = Target
-    SetVisible = 0,false
-    SetTone = 0,+C8+C8+C8+14
     SetX = 0,70
     SetY = 0,40
-    SetVisible = 12,true
     SetZoomX = 0,40
     SetZoomY = 0,40
+    SetVisible = 0,false
+    SetTone = 0,+00+48-80+FF
+    SetVisible = 12,true
     MoveZoomX = 12,4,100,EaseOut
     MoveZoomY = 12,4,100,EaseOut
-    # Desaparición mucho más rápida
-    MoveOpacity = 18,5,0,Linear
+    MoveOpacity = 18,5,0
     SetVisible = 23,false
 <Particle 3>
     Graphic = spark
     Focus = Target
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,30
-    SetZoomY = 0,30
-    # Tono verde-amarillento para la bola
-    SetTone = 0,+80+C8-80+00
     SetX = 0,160
     SetY = 0,-80
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetTone = 0,+80+C8-80+00
     SetVisible = 5,true
     SetOpacity = 5,255
-    MoveX = 5,10,0,Linear
     MoveY = 5,5,-160,EaseOut
+    MoveX = 5,10,0
     MoveY = 10,5,40,EaseIn
     SetVisible = 15,false
 <Particle 4>
     Graphic = sticky_web
     Focus = Target
-    SetVisible = 0,false
-    SetTone = 0,+C8+C8+C8+14
-    SetX = 0,0
     SetY = 0,40
-    SetVisible = 15,true
     SetZoomX = 0,40
     SetZoomY = 0,40
+    SetVisible = 0,false
+    SetTone = 0,+00+4E-80+FF
+    SetVisible = 15,true
     MoveZoomX = 15,4,100,EaseOut
     MoveZoomY = 15,4,100,EaseOut
-    # Desaparición mucho más rápida
-    MoveOpacity = 21,5,0,Linear
+    MoveOpacity = 21,5,0
     SetVisible = 26,false
 <Particle 5>
     Graphic = spark
     Focus = Target
-    SetVisible = 0,false
-    SetOpacity = 0,0
-    SetZoomX = 0,30
-    SetZoomY = 0,30
-    # Tono verde-amarillento para la bola
-    SetTone = 0,+80+C8-80+00
     SetX = 0,160
     SetY = 0,-80
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetTone = 0,+80+C8-80+00
     SetVisible = 8,true
     SetOpacity = 8,255
-    MoveX = 8,10,-70,Linear
     MoveY = 8,5,-160,EaseOut
+    MoveX = 8,10,-70
     MoveY = 13,5,40,EaseIn
     SetVisible = 18,false
 <Particle 6>
     Graphic = sticky_web
     Focus = Target
-    SetVisible = 0,false
-    SetTone = 0,+C8+C8+C8+14
     SetX = 0,-70
     SetY = 0,40
-    SetVisible = 18,true
     SetZoomX = 0,40
     SetZoomY = 0,40
+    SetVisible = 0,false
+    SetTone = 0,+00+48-80+FF
+    SetVisible = 18,true
     MoveZoomX = 18,4,100,EaseOut
     MoveZoomY = 18,4,100,EaseOut
-    # Desaparición mucho más rápida
-    MoveOpacity = 24,5,0,Linear
+    MoveOpacity = 24,5,0
     SetVisible = 29,false
+<Target>
