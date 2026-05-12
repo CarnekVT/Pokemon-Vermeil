@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [Move,BULKUP]
 Name = Essentials
@@ -17,4 +17,6 @@ Credit = Maruno
     MoveZoomX = 24,3,100
     MoveZoomY = 24,3,100
 <SE>
-    Play = 0,Fighting/Bulk Up
+    Play = 0,PRSFX- Bulk Up1
+    Play = 7,PRSFX- Bulk Up1,,146
+    Play = 15,PRSFX- Bulk Up1,,51

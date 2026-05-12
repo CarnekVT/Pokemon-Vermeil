@@ -1,0 +1,226 @@
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
+#-------------------------------
+[Move,STALKCUTTER]
+Name = PRAS Stalk Cutter
+Credit = Anon
+<User>
+    MoveX = 0,8,-16,EaseOut
+    MoveX = 8,3,48,EaseIn
+    MoveX = 11,10,0,EaseOut
+<Target>
+    MoveX = 0,11,-1
+    MoveX = 11,2,12,EaseOut
+    MoveColor = 11,2,FFFFFFFF
+    MoveX = 13,3,-24,EaseBoth
+    MoveColor = 13,6,+00+00+00+00
+    MoveX = 16,3,12,EaseBoth
+    MoveX = 19,2,0
+<SE>
+    Play = 2,PRSFX- Work Up,,101
+    Play = 11,PRSFX- Slash
+<Slash Effect>
+    Graphic = strobe 1
+    Focus = Target
+    SetX = 0,-64
+    SetY = 0,64
+    SetZ = 0,760
+    SetZoomX = 0,300
+    SetZoomY = 0,30
+    SetAngle = 0,30
+    SetVisible = 0,false
+    SetColor = 0,00FF00D0
+    SetVisible = 11,true
+    MoveX = 11,3,64,EaseOut
+    MoveY = 11,3,-64,EaseOut
+    MoveOpacity = 12,6,0
+    SetVisible = 18,false
+<Kinetic Ground Blur>
+    Graphic = black_screen
+    Focus = Background
+    SetY = 0,-120
+    SetZ = 0,710
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetColor = 0,00FF0080
+    SetOpacity = 2,160
+    MoveZoomX = 2,6,200
+    MoveOpacity = 8,3,0
+<Kinetic Slash Debris>
+    Graphic = stealth_rock
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 60
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZ = 0,715
+    SetZoomX = 0,40
+    SetZoomY = 0,40
+    SetEmitSpeed = 0,500
+    SetEmitSpeedRange = 0,150
+    SetEmitAngle = 0,90
+    SetEmitAngleRange = 0,60
+    SetEmitGravity = 0,600
+    SetEmitting = 2,true
+    MoveOpacity = 2,8,0
+    SetEmitting = 8,false
+<Kinetic Slash Dust>
+    Graphic = smog 2
+    Focus = User
+    Emitter = Straight
+    EmitterRate = 30
+    SetZ = 0,714
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetColor = 0,A0A0A0A0
+    SetEmitSpeed = 0,180
+    SetEmitAngle = 0,180
+    SetEmitAngleRange = 0,20
+    SetEmitting = 2,true
+    MoveOpacity = 2,8,0
+    SetEmitting = 8,false
+<Slash Impact Spark>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,765
+    SetZoomX = 0,50
+    SetZoomY = 0,50
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetTone = 0,+FF+FF+FF+00
+    SetVisible = 11,true
+    MoveOpacity = 11,2,255
+    MoveZoomX = 11,3,150,EaseOut
+    MoveZoomY = 11,3,150,EaseOut
+    MoveOpacity = 13,6,0
+    SetVisible = 19,false
+<Leaves Emitter>
+    Graphic = leaf
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 40
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZ = 0,765
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetColor = 0,00FF0000
+    SetEmitSpeed = 0,350
+    SetEmitSpeedRange = 0,100
+    SetEmitAngle = 0,180
+    SetEmitAngleRange = 0,60
+    SetEmitGravity = 0,400
+    SetEmitting = 11,true
+    MoveOpacity = 11,14,0
+    SetEmitting = 13,false
+#-------------------------------
+[OppMove,STALKCUTTER]
+Name = PRAS Stalk Cutter
+Credit = Anon
+<User>
+    MoveX = 0,8,16,EaseOut
+    MoveX = 8,3,-48,EaseIn
+    MoveX = 11,10,0,EaseOut
+<Target>
+    MoveX = 0,11,-1
+    MoveX = 11,2,-12,EaseOut
+    MoveColor = 11,2,FFFFFFFF
+    MoveX = 13,3,24,EaseBoth
+    MoveColor = 13,6,+00+00+00+00
+    MoveX = 16,3,0,EaseBoth
+<SE>
+    Play = 2,PRSFX- Work Up
+    Play = 11,PRSFX- Slash
+<Slash Effect>
+    Graphic = strobe 1
+    Focus = Target
+    SetX = 0,64
+    SetY = 0,-64
+    SetZ = 0,760
+    SetZoomX = 0,300
+    SetZoomY = 0,30
+    SetAngle = 0,60
+    SetVisible = 0,false
+    SetColor = 0,00FF00D0
+    SetAngle = 11,30
+    SetVisible = 11,true
+    MoveX = 11,3,-64,EaseOut
+    MoveY = 11,3,64,EaseOut
+    MoveOpacity = 12,6,0
+    SetVisible = 18,false
+<Kinetic Ground Blur>
+    Graphic = black_screen
+    Focus = Background
+    SetY = 0,-120
+    SetZ = 0,710
+    SetOpacity = 0,0
+    SetColor = 0,00FF0080
+    SetVisible = 2,false
+    SetOpacity = 2,160
+    MoveZoomX = 2,6,200
+    MoveOpacity = 8,3,0
+<Kinetic Slash Debris>
+    Graphic = stealth_rock
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 60
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZ = 0,715
+    SetZoomX = 0,40
+    SetZoomY = 0,40
+    SetEmitSpeed = 0,500
+    SetEmitSpeedRange = 0,150
+    SetEmitAngle = 0,90
+    SetEmitAngleRange = 0,60
+    SetEmitGravity = 0,600
+    SetEmitting = 2,true
+    MoveOpacity = 2,8,0
+    SetEmitting = 8,false
+<Kinetic Slash Dust>
+    Graphic = smog 2
+    Focus = User
+    Emitter = Straight
+    EmitterRate = 30
+    SetZ = 0,714
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetColor = 0,A0A0A0A0
+    SetEmitSpeed = 0,180
+    SetEmitAngle = 0,180
+    SetEmitAngleRange = 0,20
+    SetEmitting = 2,true
+    MoveOpacity = 2,8,0
+    SetEmitting = 8,false
+<Slash Impact Spark>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,765
+    SetZoomX = 0,50
+    SetZoomY = 0,50
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetTone = 0,+FF+FF+FF+00
+    SetVisible = 11,true
+    MoveOpacity = 11,2,255
+    MoveZoomX = 11,3,150,EaseOut
+    MoveZoomY = 11,3,150,EaseOut
+    MoveOpacity = 13,6,0
+    SetVisible = 19,false
+<Leaves Emitter>
+    Graphic = leaf
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 40
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZ = 0,765
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetColor = 0,00FF0000
+    SetEmitSpeed = 0,350
+    SetEmitSpeedRange = 0,100
+    SetEmitAngleRange = 0,60
+    SetEmitGravity = 0,400
+    SetEmitting = 11,true
+    MoveOpacity = 11,14,0
+    SetEmitting = 13,false

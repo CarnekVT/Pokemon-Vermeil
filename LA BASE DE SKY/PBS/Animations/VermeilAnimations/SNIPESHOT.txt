@@ -1,0 +1,285 @@
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
+#-------------------------------
+[Move,SNIPESHOT]
+Name = PRAS Snipe Shot
+Credit = Anon
+<User>
+    MoveOpacity = 26,3,0,EaseOut
+    MoveOpacity = 38,6,255
+<Target>
+    SetColor = 29,FFFFFFFF
+    MoveX = 29,1,16,EaseOut
+    MoveY = 29,1,5
+    MoveX = 30,2,-32,EaseOut
+    MoveY = 30,2,-10
+    MoveX = 32,2,32,EaseOut
+    MoveY = 32,2,10
+    MoveX = 34,1,-16,EaseOut
+    MoveY = 34,1,-5
+    MoveX = 35,2,0,EaseBoth
+    MoveY = 35,2,0,EaseBoth
+    MoveColor = 38,6,FFFFFF00,EaseIn
+<SE>
+    Play = 8,PRSFX- Solar Beam1
+    Play = 25,Water2
+    Play = 29,Water3
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetZ = 0,715
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetVisible = 25,true
+    SetOpacity = 25,255
+    MoveOpacity = 39,15,0
+<Energy Sphere>
+    Graphic = ballBurst_dazzle
+    Focus = User
+    SetZ = 0,715
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetColor = 0,00A0FFFF
+    SetZoomX = 8,0
+    SetZoomY = 8,0
+    SetVisible = 8,true
+    MoveOpacity = 8,12,255
+    MoveZoomX = 8,17,150,EaseOut
+    MoveZoomY = 8,17,150,EaseOut
+    MoveAngle = 8,17,720
+    MoveOpacity = 25,2,0
+    SetVisible = 27,false
+<Charge Drops>
+    Graphic = bubble 1
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 40
+    SetZ = 0,716
+    SetZoomX = 0,20
+    SetZoomY = 0,20
+    SetColor = 0,00A0FFFF
+    SetEmitSpeed = 0,300
+    SetEmitSpeedRange = 0,100
+    SetEmitAngleRange = 0,360
+    SetEmitting = 8,true
+    MoveZoomX = 8,17,10
+    MoveZoomY = 8,17,9
+    MoveOpacity = 25,2,0
+    SetEmitting = 27,false
+<Water Bullet Projectile>
+    Graphic = WaterProyectile
+    Focus = User
+    SetZ = 0,750
+    SetAngle = 0,-26
+    SetVisible = 0,false
+    SetColor = 0,00A0FFFF
+    MoveAngle = 0,25,30
+    SetVisible = 25,true
+    MoveX = 25,4,256
+    MoveY = 25,4,-128
+    MoveZoomY = 26,1,50
+    MoveZoomY = 27,2,20,EaseIn
+    SetVisible = 29,false
+<Impact Flash Photonic>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,724
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetColor = 0,00FFFFFF
+    SetZoomX = 29,80
+    SetZoomY = 29,80
+    SetVisible = 29,true
+    SetOpacity = 29,255
+    MoveZoomX = 29,4,150,EaseOut
+    MoveZoomY = 29,4,150,EaseOut
+    MoveOpacity = 29,10,0
+    SetVisible = 39,false
+<Impact Burst Top>
+    Graphic = hit half
+    Focus = Target
+    SetZ = 0,725
+    SetVisible = 0,false
+    SetColor = 0,00C0FFFF
+    SetVisible = 29,true
+    MoveZoomX = 29,4,160,EaseOut
+    MoveZoomY = 29,4,160,EaseOut
+    MoveOpacity = 29,10,0
+    SetVisible = 39,false
+<Impact Burst Bottom>
+    Graphic = hit half
+    Focus = Target
+    SetZ = 0,725
+    SetAngle = 0,180
+    SetVisible = 0,false
+    SetColor = 0,00C0FFFF
+    SetVisible = 29,true
+    MoveZoomX = 29,4,160,EaseOut
+    MoveZoomY = 29,4,160,EaseOut
+    MoveOpacity = 29,10,0
+    SetVisible = 39,false
+<Bubble Splash Emitter>
+    Graphic = bubble 2
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 120
+    SetZ = 0,730
+    SetZoomX = 0,20
+    SetZoomY = 0,20
+    SetColor = 0,00C0FFFF
+    SetEmitSpeed = 0,500
+    SetEmitSpeedRange = 0,200
+    SetEmitAngleRange = 0,180
+    MoveZoomX = 0,29,10
+    MoveZoomY = 0,29,9
+    SetEmitting = 29,true
+    MoveOpacity = 29,10,0
+    SetEmitting = 31,false
+#-------------------------------
+[OppMove,SNIPESHOT]
+Name = PRAS Snipe Shot
+Credit = Anon
+<User>
+    MoveOpacity = 26,3,0,EaseOut
+    MoveOpacity = 38,6,255
+<Target>
+    SetColor = 29,FFFFFFFF
+    MoveX = 29,1,-16,EaseOut
+    MoveY = 29,1,5
+    MoveX = 30,2,32,EaseOut
+    MoveY = 30,2,-10
+    MoveX = 32,2,-32,EaseOut
+    MoveY = 32,2,10
+    MoveX = 34,1,16,EaseOut
+    MoveY = 34,1,-5
+    MoveX = 35,2,0,EaseBoth
+    MoveY = 35,2,0,EaseBoth
+    MoveColor = 38,6,FFFFFF00,EaseIn
+<SE>
+    Play = 8,PRSFX- Solar Beam1
+    Play = 25,Water2
+    Play = 29,Water3
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetZ = 0,715
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetVisible = 25,true
+    SetOpacity = 25,255
+    MoveOpacity = 39,15,0
+<Energy Sphere>
+    Graphic = ballBurst_dazzle
+    Focus = User
+    SetZ = 0,715
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetColor = 0,00A0FFFF
+    SetZoomX = 8,0
+    SetZoomY = 8,0
+    SetVisible = 8,true
+    MoveOpacity = 8,12,255
+    MoveZoomX = 8,17,150,EaseOut
+    MoveZoomY = 8,17,150,EaseOut
+    MoveAngle = 8,17,-720
+    MoveOpacity = 25,2,0
+    SetVisible = 27,false
+<Charge Drops>
+    Graphic = bubble 1
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 40
+    SetZ = 0,716
+    SetZoomX = 0,20
+    SetZoomY = 0,20
+    SetColor = 0,00A0FFFF
+    SetEmitSpeed = 0,300
+    SetEmitSpeedRange = 0,100
+    SetEmitAngleRange = 0,360
+    SetEmitting = 8,true
+    MoveZoomX = 8,17,10
+    MoveZoomY = 8,17,9
+    MoveOpacity = 25,2,0
+    SetEmitting = 27,false
+<Water Bullet Projectile>
+    Graphic = WaterProyectile
+    Focus = User
+    SetZ = 0,750
+    SetAngle = 0,154
+    SetVisible = 0,false
+    SetColor = 0,00A0FFFF
+    MoveAngle = 0,25,30
+    SetVisible = 25,true
+    MoveZoomY = 25,2,50,EaseIn
+    MoveX = 25,4,-256
+    MoveY = 25,4,128
+    MoveZoomY = 27,1,30,EaseIn
+    SetVisible = 29,false
+<Impact Flash Photonic>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,724
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetColor = 0,00FFFFFF
+    SetZoomX = 29,80
+    SetZoomY = 29,80
+    SetVisible = 29,true
+    SetOpacity = 29,255
+    MoveZoomX = 29,4,150,EaseOut
+    MoveZoomY = 29,4,150,EaseOut
+    MoveOpacity = 29,10,0
+    SetVisible = 39,false
+<Diagonal Slash>
+    Graphic = strobe 1
+    Focus = Background
+    SetX = 0,200
+    SetY = 0,-200
+    SetZ = 0,718
+    SetZoomX = 0,200
+    SetZoomY = 0,20
+    SetAngle = 0,-45
+    SetVisible = 0,false
+    SetColor = 0,FF0000FF
+    SetVisible = 29,true
+    MoveOpacity = 29,8,0
+    SetVisible = 37,false
+<Impact Burst Top>
+    Graphic = hit
+    Focus = Target
+    SetZ = 0,725
+    SetVisible = 0,false
+    SetColor = 0,00C0FFFF
+    SetVisible = 29,true
+    MoveZoomX = 29,4,120,EaseOut
+    MoveZoomY = 29,4,120,EaseOut
+    MoveOpacity = 29,10,0
+    SetVisible = 39,false
+<Impact Burst Bottom>
+    Graphic = hit
+    Focus = Target
+    SetZ = 0,725
+    SetAngle = 0,180
+    SetVisible = 0,false
+    SetColor = 0,00C0FFFF
+    SetVisible = 29,true
+    MoveZoomX = 29,4,120,EaseOut
+    MoveZoomY = 29,4,120,EaseOut
+    MoveOpacity = 29,10,0
+    SetVisible = 39,false
+<Bubble Splash Emitter>
+    Graphic = bubble 2
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 120
+    SetZ = 0,730
+    SetZoomX = 0,20
+    SetZoomY = 0,20
+    SetColor = 0,00C0FFFF
+    SetEmitSpeed = 0,500
+    SetEmitSpeedRange = 0,200
+    SetEmitAngleRange = 0,180
+    MoveZoomX = 0,29,10
+    MoveZoomY = 0,29,9
+    SetEmitting = 29,true
+    MoveOpacity = 29,10,0
+    SetEmitting = 31,false

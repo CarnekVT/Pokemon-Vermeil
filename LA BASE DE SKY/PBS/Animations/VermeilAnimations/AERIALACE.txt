@@ -1,0 +1,236 @@
+[Move,AERIALACE]
+Name = PRAS Aerial Ace
+<User>
+    # Vanish (Desaparece en el dash)
+    MoveColor = 6,2,FFFFFFFF,Linear
+    MoveX = 6,3,150,EaseIn
+    MoveY = 6,3,-100,EaseIn
+    MoveOpacity = 6,3,0,Linear
+    
+    # Return Fluid (Reaparece en su lugar original suavemente)
+    # En vez de teletransportarse, lo ponemos en su origen pero invisible
+    SetX = 20,0
+    SetY = 20,0
+    MoveOpacity = 20,3,255,Linear
+    MoveColor = 20,2,FFFFFFC8,Linear
+    MoveColor = 22,4,00000000,Linear
+    # Pequeño salto de aterrizaje anime
+    MoveY = 20,3,-10,EaseOut
+    MoveY = 23,3,0,EaseIn
+<Target>
+    # Flash Hit
+    MoveColor = 12,2,FFFFFFFF,Linear
+    MoveColor = 16,6,00000000,Linear
+    MoveX = 12,1,16,Linear
+    MoveX = 13,1,-16,Linear
+    MoveX = 14,1,16,Linear
+    MoveX = 15,1,-16,Linear
+    MoveX = 16,1,16,Linear
+    MoveX = 17,1,0,Linear
+<SE>
+    Play = 6,Wind1
+    Play = 12,PRSFX- Slash
+    Play = 13,PRSFX- Focus Punch2
+    Play = 20,Wind1,80,150
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetZ = 0,550
+    SetVisible = 0,true
+    SetOpacity = 0,0
+    MoveOpacity = 2,4,200,Linear
+    MoveOpacity = 35,8,0,Linear
+    SetVisible = 43,false
+<Anime Slash Red>
+    # Capa Roja
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,580
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetAngle = 0,35
+    SetColor = 0,FF0000FF
+    SetZoomX = 0,3000
+    SetZoomY = 0,150
+    SetVisible = 12,true
+    SetOpacity = 12,255
+    MoveZoomY = 12,4,45,EaseOut
+    MoveOpacity = 18,4,0,Linear
+    SetVisible = 22,false
+<Anime Slash White>
+    # Capa Blanca Centro
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,581
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetAngle = 0,35
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,3000
+    SetZoomY = 0,45
+    SetVisible = 12,true
+    SetOpacity = 12,255
+    MoveZoomY = 12,4,15,EaseOut
+    MoveOpacity = 18,4,0,Linear
+    SetVisible = 22,false
+<Slash Light Core>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetColor = 0,FFFF00FF # Amarillo
+    SetVisible = 12,true
+    MoveZoomX = 12,3,200,EaseOut
+    MoveZoomY = 12,3,200,EaseOut
+    MoveOpacity = 15,4,0,Linear
+    SetVisible = 19,false
+<Slash Aftermath>
+    Graphic = whoosh
+    Focus = Target
+    SetZ = 0,755
+    SetVisible = 0,false
+    SetAngle = 0,125
+    SetZoomX = 0,180
+    SetZoomY = 0,180
+    SetVisible = 12,true
+    MoveOpacity = 16,4,0,Linear
+    SetVisible = 20,false
+<Sparks Emitter>
+    Graphic = Energy1
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 50
+    RandomInvertAngle = true
+    SetZ = 0,760
+    SetZoomX = 0,40
+    SetZoomY = 0,40
+    SetColor = 0,FFD000FF
+    SetEmitSpeed = 0,500
+    SetEmitSpeedRange = 0,200
+    SetEmitAngle = 0,0
+    SetEmitAngleRange = 0,180
+    SetEmitting = 0,false
+    SetEmitting = 12,true
+    SetEmitting = 14,false
+    MoveOpacity = 12,6,0,Linear
+
+
+[OppMove,AERIALACE]
+Name = PRAS Aerial Ace
+<User>
+    # Vanish (Desaparece en el dash)
+    MoveColor = 6,2,FFFFFFFF,Linear
+    MoveX = 6,3,-150,EaseIn
+    MoveY = 6,3,-100,EaseIn
+    MoveOpacity = 6,3,0,Linear
+    
+    # Return Fluid (Reaparece en su lugar original suavemente)
+    # En vez de teletransportarse, lo ponemos en su origen pero invisible
+    SetX = 20,0
+    SetY = 20,0
+    MoveOpacity = 20,3,255,Linear
+    MoveColor = 20,2,FFFFFFC8,Linear
+    MoveColor = 22,4,00000000,Linear
+    # Pequeño salto de aterrizaje anime
+    MoveY = 20,3,-10,EaseOut
+    MoveY = 23,3,0,EaseIn
+<Target>
+    # Flash Hit
+    MoveColor = 12,2,FFFFFFFF,Linear
+    MoveColor = 16,6,00000000,Linear
+    MoveX = 12,1,-16,Linear
+    MoveX = 13,1,16,Linear
+    MoveX = 14,1,-16,Linear
+    MoveX = 15,1,16,Linear
+    MoveX = 16,1,-16,Linear
+    MoveX = 17,1,0,Linear
+<SE>
+    Play = 6,Wind1
+    Play = 12,PRSFX- Slash
+    Play = 13,PRSFX- Focus Punch2
+    Play = 20,Wind1,80,150
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetZ = 0,550
+    SetVisible = 0,true
+    SetOpacity = 0,0
+    MoveOpacity = 2,4,200,Linear
+    MoveOpacity = 35,8,0,Linear
+    SetVisible = 43,false
+<Anime Slash Red>
+    # Capa Roja
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,580
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetAngle = 0,-35
+    SetColor = 0,FF0000FF
+    SetZoomX = 0,3000
+    SetZoomY = 0,150
+    SetVisible = 12,true
+    SetOpacity = 12,255
+    MoveZoomY = 12,4,45,EaseOut
+    MoveOpacity = 18,4,0,Linear
+    SetVisible = 22,false
+<Anime Slash White>
+    # Capa Blanca Centro
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,581
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetAngle = 0,-35
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,3000
+    SetZoomY = 0,45
+    SetVisible = 12,true
+    SetOpacity = 12,255
+    MoveZoomY = 12,4,15,EaseOut
+    MoveOpacity = 18,4,0,Linear
+    SetVisible = 22,false
+<Slash Light Core>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetColor = 0,FFFF00FF # Amarillo
+    SetVisible = 12,true
+    MoveZoomX = 12,3,200,EaseOut
+    MoveZoomY = 12,3,200,EaseOut
+    MoveOpacity = 15,4,0,Linear
+    SetVisible = 19,false
+<Slash Aftermath>
+    Graphic = whoosh
+    Focus = Target
+    SetZ = 0,755
+    SetVisible = 0,false
+    SetAngle = 0,-55
+    SetZoomX = 0,180
+    SetZoomY = 0,180
+    SetVisible = 12,true
+    MoveOpacity = 16,4,0,Linear
+    SetVisible = 20,false
+<Sparks Emitter>
+    Graphic = Energy1
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 50
+    RandomInvertAngle = true
+    SetZ = 0,760
+    SetZoomX = 0,40
+    SetZoomY = 0,40
+    SetColor = 0,FFD000FF
+    SetEmitSpeed = 0,500
+    SetEmitSpeedRange = 0,200
+    SetEmitAngle = 0,180
+    SetEmitAngleRange = 0,180
+    SetEmitting = 0,false
+    SetEmitting = 12,true
+    SetEmitting = 14,false
+    MoveOpacity = 12,6,0,Linear

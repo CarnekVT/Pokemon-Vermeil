@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [Move,STRUGGLEBUG]
 Name = DB Animation
@@ -128,4 +128,9 @@ Credit = Dawn Bronze
     MoveZoomX = 30,2,100
     MoveZoomY = 30,2,100
 <SE>
-    Play = 0,Bug/Struggle Bug
+    Play = 0,PRSFX- Struggle Bug
+    Play = 23,PRSFX- Bug Bite,,175
+    Play = 25,PRSFX- Bug Bite,,175
+    Play = 27,PRSFX- Bug Bite,,175
+    Play = 29,PRSFX- Bug Bite,,175
+    Play = 31,PRSFX- Bug Bite,,175
