@@ -12,7 +12,7 @@ module Settings
 
   # El ANCHO por defecto de la pantalla en píxeles (en escala 1.0).
   SCREEN_WIDTH  = 512
-  # El ALTO de la pantalla en píxelex (en escala 1.0).
+  # El ALTO de la pantalla en píxeles (en escala 1.0).
   SCREEN_HEIGHT = 384
   # El tamaño de la pantalla por defecto.
   #   * Posibles valores: 0.5, 1.0, 1.5 y 2.0.
