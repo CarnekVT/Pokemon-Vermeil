@@ -298,11 +298,17 @@ class Battle::Move
       else
         @battle.pbDisplay(_INTL("¡Es supereficaz!"))
       end
+    elsif Effectiveness.hyper_resistant?(target.damageState.typeMod)
+      if numTargets > 1
+        @battle.pbDisplay(_INTL("Es muy poco eficaz contra {1}...", target.pbThis(true)))
+      else
+        @battle.pbDisplay(_INTL("Es muy poco eficaz..."))
+      end
     elsif Effectiveness.not_very_effective?(target.damageState.typeMod)
       if numTargets > 1
-        @battle.pbDisplay(_INTL("No es muy eficaz contra {1}...", target.pbThis(true)))
+        @battle.pbDisplay(_INTL("Es poco eficaz contra {1}...", target.pbThis(true)))
       else
-        @battle.pbDisplay(_INTL("No es muy eficaz..."))
+        @battle.pbDisplay(_INTL("Es poco eficaz..."))
       end
     end
   end
