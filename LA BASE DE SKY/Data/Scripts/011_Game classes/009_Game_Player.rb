@@ -29,7 +29,8 @@ class Game_Player < Game_Character
     :surfing_jumping => 3,
     :diving => 3,
   }
-
+  # Default speed for the player.
+  DEFAULT_SPEED = 3
   def initialize(*arg)
     super(*arg)
     @lastdir = 0
@@ -79,7 +80,7 @@ class Game_Player < Game_Character
   def set_movement_type(type)
     meta = GameData::PlayerMetadata.get($player&.character_ID || 1)
     new_charset = nil
-    speed = player_speed = PLAYER_SPEEDS[type] || 3
+    speed = player_speed = PLAYER_SPEEDS[type] || DEFAULT_SPEED
     case type
     when :fishing
       new_charset = pbGetPlayerCharset(meta.fish_charset)
@@ -111,7 +112,7 @@ class Game_Player < Game_Character
       self.move_speed = speed if !@move_route_forcing
       new_charset = pbGetPlayerCharset(meta.walk_charset)
     end
-    self.move_speed = 3 if @bumping
+    self.move_speed = DEFAULT_SPEED if @bumping
     @character_name = new_charset if new_charset
   end
 
