@@ -76,6 +76,7 @@ module Effectiveness
   NOT_VERY_EFFECTIVE            = 1
   NORMAL_EFFECTIVE              = 2
   SUPER_EFFECTIVE               = 4
+  HYPER_EFFECTIVE               = 6
   INEFFECTIVE_MULTIPLIER        = INEFFECTIVE.to_f / NORMAL_EFFECTIVE
   NOT_VERY_EFFECTIVE_MULTIPLIER = NOT_VERY_EFFECTIVE.to_f / NORMAL_EFFECTIVE
   NORMAL_EFFECTIVE_MULTIPLIER   = 1.0
@@ -103,6 +104,10 @@ module Effectiveness
     return value > NORMAL_EFFECTIVE_MULTIPLIER
   end
 
+  def hyper_effective?(value)
+    return value > SUPER_EFFECTIVE_MULTIPLIER
+  end
+
   def ineffective_type?(attack_type, *defend_types)
     value = calculate(attack_type, *defend_types)
     return ineffective?(value)
@@ -126,6 +131,11 @@ module Effectiveness
   def super_effective_type?(attack_type, *defend_types)
     value = calculate(attack_type, *defend_types)
     return super_effective?(value)
+  end
+
+  def hyper_effective_type?(attack_type, *defend_types)
+    value = calculate(attack_type, *defend_types)
+    return hyper_effective?(value)
   end
 
   def get_type_effectiveness(attack_type, defend_type)

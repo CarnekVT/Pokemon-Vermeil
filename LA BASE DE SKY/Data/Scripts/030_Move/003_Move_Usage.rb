@@ -285,7 +285,14 @@ class Battle::Move
   def pbEffectivenessMessage(user, target, numTargets = 1)
     return if self.is_a?(Battle::Move::FixedDamageMove)
     return if target.damageState.disguise || target.damageState.iceFace
-    if Effectiveness.super_effective?(target.damageState.typeMod)
+
+    if Effectiveness.hyper_effective?(target.damageState.typeMod)
+      if numTargets > 1
+        @battle.pbDisplay(_INTL("¡Es hipereficaz contra {1}!", target.pbThis(true)))
+      else
+        @battle.pbDisplay(_INTL("¡Es hipereficaz!"))
+      end
+    elsif Effectiveness.super_effective?(target.damageState.typeMod)
       if numTargets > 1
         @battle.pbDisplay(_INTL("¡Es supereficaz contra {1}!", target.pbThis(true)))
       else
