@@ -120,11 +120,12 @@ module PluginManager
     name         = nil
     version      = nil
     essentials   = nil
+    lbds         = nil
     link         = nil
     dependencies = nil
     incompats    = nil
     credits      = []
-    order = [:name, :version, :essentials, :link, :dependencies, :incompatibilities, :credits]
+    order = [:name, :version, :essentials, :lbds, :link, :dependencies, :incompatibilities, :credits]
     # Asegura que primero lea el nombre del plugin, que se utiliza en la notificación de errores,
     # ordenando las claves
     keys = options.keys.sort do |a, b|
@@ -148,6 +149,8 @@ module PluginManager
         version = value
       when :essentials
         essentials = value
+      when :lbds
+        lbds = value
       when :link   # Sitio web del plugin
         if nil_or_empty?(value)
           self.error("El enlace del plugin debe ser una cadena no vacía.")
@@ -299,6 +302,7 @@ module PluginManager
       :name              => name,
       :version           => version,
       :essentials        => essentials,
+      :lbds              => lbds,
       :link              => link,
       :dependencies      => dependencies,
       :incompatibilities => incompats,
@@ -480,6 +484,9 @@ module PluginManager
       when "ESSENTIALS"
         meta[:essentials] = [] if !meta[:essentials]
         data.each { |ver| meta[:essentials].push(ver) }
+      when "LBDS"
+        meta[:lbds] = [] if !meta[:lbds]
+        data.each { |ver| meta[:lbds].push(ver) }
       when "REQUIRES"
         meta[:dependencies] = [] if !meta[:dependencies]
         if data.length < 2   # No se proporciona una versión, solo se agrega el nombre de la dependencia del plugin
@@ -800,6 +807,10 @@ module PluginManager
       
       if !meta[:essentials] || !meta[:essentials].include?(Essentials::VERSION)
         Console.echo_warn("El plugin '#{name}' puede no ser compatible con Essentials v#{Essentials::VERSION}. Intentando cargar de todos modos.")
+      end
+      
+      if !meta[:lbds] || !meta[:lbds].include?(LBDSKY::VERSION)
+        Console.echo_warn("El plugin '#{name}' puede no ser compatible con La Base De Sky v#{LBDSKY::VERSION}. Intentando cargar de todos modos.")
       end
       
       # registrar plugin
