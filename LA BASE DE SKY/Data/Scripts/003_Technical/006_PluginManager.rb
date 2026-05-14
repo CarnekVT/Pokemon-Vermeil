@@ -151,6 +151,13 @@ module PluginManager
         essentials = value
       when :lbds
         lbds = value
+        if lbds.is_a?(Array)
+          lbds = lbds[0]
+        end
+        if lbds && VersionChecker.older?(LBDSKY::VERSION, lbds)
+          self.error("El plugin '#{name}' es incompatible con La Base De Sky V#{LBDSKY::VERSION}. No se cargará. Requiere al menos La Base De Sky V#{lbds}.")
+          Kernel.exit! true
+        end        
       when :link   # Sitio web del plugin
         if nil_or_empty?(value)
           self.error("El enlace del plugin debe ser una cadena no vacía.")
@@ -485,8 +492,7 @@ module PluginManager
         meta[:essentials] = [] if !meta[:essentials]
         data.each { |ver| meta[:essentials].push(ver) }
       when "LBDS"
-        meta[:lbds] = [] if !meta[:lbds]
-        data.each { |ver| meta[:lbds].push(ver) }
+        meta[:lbds] = data[0] if data[0]
       when "REQUIRES"
         meta[:dependencies] = [] if !meta[:dependencies]
         if data.length < 2   # No se proporciona una versión, solo se agrega el nombre de la dependencia del plugin
@@ -808,9 +814,9 @@ module PluginManager
       if !meta[:essentials] || !meta[:essentials].include?(Essentials::VERSION)
         Console.echo_warn("El plugin '#{name}' puede no ser compatible con Essentials v#{Essentials::VERSION}. Intentando cargar de todos modos.")
       end
-      
-      if !meta[:lbds] || !meta[:lbds].include?(LBDSKY::VERSION)
-        Console.echo_warn("El plugin '#{name}' puede no ser compatible con La Base De Sky v#{LBDSKY::VERSION}. Intentando cargar de todos modos.")
+
+      if !meta[:lbds]
+        Console.echo_warn("El plugin '#{name}' no tiene especificada la versión mínima de La Base De Sky en el campo 'LBDS' en su archivo meta.txt. Intentando cargar de todos modos.")
       end
       
       # registrar plugin
