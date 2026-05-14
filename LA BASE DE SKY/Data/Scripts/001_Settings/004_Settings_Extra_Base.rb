@@ -459,38 +459,42 @@ module DamageNumberSettings
 end
 
 module OWShadowSettings
-  # If true, calculates the shadow size based on the sprite's pixels.
-  # If false, uses the size defined in FIXED_SHADOW_SIZE for all.
-  AUTOMATIC_SHADOW_GENERATION = false
+  # Si es verdadero, calcula el tamaño de la sombra en función de los píxeles del sprite.
+  # Si es falso, utiliza el tamaño definido en FIXED_SHADOW_SIZE para todos.
+  AUTOMATIC_SHADOW_GENERATION = true
 
-  # Fixed shadow size when automatic generation is disabled (false).
-  # A value of 10 to 14 is standard for normal-sized characters.
-  FIXED_SHADOW_SIZE = 12
+  # Tamaño fijo de la sombra cuando la generación automática está desactivada.
+  # Un valor entre 10 y 14 es ideal para personajes de tamaño normal.
+  FIXED_SHADOW_SIZE = 14
+
+  # Activar o desactivar el recorte de sombras cuando interactuan entre si.
+  # Puede afectar el rendimiento si hay una cantidad exagerada de eventos con sombra en el mapa.
+  ENABLE_SHADOW_CLIPPING = true
 
   # ============================================================================
-  # Set this to true if you want the event name and character name blacklists to be case sensitive.
+  # Si es verdadero, las blackslist de nombres de eventos y nombres de gráficos distinguirán entre mayúsculas y minúsculas.
   CASE_SENSITIVE_BLACKLISTS = false
 
-  # If an event name contains one of these words, it will not have a shadow.
+  # Si el nombre de un evento contiene una de estas palabras, no generará sombra.
   SHADOWLESS_EVENT_NAME     = [
     'door', 'FlechaSalida', 'nurse', 'Enfermera', 'Healing balls', 'Balls curativas', 'Mart', 'Tendero', 'SmashRock', 'RocaRompible', 'StrengthBoulder', 'PiedraFuerza',
     'CutTree', 'ArbolCorte', 'HeadbuttTree', 'ArbolGolpeCabeza', 'BerryPlant', 'Planta Bayas', '.shadowless', '.noshadow', '.sl', 'Entrada Mazmorra Bosque', 'Entrada Cueva', 'Relic Stone',
     'Escalera', 'Puerta', 'ExitArrow', 'NoShadow'
   ]
 
-  # If the character file and event uses contains one of these words in its filename, it will not have a shadow.
+  # Si gráfico utiliza una de estas palabras en su nombre de archivo, no generará sombra.
   SHADOWLESS_CHARACTER_NAME = ['nil']
 
-  # If an event stands on a tile with one of these terrain tags, it will not have a shadow.
-  # (Names can be seen in the script section "Terrain Tag")
+  # Si un evento se encuentra sobre una casilla con uno de estos terrain tags, no tendrá sombra.
+  # (Los nombres se pueden ver en la sección del script "Terrain Tag")
   SHADOWLESS_TERRAIN_NAME   = [
     :Grass, :DeepWater, :StillWater, :Water, :Waterfall, :WaterfallCrest,
     :Puddle
   ]
 
-  # Hash to adjust the shadow radius for specific character files.
-  # Key: Part of the filename (e.g., "PIKACHU").
-  # Value: [RADIUS, X, Y]
+  # Hash para ajustar el radio de sombra para archivos de personajes específicos.
+  # KEY: Parte del nombre del archivo (p. ej., "PIKACHU").
+  # VALUE: [RADIO, X, Y]
   CHARACTER_SHADOW_FIX = {
     'PIKACHU' => [-2, 0, 0],
     'SNORLAX' => [8, 0, 0]
