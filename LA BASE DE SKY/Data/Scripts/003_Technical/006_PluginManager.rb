@@ -292,7 +292,8 @@ module PluginManager
       when :priority  # Requerido para que no tire error.
         options[:priority] = value.to_i
       else
-        self.error("Clave de registro de plugin no válida '#{key}'.")
+        # Ignorar claves desconocidas
+        Console.echo_warn("Clave de registro de plugin no válida '#{key}'.")
       end
     end
     # Verificar que no sea first y last al mismo tiempo
