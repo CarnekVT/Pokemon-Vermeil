@@ -120,11 +120,12 @@ module PluginManager
     name         = nil
     version      = nil
     essentials   = nil
+    lbds         = nil
     link         = nil
     dependencies = nil
     incompats    = nil
     credits      = []
-    order = [:name, :version, :essentials, :link, :dependencies, :incompatibilities, :credits]
+    order = [:name, :version, :essentials, :lbds, :link, :dependencies, :incompatibilities, :credits]
     # Asegura que primero lea el nombre del plugin, que se utiliza en la notificación de errores,
     # ordenando las claves
     keys = options.keys.sort do |a, b|
@@ -148,6 +149,15 @@ module PluginManager
         version = value
       when :essentials
         essentials = value
+      when :lbds
+        lbds = value
+        if lbds.is_a?(Array)
+          lbds = lbds[0]
+        end
+        if lbds && VersionChecker.older?(LBDSKY::VERSION, lbds)
+          self.error("El plugin '#{name}' es incompatible con La Base De Sky V#{LBDSKY::VERSION}. No se cargará. Requiere al menos La Base De Sky V#{lbds}.")
+          Kernel.exit! true
+        end        
       when :link   # Sitio web del plugin
         if nil_or_empty?(value)
           self.error("El enlace del plugin debe ser una cadena no vacía.")
@@ -282,7 +292,8 @@ module PluginManager
       when :priority  # Requerido para que no tire error.
         options[:priority] = value.to_i
       else
-        self.error("Clave de registro de plugin no válida '#{key}'.")
+        # Ignorar claves desconocidas
+        Console.echo_warn("Clave de registro de plugin no válida '#{key}'.")
       end
     end
     # Verificar que no sea first y last al mismo tiempo
@@ -299,6 +310,7 @@ module PluginManager
       :name              => name,
       :version           => version,
       :essentials        => essentials,
+      :lbds              => lbds,
       :link              => link,
       :dependencies      => dependencies,
       :incompatibilities => incompats,
@@ -480,6 +492,8 @@ module PluginManager
       when "ESSENTIALS"
         meta[:essentials] = [] if !meta[:essentials]
         data.each { |ver| meta[:essentials].push(ver) }
+      when "LBDS"
+        meta[:lbds] = data[0] if data[0]
       when "REQUIRES"
         meta[:dependencies] = [] if !meta[:dependencies]
         if data.length < 2   # No se proporciona una versión, solo se agrega el nombre de la dependencia del plugin
@@ -801,6 +815,10 @@ module PluginManager
       if !meta[:essentials] || !meta[:essentials].include?(Essentials::VERSION)
         Console.echo_warn("El plugin '#{name}' puede no ser compatible con Essentials v#{Essentials::VERSION}. Intentando cargar de todos modos.")
       end
+
+      # if !meta[:lbds]
+      #   Console.echo_warn("El plugin '#{name}' no tiene especificada la versión mínima de La Base De Sky en el campo 'LBDS' en su archivo meta.txt. Intentando cargar de todos modos.")
+      # end
       
       # registrar plugin
       self.register(meta)

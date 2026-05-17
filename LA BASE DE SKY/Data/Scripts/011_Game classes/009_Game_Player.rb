@@ -9,8 +9,24 @@ class Game_Player < Game_Character
   attr_accessor :charsetData
   attr_accessor :encounter_count
 
-  SCREEN_CENTER_X = ((Settings::SCREEN_WIDTH / 2) - (Game_Map::TILE_WIDTH / 2)) * Game_Map::X_SUBPIXELS
-  SCREEN_CENTER_Y = ((Settings::SCREEN_HEIGHT / 2) - (Game_Map::TILE_HEIGHT / 2)) * Game_Map::Y_SUBPIXELS
+  # Estos valores dependen de Settings::SCREEN_WIDTH/HEIGHT, así que se calculan
+  # en runtime (vía const_missing) para respetar a los plugins que cambien
+  # esos ajustes después de cargar Scripts/.
+  def self.SCREEN_CENTER_X
+    ((Settings::SCREEN_WIDTH / 2) - (Game_Map::TILE_WIDTH / 2)) * Game_Map::X_SUBPIXELS
+  end
+
+  def self.SCREEN_CENTER_Y
+    ((Settings::SCREEN_HEIGHT / 2) - (Game_Map::TILE_HEIGHT / 2)) * Game_Map::Y_SUBPIXELS
+  end
+
+  def self.const_missing(name)
+    case name
+    when :SCREEN_CENTER_X then return SCREEN_CENTER_X()
+    when :SCREEN_CENTER_Y then return SCREEN_CENTER_Y()
+    end
+    super
+  end
   # Time in seconds for one cycle of bobbing (playing 4 charset frames) while
   # surfing or diving.
   SURF_BOB_DURATION = 1.5
@@ -29,7 +45,8 @@ class Game_Player < Game_Character
     :surfing_jumping => 3,
     :diving => 3,
   }
-
+  # Default speed for the player.
+  DEFAULT_SPEED = 3
   def initialize(*arg)
     super(*arg)
     @lastdir = 0
@@ -79,7 +96,7 @@ class Game_Player < Game_Character
   def set_movement_type(type)
     meta = GameData::PlayerMetadata.get($player&.character_ID || 1)
     new_charset = nil
-    speed = player_speed = PLAYER_SPEEDS[type] || 3
+    speed = player_speed = PLAYER_SPEEDS[type] || DEFAULT_SPEED
     case type
     when :fishing
       new_charset = pbGetPlayerCharset(meta.fish_charset)
@@ -111,7 +128,7 @@ class Game_Player < Game_Character
       self.move_speed = speed if !@move_route_forcing
       new_charset = pbGetPlayerCharset(meta.walk_charset)
     end
-    self.move_speed = 3 if @bumping
+    self.move_speed = DEFAULT_SPEED if @bumping
     @character_name = new_charset if new_charset
   end
 

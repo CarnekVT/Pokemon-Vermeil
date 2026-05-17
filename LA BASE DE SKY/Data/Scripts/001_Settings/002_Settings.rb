@@ -12,15 +12,15 @@ module Settings
 
   # El ANCHO por defecto de la pantalla en píxeles (en escala 1.0).
   SCREEN_WIDTH  = 512
-  # El ALTO de la pantalla en píxelex (en escala 1.0).
+  # El ALTO de la pantalla en píxeles (en escala 1.0).
   SCREEN_HEIGHT = 384
   # El tamaño de la pantalla por defecto.
   #   * Posibles valores: 0.5, 1.0, 1.5 y 2.0.
   SCREEN_SCALE  = 1.0
-  # Si es true (o bien estás en modo test con $DEBUG), al arrancar se aplica este
-  # SCREEN_SCALE y se ignorará el tamaño guardado en la partida para esa sesión de arranque.
-  # Déjalo en false en builds finales si quieres que la opción "Tamaño de ventana"
-  # y el archivo de guardado sigan mandando después del primer lanzamiento.
+  # Si es true, al arrancar se aplica este SCREEN_SCALE y se ignorará el tamaño
+  # guardado en la partida para esa sesión de arranque.
+  # Déjalo en false si quieres que la opción "Tamaño de ventana" y el archivo
+  # de guardado sigan mandando (también en modo debug).
   FORCE_SCREEN_SCALE_ON_BOOT = false
 
   # Índice 0–4 ligado al multiplicador lógico (p. ej. 1.5 → opción Grande).
@@ -441,7 +441,12 @@ module Settings
   # }
   # Tambien podria ser un array de nombres de archivo, en cuyo caso se usaría el mismo estilo de texto para todos los gráficos de ese estilo.
   # Los valores para los estilos en los que solo se ingresa el grafico están definidos en la clase LocationWindow, y se pueden modificar editando esa clase.
-  LOCATION_SIGN_GRAPHIC_STYLES = {
+  # Se define como método para que los estilos que dependen de
+  # Settings::SCREEN_WIDTH/HEIGHT se evalúen en runtime (respeta cambios hechos
+  # por plugins). El acceso como constante `Settings::LOCATION_SIGN_GRAPHIC_STYLES`
+  # sigue funcionando vía const_missing.
+  def self.LOCATION_SIGN_GRAPHIC_STYLES
+    {
     dp: [{ graphic: 'DP',
            text_color: Color.new(72, 80, 72), shadow_color: Color.new(144, 160, 160),
            text_offset: [8, -10] }],
@@ -475,7 +480,13 @@ module Settings
                text_offset: [0, -1], graphic_offset: [Settings::SCREEN_WIDTH / 4 - 40, Settings::SCREEN_HEIGHT - 100],
                zoomx: 2, zoomy: 2, center_text: true }
             ]
-  }
+    }
+  end
+
+  def self.const_missing(name)
+    return LOCATION_SIGN_GRAPHIC_STYLES() if name == :LOCATION_SIGN_GRAPHIC_STYLES
+    super
+  end
 
 
   #=============================================================================

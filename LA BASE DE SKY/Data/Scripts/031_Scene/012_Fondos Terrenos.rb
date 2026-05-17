@@ -1,4 +1,13 @@
 HAZARD_OPACITY = 180
+OFFSET_X_SPIKES = [[0, -25, 25], [0, -25, 25]]
+OFFSET_Y_SPIKES = [[0, 5, -5], [0, 5, -5]]
+OFFSET_X_TOXIC_SPIKES = [[25, -25], [25, -25]]
+OFFSET_Y_TOXIC_SPIKES = [[30, 30], [-20, -20]]
+OFFSET_X_STICKY_WEB = [10, 0]
+OFFSET_Y_STICKY_WEB = [20, -20]
+OFFSET_X_STEALTH_ROCK = [10, 10]
+OFFSET_Y_STEALTH_ROCK = [20, -10]
+
 class Battle::Scene
   
   def sceneWait(numframes)
@@ -174,8 +183,8 @@ class Battle::Scene
       spikes_count = sideData.effects[PBEffects::Spikes]
       spikes_count.times do |layer|
           # Position spikes in different locations for each layer
-          offset_x = [[0, -25, 25], [0, -25, 25]][side][layer]        # Spread horizontally
-          offset_y = [[0, 5, -5], [0, 5, -5]][side][layer]          # Keep near the base level
+          offset_x = OFFSET_X_SPIKES[side][layer]        # Spread horizontally
+          offset_y = OFFSET_Y_SPIKES[side][layer]          # Keep near the base level
           
           final_x = baseX + offset_x
           final_y = baseY + offset_y
@@ -198,8 +207,8 @@ class Battle::Scene
       toxic_count = sideData.effects[PBEffects::ToxicSpikes]
       toxic_count.times do |layer|
         # Position toxic spikes in different locations for each layer  
-        offset_x = [[25, -25], [25, -25]][side][layer]           # Spread horizontally
-        offset_y = [[30, 30], [-20, -20]][side][layer]            # Keep near the base level
+        offset_x = OFFSET_X_TOXIC_SPIKES[side][layer]           # Spread horizontally
+        offset_y = OFFSET_Y_TOXIC_SPIKES[side][layer]            # Keep near the base level
         
         toxic = pbAddSprite("toxicspikes_#{side}_#{layer}", baseX + offset_x, baseY + offset_y,
                            File.join(hazards_folder, "toxic_spikes"), @viewport)
@@ -216,8 +225,8 @@ class Battle::Scene
       
       # Sticky Web - appears as webbing on the ground
       if sideData.effects[PBEffects::StickyWeb]
-        offset_x = [10, 0][side]           # Spread horizontally
-        offset_y = [20, -20][side]            # Keep near the base level
+        offset_x = OFFSET_X_STICKY_WEB[side]           # Spread horizontally
+        offset_y = OFFSET_Y_STICKY_WEB[side]            # Keep near the base level
         web = pbAddSprite("stickyweb_#{side}", baseX + offset_x, baseY + offset_y,
                          File.join(hazards_folder, "sticky_web"), @viewport)
         web.z = 4

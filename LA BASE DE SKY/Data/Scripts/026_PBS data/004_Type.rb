@@ -60,10 +60,10 @@ module GameData
     end
 
     def effectiveness(other_type)
-      return Effectiveness::NORMAL_EFFECTIVE if !other_type
-      return Effectiveness::SUPER_EFFECTIVE if @weaknesses.include?(other_type)
+      return Effectiveness::NORMAL_EFFECTIVE   if !other_type
+      return Effectiveness::SUPER_EFFECTIVE    if @weaknesses.include?(other_type)
       return Effectiveness::NOT_VERY_EFFECTIVE if @resistances.include?(other_type)
-      return Effectiveness::INEFFECTIVE if @immunities.include?(other_type)
+      return Effectiveness::INEFFECTIVE        if @immunities.include?(other_type)
       return Effectiveness::NORMAL_EFFECTIVE
     end
   end
@@ -76,10 +76,13 @@ module Effectiveness
   NOT_VERY_EFFECTIVE            = 1
   NORMAL_EFFECTIVE              = 2
   SUPER_EFFECTIVE               = 4
-  INEFFECTIVE_MULTIPLIER        = INEFFECTIVE.to_f / NORMAL_EFFECTIVE
-  NOT_VERY_EFFECTIVE_MULTIPLIER = NOT_VERY_EFFECTIVE.to_f / NORMAL_EFFECTIVE
+  HYPER_EFFECTIVE               = 8
+  INEFFECTIVE_MULTIPLIER        = INEFFECTIVE.to_f / NORMAL_EFFECTIVE          # 0.0
+  NOT_VERY_EFFECTIVE_MULTIPLIER = NOT_VERY_EFFECTIVE.to_f / NORMAL_EFFECTIVE   # 0.5
   NORMAL_EFFECTIVE_MULTIPLIER   = 1.0
-  SUPER_EFFECTIVE_MULTIPLIER    = SUPER_EFFECTIVE.to_f / NORMAL_EFFECTIVE
+  SUPER_EFFECTIVE_MULTIPLIER    = SUPER_EFFECTIVE.to_f / NORMAL_EFFECTIVE      # 2.0
+  HYPER_EFFECTIVE_MULTIPLIER    = HYPER_EFFECTIVE.to_f / NORMAL_EFFECTIVE      # 4.0
+  HYPER_RESISTANT_MULTIPLIER    = NOT_VERY_EFFECTIVE_MULTIPLIER ** 2           # 0.25
 
   module_function
 
@@ -101,6 +104,14 @@ module Effectiveness
 
   def super_effective?(value)
     return value > NORMAL_EFFECTIVE_MULTIPLIER
+  end
+
+  def hyper_effective?(value)
+    return value >= HYPER_EFFECTIVE_MULTIPLIER
+  end
+
+  def hyper_resistant?(value)
+    return value > INEFFECTIVE_MULTIPLIER && value <= HYPER_RESISTANT_MULTIPLIER
   end
 
   def ineffective_type?(attack_type, *defend_types)
@@ -126,6 +137,16 @@ module Effectiveness
   def super_effective_type?(attack_type, *defend_types)
     value = calculate(attack_type, *defend_types)
     return super_effective?(value)
+  end
+
+  def hyper_effective_type?(attack_type, *defend_types)
+    value = calculate(attack_type, *defend_types)
+    return hyper_effective?(value)
+  end
+
+  def hyper_resistant_type?(attack_type, *defend_types)
+    value = calculate(attack_type, *defend_types)
+    return hyper_resistant?(value)
   end
 
   def get_type_effectiveness(attack_type, defend_type)

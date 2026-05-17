@@ -37,19 +37,36 @@ end
 class Spriteset_Map
   attr_reader :map
 
-  @@viewport0 = Viewport.new(0, 0, Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)   # Panorama
-  @@viewport0.z = -100
-  @@viewport1 = Viewport.new(0, 0, Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)   # Map, events, player, fog
-  @@viewport1.z = 0
-  @@viewport3 = Viewport.new(0, 0, Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)   # Flashing
-  @@viewport3.z = 500
+  # Se crean en tiempo de ejecución (no a nivel de clase), para que los plugins
+  # tengan oportunidad de modificar Settings::SCREEN_WIDTH/HEIGHT antes de que
+  # se construyan los viewports.
+  @@viewport0 = nil   # Panorama
+  @@viewport1 = nil   # Map, events, player, fog
+  @@viewport3 = nil   # Flashing
+
+  def self.ensure_viewports
+    if !@@viewport0 || @@viewport0.disposed?
+      @@viewport0 = Viewport.new(0, 0, Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
+      @@viewport0.z = -100
+    end
+    if !@@viewport1 || @@viewport1.disposed?
+      @@viewport1 = Viewport.new(0, 0, Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
+      @@viewport1.z = 0
+    end
+    if !@@viewport3 || @@viewport3.disposed?
+      @@viewport3 = Viewport.new(0, 0, Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
+      @@viewport3.z = 500
+    end
+  end
 
   # For access by Spriteset_Global.
   def self.viewport
+    ensure_viewports
     return @@viewport1
   end
 
   def initialize(map = nil)
+    self.class.ensure_viewports
     @map = (map) ? map : $game_map
     $scene.map_renderer.add_tileset(@map.tileset_name)
     @map.autotile_names.each { |filename| $scene.map_renderer.add_autotile(filename) }
