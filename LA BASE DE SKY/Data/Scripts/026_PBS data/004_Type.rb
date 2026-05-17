@@ -60,10 +60,10 @@ module GameData
     end
 
     def effectiveness(other_type)
-      return Effectiveness::NORMAL_EFFECTIVE if !other_type
-      return Effectiveness::SUPER_EFFECTIVE if @weaknesses.include?(other_type)
+      return Effectiveness::NORMAL_EFFECTIVE   if !other_type
+      return Effectiveness::SUPER_EFFECTIVE    if @weaknesses.include?(other_type)
       return Effectiveness::NOT_VERY_EFFECTIVE if @resistances.include?(other_type)
-      return Effectiveness::INEFFECTIVE if @immunities.include?(other_type)
+      return Effectiveness::INEFFECTIVE        if @immunities.include?(other_type)
       return Effectiveness::NORMAL_EFFECTIVE
     end
   end
