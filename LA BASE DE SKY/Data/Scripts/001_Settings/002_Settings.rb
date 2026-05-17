@@ -17,10 +17,10 @@ module Settings
   # El tamaño de la pantalla por defecto.
   #   * Posibles valores: 0.5, 1.0, 1.5 y 2.0.
   SCREEN_SCALE  = 1.0
-  # Si es true (o bien estás en modo test con $DEBUG), al arrancar se aplica este
-  # SCREEN_SCALE y se ignorará el tamaño guardado en la partida para esa sesión de arranque.
-  # Déjalo en false en builds finales si quieres que la opción "Tamaño de ventana"
-  # y el archivo de guardado sigan mandando después del primer lanzamiento.
+  # Si es true, al arrancar se aplica este SCREEN_SCALE y se ignorará el tamaño
+  # guardado en la partida para esa sesión de arranque.
+  # Déjalo en false si quieres que la opción "Tamaño de ventana" y el archivo
+  # de guardado sigan mandando (también en modo debug).
   FORCE_SCREEN_SCALE_ON_BOOT = false
 
   # Índice 0–4 ligado al multiplicador lógico (p. ej. 1.5 → opción Grande).
