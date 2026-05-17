@@ -816,9 +816,9 @@ module PluginManager
         Console.echo_warn("El plugin '#{name}' puede no ser compatible con Essentials v#{Essentials::VERSION}. Intentando cargar de todos modos.")
       end
 
-      if !meta[:lbds]
-        Console.echo_warn("El plugin '#{name}' no tiene especificada la versión mínima de La Base De Sky en el campo 'LBDS' en su archivo meta.txt. Intentando cargar de todos modos.")
-      end
+      # if !meta[:lbds]
+      #   Console.echo_warn("El plugin '#{name}' no tiene especificada la versión mínima de La Base De Sky en el campo 'LBDS' en su archivo meta.txt. Intentando cargar de todos modos.")
+      # end
       
       # registrar plugin
       self.register(meta)
