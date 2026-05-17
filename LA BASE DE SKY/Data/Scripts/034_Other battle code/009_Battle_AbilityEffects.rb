@@ -1311,6 +1311,14 @@ Battle::AbilityEffects::ModifyMoveBaseType.add(:REFRIGERATE,
   }
 )
 
+Battle::AbilityEffects::ModifyMoveBaseType.add(:DRAGONIZE,
+  proc { |ability, user, move, type|
+    next if type != :NORMAL || !GameData::Type.exists?(:DRAGON)
+    move.powerBoost = true
+    next :DRAGON
+  }
+)
+
 #===============================================================================
 # AccuracyCalcFromUser handlers
 #===============================================================================
@@ -1431,7 +1439,7 @@ Battle::AbilityEffects::DamageCalcFromUser.add(:AERILATE,
   }
 )
 
-Battle::AbilityEffects::DamageCalcFromUser.copy(:AERILATE, :GALVANIZE, :NORMALIZE, :PIXILATE, :REFRIGERATE)
+Battle::AbilityEffects::DamageCalcFromUser.copy(:AERILATE, :GALVANIZE, :NORMALIZE, :PIXILATE, :REFRIGERATE, :DRAGONIZE)
 
 Battle::AbilityEffects::DamageCalcFromUser.add(:ANALYTIC,
   proc { |ability, user, target, move, mults, power, type|
@@ -1754,6 +1762,14 @@ Battle::AbilityEffects::DamageCalcFromUser.add(:WATERBUBBLE,
   }
 )
 
+Battle::AbilityEffects::DamageCalcFromUser.add(:PIERCINGDRILL,
+  proc { |ability, user, target, move, mults, power, type|
+    if move.pbContactMove?(user) && target.damageState.protected
+      mults[:final_damage_multiplier] *= 0.25
+    end 
+  }
+)
+
 #===============================================================================
 # DamageCalcFromAlly handlers
 #===============================================================================
@@ -1784,6 +1800,28 @@ Battle::AbilityEffects::DamageCalcFromAlly.add(:STEELYSPIRIT,
     mults[:final_damage_multiplier] *= 1.5 if type == :STEEL
   }
 )
+
+Battle::AbilityEffects::DamageCalcFromUser.add(:MEGASOL,
+  proc { |ability, user, target, move, mults, power, type|
+    if ![:Sun, :HarshSun].include?(user.effectiveWeather)
+      case move.type
+      when :FIRE
+        mults[:final_damage_multiplier] *= 1.5
+      when :WATER
+        if move.function_code == "IncreasePowerInSun" 
+          mults[:final_damage_multiplier] *= 1.5 
+        else
+          mults[:final_damage_multiplier] /= 2
+        end
+      else
+        if move.function_code == "IncreasePowerInSun"
+          mults[:final_damage_multiplier] *= 1.5
+        end
+      end
+    end
+  }
+)
+
 
 #===============================================================================
 # DamageCalcFromTarget handlers
@@ -1951,13 +1989,13 @@ Battle::AbilityEffects::DamageCalcFromTargetAlly.add(:FRIENDGUARD,
 #===============================================================================
 
 Battle::AbilityEffects::CriticalCalcFromUser.add(:MERCILESS,
-  proc { |ability, user, target, move, c|
+  proc { |ability, user, target, c, move|
     next 99 if target.poisoned?
   }
 )
 
 Battle::AbilityEffects::CriticalCalcFromUser.add(:SUPERLUCK,
-  proc { |ability, user, target, move, c|
+  proc { |ability, user, target, c, move|
     next c + 1
   }
 )
@@ -1967,7 +2005,7 @@ Battle::AbilityEffects::CriticalCalcFromUser.add(:SUPERLUCK,
 #===============================================================================
 
 Battle::AbilityEffects::CriticalCalcFromTarget.add(:BATTLEARMOR,
-  proc { |ability, user, target, move, c|
+  proc { |ability, user, target, c, move|
     next -1
   }
 )
@@ -2135,6 +2173,19 @@ Battle::AbilityEffects::OnBeingHit.add(:FLAMEBODY,
     next if !move.pbContactMove?(user) || !user.affectedByContactEffect?
     next if user.burned? || !user.pbCanBurn?(target, false)
     next if battle.pbRandom(100) >= 30
+    battle.pbShowAbilitySplash(target)
+    msg = nil
+    if !Battle::Scene::USE_ABILITY_SPLASH
+      msg = _INTL("¡{1} de {2} quemó a {3}!", target.pbThis, target.abilityName, user.pbThis(true))
+    end
+    user.pbBurn(target, msg)
+    battle.pbHideAbilitySplash(target)
+  }
+)
+
+Battle::AbilityEffects::OnBeingHit.add(:SPICYSPRAY,
+  proc { |ability, user, target, move, battle|
+    next if user.burned? || !user.pbCanBurn?(target, false)
     battle.pbShowAbilitySplash(target)
     msg = nil
     if !Battle::Scene::USE_ABILITY_SPLASH
@@ -2330,7 +2381,7 @@ Battle::AbilityEffects::OnBeingHit.add(:TOXICDEBRIS,
     battle.pbShowAbilitySplash(target)
     target.pbOpposingSide.effects[PBEffects::ToxicSpikes] += 1
     battle.pbAnimation(:TOXICSPIKES, target, target.pbDirectOpposing)
-    battle.pbDisplay(_INTL("Púas tóxicas se esparcieron en el suelo alrededor de {1}!", target.pbOpposingTeam(true)))
+    battle.pbDisplay(_INTL("¡Púas tóxicas se esparcieron en el suelo alrededor de {1}!", target.pbOpposingTeam(true)))
     battle.pbHideAbilitySplash(target)
   }
 )
@@ -2417,7 +2468,7 @@ Battle::AbilityEffects::OnDealingHit.add(:POISONTOUCH,
     next if !move.pbContactMove?(user)
     next if !target.affectedByAdditionalEffects?
     next if !target.pbCanPoison?(user, false)
-    next if target.hasActiveAbility?(:SHIELDDUST) && !target.being_mold_broken?
+    next if target.hasActiveAbility?(:SHIELDDUST) && !target.beingMoldBroken?
     next if battle.pbRandom(100) >= 30
     battle.pbShowAbilitySplash(user)
     msg = nil
@@ -2433,7 +2484,7 @@ Battle::AbilityEffects::OnDealingHit.add(:TOXICCHAIN,
   proc { |ability, user, target, move, battle|
     next if !target.affectedByAdditionalEffects?
     next if !target.pbCanPoison?(user, false)
-    next if target.hasActiveAbility?(:SHIELDDUST) && !target.being_mold_broken?
+    next if target.hasActiveAbility?(:SHIELDDUST) && !target.beingMoldBroken?
     next if battle.pbRandom(100) >= 30
     battle.pbShowAbilitySplash(user)
     msg = nil
@@ -2831,8 +2882,8 @@ Battle::AbilityEffects::EndOfRoundEffect.add(:MOODY,
       battler.pbLowerStatStageByAbility(randomDown[down_idx], 1, battler, false)
     end
     battle.pbHideAbilitySplash(battler)
-    battler.pbItemStatRestoreCheck if randomDown.length > 0
-    battler.pbItemOnStatDropped
+    battler.pbItemStatRestoreCheck if randomDown.length > 0 # White Herb
+    battler.pbItemOnStatDropped # Eject Pack
   }
 )
 
@@ -3158,7 +3209,7 @@ Battle::AbilityEffects::OnSwitchIn.add(:EMBODYASPECTSPEED,
   proc { |ability, battler, battle, switch_in|
     next if battler.abilityUsedOnce?
     next if !battler.isSpecies?(:OGERPON) || battler.effects[PBEffects::Transform]
-    battle.pbDisplay(_INTL("¡La {1} usada por {2} brilló fuertemente!", battler.itemName, battler.pbThis(true)))
+    battle.pbDisplay(_INTL("¡La Máscara Turquesa usada por {1} brilló fuertemente!", battler.pbThis(true)))
     battler.pbRaiseStatStageByAbility(:SPEED, 1, battler)
     battler.markAbilityUsedOnce if Settings::MECHANICS_GENERATION >= 9
   }
@@ -3247,8 +3298,14 @@ Battle::AbilityEffects::OnSwitchIn.add(:GRASSYSURGE,
 
 Battle::AbilityEffects::OnSwitchIn.add(:HADRONENGINE,
   proc { |ability, battler, battle, switch_in|
-    battle.pbStartTerrainAbility(:Electric, battler,
-       _INTL("¡{1} Electrificó el terreno, para energizar su motor futurista!", battler.pbThis))
+    if battle.field.terrain == :Electric
+      battle.pbShowAbilitySplash(battler)
+      battle.pbDisplay(_INTL("¡{1} usó el Terreno Eléctrico para energizar su motor futurista!", battler.pbThis))
+      battle.pbHideAbilitySplash(battler)
+    elsif battle.pbCanStartTerrain?(:Electric)
+      battle.pbStartTerrainAbility(:Electric, battler,
+        _INTL("¡{1} Electrificó el terreno, para energizar su motor futurista!", battler.pbThis))
+    end
   }
 )
 
@@ -3351,6 +3408,11 @@ Battle::AbilityEffects::OnSwitchIn.add(:NEUTRALIZINGGAS,
     battle.pbHideAbilitySplash(battler)
     battle.pbDisplay(_INTL("¡Un gas reactivo se propaga por toda la zona!"))
     battle.allBattlers(true).each do |b|
+	    if b.hasActiveItem?(:ABILITYSHIELD)
+		    itemname = GameData::Item.get(b.item).name
+		    battle.pbDisplay(_INTL("¡La habilidad de {1} está protegida por los efectos de su {2}!", b.pbThis(true), itemname))
+		    next
+	    end
       # Slow Start - end all turn counts
       b.effects[PBEffects::SlowStart] = 0
       # Truant - let b move on its first turn after Neutralizing Gas disappears
@@ -3381,9 +3443,14 @@ Battle::AbilityEffects::OnSwitchIn.add(:NEUTRALIZINGGAS,
 
 Battle::AbilityEffects::OnSwitchIn.add(:ORICHALCUMPULSE,
   proc { |ability, battler, battle, switch_in|
-    next if !battle.pbCanStartWeather?(:Sun)
-    battle.pbStartWeatherAbility(:Sun, battler, false,
-       _INTL("¡{1} invocó el sol, incrementando su ataque!", battler.pbThis))
+    if [:Sun, :HarshSun].include?(battle.field.weather)
+      battle.pbShowAbilitySplash(battler)
+      battle.pbDisplay(_INTL("¡{1} aprovecha la luz del sol, enviando su pulso antiguo a un frenesí!", battler.pbThis))
+      battle.pbHideAbilitySplash(battler)
+    elsif battle.pbCanStartWeather?(:Sun)
+      battle.pbStartWeatherAbility(:Sun, battler, false,
+        _INTL("¡{1} invocó el sol, incrementando su ataque!", battler.pbThis))
+    end
   }
 )
 
@@ -3512,7 +3579,6 @@ Battle::AbilityEffects::OnSwitchIn.add(:SUPERSWEETSYRUP,
       b.pbLowerEvasionStatStageSupersweetSyrup(battler)
     end
     battle.pbHideAbilitySplash(battler)
-    battle.pbSetAbilityTrigger(battler)
   }
 )
 
@@ -3573,6 +3639,21 @@ Battle::AbilityEffects::OnSwitchIn.add(:WINDRIDER,
     battler.pbRaiseStatStageByAbility(:ATTACK, 1, battler)
   }
 )
+
+Battle::AbilityEffects::OnSwitchIn.add(:OVERGROW, proc { |ability, battler, battle, switch_in|
+  next if battler.hp > (battler.totalhp / 3).floor
+  battle.pbShowAbilitySplash(battler)
+  type = GameData::Ability.get(ability).flags[0] if !GameData::Ability.get(ability).flags.empty?
+  type = GameData::Type.get(type).name if type && GameData::Type.exists?(type)
+  if type
+    battle.pbDisplay(_INTL("¡{1} activado! Los ataques de tipo {2} de {3} ahora son más potentes.", battler.abilityName, type, battler.pbThis(true)))
+  else
+    battle.pbDisplay(_INTL("¡{1} activado! Los ataques del primer tipo de {2} ahora son más potentes.", battler.abilityName, battler.pbThis(true)))
+  end
+  battle.pbHideAbilitySplash(battler)
+})
+
+Battle::AbilityEffects::OnSwitchIn.copy(:OVERGROW, :TORRENT, :BLAZE, :SWARM)
 
 #===============================================================================
 # OnSwitchOut handlers
@@ -3673,12 +3754,8 @@ Battle::AbilityEffects::OnBattlerFainting.add(:SOULHEART,
 Battle::AbilityEffects::OnWeatherChange.add(:PROTOSYNTHESIS,
   proc { |ability, battler, battle, old_weather, ability_changed|
     next if battler.effects[PBEffects::BoosterEnergy]
-    if [:Sun, :HarshSun].include?(battle.field.pbWeather) && !battler.effects[PBEffects::Transform]
-      best = nil
-      [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-        value = battler.stat_with_stages(stat)
-        best = [stat, value] if !value || value > stat[1]
-      end
+    if [:Sun, :HarshSun].include?(battle.field.weather) && !battler.effects[PBEffects::Transform]
+      best = battler.highest_stat_including_stages
       battler.effects[PBEffects::ProtosynthesisStat] = best[0]
       battle.pbShowAbilitySplash(battler)
       battle.pbDisplay(_INTL("El sol activó la {1} de {2}!", battler.abilityName, battler.pbThis(true)))
@@ -3731,13 +3808,7 @@ Battle::AbilityEffects::OnTerrainChange.add(:QUARKDRIVE,
   proc { |ability, battler, battle, old_terrain, ability_changed|
     next if battler.effects[PBEffects::BoosterEnergy]
     if battle.field.terrain == :Electric && !battler.effects[PBEffects::Transform]
-      best = nil
-      [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-        value = battler.stat_with_stages(stat)
-        if !best || value > best[1]
-          best = [stat, value]
-        end
-      end
+      best = battler.highest_stat_including_stages
       if best
         battler.effects[PBEffects::ProtosynthesisStat] = best[0]
         battle.pbShowAbilitySplash(battler)

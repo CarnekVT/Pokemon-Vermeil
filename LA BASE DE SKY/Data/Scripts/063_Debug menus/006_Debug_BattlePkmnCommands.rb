@@ -787,7 +787,7 @@ MenuHandlers.add(:battle_pokemon_debug_menu, :set_form, {
       next if f == pkmn.form
       pkmn.forced_form = nil
       if MultipleForms.hasFunction?(pkmn, "getForm")
-        next if !pbConfirmMessage(_INTL("Esta especie decide su propia forma. ¿Sobreescribir?"))
+        next if !pbConfirmMessage(_INTL("Esta especie decide su propia forma. ¿Sobrescribir?"))
         pkmn.forced_form = f
       end
       pkmn.form_simple = f
@@ -819,10 +819,10 @@ MenuHandlers.add(:battle_pokemon_debug_menu, :set_shininess, {
     cmd = 0
     loop do
       msg_idx = pkmn.shiny? ? (pkmn.super_shiny? ? 1 : 0) : 2
-      msg = [_INTL("Es variocolor."), _INTL("Es super variocolor."), _INTL("Es normal (no variocolor).")][msg_idx]
+      msg = [_INTL("Es variocolor."), _INTL("Es súper variocolor."), _INTL("Es normal (no variocolor).")][msg_idx]
       cmd = pbMessage("\\ts[]" + msg,
                       [_INTL("Hacer variocolor"),
-                       _INTL("Hacer super variocolor"),
+                       _INTL("Hacer súper variocolor"),
                        _INTL("Hacer normal"),
                        _INTL("Resetear")], -1, nil, cmd)
       break if cmd < 0

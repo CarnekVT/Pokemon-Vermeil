@@ -306,6 +306,7 @@ class Window_AdvancedTextPokemon < SpriteWindow_Base
       @bitmapwidth = width
       @bitmapheight = height
       @numtextchars = 0
+      @oldfont = self.contents.font.clone if self.contents && !self.contents.disposed? && !@oldfont
     else
       if @letterbyletter
         @fmtchars = []

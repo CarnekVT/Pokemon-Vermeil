@@ -457,7 +457,7 @@ class Battle::Move::RaiseUserAtkSpAtk1Or2InSun < Battle::Move::MultiStatUpMove
 
   def pbOnStartUse(user, targets)
     increment = 1
-    increment = 2 if [:Sun, :HarshSun].include?(user.effectiveWeather)
+    increment = 2 if [:Sun, :HarshSun].include?(user.effectiveWeather) || user.hasActiveAbility?(:MEGASOL)
     @statUp[1] = @statUp[3] = increment
   end
 end
@@ -1028,7 +1028,7 @@ class Battle::Move::RaiseTargetAtk2LowerTargetDef2 < Battle::Move
 
   def pbMoveFailed?(user, targets)
     failed = true
-    targets.each do |b|
+    targets.each do |target|
       (@statUp.length / 2).times do |i|
         next if !target.pbCanRaiseStatStage?(@statUp[i * 2], user, self)
         failed = false
@@ -1413,7 +1413,7 @@ end
 #===============================================================================
 class Battle::Move::LowerTargetSpeed1AlwaysHitsInRain < Battle::Move::LowerTargetSpeed1
   def pbBaseAccuracy(user, target)
-    return 0 if [:Rain, :HeavyRain].include?(target.effectiveWeather)
+    return 0 if [:Rain, :HeavyRain].include?(target.effectiveWeather) && !user.hasActiveAbility?(:MEGASOL)
     return super
   end
 end
@@ -2319,25 +2319,6 @@ class Battle::Move::StartSwapAllBattlersBaseDefensiveStats < Battle::Move
 end
 
 #===============================================================================
-# Last Respects
-#===============================================================================
-# Power is increased by 50 for each time a teammate fainted this battle.
-#-------------------------------------------------------------------------------
-class Battle::Move::IncreasePowerEachFaintedAlly < Battle::Move
-  def pbBaseDamage(baseDmg, user, target)
-    numFainted = user.num_fainted_allies
-    return baseDmg if numFainted <= 0
-    baseDmg += 50 * numFainted
-    return baseDmg
-  end
-end
-
-#===============================================================================
-# Make it Rain
-#===============================================================================
-# Lowers the user's Sp.Atk by 1 stage. Also scatters coins to be picked up.
-#-------------------------------------------------------------------------------
-#===============================================================================
 # Make it Rain
 #===============================================================================
 # Lowers the user's Sp.Atk by 1 stage. Also scatters coins to be picked up.
@@ -2348,7 +2329,7 @@ class Battle::Move::AddMoneyGainedFromBattleLowerUserSpAtk1 < Battle::Move
     super
     @statDown = [:SPECIAL_ATTACK, 1]
   end
-  
+
   def pbEndOfMoveUsageEffect(user, targets, numHits, switchedBattlers)
     return if @battle.pbAllFainted?(user.idxOpposingSide)
     hit_target = false
@@ -2386,7 +2367,7 @@ class Battle::Move::RaiseUserStat1Commander < Battle::Move
       end
     end
   end
-  
+
   def pbShowAnimation(id, user, targets, hitNum = 0, showAnimation = true)
     hitNum = user.effects[PBEffects::Commander][1] + 1 if user.isCommanderHost? # Different animation based on Tatsugiri's form
     super
@@ -2411,7 +2392,7 @@ class Battle::Move::RaiseTargetAtkLowerTargetDef2 < Battle::Move
 
   def pbFailsAgainstTarget?(user, target, show_message)
     return false if damagingMove?
-    failed = !target.pbCanRaiseStatStage?(@statUp[0], user, self) && 
+    failed = !target.pbCanRaiseStatStage?(@statUp[0], user, self) &&
              !target.pbCanLowerStatStage?(@statDown[0], user, self)
     if failed
       @battle.pbDisplay(_INTL("¡Las estadísticas de {1} no pueden cambiar más!", target.pbThis(true))) if show_message
@@ -2442,7 +2423,7 @@ class Battle::Move::RaiseUserAtkSpd1RemoveHazardsSubstitutes < Battle::Move::Mul
     super
     @statUp = [:ATTACK, 1, :SPEED, 1]
   end
-  
+
   def pbMoveFailed?(user, targets)
     failed = true
     2.times do |i|

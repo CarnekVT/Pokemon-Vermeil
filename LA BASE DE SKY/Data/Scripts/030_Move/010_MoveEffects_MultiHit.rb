@@ -124,6 +124,7 @@ class Battle::Move::HitTwoToFiveTimes < Battle::Move
   def multiHitMove?; return true; end
 
   def pbNumHits(user, targets)
+    return 4 + @battle.pbRandom(2) if user.hasActiveItem?(:LOADEDDICE)
     hitChances = [
       2, 2, 2, 2, 2, 2, 2,
       3, 3, 3, 3, 3, 3, 3,
@@ -133,7 +134,6 @@ class Battle::Move::HitTwoToFiveTimes < Battle::Move
     r = @battle.pbRandom(hitChances.length)
     r = hitChances.length - 1 if user.hasActiveAbility?(:SKILLLINK)
     ret = hitChances[r]
-    ret = 4 if r < 4 && user.hasActiveItem?(:LODADEDDICE)
     return ret
   end
 end
@@ -230,8 +230,8 @@ end
 class Battle::Move::TwoTurnAttackOneTurnInSun < Battle::Move::TwoTurnMove
   def pbIsChargingTurn?(user)
     ret = super
-    if !user.effects[PBEffects::TwoTurnAttack] &&
-       [:Sun, :HarshSun].include?(user.effectiveWeather)
+    if !user.effects[PBEffects::TwoTurnAttack] && 
+      ([:Sun, :HarshSun].include?(user.effectiveWeather) || user.hasActiveAbility?(:MEGASOL))
       @powerHerb = false
       @chargingTurn = true
       @damagingTurn = true
@@ -245,7 +245,7 @@ class Battle::Move::TwoTurnAttackOneTurnInSun < Battle::Move::TwoTurnMove
   end
 
   def pbBasePowerMultiplier(power_mult, user, target)
-    power_mult /= 2 if ![:None, :Sun, :HarshSun].include?(user.effectiveWeather)
+    power_mult /= 2 if ![:None, :Sun, :HarshSun].include?(user.effectiveWeather) && !user.hasActiveAbility?(:MEGASOL)
     return power_mult
   end
 end
@@ -398,7 +398,7 @@ class Battle::Move::TwoTurnAttackOneTurnInRainChargeRaiseUserSpAtk1 < Battle::Mo
   def pbIsChargingTurn?(user)
     ret = super
     if !user.effects[PBEffects::TwoTurnAttack] &&
-       [:Rain, :HeavyRain].include?(user.effectiveWeather)
+       [:Rain, :HeavyRain].include?(user.effectiveWeather) && !user.hasActiveAbility?(:MEGASOL)
       @powerHerb = false
       @chargingTurn = true
       @damagingTurn = true

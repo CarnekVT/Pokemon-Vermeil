@@ -492,7 +492,7 @@ class PBAnimation < Array
         begin 
           if bgGraphic.bitmap.nil?
             bgColor.opacity = oldbg[2] || 0 + ((i.opacity - (oldbg[2] || 0)) * fraction) if i.opacity
-            cr = i.colorRed ? (oldbg[3]&.red || 0.0) + ((i.colorRed - (oldbg[3].red || Color.new(0, 0, 0, 0).red)) * fraction) : oldbg[3]&.red || Color.new(0, 0, 0, 0).red
+            cr = i.colorRed ? (oldbg[3]&.red || 0.0) + ((i.colorRed - (oldbg[3]&.red || Color.new(0, 0, 0, 0).red)) * fraction) : oldbg[3]&.red || Color.new(0, 0, 0, 0).red
             cg = i.colorGreen ? (oldbg[3]&.green || 0.0) + ((i.colorGreen - (oldbg[3]&.green || Color.new(0, 0, 0, 0).green)) * fraction) : oldbg[3]&.green || Color.new(0, 0, 0, 0).green
             cb = i.colorBlue ? (oldbg[3]&.blue || 0.0) + ((i.colorBlue - (oldbg[3]&.blue || Color.new(0, 0, 0, 0).blue)) * fraction) : oldbg[3]&.blue || Color.new(0, 0, 0, 0).blue
             ca = i.colorAlpha ? (oldbg[3]&.alpha || 0.0) + ((i.colorAlpha - (oldbg[3]&.alpha || Color.new(0, 0, 0, 0).alpha)) * fraction) : oldbg[3]&.alpha || Color.new(0, 0, 0, 0).alpha

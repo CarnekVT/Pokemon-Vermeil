@@ -383,7 +383,7 @@ def pbBugContestBattle(pkmn, level = 1)
   outcome = Battle::Outcome::UNDECIDED
   pbBattleAnimation(pbGetWildBattleBGM(foeParty), 0, foeParty) do
     outcome = battle.pbStartBattle
-    BattleCreationHelperMethods.after_battle(outcome, true)
+    BattleCreationHelperMethods.after_battle(outcome, true, battle)
     if Battle::Outcome.should_black_out?(outcome)
       $game_system.bgm_unpause
       $game_system.bgs_unpause

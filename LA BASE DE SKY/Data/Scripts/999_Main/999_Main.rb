@@ -1,5 +1,5 @@
 module LBDSKY
-  VERSION = "1.2.0.1" # No modificar esto
+  VERSION = "1.2.1" # No modificar esto
 end
 
 class Scene_DebugIntro
@@ -32,13 +32,11 @@ def mainFunctionDebug
     PluginManager.runPlugins
     Compiler.main
     Game.initialize
-    Graphics.resize_screen(Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
-    Graphics.scale = 0.5
-    Graphics.update
-    Graphics.scale = (Settings::SCREEN_SCALE + 1) * 0.5
-    Graphics.center
-    Graphics.update
+    # Graphics.resize_screen(Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
+    # Graphics.scale = 0.5
+    # Graphics.update
     Game.set_up_system
+    Graphics.update
     Graphics.freeze
     $scene = pbCallTitle
     $scene.main until $scene.nil?

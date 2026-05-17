@@ -309,11 +309,18 @@ class Battle::Battler
   def pbRemoveItem
     @effects[PBEffects::ChoiceBand] = nil if !hasActiveAbility?(:GORILLATACTICS)
     @effects[PBEffects::Unburden]   = true if self.item && hasActiveAbility?(:UNBURDEN)
+    if Settings::RESTORE_HELD_ITEMS_AFTER_BATTLE && @battle.used_items && pbOwnedByPlayer?
+      @battle.used_items << [self.pokemon, @item_id]
+    end
     self.item = nil
   end
 
   def pbConsumeItem(recoverable = true, symbiosis = true, belch = true)
     PBDebug.log("[Item consumed] #{pbThis} consumed its held #{itemName}")
+    # Track consumed items for RestoreItemsAfterBattle feature
+    if Settings::RESTORE_HELD_ITEMS_AFTER_BATTLE && @battle.used_items && pbOwnedByPlayer?
+      @battle.used_items << [self.pokemon, @item_id]
+    end
     if recoverable
       setRecycleItem(@item_id)
       @effects[PBEffects::PickupItem] = @item_id
@@ -434,7 +441,7 @@ class Battle::Battler
     itm = item_to_use || self.item
     if Battle::ItemEffects.triggerOnEndOfUsingMove(itm, self, @battle, !item_to_use.nil?)
       pbHeldItemTriggered(itm, item_to_use.nil?, fling)
-    elsif Battle::ItemEffects.triggerOnEndOfUsingMoveStatRestore(itm, self, @battle, !item_to_use.nil?)
+    elsif Battle::ItemEffects.triggerOnEndOfUsingMoveStatRestore(itm, self, @battle, !item_to_use.nil?) # White Herb
       pbHeldItemTriggered(itm, item_to_use.nil?, fling)
     end
   end

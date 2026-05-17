@@ -111,19 +111,21 @@ module PluginManager
   # Contiene todos los datos registrados de los plugins.
   @@Plugins = {}
 
-  EXCLUDED_REQUIRES = ["v21.1 Hotfixes", "Modular UI Scenes", "Luka's Scripting Utilities", "Marin's Scripting Utilities", 
-                       "Tileset Rearranger", "DP Scripting Utilities", "Easy Mouse", "Event Reporting"]
+  EXCLUDED_REQUIRES = ["v21.1 Hotfixes", "Modular UI Scenes", "[MUI] Enhanced Pokemon UI", "[MUI] Pokedex Data Page",
+                       "Lin's IV EV Summary Screen", "Luka's Scripting Utilities", "Marin's Scripting Utilities", 
+                       "Tileset Rearranger", "Box Auto-Sort", "DP Scripting Utilities", "Easy Mouse", "Event Reporting"]
 
   # Registra un plugin y prueba sus dependencias e incompatibilidades.
   def self.register(options)
     name         = nil
     version      = nil
     essentials   = nil
+    lbds         = nil
     link         = nil
     dependencies = nil
     incompats    = nil
     credits      = []
-    order = [:name, :version, :essentials, :link, :dependencies, :incompatibilities, :credits]
+    order = [:name, :version, :essentials, :lbds, :link, :dependencies, :incompatibilities, :credits]
     # Asegura que primero lea el nombre del plugin, que se utiliza en la notificación de errores,
     # ordenando las claves
     keys = options.keys.sort do |a, b|
@@ -147,6 +149,15 @@ module PluginManager
         version = value
       when :essentials
         essentials = value
+      when :lbds
+        lbds = value
+        if lbds.is_a?(Array)
+          lbds = lbds[0]
+        end
+        if lbds && VersionChecker.older?(LBDSKY::VERSION, lbds)
+          self.error("El plugin '#{name}' es incompatible con La Base De Sky V#{LBDSKY::VERSION}. No se cargará. Requiere al menos La Base De Sky V#{lbds}.")
+          Kernel.exit! true
+        end        
       when :link   # Sitio web del plugin
         if nil_or_empty?(value)
           self.error("El enlace del plugin debe ser una cadena no vacía.")
@@ -281,7 +292,8 @@ module PluginManager
       when :priority  # Requerido para que no tire error.
         options[:priority] = value.to_i
       else
-        self.error("Clave de registro de plugin no válida '#{key}'.")
+        # Ignorar claves desconocidas
+        Console.echo_warn("Clave de registro de plugin no válida '#{key}'.")
       end
     end
     # Verificar que no sea first y last al mismo tiempo
@@ -298,6 +310,7 @@ module PluginManager
       :name              => name,
       :version           => version,
       :essentials        => essentials,
+      :lbds              => lbds,
       :link              => link,
       :dependencies      => dependencies,
       :incompatibilities => incompats,
@@ -340,22 +353,31 @@ module PluginManager
     return @@Plugins.keys
   end
 
+  def self.get_installed(plugin_name)
+    return if !installed?(plugin_name)
+    return if !@@Plugins || !@@Plugins[plugin_name]
+    return @@Plugins[plugin_name]
+  end
+
   # Devuelve la versión instalada del plugin especificado.
   def self.version(plugin_name)
-    return if !installed?(plugin_name)
-    return @@Plugins[plugin_name][:version]
+    plugin = self.get_installed(plugin_name)
+    return if !plugin
+    return plugin[:version]
   end
 
   # Devuelve el enlace del plugin especificado.
   def self.link(plugin_name)
-    return if !installed?(plugin_name)
-    return @@Plugins[plugin_name][:link]
+    plugin = self.get_installed(plugin_name)
+    return if !plugin
+    return plugin[:link]
   end
 
   # Devuelve los créditos del plugin especificado.
   def self.credits(plugin_name)
-    return if !installed?(plugin_name)
-    return @@Plugins[plugin_name][:credits]
+    plugin = self.get_installed(plugin_name)
+    return if !plugin
+    return plugin[:credits]
   end
 
   # Compara dos versiones dadas en forma de cadena. v1 debería ser la versión del plugin
@@ -365,6 +387,9 @@ module PluginManager
   #     0 si v1 es igual a v2
   #     -1 si v1 es menor que v2
   def self.compare_versions(v1, v2)
+    return 0 if v1 == v2
+    return 1 if v1.nil? || v1.empty?
+    return -1 if v2.nil? || v2.empty?
     version_chunks1 = v1.split(".")
     version_chunks1.each_with_index do |val, i|
       next if val != ""
@@ -467,6 +492,8 @@ module PluginManager
       when "ESSENTIALS"
         meta[:essentials] = [] if !meta[:essentials]
         data.each { |ver| meta[:essentials].push(ver) }
+      when "LBDS"
+        meta[:lbds] = data[0] if data[0]
       when "REQUIRES"
         meta[:dependencies] = [] if !meta[:dependencies]
         if data.length < 2   # No se proporciona una versión, solo se agrega el nombre de la dependencia del plugin
@@ -659,6 +686,11 @@ module PluginManager
       meta[:dir] = dir
       # generar error si no se define un nombre para el plugin
       self.error("No se ha definido metadatos 'Name' para el plugin ubicado en '#{dir}'.") if !meta[:name]
+      # generar error si el plugin ya está incluido en La Base De Sky
+      if EXCLUDED_REQUIRES.include?(meta[:name])
+        self.error("El plugin '#{meta[:name]}' ya está incluido por defecto en La Base De Sky V#{LBDSKY::VERSION}. " +
+                   "Por favor, elimina la carpeta '#{dir}' para evitar conflictos.")
+      end
       # generar error si no se define un script para el plugin
       self.error("No se han definido metadatos 'Scripts' para el plugin ubicado en '#{dir}'.") if !meta[:scripts]
       plugins[meta[:name]] = meta
@@ -783,6 +815,10 @@ module PluginManager
       if !meta[:essentials] || !meta[:essentials].include?(Essentials::VERSION)
         Console.echo_warn("El plugin '#{name}' puede no ser compatible con Essentials v#{Essentials::VERSION}. Intentando cargar de todos modos.")
       end
+
+      # if !meta[:lbds]
+      #   Console.echo_warn("El plugin '#{name}' no tiene especificada la versión mínima de La Base De Sky en el campo 'LBDS' en su archivo meta.txt. Intentando cargar de todos modos.")
+      # end
       
       # registrar plugin
       self.register(meta)

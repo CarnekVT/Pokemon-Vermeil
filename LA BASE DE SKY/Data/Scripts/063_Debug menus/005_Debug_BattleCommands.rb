@@ -359,9 +359,9 @@ MenuHandlers.add(:battle_debug_menu, :terrain, {
 })
 
 MenuHandlers.add(:battle_debug_menu, :environment_time, {
-  "name"        => _INTL("Ambiente/hora"),
+  "name"        => _INTL("Entorno/hora"),
   "parent"      => :field,
-  "description" => _INTL("Define el ambiente y hora del día del combate."),
+  "description" => _INTL("Define el entorno y hora del día del combate."),
   "effect"      => proc { |battle|
     environment_types = []
     environment_cmds = []
@@ -372,17 +372,17 @@ MenuHandlers.add(:battle_debug_menu, :environment_time, {
     cmd = 0
     loop do
       environment_data = GameData::Environment.try_get(battle.environment)
-      msg = _INTL("Ambiente: {1}", environment_data.name || _INTL("Desconocido"))
+      msg = _INTL("Entorno: {1}", environment_data.name || _INTL("Desconocido"))
       msg += "\n"
       msg += _INTL("Hora del día: {1}", [_INTL("Día"), _INTL("Tarde"), _INTL("Noche")][battle.time])
-      cmd = pbMessage("\\ts[]" + msg, [_INTL("Cambiar ambiente"),
+      cmd = pbMessage("\\ts[]" + msg, [_INTL("Cambiar entorno"),
                                        _INTL("Cambiar hora del día")], -1, nil, cmd)
       break if cmd < 0
       case cmd
       when 0   # Change environment
         environment_cmd = environment_types.index(battle.environment) || 0
         new_environment = pbMessage(
-          "\\ts[]" + _INTL("Elige el nuevo ambiente."), environment_cmds, -1, nil, environment_cmd
+          "\\ts[]" + _INTL("Elige el nuevo entorno."), environment_cmds, -1, nil, environment_cmd
         )
         if new_environment >= 0
           battle.environment = environment_types[new_environment]

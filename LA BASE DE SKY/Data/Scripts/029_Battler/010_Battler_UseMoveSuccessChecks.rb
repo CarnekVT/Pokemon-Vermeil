@@ -276,7 +276,7 @@ class Battle::Battler
       @effects[PBEffects::Confusion] -= 1
       if @effects[PBEffects::Confusion] <= 0
         pbCureConfusion
-        @battle.pbDisplay(_INTL("¡{1} ya no está confuso.", pbThis))
+        @battle.pbDisplay(_INTL("¡{1} ya no está confuso!", pbThis))
       else
         @battle.pbCommonAnimation("Confusion", self)
         @battle.pbDisplay(_INTL("¡{1} está confuso!", pbThis))
@@ -351,7 +351,11 @@ class Battle::Battler
       @battle.successStates[user.index].protected = true
       return false
     end
-    if !(user.hasActiveAbility?(:UNSEENFIST) && move.pbContactMove?(user))
+    if user.hasActiveAbility?(:PIERCINGDRILL) && move.pbContactMove?(user) && target.used_protect_move?(move, user)
+      @battle.successStates[user.index].protected = true
+      target.damageState.protected = true
+    end
+    if !((user.hasActiveAbility?(:UNSEENFIST) || user.hasActiveAbility?(:PIERCINGDRILL)) && move.pbContactMove?(user))
       # Wide Guard
       if target.pbOwnSide.effects[PBEffects::WideGuard] && user.index != target.index &&
          move.pbTarget(user).num_targets > 1 &&

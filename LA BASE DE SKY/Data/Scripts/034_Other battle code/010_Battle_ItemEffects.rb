@@ -586,7 +586,7 @@ Battle::ItemEffects::StatusCure.add(:PECHABERRY,
     PBDebug.log("[Item triggered] #{battler.pbThis}'s #{itemName}") if forced
     battle.pbCommonAnimation("EatBerry", battler) if !forced
     battler.pbCureStatus(forced)
-    battle.pbDisplay(_INTL("¡{1} se ha curado del envenienmiento con {2}!", battler.pbThis, itemName)) if !forced
+    battle.pbDisplay(_INTL("¡{1} se ha curado del envenenamiento con {2}!", battler.pbThis, itemName)) if !forced
     next true
   }
 )
@@ -690,7 +690,7 @@ Battle::ItemEffects::CopyStatChanges.add(:MIRRORHERB,
         battler.pbRaiseStatStage(stat, increment, battler)
       end
     end
-    battle.pbDisplay(_INTL("¡{1} se consumió...", battler.itemName))
+    battle.pbDisplay(_INTL("¡{1} se consumió!...", battler.itemName))
     battler.pbHeldItemTriggered(item)
   }
 )
@@ -1700,7 +1700,7 @@ Battle::ItemEffects::AfterMoveUseFromUser.add(:THROATSPRAY,
     next if !move.soundMove? || numHits == 0
     next if !user.pbCanRaiseStatStage?(:SPECIAL_ATTACK, user)
     battle.pbCommonAnimation("UseItem", user)
-    user.pbRaiseStatStage(:SPECIAL_ATTACK, 1, user)
+    user.pbRaiseStatStageByCause(:SPECIAL_ATTACK, 1, user, user.itemName)
     user.pbConsumeItem
   }
 )
@@ -1879,12 +1879,8 @@ Battle::ItemEffects::OnWeatherChange.add(:BOOSTERENERGY,
     next false if battler.effects[PBEffects::ProtosynthesisStat]
     next false if battler.effects[PBEffects::BoosterEnergy]
     next false if !battler.hasActiveAbility?(:PROTOSYNTHESIS)
-    next false if ![:Sun, :HarshSun].include?(battle.field.pbWeather)
-    best = nil
-    [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-      value = battler.stat_with_stages(stat)
-      best = [stat, value] if !value || value > stat[1]
-    end
+    next false if ![:Sun, :HarshSun].include?(battle.field.weather)
+    best = battler.highest_stat_including_stages
     battler.effects[PBEffects::ProtosynthesisStat] = best[0]
     battler.effects[PBEffects::BoosterEnergy] = true
     battle.pbCommonAnimation("UseItem", battler)
@@ -1910,11 +1906,7 @@ Battle::ItemEffects::OnTerrainChange.add(:BOOSTERENERGY,
     next false if battler.effects[PBEffects::BoosterEnergy]
     next false if !battler.hasActiveAbility?(:QUARKDRIVE)
     next false if battle.field.terrain != :Electric
-    best = nil
-    [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
-      value = battler.stat_with_stages(stat)
-      best = [stat, value] if !value || value > stat[1]
-    end
+    best = battler.highest_stat_including_stages
     battler.effects[PBEffects::ProtosynthesisStat] = best[0]
     battler.effects[PBEffects::BoosterEnergy] = true
     battle.pbCommonAnimation("UseItem", battler)
@@ -2073,6 +2065,27 @@ Battle::ItemEffects::OnSwitchIn.add(:ROOMSERVICE,
     battler.pbConsumeItem
   }
 )
+
+Battle::ItemEffects::OnSwitchIn.add(:BOOSTERENERGY, proc { |item, battler, battle|
+  next false if battler.effects[PBEffects::Transform]
+  next false if battler.effects[PBEffects::ProtosynthesisStat]
+  next false if battler.effects[PBEffects::BoosterEnergy]
+  next false if !battler.hasActiveAbility?(:PROTOSYNTHESIS) && !battler.hasActiveAbility?(:QUARKDRIVE)
+  next false if battler.hasActiveAbility?(:PROTOSYNTHESIS) && [:Sun, :HarshSun].include?(battle.field.weather)
+  next false if battler.hasActiveAbility?(:QUARKDRIVE) && battle.field.terrain == :Electric
+  best = battler.highest_stat_including_stages
+  battler.effects[PBEffects::ProtosynthesisStat] = best[0]
+  battler.effects[PBEffects::BoosterEnergy] = true
+  battle.pbCommonAnimation("UseItem", battler)
+  battle.pbDisplay(_INTL("¡{1} se ha consumido!", GameData::Item.get(item).name))
+  battle.pbShowAbilitySplash(battler)
+  battle.pbDisplay(_INTL("¡{1} usó su {2} para activar {3}!",
+                         battler.pbThis, GameData::Item.get(item).name, battler.abilityName))
+  battle.pbDisplay(_INTL("¡{1} aumentó su {2}!", battler.pbThis, GameData::Stat.get(best[0]).name))
+  battle.pbHideAbilitySplash(battler)
+  battler.pbHeldItemTriggered(item)
+  next true
+})
 
 #===============================================================================
 # OnIntimidated handlers

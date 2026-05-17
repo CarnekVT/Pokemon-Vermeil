@@ -10,7 +10,7 @@ module VersionChecker
   end
 
 	def older?(v1, v2)
-		!newer_or_equal?(v1, v2)
+		compare_versions(v1, v2) < 0
 	end
 
 	def equal?(v1, v2)
@@ -18,12 +18,12 @@ module VersionChecker
 	end
 
   private
-
+	module_function
   def compare_versions(new_version, current_version)
 		# Input validation
-		return false if new_version.nil? || current_version.nil?
-		return false if new_version.to_s.strip.empty? || current_version.to_s.strip.empty?
-		return false if new_version == current_version
+		return 0 if new_version.nil? || current_version.nil?
+		return 0 if new_version.to_s.strip.empty? || current_version.to_s.strip.empty?
+		return 0 if new_version == current_version
 		
 		begin
 			# Parse version components (handles pre-release identifiers)
@@ -32,14 +32,14 @@ module VersionChecker
 			
 			# Compare main version numbers first
 			version_comparison = compare_version_numbers(new_parts[:numbers], current_parts[:numbers])
-			return version_comparison > 0 if version_comparison != 0
+			return version_comparison if version_comparison != 0
 			
 			# If main versions are equal, compare pre-release identifiers
-			compare_prerelease(new_parts[:prerelease], current_parts[:prerelease]) > 0
+			compare_prerelease(new_parts[:prerelease], current_parts[:prerelease])
 		rescue StandardError => e
 			# If parsing fails, log error and return false (assume no update needed)
 			puts "Error comparing versions '#{new_version}' and '#{current_version}': #{e.message}"
-			false
+			0
 		end
 	end
 

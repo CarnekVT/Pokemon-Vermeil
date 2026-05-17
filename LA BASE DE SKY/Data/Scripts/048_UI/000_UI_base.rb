@@ -431,6 +431,16 @@ module UI
       temp_viewport.dispose
     end
 
+    # Hide all viewports without disposing (used when opening a submenu)
+    def hide_viewports
+      @viewports.each { |viewport| viewport.visible = false }
+    end
+
+    # Restore all viewports visibility (used when returning from a submenu)
+    def show_viewports
+      @viewports.each { |viewport| viewport.visible = true }
+    end
+
     def dispose
       super
       @viewports.each { |viewport| viewport.dispose }
@@ -808,6 +818,23 @@ module UI
       return if @disposed
       @visuals.dispose
       @disposed = true
+    end
+
+    # Temporarily hide the screen without disposing it, for opening a submenu.
+    # Call resume_screen after the submenu exits to restore it.
+    def suspend_screen
+      return if @disposed
+
+      @visuals.hide_viewports
+    end
+
+    # Restore the screen after a submenu has closed (pair with suspend_screen).
+    def resume_screen
+      return if @disposed
+
+      @visuals.show_viewports
+      refresh
+      Input.update
     end
 
     #-----------------------------------------------------------------------------

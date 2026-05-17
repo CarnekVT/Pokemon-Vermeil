@@ -1,4 +1,75 @@
 #===============================================================================
+# Helper: returns HP bar zone info based on Settings::HP_BAR_COLOR_MODE
+# Returns [base_zone, blend_zone, blend_opacity (0-255)]
+#===============================================================================
+def pbHPBarZoneInfo(hp, totalhp, zone_count = 4)
+  hp_fraction = (hp > 0 && totalhp > 0) ? hp.to_f / totalhp : 0.0
+  t1 = Settings::HP_BAR_GREEN_THRESHOLD
+  t2 = Settings::HP_BAR_YELLOW_THRESHOLD
+  t3 = Settings::HP_BAR_ORANGE_THRESHOLD
+  t4 = Settings::HP_BAR_RED_THRESHOLD
+  case Settings::HP_BAR_COLOR_MODE
+  when :gradient
+    if zone_count >= 4
+      if t1 < hp_fraction
+        # no hace nada
+        color_index = 0; next_color_index = 0; blend = 0
+      elsif hp_fraction > t2
+        color_index = 0; next_color_index = 1
+        blend = 1.0 - (hp_fraction - t2) / (1.0 - t2)
+      elsif hp_fraction > t3
+        color_index = 1; next_color_index = 2
+        blend = 1.0 - (hp_fraction - t3) / (t2 - t3)
+      elsif hp_fraction > t4
+        color_index = 2; next_color_index = 3
+        blend = 1.0 - (hp_fraction - t4) / (t3 - t4)
+      else
+        color_index = 3; next_color_index = 3; blend = 0
+      end
+    else
+      if hp_fraction > t2
+        color_index = 0; next_color_index = 1
+        blend = 1.0 - (hp_fraction - t2) / (1.0 - t2)
+      elsif hp_fraction > t4
+        color_index = 1; next_color_index = 2
+        blend = 1.0 - (hp_fraction - t4) / (t2 - t4)
+      else
+        color_index = zone_count - 1; next_color_index = color_index; blend = 0
+      end
+    end
+    return [color_index, next_color_index, (blend * 255).to_i]
+  when :classic
+    last = zone_count - 1
+    color_index = 0
+    color_index = 1 if hp_fraction <= 0.5
+    color_index = last if hp_fraction <= 0.25
+    return [color_index, color_index, 0]
+  when :four_colors
+    if zone_count >= 4
+      color_index = 0
+      color_index = 1 if hp_fraction <= t2
+      color_index = 2 if hp_fraction <= t3
+      color_index = 3 if hp_fraction <= t4
+    else
+      color_index = 0
+      color_index = 1 if hp_fraction <= t2
+      color_index = zone_count - 1 if hp_fraction <= t4
+    end
+    return [color_index, color_index, 0]
+  else
+    color_index = 0
+    color_index = 1 if hp_fraction <= 0.5
+    if zone_count >= 4
+      color_index = 2 if hp_fraction <= 1.0 / 3.0
+      color_index = 3 if hp_fraction <= 0.25
+    else
+      color_index = zone_count - 1 if hp_fraction <= 0.25
+    end
+    return [color_index, color_index, 0]
+  end
+end
+
+#===============================================================================
 # Data box for regular battles
 #===============================================================================
 class Battle::Scene::PokemonDataBox < Sprite
@@ -32,6 +103,8 @@ class Battle::Scene::PokemonDataBox < Sprite
   FOE_BOX_Y           = 36
   FOE_BASE_X          = 16
   DATABOX_BASE_Z      = 150
+  CONTENT_WRAPPER_EXTRA_WIDTH = 0
+  CONTENT_WRAPPER_EXTRA_HEIGHT = 10
 
   # Side size offsets
   SIDE_2_X_OFFSETS          = [-12, 12, 0, 0]
@@ -82,6 +155,9 @@ class Battle::Scene::PokemonDataBox < Sprite
   HP_NUM_CURRENT_Y  = 2
   HP_NUM_MAX_X      = 70
   HP_NUM_MAX_Y      = 2
+
+  # Number of different HP bar colors (green, yellow, orange, red)
+  HP_COLOR_COUNT = 4
 
   def initialize(battler, sideSize, viewport = nil)
     super(viewport)
@@ -161,15 +237,15 @@ class Battle::Scene::PokemonDataBox < Sprite
     @sprites["hpPercent"] = @hpPercent
     # Create sprite wrapper that displays HP bar
     @hpBar = Sprite.new(viewport)
-    @hpBar.bitmap = @hpBarBitmap.bitmap
-    @hpBar.src_rect.height = @hpBarBitmap.height / 3
+    @hpBarDisplay = Bitmap.new(@hpBarBitmap.width, @hpBarBitmap.height / HP_COLOR_COUNT)
+    @hpBar.bitmap = @hpBarDisplay
     @sprites["hpBar"] = @hpBar
     # Create sprite wrapper that displays Exp bar
     @expBar = Sprite.new(viewport)
     @expBar.bitmap = @expBarBitmap.bitmap
     @sprites["expBar"] = @expBar
     # Create sprite wrapper that displays everything except the above
-    @contents = Bitmap.new(@databoxBitmap.width, @databoxBitmap.height)
+    @contents = Bitmap.new(@databoxBitmap.width + CONTENT_WRAPPER_EXTRA_WIDTH, @databoxBitmap.height + CONTENT_WRAPPER_EXTRA_HEIGHT)
     self.bitmap  = @contents
     self.visible = false
     self.z       = DATABOX_BASE_Z + ((@battler.index / 2) * 5)
@@ -181,6 +257,7 @@ class Battle::Scene::PokemonDataBox < Sprite
     @databoxBitmap.dispose
     @numbersBitmap.dispose
     @hpBarBitmap.dispose
+    @hpBarDisplay.dispose
     @hpPercent&.dispose
     @expBarBitmap.dispose
     @contents.dispose
@@ -412,10 +489,14 @@ class Battle::Scene::PokemonDataBox < Sprite
       w = ((w / 2.0).round) * 2
     end
     @hpBar.src_rect.width = w
-    hpColor = 0                                      # Green bar
-    hpColor = 1 if self.hp <= @battler.totalhp / 2   # Yellow bar
-    hpColor = 2 if self.hp <= @battler.totalhp / 4   # Red bar
-    @hpBar.src_rect.y = hpColor * @hpBarBitmap.height / 3
+    # HP bar color based on Settings::HP_BAR_COLOR_MODE
+    bar_h = @hpBarBitmap.height / HP_COLOR_COUNT
+    @hpBarDisplay.clear
+    color_index, next_color_index, blend_alpha = pbHPBarZoneInfo(self.hp, @battler.totalhp, HP_COLOR_COUNT)
+    @hpBarDisplay.blt(0, 0, @hpBarBitmap.bitmap, Rect.new(0, color_index * bar_h, @hpBarBitmap.width, bar_h))
+    if blend_alpha > 0 && color_index != next_color_index
+      @hpBarDisplay.blt(0, 0, @hpBarBitmap.bitmap, Rect.new(0, next_color_index * bar_h, @hpBarBitmap.width, bar_h), blend_alpha)
+    end
   end
 
   def refresh_exp
@@ -523,6 +604,7 @@ class Battle::Scene::AbilitySplashBar < Sprite
   TEXT_X_MARGIN   = 8
   ABILITY_NAME_Y  = 8
   POKEMON_NAME_Y  = 38
+  BAR_Z = 300
 
   def initialize(side, viewport = nil)
     super(viewport)
@@ -541,7 +623,7 @@ class Battle::Scene::AbilitySplashBar < Sprite
     # Position the bar
     self.x       = (side == 0) ? -Graphics.width / 2 : Graphics.width
     self.y       = (side == 0) ? PLAYER_Y : FOE_Y
-    self.z       = 120
+    self.z       = BAR_Z
     self.visible = false
   end
 

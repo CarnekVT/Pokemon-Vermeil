@@ -269,6 +269,18 @@ class Battle::Battler
     return ret
   end
 
+  def stat_multiplier_from_stage(stat)
+    return 1.0 if stat.nil?
+    stage = @stages[stat]
+    return 1.0 if stage.nil?
+    stage += STAT_STAGE_MAXIMUM
+    stage = [[stage, 0].max, (STAT_STAGE_MAXIMUM * 2)].min
+    if stat == :ACCURACY || stat == :EVASION
+      return ACC_EVA_STAGE_MULTIPLIERS[stage].to_f / ACC_EVA_STAGE_DIVISORS[stage]
+    end
+    return STAT_STAGE_MULTIPLIERS[stage].to_f / STAT_STAGE_DIVISORS[stage]
+  end
+
   def stat_with_stages(stat)
     stat_value = 0
     case stat
@@ -282,6 +294,15 @@ class Battle::Battler
     end
     stage = @stages[stat] + STAT_STAGE_MAXIMUM
     return (stat_value.to_f * STAT_STAGE_MULTIPLIERS[stage] / STAT_STAGE_DIVISORS[stage]).floor
+  end
+
+  def highest_stat_including_stages
+    best = nil
+    [:ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].each do |stat|
+      value = stat_with_stages(stat)
+      best = [stat, value] if !best || value > best[1]
+    end
+    return best
   end
 
   def pbSpeed
@@ -661,6 +682,7 @@ class Battle::Battler
     return false if hasActiveItem?(:ABILITYSHIELD)
     return @battle.moldBreaker
   end
+  alias being_mold_broken? beingMoldBroken?
 
   def airborne?
     return false if hasActiveItem?(:IRONBALL)
@@ -865,6 +887,22 @@ class Battle::Battler
 
   def setBelched
     @battle.belch[@index & 1][@pokemonIndex] = true
+  end
+
+  def used_protect_move?(move, user)
+    return false if !move.canProtectAgainst?
+    return true  if self.effects[PBEffects::Protect]
+    return true  if self.pbOwnSide.effects[PBEffects::MatBlock] && move.damagingMove?
+    return true  if self.effects[PBEffects::KingsShield] && move.damagingMove?
+    return true  if self.effects[PBEffects::Obstruct] && move.damagingMove?
+    return true  if self.effects[PBEffects::SilkTrap] && move.damagingMove?
+    return true  if self.effects[PBEffects::SpikyShield]
+    return true  if self.effects[PBEffects::BanefulBunker]
+    return true  if self.effects[PBEffects::BurningBulwark]
+    return true  if self.pbOwnSide.effects[PBEffects::WideGuard] && user.index != self.index && move.pbTarget(user).num_targets > 1 &&
+                    (Settings::MECHANICS_GENERATION >= 7 || move.damagingMove?)
+    return true  if self.pbOwnSide.effects[PBEffects::QuickGuard] && @battle.choices[user.index][4] > 0   # Move priority saved from pbCalculatePriority
+    return false
   end
 
   #-----------------------------------------------------------------------------

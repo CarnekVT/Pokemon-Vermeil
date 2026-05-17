@@ -430,7 +430,7 @@ class TilemapRenderer
       tile.z = 0
     else
       priority = tile.priority
-      tile.z = (priority == 0) ? 0 : (y * SOURCE_TILE_HEIGHT) + (priority * SOURCE_TILE_HEIGHT) + SOURCE_TILE_HEIGHT + 1
+      tile.z = (priority == 0) ? 0 : (y * SOURCE_TILE_HEIGHT) + (priority * SOURCE_TILE_HEIGHT) + SOURCE_TILE_HEIGHT + 1 - @pixel_offset_y
     end
   end
 

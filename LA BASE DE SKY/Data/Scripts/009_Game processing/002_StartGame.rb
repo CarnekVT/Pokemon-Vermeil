@@ -14,6 +14,7 @@ module Game
     if $data_system.start_map_id == 0 || !pbRgssExists?(map_file)
       raise _INTL("No se estableció una posición de inicio en el editor de mapas.")
     end
+    EventHandlers.trigger(:on_game_initialize)
   end
 
   # Loads bootup data from save file (if it exists) or creates bootup data (if
@@ -24,6 +25,9 @@ module Game
       SaveData.initialize_bootup_values
     else
       SaveData.load_bootup_values(save_data)
+    end
+    if Settings::FORCE_SCREEN_SCALE_ON_BOOT || (defined?($DEBUG) && $DEBUG)
+      $PokemonSystem.instance_variable_set(:@screensize, Settings.screensize_index_from_screen_scale)
     end
     # Set resize factor
     pbSetResizeFactor([$PokemonSystem.screensize, 4].min)
@@ -55,6 +59,7 @@ module Game
     $PokemonEncounters.setup($game_map.map_id)
     $game_map.autoplay
     $game_map.update
+    EventHandlers.trigger(:on_new_game)
   end
 
   # Loads the game from the given save data and starts the map scene.
@@ -71,6 +76,7 @@ module Game
     $PokemonMap.updateMap
     $PokemonStorage.check_max_boxes_changed
     $scene = Scene_Map.new
+    EventHandlers.trigger(:on_game_load)
   end
 
   # Loads and validates the map. Called when loading a saved game.

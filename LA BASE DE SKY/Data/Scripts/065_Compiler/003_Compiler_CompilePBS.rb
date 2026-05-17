@@ -54,7 +54,18 @@ module Compiler
           # Validate and modify the compiled data
           yield false, data_hash if block_given?
           if game_data.exists?(data_hash[:id])
-            raise _INTL("El nombre de la sección '{1}' se utiliza dos veces.\n{2}", data_hash[:id], FileLineData.linereport)
+            existing_obj = game_data.get(data_hash[:id])
+            if existing_obj.pbs_file_suffix == file_suffix
+              raise _INTL("El nombre de la sección '{1}' se utiliza dos veces.\n{2}", data_hash[:id], FileLineData.linereport)
+            else
+              # Merge existing properties with new ones (overwrite)
+              merged_hash = {}
+              existing_obj.instance_variables.each do |iv|
+                merged_hash[iv.to_s.delete("@").to_sym] = existing_obj.instance_variable_get(iv)
+              end
+              merged_hash.merge!(data_hash)
+              data_hash = merged_hash
+            end
           end
           # Add section's data to records
           game_data.register(data_hash)
@@ -423,9 +434,6 @@ module Compiler
           end
           # Validate and modify the compiled data
           validate_compiled_pokemon_form(data_hash)
-          if GameData::Species.exists?(data_hash[:id])
-            raise _INTL("El nombre de la sección '{1}' se utiliza dos veces.\n{2}", data_hash[:id], FileLineData.linereport)
-          end
           # Add section's data to records
           GameData::Species.register(data_hash)
         end
@@ -445,7 +453,17 @@ module Compiler
     if !GameData::Species.exists?(hash[:species])
       raise _INTL("ID de especie no definido '{1}'.\n{3}", hash[:species], FileLineData.linereport)
     elsif GameData::Species.exists?(hash[:id])
-      raise _INTL("La forma {1} para la especie ID {2} está definida dos veces.\n{3}", hash[:form], hash[:species], FileLineData.linereport)
+      existing_obj = GameData::Species.get(hash[:id])
+      if existing_obj.pbs_file_suffix == hash[:pbs_file_suffix]
+        raise _INTL("La forma {1} para la especie ID {2} está definida dos veces.\n{3}", hash[:form], hash[:species], FileLineData.linereport)
+      else
+        merged_hash = {}
+        existing_obj.instance_variables.each do |iv|
+          merged_hash[iv.to_s.delete("@").to_sym] = existing_obj.instance_variable_get(iv)
+        end
+        merged_hash.merge!(hash)
+        hash.replace(merged_hash)
+      end
     end
     # Perform the same validations on this form as for a regular species
     validate_compiled_pokemon(hash)
@@ -584,17 +602,22 @@ module Compiler
   #=============================================================================
   def compile_regional_dexes(*paths)
     dex_lists = []
+    dex_file_suffixes = {}
     paths.each do |path|
       compile_pbs_file_message_start(path)
+      file_suffix = File.basename(path, ".txt")["regional_dexes".length + 1, path.length] || ""
       section = nil
       pbCompilerEachPreppedLine(path) do |line, line_no|
         Graphics.update if line_no % 200 == 0
         if line[/^\s*\[\s*(\d+)\s*\]\s*$/]
           section = $~[1].to_i
           if dex_lists[section]
-            raise _INTL("La lista de la Pokédex número {1} está definida al menos dos veces.\n{2}", section, FileLineData.linereport)
+            if dex_file_suffixes[section] == file_suffix
+              raise _INTL("La lista de la Pokédex número {1} está definida al menos dos veces.\n{2}", section, FileLineData.linereport)
+            end
           end
           dex_lists[section] = []
+          dex_file_suffixes[section] = file_suffix
         else
           raise _INTL("Se esperaba una sección al principio del archivo.\n{1}", FileLineData.linereport) if !section
           species_list = line.split(",")
@@ -704,7 +727,10 @@ module Compiler
           # Raise an error if a map/version combo is used twice
           key = sprintf("%s_%d", map_number, map_version).to_sym
           if GameData::Encounter::DATA[key]
-            raise _INTL("Los encuentros para el mapa '{1}' están definidos dos veces.\n{2}", map_number, FileLineData.linereport)
+            existing_obj = GameData::Encounter::DATA[key]
+            if existing_obj.pbs_file_suffix == file_suffix
+              raise _INTL("Los encuentros para el mapa '{1}' están definidos dos veces.\n{2}", map_number, FileLineData.linereport)
+            end
           end
           step_chances = {}
           # Construct encounter hash
@@ -806,6 +832,12 @@ module Compiler
           section_line = line
           if data_hash
             validate_compiled_trainer(data_hash)
+            if GameData::Trainer.exists?(data_hash[:id][0], data_hash[:id][1], data_hash[:id][2])
+              existing_obj = GameData::Trainer.get(data_hash[:id][0], data_hash[:id][1], data_hash[:id][2])
+              if existing_obj.pbs_file_suffix == file_suffix
+                raise _INTL("El entrenador {1} {2} versión {3} está definido dos veces.\n{4}", data_hash[:id][0], data_hash[:id][1], data_hash[:id][2], FileLineData.linereport)
+              end
+            end
             GameData::Trainer.register(data_hash)
           end
           FileLineData.setSection(section_name, nil, section_line)
@@ -843,8 +875,13 @@ module Compiler
       end
       # Add last trainer's data to records
       if data_hash
-        FileLineData.setSection(section_name, nil, section_line)
         validate_compiled_trainer(data_hash)
+        if GameData::Trainer.exists?(data_hash[:id][0], data_hash[:id][1], data_hash[:id][2])
+          existing_obj = GameData::Trainer.get(data_hash[:id][0], data_hash[:id][1], data_hash[:id][2])
+          if existing_obj.pbs_file_suffix == file_suffix
+            raise _INTL("El entrenador {1} {2} versión {3} está definido dos veces.\n{4}", data_hash[:id][0], data_hash[:id][1], data_hash[:id][2], FileLineData.linereport)
+          end
+        end
         GameData::Trainer.register(data_hash)
       end
       process_pbs_file_message_end
@@ -1120,12 +1157,32 @@ module Compiler
           if data_hash[:id] == 0
             validate_compiled_global_metadata(data_hash)
             if GameData::Metadata.exists?(data_hash[:id])
-              raise _INTL("La ID de los metadatos globales '{1}' se utiliza dos veces.\n{2}", data_hash[:id], FileLineData.linereport)
+              existing_obj = GameData::Metadata.get(data_hash[:id])
+              if existing_obj.pbs_file_suffix == file_suffix
+                raise _INTL("La ID de los metadatos globales '{1}' se utiliza dos veces.\n{2}", data_hash[:id], FileLineData.linereport)
+              else
+                merged_hash = {}
+                existing_obj.instance_variables.each do |iv|
+                  merged_hash[iv.to_s.delete("@").to_sym] = existing_obj.instance_variable_get(iv)
+                end
+                merged_hash.merge!(data_hash)
+                data_hash = merged_hash
+              end
             end
           else
             validate_compiled_player_metadata(data_hash)
             if GameData::PlayerMetadata.exists?(data_hash[:id])
-              raise _INTL("La ID de los metadatos del jugador '{1}' se utiliza dos veces.\n{2}", data_hash[:id], FileLineData.linereport)
+              existing_obj = GameData::PlayerMetadata.get(data_hash[:id])
+              if existing_obj.pbs_file_suffix == file_suffix
+                raise _INTL("La ID de los metadatos del jugador '{1}' se utiliza dos veces.\n{2}", data_hash[:id], FileLineData.linereport)
+              else
+                merged_hash = {}
+                existing_obj.instance_variables.each do |iv|
+                  merged_hash[iv.to_s.delete("@").to_sym] = existing_obj.instance_variable_get(iv)
+                end
+                merged_hash.merge!(data_hash)
+                data_hash = merged_hash
+              end
             end
           end
           # Add section's data to records
@@ -1223,9 +1280,6 @@ module Compiler
       hash[:id] = hash[:area]
     else
       hash[:id] = sprintf("%s_%d", hash[:area].to_s, hash[:version]).to_sym
-    end
-    if GameData::DungeonParameters.exists?(hash[:id])
-      raise _INTL("La versión {1} del área de mazmorra {2} está definida dos veces.\n{3}", hash[:version], hash[:area], FileLineData.linereport)
     end
   end
 

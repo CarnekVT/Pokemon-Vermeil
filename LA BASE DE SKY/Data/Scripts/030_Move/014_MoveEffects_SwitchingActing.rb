@@ -231,7 +231,7 @@ class Battle::Move::StartSnowstormWeatherSwitchOutUser < Battle::Move
   def pbEndOfMoveUsageEffect(user, targets, numHits, switchedBattlers)
     return if user.wild? || !@battle.pbCanChooseNonActive?(user.index)
     return if user.effects[PBEffects::Commanding] >= 0 || user.effects[PBEffects::CommandedBy] >= 0
-    @battle.pbDisplay(_INTL("{1} ha vuelto con {2}!", user.pbThis,
+    @battle.pbDisplay(_INTL("¡{1} ha vuelto con {2}!", user.pbThis,
                             @battle.pbGetOwnerName(user.index)))
     @battle.pbPursuit(user.index)
     return if user.fainted?

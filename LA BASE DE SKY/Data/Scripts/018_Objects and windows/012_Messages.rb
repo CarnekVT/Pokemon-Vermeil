@@ -44,6 +44,7 @@ def pbGetChoiceImages(commands)
   # Stop when we hit structural boundaries (When branches, other Show Choices, etc.)
   (current_index - 1).downto(0) do |i|
     item = event.list[i]
+    next unless item  # Skip nil items
     # Stop at structural commands that indicate we've crossed into another section
     # 102: Show Choices, 402: When [**] (choice branch), 404: End (choice branch)
     break if [102, 402, 404].include?(item.code)
@@ -467,7 +468,7 @@ end
 
 def pbDisplayBattlePointsWindow(msgwindow)
   pointsString = ($player) ? $player.battle_points.to_s_formatted : "0"
-  pointswindow = Window_AdvancedTextPokemon.new(_INTL("Battle Points:\n<ar>{1}</ar>", pointsString))
+  pointswindow = Window_AdvancedTextPokemon.new(_INTL("Puntos Batalla:\n<ar>{1}</ar>", pointsString))
   pointswindow.setSkin("Graphics/Windowskins/goldskin")
   pointswindow.resizeToFit(pointswindow.text, Graphics.width)
   pointswindow.width = 160 if pointswindow.width <= 160

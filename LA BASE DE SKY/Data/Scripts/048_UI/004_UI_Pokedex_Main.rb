@@ -330,7 +330,23 @@ class PokemonPokedex_Scene
   SLIDER_MIN_BOXHEIGHT = 40                # Altura mínima de la caja
 
   # Constantes de posición para la ventana de búsqueda del Pokédex
-  DEXSEARCH_TITLE_X   = Settings::SCREEN_WIDTH / 2
+  # Las que dependen de Settings::SCREEN_WIDTH se evalúan en runtime (ver
+  # const_missing al final de la clase) para respetar a los plugins.
+  def self.DEXSEARCH_TITLE_X;        Settings::SCREEN_WIDTH / 2; end
+  def self.DEXSEARCH_START_X;        Settings::SCREEN_WIDTH / 2; end
+  def self.DEXSEARCH_CANCEL_X;       Settings::SCREEN_WIDTH - 80; end
+  def self.DEXSEARCH_PARAM_TITLE_X;  Settings::SCREEN_WIDTH / 2; end
+  def self.DEXSEARCH_PARAM_CANCEL_X; Settings::SCREEN_WIDTH - 80; end
+  def self.const_missing(name)
+    case name
+    when :DEXSEARCH_TITLE_X        then return DEXSEARCH_TITLE_X()
+    when :DEXSEARCH_START_X        then return DEXSEARCH_START_X()
+    when :DEXSEARCH_CANCEL_X       then return DEXSEARCH_CANCEL_X()
+    when :DEXSEARCH_PARAM_TITLE_X  then return DEXSEARCH_PARAM_TITLE_X()
+    when :DEXSEARCH_PARAM_CANCEL_X then return DEXSEARCH_PARAM_CANCEL_X()
+    end
+    super
+  end
   DEXSEARCH_TITLE_Y   = 10
   DEXSEARCH_ORDER_X   = 136
   DEXSEARCH_ORDER_Y   = 64
@@ -348,9 +364,7 @@ class PokemonPokedex_Scene
   DEXSEARCH_SHAPE_Y   = 174
   DEXSEARCH_RESET_X   = 80
   DEXSEARCH_RESET_Y   = 346
-  DEXSEARCH_START_X   = Settings::SCREEN_WIDTH / 2
   DEXSEARCH_START_Y   = 346
-  DEXSEARCH_CANCEL_X  = Settings::SCREEN_WIDTH - 80
   DEXSEARCH_CANCEL_Y  = 346
 
   # Constantes para las posiciones de los parámetros en pbRefreshDexSearch
@@ -390,11 +404,9 @@ class PokemonPokedex_Scene
   DEXSEARCH_PARAM_HW_BLT_Y   = 52
 
   # Constantes para posiciones del cuadro de parámetros (pbRefreshDexSearchParam)
-  DEXSEARCH_PARAM_TITLE_X    = Settings::SCREEN_WIDTH / 2
   DEXSEARCH_PARAM_TITLE_Y    = 10
   DEXSEARCH_PARAM_OK_X       = 80
   DEXSEARCH_PARAM_OK_Y       = 346
-  DEXSEARCH_PARAM_CANCEL_X   = Settings::SCREEN_WIDTH - 80
   DEXSEARCH_PARAM_CANCEL_Y   = 346
 
   # Constantes para la posición del texto título en pbRefreshDexSearchParam
@@ -435,22 +447,22 @@ class PokemonPokedex_Scene
   # For modes 3 and 4 (height/weight) the values for :xgap and :cols are
   # computed dynamically because they depend on `cmds.length`.
   DEXSEARCH_PARAM_LAYOUTS = {
-        :default => { xstart: 46,  ystart: 128, xgap: 236, ygap: 64,  halfwidth: 92, cols: 2, selbuttony: 0,   selbuttonheight: 44,
-            top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        0 => { xstart: 46,  ystart: 128, xgap: 236, ygap: 64,  halfwidth: 92, cols: 2, selbuttony: 0,   selbuttonheight: 44,
+      :default => { xstart: 46,  ystart: 128, xgap: 236, ygap: 64,  halfwidth: 92, cols: 2, selbuttony: 0,   selbuttonheight: 44,
           top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        1 => { xstart: 78,  ystart: 114, xgap: 52,  ygap: 52,  halfwidth: 22, cols: 7, selbuttony: 156, selbuttonheight: 44,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        2 => { xstart: 8,   ystart: 104, xgap: 124, ygap: 44,  halfwidth: 62, cols: 4, selbuttony: 44,  selbuttonheight: 44,
-          top_text_x_base: 298, top_blt_x_base: 250, top_spacing: 128, top_text_y: 66, top_blt_y: 58 },
-        3 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        4 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
-        5 => { xstart: 62,  ystart: 114, xgap: 132, ygap: 52,  halfwidth: 62, cols: 3, selbuttony: 44,  selbuttonheight: 44,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 0,   top_text_y: 66, top_blt_y: 50 },
-        6 => { xstart: 82,  ystart: 116, xgap: 70,  ygap: 70,  halfwidth: 0,  cols: 5, selbuttony: 88,  selbuttonheight: 68,
-          top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 0,   top_text_y: 66, top_blt_y: 50 }
+      0 => { xstart: 46,  ystart: 128, xgap: 236, ygap: 64,  halfwidth: 92, cols: 2, selbuttony: 0,   selbuttonheight: 44,
+        top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
+      1 => { xstart: 78,  ystart: 114, xgap: 52,  ygap: 52,  halfwidth: 22, cols: 7, selbuttony: 156, selbuttonheight: 44,
+        top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 128, top_text_y: 66, top_blt_y: 50 },
+      2 => { xstart: 8,   ystart: 104, xgap: 124, ygap: 44,  halfwidth: 62, cols: 4, selbuttony: 44,  selbuttonheight: 44,
+        top_text_x_base: 298, top_blt_x_base: 250, top_spacing: 128, top_text_y: 66, top_blt_y: 58 },
+      3 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
+        top_text_x_base: 295, top_blt_x_base: 464, top_spacing: 128, top_text_y: 66, top_blt_y: 54 },
+      4 => { xstart: 44,  ystart: 110, xgap: nil, ygap: 112, halfwidth: 60, cols: nil, selbuttony: nil, selbuttonheight: nil,
+        top_text_x_base: 295, top_blt_x_base: 430, top_spacing: 128, top_text_y: 66, top_blt_y: 52 },
+      5 => { xstart: 62,  ystart: 114, xgap: 132, ygap: 52,  halfwidth: 62, cols: 3, selbuttony: 44,  selbuttonheight: 44,
+        top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 0,   top_text_y: 66, top_blt_y: 44 },
+      6 => { xstart: 82,  ystart: 116, xgap: 70,  ygap: 70,  halfwidth: 0,  cols: 5, selbuttony: 88,  selbuttonheight: 68,
+        top_text_x_base: 362, top_blt_x_base: 332, top_spacing: 0,   top_text_y: 66, top_blt_y: 50 }
   }
 
 
@@ -555,6 +567,8 @@ class PokemonPokedex_Scene
     regionalSpecies.each_with_index do |species, i|
       next if !species
       next if !pbCanAddForModeList?($PokemonGlobal.pokedexMode, species)
+      next if !GameData::Species.exists?(species)
+      next if GameData::Species.get(species).hide_from_dex?
       _gender, form, _shiny = $player.pokedex.last_form_seen(species)
       species_data = GameData::Species.get_species_form(species, form)
       ret.push({
@@ -622,14 +636,14 @@ class PokemonPokedex_Scene
       item = @dexlist[i]
       next if !$player.seen?(item[:species])
       next if item[:shift] && !$player.seen?(item[:species])
-      return pbRefreshDexList(item[:number] - 1) if item[:name].downcase.include?(text.downcase)
+      return pbRefreshDexList(i) if item[:name].downcase.include?(text.downcase)
     end
     if current_index > 0
       for i in 0...current_index
         item = @dexlist[i]
         next if !$player.seen?(item[:species])
         next if item[:shift] && !$player.seen?(item[:species])
-        return pbRefreshDexList(item[:number] - 1) if item[:name].downcase.include?(text.downcase)
+        return pbRefreshDexList(i) if item[:name].downcase.include?(text.downcase)
       end
     end
     return false
@@ -663,6 +677,9 @@ class PokemonPokedex_Scene
       textpos.push([_INTL("Capturados:"), CAPTURED_TEXT_X, CAPTURED_TEXT_Y, :left, base, shadow])
       textpos.push([$player.pokedex.owned_count(pbGetPokedexRegion).to_s, CAPTURED_NUMBER_X, CAPTURED_NUMBER_Y, :left, base, shadow])
     end
+    # Teclas dinámicas para filtrar y buscar (arriba del fondo)
+    textpos.push([_INTL("[{1}]: Filtrar", KeybindingReader.key_name(:ACTION)), 8, 8, :left, Color.new(248, 248, 248), Color.black])
+    textpos.push([_INTL("[{1}]:", KeybindingReader.key_name(:SPECIAL)), Graphics.width - 44, 8, :right, Color.new(248, 248, 248), Color.black])
     # Draw all text
     pbDrawTextPositions(overlay, textpos)
     # Set Pokémon sprite
@@ -955,6 +972,9 @@ class PokemonPokedex_Scene
   def setIconBitmap(species)
     if species && $player.seen?(species)
       gender, form, shiny = $player.pokedex.last_form_seen(species)
+      if GameData::Species.get_species_form(species, form).hide_from_dex?
+        gender, form, shiny = 0, 0, false
+      end
     else
       gender, form, shiny = 0, 0, false
     end

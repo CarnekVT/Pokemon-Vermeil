@@ -19,7 +19,7 @@ class Battle::Move::UserTakesTargetItem < Battle::Move
     else
       @battle.swapHeldItems(user, target)
     end
-    @battle.pbDisplay(_INTL("{1} robó {3} de {2}!", user.pbThis, target.pbThis(true), user.itemName))
+    @battle.pbDisplay(_INTL("¡{1} robó {3} de {2}!", user.pbThis, target.pbThis(true), user.itemName))
     user.pbHeldItemTriggerCheck
   end
 end

@@ -352,13 +352,15 @@ class Battle
       pbCommonAnimation("Octolock", battler)
       battler.pbLowerStatStage(:DEFENSE, 1, nil) if battler.pbCanLowerStatStage?(:DEFENSE)
       battler.pbLowerStatStage(:SPECIAL_DEFENSE, 1, nil) if battler.pbCanLowerStatStage?(:SPECIAL_DEFENSE)
-      battler.pbItemOnStatDropped
+      battler.pbItemStatRestoreCheck # White Herb
+      battler.pbItemOnStatDropped # Eject Pack
     end
     # Syrup Bomb
     if !battler.fainted? && battler.effects[PBEffects::SyrupBomb] > 0
       pbCommonAnimation("SyrupBomb", battler)
       battler.pbLowerStatStage(:SPEED, 1, nil) if battler.pbCanLowerStatStage?(:SPEED)
-      battler.pbItemOnStatDropped
+      battler.pbItemStatRestoreCheck # White Herb
+      battler.pbItemOnStatDropped # Eject Pack
       battler.effects[PBEffects::SyrupBomb] -= 1
     end
   end
@@ -551,12 +553,12 @@ class Battle
     end
     # Terrain continues
     terrain_data = GameData::BattleTerrain.try_get(@field.terrain)
-    pbCommonAnimation(terrain_data.animation) if terrain_data
+    # pbCommonAnimation(terrain_data.animation) if terrain_data
     case @field.terrain
-    when :Electric then pbDisplay(_INTL("¡Se ha formado un campo de corriente eléctrica en el terreno de combate!"))
-    when :Grassy then pbDisplay(_INTL("¡El terreno de combate se ha cubierto de hierba!"))
-    when :Misty then pbDisplay(_INTL("¡La niebla ha envuelto el terreno de combate!"))
-    when :Psychic then pbDisplay(_INTL("¡El terreno de combate se ha vuelto muy extraño!"))
+    when :Electric then pbDisplay(_INTL("¡El terreno de combate sigue envuelto por una corriente eléctrica!"))
+    when :Grassy then pbDisplay(_INTL("¡El terreno de combate sigue cubierto de hierba!"))
+    when :Misty then pbDisplay(_INTL("¡La niebla sigue envolviendo el terreno de combate!"))
+    when :Psychic then pbDisplay(_INTL("¡El terreno de combate se sigue sintiendo extraño!"))
     end
   end
 

@@ -477,6 +477,7 @@ module Compiler
           # Write each trainer property
           schema.each_key do |key|
             next if ["SectionName", "Pokemon"].include?(key)
+            next if key == 'LoseText_F' && element.real_lose_text_f == element.real_lose_text
             val = element.get_property_for_PBS(key)
             next if val.nil?
             f.write(sprintf("%s = ", key))

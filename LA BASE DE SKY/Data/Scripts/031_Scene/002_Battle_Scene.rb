@@ -17,10 +17,22 @@ class Battle::Scene
   NUM_BALLS                     = Settings::MAX_PARTY_SIZE
   # Centre bottom of the player's side base graphic
   PLAYER_BASE_X                 = 128
-  PLAYER_BASE_Y                 = Settings::SCREEN_HEIGHT - 80
-  # Centre middle of the foe's side base graphic
-  FOE_BASE_X                    = Settings::SCREEN_WIDTH - 128
-  FOE_BASE_Y                    = (Settings::SCREEN_HEIGHT * 3 / 4) - 112
+  # Estas se leen en runtime para respetar cambios de Settings::SCREEN_* hechos
+  # por plugins. Se definen como métodos de clase y como constantes lazily
+  # mediante const_missing para no romper código existente que use
+  # `Battle::Scene::PLAYER_BASE_Y`, etc.
+  def self.PLAYER_BASE_Y; Settings::SCREEN_HEIGHT - 80; end
+  def self.FOE_BASE_X;    Settings::SCREEN_WIDTH - 128; end
+  def self.FOE_BASE_Y;    (Settings::SCREEN_HEIGHT * 3 / 4) - 112; end
+
+  def self.const_missing(name)
+    case name
+    when :PLAYER_BASE_Y then return PLAYER_BASE_Y()
+    when :FOE_BASE_X    then return FOE_BASE_X()
+    when :FOE_BASE_Y    then return FOE_BASE_Y()
+    end
+    super
+  end
   # Default focal points of user and target in animations - do not change!
   # Is the centre middle of each sprite
   FOCUSUSER_X                   = 128
@@ -206,7 +218,8 @@ class Battle::Scene
     msg_window = @sprites["messageWindow"]
     # Display message
     PBDebug.log_message(msg)
-    pbMessageDisplay(msg_window, msg, true, proc { |msg_wndw| }) { pbUpdate }
+    color_tag = shadowc3tag(MESSAGE_BASE_COLOR, MESSAGE_SHADOW_COLOR)
+    pbMessageDisplay(msg_window, color_tag + msg, true, proc { |msg_wndw| }) { pbUpdate }
     # Check if the message is brief
     @briefMessage = true if brief   # Don't wait at all if a brief message
     return if @briefMessage
@@ -232,7 +245,8 @@ class Battle::Scene
     msg_window = @sprites["messageWindow"]
     # Display message
     PBDebug.log_message(msg)
-    pbMessageDisplay(msg_window, msg + "\1", true, proc { |msg_wndw| }) { pbUpdate }
+    color_tag = shadowc3tag(MESSAGE_BASE_COLOR, MESSAGE_SHADOW_COLOR)
+    pbMessageDisplay(msg_window, color_tag + msg + "\1", true, proc { |msg_wndw| }) { pbUpdate }
     # After message has finished displaying, wait for 3 seconds or input
     timer_start = System.real_uptime
     loop do
@@ -257,7 +271,8 @@ class Battle::Scene
     msg_window = @sprites["messageWindow"]
     # Display message
     PBDebug.log_message(msg)
-    ret = pbMessageDisplay(msg_window, msg, true, proc { |msg_wndw|
+    color_tag = shadowc3tag(MESSAGE_BASE_COLOR, MESSAGE_SHADOW_COLOR)
+    ret = pbMessageDisplay(msg_window, color_tag + msg, true, proc { |msg_wndw|
       next Kernel.pbShowCommands(msg_wndw, commands, defaultValue + 1, 0) { pbGraphicsUpdate; pbFrameUpdate(msg_window) }
     }) { pbGraphicsUpdate; pbFrameUpdate(msg_window) }
     msg_window.text = ""

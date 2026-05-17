@@ -39,6 +39,11 @@ module Battle::CatchAndStoreMixin
           send_pkmn.statusCount = 0 if send_pkmn.status == :POISON   # Bad poison becomes regular
           send_pkmn.makeUnmega
           send_pkmn.makeUnprimal
+          if send_pkmn.item && pbConfirmMessage(_INTL("{1} tiene equipado {2}. ¿Quieres guardar el objeto en la mochila?", send_pkmn.name, send_pkmn.item.name))
+            item = send_pkmn.item
+            $bag.add(item)
+            send_pkmn.item = nil
+          end
           # Send chosen Pokémon to storage
           stored_box = @peer.pbStorePokemon(pbPlayer, send_pkmn)
           pbPlayer.party.delete_at(party_index)
@@ -228,7 +233,7 @@ module Battle::CatchAndStoreMixin
         dex_modifier = 1
       end
       dex_modifier *= 2 if $bag.has?(:CATCHINGCHARM)
-      critical_chance = mod_catch_rate * dex_modifier / 12
+      critical_chance = mod_catch_rate * dex_modifier / (12 * 4096)
       # Calculate the number of shakes
       if critical_chance > 0 && pbRandom(256) < critical_chance
         @criticalCapture = true

@@ -155,6 +155,8 @@ class Battle::Scene
     if Settings::SHOW_BATTLE_BASES
       2.times do |side|
         baseX, baseY = Battle::Scene.pbBattlerPosition(side)
+        next if side.zero? && !pbResolveBitmap(playerBase) # Player's base graphic doesn't exist
+        next if !side.zero? && !pbResolveBitmap(enemyBase) # Opponent's base graphic doesn't exist
         base = pbAddSprite("base_#{side}", baseX, baseY,
                           (side == 0) ? playerBase : enemyBase, @viewport)
         base.z = 3

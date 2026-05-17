@@ -110,6 +110,7 @@ class Battle
   attr_reader   :struggle         # The Struggle move
   attr_accessor :adjust_levels
   attr_accessor :adjust_levels_reset_moves
+  attr_accessor :used_items   # Items consumed by player's Pokémon during battle (for restore feature)
   def pbRandom(x); return rand(x); end
 
   #=============================================================================
@@ -188,6 +189,7 @@ class Battle
     @battleAI          = AI.new(self)
     @adjust_levels   = false
     @adjust_levels_reset_moves   = false
+    @used_items        = []   # For RestoreItemsAfterBattle feature
   end
 
   def decided?
@@ -1171,6 +1173,10 @@ class Battle
       multipliers[:final_damage_multiplier] *= 1.5 if type == :WATER
       multipliers[:final_damage_multiplier] /= 2   if type == :FIRE
     end
+    if !user.effectiveWeather.include?([:Sun, :HarshSun]) && user.activeAbility?(:MEGASOL)
+      multipliers[:final_damage_multiplier] *= 1.5 if type == :FIRE
+      multipliers[:final_damage_multiplier] /= 2   if type == :WATER
+    end
   end
   
   #-----------------------------------------------------------------------------
@@ -1195,6 +1201,14 @@ class Battle
     end
     return check_type if effective_types.include?(check_type)
     return effective_types.sample
+  end
+
+  def disablePokeBalls
+    return @rules[:disable_poke_balls]
+  end
+
+  def disablePokeBalls=(value)
+    @rules[:disable_poke_balls] = value
   end
 end
 

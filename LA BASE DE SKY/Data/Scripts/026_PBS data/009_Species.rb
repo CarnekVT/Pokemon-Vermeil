@@ -41,6 +41,9 @@ module GameData
     attr_reader :unmega_form
     attr_reader :mega_message
     attr_reader :pbs_file_suffix
+    attr_reader :hide_from_dex
+    attr_reader :region
+    attr_reader :super_shiny_hue
 
     DATA = {}
     DATA_FILENAME = "species.dat"
@@ -60,6 +63,7 @@ module GameData
       ret["FormName"]         = [:real_form_name,     "q"]
       if compiling_forms
         ret["PokedexForm"]    = [:pokedex_form,       "u"]
+        ret["Region"]         = [:region,             "q"]
         ret["MegaStone"]      = [:mega_stone,         "e", :Item]
         ret["MegaMove"]       = [:mega_move,          "e", :Move]
         ret["UnmegaForm"]     = [:unmega_form,        "i"]
@@ -107,6 +111,8 @@ module GameData
         ret["Evolutions"]     = [:evolutions,         "*ses", nil, :Evolution]
         ret["Evolution"]      = [:evolutions,         "^seS", nil, :Evolution]
       end
+      ret["HideFromDex"]      = [:hide_from_dex,      "b"]
+      ret["SuperShinyHue"]    = [:super_shiny_hue,    "*i"]
       return ret
     end
 
@@ -144,7 +150,10 @@ module GameData
         ["WildItemCommon",    GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) comúnmente llevado(s) por Pokémon salvajes de esta especie.")],
         ["WildItemUncommon",  GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) raramente llevado(s) por Pokémon salvajes de esta especie.")],
         ["WildItemRare",      GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) muy raramente llevado(s) por Pokémon salvajes de esta especie.")],
-        ["Evolutions",        EvolutionsProperty.new,             _INTL("Caminos evolutivos de esta especie.")]
+        ["Evolutions",        EvolutionsProperty.new,             _INTL("Caminos evolutivos de esta especie.")],
+        ["HideFromDex",       BooleanProperty.new,                _INTL("Indica si esta especie debe estar oculta en la Pokédex.")],
+        ["Region",            StringProperty,                     _INTL("Nombre de la región en la que debutó el Pokémon pensado para las formas regionales.")],
+        ["SuperShinyHue",     StringProperty,                     _INTL("Tonos (Hue) específicos para la versión Super Shiny (separados por comas).")]
       ]
     end
 
@@ -238,6 +247,9 @@ module GameData
       @mega_move          = hash[:mega_move]
       @unmega_form        = hash[:unmega_form]        || -2
       @mega_message       = hash[:mega_message]       || 0
+      @hide_from_dex      = hash[:hide_from_dex]      || false
+      @region             = hash[:region]             || ""
+      @super_shiny_hue    = hash[:super_shiny_hue]    || []
       @pbs_file_suffix    = hash[:pbs_file_suffix]    || ""
     end
 
@@ -259,6 +271,10 @@ module GameData
     # @return [String] the translated Pokédex entry of this species
     def pokedex_entry
       return pbGetMessageFromHash(MessageTypes::POKEDEX_ENTRIES, @real_pokedex_entry)
+    end
+
+    def region
+      return @region
     end
 
     def default_form
@@ -289,6 +305,10 @@ module GameData
       return @flags.any? { |f| f.downcase == flag.downcase }
     end
 
+    def hide_from_dex?
+      return @hide_from_dex
+    end
+
     def apply_metrics_to_sprite(sprite, index, shadow = false)
       metrics_data = GameData::SpeciesMetrics.get_species_form(@species, @form)
       metrics_data.apply_metrics_to_sprite(sprite, index, shadow)
@@ -297,6 +317,22 @@ module GameData
     def shows_shadow?
       metrics_data = GameData::SpeciesMetrics.get_species_form(@species, @form)
       return metrics_data.shows_shadow?
+    end
+
+    def self.all_species
+      keys = []
+      GameData::Species.each { |species| keys.push(species.id) if species.form == 0 }
+      return keys
+    end
+
+    # Returns true if the given form of a species is a mega form unlocked by the given item.
+    def self.form_is_mega_with_item?(species, form, item)
+      return false if !item
+      GameData::Species.each do |data|
+        next if data.species != species || data.unmega_form != form
+        return true if data.mega_stone == item
+      end
+      return false
     end
 
     def get_evolutions(exclude_invalid = false)
@@ -485,7 +521,10 @@ module GameData
         ret = ret.to_f / 10
       when "Habitat"
         ret = nil if ret == :None
+      when "SuperShinyHue"
+        ret = nil if ret.empty?  
       when "Evolutions", "Evolution"
+        return nil if key == "Evolutions"   # Already written by "Evolution"
         if ret
           ret = ret.reject { |evo| evo[3] }   # Remove prevolutions
           ret.each do |evo|

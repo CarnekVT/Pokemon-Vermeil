@@ -55,6 +55,12 @@ def pbShowUserStoreActions(pkmn)
       send_pkmn = $player.party[party_index]
       $player.party[party_index] = pkmn
       
+      if send_pkmn.item && pbConfirmMessage(_INTL("{1} tiene equipado {2}. ¿Quieres guardar el objeto en la mochila?", send_pkmn.name, send_pkmn.item.name))
+        item = send_pkmn.item
+        $bag.add(item)
+        send_pkmn.item = nil
+      end
+
       stored_box = $PokemonStorage.pbStoreCaught(send_pkmn)
       box_name   = $PokemonStorage[stored_box].name
       
@@ -62,6 +68,11 @@ def pbShowUserStoreActions(pkmn)
       pbMessage(_INTL("¡{1} se ha añadido al equipo!", pkmn.name))
       break
     when 1
+      if pkmn.item && pbConfirmMessage(_INTL("{1} tiene equipado {2}. ¿Quieres guardar el objeto en la mochila?", pkmn.name, pkmn.item.name))
+        item = pkmn.item
+        $bag.add(item)
+        pkmn.item = nil
+      end
       stored_box = $PokemonStorage.pbStoreCaught(pkmn)
       box_name   = $PokemonStorage[stored_box].name
       pbMessage(_INTL("¡{1} se ha enviado a la Caja \"{2}\"!", pkmn.name, box_name))
@@ -77,6 +88,11 @@ def pbShowUserStoreActions(pkmn)
     end
   end
   if cmd == -1
+    if pkmn.item && pbConfirmMessage(_INTL("{1} tiene equipado {2}. ¿Quieres guardar el objeto en la mochila?", pkmn.name, pkmn.item.name))
+      item = pkmn.item
+      $bag.add(item)
+      pkmn.item = nil
+    end
     stored_box = $PokemonStorage.pbStoreCaught(pkmn)
     box_name   = $PokemonStorage[stored_box].name
     pbMessage(_INTL("¡{1} se ha enviado a la Caja \"{2}\"!", pkmn.name, box_name))

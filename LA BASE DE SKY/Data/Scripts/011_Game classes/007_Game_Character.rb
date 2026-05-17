@@ -43,6 +43,8 @@ class Game_Character
   attr_accessor :stair_y_height
   attr_accessor :stair_begin_offset
 
+  attr_accessor :spiral_c, :spiral_h, :spiral_start_y, :spiral_end_y, :spiral_dir
+
   def initialize(map = nil)
     @map                       = map
     @id                        = 0
@@ -186,9 +188,13 @@ class Game_Character
 
   def lock
     return if @locked
+    current_direction = @direction
     @prelock_direction = 0   # Was @direction but disabled
     turn_toward_player
     @locked = true
+    if Settings::RESTORE_EVENT_DIRECTION
+      @prelock_direction = current_direction
+    end
   end
 
   def minilock
@@ -223,23 +229,25 @@ class Game_Character
     return @bush_depth || 0
   end
 
+  #-----------------------------------------------------------------------------
+  # Always on bush by DPertierra - Integrado
+  # https://github.com/dpertierra
+  #-----------------------------------------------------------------------------
   def calculate_bush_depth
-    if @tile_id > 0 || @always_on_top || jumping? || (respond_to?("name") && name[/airborne/i])
+    if @tile_id > 0 || @always_on_top || jumping?
       @bush_depth = 0
       return
     end
     this_map = (self.map.valid?(@x, @y)) ? [self.map, @x, @y] : $map_factory&.getNewMap(@x, @y, self.map.map_id)
-    if this_map && this_map[0].deepBush?(this_map[1], this_map[2])
+    if this_map && (this_map[0].deepBush?(this_map[1], this_map[2]) || this_map[0].bush?(this_map[1], this_map[2]))
       xbehind = @x + (@direction == 4 ? 1 : @direction == 6 ? -1 : 0)
       ybehind = @y + (@direction == 8 ? 1 : @direction == 2 ? -1 : 0)
       if moving?
         behind_map = (self.map.valid?(xbehind, ybehind)) ? [self.map, xbehind, ybehind] : $map_factory&.getNewMap(xbehind, ybehind, self.map.map_id)
-        @bush_depth = Game_Map::TILE_HEIGHT if behind_map[0].deepBush?(behind_map[1], behind_map[2])
+        @bush_depth = 12 if behind_map && (behind_map[0].bush?(behind_map[1], behind_map[2]) || behind_map[0].deepBush?(behind_map[1], behind_map[2]))
       else
-        @bush_depth = Game_Map::TILE_HEIGHT
+        @bush_depth = 12
       end
-    elsif this_map && this_map[0].bush?(this_map[1], this_map[2]) && !moving?
-      @bush_depth = 12
     else
       @bush_depth = 0
     end
@@ -255,22 +263,71 @@ class Game_Character
     return 0
   end
 
+  def is_stair_event?
+    return false
+  end
+
+  def is_event_at_target?(event, target_x, target_y)
+    if self.on_stair? && event.on_stair?
+      target_lane = self.stair_y_position + (self.y - target_y)
+      return true if event.x == target_x && event.stair_y_position == target_lane
+      return false
+    end
+    if self.on_stair? && !event.on_stair?
+      target_lane = self.stair_y_position + (self.y - target_y)
+      if target_x == self.stair_end_x
+        eff_y = self.stair_end_y - target_lane
+        return true if event.at_coordinate?(target_x, eff_y)
+      elsif target_x == self.stair_start_x
+        eff_y = self.stair_start_y - target_lane
+        return true if event.at_coordinate?(target_x, eff_y)
+      end
+      return false
+    end
+    if !self.on_stair? && event.on_stair?
+      if event.x == event.stair_end_x
+        eff_y = event.stair_end_y - event.stair_y_position
+        if target_x >= event.x && target_x < event.x + event.width &&
+           target_y > eff_y - event.height && target_y <= eff_y
+          return true
+        end
+      elsif event.x == event.stair_start_x
+        eff_y = event.stair_start_y - event.stair_y_position
+        if target_x >= event.x && target_x < event.x + event.width &&
+           target_y > eff_y - event.height && target_y <= eff_y
+          return true
+        end
+      end
+      return false
+    end
+    return event.at_coordinate?(target_x, target_y)
+  end
+
   #-----------------------------------------------------------------------------
   # Passability
   #-----------------------------------------------------------------------------
 
   def passable?(x, y, dir, strict = false)
-    if on_middle_of_stair?
-      new_y = y + (dir == 2 ? 1 : dir == 8 ? -1 : 0)
-      if new_y > self.y
-        return stair_y_position > 0
-      elsif new_y < self.y
-        return stair_y_position + 1 < stair_y_height
+    new_x = x + (dir == 6 ? 1 : dir == 4 ? -1 : 0)
+    new_y = y + (dir == 2 ? 1 : dir == 8 ? -1 : 0)
+    if on_spiral?
+      return false if dir == 4 || dir == 6
+      if @spiral_dir == :ascending
+        return false if dir == 2 && new_y > @spiral_start_y
+        return false if dir == 8 && new_y < @spiral_end_y
+      else
+        return false if dir == 8 && new_y < @spiral_start_y
+        return false if dir == 2 && new_y > @spiral_end_y
       end
-      return true
+      
+    elsif on_middle_of_stair?
+      if new_y > self.y
+        return false unless stair_y_position > 0
+      elsif new_y < self.y
+        return false unless stair_y_position + 1 < stair_y_height
+      end
+      
     else
-      new_x = x + (dir == 6 ? 1 : dir == 4 ? -1 : 0)
-      new_y = y + (dir == 2 ? 1 : dir == 8 ? -1 : 0)
       return false unless self.map.valid?(new_x, new_y)
       return true if @through
       if strict
@@ -280,16 +337,22 @@ class Game_Character
         return false unless self.map.passable?(x, y, dir, self)
         return false unless self.map.passable?(new_x, new_y, 10 - dir, self)
       end
-      self.map.events.each_value do |event|
-        next if self == event || !event.at_coordinate?(new_x, new_y) || event.through
+    end
+    self.map.events.each_value do |event|
+      next if self == event || event.through || event.is_stair_event?
+      
+      if is_event_at_target?(event, new_x, new_y)
         return false if self != $game_player || event.character_name != ""
       end
-      if $game_player.x == new_x && $game_player.y == new_y &&
-        !$game_player.through && @character_name != ""
-        return false
-      end
-      return true
     end
+
+    if self != $game_player
+      if is_event_at_target?($game_player, new_x, new_y)
+        return false if !$game_player.through && $game_player.character_name != ""
+      end
+    end
+
+    return true
   end
 
   def can_move_from_coordinate?(start_x, start_y, dir, strict = false)
@@ -345,6 +408,16 @@ class Game_Character
     ret = ((@real_x.to_f - self.map.display_x) / Game_Map::X_SUBPIXELS).round
     ret += @width * Game_Map::TILE_WIDTH / 2
     ret += self.x_offset
+    if on_spiral?
+      total_distance = (@spiral_start_y - @spiral_end_y).abs * Game_Map::REAL_RES_Y
+      current_distance = (@spiral_start_y * Game_Map::REAL_RES_Y - @real_y).abs
+      progress = current_distance.to_f / total_distance
+      turns = @spiral_h.abs / 4.0
+      angle = progress * turns * 2 * Math::PI
+      offset_x = Math.sin(angle) * @spiral_c * Game_Map::TILE_WIDTH
+      ret += offset_x.round
+    end
+    
     return ret
   end
   
@@ -376,19 +449,12 @@ class Game_Character
           @stair_last_increment = diff
         end
         if fraction >= 1
-          # oldy = @y
-          endy = @stair_end_y
-          if @stair_end_y < @stair_start_y
-            endy -= @stair_y_position
-          else
-            endy -= @stair_y_position
-          end
+          endy = @stair_end_y - @stair_y_position
           @move_initial_y = endy
           @y = endy
           @real_y = endy * Game_Map::REAL_RES_Y
-          @view_offset_y = 0 if defined?(SMOOTH_SCROLLING) && SMOOTH_SCROLLING && self.is_a?(Game_Player)          
+          @view_offset_y = 0 if defined?(SMOOTH_SCROLLING) && SMOOTH_SCROLLING && self.is_a?(Game_Player)
           clear_stair_data
-          pbWait(0.05) if self.is_a?(Game_Player)
           return calc_screen_y_ground
         end
       elsif @real_x / Game_Map::X_SUBPIXELS.to_f >= @stair_start_x * Game_Map::TILE_WIDTH &&
@@ -410,19 +476,12 @@ class Game_Character
           @stair_last_increment = diff
         end
         if fraction <= -1
-          # oldy = @y
-          endy = @stair_end_y
-          if @stair_end_y < @stair_start_y
-            endy -= @stair_y_position
-          else
-            endy -= @stair_y_position
-          end
+          endy = @stair_end_y - @stair_y_position
           @move_initial_y = endy
           @y = endy
           @real_y = endy * Game_Map::REAL_RES_Y
-          @view_offset_y = 0 if defined?(SMOOTH_SCROLLING) && SMOOTH_SCROLLING && self.is_a?(Game_Player)          
+          @view_offset_y = 0 if defined?(SMOOTH_SCROLLING) && SMOOTH_SCROLLING && self.is_a?(Game_Player)
           clear_stair_data
-          pbWait(0.05) if self.is_a?(Game_Player)
           return calc_screen_y_ground
         end
       else
@@ -430,7 +489,7 @@ class Game_Character
       end
     end
     return ((real_y - self.map.display_y) / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT).round
-  end 
+  end
 
   def screen_y
     ret = screen_y_ground
@@ -461,9 +520,9 @@ class Game_Character
   #-----------------------------------------------------------------------------
 
   def moving?
-    if self == $game_player && $DisableScrollCounter == 1
+    if self == $game_player && defined?($disable_scroll_counter) && $disable_scroll_counter == 1
       # New Game_Player#update scroll method
-      $DisableScrollCounter = 0
+      $disable_scroll_counter = 0
       @view_offset_x ||= 0
       @view_offset_y ||= 0
       self.center(
@@ -677,6 +736,33 @@ class Game_Character
 
   def move_generic(dir, turn_enabled = true)
     turn_generic(dir) if turn_enabled
+    
+    # --- SMART ZONES LOGIC ---
+    if !on_stair? && !on_spiral? && !@through && $game_map
+      stair_data = $game_map.check_stair_zones(@x, @y)
+      if stair_data
+        type = stair_data[0]
+        
+        if type == :slope
+          _, event, xinc, yinc, ypos, yheight, offset, zone = stair_data
+          stair_dir = xinc > 0 ? 6 : (xinc < 0 ? 4 : 0)
+          if dir == stair_dir
+            self.slope(xinc, yinc, ypos, yheight, offset)
+            return
+          end
+          
+        elsif type == :spiral
+          _, event, c, h, zone = stair_data
+          if zone == :start && dir == 8
+            self.set_spiral_data(c, h, :ascending)
+          elsif zone == :end && dir == 2
+            self.set_spiral_data(c, h, :descending)
+          end
+        end
+      end
+    end
+    # -------------------------
+
     if can_move_in_direction?(dir)
       turn_generic(dir)
       @move_initial_x = @x
@@ -767,15 +853,33 @@ class Game_Character
     return @stair_begin_offset && @stair_start_x && @stair_start_y &&
            @stair_end_x && @stair_end_y && @stair_y_position && @stair_y_height
   end
-  
+ 
+  def on_spiral?
+    return @spiral_c && @spiral_h && @spiral_start_y && @spiral_end_y
+  end
+
+  def set_spiral_data(c, h, direction)
+    @spiral_c = c
+    @spiral_h = h
+    @spiral_start_y = @y
+    @spiral_dir = direction
+    if direction == :ascending
+      @spiral_end_y = @y - h
+    else
+      @spiral_end_y = @y + h
+    end
+  end
+
   def on_middle_of_stair?
     return false if !on_stair?
+    start_px = (@stair_start_x * Game_Map::TILE_WIDTH * Game_Map::X_SUBPIXELS)
+    end_px   = (@stair_end_x * Game_Map::TILE_WIDTH * Game_Map::X_SUBPIXELS)
+    offset_px = @stair_begin_offset * Game_Map::X_SUBPIXELS
+    
     if @stair_start_x > @stair_end_x
-      return @real_x < (@stair_start_x * Game_Map::TILE_WIDTH - @stair_begin_offset) * Game_Map::X_SUBPIXELS &&
-          @real_x > (@stair_end_x * Game_Map::TILE_WIDTH + @stair_begin_offset) * Game_Map::X_SUBPIXELS
+      return @real_x < start_px - offset_px && @real_x > end_px + offset_px
     else
-      return @real_x > (@stair_start_x * Game_Map::TILE_WIDTH + @stair_begin_offset) * Game_Map::X_SUBPIXELS &&
-          @real_x < (@stair_end_x * Game_Map::TILE_WIDTH - @stair_begin_offset) * Game_Map::X_SUBPIXELS      
+      return @real_x > start_px + offset_px && @real_x < end_px - offset_px
     end
   end
   
@@ -789,6 +893,14 @@ class Game_Character
     @stair_begin_offset = begin_offset
     @stair_start_y += ypos
     @stair_end_y += ypos
+  end
+
+  def clear_spiral_data
+    @spiral_c = nil
+    @spiral_h = nil
+    @spiral_start_y = nil
+    @spiral_end_y = nil
+    @spiral_dir = nil
   end
   
   def clear_stair_data
@@ -1158,7 +1270,7 @@ class Game_Character
 
   def update
     if self == $game_player && defined?(SMOOTH_SCROLLING) && SMOOTH_SCROLLING && on_stair?
-      $DisableScrollCounter = 2
+      $disable_scroll_counter = 2
     end
     return if $game_temp.in_menu
     time_now = System.uptime
@@ -1258,6 +1370,31 @@ class Game_Character
     # Increment animation counter
     @anime_count += @delta_t if @walk_anime || @step_anime
     @moved_this_frame = true
+
+    # --- Spiral ---
+    if on_spiral?
+      total_distance = (@spiral_start_y - @spiral_end_y).abs * Game_Map::REAL_RES_Y
+      current_distance = (@spiral_start_y * Game_Map::REAL_RES_Y - @real_y).abs
+      progress = current_distance.to_f / total_distance
+      turns = @spiral_h.abs / 4.0
+      angle = progress * turns * 2 * Math::PI
+      eff_angle = angle
+      eff_angle = (Math::PI - angle) % (2 * Math::PI) if @spiral_c < 0
+      eff_angle += 2 * Math::PI if eff_angle < 0
+      if eff_angle >= 7*Math::PI/4 || eff_angle < Math::PI/4
+        @direction = 6 # Right
+      elsif eff_angle >= Math::PI/4 && eff_angle < 3*Math::PI/4
+        @direction = 8 # Up
+      elsif eff_angle >= 3*Math::PI/4 && eff_angle < 5*Math::PI/4
+        @direction = 4 # Left
+      else
+        @direction = 2 # Down
+      end
+
+      if !moving? && (@y == @spiral_end_y || @y == @spiral_start_y)
+        clear_spiral_data
+      end
+    end
   end
 
   def update_stop
@@ -1266,11 +1403,11 @@ class Game_Character
   end
 
   def update_pattern
-    if self == $game_player && defined?($DisableScrollCounter) && $DisableScrollCounter == 2
-      $DisableScrollCounter = 1
+    if self == $game_player && defined?($disable_scroll_counter) && $disable_scroll_counter == 2
+      $disable_scroll_counter = 1
     end
     return if @lock_pattern
-  # return if @jumping_on_spot   # Don't animate if jumping on the spot
+    # return if @jumping_on_spot   # Don't animate if jumping on the spot
     # Character has stopped moving, return to original pattern
     if @moved_last_frame && !@moved_this_frame && !@step_anime
       @pattern = @original_pattern
@@ -1285,7 +1422,7 @@ class Game_Character
     end
     # Calculate how many frames each pattern should display for, i.e. the time
     # it takes to move half a tile (or a whole tile if cycling). We assume the
-    # game uses square tiles.    
+    # game uses square tiles.
     pattern_time = pattern_update_speed / 4
     return if @anime_count < pattern_time
     # Advance to the next animation frame

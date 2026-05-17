@@ -125,7 +125,7 @@ class Scene_Credits
     add_names_to_credits(ret, [
       "The Pokémon Company",
       "Nintendo",
-      _INTL("Afilicado con Game Freak")
+      _INTL("Afiliado con Game Freak")
     ])
     ret.push("", "")
     ret.push(_INTL("Esto es un fanjuego sin ánimo de lucro."),

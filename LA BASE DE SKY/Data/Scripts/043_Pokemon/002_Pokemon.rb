@@ -535,6 +535,26 @@ class Pokemon
     @shiny = true if @super_shiny
   end
 
+  def super_shiny_hue
+    return 0 if !Settings::SUPER_SHINY_HUE_SHIFT || !super_shiny?    
+    sp_data = GameData::Species.get_species_form(@species, @form)    
+    hue_pool = sp_data.super_shiny_hue
+    hue_pool = Settings::SUPER_SHINY_HUES if hue_pool.nil? || hue_pool.empty?    
+    return 0 if hue_pool.empty?
+    return hue_pool[0] if hue_pool.length == 1    
+    if Settings::SUPER_SHINY_HUE_BY_SPECIES
+      baby_species = GameData::Species.get(@species).get_baby_species.to_s
+      seed = 0
+      baby_species.each_byte { |b| seed = (seed * 31) + b }
+    else
+      seed = @personalID
+    end    
+    srand(seed)
+    hue = hue_pool[rand(hue_pool.length)]
+    srand  
+    return hue
+  end
+
   # Makes this Pokémon not shiny.
   def no_shinyness
     @shiny = false
@@ -764,7 +784,7 @@ class Pokemon
     first_move_index = 0 if first_move_index < 0
     (first_move_index...knowable_moves.length).each do |i|
       @moves.push(Pokemon::Move.new(knowable_moves[i]))
-      $PokemonGlobal.add_seen_move(self.species, knowable_moves[i])
+      $PokemonGlobal&.add_seen_move(self.species, knowable_moves[i])
     end
   end
 
@@ -1246,23 +1266,34 @@ class Pokemon
   # @return [Hash<Integer>] hash containing this Pokémon's effective IVs
   def calcIV
     this_ivs = self.iv
+    unless this_ivs
+      fill_ivs
+      this_ivs = self.iv
+    end
     ret = {}
     GameData::Stat.each_main do |s|
-      ret[s.id] = (@ivMaxed[s.id]) ? IV_STAT_LIMIT : this_ivs[s.id]
+      ret[s.id] = @ivMaxed && @ivMaxed[s.id] ? IV_STAT_LIMIT : this_ivs[s.id]
     end
     return ret
+  end
+
+  def fill_ivs
+    @iv ||= {}
+    GameData::Stat.each_main do |s|
+      @iv[s.id] = rand(IV_STAT_LIMIT + 1)
+    end
   end
 
   # @return [Integer] the maximum HP of this Pokémon
   def calcHP(base, level, iv, ev)
     return 1 if base == 1   # For Shedinja
-    iv = ev = 0 if Settings::DISABLE_IVS_AND_EVS
+    iv = ev = 0 if Settings::DISABLE_IVS_AND_EVS || MinimalGrinding.on?
     return (((base * 2) + iv + (ev / 4)) * level / 100).floor + level + 10
   end
 
   # @return [Integer] the specified stat of this Pokémon (not used for total HP)
   def calcStat(base, level, iv, ev, nat)
-    iv = ev = 0 if Settings::DISABLE_IVS_AND_EVS
+    iv = ev = 0 if Settings::DISABLE_IVS_AND_EVS || MinimalGrinding.on?
     return (((((base * 2) + iv + (ev / 4)) * level / 100).floor + 5) * nat / 100).floor
   end
 
@@ -1275,9 +1306,7 @@ class Pokemon
     nature_mod = {}
     GameData::Stat.each_main { |s| nature_mod[s.id] = 100 }
     this_nature = self.nature_for_stats
-    if this_nature
-      this_nature.stat_changes.each { |change| nature_mod[change[0]] += change[1] }
-    end
+    this_nature&.stat_changes&.each { |change| nature_mod[change[0]] += change[1] }
     # Calculate stats
     stats = {}
     GameData::Stat.each_main do |s|
@@ -1321,7 +1350,7 @@ class Pokemon
     return ret
   end
 
-   #-----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # Move count evolution utilities.
   #-----------------------------------------------------------------------------
   def init_evo_move_count(move)
@@ -1373,7 +1402,7 @@ class Pokemon
   end
   
   def set_evo_crest_count(item, value)
-    init_crest_count(item)
+    init_evo_crest_count(item)
     @evo_crest_count[item] = value
   end
   

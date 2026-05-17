@@ -408,7 +408,7 @@ Battle::AI::Handlers::MoveFailureCheck.copy("RaiseUserAtkSpAtk1",
 Battle::AI::Handlers::MoveEffectScore.add("RaiseUserAtkSpAtk1Or2InSun",
   proc { |score, move, user, ai, battle|
     raises = move.move.statUp.clone
-    if [:Sun, :HarshSun].include?(user.battler.effectiveWeather)
+    if [:Sun, :HarshSun].include?(user.battler.effectiveWeather) || user.has_active_ability?(:MEGASOL)
       raises[1] = 2
       raises[3] = 2
     end

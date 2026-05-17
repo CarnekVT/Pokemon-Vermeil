@@ -137,7 +137,8 @@ module GameData
         trainer.party.push(pkmn)
         # Set Pokémon's properties if defined
         if pkmn_data[:form]
-          pkmn.forced_form = pkmn_data[:form] if MultipleForms.hasFunction?(species, "getForm")
+          can_mega_into_form = GameData::Species.form_is_mega_with_item?(species, pkmn_data[:form], pkmn_data[:item])
+          pkmn.forced_form = pkmn_data[:form] if MultipleForms.hasFunction?(species, "getForm") && !can_mega_into_form
           pkmn.form_simple = pkmn_data[:form]
         end
         pkmn.time_form_set = pbGetTimeNow.to_i   # To allow Furfrou/Hoopa alternate forms

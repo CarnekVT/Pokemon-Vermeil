@@ -913,16 +913,20 @@ def pbLearnMove(pkmn, move, ignore_if_known = false, by_machine = false, relearn
   if pbConfirmMessage(_INTL("¿Quieres que {1} olvide un movimiento y aprenda {2}?", pkmn_name, move_name), &block)
     loop do
       move_index = pbForgetMove(pkmn, move)
-      if move_index >= 0
+      if move_index >= 0 && pkmn.moves[move_index]
         old_move_name = pkmn.moves[move_index].name
         oldmovepp = pkmn.moves[move_index].pp
         pkmn.moves[move_index] = Pokemon::Move.new(move)   # Replaces current/total PP
         if by_machine && Settings::TAUGHT_MACHINES_KEEP_OLD_PP
           pkmn.moves[move_index].pp = [oldmovepp, pkmn.moves[move_index].total_pp].min
         end
-        pbMessage(_INTL("1, 2, y...\\wt[16] ...\\wt[16] ...\\wt[16] ¡puf!") + "\\se[Battle ball drop]\\wtnp[10]\1", &block)
-        pbMessage(_INTL("{1} ha olvidado cómo utilizar {2} y..." + "\1", pkmn_name, old_move_name), &block)
-        pbMessage("\\se[]" + _INTL("¡{1} ha aprendido {2}!", pkmn_name, move_name) + "\\se[Pkmn move learnt]\\wtnp[30]", &block)
+        if Settings::MENSAJE_CUENTA_MOVIMIENTOS
+          pbMessage(_INTL("1, 2, y...\\wt[16] ...\\wt[16] ...\\wt[16] ¡puf!") + "\\se[Battle ball drop]\\wtnp[10]\1", &block)
+          pbMessage(_INTL("{1} ha olvidado cómo utilizar {2} y..." + "\1", pkmn_name, old_move_name), &block)
+          pbMessage("\\se[]" + _INTL("¡{1} ha aprendido {2}!", pkmn_name, move_name) + "\\se[Pkmn move learnt]\\wtnp[30]", &block)
+        else
+          pbMessage("\\se[]" + _INTL("¡{1} ha olvidado {2} y ha aprendido {3}!", pkmn_name, old_move_name, move_name) + "\\se[Pkmn move learnt]\\wtnp[30]", &block)
+        end
         pkmn.changeHappiness("machine") if by_machine
         return true
       elsif pbConfirmMessage(_INTL("¿Dejas de aprender {1}?", move_name), &block)
@@ -943,6 +947,7 @@ def pbForgetMove(pkmn, moveToLearn)
     screen = PokemonSummaryScreen.new(scene)
     ret = screen.pbStartForgetScreen([pkmn], 0, moveToLearn)
   end
+  return -1 if ret >= pkmn.numMoves
   return ret
 end
 

@@ -162,7 +162,7 @@ class Battle::Battler
           when :SLEEP      then msg = _INTL("¡{1} permanece despierto por la habilidad {2}!", pbThis, abilityName)
           when :POISON     then msg = _INTL("¡La habilidad {1} de {2} previene envenenamiento!", pbThis(true), abilityName)
           when :BURN       then msg = _INTL("¡La habilidad {1} de {2} previene quemaduras!", pbThis(true), abilityName)
-          when :PARALYSIS  then msg = _INTL("¡La habilidad {1} de {2} previene paralisis!", pbThis(true), abilityName)
+          when :PARALYSIS  then msg = _INTL("¡La habilidad {1} de {2} previene parálisis!", pbThis(true), abilityName)
           when :FROZEN     then msg = _INTL("¡La habilidad {1} de {2} previene congelación!", pbThis(true), abilityName)
           when :FROSTBITE  then msg = _INTL("¡La habilidad {1} de {2} previene congelación!", pbThis(true), abilityName)
           end
