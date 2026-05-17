@@ -17,10 +17,22 @@ class Battle::Scene
   NUM_BALLS                     = Settings::MAX_PARTY_SIZE
   # Centre bottom of the player's side base graphic
   PLAYER_BASE_X                 = 128
-  PLAYER_BASE_Y                 = Settings::SCREEN_HEIGHT - 80
-  # Centre middle of the foe's side base graphic
-  FOE_BASE_X                    = Settings::SCREEN_WIDTH - 128
-  FOE_BASE_Y                    = (Settings::SCREEN_HEIGHT * 3 / 4) - 112
+  # Estas se leen en runtime para respetar cambios de Settings::SCREEN_* hechos
+  # por plugins. Se definen como métodos de clase y como constantes lazily
+  # mediante const_missing para no romper código existente que use
+  # `Battle::Scene::PLAYER_BASE_Y`, etc.
+  def self.PLAYER_BASE_Y; Settings::SCREEN_HEIGHT - 80; end
+  def self.FOE_BASE_X;    Settings::SCREEN_WIDTH - 128; end
+  def self.FOE_BASE_Y;    (Settings::SCREEN_HEIGHT * 3 / 4) - 112; end
+
+  def self.const_missing(name)
+    case name
+    when :PLAYER_BASE_Y then return PLAYER_BASE_Y()
+    when :FOE_BASE_X    then return FOE_BASE_X()
+    when :FOE_BASE_Y    then return FOE_BASE_Y()
+    end
+    super
+  end
   # Default focal points of user and target in animations - do not change!
   # Is the centre middle of each sprite
   FOCUSUSER_X                   = 128

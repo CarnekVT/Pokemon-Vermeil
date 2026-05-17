@@ -9,8 +9,24 @@ class Game_Player < Game_Character
   attr_accessor :charsetData
   attr_accessor :encounter_count
 
-  SCREEN_CENTER_X = ((Settings::SCREEN_WIDTH / 2) - (Game_Map::TILE_WIDTH / 2)) * Game_Map::X_SUBPIXELS
-  SCREEN_CENTER_Y = ((Settings::SCREEN_HEIGHT / 2) - (Game_Map::TILE_HEIGHT / 2)) * Game_Map::Y_SUBPIXELS
+  # Estos valores dependen de Settings::SCREEN_WIDTH/HEIGHT, así que se calculan
+  # en runtime (vía const_missing) para respetar a los plugins que cambien
+  # esos ajustes después de cargar Scripts/.
+  def self.SCREEN_CENTER_X
+    ((Settings::SCREEN_WIDTH / 2) - (Game_Map::TILE_WIDTH / 2)) * Game_Map::X_SUBPIXELS
+  end
+
+  def self.SCREEN_CENTER_Y
+    ((Settings::SCREEN_HEIGHT / 2) - (Game_Map::TILE_HEIGHT / 2)) * Game_Map::Y_SUBPIXELS
+  end
+
+  def self.const_missing(name)
+    case name
+    when :SCREEN_CENTER_X then return SCREEN_CENTER_X()
+    when :SCREEN_CENTER_Y then return SCREEN_CENTER_Y()
+    end
+    super
+  end
   # Time in seconds for one cycle of bobbing (playing 4 charset frames) while
   # surfing or diving.
   SURF_BOB_DURATION = 1.5

@@ -441,7 +441,12 @@ module Settings
   # }
   # Tambien podria ser un array de nombres de archivo, en cuyo caso se usaría el mismo estilo de texto para todos los gráficos de ese estilo.
   # Los valores para los estilos en los que solo se ingresa el grafico están definidos en la clase LocationWindow, y se pueden modificar editando esa clase.
-  LOCATION_SIGN_GRAPHIC_STYLES = {
+  # Se define como método para que los estilos que dependen de
+  # Settings::SCREEN_WIDTH/HEIGHT se evalúen en runtime (respeta cambios hechos
+  # por plugins). El acceso como constante `Settings::LOCATION_SIGN_GRAPHIC_STYLES`
+  # sigue funcionando vía const_missing.
+  def self.LOCATION_SIGN_GRAPHIC_STYLES
+    {
     dp: [{ graphic: 'DP',
            text_color: Color.new(72, 80, 72), shadow_color: Color.new(144, 160, 160),
            text_offset: [8, -10] }],
@@ -475,7 +480,13 @@ module Settings
                text_offset: [0, -1], graphic_offset: [Settings::SCREEN_WIDTH / 4 - 40, Settings::SCREEN_HEIGHT - 100],
                zoomx: 2, zoomy: 2, center_text: true }
             ]
-  }
+    }
+  end
+
+  def self.const_missing(name)
+    return LOCATION_SIGN_GRAPHIC_STYLES() if name == :LOCATION_SIGN_GRAPHIC_STYLES
+    super
+  end
 
 
   #=============================================================================

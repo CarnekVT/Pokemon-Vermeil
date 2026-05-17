@@ -1,10 +1,19 @@
 class Spriteset_Global
   attr_reader :playersprite
 
-  @@viewport2 = Viewport.new(0, 0, Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
-  @@viewport2.z = 200
+  # Igual que en Spriteset_Map: lazy init para que los plugins puedan modificar
+  # Settings::SCREEN_WIDTH/HEIGHT antes de la creación del viewport.
+  @@viewport2 = nil
+
+  def self.ensure_viewport
+    if !@@viewport2 || @@viewport2.disposed?
+      @@viewport2 = Viewport.new(0, 0, Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
+      @@viewport2.z = 200
+    end
+  end
 
   def initialize
+    self.class.ensure_viewport
     @map_id = $game_map&.map_id || 0
     @follower_sprites = FollowerSprites.new(Spriteset_Map.viewport)
     @playersprite = Sprite_Character.new(Spriteset_Map.viewport, $game_player)
