@@ -214,7 +214,7 @@ class Sprite_OWShadow
       next if other.disposed?
       
       o_sprite = other.sprite
-      next if !o_sprite || !o_sprite.visible || o_sprite.opacity == 0
+      next if !o_sprite || o_sprite.disposed? || !o_sprite.visible || o_sprite.opacity == 0
       next if other.__id__ > self.__id__ 
       
       o_x = o_sprite.x
