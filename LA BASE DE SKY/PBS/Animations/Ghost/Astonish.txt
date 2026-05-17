@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [Move,ASTONISH]
 Name = Essentials
@@ -157,4 +157,6 @@ Credit = Maruno
     MoveY = 13,3,-56,EaseIn
     MoveOpacity = 13,3,0
 <SE>
+    Play = 2,PRSFX- Astonish2
     Play = 2,Ghost/Astonish
+    Play = 7,PRSFX- Astonish1

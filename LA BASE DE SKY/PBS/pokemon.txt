@@ -1,4 +1,4 @@
-# Consulta la documentación en la wiki para aprender cómo editar este archivo.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [BULBASAUR]
 Name = Bulbasaur
@@ -77,6 +77,7 @@ Habitat = Grassland
 Category = Semilla
 Pokedex = Según parece, la flor de Venusaur adquiere unos colores muy vivos con una buena nutrición y mucho sol. El aroma delicado de esta flor calma los ánimos.
 Generation = 1
+Flags = HasGenderedSprites
 #-------------------------------
 [CHARMANDER]
 Name = Charmander
@@ -309,6 +310,7 @@ Habitat = Forest
 Category = Mariposa
 Pokedex = Butterfree tiene una habilidad especial para encontrar rico néctar en las flores. Localiza, extrae y transporta polen de flores que están a 10 km de distancia.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = SILVERPOWDER
 #-------------------------------
 [WEEDLE]
@@ -491,6 +493,7 @@ Habitat = Grassland
 Category = Ratón
 Pokedex = Rattata es cauto como él solo. Hasta cuando duerme mueve las orejas para oír todo lo que pueda suponer un peligro. Cava su madriguera en cualquier sitio.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = CHILANBERRY
 Evolution = RATICATE,Level,20
 #-------------------------------
@@ -518,6 +521,7 @@ Habitat = Grassland
 Category = Ratón
 Pokedex = A Raticate le crecen unos colmillos firmes y fuertes. Para mantenerlos afilados, roe rocas, troncos e incluso las paredes de las casas.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = CHILANBERRY
 #-------------------------------
 [SPEAROW]
@@ -650,6 +654,7 @@ Habitat = Forest
 Category = Ratón
 Pokedex = Tiene unas bolsas en las mejillas en las que almacena electricidad. Cuando la libera de golpe, la potencia de la descarga es igual a la de un rayo.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = LIGHTBALL
 Evolution = RAICHU,Item,THUNDERSTONE
 #-------------------------------
@@ -677,6 +682,7 @@ Habitat = Forest
 Category = Ratón
 Pokedex = Si acumula demasiada electricidad, se vuelve violento. Para evitarlo, suele descargar los excesos de energía, lo que lo mantiene calmado.
 Generation = 1
+Flags = HasGenderedSprites
 #-------------------------------
 [SANDSHREW]
 Name = Sandshrew
@@ -1075,6 +1081,7 @@ Habitat = Cave
 Category = Murciélago
 Pokedex = Debido al tiempo que pasaron en oscuras cavernas, sus ojos están atrofiados y desprovistos de visión. Utilizan ondas ultrasónicas para detectar obstáculos.
 Generation = 1
+Flags = HasGenderedSprites
 Evolution = GOLBAT,Level,22
 #-------------------------------
 [GOLBAT]
@@ -1101,7 +1108,8 @@ Habitat = Cave
 Category = Murciélago
 Pokedex = Tiene colmillos que atraviesan el pelaje más grueso. Se ceba chupando la sangre a la gente y a otros Pokémon. Revolotea en la oscuridad y ataca por la espalda.
 Generation = 1
-Evolution = CROBAT,Happiness,
+Flags = HasGenderedSprites
+Evolution = CROBAT,Happiness
 #-------------------------------
 [ODDISH]
 Name = Oddish
@@ -1155,6 +1163,7 @@ Habitat = Grassland
 Category = Hierbajo
 Pokedex = De su boca cae una miel muy nociva que desprende un hedor que puede provocar la pérdida de memoria. Con todo, hay quien afirma deleitarse con su fetidez.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = ABSORBBULB
 Evolution = VILEPLUME,Item,LEAFSTONE
 Evolution = BELLOSSOM,Item,SUNSTONE
@@ -1183,6 +1192,7 @@ Habitat = Grassland
 Category = Flor
 Pokedex = En las estaciones en las que produce más polen, Vileplume tiñe de amarillo el aire al caminar. El polen es altamente tóxico y provoca parálisis.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = ABSORBBULB
 #-------------------------------
 [PARAS]
@@ -1692,8 +1702,9 @@ Habitat = Urban
 Category = Psi
 Pokedex = Dicen que un chico que tenía capacidades psíquicas se transformó de repente en Kadabra mientras ayudaba en un estudio sobre poderes extrasensoriales.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = TWISTEDSPOON
-Evolution = ALAKAZAM,Trade,
+Evolution = ALAKAZAM,Trade
 Evolution = ALAKAZAM,Item,LINKINGCORD
 #-------------------------------
 [ALAKAZAM]
@@ -1720,6 +1731,7 @@ Habitat = Urban
 Category = Psi
 Pokedex = Aunque tiene una gran capacidad psíquica y una inteligencia excepcional, la musculatura de Alakazam es muy débil. Para moverse, utiliza poderes psíquicos.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = TWISTEDSPOON
 #-------------------------------
 [MACHOP]
@@ -1775,7 +1787,7 @@ Category = Superpoder
 Pokedex = Machoke lleva un cinturón para controlar su abrumadora energía. Como es tan peligroso, nadie se lo ha quitado nunca. Utiliza su fuerza para ayudar a la gente.
 Generation = 1
 WildItemUncommon = FOCUSBAND
-Evolution = MACHAMP,Trade,
+Evolution = MACHAMP,Trade
 Evolution = MACHAMP,Item,LINKINGCORD
 #-------------------------------
 [MACHAMP]
@@ -1989,7 +2001,7 @@ Category = Roca
 Pokedex = Baja las montañas rodando por cuestas escarpadas. Es tan robusto que destroza árboles y cantos rodados al impactar con ellos.
 Generation = 1
 WildItemUncommon = EVERSTONE
-Evolution = GOLEM,Trade,
+Evolution = GOLEM,Trade
 Evolution = GOLEM,Item,LINKINGCORD
 #-------------------------------
 [GOLEM]
@@ -2206,7 +2218,7 @@ Category = Pato Salvaje
 Pokedex = Lleva siempre una especie de palo de algún tipo de planta y dicen que éste puede ser mejor o peor. Tiene fama de haber luchado contra otros Pokémon por algún palo.
 Generation = 1
 WildItemUncommon = LEEK
-Evolution = SIRFETCHD,None,
+Evolution = SIRFETCHD,None
 #-------------------------------
 [DODUO]
 Name = Doduo
@@ -2233,6 +2245,7 @@ Habitat = Grassland
 Category = Ave Gemela
 Pokedex = Incluso mientras come o duerme, una de las cabezas sigue estando en guardia para detectar cualquier peligro. Si lo amenazan, sale huyendo a 100 km por hora.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = SHARPBEAK
 Evolution = DODRIO,Level,31
 #-------------------------------
@@ -2260,6 +2273,7 @@ Habitat = Grassland
 Category = Ave Triple
 Pokedex = Pertenece a una rara especie de Pokémon que tiene tres cabezas. Corre con energía por verdes praderas incluso en estaciones secas con poca lluvia.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = SHARPBEAK
 #-------------------------------
 [SEEL]
@@ -2473,7 +2487,7 @@ Habitat = Cave
 Category = Gas
 Pokedex = Es un Pokémon peligroso. Si en la oscuridad ves a uno flotando y te hace señas, no te acerques. Este Pokémon da lametazos para robar energía.
 Generation = 1
-Evolution = GENGAR,Trade,
+Evolution = GENGAR,Trade
 Evolution = GENGAR,Item,LINKINGCORD
 #-------------------------------
 [GENGAR]
@@ -2578,6 +2592,7 @@ Habitat = Grassland
 Category = Hipnosis
 Pokedex = Lleva un péndulo en la mano cuyo balanceo y brillo sumen a su rival en un profundo estado de hipnosis. Mientras busca a su presa, saca brillo al péndulo.
 Generation = 1
+Flags = HasGenderedSprites
 #-------------------------------
 [KRABBY]
 Name = Krabby
@@ -2946,6 +2961,7 @@ Habitat = RoughTerrain
 Category = Punzante
 Pokedex = Una vez que comienza a correr, no para: su minúsculo cerebro lo hace tan bobo que ni siquiera es capaz de acordarse de por qué empezó a hacerlo.
 Generation = 1
+Flags = HasGenderedSprites
 Evolution = RHYDON,Level,42
 #-------------------------------
 [RHYDON]
@@ -2972,6 +2988,7 @@ Habitat = RoughTerrain
 Category = Taladro
 Pokedex = Su cuerno, que gira como un taladro, destroza altos edificios de una pasada. Puede erguirse sobre las patas traseras y tiene un cerebro muy bien desarrollado.
 Generation = 1
+Flags = HasGenderedSprites
 Evolution = RHYPERIOR,CableLinkItem,PROTECTOR
 #-------------------------------
 [CHANSEY]
@@ -3000,7 +3017,7 @@ Category = Huevo
 Pokedex = Pone a diario huevos con un enorme valor nutritivo. Están tan ricos que hasta quien no tenga hambre se los comerá en un abrir y cerrar de ojos.
 Generation = 1
 WildItemCommon = LUCKYPUNCH
-Evolution = BLISSEY,Happiness,
+Evolution = BLISSEY,Happiness
 #-------------------------------
 [TANGELA]
 Name = Tangela
@@ -3135,6 +3152,7 @@ Habitat = WatersEdge
 Category = Pez Color
 Pokedex = En primavera, se pueden ver bancos de Goldeen remontando cascadas y ríos. Causa mucho daño cuando embiste con su único cuerno.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = MYSTICWATER
 Evolution = SEAKING,Level,33
 #-------------------------------
@@ -3162,6 +3180,7 @@ Habitat = WatersEdge
 Category = Pez Color
 Pokedex = Perfora agujeros en los cantos rodados de las cuencas de los ríos. Así protege sus huevos de cualquier ataque y evita que los arrastre la corriente.
 Generation = 1
+Flags = HasGenderedSprites
 WildItemUncommon = MYSTICWATER
 #-------------------------------
 [STARYU]
@@ -3244,7 +3263,7 @@ Habitat = Urban
 Category = Barrera
 Pokedex = Domina la pantomima. Con sus gestos puede convencer a sus espectadores de la existencia de algo invisible y, cuando se lo creen, las ilusiones se hacen realidad.
 Generation = 1
-Evolution = MRRIME,None,
+Evolution = MRRIME,None
 #-------------------------------
 [SCYTHER]
 Name = Scyther
@@ -3271,6 +3290,7 @@ Habitat = Grassland
 Category = Mantis
 Pokedex = Es espectacular ver lo rápido que es. Su velocidad potencia las guadañas que tiene en los brazos, pues rebanan gruesos troncos de un tajo.
 Generation = 1
+Flags = HasGenderedSprites
 Evolution = SCIZOR,CableLinkItem,METALCOAT
 Evolution = KLEAVOR,Item,BLACKAUGURITE
 #-------------------------------
@@ -3428,6 +3448,7 @@ Habitat = WatersEdge
 Category = Pez
 Pokedex = Los músculos con los que nada son débiles, así que se lo lleva la corriente con facilidad. Muchos Magikarp van a parar a piscinas naturales.
 Generation = 1
+Flags = HasGenderedSprites
 Evolution = GYARADOS,Level,20
 #-------------------------------
 [GYARADOS]
@@ -3454,6 +3475,7 @@ Habitat = WatersEdge
 Category = Atrocidad
 Pokedex = Es extremadamente feroz y violento. Cuando las personas comienzan a luchar, aparece y reduce a cenizas todo lo que pilla con intensas llamaradas.
 Generation = 1
+Flags = HasGenderedSprites
 #-------------------------------
 [LAPRAS]
 Name = Lapras
@@ -3535,16 +3557,16 @@ Habitat = Urban
 Category = Evolución
 Pokedex = Su configuración genética le permite mutar y adaptarse enseguida a cualquier medio. Evoluciona gracias a las radiaciones emitidas por varias piedras.
 Generation = 1
+Flags = HasGenderedSprites
 Evolution = VAPOREON,Item,WATERSTONE
-Evoltuion = JOLTEON,Item,THUNDERSTONE
 Evolution = FLAREON,Item,FIRESTONE
 Evolution = LEAFEON,Item,LEAFSTONE
 Evolution = LEAFEON,LocationFlag,MossRock
 Evolution = GLACEON,Item,ICESTONE
 Evolution = GLACEON,LocationFlag,IceRock
 Evolution = SYLVEON,HappinessMoveType,FAIRY
-Evolution = ESPEON,HappinessDay,
-Evolution = UMBREON,HappinessNight,
+Evolution = ESPEON,HappinessDay
+Evolution = UMBREON,HappinessNight
 #-------------------------------
 [VAPOREON]
 Name = Vaporeon
@@ -4096,6 +4118,7 @@ Habitat = Grassland
 Category = Hierba
 Pokedex = La fragancia de su flor aplaca y suaviza los ánimos. Al luchar, libera más cantidad de esencia calmante para anular el espíritu de combate de su oponente.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [CYNDAQUIL]
 Name = Cyndaquil
@@ -4382,6 +4405,7 @@ Habitat = Forest
 Category = 5estrellas
 Pokedex = Segrega un fluido por los seis puntos de unión que tiene entre patas y cuerpo. Al variar la esencia de éste, consigue expresar su estado de ánimo.
 Generation = 2
+Flags = HasGenderedSprites
 Evolution = LEDIAN,Level,18
 #-------------------------------
 [LEDIAN]
@@ -4408,6 +4432,7 @@ Habitat = Forest
 Category = 5estrellas
 Pokedex = Dicen que, en zonas de aire puro donde se ven las estrellas, hay grandes grupos de Ledian. Y es que estos Pokémon usan la luz de las estrellas como fuente de energía.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [SPINARAK]
 Name = Spinarak
@@ -4565,7 +4590,7 @@ Habitat = Forest
 Category = Ratoncito
 Pokedex = Sigue sin poder contener o retener electricidad. Cuando se asusta, descarga energía de forma accidental. Con todo, a medida que pasa el tiempo va mejorando.
 Generation = 2
-Evolution = PIKACHU,Happiness,
+Evolution = PIKACHU,Happiness
 #-------------------------------
 [CLEFFA]
 Name = Cleffa
@@ -4593,7 +4618,7 @@ Category = Estrellada
 Pokedex = Cuando hay lluvia de estrellas, se les ve danzando en círculos durante la noche. Sólo paran de día; entonces, dejan de bailar y beben el rocío de la mañana.
 Generation = 2
 WildItemUncommon = MOONSTONE
-Evolution = CLEFAIRY,Happiness,
+Evolution = CLEFAIRY,Happiness
 #-------------------------------
 [IGGLYBUFF]
 Name = Igglybuff
@@ -4620,7 +4645,7 @@ Habitat = Grassland
 Category = Globo
 Pokedex = Es suave, flexible y capaz de botar. Cuando canta sin parar con todas sus fuerzas, se va poniendo de un color rosa cada vez más intenso.
 Generation = 2
-Evolution = JIGGLYPUFF,Happiness,
+Evolution = JIGGLYPUFF,Happiness
 #-------------------------------
 [TOGEPI]
 Name = Togepi
@@ -4647,7 +4672,7 @@ Habitat = Forest
 Category = Bolapicuda
 Pokedex = Usa la compasión y la alegría que emanan de la gente y de los Pokémon como energía. Almacena sentimientos positivos en su interior y después los comparte.
 Generation = 2
-Evolution = TOGETIC,Happiness,
+Evolution = TOGETIC,Happiness
 #-------------------------------
 [TOGETIC]
 Name = Togetic
@@ -4726,6 +4751,7 @@ Habitat = Forest
 Category = Místico
 Pokedex = Tiene el enigmático poder de prever el futuro. Gente de distintos sitios ha creído durante mucho tiempo que los Xatu eran mensajeros de otro mundo.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [MAREEP]
 Name = Mareep
@@ -4908,6 +4934,7 @@ Habitat = Forest
 Category = Imitación
 Pokedex = Se camufla adoptando la imagen de un árbol para que no le ataque ningún enemigo. En invierno las patas se le ven verdes y es fácil identificarle.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [POLITOED]
 Name = Politoed
@@ -4933,6 +4960,7 @@ Habitat = WatersEdge
 Category = Rana
 Pokedex = El mechón rizado de Politoed confirma su condición de rey. Dicen que cuanto más le crece y más se le riza, mayor es el respeto que recibe de sus súbditos.
 Generation = 2
+Flags = HasGenderedSprites
 WildItemUncommon = KINGSROCK
 #-------------------------------
 [HOPPIP]
@@ -5038,6 +5066,7 @@ Habitat = Forest
 Category = Cola Larga
 Pokedex = Su cola termina en una especie de mano a la que puede dar muy buen uso. Pero, como se ha acostumbrado a usarla mucho, las de verdad se le han vuelto algo torpes.
 Generation = 2
+Flags = HasGenderedSprites
 Evolution = AMBIPOM,HasMove,DOUBLEHIT
 #-------------------------------
 [SUNKERN]
@@ -5145,6 +5174,7 @@ Habitat = WatersEdge
 Category = Pez Agua
 Pokedex = Suele vivir en el agua, pero también es posible verle en tierra en busca de comida. Cuando está en terreno firme, se cubre con una película viscosa y tóxica.
 Generation = 2
+Flags = HasGenderedSprites
 Evolution = QUAGSIRE,Level,20
 #-------------------------------
 [QUAGSIRE]
@@ -5171,6 +5201,7 @@ Habitat = WatersEdge
 Category = Pez Agua
 Pokedex = Quagsire caza dejando las fauces abiertas en el agua y esperando a que su presa entre sin darse cuenta. Como se queda quieto, no pasa mucha hambre.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [ESPEON]
 Name = Espeon
@@ -5247,6 +5278,7 @@ Habitat = Forest
 Category = Oscuridad
 Pokedex = Murkrow ha sido temido y repudiado por todos porque se cree que da mala suerte. Le encanta todo lo que resplandece. A las mujeres les roba los anillos.
 Generation = 2
+Flags = HasGenderedSprites
 Evolution = HONCHKROW,Item,DUSKSTONE
 #-------------------------------
 [SLOWKING]
@@ -5350,6 +5382,7 @@ Habitat = Cave
 Category = Paciente
 Pokedex = Generalmente es dócil, pero si recibe un ataque en su cola negra, Wobbuffet se defenderá con ferocidad. Se guarece en cuevas hasta que anochece.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [GIRAFARIG]
 Name = Girafarig
@@ -5376,6 +5409,7 @@ Habitat = Grassland
 Category = Grancuello
 Pokedex = Girafarig es herbívoro: come hierba y brotes de los árboles. Mientras se alimenta, mueve la cola como si también masticara y tragara con ella.
 Generation = 2
+Flags = HasGenderedSprites
 Evolution = FARIGIRAF,HasMove,TWINBEAM
 #-------------------------------
 [PINECO]
@@ -5482,6 +5516,7 @@ Habitat = Mountain
 Category = Escorpiala
 Pokedex = Planea por el aire sin hacer ruido. Se agarra a la cara del rival con las garras traseras y las pinzas delanteras, inyectándole veneno por el aguijón.
 Generation = 2
+Flags = HasGenderedSprites
 Evolution = GLISCOR,NightHoldItem,RAZORFANG
 #-------------------------------
 [STEELIX]
@@ -5508,6 +5543,7 @@ Habitat = Cave
 Category = Serpférrea
 Pokedex = Vive a aún mayor profundidad que Onix. Se le conoce por cavar hacia el centro de la tierra. Hay datos que demuestran que ha llegado a alcanzar 1 km de profundidad.
 Generation = 2
+Flags = HasGenderedSprites
 WildItemUncommon = METALCOAT
 #-------------------------------
 [SNUBBULL]
@@ -5613,6 +5649,7 @@ Habitat = Grassland
 Category = Tenaza
 Pokedex = Scizor tiene un cuerpo duro como el acero en el que los ataques comunes apenas hacen mella. Este Pokémon bate las alas para regular su temperatura corporal.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [SHUCKLE]
 Name = Shuckle
@@ -5668,6 +5705,7 @@ Habitat = Forest
 Category = Unicornio
 Pokedex = Va en grupo al bosque en busca de la dulce savia de los árboles. Cubierto con una coraza dura como el acero, luce su cuerno orgulloso y voltea con él a los rivales.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [SNEASEL]
 Name = Sneasel
@@ -5694,6 +5732,7 @@ Habitat = Forest
 Category = Garra Filo
 Pokedex = Trepa a los árboles clavando en la corteza sus garras curvadas. Busca nidos desprovistos de vigilancia paterna para robar huevos y comérselos.
 Generation = 2
+Flags = HasGenderedSprites
 WildItemUncommon = QUICKCLAW
 Evolution = WEAVILE,NightHoldItem,RAZORCLAW
 #-------------------------------
@@ -5748,6 +5787,7 @@ Habitat = Mountain
 Category = Hibernante
 Pokedex = En los bosques que habita, dicen que hay arroyos y árboles gigantes donde guarda su alimento. A diario, pasea por el bosque para recolectar comida.
 Generation = 2
+Flags = HasGenderedSprites
 Evolution = URSALUNA,ItemNight,PEATBLOCK
 #-------------------------------
 [SLUGMA]
@@ -5853,6 +5893,7 @@ Habitat = Cave
 Category = Puerco
 Pokedex = Está cubierto por un pelaje tupido y de largas cerdas que le permite soportar el frío. Usa los colmillos para desenterrar los alimentos cubiertos por el hielo.
 Generation = 2
+Flags = HasGenderedSprites
 Evolution = MAMOSWINE,HasMove,ANCIENTPOWER
 #-------------------------------
 [CORSOLA]
@@ -5881,7 +5922,7 @@ Category = Coral
 Pokedex = Corsola vive en las cálidas aguas de los mares del Sur. Cuando hay contaminación, las bellas ramas coralinas que le cubren se decoloran y se caen a pedazos.
 Generation = 2
 WildItemUncommon = LUMINOUSMOSS
-Evolution = CURSOLA,None,
+Evolution = CURSOLA,None
 #-------------------------------
 [REMORAID]
 Name = Remoraid
@@ -5934,6 +5975,7 @@ Habitat = Sea
 Category = Reactor
 Pokedex = Se apodera de su enemigo con los tentáculos y lo deja inmovilizado antes de propinarle el golpe final. Si el rival es muy fuerte, le escupe tinta para escapar.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [DELIBIRD]
 Name = Delibird
@@ -6065,6 +6107,7 @@ Habitat = RoughTerrain
 Category = Siniestro
 Pokedex = En la manada de Houndoom, el que tiene los cuernos especialmente orientados hacia atrás ejerce de líder. Para elegir al jefe, estos Pokémon se baten entre sí.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [KINGDRA]
 Name = Kingdra
@@ -6143,6 +6186,7 @@ Habitat = RoughTerrain
 Category = Coraza
 Pokedex = Donphan es tan fuerte que puede arrastrar fácilmente un camión de descarga. Tiene la piel tan dura como una roca, lo que le protege de ataques.
 Generation = 2
+Flags = HasGenderedSprites
 #-------------------------------
 [PORYGON2]
 Name = Porygon2
@@ -6756,6 +6800,7 @@ Habitat = Grassland
 Category = Polluelo
 Pokedex = Si le atacan, se defiende escupiendo bolas de fuego que forma en el estómago. Los Torchic tienen aversión a la oscuridad porque les impide ver lo que los rodea.
 Generation = 3
+Flags = HasGenderedSprites
 Evolution = COMBUSKEN,Level,16
 #-------------------------------
 [COMBUSKEN]
@@ -6782,6 +6827,7 @@ Habitat = Grassland
 Category = Ave Corral
 Pokedex = Propina hasta diez patadas por segundo. Tiene un instinto de lucha tan fuerte que no deja de pelear hasta que el rival se rinde.
 Generation = 3
+Flags = HasGenderedSprites
 Evolution = BLAZIKEN,Level,36
 #-------------------------------
 [BLAZIKEN]
@@ -6808,6 +6854,7 @@ Habitat = Grassland
 Category = Llameante
 Pokedex = Aprende artes marciales en las que se dan puñetazos y patadas. Al cabo de varios años, se le queman las plumas y le crecen otras nuevas, muy flexibles, en su lugar.
 Generation = 3
+Flags = HasGenderedSprites
 #-------------------------------
 [MUDKIP]
 Name = Mudkip
@@ -6994,7 +7041,7 @@ Pokedex = Es tremendamente rápido si corre en línea recta. Cuando detecta a su
 Generation = 3
 WildItemCommon = POTION
 WildItemUncommon = MAXREVIVE
-Evolution = OBSTAGOON,None,
+Evolution = OBSTAGOON,None
 #-------------------------------
 [WURMPLE]
 Name = Wurmple
@@ -7074,6 +7121,7 @@ Habitat = Forest
 Category = Mariposa
 Pokedex = Su principal característica son los dibujos y colores de sus alas. Vuela por campos cubiertos de flores para recoger el polen. Si le molestan, ataca sin dudar.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemUncommon = SHEDSHELL
 #-------------------------------
 [CASCOON]
@@ -7125,6 +7173,7 @@ Habitat = Forest
 Category = Polilla Veneno
 Pokedex = Es un Pokémon nocturno que llega desde campos y montañas atraído por las luces. Al batir las alas, libera un polvillo muy tóxico.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemUncommon = SHEDSHELL
 #-------------------------------
 [LOTAD]
@@ -7206,6 +7255,7 @@ Habitat = WatersEdge
 Category = Optimista
 Pokedex = Cuando oye música festiva, las células se le revolucionan y comienza a bailar con mucho ritmo. No se acobarda ni delante del enemigo más fuerte.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemUncommon = MENTALHERB
 #-------------------------------
 [SEEDOT]
@@ -7260,6 +7310,7 @@ Habitat = Forest
 Category = Astuto
 Pokedex = Vive en los bosques y se le da muy bien subirse a los árboles. La nariz que tiene, grande y puntiaguda, es su punto débil. Si se la pellizcan, pierde fuerza.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemUncommon = POWERHERB
 Evolution = SHIFTRY,Item,LEAFSTONE
 #-------------------------------
@@ -7287,6 +7338,7 @@ Habitat = Forest
 Category = Malvado
 Pokedex = Dicen que llega con los fríos vientos de invierno. Se le considera guardián de los bosques y se le teme; nadie se atreve a adentrarse en su morada.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemUncommon = POWERHERB
 #-------------------------------
 [TAILLOW]
@@ -7895,7 +7947,7 @@ Habitat = WatersEdge
 Category = A Topos
 Pokedex = Su cola es una especie de pelota de goma que bota y contiene los nutrientes que necesita. En días soleados, se reúne con otros en la orilla para jugar chapoteando.
 Generation = 3
-Evolution = MARILL,Happiness,
+Evolution = MARILL,Happiness
 #-------------------------------
 [NOSEPASS]
 Name = Nosepass
@@ -8138,6 +8190,7 @@ Habitat = Mountain
 Category = Meditador
 Pokedex = Medita sin parar durante muchas horas al día. Su práctica del yoga es rigurosa; como resultado, logra canalizar su energía espiritual hasta llegar a volar.
 Generation = 3
+Flags = HasGenderedSprites
 Evolution = MEDICHAM,Level,37
 #-------------------------------
 [MEDICHAM]
@@ -8164,6 +8217,7 @@ Habitat = Mountain
 Category = Meditador
 Pokedex = Gracias a agotadoras sesiones de yoga, ha adquirido la capacidad de prever las acciones del enemigo. Lucha realizando movimientos elegantes y rítmicos.
 Generation = 3
+Flags = HasGenderedSprites
 #-------------------------------
 [ELECTRIKE]
 Name = Electrike
@@ -8352,6 +8406,7 @@ Habitat = Grassland
 Category = Espina
 Pokedex = Si Roselia absorbe sus nutrientes de las ricas lluvias primaverales, florece con gran belleza. La fragancia de sus flores hace que sus enemigos se confíen.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemUncommon = POISONBARB
 Evolution = ROSERADE,Item,SHINYSTONE
 #-------------------------------
@@ -8380,6 +8435,7 @@ Habitat = Grassland
 Category = Estómago
 Pokedex = Con el líquido que tiene en el estómago, puede digerir hasta hierro de desecho. Es capaz de tragarse de una sentada cualquier cosa que lo iguale en tamaño.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemCommon = ORANBERRY
 WildItemUncommon = SITRUSBERRY
 Evolution = SWALOT,Level,26
@@ -8408,6 +8464,7 @@ Habitat = Grassland
 Category = Bolsa Veneno
 Pokedex = Tiene un ácido tan potente en el estómago que le permite digerir casi cualquier cosa. Lo único que Swalot no puede digerir es su propio estómago.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemCommon = ORANBERRY
 WildItemUncommon = SITRUSBERRY
 #-------------------------------
@@ -8542,6 +8599,7 @@ Habitat = Mountain
 Category = Torpe
 Pokedex = Un Numel almacena magma en ebullición dentro de la joroba del lomo. Es robusto y puede cargar hasta con 100 kg. Ayuda a la gente en su trabajo desde hace mucho.
 Generation = 3
+Flags = HasGenderedSprites
 Evolution = CAMERUPT,Level,33
 #-------------------------------
 [CAMERUPT]
@@ -8568,6 +8626,7 @@ Habitat = Mountain
 Category = Erupción
 Pokedex = Vive en el cráter de un volcán. Cada 10 años, los volcanes que tiene en el lomo entran en erupción de forma violenta. Se están investigando las posibles causas.
 Generation = 3
+Flags = HasGenderedSprites
 #-------------------------------
 [TORKOAL]
 Name = Torkoal
@@ -8803,6 +8862,7 @@ Habitat = RoughTerrain
 Category = Espantajo
 Pokedex = Como ha pasado miles de años en áridos desiertos, la sangre se le ha transformado en una especie de arena. Es nocturno, así que caza de noche.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemUncommon = STICKYBARB
 #-------------------------------
 [SWABLU]
@@ -9276,6 +9336,7 @@ Habitat = WatersEdge
 Category = Tierno
 Pokedex = Dicen que vive en el fondo de los grandes lagos. Se le considera el Pokémon más bello que existe y se le ha representado en multitud de pinturas y estatuas.
 Generation = 3
+Flags = HasGenderedSprites
 #-------------------------------
 [CASTFORM]
 Name = Castform
@@ -9785,6 +9846,7 @@ Habitat = Sea
 Category = Longevo
 Pokedex = Se llegó a creer que se había extinguido. La especie no ha cambiado de forma desde hace 100 millones de años. Camina por el fondo marino usando las aletas frontales.
 Generation = 3
+Flags = HasGenderedSprites
 WildItemUncommon = DEEPSEASCALE
 #-------------------------------
 [LUVDISC]
@@ -10481,6 +10543,7 @@ Shape = Winged
 Category = Estornino
 Pokedex = Viaja en grandes bandadas. Aunque es pequeño, agita las alas con gran fuerza. Son débiles individualmente, por eso forman grupos.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = STARAVIA,Level,14
 #-------------------------------
 [STARAVIA]
@@ -10506,6 +10569,7 @@ Shape = Winged
 Category = Estornino
 Pokedex = Vuela por bosques y campos en busca de Pokémon de tipo bicho. Siempre va en bandadas. Las disputas dentro de ellos son muy intensas.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = STARAPTOR,Level,34
 #-------------------------------
 [STARAPTOR]
@@ -10531,6 +10595,7 @@ Shape = Winged
 Category = Depredador
 Pokedex = Tiene un carácter salvaje. No duda en desafiar a rivales mucho mayores. Jamás deja de atacar, aunque le hieran. Le preocupa mucho la forma de su cresta.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [BIDOOF]
 Name = Bidoof
@@ -10556,6 +10621,7 @@ Shape = Quadruped
 Category = Gran Ratón
 Pokedex = Tiene nervios de acero y nada lo perturba. Es más ágil y activo de lo que aparenta. Forman colonias en las riberas de los ríos. Le crecen mucho los dientes.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = BIBAREL,Level,15
 #-------------------------------
 [BIBAREL]
@@ -10581,6 +10647,7 @@ Shape = BipedalTail
 Category = Castor
 Pokedex = Para anidar, crea presas en los ríos con maderas y barro. Tiene fama de trabajador. Un río en el que un Bibarel cree una presa jamás se desbordará.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [KRICKETOT]
 Name = Kricketot
@@ -10605,6 +10672,7 @@ Shape = Bipedal
 Category = Grillo
 Pokedex = Al agitar la cabeza de atrás hacia delante, sus antenas chocan y suenan como un xilófono. Los sonidos producidos son muy característicos.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = METRONOME
 Evolution = KRICKETUNE,Level,10
 #-------------------------------
@@ -10631,6 +10699,7 @@ Shape = MultiWinged
 Category = Grillo
 Pokedex = Cuando llora, cruza sus brazos con forma de cuchillo. Puede improvisar melodías. Los científicos tratan de estudiar sus melodías, que reflejan sus emociones.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = METRONOME
 #-------------------------------
 [SHINX]
@@ -10657,6 +10726,7 @@ Shape = Quadruped
 Category = Flash
 Pokedex = Si siente peligro, todo su pelaje brilla. Aprovecha la ceguera temporal de su rival para huir. Los músculos de sus patas delanteras generan electricidad.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = LUXIO,Level,15
 #-------------------------------
 [LUXIO]
@@ -10682,6 +10752,7 @@ Shape = Quadruped
 Category = Chispa
 Pokedex = Sus garras emiten electricidad que puede debilitar a sus rivales. Viven en grupos pequeños. Para comunicarse se tocan con las patas delanteras.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = LUXRAY,Level,30
 #-------------------------------
 [LUXRAY]
@@ -10707,6 +10778,7 @@ Shape = Quadruped
 Category = Chispa ojos
 Pokedex = Sus ojos pueden ver a través de todo. Cuando sus ojos brillan como el oro, puede ver presas escondidas. Localiza a las presas detrás de objetos y las captura.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [BUDEW]
 Name = Budew
@@ -10734,7 +10806,7 @@ Category = Brote
 Pokedex = En invierno cierra su capullo para protegerse del frío. En primavera el capullo se abre y esparce polen. Vive junto a los estanques de agua clara.
 Generation = 4
 WildItemUncommon = POISONBARB
-Evolution = ROSELIA,HappinessDay,
+Evolution = ROSELIA,HappinessDay
 #-------------------------------
 [ROSERADE]
 Name = Roserade
@@ -10759,6 +10831,7 @@ Shape = Bipedal
 Category = Ramillete
 Pokedex = Atrae a las presas con un dulce aroma y las derrota con los látigos espinosos de sus brazos. Cada una de sus manos contiene toxinas diferentes.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = POISONBARB
 #-------------------------------
 [CRANIDOS]
@@ -10965,6 +11038,7 @@ Shape = MultiBody
 Category = Abejita
 Pokedex = Está formado por otros tres Pokémon. Le lleva miel floral a Vespiquen. Almacenan miel en su colonia, y por la noche, se apiñan para dormir.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = HONEY
 Evolution = VESPIQUEN,LevelFemale,21
 #-------------------------------
@@ -11017,6 +11091,7 @@ Shape = Quadruped
 Category = Ardillalec
 Pokedex = Crea bolas de pelo que crepitan con electricidad estática. Las almacena en agujeros de árboles. A veces se ve a dos frotándose las bolsas de las mejillas.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [BUIZEL]
 Name = Buizel
@@ -11042,6 +11117,7 @@ Shape = Quadruped
 Category = Nutria Marina
 Pokedex = Posee un flotador en forma de collar hinchable. Flota en el agua con la cabeza fuera. Nada rotando sus colas, y cuando bucea, el flotador se pliega.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = FLOATZEL,Level,26
 #-------------------------------
 [FLOATZEL]
@@ -11067,6 +11143,7 @@ Shape = Quadruped
 Category = Nutria Marina
 Pokedex = Nada gracias a su flotador, que se desarrolló a raíz de perseguir presas acuáticas. También sirve como balsa. Ayuda en los rescates de gente.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [CHERUBI]
 Name = Cherubi
@@ -11196,6 +11273,7 @@ Shape = BipedalTail
 Category = Cola Larga
 Pokedex = Para comer, rompe nueces con sus dos colas. Raras veces utiliza sus brazos. Trabajan en grandes colonias y forman anillos con sus colas, en signo de amistad.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [DRIFLOON]
 Name = Drifloon
@@ -11271,7 +11349,7 @@ Shape = BipedalTail
 Category = Conejo
 Pokedex = Ataca a sus enemigos con un golpe rápido de sus orejas. Sus picotazos son muy dolorosos. En noches frías, duerme con la cabeza metida en el pelaje.
 Generation = 4
-Evolution = LOPUNNY,Happiness,
+Evolution = LOPUNNY,Happiness
 #-------------------------------
 [LOPUNNY]
 Name = Lopunny
@@ -11419,7 +11497,7 @@ Category = Campana
 Pokedex = Emite chillidos al agitar la esfera de su garganta. Se mueve con enérgicos saltos. Ensordece a sus rivales con sonidos de alta frecuencia.
 Generation = 4
 WildItemUncommon = CLEANSETAG
-Evolution = CHIMECHO,HappinessNight,
+Evolution = CHIMECHO,HappinessNight
 #-------------------------------
 [STUNKY]
 Name = Stunky
@@ -11679,6 +11757,7 @@ Shape = BipedalTail
 Category = Terrascualo
 Pokedex = Anida en pequeños agujeros en las paredes de cuevas. Cuando una presa pasa cerca, salta hacia ella. Antes vivía en el trópico.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = GABITE,Level,24
 #-------------------------------
 [GABITE]
@@ -11704,6 +11783,7 @@ Shape = BipedalTail
 Category = Cueva
 Pokedex = Existe la arraigada creencia de que una medicina hecha de sus escamas puede curarlo todo. Suele buscar y acumular gemas en su nido.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = GARCHOMP,Level,48
 #-------------------------------
 [GARCHOMP]
@@ -11729,6 +11809,7 @@ Shape = BipedalTail
 Category = Mach
 Pokedex = Cuando despliega su cuerpo y sus alas, parece un avión a reacción. Vuela a velocidad sónica. Sus alas crean cuchillas de viento que talan cualquier árbol.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [MUNCHLAX]
 Name = Munchlax
@@ -11758,7 +11839,7 @@ Generation = 4
 WildItemCommon = LEFTOVERS
 WildItemUncommon = LEFTOVERS
 WildItemRare = LEFTOVERS
-Evolution = SNORLAX,Happiness,
+Evolution = SNORLAX,Happiness
 #-------------------------------
 [RIOLU]
 Name = Riolu
@@ -11784,7 +11865,7 @@ Shape = BipedalTail
 Category = Emanación
 Pokedex = Su aura se intensifica para alertar a otros cuando está triste o tiene miedo. Puede subir tres montañas y cruzar dos cañones en una noche.
 Generation = 4
-Evolution = LUCARIO,HappinessDay,
+Evolution = LUCARIO,HappinessDay
 #-------------------------------
 [LUCARIO]
 Name = Lucario
@@ -11834,6 +11915,7 @@ Shape = Quadruped
 Category = Hipo
 Pokedex = Vive en zonas áridas. En lugar de sudar, su cuerpo expulsa granos de arena. Se embadurna de arena para protegerse de los gérmenes. No le gusta mojarse.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = HIPPOWDON,Level,34
 #-------------------------------
 [HIPPOWDON]
@@ -11859,6 +11941,7 @@ Shape = Quadruped
 Category = Peso Pesado
 Pokedex = Cuando ataca, expulsa arena almacenada en su interior para crear un gran tornado. Es tan fuerte que puede aplastar un coche por completo.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [SKORUPI]
 Name = Skorupi
@@ -11936,6 +12019,7 @@ Shape = Bipedal
 Category = Boca Tóxica
 Pokedex = Pilla desprevenidos a sus rivales para pincharles. Tiene bolsas venenosas en las mejillas. Cuando las infla emite un sonido para intimidar.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = BLACKSLUDGE
 Evolution = TOXICROAK,Level,37
 #-------------------------------
@@ -11962,6 +12046,7 @@ Shape = Bipedal
 Category = Boca Tóxica
 Pokedex = Sus bolsas venenosas almacenan una toxina que le llega a las garras por unos tubos en los brazos. Es tan potente que un simple arañazo puede ser mortal.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = BLACKSLUDGE
 #-------------------------------
 [CARNIVINE]
@@ -12012,6 +12097,7 @@ Shape = Finned
 Category = Pez Ala
 Pokedex = Si se expone mucho al sol, los dibujos de sus aletas brillan en la oscuridad. Se le llama el "Beautifly del mar" por la forma en que nada.
 Generation = 4
+Flags = HasGenderedSprites
 Evolution = LUMINEON,Level,31
 #-------------------------------
 [LUMINEON]
@@ -12037,6 +12123,7 @@ Shape = Finned
 Category = Neón
 Pokedex = Vive en las profundidades marinas. Atrae a sus presas con parpadeos del dibujo de sus cuatro aletas. Al nadar iluminado, recuerda al cielo en una noche estrellada.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [MANTYKE]
 Name = Mantyke
@@ -12089,6 +12176,7 @@ Shape = BipedalTail
 Category = Árbol Nieve
 Pokedex = Vive en montañas nevadas. Apenas tiene contacto con los humanos. En primavera, le crecen las bayas con apariencia de helado alrededor de la panza.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = NEVERMELTICE
 Evolution = ABOMASNOW,Level,40
 #-------------------------------
@@ -12115,6 +12203,7 @@ Shape = BipedalTail
 Category = Árbol Nieve
 Pokedex = Es el abominable hombre de las nieves. Produce ventiscas en las montañas. Aparece con las flores de nieve y se retira cuando se les caen los pétalos.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = NEVERMELTICE
 #-------------------------------
 [WEAVILE]
@@ -12140,6 +12229,7 @@ Shape = BipedalTail
 Category = Garra Filo
 Pokedex = Viven en zonas frías y forman grupos de cuatro o cinco para cazar coordinados. Envía señales a otros esculpiendo dibujos extraños en el hielo.
 Generation = 4
+Flags = HasGenderedSprites
 WildItemUncommon = QUICKCLAW
 #-------------------------------
 [MAGNEZONE]
@@ -12215,6 +12305,7 @@ Shape = BipedalTail
 Category = Taladro
 Pokedex = Introduce rocas en las cavidades de las manos y las dispara con los músculos. En raras ocasiones, lanza Geodude o Roggenrola.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [TANGROWTH]
 Name = Tangrowth
@@ -12239,6 +12330,7 @@ Shape = Bipedal
 Category = Enredadera
 Pokedex = Atrapa a su propia presa desplegando las ramas de sus brazos, que no le importa perder ante depredadores. Si se le cortan vuelven a crecer enseguida.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [ELECTIVIRE]
 Name = Electivire
@@ -12434,6 +12526,7 @@ Shape = Quadruped
 Category = 2colmillos
 Pokedex = Sus impresionantes colmillos están hechos de hielo. Su población se redujo tras la glaciación. Hubo un tiempo en el que se lo consideró extinto.
 Generation = 4
+Flags = HasGenderedSprites
 #-------------------------------
 [PORYGONZ]
 Name = Porygon-Z
@@ -13626,6 +13719,7 @@ Shape = Winged
 Category = Altanero
 Pokedex = El macho hace gala de ornamentación en la cabeza. No es dado a hacerse amigo de alguien que no sea su entrenador.
 Generation = 5
+Flags = HasGenderedSprites
 #-------------------------------
 [BLITZLE]
 Name = Blitzle
@@ -13730,7 +13824,7 @@ Pokedex = La energía que no puede contener en el interior de su cuerpo se escap
 Generation = 5
 WildItemCommon = EVERSTONE
 WildItemUncommon = HARDSTONE
-Evolution = GIGALITH,Trade,
+Evolution = GIGALITH,Trade
 Evolution = GIGALITH,Item,LINKINGCORD
 #-------------------------------
 [GIGALITH]
@@ -13783,7 +13877,7 @@ Shape = Winged
 Category = Murciélago
 Pokedex = Este peculiar Pokémon pega sus fosas nasales a la pared para dormir y, cuando las retira, deja un corazón marcado.
 Generation = 5
-Evolution = SWOOBAT,Happiness,
+Evolution = SWOOBAT,Happiness
 #-------------------------------
 [SWOOBAT]
 Name = Swoobat
@@ -13935,7 +14029,7 @@ Shape = Bipedal
 Category = Musculoso
 Pokedex = Ejercita sus músculos cargando vigas de acero. Le encanta lucir sus músculos entre sus amigos.
 Generation = 5
-Evolution = CONKELDURR,Trade,
+Evolution = CONKELDURR,Trade
 Evolution = CONKELDURR,Item,LINKINGCORD
 #-------------------------------
 [CONKELDURR]
@@ -14138,7 +14232,7 @@ Category = Arropado
 Pokedex = Se guarece del frío envolviéndose en hojas. se desplaza por el bosque comiendo a su paso hojas caídas.
 Generation = 5
 WildItemUncommon = MENTALHERB
-Evolution = LEAVANNY,Happiness,
+Evolution = LEAVANNY,Happiness
 #-------------------------------
 [LEAVANNY]
 Name = Leavanny
@@ -14684,7 +14778,7 @@ Pokedex = Nació del alma de un humano enterrado hace milenios. Aún conserva re
 Generation = 5
 WildItemUncommon = SPELLTAG
 Evolution = COFAGRIGUS,Level,34
-Evolution = RUNERIGUS,None,
+Evolution = RUNERIGUS,None
 #-------------------------------
 [COFAGRIGUS]
 Name = Cofagrigus
@@ -15442,6 +15536,7 @@ Shape = Multiped
 Category = Ingrávido
 Pokedex = Paraliza a sus presas con veneno y las lleva a su morada, que se encuentra a 8000m en el fondo del mar.
 Generation = 5
+Flags = HasGenderedSprites
 Evolution = JELLICENT,Level,40
 #-------------------------------
 [JELLICENT]
@@ -15467,6 +15562,7 @@ Shape = Multiped
 Category = Ingrávido
 Pokedex = Avanza expulsando violentamente el agua de mar absorbida anteriormente. Le encanta la energía vital.
 Generation = 5
+Flags = HasGenderedSprites
 #-------------------------------
 [ALOMOMOLA]
 Name = Alomomola
@@ -17341,6 +17437,7 @@ Shape = Quadruped
 Category = Regio
 Pokedex = El macho con la melena de fuego más grande de toda la manada es el líder de sus compañeros.
 Generation = 6
+Flags = HasGenderedSprites
 #-------------------------------
 [FLABEBE]
 Name = Flabébé
@@ -18347,7 +18444,7 @@ Shape = HeadArms
 Category = Tocón
 Pokedex = Pokémon que nace cuando un espíritu se adentra en un tocón podrido. Habita en bosques que son poco frecuentados por humanos.
 Generation = 6
-Evolution = TREVENANT,Trade,
+Evolution = TREVENANT,Trade
 Evolution = TREVENANT,Item,LINKINGCORD
 #-------------------------------
 [TREVENANT]
@@ -18399,7 +18496,7 @@ Category = Calabaza
 Pokedex = En el interior de la calabaza reside un espíritu que ha permanecido atrapado en este mundo. Entra en acción al caer la noche.
 Generation = 6
 Flags = InheritFormFromMother
-Evolution = GOURGEIST,Trade,
+Evolution = GOURGEIST,Trade
 Evolution = GOURGEIST,Item,LINKINGCORD
 #-------------------------------
 [GOURGEIST]
@@ -19977,7 +20074,7 @@ Category = Multigénico
 Pokedex = La pesada máscara le impide liberar toda su fuerza, que se cree que es extraordinaria.
 Generation = 7
 Flags = Legendary
-Evolution = SILVALLY,Happiness,
+Evolution = SILVALLY,Happiness
 #-------------------------------
 [SILVALLY]
 Name = Silvally
@@ -22482,7 +22579,7 @@ Category = Gusano
 Pokedex = Teje un hilo gélido que le permite aferrarse a las ramas y simula ser un carámbano mientras duerme.
 Generation = 8
 WildItemUncommon = SNOWBALL
-Evolution = FROSMOTH,HappinessNight,
+Evolution = FROSMOTH,HappinessNight
 #-------------------------------
 [FROSMOTH]
 Name = Frosmoth

@@ -48,6 +48,13 @@ class AnimationEditor
     files = get_all_files_in_folder("Graphics/Pokemon/Front", [".png", ".jpg", ".jpeg"])
     files.delete_if { |file| !GameData::Species.exists?(file[0]) }
     files.map! { |file| [file[0], file[0]] }
+    # Add AnimTest before Abomasnow
+    abomasnow_idx = files.index { |f| f[0] == "ABOMASNOW" }
+    if abomasnow_idx
+      files.insert(abomasnow_idx, ["AnimTest", "AnimTest"])
+    else
+      files.push(["AnimTest", "AnimTest"])
+    end
     ctrls.get_control(:user_sprite_name).options = files.to_h
     ctrls.get_control(:user_sprite_name).value = @settings[:user_sprite_name]
     ctrls.get_control(:target_sprite_name).options = files.to_h

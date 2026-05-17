@@ -362,7 +362,7 @@ module BattleCreationHelperMethods
     end
   end
 
-  def after_battle(outcome, continue_if_lose, battle = nil)
+  def after_battle(outcome, continue_if_lose, battle)
     $player.party.each do |pkmn|
       pkmn.statusCount = 0 if pkmn.status == :POISON   # Bad poison becomes regular
       pkmn.makeUnmega

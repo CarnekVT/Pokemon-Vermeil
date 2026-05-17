@@ -266,6 +266,72 @@ Credit = Anon
     MoveZoomY = 29,4,120,EaseOut
     MoveOpacity = 29,10,0
     SetVisible = 39,false
+<Extra Impact 1>
+    Graphic = hit
+    Focus = Target
+    SetZ = 0,726
+    SetVisible = 0,false
+    SetColor = 0,00C0FFFF
+    SetVisible = 30,true
+    MoveZoomX = 30,3,100,EaseOut
+    MoveZoomY = 30,3,100,EaseOut
+    MoveOpacity = 30,8,0
+    SetVisible = 38,false
+<Extra Impact 2>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,727
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 31,true
+    MoveZoomX = 31,3,80,EaseOut
+    MoveZoomY = 31,3,80,EaseOut
+    MoveOpacity = 31,7,0
+    SetVisible = 38,false
+<Extra Impact 3>
+    Graphic = electricity 1
+    Focus = Target
+    SetZ = 0,728
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 32,true
+    MoveZoomX = 32,3,90,EaseOut
+    MoveZoomY = 32,3,90,EaseOut
+    MoveOpacity = 32,6,0
+    SetVisible = 38,false
+<Extra Impact 1>
+    Graphic = hit
+    Focus = Target
+    SetZ = 0,726
+    SetVisible = 0,false
+    SetColor = 0,00C0FFFF
+    SetVisible = 30,true
+    MoveZoomX = 30,3,100,EaseOut
+    MoveZoomY = 30,3,100,EaseOut
+    MoveOpacity = 30,8,0
+    SetVisible = 38,false
+<Extra Impact 2>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,727
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 31,true
+    MoveZoomX = 31,3,80,EaseOut
+    MoveZoomY = 31,3,80,EaseOut
+    MoveOpacity = 31,7,0
+    SetVisible = 38,false
+<Extra Impact 3>
+    Graphic = electricity 1
+    Focus = Target
+    SetZ = 0,728
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 32,true
+    MoveZoomX = 32,3,90,EaseOut
+    MoveZoomY = 32,3,90,EaseOut
+    MoveOpacity = 32,6,0
+    SetVisible = 38,false
 <Bubble Splash Emitter>
     Graphic = bubble 2
     Focus = Target

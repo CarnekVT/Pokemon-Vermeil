@@ -127,7 +127,8 @@ class AnimationPlayer::ParticleSprite
     when :color
       new_val = []
       4.times do |i|   # R, G, B, A
-        start_val = process[6][2 * i, 2].to_i(16)
+        start_str = process[6] || "FFFFFFFF"
+        start_val = start_str[2 * i, 2].to_i(16)
         end_val = process[3][2 * i, 2].to_i(16)
         val = AnimationPlayer::Helper.interpolate(
           process[4], start_val, end_val, process[2],
@@ -139,7 +140,8 @@ class AnimationPlayer::ParticleSprite
     when :tone
       new_val = []
       4.times do |i|   # R, G, B, G
-        start_val = process[6][3 * i, 3].to_i(16)
+        start_str = process[6] || "+00+00+00+00"
+        start_val = start_str[3 * i, 3].to_i(16)
         end_val = process[3][3 * i, 3].to_i(16)
         val = AnimationPlayer::Helper.interpolate(
           process[4], start_val, end_val, process[2],

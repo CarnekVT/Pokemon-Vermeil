@@ -448,8 +448,13 @@ class AnimationEditor::Canvas < Sprite
   def refresh_battler_graphics
     if !@user_sprite_name || !@user_sprite_name || @user_sprite_name != @settings[:user_sprite_name]
       @user_sprite_name = @settings[:user_sprite_name]
-      @user_bitmap_front_name = GameData::Species.front_sprite_filename(@user_sprite_name)
-      @user_bitmap_back_name = GameData::Species.back_sprite_filename(@user_sprite_name)
+      if @user_sprite_name == "AnimTest"
+        @user_bitmap_front_name = "Graphics/UI/AnimFrontTest"
+        @user_bitmap_back_name = "Graphics/UI/AnimBackTest"
+      else
+        @user_bitmap_front_name = GameData::Species.front_sprite_filename(@user_sprite_name)
+        @user_bitmap_back_name = GameData::Species.back_sprite_filename(@user_sprite_name)
+      end
       @user_bitmap_front&.dispose
       @user_bitmap_back&.dispose
       @user_bitmap_front = RPG::Cache.load_bitmap("", @user_bitmap_front_name)
@@ -457,8 +462,13 @@ class AnimationEditor::Canvas < Sprite
     end
     if !@target_bitmap_front || !@target_sprite_name || @target_sprite_name != @settings[:target_sprite_name]
       @target_sprite_name = @settings[:target_sprite_name]
-      @target_bitmap_front_name = GameData::Species.front_sprite_filename(@target_sprite_name)
-      @target_bitmap_back_name = GameData::Species.back_sprite_filename(@target_sprite_name)
+      if @target_sprite_name == "AnimTest"
+        @target_bitmap_front_name = "Graphics/UI/AnimFrontTest"
+        @target_bitmap_back_name = "Graphics/UI/AnimBackTest"
+      else
+        @target_bitmap_front_name = GameData::Species.front_sprite_filename(@target_sprite_name)
+        @target_bitmap_back_name = GameData::Species.back_sprite_filename(@target_sprite_name)
+      end
       @target_bitmap_front&.dispose
       @target_bitmap_back&.dispose
       @target_bitmap_front = RPG::Cache.load_bitmap("", @target_bitmap_front_name)
@@ -483,8 +493,17 @@ class AnimationEditor::Canvas < Sprite
   def recalculate_battler_position(index, size, sprite_name, btmp)
     spr = Sprite.new(self.viewport)
     spr.x, spr.y = Battle::Scene.pbBattlerPosition(index, size)
+    if sprite_name == "AnimTest"
+      # For AnimTest, use default position
+      return [spr.x, spr.y - (btmp ? btmp.height / 2 : 40)]
+    end
+    # Note: apply_metrics_to_sprite may fail with animated sprite plugins
     data = GameData::Species.get_species_form(sprite_name, 0)   # Form 0
-    data.apply_metrics_to_sprite(spr, index) if data
+    begin
+      data.apply_metrics_to_sprite(spr, index) if data
+    rescue
+      # Ignore errors from incompatible plugins
+    end
     return [spr.x, spr.y - (btmp.height / 2)]
   end
 

@@ -1,0 +1,307 @@
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
+#-------------------------------
+[Move,PYROBALL]
+Name = PRAS Pyro Ball
+Credit = Anon
+<User>
+    MoveY = 2,6,-80,EaseOut
+    MoveX = 14,2,-10,EaseOut
+    MoveY = 14,2,-90,EaseOut
+    MoveX = 16,3,20,EaseIn
+    MoveY = 16,3,-60,EaseIn
+    MoveX = 22,8,0,EaseBoth
+    MoveY = 22,8,0,EaseBoth
+<Target>
+    MoveX = 21,2,10,EaseOut
+    MoveX = 23,2,-10,EaseBoth
+    MoveX = 25,2,10,EaseBoth
+    MoveX = 27,2,-10,EaseBoth
+    MoveX = 29,2,0,EaseBoth
+<SE>
+    Play = 2,Wind1
+    Play = 12,Fire3
+    Play = 16,PRSFX- Focus Punch2
+    Play = 21,Fire3
+<Cinematic Background>
+    Graphic = black_screen
+    Focus = Background
+    SetZ = 0,540
+    SetOpacity = 0,0
+    MoveOpacity = 2,6,160
+    MoveOpacity = 21,2,0
+<Impact Flash>
+    Graphic = white_screen
+    Focus = Background
+    SetZ = 0,850
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetVisible = 21,true
+    MoveOpacity = 21,1,255
+    MoveOpacity = 22,5,0
+<Pebble>
+    Graphic = stealth_rock
+    Focus = Target
+    SetZ = 0,700
+    SetZoomX = 0,60
+    SetZoomY = 0,60
+    SetVisible = 0,false
+    SetX = 2,-256
+    SetY = 2,128
+    SetVisible = 2,true
+    MoveY = 2,10,48,EaseOut
+    SetVisible = 12,false
+<Pyro Ball Outer>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 12,-256
+    SetY = 12,48
+    SetZoomX = 12,50
+    SetZoomY = 12,50
+    SetVisible = 12,true
+    MoveZoomX = 12,4,500,EaseOut
+    MoveZoomY = 12,4,500,EaseOut
+    MoveX = 16,5,0,EaseIn
+    MoveY = 16,5,0,EaseIn
+    MoveOpacity = 21,1,0
+<Pyro Ball Inner>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,751
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetX = 12,-256
+    SetY = 12,48
+    SetZoomX = 12,30
+    SetZoomY = 12,30
+    SetVisible = 12,true
+    MoveZoomX = 12,4,300,EaseOut
+    MoveZoomY = 12,4,300,EaseOut
+    MoveX = 16,5,0,EaseIn
+    MoveY = 16,5,0,EaseIn
+    MoveOpacity = 21,1,0
+<Trail 1>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,740
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 17,-204
+    SetY = 17,38
+    SetZoomX = 17,400
+    SetZoomY = 17,400
+    SetVisible = 17,true
+    MoveOpacity = 17,4,0
+<Trail 2>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,740
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 18,-153
+    SetY = 18,28
+    SetZoomX = 18,400
+    SetZoomY = 18,400
+    SetVisible = 18,true
+    MoveOpacity = 18,4,0
+<Trail 3>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,740
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 19,-102
+    SetY = 19,19
+    SetZoomX = 19,400
+    SetZoomY = 19,400
+    SetVisible = 19,true
+    MoveOpacity = 19,4,0
+<Trail 4>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,740
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 20,-51
+    SetY = 20,9
+    SetZoomX = 20,400
+    SetZoomY = 20,400
+    SetVisible = 20,true
+    MoveOpacity = 20,4,0
+<Explosion Nova>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,800
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetVisible = 21,true
+    MoveZoomX = 21,5,1000,EaseOut
+    MoveZoomY = 21,5,1000,EaseOut
+    MoveOpacity = 21,6,0
+<Explosion Core>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,801
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetZoomX = 21,50
+    SetZoomY = 21,50
+    SetVisible = 21,true
+    MoveZoomX = 21,5,600,EaseOut
+    MoveZoomY = 21,5,600,EaseOut
+    MoveOpacity = 21,6,0
+#-------------------------------
+[OppMove,PYROBALL]
+Name = PRAS Pyro Ball
+Credit = Anon
+<User>
+    MoveY = 2,6,-80,EaseOut
+    MoveX = 14,2,10,EaseOut
+    MoveY = 14,2,-90,EaseOut
+    MoveX = 16,3,-20,EaseIn
+    MoveY = 16,3,-60,EaseIn
+    MoveX = 22,8,0,EaseBoth
+    MoveY = 22,8,0,EaseBoth
+<Target>
+    MoveX = 21,2,-10,EaseOut
+    MoveX = 23,2,10,EaseBoth
+    MoveX = 25,2,-10,EaseBoth
+    MoveX = 27,2,10,EaseBoth
+    MoveX = 29,2,0,EaseBoth
+<SE>
+    Play = 2,Wind1
+    Play = 12,Fire3
+    Play = 16,PRSFX- Focus Punch2
+    Play = 21,Fire2
+<Cinematic Background>
+    Graphic = black_screen
+    Focus = Background
+    SetZ = 0,540
+    SetOpacity = 0,0
+    MoveOpacity = 2,6,160
+    MoveOpacity = 21,2,0
+<Impact Flash>
+    Graphic = white_screen
+    Focus = Background
+    SetZ = 0,850
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetVisible = 21,true
+    MoveOpacity = 21,1,255
+    MoveOpacity = 22,5,0
+<Pebble>
+    Graphic = stealth_rock
+    Focus = Target
+    SetZ = 0,700
+    SetZoomX = 0,60
+    SetZoomY = 0,60
+    SetVisible = 0,false
+    SetX = 2,256
+    SetY = 2,-128
+    SetVisible = 2,true
+    MoveY = 2,10,-208,EaseOut
+    SetVisible = 12,false
+<Pyro Ball Outer>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 12,256
+    SetY = 12,-208
+    SetZoomX = 12,50
+    SetZoomY = 12,50
+    SetVisible = 12,true
+    MoveZoomX = 12,4,500,EaseOut
+    MoveZoomY = 12,4,500,EaseOut
+    MoveX = 16,5,0,EaseIn
+    MoveY = 16,5,0,EaseIn
+    MoveOpacity = 21,1,0
+<Pyro Ball Inner>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,751
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetX = 12,256
+    SetY = 12,-208
+    SetZoomX = 12,30
+    SetZoomY = 12,30
+    SetVisible = 12,true
+    MoveZoomX = 12,4,300,EaseOut
+    MoveZoomY = 12,4,300,EaseOut
+    MoveX = 16,5,0,EaseIn
+    MoveY = 16,5,0,EaseIn
+    MoveOpacity = 21,1,0
+<Trail 1>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,740
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 17,204
+    SetY = 17,-166
+    SetZoomX = 17,400
+    SetZoomY = 17,400
+    SetVisible = 17,true
+    MoveOpacity = 17,4,0
+<Trail 2>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,740
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 18,153
+    SetY = 18,-124
+    SetZoomX = 18,400
+    SetZoomY = 18,400
+    SetVisible = 18,true
+    MoveOpacity = 18,4,0
+<Trail 3>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,740
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 19,102
+    SetY = 19,-83
+    SetZoomX = 19,400
+    SetZoomY = 19,400
+    SetVisible = 19,true
+    MoveOpacity = 19,4,0
+<Trail 4>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,740
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetX = 20,51
+    SetY = 20,-41
+    SetZoomX = 20,400
+    SetZoomY = 20,400
+    SetVisible = 20,true
+    MoveOpacity = 20,4,0
+<Explosion Nova>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,800
+    SetVisible = 0,false
+    SetColor = 0,FF3000FF
+    SetVisible = 21,true
+    MoveZoomX = 21,5,1000,EaseOut
+    MoveZoomY = 21,5,1000,EaseOut
+    MoveOpacity = 21,6,0
+<Explosion Core>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,801
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetZoomX = 21,50
+    SetZoomY = 21,50
+    SetVisible = 21,true
+    MoveZoomX = 21,5,600,EaseOut
+    MoveZoomY = 21,5,600,EaseOut
+    MoveOpacity = 21,6,0
