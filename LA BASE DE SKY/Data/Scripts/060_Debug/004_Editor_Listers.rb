@@ -355,6 +355,8 @@ end
 #===============================================================================
 class SpeciesLister
   def initialize(selection = 0, includeNew = false)
+    @sprite = IconSprite.new(Graphics.width * 3 / 4, ((Graphics.height - 64) / 2) + 64)
+    @sprite.z = 2
     @selection = selection
     @commands = []
     @ids = []
@@ -362,8 +364,14 @@ class SpeciesLister
     @index = 0
   end
 
-  def dispose; end
-  def setViewport(viewport); end
+  def dispose
+    @sprite.bitmap&.dispose
+    @sprite.dispose
+  end
+
+  def setViewport(viewport)
+    @sprite.viewport = viewport
+  end
 
   def startIndex
     return @index
@@ -399,7 +407,24 @@ class SpeciesLister
     return @ids[index]
   end
 
-  def refresh(index); end
+  def refresh(index)
+    @sprite.bitmap&.dispose
+    return if index < 0
+    begin
+      if @ids[index].is_a?(Symbol)
+        filename = GameData::Species.front_sprite_filename(@ids[index])
+        @sprite.setBitmap(filename) if filename
+      else
+        @sprite.setBitmap(nil)
+      end
+    rescue
+      @sprite.setBitmap(nil)
+    end
+    if @sprite.bitmap
+      @sprite.ox = @sprite.bitmap.width / 2
+      @sprite.oy = @sprite.bitmap.height / 2
+    end
+  end
 end
 
 #===============================================================================

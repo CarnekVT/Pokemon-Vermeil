@@ -953,6 +953,8 @@ def pbPokemonEditor
               when "ID"
                 species_hash[schema["SectionName"][0]] = data[i]
               else
+                next if schema[prop[0]].nil?
+                next if schema[prop[0]][0].nil?
                 species_hash[schema[prop[0]][0]] = data[i]
               end
             end

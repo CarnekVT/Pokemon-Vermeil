@@ -151,7 +151,7 @@ module GameData
         ["WildItemUncommon",  GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) raramente llevado(s) por Pokémon salvajes de esta especie.")],
         ["WildItemRare",      GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) muy raramente llevado(s) por Pokémon salvajes de esta especie.")],
         ["Evolutions",        EvolutionsProperty.new,             _INTL("Caminos evolutivos de esta especie.")],
-        ["HideFromDex",       BooleanProperty.new,                _INTL("Indica si esta especie debe estar oculta en la Pokédex.")],
+        ["HideFromDex",       BooleanProperty,                    _INTL("Indica si esta especie debe estar oculta en la Pokédex.")],
         ["Region",            StringProperty,                     _INTL("Nombre de la región en la que debutó el Pokémon pensado para las formas regionales.")],
         ["SuperShinyHue",     StringProperty,                     _INTL("Tonos (Hue) específicos para la versión Super Shiny (separados por comas).")]
       ]
@@ -522,7 +522,7 @@ module GameData
       when "Habitat"
         ret = nil if ret == :None
       when "SuperShinyHue"
-        ret = nil if ret.empty?  
+        ret = nil if ret&.empty?  
       when "Evolutions", "Evolution"
         return nil if key == "Evolutions"   # Already written by "Evolution"
         if ret
