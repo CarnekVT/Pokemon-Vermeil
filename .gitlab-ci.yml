@@ -176,51 +176,54 @@ release:
       echo "Download URL: ${DOWNLOAD_URL}"
       echo "URL estática al último release: ${LATEST_URL}"
 
-      # # Send Discord notification
-      # if [ -n "${DISCORD_WEBHOOK_URL:-}" ]; then
-      #   echo "Sending Discord notification..."
+      # Send Discord notification
+      if [ -z "${DISCORD_RELEASE_WEBHOOK_URL:-}" ]; then
+        echo "Warning: DISCORD_RELEASE_WEBHOOK_URL not set, skipping Discord notification"
+      else
+        echo "Sending Discord notification..."
 
-      #   if [[ "${RELEASE_NAME}" == *"${CI_COMMIT_TAG}"* ]]; then
-      #     DISPLAY_NAME="${RELEASE_NAME}"
-      #   else
-      #     DISPLAY_NAME="${RELEASE_NAME} v${CI_COMMIT_TAG}"
-      #   fi
+        if [[ "${RELEASE_NAME}" == *"${CI_COMMIT_TAG}"* ]]; then
+          DISPLAY_NAME="${RELEASE_NAME}"
+        else
+          DISPLAY_NAME="${RELEASE_NAME} v${CI_COMMIT_TAG}"
+        fi
 
-      #   TITLE_NAME="${RELEASE_NAME}"
-      #   TITLE_NAME=$(echo "${TITLE_NAME}" | sed -E 's/[[:space:]]*v?[0-9]+\.[0-9]+(\.[0-9]+)?[[:space:]]*$//')
+        TITLE_NAME="${RELEASE_NAME}"
+        TITLE_NAME=$(echo "${TITLE_NAME}" | sed -E 's/[[:space:]]*v?[0-9]+\.[0-9]+(\.[0-9]+)?[[:space:]]*$//')
 
-      #   DISCORD_PAYLOAD=$(cat <<EOF
-      # {
-      #   "embeds": [{
-      #     "title": "🎉 Nueva versión disponible de ${TITLE_NAME}",
-      #     "description": "Se ha publicado **${DISPLAY_NAME}**",
-      #     "color": 5814783,
-      #     "fields": [
-      #       {
-      #         "name": "📥 Descargar",
-      #         "value": "[**${ZIP_FILE}**](${LATEST_URL})",
-      #         "inline": false
-      #       },
-      #       {
-      #         "name": "📋 Ver cambios",
-      #         "value": "${CHANGELOG_NOTE:-No hay cambios registrados}",
-      #         "inline": false
-      #       }
-      #     ],
-      #     "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
-      #   }]
-      # }
-      # EOF
-      #   )
+        RELEASE_URL="${CI_PROJECT_URL}/-/releases/${CI_COMMIT_TAG}"
 
-      #   curl -H "Content-Type: application/json" \
-      #     -d "$DISCORD_PAYLOAD" \
-      #     "${DISCORD_WEBHOOK_URL}" || echo "Warning: Failed to send Discord notification"
+        DISCORD_PAYLOAD=$(cat <<EOF
+      {
+        "embeds": [{
+          "title": "🎉 Nueva versión disponible de ${TITLE_NAME}",
+          "url": "${RELEASE_URL}",
+          "description": "Se ha publicado **${DISPLAY_NAME}**",
+          "color": 5814783,
+          "fields": [
+            {
+              "name": "📥 Descargar",
+              "value": "[**${ZIP_FILE}**](${LATEST_URL})",
+              "inline": false
+            },
+            {
+              "name": "📋 Ver cambios",
+              "value": "${CHANGELOG_NOTE:-No hay cambios registrados}",
+              "inline": false
+            }
+          ],
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+        }]
+      }
+      EOF
+        )
 
-      #   echo "Discord notification sent successfully!"
-      # else
-      #   echo "DISCORD_WEBHOOK_URL not set, skipping Discord notification"
-      # fi
+        curl -f -H "Content-Type: application/json" \
+          -d "$DISCORD_PAYLOAD" \
+          "${DISCORD_RELEASE_WEBHOOK_URL}" || echo "Warning: Failed to send Discord notification"
+
+        echo "Discord notification sent successfully!"
+      fi
   artifacts:
     name: "LA_BASE_DE_SKY_V${CI_COMMIT_TAG}"
     paths:
