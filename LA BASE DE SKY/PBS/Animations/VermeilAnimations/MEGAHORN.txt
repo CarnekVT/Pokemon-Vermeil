@@ -1,0 +1,46 @@
+[Move,MEGAHORN]
+Name = MEGAHORN
+<User>
+    MoveX = 4,8,40,EaseOut
+    MoveX = 12,6,0,EaseIn
+<Target>
+    MoveScreenShake = 10,15,7,0
+    MoveX = 10,4,-10,EaseOut
+    MoveX = 14,8,0,EaseIn
+    MoveColor = 10,2,FFFFFFFF
+    MoveColor = 12,6,00000000
+<SE>
+    Play = 4,Wind1
+    Play = 10,Super Damage
+<Impact>
+    Graphic = hit
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 10,true
+    SetZoom = 10,100
+    MoveOpacity = 12,4,0
+    SetVisible = 16,false
+
+
+[OppMove,MEGAHORN]
+Name = MEGAHORN
+<User>
+    MoveX = 4,8,-40,EaseOut
+    MoveX = 12,6,0,EaseIn
+<Target>
+    MoveScreenShake = 10,15,7,0
+    MoveX = 10,4,10,EaseOut
+    MoveX = 14,8,0,EaseIn
+    MoveColor = 10,2,FFFFFFFF
+    MoveColor = 12,6,00000000
+<SE>
+    Play = 4,Wind1
+    Play = 10,Super Damage
+<Impact>
+    Graphic = hit
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 10,true
+    SetZoom = 10,100
+    MoveOpacity = 12,4,0
+    SetVisible = 16,false

@@ -1,0 +1,224 @@
+[Move,SHADOWBALL]
+Name = SHADOWBALL
+<User>
+    MoveZ = 4,4,20,EaseOut
+    MoveZ = 8,4,0,EaseIn
+<Target>
+    MoveScreenShake = 19,15,7,0
+    MoveColor = 19,2,FFFFFFFF
+    MoveColor = 21,6,00000000
+<SE>
+    Play = 4,ball_throw
+    Play = 19,shadow_ball_impact
+<Projectile>
+    Graphic = shadow_ball_projectile
+    Focus = User
+    SetVisible = 0,false
+    SetVisible = 4,true
+    MoveTo = Target,15
+    SetVisible = 19,false
+<Impact>
+    Graphic = shadow_ball_explosion
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    SetZoom = 19,150
+    MoveOpacity = 21,4,0
+    SetVisible = 25,false
+<Particle0>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,265,98
+    MoveOpacity = 23,4,0
+<Particle1>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,196,70
+    MoveOpacity = 23,4,0
+<Particle2>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,317,76
+    MoveOpacity = 23,4,0
+<Particle3>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,189,83
+    MoveOpacity = 23,4,0
+<Particle4>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,320,62
+    MoveOpacity = 23,4,0
+<Particle5>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,37,81
+    MoveOpacity = 23,4,0
+<Particle6>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,258,65
+    MoveOpacity = 23,4,0
+<Particle7>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,98,87
+    MoveOpacity = 23,4,0
+<Particle8>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,97,82
+    MoveOpacity = 23,4,0
+<Particle9>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,39,68
+    MoveOpacity = 23,4,0
+<Particle10>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,282,66
+    MoveOpacity = 23,4,0
+<Particle11>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,80,83
+    MoveOpacity = 23,4,0
+
+
+[OppMove,SHADOWBALL]
+Name = SHADOWBALL
+<User>
+    MoveZ = 4,4,20,EaseOut
+    MoveZ = 8,4,0,EaseIn
+<Target>
+    MoveScreenShake = 19,15,7,0
+    MoveColor = 19,2,FFFFFFFF
+    MoveColor = 21,6,00000000
+<SE>
+    Play = 4,ball_throw
+    Play = 19,shadow_ball_impact
+<Projectile>
+    Graphic = shadow_ball_projectile
+    Focus = User
+    SetVisible = 0,false
+    SetVisible = 4,true
+    MoveTo = Target,15
+    SetVisible = 19,false
+<Impact>
+    Graphic = shadow_ball_explosion
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    SetZoom = 19,150
+    MoveOpacity = 21,4,0
+    SetVisible = 25,false
+<Particle0>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,265,98
+    MoveOpacity = 23,4,0
+<Particle1>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,196,70
+    MoveOpacity = 23,4,0
+<Particle2>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,317,76
+    MoveOpacity = 23,4,0
+<Particle3>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,189,83
+    MoveOpacity = 23,4,0
+<Particle4>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,320,62
+    MoveOpacity = 23,4,0
+<Particle5>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,37,81
+    MoveOpacity = 23,4,0
+<Particle6>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,258,65
+    MoveOpacity = 23,4,0
+<Particle7>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,98,87
+    MoveOpacity = 23,4,0
+<Particle8>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,97,82
+    MoveOpacity = 23,4,0
+<Particle9>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,39,68
+    MoveOpacity = 23,4,0
+<Particle10>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,282,66
+    MoveOpacity = 23,4,0
+<Particle11>
+    Graphic = ghost_particle
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 19,true
+    MoveTo = Target,8,80,83
+    MoveOpacity = 23,4,0

@@ -1,0 +1,44 @@
+[Move,TACKLE]
+Name = TACKLE
+<User>
+    MoveX = 4,8,40,EaseOut
+    MoveX = 12,6,0,EaseIn
+<Target>
+    MoveScreenShake = 10,15,5,0
+    MoveColor = 10,2,FFFFFFFF
+    MoveColor = 12,6,00000000
+<SE>
+    Play = 4,Wind1
+    Play = 10,Super Damage
+<Impact>
+    Graphic = hit
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 10,true
+    SetZoomX = 10,100
+    SetZoomY = 10,100
+    MoveOpacity = 12,4,0
+    SetVisible = 16,false
+
+
+[OppMove,TACKLE]
+Name = TACKLE
+<User>
+    MoveX = 4,8,-40,EaseOut
+    MoveX = 12,6,0,EaseIn
+<Target>
+    MoveScreenShake = 10,15,5,0
+    MoveColor = 10,2,FFFFFFFF
+    MoveColor = 12,6,00000000
+<SE>
+    Play = 4,Wind1
+    Play = 10,Super Damage
+<Impact>
+    Graphic = hit
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 10,true
+    SetZoomX = 10,100
+    SetZoomY = 10,100
+    MoveOpacity = 12,4,0
+    SetVisible = 16,false

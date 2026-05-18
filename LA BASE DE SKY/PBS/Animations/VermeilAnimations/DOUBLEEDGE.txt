@@ -1,0 +1,48 @@
+[Move,DOUBLEEDGE]
+Name = DOUBLEEDGE
+<User>
+    MoveX = 4,6,60,EaseOut
+    MoveX = 10,6,0,EaseIn
+<Target>
+    MoveScreenShake = 10,20,10,0
+    MoveColor = 10,2,FFFFFFFF
+    MoveColor = 12,6,00000000
+<SE>
+    Play = 4,Wind1
+    Play = 10,super_damage_2
+<Impact>
+    Graphic = explosion
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 10,true
+    SetZoomX = 10,150
+    SetZoomY = 10,150
+    MoveOpacity = 12,4,0
+    SetVisible = 16,false
+<ScreenFlash>
+    Flash = 10,8,FFFFFF7F
+
+
+[OppMove,DOUBLEEDGE]
+Name = DOUBLEEDGE
+<User>
+    MoveX = 4,6,-60,EaseOut
+    MoveX = 10,6,0,EaseIn
+<Target>
+    MoveScreenShake = 10,20,10,0
+    MoveColor = 10,2,FFFFFFFF
+    MoveColor = 12,6,00000000
+<SE>
+    Play = 4,Wind1
+    Play = 10,super_damage_2
+<Impact>
+    Graphic = explosion
+    Focus = Target
+    SetVisible = 0,false
+    SetVisible = 10,true
+    SetZoomX = 10,150
+    SetZoomY = 10,150
+    MoveOpacity = 12,4,0
+    SetVisible = 16,false
+<ScreenFlash>
+    Flash = 10,8,FFFFFF7F
