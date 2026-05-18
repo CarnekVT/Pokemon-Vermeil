@@ -41,6 +41,14 @@ def mainFunctionDebug
     $scene = pbCallTitle
     $scene.main until $scene.nil?
     Graphics.transition
+  rescue Reset
+    # Al pulsar F12 (reinicio del juego), refrescar la caché del sistema
+    # para que los archivos modificados durante la sesión se vuelvan a cargar.
+    begin
+      System.reload_cache if defined?(System) && System.respond_to?(:reload_cache)
+    rescue Exception
+    end
+    raise
   rescue Hangup
     pbPrintException($!) if !$DEBUG
     pbEmergencySave
