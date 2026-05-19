@@ -16,7 +16,7 @@ MenuHandlers.add(:options_menu, :damage_numbers, {
   "order"       => 90,
   "page"        => :graphics,
   "type"        => :toggle,
-  "parameters"  => [_INTL("Sí"), _INTL("No")],
+  "parameters"  => proc { [_INTL("Sí"), _INTL("No")] },
   "description" => _INTL("Muestra números flotantes al recibir daño o curación en combate."),
   "get_proc"    => proc { next $PokemonSystem.damage_numbers },
   "set_proc"    => proc { |value, _scene| $PokemonSystem.damage_numbers = value }
