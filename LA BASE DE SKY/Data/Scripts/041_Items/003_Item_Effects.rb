@@ -497,7 +497,7 @@ ItemHandlers::UsableOnPokemon.add(:ICEHEAL, proc { |item, pkmn|
   next pkmn.able? && pkmn.status == :FROZEN
 })
 ItemHandlers::UseOnPokemon.add(:ICEHEAL, proc { |item, qty, pkmn, scene|
-  if pkmn.fainted? || pkmn.status != :FROZEN
+  if pkmn.fainted? || ![:FROZEN, :FROSTBITE].include?(pkmn.status)
     scene.pbDisplay(_INTL("No tendría ningún efecto."))
     next false
   end

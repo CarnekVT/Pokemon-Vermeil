@@ -97,7 +97,7 @@ class Interpreter
       # Update child interpreter if one exists
       if @child_interpreter
         @child_interpreter.update
-        @child_interpreter = nil if !@child_interpreter.running?
+        @child_interpreter = nil if !@child_interpreter&.running?
         return if @child_interpreter
       end
       # Do nothing if a message is being shown
