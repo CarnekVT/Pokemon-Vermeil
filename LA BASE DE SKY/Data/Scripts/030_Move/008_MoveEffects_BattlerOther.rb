@@ -689,10 +689,9 @@ end
 class Battle::Move::FlinchTargetFailsIfTargetNotUsingPriorityMove < Battle::Move::FlinchTarget
   def pbMoveFailed?(user, targets)
     failed = true
-    if !b.movedThisRound?
-      targets.each do |target|
-        failed = false if @battle.choices[target.index][4] > 0
-      end
+    targets.each do |target|
+      next if target.movedThisRound?
+      failed = false if @battle.choices[target.index][4] > 0
     end
     if failed
       @battle.pbDisplay(_INTL("¡Pero ha fallado!"))
