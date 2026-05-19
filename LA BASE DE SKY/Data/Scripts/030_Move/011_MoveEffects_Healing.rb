@@ -722,7 +722,7 @@ class Battle::Move::RevivePokemonToHalfHP < Battle::Move
     pkmn = nil
     if !@battle.controlPlayer && @battle.pbOwnedByPlayer?(user.index)
       # Player chooses the Pokémon to revive
-      @battle.scene.pbPartyScreen(user.index, false, 3) do |idxParty, party_screen|
+      @battle.scene.pbPartyScreen(user.index, false, 2) do |idxParty, party_screen|
         pkmn = @battle.pbParty(user.idxOwnSide)[idxParty]
         if pkmn.egg?
           party_screen.show_message(_INTL("¡No se puede revivir un huevo!"))

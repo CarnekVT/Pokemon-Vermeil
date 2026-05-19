@@ -141,7 +141,7 @@ class PokemonIconSprite < Sprite
     @logical_y     = 0   # Actual y coordinate
     @adjusted_x    = 0   # Offset due to "jumping" animation in party screen
     @adjusted_y    = 0   # Offset due to "jumping" animation in party screen
-    @should_be_grey = @pokemon.fainted? && Settings::GREY_OUT_FAINTED
+    @should_be_grey = @pokemon&.fainted? && Settings::GREY_OUT_FAINTED
   end
 
   def dispose
