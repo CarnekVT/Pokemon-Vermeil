@@ -407,6 +407,9 @@ class PokemonBagPartyPanel < Sprite
   LEVEL_TEXT_Y = 8
   ANNOTATION_TEXT_X = 56
   ANNOTATION_TEXT_Y = 76
+  HP_COLOR_COUNT = 4
+  HP_BAR_HEIGHT = 8
+  HP_BAR_WIDTH = 94
   
   # Colores de texto
   TEXT_BASE_COLOR = Color.new(248, 248, 248)
@@ -606,13 +609,13 @@ class PokemonBagPartyPanel < Sprite
         end
           # Draw HP bar
           if @pokemon.hp > 0
-            w = @pokemon.hp * 94 / @pokemon.totalhp.to_f
+            w = @pokemon.hp * HP_BAR_WIDTH / @pokemon.totalhp.to_f
             w = 1 if w < 1
             w = ((w / 2).round) * 2
-            color_index, next_color_index, blend_alpha = pbHPBarZoneInfo(@pokemon.hp, @pokemon.totalhp, 4)
-            @overlaysprite.bitmap.blt(HP_BAR_DRAW_X, HP_BAR_DRAW_Y, @hpbar.bitmap, Rect.new(0, color_index * 8, w, 8))
+            color_index, next_color_index, blend_alpha = pbHPBarZoneInfo(@pokemon.hp, @pokemon.totalhp, HP_COLOR_COUNT)
+            @overlaysprite.bitmap.blt(HP_BAR_DRAW_X, HP_BAR_DRAW_Y, @hpbar.bitmap, Rect.new(0, color_index * HP_BAR_HEIGHT, w, HP_BAR_HEIGHT))
             if blend_alpha > 0 && color_index != next_color_index
-              @overlaysprite.bitmap.blt(HP_BAR_DRAW_X, HP_BAR_DRAW_Y, @hpbar.bitmap, Rect.new(0, next_color_index * 8, w, 8), blend_alpha)
+              @overlaysprite.bitmap.blt(HP_BAR_DRAW_X, HP_BAR_DRAW_Y, @hpbar.bitmap, Rect.new(0, next_color_index * HP_BAR_HEIGHT, w, HP_BAR_HEIGHT), blend_alpha)
             end
           end
           # Draw status
