@@ -2,6 +2,8 @@ module LBDSKY
   VERSION = "1.2.1.1" # No modificar esto
 end
 
+Console.setup_console
+
 class Scene_DebugIntro
   def main
     Graphics.transition(0)
