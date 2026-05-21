@@ -1262,7 +1262,7 @@ Description = Convierte los movimientos de tipo Normal en tipo Dragón y aumenta
 #-------------------------------
 [MEGASOL]
 Name = Megasolar
-Description = Cualquier movimiento que el Pokémon haga actua como si hubiera clima soleado.
+Description = Cualquier movimiento que el Pokémon haga actúa como si hubiera clima soleado.
 #-------------------------------
 [SPICYSPRAY]
 Name = Salpicante
