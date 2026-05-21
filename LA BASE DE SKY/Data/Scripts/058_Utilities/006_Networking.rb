@@ -6,5 +6,7 @@ def network_available?
     return response && response.fetch(:status) == 200
   rescue StandardError
     return false
+  rescue MKXPError
+    return false
   end
 end

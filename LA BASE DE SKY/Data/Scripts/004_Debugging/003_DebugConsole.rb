@@ -10,6 +10,10 @@ module Console
     echoln Console.markup_style("Puedes ignorar cualquier mensaje anterior sobre fluidsynth.", text: :brown)
     echoln ""
     echoln Console.markup_style("===============================================================================", text: :yellow)
+    echoln Console.markup_style("LA BASE DE SKY VERSION #{LBDSKY::VERSION}", text: :yellow)
+    echoln Console.markup_style("===============================================================================", text: :yellow)
+    echoln ""
+    echoln Console.markup_style("===============================================================================", text: :yellow)
     echoln Console.markup_style("JUEGO: \"#{System.game_title}\" - Ventana de Salida", text: :yellow)
     echoln Console.markup_style("===============================================================================", text: :yellow)
     echoln "Si puedes ver esta ventana, estás ejecutando el juego en Modo de Depuración. Esto significa"
@@ -240,4 +244,3 @@ end
 #===============================================================================
 #
 #===============================================================================
-Console.setup_console
