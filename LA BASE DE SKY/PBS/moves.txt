@@ -9871,3 +9871,173 @@ FunctionCode = IgnoreTargetStatStagesNormalEffectiveAgainstFairy
 Flags = CanProtect,CanMirrorMove
 Description = Luz devastadora que pega de forma neutra a los Pokémon de tipo hada. Ignora cambios de Def. Esp. y Evasión.
 #-------------------------------
+
+#-----------------------------------------------------------------------
+# Ataques Let's GO
+#-----------------------------------------------------------------------
+[EEVEEVOLLEY]
+Name = Eevimpacto
+Type = NORMAL
+Category = Physical
+Power = 1
+Accuracy = 0
+TotalPP = 20
+Target = NearOther
+FunctionCode = PowerHigherWithUserHappiness
+Flags = Contact,CanProtect,CanMirrorMove
+Description = Cuanto mayor sea la amistad con el Entrenador, más poderoso será este ataque. No falla.
+#-------------------------------
+[BOUNCYBUBBLE]
+Name = Vapodrenaje
+Type = WATER
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = HealUserByHalfOfDamageDone
+Flags = CanProtect,CanMirrorMove
+Description = El usuario ataca disparando burbujas de agua al objetivo y absorbe la mitad del daño producido.
+#-------------------------------
+[BUZZYBUZZ]
+Name = Joltioparálisis
+Type = ELECTRIC
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = ParalyzeTarget
+Flags = CanProtect,CanMirrorMove
+EffectChance = 100
+Description = El usuario dispara una descarga eléctrica para atacar al objetivo, siempre paraliza.
+#-------------------------------
+[SIZZLYSLIDE]
+Name = Flarembestida
+Type = FIRE
+Category = Physical
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = BurnTarget
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 100
+Description = El usuario se cubre de fuego y carga contra el objetivo, siempre provoca quemadura.
+#-------------------------------
+[GLITZYGLOW]
+Name = Espeaura
+Type = PSYCHIC
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = DamageAndStartWeakenSpecialDamageAgainstUserSide
+Flags = CanProtect,CanMirrorMove
+EffectChance = 100
+Description = El usuario bombardea al objetivo con fuerza telequinética y levanta una Pantalla de Luz.
+#-------------------------------
+[BADDYBAD]
+Name = Umbreozona
+Type = DARK
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = DamageAndStartWeakenPhysicalDamageAgainstUserSide
+Flags = CanProtect,CanMirrorMove
+EffectChance = 100
+Description = El usuario actúa mal, ataca al objetivo y levanta una pantalla de Reflejo. 
+#-------------------------------
+[SAPPYSEED]
+Name = Leafitobombas
+Type = GRASS
+Category = Physical
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = DamageTargetAddLeechSeedToFoeSide
+Flags = CanProtect,CanMirrorMove
+EffectChance = 100
+Description = El usuario esparce semillas para atacar al objetivo y coloca Drenadoras.
+#-------------------------------
+[FREEZYFROST]
+Name = Glaceoprisma
+Type = ICE
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = DamageAndResetAllBattlersStatStages
+Flags = CanProtect,CanMirrorMove
+EffectChance = 100
+Description = Ataca con un cristal de neblina helada. Elimina los cambios de estadísticas de todos. 
+#-------------------------------
+[SPARKLYSWIRL]
+Name = Sylveotornado
+Type = FAIRY
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = DamageAndCureUserPartyStatus
+Flags = CanProtect,CanMirrorMove
+EffectChance = 100
+Description = Ataca al objetivo envolviéndolo con un torbellino. Cura todos los problemas de estado del equipo. 
+#-------------------------------
+[PIKAPAPOW]
+Name = Pikatormenta
+Type = ELECTRIC
+Category = Special
+Power = 1
+Accuracy = 0
+TotalPP = 20
+Target = NearOther
+FunctionCode = PowerHigherWithUserHappiness
+Flags = CanProtect,CanMirrorMove
+Description = Cuanto mayor sea la amistad con el Entrenador, más poderoso será este ataque. No falla.
+#-------------------------------
+[ZIPPYZAP]
+Name = Pikaturbo
+Type = ELECTRIC
+Category = Physical
+Power = 50
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+Priority = 2
+FunctionCode = AlwaysCriticalHit
+Flags = Contact,CanProtect,CanMirrorMove
+Description = El usuario ataca con ráfagas eléctricas, siempre va en primer lugar y es golpe crítico.
+#-------------------------------
+[SPLISHYSPLASH]
+Name = Salpikasurf
+Type = WATER
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = AllNearFoes
+FunctionCode = ParalyzeTarget
+Flags = CanProtect,CanMirrorMove
+EffectChance = 30
+Description = El usuario carga una enorme onda eléctrica y golpea al Pokémon rival con ella. Puede paralizar.
+#-------------------------------
+[FLOATYFALL]
+Name = Pikapicado
+Type = FLYING
+Category = Physical
+Power = 90
+Accuracy = 95
+TotalPP = 15
+Target = NearOther
+FunctionCode = FlinchTarget
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 30
+Description = El usuario flota en el aire y luego se lanza en picado para atacar al objetivo. Puede amedrentar.
+#-------------------------------

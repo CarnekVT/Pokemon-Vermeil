@@ -799,3 +799,15 @@ class Battle::Move::BurnAttackerBeforeUserActs < Battle::Move
     @battle.pbDisplay(_INTL("¡{1} empieza a calentar su pico!", user.pbThis))
   end
 end
+
+#===============================================================================
+# LeafitoBombas / Sappy Seed
+#===============================================================================
+class Battle::Move::DamageTargetAddLeechSeedToFoeSide < Battle::Move
+  def pbEffectWhenDealingDamage(user, target)
+    return if target.effects[PBEffects::LeechSeed] >= 0 || target.pbHasType?(:GRASS)
+    target.effects[PBEffects::LeechSeed] = user.index
+    @battle.pbAnimation(:LEECHSEED, user, target)
+    @battle.pbDisplay(_INTL("¡{1} fue infectado!", target.pbThis))
+  end
+end

@@ -1468,3 +1468,102 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("TransformUserIntoTarget"
     next score - 5
   }
 )
+
+#===============================================================================
+# Frostbites the target (halves Special Attack, like Burn halves Attack).
+#===============================================================================
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.add("FrostbiteTarget",
+  proc { |move, user, target, ai, battle|
+    next move.statusMove? && !target.battler.pbCanFrostbite?(user.battler, false, move.move)
+  }
+)
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("FrostbiteTarget",
+  proc { |score, move, user, target, ai, battle|
+    useless_score = (move.statusMove?) ? Battle::AI::MOVE_USELESS_SCORE : score
+    next useless_score if target.has_active_item?(:LUMBERRY)
+    next useless_score if target.faster_than?(user) &&
+                          target.has_active_ability?(:HYDRATION) &&
+                          [:Rain, :HeavyRain].include?(target.battler.effectiveWeather)
+    next score if move.move.addlEffect > 0 && !target.battler.affectedByAdditionalEffects?
+    if target.battler.pbCanFrostbite?(user.battler, false, move.move)
+      add_effect = move.get_score_change_for_additional_effect(user, target)
+      next useless_score if add_effect == -999   # Additional effect will be negated
+      frostbite_score = 8
+      if ai.trainer.medium_skill?
+        # Prefer if the target uses special attacks that will be weakened
+        frostbite_score += 4 if target.check_for_move { |m| m.specialMove? && m.damagingMove? }
+        frostbite_score += 4 if !target.check_for_move { |m| m.physicalMove? && m.damagingMove? }
+        # Prefer if user or ally can double power on statused targets
+        ai.each_same_side_battler(user.side) do |b, i|
+          frostbite_score += 4 if b.has_move_with_function?("DoublePowerIfTargetStatusProblem")
+        end
+        # Don't prefer if target benefits from status conditions
+        frostbite_score -= 4 if target.has_active_ability?([:GUTS, :QUICKFEET, :MARVELSCALE])
+        frostbite_score -= 8 if target.has_move_with_function?("DoublePowerIfUserPoisonedBurnedParalyzed",
+                                                               "CureUserBurnPoisonParalysis")
+        frostbite_score -= 10 if !target.battler.takesIndirectDamage?
+        if target.has_active_ability?(:SHEDSKIN)
+          frostbite_score -= 5
+        elsif target.has_active_ability?(:HYDRATION) &&
+              [:Rain, :HeavyRain].include?(target.battler.effectiveWeather)
+          frostbite_score -= 8
+        end
+        ai.each_same_side_battler(target.side) do |b, i|
+          frostbite_score -= 5 if i != target.index && b.has_active_ability?(:HEALER)
+        end
+      end
+      frostbite_score = (frostbite_score > 0) ? [frostbite_score + add_effect, 0].max : [frostbite_score - add_effect, 0].min
+      score += frostbite_score
+    end
+    next score
+  }
+)
+
+#===============================================================================
+# This move can't be selected on consecutive turns. (Blood Moon, custom variant)
+#===============================================================================
+Battle::AI::Handlers::MoveFailureCheck.add("CantSelectConsecutiveTurns",
+  proc { |move, user, ai, battle|
+    next user.effects[PBEffects::SuccessiveMove] == move.id
+  }
+)
+
+#===============================================================================
+# Starmobile-powered status moves — copies of the parent status handlers.
+# (Blazing Torque, Noxious Torque, Combat Torque, Wicked Torque, Magical Torque)
+#===============================================================================
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.copy("BurnTarget",
+                                                         "StarmobileBurnTarget")
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.copy("BurnTarget",
+                                                        "StarmobileBurnTarget")
+
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.copy("PoisonTarget",
+                                                         "StarmobilePoisonTarget")
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.copy("PoisonTarget",
+                                                        "StarmobilePoisonTarget")
+
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.copy("ParalyzeTarget",
+                                                         "StarmobileParalyzeTarget")
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.copy("ParalyzeTarget",
+                                                        "StarmobileParalyzeTarget")
+
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.copy("SleepTarget",
+                                                         "StarmobileSleepTarget")
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.copy("SleepTarget",
+                                                        "StarmobileSleepTarget")
+
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.copy("ConfuseTarget",
+                                                         "StarmobileConfuseTarget")
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.copy("ConfuseTarget",
+                                                        "StarmobileConfuseTarget")
+
+#===============================================================================
+# Deals damage and cures the user's party of status conditions. (Sylveotornado)
+#===============================================================================
+Battle::AI::Handlers::MoveEffectScore.add("DamageAndCureUserPartyStatus",
+  proc { |score, move, user, ai, battle|
+    has_status = battle.pbParty(user.index).any? { |pkmn| pkmn&.able? && pkmn.status != :NONE }
+    score += 15 if has_status
+    next score
+  }
+)

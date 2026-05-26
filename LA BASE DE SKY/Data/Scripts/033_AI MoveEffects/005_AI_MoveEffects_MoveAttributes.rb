@@ -1603,11 +1603,28 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("StartNegateTargetEvasion
 #
 #===============================================================================
 # IgnoreTargetDefSpDefEvaStatStages
- 
+
 #===============================================================================
-#
+# Ignores the target's defensive stat stages. Dragon moves hit Fairy types at
+# normal effectiveness. (Nihil Light)
 #===============================================================================
-# IgnoreTargetStatStagesNormalEffectiveAgainstFairy
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("IgnoreTargetStatStagesNormalEffectiveAgainstFairy",
+  proc { |score, move, user, target, ai, battle|
+    # Prefer if target has boosted defensive stages that will be bypassed
+    if ai.trainer.medium_skill?
+      score += 5 if target.stages[:DEFENSE] > 0 ||
+                    target.stages[:SPECIAL_DEFENSE] > 0 ||
+                    target.stages[:EVASION] > 0
+    end
+    # Prefer if target is Fairy type and this move would otherwise be nullified
+    if ai.trainer.high_skill?
+      if move.move.pbBaseType(user.battler) == :DRAGON && target.has_type?(:FAIRY)
+        score += 15
+      end
+    end
+    next score
+  }
+)
 
 #===============================================================================
 #
@@ -1773,6 +1790,42 @@ Battle::AI::Handlers::MoveEffectScore.add("NormalMovesBecomeElectric",
       next (move.statusMove?) ? Battle::AI::MOVE_USELESS_SCORE : score
     end
     score += 10 * (electric_type_better - normal_type_better)
+    next score
+  }
+)
+
+#===============================================================================
+# Deals damage and sets Reflect on the user's side on hit. (Umbreozona)
+#===============================================================================
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DamageAndStartWeakenPhysicalDamageAgainstUserSide",
+  proc { |score, move, user, target, ai, battle|
+    next score if user.pbOwnSide.effects[PBEffects::Reflect] > 0
+    next score if user.pbOwnSide.effects[PBEffects::AuroraVeil] > 0
+    ai.each_foe_battler(user.side) do |b, i|
+      next if !b.check_for_move { |m| m.physicalMove?(m.type) && m.damagingMove? }
+      score += 10
+      score += 8 if !b.check_for_move { |m| m.specialMove?(m.type) && m.damagingMove? }
+      break
+    end
+    score += 5 if user.has_active_item?(:LIGHTCLAY)
+    next score
+  }
+)
+
+#===============================================================================
+# Deals damage and sets Light Screen on the user's side on hit. (Espeaura)
+#===============================================================================
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DamageAndStartWeakenSpecialDamageAgainstUserSide",
+  proc { |score, move, user, target, ai, battle|
+    next score if user.pbOwnSide.effects[PBEffects::LightScreen] > 0
+    next score if user.pbOwnSide.effects[PBEffects::AuroraVeil] > 0
+    ai.each_foe_battler(user.side) do |b, i|
+      next if !b.check_for_move { |m| m.specialMove?(m.type) && m.damagingMove? }
+      score += 10
+      score += 8 if !b.check_for_move { |m| m.physicalMove?(m.type) && m.damagingMove? }
+      break
+    end
+    score += 5 if user.has_active_item?(:LIGHTCLAY)
     next score
   }
 )

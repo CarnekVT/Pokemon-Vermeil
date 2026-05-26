@@ -1796,3 +1796,32 @@ class Battle::Move::NormalMovesBecomeElectric < Battle::Move
     @battle.pbDisplay(_INTL("¡Una lluvia de electrones cae sobre el terreno de combate!"))
   end
 end
+
+
+#===============================================================================
+# Umbreozona
+#===============================================================================
+class Battle::Move::DamageAndStartWeakenPhysicalDamageAgainstUserSide < Battle::Move
+  def canSnatch?; return true; end
+
+  def pbEffectWhenDealingDamage(user, target)
+    return if user.pbOwnSide.effects[PBEffects::Reflect] > 0
+    user.pbOwnSide.effects[PBEffects::Reflect] = 5
+    user.pbOwnSide.effects[PBEffects::Reflect] = 8 if user.hasActiveItem?(:LIGHTCLAY)
+    @battle.pbDisplay(_INTL("¡{1} ha aumentado la resistencia de {2} ante los ataques físicos!", @name, user.pbTeam(true)))
+  end
+end
+
+#===============================================================================
+# Espeaura
+#===============================================================================
+class Battle::Move::DamageAndStartWeakenSpecialDamageAgainstUserSide < Battle::Move
+  def canSnatch?; return true; end
+
+  def pbEffectWhenDealingDamage(user, target)
+    return if user.pbOwnSide.effects[PBEffects::LightScreen] > 0
+    user.pbOwnSide.effects[PBEffects::LightScreen] = 5
+    user.pbOwnSide.effects[PBEffects::LightScreen] = 8 if user.hasActiveItem?(:LIGHTCLAY)
+    @battle.pbDisplay(_INTL("¡{1} ha aumentado la resistencia de {2} ante los ataques especiales!", @name, user.pbTeam(true)))
+  end
+end

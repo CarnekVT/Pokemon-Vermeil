@@ -760,3 +760,26 @@ Battle::AI::Handlers::MoveEffectScore.add("RemoveAllScreensAndSafeguard",
     next score
   }
 )
+
+#===============================================================================
+# Deals damage and applies Leech Seed to the target. (LeafitoBombas / Sappy Seed)
+#===============================================================================
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DamageTargetAddLeechSeedToFoeSide",
+  proc { |score, move, user, target, ai, battle|
+    next score if target.has_type?(:GRASS)
+    next score if target.effects[PBEffects::LeechSeed] >= 0
+    next score if !target.battler.takesIndirectDamage?
+    score += 15
+    score += 10 if user.turnCount < 2
+    if ai.trainer.medium_skill?
+      score += 10 if !user.check_for_move { |m| m.damagingMove? }
+      score += 8 if !battle.pbCanChooseNonActive?(target.index)
+      score -= 20 if target.has_active_ability?(:LIQUIDOOZE)
+    end
+    if ai.trainer.high_skill?
+      score += 10 if user.check_for_move { |m| m.is_a?(Battle::Move::ProtectMove) }
+      score -= 15 if target.has_move_with_function?("RemoveUserBindingAndEntryHazards")
+    end
+    next score
+  }
+)

@@ -1660,15 +1660,40 @@ class Battle::Move::DamageTargetAddStealthRocksToFoeSide < Battle::Move
 end
 
 #===============================================================================
-# Gigaton Hammer, Blood Moon
+# The move cannot be chosen if it is also the last move the user used (unless it
+# failed). (Blood Moon, Gigaton Hammer)
 #===============================================================================
-# This move becomes unselectable if you try to use it on consecutive turns.
-#-------------------------------------------------------------------------------
-class Battle::Move::CantSelectConsecutiveTurns < Battle::Move
-  def pbEffectWhenDealingDamage(user, target)
-    user.effects[PBEffects::SuccessiveMove] = @id
+class Battle::Move::CannotUseConsecutively < Battle::Move
+  def pbCanChooseMove?(user, commandPhase, showMessages)
+    if user.effects[PBEffects::GigatonHammer] && commandPhase
+      if showMessages
+        msg = _INTL("You can't use {1} twice in a row!", @name)
+        (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
+      end
+      return false
+    end
+    return true
+  end
+
+  def pbMoveFailed?(user, targets)
+    if user.effects[PBEffects::GigatonHammer]
+      @battle.pbDisplay(_INTL("But it failed!"))
+      return true
+    end
+    return false
+  end
+
+  def pbChangeUsageCounters(user, specialUsage)
+    oldVal = user.effects[PBEffects::GigatonHammer]
+    super
+    user.effects[PBEffects::GigatonHammer] = oldVal
+  end
+
+  def pbEffectGeneral(user)
+    user.effects[PBEffects::GigatonHammer] = true
   end
 end
+
 
 #===============================================================================
 # Blazing Torque
@@ -1708,4 +1733,42 @@ end
 # Confuses the target.
 #-------------------------------------------------------------------------------
 class Battle::Move::StarmobileConfuseTarget < Battle::Move::ConfuseTarget
+end
+
+
+#===============================================================================
+# Hace daño y cura los estados alterados del equipo. (Sylveotornado)
+#===============================================================================
+class Battle::Move::DamageAndCureUserPartyStatus < Battle::Move::CureUserPartyStatus
+  def pbMoveFailed?(user, targets)
+    return false  # Never fail - it's primarily a damaging move
+  end
+
+  def pbFailsAgainstTarget?(user, target, show_message)
+    return false  # Always allow damage
+  end
+
+  def pbEffectAgainstTarget(user, target)
+    # Do nothing - don't heal the opponent
+  end
+
+  def pbEffectGeneral(user)
+    # Cure all Pokémon in battle on the user's side.
+    if pbTarget(user) == :UserSide
+      @battle.allSameSideBattlers(user).each do |b|
+        pbAromatherapyHeal(b.pokemon, b) if b.status != :NONE
+      end
+    end
+    
+    # Cure all Pokémon in the user's party (including those in battle)
+    @battle.pbParty(user.index).each_with_index do |pkmn, i|
+      next if !pkmn || !pkmn.able? || pkmn.status == :NONE
+      battler = @battle.pbFindBattler(i, user)
+      if battler
+        pbAromatherapyHeal(pkmn, battler)
+      else
+        pbAromatherapyHeal(pkmn)
+      end
+    end
+  end
 end
