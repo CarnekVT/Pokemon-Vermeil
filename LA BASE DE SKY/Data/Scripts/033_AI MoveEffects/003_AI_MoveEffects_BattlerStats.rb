@@ -1918,3 +1918,136 @@ Battle::AI::Handlers::MoveEffectScore.add("StartSwapAllBattlersBaseDefensiveStat
     next score
   }
 )
+
+#===============================================================================
+# Raises user's stat by 1 stage depending on commanding Tatsugiri's form.
+# (Order Up)
+#===============================================================================
+Battle::AI::Handlers::MoveEffectScore.add("RaiseUserStat1Commander",
+  proc { |score, move, user, ai, battle|
+    next score unless user.battler.isCommanderHost?
+    form = user.battler.effects[PBEffects::Commander][1]
+    stat = [:ATTACK, :DEFENSE, :SPEED][form]
+    next ai.get_score_for_target_stat_raise(score, user, [stat, 1])
+  }
+)
+
+#===============================================================================
+# Raises the target's Attack by 2 stages, lowers their Defense by 2 stages.
+# (Spicy Extract)
+#===============================================================================
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.add("RaiseTargetAtkLowerTargetDef2",
+  proc { |move, user, target, ai, battle|
+    next move.statusMove? &&
+         !target.battler.pbCanRaiseStatStage?(:ATTACK, user.battler, move.move) &&
+         !target.battler.pbCanLowerStatStage?(:DEFENSE, user.battler, move.move)
+  }
+)
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RaiseTargetAtkLowerTargetDef2",
+  proc { |score, move, user, target, ai, battle|
+    raise_score = ai.get_score_for_target_stat_raise(0, target, [:ATTACK, 2])
+    if raise_score != Battle::AI::MOVE_USELESS_SCORE
+      score += raise_score
+      score += 5 if (user.has_active_ability?(:OPPORTUNIST) ||
+                    user.has_active_item?(:MIRRORHERB)) &&
+                    user.stat_raise_worthwhile?(user, :ATTACK)
+    end
+    lower_score = ai.get_score_for_target_stat_drop(0, target, [:DEFENSE, 2])
+    score += lower_score if lower_score != Battle::AI::MOVE_USELESS_SCORE
+    next score
+  }
+)
+
+#===============================================================================
+# Raises user's Attack and Speed by 1 stage. Clears all entry hazards and
+# substitutes on both sides. (Tidy Up)
+#===============================================================================
+Battle::AI::Handlers::MoveFailureCheck.add("RaiseUserAtkSpd1RemoveHazardsSubstitutes",
+  proc { |move, user, ai, battle|
+    next false if move.damagingMove?
+    will_fail = true
+    (move.move.statUp.length / 2).times do |i|
+      next if !user.battler.pbCanRaiseStatStage?(move.move.statUp[i * 2], user.battler, move.move)
+      will_fail = false
+      break
+    end
+    battle.allBattlers.each { |b| will_fail = false if b.effects[PBEffects::Substitute] > 0 }
+    will_fail = false if user.pbOwnSide.effects[PBEffects::StealthRock] ||
+                         user.pbOwnSide.effects[PBEffects::Spikes] > 0 ||
+                         user.pbOwnSide.effects[PBEffects::ToxicSpikes] > 0 ||
+                         user.pbOwnSide.effects[PBEffects::StickyWeb] ||
+                         (defined?(PBEffects::Steelsurge) && user.pbOwnSide.effects[PBEffects::Steelsurge]) ||
+                         user.pbOpposingSide.effects[PBEffects::StealthRock] ||
+                         user.pbOpposingSide.effects[PBEffects::Spikes] > 0 ||
+                         user.pbOpposingSide.effects[PBEffects::ToxicSpikes] > 0 ||
+                         user.pbOpposingSide.effects[PBEffects::StickyWeb] ||
+                         (defined?(PBEffects::Steelsurge) && user.pbOpposingSide.effects[PBEffects::Steelsurge])
+    next will_fail
+  }
+)
+Battle::AI::Handlers::MoveEffectScore.add("RaiseUserAtkSpd1RemoveHazardsSubstitutes",
+  proc { |score, move, user, ai, battle|
+    # Score for raising user's Attack and Speed
+    score = Battle::AI::Handlers.apply_move_effect_score("RaiseUserAtkSpd1",
+       score, move, user, ai, battle)
+    # Score for removing substitutes
+    battle.allBattlers.each do |b|
+      next if b.effects[PBEffects::Substitute] == 0
+      score += (b.idxOwnSide == user.side) ? -10 : 10
+    end
+    # Score for removing entry hazards on both sides
+    if battle.pbAbleNonActiveCount(user.idxOwnSide) > 0
+      score += 15 if user.pbOwnSide.effects[PBEffects::Spikes] > 0
+      score += 15 if user.pbOwnSide.effects[PBEffects::ToxicSpikes] > 0
+      score += 20 if user.pbOwnSide.effects[PBEffects::StealthRock]
+      score += 15 if user.pbOwnSide.effects[PBEffects::StickyWeb]
+      if defined?(PBEffects::Steelsurge) && user.pbOwnSide.effects[PBEffects::Steelsurge]
+        score += 15
+      end
+      score -= 15 if user.pbOpposingSide.effects[PBEffects::Spikes] > 0
+      score -= 15 if user.pbOpposingSide.effects[PBEffects::ToxicSpikes] > 0
+      score -= 20 if user.pbOpposingSide.effects[PBEffects::StealthRock]
+      score -= 15 if user.pbOpposingSide.effects[PBEffects::StickyWeb]
+      if defined?(PBEffects::Steelsurge) && user.pbOpposingSide.effects[PBEffects::Steelsurge]
+        score -= 15
+      end
+    end
+    next score
+  }
+)
+
+#===============================================================================
+# Lowers the target's Speed by 1 stage each turn for 3 turns. (Syrup Bomb
+# variant using Syrupy effect)
+#===============================================================================
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("LowerTargetSpeedOverTime",
+  proc { |score, move, user, target, ai, battle|
+    next score if move.move.addlEffect > 0 && !target.battler.affectedByAdditionalEffects?
+    score += 8 if target.effects[PBEffects::Syrupy] == 0 &&
+                  ai.stat_drop_worthwhile?(target, :SPEED)
+    next score
+  }
+)
+
+#===============================================================================
+# Deals damage and resets all battlers' stat stages. (Glaceoprisma)
+#===============================================================================
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DamageAndResetAllBattlersStatStages",
+  proc { |score, move, user, target, ai, battle|
+    next score unless ai.trainer.medium_skill?
+    ai.each_battler do |b|
+      GameData::Stat.each_battle do |s|
+        stage = b.stages[s.id]
+        next if stage == 0
+        score_change = stage.abs * 4
+        # Removing positive foe stages is good; removing negative foe stages is bad
+        if b.opposes?(user)
+          score += (stage > 0) ? score_change : -score_change
+        else
+          score += (stage < 0) ? score_change : -score_change
+        end
+      end
+    end
+    next score
+  }
+)

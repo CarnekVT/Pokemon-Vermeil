@@ -2499,25 +2499,14 @@ class Battle::Move::RaiseUserAtkSpd1RemoveHazardsSubstitutes < Battle::Move::Mul
   end
 end
 
-
-
 #===============================================================================
-# Syrup Bomb
+# Elimina todos los cambios en las estadísticas. (Glaceoprisma)
 #===============================================================================
-# Lower Target Speed for 3 turns.
-#-------------------------------------------------------------------------------
-class Battle::Move::LowerTargetSpeedOverTime < Battle::Move
-  def pbEffectAgainstTarget(user, target)
-    return if target.fainted? || target.damageState.substitute
-    return if target.effects[PBEffects::Syrupy] > 0
-    target.effects[PBEffects::Syrupy] = 3
-    target.effects[PBEffects::SyrupyUser] = user.index
-    @battle.pbDisplay(_INTL("¡{1} fue cubierto en caramelo pegajoso!", target.pbThis))
-  end
-
-  def pbShowAnimation(id, user, targets, hitNum = 0, showAnimation = true)
-    hitNum = (user.shiny?) ? 1 : 0
-    super
+class Battle::Move::DamageAndResetAllBattlersStatStages < Battle::Move
+  def pbEffectWhenDealingDamage(user, target)
+    if @battle.allBattlers.any? { |b| b.hasAlteredStatStages? }
+      @battle.allBattlers.each { |b| b.pbResetStatStages }
+      @battle.pbDisplay(_INTL("¡Se han eliminado todos los cambios en las características!"))
+    end
   end
 end
-
