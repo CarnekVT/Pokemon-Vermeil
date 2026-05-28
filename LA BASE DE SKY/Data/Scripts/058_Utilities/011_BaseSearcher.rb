@@ -46,17 +46,17 @@ class BaseSearcher
   def search_by_name(text, _char = '')
     current_index = get_current_index
     search_list = get_search_list
-    
-    # Search from current position to end
-    index = search(text, current_index, search_list.length)
+    return false if search_list.nil? || search_list.empty?
+
+    # Desde el siguiente elemento; vuelta al inicio sin repetir el actual
+    index = search(text, current_index + 1, search_list.length)
     return on_search_complete(index) if index
 
-    # Wrap around: search from beginning to current position
-    if current_index.positive?
+    if current_index >= 0
       index = search(text, 0, current_index)
       return on_search_complete(index) if index
     end
-    
+
     false
   end
 
