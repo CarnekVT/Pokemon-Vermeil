@@ -122,8 +122,8 @@ class Battle::Scene::PokemonDataBox < Sprite
   HP_NUMBERS_Y      = 52
   HP_NUMBERS_WIDTH  = 124
   HP_NUMBERS_HEIGHT = 16
-  HP_PERCENT_X      = 131
-  HP_PERCENT_Y      = 61
+  HP_PERCENT_X      = 133
+  HP_PERCENT_Y      = 62
   HP_PERCENT_WIDTH  = 124
   HP_PERCENT_HEIGHT = 16 
   # Drawing coordinates
