@@ -1,4 +1,5 @@
 .idea
+.cursor
 .ruby-lsp
 */.ruby-lsp
 LA BASE DE SKY/Data/Enemies.rxdata
@@ -33,3 +34,4 @@ ruby-style-suggestions.ps1
 PRE-COMMIT-SETUP-GUIDE.md
 .ruby-version
 LA BASE DE SKY/luts_log.txt
+
