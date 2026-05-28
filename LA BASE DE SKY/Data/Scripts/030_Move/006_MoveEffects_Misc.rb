@@ -70,41 +70,6 @@ class Battle::Move::DoubleMoneyGainedFromBattle < Battle::Move
 end
 
 #===============================================================================
-# The move cannot be chosen if it is also the last move the user used (unless it
-# failed). (Blood Moon, Gigaton Hammer)
-#===============================================================================
-class Battle::Move::CannotUseConsecutively < Battle::Move
-  def pbCanChooseMove?(user, commandPhase, showMessages)
-    if user.effects[PBEffects::GigatonHammer] && commandPhase
-      if showMessages
-        msg = _INTL("¡No puedes usar {1} dos veces seguidas!", @name)
-        (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
-      end
-      return false
-    end
-    return true
-  end
-
-  def pbMoveFailed?(user, targets)
-    if user.effects[PBEffects::GigatonHammer]
-      @battle.pbDisplay(_INTL("¡Pero ha fallado!"))
-      return true
-    end
-    return false
-  end
-
-  def pbChangeUsageCounters(user, specialUsage)
-    oldVal = user.effects[PBEffects::GigatonHammer]
-    super
-    user.effects[PBEffects::GigatonHammer] = oldVal
-  end
-
-  def pbEffectGeneral(user)
-    user.effects[PBEffects::GigatonHammer] = true
-  end
-end
-
-#===============================================================================
 # Fails if this isn't the user's first turn. (First Impression)
 #===============================================================================
 class Battle::Move::FailsIfNotUserFirstTurn < Battle::Move

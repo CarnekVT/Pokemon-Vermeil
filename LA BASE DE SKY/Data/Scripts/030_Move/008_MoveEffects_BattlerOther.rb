@@ -1667,7 +1667,7 @@ class Battle::Move::CannotUseConsecutively < Battle::Move
   def pbCanChooseMove?(user, commandPhase, showMessages)
     if user.effects[PBEffects::GigatonHammer] && commandPhase
       if showMessages
-        msg = _INTL("You can't use {1} twice in a row!", @name)
+        msg = _INTL("¡No puedes usar {1} dos veces seguidas!", @name)
         (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
       end
       return false
@@ -1677,7 +1677,7 @@ class Battle::Move::CannotUseConsecutively < Battle::Move
 
   def pbMoveFailed?(user, targets)
     if user.effects[PBEffects::GigatonHammer]
-      @battle.pbDisplay(_INTL("But it failed!"))
+      @battle.pbDisplay(_INTL("¡Pero ha fallado!"))
       return true
     end
     return false
