@@ -67,6 +67,14 @@ class Game_Player < Game_Character
     return ret + 1
   end
 
+  def player_x
+    return $game_player.x
+  end
+  
+  def player_y
+    return $game_player.y
+  end
+
   def has_follower?
     return $PokemonGlobal.followers.length > 0
   end

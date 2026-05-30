@@ -107,6 +107,16 @@ class Player < Trainer
     return @badges.count { |badge| badge == true }
   end
 
+  # Grants the badge at the given index to the player, records the time and
+  # triggers the :on_badge_obtained EventHandler.
+  # @param badge_index [Integer] zero-based badge index
+  def receive_badge(badge_index)
+    return if @badges[badge_index]
+    @badges[badge_index] = true
+    $stats.set_time_to_badge(badge_index) if $stats
+    EventHandlers.trigger(:on_badge_obtained, badge_index)
+  end
+
   def running?
     return false if !$game_player.can_run? || $PokemonGlobal.ice_sliding
     return $game_player.move_speed == PLAYER_SPEEDS[:running] ? true : false 
@@ -125,5 +135,12 @@ class Player < Trainer
   def owned?(species)
     return @pokedex.owned?(species)
   end
+end
+
+# Global helper used in map/common events to grant a badge and fire
+# the :on_badge_obtained EventHandler.
+# @param badge_index [Integer] zero-based badge index (0 = first badge)
+def pbReceiveBadge(badge_index)
+  $player.receive_badge(badge_index)
 end
 

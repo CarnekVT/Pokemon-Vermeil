@@ -257,7 +257,7 @@ class Battle
     if pbDisplayConfirm(_INTL("¿Quieres que {1} olvide un movimiento para aprender {2}?", pkmnName, moveName))
       loop do
         forgetMove = @scene.pbForgetMove(pkmn, newMove)
-        if forgetMove >= 0
+        if forgetMove >= 0 && pkmn.moves[forgetMove]
           oldMoveName = pkmn.moves[forgetMove].name
           pkmn.moves[forgetMove] = Pokemon::Move.new(newMove)   # Replaces current/total PP
           battler.moves[forgetMove] = Move.from_pokemon_move(self, pkmn.moves[forgetMove]) if battler

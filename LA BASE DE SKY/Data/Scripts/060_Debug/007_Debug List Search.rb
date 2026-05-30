@@ -40,6 +40,36 @@ def pbLevenshtein(first, second)
   return matrix.last.last
 end
 
+# Evita falsos positivos fuzzy (p. ej. Meltan al buscar Metang): prefijo de 3 letras compatible.
+def pbFuzzyPrefixCompatible?(word, term_clean)
+  return true if term_clean.length < 3
+  prefix_len = [3, term_clean.length, word.length].min
+  prefix = term_clean[0, prefix_len]
+  word_prefix = word[0, prefix_len]
+  return true if word.start_with?(prefix) || term_clean.start_with?(word_prefix)
+  false
+end
+
+# Busca el siguiente nombre en una lista (circular). Subcadena primero, fuzzy después.
+def pbFindListIndexBySearch(names, search_term, current_index = -1)
+  return nil if nil_or_empty?(search_term) || names.nil? || names.empty?
+  term = pbRemoveAccents(search_term.to_s).downcase
+  ranges = [[current_index + 1, names.length]]
+  ranges.push([0, current_index]) if current_index >= 0
+  ranges.each do |from, to|
+    names[from...to].each_with_index do |name, offset|
+      name_clean = pbRemoveAccents(name.to_s).downcase
+      return from + offset if name_clean.include?(term)
+    end
+  end
+  ranges.each do |from, to|
+    names[from...to].each_with_index do |name, offset|
+      return from + offset if pbSmartMatch?(name, search_term)
+    end
+  end
+  nil
+end
+
 # Lógica de coincidencia por si se escribe mal una palabra
 def pbSmartMatch?(text, search_term)
   # Limpieza básica
@@ -58,6 +88,7 @@ def pbSmartMatch?(text, search_term)
   # Dividimos el nombre del objeto en palabras para buscar similitudes
   words = text_clean.split(" ")
   words.each do |word|
+     next if !pbFuzzyPrefixCompatible?(word, term_clean)
      if (word.length - term_clean.length).abs <= tolerance
        dist = pbLevenshtein(word, term_clean)
        return true if dist <= tolerance
@@ -65,7 +96,8 @@ def pbSmartMatch?(text, search_term)
   end
   
   # Busqueda de frases completas si las longitudes son similares
-  if (text_clean.length - term_clean.length).abs <= tolerance + 2
+  if (text_clean.length - term_clean.length).abs <= tolerance + 2 &&
+     pbFuzzyPrefixCompatible?(text_clean, term_clean)
       dist_full = pbLevenshtein(text_clean, term_clean)
       return true if dist_full <= tolerance
   end

@@ -54,6 +54,10 @@
 #                                        evolución, Recogida/Recogida de miel, desmayo.
 #   :on_wild_battle_end                - Después de una batalla salvaje. Actualiza la 
 #                                        información de la cadena del Poké Radar.
+#-------------------------------------------------------------------------------------------------------------
+#   :on_badge_obtained                 - Cuando el jugador obtiene una medalla de gimnasio
+#                                        mediante pbReceiveBadge. Recibe el índice de la
+#                                        medalla (Integer, base 0).
 #============================================================================================================
 
 module EventHandlers

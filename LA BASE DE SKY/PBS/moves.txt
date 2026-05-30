@@ -9869,7 +9869,7 @@ TotalPP = 10
 Target = NearOther
 FunctionCode = IgnoreTargetStatStagesNormalEffectiveAgainstFairy
 Flags = CanProtect,CanMirrorMove
-Description = Luz devastadora que pega de forma neutra a los Pokémon de tipo hada. Ignora cambios de Def. Esp. y Evasión.
+Description = Luz devastadora que pega de forma neutra a los Pokémon de tipo Hada. Ignora cambios de Def. Esp. y Evasión.
 #-------------------------------
 
 #-----------------------------------------------------------------------
