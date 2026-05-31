@@ -34,6 +34,7 @@ def pbPrintException(e)
   message = "[Pokémon Essentials versión #{Essentials::VERSION}]\r\n"
   message += "#{Essentials::ERROR_TEXT}"   # For third party scripts to add to
   message += "[LA BASE DE SKY versión #{LBDSKY::VERSION}]\r\n"
+  message += "[#{System.game_title} versión #{Settings::GAME_VERSION}]\r\n"
   if !e.is_a?(EventScriptError)
     message += "Excepción: #{e.class}\r\n"
     message += "Mensaje: "
