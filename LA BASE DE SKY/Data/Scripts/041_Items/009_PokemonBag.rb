@@ -120,18 +120,44 @@ class PokemonBag
 
   # Deletes as many of item as possible (up to qty), and returns whether it
   # managed to delete qty of them.
-  def remove(item, qty = 1)
+  def remove(item, qty = 1, proc = nil)
     item_data = GameData::Item.try_get(item)
     return false if !item_data
     pocket = item_data.pocket
-    return ItemStorageHelper.remove(@pockets[pocket], item_data.id, qty)
+    return ItemStorageHelper.remove(@pockets[pocket], item_data.id, qty, proc)
   end
 
   # Deletes qty number of item. Doesn't delete anything if there are less than
   # qty of the item in the Bag.
-  def remove_all(item, qty = 1)
+  def remove_all(item, qty = 1, proc = nil)
     return false if !can_remove?(item, qty)
-    return remove(item, qty)
+    return remove(item, qty, proc)
+  end
+
+  # Removes all items from the Bag whose GameData::Item satisfies the given
+  # condition (proc or block). Returns true if at least one item was removed.
+  # Examples:
+  #   $bag.remove_matching { |item_data| item_data.is_TM? }
+  #   $bag.remove_matching { |item_data| item_data.is_HM? || item_data.is_TM? }
+  #   filter = proc { |item_data| item_data.has_flag?(:KeyItem) }
+  #   $bag.remove_matching(filter)
+  def remove_matching(condition = nil, &block)
+    filter = block || condition
+    return false if !filter
+    removed = false
+    @pockets.each do |pocket|
+      next if !pocket
+      pocket.each_with_index do |slot, i|
+        next if !slot
+        item_data = GameData::Item.try_get(slot[0])
+        next if !item_data || !filter.call(item_data)
+        unmark_as_new(slot[0])
+        pocket[i] = nil
+        removed = true
+      end
+      pocket.compact!
+    end
+    return removed
   end
 
   # Deletes qty copies of item from any pocket without looking up GameData::Item.
