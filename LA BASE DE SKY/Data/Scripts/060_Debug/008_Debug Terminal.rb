@@ -47,7 +47,9 @@ if !$joiplay
           else
             pbMapInterpreter.execute_script(script) unless nil_or_empty?(script)
           end
-        rescue Exception
+        rescue Exception => e
+          raise e if e.class.name == "Reset" || e.is_a?(SystemExit)
+          Console.echoln("Terminal Error: #{e.message}")
         end
         $InCommandLine = false
       end
