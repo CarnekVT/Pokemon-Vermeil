@@ -469,7 +469,7 @@ module OWShadowSettings
 
   # Activar o desactivar el recorte de sombras cuando interactuan entre si.
   # Puede afectar el rendimiento si hay una cantidad exagerada de eventos con sombra en el mapa.
-  ENABLE_SHADOW_CLIPPING = true
+  ENABLE_SHADOW_CLIPPING = false
 
   # ============================================================================
   # Si es verdadero, las blackslist de nombres de eventos y nombres de gráficos distinguirán entre mayúsculas y minúsculas.
