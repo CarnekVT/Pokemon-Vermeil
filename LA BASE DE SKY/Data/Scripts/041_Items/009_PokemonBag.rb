@@ -120,18 +120,18 @@ class PokemonBag
 
   # Deletes as many of item as possible (up to qty), and returns whether it
   # managed to delete qty of them.
-  def remove(item, qty = 1, proc = nil)
+  def remove(item, qty = 1)
     item_data = GameData::Item.try_get(item)
     return false if !item_data
     pocket = item_data.pocket
-    return ItemStorageHelper.remove(@pockets[pocket], item_data.id, qty, proc)
+    return ItemStorageHelper.remove(@pockets[pocket], item_data.id, qty)
   end
 
   # Deletes qty number of item. Doesn't delete anything if there are less than
   # qty of the item in the Bag.
-  def remove_all(item, qty = 1, proc = nil)
+  def remove_all(item, qty = 1)
     return false if !can_remove?(item, qty)
-    return remove(item, qty, proc)
+    return remove(item, qty)
   end
 
   # Removes all items from the Bag whose GameData::Item satisfies the given
