@@ -78,12 +78,8 @@ class Game_Temp
   }
 
   def add_battle_rule(rule, var = nil)
-    rules = self.battle_rules
-    if BATTLE_RULES.keys.include?(rule.to_s.downcase)
-      BATTLE_RULES[rule.to_s.downcase][1].call(rules, var)
-    else
-      raise _INTL("La regla de combate \"{1}\" no existe.", rule)
-    end
+    raise _INTL("La regla de combate \"{1}\" no existe.", rule) unless BATTLE_RULES.keys.include?(rule.to_s.downcase)
+    BATTLE_RULES[rule.to_s.downcase][1].call(self.battle_rules, var)
     # case rule.to_s.downcase
     # when "single", "1v1", "1v2", "2v1", "1v3", "3v1",
     #      "double", "2v2", "2v3", "3v2", "triple", "3v3"
