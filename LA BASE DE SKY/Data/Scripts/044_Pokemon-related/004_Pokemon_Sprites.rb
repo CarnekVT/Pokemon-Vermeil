@@ -87,9 +87,9 @@ class PokemonSprite < Sprite
     changeOrigin
   end
 
-  def setSpeciesBitmap(species, gender = 0, form = 0, shiny = false, shadow = false, back = false, egg = false)
+  def setSpeciesBitmap(species, gender = 0, form = 0, shiny = false, shadow = false, back = false, egg = false, super_shiny = false)
     @_iconbitmap&.dispose
-    @_iconbitmap = GameData::Species.sprite_bitmap(species, form, gender, shiny, shadow, back, egg)
+    @_iconbitmap = GameData::Species.sprite_bitmap(species, form, gender, shiny, shadow, back, egg, super_shiny)
     self.bitmap = @_iconbitmap&.bitmap
     refresh_tone
     changeOrigin
@@ -198,7 +198,7 @@ class PokemonIconSprite < Sprite
     @animBitmap = AnimatedBitmap.new(filename)
     
     if value.super_shiny? && !(filename && filename.include?("supershiny"))
-      hue = value.super_shiny_hue
+      hue = GameData::Species.super_shiny_hue_for(value.species, value.form, true)
       if hue != 0
         new_anim = @animBitmap.copy
         @animBitmap.dispose
@@ -295,6 +295,7 @@ class PokemonSpeciesIconSprite < Sprite
   attr_reader :gender
   attr_reader :form
   attr_reader :shiny
+  attr_reader :super_shiny
 
   # Time in seconds for one animation cycle of this Pokémon icon.
   ANIMATION_DURATION = 0.25
@@ -305,6 +306,7 @@ class PokemonSpeciesIconSprite < Sprite
     @gender        = 0
     @form          = 0
     @shiny         = false
+    @super_shiny   = false
     @frames_count  = 0
     @current_frame = 0
     refresh
@@ -332,14 +334,22 @@ class PokemonSpeciesIconSprite < Sprite
 
   def shiny=(value)
     @shiny = value
+    @super_shiny = false if !@shiny
     refresh
   end
 
-  def pbSetParams(species, gender, form, shiny = false)
+  def super_shiny=(value)
+    @super_shiny = value
+    @shiny = true if @super_shiny
+    refresh
+  end
+
+  def pbSetParams(species, gender, form, shiny = false, super_shiny = false)
     @species = species
     @gender  = gender
     @form    = form
     @shiny   = shiny
+    @super_shiny = super_shiny
     refresh
   end
 
@@ -375,10 +385,19 @@ class PokemonSpeciesIconSprite < Sprite
   def refresh
     @animBitmap&.dispose
     @animBitmap = nil
-    bitmapFileName = GameData::Species.icon_filename(@species, @form, @gender, @shiny)
+    bitmapFileName = GameData::Species.icon_filename(@species, @form, @gender, @shiny, false, false, @super_shiny)
     return unless bitmapFileName
 
     @animBitmap = AnimatedBitmap.new(bitmapFileName)
+    if @super_shiny && !bitmapFileName.include?("supershiny")
+      hue = GameData::Species.super_shiny_hue_for(@species, @form, true)
+      if hue != 0
+        new_anim = @animBitmap.copy
+        @animBitmap.dispose
+        new_anim.bitmap.apply_super_shiny_hue(hue)
+        @animBitmap = new_anim
+      end
+    end
     self.bitmap = @animBitmap.bitmap
     src_rect.width  = @animBitmap.height
     src_rect.height = @animBitmap.height

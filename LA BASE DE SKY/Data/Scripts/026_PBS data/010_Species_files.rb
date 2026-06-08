@@ -62,6 +62,8 @@ module GameData
       if super_shiny
         ret = self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Front supershiny")
         return ret if ret
+        # Sin gráfico dedicado: usar sprite normal como base (no el shiny).
+        return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Front")
       end
       return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, shiny, shadow, "Front")
     end
@@ -70,6 +72,8 @@ module GameData
       if super_shiny
         ret = self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Back supershiny")
         return ret if ret
+        # Sin gráfico dedicado: usar sprite normal como base (no el shiny).
+        return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Back")
       end
       return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, shiny, shadow, "Back")
     end
@@ -105,10 +109,46 @@ module GameData
       return (filename) ? AnimatedBitmap.new(filename) : nil
     end
 
-    def self.sprite_bitmap(species, form = 0, gender = 0, shiny = false, shadow = false, back = false, egg = false)
+    def self.super_shiny_hue_for(species, form = 0, for_display = false)
+      return 0 if !for_display && !Settings::SUPER_SHINY_HUE_SHIFT
+      sp_data = self.get_species_form(species, form)
+      hue_pool = sp_data.super_shiny_hue
+      hue_pool = Settings::SUPER_SHINY_HUES if hue_pool.nil? || hue_pool.empty?
+      return 0 if hue_pool.empty?
+      return hue_pool[0] if hue_pool.length == 1
+      if Settings::SUPER_SHINY_HUE_BY_SPECIES
+        baby_species = self.get(species).get_baby_species.to_s
+        seed = 0
+        baby_species.each_byte { |b| seed = (seed * 31) + b }
+        srand(seed)
+        hue = hue_pool[rand(hue_pool.length)]
+        srand
+        return hue
+      end
+      return hue_pool[0]
+    end
+
+    def self.apply_super_shiny_hue_to_bitmap(ret, species, form, filename)
+      return ret if !ret
+      return ret if filename && filename.include?("supershiny")
+      hue = self.super_shiny_hue_for(species, form, true)
+      return ret if hue == 0
+      new_ret = ret.copy
+      ret.dispose
+      new_ret.bitmap.apply_super_shiny_hue(hue)
+      return new_ret
+    end
+
+    def self.sprite_bitmap(species, form = 0, gender = 0, shiny = false, shadow = false, back = false, egg = false, super_shiny = false)
       return self.egg_sprite_bitmap(species, form) if egg
-      return self.back_sprite_bitmap(species, form, gender, shiny, shadow) if back
-      return self.front_sprite_bitmap(species, form, gender, shiny, shadow)
+      if back
+        filename = self.back_sprite_filename(species, form, gender, shiny, shadow, super_shiny)
+      else
+        filename = self.front_sprite_filename(species, form, gender, shiny, shadow, super_shiny)
+      end
+      ret = (filename) ? AnimatedBitmap.new(filename) : nil
+      return self.apply_super_shiny_hue_to_bitmap(ret, species, form, filename) if super_shiny
+      return ret
     end
 
     def self.sprite_bitmap_from_pokemon(pkmn, back = false, species = nil)
@@ -122,7 +162,7 @@ module GameData
       end     
       ret = (filename) ? AnimatedBitmap.new(filename) : nil
       if ret && pkmn.super_shiny? && !(filename && filename.include?("supershiny"))
-        hue = pkmn.super_shiny_hue
+        hue = self.super_shiny_hue_for(species, pkmn.form, true)
         if hue != 0
           new_ret = ret.copy
           ret.dispose
@@ -153,6 +193,8 @@ module GameData
       if super_shiny
         ret = self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Icons supershiny")
         return ret if ret
+        # Sin gráfico dedicado: usar icono normal como base (no el shiny).
+        return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, false, shadow, "Icons")
       end
       return self.check_graphic_file("Graphics/Pokemon/", species, form, gender, shiny, shadow, "Icons")
     end
@@ -166,10 +208,12 @@ module GameData
       return (filename) ? AnimatedBitmap.new(filename).deanimate : nil
     end
 
-    def self.icon_bitmap(species, form = 0, gender = 0, shiny = false, shadow = false, egg = false)
+    def self.icon_bitmap(species, form = 0, gender = 0, shiny = false, shadow = false, egg = false, super_shiny = false)
       return self.egg_icon_bitmap(species, form) if egg
-      filename = self.icon_filename(species, form, gender, shiny, shadow)
-      return (filename) ? AnimatedBitmap.new(filename).deanimate : nil
+      filename = self.icon_filename(species, form, gender, shiny, shadow, false, super_shiny)
+      ret = (filename) ? AnimatedBitmap.new(filename).deanimate : nil
+      return self.apply_super_shiny_hue_to_bitmap(ret, species, form, filename) if super_shiny
+      return ret
     end
 
     def self.icon_bitmap_from_pokemon(pkmn)
