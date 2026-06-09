@@ -66,16 +66,21 @@ def oggfiletime(file)
   return ret * 256.0
 end
 
-# Gets the length of an audio file in seconds. Supports WAV, MP3, and OGG files.
+# Gets the length of an audio file in seconds.
 def getPlayTime(filename)
-  if FileTest.exist?(filename)
-    return [getPlayTime2(filename), 0].max
-  elsif FileTest.exist?(filename + ".wav")
-    return [getPlayTime2(filename + ".wav"), 0].max
-  elsif FileTest.exist?(filename + ".mp3")
-    return [getPlayTime2(filename + ".mp3"), 0].max
-  elsif FileTest.exist?(filename + ".ogg")
-    return [getPlayTime2(filename + ".ogg"), 0].max
+  candidates = []
+  if filename[/\.[A-Za-z0-9]+\z/]
+    candidates << filename
+  else
+    [".wav", ".mp3", ".ogg", ".mid", ".midi"].each do |ext|
+      candidates << (filename + ext)
+    end
+    candidates << filename
+  end
+  candidates.each do |path|
+    next if !FileTest.exist?(path)
+    length = getPlayTime2(path)
+    return [length, 0].max if length && length >= 0
   end
   return 0
 end
@@ -151,5 +156,8 @@ def getPlayTime2(filename)
     end
   end
   return time
+rescue Errno::ENOENT
+  # Some file existence patches may report true for extensionless paths.
+  return -1
 end
 
