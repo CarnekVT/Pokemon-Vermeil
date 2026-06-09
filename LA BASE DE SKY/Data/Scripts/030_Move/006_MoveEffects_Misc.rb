@@ -742,7 +742,7 @@ class Battle::Move::UserSwapsPositionsWithAlly < Battle::Move
     idxA = user.index
     idxB = @idxAlly
     if @battle.pbSwapBattlers(idxA, idxB)
-      if @battler.battlers[idxB].effects[PBEffects::Commanding] >= 0
+      if @battle.battlers[idxB].effects[PBEffects::Commanding] >= 0
         @battle.pbDisplay(_INTL("¡{1} se ha movido!", @battle.battlers[idxA].pbThis))
       else
         @battle.pbDisplay(_INTL("¡{1} y {2} han intercambiado sus posiciones!",
