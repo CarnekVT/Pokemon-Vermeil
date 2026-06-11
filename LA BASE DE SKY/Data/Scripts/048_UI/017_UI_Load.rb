@@ -368,6 +368,9 @@ class PokemonLoadScreen
         return
       when cmd_mystery_gift
         pbFadeOutIn { pbDownloadMysteryGift(@save_data[:player]) }
+        if show_continue
+          File.open(SaveData::FILE_PATH, "wb") { |file| Marshal.dump(@save_data, file) }
+        end
       when cmd_options
         if Settings::USE_NEW_OPTIONS_UI
           UI::Options.new(true).main

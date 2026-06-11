@@ -7,16 +7,263 @@
 #===============================================================================
 module MysteryGift
   URL = "https://pastebin.com/raw/tupastebin"   # Cambia esta URL por la de tu archivo de regalos misteriosos
+  TYPE_POKEMON         = 0
+  TYPE_ITEM_BUNDLE     = -1   # gift[2] = [[item_id, qty], ...]
+  TYPE_POKEMON_BUNDLE  = -2   # gift[2] = [Pokemon, ...]
+  TYPE_MIXED_BUNDLE    = -3   # gift[2] = { items: [[item_id, qty], ...], pokemon: [Pokemon, ...] }
 end
 
 #===============================================================================
 # Creating a new Mystery Gift for the Master file, and editing an existing one.
 #===============================================================================
-# type: 0=Pokémon; 1 or higher=item (is the item's quantity).
-# item: The thing being turned into a Mystery Gift (Pokémon object or item ID).
+# type: 0=Pokémon; -1=objetos; -2=Pokémon múltiples; -3=mixto; >0=item único (cantidad).
+def pbMysteryGiftNormalizeMixedContent(content)
+  return { items: [], pokemon: [] } if !content.is_a?(Hash)
+  items = content[:items] || content["items"] || []
+  pokemon = content[:pokemon] || content["pokemon"] || []
+  return { items: items, pokemon: pokemon }
+end
+
+def pbMysteryGiftAvailablePokemonSlots
+  slots = Settings::MAX_PARTY_SIZE - $player.party_count
+  slots = 0 if slots < 0
+  $PokemonStorage.boxes.each do |box|
+    box.length.times { |i| slots += 1 if box[i].nil? }
+  end
+  return slots
+end
+
+def pbMysteryGiftCanStorePokemonCount?(count)
+  return false if !count.is_a?(Integer) || count <= 0
+  return pbMysteryGiftAvailablePokemonSlots >= count
+end
+def pbMysteryGiftContentSummary(gift)
+  return "???" if !gift.is_a?(Array) || gift.length < 3
+  if gift[2].is_a?(Pokemon)
+    return gift[2].speciesName
+  elsif gift[1] == MysteryGift::TYPE_ITEM_BUNDLE && gift[2].is_a?(Array)
+    parts = gift[2].filter_map do |entry|
+      next if !entry.is_a?(Array) || entry.length < 2
+      item_data = GameData::Item.try_get(entry[0])
+      next if !item_data
+      _INTL("{1} x{2}", item_data.name, entry[1])
+    end
+    return parts.join(", ")
+  elsif gift[1] == MysteryGift::TYPE_POKEMON_BUNDLE && gift[2].is_a?(Array)
+    return gift[2].filter_map { |p| p.speciesName if p.is_a?(Pokemon) }.join(", ")
+  elsif gift[1] == MysteryGift::TYPE_MIXED_BUNDLE
+    content = pbMysteryGiftNormalizeMixedContent(gift[2])
+    parts = []
+    content[:items].each do |entry|
+      next if !entry.is_a?(Array) || entry.length < 2
+      item_data = GameData::Item.try_get(entry[0])
+      parts.push(_INTL("{1} x{2}", item_data.name, entry[1])) if item_data
+    end
+    content[:pokemon].each { |p| parts.push(p.speciesName) if p.is_a?(Pokemon) }
+    return parts.join(", ")
+  elsif gift[1].is_a?(Integer) && gift[1] > 0
+    item_data = GameData::Item.try_get(gift[2])
+    return _INTL("{1} x{2}", item_data.name, gift[1]) if item_data
+  elsif gift[2].is_a?(Hash)
+    return gift[2][:name].to_s
+  end
+  return "???"
+end
+
+def pbMysteryGiftBundlePokemonSummary(pokemon_list)
+  return _INTL("(vacío)") if !pokemon_list.is_a?(Array) || pokemon_list.empty?
+  return pokemon_list.filter_map { |p| p.name if p.is_a?(Pokemon) }.join("\n")
+end
+
+def pbEditMysteryGiftPokemonBundle(pokemon_list)
+  pokemon_list = pokemon_list.select { |p| p.is_a?(Pokemon) }.map(&:clone)
+  loop do
+    summary = pbMysteryGiftBundlePokemonSummary(pokemon_list)
+    cmd = pbMessage(
+      _INTL("Contenido del paquete:\n{1}", summary),
+      [_INTL("Añadir Pokémon"),
+       _INTL("Quitar Pokémon"),
+       _INTL("Terminar"),
+       _INTL("Cancelar")], -1
+    )
+    case cmd
+    when 0
+      pkmn = pbChoosePokemonFromPartyOrPC(1, 2, proc { |p| !p.egg? })
+      next if !pkmn
+      pokemon_list.push(pkmn.clone)
+    when 1
+      if pokemon_list.empty?
+        pbMessage(_INTL("No hay Pokémon en el paquete."))
+        next
+      end
+      remove_cmds = pokemon_list.map.with_index { |p, i| _INTL("{1}: {2}", i + 1, p.name) }
+      remove_cmds.push(_INTL("Cancelar"))
+      pick = pbMessage(_INTL("¿Qué Pokémon quieres quitar?"), remove_cmds, -1)
+      next if pick < 0 || pick >= pokemon_list.length
+      pokemon_list.delete_at(pick)
+    when 2
+      if pokemon_list.empty?
+        pbMessage(_INTL("El paquete debe incluir al menos un Pokémon."))
+      else
+        return pokemon_list
+      end
+    when 3, -1
+      return nil
+    end
+  end
+end
+
+def pbEditMysteryGiftMixedBundle(content)
+  content = pbMysteryGiftNormalizeMixedContent(content)
+  content[:pokemon] = content[:pokemon].select { |p| p.is_a?(Pokemon) }.map(&:clone)
+  content[:items] = content[:items].map { |entry| [entry[0], entry[1]] }
+  loop do
+    summary = _INTL("Objetos:\n{1}\n\nPokémon:\n{2}",
+                    pbMysteryGiftBundleItemsSummary(content[:items]),
+                    pbMysteryGiftBundlePokemonSummary(content[:pokemon]))
+    cmd = pbMessage(
+      summary,
+      [_INTL("Añadir objeto"),
+       _INTL("Quitar objeto"),
+       _INTL("Añadir Pokémon"),
+       _INTL("Quitar Pokémon"),
+       _INTL("Terminar"),
+       _INTL("Cancelar")], -1
+    )
+    case cmd
+    when 0
+      new_item = pbChooseItemList
+      next if !new_item
+      params = ChooseNumberParams.new
+      params.setRange(1, Settings::BAG_MAX_PER_SLOT)
+      params.setDefaultValue(1)
+      params.setCancelValue(0)
+      qty = pbMessageChooseNumber(
+        _INTL("Elige la cantidad de {1}.", GameData::Item.get(new_item).name), params
+      )
+      next if qty <= 0
+      content[:items].push([new_item, qty])
+    when 1
+      if content[:items].empty?
+        pbMessage(_INTL("No hay objetos en el paquete."))
+        next
+      end
+      remove_cmds = content[:items].map.with_index do |entry, i|
+        item_data = GameData::Item.get(entry[0])
+        _INTL("{1}: {2} x{3}", i + 1, item_data.name, entry[1])
+      end
+      remove_cmds.push(_INTL("Cancelar"))
+      pick = pbMessage(_INTL("¿Qué objeto quieres quitar?"), remove_cmds, -1)
+      next if pick < 0 || pick >= content[:items].length
+      content[:items].delete_at(pick)
+    when 2
+      pkmn = pbChoosePokemonFromPartyOrPC(1, 2, proc { |p| !p.egg? })
+      next if !pkmn
+      content[:pokemon].push(pkmn.clone)
+    when 3
+      if content[:pokemon].empty?
+        pbMessage(_INTL("No hay Pokémon en el paquete."))
+        next
+      end
+      remove_cmds = content[:pokemon].map.with_index { |p, i| _INTL("{1}: {2}", i + 1, p.name) }
+      remove_cmds.push(_INTL("Cancelar"))
+      pick = pbMessage(_INTL("¿Qué Pokémon quieres quitar?"), remove_cmds, -1)
+      next if pick < 0 || pick >= content[:pokemon].length
+      content[:pokemon].delete_at(pick)
+    when 4
+      if content[:items].empty? && content[:pokemon].empty?
+        pbMessage(_INTL("El paquete debe incluir al menos un objeto o un Pokémon."))
+      else
+        return content
+      end
+    when 5, -1
+      return nil
+    end
+  end
+end
+
+def pbEditMysteryGiftBundleItems(items)
+  items = items.map { |entry| [entry[0], entry[1]] }
+  loop do
+    summary = pbMysteryGiftBundleItemsSummary(items)
+    cmd = pbMessage(
+      _INTL("Contenido del paquete:\n{1}", summary),
+      [_INTL("Añadir objeto"),
+       _INTL("Quitar objeto"),
+       _INTL("Terminar"),
+       _INTL("Cancelar")], -1
+    )
+    case cmd
+    when 0   # Añadir
+      new_item = pbChooseItemList
+      next if !new_item
+      params = ChooseNumberParams.new
+      params.setRange(1, Settings::BAG_MAX_PER_SLOT)
+      params.setDefaultValue(1)
+      params.setCancelValue(0)
+      qty = pbMessageChooseNumber(
+        _INTL("Elige la cantidad de {1}.", GameData::Item.get(new_item).name), params
+      )
+      next if qty <= 0
+      items.push([new_item, qty])
+    when 1   # Quitar
+      if items.empty?
+        pbMessage(_INTL("No hay objetos en el paquete."))
+        next
+      end
+      remove_cmds = items.map.with_index do |entry, i|
+        item_data = GameData::Item.get(entry[0])
+        _INTL("{1}: {2} x{3}", i + 1, item_data.name, entry[1])
+      end
+      remove_cmds.push(_INTL("Cancelar"))
+      pick = pbMessage(_INTL("¿Qué objeto quieres quitar?"), remove_cmds, -1)
+      next if pick < 0 || pick >= items.length
+      items.delete_at(pick)
+    when 2   # Terminar
+      if items.empty?
+        pbMessage(_INTL("El paquete debe incluir al menos un objeto."))
+      else
+        return items
+      end
+    when 3, -1
+      return nil
+    end
+  end
+end
+
+def pbMysteryGiftBundleItemsSummary(items)
+  return _INTL("(vacío)") if !items.is_a?(Array) || items.empty?
+  return items.map do |entry|
+    item_data = GameData::Item.get(entry[0])
+    _INTL("{1} x{2}", item_data.name, entry[1])
+  end.join("\n")
+end
+
+def pbMysteryGiftAnnounceItem(item, qty)
+  itm = GameData::Item.get(item)
+  itemname = (qty > 1) ? itm.portion_name_plural : itm.portion_name
+  if item == :DNASPLICERS
+    pbMessage("\\me[Item get]" + _INTL("¡Has obtenido \\c[1]{1}\\c[0]!", itemname) + "\\wtnp[40]")
+  elsif itm.is_machine?
+    if qty > 1
+      pbMessage("\\me[Machine get]" + _INTL("¡Has obtenido {1} \\c[1]{2} {3}\\c[0]!",
+                                            qty, itemname, GameData::Move.get(itm.move).name) + "\\wtnp[70]")
+    else
+      pbMessage("\\me[Machine get]" + _INTL("¡Has obtenido \\c[1]{1} {2}\\c[0]!", itemname,
+                                            GameData::Move.get(itm.move).name) + "\\wtnp[70]")
+    end
+  elsif qty > 1
+    pbMessage("\\me[Item get]" + _INTL("¡Has obtenido {1} \\c[1]{2}\\c[0]!", qty, itemname) + "\\wtnp[40]")
+  elsif itemname.starts_with_vowel?
+    pbMessage("\\me[Item get]" + _INTL("¡Has obtenido \\c[1]{1}\\c[0]!", itemname) + "\\wtnp[40]")
+  else
+    pbMessage("\\me[Item get]" + _INTL("¡Has obtenido \\c[1]{1}\\c[0]!", itemname) + "\\wtnp[40]")
+  end
+end
+
 def pbEditMysteryGift(type, item, id = 0, giftname = "", password = nil)
   begin
-    if type == 0   # Pokémon
+    if type == MysteryGift::TYPE_POKEMON   # Pokémon
       commands = [_INTL("Regalo Misterioso"),
                   _INTL("Lugar lejano")]
       commands.push(item.obtain_text) if item.obtain_text && !item.obtain_text.empty?
@@ -39,6 +286,33 @@ def pbEditMysteryGift(type, item, id = 0, giftname = "", password = nil)
           end
           return nil if pbConfirmMessage(_INTL("¿Dejar de agregar este regalo?"))
         end
+      end
+    elsif type == MysteryGift::TYPE_ITEM_BUNDLE   # Paquete de objetos
+      if id != 0 && pbConfirmMessage(_INTL("¿Quieres modificar los objetos del paquete?"))
+        item = pbEditMysteryGiftBundleItems(item)
+        return nil if !item
+      elsif !item.is_a?(Array) || item.empty?
+        item = pbEditMysteryGiftBundleItems([])
+        return nil if !item
+      end
+    elsif type == MysteryGift::TYPE_POKEMON_BUNDLE   # Paquete de Pokémon
+      if id != 0 && pbConfirmMessage(_INTL("¿Quieres modificar los Pokémon del paquete?"))
+        item = pbEditMysteryGiftPokemonBundle(item)
+        return nil if !item
+      elsif !item.is_a?(Array) || item.empty?
+        item = pbEditMysteryGiftPokemonBundle([])
+        return nil if !item
+      end
+    elsif type == MysteryGift::TYPE_MIXED_BUNDLE   # Paquete mixto
+      content = pbMysteryGiftNormalizeMixedContent(item)
+      if id != 0 && pbConfirmMessage(_INTL("¿Quieres modificar el contenido del paquete?"))
+        item = pbEditMysteryGiftMixedBundle(content)
+        return nil if !item
+      elsif content[:items].empty? && content[:pokemon].empty?
+        item = pbEditMysteryGiftMixedBundle({ items: [], pokemon: [] })
+        return nil if !item
+      else
+        item = content
       end
     elsif type > 0   # Item
       params = ChooseNumberParams.new
@@ -112,6 +386,28 @@ end
 
 def pbCreateMysteryGift(type, item)
   gift = pbEditMysteryGift(type, item)
+  pbSaveMysteryGiftToMaster(gift)
+end
+
+def pbCreateMysteryGiftBundle
+  items = pbEditMysteryGiftBundleItems([])
+  return if !items
+  pbSaveMysteryGiftToMaster(pbEditMysteryGift(MysteryGift::TYPE_ITEM_BUNDLE, items))
+end
+
+def pbCreateMysteryGiftPokemonBundle
+  pokemon = pbEditMysteryGiftPokemonBundle([])
+  return if !pokemon
+  pbSaveMysteryGiftToMaster(pbEditMysteryGift(MysteryGift::TYPE_POKEMON_BUNDLE, pokemon))
+end
+
+def pbCreateMysteryGiftMixedBundle
+  content = pbEditMysteryGiftMixedBundle({ items: [], pokemon: [] })
+  return if !content
+  pbSaveMysteryGiftToMaster(pbEditMysteryGift(MysteryGift::TYPE_MIXED_BUNDLE, content))
+end
+
+def pbSaveMysteryGiftToMaster(gift)
   if gift
     begin
       if FileTest.exist?("MysteryGiftMaster.txt")
@@ -168,17 +464,24 @@ def pbManageMysteryGifts
     pbMessage(_INTL("No se han encontrado Regalos Misteriosos en el enlace de Internet tras la descarga. Parece que está vacío.\\wtnp[20]"))
     online = []
   else
-    pbMessage(_INTL("Se han encontrado Regalos Misteriosos en el enlace de Internet.\\wtnp[20]"))
-    online = pbMysteryGiftDecrypt(online, false)
-    t = []
-    online.each { |gift| t.push(gift[0]) }
-    online = t
+    gifts = pbMysteryGiftDecrypt(online, false)
+    if !gifts.is_a?(Array) || gifts.empty?
+      pbMessage(_INTL("Se ha descargado el enlace, pero no contiene regalos válidos. Comprueba que el Pastebin tenga solo el contenido de MysteryGift.txt.\\wtnp[20]"))
+      online = []
+    else
+      pbMessage(_INTL("Se han encontrado Regalos Misteriosos en el enlace de Internet.\\wtnp[20]"))
+      t = []
+      gifts.each { |gift| t.push(gift[0]) }
+      online = t
+    end
   end
   # Show list of all gifts.
   command = 0
   loop do
     commands = pbRefreshMGCommands(master, online)
-    command = pbMessage("\\ts[]" + _INTL("Gestionar los Regalos Misteriosos (X = regalo encontrado ya en internet)."), commands, -1, nil, command)
+    command = pbMysteryGiftMessage(
+      _INTL("Regalos Misteriosos. [X] = ya publicado en internet."), commands, -1, command
+    )
     # Gift chosen
     if command == -1 || command == commands.length - 1   # Cancel
       break
@@ -225,7 +528,11 @@ def pbManageMysteryGifts
                 _INTL("Recibir el regalo"),
                 _INTL("Eliminar el regalo"),
                 _INTL("Cancelar")]
-        cmd = pbMessage("\\ts[]" + commands[command], cmds, -1, nil, cmd)
+        ontext = ["[  ]", "[X]"][(online.include?(gift[0])) ? 1 : 0]
+        header = _INTL("{1} #{2}: {3}", ontext, gift[0], gift[3])
+        detail = pbMysteryGiftGiftDetail(gift)
+        msg = detail.empty? ? header : "#{header}\n#{detail}"
+        cmd = pbMysteryGiftMessage(msg, cmds, -1, cmd)
         case cmd
         when -1, cmds.length - 1
           break
@@ -275,19 +582,78 @@ def pbManageMysteryGifts
   end
 end
 
+def pbMysteryGiftShowCommands(msgwindow, commands, cmdIfCancel = 0, defaultCmd = 0, &block)
+  return 0 if !commands || commands.empty?
+
+  max_width = Graphics.width - 16
+  cmdwindow = Window_AdvancedCommandPokemon.new(commands, max_width)
+  cmdwindow.z = 99999
+  cmdwindow.visible = true
+  cmdwindow.resizeToFit(commands, max_width)
+  cmdwindow.width = max_width if cmdwindow.width > max_width
+  cmdwindow.x = 8
+  cmdwindow.height = [cmdwindow.height, msgwindow.y].min
+  cmdwindow.y = msgwindow.y - cmdwindow.height
+  if cmdwindow.y < 0
+    cmdwindow.y = 0
+    cmdwindow.height = [cmdwindow.height, msgwindow.y].min
+  end
+  cmdwindow.index = defaultCmd
+  command = 0
+  loop do
+    Graphics.update
+    Input.update
+    msgwindow&.update
+    cmdwindow.update
+    yield if block_given?
+    if Input.trigger?(Input::BACK)
+      if cmdIfCancel > 0
+        command = cmdIfCancel - 1
+        break
+      elsif cmdIfCancel < 0
+        command = cmdIfCancel
+        break
+      end
+    end
+    if Input.trigger?(Input::USE)
+      command = cmdwindow.index
+      break
+    end
+    pbUpdateSceneMap
+  end
+  ret = command
+  cmdwindow.dispose
+  Input.update
+  return ret
+end
+
+def pbMysteryGiftMessage(message, commands, cmdIfCancel = 0, defaultCmd = 0, &block)
+  ret = 0
+  msgwindow = pbCreateMessageWindow(nil)
+  if commands
+    ret = pbMessageDisplay(msgwindow, message, true,
+      proc { |msgwndw|
+        pbMysteryGiftShowCommands(msgwndw, commands, cmdIfCancel, defaultCmd, &block)
+      }, &block)
+  else
+    pbMessageDisplay(msgwindow, message, &block)
+  end
+  pbDisposeMessageWindow(msgwindow)
+  Input.update
+  return ret
+end
+
+def pbMysteryGiftGiftDetail(gift)
+  summary = pbMysteryGiftContentSummary(gift)
+  return "" if summary.empty? || summary == "???"
+  return _INTL("Contenido: {1}", summary)
+end
+
 def pbRefreshMGCommands(master, online)
   commands = []
   master.each do |gift|
-    itemname = "BLANK"
-    if gift[2].is_a?(Pokemon)
-      itemname = gift[2].speciesName
-    elsif gift[2].is_a?(Hash)
-      itemname = gift[2][:name]
-    else
-      itemname = GameData::Item.get(gift[2]).name + sprintf(" x%d", gift[1])
-    end
     ontext = ["[  ]", "[X]"][(online.include?(gift[0])) ? 1 : 0]
-    commands.push(_INTL("{1} {2}: {3} ({4})", ontext, gift[0], gift[3], itemname))
+    commands.push(_INTL("{1} #{2}: {3}", ontext, gift[0], gift[3]))
   end
   commands.push(_INTL("-> Exportar elegidos a archivo"))
   commands.push(_INTL("-> Eliminar regalos del jugador"))
@@ -334,6 +700,28 @@ end
 
 
 
+def pbMysteryGiftPendingFromOnline(trainer, data)
+  return nil if nil_or_empty?(data)
+  online = pbMysteryGiftDecrypt(data, false)
+  if !online.is_a?(Array) || online.empty?
+    pbMessage(_INTL("Se ha descargado el enlace, pero no contiene regalos válidos. Comprueba que el Pastebin tenga solo el contenido de MysteryGift.txt."))
+    return nil
+  end
+  pending = []
+  online.each do |gift|
+    notgot = true
+    trainer.mystery_gifts.each do |j|
+      notgot = false if j[0] == gift[0]
+    end
+    pending.push(gift) if notgot
+  end
+  if pending.empty?
+    pbMessage(_INTL("No hay nuevos regalos disponibles. Es posible que ya los hayas descargado antes. En el menú de gestión (F9), usa \"Eliminar regalos del jugador\" para poder volver a descargarlos."))
+    return nil
+  end
+  return pending
+end
+
 def pbDownloadGiftWithoutPassword(trainer)
   # Descargar la lista de regalos desde el servidor usando la URL correcta
   pbMessage(_INTL("Buscando regalos en línea...\\wtnp[20]"))
@@ -347,26 +735,14 @@ def pbDownloadGiftWithoutPassword(trainer)
     pbMessage(_INTL("No se pudo descargar la lista de regalos."))
     return
   end
-  # Desencriptar los datos recibidos
-  online = pbMysteryGiftDecrypt(data, false)
-  pending = []
-  online.each do |gift|
-    notgot = true
-    trainer.mystery_gifts.each do |j|
-      notgot = false if j[0] == gift[0]
-    end
-    pending.push(gift) if notgot
-  end
-  if pending.length == 0
-    pbMessage(_INTL("No hay nuevos regalos disponibles."))
-    return
-  end
+  pending = pbMysteryGiftPendingFromOnline(trainer, data)
+  return if !pending
 
   # Filtrar solo los regalos que no tienen contraseña
   gifts_without_password = pending.select { |gift| gift.length == 4 || (gift.length == 5 && (gift[4].nil? || gift[4].empty?)) }
   # Verificar si hay regalos sin contraseña disponibles
   if gifts_without_password.empty?
-    pbMessage(_INTL("No hay regalos disponibles."))
+    pbMessage(_INTL("Hay regalos en línea, pero todos requieren contraseña. Elige \"Con contraseña\" al descargar."))
     return
   end
   # Mostrar al jugador la lista de regalos disponibles sin contraseña
@@ -408,20 +784,8 @@ def pbDownloadGiftWithPassword(trainer)
     pbMessage(_INTL("Parece que hay problemas para establecer la conexión a Internet."))
     return
   end
-  # Desencriptar los datos recibidos
-  online = pbMysteryGiftDecrypt(data, false)
-  pending = []
-  online.each do |gift|
-    notgot = true
-    trainer.mystery_gifts.each do |j|
-      notgot = false if j[0] == gift[0]
-    end
-    pending.push(gift) if notgot
-  end
-  if pending.length == 0
-    pbMessage(_INTL("No hay nuevos regalos disponibles."))
-    return
-  end
+  pending = pbMysteryGiftPendingFromOnline(trainer, data)
+  return if !pending
 
   # Buscar el regalo que coincida con la contraseña
   gift_found = nil
@@ -455,16 +819,135 @@ def pbDownloadGiftWithPassword(trainer)
 end
 
 
+def pbMysteryGiftPrepareForSave(gft)
+  return if !gft.is_a?(Array) || gft.length < 3
+  case gft[1]
+  when MysteryGift::TYPE_POKEMON
+    gft[2] = create_hash_from_pkmn(gft[2]) if gft[2].is_a?(Pokemon)
+  when MysteryGift::TYPE_POKEMON_BUNDLE
+    return if !gft[2].is_a?(Array)
+    gft[2] = gft[2].map { |p| p.is_a?(Pokemon) ? create_hash_from_pkmn(p) : p }
+  when MysteryGift::TYPE_MIXED_BUNDLE
+    content = pbMysteryGiftNormalizeMixedContent(gft[2])
+    content[:pokemon] = content[:pokemon].map { |p| p.is_a?(Pokemon) ? create_hash_from_pkmn(p) : p }
+    gft[2] = content
+  end
+end
+
+def pbMysteryGiftRestoreFromSave(gft)
+  return if !gft.is_a?(Array) || gft.length < 3
+  case gft[1]
+  when MysteryGift::TYPE_POKEMON
+    gft[2] = create_pkmn_from_hash(gft[2]) if gft[2].is_a?(Hash)
+  when MysteryGift::TYPE_POKEMON_BUNDLE
+    return if !gft[2].is_a?(Array)
+    gft[2] = gft[2].map { |p| p.is_a?(Hash) ? create_pkmn_from_hash(p) : p }
+  when MysteryGift::TYPE_ITEM_BUNDLE
+    return if !gft[2].is_a?(Array)
+    gft[2].each do |entry|
+      next if !entry.is_a?(Array) || entry.length < 2
+      item_data = GameData::Item.try_get(entry[0])
+      entry[0] = item_data.id if item_data
+    end
+  when MysteryGift::TYPE_MIXED_BUNDLE
+    content = pbMysteryGiftNormalizeMixedContent(gft[2])
+    content[:items].each do |entry|
+      next if !entry.is_a?(Array) || entry.length < 2
+      item_data = GameData::Item.try_get(entry[0])
+      entry[0] = item_data.id if item_data
+    end
+    content[:pokemon] = content[:pokemon].map { |p| p.is_a?(Hash) ? create_pkmn_from_hash(p) : p }
+    gft[2] = content
+  else
+    if gft[1].is_a?(Integer) && gft[1] > 0
+      item_data = GameData::Item.try_get(gft[2])
+      gft[2] = item_data.id if item_data
+    end
+  end
+end
+
+def pbMysteryGiftAnimationSubject(gift)
+  case gift[1]
+  when MysteryGift::TYPE_POKEMON
+    return [:pokemon, gift[2]] if gift[2].is_a?(Pokemon)
+  when MysteryGift::TYPE_POKEMON_BUNDLE
+    list = gift[2]
+    return [:pokemon, list[0]] if list.is_a?(Array) && list[0].is_a?(Pokemon)
+  when MysteryGift::TYPE_MIXED_BUNDLE
+    content = pbMysteryGiftNormalizeMixedContent(gift[2])
+    return [:pokemon, content[:pokemon][0]] if content[:pokemon][0].is_a?(Pokemon)
+    return [:item, content[:items][0][0]] if content[:items][0].is_a?(Array)
+  when MysteryGift::TYPE_ITEM_BUNDLE
+    list = gift[2]
+    return [:item, list[0][0]] if list.is_a?(Array) && list[0].is_a?(Array)
+  else
+    return [:item, gift[2]] if gift[1].is_a?(Integer) && gift[1] > 0
+  end
+  return [:item, :POKEBALL]
+end
+
+def pbMysteryGiftDeliverPokemon(pokemon, show_pokedex: true)
+  return false if !pokemon.is_a?(Pokemon)
+  return false if !pbMysteryGiftCanStorePokemonCount?(1)
+  was_owned = $player.owned?(pokemon.species)
+  return false if !pbAddPokemonSilent(pokemon)
+  pbMessage(_INTL("¡{1} recibió {2}!", $player.name, pokemon.name) + "\\me[Pkmn get]\\wtnp[80]")
+  if show_pokedex && Settings::SHOW_NEW_SPECIES_POKEDEX_ENTRY_MORE_OFTEN && !was_owned &&
+     $player.has_pokedex && $player.pokedex.species_in_unlocked_dex?(pokemon.species)
+    pbMessage(_INTL("Los datos de {1} se han añadido a la Pokédex.", pokemon.name))
+    $player.pokedex.register_last_seen(pokemon)
+    pbFadeOutIn do
+      scene = PokemonPokedexInfo_Scene.new
+      screen = PokemonPokedexInfoScreen.new(scene)
+      screen.pbDexEntry(pokemon.species)
+    end
+  end
+  return true
+end
+
+def pbMysteryGiftDeliverItems(items)
+  return false if !items.is_a?(Array) || items.empty?
+  items.each do |entry|
+    next if !entry.is_a?(Array) || entry.length < 2
+    return false if !$bag.can_add?(entry[0], entry[1])
+  end
+  items.each do |entry|
+    next if !entry.is_a?(Array) || entry.length < 2
+    $bag.add(entry[0], entry[1])
+    pbMysteryGiftAnnounceItem(entry[0], entry[1])
+  end
+  return true
+end
+
+def pbMysteryGiftDeliverPokemonList(pokemon_list)
+  pokemon_list = pokemon_list.select { |p| p.is_a?(Pokemon) }
+  return true if pokemon_list.empty?
+  return false if !pbMysteryGiftCanStorePokemonCount?(pokemon_list.length)
+  pokemon_list.each do |pokemon|
+    return false if !pbMysteryGiftDeliverPokemon(pokemon)
+  end
+  return true
+end
+
+def pbMysteryGiftDeliverMixedBundle(content)
+  content = pbMysteryGiftNormalizeMixedContent(content)
+  return false if content[:items].empty? && content[:pokemon].empty?
+  return false if !pbMysteryGiftDeliverItems(content[:items])
+  return false if !pbMysteryGiftDeliverPokemonList(content[:pokemon])
+  return true
+end
+
 # Función para manejar la animación al recibir un regalo (puede ser sin o con contraseña)
-def pbReceiveGiftAnimation( gift, trainer)
-  if gift[1] == 0
+def pbReceiveGiftAnimation(gift, trainer)
+  subject_type, subject = pbMysteryGiftAnimationSubject(gift)
+  if subject_type == :pokemon
     sprite = PokemonSprite.new(@viewport)
     sprite.setOffset(PictureOrigin::CENTER)
-    sprite.setPokemonBitmap(gift[2])
+    sprite.setPokemonBitmap(subject)
     sprite.x = Graphics.width / 2
     sprite.y = -sprite.bitmap.height / 2
   else
-    sprite = ItemIconSprite.new(0, 0, gift[2], @viewport)
+    sprite = ItemIconSprite.new(0, 0, subject, @viewport)
     sprite.x = Graphics.width / 2
     sprite.y = -sprite.height / 2
   end
@@ -481,7 +964,8 @@ def pbReceiveGiftAnimation( gift, trainer)
   pbWait(3.0) {Graphics.update; sprite.update}
   pbMessage(_INTL("¡Se ha recibido el regalo!") + "\1") {Graphics.update; sprite.update}
   pbMessage(_INTL("Por favor, recoge tu regalo del repartidor de cualquier Centro Pokémon.")) {Graphics.update; sprite.update}
-  trainer.mystery_gifts.push(gift)
+  gift_to_store = pbMysteryGiftPrepareGiftForDelivery(gift) || gift
+  trainer.mystery_gifts.push(gift_to_store)
   timer_start = System.uptime
   loop do
     sprite.opacity = lerp(255, 0, 1.5, timer_start, System.uptime)
@@ -498,11 +982,7 @@ end
 # Converts an array of gifts into a string and back.
 #===============================================================================
 def pbMysteryGiftEncrypt(gift, master = true)
-  gift.each do |gft|
-    if gft[2].is_a?(Pokemon)
-      gft[2] = create_hash_from_pkmn(gft[2])
-    end
-  end
+  gift.each { |gft| pbMysteryGiftPrepareForSave(gft) }
   if Settings::ENCRIPTAR_REGALOS_MISTERIOSOS_EN_MASTER || !master
     ret = [Zlib::Deflate.deflate(Marshal.dump(gift))].pack("m")
   else
@@ -513,22 +993,112 @@ end
 
 def pbMysteryGiftDecrypt(gift, master = true)
   return [] if nil_or_empty?(gift)
-  if Settings::ENCRIPTAR_REGALOS_MISTERIOSOS_EN_MASTER || !master
-    ret = Marshal.load(Zlib::Inflate.inflate(gift.unpack("m")[0]))
-  else
-    ret = eval(gift)
-  end
-  if ret
-    ret.each do |gft|
-      if gft[1] == 0   # Pokémon
-        # Cargamos el Pokémon
-        gft[2] = create_pkmn_from_hash(gft[2])
-      else   # Item
-        gft[2] = GameData::Item.get(gft[2]).id
-      end
+  gift = gift.strip
+  ret = nil
+  use_encrypted = Settings::ENCRIPTAR_REGALOS_MISTERIOSOS_EN_MASTER || !master
+  if use_encrypted
+    begin
+      encoded = gift.gsub(/\s+/, "")
+      decoded = encoded.unpack("m")[0]
+      ret = Marshal.load(Zlib::Inflate.inflate(decoded)) if decoded && !decoded.empty?
+    rescue Zlib::Error, ArgumentError, TypeError, EOFError
+      ret = nil
     end
   end
+  if ret.nil? && master && !Settings::ENCRIPTAR_REGALOS_MISTERIOSOS_EN_MASTER
+    begin
+      ret = eval(gift)
+    rescue
+      ret = nil
+    end
+  end
+  if ret.nil? && master && gift.start_with?("[")
+    begin
+      ret = eval(gift)
+    rescue
+      ret = nil
+    end
+  end
+  return [] if !ret.is_a?(Array)
+  ret.each { |gft| pbMysteryGiftRestoreFromSave(gft) }
   return ret
+end
+
+def pbMysteryGiftNormalizeItemEntry(entry)
+  return nil if !entry.is_a?(Array) || entry.length < 2
+  item_data = GameData::Item.try_get(entry[0])
+  return nil if !item_data
+  qty = entry[1].to_i
+  return nil if qty <= 0
+  return [item_data.id, qty]
+end
+
+def pbMysteryGiftNormalizeItemList(items)
+  return [] if !items.is_a?(Array)
+  return items.filter_map { |entry| pbMysteryGiftNormalizeItemEntry(entry) }
+end
+
+def pbMysteryGiftNormalizePokemonEntry(entry)
+  return entry if entry.is_a?(Pokemon)
+  return create_pkmn_from_hash(entry) if entry.is_a?(Hash)
+  return nil
+end
+
+def pbMysteryGiftNormalizePokemonList(pokemon_list)
+  return [] if !pokemon_list.is_a?(Array)
+  return pokemon_list.filter_map { |entry| pbMysteryGiftNormalizePokemonEntry(entry) }
+end
+
+def pbMysteryGiftResolveGiftType(gift)
+  return nil if !gift.is_a?(Array) || gift.length < 3
+  type = gift[1]
+  type = type.to_i if type.is_a?(String) && type =~ /\A-?\d+\z/
+  return type if [MysteryGift::TYPE_POKEMON, MysteryGift::TYPE_ITEM_BUNDLE,
+                  MysteryGift::TYPE_POKEMON_BUNDLE, MysteryGift::TYPE_MIXED_BUNDLE].include?(type)
+  if gift[2].is_a?(Hash) && (gift[2][:items] || gift[2]["items"] || gift[2][:pokemon] || gift[2]["pokemon"])
+    return MysteryGift::TYPE_MIXED_BUNDLE
+  end
+  if gift[2].is_a?(Array) && !gift[2].empty?
+    return MysteryGift::TYPE_ITEM_BUNDLE if gift[2][0].is_a?(Array)
+    return MysteryGift::TYPE_POKEMON_BUNDLE if gift[2][0].is_a?(Pokemon) || gift[2][0].is_a?(Hash)
+  end
+  return MysteryGift::TYPE_POKEMON if gift[2].is_a?(Pokemon) || gift[2].is_a?(Hash)
+  return :single_item if type.is_a?(Integer) && type > 0
+  return nil
+end
+
+def pbMysteryGiftPrepareGiftForDelivery(gift)
+  return nil if !gift.is_a?(Array) || gift.length < 3
+  gift = gift.clone
+  gift_type = pbMysteryGiftResolveGiftType(gift)
+  case gift_type
+  when MysteryGift::TYPE_POKEMON
+    gift[1] = MysteryGift::TYPE_POKEMON
+    gift[2] = pbMysteryGiftNormalizePokemonEntry(gift[2])
+    return nil if gift[2].nil?
+  when MysteryGift::TYPE_ITEM_BUNDLE
+    gift[1] = MysteryGift::TYPE_ITEM_BUNDLE
+    gift[2] = pbMysteryGiftNormalizeItemList(gift[2])
+    return nil if gift[2].empty?
+  when MysteryGift::TYPE_POKEMON_BUNDLE
+    gift[1] = MysteryGift::TYPE_POKEMON_BUNDLE
+    gift[2] = pbMysteryGiftNormalizePokemonList(gift[2])
+    return nil if gift[2].empty?
+  when MysteryGift::TYPE_MIXED_BUNDLE
+    content = pbMysteryGiftNormalizeMixedContent(gift[2])
+    content[:items] = pbMysteryGiftNormalizeItemList(content[:items])
+    content[:pokemon] = pbMysteryGiftNormalizePokemonList(content[:pokemon])
+    return nil if content[:items].empty? && content[:pokemon].empty?
+    gift[1] = MysteryGift::TYPE_MIXED_BUNDLE
+    gift[2] = content
+  when :single_item
+    item_data = GameData::Item.try_get(gift[2])
+    return nil if !item_data || !gift[1].is_a?(Integer) || gift[1] <= 0
+    gift[2] = item_data.id
+  else
+    return nil
+  end
+  return gift
 end
 
 #===============================================================================
@@ -553,54 +1123,31 @@ def pbReceiveMysteryGift(id)
     pbMessage(_INTL("No se han encontrado regalos sin reclamar con la ID {1}.", id))
     return false
   end
-  gift = $player.mystery_gifts[index]
-  if gift[2].is_a?(Pokemon)   # Pokémon
-    pokemon = gift[2]
-    was_owned = $player.owned?(pokemon.species)
-    if pbAddPokemonSilent(pokemon)
-      pbMessage(_INTL("¡{1} recibió {2}!", $player.name, pokemon.name) + "\\me[Pkmn get]\\wtnp[80]")
-      $player.mystery_gifts[index] = [id]
-      # Show Pokédex entry for new species if it hasn't been owned before
-      if Settings::SHOW_NEW_SPECIES_POKEDEX_ENTRY_MORE_OFTEN && !was_owned &&
-         $player.has_pokedex && $player.pokedex.species_in_unlocked_dex?(pokemon.species)
-        pbMessage(_INTL("Los datos de {1} se han añadido a la Pokédex.", pokemon.name))
-        $player.pokedex.register_last_seen(pokemon)
-        pbFadeOutIn do
-          scene = PokemonPokedexInfo_Scene.new
-          screen = PokemonPokedexInfoScreen.new(scene)
-          screen.pbDexEntry(pokemon.species)
-        end
-      end
-      return true
-    end
-  elsif gift[1] > 0   # Item
-    item = gift[2]
-    qty = gift[1]
-    if $bag.can_add?(item, qty)
-      $bag.add(item, qty)
-      itm = GameData::Item.get(item)
-      itemname = (qty > 1) ? itm.portion_name_plural : itm.portion_name
-      if item == :DNASPLICERS
-        pbMessage("\\me[Item get]" + _INTL("¡Has obtenido \\c[1]{1}\\c[0]!", itemname) + "\\wtnp[40]")
-      elsif itm.is_machine?   # TM or HM
-        if qty > 1
-          pbMessage("\\me[Machine get]" + _INTL("¡Has obtenido {1} \\c[1]{2} {3}\\c[0]!",
-                                                qty, itemname, GameData::Move.get(itm.move).name) + "\\wtnp[70]")
-        else
-          pbMessage("\\me[Machine get]" + _INTL("¡Has obtenido \\c[1]{1} {2}\\c[0]!", itemname,
-                                                GameData::Move.get(itm.move).name) + "\\wtnp[70]")
-        end
-      elsif qty > 1
-        pbMessage("\\me[Item get]" + _INTL("¡Has obtenido {1} \\c[1]{2}\\c[0]!", qty, itemname) + "\\wtnp[40]")
-      elsif itemname.starts_with_vowel?
-        pbMessage("\\me[Item get]" + _INTL("¡Has obtenido \\c[1]{1}\\c[0]!", itemname) + "\\wtnp[40]")
-      else
-        pbMessage("\\me[Item get]" + _INTL("¡Has obtenido \\c[1]{1}\\c[0]!", itemname) + "\\wtnp[40]")
-      end
-      $player.mystery_gifts[index] = [id]
-      return true
-    end
+  gift_raw = $player.mystery_gifts[index]
+  pbMysteryGiftRestoreFromSave(gift_raw)
+  gift = pbMysteryGiftPrepareGiftForDelivery(gift_raw)
+  if !gift
+    pbMessage(_INTL("No se ha podido leer el contenido del regalo."))
+    return false
   end
+  delivered = false
+  case pbMysteryGiftResolveGiftType(gift)
+  when MysteryGift::TYPE_POKEMON
+    delivered = pbMysteryGiftDeliverPokemon(gift[2])
+  when MysteryGift::TYPE_POKEMON_BUNDLE
+    delivered = pbMysteryGiftDeliverPokemonList(gift[2])
+  when MysteryGift::TYPE_ITEM_BUNDLE
+    delivered = pbMysteryGiftDeliverItems(gift[2])
+  when MysteryGift::TYPE_MIXED_BUNDLE
+    delivered = pbMysteryGiftDeliverMixedBundle(gift[2])
+  when :single_item
+    delivered = pbMysteryGiftDeliverItems([[gift[2], gift[1]]])
+  end
+  if delivered
+    $player.mystery_gifts[index] = [id]
+    return true
+  end
+  pbMessage(_INTL("No se ha podido entregar el regalo. Comprueba que tengas espacio en la Mochila y en las Cajas del PC."))
   return false
 end
 
@@ -704,10 +1251,10 @@ def create_pkmn_from_hash(poke_hash)
   pokemon.cannot_store = poke_hash[:cannot_store]
   pokemon.cannot_release = poke_hash[:cannot_release]
   pokemon.cannot_trade = poke_hash[:cannot_trade]
-  pokemon.scale = poke_hash[:scale]
-  pokemon.memento = poke_hash[:memento]
-  pokemon.spot_hash = poke_hash[:spot_hash]
-  pokemon.shiny_leaf = poke_hash[:shiny_leaf]
-  pokemon.calc_stats
+  pokemon&.scale = poke_hash[:scale] if pokemon&.respond_to?(:scale)
+  pokemon&.memento = poke_hash[:memento] if pokemon&.respond_to?(:memento)
+  pokemon&.spot_hash = poke_hash[:spot_hash] if pokemon&.respond_to?(:spot_hash)
+  pokemon&.shiny_leaf = poke_hash[:shiny_leaf] if pokemon&.respond_to?(:shiny_leaf)
+  pokemon&.calc_stats if pokemon&.respond_to?(:calc_stats)
   return pokemon
 end
