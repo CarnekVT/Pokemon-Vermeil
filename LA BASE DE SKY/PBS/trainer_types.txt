@@ -313,56 +313,56 @@ BaseMoney = 100
 Name = Líder de Gimnasio
 Gender = Male
 BaseMoney = 100
-BattleBGM = Battle Líder de Gimnasio
+BattleBGM = Battle Gym Leader
 VictoryBGM = Battle victory leader
 #-------------------------------
 [LEADER_Misty]
 Name = Líder de Gimnasio
 Gender = Female
 BaseMoney = 100
-BattleBGM = Battle Líder de Gimnasio
+BattleBGM = Battle Gym Leader
 VictoryBGM = Battle victory leader
 #-------------------------------
 [LEADER_Surge]
 Name = Líder de Gimnasio
 Gender = Male
 BaseMoney = 100
-BattleBGM = Battle Líder de Gimnasio
+BattleBGM = Battle Gym Leader
 VictoryBGM = Battle victory leader
 #-------------------------------
 [LEADER_Erika]
 Name = Líder de Gimnasio
 Gender = Female
 BaseMoney = 100
-BattleBGM = Battle Líder de Gimnasio
+BattleBGM = Battle Gym Leader
 VictoryBGM = Battle victory leader
 #-------------------------------
 [LEADER_Koga]
 Name = Líder de Gimnasio
 Gender = Male
 BaseMoney = 100
-BattleBGM = Battle Líder de Gimnasio
+BattleBGM = Battle Gym Leader
 VictoryBGM = Battle victory leader
 #-------------------------------
 [LEADER_Sabrina]
 Name = Líder de Gimnasio
 Gender = Female
 BaseMoney = 100
-BattleBGM = Battle Líder de Gimnasio
+BattleBGM = Battle Gym Leader
 VictoryBGM = Battle victory leader
 #-------------------------------
 [LEADER_Blaine]
 Name = Líder de Gimnasio
 Gender = Male
 BaseMoney = 100
-BattleBGM = Battle Líder de Gimnasio
+BattleBGM = Battle Gym Leader
 VictoryBGM = Battle victory leader
 #-------------------------------
 [LEADER_Giovanni]
 Name = Líder de Gimnasio
 Gender = Male
 BaseMoney = 100
-BattleBGM = Battle Líder de Gimnasio
+BattleBGM = Battle Gym Leader
 VictoryBGM = Battle victory leader
 #-------------------------------
 [ELITEFOUR_Lorelei]
