@@ -286,7 +286,7 @@ Battle::AI::Handlers::AbilityRanking.add(:COMMANDER,
 
 Battle::AI::Handlers::AbilityRanking.add(:CUDCHEW,
   proc { |ability, score, battler, ai|
-    next score if battler.item.is_berry? || battler.effects[PBEffects::CudChewBerry]
+    next score if battler&.item&.is_berry? || battler.effects[PBEffects::CudChewBerry]
     next 0
   }
 )
