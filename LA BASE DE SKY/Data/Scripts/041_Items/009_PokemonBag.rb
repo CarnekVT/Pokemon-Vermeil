@@ -73,7 +73,19 @@ class PokemonBag
     return ItemStorageHelper.quantity(@pockets[pocket], item_data.id)
   end
 
-  def has?(item, qty = 1)
+  # Returns whether the bag contains +item+ (at least +qty+ of it).
+  # With a block or Proc, returns whether any stored item matches the predicate.
+  #   $bag.has? { |item_id, qty| GameData::Item.get(item_id).is_fossil? }
+  #   $bag.has?(3) { |item_id, qty| qty >= 3 && ... }   # min slot qty = 3
+  #   $bag.has?(->(item_id, qty) { ... })
+  #   $bag.has?(->(item_id, qty) { ... }, 2)            # min slot qty = 2
+  def has?(item = nil, qty = 1, &block)
+    if block_given?
+      min_qty = item.is_a?(Integer) ? item : qty
+      return bag_any_item?(min_qty) { |item_id, item_qty| yield(item_id, item_qty) }
+    elsif item.is_a?(Proc)
+      return bag_any_item?(qty) { |item_id, item_qty| item.call(item_id, item_qty) }
+    end
     return quantity(item) >= qty
   end
 
@@ -83,8 +95,27 @@ class PokemonBag
     end
     return false
   end
+
+  def has_fossil?(exclude: [])
+    return has? { |item_id, _qty|
+      GameData::Item.get(item_id).is_fossil? && !exclude.include?(item_id)
+    }
+  end
+
   
   alias can_remove? has?
+
+  def bag_any_item?(min_qty)
+    rearrange
+    @pockets.each do |pocket|
+      pocket.each do |stored|
+        next if !stored || stored[1] < min_qty
+        return true if yield(stored[0], stored[1])
+      end
+    end
+    return false
+  end
+  private :bag_any_item?
 
   def can_add?(item, qty = 1)
     item_data = GameData::Item.try_get(item)
