@@ -247,16 +247,132 @@ class SpritePositioner
     oldypos = ypos
     @sprites["info"].visible = true
     ret = false
+
+    # --- Setup de caja delimitadora y ratón ---
+    box_sprite = Sprite.new(@viewport)
+    box_sprite.z = 99999
+    box_sprite.visible = false
+    dragging = false
+    mouse_start_x = 0
+    mouse_start_y = 0
+    metric_start_x = 0
+    metric_start_y = 0
+    drag_mult_x = 1
+    drag_mult_y = 1
+    # ------------------------------------------------
+
     loop do
       sprite.visible = ((System.uptime * 8).to_i % 4) < 3   # Flash the selected sprite
       Graphics.update
       Input.update
-      self.update
+      self.update      
       case param
       when 0 then @sprites["info"].setTextToFit("Posicion aliado = #{xpos},#{ypos}")
       when 1 then @sprites["info"].setTextToFit("Posición enemigo = #{xpos},#{ypos}")
       when 3 then @sprites["info"].setTextToFit("Posición sombra = #{xpos}")
       end
+
+      # --- Lógica de arrastre con ratón ---
+      if sprite.bitmap
+        zx = sprite.zoom_x.abs
+        zy = sprite.zoom_y.abs
+        bw = (sprite.bitmap.width * zx).to_i
+        bh = (sprite.bitmap.height * zy).to_i
+        left = sprite.x - (sprite.ox * zx)
+        right = left + bw
+        top = sprite.y - (sprite.oy * zy)
+        bottom = top + bh
+
+        if !box_sprite.bitmap || box_sprite.bitmap.width != bw || box_sprite.bitmap.height != bh
+          box_sprite.bitmap&.dispose
+          box_sprite.bitmap = Bitmap.new(bw, bh)
+          rojo = Color.new(255, 0, 0)
+          box_sprite.bitmap.fill_rect(0, 0, bw, 2, rojo)
+          box_sprite.bitmap.fill_rect(0, bh - 2, bw, 2, rojo)
+          box_sprite.bitmap.fill_rect(0, 0, 2, bh, rojo)
+          box_sprite.bitmap.fill_rect(bw - 2, 0, 2, bh, rojo)
+        end
+        box_sprite.x = left
+        box_sprite.y = top
+        box_sprite.visible = true
+
+        mx = Input.mouse_x
+        my = Input.mouse_y
+
+        if mx && my
+          if Input.trigger?(Input::MOUSELEFT)
+            if mx >= left && mx <= right && my >= top && my <= bottom
+              dragging = true
+              mouse_start_x = mx
+              mouse_start_y = my
+              metric_start_x = xpos
+              metric_start_y = ypos
+              
+              old_sx = sprite.x
+              old_sy = sprite.y
+              
+              case param
+              when 0
+                metrics_data.back_sprite[0] = xpos + 1
+                metrics_data.back_sprite[1] = ypos + 1
+              when 1
+                metrics_data.front_sprite[0] = xpos + 1
+                metrics_data.front_sprite[1] = ypos + 1
+              when 3
+                metrics_data.shadow_x = xpos + 1
+              end
+              refresh
+              
+              diff_x = sprite.x - old_sx
+              diff_y = sprite.y - old_sy
+              drag_mult_x = diff_x != 0 ? diff_x : 1
+              drag_mult_y = diff_y != 0 ? diff_y : 1
+              
+              case param
+              when 0
+                metrics_data.back_sprite[0] = xpos
+                metrics_data.back_sprite[1] = ypos
+              when 1
+                metrics_data.front_sprite[0] = xpos
+                metrics_data.front_sprite[1] = ypos
+              when 3
+                metrics_data.shadow_x = xpos
+              end
+              refresh
+            end
+          elsif Input.press?(Input::MOUSELEFT)
+            if dragging
+              dx = mx - mouse_start_x
+              dy = my - mouse_start_y
+              
+              new_xpos = metric_start_x + (dx.to_f / drag_mult_x).round
+              new_ypos = metric_start_y + (dy.to_f / drag_mult_y).round
+
+              if xpos != new_xpos || ypos != new_ypos
+                xpos = new_xpos
+                ypos = new_ypos if param != 3
+                case param
+                when 0
+                  metrics_data.back_sprite[0] = xpos
+                  metrics_data.back_sprite[1] = ypos
+                when 1
+                  metrics_data.front_sprite[0] = xpos
+                  metrics_data.front_sprite[1] = ypos
+                when 3
+                  metrics_data.shadow_x = xpos
+                end
+                refresh
+              end
+            end
+          else
+            dragging = false
+          end
+        end
+      else
+        box_sprite.visible = false
+      end
+      # ------------------------------------------
+
       if (Input.repeat?(Input::UP) || Input.repeat?(Input::DOWN)) && param != 3
         ypos += (Input.repeat?(Input::DOWN)) ? 1 : -1
         case param
@@ -274,8 +390,9 @@ class SpritePositioner
         end
         refresh
       end
-      if Input.repeat?(Input::ACTION) && param != 3   # Cycle to next option
-        @metricsChanged = true if xpos != oldxpos || ypos != oldypos
+      
+      if Input.repeat?(Input::ACTION)
+        @metricsChanged = true if xpos != oldxpos || (param != 3 && ypos != oldypos)
         ret = true
         pbPlayDecisionSE
         break
@@ -299,6 +416,10 @@ class SpritePositioner
         break
       end
     end
+
+    box_sprite.bitmap&.dispose
+    box_sprite.dispose
+
     @sprites["info"].visible = false
     sprite.visible = true
     return ret
@@ -464,7 +585,7 @@ class SpritePositionerScreen
         loop do
           par = @scene.pbSetParameter(command)
           break if !par
-          command = (command + 1) % 3
+          command = (command + 1) % 4
         end
       end
     end
