@@ -175,13 +175,17 @@ end
 # Inyección en Battle::Scene
 #===============================================================================
 class Battle::Scene
-  alias dni_initialize initialize
+  unless method_defined?(:dni_initialize)
+    alias dni_initialize initialize
+  end
   def initialize
     dni_initialize
     @damage_nums = []
   end
 
-  alias dni_pbUpdate pbUpdate
+  unless method_defined?(:dni_pbUpdate)
+    alias dni_pbUpdate pbUpdate
+  end
   def pbUpdate(cw = nil)
     dni_pbUpdate(cw)
     if @damage_nums
@@ -190,7 +194,9 @@ class Battle::Scene
     end
   end
 
-  alias dni_pbDisposeSprites pbDisposeSprites
+  unless method_defined?(:dni_pbDisposeSprites)
+    alias dni_pbDisposeSprites pbDisposeSprites
+  end
   def pbDisposeSprites
     dni_pbDisposeSprites
     if @damage_nums
@@ -202,7 +208,9 @@ class Battle::Scene
   # ----------------------------------------------------------------------------
   # Daño Indirecto (Veneno, Quemadura, Clima, Recoil) y Curación
   # ----------------------------------------------------------------------------
-  alias dni_pbHPChanged pbHPChanged
+  unless method_defined?(:dni_pbHPChanged)
+    alias dni_pbHPChanged pbHPChanged
+  end
   def pbHPChanged(battler, oldHP, showAnim = false)
     if DamageNumberSettings::ACTIVE && $PokemonSystem.damage_numbers == 0 && battler
       diff = oldHP - battler.hp
@@ -228,7 +236,9 @@ class Battle::Scene
   # ----------------------------------------------------------------------------
   # Daño Directo
   # ----------------------------------------------------------------------------
-  alias dni_pbHitAndHPLossAnimation pbHitAndHPLossAnimation
+  unless method_defined?(:dni_pbHitAndHPLossAnimation)
+    alias dni_pbHitAndHPLossAnimation pbHitAndHPLossAnimation
+  end
   def pbHitAndHPLossAnimation(targets)
     if DamageNumberSettings::ACTIVE && $PokemonSystem.damage_numbers == 0
       targets.each do |data|

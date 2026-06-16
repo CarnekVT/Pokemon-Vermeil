@@ -580,6 +580,18 @@ GameData::Evolution.register({
   }
 })
 
+GameData::Evolution.register({
+  :id                => :AfterBattleCritCounter,
+  :parameter         => Integer,
+  :any_level_up      => false,   # Does not need any level up
+  :after_battle_proc => proc { |pkmn, party_index, parameter|
+    ret = pkmn.crit_counter >= parameter
+    pkmn.crit_counter = 0   # Always resets after battle
+    next ret
+  }
+})
+
+
 #===============================================================================
 # Evolution methods that trigger when levelling up in battle.
 #===============================================================================

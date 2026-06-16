@@ -102,6 +102,7 @@ class Pokemon
   attr_accessor :personalID
   # A number used by certain species to evolve.
   attr_writer :evolution_counter
+  attr_writer :crit_counter
   # Used by Galarian Yamask to remember that it took sufficient damage from a
   # battle and can evolve.
   attr_accessor :ready_to_evolve
@@ -146,6 +147,11 @@ class Pokemon
     return @evolution_counter
   end
 
+  def crit_counter
+    @crit_counter ||= 0
+    return @crit_counter
+  end
+
   #-----------------------------------------------------------------------------
   # Species and form.
   #-----------------------------------------------------------------------------
@@ -167,6 +173,7 @@ class Pokemon
     @level             = nil   # In case growth rate is different for the new species
     @ability           = nil
     @evolution_counter = 0   # This counter is species-specific
+    @crit_counter      = 0   # This counter is species-specific
     calc_stats
   end
 
@@ -285,7 +292,8 @@ class Pokemon
     return if @hp > 0
     heal_status
     @ready_to_evolve = false
-    @evolution_counter = 0 if isSpecies?(:BASCULIN) || isSpecies?(:YAMASK)
+    @evolution_counter = 0 #if isSpecies?(:BASCULIN) || isSpecies?(:YAMASK)
+    @crit_counter      = 0 #if isSpecies?(:FARFETCHD)
   end
 
   # Sets this Pokémon's status. See {GameData::Status} for all possible status effects.

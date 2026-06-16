@@ -1614,6 +1614,33 @@ MenuHandlers.add(:debug_menu, :mystery_gift, {
   }
 })
 
+MenuHandlers.add(:debug_menu, :mystery_gift_bundle, {
+  "name"        => _INTL("Crear paquete de Regalo Misterioso"),
+  "parent"      => :files_menu,
+  "description" => _INTL("Crea un regalo con varios objetos distintos bajo la misma ID."),
+  "effect"      => proc {
+    pbCreateMysteryGiftBundle
+  }
+})
+
+MenuHandlers.add(:debug_menu, :mystery_gift_pokemon_bundle, {
+  "name"        => _INTL("Crear paquete Pokémon de Regalo Misterioso"),
+  "parent"      => :files_menu,
+  "description" => _INTL("Crea un regalo con varios Pokémon bajo la misma ID."),
+  "effect"      => proc {
+    pbCreateMysteryGiftPokemonBundle
+  }
+})
+
+MenuHandlers.add(:debug_menu, :mystery_gift_mixed_bundle, {
+  "name"        => _INTL("Crear paquete mixto de Regalo Misterioso"),
+  "parent"      => :files_menu,
+  "description" => _INTL("Crea un regalo con objetos y Pokémon bajo la misma ID."),
+  "effect"      => proc {
+    pbCreateMysteryGiftMixedBundle
+  }
+})
+
 MenuHandlers.add(:debug_menu, :reload_system_cache, {
   "name"        => _INTL("Recargar caché del sistema"),
   "parent"      => :files_menu,

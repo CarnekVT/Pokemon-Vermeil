@@ -18,9 +18,8 @@ end
 def pbChoosePokemonForTradePC(wanted, form = -1)
   variableNumber = 1
   nameVarNumber = 2
-    wanted = GameData::Species.get(wanted).species
-    @chosen = pbChooseTradablePokemonPC(variableNumber, nameVarNumber, wanted, form, proc { |pkmn, wanted_species|
-    })
+  wanted = GameData::Species.get(wanted).species
+  @chosen = pbChooseTradablePokemonPC(variableNumber, nameVarNumber, wanted, form, proc { |pkmn, wanted_species, wanted_form| next pkmn.species == wanted_species && (wanted_form == -1 || pkmn.form == wanted_form) })
 end
 
 def pbChooseTradablePokemonPC(variableNumber, nameVarNumber, wanted, form, ableProc = nil, allowIneligible = false)
@@ -30,8 +29,7 @@ def pbChooseTradablePokemonPC(variableNumber, nameVarNumber, wanted, form, ableP
   pbFadeOutIn {
     scene = PokemonStorageScene.new
     screen = PokemonStorageScreen.new(scene, $PokemonStorage)
-    chosen = screen.pbChoosePokemonFromPC(wanted, form, proc { |pkmn|
-    })
+    chosen = screen.pbChoosePokemonFromPC(wanted, form, ableProc)
   }
   pbSet(variableNumber, chosen)
   if chosen.nil?
@@ -46,7 +44,7 @@ def pbChooseTradablePokemonPC(variableNumber, nameVarNumber, wanted, form, ableP
 end
 
 
-def pbStartTradePC(newpoke, nickname = nil, trainerName = nil, trainerGender = 0)
+def pbStartTradePC(newpoke, nickname = nil, trainerName = nil, trainerGender = 0, level = nil)
   pos_pokemon_pc = pbGet(1)
   myPokemon = $PokemonStorage[pos_pokemon_pc[0], pos_pokemon_pc[1]]
   $stats.trade_count += 1 
@@ -60,7 +58,8 @@ def pbStartTradePC(newpoke, nickname = nil, trainerName = nil, trainerGender = 0
   else
     species_data = GameData::Species.try_get(newpoke)
     raise _INTL("La especie {1} no existe.", newpoke) if !species_data
-    yourPokemon = Pokemon.new(species_data.id, myPokemon.level)
+    level ||= myPokemon.level
+    yourPokemon = Pokemon.new(species_data.id, level)
     yourPokemon.owner = Pokemon::Owner.new_foreign(trainerName, trainerGender)
   end
   yourPokemon.name          = nickname
@@ -68,23 +67,23 @@ def pbStartTradePC(newpoke, nickname = nil, trainerName = nil, trainerGender = 0
   yourPokemon.reset_moves if resetmoves
   yourPokemon.record_first_moves
 
-		if PluginManager.installed?("Charms Case")
-        tradingCharmIV = CharmCaseSettings::TRADING_CHARM_IV
-          if $player.activeCharm?(:TRADINGCHARM)
-            unless yourPokemon.tradingCharmStatsIncreased
-              GameData::Stat.each_main do |s|
-                stat_id = s.id
-                # Adds 5 IVs to each stat.
-                yourPokemon.iv[stat_id] = [yourPokemon.iv[stat_id] + tradingCharmIV, 31].min if yourPokemon.iv[stat_id]
-              end
-              # Set the attribute to track the stat increase
-              yourPokemon.tradingCharmStatsIncreased = true
-			end
-            if rand(100) < CharmCaseSettings::TRADING_CHARM_SHINY
-              yourPokemon.shiny = true
-            end
-		  end
-		end
+  if PluginManager.installed?("Charms Case")
+    tradingCharmIV = CharmCaseSettings::TRADING_CHARM_IV
+    if $player.activeCharm?(:TRADINGCHARM)
+      unless yourPokemon.tradingCharmStatsIncreased
+        GameData::Stat.each_main do |s|
+          stat_id = s.id
+          # Adds 5 IVs to each stat.
+          yourPokemon.iv[stat_id] = [yourPokemon.iv[stat_id] + tradingCharmIV, 31].min if yourPokemon.iv[stat_id]
+        end
+        # Set the attribute to track the stat increase
+        yourPokemon.tradingCharmStatsIncreased = true
+      end
+      if rand(100) < CharmCaseSettings::TRADING_CHARM_SHINY
+        yourPokemon.shiny = true
+      end
+    end
+  end
 		
   pbFadeOutInWithMusic {
     evo = PokemonTrade_Scene.new
@@ -129,7 +128,7 @@ class PokemonStorageScreen
         command = pbShowCommands(helptext, commands)
         case command
         when 0   # Select
-          if ableProc && !ableProc.call(pokemon)
+          if ableProc && !ableProc.call(pokemon, wanted, form)
             pbMessage(_INTL("¡Este Pokémon no puede ser intercambiado!"))
             next
           end

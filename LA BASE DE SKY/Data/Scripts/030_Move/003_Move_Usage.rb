@@ -319,9 +319,7 @@ class Battle::Move
       @battle.pbDisplay(_INTL("El sustituto recibió el daño por {1}!", target.pbThis(true)))
     end
     if target.damageState.critical
-      if user.pokemon.isSpecies?(:FARFETCHD) && user.pokemon.form == 1
-        user.pokemon.evolution_counter += 1
-      end
+      user.pokemon.crit_counter += 1
       crit_color = Battle::Scene::MESSAGE_BASE_CRITICAL_COLOR.to_rgb24 + "," + Battle::Scene::MESSAGE_SHADOW_CRITICAL_COLOR.to_rgb24
       if target.damageState.affection_critical
         if numTargets > 1

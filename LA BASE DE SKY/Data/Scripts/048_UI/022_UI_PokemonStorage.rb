@@ -39,7 +39,7 @@ class PokemonBoxIcon < IconSprite
     @custom_anim&.dispose
     @custom_anim = AnimatedBitmap.new(filename)
     if @pokemon.super_shiny? && !(filename && filename.include?("supershiny"))
-      hue = @pokemon.super_shiny_hue
+      hue = GameData::Species.super_shiny_hue_for(@pokemon.species, @pokemon.form, true)
       if hue != 0
         new_anim = @custom_anim.copy
         @custom_anim.dispose

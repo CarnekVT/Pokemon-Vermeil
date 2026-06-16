@@ -230,8 +230,8 @@ module GameData
       elsif @on_trade_proc
         desc = (full) ? _INTL("Intercambio {1}", full_name) : _INTL("Intercambio")
       elsif @after_battle_proc
-        desc = (full) ? _INTL("Tiene {1}", full_name) : _INTL("O") 
-        desc = _INTL("{1} finaliza una batalla", desc)
+        desc = (full) ? _INTL("{1}", full_name) : _INTL("") 
+        desc = _INTL("{1} finaliza un combate", desc)
       elsif @level_up_proc
         if @any_level_up
           desc = (full) ? _INTL("Subir de nivel a {1}", full_name) : _INTL("Nivel")
@@ -313,6 +313,7 @@ GameData::Evolution.each do |evo|
   when :LevelRecoilDamageForm0                 then evo.description = _INTL("tras perder al menos {1} PS por daño de retroceso")
   when :LevelDefeatItsKindWithItem             then evo.description = _INTL("tras vencer a 3 de su misma especie que tengan el objeto {1}")
   when :CollectItems                           then evo.description = _INTL("teniendo al menos 999x {2} en la mochila")
+  when :AfterBattleCritCounter                 then evo.description = _INTL("habiendo asestado {1} golpes críticos")
   end
 end
 
