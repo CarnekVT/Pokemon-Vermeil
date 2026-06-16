@@ -1253,7 +1253,7 @@ Name = Teracaparazón
 Description = Su caparazón encierra energía de todos los tipos. Gracias a ello, si sus PS están al máximo, el movimiento que lo alcance no será muy eficaz.
 #-------------------------------
 [TERAFORMZERO]
-Name = Teracaparazón
+Name = Teraformación 0
 Description = Cuando Terapagos adopta la Forma Astral, anula todos los efectos del tiempo atmosférico y de los campos que haya en el terreno gracias a su poder oculto.
 #-------------------------------
 [DRAGONIZE]
