@@ -2540,6 +2540,8 @@ Battle::AbilityEffects::OnEndOfUsingMove.add(:BEASTBOOST,
   }
 )
 
+Battle::AbilityEffects::OnEndOfUsingMove.copy(:BEASTBOOST, :EELEVATE)
+
 Battle::AbilityEffects::OnEndOfUsingMove.add(:CHILLINGNEIGH,
   proc { |ability, user, targets, move, battle|
     next if battle.pbAllFainted?(user.idxOpposingSide)

@@ -94,7 +94,7 @@ class Battle::AI
     return false if pkmn.hasItem?(:IRONBALL)
     return false if @battle.field.effects[PBEffects::Gravity] > 0
     return true if pkmn.hasType?(:FLYING)
-    return true if pkmn.hasAbility?(:LEVITATE)
+    return true if (pkmn.hasAbility?(:LEVITATE) || pkmn.hasAbility?(:EELEVATE))
     return true if pkmn.hasItem?(:AIRBALLOON)
     return false
   end
@@ -120,7 +120,7 @@ class Battle::AI
            :POWERCONSTRUCT, :PRIMORDIALSEA, :PUREPOWER, :SHADOWTAG,
            :STANCECHANGE, :WONDERGUARD],
     9  => [:ARENATRAP, :BEADSOFRUIN, :HADRONENGINE, :IMPOSTER, :MAGICBOUNCE,
-           :MAGICGUARD, :MAGNETPULL, :ORICHALCUMPULSE, :SPEEDBOOST,
+           :MAGICGUARD, :MAGNETPULL, :ORICHALCUMPULSE, :SPEEDBOOST, :EELEVATE,
            :SWORDOFRUIN, :TABLETSOFRUIN, :VESSELOFRUIN],
     8  => [:ADAPTABILITY, :AERILATE, :COMMANDER, :CONTRARY, :DISGUISE,
            :DRAGONSMAW, :GALVANIZE, :GOODASGOLD, :ILLUSION, :LIBERO,

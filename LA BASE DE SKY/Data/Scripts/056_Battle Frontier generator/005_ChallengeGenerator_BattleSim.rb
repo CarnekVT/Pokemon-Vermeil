@@ -312,7 +312,7 @@ def pbDecideWinnerEffectiveness(move, otype1, otype2, ability, scores)
   return 0 if data.power == 0
   atype = data.type
   typemod = 1.0
-  if ability != :LEVITATE || data.type != :GROUND
+  if ability != :LEVITATE || data.type != :GROUND || ability != :EELEVATE
     mod1 = Effectiveness.calculate(atype, otype1)
     mod2 = (otype1 == otype2) ? 1.0 : Effectiveness.calculate(atype, otype2)
     if ability == :WONDERGUARD

@@ -1271,3 +1271,7 @@ Description = Si un Pokémon lo ataca, resulta quemado.
 [PIERCINGDRILL]
 Name = Turbotaladro
 Description = Si usa un movimiento de contacto, puede infligir daño 1/4 del daño original, al objetivo, aunque este se proteja.
+#-------------------------------
+[EELEVATE]
+Name = Impulso Anguila
+Description = Su capacidad de flotar sobre el suelo le proporciona inmunidad frente a los movimientos de tipo Tierra. Si el Pokémon derrota a un rival en ese turno, aumenta su característica más elevada en un nivel.
