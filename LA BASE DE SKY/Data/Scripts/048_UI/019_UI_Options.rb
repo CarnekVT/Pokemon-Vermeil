@@ -614,15 +614,15 @@ if !Settings::USE_NEW_OPTIONS_UI
   #===============================================================================
   # Options Menu commands
   #===============================================================================
-  MenuHandlers.add(:options_menu, :main_volume, {
-    "name"        => _INTL("Volumen General"),
-    "order"       => 9,
-    "type"        => SliderOption,
-    "parameters"  => [0, 100, 5],   # [minimum_value, maximum_value, interval]
-    "description" => _INTL("Ajusta el volumen de todo el audio en el juego."),
-    "get_proc"    => proc { next $PokemonSystem.main_volume },
-    "set_proc"    => proc { |value, screen| $PokemonSystem.main_volume = value }
-  })
+  # MenuHandlers.add(:options_menu, :main_volume, {
+  #   "name"        => _INTL("Volumen General"),
+  #   "order"       => 9,
+  #   "type"        => SliderOption,
+  #   "parameters"  => [0, 100, 5],   # [minimum_value, maximum_value, interval]
+  #   "description" => _INTL("Ajusta el volumen de todo el audio en el juego."),
+  #   "get_proc"    => proc { next $PokemonSystem.main_volume },
+  #   "set_proc"    => proc { |value, screen| $PokemonSystem.main_volume = value }
+  # })
 
 
   MenuHandlers.add(:options_menu, :bgm_volume, {

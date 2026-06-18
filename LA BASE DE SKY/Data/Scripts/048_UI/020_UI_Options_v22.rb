@@ -2198,19 +2198,19 @@ if Settings::USE_NEW_OPTIONS_UI
 
   #-------------------------------------------------------------------------------
 
-  MenuHandlers.add(:options_menu, :main_volume, {
-    "page"        => :audio,
-    "name"        => _INTL("Volumen general"),
-    "order"       => 10,
-    "type"        => :number_slider,
-    "parameters"  => [0, 100, 5],   # [minimum_value, maximum_value, interval]
-    "description" => _INTL("Ajusta el volumen de todos los audio en el juego."),
-    "get_proc"    => proc { next $PokemonSystem.main_volume },
-    "set_proc"    => proc { |value, screen| 
-      $PokemonSystem.main_volume = value 
-      screen.refresh 
-    }
-  })
+  # MenuHandlers.add(:options_menu, :main_volume, {
+  #   "page"        => :audio,
+  #   "name"        => _INTL("Volumen general"),
+  #   "order"       => 10,
+  #   "type"        => :number_slider,
+  #   "parameters"  => [0, 100, 5],   # [minimum_value, maximum_value, interval]
+  #   "description" => _INTL("Ajusta el volumen de todos los audio en el juego."),
+  #   "get_proc"    => proc { next $PokemonSystem.main_volume },
+  #   "set_proc"    => proc { |value, screen| 
+  #     $PokemonSystem.main_volume = value 
+  #     screen.refresh 
+  #   }
+  # })
 
   MenuHandlers.add(:options_menu, :bgm_volume, {
     "page"        => :audio,
