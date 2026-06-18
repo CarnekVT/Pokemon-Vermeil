@@ -782,6 +782,9 @@ class PokemonBag_Scene
   POCKET_8_GRAD = Color.new(145, 37, 255)
   POCKET_8_PAN = Color.new(144, 72, 216)
 
+  CHANGE_POCKET_SE = "GUI bag pocket"
+  BAG_CURSOR_SE = "GUI sel cursor"
+
   def pbUpdate
     pbUpdateSpriteHash(@sprites)
     @sprites["panorama"].x  = 0 if @sprites["panorama"].x == PANORAMA_STOP_X
@@ -1281,7 +1284,7 @@ class PokemonBag_Scene
           # Plays SE when scrolling the item list
           if Input.repeat?(Input::UP) && thispocket.length   > 0 || 
              Input.repeat?(Input::DOWN) && thispocket.length > 0
-            pbSEPlay("GUI bag cursor") if itemwindow.index != oldindex
+             pbPlayCursorSE if itemwindow.index != oldindex
           end
           # Change pockets
           if Input.trigger?(Input::LEFT)
@@ -1300,7 +1303,7 @@ class PokemonBag_Scene
               @bag.last_viewed_pocket = itemwindow.pocket
               thispocket = @bag.pockets[itemwindow.pocket]
               pbRefresh
-              pbSEPlay("GUI bag pocket")
+              pbSEPlay(CHANGE_POCKET_SE)
               @sprites["currentpocket"].x -= POCKET_ANIMATION_OFFSET
               pbWait(0.1) {pbUpdate}
               @sprites["currentpocket"].x += POCKET_ANIMATION_OFFSET
@@ -1321,7 +1324,7 @@ class PokemonBag_Scene
               @bag.last_viewed_pocket = itemwindow.pocket
               thispocket = @bag.pockets[itemwindow.pocket]
               pbRefresh
-              pbSEPlay("GUI bag pocket")
+              pbSEPlay(CHANGE_POCKET_SE)
               @sprites["currentpocket"].x += POCKET_ANIMATION_OFFSET
               pbWait(0.1) {pbUpdate}
               @sprites["currentpocket"].x -= POCKET_ANIMATION_OFFSET
