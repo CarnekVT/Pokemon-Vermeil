@@ -629,7 +629,6 @@ class Battle::Move::RaiseUserAtkSpd1RemoveEntryHazardsAndSubstitutes < Battle::M
       @battle.pbDisplay(_INTL("¡La red viscosa ha desaparecido del suelo alrededor de {1}!", user.pbOpposingTeam(true)))
     end
     @battle.pbDisplay(_INTL("¡Limpieza completada!")) if something_tidied
-    super
   end
 end
 
@@ -873,21 +872,6 @@ class Battle::Move::LowerUserSpAtk1 < Battle::Move::StatDownMove
   def initialize(battle, move)
     super
     @statDown = [:SPECIAL_ATTACK, 1]
-  end
-end
-
-#===============================================================================
-# Decreases the user's Special Attack by 1 stage. Scatters coins that the player
-# picks up after winning the battle. (Make It Rain)
-#===============================================================================
-class Battle::Move::AddMoneyGainedFromBattleLowerUserSpAtk1 < Battle::Move::LowerUserSpAtk1
-  def pbEffectWhenDealingDamage(user, target)
-    return if @stats_lowered
-    if user.pbOwnedByPlayer?
-      @battle.field.effects[PBEffects::PayDay] += 5 * user.level
-    end
-    @battle.pbDisplay(_INTL("¡Se esparcieron monedas por todos lados!"))
-    super
   end
 end
 
