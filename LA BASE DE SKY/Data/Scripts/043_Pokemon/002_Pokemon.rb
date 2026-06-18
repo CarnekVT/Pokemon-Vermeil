@@ -492,7 +492,7 @@ class Pokemon
   end
 
   def changeGender(recheck_form = true)
-    return if singleGendered?
+    return false if singleGendered?
     self.male? ? self.makeFemale : self.makeMale
     if recheck_form
       form = MultipleForms.call("getFormOnGenderChange", self)
@@ -500,6 +500,7 @@ class Pokemon
         self.form = form
       end
     end
+    return true
   end
 
   #=============================================================================
