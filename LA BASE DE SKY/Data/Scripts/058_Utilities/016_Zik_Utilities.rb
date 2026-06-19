@@ -78,4 +78,12 @@ class Bitmap
       end
     end
   end
+
+  def outline_rect(x, y, width, height, color, thickness = 1)
+    return if disposed?
+    fill_rect(x, y, width, thickness, color)                       # Borde superior
+    fill_rect(x, y + height - thickness, width, thickness, color)  # Borde inferior
+    fill_rect(x, y, thickness, height, color)                      # Borde izquierdo
+    fill_rect(x + width - thickness, y, thickness, height, color)  # Borde derecho
+  end
 end
