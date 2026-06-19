@@ -140,7 +140,7 @@ class Battle::AI
            :MIRRORARMOR, :MOTORDRIVE, :NEUROFORCE, :POISONPUPPETEER,
            :PRISMARMOR, :PROTOSYNTHESIS, :QUARKDRIVE, :QUEENLYMAJESTY,
            :RECKLESS, :ROUGHSKIN, :SANDRUSH, :SCHOOLING, :SCRAPPY, :SHARPNESS,
-           :SHIELDSDOWN, :SOLIDROCK, :STAKEOUT, :STAMINA, :STEELWORKER,
+           :SHIELDSDOWN, :SOLIDROCK, :STAKEOUT, :STAMINA, :STEELWORKER, :FIREMANE,
            :STRONGJAW, :STURDY, :SWIFTSWIM, :TOXICBOOST, :TRACE, :UNAWARE,
            :VICTORYSTAR, :WELLBAKEDBODY],
     5  => [:AFTERMATH, :AIRLOCK, :ANALYTIC, :ANGERSHELL, :BERSERK, :BLAZE,
@@ -474,6 +474,13 @@ Battle::AI::Handlers::AbilityRanking.add(:SKILLLINK,
 Battle::AI::Handlers::AbilityRanking.add(:STEELWORKER,
   proc { |ability, score, battler, ai|
     next score if battler.has_damaging_move_of_type?(:STEEL)
+    next 0
+  }
+)
+
+Battle::AI::Handlers::AbilityRanking.add(:FIREMANE,
+  proc { |ability, score, battler, ai|
+    next score if battler.has_damaging_move_of_type?(:FIRE)
     next 0
   }
 )
