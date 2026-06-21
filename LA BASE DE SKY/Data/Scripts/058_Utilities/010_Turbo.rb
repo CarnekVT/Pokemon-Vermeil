@@ -63,6 +63,16 @@ module Turbo
   def reset!
     set_speed(0)
   end
+
+  def lock
+    $CanToggle = false
+    reset!
+  end
+
+  def unlock
+    reset!
+    $CanToggle = true
+  end
 end
 
 # Variables globales
