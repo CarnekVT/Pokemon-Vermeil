@@ -475,6 +475,14 @@ class Battle::Battler
     end
   end
 
+  # Called when the battle terrain changes and when a Pokémon loses HP.
+  def pbItemTerrainStatBoostCheck
+    return if !itemActive?
+    if Battle::ItemEffects.triggerTerrainStatBoost(self.item, self, @battle)
+      pbHeldItemTriggered(self.item)
+    end
+  end
+
   # Used for Adrenaline Orb. Called when Intimidate is triggered (even if
   # Intimidate has no effect on the Pokémon).
   def pbItemOnIntimidatedCheck
