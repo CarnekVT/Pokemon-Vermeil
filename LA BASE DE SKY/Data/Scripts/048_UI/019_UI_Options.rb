@@ -61,75 +61,89 @@ if !Settings::USE_NEW_OPTIONS_UI
       end
     end
 
+    def vsync_config_path
+      return File.join(Dir.pwd, "mkxp.json")
+    end
+
     def vsync_initial_value?
-      return 1 if !File.exist?("mkxp.json") || $joiplay
-      file_content = File.read("mkxp.json")
+      file_path = vsync_config_path
+      return 1 if !File.exist?(file_path) || $joiplay
+      file_content = File.read(file_path)
       clean_json_string = json_remove_comments(file_content)
-      # Parse JSON content
       begin
         config = HTTPLite::JSON.parse(clean_json_string)
-
-        # Check the vsync value
-        vsync_value = config['vsync']
-        return vsync_value == true ? 0 : 1
-      rescue MKXPError => e
+        return config["vsync"] == true ? 0 : 1
+      rescue MKXPError, StandardError => e
         echoln "Error parsing JSON: #{e.message}"
+        return 1
       end
     end
 
-    def update_vsync(vsync_value)
-      file_path = "mkxp.json"
-      vsync_value = vsync_value == 1 ? false : true
-      vsync_str = vsync_value ? 'true' : 'false'
-      sync_to_refresh_str = vsync_str
-
-      # Read the file line-by-line to preserve comments and order
-      lines = File.readlines(file_path)
-      
-      updated_lines = lines.map do |line|
-        # Update the "vsync" value
-        if line.match?(/"vsync":\s*(true|false)/)
-          line.sub(/"vsync":\s*(true|false)/, "\"vsync\": #{vsync_str}")
-        # Update the "syncToRefreshrate" value
-        elsif line.match?(/"syncToRefreshrate":\s*(true|false)/)
-          if vsync_value
-            # Set to true with a trailing comma
-            line.sub(/"syncToRefreshrate":\s*(true|false),?/, "\"syncToRefreshrate\": #{sync_to_refresh_str}")
+    def pbApplyVsyncToMkxpLines(lines, enable_vsync)
+      vsync_str = enable_vsync ? "true" : "false"
+      lines.map do |line|
+        if line.match?(/^\s*"vsync"\s*:\s*(true|false)/)
+          line.sub(/"vsync"\s*:\s*(true|false)/, "\"vsync\": #{vsync_str}")
+        elsif line.match?(/^\s*"syncToRefreshrate"\s*:\s*(true|false)/)
+          if enable_vsync
+            line.sub(/"syncToRefreshrate"\s*:\s*(true|false),?/, "\"syncToRefreshrate\": true")
           else
-            # Set to false without a trailing comma
-            line.sub(/"syncToRefreshrate":\s*(true|false)/, "\"syncToRefreshrate\": #{sync_to_refresh_str},")
+            line.sub(/"syncToRefreshrate"\s*:\s*(true|false),?/, "\"syncToRefreshrate\": false,")
           end
-        # Comment out "fixedFramerate" if vsync is true
-        elsif vsync_value && line.match?(/"fixedFramerate":\s*\d+/)
-          "//#{line.strip}" # Comment out the line
-        # Uncomment "fixedFramerate" if vsync is false
-        elsif !vsync_value && line.match?(/\/\/\s*"fixedFramerate":\s*\d+/)
-          line.sub(/\/\/\s*/, '') # Uncomment the line
+        elsif enable_vsync && line.match?(/^\s*"fixedFramerate"\s*:\s*\d+/)
+          line.sub(/^(\s*)("fixedFramerate")/, '\1//\2')
+        elsif !enable_vsync && line.match?(/^\s*\/\/\s*"fixedFramerate"\s*:\s*\d+/)
+          line.sub(/^(\s*)\/\/\s*/, '\1')
         else
-          line # Return the line unchanged
+          line
         end
       end
-      
-      # Write the updated lines back to the file
-      File.open(file_path, 'w') do |file|
-        file.puts(updated_lines)
-      end
-      # Handle game restart after vsync value change
-      message = $player ? _INTL("Cambiar el valor del vsync requiere reiniciar el juego.\nPodrás guardar antes de reiniciar.\n¿Deseas reiniciar ahora?") : _INTL("Cambiar el valor del vsync requiere reiniciar el juego.\n¿Deseas reiniciar ahora?")
-      if Kernel.pbConfirmMessageSerious(message)
-        pbSaveScreen if $player
-        if System.is_really_windows?
-          # Launch Game.exe and immediately exit the current process
-          Thread.new do
-            system('start "" "Game.exe"')
-          end
-          sleep(0.1) # Give the thread some time to execute
-        else
-          pbMessage(_INTL("Al no estar en Windows el juego no puede reiniciarse automáticamente.\nSe cerrará y deberás abrirlo manualmente"))
-        end
+    end
 
-        Kernel.exit!
+    def pbRestartAfterVsyncChange
+      if System.is_really_windows?
+        Thread.new { system('start "" "Game.exe"') }
+        sleep(0.1)
+        return
       end
+      if RUBY_PLATFORM =~ /darwin/i && File.directory?("Game.app")
+        Thread.new { system('open -n "Game.app"') }
+        sleep(0.1)
+        return
+      end
+      exe = nil
+      begin
+        exe = File.readlink("/proc/self/exe") if File.exist?("/proc/self/exe")
+      rescue
+        exe = nil
+      end
+      if exe && !exe.empty? && File.exist?(exe)
+        Thread.new { system("nohup \"#{exe}\" \"#{Dir.pwd}\" >/dev/null 2>&1 &") }
+        sleep(0.1)
+        return
+      end
+      ["./mkxp-z", "./Game", "mkxp-z"].each do |candidate|
+        next if !File.exist?(candidate)
+        Thread.new { system("cd \"#{Dir.pwd}\" && nohup \"#{candidate}\" >/dev/null 2>&1 &") }
+        sleep(0.1)
+        return
+      end
+      pbMessage(_INTL("No se pudo reiniciar automáticamente.\nCierra y abre el juego manualmente."))
+    end
+
+    def update_vsync(vsync_value)
+      file_path = vsync_config_path
+      return true if !File.exist?(file_path) || $joiplay
+      message = $player ? _INTL("Cambiar el valor del vsync requiere reiniciar el juego.\nPodrás guardar antes de reiniciar.\n¿Deseas reiniciar ahora?") : _INTL("Cambiar el valor del vsync requiere reiniciar el juego.\n¿Deseas reiniciar ahora?")
+      return false unless Kernel.pbConfirmMessageSerious(message)
+      enable_vsync = (vsync_value != 1)
+      lines = File.readlines(file_path)
+      updated_lines = pbApplyVsyncToMkxpLines(lines, enable_vsync)
+      File.open(file_path, "w") { |file| file.puts(updated_lines) }
+      pbSaveScreen if $player
+      pbRestartAfterVsyncChange
+      Kernel.exit!
+      true
     end
   end
 end
@@ -824,8 +838,9 @@ if !Settings::USE_NEW_OPTIONS_UI
     "get_proc"    => proc { next $PokemonSystem.vsync },
     "set_proc"    => proc { |value, _scene|
       next if $PokemonSystem.vsync == value
+      old_value = $PokemonSystem.vsync
       $PokemonSystem.vsync = value
-      $PokemonSystem.update_vsync($PokemonSystem.vsync)
+      $PokemonSystem.vsync = old_value unless $PokemonSystem.update_vsync(value)
     }
   })
 
