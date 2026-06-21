@@ -117,7 +117,7 @@ class PokemonPokedexInfo_Scene
         # Displays item/ability lists.
         when :item, :ability
           next if !$player.owned?(species_id)
-          pbChooseDataList(special_form)
+          pbChooseDataList
         #-----------------------------------------------------------------------
         # Displays compatible species lists.
         when :general, :family, :stats, :habitat, :egg, :shape

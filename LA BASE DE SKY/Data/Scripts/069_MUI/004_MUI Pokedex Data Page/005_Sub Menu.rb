@@ -608,7 +608,7 @@ class PokemonPokedexInfo_Scene
     return if !$player.owned?(@species)
     cursor = @cursor if !cursor
     list = []
-    @data_hash[cursor].each { |k, v| list.concat(v) }
+    @data_hash[cursor].each { |k, v| list.concat(v) } 
     pbPlayBuzzerSE if list.empty?
     return if list.empty?
     list.uniq!
