@@ -754,7 +754,7 @@ MultipleForms.register(:MILCERY, {
     if sweets.include?(pkmn.item_id)
       next sweets.index(pkmn.item_id) + ((pkmn.personalID % num_flavors) * sweets.length)
     end
-    next 0
+    next pkmn.form_simple
   }
 })
 
