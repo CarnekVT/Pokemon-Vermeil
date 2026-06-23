@@ -25,6 +25,12 @@ module TurboConfig
     idx = 0 if idx < 0 || idx >= SPEED_STAGES.size
     return SPEED_STAGES[idx]
   end
+
+  # Convierte duración en frames (1/20 s) a segundos reales según el turbo.
+  def self.real_duration(frames)
+    return 0 if frames <= 0
+    return (frames / 20.0) / multiplier
+  end
 end
 
 # API pública para usar desde otros scripts/eventos.
@@ -52,7 +58,9 @@ module Turbo
     idx = 0 if idx < 0 || idx >= TurboConfig::SPEED_STAGES.size
     real_now = System.unscaled_uptime
     virtual_now = System.uptime
+    $_turbo_internal_speed_set = true
     $GameSpeed = idx
+    $_turbo_internal_speed_set = false
     $SpeedDifference = virtual_now - (real_now * TurboConfig.multiplier)
     $RefreshEventsForTurbo = true
     $buttonframes = 0
@@ -80,6 +88,16 @@ $GameSpeed = 0
 $CanToggle = true
 $RefreshEventsForTurbo = false
 $SpeedDifference = 0
+$_turbo_internal_speed_set = false
+
+# Eventos que hacen `$GameSpeed = 0` (p. ej. cinemáticas) deben pasar por
+# Turbo.set_speed para no romper System.uptime ni efectos de pantalla activos.
+trace_var(:$GameSpeed) do |val|
+  next if $_turbo_internal_speed_set
+  idx = val[0].to_i
+  idx = 0 if idx < 0 || idx >= TurboConfig::SPEED_STAGES.size
+  Turbo.set_speed(idx)
+end
 
 #===============================================================================
 # 2. System Uptime.
@@ -174,8 +192,7 @@ if defined?(MenuHandlers)
       if $PokemonSystem.only_speedup_battles == 0
         $CanToggle = true
       else
-        $CanToggle = false
-        $GameSpeed = 0
+        Turbo.lock
       end
     }
   })
@@ -206,18 +223,12 @@ EventHandlers.add(:on_game_initialize, :turbo_metrics_fix, proc {
           previous_toggle = $CanToggle
           previous_speed  = $GameSpeed          
           $CanToggle = false
-          if $GameSpeed != 0
-            $GameSpeed = 0
-            $RefreshEventsForTurbo = true
-          end
+          Turbo.set_speed(0) if $GameSpeed != 0
           begin
             turbo_metrics_pbStart
           ensure
             $CanToggle = previous_toggle
-            if $GameSpeed != previous_speed
-              $GameSpeed = previous_speed
-              $RefreshEventsForTurbo = true
-            end
+            Turbo.set_speed(previous_speed) if $GameSpeed != previous_speed
           end
         end
       end
@@ -297,58 +308,52 @@ class SpriteAnimation
 end
 
 #-------------------------------------------------------------------------------
-# Game_Screen: tone / flash / shake usan System.uptime (escalado por turbo) en
-# lugar de $stats.play_time (tiempo real).
+# Game_Screen: tone / flash / shake usan tiempo REAL (unscaled_uptime) con
+# duración ajustada al turbo, igual que los Wait del intérprete.
 #
-# Con la implementación original, los `Change Screen Color Tone`, `Flash` y
-# `Shake` mantenían su duración en tiempo real, pero los `Wait` del intérprete
-# se aceleran con el turbo. Eso descoordinaba ambas cosas: el Wait que
-# venía después de un Change Tone terminaba antes de que el tono hubiera
-# acabado de aplicarse, y se veía el mapa "a medio oscurecer" un instante
-# antes de la transición.
-#
-# Aquí hacemos que estos efectos también usen el reloj escalado, así su
-# duración va sincronizada con los Wait del evento.
+# Usar System.uptime escalado aquí rompía los fades si un evento hacía
+# `$GameSpeed = 0` a mitad del efecto (p. ej. cinemática de Fuji): el reloj
+# virtual retrocedía, lerp devolvía el tono inicial (negro) y la pantalla se
+# quedaba oscura durante todo el diálogo.
 #-------------------------------------------------------------------------------
 class Game_Screen
   def start_tone_change(tone, duration)
     if duration == 0
       @tone = tone.clone
+      @tone_initial = nil
+      @tone_timer_start = nil
       return
     end
     @tone_initial     = @tone.clone
     @tone_target      = tone.clone
-    @tone_duration    = duration / 20.0
-    @tone_timer_start = System.uptime
+    @tone_duration    = TurboConfig.real_duration(duration)
+    @tone_timer_start = System.unscaled_uptime
   end
 
   def start_flash(color, duration)
     @flash_color         = color.clone
     @flash_initial_alpha = @flash_color.alpha
-    @flash_duration      = duration / 20.0
-    @flash_timer_start   = System.uptime
+    @flash_duration      = TurboConfig.real_duration(duration)
+    @flash_timer_start   = System.unscaled_uptime
   end
 
   def start_shake(power, speed, duration)
     @shake_power       = power
     @shake_speed       = speed
-    @shake_duration    = duration / 20.0
-    @shake_timer_start = System.uptime
+    @shake_duration    = TurboConfig.real_duration(duration)
+    @shake_timer_start = System.unscaled_uptime
   end
 
   alias_method :turbo_original_update_screen, :update unless method_defined?(:turbo_original_update_screen)
   def update
-    # Sustituimos $stats.play_time por System.uptime usando una variable
-    # local "now" antes de delegar al método original, pero como el método
-    # original usa $stats.play_time directamente, reescribimos la parte de
-    # tone/flash/shake aquí.
-    now = System.uptime
+    now = System.unscaled_uptime
     if @tone_timer_start
       @tone.red = lerp(@tone_initial.red, @tone_target.red, @tone_duration, @tone_timer_start, now)
       @tone.green = lerp(@tone_initial.green, @tone_target.green, @tone_duration, @tone_timer_start, now)
       @tone.blue = lerp(@tone_initial.blue, @tone_target.blue, @tone_duration, @tone_timer_start, now)
       @tone.gray = lerp(@tone_initial.gray, @tone_target.gray, @tone_duration, @tone_timer_start, now)
       if now - @tone_timer_start >= @tone_duration
+        @tone = @tone_target.clone
         @tone_initial = nil
         @tone_timer_start = nil
       end
@@ -356,6 +361,7 @@ class Game_Screen
     if @flash_timer_start
       @flash_color.alpha = lerp(@flash_initial_alpha, 0, @flash_duration, @flash_timer_start, now)
       if now - @flash_timer_start >= @flash_duration
+        @flash_color.alpha = 0
         @flash_initial_alpha = nil
         @flash_timer_start = nil
       end
@@ -416,18 +422,128 @@ class Game_Event < Game_Character
 end
 
 class Interpreter
+  # Re-sincroniza un Wait activo tras cambiar de velocidad, conservando el
+  # tiempo restante en lugar de anularlo (lo cual lo saltaba por completo).
   def pbRefreshWaitCount
-    @wait_count = 0
-    @wait_start = System.uptime
+    return if @wait_count <= 0
+    @wait_start_real ||= System.unscaled_uptime
+    required = @wait_count / TurboConfig.multiplier
+    elapsed = System.unscaled_uptime - @wait_start_real
+    remaining = required - elapsed
+    if remaining <= 0
+      @wait_count = 0
+      @wait_start = nil
+      @wait_start_real = nil
+    else
+      @wait_count = remaining * TurboConfig.multiplier
+      @wait_start_real = System.unscaled_uptime
+      @wait_start = System.uptime
+    end
+  end
+
+  alias_method :turbo_original_command_106, :command_106 unless method_defined?(:turbo_original_command_106)
+
+  # Wait usa tiempo real (no escalado) dividido por el multiplicador del turbo.
+  # Así se acelera con el turbo pero no se salta por saltos de System.uptime
+  # ni por el bucle del intérprete procesando demasiados comandos por frame.
+  def command_106
+    turbo_original_command_106
+    @wait_start_real = System.unscaled_uptime if @wait_count > 0
+    return true
+  end
+
+  alias_method :turbo_original_interpreter_update, :update unless method_defined?(:turbo_original_interpreter_update)
+
+  def update
+    if @wait_count > 0
+      @wait_start_real ||= System.unscaled_uptime
+      required = @wait_count / TurboConfig.multiplier
+      if System.unscaled_uptime - @wait_start_real < required
+        return
+      end
+      @wait_count = 0
+      @wait_start = nil
+      @wait_start_real = nil
+    end
+    turbo_original_interpreter_update
   end
 end
 
-# Nota: no se sobrescriben command_106 (Wait), Interpreter#update ni
-# Game_Character#update_command. La implementación original de Essentials usa
-# `System.uptime`, que aquí está escalado por el turbo, así que los Waits ya
-# se aceleran automáticamente con la velocidad. Forzarlos a tiempo real (como
-# hacían los parches anteriores) hacía que los Waits NO se acelerasen.
-#
+# Waits de rutas de movimiento (Set Move Route → Wait): misma lógica que arriba.
+class Game_Character
+  alias_method :turbo_original_update_command, :update_command unless method_defined?(:turbo_original_update_command)
+
+  def update_command
+    if @wait_count > 0
+      @wait_start_real ||= System.unscaled_uptime
+      required = @wait_count / TurboConfig.multiplier
+      if System.unscaled_uptime - @wait_start_real < required
+        return
+      end
+      @wait_count = 0
+      @wait_start = nil
+      @wait_start_real = nil
+    end
+    turbo_original_update_command
+    @wait_start_real = System.unscaled_uptime if @wait_count > 0 && !@wait_start_real
+  end
+
+  alias_method :turbo_original_character_update, :update unless method_defined?(:turbo_original_character_update)
+
+  def update
+    if self == $game_player && defined?(SMOOTH_SCROLLING) && SMOOTH_SCROLLING && on_stair?
+      $disable_scroll_counter = 2
+    end
+    return turbo_original_character_update if $game_temp.in_menu
+    time_now = System.uptime
+    @last_update_time = time_now if !@last_update_time || @last_update_time > time_now
+    @delta_t = time_now - @last_update_time
+    @last_update_time = time_now
+    # El umbral original (0.25 s virtuales) se dispara antes con turbo activo y
+    # puede saltarse pasos completos del jugador, incluidos touch events.
+    return if @delta_t > (0.25 * TurboConfig.multiplier)
+    @moved_last_frame = @moved_this_frame
+    @stopped_last_frame = @stopped_this_frame
+    @moved_this_frame = false
+    @stopped_this_frame = false
+    update_command
+    (moving? || jumping?) ? update_move : update_stop
+    update_pattern
+  end
+end
+
+# Si el intérprete del mapa estaba ocupado en el mismo frame en que el jugador
+# terminó un paso, los touch events no se evaluaban. Reintentar al final del
+# frame, cuando el intérprete ya ha avanzado.
+class Game_Player
+  attr_accessor :turbo_deferred_touch
+
+  alias_method :turbo_original_update_event_triggering, :update_event_triggering unless method_defined?(:turbo_original_update_event_triggering)
+
+  def update_event_triggering
+    @turbo_deferred_touch = false
+    if Turbo.active? && @moved_this_frame && $game_system.map_interpreter.running?
+      @turbo_deferred_touch = true
+    end
+    turbo_original_update_event_triggering
+  end
+
+  def turbo_retry_deferred_touch
+    return if !$game_map || moving? || jumping? || $PokemonGlobal.forced_movement?
+    return if $game_system.map_interpreter.running?
+    result = pbCheckEventTriggerFromDistance([2])
+    result |= check_event_trigger_here([1, 2])
+    pbOnStepTaken(result) if result
+  end
+end
+
+EventHandlers.add(:on_frame_update, :turbo_deferred_touch, proc {
+  next unless Turbo.active?
+  next unless $game_player&.turbo_deferred_touch
+  $game_player.turbo_deferred_touch = false
+  $game_player.turbo_retry_deferred_touch
+})
+
 # Para los fades y otros elementos que necesitan tiempo real (no acelerable),
 # se usa explícitamente `System.unscaled_uptime` en sus implementaciones más
 # abajo (sección 9. Fix de Fades).
