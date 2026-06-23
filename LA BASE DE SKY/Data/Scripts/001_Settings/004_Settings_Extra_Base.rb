@@ -479,7 +479,7 @@ module OWShadowSettings
   SHADOWLESS_EVENT_NAME     = [
     'door', 'FlechaSalida', 'nurse', 'Enfermera', 'Healing balls', 'Balls curativas', 'Mart', 'Tendero', 'SmashRock', 'RocaRompible', 'StrengthBoulder', 'PiedraFuerza',
     'CutTree', 'ArbolCorte', 'HeadbuttTree', 'ArbolGolpeCabeza', 'BerryPlant', 'Planta Bayas', '.shadowless', '.noshadow', '.sl', 'Entrada Mazmorra Bosque', 'Entrada Cueva', 'Relic Stone',
-    'Escalera', 'Puerta', 'ExitArrow', 'NoShadow'
+    'Escalera', 'Puerta', 'ExitArrow', 'NoShadow', 'noShadow'
   ]
 
   # Si gráfico utiliza una de estas palabras en su nombre de archivo, no generará sombra.
