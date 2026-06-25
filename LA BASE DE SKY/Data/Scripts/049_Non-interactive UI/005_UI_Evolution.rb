@@ -219,8 +219,10 @@ class PokemonEvolutionScene
   def pbEvolutionSuccess
     $stats.evolution_count += 1
     # Play cry of evolved species
-    cry_time = GameData::Species.cry_length(@newspecies, @pokemon.form)
-    Pokemon.play_cry(@newspecies, @pokemon.form)
+    new_species_data = GameData::Species.get(@newspecies)
+    evo_form = (new_species_data.form > 0) ? new_species_data.form : @pokemon.form
+    cry_time = GameData::Species.cry_length(new_species_data.species, evo_form)
+    Pokemon.play_cry(new_species_data.species, evo_form)
     timer_start = System.uptime
     loop do
       Graphics.update

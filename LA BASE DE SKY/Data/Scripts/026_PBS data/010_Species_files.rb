@@ -152,17 +152,24 @@ module GameData
     end
 
     def self.sprite_bitmap_from_pokemon(pkmn, back = false, species = nil)
-      species = pkmn.species if !species
-      species = GameData::Species.get(species).species   # Just to be sure it's a symbol
-      return self.egg_sprite_bitmap(species, pkmn.form) if pkmn.egg?     
-      if back
-        filename = self.back_sprite_filename(species, pkmn.form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?, pkmn.super_shiny?)
+      form = pkmn.form
+      if species
+        species_data = GameData::Species.get(species)
+        species = species_data.species
+        form = species_data.form if species_data.form > 0
       else
-        filename = self.front_sprite_filename(species, pkmn.form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?, pkmn.super_shiny?)
-      end     
+        species = pkmn.species
+        species = GameData::Species.get(species).species   # Just to be sure it's a symbol
+      end
+      return self.egg_sprite_bitmap(species, form) if pkmn.egg?
+      if back
+        filename = self.back_sprite_filename(species, form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?, pkmn.super_shiny?)
+      else
+        filename = self.front_sprite_filename(species, form, pkmn.gender, pkmn.shiny?, pkmn.shadowPokemon?, pkmn.super_shiny?)
+      end
       ret = (filename) ? AnimatedBitmap.new(filename) : nil
       if ret && pkmn.super_shiny? && !(filename && filename.include?("supershiny"))
-        hue = self.super_shiny_hue_for(species, pkmn.form, true)
+        hue = self.super_shiny_hue_for(species, form, true)
         if hue != 0
           new_ret = ret.copy
           ret.dispose

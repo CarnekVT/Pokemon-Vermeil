@@ -962,6 +962,7 @@ def pbPokemonEditor
             # Sanitise data
             Compiler.validate_compiled_pokemon(species_hash)
             species_hash[:evolutions].each do |evo|
+              evo[0] = Compiler.cast_evolution_species(evo[0]) if evo[0].is_a?(String)
               param_type = GameData::Evolution.get(evo[1]).parameter
               if param_type.nil?
                 evo[2] = nil

@@ -276,9 +276,11 @@ class PokemonPokedexInfo_Scene
     family_evos = []
     family_evos_with_forms = []  # Store species IDs with specific forms
     for i in family_evos_temp
-      family_evos << (i[0])
-      # Check if evolution method includes "Form" and extract form number
-      if i[1].to_s.include?("Form") && i[1].to_s =~ /Form(\d+)$/
+      evo_target = GameData::Species.try_get(i[0])
+      family_evos << (evo_target ? evo_target.species : i[0])
+      if GameData::Species.form_evolution_target?(i[0])
+        family_evos_with_forms << i[0]
+      elsif i[1].to_s.include?("Form") && i[1].to_s =~ /Form(\d+)$/
         form_number = $1.to_i
         form_species = GameData::Species.get_species_form(i[0], form_number)
         family_evos_with_forms << form_species.id if form_species

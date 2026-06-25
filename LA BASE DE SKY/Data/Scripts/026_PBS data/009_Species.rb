@@ -171,6 +171,26 @@ module GameData
       return (DATA.has_key?(species_form)) ? DATA[species_form] : nil
     end
 
+    # @param target [Symbol, String] a species or species_form PBS ID (e.g. :RAICHU_1)
+    # @return [Boolean] whether the target refers to a defined alternate form
+    def self.form_evolution_target?(target)
+      return false if target.nil?
+      return false if target.to_s !~ /^.+_\d+$/
+      return exists?(target) && get(target).form > 0
+    end
+
+    # @param target [Symbol, String] evolution target from PBS data
+    # @param species_data [self] species/form being compared against
+    # @return [Boolean] whether target is an evolution into species_data
+    def self.evolution_target_matches?(target, species_data)
+      target_data = try_get(target)
+      if target_data
+        return false if target_data.form > 0 && target_data.form != species_data.form
+        return target_data.species == species_data.species
+      end
+      return target == species_data.species && species_data.form == 0
+    end
+
     def self.each_species
       DATA.each_value { |species| yield species if species.form == 0 }
     end

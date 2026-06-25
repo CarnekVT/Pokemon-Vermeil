@@ -411,24 +411,27 @@ class PokemonPokedexInfo_Scene
           evolutions = prevo_data.get_evolutions(true)
           # First, check if there are any form-specific evolution methods for this species
           has_form_evos = evolutions.any? do |evo|
+            next true if GameData::Species.form_evolution_target?(evo[0])
             evo[0] == species.species && evo[1].to_s.include?("Form") && evo[1].to_s =~ /Form(\d+)$/
           end
           
           evolutions = evolutions.select do |evo|
-            next false if evo[0] != species.species || evo[1] == :None
+            next false if evo[1] == :None
+            next false if !GameData::Species.evolution_target_matches?(evo[0], species)
             # Check if evolution method has a Form number
             if evo[1].to_s.include?("Form") && evo[1].to_s =~ /Form(\d+)$/
               form_number = $1.to_i
               next form_number == species.form
             end
             # If there are form-specific evolutions and this is not form 0, exclude non-form evolutions
-            next false if has_form_evos && species.form > 0
+            next false if has_form_evos && species.form > 0 &&
+                          !GameData::Species.form_evolution_target?(evo[0])
             true
           end
 
           count = evolutions.length
           evolutions.each do |evo|
-            next if evo[0] != species.species
+            next if !GameData::Species.evolution_target_matches?(evo[0], species)
             next if evo[1] == :None
             if species.species == :URSHIFU && evo[1] == :Item
               next if evo[2] != [:SCROLLOFDARKNESS, :SCROLLOFWATERS][species.form]
