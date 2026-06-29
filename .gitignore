@@ -35,4 +35,7 @@ ruby-style-suggestions.ps1
 PRE-COMMIT-SETUP-GUIDE.md
 .ruby-version
 LA BASE DE SKY/luts_log.txt
-
+.agents
+.claude
+AGENTS.md
+CLAUDE.md
