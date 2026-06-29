@@ -31,6 +31,13 @@ module TurboConfig
     return 0 if frames <= 0
     return (frames / 20.0) / multiplier
   end
+
+  def self.real_lerp(start_val, end_val, duration, timer_start_real)
+    now_real = System.unscaled_uptime
+    elapsed = now_real - timer_start_real
+    return end_val if elapsed >= duration
+    return start_val + (end_val - start_val) * (elapsed / duration)
+  end
 end
 
 # API pública para usar desde otros scripts/eventos.
@@ -85,16 +92,19 @@ end
 
 # Variables globales
 $GameSpeed = 0
+$buttonframes = TurboConfig::ICON_DURATION  # Inicializar oculto; set_speed lo pone a 0 para mostrar
 $CanToggle = true
 $RefreshEventsForTurbo = false
 $SpeedDifference = 0
 $_turbo_internal_speed_set = false
+$_TurboMsgWindowStack ||= []
+$CurrentMsgWindow ||= nil
 
 # Eventos que hacen `$GameSpeed = 0` (p. ej. cinemáticas) deben pasar por
 # Turbo.set_speed para no romper System.uptime ni efectos de pantalla activos.
 trace_var(:$GameSpeed) do |val|
   next if $_turbo_internal_speed_set
-  idx = val[0].to_i
+  idx = val.to_i
   idx = 0 if idx < 0 || idx >= TurboConfig::SPEED_STAGES.size
   Turbo.set_speed(idx)
 end
@@ -148,24 +158,22 @@ end
 # 4. Opciones.
 #===============================================================================
 class PokemonSystem
-  alias_method :original_initialize, :initialize unless method_defined?(:original_initialize)
+  alias_method :_turbo_orig_initialize, :initialize unless method_defined?(:_turbo_orig_initialize)
   attr_accessor :only_speedup_battles
-  attr_accessor :battle_speed
 
   def initialize
-    original_initialize
+    _turbo_orig_initialize
     @only_speedup_battles = 0 # 0 = Siempre, 1 = Solo Batalla
-    @battle_speed = 0 
   end
 end
 
 module Game
   class << self
-    alias_method :original_load, :load unless method_defined?(:original_load)
+    alias_method :_turbo_orig_game_load, :load unless method_defined?(:_turbo_orig_game_load)
   end
 
   def self.load(save_data)
-    original_load(save_data)
+    _turbo_orig_game_load(save_data)
     if $PokemonSystem
       $CanToggle = ($PokemonSystem.only_speedup_battles == 0)
     end
@@ -240,7 +248,7 @@ EventHandlers.add(:on_game_initialize, :turbo_metrics_fix, proc {
 # 5. Fixes Visuales.
 #===============================================================================
 class Game_Map
-  alias_method :original_update, :update unless method_defined?(:original_update)
+  alias_method :_turbo_orig_map_update, :update unless method_defined?(:_turbo_orig_map_update)
 
   def update
     # Si se activó el turbo, sólo refrescamos el contador de la ventana de
@@ -260,8 +268,8 @@ class Game_Map
     end
 
     temp_timer = @fog_scroll_last_update_timer
-    @fog_scroll_last_update_timer = System.uptime 
-    original_update
+    @fog_scroll_last_update_timer = System.uptime
+    _turbo_orig_map_update
     @fog_scroll_last_update_timer = temp_timer
     update_fog
   end
@@ -344,7 +352,6 @@ class Game_Screen
     @shake_timer_start = System.unscaled_uptime
   end
 
-  alias_method :turbo_original_update_screen, :update unless method_defined?(:turbo_original_update_screen)
   def update
     now = System.unscaled_uptime
     if @tone_timer_start
@@ -560,10 +567,7 @@ end
 # Se aliasan pbCreateMessageWindow / pbDisposeMessageWindow (en lugar de
 # reescribir pbMessage entero) para no pisar a otros plugins, y se usa una
 # pila para soportar mensajes anidados sin que $CurrentMsgWindow quede a nil
-# antes de tiempo.
-$CurrentMsgWindow = nil
-$_TurboMsgWindowStack ||= []
-
+# antes de tiempo. (declaradas en sección de globals arriba)
 class Object
   unless private_method_defined?(:turbo_original_pbCreateMessageWindow)
     alias_method :turbo_original_pbCreateMessageWindow, :pbCreateMessageWindow
@@ -677,14 +681,6 @@ EventHandlers.add(:on_enter_map, :fix_turbo_collision, proc { |_map_id|
 # Los fades deben usar tiempo REAL para que su duración visual sea consistente
 # independientemente de la velocidad del turbo.
 
-# Función auxiliar para lerp con tiempo real (no escalado)
-def turbo_real_lerp(start_val, end_val, duration, timer_start_real)
-  now_real = System.unscaled_uptime
-  elapsed = now_real - timer_start_real
-  return end_val if elapsed >= duration
-  return start_val + (end_val - start_val) * (elapsed / duration)
-end
-
 # Reemplazar pbFadeOutIn para usar tiempo real (idempotente).
 alias turbo_original_pbFadeOutIn pbFadeOutIn unless defined?(turbo_original_pbFadeOutIn)
 def pbFadeOutIn(z = 99999, nofadeout = false)
@@ -694,7 +690,7 @@ def pbFadeOutIn(z = 99999, nofadeout = false)
   viewport.z = z
   timer_start_real = System.unscaled_uptime
   loop do
-    col.set(0, 0, 0, turbo_real_lerp(0, 255, duration, timer_start_real))
+    col.set(0, 0, 0, TurboConfig.real_lerp(0, 255, duration, timer_start_real))
     viewport.color = col
     Graphics.update
     Input.update
@@ -710,7 +706,7 @@ def pbFadeOutIn(z = 99999, nofadeout = false)
     if !nofadeout
       timer_start_real = System.unscaled_uptime
       loop do
-        col.set(0, 0, 0, turbo_real_lerp(255, 0, duration, timer_start_real))
+        col.set(0, 0, 0, TurboConfig.real_lerp(255, 0, duration, timer_start_real))
         viewport.color = col
         Graphics.update
         Input.update
@@ -730,7 +726,7 @@ def pbFadeOutAndHide(sprites)
   pbDeactivateWindows(sprites) do
     timer_start_real = System.unscaled_uptime
     loop do
-      col.alpha = turbo_real_lerp(0, 255, duration, timer_start_real)
+      col.alpha = TurboConfig.real_lerp(0, 255, duration, timer_start_real)
       pbSetSpritesToColor(sprites, col)
       (block_given?) ? yield : pbUpdateSpriteHash(sprites)
       break if col.alpha == 255
@@ -760,7 +756,7 @@ def pbFadeInAndShow(sprites, visiblesprites = nil)
   pbDeactivateWindows(sprites) do
     timer_start_real = System.unscaled_uptime
     loop do
-      col.alpha = turbo_real_lerp(255, 0, duration, timer_start_real)
+      col.alpha = TurboConfig.real_lerp(255, 0, duration, timer_start_real)
       pbSetSpritesToColor(sprites, col)
       (block_given?) ? yield : pbUpdateSpriteHash(sprites)
       break if col.alpha == 0
@@ -777,7 +773,7 @@ def pbFadeOutInWithUpdate(sprites, z = 99999, nofadeout = false)
   viewport.z = z
   timer_start_real = System.unscaled_uptime
   loop do
-    col.set(0, 0, 0, turbo_real_lerp(0, 255, duration, timer_start_real))
+    col.set(0, 0, 0, TurboConfig.real_lerp(0, 255, duration, timer_start_real))
     viewport.color = col
     pbUpdateSpriteHash(sprites)
     Graphics.update
@@ -792,7 +788,7 @@ def pbFadeOutInWithUpdate(sprites, z = 99999, nofadeout = false)
     if !nofadeout
       timer_start_real = System.unscaled_uptime
       loop do
-        col.set(0, 0, 0, turbo_real_lerp(255, 0, duration, timer_start_real))
+        col.set(0, 0, 0, TurboConfig.real_lerp(255, 0, duration, timer_start_real))
         viewport.color = col
         pbUpdateSpriteHash(sprites)
         Graphics.update
