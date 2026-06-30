@@ -39,3 +39,7 @@ LA BASE DE SKY/luts_log.txt
 .claude
 AGENTS.md
 CLAUDE.md
+node_modules
+JUEGO/node_modules
+.opencode
+opencode.json
