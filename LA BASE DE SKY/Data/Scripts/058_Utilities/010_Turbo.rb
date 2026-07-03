@@ -8,6 +8,7 @@
 module TurboConfig
   # Velocidades: [Normal, x1.5, x2.0]
   SPEED_STAGES = [1.0, 1.5, 2.0]
+  SPEED_BATTLE_STAGES = [1.0, 2.0, 3.0]
 
   # Teclas para activar (al pulsar avanzan al siguiente nivel).
   TOGGLE_KEYS = [Input::ALT, Input::AUX1]
@@ -18,12 +19,19 @@ module TurboConfig
   # Duración real (en segundos) de los fades. NO se acelera con el turbo.
   REAL_FADE_DURATION = 0.4
 
+  # Etapas activas según el contexto: batalla usa SPEED_BATTLE_STAGES.
+  def self.current_stages
+    return SPEED_BATTLE_STAGES if defined?($game_temp) && $game_temp&.in_battle
+    return SPEED_STAGES
+  end
+
   # Helper: multiplicador actual del turbo, con clamping defensivo por si
   # $GameSpeed se sale de rango (cambios en caliente, saves antiguos, etc.).
   def self.multiplier
     idx = $GameSpeed || 0
-    idx = 0 if idx < 0 || idx >= SPEED_STAGES.size
-    return SPEED_STAGES[idx]
+    stages = current_stages
+    idx = 0 if idx < 0 || idx >= stages.size
+    return stages[idx]
   end
 
   # Convierte duración en frames (1/20 s) a segundos reales según el turbo.
@@ -62,7 +70,7 @@ module Turbo
   # Fuerza la velocidad a un índice concreto, ajustando $SpeedDifference
   # para que System.uptime sea continuo.
   def set_speed(idx)
-    idx = 0 if idx < 0 || idx >= TurboConfig::SPEED_STAGES.size
+    idx = 0 if idx < 0 || idx >= TurboConfig.current_stages.size
     real_now = System.unscaled_uptime
     virtual_now = System.uptime
     $_turbo_internal_speed_set = true
@@ -105,7 +113,7 @@ $CurrentMsgWindow ||= nil
 trace_var(:$GameSpeed) do |val|
   next if $_turbo_internal_speed_set
   idx = val.to_i
-  idx = 0 if idx < 0 || idx >= TurboConfig::SPEED_STAGES.size
+  idx = 0 if idx < 0 || idx >= TurboConfig.current_stages.size
   Turbo.set_speed(idx)
 end
 
@@ -148,7 +156,7 @@ module Input
     if $CanToggle && TurboConfig::TOGGLE_KEYS.any? { |key| trigger?(key) } && ( !Input.text_input || !trigger?(Input::AUX1) )
       # Avanzar al siguiente nivel de velocidad.
       new_idx = ($GameSpeed || 0) + 1
-      new_idx = 0 if new_idx >= TurboConfig::SPEED_STAGES.size
+      new_idx = 0 if new_idx >= TurboConfig.current_stages.size
       Turbo.set_speed(new_idx)
     end
   end
@@ -210,7 +218,7 @@ end
 EventHandlers.add(:on_start_battle, :start_speedup, proc {
   if $PokemonSystem&.only_speedup_battles == 1
     $CanToggle = true
-    Turbo.set_speed(TurboConfig::SPEED_STAGES.size - 1)
+    Turbo.set_speed(TurboConfig.current_stages.size - 1)
   end
 })
 
