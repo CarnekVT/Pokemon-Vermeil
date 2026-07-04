@@ -290,6 +290,35 @@ module Compiler
   def validate_all_compiled_berry_plants
   end
 
+  # Parses a PBS evolution target. Supports base species (RAICHU) and alternate
+  # forms (RAICHU_1). Form targets are accepted before pokemon_forms.txt is
+  # compiled; use validate_evolution_form_targets to verify them afterwards.
+  def cast_evolution_species(value)
+    str = value.to_s
+    if str =~ /^(.+)_(\d+)$/
+      species_sym = $1.to_sym
+      form_num = $2.to_i
+      if !GameData::Species.exists?(species_sym)
+        raise _INTL("Valor {1} no definido en GameData::Species\n{2}", value, FileLineData.linereport)
+      end
+      return sprintf("%s_%d", species_sym, form_num).to_sym
+    end
+    return cast_csv_value(value, "e", :Species)
+  end
+
+  def validate_evolution_form_targets
+    GameData::Species.each do |species|
+      FileLineData.setSection(species.id.to_s, "Evolutions", nil)   # For error reporting
+      species.evolutions.each do |evo|
+        next if evo[3]
+        next if evo[0].to_s !~ /^.+_\d+$/
+        if !GameData::Species.exists?(evo[0])
+          raise _INTL("Valor {1} no definido en GameData::Species\n{2}", evo[0], FileLineData.linereport)
+        end
+      end
+    end
+  end
+
   #=============================================================================
   # Compile Pokémon data
   #=============================================================================
@@ -345,7 +374,7 @@ module Compiler
     GameData::Species.each do |species|
       FileLineData.setSection(species.id.to_s, "Evolutions", nil)   # For error reporting
       species.evolutions.each do |evo|
-        evo[0] = cast_csv_value(evo[0], "e", :Species)
+        evo[0] = cast_evolution_species(evo[0])
         param_type = GameData::Evolution.get(evo[1]).parameter
         if param_type.nil?
           evo[2] = nil
@@ -495,6 +524,7 @@ module Compiler
   end
 
   def validate_all_compiled_pokemon_forms
+    validate_evolution_form_targets
     # Enumerate all evolution parameters (this couldn't be done earlier)
     GameData::Species.each do |species|
       FileLineData.setSection(species.id.to_s, "Evolutions", nil)   # For error reporting
@@ -521,15 +551,16 @@ module Compiler
       end
     end
     GameData::Species.each do |species|   # Distribute prevolutions
-      prevo_data = all_evos[[species.species, species.base_form]] || all_evos[species.species]
+      prevo_data = all_evos[species.id] || all_evos[[species.species, species.base_form]] || all_evos[species.species]
       next if !prevo_data
       # Record what species evolves from
       species.evolutions.delete_if { |evo| evo[3] }
       species.evolutions.push(prevo_data.clone)
       # Record that the prevolution can evolve into species
       prevo = GameData::Species.get(prevo_data[0])
-      if prevo.evolutions.none? { |evo| !evo[3] && evo[0] == species.species }
-        prevo.evolutions.push([species.species, :None, nil])
+      evo_target = (species.form > 0) ? species.id : species.species
+      if prevo.evolutions.none? { |evo| !evo[3] && GameData::Species.evolution_target_matches?(evo[0], species) }
+        prevo.evolutions.push([evo_target, :None, nil])
       end
     end
     # Get species names/descriptions for translating

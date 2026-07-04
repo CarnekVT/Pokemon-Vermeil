@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Partida guardada
+Comment=Abrir carpeta de partidas guardadas
+Exec=sh -c 'xdg-open "${XDG_DATA_HOME:-$HOME/.local/share}/La Base de Sky"'
+Icon=folder
+Terminal=false
+Categories=Game;

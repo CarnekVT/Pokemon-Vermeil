@@ -194,44 +194,7 @@ class Battle::Battler
 
   def pbCheckFormOnWeatherChange(ability_changed = false)
     return if fainted? || @effects[PBEffects::Transform]
-    # Castform - Forecast
-    if isSpecies?(:CASTFORM)
-      if hasActiveAbility?(:FORECAST)
-        newForm = 0
-        case effectiveWeather
-        when :Sun, :HarshSun   then newForm = 1
-        when :Rain, :HeavyRain then newForm = 2
-        when :Hail, :Snowstorm then newForm = 3
-        end
-        if @form != newForm
-          @battle.pbShowAbilitySplash(self, true)
-          @battle.pbHideAbilitySplash(self)
-          pbChangeForm(newForm, _INTL("¡{1} se ha transformado!", pbThis))
-        end
-      else
-        pbChangeForm(0, _INTL("¡{1} se ha transformado!", pbThis))
-      end
-    end
-    # Cherrim - Flower Gift
-    if isSpecies?(:CHERRIM)
-      if hasActiveAbility?(:FLOWERGIFT)
-        newForm = 0
-        newForm = 1 if [:Sun, :HarshSun].include?(effectiveWeather)
-        if @form != newForm
-          @battle.pbShowAbilitySplash(self, true)
-          @battle.pbHideAbilitySplash(self)
-          pbChangeForm(newForm, _INTL("¡{1} se ha transformado!", pbThis))
-        end
-      else
-        pbChangeForm(0, _INTL("¡{1} se ha transformado!", pbThis))
-      end
-    end
-    # Eiscue - Ice Face
-    if !ability_changed && isSpecies?(:EISCUE) && self.ability == :ICEFACE &&
-       @form == 1 && !@effects[PBEffects::Transform] &&
-       [:Hail, :Snowstorm].include?(effectiveWeather)
-      @canRestoreIceFace = true   # Changed form at end of round
-    end
+    MultipleForms.call("changeFormOnWeather", @pokemon, @battle, self)
   end
 
   def pbCheckFormOnTerrainChange(ability_changed = false)
@@ -244,72 +207,7 @@ class Battle::Battler
     return if fainted? || @effects[PBEffects::Transform]
     # Form changes upon entering battle and when the weather changes
     pbCheckFormOnWeatherChange if !endOfRound
-    # Darmanitan - Zen Mode
-    if isSpecies?(:DARMANITAN) && self.ability == :ZENMODE
-      if @hp <= @totalhp / 2
-        if @form.even?
-          @battle.pbShowAbilitySplash(self, true)
-          @battle.pbHideAbilitySplash(self)
-          pbChangeForm(@form + 1, _INTL("¡{1} activado!", abilityName))
-        end
-      elsif @form.odd?
-        @battle.pbShowAbilitySplash(self, true)
-        @battle.pbHideAbilitySplash(self)
-        pbChangeForm(@form - 1, _INTL("¡{1} activado!", abilityName))
-      end
-    end
-    # Minior - Shields Down
-    if isSpecies?(:MINIOR) && self.ability == :SHIELDSDOWN
-      if @hp > @totalhp / 2   # Turn into Meteor form
-        newForm = (@form >= 7) ? @form - 7 : @form
-        if @form != newForm
-          @battle.pbShowAbilitySplash(self, true)
-          @battle.pbHideAbilitySplash(self)
-          pbChangeForm(newForm, _INTL("¡{1} desactivado!", abilityName))
-        end
-      elsif @form < 7   # Turn into Core form
-        @battle.pbShowAbilitySplash(self, true)
-        @battle.pbHideAbilitySplash(self)
-        pbChangeForm(@form + 7, _INTL("¡{1} activado!", abilityName))
-      end
-    end
-    # Wishiwashi - Schooling
-    if isSpecies?(:WISHIWASHI) && self.ability == :SCHOOLING
-      if @level >= 20 && @hp > @totalhp / 4
-        if @form != 1
-          @battle.pbShowAbilitySplash(self, true)
-          @battle.pbHideAbilitySplash(self)
-          pbChangeForm(1, _INTL("¡{1} ha formado un banco!", pbThis))
-        end
-      elsif @form != 0
-        @battle.pbShowAbilitySplash(self, true)
-        @battle.pbHideAbilitySplash(self)
-        pbChangeForm(0, _INTL("¡El banco de {1} se ha dispersado!", pbThis(true)))
-      end
-    end
-    # Zygarde - Power Construct
-    if isSpecies?(:ZYGARDE) && self.ability == :POWERCONSTRUCT && endOfRound &&
-       @hp <= @totalhp / 2 && @form < 2   # Turn into Complete Forme
-      newForm = @form + 2
-      @battle.pbDisplay(_INTL("¡Sientes la presencia de muchos!"))
-      @battle.pbShowAbilitySplash(self, true)
-      @battle.pbHideAbilitySplash(self)
-      pbChangeForm(newForm, _INTL("¡{1} se ha transformado en su Forma Completa!", pbThis))
-    end
-    # Morpeko - Hunger Switch
-    if isSpecies?(:MORPEKO) && !@effects[PBEffects::Transform] &&
-       hasActiveAbility?(:HUNGERSWITCH) && endOfRound
-      # Intentionally doesn't show the ability splash or a message
-      newForm = (@form + 1) % 2
-      pbChangeForm(newForm, nil)
-    end
-    # Terapagos - Tera Shift
-    if isSpecies?(:TERAPAGOS) && !@effects[PBEffects::Transform] &&
-       self.ability == :TERASHIFT && @form == 0
-      @battle.pbShowAbilitySplash(self, true)
-      @battle.pbHideAbilitySplash(self)
-      pbChangeForm(1, _INTL("¡{1} se ha transformado!", pbThis))
-    end
+    MultipleForms.call("getCheckForm", @pokemon, @battle, self, endOfRound)
   end
 
   def pbTransform(target)

@@ -162,6 +162,23 @@ MultipleForms.register(:SPINDA, {
 })
 
 MultipleForms.register(:CASTFORM, {
+  "changeFormOnWeather" => proc { |pkmn, battle, battler, ability_changed|
+    if battler.hasActiveAbility?(:FORECAST)
+      newForm = 0
+      case battler.effectiveWeather
+      when :Sun, :HarshSun   then newForm = 1
+      when :Rain, :HeavyRain then newForm = 2
+      when :Hail, :Snowstorm then newForm = 3
+      end
+      if battler.form != newForm
+        battle.pbShowAbilitySplash(battler, true)
+        battle.pbHideAbilitySplash(battler)
+        battler.pbChangeForm(newForm, _INTL("¡{1} se ha transformado!", battler.pbThis))
+      end
+    else
+      battler.pbChangeForm(0, _INTL("¡{1} se ha transformado!", battler.pbThis))
+    end
+  },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0
   }
@@ -219,6 +236,19 @@ MultipleForms.register(:WORMADAM, {
 })
 
 MultipleForms.register(:CHERRIM, {
+  "changeFormOnWeather" => proc { |pkmn, battle, battler, ability_changed|  
+    if battler.hasActiveAbility?(:FLOWERGIFT)
+      newForm = 0
+      newForm = 1 if [:Sun, :HarshSun].include?(battler.effectiveWeather)
+      if battler.form != newForm
+        battle.pbShowAbilitySplash(battler, true)
+        battle.pbHideAbilitySplash(battler)
+        battler.pbChangeForm(newForm, _INTL("¡{1} se ha transformado!", battler.pbThis))
+      end
+    else
+      battler.pbChangeForm(0, _INTL("¡{1} se ha transformado!", battler.pbThis))
+    end
+  },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0
   }
@@ -333,6 +363,20 @@ MultipleForms.register(:ARCEUS, {
 })
 
 MultipleForms.register(:DARMANITAN, {
+  "getCheckForm" => proc { |pkmn, battle, battler, endOfRound|
+    next unless battler.hasActiveAbility?(:ZENMODE)
+    if battler.hp <= battler.totalhp / 2
+      if battler.form.even?
+        battle.pbShowAbilitySplash(battler, true)
+        battle.pbHideAbilitySplash(battler)
+        battler.pbChangeForm(battler.form + 1, _INTL("¡{1} activado!", battler.abilityName))
+      end
+    elsif battler.form.odd?
+      battle.pbShowAbilitySplash(battler, true)
+      battle.pbHideAbilitySplash(battler)
+      battler.pbChangeForm(battler.form - 1, _INTL("¡{1} activado!", battler.abilityName))
+    end
+  },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 2 * (pkmn.form / 2)
   }
@@ -496,6 +540,15 @@ MultipleForms.register(:XERNEAS, {
 })
 
 MultipleForms.register(:ZYGARDE, {
+  "getCheckForm" => proc { |pkmn, battle, battler, endOfRound|
+    next unless battler.hasActiveAbility?(:POWERCONSTRUCT) && endOfRound && 
+                battler.hp <= battler.totalhp / 2 && battler.form < 2 # Turn into Complete Forme
+    newForm = battler.form + 2
+    battle.pbDisplay(_INTL("¡Sientes la presencia de muchos!"))
+    battle.pbShowAbilitySplash(battler, true)
+    battle.pbHideAbilitySplash(battler)
+    battler.pbChangeForm(newForm, _INTL("¡{1} se ha transformado en su Forma Completa!", battler.pbThis))
+  },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next pkmn.form - 2 if pkmn.form >= 2 && (pkmn.fainted? || endBattle)
   },
@@ -550,6 +603,20 @@ MultipleForms.register(:LYCANROC, {
 })
 
 MultipleForms.register(:WISHIWASHI, {
+  "getCheckForm" => proc { |pkmn, battle, battler, endOfRound|
+    next unless battler.hasActiveAbility?(:SCHOOLING)
+    if battler.level >= 20 && battler.hp > battler.totalhp / 4
+      if battler.form != 1
+        battle.pbShowAbilitySplash(battler, true)
+        battle.pbHideAbilitySplash(battler)
+        battler.pbChangeForm(1, _INTL("¡{1} ha formado un banco!", battler.pbThis))
+      end
+    elsif battler.form != 0
+      battle.pbShowAbilitySplash(battler, true)
+      battle.pbHideAbilitySplash(battler)
+      battler.pbChangeForm(0, _INTL("¡El banco de {1} se ha dispersado!", battler.pbThis(true)))
+    end
+  },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0
   }
@@ -598,6 +665,21 @@ MultipleForms.register(:MINIOR, {
     # Al entrar en combate, Minior siempre empieza en forma núcleo (Core)
     # La comprobación de PS se hace después (manejada por la habilidad Escudo Limitado)
     next pkmn.form + 7 if pkmn.form < 7   # Convert from Meteor (0-6) to Core (7-13)
+  },
+  "getCheckForm" => proc { |pkmn, battle, battler, endOfRound|
+    next unless battler.hasActiveAbility?(:SHIELDSDOWN)
+    if battler.hp > battler.totalhp / 2   # Turn into Meteor form
+      newForm = (battler.form >= 7) ? battler.form - 7 : battler.form
+      if battler.form != newForm
+        battle.pbShowAbilitySplash(battler, true)
+        battle.pbHideAbilitySplash(battler)
+        battler.pbChangeForm(newForm, _INTL("¡{1} desactivado!", battler.abilityName))
+      end
+    elsif battler.form < 7   # Turn into Core form
+      battle.pbShowAbilitySplash(battler, true)
+      battle.pbHideAbilitySplash(battler)
+      battler.pbChangeForm(battler.form + 7, _INTL("¡{1} activado!", battler.abilityName))
+    end
   },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     # Fuera de combate, Minior siempre vuelve a forma meteorito (Meteor)
@@ -672,7 +754,7 @@ MultipleForms.register(:MILCERY, {
     if sweets.include?(pkmn.item_id)
       next sweets.index(pkmn.item_id) + ((pkmn.personalID % num_flavors) * sweets.length)
     end
-    next 0
+    next pkmn.form_simple
   }
 })
 
@@ -685,6 +767,13 @@ MultipleForms.register(:ALCREMIE, {
 })
 
 MultipleForms.register(:EISCUE, {
+  "changeFormOnWeather" => proc { |pkmn, battle, battler, ability_changed|
+    if !ability_changed && battler.hasActiveAbility?(:ICEFACE) &&
+       battler.form == 1 && !battler.effects[PBEffects::Transform] &&
+       [:Hail, :Snowstorm].include?(battler.effectiveWeather)
+      battler.canRestoreIceFace = true   # Changed form at end of round
+    end
+  },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0 if (pkmn.fainted? && Settings::MECHANICS_GENERATION == 7) || endBattle
   }
@@ -697,6 +786,14 @@ MultipleForms.register(:INDEEDEE, {
 })
 
 MultipleForms.register(:MORPEKO, {
+  "getCheckForm" => proc { |pkmn, battle, battler, endOfRound|
+    if !battler.effects[PBEffects::Transform] &&
+       battler.hasActiveAbility?(:HUNGERSWITCH) && endOfRound
+      # Intentionally doesn't show the ability splash or a message
+      newForm = (battler.form + 1) % 2
+      battler.pbChangeForm(newForm, nil)
+    end
+  },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0 if pkmn.fainted? || endBattle
   }
@@ -856,6 +953,14 @@ MultipleForms.register(:OGERPON, {
 })
 
 MultipleForms.register(:TERAPAGOS, {
+  "getCheckForm" => proc { |pkmn, battle, battler, endOfRound|
+    if !battler.effects[PBEffects::Transform] &&
+       battler.hasActiveAbility?(:TERASHIFT) && battler.form == 0
+      battle.pbShowAbilitySplash(battler, true)
+      battle.pbHideAbilitySplash(battler)
+      battler.pbChangeForm(1, _INTL("¡{1} se ha transformado!", battler.pbThis))
+    end
+  },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0 if endBattle || (pkmn.fainted? && pkmn.form >= 2)
   }

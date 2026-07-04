@@ -745,6 +745,9 @@ class Battle
   def swapHeldItems(battler1, battler2)
     item1 = battler1.item_id
     item2 = battler2.item_id
+    if Settings::RESTORE_HELD_ITEMS_AFTER_BATTLE && @used_items && battler1.pbOwnedByPlayer?
+      @used_items << [battler2.pokemon, item2]
+    end
     battler1.item = item2
     battler1.effects[PBEffects::ChoiceBand] = nil if !battler1.hasActiveAbility?(:GORILLATACTICS)
     battler1.effects[PBEffects::Unburden]   = (item1 && !battler1.item) if battler1.hasActiveAbility?(:UNBURDEN)

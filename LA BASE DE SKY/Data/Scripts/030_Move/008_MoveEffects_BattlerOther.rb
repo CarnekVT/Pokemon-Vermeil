@@ -128,6 +128,13 @@ class Battle::Move::PoisonTargetLowerTargetSpeed1 < Battle::Move
   end
 end
 
+class Battle::Move::PoisonTargetLowerTargetSpeed2 < Battle::Move::PoisonTargetLowerTargetSpeed1
+  def initialize(battle, move)
+    super
+    @statDown = [:SPEED, 2]
+  end
+end
+
 #===============================================================================
 # Poisons the target. Removes trapping moves, entry hazards and Leech Seed on
 # user/user's side. (Mortal Spin)
@@ -1249,9 +1256,9 @@ class Battle::Move::SetUserAndAlliesAbilityToTargetAbility < Battle::Move
       @battle.pbDisplay(_INTL("¡Pero ha fallado!")) if show_message
       return true
     end
-    @valid_targets.delete_if { |battler| battler.ability_id == target.ability_id }
-    if @valid_targets.empty?
-      @battle.pbDisplay(_INTL("But it failed!")) if show_message
+    @valid_targets.delete_if { |battler| battler.ability_id == target.ability_id } if @valid_targets
+    if !@valid_targets || @valid_targets.empty?
+      @battle.pbDisplay(_INTL("¡Pero ha fallado!")) if show_message
       return true
     end
 

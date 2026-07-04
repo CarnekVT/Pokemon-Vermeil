@@ -1687,6 +1687,12 @@ Battle::AbilityEffects::DamageCalcFromUser.add(:STEELWORKER,
   }
 )
 
+Battle::AbilityEffects::DamageCalcFromUser.add(:FIREMANE,
+  proc { |ability, user, target, move, mults, power, type|
+    mults[:attack_multiplier] *= 1.5 if type == :FIRE
+  }
+)
+
 Battle::AbilityEffects::DamageCalcFromUser.add(:STEELYSPIRIT,
   proc { |ability, user, target, move, mults, power, type|
     mults[:final_damage_multiplier] *= 1.5 if type == :STEEL
@@ -2539,6 +2545,8 @@ Battle::AbilityEffects::OnEndOfUsingMove.add(:BEASTBOOST,
     end
   }
 )
+
+Battle::AbilityEffects::OnEndOfUsingMove.copy(:BEASTBOOST, :EELEVATE)
 
 Battle::AbilityEffects::OnEndOfUsingMove.add(:CHILLINGNEIGH,
   proc { |ability, user, targets, move, battle|

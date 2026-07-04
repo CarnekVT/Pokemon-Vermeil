@@ -94,7 +94,7 @@ class Battle::AI
     return false if pkmn.hasItem?(:IRONBALL)
     return false if @battle.field.effects[PBEffects::Gravity] > 0
     return true if pkmn.hasType?(:FLYING)
-    return true if pkmn.hasAbility?(:LEVITATE)
+    return true if (pkmn.hasAbility?(:LEVITATE) || pkmn.hasAbility?(:EELEVATE))
     return true if pkmn.hasItem?(:AIRBALLOON)
     return false
   end
@@ -120,7 +120,7 @@ class Battle::AI
            :POWERCONSTRUCT, :PRIMORDIALSEA, :PUREPOWER, :SHADOWTAG,
            :STANCECHANGE, :WONDERGUARD],
     9  => [:ARENATRAP, :BEADSOFRUIN, :HADRONENGINE, :IMPOSTER, :MAGICBOUNCE,
-           :MAGICGUARD, :MAGNETPULL, :ORICHALCUMPULSE, :SPEEDBOOST,
+           :MAGICGUARD, :MAGNETPULL, :ORICHALCUMPULSE, :SPEEDBOOST, :EELEVATE,
            :SWORDOFRUIN, :TABLETSOFRUIN, :VESSELOFRUIN],
     8  => [:ADAPTABILITY, :AERILATE, :COMMANDER, :CONTRARY, :DISGUISE,
            :DRAGONSMAW, :GALVANIZE, :GOODASGOLD, :ILLUSION, :LIBERO,
@@ -140,7 +140,7 @@ class Battle::AI
            :MIRRORARMOR, :MOTORDRIVE, :NEUROFORCE, :POISONPUPPETEER,
            :PRISMARMOR, :PROTOSYNTHESIS, :QUARKDRIVE, :QUEENLYMAJESTY,
            :RECKLESS, :ROUGHSKIN, :SANDRUSH, :SCHOOLING, :SCRAPPY, :SHARPNESS,
-           :SHIELDSDOWN, :SOLIDROCK, :STAKEOUT, :STAMINA, :STEELWORKER,
+           :SHIELDSDOWN, :SOLIDROCK, :STAKEOUT, :STAMINA, :STEELWORKER, :FIREMANE,
            :STRONGJAW, :STURDY, :SWIFTSWIM, :TOXICBOOST, :TRACE, :UNAWARE,
            :VICTORYSTAR, :WELLBAKEDBODY],
     5  => [:AFTERMATH, :AIRLOCK, :ANALYTIC, :ANGERSHELL, :BERSERK, :BLAZE,
@@ -474,6 +474,13 @@ Battle::AI::Handlers::AbilityRanking.add(:SKILLLINK,
 Battle::AI::Handlers::AbilityRanking.add(:STEELWORKER,
   proc { |ability, score, battler, ai|
     next score if battler.has_damaging_move_of_type?(:STEEL)
+    next 0
+  }
+)
+
+Battle::AI::Handlers::AbilityRanking.add(:FIREMANE,
+  proc { |ability, score, battler, ai|
+    next score if battler.has_damaging_move_of_type?(:FIRE)
     next 0
   }
 )

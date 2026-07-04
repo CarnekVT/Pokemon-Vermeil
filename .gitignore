@@ -24,6 +24,7 @@ LA BASE DE SKY/Data/Tilesets.rxdata
 LA BASE DE SKY/Data/System.rxdata
 LA BASE DE SKY/Data/States.rxdata
 LA BASE DE SKY/Data/Skills.rxdata
+LA BASE DE SKY/Plugins/MakerStudio
 Gemfile
 Gemfile.lock
 rakefile
@@ -34,4 +35,11 @@ ruby-style-suggestions.ps1
 PRE-COMMIT-SETUP-GUIDE.md
 .ruby-version
 LA BASE DE SKY/luts_log.txt
-
+.agents
+.claude
+AGENTS.md
+CLAUDE.md
+node_modules
+JUEGO/node_modules
+.opencode
+opencode.json

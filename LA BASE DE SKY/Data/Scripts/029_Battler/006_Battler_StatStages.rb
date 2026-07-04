@@ -323,7 +323,7 @@ class Battle::Battler
     if Settings::MECHANICS_GENERATION >= 8 && hasActiveAbility?([:OBLIVIOUS, :OWNTEMPO, :INNERFOCUS, :SCRAPPY])
       @battle.pbShowAbilitySplash(self)
       if Battle::Scene::USE_ABILITY_SPLASH
-        @battle.pbDisplay(_INTL("¡{2} de {1} no puede bajar más!", pbThis(true), GameData::Stat.get(:ATTACK).name))
+        @battle.pbDisplay(_INTL("¡{2} de {1} no puede disminuir!", pbThis(true), GameData::Stat.get(:ATTACK).name))
       else
         @battle.pbDisplay(_INTL("¡{2} de {1} evitó que bajara su {3}!", pbThis(true), abilityName,
                                 GameData::Stat.get(:ATTACK).name))

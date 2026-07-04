@@ -21,6 +21,16 @@ module GameData
   end
 end
 
+def show_new_form_sprite(forms)
+  forms = forms.map { |form|
+    name = !form.form_name || form.form_name.empty? ? _INTL("Forma Normal") : form.form_name
+    bitmap = GameData::Species.sprite_bitmap(form.species, form.form)
+    [name, bitmap]
+  }
+  forms << [_INTL("Cancelar"), nil]
+  return forms
+end
+
 def change_pokemon_form(force_species = nil, message_var = nil, show_messages = true)
   return false if force_species && !GameData::Species.exists?(force_species)
   
@@ -50,12 +60,7 @@ def change_pokemon_form(force_species = nil, message_var = nil, show_messages = 
   end
 
   if SHOW_SPRITES_IN_FORM_CHANGER
-    form_names = forms.map { |form|
-      name = !form.form_name || form.form_name.empty? ? _INTL("Forma Normal") : form.form_name
-      bitmap = GameData::Species.sprite_bitmap(form.species, form.form)
-      [name, bitmap]
-    }
-    form_names << [_INTL("Cancelar"), nil]
+    form_names = show_new_form_sprite(forms)
   else
     form_names = forms.map { |form| 
       !form.form_name || form.form_name.empty? ? _INTL("Forma Normal") : form.form_name 

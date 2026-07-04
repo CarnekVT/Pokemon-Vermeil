@@ -1253,7 +1253,7 @@ Name = Teracaparazón
 Description = Su caparazón encierra energía de todos los tipos. Gracias a ello, si sus PS están al máximo, el movimiento que lo alcance no será muy eficaz.
 #-------------------------------
 [TERAFORMZERO]
-Name = Teracaparazón
+Name = Teraformación 0
 Description = Cuando Terapagos adopta la Forma Astral, anula todos los efectos del tiempo atmosférico y de los campos que haya en el terreno gracias a su poder oculto.
 #-------------------------------
 [DRAGONIZE]
@@ -1271,3 +1271,11 @@ Description = Si un Pokémon lo ataca, resulta quemado.
 [PIERCINGDRILL]
 Name = Turbotaladro
 Description = Si usa un movimiento de contacto, puede infligir daño 1/4 del daño original, al objetivo, aunque este se proteja.
+#-------------------------------
+[EELEVATE]
+Name = Impulso Anguila
+Description = Su capacidad de flotar sobre el suelo le proporciona inmunidad frente a los movimientos de tipo Tierra. Si el Pokémon derrota a un rival en ese turno, aumenta su característica más elevada en un nivel.
+#-------------------------------
+[FIREMANE]
+Name = Crin de Fuego
+Description = Potencia los movimientos de tipo Fuego del usuario en un 50%.

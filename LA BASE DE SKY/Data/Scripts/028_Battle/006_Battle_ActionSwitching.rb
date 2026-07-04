@@ -464,9 +464,9 @@ class Battle
         pbDisplay(_INTL("¡Las púas tóxicas lanzadas a {1} han desaparecido!", battler.pbThis(true)))
       elsif battler.pbCanPoison?(nil, false) && !battler.hasActiveItem?(:HEAVYDUTYBOOTS)
         if battler_side.effects[PBEffects::ToxicSpikes] == 2
-          battler.pbPoison(nil, _INTL("¡{1} ha sido envenenado por las púas tóxicas!", battler.pbThis), true)
+          battler.pbPoison(nil, _INTL("¡{1} ha sido gravemente envenenado por las púas tóxicas!", battler.pbThis), true)
         else
-          battler.pbPoison(nil, _INTL("¡{1} ha sido gravemente envenenado por las púas tóxicas!", battler.pbThis))
+          battler.pbPoison(nil, _INTL("¡{1} ha sido envenenado por las púas tóxicas!", battler.pbThis))
         end
       end
     end

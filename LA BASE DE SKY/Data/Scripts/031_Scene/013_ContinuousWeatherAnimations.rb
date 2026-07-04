@@ -3,6 +3,24 @@
 # Makes weather animations play continuously during battle
 #===============================================================================
 
+class PokemonSystem
+  alias continuous_weather_animations_initialize initialize unless method_defined?(:continuous_weather_animations_initialize)
+  def initialize
+    continuous_weather_animations_initialize
+    @continuous_weather_animations = ContinuousWeatherSettings::ENABLED ? 0 : 1
+  end
+
+  def continuous_weather_animations
+    @continuous_weather_animations ||= ContinuousWeatherSettings::ENABLED ? 0 : 1
+    return @continuous_weather_animations == 0 ? true : false
+  end
+
+  def continuous_weather_animations=(value)
+    @continuous_weather_animations = ContinuousWeatherSettings::ENABLED ? 0 : 1 if !@continuous_weather_animations
+    @continuous_weather_animations = value
+  end
+end
+
 module ContinuousWeatherSettings
   ENABLED = true
   # How often to restart weather animations (in frames, 60 = 1 second)
@@ -18,6 +36,8 @@ module ContinuousWeatherSettings
   VOLUME_PER_WEATHER = {
     :Sun => 20,
   }
+
+  ALLOW_CHANGE_WEATHER_ANIMATIONS_IN_SETTINGS = true
 end
 
 class Battle::Scene
@@ -25,21 +45,21 @@ class Battle::Scene
   alias cwas_pbInitSprites pbInitSprites
   def pbInitSprites
     cwas_pbInitSprites
-    pbCreateWeatherOverlay if ContinuousWeatherSettings::ENABLED
+    pbCreateWeatherOverlay if $PokemonSystem.continuous_weather_animations
   end
 
   # Add weather disposal to sprite cleanup
   alias cwas_pbDisposeSprites pbDisposeSprites
   def pbDisposeSprites
     cwas_pbDisposeSprites
-    pbDisposeWeather if ContinuousWeatherSettings::ENABLED
+    pbDisposeWeather if $PokemonSystem.continuous_weather_animations
   end
 
   # Add weather updates to frame updates
   alias cwas_pbFrameUpdate pbFrameUpdate
   def pbFrameUpdate(cw = nil)
     cwas_pbFrameUpdate(cw)
-    pbUpdateWeather if ContinuousWeatherSettings::ENABLED
+    pbUpdateWeather if $PokemonSystem.continuous_weather_animations
   end
 
   def pbCreateWeatherOverlay
@@ -52,7 +72,7 @@ class Battle::Scene
   end
 
   def pbStartContinuousWeather(battleWeather)
-    return if !ContinuousWeatherSettings::ENABLED
+    return if !$PokemonSystem.continuous_weather_animations
     return if battleWeather == :None || battleWeather.nil?
     return if battleWeather == @currentWeatherType
     
@@ -81,7 +101,7 @@ class Battle::Scene
   end
 
   def pbStopContinuousWeather
-    return if !ContinuousWeatherSettings::ENABLED
+    return if !$PokemonSystem.continuous_weather_animations
     return if !@continuousWeatherActive
 
     # Dispose the current animation player if it exists
@@ -97,7 +117,7 @@ class Battle::Scene
   end
 
   def pbStartWeatherAnimation
-    return if !ContinuousWeatherSettings::ENABLED
+    return if !$PokemonSystem.continuous_weather_animations
     return if !@currentWeatherAnimation
     
     # Load the animation just like pbCommonAnimation does
@@ -130,7 +150,7 @@ class Battle::Scene
   end
 
   def pbUpdateWeather
-    return if !ContinuousWeatherSettings::ENABLED
+    return if !$PokemonSystem.continuous_weather_animations
     return if !@continuousWeatherActive
     
     @weatherAnimationTimer += 1
@@ -146,7 +166,7 @@ class Battle::Scene
   end
 
   def pbDisposeWeather
-    return if !ContinuousWeatherSettings::ENABLED
+    return if !$PokemonSystem.continuous_weather_animations
     pbStopContinuousWeather
   end
 end
@@ -160,13 +180,13 @@ class Battle
   def pbStartWeather(user, newWeather, fixedDuration = false, showAnim = true, message = nil)
     cwas_pbStartWeather(user, newWeather, fixedDuration, showAnim, message)
     # Start continuous weather animation
-    @scene.pbStartContinuousWeather(@field.weather) if @field.weather != :None && ContinuousWeatherSettings::ENABLED
+    @scene.pbStartContinuousWeather(@field.weather) if @field.weather != :None && $PokemonSystem.continuous_weather_animations
   end
 
   alias cwas_pbStartBattleCore pbStartBattleCore
   def pbStartBattleCore(battle_loop = true)
     cwas_pbStartBattleCore(false)
-    @scene.pbStartContinuousWeather(@field.weather) if @field.weather != :None && ContinuousWeatherSettings::ENABLED
+    @scene.pbStartContinuousWeather(@field.weather) if @field.weather != :None && $PokemonSystem.continuous_weather_animations
     pbBattleLoop if battle_loop
   end
 
@@ -194,3 +214,15 @@ class Battle
   end
 
 end
+
+MenuHandlers.add(:options_menu, :continuous_weather_animations, {
+  "page"        => :graphics,
+  "name"        => _INTL("Anim. clima cont."),
+  "order"       => 20,
+  "type"        => :toggle,
+  "parameters"  => proc { [_INTL("Sí"), _INTL("No")] },
+  "condition"   => proc { next ContinuousWeatherSettings::ALLOW_CHANGE_WEATHER_ANIMATIONS_IN_SETTINGS },
+  "description" => _INTL("Elige si deseas ver las animaciones de clima continuas."),
+  "get_proc"    => proc { next $PokemonSystem.continuous_weather_animations ? 0 : 1 },
+  "set_proc"    => proc { |value, _screen| $PokemonSystem.continuous_weather_animations = value }
+})

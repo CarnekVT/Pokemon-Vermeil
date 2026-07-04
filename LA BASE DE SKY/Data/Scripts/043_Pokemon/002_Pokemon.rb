@@ -492,7 +492,7 @@ class Pokemon
   end
 
   def changeGender(recheck_form = true)
-    return if singleGendered?
+    return false if singleGendered?
     self.male? ? self.makeFemale : self.makeMale
     if recheck_form
       form = MultipleForms.call("getFormOnGenderChange", self)
@@ -500,6 +500,7 @@ class Pokemon
         self.form = form
       end
     end
+    return true
   end
 
   #=============================================================================
@@ -1228,12 +1229,11 @@ class Pokemon
     species_data.get_evolutions(true).each do |evo|   # [new_species, method, parameter, boolean]
       next if evo[3]   # Prevolution
       new_species = evo[0]
-      # Check if evolution method includes "Form" and extract form number
-      if evo[1].to_s.include?("Form")
-        # Extract form number from method name (e.g., "LevelNightForm1" -> 1)
+      # PBS form targets (e.g. RAICHU_1) are already resolved at compile time.
+      # Legacy form evolutions encode the form in the method name (e.g. LevelNightForm1).
+      if !GameData::Species.form_evolution_target?(new_species) && evo[1].to_s.include?("Form")
         if evo[1].to_s =~ /Form(\d+)$/
           form_number = $1.to_i
-          # Build species ID with form (e.g., :LYCANROC_1)
           new_species = GameData::Species.get_species_form(evo[0], form_number).id
         end
       end
