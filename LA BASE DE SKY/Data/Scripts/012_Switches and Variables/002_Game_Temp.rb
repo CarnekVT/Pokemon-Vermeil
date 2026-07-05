@@ -49,6 +49,14 @@ class Game_Temp
   attr_accessor :bag_scene
   attr_accessor :party_critical_hits_dealt
   attr_accessor :party_direct_damage_taken
+  # Current message and related windows
+  attr_accessor :current_msg_window
+  attr_accessor :current_face_window
+  attr_accessor :current_cmd_window
+  attr_accessor :current_num_window
+  attr_accessor :current_gold_window
+  attr_accessor :current_coin_window
+  attr_accessor :current_bp_window
 
   
   #-----------------------------------------------------------------------------
