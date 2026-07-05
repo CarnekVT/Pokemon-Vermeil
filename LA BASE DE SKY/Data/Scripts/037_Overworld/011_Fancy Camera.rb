@@ -95,42 +95,12 @@ def pbCameraScrollDirection(direction, distance, speed = nil)
   speed = FancyCamera::DEFAULT_SPEED if !speed || speed == 0
   x = ($game_temp.camera_x == 0) ? $game_player.x : $game_temp.camera_x
   y = ($game_temp.camera_y == 0) ? $game_player.y : $game_temp.camera_y
-  case direction
-  when 1 # Down Left
-    x -= 1 * distance
-    y += 1 * distance
-  when 2 # Down
-    y += 1 * distance
-  when 3 # Down Right
-    x += 1 * distance
-    y += 1 * distance
-  when 4 # Left
-    x -= 1 * distance
-  when 6 # Right
-    x += 1 * distance
-  when 7 # Up Left
-    x -= 1 * distance
-    y -= 1 * distance
-  when 8 # Up
-    y -= 1 * distance
-  when 9 # Up Right
-    x += 1 * distance
-    y -= 1 * distance
-  end
-  case speed
-  when 1  # Slowest
-    speed = FancyCamera::DEFAULT_SPEED * 0.5
-  when 2  # Slower
-    speed = FancyCamera::DEFAULT_SPEED * 0.75
-  when 3  # Slow
-    speed = FancyCamera::DEFAULT_SPEED * 0.85
-  when 4  # Fast
-    speed = FancyCamera::DEFAULT_SPEED * 1
-  when 5  # Faster
-    speed = FancyCamera::DEFAULT_SPEED * 1.5
-  when 6  # Fastest
-    speed = FancyCamera::DEFAULT_SPEED * 2
-  end
+  dir_vectors = {1=>[-1,1], 2=>[0,1], 3=>[1,1], 4=>[-1,0], 6=>[1,0], 7=>[-1,-1], 8=>[0,-1], 9=>[1,-1]}
+  dx, dy = dir_vectors[direction]
+  x += dx * distance if dx
+  y += dy * distance if dy
+  speed_multipliers = {1=>0.5, 2=>0.75, 3=>0.85, 4=>1.0, 5=>1.5, 6=>2.0}
+  speed = FancyCamera::DEFAULT_SPEED * speed_multipliers[speed] if speed_multipliers.key?(speed)
   pbCameraScrollTo(x, y, speed)
 end
 

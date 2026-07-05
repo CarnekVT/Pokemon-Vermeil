@@ -50,16 +50,11 @@ def unlock_vial
 end
 
 def ensure_pokevial_initialized
-  return false unless has_player_pokevial
+  return false unless player_has_pokevial?
 
   init_pokevial
   true
 end
-
-def has_player_pokevial
-  $bag.has?(:VIAL) || $bag.has?(:EMPTYVIAL)
-end
-
 
 def show_message_pokevial
   if $PokemonGlobal.vial_charges <= 0

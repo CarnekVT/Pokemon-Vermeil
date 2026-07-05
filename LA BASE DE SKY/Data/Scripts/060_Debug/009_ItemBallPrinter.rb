@@ -233,9 +233,6 @@ module ItemBallPrinter
     pbMessage(_INTL("¡Impreso!"))
   end
 
-  def self.on_print_all_press
-  end
-
   def self.on_change_hidden_items_press
     self.include_hidden_items = pbShowCommands(
       nil,

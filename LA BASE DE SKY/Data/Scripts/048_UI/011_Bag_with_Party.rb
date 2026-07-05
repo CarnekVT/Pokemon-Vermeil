@@ -14,106 +14,63 @@ class SpriteWindow_Selectable < SpriteWindow_Base
 
   def update
     super
-    if self.active && @item_max > 0 && @index >= 0 && !@ignore_input && @bag
-      if Input.repeat?(Input::UP)
-        if @index >= @column_max ||
-           (Input.trigger?(Input::UP) && (@item_max % @column_max) == 0)
-          oldindex = @index
-          @index = (@index - @column_max + @item_max) % @item_max
-          if @index != oldindex
-            pbPlayCursorSE
-            update_cursor_rect
-          end
-        end
-      elsif Input.repeat?(Input::DOWN)
-        if @index < @item_max - @column_max ||
-           (Input.trigger?(Input::DOWN) && (@item_max % @column_max) == 0)
-          oldindex = @index
-          @index = (@index + @column_max) % @item_max
-          if @index != oldindex
-            pbPlayCursorSE
-            update_cursor_rect
-          end
-        end
-      elsif Input.repeat?(Input::JUMPUP)
-        if @index > 0
-          oldindex = @index
-          @index = [self.index - self.page_item_max, 0].max
-          if @index != oldindex
-            pbPlayCursorSE
-            self.top_row -= self.page_row_max
-            update_cursor_rect
-          end
-        end
-      elsif Input.repeat?(Input::JUMPDOWN)
-        if @index < @item_max - 1
-          oldindex = @index
-          @index = [self.index + self.page_item_max, @item_max - 1].min
-          if @index != oldindex
-            pbPlayCursorSE
-            self.top_row += self.page_row_max
-            update_cursor_rect
-          end
+    return unless self.active && @item_max > 0 && @index >= 0 && !@ignore_input
+    if Input.repeat?(Input::UP)
+      if @index >= @column_max ||
+         (Input.trigger?(Input::UP) && (@item_max % @column_max) == 0)
+        oldindex = @index
+        @index = (@index - @column_max + @item_max) % @item_max
+        if @index != oldindex
+          pbPlayCursorSE
+          update_cursor_rect
         end
       end
-    elsif  self.active && @item_max > 0 && @index >= 0 && !@ignore_input
-      if Input.repeat?(Input::UP)
-        if @index >= @column_max ||
-           (Input.trigger?(Input::UP) && (@item_max % @column_max) == 0)
-          oldindex = @index
-          @index = (@index - @column_max + @item_max) % @item_max
-          if @index != oldindex
-            pbPlayCursorSE
-            update_cursor_rect
-          end
+    elsif Input.repeat?(Input::DOWN)
+      if @index < @item_max - @column_max ||
+         (Input.trigger?(Input::DOWN) && (@item_max % @column_max) == 0)
+        oldindex = @index
+        @index = (@index + @column_max) % @item_max
+        if @index != oldindex
+          pbPlayCursorSE
+          update_cursor_rect
         end
-      elsif Input.repeat?(Input::DOWN)
-        if @index < @item_max - @column_max ||
-           (Input.trigger?(Input::DOWN) && (@item_max % @column_max) == 0)
-          oldindex = @index
-          @index = (@index + @column_max) % @item_max
-          if @index != oldindex
-            pbPlayCursorSE
-            update_cursor_rect
-          end
+      end
+    elsif !@bag && Input.repeat?(Input::LEFT)
+      if @column_max >= 2 && @index > 0
+        oldindex = @index
+        @index -= 1
+        if @index != oldindex
+          pbPlayCursorSE
+          update_cursor_rect
         end
-      elsif Input.repeat?(Input::LEFT)
-        if @column_max >= 2 && @index > 0
-          oldindex = @index
-          @index -= 1
-          if @index != oldindex
-            pbPlayCursorSE
-            update_cursor_rect
-          end
+      end
+    elsif !@bag && Input.repeat?(Input::RIGHT)
+      if @column_max >= 2 && @index < @item_max - 1
+        oldindex = @index
+        @index += 1
+        if @index != oldindex
+          pbPlayCursorSE
+          update_cursor_rect
         end
-      elsif Input.repeat?(Input::RIGHT)
-        if @column_max >= 2 && @index < @item_max - 1
-          oldindex = @index
-          @index += 1
-          if @index != oldindex
-            pbPlayCursorSE
-            update_cursor_rect
-          end
+      end
+    elsif Input.repeat?(Input::JUMPUP)
+      if @index > 0
+        oldindex = @index
+        @index = [self.index - self.page_item_max, 0].max
+        if @index != oldindex
+          pbPlayCursorSE
+          self.top_row -= self.page_row_max
+          update_cursor_rect
         end
-      elsif Input.repeat?(Input::JUMPUP)
-        if @index > 0
-          oldindex = @index
-          @index = [self.index - self.page_item_max, 0].max
-          if @index != oldindex
-            pbPlayCursorSE
-            self.top_row -= self.page_row_max
-            update_cursor_rect
-          end
-        end
-      elsif Input.repeat?(Input::JUMPDOWN)
-        if @index < @item_max - 1
-          oldindex = @index
-          @index = [self.index + self.page_item_max, @item_max - 1].min
-          if @index != oldindex
-            pbPlayCursorSE
-            self.top_row += self.page_row_max
-            update_cursor_rect
-          end
+      end
+    elsif Input.repeat?(Input::JUMPDOWN)
+      if @index < @item_max - 1
+        oldindex = @index
+        @index = [self.index + self.page_item_max, @item_max - 1].min
+        if @index != oldindex
+          pbPlayCursorSE
+          self.top_row += self.page_row_max
+          update_cursor_rect
         end
       end
     end
@@ -918,41 +875,23 @@ class PokemonBag_Scene
     $game_temp.bag_scene = self if $bag.has?(:EGGHATCHER)
   end
 
+  POCKET_COLORS = {
+    1 => [POCKET_1_BG, POCKET_1_GRAD, POCKET_1_PAN],
+    2 => [POCKET_2_BG, POCKET_2_GRAD, POCKET_2_PAN],
+    3 => [POCKET_3_BG, POCKET_3_GRAD, POCKET_3_PAN],
+    4 => [POCKET_4_BG, POCKET_4_GRAD, POCKET_4_PAN],
+    5 => [POCKET_5_BG, POCKET_5_GRAD, POCKET_5_PAN],
+    6 => [POCKET_6_BG, POCKET_6_GRAD, POCKET_6_PAN],
+    7 => [POCKET_7_BG, POCKET_7_GRAD, POCKET_7_PAN],
+    8 => [POCKET_8_BG, POCKET_8_GRAD, POCKET_8_PAN],
+  }
+
   def pbPocketColor
-    case @bag.last_viewed_pocket
-    when 1
-      @sprites["background"].color = POCKET_1_BG
-      @sprites["gradient"].color = POCKET_1_GRAD
-      @sprites["panorama"].color = POCKET_1_PAN
-    when 2
-      @sprites["background"].color = POCKET_2_BG
-      @sprites["gradient"].color = POCKET_2_GRAD
-      @sprites["panorama"].color = POCKET_2_PAN
-    when 3
-      @sprites["background"].color = POCKET_3_BG
-      @sprites["gradient"].color = POCKET_3_GRAD
-      @sprites["panorama"].color = POCKET_3_PAN
-    when 4
-      @sprites["background"].color = POCKET_4_BG
-      @sprites["gradient"].color = POCKET_4_GRAD
-      @sprites["panorama"].color = POCKET_4_PAN
-    when 5
-      @sprites["background"].color = POCKET_5_BG
-      @sprites["gradient"].color = POCKET_5_GRAD
-      @sprites["panorama"].color = POCKET_5_PAN
-    when 6
-      @sprites["background"].color = POCKET_6_BG
-      @sprites["gradient"].color = POCKET_6_GRAD
-      @sprites["panorama"].color = POCKET_6_PAN
-    when 7
-      @sprites["background"].color = POCKET_7_BG
-      @sprites["gradient"].color = POCKET_7_GRAD
-      @sprites["panorama"].color = POCKET_7_PAN
-    when 8
-      @sprites["background"].color = POCKET_8_BG
-      @sprites["gradient"].color = POCKET_8_GRAD
-      @sprites["panorama"].color = POCKET_8_PAN
-    end
+    colors = POCKET_COLORS[@bag.last_viewed_pocket]
+    return unless colors
+    @sprites["background"].color = colors[0]
+    @sprites["gradient"].color = colors[1]
+    @sprites["panorama"].color = colors[2]
   end
   
   def pbFadeOutScene

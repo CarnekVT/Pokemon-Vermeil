@@ -128,35 +128,16 @@ def update_trainer_bars
       # Obtenemos la distancia a la que mira el entrenador.
       rango_entrenador = event.name[8...9].to_i
       
-      # Según a dónde mira el trainer, calculamos los espacios a los que mira.
-      if event.direction == 8 # Arriba
-        for i in 0..rango_entrenador+1
-          distance = (($game_player.x-event.x).abs) + (($game_player.y-(event.y-i)).abs)
-          if (entrenadorMasCercano>distance)
-            entrenadorMasCercano = distance
-          end
-        end
-      elsif event.direction == 2 # Abajo
-        for i in 0..rango_entrenador+1
-          distance = (($game_player.x-event.x).abs) + (($game_player.y-(event.y+i)).abs)
-          if (entrenadorMasCercano>distance)
-            entrenadorMasCercano = distance
-          end
-        end
-      elsif event.direction == 6 # Derecha
-        for i in 0..rango_entrenador+1
-          distance = (($game_player.x-(event.x+i)).abs) + (($game_player.y-event.y).abs)
-          if (entrenadorMasCercano>distance)
-            entrenadorMasCercano = distance
-          end
-        end
-      elsif event.direction == 4 # Izquierda
-        for i in 0..rango_entrenador+1
-          distance = (($game_player.x-(event.x-i)).abs) + (($game_player.y-event.y).abs)
-          if (entrenadorMasCercano>distance)
-            entrenadorMasCercano = distance
-          end
-        end
+      dx, dy = case event.direction
+               when 8 then [0, -1]
+               when 2 then [0, 1]
+               when 6 then [1, 0]
+               when 4 then [-1, 0]
+               else next
+               end
+      for i in 0..rango_entrenador+1
+        distance = ($game_player.x - (event.x + dx * i)).abs + ($game_player.y - (event.y + dy * i)).abs
+        entrenadorMasCercano = distance if entrenadorMasCercano > distance
       end
     end
   end
