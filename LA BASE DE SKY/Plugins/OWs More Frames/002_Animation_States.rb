@@ -1,10 +1,10 @@
 #===============================================================================
 # OWs More Frames — Animation States
-# Complemento que añade estados de animación diferenciados:
+# Complemento que a?ade estados de animaci?n diferenciados:
 #   - Idle: sprite quieto cuando el personaje no se mueve
 #   - Run:  sprite de carrera cuando el jugador corre
 #   - Surf: sprite de nado para Pokémon de agua (cuando aplique)
-# Los sufijos para cada estado se buscan automáticamente:
+# Los sufijos para cada estado se buscan autom?ticamente:
 #   {base}_idle, {base}_run, {base}_surf
 #===============================================================================
 module OWsMoreFrames
@@ -81,6 +81,7 @@ end
 # Followers — Estados walk/run/idle/surf
 #===============================================================================
 if defined?(Game_PokemonFollower)
+  # --- Vibrant Companions ---
   class Game_PokemonFollower
     alias _ows_as_orig_update update unless method_defined?(:_ows_as_orig_update)
     def update
@@ -90,10 +91,9 @@ if defined?(Game_PokemonFollower)
 
     private
 
-    IDLE_DEBOUNCE = 0.11
+    IDLE_DEBOUNCE = 0.3
 
     def update_state_sprite
-      return if @move_route_forcing
       return unless @vibrant_name
       idx = @vibrant_name.split("_")[1].to_i
       pkmn = $player.party[idx]
@@ -107,7 +107,15 @@ if defined?(Game_PokemonFollower)
 
     def target_charset(pkmn)
       base = OWsMoreFrames::AnimationStates.strip_state(@character_name)
-      player_moving = $game_player&.moving? || $game_player&.jumping?
+      player_input   = Input.dir4 != 0
+      player_moving  = $game_player&.moving? || $game_player&.jumping? || player_input
+      follower_moving = moving? || jumping?
+
+      # Movimiento forzado: nunca idle durante comandos de interacción.
+      if @move_route_forcing
+        @_ows_stopped = 0.0
+        return base
+      end
 
       # Surf — player surfeando + Pokémon de agua
       if $PokemonGlobal&.surfing && OWsMoreFrames::AnimationStates.water_type?(pkmn)
@@ -115,8 +123,15 @@ if defined?(Game_PokemonFollower)
         return surf if OWsMoreFrames::AnimationStates.charset_exists?(surf)
       end
 
+      # Run — jugador corre (prioridad sobre idle)
+      if player_input && $game_player&.move_speed && $game_player.move_speed >= 4
+        @_ows_stopped = 0.0
+        run = base + OWsMoreFrames::AnimationStates::RUN_SUFFIX
+        return run if OWsMoreFrames::AnimationStates.charset_exists?(run)
+      end
+
       # Idle — solo si ambos quietos durante IDLE_DEBOUNCE segundos
-      if !player_moving && !moving? && !jumping?
+      if !player_input && !follower_moving
         @_ows_stopped ||= 0.0
         @_ows_stopped += Graphics.delta
         if @_ows_stopped >= IDLE_DEBOUNCE
@@ -127,17 +142,11 @@ if defined?(Game_PokemonFollower)
         @_ows_stopped = 0.0
       end
 
-      # Run — jugador corre
-      if player_moving && $game_player&.move_speed && $game_player.move_speed >= 4
-        run = base + OWsMoreFrames::AnimationStates::RUN_SUFFIX
-        return run if OWsMoreFrames::AnimationStates.charset_exists?(run)
-      end
-
       base
     end
   end
 else
-  # Fallback para sistemas que usen Game_Follower directamente
+  # --- Fallback para sistemas que usen Game_Follower directamente ---
   class Game_Follower
     IDLE_DEBOUNCE = 0.2
 
@@ -150,12 +159,33 @@ else
     private
 
     def update_state_sprite
-      return if @move_route_forcing
       base = OWsMoreFrames::AnimationStates.strip_state(@character_name)
-      player_moving = $game_player&.moving? || $game_player&.jumping?
+      player_input   = Input.dir4 != 0
+      player_moving  = $game_player&.moving? || $game_player&.jumping? || player_input
+      follower_moving = moving? || jumping?
+
+      # Surf — no aplica a followers genéricos
+
+      # Movimiento forzado
+      if @move_route_forcing
+        @_ows_stopped = 0.0
+        @character_name = base if @character_name != base
+        return
+      end
+
+      # Run — jugador corre
+      if player_input && $game_player&.move_speed && $game_player.move_speed >= 4
+        @_ows_stopped = 0.0
+        run = base + OWsMoreFrames::AnimationStates::RUN_SUFFIX
+        return if run == @character_name
+        if OWsMoreFrames::AnimationStates.charset_exists?(run)
+          @character_name = run
+          return
+        end
+      end
 
       # Idle — solo si ambos quietos durante IDLE_DEBOUNCE segundos
-      if !player_moving && !moving? && !jumping?
+      if !player_input && !follower_moving
         @_ows_stopped ||= 0.0
         @_ows_stopped += Graphics.delta
         if @_ows_stopped >= IDLE_DEBOUNCE
@@ -168,16 +198,6 @@ else
         end
       else
         @_ows_stopped = 0.0
-      end
-
-      # Run — jugador corre
-      if player_moving && $game_player&.move_speed && $game_player.move_speed >= 4
-        run = base + OWsMoreFrames::AnimationStates::RUN_SUFFIX
-        return if run == @character_name
-        if OWsMoreFrames::AnimationStates.charset_exists?(run)
-          @character_name = run
-          return
-        end
       end
 
       @character_name = base if @character_name != base

@@ -46,19 +46,19 @@ class Game_Character
     end
     return if @lock_pattern
     # Character has stopped moving, return to original pattern
-    if @moved_last_frame && !@moved_this_frame && !@step_anime
+    if @moved_last_frame && !@moved_this_frame
       @pattern = @original_pattern
       @anime_count = 0
       return
     end
     # Character has started to move, change pattern immediately
-    if !@moved_last_frame && @moved_this_frame && !@step_anime
+    if !@moved_last_frame && @moved_this_frame
       @pattern = (@pattern + 1) % self.frames if @walk_anime
       @anime_count = 0
       return
     end
     # Calculate how many frames each pattern should display for
-    pattern_time = pattern_update_speed / 4
+    pattern_time = pattern_update_speed / self.frames
     return if @anime_count < pattern_time
     # Advance to the next animation frame
     @pattern = (@pattern + 1) % self.frames
