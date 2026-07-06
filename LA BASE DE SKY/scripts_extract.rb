@@ -1,12 +1,5 @@
 require 'zlib'
-
-class Numeric
-  def to_digits(num = 3)
-    str = to_s
-    (num - str.size).times { str = str.prepend("0") }
-    str
-  end
-end
+require 'fileutils'
 
 module Scripts
   def self.dump(path = "Data/Scripts", rxdata = "Data/Scripts.rxdata")
@@ -18,7 +11,7 @@ module Scripts
     end
 
     # Ensure directory exists and is empty
-    create_directory(path)
+    FileUtils.mkdir_p(path)
     clear_directory(path)
 
     folder_id = [1, 1]
@@ -39,17 +32,17 @@ module Scripts
         section_name = title[/\[\[\s*(.+)\s*\]\]$/, 1]&.strip || "Unnamed Section"
 
         # Folder logic: Create folder, then reset path for next section
-        folder_num   = (index < scripts.length - 2) ? folder_id[level].to_digits(3) : "999"
+        folder_num   = (index < scripts.length - 2) ? sprintf("%03d", folder_id[level]) : "999"
         folder_name  = "#{folder_num}_#{section_name}"
         folder_path = File.join(path, folder_name)
-        create_directory(folder_path)
+        FileUtils.mkdir_p(folder_path)
 
         # Reset for the next set of scripts in this folder
         folder_id[level] += 1
         file_id = 1 # Reset file numbering for the new folder
       else
         next if script.empty? # Skip empty scripts
-        file_num = file_id.to_digits(3)
+        file_num = sprintf("%03d", file_id)
         file_name = "#{file_num}_#{title}.rb"
         create_script(File.join(folder_path, file_name), script)
         file_id += 1
@@ -81,7 +74,7 @@ module Scripts
   end
 
   def self.create_script(path, content)
-    create_directory(File.dirname(path)) # Ensure the directory exists
+    FileUtils.mkdir_p(File.dirname(path))
     File.open(path, "wb") { |f| f.write(content) }
   end
 
@@ -98,13 +91,6 @@ module Scripts
     Dir.delete(path) if delete_current
   end
 
-  def self.create_directory(path)
-    parts = path.split(File::SEPARATOR)
-    (1..parts.length).each do |i|
-      sub_path = File.join(parts[0...i])
-      Dir.mkdir(sub_path) unless File.directory?(sub_path)
-    end
-  end
 end
 
 Scripts.dump

@@ -53,31 +53,6 @@ module PokeAPI
 		end
 	end
 	
-	# Clean up expired cache entries
-	def cleanup_expired_cache
-		cache = get_cache
-		expired_keys = []
-		
-		cache.each do |key, entry|
-			if Time.now - entry[:timestamp] > CACHE_DURATION
-				expired_keys << key
-			end
-		end
-		
-		expired_keys.each { |key| cache.delete(key) }
-		
-		if expired_keys.length > 0
-			puts "Cleaned up #{expired_keys.length} expired cache entries"
-		end
-	end
-	
-	# Clear entire cache (useful for debugging or forcing refresh)
-	def clear_cache
-		initialize_cache
-		$PokemonGlobal.pokeapi_cache.clear
-		puts "Pokemon API cache cleared"
-	end
-	
 	def get_data(species)
 		# Generate cache key for this species
 		cache_key = generate_cache_key(species)

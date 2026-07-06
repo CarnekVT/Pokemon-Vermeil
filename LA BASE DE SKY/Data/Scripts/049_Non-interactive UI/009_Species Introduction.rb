@@ -149,85 +149,33 @@ class SpeciesIntro
   module Bridge
     module_function
 
-    def major_version
-      ret = 0
-      if defined?(Essentials)
-        ret = Essentials::VERSION.split(".")[0].to_i
-      elsif defined?(ESSENTIALS_VERSION)
-        ret = ESSENTIALS_VERSION.split(".")[0].to_i
-      elsif defined?(ESSENTIALSVERSION)
-        ret = ESSENTIALSVERSION.split(".")[0].to_i
-      end
-      return ret
-    end
-
-    MAJOR_VERSION = major_version
-
     def message(string, &block)
-      return Kernel.pbMessage(string, &block) if MAJOR_VERSION < 20
-      return pbMessage(string, &block)
+      pbMessage(string, &block)
     end
 
     def species_name(species)
-      return PBSpecies.getName(species) if MAJOR_VERSION < 19
-      return GameData::Species.get(species).name
+      GameData::Species.get(species).name
     end
 
     def species_category(species, form)
-      if MAJOR_VERSION < 19
-        ret = pbGetMessage(
-          MessageTypes::Kinds, fspecies_from_form_v18_minus(species, form)
-        )
-        ret ||= pbGetMessage(MessageTypes::Kinds, species)
-        return ret
-      end
-      return GameData::Species.get_species_form(species, form).category
+      GameData::Species.get_species_form(species, form).category
     end
 
     def species_and_form(species_full)
-      return [getID(PBSpecies, species_full), 0] if MAJOR_VERSION < 17
-      if MAJOR_VERSION < 19
-        return pbGetSpeciesFromFSpecies(getID(PBSpecies, species_full))
-      end
       species_form = GameData::Species.get_species_form(species_full, 0)
-      return [species_form.species, species_form.form]
+      [species_form.species, species_form.form]
     end
 
     def pokemon_front_sprite_filename(species, form, gender, shiny, shadow)
-      if MAJOR_VERSION < 19
-        return pbCheckPokemonBitmapFiles([
-          species, false, gender, shiny, form, shadow
-        ])
-      end
-      return GameData::Species.front_sprite_filename(
-        species, form, gender, shiny, shadow
-      )
+      GameData::Species.front_sprite_filename(species, form, gender, shiny, shadow)
     end
 
     def register_as_seen(species, form, gender, shiny)
-      if MAJOR_VERSION < 19
-        $Trainer.seen[species]=true
-        if MAJOR_VERSION >= 17
-          pbSeenForm(fspecies_from_form_v18_minus(species,form))
-        end
-        return
-      end
-      (MAJOR_VERSION<20 ? $Trainer : $player).pokedex.register(
-        species, gender, form, shiny
-      )
+      $player.pokedex.register(species, gender, form, shiny)
     end
 
     def play_cry(species, form)
-      if MAJOR_VERSION < 19
-        pbPlayCry(species)
-        return
-      end
       GameData::Species.play_cry_from_species(species, form)
-    end
-
-    def fspecies_from_form_v18_minus(species, form)
-      return species if MAJOR_VERSION < 17
-      return pbGetFSpeciesFromForm(species, form)
     end
   end
 end

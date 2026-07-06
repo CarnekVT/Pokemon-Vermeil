@@ -1,14 +1,6 @@
 require 'zlib'
 require 'fileutils'
 
-class Numeric
-  def to_digits(num = 3)
-    str = to_s
-    (num - str.size).times { str = str.prepend("0") }
-    str
-  end
-end
-
 module Scripts
   def self.from_folder(path = "Data/Scripts", rxdata = "Data/Scripts.rxdata")
     scripts = File.open(rxdata, 'rb') { |f| Marshal.load(f) } if File.exist?(rxdata)

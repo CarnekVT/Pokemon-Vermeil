@@ -58,16 +58,6 @@ class EncounterListSettings
 end
 
 
-# Method that returns whether a specific form has been seen (any gender)
-def seen_form_any_gender?(species, form)
-  ret = false
-  if $player.pokedex.seen_form?(species, 0, form) ||
-     $player.pokedex.seen_form?(species, 1, form)
-    ret = true
-  end
-  return ret
-end
-
 class EncounterList_Scene
   # Constructor method
   # Sets a handful of key variables needed throughout the script
@@ -190,7 +180,7 @@ class EncounterList_Scene
       @sprites["icon_#{i}"].color = @default_color
       @sprites["icon_#{i}"].pbSetParams(s, 0, species_data.form, false)
       
-      if EncounterListSettings::SHOW_SHADOWS_FOR_UNSEEN_POKEMON && !seen_form_any_gender?(s, species_data.form)
+      if EncounterListSettings::SHOW_SHADOWS_FOR_UNSEEN_POKEMON && !($player.pokedex.seen_form?(s, 0, species_data.form) || $player.pokedex.seen_form?(s, 1, species_data.form))
         @sprites["icon_#{i}"].color = Color.new(0, 0, 0)
       elsif EncounterListSettings::SHOW_SHADOWS_FOR_UNSEEN_POKEMON && !$player.owned?(species_data) # SI NO LO HE CAPTURADO
         @sprites["icon_#{i}"].tone = Tone.new(0,0,0,255)

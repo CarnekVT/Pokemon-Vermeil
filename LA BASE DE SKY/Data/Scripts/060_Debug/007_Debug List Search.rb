@@ -7,16 +7,6 @@
 # 1. Utilidades de Búsqueda.
 #-------------------------------------------------------------------------------
 
-# Removedor de acentos
-def pbRemoveAccents(text)
-  return "" if text.nil?
-  text = text.to_s
-  return text.tr(
-    "ÀÁÂÃÄÅàáâãäåÈÉÊËèéêëÌÍÎÏìíîïÒÓÔÕÖØòóôõöøÙÚÛÜùúûüÑñÇç",
-    "AAAAAAaaaaaaEEEEeeeeIIIIiiiiOOOOOOooooooUUUUuuuuNnCc"
-  )
-end
-
 # Algoritmo de Levenshtein
 def pbLevenshtein(first, second)
   matrix = [(0..first.length).to_a]
@@ -53,12 +43,12 @@ end
 # Busca el siguiente nombre en una lista (circular). Subcadena primero, fuzzy después.
 def pbFindListIndexBySearch(names, search_term, current_index = -1)
   return nil if nil_or_empty?(search_term) || names.nil? || names.empty?
-  term = pbRemoveAccents(search_term.to_s).downcase
+  term = remove_accents(search_term.to_s).downcase
   ranges = [[current_index + 1, names.length]]
   ranges.push([0, current_index]) if current_index >= 0
   ranges.each do |from, to|
     names[from...to].each_with_index do |name, offset|
-      name_clean = pbRemoveAccents(name.to_s).downcase
+      name_clean = remove_accents(name.to_s).downcase
       return from + offset if name_clean.include?(term)
     end
   end
@@ -73,8 +63,8 @@ end
 # Lógica de coincidencia por si se escribe mal una palabra
 def pbSmartMatch?(text, search_term)
   # Limpieza básica
-  text_clean = pbRemoveAccents(text.to_s).downcase
-  term_clean = pbRemoveAccents(search_term.to_s).downcase
+  text_clean = remove_accents(text.to_s).downcase
+  term_clean = remove_accents(search_term.to_s).downcase
   
   # Coincidencia exacta parcial
   return true if text_clean.include?(term_clean)

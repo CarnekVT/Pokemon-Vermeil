@@ -831,6 +831,9 @@ class PokemonStorageScreen
                 @scene.grabber.clear
                 @scene.release_tension
               end
+          elsif @scene.grabber.holding_anything? && !@scene.grabber.carrying
+            pbDisplay(_INTL("Estás seleccionando Pokémon. Termina o cancela la selección."))
+            next
           else
             pbBoxCommands
           end
@@ -1091,43 +1094,55 @@ class PokemonStorageScreen
   #===============================================================================
   # Puts all held Pokemon into available slots in a box
   #===============================================================================
-  def pbPour(selected)
-    # box = @storage.currentBox
-    mons_to_place = @scene.grabber.carried_mons.clone
-    needed_space = mons_to_place && mons_to_place.size > 0 ? mons_to_place.size : 1
-    box = @scene.pbChooseBoxWithSpace("¿Dejar en qué caja?", needed_space)
-    return false if box < 0
-    count = 0
-    placed = false
-    if !mons_to_place.empty?
-      for i in 0...PokemonBox::BOX_SIZE
-        next if @storage[box, i]
-        m_t_p = mons_to_place.pop
-        next unless m_t_p && !m_t_p.empty?
-        @storage[box, i] = m_t_p[0]
-        count += 1
-        break if mons_to_place.empty?
-      end
-    elsif @heldpkmn
-      for i in 0...PokemonBox::BOX_SIZE
-        next if @storage[box, i]
-        @storage[box, i] = @heldpkmn
-        count += 1
-        placed = true
-        break
+  def pbPour(_selected)
+    carried = @scene.grabber.carried_mons
+    mons    = carried.map { |e| e[0] }.compact   # solo Pokémon reales; descarta nil
+    # Ponytail: path alternativo para hold simple si @heldpkmn está seteado
+    if mons.empty?
+      if @heldpkmn
+        mons = [@heldpkmn]
+      else
+        return false
       end
     end
-    emptied = mons_to_place.empty? || placed
+    needed_space = mons.size
+    box = @scene.pbChooseBoxWithSpace(_INTL("¿Dejar en qué caja?"), needed_space)
+    return false if box.nil? || box < 0 || box >= @storage.maxBoxes
+    # Buscar huecos libres en la caja destino (atómico: primero listamos, luego escribimos)
+    free_slots = []
+    PokemonBox::BOX_SIZE.times do |i|
+      break if free_slots.size >= mons.size
+      free_slots.push(i) if !@storage[box, i]
+    end
+    if free_slots.size < mons.size
+      pbDisplay(_INTL("La caja seleccionada no tiene espacio suficiente."))
+      return false
+    end
+    # Colocar mons en orden
+    mons.each_with_index do |pkmn, idx|
+      if box >= 0 && pkmn
+        pkmn.formTime = nil if pkmn.respond_to?("formTime")
+        pkmn.form     = 0 if pkmn.isSpecies?(:SHAYMIN)
+        pkmn.heal if Settings::HEAL_STORED_POKEMON
+      end
+      @storage[box, free_slots[idx]] = pkmn
+    end
+    @heldpkmn = nil
     @scene.refresh_box_sprites
     @scene.pbRefresh
-    @heldpkmn = nil if emptied
-    if emptied && @scene.sprites["arrow"]&.holding?
+    pbDisplay(_INTL("Pokémon dejados en {1}.", @storage[box].name))
+    # Salta a la caja destino para feedback visual inmediato
+    @scene.pbJumpToBox(box) if @storage.currentBox != box
+    @scene.refresh_box_sprites
+    @scene.pbRefresh
+    if @scene.sprites["arrow"]&.holding?
       @scene.sprites["arrow"]&.deleteSprite
-      @scene.sprites["arrow"]&.update 
-      @scene.grabber.carrying = false
+      @scene.sprites["arrow"]&.update
     end
-    @scene.grabber.pour(count)
-	  return emptied
+    @scene.grabber.carrying = false
+    @scene.grabber.clear
+    @scene.release_tension
+    return true
   end
   
   #===============================================================================

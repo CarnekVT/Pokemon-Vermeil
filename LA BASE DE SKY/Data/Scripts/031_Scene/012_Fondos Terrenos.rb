@@ -1,12 +1,15 @@
 HAZARD_OPACITY = 180
+# Mayor a BATTLER_BASE_Z (50): para que los hazards no queden por debajo del sprite del Pokémon
+PLAYER_HAZARD_Z = 51 
+ENEMY_HAZARD_Z = 4
 OFFSET_X_SPIKES = [[0, -25, 25], [0, -25, 25]]
-OFFSET_Y_SPIKES = [[0, 5, -5], [0, 5, -5]]
+OFFSET_Y_SPIKES = [[-20, -15, -25], [0, 5, -5]]
 OFFSET_X_TOXIC_SPIKES = [[25, -25], [25, -25]]
-OFFSET_Y_TOXIC_SPIKES = [[30, 30], [-20, -20]]
+OFFSET_Y_TOXIC_SPIKES = [[-10, -10], [-20, -20]]
 OFFSET_X_STICKY_WEB = [10, 0]
-OFFSET_Y_STICKY_WEB = [20, -20]
+OFFSET_Y_STICKY_WEB = [-20, -20]
 OFFSET_X_STEALTH_ROCK = [10, 10]
-OFFSET_Y_STEALTH_ROCK = [20, -10]
+OFFSET_Y_STEALTH_ROCK = [-30, -10]
 
 class Battle::Scene
   
@@ -111,37 +114,14 @@ class Battle::Scene
   # Clear all hazard sprites
   def pbDeleteHazardSprites
     return if !Settings::SHOW_HAZARDS_IN_BATTLE
-    # Clear all possible hazard sprites for both sides
-    ["stealthrock_0", "stealthrock_1", "stickyweb_0", "stickyweb_1"].each do |sprite_id|
-      if @sprites[sprite_id]
-        @sprites[sprite_id].visible = false
-        @sprites[sprite_id].dispose
-        @sprites.delete(sprite_id)
-      end
-    end
-    
-    # Clear spikes (up to 3 layers per side)
-    2.times do |side|
-      3.times do |layer|
-        sprite_id = "spikes_#{side}_#{layer}"
-        if @sprites[sprite_id]
-          @sprites[sprite_id].visible = false
-          @sprites[sprite_id].dispose
-          @sprites.delete(sprite_id)
-        end
-      end
-    end
-    
-    # Clear toxic spikes (up to 2 layers per side)
-    2.times do |side|
-      2.times do |layer|
-        sprite_id = "toxicspikes_#{side}_#{layer}"
-        if @sprites[sprite_id]
-          @sprites[sprite_id].visible = false
-          @sprites[sprite_id].dispose
-          @sprites.delete(sprite_id)
-        end
-      end
+    sprite_ids = ["stealthrock_0", "stealthrock_1", "stickyweb_0", "stickyweb_1"]
+    2.times { |s| 3.times { |l| sprite_ids << "spikes_#{s}_#{l}" } }
+    2.times { |s| 2.times { |l| sprite_ids << "toxicspikes_#{s}_#{l}" } }
+    sprite_ids.each do |id|
+      next unless @sprites[id]
+      @sprites[id].visible = false
+      @sprites[id].dispose
+      @sprites.delete(id)
     end
   end
 
@@ -166,11 +146,11 @@ class Battle::Scene
       
       # Stealth Rock - appears floating around the field
       if sideData.effects[PBEffects::StealthRock]
-        offset_x = [10, 10][side]           # Spread horizontally
-        offset_y = [20, -10][side]         # Keep near the base level
+        offset_x = OFFSET_X_STEALTH_ROCK[side]           # Spread horizontally
+        offset_y = OFFSET_Y_STEALTH_ROCK[side]         # Keep near the base level
         stealth = pbAddSprite("stealthrock_#{side}", baseX + offset_x, baseY + offset_y,
                              File.join(hazards_folder, "stealth_rock"), @viewport)
-        stealth.z = 4
+        stealth.z = (side.zero?) ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z
         stealth.opacity = HAZARD_OPACITY
         stealth.visible = true
         if stealth.bitmap
@@ -193,7 +173,7 @@ class Battle::Scene
         spikes_graphic = File.join(hazards_folder, "spikes")
         
         spikes = pbAddSprite("spikes_#{side}_#{layer}", final_x, final_y, spikes_graphic, @viewport)
-        spikes.z = 4 + layer * 0.1  # Slight z-ordering for layers
+        spikes.z = ((side.zero?) ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z) + layer * 0.1  # Slight z-ordering for layers
         spikes.opacity = HAZARD_OPACITY  # Each layer more visible: 150, 175, 200
         spikes.visible = true
         
@@ -212,8 +192,7 @@ class Battle::Scene
         
         toxic = pbAddSprite("toxicspikes_#{side}_#{layer}", baseX + offset_x, baseY + offset_y,
                            File.join(hazards_folder, "toxic_spikes"), @viewport)
-        toxic.z = 4 + layer * 0.1  # Slight z-ordering for layers
-        # toxic.z = 100 + layer * 0.1 if side == 0 # Slight z-ordering for layers 
+        toxic.z = ((side.zero?) ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z) + layer * 0.1  # Slight z-ordering for layers
         toxic.opacity = HAZARD_OPACITY  # Each layer more visible: 140, 180
         toxic.visible = true
 
@@ -229,7 +208,7 @@ class Battle::Scene
         offset_y = OFFSET_Y_STICKY_WEB[side]            # Keep near the base level
         web = pbAddSprite("stickyweb_#{side}", baseX + offset_x, baseY + offset_y,
                          File.join(hazards_folder, "sticky_web"), @viewport)
-        web.z = 4
+        web.z = (side.zero?) ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z
         web.opacity = HAZARD_OPACITY
         web.visible = true
         if web.bitmap

@@ -1,49 +1,8 @@
 #===============================================================================
 # General purpose utilities
 #===============================================================================
-def _pbNextComb(comb, length)
-  i = comb.length - 1
-  loop do
-    valid = true
-    (i...comb.length).each do |j|
-      if j == i
-        comb[j] += 1
-      else
-        comb[j] = comb[i] + (j - i)
-      end
-      if comb[j] >= length
-        valid = false
-        break
-      end
-    end
-    return true if valid
-    i -= 1
-    break unless i >= 0
-  end
-  return false
-end
-
-# Iterates through the array and yields each combination of _num_ elements in
-# the array.
 def pbEachCombination(array, num)
-  return if array.length < num || num <= 0
-  if array.length == num
-    yield array
-    return
-  elsif num == 1
-    array.each do |x|
-      yield [x]
-    end
-    return
-  end
-  currentComb = []
-  arr = []
-  num.times { |i| currentComb[i] = i }
-  loop do
-    num.times { |i| arr[i] = array[currentComb[i]] }
-    yield arr
-    break unless _pbNextComb(currentComb, array.length)
-  end
+  array.combination(num).each { |comb| yield comb }
 end
 
 # Returns a language ID
@@ -105,7 +64,6 @@ end
 #===============================================================================
 # Constants utilities
 #===============================================================================
-# Unused
 def isConst?(val, mod, constant)
   begin
     return false if !mod.const_defined?(constant.to_sym)
@@ -115,19 +73,16 @@ def isConst?(val, mod, constant)
   return (val == mod.const_get(constant.to_sym))
 end
 
-# Unused
 def hasConst?(mod, constant)
   return false if !mod || constant.nil?
   return mod.const_defined?(constant.to_sym) rescue false
 end
 
-# Unused
 def getConst(mod, constant)
   return nil if !mod || constant.nil?
   return mod.const_get(constant.to_sym) rescue nil
 end
 
-# Unused
 def getID(mod, constant)
   return nil if !mod || constant.nil?
   if constant.is_a?(Symbol) || constant.is_a?(String)

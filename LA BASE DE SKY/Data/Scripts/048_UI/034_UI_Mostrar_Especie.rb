@@ -174,15 +174,8 @@ class MostrarPokemonAnimado
   end
 end
 
-module PokeAnimadoUpdater
-  def self.update
-    return if !defined?($poke_animado) || !$poke_animado || $poke_animado.disposed?
-    $poke_animado.update
-  end
-end
-
 EventHandlers.add(:on_frame_update, :poke_animado_overlay,
-                  proc { PokeAnimadoUpdater.update })
+                  proc { $poke_animado&.update if defined?($poke_animado) && !$poke_animado.disposed? })
 
 
 # FUNCIONES PARA USARLO

@@ -198,6 +198,10 @@ EventHandlers.add(:on_step_taken, :party_pokemon_distance_tracker,
   }
 )
 
+def repel_active?
+  ($PokemonGlobal.repel > 0 || $PokemonGlobal.infRepel) == true
+end
+
 def pbOnStepTaken(eventTriggered)
   if $game_player.move_route_forcing || pbMapInterpreterRunning?
     EventHandlers.trigger(:on_step_taken, $game_player)
@@ -206,7 +210,7 @@ def pbOnStepTaken(eventTriggered)
   $PokemonGlobal.stepcount = 0 if !$PokemonGlobal.stepcount
   $PokemonGlobal.stepcount += 1
   $PokemonGlobal.stepcount &= 0x7FFFFFFF
-  repel_active = ($PokemonGlobal.repel > 0 || $PokemonGlobal.infRepel)
+  repel_active = repel_active?
   EventHandlers.trigger(:on_player_step_taken)
   handled = [nil]
   EventHandlers.trigger(:on_player_step_taken_can_transfer, handled)
@@ -218,7 +222,7 @@ end
 # Start wild encounters while turning on the spot
 EventHandlers.add(:on_player_change_direction, :trigger_encounter,
   proc {
-    repel_active = ($PokemonGlobal.repel > 0 || $PokemonGlobal.infRepel)
+    repel_active = repel_active?
     pbBattleOnStepTaken(repel_active) if !$game_temp.in_menu
   }
 )
