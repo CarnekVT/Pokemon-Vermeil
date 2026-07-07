@@ -759,6 +759,15 @@ def pbMessageDisplayFrame(msgwindow, controls, letterbyletter, commandProc, stat
     elsif !state[:appear_timer_start]
       return true
     end
+  elsif Input.press?(Input::ACTION) && ( $DEBUG || (Settings::ENABLE_SKIP_TEXT && $PokemonSystem.skip_texts==0))
+    msgwindow.textspeed=-999
+      msgwindow.update
+      if msgwindow.busy?
+        pbPlayDecisionSE() if msgwindow.pausing?
+        msgwindow.resume
+      elsif !state[:appear_timer_start]
+        return true
+      end
   end
   pbUpdateSceneMap
   msgwindow.update
