@@ -71,7 +71,7 @@ def pbGetChoiceImages(commands)
       species = parts[2].to_sym
       form = parts[3] ? parts[3].to_i : 0
       bitmap = GameData::Species.sprite_bitmap(species, form) if GameData::Species.exists?(species)
-    elsif parts[1] == "item" && parts.length >= 2
+    elsif parts[1] == "item" && parts.length >= 3
       item_id = parts[2].to_sym
       bitmap = GameData::Item.icon_bitmap(item_id) if GameData::Item.exists?(item_id)
     else
@@ -959,6 +959,7 @@ def pbShowCommandsWithHelp(msgwindow, commands, help, cmdIfCancel = 0, defaultCm
   msgwin = pbCreateMessageWindow(nil) if !msgwindow
   oldlbl = msgwin.letterbyletter
   msgwin.letterbyletter = false
+  ret = 0
   if commands
     cmdwindow = Window_AdvancedCommandPokemon.new(commands)
     cmdwindow.z = 99999
@@ -1088,6 +1089,7 @@ def handle_input(window, msg_window, current_text = '')
   window.update
   msg_window&.update
   yield if block_given?
+  false
 end
 
 def configure_window(window, msg_window, password_box, max_length, current_text, position = :right)
