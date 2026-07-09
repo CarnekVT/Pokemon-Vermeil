@@ -176,20 +176,12 @@ class Battle::Battler
 
   def pbCheckFormOnStatusChange
     return if fainted? || @effects[PBEffects::Transform]
-    # Shaymin - reverts if frozen
-    if isSpecies?(:SHAYMIN) && ( frozen? || frostbite? )
-      pbChangeForm(0, _INTL("¡{1} ha cambiado de forma!", pbThis))
-    end
+    MultipleForms.call("changeFormOnStatus", @pokemon, self)
   end
 
   def pbCheckFormOnMovesetChange
     return if fainted? || @effects[PBEffects::Transform]
-    # Keldeo - knowing Secret Sword
-    if isSpecies?(:KELDEO)
-      newForm = 0
-      newForm = 1 if pbHasMove?(:SECRETSWORD)
-      pbChangeForm(newForm, _INTL("¡{1} ha cambiado de forma!", pbThis))
-    end
+    MultipleForms.call("changeFormOnMoveset", @pokemon, self)
   end
 
   def pbCheckFormOnWeatherChange(ability_changed = false)

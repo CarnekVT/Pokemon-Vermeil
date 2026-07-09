@@ -39,13 +39,8 @@ end
 # (Relic Song)
 #===============================================================================
 class Battle::Move::SleepTargetChangeUserMeloettaForm < Battle::Move::SleepTarget
-  def pbEndOfMoveUsageEffect(user, targets, numHits, switchedBattlers)
-    return if numHits == 0
-    return if user.fainted? || user.effects[PBEffects::Transform]
-    return if !user.isSpecies?(:MELOETTA)
-    return if user.hasActiveAbility?(:SHEERFORCE) && @addlEffect > 0
-    newForm = (user.form + 1) % 2
-    user.pbChangeForm(newForm, _INTL("¡{1} se transformó!", user.pbThis))
+  def pbEndOfMoveUsageEffect(user, targets, numHits, switchedBattlers)    
+    MultipleForms.call("changeFormOnMoveUsage", user.pokemon, user, numHits, @addlEffect)
   end
 end
 

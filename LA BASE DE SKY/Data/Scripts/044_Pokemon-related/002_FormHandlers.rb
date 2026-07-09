@@ -323,7 +323,11 @@ MultipleForms.register(:GIRATINA, {
 
 MultipleForms.register(:SHAYMIN, {
   "getForm" => proc { |pkmn|
-    next 0 if pkmn.fainted? || pkmn.status == :FROZEN || PBDayNight.isNight?
+    next 0 if pkmn.fainted? || [:FROZEN, :FROSTBITE].include?(pkmn.status) || PBDayNight.isNight?
+  },
+  "changeFormOnStatus" => proc { |pkmn, battler|
+    next unless (battler.frozen? || battler.frostbite?)    
+    battler.pbChangeForm(0, _INTL("¡{1} ha cambiado de forma!", battler.pbThis))
   }
 })
 
@@ -449,12 +453,23 @@ MultipleForms.register(:KELDEO, {
   "getForm" => proc { |pkmn|
     next 1 if pkmn.hasMove?(:SECRETSWORD) # Resolute Form
     next 0                                # Ordinary Form
+  },
+  "changeFormOnMoveset" => proc { |pkmn, battler|
+    newForm = 0
+    newForm = 1 if battler.pbHasMove?(:SECRETSWORD)
+    battler.pbChangeForm(newForm, _INTL("¡{1} ha cambiado de forma!", battler.pbThis))
   }
 })
 
 MultipleForms.register(:MELOETTA, {
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0
+  },
+  "changeFormOnMoveUsage" => proc { |pkmn, user, numHits, addlEffect|
+    next if (numHits == 0 || user.fainted? || user.effects[PBEffects::Transform] || 
+            (user.hasActiveAbility?(:SHEERFORCE) && addlEffect > 0))
+    newForm = (user.form + 1) % 2
+    user.pbChangeForm(newForm, _INTL("¡{1} se transformó!", user.pbThis))
   }
 })
 
@@ -471,6 +486,16 @@ MultipleForms.register(:GENESECT, {
 MultipleForms.register(:GRENINJA, {
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 1 if pkmn.form == 2 && (pkmn.fainted? || endBattle)
+  },
+  "changeFormAfterMove" => proc { |pkmn, user, battle, move, numHits, targets|
+    next unless (user.form == 1 && !Settings::GRENINJA_BATTLE_BOND_RAISES_STATS &&
+                user.hasActiveAbility?(:BATTLEBOND) && !user.abilityUsedOnce? &&
+                targets.any? { |target| target.damageState.fainted })
+    user.markAbilityUsedOnce
+    battle.pbDisplay(_INTL("¡{1} siente la fuerza de vuestro afecto!", user.pbThis))
+    battle.pbShowAbilitySplash(user, true)
+    battle.pbHideAbilitySplash(user)
+    user.pbChangeForm(2, _INTL("¡{1} se convirtió en Greninja Ash!", user.pbThis))
   }
 })
 
@@ -515,6 +540,14 @@ MultipleForms.copy(:ESPURR, :MEOWSTIC)
 MultipleForms.register(:AEGISLASH, {
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0
+  },
+  "changeStanceForm" => proc { |pkmn, battler, move|
+    next unless battler.hasActiveAbility?(:STANCECHANGE)
+    if move.damagingMove?
+      battler.pbChangeForm(1, _INTL("¡{1} cambió a Forma Filo!", battler.pbThis))
+    elsif move.id == :KINGSSHIELD
+      battler.pbChangeForm(0, _INTL("¡{1} cambió a Forma Escudo!", battler.pbThis))
+    end
   }
 })
 
@@ -723,6 +756,12 @@ MultipleForms.register(:NECROZMA, {
 MultipleForms.register(:CRAMORANT, {
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
     next 0
+  },
+  "changeFormAfterMove" => proc { |pkmn, user, battle, move, numHits, targets|
+    next unless (user.hasActiveAbility?(:GULPMISSILE) &&
+                user.form == 0 && !user.effects[PBEffects::Transform] &&
+                ((move.id == :SURF && numHits > 0) || (move.id == :DIVE && move.chargingTurn)))
+    user.pbChangeForm((user.hp > user.totalhp / 2) ? 1 : 2, nil)
   }
 })
 
