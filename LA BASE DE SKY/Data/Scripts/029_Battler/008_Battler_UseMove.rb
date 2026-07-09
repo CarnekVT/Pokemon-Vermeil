@@ -111,6 +111,13 @@ class Battle::Battler
     sprite.visible = true
     sprite.opacity = 255
     sprite.pbSetPosition
+
+    shadow = scene.sprites["shadow_#{self.index}"]
+    return if !shadow
+
+    shadow.visible = true
+    shadow.opacity = 255
+    shadow.pbSetPosition
   end
 
   def pbHideBattlerSprite
@@ -123,10 +130,17 @@ class Battle::Battler
     sprite.visible = false
     sprite.opacity = 0
     sprite.pbSetPosition
+
+    shadow = scene.sprites["shadow_#{self.index}"]
+    return if !shadow
+
+    shadow.visible = false
+    shadow.opacity = 0
+    shadow.pbSetPosition
   end
 
 
-  def pbEndTurn(choice)
+  def pbEndTurn(choice, targets = [])
     @lastRoundMoved = @battle.turnCount   # Done something this round
     if !@effects[PBEffects::ChoiceBand] &&
        (hasActiveItem?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) ||
@@ -148,6 +162,9 @@ class Battle::Battler
     @effects[PBEffects::ShellTrap] = false
     @battle.allBattlers(true).each { |b| b.pbContinualAbilityChecks }   # Trace, end primordial weathers
     pbRestoreBattlerSprite if !(semiInvulnerable? || @effects[PBEffects::SkyDrop] >= 0) && !fainted?
+    targets.each do |b|
+      b.pbHideBattlerSprite if b.semiInvulnerable? || b.effects[PBEffects::SkyDrop] >= 0 || b.fainted?
+    end
   end
 
   def pbConfusionDamage(msg)
@@ -561,7 +578,8 @@ class Battle::Battler
     # Shadow Pokémon triggering Hyper Mode
     pbHyperMode if @battle.choices[@index][0] != :None   # Not if self is replaced
     # End of move usage
-    pbEndTurn(choice)
+    arrTargets = defined?(newTargets) ? newTargets : targets
+    pbEndTurn(choice, arrTargets)
     # Instruct
     @battle.allBattlers.each do |b|
       next if !b.effects[PBEffects::Instruct] || !b.lastMoveUsed
