@@ -1,12 +1,14 @@
 # Check if internet connection is available
-def network_available?
-  begin
-    # Try a simple HTTP request using HTTPLite to check connectivity
-    response = HTTPLite.get("http://httpbin.org/status/200")
-    return response && response.fetch(:status) == 200
-  rescue StandardError
-    return false
-  rescue MKXPError
-    return false
+# ponytail: 3 retries, bump if flaky networks common
+def network_available?(retries: 3, delay: 0.5)
+  retries.times do
+    begin
+      response = HTTPLite.get("http://httpbin.org/status/200")
+      return true if response && response.fetch(:status) == 200
+    rescue StandardError, MKXPError
+      return false
+    end
+    pbWait(delay) if retries > 1
   end
+  false
 end
