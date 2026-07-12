@@ -9756,7 +9756,7 @@ Power = 1
 Accuracy = 100
 TotalPP = 10
 Target = NearOther
-FunctionCode = PowerHigherWithTargetHP100PowerRange
+FunctionCode = PowerHigherWithTargetHP100
 Flags = Contact,CanProtect,CanMirrorMove
 Description = Oprime con los brazos o las pinzas. Cuantos más PS le queden al objetivo, más daño hace.
 #-------------------------------
