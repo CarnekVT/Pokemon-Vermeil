@@ -1,5 +1,3 @@
-# Check if internet connection is available
-# ponytail: 3 retries, bump if flaky networks common
 def network_available?(retries: 3, delay: 0.5)
   retries.times do
     begin
