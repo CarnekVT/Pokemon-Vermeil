@@ -15,28 +15,28 @@ class Battle::Scene::Animation::Intro < Battle::Scene::Animation
       makeSlideSprite("battle_bg2", 0.5, appearTime)
     end
     # Bases
-    if Settings::SHOW_BATTLE_BASES
+    if Settings::SHOW_BATTLE_BASES && !Settings::DISABLE_SLIDING_BASES
       makeSlideSprite("base_0", 1, appearTime, PictureOrigin::BOTTOM)
       makeSlideSprite("base_1", -1, appearTime, PictureOrigin::CENTER)
     end
-    # Player sprite, partner trainer sprite
-    @battle.player.each_with_index do |_p, i|
-      makeSlideSprite("player_#{i + 1}", 1, appearTime, PictureOrigin::BOTTOM)
-    end
-    # Opposing trainer sprite(s) or wild Pokémon sprite(s)
-    if @battle.trainerBattle?
-      @battle.opponent.each_with_index do |_p, i|
-        makeSlideSprite("trainer_#{i + 1}", -1, appearTime, PictureOrigin::BOTTOM)
+    # Player sprite, partner trainer sprite, opposing trainer/wild Pokémon sprite(s) and shadows
+    if !Settings::DISABLE_SLIDING_SPRITES
+      @battle.player.each_with_index do |_p, i|
+        makeSlideSprite("player_#{i + 1}", 1, appearTime, PictureOrigin::BOTTOM)
       end
-    else   # Wild battle
-      @battle.pbParty(1).each_with_index do |_pkmn, i|
-        idxBattler = (2 * i) + 1
-        makeSlideSprite("pokemon_#{idxBattler}", -1, appearTime, PictureOrigin::BOTTOM)
+      if @battle.trainerBattle?
+        @battle.opponent.each_with_index do |_p, i|
+          makeSlideSprite("trainer_#{i + 1}", -1, appearTime, PictureOrigin::BOTTOM)
+        end
+      else   # Wild battle
+        @battle.pbParty(1).each_with_index do |_pkmn, i|
+          idxBattler = (2 * i) + 1
+          makeSlideSprite("pokemon_#{idxBattler}", -1, appearTime, PictureOrigin::BOTTOM)
+        end
       end
-    end
-    # Shadows
-    @battle.battlers.length.times do |i|
-      makeSlideSprite("shadow_#{i}", (i.even?) ? 1 : -1, appearTime, PictureOrigin::CENTER)
+      @battle.battlers.length.times do |i|
+        makeSlideSprite("shadow_#{i}", (i.even?) ? 1 : -1, appearTime, PictureOrigin::CENTER)
+      end
     end
     # Fading blackness over whole screen
     blackScreen = addNewSprite(0, 0, "Graphics/Battle animations/black_screen")
