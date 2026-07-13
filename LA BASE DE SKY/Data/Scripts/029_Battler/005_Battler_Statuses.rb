@@ -452,13 +452,11 @@ class Battle::Battler
   # Generalised status displays
   #=============================================================================
   def pbContinueStatus
-    if !(semiInvulnerable? || @effects[PBEffects::SkyDrop] >= 0) && !fainted?
-      if self.status == :POISON && @statusCount > 0
-        @battle.pbCommonAnimation("Toxic", self)
-      else
-        anim_name = GameData::Status.get(self.status).animation
-        @battle.pbCommonAnimation(anim_name, self) if anim_name
-      end
+    if self.status == :POISON && @statusCount > 0
+      @battle.pbCommonAnimation("Toxic", self)
+    else
+      anim_name = GameData::Status.get(self.status).animation
+      @battle.pbCommonAnimation(anim_name, self) if anim_name
     end
     yield if block_given?
     case self.status
