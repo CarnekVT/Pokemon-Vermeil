@@ -111,6 +111,13 @@ class Battle::Battler
     sprite.visible = true
     sprite.opacity = 255
     sprite.pbSetPosition
+
+    shadow = scene.sprites["shadow_#{self.index}"]
+    return if !shadow
+
+    shadow.visible = true
+    shadow.opacity = 255
+    shadow.pbSetPosition
   end
 
   def pbHideBattlerSprite
@@ -123,6 +130,13 @@ class Battle::Battler
     sprite.visible = false
     sprite.opacity = 0
     sprite.pbSetPosition
+
+    shadow = scene.sprites["shadow_#{self.index}"]
+    return if !shadow
+
+    shadow.visible = false
+    shadow.opacity = 0
+    shadow.pbSetPosition
   end
 
 
@@ -245,14 +259,7 @@ class Battle::Battler
       pbEndTurn(choice)
       return
     end
-    # Stance Change
-    if isSpecies?(:AEGISLASH) && self.ability == :STANCECHANGE
-      if move.damagingMove?
-        pbChangeForm(1, _INTL("¡{1} cambió a Forma Filo!", pbThis))
-      elsif move.id == :KINGSSHIELD
-        pbChangeForm(0, _INTL("¡{1} cambió a Forma Escudo!", pbThis))
-      end
-    end
+    MultipleForms.call("changeStanceForm", @pokemon, self, move)
     # Calculate the move's type during this usage
     move.calcType = move.pbCalcType(self)
     # Start effect of Mold Breaker

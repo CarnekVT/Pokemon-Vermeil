@@ -220,6 +220,16 @@ class Sprite_Character < RPG::Sprite
     update_footsteps
   end
 
+  # true si el tile en (x, y) tiene terrain tag 3 (arena) en cualquier capa.
+  def on_footprint_terrain?(x, y)
+    tilesetid = @character.map.instance_eval { @map.tileset_id }
+    [2, 1, 0].any? do |e|
+      tile_id = @character.map.data[x, y, e]
+      next false if tile_id.nil?
+      next $data_tilesets[tilesetid].terrain_tags[tile_id] == 3
+    end
+  end
+
   def update_footsteps_aux
     @old_x ||= @character.x
     @old_y ||= @character.y
@@ -232,16 +242,12 @@ class Sprite_Character < RPG::Sprite
            !FootprintsSettings::FILENAME_MAY_NOT_INCLUDE.include?($game_temp.followers.realEvents[0].character_name)
           make_steps = false
         else
-          make_steps = true
+          # Follower excluido: el jugador hace las huellas, pero solo sobre arena
+          make_steps = on_footprint_terrain?(@old_x, @old_y)
         end
       elsif (!@character.respond_to?(:name) || !FootprintsSettings::EVENTNAME_MAY_NOT_INCLUDE.include?(@character.name)) &&
              !FootprintsSettings::FILENAME_MAY_NOT_INCLUDE.include?(@character.character_name)
-        tilesetid = @character.map.instance_eval { @map.tileset_id }
-        make_steps = [2,1,0].any? do |e|
-          tile_id = @character.map.data[@old_x, @old_y, e]
-          next false if tile_id.nil?
-          next $data_tilesets[tilesetid].terrain_tags[tile_id] == 3
-        end
+        make_steps = on_footprint_terrain?(@old_x, @old_y)
       end
       if make_steps
         fstep = Sprite.new(self.viewport)

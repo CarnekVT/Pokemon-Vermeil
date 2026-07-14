@@ -504,6 +504,46 @@ class Battle::Scene
   #=============================================================================
   # Plays a move animation.
   def pbAnimation(moveID, user, targets, hitNum = 0)
+    old_visible_target = []
+    old_opacity_target = []
+    old_shadow_visible_target = []
+    old_shadow_opacity_target = []
+    if targets then
+      targets.each_with_index do |b, i|
+        sprite = sprites["pokemon_#{b.index}"]
+        shadow = sprites["shadow_#{b.index}"]
+        old_visible_target[i] = sprite.visible
+        old_opacity_target[i] = sprite.opacity
+        old_shadow_visible_target[i] = shadow.visible
+        old_shadow_opacity_target[i] = shadow.opacity
+      end
+    end
+    
+    pbAnimation2(moveID, user, targets, hitNum)
+
+    if user then
+      sprite = sprites["pokemon_#{user.index}"]
+      shadow = sprites["shadow_#{user.index}"]
+      shadow.visible = sprite.visible
+      shadow.opacity = sprite.opacity
+      shadow.pbSetPosition
+    end
+
+    if targets and moveID != :SKYDROP then
+      targets.each_with_index do |b, i|
+        sprite = sprites["pokemon_#{b.index}"]
+        shadow = sprites["shadow_#{b.index}"]
+        sprite.visible = old_visible_target[i]
+        sprite.opacity = old_opacity_target[i]
+        sprite.pbSetPosition
+        shadow.visible = old_shadow_visible_target[i]
+        shadow.opacity = old_shadow_opacity_target[i]
+        shadow.pbSetPosition
+      end
+    end
+  end
+  
+  def pbAnimation2(moveID, user, targets, hitNum = 0)
     animID = pbFindMoveAnimation(moveID, user.index, hitNum)
     return if !animID
     anim = animID[0]
@@ -521,6 +561,31 @@ class Battle::Scene
 
   # Plays a common animation.
   def pbCommonAnimation(animName, user = nil, target = nil)
+    old_opacity = 255
+    if user then
+      sprite = sprites["pokemon_#{user.index}"]
+      shadow = sprites["shadow_#{user.index}"]
+      old_visible = sprite.visible
+      old_opacity = sprite.opacity
+      old_shadow_visible = shadow.visible
+      old_shadow_opacity = shadow.opacity
+    end
+
+    return if old_opacity == 0
+
+    pbCommonAnimation2(animName, user, target)
+
+    if user then
+      sprite.visible = old_visible
+      sprite.opacity = old_opacity
+      sprite.pbSetPosition
+      shadow.visible = old_shadow_visible
+      shadow.opacity = old_shadow_opacity
+      shadow.pbSetPosition
+    end
+  end
+
+  def pbCommonAnimation2(animName, user = nil, target = nil)
     return if nil_or_empty?(animName)
     target = target[0] if target.is_a?(Array)
     animations = pbLoadBattleAnimations
@@ -577,4 +642,3 @@ class Battle::Scene
     end
   end
 end
-

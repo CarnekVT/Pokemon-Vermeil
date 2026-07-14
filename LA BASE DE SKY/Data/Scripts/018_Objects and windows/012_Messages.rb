@@ -71,7 +71,7 @@ def pbGetChoiceImages(commands)
       species = parts[2].to_sym
       form = parts[3] ? parts[3].to_i : 0
       bitmap = GameData::Species.sprite_bitmap(species, form) if GameData::Species.exists?(species)
-    elsif parts[1] == "item" && parts.length >= 2
+    elsif parts[1] == "item" && parts.length >= 3
       item_id = parts[2].to_sym
       bitmap = GameData::Item.icon_bitmap(item_id) if GameData::Item.exists?(item_id)
     else
@@ -759,6 +759,15 @@ def pbMessageDisplayFrame(msgwindow, controls, letterbyletter, commandProc, stat
     elsif !state[:appear_timer_start]
       return true
     end
+  elsif Input.press?(Input::ACTION) && ( $DEBUG || (Settings::ENABLE_SKIP_TEXT && $PokemonSystem.skip_texts==0))
+    msgwindow.textspeed=-999
+    msgwindow.update
+    if msgwindow.busy?
+      pbPlayDecisionSE() if msgwindow.pausing?
+      msgwindow.resume
+    elsif !state[:appear_timer_start]
+      return true
+    end
   end
   pbUpdateSceneMap
   msgwindow.update
@@ -950,6 +959,7 @@ def pbShowCommandsWithHelp(msgwindow, commands, help, cmdIfCancel = 0, defaultCm
   msgwin = pbCreateMessageWindow(nil) if !msgwindow
   oldlbl = msgwin.letterbyletter
   msgwin.letterbyletter = false
+  ret = 0
   if commands
     cmdwindow = Window_AdvancedCommandPokemon.new(commands)
     cmdwindow.z = 99999
@@ -1079,6 +1089,7 @@ def handle_input(window, msg_window, current_text = '')
   window.update
   msg_window&.update
   yield if block_given?
+  false
 end
 
 def configure_window(window, msg_window, password_box, max_length, current_text, position = :right)

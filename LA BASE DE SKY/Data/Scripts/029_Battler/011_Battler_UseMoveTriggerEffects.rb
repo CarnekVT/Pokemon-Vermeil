@@ -115,24 +115,7 @@ class Battle::Battler
     end
     if !user.fainted? && !user.effects[PBEffects::Transform] &&
        !@battle.pbAllFainted?(user.idxOpposingSide)
-      # Greninja - Battle Bond
-      if user.isSpecies?(:GRENINJA) && user.form == 1 &&
-         !Settings::GRENINJA_BATTLE_BOND_RAISES_STATS &&
-         user.ability == :BATTLEBOND && !user.abilityUsedOnce? &&
-         targets.any? { |target| target.damageState.fainted }
-          user.markAbilityUsedOnce
-          @battle.pbDisplay(_INTL("¡{1} siente la fuerza de vuestro afecto!", user.pbThis))
-          @battle.pbShowAbilitySplash(user, true)
-          @battle.pbHideAbilitySplash(user)
-          user.pbChangeForm(2, _INTL("¡{1} se convirtió en Greninja Ash!", user.pbThis))
-      end
-      # Cramorant = Gulp Missile
-      if user.isSpecies?(:CRAMORANT) && user.ability == :GULPMISSILE &&
-         user.form == 0 && !user.effects[PBEffects::Transform] &&
-         ((move.id == :SURF && numHits > 0) || (move.id == :DIVE && move.chargingTurn))
-        # NOTE: Intentionally no ability splash or message here.
-        user.pbChangeForm((user.hp > user.totalhp / 2) ? 1 : 2, nil)
-      end
+      MultipleForms.call("changeFormAfterMove", user.pokemon, user, @battle, move, numHits, targets)
     end
     # Room Service
     if move.function_code == "StartSlowerBattlersActFirst" && @battle.field.effects[PBEffects::TrickRoom] > 0

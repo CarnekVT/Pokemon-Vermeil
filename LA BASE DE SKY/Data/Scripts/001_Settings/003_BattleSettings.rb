@@ -25,6 +25,14 @@ module Settings
   # Si esto es true, el fondo no se moverá (las bases/entrenadores/Pokémon sí lo harán).
   DISABLE_SLIDING_BACKGROUND = false
 
+  # Los sprites de entrenadores, Pokémon y sus sombras se mueven a los lados al inicio de la batalla.
+  # Si esto es true, estos sprites no se moverán al iniciar el combate.
+  DISABLE_SLIDING_SPRITES = false
+
+  # Las bases de combate se mueven a los lados al inicio de la batalla.
+  # Si esto es true, las bases no se deslizarán al entrar al combate.
+  DISABLE_SLIDING_BASES = false
+
   # Mostrar las bases de batalla (true) o no (false). Ten en cuenta que esto no afecta a los fondos de batalla, solo a las bases.
   SHOW_BATTLE_BASES = true
 
