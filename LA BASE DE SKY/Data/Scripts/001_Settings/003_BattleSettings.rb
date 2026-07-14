@@ -221,5 +221,87 @@ module Settings
   # Si es true, todos los Pokémon de la misma especie tendrán el mismo tono.
   # Si es false, el tono será único por cada Pokémon.
   SUPER_SHINY_HUE_BY_SPECIES = true
+
+
+
+  #=============================================================================
+  # ** CONFIGURACIÓN BARRAS DE ENTRENADORES **
+  #=============================================================================
+  
+  # FORMA DE LAS BARRAS
+  #    :SLANTED    - Triángulos inclinados en las esquinas
+  #    :SQUARE     - Marco que abarca toda la pantalla
+  #    :HORIZONTAL - Barras rectangulares horizontales clásicas
+  BAR_SHAPE = :HORIZONTAL
+
+  # TAMAÑO/GROSOR DEL MARCO EN MODO :SQUARE
+  #    Píxeles de grosor máximo que abarcará el marco alrededor de la pantalla
+  #    (ej: 36 o 40 para un marco fino y elegante, 64 o 80 para uno más ancho).
+  SQUARE_FRAME_THICKNESS = 80
+
+  # DIRECCIÓN DINÁMICA (EXPERIMENTAL)
+  #    true  : Las barras aparecen y se orientan hacia donde mira el entrenador
+  #            y según la orientación/posición relativa con respecto al jugador.
+  #    false : Orientación fija clásica (siempre Superior e Inferior).
+  DYNAMIC_DIRECTION = false
+
+  # COLOR RGB Y TRANSPARENCIA PERSONALIZABLE
+  #    true  : Activa el uso del color CUSTOM_RGB y la transparencia CUSTOM_ALPHA.
+  #    false : Utiliza el degradado oscuro cinemático por defecto.
+  CUSTOM_RGB_ENABLED = false
+  
+  # Color RGB [Rojo, Verde, Azul] (Valores entre 0 y 255)
+  # Ejemplos: [10, 12, 16] (Negro mate), [210, 35, 35] (Rojo), [20, 50, 150] (Azul)
+  CUSTOM_RGB   = [10, 12, 16]
+  
+  # Transparencia / Opacidad máxima (0 a 255, donde 255 es sólido y 0 invisible)
+  CUSTOM_ALPHA = 240
+
+  # ALTURA MÁXIMA DE LAS BARRAS POR MODO (píxeles)
+  #    Define qué tan altas/gruesas se extienden las barras en cada modo cuando
+  #    la cercanía está al máximo (jugador pegado al entrenador).
+  #      :HORIZONTAL -> HORIZONTAL_BAR_HEIGHT
+  #      :SLANTED    -> SLANTED_BAR_HEIGHT
+  #    BAR_HEIGHT se mantiene como "alias" de HORIZONTAL_BAR_HEIGHT por
+  #    retrocompatibilidad con scripts antiguos.
+  HORIZONTAL_BAR_HEIGHT = Graphics.height / 5
+  SLANTED_BAR_HEIGHT    = Graphics.height / 3
+  BAR_HEIGHT            = HORIZONTAL_BAR_HEIGHT   # alias retrocompat
+
+  # RAZÓN DE EXPANSIÓN INICIAL
+  #    Fracción (0..1) de la altura/grosor máximo que muestran las barras justo
+  #    al "brotar" (closeness ~ BAR_SOFT_RANGE). Valores más bajos producen un
+  #    crecimiento más dramático desde casi 0 hasta el máximo; valores cercanos
+  #    a 1 hacen que las barras aparezcan casi a su tamaño final de una vez.
+  BAR_MIN_EXPAND_RATIO    = 0.40   # barras :HORIZONTAL / :SLANTED
+  SQUARE_MIN_EXPAND_RATIO = 0.30   # grosor del marco :SQUARE
+
+  # TRANSICIONES
+  #    Rate de interpolación (lerp) calibrado a 60 FPS de referencia.
+  #    El sistema convierte internamente a delta time, así que la velocidad
+  #    de la animación es idéntica a 30, 60, 120+ FPS.
+  #      0.14 ≈ ~0.8 s para recorrer 0.0 -> 1.0
+  #      0.20 ≈ ~0.5 s
+  BAR_FADE_RATE  = 0.14   # cambio de opacidad/grosor (closeness)
+  BAR_SLIDE_RATE = 0.16   # deslizamiento al entrar las barras
+  #    Fracción (0..1) del closeness reservada como "zona suave" de fade-in/out.
+  #    Por debajo de este umbral la opacidad crece linealmente desde 0; por
+  #    encima se intensifica hasta el máximo. Valores más altos hacen el
+  #    fade-in/out más prolongado.
+  BAR_SOFT_RANGE = 0.20
+
+  # PARÁMETROS DEL DEGRADADO VERTICAL
+  #    BAR_FADE_CURVE controla cómo cae la opacidad de borde externo a interno
+  #    en cada barra. Valores >1 hacen la caída más abrupta cerca del borde
+  #    interno (degradado más "duro"); valores <1 la hacen más uniforme.
+  BAR_FADE_CURVE = 1.3
+  #    Fracción (0..1) de la opacidad máxima que la barra muestra en su
+  #    intensidad base (closeness = 1.0). El resto se "llena" conforme la
+  #    cercanía aumenta. Valores más altos = barras siempre visibles y densas.
+  BAR_ALPHA_MIN_RATIO = 0.45
+
+  BAR_OPACITY  = 255 / 8
+  SELF_SWITCH  = "A"
+  BAR_GRAPHIC  = ""
 end
 
