@@ -36,10 +36,11 @@ class Game_PokemonFollower < Game_Follower
   end
 
   #===========================================================================
-  # UPDATE — solo conga. Todo lo demás es del motor.
+  # UPDATE — conga y forzado de gráficos inmediato
   #===========================================================================
   alias va_orig_update update unless method_defined?(:va_orig_update)
   def update
+    @step_anime = VibrantAdapted::Settings.always_animate?
     va_orig_update
     update_conga
   end

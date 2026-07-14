@@ -160,7 +160,7 @@
     // Sync screen redraws to the monitor refresh rate, to reduce screen
     // tearing.
     //
-    "vsync": false,
+    "vsync": true,
 
     // Use a fixed framerate that is approx. equal to the native screen refresh
     // rate. This is different from "fixedFramerate" because the actual frame
@@ -168,9 +168,9 @@
     // refresh rate cannot be determined, this option is force-disabled. This
     // option may be force-disabled at build time.
     //
-    "syncToRefreshrate": false,
+    "syncToRefreshrate": true
 
     // The game's frame rate, if "syncToRefreshrate" is false.
     //
-    "fixedFramerate": 60
+    //"fixedFramerate": 60
 }

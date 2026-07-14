@@ -105,7 +105,9 @@ module VibrantAdapted
       when :following
         if player_moving
           @idle_timer = 0.0
+          follower.move_speed = player.move_speed
         elsif VibrantAdapted::Settings.enable_wandering?
+          follower.move_speed = 3 unless follower.moving?
           @idle_timer += dt
           if @idle_timer > VibrantAdapted::Settings::IDLE_START_TIME
             follower.vibrant_state = :wandering

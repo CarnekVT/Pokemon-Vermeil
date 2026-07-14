@@ -91,7 +91,7 @@ if defined?(Game_PokemonFollower)
 
     private
 
-    IDLE_DEBOUNCE = 0.3
+    IDLE_DEBOUNCE = 0.0
 
     def update_state_sprite
       return unless @vibrant_name
@@ -148,7 +148,7 @@ if defined?(Game_PokemonFollower)
 else
   # --- Fallback para sistemas que usen Game_Follower directamente ---
   class Game_Follower
-    IDLE_DEBOUNCE = 0.2
+    IDLE_DEBOUNCE = 0.0
 
     alias _ows_as_orig_update update unless method_defined?(:_ows_as_orig_update)
     def update

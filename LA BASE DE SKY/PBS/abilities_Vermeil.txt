@@ -1,0 +1,202 @@
+﻿# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+# Magcargo
+#-------------------------------
+[OBSIDIANSHELL]
+Name = Obsidian Shell
+Description = Reduces damage from Water and Ground type moves. When hit, sharp splinters are dug around the foe, and boosts Defense and Sp.Defense.
+#-------------------------------
+# Throgre
+#-------------------------------
+[BURNINGRAMPAGE]
+Name = Burning Rampage
+Description = Each time the Pokémon is hit, its Fire type moves gain 10% cumulative power per hit (max 50%). Immune to freezing.
+#-------------------------------
+# Sawni
+#-------------------------------
+[FROSTEDGE]
+Name = Frost Edge
+Description = Slicing and contact moves have a 20% chance to freeze the target if it has any lowered stats. Also, increases the Pokémon's Speed by 20% during the hailstorm.
+#-------------------------------
+# Mega Meganium
+#-------------------------------
+[REACTIVEPOLLEN]
+Name = Reactive Pollen
+Description = When hit by a Physical attack, releases spores that lower the attacker's Attack and Speed. If hit by a Special attack, lowers their Sp. Atk and Speed.
+#-------------------------------
+# Mega Emboar
+#-------------------------------
+[BLAZINGVANGUARD]
+Name = Blazing Vanguard
+Description = Protects the Pokémon from recoil damage and reduces damage from physical moves. It also boosts its Attack upon entering battle.
+#-------------------------------
+# Johtonian Wimpod
+#-------------------------------
+[SQUIRESWILL]
+Name = Squire's Will
+Description = When HP drops to half or less, Defense and Sp. Def sharply rise, and Attack, Sp. Atk and Speed rises. While HP is low, prevents flinching and being forced out of battle.
+#-------------------------------
+# Johtonian Golisopod
+#-------------------------------
+[WARLORDSGAZE]
+Name = Warlord's Gaze
+Description = Intimidates foes upon entry, lowering their Attack. Ruthlessly strikes any opponent that attempts to flee from battle.
+#-------------------------------
+# Tsurigo
+#-------------------------------
+[FOLDEDGUARD]
+Name = Folded Guard
+Description = The first time this Pokemon is hit in battle, the damage is halved.
+#-------------------------------
+# Kalosian Avalugg
+#-------------------------------
+[HABBAKUKHULL]
+Name = Habbakuk Hull
+Description = Halves damage from Fire, Fighting, and Rock moves. Allies take 25% less damage from spread attacks.
+#-------------------------------
+# Hisuian Avalugg
+#-------------------------------
+[PERMAFROSTJAW]
+Name = Permafrost Jaw
+Description = Powers up biting moves and lets them ignore the target's defensive Ability effects.
+#-------------------------------
+# Mega Feraligatr
+#-------------------------------
+[DELTAPLATING]
+Name = Delta Plating
+Description = Halves damage from super-effective moves. Raises Speed by 2 stages when hit by a critical hit.
+#-------------------------------
+# Tenkifetch'd
+#-------------------------------
+[PRIMALTOUGH]
+Name = Primal Tough
+Description = Reduces damage taken from Rock-type moves, but makes Ice-type moves deal more damage.
+#-------------------------------
+# Tenkifetch'd, Tinkaton, Throgre
+#-------------------------------
+[BLUDGEONMASTER]
+Name = Bludgeon Master
+Description = Powers up hammer moves by 50%.
+#-------------------------------
+# Ledian
+#-------------------------------
+[STARRYREACH]
+Name = Starry Reach
+Description = Status and punching moves gain +1 priority. Punching moves have doubled secondary effect chance.
+#-------------------------------
+# Suncorona
+#-------------------------------
+[BLESSEDCORONA]
+Name = Blessed Corona
+Description = Damages foes every turn. Allies are immune to freezing and their Fire moves are empowered.
+#-------------------------------
+# Eclipsora
+#-------------------------------
+[UMBRAVEIL]
+Name = Umbra Veil
+Description = Envelops the field in eclipse fog for 5 turns. Allies are immune to critical hits and stat drops, and Light Moves are smothered while the veil lasts.
+#-------------------------------
+# Stalactree
+#-------------------------------
+[MINERALDRIP]
+Name = Mineral Drip
+Description = Restores HP each turn. In a sandstorm, the healing is stronger.
+#-------------------------------
+# Morturne
+#-------------------------------
+[SKYSNARE]
+Name = Sky Snare
+Description = Traps Flying-type foes and halves damage from Flying-type moves.
+#-------------------------------
+# Special Intimidate
+#-------------------------------
+[OVERAWE]
+Name = Overawe
+Description = Intimidates opposing Pokemon on entry, lowering their Sp. Atk.
+#-------------------------------
+# Kick Moves Iron Fist
+#-------------------------------
+[STRIKER]
+Name = Striker
+Description = Powers up kicking moves by 50%.
+#-------------------------------
+# Mega Chesnaught
+#-------------------------------
+[IRONCLAD]
+Name = Ironclad
+Description = Halves physical damage taken. Uses Defense instead of Attack for the user's physical moves.
+#-------------------------------
+# Mega Delphox
+#-------------------------------
+[PRECOGNITION]
+Name = Precognition
+Description = Immune to priority moves. Fire and Psychic moves always hit and ignore Protect and screens.
+#-------------------------------
+# Mega Greninja
+#-------------------------------
+[HIDDENARSENAL]
+Name = Hidden Arsenal
+Description = Multi-hit moves always strike the maximum number of times. Priority moves are boosted by 50%.
+#-------------------------------
+# Pride (Special Moxie)
+#-------------------------------
+[PRIDE]
+Name = Pride
+Description = Boosts Sp. Atk each time the Pokémon knocks out a foe.
+#-------------------------------
+# Mega Raichu X
+#-------------------------------
+[OVERCHARGE]
+Name = Overcharge
+Description = Raises Attack after landing a contact move or a recoil move.
+#-------------------------------
+# Mega Glimmora
+#-------------------------------
+[CRYSTALORBIT]
+Name = Crystal Orbit
+Description = Its rotating petals reflect status moves and scatter poisonous spikes when hit by physical attacks.
+#-------------------------------
+# Mega Seperior
+#-------------------------------
+[FLEURDEMAL]
+Name = Fleur de Mal
+Description = Draining moves heal more HP. If the target is poisoned, draining moves deal more damage.
+#-------------------------------
+# Mega Typhlosion
+#-------------------------------
+[THERMALFRONT]
+Name = Thermal Front
+Description = Gives immunity to Ground-type moves. Electric-type moves can hit Ground-type Pokémon.
+#-------------------------------
+# Mega Samurott
+#-------------------------------
+[FEUDALWARD]
+Name = Feudal Ward
+Description = Reduces damage at full HP. Its regal presence blocks priority moves.
+#-------------------------------
+# Thudartic
+#-------------------------------
+[STORMLORD]
+Name = Storm Lord
+Description = Contact may paralyze. Under snow or rain, physical moves also restore HP.
+#-------------------------------
+# Mimality
+#-------------------------------
+[TOONLOGIC]
+Name = Toon Logic
+Description = Reality warps when hit. Triggers a random theatrical prank that disrupts the battle.
+#-------------------------------
+# Ardentar
+#-------------------------------
+[INCANDESCENCE]
+Name = Incandescence
+Description = Boosts Def and Sp. Atk in sun or when hit by a Fire move. May burn attackers on contact.
+#-------------------------------
+# Fire Knock
+#-------------------------------
+[FIREKNOCK]
+Name = Fire Knock
+Description = May burn the target when making contact.
+#-------------------------------
+
+

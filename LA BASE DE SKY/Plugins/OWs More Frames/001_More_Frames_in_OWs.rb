@@ -3,20 +3,40 @@ module OWsMoreFrames
   DEFAULT_FRAMES = 4
   def self.detect_frames(bitmap)
     return DEFAULT_FRAMES unless bitmap
+    width  = bitmap.width
     height = bitmap.height
-    width = bitmap.width
-    return DEFAULT_FRAMES if height == 0 || width == 0
-    directions = 4
-    frame_height = height / directions
-    return DEFAULT_FRAMES if frame_height == 0
-    frames = width / frame_height
-    return frames if frames >= 4
-    return DEFAULT_FRAMES
+    return DEFAULT_FRAMES if width <= 0 || height <= 0
+
+    cell_h = height / 4
+    return DEFAULT_FRAMES if cell_h <= 0
+
+    exact = width.to_f / cell_h
+    rounded = exact.round
+    return rounded if (exact - rounded).abs < 0.02
+
+    [16, 12, 10, 8, 6, 5, 4, 3, 2].each do |f|
+      expected = f * cell_h
+      return f if (width - expected).abs <= 2
+    end
+
+    [16, 12, 10, 8, 6, 5, 4, 3, 2].each do |f|
+      expected = (f * cell_h).to_f
+      ratio = width.to_f / expected
+      return f if (ratio - 1.0).abs < 0.01
+    end
+
+    result = [rounded, 4].max
+    result
   end
 end
 
 class Game_Character
   def frames
+    # Re-detectar si cambió el charset
+    if @frames && @frames > 0 && @character_name != @_ows_last_char_name
+      @_ows_last_char_name = @character_name
+      @frames = nil
+    end
     return @frames if @frames && @frames > 0
     if @character_name && @character_name != ""
       begin
@@ -29,6 +49,7 @@ class Game_Character
     else
       @frames = 4
     end
+    @_ows_last_char_name = @character_name
     return @frames
   end
 
@@ -46,7 +67,7 @@ class Game_Character
     end
     return if @lock_pattern
     # Character has stopped moving, return to original pattern
-    if @moved_last_frame && !@moved_this_frame
+    if @moved_last_frame && !@moved_this_frame && !@step_anime
       @pattern = @original_pattern
       @anime_count = 0
       return

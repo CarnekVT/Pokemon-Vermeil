@@ -86,7 +86,7 @@ module VibrantAdapted
     ENABLE_PHYSICAL_EMOTES = true
 
     #--- Wandering ---
-    IDLE_START_TIME     = 3.0
+    IDLE_START_TIME     = 1.0
     WANDER_RADIUS       = 3
     WANDER_STEP_DELAY   = 0.8
 

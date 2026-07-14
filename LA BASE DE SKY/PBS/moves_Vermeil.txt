@@ -1,0 +1,465 @@
+# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+# Throgre Exclusive Move
+#-------------------------------
+[BLAZINGCLUB]
+Name = Blazing Club
+Type = FIRE
+Category = Physical
+Power = 70
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = IgnoreScreensIfUserBurningRampageFull
+Flags = Contact,CanProtect,CanMirrorMove,HighCriticalHitRate
+EffectChance = 100
+Description = The user attacks with a blazing club. Has a high critical-hit ratio. If Burning Rampage is fully charged, this move ignores screens.
+#-------------------------------
+# Sawni Exclusive Move
+#-------------------------------
+[ICICLESLASH]
+Name = Icicle Slash
+Type = ICE
+Category = Physical
+Power = 70
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = LowerTargetSpeed1
+Flags = Contact,CanProtect,CanMirrorMove,Slicing
+EffectChance = 100
+Description = The user slashes at the target with a sharp icicle. This also lowers the target's Speed stat.
+#-----------------------------------------------
+# Reactive Thorn - Grass Starters Move 
+#-----------------------------------------------
+[REACTIVETHORN]
+Name = Reactive Thorn
+Type = GRASS
+Category = Physical
+Power = 50
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = ReactiveThorn
+Flags = Contact,CanProtect,CanMirrorMove
+Description = Attacks with adaptive spines using the higher offensive stat. Super effective against Flying and Bug types.
+#-----------------------------------------------
+# Warlord's Crush - Johtonian Golisopod Move
+#-----------------------------------------------
+[WARLORDSCRUSH]
+Name = Warlord's Crush
+Type = GROUND
+Category = Physical
+Power = 80
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = WarlordsCrush
+Flags = Contact,CanProtect,CanMirrorMove
+Description = The user ruthlessly crushes the foe with terracotta claws. Deals double damage if the target's Attack stat is lowered.
+#-------------------------------
+# Naussitch'd Exclusive Moves
+#-------------------------------
+[BULBBASH]
+Name = Bulb Bash
+Type = FIGHTING
+Category = Physical
+Power = 60
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = LowerTargetSpeed1
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 30
+Description = The user strikes with the thick bulb. This may lower the target's Speed.
+#-------------------------------
+[STALKCUTTER]
+Name = Stalk Cutter
+Type = FLYING
+Category = Physical
+Power = 55
+Accuracy = 95
+TotalPP = 15
+Target = NearOther
+FunctionCode = None
+Flags = Contact,CanProtect,CanMirrorMove,HighCriticalHitRate,Slicing
+Description = The user slices at weak points with a sharp stalk. It has a high critical-hit ratio.
+#-------------------------------
+# Kalosian Avalugg
+#-------------------------------
+[BERGMITESORTIE]
+Name = Bergmite Sortie
+Type = ICE
+Category = Physical
+Power = 20
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = BergmiteSortie
+Flags = CanProtect,CanMirrorMove
+EffectChance = 10
+Description = Hits 2-5 times. Each hit may lower the target's Speed.
+#-------------------------------
+# Hisuian Avalugg
+#-------------------------------
+[GLACIERCRUNCH]
+Name = Glacier Crunch
+Type = ROCK
+Category = Physical
+Power = 85
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = GlacierCrunch
+Flags = Contact,CanProtect,CanMirrorMove,Biting
+Description = A permafrost bite. Treated as a biting move and is super effective against Steel.
+#-------------------------------
+# Mega Meganium
+#-------------------------------
+[ANCIENTVIGOR]
+Name = Ancient Vigor
+Type = FAIRY
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = AncientVigor
+Flags = CanProtect,CanMirrorMove
+EffectChance = 30
+Description = Restores half the damage dealt and may raise the user's Defense and Sp. Def.
+#-------------------------------
+# Mega Emboar
+#-------------------------------
+[SERPENTFLARE]
+Name = Serpent Flare
+Type = FIRE
+Category = Physical
+Power = 25
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = SerpentFlare
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 10
+Description = Hits 2-5 times. Each hit may burn the target.
+#-------------------------------
+# Mega Feraligatr
+#-------------------------------
+[DYNASTICFANG]
+Name = Dynastic Fang
+Type = DRAGON
+Category = Physical
+Power = 85
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = DynasticFang
+Flags = Contact,CanProtect,CanMirrorMove,Biting
+Description = A biting strike. Gets +1 priority if the target has less than half HP.
+#-------------------------------
+# Flying Type Trailblaze/Flame Charge
+#-------------------------------
+[SPIRALSTRIKE]
+Name = Spiral Strike
+Type = FLYING
+Category = Physical
+Power = 50
+Accuracy = 100
+TotalPP = 20
+Target = NearOther
+FunctionCode = RaiseUserSpeed1
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 100
+Description = A spiraling burst that strikes the target and raises the user's Speed.
+#-------------------------------
+# Suncorona
+#-------------------------------
+[AUREOLAFLARE]
+Name = Aureola Flare
+Type = FIRE
+Category = Special
+Power = 100
+Accuracy = 95
+TotalPP = 10
+Target = NearOther
+FunctionCode = BurnTarget30Percent
+Flags = CanProtect,CanMirrorMove,Bullet
+EffectChance = 30
+Description = The user unleashes a blast of divine solar heat. High chance to burn the target.
+#-------------------------------
+# Eclipsora
+#-------------------------------
+[SHADOWDECREE]
+Name = Shadow Decree
+Type = DARK
+Category = Physical
+Power = 85
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = IgnoreTargetDefSpDefEvaStatStages
+Flags = CanProtect,CanMirrorMove,Contact,HighCriticalHitRate
+Description = A definitive strike delivered with the authority of the eclipse. High critical hit ratio and ignores stat changes.
+#-------------------------------
+# Stalactree
+#-------------------------------
+[STALAGMITEFALL]
+Name = Stalagmite Fall
+Type = ROCK
+Category = Physical
+Power = 100
+Accuracy = 95
+TotalPP = 10
+Target = NearOther
+FunctionCode = StalagmiteFall
+Flags = Contact,CanProtect,CanMirrorMove
+Description = A crushing cave strike. It may flinch the target or lower its Defense.
+#-------------------------------
+# Morturne
+#-------------------------------
+[SPIKYGRASP]
+Name = Spiky Grasp
+Type = GRASS
+Category = Physical
+Power = 80
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = SpikyGrasp
+Flags = CanProtect,CanMirrorMove
+Description = The user strikes with a thorny claw that drags the target down. It is super effective against Flying types.
+#-------------------------------
+# Bug Type Bulldoze
+#-------------------------------
+[WEBSHOOTER]
+Name = Webshooter
+Type = BUG
+Category = Physical
+Power = 60
+Accuracy = 100
+TotalPP = 20
+Target = AllNearFoes
+FunctionCode = LowerTargetSpeed1
+Flags = CanProtect,Mirror,CanKingRock
+EffectChance = 100
+Description = The user attacks opposing Pokémon by shooting sticky webs. This also lowers their Speed stats.
+#-------------------------------
+# Let's Go Togepi Move
+#-------------------------------
+[TOGEBEAM]
+Name = Togebeam
+Type = FAIRY
+Category = Special
+Power = 1
+Accuracy = 0
+TotalPP = 20
+Target = NearOther
+FunctionCode = PowerHigherWithUserHappiness
+Flags = CanProtect,CanMirrorMove
+Description = The more Togepi loves its Trainer, the greater the power of this move. It never misses.
+#-------------------------------
+# Electric Explosion
+#-------------------------------
+[VOLTBURST]
+Name = Volt Burst
+Type = ELECTRIC
+Category = Physical
+Power = 250
+Accuracy = 100
+TotalPP = 5
+Target = AllNearOthers
+FunctionCode = UserFaintsExplosive
+Flags = CanProtect,CanMirrorMove
+Description = The user overloads its body with electricity until it bursts, damaging all around it. The user faints.
+#-------------------------------
+# Rock Type Physical Air Slash
+#-------------------------------
+[CRAGSMASH]
+Name = Crag Smash
+Type = ROCK
+Category = Physical
+Power = 80
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = FlinchTarget
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 20
+Description = The user violently smashes the target with a hardened crag. This may also make the target flinch.
+#-------------------------------
+# Electric Close Combat
+#-------------------------------
+[LIGHTNINGRUSH]
+Name = Lightning Rush
+Type = ELECTRIC
+Category = Physical
+Power = 120
+Accuracy = 100
+TotalPP = 5
+Target = NearOther
+FunctionCode = LowerUserDefSpDef1
+Flags = Contact,CanProtect,CanMirrorMove
+Description = The user electrifies its body and rushes the target without guarding. This lowers the user's Defense and Sp. Def stats.
+#-------------------------------
+# Alolan Golem
+#-------------------------------
+[IONPULSE]
+Name = Ion Pulse
+Type = ELECTRIC
+Category = Special
+Power = 60
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = BurnTarget
+Flags = CanProtect,CanMirrorMove,Pulse
+EffectChance = 100
+Description = The user attacks with a highly charged pulse of ionized energy. This also leaves the target with a burn.
+#-------------------------------
+# Fairy Type New Physical Move
+#-------------------------------
+[PIXIESMASH]
+Name = Pixie Smash
+Type = FAIRY
+Category = Physical
+Power = 60
+Accuracy = 100
+TotalPP = 20
+Target = NearOther
+FunctionCode = FlinchTarget
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 30
+Description = The user delivers a massive, magically charged strike to the target. This may also make the target flinch.
+#-------------------------------
+# Rock Type New Special Move
+#-------------------------------
+[CRYSTALRAIN]
+Name = Crystal Rain
+Type = ROCK
+Category = Special
+Power = 80
+Accuracy = 100
+TotalPP = 10
+Target = AllNearOthers
+FunctionCode = LowerTargetSpDef1
+Flags = CanProtect,CanMirrorMove
+EffectChance = 20
+Description = The user summons a heavy rain of glowing crystals. This may also lower the Sp. Def stats of opposing Pokémon.
+#-------------------------------
+# Ground Type Punch Move
+#-------------------------------
+[TREMORPUNCH]
+Name = Tremor Punch
+Type = GROUND
+Category = Physical
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = LowerTargetDef1
+Flags = Contact,CanProtect,CanMirrorMove,Punching
+EffectChance = 20
+Description = The user punches the ground, sending a localized tremor into the target. This may also lower the target's Defense.
+#-------------------------------
+# Rock Type Kick Move
+#-------------------------------
+[BEDROCKKICK]
+Name = Bedrock Kick
+Type = ROCK
+Category = Physical
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = None
+Flags = Contact,CanProtect,CanMirrorMove
+Description = The target is attacked by a kick delivered with the incredible force of bedrock.
+#-------------------------------
+# Mega Samurott
+#-------------------------------
+[SPECTRALSLASH]
+Name = Spectral Slash
+Type = GHOST
+Category = Physical
+Power = 85
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = LowerTargetDef1
+Flags = Contact,CanProtect,CanMirrorMove,Slicing
+EffectChance = 30
+Description = The user slashes the target with a chilling, spectral blade. This may also lower the target's Defense stat.
+#-------------------------------
+# Mega Typhlosion
+#-------------------------------
+[PYROCLASM]
+Name = Pyroclasm
+Type = ELECTRIC
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 15
+Target = NearOther
+FunctionCode = BurnTarget
+Flags = CanProtect,CanMirrorMove
+EffectChance = 30
+Description = The user fires a devastating bolt of superheated volcanic ash. This may also leave the target with a burn.
+#-------------------------------
+# Mega Serperior
+#-------------------------------
+[ROYALBLIGHT]
+Name = Royal Blight
+Type = POISON
+Category = Special
+Power = 80
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = HealUserByHalfOfDamageDone
+Flags = CanProtect,CanMirrorMove,Heal
+Description = The user drains the target's life force with a corrupt, royal curse. The user's HP is restored by half the damage taken by the target.
+#-------------------------------
+# Thundartic
+#-------------------------------
+[SKYSPLITTER]
+Name = Sky Splitter
+Type = ELECTRIC
+Category = Physical
+Power = 100
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = LowerTargetSpeed1RaiseUserDef1InWeather
+Flags = CanProtect,CanMirrorMove
+Description = The user summons a bolt from the heavens. This lowers the target's Speed and may raise the user's Defense in snow or rain.
+#-------------------------------
+# Mimality
+#-------------------------------
+[SURREALMIME]
+Name = Surreal Mime
+Type = PSYCHIC
+Category = Special
+Power = 90
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = RandomTheaterEffect
+Flags = CanProtect,CanMirrorMove
+Description = A chaotic performance that traps the target and forces them to follow a nonsensical script.
+#-------------------------------
+# Ardentar
+#-------------------------------
+[MOLTENSLAG]
+Name = Molten Slag
+Type = STEEL
+Category = Physical
+Power = 95
+Accuracy = 100
+TotalPP = 10
+Target = NearOther
+FunctionCode = SuperEffectiveAgainstSteelBurn30
+Flags = Contact,CanProtect,CanMirrorMove
+EffectChance = 30
+Description = The user spits molten slag and tar. It is super effective against Steel-type Pokémon and may cause a burn.
+#-------------------------------
