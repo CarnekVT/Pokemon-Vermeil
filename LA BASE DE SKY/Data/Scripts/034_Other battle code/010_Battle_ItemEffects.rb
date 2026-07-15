@@ -682,12 +682,14 @@ Battle::ItemEffects::CopyStatChanges.add(:MIRRORHERB,
                             battler.pbThis, battler.itemName))
     raises.each_pair do |stat, increment|
       next if increment <= 0
-      if stat == :CRITICAL_HIT
-        battler.setCriticalHitRate(increment)
-        battle.pbCommonAnimation("CriticalHitRateUp", battler)
-        battle.pbDisplay(_INTL("¡{1} se está concentrando!", battler.pbThis))
-      else
-        battler.pbRaiseStatStage(stat, increment, battler)
+      if battler.pbCanRaiseStatStage?(stat, battler, nil, Battle::Scene::USE_ABILITY_SPLASH)
+        if stat == :CRITICAL_HIT
+          battler.setCriticalHitRate(increment)
+          battle.pbCommonAnimation("CriticalHitRateUp", battler)
+          battle.pbDisplay(_INTL("¡{1} se está concentrando!", battler.pbThis))
+        else
+          battler.pbRaiseStatStage(stat, increment, battler)
+        end
       end
     end
     battle.pbDisplay(_INTL("¡{1} se consumió!...", battler.itemName))
@@ -1879,7 +1881,7 @@ Battle::ItemEffects::OnWeatherChange.add(:BOOSTERENERGY,
     next false if battler.effects[PBEffects::ProtosynthesisStat]
     next false if battler.effects[PBEffects::BoosterEnergy]
     next false if !battler.hasActiveAbility?(:PROTOSYNTHESIS)
-    next false if ![:Sun, :HarshSun].include?(battle.field.weather)
+    next false if [:Sun, :HarshSun].include?(battle.field.weather)
     best = battler.highest_stat_including_stages
     battler.effects[PBEffects::ProtosynthesisStat] = best[0]
     battler.effects[PBEffects::BoosterEnergy] = true
@@ -1905,7 +1907,7 @@ Battle::ItemEffects::OnTerrainChange.add(:BOOSTERENERGY,
     next false if battler.effects[PBEffects::ProtosynthesisStat]
     next false if battler.effects[PBEffects::BoosterEnergy]
     next false if !battler.hasActiveAbility?(:QUARKDRIVE)
-    next false if battle.field.terrain != :Electric
+    next false if battle.field.terrain == :Electric
     best = battler.highest_stat_including_stages
     battler.effects[PBEffects::ProtosynthesisStat] = best[0]
     battler.effects[PBEffects::BoosterEnergy] = true

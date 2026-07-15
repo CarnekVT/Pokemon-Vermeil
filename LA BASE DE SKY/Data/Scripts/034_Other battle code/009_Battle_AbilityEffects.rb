@@ -976,15 +976,17 @@ Battle::AbilityEffects::CopyStatChanges.add(:OPPORTUNIST,
     battle.pbShowAbilitySplash(battler)
     raises.each_pair do |stat, increment|
       next if increment <= 0
-      if stat == :CRITICAL_HIT
-        battler.setCriticalHitRate(increment)
-        battle.pbCommonAnimation("CriticalHitRateUp", battler)
-        battle.pbDisplay(_INTL("¡{1} se está preparando para luchar!", battler.pbThis))
-      else
-        if Battle::Scene::USE_ABILITY_SPLASH
-          battler.pbRaiseStatStage(stat, increment, battler)
+      if battler.pbCanRaiseStatStage?(stat, battler, nil, Battle::Scene::USE_ABILITY_SPLASH)
+        if stat == :CRITICAL_HIT
+          battler.setCriticalHitRate(increment)
+          battle.pbCommonAnimation("CriticalHitRateUp", battler)
+          battle.pbDisplay(_INTL("¡{1} se está preparando para luchar!", battler.pbThis))
         else
-          battler.pbRaiseStatStageByCause(stat, increment, battler, battler.abilityName)
+          if Battle::Scene::USE_ABILITY_SPLASH
+            battler.pbRaiseStatStage(stat, increment, battler)
+          else
+            battler.pbRaiseStatStageByCause(stat, increment, battler, battler.abilityName)
+          end
         end
       end
     end
