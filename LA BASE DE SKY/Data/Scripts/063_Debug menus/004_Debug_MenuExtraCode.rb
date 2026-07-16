@@ -43,12 +43,15 @@ end
 #===============================================================================
 class SpriteWindow_DebugVariables < Window_DrawableCommand
   attr_reader :mode
+  attr_accessor :visible_ids
 
   def initialize(viewport)
+    @visible_ids = nil
     super(0, 0, Graphics.width, Graphics.height, viewport)
   end
 
   def itemCount
+    return @visible_ids.length if @visible_ids
     return (@mode == 0) ? $data_system.switches.size - 1 : $data_system.variables.size - 1
   end
 
@@ -80,8 +83,9 @@ class SpriteWindow_DebugVariables < Window_DrawableCommand
     pbSetNarrowFont(self.contents)
     colors = 0
     codeswitch = false
+    id = (@visible_ids && @visible_ids[index]) ? @visible_ids[index] : (index + 1)
     if @mode == 0
-      name = $data_system.switches[index + 1]
+      name = $data_system.switches[id]
       codeswitch = (name[/^s\:/])
       if codeswitch
         code = $~.post_match
@@ -103,7 +107,7 @@ class SpriteWindow_DebugVariables < Window_DrawableCommand
           val = (eval(code) rescue nil)
         end
       else
-        val = $game_switches[index + 1]
+        val = $game_switches[id]
       end
       if val.nil?
         status = "[-]"
@@ -117,7 +121,7 @@ class SpriteWindow_DebugVariables < Window_DrawableCommand
         colors = 1
       end
     else
-      name = $data_system.variables[index + 1]
+      name = $data_system.variables[id]
       codeswitch = (name[/^s\:/])
       if codeswitch
         code = $~.post_match
@@ -139,13 +143,13 @@ class SpriteWindow_DebugVariables < Window_DrawableCommand
           status = (eval(code) rescue nil)
         end
       else
-        status = $game_variables[index + 1]
+        status = $game_variables[id]
       end
       status = status.to_s
       status = "\"__\"" if nil_or_empty?(status)
     end
     name ||= ""
-    id_text = sprintf("%04d:", index + 1)
+    id_text = sprintf("%04d:", id)
     rect = drawCursor(index, rect)
     totalWidth = rect.width
     idWidth     = totalWidth * 15 / 100
@@ -202,11 +206,39 @@ def pbDebugVariables(mode)
     Graphics.update
     Input.update
     pbUpdateSpriteHash(sprites)
+    if Input.triggerex?(:F)
+      searchTerm = pbOpenGenericListSearch
+      if searchTerm
+        newSearch = []
+        max_size = (mode == 0) ? $data_system.switches.size : $data_system.variables.size
+        (1...max_size).each do |id|
+          name = (mode == 0) ? $data_system.switches[id] : $data_system.variables[id]
+          name = "" if name.nil?
+          if id.to_s == searchTerm || sprintf("%04d", id).include?(searchTerm) || pbSmartMatch?(_INTL(name), searchTerm) || pbSmartMatch?(name, searchTerm)
+            newSearch.push(id)
+          end
+        end
+        if !newSearch.empty?
+          right_window.visible_ids = newSearch
+          right_window.index = 0
+          right_window.refresh
+        else
+          pbMessage(_INTL("No hay resultados."))
+        end
+      end
+      next
+    end
     if Input.trigger?(Input::BACK)
       pbPlayCancelSE
+      if right_window.visible_ids
+        right_window.visible_ids = nil
+        right_window.index = 0
+        right_window.refresh
+        next
+      end
       break
     end
-    current_id = right_window.index + 1
+    current_id = (right_window.visible_ids && right_window.visible_ids[right_window.index]) ? right_window.visible_ids[right_window.index] : (right_window.index + 1)
     case mode
     when 0   # Switches
       name = $data_system.switches[current_id]
