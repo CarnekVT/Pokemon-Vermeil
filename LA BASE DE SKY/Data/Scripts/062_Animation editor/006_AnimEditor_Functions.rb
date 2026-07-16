@@ -29,6 +29,8 @@ module BattleAnimationEditor
   def pbSelectAnim(canvas, animwin)
     animfiles = []
     pbRgssChdir(File.join("Graphics", "Animations")) { animfiles.concat(Dir.glob("*.png")) }
+    animfiles.sort! { |a, b| a.downcase <=> b.downcase }
+    full_animfiles = animfiles.clone
     cmdwin = pbListWindow(animfiles, 320)
     cmdwin.opacity = 200
     cmdwin.height = 512
@@ -39,13 +41,31 @@ module BattleAnimationEditor
     ctlwin.viewport = canvas.viewport
     ctlwin.addSlider(_INTL("Matiz:"), 0, 359, 0)
     loop do
-      bmpwin.bitmapname = cmdwin.commands[cmdwin.index]
+      if cmdwin.commands.length > 0 && cmdwin.index >= 0 && cmdwin.index < cmdwin.commands.length
+        bmpwin.bitmapname = cmdwin.commands[cmdwin.index]
+      end
       Graphics.update
       Input.update
       cmdwin.update
       bmpwin.update
       ctlwin.update
       bmpwin.hue = ctlwin.value(0) if ctlwin.changed?(0)
+      if Input.triggerex?(:F)
+        searchTerm = pbOpenGenericListSearch
+        if searchTerm
+          newSearch = full_animfiles.select do |cmd|
+            pbSmartMatch?(cmd, searchTerm) || pbSmartMatch?(File.basename(cmd.to_s, ".*"), searchTerm)
+          end
+          if !newSearch.empty?
+            animfiles = newSearch
+            cmdwin.commands = animfiles
+            cmdwin.index = 0
+          else
+            pbMessage(_INTL("No hay resultados."))
+          end
+        end
+        next
+      end
       if Input.trigger?(Input::USE) && animfiles.length > 0
         filename = cmdwin.commands[cmdwin.index]
         bitmap = AnimatedBitmap.new("Graphics/Animations/" + filename, ctlwin.value(0)).deanimate
@@ -56,6 +76,13 @@ module BattleAnimationEditor
         break
       end
       if Input.trigger?(Input::BACK)
+        if animfiles != full_animfiles
+          animfiles = full_animfiles.clone
+          cmdwin.commands = animfiles
+          cmdwin.index = 0
+          pbPlayCancelSE if defined?(pbPlayCancelSE)
+          next
+        end
         break
       end
     end
@@ -88,7 +115,8 @@ module BattleAnimationEditor
     return
   end
 
-  def pbAnimName(animation, cmdwin)
+  def pbAnimName(animation, cmdwin, real_index = nil)
+    real_index = cmdwin.index if real_index.nil?
     window = ControlWindow.new(320, 128, 320, 32 * 4)
     window.z = 99999
     window.addControl(TextField.new(_INTL("Nuevo Nombre:"), animation.name))
@@ -101,7 +129,7 @@ module BattleAnimationEditor
       Input.update
       window.update
       if window.changed?(okbutton) || Input.triggerex?(:RETURN)
-        cmdwin.commands[cmdwin.index] = _INTL("{1} {2}", cmdwin.index, window.controls[0].text)
+        cmdwin.commands[cmdwin.index] = _INTL("{1} {2}", real_index, window.controls[0].text)
         animation.name = window.controls[0].text
         break
       end
@@ -116,17 +144,23 @@ module BattleAnimationEditor
 
   def pbAnimList(animations, canvas, animwin)
     commands = []
+    full_commands = []
+    full_indices = []
     animations.length.times do |i|
       animations[i] = PBAnimation.new if !animations[i]
-      commands[commands.length] = _INTL("{1} {2}", i, animations[i].name)
+      cmd_str = _INTL("{1} {2}", i, animations[i].name)
+      commands.push(cmd_str)
+      full_commands.push(cmd_str)
+      full_indices.push(i)
     end
+    cmd_indices = full_indices.clone
     cmdwin = pbListWindow(commands, 320)
     cmdwin.height = 416
     cmdwin.opacity = 224
     cmdwin.index = animations.selected
     cmdwin.viewport = canvas.viewport
     helpwindow = Window_UnformattedTextPokemon.newWithSize(
-      _INTL("Enter: Load/rename an animation\nEsc: Cancel"),
+      _INTL("Enter: Cargar/renombrar\nF: Buscar\nEsc: Cancelar/Restaurar"),
       320, 0, 320, 128, canvas.viewport
     )
     maxsizewindow = ControlWindow.new(0, 416, 320, 32 * 3)
@@ -144,36 +178,91 @@ module BattleAnimationEditor
         newsize = maxsizewindow.value(0)
         animations.resize(newsize)
         commands.clear
+        full_commands.clear
+        full_indices.clear
         animations.length.times do |i|
-          commands[commands.length] = _INTL("{1} {2}", i, animations[i].name)
+          animations[i] = PBAnimation.new if !animations[i]
+          cmd_str = _INTL("{1} {2}", i, animations[i].name)
+          commands.push(cmd_str)
+          full_commands.push(cmd_str)
+          full_indices.push(i)
         end
+        cmd_indices = full_indices.clone
         cmdwin.commands = commands
         cmdwin.index = animations.selected
         next
       end
-      if Input.trigger?(Input::USE) && animations.length > 0
+      if Input.triggerex?(:F)
+        searchTerm = pbOpenGenericListSearch
+        if searchTerm
+          new_commands = []
+          new_indices = []
+          full_commands.each_with_index do |cmd, idx|
+            cmd_text = cmd.to_s
+            if cmd_text =~ /^\d+\s+(.+)$/
+              cmd_text = $1
+            end
+            if pbSmartMatch?(_INTL(cmd_text), searchTerm) || pbSmartMatch?(cmd.to_s, searchTerm)
+              new_commands.push(cmd)
+              new_indices.push(full_indices[idx])
+            end
+          end
+          if !new_commands.empty?
+            commands = new_commands
+            cmd_indices = new_indices
+            cmdwin.commands = commands
+            cmdwin.index = 0
+          else
+            pbMessage(_INTL("No hay resultados."))
+          end
+        end
+        next
+      end
+      if Input.trigger?(Input::USE) && commands.length > 0
+        real_index = cmd_indices[cmdwin.index] || cmdwin.index
         cmd2 = pbShowCommands(helpwindow,
                               [_INTL("Cargar Animación"),
                                _INTL("Renombrar"),
                                _INTL("Eliminar")], -1)
         case cmd2
         when 0   # Load Animation
-          canvas.loadAnimation(animations[cmdwin.index])
+          canvas.loadAnimation(animations[real_index])
           animwin.animbitmap = canvas.animbitmap
-          animations.selected = cmdwin.index
+          animations.selected = real_index
           break
         when 1   # Rename
-          pbAnimName(animations[cmdwin.index], cmdwin)
+          pbAnimName(animations[real_index], cmdwin, real_index)
+          full_commands[real_index] = _INTL("{1} {2}", real_index, animations[real_index].name)
+          if cmd_indices == full_indices
+            commands = full_commands.clone
+          else
+            commands[cmdwin.index] = full_commands[real_index]
+          end
+          cmdwin.commands = commands
           cmdwin.refresh
         when 2   # Delete
           if pbConfirmMessage(_INTL("¿Estás seguro de que quieres eliminar esta animación?"))
-            animations[cmdwin.index] = PBAnimation.new
-            cmdwin.commands[cmdwin.index] = _INTL("{1} {2}", cmdwin.index, animations[cmdwin.index].name)
+            animations[real_index] = PBAnimation.new
+            full_commands[real_index] = _INTL("{1} {2}", real_index, animations[real_index].name)
+            if cmd_indices == full_indices
+              commands = full_commands.clone
+            else
+              commands[cmdwin.index] = full_commands[real_index]
+            end
+            cmdwin.commands = commands
             cmdwin.refresh
           end
         end
       end
       if Input.trigger?(Input::BACK)
+        if cmd_indices != full_indices
+          commands = full_commands.clone
+          cmd_indices = full_indices.clone
+          cmdwin.commands = commands
+          cmdwin.index = 0
+          pbPlayCancelSE if defined?(pbPlayCancelSE)
+          next
+        end
         break
       end
     end
@@ -515,6 +604,7 @@ module BattleAnimationEditor
     animfiles.uniq!
     animfiles.sort! { |a, b| a.downcase <=> b.downcase }
     animfiles = [_INTL("[Reproducir grito del usuario]")] + animfiles
+    full_animfiles = animfiles.clone
     cmdwin = pbListWindow(animfiles, 320)
     cmdwin.height = 480
     cmdwin.opacity = 200
@@ -546,11 +636,34 @@ module BattleAnimationEditor
         break
       end
       break if maxsizewindow.changed?(6)   # Cancel
+      if Input.triggerex?(:F)
+        searchTerm = pbOpenGenericListSearch
+        if searchTerm
+          newSearch = full_animfiles.select do |cmd|
+            pbSmartMatch?(cmd, searchTerm) || pbSmartMatch?(File.basename(cmd.to_s, ".*"), searchTerm)
+          end
+          if !newSearch.empty?
+            animfiles = newSearch
+            cmdwin.commands = animfiles
+            cmdwin.index = 0
+          else
+            pbMessage(_INTL("No hay resultados."))
+          end
+        end
+        next
+      end
       if Input.trigger?(Input::USE) && animfiles.length > 0
-        filename = (cmdwin.index == 0) ? "" : cmdwin.commands[cmdwin.index]
+        filename = (cmdwin.index == 0 && animfiles == full_animfiles) ? "" : cmdwin.commands[cmdwin.index]
         displayname = (filename != "") ? filename : _INTL("<user's cry>")
         maxsizewindow.controls[0].text = _INTL("Archivo: \"{1}\"", displayname)
       elsif Input.trigger?(Input::BACK)
+        if animfiles != full_animfiles
+          animfiles = full_animfiles.clone
+          cmdwin.commands = animfiles
+          cmdwin.index = 0
+          pbPlayCancelSE if defined?(pbPlayCancelSE)
+          next
+        end
         break
       end
     end
@@ -573,7 +686,8 @@ module BattleAnimationEditor
   #    animfiles.concat(Dir.glob("*.bmp"))
     end
     animfiles.uniq!
-    animfiles.sort! { |a, b| a.downcase <=> b.downcase }
+    animfiles.sort! { |a, b| a == _INTL("[Eliminar gráfico del fondo]") ? -1 : (b == _INTL("[Eliminar gráfico del fondo]") ? 1 : a.downcase <=> b.downcase) }
+    full_animfiles = animfiles.clone
     cmdwin = pbListWindow(animfiles, 320)
     cmdwin.height = 480
     cmdwin.opacity = 200
@@ -609,10 +723,33 @@ module BattleAnimationEditor
         break
       end
       break if maxsizewindow.changed?(9)   # Cancel
+      if Input.triggerex?(:F)
+        searchTerm = pbOpenGenericListSearch
+        if searchTerm
+          newSearch = full_animfiles.select do |cmd|
+            pbSmartMatch?(cmd, searchTerm) || pbSmartMatch?(File.basename(cmd.to_s, ".*"), searchTerm)
+          end
+          if !newSearch.empty?
+            animfiles = newSearch
+            cmdwin.commands = animfiles
+            cmdwin.index = 0
+          else
+            pbMessage(_INTL("No hay resultados."))
+          end
+        end
+        next
+      end
       if Input.trigger?(Input::USE) && animfiles.length > 0
-        filename = (cmdwin.index == cmdErase) ? "" : cmdwin.commands[cmdwin.index]
+        filename = (cmdwin.commands[cmdwin.index] == _INTL("[Eliminar gráfico del fondo]")) ? "" : cmdwin.commands[cmdwin.index]
         maxsizewindow.controls[0].text = _INTL("Archivo: \"{1}\"", filename)
       elsif Input.trigger?(Input::BACK)
+        if animfiles != full_animfiles
+          animfiles = full_animfiles.clone
+          cmdwin.commands = animfiles
+          cmdwin.index = 0
+          pbPlayCancelSE if defined?(pbPlayCancelSE)
+          next
+        end
         break
       end
     end

@@ -1265,43 +1265,75 @@ def pbAnimationsOrganiser
   )
   title.z = 2
   info = Window_AdvancedTextPokemon.newWithSize(
-    _INTL("Z+Arriba/Abajo: Intercambiar\nZ+Izda: Eliminar\nZ+Derecha: Insertar"),
+    _INTL("Z+Arriba/Abajo: Intercambiar\nZ+Izda: Eliminar\nZ+Derecha: Insertar\nF: Buscar"),
     Graphics.width / 2, ANIMATIONS_ORGANISER_HEIGHT, Graphics.width / 2, Graphics.height - ANIMATIONS_ORGANISER_HEIGHT, viewport
   )
   info.z = 2
   commands = []
+  cmd_indices = []
   refreshlist = true
   cmd = [0, 0]
   loop do
     if refreshlist
       commands = []
+      cmd_indices = []
       list.length.times do |i|
         commands.push(sprintf("%d: %s", i, (list[i]) ? list[i].name : "???"))
+        cmd_indices.push(i)
       end
     end
     refreshlist = false
     cmd = pbCommands3(cmdwin, commands, -1, cmd[1], true)
+    real_idx = (cmd[1].is_a?(Integer) && cmd[1] >= 0 && cmd[1] < cmd_indices.length) ? cmd_indices[cmd[1]] : cmd[1]
     case cmd[0]
+    when 6   # Search via F key
+      searchTerm = cmd[1]
+      new_commands = []
+      new_indices = []
+      list.length.times do |i|
+        cmd_text = sprintf("%d: %s", i, (list[i]) ? list[i].name : "???")
+        name_clean = (list[i]) ? _INTL(list[i].name) : "???"
+        if pbSmartMatch?(name_clean, searchTerm) || pbSmartMatch?(cmd_text, searchTerm)
+          new_commands.push(cmd_text)
+          new_indices.push(i)
+        end
+      end
+      if !new_commands.empty?
+        commands = new_commands
+        cmd_indices = new_indices
+        cmd[1] = 0
+      else
+        pbMessage(_INTL("No hay resultados."))
+      end
     when 1   # Swap animation up
-      if cmd[1] >= 0 && cmd[1] < commands.length - 1
-        list[cmd[1] + 1], list[cmd[1]] = list[cmd[1]], list[cmd[1] + 1]
+      if real_idx >= 0 && real_idx < list.length - 1
+        list[real_idx + 1], list[real_idx] = list[real_idx], list[real_idx + 1]
         refreshlist = true
+        cmd[1] = real_idx + 1
       end
     when 2   # Swap animation down
-      if cmd[1] > 0
-        list[cmd[1] - 1], list[cmd[1]] = list[cmd[1]], list[cmd[1] - 1]
+      if real_idx > 0
+        list[real_idx - 1], list[real_idx] = list[real_idx], list[real_idx - 1]
         refreshlist = true
+        cmd[1] = real_idx - 1
       end
     when 3   # Delete spot
-      list.delete_at(cmd[1])
-      cmd[1] = [cmd[1], list.length - 1].min
+      list.delete_at(real_idx)
+      cmd[1] = [real_idx, list.length - 1].min
       refreshlist = true
       pbWait(0.2)
     when 4   # Insert spot
-      list.insert(cmd[1], PBAnimation.new)
+      list.insert(real_idx, PBAnimation.new)
+      cmd[1] = real_idx
       refreshlist = true
       pbWait(0.2)
     when 0
+      if cmd_indices.length != list.length && cmd[1] < 0   # Back pressed while filtered
+        refreshlist = true
+        cmd[1] = 0
+        pbPlayCancelSE if defined?(pbPlayCancelSE)
+        next
+      end
       cmd2 = pbMessage(_INTL("¿Guardar cambios?"),
                        [_INTL("Sí"), _INTL("No"), _INTL("Cancelar")], 3)
       if [0, 1].include?(cmd2)

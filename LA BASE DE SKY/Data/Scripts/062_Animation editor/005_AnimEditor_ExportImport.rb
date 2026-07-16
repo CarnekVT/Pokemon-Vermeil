@@ -47,6 +47,8 @@ module BattleAnimationEditor
   def pbImportAnim(animations, canvas, animwin)
     animfiles = []
     pbRgssChdir(".") { animfiles.concat(Dir.glob("*.anm")) }
+    animfiles.sort! { |a, b| a.downcase <=> b.downcase }
+    full_animfiles = animfiles.clone
     cmdwin = pbListWindow(animfiles, 320)
     cmdwin.opacity = 200
     cmdwin.height = 480
@@ -55,6 +57,22 @@ module BattleAnimationEditor
       Graphics.update
       Input.update
       cmdwin.update
+      if Input.triggerex?(:F)
+        searchTerm = pbOpenGenericListSearch
+        if searchTerm
+          newSearch = full_animfiles.select do |cmd|
+            pbSmartMatch?(cmd, searchTerm) || pbSmartMatch?(File.basename(cmd.to_s, ".*"), searchTerm)
+          end
+          if !newSearch.empty?
+            animfiles = newSearch
+            cmdwin.commands = animfiles
+            cmdwin.index = 0
+          else
+            pbMessage(_INTL("No hay resultados."))
+          end
+        end
+        next
+      end
       if Input.trigger?(Input::USE) && animfiles.length > 0
         begin
           textdata = loadBase64Anim(IO.read(animfiles[cmdwin.index]))
@@ -76,6 +94,13 @@ module BattleAnimationEditor
         break
       end
       if Input.trigger?(Input::BACK)
+        if animfiles != full_animfiles
+          animfiles = full_animfiles.clone
+          cmdwin.commands = animfiles
+          cmdwin.index = 0
+          pbPlayCancelSE if defined?(pbPlayCancelSE)
+          next
+        end
         break
       end
     end

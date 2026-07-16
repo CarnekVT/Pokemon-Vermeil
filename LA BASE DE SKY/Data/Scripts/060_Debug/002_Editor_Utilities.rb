@@ -300,7 +300,13 @@ def pbCommands3(cmdwindow, commands, cmdIfCancel, defaultindex = -1, noresize = 
     Graphics.update
     Input.update
     cmdwindow.update
-    if Input.trigger?(Input::SPECIAL)
+    if Input.triggerex?(:F)
+      searchTerm = pbOpenGenericListSearch
+      if searchTerm
+        command = [6, searchTerm]
+        break
+      end
+    elsif Input.trigger?(Input::SPECIAL)
       command = [5, cmdwindow.index]
       break
     elsif Input.press?(Input::ACTION)
