@@ -7,21 +7,21 @@ class Battle::Scene
   alias __newanims__pbCreateBackdropSprites pbCreateBackdropSprites unless method_defined?(:__newanims__pbCreateBackdropSprites)
   def pbCreateBackdropSprites
     __newanims__pbCreateBackdropSprites
-    ["battle_bg", "battle_bg2"].each { |spr| @sprites[spr].z = -200 }
+    ["battle_bg", "battle_bg2"].each { |spr| @sprites[spr].z = -200 if @sprites[spr] }
     2.times do |side|
-      @sprites["base_#{side}"].z = -199
+      @sprites["base_#{side}"].z = -199 if @sprites["base_#{side}"]
     end
-    @sprites["cmdBar_bg"].z += 9999
+    @sprites["cmdBar_bg"].z += 9999 if @sprites["cmdBar_bg"]
   end
 
   alias __newanims__pbInitSprites pbInitSprites unless method_defined?(:__newanims__pbInitSprites)
   def pbInitSprites
     __newanims__pbInitSprites
-    @sprites["messageBox"].z += 9999
-    @sprites["messageWindow"].z += 9999
-    @sprites["commandWindow"].z += 9999
-    @sprites["fightWindow"].z += 9999
-    @sprites["targetWindow"].z += 9999
+    @sprites["messageBox"].z += 9999 if @sprites["messageBox"]
+    @sprites["messageWindow"].z += 9999 if @sprites["messageWindow"]
+    @sprites["commandWindow"].z += 9999 if @sprites["commandWindow"]
+    @sprites["fightWindow"].z += 9999 if @sprites["fightWindow"]
+    @sprites["targetWindow"].z += 9999 if @sprites["targetWindow"]
     2.times do |side|
       @sprites["partyBar_#{side}"].z += 9999
       NUM_BALLS.times do |i|
