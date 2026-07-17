@@ -3559,6 +3559,7 @@ Pokedex = Su configuración genética le permite mutar y adaptarse enseguida a c
 Generation = 1
 Flags = HasGenderedSprites
 Evolution = VAPOREON,Item,WATERSTONE
+Evolution = JOLTEON,Item,THUNDERSTONE
 Evolution = FLAREON,Item,FIRESTONE
 Evolution = LEAFEON,Item,LEAFSTONE
 Evolution = LEAFEON,LocationFlag,MossRock
