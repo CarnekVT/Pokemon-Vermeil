@@ -71,10 +71,8 @@ module GameData
       end
       ret["Types"]            = [:types,              "*e", :Type]
       ret["BaseStats"]        = [:base_stats,         "vvvvvv"]
-      if !compiling_forms
-        ret["GenderRatio"]    = [:gender_ratio,       "e", :GenderRatio]
-        ret["GrowthRate"]     = [:growth_rate,        "e", :GrowthRate]
-      end
+      ret["GenderRatio"]      = [:gender_ratio,       "e", :GenderRatio]
+      ret["GrowthRate"]       = [:growth_rate,        "e", :GrowthRate]
       ret["BaseExp"]          = [:base_exp,           "v"]
       ret["EVs"]              = [:evs,                "*ev", :Stat]
       ret["CatchRate"]        = [:catch_rate,         "u"]
