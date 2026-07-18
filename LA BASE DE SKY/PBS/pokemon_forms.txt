@@ -104,38 +104,56 @@ WildItemUncommon = PECHABERRY
 #-------------------------------
 [PIKACHU,2]
 FormName = Forma Coqueta
+EggGroups = Undiscovered
+Pokedex = A este Pikachu le encanta usar atuendos especiales. Cuando se siente admirada, la electricidad en sus mejillas se vuelve más intensa y brillante.
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
+Generation = 6
 Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,3]
 FormName = Forma Aristócrata
+EggGroups = Undiscovered
+Pokedex = Vestido con un elegante vestido, este Pikachu se mueve con gracia y precisión. Sus movimientos de tipo eléctrico parecen un baile perfectamente ensayado.
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
+Generation = 6
 Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,4]
 FormName = Forma Enmascarada
+EggGroups = Undiscovered
+Pokedex = Entrenada en acrobacias espectaculares, este Pikachu salta y ataca a gran velocidad. Su máscara representa su fuerte espíritu de lucha.
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
+Generation = 6
 Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,5]
 FormName = Forma Erudita
+EggGroups = Undiscovered
+Pokedex = Este Pikachu pasa incontables horas estudiando. Analiza a sus oponentes antes de atacar, liberando electricidad con precisión científica.
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
+Generation = 6
 Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,6]
 FormName = Forma Superstar
+EggGroups = Undiscovered
+Pokedex = Canta mientras lucha, energizando tanto a aliados como a espectadores. La electricidad en sus mejillas late al ritmo de sus cantos.
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
+Generation = 6
 Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,7]
 FormName = Forma Roquera
+EggGroups = Undiscovered
+Pokedex = Cuando toca la guitarra, saltan chispas por el escenario. Su naturaleza rebelde hace que sus ataques eléctricos sean potentes y contundentes.
 GenderRatio = AlwaysFemale
 Abilities = LIGHTNINGROD
+Generation = 6
 Evolution = RAICHU,None,
 #-------------------------------
 [PIKACHU,8]
