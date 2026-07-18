@@ -157,6 +157,12 @@
     //
     "subImageFix": true,
 
+    // Use the OpenGL backend instead of Metal on Apple Silicon Macs.
+    // Workaround for the game screen not filling the window on Retina displays.
+    //
+    "preferMetalRenderer": false,
+
+
     // Sync screen redraws to the monitor refresh rate, to reduce screen
     // tearing.
     //
