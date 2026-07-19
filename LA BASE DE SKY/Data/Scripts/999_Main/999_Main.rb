@@ -50,6 +50,13 @@ def mainFunctionDebug
       System.reload_cache if defined?(System) && System.respond_to?(:reload_cache)
     rescue Exception
     end
+    # F12 dispara Graphics.__reset__, que hace dispose de todos los Disposables
+    # (Sprite/Bitmap/Viewport/Window/Plane/Tilemap). Los globals que retienen uno
+    # de esos objetos sobreviven al reinicio apuntando a un recurso ya liberado:
+    # al reutilizarlo crashea con "disposed ...". Anularlos fuerza reconstrucción
+    # limpia tras el re-eval de scripts.
+    $blk = nil     # fundido a negro de Marin (058_Utilities/012: showBlk/hideBlk)
+    $blkVp = nil
     raise
   rescue Hangup
     pbPrintException($!) if !$DEBUG
