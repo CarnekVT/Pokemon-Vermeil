@@ -19,7 +19,29 @@ end
 SaveData.register(:game_system) do
   load_in_bootup
   ensure_class :Game_System
-  save_value { $game_system }
+  # En un save MANUAL hecho a mitad de un evento no se persiste el intérprete de
+  # eventos: al cargar reanudaría con @index sobre el comando en curso y lo
+  # re-ejecutaría (p.ej. re-lanzando el propio Game.save). Se guarda una copia con
+  # intérpretes limpios; el $game_system vivo queda intacto, así el evento continúa
+  # tras el save. Formato Marshal sin cambios (objeto plano) -> compatible con
+  # saves y bases antiguas en ambos sentidos.
+  #
+  # Excepción: Game.auto_save (plugin MultiSave) SÍ quiere reanudar el evento al
+  # cargar, así que en un autosave se guarda el intérprete tal cual.
+  # ponytail: el autosave se detecta husmeando el caller — única señal sin editar
+  # el plugin. Si MultiSave renombra auto_save, degrada a limpiar siempre; en ese
+  # caso, aliasar Game.auto_save para fijar un flag explícito.
+  save_value do
+    interp = $game_system.map_interpreter
+    if interp && interp.running? && caller.none? { |line| line.include?("auto_save") }
+      sys = $game_system.dup
+      sys.instance_variable_set(:@map_interpreter, Interpreter.new(0, true))
+      sys.instance_variable_set(:@battle_interpreter, Interpreter.new(0, false))
+      sys
+    else
+      $game_system
+    end
+  end
   load_value { |value| $game_system = value }
   new_game_value { Game_System.new }
 end

@@ -40,27 +40,6 @@ class Game_System
     @bgs_position           = 0
   end
 
-  # El intérprete de eventos es transitorio y NO debe guardarse. Si Game.save se
-  # llama desde un comando de un evento, el intérprete quedaría marshaleado con
-  # @index sobre ese comando; al cargar la partida reanudaría ahí y lo
-  # re-ejecutaría (p.ej. re-lanzando el propio Game.save). Se excluyen del dump y
-  # se recrean limpios al cargar. Los saves antiguos (formato objeto plano) siguen
-  # cargando por la vía por defecto sin llamar a marshal_load.
-  def marshal_dump
-    ivars = {}
-    instance_variables.each do |var|
-      next if var == :@map_interpreter || var == :@battle_interpreter
-      ivars[var] = instance_variable_get(var)
-    end
-    return ivars
-  end
-
-  def marshal_load(ivars)
-    ivars.each { |var, val| instance_variable_set(var, val) }
-    @map_interpreter    = Interpreter.new(0, true)
-    @battle_interpreter = Interpreter.new(0, false)
-  end
-
   def adventure_magic_number
     @adventure_magic_number ||= rand(2**32)
     return @adventure_magic_number
