@@ -319,86 +319,6 @@ class PokemonStorageScene
     arrow.target_y = ty
   end
 
-  # --- Controles Modificados (Tecla SPECIAL exclusiva para el equipo) ---
-  def pbSelectBoxInternal(_party)
-    selection = @selection
-    pbSetArrow(@sprites["arrow"], selection)
-    pbUpdateOverlay(selection)
-    pbSetMosaic(selection)
-    self.update
-    loop do
-      Graphics.update
-      Input.update
-      key = -1
-      key = Input::DOWN if Input.repeat?(Input::DOWN)
-      key = Input::RIGHT if Input.repeat?(Input::RIGHT)
-      key = Input::LEFT if Input.repeat?(Input::LEFT)
-      key = Input::UP if Input.repeat?(Input::UP)
-      
-      if key >= 0
-        pbPlayCursorSE
-        selection = pbChangeSelection(key, selection)
-        pbSetArrow(@sprites["arrow"], selection)
-        case selection
-        when -4
-          nextbox = (@storage.currentBox + @storage.maxBoxes - 1) % @storage.maxBoxes
-          pbSwitchBoxToLeft(nextbox)
-          @storage.currentBox = nextbox
-        when -5
-          nextbox = (@storage.currentBox + 1) % @storage.maxBoxes
-          pbSwitchBoxToRight(nextbox)
-          @storage.currentBox = nextbox
-        end
-        selection = -1 if [-4, -5].include?(selection)
-        pbUpdateOverlay(selection)
-        pbSetMosaic(selection)
-      end
-      self.update
-      
-      t = defined?(@grabber) && @grabber && (@grabber.holding_anything? || @grabber.carrying)
-      
-      if Input.trigger?(Input::JUMPUP)
-        pbPlayCursorSE
-        nextbox = (@storage.currentBox + @storage.maxBoxes - 1) % @storage.maxBoxes
-        pbSwitchBoxToLeft(nextbox)
-        @storage.currentBox = nextbox
-        pbUpdateOverlay(selection)
-        pbSetMosaic(selection)
-      elsif Input.trigger?(Input::JUMPDOWN)
-        pbPlayCursorSE
-        nextbox = (@storage.currentBox + 1) % @storage.maxBoxes
-        pbSwitchBoxToRight(nextbox)
-        @storage.currentBox = nextbox
-        pbUpdateOverlay(selection)
-        pbSetMosaic(selection)
-      elsif Input.trigger?(Input::SPECIAL)
-        pbPlayDecisionSE
-        @selection = selection
-        return [-2, -1]
-      
-      elsif Input.trigger?(Input::AUX2)
-        pbSearch
-      elsif Input.trigger?(Input::ACTION) && @command == 0   
-        if !t && (!defined?(@grabber) || !@grabber || !@grabber.carrying)
-          pbPlayDecisionSE
-          pbSetQuickSwap(!@quickswap)
-        elsif defined?(@grabber) && @grabber && @grabber.carrying && CAN_MASS_RELEASE && @multi
-          pbMassRelease
-        end
-      elsif Input.trigger?(Input::BACK)
-        @selection = selection
-        return nil
-      elsif Input.trigger?(Input::USE)
-        @selection = selection
-        if selection >= 0
-          return [@storage.currentBox, selection]
-        elsif selection == -1   
-          return [-4, -1]
-        end
-      end
-    end
-  end
-
   def pbSelectPartyInternal(party, depositing)
     selection = @selection
     pbPartySetArrow(@sprites["arrow"], selection)
@@ -718,6 +638,18 @@ class PokemonBoxArrow
     end
     _carnek_arr_update
   end
+
+  def refresh_hand
+    return if !@handsprite
+    key = if @heldpkmn
+            @quickswap ? :grabq : :grab
+          elsif @holding
+            @quickswap ? :fistq : :fist
+          else
+            @quickswap ? :point1q : :point1
+          end
+    @handsprite.change_bitmap(key)
+  end
 end
 
 # --- Texto "[BACK] Atrás" con tecla dinámica, reposicionado ---
@@ -757,10 +689,47 @@ class PokemonBoxPartySprite
   end
 
   alias _carnek_party_grab grabPokemon
+  alias _carnek_party_update update
   def grabPokemon(index, arrow)
-    _carnek_party_grab(index, arrow)
+    sprite = @pokemonsprites[index]
+    if sprite
+      arrow.grab(sprite)
+      @pokemonsprites.delete_at(index)
+      s_x = 80
+      s_y = 66
+      x_spacing = 160
+      y_spacing = 84
+      @slide_data = []
+      @pokemonsprites.each_with_index do |sp, j|
+        next if sp.nil? || sp.disposed?
+        col = j % 2
+        row = j / 2
+        target_x = PARTY_BOX_X + s_x + (col * x_spacing)
+        target_y = self.y + s_y + (row * y_spacing) + (col * 24)
+        @slide_data << [sp, sp.x, sp.y, target_x, target_y]
+      end
+      @slide_start = System.uptime
+    end
     arrow.party_grab = true
     arrow.box_offset = nil
+  end
+
+  def update
+    _carnek_party_update
+    return unless @slide_data
+    t = System.uptime - @slide_start
+    progress = t / 0.15
+    if progress >= 1.0
+      @slide_data.each { |sp, sx, sy, tx, ty| sp.x = tx; sp.y = ty if sp && !sp.disposed? }
+      @slide_data = nil
+      refresh
+      return
+    end
+    @slide_data.each do |sp, sx, sy, tx, ty|
+      next if sp&.disposed?
+      sp.x = sx + (tx - sx) * progress
+      sp.y = sy + (ty - sy) * progress
+    end
   end
 
 end
@@ -786,27 +755,78 @@ class PokemonStorageScene
 
   alias _carnek_pbSelectBox pbSelectBox
   def pbSelectBox(party)
-    return pbSelectBoxInternal(party) if @command == 1
-    ret = nil
+    _carnek_pbSelectBox(party)
+  end
+
+  alias _carnek_scene_pbSBI pbSelectBoxInternal
+  def pbSelectBoxInternal(_party)
+    selection = @selection
+    if @_carnek_reset_sel
+      selection = 0; @selection = 0
+      @_carnek_reset_sel = false
+    end
+    pbSetArrow(@sprites["arrow"], selection)
+    pbUpdateOverlay(selection)
+    pbSetMosaic(selection)
     loop do
-      ret = pbSelectBoxInternal(party) if !@choseFromParty
-      if @choseFromParty || (ret && ret[0] == -2)
-        if !@choseFromParty
-          pbShowPartyTab
-          @selection = 0
+      Graphics.update; Input.update
+      key = Input.repeat?(Input::DOWN) ? Input::DOWN :
+            Input.repeat?(Input::RIGHT) ? Input::RIGHT :
+            Input.repeat?(Input::LEFT) ? Input::LEFT :
+            Input.repeat?(Input::UP) ? Input::UP : -1
+      if key >= 0
+        pbPlayCursorSE
+        selection = pbChangeSelection(key, selection)
+        pbSetArrow(@sprites["arrow"], selection)
+        case selection
+        when -4
+          n = (@storage.currentBox + @storage.maxBoxes - 1) % @storage.maxBoxes
+          pbSwitchBoxToLeft(n)
+          @storage.currentBox = n
+        when -5
+          n = (@storage.currentBox + 1) % @storage.maxBoxes
+          pbSwitchBoxToRight(n)
+          @storage.currentBox = n
         end
-        ret = pbSelectPartyInternal(party, false)
-        if ret < 0
-          pbHidePartyTab
-          @selection = 0
-          @choseFromParty = false
-        else
-          @choseFromParty = true
-          return [-1, ret]
+        selection = -1 if [-4, -5].include?(selection)
+        pbUpdateOverlay(selection)
+        pbSetMosaic(selection)
+      end
+      self.update
+      t = @grabber.holding_anything? && !@grabber.carrying
+      if Input.trigger?(Input::JUMPUP) && !t
+        pbPlayCursorSE
+        n = (@storage.currentBox + @storage.maxBoxes - 1) % @storage.maxBoxes
+        pbSwitchBoxToLeft(n); @storage.currentBox = n
+        pbUpdateOverlay(selection); pbSetMosaic(selection)
+      elsif Input.trigger?(Input::JUMPDOWN) && !t
+        pbPlayCursorSE
+        n = (@storage.currentBox + 1) % @storage.maxBoxes
+        pbSwitchBoxToRight(n); @storage.currentBox = n
+        pbUpdateOverlay(selection); pbSetMosaic(selection)
+      elsif Input.trigger?(Input::SPECIAL) && !t
+        pbPlayDecisionSE
+        @_carnek_reset_sel = true
+        return [-2, -1]
+      elsif Input.trigger?(Input::AUX2)
+        pbSearch
+      elsif Input.trigger?(Input::ACTION) && @command == 0
+        if !t && !@grabber.carrying
+          pbPlayDecisionSE; pbSetQuickSwap(!@quickswap, true)
         end
-      else
-        @choseFromParty = false
-        return ret
+      elsif Input.trigger?(Input::BACK)
+        @selection = selection; return nil
+      elsif Input.trigger?(Input::USE)
+        @selection = selection
+        if selection >= 0
+          return [@storage.currentBox, selection]
+        elsif selection == -1
+          return [-4, -1]
+        elsif selection == -2
+          return [-2, -1]
+        elsif selection == -3
+          return [-3, -1]
+        end
       end
     end
   end
@@ -1067,4 +1087,16 @@ if defined?(UIHandlers) && UIHandlers.respond_to?(:edit_hash)
   UIHandlers.edit_hash(:summary, :page_skills, "options",
     [:item] + (Settings::ALLOW_RENAMING_POKEMON_IN_SUMMARY_SCREEN ? [:nickname] : []) + [:pokedex, :legacy])
   UIHandlers.edit_hash(:summary, :page_egg, "options", [])
+end
+
+class PokemonStorageScreen
+  alias _carnek_screen_pbHold pbHold
+  def pbHold(selected)
+    if @multi && selected[0] == -1
+      pbPlayBuzzerSE
+      pbDisplay(_INTL("No puedes usar multiselección en el equipo."))
+      return
+    end
+    _carnek_screen_pbHold(selected)
+  end
 end
