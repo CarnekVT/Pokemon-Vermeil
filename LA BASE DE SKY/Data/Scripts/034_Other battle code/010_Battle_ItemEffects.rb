@@ -1892,7 +1892,7 @@ Battle::ItemEffects::OnWeatherChange.add(:BOOSTERENERGY,
                            battler.pbThis, GameData::Item.get(item).name, battler.abilityName))
     battle.pbDisplay(_INTL("¡{1} aumentó su {2}!", battler.pbThis, GameData::Stat.get(best[0]).name))
     battle.pbHideAbilitySplash(battler)
-    battler.pbHeldItemTriggered(item)
+    # battler.pbHeldItemTriggered(item)
     next true
   }
 )
@@ -1918,7 +1918,7 @@ Battle::ItemEffects::OnTerrainChange.add(:BOOSTERENERGY,
                            battler.pbThis, GameData::Item.get(item).name, battler.abilityName))
     battle.pbDisplay(_INTL("¡{1} aumentó su {2}!", battler.pbThis, GameData::Stat.get(best[0]).name))
     battle.pbHideAbilitySplash(battler)
-    battler.pbHeldItemTriggered(item)
+    # battler.pbHeldItemTriggered(item)
     next true
   }
 )
@@ -2067,27 +2067,6 @@ Battle::ItemEffects::OnSwitchIn.add(:ROOMSERVICE,
     battler.pbConsumeItem
   }
 )
-
-Battle::ItemEffects::OnSwitchIn.add(:BOOSTERENERGY, proc { |item, battler, battle|
-  next false if battler.effects[PBEffects::Transform]
-  next false if battler.effects[PBEffects::ProtosynthesisStat]
-  next false if battler.effects[PBEffects::BoosterEnergy]
-  next false if !battler.hasActiveAbility?(:PROTOSYNTHESIS) && !battler.hasActiveAbility?(:QUARKDRIVE)
-  next false if battler.hasActiveAbility?(:PROTOSYNTHESIS) && [:Sun, :HarshSun].include?(battle.field.weather)
-  next false if battler.hasActiveAbility?(:QUARKDRIVE) && battle.field.terrain == :Electric
-  best = battler.highest_stat_including_stages
-  battler.effects[PBEffects::ProtosynthesisStat] = best[0]
-  battler.effects[PBEffects::BoosterEnergy] = true
-  battle.pbCommonAnimation("UseItem", battler)
-  battle.pbDisplay(_INTL("¡{1} se ha consumido!", GameData::Item.get(item).name))
-  battle.pbShowAbilitySplash(battler)
-  battle.pbDisplay(_INTL("¡{1} usó su {2} para activar {3}!",
-                         battler.pbThis, GameData::Item.get(item).name, battler.abilityName))
-  battle.pbDisplay(_INTL("¡{1} aumentó su {2}!", battler.pbThis, GameData::Stat.get(best[0]).name))
-  battle.pbHideAbilitySplash(battler)
-  battler.pbHeldItemTriggered(item)
-  next true
-})
 
 #===============================================================================
 # OnIntimidated handlers

@@ -1,6 +1,7 @@
 stages:
   - notify
   - release
+  # - build
 
 notify-discord:
   stage: notify
@@ -229,3 +230,48 @@ release:
     paths:
       - "LA_BASE_DE_SKY.zip"
     expire_in: never
+
+# build-macos:
+#   stage: build
+#   tags:
+#     - macos
+#   rules:
+#     - when: manual
+#   variables:
+#     GAME_FOLDER: "LA BASE DE SKY"
+#   script:
+#     # Work on a copy so the repo checkout is never modified
+#     - rm -rf /tmp/game-build
+#     - cp -R "$CI_PROJECT_DIR" /tmp/game-build
+#     - cd /tmp/game-build
+
+#     # Locate the engine template
+#     - |
+#       if [ -n "${TEMPLATE_URL:-}" ]; then
+#         curl -L -o template.zip "$TEMPLATE_URL"
+#         TEMPLATE="template.zip"
+#       elif [ -f "$GAME_FOLDER/Z-universal-macos-template.zip" ]; then
+#         TEMPLATE="$GAME_FOLDER/Z-universal-macos-template.zip"
+#       else
+#         echo "ERROR: no template found. Set TEMPLATE_URL or commit $GAME_FOLDER/Z-universal-macos-template.zip"
+#         exit 1
+#       fi
+
+#     # Package the .app (runs scripts_combine.rb inside the copy)
+#     - ruby "$GAME_FOLDER/make_macos.rb" "$GAME_FOLDER" "$TEMPLATE"
+
+#     # Build the DMG
+#     - cd "$GAME_FOLDER"
+#     - mkdir dmg_tmp
+#     - cp -R *.app dmg_tmp/
+#     - ln -s /Applications dmg_tmp/Applications
+#     - APP_NAME="$(basename *.app .app)"
+#     - hdiutil create -volname "$APP_NAME" -srcfolder dmg_tmp -ov -format UDZO "$APP_NAME.dmg"
+
+#     # Artifacts must live inside the project dir, so copy the result back
+#     - cp "$APP_NAME.dmg" "$CI_PROJECT_DIR/"
+#   artifacts:
+#     name: macos-dmg
+#     paths:
+#       - "*.dmg"
+#     expire_in: 30 days

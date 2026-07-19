@@ -9,6 +9,7 @@ class Battle::AI
     return false if @battle.rules[:cannot_switch]
     return false if @user.wild?
     return false if !@battle.pbCanSwitchOut?(@user.index)
+    return false if !@trainer.has_skill_flag?("ConsiderSwitching")
     # Don't switch if all foes are unable to do anything, e.g. resting after
     # Hyper Beam, will Truant (i.e. free turn)
     if @trainer.high_skill?

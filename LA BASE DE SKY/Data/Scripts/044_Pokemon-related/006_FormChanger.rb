@@ -71,9 +71,7 @@ def change_pokemon_form(force_species = nil, message_var = nil, show_messages = 
   form_index = pbMessage(_INTL("¿Qué forma quieres que tenga {1}?", pokemon.name), form_names, -1)
   if form_index != -1 && form_index < forms.length
     pokemon.form = forms[form_index].form
-    pokemon.form_simple = pokemon.form
-    pokemon.calc_stats
-    pokemon.reset_moves
+    pokemon.reset_moves if defined?(RandomizedChallenge) && RandomizedChallenge.randomize_moves?
     form_name = form_names[form_index].is_a?(Array) ? form_names[form_index][0] : form_names[form_index]
     text = _INTL("¡Listo! ¡He cambiado la forma de {1} a {2}!", pokemon.name, form_name)
     pbSet(message_var, text) if message_var
