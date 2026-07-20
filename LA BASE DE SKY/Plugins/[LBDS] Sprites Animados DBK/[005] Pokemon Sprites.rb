@@ -79,9 +79,21 @@ class PokemonSprite < Sprite
   
   alias animated_setSpeciesBitmap setSpeciesBitmap
   def setSpeciesBitmap(species, gender = 0, form = 0, shiny = false, shadow = false, back = false, egg = false)
-    animated_setSpeciesBitmap(species, gender, form, shiny, shadow, back, egg)
-    species_id = (species) ? GameData::Species.get_species_form(species, form).id : nil
-    pbSetDisplay([], species_id, back)
+    if species
+      @_iconbitmap&.dispose
+      @_iconbitmap = if egg
+                       GameData::Species.egg_sprite_bitmap(species, form)
+                     elsif back
+                       GameData::Species.back_sprite_bitmap(species, form, gender, shiny, shadow)
+                     else
+                       GameData::Species.front_sprite_bitmap(species, form, gender, shiny, shadow)
+                     end
+      self.bitmap = (@_iconbitmap) ? @_iconbitmap.bitmap : nil
+      species_id = GameData::Species.get_species_form(species, form).id
+      pbSetDisplay([], species_id, back)
+    else
+      animated_setSpeciesBitmap(nil, gender, form, shiny, shadow, back, egg)
+    end
   end
   
   alias animated_update update
@@ -140,7 +152,11 @@ class PokemonSprite < Sprite
   #-----------------------------------------------------------------------------
   def setSpeciesShadowBitmap(species, form = 0, female = false, shiny = false, shadow = false, dynamax = false, back = false)
     @_iconbitmap&.dispose
-    @_iconbitmap = GameData::Species.sprite_bitmap(species, form, ((female) ? 1 : 0), shiny, shadow, back)
+    if back
+      @_iconbitmap = GameData::Species.back_sprite_bitmap(species, form, ((female) ? 1 : 0), shiny, shadow)
+    else
+      @_iconbitmap = GameData::Species.front_sprite_bitmap(species, form, ((female) ? 1 : 0), shiny, shadow)
+    end
     self.bitmap = (@_iconbitmap) ? @_iconbitmap.bitmap : nil
     return if !@_iconbitmap
     setOffset

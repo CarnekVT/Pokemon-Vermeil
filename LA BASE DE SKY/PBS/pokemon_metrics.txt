@@ -873,9 +873,9 @@ AnimationSpeed = 3
 #-------------------------------
 [DRAGONITE]
 BackSprite = -14,18
-FrontSprite = 14,5
-ShadowSprite = 0,10,5
-AnimationSpeed = 3
+FrontSprite = 4,16
+ShadowSprite = 0,10,2
+AnimationSpeed = 3,2
 #-------------------------------
 [MEWTWO]
 BackSprite = -15,32

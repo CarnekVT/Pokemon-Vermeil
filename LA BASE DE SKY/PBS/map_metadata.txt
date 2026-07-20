@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [001]   # Intro
 Name = Intro
@@ -11,7 +11,7 @@ ShowArea = true
 Weather = GreenLeavesPresentColor,100
 MapPosition = 0,18,17
 SnapEdges = true
-BattleBack = RouteField
+BattleBack = indoor1
 #-------------------------------
 [032]   # Test
 Name = Test

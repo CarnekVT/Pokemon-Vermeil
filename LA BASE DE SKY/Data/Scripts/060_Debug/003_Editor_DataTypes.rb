@@ -546,9 +546,9 @@ end
 class MovePropertyForSpecies
   attr_writer :species
 
-  # def initialize(pokemondata)
-  #   @pokemondata = pokemondata
-  # end
+  def initialize(pokemondata)
+    @pokemondata = pokemondata
+  end
 
   def set(_settingname, oldsetting)
     ret = pbChooseMoveListForSpecies(@species, oldsetting || nil)

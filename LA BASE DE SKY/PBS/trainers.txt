@@ -68,7 +68,7 @@ Pokemon = MAGIKARP,18
 #-------------------------------
 [BEAUTY,Bridget]
 LoseText = ¡Mi Skitty!
-Pokemon = SKITTY,18
+Pokemon = DRAGONITE,18
 #-------------------------------
 [LASS,Crissy]
 LoseText = ¡No tienes que ganar de forma tan convincente!
