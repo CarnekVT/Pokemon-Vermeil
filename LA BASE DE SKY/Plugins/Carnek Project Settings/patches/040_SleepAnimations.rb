@@ -143,6 +143,7 @@ class Battle::Scene
       anim.pbUpdateHitOverlay
       break if anim.animDone?
     end
+    anim.pbWaitForHitOverlay
     sd = @_carnek_sleep_data[idx]
     @sprites["pokemon_#{idx}"].bitmap = sd[:bitmap].bitmap if sd && sd[:bitmap]
     anim.pbDisposeHitOverlay rescue nil
@@ -171,6 +172,7 @@ class Battle::Scene
       anim_done = anims.all?(&:animDone?)
       break if hp_done && anim_done
     end
+    anims.each { |a| a.pbWaitForHitOverlay rescue nil }
     targets.each do |t|
       idx = t[0].index
       sd = @_carnek_sleep_data[idx]

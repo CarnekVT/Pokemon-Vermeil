@@ -9,7 +9,7 @@ class SleepHitBitmap
 
   def bitmap; @frames[@current_frame]; end
   def length; @frames.length; end
-  def done?; @done; end
+  def done?; @done || @frames.length <= 1; end
 
   def update
     return if @done || @frames.length <= 1 || @speed <= 0

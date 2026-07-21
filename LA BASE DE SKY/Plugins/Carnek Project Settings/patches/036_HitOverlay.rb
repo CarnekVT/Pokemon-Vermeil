@@ -17,19 +17,37 @@ module Battle::Scene::Animation::HitOverlayHelper
     return if !@_hit_bitmap
     @_hit_bitmap.update
     if @_hit_bitmap.done?
-      Battle::Scene.carnek_scene&._carnek_hit_unregister(self)
-      @_hit_bitmap.dispose
-      @_hit_bitmap = nil
-      @_hit_batsprite.bitmap = @_hit_original_bitmap if @_hit_original_bitmap
-      return
+      _carnek_hit_cleanup
+    else
+      @_hit_batsprite.bitmap = @_hit_bitmap.bitmap
     end
-    @_hit_batsprite.bitmap = @_hit_bitmap.bitmap
+  end
+
+  def pbWaitForHitOverlay
+    return if !@_hit_bitmap
+    scene = Battle::Scene.carnek_scene
+    return if !scene
+    loop do
+      pbUpdateHitOverlay
+      break if !@_hit_bitmap
+      scene.pbUpdate
+    end
+  end
+
+  def _carnek_hit_cleanup
+    @_hit_bitmap.dispose
+    @_hit_bitmap = nil
+    Battle::Scene.carnek_scene&._carnek_hit_unregister(self)
+    @_hit_batsprite.bitmap = @_hit_original_bitmap if @_hit_batsprite && @_hit_original_bitmap
+    @_hit_original_bitmap = nil
   end
 
   def pbDisposeHitOverlay
     Battle::Scene.carnek_scene&._carnek_hit_unregister(self)
-    @_hit_bitmap&.dispose
-    @_hit_bitmap = nil
+    if @_hit_bitmap
+      @_hit_bitmap.dispose
+      @_hit_bitmap = nil
+    end
     @_hit_batsprite.bitmap = @_hit_original_bitmap if @_hit_batsprite && @_hit_original_bitmap
     @_hit_original_bitmap = nil
     @_hit_batsprite = nil

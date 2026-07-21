@@ -73,6 +73,7 @@ class Battle::Scene
         anim.pbUpdateHitOverlay
         break if anim.animDone?
       end
+      anim.pbWaitForHitOverlay
       anim.pbDisposeHitOverlay
       anim.dispose
     end
@@ -101,6 +102,7 @@ class Battle::Scene
       anim_done = anims.all?(&:animDone?)
       break if hp_done && anim_done
     end
+    anims.each { |a| a.pbWaitForHitOverlay rescue nil }
     anims.each { |a| a.pbDisposeHitOverlay rescue nil }
     anims.each { |a| a.dispose }
   end
