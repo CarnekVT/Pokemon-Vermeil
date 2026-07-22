@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [Move,TAILWHIP]
 Name = Essentials
@@ -22,4 +22,4 @@ Credit = Maruno
     MoveX = 16,2,0,EaseIn
     MoveY = 16,2,0,EaseOut
 <SE>
-    Play = 0,Normal/Tail Whip
+    Play = 0,PRSFX- Tail Whip

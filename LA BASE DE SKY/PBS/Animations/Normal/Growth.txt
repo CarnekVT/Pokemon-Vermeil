@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [Move,GROWTH]
 Name = Essentials
@@ -19,4 +19,5 @@ Credit = Maruno
     MoveZoomY = 17,4,100
     MoveColor = 17,4,F8F8F800
 <SE>
-    Play = 0,Normal/Growth
+    Play = 0,PRSFX- Growth
+    Play = 11,PRSFX- Growth

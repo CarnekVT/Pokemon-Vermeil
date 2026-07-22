@@ -1,16 +1,17 @@
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
+#-------------------------------
 [Move,SEEDBOMB]
 Name = PRAS Seed Bomb
+Credit = Anon
 <User>
     MoveY = 2,6,-40,EaseOut
-    MoveX = 2,4,-10,EaseOut
-    MoveX = 8,4,0,EaseBoth
     MoveY = 8,4,0,EaseBoth
 <Target>
-    MoveTone = 20,2,-64-32-32+64
-    MoveTone = 24,8,+00+00+00+00
     MoveX = 20,2,10,EaseOut
+    MoveTone = 20,2,-64-32-32+64
     MoveX = 22,2,-10,EaseBoth
     MoveX = 24,2,10,EaseBoth
+    MoveTone = 24,8,+00+00+00+00
     MoveX = 26,2,0,EaseBoth
 <SE>
     Play = 2,Wind1
@@ -20,12 +21,11 @@ Name = PRAS Seed Bomb
     Graphic = seed
     Focus = User
     SetZ = 0,650
-    SetZoomX = 0,100
-    SetZoomY = 0,100
     SetVisible = 0,false
     SetVisible = 2,true
-    MoveY = 2,8,-600,EaseIn
+    SetTone = 2,-10-60-FF+FF
     MoveX = 2,8,20
+    MoveY = 2,8,-600,EaseIn
     SetVisible = 10,false
 <Seed Drop 1>
     Graphic = seed
@@ -34,7 +34,7 @@ Name = PRAS Seed Bomb
     SetZoomX = 0,120
     SetZoomY = 0,120
     SetVisible = 0,false
-    SetX = 14,0
+    SetTone = 0,-10-60-FF+FF
     SetY = 14,-400
     SetVisible = 14,true
     MoveY = 14,6,0,EaseIn
@@ -50,6 +50,7 @@ Name = PRAS Seed Bomb
     SetY = 14,-440
     SetVisible = 14,true
     MoveY = 14,7,0,EaseIn
+    SetTone = 19,-10-60-FF+FF
     SetVisible = 21,false
 <Seed Drop 3>
     Graphic = seed
@@ -62,6 +63,7 @@ Name = PRAS Seed Bomb
     SetY = 14,-420
     SetVisible = 14,true
     MoveY = 14,8,0,EaseIn
+    SetTone = 19,-10-60-FF+FF
     SetVisible = 22,false
 <Explosion Flash>
     Graphic = spark
@@ -69,8 +71,8 @@ Name = PRAS Seed Bomb
     SetZ = 0,725
     SetZoomX = 0,50
     SetZoomY = 0,50
-    SetColor = 0,AAFF55FF
     SetVisible = 0,false
+    SetColor = 0,AAFF55FF
     SetVisible = 20,true
     MoveZoomX = 20,4,400,EaseOut
     MoveZoomY = 20,4,400,EaseOut
@@ -271,21 +273,19 @@ Name = PRAS Seed Bomb
     MoveAngle = 20,6,373
     MoveOpacity = 22,4,0
     SetVisible = 26,false
-
-
+#-------------------------------
 [OppMove,SEEDBOMB]
 Name = PRAS Seed Bomb
+Credit = Anon
 <User>
     MoveY = 2,6,-40,EaseOut
-    MoveX = 2,4,10,EaseOut
-    MoveX = 8,4,0,EaseBoth
     MoveY = 8,4,0,EaseBoth
 <Target>
-    MoveTone = 20,2,-64-32-32+64
-    MoveTone = 24,8,+00+00+00+00
     MoveX = 20,2,-10,EaseOut
+    MoveTone = 20,2,-64-32-32+64
     MoveX = 22,2,10,EaseBoth
     MoveX = 24,2,-10,EaseBoth
+    MoveTone = 24,8,+00+00+00+00
     MoveX = 26,2,0,EaseBoth
 <SE>
     Play = 2,Wind1
@@ -295,12 +295,11 @@ Name = PRAS Seed Bomb
     Graphic = seed
     Focus = User
     SetZ = 0,650
-    SetZoomX = 0,100
-    SetZoomY = 0,100
     SetVisible = 0,false
+    SetTone = 0,-10-60-FF+FF
     SetVisible = 2,true
-    MoveY = 2,8,-600,EaseIn
     MoveX = 2,8,-20
+    MoveY = 2,8,-600,EaseIn
     SetVisible = 10,false
 <Seed Drop 1>
     Graphic = seed
@@ -309,7 +308,7 @@ Name = PRAS Seed Bomb
     SetZoomX = 0,120
     SetZoomY = 0,120
     SetVisible = 0,false
-    SetX = 14,0
+    SetTone = 0,-10-60-FF+FF
     SetY = 14,-400
     SetVisible = 14,true
     MoveY = 14,6,0,EaseIn
@@ -321,6 +320,7 @@ Name = PRAS Seed Bomb
     SetZoomX = 0,120
     SetZoomY = 0,120
     SetVisible = 0,false
+    SetTone = 0,-10-60-FF+FF
     SetX = 14,30
     SetY = 14,-440
     SetVisible = 14,true
@@ -333,6 +333,7 @@ Name = PRAS Seed Bomb
     SetZoomX = 0,120
     SetZoomY = 0,120
     SetVisible = 0,false
+    SetTone = 0,-10-60-FF+FF
     SetX = 14,-30
     SetY = 14,-420
     SetVisible = 14,true
@@ -344,8 +345,8 @@ Name = PRAS Seed Bomb
     SetZ = 0,725
     SetZoomX = 0,50
     SetZoomY = 0,50
-    SetColor = 0,AAFF55FF
     SetVisible = 0,false
+    SetColor = 0,AAFF55FF
     SetVisible = 20,true
     MoveZoomX = 20,4,400,EaseOut
     MoveZoomY = 20,4,400,EaseOut

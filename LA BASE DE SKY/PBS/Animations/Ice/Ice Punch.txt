@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [Move,ICEPUNCH]
 Name = Essentials
@@ -110,4 +110,5 @@ Credit = Maruno
     MoveOpacity = 20,8,0,EaseIn
     SetVisible = 28,false
 <SE>
-    Play = 0,Ice/Ice Punch,80
+    Play = 0,PRSFX- Ice Punch1
+    Play = 7,PRSFX- Ice Punch2

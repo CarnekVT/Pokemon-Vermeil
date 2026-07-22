@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [Move,FIREPUNCH]
 Name = Essentials
@@ -126,4 +126,5 @@ Credit = Maruno
     SetEmitting = 16,false
     SetVisible = 17,false
 <SE>
-    Play = 0,Fire/Fire Punch,80
+    Play = 3,PRSFX- Fire Punch1
+    Play = 7,PRSFX- Fire Punch2
