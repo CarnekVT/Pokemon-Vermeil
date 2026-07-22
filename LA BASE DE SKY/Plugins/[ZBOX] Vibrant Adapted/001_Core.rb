@@ -80,7 +80,7 @@ module VibrantAdapted
       waiting_surf = defined?(VehicleMonitor) && VehicleMonitor.waiting_for_land_step?
 
       if !@@state.toggled || $player.party.empty? ||
-         $PokemonGlobal.bicycle || $PokemonGlobal.surfing || $PokemonGlobal.diving ||
+         $PokemonGlobal.bicycle || $PokemonGlobal.diving ||
          indoor_blocked || waiting_surf
         remove_follower
         return
@@ -92,13 +92,20 @@ module VibrantAdapted
         return
       end
 
+      if $PokemonGlobal.surfing && !pkmn.hasType?(:WATER)
+        remove_follower
+        return
+      end
+
+      subfolder = $PokemonGlobal.surfing ? "Surf" : "Followers"
+
       existing = $game_temp.followers.get_follower_by_name(FOLLOWER_NAME)
       if existing
-        character_name = get_pokemon_graphic(pkmn)
+        character_name = get_pokemon_graphic(pkmn, subfolder)
         existing.character_name = character_name
         existing.character_hue  = pkmn.respond_to?(:superShiny?) && pkmn.superShiny? ? pkmn.superHue : 0
       else
-        spawn_follower(pkmn)
+        spawn_follower(pkmn, subfolder)
       end
 
       if $scene.is_a?(Scene_Map) && $scene.spritesetGlobal && $scene.spritesetGlobal.respond_to?(:follower_sprites)
@@ -148,8 +155,8 @@ module VibrantAdapted
     end
 
     #--- Spawn: crear FollowerData + Game_PokemonFollower (FPEX approach) ---
-    def self.spawn_follower(pkmn)
-      character_name = get_pokemon_graphic(pkmn)
+    def self.spawn_follower(pkmn, subfolder = "Followers")
+      character_name = get_pokemon_graphic(pkmn, subfolder)
       character_hue  = pkmn.respond_to?(:superShiny?) && pkmn.superShiny? ? pkmn.superHue : 0
 
       pos = find_free_tile
@@ -217,20 +224,21 @@ module VibrantAdapted
     end
 
     #--- Gráfico del Pokémon (check_graphic_file de Essentials) ---
-    def self.get_pokemon_graphic(pkmn)
+    def self.get_pokemon_graphic(pkmn, subfolder = "Followers")
       return "" if !pkmn || pkmn.egg?
       filename = GameData::Species.check_graphic_file(
         "Graphics/Characters/", pkmn.species, pkmn.form,
-        pkmn.gender, pkmn.shiny?, pkmn.shadow, "Followers"
+        pkmn.gender, pkmn.shiny?, pkmn.shadow, subfolder
       )
       if filename.nil? || filename.empty?
-        folder = pkmn.shiny? ? "Followers shiny/" : "Followers/"
+        folder = pkmn.shiny? ? "#{subfolder} shiny/" : "#{subfolder}/"
         fallback = "#{folder}#{pkmn.species}"
         if pbResolveBitmap("Graphics/Characters/#{fallback}.png") || pbResolveBitmap("Graphics/Characters/#{fallback}")
           return fallback
-        else
-          return pkmn.species.to_s
         end
+        # Fallback: si no existe en el subfolder pedido, probar con "Followers"
+        return get_pokemon_graphic(pkmn, "Followers") if subfolder != "Followers"
+        return pkmn.species.to_s
       end
       filename = filename.gsub("Graphics/Characters/", "").gsub(".png", "").gsub(".gif", "")
       return filename
@@ -300,11 +308,9 @@ EventHandlers.add(:on_frame_update, :va_cycle_party, proc {
   next unless VibrantAdapted::Manager.toggled?
   next if $player.party.length < 2
   if Input.trigger?(VibrantAdapted::Settings::CYCLE_PARTY_FORWARD_KEY)
-    pbPlayDecisionSE
     $player.party.rotate!
     VibrantAdapted::Manager.refresh
   elsif Input.trigger?(VibrantAdapted::Settings::CYCLE_PARTY_BACKWARD_KEY)
-    pbPlayDecisionSE
     $player.party.rotate!(-1)
     VibrantAdapted::Manager.refresh
   end
@@ -315,6 +321,16 @@ EventHandlers.add(:on_frame_update, :va_clear_load_flag, proc {
   if $scene.is_a?(Scene_Map)
     VibrantAdapted::Manager.clear_just_loaded
   end
+})
+
+EventHandlers.add(:on_frame_update, :va_surfing_monitor, proc {
+  next unless VibrantAdapted::Manager.save_data.system_enabled
+  next if $game_temp.in_battle
+  surfing = $PokemonGlobal.surfing ? true : false
+  if defined?(@_va_last_surfing) && @_va_last_surfing != surfing
+    VibrantAdapted::Manager.refresh
+  end
+  @_va_last_surfing = surfing
 })
 
 #===============================================================================

@@ -1,4 +1,4 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
 #-------------------------------
 [Move,TACKLE]
 Name = Essentials
@@ -63,4 +63,4 @@ Credit = Maruno
     MoveColor = 8,9,F86020FF,EaseOut
     SetVisible = 17,false
 <SE>
-    Play = 4,Normal/Tackle
+    Play = 4,PRSFX- Tackle

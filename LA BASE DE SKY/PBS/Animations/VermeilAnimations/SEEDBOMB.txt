@@ -6,8 +6,8 @@ Name = PRAS Seed Bomb
     MoveX = 8,4,0,EaseBoth
     MoveY = 8,4,0,EaseBoth
 <Target>
-    MoveTone = 20,2,-100-50-50+100
-    MoveTone = 24,8,00000000
+    MoveTone = 20,2,-64-32-32+64
+    MoveTone = 24,8,+00+00+00+00
     MoveX = 20,2,10,EaseOut
     MoveX = 22,2,-10,EaseBoth
     MoveX = 24,2,10,EaseBoth
@@ -281,8 +281,8 @@ Name = PRAS Seed Bomb
     MoveX = 8,4,0,EaseBoth
     MoveY = 8,4,0,EaseBoth
 <Target>
-    MoveTone = 20,2,-100-50-50+100
-    MoveTone = 24,8,00000000
+    MoveTone = 20,2,-64-32-32+64
+    MoveTone = 24,8,+00+00+00+00
     MoveX = 20,2,-10,EaseOut
     MoveX = 22,2,10,EaseBoth
     MoveX = 24,2,-10,EaseBoth

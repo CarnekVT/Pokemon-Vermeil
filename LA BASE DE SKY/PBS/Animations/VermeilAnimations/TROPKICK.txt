@@ -14,8 +14,8 @@ Name = PRAS Trop Kick
     MoveY = 13,4,0,EaseIn
     MoveColor = 9,2,FFFFFFFF
     MoveColor = 11,6,00000000
-    MoveTone = 9,2,-50-50-50+50
-    MoveTone = 15,6,00000000
+    MoveTone = 9,2,-32-32-32+32
+    MoveTone = 15,6,+00+00+00+00
 <SE>
     Play = 4,Wind1
     Play = 9,Super Damage
@@ -219,8 +219,8 @@ Name = PRAS Trop Kick
     MoveY = 13,4,0,EaseIn
     MoveColor = 9,2,FFFFFFFF
     MoveColor = 11,6,00000000
-    MoveTone = 9,2,-50-50-50+50
-    MoveTone = 15,6,00000000
+    MoveTone = 9,2,-32-32-32+32
+    MoveTone = 15,6,+00+00+00+00
 <SE>
     Play = 4,Wind1
     Play = 9,Super Damage

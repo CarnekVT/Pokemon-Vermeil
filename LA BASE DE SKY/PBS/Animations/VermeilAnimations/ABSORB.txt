@@ -5,12 +5,12 @@ Name = PRAS Absorb
 Credit = Anon
 <User>
     MoveColor = 18,4,50FF3278
-    MoveColor = 22,8,+00+00+00+00
+    MoveColor = 22,8,00000000
 <Target>
     MoveColor = 2,2,FFFFFFFF
-    MoveColor = 4,4,+00+00+00+00
+    MoveColor = 4,4,00000000
     MoveX = 6,2,8,EaseOut
-    MoveTone = 6,10,-100-100-100+100
+    MoveTone = 6,10,-64-64-64+64
     MoveX = 8,3,-8,EaseBoth
     MoveX = 11,2,0,EaseBoth
     MoveTone = 25,10,+00+00+00+00
@@ -258,12 +258,12 @@ Name = PRAS Absorb
 Credit = Anon
 <User>
     MoveColor = 18,4,50FF3278
-    MoveColor = 22,8,+00+00+00+00
+    MoveColor = 22,8,00000000
 <Target>
     MoveColor = 2,2,FFFFFFFF
-    MoveColor = 4,4,+00+00+00+00
+    MoveColor = 4,4,00000000
     MoveX = 6,2,-8,EaseOut
-    MoveTone = 6,10,-100-100-100+100
+    MoveTone = 6,10,-64-64-64+64
     MoveX = 8,3,8,EaseBoth
     MoveX = 11,2,0,EaseBoth
     MoveTone = 25,10,+00+00+00+00

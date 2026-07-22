@@ -12,7 +12,7 @@ Credit = Anon
     MoveX = 11,2,12,EaseOut
     MoveColor = 11,2,FFFFFFFF
     MoveX = 13,3,-24,EaseBoth
-    MoveColor = 13,6,+00+00+00+00
+    MoveColor = 13,6,00000000
     MoveX = 16,3,12,EaseBoth
     MoveX = 19,2,0
 <SE>
@@ -125,7 +125,7 @@ Credit = Anon
     MoveX = 11,2,-12,EaseOut
     MoveColor = 11,2,FFFFFFFF
     MoveX = 13,3,24,EaseBoth
-    MoveColor = 13,6,+00+00+00+00
+    MoveColor = 13,6,00000000
     MoveX = 16,3,0,EaseBoth
 <SE>
     Play = 2,PRSFX- Work Up

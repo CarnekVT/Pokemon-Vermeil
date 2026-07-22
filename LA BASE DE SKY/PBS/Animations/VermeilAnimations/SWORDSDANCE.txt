@@ -6,7 +6,7 @@ Name = SWORDSDANCE
 <SE>
     Play = 4,sword_dance_effect
 <Aura0>
-    Graphic = sword_icon
+    Graphic = sword
     Focus = User
     SetVisible = 0,false
     SetVisible = 4,true
@@ -14,7 +14,7 @@ Name = SWORDSDANCE
     MoveAngle = 4,24,360,Linear
     MoveOpacity = 28,8,0
 <Aura1>
-    Graphic = sword_icon
+    Graphic = sword
     Focus = User
     SetVisible = 0,false
     SetVisible = 6,true
@@ -22,7 +22,7 @@ Name = SWORDSDANCE
     MoveAngle = 6,24,480,Linear
     MoveOpacity = 28,8,0
 <Aura2>
-    Graphic = sword_icon
+    Graphic = sword
     Focus = User
     SetVisible = 0,false
     SetVisible = 8,true
@@ -39,7 +39,7 @@ Name = SWORDSDANCE
 <SE>
     Play = 4,sword_dance_effect
 <Aura0>
-    Graphic = sword_icon
+    Graphic = sword
     Focus = User
     SetVisible = 0,false
     SetVisible = 4,true
@@ -47,7 +47,7 @@ Name = SWORDSDANCE
     MoveAngle = 4,24,360,Linear
     MoveOpacity = 28,8,0
 <Aura1>
-    Graphic = sword_icon
+    Graphic = sword
     Focus = User
     SetVisible = 0,false
     SetVisible = 6,true
@@ -55,7 +55,7 @@ Name = SWORDSDANCE
     MoveAngle = 6,24,480,Linear
     MoveOpacity = 28,8,0
 <Aura2>
-    Graphic = sword_icon
+    Graphic = sword
     Focus = User
     SetVisible = 0,false
     SetVisible = 8,true

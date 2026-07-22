@@ -200,28 +200,6 @@ EventHandlers.add(:following_pkmn_talk, :va_map_player_house, proc { |pkmn, rand
   next true
 })
 
-# Happiness handlers
-EventHandlers.add(:following_pkmn_talk, :va_happiness_high, proc { |pkmn, random_val|
-  next false unless VibrantAdapted::Interaction.can_talk?
-  next false if pkmn.happiness >= 220
-  next false if pkmn.happiness < 50
-  follower = $game_temp.followers.get_follower_by_name(VibrantAdapted::FOLLOWER_NAME)
-  if pkmn.happiness >= 220
-    if follower
-      VibrantAdapted::Emotes.show(follower, :Heart)
-      VibrantAdapted::PhysicalEmotes.play(follower, :love_rub)
-    end
-    pbMessage(_INTL("¡{1} se frota cariñosamente contra las piernas de {2}!", pkmn.name, $player.name))
-  else
-    if follower
-      VibrantAdapted::Emotes.show(follower, :Mad)
-      VibrantAdapted::PhysicalEmotes.play(follower, :step_back)
-    end
-    pbMessage(_INTL("{1} mira hacia otro lado, ignorando a {2}...", pkmn.name, $player.name))
-  end
-  next true
-})
-
 # Generic handlers (random_val dispatch, 5 categorías como FPEX)
 EventHandlers.add(:following_pkmn_talk, :va_generic_music, proc { |pkmn, random_val|
   next false unless VibrantAdapted::Interaction.can_talk?
