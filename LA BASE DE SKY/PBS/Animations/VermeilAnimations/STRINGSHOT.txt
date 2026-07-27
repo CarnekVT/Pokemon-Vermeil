@@ -1,0 +1,204 @@
+[Move,STRINGSHOT]
+Name = PRAS String Shot
+<User>
+    MoveX = 2,3,10,EaseOut
+    MoveX = 5,4,0,EaseBoth
+<Target>
+    MoveY = 10,4,15,EaseOut
+    MoveZoomY = 10,4,80,EaseOut
+    MoveZoomX = 10,4,110,EaseOut
+    MoveTone = 10,4,-50-50-50+00
+    MoveY = 35,6,0,EaseIn
+    MoveZoomY = 35,6,100,EaseIn
+    MoveZoomX = 35,6,100,EaseIn
+    MoveTone = 35,6,+00+00+00+00
+<SE>
+    Play = 2,PRSFX- String Shot1
+    Play = 10,PRSFX- String Shot2
+<WebLine0>
+    Graphic = string shot
+    Focus = User
+    SetZ = 0,730
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,20
+    SetZoomY = 0,60
+    SetVisible = 0,false
+    SetVisible = 2,true
+    MoveX = 2,6,250,EaseIn
+    MoveY = 2,6,-11,EaseIn
+    MoveZoomX = 2,6,200,EaseIn
+    MoveOpacity = 8,2,0
+    SetVisible = 10,false
+<WebStick0>
+    Graphic = string shot
+    Focus = Target
+    SetZ = 0,740
+    SetColor = 0,FFFFFFFF
+    SetVisible = 0,false
+    SetX = 0,14
+    SetY = 0,-11
+    SetAngle = 0,7
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetVisible = 8,true
+    MoveOpacity = 32,5,0
+    SetVisible = 37,false
+<WebLine1>
+    Graphic = string shot
+    Focus = User
+    SetZ = 0,730
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,20
+    SetZoomY = 0,60
+    SetVisible = 0,false
+    SetVisible = 4,true
+    MoveX = 4,6,250,EaseIn
+    MoveY = 4,6,-2,EaseIn
+    MoveZoomX = 4,6,200,EaseIn
+    MoveOpacity = 10,2,0
+    SetVisible = 12,false
+<WebStick1>
+    Graphic = string shot
+    Focus = Target
+    SetZ = 0,740
+    SetColor = 0,FFFFFFFF
+    SetVisible = 0,false
+    SetX = 0,3
+    SetY = 0,-2
+    SetAngle = 0,12
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetVisible = 10,true
+    MoveOpacity = 32,5,0
+    SetVisible = 37,false
+<WebLine2>
+    Graphic = string shot
+    Focus = User
+    SetZ = 0,730
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,20
+    SetZoomY = 0,60
+    SetVisible = 0,false
+    SetVisible = 6,true
+    MoveX = 6,6,250,EaseIn
+    MoveY = 6,6,12,EaseIn
+    MoveZoomX = 6,6,200,EaseIn
+    MoveOpacity = 12,2,0
+    SetVisible = 14,false
+<WebStick2>
+    Graphic = string shot
+    Focus = Target
+    SetZ = 0,740
+    SetColor = 0,FFFFFFFF
+    SetVisible = 0,false
+    SetX = 0,4
+    SetY = 0,12
+    SetAngle = 0,-5
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetVisible = 12,true
+    MoveOpacity = 32,5,0
+    SetVisible = 37,false
+
+
+[OppMove,STRINGSHOT]
+Name = PRAS String Shot
+<User>
+    MoveX = 2,3,-10,EaseOut
+    MoveX = 5,4,0,EaseBoth
+<Target>
+    MoveY = 10,4,15,EaseOut
+    MoveZoomY = 10,4,80,EaseOut
+    MoveZoomX = 10,4,110,EaseOut
+    MoveTone = 10,4,-50-50-50+00
+    MoveY = 35,6,0,EaseIn
+    MoveZoomY = 35,6,100,EaseIn
+    MoveZoomX = 35,6,100,EaseIn
+    MoveTone = 35,6,+00+00+00+00
+<SE>
+    Play = 2,PRSFX- String Shot1
+    Play = 10,PRSFX- String Shot2
+<WebLine0>
+    Graphic = string shot
+    Focus = User
+    SetZ = 0,730
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,20
+    SetZoomY = 0,60
+    SetVisible = 0,false
+    SetVisible = 2,true
+    MoveX = 2,6,-250,EaseIn
+    MoveY = 2,6,11,EaseIn
+    MoveZoomX = 2,6,200,EaseIn
+    MoveOpacity = 8,2,0
+    SetVisible = 10,false
+<WebStick0>
+    Graphic = string shot
+    Focus = Target
+    SetZ = 0,740
+    SetColor = 0,FFFFFFFF
+    SetVisible = 0,false
+    SetX = 0,4
+    SetY = 0,11
+    SetAngle = 0,-11
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetVisible = 8,true
+    MoveOpacity = 32,5,0
+    SetVisible = 37,false
+<WebLine1>
+    Graphic = string shot
+    Focus = User
+    SetZ = 0,730
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,20
+    SetZoomY = 0,60
+    SetVisible = 0,false
+    SetVisible = 4,true
+    MoveX = 4,6,-250,EaseIn
+    MoveY = 4,6,-19,EaseIn
+    MoveZoomX = 4,6,200,EaseIn
+    MoveOpacity = 10,2,0
+    SetVisible = 12,false
+<WebStick1>
+    Graphic = string shot
+    Focus = Target
+    SetZ = 0,740
+    SetColor = 0,FFFFFFFF
+    SetVisible = 0,false
+    SetX = 0,-15
+    SetY = 0,-19
+    SetAngle = 0,-25
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetVisible = 10,true
+    MoveOpacity = 32,5,0
+    SetVisible = 37,false
+<WebLine2>
+    Graphic = string shot
+    Focus = User
+    SetZ = 0,730
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,20
+    SetZoomY = 0,60
+    SetVisible = 0,false
+    SetVisible = 6,true
+    MoveX = 6,6,-250,EaseIn
+    MoveY = 6,6,11,EaseIn
+    MoveZoomX = 6,6,200,EaseIn
+    MoveOpacity = 12,2,0
+    SetVisible = 14,false
+<WebStick2>
+    Graphic = string shot
+    Focus = Target
+    SetZ = 0,740
+    SetColor = 0,FFFFFFFF
+    SetVisible = 0,false
+    SetX = 0,-20
+    SetY = 0,11
+    SetAngle = 0,17
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetVisible = 12,true
+    MoveOpacity = 32,5,0
+    SetVisible = 37,false

@@ -1,0 +1,100 @@
+[Move,KARATECHOP]
+Name = PRAS Karate Chop
+<User>
+    MoveY = 2,3,-15,EaseOut
+    MoveX = 2,3,-10,EaseOut
+    MoveX = 6,2,20,EaseIn
+    MoveY = 6,2,10,EaseIn
+    MoveX = 12,4,0,EaseBoth
+    MoveY = 12,4,0,EaseBoth
+<Target>
+    MoveY = 8,2,25,EaseOut
+    MoveZoomY = 8,2,60,EaseOut
+    MoveZoomX = 8,2,130,EaseOut
+    MoveY = 10,4,0,EaseIn
+    MoveZoomY = 10,4,100,EaseIn
+    MoveZoomX = 10,4,100,EaseIn
+    MoveColor = 8,2,FFFF5000
+    MoveColor = 10,5,00000000
+<SE>
+    Play = 2,Wind7
+    Play = 8,Super Damage
+<ChopSlash1>
+    Graphic = slash
+    Focus = Target
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetAngle = 0,45
+    SetVisible = 8,true
+    MoveZoomX = 8,3,250,EaseOut
+    MoveZoomY = 8,3,80,EaseOut
+    MoveOpacity = 9,3,0
+    SetVisible = 12,false
+<ChopSlash2>
+    Graphic = slash
+    Focus = Target
+    SetZ = 0,751
+    SetVisible = 0,false
+    SetColor = 0,FFFF8000
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetAngle = 0,-45
+    SetVisible = 8,true
+    MoveZoomX = 8,3,250,EaseOut
+    MoveZoomY = 8,3,80,EaseOut
+    MoveOpacity = 9,3,0
+    SetVisible = 12,false
+
+
+[OppMove,KARATECHOP]
+Name = PRAS Karate Chop
+<User>
+    MoveY = 2,3,-15,EaseOut
+    MoveX = 2,3,10,EaseOut
+    MoveX = 6,2,-20,EaseIn
+    MoveY = 6,2,10,EaseIn
+    MoveX = 12,4,0,EaseBoth
+    MoveY = 12,4,0,EaseBoth
+<Target>
+    MoveY = 8,2,25,EaseOut
+    MoveZoomY = 8,2,60,EaseOut
+    MoveZoomX = 8,2,130,EaseOut
+    MoveY = 10,4,0,EaseIn
+    MoveZoomY = 10,4,100,EaseIn
+    MoveZoomX = 10,4,100,EaseIn
+    MoveColor = 8,2,FFFF5000
+    MoveColor = 10,5,00000000
+<SE>
+    Play = 2,Wind7
+    Play = 8,Super Damage
+<ChopSlash1>
+    Graphic = slash
+    Focus = Target
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetAngle = 0,-45
+    SetVisible = 8,true
+    MoveZoomX = 8,3,250,EaseOut
+    MoveZoomY = 8,3,80,EaseOut
+    MoveOpacity = 9,3,0
+    SetVisible = 12,false
+<ChopSlash2>
+    Graphic = slash
+    Focus = Target
+    SetZ = 0,751
+    SetVisible = 0,false
+    SetColor = 0,FFFF8000
+    SetZoomX = 0,30
+    SetZoomY = 0,30
+    SetAngle = 0,45
+    SetVisible = 8,true
+    MoveZoomX = 8,3,250,EaseOut
+    MoveZoomY = 8,3,80,EaseOut
+    MoveOpacity = 9,3,0
+    SetVisible = 12,false

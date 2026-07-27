@@ -32,9 +32,10 @@ AnimationSpeed = 3
 #-------------------------------
 [CHARIZARD]
 BackSprite = -14,25
-FrontSprite = 6,3
-ShadowSprite = 0,6,8
-AnimationSpeed = 3
+FrontSprite = 0,15
+ShadowSprite = 3,6,4
+AnimationSpeed = 3,2
+SuperShinyHue = -180
 #-------------------------------
 [SQUIRTLE]
 BackSprite = 1,7
