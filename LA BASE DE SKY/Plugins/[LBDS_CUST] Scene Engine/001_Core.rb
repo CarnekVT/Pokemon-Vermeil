@@ -2,34 +2,27 @@
 module SceneEngine
   @players = {}
 
-  def self.play(scene_name, &block)
-    scene_name = scene_name.to_s
-    player = Player.new(scene_name)
-    @players[scene_name] = player
+  def self.play(scene_name = nil, &block)
+    if scene_name
+      path = "#{SceneEngine::Settings::SCENES_DIR}/#{scene_name}/dialogue.txt"
+      dialogue = load_dialog_from_file(path)
+    end
+    player = Player.new(dialogue_data: dialogue)
     player.run(&block)
-    @players.delete(scene_name)
   end
 
-  def self.load_dialog(scene_name)
-    path = "#{Settings::SCENES_DIR}/#{scene_name}/dialogue.txt"
+  def self.load_dialog_from_file(path)
     return {} unless File.exist?(path)
-
     data = {}
     current_label = nil
     current_speaker = nil
     current_speed = :normal
     current_text = []
-    raw = File.read(path, encoding: "UTF-8")
-
-    raw.each_line do |line|
+    File.read(path, encoding: "UTF-8").each_line do |line|
       s = line.strip
       if s =~ /^\[(\w+)\]/
         if current_label
-          data[current_label] = {
-            speaker: current_speaker,
-            speed:   current_speed,
-            text:    current_text.join("\n")
-          }
+          data[current_label] = { speaker: current_speaker, speed: current_speed, text: current_text.join("\n") }
         end
         current_label = $1.to_sym
         current_speaker = nil
@@ -43,13 +36,8 @@ module SceneEngine
         current_text << s
       end
     end
-
     if current_label
-      data[current_label] = {
-        speaker: current_speaker,
-        speed:   current_speed,
-        text:    current_text.join("\n")
-      }
+      data[current_label] = { speaker: current_speaker, speed: current_speed, text: current_text.join("\n") }
     end
     data
   end
