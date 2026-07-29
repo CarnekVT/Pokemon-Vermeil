@@ -6,6 +6,10 @@ class SceneEngine::Player
     @viewport.z = 99_999
     @image_sprites = {}
     @sprites = {}
+    @float_anim = nil
+    @float_ghosts = []
+    @aura_particles = []
+    @scrolling_sprites = []
   end
 
   def run(&block)
@@ -77,14 +81,94 @@ class SceneEngine::Player
   end
 
   def cleanup
+    stop_float
+    stop_aura
+    stop_scrolling
     @image_sprites.each_value { |s| s&.dispose rescue nil }
     @sprites.each_value { |s| s&.dispose rescue nil }
     @viewport.dispose
   rescue; end
 
   def update
+    update_float
+    update_aura_particles
+    update_scrolling
     Graphics.update
     Input.update
+  end
+
+  def update_float
+    return unless @float_anim
+    anim = @float_anim
+    anim[:counter] += 1
+    frame_interval = (60.0 / anim[:fps]).round
+    if anim[:counter] >= frame_interval
+      anim[:counter] = 0
+      anim[:frame] = (anim[:frame] + 1) % anim[:frames]
+      anim[:sprite].src_rect.x = anim[:frame] * anim[:fw]
+      if anim[:glow]
+        anim[:glow].src_rect.x = anim[:sprite].src_rect.x
+      end
+      anim[:ghost_counter] = (anim[:ghost_counter] || 0) + 1
+      if anim[:y] >= 0 && anim[:y] < anim[:end_y] && anim[:ghost_counter] >= anim[:ghost_interval] && @float_ghosts.length < 15
+        anim[:ghost_counter] = 0
+        ghost = Sprite.new(@viewport)
+        ghost.bitmap = anim[:sprite].bitmap
+        ghost.src_rect = anim[:sprite].src_rect.clone
+        ghost.x = anim[:sprite].x
+        ghost.y = anim[:sprite].y
+        ghost.z = anim[:sprite].z - 1 - @float_ghosts.length
+        ghost.opacity = 160
+        if anim[:glow]
+          ghost.blend_type = 1
+          ghost.tone = Tone.new(255, 255, 255, 0)
+        end
+        @float_ghosts << ghost
+      end
+    end
+    if anim[:y] < anim[:end_y]
+      anim[:y] += anim[:speed]
+      anim[:y] = anim[:end_y] if anim[:y] > anim[:end_y]
+      anim[:sprite].y = anim[:y].round
+      if anim[:glow]
+        g = anim[:glow]
+        g.x = anim[:sprite].x
+        g.y = anim[:sprite].y
+      end
+    else
+      anim[:bob] = (anim[:bob] || 0) + 1
+      anim[:sprite].y = anim[:end_y] + (Math.sin(anim[:bob] * 0.05) * 3).round
+      if anim[:glow]
+        g = anim[:glow]
+        g.x = anim[:sprite].x
+        g.y = anim[:sprite].y
+        if anim[:land_timer].nil?
+          anim[:land_timer] = 30
+        end
+        if anim[:land_timer] > 0
+          anim[:land_timer] -= 1
+          g.opacity = (255 * anim[:land_timer] / 30).round
+        else
+          g.blend_type = 0
+          g.tone = Tone.new(0, 0, 0, 0)
+          g.opacity = 0
+        end
+      end
+    end
+    @float_ghosts.each_with_index do |g, i|
+      g.opacity -= 4
+      g.y += 0.3
+      g.zoom_x -= 0.002
+      g.zoom_y -= 0.002
+    end
+    @float_ghosts.delete_if do |g|
+      if g.disposed? || g.opacity <= 0 || g.zoom_x <= 0
+        g.dispose rescue nil
+        true
+      else
+        false
+      end
+    end
   end
 
   def bgm(name); name.nil? || name.empty? ? pbBGMStop : pbBGMPlay(name); end
@@ -419,5 +503,166 @@ class SceneEngine::Player
   def apply_format(text, args)
     args.each_with_index { |arg, i| text = text.gsub("{#{i + 1}}", arg.to_s) }
     text
+  end
+
+  def float_sprite(filename, fw, fh, frames, x, y, end_y:, speed: 1, fps: 6, ghost_interval: 1, bg: false, glow: false, fade: SceneEngine::Settings::FADE_DEFAULT)
+    stop_float
+    if bg
+      @sprites[:float_bg] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
+      @sprites[:float_bg].bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
+      @sprites[:float_bg].z = SceneEngine::Settings::LAYER_IMG + 150
+      @sprites[:float_bg].opacity = 0
+    end
+    bmp = AnimatedBitmap.new(filename).deanimate
+    sprite = Sprite.new(@viewport)
+    sprite.bitmap = bmp
+    sprite.src_rect.set(0, 0, fw, fh)
+    sprite.x = x
+    sprite.y = y
+    sprite.z = SceneEngine::Settings::LAYER_IMG + 200
+    sprite.opacity = 0
+    glow_sprite = nil
+    if glow
+      glow_sprite = Sprite.new(@viewport)
+      glow_sprite.bitmap = bmp
+      glow_sprite.src_rect.set(0, 0, fw, fh)
+      glow_sprite.x = x
+      glow_sprite.y = y
+      glow_sprite.z = SceneEngine::Settings::LAYER_IMG + 201
+      glow_sprite.blend_type = 1
+      glow_sprite.tone = Tone.new(255, 255, 255, 0)
+      glow_sprite.opacity = 0
+    end
+    fade.times do |i|
+      sprite.opacity = 255 * (i + 1) / fade
+      @sprites[:float_bg].opacity = sprite.opacity if @sprites[:float_bg]
+      update
+    end
+    sprite.opacity = 255
+    glow_sprite.opacity = 255 if glow_sprite
+    @float_anim = {
+      bitmap: bmp, sprite: sprite, glow: glow_sprite, fw: fw, fh: fh,
+      frames: frames, frame: 0, counter: 0,
+      fps: fps, x: x, y: y, end_y: end_y, speed: speed, bob: 0,
+      start_y: y, glow_type: glow, ghost_interval: ghost_interval
+    }
+  end
+
+  def stop_float(fade: 0)
+    if fade > 0 && @float_anim
+      sp = @float_anim[:sprite]
+      gl = @float_anim[:glow]
+      fade.times do |i|
+        sp.opacity = 255 - (255 * (i + 1) / fade)
+        gl.opacity = sp.opacity if gl
+        @float_ghosts.each { |g| g.opacity -= 2 }
+        update
+      end
+    end
+    @float_ghosts.each { |g| g.dispose rescue nil }
+    @float_ghosts.clear
+    if @float_anim
+      @float_anim[:sprite]&.dispose rescue nil
+      @float_anim[:glow]&.dispose rescue nil
+      @float_anim[:bitmap]&.dispose rescue nil
+      @float_anim = nil
+    end
+    @sprites[:float_bg]&.dispose rescue nil
+    @sprites[:float_bg] = nil
+  end
+
+  def start_aura(filename, fw, fh, count: 8, range_x: 30, range_y: 60, duration: 120)
+    stop_aura
+    bmp = AnimatedBitmap.new(filename).deanimate
+    count.times do
+      p = {
+        sprite: Sprite.new(@viewport),
+        x_off: (rand - 0.5) * range_x * 2,
+        speed: 0.6 + rand * 0.8,
+        phase: rand * duration,
+        duration: duration,
+        range_y: range_y,
+        fw: fw, fh: fh
+      }
+      p[:sprite].bitmap = bmp
+      p[:sprite].src_rect.width = fw
+      p[:sprite].src_rect.height = fh
+      p[:sprite].z = SceneEngine::Settings::LAYER_IMG + 250
+      @aura_particles << p
+    end
+  end
+
+  def update_aura_particles
+    return if @aura_particles.empty?
+    cx = @float_anim ? @float_anim[:sprite].x + @float_anim[:fw] / 2 : 0
+    cy = @float_anim ? @float_anim[:sprite].y + @float_anim[:fh] / 2 : 0
+    @aura_particles.each do |p|
+      p[:phase] = (p[:phase] + p[:speed]) % p[:duration]
+      progress = p[:phase] / p[:duration]
+      p[:sprite].opacity = (Math.sin(progress * Math::PI) * 255).round
+      start_y = cy + p[:fh] / 2 + p[:range_y]
+      py = start_y - progress * (p[:range_y] * 2 + p[:fh])
+      px = cx + p[:x_off] - p[:fw] / 2
+      p[:sprite].x = px.round
+      p[:sprite].y = py.round
+    end
+  end
+
+  def stop_aura
+    @aura_particles.each { |p| p[:sprite]&.dispose rescue nil }
+    @aura_particles.clear
+  end
+
+  def change_float_bitmap(filename)
+    return unless @float_anim
+    bmp = AnimatedBitmap.new(filename).deanimate
+    @float_anim[:bitmap]&.dispose
+    @float_anim[:bitmap] = bmp
+    @float_anim[:sprite].bitmap = bmp
+    frame_x = @float_anim[:frame] * @float_anim[:fw]
+    @float_anim[:sprite].src_rect.set(frame_x, 0, @float_anim[:fw], @float_anim[:fh])
+    if @float_anim[:glow]
+      @float_anim[:glow].bitmap = bmp
+      @float_anim[:glow].src_rect.set(frame_x, 0, @float_anim[:fw], @float_anim[:fh])
+    end
+  end
+
+  def start_scrolling(filename, x, y, speed:, z: nil, mirror: false)
+    bmp = AnimatedBitmap.new(filename).deanimate
+    zh = z || SceneEngine::Settings::LAYER_IMG + 50
+    sprites = []
+    s1 = Sprite.new(@viewport)
+    s1.bitmap = bmp
+    s1.src_rect.set(0, 0, bmp.width, bmp.height)
+    s1.x = x
+    s1.y = y
+    s1.z = zh
+    s1.mirror = mirror
+    sprites << s1
+    s2 = Sprite.new(@viewport)
+    s2.bitmap = bmp
+    s2.src_rect.set(0, 0, bmp.width, bmp.height)
+    s2.x = x
+    s2.y = y - bmp.height
+    s2.z = zh
+    s2.mirror = mirror
+    sprites << s2
+    @scrolling_sprites << { sprites: sprites, speed: speed, h: bmp.height }
+  end
+
+  def stop_scrolling
+    @scrolling_sprites.each { |s| s[:sprites].each { |sp| sp.dispose rescue nil } }
+    @scrolling_sprites.clear
+  end
+
+  def update_scrolling
+    @scrolling_sprites.each do |s|
+      s[:sprites].each do |sp|
+        sp.y -= s[:speed]
+        if sp.y + s[:h] <= 0
+          sp.y += s[:h] * 2
+        end
+      end
+    end
   end
 end

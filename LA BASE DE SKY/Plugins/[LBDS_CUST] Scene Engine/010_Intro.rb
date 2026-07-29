@@ -63,32 +63,45 @@ def pbIntroVermeil
                 speaker: "Gran Espíritu"
     hide_textbox(10)
 
-    show "Graphics/Scenes/Intro/int7", 0, 0, fade: 30
+    float_sprite "Graphics/Scenes/Intro/FloatSolen96x96perFrame",
+                 96, 96, 6,
+                 Graphics.width / 2 - 48, -96,
+                 end_y: 160, speed: 0.7, fps: 6, fade: 25, bg: true, glow: true, ghost_interval: 2
+    wait 400
 
     text_inline "Observa a este muchacho. Un corazón mortal, pero forjado con una determinación inusual frente a la oscuridad que se avecina.",
                 speaker: "Mujer Misteriosa"
     text_inline "Él entiende lo que está en juego. En su sueño profundo, su mente aguarda en perfecta calma, lista para recibirte.",
                 speaker: "Mujer Misteriosa"
+    hide_textbox(10)
     text_inline "Al abrir las puertas de su alma sin resistencia, el vínculo será perfecto. Él te cederá su cuerpo material, y tú serás la fuerza que lo impulse frente a la catástrofe.",
                 speaker: "Gran Espíritu"
     hide_textbox(10)
 
     # ══════════ FASE 7: EL PACTO Y NOMBRAMIENTO ══════════
 
-    show "Graphics/Scenes/Intro/int6", 0, 0, fade: 25
-
-    text_inline "Su nombre es Solen.\nDime, ente que observa desde más allá del velo... ¿Deseas mantener el nombre que su familia le dio, o le otorgarás uno nuevo para sellar este pacto?",
+    text_inline "Su nombre es Solen.\nDime, ente que observas desde más allá del velo... ¿Deseas mantener el nombre que su familia le dio, o le otorgarás uno nuevo para sellar este pacto?",
                 speaker: "Mujer Misteriosa"
 
     hide_textbox(10)
-    fade_to_black 20
-    hide "Graphics/Scenes/Intro/int6"
-    wait 10
+    fade_to_black 15
+    @float_anim[:sprite].visible = false if @float_anim
+    @float_anim[:glow].visible = false if @float_anim && @float_anim[:glow]
+    @sprites[:float_bg]&.dispose
+    @sprites[:float_bg] = nil
     player_name = name_input(default: "Solen", min: 1, max: 12)
+    @float_anim[:sprite].visible = true if @float_anim
+    @float_anim[:glow].visible = true if @float_anim && @float_anim[:glow]
+    wait 60
 
-    # ══════════ FASE 8: EL DESCENSO ══════════
+    # ══════════ FASE 8: EL PACTO FORJADO ══════════
 
-    show "Graphics/Scenes/Intro/int10", 0, 0, fade: 0
+    hide_all
+    @sprites[:black].opacity = 255
+    @sprites[:float_bg] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
+    @sprites[:float_bg].bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
+    @sprites[:float_bg].z = SceneEngine::Settings::LAYER_IMG + 100
+    start_aura "Graphics/Scenes/Intro/AuraParticle", 12, 12, count: 12, range_x: 35, range_y: 70, duration: 90
     fade_from_black 25
 
     text_inline "El pacto está forjado en la quietud de la noche. Mi hijo renegado aguarda en las sombras, reuniendo almas para su venganza. Demuéstrame, {1}, que mi desprecio por la humanidad fue un error.",
@@ -102,6 +115,8 @@ def pbIntroVermeil
     wait 10
 
     to_white 15
+    stop_float
+    stop_aura
     hide_all
     wait 25
 
@@ -113,13 +128,29 @@ def pbIntroVermeil
     wait 20
     hide_centered_text
 
-    show "Graphics/Scenes/Intro/int8", 0, 0, fade: 0
+    show "Graphics/Scenes/Intro/BGWakeUp", 0, 0, fade: 0
+    start_scrolling "Graphics/Scenes/Intro/BGWakeUpEffectSides", 0, 0, speed: 1
+    start_scrolling "Graphics/Scenes/Intro/BGWakeUpEffectSides", Graphics.width - 294, 0, speed: 1, mirror: true
+    float_sprite "Graphics/Scenes/Intro/FloatSolen96x96perFrame",
+                 96, 96, 6,
+                 Graphics.width / 2 - 48, 160,
+                 end_y: 160, speed: 0, fps: 6, fade: 0
+    start_aura "Graphics/Scenes/Intro/AuraParticle", 12, 12, count: 12, range_x: 35, range_y: 70, duration: 90
     from_white 20, se: "Magical Light Aura Sound Effect - Aura.wav"
-    wait 40
+    wait 12
+    change_float_bitmap "Graphics/Scenes/Intro/FloatSolen96x96perFrameWakeUp"
+    wait 10
+    change_float_bitmap "Graphics/Scenes/Intro/FloatSolen96x96perFrameSolenWakeUp"
+    wait 10
+    change_float_bitmap "Graphics/Scenes/Intro/FloatSolen96x96perFramePNTransition"
+    wait 10
+    change_float_bitmap "Graphics/Scenes/Intro/FloatSolen96x96perFramePN"
+    wait 30
 
     pbChangePlayer(1)
 
     to_white 20
+    stop_scrolling
     wait 100
 
     Graphics.freeze
