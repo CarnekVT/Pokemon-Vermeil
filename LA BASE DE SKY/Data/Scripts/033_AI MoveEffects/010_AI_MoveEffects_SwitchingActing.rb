@@ -772,6 +772,11 @@ Battle::AI::Handlers::MoveFailureAgainstTargetCheck.add("DisableTargetUsingDiffe
 )
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DisableTargetUsingDifferentMove",
   proc { |score, move, user, target, ai, battle|
+    # AI Improvements (fix crash): sin PredictMoveFailure el MoveFailureAgainstTargetCheck
+    # no corre; si lastRegularMoveUsed es nil (turno 1) o un ID desconocido (Forcejeo),
+    # el GameData::Move.get de abajo lanza "Unknown ID". Guard replicado del FailureCheck.
+    next score if !target.battler.lastRegularMoveUsed ||
+                  !GameData::Move.exists?(target.battler.lastRegularMoveUsed)
     next Battle::AI::MOVE_USELESS_SCORE if target.has_active_item?(:MENTALHERB)
     if user.faster_than?(target)
       # We know which move is going to be encored (assuming the target doesn't

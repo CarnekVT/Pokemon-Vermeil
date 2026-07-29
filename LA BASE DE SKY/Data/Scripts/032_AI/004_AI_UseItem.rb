@@ -115,6 +115,13 @@ class Battle::AI
     # Prioritise using a HP restoration item
     if usable_items[:hp_heal] && (pkmn.hp <= pkmn.totalhp / 4 ||
        (pkmn.hp <= pkmn.totalhp / 2 && pbAIRandom(100) < 30))
+      # AI Improvements (Fix #13): si el rival noquea al activo igual aun curando al
+      # máximo, curar malgasta el turno -> no usar item (la IA atacará). Cubre las dos
+      # velocidades: si el rival mata desde HP máximo, curar sobra seamos rápidos o no.
+      if @trainer.high_skill? && ai_improvements_heal_wasted_by_ko?
+        PBDebug.log_ai("#{@user.name} NO se cura: el rival lo noquea igual (Fix #13)")
+        return nil
+      end
       usable_items[:hp_heal].sort! { |a, b| (a[2] == b[2]) ? a[3] <=> b[3] : a[2] <=> b[2] }
       usable_items[:hp_heal].each do |item|
         return item[0], item[1] if item[3] >= (pkmn.totalhp - pkmn.hp) * 0.75
@@ -156,6 +163,41 @@ class Battle::AI
       return usable_items[:revive].last[0], usable_items[:revive].last[1]
     end
     return nil
+  end
+
+  # AI Improvements (Fix #13): ¿el rival noquea al activo este turno aunque curemos
+  # al máximo? Si es así, curar malgasta el turno (morimos igual) -> suprimir la cura.
+  def ai_improvements_heal_wasted_by_ko?
+    rival = nil
+    each_foe_battler(@user.idxOwnSide) { |b, _i| rival ||= b }
+    return false if rival.nil?
+    ai_improvements_rival_kos_from_full_hp?(rival)
+  end
+
+  # ¿El rival noquea a @user aunque curemos al máximo? (speed-agnostic). rough_damage usa
+  # @ai.user (atacante) y @ai.target (defensor): intercambiamos @user:=rival, @target:=
+  # nuestro mon y fijamos moldBreaker al del rival (es el atacante); todo se restaura con
+  # ensure. Pesimista: asume curación total (totalhp) -> falsos positivos raros.
+  def ai_improvements_rival_kos_from_full_hp?(rival)
+    target_hp = @user.battler.totalhp
+    orig_user   = @user
+    orig_target = @target
+    orig_mold   = @battle.moldBreaker
+    begin
+      instance_variable_set(:@user, rival)
+      instance_variable_set(:@target, orig_user)
+      @battle.moldBreaker = rival.has_mold_breaker?
+      rival.battler.moves.any? do |m|
+        next false if m.nil? || m.pp == 0 || !m.damagingMove?
+        aim = Battle::AI::AIMove.new(self)
+        aim.set_up(m)
+        aim.rough_damage >= target_hp
+      end
+    ensure
+      instance_variable_set(:@user, orig_user)
+      instance_variable_set(:@target, orig_target)
+      @battle.moldBreaker = orig_mold
+    end
   end
 
   def get_usability_of_item_on_pkmn(item, party_index, side)
