@@ -21,6 +21,13 @@ class Battle::AI
       end
       return false if !foe_can_act
     end
+    # AI Improvements (anti-ping-pong): un mon recién entrado con solo movimientos
+    # malos rebota de inmediato por la rama de switch forzado (max_score <= USELESS),
+    # que no mira turnCount -> loop entre dos mons que se wallean (Blissey <-> Toxapex).
+    # Si lleva <2 turnos en pista y sigue vivo, que juegue al menos un turno antes de
+    # poder plantearse el cambio forzado. (Issue #229 ya está cubierto por el guard
+    # ConsiderSwitching del top de este método, así que aquí solo falta esto.)
+    return false if terrible_moves && @user.turnCount < 2 && !@user.fainted?
     # Various calculations to decide whether to switch
     if terrible_moves
       PBDebug.log_ai("#{@user.name} is being forced to switch out")
@@ -100,9 +107,47 @@ class Battle::AI
     # Don't bother choosing to switch if all replacements are poorly rated
     if @trainer.high_skill? && !terrible_moves
       return -1 if reserves[0][1] < 100   # If best replacement rated at <100, don't switch
+      # AI Improvements (Mec.2): rate_replacement_pokemon puntúa en absoluto y el gate
+      # <100 deja pasar cualquier reserva marginalmente mejor -> loop entre mons parecidos.
+      # Solo cambiar si el candidato supera al activo por >= SWITCH_MEJORA_MINIMA.
+      # Excepción "activo condenado": Perish Song a 1 o daño de fin de turno letal ->
+      # quedarse a morir es peor que cambiar a un candidato apenas mejor, no aplicar umbral.
+      unless @user.effects[PBEffects::PerishSong] == 1 ||
+             @user.rough_end_of_round_damage >= @user.hp
+        active_score = rate_active_pokemon_without_hazards(idxBattler)
+        if reserves[0][1] - active_score < AIImprovements::SWITCH_MIN_IMPROVEMENT
+          PBDebug.log_ai("#{@user.name} no cambia: mejora marginal " \
+                         "(candidato #{reserves[0][1]} vs activo #{active_score}, Mec.2)")
+          return -1
+        end
+      end
     end
     # Return the party index of the best rated replacement Pokémon
     return reserves[0][0]
+  end
+
+  # AI Improvements (Mec.2): puntúa al ACTIVO con rate_replacement_pokemon (baseline 100
+  # idéntico -> resta homogénea con el candidato), pero neutralizando los entry hazards
+  # de su propio lado: el activo no los sufrirá si se queda en pista (el candidato sí al
+  # entrar -> asimetría correcta). Save/restore transitorio con ensure. StealthRock/
+  # StickyWeb son booleanos; Spikes/ToxicSpikes enteros: guardar el valor literal sirve
+  # para ambos. sides[idx & 1] es el mismo objeto de lado que leen los cálculos de hazards.
+  def rate_active_pokemon_without_hazards(idxBattler)
+    side_effects = @battle.sides[idxBattler & 1].effects
+    saved = [side_effects[PBEffects::StealthRock], side_effects[PBEffects::Spikes],
+             side_effects[PBEffects::ToxicSpikes], side_effects[PBEffects::StickyWeb]]
+    begin
+      side_effects[PBEffects::StealthRock] = false
+      side_effects[PBEffects::Spikes]      = 0
+      side_effects[PBEffects::ToxicSpikes] = 0
+      side_effects[PBEffects::StickyWeb]   = false
+      return rate_replacement_pokemon(idxBattler, @battle.battlers[idxBattler].pokemon, 100)
+    ensure
+      side_effects[PBEffects::StealthRock] = saved[0]
+      side_effects[PBEffects::Spikes]      = saved[1]
+      side_effects[PBEffects::ToxicSpikes] = saved[2]
+      side_effects[PBEffects::StickyWeb]   = saved[3]
+    end
   end
 
   def rate_replacement_pokemon(idxBattler, pkmn, score)

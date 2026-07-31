@@ -419,6 +419,10 @@ Battle::AI::Handlers::MoveEffectScore.add("AddSpikesToFoeSide",
     if foe_reserves.empty?
       next (move.damagingMove?) ? score : Battle::AI::MOVE_USELESS_SCORE
     end
+    # AI Improvements (fix crash): con 3 capas [10,7,5][3] = nil -> nil * length revienta.
+    # Sin PredictMoveFailure el MoveFailureCheck no corre y el crash llega aquí. Al máximo
+    # de capas el move no aporta nada.
+    next Battle::AI::MOVE_USELESS_SCORE if user.pbOpposingSide.effects[PBEffects::Spikes] >= 3
     multiplier = [10, 7, 5][user.pbOpposingSide.effects[PBEffects::Spikes]]
     score += [multiplier * foe_reserves.length, 30].min
     next score
@@ -450,6 +454,8 @@ Battle::AI::Handlers::MoveEffectScore.add("AddToxicSpikesToFoeSide",
     if foe_reserves.empty?
       next (move.damagingMove?) ? score : Battle::AI::MOVE_USELESS_SCORE
     end
+    # AI Improvements (fix crash): con 2 capas [8,5][2] = nil -> nil * length revienta.
+    next Battle::AI::MOVE_USELESS_SCORE if user.pbOpposingSide.effects[PBEffects::ToxicSpikes] >= 2
     multiplier = [8, 5][user.pbOpposingSide.effects[PBEffects::ToxicSpikes]]
     score += [multiplier * foe_reserves.length, 30].min
     next score
