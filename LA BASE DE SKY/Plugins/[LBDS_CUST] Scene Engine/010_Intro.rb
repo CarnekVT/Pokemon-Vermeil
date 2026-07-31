@@ -5,8 +5,14 @@ def pbIntroVermeil
     # ══════════ FASE 1: EL DESPERTAR DEL ALMA ══════════
     wait 20
 
-    show "Graphics/Scenes/Intro/int1", Graphics.width / 2, Graphics.height / 2,
-         fade: 40, origin: :center
+    @sprites[:float_bg] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
+    @sprites[:float_bg].bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
+    @sprites[:float_bg].z = SceneEngine::Settings::LAYER_IMG - 10
+    golden = show_floating "Graphics/Scenes/Intro/GoldenEntity",
+                           Graphics.width / 2 - 75 / 2,
+                           (Graphics.height / 2 - 30) - 144 / 2,
+                           amplitude: 6, speed: 0.03, zoom: 1, fade: 40,
+                           z: SceneEngine::Settings::LAYER_IMG + 70
     fade_from_black 30
 
     text_inline "El equilibrio es una línea muy fina.\nUna línea que los humanos rompieron con el peso de su propia codicia.",
@@ -14,20 +20,42 @@ def pbIntroVermeil
     hide_textbox(10)
 
     # ══════════ FASE 2: LA SOMBRA DEL PASADO ══════════
-    
-    show "Graphics/Scenes/Intro/int2", 0, 0, fade: 25
-    wait 40
-    
-    show "Graphics/Scenes/Intro/int3", 0, 0, fade: 25
-    wait 20
-    
+
+    start_scrolling "Graphics/Scenes/Intro/clouds", 0, 190, speed: 1.5, horizontal: true
+    fade_in_scrolling 30
+
+    75.times do |i|
+      progress = (i + 1) / 75.0
+      z = 1 - 0.5 * progress
+      cy = (Graphics.height / 2 - 30) + 20 * progress
+      golden[:sprite].zoom_x = z
+      golden[:sprite].zoom_y = z
+      golden[:sprite].x = Graphics.width / 2 - golden[:sprite].bitmap.width * z / 2
+      golden[:base_y] = cy - golden[:sprite].bitmap.height * z / 2
+      update
+    end
+    wait 15
+
+    elder = show_floating "Graphics/Scenes/Intro/ElderSoul",
+                          -288, -410,
+                          amplitude: 6, speed: 0.03, zoom: 1, opacity: 0
+    40.times do |i|
+      progress = (i + 1) / 40.0
+      elder[:sprite].opacity = (255 * progress).round
+      update
+    end
+
     text_inline "Antes de apartarme de este mundo, asqueado por su egoísmo, enfrenté una oscuridad que no vino de los cielos ni de la tierra... sino de mi propia sangre.",
                 speaker: "???", speed: :slow
     hide_textbox(10)
+    fade_out_sprites([golden[:sprite], elder[:sprite]], 15)
+    hide_floating
+    hide_all
 
     # ══════════ FASE 3: LA GUARDIANA INTERVIENE ══════════
 
-    show "Graphics/Scenes/Intro/int4", 0, 0, fade: 30
+    show "Graphics/Scenes/Intro/FennaSupay", 0, 8, fade: 30
+    show_floating "Graphics/Scenes/Intro/SupayorusEnergy", 255, 90, amplitude: 8, speed: 0.04, fade: 20
 
     text_inline "El Guía de los Caídos.\nSu deber era noble: llevar a las almas al descanso eterno. Pero la misma avaricia que a veces ciega a los nuestros, lo alcanzó a él en el abismo.",
                 speaker: "Mujer Misteriosa"
@@ -35,6 +63,13 @@ def pbIntroVermeil
 
     # ══════════ FASE 4: EL RELATO DEL ENFRENTAMIENTO ══════════
 
+    energy = @floating_sprites.first
+    clouds = @scrolling_sprites.flat_map { |s| s[:sprites] }
+    fade_out_sprites([@image_sprites["Graphics/Scenes/Intro/FennaSupay"],
+                      energy&.[](:sprite),
+                      *clouds], 15)
+    hide_floating
+    hide_all
     show "Graphics/Scenes/Intro/int5", 0, 0, fade: 30
 
     text_inline "Comenzó a devorar las almas que juró proteger. Acumuló poder en las sombras, deseando derrocarme.",
@@ -56,17 +91,42 @@ def pbIntroVermeil
     hide_textbox(10)
 
     # ══════════ FASE 6: LA REVELACIÓN DEL RECEPTÁCULO ══════════
-    
-    show "Graphics/Scenes/Intro/int1", Graphics.width / 2, Graphics.height / 2, fade: 25, origin: :center
-    
+
+    @image_sprites["Graphics/Scenes/Intro/int5"]&.visible = false
+    fade_out_sprites([@image_sprites["Graphics/Scenes/Intro/int9"]], 20)
+    hide_floating
+    hide_all
+    stop_scrolling
+    start_scrolling "Graphics/Scenes/Intro/clouds", 0, 190, speed: 1.5, horizontal: true
+    fade_in_scrolling 25
+    golden6 = show_floating "Graphics/Scenes/Intro/GoldenEntity",
+                            Graphics.width / 2 - 75 * 0.5 / 2,
+                            (Graphics.height / 2 - 10) - 144 * 0.5 / 2,
+                            amplitude: 6, speed: 0.03, zoom: 0.5, fade: 25,
+                            z: SceneEngine::Settings::LAYER_IMG + 70
+    elder6 = show_floating "Graphics/Scenes/Intro/ElderSoul",
+                           -288, -410,
+                           amplitude: 6, speed: 0.03, zoom: 1, opacity: 0
+    30.times do |i|
+      progress = (i + 1) / 30.0
+      elder6[:sprite].opacity = (255 * progress).round
+      update
+    end
+
     text_inline "Por eso te hemos invocado a ti, Ente Dorado.\nUn alma forastera de este mundo e inmune a su hambre devoradora. Pero no puedes caminar sobre la tierra sin un receptáculo.",
                 speaker: "Gran Espíritu"
     hide_textbox(10)
 
+    fade_out_sprites([golden6[:sprite], elder6[:sprite],
+                      *@scrolling_sprites.flat_map { |s| s[:sprites] }], 20)
+    hide_floating
+    hide_all
+    stop_scrolling
+
     float_sprite "Graphics/Scenes/Intro/FloatSolen96x96perFrame",
                  96, 96, 6,
                  Graphics.width / 2 - 48, -96,
-                 end_y: 160, speed: 0.7, fps: 6, fade: 25, bg: true, glow: true, ghost_interval: 2
+                 end_y: 160, speed: 0.7, fps: 6, fade: 25, glow: true, ghost_interval: 2, bg: true
     wait 400
 
     text_inline "Observa a este muchacho. Un corazón mortal, pero forjado con una determinación inusual frente a la oscuridad que se avecina.",
@@ -97,10 +157,11 @@ def pbIntroVermeil
     # ══════════ FASE 8: EL PACTO FORJADO ══════════
 
     hide_all
+    stop_scrolling
     @sprites[:black].opacity = 255
     @sprites[:float_bg] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
     @sprites[:float_bg].bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
-    @sprites[:float_bg].z = SceneEngine::Settings::LAYER_IMG + 100
+    @sprites[:float_bg].z = SceneEngine::Settings::LAYER_IMG - 10
     start_aura "Graphics/Scenes/Intro/AuraParticle", 12, 12, count: 12, range_x: 35, range_y: 70, duration: 90
     fade_from_black 25
 

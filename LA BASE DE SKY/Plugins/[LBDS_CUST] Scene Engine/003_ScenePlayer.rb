@@ -10,6 +10,7 @@ class SceneEngine::Player
     @float_ghosts = []
     @aura_particles = []
     @scrolling_sprites = []
+    @floating_sprites = []
   end
 
   def run(&block)
@@ -84,6 +85,7 @@ class SceneEngine::Player
     stop_float
     stop_aura
     stop_scrolling
+    stop_floating
     @image_sprites.each_value { |s| s&.dispose rescue nil }
     @sprites.each_value { |s| s&.dispose rescue nil }
     @viewport.dispose
@@ -93,6 +95,7 @@ class SceneEngine::Player
     update_float
     update_aura_particles
     update_scrolling
+    update_floating
     Graphics.update
     Input.update
   end
@@ -137,7 +140,7 @@ class SceneEngine::Player
       end
     else
       anim[:bob] = (anim[:bob] || 0) + 1
-      anim[:sprite].y = anim[:end_y] + (Math.sin(anim[:bob] * 0.05) * 3).round
+      anim[:sprite].y = anim[:end_y] + Math.sin(anim[:bob] * 0.04) * 3
       if anim[:glow]
         g = anim[:glow]
         g.x = anim[:sprite].x
@@ -241,7 +244,7 @@ class SceneEngine::Player
     end
   end
 
-  def show(filename, x = 0, y = 0, fade: SceneEngine::Settings::FADE_DEFAULT, origin: :top_left)
+  def show(filename, x = 0, y = 0, fade: SceneEngine::Settings::FADE_DEFAULT, origin: :top_left, zoom: 1, z: nil)
     key = filename.to_s
     @image_sprites[key]&.dispose
 
@@ -255,16 +258,18 @@ class SceneEngine::Player
 
     case origin
     when :center
-      x -= s.bitmap.width / 2
-      y -= s.bitmap.height / 2
+      x -= s.bitmap.width * zoom / 2
+      y -= s.bitmap.height * zoom / 2
     when :bottom
-      x -= s.bitmap.width / 2
-      y -= s.bitmap.height
+      x -= s.bitmap.width * zoom / 2
+      y -= s.bitmap.height * zoom
     end
 
     s.x = x
     s.y = y
-    s.z = SceneEngine::Settings::LAYER_IMG + @image_sprites.size
+    s.zoom_x = zoom
+    s.zoom_y = zoom
+    s.z = z || SceneEngine::Settings::LAYER_IMG + @image_sprites.size
     s.opacity = 0
     s.visible = true
     @image_sprites[key] = s
@@ -627,9 +632,23 @@ class SceneEngine::Player
     end
   end
 
-  def start_scrolling(filename, x, y, speed:, z: nil, mirror: false)
+  def start_scrolling(filename, x, y, speed:, z: nil, mirror: false, horizontal: false)
     bmp = AnimatedBitmap.new(filename).deanimate
     zh = z || SceneEngine::Settings::LAYER_IMG + 50
+    if horizontal
+      # Encuadra la textura en un canvas del alto de pantalla para que el tile
+      # vertical del Plane caiga fuera de la vista (no se duplica arriba)
+      canvas = Bitmap.new(bmp.width, Graphics.height)
+      canvas.blt(0, y, bmp, Rect.new(0, 0, bmp.width, bmp.height))
+      bmp.dispose
+      bmp = canvas
+      plane = Plane.new(@viewport)
+      plane.bitmap = bmp
+      plane.oy = 0
+      plane.z = zh
+      @scrolling_sprites << { type: :plane, sprites: [plane], bitmap: bmp, speed: speed, size: bmp.width, horizontal: true }
+      return
+    end
     sprites = []
     s1 = Sprite.new(@viewport)
     s1.bitmap = bmp
@@ -647,22 +666,109 @@ class SceneEngine::Player
     s2.z = zh
     s2.mirror = mirror
     sprites << s2
-    @scrolling_sprites << { sprites: sprites, speed: speed, h: bmp.height }
+    @scrolling_sprites << { sprites: sprites, bitmap: bmp, speed: speed, size: bmp.height }
   end
 
   def stop_scrolling
-    @scrolling_sprites.each { |s| s[:sprites].each { |sp| sp.dispose rescue nil } }
+    @scrolling_sprites.each do |s|
+      s[:sprites].each { |sp| sp.dispose rescue nil }
+      s[:bitmap]&.dispose rescue nil
+    end
     @scrolling_sprites.clear
   end
 
   def update_scrolling
     @scrolling_sprites.each do |s|
       s[:sprites].each do |sp|
-        sp.y -= s[:speed]
-        if sp.y + s[:h] <= 0
-          sp.y += s[:h] * 2
+        if s[:type] == :plane
+          sp.ox -= s[:speed]
+        else
+          sp.y -= s[:speed]
+          sp.y += s[:size] * 2 if sp.y + s[:size] <= 0
         end
       end
+    end
+  end
+
+  def show_floating(filename, x, y, amplitude: 8, speed: 0.05, z: nil, zoom: 1, opacity: 255, fade: 0)
+    bmp = AnimatedBitmap.new(filename).deanimate
+    s = Sprite.new(@viewport)
+    s.bitmap = bmp
+    s.x = x
+    s.y = y
+    s.z = z || SceneEngine::Settings::LAYER_IMG + 60
+    s.zoom_x = zoom
+    s.zoom_y = zoom
+    s.opacity = 0
+    f = { sprite: s, base_x: x, base_y: y, amp: amplitude, speed: speed, counter: 0 }
+    @floating_sprites << f
+    if fade > 0
+      fade.times { |i| s.opacity = (opacity * (i + 1) / fade).round; update }
+    end
+    s.opacity = opacity
+    f
+  end
+
+  def update_floating
+    @floating_sprites.each do |f|
+      f[:counter] += 1
+      f[:sprite].y = f[:base_y] + Math.sin(f[:counter] * f[:speed]) * f[:amp]
+    end
+  end
+
+  def hide_floating
+    @floating_sprites.each { |f| f[:sprite]&.dispose rescue nil }
+    @floating_sprites.clear
+  end
+  alias stop_floating hide_floating
+
+  def fade_out_images(dur, filenames = nil)
+    targets = filenames ? filenames.map(&:to_s) : @image_sprites.keys
+    dur = 1 if dur < 1
+    dur.times do |i|
+      progress = (i + 1) / dur.to_f
+      targets.each { |k| @image_sprites[k].opacity = (255 * (1 - progress)).round if @image_sprites[k] }
+      update
+    end
+  end
+
+  def fade_out_floating(dur)
+    return if @floating_sprites.empty?
+    dur = 1 if dur < 1
+    dur.times do |i|
+      progress = (i + 1) / dur.to_f
+      @floating_sprites.each { |f| f[:sprite].opacity = (255 * (1 - progress)).round }
+      update
+    end
+  end
+
+  def fade_out_scrolling(dur)
+    return if @scrolling_sprites.empty?
+    dur = 1 if dur < 1
+    dur.times do |i|
+      progress = (i + 1) / dur.to_f
+      @scrolling_sprites.each { |s| s[:sprites].each { |sp| sp.opacity = (255 * (1 - progress)).round } }
+      update
+    end
+  end
+
+  def fade_in_scrolling(dur)
+    return if @scrolling_sprites.empty?
+    dur = 1 if dur < 1
+    dur.times do |i|
+      progress = (i + 1) / dur.to_f
+      @scrolling_sprites.each { |s| s[:sprites].each { |sp| sp.opacity = (255 * progress).round } }
+      update
+    end
+  end
+
+  def fade_out_sprites(sprites, dur)
+    return if sprites.empty?
+    dur = 1 if dur < 1
+    dur.times do |i|
+      progress = (i + 1) / dur.to_f
+      sprites.each { |sp| sp.opacity = (255 * (1 - progress)).round if sp && !sp.disposed? }
+      update
     end
   end
 end
