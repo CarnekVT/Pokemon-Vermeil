@@ -372,13 +372,12 @@ class Mode7Renderer
   def make_column(tx, ty, entries)
     walls = entries.select { |e| e[:priority] > 0 }
     return if walls.empty?
-    # Altura total basada en la prioridad más alta de esta celda.
-    pmax = walls.map { |e| e[:priority] }.max
-    h = pmax * Game_Map::TILE_HEIGHT
+    
+    # [FIX OPENCODE]: Forzamos la altura a 32px (plano) para mapeo 2D tradicional.
+    # Evitamos la extrusión matemática que causa la duplicación de techos.
+    h = Game_Map::TILE_HEIGHT
     bmp = Bitmap.new(Game_Map::TILE_WIDTH, h)
 
-    # [FIX OPENCODE]: Dibuja EXACTAMENTE lo mapeado en Maker Studio. Se ordena por
-    # prioridad y capa para respetar el z-index interno. Banda vacía = aire (transparente).
     paint_column_bmp(bmp, walls)
 
     sprite = Sprite.new(@viewport)
@@ -390,20 +389,20 @@ class Mode7Renderer
     wx = tx * Game_Map::TILE_WIDTH + Game_Map::TILE_WIDTH / 2
     wy = ty * Game_Map::TILE_HEIGHT + Game_Map::TILE_HEIGHT
 
-    # [FIX OPENCODE]: Z clásico de RMXP a partir de coordenadas de mundo, no de
-    # pantalla (las prioridades colapsan porque 3D deforma el Y proyectado).
+    # [FIX OPENCODE]: Z clásico de RMXP a partir de coordenadas de mundo.
+    pmax = walls.map { |e| e[:priority] }.max
     base_z = wy + (pmax * Game_Map::TILE_HEIGHT) + Game_Map::TILE_HEIGHT
 
-    # [sprite, wx, wy(px base), altura(px), z-mundo, entries]
     @wall_data.push([sprite, wx, wy, h, base_z, entries])
   end
 
-  # Pinta las bandas de la columna sobre el bitmap. Usado por make_column y por
-  # recomposite_autotiles (texturas animadas).
   def paint_column_bmp(bmp, walls)
-    walls.sort_by { |w| [w[:priority], w[:unify]] }.each do |w|
-      draw_y = bmp.height - (w[:priority] * Game_Map::TILE_HEIGHT)
-      bmp.blt(0, draw_y, w[:bitmap], current_src_rect(w))
+    # [FIX OPENCODE]: Dibujamos ÚNICAMENTE el tile con la prioridad más alta
+    # de esta celda en la posición base. No más columnas fantasma.
+    bmp.clear
+    top_entry = walls.max_by { |e| e[:priority] }
+    if top_entry
+      bmp.blt(0, 0, top_entry[:bitmap], current_src_rect(top_entry))
     end
   end
 
@@ -524,8 +523,11 @@ class Mode7Renderer
         sprite.visible = false
         next
       end
-      if syb < -100 || syb > Mode7.screen_h + 100 ||
-         sx < -160 || sx > Mode7.screen_w + 160
+      # [FIX OPENCODE]: Expandir el margen de culling de 100 a 300.
+      # La perspectiva cónica hace que objetos muy por debajo de la pantalla
+      # sigan proyectando sus puntas hacia arriba. Esto elimina el popping.
+      if syb < -300 || syb > Mode7.screen_h + 300 ||
+         sx < -300 || sx > Mode7.screen_w + 300
         sprite.visible = false
         next
       end
