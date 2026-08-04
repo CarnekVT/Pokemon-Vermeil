@@ -1,30 +1,20 @@
 #===============================================================================
-# Mode 7 (2.5D) - Renderer de suelo y muros verticales multicapa
+# Mode 7 (2.5D) - Renderer de suelo y muros (Uniform Billboarding)
 #===============================================================================
-# Los muros dejan de ser un único sprite estirado (efecto "cartón"). Cada celda
-# con prioridad > 0 genera una columna de altura = prioridad * 32 px, compuesta
-# por las bandas de textura reales de todas sus capas (nativas 0-2 + extendidas
-# del Maker Studio). La banda superior de cada nivel de prioridad muestra la
-# textura de la capa que la pinta; las bandas vacías heredan la de la cima.
-# El zoom_y ya no deforma: es la escala proyectiva natural del volumen (el
-# bitmap mide ya H px de mapa y cada texel de 32 px conserva su tamaño real).
 class Mode7Renderer
   # Réplica mínima de un TileSprite para reutilizar set_src_rect de las cachés
   # de TilemapRenderer.
   class ScratchTile
     attr_accessor :filename
     attr_reader   :src_rect
-
-    def initialize
-      @src_rect = Rect.new(0, 0, 32, 32)
-    end
+    def initialize; @src_rect = Rect.new(0, 0, 32, 32); end
   end
 
   attr_reader :tilesets, :autotiles, :viewport
   attr_accessor :tone, :color, :ox, :oy, :visible
 
   def initialize(viewport)
-    @viewport = (viewport) ? viewport : Viewport.new(0, 0, Mode7.screen_w, Mode7.screen_h)
+    @viewport = viewport || Viewport.new(0, 0, Mode7.screen_w, Mode7.screen_h)
     @tilesets  = TilemapRenderer::TilesetBitmaps.new
     @autotiles = TilemapRenderer::AutotileBitmaps.new
     @tone    = Tone.new(0, 0, 0, 0)
@@ -50,9 +40,7 @@ class Mode7Renderer
     Mode7.configure
   end
 
-  def disposed?
-    return @disposed
-  end
+  def disposed?; return @disposed; end
 
   def dispose
     return if disposed?
@@ -73,23 +61,10 @@ class Mode7Renderer
     @disposed = true
   end
 
-  def add_tileset(filename)
-    @tilesets.add(filename)
-    @need_build = true
-  end
-
-  def remove_tileset(filename)
-    @tilesets.remove(filename)
-  end
-
-  def add_autotile(filename)
-    @autotiles.add(filename)
-    @need_build = true
-  end
-
-  def remove_autotile(filename)
-    @autotiles.remove(filename)
-  end
+  def add_tileset(filename); @tilesets.add(filename); @need_build = true; end
+  def remove_tileset(filename); @tilesets.remove(filename); end
+  def add_autotile(filename); @autotiles.add(filename); @need_build = true; end
+  def remove_autotile(filename); @autotiles.remove(filename); end
 
   def add_extra_autotiles(tileset_id)
     arr = TilemapRenderer::EXTRA_AUTOTILES[tileset_id]
@@ -145,35 +120,30 @@ class Mode7Renderer
     end
     @wall_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
+    
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = collect_cell_entries(tx, ty)
-
-        # [FIX OPENCODE]: Dibuja SIEMPRE el suelo base primero. Una celda con
-        # muro (prioridad > 0) dejaba el suelo sin pintar; la transparencia de
-        # los arbustos mostraba el SKY_COLOR azul detrás.
-        blt_ground_cell(tx, ty, entries)
-
-        if entries.any? { |e| e[:priority] > 0 }
-          make_column(tx, ty, entries)
+        wall_entry = entries.select { |e| e[:priority] > 0 }.min_by { |e| e[:unify] }
+        
+        if wall_entry
+          wall_layer = wall_entry[:unify]
+          ground_entries = entries.select { |e| e[:unify] < wall_layer }
+          billboard_entries = entries.select { |e| e[:unify] >= wall_layer }
+          
+          blt_ground_cell(tx, ty, ground_entries)
+          make_column(tx, ty, billboard_entries)
+        else
+          blt_ground_cell(tx, ty, entries)
         end
       end
     end
     @need_build = false
     @need_ground_redraw = true
-
-    # [FIX OPENCODE]: Resetear el caché de color para que los nuevos sprites de
-    # muros absorban el tono del mapa al cambiar.
     @old_tone = nil
     @old_color = nil
   end
 
-  # ---------------------------------------------------------------------------
-  # Recolección de capas por celda (nativas 0-2 + extendidas Maker Studio)
-  # ---------------------------------------------------------------------------
-
-  # Todos los tiles pintados en la celda, cada uno con su textura resuelta y su
-  # prioridad (el tileset define la altura). Orden: capa alta primero.
   def collect_cell_entries(tx, ty)
     entries = []
     seen = {}
@@ -193,8 +163,6 @@ class Mode7Renderer
     entries
   end
 
-  # Properties de Maker Studio sobre una capa nativa (autotile extra o tileset
-  # ajeno). nil si no hay.
   def native_props_at(tx, ty, layer)
     return nil if !defined?(MakerStudio) || !MakerStudio.respond_to?(:native_props_at)
     return MakerStudio.native_props_at(@map_id, @map.width, layer, ty * @map.width + tx)
@@ -203,7 +171,7 @@ class Mode7Renderer
   def make_native_entry(tid, layer)
     if tid < TilemapRenderer::TILESET_START_ID
       filename = autotile_name_for(tid)
-      return nil if !filename
+      return nil if !filename || filename.empty?
       bmp = @autotiles[filename]
       return nil if !bmp
       @scratch.filename = filename
@@ -224,7 +192,7 @@ class Mode7Renderer
       pattern = (props["autotile_pattern"] || 0).to_i
       vid = 8 * TilemapRenderer::TILES_PER_AUTOTILE + pattern
       priority = MakerStudio.resolve_band_priority(@map, 0, props)
-      @scratch.filename = name
+      @scratch.filename = name 
       @autotiles.set_src_rect(@scratch, vid)
       return { bitmap: bmp, src_rect: @scratch.src_rect.clone, priority: priority,
                animated: @autotiles.animated?(name), filename: name, tid: vid, unify: layer }
@@ -234,7 +202,7 @@ class Mode7Renderer
       tid = @map.data[tx, ty, layer]
       tid = props["tile_id"].to_i if tid.nil? || tid == 0
       return nil if !ts || tid <= 0
-      priority = MakerStudio.resolve_band_priority(@map, tid, props)
+      priority = MakerStudio.resolve_band_priority(@map, tid, props) 
       return entry_from_tileset(ts, tid, priority, layer)
     end
     nil
@@ -269,7 +237,7 @@ class Mode7Renderer
     name = td["autotile_name"]
     bmp = ensure_autotile(name)
     return nil if !bmp
-    pattern = (td["autotile_pattern"] || 0).to_i
+    pattern = (td["autotile_pattern"] || 0).to_i 
     vid = 8 * TilemapRenderer::TILES_PER_AUTOTILE + pattern
     @scratch.filename = name
     @autotiles.set_src_rect(@scratch, vid)
@@ -280,22 +248,12 @@ class Mode7Renderer
   def append_entry(entries, seen, entry)
     return if !entry
     rect = entry[:src_rect]
-    key = [
-      entry[:priority],
-      entry[:unify],
-      entry[:filename],
-      entry[:tid],
-      rect ? [rect.x, rect.y, rect.width, rect.height] : nil
-    ]
+    key = [entry[:priority], entry[:unify], entry[:filename], entry[:tid], rect ? [rect.x, rect.y, rect.width, rect.height] : nil]
     return if seen[key]
     seen[key] = true
     entries << entry
   end
 
-  # Textura de un tile de tileset: el propio del mapa sale de la caché del
-  # renderer; los tilesets ajenos (cross-tileset) de MakerStudio.
-  # OJO: se resuelve por ts.tileset_name (nombre del ARCHIVO), nunca ts.name
-  # (nombre lógico del editor) — el archivo en disco no lleva ese nombre.
   def entry_from_tileset(ts, tid, priority, unify)
     return nil if !ts
     ts_name = ts.tileset_name
@@ -306,17 +264,15 @@ class Mode7Renderer
       @tilesets.set_src_rect(@scratch, tid)
       src = @scratch.src_rect.clone
     elsif defined?(MakerStudio)
-      bmp = MakerStudio.get_extra_tileset_for_sprite(ts_name)
+      bmp = MakerStudio.get_extra_tileset_for_sprite(ts_name) 
       return nil if !bmp
       src = MakerStudio.extra_tileset_src_rect(ts_name, tid)
     else
       return nil
     end
-    { bitmap: bmp, src_rect: src, priority: priority, animated: false, filename: nil, tid: 0, unify: unify }
+    { bitmap: bmp, src_rect: src, priority: priority, animated: false, filename: nil, tid: tid, unify: unify }
   end
-
-  # Registra un autotile extra (por nombre, no en la Table) en @autotiles con el
-  # formato expandido que espera set_src_rect.
+  
   def ensure_autotile(name)
     existing = @autotiles[name]
     return existing if existing && !existing.disposed?
@@ -341,22 +297,18 @@ class Mode7Renderer
     return @autotiles[name]
   end
 
-  # Asegura que MakerStudio tenga la data extendida del mapa cacheada.
   def ensure_extended_data
     return if !defined?(MakerStudio)
     return if MakerStudio.get_extended_data_for(@map_id)
     MakerStudio.load_extended_layers_for_map(@map_id, @map) if MakerStudio.respond_to?(:load_extended_layers_for_map)
   end
 
-  # ---------------------------------------------------------------------------
-  # Suelo: capas de prioridad 0, planas
-  # ---------------------------------------------------------------------------
-
   def blt_ground_cell(tx, ty, entries)
-    ground_entries = entries.select { |e| e && e[:priority] == 0 }
-    ground_entries.sort_by { |e| e[:unify] }.each do |e|
+    entries.sort_by { |e| e[:unify] }.each do |e|
       next if !e[:bitmap]
-      @ground.blt(tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT, e[:bitmap], e[:src_rect])
+      # [FIX OPENCODE]: Aplicar opacidad al dibujar en el suelo.
+      op = e[:opacity] || 255
+      @ground.blt(tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT, e[:bitmap], e[:src_rect], op)
       if e[:animated]
         @autotile_cells[e[:filename]] ||= []
         cells = @autotile_cells[e[:filename]]
@@ -366,19 +318,21 @@ class Mode7Renderer
   end
 
   # ---------------------------------------------------------------------------
-  # Muros: billboards planos de 32px por celda (una textura por columna)
+  # 3. Anclar los Muros a la Tierra (h = 32px)
   # ---------------------------------------------------------------------------
-
   def make_column(tx, ty, entries)
     walls = entries.select { |e| e[:priority] > 0 }
     return if walls.empty?
     
-    # [FIX OPENCODE]: Forzamos la altura a 32px (plano) para mapeo 2D tradicional.
-    # Evitamos la extrusión matemática que causa la duplicación de techos.
+    # [FIX OPENCODE]: Bloquear la altura a 32px. Esto anula el efecto de tiles flotantes.
     h = Game_Map::TILE_HEIGHT
     bmp = Bitmap.new(Game_Map::TILE_WIDTH, h)
+    bmp.clear
 
-    paint_column_bmp(bmp, walls)
+    walls.sort_by { |w| [w[:priority], w[:unify]] }.each do |w|
+      op = w[:opacity] || 255
+      bmp.blt(0, 0, w[:bitmap], current_src_rect(w), op)
+    end
 
     sprite = Sprite.new(@viewport)
     sprite.bitmap = bmp
@@ -389,31 +343,12 @@ class Mode7Renderer
     wx = tx * Game_Map::TILE_WIDTH + Game_Map::TILE_WIDTH / 2
     wy = ty * Game_Map::TILE_HEIGHT + Game_Map::TILE_HEIGHT
 
-    # [FIX OPENCODE]: Z clásico de RMXP a partir de coordenadas de mundo.
     pmax = walls.map { |e| e[:priority] }.max
     base_z = wy + (pmax * Game_Map::TILE_HEIGHT) + Game_Map::TILE_HEIGHT
 
     @wall_data.push([sprite, wx, wy, h, base_z, entries])
   end
-
-  def paint_column_bmp(bmp, walls)
-    # [FIX OPENCODE]: Dibujamos ÚNICAMENTE el tile con la prioridad más alta
-    # de esta celda en la posición base. No más columnas fantasma.
-    bmp.clear
-    top_entry = walls.max_by { |e| e[:priority] }
-    if top_entry
-      bmp.blt(0, 0, top_entry[:bitmap], current_src_rect(top_entry))
-    end
-  end
-
-  # Compone el bitmap de la columna: cada nivel de prioridad p muestra la
-  # textura de la capa más alta que lo pinte. Un nivel vacío (aire entre el
-  # suelo y el techo) NO hereda de la cima — se estira la textura del nivel
-  # inmediatamente inferior (pared sólida). Solo si no hay inferior se usa la
-  # cima. Así el voladizo transparente del techo se ve una vez, en la cima,
-  # y no se repite como estrías en todo el muro.
-  # Redibuja el contenido de la columna (lo usa recomposite_autotiles para
-  # actualizar texturas animadas). Mismo resultado que make_column: top_entry.
+  
   def current_src_rect(entry)
     return entry[:src_rect] if !entry[:animated]
     @scratch.filename = entry[:filename]
@@ -429,15 +364,24 @@ class Mode7Renderer
         key = "#{tx},#{ty}"
         next if seen[key]
         seen[key] = true
-        blt_ground_cell(tx, ty, collect_cell_entries(tx, ty))
+        
+        entries = collect_cell_entries(tx, ty)
+        wall_entry = entries.select { |e| e[:priority] > 0 }.min_by { |e| e[:unify] }
+        if wall_entry
+          blt_ground_cell(tx, ty, entries.select { |e| e[:unify] < wall_entry[:unify] })
+        else
+          blt_ground_cell(tx, ty, entries)
+        end
       end
     end
     @wall_data.each do |data|
       sprite, entries = data[0], data[5]
       next if !entries || entries.none? { |e| e[:animated] }
       next if !sprite.bitmap || sprite.bitmap.disposed?
-      walls = entries.select { |e| e[:priority] > 0 }
-      paint_column_bmp(sprite.bitmap, walls)
+      sprite.bitmap.clear
+      entries.sort_by { |w| w[:unify] }.each do |w|
+        sprite.bitmap.blt(0, 0, w[:bitmap], current_src_rect(w))
+      end
     end
   end
 
@@ -469,9 +413,6 @@ class Mode7Renderer
       wy = Mode7.world_y_for_row(sy)
       next if !wy
 
-      # [FIX OPENCODE]: Clamping del eje Y para evitar el renderizado del OUTSIDE_COLOR.
-      # Con PIVOT_RATIO 0.80 el FOV inferior proyecta wy por debajo de los límites
-      # del mapa; en vez de pintar negro, se estira el último píxel del borde.
       if wy < 0
         wy = 0
       elsif wy >= map_h_px
@@ -506,40 +447,48 @@ class Mode7Renderer
     end
   end
 
-  # Proyecta cada columna como un sólido: la altura proyectada (syb - syt) sale
-  # de la perspectiva real, y el zoom_y es solo la escala que la aplica al
-  # bitmap (que ya mide H px de mapa) — nunca deformación artificial.
+  # ---------------------------------------------------------------------------
+  # 5. Sellado Visual (Stitching) sin Efecto Acordeón
+  # ---------------------------------------------------------------------------
   def update_walls
     @wall_data.each do |data|
       sprite, wx, wyb, h, base_z = data
       pr = Mode7.project(wx, wyb)
+      
       if !pr
         sprite.visible = false
         next
       end
+      
       sx, syb = pr
       syt = Mode7.project_y(wyb - h)
+
       if !syt || syb - syt <= 0
         sprite.visible = false
         next
       end
-      # [FIX OPENCODE]: Expandir el margen de culling de 100 a 300.
-      # La perspectiva cónica hace que objetos muy por debajo de la pantalla
-      # sigan proyectando sus puntas hacia arriba. Esto elimina el popping.
-      if syb < -300 || syb > Mode7.screen_h + 300 ||
-         sx < -300 || sx > Mode7.screen_w + 300
+
+      if syb < -600 || syb > Mode7.screen_h + 600 || sx < -600 || sx > Mode7.screen_w + 600
         sprite.visible = false
         next
       end
+      
       sprite.x = sx
-      sprite.y = syb
-      # [FIX OPENCODE]: Z matemático de mundo (RMXP vanilla). El Y de pantalla lo
-      # deforma el 3D; usar syb colapsa las prioridades (Charizard pisando árboles).
+      
+      # [FIX OPENCODE]: Hundimiento de Sellado (Sinking).
+      # Sumamos +1 a la coordenada Y para empujar la base del muro físicamente
+      # hacia abajo. Esto hace que el tile con prioridad penetre 1 píxel dentro 
+      # del suelo (prioridad 0), eliminando para siempre la separación o el 
+      # borde transparente.
+      sprite.y = syb + 1
       sprite.z = base_z
-      sprite.zoom_x = Mode7.hscale(syb)
-      # [FIX OPENCODE]: +0.6px sella las costuras que deja el redondeo flotante
-      # del zoom vertical (líneas transparentes en los árboles).
-      sprite.zoom_y = (syb - syt + 0.6) / h
+      
+      # [FIX OPENCODE]: Compensación de altura. 
+      # Al subir el overlap a 2.0, compensamos el píxel que hundimos en el suelo 
+      # para que la parte superior del tile siga conectada a la fila de arriba.
+      sprite.zoom_x = Mode7.hscale(syb) + 0.02
+      sprite.zoom_y = (syb - syt + 2.0) / h.to_f
+      
       sprite.visible = true
     end
   end

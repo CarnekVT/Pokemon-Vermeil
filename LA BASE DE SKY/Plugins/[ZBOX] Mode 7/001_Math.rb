@@ -42,7 +42,7 @@ module Mode7
   end
 
   class << self
-    attr_reader :zoom, :current_alpha
+    attr_reader :zoom, :current_alpha, :sin
 
     def screen_w
       return Settings::SCREEN_WIDTH
