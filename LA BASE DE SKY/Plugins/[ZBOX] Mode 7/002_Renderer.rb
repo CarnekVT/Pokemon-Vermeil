@@ -448,18 +448,18 @@ class Mode7Renderer
   end
 
   # ---------------------------------------------------------------------------
-  # 5. Sellado Visual (Stitching) sin Efecto Acordeón
+  # 5. Sellado Visual Híbrido (X Fluido, Y Anclado)
   # ---------------------------------------------------------------------------
   def update_walls
     @wall_data.each do |data|
       sprite, wx, wyb, h, base_z = data
       pr = Mode7.project(wx, wyb)
-      
+
       if !pr
         sprite.visible = false
         next
       end
-      
+
       sx, syb = pr
       syt = Mode7.project_y(wyb - h)
 
@@ -472,23 +472,31 @@ class Mode7Renderer
         sprite.visible = false
         next
       end
-      
+
+      # [FIX OPENCODE]: Solución Híbrida.
+      # 1. Conservamos el X flotante. Esto evita los saltos y el parpadeo
+      # al caminar en diagonal (movimiento 100% fluido).
       sprite.x = sx
-      
-      # [FIX OPENCODE]: Hundimiento de Sellado (Sinking).
-      # Sumamos +1 a la coordenada Y para empujar la base del muro físicamente
-      # hacia abajo. Esto hace que el tile con prioridad penetre 1 píxel dentro 
-      # del suelo (prioridad 0), eliminando para siempre la separación o el 
-      # borde transparente.
-      sprite.y = syb + 1
+
+      # 2. Redondeamos estrictamente el Y. Al usar píxeles enteros para
+      # el eje vertical, garantizamos matemáticamente que la cima de
+      # un muro encaje perfectamente en la base del muro superior, curando
+      # las prioridades rotas sin importar el ángulo de la cámara.
+      sy_bottom = syb.round
+      sy_top = syt.round
+
+      # Hundimos la base 1 píxel dentro del suelo para soldar la grieta inferior
+      sprite.y = sy_bottom + 1
       sprite.z = base_z
-      
-      # [FIX OPENCODE]: Compensación de altura. 
-      # Al subir el overlap a 2.0, compensamos el píxel que hundimos en el suelo 
-      # para que la parte superior del tile siga conectada a la fila de arriba.
-      sprite.zoom_x = Mode7.hscale(syb) + 0.02
-      sprite.zoom_y = (syb - syt + 2.0) / h.to_f
-      
+
+      # Calculamos la altura exacta en píxeles enteros y añadimos un margen de 1.0
+      # para sobreponer microscópicamente los bordes horizontales y sellar el corte.
+      drawn_height = (sy_bottom + 1) - sy_top
+
+      # Overlap en X ampliado (+0.04) para tapar el efecto escalera vertical
+      sprite.zoom_x = Mode7.hscale(syb) + 0.04
+      sprite.zoom_y = (drawn_height + 1.0) / h.to_f
+
       sprite.visible = true
     end
   end
