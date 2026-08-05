@@ -39,6 +39,23 @@ module Mode7
 
     # Color renderizado fuera de los límites del mapa.
     OUTSIDE_COLOR = Color.new(0, 0, 0)
+
+    # =======================================================================
+    # FACTOR DE PERSPECTIVA POR TERRAIN TAG (Flat Billboarding)
+    # Los muros (priority > 0) cuyo TERRAIN TAG esté enlistado aquí se
+    # renderizan en modo "Proyección Ortográfica en Espacio de Pantalla":
+    # la escala Y queda 1:1 invariable (sin estirar en acordeón) y el sprite
+    # solo se posiciona según su coordenada base de mundo (wyb), fusionada
+    # hacia la proyección ortográfica por el valor adjunto (factor).
+    #   1.00 -> deformación cónica vanilla (Gen 5)
+    #   0.20 -> tile mucho más plano (casi billboard)
+    # Sin parallax: reutiliza los sprites del tilemap => 75 FPS sin memoria.
+    # Los tags NO enlistados se renderizan 100% vanilla.
+    WALL_TERRAIN_TAG_PERSPECTIVE = {
+      :HoneyTree => 0.20,
+      :Mode7Tag  => 0.20,
+      :None      => 1.00
+    }
   end
 
   class << self
@@ -175,7 +192,19 @@ module Mode7
       return pivot_y + (@dh * yi * @cos) / d
     end
 
+    def project_with_factor(wx, wy, factor)
+      factor = factor.to_f.clamp(0.0, 1.0)
+      full = project(wx, wy)
+      return nil if !full
+      rx = wx - cam_x
+      ry = wy - cam_y
+      flat_x = center_x + @zoom * rx
+      flat_y = pivot_y + @zoom * (ry - pivot_y)
+      return [flat_x + (full[0] - flat_x) * factor, flat_y + (full[1] - flat_y) * factor]
+    end
+
     def world_y_for_row(sy)
+      # Esta función se usa para dibujar el suelo, no debería verse afectada por el factor de un muro.
       d = sy - pivot_y
       den = @dh * @cos + d * @sin
       return nil if den.abs < 1.0e-6

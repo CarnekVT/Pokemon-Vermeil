@@ -83,6 +83,13 @@ class Mode7Renderer
     @need_ground_redraw = true
   end
 
+  # Fuerza el redibujado del suelo en el próximo update. Lo usa el ángulo
+  # dinámico (CameraControl) para que el estirar/compactar de la proyección
+  # se vea en el terreno aunque la cámara no se mueva.
+  def invalidate_ground
+    @need_ground_redraw = true
+  end
+
   def update
     @tilesets.update
     @autotiles.update
@@ -107,66 +114,198 @@ class Mode7Renderer
 
   private
 
+  # ---------------------------------------------------------------------------
+  # 1. Filtro Condicional para Columnas
+  # ---------------------------------------------------------------------------
+  def terrain_tag_for_entry(entry)
+    tid = entry[:tid]
+    return nil if !tid || tid <= 0
+    ts_id = entry[:tileset_id] || @map.tileset_id
+    ts = $data_tilesets[ts_id]
+    return nil if !ts || !ts.terrain_tags
+    raw = ts.terrain_tags[tid]
+    return nil if !raw || raw == 0
+    GameData::TerrainTag.try_get(raw)
+  rescue
+    nil
+  end
+
+  def cell_has_wall?(entries)
+    entries.any? do |e|
+      tag = terrain_tag_for_entry(e)
+      has_valid_tag = tag && defined?(Settings::WALL_TERRAIN_TAG_PERSPECTIVE) && Settings::WALL_TERRAIN_TAG_PERSPECTIVE.key?(tag.id) && tag.id != :None
+      e[:priority] > 0 || has_valid_tag
+    end
+  end
+
+  def wall_perspective_factor(entries)
+    cfg = defined?(Settings::WALL_TERRAIN_TAG_PERSPECTIVE) ? Settings::WALL_TERRAIN_TAG_PERSPECTIVE : {}
+    entries.sort_by { |e| e[:unify] }.each do |e|
+      tag = terrain_tag_for_entry(e)
+      return cfg[tag.id] if tag && cfg.key?(tag.id) && tag.id != :None
+    end
+    1.0
+  end
+
+  # ---------------------------------------------------------------------------
+  # 2. Ensamblaje Preciso (Columna por Columna) sin arrastre
+  # ---------------------------------------------------------------------------
   def build
     @map_id = $game_map.map_id
     @map = $game_map
     ensure_extended_data
     @ground&.dispose
     @ground = Bitmap.new(@map.width * Game_Map::TILE_WIDTH, @map.height * Game_Map::TILE_HEIGHT)
-    @wall_data.each do |data|
-      spr = data[0]
-      spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
-      spr.dispose
-    end
+    
+    @wall_data.each { |data| data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?; data[0].dispose }
     @wall_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
-    
+
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = collect_cell_entries(tx, ty)
-        wall_entry = entries.select { |e| e[:priority] > 0 }.min_by { |e| e[:unify] }
         
-        if wall_entry
-          wall_layer = wall_entry[:unify]
+        if cell_has_wall?(entries)
+          wall_layer = entries.select do |e|
+            tag = terrain_tag_for_entry(e)
+            has_valid_tag = tag && defined?(Settings::WALL_TERRAIN_TAG_PERSPECTIVE) && Settings::WALL_TERRAIN_TAG_PERSPECTIVE.key?(tag.id) && tag.id != :None
+            e[:priority] > 0 || has_valid_tag
+          end.map { |e| e[:unify] }.min
+
           ground_entries = entries.select { |e| e[:unify] < wall_layer }
-          billboard_entries = entries.select { |e| e[:unify] >= wall_layer }
-          
-          blt_ground_cell(tx, ty, ground_entries)
-          make_column(tx, ty, billboard_entries)
+          wall_entries = entries.select { |e| e[:unify] >= wall_layer }
+
+          blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
+          make_column(tx, ty, wall_entries) unless wall_entries.empty?
         else
           blt_ground_cell(tx, ty, entries)
         end
       end
     end
+
     @need_build = false
     @need_ground_redraw = true
     @old_tone = nil
     @old_color = nil
   end
 
-  def collect_cell_entries(tx, ty)
-    entries = []
+  def make_column(tx, ty, entries)
+    h = Game_Map::TILE_HEIGHT
+    bmp = Bitmap.new(Game_Map::TILE_WIDTH, h)
+    bmp.clear
+
+    entries.sort_by { |e| [e[:priority], e[:unify]] }.each do |e|
+      op = e[:opacity] || 255
+      bmp.blt(0, 0, e[:bitmap], current_src_rect(e), op)
+    end
+
+    sprite = Sprite.new(@viewport)
+    sprite.bitmap = bmp
+    sprite.ox = 0
+    sprite.oy = h
+    sprite.visible = false
+
+    wx = tx * Game_Map::TILE_WIDTH + (Game_Map::TILE_WIDTH / 2.0)
+    wy = ty * Game_Map::TILE_HEIGHT + Game_Map::TILE_HEIGHT
+
+    pmax = entries.map { |e| e[:priority] }.max || 0
+    factor = wall_perspective_factor(entries)
+
+    @wall_data.push([sprite, wx, wy, h, pmax, factor, entries])
+  end
+
+  def recomposite_autotiles
     seen = {}
-    2.downto(0) do |layer|
-      props = native_props_at(tx, ty, layer)
-      if props && (props["autotile_name"] || props["tileset_id"])
-        entry = make_native_prop_entry(tx, ty, layer, props)
-        append_entry(entries, seen, entry)
-      end
-      tid = @map.data[tx, ty, layer]
-      if tid && tid > 0
-        entry = make_native_entry(tid, layer)
-        append_entry(entries, seen, entry)
+    @autotile_cells.each do |filename, cells|
+      next if !@autotiles.animated?(filename)
+      cells.each do |tx, ty|
+        key = "#{tx},#{ty}"
+        next if seen[key]
+        seen[key] = true
+
+        entries = collect_cell_entries(tx, ty)
+        if cell_has_wall?(entries)
+          wall_layer = entries.select do |e|
+            tag = terrain_tag_for_entry(e)
+            has_valid_tag = tag && defined?(Settings::WALL_TERRAIN_TAG_PERSPECTIVE) && Settings::WALL_TERRAIN_TAG_PERSPECTIVE.key?(tag.id) && tag.id != :None
+            e[:priority] > 0 || has_valid_tag
+          end.map { |e| e[:unify] }.min
+
+          ground_entries = entries.select { |e| e[:unify] < wall_layer }
+          blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
+        else
+          blt_ground_cell(tx, ty, entries)
+        end
       end
     end
-    collect_extended_entries(tx, ty, entries, seen)
-    entries
+    
+    @wall_data.each do |data|
+      sprite, wx, wy, h, pmax, factor, entries = data
+      next if !sprite.bitmap || sprite.bitmap.disposed?
+      next if entries.none? { |e| e[:animated] }
+      
+      sprite.bitmap.clear
+      entries.sort_by { |w| [w[:priority], w[:unify]] }.each do |w|
+        sprite.bitmap.blt(0, 0, w[:bitmap], current_src_rect(w), w[:opacity] || 255)
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # 5. Sellado Matemático Total y Corrección de Z-Index
+  # ---------------------------------------------------------------------------
+  def update_walls
+    @wall_data.each do |data|
+      sprite, wx, wyb, h, pmax, factor, entries = data
+      factor = factor.to_f.clamp(0.0, 1.0)
+
+      half_w = Game_Map::TILE_WIDTH / 2.0
+      pr_left = Mode7.project_with_factor(wx - half_w, wyb, factor)
+      pr_right = Mode7.project_with_factor(wx + half_w, wyb, factor)
+
+      if !pr_left || !pr_right
+        sprite.visible = false
+        next
+      end
+
+      sx_left = pr_left[0].round
+      sx_right = pr_right[0].round
+      syb = pr_left[1]
+
+      pr_top = Mode7.project_with_factor(wx, wyb - h, factor)
+      if !pr_top || syb - pr_top[1] <= 0
+        sprite.visible = false
+        next
+      end
+      syt = pr_top[1]
+
+      if syb < -600 || syb > Mode7.screen_h + 600 || sx_left < -600 || sx_right > Mode7.screen_w + 600
+        sprite.visible = false
+        next
+      end
+
+      sy_bottom = syb.round
+      sy_top = syt.round
+
+      sprite.ox = 0
+      sprite.x = sx_left
+      sprite.y = sy_bottom + 1
+      sprite.z = sy_bottom + (pmax * 32)
+
+      drawn_width = sx_right - sx_left
+      drawn_height = (sy_bottom + 1) - sy_top
+
+      sprite.zoom_x = (drawn_width + 0.8) / Game_Map::TILE_WIDTH.to_f
+      sprite.zoom_y = (drawn_height + 0.8) / h.to_f
+      sprite.visible = true
+    end
   end
 
   def native_props_at(tx, ty, layer)
     return nil if !defined?(MakerStudio) || !MakerStudio.respond_to?(:native_props_at)
     return MakerStudio.native_props_at(@map_id, @map.width, layer, ty * @map.width + tx)
   end
+
 
   def make_native_entry(tid, layer)
     if tid < TilemapRenderer::TILESET_START_ID
@@ -183,6 +322,7 @@ class Mode7Renderer
     return nil if !ts
     entry_from_tileset(ts, tid, @map.priorities[tid] || 0, layer)
   end
+
 
   def make_native_prop_entry(tx, ty, layer, props)
     if props["autotile_name"]
@@ -202,7 +342,7 @@ class Mode7Renderer
       tid = @map.data[tx, ty, layer]
       tid = props["tile_id"].to_i if tid.nil? || tid == 0
       return nil if !ts || tid <= 0
-      priority = MakerStudio.resolve_band_priority(@map, tid, props) 
+      priority = MakerStudio.resolve_band_priority(@map, tid, props)
       return entry_from_tileset(ts, tid, priority, layer)
     end
     nil
@@ -245,6 +385,7 @@ class Mode7Renderer
              animated: @autotiles.animated?(name), filename: name, tid: vid, unify: ul }
   end
 
+
   def append_entry(entries, seen, entry)
     return if !entry
     rect = entry[:src_rect]
@@ -253,6 +394,7 @@ class Mode7Renderer
     seen[key] = true
     entries << entry
   end
+
 
   def entry_from_tileset(ts, tid, priority, unify)
     return nil if !ts
@@ -270,7 +412,8 @@ class Mode7Renderer
     else
       return nil
     end
-    { bitmap: bmp, src_rect: src, priority: priority, animated: false, filename: nil, tid: tid, unify: unify }
+    { bitmap: bmp, src_rect: src, priority: priority, animated: false, filename: nil, tid: tid, unify: unify,
+      tileset_id: ts.id }
   end
   
   def ensure_autotile(name)
@@ -297,16 +440,17 @@ class Mode7Renderer
     return @autotiles[name]
   end
 
+
   def ensure_extended_data
     return if !defined?(MakerStudio)
     return if MakerStudio.get_extended_data_for(@map_id)
     MakerStudio.load_extended_layers_for_map(@map_id, @map) if MakerStudio.respond_to?(:load_extended_layers_for_map)
   end
 
+
   def blt_ground_cell(tx, ty, entries)
     entries.sort_by { |e| e[:unify] }.each do |e|
       next if !e[:bitmap]
-      # [FIX OPENCODE]: Aplicar opacidad al dibujar en el suelo.
       op = e[:opacity] || 255
       @ground.blt(tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT, e[:bitmap], e[:src_rect], op)
       if e[:animated]
@@ -317,38 +461,7 @@ class Mode7Renderer
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # 3. Anclar los Muros a la Tierra (h = 32px)
-  # ---------------------------------------------------------------------------
-  def make_column(tx, ty, entries)
-    walls = entries.select { |e| e[:priority] > 0 }
-    return if walls.empty?
-    
-    # [FIX OPENCODE]: Bloquear la altura a 32px. Esto anula el efecto de tiles flotantes.
-    h = Game_Map::TILE_HEIGHT
-    bmp = Bitmap.new(Game_Map::TILE_WIDTH, h)
-    bmp.clear
 
-    walls.sort_by { |w| [w[:priority], w[:unify]] }.each do |w|
-      op = w[:opacity] || 255
-      bmp.blt(0, 0, w[:bitmap], current_src_rect(w), op)
-    end
-
-    sprite = Sprite.new(@viewport)
-    sprite.bitmap = bmp
-    sprite.ox = Game_Map::TILE_WIDTH / 2
-    sprite.oy = h
-    sprite.visible = false
-
-    wx = tx * Game_Map::TILE_WIDTH + Game_Map::TILE_WIDTH / 2
-    wy = ty * Game_Map::TILE_HEIGHT + Game_Map::TILE_HEIGHT
-
-    pmax = walls.map { |e| e[:priority] }.max
-    base_z = wy + (pmax * Game_Map::TILE_HEIGHT) + Game_Map::TILE_HEIGHT
-
-    @wall_data.push([sprite, wx, wy, h, base_z, entries])
-  end
-  
   def current_src_rect(entry)
     return entry[:src_rect] if !entry[:animated]
     @scratch.filename = entry[:filename]
@@ -356,34 +469,6 @@ class Mode7Renderer
     return @scratch.src_rect.clone
   end
 
-  def recomposite_autotiles
-    seen = {}
-    @autotile_cells.each do |filename, cells|
-      next if !@autotiles.animated?(filename)
-      cells.each do |tx, ty|
-        key = "#{tx},#{ty}"
-        next if seen[key]
-        seen[key] = true
-        
-        entries = collect_cell_entries(tx, ty)
-        wall_entry = entries.select { |e| e[:priority] > 0 }.min_by { |e| e[:unify] }
-        if wall_entry
-          blt_ground_cell(tx, ty, entries.select { |e| e[:unify] < wall_entry[:unify] })
-        else
-          blt_ground_cell(tx, ty, entries)
-        end
-      end
-    end
-    @wall_data.each do |data|
-      sprite, entries = data[0], data[5]
-      next if !entries || entries.none? { |e| e[:animated] }
-      next if !sprite.bitmap || sprite.bitmap.disposed?
-      sprite.bitmap.clear
-      entries.sort_by { |w| w[:unify] }.each do |w|
-        sprite.bitmap.blt(0, 0, w[:bitmap], current_src_rect(w))
-      end
-    end
-  end
 
   def autotile_name_for(tid)
     return nil if tid < TilemapRenderer::TILES_PER_AUTOTILE
@@ -400,6 +485,7 @@ class Mode7Renderer
     return extra[1][tid - single_start]
   end
 
+
   def draw_ground
     bmp = @ground_sprite.bitmap
     bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, Mode7::Config::SKY_COLOR)
@@ -412,6 +498,7 @@ class Mode7Renderer
     (horizon...Mode7.screen_h).each do |sy|
       wy = Mode7.world_y_for_row(sy)
       next if !wy
+
 
       if wy < 0
         wy = 0
@@ -447,59 +534,6 @@ class Mode7Renderer
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # 5. Sellado Visual Híbrido (X Fluido, Y Anclado)
-  # ---------------------------------------------------------------------------
-  def update_walls
-    @wall_data.each do |data|
-      sprite, wx, wyb, h, base_z = data
-      pr = Mode7.project(wx, wyb)
-
-      if !pr
-        sprite.visible = false
-        next
-      end
-
-      sx, syb = pr
-      syt = Mode7.project_y(wyb - h)
-
-      if !syt || syb - syt <= 0
-        sprite.visible = false
-        next
-      end
-
-      if syb < -600 || syb > Mode7.screen_h + 600 || sx < -600 || sx > Mode7.screen_w + 600
-        sprite.visible = false
-        next
-      end
-
-      # [FIX OPENCODE]: Solución Híbrida.
-      # 1. Conservamos el X flotante. Esto evita los saltos y el parpadeo
-      # al caminar en diagonal (movimiento 100% fluido).
-      sprite.x = sx
-
-      # 2. Redondeamos estrictamente el Y. Al usar píxeles enteros para
-      # el eje vertical, garantizamos matemáticamente que la cima de
-      # un muro encaje perfectamente en la base del muro superior, curando
-      # las prioridades rotas sin importar el ángulo de la cámara.
-      sy_bottom = syb.round
-      sy_top = syt.round
-
-      # Hundimos la base 1 píxel dentro del suelo para soldar la grieta inferior
-      sprite.y = sy_bottom + 1
-      sprite.z = base_z
-
-      # Calculamos la altura exacta en píxeles enteros y añadimos un margen de 1.0
-      # para sobreponer microscópicamente los bordes horizontales y sellar el corte.
-      drawn_height = (sy_bottom + 1) - sy_top
-
-      # Overlap en X ampliado (+0.04) para tapar el efecto escalera vertical
-      sprite.zoom_x = Mode7.hscale(syb) + 0.04
-      sprite.zoom_y = (drawn_height + 1.0) / h.to_f
-
-      sprite.visible = true
-    end
-  end
 
   def apply_tone_color
     if @old_tone != @tone
