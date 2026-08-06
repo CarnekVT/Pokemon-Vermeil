@@ -31,6 +31,7 @@ class Mode7Renderer
     @ground_sprite.z = -1000
     @ground_sprite.bitmap = Bitmap.new(Mode7.screen_w, Mode7.screen_h)
     @ground = nil
+    @wall_data = []
     @autotile_cells = {}
     @need_build = true
     @need_ground_redraw = true
@@ -50,6 +51,12 @@ class Mode7Renderer
     @ground_sprite = nil
     @ground&.dispose
     @ground = nil
+    @wall_data.each do |data|
+      spr = data[0]
+      spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
+      spr.dispose
+    end
+    @wall_data.clear
     @tilesets.bitmaps.each_value { |b| b.dispose }
     @tilesets.bitmaps.clear
     @autotiles.bitmaps.each_value { |b| b.dispose }
@@ -102,6 +109,7 @@ class Mode7Renderer
       @need_ground_redraw = false
     end
     update_ms_fog
+    update_walls
     apply_tone_color
     @autotiles.changed = false
   end
@@ -117,10 +125,13 @@ class Mode7Renderer
     ensure_extended_data
     @ground&.dispose
     @ground = Bitmap.new(@map.width * Game_Map::TILE_WIDTH, @map.height * Game_Map::TILE_HEIGHT)
+    @wall_data.each { |data| data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?; data[0].dispose }
+    @wall_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
 
-    # Pase 1: suelo. En celdas de muro se pinta SOLO lo que esta bajo el muro
-    # (unify < wall_layer); la cara del muro se hornea despues, por encima.
+    # Pase 1: suelo. En celdas con muro se pinta SOLO lo que esta bajo el muro
+    # (unify < wall_layer); la cara del muro (y todo lo apilado encima, incluidos
+    # tiles de prioridad 1+ sin tag) se extruye como sprite en el pase 2.
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = collect_cell_entries(tx, ty)
@@ -129,6 +140,9 @@ class Mode7Renderer
           ground_entries = entries.select { |e| e[:unify] < wall_layer }
           blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
         else
+          # Sin muro: prioridad 0 -> suelo plano (z bajo, dibuja bajo el player);
+          # la prioridad +1 se hornea tambien en el suelo porque cualquier sprite
+          # de prioridad sera un muro extruido mas tarde (pase 2) si aplica.
           blt_ground_cell(tx, ty, entries)
         end
       end
@@ -137,7 +151,10 @@ class Mode7Renderer
     # Sombras de MakerStudio horneadas en el suelo (van DEBAJO de los muros).
     bake_ms_shadows
 
-    # Pase 2: extrusion de muros, pintada por encima de el suelo y las sombras.
+    # Pase 2: extrusion de muros (tag WALL_TERRAIN_TAG_HEIGHT, o prioridad 1+),
+    # como sprites por encima del suelo y las sombras. Se extruyen JUNTOS todas
+    # las capas >= wall_layer de una celda (cara del muro + adornos encima),
+    # asi no se cortan ni se separan al cambiar de angulo.
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = collect_cell_entries(tx, ty)
@@ -321,10 +338,12 @@ class Mode7Renderer
   def apply_tone_color
     if @old_tone != @tone
       @ground_sprite.tone = @tone
+      @wall_data.each { |data| data[0].tone = @tone }
       @old_tone = @tone.clone
     end
     if @old_color != @color
       @ground_sprite.color = @color
+      @wall_data.each { |data| data[0].color = @color }
       @old_color = @color.clone
     end
   end

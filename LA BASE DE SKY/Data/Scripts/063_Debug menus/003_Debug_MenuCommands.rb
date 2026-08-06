@@ -1650,3 +1650,37 @@ MenuHandlers.add(:debug_menu, :reload_system_cache, {
     pbMessage(_INTL("Listo."))
   }
 })
+
+#===============================================================================
+# Visual 2.5D Wall Options
+#===============================================================================
+MenuHandlers.add(:debug_menu, :visual_25d_menu, {
+  "name"        => _INTL("Opciones Visual 2.5D..."),
+  "parent"      => :main,
+  "description" => _INTL("Configurar comportamiento de muros 2.5D y prioridades."),
+  "always_show" => false
+})
+
+MenuHandlers.add(:debug_menu, :visual_25d_force_priority_wall, {
+  "name"        => _INTL("Forzar prioridad 1+ como muros: {1}"),
+  "parent"      => :visual_25d_menu,
+  "description" => _INTL("Alterna si los tiles con prioridad 1+ se extruyen como muros (ON) o se quedan planos (OFF)."),
+  "effect"      => proc {
+    new_val = !Mode7Renderer.debug_mode_force_all_priority_wall?
+    Mode7Renderer.debug_mode_force_all_priority_wall = new_val
+    pbMessage(_INTL("Forzar prioridad 1+ como muros: {1}", new_val ? "ON" : "OFF"))
+    next true
+  }
+})
+
+MenuHandlers.add(:debug_menu, :visual_25d_force_priority_ground, {
+  "name"        => _INTL("Forzar prioridad 1+ como suelo: {1}"),
+  "parent"      => :visual_25d_menu,
+  "description" => _INTL("Alterna si los tiles con prioridad 1+ se mantienen como suelo plano (ON) o se extruyen como muros (OFF)."),
+  "effect"      => proc {
+    new_val = !Mode7Renderer.debug_mode_force_priority_1_as_ground?
+    Mode7Renderer.debug_mode_force_priority_1_as_ground = new_val
+    pbMessage(_INTL("Forzar prioridad 1+ como suelo: {1}", new_val ? "ON" : "OFF"))
+    next true
+  }
+})
