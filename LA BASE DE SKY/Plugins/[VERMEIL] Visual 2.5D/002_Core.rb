@@ -59,6 +59,10 @@ module Mode7
       @dh = Config::DISTANCE_H
       p = pivot_y
 
+      # Cache de proyeccion invalidado al reconfigurar (cambia angulo/zoom).
+      @hscale_cache = {}
+      @project_y_cache = {}
+
       # Prevencion matematica de division por cero
       return if @sin == 0
 
@@ -134,6 +138,14 @@ module Mode7
     # jugador -> la deformacion es del MAPA (terreno 3D horneado), no del
     # movimiento.
     def hscale(sy)
+      @hscale_cache ||= {}
+      return @hscale_cache[sy] if @hscale_cache.key?(sy)
+      result = _hscale_uncached(sy)
+      @hscale_cache[sy] = result
+      result
+    end
+
+    def _hscale_uncached(sy)
       if affine_mode?
         # La VERTICAL es conica real (heff). Para que una celda se proyecte
         # con el MISMO tamano en x que en y a cada profundidad, la escala
