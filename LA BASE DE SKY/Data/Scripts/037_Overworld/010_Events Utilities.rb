@@ -11,9 +11,16 @@
 #                                   necesidad de asignar un gráfico.
 #
 # Comandos soportados como Comentarios en el evento:
-#  s:Hitbox/X,Y                  -> Define un area de colisión usando de base el 
+#  s:Hitbox/X,Y                  -> Define un area de colisión usando de base el
 #  s:Hitbox_true/X,Y                evento e igualmente permite la interacción
 #                                   con él.
+#                                   Con 2 parámetros (X,Y): X = alcance horizontal
+#                                   simétrico (izq+der), Y = alcance hacia arriba.
+#                                   Con 3 parámetros (DER,ARR,IZQ): DER = hitbox hacia
+#                                   la derecha, IZQ = hacia la izquierda (X deja de
+#                                   ser simétrico). ARR sigue siendo hacia arriba.
+#                                   Con 4 parámetros (DER,ARR,IZQ,ABAJ): ABAJ = hitbox
+#                                   que se extiende hacia abajo.
 #                                   Si incluye "_true", la hitbox girará con el evento.
 #                                   
 #  s:Hitbox_radius/Rx,Ry         -> Define un radio de colisión alrededor del evento
@@ -64,6 +71,7 @@
 class Game_Event < Game_Character
   attr_reader :hitbox_rx, :hitbox_ry
   attr_reader :hitbox_cx, :hitbox_hy
+  attr_reader :hitbox_left, :hitbox_down
   attr_accessor :hitbox_rotate
   attr_reader :block_width, :block_height
   attr_accessor :visual_offset_x, :visual_offset_y
@@ -105,6 +113,8 @@ class Game_Event < Game_Character
     @hitbox_ry = 0
     @hitbox_cx = 0
     @hitbox_hy = 0
+    @hitbox_left = 0
+    @hitbox_down = 0
     @block_width = 1
     @block_height = 1
     @is_full_image = false
@@ -154,6 +164,8 @@ class Game_Event < Game_Character
     @hitbox_ry = 0
     @hitbox_cx = 0
     @hitbox_hy = 0
+    @hitbox_left = 0
+    @hitbox_down = 0
     @hitbox_rotate = false
     @visual_offset_x = 0
     @visual_offset_y = 0
@@ -180,10 +192,12 @@ class Game_Event < Game_Character
         @hitbox_ry = val_y
 
       # --- HITBOX ---
-      elsif cmd_text.match(/^s:Hitbox(_true)?\/(\d+),(\d+)/i)
+      elsif cmd_text.match(/^s:Hitbox(_true)?\/(\d+),(\d+)(?:,(\d+))?(?:,(\d+))?/i)
         @hitbox_rotate = !!$1
-        @hitbox_cx = $2.to_i
-        @hitbox_hy = $3.to_i
+        @hitbox_cx = $2.to_i                              # derecha (o simétrico con 2 params)
+        @hitbox_hy = $3.to_i                              # arriba
+        @hitbox_left = $4 ? $4.to_i : @hitbox_cx          # izquierda (simétrico si se omite)
+        @hitbox_down = $5 ? $5.to_i : 0                   # abajo
       
       # --- OFFSET ---
       elsif cmd_text.match(/^s:Offset\/([-\d]+),([-\d]+)/i)
@@ -317,13 +331,14 @@ class Game_Event < Game_Character
     end
 
     # Prioridad 2: HITBOX
-    if @hitbox_cx > 0 || @hitbox_hy > 0
+    # right = @hitbox_cx, up = @hitbox_hy, left = @hitbox_left, down = @hitbox_down
+    if @hitbox_cx > 0 || @hitbox_hy > 0 || @hitbox_left > 0 || @hitbox_down > 0
       if @hitbox_rotate && (@direction == 4 || @direction == 6) # Horizontal
-        return y.between?(@y - @hitbox_cx, @y + @hitbox_cx) &&
-               x.between?(@x - @hitbox_hy, @x)
+        return x.between?(@x - @hitbox_hy, @x + @hitbox_down) &&
+               y.between?(@y - @hitbox_cx, @y + @hitbox_left)
       else
-        return x.between?(@x - @hitbox_cx, @x + @hitbox_cx) &&
-               y.between?(@y - @hitbox_hy, @y)
+        return x.between?(@x - @hitbox_left, @x + @hitbox_cx) &&
+               y.between?(@y - @hitbox_hy, @y + @hitbox_down)
       end
     end
   
