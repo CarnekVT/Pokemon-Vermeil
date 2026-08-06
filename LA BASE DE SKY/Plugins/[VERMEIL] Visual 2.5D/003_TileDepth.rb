@@ -102,7 +102,10 @@ class Mode7Renderer
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
-    if @need_ground_redraw || @last_cam_x != cx || @last_cam_y != cy
+    # ponytail: umbral de 1 píxel para evitar redibujos cada frame. El movement
+    # del player causa cambios sutiles; con umbral evitamos stretch_blt por fila
+    # hasta que la cámara se mueva lo suficiente como para notar el cambio.
+    if @need_ground_redraw || (@last_cam_x - cx).abs >= 1 || (@last_cam_y - cy).abs >= 1
       draw_ground
       @last_cam_x = cx
       @last_cam_y = cy
@@ -128,6 +131,8 @@ class Mode7Renderer
     @wall_data.each { |data| data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?; data[0].dispose }
     @wall_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
+    @entry_cache = {}  # Cache de entries por (tx,ty) para evitar recomputar
+    @terrain_tag_cache = {}  # Cache de terrain_tag por tid:tileset_id
 
     # Pase 1: suelo. En celdas con muro se pinta SOLO lo que esta bajo el muro
     # (unify < wall_layer); la cara del muro (y todo lo apilado encima, incluidos
@@ -135,6 +140,7 @@ class Mode7Renderer
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = collect_cell_entries(tx, ty)
+        @entry_cache[[tx, ty]] = entries  # cache para el pase 2
         if cell_has_wall?(entries)
           wall_layer = wall_layer_unify(entries)
           ground_entries = entries.select { |e| e[:unify] < wall_layer }
@@ -157,7 +163,7 @@ class Mode7Renderer
     # asi no se cortan ni se separan al cambiar de angulo.
     @map.width.times do |tx|
       @map.height.times do |ty|
-        entries = collect_cell_entries(tx, ty)
+        entries = @entry_cache[[tx, ty]]  # usa cached del pase 1
         next if !cell_has_wall?(entries)
         wall_layer = wall_layer_unify(entries)
         wall_entries = entries.select { |e| e[:unify] >= wall_layer }

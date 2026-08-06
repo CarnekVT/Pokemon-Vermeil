@@ -49,12 +49,27 @@ class Mode7Renderer
     tid = entry[:tid]
     return nil if !tid || tid <= 0
     ts_id = entry[:tileset_id] || @map.tileset_id
+    key = "#{tid}:#{ts_id}"
+    if @terrain_tag_cache.key?(key)
+      tag = @terrain_tag_cache[key]
+      return nil if tag.nil?
+      return tag
+    end
     ts = $data_tilesets[ts_id]
-    return nil if !ts || !ts.terrain_tags
+    if !ts || !ts.terrain_tags
+      @terrain_tag_cache[key] = nil
+      return nil
+    end
     raw = ts.terrain_tags[tid]
-    return nil if !raw || raw == 0
-    GameData::TerrainTag.try_get(raw)
+    if !raw || raw == 0
+      @terrain_tag_cache[key] = nil
+      return nil
+    end
+    tag = GameData::TerrainTag.try_get(raw)
+    @terrain_tag_cache[key] = tag
+    tag
   rescue
+    @terrain_tag_cache[key] = nil
     nil
   end
 
@@ -198,8 +213,11 @@ class Mode7Renderer
 
       sx = Mode7.center_x + k * (wx - Mode7.cam_x)
 
-      # Culling: fuera de pantalla (con margen de seguridad).
-      if syb < -1000 || syb > Mode7.screen_h + 1000 || sx < -1000 || sx > Mode7.screen_w + 1000
+      # Culling estricto: salta cálculos si fuera de pantalla (margen 1 tile).
+      if syb < -Game_Map::TILE_HEIGHT ||
+         syb > Mode7.screen_h + Game_Map::TILE_HEIGHT ||
+         sx < -Game_Map::TILE_WIDTH ||
+         sx > Mode7.screen_w + Game_Map::TILE_WIDTH
         sprite.visible = false
         next
       end
