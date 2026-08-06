@@ -30,9 +30,11 @@ class Mode7Renderer
   end
 
   def entry_is_wall?(e)
-    tag = terrain_tag_for_entry(e)
-    has_valid_tag = tag && Mode7::Config::WALL_TERRAIN_TAG_HEIGHT.key?(tag.id) && tag.id != :None
-    e[:priority] > 0 || has_valid_tag
+    # SOLO los tiles CON prioridad > 0 son paredes: esos si heredan la altura
+    # de WALL_TERRAIN_TAG_HEIGHT (extrusion). Un tile de prioridad 0 NO se
+    # desvincula del suelo, aunque tenga un terrain tag de pared: se queda en
+    # el plano del terreno (no separado, no por encima del player).
+    e[:priority] > 0
   end
 
   def cell_has_wall?(entries)
@@ -52,8 +54,10 @@ class Mode7Renderer
   # ---------------------------------------------------------------------------
   # 2. Ensamblaje Preciso (Columna por Columna) sin arrastre
   # ---------------------------------------------------------------------------
-  def make_column(tx, ty, entries)
-    h_tiles = wall_layer_height(entries)
+  def make_column(tx, ty, entries, h_tiles = nil)
+    h_tiles ||= wall_layer_height(entries)
+    # ponytail: acota la altura para no crear un Bitmap fuera de limites.
+    h_tiles = 1 if h_tiles < 1 || h_tiles > 16
     h = h_tiles * Game_Map::TILE_HEIGHT
     bmp = Bitmap.new(Game_Map::TILE_WIDTH, h)
     bmp.clear
@@ -80,6 +84,7 @@ class Mode7Renderer
     @wall_data.push([sprite, wx, wy, h, pmax, entries])
   end
 
+  # ---------------------------------------------------------------------------
   # Recompone celdas con autotiles animados (suelo y columnas).
   def recomposite_autotiles
     seen = {}
@@ -114,51 +119,51 @@ class Mode7Renderer
   end
 
   # ---------------------------------------------------------------------------
-  # 3. Proyeccion de Muros: UNICA y CONICA (igual que suelo y personajes)
+  # 3. Proyeccion de Muros: PERSPECTIVE-CORRECT.
+  #    La BASE se alinea al suelo (hscale de su fila -> pega con los tiles de
+  #    alrededor y con las columnas apiladas de abajo) y el TOPE se proyecta a
+  #    su fila real (project_y de wyb-h). El zoom vertical conecta ambos, asi
+  #    el muro converge hacia el horizonte como el suelo y NO se corta con los
+  #    tiles de prioridad 1+ apilados encima.
   # ---------------------------------------------------------------------------
   def update_walls
     @wall_data.each do |data|
       sprite, wx, wyb, h, pmax, _entries = data
-      half_w = Game_Map::TILE_WIDTH / 2.0
 
-      # Proyeccion conica de la base y del tope del muro: la MISMA funcion que
-      # dibuja el suelo (draw_ground) y posiciona a los personajes (Game_Character).
-      pr_left  = Mode7.project(wx - half_w, wyb)
-      pr_right = Mode7.project(wx + half_w, wyb)
-      if !pr_left || !pr_right
-        sprite.visible = false
-        next
-      end
+      # Fila de pantalla de la base (donde toca el suelo) y del tope.
+      syb = Mode7.project_y(wyb)
+      syt = Mode7.project_y(wyb - h)
+      next (sprite.visible = false) if syb.nil? || syt.nil?
 
-      sx_left  = pr_left[0].round
-      sx_right = pr_right[0].round
-      syb      = pr_left[1]
+      # Escala horizontal = la del SUELO en la fila de la base: la columna
+      # queda pegada a los tiles de alrededor (misma formula que draw_ground).
+      k = Mode7.hscale(syb)
+      next (sprite.visible = false) if k.nil? || k <= 0
 
-      pr_top = Mode7.project(wx, wyb - h)
-      if !pr_top || syb - pr_top[1] <= 0
-        sprite.visible = false
-        next
-      end
-      syt = pr_top[1]
+      # Centro X con la MISMA formula que draw_ground para que la base de la
+      # columna coincida exactamente con la celda de suelo que la rodea.
+      sx_center = Mode7.center_x + k * (wx - Mode7.cam_x)
+      drawn_width  = Game_Map::TILE_WIDTH * k
+      sx_left   = (sx_center - drawn_width / 2.0).round
+      sx_right  = (sx_center + drawn_width / 2.0).round
+      sy_bottom = syb.round
+      sy_top    = syt.round
 
       if syb < -600 || syb > Mode7.screen_h + 600 || sx_left < -600 || sx_right > Mode7.screen_w + 600
         sprite.visible = false
         next
       end
 
-      sy_bottom = syb.round
-      sy_top    = syt.round
-
       sprite.ox = 0
       sprite.x = sx_left
       sprite.y = sy_bottom + 1
       sprite.z = sy_bottom + (pmax * 32)
 
-      drawn_width  = sx_right - sx_left
-      drawn_height = (sy_bottom + 1) - sy_top
-
-      sprite.zoom_x = (drawn_width + 0.8) / Game_Map::TILE_WIDTH.to_f
-      sprite.zoom_y = (drawn_height + 0.8) / h.to_f
+      # zoom_x = escala del suelo (base pegada al terreno).
+      # zoom_y = estira la columna hasta la fila real del tope (converge).
+      sprite.zoom_x = k
+      sprite.zoom_y = (sy_bottom + 1 - sy_top) / h.to_f
+      sprite.zoom_y = k if sprite.zoom_y <= 0
       sprite.visible = true
     end
   end

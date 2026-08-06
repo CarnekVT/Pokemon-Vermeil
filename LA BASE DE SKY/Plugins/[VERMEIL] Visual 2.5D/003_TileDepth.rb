@@ -109,6 +109,7 @@ class Mode7Renderer
       @need_ground_redraw = false
     end
     update_walls
+    update_ms_fog
     apply_tone_color
     @autotiles.changed = false
   end
@@ -139,12 +140,21 @@ class Mode7Renderer
           wall_entries = entries.select { |e| e[:unify] >= wall_layer }
 
           blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
-          make_column(tx, ty, wall_entries) unless wall_entries.empty?
+          # ponytail: una columna que falle (VRAM/limite) se degrada a suelo
+          # plano en vez de tumbar el build entero del mapa.
+          begin
+            make_column(tx, ty, wall_entries) unless wall_entries.empty?
+          rescue Exception
+            blt_ground_cell(tx, ty, wall_entries)
+            Console.echo_error("2.5D: columna fallida en (#{tx},#{ty}) - se pinta plana")
+          end
         else
           blt_ground_cell(tx, ty, entries)
         end
       end
     end
+
+    bake_ms_shadows
 
     @need_build = false
     @need_ground_redraw = true
@@ -259,7 +269,7 @@ class Mode7Renderer
   # ---------------------------------------------------------------------------
   def draw_ground
     bmp = @ground_sprite.bitmap
-    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, Mode7::Config::SKY_COLOR)
+    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_fill_color)
     return if !@ground || @ground.disposed?
     horizon = [Mode7.horizon_row.ceil, 0].max
     return if horizon >= Mode7.screen_h
@@ -299,6 +309,14 @@ class Mode7Renderer
         bmp.stretch_blt(@dest_rect, @ground, @src_rect)
       end
     end
+  end
+
+    # Color de relleno del cielo. Con panorama de MakerStudio queda TRANSPARENTE
+  # (alpha 0) para que el Plane del panorama (z=-1000) se vea por detras; sin
+  # panorama usa SKY_COLOR. Un Color con alpha 0 rellena "borrando" el bitmap.
+  def sky_fill_color
+    return Mode7::Config::SKY_COLOR if !ms_has_panorama?
+    return Color.new(0, 0, 0, 0)
   end
 
   def apply_tone_color

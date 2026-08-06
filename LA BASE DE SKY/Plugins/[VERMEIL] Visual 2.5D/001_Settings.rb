@@ -106,7 +106,7 @@ module Mode7
     FOV           = 15
 
     # =======================================================================
-    # RUBBER-HOSE (LEGACY - DESCARTADO)
+    # RUBBER (LEGACY - DESCARTADO)
     # Deformacion local elastica del suelo alrededor del jugador. Se descarto:
     # la sensacion 3D debe venir de la CONICA DE CAMARA FIJA global (sutil,
     # no mareante), no de una lente local que deformaba el muestreo.
@@ -139,8 +139,8 @@ module Mode7
     # al mover la camara vertical. (El viejo "WALL_TERRAIN_TAG_PERSPECTIVE"
     # mezclaba dos proyecciones y producia el error; se sustituyo por esto.)
     WALL_TERRAIN_TAG_HEIGHT = {
-      :HoneyTree => 2,
-      :Mode7Tag  => 2,
+      :HoneyTree => 1,
+      :Mode7Tag  => 1,
       :None      => 1
     }
   end

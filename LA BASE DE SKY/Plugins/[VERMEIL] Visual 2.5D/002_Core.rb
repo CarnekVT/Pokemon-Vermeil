@@ -255,6 +255,27 @@ def cam_y
       return pivot_y + (@dh * yi * @cos) / d
     end
 
+# Escala ON-SCREEN de un muro de WALL_TERRAIN_TAG_HEIGHT, dada su base en
+    # pantalla (sy). Usa la MISMA escala que el suelo en esa fila (hscale):
+    # es la unica forma de que el muro sea indistinguible del terreno a su
+    # alrededor y jamas se separe de los tiles adyacentes. En proyeccion
+    # AFFINE el hscale es estable (no re-muestrea frame a frame) -> el muro
+    # NO se corta al moverse; queda con una deformacion imperceptible porque
+    # es la misma que el suelo de esa fila.
+    def wall_scale(sy)
+      return nil if sy.nil?
+      hscale(sy)
+    end
+
+    # Media anchura ON-SCREEN de un muro a la profundidad mundial wy, con
+    # deformacion horizontal MINIMA (blend hacia un ancho casi constante).
+    # billboard puro (blend 0) mantiene el ancho; plena (1) = hscale cónico.
+    def wall_half_width(half_w, wy)
+      k = wall_scale(wy)
+      return half_w if k.nil?
+      half_w * k
+    end
+
     def world_y_for_row(sy)
       # AFFINE: inversa de project_y. Cuando la camara centra al jugador
       # (wy - cam_y == pivot_y) el jugador queda en pivot_y de la pantalla.
