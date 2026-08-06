@@ -212,15 +212,10 @@ class Mode7Renderer
       # pero POR DEBAJO de always_on_top (999). Techo fijo 990 garantiza esto.
       # Prioridad 0 -> z = syb (por debajo del player normal, como suelo plano).
       sprite.z = (pmax > 0) ? [syb.round + 500, 990].min : syb.round
-      # ESCALA UNIFORME horizontal con overlap de seguridad (evita huecos entre
-      # columnas adyacentes; ~1.2px de overlap a escala 1.0).
+      # ESCALA: zoom_x = zoom_y = k + overlap, igual que el suelo.
+      # Consistente con el horizontal (k + 0.04): estable, sin cortes al moverse.
       sprite.zoom_x = k + 0.04
-      # ESCALA VERTICAL perspective-correct: ajusta a la altura proyectada.
-      # Clamp minimo evita zoom_y ~ 0 o negativo (cerca del horizonte) que
-      # corta/recorta la sprite. k*0.1 es el umbral; cae a k+0.04 (overlap).
-      zoom_y = (syb - syt) / h.to_f
-      zoom_y = k + 0.04 if zoom_y <= k * 0.1
-      sprite.zoom_y = zoom_y
+      sprite.zoom_y = k + 0.04
       sprite.visible = true
     end
   end
