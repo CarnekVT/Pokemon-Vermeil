@@ -1,4 +1,0 @@
-Name          = Mode 7 (2.5D)
-Version       = 1.4.7
-Essentials    = 21.1
-Credits       = ZBOX
