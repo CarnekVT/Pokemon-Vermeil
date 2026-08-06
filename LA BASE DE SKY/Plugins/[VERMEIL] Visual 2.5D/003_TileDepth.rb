@@ -318,51 +318,53 @@ class Mode7Renderer
       # Cada iteración proyecta un world_row completo (32px). Evita overdraw:
       # el .each iteraba 1px dibujando 32px height → 32x overdraw. Con step,
       # una iteración por tile. Reduction 97% de stretch_blt.
-      (wy_start...wy_end).step(Game_Map::TILE_HEIGHT) do |wy_int|
-       sy_top = Mode7.project_y(wy_int)
-       sy_bot = Mode7.project_y(wy_int + Game_Map::TILE_HEIGHT)
-       next if sy_top.nil? || sy_bot.nil?
+      bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_fill_color)
+      return if !@ground || @ground.disposed?
+      horizon = [Mode7.horizon_row.ceil, 0].max
+      return if horizon >= Mode7.screen_h
+      # ponytail: limpiar cielo solo arriba del horizonte (no full screen).
+      if horizon > 0
+        @clear_rect.set(0, 0, Mode7.screen_w, horizon)
+        bmp.fill_rect(@clear_rect, sky_fill_color)
+      end
+      cx = Mode7.cam_x
+      map_h_px = @map.height * Game_Map::TILE_HEIGHT
+      ground_w = @ground.width
+      # escanear filas de pantalla visibles (0..screen_h-1). Cada fila = 1 pixel vertical.
+      (horizon...Mode7.screen_h).each do |sy|
+        wy = Mode7.world_y_for_row(sy)
+        next if !wy
 
-       # Determinar screen_rows que cubre esta world_row.
-       sy_lo = [sy_top.floor, horizon].max
-       sy_hi = sy_bot.floor
-       next if sy_hi < horizon || sy_lo >= Mode7.screen_h
-
-       sy_lo = horizon if sy_lo < horizon
-       sy_hi = Mode7.screen_h - 1 if sy_hi > Mode7.screen_h - 1
-       rows = sy_hi - sy_lo + 1
-       next if rows <= 0
-
-       # Calcular proyección horizontal (usa k del screen_row medio).
-       sy_mid = (sy_lo + sy_hi) / 2
-       wy_mid = wy_int + Game_Map::TILE_HEIGHT / 2
-       k = Mode7.hscale(sy_mid)
-       span = Mode7.screen_w / k
-       wx_left = cx - Mode7.center_x / k
-       lo = [wx_left.floor, 0].max
-       hi = [(wx_left + span).ceil, ground_w].min
-       if hi <= lo
-         @dest_rect.set(0, sy_lo, Mode7.screen_w, rows)
-         bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-         next
-       end
-       d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
-       d_w = ((hi - wx_left) / span) * Mode7.screen_w - d_x0
-       if d_x0 > 0 && d_x0.round > 0
-         @dest_rect.set(0, sy_lo, d_x0.round, rows)
-         bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-       end
-       d_x1 = d_x0 + d_w
-       if d_x1.round < Mode7.screen_w
-         @dest_rect.set(d_x1.round, sy_lo, Mode7.screen_w - d_x1.round, rows)
-         bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-       end
-       if d_w.round > 0
-         @src_rect.set(lo, wy_int, hi - lo, Game_Map::TILE_HEIGHT)
-         @dest_rect.set(d_x0.round, sy_lo, d_w.round, rows)
-         bmp.stretch_blt(@dest_rect, @ground, @src_rect)
-       end
-     end
+        wy = 0 if wy < 0
+        wy = map_h_px - 1 if wy >= map_h_px
+        k = Mode7.hscale(sy)
+        span = Mode7.screen_w / k
+        wx_left = cx - Mode7.center_x / k
+        lo = [wx_left.floor, 0].max
+        hi = [(wx_left + span).ceil, ground_w].min
+        if hi <= lo
+          @dest_rect.set(0, sy, Mode7.screen_w, 1)
+          bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+          next
+        end
+        d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
+        d_w = ((hi - wx_left) / span) * Mode7.screen_w - d_x0
+        if d_x0 > 0 && d_x0.round > 0
+          @dest_rect.set(0, sy, d_x0.round, 1)
+          bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+        end
+        d_x1 = d_x0 + d_w
+        if d_x1.round < Mode7.screen_w
+          @dest_rect.set(d_x1.round, sy, Mode7.screen_w - d_x1.round, 1)
+          bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+        end
+        if d_w.round > 0
+          @src_rect.set(lo, wy.floor, hi - lo, 1)
+          @dest_rect.set(d_x0.round, sy, d_w.round, 1)
+          bmp.stretch_blt(@dest_rect, @ground, @src_rect)
+        end
+      end
+    end
    end
 
     # Color de relleno del cielo. Con panorama de MakerStudio queda TRANSPARENTE
@@ -385,7 +387,6 @@ class Mode7Renderer
       @old_color = @color.clone
     end
   end
-end
 
 # Swap del renderer en Scene_Map: usa Mode7Renderer o TilemapRenderer segun
 # el estado activo de la camara 2.5D.
