@@ -62,6 +62,7 @@ module Mode7
       # Cache de proyeccion invalidado al reconfigurar (cambia angulo/zoom).
       @hscale_cache = {}
       @world_y_cache = {}
+      @project_y_cache = {}
 
       # Prevencion matematica de division por cero
       return if @sin == 0
@@ -259,6 +260,17 @@ def cam_y
     end
 
     def project_y(wy)
+      @project_y_cache ||= {}
+      key = [wy, cam_y.floor]
+      return @project_y_cache[key] if @project_y_cache.key?(key)
+      result = _project_y_uncached(wy)
+      @project_y_cache[key] = result
+      # ponytail: limitar cache size (cam_y.floor cambia lentamente).
+      @project_y_cache.clear if @project_y_cache.size > 2000
+      result
+    end
+
+    def _project_y_uncached(wy)
       return pivot_y + affine_depth_scale((wy - cam_y) - pivot_y) if affine_mode?
       ry = wy - cam_y
       yi = @zoom * (ry - pivot_y)

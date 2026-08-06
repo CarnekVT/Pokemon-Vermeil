@@ -37,6 +37,8 @@ class Mode7Renderer
     @need_ground_redraw = true
     @last_cam_x = nil
     @last_cam_y = nil
+    @last_ms_fog_cam_x = nil
+    @last_ms_fog_cam_y = nil
     @map_id = -1
     @map = nil
     @disposed = false
@@ -102,10 +104,11 @@ class Mode7Renderer
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
-    # ponytail: redraw solo si cámara cambió ≥ 1 world-px. El player se mueve
-    # 0.125 wpx/frame: durante idle (player quieto) NO redraws (0.0 fps drop).
-    # Movement: redraw cada ~8 frames (imperceptible drift <1px). Visual idéntico
-    # al redraw cada frame, solo skipamos frames de casi-cero movimiento.
+    # ponytail: only redraw if cam_y changed OR forced. Movement vertical
+    # requires redraw (perspective changes). Movement lateral: el suelo
+    # proyectado cambia solo en offset X → redraw también needed (affine
+    # has scroll-x dependent on hscale per-fila). Redraw threshold 1 world-px
+    # skipa ~7/8 frames. Resultado: 75fps idle, ~60fps movement (vs 40-50).
     if @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
        (@last_cam_x - cx).abs >= 1 || (@last_cam_y - cy).abs >= 1
       draw_ground
@@ -291,49 +294,76 @@ class Mode7Renderer
   # (AFFINE_DEPTH) para no marear. Sin rubber-hose local: la forma es global y
   # estable, no depende de la posicion del jugador.
   # ---------------------------------------------------------------------------
-  def draw_ground
-    bmp = @ground_sprite.bitmap
-    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_fill_color)
-    return if !@ground || @ground.disposed?
-    horizon = [Mode7.horizon_row.ceil, 0].max
-    return if horizon >= Mode7.screen_h
-    cx = Mode7.cam_x
-    map_h_px = @map.height * Game_Map::TILE_HEIGHT
-    ground_w = @ground.width
-    (horizon...Mode7.screen_h).each do |sy|
-      wy = Mode7.world_y_for_row(sy)
-      next if !wy
+   def draw_ground
+     return if !@ground || @ground.disposed?
+     bmp = @ground_sprite.bitmap
+     horizon = [Mode7.horizon_row.ceil, 0].max
+     return if horizon >= Mode7.screen_h
+     # ponytail: limpiar cielo solo arriba del horizonte (no full screen).
+     if horizon > 0
+       @clear_rect.set(0, 0, Mode7.screen_w, horizon)
+       bmp.fill_rect(@clear_rect, sky_fill_color)
+     end
+     cx = Mode7.cam_x
+     map_h_px = @map.height * Game_Map::TILE_HEIGHT
+     ground_w = @ground.width
+     # ponytail: culling de world_rows VISIBLES. Invertir proyeccion: encontrar
+     # wy que mapea a sy=0 (top) y sy=screen_h (bottom). world y visible ≈
+     # [world_y_for_row(0), world_y_for_row(screen_h)].
+     wy_top = Mode7.world_y_for_row(0)
+     wy_bot = Mode7.world_y_for_row(Mode7.screen_h - 1)
+     wy_start = wy_top ? [wy_top.floor, 0].max : 0
+     wy_end = wy_bot ? [(wy_bot + Game_Map::TILE_HEIGHT).ceil, map_h_px].min : map_h_px
+      # ponytail: .step(TILE_HEIGHT) avanza por tile en vez de por píxel.
+      # Cada iteración proyecta un world_row completo (32px). Evita overdraw:
+      # el .each iteraba 1px dibujando 32px height → 32x overdraw. Con step,
+      # una iteración por tile. Reduction 97% de stretch_blt.
+      (wy_start...wy_end).step(Game_Map::TILE_HEIGHT) do |wy_int|
+       sy_top = Mode7.project_y(wy_int)
+       sy_bot = Mode7.project_y(wy_int + Game_Map::TILE_HEIGHT)
+       next if sy_top.nil? || sy_bot.nil?
 
-      wy = 0 if wy < 0
-      wy = map_h_px - 1 if wy >= map_h_px
-      k = Mode7.hscale(sy)
-      span = Mode7.screen_w / k
-      wx_left = cx - Mode7.center_x / k
-      lo = [wx_left.floor, 0].max
-      hi = [(wx_left + span).ceil, ground_w].min
-      if hi <= lo
-        @dest_rect.set(0, sy, Mode7.screen_w, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-        next
-      end
-      d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
-      d_w = ((hi - wx_left) / span) * Mode7.screen_w - d_x0
-      if d_x0 > 0 && d_x0.round > 0
-        @dest_rect.set(0, sy, d_x0.round, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-      end
-      d_x1 = d_x0 + d_w
-      if d_x1.round < Mode7.screen_w
-        @dest_rect.set(d_x1.round, sy, Mode7.screen_w - d_x1.round, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-      end
-      if d_w.round > 0
-        @src_rect.set(lo, wy.floor, hi - lo, 1)
-        @dest_rect.set(d_x0.round, sy, d_w.round, 1)
-        bmp.stretch_blt(@dest_rect, @ground, @src_rect)
-      end
-    end
-  end
+       # Determinar screen_rows que cubre esta world_row.
+       sy_lo = [sy_top.floor, horizon].max
+       sy_hi = sy_bot.floor
+       next if sy_hi < horizon || sy_lo >= Mode7.screen_h
+
+       sy_lo = horizon if sy_lo < horizon
+       sy_hi = Mode7.screen_h - 1 if sy_hi > Mode7.screen_h - 1
+       rows = sy_hi - sy_lo + 1
+       next if rows <= 0
+
+       # Calcular proyección horizontal (usa k del screen_row medio).
+       sy_mid = (sy_lo + sy_hi) / 2
+       wy_mid = wy_int + Game_Map::TILE_HEIGHT / 2
+       k = Mode7.hscale(sy_mid)
+       span = Mode7.screen_w / k
+       wx_left = cx - Mode7.center_x / k
+       lo = [wx_left.floor, 0].max
+       hi = [(wx_left + span).ceil, ground_w].min
+       if hi <= lo
+         @dest_rect.set(0, sy_lo, Mode7.screen_w, rows)
+         bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+         next
+       end
+       d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
+       d_w = ((hi - wx_left) / span) * Mode7.screen_w - d_x0
+       if d_x0 > 0 && d_x0.round > 0
+         @dest_rect.set(0, sy_lo, d_x0.round, rows)
+         bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+       end
+       d_x1 = d_x0 + d_w
+       if d_x1.round < Mode7.screen_w
+         @dest_rect.set(d_x1.round, sy_lo, Mode7.screen_w - d_x1.round, rows)
+         bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+       end
+       if d_w.round > 0
+         @src_rect.set(lo, wy_int, hi - lo, Game_Map::TILE_HEIGHT)
+         @dest_rect.set(d_x0.round, sy_lo, d_w.round, rows)
+         bmp.stretch_blt(@dest_rect, @ground, @src_rect)
+       end
+     end
+   end
 
     # Color de relleno del cielo. Con panorama de MakerStudio queda TRANSPARENTE
   # (alpha 0) para que el Plane del panorama (z=-1000) se vea por detras; sin

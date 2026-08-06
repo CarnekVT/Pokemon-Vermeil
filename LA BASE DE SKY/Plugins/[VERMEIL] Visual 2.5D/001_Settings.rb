@@ -58,7 +58,7 @@ module Mode7
     # Inclinacion de la camara en grados.
     # Debe ser BAJA para no distorsionar al mover el jugador en vertical
     # (efecto acordeon). 10-14 grados da sutil 3D sin romper el ambiente.
-    DEFAULT_ALPHA = 12
+    DEFAULT_ALPHA = 25
     # =======================================================================
     # PROYECCION: AFINE (pendiente fija + scroll) = la que usa Sky.
     # La cuadricula base jamas se deforma: es un plano liso matematico en Z=0.

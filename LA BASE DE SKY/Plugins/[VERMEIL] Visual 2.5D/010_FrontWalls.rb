@@ -200,20 +200,33 @@ class Mode7Renderer
   #    encaja pixel-a-pixel con el terreno y con muros adyacentes.
   #    oy=h => el sprite se ancla a la base proyectada.
   # ---------------------------------------------------------------------------
-  def update_walls
-    @wall_data.each do |data|
-      sprite, wx, wyb, h, _entries, pmax = data
+   def update_walls
+    # ponytail: culling espacial pre-proyectivo (asimétrico). radius_x=14,
+    # radius_y=18 compensan la compresión conica del 2.5D: ves ~20 tiles
+    # horizontales (640/32) y ~18 de profundidad con perspectiva.
+     cam_tx = Mode7.cam_x / Game_Map::TILE_WIDTH
+     cam_ty = Mode7.cam_y / Game_Map::TILE_HEIGHT
+   radius_x = 14  # 640px / 32px = 20 tiles; 14 desde center = margen 6 tiles
+     radius_y = 18
+     @wall_data.each do |data|
+       sprite, wx, wyb, h, _entries, pmax = data
+       # Culling rápido por coordenada del mundo (antes de project_y).
+       wt = wx / Game_Map::TILE_WIDTH
+       wty = (wyb - Game_Map::TILE_HEIGHT / 2.0) / Game_Map::TILE_HEIGHT
+       if (wt - cam_tx).abs > radius_x || (wty - cam_ty).abs > radius_y
+         sprite.visible = false
+         next
+       end
 
       syb = Mode7.project_y(wyb)
-      syt = Mode7.project_y(wyb - h)
-      next (sprite.visible = false) if syb.nil? || syt.nil?
+      next (sprite.visible = false) if syb.nil?
 
       k = Mode7.hscale(syb)
       next (sprite.visible = false) if k.nil? || k <= 0
 
       sx = Mode7.center_x + k * (wx - Mode7.cam_x)
 
-      # Culling estricto: salta cálculos si fuera de pantalla (margen 1 tile).
+      # Culling: skipear SOLO si fuera de pantalla (margen 1 tile).
       if syb < -Game_Map::TILE_HEIGHT ||
          syb > Mode7.screen_h + Game_Map::TILE_HEIGHT ||
          sx < -Game_Map::TILE_WIDTH ||
@@ -230,8 +243,12 @@ class Mode7Renderer
       # pero POR DEBAJO de always_on_top (999). Techo fijo 990 garantiza esto.
       # Prioridad 0 -> z = syb (por debajo del player normal, como suelo plano).
       sprite.z = (pmax > 0) ? [syb.round + 500, 990].min : syb.round
-      # ESCALA: zoom_x = zoom_y = k + overlap, igual que el suelo.
-      # Consistente con el horizontal (k + 0.04): estable, sin cortes al moverse.
+      # ESCALA: zoom_x = zoom_y = k + 0.04 (MISMO escala que el suelo en esa fila).
+      # k = hscale(sy) es scroll-stable (no fluctúa frame-a-frame) → el muro queda
+      # alineado al movement, idéntico al terreno, sin cortes ni desalineación.
+      # El +0.04 overlap evita huecos entre columnas adyacentes.
+      # NOTA: k es la DERIVADA de la proyección vertical → coincide pixel-a-pixel
+      # con la compresión del suelo en draw_ground.
       sprite.zoom_x = k + 0.04
       sprite.zoom_y = k + 0.04
       sprite.visible = true

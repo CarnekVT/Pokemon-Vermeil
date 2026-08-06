@@ -27,6 +27,17 @@ class Mode7Renderer
     end
   end
 
+  # Avanza los Planes de fog/panorama de MakerStudio solo si la cámara se movió.
+   # Evita llamar a MakerStudio.update_fog_sprites cada frame (costoso).
+   def update_ms_fog_if_moved
+     cam_x = Mode7.cam_x
+     cam_y = Mode7.cam_y
+     return if @last_ms_fog_cam_x == cam_x && @last_ms_fog_cam_y == cam_y
+     @last_ms_fog_cam_x = cam_x
+     @last_ms_fog_cam_y = cam_y
+     update_ms_fog
+   end
+
   # Avanza los Planes de fog/panorama de MakerStudio cada frame (scroll/zoom).
   def update_ms_fog
     if defined?(MakerStudio) && MakerStudio.respond_to?(:update_fog_sprites)
