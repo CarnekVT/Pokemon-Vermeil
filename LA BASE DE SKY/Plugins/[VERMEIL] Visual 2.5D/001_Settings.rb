@@ -60,17 +60,17 @@ module Mode7
     # (efecto acordeon). 10-14 grados da sutil 3D sin romper el ambiente.
     DEFAULT_ALPHA = 25
     # =======================================================================
-    # PROYECCION: AFINE (pendiente fija + scroll) = la que usa Sky.
-    # La cuadricula base jamas se deforma: es un plano liso matematico en Z=0.
-    # La elevacion se construye APILANDO GEOMETRIA (bloques extruidos por
-    # terrain tag), no inflando la proyeccion ni moviendo la camara.
+    # PROYECCION: AFINE, CONIC, o SKY (Cilíndrica)
     # =======================================================================
+    # :sky    -> Proyección cilíndrica (Mario Galaxy). Líneas paralelas, 
+    #            el mundo "rueda" hacia el horizonte. (Efecto Sky real).
+    # :affine -> Pendiente constante plana.
+    # :conic  -> Perspectiva real con punto de fuga.
+    PROJECTION = :sky
 
-    # :affine -> pendiente constante. El jugador solo desliza offset (scroll).
-    #            Cero estiramiento/encogido, cero mareo. (Recomendado.)
-    # :conic  -> perspectiva real, se re-proyecta al moverte. Mas "3D" pero
-    #            con la deformacion que produce el efecto acordeon.
-    PROJECTION = :affine
+    # Radio del "planeta" para el modo :sky (en píxeles).
+    # 800.0 a 1200.0 da una caída suave perfecta para RPGs.
+    PLANET_RADIUS = 900.0
 
     # Slope de inclinacion (px de pantalla por px de mundo) en afín.
     # Positivo abajo delante (mundo hacia abajo). Menor = mas plano.

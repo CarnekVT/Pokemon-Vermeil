@@ -36,6 +36,10 @@ module Mode7
       return Config::PROJECTION == :affine
     end
 
+    def sky_mode?
+      return Config::PROJECTION == :sky
+    end
+
     # Fila del punto de fuga (vanishing row) en pantalla. Negativa = fuera del
     # limite superior (horizonte elevado). Derivada del pivote y del angulo.
     # Solo tiene sentido en proyeccion conica; en afín puro se devuelve el techo.
@@ -147,6 +151,12 @@ module Mode7
     end
 
     def _hscale_uncached(sy)
+      if sky_mode?
+        sin_theta = (sy - pivot_y).to_f / Config::PLANET_RADIUS
+        sin_theta = sin_theta.clamp(-1.0, 1.0)
+        theta = Math.asin(sin_theta)
+        return Math.cos(theta) * @zoom
+      end
       if affine_mode?
         # La VERTICAL es conica real (heff). Para que una celda se proyecte
         # con el MISMO tamano en x que en y a cada profundidad, la escala
@@ -239,6 +249,15 @@ def cam_y
     end
 
     def project(wx, wy)
+      if sky_mode?
+        rx = wx - cam_x
+        ry = (wy - cam_y) - pivot_y
+        theta = ry.to_f / Config::PLANET_RADIUS
+        sy = pivot_y + (Config::PLANET_RADIUS * Math.sin(theta))
+        sx = center_x + (Math.cos(theta) * @zoom) * rx
+        return [sx, sy]
+      end
+
       if affine_mode?
         # Pivote = ojo: el jugador (wy-cam_y == pivot_y) queda en pivot_y.
         # La curva de profundidad es FIJA en pantalla -> scroll uniforme.
@@ -271,6 +290,11 @@ def cam_y
     end
 
     def _project_y_uncached(wy)
+      if sky_mode?
+        ry = (wy - cam_y) - pivot_y
+        theta = ry.to_f / Config::PLANET_RADIUS
+        return pivot_y + (Config::PLANET_RADIUS * Math.sin(theta))
+      end
       return pivot_y + affine_depth_scale((wy - cam_y) - pivot_y) if affine_mode?
       ry = wy - cam_y
       yi = @zoom * (ry - pivot_y)
@@ -311,6 +335,12 @@ def cam_y
     end
 
     def _world_y_for_row_uncached(sy)
+      if sky_mode?
+        sin_theta = (sy - pivot_y).to_f / Config::PLANET_RADIUS
+        sin_theta = sin_theta.clamp(-1.0, 1.0) # Previene errores de dominio
+        theta = Math.asin(sin_theta)
+        return cam_y + pivot_y + (theta * Config::PLANET_RADIUS)
+      end
       # AFFINE: inversa de project_y. Cuando la camara centra al jugador
       # (wy - cam_y == pivot_y) el jugador queda en pivot_y de la pantalla.
       return cam_y + pivot_y + affine_depth_unscale(sy - pivot_y) if affine_mode?
