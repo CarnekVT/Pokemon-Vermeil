@@ -31,7 +31,6 @@ class Mode7Renderer
     @ground_sprite.z = -1000
     @ground_sprite.bitmap = Bitmap.new(Mode7.screen_w, Mode7.screen_h)
     @ground = nil
-    @wall_data = []
     @autotile_cells = {}
     @need_build = true
     @need_ground_redraw = true
@@ -51,12 +50,6 @@ class Mode7Renderer
     @ground_sprite = nil
     @ground&.dispose
     @ground = nil
-    @wall_data.each do |data|
-      spr = data[0]
-      spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
-      spr.dispose
-    end
-    @wall_data.clear
     @tilesets.bitmaps.each_value { |b| b.dispose }
     @tilesets.bitmaps.clear
     @autotiles.bitmaps.each_value { |b| b.dispose }
@@ -108,7 +101,6 @@ class Mode7Renderer
       @last_cam_y = cy
       @need_ground_redraw = false
     end
-    update_walls
     update_ms_fog
     apply_tone_color
     @autotiles.changed = false
@@ -125,36 +117,43 @@ class Mode7Renderer
     ensure_extended_data
     @ground&.dispose
     @ground = Bitmap.new(@map.width * Game_Map::TILE_WIDTH, @map.height * Game_Map::TILE_HEIGHT)
-
-    @wall_data.each { |data| data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?; data[0].dispose }
-    @wall_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
 
+    # Pase 1: suelo. En celdas de muro se pinta SOLO lo que esta bajo el muro
+    # (unify < wall_layer); la cara del muro se hornea despues, por encima.
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = collect_cell_entries(tx, ty)
-
         if cell_has_wall?(entries)
           wall_layer = wall_layer_unify(entries)
           ground_entries = entries.select { |e| e[:unify] < wall_layer }
-          wall_entries = entries.select { |e| e[:unify] >= wall_layer }
-
           blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
-          # ponytail: una columna que falle (VRAM/limite) se degrada a suelo
-          # plano en vez de tumbar el build entero del mapa.
-          begin
-            make_column(tx, ty, wall_entries) unless wall_entries.empty?
-          rescue Exception
-            blt_ground_cell(tx, ty, wall_entries)
-            Console.echo_error("2.5D: columna fallida en (#{tx},#{ty}) - se pinta plana")
-          end
         else
           blt_ground_cell(tx, ty, entries)
         end
       end
     end
 
+    # Sombras de MakerStudio horneadas en el suelo (van DEBAJO de los muros).
     bake_ms_shadows
+
+    # Pase 2: extrusion de muros, pintada por encima de el suelo y las sombras.
+    @map.width.times do |tx|
+      @map.height.times do |ty|
+        entries = collect_cell_entries(tx, ty)
+        next if !cell_has_wall?(entries)
+        wall_layer = wall_layer_unify(entries)
+        wall_entries = entries.select { |e| e[:unify] >= wall_layer }
+        # ponytail: una columna que falle (VRAM/limite) se degrada a suelo
+        # plano en vez de tumbar el build entero del mapa.
+        begin
+          make_column(tx, ty, wall_entries) unless wall_entries.empty?
+        rescue Exception
+          blt_ground_cell(tx, ty, wall_entries)
+          Console.echo_error("2.5D: columna fallida en (#{tx},#{ty}) - se pinta plana")
+        end
+      end
+    end
 
     @need_build = false
     @need_ground_redraw = true
@@ -322,12 +321,10 @@ class Mode7Renderer
   def apply_tone_color
     if @old_tone != @tone
       @ground_sprite.tone = @tone
-      @wall_data.each { |data| data[0].tone = @tone }
       @old_tone = @tone.clone
     end
     if @old_color != @color
       @ground_sprite.color = @color
-      @wall_data.each { |data| data[0].color = @color }
       @old_color = @color.clone
     end
   end
