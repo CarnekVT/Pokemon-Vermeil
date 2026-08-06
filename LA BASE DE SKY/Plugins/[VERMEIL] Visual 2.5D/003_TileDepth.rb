@@ -102,10 +102,12 @@ class Mode7Renderer
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
-    # ponytail: umbral de 1 píxel para evitar redibujos cada frame. El movement
-    # del player causa cambios sutiles; con umbral evitamos stretch_blt por fila
-    # hasta que la cámara se mueva lo suficiente como para notar el cambio.
-    if @need_ground_redraw || (@last_cam_x - cx).abs >= 1 || (@last_cam_y - cy).abs >= 1
+    # ponytail: redraw solo si cámara cambió ≥ 1 world-px. El player se mueve
+    # 0.125 wpx/frame: durante idle (player quieto) NO redraws (0.0 fps drop).
+    # Movement: redraw cada ~8 frames (imperceptible drift <1px). Visual idéntico
+    # al redraw cada frame, solo skipamos frames de casi-cero movimiento.
+    if @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
+       (@last_cam_x - cx).abs >= 1 || (@last_cam_y - cy).abs >= 1
       draw_ground
       @last_cam_x = cx
       @last_cam_y = cy

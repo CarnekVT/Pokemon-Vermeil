@@ -61,7 +61,7 @@ module Mode7
 
       # Cache de proyeccion invalidado al reconfigurar (cambia angulo/zoom).
       @hscale_cache = {}
-      @project_y_cache = {}
+      @world_y_cache = {}
 
       # Prevencion matematica de division por cero
       return if @sin == 0
@@ -289,6 +289,16 @@ def cam_y
     end
 
     def world_y_for_row(sy)
+      # Cache por (sy, cam_y) - cam_y es constante en idle, cambia poco en movement.
+      # Evita recalculo de la conica por fila en draw_ground.
+      key = [sy, cam_y.floor]
+      return @world_y_cache[key] if @world_y_cache && @world_y_cache.key?(key)
+      result = _world_y_for_row_uncached(sy)
+      @world_y_cache[key] = result if @world_y_cache
+      result
+    end
+
+    def _world_y_for_row_uncached(sy)
       # AFFINE: inversa de project_y. Cuando la camara centra al jugador
       # (wy - cam_y == pivot_y) el jugador queda en pivot_y de la pantalla.
       return cam_y + pivot_y + affine_depth_unscale(sy - pivot_y) if affine_mode?
