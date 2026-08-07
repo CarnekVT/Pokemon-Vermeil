@@ -26,7 +26,7 @@ class RPG::Weather
   private
 
   def force_weather_in_front
-    return unless $scene.is_a?(Scene_Map) && Mode7.active_now?
+    return unless $scene.is_a?(Scene_Map) && Mode7.rendering_now?
 
     # Aseguramos que el viewport del clima este por encima de cualquier capa del mapa
     if @viewport && !@viewport.disposed?

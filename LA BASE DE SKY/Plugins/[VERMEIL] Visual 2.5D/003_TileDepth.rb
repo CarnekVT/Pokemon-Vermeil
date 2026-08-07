@@ -2,10 +2,10 @@
 # [VERMEIL] Visual 2.5D - 003_TileDepth.rb
 # Renderer de suelo en perspectiva (extrusion vertical del piso 2.5D).
 # Swap del renderer en Scene_Map (TilemapRenderer <-> Mode7Renderer).
+# Pase 2 SIN agrupador horizontal (run): cada tile se eleva en su propia
+# columna para seguir la curva exacta del terreno sin despegarse.
 #===============================================================================
 
-# Replica minima de un TileSprite para reutilizar set_src_rect de las caches
-# de TilemapRenderer.
 class Mode7Renderer
   class ScratchTile
     attr_accessor :filename
@@ -27,12 +27,15 @@ class Mode7Renderer
     @scratch  = ScratchTile.new
     @src_rect  = Rect.new(0, 0, 1, 1)
     @dest_rect = Rect.new(0, 0, 1, 1)
+    @clear_rect = Rect.new(0, 0, 1, 1)
     @ground_sprite = Sprite.new(@viewport)
     @ground_sprite.z = -1000
     @ground_sprite.bitmap = Bitmap.new(Mode7.screen_w, Mode7.screen_h)
     @ground = nil
     @wall_data = []
     @autotile_cells = {}
+    @wall_cells = {}
+    @walls_known = true
     @need_build = true
     @need_ground_redraw = true
     @last_cam_x = nil
@@ -46,6 +49,11 @@ class Mode7Renderer
   end
 
   def disposed?; return @disposed; end
+
+  def wall_cell_at?(x, y)
+    return false if @disposed || !@walls_known
+    return !@wall_cells[[x.to_i, y.to_i]].nil?
+  end
 
   def dispose
     return if disposed?
@@ -63,6 +71,10 @@ class Mode7Renderer
     @tilesets.bitmaps.clear
     @autotiles.bitmaps.each_value { |b| b.dispose }
     @autotiles.bitmaps.clear
+    if @tile_bake_cache
+      @tile_bake_cache.each_value { |arr| arr[0].dispose if arr && arr[0] && !arr[0].disposed? }
+      @tile_bake_cache = nil
+    end
     @disposed = true
   end
 
@@ -88,7 +100,6 @@ class Mode7Renderer
     @need_ground_redraw = true
   end
 
-  # Fuerza el redibujado del suelo en el proximo update.
   def invalidate_ground
     @need_ground_redraw = true
   end
@@ -104,11 +115,6 @@ class Mode7Renderer
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
-    # ponytail: only redraw if cam_y changed OR forced. Movement vertical
-    # requires redraw (perspective changes). Movement lateral: el suelo
-    # proyectado cambia solo en offset X → redraw también needed (affine
-    # has scroll-x dependent on hscale per-fila). Redraw threshold 1 world-px
-    # skipa ~7/8 frames. Resultado: 75fps idle, ~60fps movement (vs 40-50).
     if @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
        (@last_cam_x - cx).abs >= 1 || (@last_cam_y - cy).abs >= 1
       draw_ground
@@ -124,9 +130,6 @@ class Mode7Renderer
 
   private
 
-  # ---------------------------------------------------------------------------
-  # Ensamblaje del suelo: extruye cada celda del mapa a un bitmap plano.
-  # ---------------------------------------------------------------------------
   def build
     @map_id = $game_map.map_id
     @map = $game_map
@@ -136,49 +139,52 @@ class Mode7Renderer
     @wall_data.each { |data| data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?; data[0].dispose }
     @wall_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
-    @entry_cache = {}  # Cache de entries por (tx,ty) para evitar recomputar
-    @terrain_tag_cache = {}  # Cache de terrain_tag por tid:tileset_id
+    @entry_cache = {}
+    @terrain_tag_cache = {}
+    @wall_cells = {}
+    @walls_known = true
 
-    # Pase 1: suelo. En celdas con muro se pinta SOLO lo que esta bajo el muro
-    # (unify < wall_layer); la cara del muro (y todo lo apilado encima, incluidos
-    # tiles de prioridad 1+ sin tag) se extruye como sprite en el pase 2.
+    # Pase 1: suelo plano. En celdas con muro se pinta SOLO lo que esta bajo el
+    # muro (unify < wall_layer); la cara del muro se extruye en el pase 2.
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = collect_cell_entries(tx, ty)
-        @entry_cache[[tx, ty]] = entries  # cache para el pase 2
+        @entry_cache[[tx, ty]] = entries
         if cell_has_wall?(entries)
           wall_layer = wall_layer_unify(entries)
           ground_entries = entries.select { |e| e[:unify] < wall_layer }
           blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
         else
-          # Sin muro: prioridad 0 -> suelo plano (z bajo, dibuja bajo el player);
-          # la prioridad +1 se hornea tambien en el suelo porque cualquier sprite
-          # de prioridad sera un muro extruido mas tarde (pase 2) si aplica.
           blt_ground_cell(tx, ty, entries)
         end
       end
     end
 
-    # Sombras de MakerStudio horneadas en el suelo (van DEBAJO de los muros).
     bake_ms_shadows
 
-    # Pase 2: extrusion de muros (tag WALL_TERRAIN_TAG_HEIGHT, o prioridad 1+),
-    # como sprites por encima del suelo y las sombras. Se extruyen JUNTOS todas
-    # las capas >= wall_layer de una celda (cara del muro + adornos encima),
-    # asi no se cortan ni se separan al cambiar de angulo.
+    # Pase 2: muros. Una columna POR TILE para seguir la curva del terreno.
     @map.width.times do |tx|
       @map.height.times do |ty|
-        entries = @entry_cache[[tx, ty]]  # usa cached del pase 1
-        next if !cell_has_wall?(entries)
-        wall_layer = wall_layer_unify(entries)
-        wall_entries = entries.select { |e| e[:unify] >= wall_layer }
-        # ponytail: una columna que falle (VRAM/limite) se degrada a suelo
-        # plano en vez de tumbar el build entero del mapa.
-        begin
-          make_column(tx, ty, wall_entries) unless wall_entries.empty?
-        rescue Exception
-          blt_ground_cell(tx, ty, wall_entries)
-          Console.echo_error("2.5D: columna fallida en (#{tx},#{ty}) - se pinta plana")
+        entries = @entry_cache[[tx, ty]]
+        if cell_has_wall?(entries)
+          @wall_cells[[tx, ty]] = true
+          wall_layer = wall_layer_unify(entries)
+          wall_entries = entries.select { |e| e[:unify] >= wall_layer }
+
+          lower_entries = wall_entries.select { |e| e[:priority] <= 1 }
+          top_entries   = wall_entries.select { |e| e[:priority] >= 2 }
+
+          begin
+            # Altura global de la columna para que base y techo embonen
+            max_h = wall_entries.map { |e| e[:unify] }.max.to_i - wall_layer + 1
+            max_h = [wall_layer_height(wall_entries), max_h].max
+
+            make_column(tx, ty, lower_entries, max_h, wall_layer, :dynamic) unless lower_entries.empty?
+            make_column(tx, ty, top_entries, max_h, wall_layer, :always_top) unless top_entries.empty?
+          rescue Exception
+            blt_ground_cell(tx, ty, wall_entries)
+            Console.echo_error("2.5D: columna fallida en (#{tx},#{ty}) - se pinta plana")
+          end
         end
       end
     end
@@ -189,28 +195,50 @@ class Mode7Renderer
     @old_color = nil
   end
 
-# (El pre-render en un solo bitmap y scroll no suma: la forma de Dibujo
-  # del mundo ya es fija en la proyeccion afine/slope elegida; ver draw_ground.)
-
-  # Completa la recopilacion de entradas de una celda (nativas + MakerStudio).
   def collect_cell_entries(tx, ty)
     entries = []
     seen = {}
     3.times do |layer|
-      tid = @map.data[tx, ty, layer]
-      next if !tid || tid <= 0
-      entry = make_native_entry(tid, layer)
+      entry = make_native_entry_with_props(tx, ty, layer)
+      next if !entry
       append_entry(entries, seen, entry)
     end
     collect_extended_entries(tx, ty, entries, seen)
     entries
   end
 
+  def make_native_entry_with_props(tx, ty, layer)
+    if defined?(MakerStudio) && MakerStudio.respond_to?(:native_props_at)
+      result = MakerStudio.native_props_at(@map_id, @map.width, layer, ty * @map.width + tx)
+      props = result.is_a?(Array) ? result[0] : result
+      if props
+        if props["autotile_name"] || props["tileset_id"]
+          return make_native_prop_entry(tx, ty, layer, props)
+        end
+        # Capa natitiva con solo efectos visuales (hue/sat/lighting/opacity/
+        # rotation...): se construye la entry nativa y se estiliza para que los
+        # efectos de MS tambien se apliquen en capas 1-3.
+        tid = @map.data[tx, ty, layer]
+        return nil if !tid || tid <= 0
+        entry = make_native_entry(tid, layer)
+        return nil if !entry
+        if MakerStudio.respond_to?(:resolve_band_priority)
+          entry[:priority] = MakerStudio.resolve_band_priority(@map, tid, props)
+        end
+        stylize_entry(entry, props, layer)
+        entry[:tileset_id] ||= @map.tileset_id
+        return entry
+      end
+    end
+    tid = @map.data[tx, ty, layer]
+    return nil if !tid || tid <= 0
+    make_native_entry(tid, layer)
+  end
+
   def blt_ground_cell(tx, ty, entries)
     entries.sort_by { |e| e[:unify] }.each do |e|
       next if !e[:bitmap]
-      op = e[:opacity] || 255
-      @ground.blt(tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT, e[:bitmap], e[:src_rect], op)
+      blt_entry_into(@ground, tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT, e, e[:opacity] || 255)
       if e[:animated]
         @autotile_cells[e[:filename]] ||= []
         cells = @autotile_cells[e[:filename]]
@@ -226,7 +254,6 @@ class Mode7Renderer
     return @scratch.src_rect.clone
   end
 
-  # Entrada desde las capas nativas del mapa (autotiles y tileset base).
   def make_native_entry(tid, layer)
     if tid < TilemapRenderer::TILESET_START_ID
       filename = autotile_name_for(tid)
@@ -287,89 +314,64 @@ class Mode7Renderer
     return extra[1][tid - single_start]
   end
 
-# ---------------------------------------------------------------------------
-  # Dibuja el cielo + el suelo proyectado fila a fila, con relleno de bordes.
-  # La proyeccion usa la CONICA DE CAMARA FIJA de Mode7 (project/world_y_for_row):
-  # arriba lejano se encoge, abajo cercano se estira, con deformacion SUTIL
-  # (AFFINE_DEPTH) para no marear. Sin rubber-hose local: la forma es global y
-  # estable, no depende de la posicion del jugador.
-  # ---------------------------------------------------------------------------
-   def draw_ground
-     return if !@ground || @ground.disposed?
-     bmp = @ground_sprite.bitmap
-     horizon = [Mode7.horizon_row.ceil, 0].max
-     return if horizon >= Mode7.screen_h
-     # ponytail: limpiar cielo solo arriba del horizonte (no full screen).
-     if horizon > 0
-       @clear_rect.set(0, 0, Mode7.screen_w, horizon)
-       bmp.fill_rect(@clear_rect, sky_fill_color)
-     end
-     cx = Mode7.cam_x
-     map_h_px = @map.height * Game_Map::TILE_HEIGHT
-     ground_w = @ground.width
-     # ponytail: culling de world_rows VISIBLES. Invertir proyeccion: encontrar
-     # wy que mapea a sy=0 (top) y sy=screen_h (bottom). world y visible ≈
-     # [world_y_for_row(0), world_y_for_row(screen_h)].
-     wy_top = Mode7.world_y_for_row(0)
-     wy_bot = Mode7.world_y_for_row(Mode7.screen_h - 1)
-     wy_start = wy_top ? [wy_top.floor, 0].max : 0
-     wy_end = wy_bot ? [(wy_bot + Game_Map::TILE_HEIGHT).ceil, map_h_px].min : map_h_px
-      # ponytail: .step(TILE_HEIGHT) avanza por tile en vez de por píxel.
-      # Cada iteración proyecta un world_row completo (32px). Evita overdraw:
-      # el .each iteraba 1px dibujando 32px height → 32x overdraw. Con step,
-      # una iteración por tile. Reduction 97% de stretch_blt.
-      bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_fill_color)
-      return if !@ground || @ground.disposed?
-      horizon = [Mode7.horizon_row.ceil, 0].max
-      return if horizon >= Mode7.screen_h
-      # ponytail: limpiar cielo solo arriba del horizonte (no full screen).
-      if horizon > 0
-        @clear_rect.set(0, 0, Mode7.screen_w, horizon)
-        bmp.fill_rect(@clear_rect, sky_fill_color)
-      end
-      cx = Mode7.cam_x
-      map_h_px = @map.height * Game_Map::TILE_HEIGHT
-      ground_w = @ground.width
-      # escanear filas de pantalla visibles (0..screen_h-1). Cada fila = 1 pixel vertical.
-      (horizon...Mode7.screen_h).each do |sy|
-        wy = Mode7.world_y_for_row(sy)
-        next if !wy
+  def draw_ground
+    return if !@ground || @ground.disposed?
+    bmp = @ground_sprite.bitmap
+    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_fill_color)
+    horizon = [Mode7.horizon_row.ceil, 0].max
+    return if horizon >= Mode7.screen_h
+    if horizon > 0
+      @clear_rect.set(0, 0, Mode7.screen_w, horizon)
+      bmp.fill_rect(@clear_rect, sky_fill_color)
+    end
+    cx = Mode7.cam_x
+    map_h_px = @map.height * Game_Map::TILE_HEIGHT
+    ground_w = @ground.width
+    (horizon...Mode7.screen_h).each do |sy|
+      wy = Mode7.world_y_for_row(sy)
+      next if !wy
 
-        wy = 0 if wy < 0
-        wy = map_h_px - 1 if wy >= map_h_px
-        k = Mode7.hscale(sy)
-        span = Mode7.screen_w / k
-        wx_left = cx - Mode7.center_x / k
-        lo = [wx_left.floor, 0].max
-        hi = [(wx_left + span).ceil, ground_w].min
-        if hi <= lo
-          @dest_rect.set(0, sy, Mode7.screen_w, 1)
-          bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-          next
-        end
-        d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
-        d_w = ((hi - wx_left) / span) * Mode7.screen_w - d_x0
-        if d_x0 > 0 && d_x0.round > 0
-          @dest_rect.set(0, sy, d_x0.round, 1)
-          bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-        end
-        d_x1 = d_x0 + d_w
-        if d_x1.round < Mode7.screen_w
-          @dest_rect.set(d_x1.round, sy, Mode7.screen_w - d_x1.round, 1)
-          bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-        end
-        if d_w.round > 0
-          @src_rect.set(lo, wy.floor, hi - lo, 1)
-          @dest_rect.set(d_x0.round, sy, d_w.round, 1)
-          bmp.stretch_blt(@dest_rect, @ground, @src_rect)
+      wy = 0 if wy < 0
+      wy = map_h_px - 1 if wy >= map_h_px
+      k = Mode7.hscale(sy)
+      span = Mode7.screen_w / k
+      wx_left = cx - Mode7.center_x / k
+      lo = [wx_left.floor, 0].max
+      hi = [(wx_left + span).ceil, ground_w].min
+      if hi <= lo
+        @dest_rect.set(0, sy, Mode7.screen_w, 1)
+        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+        next
+      end
+      d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
+      d_w = ((hi - wx_left) / span) * Mode7.screen_w - d_x0
+      if d_x0 > 0 && d_x0.round > 0
+        @dest_rect.set(0, sy, d_x0.round, 1)
+        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+      end
+      d_x1 = d_x0 + d_w
+      if d_x1.round < Mode7.screen_w
+        @dest_rect.set(d_x1.round, sy, Mode7.screen_w - d_x1.round, 1)
+        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+      end
+      if d_w.round > 0
+        @src_rect.set(lo, wy.floor, hi - lo, 1)
+        @dest_rect.set(d_x0.round, sy, d_w.round, 1)
+        bmp.stretch_blt(@dest_rect, @ground, @src_rect)
+
+        # Niebla (inerte hasta que 006_Atmosphere defina fog_alpha)
+        if Mode7.respond_to?(:fog_alpha)
+          alpha = Mode7.fog_alpha(sy)
+          if alpha > 0
+            @fog_color_obj ||= Mode7::Config::FOG_COLOR.clone
+            @fog_color_obj.alpha = alpha
+            bmp.fill_rect(@dest_rect, @fog_color_obj)
+          end
         end
       end
     end
-   end
+  end
 
-    # Color de relleno del cielo. Con panorama de MakerStudio queda TRANSPARENTE
-  # (alpha 0) para que el Plane del panorama (z=-1000) se vea por detras; sin
-  # panorama usa SKY_COLOR. Un Color con alpha 0 rellena "borrando" el bitmap.
   def sky_fill_color
     return Mode7::Config::SKY_COLOR if !ms_has_panorama?
     return Color.new(0, 0, 0, 0)
@@ -387,6 +389,7 @@ class Mode7Renderer
       @old_color = @color.clone
     end
   end
+end
 
 # Swap del renderer en Scene_Map: usa Mode7Renderer o TilemapRenderer segun
 # el estado activo de la camara 2.5D.
@@ -394,7 +397,7 @@ class Scene_Map
   alias_method :_VERMEIL_25D_orig_createSpritesets, :createSpritesets
 
   def createSpritesets
-    wanted = (Mode7.active_now?) ? Mode7Renderer : TilemapRenderer
+    wanted = Mode7.rendering_now? ? Mode7Renderer : TilemapRenderer
     if !@map_renderer || @map_renderer.disposed? || !@map_renderer.is_a?(wanted)
       @map_renderer.dispose if @map_renderer && !@map_renderer.disposed?
       @map_renderer = wanted.new(Spriteset_Map.viewport)

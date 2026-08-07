@@ -29,3 +29,8 @@ SnapEdges = true
 BattleBack = NewBark
 WildBattleBGM = HGSS Wild Pokemon Pokestir
 Environment = Grass
+#-------------------------------
+[077]   # Test 2.5d
+Name = Test 2.5d
+Weather = AutumnLeavesFalling,100
+SnapEdges = true

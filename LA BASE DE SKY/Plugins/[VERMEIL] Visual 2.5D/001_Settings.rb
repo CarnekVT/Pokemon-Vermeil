@@ -53,12 +53,11 @@ module Mode7
     # Fila de pantalla (fraccion) donde queda anclado el jugador.
     # 0.50 = centro exacto de pantalla. Combinado con cam_y anclada a pivot_y,
     # mantiene el centro de camara == centro matematico de proyeccion.
-    PIVOT_RATIO   = 0.50
+    # Jugador anclado ~62% abajo (look Animal Crossing / Sky Flyer).
+    PIVOT_RATIO   = 0.62
 
-    # Inclinacion de la camara en grados.
-    # Debe ser BAJA para no distorsionar al mover el jugador en vertical
-    # (efecto acordeon). 10-14 grados da sutil 3D sin romper el ambiente.
-    DEFAULT_ALPHA = 25
+    # Inclinacion de la camara en grados (roll del cilindro Sky).
+    DEFAULT_ALPHA = 30
     # =======================================================================
     # PROYECCION: AFINE, CONIC, o SKY (Cilíndrica)
     # =======================================================================
@@ -69,8 +68,8 @@ module Mode7
     PROJECTION = :sky
 
     # Radio del "planeta" para el modo :sky (en píxeles).
-    # 800.0 a 1200.0 da una caída suave perfecta para RPGs.
-    PLANET_RADIUS = 900.0
+    # Menor radio = mayor curvatura/perspectiva hacia el horizonte.
+    PLANET_RADIUS = 380.0
 
     # Slope de inclinacion (px de pantalla por px de mundo) en afín.
     # Positivo abajo delante (mundo hacia abajo). Menor = mas plano.
@@ -118,6 +117,9 @@ module Mode7
     # Zoom base (1.0 = escala natural del pixel art).
     DEFAULT_ZOOM  = 1
 
+    # Frames al activar/desactivar 2.5D desde Opciones o debug.
+    MODE_TRANSITION_FRAMES = 1
+
     # Altura del ojo (normalmente la altura de pantalla).
     DISTANCE_H    = Settings::SCREEN_HEIGHT
 
@@ -143,6 +145,32 @@ module Mode7
       :Mode7Tag  => 1,
       :None      => 1
     }
+
+    # =======================================================================
+    # ELEVACION FALSO 3D (apilado de capas sobre el cilindro)
+    # =======================================================================
+
+    # Px de mundo que "sube" cada capa extra (unify) por encima del suelo
+    # plano (capa 1). Sustituye al viejo `unify * 16`. Mayor = mas relieve.
+    ELEVATION_PER_UNIFY = 12
+
+    # Px de mundo plano extra que se coloca en la base de cada columna
+    # elevada para que "apoye" en el suelo y no parezca pajarse en el aire.
+    ELEVATION_FLOOR_PAD = 4
+
+    # Radio (en tiles) en pantalla donde se sigue spawncndeando/sposeando
+    # objetos/muros del filtro WALL_TERRAIN_TAG_HEIGHT. Antes era 14/18.
+    WALL_SPAWN_RADIUS_X = 26
+    WALL_SPAWN_RADIUS_Y = 34
+
+    # =======================================================================
+    # PASABILIDAD MECANICA vs ELEVACION VISUAL
+    # Si true, las celdas con un muro extruido (tile con unify de muro o terrain
+    # tag alto) quedan INTRANSITABLES para jugador y eventos: no se pueden
+    # atravesar columnas/elevaciones, igual que H-Mode7 lo hace con sus muros
+    # verticales. False = el motor sigue ignorando la extrusion (solo visual).
+    # =======================================================================
+    WALL_BLOCKS_MOVEMENT = true
   end
 end
 
