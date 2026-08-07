@@ -45,9 +45,9 @@ class Game_Character
 end
 
 # --- NUEVO: Escala Dinamica de Sprites ---
-# Adapta el tamanio del personaje a la distancia de la camara usando la misma
-# funcion SKY que usa el renderer. Con SKY_SPRITE_SCALE=0 el interior conserva
-# el tamano del personaje y evita el efecto de "embudo" hacia el fondo.
+# Adapta el tamanio del personaje a la distancia de la camara, igual que los
+# muros: usa la misma base_hscale de las columnas, asi se encoje al caminar
+# hacia el horizonte y crece al acercarse, manteniendo la escala coherente.
 class Sprite_Character < RPG::Sprite
   alias_method :_VERMEIL_25D_orig_update_scale, :update unless method_defined?(:_VERMEIL_25D_orig_update_scale)
 

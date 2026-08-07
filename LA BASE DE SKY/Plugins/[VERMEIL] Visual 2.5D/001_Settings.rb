@@ -67,21 +67,6 @@ module Mode7
     # :conic  -> Perspectiva real con punto de fuga.
     PROJECTION = :sky
 
-    # =======================================================================
-    # PROYECCION POR MAPA (interiores => affin plano, exteriores => sky)
-    # La proyeccion global (PROJECTION) se puede FORZAR por mapa via flags de
-    # metadata (PBS: map_metadata.txt, columna Flags). Asi los interiores usan
-    # proyeccion afin plana (muros billboard encajados al 100%, sin panqueque
-    # ni huecos negros) y el exterior mantiene la curva :sky.
-    #   "Mode7Affine" -> espacia el mapa en proyeccion plana.
-    #   "Mode7Sky"    -> fuerza la curva cilindrica.
-    MAP_FLAG_AFFINE = "mode7afine"
-    MAP_FLAG_SKY    = "mode7sky"
-
-    # Si true, los mapas marcados como interiores (Outdoor=false en metadata)
-    # se proyectan SIEMPRE como plano afin (recomendado: casas, cuevas).
-    AUTO_INDOOR_AFFINE = true
-
     # Radio del "planeta" para el modo :sky (en píxeles).
     # Menor radio = mayor curvatura/perspectiva hacia el horizonte.
     PLANET_RADIUS = 380.0
@@ -111,39 +96,6 @@ module Mode7
     #   ~0.15-0.3 -> deformacion suave (recomendado: no marea, da 3D sutil)
     #   ~1.0      -> conica plena (perspectiva marcada tipo Gen5)
     AFFINE_DEPTH      = 0.4
-
-    # Fuerza de la perspectiva afine (0..1). Multiplica el seno efectivo de la
-    # camara en la proyeccion. Con 1.0 = perspectiva original (crecimiento
-    # cuadratico 1/d^2 -> "embudo" en las filas cercanas, horizonte cercano).
-    # Con valores bajos el terreno se aplana, las filas apenas cambian de tamano
-    # y el horizonte se aleja (look Sky / Animal Crossing). 0.0 = afin puro plano
-    # (zoom constante por fila, sin perspectiva). Se aplica CONSISTENTEMENTE en
-    # scale/unscale/hscale/horizon para no rasgar el terreno.
-    AFFINE_PERSPECTIVE = 0.0
-
-    # =======================================================================
-    # SKY V2 - PROYECCION CILINDRICA HIBRIDA (look Sky / Animal Crossing)
-    # Terreno = mezcla de curva seno + tramo lineal; compresion horizontal de
-    # las filas lejanas; sprites con escala propia. Todos los knobs son 0..1.
-    # =======================================================================
-
-    # Peso de la curvatura seno (0..1). El resto de la curva va a la parte
-    # lineal. 1.0 = seno puro (cilindro rigido, efecto "banana");
-    # ~0.65 = terreno hbrido, menos curva en la cercania; 0.0 = recta.
-    SKY_CURVE = 0.65
-
-    # Peso lineal (0..1). Completa el 1.0 de la curva. Aplana la zona cercana
-    # y alarga la distancia al horizonte. Usa 1.0 - SKY_CURVE si lo prefieres.
-    SKY_LINEAR = 0.35
-
-    # Compresion horizontal de las filas lejanas (0..1). El ancho de una fila
-    # a distancia theta es 1 - SKY_WIDTH_PERSPECTIVE*(1 - cos(theta)): 1.0
-    # cerca, (1 - SKY_WIDTH_PERSPECTIVE) lejos. Mata el efecto "banana".
-    SKY_WIDTH_PERSPECTIVE = 0.0
-
-    # Escala de sprites/muros (0..1). Tamano = 1 - SKY_SPRITE_SCALE*(1-cos):
-    # 1.0 cerca, (1 - SKY_SPRITE_SCALE) lejos. Independiente del ancho del suelo.
-    SKY_SPRITE_SCALE = 0.0
 
     # FOV horizontal en grados. Controla el aplanado de la cuadricula,
     # desacoplado del pitch:
@@ -219,16 +171,6 @@ module Mode7
     # verticales. False = el motor sigue ignorando la extrusion (solo visual).
     # =======================================================================
     WALL_BLOCKS_MOVEMENT = true
-
-    # =======================================================================
-    # NIEBLA DE PROFUNDIDAD (distance fog hacia el horizonte)
-    # Rampa de alpha por fila de pantalla: 0 en el pivot del jugador, maximo en
-    # el horizonte. Los modulos 2.5D (suelo, muros, personajes) la consultan via
-    # Mode7.fog_alpha(screen_y) para difuminar lo lejano.
-    # =======================================================================
-    FOG_ENABLED   = false
-    FOG_MAX_ALPHA = 120
-    FOG_COLOR     = Color.new(160, 200, 230)
   end
 end
 

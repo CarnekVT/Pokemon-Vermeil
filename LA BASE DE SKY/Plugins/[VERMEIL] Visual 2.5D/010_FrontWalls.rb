@@ -199,19 +199,15 @@ class Mode7Renderer
       sprite.x = sx
       sprite.y = syb
 
-      # La profundidad SIEMPRE sale de la base del muro. Forzar los techos a
-      # z=9999 hacia que cualquier pieza de prioridad alta quedara delante del
-      # jugador, incluso cuando la pared estaba realmente detras de el.
-      # Conservamos un pequeno sesgo solo para las piezas marcadas como
-      # always_top, pero nunca saltamos al extremo 9999.
-      z_bias = (z_behavior == :always_top) ? 1 : 0
-      sprite.z = syb.round + z_bias
+      if z_behavior == :always_top
+        sprite.z = 9999
+      else
+        sprite.z = syb.round
+      end
 
-      # En SKY con SKY_SPRITE_SCALE=0 el tamano es ortografico: la pared no se
-      # estrecha hacia el fondo. El valor k sigue viniendo del mismo proyector
-      # para que, si el usuario vuelve a activar escala, no haya otra formula.
-      sprite.zoom_x = k
-      sprite.zoom_y = k
+      # Escala estable (sin distorsion vertical)
+      sprite.zoom_x = k + 0.04
+      sprite.zoom_y = k + 0.04
 
       # Niebla (inerte hasta que 006_Atmosphere defina fog_alpha)
       if Mode7.respond_to?(:fog_alpha)
