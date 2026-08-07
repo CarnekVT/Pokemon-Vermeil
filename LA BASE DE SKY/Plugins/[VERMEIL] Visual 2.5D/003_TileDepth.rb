@@ -317,56 +317,46 @@ class Mode7Renderer
   def draw_ground
     return if !@ground || @ground.disposed?
     bmp = @ground_sprite.bitmap
-    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_fill_color)
-    horizon = [Mode7.horizon_row.ceil, 0].max
-    return if horizon >= Mode7.screen_h
-    if horizon > 0
-      @clear_rect.set(0, 0, Mode7.screen_w, horizon)
-      bmp.fill_rect(@clear_rect, sky_fill_color)
-    end
+    bmp.clear
+
+    sky = sky_fill_color
+    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky) if sky.alpha > 0
+
     cx = Mode7.cam_x
     map_h_px = @map.height * Game_Map::TILE_HEIGHT
     ground_w = @ground.width
-    (horizon...Mode7.screen_h).each do |sy|
+
+    (0...Mode7.screen_h).each do |sy|
       wy = Mode7.world_y_for_row(sy)
-      next if !wy
+      in_bounds = wy && wy >= 0 && wy < map_h_px
 
-      wy = 0 if wy < 0
-      wy = map_h_px - 1 if wy >= map_h_px
-      k = Mode7.hscale(sy)
-      span = Mode7.screen_w / k
-      wx_left = cx - Mode7.center_x / k
-      lo = [wx_left.floor, 0].max
-      hi = [(wx_left + span).ceil, ground_w].min
-      if hi <= lo
-        @dest_rect.set(0, sy, Mode7.screen_w, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-        next
-      end
-      d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
-      d_w = ((hi - wx_left) / span) * Mode7.screen_w - d_x0
-      if d_x0 > 0 && d_x0.round > 0
-        @dest_rect.set(0, sy, d_x0.round, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-      end
-      d_x1 = d_x0 + d_w
-      if d_x1.round < Mode7.screen_w
-        @dest_rect.set(d_x1.round, sy, Mode7.screen_w - d_x1.round, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
-      end
-      if d_w.round > 0
-        @src_rect.set(lo, wy.floor, hi - lo, 1)
-        @dest_rect.set(d_x0.round, sy, d_w.round, 1)
-        bmp.stretch_blt(@dest_rect, @ground, @src_rect)
-
-        # Niebla (inerte hasta que 006_Atmosphere defina fog_alpha)
-        if Mode7.respond_to?(:fog_alpha)
-          alpha = Mode7.fog_alpha(sy)
-          if alpha > 0
-            @fog_color_obj ||= Mode7::Config::FOG_COLOR.clone
-            @fog_color_obj.alpha = alpha
-            bmp.fill_rect(@dest_rect, @fog_color_obj)
+      if in_bounds
+        k = Mode7.hscale(sy)
+        span = Mode7.screen_w / k
+        if !span.nan? && !span.infinite? && span > 1.0
+          wx_left = cx - (Mode7.center_x.to_f / k)
+          lo = [wx_left.floor, 0].max
+          hi = [(wx_left + span).ceil, ground_w].min
+          if hi > lo
+            d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
+            d_w = ((hi - lo) / span) * Mode7.screen_w
+            if d_w.round > 0
+              @src_rect.set(lo, wy.floor, hi - lo, 1)
+              @dest_rect.set(d_x0.round, sy, d_w.round, 1)
+              bmp.stretch_blt(@dest_rect, @ground, @src_rect)
+            end
           end
+        end
+      end
+
+      # Niebla en TODAS las filas (suelo + cielo fuera de limites).
+      if Mode7.respond_to?(:fog_alpha)
+        alpha = Mode7.fog_alpha(sy)
+        if alpha > 0
+          @fog_color_obj ||= Mode7::Config::FOG_COLOR.clone
+          @fog_color_obj.alpha = alpha
+          @dest_rect.set(0, sy, Mode7.screen_w, 1)
+          bmp.fill_rect(@dest_rect, @fog_color_obj)
         end
       end
     end

@@ -4,6 +4,8 @@
 module Mode7
   class << self
     attr_reader :zoom, :current_alpha, :sin, :distance_h, :planet_radius
+    # Proyeccion forzada por mapa (nil = usar Config::PROJECTION).
+    attr_accessor :map_projection
 
     def screen_w; return Settings::SCREEN_WIDTH; end
     def screen_h; return Settings::SCREEN_HEIGHT; end
@@ -15,12 +17,80 @@ module Mode7
     end
 
     def pivot_y; return (screen_h * pivot_ratio).round; end
-    def affine_mode?; return Config::PROJECTION == :affine; end
-    def sky_mode?; return Config::PROJECTION == :sky; end
+
+    # Proyeccion efectiva del mapa actual. El notetag/flag del mapa (visto en
+    # Game_Map#setup) puede forzar :affine o :sky; si no, usa Config::PROJECTION.
+    def map_mode
+      return @map_projection if @map_projection == :affine || @map_projection == :sky
+      Config::PROJECTION
+    end
+
+    def affine_mode?; return map_mode == :affine; end
+    def sky_mode?; return map_mode == :sky; end
+
+    # Lee la metadata del mapa y fuerza proyeccion segun flag/outdoor.
+    def detect_map_projection(map_id)
+      return nil if !defined?(GameData::MapMetadata)
+      meta = GameData::MapMetadata.get(map_id) rescue nil
+      return nil if !meta
+      if meta.has_flag?(Config::MAP_FLAG_AFFINE)
+        return :affine
+      elsif meta.has_flag?(Config::MAP_FLAG_SKY)
+        return :sky
+      elsif Config::AUTO_INDOOR_AFFINE && meta.outdoor_map == false
+        return :affine
+      end
+      nil
+    end
 
     def sky_angle_scale
       return 0.0 if !@current_alpha
       return @current_alpha.to_f / Config::DEFAULT_ALPHA
+    end
+
+    # Curva Sky V2: mezcla de curvatura seno y tramo lineal. Sustituye al
+    # sin(theta) puro que generaba el efecto cilindrico "banana".
+    def sky_curve(theta)
+      Config::SKY_CURVE * Math.sin(theta) + Config::SKY_LINEAR * theta
+    end
+
+    # Compresion horizontal de las filas lejanas: 1.0 cerca -> 1-W lejos.
+    def sky_width_scale(theta)
+      k = 1.0 - Config::SKY_WIDTH_PERSPECTIVE * (1.0 - Math.cos(theta))
+      return 0.001 if k < 0.001
+      k
+    end
+
+    # Escala de sprites/muros por profundidad. Con SKY_SPRITE_SCALE=0 es
+    # ortografica: un personaje/objeto conserva su ancho visual al alejarse.
+    def sky_sprite_scale(theta)
+      k = 1.0 - Config::SKY_SPRITE_SCALE * (1.0 - Math.cos(theta))
+      return 0.001 if k < 0.001
+      k
+    end
+
+    # Inversa de sky_curve (resolve sky_curve(theta)=t por Newton). Monotona
+    # creciente mientras |theta| < 2.14 (derivada 0.65*cos+0.35 > 0); el rango
+    # visible de la camara (~+-0.4) queda muy dentro de esa zona.
+    def sky_curve_inv(t)
+      a = Config::SKY_CURVE.to_f
+      b = Config::SKY_LINEAR.to_f
+      return t if (a + b).abs < 1.0e-9
+      theta = t / (a + b)
+      6.times do
+        f = a * Math.sin(theta) + b * theta - t
+        df = a * Math.cos(theta) + b
+        break if df.abs < 1.0e-9
+        theta -= f / df
+      end
+      theta
+    end
+
+    # Theta (angulo de profundidad) de una fila de pantalla. Invierte la curva
+    # hibrida (sky_curve) para mapear la fila sy a su angulo en el "planeta".
+    def sky_theta_for_row(sy)
+      t = (sy.to_f - pivot_y) / @planet_radius
+      sky_curve_inv(t)
     end
 
     def effective_mode_blend; return (@mode_blend || 0.0).clamp(0.0, 1.0); end
@@ -55,9 +125,7 @@ module Mode7
       @dh = @distance_h
       p = pivot_y
 
-      @hscale_cache = {}
-      @world_y_cache = {}
-      @project_y_cache = {}
+      reset_caches
       return if @sin == 0
 
       @h0 = (-@dh * p * @cos) / (@dh + p * @sin) + p
@@ -65,20 +133,16 @@ module Mode7
       @slope = (1.0 - @z0) / (p - @h0)
       @corr = 1.0 - p * @slope
       @horizon = p - @dh * @cos / @sin
+    end
 
-      t = Config::AFFINE_DEPTH.to_f
-      if t > 0
-        heff = @dh / t
-        @aff_h0 = (-heff * p * @cos) / (heff + p * @sin) + p
-        @aff_z0 = heff.to_f / (heff + p * @sin)
-        @aff_slope = (1.0 - @aff_z0) / (p - @aff_h0)
-        @aff_corr = 1.0 - p * @aff_slope
-        @aff_horizon = p - heff * @cos / @sin
-      else
-        @aff_slope = nil
-        @aff_corr = nil
-        @aff_horizon = nil
-      end
+    # Reinicia las caches de proyeccion (al cambiar mapa/camara/zoom/pivot).
+    def reset_caches
+      @hscale_cache ||= {}
+      @hscale_cache.clear
+      @world_y_cache ||= {}
+      @world_y_cache.clear
+      @project_y_cache ||= {}
+      @project_y_cache.clear
     end
 
     def set_pivot(ratio)
@@ -102,6 +166,13 @@ module Mode7
 
     def persp(sy); return @slope * sy + @corr; end
 
+    # Sin efectivo de la proyeccion afine: AFFINE_PERSPECTIVE aplana la curva
+    # (0 = plano, 1 = perspectiva original). Se usa en scale/unscale/hscale y
+    # horizonte para mantener la proyeccion autoconsistente.
+    def effective_sin
+      return @sin * Config::AFFINE_PERSPECTIVE.to_f
+    end
+
     def ortho_blend
       return 0.0 if Config::FOV >= 55
       return 1.0 if Config::FOV <= 0
@@ -117,6 +188,9 @@ module Mode7
     end
 
     def base_hscale(sy)
+      if sky_mode?
+        return @zoom * sky_sprite_scale(sky_theta_for_row(sy))
+      end
       old_a = @a; old_cos = @cos; old_sin = @sin
       base_a = Config::DEFAULT_ALPHA.to_f * Math::PI / 180.0
       @a = base_a; @cos = Math.cos(base_a); @sin = Math.sin(base_a)
@@ -126,13 +200,15 @@ module Mode7
     end
 
     def _hscale_uncached(sy)
-      return @zoom if sky_mode?
+      if sky_mode?
+        return @zoom * sky_width_scale(sky_theta_for_row(sy))
+      end
       if affine_mode?
         if Config::AFFINE_DEPTH > 0
           heff = @dh / Config::AFFINE_DEPTH.to_f
           ry = affine_depth_unscale((sy - pivot_y).to_f)
           zi = @zoom * ry
-          d = heff - zi * @sin
+          d = heff - zi * effective_sin
           return 0.0 if d.abs < 1.0e-9
           return @zoom * heff * heff * @cos / (d * d)
         end
@@ -146,10 +222,27 @@ module Mode7
 
     def horizon_row
       return 0 if sky_mode?
-      return @aff_horizon if affine_mode? && Config::AFFINE_DEPTH > 0 && @aff_horizon
-      return @horizon if affine_mode? && Config::AFFINE_DEPTH > 0
+      if affine_mode? && Config::AFFINE_DEPTH > 0
+        heff = @dh / Config::AFFINE_DEPTH.to_f
+        se = effective_sin
+        return 0 if se.abs < 1.0e-9
+        return pivot_y - (heff * @cos / se)
+      end
       return 0 if affine_mode?
       return @horizon
+    end
+
+    # Niebla de profundidad: 0 en el pivot del jugador, FOG_MAX_ALPHA en el
+    # horizonte. Interpola por fila de pantalla (screen_y). Consultada por
+    # suelo/muros/personajes para difuminar lo lejano.
+    def fog_alpha(screen_y)
+      return 0 if !Config::FOG_ENABLED
+      delta = pivot_y - horizon_row
+      return 0 if delta <= 0
+      t = (pivot_y - screen_y.to_f) / delta
+      t = 0.0 if t < 0.0
+      t = 1.0 if t > 1.0
+      (t * Config::FOG_MAX_ALPHA).round
     end
 
     def cam_x
@@ -177,7 +270,7 @@ module Mode7
       return s * ry if t <= 0
       heff = @dh / t
       yi = @zoom * ry
-      d = heff - yi * @sin
+      d = heff - yi * effective_sin
       return s * ry if d <= 0.0
       (heff * yi * @cos) / d
     end
@@ -187,7 +280,7 @@ module Mode7
       s = Config::AFFINE_SLOPE
       return so / s if t <= 0
       heff = @dh / t
-      den = so * @sin + heff * @cos
+      den = so * effective_sin + heff * @cos
       return so / s if den.abs < 1.0e-9
       yi = so * heff / den
       yi / @zoom
@@ -200,8 +293,8 @@ module Mode7
       return vanilla_project(wx, wy - elevation) if scale <= 0.0
       ry *= (@zoom * scale)
       theta = ry.to_f / @planet_radius
-      sy = pivot_y + (@planet_radius * Math.sin(theta))
-      sx = center_x + rx * @zoom
+      sy = pivot_y + (@planet_radius * sky_curve(theta))
+      sx = center_x + rx * @zoom * sky_width_scale(theta)
       return [sx, sy]
     end
 
@@ -240,7 +333,7 @@ module Mode7
       ry = (wy - cam_y - elevation) - pivot_y
       ry *= (@zoom * scale)
       theta = ry.to_f / @planet_radius
-      return pivot_y + (@planet_radius * Math.sin(theta))
+      return pivot_y + (@planet_radius * sky_curve(theta))
     end
 
     def _project_y_uncached(wy, elevation = 0)
@@ -275,9 +368,7 @@ module Mode7
     def _sky_world_y_for_row(sy)
       scale = sky_angle_scale
       return vanilla_world_y_for_row(sy) if scale <= 0.0
-      sin_theta = (sy - pivot_y).to_f / @planet_radius
-      return nil if sin_theta.abs > 1.0
-      theta = Math.asin(sin_theta)
+      theta = sky_theta_for_row(sy)
       ry = (theta * @planet_radius) / (@zoom * scale)
       return cam_y + pivot_y + ry
     end
@@ -366,5 +457,21 @@ class Scene_Map
   def update
     _VERMEIL_25D_core_update
     Mode7.update_transition if Mode7.active_now?
+  end
+end
+
+# Deteccion de interiores: al cargar un mapa se resuelve su proyeccion (flag
+# <mode7: affine>/<mode7: sky>, o AUTO_INDOOR_AFFINE) y se invalida lo cacheado.
+class Game_Map
+  alias_method :_VERMEIL_25D_core_setup, :setup unless method_defined?(:_VERMEIL_25D_core_setup)
+
+  def setup(map_id)
+    old_mode = Mode7.map_projection
+    Mode7.map_projection = Mode7.detect_map_projection(map_id)
+    _VERMEIL_25D_core_setup(map_id)
+    if Mode7.map_projection != old_mode
+      Mode7.reset_caches
+      Mode7.invalidate_renderer_ground rescue nil
+    end
   end
 end
