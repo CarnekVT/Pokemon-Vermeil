@@ -34,7 +34,6 @@ Environment = Grass
 Name = Test 2.5d
 Outdoor = true
 Weather = SakuraPetalsPresentColor,100
-SnapEdges = true
 #-------------------------------
-[078]   # MAP078
+[078]   # Test 2.5d (Indoor)
 Name = Indoor 2.5D Test

@@ -81,6 +81,13 @@ module Mode7
     # plano solo para mapas que realmente lo necesiten.
     AUTO_INDOOR_AFFINE = false
 
+    # BORDE INTERIOR. Superficie del plano para zocalos, bordes y suelo
+    # interior. No entra al volumen ni a prioridad: conserva posicion exacta
+    # junto al piso curvo. Pasabilidad sigue siendo la del tile en Maker Studio.
+    INTERIOR_BORDER_TERRAIN_TAGS = {
+      :InteriorBorder => true
+    }.freeze
+
     # Interiores: mantener el bitmap de suelo opaco para que celdas vacias no
     # dejen ver panoramas/fogs del mapa anterior por transparencia.
     INTERIOR_OPAQUE_GROUND = true
@@ -220,7 +227,7 @@ module Mode7
     #
     # Valor > 0 activa el filtro. Es compatibilidad con la configuracion vieja;
     # NO es prioridad, elevacion ni cantidad de tiles. Cada celda conserva su
-    # bitmap y proyeccion: nunca se fusiona por tag, por capas ni por Volume ID.
+    # bitmap y proyeccion; tag y capa no mezclan objetos vecinos.
     INDOOR_WALL_TERRAIN_TAG_HEIGHT = {
       :Mode7Tag => 4,
     }.freeze
@@ -341,6 +348,14 @@ unless GameData::TerrainTag.exists?(:LaddersSide)
   GameData::TerrainTag.register({
     :id        => :LaddersSide,
     :id_number => 22
+  })
+end
+
+# Marco interior de plano. ID 23 queda libre tras retirar LaddersSideReverse.
+unless GameData::TerrainTag.exists?(:InteriorBorder)
+  GameData::TerrainTag.register({
+    :id        => :InteriorBorder,
+    :id_number => 23
   })
 end
 # Maker Studio guarda la etiqueta Mountains con el ID 20. Essentials no la

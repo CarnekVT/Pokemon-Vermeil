@@ -105,9 +105,14 @@ class Mode7Renderer
       next if !spr || spr.disposed? || !spr.bitmap || spr.bitmap.disposed?
       fw = (spr.respond_to?(:shadow_frame_w) ? spr.shadow_frame_w : 0).to_i
       fw = spr.bitmap.width if fw <= 0 || fw > spr.bitmap.width
-      dx = spr.map_x * Game_Map::TILE_WIDTH - spr.ox.to_i
-      dy = spr.map_y * Game_Map::TILE_HEIGHT - spr.oy.to_i
-      @ground.blt(dx, dy, spr.bitmap, Rect.new(0, 0, fw, spr.bitmap.height), spr.opacity)
+      # TileSprite compensa ox/oy dentro de Sprite al mostrarse. El bitmap ya
+      # trae su padding; aplicarlo otra vez aqui desplaza la sombra de su origen.
+      dx = spr.map_x * Game_Map::TILE_WIDTH
+      dy = spr.map_y * Game_Map::TILE_HEIGHT
+      # Plano intermedio vanilla (z=1). 003_TileDepth lo proyecta entre suelo
+      # pasable y tiles fuente/bloqueantes; no se mezcla con @ground.
+      @shadow_ground.blt(dx, dy, spr.bitmap,
+                         Rect.new(0, 0, fw, spr.bitmap.height), spr.opacity)
     end
     aux.dispose if aux && !aux.disposed?
     aux_vp.dispose if aux_vp && !aux_vp.disposed?
@@ -136,6 +141,9 @@ class Mode7Renderer
                animated: @autotiles.animated?(name), filename: name, tid: vid, unify: layer,
                tileset_id: @map.tileset_id }
       stylize_entry(entry, props, layer)
+      entry[:native_layer] = layer
+      entry[:native_tile_id] = @map.data[tx, ty, layer].to_i
+      entry[:shadow_props] = props
       return entry
     end
     if props["tileset_id"]
@@ -148,6 +156,9 @@ class Mode7Renderer
       return nil if !entry
       stylize_entry(entry, props, layer)
       entry[:tileset_id] = ts.id
+      entry[:native_layer] = layer
+      entry[:native_tile_id] = @map.data[tx, ty, layer].to_i
+      entry[:shadow_props] = props
       return entry
     end
     nil

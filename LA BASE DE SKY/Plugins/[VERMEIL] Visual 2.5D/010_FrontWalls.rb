@@ -41,14 +41,30 @@ class Mode7Renderer
   # ---------------------------------------------------------------------------
   # Clasificacion de tiles
   # ---------------------------------------------------------------------------
-  # La prioridad del editor es la fuente de verdad. El renderer 2.5D no puede
-  # rebajar un priority 4 por su layer/unify: Maker Studio admite bandas > 4.
+  # Maker Studio calcula una prioridad EFECTIVA por celda: un P0 en una capa
+  # superior tapa las capas inferiores y anula su overhead. El 2.5D debe usar
+  # exactamente esa banda; usar prioridad cruda hace que un P0/Mountain parezca
+  # heredar el P1+ de un wall vecino.
   def cache_visual_priorities
-    @entry_cache.each_value do |entries|
+    @entry_cache.each do |(tx, ty), entries|
+      ground_cap = visual_ground_cap(tx, ty, entries)
       entries.each do |entry|
-        entry[:visual_priority] = entry[:priority].to_i
+        priority = entry[:priority].to_i
+        entry[:visual_priority] = priority > 0 && entry[:unify].to_i > ground_cap ? priority : 0
       end
     end
+  end
+
+  def visual_ground_cap(tx, ty, entries)
+    if defined?(MakerStudio) && MakerStudio.respond_to?(:cell_ground_cap)
+      return MakerStudio.cell_ground_cap(@map, tx, ty).to_i
+    end
+    # ponytail: fallback sin Maker Studio; cache local por celda, no indice global.
+    caps = entries.select { |entry| entry[:priority].to_i == 0 }
+                  .map { |entry| entry[:unify].to_i }
+    caps.empty? ? -1 : caps.max
+  rescue Exception
+    -1
   end
 
   def entry_visual_priority(entry)
@@ -59,6 +75,14 @@ class Mode7Renderer
   def wall_terrain_tag_heights
     return Mode7::Config::INDOOR_WALL_TERRAIN_TAG_HEIGHT if Mode7.indoor_map?
     Mode7::Config::OUTDOOR_WALL_TERRAIN_TAG_HEIGHT
+  end
+
+  # Borde de sala: superficie del piso. Un billboard comparte una sola base y
+  # se despega de pasillos/zonas curvas; el tag evita que wall/prioridad lo tome.
+  def interior_border_entry?(entry)
+    tag = terrain_tag_for_entry(entry)
+    return false if !tag || tag.id == :None
+    Mode7::Config::INTERIOR_BORDER_TERRAIN_TAGS.key?(tag.id)
   end
 
   def elevated_wall_terrain_tag_heights
@@ -105,6 +129,7 @@ class Mode7Renderer
 
   # Un muro fisico se decide por Terrain Tag. Priority NO significa altura.
   def entry_is_wall?(e)
+    return false if interior_border_entry?(e)
     tag = terrain_tag_for_entry(e)
     if tag && tag.id != :None
       configured = wall_terrain_tag_heights[tag.id]
@@ -119,6 +144,7 @@ class Mode7Renderer
   # Solo los muros normales fuerzan bloqueo. ElevatedWall usa la pasabilidad
   # nativa de la escalera/suelo y puede disparar camera lift al pisarlo.
   def entry_blocks_movement?(e)
+    return false if interior_border_entry?(e)
     tag = terrain_tag_for_entry(e)
     if tag && tag.id != :None
       configured = wall_terrain_tag_heights[tag.id]
@@ -178,6 +204,7 @@ class Mode7Renderer
 
   def priority_surface_entry?(e)
     return false if !Mode7::Config::PRIORITY_SURFACES
+    return false if interior_border_entry?(e)
     return false if entry_is_wall?(e)
     return true if entry_hybrid_priority(e)
     # Muros ya se dibujan como volumen. Promoverlos a priority surface los
@@ -237,60 +264,28 @@ class Mode7Renderer
   end
 
   def build_wall_columns
-    processed = {}
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
         next if !effective_cell_has_wall?(tx, ty, entries)
-        wall_entries = entries.select { |entry| entry_is_wall?(entry) }
-        wall_entries.group_by { |entry| wall_group_id(entry) }.each do |group_id, _|
-          key = [tx, ty, group_id]
-          next if processed[key]
-
-          rows = wall_stack_rows(tx, ty, group_id)
-          next if rows.empty?
-          rows.each { |row_ty, _row_entries| processed[[tx, row_ty, group_id]] = true }
-
-          all_entries = rows.flat_map { |_row_ty, row_entries| row_entries }
-          priority = all_entries.map { |entry| entry_visual_priority(entry) }.max || 0
-          unify = all_entries.map { |entry| entry[:unify].to_i }.max || 0
-          bottom_ty = rows[-1][0]
-          if all_entries.any? { |entry| entry_blocks_movement?(entry) }
-            @wall_cells[[tx, bottom_ty]] = true
-          end
-          depth = [(bottom_ty + 1) * Game_Map::TILE_HEIGHT, priority, unify]
-          make_wall_stack_column(tx, rows, unify, :dynamic, depth)
+        direct_walls = entries.select { |entry| entry_is_wall?(entry) }
+        @wall_cells[[tx, ty]] = true if direct_walls.any? { |entry| entry_blocks_movement?(entry) }
+        wall_layer = effective_wall_layer_unify(tx, ty, entries)
+        wall_entries = entries.select do |entry|
+          entry[:unify].to_i >= wall_layer && !priority_surface_entry?(entry)
         end
+        next if wall_entries.empty?
+
+        # ponytail: Stage "perfect" por celda. Cada bitmap conserva su origen
+        # de mapa; no apilar ni unir vecinos, porque Sky los separa al mover Y.
+        priority = wall_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+        unify = wall_entries.map { |entry| entry[:unify].to_i }.max || 0
+        depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority, unify]
+        make_wall_column(tx, ty, wall_entries, unify, :dynamic, depth)
       rescue Exception
         Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
       end
     end
-  end
-
-  # Identidad automatica de volumen: solo una tapa con prioridad seguida de su
-  # base priority 0 es una pieza alta de RMXP. Dos props p0 pegados no se unen.
-  # Esto evita trasladar una pared/prop ajena que comparte terrain tag.
-  def wall_group_id(entry)
-    tag = terrain_tag_for_entry(entry)
-    return [:terrain_tag, tag.id] if tag && tag.id != :None
-    [:debug_priority, entry[:unify].to_i]
-  end
-
-  def wall_stack_rows(tx, top_ty, group_id)
-    rows = []
-    ty = top_ty
-    while ty < @map.height
-      entries = @entry_cache[[tx, ty]]
-      row_entries = entries.select do |entry|
-        entry_is_wall?(entry) && wall_group_id(entry) == group_id
-      end
-      break if row_entries.empty?
-      rows.push([ty, row_entries])
-      row_priority = row_entries.map { |entry| entry_visual_priority(entry) }.max || 0
-      break if row_priority <= 0
-      ty += 1
-    end
-    rows
   end
 
   def build_priority_surfaces
@@ -337,43 +332,33 @@ class Mode7Renderer
     elevation + entry_terrain_tag_height(e)
   end
 
-  # Columna fisica de varias celdas. Ancla TODO el bitmap al suelo de su ultima
-  # celda; asi barril, arbol o estanteria de 2+ tiles no recalcula cada pieza
-  # con una Y distinta al cambiar angulo/camara.
-  def make_wall_stack_column(tx, rows, base_unify = 0, z_behavior = :dynamic, depth = nil)
-    return if rows.nil? || rows.empty?
-    entries = rows.flat_map { |_row_ty, row_entries| row_entries }
-    return if entries.empty?
-    max_elev = entries.map { |e| entry_world_elevation(e) }.max || 0.0
-    base_h = rows.length * Game_Map::TILE_HEIGHT
-    h = base_h + [max_elev.ceil, 0].max
-
-    bmp = Bitmap.new(Game_Map::TILE_WIDTH, h)
-    bmp.clear
-
-    draw_wall_stack_source(bmp, rows, base_h)
+  # Columna fisica de UNA celda. Forma original del volumen 2.5D: nunca usa
+  # filas vecinas como alto, por eso no arrastra ni corta bloques al mover Y.
+  def make_wall_column(tx, ty, entries, base_unify = 0, z_behavior = :dynamic,
+                       depth = nil)
+    return if entries.nil? || entries.empty?
+    max_elev = entries.map { |entry| entry_world_elevation(entry) }.max || 0.0
+    height = Game_Map::TILE_HEIGHT + [max_elev.ceil, 0].max
+    bitmap = Bitmap.new(Game_Map::TILE_WIDTH, height)
+    bitmap.clear
+    draw_wall_column_source(bitmap, entries)
 
     sprite = Sprite.new(@viewport)
-    sprite.bitmap = bmp
+    sprite.bitmap = bitmap
     sprite.ox = Game_Map::TILE_WIDTH / 2.0
-    sprite.oy = h
+    sprite.oy = height
     sprite.visible = false
-
     wx = tx * Game_Map::TILE_WIDTH + Game_Map::TILE_WIDTH / 2.0
-    wyb = (rows[-1][0] + 1) * Game_Map::TILE_HEIGHT
-    @wall_data.push([sprite, wx, wyb, h, rows, z_behavior, base_unify, depth])
+    wyb = (ty + 1) * Game_Map::TILE_HEIGHT
+    @wall_data.push([sprite, wx, wyb, height, entries, z_behavior, base_unify, depth])
   end
 
-  def draw_wall_stack_source(dst, rows, base_h)
-    top_pad = dst.height - base_h
-    rows.each_with_index do |(_ty, entries), row_index|
-      entries.sort_by { |entry| [entry_world_elevation(entry), entry[:unify].to_i,
-                                  entry[:priority].to_i] }.each do |entry|
-        y = (top_pad + row_index * Game_Map::TILE_HEIGHT -
-             entry_world_elevation(entry)).round
-        y = 0 if y < 0
-        blt_entry_into(dst, 0, y, entry, entry[:opacity] || 255)
-      end
+  def draw_wall_column_source(dst, entries)
+    entries.sort_by { |entry| [entry_world_elevation(entry), entry[:unify].to_i,
+                                entry[:priority].to_i] }.each do |entry|
+      y = (dst.height - Game_Map::TILE_HEIGHT - entry_world_elevation(entry)).round
+      y = 0 if y < 0
+      blt_entry_into(dst, 0, y, entry, entry[:opacity] || 255)
     end
   end
 
@@ -653,21 +638,17 @@ class Mode7Renderer
         next if seen[key]
         seen[key] = true
 
-        entries = collect_cell_entries(tx, ty)
-        ground_entries = ground_entries_for_cell(tx, ty, entries)
-        blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
+        redraw_ground_cell(tx, ty)
       end
     end
 
     @wall_data.each do |data|
-      sprite, _wx, _wyb, h, rows, _z_behavior, _base_unify, _depth = data
+      sprite, _wx, _wyb, _h, entries, _z_behavior, _base_unify, _depth = data
       next if !sprite.bitmap || sprite.bitmap.disposed?
-      entries = rows.flat_map { |_ty, row_entries| row_entries }
       next if entries.none? { |entry| entry[:animated] }
 
       sprite.bitmap.clear
-      draw_wall_stack_source(sprite.bitmap, rows,
-                             rows.length * Game_Map::TILE_HEIGHT)
+      draw_wall_column_source(sprite.bitmap, entries)
     end
 
     @priority_strips.each do |data|

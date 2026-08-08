@@ -32,6 +32,8 @@ class Mode7Renderer
     @ground_sprite.z = -1000
     @ground_sprite.bitmap = Bitmap.new(Mode7.screen_w, Mode7.screen_h)
     @ground = nil
+    @ground_above_shadow = nil
+    @shadow_ground = nil
     @wall_data = []
     @priority_strips = []
     @priority_data = []
@@ -63,6 +65,10 @@ class Mode7Renderer
     @ground_sprite = nil
     @ground&.dispose
     @ground = nil
+    @ground_above_shadow&.dispose
+    @ground_above_shadow = nil
+    @shadow_ground&.dispose
+    @shadow_ground = nil
     @wall_data.each do |data|
       spr = data[0]
       spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
@@ -153,7 +159,13 @@ class Mode7Renderer
     @map = $game_map
     ensure_extended_data
     @ground&.dispose
+    @ground_above_shadow&.dispose
+    @shadow_ground&.dispose
     @ground = Bitmap.new(@map.width * Game_Map::TILE_WIDTH, @map.height * Game_Map::TILE_HEIGHT)
+    @ground_above_shadow = Bitmap.new(@ground.width, @ground.height)
+    @shadow_ground = Bitmap.new(@ground.width, @ground.height)
+    @ground_above_shadow.clear
+    @shadow_ground.clear
     if Mode7.indoor_map? && Mode7::Config::INTERIOR_OPAQUE_GROUND
       @ground.fill_rect(0, 0, @ground.width, @ground.height, Mode7::Config::OUTSIDE_COLOR)
     end
@@ -187,12 +199,22 @@ class Mode7Renderer
     cache_terrain_tag_heights
     cache_visual_priorities
 
-    # La sombra cae sobre el suelo base (layer 0), no sobre los tiles/props de
-    # capas nativas superiores ni sobre las extendidas de Maker Studio.
-    draw_ground_pass(:base)
-    bake_ms_shadows
-    draw_ground_pass(:native_overlay)
-    draw_ground_pass(:extended)
+    # Misma pila de Maker Studio vanilla, pero cada plano se proyecta despues
+    # con la misma curva Sky. Un bitmap unico pierde este orden al hornearse.
+    @ms_shadow_env = ms_shadow_environment
+    if @ms_shadow_env
+      [:base, :native_overlay, :extended].each do |pass|
+        draw_ground_pass(pass, :below_shadow, @ground)
+      end
+      bake_ms_shadows
+      [:base, :native_overlay, :extended].each do |pass|
+        draw_ground_pass(pass, :above_shadow, @ground_above_shadow)
+      end
+    else
+      draw_ground_pass(:base, nil, @ground)
+      draw_ground_pass(:native_overlay, nil, @ground)
+      draw_ground_pass(:extended, nil, @ground)
+    end
 
     # Pase 2/3: cada tile conserva bitmap Y profundidad propios. La prioridad
     # solo modifica su oclusion, nunca hereda la posicion de un vecino.
@@ -229,25 +251,71 @@ class Mode7Renderer
     :native_overlay
   end
 
-  def draw_ground_pass(pass)
+  def draw_ground_pass(pass, shadow_band = nil, target = @ground)
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
         ground_entries = ground_entries_for_cell(tx, ty, entries)
         ground_entries.select! { |entry| ground_pass_for(entry) == pass }
-        blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
+        if shadow_band
+          ground_entries.select! do |entry|
+            ground_shadow_band_for(tx, ty, entry) == shadow_band
+          end
+        end
+        blt_ground_cell(tx, ty, ground_entries, target) unless ground_entries.empty?
       end
     end
   end
 
-  # Un volumen no absorbe visuales de otras capas de su misma celda. El muro
-  # conserva solo sus entradas etiquetadas; props p0 quedan en suelo y props
-  # p1+ usan su propia superficie de prioridad.
-  def ground_entries_for_cell(tx, ty, entries)
-    return entries.reject { |entry| priority_surface_entry?(entry) } if !effective_cell_has_wall?(tx, ty, entries)
-    entries.select do |entry|
-      !entry_is_wall?(entry) && !priority_surface_entry?(entry)
+  def ground_shadow_band_for(tx, ty, entry)
+    env = @ms_shadow_env
+    return :below_shadow if !env
+    index = ty * @map.width + tx
+    source_tid = env[:source_keys][index]
+    return :above_shadow if !source_tid.nil? && source_tid == entry_shadow_tile_id(entry)
+    passage = entry_shadow_passage(entry)
+    return :above_shadow if passage && (passage & 0x0F) == 0x0F
+    :below_shadow
+  rescue Exception
+    :below_shadow
+  end
+
+  def ms_shadow_environment
+    return nil if !defined?(MakerStudio) || !MakerStudio.respond_to?(:shadow_env_for)
+    env = MakerStudio.shadow_env_for(@map)
+    env && env[:has_shadows] ? env : nil
+  rescue Exception
+    nil
+  end
+
+  def entry_shadow_tile_id(entry)
+    return entry[:native_tile_id].to_i if entry.key?(:native_tile_id)
+    entry[:tid].to_i
+  end
+
+  def entry_shadow_passage(entry)
+    tid = entry_shadow_tile_id(entry)
+    return nil if tid < 0
+    props = entry[:shadow_props]
+    if defined?(MakerStudio) && MakerStudio.respond_to?(:resolve_shadow_tile_passage)
+      return MakerStudio.resolve_shadow_tile_passage(tid, props, @map.passages)
     end
+    tileset_id = entry[:tileset_id]
+    passages = tileset_id ? $data_tilesets[tileset_id]&.passages : @map.passages
+    passages ? passages[tid] : nil
+  end
+
+  # Particion estable de etapa "perfect": lo que esta bajo layer de muro sigue
+  # en plano curvo; layer del muro y superiores quedan dentro de su columna.
+  # Asi una misma celda nunca se dibuja a la vez en suelo y volumen.
+  def ground_entries_for_cell(tx, ty, entries)
+    if effective_cell_has_wall?(tx, ty, entries)
+      wall_layer = effective_wall_layer_unify(tx, ty, entries)
+      return entries.select do |entry|
+        entry[:unify].to_i < wall_layer && !priority_surface_entry?(entry)
+      end
+    end
+    entries.reject { |entry| priority_surface_entry?(entry) }
   end
 
   def make_native_entry_with_props(tx, ty, layer)
@@ -270,23 +338,59 @@ class Mode7Renderer
         end
         stylize_entry(entry, props, layer)
         entry[:tileset_id] ||= @map.tileset_id
+        entry[:native_layer] = layer
+        entry[:native_tile_id] = tid
+        entry[:shadow_props] = props
         return entry
       end
     end
     tid = @map.data[tx, ty, layer]
     return nil if !tid || tid <= 0
-    make_native_entry(tid, layer)
+    entry = make_native_entry(tid, layer)
+    return nil if !entry
+    entry[:native_layer] = layer
+    entry[:native_tile_id] = tid
+    entry
   end
 
-  def blt_ground_cell(tx, ty, entries)
+  def blt_ground_cell(tx, ty, entries, target = @ground)
     entries.sort_by { |e| e[:unify] }.each do |e|
       next if !e[:bitmap]
-      blt_entry_into(@ground, tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT, e, e[:opacity] || 255)
+      blt_entry_into(target, tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT, e, e[:opacity] || 255)
       if e[:animated]
         @autotile_cells[e[:filename]] ||= []
         cells = @autotile_cells[e[:filename]]
         cells.push([tx, ty]) if !cells.include?([tx, ty])
       end
+    end
+  end
+
+  def redraw_ground_cell(tx, ty)
+    return if !@ground || @ground.disposed?
+    tw = Game_Map::TILE_WIDTH
+    th = Game_Map::TILE_HEIGHT
+    x = tx * tw
+    y = ty * th
+    @clear_rect.set(x, y, tw, th)
+    @ground.clear_rect(@clear_rect)
+    @ground_above_shadow.clear_rect(@clear_rect) if @ground_above_shadow
+    if Mode7.indoor_map? && Mode7::Config::INTERIOR_OPAQUE_GROUND
+      @ground.fill_rect(@clear_rect, Mode7::Config::OUTSIDE_COLOR)
+    end
+
+    entries = collect_cell_entries(tx, ty)
+    ground_entries = ground_entries_for_cell(tx, ty, entries)
+    if @ms_shadow_env
+      lower = ground_entries.select do |entry|
+        ground_shadow_band_for(tx, ty, entry) == :below_shadow
+      end
+      upper = ground_entries.select do |entry|
+        ground_shadow_band_for(tx, ty, entry) == :above_shadow
+      end
+      blt_ground_cell(tx, ty, lower, @ground) unless lower.empty?
+      blt_ground_cell(tx, ty, upper, @ground_above_shadow) unless upper.empty?
+    else
+      blt_ground_cell(tx, ty, ground_entries, @ground) unless ground_entries.empty?
     end
   end
 
@@ -401,9 +505,10 @@ class Mode7Renderer
         bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
       end
       if d_w.round > 0
-        @src_rect.set(lo, wy.floor, hi - lo, 1)
         @dest_rect.set(d_x0.round, sy, d_w.round, 1)
-        bmp.stretch_blt(@dest_rect, @ground, @src_rect)
+        blt_projected_ground_row(bmp, @ground, lo, wy, hi)
+        blt_projected_ground_row(bmp, @shadow_ground, lo, wy, hi)
+        blt_projected_ground_row(bmp, @ground_above_shadow, lo, wy, hi)
 
         # Niebla (inerte hasta que 006_Atmosphere defina fog_alpha)
         if Mode7.respond_to?(:fog_alpha)
@@ -416,6 +521,14 @@ class Mode7Renderer
         end
       end
     end
+  end
+
+  # Los tres planos usan misma muestra X/Y. Solo cambia el orden de mezcla,
+  # igual que z=0/1/2 de Maker Studio vanilla antes de la proyeccion Sky.
+  def blt_projected_ground_row(dst, source, lo, world_y, hi)
+    return if !source || source.disposed?
+    @src_rect.set(lo, world_y.floor, hi - lo, 1)
+    dst.stretch_blt(@dest_rect, source, @src_rect)
   end
 
   def sky_fill_color
