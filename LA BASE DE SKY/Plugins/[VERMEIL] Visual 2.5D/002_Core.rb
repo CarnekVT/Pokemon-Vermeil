@@ -164,9 +164,44 @@ module Mode7
       return effective_mode_blend > 0.001
     end
 
-    def vanilla_project(wx, wy); return [wx - cam_x + center_x, wy - cam_y]; end
-    def vanilla_world_y_for_row(sy); return sy + cam_y; end
+    def vanilla_project(wx, wy); return [wx - cam_x + center_x, wy - cam_y + terrain_camera_lift]; end
+    def vanilla_world_y_for_row(sy); return sy - terrain_camera_lift + cam_y; end
     def lerp(a, b, t); return a + (b - a) * t; end
+
+    # Movimiento de camara en pantalla. No altera cam_y, por tanto no cambia
+    # curvatura ni posicion relativa de tiles vecinos.
+    def terrain_camera_lift
+      @terrain_camera_lift || 0.0
+    end
+
+    def terrain_camera_lift_target
+      return 0.0 if Config::TERRAIN_TAG_CAMERA_LIFT.empty? || !$game_player || !$game_map
+      map_id = $game_map.map_id
+      x = $game_player.x
+      y = $game_player.y
+      if @terrain_camera_map_id == map_id && @terrain_camera_x == x && @terrain_camera_y == y
+        return @terrain_camera_target || 0.0
+      end
+      @terrain_camera_map_id = map_id
+      @terrain_camera_x = x
+      @terrain_camera_y = y
+      tag = $game_player.pbTerrainTag
+      @terrain_camera_target = tag ? (Config::TERRAIN_TAG_CAMERA_LIFT[tag.id] || 0).to_f : 0.0
+    rescue
+      @terrain_camera_target = 0.0
+    end
+
+    def update_terrain_camera_lift
+      target = rendering_now? ? terrain_camera_lift_target : 0.0
+      current = terrain_camera_lift
+      smooth = Config::TERRAIN_TAG_CAMERA_LIFT_SMOOTH.to_f.clamp(0.01, 1.0)
+      value = current + (target - current) * smooth
+      value = target if (target - value).abs < 0.05
+      return if (value - current).abs < 0.01
+      @terrain_camera_lift = value
+      reset_caches
+      invalidate_renderer_ground
+    end
 
     def vanish_y
       return (pivot_y - @distance_h * @cos / @sin).round if !affine_mode?
@@ -363,7 +398,7 @@ module Mode7
       theta = sky_theta_for_world_y(wy)
       sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
       sx = center_x + rx * @zoom * sky_width_scale(theta)
-      sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
+      sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy) + terrain_camera_lift
       return [sx, sy]
     end
 
@@ -374,7 +409,7 @@ module Mode7
         ry = (wy - cam_y - elevation) - pivot_y
         sy = pivot_y + affine_depth_scale(ry)
         sx = center_x + hscale(sy) * rx
-        return [sx, sy]
+        return [sx, sy + terrain_camera_lift]
       end
       rx = wx - cam_x
       ry = wy - cam_y - elevation
@@ -383,7 +418,7 @@ module Mode7
       return nil if d <= 0
       sy = pivot_y + (@dh * yi * @cos) / d
       sx = center_x + hscale(sy) * rx
-      return [sx, sy]
+      return [sx, sy + terrain_camera_lift]
     end
 
     def project_y(wy, elevation = 0)
@@ -398,20 +433,22 @@ module Mode7
 
     def _sky_project_y(wy, elevation = 0)
       scale = sky_angle_scale
-      return wy - cam_y - elevation if scale <= 0.0
+      return wy - cam_y - elevation + terrain_camera_lift if scale <= 0.0
       theta = sky_theta_for_world_y(wy)
       sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
-      return sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
+      return sy_ground - elevation.to_f * vertical_scale_for_world_y(wy) + terrain_camera_lift
     end
 
     def _project_y_uncached(wy, elevation = 0)
       return _sky_project_y(wy, elevation) if sky_mode?
-      return pivot_y + affine_depth_scale((wy - cam_y - elevation) - pivot_y) if affine_mode?
+      if affine_mode?
+        return pivot_y + affine_depth_scale((wy - cam_y - elevation) - pivot_y) + terrain_camera_lift
+      end
       ry = wy - cam_y - elevation
       yi = @zoom * (ry - pivot_y)
       d = @dh - yi * @sin
       return nil if d <= 0
-      return pivot_y + (@dh * yi * @cos) / d
+      return pivot_y + (@dh * yi * @cos) / d + terrain_camera_lift
     end
 
     def wall_scale(sy)
@@ -439,6 +476,7 @@ module Mode7
     end
 
     def world_y_for_row(sy)
+      sy -= terrain_camera_lift
       return _sky_world_y_for_row(sy) if sky_mode?
       key = [sy, cam_y.floor]
       return @world_y_cache[key] if @world_y_cache && @world_y_cache.key?(key)
@@ -545,6 +583,7 @@ class Scene_Map
   def update
     _VERMEIL_25D_core_update
     Mode7.update_transition if Mode7.active_now?
+    Mode7.update_terrain_camera_lift
   end
 end
 

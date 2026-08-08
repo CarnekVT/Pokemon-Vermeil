@@ -184,6 +184,7 @@ class Mode7Renderer
         @entry_cache[[tx, ty]] = collect_cell_entries(tx, ty)
       end
     end
+    cache_terrain_tag_heights
     cache_visual_priorities
 
     # Pase 1: SOLO el plano del suelo. Los tiles con priority dejan de hornearse

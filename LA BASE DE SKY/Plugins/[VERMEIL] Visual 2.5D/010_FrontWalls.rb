@@ -127,6 +127,31 @@ class Mode7Renderer
     (Mode7::Config::HYBRID_PRIORITY_TERRAIN_TAG_HEIGHT[tag.id] || 0).to_i
   end
 
+  def configured_terrain_tag_height(e)
+    tag = terrain_tag_for_entry(e)
+    return 0 if !tag || tag.id == :None
+    (Mode7::Config::TERRAIN_TAG_TILE_HEIGHT[tag.id] || 0).to_i
+  end
+
+  # Un terrain tag de altura eleva la celda completa. Asi props, overlay y
+  # prioridad sobre una montana conservan la misma base visual.
+  def cache_terrain_tag_heights
+    @entry_cache.each_value do |entries|
+      height = entries.map { |entry| configured_terrain_tag_height(entry) }.max || 0
+      wall_cell = entries.any? { |entry| entry_is_wall?(entry) }
+      height = 0 if wall_cell
+      entries.each do |entry|
+        entry[:terrain_tag_height] = height
+        entry[:terrain_height_wall_cell] = true if wall_cell
+      end
+    end
+  end
+
+  def entry_terrain_tag_height(e)
+    return e[:terrain_tag_height].to_i if e.key?(:terrain_tag_height)
+    configured_terrain_tag_height(e)
+  end
+
   def hybrid_priority_active?(priority, tx, ty)
     return false if !priority || priority.to_i <= 0 || !$game_player
     return false if $game_player.x == tx && $game_player.y == ty
@@ -142,6 +167,9 @@ class Mode7Renderer
     return false if !Mode7::Config::PRIORITY_SURFACES
     return false if entry_is_wall?(e)
     return true if entry_hybrid_priority(e)
+    # Muros ya se dibujan como volumen. Promoverlos a priority surface los
+    # saca de ese volumen y rompe capas vecinas/props superiores.
+    return true if entry_terrain_tag_height(e) > 0 && !e[:terrain_height_wall_cell]
     p = entry_visual_priority(e)
     min = Mode7::Config::PRIORITY_SURFACE_MIN.to_i
     return false if p < min
@@ -264,9 +292,6 @@ class Mode7Renderer
       Console.echo_error("2.5D: volumen de terrain tag fallido") if defined?(Console)
     end
 
-    # El filtro terrain tag declara un volumen unico. Su prioridad maxima queda
-    # en Z del volumen entero: tapa al actor como RM, pero no separa/deforma
-    # barril, copa o tronco entre celdas.
     ungrouped_cells = {}
     wall_cells.each do |key, entries|
       next if grouped_cells[key]
@@ -364,8 +389,8 @@ class Mode7Renderer
   # Desde Phase 4 el layer/unify NO genera altura. Solo una elevacion explicita
   # de Maker Studio mueve el tile sobre el eje Z.
   def entry_world_elevation(e)
-    return 0.0 if !e.key?(:elevation) || e[:elevation].nil?
-    e[:elevation].to_f
+    elevation = e.key?(:elevation) && !e[:elevation].nil? ? e[:elevation].to_f : 0.0
+    elevation + entry_terrain_tag_height(e)
   end
 
   # Columna fisica de muro. Cada sprite contiene una sola prioridad; los layers
@@ -744,9 +769,13 @@ class Mode7Renderer
     @wall_data.each do |data|
       sprite, wx, wyb, h, entries, _z_behavior, _base_unify, depth, _layout = data
 
-      wt = wx / Game_Map::TILE_WIDTH
-      wty = (wyb - Game_Map::TILE_HEIGHT / 2.0) / Game_Map::TILE_HEIGHT
-      if (wt - cam_tx).abs > radius_x || (wty - cam_ty).abs > radius_y
+      half_w = sprite.bitmap.width / 2.0
+      left_tx = (wx - half_w) / Game_Map::TILE_WIDTH
+      right_tx = (wx + half_w) / Game_Map::TILE_WIDTH
+      top_ty = (wyb - h) / Game_Map::TILE_HEIGHT
+      bottom_ty = wyb / Game_Map::TILE_HEIGHT
+      if right_tx < cam_tx - radius_x || left_tx > cam_tx + radius_x ||
+         bottom_ty < cam_ty - radius_y || top_ty > cam_ty + radius_y
         sprite.visible = false
         next
       end
@@ -767,9 +796,10 @@ class Mode7Renderer
         next
       end
 
-      half_width = sprite.bitmap.width * k / 2.0
-      if syb < -h * k - Game_Map::TILE_HEIGHT ||
-         syb > Mode7.screen_h + Game_Map::TILE_HEIGHT ||
+      half_width = half_w * k
+      top_y = syb - h * k
+      if syb < -Game_Map::TILE_HEIGHT ||
+         top_y > Mode7.screen_h + Game_Map::TILE_HEIGHT ||
          sx < -half_width - Game_Map::TILE_WIDTH ||
          sx > Mode7.screen_w + half_width + Game_Map::TILE_WIDTH
         sprite.visible = false
