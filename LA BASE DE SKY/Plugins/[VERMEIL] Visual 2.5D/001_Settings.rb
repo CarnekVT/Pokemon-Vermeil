@@ -70,17 +70,16 @@ module Mode7
     # =======================================================================
     # PROYECCION POR MAPA (flags opcionales; por defecto todo sigue SKY)
     # La proyeccion global (PROJECTION) se puede FORZAR por mapa via flags de
-    # metadata (PBS: map_metadata.txt, columna Flags). Con AUTO_INDOOR_AFFINE
-    # en false, un interior NO abandona SKY salvo que lleve Mode7Affine.
+    # metadata (PBS: map_metadata.txt, columna Flags). Interior/exterior usan
+    # Sky por defecto; Mode7Affine queda disponible como excepcion por mapa.
     #   "Mode7Affine" -> espacia el mapa en proyeccion plana.
     #   "Mode7Sky"    -> fuerza la curva cilindrica.
     MAP_FLAG_AFFINE = "mode7afine"
     MAP_FLAG_SKY    = "mode7sky"
 
-    # Exterior conserva :sky. Interior (Outdoor=false) pasa a :affine 2.5D:
-    # casillas rectas, paredes/volumenes y prioridades sin curvatura Sky.
-    # Mode7Sky en Flags mantiene Sky en un interior puntual.
-    AUTO_INDOOR_AFFINE = true
+    # Sky tambien en interiores. Mode7Affine en Flags fuerza el modo interior
+    # plano solo para mapas que realmente lo necesiten.
+    AUTO_INDOOR_AFFINE = false
 
     # Interiores: mantener el bitmap de suelo opaco para que celdas vacias no
     # dejen ver panoramas/fogs del mapa anterior por transparencia.
@@ -159,10 +158,9 @@ module Mode7
     # ancho visual de habitaciones y pasillos (paredes paralelas, look SkyFlyer).
     SKY_WIDTH_PERSPECTIVE = 0.0
 
-    # Perspectiva DIRECCIONAL SOLO de personajes/eventos. Los tiles verticales
-    # (muros y priority surfaces) usan la misma escala X/Y del ancho de su fila,
-    # para no deformarse. Valor bajo = cambio de tamano muy sutil del personaje.
-    SKY_SPRITE_SCALE = 0.10
+    # Personajes/OW conservan escala fija: NPCs, followers y eventos no crecen
+    # ni encogen al recorrer la curvatura.
+    SKY_SPRITE_SCALE = 0.0
 
     # Cuanto de un pixel de altura real se ve verticalmente en pantalla. Los
     # muros y elevaciones usan este eje Z separado de la Y del suelo.
@@ -230,17 +228,16 @@ module Mode7
       :HoneyTree => 4
     }.freeze
 
-    # Componentes pequenos conectados del filtro se dibujan como un billboard
-    # vertical unico. Sirve para arboles 2x2/3x3, casas pequenas y props sin
-    # deformar sus piezas priority 0 sobre el plano del mundo.
-    TERRAIN_TAG_VOLUME_GROUP_MAX_CELLS = 16
+    # Componentes del filtro se dibujan como volumen vertical unico. Evita que
+    # casas, arboles y props conectados se deformen celda por celda en Sky.
+    TERRAIN_TAG_VOLUME_GROUP_MAX_CELLS = 48
 
     # PRIORIDAD HIBRIDA 2.5D. Terrain tags aqui NO son volumenes. Al pisar la
     # celda, el tile queda en priority 0; si el jugador esta detras (al norte),
     # usa temporalmente el valor configurado y lo cubre. No cambia PBS,
     # pasabilidad ni comportamiento fuera de Mode7.
     HYBRID_PRIORITY_TERRAIN_TAGS = {
-      :Grass => 1
+      :Grass => 3
     }.freeze
 
     # =======================================================================

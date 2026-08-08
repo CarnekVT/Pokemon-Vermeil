@@ -258,9 +258,9 @@ class Mode7Renderer
       Console.echo_error("2.5D: volumen de terrain tag fallido") if defined?(Console)
     end
 
-    # El filtro terrain tag ya declaro un volumen. La prioridad de sus piezas
-    # es arte del tileset, no otra profundidad: dividir barril/copa/tronco por
-    # priority los desplaza sobre su celda vecina al proyectar el mundo.
+    # El filtro terrain tag declara un volumen unico. Su prioridad maxima queda
+    # en Z del volumen entero: tapa al actor como RM, pero no separa/deforma
+    # barril, copa o tronco entre celdas.
     ungrouped_cells = {}
     wall_cells.each do |key, entries|
       next if grouped_cells[key]
@@ -268,7 +268,8 @@ class Mode7Renderer
     end
     depths = tile_depths(ungrouped_cells)
     ungrouped_cells.each do |(tx, ty), entries|
-      depth = [depths[[tx, ty]], 0]
+      priority = entries.map { |entry| entry_visual_priority(entry) }.max || 0
+      depth = [depths[[tx, ty]], priority]
       make_column(tx, ty, entries, wall_layer_height(entries), 0, :dynamic, depth)
     rescue Exception
       Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
@@ -300,7 +301,9 @@ class Mode7Renderer
     sprite.visible = false
     wx = min_x * Game_Map::TILE_WIDTH + width / 2.0
     wyb = (max_y + 1) * Game_Map::TILE_HEIGHT
-    @wall_data.push([sprite, wx, wyb, height, entries, :volume, 0, [wyb, 0], layout])
+    priority = entries.map { |entry| entry_visual_priority(entry) }.max || 0
+    @wall_data.push([sprite, wx, wyb, height, entries, :volume, 0,
+                     [wyb, priority], layout])
   end
 
   def draw_terrain_volume_group(bitmap, layout)
@@ -593,7 +596,8 @@ class Mode7Renderer
         next
       end
 
-      sprite.z = Mode7.depth_z((ty + 1) * Game_Map::TILE_HEIGHT, priority, unify)
+      bias = unify + (priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0)
+      sprite.z = Mode7.depth_z((ty + 1) * Game_Map::TILE_HEIGHT, priority, bias)
       apply_depth_fog_to_sprite(sprite, sprite.y + sprite.bitmap.height)
       sprite.visible = true
     end
@@ -636,7 +640,8 @@ class Mode7Renderer
       priority = hybrid_active ? hybrid_priority : 0 if hybrid_priority
       depth_wyb, depth_priority = depth || [wyb, priority]
       depth_priority = priority if hybrid_priority
-      sprite.z = Mode7.depth_z(depth_wyb, depth_priority)
+      bias = depth_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0
+      sprite.z = Mode7.depth_z(depth_wyb, depth_priority, bias)
 
       apply_depth_fog_to_sprite(sprite, sprite.y + sprite.bitmap.height)
       sprite.visible = true
@@ -770,7 +775,8 @@ class Mode7Renderer
       sprite.zoom_y = k
       priority = entries.map { |entry| entry_visual_priority(entry) }.max || 0
       depth_wyb, depth_priority = depth || [wyb, priority]
-      sprite.z = Mode7.depth_z(depth_wyb, depth_priority)
+      bias = depth_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0
+      sprite.z = Mode7.depth_z(depth_wyb, depth_priority, bias)
 
       apply_depth_fog_to_sprite(sprite, syb)
       sprite.visible = true
