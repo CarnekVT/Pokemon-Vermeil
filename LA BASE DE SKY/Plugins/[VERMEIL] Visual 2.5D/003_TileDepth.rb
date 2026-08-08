@@ -192,6 +192,7 @@ class Mode7Renderer
     end
     cache_terrain_tag_heights
     cache_visual_priorities
+    Mode7.snap_terrain_camera_lift_to_target
 
     # ponytail: conservar pila vanilla en bitmap fuente. Proyectar tres planos
     # por fila costaba FPS al caminar; walls se mantienen z=2 y tapan sombra,

@@ -262,7 +262,7 @@ module Mode7
     # queda encima, como vanilla. Valor 0..255 multiplica opacity original MS.
     # Agregar un tag aqui es opt-in, no altera sombra de otros walls.
     MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY = {
-      :Mountains => 85
+      :Mountains => 255
     }.freeze
 
     # PRIORIDAD HIBRIDA 2.5D. Terrain tags aqui NO son volumenes. Al pisar la
@@ -270,15 +270,13 @@ module Mode7
     # usa temporalmente el valor configurado y lo cubre. No cambia PBS,
     # pasabilidad ni comportamiento fuera de Mode7.
     HYBRID_PRIORITY_TERRAIN_TAGS = {
-      :Grass     => 3,
-      :TallGrass => 3
+      :Grass     => 3
     }.freeze
 
     # Altura visual en px para capas hibridas. Grass queda sobre el suelo como
     # una alfombra de hojas baja; no cambia colision, terreno ni prioridad PBS.
     HYBRID_PRIORITY_TERRAIN_TAG_HEIGHT = {
-      :Grass     => 4,
-      :TallGrass => 4
+      :Grass     => 2
     }.freeze
 
     # ELEVACION LOCAL POR TERRAIN TAG. No mueve camara: cada tile del filtro

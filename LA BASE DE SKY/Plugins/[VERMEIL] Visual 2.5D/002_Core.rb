@@ -152,7 +152,7 @@ module Mode7
     # Theta (angulo de profundidad) de una fila de pantalla. Invierte la curva
     # hibrida (sky_curve) para mapear la fila sy a su angulo en el "planeta".
     def sky_theta_for_row(sy)
-      t = (sy.to_f - pivot_y) / @planet_radius
+      t = (sy.to_f - sky_camera_lift_screen_offset - pivot_y) / @planet_radius
       sky_curve_inv(t)
     end
 
@@ -178,6 +178,19 @@ module Mode7
     # cam_y ni las coordenadas logicas del mapa.
     def terrain_camera_vertical_lift
       terrain_camera_lift * Config::TERRAIN_TAG_CAMERA_LIFT_VERTICAL_FACTOR.to_f
+    end
+
+    # Mantiene fijo el pivot mientras cambia la profundidad virtual. Antes el
+    # lift restaba projection_cam_y sin compensar y el mapa entero acompaniaba
+    # al jugador: paredes billboards parecian despegarse de su celda.
+    def sky_camera_lift_screen_offset
+      return 0.0 if !sky_mode? || terrain_camera_vertical_lift.abs < 0.001
+      scale = sky_angle_scale
+      return 0.0 if scale <= 0.0
+      anchor_wy = cam_y + pivot_y
+      theta = ((anchor_wy - projection_cam_y - pivot_y) * @zoom * scale * sky_ground_y_scale) /
+              @planet_radius
+      -@planet_radius * sky_curve(theta)
     end
 
     def projection_cam_y
@@ -261,6 +274,16 @@ module Mode7
       start_lift + (target_lift - start_lift) * t
     rescue
       @terrain_camera_target = 0.0
+    end
+
+    # Al crear el renderer del mapa, la partida ya tiene coordenada y terrain
+    # tag definitivos. Arrancar desde ese target evita una animacion falsa
+    # 0 -> Mountains al cargar/transferir mapa.
+    def snap_terrain_camera_lift_to_target
+      target = rendering_now? ? terrain_camera_lift_target : 0.0
+      return if (terrain_camera_lift - target).abs < 0.01
+      @terrain_camera_lift = target
+      reset_caches
     end
 
     def terrain_camera_lift_debug_text
@@ -551,10 +574,13 @@ module Mode7
 
     def _sky_project_y(wy, elevation = 0)
       scale = sky_angle_scale
-      return wy - projection_cam_y - elevation if scale <= 0.0
+      # Sin angulo Sky no hay profundidad que levantar; mantener coordenadas
+      # vanilla evita que TERRAIN_TAG_CAMERA_LIFT deslice todo el mapa plano.
+      return wy - cam_y - elevation if scale <= 0.0
       theta = sky_theta_for_world_y(wy)
       sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
-      return sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
+      return sy_ground + sky_camera_lift_screen_offset -
+             elevation.to_f * vertical_scale_for_world_y(wy)
     end
 
     def _project_y_uncached(wy, elevation = 0)
@@ -605,7 +631,7 @@ module Mode7
 
     def _sky_world_y_for_row(sy)
       scale = sky_angle_scale
-      return vanilla_world_y_for_row(sy) if scale <= 0.0
+      return sy + cam_y if scale <= 0.0
       @sky_row_world_offset_cache ||= {}
       offset = @sky_row_world_offset_cache[sy]
       if offset.nil?

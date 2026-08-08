@@ -46,6 +46,19 @@ module Mode7
       slope_y ||= Config::SIDE_LADDER_TERRAIN_TAG_SLOPE_Y[tag.id]
       x_offset = direction == 6 ? 1 : -1
       y_offset = direction == 6 ? slope_y.to_i : -slope_y.to_i
+      target_x = character.x + x_offset
+      target_y = character.y + y_offset
+      return nil if !$game_map.valid?(target_x, target_y)
+
+      # ponytail: una pendiente solo conecta celdas que pertenecen al mismo
+      # carril. Sin esta comprobacion el ultimo paso podia salir en diagonal y
+      # el siguiente input normal recolocaba al jugador en otra celda.
+      target_tag = $game_map.terrain_tag(target_x, target_y)
+      return nil if !side_ladder_tag?(target_tag)
+      target_slope = slope_at($game_map.map_id, target_x, target_y)
+      target_slope ||= Config::SIDE_LADDER_TERRAIN_TAG_SLOPE_Y[target_tag.id]
+      return nil if target_slope.to_i != slope_y.to_i
+
       diagonal = if x_offset > 0
                    y_offset < 0 ? 9 : 3
                  else

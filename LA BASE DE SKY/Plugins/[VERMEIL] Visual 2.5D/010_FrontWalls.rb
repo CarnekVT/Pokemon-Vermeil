@@ -273,13 +273,11 @@ class Mode7Renderer
   end
 
   def build_wall_columns
-    # P1 marca un wall de varias prioridades. El P0 de ese mismo componente
-    # debe compartir lienzo/ancla con P1-P4: si P0 sigue como columna por
-    # celda, la curva cambia su distancia relativa al caminar en vertical.
-    # Mountains usa su ruta por celda para conservar su plano de sombra MS.
-    normal_wall_components = Hash.new { |hash, key| hash[key] = {} }
-    loose_wall_bases = Hash.new { |hash, key| hash[key] = [] }
-    loose_wall_tops = Hash.new { |hash, key| hash[key] = {} }
+    # Solo un wall bloqueante puede ser pieza rigida P0/P1. Mountains y las
+    # escaleras son ElevatedWall: conservan celda propia y no absorben vecinos.
+    rigid_walls = Hash.new { |hash, key| hash[key] = {} }
+    loose_bases = Hash.new { |hash, key| hash[key] = [] }
+    loose_tops = Hash.new { |hash, key| hash[key] = [] }
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
@@ -289,48 +287,56 @@ class Mode7Renderer
 
         direct_walls.each do |entry|
           priority = entry_visual_priority(entry)
-          tag = terrain_tag_for_entry(entry)
-          tag_id = tag ? tag.id : :None
-          key = [tag_id, entry_world_elevation(entry)]
           if entry_blocks_movement?(entry)
-            normal_wall_components[key][[tx, ty]] ||= []
-            normal_wall_components[key][[tx, ty]].push(entry)
+            tag = terrain_tag_for_entry(entry)
+            key = [tag ? tag.id : :None, entry_world_elevation(entry)]
+            rigid_walls[key][[tx, ty]] ||= []
+            rigid_walls[key][[tx, ty]].push(entry)
           elsif priority <= 0
-            loose_wall_bases[[tx, ty]].push(entry)
+            loose_bases[[tx, ty]].push(entry)
           else
-            loose_wall_tops[key][[tx, ty]] ||= []
-            loose_wall_tops[key][[tx, ty]].push(entry)
+            loose_tops[[tx, ty]].push(entry)
           end
         end
       rescue Exception
         Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
       end
     end
-    normal_wall_components.each do |(_tag_id, elevation), cells|
-      priority_volume_components(cells).each do |component|
-        if component.values.flatten.any? { |entry| entry_visual_priority(entry) > 0 }
-          # Base completa: misma ruta billboard que un wall sobre Mountains.
-          # P1-P4 se vuelven a dibujar abajo solo para conservar oclusion.
-          make_wall_component(component, elevation)
-          make_wall_priority_component(component, elevation)
-          next
+    rigid_walls.each do |(_tag_id, elevation), cells|
+      used_base_entries = {}
+      components, residual_priority = priority_wall_components(cells)
+      components.each do |component|
+        base_entries = component.values.flatten.select do |entry|
+          entry_visual_priority(entry) <= 0
         end
-        component.each do |(tx, ty), entries|
-          unify = entries.map { |entry| entry[:unify].to_i }.min || 0
-          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, 0, unify]
-          make_wall_column(tx, ty, entries, unify, :dynamic, depth)
+        base_entries.each { |entry| used_base_entries[entry.object_id] = true }
+        make_wall_component(component, elevation) if !base_entries.empty?
+        make_wall_priority_component(component, elevation)
+      end
+      make_residual_wall_priority_strips(residual_priority, elevation)
+
+      cells.each do |(tx, ty), cell_entries|
+        base_entries = cell_entries.select do |entry|
+          entry_visual_priority(entry) <= 0 && !used_base_entries[entry.object_id]
         end
+        next if base_entries.empty?
+        unify = base_entries.map { |entry| entry[:unify].to_i }.max || 0
+        depth = [(ty + 1) * Game_Map::TILE_HEIGHT, 0, unify]
+        make_wall_column(tx, ty, base_entries, unify, :dynamic, depth,
+                         mountain_shadow_opacity_for(base_entries))
       end
     end
-    loose_wall_bases.each do |(tx, ty), entries|
+    loose_bases.each do |(tx, ty), entries|
       unify = entries.map { |entry| entry[:unify].to_i }.max || 0
       depth = [(ty + 1) * Game_Map::TILE_HEIGHT, 0, unify]
-      shadow_opacity = mountain_shadow_opacity_for(entries)
-      make_wall_column(tx, ty, entries, unify, :dynamic, depth, shadow_opacity)
+      make_wall_column(tx, ty, entries, unify, :dynamic, depth,
+                       mountain_shadow_opacity_for(entries))
     end
-    loose_wall_tops.each do |(_tag_id, elevation), cells|
-      priority_volume_components(cells).each do |component|
-        make_wall_priority_component(component, elevation)
+    loose_tops.each do |(tx, ty), entries|
+      entries.each do |entry|
+        priority = entry_visual_priority(entry)
+        depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority, entry[:unify].to_i]
+        make_priority_surface(tx, ty, entry, depth, nil, true)
       end
     end
   end
@@ -417,6 +423,110 @@ class Mode7Renderer
     components
   end
 
+  # P2+ (copa/techo) delimita un objeto rigido y toma solamente P1/P0 que
+  # cuelgan dentro de su ancho. P1 por si solo puede ser un piso o un pasillo:
+  # agruparlo con otro P1 contiguo convertia una sala completa en un billboard
+  # y la arrastraba al hacer scroll vertical.
+  def priority_wall_components(cells)
+    cap_cells = {}
+    cells.each do |position, entries|
+      caps = entries.select { |entry| entry_visual_priority(entry) > 1 }
+      cap_cells[position] = caps if !caps.empty?
+    end
+    return [[], priority_wall_entries(cells)] if cap_cells.empty?
+
+    claimed_priority = {}
+    components = priority_volume_components(cap_cells).map do |cap_component|
+      component = {}
+      cap_component.each do |position, entries|
+        component[position] = entries.dup
+        entries.each { |entry| claimed_priority[entry.object_id] = true }
+        cells[position].each do |entry|
+          next if entry_visual_priority(entry) > 1 || component[position].include?(entry)
+          component[position].push(entry)
+          claimed_priority[entry.object_id] = true if entry_visual_priority(entry) > 0
+        end
+      end
+
+      xs = cap_component.keys.map { |tx, _ty| tx }
+      ys = cap_component.keys.map { |_tx, ty| ty }
+      min_tx = xs.min
+      max_tx = xs.max
+      min_ty = ys.min
+      max_ty = ys.max
+      support_rows = wall_component_height(cap_component)
+      pending = cap_component.keys.dup
+      visited = {}
+
+      until pending.empty?
+        tx, ty = pending.shift
+        next if visited[[tx, ty]]
+        visited[[tx, ty]] = true
+        [[tx - 1, ty], [tx + 1, ty], [tx, ty - 1], [tx, ty + 1]].each do |nx, ny|
+          next if nx < min_tx || nx > max_tx || ny < min_ty || ny > max_ty + support_rows
+          entries = cells[[nx, ny]]
+          next if !entries
+          support_entries = entries.select { |entry| entry_visual_priority(entry) <= 1 }
+          next if support_entries.empty?
+          component[[nx, ny]] ||= []
+          support_entries.each do |entry|
+            next if component[[nx, ny]].include?(entry)
+            component[[nx, ny]].push(entry)
+            claimed_priority[entry.object_id] = true if entry_visual_priority(entry) > 0
+          end
+          pending.push([nx, ny])
+        end
+      end
+      component
+    end
+
+    [components, priority_wall_entries(cells, claimed_priority)]
+  end
+
+  def priority_wall_entries(cells, claimed = nil)
+    cells.each_with_object({}) do |(position, entries), result|
+      remaining = entries.select do |entry|
+        entry_visual_priority(entry) > 0 && (!claimed || !claimed[entry.object_id])
+      end
+      result[position] = remaining if !remaining.empty?
+    end
+  end
+
+  # P1 sin techo/copa encima conserva prioridad pero se deforma como suelo por
+  # fila. Asi sigue su celda exacta al mover camara sin convertir pasillos y
+  # decoracion plana en un objeto alto comun.
+  def make_residual_wall_priority_strips(cells, elevation)
+    rows = Hash.new { |hash, key| hash[key] = {} }
+    cells.each do |(tx, ty), entries|
+      entries.each do |entry|
+        key = [ty, entry_visual_priority(entry), entry[:unify].to_i]
+        rows[key][tx] ||= []
+        rows[key][tx].push(entry)
+      end
+    end
+    rows.each do |(ty, priority, unify), row|
+      segment = {}
+      previous = nil
+      row.keys.sort.each do |tx|
+        if previous && tx != previous + 1
+          make_priority_strip(segment, ty, priority, unify, elevation)
+          segment = {}
+        end
+        segment[tx] = row[tx]
+        previous = tx
+      end
+      make_priority_strip(segment, ty, priority, unify, elevation) if !segment.empty?
+    end
+  end
+
+  def wall_component_height(cells)
+    height = cells.values.flatten.map do |entry|
+      tag = terrain_tag_for_entry(entry)
+      tag ? wall_terrain_tag_heights[tag.id].to_i : 0
+    end.max || 0
+    [height, 1].max
+  end
+
   # ---------------------------------------------------------------------------
   # Altura fisica
   # ---------------------------------------------------------------------------
@@ -446,11 +556,11 @@ class Mode7Renderer
     wx = tx * Game_Map::TILE_WIDTH + Game_Map::TILE_WIDTH / 2.0
     wyb = (ty + 1) * Game_Map::TILE_HEIGHT
     @wall_data.push([sprite, wx, wyb, height, entries, z_behavior, base_unify, depth,
-                     surface_shadow_opacity])
+                      surface_shadow_opacity])
   end
 
-  # Componente wall rigido: P0 y P1+ salen del mismo bitmap/ancla. Solo se
-  # usa cuando existe P1; un tramo P0 normal mantiene la columna barata.
+  # P0 y P1+ de un wall bloqueante comparten bounds y ancla. P1 se separa en
+  # priority_data solo para su Z, no para volver a proyectar otra pieza.
   def make_wall_component(cells, elevation = 0)
     positions = cells.keys
     min_tx = positions.map { |tx, _ty| tx }.min
@@ -460,7 +570,7 @@ class Mode7Renderer
     width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
     height = (max_ty - min_ty + 1) * Game_Map::TILE_HEIGHT
     bitmap = Bitmap.new(width, height)
-    draw_priority_volume_source(bitmap, min_tx, min_ty, cells)
+    draw_wall_component_base_source(bitmap, min_tx, min_ty, cells)
 
     sprite = Sprite.new(@viewport)
     sprite.bitmap = bitmap
@@ -469,10 +579,22 @@ class Mode7Renderer
     sprite.visible = false
     wx = min_tx * Game_Map::TILE_WIDTH + width / 2.0
     wyb = (max_ty + 1) * Game_Map::TILE_HEIGHT
-    base_unify = cells.values.flatten.map { |entry| entry[:unify].to_i }.min || 0
-    depth = [wyb, 0, base_unify]
-    @wall_data.push([sprite, wx, wyb, height, cells, :component, base_unify, depth,
+    unify = cells.values.flatten.map { |entry| entry[:unify].to_i }.min || 0
+    depth = [wyb, 0, unify]
+    @wall_data.push([sprite, wx, wyb, height, cells, :component, unify, depth,
                      0, min_tx, min_ty, max_tx, max_ty, elevation])
+  end
+
+  def draw_wall_component_base_source(dst, min_tx, min_ty, cells)
+    dst.clear
+    cells.keys.sort_by { |tx, ty| [ty, tx] }.each do |tx, ty|
+      x = (tx - min_tx) * Game_Map::TILE_WIDTH
+      y = (ty - min_ty) * Game_Map::TILE_HEIGHT
+      cells[[tx, ty]].sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }.each do |entry|
+        next if entry_visual_priority(entry) > 0
+        blt_entry_into(dst, x, y, entry, entry[:opacity] || 255)
+      end
+    end
   end
 
   def draw_wall_column_source(dst, entries, tx = nil, ty = nil, surface_shadow_opacity = 0)
@@ -540,9 +662,8 @@ class Mode7Renderer
     end
   end
 
-  # P1-P4 del mismo wall se dibujan en lienzos separados por prioridad para
-  # respetar su Z nativa, pero todos usan bounds comunes. El P1 funciona como
-  # ancla visual de la pieza; P2+ no vuelve a calcular un origen propio.
+  # P1-P4 conserva el mismo bounds que su P0 asociado. Se dibuja por prioridad
+  # para la Z nativa, pero usa una sola escala local al actualizarse.
   def make_wall_priority_component(cells, elevation)
     bounds = cells.keys
     by_priority = Hash.new { |hash, key| hash[key] = {} }
@@ -857,7 +978,7 @@ class Mode7Renderer
       next if !sprite.bitmap || sprite.bitmap.disposed?
       if entries.is_a?(Hash)
         next if entries.values.flatten.none? { |entry| entry[:animated] }
-        draw_priority_volume_source(sprite.bitmap, min_tx, min_ty, entries)
+        draw_wall_component_base_source(sprite.bitmap, min_tx, min_ty, entries)
         next
       end
       next if entries.none? { |entry| entry[:animated] }
