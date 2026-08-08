@@ -32,5 +32,9 @@ Environment = Grass
 #-------------------------------
 [077]   # Test 2.5d
 Name = Test 2.5d
+Outdoor = true
 Weather = AutumnLeavesFalling,100
 SnapEdges = true
+#-------------------------------
+[078]   # MAP078
+Name = Indoor 2.5D Test

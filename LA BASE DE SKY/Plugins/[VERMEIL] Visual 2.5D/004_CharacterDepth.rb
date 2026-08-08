@@ -28,12 +28,12 @@ class Game_Character
   end
 
   def screen_z(height = 0)
-    # El jugador y los eventos usan su posición proyectada en pantalla como Z.
-    # Esto alinea su eje de profundidad exactamente con el de los muros.
-    return screen_y_ground + height if mode7_active_for_self?
-    
-    ret = _VERMEIL_25D_orig_screen_z(height)
-    return ret
+    if mode7_active_for_self?
+      return _VERMEIL_25D_orig_screen_z(height) if @always_on_top
+      wy = @real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+      return Mode7.depth_z(wy, 0, height)
+    end
+    _VERMEIL_25D_orig_screen_z(height)
   end
 
   private
@@ -57,7 +57,8 @@ class Sprite_Character < RPG::Sprite
 
     if $scene.is_a?(Scene_Map) && Mode7.rendering_now?
       syb = @character.screen_y_ground
-      k = Mode7.base_hscale(syb)
+      wy = @character.instance_variable_get(:@real_y).to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+      k = Mode7.object_scale_for_world_y(wy)
       self.zoom_x = k if k && k > 0
       self.zoom_y = k if k && k > 0
 

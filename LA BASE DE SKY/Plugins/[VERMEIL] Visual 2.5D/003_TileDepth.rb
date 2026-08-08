@@ -2,8 +2,8 @@
 # [VERMEIL] Visual 2.5D - 003_TileDepth.rb
 # Renderer de suelo en perspectiva (extrusion vertical del piso 2.5D).
 # Swap del renderer en Scene_Map (TilemapRenderer <-> Mode7Renderer).
-# Pase 2 SIN agrupador horizontal (run): cada tile se eleva en su propia
-# columna para seguir la curva exacta del terreno sin despegarse.
+# Todo tile conserva su propia base de profundidad. Compartir la Y de un bloque
+# grande hace que un priority 0 lejano tape al jugador.
 #===============================================================================
 
 class Mode7Renderer
@@ -33,6 +33,8 @@ class Mode7Renderer
     @ground_sprite.bitmap = Bitmap.new(Mode7.screen_w, Mode7.screen_h)
     @ground = nil
     @wall_data = []
+    @priority_strips = []
+    @priority_data = []
     @autotile_cells = {}
     @wall_cells = {}
     @walls_known = true
@@ -67,6 +69,21 @@ class Mode7Renderer
       spr.dispose
     end
     @wall_data.clear
+    @priority_strips.each do |data|
+      spr, src = data[0], data[1]
+      src.dispose if src && !src.disposed?
+      spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
+      spr.dispose
+    end
+    @priority_strips.clear
+    @priority_data.each do |data|
+      spr = data[0]
+      src = data[10]
+      src.dispose if src && !src.disposed?
+      spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
+      spr.dispose
+    end
+    @priority_data.clear
     @tilesets.bitmaps.each_value { |b| b.dispose }
     @tilesets.bitmaps.clear
     @autotiles.bitmaps.each_value { |b| b.dispose }
@@ -124,6 +141,7 @@ class Mode7Renderer
     end
     update_ms_fog
     update_walls
+    update_priority_surfaces
     apply_tone_color
     @autotiles.changed = false
   end
@@ -136,58 +154,63 @@ class Mode7Renderer
     ensure_extended_data
     @ground&.dispose
     @ground = Bitmap.new(@map.width * Game_Map::TILE_WIDTH, @map.height * Game_Map::TILE_HEIGHT)
+    if Mode7.indoor_map? && Mode7::Config::INTERIOR_OPAQUE_GROUND
+      @ground.fill_rect(0, 0, @ground.width, @ground.height, Mode7::Config::OUTSIDE_COLOR)
+    end
     @wall_data.each { |data| data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?; data[0].dispose }
     @wall_data.clear
+    @priority_strips.each do |data|
+      data[1].dispose if data[1] && !data[1].disposed?
+      data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?
+      data[0].dispose
+    end
+    @priority_strips.clear
+    @priority_data.each do |data|
+      data[10].dispose if data[10] && !data[10].disposed?
+      data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?
+      data[0].dispose
+    end
+    @priority_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
     @entry_cache = {}
     @terrain_tag_cache = {}
     @wall_cells = {}
     @walls_known = true
 
-    # Pase 1: suelo plano. En celdas con muro se pinta SOLO lo que esta bajo el
-    # muro (unify < wall_layer); la cara del muro se extruye en el pase 2.
+    # Cache completo primero. La continuidad de puertas/ventanas interiores
+    # necesita poder consultar las celdas vecinas sin depender del orden X/Y.
     @map.width.times do |tx|
       @map.height.times do |ty|
-        entries = collect_cell_entries(tx, ty)
-        @entry_cache[[tx, ty]] = entries
-        if cell_has_wall?(entries)
-          wall_layer = wall_layer_unify(entries)
-          ground_entries = entries.select { |e| e[:unify] < wall_layer }
+        @entry_cache[[tx, ty]] = collect_cell_entries(tx, ty)
+      end
+    end
+    cache_visual_priorities
+
+    # Pase 1: SOLO el plano del suelo. Los tiles con priority dejan de hornearse
+    # en este bitmap: si se deforman junto al suelo nunca pueden parecer objetos
+    # verticales. Los muros fisicos tambien se extraen del plano.
+    @map.width.times do |tx|
+      @map.height.times do |ty|
+        entries = @entry_cache[[tx, ty]]
+        if effective_cell_has_wall?(tx, ty, entries)
+          wall_layer = effective_wall_layer_unify(tx, ty, entries)
+          ground_entries = entries.select do |e|
+            e[:unify].to_i < wall_layer && !priority_surface_entry?(e)
+          end
           blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
         else
-          blt_ground_cell(tx, ty, entries)
+          ground_entries = entries.reject { |e| priority_surface_entry?(e) }
+          blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
         end
       end
     end
 
     bake_ms_shadows
 
-    # Pase 2: muros. Una columna POR TILE para seguir la curva del terreno.
-    @map.width.times do |tx|
-      @map.height.times do |ty|
-        entries = @entry_cache[[tx, ty]]
-        if cell_has_wall?(entries)
-          @wall_cells[[tx, ty]] = true
-          wall_layer = wall_layer_unify(entries)
-          wall_entries = entries.select { |e| e[:unify] >= wall_layer }
-
-          lower_entries = wall_entries.select { |e| e[:priority] <= 1 }
-          top_entries   = wall_entries.select { |e| e[:priority] >= 2 }
-
-          begin
-            # Altura global de la columna para que base y techo embonen
-            max_h = wall_entries.map { |e| e[:unify] }.max.to_i - wall_layer + 1
-            max_h = [wall_layer_height(wall_entries), max_h].max
-
-            make_column(tx, ty, lower_entries, max_h, wall_layer, :dynamic) unless lower_entries.empty?
-            make_column(tx, ty, top_entries, max_h, wall_layer, :always_top) unless top_entries.empty?
-          rescue Exception
-            blt_ground_cell(tx, ty, wall_entries)
-            Console.echo_error("2.5D: columna fallida en (#{tx},#{ty}) - se pinta plana")
-          end
-        end
-      end
-    end
+    # Pase 2/3: cada tile conserva bitmap Y profundidad propios. La prioridad
+    # solo modifica su oclusion, nunca hereda la posicion de un vecino.
+    build_wall_columns
+    build_priority_surfaces
 
     @need_build = false
     @need_ground_redraw = true
@@ -331,8 +354,11 @@ class Mode7Renderer
       wy = Mode7.world_y_for_row(sy)
       next if !wy
 
-      wy = 0 if wy < 0
-      wy = map_h_px - 1 if wy >= map_h_px
+      if wy < 0 || wy >= map_h_px
+        @dest_rect.set(0, sy, Mode7.screen_w, 1)
+        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+        next
+      end
       k = Mode7.hscale(sy)
       span = Mode7.screen_w / k
       wx_left = cx - Mode7.center_x / k
@@ -373,6 +399,7 @@ class Mode7Renderer
   end
 
   def sky_fill_color
+    return Mode7::Config::OUTSIDE_COLOR if Mode7.indoor_map? && Mode7::Config::INTERIOR_OPAQUE_GROUND
     return Mode7::Config::SKY_COLOR if !ms_has_panorama?
     return Color.new(0, 0, 0, 0)
   end
@@ -381,11 +408,15 @@ class Mode7Renderer
     if @old_tone != @tone
       @ground_sprite.tone = @tone
       @wall_data.each { |data| data[0].tone = @tone }
+      @priority_strips.each { |data| data[0].tone = @tone }
+      @priority_data.each { |data| data[0].tone = @tone }
       @old_tone = @tone.clone
     end
     if @old_color != @color
       @ground_sprite.color = @color
       @wall_data.each { |data| data[0].color = @color }
+      @priority_strips.each { |data| data[0].color = @color }
+      @priority_data.each { |data| data[0].color = @color }
       @old_color = @color.clone
     end
   end

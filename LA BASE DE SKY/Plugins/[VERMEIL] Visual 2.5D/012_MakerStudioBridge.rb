@@ -4,8 +4,50 @@
 class Mode7Renderer
   private
 
+  # El video de prueba mostraba hojas y fondo verde del exterior aun despues
+  # de entrar a la casa. Maker Studio mantiene algunos sprites de fog/panorama
+  # fuera del renderer; limpiamos SOLO objetos Sprite guardados en ivars cuyo
+  # nombre indica fog/panorama y luego dejamos que el mapa actual los recree.
+  def dispose_ms_plane_sprites(obj, seen = {})
+    return false if obj.nil?
+    oid = obj.object_id rescue nil
+    return false if oid && seen[oid]
+    seen[oid] = true if oid
+    if defined?(Sprite) && obj.is_a?(Sprite)
+      obj.dispose if !obj.disposed?
+      return true
+    end
+    if obj.is_a?(Array)
+      obj.delete_if do |v|
+        is_sprite = defined?(Sprite) && v.is_a?(Sprite)
+        dispose_ms_plane_sprites(v, seen)
+        is_sprite
+      end
+    elsif obj.is_a?(Hash)
+      obj.delete_if do |_k, v|
+        is_sprite = defined?(Sprite) && v.is_a?(Sprite)
+        dispose_ms_plane_sprites(v, seen)
+        is_sprite
+      end
+    end
+    false
+  rescue Exception
+    false
+  end
+
+  def clear_stale_ms_planes
+    return if !defined?(MakerStudio)
+    MakerStudio.instance_variables.each do |ivar|
+      next if ivar.to_s !~ /(fog|panorama)/i
+      value = MakerStudio.instance_variable_get(ivar) rescue nil
+      dispose_ms_plane_sprites(value)
+    end
+  rescue Exception
+  end
+
   def ensure_extended_data
     return if !defined?(MakerStudio)
+    clear_stale_ms_planes
     if !MakerStudio.get_extended_data_for(@map_id) && MakerStudio.respond_to?(:load_extended_layers_for_map)
       MakerStudio.load_extended_layers_for_map(@map_id, @map)
     end
@@ -32,6 +74,8 @@ class Mode7Renderer
     if defined?(MakerStudio) && MakerStudio.respond_to?(:update_fog_sprites)
       MakerStudio.update_fog_sprites
     end
+  rescue Exception
+    # Un fog/panorama viejo nunca debe tumbar el mapa durante un transfer.
   end
 
   def ms_has_panorama?
@@ -115,6 +159,8 @@ class Mode7Renderer
   # lighting son enteros que se hornean via MakerStudio::TileEffects, NO
   # Tone/Color.
   def stylize_entry(entry, src, unify = nil)
+    # Conserva override de terrain tag de Maker Studio para el filtro 2.5D.
+    entry[:terrain_tag] = src["terrain_tag"].to_i if src.key?("terrain_tag")
     v = src["opacity"];   entry[:opacity] = v.to_i if v
     v = src["rotation"];  entry[:rotation] = v.to_i if v && v.to_i != 0
     entry[:flip] = true if src["flipH"] || src["flipV"]
@@ -130,8 +176,10 @@ class Mode7Renderer
     elsif toned.is_a?(Tone)
       entry[:tone] = toned
     end
-    if unify && unify > 0
-      entry[:elevation] = unify * Mode7::Config::ELEVATION_PER_UNIFY + Mode7::Config::ELEVATION_FLOOR_PAD
+    # IMPORTANTE: `unify`/layer es orden de dibujo, NO altura fisica.
+    # Solo elevamos una entry si Maker Studio trae una elevacion explicita.
+    if src.key?("elevation") && !src["elevation"].nil?
+      entry[:elevation] = src["elevation"].to_i
     end
   end
 
