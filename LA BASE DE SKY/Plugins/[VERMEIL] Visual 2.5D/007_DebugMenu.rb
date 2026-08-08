@@ -17,6 +17,7 @@ module Mode7
         _INTL("Zoom: {1}", Mode7.zoom),
         _INTL("Radio Planeta (Sky): {1}", Mode7.planet_radius),
         _INTL("Distancia (Altura): {1}", Mode7.distance_h),
+        _INTL("Diagnostico lift"),
         _INTL("Volver")
       ]
       cmd = pbShowCommands(nil, commands, -1, cmd)
@@ -60,6 +61,8 @@ module Mode7
           Mode7.set_camera(Mode7.current_alpha, Mode7.zoom, 0, new_dist.to_f, Mode7.planet_radius)
           $scene.instance_variable_get(:@map_renderer).invalidate_ground rescue nil
         end
+      when 4 # Diagnostico lift
+        pbMessage(Mode7.terrain_camera_lift_debug_text)
       end
     end
   end

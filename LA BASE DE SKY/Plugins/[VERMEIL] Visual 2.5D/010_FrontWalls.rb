@@ -61,6 +61,10 @@ class Mode7Renderer
     Mode7::Config::OUTDOOR_WALL_TERRAIN_TAG_HEIGHT
   end
 
+  def elevated_wall_terrain_tag_heights
+    Mode7::Config::ELEVATED_WALL_TERRAIN_TAG_HEIGHT
+  end
+
   def terrain_tag_for_entry(entry)
     if entry.key?(:terrain_tag)
       return GameData::TerrainTag.try_get(entry[:terrain_tag])
@@ -101,6 +105,20 @@ class Mode7Renderer
 
   # Un muro fisico se decide por Terrain Tag. Priority NO significa altura.
   def entry_is_wall?(e)
+    tag = terrain_tag_for_entry(e)
+    if tag && tag.id != :None
+      configured = wall_terrain_tag_heights[tag.id]
+      return configured.to_i > 0 if !configured.nil?
+      configured = elevated_wall_terrain_tag_heights[tag.id]
+      return configured.to_i > 0 if !configured.nil?
+    end
+    return true if Mode7Renderer.debug_mode_force_all_priority_wall? && e[:priority].to_i > 0
+    false
+  end
+
+  # Solo los muros normales fuerzan bloqueo. ElevatedWall usa la pasabilidad
+  # nativa de la escalera/suelo y puede disparar camera lift al pisarlo.
+  def entry_blocks_movement?(e)
     tag = terrain_tag_for_entry(e)
     if tag && tag.id != :None
       configured = wall_terrain_tag_heights[tag.id]
@@ -176,6 +194,10 @@ class Mode7Renderer
     entries.any? { |e| entry_is_wall?(e) }
   end
 
+  def cell_has_blocking_wall?(entries)
+    entries.any? { |e| entry_blocks_movement?(e) }
+  end
+
   # Heuristica legacy. Phase 4 la deja disponible, pero Settings la desactiva:
   # una puerta con priority se representa mejor como priority surface que como
   # una columna inventada entre dos muros.
@@ -219,18 +241,17 @@ class Mode7Renderer
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
         next if !effective_cell_has_wall?(tx, ty, entries)
-        @wall_cells[[tx, ty]] = true if cell_has_wall?(entries)
-        wall_layer = effective_wall_layer_unify(tx, ty, entries)
-        wall_entries = entries.select do |entry|
-          entry[:unify].to_i >= wall_layer && !priority_surface_entry?(entry)
+        @wall_cells[[tx, ty]] = true if cell_has_blocking_wall?(entries)
+        wall_entries = entries.select { |entry| entry_is_wall?(entry) }
+        # ponytail: separar por prioridad y layer. Un bitmap por entrada seria
+        # mas fino, pero este corte conserva composicion de piezas iguales sin
+        # transferir prioridad entre capas; subdividir por objeto si se pide.
+        wall_entries.group_by do |entry|
+          [entry_visual_priority(entry), entry[:unify].to_i]
+        end.each do |(priority, unify), column_entries|
+          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority, unify]
+          make_column(tx, ty, column_entries, unify, :dynamic, depth)
         end
-        next if wall_entries.empty?
-        # ponytail: cada celda mantiene su propio bitmap. Unir por tag o ID
-        # convierte casas/props en rectangulos y hace que piezas ajenas hereden
-        # la misma proyeccion. El tag solo clasifica volumen y colision.
-        priority = wall_entries.map { |entry| entry_visual_priority(entry) }.max || 0
-        depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority]
-        make_column(tx, ty, wall_entries, 0, :dynamic, depth)
       rescue Exception
         Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
       end
@@ -586,16 +607,8 @@ class Mode7Renderer
         seen[key] = true
 
         entries = collect_cell_entries(tx, ty)
-        if effective_cell_has_wall?(tx, ty, entries)
-          wall_layer = effective_wall_layer_unify(tx, ty, entries)
-          ground_entries = entries.select do |e|
-            e[:unify].to_i < wall_layer && !priority_surface_entry?(e)
-          end
-          blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
-        else
-          ground_entries = entries.reject { |e| priority_surface_entry?(e) }
-          blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
-        end
+        ground_entries = ground_entries_for_cell(tx, ty, entries)
+        blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
       end
     end
 
@@ -698,8 +711,9 @@ class Mode7Renderer
       sprite.y = syb
       sprite.zoom_x = k
       sprite.zoom_y = k
-      depth_wyb, depth_priority = depth || [wyb, 0]
-      bias = depth_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0
+      depth_wyb, depth_priority, depth_unify = depth || [wyb, 0, 0]
+      bias = depth_unify.to_i
+      bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority > 0
       sprite.z = Mode7.depth_z(depth_wyb, depth_priority, bias)
 
       apply_depth_fog_to_sprite(sprite, syb)

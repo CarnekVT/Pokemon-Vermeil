@@ -12,7 +12,7 @@ class Game_Character
   def screen_x
     return _VERMEIL_25D_orig_screen_x if !mode7_active_for_self?
     wx = @real_x.to_f / Game_Map::X_SUBPIXELS + (@width * Game_Map::TILE_WIDTH / 2)
-    wy = @real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+    wy = mode7_world_y_ground
     pr = Mode7.project(wx, wy, 0)
     return -1000 if !pr
     return pr[0].round + self.x_offset
@@ -21,7 +21,7 @@ class Game_Character
   def screen_y_ground
     return _VERMEIL_25D_orig_screen_y_ground if !mode7_active_for_self?
     wx = @real_x.to_f / Game_Map::X_SUBPIXELS
-    wy = @real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+    wy = mode7_world_y_ground
     pr = Mode7.project(wx, wy, 0)
     return 100_000 if !pr
     return pr[1].round
@@ -30,7 +30,7 @@ class Game_Character
   def screen_z(height = 0)
     if mode7_active_for_self?
       return _VERMEIL_25D_orig_screen_z(height) if @always_on_top
-      wy = @real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+      wy = mode7_world_y_ground
       return Mode7.depth_z(wy, 0, height)
     end
     _VERMEIL_25D_orig_screen_z(height)
@@ -41,6 +41,19 @@ class Game_Character
   def mode7_active_for_self?
     return false if !$scene.is_a?(Scene_Map)
     return Mode7.rendering_now?
+  end
+
+  # Escaleras laterales nativas desplazan Y en pantalla mientras el personaje
+  # avanza X. 2.5D recalcula la proyeccion y antes perdia ese desplazamiento.
+  def mode7_world_y_ground
+    return @real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT if !on_stair?
+    # screen_x se consulta antes de Game_Character#moving? en algunos sprites.
+    # El motor inicializa este offset alli, pero screen_y_ground lo suma aqui.
+    @view_offset_y ||= 0 if self.is_a?(Game_Player) && defined?(SMOOTH_SCROLLING) && SMOOTH_SCROLLING
+    native_y = _VERMEIL_25D_orig_screen_y_ground
+    world_y = @real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+    flat_y = ((@real_y.to_f - map.display_y) / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT).round
+    world_y + native_y - flat_y
   end
 end
 
@@ -57,7 +70,7 @@ class Sprite_Character < RPG::Sprite
 
     if $scene.is_a?(Scene_Map) && Mode7.rendering_now?
       syb = @character.screen_y_ground
-      wy = @character.instance_variable_get(:@real_y).to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+      wy = @character.send(:mode7_world_y_ground)
       k = Mode7.object_scale_for_world_y(wy)
       self.zoom_x = k if k && k > 0
       self.zoom_y = k if k && k > 0

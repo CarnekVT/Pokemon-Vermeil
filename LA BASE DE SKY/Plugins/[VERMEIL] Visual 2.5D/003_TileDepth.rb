@@ -233,17 +233,20 @@ class Mode7Renderer
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
-        if effective_cell_has_wall?(tx, ty, entries)
-          wall_layer = effective_wall_layer_unify(tx, ty, entries)
-          ground_entries = entries.select do |entry|
-            entry[:unify].to_i < wall_layer && !priority_surface_entry?(entry)
-          end
-        else
-          ground_entries = entries.reject { |entry| priority_surface_entry?(entry) }
-        end
+        ground_entries = ground_entries_for_cell(tx, ty, entries)
         ground_entries.select! { |entry| ground_pass_for(entry) == pass }
         blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
       end
+    end
+  end
+
+  # Un volumen no absorbe visuales de otras capas de su misma celda. El muro
+  # conserva solo sus entradas etiquetadas; props p0 quedan en suelo y props
+  # p1+ usan su propia superficie de prioridad.
+  def ground_entries_for_cell(tx, ty, entries)
+    return entries.reject { |entry| priority_surface_entry?(entry) } if !effective_cell_has_wall?(tx, ty, entries)
+    entries.select do |entry|
+      !entry_is_wall?(entry) && !priority_surface_entry?(entry)
     end
   end
 

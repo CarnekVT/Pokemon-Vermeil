@@ -184,28 +184,89 @@ module Mode7
       cam_y - terrain_camera_vertical_lift
     end
 
+    def terrain_camera_lift_for_tag(tag)
+      return 0.0 if !tag || !tag.respond_to?(:id)
+      (Config::TERRAIN_TAG_CAMERA_LIFT[tag.id] || 0).to_f
+    end
+
+    # ElevatedWall es la excepcion al tag logico del jugador: un suelo puede
+    # conservar Grass para mecanicas y llevar Mountains en otra capa visual.
+    # Solo se acepta si ese tag fue declarado explicitamente ElevatedWall.
+    def terrain_camera_elevated_wall_lift_at(x, y)
+      renderer = $scene.instance_variable_get(:@map_renderer) if $scene
+      return nil if !renderer || !renderer.is_a?(Mode7Renderer) || renderer.disposed?
+      entries = renderer.instance_variable_get(:@entry_cache)
+      cell = entries && entries[[x, y]]
+      return nil if !cell
+      cell.filter_map do |entry|
+        tag = renderer.send(:terrain_tag_for_entry, entry)
+        next if !tag || !Config::ELEVATED_WALL_TERRAIN_TAG_HEIGHT.key?(tag.id)
+        terrain_camera_lift_for_tag(tag)
+      end.max || 0.0
+    rescue
+      nil
+    end
+
+    def terrain_camera_elevated_wall_tags_at(x, y)
+      renderer = $scene.instance_variable_get(:@map_renderer) if $scene
+      return [] if !renderer || !renderer.is_a?(Mode7Renderer) || renderer.disposed?
+      entries = renderer.instance_variable_get(:@entry_cache)
+      cell = entries && entries[[x, y]]
+      return [] if !cell
+      cell.filter_map do |entry|
+        tag = renderer.send(:terrain_tag_for_entry, entry)
+        tag.id if tag && Config::ELEVATED_WALL_TERRAIN_TAG_HEIGHT.key?(tag.id)
+      end.uniq
+    rescue
+      []
+    end
+
     def terrain_camera_lift_target
       return 0.0 if Config::TERRAIN_TAG_CAMERA_LIFT.empty? || !$game_player || !$game_map
       map_id = $game_map.map_id
       x = $game_player.x
       y = $game_player.y
-      if @terrain_camera_map_id == map_id && @terrain_camera_x == x && @terrain_camera_y == y
+      renderer = $scene.instance_variable_get(:@map_renderer) if $scene
+      renderer_id = renderer && !renderer.disposed? ? renderer.object_id : nil
+      if @terrain_camera_map_id == map_id && @terrain_camera_x == x && @terrain_camera_y == y &&
+         @terrain_camera_renderer_id == renderer_id
         return @terrain_camera_target || 0.0
       end
       @terrain_camera_map_id = map_id
       @terrain_camera_x = x
       @terrain_camera_y = y
-      tag = $game_player.pbTerrainTag
-      @terrain_camera_target = tag ? (Config::TERRAIN_TAG_CAMERA_LIFT[tag.id] || 0).to_f : 0.0
+      @terrain_camera_renderer_id = renderer_id
+      logical_lift = terrain_camera_lift_for_tag($game_player.pbTerrainTag)
+      elevated_lift = terrain_camera_elevated_wall_lift_at(x, y)
+      @terrain_camera_target = [logical_lift, elevated_lift || 0.0].max
     rescue
       @terrain_camera_target = 0.0
+    end
+
+    def terrain_camera_lift_debug_text
+      return _INTL("Sin jugador/mapa.") if !$game_player || !$game_map
+      tag = $game_player.pbTerrainTag
+      logical = tag ? tag.id.to_s : "None"
+      elevated = terrain_camera_elevated_wall_tags_at($game_player.x, $game_player.y)
+      elevated_text = elevated.empty? ? "ninguno" : elevated.join(", ")
+      target = terrain_camera_lift_target.round(2)
+      current = terrain_camera_lift.round(2)
+      _INTL("Logico: {1}\nElevatedWall: {2}\nLift target: {3}\nLift actual: {4}",
+            logical, elevated_text, target, current)
+    rescue
+      _INTL("No se pudo leer el lift 2.5D.")
     end
 
     def update_terrain_camera_lift
       target = rendering_now? ? terrain_camera_lift_target : 0.0
       current = terrain_camera_lift
       smooth = Config::TERRAIN_TAG_CAMERA_LIFT_SMOOTH.to_f.clamp(0.01, 1.0)
-      value = current + (target - current) * smooth
+      step = (target - current) * smooth
+      # ponytail: ground se rasteriza por filas enteras. Limitar primer paso
+      # evita saltos de 2+ px al entrar/salir verticalmente; interpolacion
+      # subpixel requeriria renderer con textura/vertices, no Bitmap#stretch_blt.
+      step = step.clamp(-1.0, 1.0)
+      value = current + step
       value = target if (target - value).abs < 0.05
       return if (value - current).abs < 0.01
       @terrain_camera_lift = value

@@ -225,9 +225,18 @@ module Mode7
       :Mode7Tag => 4,
     }.freeze
     OUTDOOR_WALL_TERRAIN_TAG_HEIGHT = {
-      :Mountains => 4,
       :Mode7Tag => 4,
       :HoneyTree => 4
+    }.freeze
+
+    # MURO ELEVADO 2.5D. Clase aparte del muro normal: conserva volumen visual,
+    # pero deja la pasabilidad al tile nativo. Mountains bloquea en paredes por
+    # su pasabilidad original y permite escaleras/plataformas que sean pasables.
+    # No duplicar un tag aqui y en *_WALL_* normal.
+    ELEVATED_WALL_TERRAIN_TAG_HEIGHT = {
+      :Mountains => 4,
+      :Ladders => 4,
+      :LaddersSide => 4
     }.freeze
 
     # PRIORIDAD HIBRIDA 2.5D. Terrain tags aqui NO son volumenes. Al pisar la
@@ -241,7 +250,7 @@ module Mode7
     # Altura visual en px para capas hibridas. Grass queda sobre el suelo como
     # una alfombra de hojas baja; no cambia colision, terreno ni prioridad PBS.
     HYBRID_PRIORITY_TERRAIN_TAG_HEIGHT = {
-      :Grass => 12
+      :Grass => 4
     }.freeze
 
     # ELEVACION LOCAL POR TERRAIN TAG. No mueve camara: cada tile del filtro
@@ -255,16 +264,29 @@ module Mode7
     }.freeze
 
     # DESPLAZAMIENTO DE CAMARA POR TERRAIN TAG. Mueve la proyeccion completa
-    # en pantalla, sin cambiar cam_y ni deformar tiles adyacentes. Usa tags
-    # pasables: Mountains no se activa porque WALL_BLOCKS_MOVEMENT lo bloquea.
+    # en pantalla, sin cambiar cam_y ni deformar tiles adyacentes. Mountains
+    # es ElevatedWall: en escalera/plataforma pasable activa lift; en pared se
+    # mantiene bloqueado por la pasabilidad nativa.
     # Valor = pixeles de subida visual de camara. Tambien desplaza una camara
     # vertical virtual: cambia profundidad/escala sin tocar cam_y real ni
     # coordenadas de colision.
     TERRAIN_TAG_CAMERA_LIFT = {
-      :Mountains => 6
+      :Mountains => 24,
+      :Ladders => 12,
+      :LaddersSide => 8
+
     }.freeze
     TERRAIN_TAG_CAMERA_LIFT_SMOOTH = 0.34
     TERRAIN_TAG_CAMERA_LIFT_VERTICAL_FACTOR = 1.0
+
+    # ESCALERAS LATERALES POR TERRAIN TAG. Unico tag: :LaddersSide.
+    # Maker Studio guarda por celda si el tramo sube-derecha (-1) o
+    # baja-derecha (1). Este valor es default para celdas aun sin metadata.
+    # Paso diagonal real: coordenadas y colision cambian juntas en vanilla y
+    # 2.5D.
+    SIDE_LADDER_TERRAIN_TAG_SLOPE_Y = {
+      :LaddersSide => -1
+    }.freeze
 
     # =======================================================================
     # ELEVACION FALSO 3D (apilado de capas sobre el cilindro)
@@ -307,3 +329,26 @@ GameData::TerrainTag.register({
   :id        => :Mode7Tag,
   :id_number => 19
 })
+
+GameData::TerrainTag.register({
+  :id        => :Ladders,
+  :id_number => 21
+})
+
+# Terrain tag unico para escaleras laterales. ID 22 queda separado de Ladders
+# (21), que conserva solo volumen/camera lift.
+unless GameData::TerrainTag.exists?(:LaddersSide)
+  GameData::TerrainTag.register({
+    :id        => :LaddersSide,
+    :id_number => 22
+  })
+end
+# Maker Studio guarda la etiqueta Mountains con el ID 20. Essentials no la
+# conoce por defecto, por eso el runtime la convertia en :None y los filtros
+# 2.5D (muro elevado y camera lift) nunca la recibian.
+unless GameData::TerrainTag.exists?(:Mountains)
+  GameData::TerrainTag.register({
+    :id        => :Mountains,
+    :id_number => 20
+  })
+end
