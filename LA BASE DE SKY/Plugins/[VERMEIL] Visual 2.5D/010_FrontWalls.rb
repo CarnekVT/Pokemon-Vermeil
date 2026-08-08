@@ -237,25 +237,60 @@ class Mode7Renderer
   end
 
   def build_wall_columns
+    processed = {}
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
         next if !effective_cell_has_wall?(tx, ty, entries)
-        @wall_cells[[tx, ty]] = true if cell_has_blocking_wall?(entries)
         wall_entries = entries.select { |entry| entry_is_wall?(entry) }
-        # ponytail: separar por prioridad y layer. Un bitmap por entrada seria
-        # mas fino, pero este corte conserva composicion de piezas iguales sin
-        # transferir prioridad entre capas; subdividir por objeto si se pide.
-        wall_entries.group_by do |entry|
-          [entry_visual_priority(entry), entry[:unify].to_i]
-        end.each do |(priority, unify), column_entries|
-          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority, unify]
-          make_column(tx, ty, column_entries, unify, :dynamic, depth)
+        wall_entries.group_by { |entry| wall_group_id(entry) }.each do |group_id, _|
+          key = [tx, ty, group_id]
+          next if processed[key]
+
+          rows = wall_stack_rows(tx, ty, group_id)
+          next if rows.empty?
+          rows.each { |row_ty, _row_entries| processed[[tx, row_ty, group_id]] = true }
+
+          all_entries = rows.flat_map { |_row_ty, row_entries| row_entries }
+          priority = all_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+          unify = all_entries.map { |entry| entry[:unify].to_i }.max || 0
+          bottom_ty = rows[-1][0]
+          if all_entries.any? { |entry| entry_blocks_movement?(entry) }
+            @wall_cells[[tx, bottom_ty]] = true
+          end
+          depth = [(bottom_ty + 1) * Game_Map::TILE_HEIGHT, priority, unify]
+          make_wall_stack_column(tx, rows, unify, :dynamic, depth)
         end
       rescue Exception
         Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
       end
     end
+  end
+
+  # Identidad automatica de volumen: solo una tapa con prioridad seguida de su
+  # base priority 0 es una pieza alta de RMXP. Dos props p0 pegados no se unen.
+  # Esto evita trasladar una pared/prop ajena que comparte terrain tag.
+  def wall_group_id(entry)
+    tag = terrain_tag_for_entry(entry)
+    return [:terrain_tag, tag.id] if tag && tag.id != :None
+    [:debug_priority, entry[:unify].to_i]
+  end
+
+  def wall_stack_rows(tx, top_ty, group_id)
+    rows = []
+    ty = top_ty
+    while ty < @map.height
+      entries = @entry_cache[[tx, ty]]
+      row_entries = entries.select do |entry|
+        entry_is_wall?(entry) && wall_group_id(entry) == group_id
+      end
+      break if row_entries.empty?
+      rows.push([ty, row_entries])
+      row_priority = row_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+      break if row_priority <= 0
+      ty += 1
+    end
+    rows
   end
 
   def build_priority_surfaces
@@ -302,22 +337,21 @@ class Mode7Renderer
     elevation + entry_terrain_tag_height(e)
   end
 
-  # Columna fisica de una celda. El bitmap solo reserva sus 32 px reales y una
-  # elevacion explicita; el numero del filtro de tag no anade aire transparente.
-  def make_column(tx, ty, entries, base_unify = 0, z_behavior = :dynamic, depth = nil)
-    return if entries.nil? || entries.empty?
+  # Columna fisica de varias celdas. Ancla TODO el bitmap al suelo de su ultima
+  # celda; asi barril, arbol o estanteria de 2+ tiles no recalcula cada pieza
+  # con una Y distinta al cambiar angulo/camara.
+  def make_wall_stack_column(tx, rows, base_unify = 0, z_behavior = :dynamic, depth = nil)
+    return if rows.nil? || rows.empty?
+    entries = rows.flat_map { |_row_ty, row_entries| row_entries }
+    return if entries.empty?
     max_elev = entries.map { |e| entry_world_elevation(e) }.max || 0.0
-    h = Game_Map::TILE_HEIGHT + [max_elev.ceil, 0].max
+    base_h = rows.length * Game_Map::TILE_HEIGHT
+    h = base_h + [max_elev.ceil, 0].max
 
     bmp = Bitmap.new(Game_Map::TILE_WIDTH, h)
     bmp.clear
 
-    entries.sort_by { |e| [entry_world_elevation(e), e[:unify].to_i, e[:priority].to_i] }.each do |e|
-      elev = entry_world_elevation(e)
-      y = (h - Game_Map::TILE_HEIGHT - elev).round
-      y = 0 if y < 0
-      blt_entry_into(bmp, 0, y, e, e[:opacity] || 255)
-    end
+    draw_wall_stack_source(bmp, rows, base_h)
 
     sprite = Sprite.new(@viewport)
     sprite.bitmap = bmp
@@ -326,8 +360,21 @@ class Mode7Renderer
     sprite.visible = false
 
     wx = tx * Game_Map::TILE_WIDTH + Game_Map::TILE_WIDTH / 2.0
-    wyb = ty * Game_Map::TILE_HEIGHT + Game_Map::TILE_HEIGHT
-    @wall_data.push([sprite, wx, wyb, h, entries, z_behavior, base_unify, depth])
+    wyb = (rows[-1][0] + 1) * Game_Map::TILE_HEIGHT
+    @wall_data.push([sprite, wx, wyb, h, rows, z_behavior, base_unify, depth])
+  end
+
+  def draw_wall_stack_source(dst, rows, base_h)
+    top_pad = dst.height - base_h
+    rows.each_with_index do |(_ty, entries), row_index|
+      entries.sort_by { |entry| [entry_world_elevation(entry), entry[:unify].to_i,
+                                  entry[:priority].to_i] }.each do |entry|
+        y = (top_pad + row_index * Game_Map::TILE_HEIGHT -
+             entry_world_elevation(entry)).round
+        y = 0 if y < 0
+        blt_entry_into(dst, 0, y, entry, entry[:opacity] || 255)
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -613,17 +660,14 @@ class Mode7Renderer
     end
 
     @wall_data.each do |data|
-      sprite, _wx, _wyb, h, entries, _z_behavior, _base_unify, _depth = data
+      sprite, _wx, _wyb, h, rows, _z_behavior, _base_unify, _depth = data
       next if !sprite.bitmap || sprite.bitmap.disposed?
-      next if entries.none? { |e| e[:animated] }
+      entries = rows.flat_map { |_ty, row_entries| row_entries }
+      next if entries.none? { |entry| entry[:animated] }
 
       sprite.bitmap.clear
-      entries.sort_by { |e| [entry_world_elevation(e), e[:unify].to_i, e[:priority].to_i] }.each do |e|
-        elev = entry_world_elevation(e)
-        y = (h - Game_Map::TILE_HEIGHT - elev).round
-        y = 0 if y < 0
-        blt_entry_into(sprite.bitmap, 0, y, e, e[:opacity] || 255)
-      end
+      draw_wall_stack_source(sprite.bitmap, rows,
+                             rows.length * Game_Map::TILE_HEIGHT)
     end
 
     @priority_strips.each do |data|
