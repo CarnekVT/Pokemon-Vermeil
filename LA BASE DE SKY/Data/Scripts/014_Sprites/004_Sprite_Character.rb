@@ -343,7 +343,7 @@ class Sprite_Character < RPG::Sprite
   end
 
   def update_child_graphics
-    unless MAPAS_SIN_REFLEJO.include?($game_map.map_id)
+    unless Settings::MAPAS_SIN_REFLEJO.include?($game_map.map_id)
       @reflection&.visible = true
       @reflection&.update
     else
