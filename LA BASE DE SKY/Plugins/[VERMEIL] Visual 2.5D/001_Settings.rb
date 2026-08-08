@@ -176,9 +176,10 @@ module Mode7
     # mas adelante. Reproduce el comportamiento visual clasico sin usar z=9999.
     PRIORITY_DEPTH_STEP = 32
 
-    # Reproyeccion costosa de tiras priority. Entre pasos, se desplazan con su
-    # ancla proyectada; reduce stretch_blt durante scroll continuo.
+    # Reproyeccion de tiras priority en scroll horizontal. Con Y no se puede
+    # interpolar: cambia la curvatura de cada fila y aparecen cortes.
     PRIORITY_REPROJECT_PIXELS = 4
+    PRIORITY_VERTICAL_REPROJECT_PIXELS = 1
 
     # FOV horizontal en grados. Controla el aplanado de la cuadricula,
     # desacoplado del pitch:

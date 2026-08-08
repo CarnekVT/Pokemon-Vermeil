@@ -133,7 +133,7 @@ class Mode7Renderer
     cx = Mode7.cam_x
     cy = Mode7.cam_y
     if @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
-       (@last_cam_x - cx).abs >= 1 || (@last_cam_y - cy).abs >= 1
+       (@last_cam_x - cx).abs >= 1 || (@last_cam_y - cy).abs > 0.001
       draw_ground
       @last_cam_x = cx
       @last_cam_y = cy
@@ -187,26 +187,12 @@ class Mode7Renderer
     cache_terrain_tag_heights
     cache_visual_priorities
 
-    # Pase 1: SOLO el plano del suelo. Los tiles con priority dejan de hornearse
-    # en este bitmap: si se deforman junto al suelo nunca pueden parecer objetos
-    # verticales. Los muros fisicos tambien se extraen del plano.
-    @map.width.times do |tx|
-      @map.height.times do |ty|
-        entries = @entry_cache[[tx, ty]]
-        if effective_cell_has_wall?(tx, ty, entries)
-          wall_layer = effective_wall_layer_unify(tx, ty, entries)
-          ground_entries = entries.select do |e|
-            e[:unify].to_i < wall_layer && !priority_surface_entry?(e)
-          end
-          blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
-        else
-          ground_entries = entries.reject { |e| priority_surface_entry?(e) }
-          blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
-        end
-      end
-    end
-
+    # La sombra cae sobre el suelo base (layer 0), no sobre los tiles/props de
+    # capas nativas superiores ni sobre las extendidas de Maker Studio.
+    draw_ground_pass(:base)
     bake_ms_shadows
+    draw_ground_pass(:native_overlay)
+    draw_ground_pass(:extended)
 
     # Pase 2/3: cada tile conserva bitmap Y profundidad propios. La prioridad
     # solo modifica su oclusion, nunca hereda la posicion de un vecino.
@@ -229,6 +215,36 @@ class Mode7Renderer
     end
     collect_extended_entries(tx, ty, entries, seen)
     entries
+  end
+
+  def native_layer_count
+    return MakerStudio::NATIVE_LAYERS if defined?(MakerStudio::NATIVE_LAYERS)
+    3
+  end
+
+  def ground_pass_for(entry)
+    unify = entry[:unify].to_i
+    return :extended if unify >= native_layer_count
+    return :base if unify <= 0
+    :native_overlay
+  end
+
+  def draw_ground_pass(pass)
+    @map.width.times do |tx|
+      @map.height.times do |ty|
+        entries = @entry_cache[[tx, ty]]
+        if effective_cell_has_wall?(tx, ty, entries)
+          wall_layer = effective_wall_layer_unify(tx, ty, entries)
+          ground_entries = entries.select do |entry|
+            entry[:unify].to_i < wall_layer && !priority_surface_entry?(entry)
+          end
+        else
+          ground_entries = entries.reject { |entry| priority_surface_entry?(entry) }
+        end
+        ground_entries.select! { |entry| ground_pass_for(entry) == pass }
+        blt_ground_cell(tx, ty, ground_entries) unless ground_entries.empty?
+      end
+    end
   end
 
   def make_native_entry_with_props(tx, ty, layer)

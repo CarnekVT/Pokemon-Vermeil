@@ -599,10 +599,16 @@ class Mode7Renderer
         next
       end
 
-      step = Mode7::Config::PRIORITY_REPROJECT_PIXELS.to_i.clamp(1, 32)
+      x_step = Mode7::Config::PRIORITY_REPROJECT_PIXELS.to_i.clamp(1, 32)
+      y_step = Mode7::Config::PRIORITY_VERTICAL_REPROJECT_PIXELS.to_i.clamp(1, 32)
+      vertical_changed = true
+      if state
+        vertical_delta = (Mode7.cam_y - state[1]).abs
+        vertical_changed = y_step <= 1 ? vertical_delta > 0.001 : vertical_delta >= y_step
+      end
       needs_projection = !state ||
-                         (Mode7.cam_x - state[0]).abs >= step ||
-                         (Mode7.cam_y - state[1]).abs >= step
+                         (Mode7.cam_x - state[0]).abs >= x_step ||
+                         vertical_changed
       if needs_projection
         if !redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation)
           sprite.visible = false

@@ -244,6 +244,17 @@ module Mode7
       @sky_row_world_offset_cache.clear
       @project_y_cache ||= {}
       @project_y_cache.clear
+      @projection_cache_cam_y = nil
+    end
+
+    # project_y/world_y dependen de la posicion exacta de camara. Usar floor
+    # los hacia saltar al cruzar cada pixel durante scroll suave vertical.
+    def refresh_camera_projection_cache
+      current_cam_y = cam_y
+      return if @projection_cache_cam_y == current_cam_y
+      @projection_cache_cam_y = current_cam_y
+      @world_y_cache.clear if @world_y_cache
+      @project_y_cache.clear if @project_y_cache
     end
 
     def set_pivot(ratio)
@@ -423,7 +434,8 @@ module Mode7
 
     def project_y(wy, elevation = 0)
       @project_y_cache ||= {}
-      key = [wy, elevation, cam_y.floor]
+      refresh_camera_projection_cache
+      key = [wy, elevation]
       return @project_y_cache[key] if @project_y_cache.key?(key)
       result = _project_y_uncached(wy, elevation)
       @project_y_cache[key] = result
@@ -478,7 +490,8 @@ module Mode7
     def world_y_for_row(sy)
       sy -= terrain_camera_lift
       return _sky_world_y_for_row(sy) if sky_mode?
-      key = [sy, cam_y.floor]
+      refresh_camera_projection_cache
+      key = sy
       return @world_y_cache[key] if @world_y_cache && @world_y_cache.key?(key)
       result = _world_y_for_row_uncached(sy)
       @world_y_cache[key] = result if @world_y_cache
