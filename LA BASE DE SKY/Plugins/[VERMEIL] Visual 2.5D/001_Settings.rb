@@ -161,9 +161,15 @@ module Mode7
     # Sky curva posicion global, no aplasta tiles hacia el horizonte.
     SKY_GROUND_Y_SCALE = 1.00
 
-    # Conicidad muy leve sobre plano compartido. Walls usan la misma escala
-    # uniforme por pieza; no deformar X/Y distinto ni reconstruir tiles por fila.
+    # Conicidad muy leve del plano de suelo. Mantiene profundidad sin convertir
+    # el mapa en una rejilla plana.
     SKY_WIDTH_PERSPECTIVE = 0.050
+
+    # Walls y priority normales se dibujan como objetos rigidos anclados a su
+    # base. No comparten la conicidad del suelo: asi un arbol, barril o tramo
+    # P1+ completo conserva forma y no se encoge por filas/celdas adyacentes.
+    # 0.0 = forma original; subirlo da perspectiva tambien a esos objetos.
+    SKY_BILLBOARD_PERSPECTIVE = 0.0
 
     # Personajes/OW conservan escala fija: NPCs, followers y eventos no crecen
     # ni encogen al recorrer la curvatura.

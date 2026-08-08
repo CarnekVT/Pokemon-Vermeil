@@ -93,14 +93,13 @@ module Mode7
       sky_directional_scale(theta, Config::SKY_SPRITE_SCALE)
     end
 
-    # Escala UNIFORME de tiles verticales (muros, priority surfaces). Debe ser
-    # exactamente la misma que usa el ancho de la fila del suelo: asi dos tiles
-    # vecinos siguen tocandose y, sobre todo, zoom_x == zoom_y. Con
-    # SKY_WIDTH_PERSPECTIVE=0 el pixel art queda 1:1 aunque el plano se comprima
-    # en profundidad por SKY_GROUND_Y_SCALE.
+    # Escala UNIFORME de objetos verticales. Terrain usa conicidad propia, pero
+    # walls/priorities usan este canal separado para no encoger piezas altas por
+    # celda. zoom_x == zoom_y siempre conserva pixel art y silueta.
     def tile_billboard_scale_for_world_y(wy)
       return @zoom if !sky_mode?
-      @zoom * sky_width_scale(sky_theta_for_world_y(wy))
+      strength = Config::SKY_BILLBOARD_PERSPECTIVE
+      @zoom * sky_directional_scale(sky_theta_for_world_y(wy), strength)
     end
 
     def sky_ground_y_scale
@@ -501,6 +500,19 @@ module Mode7
       sy = pivot_y + (@dh * yi * @cos) / d
       sx = center_x + hscale(sy) * rx
       return [sx, sy + terrain_camera_lift]
+    end
+
+    # Proyeccion para un objeto vertical entero. El Y sigue curva Sky y su base
+    # queda en coordenada real del mapa; solo X usa escala uniforme propia.
+    # ponytail: un ancla por objeto; malla vertical solo si se introduce arte 3D.
+    def project_billboard(wx, wy, elevation = 0)
+      return project(wx, wy, elevation) if !sky_mode?
+      sy = project_y(wy, elevation)
+      return nil if !sy
+      scale = tile_billboard_scale_for_world_y(wy)
+      return nil if !scale || scale <= 0
+      sx = center_x + (wx.to_f - cam_x) * scale
+      [sx, sy]
     end
 
     def project_y(wy, elevation = 0)

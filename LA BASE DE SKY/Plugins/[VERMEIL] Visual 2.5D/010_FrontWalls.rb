@@ -309,6 +309,7 @@ class Mode7Renderer
 
   def build_priority_surfaces
     strips = Hash.new { |hash, key| hash[key] = {} }
+    volumes = Hash.new { |hash, key| hash[key] = {} }
     @map.width.times do |tx|
       @map.height.times do |ty|
         @entry_cache[[tx, ty]].each do |entry|
@@ -328,10 +329,12 @@ class Mode7Renderer
             strips[top_key][tx].push(entry)
             next
           end
-          key = [:normal, entry[:unify].to_i, entry_visual_priority(entry), ty,
+          # P1+ normal forma un objeto rigido. Juntar celdas vecinas evita que
+          # cada parte se encoga/desplace por separado frente a su P0.
+          key = [entry[:unify].to_i, entry_visual_priority(entry),
                  entry_world_elevation(entry)]
-          strips[key][tx] ||= []
-          strips[key][tx].push(entry)
+          volumes[key][[tx, ty]] ||= []
+          volumes[key][[tx, ty]].push(entry)
         end
       end
     end
@@ -339,6 +342,36 @@ class Mode7Renderer
       hybrid_mode = kind == :normal ? nil : kind
       make_priority_strip(cells, ty, priority, unify, elevation, hybrid_mode)
     end
+    volumes.each do |(unify, priority, elevation), cells|
+      priority_volume_components(cells).each do |component|
+        make_priority_volume(component, unify, priority, elevation)
+      end
+    end
+  end
+
+  # Agrupa solo vecinos ortogonales con mismo layer, prioridad y elevacion.
+  # ponytail: sin ID manual; separar arte contiguo distinto requeriria metadata.
+  def priority_volume_components(cells)
+    pending = {}
+    cells.each_key { |position| pending[position] = true }
+    components = []
+    until pending.empty?
+      start = pending.keys.first
+      pending.delete(start)
+      stack = [start]
+      component = {}
+      until stack.empty?
+        tx, ty = stack.pop
+        position = [tx, ty]
+        component[position] = cells[position]
+        [[tx - 1, ty], [tx + 1, ty], [tx, ty - 1], [tx, ty + 1]].each do |neighbor|
+          next if !pending.delete(neighbor)
+          stack.push(neighbor)
+        end
+      end
+      components.push(component)
+    end
+    components
   end
 
   # ---------------------------------------------------------------------------
@@ -438,17 +471,52 @@ class Mode7Renderer
     end
   end
 
+  def make_priority_volume(cells, unify, priority, elevation)
+    positions = cells.keys
+    min_tx = positions.map { |tx, _ty| tx }.min
+    max_tx = positions.map { |tx, _ty| tx }.max
+    min_ty = positions.map { |_tx, ty| ty }.min
+    max_ty = positions.map { |_tx, ty| ty }.max
+    width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
+    height = (max_ty - min_ty + 1) * Game_Map::TILE_HEIGHT
+    source = Bitmap.new(width, height)
+    draw_priority_volume_source(source, min_tx, min_ty, cells)
+
+    sprite = Sprite.new(@viewport)
+    sprite.bitmap = source
+    sprite.ox = source.width / 2.0
+    sprite.oy = source.height
+    sprite.visible = false
+    wx = min_tx * Game_Map::TILE_WIDTH + source.width / 2.0
+    wyb = (max_ty + 1) * Game_Map::TILE_HEIGHT
+    depth = [wyb, priority, unify]
+    @priority_data.push([sprite, wx, wyb, cells, priority, elevation, depth, nil,
+                         min_tx, min_ty, source, nil, max_tx, max_ty])
+  end
+
+  def draw_priority_volume_source(source, min_tx, min_ty, cells)
+    source.clear
+    cells.keys.sort_by { |tx, ty| [ty, tx] }.each do |tx, ty|
+      x = (tx - min_tx) * Game_Map::TILE_WIDTH
+      y = (ty - min_ty) * Game_Map::TILE_HEIGHT
+      cells[[tx, ty]].sort_by do |entry|
+        [entry[:unify].to_i, entry[:priority].to_i]
+      end.each do |entry|
+        blt_entry_into(source, x, y, entry, entry[:opacity] || 255)
+      end
+    end
+  end
+
   def make_priority_surface(tx, ty, entry, depth = nil, hybrid_priority = nil)
     return if !priority_surface_entry?(entry)
 
-    # Solo prioridad hibrida llega aqui. El resto se dibuja por strips de fila.
     source = Bitmap.new(Game_Map::TILE_WIDTH, Game_Map::TILE_HEIGHT)
     source.clear
     blt_entry_into(source, 0, 0, entry, entry[:opacity] || 255)
     sprite = Sprite.new(@viewport)
-    sprite.bitmap = Bitmap.new(1, 1)
-    sprite.ox = 0
-    sprite.oy = 0
+    sprite.bitmap = source
+    sprite.ox = source.width / 2.0
+    sprite.oy = source.height
     sprite.visible = false
     wx = tx * Game_Map::TILE_WIDTH + Game_Map::TILE_WIDTH / 2.0
     wyb = (ty + 1) * Game_Map::TILE_HEIGHT
@@ -457,11 +525,20 @@ class Mode7Renderer
                          source, nil])
   end
 
-  def redraw_projected_priority_surface(sprite, source, tx, ty, elevation = 0)
+  def redraw_projected_priority_surface(sprite, source, wx, wyb, elevation = 0)
     return false if !source || source.disposed?
-    redraw_projected_priority_source(sprite, source,
-                                     tx * Game_Map::TILE_WIDTH,
-                                     ty * Game_Map::TILE_HEIGHT, elevation)
+    projected = Mode7.project_billboard(wx, wyb, elevation)
+    return false if !projected
+    scale = Mode7.tile_billboard_scale_for_world_y(wyb)
+    return false if !scale || scale <= 0
+    sprite.bitmap = source if sprite.bitmap != source
+    sprite.ox = source.width / 2.0
+    sprite.oy = source.height
+    sprite.x = projected[0]
+    sprite.y = projected[1]
+    sprite.zoom_x = scale
+    sprite.zoom_y = scale
+    true
   end
 
   def redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation = 0)
@@ -632,16 +709,20 @@ class Mode7Renderer
     radius_y = defined?(Mode7::Config::WALL_SPAWN_RADIUS_Y) ? Mode7::Config::WALL_SPAWN_RADIUS_Y : 34
 
     @priority_data.each do |data|
-      sprite, _wx, wyb, _entry, priority, elevation, depth, hybrid_priority, tx, ty, source, projection_key = data
+      sprite, wx, wyb, entry_or_cells, priority, elevation, depth, hybrid_priority,
+      tx, ty, source, projection_key, max_tx, max_ty = data
+      max_tx ||= tx
+      max_ty ||= ty
 
-      if (tx - cam_tx).abs > radius_x || (ty - cam_ty).abs > radius_y
+      if max_tx < cam_tx - radius_x || tx > cam_tx + radius_x ||
+         max_ty < cam_ty - radius_y || ty > cam_ty + radius_y
         sprite.visible = false
         next
       end
 
       camera_key = [Mode7.cam_x.round, Mode7.cam_y.round, elevation]
       if projection_key != camera_key
-        if !redraw_projected_priority_surface(sprite, source, tx, ty, elevation)
+        if !redraw_projected_priority_surface(sprite, source, wx, wyb, elevation)
           sprite.visible = false
           next
         end
@@ -651,20 +732,24 @@ class Mode7Renderer
         sprite.visible = false
         next
       end
-      if sprite.y > Mode7.screen_h || sprite.y + sprite.bitmap.height < 0 ||
-         sprite.x > Mode7.screen_w || sprite.x + sprite.bitmap.width < 0
+      top = sprite.y - sprite.oy * sprite.zoom_y
+      left = sprite.x - sprite.ox * sprite.zoom_x
+      right = left + sprite.bitmap.width * sprite.zoom_x
+      if top > Mode7.screen_h || sprite.y < 0 ||
+         left > Mode7.screen_w || right < 0
         sprite.visible = false
         next
       end
 
       hybrid_active = hybrid_priority_active?(hybrid_priority, tx, ty)
       priority = hybrid_active ? hybrid_priority : 0 if hybrid_priority
-      depth_wyb, depth_priority = depth || [wyb, priority]
+      depth_wyb, depth_priority, depth_unify = depth || [wyb, priority, 0]
       depth_priority = priority if hybrid_priority
-      bias = depth_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0
+      bias = depth_unify.to_i
+      bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority > 0
       sprite.z = Mode7.depth_z(depth_wyb, depth_priority, bias)
 
-      apply_depth_fog_to_sprite(sprite, sprite.y + sprite.bitmap.height)
+      apply_depth_fog_to_sprite(sprite, sprite.y)
       sprite.visible = true
     end
   end
@@ -706,11 +791,17 @@ class Mode7Renderer
     end
 
     @priority_data.each do |data|
-      sprite, _wx, _wyb, entry, _priority, _elevation, _depth, _hybrid, _tx, _ty, source, _projection_key = data
-      next if !entry[:animated]
+      sprite, _wx, _wyb, entry_or_cells, _priority, _elevation, _depth, _hybrid,
+      tx, ty, source, _projection_key = data
       next if !source || source.disposed?
-      source.clear
-      blt_entry_into(source, 0, 0, entry, entry[:opacity] || 255)
+      if entry_or_cells.is_a?(Hash)
+        next if entry_or_cells.values.flatten.none? { |entry| entry[:animated] }
+        draw_priority_volume_source(source, tx, ty, entry_or_cells)
+      else
+        next if !entry_or_cells[:animated]
+        source.clear
+        blt_entry_into(source, 0, 0, entry_or_cells, entry_or_cells[:opacity] || 255)
+      end
       data[11] = nil
     end
   end
@@ -751,7 +842,7 @@ class Mode7Renderer
         next
       end
 
-      pr = Mode7.project(wx, wyb, 0)
+      pr = Mode7.project_billboard(wx, wyb, 0)
       if !pr
         sprite.visible = false
         next
