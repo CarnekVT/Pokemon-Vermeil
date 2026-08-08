@@ -32,7 +32,6 @@ class Mode7Renderer
     @ground_sprite.z = -1000
     @ground_sprite.bitmap = Bitmap.new(Mode7.screen_w, Mode7.screen_h)
     @ground = nil
-    @ground_above_shadow = nil
     @shadow_ground = nil
     @wall_data = []
     @priority_strips = []
@@ -65,8 +64,6 @@ class Mode7Renderer
     @ground_sprite = nil
     @ground&.dispose
     @ground = nil
-    @ground_above_shadow&.dispose
-    @ground_above_shadow = nil
     @shadow_ground&.dispose
     @shadow_ground = nil
     @wall_data.each do |data|
@@ -159,12 +156,9 @@ class Mode7Renderer
     @map = $game_map
     ensure_extended_data
     @ground&.dispose
-    @ground_above_shadow&.dispose
     @shadow_ground&.dispose
     @ground = Bitmap.new(@map.width * Game_Map::TILE_WIDTH, @map.height * Game_Map::TILE_HEIGHT)
-    @ground_above_shadow = Bitmap.new(@ground.width, @ground.height)
     @shadow_ground = Bitmap.new(@ground.width, @ground.height)
-    @ground_above_shadow.clear
     @shadow_ground.clear
     if Mode7.indoor_map? && Mode7::Config::INTERIOR_OPAQUE_GROUND
       @ground.fill_rect(0, 0, @ground.width, @ground.height, Mode7::Config::OUTSIDE_COLOR)
@@ -199,16 +193,18 @@ class Mode7Renderer
     cache_terrain_tag_heights
     cache_visual_priorities
 
-    # Misma pila de Maker Studio vanilla, pero cada plano se proyecta despues
-    # con la misma curva Sky. Un bitmap unico pierde este orden al hornearse.
+    # ponytail: conservar pila vanilla en bitmap fuente. Proyectar tres planos
+    # por cada fila costaba FPS al caminar; separar solo superficie wall si algun
+    # dia Maker Studio necesita una profundidad adicional fuera de tiles.
     @ms_shadow_env = ms_shadow_environment
     if @ms_shadow_env
       [:base, :native_overlay, :extended].each do |pass|
         draw_ground_pass(pass, :below_shadow, @ground)
       end
       bake_ms_shadows
+      composite_ground_shadows
       [:base, :native_overlay, :extended].each do |pass|
-        draw_ground_pass(pass, :above_shadow, @ground_above_shadow)
+        draw_ground_pass(pass, :above_shadow, @ground)
       end
     else
       draw_ground_pass(:base, nil, @ground)
@@ -263,6 +259,23 @@ class Mode7Renderer
           end
         end
         blt_ground_cell(tx, ty, ground_entries, target) unless ground_entries.empty?
+      end
+    end
+  end
+
+  # Sombra Maker Studio entre bandas z=0/z=2, igual que renderer vanilla.
+  # Las celdas wall se omiten: 010_FrontWalls la coloca sobre su superficie
+  # rigida, sin volver a proyectarla detras del volumen Mountain.
+  def composite_ground_shadows
+    return if !@shadow_ground || @shadow_ground.disposed?
+    tw = Game_Map::TILE_WIDTH
+    th = Game_Map::TILE_HEIGHT
+    @map.width.times do |tx|
+      @map.height.times do |ty|
+        entries = @entry_cache[[tx, ty]]
+        next if effective_cell_has_wall?(tx, ty, entries)
+        @src_rect.set(tx * tw, ty * th, tw, th)
+        @ground.blt(tx * tw, ty * th, @shadow_ground, @src_rect)
       end
     end
   end
@@ -373,7 +386,6 @@ class Mode7Renderer
     y = ty * th
     @clear_rect.set(x, y, tw, th)
     @ground.clear_rect(@clear_rect)
-    @ground_above_shadow.clear_rect(@clear_rect) if @ground_above_shadow
     if Mode7.indoor_map? && Mode7::Config::INTERIOR_OPAQUE_GROUND
       @ground.fill_rect(@clear_rect, Mode7::Config::OUTSIDE_COLOR)
     end
@@ -388,7 +400,11 @@ class Mode7Renderer
         ground_shadow_band_for(tx, ty, entry) == :above_shadow
       end
       blt_ground_cell(tx, ty, lower, @ground) unless lower.empty?
-      blt_ground_cell(tx, ty, upper, @ground_above_shadow) unless upper.empty?
+      if !effective_cell_has_wall?(tx, ty, entries) && @shadow_ground && !@shadow_ground.disposed?
+        @src_rect.set(x, y, tw, th)
+        @ground.blt(x, y, @shadow_ground, @src_rect)
+      end
+      blt_ground_cell(tx, ty, upper, @ground) unless upper.empty?
     else
       blt_ground_cell(tx, ty, ground_entries, @ground) unless ground_entries.empty?
     end
@@ -506,9 +522,8 @@ class Mode7Renderer
       end
       if d_w.round > 0
         @dest_rect.set(d_x0.round, sy, d_w.round, 1)
-        blt_projected_ground_row(bmp, @ground, lo, wy, hi)
-        blt_projected_ground_row(bmp, @shadow_ground, lo, wy, hi)
-        blt_projected_ground_row(bmp, @ground_above_shadow, lo, wy, hi)
+        @src_rect.set(lo, wy.floor, hi - lo, 1)
+        bmp.stretch_blt(@dest_rect, @ground, @src_rect)
 
         # Niebla (inerte hasta que 006_Atmosphere defina fog_alpha)
         if Mode7.respond_to?(:fog_alpha)
@@ -521,14 +536,6 @@ class Mode7Renderer
         end
       end
     end
-  end
-
-  # Los tres planos usan misma muestra X/Y. Solo cambia el orden de mezcla,
-  # igual que z=0/1/2 de Maker Studio vanilla antes de la proyeccion Sky.
-  def blt_projected_ground_row(dst, source, lo, world_y, hi)
-    return if !source || source.disposed?
-    @src_rect.set(lo, world_y.floor, hi - lo, 1)
-    dst.stretch_blt(@dest_rect, source, @src_rect)
   end
 
   def sky_fill_color

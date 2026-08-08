@@ -341,7 +341,7 @@ class Mode7Renderer
     height = Game_Map::TILE_HEIGHT + [max_elev.ceil, 0].max
     bitmap = Bitmap.new(Game_Map::TILE_WIDTH, height)
     bitmap.clear
-    draw_wall_column_source(bitmap, entries)
+    draw_wall_column_source(bitmap, entries, tx, ty)
 
     sprite = Sprite.new(@viewport)
     sprite.bitmap = bitmap
@@ -353,13 +353,35 @@ class Mode7Renderer
     @wall_data.push([sprite, wx, wyb, height, entries, z_behavior, base_unify, depth])
   end
 
-  def draw_wall_column_source(dst, entries)
-    entries.sort_by { |entry| [entry_world_elevation(entry), entry[:unify].to_i,
-                                entry[:priority].to_i] }.each do |entry|
+  def draw_wall_column_source(dst, entries, tx = nil, ty = nil)
+    sorted = entries.sort_by do |entry|
+      [entry_world_elevation(entry), entry[:unify].to_i, entry[:priority].to_i]
+    end
+    draw_wall_column_entries(dst, sorted.select { |entry| entry[:priority].to_i <= 0 })
+    blt_wall_shadow_cell(dst, tx, ty, sorted) if !tx.nil? && !ty.nil?
+    draw_wall_column_entries(dst, sorted.select { |entry| entry[:priority].to_i > 0 })
+  end
+
+  def draw_wall_column_entries(dst, entries)
+    entries.each do |entry|
       y = (dst.height - Game_Map::TILE_HEIGHT - entry_world_elevation(entry)).round
       y = 0 if y < 0
       blt_entry_into(dst, 0, y, entry, entry[:opacity] || 255)
     end
+  end
+
+  # Sombra Maker Studio para una superficie wall. El suelo excluye esta celda
+  # para no duplicarla bajo Mountain; aqui queda sobre la parte caminable y bajo
+  # piezas con prioridad real.
+  def blt_wall_shadow_cell(dst, tx, ty, entries)
+    return if !@shadow_ground || @shadow_ground.disposed?
+    tw = Game_Map::TILE_WIDTH
+    th = Game_Map::TILE_HEIGHT
+    elevation = entries.map { |entry| entry_world_elevation(entry) }.max || 0.0
+    y = (dst.height - th - elevation).round
+    y = 0 if y < 0
+    @src_rect.set(tx * tw, ty * th, tw, th)
+    dst.blt(0, y, @shadow_ground, @src_rect)
   end
 
   # ---------------------------------------------------------------------------
@@ -643,12 +665,14 @@ class Mode7Renderer
     end
 
     @wall_data.each do |data|
-      sprite, _wx, _wyb, _h, entries, _z_behavior, _base_unify, _depth = data
+      sprite, wx, wyb, _h, entries, _z_behavior, _base_unify, _depth = data
       next if !sprite.bitmap || sprite.bitmap.disposed?
       next if entries.none? { |entry| entry[:animated] }
 
       sprite.bitmap.clear
-      draw_wall_column_source(sprite.bitmap, entries)
+      tx = ((wx - Game_Map::TILE_WIDTH / 2.0) / Game_Map::TILE_WIDTH).round
+      ty = (wyb / Game_Map::TILE_HEIGHT - 1).round
+      draw_wall_column_source(sprite.bitmap, entries, tx, ty)
     end
 
     @priority_strips.each do |data|

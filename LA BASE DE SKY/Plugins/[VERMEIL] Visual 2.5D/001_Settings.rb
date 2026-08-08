@@ -161,9 +161,9 @@ module Mode7
     # Sky curva posicion global, no aplasta tiles hacia el horizonte.
     SKY_GROUND_Y_SCALE = 1.00
 
-    # Sin convergencia horizontal: evita cortes en limites de mapa/interior.
-    # Volumen Sky viene de curva Y y objetos terrain-tag rigidos.
-    SKY_WIDTH_PERSPECTIVE = 0.0
+    # Convergencia conica leve. 0.06 reduce fondo y amplia frente sin llegar
+    # a separar columnas wall ni cerrar habitaciones en bordes del mapa.
+    SKY_WIDTH_PERSPECTIVE = 0.06
 
     # Personajes/OW conservan escala fija: NPCs, followers y eventos no crecen
     # ni encogen al recorrer la curvatura.
