@@ -166,7 +166,7 @@
     // Sync screen redraws to the monitor refresh rate, to reduce screen
     // tearing.
     //
-    "vsync": true,
+    "vsync": false,
 
     // Use a fixed framerate that is approx. equal to the native screen refresh
     // rate. This is different from "fixedFramerate" because the actual frame

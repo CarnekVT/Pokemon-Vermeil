@@ -273,36 +273,64 @@ class Mode7Renderer
   end
 
   def build_wall_columns
+    # P1 marca un wall de varias prioridades. El P0 de ese mismo componente
+    # debe compartir lienzo/ancla con P1-P4: si P0 sigue como columna por
+    # celda, la curva cambia su distancia relativa al caminar en vertical.
+    # Mountains usa su ruta por celda para conservar su plano de sombra MS.
+    normal_wall_components = Hash.new { |hash, key| hash[key] = {} }
+    loose_wall_bases = Hash.new { |hash, key| hash[key] = [] }
+    loose_wall_tops = Hash.new { |hash, key| hash[key] = {} }
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
-        next if !effective_cell_has_wall?(tx, ty, entries)
         direct_walls = entries.select { |entry| entry_is_wall?(entry) }
+        next if direct_walls.empty?
         @wall_cells[[tx, ty]] = true if direct_walls.any? { |entry| entry_blocks_movement?(entry) }
-        wall_layer = effective_wall_layer_unify(tx, ty, entries)
-        wall_entries = entries.select do |entry|
-          entry[:unify].to_i >= wall_layer && !priority_surface_entry?(entry)
-        end
-        next if wall_entries.empty?
 
-        # Base P0 y cada P1+ son sprites separados. Un P4 dentro de Mountain no
-        # puede elevar visualmente Mountain, Layer 1 ni celdas adyacentes.
-        base_entries = wall_entries.select { |entry| entry_visual_priority(entry) <= 0 }
-        if !base_entries.empty?
-          unify = base_entries.map { |entry| entry[:unify].to_i }.max || 0
-          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, 0, unify]
-          shadow_opacity = mountain_shadow_opacity_for(base_entries)
-          make_wall_column(tx, ty, base_entries, unify, :dynamic, depth, shadow_opacity)
-        end
-        wall_entries.each do |entry|
+        direct_walls.each do |entry|
           priority = entry_visual_priority(entry)
-          next if priority <= 0
-          unify = entry[:unify].to_i
-          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority, unify]
-          make_wall_column(tx, ty, [entry], unify, :dynamic, depth)
+          tag = terrain_tag_for_entry(entry)
+          tag_id = tag ? tag.id : :None
+          key = [tag_id, entry_world_elevation(entry)]
+          if entry_blocks_movement?(entry)
+            normal_wall_components[key][[tx, ty]] ||= []
+            normal_wall_components[key][[tx, ty]].push(entry)
+          elsif priority <= 0
+            loose_wall_bases[[tx, ty]].push(entry)
+          else
+            loose_wall_tops[key][[tx, ty]] ||= []
+            loose_wall_tops[key][[tx, ty]].push(entry)
+          end
         end
       rescue Exception
         Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
+      end
+    end
+    normal_wall_components.each do |(_tag_id, elevation), cells|
+      priority_volume_components(cells).each do |component|
+        if component.values.flatten.any? { |entry| entry_visual_priority(entry) > 0 }
+          # Base completa: misma ruta billboard que un wall sobre Mountains.
+          # P1-P4 se vuelven a dibujar abajo solo para conservar oclusion.
+          make_wall_component(component, elevation)
+          make_wall_priority_component(component, elevation)
+          next
+        end
+        component.each do |(tx, ty), entries|
+          unify = entries.map { |entry| entry[:unify].to_i }.min || 0
+          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, 0, unify]
+          make_wall_column(tx, ty, entries, unify, :dynamic, depth)
+        end
+      end
+    end
+    loose_wall_bases.each do |(tx, ty), entries|
+      unify = entries.map { |entry| entry[:unify].to_i }.max || 0
+      depth = [(ty + 1) * Game_Map::TILE_HEIGHT, 0, unify]
+      shadow_opacity = mountain_shadow_opacity_for(entries)
+      make_wall_column(tx, ty, entries, unify, :dynamic, depth, shadow_opacity)
+    end
+    loose_wall_tops.each do |(_tag_id, elevation), cells|
+      priority_volume_components(cells).each do |component|
+        make_wall_priority_component(component, elevation)
       end
     end
   end
@@ -345,6 +373,21 @@ class Mode7Renderer
     volumes.each do |(unify, priority, elevation), cells|
       priority_volume_components(cells).each do |component|
         make_priority_volume(component, unify, priority, elevation)
+      end
+    end
+  end
+
+  # InteriorBorder es suelo visual, no wall. Nunca se agrupa: un borde puede
+  # tocar suelo o decoracion con mismo terrain tag y un componente grande los
+  # convertia en una sola pieza visual.
+  def build_interior_border_surfaces
+    @map.width.times do |tx|
+      @map.height.times do |ty|
+        @entry_cache[[tx, ty]].each do |entry|
+          next if !interior_border_entry?(entry)
+          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, 0, entry[:unify].to_i]
+          make_priority_surface(tx, ty, entry, depth, nil, true)
+        end
       end
     end
   end
@@ -404,6 +447,32 @@ class Mode7Renderer
     wyb = (ty + 1) * Game_Map::TILE_HEIGHT
     @wall_data.push([sprite, wx, wyb, height, entries, z_behavior, base_unify, depth,
                      surface_shadow_opacity])
+  end
+
+  # Componente wall rigido: P0 y P1+ salen del mismo bitmap/ancla. Solo se
+  # usa cuando existe P1; un tramo P0 normal mantiene la columna barata.
+  def make_wall_component(cells, elevation = 0)
+    positions = cells.keys
+    min_tx = positions.map { |tx, _ty| tx }.min
+    max_tx = positions.map { |tx, _ty| tx }.max
+    min_ty = positions.map { |_tx, ty| ty }.min
+    max_ty = positions.map { |_tx, ty| ty }.max
+    width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
+    height = (max_ty - min_ty + 1) * Game_Map::TILE_HEIGHT
+    bitmap = Bitmap.new(width, height)
+    draw_priority_volume_source(bitmap, min_tx, min_ty, cells)
+
+    sprite = Sprite.new(@viewport)
+    sprite.bitmap = bitmap
+    sprite.ox = width / 2.0
+    sprite.oy = height
+    sprite.visible = false
+    wx = min_tx * Game_Map::TILE_WIDTH + width / 2.0
+    wyb = (max_ty + 1) * Game_Map::TILE_HEIGHT
+    base_unify = cells.values.flatten.map { |entry| entry[:unify].to_i }.min || 0
+    depth = [wyb, 0, base_unify]
+    @wall_data.push([sprite, wx, wyb, height, cells, :component, base_unify, depth,
+                     0, min_tx, min_ty, max_tx, max_ty, elevation])
   end
 
   def draw_wall_column_source(dst, entries, tx = nil, ty = nil, surface_shadow_opacity = 0)
@@ -471,8 +540,28 @@ class Mode7Renderer
     end
   end
 
-  def make_priority_volume(cells, unify, priority, elevation)
-    positions = cells.keys
+  # P1-P4 del mismo wall se dibujan en lienzos separados por prioridad para
+  # respetar su Z nativa, pero todos usan bounds comunes. El P1 funciona como
+  # ancla visual de la pieza; P2+ no vuelve a calcular un origen propio.
+  def make_wall_priority_component(cells, elevation)
+    bounds = cells.keys
+    by_priority = Hash.new { |hash, key| hash[key] = {} }
+    cells.each do |position, entries|
+      entries.each do |entry|
+        priority = entry_visual_priority(entry)
+        next if priority <= 0
+        key = [priority, entry[:unify].to_i]
+        by_priority[key][position] ||= []
+        by_priority[key][position].push(entry)
+      end
+    end
+    by_priority.each do |(priority, unify), priority_cells|
+      make_priority_volume(priority_cells, unify, priority, elevation, bounds)
+    end
+  end
+
+  def make_priority_volume(cells, unify, priority, elevation, bounds = nil)
+    positions = bounds || cells.keys
     min_tx = positions.map { |tx, _ty| tx }.min
     max_tx = positions.map { |tx, _ty| tx }.max
     min_ty = positions.map { |_tx, ty| ty }.min
@@ -507,8 +596,8 @@ class Mode7Renderer
     end
   end
 
-  def make_priority_surface(tx, ty, entry, depth = nil, hybrid_priority = nil)
-    return if !priority_surface_entry?(entry)
+  def make_priority_surface(tx, ty, entry, depth = nil, hybrid_priority = nil, force = false)
+    return if !force && !priority_surface_entry?(entry)
 
     source = Bitmap.new(Game_Map::TILE_WIDTH, Game_Map::TILE_HEIGHT)
     source.clear
@@ -659,33 +748,20 @@ class Mode7Renderer
         next
       end
 
-      x_step = Mode7::Config::PRIORITY_REPROJECT_PIXELS.to_i.clamp(1, 32)
-      y_step = Mode7::Config::PRIORITY_VERTICAL_REPROJECT_PIXELS.to_i.clamp(1, 32)
-      vertical_changed = true
-      if state
-        vertical_delta = (Mode7.cam_y - state[1]).abs
-        vertical_changed = y_step <= 1 ? vertical_delta > 0.001 : vertical_delta >= y_step
-      end
+      # Debe usar umbral IDENTICO a @ground: este se redibuja cada 1 px X y
+      # cada cambio Y. Reproyectar/mover antes desalineaba tall grass del suelo.
       needs_projection = !state ||
-                         (Mode7.cam_x - state[0]).abs >= x_step ||
-                         vertical_changed
+                         (Mode7.cam_x - state[0]).abs >= 1.0 ||
+                         (Mode7.cam_y - state[1]).abs > 0.001 ||
+                         state[2].nil? ||
+                         (Mode7.projection_cam_y - state[2]).abs > 0.001
       if needs_projection
         if !redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation)
           sprite.visible = false
           next
         end
-        anchor = priority_strip_anchor(min_tx, ty, elevation)
-        data[10] = [Mode7.cam_x, Mode7.cam_y, anchor ? anchor[0] : nil,
-                    anchor ? anchor[1] : nil]
+        data[10] = [Mode7.cam_x, Mode7.cam_y, Mode7.projection_cam_y]
         state = data[10]
-      elsif state[2] && state[3]
-        anchor = priority_strip_anchor(min_tx, ty, elevation)
-        if anchor
-          sprite.x += (anchor[0] - state[2]).round
-          sprite.y += (anchor[1] - state[3]).round
-          state[2] = anchor[0]
-          state[3] = anchor[1]
-        end
       end
       if !sprite.bitmap || sprite.bitmap.disposed? ||
          sprite.y > Mode7.screen_h || sprite.y + sprite.bitmap.height < 0 ||
@@ -720,13 +796,18 @@ class Mode7Renderer
         next
       end
 
-      camera_key = [Mode7.cam_x.round, Mode7.cam_y.round, elevation]
-      if projection_key != camera_key
+      needs_projection = !projection_key ||
+                         (Mode7.cam_x - projection_key[0]).abs >= 1.0 ||
+                         (Mode7.cam_y - projection_key[1]).abs > 0.001 ||
+                         elevation != projection_key[2] ||
+                         projection_key[3].nil? ||
+                         (Mode7.projection_cam_y - projection_key[3]).abs > 0.001
+      if needs_projection
         if !redraw_projected_priority_surface(sprite, source, wx, wyb, elevation)
           sprite.visible = false
           next
         end
-        data[11] = camera_key
+        data[11] = [Mode7.cam_x, Mode7.cam_y, elevation, Mode7.projection_cam_y]
       end
       if !sprite.bitmap || sprite.bitmap.disposed?
         sprite.visible = false
@@ -771,8 +852,14 @@ class Mode7Renderer
     end
 
     @wall_data.each do |data|
-      sprite, wx, wyb, _h, entries, _z_behavior, _base_unify, _depth, shadow_opacity = data
+      sprite, wx, wyb, _h, entries, _z_behavior, _base_unify, _depth, shadow_opacity,
+      min_tx, min_ty = data
       next if !sprite.bitmap || sprite.bitmap.disposed?
+      if entries.is_a?(Hash)
+        next if entries.values.flatten.none? { |entry| entry[:animated] }
+        draw_priority_volume_source(sprite.bitmap, min_tx, min_ty, entries)
+        next
+      end
       next if entries.none? { |entry| entry[:animated] }
 
       sprite.bitmap.clear

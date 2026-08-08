@@ -13,7 +13,9 @@ class Game_Character
     return _VERMEIL_25D_orig_screen_x if !mode7_active_for_self?
     wx = @real_x.to_f / Game_Map::X_SUBPIXELS + (@width * Game_Map::TILE_WIDTH / 2)
     wy = mode7_world_y_ground
-    pr = Mode7.project(wx, wy, 0)
+    # Personaje es billboard: suelo conserva conicidad, OW no deriva lateralmente
+    # al cambiar su Y en pantalla.
+    pr = Mode7.project_billboard(wx, wy, 0)
     return -1000 if !pr
     return pr[0].round + self.x_offset
   end

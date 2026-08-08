@@ -270,13 +270,15 @@ module Mode7
     # usa temporalmente el valor configurado y lo cubre. No cambia PBS,
     # pasabilidad ni comportamiento fuera de Mode7.
     HYBRID_PRIORITY_TERRAIN_TAGS = {
-      :Grass => 3
+      :Grass     => 3,
+      :TallGrass => 3
     }.freeze
 
     # Altura visual en px para capas hibridas. Grass queda sobre el suelo como
     # una alfombra de hojas baja; no cambia colision, terreno ni prioridad PBS.
     HYBRID_PRIORITY_TERRAIN_TAG_HEIGHT = {
-      :Grass => 4
+      :Grass     => 4,
+      :TallGrass => 4
     }.freeze
 
     # ELEVACION LOCAL POR TERRAIN TAG. No mueve camara: cada tile del filtro
@@ -302,7 +304,10 @@ module Mode7
       :LaddersSide => 8
 
     }.freeze
+    # La transicion empieza durante el paso, no despues de entrar a la celda.
+    # Limite por frame: evita un salto visible incluso con lifts altos.
     TERRAIN_TAG_CAMERA_LIFT_SMOOTH = 0.34
+    TERRAIN_TAG_CAMERA_LIFT_MAX_STEP = 0.75
     TERRAIN_TAG_CAMERA_LIFT_VERTICAL_FACTOR = 1.0
 
     # ESCALERAS LATERALES POR TERRAIN TAG. Unico tag: :LaddersSide.

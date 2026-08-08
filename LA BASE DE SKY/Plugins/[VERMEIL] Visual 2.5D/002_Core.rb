@@ -163,12 +163,13 @@ module Mode7
       return effective_mode_blend > 0.001
     end
 
-    def vanilla_project(wx, wy); return [wx - cam_x + center_x, wy - projection_cam_y + terrain_camera_lift]; end
+    def vanilla_project(wx, wy); return [wx - cam_x + center_x, wy - projection_cam_y]; end
     def vanilla_world_y_for_row(sy); return sy + projection_cam_y; end
     def lerp(a, b, t); return a + (b - a) * t; end
 
-    # Movimiento visual de camara. No altera cam_y real: la profundidad se
-    # aplica mediante projection_cam_y y nunca cambia coordenadas ni colision.
+    # Movimiento visual de camara. No altera cam_y real: solo entra por
+    # projection_cam_y. Sumarlo otra vez a screen Y desincroniza suelo/walls
+    # al subir una escalera y deja una copia visual del muro.
     def terrain_camera_lift
       @terrain_camera_lift || 0.0
     end
@@ -186,6 +187,14 @@ module Mode7
     def terrain_camera_lift_for_tag(tag)
       return 0.0 if !tag || !tag.respond_to?(:id)
       (Config::TERRAIN_TAG_CAMERA_LIFT[tag.id] || 0).to_f
+    end
+
+    def terrain_tag_at(x, y)
+      return nil if !$game_map
+      return $map_factory.getTerrainTagFromCoords($game_map.map_id, x, y) if $map_factory
+      $game_map.terrain_tag(x, y)
+    rescue
+      nil
     end
 
     # ElevatedWall es la excepcion al tag logico del jugador: un suelo puede
@@ -220,24 +229,36 @@ module Mode7
       []
     end
 
+    def terrain_camera_lift_at(x, y)
+      logical_lift = terrain_camera_lift_for_tag(terrain_tag_at(x, y))
+      elevated_lift = terrain_camera_elevated_wall_lift_at(x, y)
+      [logical_lift, elevated_lift || 0.0].max
+    end
+
     def terrain_camera_lift_target
       return 0.0 if Config::TERRAIN_TAG_CAMERA_LIFT.empty? || !$game_player || !$game_map
-      map_id = $game_map.map_id
-      x = $game_player.x
-      y = $game_player.y
-      renderer = $scene.instance_variable_get(:@map_renderer) if $scene
-      renderer_id = renderer && !renderer.disposed? ? renderer.object_id : nil
-      if @terrain_camera_map_id == map_id && @terrain_camera_x == x && @terrain_camera_y == y &&
-         @terrain_camera_renderer_id == renderer_id
-        return @terrain_camera_target || 0.0
+      player = $game_player
+      target_x = player.x
+      target_y = player.y
+      target_lift = terrain_camera_lift_at(target_x, target_y)
+      return target_lift if !player.moving?
+
+      start_x = player.instance_variable_get(:@move_initial_x)
+      start_y = player.instance_variable_get(:@move_initial_y)
+      return target_lift if start_x.nil? || start_y.nil?
+      progress = []
+      if target_x != start_x
+        real_x = player.real_x.to_f / Game_Map::REAL_RES_X
+        progress.push((real_x - start_x).abs / (target_x - start_x).abs.to_f)
       end
-      @terrain_camera_map_id = map_id
-      @terrain_camera_x = x
-      @terrain_camera_y = y
-      @terrain_camera_renderer_id = renderer_id
-      logical_lift = terrain_camera_lift_for_tag($game_player.pbTerrainTag)
-      elevated_lift = terrain_camera_elevated_wall_lift_at(x, y)
-      @terrain_camera_target = [logical_lift, elevated_lift || 0.0].max
+      if target_y != start_y
+        real_y = player.real_y.to_f / Game_Map::REAL_RES_Y
+        progress.push((real_y - start_y).abs / (target_y - start_y).abs.to_f)
+      end
+      return target_lift if progress.empty?
+      t = (progress.sum / progress.length.to_f).clamp(0.0, 1.0)
+      start_lift = terrain_camera_lift_at(start_x, start_y)
+      start_lift + (target_lift - start_lift) * t
     rescue
       @terrain_camera_target = 0.0
     end
@@ -264,7 +285,9 @@ module Mode7
       # ponytail: ground se rasteriza por filas enteras. Limitar primer paso
       # evita saltos de 2+ px al entrar/salir verticalmente; interpolacion
       # subpixel requeriria renderer con textura/vertices, no Bitmap#stretch_blt.
-      step = step.clamp(-1.0, 1.0)
+      max_step = Config::TERRAIN_TAG_CAMERA_LIFT_MAX_STEP.to_f
+      max_step = 0.75 if max_step <= 0.0
+      step = step.clamp(-max_step, max_step)
       value = current + step
       value = target if (target - value).abs < 0.05
       return if (value - current).abs < 0.01
@@ -479,7 +502,7 @@ module Mode7
       theta = sky_theta_for_world_y(wy)
       sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
       sx = center_x + rx * @zoom * sky_width_scale(theta)
-      sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy) + terrain_camera_lift
+      sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
       return [sx, sy]
     end
 
@@ -490,7 +513,7 @@ module Mode7
         ry = (wy - projection_cam_y - elevation) - pivot_y
         sy = pivot_y + affine_depth_scale(ry)
         sx = center_x + hscale(sy) * rx
-        return [sx, sy + terrain_camera_lift]
+        return [sx, sy]
       end
       rx = wx - cam_x
       ry = wy - projection_cam_y - elevation
@@ -499,7 +522,7 @@ module Mode7
       return nil if d <= 0
       sy = pivot_y + (@dh * yi * @cos) / d
       sx = center_x + hscale(sy) * rx
-      return [sx, sy + terrain_camera_lift]
+      return [sx, sy]
     end
 
     # Proyeccion para un objeto vertical entero. El Y sigue curva Sky y su base
@@ -528,22 +551,22 @@ module Mode7
 
     def _sky_project_y(wy, elevation = 0)
       scale = sky_angle_scale
-      return wy - projection_cam_y - elevation + terrain_camera_lift if scale <= 0.0
+      return wy - projection_cam_y - elevation if scale <= 0.0
       theta = sky_theta_for_world_y(wy)
       sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
-      return sy_ground - elevation.to_f * vertical_scale_for_world_y(wy) + terrain_camera_lift
+      return sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
     end
 
     def _project_y_uncached(wy, elevation = 0)
       return _sky_project_y(wy, elevation) if sky_mode?
       if affine_mode?
-        return pivot_y + affine_depth_scale((wy - projection_cam_y - elevation) - pivot_y) + terrain_camera_lift
+        return pivot_y + affine_depth_scale((wy - projection_cam_y - elevation) - pivot_y)
       end
       ry = wy - projection_cam_y - elevation
       yi = @zoom * (ry - pivot_y)
       d = @dh - yi * @sin
       return nil if d <= 0
-      return pivot_y + (@dh * yi * @cos) / d + terrain_camera_lift
+      return pivot_y + (@dh * yi * @cos) / d
     end
 
     def wall_scale(sy)
@@ -571,7 +594,6 @@ module Mode7
     end
 
     def world_y_for_row(sy)
-      sy -= terrain_camera_lift
       return _sky_world_y_for_row(sy) if sky_mode?
       refresh_camera_projection_cache
       key = sy

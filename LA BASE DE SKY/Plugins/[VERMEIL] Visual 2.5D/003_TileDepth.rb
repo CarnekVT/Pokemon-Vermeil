@@ -215,6 +215,7 @@ class Mode7Renderer
     # Pase 2/3: cada tile conserva bitmap Y profundidad propios. La prioridad
     # solo modifica su oclusion, nunca hereda la posicion de un vecino.
     build_wall_columns
+    build_interior_border_surfaces
     build_priority_surfaces
 
     @need_build = false
@@ -350,17 +351,13 @@ class Mode7Renderer
     passages ? passages[tid] : nil
   end
 
-  # Particion estable de etapa "perfect": lo que esta bajo layer de muro sigue
-  # en plano curvo; layer del muro y superiores quedan dentro de su columna.
-  # Asi una misma celda nunca se dibuja a la vez en suelo y volumen.
+  # Volumen pertenece al tile con terrain tag de wall, no a toda su celda.
+  # Un prop de otra layer sobre Mountains/Mode7Tag conserva su propia prioridad
+  # y no termina absorbido por el bitmap ni la Z del muro.
   def ground_entries_for_cell(tx, ty, entries)
-    if effective_cell_has_wall?(tx, ty, entries)
-      wall_layer = effective_wall_layer_unify(tx, ty, entries)
-      return entries.select do |entry|
-        entry[:unify].to_i < wall_layer && !priority_surface_entry?(entry)
-      end
+    entries.reject do |entry|
+      entry_is_wall?(entry) || priority_surface_entry?(entry) || interior_border_entry?(entry)
     end
-    entries.reject { |entry| priority_surface_entry?(entry) }
   end
 
   def make_native_entry_with_props(tx, ty, layer)
