@@ -12,6 +12,11 @@ module Mode7
     # active_now? lo consulta despues de SWITCH_ID.
     PLAYER_SWITCH = 0
 
+    # MODO INICIAL sin switches. true inicia mapas con 2.5D; false, vanilla.
+    # SWITCH_ID/PLAYER_SWITCH y el toggle debug manual tienen prioridad sobre
+    # este valor. Cambiarlo no altera partidas ni metadata de mapas.
+    DEFAULT_ENABLED = true
+
     # =======================================================================
     # HEIGHTMAP / CAMARA 3D (relieve real del terreno)
     # Referencia: H-Mode7.update_camera (V.1.4.2) y Neo Mode 7.
@@ -257,7 +262,7 @@ module Mode7
     # queda encima, como vanilla. Valor 0..255 multiplica opacity original MS.
     # Agregar un tag aqui es opt-in, no altera sombra de otros walls.
     MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY = {
-      :Mountains => 125
+      :Mountains => 85
     }.freeze
 
     # PRIORIDAD HIBRIDA 2.5D. Terrain tags aqui NO son volumenes. Al pisar la

@@ -613,21 +613,16 @@ module Mode7
       return false if !$game_switches
       return $game_switches[Config::SWITCH_ID] if Config::SWITCH_ID > 0
       return $game_switches[Config::PLAYER_SWITCH] if Config::PLAYER_SWITCH > 0
-      return false
+      Config::DEFAULT_ENABLED
     end
 
     def toggle_debug
-      if @override.nil?
-        @override = true
-      elsif @override == true
-        @override = false
-      else
-        @override = nil
-      end
+      # Toggle manual binario. No volver a Auto: F3/debug siempre deja estado
+      # explicito para probar el mismo mapa con 2.5D ON u OFF.
+      @override = @override == true ? false : true
     end
 
     def override_state
-      return _INTL("Auto") if @override.nil?
       return _INTL("ON") if @override
       return _INTL("OFF")
     end
