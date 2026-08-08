@@ -109,8 +109,8 @@ class Mode7Renderer
       # trae su padding; aplicarlo otra vez aqui desplaza la sombra de su origen.
       dx = spr.map_x * Game_Map::TILE_WIDTH
       dy = spr.map_y * Game_Map::TILE_HEIGHT
-      # Plano intermedio vanilla (z=1). 003_TileDepth lo proyecta entre suelo
-      # pasable y tiles fuente/bloqueantes; no se mezcla con @ground.
+      # Plano intermedio vanilla (z=1). 003_TileDepth lo compone entre bandas
+      # z=0/z=2 antes de proyectar una sola vez, sin coste por fila extra.
       @shadow_ground.blt(dx, dy, spr.bitmap,
                          Rect.new(0, 0, fw, spr.bitmap.height), spr.opacity)
     end

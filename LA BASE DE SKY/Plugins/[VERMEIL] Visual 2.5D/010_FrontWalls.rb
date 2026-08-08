@@ -89,6 +89,15 @@ class Mode7Renderer
     Mode7::Config::ELEVATED_WALL_TERRAIN_TAG_HEIGHT
   end
 
+  def mountain_shadow_opacity_for(entries)
+    return 0 if !@ms_shadow_env || !defined?(Mode7::Config::MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY)
+    entries.map do |entry|
+      tag = terrain_tag_for_entry(entry)
+      next 0 if !tag || tag.id == :None
+      (Mode7::Config::MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY[tag.id] || 0).to_i
+    end.max || 0
+  end
+
   def terrain_tag_for_entry(entry)
     if entry.key?(:terrain_tag)
       return GameData::TerrainTag.try_get(entry[:terrain_tag])
@@ -276,12 +285,22 @@ class Mode7Renderer
         end
         next if wall_entries.empty?
 
-        # ponytail: Stage "perfect" por celda. Cada bitmap conserva su origen
-        # de mapa; no apilar ni unir vecinos, porque Sky los separa al mover Y.
-        priority = wall_entries.map { |entry| entry_visual_priority(entry) }.max || 0
-        unify = wall_entries.map { |entry| entry[:unify].to_i }.max || 0
-        depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority, unify]
-        make_wall_column(tx, ty, wall_entries, unify, :dynamic, depth)
+        # Base P0 y cada P1+ son sprites separados. Un P4 dentro de Mountain no
+        # puede elevar visualmente Mountain, Layer 1 ni celdas adyacentes.
+        base_entries = wall_entries.select { |entry| entry_visual_priority(entry) <= 0 }
+        if !base_entries.empty?
+          unify = base_entries.map { |entry| entry[:unify].to_i }.max || 0
+          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, 0, unify]
+          shadow_opacity = mountain_shadow_opacity_for(base_entries)
+          make_wall_column(tx, ty, base_entries, unify, :dynamic, depth, shadow_opacity)
+        end
+        wall_entries.each do |entry|
+          priority = entry_visual_priority(entry)
+          next if priority <= 0
+          unify = entry[:unify].to_i
+          depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority, unify]
+          make_wall_column(tx, ty, [entry], unify, :dynamic, depth)
+        end
       rescue Exception
         Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
       end
@@ -335,13 +354,13 @@ class Mode7Renderer
   # Columna fisica de UNA celda. Forma original del volumen 2.5D: nunca usa
   # filas vecinas como alto, por eso no arrastra ni corta bloques al mover Y.
   def make_wall_column(tx, ty, entries, base_unify = 0, z_behavior = :dynamic,
-                       depth = nil)
+                       depth = nil, surface_shadow_opacity = 0)
     return if entries.nil? || entries.empty?
     max_elev = entries.map { |entry| entry_world_elevation(entry) }.max || 0.0
     height = Game_Map::TILE_HEIGHT + [max_elev.ceil, 0].max
     bitmap = Bitmap.new(Game_Map::TILE_WIDTH, height)
     bitmap.clear
-    draw_wall_column_source(bitmap, entries, tx, ty)
+    draw_wall_column_source(bitmap, entries, tx, ty, surface_shadow_opacity)
 
     sprite = Sprite.new(@viewport)
     sprite.bitmap = bitmap
@@ -350,16 +369,20 @@ class Mode7Renderer
     sprite.visible = false
     wx = tx * Game_Map::TILE_WIDTH + Game_Map::TILE_WIDTH / 2.0
     wyb = (ty + 1) * Game_Map::TILE_HEIGHT
-    @wall_data.push([sprite, wx, wyb, height, entries, z_behavior, base_unify, depth])
+    @wall_data.push([sprite, wx, wyb, height, entries, z_behavior, base_unify, depth,
+                     surface_shadow_opacity])
   end
 
-  def draw_wall_column_source(dst, entries, tx = nil, ty = nil)
+  def draw_wall_column_source(dst, entries, tx = nil, ty = nil, surface_shadow_opacity = 0)
     sorted = entries.sort_by do |entry|
       [entry_world_elevation(entry), entry[:unify].to_i, entry[:priority].to_i]
     end
-    draw_wall_column_entries(dst, sorted.select { |entry| entry[:priority].to_i <= 0 })
-    blt_wall_shadow_cell(dst, tx, ty, sorted) if !tx.nil? && !ty.nil?
-    draw_wall_column_entries(dst, sorted.select { |entry| entry[:priority].to_i > 0 })
+    return draw_wall_column_entries(dst, sorted) if surface_shadow_opacity.to_i <= 0
+    base = sorted.select { |entry| entry_visual_priority(entry) <= 0 }
+    top = sorted.reject { |entry| entry_visual_priority(entry) <= 0 }
+    draw_wall_column_entries(dst, base)
+    blt_mountain_surface_shadow(dst, tx, ty, base, surface_shadow_opacity)
+    draw_wall_column_entries(dst, top)
   end
 
   def draw_wall_column_entries(dst, entries)
@@ -370,18 +393,16 @@ class Mode7Renderer
     end
   end
 
-  # Sombra Maker Studio para una superficie wall. El suelo excluye esta celda
-  # para no duplicarla bajo Mountain; aqui queda sobre la parte caminable y bajo
-  # piezas con prioridad real.
-  def blt_wall_shadow_cell(dst, tx, ty, entries)
-    return if !@shadow_ground || @shadow_ground.disposed?
-    tw = Game_Map::TILE_WIDTH
-    th = Game_Map::TILE_HEIGHT
-    elevation = entries.map { |entry| entry_world_elevation(entry) }.max || 0.0
-    y = (dst.height - th - elevation).round
-    y = 0 if y < 0
-    @src_rect.set(tx * tw, ty * th, tw, th)
-    dst.blt(0, y, @shadow_ground, @src_rect)
+  # Mountain tiene plano de sombra propio: misma silueta/offset/opacity de MS,
+  # pero nunca encima de su source tile ni de piezas priority. Asi no invade
+  # walls normales ni convierte sombra en una textura flotante.
+  def blt_mountain_surface_shadow(dst, tx, ty, entries, opacity)
+    return if tx.nil? || ty.nil? || !@shadow_ground || @shadow_ground.disposed?
+    return if entries.any? { |entry| shadow_source_entry?(tx, ty, entry) }
+    @src_rect.set(tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT,
+                  Game_Map::TILE_WIDTH, Game_Map::TILE_HEIGHT)
+    dst.blt(0, dst.height - Game_Map::TILE_HEIGHT, @shadow_ground, @src_rect,
+            opacity.to_i.clamp(0, 255))
   end
 
   # ---------------------------------------------------------------------------
@@ -665,14 +686,14 @@ class Mode7Renderer
     end
 
     @wall_data.each do |data|
-      sprite, wx, wyb, _h, entries, _z_behavior, _base_unify, _depth = data
+      sprite, wx, wyb, _h, entries, _z_behavior, _base_unify, _depth, shadow_opacity = data
       next if !sprite.bitmap || sprite.bitmap.disposed?
       next if entries.none? { |entry| entry[:animated] }
 
       sprite.bitmap.clear
       tx = ((wx - Game_Map::TILE_WIDTH / 2.0) / Game_Map::TILE_WIDTH).round
       ty = (wyb / Game_Map::TILE_HEIGHT - 1).round
-      draw_wall_column_source(sprite.bitmap, entries, tx, ty)
+      draw_wall_column_source(sprite.bitmap, entries, tx, ty, shadow_opacity)
     end
 
     @priority_strips.each do |data|

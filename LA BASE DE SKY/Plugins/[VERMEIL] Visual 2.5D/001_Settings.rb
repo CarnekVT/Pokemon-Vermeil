@@ -161,9 +161,9 @@ module Mode7
     # Sky curva posicion global, no aplasta tiles hacia el horizonte.
     SKY_GROUND_Y_SCALE = 1.00
 
-    # Convergencia conica leve. 0.06 reduce fondo y amplia frente sin llegar
-    # a separar columnas wall ni cerrar habitaciones en bordes del mapa.
-    SKY_WIDTH_PERSPECTIVE = 0.06
+    # Conicidad muy leve sobre plano compartido. Walls usan la misma escala
+    # uniforme por pieza; no deformar X/Y distinto ni reconstruir tiles por fila.
+    SKY_WIDTH_PERSPECTIVE = 0.050
 
     # Personajes/OW conservan escala fija: NPCs, followers y eventos no crecen
     # ni encogen al recorrer la curvatura.
@@ -244,6 +244,14 @@ module Mode7
       :Mountains => 4,
       :Ladders => 4,
       :LaddersSide => 4
+    }.freeze
+
+    # SOMBRA DE SUPERFICIE PARA MOUNTAINS. Replica sombra Maker Studio sobre
+    # Mountain solo cuando la sombra cae DESDE otra pieza; el propio source tile
+    # queda encima, como vanilla. Valor 0..255 multiplica opacity original MS.
+    # Agregar un tag aqui es opt-in, no altera sombra de otros walls.
+    MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY = {
+      :Mountains => 125
     }.freeze
 
     # PRIORIDAD HIBRIDA 2.5D. Terrain tags aqui NO son volumenes. Al pisar la

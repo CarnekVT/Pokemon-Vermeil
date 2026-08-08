@@ -194,8 +194,8 @@ class Mode7Renderer
     cache_visual_priorities
 
     # ponytail: conservar pila vanilla en bitmap fuente. Proyectar tres planos
-    # por cada fila costaba FPS al caminar; separar solo superficie wall si algun
-    # dia Maker Studio necesita una profundidad adicional fuera de tiles.
+    # por fila costaba FPS al caminar; walls se mantienen z=2 y tapan sombra,
+    # igual que TilemapRenderer, sin hornear sombra sobre su cara.
     @ms_shadow_env = ms_shadow_environment
     if @ms_shadow_env
       [:base, :native_overlay, :extended].each do |pass|
@@ -263,17 +263,15 @@ class Mode7Renderer
     end
   end
 
-  # Sombra Maker Studio entre bandas z=0/z=2, igual que renderer vanilla.
-  # Las celdas wall se omiten: 010_FrontWalls la coloca sobre su superficie
-  # rigida, sin volver a proyectarla detras del volumen Mountain.
+  # Sombra Maker Studio entre bandas z=0/z=2. Incluso una celda wall recibe el
+  # bitmap base: su columna se dibuja despues, z=2, y solo deja ver sombra en
+  # transparencia real, igual que renderer vanilla.
   def composite_ground_shadows
     return if !@shadow_ground || @shadow_ground.disposed?
     tw = Game_Map::TILE_WIDTH
     th = Game_Map::TILE_HEIGHT
     @map.width.times do |tx|
       @map.height.times do |ty|
-        entries = @entry_cache[[tx, ty]]
-        next if effective_cell_has_wall?(tx, ty, entries)
         @src_rect.set(tx * tw, ty * th, tw, th)
         @ground.blt(tx * tw, ty * th, @shadow_ground, @src_rect)
       end
@@ -283,9 +281,7 @@ class Mode7Renderer
   def ground_shadow_band_for(tx, ty, entry)
     env = @ms_shadow_env
     return :below_shadow if !env
-    index = ty * @map.width + tx
-    source_tid = env[:source_keys][index]
-    return :above_shadow if !source_tid.nil? && source_tid == entry_shadow_tile_id(entry)
+    return :above_shadow if shadow_source_entry?(tx, ty, entry)
     passage = entry_shadow_passage(entry)
     return :above_shadow if passage && (passage & 0x0F) == 0x0F
     :below_shadow
@@ -293,10 +289,46 @@ class Mode7Renderer
     :below_shadow
   end
 
+  def shadow_source_entry?(tx, ty, entry)
+    env = @ms_shadow_env
+    return false if !env
+    index = ty * @map.width + tx
+    sources = env[:source_entries] && env[:source_entries][index]
+    return true if sources && sources.any? { |source| shadow_source_matches_entry?(source, entry) }
+    source_tid = env[:source_keys][index]
+    !source_tid.nil? && source_tid == entry_shadow_tile_id(entry)
+  end
+
+  # sourceLayerIndex viene del editor. Nativas antiguas pueden llegar 0-based
+  # o 1-based; extendidas llegan como layer unificada. El tileId sigue siendo
+  # obligatorio, asi el fallback no mueve una sombra a otra pieza vecina.
+  def shadow_source_matches_entry?(source, entry)
+    return false if source[:tile_id].to_i != entry_shadow_tile_id(entry)
+    layer = source[:layer]
+    return true if layer.nil?
+    native = entry[:native_layer]
+    return true if !native.nil? && (layer == native.to_i || layer == native.to_i + 1)
+    entry[:unify].to_i == layer
+  end
+
   def ms_shadow_environment
     return nil if !defined?(MakerStudio) || !MakerStudio.respond_to?(:shadow_env_for)
     env = MakerStudio.shadow_env_for(@map)
-    env && env[:has_shadows] ? env : nil
+    return nil if !env || !env[:has_shadows]
+    ext = MakerStudio.get_extended_data_for(@map_id) if MakerStudio.respond_to?(:get_extended_data_for)
+    shadows = ext ? (ext["shadowLayers"] || []) : []
+    shadows = [ext["shadowLayer"]].compact if ext && shadows.empty?
+    by_cell = Hash.new { |hash, key| hash[key] = [] }
+    shadows.each do |shadow|
+      next if !shadow || !shadow["visible"]
+      layer = shadow.key?("sourceLayerIndex") ? shadow["sourceLayerIndex"].to_i : nil
+      (shadow["sourceTiles"] || []).each do |tile|
+        index = tile["y"].to_i * @map.width + tile["x"].to_i
+        by_cell[index] << { tile_id: tile["tileId"].to_i, layer: layer }
+      end
+    end
+    env[:source_entries] = by_cell
+    env
   rescue Exception
     nil
   end
@@ -400,7 +432,7 @@ class Mode7Renderer
         ground_shadow_band_for(tx, ty, entry) == :above_shadow
       end
       blt_ground_cell(tx, ty, lower, @ground) unless lower.empty?
-      if !effective_cell_has_wall?(tx, ty, entries) && @shadow_ground && !@shadow_ground.disposed?
+      if @shadow_ground && !@shadow_ground.disposed?
         @src_rect.set(x, y, tw, th)
         @ground.blt(x, y, @shadow_ground, @src_rect)
       end
