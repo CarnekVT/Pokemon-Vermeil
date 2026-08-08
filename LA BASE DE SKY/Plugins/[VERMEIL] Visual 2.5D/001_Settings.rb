@@ -145,17 +145,17 @@ module Mode7
 
     # Curva residual del suelo. El 3D ya NO depende de una "banana" fuerte:
     # primero comprimimos el plano en Y y luego anadimos una curvatura suave.
-    SKY_CURVE = 0.10
+    SKY_CURVE = 0.45
 
     # Parte lineal de la proyeccion del suelo. Debe complementar SKY_CURVE.
-    SKY_LINEAR = 0.90
+    SKY_LINEAR = 0.55
 
     # Escala vertical LOCAL del plano. 1.0 conserva altura de cada celda;
     # Sky curva posicion global, no aplasta tiles hacia el horizonte.
     SKY_GROUND_Y_SCALE = 1.00
 
-    # Compresion horizontal por profundidad. Se deja en 0 para conservar el
-    # ancho visual de habitaciones y pasillos (paredes paralelas, look SkyFlyer).
+    # Sin convergencia horizontal: evita cortes en limites de mapa/interior.
+    # Volumen Sky viene de curva Y y objetos terrain-tag rigidos.
     SKY_WIDTH_PERSPECTIVE = 0.0
 
     # Personajes/OW conservan escala fija: NPCs, followers y eventos no crecen
@@ -238,6 +238,12 @@ module Mode7
     # pasabilidad ni comportamiento fuera de Mode7.
     HYBRID_PRIORITY_TERRAIN_TAGS = {
       :Grass => 3
+    }.freeze
+
+    # Altura visual en px para capas hibridas. Grass queda sobre el suelo como
+    # una alfombra de hojas baja; no cambia colision, terreno ni prioridad PBS.
+    HYBRID_PRIORITY_TERRAIN_TAG_HEIGHT = {
+      :Grass => 5
     }.freeze
 
     # =======================================================================

@@ -121,6 +121,12 @@ class Mode7Renderer
     Mode7::Config::HYBRID_PRIORITY_TERRAIN_TAGS[tag.id]
   end
 
+  def entry_hybrid_height(e)
+    tag = terrain_tag_for_entry(e)
+    return 0 if !tag || tag.id == :None
+    (Mode7::Config::HYBRID_PRIORITY_TERRAIN_TAG_HEIGHT[tag.id] || 0).to_i
+  end
+
   def hybrid_priority_active?(priority, tx, ty)
     return false if !priority || priority.to_i <= 0 || !$game_player
     return false if $game_player.x == tx && $game_player.y == ty
@@ -328,10 +334,11 @@ class Mode7Renderer
           if hybrid
             # Base p0 siempre. Copia pN se muestra por fila solo cuando el
             # jugador queda al norte; evita un sprite/reproyeccion por grass.
+            elevation = entry_world_elevation(entry) + entry_hybrid_height(entry)
             base_key = [:hybrid_base, entry[:unify].to_i, 0, ty,
-                        entry_world_elevation(entry)]
+                        elevation]
             top_key = [:hybrid_top, entry[:unify].to_i, hybrid.to_i, ty,
-                       entry_world_elevation(entry)]
+                       elevation]
             strips[base_key][tx] ||= []
             strips[base_key][tx].push(entry)
             strips[top_key][tx] ||= []
