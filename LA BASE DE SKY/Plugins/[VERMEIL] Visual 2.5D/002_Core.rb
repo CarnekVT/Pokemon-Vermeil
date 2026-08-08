@@ -114,7 +114,7 @@ module Mode7
     def sky_theta_for_world_y(wy)
       scale = sky_angle_scale
       return 0.0 if scale <= 0.0
-      ry = (wy.to_f - cam_y - pivot_y)
+      ry = (wy.to_f - projection_cam_y - pivot_y)
       (ry * @zoom * scale * sky_ground_y_scale) / @planet_radius
     end
 
@@ -164,14 +164,24 @@ module Mode7
       return effective_mode_blend > 0.001
     end
 
-    def vanilla_project(wx, wy); return [wx - cam_x + center_x, wy - cam_y + terrain_camera_lift]; end
-    def vanilla_world_y_for_row(sy); return sy - terrain_camera_lift + cam_y; end
+    def vanilla_project(wx, wy); return [wx - cam_x + center_x, wy - projection_cam_y + terrain_camera_lift]; end
+    def vanilla_world_y_for_row(sy); return sy + projection_cam_y; end
     def lerp(a, b, t); return a + (b - a) * t; end
 
-    # Movimiento de camara en pantalla. No altera cam_y, por tanto no cambia
-    # curvatura ni posicion relativa de tiles vecinos.
+    # Movimiento visual de camara. No altera cam_y real: la profundidad se
+    # aplica mediante projection_cam_y y nunca cambia coordenadas ni colision.
     def terrain_camera_lift
       @terrain_camera_lift || 0.0
+    end
+
+    # Camara solo visual sobre el eje de profundidad. No modifica display_y,
+    # cam_y ni las coordenadas logicas del mapa.
+    def terrain_camera_vertical_lift
+      terrain_camera_lift * Config::TERRAIN_TAG_CAMERA_LIFT_VERTICAL_FACTOR.to_f
+    end
+
+    def projection_cam_y
+      cam_y - terrain_camera_vertical_lift
     end
 
     def terrain_camera_lift_target
@@ -250,7 +260,7 @@ module Mode7
     # project_y/world_y dependen de la posicion exacta de camara. Usar floor
     # los hacia saltar al cruzar cada pixel durante scroll suave vertical.
     def refresh_camera_projection_cache
-      current_cam_y = cam_y
+      current_cam_y = projection_cam_y
       return if @projection_cache_cam_y == current_cam_y
       @projection_cache_cam_y = current_cam_y
       @world_y_cache.clear if @world_y_cache
@@ -417,13 +427,13 @@ module Mode7
       return _sky_project(wx, wy, elevation) if sky_mode?
       if affine_mode?
         rx = wx - cam_x
-        ry = (wy - cam_y - elevation) - pivot_y
+        ry = (wy - projection_cam_y - elevation) - pivot_y
         sy = pivot_y + affine_depth_scale(ry)
         sx = center_x + hscale(sy) * rx
         return [sx, sy + terrain_camera_lift]
       end
       rx = wx - cam_x
-      ry = wy - cam_y - elevation
+      ry = wy - projection_cam_y - elevation
       yi = @zoom * (ry - pivot_y)
       d = @dh - yi * @sin
       return nil if d <= 0
@@ -445,7 +455,7 @@ module Mode7
 
     def _sky_project_y(wy, elevation = 0)
       scale = sky_angle_scale
-      return wy - cam_y - elevation + terrain_camera_lift if scale <= 0.0
+      return wy - projection_cam_y - elevation + terrain_camera_lift if scale <= 0.0
       theta = sky_theta_for_world_y(wy)
       sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
       return sy_ground - elevation.to_f * vertical_scale_for_world_y(wy) + terrain_camera_lift
@@ -454,9 +464,9 @@ module Mode7
     def _project_y_uncached(wy, elevation = 0)
       return _sky_project_y(wy, elevation) if sky_mode?
       if affine_mode?
-        return pivot_y + affine_depth_scale((wy - cam_y - elevation) - pivot_y) + terrain_camera_lift
+        return pivot_y + affine_depth_scale((wy - projection_cam_y - elevation) - pivot_y) + terrain_camera_lift
       end
-      ry = wy - cam_y - elevation
+      ry = wy - projection_cam_y - elevation
       yi = @zoom * (ry - pivot_y)
       d = @dh - yi * @sin
       return nil if d <= 0
@@ -509,17 +519,17 @@ module Mode7
         offset = pivot_y + ry
         @sky_row_world_offset_cache[sy] = offset
       end
-      return cam_y + offset
+      return projection_cam_y + offset
     end
 
     def _world_y_for_row_uncached(sy)
       return _sky_world_y_for_row(sy) if sky_mode?
-      return cam_y + pivot_y + affine_depth_unscale(sy - pivot_y) if affine_mode?
+      return projection_cam_y + pivot_y + affine_depth_unscale(sy - pivot_y) if affine_mode?
       d = sy - pivot_y
       den = @dh * @cos + d * @sin
       return nil if den.abs < 1.0e-6
       yi = d * @dh / den
-      return yi / @zoom + pivot_y + cam_y
+      return yi / @zoom + pivot_y + projection_cam_y
     end
 
     def override; return @override; end

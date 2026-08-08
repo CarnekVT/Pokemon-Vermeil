@@ -99,17 +99,12 @@ class Mode7Renderer
     nil
   end
 
-  def entry_wall_height(e)
-    tag = terrain_tag_for_entry(e)
-    return 1 if !tag || tag.id == :None
-    wall_terrain_tag_heights[tag.id] || 1
-  end
-
   # Un muro fisico se decide por Terrain Tag. Priority NO significa altura.
   def entry_is_wall?(e)
     tag = terrain_tag_for_entry(e)
-    if tag && tag.id != :None && wall_terrain_tag_heights.key?(tag.id)
-      return true
+    if tag && tag.id != :None
+      configured = wall_terrain_tag_heights[tag.id]
+      return configured.to_i > 0 if !configured.nil?
     end
     return true if Mode7Renderer.debug_mode_force_all_priority_wall? && e[:priority].to_i > 0
     false
@@ -214,61 +209,12 @@ class Mode7Renderer
     0
   end
 
-  def wall_layer_height(entries)
-    entries.select { |e| entry_is_wall?(e) }.map { |e| entry_wall_height(e) }.max || 1
-  end
-
   def wall_layer_unify(entries)
     vals = entries.select { |e| entry_is_wall?(e) }.map { |e| e[:unify].to_i }
     vals.empty? ? 0 : vals.min
   end
 
-  def connected_cell_groups(cells)
-    groups = []
-    seen = {}
-    cells.each_key do |origin|
-      next if seen[origin]
-      seen[origin] = true
-      queue = [origin]
-      index = 0
-      group = []
-      while index < queue.length
-        x, y = queue[index]
-        index += 1
-        group.push([x, y, cells[[x, y]]])
-        [[-1, 0], [1, 0], [0, -1], [0, 1]].each do |dx, dy|
-          neighbor = [x + dx, y + dy]
-          next if seen[neighbor] || !cells.key?(neighbor)
-          seen[neighbor] = true
-          queue.push(neighbor)
-        end
-      end
-      groups.push(group)
-    end
-    groups
-  end
-
-  # Priority 0 conserva siempre su base individual. Piezas contiguas de la
-  # MISMA prioridad positiva comparten profundidad: un tejado priority 4 se
-  # comporta como una sola banda, sin arrastrar suelo/props priority 0.
-  def tile_depths(cells, share_priority_depth = false)
-    depths = {}
-    unless share_priority_depth
-      cells.each_key do |tx, ty|
-        depths[[tx, ty]] = (ty + 1) * Game_Map::TILE_HEIGHT
-      end
-      return depths
-    end
-
-    connected_cell_groups(cells).each do |group|
-      depth = (group.map { |_x, y, _entries| y }.max + 1) * Game_Map::TILE_HEIGHT
-      group.each { |x, y, _entries| depths[[x, y]] = depth }
-    end
-    depths
-  end
-
   def build_wall_columns
-    wall_cells = {}
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
@@ -278,73 +224,15 @@ class Mode7Renderer
         wall_entries = entries.select do |entry|
           entry[:unify].to_i >= wall_layer && !priority_surface_entry?(entry)
         end
-        wall_cells[[tx, ty]] = wall_entries unless wall_entries.empty?
-      end
-    end
-
-    grouped_cells = {}
-    max_cells = Mode7::Config::TERRAIN_TAG_VOLUME_GROUP_MAX_CELLS
-    connected_cell_groups(wall_cells).each do |group|
-      next if group.length > max_cells
-      make_terrain_volume_group(group)
-      group.each { |tx, ty, _entries| grouped_cells[[tx, ty]] = true }
-    rescue Exception
-      Console.echo_error("2.5D: volumen de terrain tag fallido") if defined?(Console)
-    end
-
-    ungrouped_cells = {}
-    wall_cells.each do |key, entries|
-      next if grouped_cells[key]
-      ungrouped_cells[key] = entries
-    end
-    depths = tile_depths(ungrouped_cells)
-    ungrouped_cells.each do |(tx, ty), entries|
-      priority = entries.map { |entry| entry_visual_priority(entry) }.max || 0
-      depth = [depths[[tx, ty]], priority]
-      make_column(tx, ty, entries, wall_layer_height(entries), 0, :dynamic, depth)
-    rescue Exception
-      Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
-    end
-  end
-
-  # Componente etiquetado como volumen: su prioridad interna es arte del objeto,
-  # no capas independientes. Se pinta como un billboard vertical rigido anclado
-  # en su borde sur; por eso un arbol 3x3 no se curva ni se parte en copa/tronco.
-  def make_terrain_volume_group(group)
-    min_x = group.map { |x, _y, _entries| x }.min
-    max_x = group.map { |x, _y, _entries| x }.max
-    min_y = group.map { |_x, y, _entries| y }.min
-    max_y = group.map { |_x, y, _entries| y }.max
-    entries = group.flat_map { |_x, _y, cell_entries| cell_entries }
-    padding = entries.map { |entry| entry_world_elevation(entry).ceil }.max || 0
-    width = (max_x - min_x + 1) * Game_Map::TILE_WIDTH
-    height = (max_y - min_y + 1) * Game_Map::TILE_HEIGHT + padding
-    layout = {
-      :cells => group, :min_x => min_x, :max_y => max_y,
-      :padding => padding, :width => width, :height => height
-    }
-    bitmap = Bitmap.new(width, height)
-    draw_terrain_volume_group(bitmap, layout)
-    sprite = Sprite.new(@viewport)
-    sprite.bitmap = bitmap
-    sprite.ox = width / 2.0
-    sprite.oy = height
-    sprite.visible = false
-    wx = min_x * Game_Map::TILE_WIDTH + width / 2.0
-    wyb = (max_y + 1) * Game_Map::TILE_HEIGHT
-    priority = entries.map { |entry| entry_visual_priority(entry) }.max || 0
-    @wall_data.push([sprite, wx, wyb, height, entries, :volume, 0,
-                     [wyb, priority], layout])
-  end
-
-  def draw_terrain_volume_group(bitmap, layout)
-    bitmap.clear
-    layout[:cells].sort_by { |x, y, _entries| [y, x] }.each do |tx, ty, entries|
-      dx = (tx - layout[:min_x]) * Game_Map::TILE_WIDTH
-      y = layout[:padding] + (layout[:max_y] - ty) * Game_Map::TILE_HEIGHT
-      entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }.each do |entry|
-        blt_entry_into(bitmap, dx, y - entry_world_elevation(entry).round,
-                       entry, entry[:opacity] || 255)
+        next if wall_entries.empty?
+        # ponytail: cada celda mantiene su propio bitmap. Unir por tag o ID
+        # convierte casas/props en rectangulos y hace que piezas ajenas hereden
+        # la misma proyeccion. El tag solo clasifica volumen y colision.
+        priority = wall_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+        depth = [(ty + 1) * Game_Map::TILE_HEIGHT, priority]
+        make_column(tx, ty, wall_entries, 0, :dynamic, depth)
+      rescue Exception
+        Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
       end
     end
   end
@@ -393,13 +281,12 @@ class Mode7Renderer
     elevation + entry_terrain_tag_height(e)
   end
 
-  # Columna fisica de muro. Cada sprite contiene una sola prioridad; los layers
-  # se componen dentro de esa banda sin convertirse en altura fisica.
-  def make_column(tx, ty, entries, max_h, base_unify = 0, z_behavior = :dynamic, depth = nil)
+  # Columna fisica de una celda. El bitmap solo reserva sus 32 px reales y una
+  # elevacion explicita; el numero del filtro de tag no anade aire transparente.
+  def make_column(tx, ty, entries, base_unify = 0, z_behavior = :dynamic, depth = nil)
     return if entries.nil? || entries.empty?
-    max_h = max_h.to_i.clamp(1, 16)
     max_elev = entries.map { |e| entry_world_elevation(e) }.max || 0.0
-    h = [max_h * Game_Map::TILE_HEIGHT, Game_Map::TILE_HEIGHT + max_elev.ceil].max
+    h = Game_Map::TILE_HEIGHT + [max_elev.ceil, 0].max
 
     bmp = Bitmap.new(Game_Map::TILE_WIDTH, h)
     bmp.clear
@@ -713,14 +600,9 @@ class Mode7Renderer
     end
 
     @wall_data.each do |data|
-      sprite, _wx, _wyb, h, entries, _z_behavior, _base_unify, _depth, layout = data
+      sprite, _wx, _wyb, h, entries, _z_behavior, _base_unify, _depth = data
       next if !sprite.bitmap || sprite.bitmap.disposed?
       next if entries.none? { |e| e[:animated] }
-
-      if layout
-        draw_terrain_volume_group(sprite.bitmap, layout)
-        next
-      end
 
       sprite.bitmap.clear
       entries.sort_by { |e| [entry_world_elevation(e), e[:unify].to_i, e[:priority].to_i] }.each do |e|
@@ -773,7 +655,7 @@ class Mode7Renderer
     radius_y = defined?(Mode7::Config::WALL_SPAWN_RADIUS_Y) ? Mode7::Config::WALL_SPAWN_RADIUS_Y : 34
 
     @wall_data.each do |data|
-      sprite, wx, wyb, h, entries, _z_behavior, _base_unify, depth, _layout = data
+      sprite, wx, wyb, h, _entries, _z_behavior, _base_unify, depth = data
 
       half_w = sprite.bitmap.width / 2.0
       left_tx = (wx - half_w) / Game_Map::TILE_WIDTH
@@ -816,8 +698,7 @@ class Mode7Renderer
       sprite.y = syb
       sprite.zoom_x = k
       sprite.zoom_y = k
-      priority = entries.map { |entry| entry_visual_priority(entry) }.max || 0
-      depth_wyb, depth_priority = depth || [wyb, priority]
+      depth_wyb, depth_priority = depth || [wyb, 0]
       bias = depth_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0
       sprite.z = Mode7.depth_z(depth_wyb, depth_priority, bias)
 

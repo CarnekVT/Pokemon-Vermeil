@@ -214,26 +214,21 @@ module Mode7
     OUTSIDE_COLOR = Color.new(0, 0, 0)
 
     # =======================================================================
-    # FILTRO DE VOLUMEN POR TERRAIN TAG. No sustituye el tag del tile: solo
-    # decide si su grafico se dibuja como volumen 2.5D y bloquea su celda.
-    # Los tags mantienen todas sus funciones: HoneyTree sigue dando Headbutt/
-    # miel; Water, TallGrass, Bridge, etc. conservan mecanicas normales.
-    # Valor = reserva de alto para columnas con varias piezas. Mode7Tag y
-    # HoneyTree pueden abarcar suelo, muros y props, por lo que siguen la ruta
-    # normal de prioridades 2.5D: no son un volumen unico. Asi no se rompen sus
-    # piezas ni sus mecanicas propias. Solo tags que representen un bloque
-    # fisico entero (como Mountains) deben ir aqui.
-    # ponytail: un solo tag de volumen hasta que Maker Studio guarde ID de objeto.
-    INDOOR_WALL_TERRAIN_TAG_HEIGHT = {}.freeze
-    OUTDOOR_WALL_TERRAIN_TAG_HEIGHT = {
-      :Mountains => 4
+    # FILTRO DE VOLUMEN POR TERRAIN TAG. No sustituye el tag del tile: decide
+    # que celdas se dibujan como volumen 2.5D. Tag, pasabilidad y mecanicas
+    # quedan intactos (por ejemplo HoneyTree conserva Headbutt/miel).
+    #
+    # Valor > 0 activa el filtro. Es compatibilidad con la configuracion vieja;
+    # NO es prioridad, elevacion ni cantidad de tiles. Cada celda conserva su
+    # bitmap y proyeccion: nunca se fusiona por tag, por capas ni por Volume ID.
+    INDOOR_WALL_TERRAIN_TAG_HEIGHT = {
+      :Mode7Tag => 4,
     }.freeze
-
-    # Componentes del filtro se dibujan como volumen vertical unico. Evita que
-    # casas, arboles y props conectados se deformen celda por celda en Sky.
-    # Solo Mountains usa esta agrupacion. 256 cubre una montana compuesta sin
-    # convertir un tag de decoracion extenso en una sabana rigida.
-    TERRAIN_TAG_VOLUME_GROUP_MAX_CELLS = 256
+    OUTDOOR_WALL_TERRAIN_TAG_HEIGHT = {
+      :Mountains => 4,
+      :Mode7Tag => 4,
+      :HoneyTree => 4
+    }.freeze
 
     # PRIORIDAD HIBRIDA 2.5D. Terrain tags aqui NO son volumenes. Al pisar la
     # celda, el tile queda en priority 0; si el jugador esta detras (al norte),
@@ -257,17 +252,19 @@ module Mode7
     # aqui: elevar bitmap de muro rompe sus capas adyacentes.
     # ponytail: hash por tag; altura por tile solo si el mapa realmente la pide.
     TERRAIN_TAG_TILE_HEIGHT = {
-      :Mountains => 4
     }.freeze
 
     # DESPLAZAMIENTO DE CAMARA POR TERRAIN TAG. Mueve la proyeccion completa
     # en pantalla, sin cambiar cam_y ni deformar tiles adyacentes. Usa tags
     # pasables: Mountains no se activa porque WALL_BLOCKS_MOVEMENT lo bloquea.
-    # Valor = pixeles de subida visual de camara.
+    # Valor = pixeles de subida visual de camara. Tambien desplaza una camara
+    # vertical virtual: cambia profundidad/escala sin tocar cam_y real ni
+    # coordenadas de colision.
     TERRAIN_TAG_CAMERA_LIFT = {
-      :Grass => 4
+      :Mountains => 6
     }.freeze
     TERRAIN_TAG_CAMERA_LIFT_SMOOTH = 0.34
+    TERRAIN_TAG_CAMERA_LIFT_VERTICAL_FACTOR = 1.0
 
     # =======================================================================
     # ELEVACION FALSO 3D (apilado de capas sobre el cilindro)
