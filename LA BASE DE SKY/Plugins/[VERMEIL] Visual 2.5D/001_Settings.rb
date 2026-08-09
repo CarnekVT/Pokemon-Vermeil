@@ -180,6 +180,12 @@ module Mode7
     # Se conserva para compatibilidad con configuraciones anteriores.
     SKY_WALL_CURVE_RESPONSE = 0.08
 
+    # RIGIDEZ VERTICAL DEL RASTER WALL (0.0..1.0). Solo P1+ de tags wall.
+    # 0.0 = alto exacto del plano Mountains. 1.0 = nunca encoge por debajo
+    # de su alto base en el borde inferior. X y prioridad siguen scanline.
+    # 0.35 conserva volumen sin volver a separar P0/P1.
+    SKY_WALL_RASTER_RIGIDITY = 1
+
     # Solape vertical en px de pantalla entre filas wall. Tapa lineas de
     # redondeo al proyectar dos tiles que comparten borde.
     SKY_WALL_ROW_OVERLAP = 1.0

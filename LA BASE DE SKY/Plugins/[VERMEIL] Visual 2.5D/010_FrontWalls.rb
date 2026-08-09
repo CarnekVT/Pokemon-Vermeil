@@ -142,6 +142,14 @@ class Mode7Renderer
     false
   end
 
+  # Una casilla Mountain/Wall puede tener su P0 con tag y P1/P4 sin tag
+  # propio (escalera, borde, remate). Todos deben compartir raster. Limitarlo
+  # a la misma celda evita arrastrar prioridad de tiles adyacentes.
+  def entry_uses_wall_raster?(entry)
+    return true if entry[:terrain_height_wall_cell]
+    entry_is_wall?(entry)
+  end
+
   # Solo los muros normales fuerzan bloqueo. ElevatedWall usa la pasabilidad
   # nativa de la escalera/suelo y puede disparar camera lift al pisarlo.
   def entry_blocks_movement?(e)
@@ -319,9 +327,10 @@ class Mode7Renderer
             strips[top_key][tx].push(entry)
             next
           end
-          # Wall P1 usa raster del plano, no Sprite escalado. Asi P0/P1
-          # comparten exactamente los scanlines de Mountains y no se separan.
-          ground_raster = entry_is_wall?(entry)
+          # P1/P4 dentro de misma celda wall usa raster del plano, incluso si
+          # fragmento superior no repite terrain tag. Asi P0/P1 comparten
+          # scanlines sin extender logica a grass/props vecinos.
+          ground_raster = entry_uses_wall_raster?(entry)
           key = [entry[:unify].to_i, entry_visual_priority(entry),
                  entry_world_elevation(entry), ground_raster]
           volumes[key][[tx, ty]] ||= []
@@ -799,12 +808,66 @@ class Mode7Renderer
     [left[0], right[0], top, bottom]
   end
 
-  def priority_strip_raster_bounds(ty)
-    top = Mode7.project_y(ty * Game_Map::TILE_HEIGHT, 0)
-    bottom = Mode7.project_y((ty + 1) * Game_Map::TILE_HEIGHT, 0)
-    return nil if !top || !bottom
-    first = [top, bottom].min.floor
-    last = [top, bottom].max.ceil
+  # Busca limite contra la misma inversa que llena @ground. No usar project_y:
+  # su redondeo directo dejaba P1 un pixel/fila distinto del raster al bajar.
+  def first_ground_row_for_world_y(world_y, low, high)
+    result = nil
+    while low <= high
+      middle = (low + high) / 2
+      row_world_y = Mode7.world_y_for_row(middle)
+      if row_world_y && row_world_y.floor >= world_y
+        result = middle
+        high = middle - 1
+      else
+        low = middle + 1
+      end
+    end
+    result
+  end
+
+  def priority_strip_ground_row_range(ty)
+    @priority_strip_row_ranges ||= {}
+    cache_key = [Mode7.projection_cam_y, Mode7.projection_revision]
+    if @priority_strip_row_ranges[:camera] != cache_key
+      @priority_strip_row_ranges.clear
+      @priority_strip_row_ranges[:camera] = cache_key
+    end
+    return @priority_strip_row_ranges[ty] if @priority_strip_row_ranges.key?(ty)
+
+    world_top = ty * Game_Map::TILE_HEIGHT
+    world_bottom = world_top + Game_Map::TILE_HEIGHT
+    first_visible = [Mode7.horizon_row.ceil, 0].max
+    last_visible = Mode7.screen_h - 1
+    return @priority_strip_row_ranges[ty] = nil if first_visible > last_visible
+    first = first_ground_row_for_world_y(world_top, first_visible, last_visible)
+    return @priority_strip_row_ranges[ty] = nil if !first
+    after_last = first_ground_row_for_world_y(world_bottom, first, last_visible)
+    last = after_last ? after_last - 1 : last_visible
+    return @priority_strip_row_ranges[ty] = nil if last < first
+    @priority_strip_row_ranges[ty] = [first, last]
+  end
+
+  def priority_strip_raster_metrics(source, ty)
+    rows = priority_strip_ground_row_range(ty)
+    return nil if !rows
+    source_first, source_last = rows
+    source_height = [source_last - source_first + 1, 1].max
+    # ponytail: alto nativo en pantalla. El billboard direccional tambien se
+    # encogia al alejarse, asi que no servia como limite de rigidez.
+    rigid_height = source.height * Mode7.zoom
+    rigid_height = [rigid_height, source_height].max
+    rigidity = Mode7::Config::SKY_WALL_RASTER_RIGIDITY.to_f.clamp(0.0, 1.0)
+    target_height = (source_height + (rigid_height - source_height) * rigidity).round
+    target_height = [target_height, 1].max
+    target_last = source_last
+    target_first = target_last - target_height + 1
+    [source_first, source_last, target_first, target_last, source_height, target_height]
+  end
+
+  def priority_strip_raster_bounds(source, ty)
+    metrics = priority_strip_raster_metrics(source, ty)
+    return nil if !metrics
+    _source_first, _source_last, first, last, _source_height, _target_height = metrics
     return nil if last < 0 || first >= Mode7.screen_h
     [[first, 0].max, [last, Mode7.screen_h - 1].min]
   end
@@ -813,10 +876,10 @@ class Mode7Renderer
   # con zoom: cada pixel toma misma X/Y de mundo que Mountain P0. El Sprite
   # solo aporta Z por fila para que actor quede arriba/abajo segun prioridad.
   def redraw_ground_raster_priority_strip(sprite, source, min_tx, ty)
-    bounds = priority_strip_raster_bounds(ty)
-    return false if !bounds
-    first_row, last_row = bounds
-    required_height = last_row - first_row + 1
+    metrics = priority_strip_raster_metrics(source, ty)
+    return false if !metrics
+    source_first, source_last, first_row, last_row, source_height, required_height = metrics
+    return false if last_row < 0 || first_row >= Mode7.screen_h
     @priority_strip_rasters ||= {}
     raster = @priority_strip_rasters[sprite.object_id]
     if !raster || raster.disposed? || raster.width != Mode7.screen_w ||
@@ -832,10 +895,12 @@ class Mode7Renderer
     world_right = world_left + source.width
     world_top = ty * Game_Map::TILE_HEIGHT
     world_bottom = world_top + source.height
-    (first_row..last_row).each do |sy|
-      wy = Mode7.world_y_for_row(sy)
+    (0...required_height).each do |target_row|
+      source_row = source_first + ((target_row + 0.5) * source_height / required_height).floor
+      source_row = [[source_row, source_first].max, source_last].min
+      wy = Mode7.world_y_for_row(source_row)
       next if !wy || wy < world_top || wy >= world_bottom
-      scale = Mode7.hscale(sy)
+      scale = Mode7.hscale(source_row)
       next if !scale || scale <= 0.001
       span = Mode7.screen_w / scale
       wx_left = Mode7.cam_x - Mode7.center_x / scale
@@ -850,7 +915,7 @@ class Mode7Renderer
       next if screen_right <= screen_left
       @src_rect.set(source_left - world_left, wy.floor - world_top,
                     source_right - source_left, 1)
-      @dest_rect.set(screen_left, sy - first_row,
+      @dest_rect.set(screen_left, target_row,
                      screen_right - screen_left, 1)
       raster.stretch_blt(@dest_rect, source, @src_rect)
     end
@@ -891,7 +956,7 @@ class Mode7Renderer
 
   def priority_strip_on_screen?(source, min_tx, ty, elevation, curve_response = 1.0,
                                 ground_raster = false)
-    return !priority_strip_raster_bounds(ty).nil? if ground_raster
+    return !priority_strip_raster_bounds(source, ty).nil? if ground_raster
     projection = priority_strip_projection(source, min_tx, ty, elevation,
                                            curve_response)
     return false if !projection
@@ -954,18 +1019,26 @@ class Mode7Renderer
         sprite.visible = false
         next
       end
-      top = sprite.y - sprite.oy * sprite.zoom_y
-      left = sprite.x - sprite.ox * sprite.zoom_x
-      right = left + sprite.bitmap.width * sprite.zoom_x
-      if top > Mode7.screen_h || sprite.y < 0 ||
-         left > Mode7.screen_w || right < 0
+      if ground_raster
+        top = sprite.y
+        bottom = top + sprite.src_rect.height * sprite.zoom_y
+        left = sprite.x
+        right = left + sprite.src_rect.width * sprite.zoom_x
+      else
+        top = sprite.y - sprite.oy * sprite.zoom_y
+        bottom = sprite.y
+        left = sprite.x - sprite.ox * sprite.zoom_x
+        right = left + sprite.bitmap.width * sprite.zoom_x
+      end
+      if top > Mode7.screen_h || bottom < 0 || left > Mode7.screen_w || right < 0
         sprite.visible = false
         next
       end
 
       bias = unify + (priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0)
       sprite.z = Mode7.depth_z((ty + 1) * Game_Map::TILE_HEIGHT, priority, bias)
-      apply_depth_fog_to_sprite(sprite, sprite.y + sprite.bitmap.height)
+      fog_y = ground_raster ? bottom : sprite.y + sprite.bitmap.height
+      apply_depth_fog_to_sprite(sprite, fog_y)
       sprite.visible = true
     end
   end
