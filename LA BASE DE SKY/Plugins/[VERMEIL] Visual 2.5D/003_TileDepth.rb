@@ -137,8 +137,11 @@ class Mode7Renderer
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
+    # @ground cuesta una pasada por scanline. Un scroll subpixel no aporta un
+    # pixel nuevo al raster, pero antes disparaba 480 stretch_blt por frame.
+    # ponytail: refresco por pixel; filtro subpixel solo si el arte deja pixel art.
     if @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
-       (@last_cam_x - cx).abs >= 1 || (@last_cam_y - cy).abs > 0.001
+       (@last_cam_x - cx).abs >= 1 || @last_cam_y.floor != cy.floor
       draw_ground
       @last_cam_x = cx
       @last_cam_y = cy
@@ -195,6 +198,7 @@ class Mode7Renderer
     end
     cache_terrain_tag_heights
     cache_visual_priorities
+    cache_wall_raster_components
     Mode7.snap_terrain_camera_lift_to_target
 
     # ponytail: conservar pila vanilla en bitmap fuente. Proyectar tres planos

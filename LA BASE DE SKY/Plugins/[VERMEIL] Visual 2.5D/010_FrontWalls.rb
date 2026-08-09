@@ -150,6 +150,40 @@ class Mode7Renderer
     entry_is_wall?(entry)
   end
 
+  # Objetos wall compactos necesitan una base comun. Si cada fila usa su
+  # borde curvo individual, arriba se solapan y abajo se separan. Componentes
+  # grandes siguen raster normal para conservar curvatura de pasillos/mapa.
+  def cache_wall_raster_components
+    cells = {}
+    @entry_cache.each do |position, entries|
+      # Una celda ElevatedWall presta su raster a las capas de ESA celda, pero
+      # corta el componente normal. Si entra aqui, su Mode7Tag/P1 conecta el
+      # ancla con walls vecinos y les contagia posicion/prioridad visual.
+      next if entries.any? { |entry| entry_is_elevated_wall?(entry) }
+      next if entries.none? { |entry|
+        entry_is_wall?(entry) && !entry_is_elevated_wall?(entry)
+      }
+      cells[position] = entries
+    end
+    return if cells.empty?
+
+    max_size = [wall_terrain_tag_heights.values.map(&:to_i).max.to_i * 2, 1].max
+    priority_volume_components(cells).each do |component|
+      xs = component.keys.map { |tx, _ty| tx }
+      ys = component.keys.map { |_tx, ty| ty }
+      next if xs.max - xs.min + 1 > max_size || ys.max - ys.min + 1 > max_size
+      anchor_ty = ys.max
+      component.each_value do |entries|
+        entries.each do |entry|
+          next if !entry_is_wall?(entry) && entry_visual_priority(entry) <= 0
+          entry[:wall_raster_anchor_ty] = anchor_ty
+        end
+      end
+    end
+    # ponytail: componentes <= reserva*2; ID de objeto si Maker Studio lo hace
+    # obligatorio para edificios contiguos mayores.
+  end
+
   # Solo los muros normales fuerzan bloqueo. ElevatedWall usa la pasabilidad
   # nativa de la escalera/suelo y puede disparar camera lift al pisarlo.
   def entry_blocks_movement?(e)
@@ -311,6 +345,7 @@ class Mode7Renderer
     @map.width.times do |tx|
       @map.height.times do |ty|
         @entry_cache[[tx, ty]].each do |entry|
+          wall_raster_entry = !entry[:wall_raster_anchor_ty].nil?
           next if !priority_surface_entry?(entry)
           hybrid = entry_hybrid_priority(entry)
           if hybrid
@@ -330,7 +365,7 @@ class Mode7Renderer
           # P1/P4 dentro de misma celda wall usa raster del plano, incluso si
           # fragmento superior no repite terrain tag. Asi P0/P1 comparten
           # scanlines sin extender logica a grass/props vecinos.
-          ground_raster = entry_uses_wall_raster?(entry)
+          ground_raster = wall_raster_entry || entry_uses_wall_raster?(entry)
           key = [entry[:unify].to_i, entry_visual_priority(entry),
                  entry_world_elevation(entry), ground_raster]
           volumes[key][[tx, ty]] ||= []
@@ -479,16 +514,22 @@ class Mode7Renderer
       previous = nil
       row.keys.sort.each do |tx|
         if previous && tx != previous + 1
+          anchor_ty = segment.values.flatten.filter_map do |entry|
+            entry[:wall_raster_anchor_ty]
+          end.max
           make_priority_strip(segment, ty, priority, unify, elevation, nil,
-                              1.0, ground_raster)
+                              1.0, ground_raster, anchor_ty)
           segment = {}
         end
         segment[tx] = row[tx]
         previous = tx
       end
       if !segment.empty?
+        anchor_ty = segment.values.flatten.filter_map do |entry|
+          entry[:wall_raster_anchor_ty]
+        end.max
         make_priority_strip(segment, ty, priority, unify, elevation, nil,
-                            1.0, ground_raster)
+                            1.0, ground_raster, anchor_ty)
       end
     end
   end
@@ -611,7 +652,8 @@ class Mode7Renderer
   # mantiene la prioridad real y evita crear/reproyectar cientos de sprites al
   # mover la camara verticalmente.
   def make_priority_strip(cells, ty, priority, unify, elevation, hybrid_mode = nil,
-                          curve_response = 1.0, ground_raster = false)
+                          curve_response = 1.0, ground_raster = false,
+                          wall_anchor_ty = nil)
     min_tx = cells.keys.min
     max_tx = cells.keys.max
     width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
@@ -628,7 +670,8 @@ class Mode7Renderer
     sprite.visible = false
     @priority_strips.push([sprite, source, min_tx, ty, priority, unify,
                            elevation, nil, cells, hybrid_mode, nil,
-                           curve_response, mountain_shadow, ground_raster])
+                           curve_response, mountain_shadow, ground_raster,
+                           wall_anchor_ty])
   end
 
   def draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow = false)
@@ -827,7 +870,11 @@ class Mode7Renderer
 
   def priority_strip_ground_row_range(ty)
     @priority_strip_row_ranges ||= {}
-    cache_key = [Mode7.projection_cam_y, Mode7.projection_revision]
+    # El plano base ya se mueve en enteros de pixel. Repetir la busqueda de
+    # filas por cada fraccion de scroll hacia que todos los P1/P4 de una casa
+    # repintaran su bitmap en cada frame.
+    # ponytail: cuantizar a pixel; subpixel solo si se requiere camara suave HD.
+    cache_key = [Mode7.projection_cam_y.floor, Mode7.projection_revision]
     if @priority_strip_row_ranges[:camera] != cache_key
       @priority_strip_row_ranges.clear
       @priority_strip_row_ranges[:camera] = cache_key
@@ -837,7 +884,11 @@ class Mode7Renderer
     world_top = ty * Game_Map::TILE_HEIGHT
     world_bottom = world_top + Game_Map::TILE_HEIGHT
     first_visible = [Mode7.horizon_row.ceil, 0].max
-    last_visible = Mode7.screen_h - 1
+    # Base de edificio puede quedar bajo viewport mientras techo aun se ve.
+    # Buscar unas filas extra evita que componente entero haga popping.
+    reserve = wall_terrain_tag_heights.values.map(&:to_i).max.to_i * 2
+    extra = [reserve * Game_Map::TILE_HEIGHT * Mode7.zoom, 0].max.ceil
+    last_visible = Mode7.screen_h - 1 + extra
     return @priority_strip_row_ranges[ty] = nil if first_visible > last_visible
     first = first_ground_row_for_world_y(world_top, first_visible, last_visible)
     return @priority_strip_row_ranges[ty] = nil if !first
@@ -847,11 +898,24 @@ class Mode7Renderer
     @priority_strip_row_ranges[ty] = [first, last]
   end
 
-  def priority_strip_raster_metrics(source, ty)
+  def priority_strip_raster_metrics(source, ty, wall_anchor_ty = nil)
     rows = priority_strip_ground_row_range(ty)
     return nil if !rows
     source_first, source_last = rows
     source_height = [source_last - source_first + 1, 1].max
+    if wall_anchor_ty
+      anchor_rows = priority_strip_ground_row_range(wall_anchor_ty)
+      return nil if !anchor_rows
+      anchor_height = [anchor_rows[1] - anchor_rows[0] + 1, 1].max
+      rigid_height = source.height * Mode7.zoom
+      rigidity = Mode7::Config::SKY_WALL_RASTER_RIGIDITY.to_f.clamp(0.0, 1.0)
+      target_height = (anchor_height + (rigid_height - anchor_height) * rigidity).round
+      target_height = [target_height, 1].max
+      target_last = anchor_rows[1] - (wall_anchor_ty - ty) * target_height
+      target_first = target_last - target_height + 1
+      return [source_first, source_last, target_first, target_last,
+              source_height, target_height]
+    end
     # ponytail: alto nativo en pantalla. El billboard direccional tambien se
     # encogia al alejarse, asi que no servia como limite de rigidez.
     rigid_height = source.height * Mode7.zoom
@@ -864,8 +928,19 @@ class Mode7Renderer
     [source_first, source_last, target_first, target_last, source_height, target_height]
   end
 
-  def priority_strip_raster_bounds(source, ty)
-    metrics = priority_strip_raster_metrics(source, ty)
+  # Estado minimo que cambia los pixeles de un strip rasterizado. La banda
+  # visible y la muestra de mundo cambian cada pixel de camara, no cada frame.
+  def priority_strip_ground_raster_state(source, ty, wall_anchor_ty = nil)
+    metrics = priority_strip_raster_metrics(source, ty, wall_anchor_ty)
+    return nil if !metrics
+    source_first, source_last, target_first, target_last, _source_height, _target_height = metrics
+    [source_first, source_last, target_first, target_last,
+     Mode7.cam_x.floor, Mode7.projection_cam_y.floor,
+     Mode7.projection_revision]
+  end
+
+  def priority_strip_raster_bounds(source, ty, wall_anchor_ty = nil)
+    metrics = priority_strip_raster_metrics(source, ty, wall_anchor_ty)
     return nil if !metrics
     _source_first, _source_last, first, last, _source_height, _target_height = metrics
     return nil if last < 0 || first >= Mode7.screen_h
@@ -875,8 +950,9 @@ class Mode7Renderer
   # P1 de wall se repinta por scanline, igual que @ground. No es un Sprite
   # con zoom: cada pixel toma misma X/Y de mundo que Mountain P0. El Sprite
   # solo aporta Z por fila para que actor quede arriba/abajo segun prioridad.
-  def redraw_ground_raster_priority_strip(sprite, source, min_tx, ty)
-    metrics = priority_strip_raster_metrics(source, ty)
+  def redraw_ground_raster_priority_strip(sprite, source, min_tx, ty,
+                                          wall_anchor_ty = nil)
+    metrics = priority_strip_raster_metrics(source, ty, wall_anchor_ty)
     return false if !metrics
     source_first, source_last, first_row, last_row, source_height, required_height = metrics
     return false if last_row < 0 || first_row >= Mode7.screen_h
@@ -896,11 +972,18 @@ class Mode7Renderer
     world_top = ty * Game_Map::TILE_HEIGHT
     world_bottom = world_top + source.height
     (0...required_height).each do |target_row|
-      source_row = source_first + ((target_row + 0.5) * source_height / required_height).floor
-      source_row = [[source_row, source_first].max, source_last].min
-      wy = Mode7.world_y_for_row(source_row)
-      next if !wy || wy < world_top || wy >= world_bottom
-      scale = Mode7.hscale(source_row)
+      if wall_anchor_ty
+        screen_row = first_row + target_row
+        source_y = ((target_row + 0.5) * source.height / required_height).floor
+        source_y = [[source_y, 0].max, source.height - 1].min
+      else
+        screen_row = source_first + ((target_row + 0.5) * source_height / required_height).floor
+        screen_row = [[screen_row, source_first].max, source_last].min
+        wy = Mode7.world_y_for_row(screen_row)
+        next if !wy || wy < world_top || wy >= world_bottom
+        source_y = wy.floor - world_top
+      end
+      scale = Mode7.hscale(screen_row)
       next if !scale || scale <= 0.001
       span = Mode7.screen_w / scale
       wx_left = Mode7.cam_x - Mode7.center_x / scale
@@ -913,7 +996,7 @@ class Mode7Renderer
       screen_left = [screen_left, 0].max
       screen_right = [screen_right, Mode7.screen_w].min
       next if screen_right <= screen_left
-      @src_rect.set(source_left - world_left, wy.floor - world_top,
+      @src_rect.set(source_left - world_left, source_y,
                     source_right - source_left, 1)
       @dest_rect.set(screen_left, target_row,
                      screen_right - screen_left, 1)
@@ -931,8 +1014,12 @@ class Mode7Renderer
   end
 
   def redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation = 0,
-                                      curve_response = 1.0, ground_raster = false)
-    return redraw_ground_raster_priority_strip(sprite, source, min_tx, ty) if ground_raster
+                                      curve_response = 1.0, ground_raster = false,
+                                      wall_anchor_ty = nil)
+    if ground_raster
+      return redraw_ground_raster_priority_strip(sprite, source, min_tx, ty,
+                                                 wall_anchor_ty)
+    end
     projection = priority_strip_projection(source, min_tx, ty, elevation,
                                            curve_response)
     return false if !projection
@@ -955,8 +1042,20 @@ class Mode7Renderer
   end
 
   def priority_strip_on_screen?(source, min_tx, ty, elevation, curve_response = 1.0,
-                                ground_raster = false)
-    return !priority_strip_raster_bounds(source, ty).nil? if ground_raster
+                                ground_raster = false, wall_anchor_ty = nil)
+    if ground_raster
+      rows = priority_strip_raster_bounds(source, ty, wall_anchor_ty)
+      return false if !rows
+      screen_y = (rows[0] + rows[1]) / 2.0
+      scale = Mode7.hscale(screen_y)
+      return false if !scale || scale <= 0.001
+      world_left = min_tx * Game_Map::TILE_WIDTH
+      screen_left = Mode7.center_x + (world_left - Mode7.cam_x) * scale
+      screen_right = screen_left + source.width * scale
+      # ponytail: bounds AABB por strip; clip por scanline solo si X deja de
+      # ser lineal. Evita rasterizar walls totalmente fuera del viewport.
+      return screen_right >= 0 && screen_left <= Mode7.screen_w
+    end
     projection = priority_strip_projection(source, min_tx, ty, elevation,
                                            curve_response)
     return false if !projection
@@ -977,7 +1076,8 @@ class Mode7Renderer
 
     @priority_strips.each do |data|
       sprite, source, min_tx, ty, priority, unify, elevation, _projection_key, _cells,
-      hybrid_mode, state, curve_response, _mountain_shadow, ground_raster = data
+      hybrid_mode, state, curve_response, _mountain_shadow, ground_raster,
+      wall_anchor_ty = data
       hybrid_active = hybrid_mode && hybrid_row_priority_active?(1, ty)
       if hybrid_mode == :hybrid_top && !hybrid_active
         sprite.visible = false
@@ -992,27 +1092,38 @@ class Mode7Renderer
         next
       end
       if !priority_strip_on_screen?(source, min_tx, ty, elevation, curve_response,
-                                    ground_raster)
+                                    ground_raster, wall_anchor_ty)
         sprite.visible = false
         next
       end
 
-      # Debe usar umbral IDENTICO a @ground: este se redibuja cada 1 px X y
-      # cada cambio Y. Reproyectar/mover antes desalineaba tall grass del suelo.
-      needs_projection = !state ||
-                         (Mode7.cam_x - state[0]).abs >= 1.0 ||
-                         (Mode7.cam_y - state[1]).abs > 0.001 ||
-                         state[2].nil? ||
-                         (Mode7.projection_cam_y - state[2]).abs > 0.001 ||
-                         state[3] != Mode7.projection_revision
+      # P1/P4 raster comparte las scanlines de Mountain, pero no debe crear un
+      # bitmap nuevo por cada 0.25 px del paso del jugador. Los strips normales
+      # conservan la ruta de proyeccion exacta.
+      raster_state = if ground_raster
+                       priority_strip_ground_raster_state(source, ty,
+                                                         wall_anchor_ty)
+                     end
+      needs_projection = if ground_raster
+                           !raster_state || state != raster_state
+                         else
+                           !state ||
+                             (Mode7.cam_x - state[0]).abs >= 1.0 ||
+                             (Mode7.cam_y - state[1]).abs > 0.001 ||
+                             state[2].nil? ||
+                             (Mode7.projection_cam_y - state[2]).abs > 0.001 ||
+                             state[3] != Mode7.projection_revision
+                         end
       if needs_projection
         if !redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation,
-                                            curve_response, ground_raster)
+                                            curve_response, ground_raster,
+                                            wall_anchor_ty)
           sprite.visible = false
           next
         end
-        data[10] = [Mode7.cam_x, Mode7.cam_y, Mode7.projection_cam_y,
-                    Mode7.projection_revision]
+        data[10] = ground_raster ? raster_state :
+                    [Mode7.cam_x, Mode7.cam_y, Mode7.projection_cam_y,
+                     Mode7.projection_revision]
         state = data[10]
       end
       if !sprite.bitmap || sprite.bitmap.disposed?
