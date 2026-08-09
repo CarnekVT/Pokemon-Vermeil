@@ -93,6 +93,10 @@ module Compiler
   # PBS file readers
   #=============================================================================
   def pbEachFileSectionEx(f, schema = nil)
+    if File.extname(f.path).downcase == ".json"
+      pbEachJSONFileSection(f, schema) { |section, name| yield section, name }
+      return
+    end
     lineno      = 1
     havesection = false
     sectionname = nil
@@ -132,6 +136,123 @@ module Compiler
       Graphics.update if lineno % 1000 == 0
     end
     yield lastsection, sectionname if havesection
+  end
+
+  #=============================================================================
+  # JSON PBS support
+  #
+  # A .json PBS file is parsed once into native Ruby values, then every field
+  # value is stringified into the same CSV-style token that get_csv_record
+  # already parses from a .txt line. This means every schema-driven .txt
+  # reader (pbEachFileSection/pbEachFileSectionNumbered, and therefore every
+  # compile_XXX that uses them) gains .json support for free, and both
+  # formats run through the exact same field coercion/validation code.
+  #=============================================================================
+  def pbLoadJSONFile(filename)
+    json_text = File.open(filename, "rb") { |f| f.read }
+    if json_text.bytesize >= 3 && json_text.getbyte(0) == 0xEF &&
+       json_text.getbyte(1) == 0xBB && json_text.getbyte(2) == 0xBF
+      json_text = json_text.byteslice(3, json_text.bytesize - 3)
+    end
+    json_text.force_encoding(Encoding::UTF_8)
+    begin
+      return HTTPLite::JSON.parse(json_text)
+    rescue MKXPError, StandardError => e
+      raise _INTL("Error de sintaxis JSON en {1}:\n{2}", filename, e.message)
+    end
+  end
+
+  def pbEachJSONFileSection(f, schema)
+    data = pbLoadJSONFile(f.path)
+    if !data.is_a?(Hash)
+      raise _INTL("El archivo JSON {1} debe contener un objeto en la raíz (keyed por ID de sección), no un {2}.", f.path, data.class)
+    end
+    data.each do |section_name, fields|
+      if !fields.is_a?(Hash)
+        raise _INTL("La sección '{1}' en {2} debe ser un objeto JSON.\n", section_name, f.path)
+      end
+      contents = {}
+      fields.each do |key, value|
+        next if value.nil?
+        fmt = (schema && schema[key]) ? schema[key][1] : nil
+        raw = ["q", "Q", "^q", "^Q"].include?(fmt)
+        if fmt && fmt[0] == "^"
+          if !value.is_a?(Array)
+            raise _INTL("El campo '{1}' de la sección '{2}' en {3} es repetible y debe ser un array JSON.", key, section_name, f.path)
+          end
+          contents[key] = value.map { |row| json_value_to_csv_token(row, raw: raw) }
+        else
+          if STAT_SEXTET_FORMATS.include?(fmt) && value.is_a?(Hash)
+            contents[key] = stat_hash_to_csv_token(value, f.path, key)
+          elsif ARRAY_OF_OBJECTS_FORMATS.key?(fmt) && value.is_a?(Array) && value.all? { |row| row.is_a?(Hash) } && !value.empty?
+            contents[key] = array_of_objects_to_csv_token(value, ARRAY_OF_OBJECTS_FORMATS[fmt], f.path, key)
+          else
+            contents[key] = json_value_to_csv_token(value, raw: raw)
+          end
+        end
+      end
+      yield contents, section_name
+    end
+  end
+
+  def json_value_to_csv_token(value, raw: false)
+    return value.map { |v| json_scalar_to_csv_token(v, raw: raw) }.join(",") if value.is_a?(Array)
+    return json_scalar_to_csv_token(value, raw: raw)
+  end
+
+  def json_scalar_to_csv_token(value, raw: false)
+    return "" if value.nil?
+    # JSON has no int/float distinction on the wire, so a whole number like
+    # BaseStats' 90 round-trips through the parser as a Float 90.0. Render
+    # whole floats without the decimal so integer-format schema fields
+    # ("u"/"v"/"i"...) get "90", not "90.0" (which fails their regex).
+    value = value.to_i if value.is_a?(Float) && value == value.to_i
+    return value.to_s if raw
+    return csvQuote(value.to_s)
+  end
+
+  # A "stat sextet" field (BaseStats, IV, EV) may be given as a JSON object
+  # keyed by the real GameData::Stat id ("HP", "ATTACK", "DEFENSE",
+  # "SPECIAL_ATTACK", "SPECIAL_DEFENSE", "SPEED") instead of a positional
+  # array, since the PBS on-disk order (Speed is 4th, not last) is easy to
+  # get wrong by hand. All 6 keys are required — no silent defaulting.
+  STAT_SEXTET_FORMATS = ["vvvvvv", "uUUUUU"].freeze
+
+  # A "*"-repeated multi-field value (Species/pokemon_forms level-up Moves,
+  # Evolutions) may be given as an array of named objects instead of one
+  # fully-flattened array, since remembering "which position is which field"
+  # across N repetitions is error-prone. All keys per object are required.
+  ARRAY_OF_OBJECTS_FORMATS = {
+    "*ie"  => ["level", "move"],
+    "*ees" => ["species", "method", "parameter"],
+    "*ses" => ["species", "method", "parameter"]
+  }.freeze
+
+  def array_of_objects_to_csv_token(value, keys, filename, field_label)
+    tokens = value.flat_map do |row|
+      if !row.is_a?(Hash)
+        raise _INTL("Cada elemento de '{1}' en {2} debe ser un objeto JSON con las claves {3}.", field_label, filename, keys.join(", "))
+      end
+      missing = keys.reject { |k| row.key?(k) }
+      if !missing.empty?
+        raise _INTL("A un elemento de '{1}' en {2} le falta la clave '{3}'.", field_label, filename, missing.first)
+      end
+      keys.map { |k| json_scalar_to_csv_token(row[k]) }
+    end
+    return tokens.join(",")
+  end
+
+  def stat_hash_to_csv_token(value, filename, field_label)
+    ordered = []
+    GameData::Stat.each_main do |s|
+      next if s.pbs_order < 0
+      key = s.id.to_s
+      if !value.key?(key)
+        raise _INTL("Al campo de stats '{1}' en {2} le falta la clave '{3}'.", field_label, filename, key)
+      end
+      ordered[s.pbs_order] = value[key]
+    end
+    return ordered.map { |v| json_scalar_to_csv_token(v) }.join(",")
   end
 
   # Used for types.txt, abilities.txt, moves.txt, items.txt, berry_plants.txt,
@@ -196,6 +317,15 @@ module Compiler
 
   # Used for town_map.txt and Battle Tower Pokémon PBS files
   def pbCompilerEachCommentedLine(filename)
+    if File.extname(filename).downcase == ".json"
+      FileLineData.file = filename
+      lines = json_lines_for_battle_tower_pokemon(filename)
+      lines.each_with_index do |line, i|
+        FileLineData.setLine(line, i + 1)
+        yield line, i + 1
+      end
+      return
+    end
     File.open(filename, "rb") do |f|
       FileLineData.file = filename
       lineno = 1
@@ -210,6 +340,24 @@ module Compiler
         end
         lineno += 1
       end
+    end
+  end
+
+  # Converts battle_tower_pokemon.json into the same
+  # "Species;Item;Nature;EV1,EV2;Move1,Move2,Move3,Move4" lines that
+  # PBPokemon.fromInspected already parses (see 054_Battle Frontier/003).
+  def json_lines_for_battle_tower_pokemon(filename)
+    data = pbLoadJSONFile(filename)
+    if !data.is_a?(Array)
+      raise _INTL("El archivo {1} debe contener un array JSON de Pokémon.", filename)
+    end
+    return data.map do |pkmn|
+      if !pkmn.is_a?(Hash) || !pkmn["species"]
+        raise _INTL("Cada Pokémon en {1} necesita al menos 'species'.", filename)
+      end
+      ev_list = Array(pkmn["ev"]).join(",")
+      moves_list = Array(pkmn["moves"]).join(",")
+      [pkmn["species"], pkmn["item"], pkmn["nature"], ev_list, moves_list].map { |v| v.to_s }.join(";")
     end
   end
 
@@ -227,9 +375,35 @@ module Compiler
     end
   end
 
+  # Maps a PBS base filename (without extension/suffix) to the method that
+  # converts its .json contents into the same already-"prepped" line strings
+  # the .txt parser below already knows how to consume line by line. Each
+  # compile_XXX that reads via pbCompilerEachPreppedLine keeps its exact
+  # existing per-line parsing/validation untouched.
+  JSON_PREPPED_LINE_CONVERTERS = {
+    "map_connections" => :json_lines_for_map_connections,
+    "regional_dexes"  => :json_lines_for_regional_dexes,
+    "encounters"      => :json_lines_for_encounters,
+    "trainers"        => :json_lines_for_trainers
+  }
+
   # Used for map_connections.txt, phone.txt, regional_dexes.txt, encounters.txt,
   # trainers.txt and dungeon_tilesets.txt
   def pbCompilerEachPreppedLine(filename)
+    if File.extname(filename).downcase == ".json"
+      base_name = File.basename(filename, ".json")
+      converter_key = JSON_PREPPED_LINE_CONVERTERS.keys.find { |k| base_name == k || base_name.start_with?(k + "_") }
+      if !converter_key
+        raise _INTL("No hay soporte JSON implementado todavía para el archivo {1}.", filename)
+      end
+      FileLineData.file = filename
+      lines = send(JSON_PREPPED_LINE_CONVERTERS[converter_key], filename)
+      lines.each_with_index do |line, i|
+        FileLineData.setLine(line, i + 1)
+        yield line, i + 1
+      end
+      return
+    end
     File.open(filename, "rb") do |f|
       FileLineData.file = filename
       lineno = 1
@@ -246,6 +420,131 @@ module Compiler
         lineno += 1
       end
     end
+  end
+
+  # Cada fila es [MapID1, Lado1, Offset1, MapID2, Lado2, Offset2] — mismo orden
+  # que las columnas de map_connections.txt (schema "iyiiyi" de compile_connections).
+  # Ejemplo real: [41, "N", 0, 40, "S", 0].
+  # También soporta objeto: {"map1":41,"side1":"N","offset1":0,"map2":40,"side2":"S","offset2":0}
+  def json_lines_for_map_connections(filename)
+    data = pbLoadJSONFile(filename)
+    if !data.is_a?(Array)
+      raise _INTL("El archivo {1} debe contener un array JSON de filas de conexión.", filename)
+    end
+    keys = ["map1", "side1", "offset1", "map2", "side2", "offset2"]
+    return data.map do |row|
+      if row.is_a?(Hash)
+        missing = keys.reject { |k| row.key?(k) }
+        if !missing.empty?
+          raise _INTL("A una conexión en {1} le falta la clave '{2}'.", filename, missing.first)
+        end
+        keys.map { |k| json_scalar_to_csv_token(row[k]) }.join(",")
+      elsif row.is_a?(Array)
+        row.map { |v| json_scalar_to_csv_token(v) }.join(",")
+      else
+        raise _INTL("Cada conexión en {1} debe ser un array o un objeto JSON.", filename)
+      end
+    end
+  end
+
+
+  def json_lines_for_regional_dexes(filename)
+    data = pbLoadJSONFile(filename)
+    if !data.is_a?(Hash)
+      raise _INTL("El archivo {1} debe contener un objeto JSON keyed por número de Pokédex.", filename)
+    end
+    lines = []
+    data.each do |dex_number, species_list|
+      if !species_list.is_a?(Array)
+        raise _INTL("La lista de la Pokédex {1} en {2} debe ser un array JSON de especies.", dex_number, filename)
+      end
+      lines.push("[#{dex_number}]")
+      lines.push(species_list.map { |s| json_scalar_to_csv_token(s) }.join(","))
+    end
+    return lines
+  end
+
+  def json_lines_for_encounters(filename)
+    data = pbLoadJSONFile(filename)
+    if !data.is_a?(Hash)
+      raise _INTL("El archivo {1} debe contener un objeto JSON keyed por \"MapID_Version\".", filename)
+    end
+    lines = []
+    data.each do |map_key, types|
+      if !types.is_a?(Hash)
+        raise _INTL("Los datos del mapa '{1}' en {2} deben ser un objeto JSON.", map_key, filename)
+      end
+      map_id, version = map_key.to_s.split("_", 2)
+      version ||= "0"
+      lines.push("[#{map_id},#{version}]")
+      types.each do |type_name, slots|
+        next if type_name.to_s.end_with?("_chance")   # Ya se consume junto a su tipo base, abajo
+        if !slots.is_a?(Array)
+          raise _INTL("Los slots del tipo de encuentro '{1}' del mapa '{2}' en {3} deben ser un array JSON.", type_name, map_key, filename)
+        end
+        chance = types["#{type_name}_chance"]
+        lines.push(chance ? "#{type_name},#{chance}" : type_name.to_s)
+        slots.each do |slot|
+          if slot.is_a?(Hash)
+            if !slot.key?("chance") || !slot.key?("species") || !slot.key?("min_level")
+              raise _INTL("A un slot de '{1}' del mapa '{2}' en {3} le falta 'chance', 'species' o 'min_level'.", type_name, map_key, filename)
+            end
+            max_level = slot.key?("max_level") ? slot["max_level"] : slot["min_level"]
+            row = [slot["chance"], slot["species"], slot["min_level"], max_level]
+          elsif slot.is_a?(Array) && slot.length >= 3
+            row = slot
+          else
+            raise _INTL("Cada slot de '{1}' del mapa '{2}' en {3} debe ser [chance, especie, nivel_min, nivel_max?] o un objeto JSON con esas claves.", type_name, map_key, filename)
+          end
+          lines.push(row.map { |v| json_scalar_to_csv_token(v) }.join(","))
+        end
+      end
+    end
+    return lines
+  end
+
+  def json_lines_for_trainers(filename)
+    data = pbLoadJSONFile(filename)
+    if !data.is_a?(Hash)
+      raise _INTL("El archivo {1} debe contener un objeto JSON keyed por \"Tipo,Nombre,Version\".", filename)
+    end
+    lines = []
+    data.each do |trainer_key, fields|
+      if !fields.is_a?(Hash)
+        raise _INTL("Los datos del entrenador '{1}' en {2} deben ser un objeto JSON.", trainer_key, filename)
+      end
+      parts = trainer_key.to_s.split(",")
+      if parts.length < 2 || parts.length > 3
+        raise _INTL("La clave del entrenador '{1}' en {2} debe tener el formato \"Tipo,Nombre\" o \"Tipo,Nombre,Version\".", trainer_key, filename)
+      end
+      parts.push("0") if parts.length < 3
+      lines.push("[#{parts.join(",")}]")
+      pokemon_list = fields["Pokemon"]
+      fields.each do |key, value|
+        next if key == "Pokemon"
+        raw = (key == "LoseText" || key == "LoseText_F")
+        lines.push("#{key} = #{json_value_to_csv_token(value, raw: raw)}")
+      end
+      next if !pokemon_list
+      if !pokemon_list.is_a?(Array)
+        raise _INTL("'Pokemon' del entrenador '{1}' en {2} debe ser un array JSON.", trainer_key, filename)
+      end
+      pokemon_list.each do |pkmn|
+        if !pkmn.is_a?(Hash) || !pkmn["Species"] || !pkmn["Level"]
+          raise _INTL("Cada Pokémon del entrenador '{1}' en {2} necesita al menos 'Species' y 'Level'.", trainer_key, filename)
+        end
+        lines.push("Pokemon = #{json_scalar_to_csv_token(pkmn["Species"])},#{json_scalar_to_csv_token(pkmn["Level"])}")
+        pkmn.each do |key, value|
+          next if key == "Species" || key == "Level"
+          if (key == "IV" || key == "EV") && value.is_a?(Hash)
+            lines.push("#{key} = #{stat_hash_to_csv_token(value, filename, key)}")
+          else
+            lines.push("#{key} = #{json_value_to_csv_token(value)}")
+          end
+        end
+      end
+    end
+    return lines
   end
 
   #=============================================================================
@@ -922,7 +1221,7 @@ module Compiler
   # Replace text in PBS files before compiling them
   #=============================================================================
   def edit_and_rewrite_pbs_file_text(filename)
-    return if !block_given?
+    return if !block_given? || !FileTest.exist?(filename)
     lines = []
     File.open(filename, "rb") do |f|
       f.each_line { |line| lines.push(line) }
@@ -977,8 +1276,19 @@ module Compiler
     # their base filenames
     text_files_keys = ret.keys.sort! { |a, b| ret[b][0].length <=> ret[a][0].length }
     Dir.chdir("PBS/") do
-      Dir.glob("*.txt") do |f|
-        base_name = File.basename(f, ".txt")
+      # Dir.glob's order isn't guaranteed alphabetical (filesystem-dependent),
+      # but additional/suffixed files (pokemon_custom.txt, pokemon_AAA.txt,
+      # pokemon_custom_001.txt...) must load in a predictable order so later
+      # files can override earlier ones. Sort case-insensitively; since "."
+      # (0x2E) sorts before "_" (0x5F) and any letter/digit, the base file
+      # (pokemon.txt) always loads before any pokemon_XXX suffix variant.
+      all_files = Dir.glob(["*.txt", "*.json"]).sort_by { |f| f.downcase }
+      # A .txt always wins over a .json with the same base name
+      txt_basenames = all_files.select { |f| File.extname(f).downcase == ".txt" }
+                               .map { |f| File.basename(f, ".txt") }
+      all_files.each do |f|
+        next if File.extname(f).downcase == ".json" && txt_basenames.include?(File.basename(f, ".json"))
+        base_name = File.basename(f, File.extname(f))
         text_files_keys.each do |key|
           next if base_name != ret[key][0] && !f.start_with?(ret[key][0] + "_")
           ret[key][1] ||= []

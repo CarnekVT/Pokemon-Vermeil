@@ -12,7 +12,7 @@ module Compiler
       compile_pbs_file_message_start(path)
       base_filename = game_data::PBS_BASE_FILENAME
       base_filename = base_filename[0] if base_filename.is_a?(Array)   # For Species
-      file_suffix = File.basename(path, ".txt")[base_filename.length + 1, path.length] || ""
+      file_suffix = File.basename(path, File.extname(path))[base_filename.length + 1, path.length] || ""
       File.open(path, "rb") do |f|
         FileLineData.file = path   # For error reporting
         # Read a whole section's lines at once, then run through this code.
@@ -422,7 +422,7 @@ module Compiler
     # Read from PBS file(s)
     paths.each do |path|
       compile_pbs_file_message_start(path)
-      file_suffix = File.basename(path, ".txt")[GameData::Species::PBS_BASE_FILENAME[1].length + 1, path.length] || ""
+      file_suffix = File.basename(path, File.extname(path))[GameData::Species::PBS_BASE_FILENAME[1].length + 1, path.length] || ""
       File.open(path, "rb") do |f|
         FileLineData.file = path   # For error reporting
         # Read a whole section's lines at once, then run through this code.
@@ -636,7 +636,7 @@ module Compiler
     dex_file_suffixes = {}
     paths.each do |path|
       compile_pbs_file_message_start(path)
-      file_suffix = File.basename(path, ".txt")["regional_dexes".length + 1, path.length] || ""
+      file_suffix = File.basename(path, File.extname(path))["regional_dexes".length + 1, path.length] || ""
       section = nil
       pbCompilerEachPreppedLine(path) do |line, line_no|
         Graphics.update if line_no % 200 == 0
@@ -706,7 +706,7 @@ module Compiler
     max_level = GameData::GrowthRate.max_level
     paths.each do |path|
       compile_pbs_file_message_start(path)
-      file_suffix = File.basename(path, ".txt")[GameData::Encounter::PBS_BASE_FILENAME.length + 1, path.length] || ""
+      file_suffix = File.basename(path, File.extname(path))[GameData::Encounter::PBS_BASE_FILENAME.length + 1, path.length] || ""
       encounter_hash = nil
       step_chances   = nil
       current_type   = nil
@@ -846,7 +846,7 @@ module Compiler
     # Read from PBS file(s)
     paths.each do |path|
       compile_pbs_file_message_start(path)
-      file_suffix = File.basename(path, ".txt")[GameData::Trainer::PBS_BASE_FILENAME.length + 1, path.length] || ""
+      file_suffix = File.basename(path, File.extname(path))[GameData::Trainer::PBS_BASE_FILENAME.length + 1, path.length] || ""
       data_hash = nil
       current_pkmn = nil
       section_name = nil
@@ -1017,7 +1017,8 @@ module Compiler
   #=============================================================================
   # Compile Battle Tower and other Cups trainers/Pokémon
   #=============================================================================
-  def compile_trainer_lists(path = "PBS/battle_facility_lists.txt")
+  def compile_trainer_lists(path = nil)
+    path ||= FileTest.exist?("PBS/battle_facility_lists.txt") ? "PBS/battle_facility_lists.txt" : "PBS/battle_facility_lists.json"
     compile_pbs_file_message_start(path)
     btTrainersRequiredTypes = {
       "Trainers"   => [0, "s"],
@@ -1143,7 +1144,7 @@ module Compiler
     player_schema = GameData::PlayerMetadata.schema
     paths.each do |path|
       compile_pbs_file_message_start(path)
-      file_suffix = File.basename(path, ".txt")[GameData::Metadata::PBS_BASE_FILENAME.length + 1, path.length] || ""
+      file_suffix = File.basename(path, File.extname(path))[GameData::Metadata::PBS_BASE_FILENAME.length + 1, path.length] || ""
       # Read from PBS file
       File.open(path, "rb") do |f|
         FileLineData.file = path   # For error reporting
