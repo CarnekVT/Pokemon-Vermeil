@@ -572,6 +572,27 @@ module Mode7
       result
     end
 
+    # Mountains/Ladders desplazan la camara y el terreno, no los OW. El paso
+    # diagonal de LaddersSide ya cambia las coordenadas reales del personaje,
+    # por eso sigue viendose diagonal sin heredar el lift de camara.
+    def overworld_project_y(wy, elevation = 0)
+      return project_y(wy, elevation) if !sky_mode? || terrain_camera_vertical_lift.abs < 0.001
+      scale = sky_angle_scale
+      return wy - cam_y - elevation if scale <= 0.0
+
+      theta = ((wy.to_f - cam_y - pivot_y) * @zoom * scale * sky_ground_y_scale) /
+              @planet_radius
+      pivot_y + (@planet_radius * sky_curve(theta)) -
+        elevation.to_f * vertical_scale_for_world_y(wy)
+    end
+
+    # ponytail: z de OW comparte su Y sin lift. Prioridad por tile conserva
+    # depth_z normal para suelo/walls; mezclar ambos canales reintroduce popping.
+    def overworld_depth_z(wy, height = 0)
+      return depth_z(wy, 0, height) if !sky_mode? || terrain_camera_vertical_lift.abs < 0.001
+      overworld_project_y(wy, 0).round + height.to_i
+    end
+
     def _sky_project_y(wy, elevation = 0)
       scale = sky_angle_scale
       # Sin angulo Sky no hay profundidad que levantar; mantener coordenadas

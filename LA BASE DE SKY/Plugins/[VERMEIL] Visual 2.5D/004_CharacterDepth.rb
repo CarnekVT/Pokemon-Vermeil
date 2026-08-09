@@ -22,18 +22,15 @@ class Game_Character
 
   def screen_y_ground
     return _VERMEIL_25D_orig_screen_y_ground if !mode7_active_for_self?
-    wx = @real_x.to_f / Game_Map::X_SUBPIXELS
     wy = mode7_world_y_ground
-    pr = Mode7.project(wx, wy, 0)
-    return 100_000 if !pr
-    return pr[1].round
+    return Mode7.overworld_project_y(wy, 0).round
   end
 
   def screen_z(height = 0)
     if mode7_active_for_self?
       return _VERMEIL_25D_orig_screen_z(height) if @always_on_top
       wy = mode7_world_y_ground
-      return Mode7.depth_z(wy, 0, height)
+      return Mode7.overworld_depth_z(wy, height)
     end
     _VERMEIL_25D_orig_screen_z(height)
   end

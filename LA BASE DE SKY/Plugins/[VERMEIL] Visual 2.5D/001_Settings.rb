@@ -297,7 +297,7 @@ module Mode7
     # vertical virtual: cambia profundidad/escala sin tocar cam_y real ni
     # coordenadas de colision.
     TERRAIN_TAG_CAMERA_LIFT = {
-      :Mountains => 24,
+      :Mountains => 50,
       :Ladders => 12,
       :LaddersSide => 8
 
