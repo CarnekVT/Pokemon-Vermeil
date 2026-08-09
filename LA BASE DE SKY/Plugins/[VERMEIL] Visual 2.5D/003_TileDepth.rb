@@ -353,11 +353,13 @@ class Mode7Renderer
   end
 
   # Volumen pertenece al tile con terrain tag de wall, no a toda su celda.
-  # Un prop de otra layer sobre Mountains/Mode7Tag conserva su propia prioridad
-  # y no termina absorbido por el bitmap ni la Z del muro.
+  # ElevatedWall (Mountains/escaleras) sigue siendo suelo: su P0 se rasteriza
+  # junto al mapa completo. Asi no abre una junta de 32 px por cada fila.
+  # Un prop de otra layer conserva prioridad propia.
   def ground_entries_for_cell(tx, ty, entries)
     entries.reject do |entry|
-      entry_is_wall?(entry) || priority_surface_entry?(entry) || interior_border_entry?(entry)
+      physical_wall = entry_is_wall?(entry) && !entry_is_elevated_wall?(entry)
+      physical_wall || priority_surface_entry?(entry) || interior_border_entry?(entry)
     end
   end
 

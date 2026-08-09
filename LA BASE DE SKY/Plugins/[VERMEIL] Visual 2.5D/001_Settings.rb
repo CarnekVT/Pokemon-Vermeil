@@ -184,10 +184,6 @@ module Mode7
     # redondeo al proyectar dos tiles que comparten borde.
     SKY_WALL_ROW_OVERLAP = 1.0
 
-    # P0 de un wall grande: base usa Y vanilla de su celda inferior; alto
-    # mezcla tramo top-bottom de Sky. 0.0 = billboard puro; 1.0 = tramo suelo.
-    SKY_WALL_COMPONENT_CURVE_RESPONSE = 0.25
-
     # Personajes/OW conservan escala fija: NPCs, followers y eventos no crecen
     # ni encogen al recorrer la curvatura.
     SKY_SPRITE_SCALE = 0.0

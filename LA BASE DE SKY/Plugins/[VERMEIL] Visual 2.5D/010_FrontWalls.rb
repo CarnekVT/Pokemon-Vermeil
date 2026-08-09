@@ -223,7 +223,9 @@ class Mode7Renderer
   def priority_surface_entry?(e)
     return false if !Mode7::Config::PRIORITY_SURFACES
     return false if interior_border_entry?(e)
-    return false if entry_is_wall?(e)
+    # Mountains/escaleras son suelo elevado, no caras verticales. Su P0 queda
+    # en el raster del mapa y su P1+ se separa solo para conservar su Z.
+    return false if entry_is_wall?(e) && !entry_is_elevated_wall?(e)
     return true if entry_hybrid_priority(e)
     # Muros ya se dibujan como volumen. Promoverlos a priority surface los
     # saca de ese volumen y rompe capas vecinas/props superiores.
@@ -285,7 +287,6 @@ class Mode7Renderer
     # Solo un wall bloqueante puede ser pieza rigida P0/P1. Mountains y las
     # escaleras son ElevatedWall: conservan celda propia y no absorben vecinos.
     rigid_walls = Hash.new { |hash, key| hash[key] = {} }
-    elevated_rows = Hash.new { |hash, key| hash[key] = {} }
     loose_bases = Hash.new { |hash, key| hash[key] = [] }
     loose_tops = Hash.new { |hash, key| hash[key] = [] }
     @map.width.times do |tx|
@@ -298,11 +299,10 @@ class Mode7Renderer
         direct_walls.each do |entry|
           priority = entry_visual_priority(entry)
           if entry_is_elevated_wall?(entry)
-            # ponytail: fila/celda, no malla. Una malla solo hace falta si Maker
-            # Studio expone vertices de relieve para cada tile.
-            key = [priority, entry[:unify].to_i, entry_world_elevation(entry)]
-            elevated_rows[key][[tx, ty]] ||= []
-            elevated_rows[key][[tx, ty]].push(entry)
+            # ponytail: Mountains/escaleras P0 permanecen en @ground. Raster
+            # unico comparte bordes y evita cortes entre filas al desplazarse.
+            # P1+ entra luego por build_priority_surfaces con misma proyeccion.
+            next
           elsif entry_blocks_movement?(entry)
             tag = terrain_tag_for_entry(entry)
             key = [tag ? tag.id : :None, entry_world_elevation(entry)]
@@ -317,10 +317,6 @@ class Mode7Renderer
       rescue Exception
         Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
       end
-    end
-    elevated_rows.each do |(_priority, _unify, elevation), cells|
-      make_cell_locked_priority_strips(cells, elevation,
-                                       Mode7::Config::SKY_WALL_CURVE_RESPONSE)
     end
     rigid_walls.each do |(_tag_id, elevation), cells|
       used_base_entries = {}
@@ -720,8 +716,7 @@ class Mode7Renderer
     end
     by_priority.each do |(priority, unify), priority_cells|
       make_priority_volume(priority_cells, unify, priority, elevation, bounds,
-                           Mode7::Config::SKY_WALL_COMPONENT_CURVE_RESPONSE,
-                           true)
+                           0.0, true)
     end
   end
 
@@ -784,21 +779,19 @@ class Mode7Renderer
   def redraw_projected_priority_surface(sprite, source, wx, wyb, elevation = 0,
                                         curve_response = 0.0, wall_component = false)
     return false if !source || source.disposed?
+    return redraw_projected_wall_surface(sprite, source, wx, wyb, elevation) if wall_component
+
     projected = Mode7.project_billboard(wx, wyb, elevation)
     return false if !projected
     scale_x = Mode7.tile_billboard_scale_for_world_y(wyb)
     return false if !scale_x || scale_x <= 0
-    if wall_component
-      scale_y = wall_component_scale_y(wyb, source.height, elevation, scale_x)
-    else
-      response = curve_response.to_f.clamp(0.0, 1.0)
-      scale_y = scale_x
-      if response > 0.0
-        top = Mode7.project_y(wyb - source.height, elevation)
-        curve_scale = top ? (projected[1] - top) / source.height.to_f : scale_x
-        curve_scale = scale_x if curve_scale <= 0.001
-        scale_y += (curve_scale - scale_y) * response
-      end
+    response = curve_response.to_f.clamp(0.0, 1.0)
+    scale_y = scale_x
+    if response > 0.0
+      top = Mode7.project_y(wyb - source.height, elevation)
+      curve_scale = top ? (projected[1] - top) / source.height.to_f : scale_x
+      curve_scale = scale_x if curve_scale <= 0.001
+      scale_y += (curve_scale - scale_y) * response
     end
     sprite.bitmap = source if sprite.bitmap != source
     sprite.ox = source.width / 2.0
@@ -807,6 +800,26 @@ class Mode7Renderer
     sprite.y = projected[1]
     sprite.zoom_x = scale_x
     sprite.zoom_y = scale_y
+    true
+  end
+
+  # Wall y sus bandas P1-P4 deben usar transformacion del MAPA, no la de un
+  # overworld billboard. Comparten base, escala y bounds; priority solo cambia
+  # Z. Mezclar project_billboard con project movia P1 lateralmente al variar la
+  # perspectiva conica y separaba barriles, techos y arboles.
+  def redraw_projected_wall_surface(sprite, source, wx, wyb, elevation = 0)
+    projected = Mode7.project(wx, wyb, elevation)
+    return false if !projected
+    scale = Mode7.hscale(projected[1])
+    return false if !scale || scale <= 0.001
+
+    sprite.bitmap = source if sprite.bitmap != source
+    sprite.ox = source.width / 2.0
+    sprite.oy = source.height
+    sprite.x = projected[0]
+    sprite.y = projected[1]
+    sprite.zoom_x = scale
+    sprite.zoom_y = scale
     true
   end
 
@@ -1070,21 +1083,6 @@ class Mode7Renderer
     end
   end
 
-  # Ancla hibrida P0: el borde inferior queda en su celda Sky real, mientras
-  # alto toma una parte de la distancia top-bottom del mapa. Asi el bloque no
-  # se pega al player como billboard ni se vuelve una tira de tiles sueltos.
-  def wall_component_scale_y(wyb, height, elevation, billboard_scale)
-    return billboard_scale if !Mode7.sky_mode? || height <= 0
-    top = Mode7.project_y(wyb - height, elevation)
-    bottom = Mode7.project_y(wyb, elevation)
-    return billboard_scale if !top || !bottom
-    ground_scale = (bottom - top) / height.to_f
-    return billboard_scale if ground_scale <= 0.001
-    ground_scale = billboard_scale if ground_scale < billboard_scale
-    response = Mode7::Config::SKY_WALL_COMPONENT_CURVE_RESPONSE.to_f.clamp(0.0, 1.0)
-    billboard_scale + ((ground_scale - billboard_scale) * response)
-  end
-
   # ---------------------------------------------------------------------------
   # Muros fisicos
   # ---------------------------------------------------------------------------
@@ -1110,22 +1108,24 @@ class Mode7Renderer
         next
       end
 
-      pr = Mode7.project_billboard(wx, wyb, 0)
+      # Misma proyeccion que @ground. Nunca usar la escala/posicion de OW para
+      # tiles del mapa: esa diferencia era arrastre vertical/lateral al caminar.
+      pr = Mode7.project(wx, wyb, elevation)
       if !pr
         sprite.visible = false
         next
       end
       sx, syb = pr
 
-      # Columna simple conserva proporcion. Componente P0 conserva X de wall,
-      # pero usa alto hibrido para coincidir mejor con tramo vertical Sky.
-      k = Mode7.tile_billboard_scale_for_world_y(wyb)
+      k = Mode7.hscale(syb)
       if !k || k <= 0
         sprite.visible = false
         next
       end
 
-      scale_y = entries.is_a?(Hash) ? wall_component_scale_y(wyb, h, elevation, k) : k
+      # P0 y P1-P4 de componente comparten este factor. No comprimir alto por
+      # separado: prioridad cambia oclusion, no geometria.
+      scale_y = k
       half_width = half_w * k
       top_y = syb - h * scale_y
       if syb < -Game_Map::TILE_HEIGHT ||
