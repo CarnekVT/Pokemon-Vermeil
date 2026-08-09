@@ -170,11 +170,23 @@ module Mode7
     # el mapa en una rejilla plana.
     SKY_WIDTH_PERSPECTIVE = 0.050
 
-    # Walls y priority normales se dibujan como objetos rigidos anclados a su
-    # base. No comparten la conicidad del suelo: asi un arbol, barril o tramo
-    # P1+ completo conserva forma y no se encoge por filas/celdas adyacentes.
-    # 0.0 = forma original; subirlo da perspectiva tambien a esos objetos.
+    # Walls bloqueantes se dibujan como objetos completos anclados a su base.
+    # ElevatedWall y prioridad fuera de walls siguen bordes de cada celda.
+    # 0.0 deja wall con forma original.
     SKY_BILLBOARD_PERSPECTIVE = 0.0
+
+    # Respuesta vertical de cada fila wall. Cada casilla conserva su base de
+    # mapa; la curva solo puede sumar alto sobre su tamano default.
+    # 0.0 = rigido; 1.0 = alto completo de la curva. 0.08 es muy leve.
+    SKY_WALL_CURVE_RESPONSE = 0.08
+
+    # Solape vertical en px de pantalla entre filas wall. Tapa lineas de
+    # redondeo al proyectar dos tiles que comparten borde.
+    SKY_WALL_ROW_OVERLAP = 1.0
+
+    # P0 de un wall grande: base usa Y vanilla de su celda inferior; alto
+    # mezcla tramo top-bottom de Sky. 0.0 = billboard puro; 1.0 = tramo suelo.
+    SKY_WALL_COMPONENT_CURVE_RESPONSE = 0.25
 
     # Personajes/OW conservan escala fija: NPCs, followers y eventos no crecen
     # ni encogen al recorrer la curvatura.
@@ -184,9 +196,9 @@ module Mode7
     # muros y elevaciones usan este eje Z separado de la Y del suelo.
     SKY_VERTICAL_SCALE = 1.00
 
-    # Tiles con prioridad > 0 dejan de hornearse dentro del suelo deformado y
-    # pasan a ser billboards verticales. Esto recupera la semantica de prioridad
-    # de RPG Maker: el tile no "sube" fisicamente; extiende su rango de oclusion.
+    # Tiles con prioridad > 0 salen del suelo y conservan prioridad RPG Maker.
+    # Fuera de wall se proyectan entre bordes de fila; dentro de wall usan una
+    # pieza completa con respuesta vertical leve, para no dejar cortes.
     PRIORITY_SURFACES = true
     PRIORITY_SURFACE_MIN = 1
 
@@ -218,6 +230,12 @@ module Mode7
 
     # Zoom base (1.0 = escala natural del pixel art).
     DEFAULT_ZOOM  = 1
+
+    # Limites y suavizado del zoom de depuracion. El zoom no modifica
+    # colisiones: solo la proyeccion y el area visible.
+    CAMERA_ZOOM_MIN           = 0.25
+    CAMERA_ZOOM_MAX           = 3.00
+    CAMERA_ZOOM_SMOOTH_FRAMES = 12
 
     # Frames al activar/desactivar 2.5D desde Opciones o debug.
     MODE_TRANSITION_FRAMES = 1
@@ -289,15 +307,13 @@ module Mode7
     TERRAIN_TAG_TILE_HEIGHT = {
     }.freeze
 
-    # DESPLAZAMIENTO DE CAMARA POR TERRAIN TAG. Mueve la proyeccion completa
-    # en pantalla, sin cambiar cam_y ni deformar tiles adyacentes. Mountains
-    # es ElevatedWall: en escalera/plataforma pasable activa lift; en pared se
-    # mantiene bloqueado por la pasabilidad nativa.
-    # Valor = pixeles de subida visual de camara. Tambien desplaza una camara
-    # vertical virtual: cambia profundidad/escala sin tocar cam_y real ni
-    # coordenadas de colision.
+    # ELEVACION DE CAMARA POR TERRAIN TAG. Mountains es ElevatedWall: en
+    # escalera/plataforma pasable activa lift; en pared usa su pasabilidad
+    # nativa. El lift cambia profundidad alrededor del pivot del jugador, NO
+    # traslada el origen del mapa: player, NPCs y colisiones quedan en su celda.
+    # Valor = intensidad base del efecto de elevacion.
     TERRAIN_TAG_CAMERA_LIFT = {
-      :Mountains => 50,
+      :Mountains => 24,
       :Ladders => 12,
       :LaddersSide => 8
 
@@ -306,7 +322,9 @@ module Mode7
     # Limite por frame: evita un salto visible incluso con lifts altos.
     TERRAIN_TAG_CAMERA_LIFT_SMOOTH = 0.34
     TERRAIN_TAG_CAMERA_LIFT_MAX_STEP = 0.75
-    TERRAIN_TAG_CAMERA_LIFT_VERTICAL_FACTOR = 1.0
+    # Cambio de profundidad por punto de lift. 50 en Mountains equivale a
+    # +15% con 0.003. Subirlo aumenta sensacion de altura; 0.0 lo desactiva.
+    TERRAIN_TAG_CAMERA_LIFT_DEPTH_FACTOR = 0.003
 
     # ESCALERAS LATERALES POR TERRAIN TAG. Unico tag: :LaddersSide.
     # Maker Studio guarda por celda si el tramo sube-derecha (-1) o

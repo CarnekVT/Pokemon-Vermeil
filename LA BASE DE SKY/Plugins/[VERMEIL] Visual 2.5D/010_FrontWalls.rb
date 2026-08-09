@@ -89,6 +89,15 @@ class Mode7Renderer
     Mode7::Config::ELEVATED_WALL_TERRAIN_TAG_HEIGHT
   end
 
+  # ElevatedWall no es una cara vertical rigida. Mountains/escaleras ya traen
+  # su relieve dibujado por tiles: conservar cada fila en su propia celda evita
+  # que lift o curvatura separen una pieza del borde superior/inferior.
+  def entry_is_elevated_wall?(entry)
+    tag = terrain_tag_for_entry(entry)
+    return false if !tag || tag.id == :None
+    elevated_wall_terrain_tag_heights[tag.id].to_i > 0
+  end
+
   def mountain_shadow_opacity_for(entries)
     return 0 if !@ms_shadow_env || !defined?(Mode7::Config::MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY)
     entries.map do |entry|
@@ -276,6 +285,7 @@ class Mode7Renderer
     # Solo un wall bloqueante puede ser pieza rigida P0/P1. Mountains y las
     # escaleras son ElevatedWall: conservan celda propia y no absorben vecinos.
     rigid_walls = Hash.new { |hash, key| hash[key] = {} }
+    elevated_rows = Hash.new { |hash, key| hash[key] = {} }
     loose_bases = Hash.new { |hash, key| hash[key] = [] }
     loose_tops = Hash.new { |hash, key| hash[key] = [] }
     @map.width.times do |tx|
@@ -287,7 +297,13 @@ class Mode7Renderer
 
         direct_walls.each do |entry|
           priority = entry_visual_priority(entry)
-          if entry_blocks_movement?(entry)
+          if entry_is_elevated_wall?(entry)
+            # ponytail: fila/celda, no malla. Una malla solo hace falta si Maker
+            # Studio expone vertices de relieve para cada tile.
+            key = [priority, entry[:unify].to_i, entry_world_elevation(entry)]
+            elevated_rows[key][[tx, ty]] ||= []
+            elevated_rows[key][[tx, ty]].push(entry)
+          elsif entry_blocks_movement?(entry)
             tag = terrain_tag_for_entry(entry)
             key = [tag ? tag.id : :None, entry_world_elevation(entry)]
             rigid_walls[key][[tx, ty]] ||= []
@@ -302,6 +318,10 @@ class Mode7Renderer
         Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
       end
     end
+    elevated_rows.each do |(_priority, _unify, elevation), cells|
+      make_cell_locked_priority_strips(cells, elevation,
+                                       Mode7::Config::SKY_WALL_CURVE_RESPONSE)
+    end
     rigid_walls.each do |(_tag_id, elevation), cells|
       used_base_entries = {}
       components, residual_priority = priority_wall_components(cells)
@@ -313,7 +333,8 @@ class Mode7Renderer
         make_wall_component(component, elevation) if !base_entries.empty?
         make_wall_priority_component(component, elevation)
       end
-      make_residual_wall_priority_strips(residual_priority, elevation)
+      make_cell_locked_priority_strips(residual_priority, elevation,
+                                       Mode7::Config::SKY_WALL_CURVE_RESPONSE)
 
       cells.each do |(tx, ty), cell_entries|
         base_entries = cell_entries.select do |entry|
@@ -376,10 +397,10 @@ class Mode7Renderer
       hybrid_mode = kind == :normal ? nil : kind
       make_priority_strip(cells, ty, priority, unify, elevation, hybrid_mode)
     end
-    volumes.each do |(unify, priority, elevation), cells|
-      priority_volume_components(cells).each do |component|
-        make_priority_volume(component, unify, priority, elevation)
-      end
+    volumes.each do |(_unify, _priority, elevation), cells|
+      # P1+ conserva prioridad Z, pero su rectangulo visible vive en la misma
+      # celda curva que el suelo. Un billboard grande era quien lo arrastraba.
+      make_cell_locked_priority_strips(cells, elevation)
     end
   end
 
@@ -423,14 +444,12 @@ class Mode7Renderer
     components
   end
 
-  # P2+ (copa/techo) delimita un objeto rigido y toma solamente P1/P0 que
-  # cuelgan dentro de su ancho. P1 por si solo puede ser un piso o un pasillo:
-  # agruparlo con otro P1 contiguo convertia una sala completa en un billboard
-  # y la arrastraba al hacer scroll vertical.
+  # P1+ delimita objeto wall. P0 y cada banda P1-P4 comparten sus bounds: un
+  # barril/techo multi-tile no puede separar su parte superior del soporte.
   def priority_wall_components(cells)
     cap_cells = {}
     cells.each do |position, entries|
-      caps = entries.select { |entry| entry_visual_priority(entry) > 1 }
+      caps = entries.select { |entry| entry_visual_priority(entry) > 0 }
       cap_cells[position] = caps if !caps.empty?
     end
     return [[], priority_wall_entries(cells)] if cap_cells.empty?
@@ -492,10 +511,10 @@ class Mode7Renderer
     end
   end
 
-  # P1 sin techo/copa encima conserva prioridad pero se deforma como suelo por
-  # fila. Asi sigue su celda exacta al mover camara sin convertir pasillos y
-  # decoracion plana en un objeto alto comun.
-  def make_residual_wall_priority_strips(cells, elevation)
+  # Cada fila de prioridad se escala entre sus dos bordes de mapa. P1/P4 nunca
+  # comparte ancla vertical con fila vecina: perspectiva comprime dentro de la
+  # casilla, no desplaza el tile entero sobre la camara.
+  def make_cell_locked_priority_strips(cells, elevation, curve_response = 1.0)
     rows = Hash.new { |hash, key| hash[key] = {} }
     cells.each do |(tx, ty), entries|
       entries.each do |entry|
@@ -509,13 +528,17 @@ class Mode7Renderer
       previous = nil
       row.keys.sort.each do |tx|
         if previous && tx != previous + 1
-          make_priority_strip(segment, ty, priority, unify, elevation)
+          make_priority_strip(segment, ty, priority, unify, elevation, nil,
+                              curve_response)
           segment = {}
         end
         segment[tx] = row[tx]
         previous = tx
       end
-      make_priority_strip(segment, ty, priority, unify, elevation) if !segment.empty?
+      if !segment.empty?
+        make_priority_strip(segment, ty, priority, unify, elevation, nil,
+                            curve_response)
+      end
     end
   end
 
@@ -620,12 +643,12 @@ class Mode7Renderer
   # Mountain tiene plano de sombra propio: misma silueta/offset/opacity de MS,
   # pero nunca encima de su source tile ni de piezas priority. Asi no invade
   # walls normales ni convierte sombra en una textura flotante.
-  def blt_mountain_surface_shadow(dst, tx, ty, entries, opacity)
+  def blt_mountain_surface_shadow(dst, tx, ty, entries, opacity, dst_x = 0)
     return if tx.nil? || ty.nil? || !@shadow_ground || @shadow_ground.disposed?
     return if entries.any? { |entry| shadow_source_entry?(tx, ty, entry) }
     @src_rect.set(tx * Game_Map::TILE_WIDTH, ty * Game_Map::TILE_HEIGHT,
                   Game_Map::TILE_WIDTH, Game_Map::TILE_HEIGHT)
-    dst.blt(0, dst.height - Game_Map::TILE_HEIGHT, @shadow_ground, @src_rect,
+    dst.blt(dst_x, dst.height - Game_Map::TILE_HEIGHT, @shadow_ground, @src_rect,
             opacity.to_i.clamp(0, 255))
   end
 
@@ -636,12 +659,16 @@ class Mode7Renderer
   # RPG Maker calcula Z por fila de tile, no por tile individual: esta unidad
   # mantiene la prioridad real y evita crear/reproyectar cientos de sprites al
   # mover la camara verticalmente.
-  def make_priority_strip(cells, ty, priority, unify, elevation, hybrid_mode = nil)
+  def make_priority_strip(cells, ty, priority, unify, elevation, hybrid_mode = nil,
+                          curve_response = 1.0)
     min_tx = cells.keys.min
     max_tx = cells.keys.max
     width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
     source = Bitmap.new(width, Game_Map::TILE_HEIGHT)
-    draw_priority_strip_source(source, min_tx, cells)
+    mountain_shadow = priority <= 0 && cells.values.flatten.any? do |entry|
+      entry_is_elevated_wall?(entry) && mountain_shadow_opacity_for([entry]) > 0
+    end
+    draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow)
 
     sprite = Sprite.new(@viewport)
     sprite.bitmap = Bitmap.new(1, 1)
@@ -649,21 +676,36 @@ class Mode7Renderer
     sprite.oy = 0
     sprite.visible = false
     @priority_strips.push([sprite, source, min_tx, ty, priority, unify,
-                           elevation, nil, cells, hybrid_mode, nil])
+                           elevation, nil, cells, hybrid_mode, nil,
+                           curve_response, mountain_shadow])
   end
 
-  def draw_priority_strip_source(source, min_tx, cells)
+  def draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow = false)
     source.clear
     cells.each do |tx, entries|
       x = (tx - min_tx) * Game_Map::TILE_WIDTH
-      entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }.each do |entry|
+      sorted = entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }
+      if mountain_shadow
+        base = sorted.select { |entry| entry_visual_priority(entry) <= 0 }
+        top = sorted.reject { |entry| entry_visual_priority(entry) <= 0 }
+        base.each do |entry|
+          blt_entry_into(source, x, 0, entry, entry[:opacity] || 255)
+        end
+        opacity = mountain_shadow_opacity_for(base)
+        blt_mountain_surface_shadow(source, tx, ty, base, opacity, x) if opacity > 0
+        top.each do |entry|
+          blt_entry_into(source, x, 0, entry, entry[:opacity] || 255)
+        end
+        next
+      end
+      sorted.each do |entry|
         blt_entry_into(source, x, 0, entry, entry[:opacity] || 255)
       end
     end
   end
 
-  # P1-P4 conserva el mismo bounds que su P0 asociado. Se dibuja por prioridad
-  # para la Z nativa, pero usa una sola escala local al actualizarse.
+  # P1-P4 usa source transparente del mismo rectangulo P0. Cada prioridad
+  # conserva Z nativa, pero todas las piezas de un objeto usan mismo anclaje.
   def make_wall_priority_component(cells, elevation)
     bounds = cells.keys
     by_priority = Hash.new { |hash, key| hash[key] = {} }
@@ -677,11 +719,14 @@ class Mode7Renderer
       end
     end
     by_priority.each do |(priority, unify), priority_cells|
-      make_priority_volume(priority_cells, unify, priority, elevation, bounds)
+      make_priority_volume(priority_cells, unify, priority, elevation, bounds,
+                           Mode7::Config::SKY_WALL_COMPONENT_CURVE_RESPONSE,
+                           true)
     end
   end
 
-  def make_priority_volume(cells, unify, priority, elevation, bounds = nil)
+  def make_priority_volume(cells, unify, priority, elevation, bounds = nil,
+                           curve_response = 0.0, wall_component = false)
     positions = bounds || cells.keys
     min_tx = positions.map { |tx, _ty| tx }.min
     max_tx = positions.map { |tx, _ty| tx }.max
@@ -701,7 +746,8 @@ class Mode7Renderer
     wyb = (max_ty + 1) * Game_Map::TILE_HEIGHT
     depth = [wyb, priority, unify]
     @priority_data.push([sprite, wx, wyb, cells, priority, elevation, depth, nil,
-                         min_tx, min_ty, source, nil, max_tx, max_ty])
+                         min_tx, min_ty, source, nil, max_tx, max_ty,
+                         curve_response, wall_component])
   end
 
   def draw_priority_volume_source(source, min_tx, min_ty, cells)
@@ -735,82 +781,77 @@ class Mode7Renderer
                          source, nil])
   end
 
-  def redraw_projected_priority_surface(sprite, source, wx, wyb, elevation = 0)
+  def redraw_projected_priority_surface(sprite, source, wx, wyb, elevation = 0,
+                                        curve_response = 0.0, wall_component = false)
     return false if !source || source.disposed?
     projected = Mode7.project_billboard(wx, wyb, elevation)
     return false if !projected
-    scale = Mode7.tile_billboard_scale_for_world_y(wyb)
-    return false if !scale || scale <= 0
+    scale_x = Mode7.tile_billboard_scale_for_world_y(wyb)
+    return false if !scale_x || scale_x <= 0
+    if wall_component
+      scale_y = wall_component_scale_y(wyb, source.height, elevation, scale_x)
+    else
+      response = curve_response.to_f.clamp(0.0, 1.0)
+      scale_y = scale_x
+      if response > 0.0
+        top = Mode7.project_y(wyb - source.height, elevation)
+        curve_scale = top ? (projected[1] - top) / source.height.to_f : scale_x
+        curve_scale = scale_x if curve_scale <= 0.001
+        scale_y += (curve_scale - scale_y) * response
+      end
+    end
     sprite.bitmap = source if sprite.bitmap != source
     sprite.ox = source.width / 2.0
     sprite.oy = source.height
     sprite.x = projected[0]
     sprite.y = projected[1]
-    sprite.zoom_x = scale
-    sprite.zoom_y = scale
+    sprite.zoom_x = scale_x
+    sprite.zoom_y = scale_y
     true
   end
 
-  def redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation = 0)
+  def priority_strip_projection(source, min_tx, ty, elevation = 0,
+                                curve_response = 1.0)
     return false if !source || source.disposed?
-    redraw_projected_priority_source(sprite, source,
-                                     min_tx * Game_Map::TILE_WIDTH,
-                                     ty * Game_Map::TILE_HEIGHT, elevation)
+    wy_top = ty * Game_Map::TILE_HEIGHT
+    wy_bottom = wy_top + Game_Map::TILE_HEIGHT
+    wy_middle = (wy_top + wy_bottom) / 2.0
+    wx_left = min_tx * Game_Map::TILE_WIDTH
+    wx_right = wx_left + source.width
+    left = Mode7.project(wx_left, wy_middle, elevation)
+    right = Mode7.project(wx_right, wy_middle, elevation)
+    top = Mode7.project_y(wy_top, elevation)
+    bottom = Mode7.project_y(wy_bottom, elevation)
+    return false if !left || !right || !top || !bottom
+    if curve_response.to_f < 1.0
+      default_height = source.height * Mode7.tile_billboard_scale_for_world_y(wy_bottom)
+      curved_extra = [bottom - top - default_height, 0.0].max
+      height = default_height + curved_extra * curve_response.to_f.clamp(0.0, 1.0)
+      # ponytail: solape de 1 px; malla vertical solo si renderer expone vertices.
+      height += Mode7::Config::SKY_WALL_ROW_OVERLAP.to_f
+      top = bottom - height
+    end
+    height = bottom - top
+    width = right[0] - left[0]
+    return false if height <= 0.001 || width <= 0.001
+    [left[0], right[0], top, bottom]
   end
 
-  def redraw_projected_priority_source(sprite, source, world_x, world_y, elevation = 0)
-    rows = []
-    Mode7.screen_h.times do |sy|
-      wy = Mode7.world_y_for_row(sy)
-      next if !wy || wy < world_y || wy >= world_y + Game_Map::TILE_HEIGHT
-      scale = Mode7.hscale(sy)
-      next if !scale || scale <= 0
-      wx_left = Mode7.cam_x - Mode7.center_x / scale
-      left = ((world_x - wx_left) * scale).round
-      right = ((world_x + source.width - wx_left) * scale).round
-      next if right <= left
-      visible_left = [left, 0].max
-      visible_right = [right, Mode7.screen_w].min
-      next if visible_right <= visible_left
-      src_left = (((visible_left - left) * source.width) / (right - left).to_f).floor
-      src_right = (((visible_right - left) * source.width) / (right - left).to_f).ceil
-      src_left = src_left.clamp(0, source.width - 1)
-      src_right = src_right.clamp(src_left + 1, source.width)
-      rows.push([sy, visible_left, visible_right,
-                 (wy - world_y).floor.clamp(0, Game_Map::TILE_HEIGHT - 1),
-                 src_left, src_right])
-    end
-    return false if rows.empty?
-
-    min_x = rows.map { |_sy, left, _right, _src_y, _src_left, _src_right| left }.min
-    max_x = rows.map { |_sy, _left, right, _src_y, _src_left, _src_right| right }.max
-    min_y = rows.map { |sy, _left, _right, _src_y, _src_left, _src_right| sy }.min
-    max_y = rows.map { |sy, _left, _right, _src_y, _src_left, _src_right| sy }.max
-    width = max_x - min_x
-    height = max_y - min_y + 1
-    if !sprite.bitmap || sprite.bitmap.disposed? ||
-       sprite.bitmap.width != width || sprite.bitmap.height != height
-      sprite.bitmap.dispose if sprite.bitmap && !sprite.bitmap.disposed?
-      sprite.bitmap = Bitmap.new(width, height)
-    end
-    sprite.bitmap.clear
-    @priority_dst_rect ||= Rect.new(0, 0, 1, 1)
-    @priority_src_rect ||= Rect.new(0, 0, 1, 1)
-    rows.each do |sy, left, right, src_y, src_left, src_right|
-      @priority_dst_rect.set(left - min_x, sy - min_y, right - left, 1)
-      @priority_src_rect.set(src_left, src_y, src_right - src_left, 1)
-      sprite.bitmap.stretch_blt(@priority_dst_rect, source, @priority_src_rect)
-    end
-    bottom_y = world_y + Game_Map::TILE_HEIGHT
-    elevated_y = Mode7.project_y(bottom_y, elevation)
-    ground_y = Mode7.project_y(bottom_y, 0)
-    offset = elevated_y && ground_y ? elevated_y - ground_y : 0
-    sprite.x = min_x
-    sprite.y = min_y + (offset || 0).round
-    sprite.ox = 0
-    sprite.oy = 0
-    sprite.zoom_x = 1.0
-    sprite.zoom_y = 1.0
+  def redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation = 0,
+                                      curve_response = 1.0)
+    projection = priority_strip_projection(source, min_tx, ty, elevation,
+                                           curve_response)
+    return false if !projection
+    left, right, top, bottom = projection
+    height = bottom - top
+    return false if height <= 0.001
+    sprite.bitmap = source if sprite.bitmap != source
+    sprite.ox = source.width / 2.0
+    sprite.oy = source.height
+    sprite.x = (left + right) / 2.0
+    sprite.y = bottom
+    sprite.zoom_x = (right - left) / source.width.to_f
+    sprite.zoom_y = height / source.height.to_f
     true
   end
 
@@ -819,23 +860,12 @@ class Mode7Renderer
     update_hybrid_priority_surfaces
   end
 
-  def priority_strip_on_screen?(source, min_tx, ty, elevation)
-    return false if !source || source.disposed?
-    world_y = ty * Game_Map::TILE_HEIGHT
-    projected = [Mode7.project_y(world_y, elevation),
-                 Mode7.project_y(world_y + Game_Map::TILE_HEIGHT, elevation)].compact
-    return false if projected.empty?
-    return false if projected.max < 0 || projected.min > Mode7.screen_h
-
-    sy = projected.sum / projected.length.to_f
-    sy = sy.clamp(0, Mode7.screen_h - 1).round
-    scale = Mode7.hscale(sy)
-    return false if !scale || scale <= 0
-    wx_left = Mode7.cam_x - Mode7.center_x / scale
-    world_x = min_tx * Game_Map::TILE_WIDTH
-    left = (world_x - wx_left) * scale
-    right = (world_x + source.width - wx_left) * scale
-    right >= 0 && left <= Mode7.screen_w
+  def priority_strip_on_screen?(source, min_tx, ty, elevation, curve_response = 1.0)
+    projection = priority_strip_projection(source, min_tx, ty, elevation,
+                                           curve_response)
+    return false if !projection
+    left, right, top, bottom = projection
+    right >= 0 && left <= Mode7.screen_w && bottom >= 0 && top <= Mode7.screen_h
   end
 
   def priority_strip_anchor(min_tx, ty, elevation)
@@ -850,7 +880,8 @@ class Mode7Renderer
     radius_y = defined?(Mode7::Config::WALL_SPAWN_RADIUS_Y) ? Mode7::Config::WALL_SPAWN_RADIUS_Y : 34
 
     @priority_strips.each do |data|
-      sprite, source, min_tx, ty, priority, unify, elevation, _projection_key, _cells, hybrid_mode, state = data
+      sprite, source, min_tx, ty, priority, unify, elevation, _projection_key, _cells,
+      hybrid_mode, state, curve_response, _mountain_shadow = data
       hybrid_active = hybrid_mode && hybrid_row_priority_active?(1, ty)
       if hybrid_mode == :hybrid_top && !hybrid_active
         sprite.visible = false
@@ -864,7 +895,7 @@ class Mode7Renderer
         sprite.visible = false
         next
       end
-      if !priority_strip_on_screen?(source, min_tx, ty, elevation)
+      if !priority_strip_on_screen?(source, min_tx, ty, elevation, curve_response)
         sprite.visible = false
         next
       end
@@ -875,18 +906,27 @@ class Mode7Renderer
                          (Mode7.cam_x - state[0]).abs >= 1.0 ||
                          (Mode7.cam_y - state[1]).abs > 0.001 ||
                          state[2].nil? ||
-                         (Mode7.projection_cam_y - state[2]).abs > 0.001
+                         (Mode7.projection_cam_y - state[2]).abs > 0.001 ||
+                         state[3] != Mode7.projection_revision
       if needs_projection
-        if !redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation)
+        if !redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation,
+                                            curve_response)
           sprite.visible = false
           next
         end
-        data[10] = [Mode7.cam_x, Mode7.cam_y, Mode7.projection_cam_y]
+        data[10] = [Mode7.cam_x, Mode7.cam_y, Mode7.projection_cam_y,
+                    Mode7.projection_revision]
         state = data[10]
       end
-      if !sprite.bitmap || sprite.bitmap.disposed? ||
-         sprite.y > Mode7.screen_h || sprite.y + sprite.bitmap.height < 0 ||
-         sprite.x > Mode7.screen_w || sprite.x + sprite.bitmap.width < 0
+      if !sprite.bitmap || sprite.bitmap.disposed?
+        sprite.visible = false
+        next
+      end
+      top = sprite.y - sprite.oy * sprite.zoom_y
+      left = sprite.x - sprite.ox * sprite.zoom_x
+      right = left + sprite.bitmap.width * sprite.zoom_x
+      if top > Mode7.screen_h || sprite.y < 0 ||
+         left > Mode7.screen_w || right < 0
         sprite.visible = false
         next
       end
@@ -907,7 +947,7 @@ class Mode7Renderer
 
     @priority_data.each do |data|
       sprite, wx, wyb, entry_or_cells, priority, elevation, depth, hybrid_priority,
-      tx, ty, source, projection_key, max_tx, max_ty = data
+      tx, ty, source, projection_key, max_tx, max_ty, curve_response, wall_component = data
       max_tx ||= tx
       max_ty ||= ty
 
@@ -922,13 +962,16 @@ class Mode7Renderer
                          (Mode7.cam_y - projection_key[1]).abs > 0.001 ||
                          elevation != projection_key[2] ||
                          projection_key[3].nil? ||
-                         (Mode7.projection_cam_y - projection_key[3]).abs > 0.001
+                         (Mode7.projection_cam_y - projection_key[3]).abs > 0.001 ||
+                         projection_key[4] != Mode7.projection_revision
       if needs_projection
-        if !redraw_projected_priority_surface(sprite, source, wx, wyb, elevation)
+        if !redraw_projected_priority_surface(sprite, source, wx, wyb, elevation,
+                                              curve_response, wall_component)
           sprite.visible = false
           next
         end
-        data[11] = [Mode7.cam_x, Mode7.cam_y, elevation, Mode7.projection_cam_y]
+        data[11] = [Mode7.cam_x, Mode7.cam_y, elevation, Mode7.projection_cam_y,
+                    Mode7.projection_revision]
       end
       if !sprite.bitmap || sprite.bitmap.disposed?
         sprite.visible = false
@@ -990,10 +1033,11 @@ class Mode7Renderer
     end
 
     @priority_strips.each do |data|
-      _sprite, source, min_tx, _ty, _priority, _unify, _elevation, _projection_key, cells = data
+      _sprite, source, min_tx, ty, _priority, _unify, _elevation, _projection_key,
+      cells, _hybrid_mode, _state, _curve_response, mountain_shadow = data
       next if !source || source.disposed?
       next if cells.values.flatten.none? { |entry| entry[:animated] }
-      draw_priority_strip_source(source, min_tx, cells)
+      draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow)
       data[7] = nil
       data[10] = nil
     end
@@ -1026,6 +1070,21 @@ class Mode7Renderer
     end
   end
 
+  # Ancla hibrida P0: el borde inferior queda en su celda Sky real, mientras
+  # alto toma una parte de la distancia top-bottom del mapa. Asi el bloque no
+  # se pega al player como billboard ni se vuelve una tira de tiles sueltos.
+  def wall_component_scale_y(wyb, height, elevation, billboard_scale)
+    return billboard_scale if !Mode7.sky_mode? || height <= 0
+    top = Mode7.project_y(wyb - height, elevation)
+    bottom = Mode7.project_y(wyb, elevation)
+    return billboard_scale if !top || !bottom
+    ground_scale = (bottom - top) / height.to_f
+    return billboard_scale if ground_scale <= 0.001
+    ground_scale = billboard_scale if ground_scale < billboard_scale
+    response = Mode7::Config::SKY_WALL_COMPONENT_CURVE_RESPONSE.to_f.clamp(0.0, 1.0)
+    billboard_scale + ((ground_scale - billboard_scale) * response)
+  end
+
   # ---------------------------------------------------------------------------
   # Muros fisicos
   # ---------------------------------------------------------------------------
@@ -1037,7 +1096,8 @@ class Mode7Renderer
     radius_y = defined?(Mode7::Config::WALL_SPAWN_RADIUS_Y) ? Mode7::Config::WALL_SPAWN_RADIUS_Y : 34
 
     @wall_data.each do |data|
-      sprite, wx, wyb, h, _entries, _z_behavior, _base_unify, depth = data
+      sprite, wx, wyb, h, entries, _z_behavior, _base_unify, depth,
+      _shadow_opacity, _min_tx, _min_ty, _max_tx, _max_ty, elevation = data
 
       half_w = sprite.bitmap.width / 2.0
       left_tx = (wx - half_w) / Game_Map::TILE_WIDTH
@@ -1057,17 +1117,17 @@ class Mode7Renderer
       end
       sx, syb = pr
 
-      # Un muro es una cara vertical, no una franja del suelo. Su pixel art
-      # conserva proporcion: zoom_x == zoom_y. La escala uniforme coincide con
-      # la separacion horizontal de la fila para evitar grietas entre columnas.
+      # Columna simple conserva proporcion. Componente P0 conserva X de wall,
+      # pero usa alto hibrido para coincidir mejor con tramo vertical Sky.
       k = Mode7.tile_billboard_scale_for_world_y(wyb)
       if !k || k <= 0
         sprite.visible = false
         next
       end
 
+      scale_y = entries.is_a?(Hash) ? wall_component_scale_y(wyb, h, elevation, k) : k
       half_width = half_w * k
-      top_y = syb - h * k
+      top_y = syb - h * scale_y
       if syb < -Game_Map::TILE_HEIGHT ||
          top_y > Mode7.screen_h + Game_Map::TILE_HEIGHT ||
          sx < -half_width - Game_Map::TILE_WIDTH ||
@@ -1079,7 +1139,7 @@ class Mode7Renderer
       sprite.x = sx
       sprite.y = syb
       sprite.zoom_x = k
-      sprite.zoom_y = k
+      sprite.zoom_y = scale_y
       depth_wyb, depth_priority, depth_unify = depth || [wyb, 0, 0]
       bias = depth_unify.to_i
       bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority > 0

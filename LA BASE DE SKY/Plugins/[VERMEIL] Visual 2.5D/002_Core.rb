@@ -3,7 +3,8 @@
 #===============================================================================
 module Mode7
   class << self
-    attr_reader :zoom, :current_alpha, :sin, :distance_h, :planet_radius
+    attr_reader :zoom, :current_alpha, :sin, :distance_h, :planet_radius,
+                :projection_revision
     # Proyeccion forzada por mapa (nil = usar Config::PROJECTION).
     attr_accessor :map_projection
 
@@ -104,8 +105,13 @@ module Mode7
 
     def sky_ground_y_scale
       v = Config::SKY_GROUND_Y_SCALE.to_f
-      return 0.01 if v <= 0.01
-      v
+      v = 0.01 if v <= 0.01
+      # Lift anclado al pivot: modifica profundidad, no projection_cam_y. Asi
+      # el jugador conserva su celda visual/logica en vez de deslizarse cuando
+      # entra a Mountains o una escalera elevada.
+      lift_factor = Config::TERRAIN_TAG_CAMERA_LIFT_DEPTH_FACTOR.to_f
+      return v if !sky_mode? || lift_factor.abs < 1.0e-6
+      v * [1.0 + terrain_camera_lift * lift_factor, 0.10].max
     end
 
     # Angulo de profundidad a partir de una coordenada Y del mundo, sin mezclar
@@ -152,7 +158,7 @@ module Mode7
     # Theta (angulo de profundidad) de una fila de pantalla. Invierte la curva
     # hibrida (sky_curve) para mapear la fila sy a su angulo en el "planeta".
     def sky_theta_for_row(sy)
-      t = (sy.to_f - sky_camera_lift_screen_offset - pivot_y) / @planet_radius
+      t = (sy.to_f - pivot_y) / @planet_radius
       sky_curve_inv(t)
     end
 
@@ -174,27 +180,10 @@ module Mode7
       @terrain_camera_lift || 0.0
     end
 
-    # Camara solo visual sobre el eje de profundidad. No modifica display_y,
-    # cam_y ni las coordenadas logicas del mapa.
-    def terrain_camera_vertical_lift
-      terrain_camera_lift * Config::TERRAIN_TAG_CAMERA_LIFT_VERTICAL_FACTOR.to_f
-    end
-
-    # Mantiene fijo el pivot mientras cambia la profundidad virtual. Antes el
-    # lift restaba projection_cam_y sin compensar y el mapa entero acompaniaba
-    # al jugador: paredes billboards parecian despegarse de su celda.
-    def sky_camera_lift_screen_offset
-      return 0.0 if !sky_mode? || terrain_camera_vertical_lift.abs < 0.001
-      scale = sky_angle_scale
-      return 0.0 if scale <= 0.0
-      anchor_wy = cam_y + pivot_y
-      theta = ((anchor_wy - projection_cam_y - pivot_y) * @zoom * scale * sky_ground_y_scale) /
-              @planet_radius
-      -@planet_radius * sky_curve(theta)
-    end
-
+    # Intensidad visual de profundidad. No modifica display_y, cam_y ni las
+    # coordenadas logicas del mapa.
     def projection_cam_y
-      cam_y - terrain_camera_vertical_lift
+      cam_y
     end
 
     def terrain_camera_lift_for_tag(tag)
@@ -283,6 +272,7 @@ module Mode7
       target = rendering_now? ? terrain_camera_lift_target : 0.0
       return if (terrain_camera_lift - target).abs < 0.01
       @terrain_camera_lift = target
+      @projection_revision = (@projection_revision || 0) + 1
       reset_caches
     end
 
@@ -315,6 +305,7 @@ module Mode7
       value = target if (target - value).abs < 0.05
       return if (value - current).abs < 0.01
       @terrain_camera_lift = value
+      @projection_revision = (@projection_revision || 0) + 1
       reset_caches
       invalidate_renderer_ground
     end
@@ -333,6 +324,10 @@ module Mode7
       @zoom = (zoom || @zoom || Config::DEFAULT_ZOOM).to_f
       @distance_h = (distance_h || @distance_h || Config::DISTANCE_H).to_f
       @planet_radius = (planet_radius || @planet_radius || Config::PLANET_RADIUS).to_f
+      # Cada cambio de camara (incluido zoom) invalida sprites que se rasterizan
+      # por filas. Camara X/Y sola no detectaba el zoom y los actualizaba solo
+      # al mover al jugador.
+      @projection_revision = (@projection_revision || 0) + 1
 
       @a = @current_alpha * Math::PI / 180.0
       @cos = Math.cos(@a)
@@ -572,25 +567,17 @@ module Mode7
       result
     end
 
-    # Mountains/Ladders desplazan la camara y el terreno, no los OW. El paso
-    # diagonal de LaddersSide ya cambia las coordenadas reales del personaje,
-    # por eso sigue viendose diagonal sin heredar el lift de camara.
+    # El lift es una traslacion de camara, por tanto OW y suelo comparten la
+    # misma proyeccion. No toca @x/@y ni pasabilidad; LaddersSide es la unica
+    # ruta que cambia la posicion real durante un tramo diagonal.
     def overworld_project_y(wy, elevation = 0)
-      return project_y(wy, elevation) if !sky_mode? || terrain_camera_vertical_lift.abs < 0.001
-      scale = sky_angle_scale
-      return wy - cam_y - elevation if scale <= 0.0
-
-      theta = ((wy.to_f - cam_y - pivot_y) * @zoom * scale * sky_ground_y_scale) /
-              @planet_radius
-      pivot_y + (@planet_radius * sky_curve(theta)) -
-        elevation.to_f * vertical_scale_for_world_y(wy)
+      project_y(wy, elevation)
     end
 
-    # ponytail: z de OW comparte su Y sin lift. Prioridad por tile conserva
-    # depth_z normal para suelo/walls; mezclar ambos canales reintroduce popping.
+    # La profundidad usa la misma camara que el dibujo; asi el personaje no
+    # parece deslizarse sobre su tile cuando terrain camera lift cambia.
     def overworld_depth_z(wy, height = 0)
-      return depth_z(wy, 0, height) if !sky_mode? || terrain_camera_vertical_lift.abs < 0.001
-      overworld_project_y(wy, 0).round + height.to_i
+      depth_z(wy, 0, height)
     end
 
     def _sky_project_y(wy, elevation = 0)
@@ -600,8 +587,7 @@ module Mode7
       return wy - cam_y - elevation if scale <= 0.0
       theta = sky_theta_for_world_y(wy)
       sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
-      return sy_ground + sky_camera_lift_screen_offset -
-             elevation.to_f * vertical_scale_for_world_y(wy)
+      return sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
     end
 
     def _project_y_uncached(wy, elevation = 0)
@@ -711,6 +697,17 @@ module Mode7
         @step_distance_h = (@target_distance_h - @distance_h) / @transition_frames
         @step_planet_radius = (@target_planet_radius - @planet_radius) / @transition_frames
       end
+    end
+
+    # Comando para la terminal F3: Mode7.set_zoom(1.50)
+    # ponytail: un unico setter cubre terminal y menu; exponer presets solo si
+    # el ajuste manual deja de ser suficiente.
+    def set_zoom(target_zoom, frames = Config::CAMERA_ZOOM_SMOOTH_FRAMES)
+      min_zoom = Config::CAMERA_ZOOM_MIN.to_f
+      max_zoom = Config::CAMERA_ZOOM_MAX.to_f
+      zoom_value = target_zoom.to_f.clamp(min_zoom, max_zoom)
+      set_camera(current_alpha, zoom_value, frames, distance_h, planet_radius)
+      return zoom_value
     end
 
     def update_transition

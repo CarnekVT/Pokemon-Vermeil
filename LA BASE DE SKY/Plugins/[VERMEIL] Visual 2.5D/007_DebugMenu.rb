@@ -35,13 +35,14 @@ module Mode7
         end
       when 1 # Editar Zoom
         params = ChooseNumberParams.new
-        params.setRange(1, 100) # 0.01 a 1.00
-        params.setDefaultValue((Mode7.zoom * 100).round)
+        min_zoom = (Mode7::Config::CAMERA_ZOOM_MIN * 100).round
+        max_zoom = (Mode7::Config::CAMERA_ZOOM_MAX * 100).round
+        params.setRange(min_zoom, max_zoom)
+        params.setDefaultValue((Mode7.zoom * 100).round.clamp(min_zoom, max_zoom))
         new_zoom_int = pbMessageChooseNumber(_INTL("Elige el Zoom (x100, ej: 60 = 0.60):"), params)
         if new_zoom_int
           new_zoom = new_zoom_int.to_f / 100.0
-          Mode7.set_camera(Mode7.current_alpha, new_zoom, 0, Mode7.distance_h, Mode7.planet_radius)
-          $scene.instance_variable_get(:@map_renderer).invalidate_ground rescue nil
+          Mode7.set_zoom(new_zoom)
         end
       when 2 # Editar Radio del Planeta (100 a 5000)
         params = ChooseNumberParams.new
