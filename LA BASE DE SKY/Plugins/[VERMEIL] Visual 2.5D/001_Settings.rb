@@ -175,9 +175,9 @@ module Mode7
     # 0.0 deja wall con forma original.
     SKY_BILLBOARD_PERSPECTIVE = 0.0
 
-    # Respuesta vertical de cada fila wall. Cada casilla conserva su base de
-    # mapa; la curva solo puede sumar alto sobre su tamano default.
-    # 0.0 = rigido; 1.0 = alto completo de la curva. 0.08 es muy leve.
+    # Legacy de configuracion. Wall P1 ahora se rasteriza con el mismo plano
+    # scanline de Mountains; no admite curva local porque separaba P0/P1.
+    # Se conserva para compatibilidad con configuraciones anteriores.
     SKY_WALL_CURVE_RESPONSE = 0.08
 
     # Solape vertical en px de pantalla entre filas wall. Tapa lineas de

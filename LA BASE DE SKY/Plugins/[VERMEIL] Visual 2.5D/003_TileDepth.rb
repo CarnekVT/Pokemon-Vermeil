@@ -35,6 +35,7 @@ class Mode7Renderer
     @shadow_ground = nil
     @wall_data = []
     @priority_strips = []
+    @priority_strip_rasters = {}
     @priority_data = []
     @autotile_cells = {}
     @wall_cells = {}
@@ -79,6 +80,7 @@ class Mode7Renderer
       spr.dispose
     end
     @priority_strips.clear
+    @priority_strip_rasters.clear
     @priority_data.each do |data|
       spr = data[0]
       src = data[10]
@@ -171,6 +173,7 @@ class Mode7Renderer
       data[0].dispose
     end
     @priority_strips.clear
+    @priority_strip_rasters.clear
     @priority_data.each do |data|
       data[10].dispose if data[10] && !data[10].disposed?
       data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?
@@ -352,14 +355,11 @@ class Mode7Renderer
     passages ? passages[tid] : nil
   end
 
-  # Volumen pertenece al tile con terrain tag de wall, no a toda su celda.
-  # ElevatedWall (Mountains/escaleras) sigue siendo suelo: su P0 se rasteriza
-  # junto al mapa completo. Asi no abre una junta de 32 px por cada fila.
-  # Un prop de otra layer conserva prioridad propia.
+  # Todo P0 pertenece al raster global. Terrain Tag wall solo aporta colision
+  # 2.5D; no saca su grafico de la cuadricula compartida.
   def ground_entries_for_cell(tx, ty, entries)
     entries.reject do |entry|
-      physical_wall = entry_is_wall?(entry) && !entry_is_elevated_wall?(entry)
-      physical_wall || priority_surface_entry?(entry) || interior_border_entry?(entry)
+      priority_surface_entry?(entry) || interior_border_entry?(entry)
     end
   end
 

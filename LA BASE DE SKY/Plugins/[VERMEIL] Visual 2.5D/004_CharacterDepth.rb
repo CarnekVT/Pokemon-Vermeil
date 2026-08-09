@@ -13,9 +13,10 @@ class Game_Character
     return _VERMEIL_25D_orig_screen_x if !mode7_active_for_self?
     wx = @real_x.to_f / Game_Map::X_SUBPIXELS + (@width * Game_Map::TILE_WIDTH / 2)
     wy = mode7_world_y_ground
-    # Personaje es billboard: suelo conserva conicidad, OW no deriva lateralmente
-    # al cambiar su Y en pantalla.
-    pr = Mode7.project_billboard(wx, wy, 0)
+    # El actor comparte la proyeccion X/Y exacta del plano. Usar billboard o
+    # screen_x vanilla lo dejaba visualmente fuera de su casilla al curvar Sky.
+    # La escala se mantiene fija en Sprite_Character (SKY_SPRITE_SCALE = 0).
+    pr = Mode7.project(wx, wy, 0)
     return -1000 if !pr
     return pr[0].round + self.x_offset
   end
