@@ -150,21 +150,27 @@ class TrainerSpriteEditor
     cw = Window_CommandPokemon.new(commands)
     cw.index    = speed
     cw.viewport = @viewport
+    oldindex = cw.index
     @sprites["info"].visible = true
     loop do
       Graphics.update
       Input.update
       cw.update
       self.update
-      speed = cmdvals[cw.index]
+      if cw.index != oldindex
+        oldindex = cw.index
+        speed = cmdvals[cw.index]
+        data.animation_speed = speed
+        refresh
+      end
       @sprites["info"].setTextToFit("Animation Speed = #{commands[cw.index]}")
       if Input.trigger?(Input::USE)
         pbPlayDecisionSE
-        data.animation_speed = speed
         @trainerChanged = true if speed != oldval
         break
       elsif Input.trigger?(Input::BACK)
         data.animation_speed = oldval
+        refresh
         pbPlayCancelSE
         break
       end
@@ -175,8 +181,16 @@ class TrainerSpriteEditor
 
   alias _zbox_tse_orig_pbSetParameter pbSetParameter
   def pbSetParameter(param)
-    return _zbox_tse_orig_pbSetParameter(param) if param < 5
+    return if !@trainerID
     case param
+    when 0
+      @sprites["trainer_1"].to_first_frame
+      @sprites["shadow_1"].to_first_frame
+      refresh
+    when 1 then pbSetSpriteScaling
+    when 2 then pbSetShadowPosition
+    when 3 then pbSetShadowVisibility
+    when 4 then pbSetSpriteHue
     when 5 then pbSetSpritePosition
     when 6 then pbSetAnimationSpeed
     end

@@ -216,14 +216,9 @@ class Mode7Renderer
   def cache_terrain_tag_heights
     @entry_cache.each_value do |entries|
       height = entries.map { |entry| configured_terrain_tag_height(entry) }.max || 0
-      wall_cell = entries.any? { |entry| entry_is_wall?(entry) }
-      elevated_wall_cell = entries.any? { |entry| entry_is_elevated_wall?(entry) }
-      height = 0 if wall_cell
-      entries.each do |entry|
-        entry[:terrain_tag_height] = height
-        entry[:terrain_height_wall_cell] = true if wall_cell
-        entry[:terrain_height_elevated_wall_cell] = true if elevated_wall_cell
-      end
+      # Un terrain-tag de wall ya tiene su renderer propio; no elevar la celda.
+      height = 0 if entries.any? { |entry| entry_is_wall?(entry) }
+      entries.each { |entry| entry[:terrain_tag_height] = height }
     end
   end
 
@@ -237,7 +232,7 @@ class Mode7Renderer
   def priority_surface_entry?(e)
     return false if !Mode7::Config::PRIORITY_SURFACES
     return false if interior_border_entry?(e)
-    return true if entry_terrain_tag_height(e) > 0 && !e[:terrain_height_wall_cell]
+    return true if entry_terrain_tag_height(e) > 0
     p = entry_visual_priority(e)
     min = Mode7::Config::PRIORITY_SURFACE_MIN.to_i
     return false if p < min
@@ -248,14 +243,10 @@ class Mode7Renderer
 
 
   def wall_component_signature(entries)
-    direct = entries.select do |entry|
+    direct = entries.any? do |entry|
       entry_is_wall?(entry) && !entry_is_elevated_wall?(entry)
     end
-    tags = direct.map do |entry|
-      tag = terrain_tag_for_entry(entry)
-      tag ? tag.id : :None
-    end.compact.uniq.sort_by(&:to_s)
-    [tags, wall_visual_base_unify(entries)]
+    direct ? [:normal_wall] : []
   end
 
   def wall_component_key(tx, ty, entries)
@@ -269,37 +260,78 @@ class Mode7Renderer
     [:auto, wall_component_signature(entries)]
   end
 
-  # Agrupa SOLO celdas que ya pertenecen al renderer wall. Nunca incorpora
-  # soporte/suelo/vecinos por heuristica. Eso permite tratar un edificio/arbol
-  # como bloque rigido sin contagiar tiles adyacentes.
-  def wall_visual_components
+  # Componente wall visual.
+  #
+  # Las celdas con Terrain Tag wall son las semillas. Una pieza P1-P4 vecina
+  # puede incorporarse aunque NO repita el tag, pero solo si su rect fuente es
+  # realmente contiguo en el mismo tileset/autotile. Esto mantiene unido el
+  # techo/P4 de un edificio sin absorber props adyacentes por simple cercania.
+  def wall_source_key(entry)
+    return [:tileset, entry[:tileset_id].to_i] if entry[:tileset_id]
+    filename = entry[:filename]
+    return [:autotile, filename.to_s] if filename && !filename.to_s.empty?
+    bmp = entry[:bitmap]
+    [:bitmap, bmp ? bmp.object_id : 0]
+  end
+
+  def wall_source_contiguous?(a, b, dx, dy)
+    return false if wall_source_key(a) != wall_source_key(b)
+    ra = a[:src_rect]
+    rb = b[:src_rect]
+    return false if !ra || !rb
+    (rb.x - ra.x) == dx * Game_Map::TILE_WIDTH &&
+      (rb.y - ra.y) == dy * Game_Map::TILE_HEIGHT
+  rescue Exception
+    false
+  end
+
+  def wall_extension_candidate?(entries, entry)
+    return false if interior_border_entry?(entry)
+    return false if entry_is_elevated_wall?(entry)
+    return false if entry_is_wall?(entry)
+    entry_visual_priority(entry) > 0
+  end
+
+  def cache_wall_visual_components
+    # Interiores raster-affine no usan bloques wall independientes. P0 queda en
+    # el raster de ground y P1+ se dibuja como strips affine con Z propio.
+    # Asi el dibujo usa exactamente la misma cuadricula que jugador/collision.
+    if Mode7.respond_to?(:raster_affine_mode?) && Mode7.raster_affine_mode?
+      @wall_visual_components = []
+      @wall_visual_owned = {}
+      return @wall_visual_components
+    end
+
     Mode7::VolumeIds.refresh if defined?(Mode7::VolumeIds) rescue nil
 
-    cells = {}
+    seed_cells = {}
     keys = {}
     @entry_cache.each do |position, entries|
       owned = wall_visual_entries(entries)
       next if owned.empty?
       tx, ty = position
-      cells[position] = owned
+      seed_cells[position] = owned
       keys[position] = wall_component_key(tx, ty, entries)
     end
 
     pending = {}
-    cells.each_key { |position| pending[position] = true }
-    result = []
+    seed_cells.each_key { |position| pending[position] = true }
+    components = []
+    claimed_extensions = {}
 
     until pending.empty?
-      start = pending.keys.first
-      pending.delete(start)
-      wanted_key = keys[start]
-      stack = [start]
+      start_pos = pending.keys.first
+      pending.delete(start_pos)
+      wanted_key = keys[start_pos]
+      stack = [start_pos]
       component = {}
 
+      # Primero une exclusivamente las celdas wall reales.
       until stack.empty?
         tx, ty = stack.pop
         pos = [tx, ty]
-        component[pos] = cells[pos]
+        component[pos] ||= []
+        component[pos].concat(seed_cells[pos])
 
         [[tx - 1, ty], [tx + 1, ty], [tx, ty - 1], [tx, ty + 1]].each do |neighbor|
           next if !pending[neighbor]
@@ -309,9 +341,52 @@ class Mode7Renderer
         end
       end
 
-      result.push(component)
+      # Luego extiende P1-P4 que pertenezca visualmente al mismo dibujo.
+      queue = []
+      component.each do |position, entries|
+        entries.each { |entry| queue.push([position, entry]) }
+      end
+
+      until queue.empty?
+        (tx, ty), source_entry = queue.shift
+        [[-1, 0], [1, 0], [0, -1], [0, 1]].each do |dx, dy|
+          npos = [tx + dx, ty + dy]
+          nentries = @entry_cache[npos]
+          next if !nentries
+
+          nentries.each do |candidate|
+            oid = candidate.object_id
+            next if claimed_extensions[oid]
+            next if !wall_extension_candidate?(nentries, candidate)
+            next if !wall_source_contiguous?(source_entry, candidate, dx, dy)
+
+            component[npos] ||= []
+            component[npos].push(candidate)
+            claimed_extensions[oid] = true
+            queue.push([npos, candidate])
+          end
+        end
+      end
+
+      components.push(component)
     end
-    result
+
+    @wall_visual_components = components
+    @wall_visual_owned = {}
+    components.each do |component|
+      component.each_value do |entries|
+        entries.each { |entry| @wall_visual_owned[entry.object_id] = true }
+      end
+    end
+    components
+  end
+
+  def wall_visual_components
+    @wall_visual_components || cache_wall_visual_components
+  end
+
+  def wall_visual_owned?(entry)
+    @wall_visual_owned && @wall_visual_owned[entry.object_id]
   end
 
   def build_wall_columns
@@ -325,31 +400,35 @@ class Mode7Renderer
       @wall_cells[[tx, ty]] = true
     end
 
-    # Dibujo: cada componente visual usa UNOS bounds rigidos. Se separa por
-    # fila/priority/layer solo para Z, pero todos esos sprites comparten el
-    # mismo bitmap-space, ancla y escala. Por tanto el bloque no se deforma.
+    # Todas las prioridades de un wall comparten EXACTAMENTE:
+    #   bounds, world-Y de base, elevacion y escala.
+    #
+    # Priority/unify solo decide Z. P4 ya no puede proyectarse como otro bloque
+    # aunque su Terrain Tag no se repita en la fila superior.
     wall_visual_components.each do |component|
       bounds = component.keys
-      groups = Hash.new { |hash, key| hash[key] = {} }
+      all_entries = component.values.flatten
+      next if all_entries.empty?
 
-      component.each do |(tx, ty), entries|
+      component_elevation = all_entries.map { |entry| entry_world_elevation(entry) }.min || 0.0
+      depth_ty = bounds.map { |_tx, ty| ty }.max
+      depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
+
+      groups = Hash.new { |hash, priority| hash[priority] = {} }
+      component.each do |position, entries|
         entries.each do |entry|
-          key = [
-            ty,
-            entry_visual_priority(entry),
-            entry[:unify].to_i,
-            entry_world_elevation(entry).to_f
-          ]
-          groups[key][[tx, ty]] ||= []
-          groups[key][[tx, ty]].push(entry)
+          priority = entry_visual_priority(entry)
+          groups[priority][position] ||= []
+          groups[priority][position].push(entry)
         end
       end
 
-      groups.each do |(depth_ty, priority, unify, elevation), group_cells|
-        depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
+      groups.each do |priority, group_cells|
+        unifies = group_cells.values.flatten.map { |entry| entry[:unify].to_i }
+        unify = unifies.empty? ? 0 : unifies.min
         make_rigid_component(
           group_cells,
-          elevation,
+          component_elevation,
           bounds,
           priority,
           unify,
@@ -361,67 +440,207 @@ class Mode7Renderer
     Console.echo_error("2.5D: build_wall_columns: #{e.message}") if defined?(Console)
   end
   # ---------------------------------------------------------------------------
-  # Priority P2+ como bloques rigidos
+  # Priority P1/P2+ como objetos rigidos, aislados por contexto de superficie
   # ---------------------------------------------------------------------------
-  # P2/P3/P4 suelen ser partes verticales de arboles, edificios y props.
-  # Proyectarlas como strips independientes de cada fila cambia el alto de cada
-  # tile y abre cortes horizontales. Desde PRIORITY_RIGID_MIN se agrupan por
-  # layer/elevacion y se dibujan con la misma geometria rigida de los walls.
-  def rigid_priority_candidate?(entries, entry)
+  # El bug de v1.7.0 era doble:
+  #   * P2+ se agrupaba ignorando si la celda estaba sobre Mountains;
+  #   * P1 del mismo objeto quedaba en un strip curvo separado.
+  #
+  # Resultado: al lado/sobre Mountains un arbol/prop podia usar bounds de otro
+  # contexto y, ademas, abrir una junta exacta entre su fila P1 y sus P2+.
+  #
+  # Ahora Mountains/Ladders forman una FRONTERA de componente. P1 solo se
+  # absorbe una fila alrededor de un componente que tenga P2+ real; nunca sirve
+  # como puente para unir objetos lejanos o un campo entero de P1.
+  def rigid_priority_member_candidate?(entries, entry)
     return false if interior_border_entry?(entry)
     return false if entry_is_elevated_wall?(entry)
-    return false if wall_visual_entries(entries).include?(entry)
+    return false if wall_visual_owned?(entry)
+    entry_visual_priority(entry) >= Mode7::Config::PRIORITY_SURFACE_MIN.to_i
+  end
+
+  def rigid_priority_seed?(entries, entry)
+    return false if !rigid_priority_member_candidate?(entries, entry)
     entry_visual_priority(entry) >= Mode7::Config::PRIORITY_RIGID_MIN.to_i
   end
 
+  # Identidad del bitmap fuente. Sirve para reconocer piezas del MISMO objeto
+  # aun cuando Maker/RPG Maker las haya colocado en layers/unify distintos.
+  def rigid_priority_source_key(entry)
+    if entry[:tileset_id]
+      return [:tileset, entry[:tileset_id].to_i]
+    end
+    filename = entry[:filename]
+    return [:autotile, filename.to_s] if filename && !filename.to_s.empty?
+    bmp = entry[:bitmap]
+    [:bitmap, bmp ? bmp.object_id : 0]
+  end
+
+  def rigid_priority_volume_id(tx, ty)
+    return nil if !defined?(Mode7::VolumeIds)
+    Mode7::VolumeIds.id_for(@map_id, tx, ty)
+  rescue Exception
+    nil
+  end
+
+  # Contexto fisico de LA ENTRY, no de toda la celda.
+  #
+  # Un Mountain P0 debajo de un arbol P2 no puede cambiar la identidad del
+  # arbol. La continuidad del objeto ya se valida por su bitmap/src_rect.
+  def rigid_priority_node_context(_entries, entry)
+    entry_world_elevation(entry).to_f.round(4)
+  end
+
+  # Comprueba continuidad visual entre dos piezas situadas en celdas vecinas.
+  #
+  # Para un objeto multtile normal, mover una celda a la derecha/abajo en el
+  # mapa implica mover exactamente 32 px a la derecha/abajo en el tileset.
+  # Esto permite unir P2/P3/P4 del MISMO arbol/prop aunque cambie layer/unify,
+  # sin contagiar un objeto adyacente que simplemente lo esté tocando.
+  def rigid_priority_source_contiguous?(a, b, dx, dy)
+    return false if rigid_priority_source_key(a) != rigid_priority_source_key(b)
+
+    ra = a[:src_rect]
+    rb = b[:src_rect]
+    return false if !ra || !rb
+
+    expected_x = dx * Game_Map::TILE_WIDTH
+    expected_y = dy * Game_Map::TILE_HEIGHT
+
+    (rb.x - ra.x) == expected_x &&
+      (rb.y - ra.y) == expected_y
+  rescue Exception
+    false
+  end
+
+  def rigid_priority_nodes_connect?(node_a, node_b)
+    ax, ay = node_a[:position]
+    bx, by = node_b[:position]
+    dx = bx - ax
+    dy = by - ay
+    return false if dx.abs + dy.abs != 1
+
+    return false if node_a[:context] != node_b[:context]
+
+    # Un Volume ID explicito es una frontera fuerte. Si cualquiera de las dos
+    # celdas tiene ID, ambas deben compartir exactamente el mismo.
+    va = node_a[:volume_id]
+    vb = node_b[:volume_id]
+    if va || vb
+      return va && vb && va == vb
+    end
+
+    rigid_priority_source_contiguous?(node_a[:entry], node_b[:entry], dx, dy)
+  end
+
   def rigid_priority_components
-    buckets = Hash.new { |hash, key| hash[key] = {} }
+    Mode7::VolumeIds.refresh if defined?(Mode7::VolumeIds) rescue nil
+
+    nodes_by_position = Hash.new { |hash, key| hash[key] = [] }
+    seed_ids = {}
 
     @entry_cache.each do |position, entries|
+      tx, ty = position
+      volume_id = rigid_priority_volume_id(tx, ty)
+
       entries.each do |entry|
-        next if !rigid_priority_candidate?(entries, entry)
-        key = [entry[:unify].to_i, entry_world_elevation(entry).to_f]
-        buckets[key][position] ||= []
-        buckets[key][position].push(entry)
+        next if !rigid_priority_member_candidate?(entries, entry)
+
+        node = {
+          position: position,
+          entry: entry,
+          context: rigid_priority_node_context(entries, entry),
+          volume_id: volume_id
+        }
+
+        nodes_by_position[position].push(node)
+        seed_ids[entry.object_id] = true if rigid_priority_seed?(entries, entry)
       end
     end
 
     result = []
-    buckets.each do |key, cells|
-      pending = {}
-      cells.each_key { |position| pending[position] = true }
+    claimed = {}
 
-      until pending.empty?
-        start = pending.keys.first
-        pending.delete(start)
-        stack = [start]
-        component = {}
+    # Solo una entry P2+ puede iniciar un bloque. P1 puede formar parte del
+    # mismo objeto si su tile fuente es realmente contiguo, pero un campo P1
+    # aislado nunca se convierte en bloque rigido.
+    nodes_by_position.each_value do |nodes|
+      nodes.each do |start_node|
+        start_id = start_node[:entry].object_id
+        next if !seed_ids[start_id]
+        next if claimed[start_id]
+
+        stack = [start_node]
+        component_nodes = []
 
         until stack.empty?
-          tx, ty = stack.pop
-          pos = [tx, ty]
-          component[pos] = cells[pos]
+          node = stack.pop
+          entry_id = node[:entry].object_id
+          next if claimed[entry_id]
 
-          [[tx - 1, ty], [tx + 1, ty], [tx, ty - 1], [tx, ty + 1]].each do |neighbor|
-            next if !pending[neighbor]
-            pending.delete(neighbor)
-            stack.push(neighbor)
+          claimed[entry_id] = true
+          component_nodes.push(node)
+
+          tx, ty = node[:position]
+          [[tx - 1, ty], [tx + 1, ty], [tx, ty - 1], [tx, ty + 1]].each do |neighbor_pos|
+            # IMPORTANTE: no usar nodes_by_position[neighbor_pos] aqui.
+            # El hash tiene default_proc y esa lectura crearia una clave nueva
+            # si la posicion no existe. Como estamos dentro de each_value,
+            # Ruby lanza "can't add a new key into hash during iteration".
+            neighbor_nodes = nodes_by_position.fetch(neighbor_pos, nil)
+            next if !neighbor_nodes || neighbor_nodes.empty?
+
+            neighbor_nodes.each do |neighbor|
+              nid = neighbor[:entry].object_id
+              next if claimed[nid]
+              next if !rigid_priority_nodes_connect?(node, neighbor)
+              stack.push(neighbor)
+            end
           end
         end
 
-        result.push([component, key])
+        next if component_nodes.empty?
+
+        # Seguridad: el componente debe contener al menos una seed P2+.
+        next if component_nodes.none? { |node| seed_ids[node[:entry].object_id] }
+
+        component = {}
+        component_nodes.each do |node|
+          pos = node[:position]
+          component[pos] ||= []
+          component[pos].push(node[:entry])
+        end
+
+        # Ya no existe bucket por unify. Las layers distintas del mismo objeto
+        # comparten exactamente los mismos bounds/ancla.
+        contexts = component_nodes.map { |node| node[:context] }.uniq
+        # rigid_priority_node_context devuelve directamente un Float de elevacion.
+        # Antes devolvia una estructura y quedo este [0] legacy, que provocaba:
+        #   undefined method `[]' for 0.0:Float
+        elevation = contexts.empty? ? 0.0 : contexts[0].to_f
+        result.push([component, elevation])
       end
     end
+
     result
   end
 
   def build_rigid_priority_blocks
-    rigid_priority_components.each do |component, key|
-      unify, elevation = key
+    @rigid_priority_owned = {}
+
+    # En interiores raster-affine TODAS las prioridades siguen la cuadricula
+    # affine por strips. No extraer P2+ a bloques rigidos.
+    return if Mode7.respond_to?(:raster_affine_mode?) && Mode7.raster_affine_mode?
+
+    rigid_priority_components.each do |component, elevation|
       bounds = component.keys
 
-      # Priority conserva Z independiente, pero todos los niveles de un mismo
-      # objeto comparten bounds/ancla/escala. No se abre una junta entre P2/P3/P4.
+      # Marcar ownership ANTES de construir strips. Una entry que entra aqui
+      # no puede volver a aparecer como priority strip.
+      component.each_value do |entries|
+        entries.each { |entry| @rigid_priority_owned[entry.object_id] = true }
+      end
+
       groups = Hash.new { |hash, priority| hash[priority] = {} }
       component.each do |position, entries|
         entries.each do |entry|
@@ -432,8 +651,18 @@ class Mode7Renderer
       end
 
       groups.each do |priority, group_cells|
-        depth_ty = group_cells.keys.map { |_tx, ty| ty }.max
+        # El Z conserva la prioridad real, pero el layer ya no divide la
+        # geometria del objeto. Solo aporta un bias minimo de orden.
+        unifies = group_cells.values.flatten.map { |entry| entry[:unify].to_i }
+        unify = unifies.empty? ? 0 : unifies.min
+
+        # IMPORTANTE: todas las prioridades del componente usan la misma base
+        # Y de los bounds completos. Antes cada priority usaba su propia fila
+        # maxima; si el objeto solo tenia P2/P3/P4, esas bases diferian y se
+        # percibia una separacion aunque el bitmap-space fuese comun.
+        depth_ty = bounds.map { |_tx, ty| ty }.max
         depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
+
         make_rigid_component(
           group_cells,
           elevation,
@@ -444,6 +673,10 @@ class Mode7Renderer
         )
       end
     end
+  end
+
+  def rigid_priority_owned?(entry)
+    @rigid_priority_owned && @rigid_priority_owned[entry.object_id]
   end
 
   def build_priority_surfaces
@@ -456,11 +689,9 @@ class Mode7Renderer
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
-        wall_owned = wall_visual_entries(entries)
-
         entries.each do |entry|
-          next if wall_owned.include?(entry)
-          next if rigid_priority_candidate?(entries, entry)
+          next if wall_visual_owned?(entry)
+          next if rigid_priority_owned?(entry)
           next if !priority_surface_entry?(entry)
 
           elevation = entry_world_elevation(entry)
@@ -575,35 +806,69 @@ class Mode7Renderer
   # ---------------------------------------------------------------------------
   # Priority surfaces (equivalente 2.5D de los tiles con estrella de RMXP)
   # ---------------------------------------------------------------------------
-  # Un strip contiene todos los tiles de una fila que comparten priority/layer.
-  # RPG Maker calcula Z por fila de tile, no por tile individual: esta unidad
-  # mantiene la prioridad real y evita crear/reproyectar cientos de sprites al
-  # mover la camara verticalmente.
+  # Raster approach: las entradas P1 se hornéan directamente en @ground.
+  # draw_ground las proyecta scanline por scanline con la misma deformación
+  # que el terreno (montañas). Cero sprites, cero cortes entre strips.
   def make_priority_strip(cells, ty, priority, unify, elevation)
     return if !cells || cells.empty?
-    min_tx = cells.keys.min
-    max_tx = cells.keys.max
-    width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
-    source = Bitmap.new(width, Game_Map::TILE_HEIGHT)
 
-    mountain_shadow = priority <= 0 && cells.values.flatten.any? do |entry|
-      entry_is_elevated_wall?(entry) && mountain_shadow_opacity_for([entry]) > 0
+    # Interior: raster affine REAL. Cada fila priority conserva un Sprite con
+    # su Z, pero su geometria se calcula desde project_y/hscale exactamente
+    # igual que la cuadricula del ground. No se hornea encima de P0.
+    if Mode7.respond_to?(:raster_affine_mode?) && Mode7.raster_affine_mode?
+      min_tx = cells.keys.min
+      max_tx = cells.keys.max
+      width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
+      source = Bitmap.new(width, Game_Map::TILE_HEIGHT)
+      source.clear
+
+      cells.each do |tx, entries|
+        x = (tx - min_tx) * Game_Map::TILE_WIDTH
+        entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }.each do |entry|
+          blt_entry_into(source, x, 0, entry, entry[:opacity] || 255)
+        end
+      end
+
+      sprite = Sprite.new(@viewport)
+      sprite.bitmap = source
+      sprite.ox = 0
+      sprite.oy = source.height
+      sprite.visible = false
+
+      @priority_strips.push([
+        sprite, source, min_tx, ty, priority, unify, elevation,
+        cells, :entries_only, nil
+      ])
+      return
     end
-    draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow)
 
-    sprite = Sprite.new(@viewport)
-    sprite.bitmap = source
-    sprite.ox = 0
-    sprite.oy = source.height
-    sprite.visible = false
-
-    @priority_strips.push([
-      sprite, source, min_tx, ty, priority, unify, elevation,
-      cells, mountain_shadow
-    ])
+    # Exterior legacy: P1 sigue integrado al raster de ground para compartir
+    # exactamente la curva del suelo.
+    return if !@ground || @ground.disposed?
+    cells.each do |tx, entries|
+      x = tx * Game_Map::TILE_WIDTH
+      y = ty * Game_Map::TILE_HEIGHT
+      sorted = entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }
+      sorted.each do |entry|
+        blt_entry_into(@ground, x, y, entry, entry[:opacity] || 255)
+      end
+    end
+    @priority_raster_cells ||= {}
+    @priority_raster_cells[ty] ||= []
+    @priority_raster_cells[ty].push(cells)
   end
+
   def draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow = false)
     source.clear
+    if @ground && !@ground.disposed?
+      cells.each_key do |tx|
+        gx = tx * Game_Map::TILE_WIDTH
+        gy = ty * Game_Map::TILE_HEIGHT
+        sx = (tx - min_tx) * Game_Map::TILE_WIDTH
+        @src_rect.set(gx, gy, Game_Map::TILE_WIDTH, Game_Map::TILE_HEIGHT)
+        source.blt(sx, 0, @ground, @src_rect)
+      end
+    end
     cells.each do |tx, entries|
       x = (tx - min_tx) * Game_Map::TILE_WIDTH
       sorted = entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }
@@ -732,7 +997,6 @@ class Mode7Renderer
     true
   end
   def update_priority_surfaces
-    update_priority_strips
     update_priority_objects
   end
   def priority_strip_on_screen?(source, min_tx, ty, elevation = 0)
@@ -750,20 +1014,36 @@ class Mode7Renderer
     cam_ty = Mode7.cam_y / Game_Map::TILE_HEIGHT
     radius_y = defined?(Mode7::Config::WALL_SPAWN_RADIUS_Y) ?
                Mode7::Config::WALL_SPAWN_RADIUS_Y : 34
+    cam_x_now = Mode7.cam_x
+    cam_y_now = Mode7.projection_cam_y
+    proj_rev = Mode7.projection_revision
 
     @priority_strips.each do |data|
       sprite, source, min_tx, ty, priority, unify, elevation,
-      _cells, _mountain_shadow = data
+      _cells, _mountain_shadow, projection_key = data
 
       if (ty - cam_ty).abs > radius_y
         sprite.visible = false
         next
       end
-      if !priority_strip_on_screen?(source, min_tx, ty, elevation)
-        sprite.visible = false
-        next
+
+      needs_recalc = !projection_key ||
+                     (cam_x_now - projection_key[0]).abs >= 0.5 ||
+                     (cam_y_now - projection_key[1]).abs >= 0.5 ||
+                     proj_rev != projection_key[2]
+      if needs_recalc
+        if !redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation)
+          sprite.visible = false
+          next
+        end
+        data[9] = [cam_x_now, cam_y_now, proj_rev]
       end
-      if !redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation)
+
+      top = sprite.y - sprite.oy * sprite.zoom_y
+      bottom = sprite.y
+      if top > Mode7.screen_h || bottom < 0 ||
+         sprite.x + sprite.bitmap.width * sprite.zoom_x < 0 ||
+         sprite.x > Mode7.screen_w
         sprite.visible = false
         next
       end
@@ -776,9 +1056,8 @@ class Mode7Renderer
         bias
       )
 
-      top = sprite.y - sprite.oy * sprite.zoom_y
       apply_depth_fog_to_sprite(sprite, sprite.y)
-      sprite.visible = !(top > Mode7.screen_h || sprite.y < 0)
+      sprite.visible = true
     end
   end
   # Priority sprites que no pertenecen a strips (actualmente InteriorBorder).
@@ -858,7 +1137,39 @@ class Mode7Renderer
       cells, mountain_shadow = data
       next if !source || source.disposed?
       next if cells.values.flatten.none? { |entry| entry[:animated] }
-      draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow)
+      if mountain_shadow == :entries_only
+        source.clear
+        cells.each do |tx, entries|
+          x = (tx - min_tx) * Game_Map::TILE_WIDTH
+          entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }.each do |entry|
+            blt_entry_into(source, x, 0, entry, entry[:opacity] || 255)
+          end
+        end
+      else
+        draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow)
+      end
+    end
+
+    if @priority_raster_cells && @ground && !@ground.disposed?
+      affected_tys = []
+      @autotile_cells.each do |filename, cells|
+        next if !@autotiles.animated?(filename)
+        cells.each do |_tx, ty|
+          affected_tys << ty if @priority_raster_cells[ty]
+        end
+      end
+      affected_tys.uniq.each do |ty|
+        @priority_raster_cells[ty].each do |strip_cells|
+          strip_cells.each do |tx, entries|
+            x = tx * Game_Map::TILE_WIDTH
+            y = ty * Game_Map::TILE_HEIGHT
+            sorted = entries.sort_by { |e| [e[:unify].to_i, e[:priority].to_i] }
+            sorted.each do |entry|
+              blt_entry_into(@ground, x, y, entry, entry[:opacity] || 255)
+            end
+          end
+        end
+      end
     end
 
     @priority_data.each do |data|
@@ -919,14 +1230,21 @@ class Mode7Renderer
 
       sx, syb = projected
 
-      # El bloque es rigido: la perspectiva solo mueve el ancla.
-      # El zoom de camara escala X/Y por igual; la profundidad NO cambia su
-      # relacion de aspecto ni hace que filas internas se separen.
-      fixed_scale = Mode7.zoom.to_f
-      fixed_scale = 0.001 if fixed_scale <= 0.001
+      if Mode7.raster_affine_mode?
+        # El bloque sigue siendo rigido: no se curva ni se escala por fila.
+        # Pero todo el bitmap recibe UNA transformacion affine uniforme, igual
+        # que la cuadricula del suelo. Asi visual y collision grid coinciden.
+        scale_x = Mode7.hscale(syb).to_f
+        scale_y = Mode7.zoom.to_f * Mode7.affine_slope_value.to_f
+      else
+        scale_x = Mode7.zoom.to_f
+        scale_y = Mode7.zoom.to_f
+      end
+      scale_x = 0.001 if scale_x <= 0.001
+      scale_y = 0.001 if scale_y <= 0.001
 
-      half_width = sprite.bitmap.width * fixed_scale / 2.0
-      screen_height = sprite.bitmap.height * fixed_scale
+      half_width = sprite.bitmap.width * scale_x / 2.0
+      screen_height = sprite.bitmap.height * scale_y
       top_y = syb - screen_height
 
       if syb < -Game_Map::TILE_HEIGHT ||
@@ -939,8 +1257,8 @@ class Mode7Renderer
 
       sprite.x = sx
       sprite.y = syb
-      sprite.zoom_x = fixed_scale
-      sprite.zoom_y = fixed_scale
+      sprite.zoom_x = scale_x
+      sprite.zoom_y = scale_y
 
       depth_wyb, depth_priority, depth_unify = depth || [wyb, 0, 0]
       bias = depth_unify.to_i

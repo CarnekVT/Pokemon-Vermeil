@@ -13,6 +13,10 @@ module Mode7
     # aun no ha construido su cache (evita volcar pasabilidad a mitad de carga).
     def wall_cell_at?(x, y)
       return false if !Config::WALL_BLOCKS_MOVEMENT
+      if indoor_map? && defined?(Config::INDOOR_WALL_BLOCKS_MOVEMENT) &&
+         !Config::INDOOR_WALL_BLOCKS_MOVEMENT
+        return false
+      end
       return false if !rendering_now?
       renderer = $scene.instance_variable_get(:@map_renderer)
       return false if !renderer.is_a?(Mode7Renderer)

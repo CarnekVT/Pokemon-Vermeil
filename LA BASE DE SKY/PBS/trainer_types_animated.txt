@@ -261,6 +261,7 @@ Name = Janitor
 Gender = Male
 BaseMoney = 24
 ShadowXY = 0,-12
+AnimationSpeed = 1
 #-------------------------------
 [MAID]
 Name = Maid
@@ -397,6 +398,7 @@ Name = Hoopster
 Gender = Male
 BaseMoney = 32
 ShadowXY = 0,-1
+AnimationSpeed = 1
 #-------------------------------
 [LINEBACKER]
 Name = Linebacker

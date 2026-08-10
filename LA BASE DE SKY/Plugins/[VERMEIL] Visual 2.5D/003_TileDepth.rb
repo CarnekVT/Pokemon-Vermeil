@@ -173,6 +173,7 @@ class Mode7Renderer
       data[0].dispose
     end
     @priority_strips.clear
+    @priority_raster_cells = {}
     @priority_data.each do |data|
       data[9].dispose if data[9] && !data[9].disposed?
       data[0].dispose
@@ -181,6 +182,8 @@ class Mode7Renderer
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
     @entry_cache = {}
     @terrain_tag_cache = {}
+    @wall_visual_components = nil
+    @wall_visual_owned = {}
     @wall_cells = {}
     @walls_known = true
 
@@ -193,6 +196,9 @@ class Mode7Renderer
     end
     cache_terrain_tag_heights
     cache_visual_priorities
+    # Debe resolverse ANTES de hornear @ground: P4/techo sin Terrain Tag puede
+    # pertenecer al mismo wall y no debe quedar duplicado en el bitmap base.
+    cache_wall_visual_components
     Mode7.snap_terrain_camera_lift_to_target
 
     # ponytail: conservar pila vanilla en bitmap fuente. Proyectar tres planos
@@ -357,14 +363,8 @@ class Mode7Renderer
   # No puede quedar tambien horneada en @ground, que era la causa principal de
   # tiles duplicados al combinar P0/P1 o wall sobre otras superficies.
   def ground_entries_for_cell(tx, ty, entries)
-    wall_owned = if respond_to?(:wall_visual_entries, true)
-                   wall_visual_entries(entries)
-                 else
-                   []
-                 end
-
     entries.reject do |entry|
-      wall_owned.include?(entry) ||
+      (respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)) ||
         priority_surface_entry?(entry) ||
         interior_border_entry?(entry)
     end
@@ -589,14 +589,12 @@ class Mode7Renderer
     if @old_tone != @tone
       @ground_sprite.tone = @tone
       @wall_data.each { |data| data[0].tone = @tone }
-      @priority_strips.each { |data| data[0].tone = @tone }
       @priority_data.each { |data| data[0].tone = @tone }
       @old_tone = @tone.clone
     end
     if @old_color != @color
       @ground_sprite.color = @color
       @wall_data.each { |data| data[0].color = @color }
-      @priority_strips.each { |data| data[0].color = @color }
       @priority_data.each { |data| data[0].color = @color }
       @old_color = @color.clone
     end

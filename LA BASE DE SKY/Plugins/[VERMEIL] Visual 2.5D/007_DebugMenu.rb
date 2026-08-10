@@ -13,7 +13,7 @@ module Mode7
     cmd = 0
     loop do
       commands = [
-        _INTL("Angulo: {1}°", Mode7.current_alpha),
+        _INTL("Angulo: {1}° ({2})", Mode7.current_alpha, Mode7.map_mode),
         _INTL("Zoom: {1}", Mode7.zoom),
         _INTL("Radio arco Sky: {1}", Mode7.planet_radius),
         _INTL("Distancia (Altura): {1}", Mode7.distance_h),

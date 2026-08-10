@@ -22,12 +22,34 @@ module Mode7
     # Proyeccion efectiva del mapa actual. El notetag/flag del mapa (visto en
     # Game_Map#setup) puede forzar :affine o :sky; si no, usa Config::PROJECTION.
     def map_mode
-      return @map_projection if @map_projection == :affine || @map_projection == :sky
+      return @map_projection if [:affine, :sky].include?(@map_projection)
       Config::PROJECTION
     end
 
     def affine_mode?; return map_mode == :affine; end
     def sky_mode?; return map_mode == :sky; end
+
+    # Raster es una politica de dibujo de tiles, NO otra proyeccion.
+    # Un interior puede usar :affine y, al mismo tiempo, rasterizar P0/P1+ con
+    # la misma cuadricula. El flag legacy Mode7RasterAffine se conserva como
+    # atajo para activar ambas cosas en un mapa concreto.
+    def raster_tiles_map?(map_id = nil)
+      return false if !defined?(GameData::MapMetadata)
+      id = map_id
+      id = $game_map.map_id if id.nil? && $game_map
+      return false if id.nil?
+      meta = GameData::MapMetadata.get(id) rescue nil
+      return false if !meta
+      return true if meta.has_flag?(Config::MAP_FLAG_RASTER_AFFINE)
+      return !!Config::INDOOR_RASTER_TILES if meta.outdoor_map == false
+      false
+    end
+
+    # Nombre conservado para no romper helpers existentes. Significa:
+    # proyeccion affine + politica raster de tiles.
+    def raster_affine_mode?
+      affine_mode? && raster_tiles_map?
+    end
 
     # Interior/exterior es una propiedad del mapa, independiente de la
     # proyeccion elegida. Asi podemos mantener :sky dentro de casas y aun
@@ -46,19 +68,33 @@ module Mode7
       return nil if !defined?(GameData::MapMetadata)
       meta = GameData::MapMetadata.get(map_id) rescue nil
       return nil if !meta
-      if meta.has_flag?(Config::MAP_FLAG_AFFINE)
+      if meta.has_flag?(Config::MAP_FLAG_RASTER_AFFINE)
+        return :affine
+      elsif meta.has_flag?(Config::MAP_FLAG_AFFINE)
         return :affine
       elsif meta.has_flag?(Config::MAP_FLAG_SKY)
         return :sky
-      elsif Config::AUTO_INDOOR_AFFINE && meta.outdoor_map == false
-        return :affine
+      elsif meta.outdoor_map == false
+        mode = Config::INDOOR_PROJECTION
+        return mode if [:affine, :sky].include?(mode)
       end
       nil
     end
 
+    # Cantidad de curvatura activa. Se deriva directamente del angulo real de
+    # camara, en vez de escalar DEFAULT_ALPHA. Esto evita que 30°/45° hagan
+    # explotar la curva por multiplicadores 2x/3x.
     def sky_angle_scale
       return 0.0 if !@current_alpha
-      return @current_alpha.to_f / Config::DEFAULT_ALPHA
+      Math.sin(@current_alpha.to_f * Math::PI / 180.0).clamp(0.0, 1.0)
+    end
+
+    # Pitch global de la camara. A 0° el mapa es top-down; al aumentar el
+    # angulo se comprime TODO el eje Y, no solo la perspectiva interna de tiles.
+    def camera_pitch_scale
+      strength = Config::CAMERA_PITCH_STRENGTH.to_f.clamp(0.0, 0.95)
+      value = 1.0 - strength * sky_angle_scale
+      value.clamp(0.20, 1.0)
     end
 
     # Media circunferencia top-down SIN punto de inflexion visible.
@@ -91,6 +127,20 @@ module Mode7
       (-Math.cos(phi) - base) / norm
     end
 
+    # Derivada exacta de sky_curve. Se usa para invertir la proyeccion durante
+    # transiciones suaves de angulo/zoom.
+    def sky_curve_derivative(theta)
+      phase = Config::SKY_ARC_PHASE.to_f
+      min_phi = Config::SKY_ARC_MIN.to_f.clamp(0.02, Math::PI / 2.0 - 0.04)
+      max_phi = Config::SKY_ARC_MAX.to_f.clamp(min_phi + 0.02, Math::PI / 2.0 - 0.02)
+      norm = Math.sin(phase)
+      norm = 1.0 if norm.abs < 1.0e-6
+      phi = phase + theta.to_f
+      return Math.sin(min_phi) / norm if phi < min_phi
+      return Math.sin(max_phi) / norm if phi > max_phi
+      Math.sin(phi) / norm
+    end
+
     def sky_directional_scale(theta, strength)
       strength = strength.to_f
       return 1.0 if strength.abs < 1.0e-9
@@ -106,13 +156,15 @@ module Mode7
     # La curvatura Sky afecta profundidad Y; no forzar derivada X evita que las
     # filas del borde se cierren y dejen huecos fuera del mapa.
     def sky_width_scale(theta)
-      sky_directional_scale(theta, Config::SKY_WIDTH_PERSPECTIVE)
+      sky_directional_scale(theta.to_f * sky_angle_scale,
+                            Config::SKY_WIDTH_PERSPECTIVE)
     end
 
     # Escala de personajes/eventos por profundidad. Puede variar suavemente
     # sin afectar la proporcion interna de los tiles del mapa.
     def sky_sprite_scale(theta)
-      sky_directional_scale(theta, Config::SKY_SPRITE_SCALE)
+      sky_directional_scale(theta.to_f * sky_angle_scale,
+                            Config::SKY_SPRITE_SCALE)
     end
 
     # Escala UNIFORME de objetos verticales. Terrain usa conicidad propia, pero
@@ -138,10 +190,8 @@ module Mode7
     # Angulo de profundidad a partir de una coordenada Y del mundo, sin mezclar
     # elevacion. Este theta representa exclusivamente distancia sobre el suelo.
     def sky_theta_for_world_y(wy)
-      scale = sky_angle_scale
-      return 0.0 if scale <= 0.0
       ry = (wy.to_f - projection_cam_y - pivot_y)
-      (ry * @zoom * scale * sky_ground_y_scale) / @planet_radius
+      (ry * @zoom * sky_ground_y_scale) / @planet_radius
     end
 
     # Escala visual de un billboard situado en la Y indicada.
@@ -159,40 +209,45 @@ module Mode7
       tile_billboard_scale_for_world_y(wy) * Config::SKY_VERTICAL_SCALE.to_f
     end
 
-    # Inversa exacta de la misma rama circular.
-    def sky_curve_inv(t)
-      phase = Config::SKY_ARC_PHASE.to_f
-      min_phi = Config::SKY_ARC_MIN.to_f.clamp(0.02, Math::PI / 2.0 - 0.04)
-      max_phi = Config::SKY_ARC_MAX.to_f.clamp(min_phi + 0.02, Math::PI / 2.0 - 0.02)
-      norm = Math.sin(phase)
-      norm = 1.0 if norm.abs < 1.0e-6
-      base = -Math.cos(phase)
+    # Convierte una distancia Y de mundo (relativa al pivot) a desplazamiento
+    # de pantalla. El angulo controla DOS cosas de forma suave:
+    #   1) mezcla plano -> arco circular;
+    #   2) pitch vertical global.
+    #
+    # Por eso cambiar el angulo ya no parece solo un cambio de textura/raster.
+    def sky_ground_offset_for_ry(ry)
+      flat = ry.to_f * @zoom * sky_ground_y_scale
+      return flat if @planet_radius.to_f.abs < 1.0e-6
 
-      raw_target = t.to_f * norm
-      low = -Math.cos(min_phi) - base
-      high = -Math.cos(max_phi) - base
-
-      if raw_target < low
-        phi = min_phi + (raw_target - low) / Math.sin(min_phi)
-        return phi - phase
-      elsif raw_target > high
-        phi = max_phi + (raw_target - high) / Math.sin(max_phi)
-        return phi - phase
-      end
-
-      cos_phi = -(raw_target + base)
-      cos_phi = cos_phi.clamp(-1.0, 1.0)
-      Math.acos(cos_phi) - phase
+      theta = flat / @planet_radius
+      mix = sky_angle_scale
+      curved = @planet_radius * sky_curve(theta)
+      blended = flat + (curved - flat) * mix
+      camera_pitch_scale * blended
     end
 
-    # Theta correspondiente a una fila de pantalla para el angulo ACTUAL.
-    # El factor alpha aparece tanto aqui como en la proyeccion directa, por lo
-    # que world_y_for_row sigue siendo la inversa exacta durante transiciones.
+    # Theta correspondiente a una fila de pantalla. Se resuelve por Newton
+    # sobre la MISMA mezcla usada por sky_ground_offset_for_ry, de modo que
+    # ground/hscale/prioridades siguen sincronizados durante una transición.
     def sky_theta_for_row(sy)
-      scale = sky_angle_scale
-      return 0.0 if scale.abs < 1.0e-6
-      t = ((sy.to_f - pivot_y) * scale) / @planet_radius
-      sky_curve_inv(t)
+      radius = @planet_radius.to_f
+      return 0.0 if radius.abs < 1.0e-6
+
+      pitch = camera_pitch_scale
+      mix = sky_angle_scale
+      target = (sy.to_f - pivot_y) / (pitch * radius)
+
+      theta = target
+      10.times do
+        curve = sky_curve(theta)
+        f = theta + (curve - theta) * mix - target
+        d = (1.0 - mix) + mix * sky_curve_derivative(theta)
+        break if d.abs < 1.0e-8
+        step = f / d
+        theta -= step
+        break if step.abs < 1.0e-7
+      end
+      theta
     end
     def effective_mode_blend; return (@mode_blend || 0.0).clamp(0.0, 1.0); end
 
@@ -423,6 +478,28 @@ module Mode7
       return @sin * Config::AFFINE_PERSPECTIVE.to_f
     end
 
+    def affine_depth_value
+      return Config::INDOOR_AFFINE_DEPTH.to_f if raster_affine_mode?
+      Config::AFFINE_DEPTH.to_f
+    end
+
+    def affine_slope_value
+      base = raster_affine_mode? ? Config::INDOOR_AFFINE_SLOPE.to_f :
+                                   Config::AFFINE_SLOPE.to_f
+      return base * camera_pitch_scale if raster_affine_mode?
+      base
+    end
+
+    def affine_zoom_value
+      return Config::INDOOR_AFFINE_ZOOM.to_f if raster_affine_mode?
+      Config::AFFINE_ZOOM.to_f
+    end
+
+    def affine_convergence_value
+      return Config::INDOOR_AFFINE_CONVERGENCE.to_f if raster_affine_mode?
+      Config::AFFINE_CONVERGENCE.to_f
+    end
+
     def ortho_blend
       return 0.0 if Config::FOV >= 55
       return 1.0 if Config::FOV <= 0
@@ -454,8 +531,9 @@ module Mode7
         return @zoom * sky_width_scale(sky_theta_for_row(sy))
       end
       if affine_mode?
-        if Config::AFFINE_DEPTH > 0
-          heff = @dh / Config::AFFINE_DEPTH.to_f
+        depth = affine_depth_value
+        if depth > 0
+          heff = @dh / depth
           ry = affine_depth_unscale((sy - pivot_y).to_f)
           zi = @zoom * ry
           d = heff - zi * effective_sin
@@ -463,7 +541,8 @@ module Mode7
           return @zoom * heff * heff * @cos / (d * d)
         end
         t = (sy / screen_h.to_f) - 0.5
-        return Config::AFFINE_ZOOM * (1.0 + Config::AFFINE_CONVERGENCE * 2.0 * t)
+        return @zoom * affine_zoom_value *
+               (1.0 + affine_convergence_value * 2.0 * t)
       end
       full = persp(sy) * @zoom
       flat = persp(pivot_y) * @zoom
@@ -473,8 +552,8 @@ module Mode7
     def horizon_row
       # Sky direccional es top-down y no coloca un horizonte dentro del viewport.
       return 0.0 if sky_mode?
-      if affine_mode? && Config::AFFINE_DEPTH > 0
-        heff = @dh / Config::AFFINE_DEPTH.to_f
+      if affine_mode? && affine_depth_value > 0
+        heff = @dh / affine_depth_value
         se = effective_sin
         return 0 if se.abs < 1.0e-9
         return pivot_y - (heff * @cos / se)
@@ -516,40 +595,36 @@ module Mode7
     end
 
     def affine_depth_scale(ry)
-      t = Config::AFFINE_DEPTH
-      s = Config::AFFINE_SLOPE
-      return s * ry if t <= 0
+      t = affine_depth_value
+      s = affine_slope_value
+      return @zoom * s * ry.to_f if t <= 0
       heff = @dh / t
       yi = @zoom * ry
       d = heff - yi * effective_sin
-      return s * ry if d <= 0.0
+      return @zoom * s * ry.to_f if d <= 0.0
       (heff * yi * @cos) / d
     end
 
     def affine_depth_unscale(so)
-      t = Config::AFFINE_DEPTH
-      s = Config::AFFINE_SLOPE
-      return so / s if t <= 0
+      t = affine_depth_value
+      s = affine_slope_value
+      if t <= 0
+        den = @zoom * s
+        return 0.0 if den.abs < 1.0e-9
+        return so.to_f / den
+      end
       heff = @dh / t
       den = so * effective_sin + heff * @cos
-      return so / s if den.abs < 1.0e-9
+      return so / [@zoom * s, 1.0e-6].max if den.abs < 1.0e-9
       yi = so * heff / den
       yi / @zoom
     end
 
     def _sky_project(wx, wy, elevation = 0)
       rx = wx.to_f - cam_x
-      scale = sky_angle_scale
       ry = wy.to_f - projection_cam_y - pivot_y
-      ground_scale = sky_ground_y_scale
-
-      if scale.abs < 1.0e-6
-        sy_ground = pivot_y + ry * @zoom * ground_scale
-        theta = 0.0
-      else
-        theta = (ry * @zoom * scale * ground_scale) / @planet_radius
-        sy_ground = pivot_y + (@planet_radius / scale) * sky_curve(theta)
-      end
+      theta = sky_theta_for_world_y(wy)
+      sy_ground = pivot_y + sky_ground_offset_for_ry(ry)
 
       sx = center_x + rx * @zoom * sky_width_scale(theta)
       sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
@@ -603,17 +678,8 @@ module Mode7
     end
 
     def _sky_project_y(wy, elevation = 0)
-      scale = sky_angle_scale
       ry = wy.to_f - projection_cam_y - pivot_y
-      ground_scale = sky_ground_y_scale
-
-      if scale.abs < 1.0e-6
-        sy_ground = pivot_y + ry * @zoom * ground_scale
-      else
-        theta = (ry * @zoom * scale * ground_scale) / @planet_radius
-        sy_ground = pivot_y + (@planet_radius / scale) * sky_curve(theta)
-      end
-
+      sy_ground = pivot_y + sky_ground_offset_for_ry(ry)
       sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
     end
     def _project_y_uncached(wy, elevation = 0)
@@ -682,22 +748,18 @@ module Mode7
     end
 
     def _sky_world_y_for_row(sy)
-      scale = sky_angle_scale
       ground_scale = sky_ground_y_scale
       denom = @zoom * ground_scale
       return projection_cam_y + pivot_y if denom.abs < 1.0e-9
 
-      if scale.abs < 1.0e-6
-        ry = (sy.to_f - pivot_y) / denom
-        return projection_cam_y + pivot_y + ry
-      end
-
       @sky_row_world_offset_cache ||= {}
-      key = [sy, scale, @zoom, ground_scale]
+      key = [sy, sky_angle_scale, camera_pitch_scale, @zoom, ground_scale,
+             @planet_radius]
       offset = @sky_row_world_offset_cache[key]
       if offset.nil?
         theta = sky_theta_for_row(sy)
-        ry = (theta * @planet_radius) / (denom * scale)
+        flat = theta * @planet_radius
+        ry = flat / denom
         offset = pivot_y + ry
         @sky_row_world_offset_cache[key] = offset
       end
@@ -806,8 +868,9 @@ class Scene_Map
   end
 end
 
-# Deteccion de interiores: al cargar un mapa se resuelve su proyeccion (flag
-# <mode7: affine>/<mode7: sky>, o AUTO_INDOOR_AFFINE) y se invalida lo cacheado.
+# Deteccion de interiores: al cargar un mapa se resuelve :affine/:sky.
+# Mode7RasterAffine conserva compatibilidad, pero ahora significa :affine +
+# politica raster de tiles, no una proyeccion distinta.
 class Game_Map
   alias_method :_VERMEIL_25D_core_setup, :setup unless method_defined?(:_VERMEIL_25D_core_setup)
 

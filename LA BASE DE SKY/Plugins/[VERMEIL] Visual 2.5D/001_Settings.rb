@@ -80,12 +80,21 @@ module Mode7
     # Sky por defecto; Mode7Affine queda disponible como excepcion por mapa.
     #   "Mode7Affine" -> espacia el mapa en proyeccion plana.
     #   "Mode7Sky"    -> fuerza el arco circular Sky.
-    MAP_FLAG_AFFINE = "mode7afine"
-    MAP_FLAG_SKY    = "mode7sky"
+    MAP_FLAG_AFFINE        = "mode7afine"
+    # Compatibilidad: fuerza :affine y activa raster de tiles para ese mapa.
+    MAP_FLAG_RASTER_AFFINE = "mode7rasteraffine"
+    MAP_FLAG_SKY           = "mode7sky"
 
-    # Sky tambien en interiores. Mode7Affine en Flags fuerza el modo interior
-    # plano solo para mapas que realmente lo necesiten.
-    AUTO_INDOOR_AFFINE = false
+    # Estilo 2.5D por defecto para interiores.
+    # Se usa la proyeccion :affine REAL del plugin. El raster de tiles se
+    # controla aparte con INDOOR_RASTER_TILES; no existe una segunda camara.
+    # Los flags del mapa siempre tienen prioridad sobre este valor.
+    INDOOR_PROJECTION = :affine
+
+    # Rasteriza las capas visuales del interior sobre la misma cuadricula
+    # affine del suelo. P0 queda en ground y P1+ usa strips affine con Z propio.
+    # Esto mantiene visual, jugador y colisiones sobre las mismas celdas.
+    INDOOR_RASTER_TILES = true
 
     # BORDE INTERIOR. Superficie del plano para zocalos, bordes y suelo
     # interior. No entra al volumen ni a prioridad: conserva posicion exacta
@@ -139,6 +148,20 @@ module Mode7
     # (zoom constante por fila, sin perspectiva). Se aplica CONSISTENTEMENTE en
     # scale/unscale/hscale/horizon para no rasgar el terreno.
     AFFINE_PERSPECTIVE = 0.0
+
+    # Parametros del :affine usado por interiores rasterizados.
+    # Slope 1.0 conserva exactamente una celda visual por celda logica cuando
+    # el angulo esta en 0; el pitch de camara puede comprimir todo el mapa de
+    # forma uniforme sin desplazar unas capas respecto de otras.
+    INDOOR_AFFINE_SLOPE       = 1.00
+    INDOOR_AFFINE_ZOOM        = 1.00
+    INDOOR_AFFINE_CONVERGENCE = 0.0
+    INDOOR_AFFINE_DEPTH       = 0.0
+
+    # El angulo deja de ser solo "cantidad de curvatura". Tambien controla el
+    # pitch vertical de la camara. 0° = top-down; al aumentar el angulo el
+    # plano se comprime verticalmente de forma continua.
+    CAMERA_PITCH_STRENGTH = 0.60
 
     # =======================================================================
     # SKY - MEDIA CIRCUNFERENCIA TOP-DOWN
@@ -324,6 +347,11 @@ module Mode7
     # verticales. False = el motor sigue ignorando la extrusion (solo visual).
     # =======================================================================
     WALL_BLOCKS_MOVEMENT = true
+
+    # En interiores raster-affine, la pasabilidad del editor/Maker Studio es
+    # la autoridad. El renderer no añade una segunda collision wall porque el
+    # bloque visual puede abarcar varias layers aunque la collision nativa no.
+    INDOOR_WALL_BLOCKS_MOVEMENT = false
 
     # =======================================================================
     # NIEBLA DE PROFUNDIDAD (distance fog hacia el horizonte)

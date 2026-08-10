@@ -162,6 +162,7 @@ BaseMoney = 40
 Name = Karateka
 Gender = Male
 BaseMoney = 32
+AnimationSpeed = 1
 #-------------------------------
 [CRUSHGIRL]
 Name = Luchadora
@@ -193,7 +194,8 @@ Name = Joven
 Gender = Male
 BaseMoney = 16
 ShadowXY = 13,-33
-SpriteOffset = -8,40
+SpriteOffset = -9,47
+AnimationSpeed = 1
 #-------------------------------
 [LASS]
 Name = Chica
