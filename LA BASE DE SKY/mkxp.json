@@ -157,6 +157,10 @@
     //
     "subImageFix": true,
 
+    // Compila rutas Ruby calientes (raster Mode 7 incluido). Este Game.exe
+    // expone YJIT; desactivar si una maquina concreta falla al arrancar.
+    "YJITEnable": true,
+
     // Use the OpenGL backend instead of Metal on Apple Silicon Macs.
     // Workaround for the game screen not filling the window on Retina displays.
     //

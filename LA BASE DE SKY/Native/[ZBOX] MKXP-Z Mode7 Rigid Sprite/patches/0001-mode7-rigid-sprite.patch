@@ -1,0 +1,371 @@
+diff --git a/binding/sprite-binding.cpp b/binding/sprite-binding.cpp
+index c697ee8..64d791f 100644
+--- a/binding/sprite-binding.cpp
++++ b/binding/sprite-binding.cpp
+@@ -83,6 +83,47 @@ DEF_GFX_PROP_F(Sprite, PatternZoomY)
+ DEF_GFX_PROP_B(Sprite, Mirror)
+ DEF_GFX_PROP_B(Sprite, PatternTile)
+ DEF_GFX_PROP_B(Sprite, Invert)
++DEF_GFX_PROP_B(Sprite, Mode7Rigid)
++
++DEF_GFX_PROP_F(Sprite, Mode7WorldX)
++DEF_GFX_PROP_F(Sprite, Mode7WorldY)
++DEF_GFX_PROP_F(Sprite, Mode7Elevation)
++DEF_GFX_PROP_F(Sprite, Mode7CurveResponse)
++
++RB_METHOD(mode7NativeAvailable) {
++    RB_UNUSED_PARAM;
++    return Qtrue;
++}
++
++RB_METHOD(mode7NativeConfigure) {
++    RB_UNUSED_PARAM;
++    bool enabled;
++    double cameraX, cameraY, centerX, pivotY;
++    double radius, zoom, angleScale, groundYScale;
++    double curve, linear, widthPerspective, verticalScale;
++    rb_get_args(argc, argv, "bffffffffffff",
++                &enabled, &cameraX, &cameraY, &centerX, &pivotY,
++                &radius, &zoom, &angleScale, &groundYScale,
++                &curve, &linear, &widthPerspective, &verticalScale RB_ARG_END);
++
++    Mode7RigidProjection value;
++    value.enabled = enabled;
++    value.cameraX = cameraX;
++    value.cameraY = cameraY;
++    value.centerX = centerX;
++    value.pivotY = pivotY;
++    value.radius = radius;
++    value.zoom = zoom;
++    value.angleScale = angleScale;
++    value.groundYScale = groundYScale;
++    value.curve = curve;
++    value.linear = linear;
++    value.widthPerspective = widthPerspective;
++    value.verticalScale = verticalScale;
++
++    GFX_GUARD_EXC(Sprite::configureMode7RigidProjection(value);)
++    return Qnil;
++}
+ 
+ RB_METHOD(spriteWidth) {
+     RB_UNUSED_PARAM;
+@@ -150,9 +191,19 @@ void spriteBindingInit() {
+     INIT_PROP_BIND(Sprite, PatternZoomX, "pattern_zoom_x");
+     INIT_PROP_BIND(Sprite, PatternZoomY, "pattern_zoom_y");
+     INIT_PROP_BIND(Sprite, Invert, "invert");
++
++    INIT_PROP_BIND(Sprite, Mode7Rigid, "mode7_rigid");
++    INIT_PROP_BIND(Sprite, Mode7WorldX, "mode7_world_x");
++    INIT_PROP_BIND(Sprite, Mode7WorldY, "mode7_world_y");
++    INIT_PROP_BIND(Sprite, Mode7Elevation, "mode7_elevation");
++    INIT_PROP_BIND(Sprite, Mode7CurveResponse, "mode7_curve_response");
+     
+     INIT_PROP_BIND(Sprite, WaveAmp, "wave_amp");
+     INIT_PROP_BIND(Sprite, WaveLength, "wave_length");
+     INIT_PROP_BIND(Sprite, WaveSpeed, "wave_speed");
+     INIT_PROP_BIND(Sprite, WavePhase, "wave_phase");
++
++    VALUE mode7Module = rb_define_module("MKXPZMode7");
++    _rb_define_module_function(mode7Module, "available?", mode7NativeAvailable);
++    _rb_define_module_function(mode7Module, "configure", mode7NativeConfigure);
+ }
+diff --git a/shader/sprite.vert b/shader/sprite.vert
+index 3fc3abc..49adfda 100644
+--- a/shader/sprite.vert
++++ b/shader/sprite.vert
+@@ -3,6 +3,16 @@ uniform mat4 projMat;
+ 
+ uniform mat4 spriteMat;
+ 
++// Optional world-space projection for rigid 2.5D objects. The complete quad
++// shares one anchor/scale, so neighbouring map tiles cannot pull its rows.
++uniform bool mode7Rigid;
++uniform vec4 mode7World;       // world x/y, elevation, curve response
++uniform vec4 mode7Camera;      // camera x/y, screen centre x, pivot y
++uniform vec4 mode7Projection;  // radius, zoom, angle scale, ground y scale
++uniform vec4 mode7Curve;       // sine weight, linear weight, width strength, vertical scale
++uniform vec2 mode7SpriteOrigin;
++uniform vec2 mode7SpritePosition;
++
+ uniform vec2 texSizeInv;
+ uniform vec2 patternSizeInv;
+ uniform vec2 patternScroll;
+@@ -18,7 +28,32 @@ varying vec2 v_patCoord;
+ 
+ void main()
+ {
+-	gl_Position = projMat * spriteMat * vec4(position, 0, 1);
++	vec4 screenPos = spriteMat * vec4(position, 0, 1);
++
++	if (mode7Rigid) {
++		float radius = max(mode7Projection.x, 1.0);
++		float theta = ((mode7World.y - mode7Camera.y - mode7Camera.w) *
++		               mode7Projection.y * mode7Projection.z * mode7Projection.w) / radius;
++		float curveY = mode7Curve.x * sin(theta) + mode7Curve.y * theta;
++		float denominator = max(0.25, 1.0 - mode7Curve.z * theta);
++		float directional = clamp(1.0 / denominator, 0.60, 1.50);
++		float scaleX = mode7Projection.y * directional;
++		float groundScale = mode7Projection.y * mode7Projection.z *
++		                    mode7Projection.w *
++		                    (mode7Curve.x * cos(theta) + mode7Curve.y);
++		float response = clamp(mode7World.w, 0.0, 1.0);
++		float scaleY = mix(scaleX, max(groundScale, 0.001), response);
++		vec2 projectedAnchor = vec2(
++			mode7Camera.z + (mode7World.x - mode7Camera.x) * scaleX,
++			mode7Camera.w + radius * curveY - mode7World.z * scaleY * mode7Curve.w
++		);
++		vec2 currentAnchor = (spriteMat * vec4(mode7SpriteOrigin, 0, 1)).xy;
++		vec2 viewportOffset = currentAnchor - mode7SpritePosition;
++		screenPos.xy = projectedAnchor + viewportOffset +
++		               (screenPos.xy - currentAnchor) * vec2(scaleX, scaleY);
++	}
++
++	gl_Position = projMat * screenPos;
+     
+     v_texCoord = texCoord * texSizeInv;
+     
+diff --git a/src/display/gl/shader.cpp b/src/display/gl/shader.cpp
+index d905a5b..cf90454 100644
+--- a/src/display/gl/shader.cpp
++++ b/src/display/gl/shader.cpp
+@@ -478,6 +478,13 @@ SpriteShader::SpriteShader()
+     GET_U(patternScroll);
+     GET_U(patternZoom);
+     GET_U(invert);
++	GET_U(mode7Rigid);
++	GET_U(mode7World);
++	GET_U(mode7Camera);
++	GET_U(mode7Projection);
++	GET_U(mode7Curve);
++	GET_U(mode7SpriteOrigin);
++	GET_U(mode7SpritePosition);
+ }
+ 
+ void SpriteShader::setSpriteMat(const float value[16])
+@@ -551,6 +558,41 @@ void SpriteShader::setInvert(bool value)
+     gl.Uniform1i(u_invert, value);
+ }
+ 
++void SpriteShader::setMode7Rigid(bool value)
++{
++	gl.Uniform1i(u_mode7Rigid, value);
++}
++
++void SpriteShader::setMode7World(const Vec4 &value)
++{
++	setVec4Uniform(u_mode7World, value);
++}
++
++void SpriteShader::setMode7Camera(const Vec4 &value)
++{
++	setVec4Uniform(u_mode7Camera, value);
++}
++
++void SpriteShader::setMode7Projection(const Vec4 &value)
++{
++	setVec4Uniform(u_mode7Projection, value);
++}
++
++void SpriteShader::setMode7Curve(const Vec4 &value)
++{
++	setVec4Uniform(u_mode7Curve, value);
++}
++
++void SpriteShader::setMode7SpriteOrigin(const Vec2 &value)
++{
++	setVec2Uniform(u_mode7SpriteOrigin, value);
++}
++
++void SpriteShader::setMode7SpritePosition(const Vec2 &value)
++{
++	setVec2Uniform(u_mode7SpritePosition, value);
++}
++
+ 
+ PlaneShader::PlaneShader()
+ {
+diff --git a/src/display/gl/shader.h b/src/display/gl/shader.h
+index b7a2881..3360efd 100644
+--- a/src/display/gl/shader.h
++++ b/src/display/gl/shader.h
+@@ -197,12 +197,21 @@ public:
+     void setShouldRenderPattern(bool value);
+     void setPatternOpacity(float value);
+     void setPatternScroll(const Vec2 &scroll);
+-    void setPatternZoom(const Vec2 &zoom);
++	void setPatternZoom(const Vec2 &zoom);
+     void setInvert(bool value);
++	void setMode7Rigid(bool value);
++	void setMode7World(const Vec4 &value);
++	void setMode7Camera(const Vec4 &value);
++	void setMode7Projection(const Vec4 &value);
++	void setMode7Curve(const Vec4 &value);
++	void setMode7SpriteOrigin(const Vec2 &value);
++	void setMode7SpritePosition(const Vec2 &value);
+ 
+ private:
+ 	GLint u_spriteMat, u_tone, u_opacity, u_color, u_bushDepth, u_bushOpacity, u_pattern, u_renderPattern,
+-    u_patternBlendType, u_patternSizeInv, u_patternTile, u_patternOpacity, u_patternScroll, u_patternZoom, u_invert;
++    u_patternBlendType, u_patternSizeInv, u_patternTile, u_patternOpacity, u_patternScroll, u_patternZoom, u_invert,
++	u_mode7Rigid, u_mode7World, u_mode7Camera, u_mode7Projection, u_mode7Curve,
++	u_mode7SpriteOrigin, u_mode7SpritePosition;
+ };
+ 
+ class PlaneShader : public ShaderBase
+diff --git a/src/display/sprite.cpp b/src/display/sprite.cpp
+index 7d95632..a3e85b3 100644
+--- a/src/display/sprite.cpp
++++ b/src/display/sprite.cpp
+@@ -43,6 +43,14 @@
+ 
+ #include "sigslot/signal.hpp"
+ 
++static Mode7RigidProjection mode7RigidProjectionState = {
++    false,
++    0.0f, 0.0f,
++    0.0f, 0.0f,
++    230.0f, 1.0f, 1.0f, 1.0f,
++    0.65f, 0.35f, 0.0f, 1.0f
++};
++
+ struct SpritePrivate
+ {
+     Bitmap *bitmap;
+@@ -68,6 +76,12 @@ struct SpritePrivate
+     Vec2 patternZoom;
+     
+     bool invert;
++
++    bool mode7Rigid;
++    float mode7WorldX;
++    float mode7WorldY;
++    float mode7Elevation;
++    float mode7CurveResponse;
+     
+     IntRect sceneRect;
+     Vec2i sceneOrig;
+@@ -110,6 +124,11 @@ struct SpritePrivate
+     patternTile(true),
+     patternOpacity(255),
+     invert(false),
++    mode7Rigid(false),
++    mode7WorldX(0.0f),
++    mode7WorldY(0.0f),
++    mode7Elevation(0.0f),
++    mode7CurveResponse(0.0f),
+     isVisible(false),
+     color(&tmp.color),
+     tone(&tmp.tone)
+@@ -193,6 +212,12 @@ struct SpritePrivate
+         
+         if (!opacity)
+             return;
++
++        if (mode7Rigid && mode7RigidProjectionState.enabled)
++        {
++            isVisible = true;
++            return;
++        }
+         
+         if (wave.active)
+         {
+@@ -361,6 +386,21 @@ DEF_ATTR_SIMPLE(Sprite, PatternScrollY, int, p->patternScroll.y)
+ DEF_ATTR_SIMPLE(Sprite, PatternZoomX, float, p->patternZoom.x)
+ DEF_ATTR_SIMPLE(Sprite, PatternZoomY, float, p->patternZoom.y)
+ DEF_ATTR_SIMPLE(Sprite, Invert,      bool,    p->invert)
++DEF_ATTR_SIMPLE(Sprite, Mode7Rigid,         bool,  p->mode7Rigid)
++DEF_ATTR_SIMPLE(Sprite, Mode7WorldX,        float, p->mode7WorldX)
++DEF_ATTR_SIMPLE(Sprite, Mode7WorldY,        float, p->mode7WorldY)
++DEF_ATTR_SIMPLE(Sprite, Mode7Elevation,     float, p->mode7Elevation)
++DEF_ATTR_SIMPLE(Sprite, Mode7CurveResponse, float, p->mode7CurveResponse)
++
++void Sprite::configureMode7RigidProjection(const Mode7RigidProjection &value)
++{
++    mode7RigidProjectionState = value;
++}
++
++const Mode7RigidProjection &Sprite::mode7RigidProjection()
++{
++    return mode7RigidProjectionState;
++}
+ 
+ void Sprite::setBitmap(Bitmap *bitmap)
+ {
+@@ -584,7 +624,10 @@ void Sprite::draw()
+     
+     ShaderBase *base;
+     
+-    bool renderEffect = p->color->hasEffect() ||
++    bool rigidMode7 = p->mode7Rigid && mode7RigidProjectionState.enabled;
++
++    bool renderEffect = rigidMode7          ||
++    p->color->hasEffect() ||
+     p->tone->hasEffect()  ||
+     flashing              ||
+     p->bushDepth != 0     ||
+@@ -598,6 +641,21 @@ void Sprite::draw()
+         shader.bind();
+         shader.applyViewportProj();
+         shader.setSpriteMat(p->trans.getMatrix());
++
++        shader.setMode7Rigid(rigidMode7);
++        if (rigidMode7)
++        {
++            const Mode7RigidProjection &m = mode7RigidProjectionState;
++            shader.setMode7World(Vec4(p->mode7WorldX, p->mode7WorldY,
++                                      p->mode7Elevation, p->mode7CurveResponse));
++            shader.setMode7Camera(Vec4(m.cameraX, m.cameraY, m.centerX, m.pivotY));
++            shader.setMode7Projection(Vec4(m.radius, m.zoom, m.angleScale,
++                                           m.groundYScale));
++            shader.setMode7Curve(Vec4(m.curve, m.linear, m.widthPerspective,
++                                      m.verticalScale));
++            shader.setMode7SpriteOrigin(p->trans.getOrigin());
++            shader.setMode7SpritePosition(p->trans.getPosition());
++        }
+         
+         shader.setTone(p->tone->norm);
+         shader.setOpacity(p->opacity.norm);
+diff --git a/src/display/sprite.h b/src/display/sprite.h
+index c440b61..954f374 100644
+--- a/src/display/sprite.h
++++ b/src/display/sprite.h
+@@ -35,6 +35,23 @@ struct Rect;
+ 
+ struct SpritePrivate;
+ 
++struct Mode7RigidProjection
++{
++	bool enabled;
++	float cameraX;
++	float cameraY;
++	float centerX;
++	float pivotY;
++	float radius;
++	float zoom;
++	float angleScale;
++	float groundYScale;
++	float curve;
++	float linear;
++	float widthPerspective;
++	float verticalScale;
++};
++
+ class Sprite : public ViewportElement, public Flashable, public Disposable
+ {
+ public:
+@@ -75,6 +92,14 @@ public:
+ 	DECL_ATTR( WaveLength,  int     )
+ 	DECL_ATTR( WaveSpeed,   int     )
+ 	DECL_ATTR( WavePhase,   float   )
++	DECL_ATTR( Mode7Rigid,         bool  )
++	DECL_ATTR( Mode7WorldX,        float )
++	DECL_ATTR( Mode7WorldY,        float )
++	DECL_ATTR( Mode7Elevation,     float )
++	DECL_ATTR( Mode7CurveResponse, float )
++
++	static void configureMode7RigidProjection(const Mode7RigidProjection &value);
++	static const Mode7RigidProjection &mode7RigidProjection();
+ 
+ 	void initDynAttribs();
+ 

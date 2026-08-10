@@ -150,38 +150,13 @@ class Mode7Renderer
     entry_is_wall?(entry)
   end
 
-  # Objetos wall compactos necesitan una base comun. Si cada fila usa su
-  # borde curvo individual, arriba se solapan y abajo se separan. Componentes
-  # grandes siguen raster normal para conservar curvatura de pasillos/mapa.
+  # El roll planetario debe ser estrictamente local por fila. No compartir una
+  # world-Y/ancla raster entre filas de un edificio: al mover la camara eso hace
+  # que una fila use la profundidad de otra y parezca "seguir" al jugador.
   def cache_wall_raster_components
-    cells = {}
-    @entry_cache.each do |position, entries|
-      # Una celda ElevatedWall presta su raster a las capas de ESA celda, pero
-      # corta el componente normal. Si entra aqui, su Mode7Tag/P1 conecta el
-      # ancla con walls vecinos y les contagia posicion/prioridad visual.
-      next if entries.any? { |entry| entry_is_elevated_wall?(entry) }
-      next if entries.none? { |entry|
-        entry_is_wall?(entry) && !entry_is_elevated_wall?(entry)
-      }
-      cells[position] = entries
+    @entry_cache.each_value do |entries|
+      entries.each { |entry| entry.delete(:wall_raster_anchor_ty) }
     end
-    return if cells.empty?
-
-    max_size = [wall_terrain_tag_heights.values.map(&:to_i).max.to_i * 2, 1].max
-    priority_volume_components(cells).each do |component|
-      xs = component.keys.map { |tx, _ty| tx }
-      ys = component.keys.map { |_tx, ty| ty }
-      next if xs.max - xs.min + 1 > max_size || ys.max - ys.min + 1 > max_size
-      anchor_ty = ys.max
-      component.each_value do |entries|
-        entries.each do |entry|
-          next if !entry_is_wall?(entry) && entry_visual_priority(entry) <= 0
-          entry[:wall_raster_anchor_ty] = anchor_ty
-        end
-      end
-    end
-    # ponytail: componentes <= reserva*2; ID de objeto si Maker Studio lo hace
-    # obligatorio para edificios contiguos mayores.
   end
 
   # Solo los muros normales fuerzan bloqueo. ElevatedWall usa la pasabilidad
@@ -238,10 +213,12 @@ class Mode7Renderer
     @entry_cache.each_value do |entries|
       height = entries.map { |entry| configured_terrain_tag_height(entry) }.max || 0
       wall_cell = entries.any? { |entry| entry_is_wall?(entry) }
+      elevated_wall_cell = entries.any? { |entry| entry_is_elevated_wall?(entry) }
       height = 0 if wall_cell
       entries.each do |entry|
         entry[:terrain_tag_height] = height
         entry[:terrain_height_wall_cell] = true if wall_cell
+        entry[:terrain_height_elevated_wall_cell] = true if elevated_wall_cell
       end
     end
   end
@@ -321,20 +298,23 @@ class Mode7Renderer
   end
 
   def build_wall_columns
-    # Wall ya no se dibuja como Sprite independiente. P0 entra a @ground y
-    # P1-P4 a strips por fila, exactamente como Mountains. Asi comparte slot
-    # con tiles vecinos y no puede perseguir camara ni abrir juntas internas.
-    # ponytail: malla 3D real solo si RGSS expone vertices/texturas por tile.
+    # La geometria visual vuelve a la ruta Ruby original: P0 se rasteriza en
+    # @ground y P1+ en strips por fila. Aqui solo se registra colision.
     @map.width.times do |tx|
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
+        next if !entries || entries.empty?
+
         direct_walls = entries.select { |entry| entry_is_wall?(entry) }
         next if direct_walls.empty?
+
         blocking = direct_walls.select { |entry| entry_blocks_movement?(entry) }
         next if blocking.empty? || ladder_overrides_wall_collision?(entries, blocking)
         @wall_cells[[tx, ty]] = true
-      rescue Exception
-        Console.echo_error("2.5D: columna fallida en (#{tx},#{ty})") if defined?(Console)
+      rescue Exception => e
+        Console.echo_error(
+          "2.5D: columna fallida en (#{tx},#{ty}): #{e.message}"
+        ) if defined?(Console)
       end
     end
   end
@@ -344,7 +324,8 @@ class Mode7Renderer
     volumes = Hash.new { |hash, key| hash[key] = {} }
     @map.width.times do |tx|
       @map.height.times do |ty|
-        @entry_cache[[tx, ty]].each do |entry|
+        entries = @entry_cache[[tx, ty]]
+        entries.each do |entry|
           wall_raster_entry = !entry[:wall_raster_anchor_ty].nil?
           next if !priority_surface_entry?(entry)
           hybrid = entry_hybrid_priority(entry)
@@ -504,19 +485,27 @@ class Mode7Renderer
     rows = Hash.new { |hash, key| hash[key] = {} }
     cells.each do |(tx, ty), entries|
       entries.each do |entry|
-        key = [ty, entry_visual_priority(entry), entry[:unify].to_i]
+        # ponytail: clase en la clave basta; un grafo adicional solo haria
+        # falta si dos volumenes distintos debieran unirse en diagonal.
+        raster_group = if entry[:terrain_height_elevated_wall_cell]
+                         :elevated
+                       elsif !entry[:wall_raster_anchor_ty].nil?
+                         [:wall_anchor, entry[:wall_raster_anchor_ty]]
+                       else
+                         :normal
+                       end
+        key = [ty, entry_visual_priority(entry), entry[:unify].to_i,
+               raster_group]
         rows[key][tx] ||= []
         rows[key][tx].push(entry)
       end
     end
-    rows.each do |(ty, priority, unify), row|
+    rows.each do |(ty, priority, unify, raster_group), row|
+      anchor_ty = raster_group.is_a?(Array) ? raster_group[1] : nil
       segment = {}
       previous = nil
       row.keys.sort.each do |tx|
         if previous && tx != previous + 1
-          anchor_ty = segment.values.flatten.filter_map do |entry|
-            entry[:wall_raster_anchor_ty]
-          end.max
           make_priority_strip(segment, ty, priority, unify, elevation, nil,
                               1.0, ground_raster, anchor_ty)
           segment = {}
@@ -525,9 +514,6 @@ class Mode7Renderer
         previous = tx
       end
       if !segment.empty?
-        anchor_ty = segment.values.flatten.filter_map do |entry|
-          entry[:wall_raster_anchor_ty]
-        end.max
         make_priority_strip(segment, ty, priority, unify, elevation, nil,
                             1.0, ground_raster, anchor_ty)
       end
@@ -594,8 +580,10 @@ class Mode7Renderer
     sprite.visible = false
     wx = min_tx * Game_Map::TILE_WIDTH + width / 2.0
     wyb = (max_ty + 1) * Game_Map::TILE_HEIGHT
-    unify = cells.values.flatten.map { |entry| entry[:unify].to_i }.min || 0
-    depth = [wyb, 0, unify]
+    all_entries = cells.values.flatten
+    unify = all_entries.map { |entry| entry[:unify].to_i }.min || 0
+    priority = all_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+    depth = [wyb, priority, unify]
     @wall_data.push([sprite, wx, wyb, height, cells, :component, unify, depth,
                      0, min_tx, min_ty, max_tx, max_ty, elevation])
   end
@@ -606,7 +594,6 @@ class Mode7Renderer
       x = (tx - min_tx) * Game_Map::TILE_WIDTH
       y = (ty - min_ty) * Game_Map::TILE_HEIGHT
       cells[[tx, ty]].sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }.each do |entry|
-        next if entry_visual_priority(entry) > 0
         blt_entry_into(dst, x, y, entry, entry[:opacity] || 255)
       end
     end
@@ -775,9 +762,13 @@ class Mode7Renderer
   end
 
   def redraw_projected_priority_surface(sprite, source, wx, wyb, elevation = 0,
-                                        curve_response = 0.0, wall_component = false)
+                                        curve_response = 0.0, wall_component = false,
+                                        bounds = nil)
     return false if !source || source.disposed?
-    return redraw_projected_wall_surface(sprite, source, wx, wyb, elevation) if wall_component
+
+    if wall_component
+      return redraw_projected_wall_surface(sprite, source, wx, wyb, elevation)
+    end
 
     projected = Mode7.project_billboard(wx, wyb, elevation)
     return false if !projected
@@ -801,23 +792,23 @@ class Mode7Renderer
     true
   end
 
-  # Wall y sus bandas P1-P4 deben usar transformacion del MAPA, no la de un
-  # overworld billboard. Comparten base, escala y bounds; priority solo cambia
-  # Z. Mezclar project_billboard con project movia P1 lateralmente al variar la
-  # perspectiva conica y separaba barriles, techos y arboles.
+  # Fallback Ruby para cualquier volumen vertical legacy. Su base usa la misma
+  # proyeccion del mapa y su altura permanece rigida; no requiere Game.exe custom.
   def redraw_projected_wall_surface(sprite, source, wx, wyb, elevation = 0)
-    projected = Mode7.project(wx, wyb, elevation)
-    return false if !projected
-    scale = Mode7.hscale(projected[1])
-    return false if !scale || scale <= 0.001
-
     sprite.bitmap = source if sprite.bitmap != source
     sprite.ox = source.width / 2.0
     sprite.oy = source.height
+
+    projected = Mode7.project(wx, wyb, elevation)
+    return false if !projected
+    scale_x = Mode7.tile_billboard_scale_for_world_y(wyb)
+    scale_y = Mode7.vertical_scale_for_world_y(wyb)
+    return false if !scale_x || scale_x <= 0.001 || !scale_y || scale_y <= 0.001
+
     sprite.x = projected[0]
     sprite.y = projected[1]
-    sprite.zoom_x = scale
-    sprite.zoom_y = scale
+    sprite.zoom_x = scale_x
+    sprite.zoom_y = scale_y
     true
   end
 
@@ -1181,8 +1172,11 @@ class Mode7Renderer
                          (Mode7.projection_cam_y - projection_key[3]).abs > 0.001 ||
                          projection_key[4] != Mode7.projection_revision
       if needs_projection
-        if !redraw_projected_priority_surface(sprite, source, wx, wyb, elevation,
-                                              curve_response, wall_component)
+        geometry_bounds = wall_component ? [tx, ty, max_tx, max_ty] : nil
+        if !redraw_projected_priority_surface(
+             sprite, source, wx, wyb, elevation,
+             curve_response, wall_component, geometry_bounds
+           )
           sprite.visible = false
           next
         end
@@ -1259,8 +1253,9 @@ class Mode7Renderer
     end
 
     @priority_data.each do |data|
-      sprite, _wx, _wyb, entry_or_cells, _priority, _elevation, _depth, _hybrid,
-      tx, ty, source, _projection_key = data
+      sprite, _wx, _wyb, entry_or_cells, priority, _elevation, _depth, _hybrid,
+      tx, ty, source, _projection_key, _max_tx, _max_ty, _curve_response,
+      wall_component = data
       next if !source || source.disposed?
       if entry_or_cells.is_a?(Hash)
         next if entry_or_cells.values.flatten.none? { |entry| entry[:animated] }
@@ -1298,7 +1293,7 @@ class Mode7Renderer
 
     @wall_data.each do |data|
       sprite, wx, wyb, h, entries, _z_behavior, _base_unify, depth,
-      _shadow_opacity, _min_tx, _min_ty, _max_tx, _max_ty, elevation = data
+      _shadow_opacity, min_tx, min_ty, max_tx, max_ty, elevation = data
 
       half_w = sprite.bitmap.width / 2.0
       left_tx = (wx - half_w) / Game_Map::TILE_WIDTH
@@ -1341,8 +1336,8 @@ class Mode7Renderer
 
       sprite.x = sx
       sprite.y = syb
-      sprite.zoom_x = k
-      sprite.zoom_y = scale_y
+      sprite.zoom_x = Mode7.tile_billboard_scale_for_world_y(wyb)
+      sprite.zoom_y = Mode7.vertical_scale_for_world_y(wyb)
       depth_wyb, depth_priority, depth_unify = depth || [wyb, 0, 0]
       bias = depth_unify.to_i
       bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority > 0

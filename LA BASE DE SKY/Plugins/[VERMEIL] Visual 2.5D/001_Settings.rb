@@ -58,16 +58,20 @@ module Mode7
     # Fila de pantalla (fraccion) donde queda anclado el jugador.
     # 0.50 = centro exacto de pantalla. Combinado con cam_y anclada a pivot_y,
     # mantiene el centro de camara == centro matematico de proyeccion.
-    # Jugador anclado ~62% abajo (look Animal Crossing / Sky Flyer).
-    PIVOT_RATIO   = 0.62
+    # Jugador ligeramente por debajo del centro, manteniendo lectura top-down.
+    # No se usa como centro de una curva simetrica: el fondo siempre comprime
+    # en una sola direccion.
+    PIVOT_RATIO   = 0.60
 
-    # Inclinacion de la camara en grados (roll del cilindro Sky).
+    # Intensidad angular del roll planetario. En :sky no rota una hoja/plano:
+    # controla cuanto terreno entra en la curvatura alrededor del jugador.
     DEFAULT_ALPHA = 25
     # =======================================================================
-    # PROYECCION: AFINE, CONIC, o SKY (Cilíndrica)
+    # PROYECCION: AFFINE, CONIC o SKY (top-down direccional)
     # =======================================================================
-    # :sky    -> Proyección cilíndrica (Mario Galaxy). Líneas paralelas, 
-    #            el mundo "rueda" hacia el horizonte. (Efecto Sky real).
+    # :sky    -> Perspectiva top-down direccional. El fondo se comprime de forma
+    #            progresiva y el frente se abre ligeramente, sin cilindro ni
+    #            curva simetrica alrededor del jugador.
     # :affine -> Pendiente constante plana.
     # :conic  -> Perspectiva real con punto de fuga.
     PROJECTION = :sky
@@ -78,7 +82,7 @@ module Mode7
     # metadata (PBS: map_metadata.txt, columna Flags). Interior/exterior usan
     # Sky por defecto; Mode7Affine queda disponible como excepcion por mapa.
     #   "Mode7Affine" -> espacia el mapa en proyeccion plana.
-    #   "Mode7Sky"    -> fuerza la curva cilindrica.
+    #   "Mode7Sky"    -> fuerza el roll planetario.
     MAP_FLAG_AFFINE = "mode7afine"
     MAP_FLAG_SKY    = "mode7sky"
 
@@ -110,9 +114,11 @@ module Mode7
     # deben seguir ordenandose por la Y de su base como el jugador.
     WALL_TOP_Z_BIAS = 1
 
-    # Radio del "planeta" para el modo :sky (en píxeles).
-    # Menor radio = mayor curvatura/perspectiva hacia el horizonte.
-    PLANET_RADIUS = 230.0
+    # Escala de profundidad de Sky. Se conserva el nombre PLANET_RADIUS por
+    # compatibilidad interna, pero YA NO representa un planeta/cilindro.
+    # Un valor alto produce perspectiva top-down muy suave.
+    SKY_DEPTH_RANGE = 820.0
+    PLANET_RADIUS   = SKY_DEPTH_RANGE
 
     # Slope de inclinacion (px de pantalla por px de mundo) en afín.
     # Positivo abajo delante (mundo hacia abajo). Menor = mas plano.
@@ -150,52 +156,49 @@ module Mode7
     AFFINE_PERSPECTIVE = 0.0
 
     # =======================================================================
-    # SKY V2 - PROYECCION CILINDRICA HIBRIDA (look Sky / Animal Crossing)
-    # Terreno = mezcla de curva seno + tramo lineal; compresion horizontal de
-    # las filas lejanas; sprites con escala propia. Todos los knobs son 0..1.
+    # SKY TOP-DOWN DIRECCIONAL
     # =======================================================================
+    # NO es un cilindro ni una curva simetrica alrededor del jugador.
+    #
+    # La separacion vertical de las filas cambia siempre en UNA sola direccion:
+    #
+    #   fondo     -> filas ligeramente mas bajas/compactas
+    #   jugador   -> ~32 px por tile
+    #   frente    -> filas ligeramente mas altas
+    #
+    # Por tanto nunca existe la secuencia:
+    #   alto -> medio -> bajo -> alto
+    #
+    # La derivada usada es:
+    #   1 + strength * tanh(sharpness * profundidad)
+    #
+    # Como strength < 1, siempre es positiva. Ademas aumenta continuamente con
+    # la profundidad: no hay valle, rebote ni efecto de hoja/ola.
 
-    # Curva residual del suelo. El 3D ya NO depende de una "banana" fuerte:
-    # primero comprimimos el plano en Y y luego anadimos una curvatura suave.
-    SKY_CURVE = 0.45
+    # Intensidad baja para conservar el look top-down de Sky.
+    SKY_DIRECTIONAL_STRENGTH = 0.22
 
-    # Parte lineal de la proyeccion del suelo. Debe complementar SKY_CURVE.
-    SKY_LINEAR = 0.55
+    # Suavidad de la transicion fondo/frente.
+    SKY_DIRECTIONAL_SHARPNESS = 1.35
 
-    # Escala vertical LOCAL del plano. 1.0 conserva altura de cada celda;
-    # Sky curva posicion global, no aplasta tiles hacia el horizonte.
+    # Escala vertical local. 1.0 mantiene ~32 px por fila cerca del jugador.
     SKY_GROUND_Y_SCALE = 1.00
 
-    # Conicidad muy leve del plano de suelo. Mantiene profundidad sin convertir
-    # el mapa en una rejilla plana.
-    SKY_WIDTH_PERSPECTIVE = 0.050
+    # Perspectiva horizontal MUY leve.
+    SKY_WIDTH_PERSPECTIVE = 0.035
 
-    # Walls bloqueantes se dibujan como objetos completos anclados a su base.
-    # ElevatedWall y prioridad fuera de walls siguen bordes de cada celda.
-    # 0.0 deja wall con forma original.
+    # Objetos verticales mantienen tamano estable.
     SKY_BILLBOARD_PERSPECTIVE = 0.0
 
-    # Legacy de configuracion. Wall P1 ahora se rasteriza con el mismo plano
-    # scanline de Mountains; no admite curva local porque separaba P0/P1.
-    # Se conserva para compatibilidad con configuraciones anteriores.
-    SKY_WALL_CURVE_RESPONSE = 0.08
-
-    # RIGIDEZ VERTICAL DEL RASTER WALL (0.0..1.0). Solo P1+ de tags wall.
-    # 0.0 = alto exacto del plano Mountains. 1.0 = nunca encoge por debajo
-    # de su alto base en el borde inferior. X y prioridad siguen scanline.
-    # 0.35 conserva volumen sin volver a separar P0/P1.
-    SKY_WALL_RASTER_RIGIDITY = 1
-
-    # Solape vertical en px de pantalla entre filas wall. Tapa lineas de
-    # redondeo al proyectar dos tiles que comparten borde.
+    # Walls/prioridades siguen la fila exacta del suelo.
+    SKY_WALL_CURVE_RESPONSE = 0.0
+    SKY_WALL_RASTER_RIGIDITY = 0.0
     SKY_WALL_ROW_OVERLAP = 1.0
 
-    # Personajes/OW conservan escala fija: NPCs, followers y eventos no crecen
-    # ni encogen al recorrer la curvatura.
-    SKY_SPRITE_SCALE = 0.0
+    # Personajes/OW casi fijos para mantener lectura Pokemon top-down.
+    SKY_SPRITE_SCALE = 0.015
 
-    # Cuanto de un pixel de altura real se ve verticalmente en pantalla. Los
-    # muros y elevaciones usan este eje Z separado de la Y del suelo.
+    # Altura fisica vertical independiente de la profundidad del suelo.
     SKY_VERTICAL_SCALE = 1.00
 
     # Tiles con prioridad > 0 salen del suelo y conservan prioridad RPG Maker.
@@ -324,6 +327,10 @@ module Mode7
     # Limite por frame: evita un salto visible incluso con lifts altos.
     TERRAIN_TAG_CAMERA_LIFT_SMOOTH = 0.34
     TERRAIN_TAG_CAMERA_LIFT_MAX_STEP = 0.75
+    # El lift interpola cada frame, pero el raster solo cambia al cruzar este
+    # intervalo. ponytail: 2.0 reduce reconstrucciones; bajar si luego se usa
+    # una resolucion donde el escalonado sea visible.
+    TERRAIN_TAG_CAMERA_LIFT_RENDER_STEP = 2.0
     # Cambio de profundidad por punto de lift. 50 en Mountains equivale a
     # +15% con 0.003. Subirlo aumenta sensacion de altura; 0.0 lo desactiva.
     TERRAIN_TAG_CAMERA_LIFT_DEPTH_FACTOR = 0.003

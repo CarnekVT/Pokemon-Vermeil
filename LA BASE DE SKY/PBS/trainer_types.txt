@@ -192,6 +192,8 @@ BaseMoney = 60
 Name = Joven
 Gender = Male
 BaseMoney = 16
+ShadowXY = 13,-33
+SpriteOffset = -8,40
 #-------------------------------
 [LASS]
 Name = Chica

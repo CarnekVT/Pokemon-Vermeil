@@ -5,9 +5,9 @@
 
 # Proyecta la posicion en pantalla de los personajes segun la camara 2.5D.
 class Game_Character
-  alias_method :_VERMEIL_25D_orig_screen_x, :screen_x
-  alias_method :_VERMEIL_25D_orig_screen_y_ground, :screen_y_ground
-  alias_method :_VERMEIL_25D_orig_screen_z, :screen_z
+  alias_method :_VERMEIL_25D_orig_screen_x, :screen_x unless method_defined?(:_VERMEIL_25D_orig_screen_x)
+  alias_method :_VERMEIL_25D_orig_screen_y_ground, :screen_y_ground unless method_defined?(:_VERMEIL_25D_orig_screen_y_ground)
+  alias_method :_VERMEIL_25D_orig_screen_z, :screen_z unless method_defined?(:_VERMEIL_25D_orig_screen_z)
 
   def screen_x
     return _VERMEIL_25D_orig_screen_x if !mode7_active_for_self?

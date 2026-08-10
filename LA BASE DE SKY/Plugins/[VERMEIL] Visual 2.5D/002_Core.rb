@@ -61,10 +61,35 @@ module Mode7
       return @current_alpha.to_f / Config::DEFAULT_ALPHA
     end
 
-    # Curva Sky V2: mezcla de curvatura seno y tramo lineal. Sustituye al
-    # sin(theta) puro que generaba el efecto cilindrico "banana".
+    # Proyeccion top-down DIRECCIONAL.
+    #
+    # La version anterior era simetrica alrededor de theta=0: la separacion de
+    # filas disminuia al acercarse al pivot y volvia a aumentar al cruzarlo.
+    # Eso generaba visualmente "alto -> medio -> bajo -> alto".
+    #
+    # Aqui la derivada aumenta monotonicamente:
+    #   f'(theta) = 1 + S * tanh(K * theta)
+    #
+    # Fondo (theta<0) siempre mas compacto; frente (theta>0) siempre un poco
+    # mas abierto. Nunca existe un punto donde vuelva a cambiar de tendencia.
     def sky_curve(theta)
-      Config::SKY_CURVE * Math.sin(theta) + Config::SKY_LINEAR * theta
+      u = theta.to_f
+      strength = Config::SKY_DIRECTIONAL_STRENGTH.to_f.clamp(0.0, 0.95)
+      sharpness = Config::SKY_DIRECTIONAL_SHARPNESS.to_f
+      return u if strength <= 1.0e-9 || sharpness.abs <= 1.0e-9
+
+      x = sharpness * u
+      ax = x.abs
+      log_cosh = ax + Math.log(1.0 + Math.exp(-2.0 * ax)) - Math.log(2.0)
+      u + (strength / sharpness) * log_cosh
+    end
+
+    def sky_curve_derivative(theta)
+      u = theta.to_f
+      strength = Config::SKY_DIRECTIONAL_STRENGTH.to_f.clamp(0.0, 0.95)
+      sharpness = Config::SKY_DIRECTIONAL_SHARPNESS.to_f
+      return 1.0 if strength <= 1.0e-9 || sharpness.abs <= 1.0e-9
+      1.0 + strength * Math.tanh(sharpness * u)
     end
 
     # Factor de perspectiva DIRECCIONAL. La formula anterior usaba cos(theta),
@@ -111,7 +136,7 @@ module Mode7
       # entra a Mountains o una escalera elevada.
       lift_factor = Config::TERRAIN_TAG_CAMERA_LIFT_DEPTH_FACTOR.to_f
       return v if !sky_mode? || lift_factor.abs < 1.0e-6
-      v * [1.0 + terrain_camera_lift * lift_factor, 0.10].max
+      v * [1.0 + terrain_camera_render_lift * lift_factor, 0.10].max
     end
 
     # Angulo de profundidad a partir de una coordenada Y del mundo, sin mezclar
@@ -138,25 +163,24 @@ module Mode7
       tile_billboard_scale_for_world_y(wy) * Config::SKY_VERTICAL_SCALE.to_f
     end
 
-    # Inversa de sky_curve (resolve sky_curve(theta)=t por Newton). Monotona
-    # creciente mientras |theta| < 2.14 (derivada 0.65*cos+0.35 > 0); el rango
-    # visible de la camara (~+-0.4) queda muy dentro de esa zona.
+    # Inversa unica de sky_curve por Newton.
+    # sky_curve_derivative nunca llega a 0, por lo que no hay ramas ni rebotes.
     def sky_curve_inv(t)
-      a = Config::SKY_CURVE.to_f
-      b = Config::SKY_LINEAR.to_f
-      return t if (a + b).abs < 1.0e-9
-      theta = t / (a + b)
-      6.times do
-        f = a * Math.sin(theta) + b * theta - t
-        df = a * Math.cos(theta) + b
+      target = t.to_f
+      theta = target
+      10.times do
+        f = sky_curve(theta) - target
+        df = sky_curve_derivative(theta)
         break if df.abs < 1.0e-9
-        theta -= f / df
+        step = f / df
+        theta -= step
+        break if step.abs < 1.0e-7
       end
       theta
     end
 
-    # Theta (angulo de profundidad) de una fila de pantalla. Invierte la curva
-    # hibrida (sky_curve) para mapear la fila sy a su angulo en el "planeta".
+    # Theta de una fila de pantalla. La inversa es unica: no hay ramas ni
+    # periodicidad, por lo que subir/bajar la camara conserva siempre el signo.
     def sky_theta_for_row(sy)
       t = (sy.to_f - pivot_y) / @planet_radius
       sky_curve_inv(t)
@@ -173,11 +197,19 @@ module Mode7
     def vanilla_world_y_for_row(sy); return sy + projection_cam_y; end
     def lerp(a, b, t); return a + (b - a) * t; end
 
-    # Movimiento visual de camara. No altera cam_y real: solo entra por
-    # projection_cam_y. Sumarlo otra vez a screen Y desincroniza suelo/walls
+    # Movimiento visual de camara. No altera cam_y real: solo modifica la
+    # profundidad del plano Sky. Sumarlo a screen Y desincroniza suelo/walls
     # al subir una escalera y deja una copia visual del muro.
     def terrain_camera_lift
       @terrain_camera_lift || 0.0
+    end
+
+    # Valor cuantizado usado por toda la proyeccion. Ground, walls y prioridad
+    # cambian juntos; usar aqui el interpolado crudo movia walls cada frame
+    # mientras el bitmap del suelo esperaba su siguiente repintado.
+    def terrain_camera_render_lift
+      return @terrain_camera_render_lift if !@terrain_camera_render_lift.nil?
+      terrain_camera_lift
     end
 
     # Intensidad visual de profundidad. No modifica display_y, cam_y ni las
@@ -270,6 +302,11 @@ module Mode7
     # 0 -> Mountains al cargar/transferir mapa.
     def snap_terrain_camera_lift_to_target
       target = rendering_now? ? terrain_camera_lift_target : 0.0
+      render_step = Config::TERRAIN_TAG_CAMERA_LIFT_RENDER_STEP.to_f
+      render_step = 1.0 if render_step <= 0.0
+      @terrain_camera_lift_render_key = (target / render_step).round
+      @terrain_camera_render_lift = target
+      @terrain_camera_lift_update_time = System.uptime
       return if (terrain_camera_lift - target).abs < 0.01
       @terrain_camera_lift = target
       @projection_revision = (@projection_revision || 0) + 1
@@ -293,24 +330,36 @@ module Mode7
     def update_terrain_camera_lift
       target = rendering_now? ? terrain_camera_lift_target : 0.0
       current = terrain_camera_lift
+      now = System.uptime
+      last_time = @terrain_camera_lift_update_time || (now - 1.0 / 60.0)
+      @terrain_camera_lift_update_time = now
+      frame_scale = ((now - last_time) * 60.0).clamp(0.25, 6.0)
       smooth = Config::TERRAIN_TAG_CAMERA_LIFT_SMOOTH.to_f.clamp(0.01, 1.0)
-      step = (target - current) * smooth
-      # ponytail: ground se rasteriza por filas enteras. Limitar primer paso
-      # evita saltos de 2+ px al entrar/salir verticalmente; interpolacion
-      # subpixel requeriria renderer con textura/vertices, no Bitmap#stretch_blt.
+      frame_smooth = 1.0 - ((1.0 - smooth)**frame_scale)
+      step = (target - current) * frame_smooth
+      # Paso dependiente de tiempo: una caida de FPS ya no alarga la bajada.
       max_step = Config::TERRAIN_TAG_CAMERA_LIFT_MAX_STEP.to_f
       max_step = 0.75 if max_step <= 0.0
-      step = step.clamp(-max_step, max_step)
+      step = step.clamp(-max_step * frame_scale, max_step * frame_scale)
       value = current + step
       value = target if (target - value).abs < 0.05
       return if (value - current).abs < 0.01
       @terrain_camera_lift = value
+
+      render_step = Config::TERRAIN_TAG_CAMERA_LIFT_RENDER_STEP.to_f
+      render_step = 1.0 if render_step <= 0.0
+      render_key = (value / render_step).round
+      final_value = (value - target).abs < 0.01
+      return if !final_value && render_key == @terrain_camera_lift_render_key
+      @terrain_camera_lift_render_key = render_key
+      @terrain_camera_render_lift = value
       @projection_revision = (@projection_revision || 0) + 1
       reset_caches
       invalidate_renderer_ground
     end
 
     def vanish_y
+      return horizon_row.round if sky_mode?
       return (pivot_y - @distance_h * @cos / @sin).round if !affine_mode?
       if Config::AFFINE_DEPTH > 0
         heff = @distance_h / Config::AFFINE_DEPTH.to_f
@@ -444,7 +493,8 @@ module Mode7
     end
 
     def horizon_row
-      return 0 if sky_mode?
+      # Sky direccional es top-down y no coloca un horizonte dentro del viewport.
+      return 0.0 if sky_mode?
       if affine_mode? && Config::AFFINE_DEPTH > 0
         heff = @dh / Config::AFFINE_DEPTH.to_f
         se = effective_sin
@@ -514,9 +564,8 @@ module Mode7
       scale = sky_angle_scale
       return vanilla_project(wx, wy - elevation) if scale <= 0.0
 
-      # El suelo y la altura usan ejes distintos. Antes `elevation` se restaba de
-      # wy, por lo que un muro "subia" recorriendo el cilindro. Ahora theta se
-      # calcula solo con la profundidad del suelo y Z se proyecta verticalmente.
+      # El suelo y la altura usan ejes distintos. Theta depende solo de la
+      # profundidad Y del mapa; la elevacion Z se aplica verticalmente despues.
       theta = sky_theta_for_world_y(wy)
       sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
       sx = center_x + rx * @zoom * sky_width_scale(theta)

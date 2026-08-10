@@ -15,7 +15,7 @@ module Mode7
       commands = [
         _INTL("Angulo: {1}°", Mode7.current_alpha),
         _INTL("Zoom: {1}", Mode7.zoom),
-        _INTL("Radio Planeta (Sky): {1}", Mode7.planet_radius),
+        _INTL("Rango profundidad Sky: {1}", Mode7.planet_radius),
         _INTL("Distancia (Altura): {1}", Mode7.distance_h),
         _INTL("Diagnostico lift"),
         _INTL("Volver")
@@ -44,11 +44,11 @@ module Mode7
           new_zoom = new_zoom_int.to_f / 100.0
           Mode7.set_zoom(new_zoom)
         end
-      when 2 # Editar Radio del Planeta (100 a 5000)
+      when 2 # Editar Rango profundidad Sky
         params = ChooseNumberParams.new
         params.setRange(100, 5000)
         params.setDefaultValue(Mode7.planet_radius.round)
-        new_rad = pbMessageChooseNumber(_INTL("Elige el Radio del Planeta (Sky):"), params)
+        new_rad = pbMessageChooseNumber(_INTL("Elige el rango de profundidad Sky:"), params)
         if new_rad
           Mode7.set_camera(Mode7.current_alpha, Mode7.zoom, 0, Mode7.distance_h, new_rad.to_f)
           $scene.instance_variable_get(:@map_renderer).invalidate_ground rescue nil

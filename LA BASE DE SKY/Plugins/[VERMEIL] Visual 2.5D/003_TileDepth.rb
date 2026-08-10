@@ -359,8 +359,8 @@ class Mode7Renderer
     passages ? passages[tid] : nil
   end
 
-  # Todo P0 pertenece al raster global. Terrain Tag wall solo aporta colision
-  # 2.5D; no saca su grafico de la cuadricula compartida.
+  # Suelo puro Ruby/vanilla. P0 permanece en @ground; solo las superficies
+  # con prioridad y los bordes interiores salen a sus sprites/strips propios.
   def ground_entries_for_cell(tx, ty, entries)
     entries.reject do |entry|
       priority_surface_entry?(entry) || interior_border_entry?(entry)
@@ -601,7 +601,7 @@ end
 # Swap del renderer en Scene_Map: usa Mode7Renderer o TilemapRenderer segun
 # el estado activo de la camara 2.5D.
 class Scene_Map
-  alias_method :_VERMEIL_25D_orig_createSpritesets, :createSpritesets
+  alias_method :_VERMEIL_25D_orig_createSpritesets, :createSpritesets unless method_defined?(:_VERMEIL_25D_orig_createSpritesets)
 
   def createSpritesets
     wanted = Mode7.rendering_now? ? Mode7Renderer : TilemapRenderer
