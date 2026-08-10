@@ -1,6 +1,3 @@
-# ponytail: parche para [DBK_010] Animated Trainer Intros
-# Reemplaza refresh (nil check shadow_xy + sprite offset) + sprite position editor
-
 module GameData
   class TrainerType
     attr_accessor :sprite_offset
@@ -206,45 +203,6 @@ class Battle::Scene::Animation::TrainerAppear
       newTrainer.setVisible(delay, true)
       newTrainer.setXY(delay, trainerX, trainerY)
       newTrainer.moveDelta(delay, 8, -Graphics.width / 4, 0)
-    end
-  end
-end
-
-class Battle::Scene::Animation::TrainerFade
-  def createProcesses
-    spriteNameBase = "trainer"
-    i = 1
-    while @sprites[spriteNameBase + "_#{i}"]
-      trSprite = @sprites[spriteNameBase + "_#{i}"]
-      i += 1
-      next if !trSprite.visible || trSprite.x > Graphics.width
-      if trSprite.is_a?(Battle::Scene::TrainerSprite)
-        data = GameData::TrainerType.try_get(trSprite.tr_type)
-        if data
-          offset = data.trainer_sprite_offset
-          trSprite.x -= offset[0]
-          trSprite.y -= offset[1]
-        end
-      end
-      trainer = addSprite(trSprite, PictureOrigin::BOTTOM)
-      trainer.moveDelta(0, 16, Graphics.width / 2, 0)
-      trainer.setVisible(16, false)
-    end
-    delay = 3
-    if @sprites["partyBar_1"]&.visible
-      partyBar = addSprite(@sprites["partyBar_1"])
-      partyBar.moveDelta(delay, 16, Graphics.width / 4, 0) if @fullAnim
-      partyBar.moveOpacity(delay, 12, 0)
-      partyBar.setVisible(delay + 12, false)
-      partyBar.setOpacity(delay + 12, 255)
-    end
-    Battle::Scene::NUM_BALLS.times do |j|
-      next if !@sprites["partyBall_1_#{j}"] || !@sprites["partyBall_1_#{j}"].visible
-      partyBall = addSprite(@sprites["partyBall_1_#{j}"])
-      partyBall.moveDelta(delay + (2 * j), 16, Graphics.width, 0) if @fullAnim
-      partyBall.moveOpacity(delay, 12, 0)
-      partyBall.setVisible(delay + 12, false)
-      partyBall.setOpacity(delay + 12, 255)
     end
   end
 end

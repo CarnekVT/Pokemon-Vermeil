@@ -35,7 +35,6 @@ class Mode7Renderer
     @shadow_ground = nil
     @wall_data = []
     @priority_strips = []
-    @priority_strip_rasters = {}
     @priority_data = []
     @autotile_cells = {}
     @wall_cells = {}
@@ -76,16 +75,13 @@ class Mode7Renderer
     @priority_strips.each do |data|
       spr, src = data[0], data[1]
       src.dispose if src && !src.disposed?
-      spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
       spr.dispose
     end
     @priority_strips.clear
-    @priority_strip_rasters.clear
     @priority_data.each do |data|
       spr = data[0]
-      src = data[10]
+      src = data[9]
       src.dispose if src && !src.disposed?
-      spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
       spr.dispose
     end
     @priority_data.clear
@@ -137,11 +133,9 @@ class Mode7Renderer
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
-    # @ground cuesta una pasada por scanline. Un scroll subpixel no aporta un
-    # pixel nuevo al raster, pero antes disparaba 480 stretch_blt por frame.
-    # ponytail: refresco por pixel; filtro subpixel solo si el arte deja pixel art.
-    if @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
-       (@last_cam_x - cx).abs >= 1 || @last_cam_y.floor != cy.floor
+    camera_moved = @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
+                   (@last_cam_x - cx).abs >= 0.5 || (@last_cam_y - cy).abs >= 0.5
+    if camera_moved
       draw_ground
       @last_cam_x = cx
       @last_cam_y = cy
@@ -168,18 +162,19 @@ class Mode7Renderer
     if Mode7.indoor_map? && Mode7::Config::INTERIOR_OPAQUE_GROUND
       @ground.fill_rect(0, 0, @ground.width, @ground.height, Mode7::Config::OUTSIDE_COLOR)
     end
-    @wall_data.each { |data| data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?; data[0].dispose }
+    @wall_data.each do |data|
+      spr = data[0]
+      spr.bitmap.dispose if spr.bitmap && !spr.bitmap.disposed?
+      spr.dispose
+    end
     @wall_data.clear
     @priority_strips.each do |data|
       data[1].dispose if data[1] && !data[1].disposed?
-      data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?
       data[0].dispose
     end
     @priority_strips.clear
-    @priority_strip_rasters.clear
     @priority_data.each do |data|
-      data[10].dispose if data[10] && !data[10].disposed?
-      data[0].bitmap.dispose if data[0].bitmap && !data[0].bitmap.disposed?
+      data[9].dispose if data[9] && !data[9].disposed?
       data[0].dispose
     end
     @priority_data.clear
@@ -198,7 +193,6 @@ class Mode7Renderer
     end
     cache_terrain_tag_heights
     cache_visual_priorities
-    cache_wall_raster_components
     Mode7.snap_terrain_camera_lift_to_target
 
     # ponytail: conservar pila vanilla en bitmap fuente. Proyectar tres planos
@@ -359,11 +353,20 @@ class Mode7Renderer
     passages ? passages[tid] : nil
   end
 
-  # Suelo puro Ruby/vanilla. P0 permanece en @ground; solo las superficies
-  # con prioridad y los bordes interiores salen a sus sprites/strips propios.
+  # Una entry de wall normal pertenece SOLO al renderer de walls.
+  # No puede quedar tambien horneada en @ground, que era la causa principal de
+  # tiles duplicados al combinar P0/P1 o wall sobre otras superficies.
   def ground_entries_for_cell(tx, ty, entries)
+    wall_owned = if respond_to?(:wall_visual_entries, true)
+                   wall_visual_entries(entries)
+                 else
+                   []
+                 end
+
     entries.reject do |entry|
-      priority_surface_entry?(entry) || interior_border_entry?(entry)
+      wall_owned.include?(entry) ||
+        priority_surface_entry?(entry) ||
+        interior_border_entry?(entry)
     end
   end
 
@@ -446,12 +449,6 @@ class Mode7Renderer
     end
   end
 
-  def current_src_rect(entry)
-    return entry[:src_rect] if !entry[:animated]
-    @scratch.filename = entry[:filename]
-    @autotiles.set_src_rect(@scratch, entry[:tid])
-    return @scratch.src_rect.clone
-  end
 
   def make_native_entry(tid, layer)
     if tid < TilemapRenderer::TILESET_START_ID
@@ -516,61 +513,69 @@ class Mode7Renderer
   def draw_ground
     return if !@ground || @ground.disposed?
     bmp = @ground_sprite.bitmap
-    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_fill_color)
+    sky_color = sky_fill_color
+    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_color)
     horizon = [Mode7.horizon_row.ceil, 0].max
     return if horizon >= Mode7.screen_h
     if horizon > 0
       @clear_rect.set(0, 0, Mode7.screen_w, horizon)
-      bmp.fill_rect(@clear_rect, sky_fill_color)
+      bmp.fill_rect(@clear_rect, sky_color)
     end
     cx = Mode7.cam_x
     map_h_px = @map.height * Game_Map::TILE_HEIGHT
     ground_w = @ground.width
-    (horizon...Mode7.screen_h).each do |sy|
+    screen_w = Mode7.screen_w
+    center_x = Mode7.center_x
+    outside_color = Mode7::Config::OUTSIDE_COLOR
+    has_fog = Mode7.respond_to?(:fog_alpha)
+    @fog_color_obj ||= Mode7::Config::FOG_COLOR.clone
+    fog_color = @fog_color_obj
+    sy = horizon
+    while sy < Mode7.screen_h
       wy = Mode7.world_y_for_row(sy)
-      next if !wy
-
-      if wy < 0 || wy >= map_h_px
-        @dest_rect.set(0, sy, Mode7.screen_w, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+      if !wy || wy < 0 || wy >= map_h_px
+        @dest_rect.set(0, sy, screen_w, 1)
+        bmp.fill_rect(@dest_rect, outside_color)
+        sy += 1
         next
       end
       k = Mode7.hscale(sy)
-      span = Mode7.screen_w / k
-      wx_left = cx - Mode7.center_x / k
+      span = screen_w / k
+      wx_left = cx - center_x / k
       lo = [wx_left.floor, 0].max
       hi = [(wx_left + span).ceil, ground_w].min
       if hi <= lo
-        @dest_rect.set(0, sy, Mode7.screen_w, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+        @dest_rect.set(0, sy, screen_w, 1)
+        bmp.fill_rect(@dest_rect, outside_color)
+        sy += 1
         next
       end
-      d_x0 = ((lo - wx_left) / span) * Mode7.screen_w
-      d_w = ((hi - wx_left) / span) * Mode7.screen_w - d_x0
-      if d_x0 > 0 && d_x0.round > 0
-        @dest_rect.set(0, sy, d_x0.round, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+      d_x0 = ((lo - wx_left) / span) * screen_w
+      d_w = ((hi - wx_left) / span) * screen_w - d_x0
+      d_x0_int = d_x0.round
+      d_w_int = d_w.round
+      d_x1_int = d_x0_int + d_w_int
+      if d_x0_int > 0
+        @dest_rect.set(0, sy, d_x0_int, 1)
+        bmp.fill_rect(@dest_rect, outside_color)
       end
-      d_x1 = d_x0 + d_w
-      if d_x1.round < Mode7.screen_w
-        @dest_rect.set(d_x1.round, sy, Mode7.screen_w - d_x1.round, 1)
-        bmp.fill_rect(@dest_rect, Mode7::Config::OUTSIDE_COLOR)
+      if d_x1_int < screen_w
+        @dest_rect.set(d_x1_int, sy, screen_w - d_x1_int, 1)
+        bmp.fill_rect(@dest_rect, outside_color)
       end
-      if d_w.round > 0
-        @dest_rect.set(d_x0.round, sy, d_w.round, 1)
+      if d_w_int > 0
+        @dest_rect.set(d_x0_int, sy, d_w_int, 1)
         @src_rect.set(lo, wy.floor, hi - lo, 1)
         bmp.stretch_blt(@dest_rect, @ground, @src_rect)
-
-        # Niebla (inerte hasta que 006_Atmosphere defina fog_alpha)
-        if Mode7.respond_to?(:fog_alpha)
+        if has_fog
           alpha = Mode7.fog_alpha(sy)
           if alpha > 0
-            @fog_color_obj ||= Mode7::Config::FOG_COLOR.clone
-            @fog_color_obj.alpha = alpha
-            bmp.fill_rect(@dest_rect, @fog_color_obj)
+            fog_color.alpha = alpha
+            bmp.fill_rect(@dest_rect, fog_color)
           end
         end
       end
+      sy += 1
     end
   end
 

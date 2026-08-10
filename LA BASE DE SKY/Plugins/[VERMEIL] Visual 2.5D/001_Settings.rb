@@ -47,8 +47,6 @@ module Mode7
     # 1.0 = instantanea, 0.05 = suave (como seguimiento reloj).
     ALTITUDE_SMOOTH   = 0.12
 
-    # Color base fuera del limite (fondo del relieve bajo el suelo).
-    RELIEF_BASE_COLOR = Color.new(80, 100, 140)
 
     # =======================================================================
     # CAMARA POR DEFECTO (ESTILO GEN 5)
@@ -65,13 +63,12 @@ module Mode7
 
     # Intensidad angular del roll planetario. En :sky no rota una hoja/plano:
     # controla cuanto terreno entra en la curvatura alrededor del jugador.
-    DEFAULT_ALPHA = 25
+    DEFAULT_ALPHA = 15
     # =======================================================================
-    # PROYECCION: AFFINE, CONIC o SKY (top-down direccional)
+    # PROYECCION: AFFINE, CONIC o SKY (arco circular top-down)
     # =======================================================================
-    # :sky    -> Perspectiva top-down direccional. El fondo se comprime de forma
-    #            progresiva y el frente se abre ligeramente, sin cilindro ni
-    #            curva simetrica alrededor del jugador.
+    # :sky    -> Arco circular top-down. Se usa una sola rama del semicírculo
+    #            para que el fondo se comprima sin rebote ni efecto de ola.
     # :affine -> Pendiente constante plana.
     # :conic  -> Perspectiva real con punto de fuga.
     PROJECTION = :sky
@@ -101,24 +98,12 @@ module Mode7
     # dejen ver panoramas/fogs del mapa anterior por transparencia.
     INTERIOR_OPAQUE_GROUND = true
 
-    # Si una puerta/ventana no lleva Mode7Tag, puede heredar visualmente la
-    # condicion de muro cuando esta encajada ENTRE dos columnas etiquetadas.
-    # Es solo visual: NO convierte esa celda en bloqueante para pasabilidad.
-    INTERIOR_INFER_WALL_CONNECTORS = false
 
-    # Legacy de Phase 3. Phase 4 ya no duplica el grafico del muro sobre el
-    # suelo; el plano y las superficies verticales se separan de forma explicita.
-    INTERIOR_WALL_GROUND_SEAL = false
 
     # Bias de profundidad para piezas de techo/prioridad alta. Nunca usar 9999:
     # deben seguir ordenandose por la Y de su base como el jugador.
     WALL_TOP_Z_BIAS = 1
 
-    # Escala de profundidad de Sky. Se conserva el nombre PLANET_RADIUS por
-    # compatibilidad interna, pero YA NO representa un planeta/cilindro.
-    # Un valor alto produce perspectiva top-down muy suave.
-    SKY_DEPTH_RANGE = 820.0
-    PLANET_RADIUS   = SKY_DEPTH_RANGE
 
     # Slope de inclinacion (px de pantalla por px de mundo) en afín.
     # Positivo abajo delante (mundo hacia abajo). Menor = mas plano.
@@ -156,50 +141,47 @@ module Mode7
     AFFINE_PERSPECTIVE = 0.0
 
     # =======================================================================
-    # SKY TOP-DOWN DIRECCIONAL
+    # SKY - ARCO CIRCULAR TOP-DOWN
     # =======================================================================
-    # NO es un cilindro ni una curva simetrica alrededor del jugador.
+    # La profundidad visible pertenece a una sola rama de un circulo.
+    # Internamente se usa sin(phi), pero el centro del arco se desplaza hacia
+    # delante de la camara. Asi el viewport NO cruza el punto donde cos(phi)
+    # volveria a disminuir y desaparece el efecto de ola.
     #
-    # La separacion vertical de las filas cambia siempre en UNA sola direccion:
+    # Visualmente:
+    #   fondo  -> filas mas compactas
+    #   centro -> intermedias
+    #   frente -> casi 32 px
     #
-    #   fondo     -> filas ligeramente mas bajas/compactas
-    #   jugador   -> ~32 px por tile
-    #   frente    -> filas ligeramente mas altas
-    #
-    # Por tanto nunca existe la secuencia:
-    #   alto -> medio -> bajo -> alto
-    #
-    # La derivada usada es:
-    #   1 + strength * tanh(sharpness * profundidad)
-    #
-    # Como strength < 1, siempre es positiva. Ademas aumenta continuamente con
-    # la profundidad: no hay valle, rebote ni efecto de hoja/ola.
+    # El arco es circular real, no tanh/atan/parabola.
 
-    # Intensidad baja para conservar el look top-down de Sky.
-    SKY_DIRECTIONAL_STRENGTH = 0.22
+    # Radio grande = perspectiva top-down suave. 1080 mantiene el efecto Sky
+    # sin convertir el mapa en un planeta exagerado.
+    SKY_ARC_RADIUS = 580.0
+    PLANET_RADIUS = SKY_ARC_RADIUS
 
-    # Suavidad de la transicion fondo/frente.
-    SKY_DIRECTIONAL_SHARPNESS = 1.35
+    # Desplaza el centro angular del circulo por debajo/delante del jugador.
+    # Esto obliga a que la pantalla use la rama monotona del arco.
+    SKY_ARC_PHASE = 0.30
 
-    # Escala vertical local. 1.0 mantiene ~32 px por fila cerca del jugador.
+    # Limite seguro (< PI/2). Fuera del arco visible se continua con la
+    # tangente del borde para que mapas largos nunca inviertan la direccion.
+    SKY_ARC_LIMIT = 1.40
+
     SKY_GROUND_Y_SCALE = 1.00
 
-    # Perspectiva horizontal MUY leve.
-    SKY_WIDTH_PERSPECTIVE = 0.035
+    # Convergencia horizontal leve. La lectura principal sigue siendo top-down.
+    SKY_WIDTH_PERSPECTIVE = 0.025
 
-    # Objetos verticales mantienen tamano estable.
+    # Objetos verticales y walls NO cambian de tamano por profundidad.
     SKY_BILLBOARD_PERSPECTIVE = 0.0
-
-    # Walls/prioridades siguen la fila exacta del suelo.
-    SKY_WALL_CURVE_RESPONSE = 0.0
-    SKY_WALL_RASTER_RIGIDITY = 0.0
-    SKY_WALL_ROW_OVERLAP = 1.0
-
-    # Personajes/OW casi fijos para mantener lectura Pokemon top-down.
-    SKY_SPRITE_SCALE = 0.015
-
-    # Altura fisica vertical independiente de la profundidad del suelo.
     SKY_VERTICAL_SCALE = 1.00
+
+    # Personajes casi estables, solo una pista minima de profundidad.
+    SKY_SPRITE_SCALE = 0.010
+
+    # Walls normales se componen como bloques rigidos y nunca heredan escala
+    # de profundidad. Mountains permanece como superficie del suelo.
 
     # Tiles con prioridad > 0 salen del suelo y conservan prioridad RPG Maker.
     # Fuera de wall se proyectan entre bordes de fila; dentro de wall usan una
@@ -207,14 +189,14 @@ module Mode7
     PRIORITY_SURFACES = true
     PRIORITY_SURFACE_MIN = 1
 
-    # Una prioridad N se ordena como si su base de profundidad estuviera N tiles
-    # mas adelante. Reproduce el comportamiento visual clasico sin usar z=9999.
-    PRIORITY_DEPTH_STEP = 32
+    # La prioridad se calcula en ESPACIO DE PANTALLA usando el alto proyectado
+    # de la fila actual. Por eso P1/P4 sigue funcionando al cambiar angulo o zoom.
+    PRIORITY_DEPTH_SCALE = 1.0
 
-    # Reproyeccion de tiras priority en scroll horizontal. Con Y no se puede
-    # interpolar: cambia la curvatura de cada fila y aparecen cortes.
-    PRIORITY_REPROJECT_PIXELS = 4
-    PRIORITY_VERTICAL_REPROJECT_PIXELS = 1
+    # Solape de seguridad para priority strips. Se multiplica suavemente por
+    # zoom/angulo para evitar lineas de 1px al interpolar la camara.
+    PRIORITY_EDGE_OVERLAP = 1.0
+    PRIORITY_EDGE_OVERLAP_MAX = 3.0
 
     # FOV horizontal en grados. Controla el aplanado de la cuadricula,
     # desacoplado del pitch:
@@ -223,24 +205,16 @@ module Mode7
     #   0     -> ortografico puro (cero distorsion horizontal)
     FOV           = 15
 
-    # =======================================================================
-    # RUBBER (LEGACY - DESCARTADO)
-    # Deformacion local elastica del suelo alrededor del jugador. Se descarto:
-    # la sensacion 3D debe venir de la CONICA DE CAMARA FIJA global (sutil,
-    # no mareante), no de una lente local que deformaba el muestreo.
-    # =======================================================================
-    RUBBER_ENABLED = false
-    RUBBER_RADIUS  = 160
-    RUBBER_FORCE   = 0.0
 
     # Zoom base (1.0 = escala natural del pixel art).
     DEFAULT_ZOOM  = 1
 
     # Limites y suavizado del zoom de depuracion. El zoom no modifica
     # colisiones: solo la proyeccion y el area visible.
-    CAMERA_ZOOM_MIN           = 0.25
-    CAMERA_ZOOM_MAX           = 3.00
-    CAMERA_ZOOM_SMOOTH_FRAMES = 12
+    CAMERA_ZOOM_MIN            = 0.25
+    CAMERA_ZOOM_MAX            = 3.00
+    CAMERA_ZOOM_SMOOTH_FRAMES  = 12
+    CAMERA_ANGLE_SMOOTH_FRAMES = 18
 
     # Frames al activar/desactivar 2.5D desde Opciones o debug.
     MODE_TRANSITION_FRAMES = 1
@@ -344,15 +318,6 @@ module Mode7
       :LaddersSide => -1
     }.freeze
 
-    # =======================================================================
-    # ELEVACION FALSO 3D (apilado de capas sobre el cilindro)
-    # =======================================================================
-
-    # Compatibilidad legacy. Desde Phase 4, el indice de layer/unify NO implica
-    # altura fisica. Solo se usa elevacion cuando Maker Studio la define de forma
-    # explicita. Estas constantes quedan para proyectos que las consulten fuera.
-    ELEVATION_PER_UNIFY = 12
-    ELEVATION_FLOOR_PAD = 4
 
     # Radio (en tiles) en pantalla donde se sigue spawncndeando/sposeando
     # objetos/muros del filtro de terrain tags. Antes era 14/18.

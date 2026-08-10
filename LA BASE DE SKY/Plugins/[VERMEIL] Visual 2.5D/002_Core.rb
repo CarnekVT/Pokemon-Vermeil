@@ -61,40 +61,40 @@ module Mode7
       return @current_alpha.to_f / Config::DEFAULT_ALPHA
     end
 
-    # Proyeccion top-down DIRECCIONAL.
+    # Arco circular real.
     #
-    # La version anterior era simetrica alrededor de theta=0: la separacion de
-    # filas disminuia al acercarse al pivot y volvia a aumentar al cruzarlo.
-    # Eso generaba visualmente "alto -> medio -> bajo -> alto".
+    # phi = theta - phase
+    # y   = sin(phi)
     #
-    # Aqui la derivada aumenta monotonicamente:
-    #   f'(theta) = 1 + S * tanh(K * theta)
+    # SKY_ARC_PHASE mantiene el viewport sobre una sola rama del semicírculo.
+    # SKY_ARC_LIMIT evita alcanzar +/-PI/2; fuera del arco se prolonga con la
+    # tangente del borde, conservando continuidad y derivada positiva.
+    # Arco circular normalizado: g(0)=0 y g'(0)=1.
     #
-    # Fondo (theta<0) siempre mas compacto; frente (theta>0) siempre un poco
-    # mas abierto. Nunca existe un punto donde vuelva a cambiar de tendencia.
+    # Esa normalizacion es importante para interpolar el angulo. La version
+    # anterior multiplicaba theta por alpha pero dejaba el radio fijo, por lo
+    # que al acercarse a 0 grados todas las filas colapsaban hacia el pivot.
+    # Aqui el limite alpha->0 es un plano top-down normal.
     def sky_curve(theta)
-      u = theta.to_f
-      strength = Config::SKY_DIRECTIONAL_STRENGTH.to_f.clamp(0.0, 0.95)
-      sharpness = Config::SKY_DIRECTIONAL_SHARPNESS.to_f
-      return u if strength <= 1.0e-9 || sharpness.abs <= 1.0e-9
+      phase = Config::SKY_ARC_PHASE.to_f
+      limit = Config::SKY_ARC_LIMIT.to_f.clamp(0.10, Math::PI / 2.0 - 0.02)
+      norm = Math.cos(phase)
+      norm = 1.0 if norm.abs < 1.0e-6
 
-      x = sharpness * u
-      ax = x.abs
-      log_cosh = ax + Math.log(1.0 + Math.exp(-2.0 * ax)) - Math.log(2.0)
-      u + (strength / sharpness) * log_cosh
+      phi = theta.to_f - phase
+      base = Math.sin(-phase)
+      edge_d = Math.cos(limit)
+
+      if phi < -limit
+        edge = Math.sin(-limit) - base
+        return (edge + (phi + limit) * edge_d) / norm
+      elsif phi > limit
+        edge = Math.sin(limit) - base
+        return (edge + (phi - limit) * edge_d) / norm
+      end
+
+      (Math.sin(phi) - base) / norm
     end
-
-    def sky_curve_derivative(theta)
-      u = theta.to_f
-      strength = Config::SKY_DIRECTIONAL_STRENGTH.to_f.clamp(0.0, 0.95)
-      sharpness = Config::SKY_DIRECTIONAL_SHARPNESS.to_f
-      return 1.0 if strength <= 1.0e-9 || sharpness.abs <= 1.0e-9
-      1.0 + strength * Math.tanh(sharpness * u)
-    end
-
-    # Factor de perspectiva DIRECCIONAL. La formula anterior usaba cos(theta),
-    # que es simetrico: alejaba y acercaba escalaban igual. Una camara real debe
-    # reducir el fondo (theta < 0) y aumentar suavemente el frente (theta > 0).
     def sky_directional_scale(theta, strength)
       strength = strength.to_f
       return 1.0 if strength.abs < 1.0e-9
@@ -163,29 +163,41 @@ module Mode7
       tile_billboard_scale_for_world_y(wy) * Config::SKY_VERTICAL_SCALE.to_f
     end
 
-    # Inversa unica de sky_curve por Newton.
-    # sky_curve_derivative nunca llega a 0, por lo que no hay ramas ni rebotes.
+    # Inversa exacta del arco circular, incluyendo las colas tangentes.
+    # Solo existe una solucion porque la derivada nunca cambia de signo.
+    # Inversa del arco circular normalizado, incluyendo colas tangentes.
     def sky_curve_inv(t)
-      target = t.to_f
-      theta = target
-      10.times do
-        f = sky_curve(theta) - target
-        df = sky_curve_derivative(theta)
-        break if df.abs < 1.0e-9
-        step = f / df
-        theta -= step
-        break if step.abs < 1.0e-7
-      end
-      theta
-    end
+      phase = Config::SKY_ARC_PHASE.to_f
+      limit = Config::SKY_ARC_LIMIT.to_f.clamp(0.10, Math::PI / 2.0 - 0.02)
+      norm = Math.cos(phase)
+      norm = 1.0 if norm.abs < 1.0e-6
+      base = Math.sin(-phase)
+      edge_d = Math.cos(limit)
 
-    # Theta de una fila de pantalla. La inversa es unica: no hay ramas ni
-    # periodicidad, por lo que subir/bajar la camara conserva siempre el signo.
+      raw_target = t.to_f * norm
+      low = Math.sin(-limit) - base
+      high = Math.sin(limit) - base
+
+      if raw_target < low
+        phi = -limit + (raw_target - low) / edge_d
+        return phi + phase
+      elsif raw_target > high
+        phi = limit + (raw_target - high) / edge_d
+        return phi + phase
+      end
+
+      v = (raw_target + base).clamp(-1.0, 1.0)
+      Math.asin(v) + phase
+    end
+    # Theta correspondiente a una fila de pantalla para el angulo ACTUAL.
+    # El factor alpha aparece tanto aqui como en la proyeccion directa, por lo
+    # que world_y_for_row sigue siendo la inversa exacta durante transiciones.
     def sky_theta_for_row(sy)
-      t = (sy.to_f - pivot_y) / @planet_radius
+      scale = sky_angle_scale
+      return 0.0 if scale.abs < 1.0e-6
+      t = ((sy.to_f - pivot_y) * scale) / @planet_radius
       sky_curve_inv(t)
     end
-
     def effective_mode_blend; return (@mode_blend || 0.0).clamp(0.0, 1.0); end
 
     def rendering_now?
@@ -193,13 +205,7 @@ module Mode7
       return effective_mode_blend > 0.001
     end
 
-    def vanilla_project(wx, wy); return [wx - cam_x + center_x, wy - projection_cam_y]; end
-    def vanilla_world_y_for_row(sy); return sy + projection_cam_y; end
-    def lerp(a, b, t); return a + (b - a) * t; end
 
-    # Movimiento visual de camara. No altera cam_y real: solo modifica la
-    # profundidad del plano Sky. Sumarlo a screen Y desincroniza suelo/walls
-    # al subir una escalera y deja una copia visual del muro.
     def terrain_camera_lift
       @terrain_camera_lift || 0.0
     end
@@ -358,15 +364,6 @@ module Mode7
       invalidate_renderer_ground
     end
 
-    def vanish_y
-      return horizon_row.round if sky_mode?
-      return (pivot_y - @distance_h * @cos / @sin).round if !affine_mode?
-      if Config::AFFINE_DEPTH > 0
-        heff = @distance_h / Config::AFFINE_DEPTH.to_f
-        return (pivot_y - heff * @cos / @sin).round
-      end
-      0
-    end
 
     def configure(alpha = nil, zoom = nil, distance_h = nil, planet_radius = nil)
       @current_alpha = (alpha || @current_alpha || Config::DEFAULT_ALPHA).to_f
@@ -417,24 +414,9 @@ module Mode7
       @project_y_cache.clear if @project_y_cache
     end
 
-    def set_pivot(ratio)
-      @pivot_override = ratio
-      configure(@current_alpha, @zoom, @distance_h, @planet_radius)
-    end
 
-    def set_vanish(row)
-      @pivot_override = (row + @distance_h * @cos / @sin) / screen_h.to_f
-      configure(@current_alpha, @zoom, @distance_h, @planet_radius)
-    end
 
-    def reset_vanish
-      @pivot_override = nil
-      configure(@current_alpha, @zoom, @distance_h, @planet_radius)
-    end
 
-    def set_default_camera
-      configure(Config::DEFAULT_ALPHA, Config::DEFAULT_ZOOM)
-    end
 
     def persp(sy); return @slope * sy + @corr; end
 
@@ -562,17 +544,21 @@ module Mode7
     def _sky_project(wx, wy, elevation = 0)
       rx = wx.to_f - cam_x
       scale = sky_angle_scale
-      return vanilla_project(wx, wy - elevation) if scale <= 0.0
+      ry = wy.to_f - projection_cam_y - pivot_y
+      ground_scale = sky_ground_y_scale
 
-      # El suelo y la altura usan ejes distintos. Theta depende solo de la
-      # profundidad Y del mapa; la elevacion Z se aplica verticalmente despues.
-      theta = sky_theta_for_world_y(wy)
-      sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
+      if scale.abs < 1.0e-6
+        sy_ground = pivot_y + ry * @zoom * ground_scale
+        theta = 0.0
+      else
+        theta = (ry * @zoom * scale * ground_scale) / @planet_radius
+        sy_ground = pivot_y + (@planet_radius / scale) * sky_curve(theta)
+      end
+
       sx = center_x + rx * @zoom * sky_width_scale(theta)
       sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
-      return [sx, sy]
+      [sx, sy]
     end
-
     def project(wx, wy, elevation = 0)
       return _sky_project(wx, wy, elevation) if sky_mode?
       if affine_mode?
@@ -595,15 +581,6 @@ module Mode7
     # Proyeccion para un objeto vertical entero. El Y sigue curva Sky y su base
     # queda en coordenada real del mapa; solo X usa escala uniforme propia.
     # ponytail: un ancla por objeto; malla vertical solo si se introduce arte 3D.
-    def project_billboard(wx, wy, elevation = 0)
-      return project(wx, wy, elevation) if !sky_mode?
-      sy = project_y(wy, elevation)
-      return nil if !sy
-      scale = tile_billboard_scale_for_world_y(wy)
-      return nil if !scale || scale <= 0
-      sx = center_x + (wx.to_f - cam_x) * scale
-      [sx, sy]
-    end
 
     def project_y(wy, elevation = 0)
       @project_y_cache ||= {}
@@ -631,14 +608,18 @@ module Mode7
 
     def _sky_project_y(wy, elevation = 0)
       scale = sky_angle_scale
-      # Sin angulo Sky no hay profundidad que levantar; mantener coordenadas
-      # vanilla evita que TERRAIN_TAG_CAMERA_LIFT deslice todo el mapa plano.
-      return wy - cam_y - elevation if scale <= 0.0
-      theta = sky_theta_for_world_y(wy)
-      sy_ground = pivot_y + (@planet_radius * sky_curve(theta))
-      return sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
-    end
+      ry = wy.to_f - projection_cam_y - pivot_y
+      ground_scale = sky_ground_y_scale
 
+      if scale.abs < 1.0e-6
+        sy_ground = pivot_y + ry * @zoom * ground_scale
+      else
+        theta = (ry * @zoom * scale * ground_scale) / @planet_radius
+        sy_ground = pivot_y + (@planet_radius / scale) * sky_curve(theta)
+      end
+
+      sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
+    end
     def _project_y_uncached(wy, elevation = 0)
       return _sky_project_y(wy, elevation) if sky_mode?
       if affine_mode?
@@ -651,30 +632,47 @@ module Mode7
       return pivot_y + (@dh * yi * @cos) / d
     end
 
-    def wall_scale(sy)
-      return nil if sy.nil?
-      hscale(sy)
+
+
+    # Alto proyectado de UNA fila justo delante de la base indicada.
+    # Cambia continuamente con zoom y angulo; se usa como unidad de prioridad
+    # visual en vez de sumar 32 px de mundo y esperar que la curva coincida.
+    def priority_screen_step(wy)
+      base = project_y(wy.to_f, 0)
+      ahead = project_y(wy.to_f + Game_Map::TILE_HEIGHT, 0)
+      fallback = Game_Map::TILE_HEIGHT.to_f * (@zoom || 1.0)
+      return fallback if base.nil? || ahead.nil?
+      step = ahead - base
+      return fallback if step <= 0.001
+      step
     end
 
-    def wall_half_width(half_w, wy)
-      k = wall_scale(wy)
-      return half_w if k.nil?
-      half_w * k
+    # Solape de raster/sprite para prioridad. Crece con zoom y con la cantidad
+    # de inclinacion activa, pero queda limitado para no emborronar pixel art.
+    def priority_edge_overlap
+      base = Config::PRIORITY_EDGE_OVERLAP.to_f
+      maxv = Config::PRIORITY_EDGE_OVERLAP_MAX.to_f
+      z = [(@zoom || 1.0).to_f, 0.25].max
+      angle = sky_mode? ? sky_angle_scale.abs : (@sin || 0.0).abs
+      factor = 0.75 + [angle, 1.5].min * 0.50
+      [[base * z * factor, 0.5].max, maxv].min
     end
 
-    # Clave de profundidad compatible con la prioridad clasica de RPG Maker.
-    # Priority N no es altura fisica: hace que el tile se ordene como si su base
-    # estuviera N tiles mas cerca del jugador. Asi un techo puede tapar al actor
-    # durante varias filas sin recurrir a z=9999.
+    # Clave de profundidad compatible con RPG Maker, pero adaptada a la
+    # proyeccion ACTUAL. Priority N avanza N altos-de-fila proyectados desde
+    # su base. Al interpolar angulo/zoom, el Z cambia en el mismo frame que
+    # cambia la geometria y no hay saltos de orden ni prioridad "encogida".
     def depth_z(wy, priority = 0, bias = 0)
-      step = defined?(Config::PRIORITY_DEPTH_STEP) ? Config::PRIORITY_DEPTH_STEP.to_f : Game_Map::TILE_HEIGHT.to_f
-      virtual_y = wy.to_f + priority.to_i * step
-      sy = project_y(virtual_y, 0)
-      sy = project_y(wy, 0) if sy.nil?
+      sy = project_y(wy.to_f, 0)
       return bias.to_i if sy.nil?
+      p = priority.to_i
+      if p > 0
+        scale = defined?(Config::PRIORITY_DEPTH_SCALE) ?
+                Config::PRIORITY_DEPTH_SCALE.to_f : 1.0
+        sy += priority_screen_step(wy) * p * scale
+      end
       sy.round + bias.to_i
     end
-
     def world_y_for_row(sy)
       return _sky_world_y_for_row(sy) if sky_mode?
       refresh_camera_projection_cache
@@ -687,18 +685,26 @@ module Mode7
 
     def _sky_world_y_for_row(sy)
       scale = sky_angle_scale
-      return sy + cam_y if scale <= 0.0
+      ground_scale = sky_ground_y_scale
+      denom = @zoom * ground_scale
+      return projection_cam_y + pivot_y if denom.abs < 1.0e-9
+
+      if scale.abs < 1.0e-6
+        ry = (sy.to_f - pivot_y) / denom
+        return projection_cam_y + pivot_y + ry
+      end
+
       @sky_row_world_offset_cache ||= {}
-      offset = @sky_row_world_offset_cache[sy]
+      key = [sy, scale, @zoom, ground_scale]
+      offset = @sky_row_world_offset_cache[key]
       if offset.nil?
         theta = sky_theta_for_row(sy)
-        ry = (theta * @planet_radius) / (@zoom * scale * sky_ground_y_scale)
+        ry = (theta * @planet_radius) / (denom * scale)
         offset = pivot_y + ry
-        @sky_row_world_offset_cache[sy] = offset
+        @sky_row_world_offset_cache[key] = offset
       end
-      return projection_cam_y + offset
+      projection_cam_y + offset
     end
-
     def _world_y_for_row_uncached(sy)
       return _sky_world_y_for_row(sy) if sky_mode?
       return projection_cam_y + pivot_y + affine_depth_unscale(sy - pivot_y) if affine_mode?
@@ -746,6 +752,15 @@ module Mode7
         @step_distance_h = (@target_distance_h - @distance_h) / @transition_frames
         @step_planet_radius = (@target_planet_radius - @planet_radius) / @transition_frames
       end
+    end
+
+    # Cambia el angulo con la misma interpolacion usada por zoom/radio.
+    # Todas las prioridades consultan la proyeccion actual cada frame, por lo
+    # que pueden acompañar esta transicion sin reconstruir el mapa.
+    def set_angle(target_alpha, frames = Config::CAMERA_ANGLE_SMOOTH_FRAMES)
+      value = target_alpha.to_f.clamp(0.0, 89.0)
+      set_camera(value, zoom, frames, distance_h, planet_radius)
+      value
     end
 
     # Comando para la terminal F3: Mode7.set_zoom(1.50)
