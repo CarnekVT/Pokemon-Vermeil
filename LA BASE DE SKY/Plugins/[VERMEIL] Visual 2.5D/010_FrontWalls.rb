@@ -167,7 +167,6 @@ class Mode7Renderer
     entries.select do |entry|
       next false if entry_is_elevated_wall?(entry)
       next false if interior_border_entry?(entry)
-      next false if entry_hybrid_priority(entry)
       entry[:unify].to_i >= base
     end
   rescue Exception
@@ -205,17 +204,6 @@ class Mode7Renderer
     ladder_unify >= wall_unify
   end
 
-  def entry_hybrid_priority(e)
-    tag = terrain_tag_for_entry(e)
-    return nil if !tag || tag.id == :None
-    Mode7::Config::HYBRID_PRIORITY_TERRAIN_TAGS[tag.id]
-  end
-
-  def entry_hybrid_height(e)
-    tag = terrain_tag_for_entry(e)
-    return 0 if !tag || tag.id == :None
-    (Mode7::Config::HYBRID_PRIORITY_TERRAIN_TAG_HEIGHT[tag.id] || 0).to_i
-  end
 
   def configured_terrain_tag_height(e)
     tag = terrain_tag_for_entry(e)
@@ -245,15 +233,10 @@ class Mode7Renderer
   end
 
 
-  def hybrid_row_priority_active?(priority, ty)
-    return false if !priority || priority.to_i <= 0 || !$game_player
-    $game_player.y < ty
-  end
 
   def priority_surface_entry?(e)
     return false if !Mode7::Config::PRIORITY_SURFACES
     return false if interior_border_entry?(e)
-    return true if entry_hybrid_priority(e)
     return true if entry_terrain_tag_height(e) > 0 && !e[:terrain_height_wall_cell]
     p = entry_visual_priority(e)
     min = Mode7::Config::PRIORITY_SURFACE_MIN.to_i
@@ -364,7 +347,7 @@ class Mode7Renderer
 
       groups.each do |(depth_ty, priority, unify, elevation), group_cells|
         depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
-        make_wall_component(
+        make_rigid_component(
           group_cells,
           elevation,
           bounds,
@@ -377,7 +360,97 @@ class Mode7Renderer
   rescue Exception => e
     Console.echo_error("2.5D: build_wall_columns: #{e.message}") if defined?(Console)
   end
+  # ---------------------------------------------------------------------------
+  # Priority P2+ como bloques rigidos
+  # ---------------------------------------------------------------------------
+  # P2/P3/P4 suelen ser partes verticales de arboles, edificios y props.
+  # Proyectarlas como strips independientes de cada fila cambia el alto de cada
+  # tile y abre cortes horizontales. Desde PRIORITY_RIGID_MIN se agrupan por
+  # layer/elevacion y se dibujan con la misma geometria rigida de los walls.
+  def rigid_priority_candidate?(entries, entry)
+    return false if interior_border_entry?(entry)
+    return false if entry_is_elevated_wall?(entry)
+    return false if wall_visual_entries(entries).include?(entry)
+    entry_visual_priority(entry) >= Mode7::Config::PRIORITY_RIGID_MIN.to_i
+  end
+
+  def rigid_priority_components
+    buckets = Hash.new { |hash, key| hash[key] = {} }
+
+    @entry_cache.each do |position, entries|
+      entries.each do |entry|
+        next if !rigid_priority_candidate?(entries, entry)
+        key = [entry[:unify].to_i, entry_world_elevation(entry).to_f]
+        buckets[key][position] ||= []
+        buckets[key][position].push(entry)
+      end
+    end
+
+    result = []
+    buckets.each do |key, cells|
+      pending = {}
+      cells.each_key { |position| pending[position] = true }
+
+      until pending.empty?
+        start = pending.keys.first
+        pending.delete(start)
+        stack = [start]
+        component = {}
+
+        until stack.empty?
+          tx, ty = stack.pop
+          pos = [tx, ty]
+          component[pos] = cells[pos]
+
+          [[tx - 1, ty], [tx + 1, ty], [tx, ty - 1], [tx, ty + 1]].each do |neighbor|
+            next if !pending[neighbor]
+            pending.delete(neighbor)
+            stack.push(neighbor)
+          end
+        end
+
+        result.push([component, key])
+      end
+    end
+    result
+  end
+
+  def build_rigid_priority_blocks
+    rigid_priority_components.each do |component, key|
+      unify, elevation = key
+      bounds = component.keys
+
+      # Priority conserva Z independiente, pero todos los niveles de un mismo
+      # objeto comparten bounds/ancla/escala. No se abre una junta entre P2/P3/P4.
+      groups = Hash.new { |hash, priority| hash[priority] = {} }
+      component.each do |position, entries|
+        entries.each do |entry|
+          priority = entry_visual_priority(entry)
+          groups[priority][position] ||= []
+          groups[priority][position].push(entry)
+        end
+      end
+
+      groups.each do |priority, group_cells|
+        depth_ty = group_cells.keys.map { |_tx, ty| ty }.max
+        depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
+        make_rigid_component(
+          group_cells,
+          elevation,
+          bounds,
+          priority,
+          unify,
+          depth_wyb
+        )
+      end
+    end
+  end
+
   def build_priority_surfaces
+    build_rigid_priority_blocks
+
+    # P1 y superficies especiales siguen el arco del suelo. P2+ ya fue
+    # retirado a bloques rigidos para evitar cortes entre filas.
     strips = Hash.new { |hash, key| hash[key] = {} }
 
     @map.width.times do |tx|
@@ -387,42 +460,29 @@ class Mode7Renderer
 
         entries.each do |entry|
           next if wall_owned.include?(entry)
+          next if rigid_priority_candidate?(entries, entry)
           next if !priority_surface_entry?(entry)
 
-          hybrid = entry_hybrid_priority(entry)
           elevation = entry_world_elevation(entry)
-
-          if hybrid
-            elevation += entry_hybrid_height(entry)
-            base_key = [:hybrid_base, entry[:unify].to_i, 0, ty, elevation]
-            top_key  = [:hybrid_top, entry[:unify].to_i, hybrid.to_i, ty, elevation]
-            strips[base_key][tx] ||= []
-            strips[base_key][tx].push(entry)
-            strips[top_key][tx] ||= []
-            strips[top_key][tx].push(entry)
-            next
-          end
-
-          key = [:normal, entry[:unify].to_i, entry_visual_priority(entry), ty,
-                 elevation]
+          key = [entry[:unify].to_i, entry_visual_priority(entry), ty, elevation]
           strips[key][tx] ||= []
           strips[key][tx].push(entry)
         end
       end
     end
 
-    strips.each do |(kind, unify, priority, ty, elevation), row|
+    strips.each do |(unify, priority, ty, elevation), row|
       segment = {}
       previous = nil
       row.keys.sort.each do |tx|
         if previous && tx != previous + 1
-          make_priority_strip(segment, ty, priority, unify, elevation, kind)
+          make_priority_strip(segment, ty, priority, unify, elevation)
           segment = {}
         end
         segment[tx] = row[tx]
         previous = tx
       end
-      make_priority_strip(segment, ty, priority, unify, elevation, kind) if !segment.empty?
+      make_priority_strip(segment, ty, priority, unify, elevation) if !segment.empty?
     end
   end
   def build_interior_border_surfaces
@@ -455,7 +515,7 @@ class Mode7Renderer
   # Columna fisica de UNA celda. Forma original del volumen 2.5D: nunca usa
   # filas vecinas como alto, por eso no arrastra ni corta bloques al mover Y.
 
-  def make_wall_component(cells, elevation = 0, bounds = nil,
+  def make_rigid_component(cells, elevation = 0, bounds = nil,
                           priority = nil, unify = nil, depth_wyb = nil)
     positions = bounds || cells.keys
     return if positions.empty?
@@ -468,7 +528,7 @@ class Mode7Renderer
     width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
     height = (max_ty - min_ty + 1) * Game_Map::TILE_HEIGHT
     bitmap = Bitmap.new(width, height)
-    draw_wall_component_base_source(bitmap, min_tx, min_ty, cells)
+    draw_rigid_component_source(bitmap, min_tx, min_ty, cells)
 
     all_entries = cells.values.flatten
     priority = all_entries.map { |entry| entry_visual_priority(entry) }.max || 0 if priority.nil?
@@ -490,7 +550,7 @@ class Mode7Renderer
       0, min_tx, min_ty, max_tx, max_ty, elevation
     ])
   end
-  def draw_wall_component_base_source(dst, min_tx, min_ty, cells)
+  def draw_rigid_component_source(dst, min_tx, min_ty, cells)
     dst.clear
     cells.keys.sort_by { |tx, ty| [ty, tx] }.each do |tx, ty|
       x = (tx - min_tx) * Game_Map::TILE_WIDTH
@@ -519,7 +579,7 @@ class Mode7Renderer
   # RPG Maker calcula Z por fila de tile, no por tile individual: esta unidad
   # mantiene la prioridad real y evita crear/reproyectar cientos de sprites al
   # mover la camara verticalmente.
-  def make_priority_strip(cells, ty, priority, unify, elevation, kind = :normal)
+  def make_priority_strip(cells, ty, priority, unify, elevation)
     return if !cells || cells.empty?
     min_tx = cells.keys.min
     max_tx = cells.keys.max
@@ -537,10 +597,9 @@ class Mode7Renderer
     sprite.oy = source.height
     sprite.visible = false
 
-    hybrid_mode = kind == :normal ? nil : kind
     @priority_strips.push([
       sprite, source, min_tx, ty, priority, unify, elevation,
-      cells, hybrid_mode, nil, mountain_shadow
+      cells, mountain_shadow
     ])
   end
   def draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow = false)
@@ -567,10 +626,8 @@ class Mode7Renderer
     end
   end
 
-  # P1-P4 usa source transparente del mismo rectangulo P0. Cada prioridad
-  # conserva Z nativa, pero todas las piezas de un objeto usan mismo anclaje.
-
-
+  # InteriorBorder usa sprite individual porque no pertenece a strips ni a
+  # bloques rigidos de prioridad.
 
   def make_priority_surface(tx, ty, entry, depth = nil, force = false)
     return if !force && !priority_surface_entry?(entry)
@@ -696,17 +753,8 @@ class Mode7Renderer
 
     @priority_strips.each do |data|
       sprite, source, min_tx, ty, priority, unify, elevation,
-      _cells, hybrid_mode, _projection_state, _mountain_shadow = data
+      _cells, _mountain_shadow = data
 
-      hybrid_active = hybrid_mode && hybrid_row_priority_active?(1, ty)
-      if hybrid_mode == :hybrid_top && !hybrid_active
-        sprite.visible = false
-        next
-      end
-      if hybrid_mode == :hybrid_base && hybrid_active
-        sprite.visible = false
-        next
-      end
       if (ty - cam_ty).abs > radius_y
         sprite.visible = false
         next
@@ -802,16 +850,15 @@ class Mode7Renderer
       next if !sprite.bitmap || sprite.bitmap.disposed?
       next if !entries.is_a?(Hash)
       next if entries.values.flatten.none? { |entry| entry[:animated] }
-      draw_wall_component_base_source(sprite.bitmap, min_tx, min_ty, entries)
+      draw_rigid_component_source(sprite.bitmap, min_tx, min_ty, entries)
     end
 
     @priority_strips.each do |data|
       _sprite, source, min_tx, ty, _priority, _unify, _elevation,
-      cells, _hybrid_mode, _projection_state, mountain_shadow = data
+      cells, mountain_shadow = data
       next if !source || source.disposed?
       next if cells.values.flatten.none? { |entry| entry[:animated] }
       draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow)
-      data[9] = nil
     end
 
     @priority_data.each do |data|
@@ -837,7 +884,7 @@ class Mode7Renderer
   end
 
   # ---------------------------------------------------------------------------
-  # Muros fisicos
+  # Bloques rigidos (walls + objetos P2+)
   # ---------------------------------------------------------------------------
   def update_walls
     cam_tx = Mode7.cam_x / Game_Map::TILE_WIDTH
@@ -872,7 +919,7 @@ class Mode7Renderer
 
       sx, syb = projected
 
-      # El wall es un BLOQUE rigido: la perspectiva solo mueve el ancla.
+      # El bloque es rigido: la perspectiva solo mueve el ancla.
       # El zoom de camara escala X/Y por igual; la profundidad NO cambia su
       # relacion de aspecto ni hace que filas internas se separen.
       fixed_scale = Mode7.zoom.to_f

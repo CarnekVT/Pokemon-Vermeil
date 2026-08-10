@@ -61,40 +61,36 @@ module Mode7
       return @current_alpha.to_f / Config::DEFAULT_ALPHA
     end
 
-    # Arco circular real.
+    # Media circunferencia top-down SIN punto de inflexion visible.
     #
-    # phi = theta - phase
-    # y   = sin(phi)
+    # Se usa una sola rama de la circunferencia:
+    #   raw(phi) = -cos(phi)
+    #   phi      = SKY_ARC_PHASE + theta
     #
-    # SKY_ARC_PHASE mantiene el viewport sobre una sola rama del semicírculo.
-    # SKY_ARC_LIMIT evita alcanzar +/-PI/2; fuera del arco se prolonga con la
-    # tangente del borde, conservando continuidad y derivada positiva.
-    # Arco circular normalizado: g(0)=0 y g'(0)=1.
-    #
-    # Esa normalizacion es importante para interpolar el angulo. La version
-    # anterior multiplicaba theta por alpha pero dejaba el radio fijo, por lo
-    # que al acercarse a 0 grados todas las filas colapsaban hacia el pivot.
-    # Aqui el limite alpha->0 es un plano top-down normal.
+    # La curva se normaliza para que g(0)=0 y g'(0)=1. Durante todo el viewport
+    # phi permanece entre SKY_ARC_MIN y SKY_ARC_MAX, ambos dentro de (0, PI/2).
+    # Por tanto la derivada es siempre positiva y la curvatura siempre convexa.
     def sky_curve(theta)
       phase = Config::SKY_ARC_PHASE.to_f
-      limit = Config::SKY_ARC_LIMIT.to_f.clamp(0.10, Math::PI / 2.0 - 0.02)
-      norm = Math.cos(phase)
+      min_phi = Config::SKY_ARC_MIN.to_f.clamp(0.02, Math::PI / 2.0 - 0.04)
+      max_phi = Config::SKY_ARC_MAX.to_f.clamp(min_phi + 0.02, Math::PI / 2.0 - 0.02)
+      norm = Math.sin(phase)
       norm = 1.0 if norm.abs < 1.0e-6
 
-      phi = theta.to_f - phase
-      base = Math.sin(-phase)
-      edge_d = Math.cos(limit)
+      phi = phase + theta.to_f
+      base = -Math.cos(phase)
 
-      if phi < -limit
-        edge = Math.sin(-limit) - base
-        return (edge + (phi + limit) * edge_d) / norm
-      elsif phi > limit
-        edge = Math.sin(limit) - base
-        return (edge + (phi - limit) * edge_d) / norm
+      if phi < min_phi
+        edge = -Math.cos(min_phi) - base
+        return (edge + (phi - min_phi) * Math.sin(min_phi)) / norm
+      elsif phi > max_phi
+        edge = -Math.cos(max_phi) - base
+        return (edge + (phi - max_phi) * Math.sin(max_phi)) / norm
       end
 
-      (Math.sin(phi) - base) / norm
+      (-Math.cos(phi) - base) / norm
     end
+
     def sky_directional_scale(theta, strength)
       strength = strength.to_f
       return 1.0 if strength.abs < 1.0e-9
@@ -163,32 +159,32 @@ module Mode7
       tile_billboard_scale_for_world_y(wy) * Config::SKY_VERTICAL_SCALE.to_f
     end
 
-    # Inversa exacta del arco circular, incluyendo las colas tangentes.
-    # Solo existe una solucion porque la derivada nunca cambia de signo.
-    # Inversa del arco circular normalizado, incluyendo colas tangentes.
+    # Inversa exacta de la misma rama circular.
     def sky_curve_inv(t)
       phase = Config::SKY_ARC_PHASE.to_f
-      limit = Config::SKY_ARC_LIMIT.to_f.clamp(0.10, Math::PI / 2.0 - 0.02)
-      norm = Math.cos(phase)
+      min_phi = Config::SKY_ARC_MIN.to_f.clamp(0.02, Math::PI / 2.0 - 0.04)
+      max_phi = Config::SKY_ARC_MAX.to_f.clamp(min_phi + 0.02, Math::PI / 2.0 - 0.02)
+      norm = Math.sin(phase)
       norm = 1.0 if norm.abs < 1.0e-6
-      base = Math.sin(-phase)
-      edge_d = Math.cos(limit)
+      base = -Math.cos(phase)
 
       raw_target = t.to_f * norm
-      low = Math.sin(-limit) - base
-      high = Math.sin(limit) - base
+      low = -Math.cos(min_phi) - base
+      high = -Math.cos(max_phi) - base
 
       if raw_target < low
-        phi = -limit + (raw_target - low) / edge_d
-        return phi + phase
+        phi = min_phi + (raw_target - low) / Math.sin(min_phi)
+        return phi - phase
       elsif raw_target > high
-        phi = limit + (raw_target - high) / edge_d
-        return phi + phase
+        phi = max_phi + (raw_target - high) / Math.sin(max_phi)
+        return phi - phase
       end
 
-      v = (raw_target + base).clamp(-1.0, 1.0)
-      Math.asin(v) + phase
+      cos_phi = -(raw_target + base)
+      cos_phi = cos_phi.clamp(-1.0, 1.0)
+      Math.acos(cos_phi) - phase
     end
+
     # Theta correspondiente a una fila de pantalla para el angulo ACTUAL.
     # El factor alpha aparece tanto aqui como en la proyeccion directa, por lo
     # que world_y_for_row sigue siendo la inversa exacta durante transiciones.
@@ -634,17 +630,23 @@ module Mode7
 
 
 
-    # Alto proyectado de UNA fila justo delante de la base indicada.
-    # Cambia continuamente con zoom y angulo; se usa como unidad de prioridad
-    # visual en vez de sumar 32 px de mundo y esperar que la curva coincida.
+    # Unidad Z de prioridad.
+    #
+    # Geometricamente sigue el alto de la fila proyectada para responder a
+    # cambios de angulo/zoom, pero NUNCA baja de PRIORITY_Z_MIN_STEP cuando
+    # zoom <= 1.0. De ese modo P1/P2/P4 conserva la precedencia RPG Maker a
+    # zoom 0.9, 0.8, etc. y no queda por debajo del personaje por redondeo.
     def priority_screen_step(wy)
       base = project_y(wy.to_f, 0)
       ahead = project_y(wy.to_f + Game_Map::TILE_HEIGHT, 0)
-      fallback = Game_Map::TILE_HEIGHT.to_f * (@zoom || 1.0)
-      return fallback if base.nil? || ahead.nil?
-      step = ahead - base
-      return fallback if step <= 0.001
-      step
+      projected = if base.nil? || ahead.nil?
+                    0.0
+                  else
+                    (ahead - base).abs
+                  end
+      zoom_step = Game_Map::TILE_HEIGHT.to_f * [(@zoom || 1.0).to_f, 1.0].max
+      min_step = Config::PRIORITY_Z_MIN_STEP.to_f
+      [projected, zoom_step, min_step].max
     end
 
     # Solape de raster/sprite para prioridad. Crece con zoom y con la cantidad
@@ -666,11 +668,7 @@ module Mode7
       sy = project_y(wy.to_f, 0)
       return bias.to_i if sy.nil?
       p = priority.to_i
-      if p > 0
-        scale = defined?(Config::PRIORITY_DEPTH_SCALE) ?
-                Config::PRIORITY_DEPTH_SCALE.to_f : 1.0
-        sy += priority_screen_step(wy) * p * scale
-      end
+      sy += priority_screen_step(wy) * p if p > 0
       sy.round + bias.to_i
     end
     def world_y_for_row(sy)

@@ -79,7 +79,7 @@ module Mode7
     # metadata (PBS: map_metadata.txt, columna Flags). Interior/exterior usan
     # Sky por defecto; Mode7Affine queda disponible como excepcion por mapa.
     #   "Mode7Affine" -> espacia el mapa en proyeccion plana.
-    #   "Mode7Sky"    -> fuerza el roll planetario.
+    #   "Mode7Sky"    -> fuerza el arco circular Sky.
     MAP_FLAG_AFFINE = "mode7afine"
     MAP_FLAG_SKY    = "mode7sky"
 
@@ -141,47 +141,60 @@ module Mode7
     AFFINE_PERSPECTIVE = 0.0
 
     # =======================================================================
-    # SKY - ARCO CIRCULAR TOP-DOWN
+    # SKY - MEDIA CIRCUNFERENCIA TOP-DOWN
     # =======================================================================
-    # La profundidad visible pertenece a una sola rama de un circulo.
-    # Internamente se usa sin(phi), pero el centro del arco se desplaza hacia
-    # delante de la camara. Asi el viewport NO cruza el punto donde cos(phi)
-    # volveria a disminuir y desaparece el efecto de ola.
+    # El viewport usa UNA sola rama convexa de una circunferencia real.
     #
-    # Visualmente:
-    #   fondo  -> filas mas compactas
-    #   centro -> intermedias
-    #   frente -> casi 32 px
+    # Antes el arco cruzaba su punto de inflexion y visualmente parecia una
+    # cursiva/S: algunas filas del fondo reducian su separacion y luego la
+    # recuperaban. Ahora la curva usa:
     #
-    # El arco es circular real, no tanh/atan/parabola.
+    #   -cos(PHASE + theta)
+    #
+    # normalizada para que alrededor del jugador g'(0)=1. Durante todo el
+    # viewport PHASE+theta permanece dentro de (0, PI/2), por lo que:
+    #   * la derivada siempre es positiva;
+    #   * la curvatura siempre tiene el mismo signo;
+    #   * al subir la camara un tile fijo siempre baja en pantalla.
+    #
+    # Es una rama de media circunferencia, no una onda periodica.
 
-    # Radio grande = perspectiva top-down suave. 1080 mantiene el efecto Sky
-    # sin convertir el mapa en un planeta exagerado.
-    SKY_ARC_RADIUS = 580.0
-    PLANET_RADIUS = SKY_ARC_RADIUS
+    # Radio grande para mantener lectura Pokemon top-down.
+    SKY_ARC_RADIUS = 1100.0
+    PLANET_RADIUS  = SKY_ARC_RADIUS
 
-    # Desplaza el centro angular del circulo por debajo/delante del jugador.
-    # Esto obliga a que la pantalla use la rama monotona del arco.
-    SKY_ARC_PHASE = 0.30
+    # Punto de la circunferencia donde queda el jugador. 1.0 rad mantiene toda
+    # la ventana visible en el mismo lado del arco y evita la "cursiva".
+    SKY_ARC_PHASE = 1.00
 
-    # Limite seguro (< PI/2). Fuera del arco visible se continua con la
-    # tangente del borde para que mapas largos nunca inviertan la direccion.
-    SKY_ARC_LIMIT = 1.40
+    # Limites angulares seguros de la rama circular. Fuera de ellos se continua
+    # con la tangente del borde, sin invertir scroll en mapas largos.
+    SKY_ARC_MIN = 0.16
+    SKY_ARC_MAX = 1.42
 
     SKY_GROUND_Y_SCALE = 1.00
 
-    # Convergencia horizontal leve. La lectura principal sigue siendo top-down.
-    SKY_WIDTH_PERSPECTIVE = 0.025
+    # Convergencia horizontal leve; el efecto principal sigue siendo top-down.
+    SKY_WIDTH_PERSPECTIVE = 0.020
 
-    # Objetos verticales y walls NO cambian de tamano por profundidad.
+    # Sprites verticales y walls no cambian tamano con la profundidad.
     SKY_BILLBOARD_PERSPECTIVE = 0.0
     SKY_VERTICAL_SCALE = 1.00
 
-    # Personajes casi estables, solo una pista minima de profundidad.
-    SKY_SPRITE_SCALE = 0.010
+    # Personajes practicamente fijos.
+    SKY_SPRITE_SCALE = 0.0
 
-    # Walls normales se componen como bloques rigidos y nunca heredan escala
-    # de profundidad. Mountains permanece como superficie del suelo.
+    # Priority 1 puede seguir la superficie; P2+ se renderiza como bloque rigido
+    # para que arboles/props no se partan entre filas.
+    PRIORITY_RIGID_MIN = 2
+
+    # Priority Z: debajo de zoom 1.0 nunca se reduce por debajo de 32 unidades.
+    # Esto evita que P1/P2/P4 pierda precedencia a zoom 0.9 o inferior.
+    PRIORITY_Z_MIN_STEP = 32.0
+
+    # Solape pequeno para P1/superficies que aun siguen el arco.
+    PRIORITY_EDGE_OVERLAP = 1.25
+    PRIORITY_EDGE_OVERLAP_MAX = 3.0
 
     # Tiles con prioridad > 0 salen del suelo y conservan prioridad RPG Maker.
     # Fuera de wall se proyectan entre bordes de fila; dentro de wall usan una
@@ -189,14 +202,6 @@ module Mode7
     PRIORITY_SURFACES = true
     PRIORITY_SURFACE_MIN = 1
 
-    # La prioridad se calcula en ESPACIO DE PANTALLA usando el alto proyectado
-    # de la fila actual. Por eso P1/P4 sigue funcionando al cambiar angulo o zoom.
-    PRIORITY_DEPTH_SCALE = 1.0
-
-    # Solape de seguridad para priority strips. Se multiplica suavemente por
-    # zoom/angulo para evitar lineas de 1px al interpolar la camara.
-    PRIORITY_EDGE_OVERLAP = 1.0
-    PRIORITY_EDGE_OVERLAP_MAX = 3.0
 
     # FOV horizontal en grados. Controla el aplanado de la cuadricula,
     # desacoplado del pitch:
@@ -262,19 +267,6 @@ module Mode7
       :Mountains => 255
     }.freeze
 
-    # PRIORIDAD HIBRIDA 2.5D. Terrain tags aqui NO son volumenes. Al pisar la
-    # celda, el tile queda en priority 0; si el jugador esta detras (al norte),
-    # usa temporalmente el valor configurado y lo cubre. No cambia PBS,
-    # pasabilidad ni comportamiento fuera de Mode7.
-    HYBRID_PRIORITY_TERRAIN_TAGS = {
-      :Grass     => 3
-    }.freeze
-
-    # Altura visual en px para capas hibridas. Grass queda sobre el suelo como
-    # una alfombra de hojas baja; no cambia colision, terreno ni prioridad PBS.
-    HYBRID_PRIORITY_TERRAIN_TAG_HEIGHT = {
-      :Grass     => 2
-    }.freeze
 
     # ELEVACION LOCAL POR TERRAIN TAG. No mueve camara: cada tile del filtro
     # se proyecta elevado sobre su propia base, sin alterar tiles adyacentes.

@@ -1,24 +1,34 @@
 module GameData
   class TrainerType
     attr_accessor :sprite_offset
+    attr_accessor :animation_speed
 
-    SCHEMA["SpriteOffset"] = [:sprite_offset, "ii"]
+    SCHEMA["SpriteOffset"]    = [:sprite_offset,    "ii"]
+    SCHEMA["AnimationSpeed"]  = [:animation_speed,  "u"]
 
     alias _zbox_tt_init_sprite_offset initialize
     def initialize(hash)
       _zbox_tt_init_sprite_offset(hash)
-      @sprite_offset = hash[:sprite_offset] || [0, 0]
+      @sprite_offset   = hash[:sprite_offset]   || [0, 0]
+      @animation_speed = hash[:animation_speed] || 2
     end
 
     alias _zbox_tt_getpbs_sprite_offset get_property_for_PBS
     def get_property_for_PBS(key)
       ret = _zbox_tt_getpbs_sprite_offset(key)
-      ret = nil if key == "SpriteOffset" && ret == [0, 0]
+      case key
+      when "SpriteOffset"   then ret = nil if ret == [0, 0]
+      when "AnimationSpeed" then ret = nil if ret == 2
+      end
       return ret
     end
 
     def trainer_sprite_offset
       return @sprite_offset || [0, 0]
+    end
+
+    def trainer_animation_speed
+      return @animation_speed || 2
     end
   end
 end
@@ -43,6 +53,9 @@ class TrainerSpriteEditor
       bitmap.scale = scale
       bitmap.refresh
       bitmap.hue_change(hue)
+      speed_val = data.trainer_animation_speed
+      speed_map = { 0 => 0, 1 => 0.75, 2 => 1.5, 3 => 3.0, 4 => 6.0 }
+      bitmap.anim_speed = speed_map[speed_val] || 1.5 if bitmap.respond_to?(:anim_speed=)
       @sprites["trainer_1"].ox = bitmap.width / 2
       @sprites["trainer_1"].oy = bitmap.height
       @sprites["trainer_1"].x = baseX + offset[0]
@@ -122,11 +135,50 @@ class TrainerSpriteEditor
     @sprites["info"].visible = false
   end
 
+  def pbSetAnimationSpeed
+    data = GameData::TrainerType.get(@trainerID)
+    speed = data.trainer_animation_speed
+    oldval = speed
+    cmdvals = [0, 1, 2, 3, 4]
+    commands = [
+      _INTL("Very Fast"),
+      _INTL("Fast"),
+      _INTL("Normal"),
+      _INTL("Slow"),
+      _INTL("Very Slow")
+    ]
+    cw = Window_CommandPokemon.new(commands)
+    cw.index    = speed
+    cw.viewport = @viewport
+    @sprites["info"].visible = true
+    loop do
+      Graphics.update
+      Input.update
+      cw.update
+      self.update
+      speed = cmdvals[cw.index]
+      @sprites["info"].setTextToFit("Animation Speed = #{commands[cw.index]}")
+      if Input.trigger?(Input::USE)
+        pbPlayDecisionSE
+        data.animation_speed = speed
+        @trainerChanged = true if speed != oldval
+        break
+      elsif Input.trigger?(Input::BACK)
+        data.animation_speed = oldval
+        pbPlayCancelSE
+        break
+      end
+    end
+    cw.dispose
+    @sprites["info"].visible = false
+  end
+
   alias _zbox_tse_orig_pbSetParameter pbSetParameter
   def pbSetParameter(param)
     return _zbox_tse_orig_pbSetParameter(param) if param < 5
     case param
     when 5 then pbSetSpritePosition
+    when 6 then pbSetAnimationSpeed
     end
     @sprites["info"].visible = false
     return false
@@ -140,7 +192,8 @@ class TrainerSpriteEditor
        _INTL("Set Shadow Position"),
        _INTL("Set Shadow Visibility"),
        _INTL("Set Sprite Hue"),
-       _INTL("Set Sprite Position")]
+       _INTL("Set Sprite Position"),
+       _INTL("Set Animation Speed")]
     )
     cw.x        = Graphics.width - cw.width
     cw.y        = Graphics.height - cw.height
@@ -203,6 +256,47 @@ class Battle::Scene::Animation::TrainerAppear
       newTrainer.setVisible(delay, true)
       newTrainer.setXY(delay, trainerX, trainerY)
       newTrainer.moveDelta(delay, 8, -Graphics.width / 4, 0)
+    end
+  end
+end
+
+class TrainerBitmapWrapper
+  attr_accessor :anim_speed
+
+  alias _zbox_tbw_orig_initialize initialize
+  def initialize(file, scale = 1)
+    _zbox_tbw_orig_initialize(file, scale)
+    @anim_speed = nil
+  end
+
+  alias _zbox_tbw_orig_update update
+  def update
+    return if disposed? || @total_frames <= 1
+    timer = System.uptime
+    speed = @anim_speed || Settings::TRAINER_ANIMATION_SPEED
+    delay = speed / @total_frames
+    return if timer - @last_uptime < delay
+    (@reversed) ? @frame_idx -= 1 : @frame_idx += 1
+    @frame_idx = 0 if @frame_idx >= @total_frames
+    @frame_idx = @total_frames - 1 if @frame_idx < 0
+    @last_uptime = timer
+  end
+end
+
+module GameData
+  class TrainerType
+    class << self
+      alias _zbox_tt_orig_front_sprite_bitmap front_sprite_bitmap
+      def front_sprite_bitmap(tr_type, filename = nil)
+        ret = _zbox_tt_orig_front_sprite_bitmap(tr_type, filename)
+        if ret.is_a?(TrainerBitmapWrapper) && self.exists?(tr_type)
+          data = self.get(tr_type)
+          speed_val = data.trainer_animation_speed
+          speed_map = { 0 => 0, 1 => 0.75, 2 => 1.5, 3 => 3.0, 4 => 6.0 }
+          ret.anim_speed = speed_map[speed_val] || 1.5
+        end
+        return ret
+      end
     end
   end
 end
