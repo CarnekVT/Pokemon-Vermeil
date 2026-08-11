@@ -95,8 +95,21 @@ class Mode7Renderer
         tag && indoor_tags[tag.id]
       end
     end
+
+    # El flag hace que indoor_map? responda TRUE aunque la metadata externa no
+    # exponga Outside/Outdoor. Debe ir ANTES del return-by-projection para que
+    # el angulo y raster_affine se resuelvan por tags tambien.
+    Mode7.tag_indoor_map_id = found ? @map_id : nil
     return if !found
 
+    # El setup pudo aplicar OUTDOOR_DEFAULT_ALPHA antes de esta deteccion
+    # (aun no se sabia que el mapa era indoor). Reaplicar el angulo del
+    # contexto rencien resuelto para que el mapa indoor-por-tags no arranque
+    # con la inclinacion equivocada.
+    if Mode7.active_now? && Mode7.indoor_map?
+      Mode7.set_camera(Mode7.context_default_alpha, Mode7.zoom,
+                       0, Mode7.distance_h, Mode7.cylindrical_radius)
+    end
     return if Mode7.map_projection == :affine
     Mode7.map_projection = :affine
     Mode7.reset_caches
@@ -311,6 +324,7 @@ class Mode7Renderer
     return false if interior_border_entry?(entry)
     return false if entry_is_elevated_wall?(entry)
     return false if entry_is_wall?(entry)
+    return false if interior_prop_entry?(entry)
     entry_visual_priority(entry) > 0
   end
 
@@ -631,6 +645,7 @@ class Mode7Renderer
             next if claimed[candidate.object_id]
             next if entry_visual_priority(candidate) <= 0
             next if interior_border_entry?(candidate)
+            next if entry_is_wall?(candidate)
             next if wall_visual_owned?(candidate)
             next if !rigid_priority_source_contiguous?(source_entry, candidate, dx, dy)
             component[pos] ||= []
@@ -665,21 +680,16 @@ class Mode7Renderer
       depth_ty = bounds.map { |_tx, ty| ty }.max
       depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
 
-      groups = Hash.new { |hash, priority| hash[priority] = {} }
-      component.each do |position, list|
-        list.each do |entry|
-          priority = entry_visual_priority(entry)
-          groups[priority][position] ||= []
-          groups[priority][position].push(entry)
-        end
-      end
-
-      groups.each do |priority, cells|
-        unify = cells.values.flatten.map { |entry| entry[:unify].to_i }.min || 0
-        make_rigid_component(
-          cells, elevation, bounds, priority, unify, depth_wyb, :indoor_prop
-        )
-      end
+      # TODO el prop en UN solo bloque: P1, P2+ y cualquier prioridad
+      # intermedia comparten bounds, base Y y elevacion. Antes cada prioridad
+      # generaba su propio componente y los P2+ se separaban visualmente del
+      # resto del prop (cada uno con su propio depth_wyb/Z). draw_rigid_...
+      # ya ordena el bitmap interno por [unify, priority].
+      priority = entries.map { |entry| entry_visual_priority(entry) }.max || 0
+      unify = entries.map { |entry| entry[:unify].to_i }.min || 0
+      make_rigid_component(
+        component, elevation, bounds, priority, unify, depth_wyb, :indoor_prop
+      )
     end
   end
 

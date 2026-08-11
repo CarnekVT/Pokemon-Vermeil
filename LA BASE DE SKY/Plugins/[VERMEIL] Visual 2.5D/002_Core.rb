@@ -7,6 +7,10 @@ module Mode7
                 :projection_revision, :projection_override
     # Proyeccion forzada por mapa (nil = usar Config::PROJECTION).
     attr_accessor :map_projection
+    # map_id del mapa al que el renderer resolvio indoor SOLO por terrain tags.
+    # Permite que indoor_map?/contexto de angulo escuchen esa deteccion sin
+    # depender de que un plugin de metadata exponga Outside/Outdoor.
+    attr_accessor :tag_indoor_map_id
 
     def screen_w; return Settings::SCREEN_WIDTH; end
     def screen_h; return Settings::SCREEN_HEIGHT; end
@@ -138,6 +142,10 @@ module Mode7
          Config::INDOOR_MAP_IDS.include?(id.to_i)
         return true
       end
+      # Deteccion por terrain tags exclusivos de interior (IndoorWall/Border/
+      # Prop). La resuelve el renderer al construir el mapa; sin esto un mapa
+      # indoor solo-por-tags usaba el angulo outdoor y raster_affine = false.
+      return true if @tag_indoor_map_id == id
 
       candidates = map_metadata_candidates_for(id)
       return true if candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_INDOOR) }
@@ -745,12 +753,18 @@ module Mode7
     # cambios de angulo/zoom, pero NUNCA baja de PRIORITY_Z_MIN_STEP cuando
     # zoom <= 1.0. De ese modo P1/P2/P4 conserva la precedencia RPG Maker a
     # zoom 0.9, 0.8, etc. y no queda por debajo del personaje por redondeo.
-    def priority_screen_step(_wy)
-      # La prioridad de RPG Maker es logica, no perspectiva. Si el paso Z
-      # cambia con el angulo, P3/P4 pueden saltar de orden al inclinar camara.
-      zoom_step = Game_Map::TILE_HEIGHT.to_f * [(@zoom || 1.0).to_f, 1.0].max
+    def priority_screen_step(wy)
+      # La prioridad de RPG Maker es logica, no perspectiva. Pero si el paso Z
+      # NO reacciona al angulo, al inclinarlo las filas se comprimen y los
+      # paredones de un lado llegan a pisar las prioridades de otro: un P1 del
+      # mismo objeto pasa delante/atras segun la fila en la que caiga.
       min_step = Config::PRIORITY_Z_MIN_STEP.to_f
-      [zoom_step, min_step].max
+      floor = project_y(wy.to_f, 0)
+      ceil = project_y(wy.to_f - Game_Map::TILE_HEIGHT, 0)
+      return min_step if !floor || !ceil
+      step = (floor - ceil).abs
+      return min_step if step < min_step
+      step
     end
 
     # Solape de raster/sprite para prioridad. Crece con zoom y con la cantidad
@@ -943,6 +957,10 @@ class Game_Map
   def setup(map_id)
     old_mode = Mode7.map_projection
     _VERMEIL_25D_core_setup(map_id)
+    # El flag indoor-por-tags pertenece al mapa que se acaba de cargar; el
+    # renderer lo pondra en su build si detecta tags indoor. Aqui solo se evita
+    # que un valor viejo de otro mapa contamine esta resolucion.
+    Mode7.tag_indoor_map_id = nil
     # Resolver DESPUES del setup: aqui ya existen $game_map y cualquier
     # metadata adicional inyectada por Maker Studio/plugins.
     Mode7.map_projection = Mode7.detect_map_projection(map_id)
