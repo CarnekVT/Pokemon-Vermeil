@@ -37,7 +37,7 @@ module Mode7
         _INTL("Modo: {1}", Mode7.projection_debug_label),
         _INTL("Angulo Indoor: {1}°", Mode7.indoor_alpha.round),
         _INTL("Angulo Outdoor: {1}°", Mode7.outdoor_alpha.round),
-        _INTL("Zoom: {1}", Mode7.zoom),
+        _INTL("Zoom base: {1}", Mode7.camera_zoom),
         _INTL("Radio Cylindrical: {1}", Mode7.cylindrical_radius),
         _INTL("Distancia (Altura): {1}", Mode7.distance_h),
         _INTL("Volver")
@@ -64,7 +64,7 @@ module Mode7
         min_zoom = (Mode7::Config::CAMERA_ZOOM_MIN * 100).round
         max_zoom = (Mode7::Config::CAMERA_ZOOM_MAX * 100).round
         params.setRange(min_zoom, max_zoom)
-        params.setDefaultValue((Mode7.zoom * 100).round.clamp(min_zoom, max_zoom))
+        params.setDefaultValue((Mode7.camera_zoom * 100).round.clamp(min_zoom, max_zoom))
         value = pbMessageChooseNumber(_INTL("Zoom x100 (100 = 1.00):"), params)
         Mode7.set_zoom(value.to_f / 100.0) if value
       when 4
@@ -73,7 +73,7 @@ module Mode7
         params.setDefaultValue(Mode7.cylindrical_radius.round)
         value = pbMessageChooseNumber(_INTL("Radio Cylindrical:"), params)
         Mode7.set_camera(
-          Mode7.current_alpha, Mode7.zoom, 0,
+          Mode7.current_alpha, Mode7.camera_zoom, 0,
           Mode7.distance_h, value.to_f
         ) if value
       when 5
@@ -82,7 +82,7 @@ module Mode7
         params.setDefaultValue(Mode7.distance_h.round)
         value = pbMessageChooseNumber(_INTL("Distancia (H):"), params)
         Mode7.set_camera(
-          Mode7.current_alpha, Mode7.zoom, 0,
+          Mode7.current_alpha, Mode7.camera_zoom, 0,
           value.to_f, Mode7.cylindrical_radius
         ) if value
       end

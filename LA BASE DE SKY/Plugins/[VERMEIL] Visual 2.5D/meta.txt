@@ -1,4 +1,4 @@
 Name          = [VERMEIL] Visual 2.5D
-Version       = 1.8.2
+Version       = 1.9.0
 Essentials    = 21.1
 Credits       = CarnekVT

@@ -97,6 +97,11 @@ module Mode7
     INDOOR_PROP_TERRAIN_TAGS = {
       :IndoorProp => true
     }.freeze
+    # Delimitacion interior/exterior: bloque negro que enmarca el exterior.
+    # Conserva layer y prioridad del tile como cualquier superficie indoor.
+    INDOOR_BLACK_TERRAIN_TAGS = {
+      :IndoorBlack => true
+    }.freeze
     INTERIOR_OPAQUE_GROUND = true
 
     WALL_TOP_Z_BIAS = 1
@@ -117,6 +122,8 @@ module Mode7
     CYLINDRICAL_PHASE  = 1.00
     CYLINDRICAL_MIN    = 0.16
     CYLINDRICAL_MAX    = 1.42
+    # Affine conserva la inclinacion principal; esta fraccion mezcla el arco.
+    CYLINDRICAL_CURVE_MIX = 0.35
 
     CYLINDRICAL_GROUND_Y_SCALE         = 1.00
     CYLINDRICAL_WIDTH_PERSPECTIVE      = 0.020
@@ -296,6 +303,14 @@ unless GameData::TerrainTag.exists?(:IndoorProp)
   GameData::TerrainTag.register({
     :id        => :IndoorProp,
     :id_number => 25
+  })
+end
+
+# Delimitacion interior/exterior. ID 26 libre.
+unless GameData::TerrainTag.exists?(:IndoorBlack)
+  GameData::TerrainTag.register({
+    :id        => :IndoorBlack,
+    :id_number => 26
   })
 end
 # Maker Studio guarda la etiqueta Mountains con el ID 20. Essentials no la

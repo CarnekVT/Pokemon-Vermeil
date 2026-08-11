@@ -31,6 +31,16 @@ class Game_Character
     if mode7_active_for_self?
       return _VERMEIL_25D_orig_screen_z(height) if @always_on_top
       wy = mode7_world_y_ground
+      if @tile_id > 0
+        begin
+          priority = self.map.priorities[@tile_id]
+          raise if priority.nil?
+          return Mode7.depth_z(wy, priority, 0)
+        rescue
+          raise _INTL("El grafico del evento es un tile fuera de rango (evento {1}, mapa {2})",
+                      @id, self.map.map_id)
+        end
+      end
       return Mode7.overworld_depth_z(wy, height)
     end
     _VERMEIL_25D_orig_screen_z(height)

@@ -45,8 +45,15 @@ class Mode7Renderer
   # otra layer no puede convertir un P1/P4 vecino en P0: eso hacia que Mountain
   # cubra props y que la prioridad pareciera heredada por adyacencia.
   def cache_visual_priorities
-    @entry_cache.each_value do |entries|
-      entries.each { |entry| entry[:visual_priority] = entry[:priority].to_i }
+    @entry_cache.each do |(tx, ty), entries|
+      cap = -1
+      if defined?(MakerStudio) && MakerStudio.respond_to?(:cell_ground_cap)
+        cap = MakerStudio.cell_ground_cap(@map, tx, ty)
+      end
+      entries.each do |entry|
+        own = entry[:priority].to_i
+        entry[:visual_priority] = own >= 1 && entry[:unify].to_i > cap ? own : 0
+      end
     end
   end
 
@@ -75,6 +82,14 @@ class Mode7Renderer
     Mode7::Config::INDOOR_PROP_TERRAIN_TAGS.key?(tag.id)
   end
 
+  # Delimitacion interior/exterior. Su layer/prioridad decide el orden visual.
+  def interior_black_entry?(entry)
+    return false if !Mode7.indoor_map?
+    tag = terrain_tag_for_entry(entry)
+    return false if !tag || tag.id == :None
+    Mode7::Config::INDOOR_BLACK_TERRAIN_TAGS.key?(tag.id)
+  end
+
   # Mountains/Ladders son tiles normales para el renderer 2.5D.
   def entry_is_elevated_wall?(_entry); false; end
   def mountain_shadow_opacity_for(_entries); 0; end
@@ -88,6 +103,7 @@ class Mode7Renderer
     Mode7::Config::INDOOR_WALL_TERRAIN_TAG_HEIGHT.each_key { |id| indoor_tags[id] = true }
     Mode7::Config::INTERIOR_BORDER_TERRAIN_TAGS.each_key { |id| indoor_tags[id] = true }
     Mode7::Config::INDOOR_PROP_TERRAIN_TAGS.each_key { |id| indoor_tags[id] = true }
+    Mode7::Config::INDOOR_BLACK_TERRAIN_TAGS.each_key { |id| indoor_tags[id] = true }
 
     found = @entry_cache.any? do |_position, entries|
       entries.any? do |entry|
@@ -107,7 +123,7 @@ class Mode7Renderer
     # contexto rencien resuelto para que el mapa indoor-por-tags no arranque
     # con la inclinacion equivocada.
     if Mode7.active_now? && Mode7.indoor_map?
-      Mode7.set_camera(Mode7.context_default_alpha, Mode7.zoom,
+      Mode7.set_camera(Mode7.context_default_alpha, Mode7.camera_zoom,
                        0, Mode7.distance_h, Mode7.cylindrical_radius)
     end
     return if Mode7.map_projection == :affine
@@ -191,6 +207,7 @@ class Mode7Renderer
     entries.select do |entry|
       next false if entry_is_elevated_wall?(entry)
       next false if interior_border_entry?(entry)
+      next false if interior_black_entry?(entry)
       entry[:unify].to_i >= base
     end
   rescue Exception
@@ -257,10 +274,9 @@ class Mode7Renderer
     return false if !Mode7::Config::PRIORITY_SURFACES
     p = entry_visual_priority(e)
     min = Mode7::Config::PRIORITY_SURFACE_MIN.to_i
+    return true if interior_black_entry?(e)
 
     if Mode7.raster_affine_mode?
-      # Border se rasteriza como strip con Z propio (build_priority_surfaces):
-      # una fila cercana queda delante de un wall lejano, como en RMXP.
       return true if interior_border_entry?(e)
       # IndoorProp usa un bloque rigido de escala constante.
       return false if indoor_prop_owned?(e)
@@ -291,9 +307,12 @@ class Mode7Renderer
       end
     end
 
-    # Mountains NO define la identidad del wall. Un P4 del mismo edificio no
-    # puede separarse solo porque debajo haya una celda Mountains.
-    [:auto, wall_component_signature(entries)]
+    direct = entries.select do |entry|
+      entry_is_wall?(entry) && !entry_is_elevated_wall?(entry)
+    end
+    return [:cell, tx, ty] if direct.empty?
+    seed = direct.min_by { |entry| entry[:unify].to_i }
+    [:auto, rigid_priority_object_key(tx, ty, seed)]
   end
 
   # Componente wall visual.
@@ -323,6 +342,7 @@ class Mode7Renderer
 
   def wall_extension_candidate?(entries, entry)
     return false if interior_border_entry?(entry)
+    return false if interior_black_entry?(entry)
     return false if entry_is_elevated_wall?(entry)
     return false if entry_is_wall?(entry)
     return false if interior_prop_entry?(entry)
@@ -482,6 +502,7 @@ class Mode7Renderer
   # como puente para unir objetos lejanos o un campo entero de P1.
   def rigid_priority_member_candidate?(entries, entry)
     return false if interior_border_entry?(entry)
+    return false if interior_black_entry?(entry)
     return false if entry_is_elevated_wall?(entry)
     return false if wall_visual_owned?(entry)
     entry_visual_priority(entry) >= Mode7::Config::PRIORITY_SURFACE_MIN.to_i
@@ -624,11 +645,8 @@ class Mode7Renderer
       end
     end
 
-    # Cada prop es SOLO sus propias celdas agrupadas por identidad de objeto.
-    # No se absorben vecinos P1-P4: un tile ajeno ya tiene su propio grupo/strip
-    # independiente. Absorberlos metia tiles prestados en el bitmap del prop
-    # (aparecia como prop de 2 tiles) y hacía depender la posicion/elevacion
-    # del bloque de tiles que no pertenecian al dibujo.
+    # Solo tiles IndoorProp pertenecen al bloque. Un vecino nunca cambia sus
+    # bounds ni su ancla; piezas multitile deben compartir tag y Volume ID.
     groups.each_value do |component|
       next if component.empty?
       @indoor_prop_components.push(component)
@@ -1282,16 +1300,23 @@ class Mode7Renderer
 
       if Mode7.raster_affine_mode?
         if _z_behavior == :indoor_prop
-          # Props indoor son objetos, no superficie: no encogen con profundidad.
+          # Props indoor son objetos: TAMANO constante (zoom fijo) aunque la
+          # distancia cambie, pero POSICION en la grid real (sx de project()
+          # con hscale actual). Overridear sx con zoom fijo hacia que el prop
+          # se descuadrase de su celda al moverse la camara.
           scale_x = Mode7.zoom.to_f
           scale_y = Mode7.zoom.to_f
         else
           # IndoorWall conecta horizontalmente con IndoorBorder en la fila de
           # apoyo, pero conserva altura fija. Asi el borde puede converger en
-          # diagonal sin aplastar el wall completo.
+          # diagonal sin aplastar el wall completo. El border y el bloque negro
+          # SON capas planas del suelo: siguen la perspectiva (scale_y = hscale).
           scale_x = Mode7.hscale(syb).to_f
-          scale_y = Mode7::Config::INDOOR_WALL_FIXED_HEIGHT ?
-                    Mode7.zoom.to_f : scale_x
+          if _z_behavior == :wall_component && Mode7::Config::INDOOR_WALL_FIXED_HEIGHT
+            scale_y = Mode7.zoom.to_f
+          else
+            scale_y = scale_x
+          end
         end
       elsif Mode7.cylindrical_mode?
         # El angulo de camara afecta al BLOQUE COMPLETO de forma uniforme.

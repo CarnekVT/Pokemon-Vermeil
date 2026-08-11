@@ -375,19 +375,15 @@ class Mode7Renderer
   # No puede quedar tambien horneada en @ground, que era la causa principal de
   # tiles duplicados al combinar P0/P1 o wall sobre otras superficies.
   def ground_entries_for_cell(tx, ty, entries)
-    raster_affine = Mode7.respond_to?(:raster_affine_mode?) && Mode7.raster_affine_mode?
-
     entries.reject do |entry|
       wall_owned = respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)
       prop_owned = respond_to?(:indoor_prop_owned?, true) && indoor_prop_owned?(entry)
 
-      # InteriorBorder se rasteriza como strips con Z propio (build_priority_
-      # surfaces): una fila cercana oculta un wall lejano, igual que en RMXP.
-      # Horneado en @ground vivia en z=-1000 y los walls siempre quedaban
-      # delante, tapando el marco de la habitacion.
+      # Border/black siguen la cuadricula affine como strips con prioridad.
       wall_owned || prop_owned ||
         priority_surface_entry?(entry) ||
-        interior_border_entry?(entry)
+        interior_border_entry?(entry) ||
+        interior_black_entry?(entry)
     end
   end
 

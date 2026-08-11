@@ -3,8 +3,9 @@
 #===============================================================================
 module Mode7
   class << self
-    attr_reader :zoom, :current_alpha, :sin, :distance_h, :cylindrical_radius,
-                :projection_revision, :projection_override
+    attr_reader :zoom, :camera_zoom, :zoom_effect_override, :current_alpha,
+                :sin, :distance_h, :cylindrical_radius, :projection_revision,
+                :projection_override
     # Proyeccion forzada por mapa (nil = usar Config::PROJECTION).
     attr_accessor :map_projection
     # map_id del mapa al que el renderer resolvio indoor SOLO por terrain tags.
@@ -337,21 +338,18 @@ module Mode7
       tile_billboard_scale_for_world_y(wy) * Config::CYLINDRICAL_VERTICAL_SCALE.to_f
     end
 
-    # Convierte una distancia Y de mundo (relativa al pivot) a desplazamiento
-    # de pantalla. El angulo controla DOS cosas de forma suave:
-    #   1) mezcla plano -> arco circular;
-    #   2) pitch vertical global.
-    #
-    # Por eso cambiar el angulo ya no parece solo un cambio de textura/raster.
+    # Affine aporta inclinacion/convergencia; el residuo circular conserva la
+    # curvatura propia de Cylindrical sin volverlo casi plano cerca del pivot.
     def cylindrical_ground_offset_for_ry(ry)
-      flat = ry.to_f * @zoom * cylindrical_ground_y_scale
+      ground_ry = ry.to_f * cylindrical_ground_y_scale
+      flat = ground_ry * @zoom
       return flat if @cylindrical_radius.to_f.abs < 1.0e-6
 
       theta = flat / @cylindrical_radius
-      mix = cylindrical_angle_scale
+      mix = cylindrical_angle_scale * Config::CYLINDRICAL_CURVE_MIX.to_f
+      affine = affine_depth_scale(ground_ry)
       curved = @cylindrical_radius * cylindrical_curve(theta)
-      blended = flat + (curved - flat) * mix
-      camera_pitch_scale * blended
+      affine * (1.0 - mix) + curved * mix
     end
 
     # Theta correspondiente a una fila de pantalla. Se resuelve por Newton
@@ -361,15 +359,19 @@ module Mode7
       radius = @cylindrical_radius.to_f
       return 0.0 if radius.abs < 1.0e-6
 
-      pitch = camera_pitch_scale
-      mix = cylindrical_angle_scale
-      target = (sy.to_f - pivot_y) / (pitch * radius)
+      mix = cylindrical_angle_scale * Config::CYLINDRICAL_CURVE_MIX.to_f
+      target = sy.to_f - pivot_y
+      zoom = @zoom.to_f
+      return 0.0 if zoom.abs < 1.0e-9
 
-      theta = target
+      theta = affine_depth_unscale(target) * zoom / radius
       10.times do
+        ground_ry = theta * radius / zoom
         curve = cylindrical_curve(theta)
-        f = theta + (curve - theta) * mix - target
-        d = (1.0 - mix) + mix * cylindrical_curve_derivative(theta)
+        f = affine_depth_scale(ground_ry) * (1.0 - mix) +
+            radius * curve * mix - target
+        d = affine_depth_derivative(ground_ry) * radius / zoom * (1.0 - mix) +
+            radius * cylindrical_curve_derivative(theta) * mix
         break if d.abs < 1.0e-8
         step = f / d
         theta -= step
@@ -546,7 +548,8 @@ module Mode7
 
     def configure(alpha = nil, zoom = nil, distance_h = nil, cylindrical_radius = nil)
       @current_alpha = (alpha || @current_alpha || context_default_alpha).to_f
-      @zoom = (zoom || @zoom || Config::DEFAULT_ZOOM).to_f
+      @camera_zoom = (zoom || @camera_zoom || Config::DEFAULT_ZOOM).to_f
+      @zoom = (@zoom_effect_override || @camera_zoom).to_f
       @distance_h = (distance_h || @distance_h || Config::DISTANCE_H).to_f
       @cylindrical_radius = (
         cylindrical_radius || @cylindrical_radius || Config::CYLINDRICAL_RADIUS
@@ -610,7 +613,9 @@ module Mode7
 
     def _hscale_uncached(sy)
       if cylindrical_mode?
-        return @zoom * cylindrical_width_scale(cylindrical_theta_for_row(sy))
+        theta = cylindrical_theta_for_row(sy)
+        ground_ry = theta * @cylindrical_radius / @zoom
+        return affine_depth_derivative(ground_ry) * cylindrical_width_scale(theta)
       end
 
       # Copia de la rama Affine del ZIP pre-curve.
@@ -694,13 +699,27 @@ module Mode7
       yi / @zoom
     end
 
+    def affine_depth_derivative(ry)
+      t = affine_depth_value
+      slope = affine_slope_value
+      return slope if t <= 0
+
+      heff = @dh / t
+      yi = @zoom * ry.to_f
+      d = heff - yi * @sin
+      return slope if d <= 0.0
+      @zoom * heff * heff * @cos / (d * d)
+    end
+
     def _cylindrical_project(wx, wy, elevation = 0)
       rx = wx.to_f - cam_x
       ry = wy.to_f - projection_cam_y - pivot_y
       theta = cylindrical_theta_for_world_y(wy)
       sy_ground = pivot_y + cylindrical_ground_offset_for_ry(ry)
 
-      sx = center_x + rx * @zoom * cylindrical_width_scale(theta)
+      scale_x = affine_depth_derivative(ry * cylindrical_ground_y_scale) *
+                cylindrical_width_scale(theta)
+      sx = center_x + rx * scale_x
       sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
       [sx, sy]
     end
@@ -808,7 +827,7 @@ module Mode7
 
       @cylindrical_row_world_offset_cache ||= {}
       key = [
-        sy, cylindrical_angle_scale, camera_pitch_scale, @zoom,
+        sy, cylindrical_angle_scale, @zoom,
         ground_scale, @cylindrical_radius
       ]
       offset = @cylindrical_row_world_offset_cache[key]
@@ -863,10 +882,10 @@ module Mode7
       case context.to_sym
       when :indoor
         @indoor_alpha = angle
-        set_camera(angle, zoom, frames, distance_h, cylindrical_radius) if indoor_map?
+        set_camera(angle, camera_zoom, frames, distance_h, cylindrical_radius) if indoor_map?
       when :outdoor
         @outdoor_alpha = angle
-        set_camera(angle, zoom, frames, distance_h, cylindrical_radius) if !indoor_map?
+        set_camera(angle, camera_zoom, frames, distance_h, cylindrical_radius) if !indoor_map?
       end
       angle
     end
@@ -882,7 +901,7 @@ module Mode7
         configure(@target_alpha, @target_zoom, @target_distance_h, @target_cylindrical_radius)
       else
         @step_alpha = (@target_alpha - @current_alpha) / @transition_frames
-        @step_zoom = (@target_zoom - @zoom) / @transition_frames
+        @step_zoom = (@target_zoom - @camera_zoom) / @transition_frames
         @step_distance_h = (@target_distance_h - @distance_h) / @transition_frames
         @step_cylindrical_radius = (@target_cylindrical_radius - @cylindrical_radius) / @transition_frames
       end
@@ -898,7 +917,7 @@ module Mode7
       else
         @outdoor_alpha = value
       end
-      set_camera(value, zoom, frames, distance_h, cylindrical_radius)
+      set_camera(value, camera_zoom, frames, distance_h, cylindrical_radius)
       value
     end
 
@@ -913,6 +932,17 @@ module Mode7
       return zoom_value
     end
 
+    def zoom_effect_override=(value)
+      value = value.to_f.clamp(Config::CAMERA_ZOOM_MIN.to_f,
+                               Config::CAMERA_ZOOM_MAX.to_f) if !value.nil?
+      current = @zoom_effect_override
+      return if current.nil? && value.nil?
+      return if current && value && (current - value).abs < 0.001
+      @zoom_effect_override = value
+      configure(@current_alpha, @camera_zoom, @distance_h, @cylindrical_radius)
+      invalidate_renderer_ground
+    end
+
     def update_transition
       if @transition_frames && @transition_frames > 0
         @transition_frames -= 1
@@ -920,7 +950,7 @@ module Mode7
           configure(@target_alpha, @target_zoom, @target_distance_h, @target_cylindrical_radius)
         else
           configure(@current_alpha + @step_alpha,
-                    @zoom + @step_zoom,
+                    @camera_zoom + @step_zoom,
                     @distance_h + @step_distance_h,
                     @cylindrical_radius + @step_cylindrical_radius)
         end
@@ -968,7 +998,7 @@ class Game_Map
     # Cada contexto conserva su propio angulo.
     target_alpha = Mode7.active_now? ? Mode7.context_default_alpha : 0.0
     Mode7.set_camera(
-      target_alpha, Mode7.zoom, 0,
+      target_alpha, Mode7.camera_zoom, 0,
       Mode7.distance_h, Mode7.cylindrical_radius
     )
 
