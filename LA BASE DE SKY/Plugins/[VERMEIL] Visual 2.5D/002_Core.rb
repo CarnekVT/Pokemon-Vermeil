@@ -3,8 +3,8 @@
 #===============================================================================
 module Mode7
   class << self
-    attr_reader :zoom, :current_alpha, :sin, :distance_h, :planet_radius,
-                :projection_revision
+    attr_reader :zoom, :current_alpha, :sin, :distance_h, :cylindrical_radius,
+                :projection_revision, :projection_override
     # Proyeccion forzada por mapa (nil = usar Config::PROJECTION).
     attr_accessor :map_projection
 
@@ -14,77 +14,193 @@ module Mode7
 
     def pivot_ratio
       return @pivot_override if !@pivot_override.nil?
-      return Config::PIVOT_RATIO
+      return Config::AFFINE_PIVOT_RATIO if affine_mode?
+      Config::CYLINDRICAL_PIVOT_RATIO
     end
 
     def pivot_y; return (screen_h * pivot_ratio).round; end
 
-    # Proyeccion efectiva del mapa actual. El notetag/flag del mapa (visto en
-    # Game_Map#setup) puede forzar :affine o :sky; si no, usa Config::PROJECTION.
-    def map_mode
-      return @map_projection if [:affine, :sky].include?(@map_projection)
-      Config::PROJECTION
-    end
-
-    def affine_mode?; return map_mode == :affine; end
-    def sky_mode?; return map_mode == :sky; end
-
-    # Raster es una politica de dibujo de tiles, NO otra proyeccion.
-    # Un interior puede usar :affine y, al mismo tiempo, rasterizar P0/P1+ con
-    # la misma cuadricula. El flag legacy Mode7RasterAffine se conserva como
-    # atajo para activar ambas cosas en un mapa concreto.
-    def raster_tiles_map?(map_id = nil)
-      return false if !defined?(GameData::MapMetadata)
+    # Metadata del mapa actual. Acepta GameData, hashes de plugins y datos
+    # expuestos por Game_Map.
+    def map_metadata_candidates_for(map_id = nil)
       id = map_id
       id = $game_map.map_id if id.nil? && $game_map
-      return false if id.nil?
-      meta = GameData::MapMetadata.get(id) rescue nil
-      return false if !meta
-      return true if meta.has_flag?(Config::MAP_FLAG_RASTER_AFFINE)
-      return !!Config::INDOOR_RASTER_TILES if meta.outdoor_map == false
+      return [] if id.nil?
+
+      candidates = []
+      if defined?(GameData::MapMetadata)
+        begin
+          meta = GameData::MapMetadata.try_get(id)
+          candidates << meta if meta
+        rescue Exception
+        end
+        begin
+          meta = GameData::MapMetadata.get(id)
+          candidates << meta if meta && !candidates.include?(meta)
+        rescue Exception
+        end
+      end
+
+      if $game_map
+        [:metadata, :map_metadata].each do |reader|
+          next if !$game_map.respond_to?(reader)
+          begin
+            meta = $game_map.public_send(reader)
+            candidates << meta if meta && !candidates.include?(meta)
+          rescue Exception
+          end
+        end
+        candidates << $game_map if !candidates.include?($game_map)
+        begin
+          raw_map = $game_map.instance_variable_get(:@map)
+          candidates << raw_map if raw_map && !candidates.include?(raw_map)
+        rescue Exception
+        end
+      end
+      candidates
+    end
+
+    def map_metadata_for(map_id = nil)
+      map_metadata_candidates_for(map_id).first
+    end
+
+    def metadata_bool(value)
+      return value if value == true || value == false
+      return true if value.is_a?(Numeric) && value.to_i != 0
+      return false if value.is_a?(Numeric) && value.to_i == 0
+      if value.is_a?(String) || value.is_a?(Symbol)
+        text = value.to_s.strip.downcase
+        return true if ["true", "yes", "1", "on"].include?(text)
+        return false if ["false", "no", "0", "off"].include?(text)
+      end
+      nil
+    end
+
+    def metadata_outdoor_state(meta)
+      return nil if !meta
+
+      [:outdoor_map, :outdoor, :outside,
+       :outdoor_map?, :outdoor?, :outside?].each do |reader|
+        next if !meta.respond_to?(reader)
+        begin
+          value = metadata_bool(meta.public_send(reader))
+          return value unless value.nil?
+        rescue Exception
+        end
+      end
+
+      if meta.respond_to?(:[])
+        [
+          :outdoor_map, :outdoor, :outside,
+          "outdoor_map", "outdoor", "outside",
+          "Outdoor", "Outside", "OutdoorMap"
+        ].each do |key|
+          begin
+            value = metadata_bool(meta[key])
+            return value unless value.nil?
+          rescue Exception
+          end
+        end
+      end
+
+      [:@outdoor_map, :@outdoor, :@outside].each do |ivar|
+        next if !meta.instance_variable_defined?(ivar)
+        value = metadata_bool(meta.instance_variable_get(ivar))
+        return value unless value.nil?
+      end
+      nil
+    rescue Exception
+      nil
+    end
+
+    def metadata_has_flag?(meta, flag)
+      return false if !meta || !flag
+      if meta.respond_to?(:has_flag?)
+        begin
+          return true if meta.has_flag?(flag)
+        rescue Exception
+        end
+      end
+      if meta.respond_to?(:flags)
+        begin
+          flags = meta.flags
+          return flags.any? { |value| value.to_s.downcase == flag.to_s.downcase } if flags
+        rescue Exception
+        end
+      end
       false
     end
 
-    # Nombre conservado para no romper helpers existentes. Significa:
-    # proyeccion affine + politica raster de tiles.
+    def indoor_map?(map_id = nil)
+      id = map_id
+      id = $game_map.map_id if id.nil? && $game_map
+      if id && defined?(Config::INDOOR_MAP_IDS) &&
+         Config::INDOOR_MAP_IDS.include?(id.to_i)
+        return true
+      end
+
+      candidates = map_metadata_candidates_for(id)
+      return true if candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_INDOOR) }
+
+      states = candidates.filter_map { |meta| metadata_outdoor_state(meta) }
+      return true if states.include?(false)
+      return false if states.include?(true)
+      false
+    end
+
+    # Override manual de Debug. :auto devuelve el control a metadata/tags.
+    def set_projection_mode(mode)
+      normalized = mode.nil? ? nil : mode.to_sym
+      normalized = nil if normalized == :auto
+      return map_mode if normalized && ![:affine, :cylindrical].include?(normalized)
+
+      @projection_override = normalized
+      reset_caches
+      renderer = $scene.instance_variable_get(:@map_renderer) if $scene.is_a?(Scene_Map)
+      renderer.refresh if renderer && renderer.respond_to?(:refresh)
+      map_mode
+    end
+
+    # Unicamente Affine o Cylindrical.
+    def map_mode
+      return @projection_override if [:affine, :cylindrical].include?(@projection_override)
+      return :affine if indoor_map?
+      return @map_projection if [:affine, :cylindrical].include?(@map_projection)
+      mode = Config::PROJECTION
+      [:affine, :cylindrical].include?(mode) ? mode : :cylindrical
+    end
+
+    def affine_mode?; map_mode == :affine; end
+    def cylindrical_mode?; map_mode == :cylindrical; end
+
+    def raster_tiles_map?(map_id = nil)
+      return true if indoor_map?(map_id)
+      map_metadata_candidates_for(map_id).any? do |meta|
+        metadata_has_flag?(meta, Config::MAP_FLAG_RASTER_AFFINE)
+      end
+    end
+
     def raster_affine_mode?
       affine_mode? && raster_tiles_map?
     end
 
-    # Interior/exterior es una propiedad del mapa, independiente de la
-    # proyeccion elegida. Asi podemos mantener :sky dentro de casas y aun
-    # aplicar reglas visuales especificas para interiores.
-    def indoor_map?(map_id = nil)
-      return false if !defined?(GameData::MapMetadata)
-      id = map_id
-      id = $game_map.map_id if id.nil? && $game_map
-      return false if id.nil?
-      meta = GameData::MapMetadata.get(id) rescue nil
-      return !!(meta && meta.outdoor_map == false)
-    end
-
-    # Lee la metadata del mapa y fuerza proyeccion segun flag/outdoor.
     def detect_map_projection(map_id)
-      return nil if !defined?(GameData::MapMetadata)
-      meta = GameData::MapMetadata.get(map_id) rescue nil
-      return nil if !meta
-      if meta.has_flag?(Config::MAP_FLAG_RASTER_AFFINE)
-        return :affine
-      elsif meta.has_flag?(Config::MAP_FLAG_AFFINE)
-        return :affine
-      elsif meta.has_flag?(Config::MAP_FLAG_SKY)
-        return :sky
-      elsif meta.outdoor_map == false
-        mode = Config::INDOOR_PROJECTION
-        return mode if [:affine, :sky].include?(mode)
+      return :affine if indoor_map?(map_id)
+      candidates = map_metadata_candidates_for(map_id)
+
+      return :affine if candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_RASTER_AFFINE) }
+      return :affine if candidates.any? do |meta|
+        metadata_has_flag?(meta, Config::MAP_FLAG_AFFINE) ||
+          metadata_has_flag?(meta, Config::MAP_FLAG_AFFINE_LEGACY)
       end
+      return :cylindrical if candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_CYLINDRICAL) }
       nil
     end
 
     # Cantidad de curvatura activa. Se deriva directamente del angulo real de
     # camara, en vez de escalar DEFAULT_ALPHA. Esto evita que 30°/45° hagan
     # explotar la curva por multiplicadores 2x/3x.
-    def sky_angle_scale
+    def cylindrical_angle_scale
       return 0.0 if !@current_alpha
       Math.sin(@current_alpha.to_f * Math::PI / 180.0).clamp(0.0, 1.0)
     end
@@ -92,24 +208,32 @@ module Mode7
     # Pitch global de la camara. A 0° el mapa es top-down; al aumentar el
     # angulo se comprime TODO el eje Y, no solo la perspectiva interna de tiles.
     def camera_pitch_scale
-      strength = Config::CAMERA_PITCH_STRENGTH.to_f.clamp(0.0, 0.95)
-      value = 1.0 - strength * sky_angle_scale
-      value.clamp(0.20, 1.0)
+      # La escala global debe permanecer 1.0. El angulo modifica la forma de
+      # la proyeccion Cylindrical, no funciona como un segundo zoom oculto.
+      1.0
+    end
+
+    # Escala uniforme de billboards/bloques al cambiar el angulo.
+    # Esto hace que la camara afecte tambien personajes, walls y P2+ sin
+    # aplastar el bitmap en X/Y por separado.
+    def camera_billboard_pitch_scale
+      # Walls/personajes no cambian de tamano solo por variar el angulo.
+      1.0
     end
 
     # Media circunferencia top-down SIN punto de inflexion visible.
     #
     # Se usa una sola rama de la circunferencia:
     #   raw(phi) = -cos(phi)
-    #   phi      = SKY_ARC_PHASE + theta
+    #   phi      = CYLINDRICAL_PHASE + theta
     #
     # La curva se normaliza para que g(0)=0 y g'(0)=1. Durante todo el viewport
-    # phi permanece entre SKY_ARC_MIN y SKY_ARC_MAX, ambos dentro de (0, PI/2).
+    # phi permanece entre CYLINDRICAL_MIN y CYLINDRICAL_MAX, ambos dentro de (0, PI/2).
     # Por tanto la derivada es siempre positiva y la curvatura siempre convexa.
-    def sky_curve(theta)
-      phase = Config::SKY_ARC_PHASE.to_f
-      min_phi = Config::SKY_ARC_MIN.to_f.clamp(0.02, Math::PI / 2.0 - 0.04)
-      max_phi = Config::SKY_ARC_MAX.to_f.clamp(min_phi + 0.02, Math::PI / 2.0 - 0.02)
+    def cylindrical_curve(theta)
+      phase = Config::CYLINDRICAL_PHASE.to_f
+      min_phi = Config::CYLINDRICAL_MIN.to_f.clamp(0.02, Math::PI / 2.0 - 0.04)
+      max_phi = Config::CYLINDRICAL_MAX.to_f.clamp(min_phi + 0.02, Math::PI / 2.0 - 0.02)
       norm = Math.sin(phase)
       norm = 1.0 if norm.abs < 1.0e-6
 
@@ -127,12 +251,12 @@ module Mode7
       (-Math.cos(phi) - base) / norm
     end
 
-    # Derivada exacta de sky_curve. Se usa para invertir la proyeccion durante
+    # Derivada exacta de cylindrical_curve. Se usa para invertir la proyeccion durante
     # transiciones suaves de angulo/zoom.
-    def sky_curve_derivative(theta)
-      phase = Config::SKY_ARC_PHASE.to_f
-      min_phi = Config::SKY_ARC_MIN.to_f.clamp(0.02, Math::PI / 2.0 - 0.04)
-      max_phi = Config::SKY_ARC_MAX.to_f.clamp(min_phi + 0.02, Math::PI / 2.0 - 0.02)
+    def cylindrical_curve_derivative(theta)
+      phase = Config::CYLINDRICAL_PHASE.to_f
+      min_phi = Config::CYLINDRICAL_MIN.to_f.clamp(0.02, Math::PI / 2.0 - 0.04)
+      max_phi = Config::CYLINDRICAL_MAX.to_f.clamp(min_phi + 0.02, Math::PI / 2.0 - 0.02)
       norm = Math.sin(phase)
       norm = 1.0 if norm.abs < 1.0e-6
       phi = phase + theta.to_f
@@ -141,7 +265,7 @@ module Mode7
       Math.sin(phi) / norm
     end
 
-    def sky_directional_scale(theta, strength)
+    def cylindrical_directional_scale(theta, strength)
       strength = strength.to_f
       return 1.0 if strength.abs < 1.0e-9
       den = 1.0 - strength * theta.to_f
@@ -153,60 +277,56 @@ module Mode7
     end
 
     # Escala horizontal del plano. Con 0 mantiene habitaciones rectangulares.
-    # La curvatura Sky afecta profundidad Y; no forzar derivada X evita que las
+    # La curvatura Cylindrical afecta profundidad Y; no forzar derivada X evita que las
     # filas del borde se cierren y dejen huecos fuera del mapa.
-    def sky_width_scale(theta)
-      sky_directional_scale(theta.to_f * sky_angle_scale,
-                            Config::SKY_WIDTH_PERSPECTIVE)
+    def cylindrical_width_scale(theta)
+      cylindrical_directional_scale(theta.to_f * cylindrical_angle_scale,
+                            Config::CYLINDRICAL_WIDTH_PERSPECTIVE)
     end
 
     # Escala de personajes/eventos por profundidad. Puede variar suavemente
     # sin afectar la proporcion interna de los tiles del mapa.
-    def sky_sprite_scale(theta)
-      sky_directional_scale(theta.to_f * sky_angle_scale,
-                            Config::SKY_SPRITE_SCALE)
+    def cylindrical_sprite_scale(theta)
+      cylindrical_directional_scale(theta.to_f * cylindrical_angle_scale,
+                            Config::CYLINDRICAL_SPRITE_SCALE)
     end
 
-    # Escala UNIFORME de objetos verticales. Terrain usa conicidad propia, pero
+    # Escala UNIFORME de objetos verticales. Terrain usa curvatura propia, pero
     # walls/priorities usan este canal separado para no encoger piezas altas por
     # celda. zoom_x == zoom_y siempre conserva pixel art y silueta.
     def tile_billboard_scale_for_world_y(wy)
-      return @zoom if !sky_mode?
-      strength = Config::SKY_BILLBOARD_PERSPECTIVE
-      @zoom * sky_directional_scale(sky_theta_for_world_y(wy), strength)
+      return @zoom if !cylindrical_mode?
+      strength = Config::CYLINDRICAL_BILLBOARD_PERSPECTIVE
+      @zoom * camera_billboard_pitch_scale *
+        cylindrical_directional_scale(cylindrical_theta_for_world_y(wy), strength)
     end
 
-    def sky_ground_y_scale
-      v = Config::SKY_GROUND_Y_SCALE.to_f
-      v = 0.01 if v <= 0.01
-      # Lift anclado al pivot: modifica profundidad, no projection_cam_y. Asi
-      # el jugador conserva su celda visual/logica en vez de deslizarse cuando
-      # entra a Mountains o una escalera elevada.
-      lift_factor = Config::TERRAIN_TAG_CAMERA_LIFT_DEPTH_FACTOR.to_f
-      return v if !sky_mode? || lift_factor.abs < 1.0e-6
-      v * [1.0 + terrain_camera_render_lift * lift_factor, 0.10].max
+    def cylindrical_ground_y_scale
+      v = Config::CYLINDRICAL_GROUND_Y_SCALE.to_f
+      v <= 0.01 ? 0.01 : v
     end
 
     # Angulo de profundidad a partir de una coordenada Y del mundo, sin mezclar
     # elevacion. Este theta representa exclusivamente distancia sobre el suelo.
-    def sky_theta_for_world_y(wy)
+    def cylindrical_theta_for_world_y(wy)
       ry = (wy.to_f - projection_cam_y - pivot_y)
-      (ry * @zoom * sky_ground_y_scale) / @planet_radius
+      (ry * @zoom * cylindrical_ground_y_scale) / @cylindrical_radius
     end
 
     # Escala visual de un billboard situado en la Y indicada.
     def object_scale_for_world_y(wy)
-      return @zoom if !sky_mode?
-      @zoom * sky_sprite_scale(sky_theta_for_world_y(wy))
+      return @zoom if !cylindrical_mode?
+      @zoom * camera_billboard_pitch_scale *
+        cylindrical_sprite_scale(cylindrical_theta_for_world_y(wy))
     end
 
-    # Escala del eje vertical Z. IMPORTANTE: no usa SKY_SPRITE_SCALE.
+    # Escala del eje vertical Z. IMPORTANTE: no usa CYLINDRICAL_SPRITE_SCALE.
     # El error de Phase 4 era ancho~=1.0 pero alto<1.0, aplastando muros.
     # Un tile vertical siempre conserva su aspect ratio; la perspectiva del
     # terreno viene de Y, no de deformar la cara del objeto.
     def vertical_scale_for_world_y(wy)
-      return object_scale_for_world_y(wy) if !sky_mode?
-      tile_billboard_scale_for_world_y(wy) * Config::SKY_VERTICAL_SCALE.to_f
+      return object_scale_for_world_y(wy) if !cylindrical_mode?
+      tile_billboard_scale_for_world_y(wy) * Config::CYLINDRICAL_VERTICAL_SCALE.to_f
     end
 
     # Convierte una distancia Y de mundo (relativa al pivot) a desplazamiento
@@ -215,33 +335,33 @@ module Mode7
     #   2) pitch vertical global.
     #
     # Por eso cambiar el angulo ya no parece solo un cambio de textura/raster.
-    def sky_ground_offset_for_ry(ry)
-      flat = ry.to_f * @zoom * sky_ground_y_scale
-      return flat if @planet_radius.to_f.abs < 1.0e-6
+    def cylindrical_ground_offset_for_ry(ry)
+      flat = ry.to_f * @zoom * cylindrical_ground_y_scale
+      return flat if @cylindrical_radius.to_f.abs < 1.0e-6
 
-      theta = flat / @planet_radius
-      mix = sky_angle_scale
-      curved = @planet_radius * sky_curve(theta)
+      theta = flat / @cylindrical_radius
+      mix = cylindrical_angle_scale
+      curved = @cylindrical_radius * cylindrical_curve(theta)
       blended = flat + (curved - flat) * mix
       camera_pitch_scale * blended
     end
 
     # Theta correspondiente a una fila de pantalla. Se resuelve por Newton
-    # sobre la MISMA mezcla usada por sky_ground_offset_for_ry, de modo que
+    # sobre la MISMA mezcla usada por cylindrical_ground_offset_for_ry, de modo que
     # ground/hscale/prioridades siguen sincronizados durante una transición.
-    def sky_theta_for_row(sy)
-      radius = @planet_radius.to_f
+    def cylindrical_theta_for_row(sy)
+      radius = @cylindrical_radius.to_f
       return 0.0 if radius.abs < 1.0e-6
 
       pitch = camera_pitch_scale
-      mix = sky_angle_scale
+      mix = cylindrical_angle_scale
       target = (sy.to_f - pivot_y) / (pitch * radius)
 
       theta = target
       10.times do
-        curve = sky_curve(theta)
+        curve = cylindrical_curve(theta)
         f = theta + (curve - theta) * mix - target
-        d = (1.0 - mix) + mix * sky_curve_derivative(theta)
+        d = (1.0 - mix) + mix * cylindrical_curve_derivative(theta)
         break if d.abs < 1.0e-8
         step = f / d
         theta -= step
@@ -249,12 +369,12 @@ module Mode7
       end
       theta
     end
-    def effective_mode_blend; return (@mode_blend || 0.0).clamp(0.0, 1.0); end
-
-    def rendering_now?
-      return true if @mode_transition_frames && @mode_transition_frames > 0
-      return effective_mode_blend > 0.001
-    end
+    # El renderer 2.5D permanece activo incluso en estado OFF.
+    # OFF significa camara a 0 grados/zoom 1 (look vanilla), no volver al
+    # TilemapRenderer. Esto evita reconstrucciones y mantiene transiciones de
+    # angulo realmente suaves.
+    def effective_mode_blend; 1.0; end
+    def rendering_now?; true; end
 
 
     def terrain_camera_lift
@@ -358,7 +478,7 @@ module Mode7
     # tag definitivos. Arrancar desde ese target evita una animacion falsa
     # 0 -> Mountains al cargar/transferir mapa.
     def snap_terrain_camera_lift_to_target
-      target = rendering_now? ? terrain_camera_lift_target : 0.0
+      target = active_now? ? terrain_camera_lift_target : 0.0
       render_step = Config::TERRAIN_TAG_CAMERA_LIFT_RENDER_STEP.to_f
       render_step = 1.0 if render_step <= 0.0
       @terrain_camera_lift_render_key = (target / render_step).round
@@ -385,7 +505,7 @@ module Mode7
     end
 
     def update_terrain_camera_lift
-      target = rendering_now? ? terrain_camera_lift_target : 0.0
+      target = active_now? ? terrain_camera_lift_target : 0.0
       current = terrain_camera_lift
       now = System.uptime
       last_time = @terrain_camera_lift_update_time || (now - 1.0 / 60.0)
@@ -416,30 +536,20 @@ module Mode7
     end
 
 
-    def configure(alpha = nil, zoom = nil, distance_h = nil, planet_radius = nil)
-      @current_alpha = (alpha || @current_alpha || Config::DEFAULT_ALPHA).to_f
+    def configure(alpha = nil, zoom = nil, distance_h = nil, cylindrical_radius = nil)
+      @current_alpha = (alpha || @current_alpha || context_default_alpha).to_f
       @zoom = (zoom || @zoom || Config::DEFAULT_ZOOM).to_f
       @distance_h = (distance_h || @distance_h || Config::DISTANCE_H).to_f
-      @planet_radius = (planet_radius || @planet_radius || Config::PLANET_RADIUS).to_f
-      # Cada cambio de camara (incluido zoom) invalida sprites que se rasterizan
-      # por filas. Camara X/Y sola no detectaba el zoom y los actualizaba solo
-      # al mover al jugador.
+      @cylindrical_radius = (
+        cylindrical_radius || @cylindrical_radius || Config::CYLINDRICAL_RADIUS
+      ).to_f
       @projection_revision = (@projection_revision || 0) + 1
 
       @a = @current_alpha * Math::PI / 180.0
       @cos = Math.cos(@a)
       @sin = Math.sin(@a)
       @dh = @distance_h
-      p = pivot_y
-
       reset_caches
-      return if @sin == 0
-
-      @h0 = (-@dh * p * @cos) / (@dh + p * @sin) + p
-      @z0 = @dh.to_f / (@dh + p * @sin)
-      @slope = (1.0 - @z0) / (p - @h0)
-      @corr = 1.0 - p * @slope
-      @horizon = p - @dh * @cos / @sin
     end
 
     # Reinicia las caches de proyeccion (al cambiar mapa/camara/zoom/pivot).
@@ -448,8 +558,10 @@ module Mode7
       @hscale_cache.clear
       @world_y_cache ||= {}
       @world_y_cache.clear
-      @sky_row_world_offset_cache ||= {}
-      @sky_row_world_offset_cache.clear
+      @affine_row_world_offset_cache ||= {}
+      @affine_row_world_offset_cache.clear
+      @cylindrical_row_world_offset_cache ||= {}
+      @cylindrical_row_world_offset_cache.clear
       @project_y_cache ||= {}
       @project_y_cache.clear
       @projection_cache_cam_y = nil
@@ -461,7 +573,8 @@ module Mode7
       current_cam_y = projection_cam_y
       return if @projection_cache_cam_y == current_cam_y
       @projection_cache_cam_y = current_cam_y
-      @world_y_cache.clear if @world_y_cache
+      # project_y depende de cam_y. La inversa por fila no: cacheamos solo el
+      # offset relativo y sumamos cam_y al final.
       @project_y_cache.clear if @project_y_cache
     end
 
@@ -469,42 +582,11 @@ module Mode7
 
 
 
-    def persp(sy); return @slope * sy + @corr; end
-
-    # Sin efectivo de la proyeccion afine: AFFINE_PERSPECTIVE aplana la curva
-    # (0 = plano, 1 = perspectiva original). Se usa en scale/unscale/hscale y
-    # horizonte para mantener la proyeccion autoconsistente.
-    def effective_sin
-      return @sin * Config::AFFINE_PERSPECTIVE.to_f
-    end
-
-    def affine_depth_value
-      return Config::INDOOR_AFFINE_DEPTH.to_f if raster_affine_mode?
-      Config::AFFINE_DEPTH.to_f
-    end
-
-    def affine_slope_value
-      base = raster_affine_mode? ? Config::INDOOR_AFFINE_SLOPE.to_f :
-                                   Config::AFFINE_SLOPE.to_f
-      return base * camera_pitch_scale if raster_affine_mode?
-      base
-    end
-
-    def affine_zoom_value
-      return Config::INDOOR_AFFINE_ZOOM.to_f if raster_affine_mode?
-      Config::AFFINE_ZOOM.to_f
-    end
-
-    def affine_convergence_value
-      return Config::INDOOR_AFFINE_CONVERGENCE.to_f if raster_affine_mode?
-      Config::AFFINE_CONVERGENCE.to_f
-    end
-
-    def ortho_blend
-      return 0.0 if Config::FOV >= 55
-      return 1.0 if Config::FOV <= 0
-      return (55.0 - Config::FOV) / 55.0
-    end
+    # Parametros Affine del ZIP pre-curve.
+    def affine_depth_value; Config::AFFINE_DEPTH.to_f; end
+    def affine_slope_value; Config::AFFINE_SLOPE.to_f; end
+    def affine_zoom_value; Config::AFFINE_ZOOM.to_f; end
+    def affine_convergence_value; Config::AFFINE_CONVERGENCE.to_f; end
 
     def hscale(sy)
       @hscale_cache ||= {}
@@ -515,51 +597,36 @@ module Mode7
     end
 
     def base_hscale(sy)
-      if sky_mode?
-        return @zoom * sky_sprite_scale(sky_theta_for_row(sy))
-      end
-      old_a = @a; old_cos = @cos; old_sin = @sin
-      base_a = Config::DEFAULT_ALPHA.to_f * Math::PI / 180.0
-      @a = base_a; @cos = Math.cos(base_a); @sin = Math.sin(base_a)
-      res = _hscale_uncached(sy)
-      @a = old_a; @cos = old_cos; @sin = old_sin
-      res
+      hscale(sy)
     end
 
     def _hscale_uncached(sy)
-      if sky_mode?
-        return @zoom * sky_width_scale(sky_theta_for_row(sy))
+      if cylindrical_mode?
+        return @zoom * cylindrical_width_scale(cylindrical_theta_for_row(sy))
       end
-      if affine_mode?
-        depth = affine_depth_value
-        if depth > 0
-          heff = @dh / depth
-          ry = affine_depth_unscale((sy - pivot_y).to_f)
-          zi = @zoom * ry
-          d = heff - zi * effective_sin
-          return 0.0 if d.abs < 1.0e-9
-          return @zoom * heff * heff * @cos / (d * d)
-        end
-        t = (sy / screen_h.to_f) - 0.5
-        return @zoom * affine_zoom_value *
-               (1.0 + affine_convergence_value * 2.0 * t)
+
+      # Copia de la rama Affine del ZIP pre-curve.
+      t = affine_depth_value
+      if t > 0
+        heff = @dh / t
+        ry = affine_depth_unscale((sy - pivot_y).to_f)
+        zi = @zoom * ry
+        d = heff - zi * @sin
+        return 0.0 if d.abs < 1.0e-9
+        return @zoom * heff * heff * @cos / (d * d)
       end
-      full = persp(sy) * @zoom
-      flat = persp(pivot_y) * @zoom
-      return flat + (full - flat) * (1.0 - ortho_blend)
+
+      screen_t = (sy / screen_h.to_f) - 0.5
+      affine_zoom_value *
+        (1.0 + affine_convergence_value * 2.0 * screen_t)
     end
 
     def horizon_row
-      # Sky direccional es top-down y no coloca un horizonte dentro del viewport.
-      return 0.0 if sky_mode?
-      if affine_mode? && affine_depth_value > 0
-        heff = @dh / affine_depth_value
-        se = effective_sin
-        return 0 if se.abs < 1.0e-9
-        return pivot_y - (heff * @cos / se)
-      end
-      return 0 if affine_mode?
-      return @horizon
+      return 0.0 if cylindrical_mode?
+      t = affine_depth_value
+      return 0 if t <= 0 || @sin.abs < 1.0e-9
+      heff = @dh / t
+      pivot_y - heff * @cos / @sin
     end
 
     # Niebla de profundidad: 0 en el pivot del jugador, FOG_MAX_ALPHA en el
@@ -577,7 +644,7 @@ module Mode7
 
     def cam_x
       return 0 if !$game_map
-      return ($game_map.display_x.to_f / Game_Map::X_SUBPIXELS) + center_x
+      ($game_map.display_x.to_f / Game_Map::X_SUBPIXELS) + center_x
     end
 
     def cam_y
@@ -589,69 +656,56 @@ module Mode7
 
     def camera_elevation
       return 0 if !Config::HEIGHTMAP_ENABLED
-      return Mode7::Heightmap.camera_altitude
+      Mode7::Heightmap.camera_altitude
     rescue
       0
     end
 
+    # Matematica Affine exacta del ZIP pre-curve.
     def affine_depth_scale(ry)
       t = affine_depth_value
-      s = affine_slope_value
-      return @zoom * s * ry.to_f if t <= 0
+      slope = affine_slope_value
+      return slope * ry.to_f if t <= 0
+
       heff = @dh / t
-      yi = @zoom * ry
-      d = heff - yi * effective_sin
-      return @zoom * s * ry.to_f if d <= 0.0
+      yi = @zoom * ry.to_f
+      d = heff - yi * @sin
+      return slope * ry.to_f if d <= 0.0
       (heff * yi * @cos) / d
     end
 
     def affine_depth_unscale(so)
       t = affine_depth_value
-      s = affine_slope_value
-      if t <= 0
-        den = @zoom * s
-        return 0.0 if den.abs < 1.0e-9
-        return so.to_f / den
-      end
+      slope = affine_slope_value
+      return so.to_f / slope if t <= 0
+
       heff = @dh / t
-      den = so * effective_sin + heff * @cos
-      return so / [@zoom * s, 1.0e-6].max if den.abs < 1.0e-9
-      yi = so * heff / den
+      den = so.to_f * @sin + heff * @cos
+      return so.to_f / slope if den.abs < 1.0e-9
+      yi = so.to_f * heff / den
       yi / @zoom
     end
 
-    def _sky_project(wx, wy, elevation = 0)
+    def _cylindrical_project(wx, wy, elevation = 0)
       rx = wx.to_f - cam_x
       ry = wy.to_f - projection_cam_y - pivot_y
-      theta = sky_theta_for_world_y(wy)
-      sy_ground = pivot_y + sky_ground_offset_for_ry(ry)
+      theta = cylindrical_theta_for_world_y(wy)
+      sy_ground = pivot_y + cylindrical_ground_offset_for_ry(ry)
 
-      sx = center_x + rx * @zoom * sky_width_scale(theta)
+      sx = center_x + rx * @zoom * cylindrical_width_scale(theta)
       sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
       [sx, sy]
     end
-    def project(wx, wy, elevation = 0)
-      return _sky_project(wx, wy, elevation) if sky_mode?
-      if affine_mode?
-        rx = wx - cam_x
-        ry = (wy - projection_cam_y - elevation) - pivot_y
-        sy = pivot_y + affine_depth_scale(ry)
-        sx = center_x + hscale(sy) * rx
-        return [sx, sy]
-      end
-      rx = wx - cam_x
-      ry = wy - projection_cam_y - elevation
-      yi = @zoom * (ry - pivot_y)
-      d = @dh - yi * @sin
-      return nil if d <= 0
-      sy = pivot_y + (@dh * yi * @cos) / d
-      sx = center_x + hscale(sy) * rx
-      return [sx, sy]
-    end
 
-    # Proyeccion para un objeto vertical entero. El Y sigue curva Sky y su base
-    # queda en coordenada real del mapa; solo X usa escala uniforme propia.
-    # ponytail: un ancla por objeto; malla vertical solo si se introduce arte 3D.
+    def project(wx, wy, elevation = 0)
+      return _cylindrical_project(wx, wy, elevation) if cylindrical_mode?
+
+      rx = wx.to_f - cam_x
+      ry = (wy.to_f - projection_cam_y - elevation.to_f) - pivot_y
+      sy = pivot_y + affine_depth_scale(ry)
+      sx = center_x + hscale(sy) * rx
+      [sx, sy]
+    end
 
     def project_y(wy, elevation = 0)
       @project_y_cache ||= {}
@@ -664,37 +718,26 @@ module Mode7
       result
     end
 
-    # El lift es una traslacion de camara, por tanto OW y suelo comparten la
-    # misma proyeccion. No toca @x/@y ni pasabilidad; LaddersSide es la unica
-    # ruta que cambia la posicion real durante un tramo diagonal.
     def overworld_project_y(wy, elevation = 0)
       project_y(wy, elevation)
     end
 
-    # La profundidad usa la misma camara que el dibujo; asi el personaje no
-    # parece deslizarse sobre su tile cuando terrain camera lift cambia.
     def overworld_depth_z(wy, height = 0)
       depth_z(wy, 0, height)
     end
 
-    def _sky_project_y(wy, elevation = 0)
+    def _cylindrical_project_y(wy, elevation = 0)
       ry = wy.to_f - projection_cam_y - pivot_y
-      sy_ground = pivot_y + sky_ground_offset_for_ry(ry)
+      sy_ground = pivot_y + cylindrical_ground_offset_for_ry(ry)
       sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
     end
+
     def _project_y_uncached(wy, elevation = 0)
-      return _sky_project_y(wy, elevation) if sky_mode?
-      if affine_mode?
-        return pivot_y + affine_depth_scale((wy - projection_cam_y - elevation) - pivot_y)
-      end
-      ry = wy - projection_cam_y - elevation
-      yi = @zoom * (ry - pivot_y)
-      d = @dh - yi * @sin
-      return nil if d <= 0
-      return pivot_y + (@dh * yi * @cos) / d
+      return _cylindrical_project_y(wy, elevation) if cylindrical_mode?
+      pivot_y + affine_depth_scale(
+        (wy.to_f - projection_cam_y - elevation.to_f) - pivot_y
+      )
     end
-
-
 
     # Unidad Z de prioridad.
     #
@@ -702,17 +745,12 @@ module Mode7
     # cambios de angulo/zoom, pero NUNCA baja de PRIORITY_Z_MIN_STEP cuando
     # zoom <= 1.0. De ese modo P1/P2/P4 conserva la precedencia RPG Maker a
     # zoom 0.9, 0.8, etc. y no queda por debajo del personaje por redondeo.
-    def priority_screen_step(wy)
-      base = project_y(wy.to_f, 0)
-      ahead = project_y(wy.to_f + Game_Map::TILE_HEIGHT, 0)
-      projected = if base.nil? || ahead.nil?
-                    0.0
-                  else
-                    (ahead - base).abs
-                  end
+    def priority_screen_step(_wy)
+      # La prioridad de RPG Maker es logica, no perspectiva. Si el paso Z
+      # cambia con el angulo, P3/P4 pueden saltar de orden al inclinar camara.
       zoom_step = Game_Map::TILE_HEIGHT.to_f * [(@zoom || 1.0).to_f, 1.0].max
       min_step = Config::PRIORITY_Z_MIN_STEP.to_f
-      [projected, zoom_step, min_step].max
+      [zoom_step, min_step].max
     end
 
     # Solape de raster/sprite para prioridad. Crece con zoom y con la cantidad
@@ -721,7 +759,7 @@ module Mode7
       base = Config::PRIORITY_EDGE_OVERLAP.to_f
       maxv = Config::PRIORITY_EDGE_OVERLAP_MAX.to_f
       z = [(@zoom || 1.0).to_f, 0.25].max
-      angle = sky_mode? ? sky_angle_scale.abs : (@sin || 0.0).abs
+      angle = cylindrical_mode? ? cylindrical_angle_scale.abs : (@sin || 0.0).abs
       factor = 0.75 + [angle, 1.5].min * 0.50
       [[base * z * factor, 0.5].max, maxv].min
     end
@@ -738,41 +776,36 @@ module Mode7
       sy.round + bias.to_i
     end
     def world_y_for_row(sy)
-      return _sky_world_y_for_row(sy) if sky_mode?
-      refresh_camera_projection_cache
-      key = sy
-      return @world_y_cache[key] if @world_y_cache && @world_y_cache.key?(key)
-      result = _world_y_for_row_uncached(sy)
-      @world_y_cache[key] = result if @world_y_cache
-      result
-    end
+      return _cylindrical_world_y_for_row(sy) if cylindrical_mode?
 
-    def _sky_world_y_for_row(sy)
-      ground_scale = sky_ground_y_scale
-      denom = @zoom * ground_scale
-      return projection_cam_y + pivot_y if denom.abs < 1.0e-9
-
-      @sky_row_world_offset_cache ||= {}
-      key = [sy, sky_angle_scale, camera_pitch_scale, @zoom, ground_scale,
-             @planet_radius]
-      offset = @sky_row_world_offset_cache[key]
+      @affine_row_world_offset_cache ||= {}
+      offset = @affine_row_world_offset_cache[sy]
       if offset.nil?
-        theta = sky_theta_for_row(sy)
-        flat = theta * @planet_radius
-        ry = flat / denom
-        offset = pivot_y + ry
-        @sky_row_world_offset_cache[key] = offset
+        offset = pivot_y + affine_depth_unscale(sy - pivot_y)
+        @affine_row_world_offset_cache[sy] = offset
       end
       projection_cam_y + offset
     end
-    def _world_y_for_row_uncached(sy)
-      return _sky_world_y_for_row(sy) if sky_mode?
-      return projection_cam_y + pivot_y + affine_depth_unscale(sy - pivot_y) if affine_mode?
-      d = sy - pivot_y
-      den = @dh * @cos + d * @sin
-      return nil if den.abs < 1.0e-6
-      yi = d * @dh / den
-      return yi / @zoom + pivot_y + projection_cam_y
+
+    def _cylindrical_world_y_for_row(sy)
+      ground_scale = cylindrical_ground_y_scale
+      denom = @zoom * ground_scale
+      return projection_cam_y + pivot_y if denom.abs < 1.0e-9
+
+      @cylindrical_row_world_offset_cache ||= {}
+      key = [
+        sy, cylindrical_angle_scale, camera_pitch_scale, @zoom,
+        ground_scale, @cylindrical_radius
+      ]
+      offset = @cylindrical_row_world_offset_cache[key]
+      if offset.nil?
+        theta = cylindrical_theta_for_row(sy)
+        flat = theta * @cylindrical_radius
+        ry = flat / denom
+        offset = pivot_y + ry
+        @cylindrical_row_world_offset_cache[key] = offset
+      end
+      projection_cam_y + offset
     end
 
     def override; return @override; end
@@ -797,20 +830,47 @@ module Mode7
       return _INTL("OFF")
     end
 
-    def set_camera(target_alpha, target_zoom, frames = 60, target_distance_h = nil, target_planet_radius = nil)
+    def indoor_alpha
+      @indoor_alpha = Config::INDOOR_DEFAULT_ALPHA.to_f if @indoor_alpha.nil?
+      @indoor_alpha
+    end
+
+    def outdoor_alpha
+      @outdoor_alpha = Config::OUTDOOR_DEFAULT_ALPHA.to_f if @outdoor_alpha.nil?
+      @outdoor_alpha
+    end
+
+    def context_default_alpha
+      indoor_map? ? indoor_alpha : outdoor_alpha
+    end
+
+    def set_context_angle(context, value, frames = Config::CAMERA_ANGLE_SMOOTH_FRAMES)
+      angle = value.to_f.clamp(0.0, 89.0)
+      case context.to_sym
+      when :indoor
+        @indoor_alpha = angle
+        set_camera(angle, zoom, frames, distance_h, cylindrical_radius) if indoor_map?
+      when :outdoor
+        @outdoor_alpha = angle
+        set_camera(angle, zoom, frames, distance_h, cylindrical_radius) if !indoor_map?
+      end
+      angle
+    end
+
+    def set_camera(target_alpha, target_zoom, frames = 60, target_distance_h = nil, target_cylindrical_radius = nil)
       @target_alpha = target_alpha.to_f
       @target_zoom = target_zoom.to_f
       @target_distance_h = (target_distance_h || @distance_h || Config::DISTANCE_H).to_f
-      @target_planet_radius = (target_planet_radius || @planet_radius || Config::PLANET_RADIUS).to_f
+      @target_cylindrical_radius = (target_cylindrical_radius || @cylindrical_radius || Config::CYLINDRICAL_RADIUS).to_f
       @transition_frames = frames.to_i
 
       if @transition_frames <= 0
-        configure(@target_alpha, @target_zoom, @target_distance_h, @target_planet_radius)
+        configure(@target_alpha, @target_zoom, @target_distance_h, @target_cylindrical_radius)
       else
         @step_alpha = (@target_alpha - @current_alpha) / @transition_frames
         @step_zoom = (@target_zoom - @zoom) / @transition_frames
         @step_distance_h = (@target_distance_h - @distance_h) / @transition_frames
-        @step_planet_radius = (@target_planet_radius - @planet_radius) / @transition_frames
+        @step_cylindrical_radius = (@target_cylindrical_radius - @cylindrical_radius) / @transition_frames
       end
     end
 
@@ -819,7 +879,12 @@ module Mode7
     # que pueden acompañar esta transicion sin reconstruir el mapa.
     def set_angle(target_alpha, frames = Config::CAMERA_ANGLE_SMOOTH_FRAMES)
       value = target_alpha.to_f.clamp(0.0, 89.0)
-      set_camera(value, zoom, frames, distance_h, planet_radius)
+      if indoor_map?
+        @indoor_alpha = value
+      else
+        @outdoor_alpha = value
+      end
+      set_camera(value, zoom, frames, distance_h, cylindrical_radius)
       value
     end
 
@@ -830,7 +895,7 @@ module Mode7
       min_zoom = Config::CAMERA_ZOOM_MIN.to_f
       max_zoom = Config::CAMERA_ZOOM_MAX.to_f
       zoom_value = target_zoom.to_f.clamp(min_zoom, max_zoom)
-      set_camera(current_alpha, zoom_value, frames, distance_h, planet_radius)
+      set_camera(current_alpha, zoom_value, frames, distance_h, cylindrical_radius)
       return zoom_value
     end
 
@@ -838,12 +903,12 @@ module Mode7
       if @transition_frames && @transition_frames > 0
         @transition_frames -= 1
         if @transition_frames == 0
-          configure(@target_alpha, @target_zoom, @target_distance_h, @target_planet_radius)
+          configure(@target_alpha, @target_zoom, @target_distance_h, @target_cylindrical_radius)
         else
           configure(@current_alpha + @step_alpha,
                     @zoom + @step_zoom,
                     @distance_h + @step_distance_h,
-                    @planet_radius + @step_planet_radius)
+                    @cylindrical_radius + @step_cylindrical_radius)
         end
         invalidate_renderer_ground
       end
@@ -856,19 +921,20 @@ module Mode7
     end
   end
 
-  configure(Config::DEFAULT_ALPHA, Config::DEFAULT_ZOOM)
+  configure(Config::OUTDOOR_DEFAULT_ALPHA, Config::DEFAULT_ZOOM)
 end
 
 class Scene_Map
   alias_method :_VERMEIL_25D_core_update, :update unless method_defined?(:_VERMEIL_25D_core_update)
   def update
     _VERMEIL_25D_core_update
-    Mode7.update_transition if Mode7.active_now?
-    Mode7.update_terrain_camera_lift
+    # 005_ModeTransition.rb actualiza la interpolacion de camara una sola vez
+    # por frame, tanto al encender como al ir a angulo 0.
+    Mode7.update_terrain_camera_lift if !Mode7::Config::TERRAIN_TAG_CAMERA_LIFT.empty?
   end
 end
 
-# Deteccion de interiores: al cargar un mapa se resuelve :affine/:sky.
+# Deteccion de interiores: al cargar un mapa se resuelve :affine/:cylindrical.
 # Mode7RasterAffine conserva compatibilidad, pero ahora significa :affine +
 # politica raster de tiles, no una proyeccion distinta.
 class Game_Map
@@ -876,8 +942,18 @@ class Game_Map
 
   def setup(map_id)
     old_mode = Mode7.map_projection
-    Mode7.map_projection = Mode7.detect_map_projection(map_id)
     _VERMEIL_25D_core_setup(map_id)
+    # Resolver DESPUES del setup: aqui ya existen $game_map y cualquier
+    # metadata adicional inyectada por Maker Studio/plugins.
+    Mode7.map_projection = Mode7.detect_map_projection(map_id)
+
+    # Cada contexto conserva su propio angulo.
+    target_alpha = Mode7.active_now? ? Mode7.context_default_alpha : 0.0
+    Mode7.set_camera(
+      target_alpha, Mode7.zoom, 0,
+      Mode7.distance_h, Mode7.cylindrical_radius
+    )
+
     if Mode7.map_projection != old_mode
       Mode7.reset_caches
       Mode7.invalidate_renderer_ground rescue nil

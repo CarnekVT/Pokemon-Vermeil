@@ -133,8 +133,11 @@ class Mode7Renderer
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
+    redraw_step = Mode7::Config::GROUND_REDRAW_WORLD_STEP.to_f
+    redraw_step = 1.0 if redraw_step <= 0.0
     camera_moved = @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
-                   (@last_cam_x - cx).abs >= 0.5 || (@last_cam_y - cy).abs >= 0.5
+                   (@last_cam_x - cx).abs >= redraw_step ||
+                   (@last_cam_y - cy).abs >= redraw_step
     if camera_moved
       draw_ground
       @last_cam_x = cx
@@ -184,6 +187,8 @@ class Mode7Renderer
     @terrain_tag_cache = {}
     @wall_visual_components = nil
     @wall_visual_owned = {}
+    @indoor_prop_components = []
+    @indoor_prop_owned = {}
     @wall_cells = {}
     @walls_known = true
 
@@ -194,11 +199,17 @@ class Mode7Renderer
         @entry_cache[[tx, ty]] = collect_cell_entries(tx, ty)
       end
     end
+
+    # Los tags exclusivos Indoor pueden resolver el modo aunque un plugin de
+    # metadata no exponga Outside/Outdoor al objeto GameData.
+    resolve_projection_from_indoor_tags if respond_to?(:resolve_projection_from_indoor_tags, true)
+
     cache_terrain_tag_heights
     cache_visual_priorities
     # Debe resolverse ANTES de hornear @ground: P4/techo sin Terrain Tag puede
     # pertenecer al mismo wall y no debe quedar duplicado en el bitmap base.
     cache_wall_visual_components
+    cache_indoor_prop_components if respond_to?(:cache_indoor_prop_components, true)
     Mode7.snap_terrain_camera_lift_to_target
 
     # ponytail: conservar pila vanilla en bitmap fuente. Proyectar tres planos
@@ -223,6 +234,7 @@ class Mode7Renderer
     # Pase 2/3: cada tile conserva bitmap Y profundidad propios. La prioridad
     # solo modifica su oclusion, nunca hereda la posicion de un vecino.
     build_wall_columns
+    build_indoor_prop_blocks if respond_to?(:build_indoor_prop_blocks, true)
     build_interior_border_surfaces
     build_priority_surfaces
 
@@ -363,8 +375,19 @@ class Mode7Renderer
   # No puede quedar tambien horneada en @ground, que era la causa principal de
   # tiles duplicados al combinar P0/P1 o wall sobre otras superficies.
   def ground_entries_for_cell(tx, ty, entries)
+    raster_affine = Mode7.respond_to?(:raster_affine_mode?) && Mode7.raster_affine_mode?
+
     entries.reject do |entry|
-      (respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)) ||
+      wall_owned = respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)
+      prop_owned = respond_to?(:indoor_prop_owned?, true) && indoor_prop_owned?(entry)
+
+      # IndoorBorder pertenece al MISMO raster affine que el suelo aunque tenga
+      # prioridad. Asi los laterales se convierten en una sola forma diagonal
+      # continua en vez de sprites rectos escalonados.
+      border_in_ground = raster_affine && interior_border_entry?(entry)
+      next false if border_in_ground
+
+      wall_owned || prop_owned ||
         priority_surface_entry?(entry) ||
         interior_border_entry?(entry)
     end
@@ -512,15 +535,14 @@ class Mode7Renderer
 
   def draw_ground
     return if !@ground || @ground.disposed?
+
     bmp = @ground_sprite.bitmap
-    sky_color = sky_fill_color
-    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, sky_color)
+    background_color = projection_fill_color
+    bmp.fill_rect(0, 0, Mode7.screen_w, Mode7.screen_h, background_color)
+
     horizon = [Mode7.horizon_row.ceil, 0].max
     return if horizon >= Mode7.screen_h
-    if horizon > 0
-      @clear_rect.set(0, 0, Mode7.screen_w, horizon)
-      bmp.fill_rect(@clear_rect, sky_color)
-    end
+
     cx = Mode7.cam_x
     map_h_px = @map.height * Game_Map::TILE_HEIGHT
     ground_w = @ground.width
@@ -530,58 +552,92 @@ class Mode7Renderer
     has_fog = Mode7.respond_to?(:fog_alpha)
     @fog_color_obj ||= Mode7::Config::FOG_COLOR.clone
     fog_color = @fog_color_obj
+
+    # Affine conserva scanline 1:1. Cylindrical agrupa 3 filas por defecto:
+    # 480 stretch_blt -> ~160 por redraw, que es la parte mas cara al caminar.
+    scan_step = 1
+    if Mode7.cylindrical_mode? &&
+       defined?(Mode7::Config::CYLINDRICAL_RASTER_SCAN_STEP)
+      scan_step = Mode7::Config::CYLINDRICAL_RASTER_SCAN_STEP.to_i
+      scan_step = 1 if scan_step < 1
+    end
+
     sy = horizon
     while sy < Mode7.screen_h
-      wy = Mode7.world_y_for_row(sy)
-      if !wy || wy < 0 || wy >= map_h_px
-        @dest_rect.set(0, sy, screen_w, 1)
+      block_h = [scan_step, Mode7.screen_h - sy].min
+      sample_sy = sy + (block_h - 1) * 0.5
+
+      wy0 = Mode7.world_y_for_row(sy)
+      wy1 = Mode7.world_y_for_row([sy + block_h, Mode7.screen_h - 1].min)
+      wy = Mode7.world_y_for_row(sample_sy)
+
+      if !wy || !wy0 || !wy1 || wy1 < 0 || wy0 >= map_h_px
+        @dest_rect.set(0, sy, screen_w, block_h)
         bmp.fill_rect(@dest_rect, outside_color)
-        sy += 1
+        sy += block_h
         next
       end
-      k = Mode7.hscale(sy)
+
+      k = Mode7.hscale(sample_sy)
+      if !k || k <= 0.001
+        @dest_rect.set(0, sy, screen_w, block_h)
+        bmp.fill_rect(@dest_rect, outside_color)
+        sy += block_h
+        next
+      end
+
       span = screen_w / k
       wx_left = cx - center_x / k
       lo = [wx_left.floor, 0].max
       hi = [(wx_left + span).ceil, ground_w].min
+
       if hi <= lo
-        @dest_rect.set(0, sy, screen_w, 1)
+        @dest_rect.set(0, sy, screen_w, block_h)
         bmp.fill_rect(@dest_rect, outside_color)
-        sy += 1
+        sy += block_h
         next
       end
+
       d_x0 = ((lo - wx_left) / span) * screen_w
       d_w = ((hi - wx_left) / span) * screen_w - d_x0
       d_x0_int = d_x0.round
       d_w_int = d_w.round
       d_x1_int = d_x0_int + d_w_int
+
       if d_x0_int > 0
-        @dest_rect.set(0, sy, d_x0_int, 1)
+        @dest_rect.set(0, sy, d_x0_int, block_h)
         bmp.fill_rect(@dest_rect, outside_color)
       end
       if d_x1_int < screen_w
-        @dest_rect.set(d_x1_int, sy, screen_w - d_x1_int, 1)
+        @dest_rect.set(d_x1_int, sy, screen_w - d_x1_int, block_h)
         bmp.fill_rect(@dest_rect, outside_color)
       end
+
       if d_w_int > 0
-        @dest_rect.set(d_x0_int, sy, d_w_int, 1)
-        @src_rect.set(lo, wy.floor, hi - lo, 1)
+        src_top = [[wy0, wy1].min.floor, 0].max
+        src_bottom = [[wy0, wy1].max.ceil, map_h_px].min
+        src_h = [src_bottom - src_top, 1].max
+
+        @dest_rect.set(d_x0_int, sy, d_w_int, block_h)
+        @src_rect.set(lo, src_top, hi - lo, src_h)
         bmp.stretch_blt(@dest_rect, @ground, @src_rect)
+
         if has_fog
-          alpha = Mode7.fog_alpha(sy)
+          alpha = Mode7.fog_alpha(sample_sy)
           if alpha > 0
             fog_color.alpha = alpha
             bmp.fill_rect(@dest_rect, fog_color)
           end
         end
       end
-      sy += 1
+
+      sy += block_h
     end
   end
 
-  def sky_fill_color
+  def projection_fill_color
     return Mode7::Config::OUTSIDE_COLOR if Mode7.indoor_map? && Mode7::Config::INTERIOR_OPAQUE_GROUND
-    return Mode7::Config::SKY_COLOR if !ms_has_panorama?
+    return Mode7::Config::CYLINDRICAL_BACKGROUND_COLOR if !ms_has_panorama?
     return Color.new(0, 0, 0, 0)
   end
 
@@ -607,7 +663,9 @@ class Scene_Map
   alias_method :_VERMEIL_25D_orig_createSpritesets, :createSpritesets unless method_defined?(:_VERMEIL_25D_orig_createSpritesets)
 
   def createSpritesets
-    wanted = Mode7.rendering_now? ? Mode7Renderer : TilemapRenderer
+    # El plugin conserva siempre su renderer. Estado OFF = angulo 0/zoom 1,
+    # no cambio de clase a TilemapRenderer.
+    wanted = Mode7Renderer
     if !@map_renderer || @map_renderer.disposed? || !@map_renderer.is_a?(wanted)
       @map_renderer.dispose if @map_renderer && !@map_renderer.disposed?
       @map_renderer = wanted.new(Spriteset_Map.viewport)

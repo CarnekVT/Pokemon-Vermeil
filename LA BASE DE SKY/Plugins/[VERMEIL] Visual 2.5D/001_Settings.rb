@@ -49,211 +49,115 @@ module Mode7
 
 
     # =======================================================================
-    # CAMARA POR DEFECTO (ESTILO GEN 5)
-    # Perspectiva conica central con horizonte elevado y camara en picado.
+    # CAMARA / PROYECCION
     # =======================================================================
 
-    # Fila de pantalla (fraccion) donde queda anclado el jugador.
-    # 0.50 = centro exacto de pantalla. Combinado con cam_y anclada a pivot_y,
-    # mantiene el centro de camara == centro matematico de proyeccion.
-    # Jugador ligeramente por debajo del centro, manteniendo lectura top-down.
-    # No se usa como centro de una curva simetrica: el fondo siempre comprime
-    # en una sola direccion.
-    PIVOT_RATIO   = 0.60
+    # El Affine antiguo usaba pivote central; Cylindrical conserva el jugador
+    # ligeramente por debajo del centro.
+    AFFINE_PIVOT_RATIO      = 0.50
+    CYLINDRICAL_PIVOT_RATIO = 0.60
+    # Angulos independientes por contexto.
+    OUTDOOR_DEFAULT_ALPHA = 15
+    INDOOR_DEFAULT_ALPHA  = 15
+    # Alias legacy para scripts externos.
+    DEFAULT_ALPHA = OUTDOOR_DEFAULT_ALPHA
 
-    # Intensidad angular del roll planetario. En :sky no rota una hoja/plano:
-    # controla cuanto terreno entra en la curvatura alrededor del jugador.
-    DEFAULT_ALPHA = 15
-    # =======================================================================
-    # PROYECCION: AFFINE, CONIC o SKY (arco circular top-down)
-    # =======================================================================
-    # :sky    -> Arco circular top-down. Se usa una sola rama del semicírculo
-    #            para que el fondo se comprima sin rebote ni efecto de ola.
-    # :affine -> Pendiente constante plana.
-    # :conic  -> Perspectiva real con punto de fuga.
-    PROJECTION = :sky
+    # Solo existen DOS modos:
+    #   :affine       -> matematica del ZIP pre-curve.
+    #   :cylindrical  -> exterior curvo.
+    PROJECTION = :cylindrical
 
-    # =======================================================================
-    # PROYECCION POR MAPA (flags opcionales; por defecto todo sigue SKY)
-    # La proyeccion global (PROJECTION) se puede FORZAR por mapa via flags de
-    # metadata (PBS: map_metadata.txt, columna Flags). Interior/exterior usan
-    # Sky por defecto; Mode7Affine queda disponible como excepcion por mapa.
-    #   "Mode7Affine" -> espacia el mapa en proyeccion plana.
-    #   "Mode7Sky"    -> fuerza el arco circular Sky.
-    MAP_FLAG_AFFINE        = "mode7afine"
-    # Compatibilidad: fuerza :affine y activa raster de tiles para ese mapa.
-    MAP_FLAG_RASTER_AFFINE = "mode7rasteraffine"
-    MAP_FLAG_SKY           = "mode7sky"
+    # Flags de mapa.
+    MAP_FLAG_AFFINE          = "mode7affine"
+    MAP_FLAG_AFFINE_LEGACY   = "mode7afine"
+    MAP_FLAG_RASTER_AFFINE   = "mode7rasteraffine"
+    MAP_FLAG_CYLINDRICAL     = "mode7cylindrical"
+    MAP_FLAG_INDOOR          = "mode7indoor"
 
-    # Estilo 2.5D por defecto para interiores.
-    # Se usa la proyeccion :affine REAL del plugin. El raster de tiles se
-    # controla aparte con INDOOR_RASTER_TILES; no existe una segunda camara.
-    # Los flags del mapa siempre tienen prioridad sobre este valor.
+    # Outside/Outdoor=false siempre fuerza Affine.
     INDOOR_PROJECTION = :affine
-
-    # Rasteriza las capas visuales del interior sobre la misma cuadricula
-    # affine del suelo. P0 queda en ground y P1+ usa strips affine con Z propio.
-    # Esto mantiene visual, jugador y colisiones sobre las mismas celdas.
     INDOOR_RASTER_TILES = true
 
-    # BORDE INTERIOR. Superficie del plano para zocalos, bordes y suelo
-    # interior. No entra al volumen ni a prioridad: conserva posicion exacta
-    # junto al piso curvo. Pasabilidad sigue siendo la del tile en Maker Studio.
-    INTERIOR_BORDER_TERRAIN_TAGS = {
-      :InteriorBorder => true
-    }.freeze
+    # IndoorWall conecta horizontalmente con el raster Affine en su base,
+    # pero conserva altura fija para no verse aplastado/encogido.
+    INDOOR_WALL_FIXED_HEIGHT = true
 
-    # Interiores: mantener el bitmap de suelo opaco para que celdas vacias no
-    # dejen ver panoramas/fogs del mapa anterior por transparencia.
+    # Fallback opcional si algun plugin de metadata no expone Outdoor/Outside
+    # al runtime. Agrega IDs solamente si los necesitas.
+    INDOOR_MAP_IDS = [].freeze
+
+    # Si el mapa contiene alguno de los Terrain Tags exclusivos de interior,
+    # la proyeccion se resuelve como Affine aunque la metadata externa no pueda
+    # leerse. Se evalua una sola vez al construir el mapa.
+    INDOOR_DETECT_FROM_TERRAIN_TAGS = true
+
+    INTERIOR_BORDER_TERRAIN_TAGS = {
+      :IndoorBorder => true
+    }.freeze
+    INDOOR_PROP_TERRAIN_TAGS = {
+      :IndoorProp => true
+    }.freeze
     INTERIOR_OPAQUE_GROUND = true
 
-
-
-    # Bias de profundidad para piezas de techo/prioridad alta. Nunca usar 9999:
-    # deben seguir ordenandose por la Y de su base como el jugador.
     WALL_TOP_Z_BIAS = 1
 
-
-    # Slope de inclinacion (px de pantalla por px de mundo) en afín.
-    # Positivo abajo delante (mundo hacia abajo). Menor = mas plano.
-    AFFINE_SLOPE = 1
-
-    # Zoom horizontal (px pantalla por px mundo). Bajo el pitch visible.
-    AFFINE_ZOOM  = 0.5
-
-    # Convergencia al horizonte (0..1). Forma de "lente" FIJA en espacio de
-    # pantalla. NOTA: cualquier valor >0 es curvatura = estiramiento al
-    # moverse (por eso Sky usa 0). En 0 el mundo es un plano afín puro:
-    # scroll 100% estable, cero mareo; la profundidad se da con AFFINE_SLOPE.
-    #   0.0 -> plano afín (Sky, RECOMENDADO)
-    #   0.2+ -> curvatura suave (acepta leve estiramiento)
+    # -----------------------------------------------------------------------
+    # AFFINE
+    # -----------------------------------------------------------------------
+    # Valores del ZIP "[VERMEIL] Visual 2.5D(AFFINE PRE-CURVE ONLY AFFINE)".
+    AFFINE_SLOPE       = 1.0
+    AFFINE_ZOOM        = 0.5
     AFFINE_CONVERGENCE = 0.0
+    AFFINE_DEPTH       = 0.4
 
-    # Profundidad vertical del plano afín. Intensidad de la CONICA DE CAMARA
-    # FIJA (terreno 3D de Sky): las filas lejanas convergen al horizonte y las
-    # cercanas se estiran, y ESA deformacion pertenece al plano del mapa, NO al
-    # jugador (scroll estable, sin mareo). Usa la MISMA logica que la conica
-    # original (affine_depth_scale, formula heff*yi*cos/(heff-yi*sin)) pero con
-    # curvatura SUTIL: AFFINE_DEPTH es el divisor de la altura del ojo (heff =
-    # DISTANCE_H/t), asi que un valor BAJO aplanNa poco y un valor ALTO curva mas.
-    #   ~0.15-0.3 -> deformacion suave (recomendado: no marea, da 3D sutil)
-    #   ~1.0      -> conica plena (perspectiva marcada tipo Gen5)
-    AFFINE_DEPTH      = 0.4
+    # -----------------------------------------------------------------------
+    # CYLINDRICAL
+    # -----------------------------------------------------------------------
+    CYLINDRICAL_RADIUS = 1100.0
+    CYLINDRICAL_PHASE  = 1.00
+    CYLINDRICAL_MIN    = 0.16
+    CYLINDRICAL_MAX    = 1.42
 
-    # Fuerza de la perspectiva afine (0..1). Multiplica el seno efectivo de la
-    # camara en la proyeccion. Con 1.0 = perspectiva original (crecimiento
-    # cuadratico 1/d^2 -> "embudo" en las filas cercanas, horizonte cercano).
-    # Con valores bajos el terreno se aplana, las filas apenas cambian de tamano
-    # y el horizonte se aleja (look Sky / Animal Crossing). 0.0 = afin puro plano
-    # (zoom constante por fila, sin perspectiva). Se aplica CONSISTENTEMENTE en
-    # scale/unscale/hscale/horizon para no rasgar el terreno.
-    AFFINE_PERSPECTIVE = 0.0
+    CYLINDRICAL_GROUND_Y_SCALE         = 1.00
+    CYLINDRICAL_WIDTH_PERSPECTIVE      = 0.020
+    CYLINDRICAL_BILLBOARD_PERSPECTIVE = 0.0
+    CYLINDRICAL_VERTICAL_SCALE         = 1.00
+    CYLINDRICAL_SPRITE_SCALE           = 0.0
 
-    # Parametros del :affine usado por interiores rasterizados.
-    # Slope 1.0 conserva exactamente una celda visual por celda logica cuando
-    # el angulo esta en 0; el pitch de camara puede comprimir todo el mapa de
-    # forma uniforme sin desplazar unas capas respecto de otras.
-    INDOOR_AFFINE_SLOPE       = 1.00
-    INDOOR_AFFINE_ZOOM        = 1.00
-    INDOOR_AFFINE_CONVERGENCE = 0.0
-    INDOOR_AFFINE_DEPTH       = 0.0
+    # Estos multiplicadores solo afectan Cylindrical. Affine no pasa por ellos.
+    # El angulo cambia la curvatura, no el zoom global. A zoom 1.0 los tiles,
+    # personajes y bloques conservan escala 1:1 alrededor del jugador.
+    CYLINDRICAL_PITCH_STRENGTH           = 0.0
+    CYLINDRICAL_BILLBOARD_PITCH_STRENGTH = 0.0
 
-    # El angulo deja de ser solo "cantidad de curvatura". Tambien controla el
-    # pitch vertical de la camara. 0° = top-down; al aumentar el angulo el
-    # plano se comprime verticalmente de forma continua.
-    CAMERA_PITCH_STRENGTH = 0.60
-
-    # =======================================================================
-    # SKY - MEDIA CIRCUNFERENCIA TOP-DOWN
-    # =======================================================================
-    # El viewport usa UNA sola rama convexa de una circunferencia real.
-    #
-    # Antes el arco cruzaba su punto de inflexion y visualmente parecia una
-    # cursiva/S: algunas filas del fondo reducian su separacion y luego la
-    # recuperaban. Ahora la curva usa:
-    #
-    #   -cos(PHASE + theta)
-    #
-    # normalizada para que alrededor del jugador g'(0)=1. Durante todo el
-    # viewport PHASE+theta permanece dentro de (0, PI/2), por lo que:
-    #   * la derivada siempre es positiva;
-    #   * la curvatura siempre tiene el mismo signo;
-    #   * al subir la camara un tile fijo siempre baja en pantalla.
-    #
-    # Es una rama de media circunferencia, no una onda periodica.
-
-    # Radio grande para mantener lectura Pokemon top-down.
-    SKY_ARC_RADIUS = 1100.0
-    PLANET_RADIUS  = SKY_ARC_RADIUS
-
-    # Punto de la circunferencia donde queda el jugador. 1.0 rad mantiene toda
-    # la ventana visible en el mismo lado del arco y evita la "cursiva".
-    SKY_ARC_PHASE = 1.00
-
-    # Limites angulares seguros de la rama circular. Fuera de ellos se continua
-    # con la tangente del borde, sin invertir scroll en mapas largos.
-    SKY_ARC_MIN = 0.16
-    SKY_ARC_MAX = 1.42
-
-    SKY_GROUND_Y_SCALE = 1.00
-
-    # Convergencia horizontal leve; el efecto principal sigue siendo top-down.
-    SKY_WIDTH_PERSPECTIVE = 0.020
-
-    # Sprites verticales y walls no cambian tamano con la profundidad.
-    SKY_BILLBOARD_PERSPECTIVE = 0.0
-    SKY_VERTICAL_SCALE = 1.00
-
-    # Personajes practicamente fijos.
-    SKY_SPRITE_SCALE = 0.0
-
-    # Priority 1 puede seguir la superficie; P2+ se renderiza como bloque rigido
-    # para que arboles/props no se partan entre filas.
     PRIORITY_RIGID_MIN = 2
-
-    # Priority Z: debajo de zoom 1.0 nunca se reduce por debajo de 32 unidades.
-    # Esto evita que P1/P2/P4 pierda precedencia a zoom 0.9 o inferior.
     PRIORITY_Z_MIN_STEP = 32.0
-
-    # Solape pequeno para P1/superficies que aun siguen el arco.
     PRIORITY_EDGE_OVERLAP = 1.25
     PRIORITY_EDGE_OVERLAP_MAX = 3.0
-
-    # Tiles con prioridad > 0 salen del suelo y conservan prioridad RPG Maker.
-    # Fuera de wall se proyectan entre bordes de fila; dentro de wall usan una
-    # pieza completa con respuesta vertical leve, para no dejar cortes.
     PRIORITY_SURFACES = true
     PRIORITY_SURFACE_MIN = 1
 
-
-    # FOV horizontal en grados. Controla el aplanado de la cuadricula,
-    # desacoplado del pitch:
-    #   55+   -> perspectiva plena (distorsion amplia, esquinas estiradas)
-    #   15-30 -> FOV retro: tiles arriba y abajo casi del mismo tamano
-    #   0     -> ortografico puro (cero distorsion horizontal)
-    FOV           = 15
-
-
-    # Zoom base (1.0 = escala natural del pixel art).
-    DEFAULT_ZOOM  = 1
-
-    # Limites y suavizado del zoom de depuracion. El zoom no modifica
-    # colisiones: solo la proyeccion y el area visible.
+    DEFAULT_ZOOM = 1.0
     CAMERA_ZOOM_MIN            = 0.25
     CAMERA_ZOOM_MAX            = 3.00
     CAMERA_ZOOM_SMOOTH_FRAMES  = 12
     CAMERA_ANGLE_SMOOTH_FRAMES = 18
-
-    # Frames al activar/desactivar 2.5D desde Opciones o debug.
     MODE_TRANSITION_FRAMES = 1
 
-    # Altura del ojo (normalmente la altura de pantalla).
-    DISTANCE_H    = Settings::SCREEN_HEIGHT
+    # Rendimiento. draw_ground hace un remuestreo horizontal por fila de
+    # pantalla; no repetirlo por cada subpixel de scroll.
+    GROUND_REDRAW_WORLD_STEP = 2.0
+    PRIORITY_REPROJECT_WORLD_STEP = 2.0
 
-    # Color del cielo (visible si la camara baja demasiado).
-    SKY_COLOR     = Color.new(104, 168, 224)
+    # Cylindrical es el modo caro: rasterizar varias filas de pantalla en un
+    # solo stretch_blt reduce mucho el coste al caminar. Affine sigue en 1px
+    # para conservar su cuadricula exacta.
+    CYLINDRICAL_RASTER_SCAN_STEP = 4
 
-    # Color renderizado fuera de los limites del mapa.
+    # Altura del ojo de la formula Affine pre-curve.
+    DISTANCE_H = Settings::SCREEN_HEIGHT
+
+    CYLINDRICAL_BACKGROUND_COLOR = Color.new(104, 168, 224)
     OUTSIDE_COLOR = Color.new(0, 0, 0)
 
     # =======================================================================
@@ -264,31 +168,26 @@ module Mode7
     # Valor > 0 activa el filtro. Es compatibilidad con la configuracion vieja;
     # NO es prioridad, elevacion ni cantidad de tiles. Cada celda conserva su
     # bitmap y proyeccion; tag y capa no mezclan objetos vecinos.
+    # Tags de wall EXCLUSIVOS por entorno.
+    #
+    # IndoorWall no actua en exteriores.
+    # Mode7Tag/HoneyTree no actuan como wall de interior.
+    # Esto evita que una regla de Mountains/outdoor cambie accidentalmente la
+    # composicion de una habitacion.
     INDOOR_WALL_TERRAIN_TAG_HEIGHT = {
-      :Mode7Tag => 4,
+      :IndoorWall => 4
     }.freeze
     OUTDOOR_WALL_TERRAIN_TAG_HEIGHT = {
-      :Mode7Tag => 4,
+      :Mode7Tag  => 4,
       :HoneyTree => 4
     }.freeze
 
-    # MURO ELEVADO 2.5D. Clase aparte del muro normal: conserva volumen visual,
-    # pero deja la pasabilidad al tile nativo. Mountains bloquea en paredes por
-    # su pasabilidad original y permite escaleras/plataformas que sean pasables.
-    # No duplicar un tag aqui y en *_WALL_* normal.
-    ELEVATED_WALL_TERRAIN_TAG_HEIGHT = {
-      :Mountains => 4,
-      :Ladders => 4,
-      :LaddersSide => 4
-    }.freeze
+    # Mountains/Ladders NO tienen propiedades visuales 2.5D.
+    # Conservan su Terrain Tag original, pero el renderer no los interpreta
+    # como volumen, elevacion ni soporte especial.
+    ELEVATED_WALL_TERRAIN_TAG_HEIGHT = {}.freeze
 
-    # SOMBRA DE SUPERFICIE PARA MOUNTAINS. Replica sombra Maker Studio sobre
-    # Mountain solo cuando la sombra cae DESDE otra pieza; el propio source tile
-    # queda encima, como vanilla. Valor 0..255 multiplica opacity original MS.
-    # Agregar un tag aqui es opt-in, no altera sombra de otros walls.
-    MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY = {
-      :Mountains => 255
-    }.freeze
+    MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY = {}.freeze
 
 
     # ELEVACION LOCAL POR TERRAIN TAG. No mueve camara: cada tile del filtro
@@ -301,17 +200,9 @@ module Mode7
     TERRAIN_TAG_TILE_HEIGHT = {
     }.freeze
 
-    # ELEVACION DE CAMARA POR TERRAIN TAG. Mountains es ElevatedWall: en
-    # escalera/plataforma pasable activa lift; en pared usa su pasabilidad
-    # nativa. El lift cambia profundidad alrededor del pivot del jugador, NO
-    # traslada el origen del mapa: player, NPCs y colisiones quedan en su celda.
-    # Valor = intensidad base del efecto de elevacion.
-    TERRAIN_TAG_CAMERA_LIFT = {
-      :Mountains => 24,
-      :Ladders => 12,
-      :LaddersSide => 8
-
-    }.freeze
+    # Sin camera-lift por Mountains/Ladders. Esta era una de las fuentes
+    # principales de desacople entre suelo, walls y prioridades.
+    TERRAIN_TAG_CAMERA_LIFT = {}.freeze
     # La transicion empieza durante el paso, no despues de entrar a la celda.
     # Limite por frame: evita un salto visible incluso con lifts altos.
     TERRAIN_TAG_CAMERA_LIFT_SMOOTH = 0.34
@@ -322,7 +213,7 @@ module Mode7
     TERRAIN_TAG_CAMERA_LIFT_RENDER_STEP = 2.0
     # Cambio de profundidad por punto de lift. 50 en Mountains equivale a
     # +15% con 0.003. Subirlo aumenta sensacion de altura; 0.0 lo desactiva.
-    TERRAIN_TAG_CAMERA_LIFT_DEPTH_FACTOR = 0.003
+    TERRAIN_TAG_CAMERA_LIFT_DEPTH_FACTOR = 0.0
 
     # ESCALERAS LATERALES POR TERRAIN TAG. Unico tag: :LaddersSide.
     # Maker Studio guarda por celda si el tramo sube-derecha (-1) o
@@ -336,8 +227,8 @@ module Mode7
 
     # Radio (en tiles) en pantalla donde se sigue spawncndeando/sposeando
     # objetos/muros del filtro de terrain tags. Antes era 14/18.
-    WALL_SPAWN_RADIUS_X = 26
-    WALL_SPAWN_RADIUS_Y = 34
+    WALL_SPAWN_RADIUS_X = 20
+    WALL_SPAWN_RADIUS_Y = 24
 
     # =======================================================================
     # PASABILIDAD MECANICA vs ELEVACION VISUAL
@@ -386,10 +277,25 @@ unless GameData::TerrainTag.exists?(:LaddersSide)
 end
 
 # Marco interior de plano. ID 23 queda libre tras retirar LaddersSideReverse.
-unless GameData::TerrainTag.exists?(:InteriorBorder)
+unless GameData::TerrainTag.exists?(:IndoorBorder)
   GameData::TerrainTag.register({
-    :id        => :InteriorBorder,
+    :id        => :IndoorBorder,
     :id_number => 23
+  })
+end
+
+# Tags exclusivos para interiores. No se consultan como walls outdoor.
+unless GameData::TerrainTag.exists?(:IndoorWall)
+  GameData::TerrainTag.register({
+    :id        => :IndoorWall,
+    :id_number => 24
+  })
+end
+
+unless GameData::TerrainTag.exists?(:IndoorProp)
+  GameData::TerrainTag.register({
+    :id        => :IndoorProp,
+    :id_number => 25
   })
 end
 # Maker Studio guarda la etiqueta Mountains con el ID 20. Essentials no la
