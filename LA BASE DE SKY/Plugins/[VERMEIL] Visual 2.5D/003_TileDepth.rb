@@ -235,7 +235,6 @@ class Mode7Renderer
     # solo modifica su oclusion, nunca hereda la posicion de un vecino.
     build_wall_columns
     build_indoor_prop_blocks if respond_to?(:build_indoor_prop_blocks, true)
-    build_interior_border_surfaces
     build_priority_surfaces
 
     @need_build = false
@@ -379,11 +378,9 @@ class Mode7Renderer
       wall_owned = respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)
       prop_owned = respond_to?(:indoor_prop_owned?, true) && indoor_prop_owned?(entry)
 
-      # Border/black siguen la cuadricula affine como strips con prioridad.
+      # Black forma parte del plano. Border usa strip overlay para tapar wall.
       wall_owned || prop_owned ||
-        priority_surface_entry?(entry) ||
-        interior_border_entry?(entry) ||
-        interior_black_entry?(entry)
+        priority_surface_entry?(entry)
     end
   end
 
@@ -446,7 +443,9 @@ class Mode7Renderer
       @ground.fill_rect(@clear_rect, Mode7::Config::OUTSIDE_COLOR)
     end
 
-    entries = collect_cell_entries(tx, ty)
+    # Conservar identidad de entries: ownership wall/prop usa object_id.
+    entries = @entry_cache[[tx, ty]] || collect_cell_entries(tx, ty)
+    refresh_animated_entry_frames(entries)
     ground_entries = ground_entries_for_cell(tx, ty, entries)
     if @ms_shadow_env
       lower = ground_entries.select do |entry|
@@ -463,6 +462,16 @@ class Mode7Renderer
       blt_ground_cell(tx, ty, upper, @ground) unless upper.empty?
     else
       blt_ground_cell(tx, ty, ground_entries, @ground) unless ground_entries.empty?
+    end
+  end
+
+  def refresh_animated_entry_frames(entries)
+    entries.each do |entry|
+      next if !entry[:animated] || !entry[:filename] || !entry[:src_rect]
+      @scratch.filename = entry[:filename]
+      @autotiles.set_src_rect(@scratch, entry[:tid])
+      source = @scratch.src_rect
+      entry[:src_rect].set(source.x, source.y, source.width, source.height)
     end
   end
 

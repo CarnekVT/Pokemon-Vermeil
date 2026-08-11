@@ -272,17 +272,17 @@ class Mode7Renderer
 
   def priority_surface_entry?(e)
     return false if !Mode7::Config::PRIORITY_SURFACES
+    # Border es remate visual: overlay alineado con la fila. Black queda suelo.
+    return true if Mode7.raster_affine_mode? && interior_border_entry?(e)
+    return false if interior_border_entry?(e) || interior_black_entry?(e)
     p = entry_visual_priority(e)
     min = Mode7::Config::PRIORITY_SURFACE_MIN.to_i
-    return true if interior_black_entry?(e)
 
     if Mode7.raster_affine_mode?
-      return true if interior_border_entry?(e)
       # IndoorProp usa un bloque rigido de escala constante.
       return false if indoor_prop_owned?(e)
     end
 
-    return false if interior_border_entry?(e)
     return true if entry_terrain_tag_height(e) > 0
     return false if p < min
     return false if p == 1 && Mode7Renderer.debug_mode_force_priority_1_as_ground?
@@ -635,18 +635,36 @@ class Mode7Renderer
     return @indoor_prop_components if !Mode7.raster_affine_mode?
 
     groups = Hash.new { |hash, key| hash[key] = {} }
+    seed_keys = {}
+    seed_sources = Hash.new { |hash, key| hash[key] = {} }
 
     @entry_cache.each do |(tx, ty), entries|
       entries.each do |entry|
         next if !interior_prop_entry?(entry)
         key = rigid_priority_object_key(tx, ty, entry, rigid_priority_volume_id(tx, ty))
+        seed_keys[key] = true
+        source_key = rigid_priority_object_key(tx, ty, entry)
+        seed_sources[key][source_key] = true
+      end
+    end
+
+    # Completa cada prop con piezas P1+ de la misma identidad fuente. Asi la
+    # parte superior no queda duplicada en strips, pero un objeto adyacente con
+    # otro origen visual nunca cambia bounds/ancla del prop.
+    @entry_cache.each do |(tx, ty), entries|
+      volume_id = rigid_priority_volume_id(tx, ty)
+      entries.each do |entry|
+        next if entry_is_wall?(entry) || interior_border_entry?(entry) || interior_black_entry?(entry)
+        next if !interior_prop_entry?(entry) && entry_visual_priority(entry) <= 0
+        key = rigid_priority_object_key(tx, ty, entry, volume_id)
+        next if !seed_keys[key]
+        source_key = rigid_priority_object_key(tx, ty, entry)
+        next if !seed_sources[key][source_key]
         groups[key][[tx, ty]] ||= []
         groups[key][[tx, ty]].push(entry)
       end
     end
 
-    # Solo tiles IndoorProp pertenecen al bloque. Un vecino nunca cambia sus
-    # bounds ni su ancla; piezas multitile deben compartir tag y Volume ID.
     groups.each_value do |component|
       next if component.empty?
       @indoor_prop_components.push(component)
@@ -670,7 +688,14 @@ class Mode7Renderer
       next if entries.empty?
 
       elevation = entries.map { |entry| entry_world_elevation(entry) }.min || 0.0
-      depth_ty = bounds.map { |_tx, ty| ty }.max
+      depth_candidates = component.flat_map do |(_tx, ty), cell_entries|
+        cell_entries.map do |entry|
+          [ty, entry_visual_priority(entry), entry[:unify].to_i]
+        end
+      end
+      depth_ty, priority, depth_unify = depth_candidates.max_by do |ty, entry_priority, entry_unify|
+        [ty + entry_priority, entry_unify]
+      end
       depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
 
       # TODO el prop en UN solo bloque: P1, P2+ y cualquier prioridad
@@ -678,10 +703,9 @@ class Mode7Renderer
       # generaba su propio componente y los P2+ se separaban visualmente del
       # resto del prop (cada uno con su propio depth_wyb/Z). draw_rigid_...
       # ya ordena el bitmap interno por [unify, priority].
-      priority = entries.map { |entry| entry_visual_priority(entry) }.max || 0
-      unify = entries.map { |entry| entry[:unify].to_i }.min || 0
       make_rigid_component(
-        component, elevation, bounds, priority, unify, depth_wyb, :indoor_prop
+        component, elevation, bounds, priority, depth_unify,
+        depth_wyb, :indoor_prop
       )
     end
   end
@@ -756,7 +780,9 @@ class Mode7Renderer
           next if !priority_surface_entry?(entry)
 
           elevation = entry_world_elevation(entry)
-          key = [entry[:unify].to_i, entry_visual_priority(entry), ty, elevation]
+          priority = entry_visual_priority(entry)
+          priority = 1 if interior_border_entry?(entry) && priority < 1
+          key = [entry[:unify].to_i, priority, ty, elevation]
           strips[key][tx] ||= []
           strips[key][tx].push(entry)
         end
@@ -777,22 +803,6 @@ class Mode7Renderer
       make_priority_strip(segment, ty, priority, unify, elevation) if !segment.empty?
     end
   end
-  def build_interior_border_surfaces
-    return if Mode7.raster_affine_mode?
-    @map.width.times do |tx|
-      @map.height.times do |ty|
-        @entry_cache[[tx, ty]].each do |entry|
-          next if !interior_border_entry?(entry)
-          # InteriorBorder conserva su estrella nativa. Forzarlo a P0 hacia
-          # que un borde P4/P6 quedara debajo del actor aunque Maker lo guarde.
-          depth = [(ty + 1) * Game_Map::TILE_HEIGHT,
-                   entry_visual_priority(entry), entry[:unify].to_i]
-          make_priority_surface(tx, ty, entry, depth, true)
-        end
-      end
-    end
-  end
-
   # Agrupa solo vecinos ortogonales con mismo layer, prioridad y elevacion.
   # ponytail: sin ID manual; separar arte contiguo distinto requeriria metadata.
 

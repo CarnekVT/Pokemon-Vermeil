@@ -611,27 +611,10 @@ module Mode7
       hscale(sy)
     end
 
-    def _hscale_uncached(sy)
-      if cylindrical_mode?
-        theta = cylindrical_theta_for_row(sy)
-        ground_ry = theta * @cylindrical_radius / @zoom
-        return affine_depth_derivative(ground_ry) * cylindrical_width_scale(theta)
-      end
-
-      # Copia de la rama Affine del ZIP pre-curve.
-      t = affine_depth_value
-      if t > 0
-        heff = @dh / t
-        ry = affine_depth_unscale((sy - pivot_y).to_f)
-        zi = @zoom * ry
-        d = heff - zi * @sin
-        return 0.0 if d.abs < 1.0e-9
-        return @zoom * heff * heff * @cos / (d * d)
-      end
-
-      screen_t = (sy / screen_h.to_f) - 0.5
-      affine_zoom_value *
-        (1.0 + affine_convergence_value * 2.0 * screen_t)
+    # Perspectiva inclinada: profundidad solo en Y. X constante evita el cono,
+    # cortes entre filas y crecimiento lateral de props/volumenes.
+    def _hscale_uncached(_sy)
+      @zoom
     end
 
     def horizon_row
@@ -717,9 +700,7 @@ module Mode7
       theta = cylindrical_theta_for_world_y(wy)
       sy_ground = pivot_y + cylindrical_ground_offset_for_ry(ry)
 
-      scale_x = affine_depth_derivative(ry * cylindrical_ground_y_scale) *
-                cylindrical_width_scale(theta)
-      sx = center_x + rx * scale_x
+      sx = center_x + rx * @zoom
       sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
       [sx, sy]
     end

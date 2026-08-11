@@ -57,8 +57,8 @@ module Mode7
     AFFINE_PIVOT_RATIO      = 0.50
     CYLINDRICAL_PIVOT_RATIO = 0.60
     # Angulos independientes por contexto.
-    OUTDOOR_DEFAULT_ALPHA = 15
-    INDOOR_DEFAULT_ALPHA  = 15
+    OUTDOOR_DEFAULT_ALPHA = 28
+    INDOOR_DEFAULT_ALPHA  = 28
     # Alias legacy para scripts externos.
     DEFAULT_ALPHA = OUTDOOR_DEFAULT_ALPHA
 
@@ -123,7 +123,7 @@ module Mode7
     CYLINDRICAL_MIN    = 0.16
     CYLINDRICAL_MAX    = 1.42
     # Affine conserva la inclinacion principal; esta fraccion mezcla el arco.
-    CYLINDRICAL_CURVE_MIX = 0.35
+    CYLINDRICAL_CURVE_MIX = 0.20
 
     CYLINDRICAL_GROUND_Y_SCALE         = 1.00
     CYLINDRICAL_WIDTH_PERSPECTIVE      = 0.020
@@ -139,8 +139,8 @@ module Mode7
 
     PRIORITY_RIGID_MIN = 2
     PRIORITY_Z_MIN_STEP = 32.0
-    PRIORITY_EDGE_OVERLAP = 1.25
-    PRIORITY_EDGE_OVERLAP_MAX = 3.0
+    PRIORITY_EDGE_OVERLAP = 2.0
+    PRIORITY_EDGE_OVERLAP_MAX = 4.0
     PRIORITY_SURFACES = true
     PRIORITY_SURFACE_MIN = 1
 
@@ -151,15 +151,13 @@ module Mode7
     CAMERA_ANGLE_SMOOTH_FRAMES = 18
     MODE_TRANSITION_FRAMES = 1
 
-    # Rendimiento. draw_ground hace un remuestreo horizontal por fila de
-    # pantalla; no repetirlo por cada subpixel de scroll.
-    GROUND_REDRAW_WORLD_STEP = 2.0
-    PRIORITY_REPROJECT_WORLD_STEP = 2.0
+    # Mantener suelo y sprites en el mismo subpixel evita juntas al detenerse.
+    # ponytail: raster exacto; subir a 1.0 solo si Cylindrical pierde FPS.
+    GROUND_REDRAW_WORLD_STEP = 1.0
+    PRIORITY_REPROJECT_WORLD_STEP = 1.0
 
-    # Cylindrical es el modo caro: rasterizar varias filas de pantalla en un
-    # solo stretch_blt reduce mucho el coste al caminar. Affine sigue en 1px
-    # para conservar su cuadricula exacta.
-    CYLINDRICAL_RASTER_SCAN_STEP = 4
+    # Una muestra por fila evita cortes horizontales en tiles altos.
+    CYLINDRICAL_RASTER_SCAN_STEP = 2
 
     # Altura del ojo de la formula Affine pre-curve.
     DISTANCE_H = Settings::SCREEN_HEIGHT
