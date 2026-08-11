@@ -67,7 +67,7 @@ class Sprite_Reflection
       @sprite.z        -= 1000   # Still water is -2000, map is 0 and above
       @sprite.z        += 1 if event == $game_player
       @sprite.zoom_x   = @parent_sprite.zoom_x
-      if Settings::ANIMATE_REFLECTIONS && !GameData::MapMetadata.try_get(event.map_id)&.still_reflections
+      if Settings::ANIMATE_REFLECTIONS && !Settings::MAPAS_SIN_REFLEJO_ONDULANTE.include?(event.map_id) && !GameData::MapMetadata.try_get(event.map_id)&.still_reflections
         @sprite.zoom_x   += 0.05 * @sprite.zoom_x * Math.sin(2 * Math::PI * System.uptime)
       end
       @sprite.zoom_y   = @parent_sprite.zoom_y
