@@ -259,8 +259,9 @@ class Mode7Renderer
     min = Mode7::Config::PRIORITY_SURFACE_MIN.to_i
 
     if Mode7.raster_affine_mode?
-      # Border se hornea entero dentro del raster affine, sin sprites por fila.
-      return false if interior_border_entry?(e)
+      # Border se rasteriza como strip con Z propio (build_priority_surfaces):
+      # una fila cercana queda delante de un wall lejano, como en RMXP.
+      return true if interior_border_entry?(e)
       # IndoorProp usa un bloque rigido de escala constante.
       return false if indoor_prop_owned?(e)
     end
@@ -623,38 +624,12 @@ class Mode7Renderer
       end
     end
 
-    claimed = {}
+    # Cada prop es SOLO sus propias celdas agrupadas por identidad de objeto.
+    # No se absorben vecinos P1-P4: un tile ajeno ya tiene su propio grupo/strip
+    # independiente. Absorberlos metia tiles prestados en el bitmap del prop
+    # (aparecia como prop de 2 tiles) y hacía depender la posicion/elevacion
+    # del bloque de tiles que no pertenecian al dibujo.
     groups.each_value do |component|
-      component.each_value do |entries|
-        entries.each { |entry| claimed[entry.object_id] = true }
-      end
-    end
-
-    groups.each_value do |component|
-      anchors = []
-      component.each do |position, entries|
-        entries.each { |entry| anchors.push([position, entry]) }
-      end
-
-      anchors.each do |(tx, ty), source_entry|
-        [[-1,0],[1,0],[0,-1],[0,1]].each do |dx, dy|
-          pos = [tx + dx, ty + dy]
-          entries = @entry_cache[pos]
-          next if !entries
-          entries.each do |candidate|
-            next if claimed[candidate.object_id]
-            next if entry_visual_priority(candidate) <= 0
-            next if interior_border_entry?(candidate)
-            next if entry_is_wall?(candidate)
-            next if wall_visual_owned?(candidate)
-            next if !rigid_priority_source_contiguous?(source_entry, candidate, dx, dy)
-            component[pos] ||= []
-            component[pos].push(candidate)
-            claimed[candidate.object_id] = true
-          end
-        end
-      end
-
       next if component.empty?
       @indoor_prop_components.push(component)
       component.each_value do |entries|

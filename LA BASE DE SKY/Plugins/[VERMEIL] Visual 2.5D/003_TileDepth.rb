@@ -381,12 +381,10 @@ class Mode7Renderer
       wall_owned = respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)
       prop_owned = respond_to?(:indoor_prop_owned?, true) && indoor_prop_owned?(entry)
 
-      # IndoorBorder pertenece al MISMO raster affine que el suelo aunque tenga
-      # prioridad. Asi los laterales se convierten en una sola forma diagonal
-      # continua en vez de sprites rectos escalonados.
-      border_in_ground = raster_affine && interior_border_entry?(entry)
-      next false if border_in_ground
-
+      # InteriorBorder se rasteriza como strips con Z propio (build_priority_
+      # surfaces): una fila cercana oculta un wall lejano, igual que en RMXP.
+      # Horneado en @ground vivia en z=-1000 y los walls siempre quedaban
+      # delante, tapando el marco de la habitacion.
       wall_owned || prop_owned ||
         priority_surface_entry?(entry) ||
         interior_border_entry?(entry)
