@@ -240,7 +240,7 @@ module Mode7
     EXT_CORNERS_PRIORITIES = true
     # ponytail: solape subpixel minimo; subirlo solo si otro backend rasteriza
     # juntas mayores entre quads que comparten exactamente el mismo borde.
-    EXT_CORNERS_OVERLAP    = 0.35
+    EXT_CORNERS_OVERLAP    = 1.0
 
     # -----------------------------------------------------------------------
     # RENDERER V4.0 - NDS TILE SPACE / ALTO RENDIMIENTO

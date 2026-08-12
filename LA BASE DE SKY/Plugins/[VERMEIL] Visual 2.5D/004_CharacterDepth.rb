@@ -44,7 +44,8 @@ class Game_Character
                       @id, self.map.map_id)
         end
       end
-      return Mode7.depth_z_at_elevation(wy, elevation, 0, height)
+      height_bias = height > Game_Map::TILE_HEIGHT ? Game_Map::TILE_HEIGHT - 1 : 0
+      return Mode7.depth_z_at_elevation(wy, elevation, 0, height_bias)
     end
     _VERMEIL_25D_orig_screen_z(height)
   end

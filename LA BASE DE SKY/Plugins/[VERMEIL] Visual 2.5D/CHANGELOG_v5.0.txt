@@ -18,3 +18,14 @@
 - WallPlane ignora tiles de otras layers y agrupa su fila en un unico quad.
 - Z de superficies/objetos elevados usa su elevacion real.
 - Solape subpixel minimo entre quads para cerrar cortes de rasterizacion.
+
+[VERMEIL] Visual 2.5D v5.0.2
+================================
+- El Z de personajes vuelve a limitar el ajuste por altura a 31 px, como
+  Essentials, para quedar ocultos por edificios cuando caminan detras.
+
+[VERMEIL] Visual 2.5D v5.0.3
+================================
+- EXT_CORNERS_OVERLAP sube a 1.0 px para cerrar la costura que la meseta
+  (MountainTop) y la pared (MountainWallPlane) abren al reproyectar en
+  marcha: el redondeo de proyeccion separaba sus bordes compartidos.
