@@ -18,15 +18,18 @@ VERMEIL V5 - TERRAIN TAGS 3D
 34 NDSRoofPlane              quad horizontal 3D
 35 NDSWallPlane              quad vertical 3D
 36 NDSMountainWallPlane      quad vertical de montana
+37 NDSStair                  rampa inclinada, 32 px al norte
 
 REGLAS
 ------
 - Una sola camara calcula suelo, personaje, props y estructuras.
 - 22/24/33 son billboards: escala uniforme F/depth y ancla en el pie.
-- 23/29/32/34/35/36 usan Sprite#corners del MKXP-Z nuevo.
+- 23/29/32/34/35/36/37 usan Sprite#corners del MKXP-Z nuevo.
 - Priority solo ordena Z; no cambia altura, escala ni categoria.
 - Zoom 0.5-1.5 es global. Ningun Terrain Tag tiene zoom propio.
 - WallPlane se coloca en el borde norte de las celdas que contienen su textura.
+- 37 NDSStair se inclina hacia el norte 32 px sobre su pie sur; NUNCA bakea en
+  @ground ni como strip plano (un solo render: la rampa).
 
 MAP079 / BW TILES
 -----------------
@@ -35,6 +38,7 @@ MAP079 / BW TILES
 - casas, Centro Pokemon y rocas completas: 24
 - meseta: 29
 - cara frontal de la meseta: 36
+- escaleras que suben a la meseta: 37
 
 CAMARA BASE
 -----------

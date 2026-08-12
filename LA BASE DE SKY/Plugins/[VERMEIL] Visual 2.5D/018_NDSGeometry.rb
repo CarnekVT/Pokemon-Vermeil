@@ -639,7 +639,41 @@ class Mode7Renderer
         :nds_structure, :nds_overlay, :nds_wall, :nds_mountain_wall,
         :nds_roof, :nds_roof_high
       ]
-      if rigid_2d.include?(rigid_kind)
+      if rigid_kind == :nds_stair
+        # Rampa: el borde sur es el pie (wy alto, elev 0) y el borde norte sube
+        # hasta NDS_STAIR_HEIGHT. Asi la escalera inclina hacia el norte sobre
+        # su propio bitmap, como en las rampas NDS.
+        left_wx  = min_tx.to_f * Game_Map::TILE_WIDTH
+        right_wx = (max_tx.to_f + 1.0) * Game_Map::TILE_WIDTH
+        south_wy = (max_ty.to_f + 1.0) * Game_Map::TILE_HEIGHT
+        north_wy = min_ty.to_f * Game_Map::TILE_HEIGHT
+        stair_h  = Mode7::Config::NDS_STAIR_HEIGHT.to_f
+        bl = Mode7.project(left_wx,  south_wy, elev)
+        br = Mode7.project(right_wx, south_wy, elev)
+        tl = Mode7.project(left_wx,  north_wy, elev + stair_h)
+        tr = Mode7.project(right_wx, north_wy, elev + stair_h)
+        if !bl || !br || !tl || !tr
+          sprite.visible = false
+          next
+        end
+        points = [tl[0], tl[1], tr[0], tr[1], br[0], br[1], bl[0], bl[1]]
+        points = Mode7::MKXPZExt.expand_quad(points, overlap) if overlap > 0.0
+        xs = [points[0], points[2], points[4], points[6]]
+        ys = [points[1], points[3], points[5], points[7]]
+        margin = Game_Map::TILE_WIDTH.to_f
+        visible = xs.max >= -margin && xs.min <= Mode7.screen_w + margin &&
+                  ys.max >= -margin && ys.min <= Mode7.screen_h + margin
+        sprite.visible = visible
+        next if !visible
+
+        sprite.corners = points
+        sprite.x = (xs.min + xs.max) * 0.5
+        sprite.y = (points[5] + points[7]) * 0.5
+        sprite.ox = sprite.bitmap.width / 2.0
+        sprite.oy = sprite.bitmap.height.to_f
+        sprite.zoom_x = [xs.max - xs.min, 0.001].max / sprite.bitmap.width.to_f
+        sprite.zoom_y = [ys.max - ys.min, 0.001].max / sprite.bitmap.height.to_f
+      elsif rigid_2d.include?(rigid_kind)
         begin
           sprite.corners = nil if sprite.corners
         rescue Exception

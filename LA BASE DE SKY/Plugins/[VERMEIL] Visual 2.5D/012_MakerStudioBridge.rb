@@ -101,6 +101,14 @@ class Mode7Renderer
       # trae su padding; aplicarlo otra vez aqui desplaza la sombra de su origen.
       dx = spr.map_x * Game_Map::TILE_WIDTH
       dy = spr.map_y * Game_Map::TILE_HEIGHT
+      # Los props verticales (billboard/estructura/overlay) aplastan su silueta
+      # en una linea antiestetica con la direccion de CADA capa de MS. Para
+      # ellos el bake sustituye el slab plano por un blob radial uniforme en
+      # la base del objeto: direccion consistente y sin cola pixelada.
+      if Mode7::Config::NDS_SHADOW_PROP_BLOBS && nds_prop_shadow_footprint?(spr, fw)
+        nds_bake_prop_shadow_blob(spr, fw)
+        next
+      end
       # Plano intermedio vanilla (z=1). 003_TileDepth lo compone entre bandas
       # z=0/z=2 antes de proyectar una sola vez, sin coste por fila extra.
       @shadow_ground.blt(dx, dy, spr.bitmap,
@@ -112,6 +120,87 @@ class Mode7Renderer
     Console.echo_error("VERMEIL: bake_ms_shadows: #{$!.message}") if defined?(Console)
     aux.dispose if defined?(aux) && aux && aux.respond_to?(:dispose) && !aux.disposed?
     aux_vp.dispose if defined?(aux_vp) && aux_vp && aux_vp.respond_to?(:dispose) && !aux_vp.disposed?
+  end
+
+  # Devuelve true si la sombra de MS cubre una celda con billboard/estructura/
+  # overlay: hay que tratarla como sombra de prop vertical, no como slab plano.
+  def nds_prop_shadow_footprint?(spr, fw)
+    return false if !@entry_cache
+    tw = Game_Map::TILE_WIDTH
+    th = Game_Map::TILE_HEIGHT
+    bw = [1, (fw.to_f / tw).ceil].max
+    bh = [1, (spr.bitmap.height.to_f / th).ceil].max
+    (0...bw).each do |ox|
+      (0...bh).each do |oy|
+        tx = spr.map_x + ox
+        ty = spr.map_y + oy
+        next if tx < 0 || ty < 0
+        entries = @entry_cache[[tx, ty]]
+        next if !entries || entries.empty?
+        if entries.any? do |entry|
+             id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
+             id == Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG ||
+               id == Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG ||
+               id == Mode7::Config::NDS_OVERLAY_TERRAIN_TAG
+           end
+          return true
+        end
+      end
+    end
+    false
+  rescue Exception
+    false
+  end
+
+  # Blob radial cacheado por (w,h): economico y sin per-pixel por sombra.
+  def nds_shadow_blob_bitmap(w, h)
+    @shadow_blob_cache ||= {}
+    key = "#{w}x#{h}"
+    cached = @shadow_blob_cache[key]
+    return cached if cached && !cached.disposed?
+    bmp = Bitmap.new(w, h)
+    cx = w / 2.0
+    cy = h / 2.0
+    max_r = [cx, cy].max.to_f
+    max_r = 1.0 if max_r <= 0.0
+    # Alfa del 110 en el nucleo decayendo a 0 en el borde. La sombra se dibuja
+    # con el alpha del sprite original; esto es solo el gradiente interno.
+    h.times do |y|
+      w.times do |x|
+        d = Math.sqrt(((x - cx) / max_r)**2 + ((y - cy) / max_r)**2)
+        next if d > 1.0
+        a = (110 * (1.0 - d)).round.clamp(0, 255)
+        bmp.set_pixel(x, y, Color.new(0, 0, 0, a)) if a > 0
+      end
+    end
+    @shadow_blob_cache[key] = bmp
+    bmp
+  rescue Exception
+    nil
+  end
+
+  # Hornea un blob radial en @shadow_ground centrado en la base del prop que
+  # cubre la sombra. Usa la celda central del footprint para el pivo.
+  def nds_bake_prop_shadow_blob(spr, fw)
+    tw = Game_Map::TILE_WIDTH
+    th = Game_Map::TILE_HEIGHT
+    bw = [1, (fw.to_f / tw).ceil].max
+    bh = [1, (spr.bitmap.height.to_f / th).ceil].max
+    cx = spr.map_x + bw / 2.0
+    cy = spr.map_y + bh / 2.0
+    # Radio proporcional al footprint. En pixeles de mundo.
+    rw = (fw + tw * 0.5).round
+    rh = (spr.bitmap.height.to_f + th * 0.6).round
+    rw = [tw, rw].max
+    rh = [th, rh].max
+    bmp = nds_shadow_blob_bitmap(rw, rh)
+    return if !bmp
+    dx = (cx * tw - rw / 2.0).round
+    dy = (cy * th - rh / 2.0).round
+    op = (spr.respond_to?(:opacity) ? spr.opacity.to_i : 255).clamp(0, 255)
+    @shadow_ground.blt(dx, dy, bmp, Rect.new(0, 0, rw, rh), op)
+  rescue Exception => e
+    Console.echo_error("2.5D blob shadow: #{e.message}") if defined?(Console)
   end
 
   def native_props_at(tx, ty, layer)

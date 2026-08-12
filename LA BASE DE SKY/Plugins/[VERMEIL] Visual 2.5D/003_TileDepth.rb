@@ -414,7 +414,8 @@ class Mode7Renderer
         Mode7::Config::NDS_OVERLAY_TERRAIN_TAG,
         Mode7::Config::NDS_ROOF_PLANE_TERRAIN_TAG,
         Mode7::Config::NDS_WALL_PLANE_TERRAIN_TAG,
-        Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+        Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG,
+        Mode7::Config::NDS_STAIR_TERRAIN_TAG
       ].include?(id)
 
       # Una categoria 2D/vertical pertenece a UN solo renderer. Nunca se

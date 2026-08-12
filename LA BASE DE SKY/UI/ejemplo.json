@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "nombre": "ejemplo",
+  "titulo": "Ejemplo",
+  "lienzo": { "ancho": 512, "alto": 384 },
+  "oscurecer_mapa": 150,
+  "aperturas": { "tecla": "Q" },
+  "elementos": [
+    {
+      "id": "ventana", "tipo": "panel", "capa": 0,
+      "x": 96, "y": 76, "ancho": 320, "alto": 232,
+      "color": "#141C2AF2", "borde": "#4A7FA88C", "borde_grosor": 1,
+      "entrada": { "efecto": "crece", "duracion": 0.28, "suavizado": "golpe" }
+    },
+    {
+      "id": "cabecera", "tipo": "panel", "capa": 1,
+      "x": 96, "y": 76, "ancho": 320, "alto": 3,
+      "color": "#5A9BD4FF",
+      "entrada": { "efecto": "desde_izquierda", "duracion": 0.35, "suavizado": "sale_suave", "distancia": 320 }
+    },
+    {
+      "id": "titulo", "tipo": "texto", "capa": 10,
+      "x": 116, "y": 92, "ancho": 280, "alto": 24,
+      "texto": "HOLA, {jugador}", "tamano": 18,
+      "color": "#FFFFFF", "sombra": "#050A12", "contorno": true,
+      "entrada": { "efecto": "desde_arriba", "duracion": 0.3, "suavizado": "suave", "retraso": 0.1 }
+    },
+    {
+      "id": "datos", "tipo": "texto", "capa": 10,
+      "x": 116, "y": 120, "ancho": 280, "alto": 18,
+      "texto": "{dinero}$   -   {insignias} medallas   -   {mapa}", "tamano": 11,
+      "color": "#93AABE", "sombra": "#050A12", "contorno": true,
+      "entrada": { "efecto": "aparece", "duracion": 0.4, "retraso": 0.2 }
+    },
+    {
+      "id": "nombre_poke", "tipo": "texto", "capa": 10,
+      "x": 116, "y": 150, "ancho": 200, "alto": 18,
+      "texto": "{equipo.1.nombre}  Nv{equipo.1.nivel}", "tamano": 13,
+      "color": "#FFFFFF", "sombra": "#050A12", "contorno": true,
+      "entrada": { "efecto": "aparece", "duracion": 0.4, "retraso": 0.26 }
+    },
+    {
+      "id": "vida", "tipo": "barra", "capa": 10,
+      "x": 116, "y": 172, "ancho": 180, "alto": 8,
+      "valor": "{equipo.1.hp}", "maximo": "{equipo.1.hp_max}",
+      "por_tramos": true, "color_fondo": "#0A1018FF",
+      "borde": "#3A5A7A8C", "borde_grosor": 1,
+      "entrada": { "efecto": "aparece", "duracion": 0.4, "retraso": 0.3 }
+    },
+    {
+      "id": "hptexto", "tipo": "texto", "capa": 10,
+      "x": 116, "y": 182, "ancho": 180, "alto": 16,
+      "texto": "{equipo.1.hp} / {equipo.1.hp_max}", "tamano": 10,
+      "alineacion": "derecha",
+      "color": "#7E93A6", "sombra": "#050A12", "contorno": true,
+      "entrada": { "efecto": "aparece", "duracion": 0.4, "retraso": 0.34 }
+    },
+    {
+      "id": "poke", "tipo": "pokemon", "capa": 10,
+      "x": 330, "y": 148, "cual": 1, "modo": "icono",
+      "entrada": { "efecto": "aparece", "duracion": 0.4, "retraso": 0.3 }
+    },
+    {
+      "id": "boton_equipo", "tipo": "boton", "capa": 20,
+      "x": 116, "y": 212, "ancho": 280, "alto": 32,
+      "texto": "Ver el equipo", "tamano": 14,
+      "color": "#3A8A55FF", "color_encima": "#54AC72FF", "color_pulsado": "#276140FF",
+      "borde": "#FFFFFF3C", "borde_encima": "#FFFFFFC8", "borde_pulsado": "#00000078",
+      "borde_grosor": 1, "contorno": true,
+      "escala_encima": 1.05, "escala_pulsado": 0.97,
+      "entrada": { "efecto": "desde_izquierda", "duracion": 0.26, "suavizado": "sale_suave", "retraso": 0.38, "distancia": 40 },
+      "accion": { "tipo": "interruptor_interfaz", "nombre": "equipo" }
+    },
+    {
+      "id": "boton_cerrar", "tipo": "boton", "capa": 20,
+      "x": 116, "y": 250, "ancho": 280, "alto": 30,
+      "texto": "Cerrar", "tamano": 14,
+      "color": "#39404AFF", "color_encima": "#565E6AFF", "color_pulsado": "#262B33FF",
+      "borde": "#FFFFFF3C", "borde_encima": "#FFFFFFC8", "borde_pulsado": "#00000078",
+      "borde_grosor": 1, "contorno": true,
+      "escala_encima": 1.05, "escala_pulsado": 0.97,
+      "sonido": "GUI menu close",
+      "entrada": { "efecto": "desde_izquierda", "duracion": 0.26, "suavizado": "sale_suave", "retraso": 0.44, "distancia": 40 },
+      "accion": { "tipo": "cerrar" }
+    },
+    {
+      "id": "pie", "tipo": "texto", "capa": 10,
+      "x": 116, "y": 286, "ancho": 280, "alto": 16,
+      "texto": "Flechas y Z, o el raton. X para salir.", "tamano": 10,
+      "color": "#55677A", "sombra": "#050A12", "contorno": true,
+      "entrada": { "efecto": "aparece", "duracion": 0.5, "retraso": 0.5 }
+    }
+  ]
+}

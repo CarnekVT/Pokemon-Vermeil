@@ -359,6 +359,17 @@ module Mode7
     NDS_ROOF_PLANE_TERRAIN_TAG          = :NDSRoofPlane
     NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG = :NDSMountainWallPlane
 
+    # La escalera se dibuja como una rampa 3D: un quad inclinado cuyo borde sur
+    # queda a ras del suelo y el borde norte sube hasta la elevacion vecina.
+    # NDS_STAIR_HEIGHT es la subida por defecto si no hay meseta/volumen al norte.
+    NDS_STAIR_TERRAIN_TAG = :NDSStair
+    NDS_STAIR_HEIGHT      = 32.0
+    # Sombras: las capas de Maker Studio son sombras planas por layer. Los props
+    # verticales (billboards/estructuras) las aplanan en una linea antiestetica y
+    # heredan la direccion de config de CADA sombra. Con NDS_SHADOW_PROP_BLOBS
+    # el bake las sustituye por un blob radial uniforme en la base del prop.
+    NDS_SHADOW_PROP_BLOBS = true
+
     # -----------------------------------------------------------------------
     # FPS / MKXP-Z
     # -----------------------------------------------------------------------
@@ -398,7 +409,8 @@ end
   [:NDSOverlay,      33],
   [:NDSRoofPlane,     34],
   [:NDSWallPlane,     35],
-  [:NDSMountainWallPlane, 36]
+  [:NDSMountainWallPlane, 36],
+  [:NDSStair,         37]
 ].each do |id, number|
   next if GameData::TerrainTag.exists?(id)
   GameData::TerrainTag.register({ :id => id, :id_number => number })

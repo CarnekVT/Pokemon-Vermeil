@@ -226,6 +226,10 @@ class Mode7Renderer
       id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
   end
 
+  def nds_stair_entry?(entry)
+    nds_category_id(entry) == Mode7::Config::NDS_STAIR_TERRAIN_TAG
+  end
+
   def nds_explicit_category_entry?(entry)
     id = nds_category_id(entry)
     [
@@ -246,7 +250,8 @@ class Mode7Renderer
       Mode7::Config::NDS_OVERLAY_TERRAIN_TAG,
       Mode7::Config::NDS_ROOF_PLANE_TERRAIN_TAG,
       Mode7::Config::NDS_WALL_PLANE_TERRAIN_TAG,
-      Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+      Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG,
+      Mode7::Config::NDS_STAIR_TERRAIN_TAG
     ].include?(id)
   end
 
@@ -273,6 +278,7 @@ class Mode7Renderer
 
   def priority_surface_entry?(entry)
     return false if nds_floor_entry?(entry)
+    return false if nds_stair_entry?(entry)
     return true if nds_roof_plane_entry?(entry)
     return true if nds_billboard_entry?(entry) || nds_protected_roof_entry?(entry)
     _VERMEIL_V4_orig_priority_surface_entry(entry)
@@ -548,9 +554,60 @@ class Mode7Renderer
       end
       make_priority_strip(segment, ty, priority, unify, elevation) if !segment.empty?
     end
+
+    build_nds_stair_ramps
   rescue Exception => e
     Console.echo_error("2.5D V5 build surfaces: #{e.message}") if defined?(Console)
     _VERMEIL_V5_orig_build_priority_surfaces
+  end
+
+  # ---------------------------------------------------------------------------
+  # Escaleras: regiones contiguas de NDSStair = un quad inclinado.
+  # ---------------------------------------------------------------------------
+  def build_nds_stair_ramps
+    stair_cells = {}
+    @entry_cache.each do |(tx, ty), entries|
+      if entries.any? { |entry| nds_stair_entry?(entry) }
+        stair_cells[[tx, ty]] = true
+      end
+    end
+    return if stair_cells.empty?
+
+    visited = {}
+    stair_cells.each do |(tx, ty), _flag|
+      next if visited[[tx, ty]]
+      region = {}
+      queue = [[tx, ty]]
+      visited[[tx, ty]] = true
+      until queue.empty?
+        cx, cy = queue.shift
+        region[[cx, cy]] = true
+        [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]].each do |nx, ny|
+          if stair_cells[[nx, ny]] && !visited[[nx, ny]]
+            visited[[nx, ny]] = true
+            queue.push([nx, ny])
+          end
+        end
+      end
+      make_nds_stair_ramp(region)
+    end
+  rescue Exception => e
+    Console.echo_error("2.5D V5 stairs build: #{e.message}") if defined?(Console)
+  end
+
+  def make_nds_stair_ramp(region)
+    positions = region.keys
+    return if positions.empty?
+
+    cells = {}
+    region.each_key do |pos|
+      entries = @entry_cache[pos]
+      cells[pos] = entries.select { |entry| nds_stair_entry?(entry) }
+    end
+    # El quad inclinado se crea como wall_data con kind :nds_stair. Elevation
+    # 0 (escalera a ras de suelo) y la fuerza de elevacion la aplica
+    # 018_NDSGeometry#update_walls con Config::NDS_STAIR_HEIGHT.
+    make_rigid_component(cells, 0.0, positions, nil, nil, nil, :nds_stair)
   end
 end
 

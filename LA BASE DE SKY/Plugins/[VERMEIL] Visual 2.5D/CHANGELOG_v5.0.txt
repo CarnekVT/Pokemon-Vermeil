@@ -25,7 +25,20 @@
   Essentials, para quedar ocultos por edificios cuando caminan detras.
 
 [VERMEIL] Visual 2.5D v5.0.3
-================================
+===============================
 - EXT_CORNERS_OVERLAP sube a 1.0 px para cerrar la costura que la meseta
   (MountainTop) y la pared (MountainWallPlane) abren al reproyectar en
   marcha: el redondeo de proyeccion separaba sus bordes compartidos.
+
+[VERMEIL] Visual 2.5D v5.1.0
+===============================
+- Nuevo Terrain Tag 37 NDSStair: las escaleras se renderizan como una rampa
+  inclinada hacia el norte (NDS_STAIR_HEIGHT, 32 px) sobre su pie sur.
+  El Entry/Move del jugador ya subia por on_stair?; ahora hay geometria.
+- NDSStair se excluye de bake en @ground y de strips planos: un solo render,
+  el quad inclinado, para evitar doble imagen.
+- Nuevo NDS_SHADOW_PROP_BLOBS (defecto on): las sombras de Maker Studio
+  sobre billboards/estructuras/overlays (molino, buzones, casas) se baken
+  como un blob radial uniforme en la base en vez del slab plano con la
+  direccion de cada capa. Usa un gradiente cacheado por tamano.
+- TAG_MAP_V5.txt documenta el tag 37 y su regla de inclinacion.
