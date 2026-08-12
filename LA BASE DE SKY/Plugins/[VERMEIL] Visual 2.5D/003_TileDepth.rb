@@ -210,26 +210,12 @@ class Mode7Renderer
     # pertenecer al mismo wall y no debe quedar duplicado en el bitmap base.
     cache_wall_visual_components
     cache_indoor_prop_components if respond_to?(:cache_indoor_prop_components, true)
-    Mode7.snap_terrain_camera_lift_to_target
 
     # ponytail: conservar pila vanilla en bitmap fuente. Proyectar tres planos
     # por fila costaba FPS al caminar; walls se mantienen z=2 y tapan sombra,
     # igual que TilemapRenderer, sin hornear sombra sobre su cara.
     @ms_shadow_env = ms_shadow_environment
-    if @ms_shadow_env
-      [:base, :native_overlay, :extended].each do |pass|
-        draw_ground_pass(pass, :below_shadow, @ground)
-      end
-      bake_ms_shadows
-      composite_ground_shadows
-      [:base, :native_overlay, :extended].each do |pass|
-        draw_ground_pass(pass, :above_shadow, @ground)
-      end
-    else
-      draw_ground_pass(:base, nil, @ground)
-      draw_ground_pass(:native_overlay, nil, @ground)
-      draw_ground_pass(:extended, nil, @ground)
-    end
+    compose_ground_fast
 
     # Pase 2/3: cada tile conserva bitmap Y profundidad propios. La prioridad
     # solo modifica su oclusion, nunca hereda la posicion de un vecino.
@@ -279,6 +265,44 @@ class Mode7Renderer
           end
         end
         blt_ground_cell(tx, ty, ground_entries, target) unless ground_entries.empty?
+      end
+    end
+  end
+
+  # V4.1: compone cada celda UNA sola vez. La version anterior recorria el
+  # mapa 3-7 veces al arrancar (y duplicaba accidentalmente el pase inferior
+  # de Maker Studio), lo que explicaba buena parte del tiempo de carga.
+  def compose_ground_fast
+    if @ms_shadow_env
+      bake_ms_shadows
+    end
+
+    tw = Game_Map::TILE_WIDTH
+    th = Game_Map::TILE_HEIGHT
+    @map.width.times do |tx|
+      @map.height.times do |ty|
+        entries = @entry_cache[[tx, ty]]
+        ground_entries = ground_entries_for_cell(tx, ty, entries)
+
+        if @ms_shadow_env
+          lower = []
+          upper = []
+          ground_entries.each do |entry|
+            if ground_shadow_band_for(tx, ty, entry) == :above_shadow
+              upper << entry
+            else
+              lower << entry
+            end
+          end
+          blt_ground_cell(tx, ty, lower, @ground) unless lower.empty?
+          if @shadow_ground && !@shadow_ground.disposed?
+            @src_rect.set(tx * tw, ty * th, tw, th)
+            @ground.blt(tx * tw, ty * th, @shadow_ground, @src_rect)
+          end
+          blt_ground_cell(tx, ty, upper, @ground) unless upper.empty?
+        else
+          blt_ground_cell(tx, ty, ground_entries, @ground) unless ground_entries.empty?
+        end
       end
     end
   end
@@ -377,10 +401,25 @@ class Mode7Renderer
     entries.reject do |entry|
       wall_owned = respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)
       prop_owned = respond_to?(:indoor_prop_owned?, true) && indoor_prop_owned?(entry)
+      id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
+      rigid_tag = [
+        Mode7::Config::NDS_WALL_TERRAIN_TAG,
+        Mode7::Config::NDS_ROOF_TERRAIN_TAG,
+        Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG,
+        Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG,
+        Mode7::Config::NDS_INDOOR_WALL_TERRAIN_TAG,
+        Mode7::Config::NDS_INDOOR_PROP_TERRAIN_TAG,
+        Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG,
+        Mode7::Config::NDS_ROOF_HIGH_TERRAIN_TAG,
+        Mode7::Config::NDS_OVERLAY_TERRAIN_TAG,
+        Mode7::Config::NDS_ROOF_PLANE_TERRAIN_TAG,
+        Mode7::Config::NDS_WALL_PLANE_TERRAIN_TAG,
+        Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+      ].include?(id)
 
-      # Black forma parte del plano. Border usa strip overlay para tapar wall.
-      wall_owned || prop_owned ||
-        priority_surface_entry?(entry)
+      # Una categoria 2D/vertical pertenece a UN solo renderer. Nunca se
+      # hornea tambien en @ground; esto elimina casas/arboles duplicados.
+      wall_owned || prop_owned || rigid_tag || priority_surface_entry?(entry)
     end
   end
 

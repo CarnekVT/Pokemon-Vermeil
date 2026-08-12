@@ -1,0 +1,39 @@
+MKXP-Z / POKEMON ESSENTIALS - PERFIL 120 FPS
+==============================================
+
+NO reemplaces tu mkxp.json entero. Fusiona/cambia estas claves dentro del objeto
+JSON principal de tu mkxp.json existente:
+
+  "vsync": false,
+  "syncToRefreshrate": false,
+  "fixedFramerate": 120,
+  "frameSkip": false,
+  "displayFPS": true,
+  "YJITEnable": true,
+  "smoothScaling": 0,
+  "smoothScalingDown": 0,
+  "bitmapSmoothScaling": 0,
+  "bitmapSmoothScalingDown": 0,
+
+POR QUE 120
+-----------
+Pokemon Essentials v21.1 usa normalmente vsync=true y syncToRefreshrate=true.
+Eso hace que, en un monitor de 75 Hz, el juego tienda a quedar alrededor de 75.
+Al desactivar ambos, fixedFramerate pasa a ser la tasa del juego. 120 da un
+objetivo real de tres cifras sin depender del refresco de 75 Hz.
+
+Los cuatro ajustes de scaling en 0 fuerzan Nearest-Neighbor y ayudan a conservar
+el pixel-art de los tiles sin filtrado borroso.
+
+YJITEnable requiere Ruby 3.1+; el Game.exe que compilaste usa Ruby 3.1.
+
+SI 120 NO ES ESTABLE
+--------------------
+Prueba 100 antes de bajar el perfil visual:
+
+  "fixedFramerate": 100,
+
+Si 120 va sobrado puedes probar 144, pero primero valida timers, animaciones,
+movimiento y plugins. Essentials define fixedFramerate como la tasa del juego
+cuando syncToRefreshrate es false, por lo que los sistemas que consultan esa tasa
+pueden adaptarse; plugins que cuenten updates de forma rígida deben probarse.

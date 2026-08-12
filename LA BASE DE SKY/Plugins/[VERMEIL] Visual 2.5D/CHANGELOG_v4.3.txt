@@ -1,0 +1,20 @@
+VERMEIL Visual 2.5D v4.3.2 - BW Hard Fixes
+
+- Retirado el clamp lateral de camara que dejaba caminar al jugador fuera de
+  pantalla antes de alcanzar el borde real del mapa.
+- Estructuras y billboards bloquean su cuerpo superior; el borde inferior
+  conserva la pasabilidad del tileset para permitir puertas y entradas.
+- Map079: arboles, aerogeneradores, buzones y estatuas reclasificados de
+  NDSStructure a NDSBillboard.
+
+- Eliminado zoom progresivo/espacial por defecto.
+- Personajes, eventos, billboards, estructuras, walls y roofs protegidos: escala 1:1.
+- Fix de doble dibujo: categorias rigidas/verticales no se hornean tambien en el ground.
+- Fix de Z: estructuras usan Priority del pie, no el maximo de toda la imagen.
+- Fix de cortes/triangulos azules: cobertura X conservadora del ground.
+- Quads viejos se ocultan al abandonar perspectiva: no queda un segundo ground.
+- Suelo, prioridades y volumen usan bordes exactos: sin tiles ensanchados.
+- Personajes conservan la elevacion al activar coordenadas subpixel MKXP-Z.
+- Menu debug ya no ofrece zoom.
+- Restaurado viewport 640x480. Retirados overrides experimentales de fuente;
+  se conserva fontHeightReporting=1 y subImageFix=true.

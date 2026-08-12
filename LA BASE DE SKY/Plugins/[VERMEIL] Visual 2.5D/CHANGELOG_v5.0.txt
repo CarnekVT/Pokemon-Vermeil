@@ -1,0 +1,20 @@
+[VERMEIL] Visual 2.5D v5.0.0
+================================
+- Reemplaza escalas independientes por una sola F/depth de camara.
+- Personajes, edificios y props comparten escala uniforme y ancla de pie.
+- Restaura zoom global 0.5-1.5 y zonas de zoom progresivo.
+- La camara sigue al jugador hasta el borde real del mapa.
+- WallPlane/MountainWallPlane usan Sprite#corners nativo sobre el borde norte.
+- Evita duplicar una cara de volumen cuando existe un WallPlane explicito.
+- Registra etiquetas Maker Studio 19-36.
+- Reasigna los tiles usados por Map079/BW Tiles.
+- mkxp.json desactiva el recorte RGSS del outline de fuentes.
+
+[VERMEIL] Visual 2.5D v5.0.1
+================================
+- NDSBillboard conserva Priority real aunque Maker Studio marque ground cap.
+- Los P0/P1/P2/P3/P4 de un objeto comparten bounds, ancla y escala; solo cambia Z.
+- MountainTop y tiles colocados encima se proyectan como una sola superficie.
+- WallPlane ignora tiles de otras layers y agrupa su fila en un unico quad.
+- Z de superficies/objetos elevados usa su elevacion real.
+- Solape subpixel minimo entre quads para cerrar cortes de rasterizacion.

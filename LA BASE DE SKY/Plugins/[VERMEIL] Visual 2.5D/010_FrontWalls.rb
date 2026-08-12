@@ -41,9 +41,8 @@ class Mode7Renderer
   # ---------------------------------------------------------------------------
   # Clasificacion de tiles
   # ---------------------------------------------------------------------------
-  # Vanilla conserva la estrella propia de cada entry. Un P0 de Mountains en
-  # otra layer no puede convertir un P1/P4 vecino en P0: eso hacia que Mountain
-  # cubra props y que la prioridad pareciera heredada por adyacencia.
+  # Priority conserva solo el orden visual propio de cada entry. Un P0 de otra
+  # layer nunca hereda ni modifica la prioridad de un vecino.
   def cache_visual_priorities
     @entry_cache.each do |(tx, ty), entries|
       cap = -1
@@ -90,7 +89,7 @@ class Mode7Renderer
     Mode7::Config::INDOOR_BLACK_TERRAIN_TAGS.key?(tag.id)
   end
 
-  # Mountains/Ladders son tiles normales para el renderer 2.5D.
+  # V4 no tiene ElevatedWall ni sombras especiales por Terrain Tag.
   def entry_is_elevated_wall?(_entry); false; end
   def mountain_shadow_opacity_for(_entries); 0; end
 
@@ -185,7 +184,7 @@ class Mode7Renderer
   # ---------------------------------------------------------------------------
   # Ownership visual de walls normales
   # ---------------------------------------------------------------------------
-  # Una celda con Terrain Tag wall tiene una unica ruta visual:
+  # Una celda con Terrain Tag NDS wall tiene una unica ruta visual:
   #   wall sprite fijo
   #
   # Nunca puede dibujarse tambien en @ground o @priority_strips. Esto elimina
@@ -228,23 +227,6 @@ class Mode7Renderer
     false
   end
 
-  # Una escalera en capa superior es un suelo caminable que cruza una pared
-  # inferior. El mapa ya decide su pasabilidad nativa; la cache 2.5D no debe
-  # volver a bloquearla solo por encontrar Mountains/Mode7Tag debajo.
-  def entry_is_walkable_ladder?(e)
-    tag = terrain_tag_for_entry(e)
-    return false if !tag || tag.id == :None
-    tag.id == :Ladders || tag.id == :LaddersSide
-  end
-
-  def ladder_overrides_wall_collision?(entries, blocking_entries)
-    ladders = entries.select { |entry| entry_is_walkable_ladder?(entry) }
-    return false if ladders.empty? || blocking_entries.empty?
-    ladder_unify = ladders.map { |entry| entry[:unify].to_i }.max
-    wall_unify = blocking_entries.map { |entry| entry[:unify].to_i }.max
-    ladder_unify >= wall_unify
-  end
-
 
   def configured_terrain_tag_height(e)
     tag = terrain_tag_for_entry(e)
@@ -279,7 +261,7 @@ class Mode7Renderer
     min = Mode7::Config::PRIORITY_SURFACE_MIN.to_i
 
     if Mode7.raster_affine_mode?
-      # IndoorProp usa un bloque rigido de escala constante.
+      # NDSIndoorProp usa un bloque rigido de escala constante.
       return false if indoor_prop_owned?(e)
     end
 
@@ -317,7 +299,7 @@ class Mode7Renderer
 
   # Componente wall visual.
   #
-  # Las celdas con Terrain Tag wall son las semillas. Una pieza P1-P4 vecina
+  # Las celdas con Terrain Tag NDS wall son las semillas. Una pieza P1-P4 vecina
   # puede incorporarse aunque NO repita el tag, pero solo si su rect fuente es
   # realmente contiguo en el mismo tileset/autotile. Esto mantiene unido el
   # techo/P4 de un edificio sin absorber props adyacentes por simple cercania.
@@ -491,13 +473,13 @@ class Mode7Renderer
   # Priority P1/P2+ como objetos rigidos, aislados por contexto de superficie
   # ---------------------------------------------------------------------------
   # El bug de v1.7.0 era doble:
-  #   * P2+ se agrupaba ignorando si la celda estaba sobre Mountains;
+  #   * P2+ se agrupaba ignorando si la celda estaba sobre tags legacy;
   #   * P1 del mismo objeto quedaba en un strip curvo separado.
   #
-  # Resultado: al lado/sobre Mountains un arbol/prop podia usar bounds de otro
+  # Resultado: al lado/sobre tags legacy un arbol/prop podia usar bounds de otro
   # contexto y, ademas, abrir una junta exacta entre su fila P1 y sus P2+.
   #
-  # Ahora Mountains/Ladders forman una FRONTERA de componente. P1 solo se
+  # Ahora Las categorias NDS explicitas forman una FRONTERA de componente. P1 solo se
   # absorbe una fila alrededor de un componente que tenga P2+ real; nunca sirve
   # como puente para unir objetos lejanos o un campo entero de P1.
   def rigid_priority_member_candidate?(entries, entry)
@@ -537,11 +519,10 @@ class Mode7Renderer
   # es CONSTANTE para P1/P2/P3/P4 del mismo arbol/prop.
   #
   # Esto es mucho mas estable que flood-fill por celda y no depende de que
-  # haya Mountains, P0 o P1 debajo. Dos objetos vecinos del mismo tileset
+  # haya tags legacy, P0 o P1 debajo. Dos objetos vecinos del mismo tileset
   # obtienen origenes distintos y no se fusionan.
   def rigid_priority_object_key(tx, ty, entry, volume_id = nil)
-    # Solo elevacion EXPLICITA separa objetos. Mountains es soporte del terreno,
-    # no identidad del dibujo: si la mitad de un arbol/P4 cae sobre Mountains,
+    # Solo elevacion EXPLICITA separa objetos. el Terrain Tag visual es la identidad del dibujo;
     # todas sus piezas deben seguir dentro del mismo bloque.
     explicit_elevation = (
       entry.key?(:elevation) && !entry[:elevation].nil? ? entry[:elevation].to_f : 0.0
@@ -627,7 +608,7 @@ class Mode7Renderer
   end
 
   # ---------------------------------------------------------------------------
-  # IndoorProp: bloque rigido sin encogimiento por profundidad
+  # NDSIndoorProp: bloque rigido sin encogimiento por profundidad
   # ---------------------------------------------------------------------------
   def cache_indoor_prop_components
     @indoor_prop_components = []
@@ -835,7 +816,22 @@ class Mode7Renderer
     draw_rigid_component_source(bitmap, min_tx, min_ty, cells)
 
     all_entries = cells.values.flatten
-    priority = all_entries.map { |entry| entry_visual_priority(entry) }.max || 0 if priority.nil?
+    protected_kinds = [
+      :component, :wall_component, :indoor_prop, :nds_billboard,
+      :nds_structure, :nds_overlay, :nds_wall, :nds_mountain_wall,
+      :nds_roof, :nds_roof_high
+    ]
+    if priority.nil?
+      if protected_kinds.include?(rigid_kind)
+        # Solo calcula una prioridad de respaldo. Si el caller entrega una capa
+        # P0/P1/P2+, conservarla: todas comparten bounds, pero no el orden Z.
+        foot_entries = cells.select { |(_tx, ty), _v| ty == max_ty }.values.flatten
+        foot_entries = all_entries if foot_entries.empty?
+        priority = foot_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+      else
+        priority = all_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+      end
+    end
     unify = all_entries.map { |entry| entry[:unify].to_i }.min || 0 if unify.nil?
     depth_wyb ||= (max_ty + 1) * Game_Map::TILE_HEIGHT
 
@@ -1126,8 +1122,9 @@ class Mode7Renderer
 
       effective_priority = priority
       bias = unify + (effective_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0)
-      sprite.z = Mode7.depth_z(
+      sprite.z = Mode7.depth_z_at_elevation(
         (ty + 1) * Game_Map::TILE_HEIGHT,
+        elevation,
         effective_priority,
         bias
       )
@@ -1317,7 +1314,7 @@ class Mode7Renderer
           scale_x = Mode7.zoom.to_f
           scale_y = Mode7.zoom.to_f
         else
-          # IndoorWall conecta horizontalmente con IndoorBorder en la fila de
+          # NDSIndoorWall conecta horizontalmente con NDSIndoorBorder en la fila de
           # apoyo, pero conserva altura fija. Asi el borde puede converger en
           # diagonal sin aplastar el wall completo. El border y el bloque negro
           # SON capas planas del suelo: siguen la perspectiva (scale_y = hscale).

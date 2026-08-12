@@ -39,11 +39,6 @@ module Mode7
           candidates << meta if meta
         rescue Exception
         end
-        begin
-          meta = GameData::MapMetadata.get(id)
-          candidates << meta if meta && !candidates.include?(meta)
-        rescue Exception
-        end
       end
 
       if $game_map
@@ -143,7 +138,7 @@ module Mode7
          Config::INDOOR_MAP_IDS.include?(id.to_i)
         return true
       end
-      # Deteccion por terrain tags exclusivos de interior (IndoorWall/Border/
+      # Deteccion por terrain tags exclusivos de interior (NDSIndoorWall/Border/
       # Prop). La resuelve el renderer al construir el mapa; sin esto un mapa
       # indoor solo-por-tags usaba el angulo outdoor y raster_affine = false.
       return true if @tag_indoor_map_id == id
@@ -387,164 +382,11 @@ module Mode7
     def rendering_now?; true; end
 
 
-    def terrain_camera_lift
-      @terrain_camera_lift || 0.0
-    end
-
-    # Valor cuantizado usado por toda la proyeccion. Ground, walls y prioridad
-    # cambian juntos; usar aqui el interpolado crudo movia walls cada frame
-    # mientras el bitmap del suelo esperaba su siguiente repintado.
-    def terrain_camera_render_lift
-      return @terrain_camera_render_lift if !@terrain_camera_render_lift.nil?
-      terrain_camera_lift
-    end
-
-    # Intensidad visual de profundidad. No modifica display_y, cam_y ni las
-    # coordenadas logicas del mapa.
+    # V4: la camara no se eleva por Terrain Tag. Todo el relieve pertenece a
+    # la geometria/tile y comparte el mismo espacio de proyeccion.
     def projection_cam_y
       cam_y
     end
-
-    def terrain_camera_lift_for_tag(tag)
-      return 0.0 if !tag || !tag.respond_to?(:id)
-      (Config::TERRAIN_TAG_CAMERA_LIFT[tag.id] || 0).to_f
-    end
-
-    def terrain_tag_at(x, y)
-      return nil if !$game_map
-      return $map_factory.getTerrainTagFromCoords($game_map.map_id, x, y) if $map_factory
-      $game_map.terrain_tag(x, y)
-    rescue
-      nil
-    end
-
-    # ElevatedWall es la excepcion al tag logico del jugador: un suelo puede
-    # conservar Grass para mecanicas y llevar Mountains en otra capa visual.
-    # Solo se acepta si ese tag fue declarado explicitamente ElevatedWall.
-    def terrain_camera_elevated_wall_lift_at(x, y)
-      renderer = $scene.instance_variable_get(:@map_renderer) if $scene
-      return nil if !renderer || !renderer.is_a?(Mode7Renderer) || renderer.disposed?
-      entries = renderer.instance_variable_get(:@entry_cache)
-      cell = entries && entries[[x, y]]
-      return nil if !cell
-      cell.filter_map do |entry|
-        tag = renderer.send(:terrain_tag_for_entry, entry)
-        next if !tag || !Config::ELEVATED_WALL_TERRAIN_TAG_HEIGHT.key?(tag.id)
-        terrain_camera_lift_for_tag(tag)
-      end.max || 0.0
-    rescue
-      nil
-    end
-
-    def terrain_camera_elevated_wall_tags_at(x, y)
-      renderer = $scene.instance_variable_get(:@map_renderer) if $scene
-      return [] if !renderer || !renderer.is_a?(Mode7Renderer) || renderer.disposed?
-      entries = renderer.instance_variable_get(:@entry_cache)
-      cell = entries && entries[[x, y]]
-      return [] if !cell
-      cell.filter_map do |entry|
-        tag = renderer.send(:terrain_tag_for_entry, entry)
-        tag.id if tag && Config::ELEVATED_WALL_TERRAIN_TAG_HEIGHT.key?(tag.id)
-      end.uniq
-    rescue
-      []
-    end
-
-    def terrain_camera_lift_at(x, y)
-      logical_lift = terrain_camera_lift_for_tag(terrain_tag_at(x, y))
-      elevated_lift = terrain_camera_elevated_wall_lift_at(x, y)
-      [logical_lift, elevated_lift || 0.0].max
-    end
-
-    def terrain_camera_lift_target
-      return 0.0 if Config::TERRAIN_TAG_CAMERA_LIFT.empty? || !$game_player || !$game_map
-      player = $game_player
-      target_x = player.x
-      target_y = player.y
-      target_lift = terrain_camera_lift_at(target_x, target_y)
-      return target_lift if !player.moving?
-
-      start_x = player.instance_variable_get(:@move_initial_x)
-      start_y = player.instance_variable_get(:@move_initial_y)
-      return target_lift if start_x.nil? || start_y.nil?
-      progress = []
-      if target_x != start_x
-        real_x = player.real_x.to_f / Game_Map::REAL_RES_X
-        progress.push((real_x - start_x).abs / (target_x - start_x).abs.to_f)
-      end
-      if target_y != start_y
-        real_y = player.real_y.to_f / Game_Map::REAL_RES_Y
-        progress.push((real_y - start_y).abs / (target_y - start_y).abs.to_f)
-      end
-      return target_lift if progress.empty?
-      t = (progress.sum / progress.length.to_f).clamp(0.0, 1.0)
-      start_lift = terrain_camera_lift_at(start_x, start_y)
-      start_lift + (target_lift - start_lift) * t
-    rescue
-      @terrain_camera_target = 0.0
-    end
-
-    # Al crear el renderer del mapa, la partida ya tiene coordenada y terrain
-    # tag definitivos. Arrancar desde ese target evita una animacion falsa
-    # 0 -> Mountains al cargar/transferir mapa.
-    def snap_terrain_camera_lift_to_target
-      target = active_now? ? terrain_camera_lift_target : 0.0
-      render_step = Config::TERRAIN_TAG_CAMERA_LIFT_RENDER_STEP.to_f
-      render_step = 1.0 if render_step <= 0.0
-      @terrain_camera_lift_render_key = (target / render_step).round
-      @terrain_camera_render_lift = target
-      @terrain_camera_lift_update_time = System.uptime
-      return if (terrain_camera_lift - target).abs < 0.01
-      @terrain_camera_lift = target
-      @projection_revision = (@projection_revision || 0) + 1
-      reset_caches
-    end
-
-    def terrain_camera_lift_debug_text
-      return _INTL("Sin jugador/mapa.") if !$game_player || !$game_map
-      tag = $game_player.pbTerrainTag
-      logical = tag ? tag.id.to_s : "None"
-      elevated = terrain_camera_elevated_wall_tags_at($game_player.x, $game_player.y)
-      elevated_text = elevated.empty? ? "ninguno" : elevated.join(", ")
-      target = terrain_camera_lift_target.round(2)
-      current = terrain_camera_lift.round(2)
-      _INTL("Logico: {1}\nElevatedWall: {2}\nLift target: {3}\nLift actual: {4}",
-            logical, elevated_text, target, current)
-    rescue
-      _INTL("No se pudo leer el lift 2.5D.")
-    end
-
-    def update_terrain_camera_lift
-      target = active_now? ? terrain_camera_lift_target : 0.0
-      current = terrain_camera_lift
-      now = System.uptime
-      last_time = @terrain_camera_lift_update_time || (now - 1.0 / 60.0)
-      @terrain_camera_lift_update_time = now
-      frame_scale = ((now - last_time) * 60.0).clamp(0.25, 6.0)
-      smooth = Config::TERRAIN_TAG_CAMERA_LIFT_SMOOTH.to_f.clamp(0.01, 1.0)
-      frame_smooth = 1.0 - ((1.0 - smooth)**frame_scale)
-      step = (target - current) * frame_smooth
-      # Paso dependiente de tiempo: una caida de FPS ya no alarga la bajada.
-      max_step = Config::TERRAIN_TAG_CAMERA_LIFT_MAX_STEP.to_f
-      max_step = 0.75 if max_step <= 0.0
-      step = step.clamp(-max_step * frame_scale, max_step * frame_scale)
-      value = current + step
-      value = target if (target - value).abs < 0.05
-      return if (value - current).abs < 0.01
-      @terrain_camera_lift = value
-
-      render_step = Config::TERRAIN_TAG_CAMERA_LIFT_RENDER_STEP.to_f
-      render_step = 1.0 if render_step <= 0.0
-      render_key = (value / render_step).round
-      final_value = (value - target).abs < 0.01
-      return if !final_value && render_key == @terrain_camera_lift_render_key
-      @terrain_camera_lift_render_key = render_key
-      @terrain_camera_render_lift = value
-      @projection_revision = (@projection_revision || 0) + 1
-      reset_caches
-      invalidate_renderer_ground
-    end
-
 
     def configure(alpha = nil, zoom = nil, distance_h = nil, cylindrical_radius = nil)
       @current_alpha = (alpha || @current_alpha || context_default_alpha).to_f
@@ -640,11 +482,28 @@ module Mode7
 
     def cam_x
       return 0 if !$game_map
+      if $game_player && $scene.is_a?(Scene_Map)
+        real_x = $game_player.instance_variable_get(:@real_x)
+        if !real_x.nil?
+          width = $game_player.instance_variable_get(:@width)
+          width = width ? width.to_i : 1
+          width = 1 if width <= 0
+          return real_x.to_f / Game_Map::X_SUBPIXELS +
+                 width * Game_Map::TILE_WIDTH / 2.0
+        end
+      end
       ($game_map.display_x.to_f / Game_Map::X_SUBPIXELS) + center_x
     end
 
     def cam_y
       return 0 if !$game_map
+      if $game_player && $scene.is_a?(Scene_Map)
+        real_y = $game_player.instance_variable_get(:@real_y)
+        if !real_y.nil?
+          foot = real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+          return foot - pivot_y
+        end
+      end
       base = $game_map.display_y.to_f / Game_Map::Y_SUBPIXELS
       return base - camera_elevation if Config::HEIGHTMAP_ENABLED
       base
@@ -949,15 +808,6 @@ module Mode7
   configure(Config::OUTDOOR_DEFAULT_ALPHA, Config::DEFAULT_ZOOM)
 end
 
-class Scene_Map
-  alias_method :_VERMEIL_25D_core_update, :update unless method_defined?(:_VERMEIL_25D_core_update)
-  def update
-    _VERMEIL_25D_core_update
-    # 005_ModeTransition.rb actualiza la interpolacion de camara una sola vez
-    # por frame, tanto al encender como al ir a angulo 0.
-    Mode7.update_terrain_camera_lift if !Mode7::Config::TERRAIN_TAG_CAMERA_LIFT.empty?
-  end
-end
 
 # Deteccion de interiores: al cargar un mapa se resuelve :affine/:cylindrical.
 # Mode7RasterAffine conserva compatibilidad, pero ahora significa :affine +

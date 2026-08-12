@@ -21,12 +21,23 @@ module Mode7
 
     class << self
       def setup(map_id)
+        if defined?(Mode7::Config::PROGRESSIVE_ZOOM_ENABLED) && !Mode7::Config::PROGRESSIVE_ZOOM_ENABLED
+          Mode7.zoom_effect_override = nil
+          @map_id = map_id.to_i
+          @profiles = []
+          @zones = []
+          return
+        end
         Mode7.zoom_effect_override = nil
         @map_id = map_id.to_i
         @profiles, @zones = load_map_data(@map_id)
       end
 
       def update
+        if defined?(Mode7::Config::PROGRESSIVE_ZOOM_ENABLED) && !Mode7::Config::PROGRESSIVE_ZOOM_ENABLED
+          Mode7.zoom_effect_override = nil
+          return
+        end
         if !$game_map || !$game_player || !Mode7.active_now?
           Mode7.zoom_effect_override = nil
           return

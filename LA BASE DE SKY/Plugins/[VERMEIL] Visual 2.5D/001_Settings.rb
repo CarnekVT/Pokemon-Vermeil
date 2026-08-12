@@ -54,31 +54,37 @@ module Mode7
 
     # El Affine antiguo usaba pivote central; Cylindrical conserva el jugador
     # ligeramente por debajo del centro.
-    AFFINE_PIVOT_RATIO      = 0.50
+    AFFINE_PIVOT_RATIO      = 0.60
     CYLINDRICAL_PIVOT_RATIO = 0.60
+    # Camara NDS: el jugador/pivote queda al 50% de la pantalla.
+    PERSPECTIVE_PIVOT_RATIO = 0.52
     # Angulos independientes por contexto.
-    OUTDOOR_DEFAULT_ALPHA = 28
-    INDOOR_DEFAULT_ALPHA  = 28
+    # El video de referencia trabaja alrededor de 40-45 grados.
+    OUTDOOR_DEFAULT_ALPHA = 40
+    INDOOR_DEFAULT_ALPHA  = 24
     # Alias legacy para scripts externos.
     DEFAULT_ALPHA = OUTDOOR_DEFAULT_ALPHA
 
-    # Solo existen DOS modos:
-    #   :affine       -> matematica del ZIP pre-curve.
-    #   :cylindrical  -> exterior curvo.
-    PROJECTION = :cylindrical
+    # Modos de proyeccion:
+    #   :perspective  -> camara pinhole NDS (renderer v2.1, recomendado)
+    #   :affine       -> modo legacy pre-curve
+    #   :cylindrical  -> modo legacy curvo
+    PROJECTION = :perspective
 
     # Flags de mapa.
     MAP_FLAG_AFFINE          = "mode7affine"
     MAP_FLAG_AFFINE_LEGACY   = "mode7afine"
     MAP_FLAG_RASTER_AFFINE   = "mode7rasteraffine"
     MAP_FLAG_CYLINDRICAL     = "mode7cylindrical"
+    MAP_FLAG_PERSPECTIVE     = "mode7perspective"
     MAP_FLAG_INDOOR          = "mode7indoor"
 
-    # Outside/Outdoor=false siempre fuerza Affine.
+    # Outside/Outdoor=false usa el modo indoor configurado. Los flags de mapa
+    # explicitos (mode7perspective/mode7affine/mode7cylindrical) tienen prioridad.
     INDOOR_PROJECTION = :affine
     INDOOR_RASTER_TILES = true
 
-    # IndoorWall conecta horizontalmente con el raster Affine en su base,
+    # NDSIndoorWall conecta horizontalmente con el raster Affine en su base,
     # pero conserva altura fija para no verse aplastado/encogido.
     INDOOR_WALL_FIXED_HEIGHT = true
 
@@ -87,21 +93,10 @@ module Mode7
     INDOOR_MAP_IDS = [].freeze
 
     # Si el mapa contiene alguno de los Terrain Tags exclusivos de interior,
-    # la proyeccion se resuelve como Affine aunque la metadata externa no pueda
-    # leerse. Se evalua una sola vez al construir el mapa.
+    # la proyeccion se resuelve con INDOOR_PROJECTION aunque la metadata externa
+    # no pueda leerse. Se evalua una sola vez al construir el mapa.
     INDOOR_DETECT_FROM_TERRAIN_TAGS = true
 
-    INTERIOR_BORDER_TERRAIN_TAGS = {
-      :IndoorBorder => true
-    }.freeze
-    INDOOR_PROP_TERRAIN_TAGS = {
-      :IndoorProp => true
-    }.freeze
-    # Delimitacion interior/exterior: bloque negro que enmarca el exterior.
-    # Conserva layer y prioridad del tile como cualquier superficie indoor.
-    INDOOR_BLACK_TERRAIN_TAGS = {
-      :IndoorBlack => true
-    }.freeze
     INTERIOR_OPAQUE_GROUND = true
 
     WALL_TOP_Z_BIAS = 1
@@ -139,101 +134,73 @@ module Mode7
 
     PRIORITY_RIGID_MIN = 2
     PRIORITY_Z_MIN_STEP = 32.0
-    PRIORITY_EDGE_OVERLAP = 2.0
-    PRIORITY_EDGE_OVERLAP_MAX = 4.0
+    # ponytail: sin sangrado entre superficies; reactivar solo ante juntas
+    # transparentes reproducibles en el raster legacy.
+    PRIORITY_EDGE_OVERLAP = 0.0
+    PRIORITY_EDGE_OVERLAP_MAX = 0.0
     PRIORITY_SURFACES = true
     PRIORITY_SURFACE_MIN = 1
 
     DEFAULT_ZOOM = 1.0
-    CAMERA_ZOOM_MIN            = 0.25
-    CAMERA_ZOOM_MAX            = 3.00
+    CAMERA_ZOOM_MIN            = 0.50
+    CAMERA_ZOOM_MAX            = 1.50
     CAMERA_ZOOM_SMOOTH_FRAMES  = 12
     CAMERA_ANGLE_SMOOTH_FRAMES = 18
     MODE_TRANSITION_FRAMES = 1
 
     # Mantener suelo y sprites en el mismo subpixel evita juntas al detenerse.
     # ponytail: raster exacto; subir a 1.0 solo si Cylindrical pierde FPS.
-    GROUND_REDRAW_WORLD_STEP = 1.0
-    PRIORITY_REPROJECT_WORLD_STEP = 1.0
+    GROUND_REDRAW_WORLD_STEP = 2.0
+    PRIORITY_REPROJECT_WORLD_STEP = 2.0
 
     # Una muestra por fila evita cortes horizontales en tiles altos.
     CYLINDRICAL_RASTER_SCAN_STEP = 2
 
     # Altura del ojo de la formula Affine pre-curve.
-    DISTANCE_H = Settings::SCREEN_HEIGHT
+    # Distancia de la camara NDS al pivote. 380 replica el perfil del video.
+    DISTANCE_H = 640.0
 
     CYLINDRICAL_BACKGROUND_COLOR = Color.new(104, 168, 224)
     OUTSIDE_COLOR = Color.new(0, 0, 0)
 
     # =======================================================================
-    # FILTRO DE VOLUMEN POR TERRAIN TAG. No sustituye el tag del tile: decide
-    # que celdas se dibujan como volumen 2.5D. Tag, pasabilidad y mecanicas
-    # quedan intactos (por ejemplo HoneyTree conserva Headbutt/miel).
+    # SISTEMA NDS V5 - TERRAIN TAGS VISUALES LIMPIOS
+    # =======================================================================
+    # V5 deja de reutilizar tags legacy/mecanicas legacy/Mode7Tag/HoneyTree como reglas
+    # visuales. Los Terrain Tags del renderer describen SOLO la funcion visual
+    # del tile. Priority conserva exclusivamente su funcion de orden de dibujo.
     #
-    # Valor > 0 activa el filtro. Es compatibilidad con la configuracion vieja;
-    # NO es prioridad, elevacion ni cantidad de tiles. Cada celda conserva su
-    # bitmap y proyeccion; tag y capa no mezclan objetos vecinos.
-    # Tags de wall EXCLUSIVOS por entorno.
-    #
-    # IndoorWall no actua en exteriores.
-    # Mode7Tag/HoneyTree no actuan como wall de interior.
-    # Esto evita que una regla de Mountains/outdoor cambie accidentalmente la
-    # composicion de una habitacion.
+    # Tags que cuentan como pared fisica. No existe camera-lift por Terrain Tag.
     INDOOR_WALL_TERRAIN_TAG_HEIGHT = {
-      :IndoorWall => 4
+      :NDSIndoorWall => 4
     }.freeze
     OUTDOOR_WALL_TERRAIN_TAG_HEIGHT = {
-      :Mode7Tag  => 4,
-      :HoneyTree => 4
+      :NDSWall              => 4,
+      :NDSMountainWall      => 4,
+      :NDSWallPlane         => 4,
+      :NDSMountainWallPlane => 4
     }.freeze
 
-    # Mountains/Ladders NO tienen propiedades visuales 2.5D.
-    # Conservan su Terrain Tag original, pero el renderer no los interpreta
-    # como volumen, elevacion ni soporte especial.
+    INTERIOR_BORDER_TERRAIN_TAGS = {
+      :NDSIndoorBorder => true
+    }.freeze
+    INDOOR_PROP_TERRAIN_TAGS = {
+      :NDSIndoorProp => true
+    }.freeze
+    INDOOR_BLACK_TERRAIN_TAGS = {
+      :NDSIndoorBlack => true
+    }.freeze
+
+    # Compatibilidad interna del renderer. V4 no define ElevatedWall, sombras
+    # de tags legacy, altura generica por tag ni desplazamiento de camara por tag.
     ELEVATED_WALL_TERRAIN_TAG_HEIGHT = {}.freeze
-
     MOUNTAIN_SHADOW_TERRAIN_TAG_OPACITY = {}.freeze
-
-
-    # ELEVACION LOCAL POR TERRAIN TAG. No mueve camara: cada tile del filtro
-    # se proyecta elevado sobre su propia base, sin alterar tiles adyacentes.
-    # Valor = alto visual en px. No cambia tag, colision ni eventos.
-    # Usa un tag pasable que NO este en *_WALL_TERRAIN_TAG_HEIGHT. Si un tag
-    # pertenece a volumen (por ejemplo :Mountains), gana volumen y se ignora
-    # aqui: elevar bitmap de muro rompe sus capas adyacentes.
-    # ponytail: hash por tag; altura por tile solo si el mapa realmente la pide.
-    TERRAIN_TAG_TILE_HEIGHT = {
-    }.freeze
-
-    # Sin camera-lift por Mountains/Ladders. Esta era una de las fuentes
-    # principales de desacople entre suelo, walls y prioridades.
-    TERRAIN_TAG_CAMERA_LIFT = {}.freeze
-    # La transicion empieza durante el paso, no despues de entrar a la celda.
-    # Limite por frame: evita un salto visible incluso con lifts altos.
-    TERRAIN_TAG_CAMERA_LIFT_SMOOTH = 0.34
-    TERRAIN_TAG_CAMERA_LIFT_MAX_STEP = 0.75
-    # El lift interpola cada frame, pero el raster solo cambia al cruzar este
-    # intervalo. ponytail: 2.0 reduce reconstrucciones; bajar si luego se usa
-    # una resolucion donde el escalonado sea visible.
-    TERRAIN_TAG_CAMERA_LIFT_RENDER_STEP = 2.0
-    # Cambio de profundidad por punto de lift. 50 en Mountains equivale a
-    # +15% con 0.003. Subirlo aumenta sensacion de altura; 0.0 lo desactiva.
-    TERRAIN_TAG_CAMERA_LIFT_DEPTH_FACTOR = 0.0
-
-    # ESCALERAS LATERALES POR TERRAIN TAG. Unico tag: :LaddersSide.
-    # Maker Studio guarda por celda si el tramo sube-derecha (-1) o
-    # baja-derecha (1). Este valor es default para celdas aun sin metadata.
-    # Paso diagonal real: coordenadas y colision cambian juntas en vanilla y
-    # 2.5D.
-    SIDE_LADDER_TERRAIN_TAG_SLOPE_Y = {
-      :LaddersSide => -1
-    }.freeze
-
+    TERRAIN_TAG_TILE_HEIGHT = {}.freeze
 
     # Radio (en tiles) en pantalla donde se sigue spawncndeando/sposeando
     # objetos/muros del filtro de terrain tags. Antes era 14/18.
-    WALL_SPAWN_RADIUS_X = 20
-    WALL_SPAWN_RADIUS_Y = 24
+    WALL_SPAWN_RADIUS_X = 14
+    WALL_SPAWN_RADIUS_Y = 16
 
     # =======================================================================
     # PASABILIDAD MECANICA vs ELEVACION VISUAL
@@ -258,65 +225,181 @@ module Mode7
     FOG_ENABLED   = false
     FOG_MAX_ALPHA = 120
     FOG_COLOR     = Color.new(160, 200, 230)
+
+    # =======================================================================
+    # MKXP-Z EXT (rama feature.interactable-console-shader + integraciones)
+    # =======================================================================
+    # Conserva coordenadas Float hasta Sprite.x/y. Reduce el temblor al hacer
+    # scroll lento y durante transiciones suaves de camara.
+    EXT_SUBPIXEL_SPRITES = true
+
+    # Quads arbitrarios nativos. Walls y superficies de prioridad pueden usar
+    # los 4 vertices proyectados en vez de depender solo de zoom_x/zoom_y.
+    EXT_CORNERS_ENABLED    = true
+    EXT_CORNERS_WALLS      = true
+    EXT_CORNERS_PRIORITIES = true
+    # ponytail: solape subpixel minimo; subirlo solo si otro backend rasteriza
+    # juntas mayores entre quads que comparten exactamente el mismo borde.
+    EXT_CORNERS_OVERLAP    = 0.35
+
+    # -----------------------------------------------------------------------
+    # RENDERER V4.0 - NDS TILE SPACE / ALTO RENDIMIENTO
+    # -----------------------------------------------------------------------
+    # Objetivo: perspectiva NDS coherente con el menor coste Ruby posible.
+    # Todo usa la misma Mode7.project(): suelo, volumen, walls y personajes.
+    # No se usan modelos 3D.
+    NDS_PERFORMANCE_PROFILE = :performance  # :performance, :balanced, :quality
+
+    # Suelo por bandas proyectadas. V4 usa bandas grandes/adaptativas para
+    # bajar draw calls. En :performance suele trabajar en 16px y solo baja si
+    # el angulo realmente necesita mas subdivision.
+    GEOMETRY_GROUND_ENABLED      = true
+    GEOMETRY_GROUND_BAND_HEIGHT  = 24
+    GEOMETRY_GROUND_OVERLAP      = 0.35
+    GEOMETRY_GROUND_CULL_MARGIN  = 48
+    GEOMETRY_GROUND_X_MARGIN     = 48
+    GEOMETRY_GROUND_POOL_MAX     = 96
+    NDS_GROUND_REPROJECT_STEP    = 1.00
+
+    GEOMETRY_PRIORITY_SURFACES = true
+    GEOMETRY_WALLS             = true
+
+    # Camara NDS segura. BALANCE 0.5 reparte el foreshortening entre X/Y:
+    # evita que al subir el angulo los tiles se ensanchen de golpe.
+    PERSPECTIVE_NEAR_CLIP        = 24.0
+    PERSPECTIVE_COS_MIN          = 0.18
+    PERSPECTIVE_FOCAL_SCALE_MAX  = 3.5
+    PERSPECTIVE_FOCAL_BALANCE    = 0.30
+    PERSPECTIVE_SAFE_DISTANCE     = true
+    PERSPECTIVE_SAFE_DISTANCE_BASE = 300.0
+    PERSPECTIVE_SAFE_DISTANCE_PER_DEGREE = 4.0
+    PERSPECTIVE_BILLBOARD_HEIGHT = 32.0
+
+    # V5: una sola camara. Suelo, personajes y billboards comparten F/depth.
+    PERSPECTIVE_OUTDOOR_BILLBOARD_STRENGTH = 1.0
+    PERSPECTIVE_INDOOR_BILLBOARD_STRENGTH  = 1.0
+
+    PERSPECTIVE_GROUND_MIN_SCALE = 0.55
+    PERSPECTIVE_GROUND_MAX_SCALE = 1.65
+    PERSPECTIVE_OBJECT_MIN_SCALE = 0.55
+    PERSPECTIVE_OBJECT_MAX_SCALE = 1.65
+
+    # -----------------------------------------------------------------------
+    # CATEGORIAS VISUALES NDS V4
+    # -----------------------------------------------------------------------
+    # IDs 19-26 son el nucleo nuevo. IDs 27+ cubren casos especializados.
+    NDS_FLOOR_TERRAIN_TAG       = :NDSFloor
+    NDS_WALL_TERRAIN_TAG        = :NDSWall
+    NDS_ROOF_TERRAIN_TAG        = :NDSRoof
+    NDS_BILLBOARD_TERRAIN_TAG   = :NDSBillboard
+    NDS_VOLUME_TERRAIN_TAG      = :NDSVolume
+    NDS_STRUCTURE_TERRAIN_TAG   = :NDSStructure
+    NDS_INDOOR_WALL_TERRAIN_TAG = :NDSIndoorWall
+    NDS_INDOOR_PROP_TERRAIN_TAG = :NDSIndoorProp
+
+    NDS_INDOOR_BORDER_TERRAIN_TAG = :NDSIndoorBorder
+    NDS_INDOOR_BLACK_TERRAIN_TAG  = :NDSIndoorBlack
+    NDS_MOUNTAIN_TOP_TERRAIN_TAG  = :NDSMountainTop
+    NDS_MOUNTAIN_WALL_TERRAIN_TAG = :NDSMountainWall
+    NDS_ROOF_HIGH_TERRAIN_TAG     = :NDSRoofHigh
+    NDS_VOLUME_HIGH_TERRAIN_TAG   = :NDSVolumeHigh
+    NDS_OVERLAY_TERRAIN_TAG       = :NDSOverlay
+
+    # La camara mueve TODOS los grupos en el mismo espacio. El bitmap conserva
+    # proporcion; la perspectiva solo aplica una escala uniforme por su pie.
+    NDS_WALL_HEIGHT_SCALE          = 0.88
+    NDS_MOUNTAIN_WALL_HEIGHT_SCALE = 1.00
+    NDS_BILLBOARD_DEPTH_STRENGTH   = 1.00
+    NDS_STRUCTURE_DEPTH_STRENGTH   = 1.00
+    NDS_OVERLAY_DEPTH_STRENGTH     = 1.00
+    NDS_BILLBOARD_SCALE_MIN        = 0.55
+    NDS_BILLBOARD_SCALE_MAX        = 1.65
+    NDS_STRUCTURE_SCALE_MIN        = 0.55
+    NDS_STRUCTURE_SCALE_MAX        = 1.65
+
+    # Alturas independientes de Priority. Priority vuelve a ser SOLO orden Z.
+    NDS_ROOF_HEIGHT       = 48.0
+    NDS_ROOF_HIGH_HEIGHT  = 72.0
+    NDS_MOUNTAIN_HEIGHT   = 32.0
+    NDS_VOLUME_HIGH_HEIGHT = 24.0
+
+    # -----------------------------------------------------------------------
+    # VOLUMEN NDS POR TILE
+    # -----------------------------------------------------------------------
+    # NDSVolume genera grosor ligero; NDSVolumeHigh y NDSMountainTop tienen
+    # alturas propias. El TOP conserva la textura original.
+    NDS_VOLUME_ENABLED          = true
+    NDS_VOLUME_DEFAULT_HEIGHT   = 8.0
+    NDS_VOLUME_MAX_HEIGHT       = 64.0
+    NDS_VOLUME_FRONT_FACES      = true
+    NDS_VOLUME_SIDE_FACES       = true
+    NDS_VOLUME_EDGE_SAMPLE      = 1
+    NDS_VOLUME_FRONT_SHADE      = 30
+    NDS_VOLUME_SIDE_SHADE       = 48
+    NDS_VOLUME_CULL_TILES_X     = 14
+    NDS_VOLUME_CULL_TILES_Y     = 12
+    NDS_VOLUME_BUCKET_SIZE      = 8
+    NDS_VOLUME_REPROJECT_STEP   = 2.00
+
+    # V4.1 Fast Path
+    # Las caras de volumen se preparan como metadata al cargar el mapa y sus
+    # Bitmaps/Sprites se crean solo cuando entran en la zona visible.
+    NDS_LAZY_VOLUME_FACES       = true
+    NDS_VOLUME_FACE_BUILD_BUDGET = 4
+    NDS_VOLUME_FACE_CACHE_MAX    = 128
+
+    # Buckets espaciales para no iterar todas las fachadas/props del mapa en
+    # cada frame. 8 tiles es un buen compromiso para mapas grandes.
+    NDS_RUNTIME_BUCKET_SIZE      = 8
+    NDS_WALL_REPROJECT_STEP      = 2.0
+
+    # Los tags normales protegen arte Pokemon ya perspectivado. Usa los tags
+    # Plane solo cuando quieras una superficie geometricamente 3D.
+    NDS_WALL_PLANE_TERRAIN_TAG          = :NDSWallPlane
+    NDS_ROOF_PLANE_TERRAIN_TAG          = :NDSRoofPlane
+    NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG = :NDSMountainWallPlane
+
+    # -----------------------------------------------------------------------
+    # FPS / MKXP-Z
+    # -----------------------------------------------------------------------
+    # El ZIP incluye un perfil mkxp.json para 120 FPS: vsync OFF,
+    # syncToRefreshrate OFF y fixedFramerate 120. Se configura fuera del plugin
+    # para que sea facil volver atras si otro plugin depende de una tasa concreta.
+    # Graphics.average_frame_rate se usa aqui solo para diagnostico.
+    # V5: zoom de camara global. Ningun Terrain Tag posee un zoom propio.
+    PROGRESSIVE_ZOOM_ENABLED = true
+    FORCE_RIGID_OBJECT_SCALE = false
+    GROUND_SAFE_X_COVERAGE = true
+
+    NDS_SHOW_PERFORMANCE_DEBUG = true
   end
 end
 
-# Registro del Terrain Tag propio del plugin (muros / billboards 2.5D).
-GameData::TerrainTag.register({
-  :id        => :Mode7Tag,
-  :id_number => 19
-})
-
-GameData::TerrainTag.register({
-  :id        => :Ladders,
-  :id_number => 21
-})
-
-# Terrain tag unico para escaleras laterales. ID 22 queda separado de Ladders
-# (21), que conserva solo volumen/camera lift.
-unless GameData::TerrainTag.exists?(:LaddersSide)
-  GameData::TerrainTag.register({
-    :id        => :LaddersSide,
-    :id_number => 22
-  })
-end
-
-# Marco interior de plano. ID 23 queda libre tras retirar LaddersSideReverse.
-unless GameData::TerrainTag.exists?(:IndoorBorder)
-  GameData::TerrainTag.register({
-    :id        => :IndoorBorder,
-    :id_number => 23
-  })
-end
-
-# Tags exclusivos para interiores. No se consultan como walls outdoor.
-unless GameData::TerrainTag.exists?(:IndoorWall)
-  GameData::TerrainTag.register({
-    :id        => :IndoorWall,
-    :id_number => 24
-  })
-end
-
-unless GameData::TerrainTag.exists?(:IndoorProp)
-  GameData::TerrainTag.register({
-    :id        => :IndoorProp,
-    :id_number => 25
-  })
-end
-
-# Delimitacion interior/exterior. ID 26 libre.
-unless GameData::TerrainTag.exists?(:IndoorBlack)
-  GameData::TerrainTag.register({
-    :id        => :IndoorBlack,
-    :id_number => 26
-  })
-end
-# Maker Studio guarda la etiqueta Mountains con el ID 20. Essentials no la
-# conoce por defecto, por eso el runtime la convertia en :None y los filtros
-# 2.5D (muro elevado y camera lift) nunca la recibian.
-unless GameData::TerrainTag.exists?(:Mountains)
-  GameData::TerrainTag.register({
-    :id        => :Mountains,
-    :id_number => 20
-  })
+#===============================================================================
+# Terrain Tags visuales NDS V4
+# IDs 19-26 forman el nucleo. El usuario puede reasignar sus tilesets sin
+# conservar ninguna semantica del sistema anterior.
+#===============================================================================
+[
+  [:NDSFloor,        19],
+  [:NDSWall,         20],
+  [:NDSRoof,         21],
+  [:NDSBillboard,    22],
+  [:NDSVolume,       23],
+  [:NDSStructure,    24],
+  [:NDSIndoorWall,   25],
+  [:NDSIndoorProp,   26],
+  [:NDSIndoorBorder, 27],
+  [:NDSIndoorBlack,  28],
+  [:NDSMountainTop,  29],
+  [:NDSMountainWall, 30],
+  [:NDSRoofHigh,     31],
+  [:NDSVolumeHigh,   32],
+  [:NDSOverlay,      33],
+  [:NDSRoofPlane,     34],
+  [:NDSWallPlane,     35],
+  [:NDSMountainWallPlane, 36]
+].each do |id, number|
+  next if GameData::TerrainTag.exists?(id)
+  GameData::TerrainTag.register({ :id => id, :id_number => number })
 end

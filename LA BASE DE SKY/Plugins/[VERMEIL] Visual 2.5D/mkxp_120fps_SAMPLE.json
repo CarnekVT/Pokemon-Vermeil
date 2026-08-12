@@ -17,8 +17,8 @@
 
     // The game window's width and height, in pixels.
     //
-    "defScreenW": 640,
-    "defScreenH": 480,
+    "defScreenW": 512,
+    "defScreenH": 384,
 
     // The path to the game window's icon. For Linux only. (Default: none)
     //
@@ -155,21 +155,14 @@
 
     // The game's frame rate, if "syncToRefreshrate" is false.
     //
-    // "fixedFramerate": 60,
-
-    // VERMEIL / mkxp-z safe runtime profile
-    // fontHeightReporting=1 uses rendered glyph height and avoids cutting
-    // the lower half/bottom of glyphs in some fonts.
     "fixedFramerate": 120,
     "frameSkip": false,
+
+    // Show average FPS in the window title.
     "displayFPS": true,
     "YJITEnable": true,
-
-    "fontHeightReporting": 1,
-    "fontOutlineCrop": false,
-
     "smoothScaling": 0,
     "smoothScalingDown": 0,
     "bitmapSmoothScaling": 0,
-    "bitmapSmoothScalingDown": 0
+    "bitmapSmoothScalingDown": 0,
 }

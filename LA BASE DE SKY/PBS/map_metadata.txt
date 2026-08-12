@@ -37,3 +37,6 @@ Weather = SakuraPetalsPresentColor,100
 #-------------------------------
 [078]   # Test 2.5d (Indoor)
 Name = Indoor 2.5D Test
+#-------------------------------
+[079]   # New 2.5D Test
+SnapEdges = true
