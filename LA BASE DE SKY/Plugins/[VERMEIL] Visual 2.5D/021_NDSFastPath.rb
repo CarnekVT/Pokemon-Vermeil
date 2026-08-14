@@ -43,6 +43,7 @@ class Mode7Renderer
 
     cx = Mode7.cam_x
     cy = Mode7.cam_y
+    ce = Mode7.respond_to?(:projection_cam_elevation) ? Mode7.projection_cam_elevation.to_f : 0.0
 
     if nds_ground_active?
       fast_refresh_nds_background(built)
@@ -51,6 +52,7 @@ class Mode7Renderer
       update_nds_ground(built)
       @last_cam_x = cx
       @last_cam_y = cy
+      @last_cam_elevation = ce
       @need_ground_redraw = false
     else
       # La proyeccion anterior usaba quads separados. Ocultarlos antes del
@@ -59,12 +61,15 @@ class Mode7Renderer
       redraw_step = Mode7::Config::GROUND_REDRAW_WORLD_STEP.to_f
       redraw_step = 1.0 if redraw_step <= 0.0
       camera_moved = @need_ground_redraw || @last_cam_x.nil? || @last_cam_y.nil? ||
+                     @last_cam_elevation.nil? ||
                      (@last_cam_x - cx).abs >= redraw_step ||
-                     (@last_cam_y - cy).abs >= redraw_step
+                     (@last_cam_y - cy).abs >= redraw_step ||
+                     (@last_cam_elevation - ce).abs >= 0.01
       if camera_moved
         draw_ground
         @last_cam_x = cx
         @last_cam_y = cy
+        @last_cam_elevation = ce
         @need_ground_redraw = false
       end
     end
@@ -167,6 +172,11 @@ class Mode7Renderer
     @nds_fast_object_active = []
     @nds_fast_wall_key = nil
     @nds_fast_priority_key = nil
+    @nds_fast_wall_visibility_key = nil
+    @nds_fast_priority_visibility_key = nil
+    @nds_fast_wall_subset = []
+    @nds_fast_strip_subset = []
+    @nds_fast_object_subset = []
   end
 
   def nds_fast_visible_indices(buckets, radius_x, radius_y)
@@ -214,21 +224,31 @@ class Mode7Renderer
     step = 1.0 if step <= 0.0
     key = [(Mode7.cam_x / step).round,
            (Mode7.projection_cam_y / step).round,
+           Mode7.projection_cam_elevation.to_f.round(3),
            Mode7.projection_revision]
     return if @nds_fast_wall_key == key
     @nds_fast_wall_key = key
 
     full = @wall_data || []
-    indices = nds_fast_visible_indices(
-      @nds_fast_wall_buckets,
-      Mode7::Config::WALL_SPAWN_RADIUS_X,
-      Mode7::Config::WALL_SPAWN_RADIUS_Y
-    )
-    nds_fast_hide_leaving(full, @nds_fast_wall_active, indices)
-    @nds_fast_wall_active = indices
+    visibility_key = [
+      (Mode7.cam_x / Game_Map::TILE_WIDTH).floor,
+      (Mode7.projection_cam_y / Game_Map::TILE_HEIGHT).floor,
+      Mode7.projection_cam_elevation.to_f.round(2),
+      Mode7.projection_revision
+    ]
+    if @nds_fast_wall_visibility_key != visibility_key
+      indices = nds_fast_visible_indices(
+        @nds_fast_wall_buckets,
+        Mode7::Config::WALL_SPAWN_RADIUS_X,
+        Mode7::Config::WALL_SPAWN_RADIUS_Y
+      )
+      nds_fast_hide_leaving(full, @nds_fast_wall_active, indices)
+      @nds_fast_wall_active = indices
+      @nds_fast_wall_subset = indices.map { |i| full[i] }.compact
+      @nds_fast_wall_visibility_key = visibility_key
+    end
 
-    subset = indices.map { |i| full[i] }.compact
-    @wall_data = subset
+    @wall_data = @nds_fast_wall_subset
     _VERMEIL_V41_fast_orig_update_walls
   ensure
     @wall_data = full if defined?(full) && full
@@ -247,18 +267,28 @@ class Mode7Renderer
 
     rx = Mode7::Config::WALL_SPAWN_RADIUS_X
     ry = Mode7::Config::WALL_SPAWN_RADIUS_Y
-    strip_indices = nds_fast_visible_indices(@nds_fast_strip_buckets, rx, ry)
-    object_indices = nds_fast_visible_indices(@nds_fast_object_buckets, rx, ry)
-
     full_strips = @priority_strips || []
     full_objects = @priority_data || []
-    nds_fast_hide_leaving(full_strips, @nds_fast_strip_active, strip_indices)
-    nds_fast_hide_leaving(full_objects, @nds_fast_object_active, object_indices)
-    @nds_fast_strip_active = strip_indices
-    @nds_fast_object_active = object_indices
+    visibility_key = [
+      (Mode7.cam_x / Game_Map::TILE_WIDTH).floor,
+      (Mode7.projection_cam_y / Game_Map::TILE_HEIGHT).floor,
+      Mode7.projection_cam_elevation.to_f.round(2),
+      Mode7.projection_revision
+    ]
+    if @nds_fast_priority_visibility_key != visibility_key
+      strip_indices = nds_fast_visible_indices(@nds_fast_strip_buckets, rx, ry)
+      object_indices = nds_fast_visible_indices(@nds_fast_object_buckets, rx, ry)
+      nds_fast_hide_leaving(full_strips, @nds_fast_strip_active, strip_indices)
+      nds_fast_hide_leaving(full_objects, @nds_fast_object_active, object_indices)
+      @nds_fast_strip_active = strip_indices
+      @nds_fast_object_active = object_indices
+      @nds_fast_strip_subset = strip_indices.map { |i| full_strips[i] }.compact
+      @nds_fast_object_subset = object_indices.map { |i| full_objects[i] }.compact
+      @nds_fast_priority_visibility_key = visibility_key
+    end
 
-    @priority_strips = strip_indices.map { |i| full_strips[i] }.compact
-    @priority_data = object_indices.map { |i| full_objects[i] }.compact
+    @priority_strips = @nds_fast_strip_subset
+    @priority_data = @nds_fast_object_subset
     _VERMEIL_V41_fast_orig_update_priority_surfaces
   ensure
     @priority_strips = full_strips if defined?(full_strips) && full_strips

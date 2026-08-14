@@ -79,9 +79,24 @@ module Mode7
       return 0.0 if !$scene.is_a?(Scene_Map) || !$game_map
       renderer = $scene.instance_variable_get(:@map_renderer)
       return 0.0 if !renderer.is_a?(Mode7Renderer) || renderer.disposed?
+      sx = x.to_i
+      sy = y.to_i
+      # Compatibilidad para llamadas discretas. La altura continua de una rampa
+      # se resuelve en nds_surface_height_at_real(), usando el pie real del actor.
+      stair_h = renderer.instance_variable_get(:@nds_stair_elevations)
+      if stair_h && (value = stair_h[[sx, sy]])
+        return value.to_f
+      end
       cache = renderer.instance_variable_get(:@entry_cache)
-      entries = cache && cache[[x.to_i, y.to_i]]
+      entries = cache && cache[[sx, sy]]
       return 0.0 if !entries || entries.empty?
+      mountain = entries.any? do |entry|
+        tag = renderer.send(:terrain_tag_for_entry, entry)
+        tag && tag.id == Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
+      end
+      if mountain && renderer.respond_to?(:nds_mountain_height_at, true)
+        return renderer.send(:nds_mountain_height_at, sx, sy).to_f
+      end
       entries.map do |entry|
         tag = renderer.send(:terrain_tag_for_entry, entry)
         tag ? nds_volume_height_for_tag(tag.id) : 0.0
@@ -90,12 +105,64 @@ module Mode7
       0.0
     end
 
-    def depth_z_at_elevation(wy, elevation = 0.0, priority = 0, bias = 0)
+    # Altura de superficie en coordenadas de mundo (px). A diferencia de la API
+    # discreta, una NDSStair interpola continuamente entre su borde sur y norte.
+    # Esto evita el salto de prioridad/altura a mitad de una escalera de 1 tile.
+    def nds_surface_height_at_real(world_x, world_y)
+      return 0.0 if !$scene.is_a?(Scene_Map) || !$game_map
+      renderer = $scene.instance_variable_get(:@map_renderer)
+      return 0.0 if !renderer.is_a?(Mode7Renderer) || renderer.disposed?
+      wx = world_x.to_f
+      wy = world_y.to_f
+      ramps = renderer.instance_variable_get(:@nds_stair_ramps)
+      if ramps
+        ramps.each do |ramp|
+          next if wx < ramp[:west_wx] - 0.001 || wx > ramp[:east_wx] + 0.001
+          next if wy < ramp[:north_wy] - 0.001 || wy > ramp[:south_wy] + 0.001
+          span = ramp[:south_wy] - ramp[:north_wy]
+          next if span.abs <= 0.001
+          t = ((ramp[:south_wy] - wy) / span).clamp(0.0, 1.0)
+          return ramp[:south_z] + (ramp[:north_z] - ramp[:south_z]) * t
+        end
+      end
+      tw = Game_Map::TILE_WIDTH.to_f
+      th = Game_Map::TILE_HEIGHT.to_f
+      tx = (wx / tw).floor
+      # El pie de un personaje cae exactamente en el borde sur de su celda.
+      ty = ((wy - 0.001) / th).floor
+      nds_surface_height_at(tx, ty)
+    rescue Exception
+      0.0
+    end
+
+    # Orden fisico de sprites para perspective. La distancia real de camara es
+    # la componente principal; Priority solo es un pequeno desempate local.
+    # De esta forma P4 en Z=0 nunca puede saltar por encima de un actor/top que
+    # se encuentra realmente a Z=32/64/96.
+    def physical_depth_z(wy, elevation = 0.0, priority = 0, bias = 0)
+      if perspective_mode? && respond_to?(:perspective_depth_for)
+        depth = perspective_depth_for(wy.to_f, elevation.to_f)
+        base = Config::PHYSICAL_DEPTH_Z_BASE.to_i
+        scale = Config::PHYSICAL_DEPTH_Z_SCALE.to_f
+        scale = 64.0 if scale <= 0.0
+        pstep = Config::PRIORITY_DEPTH_BIAS_STEP.to_i
+        return base - (depth * scale).round + priority.to_i * pstep + bias.to_i
+      end
+
       sy = project_y(wy.to_f, elevation.to_f)
       return bias.to_i if sy.nil?
       p = priority.to_i
       sy += priority_screen_step(wy) * p if p > 0
       sy.round + bias.to_i
+    end
+
+    def depth_z_at_elevation(wy, elevation = 0.0, priority = 0, bias = 0)
+      physical_depth_z(wy, elevation, priority, bias)
+    end
+
+    # Mantiene coherente el codigo legacy/volume faces que aun llama depth_z.
+    def depth_z(wy, priority = 0, bias = 0)
+      physical_depth_z(wy, 0.0, priority, bias)
     end
 
     def nds_tile_category_help
@@ -143,6 +210,53 @@ module Mode7
   end
 end
 
+# Maker Studio puede sustituir el tileset de una celda sin modificar las tablas
+# nativas de Game_Map. Resolvemos bush/deep bush desde las mismas entries que ve
+# el renderer para que la lógica y la imagen nunca consulten propiedades distintas.
+module Mode7
+  class << self
+    def nds_effective_bush_state(map, x, y)
+      return nil if !defined?(MakerStudio) || !$scene.is_a?(Scene_Map)
+      renderer = $scene.instance_variable_get(:@map_renderer)
+      return nil if !renderer.is_a?(Mode7Renderer) || renderer.disposed?
+      return nil if renderer.instance_variable_get(:@map) != map
+      cache = renderer.instance_variable_get(:@entry_cache)
+      entries = cache && cache[[x.to_i, y.to_i]]
+      return nil if !entries
+
+      bush = false
+      deep = false
+      entries.reverse_each do |entry|
+        passage = renderer.send(:entry_shadow_passage, entry)
+        next if !passage || (passage.to_i & 0x40) != 0x40
+        bush = true
+        tag = renderer.send(:terrain_tag_for_entry, entry)
+        deep = true if tag && tag.respond_to?(:deep_bush) && tag.deep_bush
+      end
+      [bush, deep]
+    rescue Exception
+      nil
+    end
+  end
+end
+
+class Game_Map
+  alias_method :_VERMEIL_NDS_orig_bush?, :bush? unless method_defined?(:_VERMEIL_NDS_orig_bush?)
+  alias_method :_VERMEIL_NDS_orig_deepBush?, :deepBush? unless method_defined?(:_VERMEIL_NDS_orig_deepBush?)
+
+  def bush?(x, y)
+    state = Mode7.nds_effective_bush_state(self, x, y)
+    return state[0] if state
+    _VERMEIL_NDS_orig_bush?(x, y)
+  end
+
+  def deepBush?(x, y)
+    state = Mode7.nds_effective_bush_state(self, x, y)
+    return state[1] if state
+    _VERMEIL_NDS_orig_deepBush?(x, y)
+  end
+end
+
 class Mode7Renderer
   private
 
@@ -161,6 +275,128 @@ class Mode7Renderer
     id
   rescue Exception
     nil
+  end
+
+  # Altura real de una meseta.
+  #
+  # V5.6 calculaba la altura POR CELDA mirando los MountainWall justo al sur.
+  # En una meseta de varias filas, las celdas del borde sur veian 2/3 walls
+  # mientras las filas interiores no veian ninguno. El mismo plateau terminaba
+  # partido en escalones horizontales (32/64/96) aunque visualmente fuese una
+  # unica cima.
+  #
+  # V5.7 resuelve primero connected-components de NDSMountainTop en map-space.
+  # Todas las celdas de la misma meseta comparten una sola altura, tomada de la
+  # mayor pila de MountainWall que existe bajo SU BORDE SUR.
+  def nds_mountain_wall_cell?(tx, ty)
+    return false if tx < 0 || ty < 0 || tx >= @map.width || ty >= @map.height
+    entries = @entry_cache[[tx, ty]] || []
+    entries.any? do |entry|
+      id = nds_category_id(entry)
+      id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
+        id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+    end
+  rescue Exception
+    false
+  end
+
+  def nds_mountain_top_cell?(tx, ty)
+    return false if tx < 0 || ty < 0 || tx >= @map.width || ty >= @map.height
+    entries = @entry_cache[[tx, ty]] || []
+    entries.any? do |entry|
+      nds_category_id(entry) == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
+    end
+  rescue Exception
+    false
+  end
+
+  def nds_build_mountain_height_cache
+    @nds_mountain_height_cache = {}
+    @nds_mountain_height_cache_complete = false
+    base = Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
+    base = 32.0 if base <= 0.0
+
+    top_cells = {}
+    @entry_cache.each do |(tx, ty), entries|
+      if entries.any? { |entry| nds_category_id(entry) == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG }
+        top_cells[[tx, ty]] = true
+      end
+    end
+
+    visited = {}
+    top_cells.each_key do |start|
+      next if visited[start]
+      component = {}
+      queue = [start]
+      visited[start] = true
+
+      until queue.empty?
+        cx, cy = queue.shift
+        component[[cx, cy]] = true
+        [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]].each do |nx, ny|
+          pos = [nx, ny]
+          next if !top_cells[pos] || visited[pos]
+          visited[pos] = true
+          queue << pos
+        end
+      end
+
+      # Solo el borde sur puede tener una fachada frontal. Una pila de N rows
+      # equivale a N * NDS_MOUNTAIN_HEIGHT de elevacion fisica.
+      wall_levels = []
+      component.each_key do |cx, cy|
+        next if component[[cx, cy + 1]]
+        count = 0
+        wy = cy + 1
+        while wy < @map.height && nds_mountain_wall_cell?(cx, wy)
+          count += 1
+          wy += 1
+        end
+        wall_levels << count if count > 0
+      end
+
+      levels = wall_levels.empty? ? 1 : wall_levels.max
+      levels = 1 if levels <= 0
+      height = base * levels
+      component.each_key { |pos| @nds_mountain_height_cache[pos] = height }
+    end
+
+    @nds_mountain_height_cache_complete = true
+  rescue Exception => e
+    @nds_mountain_height_cache ||= {}
+    @nds_mountain_height_cache_complete = true
+    Console.echo_error("2.5D V5.7 mountain height cache: #{e.message}") if defined?(Console)
+  end
+
+  def nds_mountain_height_at(tx, ty)
+    if !@nds_mountain_height_cache_complete
+      nds_build_mountain_height_cache
+    end
+    key = [tx.to_i, ty.to_i]
+    @nds_mountain_height_cache[key] || Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
+  rescue Exception
+    Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
+  end
+
+  # Altura de una celda sin considerar NDSStair. Se usa para conectar la rampa
+  # con el terreno que tiene inmediatamente al norte/sur.
+  def nds_base_surface_height_at(tx, ty)
+    return 0.0 if tx < 0 || ty < 0 || tx >= @map.width || ty >= @map.height
+    entries = @entry_cache[[tx, ty]] || []
+    max_h = 0.0
+    entries.each do |entry|
+      id = nds_category_id(entry)
+      next if id == Mode7::Config::NDS_STAIR_TERRAIN_TAG
+      h = if id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
+            nds_mountain_height_at(tx, ty)
+          else
+            Mode7.nds_volume_height_for_tag(id).to_f
+          end
+      max_h = h if h > max_h
+    end
+    max_h
+  rescue Exception
+    0.0
   end
 
   def nds_floor_entry?(entry)
@@ -185,6 +421,12 @@ class Mode7Renderer
     id = nds_category_id(entry)
     id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
       id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+  end
+
+  def nds_mountain_face_plane_entry?(entry)
+    id = nds_category_id(entry)
+    id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG ||
+      id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG
   end
 
   def nds_roof_plane_entry?(entry)
@@ -217,6 +459,130 @@ class Mode7Renderer
     id == Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG ||
       id == Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG ||
       id == Mode7::Config::NDS_OVERLAY_TERRAIN_TAG
+  end
+
+  # Grass/TallGrass permanece en el receptor. El bit bush controla solamente
+  # la oclusion de la mitad inferior del personaje, no crea geometria vertical.
+  def nds_ground_bush_entry?(entry)
+    tag = terrain_tag_for_entry(entry)
+    return false if !tag
+    grass = tag.id == :Grass || tag.id == :TallGrass ||
+            (tag.respond_to?(:shows_grass_rustle) && tag.shows_grass_rustle) ||
+            (tag.respond_to?(:deep_bush) && tag.deep_bush)
+    return false if !grass
+    passage = entry_shadow_passage(entry)
+    passage && (passage.to_i & 0x40) == 0x40
+  rescue Exception
+    false
+  end
+
+  def nds_bush_overlay_entry?(_entry)
+    false
+  end
+
+  # Parte superior de hierba de 2 tiles: muchos tilesets ponen el pie con
+  # Grass/TallGrass y la mitad superior como un tile P1 sin Terrain Tag justo
+  # encima. Proyectar ese P1 como suelo lo separa hacia el horizonte. V5.8 lo
+  # detecta por continuidad vertical del rect fuente y lo convierte en overlay
+  # billboard anclado al pie de la hierba.
+  def nds_bush_cap_pair?(cap, bush)
+    return false if !cap || !bush
+    return false if nds_category_id(cap)
+    return false if cap[:priority].to_i <= 0
+    return false if !nds_ground_bush_entry?(bush)
+    return false if wall_source_key(cap) != wall_source_key(bush)
+    a = cap[:src_rect]
+    b = bush[:src_rect]
+    return false if !a || !b
+    a.x.to_i == b.x.to_i &&
+      (b.y.to_i - a.y.to_i) == Game_Map::TILE_HEIGHT
+  rescue Exception
+    false
+  end
+
+  def cache_nds_bush_caps
+    @nds_bush_cap_owned = {}
+    @nds_bush_cap_specs = []
+
+    @entry_cache.each do |(tx, ty), entries|
+      entries.each do |cap|
+        next if nds_category_id(cap)
+        next if cap[:priority].to_i <= 0
+
+        # Layout A: ambas mitades estan en la misma celda/capas.
+        bush = entries.find { |candidate| nds_bush_cap_pair?(cap, candidate) }
+        top_ty = ty - 1
+        base_ty = ty
+
+        # Layout B: la mitad superior esta realmente una celda al norte.
+        if !bush
+          below = @entry_cache[[tx, ty + 1]] || []
+          bush = below.find { |candidate| nds_bush_cap_pair?(cap, candidate) }
+          top_ty = ty
+          base_ty = ty + 1
+        end
+        next if !bush
+
+        @nds_bush_cap_owned[cap.object_id] = true
+        elevation = nds_base_surface_height_at(tx, base_ty).to_f
+        @nds_bush_cap_specs << {
+          tx: tx, top_ty: top_ty, base_ty: base_ty, entry: cap,
+          elevation: elevation, priority: cap[:priority].to_i,
+          unify: cap[:unify].to_i
+        }
+      end
+    end
+    @nds_bush_cap_specs
+  rescue Exception => e
+    @nds_bush_cap_owned ||= {}
+    @nds_bush_cap_specs ||= []
+    Console.echo_error("2.5D V5.8 bush caps: #{e.message}") if defined?(Console)
+    @nds_bush_cap_specs
+  end
+
+  def nds_bush_cap_owned?(entry)
+    @nds_bush_cap_owned && @nds_bush_cap_owned[entry.object_id]
+  end
+
+  def build_nds_bush_cap_overlays
+    specs = @nds_bush_cap_specs || []
+    return if specs.empty?
+
+    groups = Hash.new { |h, k| h[k] = [] }
+    specs.each do |spec|
+      key = [spec[:top_ty], spec[:base_ty], spec[:elevation].round(4),
+             spec[:priority], spec[:unify]]
+      groups[key] << spec
+    end
+
+    groups.each_value do |items|
+      items.sort_by! { |spec| spec[:tx] }
+      segment = []
+      flush = proc do
+        next if segment.empty?
+        cells = {}
+        bounds = []
+        segment.each do |spec|
+          cells[[spec[:tx], spec[:top_ty]]] = [spec[:entry]]
+          bounds << [spec[:tx], spec[:top_ty]]
+          bounds << [spec[:tx], spec[:base_ty]]
+        end
+        first = segment.first
+        depth_wyb = (first[:base_ty] + 1) * Game_Map::TILE_HEIGHT
+        make_rigid_component(cells, first[:elevation], bounds,
+                             first[:priority], first[:unify], depth_wyb,
+                             :nds_bush_overlay)
+        segment.clear
+      end
+
+      previous_x = nil
+      items.each do |spec|
+        flush.call if previous_x && spec[:tx] != previous_x + 1
+        segment << spec
+        previous_x = spec[:tx]
+      end
+      flush.call
+    end
   end
 
   def nds_volume_entry?(entry)
@@ -279,6 +645,7 @@ class Mode7Renderer
   def priority_surface_entry?(entry)
     return false if nds_floor_entry?(entry)
     return false if nds_stair_entry?(entry)
+    return false if nds_ground_bush_entry?(entry)
     return true if nds_roof_plane_entry?(entry)
     return true if nds_billboard_entry?(entry) || nds_protected_roof_entry?(entry)
     _VERMEIL_V4_orig_priority_surface_entry(entry)
@@ -290,7 +657,9 @@ class Mode7Renderer
   end
 
   def rigid_priority_member_candidate?(entries, entry)
+    return false if nds_bush_cap_owned?(entry)
     return false if nds_floor_entry?(entry) || nds_roof_plane_entry?(entry) || nds_volume_entry?(entry)
+    return false if nds_ground_bush_entry?(entry)
     return true if nds_billboard_entry?(entry) || nds_protected_roof_entry?(entry)
     # Una escalera/decal colocado sobre una meseta pertenece a la textura de la
     # superficie. Priority no puede extraerlo como objeto ni cambiar sus bounds.
@@ -307,6 +676,8 @@ class Mode7Renderer
   end
 
   def rigid_priority_seed?(entries, entry)
+    return false if nds_bush_cap_owned?(entry)
+    return false if nds_ground_bush_entry?(entry)
     return true if nds_billboard_entry?(entry) || nds_protected_roof_entry?(entry)
     _VERMEIL_V4_orig_rigid_seed(entries, entry)
   end
@@ -329,10 +700,34 @@ class Mode7Renderer
   end
 
   def wall_visual_entries(entries)
-    # Un WallPlane ya es una cara completa. Nada colocado en otra layer de su
-    # celda puede incorporarse al bitmap vertical ni alterar sus bounds.
+    # NDSStair abre fisicamente la fachada. Si debajo de la escalera existe un
+    # MountainWall en otra layer, no puede seguir formando parte del bloque:
+    # antes unia izquierda/derecha por detras de la rampa y aparecia como una
+    # banda completa atravesando la entrada.
+    has_stair = entries.any? { |entry| nds_stair_entry?(entry) }
+
+    # Un WallPlane ya es una cara completa. Con escalera, se conserva cualquier
+    # WallPlane generico pero se elimina MountainWallPlane de esa celda.
     plane_entries = entries.select { |entry| nds_wall_plane_entry?(entry) }
+    if has_stair
+      plane_entries.reject! do |entry|
+        nds_category_id(entry) == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+      end
+    end
     return plane_entries if !plane_entries.empty?
+
+    # MountainWall normal ya es arte de fachada. Una celda ocupada por Stair es
+    # el hueco real del acceso y por tanto no renderiza wall detras.
+    if !has_stair
+      mountain_entries = entries.select { |entry| nds_mountain_wall_entry?(entry) }
+      return mountain_entries if !mountain_entries.empty?
+    end
+
+    # Si lo unico descartado era MountainWall bajo la escalera, no caer al
+    # renderer legacy porque lo volveria a absorber mediante Priority/textura.
+    if has_stair && entries.any? { |entry| nds_mountain_wall_entry?(entry) }
+      return []
+    end
     _VERMEIL_V5_orig_wall_visual_entries(entries)
   end
 
@@ -342,11 +737,20 @@ class Mode7Renderer
   end
 
   def wall_component_key(tx, ty, entries)
+    # MountainWall normal y MountainWallPlane describen la MISMA cara fisica.
+    # Una pila vertical no se separa por fila, variante de tile ni tipo Plane:
+    # todas las celdas ortogonalmente contiguas se colapsan sobre un solo plano
+    # vertical. Esto elimina definitivamente el efecto de terrazas apiladas.
+    mountain = entries.find { |entry| nds_mountain_wall_entry?(entry) }
+    if mountain
+      volume_id = rigid_priority_volume_id(tx, ty) rescue nil
+      return [:nds_mountain_face, volume_id || :auto]
+    end
+
     plane = entries.find { |entry| nds_wall_plane_entry?(entry) }
     if plane
-      # Una fila contigua de cara 3D usa un solo quad, incluso si el tileset
-      # repite el mismo tile central. Evita una junta/sprite por cada celda.
-      return [:nds_wall_plane_row, nds_category_id(plane), ty, wall_source_key(plane)]
+      plane_id = nds_category_id(plane)
+      return [:nds_wall_plane_row, plane_id, ty, wall_source_key(plane)]
     end
     _VERMEIL_V5_orig_wall_component_key(tx, ty, entries)
   end
@@ -421,13 +825,127 @@ class Mode7Renderer
   end
 
   # ---------------------------------------------------------------------------
-  # Billboards/estructuras/overlays: misma geometria, una mascara por Priority.
+  # Billboards/estructuras: una geometria por objeto; overlays especiales aun
+  # pueden conservar mascaras por Priority cuando su funcion sea de foreground.
   # ---------------------------------------------------------------------------
+  def nds_structure_volume_ids(component)
+    ids = {}
+    component.each_key do |tx, ty|
+      id = rigid_priority_volume_id(tx, ty)
+      ids[id] = true if id
+    end
+    ids.keys
+  rescue Exception
+    []
+  end
+
+  def nds_structure_components_compatible?(a, elev_a, b, elev_b)
+    return false if (elev_a.to_f - elev_b.to_f).abs > 0.001
+    ids_a = nds_structure_volume_ids(a)
+    ids_b = nds_structure_volume_ids(b)
+    return true if ids_a.empty? || ids_b.empty?
+    !(ids_a & ids_b).empty?
+  end
+
+  # NDSStructure se agrupa por continuidad EN EL MAPA, no por la posicion del
+  # rect fuente en el tileset. Asi una casa partida en varias zonas del PNG pero
+  # contigua en el mapa conserva un solo bitmap/ancla/escala.
+  def nds_merge_structure_components(components)
+    structures = []
+    other = []
+    components.each do |component, elevation|
+      if nds_component_kind(component) == :nds_structure
+        structures << [component, elevation]
+      else
+        other << [component, elevation]
+      end
+    end
+    return components if structures.length <= 1
+
+    pending = (0...structures.length).to_a
+    merged = []
+    until pending.empty?
+      seed_i = pending.shift
+      seed, seed_e = structures[seed_i]
+      combined = {}
+      seed.each { |pos, entries| combined[pos] = entries.dup }
+      changed = true
+      while changed
+        changed = false
+        pending.dup.each do |idx|
+          candidate, candidate_e = structures[idx]
+          next if !nds_structure_components_compatible?(combined, seed_e, candidate, candidate_e)
+          touches = candidate.keys.any? do |x, y|
+            combined.key?([x, y]) || combined.key?([x - 1, y]) ||
+              combined.key?([x + 1, y]) || combined.key?([x, y - 1]) ||
+              combined.key?([x, y + 1])
+          end
+          next if !touches
+          candidate.each do |pos, entries|
+            combined[pos] ||= []
+            combined[pos].concat(entries)
+          end
+          pending.delete(idx)
+          changed = true
+        end
+      end
+      merged << [combined, seed_e]
+    end
+    other + merged
+  end
+
+  def nds_merge_billboard_rows(components)
+    components = nds_merge_structure_components(components)
+    rows = Hash.new { |hash, key| hash[key] = [] }
+    output = []
+    components.each do |component, elevation|
+      bounds = component.keys
+      kind = nds_component_kind(component)
+      # Structures ya llegan unidas por connected-components en map-space. No
+      # volver a inferir su identidad desde source rect/foot row.
+      if kind == :nds_structure
+        output << [component, elevation]
+        next
+      end
+      if bounds.empty? || kind != :nds_billboard
+        output << [component, elevation]
+        next
+      end
+      min_tx = bounds.map { |tx, _ty| tx }.min
+      max_tx = bounds.map { |tx, _ty| tx }.max
+      foot_ty = bounds.map { |_tx, ty| ty }.max
+      key = [kind, foot_ty, elevation.to_f.round(4)]
+      rows[key] << [component, elevation, min_tx, max_tx]
+    end
+
+    rows.each_value do |items|
+      current = nil
+      items.sort_by { |item| item[2] }.each do |component, elevation, min_tx, max_tx|
+        span = current ? [current[3], max_tx].max - current[2] + 1 : 0
+        if current && min_tx <= current[3] + 1 && span <= 16
+          component.each do |position, entries|
+            current[0][position] ||= []
+            current[0][position].concat(entries)
+          end
+          current[3] = [current[3], max_tx].max
+        else
+          output << [current[0], current[1]] if current
+          copy = {}
+          component.each { |position, entries| copy[position] = entries.dup }
+          current = [copy, elevation, min_tx, max_tx]
+        end
+      end
+      output << [current[0], current[1]] if current
+    end
+    output
+  end
+
   def build_rigid_priority_blocks
     @rigid_priority_owned = {}
     return if Mode7.respond_to?(:raster_affine_mode?) && Mode7.raster_affine_mode?
 
-    rigid_priority_components.each do |component, elevation|
+    components = nds_merge_billboard_rows(rigid_priority_components)
+    components.each do |component, elevation|
       bounds = component.keys
       all_entries = component.values.flatten
       next if all_entries.empty?
@@ -439,6 +957,15 @@ class Mode7Renderer
       depth_ty = bounds.map { |_tx, ty| ty }.max
       depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
       kind = nds_component_kind(component)
+
+      # Un arbol o edificio es una sola malla vertical ordenada por su pie.
+      # Separarlo por Priority duplicaba sprites y abria columnas entre piezas.
+      if [:nds_billboard, :nds_structure].include?(kind)
+        unify = all_entries.map { |entry| entry[:unify].to_i }.min || 0
+        make_rigid_component(component, elevation, bounds,
+                             0, unify, depth_wyb, kind)
+        next
+      end
 
       groups = Hash.new { |hash, priority| hash[priority] = {} }
       component.each do |position, entries|
@@ -470,17 +997,31 @@ class Mode7Renderer
     alias_method :_VERMEIL_V5_orig_build_priority_surfaces, :build_priority_surfaces
   end
 
-  def nds_volume_surface_elevation(entries)
+  def nds_volume_surface_elevation(entries, tx = nil, ty = nil)
+    # En mapas del Maker una cara puede solaparse una o dos filas con el top
+    # que usa de respaldo. La cara gana la celda: si no, el top atraviesa el
+    # muro y el plano vertical queda anclado dentro de la propia meseta.
+    return nil if entries.any? { |entry| nds_mountain_face_plane_entry?(entry) }
     volume = entries.select { |entry| nds_volume_entry?(entry) }
     return nil if volume.empty?
-    volume.map { |entry| entry_world_elevation(entry).to_f }.max
+    volume.map do |entry|
+      id = nds_category_id(entry)
+      if id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG && !tx.nil? && !ty.nil?
+        explicit = entry.key?(:elevation) && !entry[:elevation].nil? ? entry[:elevation].to_f : 0.0
+        explicit + nds_mountain_height_at(tx, ty)
+      else
+        entry_world_elevation(entry).to_f
+      end
+    end.max
   end
 
   def nds_elevated_surface_entries(entries, base_unify)
     entries.reject do |entry|
       entry[:unify].to_i < base_unify ||
         wall_visual_owned?(entry) || rigid_priority_owned?(entry) ||
+        nds_bush_cap_owned?(entry) ||
         nds_wall_entry?(entry) || nds_billboard_entry?(entry) ||
+        nds_stair_entry?(entry) ||
         nds_protected_roof_entry?(entry) || nds_roof_plane_entry?(entry) ||
         interior_black_entry?(entry) || indoor_prop_owned?(entry)
     end
@@ -491,14 +1032,18 @@ class Mode7Renderer
   end
 
   def build_priority_surfaces
+    # Debe resolverse antes del extractor P2+ para que la mitad superior de la
+    # hierba no sea reclamada como objeto generico.
+    cache_nds_bush_caps
     build_rigid_priority_blocks
+    build_nds_bush_cap_overlays
     @nds_elevated_surface_owned = {}
 
-    # El top y cualquier escalera/decal de sus layers forman una sola textura
-    # proyectada. Priority solo decide el orden dentro de esa textura.
+    # El top y sus decals planos forman una textura proyectada. Las escaleras
+    # quedan fuera: pertenecen a una unica rampa inclinada y no se duplican.
     elevated_rows = Hash.new { |hash, key| hash[key] = {} }
     @entry_cache.each do |(tx, ty), entries|
-      elevation = nds_volume_surface_elevation(entries)
+      elevation = nds_volume_surface_elevation(entries, tx, ty)
       next if elevation.nil? || elevation <= 0.0
       volume_entries = entries.select { |entry| nds_volume_entry?(entry) }
       base_unify = volume_entries.map { |entry| entry[:unify].to_i }.min || 0
@@ -529,6 +1074,7 @@ class Mode7Renderer
       entries.each do |entry|
         next if wall_visual_owned?(entry)
         next if rigid_priority_owned?(entry)
+        next if nds_bush_cap_owned?(entry)
         next if nds_elevated_surface_owned?(entry)
         next if !priority_surface_entry?(entry)
 
@@ -562,9 +1108,11 @@ class Mode7Renderer
   end
 
   # ---------------------------------------------------------------------------
-  # Escaleras: regiones contiguas de NDSStair = un quad inclinado.
+  # Escaleras: cada region contigua de NDSStair es una sola rampa continua.
   # ---------------------------------------------------------------------------
   def build_nds_stair_ramps
+    @nds_stair_elevations = {}
+    @nds_stair_ramps = []
     stair_cells = {}
     @entry_cache.each do |(tx, ty), entries|
       if entries.any? { |entry| nds_stair_entry?(entry) }
@@ -599,15 +1147,55 @@ class Mode7Renderer
     positions = region.keys
     return if positions.empty?
 
+    xs = positions.map { |p| p[0] }
+    ys = positions.map { |p| p[1] }
+    min_tx = xs.min
+    max_tx = xs.max
+    min_ty = ys.min
+    max_ty = ys.max
+    tw = Game_Map::TILE_WIDTH.to_f
+    th = Game_Map::TILE_HEIGHT.to_f
+
+    # La rampa conecta las superficies reales que tiene al sur/norte. Si el
+    # norte no esta elevado, conserva la subida NDS_STAIR_HEIGHT tradicional.
+    south_samples = (min_tx..max_tx).map { |x| nds_base_surface_height_at(x, max_ty + 1) }
+    north_samples = (min_tx..max_tx).map { |x| nds_base_surface_height_at(x, min_ty - 1) }
+    south_z = south_samples.max || 0.0
+    north_z = north_samples.max || 0.0
+    if (north_z - south_z).abs <= 0.01
+      north_z = south_z + Mode7::Config::NDS_STAIR_HEIGHT.to_f
+    end
+
+    north_wy = min_ty * th
+    south_wy = (max_ty + 1) * th
+    @nds_stair_ramps ||= []
+    @nds_stair_ramps << {
+      west_wx: min_tx * tw, east_wx: (max_tx + 1) * tw,
+      north_wy: north_wy, south_wy: south_wy,
+      north_z: north_z.to_f, south_z: south_z.to_f
+    }
+
+    @nds_stair_elevations ||= {}
+    span = [south_wy - north_wy, 0.001].max
+    region.each_key do |(x, ty)|
+      # Valor discreto compatible con scripts externos: altura en el borde sur
+      # de la celda. El personaje usa la API continua con su real_x/real_y.
+      cell_south = (ty + 1) * th
+      t = ((south_wy - cell_south) / span).clamp(0.0, 1.0)
+      @nds_stair_elevations[[x, ty]] = south_z + (north_z - south_z) * t
+    end
+
     cells = {}
-    region.each_key do |pos|
-      entries = @entry_cache[pos]
+    positions.each do |pos|
+      entries = @entry_cache[pos] || []
       cells[pos] = entries.select { |entry| nds_stair_entry?(entry) }
     end
-    # El quad inclinado se crea como wall_data con kind :nds_stair. Elevation
-    # 0 (escalera a ras de suelo) y la fuerza de elevacion la aplica
-    # 018_NDSGeometry#update_walls con Config::NDS_STAIR_HEIGHT.
-    make_rigid_component(cells, 0.0, positions, nil, nil, nil, :nds_stair)
+    depth_wy = south_wy
+    sprite = make_rigid_component(cells, south_z, positions, 0, -1, depth_wy, :nds_stair)
+    if sprite
+      sprite.instance_variable_set(:@nds_stair_south_z, south_z.to_f)
+      sprite.instance_variable_set(:@nds_stair_north_z, north_z.to_f)
+    end
   end
 end
 

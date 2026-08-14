@@ -372,28 +372,39 @@ class Mode7Renderer
       end
 
       # Luego extiende P1-P4 que pertenezca visualmente al mismo dibujo.
-      queue = []
-      component.each do |position, entries|
-        entries.each { |entry| queue.push([position, entry]) }
+      # EXCEPCION V5.8: una fachada de montana se compone exclusivamente de
+      # celdas con tag MountainWall. Absorber P1/P2 vecinos metia bordes/top del
+      # tileset dentro del mismo quad vertical y producia las terrazas/bandas
+      # horizontales visibles al apilar dos o mas walls.
+      mountain_component = component.values.flatten.any? do |entry|
+        respond_to?(:nds_mountain_wall_entry?, true) &&
+          nds_mountain_wall_entry?(entry)
       end
 
-      until queue.empty?
-        (tx, ty), source_entry = queue.shift
-        [[-1, 0], [1, 0], [0, -1], [0, 1]].each do |dx, dy|
-          npos = [tx + dx, ty + dy]
-          nentries = @entry_cache[npos]
-          next if !nentries
+      if !mountain_component
+        queue = []
+        component.each do |position, entries|
+          entries.each { |entry| queue.push([position, entry]) }
+        end
 
-          nentries.each do |candidate|
-            oid = candidate.object_id
-            next if claimed_extensions[oid]
-            next if !wall_extension_candidate?(nentries, candidate)
-            next if !wall_source_contiguous?(source_entry, candidate, dx, dy)
+        until queue.empty?
+          (tx, ty), source_entry = queue.shift
+          [[-1, 0], [1, 0], [0, -1], [0, 1]].each do |dx, dy|
+            npos = [tx + dx, ty + dy]
+            nentries = @entry_cache[npos]
+            next if !nentries
 
-            component[npos] ||= []
-            component[npos].push(candidate)
-            claimed_extensions[oid] = true
-            queue.push([npos, candidate])
+            nentries.each do |candidate|
+              oid = candidate.object_id
+              next if claimed_extensions[oid]
+              next if !wall_extension_candidate?(nentries, candidate)
+              next if !wall_source_contiguous?(source_entry, candidate, dx, dy)
+
+              component[npos] ||= []
+              component[npos].push(candidate)
+              claimed_extensions[oid] = true
+              queue.push([npos, candidate])
+            end
           end
         end
       end
@@ -849,6 +860,7 @@ class Mode7Renderer
       sprite, wx, wyb, height, cells, rigid_kind, unify, depth,
       0, min_tx, min_ty, max_tx, max_ty, elevation
     ])
+    sprite
   end
   def draw_rigid_component_source(dst, min_tx, min_ty, cells)
     dst.clear
@@ -911,7 +923,38 @@ class Mode7Renderer
       return
     end
 
-    # Exterior legacy: P1 sigue integrado al raster de ground para compartir
+    # Exterior legacy: superficies elevadas (terrain tag height > 0) se
+    # renderizan como sprites separados para que aparezcan POR ENCIMA del suelo
+    # en vez de hornearse en @ground (Z=-1000). MountainTop, VolumeHigh, etc.
+    has_elevated = cells.values.flatten.any? { |entry| entry_terrain_tag_height(entry) > 0 }
+    if has_elevated
+      min_tx = cells.keys.min
+      max_tx = cells.keys.max
+      width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
+      source = Bitmap.new(width, Game_Map::TILE_HEIGHT)
+      source.clear
+
+      cells.each do |tx, entries|
+        x = (tx - min_tx) * Game_Map::TILE_WIDTH
+        entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }.each do |entry|
+          blt_entry_into(source, x, 0, entry, entry[:opacity] || 255)
+        end
+      end
+
+      sprite = Sprite.new(@viewport)
+      sprite.bitmap = source
+      sprite.ox = 0
+      sprite.oy = source.height
+      sprite.visible = false
+
+      @priority_strips.push([
+        sprite, source, min_tx, ty, priority, unify, elevation,
+        cells, :entries_only, nil
+      ])
+      return
+    end
+
+    # Exterior legacy: P1 normal se integra al raster de ground para compartir
     # exactamente la curva del suelo.
     return if !@ground || @ground.disposed?
     cells.each do |tx, entries|
@@ -1086,6 +1129,7 @@ class Mode7Renderer
                Mode7::Config::WALL_SPAWN_RADIUS_Y : 34
     cam_x_now = Mode7.cam_x
     cam_y_now = Mode7.projection_cam_y
+    cam_elev_now = Mode7.projection_cam_elevation.to_f
     proj_rev = Mode7.projection_revision
 
     @priority_strips.each do |data|
@@ -1102,13 +1146,15 @@ class Mode7Renderer
       needs_recalc = !projection_key ||
                      (cam_x_now - projection_key[0]).abs >= reproj_step ||
                      (cam_y_now - projection_key[1]).abs >= reproj_step ||
-                     proj_rev != projection_key[2]
+                     projection_key.length < 4 ||
+                     (cam_elev_now - projection_key[2]).abs >= 0.01 ||
+                     proj_rev != projection_key[3]
       if needs_recalc
         if !redraw_projected_priority_strip(sprite, source, min_tx, ty, elevation)
           sprite.visible = false
           next
         end
-        data[9] = [cam_x_now, cam_y_now, proj_rev]
+        data[9] = [cam_x_now, cam_y_now, cam_elev_now, proj_rev]
       end
 
       top = sprite.y - sprite.oy * sprite.zoom_y
@@ -1120,6 +1166,8 @@ class Mode7Renderer
         next
       end
 
+      # Elevacion y Priority son conceptos distintos. Promover el piso elevado
+      # a P1 hacia que MountainTop tapara al actor y a sus propios decals.
       effective_priority = priority
       bias = unify + (effective_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0)
       sprite.z = Mode7.depth_z_at_elevation(
@@ -1159,13 +1207,16 @@ class Mode7Renderer
       needs_projection = !projection_key ||
                          (Mode7.cam_x - projection_key[0]).abs >= reproj_step ||
                          (Mode7.projection_cam_y - projection_key[1]).abs >= reproj_step ||
-                         projection_key[2] != Mode7.projection_revision
+                         projection_key.length < 4 ||
+                         (Mode7.projection_cam_elevation.to_f - projection_key[2]).abs >= 0.01 ||
+                         projection_key[3] != Mode7.projection_revision
       if needs_projection
         if !redraw_projected_priority_surface(sprite, source, wx, wyb, elevation)
           sprite.visible = false
           next
         end
-        data[10] = [Mode7.cam_x, Mode7.projection_cam_y, Mode7.projection_revision]
+        data[10] = [Mode7.cam_x, Mode7.projection_cam_y,
+                    Mode7.projection_cam_elevation.to_f, Mode7.projection_revision]
       end
 
       top = sprite.y - sprite.oy * sprite.zoom_y
@@ -1258,6 +1309,7 @@ class Mode7Renderer
     end
   end
   def apply_depth_fog_to_sprite(sprite, sy)
+    return if !Mode7::Config::FOG_ENABLED && sprite.color.alpha == 0
     return if !Mode7.respond_to?(:fog_alpha)
     alpha = Mode7.fog_alpha(sy)
     if alpha > 0

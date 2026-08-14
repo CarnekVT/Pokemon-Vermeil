@@ -59,8 +59,9 @@ module Mode7
     # Camara NDS: el jugador/pivote queda al 50% de la pantalla.
     PERSPECTIVE_PIVOT_RATIO = 0.52
     # Angulos independientes por contexto.
-    # El video de referencia trabaja alrededor de 40-45 grados.
-    OUTDOOR_DEFAULT_ALPHA = 40
+    # V5.7: exterior mas sutil tipo Pokemon 2.5D; evita que fachadas y
+    # billboards se vean excesivamente inclinados.
+    OUTDOOR_DEFAULT_ALPHA = 25
     INDOOR_DEFAULT_ALPHA  = 24
     # Alias legacy para scripts externos.
     DEFAULT_ALPHA = OUTDOOR_DEFAULT_ALPHA
@@ -134,6 +135,19 @@ module Mode7
 
     PRIORITY_RIGID_MIN = 2
     PRIORITY_Z_MIN_STEP = 32.0
+
+    # V5.8: profundidad fisica primero, Priority solo desempata objetos que
+    # comparten practicamente la misma superficie. Ya no puede saltar por
+    # encima de una montana/plataforma solo por ser P2/P4.
+    PHYSICAL_DEPTH_Z_BASE    = 100000
+    PHYSICAL_DEPTH_Z_SCALE   = 64.0
+    PRIORITY_DEPTH_BIAS_STEP = 4
+
+    # La camara acompana la elevacion real bajo los pies del jugador. En una
+    # escalera el valor es continuo, por lo que al llegar a una meseta la
+    # pantalla mantiene al jugador en el mismo nivel visual en vez de dejarlo
+    # subir hacia el borde superior.
+    CAMERA_FOLLOW_SURFACE_ELEVATION = true
     # ponytail: sin sangrado entre superficies; reactivar solo ante juntas
     # transparentes reproducibles en el raster legacy.
     PRIORITY_EDGE_OVERLAP = 0.0
@@ -150,8 +164,8 @@ module Mode7
 
     # Mantener suelo y sprites en el mismo subpixel evita juntas al detenerse.
     # ponytail: raster exacto; subir a 1.0 solo si Cylindrical pierde FPS.
-    GROUND_REDRAW_WORLD_STEP = 2.0
-    PRIORITY_REPROJECT_WORLD_STEP = 2.0
+    GROUND_REDRAW_WORLD_STEP = 1.0
+    PRIORITY_REPROJECT_WORLD_STEP = 1.0
 
     # Una muestra por fila evita cortes horizontales en tiles altos.
     CYLINDRICAL_RASTER_SCAN_STEP = 2
@@ -240,7 +254,7 @@ module Mode7
     EXT_CORNERS_PRIORITIES = true
     # ponytail: solape subpixel minimo; subirlo solo si otro backend rasteriza
     # juntas mayores entre quads que comparten exactamente el mismo borde.
-    EXT_CORNERS_OVERLAP    = 1.0
+    EXT_CORNERS_OVERLAP    = 0.0
 
     # -----------------------------------------------------------------------
     # RENDERER V4.0 - NDS TILE SPACE / ALTO RENDIMIENTO
@@ -250,16 +264,22 @@ module Mode7
     # No se usan modelos 3D.
     NDS_PERFORMANCE_PROFILE = :performance  # :performance, :balanced, :quality
 
-    # Suelo por bandas proyectadas. V4 usa bandas grandes/adaptativas para
-    # bajar draw calls. En :performance suele trabajar en 16px y solo baja si
-    # el angulo realmente necesita mas subdivision.
+    # La malla cacheada evita los ~480 stretch_blt que hacía el raster legacy
+    # cada vez que avanza la cámara. Es el único camino viable para mantener
+    # FPS estables en exterior; las bandas runtime se adaptan al perfil NDS.
     GEOMETRY_GROUND_ENABLED      = true
-    GEOMETRY_GROUND_BAND_HEIGHT  = 24
-    GEOMETRY_GROUND_OVERLAP      = 0.35
+    GEOMETRY_GROUND_BAND_HEIGHT  = 32
+    GEOMETRY_GROUND_OVERLAP      = 0.0
     GEOMETRY_GROUND_CULL_MARGIN  = 48
     GEOMETRY_GROUND_X_MARGIN     = 48
     GEOMETRY_GROUND_POOL_MAX     = 96
-    NDS_GROUND_REPROJECT_STEP    = 1.00
+    # mkxp-z-ext proyecta el bitmap completo con un vertex shader. Esto elimina
+    # las bandas/corners del suelo y todo su coste Ruby durante el movimiento.
+    # Si Shader no existe o no compila, el renderer vuelve al camino por bandas.
+    NDS_NATIVE_GROUND_SHADER     = true
+    # Cuantización subpíxel: evita que suelo, paredes y tops se actualicen en
+    # frames distintos sin introducir los saltos visibles del umbral de 2 px.
+    NDS_GROUND_REPROJECT_STEP    = 1.0
 
     GEOMETRY_PRIORITY_SURFACES = true
     GEOMETRY_WALLS             = true
@@ -309,6 +329,10 @@ module Mode7
     # proporcion; la perspectiva solo aplica una escala uniforme por su pie.
     NDS_WALL_HEIGHT_SCALE          = 0.88
     NDS_MOUNTAIN_WALL_HEIGHT_SCALE = 1.00
+    # El tag MountainWall normal conserva el arte 2D apilado como una sola
+    # fachada rigida. Solo MountainWallPlane fuerza un quad vertical real.
+    # Convertir cada fila normal en plano producia tiras y huecos entre niveles.
+    NDS_MOUNTAIN_WALLS_AS_PLANES   = true
     NDS_BILLBOARD_DEPTH_STRENGTH   = 1.00
     NDS_STRUCTURE_DEPTH_STRENGTH   = 1.00
     NDS_OVERLAY_DEPTH_STRENGTH     = 1.00
@@ -339,7 +363,7 @@ module Mode7
     NDS_VOLUME_CULL_TILES_X     = 14
     NDS_VOLUME_CULL_TILES_Y     = 12
     NDS_VOLUME_BUCKET_SIZE      = 8
-    NDS_VOLUME_REPROJECT_STEP   = 2.00
+    NDS_VOLUME_REPROJECT_STEP   = 1.0
 
     # V4.1 Fast Path
     # Las caras de volumen se preparan como metadata al cargar el mapa y sus
@@ -351,7 +375,7 @@ module Mode7
     # Buckets espaciales para no iterar todas las fachadas/props del mapa en
     # cada frame. 8 tiles es un buen compromiso para mapas grandes.
     NDS_RUNTIME_BUCKET_SIZE      = 8
-    NDS_WALL_REPROJECT_STEP      = 2.0
+    NDS_WALL_REPROJECT_STEP      = 1.0
 
     # Los tags normales protegen arte Pokemon ya perspectivado. Usa los tags
     # Plane solo cuando quieras una superficie geometricamente 3D.
@@ -368,7 +392,14 @@ module Mode7
     # verticales (billboards/estructuras) las aplanan en una linea antiestetica y
     # heredan la direccion de config de CADA sombra. Con NDS_SHADOW_PROP_BLOBS
     # el bake las sustituye por un blob radial uniforme en la base del prop.
-    NDS_SHADOW_PROP_BLOBS = true
+    NDS_SHADOW_PROP_BLOBS = false
+    NDS_SHADOW_BLOB_CORE_ALPHA = 180
+    NDS_SHADOW_BLOB_MIN_OPACITY = 192
+
+    # La sombra del personaje se apoya en el plano: se comprime en Y con la
+    # misma cámara que el suelo y se oculta bajo la hierba alta.
+    OW_SHADOW_GROUND_ALIGNMENT = true
+    OW_SHADOW_HIDE_IN_BUSH     = true
 
     # -----------------------------------------------------------------------
     # FPS / MKXP-Z

@@ -23,8 +23,29 @@ class Sprite_OWShadow
   def update
     _VERMEIL_25D_orig_update_depth
     return if disposed? || !$scene.is_a?(Scene_Map) || !Mode7.rendering_now?
-    return if !@event.is_a?(Game_Player) || !@sprite || @sprite.disposed?
+    return if !@event.is_a?(Game_Player) || !@sprite || @sprite.disposed? ||
+              !@rsprite || @rsprite.disposed?
+    if Mode7::Config::OW_SHADOW_HIDE_IN_BUSH && @event.bush_depth > 0
+      @sprite.visible = false
+      return
+    end
     return if !@sprite.visible || @sprite.opacity <= 0
+    if Mode7::Config::OW_SHADOW_GROUND_ALIGNMENT && Mode7.perspective_mode?
+      # Sprite_OWShadow hereda el zoom uniforme del personaje. Una sombra es
+      # plana, así que Y debe usar la derivada vertical del plano proyectado.
+      # Conservamos el factor temporal de salto/flotación del script original.
+      original_scale = @rsprite.zoom_x.to_f
+      factor = original_scale.abs > 0.001 ? @sprite.zoom_x.to_f / original_scale : 1.0
+      wy = @event.real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+      elevation = if Mode7.respond_to?(:nds_surface_height_at_real)
+                    wx = @event.real_x.to_f / Game_Map::X_SUBPIXELS + Game_Map::TILE_WIDTH / 2.0
+                    Mode7.nds_surface_height_at_real(wx, wy)
+                  else
+                    Mode7.nds_surface_height_at(@event.x, @event.y)
+                  end
+      @sprite.zoom_x = Mode7.object_scale_for_world_y(wy, elevation) * factor
+      @sprite.zoom_y = Mode7.perspective_vertical_scale_for_world_y(wy, elevation) * factor
+    end
     # No usar ground_cap: cambia por celda durante movimiento vertical/diagonal
     # y hace alternar z contra Mountain. Mismo Z interpolado del player, -1.
     @sprite.z = @event.screen_z(@rsprite.src_rect.height) - 1

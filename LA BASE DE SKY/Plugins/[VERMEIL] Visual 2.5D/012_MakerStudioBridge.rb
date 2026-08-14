@@ -89,11 +89,24 @@ class Mode7Renderer
     if !ext || !(ext["shadowLayers"] || ext["shadowLayer"])
       return
     end
+    shadows = ext["shadowLayers"]
+    shadows = [ext["shadowLayer"]].compact if !shadows || shadows.empty?
+    # create_shadow_sprites_for_map aplica estos mismos filtros. Mantener una
+    # lista paralela permite recuperar las celdas fuente reales de cada sombra.
+    shadow_defs = shadows.select do |shadow|
+      next false if !shadow || !shadow["visible"]
+      config = shadow["config"]
+      sources = shadow["sourceTiles"]
+      config && sources && !sources.empty? &&
+        !config["height"].nil? && !config["direction"].nil?
+    end
     aux_vp = Viewport.new(0, 0, 1, 1)
     aux_vp.visible = false
     aux = TilemapRenderer.new(aux_vp)
     aux.create_shadow_sprites_for_map(@map, ext)
-    aux.instance_variable_get(:@shadow_sprites).each do |spr|
+    @nds_baked_prop_shadow_keys = {}
+    shadow_sprites = aux.instance_variable_get(:@shadow_sprites) || []
+    shadow_sprites.each_with_index do |spr, shadow_index|
       next if !spr || spr.disposed? || !spr.bitmap || spr.bitmap.disposed?
       fw = (spr.respond_to?(:shadow_frame_w) ? spr.shadow_frame_w : 0).to_i
       fw = spr.bitmap.width if fw <= 0 || fw > spr.bitmap.width
@@ -105,12 +118,21 @@ class Mode7Renderer
       # en una linea antiestetica con la direccion de CADA capa de MS. Para
       # ellos el bake sustituye el slab plano por un blob radial uniforme en
       # la base del objeto: direccion consistente y sin cola pixelada.
-      if Mode7::Config::NDS_SHADOW_PROP_BLOBS && nds_prop_shadow_footprint?(spr, fw)
-        nds_bake_prop_shadow_blob(spr, fw)
+      prop_cells = if Mode7::Config::NDS_SHADOW_PROP_BLOBS
+                     source_cells = nds_shadow_source_prop_cells(
+                       shadow_defs[shadow_index]
+                     )
+                     source_cells.empty? ? nds_prop_shadow_cells(spr, fw) : source_cells
+                   else
+                     []
+                   end
+      if !prop_cells.empty?
+        nds_bake_prop_shadow_blobs(prop_cells, spr)
         next
       end
-      # Plano intermedio vanilla (z=1). 003_TileDepth lo compone entre bandas
-      # z=0/z=2 antes de proyectar una sola vez, sin coste por fila extra.
+      # Maker Studio ya entrega esta silueta proyectada. Se hornea una sola vez
+      # en el receptor; convertirla despues en otro quad de perspectiva era una
+      # segunda proyeccion y producia curvas/zigzags ademas de otro Sprite.
       @shadow_ground.blt(dx, dy, spr.bitmap,
                          Rect.new(0, 0, fw, spr.bitmap.height), spr.opacity)
     end
@@ -122,14 +144,48 @@ class Mode7Renderer
     aux_vp.dispose if defined?(aux_vp) && aux_vp && aux_vp.respond_to?(:dispose) && !aux_vp.disposed?
   end
 
-  # Devuelve true si la sombra de MS cubre una celda con billboard/estructura/
-  # overlay: hay que tratarla como sombra de prop vertical, no como slab plano.
-  def nds_prop_shadow_footprint?(spr, fw)
-    return false if !@entry_cache
+  # Fuente vertical de Maker Studio: las posiciones sourceTiles son mas fiables
+  # que buscar el objeto dentro del bitmap proyectado (que puede extenderse diez
+  # celdas en otra direccion). Tambien cubre props legacy P1+ aun sin tag NDS.
+  def nds_shadow_source_prop_cells(shadow)
+    return [] if !shadow || !@entry_cache
+    cells = []
+    (shadow["sourceTiles"] || []).each do |source|
+      tx = source["x"].to_i
+      ty = source["y"].to_i
+      entries = @entry_cache[[tx, ty]]
+      next if !entries || entries.empty?
+      prop = entries.any? do |entry|
+        id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
+        explicit = [
+          Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG,
+          Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG,
+          Mode7::Config::NDS_OVERLAY_TERRAIN_TAG,
+          Mode7::Config::NDS_INDOOR_PROP_TERRAIN_TAG
+        ].include?(id)
+        next true if explicit
+        next false if respond_to?(:nds_floor_entry?, true) && nds_floor_entry?(entry)
+        next false if respond_to?(:nds_volume_entry?, true) && nds_volume_entry?(entry)
+        next false if respond_to?(:nds_stair_entry?, true) && nds_stair_entry?(entry)
+        next false if respond_to?(:nds_wall_entry?, true) && nds_wall_entry?(entry)
+        entry_visual_priority(entry).to_i > 0
+      end
+      cells << [tx, ty] if prop
+    end
+    cells.uniq
+  rescue Exception
+    []
+  end
+
+  # Celdas de props verticales cubiertas por una capa de sombra de Maker Studio.
+  # La lista recupera el pie real del objeto aunque la sombra tenga offset.
+  def nds_prop_shadow_cells(spr, fw)
+    return [] if !@entry_cache
     tw = Game_Map::TILE_WIDTH
     th = Game_Map::TILE_HEIGHT
     bw = [1, (fw.to_f / tw).ceil].max
     bh = [1, (spr.bitmap.height.to_f / th).ceil].max
+    cells = []
     (0...bw).each do |ox|
       (0...bh).each do |oy|
         tx = spr.map_x + ox
@@ -143,13 +199,36 @@ class Mode7Renderer
                id == Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG ||
                id == Mode7::Config::NDS_OVERLAY_TERRAIN_TAG
            end
-          return true
+          cells << [tx, ty]
         end
       end
     end
-    false
+    cells.uniq
   rescue Exception
-    false
+    []
+  end
+
+  def nds_prop_shadow_groups(cells)
+    pending = {}
+    cells.each { |cell| pending[cell] = true }
+    groups = []
+    until pending.empty?
+      seed = pending.keys.first
+      pending.delete(seed)
+      queue = [seed]
+      group = []
+      until queue.empty?
+        cell = queue.shift
+        group << cell
+        x, y = cell
+        [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].each do |near|
+          next if !pending.delete(near)
+          queue << near
+        end
+      end
+      groups << group
+    end
+    groups
   end
 
   # Blob radial cacheado por (w,h): economico y sin per-pixel por sombra.
@@ -161,15 +240,21 @@ class Mode7Renderer
     bmp = Bitmap.new(w, h)
     cx = w / 2.0
     cy = h / 2.0
-    max_r = [cx, cy].max.to_f
-    max_r = 1.0 if max_r <= 0.0
-    # Alfa del 110 en el nucleo decayendo a 0 en el borde. La sombra se dibuja
-    # con el alpha del sprite original; esto es solo el gradiente interno.
+    rx = [cx, 1.0].max
+    ry = [cy, 1.0].max
+    # La sombra se dibuja con el alpha de Maker Studio. Un nucleo demasiado
+    # tenue desaparecia al combinar ambos alphas sobre césped claro.
+    core_alpha = if defined?(Mode7::Config::NDS_SHADOW_BLOB_CORE_ALPHA)
+                   Mode7::Config::NDS_SHADOW_BLOB_CORE_ALPHA.to_i
+                 else
+                   180
+                 end
+    core_alpha = core_alpha.clamp(0, 255)
     h.times do |y|
       w.times do |x|
-        d = Math.sqrt(((x - cx) / max_r)**2 + ((y - cy) / max_r)**2)
+        d = Math.sqrt(((x - cx) / rx)**2 + ((y - cy) / ry)**2)
         next if d > 1.0
-        a = (110 * (1.0 - d)).round.clamp(0, 255)
+        a = (core_alpha * (1.0 - d)).round.clamp(0, 255)
         bmp.set_pixel(x, y, Color.new(0, 0, 0, a)) if a > 0
       end
     end
@@ -179,26 +264,36 @@ class Mode7Renderer
     nil
   end
 
-  # Hornea un blob radial en @shadow_ground centrado en la base del prop que
-  # cubre la sombra. Usa la celda central del footprint para el pivo.
-  def nds_bake_prop_shadow_blob(spr, fw)
+  # Una elipse corta bajo cada objeto conserva el lenguaje visual Pokemon y no
+  # depende del shear de Maker Studio ni crea sprites durante el movimiento.
+  def nds_bake_prop_shadow_blobs(cells, spr)
     tw = Game_Map::TILE_WIDTH
     th = Game_Map::TILE_HEIGHT
-    bw = [1, (fw.to_f / tw).ceil].max
-    bh = [1, (spr.bitmap.height.to_f / th).ceil].max
-    cx = spr.map_x + bw / 2.0
-    cy = spr.map_y + bh / 2.0
-    # Radio proporcional al footprint. En pixeles de mundo.
-    rw = (fw + tw * 0.5).round
-    rh = (spr.bitmap.height.to_f + th * 0.6).round
-    rw = [tw, rw].max
-    rh = [th, rh].max
-    bmp = nds_shadow_blob_bitmap(rw, rh)
-    return if !bmp
-    dx = (cx * tw - rw / 2.0).round
-    dy = (cy * th - rh / 2.0).round
     op = (spr.respond_to?(:opacity) ? spr.opacity.to_i : 255).clamp(0, 255)
-    @shadow_ground.blt(dx, dy, bmp, Rect.new(0, 0, rw, rh), op)
+    min_op = if defined?(Mode7::Config::NDS_SHADOW_BLOB_MIN_OPACITY)
+               Mode7::Config::NDS_SHADOW_BLOB_MIN_OPACITY.to_i.clamp(0, 255)
+             else
+               192
+             end
+    op = min_op if op < min_op
+    nds_prop_shadow_groups(cells).each do |group|
+      xs = group.map { |x, _y| x }
+      ys = group.map { |_x, y| y }
+      key = [xs.min, ys.min, xs.max, ys.max]
+      next if @nds_baked_prop_shadow_keys[key]
+      @nds_baked_prop_shadow_keys[key] = true
+
+      cell_width = xs.max - xs.min + 1
+      rw = (cell_width * tw * 0.72).round.clamp((tw * 0.65).round, tw * 3)
+      rh = (rw * 0.32).round.clamp((th * 0.25).round, (th * 0.8).round)
+      bmp = nds_shadow_blob_bitmap(rw, rh)
+      next if !bmp
+      cx = (xs.min + xs.max + 1) * tw / 2.0
+      base_y = (ys.max + 1) * th.to_f
+      dx = (cx - rw / 2.0).round
+      dy = (base_y - rh / 2.0).round
+      @shadow_ground.blt(dx, dy, bmp, Rect.new(0, 0, rw, rh), op)
+    end
   rescue Exception => e
     Console.echo_error("2.5D blob shadow: #{e.message}") if defined?(Console)
   end

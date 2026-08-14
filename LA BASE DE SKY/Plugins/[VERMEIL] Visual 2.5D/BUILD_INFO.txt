@@ -1,0 +1,18 @@
+VERMEIL Visual 2.5D - VERIFIED BUILD
+Version: 5.8.1
+Build date: 2026-08-13
+Base: user upload [VERMEIL] Visual 2.5D(4).zip (v5.7.1)
+Expected OUTDOOR_DEFAULT_ALPHA: 25
+
+V5.8 verification markers:
+- meta.txt must say Version = 5.8.0
+- Settings: CAMERA_FOLLOW_SURFACE_ELEVATION = true
+- Settings: PHYSICAL_DEPTH_Z_SCALE = 64.0
+- 020_NDSTileCategories.rb contains cache_nds_bush_caps
+- Mountain wall_component_key returns :nds_mountain_face
+- nds_ground.vert contains u_camera_elevation
+
+Installation: replace the entire previous [VERMEIL] Visual 2.5D folder.
+Do not merge over an older copy.
+
+Hotfix 5.8.1: cam_elev_now scoped in update_priority_strips.

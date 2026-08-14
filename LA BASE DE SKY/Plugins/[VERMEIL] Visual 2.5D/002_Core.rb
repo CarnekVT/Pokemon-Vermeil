@@ -418,16 +418,21 @@ module Mode7
       @project_y_cache ||= {}
       @project_y_cache.clear
       @projection_cache_cam_y = nil
+      @projection_cache_cam_elevation = nil
     end
 
     # project_y/world_y dependen de la posicion exacta de camara. Usar floor
     # los hacia saltar al cruzar cada pixel durante scroll suave vertical.
     def refresh_camera_projection_cache
       current_cam_y = projection_cam_y
-      return if @projection_cache_cam_y == current_cam_y
+      current_cam_elevation = projection_cam_elevation
+      return if @projection_cache_cam_y == current_cam_y &&
+                @projection_cache_cam_elevation == current_cam_elevation
       @projection_cache_cam_y = current_cam_y
-      # project_y depende de cam_y. La inversa por fila no: cacheamos solo el
-      # offset relativo y sumamos cam_y al final.
+      @projection_cache_cam_elevation = current_cam_elevation
+      # project_y depende tanto de la posicion Y como de la altura fisica que
+      # sigue la camara. Limpiar la cache en ambos casos evita que el suelo se
+      # quede en la altura anterior al terminar una escalera.
       @project_y_cache.clear if @project_y_cache
     end
 
@@ -516,6 +521,29 @@ module Mode7
       0
     end
 
+    # Elevacion del receptor que sigue la camara. No es el heightmap legacy:
+    # consulta la misma superficie fisica que usa el personaje (MountainTop,
+    # NDSVolume y NDSStair). Al restarla a todas las Z del mundo trasladamos la
+    # camara verticalmente junto al actor sin alterar las coordenadas del mapa.
+    def projection_cam_elevation
+      return 0.0 if !defined?(Config::CAMERA_FOLLOW_SURFACE_ELEVATION) ||
+                    !Config::CAMERA_FOLLOW_SURFACE_ELEVATION
+      return 0.0 if !$game_player || !$scene.is_a?(Scene_Map)
+      return 0.0 if !respond_to?(:nds_surface_height_at_real)
+      real_x = $game_player.instance_variable_get(:@real_x)
+      real_y = $game_player.instance_variable_get(:@real_y)
+      return 0.0 if real_x.nil? || real_y.nil?
+      width = $game_player.instance_variable_get(:@width)
+      width = width ? width.to_i : 1
+      width = 1 if width <= 0
+      wx = real_x.to_f / Game_Map::X_SUBPIXELS +
+           width * Game_Map::TILE_WIDTH / 2.0
+      wy = real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+      nds_surface_height_at_real(wx, wy).to_f
+    rescue Exception
+      0.0
+    end
+
     # Matematica Affine exacta del ZIP pre-curve.
     def affine_depth_scale(ry)
       t = affine_depth_value
@@ -558,9 +586,10 @@ module Mode7
       ry = wy.to_f - projection_cam_y - pivot_y
       theta = cylindrical_theta_for_world_y(wy)
       sy_ground = pivot_y + cylindrical_ground_offset_for_ry(ry)
+      relative_elevation = elevation.to_f - projection_cam_elevation.to_f
 
       sx = center_x + rx * @zoom
-      sy = sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
+      sy = sy_ground - relative_elevation * vertical_scale_for_world_y(wy)
       [sx, sy]
     end
 
@@ -568,7 +597,8 @@ module Mode7
       return _cylindrical_project(wx, wy, elevation) if cylindrical_mode?
 
       rx = wx.to_f - cam_x
-      ry = (wy.to_f - projection_cam_y - elevation.to_f) - pivot_y
+      relative_elevation = elevation.to_f - projection_cam_elevation.to_f
+      ry = (wy.to_f - projection_cam_y - relative_elevation) - pivot_y
       sy = pivot_y + affine_depth_scale(ry)
       sx = center_x + hscale(sy) * rx
       [sx, sy]
@@ -596,13 +626,15 @@ module Mode7
     def _cylindrical_project_y(wy, elevation = 0)
       ry = wy.to_f - projection_cam_y - pivot_y
       sy_ground = pivot_y + cylindrical_ground_offset_for_ry(ry)
-      sy_ground - elevation.to_f * vertical_scale_for_world_y(wy)
+      relative_elevation = elevation.to_f - projection_cam_elevation.to_f
+      sy_ground - relative_elevation * vertical_scale_for_world_y(wy)
     end
 
     def _project_y_uncached(wy, elevation = 0)
       return _cylindrical_project_y(wy, elevation) if cylindrical_mode?
+      relative_elevation = elevation.to_f - projection_cam_elevation.to_f
       pivot_y + affine_depth_scale(
-        (wy.to_f - projection_cam_y - elevation.to_f) - pivot_y
+        (wy.to_f - projection_cam_y - relative_elevation) - pivot_y
       )
     end
 

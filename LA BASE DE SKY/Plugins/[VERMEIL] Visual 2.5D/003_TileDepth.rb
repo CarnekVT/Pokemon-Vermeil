@@ -43,6 +43,7 @@ class Mode7Renderer
     @need_ground_redraw = true
     @last_cam_x = nil
     @last_cam_y = nil
+    @last_cam_elevation = nil
     @last_ms_fog_cam_x = nil
     @last_ms_fog_cam_y = nil
     @map_id = -1
@@ -133,15 +134,18 @@ class Mode7Renderer
     end
     cx = Mode7.cam_x
     cy = Mode7.cam_y
+    ce = Mode7.respond_to?(:projection_cam_elevation) ? Mode7.projection_cam_elevation.to_f : 0.0
     redraw_step = Mode7::Config::GROUND_REDRAW_WORLD_STEP.to_f
     redraw_step = 1.0 if redraw_step <= 0.0
-    camera_moved = @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil?) ||
+    camera_moved = @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil? || @last_cam_elevation.nil?) ||
                    (@last_cam_x - cx).abs >= redraw_step ||
-                   (@last_cam_y - cy).abs >= redraw_step
+                   (@last_cam_y - cy).abs >= redraw_step ||
+                   (@last_cam_elevation - ce).abs >= 0.01
     if camera_moved
       draw_ground
       @last_cam_x = cx
       @last_cam_y = cy
+      @last_cam_elevation = ce
       @need_ground_redraw = false
     end
     update_ms_fog
@@ -185,6 +189,11 @@ class Mode7Renderer
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
     @entry_cache = {}
     @terrain_tag_cache = {}
+    # V5.7: estos caches dependen del mapa completo y deben reconstruirse en
+    # cada refresh. La altura de una meseta se resuelve por componente.
+    @nds_mountain_height_cache = nil
+    @nds_mountain_height_cache_complete = false
+    @nds_underlay_cache = {}
     @wall_visual_components = nil
     @wall_visual_owned = {}
     @indoor_prop_components = []
@@ -283,6 +292,7 @@ class Mode7Renderer
       @map.height.times do |ty|
         entries = @entry_cache[[tx, ty]]
         ground_entries = ground_entries_for_cell(tx, ty, entries)
+        paint_nds_underlay(tx, ty, entries, ground_entries, @ground)
 
         if @ms_shadow_env
           lower = []
@@ -420,8 +430,97 @@ class Mode7Renderer
 
       # Una categoria 2D/vertical pertenece a UN solo renderer. Nunca se
       # hornea tambien en @ground; esto elimina casas/arboles duplicados.
-      wall_owned || prop_owned || rigid_tag || priority_surface_entry?(entry)
+      volume_owned = respond_to?(:nds_volume_entry?, true) && nds_volume_entry?(entry)
+      wall_owned || prop_owned || rigid_tag || volume_owned || priority_surface_entry?(entry)
     end
+  end
+
+  # -------------------------------------------------------------------------
+  # V5.7 - Underlay seguro para volumenes elevados
+  # -------------------------------------------------------------------------
+  # Un MountainTop/Wall/Stair puede ocupar todas las layers de una celda. Como
+  # esos entries salen de @ground y se renderizan aparte, el plano Z=0 quedaba
+  # transparente y se veia el color azul del sky por las esquinas/costuras.
+  #
+  # Se rellena SOLO la base que falte con el ground P0 mas cercano. No altera
+  # la geometria elevada ni roba Priority; funciona como suelo oculto debajo
+  # del volumen para que un subpixel abierto nunca revele el background.
+  def nds_underlay_required?(entries)
+    return false if !entries || entries.empty?
+    ids = [
+      Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG,
+      Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG,
+      Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG,
+      Mode7::Config::NDS_STAIR_TERRAIN_TAG,
+      Mode7::Config::NDS_VOLUME_TERRAIN_TAG,
+      Mode7::Config::NDS_VOLUME_HIGH_TERRAIN_TAG
+    ]
+    entries.any? do |entry|
+      id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
+      ids.include?(id)
+    end
+  rescue Exception
+    false
+  end
+
+  def nds_base_ground_present?(ground_entries)
+    return false if !ground_entries || ground_entries.empty?
+    ground_entries.any? do |entry|
+      ground_pass_for(entry) == :base && entry_visual_priority(entry).to_i <= 0
+    end
+  rescue Exception
+    false
+  end
+
+  def nds_underlay_entries_for(tx, ty)
+    @nds_underlay_cache ||= {}
+    key = [tx, ty]
+    return @nds_underlay_cache[key] if @nds_underlay_cache.key?(key)
+
+    # Buscar primero las celdas mas cercanas. En empate se favorece el sur y
+    # los laterales, que normalmente representan el terreno visible al pie de
+    # una montana.
+    1.upto(5) do |radius|
+      offsets = []
+      (-radius..radius).each do |dx|
+        dy = radius - dx.abs
+        offsets << [dx, dy]
+        offsets << [dx, -dy] if dy > 0
+      end
+      offsets.sort_by! do |dx, dy|
+        side_rank = dy > 0 ? 0 : (dy == 0 ? 1 : 2)
+        [side_rank, dx.abs, dy.abs]
+      end
+
+      offsets.each do |dx, dy|
+        nx = tx + dx
+        ny = ty + dy
+        next if nx < 0 || ny < 0 || nx >= @map.width || ny >= @map.height
+        nentries = @entry_cache[[nx, ny]] || []
+        next if nentries.empty?
+        candidates = ground_entries_for_cell(nx, ny, nentries).select do |entry|
+          ground_pass_for(entry) == :base &&
+            entry_visual_priority(entry).to_i <= 0
+        end
+        next if candidates.empty?
+        @nds_underlay_cache[key] = candidates
+        return candidates
+      end
+    end
+
+    @nds_underlay_cache[key] = []
+  rescue Exception
+    @nds_underlay_cache ||= {}
+    @nds_underlay_cache[[tx, ty]] = []
+  end
+
+  def paint_nds_underlay(tx, ty, entries, ground_entries, target = @ground)
+    return if !nds_underlay_required?(entries)
+    return if nds_base_ground_present?(ground_entries)
+    underlay = nds_underlay_entries_for(tx, ty)
+    return if !underlay || underlay.empty?
+    blt_ground_cell(tx, ty, underlay, target)
+  rescue Exception
   end
 
   def make_native_entry_with_props(tx, ty, layer)
@@ -487,6 +586,7 @@ class Mode7Renderer
     entries = @entry_cache[[tx, ty]] || collect_cell_entries(tx, ty)
     refresh_animated_entry_frames(entries)
     ground_entries = ground_entries_for_cell(tx, ty, entries)
+    paint_nds_underlay(tx, ty, entries, ground_entries, @ground)
     if @ms_shadow_env
       lower = ground_entries.select do |entry|
         ground_shadow_band_for(tx, ty, entry) == :below_shadow

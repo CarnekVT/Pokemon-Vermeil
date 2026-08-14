@@ -63,21 +63,27 @@ module Mode7
     end
 
     def nds_ground_band_height
-      base = case nds_performance_profile
-             when :quality then 8
-             when :balanced then 12
-             else 16
-             end
-      # Angulos altos necesitan mas subdivision para que la interpolacion del
-      # quad no se note. Solo se paga ese coste cuando hace falta.
+      # Una banda por fila de tiles: ningún tile cambia de geometría a mitad de
+      # su bitmap y todas las capas horneadas (incluidas sombras MS) conservan
+      # los mismos cuatro vértices. A ángulos extremos se subdivide por mitades.
+      base = Config::GEOMETRY_GROUND_BAND_HEIGHT.to_i
+      base = Game_Map::TILE_HEIGHT if base <= 0
       a = (@current_alpha || context_default_alpha).to_f
-      base = [base, 12].min if a >= 50.0
-      base = [base, 8].min if a >= 60.0
+      base = [base, Game_Map::TILE_HEIGHT / 2].min if a >= 55.0
+      base = [base, Game_Map::TILE_HEIGHT / 4].min if a >= 65.0
       base
     end
 
     def nds_side_faces?
       return false if !Config::NDS_VOLUME_SIDE_FACES
+      # El perfil rapido usa exclusivamente las fachadas dibujadas por el
+      # mapper. Generar laterales desde el top copiaba el bevel azul/cian y
+      # producia las cunas visibles de las montanas.
+      return false if nds_performance_profile == :performance
+      true
+    end
+
+    def nds_full_side_faces?
       nds_performance_profile != :performance
     end
 
@@ -178,7 +184,7 @@ class Mode7Renderer
     step = 0.25 if step <= 0.0
     cx = (Mode7.cam_x / step).round
     cy = (Mode7.projection_cam_y / step).round
-    [cx, cy,
+    [cx, cy, Mode7.projection_cam_elevation.to_f.round(3),
      Mode7.instance_variable_get(:@current_alpha).to_f.round(3),
      Mode7.instance_variable_get(:@zoom).to_f.round(4),
      Mode7.instance_variable_get(:@distance_h).to_f.round(3),
@@ -327,10 +333,25 @@ class Mode7Renderer
     return 0.0 if tx < 0 || ty < 0 || tx >= @map.width || ty >= @map.height
     entries = @entry_cache[[tx, ty]]
     return 0.0 if !entries || entries.empty?
+    # Una fachada explícita ocupa la celda aunque debajo haya un MountainTop de
+    # respaldo en otra layer. Esto coloca el borde del volumen justo al norte
+    # de la primera fila de pared y evita tops que atraviesan la textura.
+    if entries.any? do |entry|
+         id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
+         id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG ||
+           id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG
+       end
+      return 0.0
+    end
     max_h = 0.0
     entries.each do |entry|
       id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
-      h = id ? Mode7.nds_volume_height_for_tag(id).to_f : 0.0
+      h = if id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG &&
+             respond_to?(:nds_mountain_height_at, true)
+            nds_mountain_height_at(tx, ty).to_f
+          else
+            id ? Mode7.nds_volume_height_for_tag(id).to_f : 0.0
+          end
       max_h = h if h > max_h
     end
     max_h
@@ -349,13 +370,49 @@ class Mode7Renderer
     bmp
   end
 
+  # Los bordes azul/cian del top son un bevel, no la textura de una pared.
+  # Para un lateral real se reutiliza la primera fachada de montana al sur.
+  def nds_volume_side_cell_bitmap(tx, ty)
+    # Un lateral solo puede reutilizar la fachada LOCAL de la misma montana. La
+    # busqueda antigua recorria hasta 12 filas y podia copiar arte de otra pared.
+    [ty, ty + 1].each do |sample_ty|
+      next if sample_ty < 0 || sample_ty >= @map.height
+      entries = @entry_cache[[tx, sample_ty]] || []
+      entry = entries.reverse.find do |candidate|
+        id = respond_to?(:nds_category_id, true) ? nds_category_id(candidate) : nil
+        id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG ||
+          id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG
+      end
+      next if !entry
+      bmp = Bitmap.new(Game_Map::TILE_WIDTH, Game_Map::TILE_HEIGHT)
+      bmp.clear
+      blt_entry_into(bmp, 0, 0, entry, entry[:opacity] || 255)
+      return [bmp, true]
+    end
+    [nds_volume_cell_bitmap(tx, ty), false]
+  rescue Exception
+    [nds_volume_cell_bitmap(tx, ty), false]
+  end
+
+  def nds_mountain_volume_cell?(tx, ty)
+    entries = @entry_cache[[tx, ty]]
+    return false if !entries || entries.empty?
+    entries.any? do |entry|
+      id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
+      id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
+    end
+  rescue Exception
+    false
+  end
+
   def nds_explicit_front_face_at?(tx, ty)
     entries = @entry_cache[[tx, ty + 1]]
     return false if !entries || entries.empty?
     entries.any? do |entry|
       id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
       id == Mode7::Config::NDS_WALL_PLANE_TERRAIN_TAG ||
-        id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+        id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG ||
+        id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG
     end
   rescue Exception
     false
@@ -410,8 +467,6 @@ class Mode7Renderer
         tile.dispose
         tx += 1
       end
-      shade = Mode7::Config::NDS_VOLUME_FRONT_SHADE.to_i.clamp(0, 255)
-      src.fill_rect(0, 0, src.width, src.height, Color.new(0, 0, 0, shade)) if shade > 0
       return src
     end
 
@@ -423,19 +478,30 @@ class Mode7Renderer
     src.clear
     ty = ty0
     while ty <= ty1
-      tile = nds_volume_cell_bitmap(tx, ty)
-      edge_x = side == :west ? 0 : tw - sample
-      strip = Bitmap.new(sample, th)
-      strip.blt(0, 0, tile, Rect.new(edge_x, 0, sample, th))
-      src.stretch_blt(Rect.new((ty - ty0) * th, 0, th, src.height),
-                      strip, Rect.new(0, 0, sample, th))
-      strip.dispose
+      tile, wall_art = nds_volume_side_cell_bitmap(tx, ty)
+      target = Rect.new((ty - ty0) * th, 0, th, src.height)
+      if wall_art
+        src.stretch_blt(target, tile, Rect.new(0, 0, tw, th))
+      else
+        edge_x = side == :west ? 0 : tw - sample
+        strip = Bitmap.new(sample, th)
+        strip.blt(0, 0, tile, Rect.new(edge_x, 0, sample, th))
+        src.stretch_blt(target, strip, Rect.new(0, 0, sample, th))
+        strip.dispose
+      end
       tile.dispose
       ty += 1
     end
-    shade = Mode7::Config::NDS_VOLUME_SIDE_SHADE.to_i.clamp(0, 255)
-    src.fill_rect(0, 0, src.width, src.height, Color.new(0, 0, 0, shade)) if shade > 0
     src
+  end
+
+  def nds_volume_face_shade(kind)
+    value = if kind == :front
+              Mode7::Config::NDS_VOLUME_FRONT_SHADE
+            else
+              Mode7::Config::NDS_VOLUME_SIDE_SHADE
+            end
+    value.to_i.clamp(0, 255)
   end
 
   def add_nds_volume_face(bitmap, kind, world_points, min_tx, min_ty, max_tx, max_ty, spec = nil)
@@ -445,11 +511,12 @@ class Mode7Renderer
       sprite.bitmap = bitmap
       sprite.visible = false
       sprite.z = -999
+      sprite.color.set(0, 0, 0, nds_volume_face_shade(kind))
     end
     face = {
       sprite: sprite, bitmap: bitmap, kind: kind, world: world_points,
       min_tx: min_tx, min_ty: min_ty, max_tx: max_tx, max_ty: max_ty,
-      spec: spec, last_used: 0
+      spec: spec, last_used: 0, shade: nds_volume_face_shade(kind)
     }
     index = @nds_volume_faces.length
     @nds_volume_faces << face
@@ -483,6 +550,7 @@ class Mode7Renderer
     spr.bitmap = bitmap
     spr.visible = false
     spr.z = -999
+    spr.color.set(0, 0, 0, face[:shade].to_i.clamp(0, 255))
     face[:sprite] = spr
     spr
   rescue Exception => e
@@ -533,7 +601,10 @@ class Mode7Renderer
         while tx < @map.width
           h = heights[tx][ty]
           south = ty + 1 < @map.height ? heights[tx][ty + 1] : 0.0
-          if h <= south + 0.01 || nds_explicit_front_face_at?(tx, ty)
+          # NDSMountainTop ya tiene una fachada NDSMountainWall explicita. Su
+          # borde sur no debe extruirse copiando el tile superior (cara azul).
+          if h <= south + 0.01 || nds_explicit_front_face_at?(tx, ty) ||
+             nds_mountain_volume_cell?(tx, ty)
             tx += 1
             next
           end
@@ -544,7 +615,8 @@ class Mode7Renderer
             h2 = heights[tx][ty]
             s2 = ty + 1 < @map.height ? heights[tx][ty + 1] : 0.0
             break if (h2 - h).abs > 0.01 || (s2 - base).abs > 0.01 ||
-                     h2 <= s2 + 0.01 || nds_explicit_front_face_at?(tx, ty)
+                     h2 <= s2 + 0.01 || nds_explicit_front_face_at?(tx, ty) ||
+                     nds_mountain_volume_cell?(tx, ty)
             tx += 1
           end
           nds_make_front_run(ty, start, tx - 1, h, base)
@@ -552,8 +624,10 @@ class Mode7Renderer
       end
     end
 
-    # Laterales solo en balanced/quality. Performance prioriza draw calls bajos.
+    # Balanced/quality pueden generar laterales para volumenes genericos. El
+    # perfil performance conserva solo las fachadas explicitas del mapa.
     if Mode7.nds_side_faces?
+      mountain_only = !Mode7.nds_full_side_faces?
       @map.width.times do |tx|
         [:west, :east].each do |side|
           ty = 0
@@ -561,7 +635,13 @@ class Mode7Renderer
             h = heights[tx][ty]
             nx = side == :west ? tx - 1 : tx + 1
             neighbor = (nx >= 0 && nx < @map.width) ? heights[nx][ty] : 0.0
-            if h <= neighbor + 0.01
+            # MountainTop usa exclusivamente las fachadas NDSMountainWall
+            # dibujadas por el mapper. Nunca sintetizar laterales copiando el
+            # bevel/top: en balanced/quality reaparecian ganchos marrones o
+            # cunas azul/cian en las esquinas.
+            if h <= neighbor + 0.01 ||
+               nds_mountain_volume_cell?(tx, ty) ||
+               (mountain_only && !nds_mountain_volume_cell?(tx, ty))
               ty += 1
               next
             end
@@ -572,6 +652,8 @@ class Mode7Renderer
               h2 = heights[tx][ty]
               n2 = (nx >= 0 && nx < @map.width) ? heights[nx][ty] : 0.0
               break if (h2 - h).abs > 0.01 || (n2 - base).abs > 0.01 || h2 <= n2 + 0.01
+              break if nds_mountain_volume_cell?(tx, ty)
+              break if mountain_only && !nds_mountain_volume_cell?(tx, ty)
               ty += 1
             end
             nds_make_side_run(side, tx, start, ty - 1, h, base)
@@ -589,6 +671,7 @@ class Mode7Renderer
     step = 0.5 if step <= 0.0
     [(Mode7.cam_x / step).round,
      (Mode7.projection_cam_y / step).round,
+     Mode7.projection_cam_elevation.to_f.round(3),
      Mode7.instance_variable_get(:@current_alpha).to_f.round(3),
      Mode7.instance_variable_get(:@zoom).to_f.round(4),
      Mode7.instance_variable_get(:@distance_h).to_f.round(3),
@@ -666,8 +749,12 @@ class Mode7Renderer
       spr.visible = visible
       next if !visible
       spr.corners = points
-      max_world_y = [w[1], w[4], w[7], w[10]].max
-      spr.z = Mode7.depth_z(max_world_y, 0, -2)
+      # La cara vertical tiene profundidad fisica en Y y Z. Usar solo Y/Z=0
+      # permitia que un priority del suelo la sobrepasara. Ordenamos por el
+      # centro de la cara hasta disponer de depth-buffer por pixel.
+      center_world_y = (w[1] + w[4] + w[7] + w[10]) / 4.0
+      center_world_z = (w[2] + w[5] + w[8] + w[11]) / 4.0
+      spr.z = Mode7.depth_z_at_elevation(center_world_y, center_world_z, 0, -2)
       spr.tone = @tone
       active << i
     end

@@ -68,14 +68,20 @@ class Game_Character
   # subir/bajar una plataforma no produzca un salto de un frame.
   def mode7_world_elevation
     return 0.0 if !$game_map || !Mode7.respond_to?(:nds_surface_height_at)
+    # Primero consulta la superficie con el pie REAL del actor. NDSStair puede
+    # devolver asi 0..32 de forma continua incluso si ocupa una sola celda.
+    if Mode7.respond_to?(:nds_surface_height_at_real)
+      wx = @real_x.to_f / Game_Map::X_SUBPIXELS + (@width * Game_Map::TILE_WIDTH / 2.0)
+      wy = @real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
+      return Mode7.nds_surface_height_at_real(wx, wy)
+    end
+
     target = Mode7.nds_surface_height_at(@x, @y)
     return target if !moving?
-
     start_x = @move_initial_x
     start_y = @move_initial_y
     return target if start_x.nil? || start_y.nil?
     start = Mode7.nds_surface_height_at(start_x, start_y)
-
     progress = []
     if @x != start_x
       rx = @real_x.to_f / Game_Map::X_SUBPIXELS

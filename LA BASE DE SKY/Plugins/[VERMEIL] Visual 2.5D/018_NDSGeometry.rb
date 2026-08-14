@@ -97,7 +97,7 @@ module Mode7
     # La camara esta al sur y por encima del pivote, mirando hacia el norte.
     # alpha es inclinacion desde cenital:
     #   0°  -> cenital
-    #   40° -> perfil NDS recomendado
+    #   25° -> perfil exterior sutil por defecto (V5.7)
     #   75° -> perspectiva extrema como la demostracion del video
     #
     # Para conservar 1:1 vertical del suelo alrededor del pivote usamos
@@ -144,9 +144,13 @@ module Mode7
 
     def perspective_depth_for(wy, elevation = 0.0)
       dy = wy.to_f - perspective_pivot_world_y
+      # Todo se expresa relativo a la altura de camara. Si el jugador sube
+      # 64 px, una superficie a Z=64 vuelve a tener Z relativa 0 y permanece
+      # estable alrededor del pivote en pantalla.
+      relative_elevation = elevation.to_f - projection_cam_elevation.to_f
       perspective_distance -
         dy * perspective_sin -
-        elevation.to_f * perspective_cos_raw
+        relative_elevation * perspective_cos_raw
     end
 
     def perspective_valid_depth(depth)
@@ -172,6 +176,7 @@ module Mode7
     def perspective_project(wx, wy, elevation = 0)
       dy = wy.to_f - perspective_pivot_world_y
       elev = elevation.to_f
+      relative_elevation = elev - projection_cam_elevation.to_f
       depth = perspective_depth_for(wy, elev)
       return nil if !perspective_valid_depth(depth)
 
@@ -179,7 +184,7 @@ module Mode7
       sx = center_x + focal * (wx.to_f - cam_x) / depth
 
       # Eje vertical de imagen. Y del mundo baja en pantalla, Z sube.
-      vertical = dy * perspective_cos_raw - elev * perspective_sin
+      vertical = dy * perspective_cos_raw - relative_elevation * perspective_sin
       sy = pivot_y + focal * vertical / depth
       [sx, sy]
     end
@@ -189,7 +194,8 @@ module Mode7
       return _cylindrical_project(wx, wy, elevation) if cylindrical_mode?
 
       rx = wx.to_f - cam_x
-      ry = (wy.to_f - projection_cam_y - elevation.to_f) - pivot_y
+      relative_elevation = elevation.to_f - projection_cam_elevation.to_f
+      ry = (wy.to_f - projection_cam_y - relative_elevation) - pivot_y
       sy = pivot_y + affine_depth_scale(ry)
       sx = center_x + hscale(sy) * rx
       [sx, sy]
@@ -203,22 +209,24 @@ module Mode7
     def _project_y_uncached(wy, elevation = 0)
       return perspective_project_y(wy, elevation) if perspective_mode?
       return _cylindrical_project_y(wy, elevation) if cylindrical_mode?
+      relative_elevation = elevation.to_f - projection_cam_elevation.to_f
       pivot_y + affine_depth_scale(
-        (wy.to_f - projection_cam_y - elevation.to_f) - pivot_y
+        (wy.to_f - projection_cam_y - relative_elevation) - pivot_y
       )
     end
 
-    # Inversa analitica del plano Z=0:
-    # s = F * dy*cos / (D - dy*sin)
-    # dy = s*D / (F*cos + s*sin)
+    # Inversa analitica del plano Z=0 incluyendo traslacion vertical de camara.
+    # Para ground, Z relativa = -Ecam:
+    # s = F * (dy*cos + Ecam*sin) / (D - dy*sin + Ecam*cos)
     def perspective_world_y_for_row(sy)
       s = sy.to_f - pivot_y
       f = perspective_focal
       c = perspective_cos_raw
       si = perspective_sin
+      e = projection_cam_elevation.to_f
       den = f * c + s * si
       return perspective_pivot_world_y if den.abs < 1.0e-7
-      dy = s * perspective_distance / den
+      dy = (s * (perspective_distance + e * c) - f * e * si) / den
       perspective_pivot_world_y + dy
     end
 
@@ -232,7 +240,7 @@ module Mode7
         offset = pivot_y + affine_depth_unscale(sy - pivot_y)
         @affine_row_world_offset_cache[sy] = offset
       end
-      projection_cam_y + offset
+      projection_cam_y - projection_cam_elevation.to_f + offset
     end
 
     def perspective_world_x_for_screen(sx, wy)
@@ -280,14 +288,17 @@ module Mode7
 
     # Derivada vertical local del plano de una pared. La geometria corners usa
     # project() directamente; esto solo sirve de aproximacion para codigo legacy.
-    def perspective_vertical_scale_for_world_y(wy)
+    def perspective_vertical_scale_for_world_y(wy, elevation = 0.0)
       dy = wy.to_f - perspective_pivot_world_y
-      d = perspective_depth_for(wy, 0.0)
+      d = perspective_depth_for(wy, elevation.to_f)
       near = Config::PERSPECTIVE_NEAR_CLIP.to_f
       near = 8.0 if near <= 0.0
       d = near if d < near
+      # d/dy de F * dy * cos(a) / (D - dy * sin(a)). Usar la
+      # derivada real evita que las sombras sobre el plano parezcan curvas.
+      camera_elev = projection_cam_elevation.to_f
       value = perspective_focal *
-              (perspective_distance * perspective_sin - dy) /
+              (perspective_distance * perspective_cos_raw + camera_elev) /
               (d * d)
       value.abs
     end
@@ -623,10 +634,15 @@ class Mode7Renderer
       end
 
       elev = elevation.to_f
+      sort_elevation = elev
       plane_kind = [:nds_wall_plane, :nds_mountain_wall_plane].include?(rigid_kind)
+      mountain_plane = rigid_kind == :nds_mountain_wall &&
+                       Mode7::Config::NDS_MOUNTAIN_WALLS_AS_PLANES
+      project_as_plane = plane_kind || mountain_plane
+      stair_depth = nil
       # Un WallPlane se coloca sobre el borde norte de las celdas que guardan
       # su textura. Asi conecta con el top elevado, no una fila mas al sur.
-      base_wy = plane_kind ? min_ty.to_f * Game_Map::TILE_HEIGHT : wyb.to_f
+      base_wy = project_as_plane ? min_ty.to_f * Game_Map::TILE_HEIGHT : wyb.to_f
       base = Mode7.project(wx.to_f, base_wy, elev)
       if !base
         sprite.visible = false
@@ -636,18 +652,32 @@ class Mode7Renderer
       # ponytail: pixel art 2D como billboard; quad solo en planes explicitos.
       rigid_2d = [
         :component, :wall_component, :indoor_prop, :nds_billboard,
-        :nds_structure, :nds_overlay, :nds_wall, :nds_mountain_wall,
+        :nds_structure, :nds_overlay, :nds_bush_overlay, :nds_wall,
         :nds_roof, :nds_roof_high
       ]
-      if rigid_kind == :nds_stair
-        # Rampa: el borde sur es el pie (wy alto, elev 0) y el borde norte sube
-        # hasta NDS_STAIR_HEIGHT. Asi la escalera inclina hacia el norte sobre
-        # su propio bitmap, como en las rampas NDS.
+      rigid_2d << :nds_mountain_wall if !mountain_plane
+      if rigid_kind == :nds_stair || rigid_kind == :nds_stair_row
+        # Rampa por fila: su borde sur usa la altura local y el norte suma el
+        # rise del tramo. Los bordes de filas consecutivas coinciden exactos.
         left_wx  = min_tx.to_f * Game_Map::TILE_WIDTH
         right_wx = (max_tx.to_f + 1.0) * Game_Map::TILE_WIDTH
         south_wy = (max_ty.to_f + 1.0) * Game_Map::TILE_HEIGHT
         north_wy = min_ty.to_f * Game_Map::TILE_HEIGHT
-        stair_h  = Mode7::Config::NDS_STAIR_HEIGHT.to_f
+        stair_h  = if rigid_kind == :nds_stair_row
+                     sprite.instance_variable_get(:@nds_stair_rise).to_f
+                   else
+                     north_z = sprite.instance_variable_get(:@nds_stair_north_z)
+                     south_z = sprite.instance_variable_get(:@nds_stair_south_z)
+                     if !north_z.nil? && !south_z.nil?
+                       north_z.to_f - south_z.to_f
+                     else
+                       Mode7::Config::NDS_STAIR_HEIGHT.to_f
+                     end
+                   end
+        # La rampa es suelo transitable: todo el quad queda por debajo del
+        # personaje. Usamos su esquina norte/alta, el menor depth visual del
+        # recorrido, en vez del pie sur del bitmap completo.
+        stair_depth = [north_wy, elev + stair_h, south_wy, elev]
         bl = Mode7.project(left_wx,  south_wy, elev)
         br = Mode7.project(right_wx, south_wy, elev)
         tl = Mode7.project(left_wx,  north_wy, elev + stair_h)
@@ -698,13 +728,23 @@ class Mode7Renderer
       else
         left_wx  = min_tx.to_f * Game_Map::TILE_WIDTH
         right_wx = (max_tx.to_f + 1.0) * Game_Map::TILE_WIDTH
-        base_wy  = plane_kind ? min_ty.to_f * Game_Map::TILE_HEIGHT : wyb.to_f
+        base_wy  = project_as_plane ? min_ty.to_f * Game_Map::TILE_HEIGHT : wyb.to_f
         height   = h.to_f
         if rigid_kind == :nds_wall_plane
           height *= Mode7::Config::NDS_WALL_HEIGHT_SCALE.to_f
-        elsif rigid_kind == :nds_mountain_wall_plane
-          height *= Mode7::Config::NDS_MOUNTAIN_WALL_HEIGHT_SCALE.to_f
+        elsif rigid_kind == :nds_mountain_wall_plane || mountain_plane
+          # La textura puede ocupar varias filas en el editor, pero representa
+          # una sola cara entre suelo y MountainTop. La altura geométrica debe
+          # coincidir con la meseta, no con el alto del bitmap fuente.
+          # Una fachada con N filas apiladas representa N niveles verticales.
+          # Usar solo 32 px comprimia el bitmap y desalineaba el MountainTop.
+          height = h.to_f * Mode7::Config::NDS_MOUNTAIN_WALL_HEIGHT_SCALE.to_f
         end
+        # Un plano vertical ocupa un rango de Z. Ordenarlo solo por su base
+        # (Z=0) hacia que Priority/suelo bajo ganaran al muro de una meseta.
+        # El centro fisico de la cara es una aproximacion estable hasta contar
+        # con depth-buffer por pixel.
+        sort_elevation = elev + height * 0.5
 
         bl = Mode7.project(left_wx,  base_wy, elev)
         br = Mode7.project(right_wx, base_wy, elev)
@@ -734,13 +774,21 @@ class Mode7Renderer
         sprite.zoom_y = [ys.max - ys.min, 0.001].max / sprite.bitmap.height.to_f
       end
 
-      depth_wyb, depth_priority, depth_unify = depth || [base_wy, 0, 0]
-      depth_wyb = base_wy if plane_kind
-      bias = depth_unify.to_i
-      bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority.to_i > 0
-      sprite.z = Mode7.depth_z_at_elevation(
-        depth_wyb, elev, depth_priority, bias
-      )
+      if stair_depth
+        # Una rampa es terreno: el quad completo debe quedar detras del actor en
+        # cualquier punto. Usa el menor Z de ambos extremos, no solo el norte.
+        z_north = Mode7.depth_z_at_elevation(stair_depth[0], stair_depth[1], 0, -4)
+        z_south = Mode7.depth_z_at_elevation(stair_depth[2], stair_depth[3], 0, -4)
+        sprite.z = [z_north, z_south].min
+      else
+        depth_wyb, depth_priority, depth_unify = depth || [base_wy, 0, 0]
+        depth_wyb = base_wy if project_as_plane
+        bias = depth_unify.to_i
+        bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority.to_i > 0
+        sprite.z = Mode7.depth_z_at_elevation(
+          depth_wyb, sort_elevation, depth_priority, bias
+        )
+      end
       apply_depth_fog_to_sprite(sprite, sprite.y)
     end
   rescue Exception => e

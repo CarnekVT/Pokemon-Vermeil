@@ -28,8 +28,12 @@ REGLAS
 - Priority solo ordena Z; no cambia altura, escala ni categoria.
 - Zoom 0.5-1.5 es global. Ningun Terrain Tag tiene zoom propio.
 - WallPlane se coloca en el borde norte de las celdas que contienen su textura.
+- NDSMountainWall conserva el arte 2D y une todas sus filas contiguas en una
+  sola fachada. Usa NDSMountainWallPlane solo cuando necesites un quad 3D real.
 - 37 NDSStair se inclina hacia el norte 32 px sobre su pie sur; NUNCA bakea en
   @ground ni como strip plano (un solo render: la rampa).
+- Grass/TallGrass vanilla con bit bush permanece en el plano; el recorte bush
+  del personaje funciona sin convertir las briznas en billboards.
 
 MAP079 / BW TILES
 -----------------
