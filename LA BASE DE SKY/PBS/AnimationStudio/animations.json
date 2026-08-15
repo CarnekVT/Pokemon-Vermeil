@@ -1,0 +1,2181 @@
+{
+  "format": "battle-animation-studio",
+  "version": 10,
+  "preview": {
+    "battlers": {
+      "user": {
+        "projectPath": "Graphics/UI/AnimBackTest.png",
+        "folder": "UI",
+        "name": "AnimBackTest",
+        "label": "AnimBackTest"
+      },
+      "target": {
+        "projectPath": "Graphics/UI/AnimFrontTest.png",
+        "folder": "UI",
+        "name": "AnimFrontTest",
+        "label": "AnimFrontTest"
+      }
+    },
+    "scene": {
+      "background": "Graphics/Battlebacks/indoor1_bg.png",
+      "playerBase": "Graphics/Battlebacks/indoor1_base0.png",
+      "enemyBase": "Graphics/Battlebacks/indoor1_base1.png",
+      "showBases": true,
+      "dim": 0
+    },
+    "contextMode": "auto",
+    "manualContext": {
+      "width": 512,
+      "height": 384,
+      "user": {
+        "x": 128,
+        "y": 326,
+        "focusX": 128,
+        "focusY": 278,
+        "zoomX": 1,
+        "zoomY": 1
+      },
+      "target": {
+        "x": 390,
+        "y": 174,
+        "focusX": 390,
+        "focusY": 126,
+        "zoomX": 1,
+        "zoomY": 1
+      }
+    },
+    "autoKey": true,
+    "loop": false,
+    "showPath": true,
+    "focusMode": false,
+    "layout": {
+      "leftWidth": 220,
+      "rightWidth": 430,
+      "timelineHeight": 380,
+      "framePixels": 8
+    }
+  },
+  "animations": [
+    {
+      "id": "anim_msuss6oc_1",
+      "name": "DB Animation",
+      "fps": 20,
+      "duration": 39,
+      "source": {
+        "type": "pbs",
+        "path": "PBS/Animations/Common/Burn.txt",
+        "move": "Burn",
+        "version": 0,
+        "native": true,
+        "catalogType": "common",
+        "opposing": false,
+        "external": false,
+        "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY"
+      },
+      "battlers": {
+        "user": {
+          "id": "battler_user",
+          "type": "battler",
+          "side": "user",
+          "name": "User",
+          "enabled": true,
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_msuss6oe_h",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_msuss6od_9",
+              "frame": 8,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_msuss6od_a",
+              "frame": 9,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_msuss6od_b",
+              "frame": 11,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_msuss6od_c",
+              "frame": 13,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_msuss6od_d",
+              "frame": 15,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_msuss6od_e",
+              "frame": 17,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_msuss6od_f",
+              "frame": 19,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_msuss6od_g",
+              "frame": 20,
+              "easing": "linear",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "facing": [],
+            "flipY": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [
+            {
+              "name": "MoveColor",
+              "args": [
+                "7",
+                "3",
+                "C03800CC"
+              ]
+            },
+            {
+              "name": "MoveColor",
+              "args": [
+                "22",
+                "7",
+                "C0380000"
+              ]
+            }
+          ],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 29,
+          "imported": {
+            "format": "pbs",
+            "focus": "user",
+            "rawProps": {},
+            "pbsBattlerParticle": true,
+            "graphic": "USER"
+          },
+          "pbs": {
+            "focus": "user",
+            "foeInvertX": false,
+            "foeInvertY": false,
+            "foeFlip": false,
+            "tiled": false,
+            "angleOverride": "None",
+            "secondLayer": false,
+            "maskGraphic": "",
+            "emitter": "None",
+            "emitterRate": 1,
+            "emitterIntensity": 1,
+            "randomFrameMax": 0,
+            "randomAngleRange": 0,
+            "randomInvertAngle": false,
+            "randomInvertFlip": false,
+            "commands": {
+              "color": [
+                {
+                  "frame": 7,
+                  "duration": 3,
+                  "value": "C03800CC",
+                  "easing": "ease_both"
+                },
+                {
+                  "frame": 22,
+                  "duration": 7,
+                  "value": "C0380000",
+                  "easing": "ease_both"
+                }
+              ],
+              "x": [
+                {
+                  "frame": 8,
+                  "duration": 1,
+                  "value": 5,
+                  "easing": "ease_both"
+                },
+                {
+                  "frame": 9,
+                  "duration": 2,
+                  "value": -5,
+                  "easing": "ease_both"
+                },
+                {
+                  "frame": 11,
+                  "duration": 2,
+                  "value": 5,
+                  "easing": "ease_both"
+                },
+                {
+                  "frame": 13,
+                  "duration": 2,
+                  "value": -5,
+                  "easing": "ease_both"
+                },
+                {
+                  "frame": 15,
+                  "duration": 2,
+                  "value": 5,
+                  "easing": "ease_both"
+                },
+                {
+                  "frame": 17,
+                  "duration": 2,
+                  "value": -5,
+                  "easing": "ease_both"
+                },
+                {
+                  "frame": 19,
+                  "duration": 1,
+                  "value": 0,
+                  "easing": "ease_both"
+                }
+              ]
+            },
+            "emitterCommands": {}
+          }
+        },
+        "target": {
+          "id": "battler_target",
+          "type": "battler",
+          "side": "target",
+          "name": "Target",
+          "enabled": true,
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_msuss6oc_4",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_msuss6oc_5",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "facing": [],
+            "flipY": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        }
+      },
+      "camera": {
+        "id": "camera_main",
+        "type": "camera",
+        "name": "Camera",
+        "enabled": true,
+        "visual": {
+          "cameraX": 0,
+          "cameraY": 0,
+          "cameraZoom": 100,
+          "cameraRotation": 0
+        },
+        "valueKeys": {
+          "size": [],
+          "scaleX": [],
+          "scaleY": [],
+          "rotation": [],
+          "opacity": [],
+          "graphicFrame": [],
+          "srcX": [],
+          "srcY": [],
+          "srcW": [],
+          "srcH": [],
+          "z": [],
+          "blend": [],
+          "flip": [],
+          "cameraX": [],
+          "cameraY": [],
+          "cameraZoom": [],
+          "cameraRotation": []
+        },
+        "visibleKeys": [
+          {
+            "id": "vkey_msuss6oc_6",
+            "frame": 0,
+            "value": true
+          }
+        ],
+        "positionKeys": [
+          {
+            "id": "key_msuss6oc_7",
+            "frame": 0,
+            "easing": "linear",
+            "point": {
+              "anchor": "screen",
+              "x": 0,
+              "y": 0,
+              "offsetX": 0,
+              "offsetY": 0
+            }
+          }
+        ],
+        "startFrame": 0,
+        "endFrame": 0,
+        "logic": []
+      },
+      "tracks": [
+        {
+          "id": "track_msuss6oc_8",
+          "type": "effects",
+          "name": "Effects",
+          "clips": [
+            {
+              "id": "clip_msuss6oe_i",
+              "type": "pbs-particle",
+              "name": "After Flame Emitter 1",
+              "enabled": true,
+              "startFrame": 0,
+              "endFrame": 39,
+              "graphic": {
+                "source": "new",
+                "projectPath": "",
+                "folder": "Battle animations",
+                "name": "flame",
+                "relativeHint": "flame",
+                "externalGameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "flame",
+                  "flame"
+                ],
+                "rawName": "flame",
+                "specialBattler": "flame",
+                "maskGraphic": ""
+              },
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "visibleKeys": [
+                {
+                  "id": "vkey_msuss6oe_z",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_msuss6oe_n",
+                  "frame": 0,
+                  "easing": "linear",
+                  "point": {
+                    "anchor": "pbs:user_position",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "foeInvertX": false,
+                    "foeInvertY": false
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_msuss6oe_o",
+                    "frame": 8,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_p",
+                    "frame": 11,
+                    "value": 100,
+                    "easing": "ease_in"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_q",
+                    "frame": 18,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_msuss6oe_r",
+                    "frame": 8,
+                    "value": 15,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_s",
+                    "frame": 11,
+                    "value": 100,
+                    "easing": "ease_in"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_t",
+                    "frame": 18,
+                    "value": 15,
+                    "easing": "linear"
+                  }
+                ],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_msuss6oe_u",
+                    "frame": 8,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_v",
+                    "frame": 10,
+                    "value": 66.66666666666667,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_w",
+                    "frame": 14,
+                    "value": 66.66666666666667,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_x",
+                    "frame": 18,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [
+                  {
+                    "id": "pkey_msuss6oe_y",
+                    "frame": 8,
+                    "value": 10,
+                    "easing": "linear"
+                  }
+                ],
+                "blend": [],
+                "flip": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": [],
+                "flipY": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [
+                {
+                  "name": "SetColor",
+                  "args": [
+                    "8",
+                    "F86000F4"
+                  ]
+                },
+                {
+                  "name": "MoveColor",
+                  "args": [
+                    "8",
+                    "9",
+                    "F80000DC",
+                    "EaseIn"
+                  ]
+                }
+              ],
+              "pbs": {
+                "focus": "user_position",
+                "foeInvertX": false,
+                "foeInvertY": false,
+                "foeFlip": false,
+                "tiled": false,
+                "angleOverride": "None",
+                "secondLayer": true,
+                "maskGraphic": "",
+                "emitter": "Projectile",
+                "emitterRate": 10,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "commands": {
+                  "z": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomX": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 8,
+                      "duration": 3,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 11,
+                      "duration": 7,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 15,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 8,
+                      "duration": 3,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 11,
+                      "duration": 7,
+                      "value": 15,
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 8,
+                      "duration": 2,
+                      "value": 170,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 14,
+                      "duration": 4,
+                      "value": 0,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "color": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": "F86000F4",
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 8,
+                      "duration": 9,
+                      "value": "F80000DC",
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "zoomX2": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomY2": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    }
+                  ],
+                  "color2": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": "E0E000F4",
+                      "easing": "linear"
+                    }
+                  ]
+                },
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 9,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitX": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 35,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitY": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": -25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 2,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 200,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 90,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "frame": 8,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ]
+                }
+              },
+              "logic": [],
+              "imported": {
+                "format": "pbs",
+                "focus": "user_position",
+                "rawProps": {
+                  "Graphic": "flame",
+                  "Focus": "UserPosition",
+                  "SecondLayer": "true",
+                  "Emitter": "Projectile",
+                  "EmitterRate": "10",
+                  "RandomInvertFlip": "true"
+                },
+                "pbsBattlerParticle": false,
+                "graphic": "flame"
+              }
+            },
+            {
+              "id": "clip_msuss6oe_10",
+              "type": "pbs-particle",
+              "name": "After Flame Emitter 2",
+              "enabled": true,
+              "startFrame": 0,
+              "endFrame": 39,
+              "graphic": {
+                "source": "new",
+                "projectPath": "",
+                "folder": "Battle animations",
+                "name": "flame",
+                "relativeHint": "flame",
+                "externalGameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "flame",
+                  "flame"
+                ],
+                "rawName": "flame",
+                "specialBattler": "flame",
+                "maskGraphic": ""
+              },
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "visibleKeys": [
+                {
+                  "id": "vkey_msuss6oe_1h",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_msuss6oe_15",
+                  "frame": 0,
+                  "easing": "linear",
+                  "point": {
+                    "anchor": "pbs:user_position",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "foeInvertX": false,
+                    "foeInvertY": false
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_msuss6oe_16",
+                    "frame": 10,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_17",
+                    "frame": 13,
+                    "value": 100,
+                    "easing": "ease_in"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_18",
+                    "frame": 20,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_msuss6oe_19",
+                    "frame": 10,
+                    "value": 15,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_1a",
+                    "frame": 13,
+                    "value": 100,
+                    "easing": "ease_in"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_1b",
+                    "frame": 20,
+                    "value": 15,
+                    "easing": "linear"
+                  }
+                ],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_msuss6oe_1c",
+                    "frame": 10,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_1d",
+                    "frame": 12,
+                    "value": 66.66666666666667,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_1e",
+                    "frame": 16,
+                    "value": 66.66666666666667,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6oe_1f",
+                    "frame": 20,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [
+                  {
+                    "id": "pkey_msuss6oe_1g",
+                    "frame": 10,
+                    "value": 10,
+                    "easing": "linear"
+                  }
+                ],
+                "blend": [],
+                "flip": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": [],
+                "flipY": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [
+                {
+                  "name": "SetColor",
+                  "args": [
+                    "10",
+                    "F86000F4"
+                  ]
+                },
+                {
+                  "name": "MoveColor",
+                  "args": [
+                    "10",
+                    "9",
+                    "F80000DC",
+                    "EaseIn"
+                  ]
+                }
+              ],
+              "pbs": {
+                "focus": "user_position",
+                "foeInvertX": false,
+                "foeInvertY": false,
+                "foeFlip": false,
+                "tiled": false,
+                "angleOverride": "None",
+                "secondLayer": true,
+                "maskGraphic": "",
+                "emitter": "Projectile",
+                "emitterRate": 10,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "commands": {
+                  "z": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomX": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 10,
+                      "duration": 3,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 13,
+                      "duration": 7,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 15,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 10,
+                      "duration": 3,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 13,
+                      "duration": 7,
+                      "value": 15,
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 10,
+                      "duration": 2,
+                      "value": 170,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 16,
+                      "duration": 4,
+                      "value": 0,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "color": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": "F86000F4",
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 10,
+                      "duration": 9,
+                      "value": "F80000DC",
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "zoomX2": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomY2": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    }
+                  ],
+                  "color2": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": "E0E000F4",
+                      "easing": "linear"
+                    }
+                  ]
+                },
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 12,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitX": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitY": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": -25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 2,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 200,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 90,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "frame": 10,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ]
+                }
+              },
+              "logic": [],
+              "imported": {
+                "format": "pbs",
+                "focus": "user_position",
+                "rawProps": {
+                  "Graphic": "flame",
+                  "Focus": "UserPosition",
+                  "SecondLayer": "true",
+                  "Emitter": "Projectile",
+                  "EmitterRate": "10",
+                  "RandomInvertFlip": "true"
+                },
+                "pbsBattlerParticle": false,
+                "graphic": "flame"
+              }
+            },
+            {
+              "id": "clip_msuss6oe_1i",
+              "type": "pbs-particle",
+              "name": "After Flame Emitter 3",
+              "enabled": true,
+              "startFrame": 0,
+              "endFrame": 39,
+              "graphic": {
+                "source": "new",
+                "projectPath": "",
+                "folder": "Battle animations",
+                "name": "flame",
+                "relativeHint": "flame",
+                "externalGameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "flame",
+                  "flame"
+                ],
+                "rawName": "flame",
+                "specialBattler": "flame",
+                "maskGraphic": ""
+              },
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "visibleKeys": [
+                {
+                  "id": "vkey_msuss6of_1z",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_msuss6of_1n",
+                  "frame": 0,
+                  "easing": "linear",
+                  "point": {
+                    "anchor": "pbs:user_position",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "foeInvertX": false,
+                    "foeInvertY": false
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_msuss6of_1o",
+                    "frame": 11,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6of_1p",
+                    "frame": 14,
+                    "value": 100,
+                    "easing": "ease_in"
+                  },
+                  {
+                    "id": "pkey_msuss6of_1q",
+                    "frame": 21,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_msuss6of_1r",
+                    "frame": 11,
+                    "value": 15,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6of_1s",
+                    "frame": 14,
+                    "value": 100,
+                    "easing": "ease_in"
+                  },
+                  {
+                    "id": "pkey_msuss6of_1t",
+                    "frame": 21,
+                    "value": 15,
+                    "easing": "linear"
+                  }
+                ],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_msuss6of_1u",
+                    "frame": 11,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6of_1v",
+                    "frame": 13,
+                    "value": 66.66666666666667,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_msuss6of_1w",
+                    "frame": 17,
+                    "value": 66.66666666666667,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6of_1x",
+                    "frame": 21,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [
+                  {
+                    "id": "pkey_msuss6of_1y",
+                    "frame": 11,
+                    "value": 10,
+                    "easing": "linear"
+                  }
+                ],
+                "blend": [],
+                "flip": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": [],
+                "flipY": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [
+                {
+                  "name": "SetColor",
+                  "args": [
+                    "11",
+                    "F86000F4"
+                  ]
+                },
+                {
+                  "name": "MoveColor",
+                  "args": [
+                    "11",
+                    "9",
+                    "F80000DC",
+                    "EaseIn"
+                  ]
+                }
+              ],
+              "pbs": {
+                "focus": "user_position",
+                "foeInvertX": false,
+                "foeInvertY": false,
+                "foeFlip": false,
+                "tiled": false,
+                "angleOverride": "None",
+                "secondLayer": true,
+                "maskGraphic": "",
+                "emitter": "Projectile",
+                "emitterRate": 10,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "commands": {
+                  "z": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomX": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 11,
+                      "duration": 3,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 14,
+                      "duration": 7,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 15,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 11,
+                      "duration": 3,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 14,
+                      "duration": 7,
+                      "value": 15,
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 11,
+                      "duration": 2,
+                      "value": 170,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 17,
+                      "duration": 4,
+                      "value": 0,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "color": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": "F86000F4",
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 11,
+                      "duration": 9,
+                      "value": "F80000DC",
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "zoomX2": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomY2": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    }
+                  ],
+                  "color2": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": "E0E000F4",
+                      "easing": "linear"
+                    }
+                  ]
+                },
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 12,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 14,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitX": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": -30,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitY": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": -25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 2,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 200,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 90,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "frame": 11,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ]
+                }
+              },
+              "logic": [],
+              "imported": {
+                "format": "pbs",
+                "focus": "user_position",
+                "rawProps": {
+                  "Graphic": "flame",
+                  "Focus": "UserPosition",
+                  "SecondLayer": "true",
+                  "Emitter": "Projectile",
+                  "EmitterRate": "10",
+                  "RandomInvertFlip": "true"
+                },
+                "pbsBattlerParticle": false,
+                "graphic": "flame"
+              }
+            },
+            {
+              "id": "clip_msuss6of_20",
+              "type": "pbs-particle",
+              "name": "After Flame Emitter 4",
+              "enabled": true,
+              "startFrame": 0,
+              "endFrame": 39,
+              "graphic": {
+                "source": "new",
+                "projectPath": "",
+                "folder": "Battle animations",
+                "name": "flame",
+                "relativeHint": "flame",
+                "externalGameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "flame",
+                  "flame"
+                ],
+                "rawName": "flame",
+                "specialBattler": "flame",
+                "maskGraphic": ""
+              },
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "visibleKeys": [
+                {
+                  "id": "vkey_msuss6of_2h",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_msuss6of_25",
+                  "frame": 0,
+                  "easing": "linear",
+                  "point": {
+                    "anchor": "pbs:user_position",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "foeInvertX": false,
+                    "foeInvertY": false
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_msuss6of_26",
+                    "frame": 13,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6of_27",
+                    "frame": 16,
+                    "value": 100,
+                    "easing": "ease_in"
+                  },
+                  {
+                    "id": "pkey_msuss6of_28",
+                    "frame": 23,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_msuss6of_29",
+                    "frame": 13,
+                    "value": 15,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6of_2a",
+                    "frame": 16,
+                    "value": 100,
+                    "easing": "ease_in"
+                  },
+                  {
+                    "id": "pkey_msuss6of_2b",
+                    "frame": 23,
+                    "value": 15,
+                    "easing": "linear"
+                  }
+                ],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_msuss6of_2c",
+                    "frame": 13,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6of_2d",
+                    "frame": 15,
+                    "value": 66.66666666666667,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_msuss6of_2e",
+                    "frame": 19,
+                    "value": 66.66666666666667,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msuss6of_2f",
+                    "frame": 23,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [
+                  {
+                    "id": "pkey_msuss6of_2g",
+                    "frame": 13,
+                    "value": 10,
+                    "easing": "linear"
+                  }
+                ],
+                "blend": [],
+                "flip": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": [],
+                "flipY": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [
+                {
+                  "name": "SetColor",
+                  "args": [
+                    "13",
+                    "F86000F4"
+                  ]
+                },
+                {
+                  "name": "MoveColor",
+                  "args": [
+                    "13",
+                    "9",
+                    "F80000DC",
+                    "EaseIn"
+                  ]
+                }
+              ],
+              "pbs": {
+                "focus": "user_position",
+                "foeInvertX": false,
+                "foeInvertY": false,
+                "foeFlip": false,
+                "tiled": false,
+                "angleOverride": "None",
+                "secondLayer": true,
+                "maskGraphic": "",
+                "emitter": "Projectile",
+                "emitterRate": 10,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "commands": {
+                  "z": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomX": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 13,
+                      "duration": 3,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 16,
+                      "duration": 7,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 15,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 13,
+                      "duration": 3,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 16,
+                      "duration": 7,
+                      "value": 15,
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 13,
+                      "duration": 2,
+                      "value": 170,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "frame": 19,
+                      "duration": 4,
+                      "value": 0,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "color": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": "F86000F4",
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 13,
+                      "duration": 9,
+                      "value": "F80000DC",
+                      "easing": "ease_in"
+                    }
+                  ],
+                  "zoomX2": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomY2": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    }
+                  ],
+                  "color2": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": "E0E000F4",
+                      "easing": "linear"
+                    }
+                  ]
+                },
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 14,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 15,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "frame": 16,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitX": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": -10,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitY": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": -30,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 2,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 200,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 90,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "frame": 13,
+                      "duration": 0,
+                      "value": 5,
+                      "easing": "linear"
+                    }
+                  ]
+                }
+              },
+              "logic": [],
+              "imported": {
+                "format": "pbs",
+                "focus": "user_position",
+                "rawProps": {
+                  "Graphic": "flame",
+                  "Focus": "UserPosition",
+                  "SecondLayer": "true",
+                  "Emitter": "Projectile",
+                  "EmitterRate": "10",
+                  "RandomInvertFlip": "true"
+                },
+                "pbsBattlerParticle": false,
+                "graphic": "flame"
+              }
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "se",
+          "frame": 5,
+          "name": "Common/Status Burned",
+          "volume": 100,
+          "pitch": 100
+        }
+      ],
+      "logic": [],
+      "notes": "",
+      "scene": {
+        "background": "Graphics/Battlebacks/indoor1_bg.png",
+        "playerBase": "Graphics/Battlebacks/indoor1_base0.png",
+        "enemyBase": "Graphics/Battlebacks/indoor1_base1.png",
+        "source": "project"
+      },
+      "noUser": false,
+      "noTarget": true,
+      "hidesDataBoxes": false,
+      "credit": "Dawn Bronze"
+    }
+  ],
+  "reusableClips": [],
+  "packages": [],
+  "editor": {
+    "lastAnimationId": "anim_msuss6oc_1"
+  }
+}

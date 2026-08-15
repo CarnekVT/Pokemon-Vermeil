@@ -1,0 +1,6 @@
+Name       = Battle Animation Studio Preview Bridge
+Version    = 1.2.0
+Essentials = 21.2
+Credits    = Battle Animation Studio
+Last       = true
+Priority   = 10000

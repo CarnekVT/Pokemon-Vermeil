@@ -193,6 +193,8 @@ class Mode7Renderer
     # cada refresh. La altura de una meseta se resuelve por componente.
     @nds_mountain_height_cache = nil
     @nds_mountain_height_cache_complete = false
+    @nds_mountain_component_cache = {}
+    @nds_mountain_wall_source_cache = {}
     @nds_underlay_cache = {}
     @wall_visual_components = nil
     @wall_visual_owned = {}
@@ -208,6 +210,12 @@ class Mode7Renderer
         @entry_cache[[tx, ty]] = collect_cell_entries(tx, ty)
       end
     end
+
+    # V5.10: compilar/cargar la geometria fisica DESPUES de tener el mapa
+    # completo en cache y ANTES de construir superficies/caras/colision.
+    # 023_NDSSurfaceGeometry.rb define este hook y usa JSON explicito si existe;
+    # de lo contrario convierte los tags legacy a la misma rejilla de alturas.
+    build_nds_surface_geometry if respond_to?(:build_nds_surface_geometry, true)
 
     # Los tags exclusivos Indoor pueden resolver el modo aunque un plugin de
     # metadata no exponga Outside/Outdoor al objeto GameData.

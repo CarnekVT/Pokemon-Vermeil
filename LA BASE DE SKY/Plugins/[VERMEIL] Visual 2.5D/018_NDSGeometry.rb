@@ -718,6 +718,21 @@ class Mode7Renderer
         sprite.zoom_x = scale
         sprite.zoom_y = scale
 
+        if rigid_kind == :nds_bush_overlay
+          # El bitmap tiene una fila transparente de base para conservar el pie.
+          # Alinear su junta (32 px sobre el pie) con el borde norte REAL del
+          # tile bush elimina la separacion que quedaba al inclinar la camara.
+          base_ty = sprite.instance_variable_get(:@nds_bush_base_ty)
+          if !base_ty.nil?
+            desired = Mode7.project_y(base_ty.to_f * Game_Map::TILE_HEIGHT, elev)
+            if desired
+              current = sprite.y - Game_Map::TILE_HEIGHT.to_f * scale
+              sprite.y += desired - current
+              sprite.y += Mode7::Config::NDS_BUSH_CAP_OVERLAP_PX.to_f
+            end
+          end
+        end
+
         half_w = sprite.bitmap.width * scale * 0.5
         top = sprite.y - sprite.bitmap.height * scale
         sprite.visible = !(sprite.x + half_w < -Game_Map::TILE_WIDTH ||

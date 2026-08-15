@@ -1,3 +1,35 @@
+===============================================================================
+v5.10.1 - SURFACE/VISUAL CONSISTENCY HOTFIX
+===============================================================================
+- FIX principal de montanas: nds_volume_surface_elevation ya no vuelve a usar
+  nds_mountain_height_at legacy. El MountainTop visible usa SurfaceGeometry.
+- Cliff faces, colision, camara, actor, props y superficie superior comparten
+  ahora la misma altura fisica por celda.
+- Un override explicito level:0 conserva Z=0 aunque el tile tenga MountainTop
+  legacy; no reaparece la altura inferida por las filas MountainWall.
+- Las celdas NDSStair no generan ademas un MountainTop horizontal duplicado:
+  la rampa inclinada es la unica superficie visible/caminable en ese hueco.
+- Una celda elevada por Geometry Editor ya no necesita MountainTop/Volume para
+  levantar su grafico: el P0 normal sale del ground Z=0 y se dibuja en su Z real.
+- MountainWall/MountainWallPlane siguen siendo solo arte/material de cliff.
+
+
+===============================================================================
+v5.10.0 - SURFACE GEOMETRY / PHYSICAL RUNTIME (Milestone 1)
+===============================================================================
+- Nueva fuente de verdad: 023_NDSSurfaceGeometry.rb.
+- Soporte opcional Data/VERMEIL2_5D/MapXXX.json (height grid por mapa).
+- El JSON usa inherit_legacy=true por defecto: se puede migrar el mapa por zonas;
+  una celda level:0 permite aplanar explicitamente sin perder el resto.
+- Sin JSON, los Terrain Tags actuales se convierten a la misma geometria legacy.
+- Camara, actores, props, volume faces y colision consultan la misma altura.
+- MountainWall/MountainWallPlane pasan a ser arte/material vertical: ya no crean
+  una segunda pared de colision 1..N tiles delante del borde de MountainTop.
+- Compatibilidad de pasabilidad para filas MountainWall decorativas de mapas 2D.
+- La altura grafica del charset deja de sumar 31 px al depth; bias local = 2.
+- Priority queda como desempate local tambien en Affine.
+- Bush cap overlap = 2 px para cerrar la ultima junta de hierba alta doble.
+- Base preparada para VERMEIL Geometry Editor de Maker Studio.
 
 ================================================================================
 v5.8.1 - HOTFIX DE CAMARA/ELEVACION
@@ -188,3 +220,21 @@ v5.8.0 - 2026-08-13
 - Affine usa la misma elevacion relativa de camara que Perspective, evitando
   saltos de posicion al cambiar de contexto indoor/outdoor.
 
+
+===============================================================================
+v5.9.0 - MOUNTAIN SURFACE SOLVER / SUPPORT / COLLISION / SIDE FACES
+===============================================================================
+- MountainTop pasa a ser la autoridad de la geometria de meseta.
+- MountainWall deja de colapsarse como componente rectangular; se usa como arte
+  y como referencia del numero de niveles de altura.
+- Frentes de montana generados automaticamente desde el borde sur real del top.
+- Laterales WEST/EAST generados automaticamente incluso en perfil performance,
+  reutilizando la textura MountainWall de la misma meseta (no el bevel del top).
+- Las escaleras abren el frente generado y siguen siendo el puente entre alturas.
+- Colision por discontinuidad de altura: no se cruza de Z0 a Z32/64/96 por los
+  lados; NDSStair permite el cambio de nivel.
+- Props/estructuras y componentes de prioridad heredan la altura de la superficie
+  que existe bajo su fila de apoyo, por lo que objetos sobre montanas suben con ella.
+- Hierba alta de 2 tiles: la mitad superior se alinea con el borde proyectado del
+  tile base y aplica un solape subpixel para eliminar la junta restante.
+- Angulo exterior default se mantiene en 25 grados.

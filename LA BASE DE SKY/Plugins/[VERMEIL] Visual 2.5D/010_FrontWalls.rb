@@ -614,7 +614,12 @@ class Mode7Renderer
     seed_groups.filter_map do |group|
       cells = group[:cells]
       next if cells.empty?
-      [cells, group[:elevation] || 0.0]
+      elevation = group[:elevation] || 0.0
+      if respond_to?(:nds_component_support_height, true)
+        support = nds_component_support_height(cells).to_f
+        elevation = support if support > elevation.to_f
+      end
+      [cells, elevation]
     end
   end
 

@@ -148,6 +148,18 @@ module Mode7
     # pantalla mantiene al jugador en el mismo nivel visual en vez de dejarlo
     # subir hacia el borde superior.
     CAMERA_FOLLOW_SURFACE_ELEVATION = true
+
+    # V5.10: una sola fuente de verdad para altura fisica. Si existe
+    # Data/VERMEIL2_5D/MapXXX.json, runtime, camara, colision, props y caras
+    # verticales leen esa geometria. Sin archivo se genera un fallback desde
+    # los Terrain Tags actuales para mantener mapas legacy funcionando.
+    SURFACE_GEOMETRY_ENABLED     = true
+    SURFACE_GEOMETRY_DIRECTORY   = "Data/VERMEIL2_5D"
+    SURFACE_GEOMETRY_HEIGHT_STEP = 32.0
+
+    # La altura grafica de un charset NO debe sumar casi un tile entero al Z.
+    # Este bias solo desempata billboards que comparten la misma superficie.
+    CHARACTER_DEPTH_BIAS = 2
     # ponytail: sin sangrado entre superficies; reactivar solo ante juntas
     # transparentes reproducibles en el raster legacy.
     PRIORITY_EDGE_OVERLAP = 0.0
@@ -333,6 +345,21 @@ module Mode7
     # fachada rigida. Solo MountainWallPlane fuerza un quad vertical real.
     # Convertir cada fila normal en plano producia tiras y huecos entre niveles.
     NDS_MOUNTAIN_WALLS_AS_PLANES   = true
+
+    # V5.9: MountainTop es la autoridad geometrica. MountainWall queda como
+    # proveedor de arte/numero de niveles; las caras fisicas se generan desde
+    # el borde REAL de la meseta. Esto permite frentes irregulares y laterales
+    # automaticos sin obligar al mapper a dibujar un mapa pensando en 3D.
+    NDS_MOUNTAIN_AUTO_FACES         = true
+    NDS_MOUNTAIN_AUTO_SIDE_FACES    = true
+    NDS_MOUNTAIN_HEIGHT_COLLISION   = true
+    NDS_MOUNTAIN_COLLISION_EPSILON  = 1.0
+
+    # La mitad superior de una hierba de dos tiles es billboard mientras el
+    # pie sigue siendo bush/suelo. Se alinea matematicamente con el borde norte
+    # del tile base y se deja este pequeno solape para ocultar raster seams.
+    NDS_BUSH_CAP_OVERLAP_PX         = 2.0
+
     NDS_BILLBOARD_DEPTH_STRENGTH   = 1.00
     NDS_STRUCTURE_DEPTH_STRENGTH   = 1.00
     NDS_OVERLAY_DEPTH_STRENGTH     = 1.00
@@ -388,6 +415,24 @@ module Mode7
     # NDS_STAIR_HEIGHT es la subida por defecto si no hay meseta/volumen al norte.
     NDS_STAIR_TERRAIN_TAG = :NDSStair
     NDS_STAIR_HEIGHT      = 32.0
+
+    # -----------------------------------------------------------------------
+    # OBJETOS GEOMETRY (cubos/planos del editor 2.5D Geometry)
+    # -----------------------------------------------------------------------
+    # Objetos colocados con la herramienta "Objetos" del mod Maker Studio y
+    # guardados en Data/VERMEIL2_5D/MapXXX.json (array "objects"). Se dibujan
+    # como quads 3D texturizados y, segun su colision, bloquean el paso.
+    NDS_GEOMETRY_OBJECTS_ENABLED = true
+    NDS_OBJECT_CULL_TILES_X      = 16
+    NDS_OBJECT_CULL_TILES_Y      = 14
+    NDS_OBJECT_FRONT_SHADE       = 24
+    NDS_OBJECT_SIDE_SHADE        = 46
+    NDS_OBJECT_TOP_SHADE         = 0
+    NDS_OBJECT_LAZY_BITMAPS      = true
+    NDS_OBJECT_REPROJECT_STEP    = 1.0
+    # Altura (en tiles) que el jugador puede subir por una cara "climb"/"one-way"
+    # sin escalera. Por encima se trata como pared solida.
+    NDS_OBJECT_CLIMB_MAX_TILES   = 1
     # Sombras: las capas de Maker Studio son sombras planas por layer. Los props
     # verticales (billboards/estructuras) las aplanan en una linea antiestetica y
     # heredan la direccion de config de CADA sombra. Con NDS_SHADOW_PROP_BLOBS

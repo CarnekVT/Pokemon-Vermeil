@@ -151,9 +151,9 @@ module Mode7
 
       sy = project_y(wy.to_f, elevation.to_f)
       return bias.to_i if sy.nil?
-      p = priority.to_i
-      sy += priority_screen_step(wy) * p if p > 0
-      sy.round + bias.to_i
+      # Incluso en Affine, Priority es solo un desempate local. Usar un paso de
+      # fila completo volvia a permitir que P2/P4 ganara contra altura fisica.
+      sy.round + priority.to_i * Config::PRIORITY_DEPTH_BIAS_STEP.to_i + bias.to_i
     end
 
     def depth_z_at_elevation(wy, elevation = 0.0, priority = 0, bias = 0)
@@ -300,6 +300,22 @@ class Mode7Renderer
     false
   end
 
+  def nds_mountain_wall_entry_at(tx, ty)
+    return nil if tx < 0 || ty < 0 || tx >= @map.width || ty >= @map.height
+    entries = @entry_cache[[tx, ty]] || []
+    entries.reverse.find { |entry| nds_mountain_wall_entry?(entry) }
+  rescue Exception
+    nil
+  end
+
+  def nds_stair_cell?(tx, ty)
+    return false if tx < 0 || ty < 0 || tx >= @map.width || ty >= @map.height
+    entries = @entry_cache[[tx, ty]] || []
+    entries.any? { |entry| nds_stair_entry?(entry) }
+  rescue Exception
+    false
+  end
+
   def nds_mountain_top_cell?(tx, ty)
     return false if tx < 0 || ty < 0 || tx >= @map.width || ty >= @map.height
     entries = @entry_cache[[tx, ty]] || []
@@ -312,6 +328,8 @@ class Mode7Renderer
 
   def nds_build_mountain_height_cache
     @nds_mountain_height_cache = {}
+    @nds_mountain_component_cache = {}
+    @nds_mountain_wall_source_cache = {}
     @nds_mountain_height_cache_complete = false
     base = Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
     base = 32.0 if base <= 0.0
@@ -324,6 +342,7 @@ class Mode7Renderer
     end
 
     visited = {}
+    component_id = 0
     top_cells.each_key do |start|
       next if visited[start]
       component = {}
@@ -341,14 +360,17 @@ class Mode7Renderer
         end
       end
 
-      # Solo el borde sur puede tener una fachada frontal. Una pila de N rows
-      # equivale a N * NDS_MOUNTAIN_HEIGHT de elevacion fisica.
+      # El borde sur aporta la ALTURA y el ARTE, pero no la geometria. Cada
+      # componente MountainTop se convierte en un volumen unico; una forma en L
+      # conserva su silueta porque las caras se generaran desde sus bordes.
       wall_levels = []
+      wall_sources = []
       component.each_key do |cx, cy|
         next if component[[cx, cy + 1]]
         count = 0
         wy = cy + 1
         while wy < @map.height && nds_mountain_wall_cell?(cx, wy)
+          wall_sources << nds_mountain_wall_entry_at(cx, wy) if count == 0
           count += 1
           wy += 1
         end
@@ -358,7 +380,13 @@ class Mode7Renderer
       levels = wall_levels.empty? ? 1 : wall_levels.max
       levels = 1 if levels <= 0
       height = base * levels
-      component.each_key { |pos| @nds_mountain_height_cache[pos] = height }
+      source = wall_sources.compact.first
+      component_id += 1
+      component.each_key do |pos|
+        @nds_mountain_height_cache[pos] = height
+        @nds_mountain_component_cache[pos] = component_id
+        @nds_mountain_wall_source_cache[pos] = source if source
+      end
     end
 
     @nds_mountain_height_cache_complete = true
@@ -376,6 +404,41 @@ class Mode7Renderer
     @nds_mountain_height_cache[key] || Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
   rescue Exception
     Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
+  end
+
+  def nds_mountain_component_id_at(tx, ty)
+    nds_build_mountain_height_cache if !@nds_mountain_height_cache_complete
+    (@nds_mountain_component_cache || {})[[tx.to_i, ty.to_i]]
+  rescue Exception
+    nil
+  end
+
+  # Fuente de pared para una cara generada. Primero busca la pila local justo
+  # al sur de esta columna del top; si la entrada es una zona lateral/interior,
+  # reutiliza la fachada representativa de la misma meseta.
+  def nds_mountain_wall_source_for(tx, ty)
+    cy = ty.to_i
+    while cy < @map.height && nds_mountain_top_cell?(tx, cy)
+      cy += 1
+    end
+    entry = nds_mountain_wall_entry_at(tx, cy)
+    return entry if entry
+    nds_build_mountain_height_cache if !@nds_mountain_height_cache_complete
+    (@nds_mountain_wall_source_cache || {})[[tx.to_i, ty.to_i]]
+  rescue Exception
+    nil
+  end
+
+  def nds_component_support_height(component)
+    return 0.0 if !component || component.empty?
+    foot_ty = component.keys.map { |_tx, ty| ty }.max
+    values = component.keys.filter_map do |tx, ty|
+      next if ty != foot_ty
+      nds_base_surface_height_at(tx, ty).to_f
+    end
+    values.empty? ? 0.0 : values.max
+  rescue Exception
+    0.0
   end
 
   # Altura de una celda sin considerar NDSStair. Se usa para conectar la rampa
@@ -569,9 +632,12 @@ class Mode7Renderer
         end
         first = segment.first
         depth_wyb = (first[:base_ty] + 1) * Game_Map::TILE_HEIGHT
-        make_rigid_component(cells, first[:elevation], bounds,
-                             first[:priority], first[:unify], depth_wyb,
-                             :nds_bush_overlay)
+        sprite = make_rigid_component(cells, first[:elevation], bounds,
+                                     first[:priority], first[:unify], depth_wyb,
+                                     :nds_bush_overlay)
+        if sprite
+          sprite.instance_variable_set(:@nds_bush_base_ty, first[:base_ty])
+        end
         segment.clear
       end
 
@@ -790,6 +856,17 @@ class Mode7Renderer
   def build_wall_columns
     @entry_cache.each do |(tx, ty), entries|
       direct_walls = entries.select { |entry| entry_is_wall?(entry) }
+      # V5.10: MountainWall/MountainWallPlane son MATERIAL vertical, no una
+      # casilla fisica delante de la meseta. Si los dejamos en @wall_cells la
+      # colision queda 1..N tiles mas cerca que la cara 3D y el error crece con
+      # la altura. La barrera real es ahora el cambio de altura del height grid.
+      if Mode7::Config::NDS_MOUNTAIN_AUTO_FACES
+        direct_walls = direct_walls.reject do |entry|
+          id = nds_category_id(entry)
+          id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
+            id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+        end
+      end
       next if direct_walls.empty?
       blocking = direct_walls.select { |entry| entry_blocks_movement?(entry) }
       next if blocking.empty?
@@ -807,6 +884,13 @@ class Mode7Renderer
       kind = nds_component_kind(component)
 
       if [:nds_wall, :nds_mountain_wall, :nds_wall_plane, :nds_mountain_wall_plane].include?(kind)
+        # V5.9: MountainWall es textura/metadata. La cara fisica se genera desde
+        # MountainTop en 019, para que visual, colision y forma irregular usen
+        # exactamente el mismo borde. Evita colapsar una L en un rectangulo.
+        if Mode7::Config::NDS_MOUNTAIN_AUTO_FACES &&
+           [:nds_mountain_wall, :nds_mountain_wall_plane].include?(kind)
+          next
+        end
         priority = all_entries.map { |entry| entry_visual_priority(entry) }.max || 0
         unify = all_entries.map { |entry| entry[:unify].to_i }.min || 0
         make_rigid_component(component, component_elevation, bounds,
@@ -840,7 +924,9 @@ class Mode7Renderer
   end
 
   def nds_structure_components_compatible?(a, elev_a, b, elev_b)
-    return false if (elev_a.to_f - elev_b.to_f).abs > 0.001
+    elev_a = [elev_a.to_f, nds_component_support_height(a)].max
+    elev_b = [elev_b.to_f, nds_component_support_height(b)].max
+    return false if (elev_a - elev_b).abs > 0.001
     ids_a = nds_structure_volume_ids(a)
     ids_b = nds_structure_volume_ids(b)
     return true if ids_a.empty? || ids_b.empty?
@@ -957,6 +1043,11 @@ class Mode7Renderer
       depth_ty = bounds.map { |_tx, ty| ty }.max
       depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
       kind = nds_component_kind(component)
+      # Un objeto apoyado sobre MountainTop/Volume hereda la superficie bajo su
+      # fila de apoyo. Antes el prop seguia en Z=0 aunque el suelo estuviera a
+      # 32/64/96, porque solo se miraba la elevacion del propio tile grafico.
+      support = nds_component_support_height(component)
+      elevation = support if support > elevation.to_f
 
       # Un arbol o edificio es una sola malla vertical ordenada por su pie.
       # Separarlo por Priority duplicaba sprites y abria columnas entre piezas.
