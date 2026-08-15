@@ -12,7 +12,7 @@ module MessageConfig
   LIGHT_MALE_TEXT_SHADOW_COLOR   = LIGHT_TEXT_SHADOW_COLOR
   FEMALE_TEXT_MAIN_COLOR         = Color.new(224, 8, 8)      # Used by message tag "\r"
   FEMALE_TEXT_SHADOW_COLOR       = Color.new(208, 208, 200)
-  LIGHT_FEMALE_TEXT_MAIN_COLOR   = Color.new(248, 128, 160)   # Used by message tag "\r"
+  LIGHT_FEMALE_TEXT_MAIN_COLOR   = Color.new(248, 128, 160)  # Used by message tag "\r"
   LIGHT_FEMALE_TEXT_SHADOW_COLOR = Color.new(88, 80, 72)
   FONT_NAME                      = "Power Green"
   FONT_SIZE                      = 27
