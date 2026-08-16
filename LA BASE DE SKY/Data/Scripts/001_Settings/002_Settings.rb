@@ -278,6 +278,8 @@ module Settings
 
   INCUBATOR_CHOOSE_EGG_FROM_PC = true
 
+  ALLOW_SEND_EGGS_TO_PC = true
+
   #=============================================================================
 
   # Los nombres de cada bolsillo de la Mochila.
@@ -820,7 +822,7 @@ end
 module Essentials
   VERSION = '21.1'
   ERROR_TEXT = ''
-  MKXPZ_VERSION = '2.4.2/d13f35c'
+  MKXPZ_VERSION = '2.4.2/3a80c929'
 end
 
 

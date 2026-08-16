@@ -13,12 +13,12 @@
     // Note that the "Game Title" defined in RPG Maker XP should not have
     // accented characters in it, which is why this property is useful.
     //
-    "windowTitle": "Pokémon Balance",
+    "windowTitle": "La Base De Sky 1.2.1.1",
 
     // The game window's width and height, in pixels.
     //
-    "defScreenW": 640,
-    "defScreenH": 480,
+    "defScreenW": 512,
+    "defScreenH": 384,
 
     // The path to the game window's icon. For Linux only. (Default: none)
     //
@@ -36,15 +36,49 @@
     // have no other use.
     //
     "bindingNames": {
-      "c": "Use",
-      "b": "Back",
-      "a": "Action",
-      "x": "JumpUp",
-      "y": "JumpDown",
-      "z": "Special",
-      "l": "(unused)",
-      "r": "(unused)"
+      "c": "Use (C)",
+      "b": "Back (X)",
+      "a": "Action (Z)",
+      "x": "JumpUp (A)",
+      "y": "JumpDown (S)",
+      "z": "Special (D)",
+      "l": "AUX1 (Q)",
+      "r": "AUX2 (W)"
     },
+    
+    // Limit the maximum size (width, height) of most textures mkxp will create
+    // (exceptions are rendering backbuffers and similar).
+    // If set to 0, the hardware maximum is used.
+    // This is useful for recording traces that can be played back on machines
+    // with lower specs.
+    //
+    // "maxTextureSize": 0,
+
+    // Controls the algorithm for reporting the height of rendered text.
+    // 0: Nominal (TTF_FontHeight); matches RGSS behavior; may cut off bottoms
+    //    of some characters.
+    // 1: Rendered (TTF_SizeUTF8); deviates from RGSS; may look better.
+    // (default: 0)
+    "fontHeightReporting": 1,
+
+    // A list of fonts to render without alpha blending.
+    //
+    // "solidFonts": [
+    //     "Arial",
+    //     "Times New Roman",
+    // ],
+
+    // Font substitutions allow drop-in replacements of fonts to be used without
+    // changing the RGSS scripts, e.g. providing 'Liberation Sans' when the game
+    // thinks it's using 'Arial'. Font family to be substituted and replacement
+    // family are separated by one sole '>'. Be careful not to include any
+    // spaces.
+    // This is not connected to the built-in font, which is always used when a
+    // non-existing font family is requested by RGSS.
+    //
+    "fontSub": [
+        "Arial>Liberation Sans"
+    ],
 
     // The name of this game's save folder. If undefined, the save folder's name
     // will be the "Game Title" as defined in RPG Maker XP. It should not
@@ -80,7 +114,7 @@
     // Index all accessible assets via their lower case path (emulates Windows
     // case insensitivity).
     //
-    // "pathCache": true,
+    "pathCache": true,
 
     //==========================================================================
     // Window size, scaling, rendering and frame rate.
@@ -140,6 +174,12 @@
     //
     "subImageFix": true,
 
+    // Use the OpenGL backend instead of Metal on Apple Silicon Macs.
+    // Workaround for the game screen not filling the window on Retina displays.
+    //
+    "preferMetalRenderer": false,
+
+
     // Sync screen redraws to the monitor refresh rate, to reduce screen
     // tearing.
     //
@@ -155,21 +195,5 @@
 
     // The game's frame rate, if "syncToRefreshrate" is false.
     //
-    // "fixedFramerate": 60,
-
-    // VERMEIL / mkxp-z safe runtime profile
-    // fontHeightReporting=1 uses rendered glyph height and avoids cutting
-    // the lower half/bottom of glyphs in some fonts.
-    "fixedFramerate": 120,
-    "frameSkip": false,
-    "displayFPS": true,
-    "YJITEnable": true,
-
-    "fontHeightReporting": 1,
-    "fontOutlineCrop": false,
-
-    "smoothScaling": 0,
-    "smoothScalingDown": 0,
-    "bitmapSmoothScaling": 0,
-    "bitmapSmoothScalingDown": 0
+    "fixedFramerate": 60
 }

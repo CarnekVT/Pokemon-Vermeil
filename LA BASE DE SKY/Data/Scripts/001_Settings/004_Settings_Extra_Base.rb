@@ -308,7 +308,6 @@ BACKSPRITE_SCALE  = 1 # 3
 # Mostrar el número de pasos restantes para la eclosión de un HUEVO en la
 # pantalla de Datos.
 ################################################################################
-
 MOSTRAR_PASOS_HUEVO = false
 
 
@@ -318,7 +317,6 @@ module Settings
   # IDs de los mapas en los que no quieres que el personaje tenga reflejo.
   # Ejemplo: MAPAS_SIN_REFLEJO = [12,157,536]
   ################################################################################
-
   MAPAS_SIN_REFLEJO = []
 
   ################################################################################
@@ -326,7 +324,6 @@ module Settings
   # IDs de los mapas en los que no quieres que el reflejo del personaje no ondule.
   # Ejemplo: MAPAS_SIN_REFLEJO_ONDULANTE = [12,157,536]
   ################################################################################
-
   MAPAS_SIN_REFLEJO_ONDULANTE = []
 
 end
@@ -364,6 +361,7 @@ REGIONAL_SPECIES = [:RATTATA, :RATICATE, :RAICHU, :SANDSHREW, :SANDSLASH, :VULPI
                     :PIKACHU, :URSALUNA, :FLABEBE, :FLOETTE, :FLORGES, :SHELLOS, :GASTRODON, :BURMY, :WORMADAM,
                     :ORICORIO, :BASCULIN, :SQUAWKABILLY, :VIVILLON]
 
+
 #######################################################################################
 # LISTADO DE FORMAS DE POKÉMON NO PERMITIDAS
 # Este listado es para configurar determinadas formas de Pokémon del listado de arriba
@@ -383,13 +381,14 @@ SHOW_SPRITES_IN_FORM_CHANGER = true
 ################################################################################
 # ESCALERAS LATERALES
 # RECUERDA que los eventos de la escalera se deben llamar "Stairs".
-# Configuraciones parra las escaleras laterales
+# Configuraciones para las escaleras laterales
 ################################################################################
 SMOOTH_SCROLLING = true
 SPEED_REDUCTION_ON_STAIRS = 0.85
 # Nombres de eventos que al iniciar su movimiento deben activar la función de escaleras laterales
 STAIR_EVENT_NAMES = ['Stairs', 'Slope']
 $disable_scroll_counter = 0
+
 
 ################################################################################
 # Huellas en la Arena
