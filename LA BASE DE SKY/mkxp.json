@@ -45,6 +45,28 @@
       "l": "AUX1 (Q)",
       "r": "AUX2 (W)"
     },
+    
+    // Limit the maximum size (width, height) of most textures mkxp will create
+    // (exceptions are rendering backbuffers and similar).
+    // If set to 0, the hardware maximum is used.
+    // This is useful for recording traces that can be played back on machines
+    // with lower specs.
+    //
+    // "maxTextureSize": 0,
+
+    // Controls the algorithm for reporting the height of rendered text.
+    // 0: Nominal (TTF_FontHeight); matches RGSS behavior; may cut off bottoms
+    //    of some characters.
+    // 1: Rendered (TTF_SizeUTF8); deviates from RGSS; may look better.
+    // (default: 0)
+    "fontHeightReporting": 1,
+
+    // A list of fonts to render without alpha blending.
+    //
+    // "solidFonts": [
+    //     "Arial",
+    //     "Times New Roman",
+    // ],
 
     // Font substitutions allow drop-in replacements of fonts to be used without
     // changing the RGSS scripts, e.g. providing 'Liberation Sans' when the game
@@ -53,15 +75,10 @@
     // spaces.
     // This is not connected to the built-in font, which is always used when a
     // non-existing font family is requested by RGSS.
-    // "fontSub": [
-    //     "Arial>Liberation Sans"
-    // ],
-
-    // Controls the algorithm for reporting the height of rendered text.
-    // 0: Nominal (TTF_FontHeight); matches RGSS behavior; may cut off bottoms of some characters.
-    // 1: Rendered (TTF_SizeUTF8); deviates from RGSS; may look better.
-    // (default: 0)
-    "fontHeightReporting": 1,
+    //
+    "fontSub": [
+        "Arial>Liberation Sans"
+    ],
 
     // The name of this game's save folder. If undefined, the save folder's name
     // will be the "Game Title" as defined in RPG Maker XP. It should not

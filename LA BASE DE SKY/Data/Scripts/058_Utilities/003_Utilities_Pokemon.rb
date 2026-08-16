@@ -228,8 +228,10 @@ def pbAddForeignPokemon(pkmn, level = 1, owner_name = nil, nickname = nil, owner
   return true
 end
 
-def pbGenerateEgg(pkmn, text = "")
-  return false if !pkmn || $player.party_full?
+def pbGenerateEgg(pkmn, text = "", allow_change_party = true)
+  return false if !pkmn 
+  return false if $player.party_full? && !Settings::ALLOW_SEND_EGGS_TO_PC
+  return false if $player.party_full? && pbBoxesFull?
   pkmn = Pokemon.new(pkmn, Settings::EGG_LEVEL) if !pkmn.is_a?(Pokemon)
   # Set egg's details
   pkmn.name           = _INTL("Huevo")
@@ -237,7 +239,17 @@ def pbGenerateEgg(pkmn, text = "")
   pkmn.obtain_text    = text
   pkmn.calc_stats
   # Add egg to party
-  $player.party[$player.party.length] = pkmn
+  if $player.party_full? 
+    if allow_change_party && $PokemonSystem.sendtoboxes == 0
+      pbShowUserStoreActions(pkmn)
+    else
+      stored_box = $PokemonStorage.pbStoreCaught(pkmn)
+      box_name   = $PokemonStorage[stored_box].name
+      pbMessage(_INTL("¡{1} se ha enviado a la Caja \"{2}\"!", pkmn.name, box_name))
+    end
+  else
+    $player.party[$player.party.length] = pkmn
+  end
   return true
 end
 alias pbAddEgg pbGenerateEgg
