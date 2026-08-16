@@ -13,12 +13,12 @@
     // Note that the "Game Title" defined in RPG Maker XP should not have
     // accented characters in it, which is why this property is useful.
     //
-    "windowTitle": "La Base De Sky 1.2.1.1",
+    "windowTitle": "Pokémon Balance",
 
     // The game window's width and height, in pixels.
     //
-    "defScreenW": 512,
-    "defScreenH": 384,
+    "defScreenW": 640,
+    "defScreenH": 480,
 
     // The path to the game window's icon. For Linux only. (Default: none)
     //
