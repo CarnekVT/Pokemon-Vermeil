@@ -54,12 +54,21 @@ class Mode7Renderer
       rescue Exception
       end
       spr.dispose if spr && !spr.disposed?
-      bmp.dispose if bmp && !bmp.disposed?
+      bmp.dispose if bmp && !bmp.disposed? && !face[:bitmap_shared]
     end
+    if @nds_object_face_bitmap_cache
+      @nds_object_face_bitmap_cache.each_value do |bmp|
+        bmp.dispose if bmp && !bmp.disposed?
+      rescue Exception
+      end
+    end
+    @nds_object_face_bitmap_cache = {}
     @nds_object_faces = []
     @nds_object_buckets = nil
     @nds_object_active = []
     @nds_object_projection_key = nil
+    @nds_object_visibility_key = nil
+    @nds_object_visible_indices = []
     if @nds_object_material_cache
       @nds_object_material_cache.each_value do |pair|
         bmp = pair.is_a?(Array) ? pair[0] : nil
@@ -211,8 +220,20 @@ class Mode7Renderer
     [src_b, src_r]
   end
 
-  # Bitmap de una cara a partir del material. Se estira el tile origen al
-  # tamano de la cara (footprint en top; alto real en caras verticales).
+  def nds_object_face_bitmap_cache_key(mat, face, w, h)
+    return nil if !mat.is_a?(Hash)
+    [
+      mat, w.to_i, h.to_i,
+      face[:uv_rect], face[:pattern_uv],
+      face[:obj] && face[:obj][:material_repeat] == true
+    ]
+  rescue Exception
+    nil
+  end
+
+  # Bitmap de una cara a partir del material. Stretch y Repeat Pattern usan
+  # rutas distintas; bitmaps visualmente identicos se comparten entre sprites
+  # para no reconstruir la misma pared/textura cientos de veces.
   def nds_object_face_bitmap(obj, face)
     # Model Workshop supports a different material for each face. Manual/legacy
     # objects still fall back to obj[:material].
@@ -223,11 +244,23 @@ class Mode7Renderer
     h = face[:px_h].to_i
     w = [w, 1].max
     h = [h, 1].max
+    cache_key = nds_object_face_bitmap_cache_key(mat, face, w, h)
+    @nds_object_face_bitmap_cache ||= {}
+    if cache_key
+      cached = @nds_object_face_bitmap_cache[cache_key]
+      if cached && !cached.disposed?
+        face[:bitmap_shared] = true
+        return cached
+      end
+    end
     out = Bitmap.new(w, h)
     out.clear
     src_b, src_r = nds_object_baked_material_source(mat)
     uv = face[:uv_rect]
-    if src_b && src_r && uv.is_a?(Array) && uv.length == 4
+    # uv_rect splits a stretched texture across subdivided faces. Repeat Pattern
+    # must keep the entire selected rectangle as the unit and use pattern_uv
+    # only for phase, otherwise a 1x2 source is accidentally cropped to 1x1.
+    if obj[:material_repeat] != true && src_b && src_r && uv.is_a?(Array) && uv.length == 4
       begin
         u0 = [[uv[0].to_f, 0.0].max, 1.0].min
         v0 = [[uv[1].to_f, 0.0].max, 1.0].min
@@ -244,25 +277,35 @@ class Mode7Renderer
     if src_b && src_r
       begin
         if obj[:material_repeat] == true
-          # Repeat the complete selected source rectangle as one material unit.
-          # Example: a 32x64 (1x2 tiles) cliff repeats every 1x2 tiles, not
-          # every 32x32 tile. If the face is exactly 1x2, it is drawn once.
+          # Repeat the COMPLETE selected rectangle as one pattern unit. A 1x2
+          # selection therefore repeats every 32x64, never as two independent
+          # 32x32 tiles. pattern_uv preserves phase across subdivided/deformed
+          # faces so the texture does not restart at each control segment.
           unit_w = [src_r.width.to_i, 1].max
           unit_h = [src_r.height.to_i, 1].max
           tmp = Bitmap.new(unit_w, unit_h)
           tmp.stretch_blt(Rect.new(0, 0, unit_w, unit_h), src_b, src_r)
+          pu = face[:pattern_uv]
+          start_x = 0
+          start_y = 0
+          if pu.is_a?(Array) && pu.length == 4
+            start_x = (pu[0].to_f * Game_Map::TILE_WIDTH).round
+            start_y = (pu[1].to_f * Game_Map::TILE_HEIGHT).round
+          end
+          phase_x = ((start_x % unit_w) + unit_w) % unit_w
+          phase_y = ((start_y % unit_h) + unit_h) % unit_h
           yy = 0
           while yy < h
+            sy = (phase_y + yy) % unit_h
+            dh = [unit_h - sy, h - yy].min
             xx = 0
             while xx < w
-              dw = [unit_w, w - xx].min
-              dh = [unit_h, h - yy].min
-              # Crop the repeated unit at the face boundary instead of stretching
-              # one tile across an entire merged mountain face.
-              out.blt(xx, yy, tmp, Rect.new(0, 0, dw, dh))
-              xx += unit_w
+              sx = (phase_x + xx) % unit_w
+              dw = [unit_w - sx, w - xx].min
+              out.blt(xx, yy, tmp, Rect.new(sx, sy, dw, dh))
+              xx += dw
             end
-            yy += unit_h
+            yy += dh
           end
           tmp.dispose
         else
@@ -273,6 +316,17 @@ class Mode7Renderer
       end
     else
       out.fill_rect(0, 0, w, h, nds_object_category_color(obj))
+    end
+    if cache_key
+      max_cache = if Mode7::Config.const_defined?(:NDS_OBJECT_BITMAP_CACHE_MAX)
+                    Mode7::Config::NDS_OBJECT_BITMAP_CACHE_MAX.to_i
+                  else
+                    256
+                  end
+      if max_cache <= 0 || @nds_object_face_bitmap_cache.length < max_cache
+        @nds_object_face_bitmap_cache[cache_key] = out
+        face[:bitmap_shared] = true
+      end
     end
     out
   end
@@ -389,7 +443,7 @@ class Mode7Renderer
           fkind = surface == "top" ? :top : (["north", "south"].include?(edge) ? :front : :side)
           face = {
             kind: fkind, edge: edge, obj: pseudo, world: world,
-            uv_rect: mf[:uv_rect],
+            uv_rect: mf[:uv_rect], pattern_uv: mf[:pattern_uv],
             px_w: [pw.round, 1].max, px_h: [ph.round, 1].max,
             min_tx: min_tx, min_ty: min_ty, max_tx: max_tx, max_ty: max_ty,
             shade: nds_object_face_shade(fkind), bitmap: nil, sprite: nil
@@ -557,6 +611,39 @@ class Mode7Renderer
      Mode7.projection_revision]
   end
 
+  def prune_nds_object_face_cache(active_indices)
+    return if !Mode7::Config.const_defined?(:NDS_OBJECT_FACE_CACHE_MAX)
+    max = Mode7::Config::NDS_OBJECT_FACE_CACHE_MAX.to_i
+    return if max <= 0
+    live = []
+    (@nds_object_faces || []).each_with_index do |face, i|
+      spr = face[:sprite]
+      live << [face[:last_used].to_i, i] if spr && !spr.disposed?
+    end
+    return if live.length <= max
+    active = {}
+    active_indices.each { |i| active[i] = true }
+    live.sort_by! { |pair| pair[0] }
+    live_count = live.length
+    live.each do |_stamp, i|
+      next if active[i]
+      face = @nds_object_faces[i]
+      spr = face[:sprite]
+      bmp = face[:bitmap]
+      begin
+        spr.corners = nil if spr && !spr.disposed? && Mode7::MKXPZExt.corners?
+      rescue Exception
+      end
+      spr.dispose if spr && !spr.disposed?
+      bmp.dispose if bmp && !bmp.disposed? && !face[:bitmap_shared]
+      face[:sprite] = nil
+      face[:bitmap] = nil
+      live_count -= 1
+      break if live_count <= max
+    end
+  rescue Exception
+  end
+
   def update_nds_geometry_objects
     return if !@nds_object_faces || @nds_object_faces.empty?
     key = nds_object_key
@@ -574,29 +661,49 @@ class Mode7Renderer
     by0 = (cam_ty - ry) / bs
     by1 = (cam_ty + ry) / bs
 
-    indices = {}
-    bx = bx0
-    while bx <= bx1
-      by = by0
-      while by <= by1
-        (@nds_object_buckets[[bx, by]] || []).each { |i| indices[i] = true }
-        by += 1
+    visibility_key = [cam_tx, cam_ty, rx, ry, bs]
+    if @nds_object_visibility_key != visibility_key || !@nds_object_visible_indices
+      seen = {}
+      bx = bx0
+      while bx <= bx1
+        by = by0
+        while by <= by1
+          (@nds_object_buckets[[bx, by]] || []).each { |i| seen[i] = true }
+          by += 1
+        end
+        bx += 1
       end
-      bx += 1
+      @nds_object_visible_indices = seen.keys
+      @nds_object_visibility_key = visibility_key
     end
+    indices = @nds_object_visible_indices || []
+    index_lookup = {}
+    indices.each { |i| index_lookup[i] = true }
 
     (@nds_object_active || []).each do |i|
-      next if indices[i]
+      next if index_lookup[i]
       spr = @nds_object_faces[i][:sprite]
       spr.visible = false if spr && !spr.disposed?
     end
 
     active = []
+    build_budget = if Mode7::Config.const_defined?(:NDS_OBJECT_FACE_BUILD_BUDGET)
+                     Mode7::Config::NDS_OBJECT_FACE_BUILD_BUDGET.to_i
+                   else
+                     8
+                   end
+    build_budget = 1 if build_budget < 1
+    deferred = false
+    frame_stamp = Graphics.respond_to?(:frame_count) ? Graphics.frame_count.to_i : 0
 
-    indices.each_key do |i|
+    indices.each do |i|
       face = @nds_object_faces[i]
       spr = face[:sprite]
       if !spr || spr.disposed?
+        if build_budget <= 0
+          deferred = true
+          next
+        end
         bmp = face[:bitmap]
         if !bmp || bmp.disposed?
           bmp = nds_object_face_bitmap(face[:obj], face)
@@ -610,8 +717,10 @@ class Mode7Renderer
         mat = face[:obj][:material]
         spr.opacity = mat.is_a?(Hash) && mat.key?("opacity") ? mat["opacity"].to_i.clamp(0, 255) : 255
         face[:sprite] = spr
+        build_budget -= 1
       end
 
+      face[:last_used] = frame_stamp
       points = nds_object_project_points(face[:world])
       if !points
         spr.visible = false
@@ -634,6 +743,10 @@ class Mode7Renderer
       active << i
     end
     @nds_object_active = active
+    prune_nds_object_face_cache(active) if frame_stamp > 0 && (frame_stamp % 180) == 0
+    # Continue lazily creating faces on following frames without freezing the
+    # first map frame. Existing faces stay visible while the queue finishes.
+    @nds_object_projection_key = nil if deferred
   rescue Exception => e
     Console.echo_error("2.5D geometry objects update: #{e.message}") if defined?(Console)
   end

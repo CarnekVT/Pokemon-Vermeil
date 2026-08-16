@@ -157,6 +157,13 @@ module Mode7
     SURFACE_GEOMETRY_DIRECTORY   = "Data/VERMEIL2_5D"
     SURFACE_GEOMETRY_HEIGHT_STEP = 32.0
 
+    # Gameplay never parses the large authoring MapXXX.json by default. Maker
+    # Studio writes MapXXX_runtime.json on save; using only that compact sidecar
+    # avoids the multi-second model JSON hitch when loading a save/map. Set true
+    # only as a temporary migration fallback for old maps that have not been
+    # re-saved with Geometry 3.x.
+    SURFACE_GEOMETRY_ALLOW_EDITOR_JSON_RUNTIME = false
+
     # La altura grafica de un charset NO debe sumar casi un tile entero al Z.
     # Este bias solo desempata billboards que comparten la misma superficie.
     CHARACTER_DEPTH_BIAS = 2
@@ -176,8 +183,8 @@ module Mode7
 
     # Mantener suelo y sprites en el mismo subpixel evita juntas al detenerse.
     # ponytail: raster exacto; subir a 1.0 solo si Cylindrical pierde FPS.
-    GROUND_REDRAW_WORLD_STEP = 1.0
-    PRIORITY_REPROJECT_WORLD_STEP = 1.0
+    GROUND_REDRAW_WORLD_STEP = 2.0
+    PRIORITY_REPROJECT_WORLD_STEP = 2.0
 
     # Una muestra por fila evita cortes horizontales en tiles altos.
     CYLINDRICAL_RASTER_SCAN_STEP = 2
@@ -275,6 +282,10 @@ module Mode7
     # Todo usa la misma Mode7.project(): suelo, volumen, walls y personajes.
     # No se usan modelos 3D.
     NDS_PERFORMANCE_PROFILE = :performance  # :performance, :balanced, :quality
+    # Global runtime cache layer. Keeps expensive projection/mode queries out
+    # of hot per-face/per-character loops and idles 3D-only work when disabled.
+    GLOBAL_RUNTIME_OPTIMIZATIONS = true
+    IDLE_3D_WHEN_DISABLED        = true
 
     # La malla cacheada evita los ~480 stretch_blt que hacía el raster legacy
     # cada vez que avanza la cámara. Es el único camino viable para mantener
@@ -291,7 +302,7 @@ module Mode7
     NDS_NATIVE_GROUND_SHADER     = true
     # Cuantización subpíxel: evita que suelo, paredes y tops se actualicen en
     # frames distintos sin introducir los saltos visibles del umbral de 2 px.
-    NDS_GROUND_REPROJECT_STEP    = 1.0
+    NDS_GROUND_REPROJECT_STEP    = 2.0
 
     GEOMETRY_PRIORITY_SURFACES = true
     GEOMETRY_WALLS             = true
@@ -390,19 +401,19 @@ module Mode7
     NDS_VOLUME_CULL_TILES_X     = 14
     NDS_VOLUME_CULL_TILES_Y     = 12
     NDS_VOLUME_BUCKET_SIZE      = 8
-    NDS_VOLUME_REPROJECT_STEP   = 1.0
+    NDS_VOLUME_REPROJECT_STEP   = 2.0
 
     # V4.1 Fast Path
     # Las caras de volumen se preparan como metadata al cargar el mapa y sus
     # Bitmaps/Sprites se crean solo cuando entran en la zona visible.
     NDS_LAZY_VOLUME_FACES       = true
-    NDS_VOLUME_FACE_BUILD_BUDGET = 4
+    NDS_VOLUME_FACE_BUILD_BUDGET = 3
     NDS_VOLUME_FACE_CACHE_MAX    = 128
 
     # Buckets espaciales para no iterar todas las fachadas/props del mapa en
     # cada frame. 8 tiles es un buen compromiso para mapas grandes.
     NDS_RUNTIME_BUCKET_SIZE      = 8
-    NDS_WALL_REPROJECT_STEP      = 1.0
+    NDS_WALL_REPROJECT_STEP      = 2.0
 
     # Los tags normales protegen arte Pokemon ya perspectivado. Usa los tags
     # Plane solo cuando quieras una superficie geometricamente 3D.
@@ -429,7 +440,13 @@ module Mode7
     NDS_OBJECT_SIDE_SHADE        = 46
     NDS_OBJECT_TOP_SHADE         = 0
     NDS_OBJECT_LAZY_BITMAPS      = true
-    NDS_OBJECT_REPROJECT_STEP    = 1.0
+    NDS_OBJECT_REPROJECT_STEP    = 2.0
+    # Limita creación de sprites/materiales Geometry por frame para evitar picos al cargar.
+    NDS_OBJECT_FACE_BUILD_BUDGET = 4
+    NDS_OBJECT_FACE_CACHE_MAX    = 192
+    # Reuse identical generated face bitmaps (same material/UV/size) across
+    # sprites. This cuts allocations heavily on repeated cliffs/buildings.
+    NDS_OBJECT_BITMAP_CACHE_MAX  = 256
     # Altura (en tiles) que el jugador puede subir por una cara "climb"/"one-way"
     # sin escalera. Por encima se trata como pared solida.
     NDS_OBJECT_CLIMB_MAX_TILES   = 1
@@ -458,7 +475,7 @@ module Mode7
     FORCE_RIGID_OBJECT_SCALE = false
     GROUND_SAFE_X_COVERAGE = true
 
-    NDS_SHOW_PERFORMANCE_DEBUG = true
+    NDS_SHOW_PERFORMANCE_DEBUG = false
   end
 end
 

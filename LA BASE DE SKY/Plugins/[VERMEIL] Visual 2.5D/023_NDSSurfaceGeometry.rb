@@ -171,6 +171,16 @@ module Mode7
       @objects = objects ? objects.map { |obj| Marshal.load(Marshal.dump(obj)) } : []
       faces = other.mesh_faces
       @mesh_faces = faces ? faces.map { |face| Marshal.load(Marshal.dump(face)) } : []
+      # Keep compiled model collision when explicit Geometry is overlaid on
+      # legacy terrain. Older builds copied the visible mesh but dropped this
+      # grid, which made placed models walk-through on inherit_legacy maps.
+      collision = other.instance_variable_get(:@model_collision_cells)
+      @model_collision_cells = {}
+      if collision.is_a?(Hash)
+        collision.each do |key, rows|
+          @model_collision_cells[key] = rows.map { |row| Marshal.load(Marshal.dump(row)) }
+        end
+      end
       self
     end
 
@@ -218,11 +228,56 @@ module Mode7
       File.join(dir, format("Map%03d.json", map_id.to_i))
     end
 
+    # Runtime data is intentionally separated from the authoring JSON. The
+    # editor file can contain model templates, topology and UI metadata; the
+    # game only needs already-compiled cells, collisions and mesh faces.
+    def self.runtime_file_path(map_id)
+      dir = Mode7::Config::SURFACE_GEOMETRY_DIRECTORY.to_s
+      File.join(dir, format("Map%03d_runtime.json", map_id.to_i))
+    end
+
+    def self.clear_file_cache!(map_id = nil)
+      @file_geometry_cache ||= {}
+      if map_id.nil?
+        @file_geometry_cache.clear
+      else
+        paths = [file_path(map_id), runtime_file_path(map_id)]
+        @file_geometry_cache.delete_if { |key, _value| paths.include?(key[0]) }
+      end
+    rescue Exception
+    end
+
     def self.from_file(map_id, width, height)
       return nil if !defined?(JSON)
-      path = file_path(map_id)
-      return nil if !File.file?(path)
-      raw = JSON.parse(File.read(path))
+      runtime_path = runtime_file_path(map_id)
+      allow_editor = Mode7::Config.const_defined?(:SURFACE_GEOMETRY_ALLOW_EDITOR_JSON_RUNTIME) &&
+                     Mode7::Config::SURFACE_GEOMETRY_ALLOW_EDITOR_JSON_RUNTIME
+      path = if File.file?(runtime_path)
+               runtime_path
+             elsif allow_editor
+               file_path(map_id)
+             else
+               runtime_path
+             end
+      cache_key = [path, width.to_i, height.to_i]
+      @file_geometry_cache ||= {}
+      # key? is intentional: nil is a cached result for maps without Geometry.
+      return @file_geometry_cache[cache_key] if @file_geometry_cache.key?(cache_key)
+
+      # Disk access happens at most once per map/dimensions for this process.
+      # In particular, Game_Map#passable? never reaches this method anymore.
+      if !File.file?(path)
+        @file_geometry_cache[cache_key] = nil
+        if !allow_editor && File.file?(file_path(map_id))
+          @runtime_missing_warned ||= {}
+          if !@runtime_missing_warned[map_id.to_i]
+            @runtime_missing_warned[map_id.to_i] = true
+            Console.echo_li("[VERMEIL] Geometry runtime sidecar missing for Map#{format('%03d', map_id.to_i)}; re-save the map in Maker Studio (authoring JSON skipped for fast load).") if defined?(Console)
+          end
+        end
+        return nil
+      end
+      raw = JSON.parse(File.binread(path))
       return nil if !raw.is_a?(Hash)
       step = (raw["height_step"] || Mode7::Config::SURFACE_GEOMETRY_HEIGHT_STEP).to_f
       geo = new(map_id, width, height, step, :file, path)
@@ -306,47 +361,87 @@ module Mode7
       collision_rows = raw["model_collision_cells"]
       geo.set_model_collision_cells(collision_rows) if collision_rows.is_a?(Array)
 
-      faces = raw["mesh_faces"]
-      if faces.is_a?(Array)
-        parsed_faces = faces.map do |f|
-          next nil if !f.is_a?(Hash)
-          raw_kind = f["kind"].to_s
+      # v5.12.1: compact faces are normalized in ONE pass. The previous loader
+      # first expanded every compact row into a String-keyed Hash and then built
+      # a second Symbol-keyed Hash, doubling allocations on model-heavy maps.
+      compact = raw["mesh_faces_compact"]
+      if compact.is_a?(Array)
+        mats = raw["materials"].is_a?(Array) ? raw["materials"] : []
+        parsed_faces = []
+        parsed_faces.reserve(compact.length) if parsed_faces.respond_to?(:reserve)
+        compact.each do |a|
+          next if !a.is_a?(Array)
+          raw_kind = a[1].to_s
           kind = raw_kind == "top" ? "top" : (raw_kind == "quad" ? "quad" : "side")
-          edge = f["edge"].to_s
+          edge = a[3].to_s
           edge = nil if !["north", "south", "east", "west"].include?(edge)
           vertices = nil
-          if f["vertices"].is_a?(Array) && f["vertices"].length == 4
-            vertices = f["vertices"].map do |v|
+          if a[4].is_a?(Array) && a[4].length == 4
+            vertices = a[4].map do |v|
               next [0.0, 0.0, 0.0] if !v.is_a?(Array)
               [v[0].to_f, v[1].to_f, [v[2].to_f, 0.0].max]
             end
           end
-          {
-            id: f["id"].to_i,
-            kind: kind,
-            surface: f["surface"].to_s,
-            edge: edge,
-            vertices: vertices,
-            uv_rect: begin
-              uv = f["uv_rect"]
-              uv.is_a?(Array) && uv.length == 4 ? uv.map { |v| [[v.to_f, 0.0].max, 1.0].min } : nil
-            end,
-            x0: f["x0"].to_f, y0: f["y0"].to_f,
-            x1: f["x1"].to_f, y1: f["y1"].to_f,
-            z0: [f["z0"].to_f, 0.0].max,
-            z1: [f["z1"].to_f, 0.0].max,
-            material: f["material"].is_a?(Hash) ? f["material"] : nil,
-            material_repeat: f["material_repeat"] == false ? false : true,
-            category: f["category"].to_s.empty? ? "mountain" : f["category"].to_s,
-            model_id: f["model_id"].to_s,
-            model_instance_id: f["model_instance_id"].to_i,
-            part_id: f["part_id"].to_s
+          uv = a[5]
+          uv_rect = uv.is_a?(Array) && uv.length == 4 ? uv.map { |v| [[v.to_f, 0.0].max, 1.0].min } : nil
+          puv = a[6]
+          pattern_uv = puv.is_a?(Array) && puv.length == 4 ? puv.map { |v| v.to_f } : nil
+          mi = a[7].to_i
+          parsed_faces << {
+            id: a[0].to_i, kind: kind, surface: a[2].to_s, edge: edge,
+            vertices: vertices, uv_rect: uv_rect, pattern_uv: pattern_uv,
+            x0: a[14].to_f, y0: a[15].to_f, x1: a[16].to_f, y1: a[17].to_f,
+            z0: [a[18].to_f, 0.0].max, z1: [a[19].to_f, 0.0].max,
+            material: (mi >= 0 && mats[mi].is_a?(Hash)) ? mats[mi] : nil,
+            material_repeat: a[8].to_i != 0,
+            category: a[9].to_s.empty? ? "mountain" : a[9].to_s,
+            model_id: a[10].to_s, model_instance_id: a[11].to_i, part_id: a[12].to_s
           }
-        end.compact
+        end
         geo.instance_variable_get(:@mesh_faces).concat(parsed_faces)
+      else
+        faces = raw["mesh_faces"]
+        if faces.is_a?(Array)
+          parsed_faces = faces.map do |f|
+            next nil if !f.is_a?(Hash)
+            raw_kind = f["kind"].to_s
+            kind = raw_kind == "top" ? "top" : (raw_kind == "quad" ? "quad" : "side")
+            edge = f["edge"].to_s
+            edge = nil if !["north", "south", "east", "west"].include?(edge)
+            vertices = nil
+            if f["vertices"].is_a?(Array) && f["vertices"].length == 4
+              vertices = f["vertices"].map do |v|
+                next [0.0, 0.0, 0.0] if !v.is_a?(Array)
+                [v[0].to_f, v[1].to_f, [v[2].to_f, 0.0].max]
+              end
+            end
+            {
+              id: f["id"].to_i, kind: kind, surface: f["surface"].to_s, edge: edge, vertices: vertices,
+              uv_rect: begin
+                uv = f["uv_rect"]
+                uv.is_a?(Array) && uv.length == 4 ? uv.map { |v| [[v.to_f, 0.0].max, 1.0].min } : nil
+              end,
+              x0: f["x0"].to_f, y0: f["y0"].to_f, x1: f["x1"].to_f, y1: f["y1"].to_f,
+              z0: [f["z0"].to_f, 0.0].max, z1: [f["z1"].to_f, 0.0].max,
+              material: f["material"].is_a?(Hash) ? f["material"] : nil,
+              material_repeat: f["material_repeat"] == false ? false : true,
+              pattern_uv: (f["pattern_uv"].is_a?(Array) && f["pattern_uv"].length == 4) ? f["pattern_uv"].map { |v| v.to_f } : nil,
+              category: f["category"].to_s.empty? ? "mountain" : f["category"].to_s,
+              model_id: f["model_id"].to_s, model_instance_id: f["model_instance_id"].to_i, part_id: f["part_id"].to_s
+            }
+          end.compact
+          geo.instance_variable_get(:@mesh_faces).concat(parsed_faces)
+        end
+      end
+      @file_geometry_cache[cache_key] = geo
+      # Keep a bounded number of fully-normalized map geometries in memory.
+      if @file_geometry_cache.length > 6
+        oldest = @file_geometry_cache.keys.find { |k| k != cache_key }
+        @file_geometry_cache.delete(oldest) if oldest
       end
       geo
     rescue Exception => e
+      @file_geometry_cache[cache_key] = nil if defined?(cache_key) && cache_key
       Console.echo_error("VERMEIL geometry JSON #{path}: #{e.message}") if defined?(Console)
       nil
     end
@@ -425,22 +520,28 @@ class Mode7Renderer
     @nds_surface_geometry = nil
     return if !Mode7::Config::SURFACE_GEOMETRY_ENABLED
 
-    # Siempre compila primero la geometria legacy. Un JSON del editor funciona
-    # por defecto como OVERLAY: solo las celdas pintadas reemplazan los tags y
-    # las demas conservan su altura actual. Asi se puede migrar un mapa poco a
-    # poco sin aplanar todas las montanas al crear el primer MapXXX.json.
+    # Read the explicit file first. A fully-authored Geometry map can opt out of
+    # legacy Terrain Tags; in that common case there is no reason to scan the
+    # complete map and calculate legacy elevation before throwing it away.
+    overlay = Mode7::SurfaceGeometry.from_file(@map_id, @map.width, @map.height)
+    if overlay && !overlay.inherit_legacy
+      @nds_surface_geometry = overlay
+      Mode7.register_geometry_collision_source(@nds_surface_geometry, @map_id) if Mode7.respond_to?(:register_geometry_collision_source)
+      Console.echo_li("[VERMEIL] Runtime Geometry: #{overlay.path}") if defined?(Console) rescue nil
+      return
+    end
+
     legacy = Mode7::SurfaceGeometry.new(
       @map_id, @map.width, @map.height,
       Mode7::Config::SURFACE_GEOMETRY_HEIGHT_STEP, :legacy, nil
     )
-    @map.width.times do |tx|
-      @map.height.times do |ty|
-        h = nds_legacy_surface_height_at(tx, ty)
-        legacy.set_height(tx, ty, h) if h.abs >= 0.001
-      end
+    (@entry_cache || {}).each do |pos, entries|
+      next if !entries || entries.empty?
+      tx, ty = pos
+      h = nds_legacy_surface_height_at(tx, ty)
+      legacy.set_height(tx, ty, h) if h.abs >= 0.001
     end
 
-    overlay = Mode7::SurfaceGeometry.from_file(@map_id, @map.width, @map.height)
     geo = if overlay && overlay.inherit_legacy
             legacy.overlay_from!(overlay)
           elsif overlay
@@ -449,12 +550,14 @@ class Mode7Renderer
             legacy
           end
     @nds_surface_geometry = geo
+    Mode7.register_geometry_collision_source(@nds_surface_geometry, @map_id) if Mode7.respond_to?(:register_geometry_collision_source)
     if defined?(Console)
       label = geo.explicit? ? geo.path : "Terrain Tags legacy"
       Console.echo_li("[VERMEIL] Surface Geometry: #{label}") rescue nil
     end
   rescue Exception => e
     @nds_surface_geometry = nil
+    Mode7.register_geometry_collision_source(nil, @map_id) if Mode7.respond_to?(:register_geometry_collision_source)
     Console.echo_error("VERMEIL surface geometry build: #{e.message}") if defined?(Console)
   end
 

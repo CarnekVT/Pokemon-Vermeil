@@ -327,6 +327,8 @@ class Mode7Renderer
     @nds_volume_buckets = nil
     @nds_volume_active = []
     @nds_volume_projection_key = nil
+    @nds_volume_visibility_key = nil
+    @nds_volume_visible_indices = []
   end
 
   def nds_volume_cell_height(tx, ty)
@@ -650,81 +652,105 @@ class Mode7Renderer
     @nds_volume_faces = []
     @nds_volume_buckets = Hash.new { |h, k| h[k] = [] }
     @nds_volume_active = []
+    @nds_volume_visibility_key = nil
+    @nds_volume_visible_indices = []
 
-    heights = Array.new(@map.width) { Array.new(@map.height, 0.0) }
-    @map.width.times do |tx|
-      @map.height.times { |ty| heights[tx][ty] = nds_volume_cell_height(tx, ty) }
+    # Sparse height map. The previous implementation allocated width*height
+    # Floats and then scanned the whole map again for fronts and side faces.
+    # Most maps only have volume on a fraction of their cells.
+    heights = {}
+    (@entry_cache || {}).each do |pos, entries|
+      next if !entries || entries.empty?
+      tx, ty = pos
+      h = nds_volume_cell_height(tx, ty)
+      heights[[tx, ty]] = h if h > 0.01
+    end
+    return if heights.empty?
+
+    rows = Hash.new { |h, k| h[k] = [] }
+    cols = Hash.new { |h, k| h[k] = [] }
+    heights.each_key do |tx, ty|
+      rows[ty] << tx
+      cols[tx] << ty
     end
 
     # Frentes (sur): agrupar runs horizontales con misma altura/base.
     if Mode7::Config::NDS_VOLUME_FRONT_FACES
-      @map.height.times do |ty|
-        tx = 0
-        while tx < @map.width
-          h = heights[tx][ty]
-          south = ty + 1 < @map.height ? heights[tx][ty + 1] : 0.0
+      rows.each do |ty, xs|
+        xs.sort!
+        i = 0
+        while i < xs.length
+          tx = xs[i]
+          h = heights[[tx, ty]].to_f
+          south = heights[[tx, ty + 1]].to_f
           mountain = nds_mountain_volume_cell?(tx, ty)
           stair_cut = respond_to?(:nds_stair_cell?, true) && nds_stair_cell?(tx, ty + 1)
           auto_mountain = mountain && Mode7::Config::NDS_MOUNTAIN_AUTO_FACES
           blocked_generic = !mountain && nds_explicit_front_face_at?(tx, ty)
           if h <= south + 0.01 || stair_cut || blocked_generic ||
              (mountain && !auto_mountain)
-            tx += 1
+            i += 1
             next
           end
           base = south
-          start = tx
-          tx += 1
-          while tx < @map.width
-            h2 = heights[tx][ty]
-            s2 = ty + 1 < @map.height ? heights[tx][ty + 1] : 0.0
-            mountain2 = nds_mountain_volume_cell?(tx, ty)
-            stair2 = respond_to?(:nds_stair_cell?, true) && nds_stair_cell?(tx, ty + 1)
-            generic_block2 = !mountain2 && nds_explicit_front_face_at?(tx, ty)
+          start_tx = tx
+          last_tx = tx
+          i += 1
+          while i < xs.length
+            tx2 = xs[i]
+            break if tx2 != last_tx + 1
+            h2 = heights[[tx2, ty]].to_f
+            s2 = heights[[tx2, ty + 1]].to_f
+            mountain2 = nds_mountain_volume_cell?(tx2, ty)
+            stair2 = respond_to?(:nds_stair_cell?, true) && nds_stair_cell?(tx2, ty + 1)
+            generic_block2 = !mountain2 && nds_explicit_front_face_at?(tx2, ty)
             break if (h2 - h).abs > 0.01 || (s2 - base).abs > 0.01 ||
                      h2 <= s2 + 0.01 || stair2 || generic_block2 ||
-                     mountain2 != mountain || (mountain2 && !Mode7::Config::NDS_MOUNTAIN_AUTO_FACES)
-            tx += 1
+                     mountain2 != mountain ||
+                     (mountain2 && !Mode7::Config::NDS_MOUNTAIN_AUTO_FACES)
+            last_tx = tx2
+            i += 1
           end
-          nds_make_front_run(ty, start, tx - 1, h, base)
+          nds_make_front_run(ty, start_tx, last_tx, h, base)
         end
       end
     end
 
-    # Balanced/quality pueden generar laterales para volumenes genericos. El
-    # perfil performance conserva solo las fachadas explicitas del mapa.
+    # Laterales: sparse columns instead of width*height scans.
     if Mode7.nds_side_faces?
       mountain_only = !Mode7.nds_full_side_faces?
-      @map.width.times do |tx|
+      cols.each do |tx, ys|
+        ys.sort!
         [:west, :east].each do |side|
-          ty = 0
-          while ty < @map.height
-            h = heights[tx][ty]
+          i = 0
+          while i < ys.length
+            ty = ys[i]
+            h = heights[[tx, ty]].to_f
             nx = side == :west ? tx - 1 : tx + 1
-            neighbor = (nx >= 0 && nx < @map.width) ? heights[nx][ty] : 0.0
+            neighbor = heights[[nx, ty]].to_f
             mountain = nds_mountain_volume_cell?(tx, ty)
-            allow_face = if mountain
-                           Mode7::Config::NDS_MOUNTAIN_AUTO_SIDE_FACES
-                         else
-                           !mountain_only
-                         end
+            allow_face = mountain ? Mode7::Config::NDS_MOUNTAIN_AUTO_SIDE_FACES : !mountain_only
             if h <= neighbor + 0.01 || !allow_face
-              ty += 1
+              i += 1
               next
             end
             base = neighbor
-            start = ty
-            ty += 1
-            while ty < @map.height
-              h2 = heights[tx][ty]
-              n2 = (nx >= 0 && nx < @map.width) ? heights[nx][ty] : 0.0
-              mountain2 = nds_mountain_volume_cell?(tx, ty)
+            start_ty = ty
+            last_ty = ty
+            i += 1
+            while i < ys.length
+              ty2 = ys[i]
+              break if ty2 != last_ty + 1
+              h2 = heights[[tx, ty2]].to_f
+              n2 = heights[[nx, ty2]].to_f
+              mountain2 = nds_mountain_volume_cell?(tx, ty2)
               allow2 = mountain2 ? Mode7::Config::NDS_MOUNTAIN_AUTO_SIDE_FACES : !mountain_only
-              break if (h2 - h).abs > 0.01 || (n2 - base).abs > 0.01 || h2 <= n2 + 0.01
-              break if mountain2 != mountain || !allow2
-              ty += 1
+              break if (h2 - h).abs > 0.01 || (n2 - base).abs > 0.01 ||
+                       h2 <= n2 + 0.01 || mountain2 != mountain || !allow2
+              last_ty = ty2
+              i += 1
             end
-            nds_make_side_run(side, tx, start, ty - 1, h, base)
+            nds_make_side_run(side, tx, start_ty, last_ty, h, base)
           end
         end
       end
@@ -763,20 +789,28 @@ class Mode7Renderer
     by0 = (cam_ty - ry) / bs
     by1 = (cam_ty + ry) / bs
 
-    indices = {}
-    bx = bx0
-    while bx <= bx1
-      by = by0
-      while by <= by1
-        (@nds_volume_buckets[[bx, by]] || []).each { |i| indices[i] = true }
-        by += 1
+    visibility_key = [cam_tx, cam_ty, rx, ry, bs]
+    if @nds_volume_visibility_key != visibility_key || !@nds_volume_visible_indices
+      seen = {}
+      bx = bx0
+      while bx <= bx1
+        by = by0
+        while by <= by1
+          (@nds_volume_buckets[[bx, by]] || []).each { |i| seen[i] = true }
+          by += 1
+        end
+        bx += 1
       end
-      bx += 1
+      @nds_volume_visible_indices = seen.keys
+      @nds_volume_visibility_key = visibility_key
     end
+    indices = @nds_volume_visible_indices || []
+    index_lookup = {}
+    indices.each { |i| index_lookup[i] = true }
 
     # Oculta solo lo que estaba activo el frame de reproyeccion anterior.
     (@nds_volume_active || []).each do |i|
-      next if indices[i]
+      next if index_lookup[i]
       spr = @nds_volume_faces[i][:sprite]
       spr.visible = false if spr && !spr.disposed?
     end
@@ -786,7 +820,7 @@ class Mode7Renderer
     build_budget = 1 if build_budget < 1
     frame_stamp = Graphics.respond_to?(:frame_count) ? Graphics.frame_count.to_i : 0
 
-    indices.each_key do |i|
+    indices.each do |i|
       face = @nds_volume_faces[i]
       spr = face[:sprite]
       if !spr || spr.disposed?

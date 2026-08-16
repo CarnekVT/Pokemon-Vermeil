@@ -768,21 +768,19 @@ class Mode7Renderer
     # retirado a bloques rigidos para evitar cortes entre filas.
     strips = Hash.new { |hash, key| hash[key] = {} }
 
-    @map.width.times do |tx|
-      @map.height.times do |ty|
-        entries = @entry_cache[[tx, ty]]
-        entries.each do |entry|
-          next if wall_visual_owned?(entry)
-          next if rigid_priority_owned?(entry)
-          next if !priority_surface_entry?(entry)
+    (@entry_cache || {}).each do |(tx, ty), entries|
+      next if !entries || entries.empty?
+      entries.each do |entry|
+        next if wall_visual_owned?(entry)
+        next if rigid_priority_owned?(entry)
+        next if !priority_surface_entry?(entry)
 
-          elevation = entry_world_elevation(entry)
-          priority = entry_visual_priority(entry)
-          priority = 1 if interior_border_entry?(entry) && priority < 1
-          key = [entry[:unify].to_i, priority, ty, elevation]
-          strips[key][tx] ||= []
-          strips[key][tx].push(entry)
-        end
+        elevation = entry_world_elevation(entry)
+        priority = entry_visual_priority(entry)
+        priority = 1 if interior_border_entry?(entry) && priority < 1
+        key = [entry[:unify].to_i, priority, ty, elevation]
+        strips[key][tx] ||= []
+        strips[key][tx].push(entry)
       end
     end
 

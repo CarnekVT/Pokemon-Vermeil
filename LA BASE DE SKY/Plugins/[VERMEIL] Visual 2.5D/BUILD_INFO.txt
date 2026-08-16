@@ -1,11 +1,17 @@
-VERMEIL Visual 2.5D
-Version: 5.10.1
-Milestone: Surface Geometry Consistency Hotfix
-Build: 2026-08-13
+[VERMEIL] Visual 2.5D
+Version: 5.12.0
+Build: Deterministic Model Collision Bridge
 
-Key changes:
-- Mountain top surfaces, generated cliff faces, collision, camera and support elevation read the same SurfaceGeometry grid.
-- Stair cells no longer duplicate a flat MountainTop surface underneath the ramp.
-- Explicit level 0 overrides remain authoritative even on legacy MountainTop tiles.
-- Generated volume/cliff geometry uses the central height grid; MountainWall remains art/material only.
-- Explicit height cells elevate ordinary P0 tile art too; Terrain Tags are no longer required just to lift a surface.
+Collision fix:
+- Maker Studio final passability is bridged after its own overrides, so early returns cannot bypass Geometry.
+- No prepend and no recursive Game_Map alias chain.
+- Geometry determines the real destination cell from actor/source-vs-destination call style.
+- Model collision remains independent from the 2.5D renderer.
+- Compact MapXXX_collision.json sidecar can be preloaded once at map setup.
+- No File/JSON work happens inside passable?/playerPassable?/passableStrict?.
+
+Load/performance:
+- Full visual Geometry remains cached by map/dimensions.
+- Collision sidecar contains only model_collision_cells, not meshes/textures.
+
+V5.12.0: independent model physics gate + runtime-only geometry sidecar + compact mesh material table.

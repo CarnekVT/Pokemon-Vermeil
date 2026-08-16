@@ -81,7 +81,6 @@ module Mode7
     # -------------------------------------------------------------------------
     def object_cell_blocked?(x, y, dir)
       return false if !Config::NDS_GEOMETRY_OBJECTS_ENABLED
-      return false if !rendering_now? || !$scene.is_a?(Scene_Map)
       dx, dy = case dir.to_i
                when 2 then [0, 1]
                when 4 then [-1, 0]
@@ -95,9 +94,19 @@ module Mode7
       y1 = y0 + dy
       return false if x1 < 0 || y1 < 0 || x1 >= $game_map.width || y1 >= $game_map.height
 
-      renderer = $scene.instance_variable_get(:@map_renderer)
-      return false if !renderer.is_a?(Mode7Renderer) || renderer.disposed?
-      geo = renderer.nds_surface_geometry
+      # Collision must never depend on renderer visibility or perform file I/O.
+      # 028_GeometryCollisionAuthority keeps the already-loaded Geometry object in
+      # memory. During renderer rebuilds/transitions we continue using that source.
+      geo = nil
+      if Mode7.respond_to?(:geometry_collision_source)
+        geo = Mode7.geometry_collision_source
+      end
+      if !geo && rendering_now? && $scene.is_a?(Scene_Map)
+        renderer = $scene.instance_variable_get(:@map_renderer)
+        if renderer.is_a?(Mode7Renderer) && !renderer.disposed?
+          geo = renderer.nds_surface_geometry
+        end
+      end
       return false if !geo
 
       step = geo.height_step.to_f
@@ -163,6 +172,28 @@ module Mode7
       false
     end
 
+    # passable?, passableStrict? and playerPassable? can ask the same 2.5D
+    # question several times during a single movement frame. Cache the combined
+    # static geometry result for that frame to remove duplicate Ruby lookups.
+    def movement_blocked_cached?(x, y, dir)
+      frame = Graphics.respond_to?(:frame_count) ? Graphics.frame_count.to_i : 0
+      map_id = ($game_map && $game_map.respond_to?(:map_id)) ? $game_map.map_id.to_i : 0
+      if @movement_block_cache_frame != frame || @movement_block_cache_map != map_id
+        @movement_block_cache_frame = frame
+        @movement_block_cache_map = map_id
+        @movement_block_cache = {}
+      end
+      key = [x.to_i, y.to_i, dir.to_i]
+      return @movement_block_cache[key] if @movement_block_cache.key?(key)
+      value = solid_cell_at?(x, y) ||
+              surface_transition_blocked?(x, y, dir) ||
+              object_cell_blocked?(x, y, dir)
+      @movement_block_cache[key] = value
+      value
+    rescue Exception
+      false
+    end
+
     # V5.10 transitional compatibility for maps authored in 2D:
     # MountainWall rows are artwork sampled by the vertical cliff renderer.
     # Their old tileset passability must not create a second collision wall in
@@ -218,8 +249,7 @@ module Passability_2p5D
     Game_Map.class_eval do
       alias_method :_ZBOX_25D_orig_passable, :passable?
       def passable?(x, y, dir, self_event = nil)
-        if Mode7.solid_cell_at?(x, y) || Mode7.surface_transition_blocked?(x, y, dir) ||
-           Mode7.object_cell_blocked?(x, y, dir)
+        if Mode7.movement_blocked_cached?(x, y, dir)
           return false if !self_event || !self_event.through
         end
         result = _ZBOX_25D_orig_passable(x, y, dir, self_event)
@@ -229,8 +259,7 @@ module Passability_2p5D
 
       alias_method :_ZBOX_25D_orig_passable_strict, :passableStrict?
       def passableStrict?(x, y, dir, self_event = nil)
-        return false if Mode7.solid_cell_at?(x, y) || Mode7.surface_transition_blocked?(x, y, dir) ||
-                        Mode7.object_cell_blocked?(x, y, dir)
+        return false if Mode7.movement_blocked_cached?(x, y, dir)
         result = _ZBOX_25D_orig_passable_strict(x, y, dir, self_event)
         return true if !result && Mode7.decorative_mountain_wall_transition?(x, y, dir)
         result
@@ -238,8 +267,7 @@ module Passability_2p5D
 
       alias_method :_ZBOX_25D_orig_player_passable, :playerPassable?
       def playerPassable?(x, y, dir, self_event = nil)
-        return false if Mode7.solid_cell_at?(x, y) || Mode7.surface_transition_blocked?(x, y, dir) ||
-                        Mode7.object_cell_blocked?(x, y, dir)
+        return false if Mode7.movement_blocked_cached?(x, y, dir)
         result = _ZBOX_25D_orig_player_passable(x, y, dir, self_event)
         return true if !result && Mode7.decorative_mountain_wall_transition?(x, y, dir)
         result

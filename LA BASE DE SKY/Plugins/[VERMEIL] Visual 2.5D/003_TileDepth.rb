@@ -187,7 +187,9 @@ class Mode7Renderer
     end
     @priority_data.clear
     @autotile_cells = Hash.new { |h, k| h[k] = [] }
-    @entry_cache = {}
+    # Sparse cache: empty map cells no longer allocate Hash entries. Reads of
+    # missing cells still return [] so legacy code keeps the same semantics.
+    @entry_cache = Hash.new { |_h, _k| [] }
     @terrain_tag_cache = {}
     # V5.7: estos caches dependen del mapa completo y deben reconstruirse en
     # cada refresh. La altura de una meseta se resuelve por componente.
@@ -207,7 +209,8 @@ class Mode7Renderer
     # necesita poder consultar las celdas vecinas sin depender del orden X/Y.
     @map.width.times do |tx|
       @map.height.times do |ty|
-        @entry_cache[[tx, ty]] = collect_cell_entries(tx, ty)
+        entries = collect_cell_entries(tx, ty)
+        @entry_cache[[tx, ty]] = entries unless entries.empty?
       end
     end
 
@@ -271,18 +274,19 @@ class Mode7Renderer
   end
 
   def draw_ground_pass(pass, shadow_band = nil, target = @ground)
-    @map.width.times do |tx|
-      @map.height.times do |ty|
-        entries = @entry_cache[[tx, ty]]
-        ground_entries = ground_entries_for_cell(tx, ty, entries)
-        ground_entries.select! { |entry| ground_pass_for(entry) == pass }
-        if shadow_band
-          ground_entries.select! do |entry|
-            ground_shadow_band_for(tx, ty, entry) == shadow_band
-          end
+    # Empty cells have nothing to composite. Iterating the sparse entry cache
+    # avoids a second width*height walk on large maps.
+    (@entry_cache || {}).each do |pos, entries|
+      next if !entries || entries.empty?
+      tx, ty = pos
+      ground_entries = ground_entries_for_cell(tx, ty, entries)
+      ground_entries.select! { |entry| ground_pass_for(entry) == pass }
+      if shadow_band
+        ground_entries.select! do |entry|
+          ground_shadow_band_for(tx, ty, entry) == shadow_band
         end
-        blt_ground_cell(tx, ty, ground_entries, target) unless ground_entries.empty?
       end
+      blt_ground_cell(tx, ty, ground_entries, target) unless ground_entries.empty?
     end
   end
 
@@ -296,31 +300,30 @@ class Mode7Renderer
 
     tw = Game_Map::TILE_WIDTH
     th = Game_Map::TILE_HEIGHT
-    @map.width.times do |tx|
-      @map.height.times do |ty|
-        entries = @entry_cache[[tx, ty]]
-        ground_entries = ground_entries_for_cell(tx, ty, entries)
-        paint_nds_underlay(tx, ty, entries, ground_entries, @ground)
+    (@entry_cache || {}).each do |pos, entries|
+      next if !entries || entries.empty?
+      tx, ty = pos
+      ground_entries = ground_entries_for_cell(tx, ty, entries)
+      paint_nds_underlay(tx, ty, entries, ground_entries, @ground)
 
-        if @ms_shadow_env
-          lower = []
-          upper = []
-          ground_entries.each do |entry|
-            if ground_shadow_band_for(tx, ty, entry) == :above_shadow
-              upper << entry
-            else
-              lower << entry
-            end
+      if @ms_shadow_env
+        lower = []
+        upper = []
+        ground_entries.each do |entry|
+          if ground_shadow_band_for(tx, ty, entry) == :above_shadow
+            upper << entry
+          else
+            lower << entry
           end
-          blt_ground_cell(tx, ty, lower, @ground) unless lower.empty?
-          if @shadow_ground && !@shadow_ground.disposed?
-            @src_rect.set(tx * tw, ty * th, tw, th)
-            @ground.blt(tx * tw, ty * th, @shadow_ground, @src_rect)
-          end
-          blt_ground_cell(tx, ty, upper, @ground) unless upper.empty?
-        else
-          blt_ground_cell(tx, ty, ground_entries, @ground) unless ground_entries.empty?
         end
+        blt_ground_cell(tx, ty, lower, @ground) unless lower.empty?
+        if @shadow_ground && !@shadow_ground.disposed?
+          @src_rect.set(tx * tw, ty * th, tw, th)
+          @ground.blt(tx * tw, ty * th, @shadow_ground, @src_rect)
+        end
+        blt_ground_cell(tx, ty, upper, @ground) unless upper.empty?
+      else
+        blt_ground_cell(tx, ty, ground_entries, @ground) unless ground_entries.empty?
       end
     end
   end

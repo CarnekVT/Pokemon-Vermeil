@@ -419,6 +419,8 @@ module Mode7
       @project_y_cache.clear
       @projection_cache_cam_y = nil
       @projection_cache_cam_elevation = nil
+      @projection_cam_elevation_key = nil
+      @projection_cam_elevation_value = 0.0
     end
 
     # project_y/world_y dependen de la posicion exacta de camara. Usar floor
@@ -536,10 +538,19 @@ module Mode7
       width = $game_player.instance_variable_get(:@width)
       width = width ? width.to_i : 1
       width = 1 if width <= 0
+      map_id = ($game_map && $game_map.respond_to?(:map_id)) ? $game_map.map_id.to_i : 0
+      # project()/walls/volume/objects ask for this value many times per frame.
+      # The physical surface cannot change while the player's exact subpixel
+      # coordinates stay identical, so cache the expensive ramp/geometry lookup.
+      key = [map_id, real_x, real_y, width]
+      return @projection_cam_elevation_value.to_f if @projection_cam_elevation_key == key
       wx = real_x.to_f / Game_Map::X_SUBPIXELS +
            width * Game_Map::TILE_WIDTH / 2.0
       wy = real_y.to_f / Game_Map::Y_SUBPIXELS + Game_Map::TILE_HEIGHT
-      nds_surface_height_at_real(wx, wy).to_f
+      value = nds_surface_height_at_real(wx, wy).to_f
+      @projection_cam_elevation_key = key
+      @projection_cam_elevation_value = value
+      value
     rescue Exception
       0.0
     end
