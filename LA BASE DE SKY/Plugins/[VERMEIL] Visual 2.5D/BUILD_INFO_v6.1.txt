@@ -1,0 +1,7 @@
+[VERMEIL] Visual 2.5D v6.1.0
+- Geometry v4.2.0 bundled
+- V25R2 line-based first-frame runtime (no map JSON parsing)
+- V25C2 compact collision runtime
+- V25M1 model faces stay lazy/idle streamed
+- Legacy MapXXX.json loaders removed from active runtime paths
+- Direct model placement and transform editing in Geometry Studio

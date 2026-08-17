@@ -9,7 +9,7 @@
 #   * colision de desniveles
 #   * superficie de MountainTop/Volume/Stair
 #
-# Archivo opcional: Data/VERMEIL2_5D/MapXXX.json
+# Runtime limpio: Data/VERMEIL_GEOMETRY_V4/MapXXX.v25r (sin JSON de autoría)
 # Si no existe, se compila un fallback desde los Terrain Tags actuales.
 #===============================================================================
 
@@ -20,7 +20,7 @@ end
 
 module Mode7
   class SurfaceGeometry
-    attr_reader :map_id, :width, :height, :height_step, :source, :path, :inherit_legacy, :objects, :mesh_faces, :model_collision_cells
+    attr_reader :map_id, :width, :height, :height_step, :source, :path, :inherit_legacy, :objects, :mesh_faces, :model_collision_cells, :model_stream_path, :model_face_count, :planes
 
     def initialize(map_id, width, height, height_step, source = :legacy, path = nil)
       @map_id = map_id.to_i
@@ -32,14 +32,56 @@ module Mode7
       @path = path
       @cells = {}
       @ramps = []
+      # DS-style authored terrain is stored as a few merged rectangular planes.
+      # @plane_index makes gameplay height queries O(1) without generating a 3D
+      # object/collider per tile.
+      @planes = []
+      @plane_index = {}
       @objects = []
       @mesh_faces = []
       @model_collision_cells = {}
+      @model_stream_path = nil
+      @model_face_count = 0
       @inherit_legacy = false
     end
 
     def explicit?
       @source == :file
+    end
+
+    def set_model_stream(path, count = 0)
+      @model_stream_path = path
+      @model_face_count = count.to_i
+    end
+
+    def self.normalize_compact_mesh_face(a, mats)
+      return nil if !a.is_a?(Array)
+      raw_kind = a[1].to_s
+      kind = raw_kind == "top" ? "top" : (raw_kind == "quad" ? "quad" : "side")
+      edge = a[3].to_s
+      edge = nil if !["north", "south", "east", "west"].include?(edge)
+      vertices = nil
+      if a[4].is_a?(Array) && a[4].length == 4
+        vertices = a[4].map do |v|
+          next [0.0, 0.0, 0.0] if !v.is_a?(Array)
+          [v[0].to_f, v[1].to_f, [v[2].to_f, 0.0].max]
+        end
+      end
+      uv = a[5]
+      uv_rect = uv.is_a?(Array) && uv.length == 4 ? uv.map { |v| [[v.to_f, 0.0].max, 1.0].min } : nil
+      puv = a[6]
+      pattern_uv = puv.is_a?(Array) && puv.length == 4 ? puv.map { |v| v.to_f } : nil
+      mi = a[7].to_i
+      {
+        id: a[0].to_i, kind: kind, surface: a[2].to_s, edge: edge,
+        vertices: vertices, uv_rect: uv_rect, pattern_uv: pattern_uv,
+        x0: a[14].to_f, y0: a[15].to_f, x1: a[16].to_f, y1: a[17].to_f,
+        z0: [a[18].to_f, 0.0].max, z1: [a[19].to_f, 0.0].max,
+        material: (mi >= 0 && mats[mi].is_a?(Hash)) ? mats[mi] : nil,
+        material_repeat: a[8].to_i != 0,
+        category: a[9].to_s.empty? ? "mountain" : a[9].to_s,
+        model_id: a[10].to_s, model_instance_id: a[11].to_i, part_id: a[12].to_s
+      }
     end
 
     def inside?(x, y)
@@ -59,10 +101,71 @@ module Mode7
       end
     end
 
+    def add_plane(hash)
+      return if !hash.is_a?(Hash)
+      x = (hash["x"] || hash[:x]).to_i
+      y = (hash["y"] || hash[:y]).to_i
+      w = [(hash["width"] || hash[:width] || 1).to_i, 1].max
+      h = [(hash["height"] || hash[:height] || 1).to_i, 1].max
+      raw = hash["corners"] || hash[:corners]
+      return if !raw.is_a?(Array) || raw.length != 4
+      # Runtime JSON stores height-step units; SurfaceGeometry always exposes px.
+      corners = raw.map { |v| [v.to_f * @height_step, 0.0].max }
+      plane = { x: x, y: y, width: w, height: h, corners: corners }
+      idx = @planes.length
+      @planes << plane
+      y.upto(y + h - 1) do |ty|
+        x.upto(x + w - 1) do |tx|
+          next if !inside?(tx, ty)
+          @plane_index[[tx, ty]] = idx
+        end
+      end
+      plane
+    rescue Exception
+      nil
+    end
+
+    def plane_at(x, y)
+      idx = @plane_index[[x.to_i, y.to_i]]
+      idx.nil? ? nil : @planes[idx]
+    rescue Exception
+      nil
+    end
+
+    def plane_cell?(x, y)
+      @plane_index.key?([x.to_i, y.to_i])
+    rescue Exception
+      false
+    end
+
+    def plane_height(plane, u, v)
+      return 0.0 if !plane
+      z00, z10, z11, z01 = plane[:corners]
+      u = [[u.to_f, 0.0].max, 1.0].min
+      v = [[v.to_f, 0.0].max, 1.0].min
+      north = z00 + (z10 - z00) * u
+      south = z01 + (z11 - z01) * u
+      north + (south - north) * v
+    rescue Exception
+      0.0
+    end
+
+    def plane_center_height_at(x, y)
+      plane = plane_at(x, y)
+      return nil if !plane
+      u = ((x.to_f + 0.5) - plane[:x].to_f) / plane[:width].to_f
+      v = ((y.to_f + 0.5) - plane[:y].to_f) / plane[:height].to_f
+      plane_height(plane, u, v)
+    rescue Exception
+      nil
+    end
+
     def height_at(x, y)
       x = x.to_i
       y = y.to_i
       return 0.0 if !inside?(x, y)
+      ph = plane_center_height_at(x, y)
+      return ph.to_f if !ph.nil?
       cell = @cells[[x, y]]
       cell ? cell[:height].to_f : 0.0
     end
@@ -73,7 +176,7 @@ module Mode7
     end
 
     def explicit_cell?(x, y)
-      @cells.key?([x.to_i, y.to_i])
+      @cells.key?([x.to_i, y.to_i]) || plane_cell?(x, y)
     end
 
     def ramp_cell?(x, y)
@@ -167,10 +270,21 @@ module Mode7
       @inherit_legacy = true
       ramps = other.instance_variable_get(:@ramps)
       @ramps = ramps ? ramps.map(&:dup) : []
+      @planes = []
+      @plane_index = {}
+      planes = other.respond_to?(:planes) ? other.planes : []
+      (planes || []).each do |pl|
+        # other planes are already in pixels; convert back to step units for add_plane.
+        raw = { x: pl[:x], y: pl[:y], width: pl[:width], height: pl[:height],
+                corners: (pl[:corners] || []).map { |z| z.to_f / @height_step } }
+        add_plane(raw)
+      end
       objects = other.objects
       @objects = objects ? objects.map { |obj| Marshal.load(Marshal.dump(obj)) } : []
       faces = other.mesh_faces
       @mesh_faces = faces ? faces.map { |face| Marshal.load(Marshal.dump(face)) } : []
+      @model_stream_path = other.respond_to?(:model_stream_path) ? other.model_stream_path : nil
+      @model_face_count = other.respond_to?(:model_face_count) ? other.model_face_count.to_i : 0
       # Keep compiled model collision when explicit Geometry is overlaid on
       # legacy terrain. Older builds copied the visible mesh but dropped this
       # grid, which made placed models walk-through on inherit_legacy maps.
@@ -204,6 +318,16 @@ module Mode7
     def real_height_at(world_x, world_y, tile_w, tile_h)
       wx = world_x.to_f
       wy = world_y.to_f
+      tx0 = (wx / tile_w).floor
+      ty0 = (wy / tile_h).floor
+      plane = plane_at(tx0, ty0)
+      if plane
+        west = plane[:x].to_f * tile_w
+        north = plane[:y].to_f * tile_h
+        span_x = [plane[:width].to_f * tile_w, 0.001].max
+        span_y = [plane[:height].to_f * tile_h, 0.001].max
+        return plane_height(plane, (wx - west) / span_x, (wy - north) / span_y)
+      end
       @ramps.each do |ramp|
         west = ramp[:x] * tile_w
         east = (ramp[:x] + ramp[:width]) * tile_w
@@ -223,17 +347,15 @@ module Mode7
       0.0
     end
 
+    # Geometry v4 runtime methods are implemented by 032_GeometryV4Codec.rb.
+    # Keep these delegating definitions here so this file never touches the old
+    # legacy Geometry JSON path, regardless of plugin load order.
     def self.file_path(map_id)
-      dir = Mode7::Config::SURFACE_GEOMETRY_DIRECTORY.to_s
-      File.join(dir, format("Map%03d.json", map_id.to_i))
+      File.join(Mode7::Config::SURFACE_GEOMETRY_DIRECTORY.to_s, format("Map%03d.v25d", map_id.to_i))
     end
 
-    # Runtime data is intentionally separated from the authoring JSON. The
-    # editor file can contain model templates, topology and UI metadata; the
-    # game only needs already-compiled cells, collisions and mesh faces.
     def self.runtime_file_path(map_id)
-      dir = Mode7::Config::SURFACE_GEOMETRY_DIRECTORY.to_s
-      File.join(dir, format("Map%03d_runtime.json", map_id.to_i))
+      File.join(Mode7::Config::SURFACE_GEOMETRY_DIRECTORY.to_s, format("Map%03d.v25r", map_id.to_i))
     end
 
     def self.clear_file_cache!(map_id = nil)
@@ -242,207 +364,26 @@ module Mode7
         @file_geometry_cache.clear
       else
         paths = [file_path(map_id), runtime_file_path(map_id)]
-        @file_geometry_cache.delete_if { |key, _value| paths.include?(key[0]) }
+        @file_geometry_cache.delete_if { |key, _| paths.include?(key[0]) }
       end
     rescue Exception
     end
 
     def self.from_file(map_id, width, height)
-      return nil if !defined?(JSON)
-      runtime_path = runtime_file_path(map_id)
-      allow_editor = Mode7::Config.const_defined?(:SURFACE_GEOMETRY_ALLOW_EDITOR_JSON_RUNTIME) &&
-                     Mode7::Config::SURFACE_GEOMETRY_ALLOW_EDITOR_JSON_RUNTIME
-      path = if File.file?(runtime_path)
-               runtime_path
-             elsif allow_editor
-               file_path(map_id)
-             else
-               runtime_path
-             end
+      path = runtime_file_path(map_id)
       cache_key = [path, width.to_i, height.to_i]
       @file_geometry_cache ||= {}
-      # key? is intentional: nil is a cached result for maps without Geometry.
       return @file_geometry_cache[cache_key] if @file_geometry_cache.key?(cache_key)
-
-      # Disk access happens at most once per map/dimensions for this process.
-      # In particular, Game_Map#passable? never reaches this method anymore.
-      if !File.file?(path)
-        @file_geometry_cache[cache_key] = nil
-        if !allow_editor && File.file?(file_path(map_id))
-          @runtime_missing_warned ||= {}
-          if !@runtime_missing_warned[map_id.to_i]
-            @runtime_missing_warned[map_id.to_i] = true
-            Console.echo_li("[VERMEIL] Geometry runtime sidecar missing for Map#{format('%03d', map_id.to_i)}; re-save the map in Maker Studio (authoring JSON skipped for fast load).") if defined?(Console)
-          end
-        end
-        return nil
-      end
-      raw = JSON.parse(File.binread(path))
-      return nil if !raw.is_a?(Hash)
-      step = (raw["height_step"] || Mode7::Config::SURFACE_GEOMETRY_HEIGHT_STEP).to_f
-      geo = new(map_id, width, height, step, :file, path)
-      geo.instance_variable_set(:@inherit_legacy, raw.fetch("inherit_legacy", true) != false)
-      cells = raw["cells"]
-      if cells.is_a?(Hash)
-        cells.each do |key, value|
-          xy = key.to_s.split(",", 2)
-          next if xy.length != 2
-          x = xy[0].to_i
-          y = xy[1].to_i
-          material = nil
-          h = 0.0
-          if value.is_a?(Numeric)
-            h = value.to_f * step
-          elsif value.is_a?(Hash)
-            material = value["material"]
-            if value.key?("height")
-              h = value["height"].to_f
+      geo = if defined?(Mode7::GeometryV4Fast)
+              Mode7::GeometryV4Fast.load_surface(path, map_id, width, height)
             else
-              h = value.fetch("level", 0).to_f * step
+              nil
             end
-          end
-          geo.set_height(x, y, h, material, true)
-        end
-      end
-      ramps = raw["ramps"]
-      ramps.each { |r| geo.add_ramp(r) } if ramps.is_a?(Array)
-      # Manual objects and Scene Compiler instances use one canonical runtime
-      # path. compiled_objects are generated from the *actual placed source*
-      # (tilesetId/tileId/layer/x/y) by the Maker Studio editor.
-      objects = []
-      objects.concat(raw["objects"]) if raw["objects"].is_a?(Array)
-      objects.concat(raw["compiled_objects"]) if raw["compiled_objects"].is_a?(Array)
-      objects.concat(raw["model_objects"]) if raw["model_objects"].is_a?(Array)
-      if !objects.empty?
-        geo.instance_variable_get(:@objects).concat(objects.map do |o|
-          next nil if !o.is_a?(Hash)
-          {
-            id: o["id"].to_i,
-            name: o["name"].to_s.empty? ? "Object #{o["id"].to_i}" : o["name"].to_s,
-            compiled: o["compiled"] == true,
-            source_key: o["source_key"].to_s,
-            instance_key: o["instance_key"].to_s,
-            source: o["source"].is_a?(Hash) ? o["source"] : nil,
-            components: o["components"].is_a?(Hash) ? o["components"] : {},
-            type: o["type"] == "plane" ? "plane" : "cube",
-            x: o["x"].to_i,
-            y: o["y"].to_i,
-            w: [o["w"].to_i, 1].max,
-            h: [o["h"].to_i, 1].max,
-            # Floats are intentional: the editor now exposes engine-style
-            # quarter-tile transforms instead of forcing integer-only Z/H.
-            height: [o["height"].to_f, 0.0].max,
-            anchor_z: [o["anchor_z"].to_f, 0.0].max,
-            anchor_row: [[o["anchor_row"].nil? ? [o["h"].to_i - 1, 0].max : o["anchor_row"].to_i, 0].max, [[o["h"].to_i, 1].max - 1, 0].max].min,
-            rotation: ((o["rotation"].to_i / 90).round * 90) % 360,
-            collision: o["collision"].to_s.empty? ? "solid" : o["collision"].to_s,
-            category: o["category"].to_s.empty? ? "prop" : o["category"].to_s,
-            characters_in_front: o["characters_in_front"] == true,
-            footprint: begin
-              fp = {}
-              if o["footprint"].is_a?(Hash)
-                o["footprint"].each do |key, value|
-                  xy = key.to_s.split(",", 2)
-                  next if xy.length != 2
-                  mode = value.is_a?(Hash) ? value["collision"] : value
-                  fp[[xy[0].to_i, xy[1].to_i]] = mode.to_s
-                end
-              end
-              fp
-            end,
-            material: o["material"].is_a?(Hash) ? o["material"] : nil,
-            face_materials: o["face_materials"].is_a?(Hash) ? o["face_materials"] : {},
-            model_id: o["model_id"].to_s,
-            model_instance_id: o["model_instance_id"].to_i,
-            render: o["render"] == false ? false : true
-          }.compact
-        end.compact)
-      end
-      collision_rows = raw["model_collision_cells"]
-      geo.set_model_collision_cells(collision_rows) if collision_rows.is_a?(Array)
-
-      # v5.12.1: compact faces are normalized in ONE pass. The previous loader
-      # first expanded every compact row into a String-keyed Hash and then built
-      # a second Symbol-keyed Hash, doubling allocations on model-heavy maps.
-      compact = raw["mesh_faces_compact"]
-      if compact.is_a?(Array)
-        mats = raw["materials"].is_a?(Array) ? raw["materials"] : []
-        parsed_faces = []
-        parsed_faces.reserve(compact.length) if parsed_faces.respond_to?(:reserve)
-        compact.each do |a|
-          next if !a.is_a?(Array)
-          raw_kind = a[1].to_s
-          kind = raw_kind == "top" ? "top" : (raw_kind == "quad" ? "quad" : "side")
-          edge = a[3].to_s
-          edge = nil if !["north", "south", "east", "west"].include?(edge)
-          vertices = nil
-          if a[4].is_a?(Array) && a[4].length == 4
-            vertices = a[4].map do |v|
-              next [0.0, 0.0, 0.0] if !v.is_a?(Array)
-              [v[0].to_f, v[1].to_f, [v[2].to_f, 0.0].max]
-            end
-          end
-          uv = a[5]
-          uv_rect = uv.is_a?(Array) && uv.length == 4 ? uv.map { |v| [[v.to_f, 0.0].max, 1.0].min } : nil
-          puv = a[6]
-          pattern_uv = puv.is_a?(Array) && puv.length == 4 ? puv.map { |v| v.to_f } : nil
-          mi = a[7].to_i
-          parsed_faces << {
-            id: a[0].to_i, kind: kind, surface: a[2].to_s, edge: edge,
-            vertices: vertices, uv_rect: uv_rect, pattern_uv: pattern_uv,
-            x0: a[14].to_f, y0: a[15].to_f, x1: a[16].to_f, y1: a[17].to_f,
-            z0: [a[18].to_f, 0.0].max, z1: [a[19].to_f, 0.0].max,
-            material: (mi >= 0 && mats[mi].is_a?(Hash)) ? mats[mi] : nil,
-            material_repeat: a[8].to_i != 0,
-            category: a[9].to_s.empty? ? "mountain" : a[9].to_s,
-            model_id: a[10].to_s, model_instance_id: a[11].to_i, part_id: a[12].to_s
-          }
-        end
-        geo.instance_variable_get(:@mesh_faces).concat(parsed_faces)
-      else
-        faces = raw["mesh_faces"]
-        if faces.is_a?(Array)
-          parsed_faces = faces.map do |f|
-            next nil if !f.is_a?(Hash)
-            raw_kind = f["kind"].to_s
-            kind = raw_kind == "top" ? "top" : (raw_kind == "quad" ? "quad" : "side")
-            edge = f["edge"].to_s
-            edge = nil if !["north", "south", "east", "west"].include?(edge)
-            vertices = nil
-            if f["vertices"].is_a?(Array) && f["vertices"].length == 4
-              vertices = f["vertices"].map do |v|
-                next [0.0, 0.0, 0.0] if !v.is_a?(Array)
-                [v[0].to_f, v[1].to_f, [v[2].to_f, 0.0].max]
-              end
-            end
-            {
-              id: f["id"].to_i, kind: kind, surface: f["surface"].to_s, edge: edge, vertices: vertices,
-              uv_rect: begin
-                uv = f["uv_rect"]
-                uv.is_a?(Array) && uv.length == 4 ? uv.map { |v| [[v.to_f, 0.0].max, 1.0].min } : nil
-              end,
-              x0: f["x0"].to_f, y0: f["y0"].to_f, x1: f["x1"].to_f, y1: f["y1"].to_f,
-              z0: [f["z0"].to_f, 0.0].max, z1: [f["z1"].to_f, 0.0].max,
-              material: f["material"].is_a?(Hash) ? f["material"] : nil,
-              material_repeat: f["material_repeat"] == false ? false : true,
-              pattern_uv: (f["pattern_uv"].is_a?(Array) && f["pattern_uv"].length == 4) ? f["pattern_uv"].map { |v| v.to_f } : nil,
-              category: f["category"].to_s.empty? ? "mountain" : f["category"].to_s,
-              model_id: f["model_id"].to_s, model_instance_id: f["model_instance_id"].to_i, part_id: f["part_id"].to_s
-            }
-          end.compact
-          geo.instance_variable_get(:@mesh_faces).concat(parsed_faces)
-        end
-      end
       @file_geometry_cache[cache_key] = geo
-      # Keep a bounded number of fully-normalized map geometries in memory.
-      if @file_geometry_cache.length > 6
-        oldest = @file_geometry_cache.keys.find { |k| k != cache_key }
-        @file_geometry_cache.delete(oldest) if oldest
-      end
       geo
     rescue Exception => e
       @file_geometry_cache[cache_key] = nil if defined?(cache_key) && cache_key
-      Console.echo_error("VERMEIL geometry JSON #{path}: #{e.message}") if defined?(Console)
+      Console.echo_error("VERMEIL Geometry v4 #{path}: #{e.message}") if defined?(Console)
       nil
     end
   end
@@ -597,6 +538,12 @@ class Mode7Renderer
     return base if !@nds_surface_geometry
     return base if respond_to?(:nds_stair_cell?, true) && nds_stair_cell?(tx, ty)
     h = @nds_surface_geometry.height_at(tx, ty).to_f
+    if @nds_surface_geometry.respond_to?(:plane_cell?) && @nds_surface_geometry.plane_cell?(tx, ty)
+      pl = @nds_surface_geometry.plane_at(tx, ty) rescue nil
+      if pl && (pl[:corners] || []).any? { |z| z.to_f > 0.001 }
+        return []
+      end
+    end
     return base if h <= 0.001
     # Todo lo que sobrevivio al filtro original ya es arte horizontal P0.
     # Debe abandonar @ground para que no exista simultaneamente en Z=0 y Z=h.

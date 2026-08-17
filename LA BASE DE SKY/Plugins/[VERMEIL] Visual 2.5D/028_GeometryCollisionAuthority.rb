@@ -3,7 +3,7 @@
 # V5.11.4 - Deterministic collision source + Maker Studio bridge support.
 #
 # Important performance rule:
-#   Game_Map#passable? NEVER opens/stats/parses Geometry JSON.
+#   Game_Map#passable? NEVER opens or parses Geometry files.
 # Geometry is loaded by the renderer once, then registered here as an in-memory
 # collision source. During the short window before the renderer exists, normal
 # map passability is used and no disk lookup is attempted.
@@ -25,52 +25,11 @@ module Mode7
       nil
     end
 
-    # Lightweight collision preload. This is called once when Game_Map#setup
-    # finishes (via MakerStudio/016 bridge), never from passable?. The editor
-    # writes MapXXX_collision.json containing only the movement grid.
+    # Lightweight collision preload. V6.1 delegates to the compact V25C2
+    # physics loader. No legacy Geometry JSON path is consulted.
     def preload_geometry_collision_for_map(map_id, width = nil, height = nil)
-      map_id = map_id.to_i
-      @geometry_collision_sidecar_cache ||= {}
-      cached = @geometry_collision_sidecar_cache[map_id]
-      if cached
-        @geometry_collision_authority_map_id = map_id
-        @geometry_collision_authority_geo = cached
-        return cached
-      end
-      return nil if !defined?(Mode7::SurfaceGeometry)
-      dir = if defined?(Config::SURFACE_GEOMETRY_DIRECTORY)
-              Config::SURFACE_GEOMETRY_DIRECTORY.to_s
-            else
-              "Data/VERMEIL2_5D"
-            end
-      path = File.join(dir, format("Map%03d_collision.json", map_id))
-      return nil if !File.file?(path)
-      raw = JSON.parse(File.binread(path))
-      rows = raw["model_collision_cells"]
-      compact_rows = raw["model_collision_cells_compact"]
-      if !rows.is_a?(Array) && compact_rows.is_a?(Array)
-        rows = compact_rows.map do |r|
-          next nil if !r.is_a?(Array)
-          collision = case r[2].to_i
-                      when 1 then "climb"
-                      when 2 then "one-way"
-                      when 3 then "none"
-                      else "solid"
-                      end
-          { "x" => r[0], "y" => r[1], "collision" => collision, "base" => r[3], "height" => r[4],
-            "model_id" => r[5], "model_instance_id" => r[6], "part_id" => r[7] }
-        end.compact
-      end
-      return nil if !rows.is_a?(Array)
-      map = defined?($game_map) ? $game_map : nil
-      w = width || (map && map.respond_to?(:width) ? map.width : raw["width"])
-      h = height || (map && map.respond_to?(:height) ? map.height : raw["height"])
-      step = raw["height_step"] || (defined?(Config::SURFACE_GEOMETRY_HEIGHT_STEP) ? Config::SURFACE_GEOMETRY_HEIGHT_STEP : 32)
-      geo = Mode7::SurfaceGeometry.new(map_id, w.to_i, h.to_i, step.to_f, :collision_sidecar, path)
-      geo.set_model_collision_cells(rows)
-      @geometry_collision_sidecar_cache[map_id] = geo
-      register_geometry_collision_source(geo, map_id)
-      geo
+      return nil if !defined?(Mode7::ModelPhysicsWorld)
+      Mode7::ModelPhysicsWorld.preload(map_id)
     rescue Exception => e
       Console.echo_error("VERMEIL collision sidecar #{map_id}: #{e.message}") if defined?(Console)
       nil

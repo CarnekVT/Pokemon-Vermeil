@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Animation Studio Runtime v1.9.0
+# Battle Animation Studio Runtime v1.10.7
 # Plays animations exported by the Maker Studio Battle Animation Studio.
 # Credits: CarnekVT
 # Source data: PBS/AnimationStudio/compiled_animations.json
@@ -11,8 +11,8 @@ end
 
 module BattleAnimationStudioRuntime
   DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
-  VERSION = 15
-  RUNTIME_PARTICLE_LIMIT = 120
+  VERSION = 16
+  RUNTIME_PARTICLE_LIMIT = 240
   @cache = nil
   @mtime = nil
   @lookup_index = nil
@@ -192,6 +192,8 @@ module BattleAnimationStudioRuntime
       @preloaded_bitmaps = []
       @data_box_visibilities = {}
       @form_restore = {}
+      @active_visual_pokemon = {}
+      @battler_view_state = {}
       @applied_form_rule_ids = {}
       @anchor_cache = {}
       prepare_runtime_cache
@@ -273,6 +275,145 @@ module BattleAnimationStudioRuntime
       []
     end
 
+    # Loads a battler bitmap using the signature available in the current battle
+    # sprite implementation. DBK's Battle::Scene::BattlerSprite expects
+    # (pokemon, battler, back), while vanilla/other renderers commonly expose
+    # (pokemon, back). Keep the switch local and let the renderer build the
+    # correct front/back bitmap (DBK bakes x3 Back / x2 Front into its wrapper).
+    def set_battler_bitmap_view(side, pokemon, back)
+      battler = battler_for_side(side)
+      sprite = sprite_for_side(side)
+      return false if !sprite || !pokemon
+      if sprite.respond_to?(:setPokemonBitmap)
+        begin
+          sprite.setPokemonBitmap(pokemon, battler, !!back)
+        rescue ArgumentError, TypeError
+          sprite.setPokemonBitmap(pokemon, !!back)
+        end
+      elsif sprite.respond_to?(:pokemon=)
+        sprite.pokemon = pokemon
+      else
+        return false
+      end
+      @battler_view_state[side.to_s] = !!back
+      true
+    rescue => e
+      BattleAnimationStudioRuntime.log("battler view #{side} #{e.class}: #{e.message}")
+      false
+    end
+
+    BAS_EDITOR_BACK_SCALE  = 3.0 unless const_defined?(:BAS_EDITOR_BACK_SCALE)
+    BAS_EDITOR_FRONT_SCALE = 2.0  unless const_defined?(:BAS_EDITOR_FRONT_SCALE)
+
+    # BAS mirrors the actual DBK battler footprint in the editor: Back x3 and
+    # Front x2 by default. Because DBK bakes those multipliers into
+    # DeluxeBitmapWrapper, the correction below becomes 1:1 for the defaults
+    # and only compensates genuinely different per-view renderer profiles.
+    def renderer_default_view_scale(back)
+      if back && defined?(Settings::BACK_BATTLER_SPRITE_SCALE)
+        n = Settings::BACK_BATTLER_SPRITE_SCALE.to_f rescue 1.0
+        return n > 0 ? n : 1.0
+      elsif !back && defined?(Settings::FRONT_BATTLER_SPRITE_SCALE)
+        n = Settings::FRONT_BATTLER_SPRITE_SCALE.to_f rescue 1.0
+        return n > 0 ? n : 1.0
+      end
+      1.0
+    rescue
+      1.0
+    end
+
+    def asymmetric_battler_renderer?
+      return false if !defined?(Settings::BACK_BATTLER_SPRITE_SCALE) || !defined?(Settings::FRONT_BATTLER_SPRITE_SCALE)
+      b = renderer_default_view_scale(true)
+      f = renderer_default_view_scale(false)
+      (b - f).abs > 0.001
+    rescue
+      false
+    end
+
+    def editor_view_profile_scale(back)
+      return 1.0 if !asymmetric_battler_renderer?
+      back ? BAS_EDITOR_BACK_SCALE : BAS_EDITOR_FRONT_SCALE
+    end
+
+    def battler_view_profile_correction(side, track, frame)
+      return 1.0 if !asymmetric_battler_renderer?
+      battler = battler_for_side(side)
+      return 1.0 if !battler
+      natural_back = (battler.index.to_i.even? rescue side.to_sym == :user)
+      wanted_back = desired_battler_back?(side, track, frame)
+      return 1.0 if wanted_back == natural_back
+      natural_renderer = renderer_default_view_scale(natural_back)
+      wanted_renderer = renderer_default_view_scale(wanted_back)
+      natural_editor = editor_view_profile_scale(natural_back)
+      wanted_editor = editor_view_profile_scale(wanted_back)
+      return 1.0 if wanted_renderer <= 0 || natural_editor <= 0
+      correction = (wanted_editor / natural_editor) * (natural_renderer / wanted_renderer)
+      correction.finite? && correction > 0 ? correction : 1.0
+    rescue
+      1.0
+    end
+
+    def special_battler_view_for(clip)
+      graphic = clip.is_a?(Hash) && clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
+      source = graphic["source"].to_s
+      return nil if !source.start_with?("battler-")
+      side = source.include?("target") ? :target : :user
+      battler = battler_for_side(side)
+      natural_back = (battler.index.to_i.even? rescue side == :user)
+      wanted_back = if source.include?("-front")
+                      false
+                    elsif source.include?("-back")
+                      true
+                    elsif source.include?("-opp")
+                      !natural_back
+                    else
+                      natural_back
+                    end
+      [side, wanted_back]
+    rescue
+      nil
+    end
+
+    def apply_special_battler_profile_scale(sprite, clip)
+      return if !sprite || !asymmetric_battler_renderer?
+      info = special_battler_view_for(clip)
+      return if !info
+      back = info[1]
+      renderer = renderer_default_view_scale(back)
+      return if renderer <= 0
+      # The special view bitmap is already resized by the battle renderer.
+      # Convert that baked renderer scale back into BAS's editor presentation.
+      correction = editor_view_profile_scale(back) / renderer
+      sprite.zoom_x *= correction
+      sprite.zoom_y *= correction
+    rescue
+    end
+
+    def desired_battler_back?(side, track, frame)
+      battler = battler_for_side(side)
+      natural = (battler.index.to_i.even? rescue side.to_sym == :user)
+      facing = sample_discrete_value(track, "facing", frame, 0).to_i rescue 0
+      return true if facing == 1
+      return false if facing == 2
+      natural
+    end
+
+    def apply_battler_view(side, track, frame)
+      battler = battler_for_side(side)
+      sprite = sprite_for_side(side)
+      return if !battler || !sprite || !track
+      back = desired_battler_back?(side, track, frame)
+      key = side.to_s
+      return if @battler_view_state.key?(key) && @battler_view_state[key] == back
+      pokemon = @active_visual_pokemon[key]
+      pokemon ||= battler.respond_to?(:visiblePokemon) ? battler.visiblePokemon : nil
+      pokemon ||= battler.pokemon if battler.respond_to?(:pokemon)
+      set_battler_bitmap_view(side, pokemon, back) if pokemon
+    rescue => e
+      BattleAnimationStudioRuntime.log("apply battler view #{side} #{e.class}: #{e.message}")
+    end
+
     def apply_visual_form(side, form)
       battler = battler_for_side(side)
       sprite = sprite_for_side(side)
@@ -284,12 +425,10 @@ module BattleAnimationStudioRuntime
       visual.form = form.to_i
       key = side.to_s
       @form_restore[key] ||= pokemon
-      back = (battler.index.to_i.even? rescue side.to_sym == :user)
-      if sprite.respond_to?(:setPokemonBitmap)
-        sprite.setPokemonBitmap(visual, back)
-      elsif sprite.respond_to?(:pokemon=)
-        sprite.pokemon = visual
-      end
+      @active_visual_pokemon[key] = visual
+      track = battler_track(side)
+      back = track ? desired_battler_back?(side, track, @frame) : (battler.index.to_i.even? rescue side.to_sym == :user)
+      set_battler_bitmap_view(side, visual, back)
     rescue => e
       BattleAnimationStudioRuntime.log("form #{side} #{e.class}: #{e.message}")
     end
@@ -320,18 +459,31 @@ module BattleAnimationStudioRuntime
       @form_restore.each do |key, pokemon|
         side = key.to_sym
         battler = battler_for_side(side)
-        sprite = sprite_for_side(side)
-        next if !sprite || !pokemon
+        next if !pokemon
         back = (battler.index.to_i.even? rescue side == :user)
-        if sprite.respond_to?(:setPokemonBitmap)
-          sprite.setPokemonBitmap(pokemon, back)
-        elsif sprite.respond_to?(:pokemon=)
-          sprite.pokemon = pokemon
-        end
+        set_battler_bitmap_view(side, pokemon, back)
       end
+      @active_visual_pokemon.clear
       @form_restore.clear
     rescue
+      @active_visual_pokemon.clear
       @form_restore.clear
+    end
+
+    def restore_battler_views
+      [:user, :target].each do |side|
+        battler = battler_for_side(side)
+        sprite = sprite_for_side(side)
+        next if !battler || !sprite
+        pokemon = battler.respond_to?(:visiblePokemon) ? battler.visiblePokemon : nil
+        pokemon ||= battler.pokemon if battler.respond_to?(:pokemon)
+        next if !pokemon
+        natural_back = (battler.index.to_i.even? rescue side == :user)
+        set_battler_bitmap_view(side, pokemon, natural_back)
+      end
+      @battler_view_state.clear
+    rescue
+      @battler_view_state.clear
     end
 
     def capture_sprite(sprite)
@@ -391,6 +543,7 @@ module BattleAnimationStudioRuntime
     def dispose
       restore_camera!
       restore_visual_forms
+      restore_battler_views
       restore_sprite(user_sprite, @original[:user])
       restore_sprite(target_sprite, @original[:target]) if target_sprite != user_sprite
       restore_scene_visibility
@@ -441,7 +594,7 @@ module BattleAnimationStudioRuntime
       h.is_a?(Hash) ? h[side.to_s] : nil
     end
 
-    def create_front_battler(side)
+    def create_battler_view(side, back)
       battler = side == :target ? @target : @user
       return nil if !battler
       begin
@@ -450,9 +603,9 @@ module BattleAnimationStudioRuntime
         pkmn = battler.respond_to?(:visiblePokemon) ? battler.visiblePokemon : nil
         pkmn ||= battler.pokemon if battler.respond_to?(:pokemon)
         begin
-          sprite.setPokemonBitmap(pkmn, battler, false)
-        rescue
-          sprite.setPokemonBitmap(pkmn, false) if pkmn
+          sprite.setPokemonBitmap(pkmn, battler, !!back)
+        rescue ArgumentError, TypeError
+          sprite.setPokemonBitmap(pkmn, !!back) if pkmn
         end
         # Ensure default size if the battler sprite ended up without a bitmap.
         if !sprite.bitmap || sprite.bitmap.disposed? || sprite.bitmap.width == 0 || sprite.bitmap.height == 0
@@ -461,7 +614,8 @@ module BattleAnimationStudioRuntime
           sprite.oy = DEFAULT_BATTLER_HEIGHT
         end
         return sprite
-      rescue
+      rescue => e
+        BattleAnimationStudioRuntime.log("create battler view #{side}/#{back ? 'back' : 'front'} #{e.class}: #{e.message}")
         return nil
       end
     end
@@ -485,9 +639,21 @@ module BattleAnimationStudioRuntime
         sprite = nil
         if source.start_with?("battler-")
           side = source.include?("target") ? :target : :user
-          if source.include?("front")
-            sprite = create_front_battler(side)
-          end
+          battler = side == :target ? @target : @user
+          natural_back = (battler.index.to_i.even? rescue side == :user)
+          wanted_back = if source.include?("-front")
+                          false
+                        elsif source.include?("-back")
+                          true
+                        elsif source.include?("-opp")
+                          !natural_back
+                        else
+                          natural_back
+                        end
+          # Build the requested view with the real battle renderer. This is
+          # essential for DBK, whose back/front bitmap scales are different
+          # (commonly Back x3 and Front x2) and are baked into the bitmap.
+          sprite = create_battler_view(side, wanted_back)
           if !sprite
             original = side == :target ? target_sprite : user_sprite
             if original
@@ -906,20 +1072,23 @@ module BattleAnimationStudioRuntime
       fallback
     end
 
-    def draw_runtime_circle(bitmap, cx, cy, rx, ry, color, hollow = false)
+    def draw_runtime_circle(bitmap, cx, cy, rx, ry, color, hollow = false, line_width = nil)
       rx = [1, rx.to_i].max; ry = [1, ry.to_i].max
-      inner = hollow ? 0.72 : -1.0
+      thickness_px = [[(line_width || [rx, ry].min * 0.12).to_f.round, 1].max, [rx, ry].min].min
+      inner_rx = [0, rx - thickness_px].max
+      inner_ry = [0, ry - thickness_px].max
       (-ry..ry).each do |yy|
         ny = yy.to_f / ry
         next if ny.abs > 1.0
         span = (rx * Math.sqrt([0.0, 1.0 - ny * ny].max)).round
-        if !hollow
+        if !hollow || inner_rx <= 0 || inner_ry <= 0 || yy.abs >= inner_ry
           bitmap.fill_rect(cx - span, cy + yy, span * 2 + 1, 1, color)
         else
-          inner_span = (span * inner).round
-          thickness = [1, span - inner_span].max
-          bitmap.fill_rect(cx - span, cy + yy, thickness, 1, color)
-          bitmap.fill_rect(cx + inner_span, cy + yy, thickness + 1, 1, color)
+          iny = yy.to_f / inner_ry
+          inner_span = (inner_rx * Math.sqrt([0.0, 1.0 - iny * iny].max)).round
+          left_w = [1, span - inner_span].max
+          bitmap.fill_rect(cx - span, cy + yy, left_w, 1, color)
+          bitmap.fill_rect(cx + inner_span + 1, cy + yy, left_w, 1, color)
         end
       end
     rescue
@@ -946,7 +1115,7 @@ module BattleAnimationStudioRuntime
         end
       when "circle"
         color = runtime_color(graphic["proceduralColor"])
-        draw_runtime_circle(bmp, w / 2, h / 2, w / 2, h / 2, color, !!graphic["proceduralHollow"])
+        draw_runtime_circle(bmp, w / 2, h / 2, w / 2, h / 2, color, !!graphic["proceduralHollow"], graphic["proceduralLineWidth"])
       else
         bmp.fill_rect(0, 0, w, h, runtime_color(graphic["proceduralColor"]))
       end
@@ -960,7 +1129,7 @@ module BattleAnimationStudioRuntime
       graphic = clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
       id = clip["id"].to_s
       if graphic["procedural"]
-        signature = [graphic["procedural"], graphic["proceduralW"], graphic["proceduralH"], graphic["proceduralColor"], graphic["proceduralHollow"], graphic["proceduralLayers"]].inspect
+        signature = [graphic["procedural"], graphic["proceduralW"], graphic["proceduralH"], graphic["proceduralColor"], graphic["proceduralHollow"], graphic["proceduralLineWidth"], graphic["proceduralLayers"]].inspect
         return if @effect_bitmap_names[id] == signature && sprite.bitmap && !sprite.bitmap.disposed?
         old = @procedural_bitmaps[id]
         old.dispose if old && !old.disposed?
@@ -1261,13 +1430,45 @@ module BattleAnimationStudioRuntime
       origin = origin.dup
       graphic = clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
       special = graphic["source"].to_s.start_with?("battler-")
-      offset = (special && sprite.bitmap && !sprite.bitmap.disposed?) ? sprite.bitmap.height / 2.0 : 0.0
+      offset = (special && sprite.bitmap && !sprite.bitmap.disposed?) ? ((sprite.src_rect && sprite.src_rect.height > 0) ? sprite.src_rect.height / 2.0 : sprite.bitmap.height / 2.0) : 0.0
       # AnimationPlayer::Helper#get_xy_offset participates in both the current
       # sprite coordinate and the focus target used by the angle override.
       origin[1] += offset
       target[1] += offset
       sprite.angle = sample_value(clip, "rotation", frame, 0) + rgss_angle_between(origin[0], origin[1], target[0], target[1])
     rescue
+    end
+
+    # Emitter version of the PBS angle override. RandomAngleRange replaces
+    # InitialAngleToFocus, while AlwaysPointAtFocus adds the random offset. This
+    # is the same order used by the Studio preview/New Animation Editor.
+    def apply_emitter_angle_override(sprite, clip, frame, desc)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      mode = pbs["angleOverride"].to_s.downcase
+      base_rotation = sample_value(clip, "rotation", frame, 0).to_f
+      range = (desc[:random_angle_range] || 0).to_i
+      angle_offset = (desc[:random_angle] || 0).to_f
+      target = pbs_focus_target(clip).dup
+      graphic = clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
+      special = graphic["source"].to_s.start_with?("battler-")
+      offset = (special && sprite.bitmap && !sprite.bitmap.disposed?) ? sprite.bitmap.height / 2.0 : 0.0
+
+      if mode.include?("always") && mode.include?("focus")
+        origin = sample_position(clip, frame).dup
+        origin[1] += offset
+        target[1] += offset
+        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + angle_offset
+      elsif mode.include?("initial") && mode.include?("focus") && range <= 0
+        origin = pbs_initial_angle_origin(clip).dup
+        origin[1] += offset
+        # InitialAngleToFocus adds get_xy_offset to the source point only.
+        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1])
+      else
+        sprite.angle = base_rotation + angle_offset
+      end
+      sprite.angle *= -1 if desc[:random_angle_invert]
+    rescue => e
+      BattleAnimationStudioRuntime.log("emitter angle #{e.class}: #{e.message}")
     end
 
     def priority_reference(obj, frame)
@@ -1298,18 +1499,84 @@ module BattleAnimationStudioRuntime
       "absolute"
     end
 
+    def pbs_native_layer?(obj)
+      return false if !obj.is_a?(Hash)
+      imported = obj["imported"].is_a?(Hash) ? obj["imported"] : {}
+      imported["format"].to_s.downcase == "pbs" || obj["type"].to_s == "pbs-particle"
+    rescue
+      false
+    end
+
+    def nae_battler_z(index)
+      idx = index.to_i
+      1000 + (100 * ((idx / 2) + 1) * (idx.even? ? 1 : -1))
+    end
+
+    def pbs_z_focus(obj)
+      pbs = obj["pbs"].is_a?(Hash) ? obj["pbs"] : {}
+      focus = pbs["focus"].to_s.downcase
+      ui = (@user.index rescue 0).to_i
+      ti = (@target.index rescue 1).to_i
+      uz = nae_battler_z(ui)
+      tz = nae_battler_z(ti)
+      case focus
+      when "foreground" then 2000
+      when "midground" then 1000
+      when "background" then 0
+      when "user", "user_position" then uz
+      when "target", "target_position" then tz
+      when "user_and_target", "user_position_and_target", "user_and_target_position", "user_position_and_target_position" then [uz, tz]
+      when "user_side_foreground", "target_side_foreground"
+        idx = focus.start_with?("user") ? ui : ti
+        1000 + (idx.even? ? 1000 : 0)
+      when "user_side_background", "target_side_background"
+        idx = focus.start_with?("user") ? ui : ti
+        idx.even? ? 1000 : 0
+      else
+        nil
+      end
+    rescue
+      nil
+    end
+
+    def apply_pbs_native_z(sprite, obj, frame)
+      return if !sprite || !pbs_native_layer?(obj)
+      z = sample_value(obj, "z", frame, 0).to_f
+      focus = pbs_z_focus(obj)
+      if focus.is_a?(Array)
+        distance = -100.0
+        u = focus[0].to_f; t = focus[1].to_f
+        if z >= 0
+          sprite.z = u > t ? u + z : u - z
+        elsif z <= distance
+          sprite.z = u > t ? t + z + distance : t - z + distance
+        else
+          sprite.z = u + ((z / distance) * (t - u)).to_i
+        end
+      elsif !focus.nil?
+        sprite.z = z + focus.to_f
+      else
+        sprite.z = z
+      end
+    rescue => e
+      BattleAnimationStudioRuntime.log("pbs z #{e.class}: #{e.message}")
+    end
+
     def apply_layer_priority(sprite, obj, frame)
       return if !sprite || !obj
       priority = (obj["priority"] || 0).to_f
       explicit = (obj["priorityReference"] || "auto").to_s.downcase
-      # Keep runtime and Studio preview identical: explicit absolute is an actual
-      # Z value, while unresolved Auto is only an offset over the object's Z.
+      # Explicit references are authoritative even at priority 0. This makes
+      # "Normal (0) respecto a Target/User" mean exactly the battler's layer.
       if explicit == "absolute"
         sprite.z = priority
         return
       end
-      return if priority == 0
-      case priority_reference(obj, frame)
+      ref = priority_reference(obj, frame)
+      if explicit == "auto" && priority == 0
+        return
+      end
+      case ref
       when "target"
         base = target_sprite
         sprite.z = (base ? base.z.to_f : sprite.z.to_f) + priority
@@ -1321,21 +1588,26 @@ module BattleAnimationStudioRuntime
       when "background"
         sprite.z = -100000 + priority
       else
-        sprite.z = sprite.z.to_f + priority
+        sprite.z = sprite.z.to_f + priority if priority != 0
       end
     rescue
     end
 
-    def apply_object(sprite, obj, frame, battler = false)
+    def apply_object(sprite, obj, frame, battler = false, side = nil)
       return if !sprite || !obj
       pos = sample_position(obj, frame)
       sprite.x = pos[0]; sprite.y = pos[1]
       size = sample_value(obj, "size", frame, 100) / 100.0
-      sx = sample_value(obj, "scaleX", frame, 100) / 100.0 * size
-      sy = sample_value(obj, "scaleY", frame, 100) / 100.0 * size
+      view_scale = battler ? sample_value(obj, "viewScale", frame, 100) / 100.0 : 1.0
+      sx = sample_value(obj, "scaleX", frame, 100) / 100.0 * size * view_scale
+      sy = sample_value(obj, "scaleY", frame, 100) / 100.0 * size * view_scale
       sy *= -1.0 if sample_value(obj, "flipY", frame, 0) >= 0.5
       if battler
-        base = sprite.equal?(target_sprite) ? @original[:target] : @original[:user]
+        side ||= sprite.equal?(target_sprite) ? :target : :user
+        view_correction = battler_view_profile_correction(side, obj, frame)
+        sx *= view_correction
+        sy *= view_correction
+        base = side.to_sym == :target ? @original[:target] : @original[:user]
         sprite.zoom_x = (base && base[:zoom_x] ? base[:zoom_x] : 1.0) * sx
         sprite.zoom_y = (base && base[:zoom_y] ? base[:zoom_y] : 1.0) * sy
         sprite.angle = (base && base[:angle] ? base[:angle] : 0).to_f + sample_value(obj, "rotation", frame, 0)
@@ -1345,7 +1617,14 @@ module BattleAnimationStudioRuntime
       end
       sprite.opacity = [[(sample_value(obj, "opacity", frame, 100) * 2.55).round, 0].max, 255].min
       sprite.visible = sample_visible(obj, frame)
-      sprite.z = sample_value(obj, "z", frame, sprite.z).round
+      if battler
+        side ||= sprite.equal?(target_sprite) ? :target : :user
+        base = side.to_sym == :target ? @original[:target] : @original[:user]
+        sprite.z = ((base && base[:z] ? base[:z] : sprite.z).to_f + sample_value(obj, "z", frame, 0).to_f).round
+      else
+        sprite.z = sample_value(obj, "z", frame, sprite.z).round
+        apply_pbs_native_z(sprite, obj, frame)
+      end
       sprite.blend_type = sample_value(obj, "blend", frame, 0).round if sprite.respond_to?(:blend_type=)
       sprite.mirror = sample_value(obj, "flip", frame, 0) >= 0.5 if sprite.respond_to?(:mirror=)
       tone = to_tone(fx_at(obj, "tone", frame))
@@ -1356,8 +1635,14 @@ module BattleAnimationStudioRuntime
 
     def apply_battlers
       u = battler_track(:user); t = battler_track(:target)
-      apply_object(user_sprite, u, @frame, true) if u && user_sprite
-      apply_object(target_sprite, t, @frame, true) if t && target_sprite && target_sprite != user_sprite
+      if u && user_sprite
+        apply_battler_view(:user, u, @frame)
+        apply_object(user_sprite, u, @frame, true, :user)
+      end
+      if t && target_sprite && target_sprite != user_sprite
+        apply_battler_view(:target, t, @frame)
+        apply_object(target_sprite, t, @frame, true, :target)
+      end
     end
 
     def emitter_type(clip)
@@ -1430,6 +1715,35 @@ module BattleAnimationStudioRuntime
       fallback
     end
 
+    def emitter_particle_command_frame(clip, emission_frame, age)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      mode = pbs["particleCommandSpace"].to_s.downcase
+      return emission_frame.to_f + age.to_f if mode == "animation"
+      return age.to_f if mode == "particle"
+      # Compatibility with BAS 1.9.4-1.9.6. Studio-created emitter radius keys
+      # were written on the animation timeline; native PBS keeps them particle-local.
+      emitting = pbs["emitterCommands"].is_a?(Hash) ? (pbs["emitterCommands"]["emitting"] || []) : []
+      emitting = emitting.is_a?(Array) ? emitting.sort_by { |cmd| (cmd["frame"] || 0).to_f } : []
+      start_cmd = emitting.find { |cmd| runtime_bool(cmd["value"]) }
+      start_frame = start_cmd ? (start_cmd["frame"] || 0).to_f : 0.0
+      min_radius_frame = nil
+      commands = pbs["commands"].is_a?(Hash) ? pbs["commands"] : {}
+      ["radiusX", "radiusY", "radiusZ"].each do |prop|
+        list = commands[prop]
+        next if !list.is_a?(Array)
+        list.each do |cmd|
+          cf = (cmd["frame"] || 0).to_f
+          min_radius_frame = cf if min_radius_frame.nil? || cf < min_radius_frame
+        end
+      end
+      if start_frame > 0.0 && !min_radius_frame.nil? && min_radius_frame >= start_frame
+        return emission_frame.to_f + age.to_f
+      end
+      age.to_f
+    rescue
+      age.to_f
+    end
+
     def emitter_randomized(clip, key, range_key, frame, rnd, fallback = 0)
       base = emitter_value(clip, key, frame, fallback).to_f
       range = [0.0, emitter_value(clip, range_key, frame, 0).to_f].max
@@ -1455,35 +1769,37 @@ module BattleAnimationStudioRuntime
       list = cached_emitter_commands(clip, "emitting")
       base_rate = [((clip["pbs"] || {})["emitterRate"] || 1).to_f, 0.01].max
       out = []
-      if !list.empty?
-        active_start = nil
-        list.each do |cmd|
-          f = (cmd["frame"] || 0).to_f
-          if runtime_bool(cmd["value"])
-            active_start = f
-          elsif active_start
-            t = active_start
-            stop = f - 0.0000001
-            while t <= stop && t <= duration
-              out << t
-              rate = [emitter_value(clip, "emitterRate", t, base_rate).to_f, 0.01].max
-              t += animation_fps / rate
-            end
-            active_start = nil
-          end
-        end
-        if active_start
-          t = active_start
-          while t <= duration + 0.000001
-            out << t
-            rate = [emitter_value(clip, "emitterRate", t, base_rate).to_f, 0.01].max
-            t += animation_fps / rate
-          end
+      state = false
+      active_start = nil
+
+      # Match the Studio preview exactly: every SetEmitting=true restarts the
+      # cadence, but emissions from the already-active interval are preserved.
+      flush_interval = proc do |finish_frame|
+        next if !state || active_start.nil?
+        stop = [finish_frame.to_f, duration.to_f].min
+        t = active_start.to_f
+        guard = 0
+        while t <= stop + 0.000001 && guard < 20000
+          out << t
+          rate = [emitter_value(clip, "emitterRate", t, base_rate).to_f, 0.01].max
+          t += animation_fps / rate
+          guard += 1
         end
       end
+
+      list.each do |cmd|
+        f = (cmd["frame"] || 0).to_f
+        break if f > duration.to_f + 0.000001
+        flush_interval.call(f - 0.0000001)
+        state = runtime_bool(cmd["value"])
+        active_start = state ? f : nil
+      end
+      flush_interval.call(duration.to_f)
+
       @emitter_frame_cache[key] = out
       out
-    rescue
+    rescue => e
+      BattleAnimationStudioRuntime.log("emitter frames #{e.class}: #{e.message}")
       @emitter_frame_cache[key] = []
     end
 
@@ -1528,14 +1844,35 @@ module BattleAnimationStudioRuntime
       @emitter_lifetime_cache[key] = duration
     end
 
-    def emitter_seed(clip, emission_index, particle_index)
-      base = stable_seed(clip["id"].to_s)
-      ((base ^ ((emission_index.to_i + 1) * 0x9E3779B1) ^ ((particle_index.to_i + 1) * 0x85EBCA6B)) & 0xffffffff)
+    # Emitter randomness is intentionally deterministic so a particle has the
+    # same spawn position/size/angle/frame in Studio preview and in gameplay.
+    # The seed format mirrors preview.js: `${clip.id}:${round(frame*1000)}:${j}`.
+    def emitter_seed(clip, emission_frame, particle_index)
+      frame_key = (emission_frame.to_f * 1000.0).round
+      stable_seed("#{clip["id"]}:#{frame_key}:#{particle_index.to_i}")
+    rescue
+      1
+    end
+
+    # preview.js uses xorshift32 and exposes the low six decimal digits. Keep an
+    # emitter-specific generator instead of changing the runtime RNG used by
+    # unrelated effects.
+    def emitter_seeded_random(seed)
+      state = seed.to_i & 0xffffffff
+      proc do
+        state ^= ((state << 13) & 0xffffffff)
+        state &= 0xffffffff
+        state ^= (state >> 17)
+        state &= 0xffffffff
+        state ^= ((state << 5) & 0xffffffff)
+        state &= 0xffffffff
+        (state % 1_000_000).to_f / 1_000_000.0
+      end
     end
 
     def build_emitter_descriptor(clip, ef, emission_index, particle_in_emission)
-      seed = emitter_seed(clip, emission_index, particle_in_emission)
-      rnd = seeded_random(seed)
+      seed = emitter_seed(clip, ef, particle_in_emission)
+      rnd = emitter_seeded_random(seed)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
       desc = {}
       desc[:frame] = ef
@@ -1551,18 +1888,33 @@ module BattleAnimationStudioRuntime
       desc[:radius_x_mult] = (100.0 + ((rnd.call * 2.0 - 1.0) * [0.0, emitter_value(clip, "emitRadiusXRange", ef, 0).to_f].max)) / 100.0
       desc[:radius_y_mult] = (100.0 + ((rnd.call * 2.0 - 1.0) * [0.0, emitter_value(clip, "emitRadiusYRange", ef, 0).to_f].max)) / 100.0
       desc[:radius_z_mult] = (100.0 + ((rnd.call * 2.0 - 1.0) * [0.0, emitter_value(clip, "emitRadiusZRange", ef, 0).to_f].max)) / 100.0
+      particle_size = [1.0, emitter_value(clip, "particleSize", ef, (pbs["particleSize"] || 100)).to_f].max
+      particle_size_range = [0.0, emitter_value(clip, "particleSizeRange", ef, (pbs["particleSizeRange"] || 0)).to_f].max
+      particle_size_value = particle_size + (particle_size_range > 0 ? ((rnd.call * 2.0 - 1.0) * particle_size_range) : 0.0)
+      desc[:particle_size_mult] = [0.01, particle_size_value / 100.0].max
       desc[:zoom_mult] = (100.0 + ((rnd.call * 2.0 - 1.0) * [0.0, emitter_value(clip, "emitZoomRange", ef, 0).to_f].max)) / 100.0
       desc[:zoom_x_mult] = (100.0 + ((rnd.call * 2.0 - 1.0) * [0.0, emitter_value(clip, "emitZoomXRange", ef, 0).to_f].max)) / 100.0
       desc[:zoom_y_mult] = (100.0 + ((rnd.call * 2.0 - 1.0) * [0.0, emitter_value(clip, "emitZoomYRange", ef, 0).to_f].max)) / 100.0
       desc[:clockwise] = runtime_bool(emitter_value(clip, "emitClockwise", ef, false))
-      random_flip_enabled = runtime_bool(emitter_value(clip, "randomInvertFlip", ef, !!pbs["randomInvertFlip"]))
-      desc[:random_flip] = random_flip_enabled && rnd.call < 0.5
-      range = [0, emitter_value(clip, "randomAngleRange", ef, (pbs["randomAngleRange"] || 0)).to_i].max
-      desc[:random_angle] = range > 0 ? ((rnd.call * (range * 2 + 1)).floor - range) : 0
-      random_invert_enabled = runtime_bool(emitter_value(clip, "randomInvertAngle", ef, !!pbs["randomInvertAngle"]))
-      desc[:random_angle_invert] = random_invert_enabled && rnd.call < 0.5
+
+      # drawClip() deliberately starts a fresh PRNG for visual-only spawn
+      # choices. Reproduce that exact sequence here instead of continuing the
+      # movement RNG, which previously made gameplay particles visibly differ.
+      visual_rnd = emitter_seeded_random(seed)
       random_max = [0, emitter_value(clip, "randomFrameMax", ef, (pbs["randomFrameMax"] || 0)).to_i].max
-      desc[:random_frame] = random_max > 0 ? (rnd.call * (random_max + 1)).floor : nil
+      frame_rnd = emitter_seeded_random(seed)
+      desc[:random_frame] = random_max > 0 ? (frame_rnd.call * (random_max + 1)).floor : nil
+
+      random_flip_enabled = runtime_bool(emitter_value(clip, "randomInvertFlip", ef, !!pbs["randomInvertFlip"]))
+      desc[:random_flip] = random_flip_enabled && visual_rnd.call < 0.5
+
+      range = [0, emitter_value(clip, "randomAngleRange", ef, (pbs["randomAngleRange"] || 0)).to_i].max
+      desc[:random_angle_range] = range
+      desc[:random_angle] = range > 0 ? ((visual_rnd.call * (range * 2 + 1)).floor - range) : 0
+
+      random_invert_enabled = runtime_bool(emitter_value(clip, "randomInvertAngle", ef, !!pbs["randomInvertAngle"]))
+      desc[:random_angle_invert] = random_invert_enabled && visual_rnd.call < 0.5
+
       desc[:drain_travel] = [emitter_value(clip, "drainTravelFrames", ef, (pbs["drainTravelFrames"] || 14)).to_f, 1.0].max
       desc[:energy_travel] = [emitter_value(clip, "energyTravelFrames", ef, (pbs["energyTravelFrames"] || 16)).to_f, 1.0].max
       desc[:energy_turns] = emitter_value(clip, "energyTurns", ef, (pbs["energyTurns"] || 0)).to_f
@@ -1639,6 +1991,7 @@ module BattleAnimationStudioRuntime
     def apply_emitter_particle(sprite, clip, local_frame, extra, desc, pool_index)
       return if !sprite
       apply_object(sprite, clip, local_frame, false)
+      apply_special_battler_profile_scale(sprite, clip)
       apply_layer_priority(sprite, clip, local_frame)
       if !sprite.visible
         hide_second_layer(clip, emitter_layer_key(clip, pool_index))
@@ -1649,10 +2002,26 @@ module BattleAnimationStudioRuntime
       sprite.z = sprite.z.to_f + extra[:z].to_f
       sprite.zoom_x *= extra[:scale_x].to_f
       sprite.zoom_y *= extra[:scale_y].to_f
-      apply_pbs_angle_override(sprite, clip, local_frame)
+      # Opacity has two timelines for emitters: the particle's own opacity is
+      # sampled in local lifetime (above), while emitterOpacity is a global
+      # animation-frame multiplier controlled by the Studio inspector.
+      emitter_alpha = [[sample_value(clip, "emitterOpacity", @frame, 100).to_f / 100.0, 0.0].max, 1.0].min
+      sprite.opacity = [[(sprite.opacity.to_f * emitter_alpha).round, 0].max, 255].min
+      apply_emitter_angle_override(sprite, clip, local_frame, desc)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      focus = pbs["focus"].to_s.downcase
+      relative_index = if focus.include?("and")
+                         -1
+                       elsif focus.start_with?("user")
+                         (@user.index rescue -1)
+                       elsif focus.start_with?("target")
+                         (@target.index rescue -1)
+                       else
+                         -1
+                       end
+      # Match preview.js semantics for imported PBS FoeFlip.
+      sprite.mirror = true if pbs["foeFlip"] && relative_index.to_i >= 0 && relative_index.to_i.odd? && sprite.respond_to?(:mirror=)
       sprite.mirror = !sprite.mirror if desc[:random_flip] && sprite.respond_to?(:mirror=)
-      sprite.angle += desc[:random_angle].to_f
-      sprite.angle *= -1 if desc[:random_angle_invert]
       # RandomFrameMax is a spawn-time choice. Keep it until a Frame process
       # begins, rather than rolling a new frame every render update.
       frame_keys = cached_value_keys(clip, "graphicFrame")
@@ -1664,7 +2033,7 @@ module BattleAnimationStudioRuntime
       tone = to_tone(fx_at(clip, "tone", local_frame)); color = to_color(fx_at(clip, "color", local_frame))
       sprite.tone = tone if tone && sprite.respond_to?(:tone=)
       sprite.color = color if color && sprite.respond_to?(:color=)
-      apply_second_layer(clip, sprite, local_frame, emitter_layer_key(clip, pool_index), desc[:random_angle_invert])
+      apply_second_layer(clip, sprite, local_frame, emitter_layer_key(clip, pool_index), desc[:random_angle_invert], emitter_alpha)
     rescue => e
       BattleAnimationStudioRuntime.log("emitter particle #{e.class}: #{e.message}")
       sprite.visible = false rescue nil
@@ -1693,9 +2062,10 @@ module BattleAnimationStudioRuntime
         sec = age.to_f / fps
         phase = desc[:angle].to_f * Math::PI / 180.0
         dir = desc[:clockwise] ? -1.0 : 1.0
-        radius_x = sample_pbs_scalar(clip, "radiusX", age, 0).to_f
-        radius_y = sample_pbs_scalar(clip, "radiusY", age, 0).to_f
-        radius_z = sample_pbs_scalar(clip, "radiusZ", age, 0).to_f
+        particle_command_frame = emitter_particle_command_frame(clip, ef, age)
+        radius_x = sample_pbs_scalar(clip, "radiusX", particle_command_frame, 0).to_f
+        radius_y = sample_pbs_scalar(clip, "radiusY", particle_command_frame, 0).to_f
+        radius_z = sample_pbs_scalar(clip, "radiusZ", particle_command_frame, 0).to_f
         dx = desc[:ox].to_f; dy = desc[:oy].to_f; zoff = 0.0
         if type == "straight" || type == "projectile"
           dx += Math.cos(phase) * desc[:speed].to_f * sec
@@ -1736,8 +2106,8 @@ module BattleAnimationStudioRuntime
         next if !sprite
         apply_emitter_particle(sprite, clip, age,
           { :dx => dx, :dy => dy, :z => zoff,
-            :scale_x => desc[:zoom_mult].to_f * desc[:zoom_x_mult].to_f,
-            :scale_y => desc[:zoom_mult].to_f * desc[:zoom_y_mult].to_f }, desc, particle_index)
+            :scale_x => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_x_mult].to_f,
+            :scale_y => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_y_mult].to_f }, desc, particle_index)
         particle_index += 1
       end
       hide_emitter_tail(clip, particle_index)
@@ -1801,7 +2171,7 @@ module BattleAnimationStudioRuntime
     rescue
     end
 
-    def apply_second_layer(clip, main, frame, instance_key = nil, random_angle_inverted = false)
+    def apply_second_layer(clip, main, frame, instance_key = nil, random_angle_inverted = false, opacity_multiplier = 1.0)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
       if !pbs["secondLayer"] || !main || !main.visible || !main.bitmap || main.bitmap.disposed?
         hide_second_layer(clip, instance_key)
@@ -1821,7 +2191,7 @@ module BattleAnimationStudioRuntime
       angle2 = sample_pbs_scalar(clip, "angle2", frame, 0).to_f
       angle2 *= -1.0 if random_angle_inverted
       sprite.angle = main.angle.to_f + angle2
-      sprite.opacity = [[main.opacity.to_f + sample_pbs_scalar(clip, "opacity2", frame, 0).to_f, 0].max, 255].min.round
+      sprite.opacity = [[main.opacity.to_f + (sample_pbs_scalar(clip, "opacity2", frame, 0).to_f * opacity_multiplier.to_f), 0].max, 255].min.round
       sprite.z = main.z.to_f + sample_pbs_scalar(clip, "z2", frame, 0).to_f
       raw_flip2 = sample_pbs_scalar(clip, "flip2", frame, false)
       flip2 = (raw_flip2 == true || (raw_flip2.respond_to?(:to_i) && raw_flip2.to_i != 0))
@@ -1860,6 +2230,7 @@ module BattleAnimationStudioRuntime
       end
       update_bitmap(sprite, clip, @frame)
       apply_object(sprite, clip, @frame, false)
+      apply_special_battler_profile_scale(sprite, clip)
       apply_layer_priority(sprite, clip, @frame)
       apply_pbs_angle_override(sprite, clip, @frame)
       apply_source_frame(sprite, clip, @frame)

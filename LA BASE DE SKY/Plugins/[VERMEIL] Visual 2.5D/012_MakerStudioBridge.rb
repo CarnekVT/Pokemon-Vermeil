@@ -47,18 +47,21 @@ class Mode7Renderer
 
   def ensure_extended_data
     return if !defined?(MakerStudio)
-    clear_stale_ms_planes
+    # V5.13: never recursively walk MakerStudio's fog/panorama ivars during a
+    # map renderer build. Those caches can contain large arrays/hashes and the
+    # walk used to happen exactly on the loading-frame hot path. Maker Studio's
+    # own renderer lifecycle already disposes stale planes and creates current
+    # map fog lazily.
     if !MakerStudio.get_extended_data_for(@map_id) && MakerStudio.respond_to?(:load_extended_layers_for_map)
       MakerStudio.load_extended_layers_for_map(@map_id, @map)
     end
+    # Fog creation itself is cache-guarded per map. Keep it, but avoid the old
+    # recursive global cache walk above.
     if MakerStudio.respond_to?(:create_fog_sprites_for_map)
-      begin
-        MakerStudio.create_fog_sprites_for_map(@map_id, @map)
-        Console.echoln("VERMEIL: MS fog/panorama planes ok para mapa #{@map_id}") if defined?(Console)
-      rescue Exception
-        Console.echo_error("VERMEIL: create_fog_sprites_for_map: #{$!.message}") if defined?(Console)
-      end
+      MakerStudio.create_fog_sprites_for_map(@map_id, @map)
     end
+  rescue Exception => e
+    Console.echo_error("VERMEIL MakerStudio bridge: #{e.message}") if defined?(Console)
   end
 
 

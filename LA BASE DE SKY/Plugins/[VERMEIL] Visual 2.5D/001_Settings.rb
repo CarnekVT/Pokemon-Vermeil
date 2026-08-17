@@ -149,19 +149,16 @@ module Mode7
     # subir hacia el borde superior.
     CAMERA_FOLLOW_SURFACE_ELEVATION = true
 
-    # V5.10: una sola fuente de verdad para altura fisica. Si existe
-    # Data/VERMEIL2_5D/MapXXX.json, runtime, camara, colision, props y caras
-    # verticales leen esa geometria. Sin archivo se genera un fallback desde
-    # los Terrain Tags actuales para mantener mapas legacy funcionando.
+    # V6 / Geometry v4: explicit Geometry data uses the clean V25 files under
+    # Data/VERMEIL_GEOMETRY_V4. The old legacy Geometry JSON folder is not a
+    # runtime source anymore. Maps without a v4 runtime can still use Visual
+    # 2.5D Terrain Tags normally; authored v4 maps are authoritative.
     SURFACE_GEOMETRY_ENABLED     = true
-    SURFACE_GEOMETRY_DIRECTORY   = "Data/VERMEIL2_5D"
+    SURFACE_GEOMETRY_DIRECTORY   = "Data/VERMEIL_GEOMETRY_V4"
     SURFACE_GEOMETRY_HEIGHT_STEP = 32.0
 
-    # Gameplay never parses the large authoring MapXXX.json by default. Maker
-    # Studio writes MapXXX_runtime.json on save; using only that compact sidecar
-    # avoids the multi-second model JSON hitch when loading a save/map. Set true
-    # only as a temporary migration fallback for old maps that have not been
-    # re-saved with Geometry 3.x.
+    # Compatibility constant retained for older code paths. Geometry v4 runtime
+    # never falls back to editor JSON; it reads MapXXX.v25r only.
     SURFACE_GEOMETRY_ALLOW_EDITOR_JSON_RUNTIME = false
 
     # La altura grafica de un charset NO debe sumar casi un tile entero al Z.
@@ -431,7 +428,7 @@ module Mode7
     # OBJETOS GEOMETRY (cubos/planos del editor 2.5D Geometry)
     # -----------------------------------------------------------------------
     # Objetos colocados con la herramienta "Objetos" del mod Maker Studio y
-    # guardados en Data/VERMEIL2_5D/MapXXX.json (array "objects"). Se dibujan
+    # guardados en legacy Geometry authoring data (array "objects"). Se dibujan
     # como quads 3D texturizados y, segun su colision, bloquean el paso.
     NDS_GEOMETRY_OBJECTS_ENABLED = true
     NDS_OBJECT_CULL_TILES_X      = 16
@@ -447,6 +444,17 @@ module Mode7
     # Reuse identical generated face bitmaps (same material/UV/size) across
     # sprites. This cuts allocations heavily on repeated cliffs/buildings.
     NDS_OBJECT_BITMAP_CACHE_MAX  = 256
+    # Model Studio 3.1 writes optional special-model meshes as JSONL. Only a tiny
+    # number of faces are parsed/registered per frame, eliminating the
+    # synchronous full-model JSON.parse hitch when entering a map.
+    # Hybrid terrain keeps first-frame geometry tiny. Special Model Studio /
+    # Blockbench meshes wait until the map is already playable and are streamed
+    # only while the player is idle, avoiding micro-hitches during movement.
+    NDS_MODEL_STREAM_START_DELAY_FRAMES = 12
+    NDS_MODEL_STREAM_INTERVAL_FRAMES    = 2
+    NDS_MODEL_STREAM_IDLE_ONLY          = true
+    NDS_MODEL_STREAM_FACE_BUDGET        = 16
+    NDS_MODEL_STREAM_TIME_MS            = 0.75
     # Altura (en tiles) que el jugador puede subir por una cara "climb"/"one-way"
     # sin escalera. Por encima se trata como pared solida.
     NDS_OBJECT_CLIMB_MAX_TILES   = 1

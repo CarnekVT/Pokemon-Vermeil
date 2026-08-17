@@ -5,7 +5,7 @@
 # Model collision no longer depends on Game_Map#passable?. Maker Studio and
 # Essentials may replace/short-circuit tile passability in different orders;
 # player movement is gated one level earlier at Game_Player#can_move_in_direction?.
-# The hot path is an O(1) Hash lookup and never touches disk or JSON.
+# The hot path is an O(1) Hash lookup and never touches disk while the player is moving.
 #===============================================================================
 module Mode7
   module ModelPhysicsWorld
@@ -20,9 +20,9 @@ module Mode7
         dir = if defined?(Mode7::Config::SURFACE_GEOMETRY_DIRECTORY)
                 Mode7::Config::SURFACE_GEOMETRY_DIRECTORY.to_s
               else
-                "Data/VERMEIL2_5D"
+                "Data/VERMEIL_GEOMETRY_V4"
               end
-        File.join(dir, format("Map%03d_collision.json", map_id.to_i))
+        File.join(dir, format("Map%03d.v25c", map_id.to_i))
       end
 
       def build_index(rows)
@@ -68,8 +68,8 @@ module Mode7
         cells
       end
 
-      # Called once from Game_Map#setup. This is the only disk access needed by
-      # model physics. Missing sidecars are negatively cached for the session.
+      # Called once from Game_Map#setup. V6.1 reads the compact V25C2 sidecar.
+      # No JSON and no visual model/mesh data are part of this path.
       def preload(map_id)
         map_id = map_id.to_i
         @worlds ||= {}
@@ -77,18 +77,11 @@ module Mode7
           activate(map_id, @worlds[map_id])
           return @worlds[map_id]
         end
-        path = collision_path(map_id)
-        cells = {}
-        if File.file?(path) && defined?(JSON)
-          raw = JSON.parse(File.binread(path))
-          if raw.is_a?(Hash)
-            if raw["model_collision_cells_compact"].is_a?(Array)
-              cells = build_index_compact(raw["model_collision_cells_compact"])
-            else
-              cells = build_index(raw["model_collision_cells"])
-            end
-          end
-        end
+        cells = if defined?(Mode7::GeometryV4Fast)
+                  Mode7::GeometryV4Fast.load_collision(collision_path(map_id))
+                else
+                  {}
+                end
         @worlds[map_id] = cells
         activate(map_id, cells)
         cells

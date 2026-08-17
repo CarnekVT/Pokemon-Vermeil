@@ -195,5 +195,5 @@
 
     // The game's frame rate, if "syncToRefreshrate" is false.
     //
-    "fixedFramerate": 60
+    "fixedFramerate": 120
 }

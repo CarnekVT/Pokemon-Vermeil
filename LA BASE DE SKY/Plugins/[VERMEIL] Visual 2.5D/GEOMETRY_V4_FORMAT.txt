@@ -1,0 +1,20 @@
+VERMEIL 2.5D / Geometry v4 clean runtime
+=========================================
+
+Geometry v4 does not use Data/VERMEIL2_5D/*.json.
+Delete the entire old Data/VERMEIL2_5D folder before opening Geometry v4.
+
+New directory:
+  Data/VERMEIL_GEOMETRY_V4/
+
+Files per authored map:
+  MapXXX.v25d  editor/source data
+  MapXXX.v25r  compact first-frame runtime terrain
+  MapXXX.v25c  compact model collision sidecar
+  MapXXX.v25m  deferred low-poly model stream
+
+The V25 files use a strict tagged serializer, not JSON. Gameplay reads .v25r,
+.v25c and .v25m only. The authoring .v25d file is not parsed during gameplay.
+
+A v4 runtime is authoritative (`inherit_legacy=false`). Old Geometry heights and
+old Geometry JSON cannot appear underneath or return after deleting terrain.

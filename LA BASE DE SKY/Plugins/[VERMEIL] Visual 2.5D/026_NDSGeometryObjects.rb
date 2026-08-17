@@ -1,7 +1,7 @@
 #===============================================================================
 # [VERMEIL] Visual 2.5D - 026_NDSGeometryObjects.rb (Region Mesh)
 # Objetos Geometry (cubos/planos) colocados con la herramienta "Objetos" del
-# mod Maker Studio 2.5D Geometry (Data/VERMEIL2_5D/MapXXX.json -> "objects").
+# mod Maker Studio 2.5D Geometry (legacy Geometry authoring data -> "objects").
 #
 # Cada objeto se dibuja como quads 3D texturizados con Sprite#corners:
 #   * cubo  -> top + caras sur/norte + caras este/oeste
@@ -99,6 +99,35 @@ class Mode7Renderer
     name = mat["graphic"].to_s
     name = mat["tileset_name"].to_s if name.empty?
     return [nil, nil] if name.empty?
+
+    # Model Studio 3.1 / Blockbench link: project-local pixel-art textures live
+    # under Graphics/Models and can be edited directly in Aseprite or any PNG
+    # editor. Runtime caches them once just like a tileset; no per-face IO.
+    if kind == "image"
+      @nds_external_model_texture_cache ||= {}
+      clean = name.tr("\\", "/").sub(%r{^/+}, "")
+      bmp = @nds_external_model_texture_cache[clean]
+      if !bmp || bmp.disposed?
+        path = File.join("Graphics", "Models", clean)
+        path += ".png" if File.extname(path).to_s.empty?
+        begin
+          bmp = Bitmap.new(path)
+          @nds_external_model_texture_cache[clean] = bmp
+        rescue Exception
+          bmp = nil
+        end
+      end
+      return [nil, nil] if !bmp || bmp.disposed?
+      r = mat["src_rect"]
+      if r.is_a?(Hash)
+        x = (r["x"] || r[:x] || 0).to_i
+        y = (r["y"] || r[:y] || 0).to_i
+        w = (r["w"] || r[:w] || bmp.width).to_i
+        h = (r["h"] || r[:h] || bmp.height).to_i
+        return [bmp, Rect.new(x, y, [w, 1].max, [h, 1].max)]
+      end
+      return [bmp, Rect.new(0, 0, bmp.width, bmp.height)]
+    end
 
     if kind == "autotile"
       bmp = nil
@@ -395,8 +424,8 @@ class Mode7Renderer
     end
   end
 
-  def nds_object_build_region_mesh_faces(tw, th, step)
-    faces = nds_geometry_mesh_faces
+  def nds_object_build_region_mesh_faces(tw, th, step, faces_override = nil)
+    faces = faces_override || nds_geometry_mesh_faces
     return if !faces || faces.empty?
     faces.each do |mf|
       begin
