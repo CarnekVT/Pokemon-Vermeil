@@ -684,13 +684,17 @@ class Battle::Battler
   end
   alias being_mold_broken? beingMoldBroken?
 
+  def hasAirborneAbility?
+    return hasActiveAbility?([:LEVITATE, :EELEVATE])
+  end
+
   def airborne?
     return false if hasActiveItem?(:IRONBALL)
     return false if @effects[PBEffects::Ingrain]
     return false if @effects[PBEffects::SmackDown]
     return false if @battle.field.effects[PBEffects::Gravity] > 0
     return true if pbHasType?(:FLYING)
-    return true if (hasActiveAbility?(:LEVITATE) || hasActiveAbility?(:EELEVATE)) && !beingMoldBroken?
+    return true if hasAirborneAbility? && !beingMoldBroken?
     return true if hasActiveItem?(:AIRBALLOON)
     return true if @effects[PBEffects::MagnetRise] > 0
     return true if @effects[PBEffects::Telekinesis] > 0
@@ -799,6 +803,10 @@ class Battle::Battler
       return false
     end
     return true
+  end
+
+  def canMakeContactThroughProtection?
+    return hasActiveAbility?([:UNSEENFIST, :PIERCINGDRILL])
   end
 
   def trappedInBattle?

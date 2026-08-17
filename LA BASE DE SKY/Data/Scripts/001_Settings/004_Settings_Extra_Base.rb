@@ -158,6 +158,11 @@ module Settings
   # Para esto se utiliza la PokeAPI, si no hay internet no hará nada
   SHOW_STAT_CHANGES_WITH_POKEAPI = false
 
+  # Origen de los datos de PokeAPI (stats/abilities/types de referencia):
+  # :network -> descarga y cachea en Data/data_pokeapi.json (se auto-actualiza con nuevos Pokémon)
+  # :local   -> solo lee Data/data_pokeapi.json, nunca toca internet (hay que mantenerlo a mano)
+  POKEAPI_DATA_SOURCE = :network
+
 
 
   ################################################################################

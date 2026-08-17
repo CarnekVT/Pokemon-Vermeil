@@ -61,6 +61,10 @@
     // (default: 0)
     "fontHeightReporting": 1,
 
+    "fontHinting": 1,
+
+    "fontScale": 1.2,
+
     // A list of fonts to render without alpha blending.
     //
     // "solidFonts": [
@@ -177,7 +181,7 @@
     // Use the OpenGL backend instead of Metal on Apple Silicon Macs.
     // Workaround for the game screen not filling the window on Retina displays.
     //
-    "preferMetalRenderer": false,
+    "preferMetalRenderer": true,
 
 
     // Sync screen redraws to the monitor refresh rate, to reduce screen
