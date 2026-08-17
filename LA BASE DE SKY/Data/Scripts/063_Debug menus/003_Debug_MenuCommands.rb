@@ -1650,3 +1650,20 @@ MenuHandlers.add(:debug_menu, :reload_system_cache, {
     pbMessage(_INTL("Listo."))
   }
 })
+
+MenuHandlers.add(:debug_menu, :pokeapi_download_all, {
+  "name"        => _INTL("Descargar caché completo de PokeAPI"),
+  "parent"      => :files_menu,
+  "description" => _INTL("Descarga todas las especies desde PokeAPI y las guarda en Data/data_pokeapi.json. Requiere Settings::POKEAPI_DATA_SOURCE = :network y tarda varios minutos."),
+  "effect"      => proc {
+    if Settings::POKEAPI_DATA_SOURCE != :network
+      pbMessage(_INTL("Cambia Settings::POKEAPI_DATA_SOURCE a :network primero."))
+      next
+    end
+    msgwindow = pbCreateMessageWindow
+    pbMessageDisplay(msgwindow, _INTL("Descargando... esto puede tardar varios minutos, el juego no responderá mientras tanto."))
+    count, total = PokeAPI.download_all
+    pbMessageDisplay(msgwindow, _INTL("Listo: {1}/{2} especies guardadas en Data/data_pokeapi.json.", count, total))
+    pbDisposeMessageWindow(msgwindow)
+  }
+})
