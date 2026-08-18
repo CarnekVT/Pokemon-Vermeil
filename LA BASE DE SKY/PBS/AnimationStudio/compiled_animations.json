@@ -1,7 +1,7 @@
 {
   "format": "battle-animation-studio-compiled",
   "version": 15,
-  "exportedAt": "2026-08-17T19:58:52.558Z",
+  "exportedAt": "2026-08-18T02:52:43.662Z",
   "animations": [
     {
       "id": "anim_msuyz7mp_1xi",
@@ -16,6 +16,11 @@
         "opposing": false,
         "sideContext": "player",
         "targetMode": "foe",
+        "variantScope": "auto",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": "",
         "system": "vermeil_ruby",
         "path": "C:\\Users\\nuevo usuario\\Downloads\\Pokemon-Vermeil-First-Base-Branch-do-not-touch\\Pokemon-Vermeil-First-Base-Branch-do-not-touch\\Plugins\\[VERMEIL] BattleAnimations\\[036] Vermeil Common Animations.rb",
         "approximate": true,
@@ -168,8 +173,22 @@
           ],
           "valueKeys": {
             "size": [],
-            "scaleX": [],
-            "scaleY": [],
+            "scaleX": [
+              {
+                "id": "pkey_msxyx6z3_12d",
+                "frame": 0,
+                "value": 100,
+                "easing": "linear"
+              }
+            ],
+            "scaleY": [
+              {
+                "id": "pkey_msxyx6z3_12e",
+                "frame": 0,
+                "value": 100,
+                "easing": "linear"
+              }
+            ],
             "viewScale": [],
             "rotation": [],
             "opacity": [],
@@ -1035,7 +1054,8 @@
           "source": "static"
         }
       ],
-      "hidesDataBoxes": false
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false
     },
     {
       "id": "anim_msuyziwe_1z8",
@@ -1050,6 +1070,11 @@
         "opposing": true,
         "sideContext": "foe",
         "targetMode": "foe",
+        "variantScope": "auto",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": "",
         "system": "vermeil_ruby",
         "path": "C:\\Users\\nuevo usuario\\Downloads\\Pokemon-Vermeil-First-Base-Branch-do-not-touch\\Pokemon-Vermeil-First-Base-Branch-do-not-touch\\Plugins\\[VERMEIL] BattleAnimations\\[036] Vermeil Common Animations.rb",
         "approximate": true,
@@ -2079,7 +2104,8 @@
           "source": "static"
         }
       ],
-      "hidesDataBoxes": false
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false
     },
     {
       "id": "anim_msv1hsrf_kd",
@@ -2094,6 +2120,11 @@
         "opposing": false,
         "sideContext": "player",
         "targetMode": "foe",
+        "variantScope": "auto",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": "",
         "runtimeEnabled": true
       },
       "battlers": {
@@ -5952,7 +5983,8 @@
         "referenceWidth": 640,
         "referenceHeight": 480
       },
-      "hidesDataBoxes": true
+      "hidesDataBoxes": true,
+      "hidesAdjacents": true
     },
     {
       "id": "anim_msvd099d_7wn",
@@ -5967,6 +5999,11 @@
         "opposing": false,
         "sideContext": "player",
         "targetMode": "both",
+        "variantScope": "auto",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": "",
         "runtimeEnabled": true
       },
       "battlers": {
@@ -5976,7 +6013,7 @@
           "side": "user",
           "name": "User",
           "enabled": true,
-          "locked": true,
+          "locked": false,
           "formRules": [],
           "visual": {
             "size": 100,
@@ -6850,7 +6887,7 @@
           "fxOps": [],
           "logic": [],
           "startFrame": 0,
-          "endFrame": 8
+          "endFrame": 95
         }
       },
       "camera": {
@@ -7625,12 +7662,29 @@
                   "id": "vkey_msvd8cw8_o5",
                   "frame": 0,
                   "value": true
+                },
+                {
+                  "id": "vkey_msxnsskp_5l",
+                  "frame": 9,
+                  "value": true
                 }
               ],
               "positionKeys": [
                 {
                   "id": "key_msvd8cw8_o6",
                   "frame": 0,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 315.6691729323308,
+                    "y": 229.26315789473682,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_msxnsskp_5i",
+                  "frame": 9,
                   "easing": "ease_both",
                   "point": {
                     "anchor": "screen",
@@ -7648,6 +7702,12 @@
                     "frame": 0,
                     "value": 150,
                     "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msxnsskp_5j",
+                    "frame": 9,
+                    "value": 150,
+                    "easing": "ease_both"
                   }
                 ],
                 "scaleX": [],
@@ -7658,6 +7718,12 @@
                   {
                     "id": "pkey_msvda7cm_1c9",
                     "frame": 0,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_msxnsskp_5k",
+                    "frame": 9,
                     "value": 0,
                     "easing": "ease_both"
                   },
@@ -8061,6 +8127,477 @@
                 "offsetX": 0,
                 "offsetY": 0
               }
+            },
+            {
+              "id": "clip_msxntw66_5m",
+              "type": "projectile",
+              "name": "Onda 1",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 77,
+              "endFrame": 89,
+              "graphic": {
+                "source": "procedural",
+                "projectPath": "",
+                "folder": "Animations",
+                "name": "Shockwave",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "center",
+                "assetCandidates": [],
+                "procedural": "circle",
+                "proceduralW": 96,
+                "proceduralH": 96,
+                "proceduralColor": "rgba(255,255,255,0.9)",
+                "proceduralHollow": true,
+                "proceduralLineWidth": 7
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 1,
+                "flip": 0
+              },
+              "priority": 1,
+              "priorityReference": "user",
+              "visibleKeys": [
+                {
+                  "id": "vkey_msxntw66_5r",
+                  "frame": 77,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_msxntw66_5s",
+                  "frame": 77,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 299,
+                    "y": 273,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_msxntw66_5t",
+                  "frame": 89,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 299,
+                    "y": 273,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [
+                  {
+                    "id": "pkey_msxntw66_5u",
+                    "frame": 77,
+                    "value": 20,
+                    "easing": "ease_out"
+                  },
+                  {
+                    "id": "pkey_msxntw66_5v",
+                    "frame": 89,
+                    "value": 220,
+                    "easing": "ease_out"
+                  }
+                ],
+                "scaleX": [],
+                "scaleY": [
+                  {
+                    "id": "pkey_msxntw66_5w",
+                    "frame": 77,
+                    "value": 100,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_msxntw66_5x",
+                    "frame": 89,
+                    "value": 100,
+                    "easing": "linear"
+                  }
+                ],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_msxntw66_5y",
+                    "frame": 77,
+                    "value": 100,
+                    "easing": "ease_out"
+                  },
+                  {
+                    "id": "pkey_msxntw66_5z",
+                    "frame": 89,
+                    "value": 0,
+                    "easing": "ease_out"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": []
+              },
+              "fxOps": [],
+              "pbs": null,
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "pbs:target",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "clip_msxntw66_60",
+              "type": "projectile",
+              "name": "Onda 2",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 79,
+              "endFrame": 91,
+              "graphic": {
+                "source": "procedural",
+                "projectPath": "",
+                "folder": "Animations",
+                "name": "Shockwave",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "center",
+                "assetCandidates": [],
+                "procedural": "circle",
+                "proceduralW": 96,
+                "proceduralH": 96,
+                "proceduralColor": "rgba(255,255,255,0.9)",
+                "proceduralHollow": true,
+                "proceduralLineWidth": 7
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 1,
+                "flip": 0
+              },
+              "priority": 2,
+              "priorityReference": "user",
+              "visibleKeys": [
+                {
+                  "id": "vkey_msxntw66_65",
+                  "frame": 79,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_msxntw66_66",
+                  "frame": 79,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 299,
+                    "y": 273,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_msxntw66_67",
+                  "frame": 91,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 299,
+                    "y": 273,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [
+                  {
+                    "id": "pkey_msxntw66_68",
+                    "frame": 79,
+                    "value": 20,
+                    "easing": "ease_out"
+                  },
+                  {
+                    "id": "pkey_msxntw66_69",
+                    "frame": 91,
+                    "value": 220,
+                    "easing": "ease_out"
+                  }
+                ],
+                "scaleX": [],
+                "scaleY": [
+                  {
+                    "id": "pkey_msxntw66_6a",
+                    "frame": 79,
+                    "value": 100,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_msxntw66_6b",
+                    "frame": 91,
+                    "value": 100,
+                    "easing": "linear"
+                  }
+                ],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_msxntw66_6c",
+                    "frame": 79,
+                    "value": 100,
+                    "easing": "ease_out"
+                  },
+                  {
+                    "id": "pkey_msxntw66_6d",
+                    "frame": 91,
+                    "value": 0,
+                    "easing": "ease_out"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": []
+              },
+              "fxOps": [],
+              "pbs": null,
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "pbs:target",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "clip_msxntw66_6e",
+              "type": "projectile",
+              "name": "Onda 3",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 81,
+              "endFrame": 93,
+              "graphic": {
+                "source": "procedural",
+                "projectPath": "",
+                "folder": "Animations",
+                "name": "Shockwave",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "center",
+                "assetCandidates": [],
+                "procedural": "circle",
+                "proceduralW": 96,
+                "proceduralH": 96,
+                "proceduralColor": "rgba(255,255,255,0.9)",
+                "proceduralHollow": true,
+                "proceduralLineWidth": 7
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 1,
+                "flip": 0
+              },
+              "priority": 2,
+              "priorityReference": "user",
+              "visibleKeys": [
+                {
+                  "id": "vkey_msxntw66_6j",
+                  "frame": 81,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_msxntw66_6k",
+                  "frame": 81,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 299,
+                    "y": 273,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_msxntw66_6l",
+                  "frame": 93,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 299,
+                    "y": 273,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [
+                  {
+                    "id": "pkey_msxntw66_6m",
+                    "frame": 81,
+                    "value": 20,
+                    "easing": "ease_out"
+                  },
+                  {
+                    "id": "pkey_msxntw66_6n",
+                    "frame": 93,
+                    "value": 220,
+                    "easing": "ease_out"
+                  }
+                ],
+                "scaleX": [],
+                "scaleY": [
+                  {
+                    "id": "pkey_msxntw66_6o",
+                    "frame": 81,
+                    "value": 100,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_msxntw66_6p",
+                    "frame": 93,
+                    "value": 100,
+                    "easing": "linear"
+                  }
+                ],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_msxntw66_6q",
+                    "frame": 81,
+                    "value": 100,
+                    "easing": "ease_out"
+                  },
+                  {
+                    "id": "pkey_msxntw66_6r",
+                    "frame": 93,
+                    "value": 0,
+                    "easing": "ease_out"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": []
+              },
+              "fxOps": [],
+              "pbs": null,
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "pbs:target",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
             }
           ]
         }
@@ -8075,7 +8612,8 @@
         "responsive": true,
         "referenceWidth": 640,
         "referenceHeight": 480
-      }
+      },
+      "hidesAdjacents": false
     }
   ]
 }

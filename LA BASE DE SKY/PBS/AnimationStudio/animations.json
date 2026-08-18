@@ -5,16 +5,16 @@
     "language": "es",
     "battlers": {
       "user": {
-        "projectPath": "Graphics/Pokemon/Back/DRAGONITE.png",
+        "projectPath": "Graphics/Pokemon/Back/ABOMASNOW_female.png",
         "folder": "Pokemon/Back",
-        "name": "DRAGONITE",
-        "label": "DRAGONITE"
+        "name": "ABOMASNOW_female",
+        "label": "ABOMASNOW_female"
       },
       "target": {
-        "projectPath": "Graphics/Pokemon/Front/GRENINJA_2.png",
+        "projectPath": "Graphics/Pokemon/Front/ABOMASNOW_1.png",
         "folder": "Pokemon/Front",
-        "name": "GRENINJA_2",
-        "label": "GRENINJA_2"
+        "name": "ABOMASNOW_1",
+        "label": "ABOMASNOW_1"
       }
     },
     "scene": {
@@ -26,9 +26,10 @@
       "source": "project"
     },
     "contextMode": "auto",
+    "battleFormat": "single",
     "manualContext": {
-      "width": 512,
-      "height": 384,
+      "width": 640,
+      "height": 480,
       "user": {
         "x": 128,
         "y": 326,
@@ -58,7 +59,7 @@
     "sidePreview": "player",
     "layout": {
       "leftWidth": 150,
-      "rightWidth": 720,
+      "rightWidth": 640,
       "timelineHeight": 283,
       "framePixels": 8
     },
@@ -78,6 +79,11 @@
         "opposing": false,
         "sideContext": "player",
         "targetMode": "foe",
+        "variantScope": "auto",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": "",
         "system": "vermeil_ruby",
         "path": "C:\\Users\\nuevo usuario\\Downloads\\Pokemon-Vermeil-First-Base-Branch-do-not-touch\\Pokemon-Vermeil-First-Base-Branch-do-not-touch\\Plugins\\[VERMEIL] BattleAnimations\\[036] Vermeil Common Animations.rb",
         "approximate": true,
@@ -229,8 +235,22 @@
           ],
           "valueKeys": {
             "size": [],
-            "scaleX": [],
-            "scaleY": [],
+            "scaleX": [
+              {
+                "id": "pkey_msxyx6z3_12d",
+                "frame": 0,
+                "value": 100,
+                "easing": "linear"
+              }
+            ],
+            "scaleY": [
+              {
+                "id": "pkey_msxyx6z3_12e",
+                "frame": 0,
+                "value": 100,
+                "easing": "linear"
+              }
+            ],
             "viewScale": [],
             "rotation": [],
             "opacity": [],
@@ -1096,7 +1116,8 @@
           "source": "static"
         }
       ],
-      "hidesDataBoxes": false
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false
     },
     {
       "id": "anim_msuyziwe_1z8",
@@ -1111,6 +1132,11 @@
         "opposing": true,
         "sideContext": "foe",
         "targetMode": "foe",
+        "variantScope": "auto",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": "",
         "system": "vermeil_ruby",
         "path": "C:\\Users\\nuevo usuario\\Downloads\\Pokemon-Vermeil-First-Base-Branch-do-not-touch\\Pokemon-Vermeil-First-Base-Branch-do-not-touch\\Plugins\\[VERMEIL] BattleAnimations\\[036] Vermeil Common Animations.rb",
         "approximate": true,
@@ -2139,11 +2165,12 @@
           "source": "static"
         }
       ],
-      "hidesDataBoxes": false
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false
     },
     {
       "id": "anim_msv1hsrf_kd",
-      "name": "VoltTackle",
+      "name": "VoltTackle(Player)",
       "fps": 20,
       "duration": 70,
       "source": {
@@ -2153,7 +2180,12 @@
         "catalogType": "move",
         "opposing": false,
         "sideContext": "player",
-        "targetMode": "foe"
+        "targetMode": "foe",
+        "variantScope": "physical",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": ""
       },
       "battlers": {
         "user": {
@@ -6011,13 +6043,14 @@
         "referenceWidth": 640,
         "referenceHeight": 480
       },
-      "hidesDataBoxes": true
+      "hidesDataBoxes": true,
+      "hidesAdjacents": true
     },
     {
       "id": "anim_msvd099d_7wn",
       "name": "Explosion",
       "fps": 20,
-      "duration": 120,
+      "duration": 150,
       "source": {
         "type": "studio",
         "move": "EXPLOSION",
@@ -6025,7 +6058,12 @@
         "catalogType": "move",
         "opposing": false,
         "sideContext": "player",
-        "targetMode": "both"
+        "targetMode": "both",
+        "variantScope": "auto",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": ""
       },
       "battlers": {
         "user": {
@@ -6375,6 +6413,30 @@
                 "offsetX": 0,
                 "offsetY": 0
               }
+            },
+            {
+              "id": "key_msy3kzzb_de",
+              "frame": 117,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_msy3l6fp_df",
+              "frame": 122,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
             }
           ],
           "valueKeys": {
@@ -6623,8 +6685,26 @@
                 "easing": "linear"
               },
               {
+                "id": "pkey_msy3klpm_db",
+                "frame": 90,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
                 "id": "pkey_msxn1v0x_33",
                 "frame": 93,
+                "value": 155,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_msy3lmm5_dh",
+                "frame": 117,
+                "value": 155,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_msy3l80j_dg",
+                "frame": 122,
                 "value": 0,
                 "easing": "linear"
               }
@@ -6675,6 +6755,12 @@
               {
                 "id": "pkey_mswmjpxu_6a",
                 "frame": 64,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_msy3kmvn_dc",
+                "frame": 90,
                 "value": 0,
                 "easing": "linear"
               },
@@ -6735,6 +6821,12 @@
                 "easing": "linear"
               },
               {
+                "id": "pkey_msy3ko2d_dd",
+                "frame": 90,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
                 "id": "pkey_msxn1v0x_35",
                 "frame": 93,
                 "value": 0,
@@ -6765,7 +6857,7 @@
           "fxOps": [],
           "logic": [],
           "startFrame": 0,
-          "endFrame": 96
+          "endFrame": 122
         },
         "target": {
           "id": "battler_target",
@@ -8633,7 +8725,8 @@
         "responsive": true,
         "referenceWidth": 640,
         "referenceHeight": 480
-      }
+      },
+      "hidesAdjacents": false
     }
   ],
   "reusableClips": [],

@@ -832,15 +832,11 @@ class Mode7Renderer
 
       face[:last_used] = frame_stamp
       w = face[:world]
-      p0 = Mode7.project(w[0],  w[1],  w[2])
-      p1 = Mode7.project(w[3],  w[4],  w[5])
-      p2 = Mode7.project(w[6],  w[7],  w[8])
-      p3 = Mode7.project(w[9],  w[10], w[11])
-      if !p0 || !p1 || !p2 || !p3
+      points = Mode7.project_quad(w)
+      if !points
         spr.visible = false
         next
       end
-      points = [p0[0], p0[1], p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]]
       overlap = Mode7::Config::EXT_CORNERS_OVERLAP.to_f
       points = Mode7.nds_fast_expand_quad(points, overlap) if overlap > 0.0
       xs = [points[0], points[2], points[4], points[6]]

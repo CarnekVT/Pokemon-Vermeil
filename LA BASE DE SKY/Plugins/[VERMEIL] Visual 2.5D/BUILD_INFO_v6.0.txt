@@ -1,8 +1,0 @@
-[VERMEIL] Visual 2.5D v6.0.0 — Clean Geometry Runtime
-
-- Runtime Geometry moved to Data/VERMEIL_GEOMETRY_V4.
-- Old Data/VERMEIL2_5D JSON is never loaded.
-- New V25 tagged files: .v25r runtime, .v25c collision, .v25m streamed models.
-- Clean v4 maps always use inherit_legacy=false so old Terrain Tag elevation cannot reappear as ghost terrain.
-- Model stream remains deferred/idle.
-- Geometry authoring data is never parsed by gameplay.

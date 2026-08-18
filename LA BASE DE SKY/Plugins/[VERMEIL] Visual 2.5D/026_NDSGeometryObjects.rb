@@ -382,15 +382,9 @@ class Mode7Renderer
   end
 
   # Convierte [wx,wy,z...] world -> puntos screen para Sprite#corners.
+  # V25 agrupa las cuatro proyecciones en una sola llamada nativa.
   def nds_object_project_points(world)
-    out = []
-    4.times do |i|
-      p = Mode7.project(world[i * 3], world[i * 3 + 1], world[i * 3 + 2])
-      return nil if !p
-      out << p[0]
-      out << p[1]
-    end
-    out
+    Mode7.project_quad(world)
   end
 
   def nds_object_add_face(face)

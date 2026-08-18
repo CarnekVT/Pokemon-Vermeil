@@ -190,7 +190,7 @@ module BattleAnimationStudioRuntime
       @emitter_command_cache = {}
       @pbs_command_cache = {}
       @preloaded_bitmaps = []
-      @data_box_visibilities = {}
+      @hidden_scene_states = {}
       @form_restore = {}
       @active_visual_pokemon = {}
       @battler_view_state = {}
@@ -198,7 +198,7 @@ module BattleAnimationStudioRuntime
       @anchor_cache = {}
       prepare_runtime_cache
       capture_original_battlers
-      capture_and_apply_scene_visibility
+      capture_scene_hide_targets
       create_effect_sprites
       prewarm_animation_assets
       prepare_emitter_caches
@@ -296,6 +296,7 @@ module BattleAnimationStudioRuntime
         return false
       end
       @battler_view_state[side.to_s] = !!back
+      clear_battler_anchor_cache(side) if respond_to?(:clear_battler_anchor_cache)
       true
     rescue => e
       BattleAnimationStudioRuntime.log("battler view #{side} #{e.class}: #{e.message}")
@@ -426,6 +427,7 @@ module BattleAnimationStudioRuntime
       key = side.to_s
       @form_restore[key] ||= pokemon
       @active_visual_pokemon[key] = visual
+      clear_battler_anchor_cache(side)
       track = battler_track(side)
       back = track ? desired_battler_back?(side, track, @frame) : (battler.index.to_i.even? rescue side.to_sym == :user)
       set_battler_bitmap_view(side, visual, back)
@@ -465,6 +467,7 @@ module BattleAnimationStudioRuntime
       end
       @active_visual_pokemon.clear
       @form_restore.clear
+      clear_battler_anchor_cache
     rescue
       @active_visual_pokemon.clear
       @form_restore.clear
@@ -482,6 +485,7 @@ module BattleAnimationStudioRuntime
         set_battler_bitmap_view(side, pokemon, natural_back)
       end
       @battler_view_state.clear
+      clear_battler_anchor_cache
     rescue
       @battler_view_state.clear
     end
@@ -509,22 +513,81 @@ module BattleAnimationStudioRuntime
       false
     end
 
-    def capture_and_apply_scene_visibility
+    def active_battler_indices
+      [(@user.index rescue nil), (@target.index rescue nil)].compact.map { |v| v.to_i }.uniq
+    end
+
+    def adjacent_sprite_key?(key)
+      s = key.to_s
+      if s =~ /\A(?:pokemon|shadow)_(\d+)\z/i
+        idx = $1.to_i
+        return !active_battler_indices.include?(idx)
+      end
+      false
+    end
+
+    def capture_scene_hide_targets
+      @hidden_scene_states.clear
       hide_boxes = !!@data["hidesDataBoxes"]
+      hide_adjacents = !!@data["hidesAdjacents"]
+      return if !hide_boxes && !hide_adjacents
       (@sprites || {}).each do |key, sprite|
-        next if !sprite || !ui_sprite_key?(key)
-        @data_box_visibilities[key.to_s] = (sprite.visible rescue true)
-        sprite.visible = false if hide_boxes && sprite.respond_to?(:visible=)
+        next if !sprite
+        key_s = key.to_s
+        kind = nil
+        kind = :ui if hide_boxes && ui_sprite_key?(key_s)
+        kind = :adjacent if !kind && hide_adjacents && adjacent_sprite_key?(key_s)
+        next if !kind
+        @hidden_scene_states[key_s] = {
+          :kind => kind,
+          :visible => (sprite.visible rescue true),
+          :opacity => (sprite.opacity rescue 255)
+        }
+      end
+      apply_scene_hide_progress(0.0)
+    rescue
+    end
+
+    def scene_hide_fade_span
+      @scene_hide_fade_span ||= begin
+        dur = [1.0, duration.to_f].max
+        [[dur * 0.12, 3.0].max, 8.0].min
+      end
+    end
+
+    def hidden_mix_for_frame(frame_value)
+      return 0.0 if @hidden_scene_states.empty?
+      span = scene_hide_fade_span
+      return 1.0 if span <= 0.0
+      dur = [1.0, duration.to_f].max
+      mix = [[frame_value.to_f / span, 1.0].min, 0.0].max
+      tail = [[(dur - frame_value.to_f) / span, 1.0].min, 0.0].max
+      [mix, tail].min
+    end
+
+    def apply_scene_hide_progress(frame_value = @frame)
+      return if @hidden_scene_states.empty?
+      mix = hidden_mix_for_frame(frame_value)
+      (@hidden_scene_states || {}).each do |key, st|
+        sprite = @sprites[key]
+        next if !sprite
+        base_visible = st[:visible] != false
+        base_opacity = (st[:opacity] || 255).to_f
+        opacity = (base_opacity * (1.0 - mix)).round
+        sprite.opacity = opacity if sprite.respond_to?(:opacity=)
+        sprite.visible = (base_visible && opacity > 0) if sprite.respond_to?(:visible=)
       end
     rescue
     end
 
     def restore_scene_visibility
-      @data_box_visibilities.each do |key, visible|
+      @hidden_scene_states.each do |key, st|
         sprite = @sprites[key]
-        sprite.visible = visible if sprite && sprite.respond_to?(:visible=)
+        next if !sprite
+        sprite.visible = st[:visible] if sprite.respond_to?(:visible=)
+        sprite.opacity = st[:opacity] if sprite.respond_to?(:opacity=)
       end
-      @data_box_visibilities.clear
+      @hidden_scene_states.clear
     rescue
     end
 
@@ -890,8 +953,80 @@ module BattleAnimationStudioRuntime
       true
     end
 
+    # Returns the natural battle view for a battler slot. This is intentionally
+    # separate from the view BAS may force during an animation.
+    def natural_battler_back?(side)
+      battler = battler_for_side(side)
+      return side.to_sym == :user if !battler
+      battler.index.to_i.even?
+    rescue
+      side.to_sym == :user
+    end
+
+    def visual_pokemon_for_side(side)
+      key = side.to_s
+      active = @active_visual_pokemon[key] rescue nil
+      return active if active
+      battler = battler_for_side(side)
+      return nil if !battler
+      pkmn = battler.respond_to?(:visiblePokemon) ? (battler.visiblePokemon rescue nil) : nil
+      pkmn ||= (battler.pokemon rescue nil) if battler.respond_to?(:pokemon)
+      pkmn
+    rescue
+      nil
+    end
+
+    # DBK's BattlerSprite#pbSetPosition applies metrics by battler index, even
+    # when setPokemonBitmap is explicitly asked for the opposite view. BAS
+    # therefore keeps the scene/plugin's settled natural position and adds only
+    # the metric delta for the requested Back/Front view. This also preserves
+    # offsets introduced by custom battle scenes.
+    def battler_metric_offset_for_view(side, back)
+      pkmn = visual_pokemon_for_side(side)
+      return [0.0, 0.0] if !pkmn || !defined?(GameData::SpeciesMetrics)
+      species = (pkmn.species rescue nil)
+      form = (pkmn.form rescue 0).to_i
+      female = (pkmn.respond_to?(:female?) ? (pkmn.female? rescue false) : false)
+      metrics = nil
+      begin
+        metrics = GameData::SpeciesMetrics.get_species_form(species, form, female)
+      rescue ArgumentError
+        metrics = GameData::SpeciesMetrics.get_species_form(species, form) rescue nil
+      end
+      return [0.0, 0.0] if !metrics
+      raw = back ? (metrics.back_sprite rescue nil) : (metrics.front_sprite rescue nil)
+      raw = [0, 0] if !raw.is_a?(Array)
+      x = (raw[0] || 0).to_f * 2.0
+      y = (raw[1] || 0).to_f * 2.0
+      y -= (metrics.front_sprite_altitude rescue 0).to_f * 2.0 if !back
+      [x, y]
+    rescue
+      [0.0, 0.0]
+    end
+
+    def clear_battler_anchor_cache(side = nil)
+      if !@anchor_cache
+        @anchor_cache = {}
+        return
+      end
+      if side.nil?
+        @anchor_cache.clear
+      else
+        target = side.to_sym
+        @anchor_cache.keys.each do |key|
+          @anchor_cache.delete(key) if key.is_a?(Array) && key[0].to_sym == target
+        end
+      end
+    rescue
+      @anchor_cache.clear if @anchor_cache
+    end
+
     def base_anchor(side, focus = false)
-      key = [side, focus ? 1 : 0]
+      track = battler_track(side)
+      wanted_back = track ? desired_battler_back?(side, track, @frame) : natural_battler_back?(side)
+      visual = visual_pokemon_for_side(side)
+      form_key = visual ? "#{(visual.species rescue '')}:#{(visual.form rescue 0)}" : ""
+      key = [side, focus ? 1 : 0, wanted_back ? 1 : 0, form_key]
       cached = @anchor_cache[key]
       return cached if cached
       sprite = side == :target ? target_sprite : user_sprite
@@ -901,8 +1036,18 @@ module BattleAnimationStudioRuntime
             else
               x = original[:x].to_f
               y = original[:y].to_f
+              natural_back = natural_battler_back?(side)
+              if wanted_back != natural_back
+                natural_metric = battler_metric_offset_for_view(side, natural_back)
+                wanted_metric = battler_metric_offset_for_view(side, wanted_back)
+                x += wanted_metric[0] - natural_metric[0]
+                y += wanted_metric[1] - natural_metric[1]
+              end
               if focus
-                h = (sprite.bitmap && !sprite.bitmap.disposed?) ? sprite.bitmap.height : 80
+                # Match the actual rendered bitmap used by gameplay. DBK's
+                # wrapper already contains x3/x2 (or a per-species scale), so
+                # this gives the exact visual centre without applying scale twice.
+                h = (sprite.bitmap && !sprite.bitmap.disposed?) ? sprite.bitmap.height.to_f : 80.0
                 y -= h / 2.0
               end
               [x, y]
@@ -2512,6 +2657,7 @@ module BattleAnimationStudioRuntime
       apply_battlers
       clips.each { |clip| apply_clip(clip) }
       update_screen_events
+      apply_scene_hide_progress(@frame)
 
       if @frame >= duration - 0.0001
         @done = true

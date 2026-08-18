@@ -1,4 +1,0 @@
-[VERMEIL] Visual 2.5D v6.1.0
-Geometry v4.2.0 compatible.
-Gameplay loads only Data/VERMEIL_GEOMETRY_V4/MapXXX.v25r/.v25c/.v25m.
-MapXXX.v25d is editor-only. Old Data/VERMEIL2_5D JSON is never used by runtime.

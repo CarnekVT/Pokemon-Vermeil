@@ -1,4 +1,1 @@
-Name          = [VERMEIL] Visual 2.5D
-Version = 5.12.1
-Essentials    = 21.1
-Credits       = CarnekVT
+6.2.0
