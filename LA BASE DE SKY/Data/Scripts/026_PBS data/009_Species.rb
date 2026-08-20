@@ -189,8 +189,34 @@ module GameData
       return target == species_data.species && species_data.form == 0
     end
 
+    # Dex nacional: orden de regional_dexes.txt, no el de compilación.
+    # Otros sufijos se compilan después y, si la especie
+    # ya no está en pokemon.txt, acabaría al final. Las que sí están en la Dex
+    # regional conservan sitio; las realmente nuevas quedan al cabo.
+    # ponytail: un each cubre Pokédex, resumen y Hall of Fame
     def self.each_species
-      DATA.each_value { |species| yield species if species.form == 0 }
+      yielded = {}
+      if defined?(pbLoadRegionalDexes)
+        lists = pbLoadRegionalDexes rescue nil
+        if lists.is_a?(Array)
+          lists.each do |list|
+            next if !list
+            list.each do |sp|
+              data = try_get(sp)
+              next if !data || data.form != 0
+              next if yielded[data.species]
+              yielded[data.species] = true
+              yield data
+            end
+          end
+        end
+      end
+      DATA.each_value do |species|
+        next if species.form != 0
+        next if yielded[species.species]
+        yielded[species.species] = true
+        yield species
+      end
     end
 
     def self.each_form_for_species(this_species)
