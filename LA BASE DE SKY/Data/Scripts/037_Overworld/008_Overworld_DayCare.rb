@@ -420,6 +420,7 @@ class DayCare
 
   def self.get_details(index, name_var, cost_var)
     day_care = $PokemonGlobal.day_care
+    index = (day_care.slots.index { |slot| slot.filled? } || 0) if index < 0
     $game_variables[name_var] = day_care[index].pokemon_name if name_var > 0
     $game_variables[cost_var] = day_care[index].cost if cost_var > 0
   end
@@ -469,7 +470,7 @@ class DayCare
     when 0
       raise _INTL("No hay Pokémon en la Guardería para elegir.")
     when 1
-      day_care.slots.each_with_index { |slot, i| $game_variables[choice_var] = i if slot.filled? }
+      $game_variables[choice_var] = (day_care.slots.index { |slot| slot.filled? } || 0)
     else
       commands = []
       indices = []
