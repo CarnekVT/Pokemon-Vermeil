@@ -1,0 +1,4 @@
+Name          = [CARNEK] Studio Runtime
+Version       = 0.2.0
+Essentials    = 21.1
+Credits       = CarnekVT

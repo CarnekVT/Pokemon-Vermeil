@@ -43,12 +43,31 @@ class Mode7Renderer
   # ---------------------------------------------------------------------------
   # Priority conserva solo el orden visual propio de cada entry. Un P0 de otra
   # layer nunca hereda ni modifica la prioridad de un vecino.
+  def v25_cached_ground_cap(tx, ty)
+    index = ty * @map.width + tx
+    data = @v25_cell_caps_index
+    if data
+      value = nil
+      if data.is_a?(Array)
+        value = data[index]
+      elsif data.is_a?(Hash)
+        value = data[index]
+        value = data[index.to_s] if value.nil?
+        value = data[[tx, ty]] if value.nil?
+      end
+      return value.to_i unless value.nil?
+    end
+    if defined?(MakerStudio) && MakerStudio.respond_to?(:cell_ground_cap)
+      return MakerStudio.cell_ground_cap(@map, tx, ty).to_i
+    end
+    -1
+  rescue Exception
+    -1
+  end
+
   def cache_visual_priorities
     @entry_cache.each do |(tx, ty), entries|
-      cap = -1
-      if defined?(MakerStudio) && MakerStudio.respond_to?(:cell_ground_cap)
-        cap = MakerStudio.cell_ground_cap(@map, tx, ty)
-      end
+      cap = v25_cached_ground_cap(tx, ty)
       entries.each do |entry|
         own = entry[:priority].to_i
         entry[:visual_priority] = own >= 1 && entry[:unify].to_i > cap ? own : 0
@@ -138,7 +157,8 @@ class Mode7Renderer
     tid = entry[:tid]
     return nil if !tid || tid <= 0
     ts_id = entry[:tileset_id] || @map.tileset_id
-    key = "#{tid}:#{ts_id}"
+    # Numeric key evita miles de Strings temporales durante el build.
+    key = (ts_id.to_i << 20) ^ tid.to_i
     return @terrain_tag_cache[key] if @terrain_tag_cache.key?(key)
 
     ts = $data_tilesets[ts_id]
@@ -238,9 +258,14 @@ class Mode7Renderer
   # prioridad sobre una montana conservan la misma base visual.
   def cache_terrain_tag_heights
     @entry_cache.each_value do |entries|
-      height = entries.map { |entry| configured_terrain_tag_height(entry) }.max || 0
-      # Un terrain-tag de wall ya tiene su renderer propio; no elevar la celda.
-      height = 0 if entries.any? { |entry| entry_is_wall?(entry) }
+      height = 0
+      has_wall = false
+      entries.each do |entry|
+        h = configured_terrain_tag_height(entry)
+        height = h if h > height
+        has_wall ||= entry_is_wall?(entry)
+      end
+      height = 0 if has_wall
       entries.each { |entry| entry[:terrain_tag_height] = height }
     end
   end
@@ -281,14 +306,6 @@ class Mode7Renderer
   end
 
   def wall_component_key(tx, ty, entries)
-    if defined?(Mode7::VolumeIds)
-      begin
-        id = Mode7::VolumeIds.id_for(@map_id, tx, ty)
-        return [:volume, id] if id
-      rescue Exception
-      end
-    end
-
     direct = entries.select do |entry|
       entry_is_wall?(entry) && !entry_is_elevated_wall?(entry)
     end
@@ -332,8 +349,6 @@ class Mode7Renderer
   end
 
   def cache_wall_visual_components
-    Mode7::VolumeIds.refresh if defined?(Mode7::VolumeIds) rescue nil
-
     seed_cells = {}
     keys = {}
     @entry_cache.each do |position, entries|
@@ -516,13 +531,6 @@ class Mode7Renderer
     [:bitmap, bmp ? bmp.object_id : 0]
   end
 
-  def rigid_priority_volume_id(tx, ty)
-    return nil if !defined?(Mode7::VolumeIds)
-    Mode7::VolumeIds.id_for(@map_id, tx, ty)
-  rescue Exception
-    nil
-  end
-
   # Identidad geometrica del objeto.
   #
   # Para un multitile dibujado sin reordenar piezas:
@@ -532,14 +540,12 @@ class Mode7Renderer
   # Esto es mucho mas estable que flood-fill por celda y no depende de que
   # haya tags legacy, P0 o P1 debajo. Dos objetos vecinos del mismo tileset
   # obtienen origenes distintos y no se fusionan.
-  def rigid_priority_object_key(tx, ty, entry, volume_id = nil)
+  def rigid_priority_object_key(tx, ty, entry)
     # Solo elevacion EXPLICITA separa objetos. el Terrain Tag visual es la identidad del dibujo;
     # todas sus piezas deben seguir dentro del mismo bloque.
     explicit_elevation = (
       entry.key?(:elevation) && !entry[:elevation].nil? ? entry[:elevation].to_f : 0.0
     ).round(4)
-
-    return [:volume, volume_id, explicit_elevation] if volume_id
 
     rect = entry[:src_rect]
     return [:single, entry.object_id, explicit_elevation] if !rect
@@ -555,8 +561,6 @@ class Mode7Renderer
   end
 
   def rigid_priority_components
-    Mode7::VolumeIds.refresh if defined?(Mode7::VolumeIds) rescue nil
-
     groups = Hash.new do |hash, key|
       hash[key] = {
         cells: Hash.new { |h, position| h[position] = [] },
@@ -565,20 +569,50 @@ class Mode7Renderer
       }
     end
 
-    @entry_cache.each do |(tx, ty), entries|
-      volume_id = rigid_priority_volume_id(tx, ty)
+    # Phase 2.4.1: cada entry se clasifica una sola vez durante este build.
+    # Antes rigid_priority_seed? volvía a ejecutar toda la cadena de
+    # rigid_priority_member_candidate? y las búsquedas vecinas repetían de nuevo
+    # la misma clasificación. En mapas grandes eso era una parte importante del
+    # coste de rigid_priority_components.
+    candidate_cache = {}
+    priority_cache  = {}
+    elevation_cache = {}
+
+    @entry_cache.each do |position, entries|
+      tx, ty = position
       entries.each do |entry|
-        next if !rigid_priority_member_candidate?(entries, entry)
-        key = rigid_priority_object_key(tx, ty, entry, volume_id)
+        oid = entry.object_id
+        candidate = rigid_priority_member_candidate?(entries, entry)
+        candidate_cache[oid] = candidate
+        next if !candidate
+
+        priority = entry_visual_priority(entry).to_i
+        priority_cache[oid] = priority
+        elevation = entry_world_elevation(entry).to_f
+        elevation_cache[oid] = elevation
+
+        key = rigid_priority_object_key(tx, ty, entry)
         group = groups[key]
-        group[:cells][[tx, ty]].push(entry)
-        group[:has_seed] = true if rigid_priority_seed?(entries, entry)
-        value = entry_world_elevation(entry).to_f
-        group[:elevation] = value if group[:elevation].nil? || value < group[:elevation]
+        group[:cells][position].push(entry)
+
+        # La implementación efectiva de V5 convierte billboards/roof protegidos
+        # en seed aunque su Priority sea baja. Como la entry ya pasó el filtro
+        # candidate, no necesitamos volver a ejecutar toda la cadena de aliases.
+        is_seed = if respond_to?(:nds_billboard_entry?, true) && nds_billboard_entry?(entry)
+                    true
+                  elsif respond_to?(:nds_protected_roof_entry?, true) && nds_protected_roof_entry?(entry)
+                    true
+                  else
+                    priority >= Mode7::Config::PRIORITY_RIGID_MIN.to_i
+                  end
+        group[:has_seed] = true if is_seed
+        group[:elevation] = elevation if group[:elevation].nil? || elevation < group[:elevation]
       end
     end
 
-    seed_groups = groups.values.select { |group| group[:has_seed] }
+    seed_groups = []
+    groups.each_value { |group| seed_groups << group if group[:has_seed] }
+
     claimed = {}
     seed_groups.each do |group|
       group[:cells].each_value do |entries|
@@ -586,32 +620,37 @@ class Mode7Renderer
       end
     end
 
-    # P1 no crea un componente por si solo, pero puede unirse a un P2+ si es
-    # literalmente la pieza vecina del mismo dibujo fuente.
+    # P1 vecino: reutiliza la clasificación ya calculada. También se evita crear
+    # el array temporal `anchors` de cada componente.
+    neighbors = [[-1, 0], [1, 0], [0, -1], [0, 1]]
     seed_groups.each do |group|
-      anchors = []
-      group[:cells].each do |position, entries|
-        entries.each { |entry| anchors.push([position, entry]) }
-      end
-
-      anchors.each do |(tx, ty), source_entry|
-        [[-1,0],[1,0],[0,-1],[0,1]].each do |dx, dy|
-          pos = [tx + dx, ty + dy]
-          entries = @entry_cache[pos]
-          next if !entries
-          entries.each do |candidate|
-            next if claimed[candidate.object_id]
-            next if entry_visual_priority(candidate) != 1
-            next if !rigid_priority_member_candidate?(entries, candidate)
-            next if !rigid_priority_source_contiguous?(source_entry, candidate, dx, dy)
-            group[:cells][pos].push(candidate)
-            claimed[candidate.object_id] = true
+      group[:cells].to_a.each do |position, source_entries|
+        tx, ty = position
+        source_entries.each do |source_entry|
+          neighbors.each do |dx, dy|
+            pos = [tx + dx, ty + dy]
+            entries = @entry_cache[pos]
+            next if !entries || entries.empty?
+            entries.each do |candidate|
+              oid = candidate.object_id
+              next if claimed[oid]
+              priority = priority_cache.key?(oid) ? priority_cache[oid] : entry_visual_priority(candidate).to_i
+              next if priority != 1
+              member = candidate_cache.key?(oid) ? candidate_cache[oid] : rigid_priority_member_candidate?(entries, candidate)
+              candidate_cache[oid] = member
+              priority_cache[oid] = priority
+              next if !member
+              next if !rigid_priority_source_contiguous?(source_entry, candidate, dx, dy)
+              group[:cells][pos].push(candidate)
+              claimed[oid] = true
+            end
           end
         end
       end
     end
 
-    seed_groups.filter_map do |group|
+    output = []
+    seed_groups.each do |group|
       cells = group[:cells]
       next if cells.empty?
       elevation = group[:elevation] || 0.0
@@ -619,8 +658,9 @@ class Mode7Renderer
         support = nds_component_support_height(cells).to_f
         elevation = support if support > elevation.to_f
       end
-      [cells, elevation]
+      output << [cells, elevation]
     end
+    output
   end
 
   # ---------------------------------------------------------------------------
@@ -638,7 +678,7 @@ class Mode7Renderer
     @entry_cache.each do |(tx, ty), entries|
       entries.each do |entry|
         next if !interior_prop_entry?(entry)
-        key = rigid_priority_object_key(tx, ty, entry, rigid_priority_volume_id(tx, ty))
+        key = rigid_priority_object_key(tx, ty, entry)
         seed_keys[key] = true
         source_key = rigid_priority_object_key(tx, ty, entry)
         seed_sources[key][source_key] = true
@@ -649,11 +689,10 @@ class Mode7Renderer
     # parte superior no queda duplicada en strips, pero un objeto adyacente con
     # otro origen visual nunca cambia bounds/ancla del prop.
     @entry_cache.each do |(tx, ty), entries|
-      volume_id = rigid_priority_volume_id(tx, ty)
       entries.each do |entry|
         next if entry_is_wall?(entry) || interior_border_entry?(entry) || interior_black_entry?(entry)
         next if !interior_prop_entry?(entry) && entry_visual_priority(entry) <= 0
-        key = rigid_priority_object_key(tx, ty, entry, volume_id)
+        key = rigid_priority_object_key(tx, ty, entry)
         next if !seed_keys[key]
         source_key = rigid_priority_object_key(tx, ty, entry)
         next if !seed_sources[key][source_key]
@@ -716,6 +755,7 @@ class Mode7Renderer
 
     rigid_priority_components.each do |component, elevation|
       bounds = component.keys
+      next if bounds.empty?
 
       # Marcar ownership ANTES de construir strips. Una entry que entra aqui
       # no puede volver a aparecer como priority strip.
@@ -723,37 +763,87 @@ class Mode7Renderer
         entries.each { |entry| @rigid_priority_owned[entry.object_id] = true }
       end
 
-      groups = Hash.new { |hash, priority| hash[priority] = {} }
-      component.each do |position, entries|
+      # Un rigid Priority ya ES un objeto fisico completo. Sus P1/P2/P3/P4
+      # describen como se recompone el bitmap interno, no cuatro profundidades
+      # de mundo distintas. Aplicar Priority otra vez al sprite.z hacia que un
+      # prop (buzon/arbol/etc.) siguiera tapando al actor incluso despues de
+      # que sus pies hubiesen rebasado el pie fisico del objeto.
+      #
+      # draw_rigid_component_source conserva el orden interno por
+      # [unify, priority], por lo que podemos materializar todo el objeto en un
+      # unico Sprite y ordenar ese Sprite SOLO por su base Y/elevacion real.
+      min_unify = nil
+      component.each_value do |entries|
         entries.each do |entry|
-          priority = entry_visual_priority(entry)
-          groups[priority][position] ||= []
-          groups[priority][position].push(entry)
+          u = entry[:unify].to_i
+          min_unify = u if min_unify.nil? || u < min_unify
         end
       end
+      min_unify ||= 0
 
-      groups.each do |priority, group_cells|
-        # El Z conserva la prioridad real, pero el layer ya no divide la
-        # geometria del objeto. Solo aporta un bias minimo de orden.
-        unifies = group_cells.values.flatten.map { |entry| entry[:unify].to_i }
-        unify = unifies.empty? ? 0 : unifies.min
+      # NDSBillboard (Terrain 22) ya declara un PROP RIGIDO. Su Priority de
+      # tileset NO puede empujar el objeto una fila hacia delante: eso hacia que
+      # un buzón P0+P1 siguiera tapando al actor aun cuando este ya estaba sobre
+      # la celda P0. El molino (tambien tag 22) funcionaba porque no dependia de
+      # esa mezcla de prioridades.
+      #
+      # Para billboards buscamos primero su P0 real. Si una pieza P1/P2 quedo en
+      # otro componente porque sus tiles no son contiguos en la hoja del
+      # tileset, usamos Priority SOLO para localizar el P0 situado al sur. Una
+      # vez hallado, todo el billboard comparte ese pie fisico. Priority sigue
+      # ordenando las piezas dentro del bitmap, pero NO altera el Z mundial.
+      component_kind = respond_to?(:nds_component_kind, true) ? nds_component_kind(component) : nil
+      depth_wyb = nil
+      if component_kind == :nds_billboard
+        anchor_tys = []
+        component.each do |(tx, ty), entries|
+          entries.each do |entry|
+            next if !respond_to?(:nds_category_id, true)
+            next if nds_category_id(entry) != Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG
+            p = entry_visual_priority(entry).to_i
+            if p <= 0
+              anchor_tys << ty
+              next
+            end
 
-        # IMPORTANTE: todas las prioridades del componente usan la misma base
-        # Y de los bounds completos. Antes cada priority usaba su propia fila
-        # maxima; si el objeto solo tenia P2/P3/P4, esas bases diferian y se
-        # percibia una separacion aunque el bitmap-space fuese comun.
-        depth_ty = bounds.map { |_tx, ty| ty }.max
-        depth_wyb = (depth_ty + 1) * Game_Map::TILE_HEIGHT
-
-        make_rigid_component(
-          group_cells,
-          elevation,
-          bounds,
-          priority,
-          unify,
-          depth_wyb
-        )
+            # P1 espera su P0 una fila al sur, P2 dos, etc. No exigimos que el
+            # rect fuente sea contiguo: muchos props de tileset (como buzones)
+            # guardan sus piezas separadas dentro de la hoja.
+            target_ty = ty + p
+            target_entries = @entry_cache[[tx, target_ty]] || []
+            has_p0 = target_entries.any? do |candidate|
+              nds_category_id(candidate) == Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG &&
+                entry_visual_priority(candidate).to_i <= 0
+            end
+            anchor_tys << target_ty if has_p0
+          end
+        end
+        anchor_ty = anchor_tys.empty? ? bounds.map { |_tx, ty| ty }.max : anchor_tys.max
+        depth_wyb = (anchor_ty + 1) * Game_Map::TILE_HEIGHT
+      else
+        # Priority generica conserva la semantica RMXP: P1 ancla una fila al
+        # sur, P2 dos, etc. Solo NDSBillboard usa la autoridad de pie rigido.
+        component.each do |(_tx, ty), entries|
+          entries.each do |entry|
+            p = entry_visual_priority(entry).to_i
+            logical_wyb = (ty + 1 + [p, 0].max) * Game_Map::TILE_HEIGHT
+            depth_wyb = logical_wyb if depth_wyb.nil? || logical_wyb > depth_wyb
+          end
+        end
+        depth_wyb ||= (bounds.map { |_tx, ty| ty }.max + 1) * Game_Map::TILE_HEIGHT
       end
+
+      # El layer/unify SOLO ordena piezas internas. En empate exacto de pie el
+      # actor gana, por eso el objeto usa bias global -1.
+      make_rigid_component(
+        component,
+        elevation,
+        bounds,
+        0,
+        -1,
+        depth_wyb,
+        :priority_object
+      )
     end
   end
 
@@ -813,23 +903,34 @@ class Mode7Renderer
   # Columna fisica de UNA celda. Forma original del volumen 2.5D: nunca usa
   # filas vecinas como alto, por eso no arrastra ni corta bloques al mover Y.
 
+  # Phase 2.4.1: los bloques rígidos se describen durante el build, pero su
+  # Bitmap se crea solamente cuando entran en el radio visible. Esto conserva
+  # exactamente cells/bounds/depth y evita rasterizar cientos de props fuera de
+  # cámara durante la transferencia de mapa.
   def make_rigid_component(cells, elevation = 0, bounds = nil,
-                          priority = nil, unify = nil, depth_wyb = nil,
-                          rigid_kind = :component)
+                           priority = nil, unify = nil, depth_wyb = nil,
+                           rigid_kind = :component)
     positions = bounds || cells.keys
-    return if positions.empty?
+    return if !positions || positions.empty?
 
-    min_tx = positions.map { |tx, _ty| tx }.min
-    max_tx = positions.map { |tx, _ty| tx }.max
-    min_ty = positions.map { |_tx, ty| ty }.min
-    max_ty = positions.map { |_tx, ty| ty }.max
+    first = positions[0]
+    min_tx = max_tx = first[0]
+    min_ty = max_ty = first[1]
+    positions.each do |tx, ty|
+      min_tx = tx if tx < min_tx
+      max_tx = tx if tx > max_tx
+      min_ty = ty if ty < min_ty
+      max_ty = ty if ty > max_ty
+    end
 
-    width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
-    height = (max_ty - min_ty + 1) * Game_Map::TILE_HEIGHT
-    bitmap = Bitmap.new(width, height)
-    draw_rigid_component_source(bitmap, min_tx, min_ty, cells)
+    tw = Game_Map::TILE_WIDTH
+    th = Game_Map::TILE_HEIGHT
+    width  = (max_tx - min_tx + 1) * tw
+    height = (max_ty - min_ty + 1) * th
 
-    all_entries = cells.values.flatten
+    all_entries = []
+    cells.each_value { |entries| entries.each { |entry| all_entries << entry } }
+
     protected_kinds = [
       :component, :wall_component, :indoor_prop, :nds_billboard,
       :nds_structure, :nds_overlay, :nds_wall, :nds_mountain_wall,
@@ -837,34 +938,81 @@ class Mode7Renderer
     ]
     if priority.nil?
       if protected_kinds.include?(rigid_kind)
-        # Solo calcula una prioridad de respaldo. Si el caller entrega una capa
-        # P0/P1/P2+, conservarla: todas comparten bounds, pero no el orden Z.
-        foot_entries = cells.select { |(_tx, ty), _v| ty == max_ty }.values.flatten
+        foot_entries = []
+        cells.each do |(_tx, ty), entries|
+          entries.each { |entry| foot_entries << entry } if ty == max_ty
+        end
         foot_entries = all_entries if foot_entries.empty?
-        priority = foot_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+        priority = 0
+        foot_entries.each do |entry|
+          p = entry_visual_priority(entry).to_i
+          priority = p if p > priority
+        end
       else
-        priority = all_entries.map { |entry| entry_visual_priority(entry) }.max || 0
+        priority = 0
+        all_entries.each do |entry|
+          p = entry_visual_priority(entry).to_i
+          priority = p if p > priority
+        end
       end
     end
-    unify = all_entries.map { |entry| entry[:unify].to_i }.min || 0 if unify.nil?
-    depth_wyb ||= (max_ty + 1) * Game_Map::TILE_HEIGHT
 
+    if unify.nil?
+      unify = nil
+      all_entries.each do |entry|
+        u = entry[:unify].to_i
+        unify = u if unify.nil? || u < unify
+      end
+      unify ||= 0
+    end
+    depth_wyb ||= (max_ty + 1) * th
+
+    # Sprite sí existe desde el build para mantener compatibilidad con los
+    # módulos que guardan metadata en él (stair/bush/etc.). Solo se difieren el
+    # Bitmap y el blit del componente.
     sprite = Sprite.new(@viewport)
-    sprite.bitmap = bitmap
     sprite.ox = width / 2.0
     sprite.oy = height
     sprite.visible = false
 
-    wx = min_tx * Game_Map::TILE_WIDTH + width / 2.0
-    wyb = (max_ty + 1) * Game_Map::TILE_HEIGHT
+    wx  = min_tx * tw + width / 2.0
+    wyb = (max_ty + 1) * th
     depth = [depth_wyb, priority, unify]
+    lazy = { width: width, height: height, min_tx: min_tx, min_ty: min_ty }
 
     @wall_data.push([
       sprite, wx, wyb, height, cells, rigid_kind, unify, depth,
-      0, min_tx, min_ty, max_tx, max_ty, elevation
+      0, min_tx, min_ty, max_tx, max_ty, elevation, lazy
     ])
     sprite
   end
+
+  def v25_materialize_rigid_component(data)
+    return nil if !data
+    sprite = data[0]
+    return nil if !sprite || sprite.disposed?
+    return sprite.bitmap if sprite.bitmap && !sprite.bitmap.disposed?
+
+    lazy = data[14]
+    return nil if !lazy
+    width  = lazy[:width].to_i
+    height = lazy[:height].to_i
+    return nil if width <= 0 || height <= 0
+
+    bitmap = Bitmap.new(width, height)
+    draw_rigid_component_source(bitmap, lazy[:min_tx].to_i, lazy[:min_ty].to_i, data[4])
+    sprite.bitmap = bitmap
+    sprite.ox = width / 2.0
+    sprite.oy = height
+    sprite.tone = @tone if @tone
+    sprite.color = @color if @color
+    data[14] = nil
+    bitmap
+  rescue Exception => e
+    Console.echo_error("2.5D lazy rigid materialize: #{e.message}") if defined?(Console)
+    nil
+  end
+
   def draw_rigid_component_source(dst, min_tx, min_ty, cells)
     dst.clear
     cells.keys.sort_by { |tx, ty| [ty, tx] }.each do |tx, ty|
@@ -957,20 +1105,40 @@ class Mode7Renderer
       return
     end
 
-    # Exterior legacy: P1 normal se integra al raster de ground para compartir
-    # exactamente la curva del suelo.
-    return if !@ground || @ground.disposed?
+    # Exterior: P0 y P1 deben seguir siendo capas INDEPENDIENTES, igual que
+    # en el Tilemap de RMXP. Hornear P1 dentro de @ground destruia la prioridad:
+    # al cruzar arriba/abajo del objeto, el actor ya no podia cambiar de orden
+    # respecto al P1 y el P0 quedaba visualmente absorbido por la misma celda.
+    #
+    # P0 permanece en @ground. P1 conserva un Sprite propio con la MISMA
+    # proyeccion de fila que el suelo; update_priority_strips recalcula su Z a
+    # partir de (ty + 1), elevation y priority. Por tanto:
+    #   actor al norte  -> P1 delante
+    #   actor al sur    -> actor delante
+    # sin modificar ni retirar el P0 de la celda.
+    min_tx = cells.keys.min
+    max_tx = cells.keys.max
+    width = (max_tx - min_tx + 1) * Game_Map::TILE_WIDTH
+    source = Bitmap.new(width, Game_Map::TILE_HEIGHT)
+    source.clear
+
     cells.each do |tx, entries|
-      x = tx * Game_Map::TILE_WIDTH
-      y = ty * Game_Map::TILE_HEIGHT
-      sorted = entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }
-      sorted.each do |entry|
-        blt_entry_into(@ground, x, y, entry, entry[:opacity] || 255)
+      x = (tx - min_tx) * Game_Map::TILE_WIDTH
+      entries.sort_by { |entry| [entry[:unify].to_i, entry[:priority].to_i] }.each do |entry|
+        blt_entry_into(source, x, 0, entry, entry[:opacity] || 255)
       end
     end
-    @priority_raster_cells ||= {}
-    @priority_raster_cells[ty] ||= []
-    @priority_raster_cells[ty].push(cells)
+
+    sprite = Sprite.new(@viewport)
+    sprite.bitmap = source
+    sprite.ox = 0
+    sprite.oy = source.height
+    sprite.visible = false
+
+    @priority_strips.push([
+      sprite, source, min_tx, ty, priority, unify, elevation,
+      cells, :entries_only, nil
+    ])
   end
 
   def draw_priority_strip_source(source, min_tx, ty, cells, mountain_shadow = false)
@@ -1169,15 +1337,27 @@ class Mode7Renderer
         next
       end
 
-      # Elevacion y Priority son conceptos distintos. Promover el piso elevado
-      # a P1 hacia que MountainTop tapara al actor y a sus propios decals.
-      effective_priority = priority
-      bias = unify + (effective_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS : 0)
+      # Semantica RMXP exacta para Priority en una fila plana:
+      #   P0 -> pie en (ty + 1)
+      #   P1 -> pie en (ty + 2)
+      #   P2 -> pie en (ty + 3) ...
+      #
+      # La geometria visual NO se mueve: solo cambia el ancla usada para Z.
+      # Esto hace que P1 de la fila superior y P0 de la fila inferior cambien
+      # delante/detras del actor en el mismo punto, sin que P0 desaparezca.
+      effective_priority = [priority.to_i, 0].max
+      logical_wyb = (ty + 1 + effective_priority) * Game_Map::TILE_HEIGHT
+
+      # `unify` identifica el layer de origen, NO una prioridad contra actors.
+      # Sumirlo al Z global hacia que un P1 de layer 2/3 venciera al personaje
+      # incluso cuando este ya estaba sobre la casilla P0 del mismo objeto.
+      # En un empate exacto de pie damos -1 al tile: el personaje gana el tie;
+      # una fila al norte/sur sigue ordenandose normalmente por profundidad.
       sprite.z = Mode7.depth_z_at_elevation(
-        (ty + 1) * Game_Map::TILE_HEIGHT,
+        logical_wyb,
         elevation,
-        effective_priority,
-        bias
+        0,
+        -1
       )
 
       apply_depth_fog_to_sprite(sprite, sprite.y)
@@ -1231,10 +1411,10 @@ class Mode7Renderer
         next
       end
 
-      depth_wyb, depth_priority, depth_unify = depth || [wyb, priority, 0]
-      bias = depth_unify.to_i
-      bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority.to_i > 0
-      sprite.z = Mode7.depth_z(depth_wyb, depth_priority, bias)
+      depth_wyb, depth_priority, _depth_unify = depth || [wyb, priority, 0]
+      # Igual que los strips: el layer no compite con el Z del personaje.
+      # En empate exacto el actor queda delante.
+      sprite.z = Mode7.depth_z(depth_wyb, depth_priority, -1)
 
       apply_depth_fog_to_sprite(sprite, sprite.y)
       sprite.visible = true
@@ -1410,8 +1590,22 @@ class Mode7Renderer
       sprite.zoom_y = scale_y
 
       depth_wyb, depth_priority, depth_unify = depth || [wyb, 0, 0]
-      bias = depth_unify.to_i
-      bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority.to_i > 0
+
+      # NDSBillboard es un prop rigido con un unico pie fisico. `unify` describe
+      # el layer/origen de sus piezas y solo debe ordenar el bitmap interno; si
+      # se suma al Z mundial, un billboard P0 colocado en una layer alta puede
+      # ganarle al personaje aun cuando ambos comparten exactamente el mismo
+      # pie. Este era el caso especifico de los buzones Terrain 22.
+      #
+      # En empate de pie dejamos el billboard una unidad debajo del actor. Al
+      # estar el actor al norte/sur, la profundidad fisica Y vuelve a decidir
+      # normalmente. Otros rigid kinds conservan su comportamiento anterior.
+      if _z_behavior == :nds_billboard
+        bias = -1
+      else
+        bias = depth_unify.to_i
+        bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority.to_i > 0
+      end
       sprite.z = Mode7.depth_z(depth_wyb, depth_priority, bias)
 
       apply_depth_fog_to_sprite(sprite, syb)

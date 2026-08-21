@@ -416,8 +416,16 @@ class Mode7Renderer
 
   def collect_extended_entries(tx, ty, entries, seen)
     return if !defined?(MakerStudio) || !MakerStudio.respond_to?(:ext_layers_index_for)
-    layers = MakerStudio.ext_layers_index_for(@map_id, @map.width)
-    return if layers.empty?
+    layers = @v25_ext_layers_index
+    if layers.nil?
+      begin
+        layers = MakerStudio.ext_layers_index_for(@map_id, @map.width)
+        @v25_ext_layers_index = layers
+      rescue Exception
+        layers = []
+      end
+    end
+    return if !layers || layers.empty?
     idx = ty * @map.width + tx
     
     layers.each do |layer|

@@ -205,14 +205,15 @@ class Mode7Renderer
     @wall_cells = {}
     @walls_known = true
 
-    # Cache completo primero. La continuidad de puertas/ventanas interiores
-    # necesita poder consultar las celdas vecinas sin depender del orden X/Y.
-    @map.width.times do |tx|
-      @map.height.times do |ty|
-        entries = collect_cell_entries(tx, ty)
-        @entry_cache[[tx, ty]] = entries unless entries.empty?
-      end
-    end
+    # V25 2.4.2: resolver una vez los indices ya cacheados por Maker Studio.
+    # Si una integracion antigua no expone estos helpers, los metodos de acceso
+    # conservan automaticamente el camino legacy.
+    prepare_v25_maker_studio_indexes if respond_to?(:prepare_v25_maker_studio_indexes, true)
+
+    # Cache completo primero. Phase 2.4.7 construye tambien el indice numerico
+    # en el MISMO recorrido; 2.4.6 lo reconstruia despues durante
+    # cache_visual_priorities, pagando otro walk/hash-fill de todas las celdas.
+    build_v25_entry_cache
 
     # V5.10: compilar/cargar la geometria fisica DESPUES de tener el mapa
     # completo en cache y ANTES de construir superficies/caras/colision.
@@ -247,6 +248,26 @@ class Mode7Renderer
     @need_ground_redraw = true
     @old_tone = nil
     @old_color = nil
+  end
+
+  # Phase 2.4.8: la construccion real del cache puede fusionar el prepass
+  # estatico en el mismo recorrido. El helper vive en 037 y se resuelve en
+  # runtime despues de cargar todos los scripts; el fallback conserva 2.4.7.1.
+  def build_v25_entry_cache
+    if respond_to?(:v25_build_entry_cache_prepass, true)
+      return v25_build_entry_cache_prepass
+    end
+    @v25_entry_index = {}
+    width = @map.width
+    @map.height.times do |ty|
+      row = ty * width
+      width.times do |tx|
+        entries = collect_cell_entries(tx, ty)
+        next if entries.empty?
+        @entry_cache[[tx, ty]] = entries
+        @v25_entry_index[row + tx] = entries
+      end
+    end
   end
 
   def collect_cell_entries(tx, ty)
@@ -294,19 +315,56 @@ class Mode7Renderer
   # mapa 3-7 veces al arrancar (y duplicaba accidentalmente el pase inferior
   # de Maker Studio), lo que explicaba buena parte del tiempo de carga.
   def compose_ground_fast
-    if @ms_shadow_env
-      bake_ms_shadows
-    end
+    shadow_env = @ms_shadow_env
+    bake_ms_shadows if shadow_env
 
     tw = Game_Map::TILE_WIDTH
     th = Game_Map::TILE_HEIGHT
+    width = @map.width
+
+    # Phase 2.4.11: 2.4.8 already builds a sparse integer cell index. Use it
+    # directly instead of walking Hash keys [x,y] again during composition.
+    # The fallback preserves compatibility with older/external build paths.
+    packed = @v25_entry_index
+    if packed
+      packed.each_pair do |idx, entries|
+        next if !entries || entries.empty?
+        ty = idx / width
+        tx = idx - ty * width
+        ground_entries = ground_entries_for_cell(tx, ty, entries)
+        paint_nds_underlay(tx, ty, entries, ground_entries, @ground)
+
+        if shadow_env
+          lower = []
+          upper = []
+          ground_entries.each do |entry|
+            if ground_shadow_band_for(tx, ty, entry) == :above_shadow
+              upper << entry
+            else
+              lower << entry
+            end
+          end
+          blt_ground_cell(tx, ty, lower, @ground) unless lower.empty?
+          if @shadow_ground && !@shadow_ground.disposed?
+            px = tx * tw
+            py = ty * th
+            @src_rect.set(px, py, tw, th)
+            @ground.blt(px, py, @shadow_ground, @src_rect)
+          end
+          blt_ground_cell(tx, ty, upper, @ground) unless upper.empty?
+        else
+          blt_ground_cell(tx, ty, ground_entries, @ground) unless ground_entries.empty?
+        end
+      end
+      return
+    end
+
     (@entry_cache || {}).each do |pos, entries|
       next if !entries || entries.empty?
       tx, ty = pos
       ground_entries = ground_entries_for_cell(tx, ty, entries)
       paint_nds_underlay(tx, ty, entries, ground_entries, @ground)
-
-      if @ms_shadow_env
+      if shadow_env
         lower = []
         upper = []
         ground_entries.each do |entry|
@@ -318,8 +376,10 @@ class Mode7Renderer
         end
         blt_ground_cell(tx, ty, lower, @ground) unless lower.empty?
         if @shadow_ground && !@shadow_ground.disposed?
-          @src_rect.set(tx * tw, ty * th, tw, th)
-          @ground.blt(tx * tw, ty * th, @shadow_ground, @src_rect)
+          px = tx * tw
+          py = ty * th
+          @src_rect.set(px, py, tw, th)
+          @ground.blt(px, py, @shadow_ground, @src_rect)
         end
         blt_ground_cell(tx, ty, upper, @ground) unless upper.empty?
       else
@@ -418,12 +478,9 @@ class Mode7Renderer
   # Una entry de wall normal pertenece SOLO al renderer de walls.
   # No puede quedar tambien horneada en @ground, que era la causa principal de
   # tiles duplicados al combinar P0/P1 o wall sobre otras superficies.
-  def ground_entries_for_cell(tx, ty, entries)
-    entries.reject do |entry|
-      wall_owned = respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)
-      prop_owned = respond_to?(:indoor_prop_owned?, true) && indoor_prop_owned?(entry)
-      id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
-      rigid_tag = [
+  def v25_rigid_ground_tag?(id)
+    @v25_rigid_ground_tags ||= begin
+      ids = [
         Mode7::Config::NDS_WALL_TERRAIN_TAG,
         Mode7::Config::NDS_ROOF_TERRAIN_TAG,
         Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG,
@@ -437,7 +494,36 @@ class Mode7Renderer
         Mode7::Config::NDS_WALL_PLANE_TERRAIN_TAG,
         Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG,
         Mode7::Config::NDS_STAIR_TERRAIN_TAG
-      ].include?(id)
+      ]
+      h = {}
+      ids.each { |tag_id| h[tag_id] = true }
+      h
+    end
+    !!@v25_rigid_ground_tags[id]
+  end
+
+  def v25_underlay_volume_tag?(id)
+    @v25_underlay_volume_tags ||= begin
+      h = {}
+      [
+        Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG,
+        Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG,
+        Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG,
+        Mode7::Config::NDS_STAIR_TERRAIN_TAG,
+        Mode7::Config::NDS_VOLUME_TERRAIN_TAG,
+        Mode7::Config::NDS_VOLUME_HIGH_TERRAIN_TAG
+      ].each { |tag_id| h[tag_id] = true }
+      h
+    end
+    !!@v25_underlay_volume_tags[id]
+  end
+
+  def ground_entries_for_cell(tx, ty, entries)
+    entries.reject do |entry|
+      wall_owned = respond_to?(:wall_visual_owned?, true) && wall_visual_owned?(entry)
+      prop_owned = respond_to?(:indoor_prop_owned?, true) && indoor_prop_owned?(entry)
+      id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
+      rigid_tag = v25_rigid_ground_tag?(id)
 
       # Una categoria 2D/vertical pertenece a UN solo renderer. Nunca se
       # hornea tambien en @ground; esto elimina casas/arboles duplicados.
@@ -458,17 +544,9 @@ class Mode7Renderer
   # del volumen para que un subpixel abierto nunca revele el background.
   def nds_underlay_required?(entries)
     return false if !entries || entries.empty?
-    ids = [
-      Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG,
-      Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG,
-      Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG,
-      Mode7::Config::NDS_STAIR_TERRAIN_TAG,
-      Mode7::Config::NDS_VOLUME_TERRAIN_TAG,
-      Mode7::Config::NDS_VOLUME_HIGH_TERRAIN_TAG
-    ]
     entries.any? do |entry|
       id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
-      ids.include?(id)
+      v25_underlay_volume_tag?(id)
     end
   rescue Exception
     false
@@ -485,12 +563,13 @@ class Mode7Renderer
 
   def nds_underlay_entries_for(tx, ty)
     @nds_underlay_cache ||= {}
-    key = [tx, ty]
+    width = @map.width
+    key = ty * width + tx
     return @nds_underlay_cache[key] if @nds_underlay_cache.key?(key)
 
     # Buscar primero las celdas mas cercanas. En empate se favorece el sur y
     # los laterales, que normalmente representan el terreno visible al pie de
-    # una montana.
+    # una montana. El indice numerico evita claves [x,y] temporales.
     1.upto(5) do |radius|
       offsets = []
       (-radius..radius).each do |dx|
@@ -506,9 +585,10 @@ class Mode7Renderer
       offsets.each do |dx, dy|
         nx = tx + dx
         ny = ty + dy
-        next if nx < 0 || ny < 0 || nx >= @map.width || ny >= @map.height
-        nentries = @entry_cache[[nx, ny]] || []
-        next if nentries.empty?
+        next if nx < 0 || ny < 0 || nx >= width || ny >= @map.height
+        nidx = ny * width + nx
+        nentries = @v25_entry_index ? @v25_entry_index[nidx] : @entry_cache[[nx, ny]]
+        next if !nentries || nentries.empty?
         candidates = ground_entries_for_cell(nx, ny, nentries).select do |entry|
           ground_pass_for(entry) == :base &&
             entry_visual_priority(entry).to_i <= 0
@@ -522,7 +602,7 @@ class Mode7Renderer
     @nds_underlay_cache[key] = []
   rescue Exception
     @nds_underlay_cache ||= {}
-    @nds_underlay_cache[[tx, ty]] = []
+    @nds_underlay_cache[ty.to_i * (@map ? @map.width : 1) + tx.to_i] = []
   end
 
   def paint_nds_underlay(tx, ty, entries, ground_entries, target = @ground)
@@ -534,10 +614,75 @@ class Mode7Renderer
   rescue Exception
   end
 
+  # -------------------------------------------------------------------------
+  # V25 2.4.2 - acceso directo a indices de Maker Studio
+  # -------------------------------------------------------------------------
+  def prepare_v25_maker_studio_indexes
+    @v25_native_props_index = nil
+    @v25_ext_layers_index = nil
+    @v25_cell_caps_index = nil
+    return if !defined?(MakerStudio)
+
+    if MakerStudio.respond_to?(:native_props_index_for)
+      begin
+        @v25_native_props_index = MakerStudio.native_props_index_for(@map_id, @map.width)
+      rescue Exception
+        @v25_native_props_index = nil
+      end
+    end
+    if MakerStudio.respond_to?(:ext_layers_index_for)
+      begin
+        @v25_ext_layers_index = MakerStudio.ext_layers_index_for(@map_id, @map.width)
+      rescue Exception
+        @v25_ext_layers_index = nil
+      end
+    end
+    if MakerStudio.respond_to?(:cell_caps_for)
+      begin
+        # Maker Studio LBDS API: cell_caps_for(map) receives the Game_Map.
+        # @map is $game_map in Mode7Renderer#build. Calling it with map_id +
+        # width raised ArgumentError on the current LBDS integration.
+        @v25_cell_caps_index = MakerStudio.cell_caps_for(@map)
+      rescue Exception
+        @v25_cell_caps_index = nil
+      end
+    end
+  end
+
+  def v25_indexed_native_props(layer, index)
+    data = @v25_native_props_index
+    return nil if !data
+    value = nil
+    if data.is_a?(Array)
+      layer_data = data[layer]
+      value = layer_data[index] if layer_data.respond_to?(:[])
+    elsif data.is_a?(Hash)
+      layer_data = data[layer] || data[layer.to_s] || data[layer.to_sym] rescue nil
+      if layer_data.respond_to?(:[])
+        value = layer_data[index] || layer_data[index.to_s]
+      end
+      value ||= data[[layer, index]] || data[[layer.to_s, index]]
+    end
+    value = value[0] if value.is_a?(Array) && value.length == 2 && value[0].is_a?(Hash)
+    value.is_a?(Hash) ? value : nil
+  rescue Exception
+    nil
+  end
+
+  def v25_native_props_at(tx, ty, layer)
+    index = ty * @map.width + tx
+    props = v25_indexed_native_props(layer, index)
+    return props if props
+    return nil if !defined?(MakerStudio) || !MakerStudio.respond_to?(:native_props_at)
+    result = MakerStudio.native_props_at(@map_id, @map.width, layer, index)
+    result.is_a?(Array) ? result[0] : result
+  rescue Exception
+    nil
+  end
+
   def make_native_entry_with_props(tx, ty, layer)
-    if defined?(MakerStudio) && MakerStudio.respond_to?(:native_props_at)
-      result = MakerStudio.native_props_at(@map_id, @map.width, layer, ty * @map.width + tx)
-      props = result.is_a?(Array) ? result[0] : result
+    if defined?(MakerStudio)
+      props = v25_native_props_at(tx, ty, layer)
       if props
         if props["autotile_name"] || props["tileset_id"]
           return make_native_prop_entry(tx, ty, layer, props)

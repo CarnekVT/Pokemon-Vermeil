@@ -59,7 +59,7 @@ module TrainerPokemonProperty
     ]
     Pokemon::MAX_MOVES.times do |i|
       properties.push([_INTL("Move {1}", i + 1),
-                       MovePropertyForSpecies.new(oldsetting), _INTL("Movimiento conocido por el Pokémon. Deja todos los movimientos en blanco (usa la tecla Z para borrar) para un conjunto de movimientos salvaje.")])
+                       MovePropertyForSpecies.new, _INTL("Movimiento conocido por el Pokémon. Deja todos los movimientos en blanco (usa la tecla Z para borrar) para un conjunto de movimientos salvaje.")])
     end
     properties.concat([
       [_INTL("Ability"),       AbilityProperty,                         _INTL("Habilidad del Pokémon. Sobrescribe el índice de habilidad.")],
@@ -69,7 +69,7 @@ module TrainerPokemonProperty
       [_INTL("IVs"),           IVsProperty.new(Pokemon::IV_STAT_LIMIT), _INTL("Valores individuales para cada una de las estadísticas del Pokémon.")],
       [_INTL("EVs"),           EVsProperty.new(Pokemon::EV_STAT_LIMIT), _INTL("Valores de esfuerzo para cada una de las estadísticas del Pokémon.")],
       [_INTL("Happiness"),     LimitProperty2.new(255),                 _INTL("Felicidad del Pokémon (0-255).")],
-      [_INTL("Poké Ball"),     BallProperty.new(oldsetting),            _INTL("El tipo de Poké Ball en la que se guarda el Pokémon.")]
+      [_INTL("Poké Ball"),     BallProperty.new,            _INTL("El tipo de Poké Ball en la que se guarda el Pokémon.")]
     ])
     return properties
   end
@@ -129,6 +129,8 @@ def pbRegisterPartner(tr_type, tr_name, tr_id = 0)
   tr_type = GameData::TrainerType.get(tr_type).id
   pbCancelVehicles
   trainer = pbLoadTrainer(tr_type, tr_name, tr_id)
+  pbMissingTrainer(tr_type, tr_name, tr_id) if !trainer
+  trainer = pbLoadTrainer(tr_type, tr_name, tr_id) if !trainer
   EventHandlers.trigger(:on_trainer_load, trainer)
   trainer.party.each do |i|
     i.owner = Pokemon::Owner.new_from_trainer(trainer)

@@ -245,6 +245,12 @@ class Mode7Renderer
       nds_fast_hide_leaving(full, @nds_fast_wall_active, indices)
       @nds_fast_wall_active = indices
       @nds_fast_wall_subset = indices.map { |i| full[i] }.compact
+      # Phase 2.4.1: rasteriza solo los componentes que entraron al radio activo.
+      # Los demás conservan únicamente su descriptor/bounds y no pagan Bitmap
+      # ni blits durante la carga inicial del mapa.
+      if respond_to?(:v25_materialize_rigid_component, true)
+        @nds_fast_wall_subset.each { |data| v25_materialize_rigid_component(data) }
+      end
       @nds_fast_wall_visibility_key = visibility_key
     end
 

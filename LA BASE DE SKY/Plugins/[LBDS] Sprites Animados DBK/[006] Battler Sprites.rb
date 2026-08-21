@@ -584,8 +584,9 @@ Battle::AbilityEffects::OnBeingHit.add(:ILLUSION,
 class Battle::Move::TwoTurnMove < Battle::Move
   def pbShowAnimation(id, user, targets, hitNum = 0, showAnimation = true)
     hitNum = 1 if @chargingTurn && !@damagingTurn
+    super
     case @function_code
-    #-----------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
     # These moves completely vanish the user during the charging turn.
     when "TwoTurnAttackInvulnerableUnderground",         # Dig
          "TwoTurnAttackInvulnerableUnderwater",          # Dive
@@ -597,33 +598,32 @@ class Battle::Move::TwoTurnMove < Battle::Move
          "TwoTurnAttackInvulnerableInSkyParalyzeTarget", # Bounce
          "TwoTurnAttackInvulnerableInSkyTargetCannotAct" # Sky Drop
       vanishMode = 2
-    #-----------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
     # All other two-turn moves do not vanish the user.
     else
       vanishMode = 0
     end
     if vanishMode > 0
-	  #-----------------------------------------------------------------------------
-	  # Vanishes during the charging turn.
+      #-------------------------------------------------------------------------
+      # Vanishes during the charging turn.
       if hitNum == 1
         @battle.scene.pbChangePokemon(user, user.visiblePokemon, vanishMode)
         if @function_code == "TwoTurnAttackInvulnerableInSkyTargetCannotAct"  # Sky Drop also vanishes the targets.
           targets.each do |b|
-          @battle.scene.pbChangePokemon(b, b.visiblePokemon, vanishMode)
-        end
+            @battle.scene.pbChangePokemon(b, b.visiblePokemon, vanishMode)
           end
-      #-----------------------------------------------------------------------------
+        end
+      #-------------------------------------------------------------------------
       # Reappears during the attacking turn.
-        else
-          @battle.scene.pbChangePokemon(user, user.visiblePokemon, 0)
-          if @function_code == "TwoTurnAttackInvulnerableInSkyTargetCannotAct"  # Targets of Sky Drop also reappear.
-            targets.each do |b|
+      else
+        @battle.scene.pbChangePokemon(user, user.visiblePokemon, 0)
+        if @function_code == "TwoTurnAttackInvulnerableInSkyTargetCannotAct"  # Targets of Sky Drop also reappear.
+          targets.each do |b|
             @battle.scene.pbChangePokemon(b, b.visiblePokemon, 0)
           end
         end
       end
     end
-    super
   end
 end
 
@@ -634,7 +634,7 @@ end
 #-------------------------------------------------------------------------------
 class Battle::Move::TwoTurnAttackInvulnerableInSkyTargetCannotAct < Battle::Move::TwoTurnMove
   def pbAttackingTurnMessage(user, targets)
-    @battle.pbDisplay(_INTL("¡{1} se liberó de Caída Libre!", targets[0].pbThis))
+    @battle.pbDisplay(_INTL("{1} was freed from the Sky Drop!", targets[0].pbThis))
     targets.each do |b|
       next if b.effects[PBEffects::SkyDrop] != user.index
       b.effects[PBEffects::SkyDrop] = -1
@@ -671,6 +671,17 @@ class Battle::Move::StartGravity < Battle::Move
       next if b.battlerSprite.vanishMode != 2
       @battle.scene.pbChangePokemon(b, b.visiblePokemon, 0)
     end
+  end
+end
+
+#===============================================================================
+# After inflicting damage, user switches out. Ignores trapping moves.
+# (Flip Turn, U-turn, Volt Switch)
+#===============================================================================
+class Battle::Move::SwitchOutUserDamagingMove < Battle::Move
+  def pbShowAnimation(id, user, targets, hitNum = 0, showAnimation = true)
+    super(id, user, targets, hitNum, showAnimation)
+    @battle.scene.pbChangePokemon(user, user.visiblePokemon, 0)
   end
 end
 

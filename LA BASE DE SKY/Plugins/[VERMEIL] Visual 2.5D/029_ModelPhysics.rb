@@ -14,6 +14,8 @@ module Mode7
         @worlds = {}
         @active_map_id = nil
         @active_cells = nil
+        @sidecar_authoritative = {}
+        @surface_fallback_maps = {}
       end
 
       def collision_path(map_id)
@@ -73,18 +75,29 @@ module Mode7
       def preload(map_id)
         map_id = map_id.to_i
         @worlds ||= {}
-        if @worlds.key?(map_id)
+        @sidecar_authoritative ||= {}
+        @surface_fallback_maps ||= {}
+        path = collision_path(map_id)
+        has_sidecar = File.file?(path)
+        @sidecar_authoritative[map_id] = has_sidecar
+
+        if has_sidecar
+          cells = if defined?(Mode7::GeometryV4Fast)
+                    Mode7::GeometryV4Fast.load_collision(path)
+                  else
+                    {}
+                  end
+          @worlds[map_id] = cells || {}
+          @surface_fallback_maps.delete(map_id)
           activate(map_id, @worlds[map_id])
           return @worlds[map_id]
         end
-        cells = if defined?(Mode7::GeometryV4Fast)
-                  Mode7::GeometryV4Fast.load_collision(collision_path(map_id))
-                else
-                  {}
-                end
-        @worlds[map_id] = cells
-        activate(map_id, cells)
-        cells
+
+        # No .v25c: do not freeze an empty world as authoritative. The renderer
+        # will register the already-loaded .v25r geometry a few lines later.
+        @worlds[map_id] ||= {}
+        activate(map_id, @worlds[map_id])
+        @worlds[map_id]
       rescue Exception => e
         Console.echo_error("VERMEIL ModelPhysics preload #{map_id}: #{e.message}") if defined?(Console)
         @worlds ||= {}
@@ -106,20 +119,133 @@ module Mode7
         nil
       end
 
+      # Build an O(1) collision grid directly from runtime Geometry when the
+      # project has no MapXXX.v25c. This keeps gameplay collision authoritative
+      # even for imported models that only ship in .v25r/.v25m.
+      def build_surface_fallback_cells(geo)
+        cells = {}
+        return cells if !geo
+        step = geo.respond_to?(:height_step) ? geo.height_step.to_f : 32.0
+        step = 32.0 if step <= 0.001
+
+        model_object_keys = {}
+        objects = geo.respond_to?(:objects) ? (geo.objects || []) : []
+        objects.each do |obj|
+          next if !obj.is_a?(Hash)
+          model_key = [obj[:model_id].to_s, obj[:model_instance_id].to_i]
+          model_object_keys[model_key] = true if !model_key[0].empty? || model_key[1] != 0
+          ox = obj[:x].to_i
+          oy = obj[:y].to_i
+          ow = [obj[:w].to_i, 1].max
+          oh = [obj[:h].to_i, 1].max
+          oy.upto(oy + oh - 1) do |ty|
+            ox.upto(ox + ow - 1) do |tx|
+              mode = geo.respond_to?(:object_footprint_mode) ? geo.object_footprint_mode(obj, tx, ty) : "inherit"
+              next if mode == "void"
+              collision = mode == "inherit" ? (obj[:collision] || "solid").to_s : mode.to_s
+              next if collision == "none"
+              entry = {
+                collision: collision,
+                base: obj[:anchor_z].to_f,
+                height: [obj[:height].to_f, 0.05].max,
+                model_id: obj[:model_id].to_s,
+                model_instance_id: obj[:model_instance_id].to_i,
+                part_id: obj[:id].to_s
+              }
+              (cells[[tx, ty]] ||= []) << entry
+            end
+          end
+        end
+
+        # Mesh-only imported models: derive a conservative XY convex footprint.
+        # Terrain/mountain faces have no model identity and are deliberately
+        # ignored. If an O-record exists for this model, its authored collision
+        # above remains authoritative (including collision=none).
+        grouped = Hash.new { |h, k| h[k] = { pts: [], min_z: nil, max_z: nil } }
+        faces = geo.respond_to?(:mesh_faces) ? (geo.mesh_faces || []) : []
+        faces.each do |face|
+          next if !face.is_a?(Hash)
+          key = [face[:model_id].to_s, face[:model_instance_id].to_i]
+          next if key[0].empty? && key[1] == 0
+          next if model_object_keys[key]
+          group = grouped[key]
+          verts = face[:vertices]
+          if verts.is_a?(Array) && !verts.empty?
+            verts.each do |v|
+              next if !v.is_a?(Array)
+              x = v[0].to_f; y = v[1].to_f; z = v[2].to_f
+              group[:pts] << [x, y]
+              group[:min_z] = z if group[:min_z].nil? || z < group[:min_z]
+              group[:max_z] = z if group[:max_z].nil? || z > group[:max_z]
+            end
+          else
+            x0 = face[:x0].to_f; y0 = face[:y0].to_f
+            x1 = face[:x1].to_f; y1 = face[:y1].to_f
+            group[:pts].concat([[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
+            z0 = face[:z0].to_f; z1 = face[:z1].to_f
+            group[:min_z] = [group[:min_z], z0, z1].compact.min
+            group[:max_z] = [group[:max_z], z0, z1].compact.max
+          end
+        end
+
+        grouped.each do |(model_id, instance_id), group|
+          pts = group[:pts]
+          next if pts.empty?
+          xs = pts.map { |pt| pt[0] }
+          ys = pts.map { |pt| pt[1] }
+          min_tx = xs.min.floor
+          max_tx = [xs.max.ceil - 1, min_tx].max
+          min_ty = ys.min.floor
+          max_ty = [ys.max.ceil - 1, min_ty].max
+          base = group[:min_z].to_f
+          height = [group[:max_z].to_f - base, 0.05].max
+          min_ty.upto(max_ty) do |ty|
+            min_tx.upto(max_tx) do |tx|
+              entry = { collision: "solid", base: base, height: height,
+                        model_id: model_id, model_instance_id: instance_id, part_id: "mesh" }
+              (cells[[tx, ty]] ||= []) << entry
+            end
+          end
+        end
+        cells
+      rescue Exception => e
+        Console.echo_error("VERMEIL ModelPhysics runtime fallback: #{e.message}") if defined?(Console)
+        {}
+      end
+
       def register_surface_geometry(map_id, geo)
         return nil if !geo
-        rows_hash = geo.instance_variable_get(:@model_collision_cells) rescue nil
-        rows = []
-        if rows_hash.is_a?(Hash)
-          rows_hash.each_value { |arr| rows.concat(Array(arr)) }
+        map_id = map_id.to_i
+        @worlds ||= {}
+        @sidecar_authoritative ||= {}
+        @surface_fallback_maps ||= {}
+
+        # A real .v25c always wins, including an intentionally empty one.
+        if @sidecar_authoritative[map_id]
+          activate(map_id, @worlds[map_id] || {})
+          return @worlds[map_id]
         end
-        # Runtime visual sidecars intentionally omit model collision in v5.12.1;
-        # keep the already-preloaded compact physics world instead of replacing it
-        # with an empty hash when the renderer registers its geometry.
-        return (@worlds && @worlds[map_id.to_i]) if rows.empty? && @worlds && @worlds.key?(map_id.to_i)
-        register_rows(map_id, rows)
-      rescue Exception
+
+        cells = build_surface_fallback_cells(geo)
+        @worlds[map_id] = cells
+        @surface_fallback_maps[map_id] = true
+        activate(map_id, cells)
+        cells
+      rescue Exception => e
+        Console.echo_error("VERMEIL ModelPhysics register surface #{map_id}: #{e.message}") if defined?(Console)
         nil
+      end
+
+      # Model streaming may append faces after initial map build. Refresh only
+      # fallback worlds; sidecar-authored physics never changes.
+      def refresh_surface_fallback(map_id, geo)
+        map_id = map_id.to_i
+        return @worlds && @worlds[map_id] if @sidecar_authoritative && @sidecar_authoritative[map_id]
+        register_surface_geometry(map_id, geo)
+      end
+
+      def sidecar_authoritative?(map_id)
+        @sidecar_authoritative && !!@sidecar_authoritative[map_id.to_i]
       end
 
       def activate(map_id, cells)

@@ -6,6 +6,10 @@
 
 class Mode7Renderer
   PROFILE_METHODS = [
+    :build_v25_entry_cache,
+    :cache_terrain_tag_heights,
+    :cache_visual_priorities,
+    :resolve_projection_from_indoor_tags,
     :compose_ground_fast,
     :build_nds_surface_geometry,
     :cache_wall_visual_components,

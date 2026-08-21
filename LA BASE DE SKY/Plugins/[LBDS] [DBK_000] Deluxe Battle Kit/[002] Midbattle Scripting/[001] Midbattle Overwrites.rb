@@ -386,7 +386,7 @@ class Battle
     return if @field.effects[effect] <= 0
     @field.effects[effect] -= 1
     return if @field.effects[effect] > 0
-    @scene.pbDeleteTrickRoomBackground() if effect == PBEffects::TrickRoom
+    @scene.pbDeleteTrickRoomBackground if effect == PBEffects::TrickRoom
     pbDisplay(msg)
     if effect == PBEffects::MagicRoom
       pbPriority(true).each { |battler| battler.pbItemTerrainStatBoostCheck }
@@ -715,7 +715,7 @@ class Battle::Battler
   alias dx_pbEndTurn pbEndTurn
   def pbEndTurn(_choice)
     dx_pbEndTurn(_choice)
-	  return if !@pokemon
+    return if !@pokemon
     @battle.pbDeluxeTriggers(self, nil, "TurnEnd", @turnCount, @species, *@pokemon.types)
   end
 end

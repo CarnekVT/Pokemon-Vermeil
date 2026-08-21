@@ -809,8 +809,7 @@ class Mode7Renderer
     # vertical. Esto elimina definitivamente el efecto de terrazas apiladas.
     mountain = entries.find { |entry| nds_mountain_wall_entry?(entry) }
     if mountain
-      volume_id = rigid_priority_volume_id(tx, ty) rescue nil
-      return [:nds_mountain_face, volume_id || :auto]
+      return [:nds_mountain_face, :auto]
     end
 
     plane = entries.find { |entry| nds_wall_plane_entry?(entry) }
@@ -912,25 +911,10 @@ class Mode7Renderer
   # Billboards/estructuras: una geometria por objeto; overlays especiales aun
   # pueden conservar mascaras por Priority cuando su funcion sea de foreground.
   # ---------------------------------------------------------------------------
-  def nds_structure_volume_ids(component)
-    ids = {}
-    component.each_key do |tx, ty|
-      id = rigid_priority_volume_id(tx, ty)
-      ids[id] = true if id
-    end
-    ids.keys
-  rescue Exception
-    []
-  end
-
   def nds_structure_components_compatible?(a, elev_a, b, elev_b)
     elev_a = [elev_a.to_f, nds_component_support_height(a)].max
     elev_b = [elev_b.to_f, nds_component_support_height(b)].max
-    return false if (elev_a - elev_b).abs > 0.001
-    ids_a = nds_structure_volume_ids(a)
-    ids_b = nds_structure_volume_ids(b)
-    return true if ids_a.empty? || ids_b.empty?
-    !(ids_a & ids_b).empty?
+    (elev_a - elev_b).abs <= 0.001
   end
 
   # NDSStructure se agrupa por continuidad EN EL MAPA, no por la posicion del
@@ -1092,18 +1076,23 @@ class Mode7Renderer
     # En mapas del Maker una cara puede solaparse una o dos filas con el top
     # que usa de respaldo. La cara gana la celda: si no, el top atraviesa el
     # muro y el plano vertical queda anclado dentro de la propia meseta.
-    return nil if entries.any? { |entry| nds_mountain_face_plane_entry?(entry) }
-    volume = entries.select { |entry| nds_volume_entry?(entry) }
-    return nil if volume.empty?
-    volume.map do |entry|
-      id = nds_category_id(entry)
-      if id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG && !tx.nil? && !ty.nil?
-        explicit = entry.key?(:elevation) && !entry[:elevation].nil? ? entry[:elevation].to_f : 0.0
-        explicit + nds_mountain_height_at(tx, ty)
-      else
-        entry_world_elevation(entry).to_f
-      end
-    end.max
+    # Phase 2.4.10 keeps the exact rule but avoids any?/select/map temporaries.
+    maximum = nil
+    mountain_top_id = Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
+    entries.each do |entry|
+      return nil if nds_mountain_face_plane_entry?(entry)
+      next if !nds_volume_entry?(entry)
+      id_cache = entry[:nds_tag_id]
+      id = id_cache == false || id_cache.nil? ? nds_category_id(entry) : id_cache
+      value = if id == mountain_top_id && !tx.nil? && !ty.nil?
+                explicit = entry.key?(:elevation) && !entry[:elevation].nil? ? entry[:elevation].to_f : 0.0
+                explicit + nds_mountain_height_at(tx, ty)
+              else
+                entry_world_elevation(entry).to_f
+              end
+      maximum = value if maximum.nil? || value > maximum
+    end
+    maximum
   end
 
   def nds_elevated_surface_entries(entries, base_unify)
@@ -1136,8 +1125,13 @@ class Mode7Renderer
     @entry_cache.each do |(tx, ty), entries|
       elevation = nds_volume_surface_elevation(entries, tx, ty)
       next if elevation.nil? || elevation <= 0.0
-      volume_entries = entries.select { |entry| nds_volume_entry?(entry) }
-      base_unify = volume_entries.map { |entry| entry[:unify].to_i }.min || 0
+      base_unify = nil
+      entries.each do |entry|
+        next if !nds_volume_entry?(entry)
+        unify = entry[:unify].to_i
+        base_unify = unify if base_unify.nil? || unify < base_unify
+      end
+      base_unify ||= 0
       surface_entries = nds_elevated_surface_entries(entries, base_unify)
       next if surface_entries.empty?
       surface_entries.each do |entry|
@@ -1218,8 +1212,10 @@ class Mode7Renderer
       region = {}
       queue = [[tx, ty]]
       visited[[tx, ty]] = true
-      until queue.empty?
-        cx, cy = queue.shift
+      head = 0
+      while head < queue.length
+        cx, cy = queue[head]
+        head += 1
         region[[cx, cy]] = true
         [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]].each do |nx, ny|
           if stair_cells[[nx, ny]] && !visited[[nx, ny]]

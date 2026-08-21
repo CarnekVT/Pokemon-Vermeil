@@ -410,16 +410,184 @@ class SpritePositioner
     oldscale = scale
     @sprites["info"].visible = true
     ret = false
+
+    # --- Setup de cajas delimitadoras y ratón ---
+    box_sprites = [Sprite.new(@viewport), Sprite.new(@viewport)]
+    box_sprites.each { |b| b.z = 99999; b.visible = false }
+    dragging = false
+    drag_target = -1
+    mouse_start_x = 0
+    mouse_start_y = 0
+    metric_start_x = 0
+    metric_start_y = 0
+    drag_mult_x = 1
+    drag_mult_y = 1
+    # --------------------------------------------------
+
     loop do
-      sprite.visible = ((System.uptime * 8).to_i % 4) < 3
+      # Definir qué sprites están activos según el parámetro
+      active_sprites = []
+      case param
+      when 0 then active_sprites = [@sprites["pokemon_0"]]
+      when 1 then active_sprites = [@sprites["pokemon_1"]]
+      when 2 then active_sprites = [@sprites["shadow_0"], @sprites["shadow_1"]]
+      end
+
+      active_sprites.each do |spr|
+        spr.visible = ((System.uptime * 8).to_i % 4) < 3 if spr
+      end
+
       Graphics.update
       Input.update
       self.update
+      
       case param
       when 0 then @sprites["info"].setTextToFit("Posición Aliado = #{xpos},#{ypos},#{scale}")
       when 1 then @sprites["info"].setTextToFit("Posición Enemigo = #{xpos},#{ypos},#{scale}")
       when 2 then @sprites["info"].setTextToFit("Posición Sombra = #{xpos},#{scale},#{ypos}")
       end
+
+      # --- Lógica de arrastre múltiple con ratón ---
+      active_sprites.each_with_index do |spr, i|
+        if spr && spr.bitmap && spr.visible
+          zx = spr.zoom_x.abs
+          zy = spr.zoom_y.abs
+          bw = (spr.bitmap.width * zx).to_i
+          bh = (spr.bitmap.height * zy).to_i
+          left = spr.x - (spr.ox * zx)
+          top = spr.y - (spr.oy * zy)
+
+          if !box_sprites[i].bitmap || box_sprites[i].bitmap.width != bw || box_sprites[i].bitmap.height != bh
+            box_sprites[i].bitmap&.dispose
+            box_sprites[i].bitmap = Bitmap.new(bw, bh)
+            rojo = Color.new(255, 0, 0)
+            box_sprites[i].bitmap.fill_rect(0, 0, bw, 2, rojo)
+            box_sprites[i].bitmap.fill_rect(0, bh - 2, bw, 2, rojo)
+            box_sprites[i].bitmap.fill_rect(0, 0, 2, bh, rojo)
+            box_sprites[i].bitmap.fill_rect(bw - 2, 0, 2, bh, rojo)
+          end
+          box_sprites[i].x = left
+          box_sprites[i].y = top
+          box_sprites[i].visible = true
+        else
+          box_sprites[i].visible = false
+        end
+      end
+
+      mx = Input.mouse_x
+      my = Input.mouse_y
+
+      if mx && my
+        if Input.trigger?(Input::MOUSELEFT)
+          active_sprites.each_with_index do |spr, i|
+            next if !spr || !spr.bitmap || !box_sprites[i].visible
+            left = box_sprites[i].x
+            right = left + box_sprites[i].bitmap.width
+            top = box_sprites[i].y
+            bottom = top + box_sprites[i].bitmap.height
+            
+            if mx >= left && mx <= right && my >= top && my <= bottom
+              dragging = true
+              drag_target = i
+              mouse_start_x = mx
+              mouse_start_y = my
+              metric_start_x = xpos
+              # Si es la sombra aliada (i==0 en param 2), su Y es la variable 'scale'
+              metric_start_y = (param == 2 && i == 0) ? scale : ypos
+              
+              old_sx = spr.x
+              old_sy = spr.y
+              
+              case param
+              when 0
+                metrics_data.back_sprite[0] = xpos + 1
+                metrics_data.back_sprite[1] = ypos + 1
+              when 1
+                metrics_data.front_sprite[0] = xpos + 1
+                metrics_data.front_sprite[1] = ypos + 1
+              when 2
+                metrics_data.shadow_sprite[0] = xpos + 1
+                if i == 0
+                  metrics_data.shadow_sprite[1] = scale + 1
+                else
+                  metrics_data.shadow_sprite[2] = ypos + 1
+                end
+              end
+              refresh
+              2.times { |j| @sprites["pokemon_#{j}"].iconBitmap.deanimate; @sprites["shadow_#{j}"].iconBitmap.deanimate }
+              
+              diff_x = spr.x - old_sx
+              diff_y = spr.y - old_sy
+              drag_mult_x = diff_x != 0 ? diff_x : 1
+              drag_mult_y = diff_y != 0 ? diff_y : 1
+              
+              case param
+              when 0
+                metrics_data.back_sprite[0] = xpos
+                metrics_data.back_sprite[1] = ypos
+              when 1
+                metrics_data.front_sprite[0] = xpos
+                metrics_data.front_sprite[1] = ypos
+              when 2
+                metrics_data.shadow_sprite[0] = xpos
+                metrics_data.shadow_sprite[1] = scale
+                metrics_data.shadow_sprite[2] = ypos
+              end
+              refresh
+              2.times { |j| @sprites["pokemon_#{j}"].iconBitmap.deanimate; @sprites["shadow_#{j}"].iconBitmap.deanimate }
+              break # Solo agarrar un sprite a la vez
+            end
+          end
+        elsif Input.press?(Input::MOUSELEFT)
+          if dragging
+            dx = mx - mouse_start_x
+            dy = my - mouse_start_y
+            
+            new_xpos = metric_start_x + (dx.to_f / drag_mult_x).round
+            new_ypos = metric_start_y + (dy.to_f / drag_mult_y).round
+
+            changed = false
+            if xpos != new_xpos
+              xpos = new_xpos
+              changed = true
+            end
+            
+            if param == 2 && drag_target == 0
+              if scale != new_ypos
+                scale = new_ypos
+                changed = true
+              end
+            else
+              if ypos != new_ypos
+                ypos = new_ypos
+                changed = true
+              end
+            end
+
+            if changed
+              case param
+              when 0
+                metrics_data.back_sprite[0] = xpos
+                metrics_data.back_sprite[1] = ypos
+              when 1
+                metrics_data.front_sprite[0] = xpos
+                metrics_data.front_sprite[1] = ypos
+              when 2
+                metrics_data.shadow_sprite[0] = xpos
+                metrics_data.shadow_sprite[1] = scale
+                metrics_data.shadow_sprite[2] = ypos
+              end
+              refresh
+              2.times { |j| @sprites["pokemon_#{j}"].iconBitmap.deanimate; @sprites["shadow_#{j}"].iconBitmap.deanimate }
+            end
+          end
+        else
+          dragging = false
+          drag_target = -1
+        end
+      end
+      # ------------------------------------------
+
       if (Input.repeat?(Input::UP) || Input.repeat?(Input::DOWN))
         ypos += (Input.repeat?(Input::DOWN)) ? 1 : -1
         case param
@@ -491,6 +659,12 @@ class SpritePositioner
         break
       end
     end
+
+    box_sprites.each do |b|
+      b.bitmap&.dispose
+      b.dispose
+    end
+
     @sprites["info"].visible = false
     sprite.visible = true
     2.times do |i|
@@ -539,7 +713,23 @@ class SpritePositioner
     cw.dispose
     return ret
   end
-  
+
+  def pbSearchSpeciesInCommandList(cw, commands, prompt = nil)
+    prompt ||= _INTL("Busca una especie en específico.")
+    find_species = pbMessageFreeText("\\ts[]" + prompt, "", false, 100, Graphics.width)
+    return if nil_or_empty?(find_species)
+    return if find_species.downcase == commands[cw.index].downcase
+    found_index = pbFindListIndexBySearch(commands, find_species, cw.index)
+    if found_index.nil?
+      pbMessage(_INTL("No se han encontrado especies."))
+      return
+    end
+    pbPlayDecisionSE
+    cw.index = found_index
+    pbChangeSpecies(@allspecies[found_index][1], @allspecies[found_index][2], @allspecies[found_index][4], @shiny)
+    refresh
+  end
+
   def pbChooseSpecies
     if @starting
       pbFadeInAndShow(@sprites) { update }
@@ -586,26 +776,7 @@ class SpritePositioner
         pbChangeSpecies(@allspecies[cw.index][1], @allspecies[cw.index][2], @allspecies[cw.index][4], @shiny)
         refresh
       elsif Input.trigger?(Input::ACTION)
-        find_species = pbMessageFreeText("\\ts[]" + _INTL("Busca una especie en específico."), "", false, 100, Graphics.width)
-        next if nil_or_empty?(find_species)
-        next if find_species.downcase == commands[cw.index].downcase
-        new_species = false
-        smart_match_defined = defined?(pbSmartMatch?)
-        commands.each_with_index do |name, i|
-          if smart_match_defined
-            next if !pbSmartMatch?(name, find_species)
-          else
-            next if !name.downcase.include?(find_species.downcase)
-          end
-          new_species = true
-          pbPlayDecisionSE
-          oldindex = cw.index
-          cw.index = i
-          pbChangeSpecies(@allspecies[i][1], @allspecies[i][2], @allspecies[i][4], @shiny)
-          refresh
-          break
-        end
-        pbMessage("No se han encontrado especies.") if !new_species
+        pbSearchSpeciesInCommandList(cw, commands)
       end
     end
     @oldSpeciesIndex = cw.index
@@ -776,6 +947,20 @@ class DynamaxSpritePositioner < SpritePositioner
     oldypos = ypos
     @sprites["info"].visible = true
     ret = false
+
+    # --- Setup de caja delimitadora y ratón ---
+    box_sprite = Sprite.new(@viewport)
+    box_sprite.z = 99999
+    box_sprite.visible = false
+    dragging = false
+    mouse_start_x = 0
+    mouse_start_y = 0
+    metric_start_x = 0
+    metric_start_y = 0
+    drag_mult_x = 1
+    drag_mult_y = 1
+    # ------------------------------------------------
+
     loop do
       sprite.visible = ((System.uptime * 8).to_i % 4) < 3
       Graphics.update
@@ -785,6 +970,114 @@ class DynamaxSpritePositioner < SpritePositioner
       when 0 then @sprites["info"].setTextToFit("Posición Aliado = #{xpos},#{ypos}")
       when 1 then @sprites["info"].setTextToFit("Posición Enemigo = #{xpos},#{ypos}")
       end
+
+      # --- Lógica de arrastre con ratón ---
+      if sprite.bitmap
+        zx = sprite.zoom_x.abs
+        zy = sprite.zoom_y.abs
+        bw = (sprite.bitmap.width * zx).to_i
+        bh = (sprite.bitmap.height * zy).to_i
+        left = sprite.x - (sprite.ox * zx)
+        right = left + bw
+        top = sprite.y - (sprite.oy * zy)
+        bottom = top + bh
+
+        if !box_sprite.bitmap || box_sprite.bitmap.width != bw || box_sprite.bitmap.height != bh
+          box_sprite.bitmap&.dispose
+          box_sprite.bitmap = Bitmap.new(bw, bh)
+          rojo = Color.new(255, 0, 0)
+          box_sprite.bitmap.fill_rect(0, 0, bw, 2, rojo)
+          box_sprite.bitmap.fill_rect(0, bh - 2, bw, 2, rojo)
+          box_sprite.bitmap.fill_rect(0, 0, 2, bh, rojo)
+          box_sprite.bitmap.fill_rect(bw - 2, 0, 2, bh, rojo)
+        end
+        box_sprite.x = left
+        box_sprite.y = top
+        box_sprite.visible = true
+
+        mx = Input.mouse_x
+        my = Input.mouse_y
+
+        if mx && my
+          if Input.trigger?(Input::MOUSELEFT)
+            if mx >= left && mx <= right && my >= top && my <= bottom
+              dragging = true
+              mouse_start_x = mx
+              mouse_start_y = my
+              metric_start_x = xpos
+              metric_start_y = ypos
+              
+              old_sx = sprite.x
+              old_sy = sprite.y
+              
+              case param
+              when 0
+                metrics_data.dmax_back_sprite[0] = xpos + 1
+                metrics_data.dmax_back_sprite[1] = ypos + 1
+              when 1
+                metrics_data.dmax_front_sprite[0] = xpos + 1
+                metrics_data.dmax_front_sprite[1] = ypos + 1
+              end
+              refresh
+              2.times do |i|
+                @sprites["pokemon_#{i}"].iconBitmap.deanimate
+                @sprites["shadow_#{i}"].iconBitmap.deanimate
+              end
+              
+              diff_x = sprite.x - old_sx
+              diff_y = sprite.y - old_sy
+              drag_mult_x = diff_x != 0 ? diff_x : 1
+              drag_mult_y = diff_y != 0 ? diff_y : 1
+              
+              case param
+              when 0
+                metrics_data.dmax_back_sprite[0] = xpos
+                metrics_data.dmax_back_sprite[1] = ypos
+              when 1
+                metrics_data.dmax_front_sprite[0] = xpos
+                metrics_data.dmax_front_sprite[1] = ypos
+              end
+              refresh
+              2.times do |i|
+                @sprites["pokemon_#{i}"].iconBitmap.deanimate
+                @sprites["shadow_#{i}"].iconBitmap.deanimate
+              end
+            end
+          elsif Input.press?(Input::MOUSELEFT)
+            if dragging
+              dx = mx - mouse_start_x
+              dy = my - mouse_start_y
+              
+              new_xpos = metric_start_x + (dx.to_f / drag_mult_x).round
+              new_ypos = metric_start_y + (dy.to_f / drag_mult_y).round
+
+              if xpos != new_xpos || ypos != new_ypos
+                xpos = new_xpos
+                ypos = new_ypos
+                case param
+                when 0
+                  metrics_data.dmax_back_sprite[0] = xpos
+                  metrics_data.dmax_back_sprite[1] = ypos
+                when 1
+                  metrics_data.dmax_front_sprite[0] = xpos
+                  metrics_data.dmax_front_sprite[1] = ypos
+                end
+                refresh
+                2.times do |i|
+                  @sprites["pokemon_#{i}"].iconBitmap.deanimate
+                  @sprites["shadow_#{i}"].iconBitmap.deanimate
+                end
+              end
+            end
+          else
+            dragging = false
+          end
+        end
+      else
+        box_sprite.visible = false
+      end
+      # ------------------------------------------
+
       if (Input.repeat?(Input::UP) || Input.repeat?(Input::DOWN))
         ypos += (Input.repeat?(Input::DOWN)) ? 1 : -1
         case param
@@ -832,6 +1125,10 @@ class DynamaxSpritePositioner < SpritePositioner
         break
       end
     end
+
+    box_sprite.bitmap&.dispose
+    box_sprite.dispose
+
     @sprites["info"].visible = false
     sprite.visible = true
     2.times do |i|
@@ -924,21 +1221,7 @@ class DynamaxSpritePositioner < SpritePositioner
         pbChangeSpecies(@allspecies[cw.index][1], @allspecies[cw.index][2], @allspecies[cw.index][4], @shiny)
         refresh
       elsif Input.trigger?(Input::ACTION) || Input.triggerex?(:F)
-        find_species = pbMessageFreeText("\\ts[]" + _INTL("Buscar una especie en específico."), "", false, 100, Graphics.width)
-        next if nil_or_empty?(find_species)
-        next if find_species.downcase == commands[cw.index].downcase
-        new_species = false
-        commands.each_with_index do |name, i|
-          next if !name.downcase.include?(find_species.downcase)
-          new_species = true
-          pbPlayDecisionSE
-          oldindex = cw.index
-          cw.index = i
-          pbChangeSpecies(@allspecies[i][1], @allspecies[i][2], @allspecies[i][4], @shiny)
-          refresh
-          break
-        end
-        pbMessage("No se han encontrado especies.") if !new_species
+        pbSearchSpeciesInCommandList(cw, commands, _INTL("Buscar una especie en específico."))
       end
     end
     @oldSpeciesIndex = cw.index

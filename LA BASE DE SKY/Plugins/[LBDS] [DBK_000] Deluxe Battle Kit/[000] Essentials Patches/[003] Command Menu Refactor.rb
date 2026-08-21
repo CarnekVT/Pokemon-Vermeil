@@ -172,8 +172,6 @@ end
 #===============================================================================
 # Battle::Scene rewrites.
 #===============================================================================
-# Rewrites code related to the functionality of the fight menu.
-#-------------------------------------------------------------------------------
 class Battle::Scene
   #-----------------------------------------------------------------------------
   # Edited for command menu display.
@@ -291,37 +289,6 @@ end
 # Rewrites code related to the fight menu and the command loop during battle.
 #-------------------------------------------------------------------------------
 class Battle
-  
-  unless defined?(Battle::Outcome)
-    module Outcome
-      UNDECIDED = 0
-      WIN       = 1
-      LOSE      = 2   # Also used when player forfeits a trainer battle
-      FLEE      = 3   # Player or wild Pokémon ran away, count as a win
-      CATCH     = 4   # Counts as a win
-      DRAW      = 5
-
-      def self.decided?(decision)
-        return decision != UNDECIDED
-      end
-
-      def self.should_black_out?(decision)
-        return decision == LOSE || decision == DRAW
-      end
-
-      def self.success?(decision)
-        return !self.should_black_out?(decision)
-      end
-    end
-  end
-
-  unless defined?(decided?)
-    def decided?
-      return Outcome.decided?(@decision)
-    end
-  end
-
-
   def pbFightMenu(idxBattler)
     return pbAutoChooseMove(idxBattler) if !pbCanShowFightMenu?(idxBattler)
     return true if pbAutoFightMenu(idxBattler)
@@ -500,6 +467,9 @@ class Battle::AI
   end
   
   def pbGetMovesToScore
+    if @battle.pbRegisteredMegaEvolution?(@user.battler.index)
+      @user.battler.display_mega_moves
+    end
     moves_to_score = [] 
     Pokemon::MAX_MOVES.times do |i|
       move = @user.battler.moves[i]

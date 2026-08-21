@@ -78,22 +78,22 @@ class PokemonSprite < Sprite
   end
   
   alias animated_setSpeciesBitmap setSpeciesBitmap
-  def setSpeciesBitmap(species, gender = 0, form = 0, shiny = false, shadow = false, back = false, egg = false)
-    if species
-      @_iconbitmap&.dispose
-      @_iconbitmap = if egg
-                       GameData::Species.egg_sprite_bitmap(species, form)
-                     elsif back
-                       GameData::Species.back_sprite_bitmap(species, form, gender, shiny, shadow)
-                     else
-                       GameData::Species.front_sprite_bitmap(species, form, gender, shiny, shadow)
-                     end
-      self.bitmap = (@_iconbitmap) ? @_iconbitmap.bitmap : nil
-      species_id = GameData::Species.get_species_form(species, form).id
-      pbSetDisplay([], species_id, back)
+  def setSpeciesBitmap(species, gender = 0, form = 0, shiny = false, shadow = false, back = false, egg = false, super_shiny = false)
+    motor = method(:animated_setSpeciesBitmap)
+    if DBKSuperShinyCompat.method_accepts_param?(motor, :super_shiny)
+      animated_setSpeciesBitmap(species, gender, form, shiny, shadow, back, egg, super_shiny)
     else
-      animated_setSpeciesBitmap(nil, gender, form, shiny, shadow, back, egg)
+      animated_setSpeciesBitmap(species, gender, form, shiny, shadow, back, egg)
+      if DBKSuperShinyCompat.super_shiny_active?(shiny, super_shiny)
+        @_iconbitmap&.dispose
+        @_iconbitmap = GameData::Species.sprite_bitmap(species, form, gender, shiny, shadow, back, egg, true)
+        self.bitmap = @_iconbitmap&.bitmap
+        refresh_tone
+        changeOrigin
+      end
     end
+    species_id = (species) ? GameData::Species.get_species_form(species, form).id : nil
+    pbSetDisplay([], species_id, back)
   end
   
   alias animated_update update
@@ -152,11 +152,7 @@ class PokemonSprite < Sprite
   #-----------------------------------------------------------------------------
   def setSpeciesShadowBitmap(species, form = 0, female = false, shiny = false, shadow = false, dynamax = false, back = false)
     @_iconbitmap&.dispose
-    if back
-      @_iconbitmap = GameData::Species.back_sprite_bitmap(species, form, ((female) ? 1 : 0), shiny, shadow)
-    else
-      @_iconbitmap = GameData::Species.front_sprite_bitmap(species, form, ((female) ? 1 : 0), shiny, shadow)
-    end
+    @_iconbitmap = GameData::Species.sprite_bitmap(species, form, ((female) ? 1 : 0), shiny, shadow, back)
     self.bitmap = (@_iconbitmap) ? @_iconbitmap.bitmap : nil
     return if !@_iconbitmap
     setOffset
@@ -264,13 +260,12 @@ class PokemonSpeciesIconSprite < Sprite
   def refresh
     @animBitmap&.dispose
     @animBitmap = nil
-    shiny = (@shiny && @shiny != 0)
-    bitmapFileName = GameData::Species.icon_filename(@species, @form, @gender, shiny)
+    super_shiny = instance_variable_defined?(:@super_shiny) && @super_shiny
+    bitmapFileName = DBKSuperShinyCompat.icon_filename(@species, @form, @gender, @shiny, super_shiny)
     return if !bitmapFileName
     hue = 0
-    if @shiny.is_a?(Integer) && @shiny >= 2
-      metrics = GameData::SpeciesMetrics.get_species_form(@species, @form, @gender == 1)
-      hue = metrics.sprite_super_hue
+    if DBKSuperShinyCompat.super_shiny_active?(@shiny, super_shiny) && !bitmapFileName.include?("supershiny")
+      hue = DBKSuperShinyCompat.hue_for_species_form(@species, @form, @gender == 1)
     end
     @animBitmap = AnimatedBitmap.new(bitmapFileName, hue)
     self.bitmap = @animBitmap.bitmap

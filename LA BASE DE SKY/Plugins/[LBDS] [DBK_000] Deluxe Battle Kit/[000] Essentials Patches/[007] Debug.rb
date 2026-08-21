@@ -71,10 +71,14 @@ class BattleRulesDebug
     MenuHandlers.each_available(:battle_rules_menu) do |option, hash, name|
       rule = hash["rule"]
       value = battleRules[rule].clone
+      nameRule = hash["nameRule"]
+      if rule && value.nil?
+        value = battleRules[rule.to_sym].clone
+      end
       next if @selecting && (rule.nil? || !value.nil?)
       next if !@selecting && !rule.nil? && value.nil?
       if @selecting
-        name = rule
+        name = (nameRule) ? nameRule : rule
       else
         case rule
         when "tempParty" then value = sprintf("%d PkMn", value.length / 2)
@@ -116,8 +120,9 @@ class BattleRulesDebug
   
   def pbRemoveBattleRule(index)
     rule = @commands.getRule(index)
-    return false if $game_temp.battle_rules[rule].nil?
+    return false if $game_temp.battle_rules[rule].nil? && $game_temp.battle_rules[rule.to_sym].nil?
     $game_temp.battle_rules.delete(rule)
+    $game_temp.battle_rules.delete(rule.to_sym)
     return true
   end
 end
@@ -143,7 +148,7 @@ end
 # Generic utility for setting battle rules during gameplay.
 #===============================================================================
 def pbApplyBattleRule(rule, value_type, set_value, msg = "")
-  if nil_or_empty?(rule)
+  if (rule.is_a?(String) && nil_or_empty?(rule)) || (rule.is_a?(Symbol) && rule.nil?)
     pbMessage(_INTL("La regla de combate seleccionada es inválida."))
     return false
   end
@@ -354,12 +359,13 @@ MenuHandlers.add(:battle_rules_menu, :clear_all_rules, {
 
 MenuHandlers.add(:battle_rules_menu, :size, {
   "name"        => _INTL("Tamaño de combate: [{1}]"),
-  "rule"        => "size",
+  "nameRule"    => "size",
+  "rule"        => "side_sizes",
   "order"       => 25,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Determina el número de combatientes en cada lado del campo."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("size", :Choose, 
+    next pbApplyBattleRule(:side_sizes, :Choose, 
       ["single", "1v1", "1v2", "1v3", "2v1", "3v1", "double", "2v2", "2v3", "3v2", "triple", "3v3"],
       _INTL("Set the battle size."))
   }
@@ -367,113 +373,123 @@ MenuHandlers.add(:battle_rules_menu, :size, {
 
 MenuHandlers.add(:battle_rules_menu, :noPartner, {
   "name"        => _INTL("Sin compañero: [{1}]"),
-  "rule"        => "noPartner",
+  "nameRule"    => "noPartner",
+  "rule"        => "no_partner_trainer",
   "order"       => 50,
   "parent"      => :set_battle_rules,
   "description" => _INTL("El entrenador compañero del jugador no participará en la batalla."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("noPartner", :Toggle, true)
+    next pbApplyBattleRule(:no_partner_trainer, :Toggle, true)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :canLose, {
-  "name"        => _INTL("Puede perder: [{1}]"),
-  "rule"        => "canLose",
+  "name"        => _INTL("No puede perder: [{1}]"),
+  "nameRule"    => "cannotlose",
+  "rule"        => "continue_if_lose",
   "order"       => 75,
   "parent"      => :set_battle_rules,
   "description" => _INTL("El juego continuará incluso si el jugador pierde la batalla."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("canLose", :Toggle, true)
+    next pbApplyBattleRule(:continue_if_lose, :Toggle, true)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :canRun, {
-  "name"        => _INTL("Puede huir: [{1}]"),
-  "rule"        => "canRun",
+  "name"        => _INTL("No puede huir: [{1}]"),
+  "nameRule"    => "cannotrun",
+  "rule"        => "cannot_run",
   "order"       => 100,
   "parent"      => :set_battle_rules,
   "description" => _INTL("El jugador no podrá seleccionar el comando Huir."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("canRun", :Toggle, false)
+    next pbApplyBattleRule(:cannot_run, :Toggle, true)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :roamerFlees, {
   "name"        => _INTL("Los Pokémon salvajes huyen: [{1}]"),
-  "rule"        => "roamerFlees",
+  "nameRule"    => "roamerflees",
+  "rule"        => "roamer_flees",
   "order"       => 125,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Los Pokémon salvajes siempre intentarán huir como su primera acción."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("roamerFlees", :Toggle, true)
+    next pbApplyBattleRule(:roamer_flees, :Toggle, true)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :canSwitch, {
-  "name"        => _INTL("Puede cambiar: [{1}]"),
-  "rule"        => "canSwitch",
+  "name"        => _INTL("No puede cambiar: [{1}]"),
+  "nameRule"    => "cannotswitch",
+  "rule"        => "cannot_switch",
   "order"       => 150,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Los entrenadores no podrán cambiar manualmente de Pokémon."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("canSwitch", :Toggle, false)
+    next pbApplyBattleRule(:cannot_switch, :Toggle, true)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :switchStyle, {
-  "name"        => _INTL("Estilo de cambio: [{1}]"),
-  "rule"        => "switchStyle",
+  "name"        => _INTL("No estilo de cambio: [{1}]"),
+  "nameRule"    => "noswitchstyle",
+  "rule"        => "no_switch_style",
   "order"       => 175,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Determina si el modo de cambio está habilitado."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("switchStyle", :Boolean, nil, 
+    next pbApplyBattleRule(:no_switch_style, :Boolean, nil, 
       _INTL("Establece si el modo de cambio debe estar habilitado. (Solo batallas contra entrenadores)"))
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :expGain, {
-  "name"        => _INTL("Ganar experiencia: [{1}]"),
-  "rule"        => "expGain",
+  "name"        => _INTL("No ganar experiencia: [{1}]"),
+  "nameRule"    => "noexp",
+  "rule"        => "no_exp_gain",
   "order"       => 200,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Los Pokémon del jugador no ganarán experiencia."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("expGain", :Toggle, false)
+    next pbApplyBattleRule(:no_exp_gain, :Toggle, True)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :moneyGain, {
-  "name"        => _INTL("Ganar dinero: [{1}]"),
-  "rule"        => "moneyGain",
+  "name"        => _INTL("No ganar dinero: [{1}]"),
+  "nameRule"    => "nomoney",
+  "rule"        => "no_money_gain",
   "order"       => 225,
   "parent"      => :set_battle_rules,
   "description" => _INTL("El jugador no perderá ni recibirá dinero de premio."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("moneyGain", :Toggle, false)
+    next pbApplyBattleRule(:no_money_gain, :Toggle, true)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :defaultWeather, {
   "name"        => _INTL("Clima: [{1}]"),
-  "rule"        => "defaultWeather",
+  "nameRule"    => "weather",
+  "rule"        => "default_weather",
   "order"       => 250,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Determina el clima predeterminado de la batalla."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("defaultWeather", :Data, :BattleWeather,
+    next pbApplyBattleRule(:default_weather, :Data, :BattleWeather,
       _INTL("Establece el clima predeterminado de la batalla."))
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :defaultTerrain, {
   "name"        => _INTL("Terreno: [{1}]"),
-  "rule"        => "defaultTerrain",
+  "nameRule"    => "terrain",
+  "rule"        => "default_terrain",
   "order"       => 275,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Determina el terreno predeterminado de la batalla."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("defaultTerrain", :Data, :BattleTerrain,
+    next pbApplyBattleRule(:default_terrain, :Data, :BattleTerrain,
       _INTL("Establece el terreno predeterminado de la batalla."))
   }
 })
@@ -485,77 +501,83 @@ MenuHandlers.add(:battle_rules_menu, :environment, {
   "parent"      => :set_battle_rules,
   "description" => _INTL("Determina el entorno de la batalla."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("environment", :Data, :Environment,
+    next pbApplyBattleRule(:environment, :Data, :Environment,
       _INTL("Establece el entorno de la batalla."))
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :disablePokeBalls, {
   "name"        => _INTL("Poké Balls deshabilitadas: [{1}]"),
-  "rule"        => "disablePokeBalls",
+  "nameRule"    => "disablepokeballs",
+  "rule"        => "disable_poke_balls",
   "order"       => 325,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Las Poké Balls no podrán ser seleccionadas desde la bolsa."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("disablePokeBalls", :Toggle, true)
+    next pbApplyBattleRule(:disable_poke_balls, :Toggle, true)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :forceCatchIntoParty, {
   "name"        => _INTL("Captura va al equipo: [{1}]"),
-  "rule"        => "forceCatchIntoParty",
+  "nameRule"    => "forcecatchintoparty",
+  "rule"        => "force_catch_into_party",
   "order"       => 350,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Cualquier Pokémon capturado debe ser añadido al equipo."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("forceCatchIntoParty", :Toggle, true)
+    next pbApplyBattleRule(:force_catch_into_party, :Toggle, true)
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :battleAnims, {
-  "name"        => _INTL("Mostrar animaciones de combate: [{1}]"),
-  "rule"        => "battleAnims",
+  "name"        => _INTL("No mostrar animaciones de combate: [{1}]"),
+  "nameRule"    => "noanims",
+  "rule"        => "no_battle_animations",
   "order"       => 375,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Determina si las animaciones de combate están habilitadas."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("battleAnims", :Boolean, nil, 
+    next pbApplyBattleRule(:no_battle_animations, :Boolean, nil, 
       _INTL("Establece si las animaciones de combate deben estar habilitadas."))
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :backdrop, {
   "name"        => _INTL("Fondo: [{1}]"),
-  "rule"        => "backdrop",
+  "nameRule"    => "backdrop",
+  "rule"        => "backdrop_name",
   "order"       => 400,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Determina el gráfico utilizado para el fondo de la batalla."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("backdrop", :String, nil, 
+    next pbApplyBattleRule(:backdrop_name, :String, nil, 
       _INTL("Establece el nombre del gráfico de fondo."))
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :base, {
   "name"        => _INTL("Bases: [{1}]"),
-  "rule"        => "base",
+  "nameRule"    => "base",
+  "rule"        => "base_name",
   "order"       => 425,
   "parent"      => :set_battle_rules,
   "description" => _INTL("Determina los gráficos utilizados para las bases de batalla."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("base", :String, nil, 
+    next pbApplyBattleRule(:base_name, :String, nil, 
       _INTL("Establece el nombre de los gráficos de las bases de batalla."))
   }
 })
 
 MenuHandlers.add(:battle_rules_menu, :outcomeVar, {
   "name"        => _INTL("Variable de resultado: [{1}]"),
-  "rule"        => "outcomeVar",
+  "nameRule"    => "outcomevar",
+  "rule"        => "outcome_variable",
   "order"       => 450,
   "parent"      => :set_battle_rules,
   "description" => _INTL("El número de variable utilizado para almacenar el resultado de la batalla."),
   "effect"      => proc { |menu|
-    next pbApplyBattleRule("outcomeVar", :Integer, 1, 
+    next pbApplyBattleRule(:outcome_variable, :Integer, 1, 
       _INTL("Establece un número de variable."))
   }
 })

@@ -40,8 +40,7 @@ class Mode7Renderer
   def build
     dispose_nds_geometry_objects
     _VERMEIL_V60_obj_orig_build
-    build_nds_geometry_objects if Mode7::Config::NDS_GEOMETRY_OBJECTS_ENABLED &&
-                                  Mode7::MKXPZExt.corners?
+    build_nds_geometry_objects if Mode7::Config::NDS_GEOMETRY_OBJECTS_ENABLED
   end
 
   def dispose_nds_geometry_objects
@@ -64,11 +63,13 @@ class Mode7Renderer
     end
     @nds_object_face_bitmap_cache = {}
     @nds_object_faces = []
-    @nds_object_buckets = nil
+    @nds_object_buckets = Hash.new { |h, k| h[k] = [] }
     @nds_object_active = []
     @nds_object_projection_key = nil
     @nds_object_visibility_key = nil
     @nds_object_visible_indices = []
+    @nds_object_batch_world_packed = nil
+    @nds_object_batch_count = 0
     if @nds_object_material_cache
       @nds_object_material_cache.each_value do |pair|
         bmp = pair.is_a?(Array) ? pair[0] : nil
@@ -387,9 +388,167 @@ class Mode7Renderer
     Mode7.project_quad(world)
   end
 
+  # Stock Sky does not expose Sprite#corners. This remains the compatibility
+  # fallback for DLL v102/missing DLL. Phase 2 normally bypasses this method and
+  # gets the final Sprite transform for ALL candidate faces in one native batch.
+  def nds_object_apply_sky_sprite_fallback(sprite, bitmap, points)
+    return false if !sprite || sprite.disposed? || !bitmap || bitmap.disposed?
+    return false if !points.is_a?(Array) || points.length < 8
+
+    x0, y0 = points[0].to_f, points[1].to_f
+    x1, y1 = points[2].to_f, points[3].to_f
+    x2, y2 = points[4].to_f, points[5].to_f
+    x3, y3 = points[6].to_f, points[7].to_f
+    ex = x1 - x0
+    ey = y1 - y0
+    projected_w = Math.sqrt(ex * ex + ey * ey)
+    side_a = Math.sqrt((x3 - x0) * (x3 - x0) + (y3 - y0) * (y3 - y0))
+    side_b = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
+    projected_h = (side_a + side_b) * 0.5
+    return false if projected_w < 0.05 || projected_h < 0.05
+
+    sprite.x = (x0 + x1 + x2 + x3) * 0.25
+    sprite.y = (y0 + y1 + y2 + y3) * 0.25
+    sprite.zoom_x = projected_w / [bitmap.width.to_f, 1.0].max
+    sprite.zoom_y = projected_h / [bitmap.height.to_f, 1.0].max
+    sprite.angle = Math.atan2(ey, ex) * 180.0 / Math::PI
+    true
+  rescue Exception => e
+    if !@nds_object_sky_fallback_error_logged && defined?(Console)
+      @nds_object_sky_fallback_error_logged = true
+      Console.echo_error("2.5D geometry Sky fallback: #{e.message}")
+    end
+    false
+  end
+
+  # Apply the 6-double transform returned by V25Native v103. ox/oy and bitmap
+  # are static and are configured only when the Sprite is created.
+  def nds_object_apply_sky_native_transform(sprite, face, values, offset)
+    projected_w = values[offset + 2].to_f
+    projected_h = values[offset + 3].to_f
+    return false if projected_w <= 0.0 || projected_h <= 0.0
+    sprite.x = values[offset].to_f
+    sprite.y = values[offset + 1].to_f
+    sprite.zoom_x = projected_w * face[:inv_bitmap_w].to_f
+    sprite.zoom_y = projected_h * face[:inv_bitmap_h].to_f
+    sprite.angle = values[offset + 4].to_f
+    depth = values[offset + 5].to_f
+    scale = Mode7::Config::PHYSICAL_DEPTH_Z_SCALE.to_f
+    scale = 64.0 if scale <= 0.0
+    sprite.z = Mode7::Config::PHYSICAL_DEPTH_Z_BASE.to_i - (depth * scale).round + face[:depth_bias].to_i
+    true
+  end
+
+  def nds_object_face_tone_key
+    t = @tone
+    return nil if !t
+    [t.red.to_i, t.green.to_i, t.blue.to_i, t.gray.to_i]
+  rescue Exception
+    nil
+  end
+
+  def nds_object_apply_tone_if_changed(face, spr, tone_key)
+    return if !spr || spr.disposed?
+    if face[:tone_key] != tone_key
+      spr.tone = @tone
+      face[:tone_key] = tone_key
+    end
+  rescue Exception
+  end
+
+  # Faces de un mismo modelo/objeto deben cruzar al actor como una sola
+  # entidad. Ordenar cada cara por su centro hacia que una cara norte/top pudiera
+  # quedar por delante del personaje aunque el pie fisico del modelo estuviera
+  # detras. El ancla comun usa el borde sur + base Z del objeto.
+  def v25_object_depth_group_key(face)
+    obj = face[:obj]
+    return nil if !obj.is_a?(Hash)
+    model_id = obj[:model_id].to_s
+    instance_id = obj[:model_instance_id].to_i
+    return [:model, model_id, instance_id] if !model_id.empty? || instance_id != 0
+
+    # Los objetos compilados/manuales comparten el mismo Hash entre sus caras.
+    # Las mallas de terreno sin identidad de modelo conservan profundidad por cara.
+    return [:object, obj.object_id] if obj.key?(:x) && obj.key?(:y) && obj.key?(:w) && obj.key?(:h)
+    nil
+  rescue Exception
+    nil
+  end
+
+  def v25_register_object_depth_anchor(face, index)
+    key = v25_object_depth_group_key(face)
+    return if !key
+    world = face[:world]
+    return if !world.is_a?(Array) || world.length < 12
+
+    max_y = nil
+    min_z = nil
+    i = 0
+    while i + 2 < world.length
+      wy = world[i + 1].to_f
+      wz = world[i + 2].to_f
+      max_y = wy if max_y.nil? || wy > max_y
+      min_z = wz if min_z.nil? || wz < min_z
+      i += 3
+    end
+    return if max_y.nil? || min_z.nil?
+
+    @v25_object_depth_groups ||= {}
+    group = (@v25_object_depth_groups[key] ||= { indices: [], world_y: max_y, world_z: min_z })
+    group[:indices] << index
+    changed = false
+    if max_y > group[:world_y].to_f
+      group[:world_y] = max_y
+      changed = true
+    end
+    if min_z < group[:world_z].to_f
+      group[:world_z] = min_z
+      changed = true
+    end
+
+    # Streaming puede descubrir una cara mas al sur/baja despues. Mantener todas
+    # las caras ya cargadas en el mismo ancla evita que el modelo se parta en Z.
+    if changed || group[:indices].length == 1
+      group[:indices].each do |face_index|
+        f = @nds_object_faces && @nds_object_faces[face_index]
+        next if !f.is_a?(Hash)
+        f[:sort_world_y] = group[:world_y].to_f
+        f[:sort_world_z] = group[:world_z].to_f
+      end
+    else
+      face[:sort_world_y] = group[:world_y].to_f
+      face[:sort_world_z] = group[:world_z].to_f
+    end
+  rescue Exception
+  end
+
+  def v25_apply_object_depth_anchor(sprite, face)
+    return if !sprite || sprite.disposed? || !face.is_a?(Hash)
+    return if !face.key?(:sort_world_y)
+    sprite.z = Mode7.depth_z_at_elevation(
+      face[:sort_world_y].to_f,
+      face[:sort_world_z].to_f,
+      0,
+      face[:depth_bias].to_i
+    )
+  rescue Exception
+  end
+
   def nds_object_add_face(face)
+    @nds_object_faces ||= []
+    @nds_object_buckets ||= Hash.new { |h, k| h[k] = [] }
+    world = face[:world]
+    if world.is_a?(Array) && world.length >= 12
+      face[:center_world_y] = (world[1].to_f + world[4].to_f + world[7].to_f + world[10].to_f) * 0.25
+      face[:center_world_z] = (world[2].to_f + world[5].to_f + world[8].to_f + world[11].to_f) * 0.25
+    else
+      face[:center_world_y] = 0.0
+      face[:center_world_z] = 0.0
+    end
+    face[:depth_bias] = face[:obj].is_a?(Hash) && face[:obj][:characters_in_front] ? -8 : -2
     index = @nds_object_faces.length
     @nds_object_faces << face
+    v25_register_object_depth_anchor(face, index)
     bs = Mode7::Config::NDS_RUNTIME_BUCKET_SIZE.to_i
     bs = 8 if bs <= 0
     bx0 = face[:min_tx] / bs
@@ -405,6 +564,11 @@ class Mode7Renderer
       end
       bx += 1
     end
+    # Streaming can append model faces after the initial build. Invalidate only
+    # the candidate batch metadata; existing Sprites/bitmaps remain untouched.
+    @nds_object_visibility_key = nil
+    @nds_object_batch_world_packed = nil
+    @nds_object_batch_count = 0
   end
 
   def nds_object_connected_at?(obj, tx, ty, base_z, top_z, step)
@@ -522,6 +686,7 @@ class Mode7Renderer
 
   def build_nds_geometry_objects
     @nds_object_faces = []
+    @v25_object_depth_groups = {}
     @nds_object_buckets = Hash.new { |h, k| h[k] = [] }
     @nds_object_active = []
     objs = nds_geometry_objects || []
@@ -651,6 +816,7 @@ class Mode7Renderer
     live.each do |_stamp, i|
       next if active[i]
       face = @nds_object_faces[i]
+      next if !face.is_a?(Hash)
       spr = face[:sprite]
       bmp = face[:bitmap]
       begin
@@ -667,11 +833,64 @@ class Mode7Renderer
   rescue Exception
   end
 
+  # Sky-safe lifecycle guard. Some renderer rebuild/dispose paths can leave
+  # already-compiled faces alive while the spatial bucket table is reset.
+  # Recreate it from face bounds instead of crashing every update.
+  def ensure_nds_object_buckets
+    return true if @nds_object_buckets.is_a?(Hash)
+    @nds_object_buckets = Hash.new { |h, k| h[k] = [] }
+    bs = Mode7::Config::NDS_RUNTIME_BUCKET_SIZE.to_i
+    bs = 8 if bs <= 0
+    (@nds_object_faces || []).each_with_index do |face, index|
+      next if !face.is_a?(Hash)
+      min_tx = face[:min_tx]
+      min_ty = face[:min_ty]
+      max_tx = face[:max_tx]
+      max_ty = face[:max_ty]
+      next if min_tx.nil? || min_ty.nil? || max_tx.nil? || max_ty.nil?
+      bx0 = min_tx.to_i / bs
+      bx1 = max_tx.to_i / bs
+      by0 = min_ty.to_i / bs
+      by1 = max_ty.to_i / bs
+      bx = bx0
+      while bx <= bx1
+        by = by0
+        while by <= by1
+          @nds_object_buckets[[bx, by]] << index
+          by += 1
+        end
+        bx += 1
+      end
+    end
+    @nds_object_visibility_key = nil
+    @nds_object_visible_indices = []
+    @nds_object_batch_world_packed = nil
+    @nds_object_batch_count = 0
+    if !@nds_object_bucket_rebuild_logged && defined?(Console)
+      @nds_object_bucket_rebuild_logged = true
+      begin
+        Console.echo_li('[VERMEIL 2.5D] Geometry buckets rebuilt (Sky-safe lifecycle guard)')
+      rescue Exception
+      end
+    end
+    true
+  rescue Exception => e
+    Console.echo_error("2.5D geometry bucket rebuild: #{e.message}") if defined?(Console)
+    @nds_object_buckets = Hash.new { |h, k| h[k] = [] }
+    false
+  end
+
   def update_nds_geometry_objects
     return if !@nds_object_faces || @nds_object_faces.empty?
+    ensure_nds_object_buckets
     key = nds_object_key
     return if @nds_object_projection_key == key
     @nds_object_projection_key = key
+
+    sample = defined?(Mode7::V25Perf) && Mode7::V25Perf.sample_now?
+    total_t0 = Mode7::V25Perf.clock if sample
+    batch_ms = 0.0
+    apply_t0 = nil
 
     bs = Mode7::Config::NDS_RUNTIME_BUCKET_SIZE.to_i
     bs = 8 if bs <= 0
@@ -685,7 +904,8 @@ class Mode7Renderer
     by1 = (cam_ty + ry) / bs
 
     visibility_key = [cam_tx, cam_ty, rx, ry, bs]
-    if @nds_object_visibility_key != visibility_key || !@nds_object_visible_indices
+    visibility_changed = (@nds_object_visibility_key != visibility_key || !@nds_object_visible_indices)
+    if visibility_changed
       seen = {}
       bx = bx0
       while bx <= bx1
@@ -696,17 +916,66 @@ class Mode7Renderer
         end
         bx += 1
       end
-      @nds_object_visible_indices = seen.keys
+      new_indices = seen.keys
+
+      # Hide faces that left the spatial candidate window only when that window
+      # actually changes. Phase 1 rebuilt this lookup on every reprojection.
+      keep = seen
+      (@nds_object_active || []).each do |i|
+        next if keep[i]
+        face = @nds_object_faces[i]
+        spr = face.is_a?(Hash) ? face[:sprite] : nil
+        spr.visible = false if spr && !spr.disposed?
+      end
+
+      @nds_object_visible_indices = new_indices
       @nds_object_visibility_key = visibility_key
+      @nds_object_batch_world_packed = nil
+      @nds_object_batch_count = 0
     end
     indices = @nds_object_visible_indices || []
-    index_lookup = {}
-    indices.each { |i| index_lookup[i] = true }
 
-    (@nds_object_active || []).each do |i|
-      next if index_lookup[i]
-      spr = @nds_object_faces[i][:sprite]
-      spr.visible = false if spr && !spr.disposed?
+    # Phase 2 native Sky batch. The world buffer is static while the player stays
+    # inside the same tile/candidate window, so Ruby packs it only when visibility
+    # changes (or streamed model faces invalidate it).
+    native_batch = false
+    transforms = nil
+    if !Mode7::MKXPZExt.corners? &&
+       Mode7::Config.const_defined?(:NDS_OBJECT_SKY_NATIVE_BATCH) &&
+       Mode7::Config::NDS_OBJECT_SKY_NATIVE_BATCH &&
+       defined?(Mode7::V25Native) && Mode7::V25Native.active? &&
+       Mode7::V25Native.respond_to?(:sprite_batch_available?) &&
+       Mode7::V25Native.sprite_batch_available?
+      min_faces = Mode7::Config.const_defined?(:NDS_OBJECT_SKY_BATCH_MIN_FACES) ?
+                  Mode7::Config::NDS_OBJECT_SKY_BATCH_MIN_FACES.to_i : 4
+      if indices.length >= [min_faces, 1].max
+        if !@nds_object_batch_world_packed || @nds_object_batch_count != indices.length
+          flat = []
+          flat_cap = indices.length * 12
+          flat = Array.new(flat_cap, 0.0)
+          cursor = 0
+          indices.each do |i|
+            face = @nds_object_faces[i]
+            world = face.is_a?(Hash) ? face[:world] : nil
+            if world.is_a?(Array) && world.length >= 12
+              j = 0
+              while j < 12
+                flat[cursor + j] = world[j].to_f
+                j += 1
+              end
+            end
+            cursor += 12
+          end
+          @nds_object_batch_world_packed = flat.pack("d*")
+          @nds_object_batch_count = indices.length
+        end
+        bt0 = Mode7::V25Perf.clock if sample
+        transforms = Mode7::V25Native.project_sprite_quads_packed(
+          @nds_object_batch_world_packed, indices.length
+        )
+        batch_ms = (Mode7::V25Perf.clock - bt0) * 1000.0 if sample && bt0
+        native_batch = transforms.is_a?(Array) && transforms.length >= indices.length * 6
+      end
     end
 
     active = []
@@ -718,10 +987,43 @@ class Mode7Renderer
     build_budget = 1 if build_budget < 1
     deferred = false
     frame_stamp = Graphics.respond_to?(:frame_count) ? Graphics.frame_count.to_i : 0
+    tone_key = nds_object_face_tone_key
+    screen_visible_count = 0
+    created_count = 0
+    culled_count = 0
+    apply_t0 = Mode7::V25Perf.clock if sample
 
-    indices.each do |i|
+    indices.each_with_index do |i, slot|
       face = @nds_object_faces[i]
+      next if !face.is_a?(Hash)
       spr = face[:sprite]
+      points = nil
+      batch_offset = slot * 6
+      visible = false
+
+      if native_batch
+        visible = transforms[batch_offset + 2].to_f > 0.0 && transforms[batch_offset + 3].to_f > 0.0
+      else
+        points = nds_object_project_points(face[:world])
+        if points
+          min_x = [points[0], points[2], points[4], points[6]].min
+          max_x = [points[0], points[2], points[4], points[6]].max
+          min_y = [points[1], points[3], points[5], points[7]].min
+          max_y = [points[1], points[3], points[5], points[7]].max
+          margin = Mode7::Config.const_defined?(:V25_NATIVE_SCREEN_MARGIN) ? Mode7::Config::V25_NATIVE_SCREEN_MARGIN.to_f : 40.0
+          visible = max_x >= -margin && min_x <= Mode7.screen_w + margin &&
+                    max_y >= -margin && min_y <= Mode7.screen_h + margin
+        end
+      end
+
+      if !visible
+        spr.visible = false if spr && !spr.disposed?
+        culled_count += 1
+        next
+      end
+      screen_visible_count += 1
+
+      # Create expensive Bitmap/Sprite resources only AFTER screen culling.
       if !spr || spr.disposed?
         if build_budget <= 0
           deferred = true
@@ -732,6 +1034,7 @@ class Mode7Renderer
           bmp = nds_object_face_bitmap(face[:obj], face)
           face[:bitmap] = bmp
         end
+        next if !bmp || bmp.disposed?
         spr = Sprite.new(@viewport)
         spr.bitmap = bmp
         spr.visible = false
@@ -739,37 +1042,76 @@ class Mode7Renderer
         spr.color.set(0, 0, 0, face[:shade].to_i.clamp(0, 255))
         mat = face[:obj][:material]
         spr.opacity = mat.is_a?(Hash) && mat.key?("opacity") ? mat["opacity"].to_i.clamp(0, 255) : 255
+        spr.ox = bmp.width * 0.5
+        spr.oy = bmp.height * 0.5
+        face[:inv_bitmap_w] = 1.0 / [bmp.width.to_f, 1.0].max
+        face[:inv_bitmap_h] = 1.0 / [bmp.height.to_f, 1.0].max
         face[:sprite] = spr
         build_budget -= 1
+        created_count += 1
+      elsif face[:inv_bitmap_w].nil? || face[:inv_bitmap_h].nil?
+        bmp = spr.bitmap
+        if bmp && !bmp.disposed?
+          face[:inv_bitmap_w] = 1.0 / [bmp.width.to_f, 1.0].max
+          face[:inv_bitmap_h] = 1.0 / [bmp.height.to_f, 1.0].max
+        end
       end
 
       face[:last_used] = frame_stamp
-      points = nds_object_project_points(face[:world])
-      if !points
-        spr.visible = false
-        next
+      if Mode7::MKXPZExt.corners?
+        spr.corners = points
+        center_world_y = face.key?(:sort_world_y) ? face[:sort_world_y].to_f : face[:center_world_y].to_f
+        center_world_z = face.key?(:sort_world_z) ? face[:sort_world_z].to_f : face[:center_world_z].to_f
+        spr.z = Mode7.depth_z_at_elevation(center_world_y, center_world_z, 0, face[:depth_bias].to_i)
+      elsif native_batch
+        if !nds_object_apply_sky_native_transform(spr, face, transforms, batch_offset)
+          spr.visible = false
+          next
+        end
+        v25_apply_object_depth_anchor(spr, face)
+      else
+        if !nds_object_apply_sky_sprite_fallback(spr, spr.bitmap, points)
+          spr.visible = false
+          next
+        end
+        center_world_y = face.key?(:sort_world_y) ? face[:sort_world_y].to_f : face[:center_world_y].to_f
+        center_world_z = face.key?(:sort_world_z) ? face[:sort_world_z].to_f : face[:center_world_z].to_f
+        spr.z = Mode7.depth_z_at_elevation(center_world_y, center_world_z, 0, face[:depth_bias].to_i)
       end
-      xs = [points[0], points[2], points[4], points[6]]
-      ys = [points[1], points[3], points[5], points[7]]
-      margin = 40.0
-      visible = xs.max >= -margin && xs.min <= Mode7.screen_w + margin &&
-                ys.max >= -margin && ys.min <= Mode7.screen_h + margin
-      spr.visible = visible
-      next if !visible
-      spr.corners = points
-      w = face[:world]
-      center_world_y = (w[1] + w[4] + w[7] + w[10]) / 4.0
-      center_world_z = (w[2] + w[5] + w[8] + w[11]) / 4.0
-      depth_bias = face[:obj][:characters_in_front] ? -8 : -2
-      spr.z = Mode7.depth_z_at_elevation(center_world_y, center_world_z, 0, depth_bias)
-      spr.tone = @tone
+
+      spr.visible = true
+      nds_object_apply_tone_if_changed(face, spr, tone_key)
       active << i
     end
+
+    if !Mode7::MKXPZExt.corners? && !@nds_object_sky_fallback_logged && defined?(Console)
+      @nds_object_sky_fallback_logged = true
+      begin
+        backend = native_batch ? 'native batch v103' : 'Sprite compatibility'
+        Console.echo_li("[VERMEIL 2.5D] Geometry objects: Sky backend = #{backend}")
+      rescue Exception
+      end
+    end
+
     @nds_object_active = active
     prune_nds_object_face_cache(active) if frame_stamp > 0 && (frame_stamp % 180) == 0
-    # Continue lazily creating faces on following frames without freezing the
-    # first map frame. Existing faces stay visible while the queue finishes.
     @nds_object_projection_key = nil if deferred
+
+    if sample
+      apply_ms = (Mode7::V25Perf.clock - apply_t0) * 1000.0
+      total_ms = (Mode7::V25Perf.clock - total_t0) * 1000.0
+      Mode7::V25Perf.report_geometry(
+        candidates: indices.length,
+        visible: screen_visible_count,
+        active: active.length,
+        culled: culled_count,
+        created: created_count,
+        native_batch: native_batch,
+        batch_ms: batch_ms,
+        apply_ms: apply_ms,
+        total_ms: total_ms
+      )
+    end
   rescue Exception => e
     Console.echo_error("2.5D geometry objects update: #{e.message}") if defined?(Console)
   end

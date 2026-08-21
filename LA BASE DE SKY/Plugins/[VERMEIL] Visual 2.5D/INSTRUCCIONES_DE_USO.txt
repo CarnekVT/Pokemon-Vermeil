@@ -1,0 +1,86 @@
+[VERMEIL] Visual 2.5D - Guia de uso y configuracion
+
+Este archivo explica como CONFIGURAR y USAR Visual 2.5D. No contiene pasos de instalacion.
+
+1. CONFIGURACION PRINCIPAL
+- Revisa 001_Settings.rb para los parametros globales del sistema.
+- Los modos de proyeccion disponibles dependen de la configuracion del mapa y pueden incluir Perspective, Affine y Cylindrical.
+- Ajusta angulo, zoom/FOV y parametros de raster desde las constantes correspondientes de Config.
+
+2. INDOOR / OUTDOOR
+- Usa los tags/categorias NDS definidos por Visual 2.5D para indicar walls, props, roofs, mountains, stairs y superficies.
+- Indoor puede usar una proyeccion distinta de Outdoor segun la configuracion del plugin.
+- No uses Priority como sustituto de altura fisica: Priority controla orden visual; la elevacion/Geometry controla altura.
+
+3. GEOMETRY
+- La geometria runtime se lee desde Data/VERMEIL_GEOMETRY_V4 cuando existe un archivo del mapa.
+- Geometry puede definir superficies elevadas, caras y colision de modelos/volumenes.
+- Para objetos estaticos, evita duplicar la misma pieza como ground y como objeto 3D.
+
+4. PRIORITY / WALLS
+- Los walls y objetos rigidos se agrupan por identidad visual para que P1/P2/P3/P4 permanezcan unidos.
+- Las superficies elevadas usan su elevacion fisica para profundidad; no dependen solo de Priority.
+
+5. RENDIMIENTO V25
+- Con V25Native disponible, Geometry puede usar batch nativo para proyectar multiples caras.
+- En Sky sin Sprite#corners, Perspective/Affine usan bandas adaptativas para el suelo.
+- El profiler puede mostrar lineas [V25 FRAME], [V25 PERF] y [V25 FRAME] en consola durante pruebas.
+- Las lineas de profiler son diagnostico y no requieren cambios en los mapas.
+
+6. DEBUG
+- Usa las opciones Debug de Visual 2.5D para comprobar el backend V25, el modo de proyeccion y comparaciones de rendimiento.
+- V25Native.dll v103 disponible debe mostrarse como available (Sky-safe) cuando el acelerador CPU esta activo.
+
+
+--- Rendimiento de mapas grandes (Phase 2.4.3) ---
+Visual 2.5D reutiliza indices dispersos de Maker Studio y cachea el filtrado de ground durante la construccion del mapa.
+No requiere activar ninguna opcion adicional: conserva tus Terrain Tags, priorities,
+Geometry y modos de camara existentes. Para comparar rendimiento usa las lineas
+[VERMEIL PERF] y [V25 FRAME] de la consola de Debug.
+
+RENDIMIENTO DE CONSTRUCCION (V25 2.4.6)
+- La clasificacion de Floor/WallPlane/Roof/Billboard/Volume/Stair/Priority se cachea por entry durante el build.
+- No requiere configuracion adicional ni cambia los Terrain Tags del mapa.
+- En consola, [VERMEIL PERF] permite comparar build, compose_ground_fast, build_priority_surfaces y scan/other.
+
+RENDIMIENTO DE BUILD (Phase 2.4.8)
+- El prepass de Terrain Tags y clasificacion estatica se fusiona con el scan inicial del mapa.
+- La altura de Volume/VolumeHigh/MountainTop conserva la misma semantica de 2.4.7.1.
+- Priority y terrain_tag_height se publican despues de la geometria/ deteccion Indoor para conservar el orden visual.
+- No requiere cambiar V25Native.dll v103 ni los parametros de camara.
+
+Rendimiento de construcción (Phase 2.4.10)
+- Conserva el orden exacto de Priority de Phase 2.4.8; no fusiona sus pasadas.
+- Reduce temporales al calcular superficies de Volume/MountainTop.
+- Priority, walls y estructuras se agrupan por identidad visual/origen y elevación explícita.
+- La BFS de escaleras usa cursor en vez de Array#shift.
+- V25Native.dll v103 sigue siendo la DLL compatible con este paquete.
+
+RENDIMIENTO DEL GROUND
+- Los tiles sin hue/saturation/lighting/tone/color usan copia directa al bitmap del suelo.
+- Los tiles con efectos de Maker Studio conservan el horneado visual normal.
+- El compositor usa el indice disperso de celdas creado durante el build; no cambia tags, alturas ni Priority.
+
+PRIORIDADES P0/P1
+- P0 se mantiene como suelo/base normal.
+- P1 conserva una superficie independiente y cambia delante/detras del personaje segun la posicion Y de sus pies.
+- En empate exacto de pie entre P1 y el personaje, el personaje queda delante; P1 vuelve a ganar al situarse el actor al norte del objeto.
+
+COLISION Y PROFUNDIDAD DE MODELOS
+- Los modelos con collision=solid/climb/one-way usan el sidecar V25C del mapa para bloquear movimiento.
+- La colision se consulta desde la misma ruta de passable?/playerPassable?, independientemente de si el modelo esta visible o en streaming.
+- Las caras de una misma instancia de modelo comparten un pie visual comun para no atravesar el orden del personaje cara por cara.
+- collision=none mantiene el modelo como decorativo y no bloquea al jugador.
+
+
+Terrain 22 / NDSBillboard
+-------------------------
+NDSBillboard mantiene el objeto vertical, pero respeta Priority por pieza. P0 y P1 pueden estar separados en el tileset: el pie se resuelve como fila + Priority, de modo que el prop cambia delante/detras del personaje sin convertir P0 en foreground.
+
+Modelos y colision
+------------------
+Los modelos con collision=solid usan MapXXX.v25c cuando existe. Si no existe sidecar, Visual 2.5D deriva una rejilla de colision desde los objetos/modelos runtime ya cargados. collision=none en un objeto runtime sigue desactivando su colision.
+
+DEBUG / COLISION
+- En modo Debug, mantener Ctrl usa el atravesado de paredes de Essentials y también ignora la colisión V25 de modelos/Geometry.
+- Fuera de Debug, Ctrl no desactiva la colisión V25.

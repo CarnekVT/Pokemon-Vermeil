@@ -238,8 +238,7 @@ end
 class Battle::Battler
   def pbProcessTurn(choice, tryFlee = true)
     return false if fainted?
-    if tryFlee && wild? &&
-       @battle.rules["alwaysflee"] && @battle.pbCanRun?(@index)
+    if tryFlee && wild? && @battle.rules[:roamer_flees] && @battle.pbCanRun?(@index)
       pbBeginTurn(choice)
       wild_flee(_INTL("¡{1} huyó del combate!", pbThis))
       pbEndTurn(choice)
@@ -275,7 +274,9 @@ class Battle::Battler
       return false
     end
     PBDebug.log("[Use move] #{pbThis} (#{@index}) used #{choice[2].name}")
+    @battle.clearStagesChangeRecords
     PBDebug.logonerr { pbUseMove(choice, choice[2] == @battle.struggle) }
+    @battle.checkStatChangeResponses
     @battle.pbJudge
     @battle.pbCalculatePriority if Settings::RECALCULATE_TURN_ORDER_AFTER_SPEED_CHANGES
     return true

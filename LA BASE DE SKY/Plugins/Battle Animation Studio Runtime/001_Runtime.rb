@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Animation Studio Runtime v1.10.7
+# Battle Animation Studio Runtime v1.10.64
 # Plays animations exported by the Maker Studio Battle Animation Studio.
 # Credits: CarnekVT
 # Source data: PBS/AnimationStudio/compiled_animations.json
@@ -10,12 +10,13 @@ rescue LoadError
 end
 
 module BattleAnimationStudioRuntime
-  DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
-  VERSION = 16
+  DEFAULT_DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
+  VERSION = 31
   RUNTIME_PARTICLE_LIMIT = 240
   @cache = nil
   @mtime = nil
   @lookup_index = nil
+  @data_path = nil
   @active_player = nil
 
   module_function
@@ -60,22 +61,29 @@ module BattleAnimationStudioRuntime
     @lookup_index = {}
   end
 
+  def data_file
+    DEFAULT_DATA_FILE
+  end
+
   def load_data
-    return nil if !File.exist?(DATA_FILE)
-    mtime = File.mtime(DATA_FILE).to_i rescue 0
-    return @cache if @cache && @mtime == mtime && @lookup_index
+    path = data_file
+    return nil if !File.exist?(path)
+    mtime = File.mtime(path).to_i rescue 0
+    return @cache if @cache && @mtime == mtime && @lookup_index && @data_path == path
     if !defined?(JSON)
-      log("Ruby JSON is unavailable; cannot read #{DATA_FILE}.")
+      log("Ruby JSON is unavailable; cannot read #{path}.")
       return nil
     end
-    @cache = JSON.parse(File.binread(DATA_FILE))
+    @cache = JSON.parse(File.binread(path))
     @mtime = mtime
+    @data_path = path
     rebuild_lookup_index
     @cache
   rescue => e
     log("#{e.class}: #{e.message}")
     @cache = nil
     @lookup_index = nil
+    @data_path = nil
   end
 
   def animations
@@ -89,6 +97,68 @@ module BattleAnimationStudioRuntime
     s.is_a?(Hash) ? s : {}
   end
 
+  def move_data_for(move_id)
+    return nil if !defined?(GameData::Move)
+    id = normalize_move_id(move_id)
+    GameData::Move.try_get(id.to_sym) rescue (GameData::Move.get(id.to_sym) rescue nil)
+  end
+
+  def move_category_scope(move_id)
+    data = move_data_for(move_id)
+    return "" if !data
+    category = data.respond_to?(:category) ? data.category : nil
+    value = category.respond_to?(:to_i) ? category.to_i : -1
+    return "physical" if value == 0 || category.to_s.downcase.include?("physical")
+    return "special" if value == 1 || category.to_s.downcase.include?("special")
+    return "status" if value == 2 || category.to_s.downcase.include?("status")
+    ""
+  rescue
+    ""
+  end
+
+  def move_target_scope(move_id)
+    data = move_data_for(move_id)
+    return "" if !data
+    target = data.respond_to?(:target) ? data.target.to_s.downcase.sub(/^:/, "") : ""
+    return "single_foe" if ["nearfoe", "randomnearfoe", "foe"].include?(target)
+    return "single_other" if ["other", "nearother"].include?(target)
+    return "multiple_foes" if ["allnearfoes", "allfoes", "foeside"].include?(target)
+    return "single_user" if target == "user"
+    return "single_other" if ["nearally", "userornearally"].include?(target)
+    return "multiple_users" if ["allallies", "userandallies", "userside"].include?(target)
+    return "adjacent_others" if target == "allnearothers"
+    return "all_battlers" if ["allbattlers", "bothsides"].include?(target)
+    return "environment" if target == "none"
+    ""
+  rescue
+    ""
+  end
+
+  def filter_move_variants(list, move_id)
+    return list if !list.is_a?(Array) || list.empty?
+    category = move_category_scope(move_id)
+    if !category.empty?
+      exact = list.select { |a| source_of(a)["variantScope"].to_s.downcase == category }
+      broad = list.select do |a|
+        scope = source_of(a)["variantScope"].to_s.downcase
+        scope.empty? || scope == "auto" || (scope == "both" && category != "status")
+      end
+      list = broad + exact unless exact.empty? && broad.empty?
+    end
+    target_scope = move_target_scope(move_id)
+    if !target_scope.empty?
+      exact_target = list.select { |a| source_of(a)["targetScope"].to_s.downcase == target_scope }
+      generic_target = list.select do |a|
+        scope = source_of(a)["targetScope"].to_s.downcase
+        scope.empty? || scope == "auto"
+      end
+      list = generic_target + exact_target unless exact_target.empty? && generic_target.empty?
+    end
+    list.uniq
+  rescue
+    list
+  end
+
   def matching(move_id, version, user_index, common = false)
     mid = normalize_move_id(move_id)
     load_data
@@ -100,9 +170,12 @@ module BattleAnimationStudioRuntime
     ver = version.to_i
     exact_version = list.select { |a| source_of(a)["version"].to_i == ver }
     list = exact_version unless exact_version.empty?
+    list = filter_move_variants(list, mid) unless common
     opposing = user_index.to_i.odd?
     side_matches = list.select { |a| !!source_of(a)["opposing"] == opposing }
     list = side_matches unless side_matches.empty?
+    selected = list.select { |a| source_of(a)["runtimeSelected"] == true }
+    list = selected unless selected.empty?
 
     # A Studio-authored animation must win over an imported reference using the
     # same Move ID/version/side. Imported Ruby/PBS/EBDX entries are useful as
@@ -123,6 +196,103 @@ module BattleAnimationStudioRuntime
     matching(name, 0, user_index || 0, true)
   end
 
+  # Common animations are frequently called by Essentials as
+  # pbCommonAnimation(name, affected_battler). In that call shape the first
+  # battler is not necessarily the authored User. Status/residual visuals such
+  # as Poison, SaltCure and SnapTrap are usually Target-centric. Infer which
+  # authored battler role owns the animation so the supplied battler is mapped
+  # to the correct role instead of assigning the same sprite to User + Target.
+  def common_battler_track_score(track)
+    return 0 if !track.is_a?(Hash)
+    score = 0
+    positions = track["positionKeys"]
+    if positions.is_a?(Array)
+      score += [positions.length - 1, 0].max * 2
+      positions.each do |key|
+        point = key.is_a?(Hash) && key["point"].is_a?(Hash) ? key["point"] : {}
+        motion = point["x"].to_f.abs + point["y"].to_f.abs + point["offsetX"].to_f.abs + point["offsetY"].to_f.abs
+        score += 2 if motion > 0.001
+      end
+    end
+    values = track["valueKeys"]
+    if values.is_a?(Hash)
+      values.each_value do |keys|
+        next if !keys.is_a?(Array) || keys.empty?
+        score += keys.length
+      end
+    end
+    visible = track["visibleKeys"]
+    score += [visible.length - 1, 0].max if visible.is_a?(Array)
+    fx = track["fxOps"]
+    score += fx.length * 2 if fx.is_a?(Array)
+    score
+  rescue
+    0
+  end
+
+  def common_clip_role_scores(data)
+    scores = { "user" => 0, "target" => 0 }
+    tracks = data.is_a?(Hash) && data["tracks"].is_a?(Array) ? data["tracks"] : []
+    tracks.each do |track|
+      next if !track.is_a?(Hash) || !track["clips"].is_a?(Array)
+      track["clips"].each do |clip|
+        next if !clip.is_a?(Hash)
+        role = ""
+        manual = clip["coordinateSpaceManual"] == true
+        space = (clip["coordinateSpace"] || "auto").to_s.downcase
+        role = space if manual && ["user", "target"].include?(space)
+        if role.empty?
+          keys = clip["positionKeys"].is_a?(Array) ? clip["positionKeys"] : []
+          keys.each do |key|
+            point = key.is_a?(Hash) && key["point"].is_a?(Hash) ? key["point"] : {}
+            anchor = (point["anchor"] || "").to_s.downcase
+            if anchor.include?("target") && !anchor.include?("user")
+              role = "target"
+              break
+            elsif anchor.include?("user") && !anchor.include?("target")
+              role = "user"
+              break
+            end
+          end
+        end
+        if role.empty?
+          pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+          focus = (pbs["focus"] || "").to_s.downcase
+          role = "target" if focus.include?("target") && !focus.include?("user")
+          role = "user" if role.empty? && focus.include?("user") && !focus.include?("target")
+        end
+        scores[role] += 3 if scores.key?(role)
+      end
+    end
+    scores
+  rescue
+    { "user" => 0, "target" => 0 }
+  end
+
+  def common_subject_role(data)
+    return "both" if !data.is_a?(Hash)
+    src = source_of(data)
+    explicit = (src["commonSubjectRole"] || data["commonSubjectRole"] || "auto").to_s.downcase
+    return explicit if ["user", "target", "both", "none"].include?(explicit)
+    no_user = !!data["noUser"]
+    no_target = !!data["noTarget"]
+    return "target" if no_user && !no_target
+    return "user" if no_target && !no_user
+    return "none" if no_user && no_target
+
+    battlers = data["battlers"].is_a?(Hash) ? data["battlers"] : {}
+    user_score = common_battler_track_score(battlers["user"])
+    target_score = common_battler_track_score(battlers["target"])
+    clip_scores = common_clip_role_scores(data)
+    user_score += clip_scores["user"].to_i
+    target_score += clip_scores["target"].to_i
+    return "target" if target_score > user_score
+    return "user" if user_score > target_score
+    "both"
+  rescue
+    "both"
+  end
+
   def custom_matching(name, version = 0, user_index = 0)
     mid = normalize_move_id(name)
     load_data
@@ -136,6 +306,8 @@ module BattleAnimationStudioRuntime
     opposing = user_index.to_i.odd?
     side_matches = list.select { |a| !!source_of(a)["opposing"] == opposing }
     list = side_matches unless side_matches.empty?
+    selected = list.select { |a| source_of(a)["runtimeSelected"] == true }
+    list = selected unless selected.empty?
     studio = list.reverse.find do |a|
       src = source_of(a)
       src["type"].to_s.downcase == "studio" || src["system"].to_s.downcase == "battle_animation_studio"
@@ -150,15 +322,105 @@ module BattleAnimationStudioRuntime
     fallback
   end
 
+  def clone_value(value)
+    Marshal.load(Marshal.dump(value))
+  rescue
+    value
+  end
+
+  # Resolve battler context without ever invoking methods on nil. Ruby's
+  # inline `rescue` prevented crashes, but Essentials' exception tracer still
+  # records those rescued NoMethodErrors, flooding the log for Target-only
+  # Common animations (e.g. SnapTrap).
+  def safe_battler_index(battler, fallback = nil)
+    return fallback if !battler || !battler.respond_to?(:index)
+    value = battler.index
+    value.nil? ? fallback : value.to_i
+  rescue
+    fallback
+  end
+
+  def safe_battler_battle(*battlers)
+    battlers.each do |battler|
+      next if !battler || !battler.respond_to?(:battle)
+      battle = battler.battle rescue nil
+      return battle if battle
+    end
+    nil
+  rescue
+    nil
+  end
+
+  def runtime_context_descriptor(user, target, data = nil)
+    battle = safe_battler_battle(user, target)
+    # A one-battler Common can intentionally have no User or no Target. For
+    # formation math, let the existing battler provide the missing reference
+    # index instead of fabricating an unrelated slot 0/1.
+    ti_fallback = safe_battler_index(user, 1)
+    ui_fallback = safe_battler_index(target, 0)
+    ui = safe_battler_index(user, ui_fallback).to_i
+    ti = safe_battler_index(target, ti_fallback).to_i
+    user_size = battle && battle.respond_to?(:pbSideSize) ? (battle.pbSideSize(ui) rescue 1).to_i : 1
+    target_size = battle && battle.respond_to?(:pbSideSize) ? (battle.pbSideSize(ti) rescue 1).to_i : 1
+    user_size = 1 if user_size < 1
+    target_size = 1 if target_size < 1
+    source = data.is_a?(Hash) && data["source"].is_a?(Hash) ? data["source"] : {}
+    scope = (source["targetScope"] || "single_foe").to_s
+    {
+      "battleFormat" => "#{user_size}v#{target_size}",
+      "userSlot" => ui / 2,
+      "targetSlot" => ti / 2,
+      "targetScope" => scope
+    }
+  rescue
+    { "battleFormat" => "1v1", "userSlot" => 0, "targetSlot" => 0, "targetScope" => "single_foe" }
+  end
+
+  def context_timeline_key(context)
+    c = context.is_a?(Hash) ? context : {}
+    "#{c["battleFormat"] || "1v1"}|u#{(c["userSlot"] || 0).to_i}|t#{(c["targetSlot"] || 0).to_i}|#{c["targetScope"] || "single_foe"}"
+  end
+
+  def apply_context_timeline(data, user, target)
+    return data if !data.is_a?(Hash)
+    variants = data["contextTimelines"]
+    return data if !variants.is_a?(Array) || variants.empty?
+    context = runtime_context_descriptor(user, target, data)
+    key = context_timeline_key(context)
+    variant = variants.reverse.find { |v| v.is_a?(Hash) && v["key"].to_s == key }
+    if !variant
+      variant = variants.reverse.find do |v|
+        c = v.is_a?(Hash) && v["context"].is_a?(Hash) ? v["context"] : {}
+        c["battleFormat"].to_s == context["battleFormat"].to_s &&
+          c["userSlot"].to_i == context["userSlot"].to_i &&
+          c["targetSlot"].to_i == context["targetSlot"].to_i
+      end
+    end
+    return data if !variant || !variant["snapshot"].is_a?(Hash)
+    out = clone_value(data)
+    snap = variant["snapshot"]
+    ["fps", "duration", "battlers", "camera", "tracks", "events", "logic", "notes", "hidesDataBoxes", "hidesAdjacents", "scene"].each do |field|
+      out[field] = clone_value(snap[field]) if snap.key?(field)
+    end
+    out["source"] = clone_value(data["source"] || {})
+    out["source"]["activeRuntimeTimelineContext"] = context
+    out
+  rescue => e
+    log("context timeline #{e.class}: #{e.message}")
+    data
+  end
+
    DEFAULT_BATTLER_WIDTH  = 96
    DEFAULT_BATTLER_HEIGHT = 96
    class Player
-     def initialize(sprites, viewport, user, target, data)
+     def initialize(sprites, viewport, user, target, data, explicit_targets = nil)
       @sprites = sprites || {}
       @viewport = viewport
       @user = user
       @target = target || user
-      @data = data || {}
+      raw_targets = explicit_targets.is_a?(Array) ? explicit_targets : [explicit_targets]
+      @explicit_targets = raw_targets.compact.select { |b| b && b.respond_to?(:index) }.uniq { |b| (b.index rescue b.object_id) }
+      @data = BattleAnimationStudioRuntime.apply_context_timeline(data || {}, @user, @target)
       @frame = 0.0
       @previous_event_frame = nil
       @clock_start = monotonic_seconds
@@ -193,11 +455,33 @@ module BattleAnimationStudioRuntime
       @hidden_scene_states = {}
       @form_restore = {}
       @active_visual_pokemon = {}
+      # Keep the renderer's already-running battler bitmap alive. Reassigning
+      # setPokemonBitmap at the start of every BAS animation resets the internal
+      # frame timer used by Animated Pokemon/DBK battler sprites, causing their
+      # idle loop to visibly jump back to frame 0. Seed the state from the
+      # battlers' natural views so apply_battler_view only reloads a bitmap when
+      # an animation explicitly changes Front/Back (or a form rule requires it).
       @battler_view_state = {}
+      begin
+        @battler_view_state["user"] = !!(@user.index.to_i.even?) if @user
+      rescue
+        @battler_view_state["user"] = true if @user
+      end
+      begin
+        @battler_view_state["target"] = !!(@target.index.to_i.even?) if @target
+      rescue
+        @battler_view_state["target"] = false if @target
+      end
       @applied_form_rule_ids = {}
       @anchor_cache = {}
+      @runtime_battlers_cache = nil
+      @move_affected_battlers_cache = nil
+      @move_affected_indices_cache = nil
+      @secondary_battler_originals = {}
+      build_battle_target_cache
       prepare_runtime_cache
       capture_original_battlers
+      capture_secondary_battlers
       capture_scene_hide_targets
       create_effect_sprites
       prewarm_animation_assets
@@ -205,6 +489,24 @@ module BattleAnimationStudioRuntime
     end
 
     def animDone?; @done; end
+
+    # Nil-safe battle context for Common animations whose semantic subject is
+    # only User or only Target. These helpers deliberately avoid `nil.index
+    # rescue ...` because Essentials/debug exception tracers report rescued
+    # NoMethodErrors too.
+    def runtime_user_index(fallback = 0)
+      other = BattleAnimationStudioRuntime.safe_battler_index(@target, fallback)
+      BattleAnimationStudioRuntime.safe_battler_index(@user, other)
+    end
+
+    def runtime_target_index(fallback = 1)
+      other = BattleAnimationStudioRuntime.safe_battler_index(@user, fallback)
+      BattleAnimationStudioRuntime.safe_battler_index(@target, other)
+    end
+
+    def runtime_battle
+      BattleAnimationStudioRuntime.safe_battler_battle(@user, @target)
+    end
 
     def duration
       [1.0, (@data["duration"] || 1).to_f].max
@@ -478,10 +780,15 @@ module BattleAnimationStudioRuntime
         battler = battler_for_side(side)
         sprite = sprite_for_side(side)
         next if !battler || !sprite
+        natural_back = (battler.index.to_i.even? rescue side == :user)
+        current_back = @battler_view_state[side.to_s]
+        # If BAS never changed this battler's view, leave the existing bitmap
+        # untouched. This preserves animated-sprite loop progress across BAS
+        # animations instead of restarting the Pokémon's idle cycle on dispose.
+        next if current_back.nil? || current_back == natural_back
         pokemon = battler.respond_to?(:visiblePokemon) ? battler.visiblePokemon : nil
         pokemon ||= battler.pokemon if battler.respond_to?(:pokemon)
         next if !pokemon
-        natural_back = (battler.index.to_i.even? rescue side == :user)
         set_battler_bitmap_view(side, pokemon, natural_back)
       end
       @battler_view_state.clear
@@ -492,15 +799,49 @@ module BattleAnimationStudioRuntime
 
     def capture_sprite(sprite)
       return nil if !sprite
-      { x: sprite.x, y: sprite.y, zoom_x: sprite.zoom_x, zoom_y: sprite.zoom_y,
-        angle: sprite.angle, opacity: sprite.opacity, visible: sprite.visible,
-        z: sprite.z, mirror: (sprite.mirror rescue false), tone: (sprite.tone.clone rescue nil),
-        color: (sprite.color.clone rescue nil) }
+      {
+        :x => (sprite.respond_to?(:x) ? (sprite.x rescue 0) : 0),
+        :y => (sprite.respond_to?(:y) ? (sprite.y rescue 0) : 0),
+        :zoom_x => (sprite.respond_to?(:zoom_x) ? (sprite.zoom_x rescue 1.0) : 1.0),
+        :zoom_y => (sprite.respond_to?(:zoom_y) ? (sprite.zoom_y rescue 1.0) : 1.0),
+        :angle => (sprite.respond_to?(:angle) ? (sprite.angle rescue 0) : 0),
+        :opacity => (sprite.respond_to?(:opacity) ? (sprite.opacity rescue 255) : 255),
+        :visible => (sprite.respond_to?(:visible) ? (sprite.visible rescue true) : true),
+        :z => (sprite.respond_to?(:z) ? (sprite.z rescue 0) : 0),
+        :mirror => (sprite.respond_to?(:mirror) ? (sprite.mirror rescue false) : false),
+        :tone => (sprite.respond_to?(:tone) ? (sprite.tone.clone rescue nil) : nil),
+        :color => (sprite.respond_to?(:color) ? (sprite.color.clone rescue nil) : nil)
+      }
+    rescue
+      nil
     end
 
     def capture_original_battlers
       @original[:user] = capture_sprite(user_sprite)
       @original[:target] = capture_sprite(target_sprite)
+    end
+
+    def capture_secondary_battlers
+      @secondary_battler_originals ||= {}
+      ui = runtime_user_index(-1).to_i
+      ti = runtime_target_index(-1).to_i
+      move_affected_battlers.each do |b|
+        idx = (b.index rescue -1).to_i
+        next if idx < 0 || idx == ui || idx == ti
+        sp = (@sprites["pokemon_#{idx}"] rescue nil)
+        next if !sp
+        @secondary_battler_originals[idx] = capture_sprite(sp)
+      end
+    rescue
+      @secondary_battler_originals ||= {}
+    end
+
+    def restore_secondary_battlers
+      (@secondary_battler_originals || {}).each do |idx, st|
+        sp = (@sprites["pokemon_#{idx}"] rescue nil)
+        restore_sprite(sp, st) if sp && st
+      end
+    rescue
     end
 
     def ui_sprite_key?(key)
@@ -514,7 +855,8 @@ module BattleAnimationStudioRuntime
     end
 
     def active_battler_indices
-      [(@user.index rescue nil), (@target.index rescue nil)].compact.map { |v| v.to_i }.uniq
+      base = [runtime_user_index(nil), runtime_target_index(nil)].compact.map { |v| v.to_i }
+      (base + move_affected_indices).uniq
     end
 
     def adjacent_sprite_key?(key)
@@ -538,10 +880,15 @@ module BattleAnimationStudioRuntime
         kind = :ui if hide_boxes && ui_sprite_key?(key_s)
         kind = :adjacent if !kind && hide_adjacents && adjacent_sprite_key?(key_s)
         next if !kind
+        can_visible = sprite.respond_to?(:visible) && sprite.respond_to?(:visible=)
+        can_opacity = sprite.respond_to?(:opacity) && sprite.respond_to?(:opacity=)
+        next if !can_visible && !can_opacity
         @hidden_scene_states[key_s] = {
           :kind => kind,
-          :visible => (sprite.visible rescue true),
-          :opacity => (sprite.opacity rescue 255)
+          :visible => (can_visible ? (sprite.visible rescue true) : true),
+          :opacity => (can_opacity ? (sprite.opacity rescue 255) : 255),
+          :can_visible => can_visible,
+          :can_opacity => can_opacity
         }
       end
       apply_scene_hide_progress(0.0)
@@ -574,8 +921,14 @@ module BattleAnimationStudioRuntime
         base_visible = st[:visible] != false
         base_opacity = (st[:opacity] || 255).to_f
         opacity = (base_opacity * (1.0 - mix)).round
-        sprite.opacity = opacity if sprite.respond_to?(:opacity=)
-        sprite.visible = (base_visible && opacity > 0) if sprite.respond_to?(:visible=)
+        if st[:can_opacity] && sprite.respond_to?(:opacity=)
+          sprite.opacity = opacity
+          sprite.visible = (base_visible && opacity > 0) if st[:can_visible] && sprite.respond_to?(:visible=)
+        elsif st[:can_visible] && sprite.respond_to?(:visible=)
+          # Non-Sprite UI helpers (e.g. TargetMenu) have no opacity API. Keep
+          # them untouched until the fade is effectively complete, then hide.
+          sprite.visible = (base_visible && mix < 0.999)
+        end
       end
     rescue
     end
@@ -584,8 +937,8 @@ module BattleAnimationStudioRuntime
       @hidden_scene_states.each do |key, st|
         sprite = @sprites[key]
         next if !sprite
-        sprite.visible = st[:visible] if sprite.respond_to?(:visible=)
-        sprite.opacity = st[:opacity] if sprite.respond_to?(:opacity=)
+        sprite.visible = st[:visible] if st[:can_visible] && sprite.respond_to?(:visible=)
+        sprite.opacity = st[:opacity] if st[:can_opacity] && sprite.respond_to?(:opacity=)
       end
       @hidden_scene_states.clear
     rescue
@@ -609,6 +962,7 @@ module BattleAnimationStudioRuntime
       restore_battler_views
       restore_sprite(user_sprite, @original[:user])
       restore_sprite(target_sprite, @original[:target]) if target_sprite != user_sprite
+      restore_secondary_battlers
       restore_scene_visibility
       @effect_sprites.each_value { |s| s.dispose if s && !s.disposed? }
       @emitter_sprites.each_value { |pool| pool.each { |s| s.dispose if s && !s.disposed? } }
@@ -638,10 +992,270 @@ module BattleAnimationStudioRuntime
         next if !track.is_a?(Hash) || !track["clips"].is_a?(Array)
         track["clips"].each { |clip| @clips_cache << clip if clip.is_a?(Hash) }
       end
+      expand_replicated_clips
+      @clip_by_id_cache = {}
+      (@clips_cache || []).each do |clip|
+        next if !clip.is_a?(Hash)
+        id = clip["id"].to_s
+        @clip_by_id_cache[id] ||= clip if !id.empty?
+      end
+      @screen_fixed_clip_ids = {}
+      (@clips_cache || []).each do |clip|
+        next if !clip.is_a?(Hash)
+        space = (clip["coordinateSpace"] || "auto").to_s.downcase
+        manual_space = clip["coordinateSpaceManual"] == true
+        # Legacy clips remain camera/world-space until the author explicitly
+        # chooses Fixed screen in the inspector.
+        fixed = manual_space && space == "screen"
+        @screen_fixed_clip_ids[clip["id"].to_s] = true if fixed
+      end
       events = @data["events"].is_a?(Array) ? @data["events"] : []
       @se_events = events.select { |ev| ev.is_a?(Hash) && ev["type"].to_s.downcase == "se" }.sort_by { |ev| (ev["frame"] || 0).to_f }
       @screen_events = events.select { |ev| ev.is_a?(Hash) && ["screen_black_envelope", "screen_white_envelope", "screen_flash", "flash", "darken"].include?(ev["type"].to_s) }
       @shake_events = events.select { |ev| ev.is_a?(Hash) && ev["type"].to_s == "screen_shake" }
+    end
+
+    def runtime_battlers
+      return @runtime_battlers_cache if @runtime_battlers_cache.is_a?(Array)
+      battle = runtime_battle
+      list = battle && battle.respond_to?(:battlers) ? (battle.battlers rescue []) : []
+      @runtime_battlers_cache = list.is_a?(Array) ? list.compact : []
+    rescue
+      @runtime_battlers_cache = []
+    end
+
+    def calculated_scope_battlers
+      src = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      scope = (src["targetScope"] || "single_foe").to_s.downcase
+      detected_target = (src["detectedTarget"] || "").to_s.downcase
+      list = runtime_battlers
+      ui = runtime_user_index(0).to_i
+      ti = runtime_target_index(1).to_i
+      user_parity = ui % 2
+      target_parity = ti % 2
+      battle = runtime_battle
+      return [] if scope == "environment"
+      if scope == "single_user"
+        if ["nearally", "userornearally"].include?(detected_target)
+          return list.select { |b| (b.index rescue -1).to_i == ti }
+        end
+        return list.select { |b| (b.index rescue -1).to_i == ui }
+      end
+      if scope == "multiple_users"
+        if detected_target == "allallies"
+          return list.select { |b| (b.index rescue -1).to_i % 2 == user_parity && (b.index rescue -1).to_i != ui }
+        end
+        return list.select { |b| (b.index rescue -1).to_i % 2 == user_parity }
+      end
+      return list.select { |b| (b.index rescue -1).to_i == ti } if scope == "single_foe" || scope == "single_other"
+      if scope == "multiple_foes"
+        return list.select do |b|
+          idx = (b.index rescue -1).to_i
+          next false if idx < 0 || idx % 2 != target_parity
+          detected_target == "allnearfoes" ? (battle && battle.respond_to?(:nearBattlers?) ? !!(battle.nearBattlers?(ui, idx) rescue false) : true) : true
+        end
+      end
+      if scope == "adjacent_others"
+        return list.select do |b|
+          idx = (b.index rescue -1).to_i
+          idx >= 0 && idx != ui && (battle && battle.respond_to?(:nearBattlers?) ? !!(battle.nearBattlers?(ui, idx) rescue false) : true)
+        end
+      end
+      return list if scope == "all_battlers"
+      list.select { |b| (b.index rescue -1).to_i == ti }
+    rescue
+      []
+    end
+
+    def build_battle_target_cache
+      explicit = @explicit_targets.is_a?(Array) ? @explicit_targets.select { |b| b && b.respond_to?(:index) } : []
+      src = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      scope = (src["targetScope"] || "single_foe").to_s.downcase
+      multi_scope = ["multiple_foes", "multiple_users", "adjacent_others", "all_battlers"].include?(scope)
+      calculated = calculated_scope_battlers
+      # Battle#pbAnimation should normally hand us the exact Essentials target
+      # list. Some plugins/wrappers, however, forward only the first target. For
+      # multi-target moves, union that list with Essentials' own side/adjacency
+      # semantics so hide/replication never makes legitimate battlers vanish.
+      combined = multi_scope ? (explicit + calculated) : (explicit.empty? ? calculated : explicit)
+      @move_affected_battlers_cache = combined.compact.uniq { |b| (b.index rescue b.object_id) }
+      @move_affected_indices_cache = @move_affected_battlers_cache.map { |b| (b.index rescue -1).to_i }.select { |i| i >= 0 }.uniq
+    rescue
+      @move_affected_battlers_cache = []
+      @move_affected_indices_cache = []
+    end
+
+    def move_affected_battlers
+      return @move_affected_battlers_cache if @move_affected_battlers_cache.is_a?(Array)
+      build_battle_target_cache
+      @move_affected_battlers_cache || []
+    end
+
+    def move_affected_indices
+      return @move_affected_indices_cache if @move_affected_indices_cache.is_a?(Array)
+      build_battle_target_cache
+      @move_affected_indices_cache || []
+    end
+
+    def replica_anchor_role_for_clip(clip, mode)
+      return "user" if mode == "user_adjacents"
+      return "target" if mode == "target_adjacents"
+      focus = ((clip["pbs"].is_a?(Hash) ? clip["pbs"]["focus"] : nil) || "").to_s.downcase
+      return "user" if focus.include?("user") && !focus.include?("target")
+      return "target" if focus.include?("target")
+      keys = clip["positionKeys"].is_a?(Array) ? clip["positionKeys"] : []
+      keys.each do |k|
+        a = (k.is_a?(Hash) && k["point"].is_a?(Hash) ? k["point"]["anchor"] : "").to_s.downcase
+        return "target" if a.include?("target")
+        return "user" if a.include?("user")
+      end
+      "target"
+    end
+
+    def clip_semantic_role(clip)
+      return "" if !clip.is_a?(Hash)
+      manual = clip["coordinateSpaceManual"] == true
+      explicit = (clip["coordinateSpace"] || "auto").to_s.downcase
+      if manual
+        return explicit if ["user", "target"].include?(explicit)
+        return "" if explicit == "screen"
+      end
+      keys = clip["positionKeys"].is_a?(Array) ? clip["positionKeys"] : []
+      keys.each do |k|
+        point = k.is_a?(Hash) && k["point"].is_a?(Hash) ? k["point"] : {}
+        a = (point["anchor"] || "").to_s.downcase
+        next if a.empty? || a.include?("screen") || a.include?("_and_") || a == "user_target"
+        return "target" if a.include?("target") && !a.include?("user")
+        return "user" if a.include?("user") && !a.include?("target")
+      end
+      original = clip["editorOriginalPosition"].is_a?(Hash) ? clip["editorOriginalPosition"] : {}
+      oa = (original["anchor"] || "").to_s.downcase
+      return "target" if oa.include?("target") && !oa.include?("user")
+      return "user" if oa.include?("user") && !oa.include?("target")
+      # Focus/priority are visual behavior and draw-order metadata. They do not
+      # make a pure screen-authored clip follow a battler automatically.
+      ""
+    rescue
+      ""
+    end
+
+    def clip_target_local?(clip)
+      return true if clip_semantic_role(clip) == "target"
+      pbs = clip.is_a?(Hash) && clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      emitter = (pbs["emitter"] || pbs["emitterType"] || "none").to_s.downcase
+      focus = (pbs["focus"] || "").to_s.downcase
+      return true if emitter != "none" && focus.include?("target") && !focus.include?("user")
+      false
+    rescue
+      false
+    end
+
+    def replica_battlers_for_clip(clip)
+      src = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      mode = (clip["replicateTo"] || "none").to_s.downcase
+      scope = (src["targetScope"] || "single_foe").to_s.downcase
+      target_local = clip_target_local?(clip)
+      if mode == "none" && src["autoReplicateAffected"] == true && target_local && ["multiple_foes", "multiple_users", "adjacent_others", "all_battlers"].include?(scope)
+        mode = "affected"
+      end
+      return [] if mode == "none"
+      ti = runtime_target_index(1).to_i
+      if mode == "affected"
+        return [] if !target_local
+        return move_affected_battlers.map { |b| ["target", b] }.reject { |entry| (entry[1].index rescue -1).to_i == ti }
+      end
+      ui = runtime_user_index(0).to_i
+      user_parity = ui % 2
+      target_parity = ti % 2
+      battle = runtime_battle
+      anchor_role = replica_anchor_role_for_clip(clip, mode)
+      out = []
+      runtime_battlers.each do |b|
+        idx = (b.index rescue -1).to_i
+        next if idx < 0 || idx == ti
+        parity = idx % 2
+        hit = false
+        if mode == "target_near"
+          hit = move_affected_indices.include?(idx) && idx != ti && (battle && battle.respond_to?(:nearBattlers?) ? !!(battle.nearBattlers?(ui, idx) rescue false) : true)
+        elsif mode == "target_adjacents"
+          hit = move_affected_indices.include?(idx) && idx != ti
+        elsif mode == "user_adjacents"
+          hit = idx != ui && parity == user_parity
+        elsif mode == "near_others"
+          hit = idx != ui && (battle && battle.respond_to?(:nearBattlers?) ? !!(battle.nearBattlers?(ui, idx) rescue false) : true)
+        elsif mode == "all_targets"
+          hit = true
+        elsif mode == "all_adjacents"
+          hit = idx != ui
+        end
+        out << [anchor_role, b] if hit
+      end
+      out
+    rescue
+      []
+    end
+
+    def expand_replicated_clips
+      original = (@clips_cache || []).clone
+      original.each do |clip|
+        replica_battlers_for_clip(clip).each do |entry|
+          anchor_role, battler = entry
+          begin
+            copy = Marshal.load(Marshal.dump(clip))
+          rescue
+            copy = clip.dup
+          end
+          idx = (battler.index rescue -1).to_i
+          next if idx < 0
+          copy["_replicaSourceClipId"] = clip["id"].to_s
+          copy["_replicaSourceClipRef"] = clip
+          copy["id"] = "#{clip["id"]}__replica_#{anchor_role}_#{idx}"
+          copy["replicateTo"] = "none"
+          copy["_replicaSide"] = anchor_role.to_s
+          copy["_replicaBattlerIndex"] = idx
+          @clips_cache << copy
+        end
+      end
+    rescue => e
+      BattleAnimationStudioRuntime.log("replica expansion #{e.class}: #{e.message}")
+    end
+
+    def with_replica_battler(clip)
+      side = clip["_replicaSide"].to_s
+      idx = clip["_replicaBattlerIndex"]
+      return yield if side.empty? || idx.nil?
+      battler = runtime_battlers.find { |b| (b.index rescue -1).to_i == idx.to_i }
+      return yield if !battler
+      key = side == "user" ? :user : :target
+      old_battler = key == :user ? @user : @target
+      old_original = @original[key]
+      old_shift = @replica_screen_shift
+      old_shift_role = @replica_screen_shift_role
+      primary_anchor = base_anchor(key, true)
+      if key == :user
+        @user = battler
+      else
+        @target = battler
+      end
+      sp = @sprites["pokemon_#{idx.to_i}"] rescue nil
+      @original[key] = capture_sprite(sp) || old_original
+      clear_battler_anchor_cache(key)
+      replica_anchor = base_anchor(key, true)
+      @replica_screen_shift = [replica_anchor[0].to_f - primary_anchor[0].to_f, replica_anchor[1].to_f - primary_anchor[1].to_f]
+      @replica_screen_shift_role = key.to_s
+      begin
+        yield
+      ensure
+        if key == :user
+          @user = old_battler
+        else
+          @target = old_battler
+        end
+        @original[key] = old_original
+        @replica_screen_shift = old_shift
+        @replica_screen_shift_role = old_shift_role
+        clear_battler_anchor_cache(key)
+      end
     end
 
     def tracks
@@ -703,6 +1317,10 @@ module BattleAnimationStudioRuntime
         if source.start_with?("battler-")
           side = source.include?("target") ? :target : :user
           battler = side == :target ? @target : @user
+          if clip["_replicaBattlerIndex"]
+            rb = runtime_battlers.find { |b| (b.index rescue -1).to_i == clip["_replicaBattlerIndex"].to_i }
+            battler = rb if rb
+          end
           natural_back = (battler.index.to_i.even? rescue side == :user)
           wanted_back = if source.include?("-front")
                           false
@@ -876,16 +1494,18 @@ module BattleAnimationStudioRuntime
     end
 
     def cached_value_keys(obj, prop)
-      key = [obj.object_id, prop.to_s]
+      source = replica_visual_source(obj)
+      key = [source.object_id, prop.to_s]
       @value_key_cache[key] ||= begin
-        raw = (((obj["valueKeys"] || {})[prop] rescue nil) || [])
+        raw = (((source["valueKeys"] || {})[prop] rescue nil) || [])
         raw.is_a?(Array) ? raw.sort_by { |k| (k["frame"] || 0).to_f } : []
       end
     end
 
     def sample_value(obj, prop, frame, fallback)
-      keys = cached_value_keys(obj, prop)
-      base = ((obj["visual"] || {})[prop] rescue nil)
+      source = replica_visual_source(obj)
+      keys = cached_value_keys(source, prop)
+      base = ((source["visual"] || {})[prop] rescue nil)
       base = fallback if base.nil?
       return base.to_f if keys.empty?
       return keys.first["value"].to_f if frame <= keys.first["frame"].to_f
@@ -910,8 +1530,9 @@ module BattleAnimationStudioRuntime
     # Frame selection, src_rect and similar properties are discrete in the
     # Studio. Interpolating them produces in-between cells and visual tearing.
     def sample_discrete_value(obj, prop, frame, fallback)
-      keys = cached_value_keys(obj, prop)
-      base = ((obj["visual"] || {})[prop] rescue nil)
+      source = replica_visual_source(obj)
+      keys = cached_value_keys(source, prop)
+      base = ((source["visual"] || {})[prop] rescue nil)
       base = fallback if base.nil?
       return base.to_f if keys.empty?
       f = frame.to_f.floor + 0.000001
@@ -932,11 +1553,12 @@ module BattleAnimationStudioRuntime
     end
 
     def sample_visible(obj, frame)
-      keys = @visible_key_cache[obj.object_id] ||= begin
-        raw = obj["visibleKeys"] || []
+      source = replica_visual_source(obj)
+      keys = @visible_key_cache[source.object_id] ||= begin
+        raw = source["visibleKeys"] || []
         raw.is_a?(Array) ? raw.sort_by { |k| (k["frame"] || 0).to_f } : []
       end
-      base = obj["enabled"] != false
+      base = source["enabled"] != false
       return base if keys.empty? || frame < keys.first["frame"].to_f
       return !!keys.last["value"] if frame >= keys.last["frame"].to_f
       lo = 0; hi = keys.length - 1
@@ -1093,7 +1715,7 @@ module BattleAnimationStudioRuntime
       ox = p["offsetX"].to_f; oy = p["offsetY"].to_f
       x = p["x"].to_f; y = p["y"].to_f
       if anchor.start_with?("pbs:") && !anchor.include?("_and_")
-        idx = anchor.include?("target") ? (@target.index rescue 1) : (@user.index rescue 0)
+        idx = anchor.include?("target") ? runtime_target_index(1) : runtime_user_index(0)
         if idx.to_i.odd?
           x *= -1 if p["foeInvertX"]
           y *= -1 if p["foeInvertY"]
@@ -1154,8 +1776,115 @@ module BattleAnimationStudioRuntime
       0.0
     end
 
+    def context_role_for_object(obj)
+      return "" if !obj.is_a?(Hash) || ["battler", "camera"].include?(obj["type"].to_s)
+      clip_semantic_role(obj)
+    rescue
+      ""
+    end
+
+    def formation_offset_for_role(role)
+      battler = role.to_s == "user" ? @user : @target
+      return [0.0, 0.0] if !battler
+      idx = (battler.index rescue (role.to_s == "user" ? 0 : 1)).to_i
+      battle = (battler.battle rescue nil)
+      size = battle && battle.respond_to?(:pbSideSize) ? (battle.pbSideSize(idx) rescue 1).to_i : 1
+      current = Battle::Scene.pbBattlerPosition(idx, size) rescue nil
+      base = Battle::Scene.pbBattlerPosition(idx, 1) rescue nil
+      return [0.0, 0.0] if !current || !base
+      [current[0].to_f - base[0].to_f, current[1].to_f - base[1].to_f]
+    rescue
+      [0.0, 0.0]
+    end
+
+    def authored_role_follow_delta(role, frame)
+      begin
+        side = role.to_s == "target" ? :target : :user
+        track = battler_track(side)
+        return [0.0, 0.0] if !track
+        base = side == :target ? resolve_point({ "anchor" => "target_battler" }) : resolve_point({ "anchor" => "user_battler" })
+        pos = sample_position(track, frame.to_f)
+        [pos[0].to_f - base[0].to_f, pos[1].to_f - base[1].to_f]
+      rescue => e
+        BattleAnimationStudioRuntime.log("authored follow #{role} #{e.class}: #{e.message}")
+        [0.0, 0.0]
+      end
+    end
+
+    def legacy_single_target_screen_point(obj, point, ret)
+      return ret if !obj.is_a?(Hash) || !point.is_a?(Hash) || ["battler", "camera"].include?(obj["type"].to_s)
+      src = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      scope = (src["targetScope"] || "single_foe").to_s.downcase
+      return ret if !["single_foe", "single_other"].include?(scope)
+      return ret if obj["coordinateSpaceManual"] == true
+      return ret if point["anchor"].to_s.downcase != "screen"
+      pref = (obj["priorityReference"] || "auto").to_s.downcase
+      return ret if !["target", "user"].include?(pref)
+      ux = 128.0; uy = Graphics.height.to_f - 80.0; tx = Graphics.width.to_f - 128.0; ty = Graphics.height.to_f * 3.0 / 4.0 - 112.0
+      vx = tx - ux; vy = ty - uy; denom = vx * vx + vy * vy
+      alpha = denom > 0.0 ? (((ret[0].to_f - ux) * vx + (ret[1].to_f - uy) * vy) / denom) : (pref == "target" ? 1.0 : 0.0)
+      alpha = [[alpha, 0.0].max, 1.0].min
+      du = formation_offset_for_role("user"); dt = formation_offset_for_role("target")
+      [ret[0].to_f + du[0].to_f * (1.0 - alpha) + dt[0].to_f * alpha, ret[1].to_f + du[1].to_f * (1.0 - alpha) + dt[1].to_f * alpha]
+    rescue
+      ret
+    end
+
+    def authored_stage_battler_point(obj, point, ret)
+      return ret if !obj.is_a?(Hash) || obj["type"].to_s != "battler" || !point.is_a?(Hash)
+      role = obj["side"].to_s == "target" ? "target" : "user"
+      src = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      scope = (src["targetScope"] || "single_foe").to_s.downcase
+      return ret if role == "target" && ["single_foe", "single_other"].include?(scope)
+      anchor = point["anchor"].to_s.downcase
+      belongs = if role == "user"
+                  ["user_battler", "user", "pbs:user", "pbs:user_position"].include?(anchor)
+                else
+                  ["target_battler", "target", "pbs:target", "pbs:target_position"].include?(anchor)
+                end
+      return ret if !belongs
+      delta = formation_offset_for_role(role)
+      return ret if delta[0].to_f.abs < 0.001 && delta[1].to_f.abs < 0.001
+      motion = point["offsetX"].to_f.abs + point["offsetY"].to_f.abs + point["x"].to_f.abs + point["y"].to_f.abs
+      return ret if motion < 24.0
+      candidate = [ret[0].to_f - delta[0].to_f, ret[1].to_f - delta[1].to_f]
+      cx = Graphics.width.to_f / 2.0
+      current_distance = (ret[0].to_f - cx).abs
+      candidate_distance = (candidate[0].to_f - cx).abs
+      return candidate if candidate_distance + 12.0 < current_distance
+      ret
+    rescue
+      ret
+    end
+
     def resolve_object_point(obj, point)
       ret = resolve_point(point)
+      anchor = point.is_a?(Hash) ? point["anchor"].to_s.downcase : ""
+      src = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      role = context_role_for_object(obj)
+      ret = legacy_single_target_screen_point(obj, point, ret) if src["contextAutoAdapt"] != false
+      if ["", "screen"].include?(anchor) && src["contextAutoAdapt"] != false
+        if !role.empty?
+          delta = formation_offset_for_role(role)
+          ret = [ret[0].to_f + delta[0].to_f, ret[1].to_f + delta[1].to_f]
+        end
+        if @replica_screen_shift
+          ret = [ret[0].to_f + @replica_screen_shift[0].to_f, ret[1].to_f + @replica_screen_shift[1].to_f]
+        end
+      end
+      ret = authored_stage_battler_point(obj, point, ret) if src["contextAutoAdapt"] != false
+      # Battler choreography (Impact, Dash, authored Position keys, etc.) must
+      # not drag unrelated effects. Only explicit Follow User / Follow Target
+      # coordinate spaces inherit authored battler motion. Auto/legacy anchors
+      # keep their formation-relative placement without becoming child transforms.
+      manual_space = obj["coordinateSpaceManual"] == true
+      explicit_space = (obj["coordinateSpace"] || "auto").to_s.downcase
+      follows_role = manual_space && ["user", "target"].include?(explicit_space) && explicit_space == role
+      if src["contextAutoAdapt"] != false && !role.empty? && follows_role && obj["type"].to_s != "battler"
+        follow_frame = @point_context_frame.nil? ? (@frame || 0) : @point_context_frame
+        follow = authored_role_follow_delta(role, follow_frame)
+        ret = [ret[0].to_f + follow[0].to_f, ret[1].to_f + follow[1].to_f]
+      end
       imported = obj.is_a?(Hash) ? (obj["imported"] || {}) : {}
       if obj["type"].to_s == "battler" && imported["pbsBattlerParticle"] && point.is_a?(Hash) && point["anchor"].to_s.start_with?("pbs:")
         ret = [ret[0], ret[1] + pbs_battler_baseline_offset(obj)]
@@ -1164,8 +1893,9 @@ module BattleAnimationStudioRuntime
     end
 
     def sample_position(obj, frame)
-      keys = @position_key_cache[obj.object_id] ||= begin
-        raw = obj["positionKeys"] || []
+      source = replica_visual_source(obj)
+      keys = @position_key_cache[source.object_id] ||= begin
+        raw = source["positionKeys"] || []
         raw.is_a?(Array) ? raw.sort_by { |k| (k["frame"] || 0).to_f } : []
       end
       return [Graphics.width / 2.0, Graphics.height / 2.0] if keys.empty?
@@ -1189,17 +1919,34 @@ module BattleAnimationStudioRuntime
       [Graphics.width / 2.0, Graphics.height / 2.0]
     end
 
+    # Virtual multi-target replicas must inherit the full visual timeline of
+    # their source clip. Their own copy only changes semantic battler anchors.
+    # Keeping frame/src_rect/graphic-switch sampling tied to the source avoids
+    # replicas getting stuck on frame 0 of a spritesheet.
+    def replica_visual_source(clip)
+      return clip if !clip.is_a?(Hash)
+      direct = clip["_replicaSourceClipRef"]
+      return direct if direct.is_a?(Hash)
+      source_id = clip["_replicaSourceClipId"].to_s
+      return clip if source_id.empty?
+      source = (@clip_by_id_cache || {})[source_id]
+      source.is_a?(Hash) ? source : clip
+    rescue
+      clip
+    end
+
     def latest_graphic(clip, frame)
+      source = replica_visual_source(clip)
       raw_value = nil
-      switches = @graphic_switch_cache[clip.object_id] ||= begin
-        raw = clip["graphicSwitches"] || []
+      switches = @graphic_switch_cache[source.object_id] ||= begin
+        raw = source["graphicSwitches"] || []
         raw.is_a?(Array) ? raw.sort_by { |sw| (sw["frame"] || 0).to_f } : []
       end
       switches.each do |sw|
         break if sw["frame"].to_f > frame
         raw_value = sw["value"].to_s unless sw["value"].to_s.empty?
       end
-      resolve_runtime_graphic(clip, raw_value)
+      resolve_runtime_graphic(source, raw_value)
     end
 
     def runtime_color(raw, fallback = Color.new(255,255,255,255))
@@ -1271,7 +2018,8 @@ module BattleAnimationStudioRuntime
 
     def update_bitmap(sprite, clip, frame)
       return if !sprite
-      graphic = clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
+      visual_clip = replica_visual_source(clip)
+      graphic = visual_clip["graphic"].is_a?(Hash) ? visual_clip["graphic"] : {}
       id = clip["id"].to_s
       if graphic["procedural"]
         signature = [graphic["procedural"], graphic["proceduralW"], graphic["proceduralH"], graphic["proceduralColor"], graphic["proceduralHollow"], graphic["proceduralLineWidth"], graphic["proceduralLayers"]].inspect
@@ -1351,15 +2099,16 @@ module BattleAnimationStudioRuntime
 
     def apply_source_frame(sprite, clip, frame, random_seed = nil, forced_frame = nil)
       return if !sprite || !sprite.respond_to?(:src_rect) || !sprite.src_rect || !sprite.bitmap || sprite.bitmap.disposed?
-      graphic = clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
+      visual_clip = replica_visual_source(clip)
+      graphic = visual_clip["graphic"].is_a?(Hash) ? visual_clip["graphic"] : {}
       # Battler proxy/clones already inherit the live battler src_rect. Only an
       # explicit src_rect timeline is allowed to replace it.
       special_battler = graphic["source"].to_s.start_with?("battler-")
-      custom_w = sample_discrete_value(clip, "srcW", frame, 0).round
-      custom_h = sample_discrete_value(clip, "srcH", frame, 0).round
+      custom_w = sample_discrete_value(visual_clip, "srcW", frame, 0).round
+      custom_h = sample_discrete_value(visual_clip, "srcH", frame, 0).round
       if custom_w > 0 && custom_h > 0
-        sx = sample_discrete_value(clip, "srcX", frame, 0).round
-        sy = sample_discrete_value(clip, "srcY", frame, 0).round
+        sx = sample_discrete_value(visual_clip, "srcX", frame, 0).round
+        sy = sample_discrete_value(visual_clip, "srcY", frame, 0).round
         sw = [[custom_w, 1].max, sprite.bitmap.width - [sx, 0].max].min
         sh = [[custom_h, 1].max, sprite.bitmap.height - [sy, 0].max].min
         sprite.src_rect.set([sx, 0].max, [sy, 0].max, [sw, 1].max, [sh, 1].max)
@@ -1368,8 +2117,8 @@ module BattleAnimationStudioRuntime
       return if special_battler
       width = sprite.bitmap.width.to_i; height = sprite.bitmap.height.to_i
       return if width <= 0 || height <= 0
-      fr = forced_frame.nil? ? [0, sample_discrete_value(clip, "graphicFrame", frame, (graphic["frame"] || 0)).round].max : [forced_frame.to_i, 0].max
-      random_max = ((clip["pbs"] || {})["randomFrameMax"] rescue nil).to_i
+      fr = forced_frame.nil? ? [0, sample_discrete_value(visual_clip, "graphicFrame", frame, (graphic["frame"] || 0)).round].max : [forced_frame.to_i, 0].max
+      random_max = ((visual_clip["pbs"] || {})["randomFrameMax"] rescue nil).to_i
       if forced_frame.nil? && random_seed && random_max > 0
         fr = (seeded_random(random_seed).call * (random_max + 1)).floor
       end
@@ -1425,7 +2174,7 @@ module BattleAnimationStudioRuntime
       end
       sheet = (mode == "sheet")
       if mode == "auto"
-        code_like = graphic["source"].to_s == "code" || clip["type"].to_s.include?("code")
+        code_like = graphic["source"].to_s == "code" || visual_clip["type"].to_s.include?("code")
         if code_like && (width > height * 1.35 || height > width * 1.35)
           cols, rows, fw, fh, count = dynamic_code_grid(sprite.bitmap)
           if count > 1
@@ -1444,7 +2193,7 @@ module BattleAnimationStudioRuntime
       side = height
       count = [width / [side, 1].max, 1].max
       if graphic["playSheet"] && forced_frame.nil?
-        sec = [0.0, frame.to_f - (clip["startFrame"] || 0).to_f].max / animation_fps
+        sec = [0.0, frame.to_f - (visual_clip["startFrame"] || 0).to_f].max / animation_fps
         fr = (sec * [(graphic["sheetFps"] || 20).to_f, 1.0].max).floor
       end
       fr %= count
@@ -1483,9 +2232,10 @@ module BattleAnimationStudioRuntime
     end
 
     def fx_at(clip, kind, frame)
+      source = replica_visual_source(clip)
       value = nil
-      ops = @fx_cache[clip.object_id] ||= begin
-        raw = clip["fxOps"] || []
+      ops = @fx_cache[source.object_id] ||= begin
+        raw = source["fxOps"] || []
         raw.is_a?(Array) ? raw.sort_by { |op| (op["frame"] || 0).to_f } : []
       end
       ops.each do |op|
@@ -1494,14 +2244,14 @@ module BattleAnimationStudioRuntime
         next if op["name"].to_s != "legacyFx"
         value = op[kind]
       end
-      keys = clip["valueKeys"].is_a?(Hash) ? clip["valueKeys"] : {}
+      keys = source["valueKeys"].is_a?(Hash) ? source["valueKeys"] : {}
       if kind.to_s == "tone" && ["toneRed", "toneGreen", "toneBlue", "toneGray"].any? { |p| keys[p].is_a?(Array) && !keys[p].empty? }
         base = value.is_a?(Hash) ? value : {}
         return {
-          "red"   => sample_value(clip, "toneRed", frame, base["red"] || 0),
-          "green" => sample_value(clip, "toneGreen", frame, base["green"] || 0),
-          "blue"  => sample_value(clip, "toneBlue", frame, base["blue"] || 0),
-          "gray"  => sample_value(clip, "toneGray", frame, base["gray"] || 0)
+          "red"   => sample_value(source, "toneRed", frame, base["red"] || 0),
+          "green" => sample_value(source, "toneGreen", frame, base["green"] || 0),
+          "blue"  => sample_value(source, "toneBlue", frame, base["blue"] || 0),
+          "gray"  => sample_value(source, "toneGray", frame, base["gray"] || 0)
         }
       end
       value
@@ -1580,7 +2330,7 @@ module BattleAnimationStudioRuntime
       # sprite coordinate and the focus target used by the angle override.
       origin[1] += offset
       target[1] += offset
-      sprite.angle = sample_value(clip, "rotation", frame, 0) + rgss_angle_between(origin[0], origin[1], target[0], target[1])
+      sprite.angle = sample_value(clip, "rotation", frame, 0) + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + (sample_value(clip, "flipY", frame, 0) >= 0.5 ? 180.0 : 0.0)
     rescue
     end
 
@@ -1602,14 +2352,14 @@ module BattleAnimationStudioRuntime
         origin = sample_position(clip, frame).dup
         origin[1] += offset
         target[1] += offset
-        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + angle_offset
+        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + angle_offset + (sample_value(clip, "flipY", frame, 0) >= 0.5 ? 180.0 : 0.0)
       elsif mode.include?("initial") && mode.include?("focus") && range <= 0
         origin = pbs_initial_angle_origin(clip).dup
         origin[1] += offset
         # InitialAngleToFocus adds get_xy_offset to the source point only.
-        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1])
+        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + (sample_value(clip, "flipY", frame, 0) >= 0.5 ? 180.0 : 0.0)
       else
-        sprite.angle = base_rotation + angle_offset
+        sprite.angle = base_rotation + angle_offset + (sample_value(clip, "flipY", frame, 0) >= 0.5 ? 180.0 : 0.0)
       end
       sprite.angle *= -1 if desc[:random_angle_invert]
     rescue => e
@@ -1660,14 +2410,14 @@ module BattleAnimationStudioRuntime
     def pbs_z_focus(obj)
       pbs = obj["pbs"].is_a?(Hash) ? obj["pbs"] : {}
       focus = pbs["focus"].to_s.downcase
-      ui = (@user.index rescue 0).to_i
-      ti = (@target.index rescue 1).to_i
+      ui = runtime_user_index(0).to_i
+      ti = runtime_target_index(1).to_i
       uz = nae_battler_z(ui)
       tz = nae_battler_z(ti)
       case focus
       when "foreground" then 2000
       when "midground" then 1000
-      when "background" then 0
+      when "background" then 100
       when "user", "user_position" then uz
       when "target", "target_position" then tz
       when "user_and_target", "user_position_and_target", "user_and_target_position", "user_position_and_target_position" then [uz, tz]
@@ -1709,7 +2459,7 @@ module BattleAnimationStudioRuntime
 
     def apply_layer_priority(sprite, obj, frame)
       return if !sprite || !obj
-      priority = (obj["priority"] || 0).to_f
+      priority = sample_value(obj, "priority", frame, (obj["priority"] || 0).to_f).to_f
       explicit = (obj["priorityReference"] || "auto").to_s.downcase
       # Explicit references are authoritative even at priority 0. This makes
       # "Normal (0) respecto a Target/User" mean exactly the battler's layer.
@@ -1724,14 +2474,19 @@ module BattleAnimationStudioRuntime
       case ref
       when "target"
         base = target_sprite
-        sprite.z = (base ? base.z.to_f : sprite.z.to_f) + priority
+        fallback_z = nae_battler_z(runtime_target_index(1))
+        base_z = base && base.respond_to?(:z) ? base.z.to_f : fallback_z.to_f
+        sprite.z = base_z + priority
       when "user"
         base = user_sprite
-        sprite.z = (base ? base.z.to_f : sprite.z.to_f) + priority
+        fallback_z = nae_battler_z(runtime_user_index(0))
+        base_z = base && base.respond_to?(:z) ? base.z.to_f : fallback_z.to_f
+        sprite.z = base_z + priority
       when "foreground"
         sprite.z = 100000 + priority
       when "background"
-        sprite.z = -100000 + priority
+        # Background animation layers must stay above the battleback but below battlers.
+        sprite.z = 100 + priority
       else
         sprite.z = sprite.z.to_f + priority if priority != 0
       end
@@ -1746,7 +2501,11 @@ module BattleAnimationStudioRuntime
       view_scale = battler ? sample_value(obj, "viewScale", frame, 100) / 100.0 : 1.0
       sx = sample_value(obj, "scaleX", frame, 100) / 100.0 * size * view_scale
       sy = sample_value(obj, "scaleY", frame, 100) / 100.0 * size * view_scale
-      sy *= -1.0 if sample_value(obj, "flipY", frame, 0) >= 0.5
+      # RGSS/mkxp-z doesn't reliably render negative zoom_y. Represent local
+      # vertical reflection as a 180-degree rotation plus horizontal mirror:
+      # V == R(180) * H. H+V becomes a plain 180-degree rotation.
+      flip_h = sample_value(obj, "flip", frame, 0) >= 0.5
+      flip_v = sample_value(obj, "flipY", frame, 0) >= 0.5
       if battler
         side ||= sprite.equal?(target_sprite) ? :target : :user
         view_correction = battler_view_profile_correction(side, obj, frame)
@@ -1755,10 +2514,10 @@ module BattleAnimationStudioRuntime
         base = side.to_sym == :target ? @original[:target] : @original[:user]
         sprite.zoom_x = (base && base[:zoom_x] ? base[:zoom_x] : 1.0) * sx
         sprite.zoom_y = (base && base[:zoom_y] ? base[:zoom_y] : 1.0) * sy
-        sprite.angle = (base && base[:angle] ? base[:angle] : 0).to_f + sample_value(obj, "rotation", frame, 0)
+        sprite.angle = (base && base[:angle] ? base[:angle] : 0).to_f + sample_value(obj, "rotation", frame, 0) + (flip_v ? 180.0 : 0.0)
       else
         sprite.zoom_x = sx; sprite.zoom_y = sy
-        sprite.angle = sample_value(obj, "rotation", frame, 0)
+        sprite.angle = sample_value(obj, "rotation", frame, 0) + (flip_v ? 180.0 : 0.0)
       end
       sprite.opacity = [[(sample_value(obj, "opacity", frame, 100) * 2.55).round, 0].max, 255].min
       sprite.visible = sample_visible(obj, frame)
@@ -1771,11 +2530,106 @@ module BattleAnimationStudioRuntime
         apply_pbs_native_z(sprite, obj, frame)
       end
       sprite.blend_type = sample_value(obj, "blend", frame, 0).round if sprite.respond_to?(:blend_type=)
-      sprite.mirror = sample_value(obj, "flip", frame, 0) >= 0.5 if sprite.respond_to?(:mirror=)
+      if sprite.respond_to?(:mirror=)
+        base_mirror = false
+        if battler
+          side ||= sprite.equal?(target_sprite) ? :target : :user
+          mirror_base = side.to_sym == :target ? @original[:target] : @original[:user]
+          base_mirror = !!(mirror_base && mirror_base[:mirror])
+        end
+        sprite.mirror = base_mirror ^ flip_h ^ flip_v
+      end
       tone = to_tone(fx_at(obj, "tone", frame))
       sprite.tone = tone if tone && sprite.respond_to?(:tone=)
     rescue => e
       BattleAnimationStudioRuntime.log("apply_object #{e.class}: #{e.message}")
+    end
+
+    def affected_battler_original(idx)
+      i = idx.to_i
+      ui = runtime_user_index(-999).to_i
+      ti = runtime_target_index(-998).to_i
+      return @original[:user] if i == ui
+      return @original[:target] if i == ti
+      (@secondary_battler_originals || {})[i]
+    rescue
+      nil
+    end
+
+    def track_has_value_keys?(track, prop)
+      map = track.is_a?(Hash) && track["valueKeys"].is_a?(Hash) ? track["valueKeys"] : {}
+      arr = map[prop.to_s]
+      arr.is_a?(Array) && !arr.empty?
+    rescue
+      false
+    end
+
+    def track_has_visible_keys?(track)
+      arr = track.is_a?(Hash) ? track["visibleKeys"] : nil
+      arr.is_a?(Array) && !arr.empty?
+    rescue
+      false
+    end
+
+    def apply_replicated_battler_track(sprite, battler, primary_delta, track, frame)
+      return if !sprite || !battler || !track
+      idx = (battler.index rescue -1).to_i
+      original = affected_battler_original(idx)
+      return if !original
+      # Replicate only channels that the author actually keyed on Target. This
+      # keeps each battler's own bitmap/state but mirrors intentional hit
+      # reactions such as shake, vanish/fade and squash. Default/empty Target
+      # channels never overwrite adjacent battlers.
+      sprite.x = original[:x].to_f + primary_delta[0].to_f if sprite.respond_to?(:x=) && original.key?(:x)
+      sprite.y = original[:y].to_f + primary_delta[1].to_f if sprite.respond_to?(:y=) && original.key?(:y)
+
+      if track_has_visible_keys?(track) && sprite.respond_to?(:visible=)
+        sprite.visible = !!original[:visible] && sample_visible(track, frame)
+      end
+      if track_has_value_keys?(track, "opacity") && sprite.respond_to?(:opacity=)
+        pct = [[sample_value(track, "opacity", frame, 100).to_f, 0.0].max, 100.0].min / 100.0
+        sprite.opacity = [[(original[:opacity].to_f * pct).round, 0].max, 255].min
+      end
+      if (track_has_value_keys?(track, "size") || track_has_value_keys?(track, "scaleX") || track_has_value_keys?(track, "viewScale")) && sprite.respond_to?(:zoom_x=)
+        size = sample_value(track, "size", frame, 100).to_f / 100.0
+        sx = sample_value(track, "scaleX", frame, 100).to_f / 100.0
+        vs = sample_value(track, "viewScale", frame, 100).to_f / 100.0
+        sprite.zoom_x = original[:zoom_x].to_f * size * sx * vs
+      end
+      if (track_has_value_keys?(track, "size") || track_has_value_keys?(track, "scaleY") || track_has_value_keys?(track, "viewScale")) && sprite.respond_to?(:zoom_y=)
+        size = sample_value(track, "size", frame, 100).to_f / 100.0
+        sy = sample_value(track, "scaleY", frame, 100).to_f / 100.0
+        vs = sample_value(track, "viewScale", frame, 100).to_f / 100.0
+        sprite.zoom_y = original[:zoom_y].to_f * size * sy * vs
+      end
+      flip_h_keyed = track_has_value_keys?(track, "flip")
+      flip_v_keyed = track_has_value_keys?(track, "flipY")
+      flip_h = flip_h_keyed && sample_value(track, "flip", frame, 0) >= 0.5
+      flip_v = flip_v_keyed && sample_value(track, "flipY", frame, 0) >= 0.5
+      if (track_has_value_keys?(track, "rotation") || flip_v_keyed) && sprite.respond_to?(:angle=)
+        rotation = track_has_value_keys?(track, "rotation") ? sample_value(track, "rotation", frame, 0).to_f : 0.0
+        sprite.angle = original[:angle].to_f + rotation + (flip_v ? 180.0 : 0.0)
+      end
+      if (flip_h_keyed || flip_v_keyed) && sprite.respond_to?(:mirror=)
+        sprite.mirror = (!!original[:mirror]) ^ flip_h ^ flip_v
+      end
+      if track_has_value_keys?(track, "z") && sprite.respond_to?(:z=)
+        sprite.z = (original[:z].to_f + sample_value(track, "z", frame, 0).to_f).round
+      end
+      tone_keyed = ["toneRed", "toneGreen", "toneBlue", "toneGray"].any? { |prop| track_has_value_keys?(track, prop) }
+      tone_ops = track["fxOps"].is_a?(Array) && track["fxOps"].any? { |op| op.is_a?(Hash) && op["type"].to_s.downcase == "tone" }
+      if (tone_keyed || tone_ops) && sprite.respond_to?(:tone=)
+        tone = to_tone(fx_at(track, "tone", frame))
+        sprite.tone = tone if tone
+      end
+      color_keyed = ["colorRed", "colorGreen", "colorBlue", "colorAlpha"].any? { |prop| track_has_value_keys?(track, prop) }
+      color_ops = track["fxOps"].is_a?(Array) && track["fxOps"].any? { |op| op.is_a?(Hash) && op["type"].to_s.downcase == "color" }
+      if (color_keyed || color_ops) && sprite.respond_to?(:color=)
+        color = to_color(fx_at(track, "color", frame))
+        sprite.color = color if color
+      end
+    rescue => e
+      BattleAnimationStudioRuntime.log("replicated battler track #{e.class}: #{e.message}")
     end
 
     def apply_battlers
@@ -1788,6 +2642,26 @@ module BattleAnimationStudioRuntime
         apply_battler_view(:target, t, @frame)
         apply_object(target_sprite, t, @frame, true, :target)
       end
+      src = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      if t && src["autoReplicateAffected"] == true && @target && target_sprite
+        ui = runtime_user_index(-1).to_i
+        ti = runtime_target_index(-1).to_i
+        primary_original = @original[:target] || {}
+        px0 = (primary_original[:x] || target_sprite.x).to_f
+        py0 = (primary_original[:y] || target_sprite.y).to_f
+        # Use the actual primary Target sprite after applying its track. This
+        # captures authored shake/recoil but not an absolute foreign slot.
+        primary_delta = [target_sprite.x.to_f - px0, target_sprite.y.to_f - py0]
+        move_affected_battlers.each do |b|
+          idx = (b.index rescue -1).to_i
+          next if idx < 0 || idx == ti
+          sp = @sprites["pokemon_#{idx}"] rescue nil
+          next if !sp
+          apply_replicated_battler_track(sp, b, primary_delta, t, @frame)
+        end
+      end
+    rescue => e
+      BattleAnimationStudioRuntime.log("apply battlers #{e.class}: #{e.message}")
     end
 
     def emitter_type(clip)
@@ -1799,9 +2673,10 @@ module BattleAnimationStudioRuntime
     end
 
     def cached_emitter_commands(clip, name)
-      key = [clip.object_id, name.to_s]
+      source = replica_visual_source(clip)
+      key = [source.object_id, name.to_s]
       @emitter_command_cache[key] ||= begin
-        pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+        pbs = source["pbs"].is_a?(Hash) ? source["pbs"] : {}
         map = pbs["emitterCommands"].is_a?(Hash) ? pbs["emitterCommands"] : {}
         raw = map[name.to_s] || []
         raw.is_a?(Array) ? raw.sort_by { |cmd| (cmd["frame"] || 0).to_f } : []
@@ -1830,9 +2705,10 @@ module BattleAnimationStudioRuntime
     end
 
     def cached_pbs_commands(clip, name)
-      key = [clip.object_id, name.to_s]
+      source = replica_visual_source(clip)
+      key = [source.object_id, name.to_s]
       @pbs_command_cache[key] ||= begin
-        pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+        pbs = source["pbs"].is_a?(Hash) ? source["pbs"] : {}
         map = pbs["commands"].is_a?(Hash) ? pbs["commands"] : {}
         raw = map[name.to_s] || []
         raw.is_a?(Array) ? raw.sort_by { |cmd| (cmd["frame"] || 0).to_f } : []
@@ -1960,6 +2836,16 @@ module BattleAnimationStudioRuntime
         life = [max_travel + 4.0, 1.0].max
         @emitter_lifetime_cache[key] = life
         return life
+      elsif type == "risescatter" || type == "rise_scatter"
+        base_rise = (pbs["riseFrames"] || 6).to_f
+        base_scatter = (pbs["scatterFrames"] || 6).to_f
+        rise_keys = cached_emitter_commands(clip, "riseFrames")
+        scatter_keys = cached_emitter_commands(clip, "scatterFrames")
+        max_rise = ([base_rise] + rise_keys.map { |cmd| cmd["value"].to_f }).max
+        max_scatter = ([base_scatter] + scatter_keys.map { |cmd| cmd["value"].to_f }).max
+        life = [max_rise + max_scatter, 1.0].max
+        @emitter_lifetime_cache[key] = life
+        return life
       elsif type == "energyin" || type == "energyout"
         base_travel = (pbs["energyTravelFrames"] || 16).to_f
         travel_keys = cached_emitter_commands(clip, "energyTravelFrames")
@@ -2063,6 +2949,10 @@ module BattleAnimationStudioRuntime
       desc[:drain_travel] = [emitter_value(clip, "drainTravelFrames", ef, (pbs["drainTravelFrames"] || 14)).to_f, 1.0].max
       desc[:energy_travel] = [emitter_value(clip, "energyTravelFrames", ef, (pbs["energyTravelFrames"] || 16)).to_f, 1.0].max
       desc[:energy_turns] = emitter_value(clip, "energyTurns", ef, (pbs["energyTurns"] || 0)).to_f
+      desc[:rise_frames] = [1.0, emitter_value(clip, "riseFrames", ef, (pbs["riseFrames"] || 6)).to_f].max
+      desc[:rise_height] = [1.0, emitter_value(clip, "riseHeight", ef, (pbs["riseHeight"] || 64)).to_f].max
+      desc[:scatter_frames] = [0.0, emitter_value(clip, "scatterFrames", ef, (pbs["scatterFrames"] || 6)).to_f].max
+      desc[:scatter_speed] = [0.0, emitter_value(clip, "scatterSpeed", ef, (pbs["scatterSpeed"] || [20.0, desc[:speed].to_f * 0.75].max)).to_f].max
       desc
     end
 
@@ -2133,6 +3023,18 @@ module BattleAnimationStudioRuntime
     rescue
     end
 
+    def sample_emitter_spawn_position(clip, emission_frame)
+      old_context = @point_context_frame
+      begin
+        @point_context_frame = emission_frame.to_f
+        sample_position(clip, emission_frame.to_f)
+      ensure
+        @point_context_frame = old_context
+      end
+    rescue
+      sample_position(clip, emission_frame.to_f)
+    end
+
     def apply_emitter_particle(sprite, clip, local_frame, extra, desc, pool_index)
       return if !sprite
       apply_object(sprite, clip, local_frame, false)
@@ -2142,8 +3044,12 @@ module BattleAnimationStudioRuntime
         hide_second_layer(clip, emitter_layer_key(clip, pool_index))
         return
       end
-      sprite.x += extra[:dx].to_f
-      sprite.y += extra[:dy].to_f
+      # Freeze each particle's emitter origin at its own spawn frame. The emitter
+      # itself can keep following User/Target, but already-spawned particles must
+      # continue in their own local trajectory (e.g. vertical Rise + Scatter).
+      spawn_pos = sample_emitter_spawn_position(clip, desc[:frame])
+      sprite.x = spawn_pos[0].to_f + extra[:dx].to_f
+      sprite.y = spawn_pos[1].to_f + extra[:dy].to_f
       sprite.z = sprite.z.to_f + extra[:z].to_f
       sprite.zoom_x *= extra[:scale_x].to_f
       sprite.zoom_y *= extra[:scale_y].to_f
@@ -2151,25 +3057,34 @@ module BattleAnimationStudioRuntime
       # sampled in local lifetime (above), while emitterOpacity is a global
       # animation-frame multiplier controlled by the Studio inspector.
       emitter_alpha = [[sample_value(clip, "emitterOpacity", @frame, 100).to_f / 100.0, 0.0].max, 1.0].min
-      sprite.opacity = [[(sprite.opacity.to_f * emitter_alpha).round, 0].max, 255].min
+      particle_alpha = [[extra[:opacity_mult].nil? ? 1.0 : extra[:opacity_mult].to_f, 0.0].max, 1.0].min
+      total_alpha = emitter_alpha * particle_alpha
+      sprite.opacity = [[(sprite.opacity.to_f * total_alpha).round, 0].max, 255].min
       apply_emitter_angle_override(sprite, clip, local_frame, desc)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
       focus = pbs["focus"].to_s.downcase
       relative_index = if focus.include?("and")
                          -1
                        elsif focus.start_with?("user")
-                         (@user.index rescue -1)
+                         runtime_user_index(-1)
                        elsif focus.start_with?("target")
-                         (@target.index rescue -1)
+                         runtime_target_index(-1)
                        else
                          -1
                        end
-      # Match preview.js semantics for imported PBS FoeFlip.
-      sprite.mirror = true if pbs["foeFlip"] && relative_index.to_i >= 0 && relative_index.to_i.odd? && sprite.respond_to?(:mirror=)
-      sprite.mirror = !sprite.mirror if desc[:random_flip] && sprite.respond_to?(:mirror=)
+      # Match preview.js semantics for imported PBS FoeFlip while preserving
+      # the RGSS-safe vertical-flip representation (mirror XOR flipY + 180deg).
+      if sprite.respond_to?(:mirror=)
+        final_h = sample_value(clip, "flip", local_frame, 0) >= 0.5
+        final_h = true if pbs["foeFlip"] && relative_index.to_i >= 0 && relative_index.to_i.odd?
+        final_h = !final_h if desc[:random_flip]
+        final_v = sample_value(clip, "flipY", local_frame, 0) >= 0.5
+        sprite.mirror = final_h ^ final_v
+      end
       # RandomFrameMax is a spawn-time choice. Keep it until a Frame process
       # begins, rather than rolling a new frame every render update.
-      frame_keys = cached_value_keys(clip, "graphicFrame")
+      visual_clip = replica_visual_source(clip)
+      frame_keys = cached_value_keys(visual_clip, "graphicFrame")
       random_frame = desc[:random_frame]
       use_random_frame = !random_frame.nil? && (frame_keys.empty? || local_frame < frame_keys.first["frame"].to_f)
       apply_source_frame(sprite, clip, local_frame, nil, use_random_frame ? random_frame : nil)
@@ -2178,7 +3093,7 @@ module BattleAnimationStudioRuntime
       tone = to_tone(fx_at(clip, "tone", local_frame)); color = to_color(fx_at(clip, "color", local_frame))
       sprite.tone = tone if tone && sprite.respond_to?(:tone=)
       sprite.color = color if color && sprite.respond_to?(:color=)
-      apply_second_layer(clip, sprite, local_frame, emitter_layer_key(clip, pool_index), desc[:random_angle_invert], emitter_alpha)
+      apply_second_layer(clip, sprite, local_frame, emitter_layer_key(clip, pool_index), desc[:random_angle_invert], total_alpha)
     rescue => e
       BattleAnimationStudioRuntime.log("emitter particle #{e.class}: #{e.message}")
       sprite.visible = false rescue nil
@@ -2216,6 +3131,18 @@ module BattleAnimationStudioRuntime
           dx += Math.cos(phase) * desc[:speed].to_f * sec
           dy -= Math.sin(phase) * desc[:speed].to_f * sec
           dy += desc[:gravity].to_f * sec * sec / 2.0 if type == "projectile"
+        elsif type == "risescatter" || type == "rise_scatter"
+          rise_frames = [1.0, desc[:rise_frames].to_f].max
+          scatter_frames = [0.0, desc[:scatter_frames].to_f].max
+          next if age > rise_frames + scatter_frames
+          rise_t = [[age / rise_frames, 0.0].max, 1.0].min
+          rise_ease = 1.0 - ((1.0 - rise_t) ** 2)
+          dy -= desc[:rise_height].to_f * rise_ease
+          if age > rise_frames
+            scatter_sec = (age - rise_frames) / fps
+            dx += Math.cos(phase) * desc[:scatter_speed].to_f * scatter_sec
+            dy -= Math.sin(phase).abs * desc[:scatter_speed].to_f * scatter_sec * 0.12
+          end
         elsif type == "helix"
           dx += radius_x * desc[:radius_x_mult].to_f * Math.sin(phase + (Math::PI * 2.0 * sec / desc[:period_x].to_f) * dir)
           dy += desc[:speed].to_f * sec if desc[:speed].to_f != 0
@@ -2249,10 +3176,23 @@ module BattleAnimationStudioRuntime
         end
         sprite = ensure_emitter_sprite(clip, particle_index, template)
         next if !sprite
+        opacity_start = [[emitter_value(clip, "particleOpacityStart", ef, 5).to_f, 0.0].max, 100.0].min / 100.0
+        opacity_normal = [[emitter_value(clip, "particleOpacity", ef, 100).to_f, 0.0].max, 100.0].min / 100.0
+        opacity_end = [[emitter_value(clip, "particleOpacityEnd", ef, 0).to_f, 0.0].max, 100.0].min / 100.0
+        opacity_t = [[age.to_f / [life.to_f, 1.0].max, 0.0].max, 1.0].min
+        fade_in_end = 0.22
+        if opacity_t <= fade_in_end
+          local_t = opacity_t / fade_in_end
+          particle_opacity = opacity_start + ((opacity_normal - opacity_start) * local_t)
+        else
+          local_t = (opacity_t - fade_in_end) / (1.0 - fade_in_end)
+          particle_opacity = opacity_normal + ((opacity_end - opacity_normal) * local_t)
+        end
         apply_emitter_particle(sprite, clip, age,
           { :dx => dx, :dy => dy, :z => zoff,
             :scale_x => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_x_mult].to_f,
-            :scale_y => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_y_mult].to_f }, desc, particle_index)
+            :scale_y => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_y_mult].to_f,
+            :opacity_mult => particle_opacity }, desc, particle_index)
         particle_index += 1
       end
       hide_emitter_tail(clip, particle_index)
@@ -2360,6 +3300,14 @@ module BattleAnimationStudioRuntime
     end
 
     def apply_clip(clip)
+      if clip["_replicaBattlerIndex"]
+        with_replica_battler(clip) { apply_clip_core(clip) }
+      else
+        apply_clip_core(clip)
+      end
+    end
+
+    def apply_clip_core(clip)
       if emitter_type(clip) != "none"
         apply_emitter(clip)
         return
@@ -2597,17 +3545,21 @@ module BattleAnimationStudioRuntime
           apply_camera_to_sprite(sprite, state)
         end
       end
-      @effect_sprites.each_value do |sprite|
+      @effect_sprites.each do |id, sprite|
+        next if @screen_fixed_clip_ids && @screen_fixed_clip_ids[id.to_s]
         next if !sprite || seen[sprite.object_id] || !sprite.visible
         seen[sprite.object_id] = true
         apply_camera_to_sprite(sprite, state)
       end
-      @second_layer_sprites.each_value do |sprite|
+      @second_layer_sprites.each do |id, sprite|
+        base_id = id.to_s.split("@@")[0]
+        next if @screen_fixed_clip_ids && @screen_fixed_clip_ids[base_id]
         next if !sprite || seen[sprite.object_id] || !sprite.visible
         seen[sprite.object_id] = true
         apply_camera_to_sprite(sprite, state)
       end
-      @emitter_sprites.each_value do |pool|
+      @emitter_sprites.each do |id, pool|
+        next if @screen_fixed_clip_ids && @screen_fixed_clip_ids[id.to_s]
         pool.each do |sprite|
           next if !sprite || seen[sprite.object_id] || !sprite.visible
           seen[sprite.object_id] = true
@@ -2694,7 +3646,21 @@ module BattleAnimationStudioRuntime
         no_user = !!data["noUser"]
         no_target = !!data["noTarget"]
         affected = raw_target || user
-        if no_user && !no_target
+        one_battler_call = !user.nil? && raw_target.nil?
+        subject_role = BattleAnimationStudioRuntime.common_subject_role(data)
+        if one_battler_call && subject_role == "target"
+          # Essentials residual/status effects commonly use
+          # pbCommonAnimation(name, affected_battler). For a Target-authored
+          # Common, that battler must become Target (not User+Target).
+          play_user = nil
+          play_target = affected
+        elsif one_battler_call && subject_role == "user"
+          play_user = affected
+          play_target = nil
+        elsif one_battler_call && subject_role == "none"
+          play_user = nil
+          play_target = nil
+        elsif no_user && !no_target
           play_user = nil
           play_target = affected
         elsif no_target && !no_user
@@ -2704,14 +3670,18 @@ module BattleAnimationStudioRuntime
           play_user = nil
           play_target = nil
         else
-          # Commons that define both roles still need a useful Target when the
-          # caller supplies only the affected battler. This mirrors the old
-          # animation fallback where target || user is used.
+          # Commons that truly use both roles preserve the legacy fallback.
           play_target ||= play_user
         end
       end
 
-      player = BattleAnimationStudioRuntime::Player.new(@sprites, @viewport, play_user, play_target, data)
+      explicit_targets = targets.is_a?(Array) ? targets.compact : [targets].compact
+      # Common animations often receive a single affected battler through a
+      # different argument shape; preserve the remapped role in that case.
+      if explicit_targets.empty? && play_target
+        explicit_targets = [play_target]
+      end
+      player = BattleAnimationStudioRuntime::Player.new(@sprites, @viewport, play_user, play_target, data, explicit_targets)
       begin
         BattleAnimationStudioRuntime.active_player = player
         loop do

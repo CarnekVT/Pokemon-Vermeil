@@ -94,6 +94,15 @@ module Mode7
       y1 = y0 + dy
       return false if x1 < 0 || y1 < 0 || x1 >= $game_map.width || y1 >= $game_map.height
 
+      # V25 model collision authority. El sidecar .v25c se precarga al montar
+      # el mapa y vive en un Hash O(1). Consultarlo aqui hace que la colision de
+      # modelos use EXACTAMENTE la misma ruta que passable?/playerPassable?, sin
+      # depender de Game_Player#can_move_in_direction? ni del renderer visual.
+      if defined?(Mode7::ModelPhysicsWorld) &&
+         Mode7::ModelPhysicsWorld.respond_to?(:blocked_cell?)
+        return true if Mode7::ModelPhysicsWorld.blocked_cell?(x1, y1, dir, x0, y0)
+      end
+
       # Collision must never depend on renderer visibility or perform file I/O.
       # 028_GeometryCollisionAuthority keeps the already-loaded Geometry object in
       # memory. During renderer rebuilds/transitions we continue using that source.

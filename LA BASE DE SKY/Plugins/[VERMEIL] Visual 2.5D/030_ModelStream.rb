@@ -134,6 +134,10 @@ class Mode7Renderer
       end
     end
     # Force visibility recalc after adding bucket entries.
+    if loaded > 0 && defined?(Mode7::ModelPhysicsWorld) &&
+       Mode7::ModelPhysicsWorld.respond_to?(:refresh_surface_fallback)
+      Mode7::ModelPhysicsWorld.refresh_surface_fallback(@map_id, geo)
+    end
     @nds_object_projection_key = nil
     @nds_object_visibility_key = nil
   rescue Exception => e

@@ -215,7 +215,7 @@ Battle::AbilityEffects::OnBeingHit.add(:INNARDSOUT,
       if Battle::Scene::USE_ABILITY_SPLASH
         battle.pbDisplay(_INTL("¡{1} se ha hecho daño!", user.pbThis))
       else
-        battle.pbDisplay(_INTL("¡{1} ha isdo dañado por {3} de {2}!", user.pbThis,
+        battle.pbDisplay(_INTL("¡{1} ha sido dañado por {3} de {2}!", user.pbThis,
            target.pbThis(true), target.abilityName))
       end
     end
@@ -387,7 +387,7 @@ end
 # Damage dealt is based on the target's non-boosted HP.
 #-------------------------------------------------------------------------------
 class Battle::Move::PowerHigherWithTargetHP < Battle::Move
-  def pbBaseDamage(baseDmg, user, target)
+  def pbBasePower(baseDmg, user, target)
     return [120 * target.real_hp / target.real_totalhp, 1].max
   end
 end
@@ -397,8 +397,8 @@ end
 #===============================================================================
 # Damage dealt is based on the target's non-boosted HP.
 #-------------------------------------------------------------------------------
-class Battle::Move::PowerHigherWithTargetHP100PowerRange < Battle::Move
-  def pbBaseDamage(baseDmg, user, target)
+class Battle::Move::PowerHigherWithTargetHP100 < Battle::Move
+  def pbBasePower(baseDmg, user, target)
     return [100 * target.real_hp / target.real_totalhp, 1].max
   end
 end
@@ -712,7 +712,7 @@ class Battle::Move::CurseTargetOrLowerUserSpd1RaiseUserAtkDef1 < Battle::Move
   alias dx_pbMoveFailed? pbMoveFailed?
   def pbMoveFailed?(user, targets)
     if user.pokemon.immunities.include?(:SELFKO) && 
-       user.pbHasType?(:GHOST) && user.real_hp <= user.real_totalhp / 2
+       user.pbHasType?(:GHOST) && user.hp <= user.real_totalhp / 2
       @battle.pbDisplay(_INTL("¡Pero falló!"))
       return true
     end
@@ -728,7 +728,7 @@ end
 class Battle::Move::UserLosesHalfOfTotalHP < Battle::Move
   def pbMoveFailed?(user, targets)
     if user.pokemon.immunities.include?(:SELFKO) && 
-       user.takesIndirectDamage? && user.real_hp <= user.real_totalhp / 2
+       user.takesIndirectDamage? && user.hp <= user.real_totalhp / 2
       @battle.pbDisplay(_INTL("¡Pero falló!"))
       return true
     end
@@ -745,7 +745,7 @@ class Battle::Move::UserLosesHalfOfTotalHPExplosive < Battle::Move
   alias dx_pbMoveFailed? pbMoveFailed?
   def pbMoveFailed?(user, targets)
     if user.pokemon.immunities.include?(:SELFKO) && 
-       user.takesIndirectDamage? && user.real_hp <= user.real_totalhp / 2
+       user.takesIndirectDamage? && user.hp <= user.real_totalhp / 2
       @battle.pbDisplay(_INTL("¡Pero falló!"))
       return true
     end

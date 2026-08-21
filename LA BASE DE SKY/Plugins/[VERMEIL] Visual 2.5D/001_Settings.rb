@@ -444,6 +444,15 @@ module Mode7
     # Reuse identical generated face bitmaps (same material/UV/size) across
     # sprites. This cuts allocations heavily on repeated cliffs/buildings.
     NDS_OBJECT_BITMAP_CACHE_MAX  = 256
+    # Phase 2 Sky-safe Performance Core. With the stock Sky runtime (no
+    # Sprite#corners), project/cull all candidate Geometry faces in ONE DLL call.
+    NDS_OBJECT_SKY_NATIVE_BATCH  = true
+    NDS_OBJECT_SKY_BATCH_MIN_FACES = 4
+
+    # Lightweight diagnostics. Timing is sampled only once every N frames, so it
+    # does not turn profiling itself into the performance problem.
+    V25_PERF_DIAGNOSTICS         = true
+    V25_PERF_SAMPLE_INTERVAL     = 300
     # Model Studio 3.1 writes optional special-model meshes as JSONL. Only a tiny
     # number of faces are parsed/registered per frame, eliminating the
     # synchronous full-model JSON.parse hitch when entering a map.
