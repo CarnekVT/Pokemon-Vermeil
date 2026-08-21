@@ -813,7 +813,6 @@ class Battle
       battler.tookPhysicalHit                      = false
       battler.statsRaisedThisRound                 = false
       battler.statsLoweredThisRound                = false
-      battler.canRestoreIceFace                    = false
       battler.lastRoundMoveFailed                  = battler.lastMoveFailed
       battler.lastAttacker.clear
       battler.lastFoeAttacker.clear

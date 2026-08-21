@@ -812,7 +812,7 @@ MultipleForms.register(:EISCUE, {
        [:Hail, :Snowstorm].include?(battler.effectiveWeather)
       battle.pbShowAbilitySplash(self, true)
       battle.pbHideAbilitySplash(self)
-      pbChangeForm(0, _INTL("{1} transformed!", battler.pbThis))
+      pbChangeForm(0, _INTL("¡{1} se transformó!", battler.pbThis))
     end
   },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
