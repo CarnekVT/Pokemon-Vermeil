@@ -810,7 +810,9 @@ MultipleForms.register(:EISCUE, {
     if !ability_changed && battler.hasActiveAbility?(:ICEFACE) &&
        battler.form == 1 && !battler.effects[PBEffects::Transform] &&
        [:Hail, :Snowstorm].include?(battler.effectiveWeather)
-      battler.canRestoreIceFace = true   # Changed form at end of round
+      battle.pbShowAbilitySplash(self, true)
+      battle.pbHideAbilitySplash(self)
+      pbChangeForm(0, _INTL("{1} transformed!", battler.pbThis))
     end
   },
   "getFormOnLeavingBattle" => proc { |pkmn, battle, usedInBattle, endBattle|
