@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Animation Studio Runtime v1.10.64
+# Battle Animation Studio Runtime v1.0
 # Plays animations exported by the Maker Studio Battle Animation Studio.
 # Credits: CarnekVT
 # Source data: PBS/AnimationStudio/compiled_animations.json
@@ -11,7 +11,7 @@ end
 
 module BattleAnimationStudioRuntime
   DEFAULT_DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
-  VERSION = 31
+  VERSION = 32
   RUNTIME_PARTICLE_LIMIT = 240
   @cache = nil
   @mtime = nil
@@ -2373,6 +2373,11 @@ module BattleAnimationStudioRuntime
       focus = pbs["focus"].to_s.downcase
       return "target" if focus.include?("target")
       return "user" if focus.include?("user")
+      # Follow User/Target is also a layer reference. Do not let a screen-authored
+      # anchor make a user-directed effect ignore its priority.
+      space = (obj["coordinateSpace"] || "auto").to_s.downcase
+      return "target" if space == "target"
+      return "user" if space == "user"
       keys = @position_key_cache[obj.object_id] ||= begin
         raw = obj["positionKeys"] || []
         raw.is_a?(Array) ? raw.sort_by { |k| (k["frame"] || 0).to_f } : []
@@ -2461,8 +2466,9 @@ module BattleAnimationStudioRuntime
       return if !sprite || !obj
       priority = sample_value(obj, "priority", frame, (obj["priority"] || 0).to_f).to_f
       explicit = (obj["priorityReference"] || "auto").to_s.downcase
-      # Explicit references are authoritative even at priority 0. This makes
-      # "Normal (0) respecto a Target/User" mean exactly the battler's layer.
+      # Never tie an effect to the battler's exact Z: RGSS can resolve equal-Z
+      # sprites by creation order. User/Target + 0 is the normal effect layer
+      # immediately above the battler; negatives remain behind it.
       if explicit == "absolute"
         sprite.z = priority
         return
@@ -2471,19 +2477,20 @@ module BattleAnimationStudioRuntime
       if explicit == "auto" && priority == 0
         return
       end
+      battler_offset = priority >= 0 ? priority + 1 : priority
       case ref
       when "target"
         base = target_sprite
         fallback_z = nae_battler_z(runtime_target_index(1))
         base_z = base && base.respond_to?(:z) ? base.z.to_f : fallback_z.to_f
-        sprite.z = base_z + priority
+        sprite.z = base_z + battler_offset
       when "user"
         base = user_sprite
         fallback_z = nae_battler_z(runtime_user_index(0))
         base_z = base && base.respond_to?(:z) ? base.z.to_f : fallback_z.to_f
-        sprite.z = base_z + priority
+        sprite.z = base_z + battler_offset
       when "foreground"
-        sprite.z = 100000 + priority
+        sprite.z = 2000 + priority
       when "background"
         # Background animation layers must stay above the battleback but below battlers.
         sprite.z = 100 + priority
@@ -3448,6 +3455,111 @@ module BattleAnimationStudioRuntime
       state
     end
 
+    def camera_focus_entries(camera)
+      list = camera.is_a?(Hash) && camera["logic"].is_a?(Array) ? camera["logic"] : []
+      list.select do |entry|
+        entry.is_a?(Hash) && ["focus", "follow", "focus_clear"].include?(entry["type"].to_s.downcase)
+      end.sort_by { |entry| (entry["frame"] || 0).to_f }
+    rescue
+      []
+    end
+
+    def camera_focus_directive(camera)
+      chosen = nil
+      camera_focus_entries(camera).each do |entry|
+        break if (entry["frame"] || 0).to_f > @frame.to_f
+        chosen = entry
+      end
+      return nil if !chosen || chosen["type"].to_s.downcase == "focus_clear"
+      side = chosen["side"].to_s.downcase == "target" ? :target : :user
+      start = (chosen["frame"] || 0).to_f
+      duration = [(chosen["duration"] || 0).to_f, 0.0].max
+      t = duration <= 0 ? 1.0 : ease01((@frame.to_f - start) / [duration, 0.0001].max, chosen["easing"] || "ease_out")
+      [side, [[t, 0.0].max, 1.0].min]
+    rescue
+      nil
+    end
+
+    def camera_focus_offset(camera)
+      list = camera_focus_entries(camera)
+      chosen_index = -1
+      list.each_with_index do |entry, i|
+        break if (entry["frame"] || 0).to_f > @frame.to_f
+        chosen_index = i
+      end
+      return [0.0, 0.0] if chosen_index < 0
+      chosen = list[chosen_index]
+      type = chosen["type"].to_s.downcase
+      start = (chosen["frame"] || 0).to_f
+      duration = [(chosen["duration"] || 0).to_f, 0.0].max
+      t = duration <= 0 ? 1.0 : ease01((@frame.to_f - start) / [duration, 0.0001].max, chosen["easing"] || "ease_out")
+      t = [[t, 0.0].max, 1.0].min
+      previous_side = nil
+      if chosen_index > 0
+        previous = list[chosen_index - 1]
+        if previous["type"].to_s.downcase != "focus_clear"
+          previous_side = previous["side"].to_s.downcase == "target" ? :target : :user
+        end
+      end
+      current_side = type == "focus_clear" ? nil : (chosen["side"].to_s.downcase == "target" ? :target : :user)
+      center_x = Graphics.width.to_f / 2.0
+      center_y = Graphics.height.to_f / 2.0
+      from = previous_side ? camera_follow_point(previous_side) : [center_x, center_y]
+      to = current_side ? camera_follow_point(current_side) : [center_x, center_y]
+      [
+        (from[0].to_f - center_x) + ((to[0].to_f - from[0].to_f) * t),
+        (from[1].to_f - center_y) + ((to[1].to_f - from[1].to_f) * t)
+      ]
+    rescue
+      [0.0, 0.0]
+    end
+
+    def camera_bounds_mode
+      scene = @data["scene"].is_a?(Hash) ? @data["scene"] : {}
+      mode = (scene["cameraBoundsMode"] || "auto").to_s.downcase
+      return :screen if mode == "screen"
+      return :extended if mode == "extended"
+      source = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      source["system"].to_s.downcase == "ebdx" ? :extended : :screen
+    rescue
+      :screen
+    end
+
+    def constrain_camera_state(x, y, zoom, rotation)
+      return [x, y, zoom] if camera_bounds_mode == :extended
+      width = [Graphics.width.to_f, 1.0].max
+      height = [Graphics.height.to_f, 1.0].max
+      rad = rotation.to_f * Math::PI / 180.0
+      ac = Math.cos(rad).abs
+      asin = Math.sin(rad).abs
+      min_zoom_x = (width * ac + height * asin) / width
+      min_zoom_y = (width * asin + height * ac) / height
+      zoom = [zoom.to_f, 1.0, min_zoom_x, min_zoom_y].max
+      req_half_x = (width * ac + height * asin) / (2.0 * zoom)
+      req_half_y = (width * asin + height * ac) / (2.0 * zoom)
+      max_x = [width / 2.0 - req_half_x, 0.0].max
+      max_y = [height / 2.0 - req_half_y, 0.0].max
+      x = [[x.to_f, -max_x].max, max_x].min
+      y = [[y.to_f, -max_y].max, max_y].min
+      [x, y, zoom]
+    rescue
+      [x, y, zoom]
+    end
+
+    def camera_follow_point(side)
+      sprite = side.to_sym == :target ? target_sprite : user_sprite
+      if sprite && !(sprite.respond_to?(:disposed?) && sprite.disposed?)
+        x = (sprite.x rescue Graphics.width.to_f / 2.0).to_f
+        y = (sprite.y rescue Graphics.height.to_f / 2.0).to_f
+        h = (sprite.bitmap && !sprite.bitmap.disposed?) ? sprite.bitmap.height.to_f : 80.0
+        zy = (sprite.zoom_y rescue 1.0).to_f.abs
+        return [x, y - (h * zy / 2.0)]
+      end
+      base_anchor(side, true)
+    rescue
+      [Graphics.width.to_f / 2.0, Graphics.height.to_f / 2.0]
+    end
+
     def camera_state
       state = neutral_camera_state
       camera = @data["camera"].is_a?(Hash) ? @data["camera"] : nil
@@ -3458,6 +3570,9 @@ module BattleAnimationStudioRuntime
       x *= rs[0]; y *= rs[1]
       zoom = camera ? [0.05, sample_value(camera, "cameraZoom", @frame, 100).to_f / 100.0].max : 1.0
       rotation = camera ? sample_value(camera, "cameraRotation", @frame, 0).to_f : 0.0
+      focus_offset = camera_focus_offset(camera)
+      x += focus_offset[0].to_f
+      y += focus_offset[1].to_f
       (@shake_events || []).each do |ev|
         start = (ev["frame"] || 0).to_f
         dur = [(ev["duration"] || 1).to_f, 1.0].max
@@ -3469,6 +3584,8 @@ module BattleAnimationStudioRuntime
         x += Math.sin(local * 2.73 + 0.31) * strength if axis != 2
         y += Math.cos(local * 3.91 + 0.77) * strength * 0.55 if axis != 1
       end
+      constrained = constrain_camera_state(x, y, zoom, rotation)
+      x = constrained[0]; y = constrained[1]; zoom = constrained[2]
       state[:x] = x; state[:y] = y; state[:zoom] = zoom; state[:rotation] = rotation
       rad = rotation * Math::PI / 180.0
       state[:cos] = Math.cos(rad); state[:sin] = Math.sin(rad)
