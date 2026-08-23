@@ -490,9 +490,9 @@ class Battle
     # Pledge Rainbow
     pbEORCountDownSideEffect(side, PBEffects::Rainbow,
                              _INTL("El arcoíris sobre {1} ha desaparecido.", @battlers[side].pbTeam(true)))
-    # Pledge Sea of Fire
-    pbEORCountDownSideEffect(side, PBEffects::SeaOfFire,
-                             _INTL("El mar de llamas que rodeaba a {1} ha desaparecido.", @battlers[side].pbTeam(true)))
+    
+    # NOTE: Pledge Sea of Fire's counter is counted down above.
+
     # Pledge Swamp
     pbEORCountDownSideEffect(side, PBEffects::Swamp,
                              _INTL("El pantano que rodeaba a {1} ha desaparecido!", @battlers[side].pbTeam(true)))
@@ -813,7 +813,6 @@ class Battle
       battler.tookPhysicalHit                      = false
       battler.statsRaisedThisRound                 = false
       battler.statsLoweredThisRound                = false
-      battler.canRestoreIceFace                    = false
       battler.lastRoundMoveFailed                  = battler.lastMoveFailed
       battler.lastAttacker.clear
       battler.lastFoeAttacker.clear

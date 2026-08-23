@@ -672,6 +672,49 @@ module Compiler
     end
     # Save all data
     save_data(dex_lists, "Data/regional_dexes.dat")
+    $game_temp.regional_dexes_data = nil if $game_temp
+    reorder_species_data_by_dex_lists(dex_lists)
+  end
+
+  # Especies definidas solo en PBS extra se registran
+  # al final de DATA. Si ya están en una Dex regional, vuelven a ese orden.
+  def reorder_species_data_by_dex_lists(dex_lists)
+    data = GameData::Species::DATA
+    return if data.empty? || !dex_lists.is_a?(Array)
+    order = []
+    seen = {}
+    dex_lists.each do |list|
+      next if !list
+      list.each do |sp|
+        species_data = GameData::Species.try_get(sp)
+        next if !species_data
+        base = species_data.species
+        next if seen[base]
+        seen[base] = true
+        order.push(base)
+      end
+    end
+    return if order.empty?
+    data.each_value do |s|
+      next if s.form != 0 || seen[s.species]
+      seen[s.species] = true
+      order.push(s.species)
+    end
+    grouped = {}
+    data.each do |key, val|
+      grouped[val.species] ||= []
+      grouped[val.species].push([key, val])
+    end
+    new_data = {}
+    order.each do |sp|
+      entries = grouped[sp]
+      next if !entries
+      entries.each { |key, val| new_data[key] = val }
+    end
+    data.each { |key, val| new_data[key] = val unless new_data.has_key?(key) }
+    data.clear
+    new_data.each { |key, val| data[key] = val }
+    GameData::Species.save
   end
 
   #=============================================================================

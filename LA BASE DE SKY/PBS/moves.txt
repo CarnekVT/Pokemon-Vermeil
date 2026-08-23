@@ -275,6 +275,7 @@ Type = BUG
 Category = Status
 Accuracy = 100
 TotalPP = 20
+Priority = 1
 Target = NearOther
 FunctionCode = TargetNextFireMoveDamagesTarget
 Flags = CanProtect,CanMirrorMove,Powder
@@ -454,7 +455,7 @@ Accuracy = 100
 TotalPP = 10
 Target = NearOther
 FunctionCode = TrapUserAndTargetInBattle
-Flags = Contact,CanProtect,CanMirrorMove
+Flags = Contact,CanProtect,CanMirrorMove,Biting
 Description = Prohibe al objetivo y al usuario abandonar el combate hasta que uno de los dos se debilite.
 #-------------------------------
 [THROATCHOP]
@@ -7712,7 +7713,7 @@ Category = Status
 Accuracy = 0
 TotalPP = 10
 Target = BothSides
-Priority = -7
+Priority = 0
 FunctionCode = StartSwapAllBattlersBaseDefensiveStats
 Flags = CanMirrorMove
 Description = Crea una zona que intercambia la Defensa y Def. Esp. de todos por 5 turnos.
