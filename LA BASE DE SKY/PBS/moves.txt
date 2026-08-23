@@ -3399,7 +3399,7 @@ Accuracy = 0
 TotalPP = 5
 Target = User
 FunctionCode = SetAttackerMovePPTo0IfUserFaints
-Description = Si el usuario se debilita al recibir un ataque, s los PP de este último ataque serán eliminados.
+Description = Si el usuario se debilita al recibir un ataque, los PP de este último ataque serán eliminados.
 #-------------------------------
 [NIGHTMARE]
 Name = Pesadilla
@@ -9857,7 +9857,7 @@ Accuracy = 100
 TotalPP = 10
 Target = NearOther
 FunctionCode = None
-Flags = Contact,CanProtect,CanMirrorMove
+Flags = CanProtect,CanMirrorMove
 Description = Movimiento cuyo tipo varía al del usuario en caso de que éste haya teracristalizado.
 #-------------------------------
 [NIHILLIGHT]

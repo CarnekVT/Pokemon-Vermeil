@@ -2101,10 +2101,10 @@ Battle::AbilityEffects::OnBeingHit.add(:CURSEDBODY,
     user.effects[PBEffects::Disable]     = 3
     user.effects[PBEffects::DisableMove] = regularMove.id
     if Battle::Scene::USE_ABILITY_SPLASH
-      battle.pbDisplay(_INTL("¡{1} de {2} fue deshabilitado!", user.pbThis, regularMove.name))
+      battle.pbDisplay(_INTL("¡{1} de {2} fue deshabilitado!", regularMove.name, user.pbThis))
     else
       battle.pbDisplay(_INTL("¡{1} de {2} fue deshabilitado por la habilidad {4} de {3}!",
-          user.pbThis, regularMove.name, target.pbThis(true), target.abilityName))
+                              regularMove.name, user.pbThis, target.pbThis(true), target.abilityName))
     end
     battle.pbHideAbilitySplash(target)
     user.pbItemStatusCureCheck
@@ -3381,7 +3381,7 @@ Battle::AbilityEffects::OnSwitchIn.add(:INTREPIDSWORD,
 Battle::AbilityEffects::OnSwitchIn.add(:MIMICRY,
   proc { |ability, battler, battle, switch_in|
     next if battle.field.terrain == :None
-    Battle::AbilityEffects.triggerOnTerrainChange(ability, battler, battle, false)
+    Battle::AbilityEffects.triggerOnTerrainChange(ability, battler, battle, battle.field.terrain, false)
   }
 )
 

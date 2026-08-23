@@ -1337,7 +1337,12 @@ class Battle::Move::ReplaceMoveWithTargetLastMoveUsed < Battle::Move
     @moveBlacklist = [
       "ReplaceMoveWithTargetLastMoveUsed",   # Sketch (this move)
       "RevivePokemonToHalfHP",               # Revival Blessing
-      "Struggle"                             # Struggle
+      "Struggle",                            # Struggle
+      "StarmobileBurnTarget",                # Starmobile
+      "StarmobileParalyzeTarget",            # Starmobile
+      "StarmobileConfuseTarget",             # Starmobile
+      "StarmobilePoisonTarget",              # Starmobile
+      "StarmobileSleepTarget",               # Starmobile
     ]
     @signatureMoveBlacklist = []
     if Settings::MECHANICS_GENERATION >= 9

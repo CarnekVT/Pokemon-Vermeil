@@ -2650,7 +2650,7 @@ Flags = Legendary
 [ZYGARDE,4]
 FormName = Mega Zygarde
 MegaStone = ZYGARDITE
-BaseStats = 74,65,67,92,125,128
+BaseStats = 216,70,91,100,216,85
 Abilities = POWERCONSTRUCT
 HiddenAbilities = POWERCONSTRUCT
 Height = 7.7

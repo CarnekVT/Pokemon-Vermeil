@@ -2958,7 +2958,7 @@ Description = Una de las misteriosas Megapiedras. Permite megaevolucionar a Exca
 #-------------------------------
 [SCOLIPITE]
 Name = Scolipedita
-amePlural = Scolipeditas
+NamePlural = Scolipeditas
 Pocket = 1
 Price = 0
 BPPrice = 50
