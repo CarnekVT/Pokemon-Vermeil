@@ -494,7 +494,17 @@ class Mode7Renderer
     begin
       durations = @autotiles.instance_variable_get(:@frame_durations)
       durations[name] = TilemapRenderer::AUTOTILE_FRAME_DURATION.to_f / 20 if durations && !durations.key?(name)
-      expanded = AutotileExpander.expand(raw)
+      # Essentials v21/LBDS defines the expander under TilemapRenderer.
+      # An unqualified constant here resolves inside Mode7Renderer first.
+      expander = nil
+      if defined?(TilemapRenderer::AutotileExpander)
+        expander = TilemapRenderer::AutotileExpander
+      elsif defined?(::AutotileExpander)
+        expander = ::AutotileExpander
+      end
+      return nil if !expander
+      expanded = expander.expand(raw)
+      return nil if !expanded || expanded.disposed?
       @autotiles[name] = expanded
       load_counts = @autotiles.instance_variable_get(:@load_counts)
       load_counts[name] ||= 1 if load_counts

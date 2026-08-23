@@ -144,9 +144,9 @@ class Mode7Renderer
       Mode7.set_camera(Mode7.context_default_alpha, Mode7.camera_zoom,
                        0, Mode7.distance_h, Mode7.cylindrical_radius)
     end
-    return if Mode7.map_projection == :affine
-    Mode7.map_projection = :affine
-    Mode7.reset_caches
+    # NDS-only: detectar un mapa interior cambia el contexto/angulo, no el
+    # backend de proyeccion. Affine/Cylindrical ya no son modos de mapa.
+    Mode7.map_projection = :perspective
   rescue Exception
   end
 

@@ -22,7 +22,7 @@ module Mode7
   class SurfaceGeometry
     attr_reader :map_id, :width, :height, :height_step, :source, :path, :inherit_legacy, :objects, :mesh_faces, :model_collision_cells, :model_stream_path, :model_face_count, :planes
 
-    def initialize(map_id, width, height, height_step, source = :legacy, path = nil)
+    def initialize(map_id, width, height, height_step, source = :nds_tags, path = nil)
       @map_id = map_id.to_i
       @width = width.to_i
       @height = height.to_i
@@ -461,9 +461,9 @@ class Mode7Renderer
     @nds_surface_geometry = nil
     return if !Mode7::Config::SURFACE_GEOMETRY_ENABLED
 
-    # Read the explicit file first. A fully-authored Geometry map can opt out of
-    # legacy Terrain Tags; in that common case there is no reason to scan the
-    # complete map and calculate legacy elevation before throwing it away.
+    # Read the explicit Geometry V4 file first. If it is fully authored, it is
+    # authoritative. Otherwise its compatibility inherit flag overlays the
+    # NDS Terrain Tag surface generated below.
     overlay = Mode7::SurfaceGeometry.from_file(@map_id, @map.width, @map.height)
     if overlay && !overlay.inherit_legacy
       @nds_surface_geometry = overlay
@@ -472,28 +472,30 @@ class Mode7Renderer
       return
     end
 
-    legacy = Mode7::SurfaceGeometry.new(
+    nds_tags = Mode7::SurfaceGeometry.new(
       @map_id, @map.width, @map.height,
-      Mode7::Config::SURFACE_GEOMETRY_HEIGHT_STEP, :legacy, nil
+      Mode7::Config::SURFACE_GEOMETRY_HEIGHT_STEP, :nds_tags, nil
     )
     (@entry_cache || {}).each do |pos, entries|
       next if !entries || entries.empty?
       tx, ty = pos
-      h = nds_legacy_surface_height_at(tx, ty)
-      legacy.set_height(tx, ty, h) if h.abs >= 0.001
+      h = nds_tag_surface_height_at(tx, ty)
+      nds_tags.set_height(tx, ty, h) if h.abs >= 0.001
     end
 
     geo = if overlay && overlay.inherit_legacy
-            legacy.overlay_from!(overlay)
+            # inherit_legacy is retained only as an on-disk compatibility field.
+            # Its runtime meaning is now "inherit NDS Terrain Tags".
+            nds_tags.overlay_from!(overlay)
           elsif overlay
             overlay
           else
-            legacy
+            nds_tags
           end
     @nds_surface_geometry = geo
     Mode7.register_geometry_collision_source(@nds_surface_geometry, @map_id) if Mode7.respond_to?(:register_geometry_collision_source)
     if defined?(Console)
-      label = geo.explicit? ? geo.path : "Terrain Tags legacy"
+      label = geo.explicit? ? geo.path : "NDS Terrain Tags"
       Console.echo_li("[VERMEIL] Surface Geometry: #{label}") rescue nil
     end
   rescue Exception => e
@@ -502,9 +504,9 @@ class Mode7Renderer
     Console.echo_error("VERMEIL surface geometry build: #{e.message}") if defined?(Console)
   end
 
-  # Conversion legacy. IMPORTANTE: MountainWall/MountainWallPlane nunca tienen
-  # altura horizontal; solo MountainTop/Volume definen la superficie caminable.
-  def nds_legacy_surface_height_at(tx, ty)
+  # Superficie derivada de Terrain Tags NDS. MountainWall/MountainWallPlane
+  # nunca tienen altura horizontal; MountainTop/Volume definen superficie.
+  def nds_tag_surface_height_at(tx, ty)
     return 0.0 if tx < 0 || ty < 0 || tx >= @map.width || ty >= @map.height
     entries = @entry_cache[[tx, ty]] || []
     max_h = 0.0
@@ -523,6 +525,11 @@ class Mode7Renderer
     max_h
   rescue Exception
     0.0
+  end
+
+  # Alias de compatibilidad: ya no representa un backend legacy; delega a NDS.
+  def nds_legacy_surface_height_at(tx, ty)
+    nds_tag_surface_height_at(tx, ty)
   end
 
   # V5.10.1: una celda pintada en el Geometry Editor puede elevar cualquier
@@ -597,7 +604,7 @@ class Mode7Renderer
     # Una escalera es una superficie inclinada unica. No dibujar tambien un
     # MountainTop horizontal debajo/encima de la rampa.
     return nil if entries.any? { |entry| nds_stair_entry?(entry) }
-    h = @nds_surface_geometry ? @nds_surface_geometry.height_at(tx, ty).to_f : nds_legacy_surface_height_at(tx, ty).to_f
+    h = @nds_surface_geometry ? @nds_surface_geometry.height_at(tx, ty).to_f : nds_tag_surface_height_at(tx, ty).to_f
     return nil if h <= 0.001
     # La geometria explicita es independiente del Terrain Tag: un tile normal
     # pintado L1/L2 en Maker Studio tambien se convierte en superficie 3D real.
@@ -610,7 +617,7 @@ class Mode7Renderer
   # desde una categoria distinta: consulta la misma geometria central.
   def nds_base_surface_height_at(tx, ty)
     return @nds_surface_geometry.height_at(tx, ty) if @nds_surface_geometry
-    nds_legacy_surface_height_at(tx, ty)
+    nds_tag_surface_height_at(tx, ty)
   rescue Exception
     0.0
   end
@@ -629,7 +636,7 @@ class Mode7Renderer
       end
       return @nds_surface_geometry.height_at(tx, ty)
     end
-    nds_legacy_surface_height_at(tx, ty)
+    nds_tag_surface_height_at(tx, ty)
   rescue Exception
     0.0
   end

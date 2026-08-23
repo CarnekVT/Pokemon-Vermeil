@@ -231,9 +231,7 @@ class Mode7Renderer
           entry[:v25_pre_visual_priority] = (billboard || protected_roof) ? own : visual
           entry[:v25_pre_explicit_elevation] =
             (entry.key?(:elevation) && !entry[:elevation].nil? ? entry[:elevation].to_f : 0.0).round(4)
-          # Phase 2.4.15: do not allocate a rigid source key for every tile.
-          # It is memoized lazily only if this entry actually becomes a rigid
-          # Priority candidate.
+          entry[:v25_pre_rigid_source_key] = rigid_priority_source_key(entry)
         end
 
         cell_height = 0 if has_wall
@@ -325,8 +323,7 @@ class Mode7Renderer
         end
 
         entry[:v25_explicit_elevation] = entry.delete(:v25_pre_explicit_elevation) || 0.0
-        # Source identity is intentionally deferred until rigid Priority needs it.
-        entry.delete(:v25_pre_rigid_source_key)
+        entry[:v25_rigid_source_key] = entry.delete(:v25_pre_rigid_source_key) || rigid_priority_source_key(entry)
         entry.delete(:v25_pre_flags)
         entry.delete(:v25_pre_visual_priority)
         entry.delete(:v25_pre_tag_ref)

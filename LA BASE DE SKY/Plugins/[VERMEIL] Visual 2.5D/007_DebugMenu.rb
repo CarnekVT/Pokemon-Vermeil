@@ -8,16 +8,8 @@ end
 
 module Mode7
   def self.projection_debug_label
-    forced = projection_override
-    source = forced ? _INTL("Manual") : _INTL("Auto")
     indoor = indoor_map? ? _INTL("Indoor") : _INTL("Outdoor")
-    label = case map_mode
-            when :perspective then _INTL("Camara NDS")
-            when :affine then _INTL("Affine legacy")
-            when :cylindrical then _INTL("Cylindrical legacy")
-            else map_mode.to_s
-            end
-    _INTL("{1} [{2}/{3}]", label, source, indoor)
+    _INTL("Camara NDS [Fija/{1}]", indoor)
   end
 
   def self.performance_profile_label
@@ -27,22 +19,12 @@ module Mode7
     else _INTL("Rendimiento")
     end
   rescue Exception
-    _INTL("Legacy")
+    _INTL("Rendimiento")
   end
 
   def self.open_projection_debug_selector
-    values = [:auto, :perspective, :affine, :cylindrical]
-    labels = [
-      _INTL("Auto (metadata/tags)"),
-      _INTL("Camara NDS / Perspective V5"),
-      _INTL("Affine legacy"),
-      _INTL("Cylindrical legacy")
-    ]
-    current = projection_override || :auto
-    index = values.index(current) || 0
-    chosen = pbShowCommands(nil, labels, -1, index)
-    return if chosen < 0
-    set_projection_mode(values[chosen])
+    pbMessage(_INTL("Visual 2.5D usa Camara NDS en todos los mapas. Affine y Cylindrical ya no son modos seleccionables."))
+    set_projection_mode(:perspective)
   end
 
   def self.open_performance_profile_selector

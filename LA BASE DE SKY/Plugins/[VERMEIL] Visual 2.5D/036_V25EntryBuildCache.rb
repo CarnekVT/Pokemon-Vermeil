@@ -224,26 +224,19 @@ class Mode7Renderer
     []
   end
 
-  def v25_rigid_source_key_cached(entry)
-    return entry[:v25_rigid_source_key] if entry.key?(:v25_rigid_source_key)
-    key = rigid_priority_source_key(entry)
-    entry[:v25_rigid_source_key] = key
-    key
-  end
-
   def v25_rigid_object_key_fast(tx, ty, entry)
     explicit = entry[:v25_explicit_elevation] || 0.0
     rect = entry[:src_rect]
     return [:single, entry.object_id, explicit] if !rect
-    source = v25_rigid_source_key_cached(entry)
+    source = entry[:v25_rigid_source_key] || rigid_priority_source_key(entry)
     origin_x = tx * Game_Map::TILE_WIDTH  - rect.x.to_i
     origin_y = ty * Game_Map::TILE_HEIGHT - rect.y.to_i
     [:source_object, source, origin_x, origin_y, explicit]
   end
 
   def v25_rigid_contiguous_fast?(a, b, dx, dy)
-    sa = v25_rigid_source_key_cached(a)
-    sb = v25_rigid_source_key_cached(b)
+    sa = a[:v25_rigid_source_key] || rigid_priority_source_key(a)
+    sb = b[:v25_rigid_source_key] || rigid_priority_source_key(b)
     return false if sa != sb
     ra = a[:src_rect]
     rb = b[:src_rect]

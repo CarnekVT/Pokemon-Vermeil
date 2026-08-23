@@ -4,12 +4,12 @@ Este archivo explica como CONFIGURAR y USAR Visual 2.5D. No contiene pasos de in
 
 1. CONFIGURACION PRINCIPAL
 - Revisa 001_Settings.rb para los parametros globales del sistema.
-- Los modos de proyeccion disponibles dependen de la configuracion del mapa y pueden incluir Perspective, Affine y Cylindrical.
+- Todos los mapas 2.5D usan Camara NDS / Perspective. Affine y Cylindrical ya no son modos seleccionables.
 - Ajusta angulo, zoom/FOV y parametros de raster desde las constantes correspondientes de Config.
 
 2. INDOOR / OUTDOOR
 - Usa los tags/categorias NDS definidos por Visual 2.5D para indicar walls, props, roofs, mountains, stairs y superficies.
-- Indoor puede usar una proyeccion distinta de Outdoor segun la configuracion del plugin.
+- Indoor y Outdoor usan el mismo backend NDS; cada contexto puede conservar un angulo distinto.
 - No uses Priority como sustituto de altura fisica: Priority controla orden visual; la elevacion/Geometry controla altura.
 
 3. GEOMETRY
@@ -23,7 +23,7 @@ Este archivo explica como CONFIGURAR y USAR Visual 2.5D. No contiene pasos de in
 
 5. RENDIMIENTO V25
 - Con V25Native disponible, Geometry puede usar batch nativo para proyectar multiples caras.
-- En Sky sin Sprite#corners, Perspective/Affine usan bandas adaptativas para el suelo.
+- En Sky sin Sprite#corners, Perspective NDS usa bandas adaptativas de compatibilidad para el suelo sin cambiar el modo del mapa.
 - El profiler puede mostrar lineas [V25 FRAME], [V25 PERF] y [V25 FRAME] en consola durante pruebas.
 - Las lineas de profiler son diagnostico y no requieren cambios en los mapas.
 
@@ -84,3 +84,18 @@ Los modelos con collision=solid usan MapXXX.v25c cuando existe. Si no existe sid
 DEBUG / COLISION
 - En modo Debug, mantener Ctrl usa el atravesado de paredes de Essentials y también ignora la colisión V25 de modelos/Geometry.
 - Fuera de Debug, Ctrl no desactiva la colisión V25.
+
+
+NDS ONLY / RUNTIME ESTABLE (Phase 2.5.2)
+- La proyeccion de gameplay es siempre Perspective NDS, tanto Indoor como Outdoor.
+- Los flags antiguos mode7affine/mode7cylindrical se ignoran en runtime.
+- Mapas sin Geometry V4 construyen su superficie desde Terrain Tags NDS; la consola muestra "NDS Terrain Tags".
+- El experimento Compiled Cells/.v25b no forma parte de esta base estable.
+
+RENDIMIENTO DE CARGA (PHASE 2.5.2)
+- Visual 2.5D compone primero solo el suelo que la cámara puede ver. Las celdas nuevas
+  se preparan justo antes de entrar en pantalla, por lo que mapas grandes ya no tienen
+  que rasterizar todo el suelo durante la transferencia.
+- progressive_zoom.json se lee una sola vez por ejecución. Para herramientas Debug que
+  lo editen en caliente puede usarse Mode7::ProgressiveZoom.reload_runtime_data!.
+- El log [VERMEIL LOAD] separa Game_Map#setup del [VERMEIL PERF] del renderer.

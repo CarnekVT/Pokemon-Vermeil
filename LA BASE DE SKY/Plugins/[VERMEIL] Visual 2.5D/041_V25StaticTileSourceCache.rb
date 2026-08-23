@@ -1,6 +1,6 @@
 #===============================================================================
 # [VERMEIL] Visual 2.5D - 041_V25StaticTileSourceCache.rb
-# Phase 2.4.15 - static tile source cache + allocation-light keys
+# Phase 2.4.13 - static tile source cache
 #
 # Build-only optimization. Static tileset entries repeatedly resolve the same
 # bitmap + source rectangle for the same tile ID. Cache that immutable source
@@ -110,20 +110,14 @@ class Mode7Renderer
         src = @scratch.src_rect.clone
       else
         @v25_static_autotile_source_cache ||= {}
-        # Phase 2.4.15: avoid allocating [filename, tid] for every lookup.
-        # Nested hashes preserve exact key semantics without hash-collision tricks.
-        by_tid = @v25_static_autotile_source_cache[filename]
-        if !by_tid
-          by_tid = {}
-          @v25_static_autotile_source_cache[filename] = by_tid
-        end
-        src = by_tid[tid]
+        key = [filename, tid]
+        src = @v25_static_autotile_source_cache[key]
         if !src
           @scratch.filename = filename
           @autotiles.set_src_rect(@scratch, tid)
           r = @scratch.src_rect
           src = Rect.new(r.x, r.y, r.width, r.height)
-          by_tid[tid] = src
+          @v25_static_autotile_source_cache[key] = src
         end
       end
 

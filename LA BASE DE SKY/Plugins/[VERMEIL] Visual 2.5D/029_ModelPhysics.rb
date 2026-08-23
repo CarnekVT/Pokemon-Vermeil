@@ -16,6 +16,7 @@ module Mode7
         @active_cells = nil
         @sidecar_authoritative = {}
         @surface_fallback_maps = {}
+        @surface_geometry_ids = {}
       end
 
       def collision_path(map_id)
@@ -219,6 +220,7 @@ module Mode7
         @worlds ||= {}
         @sidecar_authoritative ||= {}
         @surface_fallback_maps ||= {}
+        @surface_geometry_ids ||= {}
 
         # A real .v25c always wins, including an intentionally empty one.
         if @sidecar_authoritative[map_id]
@@ -226,9 +228,20 @@ module Mode7
           return @worlds[map_id]
         end
 
+        # SurfaceGeometry.from_file keeps a small per-map runtime cache. If the
+        # exact same geometry object is revisited, its collision grid is already
+        # valid; rebuilding every footprint/mesh cell only lengthened transfers.
+        geo_id = geo.object_id
+        if @surface_fallback_maps[map_id] && @surface_geometry_ids[map_id] == geo_id &&
+           @worlds.key?(map_id)
+          activate(map_id, @worlds[map_id] || {})
+          return @worlds[map_id]
+        end
+
         cells = build_surface_fallback_cells(geo)
         @worlds[map_id] = cells
         @surface_fallback_maps[map_id] = true
+        @surface_geometry_ids[map_id] = geo_id
         activate(map_id, cells)
         cells
       rescue Exception => e

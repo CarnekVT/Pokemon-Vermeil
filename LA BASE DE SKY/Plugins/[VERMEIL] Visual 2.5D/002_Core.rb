@@ -152,54 +152,26 @@ module Mode7
       false
     end
 
-    # Override manual de Debug. :auto devuelve el control a metadata/tags.
-    def set_projection_mode(mode)
-      normalized = mode.nil? ? nil : mode.to_sym
-      normalized = nil if normalized == :auto
-      return map_mode if normalized && ![:affine, :cylindrical].include?(normalized)
-
-      @projection_override = normalized
-      reset_caches
-      renderer = $scene.instance_variable_get(:@map_renderer) if $scene.is_a?(Scene_Map)
+    # NDS-only: metadata y Debug ya no pueden cambiar el backend de proyeccion.
+    # :auto/:perspective se aceptan por compatibilidad; cualquier valor antiguo
+    # termina igualmente en :perspective.
+    def set_projection_mode(_mode)
+      changed = @projection_override != :perspective || @map_projection != :perspective
+      @projection_override = :perspective
+      @map_projection = :perspective
+      reset_caches if changed
+      renderer = $scene.instance_variable_get(:@map_renderer) if changed && $scene.is_a?(Scene_Map)
       renderer.refresh if renderer && renderer.respond_to?(:refresh)
-      map_mode
+      :perspective
     end
 
-    # Unicamente Affine o Cylindrical.
-    def map_mode
-      return @projection_override if [:affine, :cylindrical].include?(@projection_override)
-      return :affine if indoor_map?
-      return @map_projection if [:affine, :cylindrical].include?(@map_projection)
-      mode = Config::PROJECTION
-      [:affine, :cylindrical].include?(mode) ? mode : :cylindrical
-    end
-
-    def affine_mode?; map_mode == :affine; end
-    def cylindrical_mode?; map_mode == :cylindrical; end
-
-    def raster_tiles_map?(map_id = nil)
-      return true if indoor_map?(map_id)
-      map_metadata_candidates_for(map_id).any? do |meta|
-        metadata_has_flag?(meta, Config::MAP_FLAG_RASTER_AFFINE)
-      end
-    end
-
-    def raster_affine_mode?
-      affine_mode? && raster_tiles_map?
-    end
-
-    def detect_map_projection(map_id)
-      return :affine if indoor_map?(map_id)
-      candidates = map_metadata_candidates_for(map_id)
-
-      return :affine if candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_RASTER_AFFINE) }
-      return :affine if candidates.any? do |meta|
-        metadata_has_flag?(meta, Config::MAP_FLAG_AFFINE) ||
-          metadata_has_flag?(meta, Config::MAP_FLAG_AFFINE_LEGACY)
-      end
-      return :cylindrical if candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_CYLINDRICAL) }
-      nil
-    end
+    def map_mode; :perspective; end
+    def perspective_mode?; true; end
+    def affine_mode?; false; end
+    def cylindrical_mode?; false; end
+    def raster_tiles_map?(_map_id = nil); false; end
+    def raster_affine_mode?; false; end
+    def detect_map_projection(_map_id); :perspective; end
 
     # Cantidad de curvatura activa. Se deriva directamente del angulo real de
     # camara, en vez de escalar DEFAULT_ALPHA. Esto evita que 30°/45° hagan
@@ -852,9 +824,8 @@ module Mode7
 end
 
 
-# Deteccion de interiores: al cargar un mapa se resuelve :affine/:cylindrical.
-# Mode7RasterAffine conserva compatibilidad, pero ahora significa :affine +
-# politica raster de tiles, no una proyeccion distinta.
+# Deteccion de contexto interior/exterior. La proyeccion ya es siempre NDS;
+# el contexto solo decide angulo y categorias visuales.
 class Game_Map
   alias_method :_VERMEIL_25D_core_setup, :setup unless method_defined?(:_VERMEIL_25D_core_setup)
 

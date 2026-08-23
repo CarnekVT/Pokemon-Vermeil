@@ -83,8 +83,10 @@ module Mode7
       @perf_mode_valid = false
     end
 
-    def map_projection=(value)
-      @map_projection = value
+    def map_projection=(_value)
+      # NDS-only: even external/older scripts cannot switch the active map back
+      # to Affine/Cylindrical. Keep the writer for API compatibility.
+      @map_projection = :perspective
       @perf_mode_valid = false
     end
 

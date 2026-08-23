@@ -66,10 +66,10 @@ module Mode7
     # Alias legacy para scripts externos.
     DEFAULT_ALPHA = OUTDOOR_DEFAULT_ALPHA
 
-    # Modos de proyeccion:
-    #   :perspective  -> camara pinhole NDS (renderer v2.1, recomendado)
-    #   :affine       -> modo legacy pre-curve
-    #   :cylindrical  -> modo legacy curvo
+    # Proyeccion unica de gameplay: camara pinhole NDS.
+    # Affine/Cylindrical se conservan solo como implementacion interna antigua
+    # para compatibilidad de codigo, pero ya no pueden ser seleccionados por mapa.
+    NDS_ONLY_PROJECTION = true
     PROJECTION = :perspective
 
     # Flags de mapa.
@@ -80,10 +80,11 @@ module Mode7
     MAP_FLAG_PERSPECTIVE     = "mode7perspective"
     MAP_FLAG_INDOOR          = "mode7indoor"
 
-    # Outside/Outdoor=false usa el modo indoor configurado. Los flags de mapa
-    # explicitos (mode7perspective/mode7affine/mode7cylindrical) tienen prioridad.
-    INDOOR_PROJECTION = :affine
-    INDOOR_RASTER_TILES = true
+    # Indoor/Outdoor comparten el mismo backend NDS. El contexto solo cambia
+    # angulo, tags y reglas visuales; nunca cambia la proyeccion. Los flags
+    # mode7affine/mode7cylindrical antiguos se ignoran en runtime.
+    INDOOR_PROJECTION = :perspective
+    INDOOR_RASTER_TILES = false
 
     # NDSIndoorWall conecta horizontalmente con el raster Affine en su base,
     # pero conserva altura fija para no verse aplastado/encogido.

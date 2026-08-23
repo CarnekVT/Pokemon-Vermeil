@@ -18,6 +18,8 @@ module Mode7
     @map_id = nil
     @profiles = []
     @zones = []
+    @document_loaded = false
+    @document = nil
 
     class << self
       def setup(map_id)
@@ -77,8 +79,32 @@ module Mode7
 
       private
 
+      # Runtime data is immutable while the game is running. Reading/parsing the
+      # same authoring JSON on every transfer added avoidable disk I/O exactly on
+      # the loading frame. Keep one in-memory document and only normalize the
+      # current map section. Debug/editor code may call reload_runtime_data! after
+      # changing progressive_zoom.json.
+      def runtime_document
+        return @document if @document_loaded
+        @document_loaded = true
+        @document = JSON.parse(File.read(FILE_PATH))
+        @document = {} if !@document.is_a?(Hash)
+        @document
+      rescue Exception
+        @document = {}
+      end
+
+      def reload_runtime_data!
+        @document_loaded = false
+        @document = nil
+        @map_id = nil
+        @profiles = []
+        @zones = []
+        true
+      end
+
       def load_map_data(map_id)
-        data = JSON.parse(File.read(FILE_PATH))
+        data = runtime_document
         maps = data.is_a?(Hash) ? data["maps"] : nil
         map = maps.is_a?(Hash) ? maps[map_id.to_s] : nil
         return [[], []] if !map.is_a?(Hash)

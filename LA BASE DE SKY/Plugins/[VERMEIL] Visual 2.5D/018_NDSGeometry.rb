@@ -21,50 +21,25 @@ module Mode7
     # -------------------------------------------------------------------------
     # Seleccion de modo
     # -------------------------------------------------------------------------
-    def set_projection_mode(mode)
-      normalized = mode.nil? ? nil : mode.to_sym
-      normalized = nil if normalized == :auto
-      valid = [:perspective, :affine, :cylindrical]
-      return map_mode if normalized && !valid.include?(normalized)
-      @projection_override = normalized
-      @projection_revision = (@projection_revision || 0) + 1
-      reset_caches
-      renderer = $scene.instance_variable_get(:@map_renderer) if $scene.is_a?(Scene_Map)
+    # Phase 2.5.1: NDS es la unica proyeccion de gameplay.
+    # Los flags Affine/Cylindrical antiguos se ignoran; se conservan sus
+    # constantes unicamente para que proyectos/plugins viejos no fallen al leerlas.
+    def set_projection_mode(_mode)
+      changed = @projection_override != :perspective || @map_projection != :perspective
+      @projection_override = :perspective
+      @map_projection = :perspective
+      @projection_revision = (@projection_revision || 0) + 1 if changed
+      reset_caches if changed
+      renderer = $scene.instance_variable_get(:@map_renderer) if changed && $scene.is_a?(Scene_Map)
       renderer.refresh if renderer && renderer.respond_to?(:refresh)
-      map_mode
+      :perspective
     end
 
-    def map_mode
-      valid = [:perspective, :affine, :cylindrical]
-      return @projection_override if valid.include?(@projection_override)
-      if indoor_map?
-        mode = Config::INDOOR_PROJECTION
-        return valid.include?(mode) ? mode : :perspective
-      end
-      return @map_projection if valid.include?(@map_projection)
-      mode = Config::PROJECTION
-      valid.include?(mode) ? mode : :perspective
-    end
-
-    def perspective_mode?; map_mode == :perspective; end
-    def affine_mode?;      map_mode == :affine; end
-    def cylindrical_mode?; map_mode == :cylindrical; end
-
-    def detect_map_projection(map_id)
-      candidates = map_metadata_candidates_for(map_id)
-      if defined?(Config::MAP_FLAG_PERSPECTIVE) &&
-         candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_PERSPECTIVE) }
-        return :perspective
-      end
-      return :affine if candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_RASTER_AFFINE) }
-      return :affine if candidates.any? do |meta|
-        metadata_has_flag?(meta, Config::MAP_FLAG_AFFINE) ||
-          metadata_has_flag?(meta, Config::MAP_FLAG_AFFINE_LEGACY)
-      end
-      return :cylindrical if candidates.any? { |meta| metadata_has_flag?(meta, Config::MAP_FLAG_CYLINDRICAL) }
-      return Config::INDOOR_PROJECTION if indoor_map?(map_id)
-      nil
-    end
+    def map_mode; :perspective; end
+    def perspective_mode?; true; end
+    def affine_mode?; false; end
+    def cylindrical_mode?; false; end
+    def detect_map_projection(_map_id); :perspective; end
 
     def pivot_ratio
       return @pivot_override if !@pivot_override.nil?
@@ -885,7 +860,7 @@ class Mode7Renderer
 end
 
 #-------------------------------------------------------------------------------
-# Interior detectado por Terrain Tag: respeta INDOOR_PROJECTION.
+# Interior detectado por Terrain Tag: mantiene NDS y cambia solo el contexto.
 #-------------------------------------------------------------------------------
 class Mode7Renderer
   private
@@ -911,23 +886,13 @@ class Mode7Renderer
     Mode7.tag_indoor_map_id = found ? @map_id : nil
     return if !found
 
-    candidates = Mode7.map_metadata_candidates_for(@map_id)
-    explicit = candidates.any? do |meta|
-      (defined?(Mode7::Config::MAP_FLAG_PERSPECTIVE) &&
-       Mode7.metadata_has_flag?(meta, Mode7::Config::MAP_FLAG_PERSPECTIVE)) ||
-        Mode7.metadata_has_flag?(meta, Mode7::Config::MAP_FLAG_RASTER_AFFINE) ||
-        Mode7.metadata_has_flag?(meta, Mode7::Config::MAP_FLAG_AFFINE) ||
-        Mode7.metadata_has_flag?(meta, Mode7::Config::MAP_FLAG_AFFINE_LEGACY) ||
-        Mode7.metadata_has_flag?(meta, Mode7::Config::MAP_FLAG_CYLINDRICAL)
-    end
-    return if explicit
-
-    Mode7.map_projection = Mode7::Config::INDOOR_PROJECTION
+    # NDS-only: los tags indoor solo seleccionan el contexto visual y su angulo.
+    # Nunca fuerzan Affine ni otra proyeccion.
+    Mode7.map_projection = :perspective
     if Mode7.active_now?
       Mode7.set_camera(Mode7.context_default_alpha, Mode7.camera_zoom,
                        0, Mode7.distance_h, Mode7.cylindrical_radius)
     end
-    Mode7.reset_caches
   rescue Exception
   end
 end
