@@ -16,7 +16,7 @@ Sin dependencias: no hace falta instalar ninguna gema.
 ## Qué cubre y qué no
 
 | Cubierto | No cubierto |
-|---|---|
+| --- | --- |
 | Que todos los scripts y plugins evalúen sin error | Pantallas, menús, HUD |
 | Que `GameData` cargue | Overworld, eventos de mapa, cutscenes |
 | Integridad de los datos PBS (referencias colgadas) | Gráficos, audio, input |
@@ -28,7 +28,7 @@ necesita un contexto OpenGL.
 ## Archivos
 
 | Archivo | Qué hace |
-|---|---|
+| --- | --- |
 | `rgss_shim.rb` | Clases falsas de RGSS/MKXP (`Graphics`, `Bitmap`, `Sprite`, `RPG::*`…) y la guardia de escritura |
 | `harness.rb` | Localiza la carpeta del juego por `mkxp.json`, carga scripts y plugins, monta el estado de partida |
 | `battle_helper.rb` | `TestScene` (batalla guionizada) y los helpers `mon` / `run_battle` |
@@ -68,6 +68,11 @@ Los tests que no tocan combate heredan de `EngineTest`.
 - Las escrituras están bloqueadas durante los tests: si algo intenta escribir en
   el repo (`errorlog.txt`, un `.dat` recompilado, un save) el test falla con
   `WriteGuard::Violation` en vez de ensuciar el árbol de trabajo.
+- `Data/*.dat` está en `.gitignore`, así que un checkout limpio (el de CI) sólo
+  trae los `PBS/*.txt`. Si falta `Data/species.dat`, el harness compila el PBS al
+  arrancar, igual que hace el juego. Si los `.dat` ya están, no toca nada: tu
+  build local no se sobrescribe. De paso, en CI un PBS que no compile tumba el
+  pipeline.
 - Las excepciones de dentro del combate se relanzan en vez de registrarse, para
   que el test enseñe la traza real.
 - `tests/` vive fuera de `LA BASE DE SKY/`, así que no entra en el zip de release.

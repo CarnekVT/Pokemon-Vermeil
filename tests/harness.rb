@@ -45,7 +45,8 @@ module TestGame
         surface_exceptions
         neutralize_plugin_exit
         load_plugins
-        MessageTypes.load_default_messages
+        compile_pbs_if_needed
+        MessageTypes.load_default_messages if File.exist?("Data/messages_core.dat")
         GameData.load_all
       end
 
@@ -95,6 +96,23 @@ module TestGame
       walk("Data/Scripts") do |path|
         next if path.include?("999_Main")
         evaluate(path, File.unguarded_open(path, "r:UTF-8", &:read))
+      end
+    end
+
+    # Data/*.dat is gitignored, so a fresh checkout (CI, most of all) only has the
+    # PBS text files. Compiling them is what the game itself does on startup.
+    #
+    # Only compile_pbs_files is called, not the whole Compiler.main: the rest of
+    # it rewrites map .rxdata and deletes data files, which is not something a
+    # test run should do to a working copy.
+    #
+    # ponytail: runs only when the .dat are absent. Where they exist they are
+    # left alone, so the suite never writes over a local build.
+    def compile_pbs_if_needed
+      return if File.exist?("Data/species.dat")
+      WriteGuard.unguarded do
+        FileLineData.clear
+        Compiler.compile_pbs_files
       end
     end
 

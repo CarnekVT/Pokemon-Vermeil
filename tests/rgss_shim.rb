@@ -34,6 +34,8 @@ end
 class File
   class << self
     alias_method :unguarded_open, :open
+    alias_method :unguarded_write, :write
+    alias_method :unguarded_delete, :delete
 
     def open(path, mode = "r", *args, &block)
       if !WriteGuard.off? && mode.is_a?(String) && mode.match?(WriteGuard::WRITE_MODE)
@@ -42,11 +44,13 @@ class File
       unguarded_open(path, mode, *args, &block)
     end
 
-    def write(path, *)
+    def write(path, *args)
+      return unguarded_write(path, *args) if WriteGuard.off?
       raise WriteGuard::Violation, "el test intentó escribir en #{path}"
     end
 
     def delete(*paths)
+      return unguarded_delete(*paths) if WriteGuard.off?
       raise WriteGuard::Violation, "el test intentó borrar #{paths.join(', ')}"
     end
   end
@@ -54,7 +58,10 @@ end
 
 class Dir
   class << self
-    def mkdir(path, *)
+    alias_method :unguarded_mkdir, :mkdir
+
+    def mkdir(path, *args)
+      return unguarded_mkdir(path, *args) if WriteGuard.off?
       raise WriteGuard::Violation, "el test intentó crear el directorio #{path}"
     end
   end
@@ -518,6 +525,9 @@ def load_data(filename)
   File.unguarded_open(filename, "rb") { |file| Marshal.load(file) }
 end
 
-def save_data(*)
-  raise WriteGuard::Violation, "el test intentó guardar datos con save_data"
+def save_data(object, filename)
+  if !WriteGuard.off?
+    raise WriteGuard::Violation, "el test intentó guardar datos en #{filename}"
+  end
+  File.unguarded_open(filename, "wb") { |file| Marshal.dump(object, file) }
 end
