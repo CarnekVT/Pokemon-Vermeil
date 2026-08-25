@@ -2,11 +2,16 @@
 # Used when generating new trainers for battle challenges
 #===============================================================================
 class Battle::DebugSceneNoVisuals
+  # Battler code looks sprites up by name (pbRestoreBattlerSprite, for one) and
+  # bails out when there is none, so an empty hash is all this scene needs.
+  attr_reader :sprites
+
   def initialize(log_messages = false)
     @battle       = nil
     @lastCmd      = [0, 0, 0, 0]
     @lastMove     = [0, 0, 0, 0]
     @log_messages = log_messages
+    @sprites      = {}
   end
 
   # Called whenever the battle begins.
@@ -38,10 +43,26 @@ class Battle::DebugSceneNoVisuals
   def pbTrainerBattleSuccess; end
   def pbBattleArenaJudgment(b1, b2, r1, r2); end
   def pbBattleArenaBattlers(b1, b2); end
+  def pbSwapBattlerSprites(idxA, idxB); end
+
+  # Terrain, Trick Room and weather backdrops (031_Scene/012 y 013).
+  def pbSetFieldBackground; end
+  def pbSetTrickRoomBackground; end
+  def pbDeleteTrickRoomBackground; end
+  def pbUpdateHazardSprites; end
+  def pbStartContinuousWeather(battleWeather); end
+  def pbStopContinuousWeather; end
+
+  # Poké Ball throwing animations (031_Scene/005).
+  def pbThrow(ball, shakes, critical, targetBattler, showPlayer = false); end
+  def pbThrowSuccess; end
+  def pbThrowAndDeflect(ball, idxBattler); end
+  def pbHideCaptureBall(idxBattler); end
 
   def pbUpdate(cw = nil); end
   def pbRefresh; end
   def pbRefreshOne(idxBattler); end
+  def pbRefreshEverything; end
 
   def pbDisplayMessage(msg, brief = false)
     PBDebug.log_message(msg) if @log_messages
@@ -73,6 +94,8 @@ class Battle::DebugSceneNoVisuals
   def pbEXPBar(battler, startExp, endExp, tempExp1, tempExp2); end
   def pbLevelUp(pkmn, battler, oldTotalHP, oldAttack, oldDefense, oldSpAtk, oldSpDef, oldSpeed); end
   def pbForgetMove(pkmn, moveToLearn); return 0; end   # Always forget first move
+  def pbNameEntry(helpText, pkmn); return pkmn.name; end   # Never rename
+  def pbShowPokedex(species); end
 
   def pbCommandMenu(idxBattler, firstAction)
     return 1 if rand(15) == 0   # Bag
