@@ -179,6 +179,7 @@ def pbChooseMoveList(default = nil)
 end
 
 def pbChooseMoveListForSpecies(species, defaultMoveID = nil)
+  return nil unless species
   cmdwin = pbListWindow([], 200)
   commands = []
   index = 1
