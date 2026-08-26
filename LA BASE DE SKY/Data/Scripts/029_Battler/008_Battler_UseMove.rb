@@ -648,7 +648,7 @@ class Battle::Battler
         @battle.pbHideAbilitySplash(mc) if move.magicBounceIndex >= 0
         success = false
         if !move.pbMoveFailed?(mc, [])
-          success = pbProcessMoveHit(move, mc, [], 0, false)
+          success = pbProcessMoveHit(move, mc, [], 0)
         end
         move.hadEffectWhenMagicCoated = success
         mc.lastMoveFailed = true if !success
@@ -672,7 +672,7 @@ class Battle::Battler
       if b.pbCanChooseMove?(b.moves[idxMove], false)
         PBDebug.logonerr do
           @battle.clearStagesChangeRecords
-          b.pbUseMoveSimple(b.lastMoveUsed, b.lastRegularMoveTarget, idxMove, false)
+          b.pbUseMoveSimple(b.lastMoveUsed, b.lastRegularMoveTarget, idxMove)
           @battle.checkStatChangeResponses
         end
         b.lastRoundMoved = oldLastRoundMoved
