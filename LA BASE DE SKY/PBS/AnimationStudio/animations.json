@@ -72,7 +72,7 @@
     "playerBattlerSize": 3,
     "foeBattlerSize": 2,
     "quickIntensity": 120,
-    "sidePreview": "foe",
+    "sidePreview": "player",
     "layout": {
       "leftWidth": 271,
       "rightWidth": 520,
@@ -82,999 +82,6 @@
     "onionMode": "off"
   },
   "animations": [
-    {
-      "id": "anim_mt22k4ov_4z",
-      "name": "SnapTrap",
-      "fps": 20,
-      "duration": 34,
-      "source": {
-        "type": "studio",
-        "move": "SnapTrap",
-        "version": 0,
-        "catalogType": "common",
-        "opposing": false,
-        "sideContext": "both",
-        "targetMode": "foe",
-        "targetScope": "single_foe",
-        "allowedTargetScopes": [],
-        "variantScope": "auto",
-        "customSpace": "battlers",
-        "detectedTraits": [],
-        "detectedFunctionCode": "",
-        "detectedCategory": "",
-        "detectedTarget": "",
-        "contextAutoAdapt": true,
-        "previewAffectedTargets": true,
-        "autoReplicateAffected": true,
-        "activeTimelineContext": {
-          "battleFormat": "1v1",
-          "userSlot": 0,
-          "targetSlot": 0,
-          "targetIndex": 1,
-          "targetScope": "single_foe"
-        },
-        "askBackupOnContextEdit": false,
-        "autoReplicateTouched": false,
-        "commonSubjectRole": "target",
-        "authors": [
-          "CarnekVT"
-        ],
-        "runtimeSelected": false,
-        "initialPack": true,
-        "initialPackKey": "SnapTrap_Common_V0",
-        "groupIdentity": "common|SNAPTRAP"
-      },
-      "contextTimelines": [],
-      "battlers": {
-        "user": {
-          "id": "battler_user",
-          "type": "battler",
-          "side": "user",
-          "name": "User",
-          "enabled": true,
-          "locked": true,
-          "formRules": [],
-          "visual": {
-            "size": 100,
-            "scaleX": 100,
-            "scaleY": 100,
-            "opacity": 100,
-            "rotation": 0,
-            "z": 0,
-            "blend": 0,
-            "flip": 0
-          },
-          "visibleKeys": [
-            {
-              "id": "vkey_mt22k4ov_50",
-              "frame": 0,
-              "value": true
-            }
-          ],
-          "positionKeys": [
-            {
-              "id": "key_mt22k4ov_51",
-              "frame": 0,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 0,
-                "offsetY": 0
-              }
-            }
-          ],
-          "valueKeys": {
-            "size": [],
-            "scaleX": [],
-            "scaleY": [],
-            "viewScale": [],
-            "rotation": [],
-            "opacity": [],
-            "graphicFrame": [],
-            "srcX": [],
-            "srcY": [],
-            "srcW": [],
-            "srcH": [],
-            "z": [],
-            "blend": [],
-            "flip": [],
-            "flipY": [],
-            "facing": [],
-            "toneRed": [],
-            "toneGreen": [],
-            "toneBlue": [],
-            "toneGray": [],
-            "cameraX": [],
-            "cameraY": [],
-            "cameraZoom": [],
-            "cameraRotation": [],
-            "originX": [],
-            "originY": [],
-            "originOffsetX": [],
-            "originOffsetY": [],
-            "colorRed": [],
-            "colorGreen": [],
-            "colorBlue": [],
-            "colorAlpha": []
-          },
-          "fxOps": [],
-          "logic": [],
-          "startFrame": 0,
-          "endFrame": 0
-        },
-        "target": {
-          "id": "battler_target",
-          "type": "battler",
-          "side": "target",
-          "name": "Target",
-          "enabled": true,
-          "locked": true,
-          "formRules": [],
-          "visual": {
-            "size": 100,
-            "scaleX": 100,
-            "scaleY": 100,
-            "opacity": 100,
-            "rotation": 0,
-            "z": 0,
-            "blend": 0,
-            "flip": 0
-          },
-          "visibleKeys": [
-            {
-              "id": "vkey_mt22k4ov_52",
-              "frame": 0,
-              "value": true
-            },
-            {
-              "id": "vkey_mt22wyao_ey",
-              "frame": 29,
-              "value": true
-            }
-          ],
-          "positionKeys": [
-            {
-              "id": "key_mt22k4ov_53",
-              "frame": 0,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 0,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22ut3h_e5",
-              "frame": 7,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 0,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22ut3h_e6",
-              "frame": 8,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 14.399999999999977,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22ut3h_e7",
-              "frame": 9,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": -10.800000000000011,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22ut3h_e8",
-              "frame": 10,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 6,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22ut3h_e9",
-              "frame": 11,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 0,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22w6pp_en",
-              "frame": 21,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 0,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22w6pp_eq",
-              "frame": 22,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 14.399999999999977,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22w6pp_es",
-              "frame": 23,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": -10.800000000000011,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22w6pp_et",
-              "frame": 24,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 6,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22w6pp_eu",
-              "frame": 25,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 0,
-                "offsetY": 0
-              }
-            },
-            {
-              "id": "key_mt22wyao_ew",
-              "frame": 29,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 0,
-                "offsetY": 0
-              }
-            }
-          ],
-          "valueKeys": {
-            "size": [
-              {
-                "id": "pkey_mt22ut3h_ea",
-                "frame": 7,
-                "value": 100,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mt22ut3h_eb",
-                "frame": 8,
-                "value": 104.80000000000001,
-                "easing": "ease_out"
-              },
-              {
-                "id": "pkey_mt22ut3h_ec",
-                "frame": 11,
-                "value": 100,
-                "easing": "ease_both"
-              },
-              {
-                "id": "pkey_mt22w6pp_eo",
-                "frame": 21,
-                "value": 100,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mt22w6pp_er",
-                "frame": 22,
-                "value": 104.80000000000001,
-                "easing": "ease_out"
-              },
-              {
-                "id": "pkey_mt22w6pp_ev",
-                "frame": 25,
-                "value": 100,
-                "easing": "ease_both"
-              }
-            ],
-            "scaleX": [],
-            "scaleY": [
-              {
-                "id": "pkey_mt22u4z5_e3",
-                "frame": 0,
-                "value": 100,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mt22u9kr_e4",
-                "frame": 5,
-                "value": 100,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mt22tumn_e1",
-                "frame": 7,
-                "value": 70,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mt22w6pp_em",
-                "frame": 19,
-                "value": 100,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mt22tztj_e2",
-                "frame": 20,
-                "value": 70,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mt22w6pp_ep",
-                "frame": 21,
-                "value": 70,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mt22wyao_ex",
-                "frame": 29,
-                "value": 100,
-                "easing": "linear"
-              }
-            ],
-            "viewScale": [],
-            "rotation": [],
-            "opacity": [],
-            "graphicFrame": [],
-            "srcX": [],
-            "srcY": [],
-            "srcW": [],
-            "srcH": [],
-            "z": [],
-            "blend": [],
-            "flip": [],
-            "flipY": [],
-            "facing": [],
-            "toneRed": [],
-            "toneGreen": [],
-            "toneBlue": [],
-            "toneGray": [],
-            "cameraX": [],
-            "cameraY": [],
-            "cameraZoom": [],
-            "cameraRotation": [],
-            "originX": [],
-            "originY": [],
-            "originOffsetX": [],
-            "originOffsetY": [],
-            "colorRed": [],
-            "colorGreen": [],
-            "colorBlue": [],
-            "colorAlpha": []
-          },
-          "fxOps": [],
-          "logic": [],
-          "startFrame": 0,
-          "endFrame": 29
-        }
-      },
-      "camera": {
-        "id": "camera_main",
-        "type": "camera",
-        "name": "Camera",
-        "enabled": true,
-        "locked": false,
-        "visual": {
-          "cameraX": 0,
-          "cameraY": 0,
-          "cameraZoom": 100,
-          "cameraRotation": 0,
-          "size": 100,
-          "scaleX": 100,
-          "scaleY": 100,
-          "opacity": 100,
-          "rotation": 0,
-          "z": 0,
-          "blend": 0,
-          "flip": 0
-        },
-        "valueKeys": {
-          "size": [],
-          "scaleX": [],
-          "scaleY": [],
-          "viewScale": [],
-          "rotation": [],
-          "opacity": [],
-          "graphicFrame": [],
-          "srcX": [],
-          "srcY": [],
-          "srcW": [],
-          "srcH": [],
-          "z": [],
-          "blend": [],
-          "flip": [],
-          "flipY": [],
-          "facing": [],
-          "toneRed": [],
-          "toneGreen": [],
-          "toneBlue": [],
-          "toneGray": [],
-          "cameraX": [],
-          "cameraY": [],
-          "cameraZoom": [],
-          "cameraRotation": []
-        },
-        "visibleKeys": [
-          {
-            "id": "vkey_mt22k4ov_54",
-            "frame": 0,
-            "value": true
-          }
-        ],
-        "positionKeys": [
-          {
-            "id": "key_mt22k4ov_55",
-            "frame": 0,
-            "easing": "linear",
-            "point": {
-              "anchor": "screen",
-              "x": 0,
-              "y": 0,
-              "offsetX": 0,
-              "offsetY": 0
-            }
-          }
-        ],
-        "startFrame": 0,
-        "endFrame": 0,
-        "logic": [],
-        "fxOps": []
-      },
-      "tracks": [
-        {
-          "id": "track_mt22k4ov_56",
-          "type": "effects",
-          "name": "Effects",
-          "clips": [
-            {
-              "id": "clip_mt22ncu3_57",
-              "type": "projectile",
-              "name": "Bite 1",
-              "enabled": true,
-              "locked": false,
-              "startFrame": 0,
-              "endFrame": 32,
-              "graphic": {
-                "source": "new",
-                "projectPath": "Graphics/Battle animations/fangs.png",
-                "folder": "Battle animations",
-                "name": "fangs",
-                "relativeHint": "",
-                "externalGameRoot": "",
-                "hue": 0,
-                "spritesheet": "auto",
-                "frame": 0,
-                "playSheet": false,
-                "sheetFps": 20,
-                "cellW": 192,
-                "cellH": 192,
-                "cols": 5,
-                "rows": 0,
-                "origin": "auto",
-                "assetCandidates": []
-              },
-              "graphicSwitches": [],
-              "visual": {
-                "size": 100,
-                "scaleX": 100,
-                "scaleY": 100,
-                "opacity": 100,
-                "rotation": 0,
-                "z": 0,
-                "blend": 0,
-                "flip": 0
-              },
-              "priority": 0,
-              "priorityReference": "target",
-              "replicateTo": "none",
-              "coordinateSpace": "target",
-              "coordinateSpaceManual": true,
-              "visibleKeys": [
-                {
-                  "id": "vkey_mt22ncu3_59",
-                  "frame": 0,
-                  "value": true
-                },
-                {
-                  "id": "vkey_mt22x8jh_f0",
-                  "frame": 32,
-                  "value": true
-                }
-              ],
-              "positionKeys": [
-                {
-                  "id": "key_mt22ncu3_5a",
-                  "frame": 0,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": 66
-                  }
-                },
-                {
-                  "id": "key_mt22q879_ds",
-                  "frame": 5,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": 96
-                  }
-                },
-                {
-                  "id": "key_mt22ncu3_5b",
-                  "frame": 7,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": 46
-                  }
-                },
-                {
-                  "id": "key_mt22vnco_ef",
-                  "frame": 19,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": 96
-                  }
-                },
-                {
-                  "id": "key_mt22vnco_eg",
-                  "frame": 21,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": 46
-                  }
-                },
-                {
-                  "id": "key_mt22x8jh_ez",
-                  "frame": 32,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": 96
-                  }
-                }
-              ],
-              "valueKeys": {
-                "size": [],
-                "scaleX": [],
-                "scaleY": [],
-                "viewScale": [],
-                "rotation": [],
-                "opacity": [
-                  {
-                    "id": "pkey_mt22y77p_f5",
-                    "frame": 0,
-                    "value": 0,
-                    "easing": "ease_both"
-                  },
-                  {
-                    "id": "pkey_mt26bao1_d4",
-                    "frame": 5,
-                    "value": 100,
-                    "easing": "ease_both"
-                  },
-                  {
-                    "id": "pkey_mt249810_4f",
-                    "frame": 28,
-                    "value": 100,
-                    "easing": "ease_both"
-                  },
-                  {
-                    "id": "pkey_mt22yb7l_f6",
-                    "frame": 32,
-                    "value": 0,
-                    "easing": "ease_both"
-                  }
-                ],
-                "graphicFrame": [],
-                "srcX": [],
-                "srcY": [],
-                "srcW": [],
-                "srcH": [],
-                "z": [],
-                "blend": [],
-                "flip": [],
-                "flipY": [],
-                "facing": [],
-                "toneRed": [
-                  {
-                    "id": "pkey_mt2aulgn_2ii",
-                    "frame": 0,
-                    "value": -100,
-                    "easing": "linear"
-                  }
-                ],
-                "toneGreen": [
-                  {
-                    "id": "pkey_mt2aum3c_2ij",
-                    "frame": 0,
-                    "value": -100,
-                    "easing": "linear"
-                  }
-                ],
-                "toneBlue": [
-                  {
-                    "id": "pkey_mt2aunoj_2ik",
-                    "frame": 0,
-                    "value": -100,
-                    "easing": "linear"
-                  }
-                ],
-                "toneGray": [],
-                "cameraX": [],
-                "cameraY": [],
-                "cameraZoom": [],
-                "cameraRotation": [],
-                "invert": [],
-                "colorRed": [],
-                "colorGreen": [],
-                "colorBlue": [],
-                "colorAlpha": [],
-                "originX": [],
-                "originY": [],
-                "originOffsetX": [],
-                "originOffsetY": [],
-                "priority": []
-              },
-              "fxOps": [],
-              "pbs": {
-                "focus": "target"
-              },
-              "logic": [],
-              "imported": null,
-              "editorOriginalPosition": {
-                "anchor": "pbs:target",
-                "x": 0,
-                "y": 0,
-                "offsetX": -11,
-                "offsetY": 66
-              }
-            },
-            {
-              "id": "clip_mt22s3op_du",
-              "type": "projectile",
-              "name": "Bite 2",
-              "enabled": true,
-              "locked": false,
-              "startFrame": 0,
-              "endFrame": 32,
-              "graphic": {
-                "source": "new",
-                "projectPath": "Graphics/Battle animations/fangs.png",
-                "folder": "Battle animations",
-                "name": "fangs",
-                "relativeHint": "",
-                "externalGameRoot": "",
-                "hue": 0,
-                "spritesheet": "auto",
-                "frame": 0,
-                "playSheet": false,
-                "sheetFps": 20,
-                "cellW": 192,
-                "cellH": 192,
-                "cols": 5,
-                "rows": 0,
-                "origin": "auto",
-                "assetCandidates": []
-              },
-              "graphicSwitches": [],
-              "visual": {
-                "size": 100,
-                "scaleX": 100,
-                "scaleY": 100,
-                "opacity": 100,
-                "rotation": 0,
-                "z": 0,
-                "blend": 0,
-                "flip": 0
-              },
-              "priority": 0,
-              "priorityReference": "target",
-              "replicateTo": "none",
-              "coordinateSpace": "target",
-              "coordinateSpaceManual": true,
-              "visibleKeys": [
-                {
-                  "id": "vkey_mt22s3op_dv",
-                  "frame": 0,
-                  "value": true
-                },
-                {
-                  "id": "vkey_mt22x8jh_f3",
-                  "frame": 32,
-                  "value": true
-                }
-              ],
-              "positionKeys": [
-                {
-                  "id": "key_mt22s3op_dw",
-                  "frame": 0,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": -34
-                  }
-                },
-                {
-                  "id": "key_mt22s3op_dx",
-                  "frame": 5,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": -104
-                  }
-                },
-                {
-                  "id": "key_mt22s3op_dy",
-                  "frame": 7,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": 16
-                  }
-                },
-                {
-                  "id": "key_mt22vnco_ek",
-                  "frame": 19,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": -104
-                  }
-                },
-                {
-                  "id": "key_mt22vnco_el",
-                  "frame": 21,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": 16
-                  }
-                },
-                {
-                  "id": "key_mt22x8jh_f1",
-                  "frame": 32,
-                  "easing": "ease_both",
-                  "point": {
-                    "anchor": "pbs:target",
-                    "x": 0,
-                    "y": 0,
-                    "offsetX": 9,
-                    "offsetY": -64
-                  }
-                }
-              ],
-              "valueKeys": {
-                "size": [],
-                "scaleX": [],
-                "scaleY": [],
-                "viewScale": [],
-                "rotation": [],
-                "opacity": [
-                  {
-                    "id": "pkey_mt22y1ns_f4",
-                    "frame": 0,
-                    "value": 0,
-                    "easing": "ease_both"
-                  },
-                  {
-                    "id": "pkey_mt26bg6r_d5",
-                    "frame": 5,
-                    "value": 100,
-                    "easing": "ease_both"
-                  },
-                  {
-                    "id": "pkey_mt249awp_4h",
-                    "frame": 28,
-                    "value": 100,
-                    "easing": "ease_both"
-                  },
-                  {
-                    "id": "pkey_mt22ydnp_f7",
-                    "frame": 32,
-                    "value": 0,
-                    "easing": "ease_both"
-                  }
-                ],
-                "graphicFrame": [],
-                "srcX": [],
-                "srcY": [],
-                "srcW": [],
-                "srcH": [],
-                "z": [],
-                "blend": [],
-                "flip": [],
-                "flipY": [
-                  {
-                    "id": "pkey_mt22sgi3_e0",
-                    "frame": 0,
-                    "value": 1,
-                    "easing": "linear"
-                  },
-                  {
-                    "id": "pkey_mt22x8jh_f2",
-                    "frame": 32,
-                    "value": 1,
-                    "easing": "linear"
-                  }
-                ],
-                "facing": [],
-                "toneRed": [
-                  {
-                    "id": "pkey_mt2auplw_2il",
-                    "frame": 0,
-                    "value": -100,
-                    "easing": "linear"
-                  }
-                ],
-                "toneGreen": [
-                  {
-                    "id": "pkey_mt2auq2t_2im",
-                    "frame": 0,
-                    "value": -100,
-                    "easing": "linear"
-                  }
-                ],
-                "toneBlue": [
-                  {
-                    "id": "pkey_mt2auqty_2in",
-                    "frame": 0,
-                    "value": -100,
-                    "easing": "linear"
-                  }
-                ],
-                "toneGray": [],
-                "cameraX": [],
-                "cameraY": [],
-                "cameraZoom": [],
-                "cameraRotation": [],
-                "invert": [],
-                "colorRed": [],
-                "colorGreen": [],
-                "colorBlue": [],
-                "colorAlpha": [],
-                "originX": [],
-                "originY": [],
-                "originOffsetX": [],
-                "originOffsetY": [],
-                "priority": []
-              },
-              "fxOps": [],
-              "pbs": {
-                "focus": "target"
-              },
-              "logic": [],
-              "imported": null,
-              "editorOriginalPosition": {
-                "anchor": "pbs:target",
-                "x": 0,
-                "y": 0,
-                "offsetX": -11,
-                "offsetY": 66
-              }
-            }
-          ]
-        }
-      ],
-      "events": [
-        {
-          "id": "event_mt24cdk1_4i",
-          "type": "se",
-          "frame": 7,
-          "name": "Anim/PRSFX- Bite",
-          "volume": 100,
-          "pitch": 100
-        },
-        {
-          "id": "event_mt24cime_4j",
-          "type": "se",
-          "frame": 21,
-          "name": "Anim/PRSFX- Bite",
-          "volume": 100,
-          "pitch": 100
-        }
-      ],
-      "logic": [],
-      "notes": "",
-      "hidesDataBoxes": false,
-      "hidesAdjacents": false,
-      "scene": {
-        "inheritProject": true,
-        "source": "project",
-        "responsive": true,
-        "referenceWidth": 640,
-        "referenceHeight": 480,
-        "cameraBoundsMode": "auto"
-      }
-    },
     {
       "id": "anim_mt3nkm5h_8a",
       "name": "Punch",
@@ -5115,7 +4122,8 @@
         "runtimeEnabled": false,
         "initialPackKey": "EXPLOSION_Player_V0",
         "initialPack": true,
-        "groupIdentity": "move|EXPLOSION"
+        "groupIdentity": "move|EXPLOSION",
+        "initialPackRevision": 29
       },
       "battlers": {
         "user": {
@@ -5124,7 +4132,7 @@
           "side": "user",
           "name": "User",
           "enabled": true,
-          "locked": true,
+          "locked": false,
           "formRules": [],
           "visual": {
             "size": 100,
@@ -5198,11 +4206,11 @@
               "frame": 11,
               "easing": "ease_both",
               "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
+                "anchor": "screen",
+                "x": 320,
+                "y": 336,
+                "offsetX": 0,
+                "offsetY": 0
               }
             },
             {
@@ -5210,263 +4218,23 @@
               "frame": 18,
               "easing": "ease_both",
               "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmgadk_2t",
-              "frame": 40,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmigkn_34",
-              "frame": 46,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmj0gz_38",
-              "frame": 51,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 176,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmj4hu_3c",
-              "frame": 56,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmjnuf_64",
-              "frame": 60,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 176,
-                "offsetY": -70
+                "anchor": "screen",
+                "x": 320,
+                "y": 336,
+                "offsetX": 0,
+                "offsetY": 0
               }
             },
             {
               "id": "key_mswmjpxu_68",
-              "frame": 64,
+              "frame": 84,
               "easing": "ease_both",
               "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmlnvr_6e",
-              "frame": 67,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mszfgul2_3r",
-              "frame": 68,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 176,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmm953_6j",
-              "frame": 70,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmm953_6k",
-              "frame": 71,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 166,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mszfh662_3v",
-              "frame": 72,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmm953_6l",
-              "frame": 73,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 171,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmm953_6m",
-              "frame": 74,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmnkmn_6s",
-              "frame": 75,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mszfqb7v_47",
-              "frame": 77,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmo1vj_6u",
-              "frame": 78,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmo1vj_6v",
-              "frame": 79,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 163,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mszfpgsv_42",
-              "frame": 80,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmo1vj_6w",
-              "frame": 81,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 170,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_mswmo1vj_6x",
-              "frame": 82,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
-              }
-            },
-            {
-              "id": "key_msxn3opp_3a",
-              "frame": 83,
-              "easing": "ease_both",
-              "point": {
-                "anchor": "user_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 175,
-                "offsetY": -70
+                "anchor": "screen",
+                "x": 320,
+                "y": 336,
+                "offsetX": 0,
+                "offsetY": 0
               }
             },
             {
@@ -6026,7 +4794,9 @@
           "fxOps": [],
           "logic": [],
           "startFrame": 0,
-          "endFrame": 122
+          "endFrame": 122,
+          "coordinateSpace": "screen",
+          "coordinateSpaceManual": true
         },
         "target": {
           "id": "battler_target",
@@ -7034,7 +5804,7 @@
                 "blend": 0,
                 "flip": 0
               },
-              "priority": 1,
+              "priority": 0,
               "priorityReference": "foreground",
               "replicateTo": "none",
               "coordinateSpace": "auto",
@@ -7252,8 +6022,8 @@
                 "blend": 0,
                 "flip": 0
               },
-              "priority": -1,
-              "priorityReference": "auto",
+              "priority": 0,
+              "priorityReference": "background",
               "replicateTo": "none",
               "coordinateSpace": "auto",
               "coordinateSpaceManual": false,
@@ -8920,8 +7690,8 @@
                 "sheetFps": 20,
                 "cellW": 192,
                 "cellH": 192,
-                "cols": 5,
-                "rows": 0,
+                "cols": 4,
+                "rows": 3,
                 "origin": "auto",
                 "assetCandidates": [
                   "Graphics/Animations/PRAS- Explosions.png"
@@ -9148,8 +7918,8 @@
                 "sheetFps": 20,
                 "cellW": 192,
                 "cellH": 192,
-                "cols": 5,
-                "rows": 0,
+                "cols": 4,
+                "rows": 3,
                 "origin": "auto",
                 "assetCandidates": [
                   "Graphics/Animations/PRAS- Explosions.png"
@@ -9376,8 +8146,8 @@
                 "sheetFps": 20,
                 "cellW": 192,
                 "cellH": 192,
-                "cols": 5,
-                "rows": 0,
+                "cols": 4,
+                "rows": 3,
                 "origin": "auto",
                 "assetCandidates": [
                   "Graphics/Animations/PRAS- Explosions.png"
@@ -9716,7 +8486,8 @@
         "initialPackKey": "VOLTTACKLE_Player_V0",
         "initialPack": true,
         "runtimeEnabled": false,
-        "groupIdentity": "move|VOLTTACKLE"
+        "groupIdentity": "move|VOLTTACKLE",
+        "initialPackRevision": 29
       },
       "battlers": {
         "user": {
@@ -10702,7 +9473,7 @@
         "id": "camera_main",
         "type": "camera",
         "name": "Camera",
-        "enabled": false,
+        "enabled": true,
         "locked": false,
         "visual": {
           "cameraX": 0,
@@ -12790,7 +11561,7 @@
                 "flip": 0
               },
               "priority": 1,
-              "priorityReference": "user",
+              "priorityReference": "target",
               "replicateTo": "none",
               "coordinateSpace": "auto",
               "coordinateSpaceManual": false,
@@ -13701,7 +12472,8 @@
         "initialPackKey": "SnapTrap_Player_V0",
         "initialPack": true,
         "runtimeEnabled": false,
-        "groupIdentity": "move|SNAPTRAP"
+        "groupIdentity": "move|SNAPTRAP",
+        "initialPackRevision": 29
       },
       "contextTimelines": [],
       "battlers": {
@@ -14263,7 +13035,13 @@
             }
           ]
         },
-        "visibleKeys": [],
+        "visibleKeys": [
+          {
+            "id": "vkey_mt57buaf_4n",
+            "frame": 0,
+            "value": true
+          }
+        ],
         "positionKeys": [
           {
             "id": "key_mt2asena_2ia",
@@ -14322,14 +13100,14 @@
                 "relativeHint": "Graphics/BattleParticlesAnimations/Leer.png",
                 "externalGameRoot": "",
                 "hue": 0,
-                "spritesheet": "auto",
+                "spritesheet": "rmxp",
                 "frame": 0,
                 "playSheet": false,
                 "sheetFps": 20,
-                "cellW": 192,
-                "cellH": 192,
+                "cellW": 64,
+                "cellH": 64,
                 "cols": 5,
-                "rows": 0,
+                "rows": 1,
                 "origin": "auto",
                 "assetCandidates": [
                   "Graphics/BattleParticlesAnimations/Leer.png"
@@ -15372,6 +14150,1007 @@
         "referenceHeight": 480,
         "cameraBoundsMode": "screen"
       }
+    },
+    {
+      "id": "anim_mt66wbvq_4z",
+      "name": "SnapTrap",
+      "fps": 20,
+      "duration": 34,
+      "source": {
+        "type": "studio",
+        "move": "SNAPTRAP",
+        "version": 0,
+        "catalogType": "common",
+        "opposing": false,
+        "sideContext": "both",
+        "targetMode": "foe",
+        "targetScope": "single_foe",
+        "allowedTargetScopes": [],
+        "variantScope": "auto",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "",
+        "detectedCategory": "",
+        "detectedTarget": "",
+        "contextAutoAdapt": true,
+        "previewAffectedTargets": true,
+        "autoReplicateAffected": true,
+        "activeTimelineContext": {
+          "battleFormat": "1v1",
+          "userSlot": 0,
+          "targetSlot": 0,
+          "targetIndex": 1,
+          "targetScope": "single_foe"
+        },
+        "askBackupOnContextEdit": false,
+        "autoReplicateTouched": false,
+        "commonSubjectRole": "target",
+        "authors": [
+          "CarnekVT"
+        ],
+        "runtimeSelected": false,
+        "initialPackRevision": 29,
+        "initialPackKey": "SnapTrap_Common_V0",
+        "initialPack": true,
+        "runtimeEnabled": false,
+        "groupIdentity": "common|SNAPTRAP"
+      },
+      "contextTimelines": [],
+      "battlers": {
+        "user": {
+          "id": "battler_user",
+          "type": "battler",
+          "side": "user",
+          "name": "User",
+          "enabled": true,
+          "locked": true,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mt22k4ov_50",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mt22k4ov_51",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        },
+        "target": {
+          "id": "battler_target",
+          "type": "battler",
+          "side": "target",
+          "name": "Target",
+          "enabled": true,
+          "locked": true,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mt22k4ov_52",
+              "frame": 0,
+              "value": true
+            },
+            {
+              "id": "vkey_mt22wyao_ey",
+              "frame": 29,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mt22k4ov_53",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22ut3h_e5",
+              "frame": 7,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22ut3h_e6",
+              "frame": 8,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 14.399999999999977,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22ut3h_e7",
+              "frame": 9,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -10.800000000000011,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22ut3h_e8",
+              "frame": 10,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 6,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22ut3h_e9",
+              "frame": 11,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22w6pp_en",
+              "frame": 21,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22w6pp_eq",
+              "frame": 22,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 14.399999999999977,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22w6pp_es",
+              "frame": 23,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -10.800000000000011,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22w6pp_et",
+              "frame": 24,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 6,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22w6pp_eu",
+              "frame": 25,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mt22wyao_ew",
+              "frame": 29,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [
+              {
+                "id": "pkey_mt22ut3h_ea",
+                "frame": 7,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mt22ut3h_eb",
+                "frame": 8,
+                "value": 104.80000000000001,
+                "easing": "ease_out"
+              },
+              {
+                "id": "pkey_mt22ut3h_ec",
+                "frame": 11,
+                "value": 100,
+                "easing": "ease_both"
+              },
+              {
+                "id": "pkey_mt22w6pp_eo",
+                "frame": 21,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mt22w6pp_er",
+                "frame": 22,
+                "value": 104.80000000000001,
+                "easing": "ease_out"
+              },
+              {
+                "id": "pkey_mt22w6pp_ev",
+                "frame": 25,
+                "value": 100,
+                "easing": "ease_both"
+              }
+            ],
+            "scaleX": [],
+            "scaleY": [
+              {
+                "id": "pkey_mt22u4z5_e3",
+                "frame": 0,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mt22u9kr_e4",
+                "frame": 5,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mt22tumn_e1",
+                "frame": 7,
+                "value": 70,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mt22w6pp_em",
+                "frame": 19,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mt22tztj_e2",
+                "frame": 20,
+                "value": 70,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mt22w6pp_ep",
+                "frame": 21,
+                "value": 70,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mt22wyao_ex",
+                "frame": 29,
+                "value": 100,
+                "easing": "linear"
+              }
+            ],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 29
+        }
+      },
+      "camera": {
+        "id": "camera_main",
+        "type": "camera",
+        "name": "Camera",
+        "enabled": true,
+        "locked": false,
+        "visual": {
+          "cameraX": 0,
+          "cameraY": 0,
+          "cameraZoom": 100,
+          "cameraRotation": 0,
+          "size": 100,
+          "scaleX": 100,
+          "scaleY": 100,
+          "opacity": 100,
+          "rotation": 0,
+          "z": 0,
+          "blend": 0,
+          "flip": 0
+        },
+        "valueKeys": {
+          "size": [],
+          "scaleX": [],
+          "scaleY": [],
+          "viewScale": [],
+          "rotation": [],
+          "opacity": [],
+          "graphicFrame": [],
+          "srcX": [],
+          "srcY": [],
+          "srcW": [],
+          "srcH": [],
+          "z": [],
+          "blend": [],
+          "flip": [],
+          "flipY": [],
+          "facing": [],
+          "toneRed": [],
+          "toneGreen": [],
+          "toneBlue": [],
+          "toneGray": [],
+          "cameraX": [],
+          "cameraY": [],
+          "cameraZoom": [],
+          "cameraRotation": []
+        },
+        "visibleKeys": [
+          {
+            "id": "vkey_mt22k4ov_54",
+            "frame": 0,
+            "value": true
+          }
+        ],
+        "positionKeys": [
+          {
+            "id": "key_mt22k4ov_55",
+            "frame": 0,
+            "easing": "linear",
+            "point": {
+              "anchor": "screen",
+              "x": 0,
+              "y": 0,
+              "offsetX": 0,
+              "offsetY": 0
+            }
+          }
+        ],
+        "startFrame": 0,
+        "endFrame": 0,
+        "logic": [],
+        "fxOps": []
+      },
+      "tracks": [
+        {
+          "id": "track_mt22k4ov_56",
+          "type": "effects",
+          "name": "Effects",
+          "clips": [
+            {
+              "id": "clip_mt66wbvq_50",
+              "type": "projectile",
+              "name": "Bite 1",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 32,
+              "graphic": {
+                "source": "project",
+                "projectPath": "Graphics/Battle animations/fangs.png",
+                "folder": "Battle animations",
+                "name": "fangs",
+                "relativeHint": "Graphics/Battle animations/fangs.png",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "Graphics/Battle animations/fangs.png"
+                ],
+                "localized": true
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "target",
+              "replicateTo": "none",
+              "coordinateSpace": "target",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mt22ncu3_59",
+                  "frame": 0,
+                  "value": true
+                },
+                {
+                  "id": "vkey_mt22x8jh_f0",
+                  "frame": 32,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mt22ncu3_5a",
+                  "frame": 0,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": 66
+                  }
+                },
+                {
+                  "id": "key_mt22q879_ds",
+                  "frame": 5,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": 96
+                  }
+                },
+                {
+                  "id": "key_mt22ncu3_5b",
+                  "frame": 7,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": 46
+                  }
+                },
+                {
+                  "id": "key_mt22vnco_ef",
+                  "frame": 19,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": 96
+                  }
+                },
+                {
+                  "id": "key_mt22vnco_eg",
+                  "frame": 21,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": 46
+                  }
+                },
+                {
+                  "id": "key_mt22x8jh_ez",
+                  "frame": 32,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": 96
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mt22y77p_f5",
+                    "frame": 0,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mt26bao1_d4",
+                    "frame": 5,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mt249810_4f",
+                    "frame": 28,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mt22yb7l_f6",
+                    "frame": 32,
+                    "value": 0,
+                    "easing": "ease_both"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [
+                  {
+                    "id": "pkey_mt2aulgn_2ii",
+                    "frame": 0,
+                    "value": -100,
+                    "easing": "linear"
+                  }
+                ],
+                "toneGreen": [
+                  {
+                    "id": "pkey_mt2aum3c_2ij",
+                    "frame": 0,
+                    "value": -100,
+                    "easing": "linear"
+                  }
+                ],
+                "toneBlue": [
+                  {
+                    "id": "pkey_mt2aunoj_2ik",
+                    "frame": 0,
+                    "value": -100,
+                    "easing": "linear"
+                  }
+                ],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "priority": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "focus": "target"
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "pbs:target",
+                "x": 0,
+                "y": 0,
+                "offsetX": -11,
+                "offsetY": 66
+              }
+            },
+            {
+              "id": "clip_mt66wbvq_51",
+              "type": "projectile",
+              "name": "Bite 2",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 32,
+              "graphic": {
+                "source": "project",
+                "projectPath": "Graphics/Battle animations/fangs.png",
+                "folder": "Battle animations",
+                "name": "fangs",
+                "relativeHint": "Graphics/Battle animations/fangs.png",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "Graphics/Battle animations/fangs.png"
+                ],
+                "localized": true
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "target",
+              "replicateTo": "none",
+              "coordinateSpace": "target",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mt22s3op_dv",
+                  "frame": 0,
+                  "value": true
+                },
+                {
+                  "id": "vkey_mt22x8jh_f3",
+                  "frame": 32,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mt22s3op_dw",
+                  "frame": 0,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": -34
+                  }
+                },
+                {
+                  "id": "key_mt22s3op_dx",
+                  "frame": 5,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": -104
+                  }
+                },
+                {
+                  "id": "key_mt22s3op_dy",
+                  "frame": 7,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": 16
+                  }
+                },
+                {
+                  "id": "key_mt22vnco_ek",
+                  "frame": 19,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": -104
+                  }
+                },
+                {
+                  "id": "key_mt22vnco_el",
+                  "frame": 21,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": 16
+                  }
+                },
+                {
+                  "id": "key_mt22x8jh_f1",
+                  "frame": 32,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 9,
+                    "offsetY": -64
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mt22y1ns_f4",
+                    "frame": 0,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mt26bg6r_d5",
+                    "frame": 5,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mt249awp_4h",
+                    "frame": 28,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mt22ydnp_f7",
+                    "frame": 32,
+                    "value": 0,
+                    "easing": "ease_both"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [
+                  {
+                    "id": "pkey_mt22sgi3_e0",
+                    "frame": 0,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mt22x8jh_f2",
+                    "frame": 32,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ],
+                "facing": [],
+                "toneRed": [
+                  {
+                    "id": "pkey_mt2auplw_2il",
+                    "frame": 0,
+                    "value": -100,
+                    "easing": "linear"
+                  }
+                ],
+                "toneGreen": [
+                  {
+                    "id": "pkey_mt2auq2t_2im",
+                    "frame": 0,
+                    "value": -100,
+                    "easing": "linear"
+                  }
+                ],
+                "toneBlue": [
+                  {
+                    "id": "pkey_mt2auqty_2in",
+                    "frame": 0,
+                    "value": -100,
+                    "easing": "linear"
+                  }
+                ],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "priority": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "focus": "target"
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "pbs:target",
+                "x": 0,
+                "y": 0,
+                "offsetX": -11,
+                "offsetY": 66
+              }
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "event_mt24cdk1_4i",
+          "type": "se",
+          "frame": 7,
+          "name": "Anim/PRSFX- Bite",
+          "volume": 100,
+          "pitch": 100
+        },
+        {
+          "id": "event_mt24cime_4j",
+          "type": "se",
+          "frame": 21,
+          "name": "Anim/PRSFX- Bite",
+          "volume": 100,
+          "pitch": 100
+        }
+      ],
+      "logic": [],
+      "notes": "",
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false,
+      "scene": {
+        "inheritProject": true,
+        "source": "project",
+        "responsive": true,
+        "referenceWidth": 640,
+        "referenceHeight": 480,
+        "cameraBoundsMode": "auto"
+      }
     }
   ],
   "reusableClips": [],
@@ -15379,6 +15158,6 @@
   "exportGameDataDir": "PBS/AnimationStudio",
   "exportPackageDir": "C:/Users/nuevo usuario/Downloads/Animaciones/Common Snap Trap",
   "editor": {
-    "lastAnimationId": "anim_mt4u3tvi_cr"
+    "lastAnimationId": "anim_mt3wt4q6_6d"
   }
 }

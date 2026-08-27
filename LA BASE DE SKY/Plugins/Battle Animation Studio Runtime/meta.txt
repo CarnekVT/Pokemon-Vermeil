@@ -1,5 +1,5 @@
 Name       = Battle Animation Studio Runtime
-Version    = 1.0.22
+Version    = 1.0.30
 Essentials = 21.1
 Credits    = CarnekVT
 Last       = true

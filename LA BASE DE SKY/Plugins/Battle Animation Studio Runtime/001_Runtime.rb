@@ -1,17 +1,223 @@
 #===============================================================================
-# Battle Animation Studio Runtime v1.0
+# Battle Animation Studio Runtime v1.0.30 - LBDS
 # Plays animations exported by the Maker Studio Battle Animation Studio.
 # Credits: CarnekVT
 # Source data: PBS/AnimationStudio/compiled_animations.json
 #===============================================================================
-begin
-  require "json"
-rescue LoadError
+# Minimal JSON reader used when the embedded Ruby build does not ship the json
+# standard library. It supports the JSON types emitted by Battle Animation Studio
+# and deliberately has no external dependencies.
+module BattleAnimationStudioMiniJSON
+  class Parser
+    def initialize(text)
+      @text = text.to_s
+      @index = 0
+      @length = @text.bytesize
+    end
+
+    def parse
+      skip_space
+      value = parse_value
+      skip_space
+      error("trailing data") if @index < @length
+      value
+    end
+
+    def error(message)
+      raise RuntimeError, "JSON parse error at #{@index}: #{message}"
+    end
+
+    def byte(index = @index)
+      @text.getbyte(index)
+    end
+
+    def skip_space
+      while @index < @length
+        b = byte
+        break unless b == 32 || b == 9 || b == 10 || b == 13
+        @index += 1
+      end
+    end
+
+    def parse_value
+      skip_space
+      b = byte
+      error("unexpected end") unless b
+      return parse_object if b == 123 # {
+      return parse_array if b == 91   # [
+      return parse_string if b == 34  # "
+      return parse_number if b == 45 || (b >= 48 && b <= 57)
+      return parse_literal("true", true) if b == 116
+      return parse_literal("false", false) if b == 102
+      return parse_literal("null", nil) if b == 110
+      error("unexpected byte #{b}")
+    end
+
+    def parse_literal(word, value)
+      error("expected #{word}") unless @text.byteslice(@index, word.length) == word
+      @index += word.length
+      value
+    end
+
+    def parse_object
+      result = {}
+      @index += 1
+      skip_space
+      if byte == 125 # }
+        @index += 1
+        return result
+      end
+      loop do
+        skip_space
+        error("object key must be a string") unless byte == 34
+        key = parse_string
+        skip_space
+        error("expected :") unless byte == 58
+        @index += 1
+        result[key] = parse_value
+        skip_space
+        b = byte
+        if b == 125
+          @index += 1
+          break
+        end
+        error("expected , or }") unless b == 44
+        @index += 1
+      end
+      result
+    end
+
+    def parse_array
+      result = []
+      @index += 1
+      skip_space
+      if byte == 93 # ]
+        @index += 1
+        return result
+      end
+      loop do
+        result << parse_value
+        skip_space
+        b = byte
+        if b == 93
+          @index += 1
+          break
+        end
+        error("expected , or ]") unless b == 44
+        @index += 1
+      end
+      result
+    end
+
+    def parse_string
+      error("expected string") unless byte == 34
+      @index += 1
+      out = String.new
+      segment = @index
+      i = @index
+      while i < @length
+        b = byte(i)
+        if b == 34
+          out << @text.byteslice(segment, i - segment) if i > segment
+          @index = i + 1
+          return out
+        elsif b == 92
+          out << @text.byteslice(segment, i - segment) if i > segment
+          i += 1
+          error("unterminated escape") if i >= @length
+          esc = byte(i)
+          case esc
+          when 34 then out << '"'
+          when 92 then out << "\\"
+          when 47 then out << "/"
+          when 98 then out << "\b"
+          when 102 then out << "\f"
+          when 110 then out << "\n"
+          when 114 then out << "\r"
+          when 116 then out << "\t"
+          when 117
+            @index = i + 1
+            out << parse_unicode_escape
+            i = @index - 1
+          else
+            error("invalid escape")
+          end
+          i += 1
+          segment = i
+          next
+        elsif b < 32
+          error("control character in string")
+        end
+        i += 1
+      end
+      error("unterminated string")
+    end
+
+    def parse_unicode_escape
+      hex = @text.byteslice(@index, 4)
+      error("invalid unicode escape") unless hex && hex.length == 4 && hex =~ /\A[0-9a-fA-F]{4}\z/
+      @index += 4
+      code = hex.to_i(16)
+      if code >= 0xD800 && code <= 0xDBFF && @text.byteslice(@index, 2) == "\\u"
+        low_hex = @text.byteslice(@index + 2, 4)
+        if low_hex && low_hex =~ /\A[0-9a-fA-F]{4}\z/
+          low = low_hex.to_i(16)
+          if low >= 0xDC00 && low <= 0xDFFF
+            @index += 6
+            code = 0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00)
+          end
+        end
+      end
+      begin
+        [code].pack("U")
+      rescue
+        "?"
+      end
+    end
+
+    def parse_number
+      start = @index
+      i = @index
+      while i < @length
+        b = byte(i)
+        if (b >= 48 && b <= 57) || b == 45 || b == 43 || b == 46 || b == 101 || b == 69
+          i += 1
+        else
+          break
+        end
+      end
+      token = @text.byteslice(start, i - start)
+      error("invalid number") if token.nil? || token.empty?
+      @index = i
+      (token.index(".") || token.index("e") || token.index("E")) ? token.to_f : token.to_i
+    end
+  end
+
+  def self.parse(text)
+    Parser.new(text).parse
+  end
 end
 
 module BattleAnimationStudioRuntime
+  # Runtime build flavor. The Studio ships two runtime templates because clean
+  # Essentials v21.1 and LBDS do not share the same battle-frame plumbing.
+  BASE_FLAVOR = :lbds
+  NEW_ANIMATION_EDITOR_OPTIONAL = true
+
+  def self.new_animation_editor_available?
+    return true if defined?(AnimationPlayer::Helper)
+    return true if defined?(AnimationPlayer::Emitter)
+    false
+  rescue
+    false
+  end
+
+  def self.vanilla_runtime?
+    BASE_FLAVOR == :pe21_vanilla
+  end
+
   DEFAULT_DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
-  VERSION = 32
+  VERSION = 34
   RUNTIME_PARTICLE_LIMIT = 240
   @cache = nil
   @mtime = nil
@@ -70,11 +276,17 @@ module BattleAnimationStudioRuntime
     return nil if !File.exist?(path)
     mtime = File.mtime(path).to_i rescue 0
     return @cache if @cache && @mtime == mtime && @lookup_index && @data_path == path
-    if !defined?(JSON)
-      log("Ruby JSON is unavailable; cannot read #{path}.")
-      return nil
+    raw = File.open(path, "rb") { |file| file.read }
+    if defined?(JSON) && JSON.respond_to?(:parse)
+      begin
+        @cache = JSON.parse(raw)
+      rescue => json_error
+        log("Host JSON failed (#{json_error.class}: #{json_error.message}); using internal parser.")
+        @cache = BattleAnimationStudioMiniJSON.parse(raw)
+      end
+    else
+      @cache = BattleAnimationStudioMiniJSON.parse(raw)
     end
-    @cache = JSON.parse(File.binread(path))
     @mtime = mtime
     @data_path = path
     rebuild_lookup_index
@@ -1303,7 +1515,13 @@ module BattleAnimationStudioRuntime
       graphic = clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
       mask = (pbs["maskGraphic"] || graphic["maskGraphic"] || "").to_s
       return if mask.empty? || !defined?(RPG::Cache)
-      sprite.pattern = RPG::Cache.load_bitmap("Graphics/Battle animations/", mask)
+      resolved = resolve_runtime_graphic(clip, mask)
+      return if resolved.nil? || resolved.empty?
+      normalized = resolved.to_s.tr("\\", "/")
+      slash = normalized.rindex("/")
+      folder = slash ? normalized[0..slash] : ""
+      filename = slash ? normalized[(slash + 1)..-1] : normalized
+      sprite.pattern = RPG::Cache.load_bitmap(folder, filename)
     rescue => e
       BattleAnimationStudioRuntime.log("mask #{e.class}: #{e.message}")
     end
@@ -1382,6 +1600,7 @@ module BattleAnimationStudioRuntime
       add_value.call(graphic["name"])
       folder = graphic["folder"].to_s.tr("\\", "/").sub(/^Graphics\//i, "").sub(/^\/+|\/+$/, "")
       roots = [
+        "Graphics/AnimationStudio",
         "Graphics/Animations",
         "Graphics/Battle animations",
         "Graphics/EBDX/Animations/Moves",
@@ -1459,7 +1678,10 @@ module BattleAnimationStudioRuntime
         end
         pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
         mask = pbs["maskGraphic"].to_s
-        names["Graphics/Battle animations/#{mask}"] = true if !mask.empty?
+        if !mask.empty?
+          resolved_mask = resolve_runtime_graphic(clip, mask)
+          names[resolved_mask] = true if resolved_mask && !resolved_mask.empty?
+        end
       end
       names.each_key { |name| preload_bitmap_path(name) }
       # Give each template its first bitmap now as well, so the first active
@@ -2127,11 +2349,16 @@ module BattleAnimationStudioRuntime
       if mode == "rmxp"
         cw = [(graphic["cellW"] || 192).to_i, 1].max
         ch = [(graphic["cellH"] || 192).to_i, 1].max
-        cols = [(graphic["cols"] || (width / cw)).to_i, 1].max
-        rows = [height / ch, 1].max
+        actual_cols = [width / cw, 1].max
+        actual_rows = [height / ch, 1].max
+        declared_cols = (graphic["cols"] || 0).to_i
+        cols = declared_cols > 0 && declared_cols <= actual_cols ? declared_cols : actual_cols
+        rows = actual_rows
         count = [cols * rows, 1].max
         fr %= count
-        sprite.src_rect.set((fr % cols) * cw, (fr / cols) * ch, [cw, width].min, [ch, height].min)
+        sx = (fr % cols) * cw
+        sy = (fr / cols) * ch
+        sprite.src_rect.set(sx, sy, [[cw, width - sx].min, 1].max, [[ch, height - sy].min, 1].max)
         return
       end
       if mode == "code-dynamic-grid"
@@ -2475,6 +2702,20 @@ module BattleAnimationStudioRuntime
       end
       ref = priority_reference(obj, frame)
       if explicit == "auto" && priority == 0
+        # Compatibility for Initial Pack copies installed before FIX28. Those
+        # builds did not persist explicit layer references for Explosion BG/Fade.
+        source = @data["source"].is_a?(Hash) ? @data["source"] : {}
+        initial_pack = source["initialPack"] == true || !source["initialPackKey"].to_s.empty?
+        if initial_pack && source["move"].to_s.upcase == "EXPLOSION"
+          layer_name = obj["name"].to_s.downcase
+          if layer_name == "bg"
+            sprite.z = 100
+            return
+          elsif layer_name == "fade"
+            sprite.z = 2000
+            return
+          end
+        end
         return
       end
       battler_offset = priority >= 0 ? priority + 1 : priority
@@ -3519,14 +3760,18 @@ module BattleAnimationStudioRuntime
       mode = (scene["cameraBoundsMode"] || "auto").to_s.downcase
       return :screen if mode == "screen"
       return :extended if mode == "extended"
-      source = @data["source"].is_a?(Hash) ? @data["source"] : {}
-      source["system"].to_s.downcase == "ebdx" ? :extended : :screen
+      # Auto is deliberately adaptive. A camera zoom is dimensionless and must
+      # survive importing a 640x480 animation into 640x440 (or any other canvas).
+      # Only an explicit Screen mode is allowed to clamp zoom to hide edges.
+      :adaptive
     rescue
       :screen
     end
 
     def constrain_camera_state(x, y, zoom, rotation)
-      return [x, y, zoom] if camera_bounds_mode == :extended
+      bounds_mode = camera_bounds_mode
+      return [x, y, zoom] if bounds_mode == :extended
+      return [x, y, [zoom.to_f, 0.05].max] if bounds_mode == :adaptive
       width = [Graphics.width.to_f, 1.0].max
       height = [Graphics.height.to_f, 1.0].max
       rad = rotation.to_f * Math::PI / 180.0
@@ -3738,6 +3983,79 @@ module BattleAnimationStudioRuntime
   end
 
   module SceneHook
+    # Clean Essentials v21.1's pbGraphicsUpdate already calls Graphics.update.
+    # BAS must therefore not call Graphics.update and pbGraphicsUpdate in the
+    # same iteration or the camera is rendered once transformed and once
+    # restored. This pump mirrors vanilla Battle::Scene#pbUpdate while keeping
+    # the camera active only for the single real Graphics.update.
+    def bas_runtime_pump_vanilla_frame(player)
+      if @animations && @animations.respond_to?(:each_with_index) && @animations.length > 0
+        compact = false
+        @animations.each_with_index do |anim, i|
+          next if !anim
+          anim.update if anim.respond_to?(:update)
+          if anim.respond_to?(:animDone?) && anim.animDone?
+            anim.dispose if anim.respond_to?(:dispose)
+            @animations[i] = nil
+            compact = true
+          end
+        end
+        @animations.compact! if compact && @animations.respond_to?(:compact!)
+      end
+      bg = @sprites && @sprites["battle_bg"]
+      bg.update if bg && bg.respond_to?(:update)
+      player.prepare_camera_render
+      begin
+        Graphics.update
+      ensure
+        player.restore_camera!
+      end
+      if respond_to?(:pbInputUpdate)
+        pbInputUpdate
+      else
+        Input.update
+      end
+      if respond_to?(:pbFrameUpdate)
+        pbFrameUpdate(nil)
+      else
+        # Last-resort vanilla-compatible update for projects that renamed the
+        # helper but kept the normal sprite table.
+        battle = instance_variable_get(:@battle) rescue nil
+        battlers = battle && battle.respond_to?(:battlers) ? battle.battlers : []
+        battlers.each_with_index do |b, i|
+          next if !b
+          @sprites["dataBox_#{i}"].update if @sprites["dataBox_#{i}"] && @sprites["dataBox_#{i}"].respond_to?(:update)
+          @sprites["pokemon_#{i}"].update if @sprites["pokemon_#{i}"] && @sprites["pokemon_#{i}"].respond_to?(:update)
+          @sprites["shadow_#{i}"].update if @sprites["shadow_#{i}"] && @sprites["shadow_#{i}"].respond_to?(:update)
+        end
+      end
+    end
+
+    # LBDS keeps its own battle-scene wrappers. Preserve its established frame
+    # flow, but the BAS renderer itself remains independent of New Animation
+    # Editor. If NAE isn't installed, all BAS matching/rendering still works and
+    # non-BAS animations simply fall through to whatever LBDS provides.
+    def bas_runtime_pump_lbds_frame(player)
+      player.prepare_camera_render
+      begin
+        Graphics.update
+      ensure
+        player.restore_camera!
+      end
+      Input.update
+      pbGraphicsUpdate if respond_to?(:pbGraphicsUpdate)
+      pbInputUpdate if respond_to?(:pbInputUpdate)
+      pbFrameUpdate(nil) if respond_to?(:pbFrameUpdate)
+    end
+
+    def bas_runtime_pump_frame(player)
+      if BattleAnimationStudioRuntime.vanilla_runtime?
+        bas_runtime_pump_vanilla_frame(player)
+      else
+        bas_runtime_pump_lbds_frame(player)
+      end
+    end
+
     def pbPlayBattleAnimationStudio(move_id, user, targets, version = 0, common = false)
       raw_target = targets.is_a?(Array) ? targets[0] : targets
       side_battler = user || raw_target
@@ -3807,16 +4125,7 @@ module BattleAnimationStudioRuntime
           # (including sleep/idle animation plugins) also wrap Graphics.update;
           # chaining both wrappers can recurse until SystemStackError. Apply the
           # Studio camera only around the actual rendered Graphics frame instead.
-          player.prepare_camera_render
-          begin
-            Graphics.update
-          ensure
-            player.restore_camera!
-          end
-          Input.update
-          pbGraphicsUpdate
-          pbInputUpdate
-          pbFrameUpdate(nil)
+          bas_runtime_pump_frame(player)
           break if player.animDone?
         end
       ensure
@@ -3913,6 +4222,10 @@ end
 
 module BattleAnimationStudioRuntime
   def self.install_new_animation_editor_compat
+    # New Animation Editor is optional in both builds. Never reference its
+    # classes unless they actually exist; the BAS renderer has its own focus,
+    # particle, camera and timeline implementation.
+    return false unless new_animation_editor_available?
     if defined?(AnimationPlayer::Helper)
       klass = AnimationPlayer::Helper.singleton_class
       unless klass.ancestors.include?(BattleAnimationStudioRuntimeNAEFocusGuard)
@@ -3925,6 +4238,7 @@ module BattleAnimationStudioRuntime
         klass.prepend(BattleAnimationStudioRuntimeNAEEmitterGuard)
       end
     end
+    true
   rescue => e
     log("NAE compat #{e.class}: #{e.message}")
   end

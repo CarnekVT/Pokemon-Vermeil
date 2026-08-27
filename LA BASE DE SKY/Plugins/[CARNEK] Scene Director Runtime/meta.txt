@@ -1,4 +1,4 @@
 Name        = [CARNEK] Scene Director Runtime
-Version     = 0.3.1
+Version     = 0.3.2
 Essentials  = 21.1
 Credits     = CarnekVT
