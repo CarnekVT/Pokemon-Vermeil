@@ -569,6 +569,7 @@ class Battle::Battler
     if Settings::MECHANICS_GENERATION <= 8
       ability_blacklist.push(:GULPMISSILE)
     end
+    return true if hasActiveItem?(:ABILITYSHIELD)
     return ability_blacklist.include?(abil.id)
   end
 

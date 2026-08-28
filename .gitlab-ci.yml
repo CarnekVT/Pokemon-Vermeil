@@ -1,7 +1,22 @@
 stages:
+  - test
   - notify
   - release
   # - build
+
+# Boots Essentials headlessly and runs tests/. No gems to install: the runner is
+# tests/framework.rb and everything else ships with Ruby.
+tests:
+  stage: test
+  image: ruby:3.4
+  tags:
+    - self-hosted
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_TAG
+  script:
+    - ruby tests/run.rb
 
 notify-discord:
   stage: notify

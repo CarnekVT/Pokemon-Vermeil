@@ -541,7 +541,7 @@ class Game_Character
       return false if self.respond_to?(:name) && OWShadowSettings::SHADOWLESS_EVENT_NAME.any? { |e| self.name[/#{e}/]}
     else
       return false if OWShadowSettings::SHADOWLESS_CHARACTER_NAME.any?{ |e| self.character_name[/#{e}/i] }
-      return false if self.respond_to?(:name) && OWShadowSettings::SHADOWLESS_EVENT_NAME.any? { |e| self.name[/#{e}/]}
+      return false if self.respond_to?(:name) && OWShadowSettings::SHADOWLESS_EVENT_NAME.any? { |e| self.name[/#{e}/i]}
     end
     terrain = $game_map.terrain_tag(self.x, self.y)
     return false if OWShadowSettings::SHADOWLESS_TERRAIN_NAME.any? { |e| terrain == e } if terrain

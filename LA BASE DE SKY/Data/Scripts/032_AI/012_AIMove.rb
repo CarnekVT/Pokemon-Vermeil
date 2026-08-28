@@ -200,14 +200,14 @@ class Battle::AI::AIMove
       if @ai.battle.pbCheckGlobalAbility(:VESSELOFRUIN) && user.ability_id != :VESSELOFRUIN
         multipliers[:power_multiplier] *= 3 / 4.0 if specialMove?(calc_type)
       end
-      if @ai.battle.pbCheckGlobalAbility(:SWORDOFRUIN) && user.ability_id != :SWORDOFRUIN
+      if @ai.battle.pbCheckGlobalAbility(:SWORDOFRUIN) && target.ability_id != :SWORDOFRUIN
         if @ai.battle.field.effects[PBEffects::WonderRoom] > 0
           multipliers[:defense_multiplier] *= 3 / 4.0 if specialMove?(calc_type)
         else
           multipliers[:defense_multiplier] *= 3 / 4.0 if physicalMove?(calc_type)
         end
       end
-      if @ai.battle.pbCheckGlobalAbility(:BEADSOFRUIN) && user.ability_id != :BEADSOFRUIN
+      if @ai.battle.pbCheckGlobalAbility(:BEADSOFRUIN) && target.ability_id != :BEADSOFRUIN
         if @ai.battle.field.effects[PBEffects::WonderRoom] > 0
           multipliers[:defense_multiplier] *= 3 / 4.0 if physicalMove?(calc_type)
         else

@@ -433,7 +433,7 @@ class Battle::Move::ThrowUserItemAtTarget < Battle::Move
     #       at it has some kind of effect (i.e. it isn't an effectless berry). I
     #       think this isn't in the spirit of "consuming a berry", so I've said
     #       that Belch is usable after having any kind of berry flung at you.
-    target.setBelched if user.item.is_berry?
+    target.setBelched if user&.item&.is_berry?
   end
 
   def pbEndOfMoveUsageEffect(user, targets, numHits, switchedBattlers)

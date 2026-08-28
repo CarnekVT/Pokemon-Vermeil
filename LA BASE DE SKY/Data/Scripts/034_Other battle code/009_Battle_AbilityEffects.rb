@@ -4,6 +4,7 @@
 module Battle::AbilityEffects
   SpeedCalc                        = AbilityHandlerHash.new
   WeightCalc                       = AbilityHandlerHash.new
+  Trace                            = AbilityHandlerHash.new
   # Battler's HP changed
   OnHPDroppedBelowHalf             = AbilityHandlerHash.new
   # Battler's status condition
@@ -58,7 +59,10 @@ module Battle::AbilityEffects
   # Switching and fainting
   CertainSwitching                 = AbilityHandlerHash.new   # None!
   TrappingByTarget                 = AbilityHandlerHash.new
+  OnSwitchInNeutralizingGas        = AbilityHandlerHash.new
+  OnSwitchInUnnerve                = AbilityHandlerHash.new
   OnSwitchIn                       = AbilityHandlerHash.new
+  OnSwitchInDelayed                = AbilityHandlerHash.new
   OnSwitchOut                      = AbilityHandlerHash.new
   ChangeOnBattlerFainting          = AbilityHandlerHash.new
   OnBattlerFainting                = AbilityHandlerHash.new   # Soul-Heart
@@ -83,6 +87,10 @@ module Battle::AbilityEffects
 
   def self.triggerWeightCalc(ability, battler, weight)
     return trigger(WeightCalc, ability, battler, weight, ret: weight)
+  end
+
+  def self.triggerTrace(ability, battler, battle, on_switch_in = false)
+    Trace.trigger(ability, battler, battle, on_switch_in)
   end
 
   #-----------------------------------------------------------------------------
@@ -277,8 +285,20 @@ module Battle::AbilityEffects
     return trigger(TrappingByTarget, ability, switcher, bearer, battle)
   end
 
+  def self.triggerOnSwitchInNeutralizingGas(ability, battler, battle, switch_in = false)
+    OnSwitchInNeutralizingGas.trigger(ability, battler, battle, switch_in)
+  end
+
+  def self.triggerOnSwitchInUnnerve(ability, battler, battle, switch_in = false)
+    OnSwitchInUnnerve.trigger(ability, battler, battle, switch_in)
+  end
+
   def self.triggerOnSwitchIn(ability, battler, battle, switch_in = false)
     OnSwitchIn.trigger(ability, battler, battle, switch_in)
+  end
+
+  def self.triggerOnSwitchInDelayed(ability, battler, battle, switch_in = false)
+    OnSwitchInDelayed.trigger(ability, battler, battle, switch_in)
   end
 
   def self.triggerOnSwitchOut(ability, battler, end_of_battle)
@@ -386,6 +406,17 @@ Battle::AbilityEffects::WeightCalc.add(:HEAVYMETAL,
 Battle::AbilityEffects::WeightCalc.add(:LIGHTMETAL,
   proc { |ability, battler, w|
     next [w / 2, 1].max
+  }
+)
+
+#===============================================================================
+# Trace handlers
+#===============================================================================
+
+Battle::AbilityEffects::Trace.add(:TRACE,
+  proc { |ability, battler, battle, switch_in|
+    next if Settings::MECHANICS_GENERATION <= 5
+    Battle::AbilityEffects.triggerTrace(battler.ability, battler, battle, switch_in)
   }
 )
 
@@ -2101,10 +2132,10 @@ Battle::AbilityEffects::OnBeingHit.add(:CURSEDBODY,
     user.effects[PBEffects::Disable]     = 3
     user.effects[PBEffects::DisableMove] = regularMove.id
     if Battle::Scene::USE_ABILITY_SPLASH
-      battle.pbDisplay(_INTL("¡{1} de {2} fue deshabilitado!", user.pbThis, regularMove.name))
+      battle.pbDisplay(_INTL("¡{1} de {2} fue deshabilitado!", regularMove.name, user.pbThis))
     else
       battle.pbDisplay(_INTL("¡{1} de {2} fue deshabilitado por la habilidad {4} de {3}!",
-          user.pbThis, regularMove.name, target.pbThis(true), target.abilityName))
+                              regularMove.name, user.pbThis, target.pbThis(true), target.abilityName))
     end
     battle.pbHideAbilitySplash(target)
     user.pbItemStatusCureCheck
@@ -2982,6 +3013,76 @@ Battle::AbilityEffects::TrappingByTarget.add(:SHADOWTAG,
 )
 
 #===============================================================================
+# OnSwitchInNeutralizingGas handlers
+#===============================================================================
+
+Battle::AbilityEffects::OnSwitchInNeutralizingGas.add(:NEUTRALIZINGGAS,
+  proc { |ability, battler, battle, switch_in|
+    battle.pbShowAbilitySplash(battler, true)
+    battle.pbHideAbilitySplash(battler)
+    battle.pbDisplay(_INTL("¡Un gas reactivo se propaga por toda la zona!"))
+    battle.allBattlers(true).each do |b|
+	    if b.hasActiveItem?(:ABILITYSHIELD)
+		    itemname = GameData::Item.get(b.item).name
+		    battle.pbDisplay(_INTL("¡La habilidad de {1} está protegida por los efectos de su {2}!", b.pbThis(true), itemname))
+		    next
+	    end
+      # Slow Start - end all turn counts
+      b.effects[PBEffects::SlowStart] = 0
+      # Truant - let b move on its first turn after Neutralizing Gas disappears
+      b.effects[PBEffects::Truant] = false
+      # Gorilla Tactics - end choice lock
+      if !b.hasActiveItem?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF])
+        b.effects[PBEffects::ChoiceBand] = nil
+      end
+      # Illusion - end illusions
+      if b.effects[PBEffects::Illusion]
+        b.effects[PBEffects::Illusion] = nil
+        if !b.effects[PBEffects::Transform]
+          battle.scene.pbChangePokemon(b, b.pokemon)
+          battle.pbDisplay(_INTL("¡{2} de {1} se disipó!", b.pbThis(true), b.abilityName))
+          battle.pbSetSeen(b)
+        end
+      end
+    end
+    # Trigger items upon Unnerve being negated
+    battler.ability_id = nil   # Allows checking if Unnerve was active before
+    had_unnerve = battle.pbCheckGlobalAbility([:UNNERVE, :ASONECHILLINGNEIGH, :ASONEGRIMNEIGH])
+    battler.ability_id = :NEUTRALIZINGGAS
+    if had_unnerve && !battle.pbCheckGlobalAbility([:UNNERVE, :ASONECHILLINGNEIGH, :ASONEGRIMNEIGH])
+      battle.allBattlers(true).each { |b| b.pbItemsOnUnnerveEnding }
+    end
+  }
+)
+
+#===============================================================================
+# OnSwitchInUnnerve handlers
+#===============================================================================
+
+Battle::AbilityEffects::OnSwitchInUnnerve.add(:ASONECHILLINGNEIGH,
+  proc { |ability, battler, battle, switch_in|
+    battle.pbShowAbilitySplash(battler)
+    battle.pbDisplay(_INTL("¡{1} tiene dos habilidades!", battler.pbThis))
+    battle.pbHideAbilitySplash(battler)
+    battler.ability_id = :UNNERVE
+    battle.pbShowAbilitySplash(battler)
+    battle.pbDisplay(_INTL("¡{1} está muy nervioso y no puede comer bayas!", battler.pbOpposingTeam))
+    battle.pbHideAbilitySplash(battler)
+    battler.ability_id = ability
+  }
+)
+
+Battle::AbilityEffects::OnSwitchInUnnerve.copy(:ASONECHILLINGNEIGH, :ASONEGRIMNEIGH)
+
+Battle::AbilityEffects::OnSwitchInUnnerve.add(:UNNERVE,
+  proc { |ability, battler, battle, switch_in|
+    battle.pbShowAbilitySplash(battler)
+    battle.pbDisplay(_INTL("¡{1} está muy nervioso y no puede comer bayas!", battler.pbOpposingTeam))
+    battle.pbHideAbilitySplash(battler)
+  }
+)
+
+#===============================================================================
 # OnSwitchIn handlers
 #===============================================================================
 
@@ -3031,21 +3132,6 @@ Battle::AbilityEffects::OnSwitchIn.add(:ANTICIPATION,
   }
 )
 
-Battle::AbilityEffects::OnSwitchIn.add(:ASONECHILLINGNEIGH,
-  proc { |ability, battler, battle, switch_in|
-    battle.pbShowAbilitySplash(battler)
-    battle.pbDisplay(_INTL("¡{1} tiene dos habilidades!", battler.pbThis))
-    battle.pbHideAbilitySplash(battler)
-    battler.ability_id = :UNNERVE
-    battle.pbShowAbilitySplash(battler)
-    battle.pbDisplay(_INTL("¡{1} está muy nervioso y no puede comer bayas!", battler.pbOpposingTeam))
-    battle.pbHideAbilitySplash(battler)
-    battler.ability_id = ability
-  }
-)
-
-Battle::AbilityEffects::OnSwitchIn.copy(:ASONECHILLINGNEIGH, :ASONEGRIMNEIGH)
-
 Battle::AbilityEffects::OnSwitchIn.add(:AURABREAK,
   proc { |ability, battler, battle, switch_in|
     battle.pbShowAbilitySplash(battler)
@@ -3054,44 +3140,19 @@ Battle::AbilityEffects::OnSwitchIn.add(:AURABREAK,
   }
 )
 
-Battle::AbilityEffects::OnSwitchIn.add(:COMATOSE,
+Battle::AbilityEffects::OnSwitchIn.add(:BEADSOFRUIN,
   proc { |ability, battler, battle, switch_in|
     battle.pbShowAbilitySplash(battler)
-    battle.pbDisplay(_INTL("¡{1} está sumido en un profundo letargo!", battler.pbThis))
+    battle.pbDisplay(_INTL("¡La {2} de {1} ha debilitado la Defensa Especial de todos los Pokémon circundantes!",
+                           battler.pbThis(true), battler.abilityName))
     battle.pbHideAbilitySplash(battler)
   }
 )
 
-Battle::AbilityEffects::OnSwitchIn.add(:COSTAR,
+Battle::AbilityEffects::OnSwitchIn.add(:COMATOSE,
   proc { |ability, battler, battle, switch_in|
-    allies = battler.allAllies
-    next if allies.empty?
-    # Determine which ally to copy the stats of
-    if allies.length > 1
-      target = nil
-      target_stages = 0
-      allies.each do |ally|
-        if target.nil?
-          target = ally
-          GameData::Stat.each_battle { |s| target_stages += ally.stages[s.id] }
-          target_stages += ally.criticalHitRate
-        else
-          stages = 0
-          GameData::Stat.each_battle { |s| stages += ally.stages[s.id] }
-          stages += ally.criticalHitRate
-          next if stages < target_stages
-          target = ally
-          target_stages = stages
-        end
-      end
-    else
-      target = allies[0]
-    end
-    # Copy the stats
     battle.pbShowAbilitySplash(battler)
-    GameData::Stat.each_battle { |s| battler.stages[s.id] = target.stages[s.id] }
-    battler.setCriticalHitRate(target.criticalHitRate)
-    battle.pbDisplay(_INTL("{1} copió los cambios de características de {2}!", battler.pbThis, target.pbThis(true)))
+    battle.pbDisplay(_INTL("¡{1} está sumido en un profundo letargo!", battler.pbThis))
     battle.pbHideAbilitySplash(battler)
   }
 )
@@ -3306,33 +3367,6 @@ Battle::AbilityEffects::OnSwitchIn.add(:HADRONENGINE,
   }
 )
 
-Battle::AbilityEffects::OnSwitchIn.add(:HOSPITALITY,
-  proc { |ability, battler, battle, switch_in|
-    allies = battler.allAllies
-    allies.reject! { |ally| !ally.near?(battler) || !ally.canHeal? }
-    next if allies.empty?
-    battle.pbShowAbilitySplash(battler)
-    allies.each do |ally|
-      next if ally.pbRecoverHP(ally.totalhp / 4) == 0
-      battle.pbDisplay(_INTL("¡{1} bebió todo el matcha que {2} preparó!", ally.pbThis, battler.pbThis(true)))
-    end
-    battle.pbHideAbilitySplash(battler)
-  }
-)
-
-Battle::AbilityEffects::OnSwitchIn.add(:ICEFACE,
-  proc { |ability, battler, battle, switch_in|
-    next if !battler.isSpecies?(:EISCUE) || battler.form != 1 || battler.effects[PBEffects::Transform]
-    next if ![:Hail, :Snowstorm].include?(battler.effectiveWeather)
-    battle.pbShowAbilitySplash(battler)
-    if !Battle::Scene::USE_ABILITY_SPLASH
-      battle.pbDisplay(_INTL("¡La habilidad {2} de {1} se ha activado!", battler.pbThis(true), battler.abilityName))
-    end
-    battler.pbChangeForm(0, _INTL("¡{1} se ha transformado!", battler.pbThis))
-    battle.pbHideAbilitySplash(battler)
-  }
-)
-
 Battle::AbilityEffects::OnSwitchIn.add(:IMPOSTER,
   proc { |ability, battler, battle, switch_in|
     next if !switch_in || battler.effects[PBEffects::Transform]
@@ -3378,13 +3412,6 @@ Battle::AbilityEffects::OnSwitchIn.add(:INTREPIDSWORD,
   }
 )
 
-Battle::AbilityEffects::OnSwitchIn.add(:MIMICRY,
-  proc { |ability, battler, battle, switch_in|
-    next if battle.field.terrain == :None
-    Battle::AbilityEffects.triggerOnTerrainChange(ability, battler, battle, false)
-  }
-)
-
 Battle::AbilityEffects::OnSwitchIn.add(:MISTYSURGE,
   proc { |ability, battler, battle, switch_in|
     battle.pbStartTerrainAbility(:Misty, battler)
@@ -3396,45 +3423,6 @@ Battle::AbilityEffects::OnSwitchIn.add(:MOLDBREAKER,
     battle.pbShowAbilitySplash(battler)
     battle.pbDisplay(_INTL("¡{1} rompe el molde!", battler.pbThis))
     battle.pbHideAbilitySplash(battler)
-  }
-)
-
-Battle::AbilityEffects::OnSwitchIn.add(:NEUTRALIZINGGAS,
-  proc { |ability, battler, battle, switch_in|
-    battle.pbShowAbilitySplash(battler, true)
-    battle.pbHideAbilitySplash(battler)
-    battle.pbDisplay(_INTL("¡Un gas reactivo se propaga por toda la zona!"))
-    battle.allBattlers(true).each do |b|
-	    if b.hasActiveItem?(:ABILITYSHIELD)
-		    itemname = GameData::Item.get(b.item).name
-		    battle.pbDisplay(_INTL("¡La habilidad de {1} está protegida por los efectos de su {2}!", b.pbThis(true), itemname))
-		    next
-	    end
-      # Slow Start - end all turn counts
-      b.effects[PBEffects::SlowStart] = 0
-      # Truant - let b move on its first turn after Neutralizing Gas disappears
-      b.effects[PBEffects::Truant] = false
-      # Gorilla Tactics - end choice lock
-      if !b.hasActiveItem?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF])
-        b.effects[PBEffects::ChoiceBand] = nil
-      end
-      # Illusion - end illusions
-      if b.effects[PBEffects::Illusion]
-        b.effects[PBEffects::Illusion] = nil
-        if !b.effects[PBEffects::Transform]
-          battle.scene.pbChangePokemon(b, b.pokemon)
-          battle.pbDisplay(_INTL("¡{2} de {1} se disipó!", b.pbThis(true), b.abilityName))
-          battle.pbSetSeen(b)
-        end
-      end
-    end
-    # Trigger items upon Unnerve being negated
-    battler.ability_id = nil   # Allows checking if Unnerve was active before
-    had_unnerve = battle.pbCheckGlobalAbility([:UNNERVE, :ASONECHILLINGNEIGH, :ASONEGRIMNEIGH])
-    battler.ability_id = :NEUTRALIZINGGAS
-    if had_unnerve && !battle.pbCheckGlobalAbility([:UNNERVE, :ASONECHILLINGNEIGH, :ASONEGRIMNEIGH])
-      battle.allBattlers(true).each { |b| b.pbItemsOnUnnerveEnding }
-    end
   }
 )
 
@@ -3453,14 +3441,20 @@ Battle::AbilityEffects::OnSwitchIn.add(:ORICHALCUMPULSE,
 
 Battle::AbilityEffects::OnSwitchIn.add(:PASTELVEIL,
   proc { |ability, battler, battle, switch_in|
-    next if battler.allAllies.none? { |ally| ally.status == :POISON }
+    next if battler.status != :POISON && battler.allAllies.none? { |ally| ally.status == :POISON }
     battle.pbShowAbilitySplash(battler)
+    if battler.status == :POISON
+      battler.pbCureStatus(Battle::Scene::USE_ABILITY_SPLASH)
+      if !Battle::Scene::USE_ABILITY_SPLASH
+        battle.pbDisplay(_INTL("¡La habilidad {2} de {1} curó su propio envenenamiento!", battler.pbThis, battler.abilityName))
+      end
+    end
     battler.allAllies.each do |ally|
       next if ally.status != :POISON
       ally.pbCureStatus(Battle::Scene::USE_ABILITY_SPLASH)
       if !Battle::Scene::USE_ABILITY_SPLASH
         battle.pbDisplay(_INTL("¡La habilidad {2} de {1} curó el envenenamiento de {3}!",
-           battler.pbThis, battler.abilityName, b.pbThis(true)))
+           battler.pbThis, battler.abilityName, ally.pbThis(true)))
       end
     end
     battle.pbHideAbilitySplash(battler)
@@ -3481,23 +3475,9 @@ Battle::AbilityEffects::OnSwitchIn.add(:PRIMORDIALSEA,
   }
 )
 
-Battle::AbilityEffects::OnSwitchIn.add(:PROTOSYNTHESIS,
-  proc { |ability, battler, battle, switch_in|
-    next if battler.effects[PBEffects::ProtosynthesisStat]
-    Battle::AbilityEffects.triggerOnWeatherChange(ability, battler, battle, battle.field.weather, false)
-  }
-)
-
 Battle::AbilityEffects::OnSwitchIn.add(:PSYCHICSURGE,
   proc { |ability, battler, battle, switch_in|
     battle.pbStartTerrainAbility(:Psychic, battler)
-  }
-)
-
-Battle::AbilityEffects::OnSwitchIn.add(:QUARKDRIVE,
-  proc { |ability, battler, battle, switch_in|
-    next if battler.effects[PBEffects::ProtosynthesisStat]
-    Battle::AbilityEffects.triggerOnTerrainChange(ability, battler, battle, battle.field.terrain, false)
   }
 )
 
@@ -3590,6 +3570,15 @@ Battle::AbilityEffects::OnSwitchIn.add(:SUPREMEOVERLORD,
   }
 )
 
+Battle::AbilityEffects::OnSwitchIn.add(:SWORDOFRUIN,
+  proc { |ability, battler, battle, switch_in|
+    battle.pbShowAbilitySplash(battler)
+    battle.pbDisplay(_INTL("¡La {2} de {1} ha debilitado la Defensa de todos los Pokémon circundantes!",
+                           battler.pbThis(true), battler.abilityName))
+    battle.pbHideAbilitySplash(battler)
+  }
+)
+
 Battle::AbilityEffects::OnSwitchIn.add(:TERAFORMZERO,
   proc { |ability, battler, battle, switch_in|
     next if battler.abilityUsedOnce?
@@ -3606,11 +3595,37 @@ Battle::AbilityEffects::OnSwitchIn.add(:TERAFORMZERO,
   }
 )
 
+Battle::AbilityEffects::OnSwitchIn.add(:TABLETSOFRUIN,
+  proc { |ability, battler, battle, switch_in|
+    battle.pbShowAbilitySplash(battler)
+    battle.pbDisplay(_INTL("¡La {2} de {1} ha debilitado el Ataque de todos los Pokémon circundantes!",
+                           battler.pbThis(true), battler.abilityName))
+    battle.pbHideAbilitySplash(battler)
+  }
+)
+
 Battle::AbilityEffects::OnSwitchIn.add(:TERAVOLT,
   proc { |ability, battler, battle, switch_in|
     battle.pbShowAbilitySplash(battler)
     battle.pbDisplay(_INTL("¡{1} desprende un aura chisporroteante!", battler.pbThis))
     battle.pbHideAbilitySplash(battler)
+  }
+)
+
+Battle::AbilityEffects::OnSwitchIn.add(:TRACE,
+  proc { |ability, battler, battle, switch_in|
+    choices = battle.allOtherSideBattlers(battler.index).select do |b|
+      next !b.ungainableAbility? || b.ability_id == :WONDERGUARD
+    end
+    next if choices.empty?
+    choice = choices[battle.pbRandom(choices.length)]
+    battle.pbShowAbilitySplash(battler)
+    battler.ability = choice.ability
+    battle.pbDisplay(_INTL("¡{1} ha copiado la habilidad {2} de {3}!", battler.pbThis, choice.pbThis(true), choice.abilityName))
+    battle.pbHideAbilitySplash(battler)
+    if !switch_in && (battler.unstoppableAbility? || battler.abilityActive?)
+      Battle::AbilityEffects.triggerOnSwitchIn(battler.ability, battler, battle)
+    end
   }
 )
 
@@ -3622,10 +3637,11 @@ Battle::AbilityEffects::OnSwitchIn.add(:TURBOBLAZE,
   }
 )
 
-Battle::AbilityEffects::OnSwitchIn.add(:UNNERVE,
+Battle::AbilityEffects::OnSwitchIn.add(:VESSELOFRUIN,
   proc { |ability, battler, battle, switch_in|
     battle.pbShowAbilitySplash(battler)
-    battle.pbDisplay(_INTL("¡{1} está muy nervioso y no puede comer bayas!", battler.pbOpposingTeam))
+    battle.pbDisplay(_INTL("¡La {2} de {1} ha debilitado el Ataque Especial de todos los Pokémon circundantes!",
+                           battler.pbThis(true), battler.abilityName))
     battle.pbHideAbilitySplash(battler)
   }
 )
@@ -3634,6 +3650,15 @@ Battle::AbilityEffects::OnSwitchIn.add(:WINDRIDER,
   proc { |ability, battler, battle, switch_in|
     next if battler.pbOwnSide.effects[PBEffects::Tailwind] == 0
     battler.pbRaiseStatStageByAbility(:ATTACK, 1, battler)
+  }
+)
+
+Battle::AbilityEffects::OnSwitchIn.add(:ZEROTOHERO,
+  proc { |ability, battler, battle, switch_in|
+    next if battler.form != 1
+    battle.pbShowAbilitySplash(battler)
+    battle.pbDisplay(_INTL("¡{1} experimentó una transformación heroica!", battler.pbThis))
+    battle.pbHideAbilitySplash(battler)
   }
 )
 
@@ -3651,6 +3676,98 @@ Battle::AbilityEffects::OnSwitchIn.add(:OVERGROW, proc { |ability, battler, batt
 })
 
 Battle::AbilityEffects::OnSwitchIn.copy(:OVERGROW, :TORRENT, :BLAZE, :SWARM)
+
+#===============================================================================
+# OnSwitchInDelayed handlers
+# NOTE: no sé por qué estas habilidades en concreto deben activarse después de
+#       todas las de OnSwitchIn. Solo sigo lo que dice esto:
+#       https://bulbapedia.bulbagarden.net/wiki/User:FIQ/Turn_sequence
+#===============================================================================
+
+Battle::AbilityEffects::OnSwitchInDelayed.add(:COSTAR,
+  proc { |ability, battler, battle, switch_in|
+    allies = battler.allAllies
+    next if allies.empty?
+    # Determine which ally to copy the stats of
+    if allies.length > 1
+      target = nil
+      target_stages = 0
+      allies.each do |ally|
+        if target.nil?
+          target = ally
+          GameData::Stat.each_battle { |s| target_stages += ally.stages[s.id] }
+          target_stages += ally.criticalHitRate
+        else
+          stages = 0
+          GameData::Stat.each_battle { |s| stages += ally.stages[s.id] }
+          stages += ally.criticalHitRate
+          next if stages < target_stages
+          target = ally
+          target_stages = stages
+        end
+      end
+    else
+      target = allies[0]
+    end
+    # Copy the stats
+    battle.pbShowAbilitySplash(battler)
+    GameData::Stat.each_battle { |s| battler.stages[s.id] = target.stages[s.id] }
+    battler.setCriticalHitRate(target.criticalHitRate)
+    battle.pbDisplay(_INTL("{1} copió los cambios de características de {2}!", battler.pbThis, target.pbThis(true)))
+    battle.pbHideAbilitySplash(battler)
+  }
+)
+
+Battle::AbilityEffects::OnSwitchInDelayed.add(:HOSPITALITY,
+  proc { |ability, battler, battle, switch_in|
+    allies = battler.allAllies
+    allies.reject! { |ally| !ally.near?(battler) || !ally.canHeal? }
+    next if allies.empty?
+    battle.pbShowAbilitySplash(battler)
+    allies.each do |ally|
+      next if ally.pbRecoverHP(ally.totalhp / 4) == 0
+      battle.pbDisplay(_INTL("¡{1} bebió todo el matcha que {2} preparó!", ally.pbThis, battler.pbThis(true)))
+    end
+    battle.pbHideAbilitySplash(battler)
+  }
+)
+
+Battle::AbilityEffects::OnSwitchInDelayed.add(:ICEFACE,
+  proc { |ability, battler, battle, switch_in|
+    next if !battler.isSpecies?(:EISCUE) || battler.form != 1 || battler.effects[PBEffects::Transform]
+    next if ![:Hail, :Snowstorm].include?(battler.effectiveWeather)
+    battle.pbShowAbilitySplash(battler)
+    if !Battle::Scene::USE_ABILITY_SPLASH
+      battle.pbDisplay(_INTL("¡La habilidad {2} de {1} se ha activado!", battler.pbThis(true), battler.abilityName))
+    end
+    battler.pbChangeForm(0, _INTL("¡{1} se ha transformado!", battler.pbThis))
+    battle.pbHideAbilitySplash(battler)
+  }
+)
+
+# NOTE: se supone que esta habilidad debe activarse antes que el resto de las
+#       de OnSwitchInDelayed, y al mismo tiempo que la Regresión Primigenia. Se
+#       ignora porque no supone ninguna diferencia.
+Battle::AbilityEffects::OnSwitchInDelayed.add(:MIMICRY,
+  proc { |ability, battler, battle, switch_in|
+    next if battle.field.terrain == :None
+    Battle::AbilityEffects.triggerOnTerrainChange(ability, battler, battle, battle.field.terrain, false)
+  }
+)
+
+Battle::AbilityEffects::OnSwitchInDelayed.add(:PROTOSYNTHESIS,
+  proc { |ability, battler, battle, switch_in|
+    next if battler.effects[PBEffects::ProtosynthesisStat]
+    Battle::AbilityEffects.triggerOnWeatherChange(ability, battler, battle, battle.field.weather, false)
+  }
+)
+
+Battle::AbilityEffects::OnSwitchInDelayed.add(:QUARKDRIVE,
+  proc { |ability, battler, battle, switch_in|
+    next if battler.effects[PBEffects::ProtosynthesisStat]
+    Battle::AbilityEffects.triggerOnTerrainChange(ability, battler, battle, battle.field.terrain, false)
+  }
+)
 
 #===============================================================================
 # OnSwitchOut handlers

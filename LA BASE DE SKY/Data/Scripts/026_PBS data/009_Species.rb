@@ -148,7 +148,7 @@ module GameData
         ["WildItemCommon",    GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) comúnmente llevado(s) por Pokémon salvajes de esta especie.")],
         ["WildItemUncommon",  GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) raramente llevado(s) por Pokémon salvajes de esta especie.")],
         ["WildItemRare",      GameDataPoolProperty.new(:Item),    _INTL("Objeto(s) muy raramente llevado(s) por Pokémon salvajes de esta especie.")],
-        ["Evolutions",        EvolutionsProperty.new,             _INTL("Caminos evolutivos de esta especie.")],
+        ["Evolution",        EvolutionsProperty.new,              _INTL("Caminos evolutivos de esta especie.")],
         ["HideFromDex",       BooleanProperty,                    _INTL("Indica si esta especie debe estar oculta en la Pokédex.")],
         ["Region",            StringProperty,                     _INTL("Nombre de la región en la que debutó el Pokémon pensado para las formas regionales.")],
         ["SuperShinyHue",     StringProperty,                     _INTL("Tonos (Hue) específicos para la versión Super Shiny (separados por comas).")]
