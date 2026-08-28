@@ -3,8 +3,8 @@ class Sprite_Picture
     @viewport = viewport
     @picture = picture
     @sprite = nil
-    update
   end
+
 
   def dispose
     @sprite&.dispose
@@ -56,4 +56,3 @@ class Sprite_Picture
     @sprite.tone = @picture.tone
   end
 end
-

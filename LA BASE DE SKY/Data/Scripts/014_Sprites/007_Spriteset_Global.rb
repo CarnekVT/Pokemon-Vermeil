@@ -19,8 +19,15 @@ class Spriteset_Global
     @playersprite = Sprite_Character.new(Spriteset_Map.viewport, $game_player)
     @weather = RPG::Weather.new(Spriteset_Map.viewport)
     @picture_sprites = []
+    @active_picture_sprites = {}
     (1..100).each do |i|
-      @picture_sprites.push(Sprite_Picture.new(@@viewport2, $game_screen.pictures[i]))
+      picture = $game_screen.pictures[i]
+      sprite = Sprite_Picture.new(@@viewport2, picture)
+      @picture_sprites.push(sprite)
+      if picture.name != ""
+        sprite.update
+        @active_picture_sprites[i] = sprite
+      end
     end
     @timer_sprite = Sprite_Timer.new
     update
@@ -35,6 +42,7 @@ class Spriteset_Global
     @weather = nil
     @picture_sprites.each { |sprite| sprite.dispose }
     @picture_sprites.clear
+    @active_picture_sprites.clear
     @timer_sprite.dispose
     @timer_sprite = nil
   end
@@ -59,8 +67,21 @@ class Spriteset_Global
     @weather.ox = ($game_map.display_x / Game_Map::X_SUBPIXELS).round
     @weather.oy = ($game_map.display_y / Game_Map::Y_SUBPIXELS).round
     @weather.update
-    @picture_sprites.each { |sprite| sprite.update }
+    changed_pictures = Game_Picture.changed_picture_numbers
+    changed_pictures.each_key do |number|
+      picture = $game_screen.pictures[number]
+      sprite = @picture_sprites[number - 1]
+      sprite.update
+      if picture.name == ""
+        @active_picture_sprites.delete(number)
+      else
+        @active_picture_sprites[number] = sprite
+      end
+    end
+    @active_picture_sprites.each do |number, sprite|
+      sprite.update if !changed_pictures.key?(number)
+    end
+    changed_pictures.clear
     @timer_sprite.update
   end
 end
-
