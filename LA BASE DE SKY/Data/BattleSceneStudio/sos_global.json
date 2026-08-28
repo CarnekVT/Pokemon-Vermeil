@@ -1,11 +1,13 @@
 {
   "format": "battle-scene-studio-sos-global",
-  "formatVersion": 2,
+  "formatVersion": 3,
   "activeDataset": "pokerogue",
-  "enabled": false,
+  "enabled": true,
   "mode": "always",
   "switchId": 62,
+  "allowChainCalls": true,
   "limitCallsToOne": false,
+  "maxSimultaneousSOS": 2,
   "shinyMultiplier": 1,
   "requirements": [
     {
@@ -392,6 +394,117 @@
           "species": "DONPHAN",
           "form": 0,
           "weight": 16.25,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "MAGMORTAR",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 75,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "MAGMORTAR",
+          "form": 0,
+          "weight": 35,
+          "requirements": []
+        },
+        {
+          "species": "MAGBY",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "KLINKLANG",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "ELECTIVIRE",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "METAGROSS",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "BRONZONG",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "MAGMAR",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "SIMISEAR",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "CAMERUPT",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "SALAZZLE",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        },
+        {
+          "species": "MAGCARGO",
+          "form": 0,
+          "weight": 13,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "PERSIAN",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 80,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "MEOWTH",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "GOODRA",
+      "form": 1,
+      "callRate": 30,
+      "answerRate": 80,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "SLIGGOO",
+          "form": 1,
+          "weight": 65,
+          "requirements": []
+        },
+        {
+          "species": "GOOMY",
+          "form": 0,
+          "weight": 35,
           "requirements": []
         }
       ]

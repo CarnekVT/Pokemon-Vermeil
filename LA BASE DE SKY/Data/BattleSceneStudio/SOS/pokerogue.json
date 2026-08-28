@@ -35,17 +35,13 @@
         "UMBREON",
         "DEINO",
         "DREEPY",
-        "DARKRAI",
-        "GALAR_MOLTRES",
         "GENGAR",
         "CROBAT",
         "HOUNDOOM",
         "ZOROARK",
         "GRIMMSNARL",
         "HYDREIGON",
-        "DRAGAPULT",
-        "PALKIA",
-        "YVELTAL"
+        "DRAGAPULT"
       ]
     },
     {
@@ -71,8 +67,6 @@
         "GLIGAR",
         "KLAWF",
         "POLTCHAGEIST",
-        "LANDORUS",
-        "OKIDOGI",
         "DONPHAN",
         "CENTISKORCH",
         "SCOVILLAIN",
@@ -85,8 +79,7 @@
         "MUDSDALE",
         "COPPERAJAH",
         "STEELIX",
-        "SINISTCHA",
-        "GROUDON"
+        "SINISTCHA"
       ]
     },
     {
@@ -109,9 +102,6 @@
         "QUAXLY",
         "TATSUGIRI",
         "TIRTOUGA",
-        "CRESSELIA",
-        "KELDEO",
-        "TAPU_FINI",
         "STARMIE",
         "CLOYSTER",
         "KINGLER",
@@ -151,7 +141,6 @@
         "NACLI",
         "GLIMMET",
         "SHUCKLE",
-        "UXIE",
         "PARASECT",
         "CROBAT",
         "URSARING",
@@ -165,8 +154,7 @@
         "LYCANROC",
         "FERROTHORN",
         "GARGANACL",
-        "GLIMMORA",
-        "TERAPAGOS"
+        "GLIMMORA"
       ]
     },
     {
@@ -193,8 +181,6 @@
         "GALAR_MEOWTH",
         "DITTO",
         "DURALUDON",
-        "COBALION",
-        "STAKATAKA",
         "MACHAMP",
         "MAGNEZONE",
         "PROBOPASS",
@@ -232,9 +218,6 @@
         "LILEEP",
         "ANORITH",
         "GIBLE",
-        "REGIROCK",
-        "TAPU_BULU",
-        "PHEROMOSA",
         "HELIOLISK",
         "FLYGON",
         "GLISCOR",
@@ -276,9 +259,6 @@
         "HITMONTOP",
         "GALLADE",
         "GALAR_FARFETCHD",
-        "TERRAKION",
-        "KUBFU",
-        "GALAR_ZAPDOS",
         "HARIYAMA",
         "MEDICHAM",
         "TOXICROAK",
@@ -289,8 +269,7 @@
         "ANNIHILAPE",
         "PANGORO",
         "SIRFETCHD",
-        "HISUI_DECIDUEYE",
-        "ZAMAZENTA"
+        "HISUI_DECIDUEYE"
       ]
     },
     {
@@ -318,8 +297,7 @@
         "GOUGING_FIRE",
         "RAGING_BOLT",
         "IRON_BOULDER",
-        "IRON_CROWN",
-        "ETERNATUS"
+        "IRON_CROWN"
       ]
     },
     {
@@ -339,8 +317,6 @@
         "KLEFKI",
         "PORYGON",
         "BELDUM",
-        "GENESECT",
-        "MAGEARNA",
         "BRONZONG",
         "ELECTIVIRE",
         "MAGMORTAR",
@@ -371,7 +347,6 @@
         "AUDINO",
         "FENNEKIN",
         "IMPIDIMP",
-        "DIANCIE",
         "ETERNAL_FLOETTE",
         "WIGGLYTUFF",
         "TOGEKISS",
@@ -382,8 +357,7 @@
         "HATTERENE",
         "ALCREMIE",
         "DELPHOX",
-        "GRIMMSNARL",
-        "XERNEAS"
+        "GRIMMSNARL"
       ]
     },
     {
@@ -434,8 +408,6 @@
         "TOEDSCOOL",
         "BLOODMOON_URSALUNA",
         "DURANT",
-        "KARTANA",
-        "WO_CHIEN",
         "VICTREEBEL",
         "VESPIQUEN",
         "LILLIGANT",
@@ -459,8 +431,7 @@
         "ACCELGOR",
         "CHESNAUGHT",
         "DECIDUEYE",
-        "TOEDSCRUEL",
-        "CALYREX"
+        "TOEDSCRUEL"
       ]
     },
     {
@@ -488,7 +459,6 @@
         "GROWLITHE",
         "TURTWIG",
         "BONSLY",
-        "VIRIZION",
         "JUMPLUFF",
         "VESPIQUEN",
         "NOIVERN",
@@ -523,8 +493,6 @@
         "FUECOCO",
         "CERULEDGE",
         "SPIRITOMB",
-        "MARSHADOW",
-        "SPECTRIER",
         "MAROWAK",
         "GENGAR",
         "BANETTE",
@@ -537,8 +505,7 @@
         "POLTEAGEIST",
         "HOUNDSTONE",
         "SKELEDIRGE",
-        "HISUI_TYPHLOSION",
-        "GIRATINA"
+        "HISUI_TYPHLOSION"
       ]
     },
     {
@@ -565,8 +532,6 @@
         "DELIBIRD",
         "CRYOGONAL",
         "AMAURA",
-        "ARTICUNO",
-        "REGICE",
         "DEWGONG",
         "GLALIE",
         "WALREIN",
@@ -580,8 +545,7 @@
         "CETITAN",
         "JYNX",
         "GLACEON",
-        "AURORUS",
-        "KYUREM"
+        "AURORUS"
       ]
     },
     {
@@ -602,7 +566,6 @@
         "ALOLA_EXEGGUTOR",
         "ALOLA_MAROWAK",
         "BRUXISH",
-        "BLACEPHALON",
         "ALOLA_RATICATE",
         "ALOLA_PERSIAN",
         "ALOLA_SANDSLASH",
@@ -654,10 +617,6 @@
         "KANGASKHAN",
         "CHATOT",
         "KLEAVOR",
-        "TAPU_LELE",
-        "BUZZWOLE",
-        "ZARUDE",
-        "MUNKIDORI",
         "EXEGGUTOR",
         "CHERRIM",
         "LEAVANNY",
@@ -696,17 +655,13 @@
         "DITTO",
         "PORYGON",
         "ROTOM",
-        "TYPE_NULL",
         "MUK",
         "ELECTRODE",
         "BRONZONG",
         "MAGNEZONE",
         "REUNICLUS",
         "KLINKLANG",
-        "PORYGON_Z",
-        "ZYGARDE",
-        "MEWTWO",
-        "MIRAIDON"
+        "PORYGON_Z"
       ]
     },
     {
@@ -735,8 +690,6 @@
         "VAPOREON",
         "SLOWKING",
         "BATTLE_BOND_GRENINJA",
-        "SUICUNE",
-        "MESPRIT",
         "SWANNA",
         "ARAQUANID",
         "AZUMARILL",
@@ -787,9 +740,6 @@
         "SPRIGATITO",
         "CHANSEY",
         "SYLVEON",
-        "SHAYMIN",
-        "MELOETTA",
-        "ENAMORUS",
         "LEDIAN",
         "GRANBULL",
         "DELCATTY",
@@ -882,9 +832,6 @@
         "GIBLE",
         "ARCHEOPS",
         "AXEW",
-        "TORNADUS",
-        "TING_LU",
-        "OGERPON",
         "SWELLOW",
         "ALTARIA",
         "STARAPTOR",
@@ -902,8 +849,7 @@
         "BLAZIKEN",
         "RAMPARDOS",
         "BASTIODON",
-        "GARGANACL",
-        "HO_OH"
+        "GARGANACL"
       ]
     },
     {
@@ -944,8 +890,6 @@
         "SNORLAX",
         "DUNSPARCE",
         "DITTO",
-        "LATIAS",
-        "LATIOS",
         "DODRIO",
         "FURRET",
         "GUMSHOOS",
@@ -987,11 +931,6 @@
         "ROTOM",
         "JOLTEON",
         "HISUI_VOLTORB",
-        "ZAPDOS",
-        "THUNDURUS",
-        "XURKITREE",
-        "ZERAORA",
-        "REGIELEKI",
         "RAICHU",
         "MANECTRIC",
         "LUXRAY",
@@ -1001,8 +940,7 @@
         "PAWMOT",
         "BELLIBOLT",
         "AMPHAROS",
-        "HISUI_ELECTRODE",
-        "ZEKROM"
+        "HISUI_ELECTRODE"
       ]
     },
     {
@@ -1027,8 +965,6 @@
         "ESPEON",
         "GALAR_YAMASK",
         "ARCHEN",
-        "REGISTEEL",
-        "FEZANDIPITI",
         "ALAKAZAM",
         "HYPNO",
         "XATU",
@@ -1038,8 +974,7 @@
         "BEHEEYEM",
         "TINKATON",
         "RUNERIGUS",
-        "ARCHEOPS",
-        "KORAIDON"
+        "ARCHEOPS"
       ]
     },
     {
@@ -1083,8 +1018,7 @@
         "KILOWATTREL",
         "GYARADOS",
         "EMPOLEON",
-        "PRIMARINA",
-        "LUGIA"
+        "PRIMARINA"
       ]
     },
     {
@@ -1124,7 +1058,6 @@
         "GALAR_CORSOLA",
         "ARCTOVISH",
         "HISUI_QWILFISH",
-        "NIHILEGO",
         "LANTURN",
         "MANTINE",
         "WAILORD",
@@ -1139,8 +1072,7 @@
         "EELEKTROSS",
         "CURSOLA",
         "BASCULEGION",
-        "OVERQWIL",
-        "KYOGRE"
+        "OVERQWIL"
       ]
     },
     {
@@ -1171,7 +1103,6 @@
         "TOXEL",
         "SQUAWKABILLY",
         "VAROOM",
-        "GUZZLORD",
         "MUK",
         "WEEZING",
         "SKUNTANK",
@@ -1215,9 +1146,6 @@
         "GALAR_MR_MIME",
         "ARCTOZOLT",
         "HISUI_AVALUGG",
-        "GLASTRIER",
-        "CHIEN_PAO",
-        "GALAR_ARTICUNO",
         "BEARTIC",
         "WEAVILE",
         "ABOMASNOW",
@@ -1229,8 +1157,7 @@
         "HISUI_ZOROARK",
         "MR_RIME",
         "ALOLA_SANDSLASH",
-        "ALOLA_NINETALES",
-        "ZACIAN"
+        "ALOLA_NINETALES"
       ]
     },
     {
@@ -1252,18 +1179,12 @@
         "SOLOSIS",
         "PORYGON",
         "BELDUM",
-        "COSMOG",
-        "CELESTEELA",
         "CLEFABLE",
         "BRONZONG",
         "MUSHARNA",
         "REUNICLUS",
         "METAGROSS",
-        "PORYGON_Z",
-        "SOLGALEO",
-        "LUNALA",
-        "RAYQUAZA",
-        "NECROZMA"
+        "PORYGON_Z"
       ]
     },
     {
@@ -1292,8 +1213,6 @@
         "HISUI_SLIGGOO",
         "POLITOED",
         "GALAR_STUNFISK",
-        "AZELF",
-        "POIPOLE",
         "QUAGSIRE",
         "LUDICOLO",
         "ARBOK",
@@ -1341,8 +1260,6 @@
         "PAWNIARD",
         "SCYTHER",
         "SHEDINJA",
-        "RAIKOU",
-        "ENTEI",
         "NIDOQUEEN",
         "NIDOKING",
         "TSAREENA",
@@ -1376,14 +1293,11 @@
         "SKORUPI",
         "LITWICK",
         "GIMMIGHOUL",
-        "HOOPA",
-        "TAPU_KOKO",
         "CHIMECHO",
         "COFAGRIGUS",
         "GOLURK",
         "AEGISLASH",
-        "GHOLDENGO",
-        "REGIGIGAS"
+        "GHOLDENGO"
       ]
     },
     {
@@ -1495,10 +1409,6 @@
         "FLAREON",
         "LARVESTA",
         "HISUI_GROWLITHE",
-        "MOLTRES",
-        "HEATRAN",
-        "VOLCANION",
-        "CHI_YU",
         "NINETALES",
         "ARCANINE",
         "RAPIDASH",
@@ -1518,8 +1428,7 @@
         "INCINEROAR",
         "CINDERACE",
         "ARMAROUGE",
-        "HISUI_ARCANINE",
-        "RESHIRAM"
+        "HISUI_ARCANINE"
       ]
     },
     {
@@ -1548,7 +1457,6 @@
         "TYRUNT",
         "DRACOZOLT",
         "DRACOVISH",
-        "REGIDRAGO",
         "SALAMENCE",
         "KOMMO_O",
         "TYRANITAR",
@@ -1558,8 +1466,7 @@
         "GARCHOMP",
         "HAXORUS",
         "BAXCALIBUR",
-        "TYRANTRUM",
-        "DIALGA"
+        "TYRANTRUM"
       ]
     }
   ],

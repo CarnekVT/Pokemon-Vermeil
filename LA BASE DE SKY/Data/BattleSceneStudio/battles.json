@@ -1,7 +1,7 @@
 {
   "format": "battle-scene-studio",
   "formatVersion": 27,
-  "editorVersion": "0.6.12",
+  "editorVersion": "0.6.18",
   "groups": [
     {
       "id": "wild_main",
@@ -61,6 +61,9 @@
         "enabled": false,
         "automaticCalls": true,
         "initialCall": false,
+        "allowAdditionalCalls": false,
+        "allowRecursiveCalls": false,
+        "maxSimultaneousSOS": 1,
         "callRound": 1,
         "callRate": null,
         "answerRate": null,
@@ -125,6 +128,9 @@
         "enabled": true,
         "automaticCalls": true,
         "initialCall": true,
+        "allowAdditionalCalls": true,
+        "allowRecursiveCalls": false,
+        "maxSimultaneousSOS": 1,
         "callRound": 1,
         "callRate": 100,
         "answerRate": null,
@@ -149,7 +155,7 @@
         "battlers": {}
       },
       "notes": "",
-      "updatedAt": 1787883769442
+      "updatedAt": 1787927322013
     },
     {
       "id": "battle_mtcbup7i_7",
@@ -202,6 +208,9 @@
         "enabled": true,
         "automaticCalls": false,
         "initialCall": true,
+        "allowAdditionalCalls": false,
+        "allowRecursiveCalls": false,
+        "maxSimultaneousSOS": 1,
         "callRound": 1,
         "callRate": 30,
         "answerRate": 75,
@@ -291,12 +300,27 @@
         "enabled": true,
         "automaticCalls": true,
         "initialCall": true,
+        "allowAdditionalCalls": true,
+        "allowRecursiveCalls": false,
+        "maxSimultaneousSOS": 2,
         "callRound": 1,
         "callRate": 100,
         "answerRate": 100,
         "pool": [
           {
             "species": "DARMANITAN",
+            "form": 1,
+            "weight": 100,
+            "requirements": []
+          },
+          {
+            "species": "BEARTIC",
+            "form": 0,
+            "weight": 100,
+            "requirements": []
+          },
+          {
+            "species": "DECIDUEYE",
             "form": 1,
             "weight": 100,
             "requirements": []
@@ -309,7 +333,7 @@
         "battlers": {}
       },
       "notes": "",
-      "updatedAt": 1787892918922
+      "updatedAt": 1787926483113
     }
   ],
   "global": {

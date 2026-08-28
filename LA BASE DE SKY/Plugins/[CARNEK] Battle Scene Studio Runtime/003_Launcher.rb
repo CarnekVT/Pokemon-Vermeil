@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio 0.6.14 - Phase 1 launcher
+# Battle Scene Studio 0.6.19 - Phase 1 launcher
 # Normal battles + BSS-native SOS only.
 #===============================================================================
 module BSS064
@@ -62,8 +62,19 @@ module BSS064
       enabled=(hget(bp,"setup","kind").to_s!="trainer" && (cfg["enabled"]==true || global_for_bss || global_active))
       battle.bss_sos_enabled=enabled if battle.respond_to?(:bss_sos_enabled=)
       if battle.respond_to?(:bss_sos_config=)
+        scripted=(cfg["enabled"] == true)
         merged=global.dup
-        merged.merge!(cfg)
+        if scripted
+          merged.merge!(cfg)
+          merged["scriptedBattle"] = true
+          merged["allowAdditionalCalls"] = (cfg["allowAdditionalCalls"] == true)
+          merged["allowRecursiveCalls"] = (cfg["allowRecursiveCalls"] == true)
+          merged["maxSimultaneousSOS"] = [[cfg["maxSimultaneousSOS"].to_i,1].max,2].min
+        else
+          # A BSS battle reached only through SOS Global must obey the GLOBAL chain
+          # and simultaneous-allies settings, rather than blueprint defaults.
+          merged["scriptedBattle"] = false
+        end
         battle.bss_sos_config=merged
       end
       battle.bss_sos_chain=0 if battle.respond_to?(:bss_sos_chain=)
@@ -170,6 +181,6 @@ def pbBSSBattle(key)
 end
 
 if defined?(EventHandlers)
-  EventHandlers.add(:on_game_load,:bss_064_ready,proc { BSS064.clear_cache; BSS064.write_status("ready",{"message"=>"BSS 0.6.14 Phase 1 JSON SOS ready"}) rescue nil })
+  EventHandlers.add(:on_game_load,:bss_064_ready,proc { BSS064.clear_cache; BSS064.write_status("ready",{"message"=>"BSS 0.6.19 Phase 1 JSON SOS ready"}) rescue nil })
   EventHandlers.add(:on_frame_update,:bss_064_control,proc { BSS064.poll_control rescue nil })
 end

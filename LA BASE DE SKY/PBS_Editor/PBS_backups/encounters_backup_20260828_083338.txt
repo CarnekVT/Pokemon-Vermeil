@@ -1,0 +1,108 @@
+﻿# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+[042] # New Bark Town
+LandMorning,10
+    20,LEDYBA,2,3
+    20,PIDGEY,2,3
+    20,SENTRET,2,3
+    10,CATERPIE,2,3
+    10,HOPPIP,2,3
+    10,YAMPER,2,3
+    5,BONSLY,2,3
+    5,BUDEW,2,3
+LandDay,10
+    20,AZURILL,2,3
+    20,PIDGEY,2,3
+    20,SENTRET,2,3
+    10,CATERPIE,2,3
+    10,HOOTHOOT,2,3
+    10,LEDYBA,2,3
+    5,BONSLY,2,3
+    5,SMOLIV,2,3
+LandNight,10
+    20,HOOTHOOT,2,3
+    20,MASCHIFF,2,3
+    20,SPINARAK,2,3
+    10,HOPPIP,2,3
+    10,LEDYBA,2,3
+    10,PIDGEY,2,3
+    5,BONSLY,2,4
+    5,HOUNDOUR,2,4
+SuperRod
+    60,MAGIKARP,2,3
+    30,CHINCHOU,2,3
+    10,TYMPOLE,2,3
+WaterMorning,10
+    50,CHINCHOU,5
+    20,DUCKLETT,5
+    20,FINIZEN,5
+    10,LANTURN,5
+WaterDay,10
+    50,CHINCHOU,5
+    20,ARROKUDA,5
+    20,FINIZEN,5
+    10,LANTURN,5
+WaterNight,10
+    10,TENTACRUEL,5
+    50,TENTACOOL,5
+    20,MAREANIE,5
+    20,BASCULIN_2,5
+
+#-------------------------------
+[002] # Route 29
+LandMorning,10
+    20,LEDYBA,2,3
+    20,PIDGEY,2,3
+    20,SENTRET,2,3
+    10,CATERPIE,2,3
+    10,HOPPIP,2,3
+    10,YAMPER,2,3
+    5,FLETCHLING,2,3
+    5,BUDEW,2,3
+LandDay,10
+    20,AZURILL,2,3
+    20,PIDGEY,2,3
+    20,SENTRET,2,3
+    10,CATERPIE,2,3
+    10,HOOTHOOT,2,3
+    10,LEDYBA,2,3
+    5,LITLEO,2,3
+    5,SMOLIV,2,3
+LandNight,10
+    20,HOOTHOOT,2,3
+    20,MASCHIFF,2,3
+    20,SPINARAK,2,3
+    10,HOPPIP,2,3
+    10,LEDYBA,2,3
+    10,PIDGEY,2,3
+    5,BONSLY,2,4
+    5,HOUNDOUR,2,4
+SuperRod
+    60,MAGIKARP,2,3
+    30,CHINCHOU,2,3
+    10,TYMPOLE,2,3
+WaterMorning,10
+    50,CHINCHOU,5
+    20,DUCKLETT,5
+    20,FINIZEN,5
+    10,LANTURN,5
+WaterDay,10
+    50,CHINCHOU,5
+    20,ARROKUDA,5
+    20,FINIZEN,5
+    10,LANTURN,5
+WaterNight,10
+    50,TENTACOOL,5
+    20,MAREANIE,5
+    20,BASCULIN_2,5
+	10,TENTACRUEL,5
+HoneyTree,100
+	50,COMBEE,5
+    20,CATERPIE,5
+    20,TAROUNTULA,5
+	10,FARFETCHD,5
+HeadbuttHigh,100
+	50,PINECO,5
+    20,EXEGGCUTE,5
+    20,SIZZLIPEDE,5
+	10,METAPOD,5

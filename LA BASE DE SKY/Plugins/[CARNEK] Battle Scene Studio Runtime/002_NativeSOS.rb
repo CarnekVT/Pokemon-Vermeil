@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio 0.6.14 - Native SOS (Phase 1)
+# Battle Scene Studio 0.6.19 - Native SOS (Phase 1)
 # BSS-owned SOS. Runtime assignments come only from sos_global.json.
 # Dynamic battler creation follows the v21/DBK SOS lifecycle supplied by the
 # user. Growth slots are created by the project's real pbCreateBattler constructor
@@ -24,7 +24,7 @@ end
 
 #===============================================================================
 # Dynamic battlers are intentionally NOT monkey-patched here.
-# BSS 0.6.14 follows the same creation/replacement lifecycle as the supplied
+# BSS 0.6.19 follows the same creation/replacement lifecycle as the supplied
 # SOS source: pbCreateBattler for new slots and pbInitialize only for an already
 # constructed fainted slot. This avoids entering the project's Battler initializer
 # with a hand-built/partially seeded object.
@@ -51,14 +51,68 @@ class Battle
       @bss_last_turn_called   = -99
       @bss_last_call_answered = nil
       @bss_initial_sos_done   = false
+      @bss_sos_summoned_indices = {}
       self.sosBattle = false if respond_to?(:sosBattle=)
     end
   end
 
   def bss_sos_limit_one?
     cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    return !(cfg["allowChainCalls"] == true) if cfg.key?("allowChainCalls")
     return cfg["limitCallsToOne"] != false if cfg.key?("limitCallsToOne")
-    BSS064.global_sos["limitCallsToOne"] != false
+    global=BSS064.global_sos
+    return !(global["allowChainCalls"] == true) if global.is_a?(Hash) && global.key?("allowChainCalls")
+    global.is_a?(Hash) ? global["limitCallsToOne"] != false : true
+  end
+
+  def bss_scripted_sos_battle?
+    cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    cfg["scriptedBattle"] == true
+  end
+
+  # Global SOS has two separate concepts:
+  # - allowChainCalls: more calls may happen after the first successful call.
+  # - allowSOSContinuation: a battler that arrived by SOS may become the caller
+  #   and keep the original chain alive (important when the first caller faints).
+  # Scripted battles keep their explicit per-blueprint controls.
+  def bss_sos_continuation_allowed?
+    cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    return cfg["allowRecursiveCalls"] == true if bss_scripted_sos_battle?
+    return cfg["allowSOSContinuation"] == true if cfg.key?("allowSOSContinuation")
+    # Backward compatibility with 0.6.18 JSON: the old chain checkbox meant both.
+    return cfg["allowChainCalls"] == true if cfg.key?("allowChainCalls")
+    global=BSS064.global_sos
+    return global["allowSOSContinuation"] == true if global.is_a?(Hash) && global.key?("allowSOSContinuation")
+    global.is_a?(Hash) && global["allowChainCalls"] == true
+  end
+
+  def bss_additional_sos_calls_allowed?
+    cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    return cfg["allowAdditionalCalls"] == true if bss_scripted_sos_battle?
+    return true if bss_sos_continuation_allowed?
+    return cfg["allowChainCalls"] == true if cfg.key?("allowChainCalls")
+    !bss_sos_limit_one?
+  end
+
+  def bss_recursive_sos_calls_allowed?
+    bss_sos_continuation_allowed?
+  end
+
+  # Number of SOS allies that may be alive beside the current caller.
+  # 1 = standard Alola-style caller + one ally. 2 = extended caller + two allies.
+  def bss_sos_max_simultaneous_allies
+    cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    n=cfg["maxSimultaneousSOS"].to_i
+    if n<=0
+      global=BSS064.global_sos
+      n=global["maxSimultaneousSOS"].to_i if global.is_a?(Hash)
+    end
+    n=1 if n<=0
+    [[n,1].max,2].min
+  end
+
+  def bss_sos_max_live_same_side
+    1 + bss_sos_max_simultaneous_allies
   end
 
   def bss_sos_shiny_multiplier
@@ -114,7 +168,19 @@ class Battle
   end
 
   def bss_sos_profile(caller)
-    profile=BSS064.sos_profile(caller.species, caller.form)
+    return nil if !caller
+    profile=nil
+    # A surviving SOS ally that is explicitly allowed to continue the chain uses
+    # the ORIGINAL caller's profile/pool first. Without this, mixed-species pools
+    # (e.g. caller A -> ally B) stop as soon as A faints if B has no own profile.
+    if bss_sos_summoned_battler?(caller.index) && bss_sos_continuation_allowed? && @bss_original_caller
+      begin
+        profile=BSS064.sos_profile(@bss_original_caller.species, @bss_original_caller.form)
+      rescue
+        profile=nil
+      end
+    end
+    profile ||= BSS064.sos_profile(caller.species, caller.form)
     return nil if !profile
     return nil if !bss_requirements_met?(profile["requirements"], caller)
     profile
@@ -132,6 +198,7 @@ class Battle
   # ---------------------------------------------------------------------------
   def bss_find_new_battler_slot(caller)
     return [-1, false] if !caller
+    return [-1, false] if bss_live_same_side_count(caller.index) >= bss_sos_max_live_same_side
     # Use the source SOS slot finder when present, including any project-specific
     # side-size/index changes made by that implementation.
     if respond_to?(:pbFindNewBattlerIndex)
@@ -232,34 +299,87 @@ class Battle
     bss_prepare_battle_slot(idx_battler)
   end
 
+  # SOS Battles v21.1 assumes all of these are [player_side, foe_side] arrays.
+  # LBDS and some battle-base combinations can omit one legacy tracker entirely,
+  # or leave its foe-side row nil. Never call []/push on that nil row.
+  def bss_side_array!(ivar, side)
+    side = side.to_i
+    outer = instance_variable_get(ivar)
+    if outer.is_a?(Hash)
+      outer[side] = [] if !outer[side].is_a?(Array)
+      return outer[side]
+    end
+    if !outer.is_a?(Array)
+      outer = []
+      instance_variable_set(ivar, outer)
+    end
+    outer << [] while outer.length <= side
+    outer[side] = [] if !outer[side].is_a?(Array)
+    outer[side]
+  end
+
+  def bss_prepare_source_bookkeeping_arrays(side = 1)
+    [:@initialItems, :@recycleItems, :@belch, :@battleBond,
+     :@corrosiveGas, :@usedInBattle].each { |ivar| bss_side_array!(ivar, side) }
+    bss_side_array!(:@abils_triggered, side) if instance_variable_defined?(:@abils_triggered)
+    bss_side_array!(:@rage_hit_count, side) if instance_variable_defined?(:@rage_hit_count)
+    if instance_variable_defined?(:@wonderLauncher) && (trainerBattle? rescue false)
+      bss_side_array!(:@launcherPoints, side)
+      bss_side_array!(:@launcherCounter, side)
+    end
+    true
+  end
+
+  def bss_initial_item_value(side, idx_party, pkmn)
+    outer = @initialItems
+    sample = nil
+    if outer.is_a?(Array)
+      outer.each do |rows|
+        next if !rows.is_a?(Array)
+        sample = rows.find { |row| !row.nil? }
+        break if !sample.nil?
+      end
+    end
+    return [pkmn.item_id, side.to_i, idx_party.to_i, false] if sample.is_a?(Array)
+    pkmn.item_id
+  end
+
   def bss_append_source_bookkeeping(pkmn)
-    # This is deliberately the same append order used by the supplied SOS source.
-    @initialItems[1].push(pkmn.item_id)
-    @recycleItems[1].push(nil)
-    @belch[1].push(false)
-    @battleBond[1].push(false)
-    @corrosiveGas[1].push(false)
-    @usedInBattle[1].push(true)
-    @abils_triggered[1].push(false) if defined?(@abils_triggered)
-    @rage_hit_count[1].push(0) if defined?(@rage_hit_count)
-    if defined?(@wonderLauncher) && trainerBattle?
-      @launcherPoints[1].push(0)
-      @launcherCounter[1].push(launcherBattle?)
+    # Same semantic bookkeeping as the supplied SOS source, but each tracker is
+    # normalized first so standalone BSS also works on LBDS builds that removed
+    # or never initialized one of the legacy arrays (e.g. @battleBond[1]).
+    side = 1
+    bss_prepare_source_bookkeeping_arrays(side)
+    idx_party = @party2.is_a?(Array) ? [@party2.length - 1, 0].max : bss_side_array!(:@usedInBattle, side).length
+    bss_side_array!(:@initialItems, side).push(bss_initial_item_value(side, idx_party, pkmn))
+    bss_side_array!(:@recycleItems, side).push(nil)
+    bss_side_array!(:@belch, side).push(false)
+    bss_side_array!(:@battleBond, side).push(false)
+    bss_side_array!(:@corrosiveGas, side).push(false)
+    bss_side_array!(:@usedInBattle, side).push(true)
+    bss_side_array!(:@abils_triggered, side).push(false) if instance_variable_defined?(:@abils_triggered)
+    bss_side_array!(:@rage_hit_count, side).push(0) if instance_variable_defined?(:@rage_hit_count)
+    if instance_variable_defined?(:@wonderLauncher) && (trainerBattle? rescue false)
+      bss_side_array!(:@launcherPoints, side).push(0)
+      bss_side_array!(:@launcherCounter, side).push((launcherBattle? rescue false))
     end
   end
 
   def bss_replace_source_bookkeeping(idx_party, pkmn)
-    @initialItems[1][idx_party] = pkmn.item_id
-    @recycleItems[1][idx_party] = nil
-    @belch[1][idx_party] = false
-    @battleBond[1][idx_party] = false
-    @corrosiveGas[1][idx_party] = false
-    @usedInBattle[1][idx_party] = true
-    @abils_triggered[1][idx_party] = false if defined?(@abils_triggered)
-    @rage_hit_count[1][idx_party] = 0 if defined?(@rage_hit_count)
-    if defined?(@wonderLauncher) && trainerBattle?
-      @launcherPoints[1][idx_party] = 0
-      @launcherCounter[1][idx_party] = launcherBattle?
+    side = 1
+    idx_party = idx_party.to_i
+    bss_prepare_source_bookkeeping_arrays(side)
+    bss_side_array!(:@initialItems, side)[idx_party] = bss_initial_item_value(side, idx_party, pkmn)
+    bss_side_array!(:@recycleItems, side)[idx_party] = nil
+    bss_side_array!(:@belch, side)[idx_party] = false
+    bss_side_array!(:@battleBond, side)[idx_party] = false
+    bss_side_array!(:@corrosiveGas, side)[idx_party] = false
+    bss_side_array!(:@usedInBattle, side)[idx_party] = true
+    bss_side_array!(:@abils_triggered, side)[idx_party] = false if instance_variable_defined?(:@abils_triggered)
+    bss_side_array!(:@rage_hit_count, side)[idx_party] = 0 if instance_variable_defined?(:@rage_hit_count)
+    if instance_variable_defined?(:@wonderLauncher) && (trainerBattle? rescue false)
+      bss_side_array!(:@launcherPoints, side)[idx_party] = 0
+      bss_side_array!(:@launcherCounter, side)[idx_party] = (launcherBattle? rescue false)
     end
   end
 
@@ -281,6 +401,7 @@ class Battle
       end
       bss_prepare_party_tracking_slot(1, idx_party)
       bss_prepare_battle_slot(idx_battler)
+      bss_prepare_source_bookkeeping_arrays(1)
       BSS064.log("SOS lifecycle: source pbInitializeNewBattler idx=#{idx_battler} party=#{idx_party} full=#{full_update}")
       pbInitializeNewBattler([idx_battler, pkmn], [], full_update)
       battler = @battlers[idx_battler]
@@ -298,6 +419,7 @@ class Battle
       @party2order = Array.new(@party2.length) { |i| i }
       bss_prepare_party_tracking_slot(1, idx_party)
       bss_prepare_battle_slot(idx_battler)
+      bss_prepare_source_bookkeeping_arrays(1)
       pbCreateBattler(idx_battler, pkmn, idx_party)
       if @battleAI
         if @battleAI.respond_to?(:create_new_ai_battler)
@@ -319,6 +441,7 @@ class Battle
       @party2order = Array.new(@party2.length) { |i| i }
       bss_prepare_party_tracking_slot(1, idx_party)
       bss_prepare_battle_slot(idx_battler)
+      bss_prepare_source_bookkeeping_arrays(1)
       battler = @battlers[idx_battler]
       raise RuntimeError, "SOS replacement slot #{idx_battler} has no constructed battler" if !battler
       battler.pbInitialize(pkmn, idx_party)
@@ -457,6 +580,10 @@ class Battle
     end
   end
 
+  def bss_sos_summoned_battler?(idx_battler)
+    @bss_sos_summoned_indices.is_a?(Hash) && @bss_sos_summoned_indices[idx_battler.to_i] == true
+  end
+
   def bss_sos_answer_rate(caller)
     cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
     direct=cfg["answerRate"]
@@ -466,7 +593,7 @@ class Battle
     [[profile["answerRate"].to_i,0].max,100].min
   end
 
-  def bss_call_for_help(caller, guaranteed=false)
+  def bss_call_for_help(caller, guaranteed=false, acts_this_round=false)
     return false if !caller || !@bss_sos_enabled
     begin
       @scene.pbAnimateSubstitute(caller,:hide) if @scene.respond_to?(:pbAnimateSubstitute)
@@ -488,6 +615,8 @@ class Battle
         if battler
           @peer.pbOnEnteringBattle(self,battler,pokemon,true) if @peer && @peer.respond_to?(:pbOnEnteringBattle)
           @bss_last_call_answered=true
+          @bss_sos_summoned_indices ||= {}
+          @bss_sos_summoned_indices[idx] = true
           bss_set_sos_chain(caller)
           if @scene.respond_to?(:bss_pbSOSJoin)
             @scene.bss_pbSOSJoin(idx)
@@ -501,6 +630,15 @@ class Battle
           end
           pbCalculatePriority(true)
           pbOnBattlerEnteringBattle(idx)
+          # Normal SOS calls happen after the round, so the source plugin marks a
+          # new battler as having already moved. BSS can also force an SOS BEFORE
+          # the first command phase; in that one case it must be eligible for an
+          # AI command and an action in the same first turn.
+          if acts_this_round
+            battler.lastRoundMoved = @turnCount.to_i - 1 if battler.respond_to?(:lastRoundMoved=)
+            @choices[idx] = [:None, 0, nil, -1] if @choices.is_a?(Array) && idx < @choices.length
+          end
+          @scene.bss_sync_sos_side_size_state(idx) if @scene.respond_to?(:bss_sync_sos_side_size_state)
           pbSetSeen(battler)
           @scene.bss_sync_enhanced_ui_icons if @scene.respond_to?(:bss_sync_enhanced_ui_icons)
           @bss_last_turn_called=@turnCount
@@ -534,10 +672,14 @@ class Battle
         if @turnCount.to_i+1>=wanted
           @bss_initial_sos_done=true
           caller=@battlers[1] || @battlers[3] || @battlers[5]
-          bss_call_for_help(caller,true) if caller && caller.bss_can_sos_call_simple?
+          bss_call_for_help(caller,true,true) if caller && caller.bss_can_sos_call_simple?
         end
       end
-        bss064_command_phase_without_native_sos(*args)
+      if @bss_sos_enabled && @scene.respond_to?(:bss_sync_sos_side_size_state)
+        anchor=[1,3,5].map { |i| @battlers[i] rescue nil }.find { |b| b && !(b.fainted? rescue true) }
+        @scene.bss_sync_sos_side_size_state(anchor.index) if anchor && pbSideSize(anchor.index).to_i>1
+      end
+      bss064_command_phase_without_native_sos(*args)
     end
   end
 
@@ -547,7 +689,7 @@ class Battle
       self.sosBattle=false if respond_to?(:sosBattle=)
       ret=bss064_end_round_without_native_sos(*args)
       self.sosBattle=false if respond_to?(:sosBattle=)
-      if @bss_sos_enabled && @bss_sos_config.is_a?(Hash) && @bss_sos_config["automaticCalls"]!=false && (wildBattle? rescue false)
+      if @bss_sos_enabled && @bss_sos_config.is_a?(Hash) && @bss_sos_config["automaticCalls"]!=false && (!bss_scripted_sos_battle? || @bss_last_call_answered!=true || bss_additional_sos_calls_allowed?) && (wildBattle? rescue false)
         pbPriority(true).each do |b|
           next if !b || (b.fainted? rescue true) || !(b.wild? rescue false)
           if b.bss_can_sos_call?
@@ -579,10 +721,11 @@ class Battle::Battler
   def bss_can_sos_call?
     return false if !@battle.bss_sos_enabled || @battle.trainerBattle?
     return false if !(wild? rescue false) || !opposes? || fainted? || usingMultiTurnAttack?
-    return false if @battle.bss_live_same_side_count(@index)>=2
+    return false if @battle.bss_live_same_side_count(@index)>=@battle.bss_sos_max_live_same_side
     return false if respond_to?(:pbHasAnyStatus?) && pbHasAnyStatus?
     return false if bss_sos_call_rate<=0
-    return false if @battle.bss_sos_limit_one? && @battle.bss_last_call_answered && !@battle.bss_adrenaline_orb
+    return false if @battle.bss_last_call_answered && !@battle.bss_additional_sos_calls_allowed?
+    return false if @battle.bss_sos_summoned_battler?(@index) && !@battle.bss_recursive_sos_calls_allowed?
     rate=bss_sos_call_rate
     rate*=5 if hp<=totalhp/4
     rate*=3 if hp>totalhp/4 && hp<=totalhp/2
@@ -593,7 +736,9 @@ class Battle::Battler
   def bss_can_sos_call_simple?
     return false if !@battle.bss_sos_enabled || @battle.trainerBattle?
     return false if !(wild? rescue false) || !opposes? || fainted? || usingMultiTurnAttack?
-    @battle.bss_live_same_side_count(@index)<2
+    return false if @battle.bss_last_call_answered && !@battle.bss_additional_sos_calls_allowed?
+    return false if @battle.bss_sos_summoned_battler?(@index) && !@battle.bss_recursive_sos_calls_allowed?
+    @battle.bss_live_same_side_count(@index)<@battle.bss_sos_max_live_same_side
   end
 end
 
@@ -604,6 +749,24 @@ end
 # defensive sync immediately before Enhanced UI hides its UI.
 #===============================================================================
 class Battle::Scene
+  def bss_raise_target_menu_z
+    win = @sprites.is_a?(Hash) ? @sprites["targetWindow"] : nil
+    return false if !win
+    z = 10000
+    win.z = z if win.respond_to?(:z=)
+    win.instance_variables.each do |ivar|
+      obj = win.instance_variable_get(ivar) rescue nil
+      rows = obj.is_a?(Hash) ? obj.values : (obj.is_a?(Array) ? obj : [obj])
+      rows.compact.each do |child|
+        child.z = [child.z.to_i, z].max if child.respond_to?(:z=) && child.respond_to?(:z)
+      end
+    end
+    true
+  rescue => e
+    BSS064.log("Target menu z warning: #{e.class}: #{e.message}")
+    false
+  end
+
   def bss_ensure_enhanced_ui_icon(idx_battler)
     battler = @battle.battlers[idx_battler] rescue nil
     return false if !battler || !@sprites.is_a?(Hash)
@@ -634,6 +797,38 @@ class Battle::Scene
     BSS064.log("Enhanced UI sync warning: #{e.class}: #{e.message}")
   end
 
+  # Keep the internal formation size stored by BattlerSprite/ShadowSprite in sync
+  # with Battle#sideSizes without touching x/y/z.  The stock sprite classes cache
+  # @sideSize and setPokemonBitmap -> pbSetPosition uses that cached value.  If it
+  # stays at 1 after an SOS expands the side, any move animation that reloads a
+  # battler bitmap resets the caller to its old singles position.
+  #
+  # IMPORTANT: this method deliberately does not reposition sprites.  Formation
+  # changes are animated by BSSSOSJoin, exactly like the source SOS plugin, so the
+  # caller glides into doubles/triples instead of being corrected by a visible TP.
+  def bss_sync_sos_side_size_state(idx_battler)
+    return false if !@battle || !@sprites
+    side_size = @battle.pbSideSize(idx_battler).to_i
+    side_size = [[side_size, 1].max, 3].min
+    @battle.allSameSideBattlers(idx_battler).each do |b|
+      next if !b
+      bat = @sprites["pokemon_#{b.index}"]
+      sha = @sprites["shadow_#{b.index}"]
+      bat.sideSize = side_size if bat && bat.respond_to?(:sideSize=)
+      sha.sideSize = side_size if sha && sha.respond_to?(:sideSize=)
+    end
+    true
+  rescue => e
+    BSS064.log("SOS side-size sync warning: #{e.class}: #{e.message}")
+    false
+  end
+
+  # Compatibility with 0.6.17 callers.  This used to hard-set x/y/z and caused
+  # the visible post-call teleport.  It is now intentionally state-only.
+  def bss_snap_sos_side_positions(idx_battler)
+    bss_sync_sos_side_size_state(idx_battler)
+  end
+
   def bss_pbPrepNewBattler(idx_battler)
     pbRefresh
     battler = @battle.battlers[idx_battler]
@@ -644,8 +839,9 @@ class Battle::Scene
       rescue
       end
       if defined?(TargetMenu)
-        @sprites["targetWindow"] = TargetMenu.new(@viewport, 200, @battle.sideSizes)
+        @sprites["targetWindow"] = TargetMenu.new(@viewport, 10000, @battle.sideSizes)
         @sprites["targetWindow"].visible = false
+        bss_raise_target_menu_z
       end
       pbCreatePokemonSprite(idx_battler)
       bss_ensure_enhanced_ui_icon(idx_battler)
@@ -663,6 +859,7 @@ class Battle::Scene
     @sprites["pokemon_#{idx_battler}"].visible = false if @sprites["pokemon_#{idx_battler}"]
     @sprites["shadow_#{idx_battler}"].visible = false if @sprites["shadow_#{idx_battler}"]
     side_size = @battle.pbSideSize(idx_battler)
+    bss_sync_sos_side_size_state(idx_battler)
     @battle.allSameSideBattlers(idx_battler).each do |b|
       bat_sprite = @sprites["pokemon_#{b.index}"]
       sha_sprite = @sprites["shadow_#{b.index}"]
@@ -686,6 +883,7 @@ class Battle::Scene
       bss_ensure_enhanced_ui_icon(b.index)
     end
     bss_sync_enhanced_ui_icons
+    bss_raise_target_menu_z
     add_new_battler
   end
 
@@ -698,24 +896,138 @@ class Battle::Scene
     while inPartyAnimation?
       pbUpdate
     end
-    if @battle.showAnims && battler.shiny?
+    bss_sync_sos_side_size_state(idx_battler)
+    show_anims = if @battle.respond_to?(:showAnims)
+                   (@battle.showAnims rescue true)
+                 elsif @battle.instance_variable_defined?(:@showAnims)
+                   (@battle.instance_variable_get(:@showAnims) rescue true)
+                 else
+                   true
+                 end
+    if show_anims && battler.shiny?
       begin
         pbCommonAnimation("Shiny", battler)
       rescue
       end
     end
+    bss_raise_target_menu_z
     bss_sync_enhanced_ui_icons
   end
 end
 
 class Battle::Scene::BattlerSprite < RPG::Sprite
-  attr_accessor :sideSize unless method_defined?(:sideSize)
+  # Essentials v21.1 already defines attr_reader :sideSize.  Checking only for
+  # `sideSize` therefore skipped creation of the writer in older BSS builds.
+  # Keep @sideSize mutable so every later setPokemonBitmap/pbSetPosition uses the
+  # live SOS formation instead of the original singles formation.
+  def sideSize=(value)
+    @sideSize = [[value.to_i, 1].max, 3].min
+  end unless method_defined?(:sideSize=)
 end
 class Battle::Scene::BattlerShadowSprite < RPG::Sprite
-  attr_accessor :sideSize unless method_defined?(:sideSize)
+  def sideSize=(value)
+    @sideSize = [[value.to_i, 1].max, 3].min
+  end unless method_defined?(:sideSize=)
+
+  def sideSize
+    @sideSize
+  end unless method_defined?(:sideSize)
+end
+
+module Battle::Scene::Animation::BSSSOSPositionMixin
+  # Ask the ACTUAL battler/shadow sprite class where it would settle for the
+  # current side size, then restore the visible coordinates before Graphics.update.
+  # This is intentionally a same-frame probe: DBK/LBDS/custom BattlerSprite
+  # overrides remain the authority for X/Y/Z and there is no visible teleport.
+  def bss_probe_native_sprite_position(sprite, side_size)
+    return nil if !sprite || !sprite.respond_to?(:pbSetPosition)
+    old_x = sprite.x rescue nil
+    old_y = sprite.y rescue nil
+    old_z = sprite.z rescue nil
+    sprite.sideSize = side_size if sprite.respond_to?(:sideSize=)
+    sprite.pbSetPosition
+    target = [sprite.x, sprite.y, sprite.z]
+    sprite.x = old_x if !old_x.nil? && sprite.respond_to?(:x=)
+    sprite.y = old_y if !old_y.nil? && sprite.respond_to?(:y=)
+    sprite.z = old_z if !old_z.nil? && sprite.respond_to?(:z=)
+    target
+  rescue => e
+    BSS064.log("SOS native position probe warning: #{e.class}: #{e.message}")
+    begin
+      sprite.x = old_x if !old_x.nil? && sprite.respond_to?(:x=)
+      sprite.y = old_y if !old_y.nil? && sprite.respond_to?(:y=)
+      sprite.z = old_z if !old_z.nil? && sprite.respond_to?(:z=)
+    rescue
+    end
+    nil
+  end
+
+  def bss_sos_battler_position(b, side_size, battler_sprite=nil)
+    native = bss_probe_native_sprite_position(battler_sprite, side_size)
+    return native if native
+    # Vanilla-compatible fallback used only if the project's sprite has no
+    # pbSetPosition API. Keep it source-faithful to Essentials/SOS Battles.
+    p = Battle::Scene.pbBattlerPosition(b.index, side_size)
+    new_x, new_y = p[0], p[1]
+    metrics = nil
+    begin
+      if defined?(PluginManager) && PluginManager.respond_to?(:installed?) && PluginManager.installed?("[DBK] Animated Pokémon System")
+        if b.respond_to?(:battlerSprite) && b.battlerSprite && b.battlerSprite.respond_to?(:substitute) && b.battlerSprite.substitute
+          new_y += Settings::SUBSTITUTE_DOLL_METRICS[1] if defined?(Settings::SUBSTITUTE_DOLL_METRICS)
+        else
+          metrics = GameData::SpeciesMetrics.get_species_form(b.species, b.form, b.gender == 1) rescue nil
+        end
+      else
+        metrics = GameData::SpeciesMetrics.get_species_form(b.species, b.form) rescue nil
+      end
+    rescue
+      metrics = GameData::SpeciesMetrics.get_species_form(b.species, b.form) rescue nil
+    end
+    if metrics
+      if metrics.respond_to?(:front_sprite)
+        fs = metrics.front_sprite rescue nil
+        if fs
+          new_x += fs[0].to_i * 2
+          new_y += fs[1].to_i * 2
+        end
+      end
+      alt = metrics.respond_to?(:front_sprite_altitude) ? (metrics.front_sprite_altitude rescue 0) : 0
+      new_y -= alt.to_i * 2
+    end
+    new_z = 50 - (5 * (b.index + 1) / 2)
+    [new_x, new_y, new_z]
+  end
+
+  def bss_sos_shadow_position(b, side_size, shadow_sprite=nil)
+    native = bss_probe_native_sprite_position(shadow_sprite, side_size)
+    return native if native
+    p = Battle::Scene.pbBattlerPosition(b.index, side_size)
+    new_x, new_y, new_z = p[0], p[1], 3
+    begin
+      if defined?(PluginManager) && PluginManager.respond_to?(:installed?) && PluginManager.installed?("[DBK] Animated Pokémon System")
+        substituted = b.respond_to?(:battlerSprite) && b.battlerSprite && b.battlerSprite.respond_to?(:substitute) && b.battlerSprite.substitute
+        if !substituted
+          metrics = GameData::SpeciesMetrics.get_species_form(b.species, b.form, b.gender == 1) rescue nil
+          if metrics
+            fs = metrics.front_sprite rescue nil
+            ss = metrics.shadow_sprite rescue nil
+            new_x += (fs ? fs[0].to_i * 2 : 0) + (ss ? ss[0].to_i * 2 : 0)
+            new_y += (fs ? fs[1].to_i * 2 : 0) + (ss ? ss[2].to_i * 2 : 0)
+            new_y -= (shadow_sprite.height / 4).round if shadow_sprite && shadow_sprite.respond_to?(:height)
+          end
+        end
+      else
+        metrics = GameData::SpeciesMetrics.get_species_form(b.species, b.form) rescue nil
+        new_x += metrics.shadow_x.to_i * 2 if metrics && metrics.respond_to?(:shadow_x)
+      end
+    rescue
+    end
+    [new_x, new_y, new_z]
+  end
 end
 
 class Battle::Scene::Animation::BSSSOSJoin < Battle::Scene::Animation
+  include Battle::Scene::Animation::BSSSOSPositionMixin
   def initialize(sprites, viewport, battle, idx_sos, add_new)
     @battle = battle
     @idx_sos = idx_sos
@@ -732,7 +1044,10 @@ class Battle::Scene::Animation::BSSSOSJoin < Battle::Scene::Animation
       boxsp = @sprites["dataBox_#{b.index}"]
       next if !bat
       if b.index == @idx_sos
+        side_size = bat.respond_to?(:sideSize) && bat.sideSize ? bat.sideSize : @battle.pbSideSize(b.index)
+        _nx, _ny, native_z = bss_sos_battler_position(b, side_size, bat)
         obj = addSprite(bat, PictureOrigin::BOTTOM)
+        obj.setZ(delay, native_z) if obj.respond_to?(:setZ)
         obj.setTone(delay, Tone.new(-196, -196, -196, -196))
         obj.setOpacity(delay, 0)
         obj.setVisible(delay, true)
@@ -740,7 +1055,9 @@ class Battle::Scene::Animation::BSSSOSJoin < Battle::Scene::Animation
         obj.moveTone(delay + 4, 10, Tone.new(0, 0, 0, 0), [bat, :pbPlayIntroAnimation])
         if sha
           sha.visible = false
+          _sx, _sy, native_shadow_z = bss_sos_shadow_position(b, side_size, sha)
           sh = addSprite(sha, PictureOrigin::CENTER)
+          sh.setZ(delay, native_shadow_z) if sh.respond_to?(:setZ)
           sh.setOpacity(delay, 0)
           sh.setVisible(delay, true)
           sh.moveOpacity(delay, 4, 255)
@@ -753,12 +1070,17 @@ class Battle::Scene::Animation::BSSSOSJoin < Battle::Scene::Animation
           bx.moveDelta(delay, 8, -dir * Graphics.width / 2, 0)
         end
       else
-        pos = Battle::Scene.pbBattlerPosition(b.index, @battle.pbSideSize(b.index))
+        side_size = bat.respond_to?(:sideSize) && bat.sideSize ? bat.sideSize : @battle.pbSideSize(b.index)
+        new_x, new_y, new_z = bss_sos_battler_position(b, side_size, bat)
         obj = addSprite(bat, PictureOrigin::BOTTOM)
-        obj.moveXY(delay, 4, pos[0], pos[1])
+        obj.setZ(delay, new_z) if obj.respond_to?(:setZ)
+        obj.moveXY(delay, 4, new_x, new_y)
         if sha
+          shadow_size = sha.respond_to?(:sideSize) && sha.sideSize ? sha.sideSize : side_size
+          sx, sy, sz = bss_sos_shadow_position(b, shadow_size, sha)
           sh = addSprite(sha, PictureOrigin::CENTER)
-          sh.moveXY(delay, 4, pos[0], pos[1])
+          sh.setZ(delay, sz) if sh.respond_to?(:setZ)
+          sh.moveXY(delay, 4, sx, sy)
         end
         if boxsp
           bx = addSprite(boxsp)
@@ -772,6 +1094,36 @@ end
 
 # Run before Enhanced Battle UI's pbHideInfoUI loop. It expects a non-nil icon
 # for every battler returned by allBattlers, including the newly inserted SOS.
+#===============================================================================
+# Animation compatibility: keep formation metadata current before any scene move
+# or common animation.  BAS continues to own its anchors, priorityReference, Z,
+# target replication and restoration.  BSS only fixes the stale sideSize state
+# that made BAS capture/restore a singles position after an SOS had joined.
+#===============================================================================
+module BSS064AnimationFormationCompat
+  def pbAnimation(move_id, user, targets, *args)
+    begin
+      anchor = user || (targets.is_a?(Array) ? targets.compact[0] : targets)
+      if anchor && @battle && @battle.respond_to?(:bss_sos_enabled) && @battle.bss_sos_enabled
+        bss_sync_sos_side_size_state(anchor.index) if respond_to?(:bss_sync_sos_side_size_state)
+      end
+    rescue
+    end
+    super
+  end
+
+  def pbCommonAnimation(anim_name, user = nil, target = nil, *args)
+    begin
+      anchor = user || target
+      if anchor && @battle && @battle.respond_to?(:bss_sos_enabled) && @battle.bss_sos_enabled
+        bss_sync_sos_side_size_state(anchor.index) if respond_to?(:bss_sync_sos_side_size_state)
+      end
+    rescue
+    end
+    super
+  end
+end
+
 module BSS064EnhancedUICompat
   def pbHideInfoUI(*args)
     bss_sync_enhanced_ui_icons if respond_to?(:bss_sync_enhanced_ui_icons)
@@ -783,9 +1135,12 @@ module BSS064
   class << self
     def install_enhanced_ui_compat
       return false if !defined?(Battle::Scene)
-      return false if !Battle::Scene.method_defined?(:pbHideInfoUI)
-      return true if Battle::Scene.ancestors.include?(BSS064EnhancedUICompat)
-      Battle::Scene.prepend(BSS064EnhancedUICompat)
+      if !Battle::Scene.ancestors.include?(BSS064AnimationFormationCompat)
+        Battle::Scene.prepend(BSS064AnimationFormationCompat)
+      end
+      if Battle::Scene.method_defined?(:pbHideInfoUI) && !Battle::Scene.ancestors.include?(BSS064EnhancedUICompat)
+        Battle::Scene.prepend(BSS064EnhancedUICompat)
+      end
       true
     rescue => e
       log("Enhanced UI compat install warning: #{e.class}: #{e.message}")

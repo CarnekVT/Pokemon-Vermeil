@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio Runtime 0.6.14
+# Battle Scene Studio Runtime 0.6.19
 # Source-first rebuild for Pokemon Essentials v21.1.
 # JSON parser architecture is the same minimal, dependency-free reader shipped
 # by the supplied Battle Animation Studio runtime.
@@ -132,7 +132,7 @@ module BSSMiniJSON
 end
 
 module BSS064
-  VERSION = "0.6.14"
+  VERSION = "0.6.19"
   FORMAT_VERSION = 25
   DATA_FILE = "Data/BattleSceneStudio/battles.json"
   SOS_GLOBAL_FILE = "Data/BattleSceneStudio/sos_global.json"
@@ -149,7 +149,7 @@ module BSS064
     attr_accessor :running, :last_control_token
 
     def log(message)
-      PBDebug.log("[BSS 0.6.14] #{message}") if defined?(PBDebug)
+      PBDebug.log("[BSS 0.6.19] #{message}") if defined?(PBDebug)
     rescue
     end
 

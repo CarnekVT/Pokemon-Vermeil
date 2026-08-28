@@ -1,4 +1,3 @@
-﻿# See the documentation on the wiki to learn how to edit this file.
 #-------------------------------
 [042] # New Bark Town
 LandMorning,10
@@ -47,7 +46,6 @@ WaterNight,10
     50,TENTACOOL,5
     20,MAREANIE,5
     20,BASCULIN_2,5
-
 #-------------------------------
 [002] # Route 29
 LandMorning,10
@@ -95,14 +93,21 @@ WaterNight,10
     50,TENTACOOL,5
     20,MAREANIE,5
     20,BASCULIN_2,5
-	10,TENTACRUEL,5
+    10,TENTACRUEL,5
 HoneyTree,100
-	50,COMBEE,5
+    50,COMBEE,5
     20,CATERPIE,5
     20,TAROUNTULA,5
-	10,FARFETCHD,5
+    10,FARFETCHD,5
 HeadbuttHigh,100
-	50,PINECO,5
+    50,PINECO,5
     20,EXEGGCUTE,5
     20,SIZZLIPEDE,5
-	10,METAPOD,5
+    10,METAPOD,5
+#-------------------------------
+[79]
+Land,21
+    40,GOODRA_1,5,10
+    30,PERSIAN,5,10
+    20,DRATINI,5,10
+    10,DEDENNE,5,10
