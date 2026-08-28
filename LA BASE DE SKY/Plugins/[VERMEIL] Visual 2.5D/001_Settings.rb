@@ -182,7 +182,7 @@ module Mode7
     # Mantener suelo y sprites en el mismo subpixel evita juntas al detenerse.
     # ponytail: raster exacto; subir a 1.0 solo si Cylindrical pierde FPS.
     GROUND_REDRAW_WORLD_STEP = 2.0
-    PRIORITY_REPROJECT_WORLD_STEP = 2.0
+    PRIORITY_REPROJECT_WORLD_STEP = 0.01
 
     # Una muestra por fila evita cortes horizontales en tiles altos.
     CYLINDRICAL_RASTER_SCAN_STEP = 2
@@ -460,11 +460,16 @@ module Mode7
     # Hybrid terrain keeps first-frame geometry tiny. Special Model Studio /
     # Blockbench meshes wait until the map is already playable and are streamed
     # only while the player is idle, avoiding micro-hitches during movement.
-    NDS_MODEL_STREAM_START_DELAY_FRAMES = 12
-    NDS_MODEL_STREAM_INTERVAL_FRAMES    = 2
-    NDS_MODEL_STREAM_IDLE_ONLY          = true
-    NDS_MODEL_STREAM_FACE_BUDGET        = 16
-    NDS_MODEL_STREAM_TIME_MS            = 0.75
+    NDS_MODEL_STREAM_START_DELAY_FRAMES = 2
+    NDS_MODEL_STREAM_INTERVAL_FRAMES    = 1
+    NDS_MODEL_STREAM_IDLE_ONLY          = false
+    NDS_MODEL_STREAM_FACE_BUDGET        = 12
+    NDS_MODEL_STREAM_TIME_MS            = 0.50
+
+    # Phase 2A FIX1: el path UV directo queda compilado en Game.exe, pero se
+    # mantiene en cuarentena hasta recuperar paridad 1:1 con el material baked
+    # de Phase 1. Así ningún modelo desaparece por una incompatibilidad UV.
+    V25_PHASE2A_DIRECT_MATERIALS_ENABLED = false
     # Altura (en tiles) que el jugador puede subir por una cara "climb"/"one-way"
     # sin escalera. Por encima se trata como pared solida.
     NDS_OBJECT_CLIMB_MAX_TILES   = 1

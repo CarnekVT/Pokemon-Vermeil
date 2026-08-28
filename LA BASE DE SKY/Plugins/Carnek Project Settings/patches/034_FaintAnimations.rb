@@ -104,7 +104,13 @@ class Battle::Scene
         break if System.uptime - timer_start >= cry_len
       end
     end
-    if @battle.wildBattle? && battler.opposes?
+    # BSS scripted trainer SOS are dynamic external reinforcements, not members
+    # that should be recalled by the trainer. Give those SOS battlers the same
+    # faint treatment as a wild opponent while keeping normal trainer Pokémon
+    # on BattlerFaintRecall.
+    external_sos = @battle.respond_to?(:bss_sos_summoned_battler?) &&
+                   @battle.bss_sos_summoned_battler?(idx)
+    if battler.opposes? && (@battle.wildBattle? || external_sos)
       old_height = @sprites["pokemon_#{idx}"].src_rect.height
       faintAnim   = Animation::BattlerFaintShrink.new(@sprites, @viewport, idx, @battle)
       dataBoxAnim = Animation::DataBoxDisappear.new(@sprites, @viewport, idx)

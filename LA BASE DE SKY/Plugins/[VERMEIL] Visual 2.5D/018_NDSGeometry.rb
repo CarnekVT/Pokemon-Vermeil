@@ -333,6 +333,15 @@ class Mode7Renderer
   private
 
   def nds_ground_active?
+    # V25 PATCH3: the Luka-derived Game.exe exposes Sprite#corners/Shader, but
+    # enabling the experimental quad/GPU ground solely because those APIs exist
+    # changed Sky's proven ground path and could leave blue/unrendered bands at
+    # the perspective near plane.  Keep the adaptive Sky band renderer as the
+    # compatibility authority; corners/native mesh remain enabled elsewhere.
+    if Mode7::Config.const_defined?(:V25_NEXT_SAFE_GROUND_BANDS) &&
+       Mode7::Config::V25_NEXT_SAFE_GROUND_BANDS
+      return false
+    end
     Mode7::Config::GEOMETRY_GROUND_ENABLED &&
       Mode7.respond_to?(:perspective_mode?) &&
       Mode7.perspective_mode? &&

@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio 0.6.19 - Phase 1 launcher
+# Battle Scene Studio 0.6.25 - Phase 1 launcher
 # Normal battles + BSS-native SOS only.
 #===============================================================================
 module BSS064
@@ -11,13 +11,8 @@ module BSS064
       level=[[raw["level"].to_i,1].max,100].min
       pkmn=Pokemon.new(species.to_sym,level)
       form=raw["form"].to_i; pkmn.form=form if form>0 && pkmn.respond_to?(:form=)
-      pkmn.shiny=(raw["shiny"]==true) if pkmn.respond_to?(:shiny=)
-      item=raw["item"].to_s.upcase; pkmn.item=item.to_sym if !item.empty? && pkmn.respond_to?(:item=) && (GameData::Item.exists?(item.to_sym) rescue false)
-      moves=raw["moves"].is_a?(Array) ? raw["moves"] : []
-      if !moves.empty?
-        pkmn.forget_all_moves if pkmn.respond_to?(:forget_all_moves)
-        moves.first(4).each { |m| id=m.to_s.upcase; pkmn.learn_move(id.to_sym) if !id.empty? && (GameData::Move.exists?(id.to_sym) rescue false) }
-      end
+      pkmn.form_simple=pkmn.form if pkmn.respond_to?(:form_simple=)
+      apply_custom_pokemon_fields(pkmn,raw,true)
       pkmn.calc_stats if pkmn.respond_to?(:calc_stats); pkmn.heal if pkmn.respond_to?(:heal)
       hp=raw.key?("hpPercent") ? raw["hpPercent"].to_f : 100.0
       pkmn.hp=[[(pkmn.totalhp*hp/100.0).round,1].max,pkmn.totalhp].min if pkmn.respond_to?(:hp=)
@@ -41,7 +36,13 @@ module BSS064
       return nil if !defined?(NPCTrainer)
       cfg=hget(bp,"setup","trainer"); cfg={} if !cfg.is_a?(Hash)
       type=resolve_trainer_type(cfg["type"]) || default_trainer_type; return nil if !type
-      tr=NPCTrainer.new((cfg["name"]||"Trainer").to_s,type); tr.party=party; tr
+      tr=NPCTrainer.new((cfg["name"]||"Trainer").to_s,type); tr.party=party
+      defeat=(cfg["defeatMessage"]||"").to_s
+      if !defeat.strip.empty?
+        begin; tr.lose_text=defeat if tr.respond_to?(:lose_text=); rescue; end
+        begin; tr.instance_variable_set(:@lose_text,defeat); rescue; end
+      end
+      tr
     rescue => e
       log("Trainer build failed: #{e.class}: #{e.message}"); nil
     end
@@ -59,10 +60,11 @@ module BSS064
       global=global_sos; global={} if !global.is_a?(Hash)
       global_for_bss=(global["enabled"]==true && global["mode"].to_s=="battle_only" && BSS064.global_sos_requirements_met?)
       global_active=BSS064.global_sos_active?
-      enabled=(hget(bp,"setup","kind").to_s!="trainer" && (cfg["enabled"]==true || global_for_bss || global_active))
+      kind=hget(bp,"setup","kind").to_s
+      scripted=(cfg["enabled"] == true)
+      enabled=scripted || (kind!="trainer" && (global_for_bss || global_active))
       battle.bss_sos_enabled=enabled if battle.respond_to?(:bss_sos_enabled=)
       if battle.respond_to?(:bss_sos_config=)
-        scripted=(cfg["enabled"] == true)
         merged=global.dup
         if scripted
           merged.merge!(cfg)
@@ -79,6 +81,7 @@ module BSS064
       end
       battle.bss_sos_chain=0 if battle.respond_to?(:bss_sos_chain=)
       battle.bss_initial_sos_done=false if battle.respond_to?(:bss_initial_sos_done=)
+      battle.instance_variable_set(:@bss_sos_fixed_cursor,0)
       battle.sosBattle=false if battle.respond_to?(:sosBattle=)
       enabled
     end
@@ -100,8 +103,12 @@ module BSS064
       gs=global_sos; gs={} if !gs.is_a?(Hash)
       global_for_bss=(gs["enabled"]==true && gs["mode"].to_s=="battle_only" && BSS064.global_sos_requirements_met?)
       global_active=BSS064.global_sos_active?
-      sos_enabled=(kind=="wild" && (sos_cfg["enabled"]==true || global_for_bss || global_active))
-      foe_party=foe_party.first(1) if sos_enabled
+      scripted_sos=(sos_cfg["enabled"]==true)
+      sos_enabled=scripted_sos || (kind=="wild" && (global_for_bss || global_active))
+      # Wild scripted SOS starts from the configured caller only. Trainer SOS keeps
+      # the trainer's reserve party intact; setBattleMode still starts with one
+      # active foe and dynamic SOS allies are appended during battle.
+      foe_party=foe_party.first(1) if sos_enabled && kind=="wild"
 
       original_party=(defined?($player) && $player ? $player.party : nil)
       if live_test
@@ -129,10 +136,11 @@ module BSS064
       battle.ally_items=[] if battle.respond_to?(:ally_items=); battle.items=foe_trainer ? [foe_trainer.items] : [] if battle.respond_to?(:items=)
       BattleCreationHelperMethods.prepare_battle(battle)
       configure_native_sos(battle,bp)
+      configure_native_boss(battle,bp) if respond_to?(:configure_native_boss)
       battle.canLose=(hget(bp,"setup","canLose")!=false) if battle.respond_to?(:canLose=)
       begin; $game_temp.clear_battle_rules; rescue; end if defined?($game_temp)&&$game_temp
 
-      write_status("running",{"key"=>bp["key"],"name"=>bp["name"],"formation"=>mode,"sos"=>sos_enabled})
+      write_status("running",{"key"=>bp["key"],"name"=>bp["name"],"formation"=>mode,"sos"=>sos_enabled,"boss"=>(hget(bp,"boss","enabled")==true)})
       bgm_name=hget(bp,"environment","bgm").to_s.strip
       bgm=if !bgm_name.empty? then bgm_name elsif foe_trainer then pbGetTrainerBattleBGM([foe_trainer]) else pbGetWildBattleBGM(foe_party) end
       anim_type=foe_trainer ? (battle.singleBattle? ? 1 : 3) : (foe_party.length==1 ? 0 : 2)
@@ -181,6 +189,6 @@ def pbBSSBattle(key)
 end
 
 if defined?(EventHandlers)
-  EventHandlers.add(:on_game_load,:bss_064_ready,proc { BSS064.clear_cache; BSS064.write_status("ready",{"message"=>"BSS 0.6.19 Phase 1 JSON SOS ready"}) rescue nil })
+  EventHandlers.add(:on_game_load,:bss_064_ready,proc { BSS064.clear_cache; BSS064.write_status("ready",{"message"=>"BSS 0.6.25 Phase 1 SOS + Boss/Totem ready"}) rescue nil })
   EventHandlers.add(:on_frame_update,:bss_064_control,proc { BSS064.poll_control rescue nil })
 end

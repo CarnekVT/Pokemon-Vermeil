@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio 0.6.19 - Native SOS (Phase 1)
+# Battle Scene Studio 0.6.25 - Native SOS (Phase 1)
 # BSS-owned SOS. Runtime assignments come only from sos_global.json.
 # Dynamic battler creation follows the v21/DBK SOS lifecycle supplied by the
 # user. Growth slots are created by the project's real pbCreateBattler constructor
@@ -24,7 +24,7 @@ end
 
 #===============================================================================
 # Dynamic battlers are intentionally NOT monkey-patched here.
-# BSS 0.6.19 follows the same creation/replacement lifecycle as the supplied
+# BSS 0.6.25 follows the same creation/replacement lifecycle as the supplied
 # SOS source: pbCreateBattler for new slots and pbInitialize only for an already
 # constructed fainted slot. This avoids entering the project's Battler initializer
 # with a hand-built/partially seeded object.
@@ -52,6 +52,7 @@ class Battle
       @bss_last_call_answered = nil
       @bss_initial_sos_done   = false
       @bss_sos_summoned_indices = {}
+      @bss_sos_fixed_cursor      = 0
       self.sosBattle = false if respond_to?(:sosBattle=)
     end
   end
@@ -68,6 +69,13 @@ class Battle
   def bss_scripted_sos_battle?
     cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
     cfg["scriptedBattle"] == true
+  end
+
+  # Global SOS is wild-only. Trainer SOS is allowed only when the current BSS
+  # blueprint explicitly enables its scripted SOS block.
+  def bss_sos_runtime_battle_allowed?
+    return true if (wildBattle? rescue false)
+    (trainerBattle? rescue false) && bss_scripted_sos_battle?
   end
 
   # Global SOS has two separate concepts:
@@ -113,6 +121,16 @@ class Battle
 
   def bss_sos_max_live_same_side
     1 + bss_sos_max_simultaneous_allies
+  end
+
+  # Number of allies produced by one SCRIPTED SOS event. This is distinct from
+  # maxSimultaneousSOS, which is only the live-side cap.
+  def bss_sos_summons_per_call
+    return 1 if !bss_scripted_sos_battle?
+    cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    n=cfg["summonsPerCall"].to_i
+    n=1 if n<=0
+    [[n,1].max,bss_sos_max_simultaneous_allies].min
   end
 
   def bss_sos_shiny_multiplier
@@ -201,7 +219,7 @@ class Battle
     return [-1, false] if bss_live_same_side_count(caller.index) >= bss_sos_max_live_same_side
     # Use the source SOS slot finder when present, including any project-specific
     # side-size/index changes made by that implementation.
-    if respond_to?(:pbFindNewBattlerIndex)
+    if respond_to?(:pbFindNewBattlerIndex) && !((trainerBattle? rescue false) && bss_scripted_sos_battle?)
       side = caller.idxOwnSide.to_i
       before = @sideSizes.is_a?(Array) ? @sideSizes[side].to_i : pbSideSize(caller.index).to_i
       idx_new = pbFindNewBattlerIndex(caller)
@@ -387,7 +405,7 @@ class Battle
     # Prefer the lifecycle supplied by the installed SOS plugin, but seed the
     # additional LBDS 1.2.x party-indexed state BEFORE it constructs/reinitializes
     # the battler. The stock SOS source doesn't maintain those newer arrays.
-    if respond_to?(:pbInitializeNewBattler)
+    if respond_to?(:pbInitializeNewBattler) && !((trainerBattle? rescue false) && bss_scripted_sos_battle?)
       idx_party = nil
       if full_update
         idx_party = @party2.length
@@ -547,6 +565,12 @@ class Battle
 
   def bss_pick_sos_entry(caller)
     rows=bss_sos_pool_entries(caller)
+    cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    if bss_scripted_sos_battle? && cfg["allySelectionMode"].to_s == "fixed"
+      idx=@bss_sos_fixed_cursor.to_i
+      return nil if idx<0 || idx>=rows.length
+      return rows[idx]
+    end
     weighted=rows.select { |x| x["weight"].to_i>0 }
     return rows[0] if weighted.empty?
     total=weighted.inject(0) { |n,x| n+x["weight"].to_i }
@@ -559,15 +583,118 @@ class Battle
     weighted[-1]
   end
 
+  def bss_max_level
+    return GameData::GrowthRate.max_level.to_i if defined?(GameData::GrowthRate) && GameData::GrowthRate.respond_to?(:max_level)
+    100
+  rescue
+    100
+  end
+
+  def bss_level_value(value, fallback)
+    return fallback.to_i if value.nil? || value.to_s.empty?
+    [[value.to_i, 1].max, bss_max_level].min
+  end
+
+  # Returns rows [weight, species, min_level, max_level] from the CURRENT map.
+  # Prefer the current encounter type and the requested SOS species. If that
+  # species isn't native to the map, fall back to the zone's overall level table.
+  def bss_zone_encounter_rows(species)
+    return [] if !defined?(GameData::Encounter) || !defined?($game_map) || !$game_map
+    version = (defined?($PokemonGlobal) && $PokemonGlobal && $PokemonGlobal.respond_to?(:encounter_version)) ? $PokemonGlobal.encounter_version : 0
+    data = GameData::Encounter.get($game_map.map_id, version) rescue nil
+    return [] if !data || !data.respond_to?(:types) || !data.types.is_a?(Hash)
+    types = data.types
+    enc_type = nil
+    begin
+      enc_type = $PokemonEncounters.encounter_type if defined?($PokemonEncounters) && $PokemonEncounters && $PokemonEncounters.respond_to?(:encounter_type)
+    rescue
+      enc_type = nil
+    end
+    current_rows = enc_type && types[enc_type].is_a?(Array) ? types[enc_type] : []
+    all_rows = types.values.select { |rows| rows.is_a?(Array) }.flatten(1)
+    sid = species.to_s.upcase
+    match = proc { |row| row.is_a?(Array) && row.length >= 4 && row[1].to_s.upcase == sid }
+    rows = current_rows.select { |row| match.call(row) }
+    rows = all_rows.select { |row| match.call(row) } if rows.empty?
+    rows = current_rows.select { |row| row.is_a?(Array) && row.length >= 4 } if rows.empty?
+    rows = all_rows.select { |row| row.is_a?(Array) && row.length >= 4 } if rows.empty?
+    rows
+  rescue => e
+    BSS064.log("SOS zone level lookup warning: #{e.class}: #{e.message}")
+    []
+  end
+
+  def bss_pick_zone_level(species, fallback_level)
+    rows = bss_zone_encounter_rows(species)
+    return [[fallback_level.to_i,1].max,bss_max_level].min if rows.empty?
+    total = rows.inject(0) { |sum,row| sum + [row[0].to_i,1].max }
+    roll = pbRandom([total,1].max)
+    picked = rows[-1]
+    rows.each do |row|
+      roll -= [row[0].to_i,1].max
+      if roll < 0
+        picked = row
+        break
+      end
+    end
+    lo = [[picked[2].to_i,1].max,bss_max_level].min
+    hi = [[picked[3].to_i,lo].max,bss_max_level].min
+    lo + pbRandom([hi-lo+1,1].max)
+  rescue
+    [[fallback_level.to_i,1].max,bss_max_level].min
+  end
+
+  def bss_sos_level_for(entry, caller)
+    cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    mode=cfg["levelMode"].to_s.downcase
+    mode="range" if mode=="custom"   # migrate legacy JSON in-place
+    mode="zone" if !["zone","range","fixed"].include?(mode)
+    base=(caller && caller.respond_to?(:level)) ? caller.level.to_i : 1
+    if mode=="fixed"
+      return bss_level_value(cfg["levelFixed"],base)
+    elsif mode=="range"
+      lo=bss_level_value(cfg["levelMin"],base)
+      hi=bss_level_value(cfg["levelMax"],base)
+      lo,hi=hi,lo if hi<lo
+      return lo + pbRandom([hi-lo+1,1].max)
+    end
+    bss_pick_zone_level(entry["species"],base)
+  end
+
+  def bss_apply_scripted_sos_moves(pkmn, entry)
+    return pkmn if !bss_scripted_sos_battle? || !entry.is_a?(Hash)
+    return pkmn if entry["moveMode"].to_s != "custom"
+    raw=entry["moves"].is_a?(Array) ? entry["moves"] : []
+    ids=raw.map { |x| x.to_s.strip.upcase }.reject { |x| x.empty? }.first(4)
+    ids.select! { |id| GameData::Move.exists?(id.to_sym) rescue false }
+    return pkmn if ids.empty?
+    begin
+      pkmn.moves.clear if pkmn.respond_to?(:moves) && pkmn.moves.respond_to?(:clear)
+      ids.each { |id| pkmn.learn_move(id.to_sym) if pkmn.respond_to?(:learn_move) }
+    rescue => e
+      BSS064.log("SOS custom movepool warning: #{e.class}: #{e.message}")
+    end
+    pkmn
+  end
+
   def bss_generate_sos_pokemon(entry, caller)
-    original=@bss_original_caller || caller.pokemon
-    level=[original.level-(pbRandom(5)+1),1].max
+    level=bss_sos_level_for(entry,caller)
     species=entry["species"].to_s.upcase.to_sym
-    pkmn=pbGenerateWildPokemon(species,level)
+    trainer_sos=(trainerBattle? rescue false) && bss_scripted_sos_battle?
+    pkmn=trainer_sos ? Pokemon.new(species,level) : pbGenerateWildPokemon(species,level)
     form=entry["form"].to_i
     pkmn.form=form if form>0 && pkmn.respond_to?(:form=)
     pkmn.form_simple=pkmn.form if pkmn.respond_to?(:form_simple=)
-    @peer.pbOnStartingBattle(self,pkmn,true) if @peer && @peer.respond_to?(:pbOnStartingBattle)
+    if trainer_sos && caller && caller.respond_to?(:pokemon) && caller.pokemon
+      begin
+        pkmn.owner = caller.pokemon.owner if pkmn.respond_to?(:owner=) && caller.pokemon.respond_to?(:owner)
+      rescue
+      end
+    end
+    BSS064.apply_custom_pokemon_fields(pkmn,entry,true) if BSS064.respond_to?(:apply_custom_pokemon_fields)
+    pkmn.calc_stats if pkmn.respond_to?(:calc_stats)
+    pkmn.heal if pkmn.respond_to?(:heal)
+    @peer.pbOnStartingBattle(self,pkmn,!trainer_sos) if @peer && @peer.respond_to?(:pbOnStartingBattle)
     pkmn
   end
 
@@ -584,6 +711,23 @@ class Battle
     @bss_sos_summoned_indices.is_a?(Hash) && @bss_sos_summoned_indices[idx_battler.to_i] == true
   end
 
+  def bss_sos_message(key, fallback, *args)
+    cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+    text=nil
+    if bss_scripted_sos_battle? && cfg["messages"].is_a?(Hash)
+      raw=cfg["messages"][key.to_s]
+      text=raw.to_s if !raw.nil? && !raw.to_s.strip.empty?
+    end
+    text=fallback if !text || text.empty?
+    begin
+      return _INTL(text,*args)
+    rescue
+      out=text.to_s.dup
+      args.each_with_index { |arg,i| out.gsub!("{#{i+1}}",arg.to_s) }
+      out
+    end
+  end
+
   def bss_sos_answer_rate(caller)
     cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
     direct=cfg["answerRate"]
@@ -593,63 +737,69 @@ class Battle
     [[profile["answerRate"].to_i,0].max,100].min
   end
 
-  def bss_call_for_help(caller, guaranteed=false, acts_this_round=false)
+  def bss_call_for_help(caller, guaranteed=false, acts_this_round=false, show_intro=true)
     return false if !caller || !@bss_sos_enabled
     begin
-      @scene.pbAnimateSubstitute(caller,:hide) if @scene.respond_to?(:pbAnimateSubstitute)
+      @scene.pbAnimateSubstitute(caller,:hide) if show_intro && @scene.respond_to?(:pbAnimateSubstitute)
     rescue
     end
-    pbDisplay(_INTL("¡{1} pidió ayuda!", caller.pbThis))
-    begin
-      @scene.pbAnimation(:GROWL, caller, caller.pbDirectOpposing(true))
-    rescue
+    if show_intro
+      pbDisplay(bss_sos_message("call","¡{1} pidió ayuda!",caller.pbThis))
+      begin
+        @scene.pbAnimation(:GROWL, caller, caller.pbDirectOpposing(true))
+      rescue
+      end
+      pbDisplayPaused(bss_sos_message("wait","... ... ..."))
     end
-    pbDisplayPaused(_INTL("... ... ..."))
     answered=guaranteed || pbRandom(100)<bss_sos_answer_rate(caller)
     if answered
-      idx,grow_side=bss_find_new_battler_slot(caller)
-      if idx>=0
-        entry=bss_pick_sos_entry(caller)
-        pokemon=bss_generate_sos_pokemon(entry,caller)
-        battler=bss_create_fresh_sos_battler(idx,caller,pokemon,grow_side)
-        if battler
-          @peer.pbOnEnteringBattle(self,battler,pokemon,true) if @peer && @peer.respond_to?(:pbOnEnteringBattle)
-          @bss_last_call_answered=true
-          @bss_sos_summoned_indices ||= {}
-          @bss_sos_summoned_indices[idx] = true
-          bss_set_sos_chain(caller)
-          if @scene.respond_to?(:bss_pbSOSJoin)
-            @scene.bss_pbSOSJoin(idx)
-          else
-            @scene.pbRefresh if @scene.respond_to?(:pbRefresh)
+      entry=bss_pick_sos_entry(caller)
+      if entry
+        idx,grow_side=bss_find_new_battler_slot(caller)
+        if idx>=0
+          pokemon=bss_generate_sos_pokemon(entry,caller)
+          battler=bss_create_fresh_sos_battler(idx,caller,pokemon,grow_side)
+          if battler
+            @peer.pbOnEnteringBattle(self,battler,pokemon,!((trainerBattle? rescue false) && bss_scripted_sos_battle?)) if @peer && @peer.respond_to?(:pbOnEnteringBattle)
+            @bss_last_call_answered=true
+            @bss_sos_summoned_indices ||= {}
+            @bss_sos_summoned_indices[idx] = true
+            cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
+            @bss_sos_fixed_cursor=@bss_sos_fixed_cursor.to_i+1 if bss_scripted_sos_battle? && cfg["allySelectionMode"].to_s=="fixed"
+            bss_set_sos_chain(caller)
+            if @scene.respond_to?(:bss_pbSOSJoin)
+              @scene.bss_pbSOSJoin(idx)
+            else
+              @scene.pbRefresh if @scene.respond_to?(:pbRefresh)
+            end
+            pbDisplay(bss_sos_message("success","¡Apareció {1}!",battler.name,caller.pbThis))
+            begin
+              @scene.pbAnimateSubstitute(caller,:show) if show_intro && @scene.respond_to?(:pbAnimateSubstitute)
+            rescue
+            end
+            pbCalculatePriority(true)
+            pbOnBattlerEnteringBattle(idx)
+            # Normal SOS calls happen after the round, so the source plugin marks a
+            # new battler as having already moved. BSS can also force an SOS BEFORE
+            # the first command phase; in that one case it must be eligible for an
+            # AI command and an action in the same first turn.
+            if acts_this_round
+              battler.lastRoundMoved = @turnCount.to_i - 1 if battler.respond_to?(:lastRoundMoved=)
+              @choices[idx] = [:None, 0, nil, -1] if @choices.is_a?(Array) && idx < @choices.length
+            end
+            @scene.bss_sync_sos_side_size_state(idx) if @scene.respond_to?(:bss_sync_sos_side_size_state)
+            pbSetSeen(battler)
+            @scene.bss_sync_enhanced_ui_icons if @scene.respond_to?(:bss_sync_enhanced_ui_icons)
+            @bss_last_turn_called=@turnCount
+            return true
           end
-          pbDisplay(_INTL("¡Apareció {1}!", battler.name))
-          begin
-            @scene.pbAnimateSubstitute(caller,:show) if @scene.respond_to?(:pbAnimateSubstitute)
-          rescue
-          end
-          pbCalculatePriority(true)
-          pbOnBattlerEnteringBattle(idx)
-          # Normal SOS calls happen after the round, so the source plugin marks a
-          # new battler as having already moved. BSS can also force an SOS BEFORE
-          # the first command phase; in that one case it must be eligible for an
-          # AI command and an action in the same first turn.
-          if acts_this_round
-            battler.lastRoundMoved = @turnCount.to_i - 1 if battler.respond_to?(:lastRoundMoved=)
-            @choices[idx] = [:None, 0, nil, -1] if @choices.is_a?(Array) && idx < @choices.length
-          end
-          @scene.bss_sync_sos_side_size_state(idx) if @scene.respond_to?(:bss_sync_sos_side_size_state)
-          pbSetSeen(battler)
-          @scene.bss_sync_enhanced_ui_icons if @scene.respond_to?(:bss_sync_enhanced_ui_icons)
-          @bss_last_turn_called=@turnCount
-          return true
         end
       end
     end
     @bss_last_call_answered=false
-    pbDisplay(_INTL("¡La ayuda no apareció!"))
+    pbDisplay(bss_sos_message("fail","¡La ayuda no apareció!",caller.pbThis))
     begin
-      @scene.pbAnimateSubstitute(caller,:show) if @scene.respond_to?(:pbAnimateSubstitute)
+      @scene.pbAnimateSubstitute(caller,:show) if show_intro && @scene.respond_to?(:pbAnimateSubstitute)
     rescue
     end
     @bss_last_turn_called=@turnCount
@@ -658,10 +808,30 @@ class Battle
     BSS064.log("Native SOS call failed: #{e.class}: #{e.message}")
     BSS064.log((e.backtrace||[])[0,12].join(" | "))
     begin
-      @scene.pbAnimateSubstitute(caller,:show) if caller && @scene.respond_to?(:pbAnimateSubstitute)
+      @scene.pbAnimateSubstitute(caller,:show) if show_intro && caller && @scene.respond_to?(:pbAnimateSubstitute)
     rescue
     end
     false
+  end
+
+  # One scripted SOS event can deliberately bring 1 or 2 allies. The answer roll
+  # belongs to the event: once the first ally answers, the additional configured
+  # allies are guaranteed, and only the first arrival repeats the call/wait intro.
+  def bss_call_for_help_batch(caller, guaranteed=false, acts_this_round=false)
+    count=bss_sos_summons_per_call
+    first=bss_call_for_help(caller,guaranteed,acts_this_round,true)
+    return false if !first
+    success=true
+    i=1
+    while i<count
+      break if bss_live_same_side_count(caller.index)>=bss_sos_max_live_same_side
+      ok=bss_call_for_help(caller,true,acts_this_round,false)
+      break if !ok
+      success=true
+      i+=1
+    end
+    @bss_last_call_answered=true if success
+    success
   end
 
   unless method_defined?(:bss064_command_phase_without_native_sos)
@@ -672,7 +842,7 @@ class Battle
         if @turnCount.to_i+1>=wanted
           @bss_initial_sos_done=true
           caller=@battlers[1] || @battlers[3] || @battlers[5]
-          bss_call_for_help(caller,true,true) if caller && caller.bss_can_sos_call_simple?
+          bss_call_for_help_batch(caller,true,true) if caller && caller.bss_can_sos_call_simple?
         end
       end
       if @bss_sos_enabled && @scene.respond_to?(:bss_sync_sos_side_size_state)
@@ -689,11 +859,13 @@ class Battle
       self.sosBattle=false if respond_to?(:sosBattle=)
       ret=bss064_end_round_without_native_sos(*args)
       self.sosBattle=false if respond_to?(:sosBattle=)
-      if @bss_sos_enabled && @bss_sos_config.is_a?(Hash) && @bss_sos_config["automaticCalls"]!=false && (!bss_scripted_sos_battle? || @bss_last_call_answered!=true || bss_additional_sos_calls_allowed?) && (wildBattle? rescue false)
+      if @bss_sos_enabled && @bss_sos_config.is_a?(Hash) && @bss_sos_config["automaticCalls"]!=false && (!bss_scripted_sos_battle? || @bss_last_call_answered!=true || bss_additional_sos_calls_allowed?) && bss_sos_runtime_battle_allowed?
+        trainer_sos=(trainerBattle? rescue false) && bss_scripted_sos_battle?
         pbPriority(true).each do |b|
-          next if !b || (b.fainted? rescue true) || !(b.wild? rescue false)
+          next if !b || (b.fainted? rescue true)
+          next if trainer_sos ? !(b.opposes? rescue false) : !(b.wild? rescue false)
           if b.bss_can_sos_call?
-            bss_call_for_help(b,false)
+            bss_call_for_help_batch(b,false,false)
             b.bss_took_super_effective_damage=false
             break
           end
@@ -719,8 +891,11 @@ class Battle::Battler
   end
 
   def bss_can_sos_call?
-    return false if !@battle.bss_sos_enabled || @battle.trainerBattle?
-    return false if !(wild? rescue false) || !opposes? || fainted? || usingMultiTurnAttack?
+    return false if !@battle.bss_sos_enabled
+    trainer_sos=(@battle.trainerBattle? rescue false) && @battle.bss_scripted_sos_battle?
+    return false if (@battle.trainerBattle? rescue false) && !trainer_sos
+    return false if !trainer_sos && !(wild? rescue false)
+    return false if !opposes? || fainted? || usingMultiTurnAttack?
     return false if @battle.bss_live_same_side_count(@index)>=@battle.bss_sos_max_live_same_side
     return false if respond_to?(:pbHasAnyStatus?) && pbHasAnyStatus?
     return false if bss_sos_call_rate<=0
@@ -734,8 +909,11 @@ class Battle::Battler
   end
 
   def bss_can_sos_call_simple?
-    return false if !@battle.bss_sos_enabled || @battle.trainerBattle?
-    return false if !(wild? rescue false) || !opposes? || fainted? || usingMultiTurnAttack?
+    return false if !@battle.bss_sos_enabled
+    trainer_sos=(@battle.trainerBattle? rescue false) && @battle.bss_scripted_sos_battle?
+    return false if (@battle.trainerBattle? rescue false) && !trainer_sos
+    return false if !trainer_sos && !(wild? rescue false)
+    return false if !opposes? || fainted? || usingMultiTurnAttack?
     return false if @battle.bss_last_call_answered && !@battle.bss_additional_sos_calls_allowed?
     return false if @battle.bss_sos_summoned_battler?(@index) && !@battle.bss_recursive_sos_calls_allowed?
     @battle.bss_live_same_side_count(@index)<@battle.bss_sos_max_live_same_side

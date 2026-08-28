@@ -1,11 +1,12 @@
 {
   "format": "battle-scene-studio-sos-global",
-  "formatVersion": 3,
-  "activeDataset": "pokerogue",
+  "formatVersion": 4,
+  "activeDataset": "sm_usum",
   "enabled": true,
   "mode": "always",
   "switchId": 62,
   "allowChainCalls": true,
+  "allowSOSContinuation": true,
   "limitCallsToOne": false,
   "maxSimultaneousSOS": 2,
   "shinyMultiplier": 1,
@@ -306,27 +307,6 @@
       ]
     },
     {
-      "species": "RIBOMBEE",
-      "form": 0,
-      "callRate": 30,
-      "answerRate": 100,
-      "requirements": [],
-      "pool": [
-        {
-          "species": "BLISSEY",
-          "form": 0,
-          "weight": 70,
-          "requirements": []
-        },
-        {
-          "species": "PELIPPER",
-          "form": 0,
-          "weight": 30,
-          "requirements": []
-        }
-      ]
-    },
-    {
       "species": "MIMIKYU",
       "form": 0,
       "callRate": 30,
@@ -418,25 +398,7 @@
           "requirements": []
         },
         {
-          "species": "KLINKLANG",
-          "form": 0,
-          "weight": 13,
-          "requirements": []
-        },
-        {
           "species": "ELECTIVIRE",
-          "form": 0,
-          "weight": 13,
-          "requirements": []
-        },
-        {
-          "species": "METAGROSS",
-          "form": 0,
-          "weight": 13,
-          "requirements": []
-        },
-        {
-          "species": "BRONZONG",
           "form": 0,
           "weight": 13,
           "requirements": []

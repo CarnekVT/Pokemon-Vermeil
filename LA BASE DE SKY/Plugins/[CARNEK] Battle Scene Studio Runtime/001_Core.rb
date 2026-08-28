@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio Runtime 0.6.19
+# Battle Scene Studio Runtime 0.6.25
 # Source-first rebuild for Pokemon Essentials v21.1.
 # JSON parser architecture is the same minimal, dependency-free reader shipped
 # by the supplied Battle Animation Studio runtime.
@@ -132,8 +132,8 @@ module BSSMiniJSON
 end
 
 module BSS064
-  VERSION = "0.6.19"
-  FORMAT_VERSION = 25
+  VERSION = "0.6.25"
+  FORMAT_VERSION = 33
   DATA_FILE = "Data/BattleSceneStudio/battles.json"
   SOS_GLOBAL_FILE = "Data/BattleSceneStudio/sos_global.json"
   SOS_CATALOG_DIR = "Data/BattleSceneStudio/SOS"
@@ -149,7 +149,7 @@ module BSS064
     attr_accessor :running, :last_control_token
 
     def log(message)
-      PBDebug.log("[BSS 0.6.19] #{message}") if defined?(PBDebug)
+      PBDebug.log("[BSS 0.6.25] #{message}") if defined?(PBDebug)
     rescue
     end
 
@@ -210,6 +210,104 @@ module BSS064
       cur=hash
       keys.each { |k| return nil if !cur.is_a?(Hash); cur=cur[k] }
       cur
+    end
+
+    # Applies only explicit JSON overrides. Blank/nil fields leave Essentials'
+    # normal generated value alone, which keeps ordinary foes/SOS source-faithful.
+    def apply_custom_pokemon_fields(pkmn, raw, apply_moves=true)
+      return pkmn if !pkmn || !raw.is_a?(Hash)
+      begin
+        item=raw["item"].to_s.strip.upcase
+        if !item.empty? && pkmn.respond_to?(:item=) && (GameData::Item.exists?(item.to_sym) rescue false)
+          pkmn.item=item.to_sym
+        end
+      rescue => e
+        log("Custom item ignored: #{e.class}: #{e.message}")
+      end
+      begin
+        ability=raw["ability"].to_s.strip.upcase
+        if !ability.empty? && pkmn.respond_to?(:ability=) && (GameData::Ability.exists?(ability.to_sym) rescue false)
+          pkmn.ability=ability.to_sym
+        end
+      rescue => e
+        log("Custom ability ignored: #{e.class}: #{e.message}")
+      end
+      begin
+        nature=raw["nature"].to_s.strip.upcase
+        if !nature.empty? && pkmn.respond_to?(:nature=) && (GameData::Nature.exists?(nature.to_sym) rescue false)
+          pkmn.nature=nature.to_sym
+        end
+      rescue => e
+        log("Custom nature ignored: #{e.class}: #{e.message}")
+      end
+      begin
+        case raw["gender"].to_s.downcase
+        when "male"
+          pkmn.makeMale if pkmn.respond_to?(:makeMale)
+        when "female"
+          pkmn.makeFemale if pkmn.respond_to?(:makeFemale)
+        end
+      rescue => e
+        log("Custom gender ignored: #{e.class}: #{e.message}")
+      end
+      begin
+        if raw.key?("happiness") && !raw["happiness"].nil? && raw["happiness"].to_s != "" && pkmn.respond_to?(:happiness=)
+          pkmn.happiness=[[raw["happiness"].to_i,0].max,255].min
+        end
+      rescue => e
+        log("Custom happiness ignored: #{e.class}: #{e.message}")
+      end
+      begin
+        pkmn.shiny=(raw["shiny"]==true) if raw.key?("shiny") && pkmn.respond_to?(:shiny=)
+      rescue => e
+        log("Custom shiny ignored: #{e.class}: #{e.message}")
+      end
+      stat_keys=[:HP,:ATTACK,:DEFENSE,:SPECIAL_ATTACK,:SPECIAL_DEFENSE,:SPEED]
+      begin
+        ivs=raw["ivs"].is_a?(Hash) ? raw["ivs"] : {}
+        if pkmn.respond_to?(:iv) && pkmn.iv.respond_to?(:[]=)
+          stat_keys.each do |stat|
+            value=ivs[stat.to_s]
+            next if value.nil? || value.to_s==""
+            pkmn.iv[stat]=[[value.to_i,0].max,31].min
+          end
+        end
+      rescue => e
+        log("Custom IVs ignored: #{e.class}: #{e.message}")
+      end
+      begin
+        evs=raw["evs"].is_a?(Hash) ? raw["evs"] : {}
+        if pkmn.respond_to?(:ev) && pkmn.ev.respond_to?(:[]=)
+          stat_keys.each do |stat|
+            value=evs[stat.to_s]
+            next if value.nil? || value.to_s==""
+            pkmn.ev[stat]=[[value.to_i,0].max,252].min
+          end
+        end
+      rescue => e
+        log("Custom EVs ignored: #{e.class}: #{e.message}")
+      end
+      begin
+        mode=raw["moveMode"].to_s.downcase
+        rows=raw["moves"].is_a?(Array) ? raw["moves"] : []
+        custom_moves=(mode=="custom") || (mode.empty? && !rows.empty?)
+        if apply_moves && custom_moves
+          ids=rows.map { |x| x.to_s.strip.upcase }.reject { |x| x.empty? }.first(4)
+          ids.select! { |id| GameData::Move.exists?(id.to_sym) rescue false }
+          if !ids.empty?
+            if pkmn.respond_to?(:forget_all_moves)
+              pkmn.forget_all_moves
+            elsif pkmn.respond_to?(:moves) && pkmn.moves.respond_to?(:clear)
+              pkmn.moves.clear
+            end
+            ids.each { |id| pkmn.learn_move(id.to_sym) if pkmn.respond_to?(:learn_move) }
+          end
+        end
+      rescue => e
+        log("Custom moves ignored: #{e.class}: #{e.message}")
+      end
+      pkmn.calc_stats if pkmn.respond_to?(:calc_stats)
+      pkmn
     end
 
     def global_sos

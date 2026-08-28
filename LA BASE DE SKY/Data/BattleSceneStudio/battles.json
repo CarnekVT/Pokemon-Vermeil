@@ -1,7 +1,7 @@
 {
   "format": "battle-scene-studio",
-  "formatVersion": 27,
-  "editorVersion": "0.6.18",
+  "formatVersion": 33,
+  "editorVersion": "0.6.25",
   "groups": [
     {
       "id": "wild_main",
@@ -23,7 +23,8 @@
         "trainer": {
           "type": "ACE_TRAINER_M",
           "name": "Trainer",
-          "version": 0
+          "version": 0,
+          "defeatMessage": ""
         },
         "canLose": true
       },
@@ -35,7 +36,27 @@
             "form": 0,
             "item": "",
             "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
             "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
             "shiny": false,
             "hpPercent": 100
           }
@@ -47,7 +68,27 @@
             "form": 0,
             "item": "",
             "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
             "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
             "shiny": false,
             "hpPercent": 100
           }
@@ -57,6 +98,23 @@
         "battleback": "",
         "bgm": ""
       },
+      "boss": {
+        "enabled": false,
+        "mode": "totem",
+        "foeIndex": 0,
+        "title": "Totem",
+        "encounterMessage": "",
+        "auraMessage": "¡{1} está rodeado por un aura!",
+        "stats": {
+          "ATTACK": 0,
+          "DEFENSE": 0,
+          "SPECIAL_ATTACK": 0,
+          "SPECIAL_DEFENSE": 0,
+          "SPEED": 0,
+          "ACCURACY": 0,
+          "EVASION": 0
+        }
+      },
       "sos": {
         "enabled": false,
         "automaticCalls": true,
@@ -64,9 +122,21 @@
         "allowAdditionalCalls": false,
         "allowRecursiveCalls": false,
         "maxSimultaneousSOS": 1,
+        "summonsPerCall": 1,
+        "allySelectionMode": "random",
         "callRound": 1,
         "callRate": null,
         "answerRate": null,
+        "levelMode": "range",
+        "levelMin": null,
+        "levelMax": null,
+        "levelFixed": null,
+        "messages": {
+          "call": "",
+          "wait": "",
+          "success": "",
+          "fail": ""
+        },
         "pool": [],
         "primary": "",
         "secondary": ""
@@ -90,7 +160,8 @@
         "trainer": {
           "type": "ACE_TRAINER_M",
           "name": "Trainer",
-          "version": 0
+          "version": 0,
+          "defeatMessage": ""
         },
         "canLose": true
       },
@@ -102,7 +173,27 @@
             "form": 0,
             "item": "",
             "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
             "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
             "shiny": false,
             "hpPercent": 100
           }
@@ -114,7 +205,27 @@
             "form": 0,
             "item": "",
             "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
             "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
             "shiny": false,
             "hpPercent": 100
           }
@@ -124,6 +235,23 @@
         "battleback": "",
         "bgm": ""
       },
+      "boss": {
+        "enabled": false,
+        "mode": "totem",
+        "foeIndex": 0,
+        "title": "Totem",
+        "encounterMessage": "",
+        "auraMessage": "¡{1} está rodeado por un aura!",
+        "stats": {
+          "ATTACK": 0,
+          "DEFENSE": 0,
+          "SPECIAL_ATTACK": 0,
+          "SPECIAL_DEFENSE": 0,
+          "SPEED": 0,
+          "ACCURACY": 0,
+          "EVASION": 0
+        }
+      },
       "sos": {
         "enabled": true,
         "automaticCalls": true,
@@ -131,19 +259,83 @@
         "allowAdditionalCalls": true,
         "allowRecursiveCalls": false,
         "maxSimultaneousSOS": 1,
+        "summonsPerCall": 1,
+        "allySelectionMode": "random",
         "callRound": 1,
         "callRate": 100,
         "answerRate": null,
+        "levelMode": "range",
+        "levelMin": null,
+        "levelMax": null,
+        "levelFixed": null,
+        "messages": {
+          "call": "",
+          "wait": "",
+          "success": "",
+          "fail": ""
+        },
         "pool": [
           {
             "species": "BAGON",
+            "level": 50,
             "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 100,
             "requirements": []
           },
           {
             "species": "SALAMENCE",
+            "level": 50,
             "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 100,
             "requirements": []
           }
@@ -170,7 +362,8 @@
         "trainer": {
           "type": "ACE_TRAINER_M",
           "name": "Trainer",
-          "version": 0
+          "version": 0,
+          "defeatMessage": ""
         },
         "canLose": true
       },
@@ -182,7 +375,27 @@
             "form": 0,
             "item": "",
             "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
             "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
             "shiny": false,
             "hpPercent": 100
           }
@@ -194,7 +407,27 @@
             "form": 0,
             "item": "",
             "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
             "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
             "shiny": false,
             "hpPercent": 100
           }
@@ -204,6 +437,23 @@
         "battleback": "",
         "bgm": ""
       },
+      "boss": {
+        "enabled": false,
+        "mode": "totem",
+        "foeIndex": 0,
+        "title": "Totem",
+        "encounterMessage": "",
+        "auraMessage": "¡{1} está rodeado por un aura!",
+        "stats": {
+          "ATTACK": 0,
+          "DEFENSE": 0,
+          "SPECIAL_ATTACK": 0,
+          "SPECIAL_DEFENSE": 0,
+          "SPEED": 0,
+          "ACCURACY": 0,
+          "EVASION": 0
+        }
+      },
       "sos": {
         "enabled": true,
         "automaticCalls": false,
@@ -211,31 +461,147 @@
         "allowAdditionalCalls": false,
         "allowRecursiveCalls": false,
         "maxSimultaneousSOS": 1,
+        "summonsPerCall": 1,
+        "allySelectionMode": "random",
         "callRound": 1,
         "callRate": 30,
         "answerRate": 75,
+        "levelMode": "range",
+        "levelMin": null,
+        "levelMax": null,
+        "levelFixed": null,
+        "messages": {
+          "call": "",
+          "wait": "",
+          "success": "",
+          "fail": ""
+        },
         "pool": [
           {
             "species": "GASTLY",
+            "level": 50,
             "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 50,
             "requirements": []
           },
           {
             "species": "HAUNTER",
+            "level": 50,
             "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 25,
             "requirements": []
           },
           {
             "species": "ZUBAT",
+            "level": 50,
             "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 15,
             "requirements": []
           },
           {
             "species": "SABLEYE",
+            "level": 50,
             "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 10,
             "requirements": []
           }
@@ -262,7 +628,8 @@
         "trainer": {
           "type": "ACE_TRAINER_M",
           "name": "Trainer",
-          "version": 0
+          "version": 0,
+          "defeatMessage": ""
         },
         "canLose": true
       },
@@ -274,7 +641,27 @@
             "form": 0,
             "item": "",
             "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
             "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
             "shiny": false,
             "hpPercent": 100
           }
@@ -286,7 +673,27 @@
             "form": 0,
             "item": "",
             "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
             "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
             "shiny": false,
             "hpPercent": 100
           }
@@ -296,6 +703,23 @@
         "battleback": "",
         "bgm": ""
       },
+      "boss": {
+        "enabled": false,
+        "mode": "totem",
+        "foeIndex": 0,
+        "title": "Totem",
+        "encounterMessage": "",
+        "auraMessage": "¡{1} está rodeado por un aura!",
+        "stats": {
+          "ATTACK": 0,
+          "DEFENSE": 0,
+          "SPECIAL_ATTACK": 0,
+          "SPECIAL_DEFENSE": 0,
+          "SPEED": 0,
+          "ACCURACY": 0,
+          "EVASION": 0
+        }
+      },
       "sos": {
         "enabled": true,
         "automaticCalls": true,
@@ -303,25 +727,115 @@
         "allowAdditionalCalls": true,
         "allowRecursiveCalls": false,
         "maxSimultaneousSOS": 2,
+        "summonsPerCall": 1,
+        "allySelectionMode": "random",
         "callRound": 1,
         "callRate": 100,
         "answerRate": 100,
+        "levelMode": "range",
+        "levelMin": null,
+        "levelMax": null,
+        "levelFixed": null,
+        "messages": {
+          "call": "",
+          "wait": "",
+          "success": "",
+          "fail": ""
+        },
         "pool": [
           {
             "species": "DARMANITAN",
+            "level": 50,
             "form": 1,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 100,
             "requirements": []
           },
           {
             "species": "BEARTIC",
+            "level": 50,
             "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 100,
             "requirements": []
           },
           {
             "species": "DECIDUEYE",
+            "level": 50,
             "form": 1,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
             "weight": 100,
             "requirements": []
           }
@@ -334,6 +848,356 @@
       },
       "notes": "",
       "updatedAt": 1787926483113
+    },
+    {
+      "id": "battle_mtd6oqc2_d",
+      "key": "soschanoarceus",
+      "name": "Trainer SOS",
+      "enabled": true,
+      "groupId": "wild_main",
+      "category": "",
+      "setup": {
+        "kind": "trainer",
+        "formation": "1v1",
+        "trainer": {
+          "type": "YOUNGSTER",
+          "name": "Chano",
+          "version": 0,
+          "defeatMessage": "Ni con la ayuda de un Pokémon Salvaje pude hacerte frente..."
+        },
+        "canLose": true
+      },
+      "teams": {
+        "foes": [
+          {
+            "species": "RATTATA",
+            "level": 2,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ],
+        "testPlayer": [
+          {
+            "species": "EEVEE",
+            "level": 55,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ]
+      },
+      "environment": {
+        "battleback": "",
+        "bgm": ""
+      },
+      "boss": {
+        "enabled": false,
+        "mode": "totem",
+        "foeIndex": 0,
+        "title": "Totem",
+        "encounterMessage": "",
+        "auraMessage": "¡{1} está rodeado por un aura!",
+        "stats": {
+          "ATTACK": 0,
+          "DEFENSE": 0,
+          "SPECIAL_ATTACK": 0,
+          "SPECIAL_DEFENSE": 0,
+          "SPEED": 0,
+          "ACCURACY": 0,
+          "EVASION": 0
+        }
+      },
+      "sos": {
+        "enabled": true,
+        "automaticCalls": true,
+        "initialCall": true,
+        "allowAdditionalCalls": false,
+        "allowRecursiveCalls": false,
+        "maxSimultaneousSOS": 1,
+        "summonsPerCall": 1,
+        "allySelectionMode": "fixed",
+        "callRound": 1,
+        "callRate": 100,
+        "answerRate": 100,
+        "levelMode": "fixed",
+        "levelMin": 20,
+        "levelMax": 20,
+        "levelFixed": 21,
+        "messages": {
+          "call": "¡{1} está llorando por un poco de ayuda!",
+          "wait": "",
+          "success": "¡SUPUTAMADRE, es un {1}!",
+          "fail": ""
+        },
+        "pool": [
+          {
+            "species": "DRAGONITE",
+            "level": 50,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
+            "weight": 100,
+            "requirements": []
+          }
+        ],
+        "primary": "",
+        "secondary": ""
+      },
+      "layout": {
+        "battlers": {}
+      },
+      "notes": "",
+      "updatedAt": 1787938858555
+    },
+    {
+      "id": "battle_mtd9t0o7_v",
+      "key": "totemtest",
+      "name": "TotemTest",
+      "enabled": true,
+      "groupId": "wild_main",
+      "category": "",
+      "setup": {
+        "kind": "wild",
+        "formation": "1v1",
+        "trainer": {
+          "type": "ACE_TRAINER_M",
+          "name": "Trainer",
+          "version": 0,
+          "defeatMessage": ""
+        },
+        "canLose": true
+      },
+      "teams": {
+        "foes": [
+          {
+            "species": "GUMSHOOS",
+            "level": 50,
+            "form": 0,
+            "item": "ORANBERRY",
+            "ability": "STRONGJAW",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "custom",
+            "moves": [
+              "YAWN",
+              "UTURN",
+              "TAKEDOWN",
+              "PROTECT"
+            ],
+            "ivs": {
+              "HP": 31,
+              "ATTACK": 31,
+              "DEFENSE": 31,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": 31,
+              "SPEED": 31
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ],
+        "testPlayer": [
+          {
+            "species": "EEVEE",
+            "level": 55,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "default",
+            "moves": [],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ]
+      },
+      "environment": {
+        "battleback": "",
+        "bgm": ""
+      },
+      "boss": {
+        "enabled": true,
+        "mode": "totem",
+        "foeIndex": 0,
+        "title": "Dominante",
+        "encounterMessage": "!El Pokémon Dominantes {1} te ataca!",
+        "auraMessage": "¡{1} está rodeado por un aura!",
+        "stats": {
+          "ATTACK": 1,
+          "DEFENSE": 1,
+          "SPECIAL_ATTACK": 1,
+          "SPECIAL_DEFENSE": 1,
+          "SPEED": 1,
+          "ACCURACY": 1,
+          "EVASION": 1
+        }
+      },
+      "sos": {
+        "enabled": true,
+        "automaticCalls": true,
+        "initialCall": false,
+        "allowAdditionalCalls": true,
+        "allowRecursiveCalls": false,
+        "maxSimultaneousSOS": 1,
+        "summonsPerCall": 1,
+        "allySelectionMode": "random",
+        "callRound": 1,
+        "callRate": 100,
+        "answerRate": 100,
+        "levelMode": "fixed",
+        "levelMin": null,
+        "levelMax": null,
+        "levelFixed": 28,
+        "messages": {
+          "call": "",
+          "wait": "",
+          "success": "",
+          "fail": ""
+        },
+        "pool": [
+          {
+            "species": "COMFEY",
+            "level": 50,
+            "form": 0,
+            "item": "",
+            "ability": "TRIAGE",
+            "nature": "",
+            "gender": "auto",
+            "moveMode": "custom",
+            "moves": [
+              "POLLENPUFF",
+              "DRAININGKISS",
+              "PROTECT",
+              "QUIVERDANCE"
+            ],
+            "ivs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "evs": {
+              "HP": null,
+              "ATTACK": null,
+              "DEFENSE": null,
+              "SPECIAL_ATTACK": null,
+              "SPECIAL_DEFENSE": null,
+              "SPEED": null
+            },
+            "happiness": null,
+            "shiny": false,
+            "hpPercent": 100,
+            "weight": 100,
+            "requirements": []
+          }
+        ],
+        "primary": "",
+        "secondary": ""
+      },
+      "layout": {
+        "battlers": {}
+      },
+      "notes": "",
+      "updatedAt": 1787943339601
     }
   ],
   "global": {

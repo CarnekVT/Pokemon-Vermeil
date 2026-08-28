@@ -1,29 +1,33 @@
 #===============================================================================
 # [VERMEIL] Visual 2.5D - 025_V25SkyGroundBands.rb
-# V25 Phase 2.3.1 - Sky-safe adaptive persistent ground bands
+# V25 Phase 2A FIX1 - Sky-safe exact persistent ground scanlines
 #
 # Sky's stock mkxp-z has no Sprite#corners and no custom Shader API. The old
 # compatibility path therefore rebuilt the projected floor into a screen-sized
 # Bitmap with many Bitmap#stretch_blt calls whenever the camera moved.
 #
 # This backend keeps the already-composed map bitmap (@ground) untouched and
-# displays narrow persistent Sprite bands that reference it directly. Camera
-# movement only changes src_rect/position/zoom. This preserves the existing
-# scanline perspective while moving the expensive resampling out of Ruby's
-# per-movement CPU path.
+# displays persistent Sprite scanlines that reference it directly. FIX1 uses an
+# exact one-row plan in Perspective/Affine: the previous adaptive 8/16/32-row
+# approximation was fast, but its independently quantized source rectangles
+# produced a visible wave/shimmer while the camera moved.
 #===============================================================================
 
 module Mode7
   module Config
     V25_SKY_GROUND_BANDS = true unless const_defined?(:V25_SKY_GROUND_BANDS)
+    # V25 PATCH3: visual parity first. The new executable may expose corners
+    # and Shader, but ground keeps the tested Sky adaptive-band renderer until
+    # the GPU ground path has exact near-plane/source-coverage parity.
+    V25_NEXT_SAFE_GROUND_BANDS = true unless const_defined?(:V25_NEXT_SAFE_GROUND_BANDS)
 
     # Phase 2.3.1: the adaptive plan applies to BOTH :perspective and :affine.
     # Phase 2.3 accidentally enabled it only for Affine, so Perspective maps
     # still used one Sprite per screen row (480 bands at 640x480).
     # 0.10 px keeps the approximation well below one visible pixel.
-    V25_SKY_AFFINE_ADAPTIVE_BANDS = true unless const_defined?(:V25_SKY_AFFINE_ADAPTIVE_BANDS)
-    V25_SKY_AFFINE_MAX_BAND_HEIGHT = 32 unless const_defined?(:V25_SKY_AFFINE_MAX_BAND_HEIGHT)
-    V25_SKY_AFFINE_MAX_SCREEN_ERROR = 0.10 unless const_defined?(:V25_SKY_AFFINE_MAX_SCREEN_ERROR)
+    V25_SKY_AFFINE_ADAPTIVE_BANDS = false unless const_defined?(:V25_SKY_AFFINE_ADAPTIVE_BANDS)
+    V25_SKY_AFFINE_MAX_BAND_HEIGHT = 1 unless const_defined?(:V25_SKY_AFFINE_MAX_BAND_HEIGHT)
+    V25_SKY_AFFINE_MAX_SCREEN_ERROR = 0.0 unless const_defined?(:V25_SKY_AFFINE_MAX_SCREEN_ERROR)
 
     # Exact compatibility switch. Setting this to 1 and disabling adaptive bands
     # reproduces the Phase 2.2 one-row-per-Sprite path.
@@ -50,9 +54,12 @@ class Mode7Renderer
 
   def v25_sky_ground_bands_enabled?
     return false if !Mode7::Config::V25_SKY_GROUND_BANDS
+    return false if !Mode7.respond_to?(:perspective_mode?) || !Mode7.perspective_mode?
+    safe = Mode7::Config.const_defined?(:V25_NEXT_SAFE_GROUND_BANDS) &&
+           Mode7::Config::V25_NEXT_SAFE_GROUND_BANDS
+    return true if safe
     return false if Mode7::MKXPZExt.corners?
     return false if Mode7::MKXPZExt.shader?
-    return false if !Mode7.respond_to?(:perspective_mode?) || !Mode7.perspective_mode?
     true
   rescue Exception
     false

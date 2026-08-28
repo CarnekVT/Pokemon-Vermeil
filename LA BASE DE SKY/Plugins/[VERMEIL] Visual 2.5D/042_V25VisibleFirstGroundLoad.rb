@@ -156,7 +156,34 @@ class Mode7Renderer
       max_y = bottom if bottom > max_y
       found = true
     end
+    # V25 PATCH3: when the new Game.exe exposes Shader/corners, the active
+    # ground backend may sample the NDS source rectangle instead of exactly the
+    # Sky-band plan above. Union both visible source ranges before rasterizing
+    # cells. Without this, priority/stair sprites can remain visible while the
+    # underlying @ground pixels are still transparent, producing blue "unloaded"
+    # zones even though the map itself is present.
+    if respond_to?(:nds_visible_world_y_range, true) &&
+       respond_to?(:nds_visible_world_x_range, true)
+      begin
+        ny0, ny1 = nds_visible_world_y_range
+        nx0, nx1 = nds_visible_world_x_range(ny0, ny1)
+        if nx1.to_f > nx0.to_f && ny1.to_f > ny0.to_f
+          min_x = [min_x, nx0.floor].min
+          max_x = [max_x, nx1.ceil].max
+          min_y = [min_y, ny0.floor].min
+          max_y = [max_y, ny1.ceil].max
+          found = true
+        end
+      rescue Exception
+      end
+    end
+
     return nil if !found
+
+    min_x = min_x.clamp(0, ground_w)
+    max_x = max_x.clamp(0, ground_w)
+    min_y = min_y.clamp(0, map_h_px)
+    max_y = max_y.clamp(0, map_h_px)
 
     tw = Game_Map::TILE_WIDTH
     th = Game_Map::TILE_HEIGHT

@@ -602,12 +602,17 @@ class Mode7Renderer
         y1 = mf[:y1].to_f
         z0 = mf[:z0].to_f * step
         z1 = mf[:z1].to_f * step
+        model_key = [mf[:model_id].to_s, mf[:model_instance_id].to_i]
+        model_meta = @nds_model_object_index && @nds_model_object_index[model_key]
         pseudo = {
           category: mf[:category].to_s.empty? ? "mountain" : mf[:category].to_s,
           material: mf[:material],
           face_materials: {},
           material_repeat: mf[:material_repeat] != false,
-          characters_in_front: false,
+          # Compact mesh faces do not serialize this flag themselves. Recover
+          # it from the authored model/object instance so RGSS depth priority is
+          # identical to the non-streamed object path.
+          characters_in_front: model_meta.is_a?(Hash) && model_meta[:characters_in_front] == true,
           model_id: mf[:model_id],
           model_instance_id: mf[:model_instance_id]
         }
@@ -700,6 +705,17 @@ class Mode7Renderer
     objs = nds_geometry_objects || []
     mesh_faces = nds_geometry_mesh_faces || []
     return if objs.empty? && mesh_faces.empty?
+
+    # Model-stream faces only carry model_id/instance_id. Keep the authored
+    # object metadata indexed so streamed faces recover priority semantics.
+    @nds_model_object_index = {}
+    objs.each do |obj|
+      next if !obj.is_a?(Hash)
+      mid = obj[:model_id].to_s
+      iid = obj[:model_instance_id].to_i
+      next if mid.empty? && iid == 0
+      @nds_model_object_index[[mid, iid]] = obj
+    end
 
     tw = Game_Map::TILE_WIDTH.to_f
     th = Game_Map::TILE_HEIGHT.to_f
@@ -929,6 +945,93 @@ class Mode7Renderer
     obj[:material]
   end
 
+  # V25 Next Phase 2A: native model faces can sample the original material
+  # Bitmap directly. The old path first created a face-sized Bitmap (stretch or
+  # repeated pattern) for every distinct face. Phase 2A sends local UVs plus the
+  # selected source rectangle to the shader instead; transformed materials are
+  # still cached once by nds_object_baked_material_source.
+  def v25_native_material_uv_supported?
+    enabled = Mode7::Config.const_defined?(:V25_PHASE2A_DIRECT_MATERIALS_ENABLED) &&
+              Mode7::Config::V25_PHASE2A_DIRECT_MATERIALS_ENABLED
+    if !enabled
+      if !@v25_direct_material_quarantine_logged && defined?(Console)
+        @v25_direct_material_quarantine_logged = true
+        Console.echo_li("[VERMEIL 2.5D] Phase 2A FIX1: direct material UV quarantined; Phase 1 material fallback active")
+      end
+      return false
+    end
+    return false if !defined?(V25Engine) || !V25Engine.respond_to?(:capabilities)
+    caps = V25Engine.capabilities
+    return false if !caps.is_a?(Hash) || caps[:native_material_uv] != true
+    defined?(V25NativeMesh) && V25NativeMesh.instance_methods.include?(:add_quad_material)
+  rescue Exception
+    false
+  end
+
+  def v25_native_material_packet(obj, face)
+    return nil if !v25_native_material_uv_supported?
+    mat = v25_native_mesh_face_material(obj, face)
+    return nil if !mat.is_a?(Hash)
+    src_b, src_r = nds_object_baked_material_source(mat)
+    return nil if !src_b || src_b.disposed? || !src_r
+    # Direct GL access is not valid for mkxp-z mega surfaces. Preserve the old
+    # face-Bitmap path in that uncommon case.
+    return nil if src_b.respond_to?(:mega?) && src_b.mega?
+
+    bw = src_b.width.to_f
+    bh = src_b.height.to_f
+    return nil if bw <= 0.0 || bh <= 0.0
+    rw = [src_r.width.to_f, 1.0].max
+    rh = [src_r.height.to_f, 1.0].max
+
+    # Sample texel centres, not atlas edges. This matches Bitmap#blt/stretch_blt
+    # much more closely with nearest filtering and prevents an atlas material
+    # from bleeding one pixel from the tile next to its src_rect. For a 1px
+    # source the UV span is intentionally zero (constant texel).
+    uv_x = (src_r.x.to_f + 0.5) / bw
+    uv_y = (src_r.y.to_f + 0.5) / bh
+    uv_w = [rw - 1.0, 0.0].max / bw
+    uv_h = [rh - 1.0, 0.0].max / bh
+    uv_rect = [uv_x, uv_y, uv_w, uv_h]
+
+    repeat_uv = obj[:material_repeat] == true
+    if repeat_uv
+      pu = face[:pattern_uv]
+      start_x = 0.0
+      start_y = 0.0
+      if pu.is_a?(Array) && pu.length >= 2
+        start_x = pu[0].to_f * Game_Map::TILE_WIDTH
+        start_y = pu[1].to_f * Game_Map::TILE_HEIGHT
+      end
+      fw = [face[:px_w].to_f, 1.0].max
+      fh = [face[:px_h].to_f, 1.0].max
+      u0 = start_x / rw
+      v0 = start_y / rh
+      u1 = (start_x + fw) / rw
+      v1 = (start_y + fh) / rh
+    else
+      src_uv = face[:uv_rect]
+      if src_uv.is_a?(Array) && src_uv.length == 4
+        u0 = src_uv[0].to_f.clamp(0.0, 1.0)
+        v0 = src_uv[1].to_f.clamp(0.0, 1.0)
+        u1 = src_uv[2].to_f.clamp(0.0, 1.0)
+        v1 = src_uv[3].to_f.clamp(0.0, 1.0)
+      else
+        u0 = v0 = 0.0
+        u1 = v1 = 1.0
+      end
+    end
+
+    uv = [u0, v0, u1, v0, u1, v1, u0, v1]
+    [src_b, uv, uv_rect, repeat_uv]
+  rescue Exception => e
+    if defined?(Console) && !@v25_native_material_packet_error_logged
+      @v25_native_material_packet_error_logged = true
+      Console.echo_error("V25 direct material fallback: #{e.message}")
+    end
+    nil
+  end
+
   def v25_native_mesh_sync_group_z(group, face)
     mesh = group[:mesh]
     return if !mesh || mesh.disposed?
@@ -936,6 +1039,46 @@ class Mode7Renderer
     wz = face.key?(:sort_world_z) ? face[:sort_world_z].to_f : face[:center_world_z].to_f
     mesh.z = Mode7.depth_z_at_elevation(wy, wz, 0, face[:depth_bias].to_i)
   rescue Exception
+  end
+
+  # V25 PATCH3: V25Native v103's 2D quad helper reports nil when one vertex is
+  # behind the near plane. Native meshes must not be rejected at that stage:
+  # the new mkxp-z shader clips their triangles correctly on the GPU. Return
+  # true only when at least one vertex is still in front, so fully-behind faces
+  # remain cheaply culled.
+  def v25_native_mesh_crosses_near_plane?(face)
+    return false if !v25_native_mesh_face?(face)
+    return false if !Mode7.respond_to?(:perspective_mode?) || !Mode7.perspective_mode?
+    world = face[:world]
+    return false if !world.is_a?(Array) || world.length < 12
+
+    math = Mode7.nds_camera_math
+    py = Mode7.pivot_y.to_f
+    cam_y = Mode7.projection_cam_y.to_f
+    cam_elev = Mode7.projection_cam_elevation.to_f
+    distance = math[:distance].to_f
+    sin_a = math[:sin].to_f
+    cos_a = math[:cos_raw].to_f
+    near = Mode7::Config::PERSPECTIVE_NEAR_CLIP.to_f
+    near = 8.0 if near <= 0.0
+
+    any_front = false
+    any_behind = false
+    4.times do |i|
+      wy = world[i * 3 + 1].to_f
+      wz = world[i * 3 + 2].to_f
+      dy = wy - (cam_y + py)
+      rel = wz - cam_elev
+      depth = distance - dy * sin_a - rel * cos_a
+      if depth > near
+        any_front = true
+      else
+        any_behind = true
+      end
+    end
+    any_front && any_behind
+  rescue Exception
+    false
   end
 
   def ensure_v25_native_mesh_face(face, index)
@@ -952,22 +1095,50 @@ class Mode7Renderer
       @nds_native_mesh_groups[key] = group
       if defined?(Console) && !@v25_native_mesh_backend_logged
         @v25_native_mesh_backend_logged = true
-        Console.echo_li("[VERMEIL 2.5D] Geometry objects: V25 Next backend = Native Mesh")
+        Console.echo_li("[VERMEIL 2.5D] Geometry objects: V25 Next backend = Native Mesh / Direct Materials")
       end
     end
 
     mesh = group[:mesh]
     if !group[:indices][index]
-      bmp = face[:bitmap]
-      if !bmp || bmp.disposed?
-        bmp = nds_object_face_bitmap(face[:obj], face)
-        face[:bitmap] = bmp
-      end
-      return false if !bmp || bmp.disposed?
-
       mat = v25_native_mesh_face_material(face[:obj], face)
       opacity = mat.is_a?(Hash) && mat.key?("opacity") ? mat["opacity"].to_i.clamp(0, 255) : 255
-      mesh.add_quad(bmp, face[:world], face[:shade].to_i.clamp(0, 255), opacity)
+      direct = false
+
+      packet = v25_native_material_packet(face[:obj], face)
+      if packet
+        bmp, uv, uv_rect, repeat_uv = packet
+        handle = mesh.add_quad_material(
+          bmp, face[:world], uv, uv_rect, repeat_uv,
+          face[:shade].to_i.clamp(0, 255), opacity
+        )
+        direct = handle.to_i >= 0
+      end
+
+      # Exact Phase 1 fallback: unsupported/mega/missing material still gets the
+      # old face-sized Bitmap. Phase 2A never changes how such a face looks.
+      if !direct
+        bmp = face[:bitmap]
+        if !bmp || bmp.disposed?
+          bmp = nds_object_face_bitmap(face[:obj], face)
+          face[:bitmap] = bmp
+        end
+        return false if !bmp || bmp.disposed?
+        fallback_handle = mesh.add_quad(
+          bmp, face[:world], face[:shade].to_i.clamp(0, 255), opacity
+        )
+        # If the native object cannot own this Bitmap (for example a very large
+        # mega surface), leave the face to the proven Sprite fallback instead
+        # of marking a quad that was never uploaded.
+        return false if fallback_handle.to_i < 0
+      else
+        face[:native_direct_material] = true
+        @v25_native_direct_material_faces = @v25_native_direct_material_faces.to_i + 1
+        if @v25_native_direct_material_faces == 1 && defined?(Console)
+          Console.echo_li("[VERMEIL 2.5D] V25 Next Phase 2A: direct material UV active")
+        end
+      end
+
       group[:indices][index] = true
       face[:native_mesh] = mesh
       face[:native_mesh_added] = true
@@ -998,6 +1169,47 @@ class Mode7Renderer
     end
   end
 
+  # Perspective can display geometry well outside a fixed +/-14 tile window.
+  # Derive the vertical candidate range from the rows actually visible on
+  # screen, then keep the legacy radius as a minimum safety margin. This avoids
+  # G=0/model pop-out while the model is still inside the camera frustum.
+  def v25_object_candidate_tile_bounds(rx, ry)
+    tw = Game_Map::TILE_WIDTH.to_f
+    th = Game_Map::TILE_HEIGHT.to_f
+    cam_tx = (Mode7.cam_x / tw).floor
+    cam_ty = (Mode7.projection_cam_y / th).floor
+    min_tx = cam_tx - rx
+    max_tx = cam_tx + rx
+    min_ty = cam_ty - ry
+    max_ty = cam_ty + ry
+
+    if Mode7.respond_to?(:world_y_for_row) && Mode7.respond_to?(:horizon_row)
+      top_row = [Mode7.horizon_row.ceil + 1, 0].max
+      bottom_row = [Mode7.screen_h - 1, top_row].max
+      wy_top = Mode7.world_y_for_row(top_row)
+      wy_bottom = Mode7.world_y_for_row(bottom_row)
+      if wy_top && wy_bottom
+        a = (wy_top.to_f / th).floor
+        b = (wy_bottom.to_f / th).ceil
+        vis_min = [a, b].min - 2
+        vis_max = [a, b].max + 2
+        min_ty = [min_ty, vis_min].min
+        max_ty = [max_ty, vis_max].max
+      end
+    end
+
+    # Horizontal scale is constant in the current NDS perspective, but derive
+    # a minimum screen-width radius so zoom-out never clips model candidates.
+    zoom = Mode7.respond_to?(:hscale) ? Mode7.hscale(Mode7.pivot_y).to_f : 1.0
+    zoom = 1.0 if zoom <= 0.001
+    screen_tiles_x = ((Mode7.screen_w / zoom) / tw * 0.5).ceil + 2
+    min_tx = [min_tx, cam_tx - screen_tiles_x].min
+    max_tx = [max_tx, cam_tx + screen_tiles_x].max
+    [min_tx, max_tx, min_ty, max_ty]
+  rescue Exception
+    [cam_tx - rx, cam_tx + rx, cam_ty - ry, cam_ty + ry]
+  end
+
   def update_nds_geometry_objects
     return if !@nds_object_faces || @nds_object_faces.empty?
     ensure_nds_object_buckets
@@ -1012,16 +1224,15 @@ class Mode7Renderer
 
     bs = Mode7::Config::NDS_RUNTIME_BUCKET_SIZE.to_i
     bs = 8 if bs <= 0
-    cam_tx = (Mode7.cam_x / Game_Map::TILE_WIDTH).floor
-    cam_ty = (Mode7.cam_y / Game_Map::TILE_HEIGHT).floor
     rx = Mode7::Config::NDS_OBJECT_CULL_TILES_X.to_i
     ry = Mode7::Config::NDS_OBJECT_CULL_TILES_Y.to_i
-    bx0 = (cam_tx - rx) / bs
-    bx1 = (cam_tx + rx) / bs
-    by0 = (cam_ty - ry) / bs
-    by1 = (cam_ty + ry) / bs
+    min_tx, max_tx, min_ty, max_ty = v25_object_candidate_tile_bounds(rx, ry)
+    bx0 = min_tx / bs
+    bx1 = max_tx / bs
+    by0 = min_ty / bs
+    by1 = max_ty / bs
 
-    visibility_key = [cam_tx, cam_ty, rx, ry, bs]
+    visibility_key = [min_tx, max_tx, min_ty, max_ty, rx, ry, bs]
     visibility_changed = (@nds_object_visibility_key != visibility_key || !@nds_object_visible_indices)
     if visibility_changed
       seen = {}
@@ -1131,6 +1342,11 @@ class Mode7Renderer
           margin = Mode7::Config.const_defined?(:V25_NATIVE_SCREEN_MARGIN) ? Mode7::Config::V25_NATIVE_SCREEN_MARGIN.to_f : 40.0
           visible = max_x >= -margin && min_x <= Mode7.screen_w + margin &&
                     max_y >= -margin && min_y <= Mode7.screen_h + margin
+        elsif v25_native_mesh_crosses_near_plane?(face)
+          # The CPU quad helper cannot represent a clipped 5/6-vertex polygon.
+          # Keep the candidate alive and let V25NativeMesh/OpenGL perform the
+          # real near-plane clipping instead of making the model disappear.
+          visible = true
         end
       end
 
