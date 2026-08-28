@@ -44,6 +44,14 @@ class Mode7Renderer
   end
 
   def dispose_nds_geometry_objects
+    if @nds_native_mesh_groups
+      @nds_native_mesh_groups.each_value do |group|
+        mesh = group.is_a?(Hash) ? group[:mesh] : nil
+        mesh.dispose if mesh && mesh.respond_to?(:disposed?) && !mesh.disposed?
+      rescue Exception
+      end
+    end
+    @nds_native_mesh_groups = {}
     @nds_object_faces ||= []
     @nds_object_faces.each do |face|
       spr = face[:sprite]
@@ -880,6 +888,116 @@ class Mode7Renderer
     false
   end
 
+  #---------------------------------------------------------------------------
+  # V25 mkxp-z Next Phase 1 native model backend.
+  # Only imported model instances use it in this phase. Terrain/legacy geometry
+  # keeps the proven Sprite path until native chunks arrive in later phases.
+  #---------------------------------------------------------------------------
+  def v25_native_mesh_supported?
+    return false if !defined?(V25NativeMesh)
+    return false if !defined?(V25Engine) || !V25Engine.respond_to?(:capabilities)
+    caps = V25Engine.capabilities
+    caps.is_a?(Hash) && caps[:native_mesh_instances] == true
+  rescue Exception
+    false
+  end
+
+  def v25_native_mesh_face?(face)
+    return false if !v25_native_mesh_supported? || !face.is_a?(Hash)
+    obj = face[:obj]
+    return false if !obj.is_a?(Hash)
+    model_id = obj[:model_id].to_s
+    instance_id = obj[:model_instance_id].to_i
+    !model_id.empty? || instance_id != 0
+  rescue Exception
+    false
+  end
+
+  def v25_native_mesh_group_key(face)
+    obj = face[:obj]
+    return nil if !obj.is_a?(Hash)
+    [:model, obj[:model_id].to_s, obj[:model_instance_id].to_i]
+  rescue Exception
+    nil
+  end
+
+  def v25_native_mesh_face_material(obj, face)
+    fm = obj[:face_materials].is_a?(Hash) ? obj[:face_materials] : {}
+    face_key = face[:kind] == :top ? "top" : face[:edge].to_s
+    fm[face_key] || fm[face_key.to_sym] || obj[:material]
+  rescue Exception
+    obj[:material]
+  end
+
+  def v25_native_mesh_sync_group_z(group, face)
+    mesh = group[:mesh]
+    return if !mesh || mesh.disposed?
+    wy = face.key?(:sort_world_y) ? face[:sort_world_y].to_f : face[:center_world_y].to_f
+    wz = face.key?(:sort_world_z) ? face[:sort_world_z].to_f : face[:center_world_z].to_f
+    mesh.z = Mode7.depth_z_at_elevation(wy, wz, 0, face[:depth_bias].to_i)
+  rescue Exception
+  end
+
+  def ensure_v25_native_mesh_face(face, index)
+    return false if !v25_native_mesh_face?(face)
+    key = v25_native_mesh_group_key(face)
+    return false if !key
+
+    @nds_native_mesh_groups ||= {}
+    group = @nds_native_mesh_groups[key]
+    if !group || !group[:mesh] || group[:mesh].disposed?
+      mesh = V25NativeMesh.new(@viewport)
+      mesh.visible = true
+      group = { mesh: mesh, indices: {}, tone_key: nil }
+      @nds_native_mesh_groups[key] = group
+      if defined?(Console) && !@v25_native_mesh_backend_logged
+        @v25_native_mesh_backend_logged = true
+        Console.echo_li("[VERMEIL 2.5D] Geometry objects: V25 Next backend = Native Mesh")
+      end
+    end
+
+    mesh = group[:mesh]
+    if !group[:indices][index]
+      bmp = face[:bitmap]
+      if !bmp || bmp.disposed?
+        bmp = nds_object_face_bitmap(face[:obj], face)
+        face[:bitmap] = bmp
+      end
+      return false if !bmp || bmp.disposed?
+
+      mat = v25_native_mesh_face_material(face[:obj], face)
+      opacity = mat.is_a?(Hash) && mat.key?("opacity") ? mat["opacity"].to_i.clamp(0, 255) : 255
+      mesh.add_quad(bmp, face[:world], face[:shade].to_i.clamp(0, 255), opacity)
+      group[:indices][index] = true
+      face[:native_mesh] = mesh
+      face[:native_mesh_added] = true
+    end
+
+    v25_native_mesh_sync_group_z(group, face)
+    true
+  rescue Exception => e
+    if defined?(Console) && !@v25_native_mesh_error_logged
+      @v25_native_mesh_error_logged = true
+      Console.echo_error("V25 Native Mesh fallback: #{e.message}")
+    end
+    false
+  end
+
+  def sync_v25_native_mesh_tone
+    return if !@nds_native_mesh_groups || @nds_native_mesh_groups.empty?
+    tone = @tone
+    return if !tone
+    key = [tone.red.to_i, tone.green.to_i, tone.blue.to_i, tone.gray.to_i]
+    @nds_native_mesh_groups.each_value do |group|
+      next if group[:tone_key] == key
+      mesh = group[:mesh]
+      next if !mesh || mesh.disposed?
+      mesh.set_tone(key[0], key[1], key[2], key[3])
+      group[:tone_key] = key
+    rescue Exception
+    end
+  end
+
   def update_nds_geometry_objects
     return if !@nds_object_faces || @nds_object_faces.empty?
     ensure_nds_object_buckets
@@ -1022,6 +1140,17 @@ class Mode7Renderer
         next
       end
       screen_visible_count += 1
+
+      # V25 mkxp-z Next Phase 1: imported model faces stay in world space in
+      # one native SceneElement per model instance. RGSS Z still orders the
+      # whole model against characters, but its faces no longer become Sprites.
+      if v25_native_mesh_face?(face)
+        if ensure_v25_native_mesh_face(face, i)
+          face[:last_used] = frame_stamp
+          active << i
+          next
+        end
+      end
 
       # Create expensive Bitmap/Sprite resources only AFTER screen culling.
       if !spr || spr.disposed?

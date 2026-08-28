@@ -1,0 +1,400 @@
+{
+  "format": "battle-scene-studio-sos-global",
+  "formatVersion": 2,
+  "activeDataset": "pokerogue",
+  "enabled": false,
+  "mode": "always",
+  "switchId": 62,
+  "limitCallsToOne": false,
+  "shinyMultiplier": 1,
+  "requirements": [
+    {
+      "type": "badge_min",
+      "id": 0,
+      "value": 1
+    }
+  ],
+  "overrides": [
+    {
+      "species": "EXCADRILL",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 75,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "EXCADRILL",
+          "form": 0,
+          "weight": 55,
+          "requirements": []
+        },
+        {
+          "species": "DRILBUR",
+          "form": 0,
+          "weight": 45,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "ANNIHILAPE",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 80,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "PRIMEAPE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MANKEY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "SCEPTILE",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 80,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "GROVYLE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TREECKO",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "CUBONE",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "CUBONE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "KANGASKHAN",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "HAUNTER",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "HAUNTER",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GENGAR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "TAUROS",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "TAUROS",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MILTANK",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "MILTANK",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "MILTANK",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TAUROS",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "MAGIKARP",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "MAGIKARP",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GYARADOS",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "DRATINI",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "DRATINI",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "DRAGONAIR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "CRUSTLE",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 75,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "CRUSTLE",
+          "form": 0,
+          "weight": 35,
+          "requirements": []
+        },
+        {
+          "species": "BARBARACLE",
+          "form": 0,
+          "weight": 16.25,
+          "requirements": []
+        },
+        {
+          "species": "WORMADAM",
+          "form": 0,
+          "weight": 16.25,
+          "requirements": []
+        },
+        {
+          "species": "CLAWITZER",
+          "form": 0,
+          "weight": 16.25,
+          "requirements": []
+        },
+        {
+          "species": "CRAWDAUNT",
+          "form": 0,
+          "weight": 16.25,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "LURANTIS",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "CASTFORM",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TRUMBEAK",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        },
+        {
+          "species": "KECLEON",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "COMFEY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "KOMMOO",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "SCIZOR",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "HAKAMOO",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        },
+        {
+          "species": "NOIVERN",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "RIBOMBEE",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "BLISSEY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "PELIPPER",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "MIMIKYU",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 100,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "HAUNTER",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GENGAR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        },
+        {
+          "species": "BANETTE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "JELLICENT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ]
+    },
+    {
+      "species": "SCOVILLAIN",
+      "form": 0,
+      "callRate": 30,
+      "answerRate": 75,
+      "requirements": [],
+      "pool": [
+        {
+          "species": "SCOVILLAIN",
+          "form": 0,
+          "weight": 35,
+          "requirements": []
+        },
+        {
+          "species": "MAROWAK",
+          "form": 0,
+          "weight": 16.25,
+          "requirements": []
+        },
+        {
+          "species": "CENTISKORCH",
+          "form": 0,
+          "weight": 16.25,
+          "requirements": []
+        },
+        {
+          "species": "DUGTRIO",
+          "form": 0,
+          "weight": 16.25,
+          "requirements": []
+        },
+        {
+          "species": "DONPHAN",
+          "form": 0,
+          "weight": 16.25,
+          "requirements": []
+        }
+      ]
+    }
+  ]
+}

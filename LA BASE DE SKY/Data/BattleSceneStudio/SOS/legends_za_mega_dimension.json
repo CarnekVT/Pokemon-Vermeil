@@ -1,0 +1,2480 @@
+{
+  "format": "battle-scene-studio-sos-catalog",
+  "formatVersion": 3,
+  "id": "legends_za_mega_dimension",
+  "name": "Legends: Z-A · Mega Dimension",
+  "kind": "reference_templates",
+  "canonicalSOS": false,
+  "runtimeUsable": false,
+  "source": "Dataset maestro proporcionado por el usuario",
+  "sourceKind": "hyperspace_reference",
+  "description": "Mega Dimension: plantillas de Hyperspace priorizando familia, relaciones canónicas, Rogue Mega, Alpha/lore y rivalidad. No se presenta como SOS literal de Alola.",
+  "profiles": [],
+  "groups": [
+    {
+      "id": "hyperspace_family",
+      "name": "Familias / manadas fuertes",
+      "species": [
+        "AMOONGUSS",
+        "ANNIHILAPE",
+        "ARCTIBAX",
+        "ARMAROUGE",
+        "BAXCALIBUR",
+        "BLAZIKEN",
+        "CERULEDGE",
+        "CHIMECHO",
+        "COFAGRIGUS",
+        "COMBUSKEN",
+        "CORVIKNIGHT",
+        "CORVISQUIRE",
+        "CRABOMINABLE",
+        "CROBAT",
+        "DACHSBUN",
+        "GARGANACL",
+        "GHOLDENGO",
+        "GLIMMORA",
+        "GOLBAT",
+        "GOLISOPOD",
+        "GOLURK",
+        "GRAFAIAI",
+        "GRAPPLOCT",
+        "GROVYLE",
+        "GRUMPIG",
+        "HOUNDSTONE",
+        "JIGGLYPUFF",
+        "KLEAVOR",
+        "LIEPARD",
+        "MABOSSTIFF",
+        "MAROWAK",
+        "MARSHTOMP",
+        "MELMETAL",
+        "MILOTIC",
+        "MRMIME",
+        "MRRIME",
+        "MUSHARNA",
+        "NACLSTACK",
+        "OVERQWIL",
+        "PALOSSAND",
+        "PERRSERKER",
+        "PERSIAN",
+        "PORYGON2",
+        "PORYGONZ",
+        "PRIMEAPE",
+        "RUNERIGUS",
+        "SCEPTILE",
+        "SCOVILLAIN",
+        "SIRFETCHD",
+        "STARAPTOR",
+        "STARAVIA",
+        "SWALOT",
+        "SWAMPERT",
+        "THIEVUL",
+        "TINKATON",
+        "TINKATUFF",
+        "TOXTRICITY",
+        "WIGGLYTUFF"
+      ]
+    },
+    {
+      "id": "canon_relation",
+      "name": "Relaciones canónicas especiales",
+      "species": [
+        "DONDOZO",
+        "LATIAS",
+        "LATIOS",
+        "TATSUGIRI"
+      ]
+    },
+    {
+      "id": "rogue_mega",
+      "name": "Rogue Mega / Mega packs",
+      "species": [
+        "ABSOL",
+        "BAXCALIBUR",
+        "CHIMECHO",
+        "CRABOMINABLE",
+        "DARKRAI",
+        "GARCHOMP",
+        "GLIMMORA",
+        "GOLISOPOD",
+        "GOLURK",
+        "HEATRAN",
+        "LUCARIO",
+        "MAGEARNA",
+        "MEOWSTIC",
+        "RAICHU",
+        "SCOVILLAIN",
+        "STARAPTOR",
+        "TATSUGIRI",
+        "ZERAORA"
+      ]
+    },
+    {
+      "id": "rival_not_ally",
+      "name": "Rivales / refuerzo hostil",
+      "species": [
+        "SEVIPER",
+        "ZANGOOSE"
+      ]
+    },
+    {
+      "id": "lore_group",
+      "name": "Grupos de lore",
+      "species": [
+        "COBALION",
+        "KELDEO",
+        "TERRAKION",
+        "VIRIZION"
+      ]
+    }
+  ],
+  "examples": [
+    {
+      "id": "md_annihilape_primeape_mankey",
+      "name": "Mega Dimension · Annihilape → Primeape / Mankey",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "ANNIHILAPE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "PRIMEAPE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MANKEY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_primeape_mankey",
+      "name": "Mega Dimension · Primeape → Mankey",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "PRIMEAPE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MANKEY",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_persian_meowth",
+      "name": "Mega Dimension · Persian → Meowth",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "PERSIAN",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MEOWTH",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_perrserker_galarian_meowth",
+      "name": "Mega Dimension · Perrserker → Galarian Meowth",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "PERRSERKER",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MEOWTH",
+          "form": 0,
+          "weight": 100,
+          "requirements": [],
+          "formTag": "galar"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_sirfetch_d_galarian_farfetch_d",
+      "name": "Mega Dimension · Sirfetch'd → Galarian Farfetch'd",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "SIRFETCHD",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "FARFETCHD",
+          "form": 0,
+          "weight": 100,
+          "requirements": [],
+          "formTag": "galar"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_marowak_cubone",
+      "name": "Mega Dimension · Marowak → Cubone",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "MAROWAK",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CUBONE",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_porygon_z_porygon2_porygon",
+      "name": "Mega Dimension · Porygon-Z → Porygon2 / Porygon",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "PORYGONZ",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "PORYGON2",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "PORYGON",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_porygon2_porygon",
+      "name": "Mega Dimension · Porygon2 → Porygon",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "PORYGON2",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "PORYGON",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_scovillain_capsakid",
+      "name": "Mega Dimension · Scovillain → Capsakid",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "SCOVILLAIN",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CAPSAKID",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_tinkaton_tinkatuff_tinkatink",
+      "name": "Mega Dimension · Tinkaton → Tinkatuff / Tinkatink",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "TINKATON",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "TINKATUFF",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TINKATINK",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_tinkatuff_tinkatink",
+      "name": "Mega Dimension · Tinkatuff → Tinkatink",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "TINKATUFF",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "TINKATINK",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_glimmora_glimmet",
+      "name": "Mega Dimension · Glimmora → Glimmet",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GLIMMORA",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GLIMMET",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_houndstone_greavard",
+      "name": "Mega Dimension · Houndstone → Greavard",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "HOUNDSTONE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GREAVARD",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_palossand_sandygast",
+      "name": "Mega Dimension · Palossand → Sandygast",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "PALOSSAND",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "SANDYGAST",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_baxcalibur_arctibax_frigibax",
+      "name": "Mega Dimension · Baxcalibur → Arctibax / Frigibax",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "BAXCALIBUR",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "ARCTIBAX",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "FRIGIBAX",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_arctibax_frigibax",
+      "name": "Mega Dimension · Arctibax → Frigibax",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "ARCTIBAX",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "FRIGIBAX",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_gholdengo_gimmighoul",
+      "name": "Mega Dimension · Gholdengo → Gimmighoul",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GHOLDENGO",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GIMMIGHOUL",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_overqwil_hisuian_qwilfish",
+      "name": "Mega Dimension · Overqwil → Hisuian Qwilfish",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "OVERQWIL",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "QWILFISH",
+          "form": 0,
+          "weight": 100,
+          "requirements": [],
+          "formTag": "hisui"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_sceptile_grovyle_treecko",
+      "name": "Mega Dimension · Sceptile → Grovyle / Treecko",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "SCEPTILE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GROVYLE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TREECKO",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_grovyle_treecko",
+      "name": "Mega Dimension · Grovyle → Treecko",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GROVYLE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "TREECKO",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_blaziken_combusken_torchic",
+      "name": "Mega Dimension · Blaziken → Combusken / Torchic",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "BLAZIKEN",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "COMBUSKEN",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TORCHIC",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_combusken_torchic",
+      "name": "Mega Dimension · Combusken → Torchic",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "COMBUSKEN",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "TORCHIC",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_swampert_marshtomp_mudkip",
+      "name": "Mega Dimension · Swampert → Marshtomp / Mudkip",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "SWAMPERT",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MARSHTOMP",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MUDKIP",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_marshtomp_mudkip",
+      "name": "Mega Dimension · Marshtomp → Mudkip",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "MARSHTOMP",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MUDKIP",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_milotic_feebas",
+      "name": "Mega Dimension · Milotic → Feebas",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "MILOTIC",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "FEEBAS",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_chimecho_chingling",
+      "name": "Mega Dimension · Chimecho → Chingling",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "CHIMECHO",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CHINGLING",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_liepard_purrloin",
+      "name": "Mega Dimension · Liepard → Purrloin",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "LIEPARD",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "PURRLOIN",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_musharna_munna",
+      "name": "Mega Dimension · Musharna → Munna",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "MUSHARNA",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MUNNA",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_cofagrigus_unovan_yamask",
+      "name": "Mega Dimension · Cofagrigus → Unovan Yamask",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "COFAGRIGUS",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "YAMASK",
+          "form": 0,
+          "weight": 100,
+          "requirements": [],
+          "formTag": "unova"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_runerigus_galarian_yamask",
+      "name": "Mega Dimension · Runerigus → Galarian Yamask",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "RUNERIGUS",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "YAMASK",
+          "form": 0,
+          "weight": 100,
+          "requirements": [],
+          "formTag": "galar"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_golisopod_wimpod",
+      "name": "Mega Dimension · Golisopod → Wimpod",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GOLISOPOD",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "WIMPOD",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_thievul_nickit",
+      "name": "Mega Dimension · Thievul → Nickit",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "THIEVUL",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "NICKIT",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_grapploct_clobbopus",
+      "name": "Mega Dimension · Grapploct → Clobbopus",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GRAPPLOCT",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CLOBBOPUS",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_kleavor_scyther",
+      "name": "Mega Dimension · Kleavor → Scyther",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "KLEAVOR",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "SCYTHER",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_golurk_golett",
+      "name": "Mega Dimension · Golurk → Golett",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GOLURK",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GOLETT",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_corviknight_corvisquire_rookidee",
+      "name": "Mega Dimension · Corviknight → Corvisquire / Rookidee",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "CORVIKNIGHT",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CORVISQUIRE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "ROOKIDEE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_corvisquire_rookidee",
+      "name": "Mega Dimension · Corvisquire → Rookidee",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "CORVISQUIRE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "ROOKIDEE",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_wigglytuff_jigglypuff_igglybuff",
+      "name": "Mega Dimension · Wigglytuff → Jigglypuff / Igglybuff",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "WIGGLYTUFF",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "JIGGLYPUFF",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "IGGLYBUFF",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_jigglypuff_igglybuff",
+      "name": "Mega Dimension · Jigglypuff → Igglybuff",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "JIGGLYPUFF",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "IGGLYBUFF",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_dachsbun_fidough",
+      "name": "Mega Dimension · Dachsbun → Fidough",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "DACHSBUN",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "FIDOUGH",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_staraptor_staravia_starly",
+      "name": "Mega Dimension · Staraptor → Staravia / Starly",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "STARAPTOR",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "STARAVIA",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "STARLY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_staravia_starly",
+      "name": "Mega Dimension · Staravia → Starly",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "STARAVIA",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "STARLY",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_grumpig_spoink",
+      "name": "Mega Dimension · Grumpig → Spoink",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GRUMPIG",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "SPOINK",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_crabominable_crabrawler",
+      "name": "Mega Dimension · Crabominable → Crabrawler",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "CRABOMINABLE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CRABRAWLER",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_garganacl_naclstack_nacli",
+      "name": "Mega Dimension · Garganacl → Naclstack / Nacli",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GARGANACL",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "NACLSTACK",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "NACLI",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_naclstack_nacli",
+      "name": "Mega Dimension · Naclstack → Nacli",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "NACLSTACK",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "NACLI",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_swalot_gulpin",
+      "name": "Mega Dimension · Swalot → Gulpin",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "SWALOT",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GULPIN",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_crobat_golbat_zubat",
+      "name": "Mega Dimension · Crobat → Golbat / Zubat",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "CROBAT",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GOLBAT",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "ZUBAT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_golbat_zubat",
+      "name": "Mega Dimension · Golbat → Zubat",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GOLBAT",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "ZUBAT",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_armarouge_charcadet",
+      "name": "Mega Dimension · Armarouge → Charcadet",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "ARMAROUGE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CHARCADET",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_ceruledge_charcadet",
+      "name": "Mega Dimension · Ceruledge → Charcadet",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "CERULEDGE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CHARCADET",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_mabosstiff_maschiff",
+      "name": "Mega Dimension · Mabosstiff → Maschiff",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "MABOSSTIFF",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MASCHIFF",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_toxtricity_toxel",
+      "name": "Mega Dimension · Toxtricity → Toxel",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "TOXTRICITY",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "TOXEL",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_grafaiai_shroodle",
+      "name": "Mega Dimension · Grafaiai → Shroodle",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "GRAFAIAI",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "SHROODLE",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_mr_mime_mime_jr",
+      "name": "Mega Dimension · Mr. Mime → Mime Jr.",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "MRMIME",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MIMEJR",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_mr_rime_galarian_mr_mime_mime_jr",
+      "name": "Mega Dimension · Mr. Rime → Galarian Mr. Mime / Mime Jr.",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "MRRIME",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MRMIME",
+          "form": 0,
+          "weight": 70,
+          "requirements": [],
+          "formTag": "galar"
+        },
+        {
+          "species": "MIMEJR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_amoonguss_foongus",
+      "name": "Mega Dimension · Amoonguss → Foongus",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "AMOONGUSS",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "FOONGUS",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_melmetal_meltan",
+      "name": "Mega Dimension · Melmetal → Meltan",
+      "sourceGroup": "hyperspace_family",
+      "caller": {
+        "species": "MELMETAL",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MELTAN",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "HYPERSPACE_FAMILY",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "md_dondozo_tatsugiri",
+      "name": "Mega Dimension · Dondozo → Tatsugiri",
+      "sourceGroup": "canon_relation",
+      "caller": {
+        "species": "DONDOZO",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "TATSUGIRI",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "CANON_RELATION",
+      "conditions": {},
+      "note": "Relación canónica especial; no son familia evolutiva."
+    },
+    {
+      "id": "md_tatsugiri_dondozo",
+      "name": "Mega Dimension · Tatsugiri → Dondozo",
+      "sourceGroup": "canon_relation",
+      "caller": {
+        "species": "TATSUGIRI",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "DONDOZO",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "CANON_RELATION",
+      "conditions": {},
+      "note": "Relación canónica especial; no son familia evolutiva."
+    },
+    {
+      "id": "md_latias_latios",
+      "name": "Mega Dimension · Latias → Latios",
+      "sourceGroup": "canon_relation",
+      "caller": {
+        "species": "LATIAS",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "LATIOS",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "CANON_DUO",
+      "conditions": {},
+      "note": "Dúo canónico para encuentros personalizados."
+    },
+    {
+      "id": "md_latios_latias",
+      "name": "Mega Dimension · Latios → Latias",
+      "sourceGroup": "canon_relation",
+      "caller": {
+        "species": "LATIOS",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "LATIAS",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "CANON_DUO",
+      "conditions": {},
+      "note": "Dúo canónico para encuentros personalizados."
+    },
+    {
+      "id": "md_zangoose_seviper_rival",
+      "name": "Mega Dimension · Zangoose → Seviper (rival)",
+      "sourceGroup": "rival_not_ally",
+      "caller": {
+        "species": "ZANGOOSE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "SEVIPER",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "RIVAL_NOT_ALLY",
+      "conditions": {},
+      "note": "Refuerzo hostil: puede atacar al caller."
+    },
+    {
+      "id": "md_seviper_zangoose_rival",
+      "name": "Mega Dimension · Seviper → Zangoose (rival)",
+      "sourceGroup": "rival_not_ally",
+      "caller": {
+        "species": "SEVIPER",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "ZANGOOSE",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "RIVAL_NOT_ALLY",
+      "conditions": {},
+      "note": "Refuerzo hostil: puede atacar al caller."
+    },
+    {
+      "id": "md_mega_raichu_x_pikachu_pichu",
+      "name": "Mega Dimension · Mega Raichu X → Pikachu / Pichu",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "RAICHU",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "PIKACHU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "PICHU",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_raichu_y_pikachu_pichu",
+      "name": "Mega Dimension · Mega Raichu Y → Pikachu / Pichu",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "RAICHU",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "PIKACHU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "PICHU",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_chimecho_chingling",
+      "name": "Mega Dimension · Mega Chimecho → Chingling",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "CHIMECHO",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CHINGLING",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_absol_z_absol",
+      "name": "Mega Dimension · Mega Absol Z → Absol",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "ABSOL",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "ABSOL",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_staraptor_staravia_starly",
+      "name": "Mega Dimension · Mega Staraptor → Staravia / Starly",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "STARAPTOR",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "STARAVIA",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "STARLY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_garchomp_z_gabite_gible",
+      "name": "Mega Dimension · Mega Garchomp Z → Gabite / Gible",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "GARCHOMP",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GABITE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GIBLE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_lucario_z_riolu",
+      "name": "Mega Dimension · Mega Lucario Z → Riolu",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "LUCARIO",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "RIOLU",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_heatran_heatran",
+      "name": "Mega Dimension · Mega Heatran → Heatran",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "HEATRAN",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "HEATRAN",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_darkrai_darkrai",
+      "name": "Mega Dimension · Mega Darkrai → Darkrai",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "DARKRAI",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "DARKRAI",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_golurk_golett",
+      "name": "Mega Dimension · Mega Golurk → Golett",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "GOLURK",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GOLETT",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_meowstic_espurr",
+      "name": "Mega Dimension · Mega Meowstic → Espurr",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "MEOWSTIC",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "ESPURR",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_crabominable_crabrawler",
+      "name": "Mega Dimension · Mega Crabominable → Crabrawler",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "CRABOMINABLE",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CRABRAWLER",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_golisopod_wimpod",
+      "name": "Mega Dimension · Mega Golisopod → Wimpod",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "GOLISOPOD",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "WIMPOD",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_magearna_magearna",
+      "name": "Mega Dimension · Mega Magearna → Magearna",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "MAGEARNA",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "MAGEARNA",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_zeraora_zeraora",
+      "name": "Mega Dimension · Mega Zeraora → Zeraora",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "ZERAORA",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "ZERAORA",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_scovillain_capsakid",
+      "name": "Mega Dimension · Mega Scovillain → Capsakid",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "SCOVILLAIN",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "CAPSAKID",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_glimmora_glimmet",
+      "name": "Mega Dimension · Mega Glimmora → Glimmet",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "GLIMMORA",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "GLIMMET",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_tatsugiri_dondozo",
+      "name": "Mega Dimension · Mega Tatsugiri → Dondozo",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "TATSUGIRI",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "DONDOZO",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_mega_baxcalibur_arctibax_frigibax",
+      "name": "Mega Dimension · Mega Baxcalibur → Arctibax / Frigibax",
+      "sourceGroup": "rogue_mega",
+      "caller": {
+        "species": "BAXCALIBUR",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "ARCTIBAX",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "FRIGIBAX",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "ROGUE_MEGA_SAFE_PACK",
+      "conditions": {},
+      "note": "Composición personalizada coherente; no implica una invocación literal del boss original."
+    },
+    {
+      "id": "md_swords_of_justice_cobalion",
+      "name": "Mega Dimension · Swords of Justice · COBALION",
+      "sourceGroup": "lore_group",
+      "caller": {
+        "species": "COBALION",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "TERRAKION",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "VIRIZION",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "KELDEO",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "LORE_GROUP",
+      "conditions": {},
+      "note": "Lore-safe para encuentro custom; no afirma spawn simultáneo en Unknown Area."
+    },
+    {
+      "id": "md_swords_of_justice_terrakion",
+      "name": "Mega Dimension · Swords of Justice · TERRAKION",
+      "sourceGroup": "lore_group",
+      "caller": {
+        "species": "TERRAKION",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "COBALION",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "VIRIZION",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "KELDEO",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "LORE_GROUP",
+      "conditions": {},
+      "note": "Lore-safe para encuentro custom; no afirma spawn simultáneo en Unknown Area."
+    },
+    {
+      "id": "md_swords_of_justice_virizion",
+      "name": "Mega Dimension · Swords of Justice · VIRIZION",
+      "sourceGroup": "lore_group",
+      "caller": {
+        "species": "VIRIZION",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "COBALION",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TERRAKION",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "KELDEO",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "LORE_GROUP",
+      "conditions": {},
+      "note": "Lore-safe para encuentro custom; no afirma spawn simultáneo en Unknown Area."
+    },
+    {
+      "id": "md_swords_of_justice_keldeo",
+      "name": "Mega Dimension · Swords of Justice · KELDEO",
+      "sourceGroup": "lore_group",
+      "caller": {
+        "species": "KELDEO",
+        "form": 0,
+        "level": 140
+      },
+      "pool": [
+        {
+          "species": "COBALION",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TERRAKION",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "VIRIZION",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 80,
+      "initialCall": true,
+      "canonLevel": "CANON_SAFE",
+      "relationType": "LORE_GROUP",
+      "conditions": {},
+      "note": "Lore-safe para encuentro custom; no afirma spawn simultáneo en Unknown Area."
+    }
+  ],
+  "canonPolicy": {
+    "priority": [
+      "SAME_SPECIES",
+      "HYPERSPACE_FAMILY",
+      "CANON_RELATION",
+      "HYPERSPACE_CLUSTER",
+      "HYPERSPACE_COHABITATION"
+    ],
+    "neverInventOutsideContext": true
+  }
+}

@@ -1,0 +1,318 @@
+{
+  "format": "battle-scene-studio",
+  "formatVersion": 27,
+  "editorVersion": "0.6.12",
+  "groups": [
+    {
+      "id": "wild_main",
+      "name": "Salvajes normales",
+      "system": true
+    }
+  ],
+  "blueprints": [
+    {
+      "id": "battle_wild_encounter",
+      "key": "wild_encounter",
+      "name": "Wild Encounter",
+      "enabled": true,
+      "groupId": "wild_main",
+      "category": "",
+      "setup": {
+        "kind": "wild",
+        "formation": "1v1",
+        "trainer": {
+          "type": "ACE_TRAINER_M",
+          "name": "Trainer",
+          "version": 0
+        },
+        "canLose": true
+      },
+      "teams": {
+        "foes": [
+          {
+            "species": "PIKACHU",
+            "level": 50,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "moves": [],
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ],
+        "testPlayer": [
+          {
+            "species": "EEVEE",
+            "level": 55,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "moves": [],
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ]
+      },
+      "environment": {
+        "battleback": "",
+        "bgm": ""
+      },
+      "sos": {
+        "enabled": false,
+        "automaticCalls": true,
+        "initialCall": false,
+        "callRound": 1,
+        "callRate": null,
+        "answerRate": null,
+        "pool": [],
+        "primary": "",
+        "secondary": ""
+      },
+      "layout": {
+        "battlers": {}
+      },
+      "notes": "",
+      "updatedAt": 1787892108630
+    },
+    {
+      "id": "battle_sos_bagon",
+      "key": "sos_bagon",
+      "name": "SOS Bagon",
+      "enabled": true,
+      "groupId": "wild_main",
+      "category": "",
+      "setup": {
+        "kind": "wild",
+        "formation": "1v1",
+        "trainer": {
+          "type": "ACE_TRAINER_M",
+          "name": "Trainer",
+          "version": 0
+        },
+        "canLose": true
+      },
+      "teams": {
+        "foes": [
+          {
+            "species": "BAGON",
+            "level": 35,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "moves": [],
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ],
+        "testPlayer": [
+          {
+            "species": "EEVEE",
+            "level": 55,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "moves": [],
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ]
+      },
+      "environment": {
+        "battleback": "",
+        "bgm": ""
+      },
+      "sos": {
+        "enabled": true,
+        "automaticCalls": true,
+        "initialCall": true,
+        "callRound": 1,
+        "callRate": 100,
+        "answerRate": null,
+        "pool": [
+          {
+            "species": "BAGON",
+            "form": 0,
+            "weight": 100,
+            "requirements": []
+          },
+          {
+            "species": "SALAMENCE",
+            "form": 0,
+            "weight": 100,
+            "requirements": []
+          }
+        ],
+        "primary": "BAGON",
+        "secondary": "SALAMENCE"
+      },
+      "layout": {
+        "battlers": {}
+      },
+      "notes": "",
+      "updatedAt": 1787883769442
+    },
+    {
+      "id": "battle_mtcbup7i_7",
+      "key": "pok_rogue_abyss_plantilla_de_refuerzos",
+      "name": "PokéRogue · Abyss · plantilla de refuerzos",
+      "enabled": true,
+      "groupId": "wild_main",
+      "category": "Ejemplo SOS",
+      "setup": {
+        "kind": "wild",
+        "formation": "1v1",
+        "trainer": {
+          "type": "ACE_TRAINER_M",
+          "name": "Trainer",
+          "version": 0
+        },
+        "canLose": true
+      },
+      "teams": {
+        "foes": [
+          {
+            "species": "GASTLY",
+            "level": 30,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "moves": [],
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ],
+        "testPlayer": [
+          {
+            "species": "EEVEE",
+            "level": 55,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "moves": [],
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ]
+      },
+      "environment": {
+        "battleback": "",
+        "bgm": ""
+      },
+      "sos": {
+        "enabled": true,
+        "automaticCalls": false,
+        "initialCall": true,
+        "callRound": 1,
+        "callRate": 30,
+        "answerRate": 75,
+        "pool": [
+          {
+            "species": "GASTLY",
+            "form": 0,
+            "weight": 50,
+            "requirements": []
+          },
+          {
+            "species": "HAUNTER",
+            "form": 0,
+            "weight": 25,
+            "requirements": []
+          },
+          {
+            "species": "ZUBAT",
+            "form": 0,
+            "weight": 15,
+            "requirements": []
+          },
+          {
+            "species": "SABLEYE",
+            "form": 0,
+            "weight": 10,
+            "requirements": []
+          }
+        ],
+        "primary": "",
+        "secondary": ""
+      },
+      "layout": {
+        "battlers": {}
+      },
+      "notes": "",
+      "updatedAt": 1787883824903
+    },
+    {
+      "id": "battle_mtcfoz45_a",
+      "key": "test_sos",
+      "name": "TSOST",
+      "enabled": true,
+      "groupId": "wild_main",
+      "category": "",
+      "setup": {
+        "kind": "wild",
+        "formation": "1v1",
+        "trainer": {
+          "type": "ACE_TRAINER_M",
+          "name": "Trainer",
+          "version": 0
+        },
+        "canLose": true
+      },
+      "teams": {
+        "foes": [
+          {
+            "species": "ROWLET",
+            "level": 50,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "moves": [],
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ],
+        "testPlayer": [
+          {
+            "species": "EEVEE",
+            "level": 55,
+            "form": 0,
+            "item": "",
+            "ability": "",
+            "moves": [],
+            "shiny": false,
+            "hpPercent": 100
+          }
+        ]
+      },
+      "environment": {
+        "battleback": "",
+        "bgm": ""
+      },
+      "sos": {
+        "enabled": true,
+        "automaticCalls": true,
+        "initialCall": true,
+        "callRound": 1,
+        "callRate": 100,
+        "answerRate": 100,
+        "pool": [
+          {
+            "species": "DARMANITAN",
+            "form": 1,
+            "weight": 100,
+            "requirements": []
+          }
+        ],
+        "primary": "",
+        "secondary": ""
+      },
+      "layout": {
+        "battlers": {}
+      },
+      "notes": "",
+      "updatedAt": 1787892918922
+    }
+  ],
+  "global": {
+    "mainGroupId": "wild_main"
+  }
+}
