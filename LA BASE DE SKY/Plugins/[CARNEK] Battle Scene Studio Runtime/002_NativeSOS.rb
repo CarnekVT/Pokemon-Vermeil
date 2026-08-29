@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio 0.6.37 - Native SOS (Phase 1)
+# Battle Scene Studio 0.6.40 - Native SOS (Phase 1)
 # BSS-owned SOS. Runtime assignments come only from sos_global.json.
 # Dynamic battler creation follows the v21/DBK SOS lifecycle supplied by the
 # user. Growth slots are created by the project's real pbCreateBattler constructor
@@ -24,7 +24,7 @@ end
 
 #===============================================================================
 # Dynamic battlers are intentionally NOT monkey-patched here.
-# BSS 0.6.37 follows the same creation/replacement lifecycle as the supplied
+# BSS 0.6.40 follows the same creation/replacement lifecycle as the supplied
 # SOS source: pbCreateBattler for new slots and pbInitialize only for an already
 # constructed fainted slot. This avoids entering the project's Battler initializer
 # with a hand-built/partially seeded object.
@@ -32,7 +32,7 @@ end
 
 #===============================================================================
 # Bundled BAS SOS Call animation
-# Uses the CarnekVT-authored SOS Call animpack supplied with v0.6.37 whenever
+# Uses the CarnekVT-authored SOS Call animpack supplied with v0.6.40 whenever
 # Battle Animation Studio Runtime is present. The animation is injected into the
 # BAS in-memory custom catalog only; the user's compiled_animations.json is never
 # edited. Without BAS, the native Growl fallback remains untouched.
@@ -1025,7 +1025,15 @@ class Battle
     if show_intro
       pbDisplay(bss_sos_message("call","¡{1} pidió ayuda!",caller.pbThis))
       begin
+        # The public BAS custom-animation path does not necessarily pass through
+        # Scene#pbAnimation. Snapshot the caller here so SOS Call itself can never
+        # leak a temporary Front/Back bitmap scale into the live Totem.
+        sos_scale_snapshot=@scene.bss_boss_animation_scale_snapshot if @scene.respond_to?(:bss_boss_animation_scale_snapshot)
         played_bas=BSS064.play_bas_sos_call(@scene,caller)
+        @scene.bss_restore_boss_animation_scale(sos_scale_snapshot) if sos_scale_snapshot && @scene.respond_to?(:bss_restore_boss_animation_scale)
+        # Side/render adapters can still refresh immediately after BAS returns;
+        # reassert the canonical Totem footprint as a second guard.
+        @scene.bss_reassert_boss_visual_scale(caller,true) if @scene.respond_to?(:bss_reassert_boss_visual_scale)
         @scene.pbAnimation(:GROWL, caller, caller.pbDirectOpposing(true)) if !played_bas
       rescue
         begin; @scene.pbAnimation(:GROWL, caller, caller.pbDirectOpposing(true)); rescue; end
@@ -1053,6 +1061,9 @@ class Battle
             else
               @scene.pbRefresh if @scene.respond_to?(:pbRefresh)
             end
+            # SOS side-size changes refresh battler renderers in LBDS/DBK. Reapply
+            # the caller/Totem's captured on-screen dimensions after that refresh.
+            @scene.bss_reassert_boss_visual_scale(caller,true) if @scene.respond_to?(:bss_reassert_boss_visual_scale)
             pbDisplay(bss_sos_message("success","¡Apareció {1}!",battler.name,caller.pbThis))
             begin
               @scene.pbAnimateSubstitute(caller,:show) if show_intro && @scene.respond_to?(:pbAnimateSubstitute)
@@ -1069,6 +1080,7 @@ class Battle
               @choices[idx] = [:None, 0, nil, -1] if @choices.is_a?(Array) && idx < @choices.length
             end
             @scene.bss_sync_sos_side_size_state(idx) if @scene.respond_to?(:bss_sync_sos_side_size_state)
+            @scene.bss_reassert_boss_visual_scale(caller,true) if @scene.respond_to?(:bss_reassert_boss_visual_scale)
             pbSetSeen(battler)
             @scene.bss_sync_enhanced_ui_icons if @scene.respond_to?(:bss_sync_enhanced_ui_icons)
             @bss_last_turn_called=@turnCount

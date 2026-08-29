@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio Runtime 0.6.37
+# Battle Scene Studio Runtime 0.6.40
 # Source-first rebuild for Pokemon Essentials v21.1.
 # JSON parser architecture is the same minimal, dependency-free reader shipped
 # by the supplied Battle Animation Studio runtime.
@@ -132,9 +132,10 @@ module BSSMiniJSON
 end
 
 module BSS064
-  VERSION = "0.6.37"
-  FORMAT_VERSION = 42
+  VERSION = "0.6.42"
+  FORMAT_VERSION = 47
   DATA_FILE = "Data/BattleSceneStudio/battles.json"
+  RECOVERY_DATA_FILE = "Data/BattleSceneStudio/battles.recovery.json"
   SOS_GLOBAL_FILE = "Data/BattleSceneStudio/sos_global.json"
   SOS_CATALOG_DIR = "Data/BattleSceneStudio/SOS"
   CONTROL_FILE = "Data/BattleSceneStudio/runtime_control.json"
@@ -150,7 +151,7 @@ module BSS064
     attr_accessor :running, :last_control_token
 
     def log(message)
-      PBDebug.log("[BSS 0.6.37] #{message}") if defined?(PBDebug)
+      PBDebug.log("[BSS 0.6.40] #{message}") if defined?(PBDebug)
     rescue
     end
 
@@ -198,7 +199,17 @@ module BSS064
 
     def data
       return @cache if @cache
-      @cache=read_json_file(DATA_FILE,{"blueprints"=>[],"global"=>{}})
+      fallback={"blueprints"=>[],"global"=>{}}
+      main=read_json_file(DATA_FILE,fallback)
+      recovery=File.exist?(RECOVERY_DATA_FILE) ? read_json_file(RECOVERY_DATA_FILE,fallback) : nil
+      main_at=(main.is_a?(Hash) ? main["_bssSavedAt"].to_i : 0)
+      recovery_at=(recovery.is_a?(Hash) ? recovery["_bssSavedAt"].to_i : 0)
+      if recovery && recovery_at>main_at
+        log("Using battles.recovery.json because battles.json is older/locked")
+        @cache=recovery
+      else
+        @cache=main
+      end
     end
 
     def find(key)

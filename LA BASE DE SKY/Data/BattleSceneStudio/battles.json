@@ -1,7 +1,7 @@
 {
   "format": "battle-scene-studio",
-  "formatVersion": 45,
-  "editorVersion": "0.6.37",
+  "formatVersion": 47,
+  "editorVersion": "0.6.43",
   "groups": [
     {
       "id": "wild_main",
@@ -26,7 +26,9 @@
           "version": 0,
           "defeatMessage": ""
         },
-        "canLose": true
+        "canLose": true,
+        "victoryMessage": "",
+        "victoryCelebration": true
       },
       "teams": {
         "foes": [
@@ -96,7 +98,11 @@
       },
       "environment": {
         "battleback": "",
-        "bgm": ""
+        "bgm": "",
+        "backgroundGraphic": "",
+        "victoryBgm": "",
+        "basesMode": "inherit",
+        "defeatBgm": ""
       },
       "boss": {
         "enabled": false,
@@ -147,6 +153,8 @@
             "Graphics/BattleSceneStudio/Auras/TotemCharged004.png"
           ],
           "graphicFrameFrames": 6,
+          "graphicTransitionFrames": 2,
+          "parallelLayers": [],
           "depthMode": "alternate",
           "blendMode": "normal",
           "introDuration": 104,
@@ -158,6 +166,13 @@
           "outlineColor": "#DD445B",
           "outlineOpacity": 46,
           "outlineSize": 2,
+          "outlineEffect": "standard",
+          "outlineCopies": 6,
+          "outlineCopySpacing": 100,
+          "roaringStrength": 100,
+          "roaringSpeed": 100,
+          "pulseStrength": 100,
+          "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
           "basZoomBounds": "screen"
@@ -211,7 +226,9 @@
           "version": 0,
           "defeatMessage": ""
         },
-        "canLose": true
+        "canLose": true,
+        "victoryMessage": "",
+        "victoryCelebration": true
       },
       "teams": {
         "foes": [
@@ -281,7 +298,11 @@
       },
       "environment": {
         "battleback": "",
-        "bgm": ""
+        "bgm": "",
+        "backgroundGraphic": "",
+        "victoryBgm": "",
+        "basesMode": "inherit",
+        "defeatBgm": ""
       },
       "boss": {
         "enabled": false,
@@ -332,6 +353,8 @@
             "Graphics/BattleSceneStudio/Auras/TotemCharged004.png"
           ],
           "graphicFrameFrames": 6,
+          "graphicTransitionFrames": 2,
+          "parallelLayers": [],
           "depthMode": "alternate",
           "blendMode": "normal",
           "introDuration": 104,
@@ -343,6 +366,13 @@
           "outlineColor": "#DD445B",
           "outlineOpacity": 46,
           "outlineSize": 2,
+          "outlineEffect": "standard",
+          "outlineCopies": 6,
+          "outlineCopySpacing": 100,
+          "roaringStrength": 100,
+          "roaringSpeed": 100,
+          "pulseStrength": 100,
+          "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
           "basZoomBounds": "screen"
@@ -461,7 +491,9 @@
           "version": 0,
           "defeatMessage": ""
         },
-        "canLose": true
+        "canLose": true,
+        "victoryMessage": "",
+        "victoryCelebration": true
       },
       "teams": {
         "foes": [
@@ -531,7 +563,11 @@
       },
       "environment": {
         "battleback": "",
-        "bgm": ""
+        "bgm": "",
+        "backgroundGraphic": "",
+        "victoryBgm": "",
+        "basesMode": "inherit",
+        "defeatBgm": ""
       },
       "boss": {
         "enabled": false,
@@ -582,6 +618,8 @@
             "Graphics/BattleSceneStudio/Auras/TotemCharged004.png"
           ],
           "graphicFrameFrames": 6,
+          "graphicTransitionFrames": 2,
+          "parallelLayers": [],
           "depthMode": "alternate",
           "blendMode": "normal",
           "introDuration": 104,
@@ -593,6 +631,13 @@
           "outlineColor": "#DD445B",
           "outlineOpacity": 46,
           "outlineSize": 2,
+          "outlineEffect": "standard",
+          "outlineCopies": 6,
+          "outlineCopySpacing": 100,
+          "roaringStrength": 100,
+          "roaringSpeed": 100,
+          "pulseStrength": 100,
+          "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
           "basZoomBounds": "screen"
@@ -775,7 +820,9 @@
           "version": 0,
           "defeatMessage": ""
         },
-        "canLose": true
+        "canLose": true,
+        "victoryMessage": "",
+        "victoryCelebration": true
       },
       "teams": {
         "foes": [
@@ -845,7 +892,11 @@
       },
       "environment": {
         "battleback": "",
-        "bgm": ""
+        "bgm": "",
+        "backgroundGraphic": "",
+        "victoryBgm": "",
+        "basesMode": "inherit",
+        "defeatBgm": ""
       },
       "boss": {
         "enabled": false,
@@ -896,6 +947,8 @@
             "Graphics/BattleSceneStudio/Auras/TotemCharged004.png"
           ],
           "graphicFrameFrames": 6,
+          "graphicTransitionFrames": 2,
+          "parallelLayers": [],
           "depthMode": "alternate",
           "blendMode": "normal",
           "introDuration": 104,
@@ -907,6 +960,13 @@
           "outlineColor": "#DD445B",
           "outlineOpacity": 46,
           "outlineSize": 2,
+          "outlineEffect": "standard",
+          "outlineCopies": 6,
+          "outlineCopySpacing": 100,
+          "roaringStrength": 100,
+          "roaringSpeed": 100,
+          "pulseStrength": 100,
+          "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
           "basZoomBounds": "screen"
@@ -1057,7 +1117,9 @@
           "version": 0,
           "defeatMessage": "Ni con la ayuda de un Pokémon Salvaje pude hacerte frente..."
         },
-        "canLose": true
+        "canLose": true,
+        "victoryMessage": "",
+        "victoryCelebration": true
       },
       "teams": {
         "foes": [
@@ -1127,7 +1189,11 @@
       },
       "environment": {
         "battleback": "",
-        "bgm": ""
+        "bgm": "",
+        "backgroundGraphic": "",
+        "victoryBgm": "",
+        "basesMode": "inherit",
+        "defeatBgm": ""
       },
       "boss": {
         "enabled": false,
@@ -1178,6 +1244,8 @@
             "Graphics/BattleSceneStudio/Auras/TotemCharged004.png"
           ],
           "graphicFrameFrames": 6,
+          "graphicTransitionFrames": 2,
+          "parallelLayers": [],
           "depthMode": "alternate",
           "blendMode": "normal",
           "introDuration": 104,
@@ -1189,6 +1257,13 @@
           "outlineColor": "#DD445B",
           "outlineOpacity": 46,
           "outlineSize": 2,
+          "outlineEffect": "standard",
+          "outlineCopies": 6,
+          "outlineCopySpacing": 100,
+          "roaringStrength": 100,
+          "roaringSpeed": 100,
+          "pulseStrength": 100,
+          "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
           "basZoomBounds": "screen"
@@ -1275,7 +1350,9 @@
           "version": 0,
           "defeatMessage": ""
         },
-        "canLose": true
+        "canLose": true,
+        "victoryMessage": "¡Has derrotado al {1} Dominante!",
+        "victoryCelebration": true
       },
       "teams": {
         "foes": [
@@ -1350,7 +1427,11 @@
       },
       "environment": {
         "battleback": "",
-        "bgm": "Battle Scene Studio/Raid (Ultra) battle v1"
+        "bgm": "Battle Scene Studio/Raid (Ultra) battle v1",
+        "backgroundGraphic": "",
+        "victoryBgm": "Battle Scene Studio/Raid (Ultra) adventure",
+        "basesMode": "inherit",
+        "defeatBgm": ""
       },
       "boss": {
         "enabled": true,
@@ -1373,7 +1454,7 @@
           "introEnabled": true,
           "profileId": "aura_mtdo80t2",
           "color": "#FFB042",
-          "particleCount": 8,
+          "particleCount": 9,
           "riseSpeed": 80,
           "cycleFrames": 30,
           "riseHeight": 120,
@@ -1398,6 +1479,80 @@
             "Graphics/BattleSceneStudio/Auras/TotemCharged001.png"
           ],
           "graphicFrameFrames": 4,
+          "graphicTransitionFrames": 4,
+          "parallelLayers": [
+            {
+              "id": "layer_1",
+              "name": "Capa paralela 1",
+              "enabled": true,
+              "graphicMode": "sequence",
+              "particleGraphic": "Graphics/BattleSceneStudio/Auras/TotemCharged001.png",
+              "particleGraphics": [
+                "Graphics/BattleSceneStudio/Auras/TotemCharged001.png",
+                "Graphics/BattleSceneStudio/Auras/TotemCharged002.png",
+                "Graphics/BattleSceneStudio/Auras/TotemCharged003.png",
+                "Graphics/BattleSceneStudio/Auras/TotemCharged004.png"
+              ],
+              "graphicFrameFrames": 1,
+              "graphicTransitionFrames": 15,
+              "opacity": 100,
+              "opacityStart": 0,
+              "opacityMid": 100,
+              "opacityEnd": 0,
+              "particleCount": 4,
+              "scale": 100,
+              "riseSpeed": 135,
+              "cycleFrames": 50,
+              "riseHeight": 100,
+              "spreadX": 100,
+              "spreadY": 80,
+              "laneWidth": 100,
+              "swayAmount": 100,
+              "stretchStart": 62,
+              "stretchEnd": 132,
+              "spawnMode": "async",
+              "asyncAmount": 100,
+              "phaseOffset": 23,
+              "offsetX": 0,
+              "offsetY": 0,
+              "depthMode": "alternate",
+              "blendMode": "additive"
+            },
+            {
+              "id": "layer_2",
+              "name": "Capa paralela 2",
+              "enabled": true,
+              "graphicMode": "single",
+              "particleGraphic": "Graphics/Battle animations/ballBurst_diamond.png",
+              "particleGraphics": [
+                "Graphics/BattleSceneStudio/Auras/TotemCharged001.png"
+              ],
+              "graphicFrameFrames": 6,
+              "graphicTransitionFrames": 2,
+              "opacity": 100,
+              "opacityStart": 0,
+              "opacityMid": 100,
+              "opacityEnd": 0,
+              "particleCount": 4,
+              "scale": 20,
+              "riseSpeed": 135,
+              "cycleFrames": 30,
+              "riseHeight": 100,
+              "spreadX": 100,
+              "spreadY": 80,
+              "laneWidth": 100,
+              "swayAmount": 100,
+              "stretchStart": 62,
+              "stretchEnd": 132,
+              "spawnMode": "async",
+              "asyncAmount": 200,
+              "phaseOffset": 46,
+              "offsetX": 0,
+              "offsetY": 0,
+              "depthMode": "alternate",
+              "blendMode": "additive"
+            }
+          ],
           "depthMode": "alternate",
           "blendMode": "additive",
           "introDuration": 104,
@@ -1407,8 +1562,15 @@
           "introReturnFrames": 24,
           "outlineEnabled": true,
           "outlineColor": "#FEF9D7",
-          "outlineOpacity": 46,
-          "outlineSize": 2,
+          "outlineOpacity": 30,
+          "outlineSize": 3,
+          "outlineEffect": "roaring_knight",
+          "outlineCopies": 3,
+          "outlineCopySpacing": 100,
+          "roaringStrength": 100,
+          "roaringSpeed": 100,
+          "pulseStrength": 200,
+          "pulseSpeed": 200,
           "basZoomEnabled": true,
           "basZoom": 150,
           "basZoomBounds": "screen"
@@ -1523,7 +1685,7 @@
             "moves": [
               "SUPERFANG",
               "QUICKATTACK",
-              "WIDEGUARD",
+              "PROTECT",
               "TAILWHIP"
             ],
             "ivs": {
@@ -1556,11 +1718,12 @@
         "battlers": {}
       },
       "notes": "",
-      "updatedAt": 1787973339062
+      "updatedAt": 1787981876007
     }
   ],
   "global": {
     "mainGroupId": "wild_main",
+    "battleBasesEnabled": false,
     "auraProfiles": [
       {
         "id": "ebdx_default",
@@ -1599,6 +1762,8 @@
             "Graphics/BattleSceneStudio/Auras/TotemCharged004.png"
           ],
           "graphicFrameFrames": 6,
+          "graphicTransitionFrames": 2,
+          "parallelLayers": [],
           "depthMode": "alternate",
           "blendMode": "normal",
           "introDuration": 104,
@@ -1610,6 +1775,13 @@
           "outlineColor": "#DD445B",
           "outlineOpacity": 46,
           "outlineSize": 2,
+          "outlineEffect": "standard",
+          "outlineCopies": 6,
+          "outlineCopySpacing": 100,
+          "roaringStrength": 100,
+          "roaringSpeed": 100,
+          "pulseStrength": 100,
+          "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
           "basZoomBounds": "screen"
@@ -1624,7 +1796,7 @@
           "introEnabled": true,
           "profileId": "ebdx_default",
           "color": "#FFB042",
-          "particleCount": 8,
+          "particleCount": 9,
           "riseSpeed": 80,
           "cycleFrames": 30,
           "riseHeight": 120,
@@ -1649,6 +1821,80 @@
             "Graphics/BattleSceneStudio/Auras/TotemCharged001.png"
           ],
           "graphicFrameFrames": 4,
+          "graphicTransitionFrames": 4,
+          "parallelLayers": [
+            {
+              "id": "layer_1",
+              "name": "Capa paralela 1",
+              "enabled": true,
+              "graphicMode": "sequence",
+              "particleGraphic": "Graphics/BattleSceneStudio/Auras/TotemCharged001.png",
+              "particleGraphics": [
+                "Graphics/BattleSceneStudio/Auras/TotemCharged001.png",
+                "Graphics/BattleSceneStudio/Auras/TotemCharged002.png",
+                "Graphics/BattleSceneStudio/Auras/TotemCharged003.png",
+                "Graphics/BattleSceneStudio/Auras/TotemCharged004.png"
+              ],
+              "graphicFrameFrames": 1,
+              "graphicTransitionFrames": 15,
+              "opacity": 100,
+              "opacityStart": 0,
+              "opacityMid": 100,
+              "opacityEnd": 0,
+              "particleCount": 4,
+              "scale": 100,
+              "riseSpeed": 135,
+              "cycleFrames": 50,
+              "riseHeight": 100,
+              "spreadX": 100,
+              "spreadY": 80,
+              "laneWidth": 100,
+              "swayAmount": 100,
+              "stretchStart": 62,
+              "stretchEnd": 132,
+              "spawnMode": "async",
+              "asyncAmount": 100,
+              "phaseOffset": 23,
+              "offsetX": 0,
+              "offsetY": 0,
+              "depthMode": "alternate",
+              "blendMode": "additive"
+            },
+            {
+              "id": "layer_2",
+              "name": "Capa paralela 2",
+              "enabled": true,
+              "graphicMode": "single",
+              "particleGraphic": "Graphics/Battle animations/ballBurst_diamond.png",
+              "particleGraphics": [
+                "Graphics/BattleSceneStudio/Auras/TotemCharged001.png"
+              ],
+              "graphicFrameFrames": 6,
+              "graphicTransitionFrames": 2,
+              "opacity": 100,
+              "opacityStart": 0,
+              "opacityMid": 100,
+              "opacityEnd": 0,
+              "particleCount": 4,
+              "scale": 20,
+              "riseSpeed": 135,
+              "cycleFrames": 30,
+              "riseHeight": 100,
+              "spreadX": 100,
+              "spreadY": 80,
+              "laneWidth": 100,
+              "swayAmount": 100,
+              "stretchStart": 62,
+              "stretchEnd": 132,
+              "spawnMode": "async",
+              "asyncAmount": 200,
+              "phaseOffset": 46,
+              "offsetX": 0,
+              "offsetY": 0,
+              "depthMode": "alternate",
+              "blendMode": "additive"
+            }
+          ],
           "depthMode": "alternate",
           "blendMode": "additive",
           "introDuration": 104,
@@ -1658,13 +1904,21 @@
           "introReturnFrames": 24,
           "outlineEnabled": true,
           "outlineColor": "#FEF9D7",
-          "outlineOpacity": 46,
-          "outlineSize": 2,
+          "outlineOpacity": 30,
+          "outlineSize": 3,
+          "outlineEffect": "roaring_knight",
+          "outlineCopies": 3,
+          "outlineCopySpacing": 100,
+          "roaringStrength": 100,
+          "roaringSpeed": 100,
+          "pulseStrength": 200,
+          "pulseSpeed": 200,
           "basZoomEnabled": true,
           "basZoom": 150,
           "basZoomBounds": "screen"
         }
       }
     ]
-  }
+  },
+  "_bssSavedAt": 1787981877042
 }

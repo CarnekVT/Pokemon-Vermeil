@@ -1,9 +1,215 @@
 #===============================================================================
-# Battle Scene Studio 0.6.37 - Phase 1 launcher
+# Battle Scene Studio 0.6.42 - Phase 1 launcher
 # Normal battles + BSS-native SOS only.
 #===============================================================================
+
+# Per-battle scene extensions. They are prepended to the scene singleton only
+# for BSS battles, so ordinary Essentials/DBK battles are untouched.
+module BSS064SceneEnvironmentCompat
+  def pbCreateBackdropSprites(*args,&block)
+    result=super
+    cfg=(@battle.respond_to?(:bss_environment_config) ? @battle.bss_environment_config : nil) rescue nil
+    cfg={} if !cfg.is_a?(Hash)
+    custom=cfg["backgroundGraphic"].to_s.strip.tr("\\","/")
+    if !custom.empty? && custom =~ /\AGraphics\/.+\.(?:png|gif|jpg|jpeg|webp|bmp)\z/i
+      begin
+        bg=@sprites["battle_bg"]
+        bg.setBitmap(custom) if bg && bg.respond_to?(:setBitmap)
+        bg2=@sprites["battle_bg2"]
+        bg2.setBitmap(custom) if bg2 && bg2.respond_to?(:setBitmap)
+      rescue => e
+        BSS064.log("Custom battle background warning: #{e.class}: #{e.message}")
+      end
+    end
+    show_bases=true
+    mode=cfg["basesMode"].to_s
+    if mode=="off"
+      show_bases=false
+    elsif mode=="on"
+      show_bases=true
+    else
+      begin
+        global=BSS064.data["global"]
+        show_bases=(global.is_a?(Hash) ? global["battleBasesEnabled"]!=false : true)
+      rescue
+        show_bases=true
+      end
+    end
+    if !show_bases
+      ["base_0","base_1"].each do |key|
+        sp=@sprites[key] rescue nil
+        next if !sp
+        sp.visible=false if sp.respond_to?(:visible=)
+        sp.opacity=0 if sp.respond_to?(:opacity=)
+      end
+    end
+    result
+  end
+
+  def bss_victory_subject_name
+    battle=@battle
+    return "Pokémon" if !battle
+    if battle.respond_to?(:bss_boss_enabled?) && battle.bss_boss_enabled?
+      return battle.bss_boss_name_for_intro.to_s if battle.respond_to?(:bss_boss_name_for_intro)
+    end
+    begin
+      party=battle.pbParty(1)
+      pkmn=party && party[0]
+      return pkmn.name.to_s if pkmn
+    rescue
+    end
+    "Pokémon"
+  end
+
+  def bss_custom_victory_bgm_name
+    battle=@battle
+    env=(battle && battle.respond_to?(:bss_environment_config)) ? battle.bss_environment_config : nil
+    env={} if !env.is_a?(Hash)
+    name=env["victoryBgm"].to_s.strip.tr("\\","/")
+    name=name.sub(%r{\A(?:Audio/)?BGM/}i,"")
+    name=name.sub(/\.(?:ogg|mp3|wav|mid|midi|flac|opus|m4a)\z/i,"")
+    name
+  rescue
+    ""
+  end
+
+  def bss_play_custom_victory_bgm
+    name=bss_custom_victory_bgm_name
+    return false if name.empty?
+    pbBGMPlay(name)
+    true
+  rescue => e
+    BSS064.log("Custom victory BGM warning: #{e.class}: #{e.message}")
+    false
+  end
+
+  def bss_play_player_victory_celebration
+    battle=@battle
+    return if !battle
+    battler=nil
+    begin
+      rows=battle.battlers
+      battler=rows.compact.find { |b| (b.index.to_i.even? rescue false) && !(b.fainted? rescue true) } if rows.respond_to?(:compact)
+    rescue
+      battler=nil
+    end
+    return if !battler
+    idx=(battler.index rescue 0).to_i
+    sp=@sprites["pokemon_#{idx}"] rescue nil
+    pkmn=(battler.visiblePokemon rescue nil) if battler.respond_to?(:visiblePokemon)
+    pkmn ||= (battler.pokemon rescue nil) if battler.respond_to?(:pokemon)
+    begin
+      if pkmn && defined?(GameData::Species) && GameData::Species.respond_to?(:play_cry_from_pokemon)
+        GameData::Species.play_cry_from_pokemon(pkmn)
+      elsif pkmn && pkmn.respond_to?(:play_cry)
+        pkmn.play_cry
+      end
+    rescue
+    end
+    return if !sp || (sp.disposed? rescue true)
+    base_y=(sp.y rescue 0).to_f
+    started=BSS064.respond_to?(:monotonic_seconds) ? BSS064.monotonic_seconds : Time.now.to_f
+    duration=0.56
+    loop do
+      now=BSS064.respond_to?(:monotonic_seconds) ? BSS064.monotonic_seconds : Time.now.to_f
+      elapsed=now-started
+      break if elapsed>=duration
+      phase=elapsed/duration
+      # Two small celebratory hops, always clocked in real/unscaled time.
+      hop=(Math.sin(phase*Math::PI*4.0)).abs
+      sp.y=base_y-(hop*10.0)
+      pbUpdate
+    end
+  rescue => e
+    BSS064.log("Victory celebration warning: #{e.class}: #{e.message}")
+  ensure
+    begin;sp.y=base_y if sp && !(sp.disposed? rescue true) && !base_y.nil?;rescue;end
+  end
+
+  def bss_custom_victory_sequence
+    return if @bss_custom_victory_done
+    battle=@battle
+    setup=(battle.respond_to?(:bss_setup_config) ? battle.bss_setup_config : nil) rescue nil
+    setup={} if !setup.is_a?(Hash)
+    msg=setup["victoryMessage"].to_s
+    celebrate=setup["victoryCelebration"]!=false
+    return if msg.empty? && !celebrate
+    @bss_custom_victory_done=true
+    bss_play_player_victory_celebration if celebrate
+    if !msg.empty? && battle && battle.respond_to?(:pbDisplayPaused)
+      battle.pbDisplayPaused(msg.gsub("{1}",bss_victory_subject_name))
+    end
+  rescue => e
+    BSS064.log("Custom victory sequence warning: #{e.class}: #{e.message}")
+  end
+
+  def pbWildBattleSuccess(*args,&block)
+    result=super
+    bss_play_custom_victory_bgm
+    bss_custom_victory_sequence
+    result
+  end
+
+  def pbTrainerBattleSuccess(*args,&block)
+    result=super
+    bss_play_custom_victory_bgm
+    bss_custom_victory_sequence
+    result
+  end
+end
+
+module BSS064BattleVictoryBGMCompat
+  # The editor normally stores a path relative to Audio/BGM without extension,
+  # but older BSS builds/manual entries may contain Audio/BGM/... or the file
+  # extension. Essentials' pbBGMPlay expects the relative logical BGM name.
+  def bss_result_bgm_name(value)
+    name=value.to_s.strip.tr("\\","/")
+    name=name.sub(%r{\A(?:Audio/)?BGM/}i,"")
+    name=name.sub(/\.(?:ogg|mp3|wav|mid|midi|flac|opus|m4a)\z/i,"")
+    name
+  rescue
+    value.to_s.strip
+  end
+
+  def pbEndOfBattle(*args,&block)
+    begin
+      env=respond_to?(:bss_environment_config) ? bss_environment_config : nil
+      env={} if !env.is_a?(Hash)
+      if @decision==Battle::Outcome::WIN
+        name=bss_result_bgm_name(env["victoryBgm"])
+        if !name.empty? && defined?($PokemonGlobal) && $PokemonGlobal
+          $PokemonGlobal.nextBattleVictoryBGM=pbStringToAudioFile(name)
+        end
+      elsif @decision==Battle::Outcome::LOSE || @decision==Battle::Outcome::DRAW
+        # Essentials has no native "next defeat BGM" equivalent. Start the BSS
+        # track before the base loss flow so it plays under the loss message and
+        # is then faded normally by Scene#pbEndBattle.
+        name=bss_result_bgm_name(env["defeatBgm"])
+        pbBGMPlay(name) if !name.empty?
+      end
+    rescue => e
+      BSS064.log("Battle result BGM warning: #{e.class}: #{e.message}")
+    end
+    super
+  end
+end
+class Battle
+  attr_accessor :bss_blueprint unless method_defined?(:bss_blueprint)
+  attr_accessor :bss_environment_config unless method_defined?(:bss_environment_config)
+  attr_accessor :bss_setup_config unless method_defined?(:bss_setup_config)
+end
+
 module BSS064
   class << self
+    def normalize_bgm_name(value)
+      name=value.to_s.strip.tr("\\","/")
+      name=name.sub(%r{\A(?:Audio/)?BGM/}i,"")
+      name=name.sub(/\.(?:ogg|mp3|wav|mid|midi|flac|opus|m4a)\z/i,"")
+      name
+    rescue
+      value.to_s.strip
+    end
+
     def build_pokemon(raw)
       return nil if !raw.is_a?(Hash) || !defined?(Pokemon)
       species=raw["species"].to_s.upcase
@@ -45,6 +251,28 @@ module BSS064
       tr
     rescue => e
       log("Trainer build failed: #{e.class}: #{e.message}"); nil
+    end
+
+    def configure_bss_scene_environment(battle,bp)
+      return false if !battle
+      env=hget(bp,"environment");env={} if !env.is_a?(Hash)
+      setup=hget(bp,"setup");setup={} if !setup.is_a?(Hash)
+      battle.bss_blueprint=bp if battle.respond_to?(:bss_blueprint=)
+      battle.bss_environment_config=env if battle.respond_to?(:bss_environment_config=)
+      battle.bss_setup_config=setup if battle.respond_to?(:bss_setup_config=)
+      custom_back=env["battleback"].to_s.strip
+      battle.backdrop=custom_back if !custom_back.empty? && battle.respond_to?(:backdrop=)
+      scene=battle.instance_variable_get(:@scene) rescue nil
+      if scene
+        singleton=class << scene; self; end
+        singleton.prepend(BSS064SceneEnvironmentCompat) if !singleton.ancestors.include?(BSS064SceneEnvironmentCompat)
+      end
+      battle_singleton=class << battle; self; end
+      battle_singleton.prepend(BSS064BattleVictoryBGMCompat) if !battle_singleton.ancestors.include?(BSS064BattleVictoryBGMCompat)
+      true
+    rescue => e
+      log("Scene/environment configure failed: #{e.class}: #{e.message}")
+      false
     end
 
     def formation(bp,player_party,foe_party,sos_enabled=false)
@@ -176,29 +404,47 @@ module BSS064
       return false if @running
       return false if defined?($game_temp) && $game_temp && ($game_temp.in_battle rescue false)
       return false if Time.now.to_f-req["armedAt"].to_f<0.20
-      # Require a stable overworld after Reset. F12 can rebuild scripts before
-      # Scene_Map/$game_map are ready, so count several healthy map frames instead
-      # of launching the battle during reconstruction.
-      return false if defined?($game_temp) && !$game_temp
-      return false if defined?($game_map) && !$game_map
+      # F12 rebuilds scripts before every gameplay singleton is ready. Do not
+      # consume the marker until the overworld/player/party are all stable.
+      return false if !defined?($game_temp) || !$game_temp
+      return false if !defined?($game_map) || !$game_map
+      return false if !defined?($game_player) || !$game_player
+      return false if !defined?($player) || !$player
+      party=($player.party rescue nil)
+      return false if !party || party.empty?
       if defined?(Scene_Map) && defined?($scene) && $scene && !$scene.is_a?(Scene_Map)
+        req["readyFrames"]=0
         return false
       end
       req["readyFrames"]=req["readyFrames"].to_i+1
-      return false if req["readyFrames"].to_i<12
+      return false if req["readyFrames"].to_i<20
       key=req["key"].to_s
+      write_status("f12_resuming",{"key"=>key,"message"=>"Reiniciando Test game tras F12…"})
+      # Keep runtime_active_battle.json alive while starting the replacement
+      # battle. If the map is still transient and launch fails, retry instead of
+      # deleting the only information needed to recover the BSS test.
+      result=run_blueprint(key,true)
+      if result==false
+        req["readyFrames"]=0
+        req["armedAt"]=Time.now.to_f
+        @pending_f12_resume=req
+        @f12_resume_armed=true
+        return false
+      end
       @pending_f12_resume=nil
       @f12_resume_armed=false
-      clear_active_battle
-      write_status("f12_resuming",{"key"=>key,"message"=>"Reiniciando Test game tras F12…"})
-      run_blueprint(key,true)
       true
     rescue => e
       log("F12 auto-resume failed: #{e.class}: #{e.message}")
-      @pending_f12_resume=nil
-      @f12_resume_armed=false
-      clear_active_battle
-      write_status("error",{"message"=>"F12 resume: #{e.class}: #{e.message}"})
+      # Preserve marker and retry from a clean settled frame instead of
+      # silently turning BSS off after Reset.
+      if req.is_a?(Hash)
+        req["readyFrames"]=0
+        req["armedAt"]=Time.now.to_f
+        @pending_f12_resume=req
+        @f12_resume_armed=true
+      end
+      write_status("f12_resuming",{"key"=>(req&&req["key"]).to_s,"message"=>"F12: esperando runtime estable · #{e.class}"}) rescue nil
       false
     end
 
@@ -255,6 +501,7 @@ module BSS064
       battle.party1starts=[0] if battle.respond_to?(:party1starts=); battle.party2starts=[0] if battle.respond_to?(:party2starts=)
       battle.ally_items=[] if battle.respond_to?(:ally_items=); battle.items=foe_trainer ? [foe_trainer.items] : [] if battle.respond_to?(:items=)
       BattleCreationHelperMethods.prepare_battle(battle)
+      configure_bss_scene_environment(battle,bp)
       configure_native_sos(battle,bp)
       configure_native_boss(battle,bp) if respond_to?(:configure_native_boss)
       battle.canLose=(hget(bp,"setup","canLose")!=false) if battle.respond_to?(:canLose=)
@@ -263,7 +510,15 @@ module BSS064
       # Only an explicit editor Test game session gets an F12 resume marker.
       # Event-command battles (pbBSSBattle) and ordinary gameplay never do.
       write_status("running",{"key"=>bp["key"],"name"=>bp["name"],"formation"=>mode,"sos"=>sos_enabled,"boss"=>(hget(bp,"boss","enabled")==true)})
-      bgm_name=hget(bp,"environment","bgm").to_s.strip
+      bgm_name=normalize_bgm_name(hget(bp,"environment","bgm"))
+      victory_bgm_name=normalize_bgm_name(hget(bp,"environment","victoryBgm"))
+      if !victory_bgm_name.empty? && defined?($PokemonGlobal) && $PokemonGlobal
+        begin
+          $PokemonGlobal.nextBattleVictoryBGM=pbStringToAudioFile(victory_bgm_name)
+        rescue => e
+          log("Victory BGM pre-arm warning: #{e.class}: #{e.message}")
+        end
+      end
       bgm=if !bgm_name.empty? then bgm_name elsif foe_trainer then pbGetTrainerBattleBGM([foe_trainer]) else pbGetWildBattleBGM(foe_party) end
       anim_type=foe_trainer ? (battle.singleBattle? ? 1 : 3) : (foe_party.length==1 ? 0 : 2)
       subject=foe_trainer ? [foe_trainer] : foe_party
@@ -322,19 +577,26 @@ module BSS064
       clear_cache rescue nil
       @running=false
       @last_control_token=nil
-      # Reset itself is not an error. If an editor-launched battle marker survived
-      # F12, arm exactly one runtime-owned resume. on_game_load can fire more than
-      # once during a reload, so keep the pending request rather than duplicating it.
       return true if @f12_resume_armed==true && @pending_f12_resume.is_a?(Hash)
       raw=active_battle_request rescue nil
-      if raw.is_a?(Hash) && schedule_active_battle_resume
-        @f12_resume_armed=true
-        return true
+      if raw.is_a?(Hash)
+        if schedule_active_battle_resume
+          @f12_resume_armed=true
+          return true
+        end
+        # Keep an explicit recent Reset marker through early initialization.
+        reset_at=raw["resetDetectedAt"].to_i
+        reset_age=reset_at>0 ? ((Time.now.to_f*1000).to_i-reset_at) : 999999
+        if raw["resumeAfterReset"]==true && reset_age>=0 && reset_age<=120000
+          @pending_f12_resume={"key"=>raw["key"].to_s,"token"=>raw["token"].to_s,"armedAt"=>Time.now.to_f,"readyFrames"=>0}
+          @f12_resume_armed=true
+          return true
+        end
+        clear_active_battle
       end
-      clear_active_battle if raw.is_a?(Hash)
       @pending_f12_resume=nil
       @f12_resume_armed=false
-      write_status("ready",{"message"=>"BSS 0.6.37 ready · runtime reloaded"})
+      write_status("ready",{"message"=>"BSS 0.6.40 ready · runtime reloaded"})
       true
     rescue => e
       log("Runtime ready bridge warning: #{e.class}: #{e.message}")
@@ -382,6 +644,12 @@ def pbBSSBattle(key)
 end
 
 if defined?(EventHandlers)
+  EventHandlers.add(:on_game_initialize,:bss_064_initialize,proc do
+    begin
+      BSS064.runtime_ready!
+    rescue
+    end
+  end)
   EventHandlers.add(:on_game_load,:bss_064_ready,proc do
     begin
       BSS064.runtime_ready!

@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio Runtime 0.6.37
+# Battle Scene Studio Runtime 0.6.40
 # BSS-native Boss/Totem layer.
 #
 # Totem aura goals:
@@ -164,6 +164,60 @@ module BSS064
       BOSS_AURA_FRAME_GRAPHICS.clone
     end
 
+    def aura_layer_config(raw, index=0)
+      raw={} if !raw.is_a?(Hash)
+      mode=raw["graphicMode"].to_s.downcase
+      mode="single" if !["single","sequence"].include?(mode)
+      spawn=raw["spawnMode"].to_s
+      spawn="async" if !["async","simultaneous"].include?(spawn)
+      depth=raw["depthMode"].to_s
+      depth="alternate" if !["alternate","front","back"].include?(depth)
+      seq=aura_graphic_paths(raw.merge("graphicMode"=>"sequence"))
+      {
+        "id"                    => (raw["id"].to_s.empty? ? "layer_#{index.to_i+1}" : raw["id"].to_s),
+        "name"                  => (raw["name"].to_s.empty? ? "Capa paralela #{index.to_i+1}" : raw["name"].to_s),
+        "enabled"               => raw["enabled"] != false,
+        "graphicMode"           => mode,
+        "particleGraphic"       => (raw["particleGraphic"].to_s.empty? ? (seq[0] || BOSS_AURA_FRAME_GRAPHICS[0]) : raw["particleGraphic"].to_s),
+        "particleGraphics"      => seq,
+        "graphicFrameFrames"    => clamp_float(raw["graphicFrameFrames"],1.0,60.0,6.0),
+        "graphicTransitionFrames"=> clamp_float(raw["graphicTransitionFrames"],0.0,30.0,2.0),
+        "opacity"               => clamp_float(raw["opacity"],0.0,100.0,100.0),
+        "opacityStart"          => clamp_float(raw["opacityStart"],0.0,100.0,0.0),
+        "opacityMid"            => clamp_float(raw["opacityMid"],0.0,100.0,100.0),
+        "opacityEnd"            => clamp_float(raw["opacityEnd"],0.0,100.0,0.0),
+        "particleCount"         => clamp_int(raw["particleCount"],4,24,12),
+        "scale"                 => clamp_float(raw["scale"],10.0,300.0,100.0),
+        "riseSpeed"             => clamp_float(raw["riseSpeed"],25.0,300.0,135.0),
+        "cycleFrames"           => clamp_float(raw["cycleFrames"],10.0,120.0,30.0),
+        "riseHeight"            => clamp_float(raw["riseHeight"],20.0,300.0,100.0),
+        "spreadX"               => clamp_float(raw["spreadX"],25.0,200.0,100.0),
+        "spreadY"               => clamp_float(raw["spreadY"],25.0,180.0,80.0),
+        "laneWidth"             => clamp_float(raw["laneWidth"],25.0,200.0,100.0),
+        "swayAmount"            => clamp_float(raw["swayAmount"],0.0,300.0,100.0),
+        "stretchStart"          => clamp_float(raw["stretchStart"],10.0,250.0,62.0),
+        "stretchEnd"            => clamp_float(raw["stretchEnd"],10.0,300.0,132.0),
+        "spawnMode"             => spawn,
+        "asyncAmount"           => clamp_float(raw["asyncAmount"],0.0,300.0,100.0),
+        "phaseOffset"           => clamp_float(raw["phaseOffset"],0.0,100.0,((index.to_i+1)*23)%100),
+        "offsetX"               => clamp_float(raw["offsetX"],-100.0,100.0,0.0),
+        "offsetY"               => clamp_float(raw["offsetY"],-100.0,100.0,0.0),
+        "depthMode"             => depth,
+        "blendMode"             => (["normal","additive"].include?(raw["blendMode"].to_s) ? raw["blendMode"].to_s : "additive")
+      }
+    rescue
+      {
+        "id"=>"layer_#{index.to_i+1}","name"=>"Capa paralela #{index.to_i+1}","enabled"=>true,
+        "graphicMode"=>"single","particleGraphic"=>BOSS_AURA_FRAME_GRAPHICS[0],
+        "particleGraphics"=>BOSS_AURA_FRAME_GRAPHICS.clone,"graphicFrameFrames"=>6.0,
+        "graphicTransitionFrames"=>2.0,"opacity"=>100.0,"opacityStart"=>0.0,"opacityMid"=>100.0,"opacityEnd"=>0.0,"particleCount"=>12,"scale"=>100.0,
+        "riseSpeed"=>135.0,"cycleFrames"=>30.0,"riseHeight"=>100.0,"spreadX"=>100.0,"spreadY"=>80.0,
+        "laneWidth"=>100.0,"swayAmount"=>100.0,"stretchStart"=>62.0,"stretchEnd"=>132.0,
+        "spawnMode"=>"async","asyncAmount"=>100.0,"phaseOffset"=>((index.to_i+1)*23)%100,
+        "offsetX"=>0.0,"offsetY"=>0.0,"depthMode"=>"alternate","blendMode"=>"additive"
+      }
+    end
+
     def boss_aura_config(boss_cfg)
       raw = boss_cfg.is_a?(Hash) && boss_cfg["aura"].is_a?(Hash) ? boss_cfg["aura"] : {}
       spawn_mode=raw["spawnMode"].to_s
@@ -197,6 +251,8 @@ module BSS064
         "particleGraphic"=> (raw["particleGraphic"].to_s.empty? ? BOSS_AURA_FRAME_GRAPHICS[0] : raw["particleGraphic"].to_s),
         "particleGraphics"=> aura_graphic_paths(raw.merge("graphicMode"=>"sequence")),
         "graphicFrameFrames"=> clamp_float(raw["graphicFrameFrames"], 1.0, 60.0, 6.0),
+        "graphicTransitionFrames"=> clamp_float(raw["graphicTransitionFrames"], 0.0, 30.0, 2.0),
+        "parallelLayers"  => (raw["parallelLayers"].is_a?(Array) ? raw["parallelLayers"][0,3].each_with_index.map { |layer,i| aura_layer_config(layer,i) } : []),
         "depthMode"      => (["alternate","front","back"].include?(raw["depthMode"].to_s) ? raw["depthMode"].to_s : "alternate"),
         "blendMode"      => (["normal","additive"].include?(raw["blendMode"].to_s) ? raw["blendMode"].to_s : "normal"),
         "introDuration"  => clamp_int(raw["introDuration"], 48, 180, 104),
@@ -207,6 +263,13 @@ module BSS064
         "outlineColor"   => (raw["outlineColor"].to_s.empty? ? (raw["color"].to_s.empty? ? "#DD445B" : raw["color"].to_s) : raw["outlineColor"].to_s),
         "outlineOpacity" => clamp_float(raw["outlineOpacity"], 0.0, 100.0, 46.0),
         "outlineSize"    => clamp_int(raw["outlineSize"], 1, 8, 2),
+        "outlineEffect"  => (["standard","roaring_knight","pulse"].include?(raw["outlineEffect"].to_s) ? raw["outlineEffect"].to_s : "standard"),
+        "outlineCopies"  => clamp_int(raw["outlineCopies"], 1, 12, 6),
+        "outlineCopySpacing"=> clamp_float(raw["outlineCopySpacing"], 25.0, 300.0, 100.0),
+        "roaringStrength"=> clamp_float(raw["roaringStrength"], 0.0, 250.0, 100.0),
+        "roaringSpeed"   => clamp_float(raw["roaringSpeed"], 10.0, 300.0, 100.0),
+        "pulseStrength"  => clamp_float(raw["pulseStrength"], 0.0, 250.0, 100.0),
+        "pulseSpeed"     => clamp_float(raw["pulseSpeed"], 10.0, 300.0, 100.0),
         "basZoomEnabled" => raw["basZoomEnabled"] != false,
         "basZoom"        => clamp_float(raw["basZoom"], 100.0, 220.0, 150.0),
         "basZoomBounds"  => (["screen","extended"].include?(raw["basZoomBounds"].to_s) ? raw["basZoomBounds"].to_s : "screen")
@@ -216,9 +279,10 @@ module BSS064
         "profileId"=>"ebdx_default", "enabled"=>true, "introEnabled"=>true, "introSpotlight"=>true, "color"=>"#DD445B",
         "particleCount"=>12, "riseSpeed"=>135.0, "cycleFrames"=>30.0, "riseHeight"=>100.0, "spreadX"=>100.0, "spreadY"=>80.0,
         "laneWidth"=>100.0, "swayAmount"=>100.0, "offsetX"=>0.0, "offsetY"=>0.0, "particleScale"=>100.0, "stretchStart"=>62.0, "stretchEnd"=>132.0,
-        "opacity"=>100.0, "opacityStart"=>0.0, "opacityMid"=>100.0, "opacityEnd"=>0.0, "spawnMode"=>"async", "asyncAmount"=>100.0, "graphicMode"=>"sequence", "particleGraphic"=>BOSS_AURA_FRAME_GRAPHICS[0], "particleGraphics"=>BOSS_AURA_FRAME_GRAPHICS.clone, "graphicFrameFrames"=>6.0, "depthMode"=>"alternate", "blendMode"=>"normal",
+        "opacity"=>100.0, "opacityStart"=>0.0, "opacityMid"=>100.0, "opacityEnd"=>0.0, "spawnMode"=>"async", "asyncAmount"=>100.0, "graphicMode"=>"sequence", "particleGraphic"=>BOSS_AURA_FRAME_GRAPHICS[0], "particleGraphics"=>BOSS_AURA_FRAME_GRAPHICS.clone, "graphicFrameFrames"=>6.0, "graphicTransitionFrames"=>2.0, "parallelLayers"=>[], "depthMode"=>"alternate", "blendMode"=>"normal",
         "introDuration"=>104, "impactHold"=>56, "introReturnFrames"=>24, "fadeOutFrames"=>18,
-        "outlineEnabled"=>true, "outlineColor"=>"#DD445B", "outlineOpacity"=>46.0, "outlineSize"=>2,
+        "outlineEnabled"=>true, "outlineColor"=>"#DD445B", "outlineOpacity"=>46.0, "outlineSize"=>2, "outlineEffect"=>"standard", "outlineCopies"=>6, "outlineCopySpacing"=>100.0,
+        "roaringStrength"=>100.0, "roaringSpeed"=>100.0, "pulseStrength"=>100.0, "pulseSpeed"=>100.0,
         "basZoomEnabled"=>true, "basZoom"=>150.0, "basZoomBounds"=>"screen"
       }
     end
@@ -263,10 +327,20 @@ module BSS064
     # every mkxp-z/LBDS setup (some projects render at 120 FPS while reporting
     # a lower logical rate), which made the passive aura race ahead.
     def monotonic_seconds
-      if Process.respond_to?(:clock_gettime) && defined?(Process::CLOCK_MONOTONIC)
-        return Process.clock_gettime(Process::CLOCK_MONOTONIC).to_f
+      # The user's base exposes System.unscaled_uptime specifically so Turbo
+      # can speed gameplay without shortening authored animation timing.
+      if defined?(System) && System.respond_to?(:unscaled_uptime)
+        value=(System.unscaled_uptime.to_f rescue nil)
+        return value if value && value>=0
       end
-      return System.uptime.to_f if defined?(System) && System.respond_to?(:uptime)
+      if Process.respond_to?(:clock_gettime) && defined?(Process::CLOCK_MONOTONIC)
+        value=(Process.clock_gettime(Process::CLOCK_MONOTONIC).to_f rescue nil)
+        return value if value && value>=0
+      end
+      if defined?(System) && System.respond_to?(:uptime)
+        value=(System.uptime.to_f rescue nil)
+        return value if value && value>=0
+      end
       fc=(Graphics.frame_count rescue 0).to_f
       fr=(Graphics.frame_rate rescue 40).to_f
       fr=40.0 if fr<=0
@@ -343,25 +417,23 @@ module BSS064
   # separate frame PNGs. No persistent Sprite ever receives the full strip.
   class BossAuraEmitter
     include BossAuraGeometry
-    FRAME_COUNT = 4
 
     def initialize(viewport, scene_sprites, cfg, key_prefix = "bss_totem_persistent")
-      @viewport = viewport
-      @scene_sprites = scene_sprites.is_a?(Hash) ? scene_sprites : nil
-      @cfg = cfg || {}
-      @key_prefix = key_prefix.to_s
-      # Persistent aura never loads the 4-cell strip. Each cell is shipped as
-      # its own 70x70 asset so no renderer/BAS wrapper can ever expose the full
-      # sheet outside the activation sequence.
-      paths=BSS064.aura_graphic_paths(@cfg);@frame_bitmaps = paths.map { |path| BSS064.new_bitmap(path) }.compact;@frame_bitmaps = BSS064::BOSS_AURA_FRAME_GRAPHICS.map { |path| BSS064.new_bitmap(path) }.compact if @frame_bitmaps.empty?
-      @particles = []
-      @frame = 0.0
-      @last_clock = nil
-      @disposed = false
-      @rgb = BSS064.aura_color_rgb(@cfg["color"])
-      @tone = aura_tone(@rgb)
-      count = BSS064.clamp_int(@cfg["particleCount"], 4, 24, 12)
-      count.times { |i| create_particle(i, count) }
+      @viewport=viewport
+      @scene_sprites=scene_sprites.is_a?(Hash) ? scene_sprites : nil
+      @cfg=cfg || {}
+      @key_prefix=key_prefix.to_s
+      @particles=[]
+      @frame=0.0
+      @last_clock=nil
+      @disposed=false
+      @rgb=BSS064.aura_color_rgb(@cfg["color"])
+      @tone=aura_tone(@rgb)
+      @layers=[]
+      build_layers
+      count=[BSS064.clamp_int(@cfg["particleCount"],4,24,12),*@layers.map { |layer| layer[:particle_count].to_i }].max
+      count=BSS064.clamp_int(count,4,24,12)
+      count.times { |i| create_particle(i,count) }
     end
 
     def disposed?; @disposed; end
@@ -375,44 +447,97 @@ module BSS064
       dt=now-@last_clock
       @last_clock=now
       return 0.0 if dt<=0
-      # Do not fast-forward the emitter after a blocking transition/menu stall.
       dt=0.05 if dt>0.05
       dt*40.0
     rescue
       0.0
     end
 
-    def frame_bitmap(index)
-      return nil if @frame_bitmaps.empty?
-      @frame_bitmaps[index.to_i % @frame_bitmaps.length]
+    def layer_from_raw(raw, primary=false, index=0)
+      raw={} if !raw.is_a?(Hash)
+      src=primary ? @cfg : raw
+      mode=src["graphicMode"].to_s.downcase
+      mode=(primary ? "sequence" : "single") if !["single","sequence"].include?(mode)
+      paths=BSS064.aura_graphic_paths(src.merge("graphicMode"=>mode))
+      paths=BSS064::BOSS_AURA_FRAME_GRAPHICS.clone if paths.empty?
+      bitmaps=paths.map { |path| BSS064.new_bitmap(path) }.compact
+      return nil if bitmaps.empty?
+      spawn=src["spawnMode"].to_s
+      spawn="async" if !["async","simultaneous"].include?(spawn)
+      depth=src["depthMode"].to_s
+      depth="alternate" if !["alternate","front","back"].include?(depth)
+      {
+        :primary=>primary,
+        :bitmaps=>bitmaps,
+        :hold=>BSS064.clamp_float(src["graphicFrameFrames"],1,60,6),
+        :transition=>BSS064.clamp_float(src["graphicTransitionFrames"],0,30,2),
+        :opacity=>BSS064.clamp_float(src["opacity"],0,100,100)/100.0,
+        :opacity_start=>BSS064.clamp_float(src["opacityStart"],0,100,0)/100.0,
+        :opacity_mid=>BSS064.clamp_float(src["opacityMid"],0,100,100)/100.0,
+        :opacity_end=>BSS064.clamp_float(src["opacityEnd"],0,100,0)/100.0,
+        :particle_count=>BSS064.clamp_int(src["particleCount"],4,24,12),
+        :scale=>(primary ? BSS064.clamp_float(src["particleScale"],25,250,100)/100.0 : BSS064.clamp_float(src["scale"],10,300,100)/100.0),
+        :rise_speed=>BSS064.clamp_float(src["riseSpeed"],25,300,135)/100.0,
+        :cycle_frames=>BSS064.clamp_float(src["cycleFrames"],10,120,30),
+        :rise_height=>BSS064.clamp_float(src["riseHeight"],20,300,100)/100.0,
+        :spread_x=>BSS064.clamp_float(src["spreadX"],25,200,100)/100.0,
+        :spread_y=>BSS064.clamp_float(src["spreadY"],25,180,80)/100.0,
+        :lane_width=>BSS064.clamp_float(src["laneWidth"],25,200,100)/100.0,
+        :sway_amount=>BSS064.clamp_float(src["swayAmount"],0,300,100)/100.0,
+        :stretch_start=>BSS064.clamp_float(src["stretchStart"],10,250,62)/100.0,
+        :stretch_end=>BSS064.clamp_float(src["stretchEnd"],10,300,132)/100.0,
+        :spawn_mode=>spawn,
+        :async_amount=>BSS064.clamp_float(src["asyncAmount"],0,300,100)/100.0,
+        :phase_offset=>(primary ? 0.0 : BSS064.clamp_float(src["phaseOffset"],0,100,((index+1)*23)%100)/100.0),
+        :offset_x=>BSS064.clamp_float(src["offsetX"],-100,100,0)/100.0,
+        :offset_y=>BSS064.clamp_float(src["offsetY"],-100,100,0)/100.0,
+        :depth=>depth,
+        :blend=>(src["blendMode"].to_s=="additive" ? 1 : 0),
+        :id=>(primary ? "main" : (src["id"].to_s.empty? ? "parallel_#{index+1}" : src["id"].to_s))
+      }
+    rescue => e
+      BSS064.log("Boss aura layer warning: #{e.class}: #{e.message}")
+      nil
     end
 
-    def create_particle(i, count)
-      sp = Sprite.new(@viewport)
-      bmp=frame_bitmap(0)
-      sp.bitmap = bmp if bmp
-      if bmp
-        sp.ox = bmp.width / 2
-        sp.oy = bmp.height
+    def build_layers
+      main=layer_from_raw(@cfg,true,0)
+      @layers << main if main
+      rows=@cfg["parallelLayers"].is_a?(Array) ? @cfg["parallelLayers"] : []
+      rows[0,3].each_with_index do |raw,i|
+        next if !raw.is_a?(Hash) || raw["enabled"]==false
+        layer=layer_from_raw(raw,false,i)
+        @layers << layer if layer
       end
-      sp.visible = false
-      sp.opacity = 0
-      sp.tone = @tone if sp.respond_to?(:tone=)
-      sp.blend_type = (@cfg["blendMode"].to_s == "additive" ? 1 : 0) if sp.respond_to?(:blend_type=)
-      key = "#{@key_prefix}_#{i}"
-      @scene_sprites[key] = sp if @scene_sprites
-      # Stable lanes instead of a new random point on every respawn. The four
-      # TotemCharged cells now play in order, so the passive aura reads as a
-      # coherent flame field hugging the battler rather than sparks scattered
-      # independently around it.
+    end
+
+    def create_layer_sprite(layer, i, suffix)
+      sp=Sprite.new(@viewport)
+      bmp=layer[:bitmaps][0]
+      if bmp
+        sp.bitmap=bmp
+        sp.ox=bmp.width/2
+        sp.oy=bmp.height
+      end
+      sp.visible=false;sp.opacity=0
+      sp.tone=@tone if sp.respond_to?(:tone=)
+      sp.blend_type=layer[:blend] if sp.respond_to?(:blend_type=)
+      key="#{@key_prefix}_#{layer[:id]}_#{i}_#{suffix}"
+      @scene_sprites[key]=sp if @scene_sprites
+      [sp,key]
+    end
+
+    def create_particle(i,count)
       denom=[count.to_i-1,1].max.to_f
       lane=i.to_f/denom
-      row=(i % 3)
-      @particles << {
-        :sprite=>sp, :key=>key, :lane=>lane, :row=>row,
-        :phase=>(@cfg["spawnMode"].to_s=="simultaneous" ? 0.0 : i.to_f*7.0*(BSS064.clamp_float(@cfg["asyncAmount"],0,300,100)/100.0)), :front=>(i % 2 == 0),
-        :frame_index=>0
-      }
+      layer_rows=@layers.map do |layer|
+        a=create_layer_sprite(layer,i,"a");b=create_layer_sprite(layer,i,"b")
+        # Every layer gets its own phase. Parallel async layers therefore do not
+        # spawn on the same frame merely because the main particle did.
+        particle_phase=(layer[:spawn_mode]=="simultaneous" ? 0.0 : i.to_f*7.0*layer[:async_amount])
+        {:layer=>layer,:a=>a[0],:a_key=>a[1],:b=>b[0],:b_key=>b[1],:phase=>particle_phase}
+      end
+      @particles << {:layers=>layer_rows,:lane=>lane,:row=>(i%3),:front=>(i%2==0)}
     rescue => e
       BSS064.log("Boss aura particle create warning: #{e.class}: #{e.message}")
     end
@@ -420,22 +545,20 @@ module BSS064
     def dispose
       return if @disposed
       @particles.each do |row|
-        sp = row[:sprite]
-        begin
-          @scene_sprites.delete(row[:key]) if @scene_sprites && @scene_sprites[row[:key]].equal?(sp)
-        rescue
-        end
-        begin
-          sp.dispose if sp && !sp.disposed?
-        rescue
+        row[:layers].each do |lr|
+          [[:a,:a_key],[:b,:b_key]].each do |spk,keyk|
+            sp=lr[spk];key=lr[keyk]
+            begin;@scene_sprites.delete(key) if @scene_sprites && @scene_sprites[key].equal?(sp);rescue;end
+            begin;sp.dispose if sp && !sp.disposed?;rescue;end
+          end
         end
       end
       @particles.clear
-      @frame_bitmaps.each do |bmp|
-        begin; bmp.dispose if bmp && !bmp.disposed?; rescue; end
+      @layers.each do |layer|
+        layer[:bitmaps].each { |bmp| begin;bmp.dispose if bmp && !bmp.disposed?;rescue;end }
+        layer[:bitmaps].clear
       end
-      @frame_bitmaps.clear
-      @disposed = true
+      @layers.clear;@disposed=true
     end
 
     def smoothstep01(x)
@@ -443,106 +566,120 @@ module BSS064
       x*x*(3.0-2.0*x)
     end
 
-    def opacity_curve(t)
-      start=BSS064.clamp_float(@cfg["opacityStart"],0,100,0)/100.0
-      mid=BSS064.clamp_float(@cfg["opacityMid"],0,100,100)/100.0
-      finish=BSS064.clamp_float(@cfg["opacityEnd"],0,100,0)/100.0
+    def layer_opacity_curve(layer,t)
+      start=layer[:opacity_start].to_f;mid=layer[:opacity_mid].to_f;finish=layer[:opacity_end].to_f
       if t.to_f<=0.5
-        q=smoothstep01(t.to_f*2.0)
-        start+(mid-start)*q
+        q=smoothstep01(t.to_f*2.0);start+(mid-start)*q
       else
-        q=smoothstep01((t.to_f-0.5)*2.0)
-        mid+(finish-mid)*q
+        q=smoothstep01((t.to_f-0.5)*2.0);mid+(finish-mid)*q
       end
     rescue
       1.0
     end
 
-    def update(target_sprite, battler, master_alpha=1.0, allow_fainted=false)
-      return if @disposed
-      state = target_state(target_sprite)
-      fainted=(battler.fainted? rescue false)
-      if !state || !battler || (fainted && !allow_fainted) || ((!state[:visible] || state[:opacity] <= 0) && !allow_fainted) || @frame_bitmaps.empty?
-        hide_all
-        return
-      end
-      step=logical_step
-      # A final fade still needs to render even if two update hooks hit the same
-      # monotonic instant. Geometry remains live; only particle phase waits.
-      @frame += step if step>0
-      speed = BSS064.clamp_float(@cfg["riseSpeed"],25,300,135) / 100.0
-      cycle_frames = BSS064.clamp_float(@cfg["cycleFrames"],10,120,30)
-      rise_height = BSS064.clamp_float(@cfg["riseHeight"],20,300,100) / 100.0
-      spread_x = BSS064.clamp_float(@cfg["spreadX"],25,200,100) / 100.0
-      spread_y = BSS064.clamp_float(@cfg["spreadY"],25,180,80) / 100.0
-      lane_width = BSS064.clamp_float(@cfg["laneWidth"],25,200,100) / 100.0
-      sway_amount = BSS064.clamp_float(@cfg["swayAmount"],0,300,100) / 100.0
-      offset_x = BSS064.clamp_float(@cfg["offsetX"],-100,100,0) / 100.0
-      offset_y = BSS064.clamp_float(@cfg["offsetY"],-100,100,0) / 100.0
-      scale_cfg = BSS064.clamp_float(@cfg["particleScale"],25,250,100) / 100.0
-      stretch_start = BSS064.clamp_float(@cfg["stretchStart"],10,250,62) / 100.0
-      stretch_end = BSS064.clamp_float(@cfg["stretchEnd"],10,300,132) / 100.0
-      opacity_cfg = BSS064.clamp_float(@cfg["opacity"],0,100,100) / 100.0
-      depth_mode = @cfg["depthMode"].to_s
-      depth_mode = "alternate" if !["alternate","front","back"].include?(depth_mode)
-      blend_mode = @cfg["blendMode"].to_s
-      global_alpha=[[master_alpha.to_f,0.0].max,1.0].min
-      life=[cycle_frames/[speed,0.25].max,14.0].max
-      @particles.each_with_index do |row,i|
-        sp = row[:sprite]
-        next if !sp || (sp.disposed? rescue true)
-        raw_t=((@frame+row[:phase].to_f) % life)/life
-        start_t=0.075; end_t=0.925
-        if raw_t<=start_t || raw_t>=end_t
-          sp.opacity=0;sp.visible=false
-          next
-        end
-        t=(raw_t-start_t)/(end_t-start_t)
-        t=[[t,0.0].max,1.0].min
-        base_lane=0.5 + 0.68*(row[:lane].to_f-0.5)*lane_width
-        nx=0.5 + (base_lane-0.5)*spread_x
-        nx += Math.sin((t*Math::PI*2.0)+(i*0.73))*0.012*spread_x*sway_amount
-        nx=[[nx,0.04].max,0.96].min
-        base_y=[0.68,0.54,0.78][row[:row].to_i % 3]
-        ny=0.5 + (base_y-0.5)*spread_y
-        ny=[[ny,0.10].max,0.92].min
-        rise=state[:height]*0.12*t*speed*rise_height
-        x,y=local_to_world(state,nx+offset_x,ny+offset_y,rise)
-        sp.x=x;sp.y=y
-        sp.z = depth_mode == "front" ? state[:z]+1 : (depth_mode == "back" ? state[:z]-1 : (row[:front] ? state[:z]+1 : state[:z]-1))
-        sp.blend_type=(blend_mode=="additive" ? 1 : 0) if sp.respond_to?(:blend_type=)
-        sp.angle=state[:angle] if sp.respond_to?(:angle=)
-        sp.mirror=((nx >= 0.5) ^ state[:mirror]) if sp.respond_to?(:mirror=)
-        graphic_frames=BSS064.clamp_float(@cfg["graphicFrameFrames"],1,60,6)
-        fi=@frame_bitmaps.empty? ? 0 : (((@frame+row[:phase].to_f)/graphic_frames).floor % @frame_bitmaps.length)
-        if row[:frame_index].to_i!=fi
-          row[:frame_index]=fi
-          bmp=frame_bitmap(fi)
-          if bmp && !sp.bitmap.equal?(bmp)
-            sp.bitmap=bmp;sp.ox=bmp.width/2;sp.oy=bmp.height
+    # One-shot graphic sequence: 1 -> 2 -> 3 -> 4 -> final graphic while the
+    # particle fades. It never loops 4 -> 1 inside one particle life.
+    def sequence_state(layer,age)
+      list=layer[:bitmaps]
+      return [0,nil,1.0,0.0] if !list || list.length<=1
+      hold=[layer[:hold].to_f,1.0].max;trans=[layer[:transition].to_f,0.0].max;cursor=[age.to_f,0.0].max
+      (0...(list.length-1)).each do |i|
+        return [i,nil,1.0,0.0] if cursor<hold
+        cursor-=hold
+        if trans>0.0
+          if cursor<trans
+            q=smoothstep01(cursor/trans);return [i,i+1,1.0-q,q]
           end
+          cursor-=trans
         end
-        stretch=stretch_start + (stretch_end-stretch_start)*t
-        sp.zoom_x=[state[:zoom_x].abs*scale_cfg,0.05].max
-        sp.zoom_y=[state[:zoom_y].abs*scale_cfg*stretch,0.05].max
-        alpha=opacity_curve(t)
-        live_opacity=allow_fainted ? 255.0 : state[:opacity].to_f
-        live_alpha=live_opacity*opacity_cfg*alpha*global_alpha
-        sp.opacity=[[live_alpha.round,0].max,255].min
-        sp.visible=sp.opacity>1
+      end
+      [list.length-1,nil,1.0,0.0]
+    rescue
+      [0,nil,1.0,0.0]
+    end
+
+    def assign_bitmap(sp,layer,index)
+      return if !sp
+      bmp=layer[:bitmaps][index.to_i] rescue nil
+      return if !bmp
+      if !sp.bitmap.equal?(bmp)
+        sp.bitmap=bmp;sp.ox=bmp.width/2;sp.oy=bmp.height
+      end
+    rescue;end
+
+    def hide_layer(lr)
+      [lr[:a],lr[:b]].each do |sp|
+        next if !sp || (sp.disposed? rescue true)
+        sp.opacity=0;sp.visible=false
+      end
+    rescue;end
+
+    def update_layer(lr,state,row,i,global_alpha,live_opacity)
+      layer=lr[:layer]
+      count=[layer[:particle_count].to_i,1].max
+      if i>=count
+        hide_layer(lr);return
+      end
+      speed=layer[:rise_speed].to_f
+      life=[layer[:cycle_frames].to_f/[speed,0.25].max,14.0].max
+      raw_frame=@frame+lr[:phase].to_f+(life*layer[:phase_offset].to_f)
+      raw_t=(raw_frame % life)/life
+      start_t=0.075;end_t=0.925
+      if raw_t<=start_t || raw_t>=end_t
+        hide_layer(lr);return
+      end
+      t=(raw_t-start_t)/(end_t-start_t);t=[[t,0.0].max,1.0].min
+      lane=count>1 ? i.to_f/(count-1).to_f : 0.5
+      base_lane=0.5+0.68*(lane-0.5)*layer[:lane_width].to_f
+      nx=0.5+(base_lane-0.5)*layer[:spread_x].to_f
+      nx+=Math.sin((t*Math::PI*2.0)+(i*0.73)+(layer[:phase_offset].to_f*Math::PI*2.0))*0.012*layer[:spread_x].to_f*layer[:sway_amount].to_f
+      nx=[[nx+layer[:offset_x].to_f,0.04].max,0.96].min
+      base_y=[0.68,0.54,0.78][row[:row].to_i%3]
+      ny=0.5+(base_y-0.5)*layer[:spread_y].to_f
+      ny=[[ny+layer[:offset_y].to_f,0.10].max,0.92].min
+      rise=state[:height]*0.12*t*speed*layer[:rise_height].to_f
+      stretch=layer[:stretch_start].to_f+(layer[:stretch_end].to_f-layer[:stretch_start].to_f)*t
+      base_alpha=(live_opacity.to_f/255.0)*layer[:opacity].to_f*layer_opacity_curve(layer,t)*global_alpha.to_f
+      sequence_age=(raw_t-start_t)*life
+      ia,ib,wa,wb=sequence_state(layer,sequence_age)
+      assign_bitmap(lr[:a],layer,ia);assign_bitmap(lr[:b],layer,ib) if ib
+      x,y=local_to_world(state,nx,ny,rise)
+      depth=layer[:depth]
+      z=depth=="front" ? state[:z]+1 : (depth=="back" ? state[:z]-1 : (row[:front] ? state[:z]+1 : state[:z]-1))
+      [[:a,wa],[:b,wb]].each do |which,weight|
+        sp=lr[which];next if !sp || (sp.disposed? rescue true)
+        if weight.to_f<=0.001 || (which==:b && ib.nil?)
+          sp.opacity=0;sp.visible=false;next
+        end
+        sp.x=x;sp.y=y;sp.z=z;sp.blend_type=layer[:blend] if sp.respond_to?(:blend_type=)
+        sp.angle=state[:angle] if sp.respond_to?(:angle=);sp.mirror=((nx>=0.5) ^ state[:mirror]) if sp.respond_to?(:mirror=)
+        sp.zoom_x=[state[:zoom_x].abs*layer[:scale].to_f,0.05].max
+        sp.zoom_y=[state[:zoom_y].abs*layer[:scale].to_f*stretch,0.05].max
+        alpha=base_alpha*weight.to_f;sp.opacity=[[(alpha*255.0).round,0].max,255].min;sp.visible=sp.opacity>1
       end
     rescue => e
-      BSS064.log("Boss aura update warning: #{e.class}: #{e.message}")
-      hide_all
+      BSS064.log("Boss aura layer update warning: #{e.class}: #{e.message}");hide_layer(lr)
+    end
+
+    def update(target_sprite,battler,master_alpha=1.0,allow_fainted=false)
+      return if @disposed
+      state=target_state(target_sprite);fainted=(battler.fainted? rescue false)
+      if !state || !battler || (fainted && !allow_fainted) || ((!state[:visible] || state[:opacity]<=0) && !allow_fainted) || @layers.empty?
+        hide_all;return
+      end
+      step=logical_step;@frame+=step if step>0
+      global_alpha=[[master_alpha.to_f,0.0].max,1.0].min
+      live_opacity=allow_fainted ? 255.0 : state[:opacity].to_f
+      @particles.each_with_index do |row,i|
+        row[:layers].each { |lr| update_layer(lr,state,row,i,global_alpha,live_opacity) }
+      end
+    rescue => e
+      BSS064.log("Boss aura update warning: #{e.class}: #{e.message}");hide_all
     end
 
     def hide_all
-      @particles.each do |row|
-        sp = row[:sprite]
-        sp.visible = false if sp && !(sp.disposed? rescue true)
-      end
-    rescue
-    end
+      @particles.each { |row| row[:layers].each { |lr| hide_layer(lr) } }
+    rescue;end
   end
 
   # Persistent bright contour.  Eight tinted copies of the live battler are
@@ -552,70 +689,121 @@ module BSS064
   class BossAuraOutline
     def initialize(viewport,scene_sprites,cfg,key_prefix="bss_totem_outline")
       @viewport=viewport;@scene_sprites=scene_sprites.is_a?(Hash) ? scene_sprites : nil
-      @cfg=cfg||{};@sprites=[];@disposed=false
-      @rgb=BSS064.aura_color_rgb(@cfg["outlineColor"])
+      @cfg=cfg||{};@contours=[];@ghosts=[];@disposed=false;@rgb=BSS064.aura_color_rgb(@cfg["outlineColor"])
       r=BSS064.clamp_int(@cfg["outlineSize"],1,8,2)
-      offsets=[[-r,-r],[0,-r],[r,-r],[-r,0],[r,0],[-r,r],[0,r],[r,r]]
-      offsets.each_with_index do |ofs,i|
-        sp=Sprite.new(@viewport);sp.visible=false;sp.opacity=0
-        # Normal blend + a full Color overlay preserves the exact user-picked
-        # outline hue. Additive blending could wash saturated colors to white.
-        sp.blend_type=0 if sp.respond_to?(:blend_type=)
-        sp.color=Color.new(@rgb[0],@rgb[1],@rgb[2],255) if sp.respond_to?(:color=)
-        key="#{key_prefix}_#{i}";@scene_sprites[key]=sp if @scene_sprites
-        @sprites << [sp,key,ofs]
+      [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]].each_with_index do |unit,i|
+        sp=make_sprite("#{key_prefix}_edge_#{i}");@contours << [sp,"#{key_prefix}_edge_#{i}",unit,r]
+      end
+      count=BSS064.clamp_int(@cfg["outlineCopies"],1,12,6)
+      count.times do |i|
+        key="#{key_prefix}_ghost_#{i}";sp=make_sprite(key);@ghosts << [sp,key,i]
       end
     rescue => e
       BSS064.log("Boss outline create warning: #{e.class}: #{e.message}")
     end
 
+    def make_sprite(key)
+      sp=Sprite.new(@viewport);sp.visible=false;sp.opacity=0
+      sp.blend_type=0 if sp.respond_to?(:blend_type=)
+      sp.color=Color.new(@rgb[0],@rgb[1],@rgb[2],255) if sp.respond_to?(:color=)
+      @scene_sprites[key]=sp if @scene_sprites
+      sp
+    end
+
     def disposed?;@disposed;end
+
+    def sync_from_target(sp,target,bmp,src)
+      return if !sp || (sp.disposed? rescue true)
+      sp.bitmap=bmp if !sp.bitmap.equal?(bmp)
+      if src && sp.respond_to?(:src_rect) && sp.src_rect
+        sp.src_rect.set(src.x,src.y,src.width,src.height)
+      end
+      sp.ox=(target.ox rescue 0);sp.oy=(target.oy rescue 0)
+      sp.angle=(target.angle rescue 0) if sp.respond_to?(:angle=)
+      sp.mirror=(target.mirror rescue false) if sp.respond_to?(:mirror=)
+      sp.color=Color.new(@rgb[0],@rgb[1],@rgb[2],255) if sp.respond_to?(:color=)
+      sp.blend_type=0 if sp.respond_to?(:blend_type=)
+    rescue;end
+
+    def gaussian(x,center,width)
+      Math.exp(-(((x-center)/width)**2))
+    rescue
+      0.0
+    end
 
     def update(target,battler,master_alpha=1.0,allow_fainted=false)
       return if @disposed
       bmp=target && target.respond_to?(:bitmap) ? target.bitmap : nil
       fainted=(battler.fainted? rescue false)
       visible=target && bmp && !(bmp.disposed? rescue true) && !(target.disposed? rescue true) && (!fainted || allow_fainted) && (allow_fainted || ((target.visible rescue true) && (target.opacity rescue 255).to_i>0))
-      if !visible
-        hide_all;return
-      end
-      src=(target.src_rect rescue nil)
-      cfg_op=BSS064.clamp_float(@cfg["outlineOpacity"],0,100,46)/100.0
-      fade=[[master_alpha.to_f,0.0].max,1.0].min
-      target_op=allow_fainted ? 255.0 : (target.opacity rescue 255).to_f
-      base_op=[(target_op*cfg_op*fade).round,0].max
-      @sprites.each do |sp,key,ofs|
-        next if !sp || (sp.disposed? rescue true)
-        sp.bitmap=bmp if !sp.bitmap.equal?(bmp)
-        sp.color=Color.new(@rgb[0],@rgb[1],@rgb[2],255) if sp.respond_to?(:color=)
-        sp.blend_type=0 if sp.respond_to?(:blend_type=)
-        if src && sp.respond_to?(:src_rect) && sp.src_rect
-          sp.src_rect.set(src.x,src.y,src.width,src.height)
+      if !visible;hide_all;return;end
+      src=(target.src_rect rescue nil);fade=[[master_alpha.to_f,0.0].max,1.0].min
+      cfg_op=BSS064.clamp_float(@cfg["outlineOpacity"],0,100,46)/100.0;target_op=allow_fainted ? 255.0 : (target.opacity rescue 255).to_f
+      effect=@cfg["outlineEffect"].to_s;effect="standard" if !["standard","roaring_knight","pulse"].include?(effect)
+      base_op=[[(target_op*cfg_op*fade).round,0].max,255].min
+      zbase_x=(target.zoom_x rescue 1.0).to_f;zbase_y=(target.zoom_y rescue 1.0).to_f;clock=BSS064.monotonic_seconds
+      radius=BSS064.clamp_int(@cfg["outlineSize"],1,8,2).to_f
+      roaring_strength=BSS064.clamp_float(@cfg["roaringStrength"],0,250,100)/100.0
+      roaring_speed=BSS064.clamp_float(@cfg["roaringSpeed"],10,300,100)/100.0
+      pulse_strength=BSS064.clamp_float(@cfg["pulseStrength"],0,250,100)/100.0
+      pulse_speed=BSS064.clamp_float(@cfg["pulseSpeed"],10,300,100)/100.0
+      spacing=BSS064.clamp_float(@cfg["outlineCopySpacing"],25,300,100)/100.0
+
+      # The close 8-way contour always follows the live battler exactly. This is
+      # separate from the Roaring/Pulse copies so the silhouette never becomes
+      # the noisy multi-outline artifact of the old implementation.
+      @contours.each_with_index do |row,i|
+        sp,key,unit,r=row;next if !sp || (sp.disposed? rescue true);sync_from_target(sp,target,bmp,src)
+        local_radius=radius
+        if effect=="pulse"
+          phase=(clock*1.90*pulse_speed)%1.0;beat=[gaussian(phase,0.10,0.10)+0.76*gaussian(phase,0.33,0.115),1.0].min
+          pulse_body=0.10+0.90*beat
+          local_radius=radius*(1.0+0.28*pulse_body*pulse_strength)
         end
-        sp.ox=(target.ox rescue 0);sp.oy=(target.oy rescue 0)
-        sp.zoom_x=(target.zoom_x rescue 1.0);sp.zoom_y=(target.zoom_y rescue 1.0)
-        sp.angle=(target.angle rescue 0) if sp.respond_to?(:angle=)
-        sp.mirror=(target.mirror rescue false) if sp.respond_to?(:mirror=)
-        sp.x=(target.x rescue 0)+ofs[0];sp.y=(target.y rescue 0)+ofs[1]
-        sp.z=(target.z rescue 50)-1
-        sp.opacity=base_op;sp.visible=base_op>1
+        sp.zoom_x=zbase_x;sp.zoom_y=zbase_y;sp.x=(target.x rescue 0)+unit[0]*local_radius;sp.y=(target.y rescue 0)+unit[1]*local_radius
+        sp.z=(target.z rescue 50)-1;sp.opacity=base_op;sp.visible=sp.opacity>1
+      end
+
+      @ghosts.each do |row|
+        sp,key,i=row;next if !sp || (sp.disposed? rescue true);sync_from_target(sp,target,bmp,src)
+        n=i+1;fall=[1.0-(i.to_f/[@ghosts.length,1].max.to_f),0.08].max
+        if effect=="roaring_knight"
+          # Reference-style displaced afterimages: a directional white/tinted
+          # trail with staggered jitter, not a circular glow.
+          phase=clock*9.0*roaring_speed+i*1.83
+          dist=n*radius*2.55*spacing*roaring_strength
+          dx=dist*(0.72+0.20*Math.sin(phase*0.53))
+          dy=-dist*0.16+Math.sin(phase)*radius*1.85*roaring_strength
+          zoom=1.0+n*0.010*roaring_strength
+          sp.x=(target.x rescue 0)+dx;sp.y=(target.y rescue 0)+dy;sp.zoom_x=zbase_x*zoom;sp.zoom_y=zbase_y*zoom
+          sp.z=(target.z rescue 50)-2-n;sp.opacity=[[base_op*fall*(0.22+0.28*(Math.sin(phase*0.71)*0.5+0.5))*[roaring_strength,0.15].max,205].min,0].max.to_i;sp.visible=sp.opacity>1
+        elsif effect=="pulse"
+          phase=(clock*1.90*pulse_speed-i*0.075*spacing)%1.0;phase+=1.0 if phase<0
+          beat=[gaussian(phase,0.10,0.10)+0.76*gaussian(phase,0.33,0.115),1.0].min
+          pulse_body=0.10+0.90*beat
+          grow=1.0+n*0.024*spacing*pulse_strength*(0.48+pulse_body*1.38)
+          sp.x=(target.x rescue 0);sp.y=(target.y rescue 0);sp.zoom_x=zbase_x*grow;sp.zoom_y=zbase_y*grow
+          sp.z=(target.z rescue 50)-2-n;sp.opacity=[[base_op*fall*pulse_body*[pulse_strength,0.15].max,190].min,0].max.to_i;sp.visible=sp.opacity>1
+        else
+          sp.visible=false;sp.opacity=0
+        end
       end
     rescue => e
-      BSS064.log("Boss outline update warning: #{e.class}: #{e.message}")
-      hide_all
+      BSS064.log("Boss outline update warning: #{e.class}: #{e.message}");hide_all
     end
 
     def hide_all
-      @sprites.each{|row|sp=row[0];sp.visible=false if sp && !(sp.disposed? rescue true)}
+      (@contours+@ghosts).each{|row|sp=row[0];sp.visible=false if sp && !(sp.disposed? rescue true);sp.opacity=0 if sp && !(sp.disposed? rescue true)}
     rescue;end
 
     def dispose
       return if @disposed
-      @sprites.each do |sp,key,ofs|
+      (@contours+@ghosts).each do |row|
+        sp=row[0];key=row[1]
         begin;@scene_sprites.delete(key) if @scene_sprites && @scene_sprites[key].equal?(sp);rescue;end
         begin;sp.bitmap=nil if sp && !(sp.disposed? rescue true);sp.dispose if sp && !sp.disposed?;rescue;end
       end
-      @sprites.clear;@disposed=true
+      @contours.clear;@ghosts.clear;@disposed=true
     rescue;@disposed=true;end
   end
 
@@ -1240,36 +1428,118 @@ class Battle::Scene
     @bss_boss_aura_battler=nil;@bss_boss_aura_fade_started=nil
   end
 
+  def bss_boss_frame_dimensions(sprite)
+    return [0.0,0.0] if !sprite || (sprite.disposed? rescue true)
+    bmp=(sprite.bitmap rescue nil);src=(sprite.src_rect rescue nil)
+    w=(src && src.width.to_i>0) ? src.width.to_f : (bmp && !(bmp.disposed? rescue true) ? bmp.width.to_f : 0.0)
+    h=(src && src.height.to_i>0) ? src.height.to_f : (bmp && !(bmp.disposed? rescue true) ? bmp.height.to_f : 0.0)
+    [w,h]
+  rescue
+    [0.0,0.0]
+  end
+
   def bss_capture_boss_native_scale(battler=nil,force=false)
     battle=@battle
     battler ||= (battle.bss_find_boss_battler rescue nil) if battle
     return nil if !battler
     sprite=bss_boss_target_sprite(battler);return nil if !sprite || (sprite.disposed? rescue true)
-    @bss_boss_native_scale ||= {}
+    @bss_boss_native_scale ||= {};@bss_boss_native_renderer ||= {}
     idx=(battler.index rescue 1).to_i
     current=[(sprite.zoom_x rescue 1.0).to_f,(sprite.zoom_y rescue 1.0).to_f]
+    bmp=(sprite.bitmap rescue nil);src=(sprite.src_rect rescue nil);fw,fh=bss_boss_frame_dimensions(sprite)
+    renderer={
+      :width=>(bmp && !(bmp.disposed? rescue true) ? bmp.width.to_i : 0),
+      :height=>(bmp && !(bmp.disposed? rescue true) ? bmp.height.to_i : 0),
+      :src_w=>(src ? src.width.to_i : 0),:src_h=>(src ? src.height.to_i : 0),
+      :frame_w=>fw,:frame_h=>fh,
+      # Store what the player actually sees, not only zoom. LBDS/Animated DBK
+      # can bake a multiplier into the bitmap/src_rect during SOS/BAS.
+      :display_w=>fw*current[0].abs,:display_h=>fh*current[1].abs,
+      :x=>(sprite.x rescue 0).to_f,:y=>(sprite.y rescue 0).to_f,:z=>(sprite.z rescue 50).to_i,
+      :back=>((battler.index.to_i.even?) rescue false)
+    }
     return @bss_boss_native_scale[idx] if !force && @bss_boss_native_scale[idx]
-    @bss_boss_native_scale[idx]=current if current[0]>0 && current[1]>0
+    if current[0]!=0 && current[1]!=0 && fw>0 && fh>0
+      @bss_boss_native_scale[idx]=current;@bss_boss_native_renderer[idx]=renderer
+    end
     @bss_boss_native_scale[idx]
   rescue => e
-    BSS064.log("Boss native scale capture warning: #{e.class}: #{e.message}")
-    nil
+    BSS064.log("Boss native scale capture warning: #{e.class}: #{e.message}");nil
+  end
+
+  def bss_boss_renderer_profile_mismatch?(sprite,idx)
+    info=@bss_boss_native_renderer && @bss_boss_native_renderer[idx]
+    return false if !info || !sprite || (sprite.disposed? rescue true)
+    bmp=(sprite.bitmap rescue nil);return false if !bmp || (bmp.disposed? rescue true)
+    src=(sprite.src_rect rescue nil);w=bmp.width.to_i;h=bmp.height.to_i;sw=src ? src.width.to_i : 0;sh=src ? src.height.to_i : 0
+    return true if info[:width].to_i>0 && (w-info[:width].to_i).abs>1
+    return true if info[:height].to_i>0 && (h-info[:height].to_i).abs>1
+    return true if info[:src_w].to_i>0 && sw>0 && (sw-info[:src_w].to_i).abs>1
+    return true if info[:src_h].to_i>0 && sh>0 && (sh-info[:src_h].to_i).abs>1
+    false
+  rescue
+    false
+  end
+
+  def bss_apply_boss_display_size(sprite,idx)
+    info=@bss_boss_native_renderer && @bss_boss_native_renderer[idx]
+    base=@bss_boss_native_scale && @bss_boss_native_scale[idx]
+    return false if !sprite || !info || !base
+    fw,fh=bss_boss_frame_dimensions(sprite);return false if fw<=0 || fh<=0
+    want_w=info[:display_w].to_f;want_h=info[:display_h].to_f
+    return false if want_w<=0 || want_h<=0
+    sx=base[0].to_f<0 ? -1.0 : 1.0;sy=base[1].to_f<0 ? -1.0 : 1.0
+    sprite.zoom_x=sx*(want_w/fw) if sprite.respond_to?(:zoom_x=)
+    sprite.zoom_y=sy*(want_h/fh) if sprite.respond_to?(:zoom_y=)
+    true
+  rescue => e
+    BSS064.log("Boss display-size restore warning: #{e.class}: #{e.message}");false
+  end
+
+  # Reassert the physical on-screen size of the Totem. This is intentionally
+  # callable by SOS because that flow can rebuild every battler renderer without
+  # going through Scene#pbAnimation.
+  def bss_reassert_boss_visual_scale(battler=nil,rebuild=true)
+    battle=@battle;battler ||= (battle.bss_find_boss_battler rescue nil) if battle
+    return false if !battler || (battler.fainted? rescue false)
+    idx=(battler.index rescue -1).to_i;return false if idx<0
+    bss_capture_boss_native_scale(battler,false)
+    sprite=bss_boss_target_sprite(battler);return false if !sprite || (sprite.disposed? rescue true)
+    if rebuild && bss_boss_renderer_profile_mismatch?(sprite,idx)
+      bss_restore_boss_natural_renderer(battler,nil,true)
+      sprite=bss_boss_target_sprite(battler) rescue sprite
+    end
+    bss_apply_boss_display_size(sprite,idx)
+  rescue => e
+    BSS064.log("Boss visual-scale reassert warning: #{e.class}: #{e.message}");false
+  end
+
+  # BAS/Animated DBK can replace the whole battler bitmap while showing a
+  # temporary Front/Back view. Rebuild the natural renderer and restore the
+  # original DISPLAYED dimensions instead of blindly reusing zoom_x/zoom_y.
+  def bss_restore_boss_natural_renderer(battler,snapshot=nil,force=false)
+    return false if !battler || (battler.fainted? rescue false)
+    sprite=bss_boss_target_sprite(battler);return false if !sprite || (sprite.disposed? rescue true)
+    idx=(battler.index rescue -1).to_i;return false if idx<0
+    return false if !force && !bss_boss_renderer_profile_mismatch?(sprite,idx)
+    pkmn=(battler.visiblePokemon rescue nil) if battler.respond_to?(:visiblePokemon)
+    pkmn ||= (battler.pokemon rescue nil) if battler.respond_to?(:pokemon)
+    return false if !pkmn
+    back=(battler.index.to_i.even? rescue false)
+    x=snapshot && snapshot[:x] ? snapshot[:x] : (sprite.x rescue nil);y=snapshot && snapshot[:y] ? snapshot[:y] : (sprite.y rescue nil);z=snapshot && snapshot[:z] ? snapshot[:z] : (sprite.z rescue nil)
+    begin;sprite.setPokemonBitmap(pkmn,battler,back);rescue ArgumentError, TypeError;sprite.setPokemonBitmap(pkmn,back);end
+    sprite.x=x if !x.nil? && sprite.respond_to?(:x=);sprite.y=y if !y.nil? && sprite.respond_to?(:y=);sprite.z=z if !z.nil? && sprite.respond_to?(:z=)
+    bss_apply_boss_display_size(sprite,idx)
+    true
+  rescue => e
+    BSS064.log("Boss natural renderer restore warning: #{e.class}: #{e.message}");false
   end
 
   def bss_guard_boss_sprite_scale
     return if @bss_boss_animation_depth.to_i>0
     battle=@battle;return if !battle || !battle.respond_to?(:bss_boss_enabled?) || !battle.bss_boss_enabled?
     battler=battle.bss_find_boss_battler rescue nil;return if !battler
-    sprite=bss_boss_target_sprite(battler);return if !sprite || (sprite.disposed? rescue true)
-    base=bss_capture_boss_native_scale(battler,false);return if !base
-    bx,by=base;zx=(sprite.zoom_x rescue bx).to_f;zy=(sprite.zoom_y rescue by).to_f
-    # The renderer scale captured before the first Totem animation is the
-    # stable baseline. Temporary move/BAS scaling is allowed only while an
-    # animation is executing; any leaked shrink or enlargement is restored.
-    if (zx-bx.to_f).abs>0.001 || (zy-by.to_f).abs>0.001
-      sprite.zoom_x=bx if sprite.respond_to?(:zoom_x=)
-      sprite.zoom_y=by if sprite.respond_to?(:zoom_y=)
-    end
+    bss_reassert_boss_visual_scale(battler,true)
   rescue => e
     BSS064.log("Boss scale guard warning: #{e.class}: #{e.message}")
   end
@@ -1417,68 +1687,63 @@ class Battle::Scene
   end
 
   def bss_play_boss_aura_sequence(battler,boss_cfg)
+    intro=nil;player=nil;turbo_restore=nil
     sprite=bss_boss_target_sprite(battler);return if !sprite
     cfg=BSS064.boss_aura_config(boss_cfg)
-    intro=BSS064::BossAuraIntro.new(self,sprite,battler,cfg) do
-      if @battle && @battle.respond_to?(:bss_boss_aura_active=)
-        @battle.bss_boss_aura_active=true
+
+    # Aura intro is authored in real 40-Hz time. Lock the user's native Turbo
+    # to x1 for the whole sequence so Input.update cannot change it mid-charge.
+    if defined?(Turbo) && Turbo.respond_to?(:set_speed)
+      begin
+        old_speed=Turbo.respond_to?(:speed) ? Turbo.speed.to_i : (defined?($GameSpeed) ? $GameSpeed.to_i : 0)
+        old_toggle=defined?($CanToggle) ? $CanToggle : nil
+        turbo_restore={:speed=>old_speed,:toggle=>old_toggle}
+        $CanToggle=false if defined?($CanToggle)
+        Turbo.set_speed(0)
+      rescue => e
+        BSS064.log("Aura Turbo lock warning: #{e.class}: #{e.message}")
       end
+    end
+
+    intro=BSS064::BossAuraIntro.new(self,sprite,battler,cfg) do
+      if @battle && @battle.respond_to?(:bss_boss_aura_active=);@battle.bss_boss_aura_active=true;end
       bss_update_boss_aura
     end
-    total=intro.total_duration.to_i
-    BSS064.install_bas_aura_compat
-    player=nil
+    total=intro.total_duration.to_i;BSS064.install_bas_aura_compat
     use_bas=cfg["basZoomEnabled"] && BSS064.bas_available? && respond_to?(:bas_runtime_pump_frame)
     if use_bas
-      offset=bss_boss_static_camera_offset(sprite)
-      data=bss_bas_camera_data(total,cfg["basZoom"],cfg["basZoomBounds"],offset[0],offset[1])
+      offset=bss_boss_static_camera_offset(sprite);data=bss_bas_camera_data(total,cfg["basZoom"],cfg["basZoomBounds"],offset[0],offset[1])
       player=BattleAnimationStudioRuntime::Player.new(bss_scene_sprites,@viewport,battler,battler,data,[battler])
       BattleAnimationStudioRuntime.active_player=player if BattleAnimationStudioRuntime.respond_to?(:active_player=)
     end
-
-    # Run visual logic at the same fixed 40 Hz as EBDX, while allowing the
-    # actual scene/BAS camera to render at any refresh rate. This fixes both the
-    # "too fast" charge and the weak 120-FPS version of the sequence.
-    started=BSS064.monotonic_seconds
-    last_logic=-1
-    safety=0
+    started=BSS064.monotonic_seconds;last_logic=-1;safety=0
     loop do
-      elapsed=BSS064.monotonic_seconds-started
-      logical=(elapsed*40.0).floor
-      logical=0 if logical<0
-      logical=total-1 if logical>=total
+      elapsed=BSS064.monotonic_seconds-started;logical=(elapsed*40.0).floor;logical=0 if logical<0;logical=total-1 if logical>=total
       if logical>last_logic
-        first=[last_logic+1,0].max
-        (first..logical).each { |f| intro.update(f) }
-        last_logic=logical
+        first=[last_logic+1,0].max;(first..logical).each { |f| intro.update(f) };last_logic=logical
       end
-      if use_bas
-        player.update
-        bas_runtime_pump_frame(player)
-      else
-        bss_plain_frame_pump
-      end
-      break if elapsed*40.0>=total
-      safety+=1
-      break if safety>20000
+      use_bas ? (player.update;bas_runtime_pump_frame(player)) : bss_plain_frame_pump
+      break if elapsed*40.0>=total;safety+=1;break if safety>20000
     end
   rescue => e
     BSS064.log("Boss aura sequence warning: #{e.class}: #{e.message}")
   ensure
     begin
-      if player && defined?(BattleAnimationStudioRuntime) && BattleAnimationStudioRuntime.respond_to?(:active_player=) && BattleAnimationStudioRuntime.active_player.equal?(player)
-        BattleAnimationStudioRuntime.active_player=nil
-      end
+      if player && defined?(BattleAnimationStudioRuntime) && BattleAnimationStudioRuntime.respond_to?(:active_player=) && BattleAnimationStudioRuntime.active_player.equal?(player);BattleAnimationStudioRuntime.active_player=nil;end
     rescue;end
-    begin;player.restore_camera! if player;rescue;end
-    begin;player.dispose if player;rescue;end
-    # Even if a third-party camera/runtime interrupts the intro, a configured
-    # Totem keeps its charged state instead of silently losing the aura.
+    begin;player.restore_camera! if player;rescue;end;begin;player.dispose if player;rescue;end
     if @battle && @battle.respond_to?(:bss_boss_aura_active=) && @battle.respond_to?(:bss_boss_has_stat_aura?) && @battle.bss_boss_has_stat_aura?
-      @battle.bss_boss_aura_active=true
-      begin;bss_update_boss_aura;rescue;end
+      @battle.bss_boss_aura_active=true;begin;bss_update_boss_aura;rescue;end
     end
-    intro.dispose if intro
+    begin;intro.dispose if intro;rescue;end
+    if turbo_restore && defined?(Turbo) && Turbo.respond_to?(:set_speed)
+      begin
+        Turbo.set_speed(turbo_restore[:speed].to_i)
+        $CanToggle=turbo_restore[:toggle] if defined?($CanToggle) && !turbo_restore[:toggle].nil?
+      rescue => e
+        BSS064.log("Aura Turbo restore warning: #{e.class}: #{e.message}")
+      end
+    end
   end
 end
 
@@ -1499,19 +1764,52 @@ module BSS064BossAnimationScaleCompat
     base=bss_capture_boss_native_scale(battler,false) rescue nil
     zx=base ? base[0].to_f : (sprite.zoom_x rescue 1.0).to_f
     zy=base ? base[1].to_f : (sprite.zoom_y rescue 1.0).to_f
-    [sprite,zx,zy,idx]
+    {
+      :sprite=>sprite,:battler=>battler,:idx=>idx,:zoom_x=>zx,:zoom_y=>zy,
+      :x=>(sprite.x rescue 0).to_f,:y=>(sprite.y rescue 0).to_f,:z=>(sprite.z rescue 50).to_i,
+      :display_w=>((bss_boss_frame_dimensions(sprite)[0] rescue 0).to_f*(sprite.zoom_x rescue 1.0).to_f.abs),
+      :display_h=>((bss_boss_frame_dimensions(sprite)[1] rescue 0).to_f*(sprite.zoom_y rescue 1.0).to_f.abs)
+    }
   rescue
     nil
   end
 
   def bss_restore_boss_animation_scale(snapshot)
-    return if !snapshot
-    sprite,zx,zy,idx=snapshot
+    return if !snapshot.is_a?(Hash)
+    battler=snapshot[:battler]
+    sprite=snapshot[:sprite]
     return if !sprite || (sprite.disposed? rescue true)
-    sprite.zoom_x=zx if sprite.respond_to?(:zoom_x=)
-    sprite.zoom_y=zy if sprite.respond_to?(:zoom_y=)
+    idx=snapshot[:idx].to_i
+    # Repair a leaked Front/Back renderer profile first. This is the missing
+    # step for LBDS Animated DBK, where the view's x2/x3 scale lives inside the
+    # rebuilt bitmap rather than only in sprite.zoom_x/y.
+    bss_restore_boss_natural_renderer(battler,snapshot,false) if battler && respond_to?(:bss_restore_boss_natural_renderer)
+    sprite=bss_boss_target_sprite(battler) rescue sprite
+    return if !sprite || (sprite.disposed? rescue true)
+    # Renderer dimensions may have changed. First restore the exact physical
+    # footprint seen immediately before this animation/SOS call. This is more
+    # robust than restoring raw zoom on LBDS Animated DBK because Front/Back
+    # changes can rebuild a bitmap at a different baked-in scale.
+    applied=false
+    begin
+      fw,fh=bss_boss_frame_dimensions(sprite)
+      want_w=snapshot[:display_w].to_f;want_h=snapshot[:display_h].to_f
+      if fw.to_f>0 && fh.to_f>0 && want_w>0 && want_h>0
+        sx=snapshot[:zoom_x].to_f<0 ? -1.0 : 1.0
+        sy=snapshot[:zoom_y].to_f<0 ? -1.0 : 1.0
+        sprite.zoom_x=sx*(want_w/fw.to_f) if sprite.respond_to?(:zoom_x=)
+        sprite.zoom_y=sy*(want_h/fh.to_f) if sprite.respond_to?(:zoom_y=)
+        applied=true
+      end
+    rescue
+      applied=false
+    end
+    bss_apply_boss_display_size(sprite,idx) if !applied && respond_to?(:bss_apply_boss_display_size)
+    sprite.x=snapshot[:x] if sprite.respond_to?(:x=)
+    sprite.y=snapshot[:y] if sprite.respond_to?(:y=)
+    sprite.z=snapshot[:z] if sprite.respond_to?(:z=)
     @bss_boss_native_scale ||= {}
-    @bss_boss_native_scale[idx]=[zx,zy] if idx && idx>=0 && !@bss_boss_native_scale[idx]
+    @bss_boss_native_scale[idx]=[snapshot[:zoom_x].to_f,snapshot[:zoom_y].to_f] if idx>=0 && !@bss_boss_native_scale[idx]
   rescue => e
     BSS064.log("Boss animation scale restore warning: #{e.class}: #{e.message}")
   end
