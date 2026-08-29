@@ -1,7 +1,86 @@
 {
-  "format": "battle-animation-studio-compiled",
-  "version": 19,
-  "exportedAt": "2026-08-29T01:40:37.201Z",
+  "format": "battle-animation-studio",
+  "version": 41,
+  "preview": {
+    "language": "en",
+    "studioName": "Battle Animation Studio",
+    "battlers": {
+      "user": {
+        "projectPath": "Graphics/Pokemon/Back/CORVIKNIGHT.png",
+        "folder": "Pokemon/Back",
+        "name": "CORVIKNIGHT",
+        "label": "CORVIKNIGHT"
+      },
+      "target": {
+        "projectPath": "Graphics/Pokemon/Front/DRAGONITE.png",
+        "folder": "Pokemon/Front",
+        "name": "DRAGONITE",
+        "label": "DRAGONITE"
+      }
+    },
+    "battlerSelectionExplicit": true,
+    "battlerSizeManual": {
+      "player": true,
+      "foe": true
+    },
+    "battlerScalePreset": "auto",
+    "scene": {
+      "background": "Graphics/Battlebacks/indoor1_bg.png",
+      "playerBase": "",
+      "enemyBase": "",
+      "showBases": true,
+      "dim": 0,
+      "source": "project"
+    },
+    "contextMode": "auto",
+    "battleFormat": "1v1",
+    "activeUserSlot": 0,
+    "activeTargetSlot": 0,
+    "activeTargetIndex": 1,
+    "activeTargetSelectionExplicit": false,
+    "manualContext": {
+      "width": 640,
+      "height": 480,
+      "user": {
+        "x": 128,
+        "y": 326,
+        "focusX": 128,
+        "focusY": 278,
+        "zoomX": 1,
+        "zoomY": 1
+      },
+      "target": {
+        "x": 390,
+        "y": 174,
+        "focusX": 390,
+        "focusY": 126,
+        "zoomX": 1,
+        "zoomY": 1
+      }
+    },
+    "autoKey": true,
+    "loop": true,
+    "showPath": true,
+    "autosaveEnabled": false,
+    "autosaveDelaySeconds": 3.5,
+    "defaultAnimationAuthor": "CarnekVT",
+    "initialPackPrompted": true,
+    "initialPackInstalled": true,
+    "focusMode": true,
+    "battlerScale": 1,
+    "testBattlerScale": 1,
+    "playerBattlerSize": 3,
+    "foeBattlerSize": 2,
+    "quickIntensity": 85,
+    "sidePreview": "foe",
+    "layout": {
+      "leftWidth": 271,
+      "rightWidth": 520,
+      "timelineHeight": 283,
+      "framePixels": 16
+    },
+    "onionMode": "off"
+  },
   "animations": [
     {
       "id": "anim_mt3nkm5h_8a",
@@ -43,8 +122,7 @@
         ],
         "runtimeSelected": false,
         "groupIdentity": "custom|CUSTOM_ANIMATION",
-        "groupName": "Punch",
-        "runtimeEnabled": true
+        "groupName": "Punch"
       },
       "contextTimelines": [],
       "battlers": {
@@ -463,7 +541,7 @@
               "endFrame": 25,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/punches.png",
+                "projectPath": "Graphics/Battle animations/Examples/punches.png",
                 "folder": "Battle animations",
                 "name": "punches",
                 "relativeHint": "",
@@ -484,8 +562,8 @@
                 {
                   "id": "gkey_mt3nn7vf_8v",
                   "frame": 0,
-                  "value": "Graphics/AnimationStudio/GEN8- Elemental Punch.png",
-                  "projectPath": "Graphics/AnimationStudio/GEN8- Elemental Punch.png",
+                  "value": "Graphics/Animations/GEN8- Elemental Punch.png",
+                  "projectPath": "Graphics/Animations/GEN8- Elemental Punch.png",
                   "source": "legacy",
                   "name": "GEN8- Elemental Punch"
                 }
@@ -837,8 +915,7 @@
           "CarnekVT"
         ],
         "runtimeSelected": false,
-        "groupIdentity": "custom|KICK",
-        "runtimeEnabled": true
+        "groupIdentity": "custom|KICK"
       },
       "contextTimelines": [],
       "battlers": {
@@ -1314,7 +1391,7 @@
               "endFrame": 25,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/Kick.png",
+                "projectPath": "Graphics/Battle animations/Kick.png",
                 "folder": "Battle animations",
                 "name": "Kick",
                 "relativeHint": "",
@@ -1679,8 +1756,7 @@
           "CarnekVT"
         ],
         "runtimeSelected": false,
-        "groupIdentity": "custom|BITE",
-        "runtimeEnabled": true
+        "groupIdentity": "custom|BITE"
       },
       "contextTimelines": [],
       "battlers": {
@@ -2068,7 +2144,7 @@
               "endFrame": 16,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/fangs.png",
+                "projectPath": "Graphics/Battle animations/fangs.png",
                 "folder": "Battle animations",
                 "name": "fangs",
                 "relativeHint": "",
@@ -2277,7 +2353,7 @@
               "endFrame": 16,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/fangs.png",
+                "projectPath": "Graphics/Battle animations/fangs.png",
                 "folder": "Battle animations",
                 "name": "fangs",
                 "relativeHint": "",
@@ -2554,8 +2630,7 @@
           "CarnekVT"
         ],
         "runtimeSelected": false,
-        "groupIdentity": "custom|HITE",
-        "runtimeEnabled": true
+        "groupIdentity": "custom|HITE"
       },
       "contextTimelines": [],
       "battlers": {
@@ -2974,7 +3049,7 @@
               "endFrame": 8,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Strike.png",
+                "projectPath": "Graphics/Animations/PRAS- Strike.png",
                 "folder": "Animations",
                 "name": "PRAS- Strike",
                 "relativeHint": "",
@@ -3293,8 +3368,7 @@
           "CarnekVT"
         ],
         "runtimeSelected": false,
-        "groupIdentity": "custom|CUT",
-        "runtimeEnabled": true
+        "groupIdentity": "custom|CUT"
       },
       "contextTimelines": [],
       "battlers": {
@@ -3723,7 +3797,7 @@
               "endFrame": 11,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Strike.png",
+                "projectPath": "Graphics/Animations/PRAS- Strike.png",
                 "folder": "Animations",
                 "name": "PRAS- Strike",
                 "relativeHint": "",
@@ -3744,32 +3818,32 @@
                 {
                   "id": "gkey_mt3ozbhf_1r7",
                   "frame": 0,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mt3p3vzl_1rw",
                   "frame": 5,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mt3p49p9_1s6",
                   "frame": 9,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mt3p5vhs_1xh",
                   "frame": 11,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 }
@@ -4234,7 +4308,7 @@
         ],
         "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
         "runtimeSelected": false,
-        "runtimeEnabled": true,
+        "runtimeEnabled": false,
         "initialPackKey": "EXPLOSION_Player_V0",
         "initialPack": true,
         "groupIdentity": "move|EXPLOSION",
@@ -5929,7 +6003,7 @@
               "endFrame": 99,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/black_screen.png",
+                "projectPath": "Graphics/Animations/black_screen.png",
                 "folder": "Animations",
                 "name": "black_screen",
                 "relativeHint": "Graphics/Animations/black_screen.png",
@@ -5953,16 +6027,16 @@
                 {
                   "id": "gkey_msxmxk9c_2p",
                   "frame": 0,
-                  "value": "Graphics/AnimationStudio/black_screen.png",
-                  "projectPath": "Graphics/AnimationStudio/black_screen.png",
+                  "value": "Graphics/Animations/black_screen.png",
+                  "projectPath": "Graphics/Animations/black_screen.png",
                   "source": "legacy",
                   "name": "black_screen"
                 },
                 {
                   "id": "gkey_msxmxtnu_2q",
                   "frame": 79,
-                  "value": "Graphics/AnimationStudio/white_screen.png",
-                  "projectPath": "Graphics/AnimationStudio/white_screen.png",
+                  "value": "Graphics/Animations/white_screen.png",
+                  "projectPath": "Graphics/Animations/white_screen.png",
                   "source": "legacy",
                   "name": "white_screen"
                 }
@@ -6176,7 +6250,7 @@
               "endFrame": 87,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Fire BG.png",
+                "projectPath": "Graphics/Animations/PRAS- Fire BG.png",
                 "folder": "Animations",
                 "name": "PRAS- Fire BG",
                 "relativeHint": "Graphics/Animations/PRAS- Fire BG.png",
@@ -6362,7 +6436,7 @@
               "endFrame": 51,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/Energy1.png",
+                "projectPath": "Graphics/Animations/Energy1.png",
                 "folder": "Animations",
                 "name": "Energy1",
                 "relativeHint": "Graphics/Animations/Energy1.png",
@@ -7280,7 +7354,7 @@
               "endFrame": 120,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/dust cloud.png",
+                "projectPath": "Graphics/Animations/dust cloud.png",
                 "folder": "Animations",
                 "name": "dust cloud",
                 "relativeHint": "Graphics/Animations/dust cloud.png",
@@ -7565,7 +7639,7 @@
               "endFrame": 103,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/dust cloud.png",
+                "projectPath": "Graphics/Animations/dust cloud.png",
                 "folder": "Animations",
                 "name": "dust cloud",
                 "relativeHint": "Graphics/Animations/dust cloud.png",
@@ -7905,7 +7979,7 @@
               "endFrame": 109,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Explosions.png",
+                "projectPath": "Graphics/Animations/PRAS- Explosions.png",
                 "folder": "Animations",
                 "name": "PRAS- Explosions",
                 "relativeHint": "Graphics/Animations/PRAS- Explosions.png",
@@ -8145,7 +8219,7 @@
               "endFrame": 109,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Explosions.png",
+                "projectPath": "Graphics/Animations/PRAS- Explosions.png",
                 "folder": "Animations",
                 "name": "PRAS- Explosions",
                 "relativeHint": "Graphics/Animations/PRAS- Explosions.png",
@@ -8385,7 +8459,7 @@
               "endFrame": 109,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Explosions.png",
+                "projectPath": "Graphics/Animations/PRAS- Explosions.png",
                 "folder": "Animations",
                 "name": "PRAS- Explosions",
                 "relativeHint": "Graphics/Animations/PRAS- Explosions.png",
@@ -8748,7 +8822,7 @@
         "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
         "initialPackKey": "VOLTTACKLE_Player_V0",
         "initialPack": true,
-        "runtimeEnabled": true,
+        "runtimeEnabled": false,
         "groupIdentity": "move|VOLTTACKLE",
         "initialPackRevision": 29
       },
@@ -10002,7 +10076,7 @@
               "endFrame": 18,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Electric.png",
+                "projectPath": "Graphics/Animations/PRAS- Electric.png",
                 "folder": "Animations",
                 "name": "PRAS- Electric",
                 "relativeHint": "Graphics/Animations/PRAS- Electric.png",
@@ -10268,7 +10342,7 @@
               "endFrame": 22,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Electric.png",
+                "projectPath": "Graphics/Animations/PRAS- Electric.png",
                 "folder": "Animations",
                 "name": "PRAS- Electric",
                 "relativeHint": "Graphics/Animations/PRAS- Electric.png",
@@ -10493,7 +10567,7 @@
               "endFrame": 19,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Electric.png",
+                "projectPath": "Graphics/Animations/PRAS- Electric.png",
                 "folder": "Animations",
                 "name": "PRAS- Electric",
                 "relativeHint": "Graphics/Animations/PRAS- Electric.png",
@@ -10725,7 +10799,7 @@
               "endFrame": 25,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Electric.png",
+                "projectPath": "Graphics/Animations/PRAS- Electric.png",
                 "folder": "Animations",
                 "name": "PRAS- Electric",
                 "relativeHint": "Graphics/Animations/PRAS- Electric.png",
@@ -10944,7 +11018,7 @@
               "endFrame": 50,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/black_screen.png",
+                "projectPath": "Graphics/Animations/black_screen.png",
                 "folder": "Animations",
                 "name": "black_screen",
                 "relativeHint": "Graphics/Animations/black_screen.png",
@@ -11172,7 +11246,7 @@
               "endFrame": 40,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/white_screen.png",
+                "projectPath": "Graphics/Animations/white_screen.png",
                 "folder": "Animations",
                 "name": "white_screen",
                 "relativeHint": "Graphics/Animations/white_screen.png",
@@ -11432,7 +11506,7 @@
               "endFrame": 30,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/electric1.png",
+                "projectPath": "Graphics/Animations/electric1.png",
                 "folder": "Animations",
                 "name": "electric1",
                 "relativeHint": "Graphics/Animations/electric1.png",
@@ -11937,7 +12011,7 @@
               "endFrame": 14,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/Energy1.png",
+                "projectPath": "Graphics/Animations/Energy1.png",
                 "folder": "Animations",
                 "name": "Energy1",
                 "relativeHint": "Graphics/Animations/Energy1.png",
@@ -12285,7 +12359,7 @@
               "endFrame": 70,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/electric2.png",
+                "projectPath": "Graphics/Animations/electric2.png",
                 "folder": "Animations",
                 "name": "electric2",
                 "relativeHint": "Graphics/Animations/electric2.png",
@@ -12894,7 +12968,7 @@
         "runtimeSelected": false,
         "initialPackKey": "SnapTrap_Player_V0",
         "initialPack": true,
-        "runtimeEnabled": true,
+        "runtimeEnabled": false,
         "groupIdentity": "move|SNAPTRAP",
         "initialPackRevision": 29
       },
@@ -13551,7 +13625,7 @@
               "endFrame": 18,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/Leer.png",
+                "projectPath": "Graphics/BattleParticlesAnimations/Leer.png",
                 "folder": "BattleParticlesAnimations",
                 "name": "Leer",
                 "relativeHint": "Graphics/BattleParticlesAnimations/Leer.png",
@@ -13831,7 +13905,7 @@
               "endFrame": 52,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/fangs.png",
+                "projectPath": "Graphics/Battle animations/fangs.png",
                 "folder": "Battle animations",
                 "name": "fangs",
                 "relativeHint": "Graphics/Battle animations/fangs.png",
@@ -14174,7 +14248,7 @@
               "endFrame": 52,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/fangs.png",
+                "projectPath": "Graphics/Battle animations/fangs.png",
                 "folder": "Battle animations",
                 "name": "fangs",
                 "relativeHint": "Graphics/Battle animations/fangs.png",
@@ -14711,7 +14785,7 @@
         "initialPackRevision": 29,
         "initialPackKey": "SnapTrap_Common_V0",
         "initialPack": true,
-        "runtimeEnabled": true,
+        "runtimeEnabled": false,
         "groupIdentity": "common|SNAPTRAP"
       },
       "contextTimelines": [],
@@ -15206,7 +15280,7 @@
               "endFrame": 32,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/fangs.png",
+                "projectPath": "Graphics/Battle animations/fangs.png",
                 "folder": "Battle animations",
                 "name": "fangs",
                 "relativeHint": "Graphics/Battle animations/fangs.png",
@@ -15446,7 +15520,7 @@
               "endFrame": 32,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/fangs.png",
+                "projectPath": "Graphics/Battle animations/fangs.png",
                 "folder": "Battle animations",
                 "name": "fangs",
                 "relativeHint": "Graphics/Battle animations/fangs.png",
@@ -15757,8 +15831,7 @@
           "CarnekVT"
         ],
         "runtimeSelected": false,
-        "groupIdentity": "move|OBLIVIONWING",
-        "runtimeEnabled": true
+        "groupIdentity": "move|OBLIVIONWING"
       },
       "contextTimelines": [],
       "battlers": {
@@ -16147,7 +16220,7 @@
               "endFrame": 21,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/AnimationStudio/Energy1.png",
+                "projectPath": "Graphics/Animations/Energy1.png",
                 "folder": "Animations",
                 "name": "Energy1",
                 "relativeHint": "",
@@ -16426,7 +16499,7 @@
               "endFrame": 21,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/AnimationStudio/Energy1.png",
+                "projectPath": "Graphics/Animations/Energy1.png",
                 "folder": "Animations",
                 "name": "Energy1",
                 "relativeHint": "",
@@ -16746,8 +16819,7 @@
           "CarnekVT"
         ],
         "runtimeSelected": false,
-        "groupIdentity": "move|NIGHTSLASH",
-        "runtimeEnabled": true
+        "groupIdentity": "move|NIGHTSLASH"
       },
       "contextTimelines": [],
       "battlers": {
@@ -17302,20 +17374,6 @@
               },
               "axisX": true,
               "axisY": true
-            },
-            {
-              "id": "key_mtdpqwch_ah",
-              "frame": 33,
-              "easing": "ease_both",
-              "axisX": true,
-              "axisY": true,
-              "point": {
-                "anchor": "target_battler",
-                "x": 0,
-                "y": 0,
-                "offsetX": 0,
-                "offsetY": 0
-              }
             }
           ],
           "valueKeys": {
@@ -17397,24 +17455,12 @@
                 "frame": 30,
                 "value": 105.84888888888888,
                 "easing": "ease_both"
-              },
-              {
-                "id": "pkey_mtdpr5rk_ak",
-                "frame": 33,
-                "value": 100,
-                "easing": "ease_both"
               }
             ],
             "scaleX": [
               {
                 "id": "pkey_mtdccf2g_32u",
                 "frame": 24,
-                "value": 100,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mtdpqxzm_ai",
-                "frame": 33,
                 "value": 100,
                 "easing": "linear"
               }
@@ -17453,12 +17499,6 @@
               {
                 "id": "pkey_mtdcm9r4_33p",
                 "frame": 29,
-                "value": 100,
-                "easing": "linear"
-              },
-              {
-                "id": "pkey_mtdpqxzm_aj",
-                "frame": 33,
                 "value": 100,
                 "easing": "linear"
               }
@@ -17618,7 +17658,7 @@
           "fxOps": [],
           "logic": [],
           "startFrame": 0,
-          "endFrame": 33
+          "endFrame": 31
         }
       },
       "camera": {
@@ -17780,7 +17820,7 @@
               "endFrame": 34,
               "graphic": {
                 "source": "studio",
-                "projectPath": "Graphics/AnimationStudio/black_screen_2.png",
+                "projectPath": "Graphics/AnimationStudio/black_screen.png",
                 "folder": "AnimationStudio",
                 "name": "black_screen",
                 "relativeHint": "",
@@ -17973,7 +18013,7 @@
               "endFrame": 17,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Strike.png",
+                "projectPath": "Graphics/Animations/PRAS- Strike.png",
                 "folder": "Animations",
                 "name": "PRAS- Strike",
                 "relativeHint": "Graphics/Animations/PRAS- Strike.png",
@@ -17997,32 +18037,32 @@
                 {
                   "id": "gkey_mtdby8e0_10e",
                   "frame": 6,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdby8e0_10f",
                   "frame": 11,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdby8e0_10g",
                   "frame": 15,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdby8e0_10h",
                   "frame": 17,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 }
@@ -18372,7 +18412,7 @@
               "endFrame": 23,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Strike.png",
+                "projectPath": "Graphics/Animations/PRAS- Strike.png",
                 "folder": "Animations",
                 "name": "PRAS- Strike",
                 "relativeHint": "Graphics/Animations/PRAS- Strike.png",
@@ -18396,32 +18436,32 @@
                 {
                   "id": "gkey_mtdc156d_126",
                   "frame": 12,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdc156d_127",
                   "frame": 17,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdc156d_128",
                   "frame": 21,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdc156d_129",
                   "frame": 23,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 }
@@ -18778,7 +18818,7 @@
               "endFrame": 28,
               "graphic": {
                 "source": "project",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Strike.png",
+                "projectPath": "Graphics/Animations/PRAS- Strike.png",
                 "folder": "Animations",
                 "name": "PRAS- Strike",
                 "relativeHint": "Graphics/Animations/PRAS- Strike.png",
@@ -18802,32 +18842,32 @@
                 {
                   "id": "gkey_mtdc8e78_2w2",
                   "frame": 17,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdc8e78_2w3",
                   "frame": 22,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdc8e78_2w4",
                   "frame": 26,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 },
                 {
                   "id": "gkey_mtdc8e78_2w5",
                   "frame": 28,
-                  "value": "Graphics/AnimationStudio/Cut.png",
-                  "projectPath": "Graphics/AnimationStudio/Cut.png",
+                  "value": "Graphics/Battle animations/Cut.png",
+                  "projectPath": "Graphics/Battle animations/Cut.png",
                   "source": "new",
                   "name": "Cut"
                 }
@@ -19196,7 +19236,7 @@
               "endFrame": 44,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/AnimationStudio/PRAS- Ominous Wind FG.png",
+                "projectPath": "Graphics/Animations/PRAS- Ominous Wind FG.png",
                 "folder": "Animations",
                 "name": "PRAS- Ominous Wind FG",
                 "relativeHint": "",
@@ -19753,7 +19793,7 @@
               "endFrame": 26,
               "graphic": {
                 "source": "studio",
-                "projectPath": "Graphics/AnimationStudio/Energy1_2.png",
+                "projectPath": "Graphics/AnimationStudio/Energy1.png",
                 "folder": "AnimationStudio",
                 "name": "Energy1",
                 "relativeHint": "",
@@ -20149,7 +20189,7 @@
               "endFrame": 32,
               "graphic": {
                 "source": "studio",
-                "projectPath": "Graphics/AnimationStudio/Energy1_2.png",
+                "projectPath": "Graphics/AnimationStudio/Energy1.png",
                 "folder": "AnimationStudio",
                 "name": "Energy1",
                 "relativeHint": "",
@@ -20545,7 +20585,7 @@
               "endFrame": 38,
               "graphic": {
                 "source": "studio",
-                "projectPath": "Graphics/AnimationStudio/Energy1_2.png",
+                "projectPath": "Graphics/AnimationStudio/Energy1.png",
                 "folder": "AnimationStudio",
                 "name": "Energy1",
                 "relativeHint": "",
@@ -21063,8 +21103,7 @@
           "CarnekVT"
         ],
         "groupIdentity": "move|WATERSHURIKEN",
-        "runtimeSelected": false,
-        "runtimeEnabled": true
+        "runtimeSelected": false
       },
       "contextTimelines": [],
       "battlers": {
@@ -21360,8 +21399,7 @@
         "external": false,
         "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
         "groupIdentity": "move|GROWL",
-        "runtimeSelected": false,
-        "runtimeEnabled": true
+        "runtimeSelected": false
       },
       "contextTimelines": [],
       "battlers": {
@@ -21762,7 +21800,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/circle.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -21783,8 +21821,7 @@
                 ],
                 "rawName": "circle",
                 "specialBattler": "circle",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -22044,7 +22081,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/circle.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -22065,8 +22102,7 @@
                 ],
                 "rawName": "circle",
                 "specialBattler": "circle",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -22332,7 +22368,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/circle.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -22353,8 +22389,7 @@
                 ],
                 "rawName": "circle",
                 "specialBattler": "circle",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -22620,7 +22655,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -22641,8 +22676,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -22933,7 +22967,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -22954,8 +22988,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -23251,7 +23284,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -23272,8 +23305,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -23596,7 +23628,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -23617,8 +23649,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -23946,7 +23977,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -23967,8 +23998,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -24291,7 +24321,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -24312,8 +24342,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -24641,7 +24670,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -24662,8 +24691,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -24954,7 +24982,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -24975,8 +25003,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -25288,7 +25315,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -25309,8 +25336,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -25633,7 +25659,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -25654,8 +25680,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -25983,7 +26008,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -26004,8 +26029,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -26328,7 +26352,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap.png",
+                "projectPath": "",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -26349,8 +26373,7 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": "",
-                "resolvedAtExport": true
+                "maskGraphic": ""
               },
               "graphicSwitches": [],
               "visual": {
@@ -26685,8 +26708,8 @@
         "inheritProject": true,
         "source": "project",
         "responsive": true,
-        "referenceWidth": 640,
-        "referenceHeight": 480,
+        "referenceWidth": 0,
+        "referenceHeight": 0,
         "cameraBoundsMode": "auto"
       },
       "noUser": false,
@@ -26725,8 +26748,7 @@
           "CarnekVT"
         ],
         "runtimeSelected": false,
-        "groupIdentity": "custom|SOSCALL",
-        "runtimeEnabled": true
+        "groupIdentity": "custom|SOSCALL"
       },
       "contextTimelines": [],
       "battlers": {
@@ -26981,7 +27003,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/circle_2.png",
+                "projectPath": "Graphics/Animations/circle.png",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -27252,7 +27274,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/circle_2.png",
+                "projectPath": "Graphics/Animations/circle.png",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -27536,7 +27558,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/circle_2.png",
+                "projectPath": "Graphics/Animations/circle.png",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -27820,7 +27842,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -28115,7 +28137,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -28415,7 +28437,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -28735,7 +28757,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -29060,7 +29082,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -29380,7 +29402,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -29705,7 +29727,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -30000,7 +30022,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -30316,7 +30338,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -30636,7 +30658,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -30961,7 +30983,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -31281,7 +31303,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/AnimationStudio/zap_2.png",
+                "projectPath": "Graphics/Animations/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -31627,5 +31649,12 @@
         "cameraBoundsMode": "auto"
       }
     }
-  ]
+  ],
+  "reusableClips": [],
+  "packages": [],
+  "exportGameDataDir": "PBS/AnimationStudio",
+  "exportPackageDir": "C:/Users/nuevo usuario/OneDrive/Datos adjuntos de correo electronico/CarnekMods/BAS - Battle Animation Studio/Weas/SOS Call",
+  "editor": {
+    "lastAnimationId": "anim_mtdiyyto_kf"
+  }
 }

@@ -1222,7 +1222,7 @@ module BattleAnimationStudioRuntime
         @screen_fixed_clip_ids[clip["id"].to_s] = true if fixed
       end
       events = @data["events"].is_a?(Array) ? @data["events"] : []
-      @se_events = events.select { |ev| ev.is_a?(Hash) && ev["type"].to_s.downcase == "se" }.sort_by { |ev| (ev["frame"] || 0).to_f }
+      @se_events = events.select { |ev| ev.is_a?(Hash) && ["se", "cry"].include?(ev["type"].to_s.downcase) }.sort_by { |ev| (ev["frame"] || 0).to_f }
       @screen_events = events.select { |ev| ev.is_a?(Hash) && ["screen_black_envelope", "screen_white_envelope", "screen_flash", "flash", "darken"].include?(ev["type"].to_s) }
       @shake_events = events.select { |ev| ev.is_a?(Hash) && ev["type"].to_s == "screen_shake" }
     end
@@ -2121,22 +2121,35 @@ module BattleAnimationStudioRuntime
         raw.is_a?(Array) ? raw.sort_by { |k| (k["frame"] || 0).to_f } : []
       end
       return [Graphics.width / 2.0, Graphics.height / 2.0] if keys.empty?
-      return resolve_object_point(obj, keys.first["point"]) if frame <= keys.first["frame"].to_f
-      return resolve_object_point(obj, keys.last["point"]) if frame >= keys.last["frame"].to_f
-      lo = 0; hi = keys.length - 1
-      while lo + 1 < hi
-        mid = (lo + hi) / 2
-        if keys[mid]["frame"].to_f <= frame
-          lo = mid
-        else
-          hi = mid
+      sample_axis = lambda do |axis|
+        flag = axis == 0 ? "axisX" : "axisY"
+        enabled = keys.select { |k| k[flag] != false }
+        return axis == 0 ? Graphics.width / 2.0 : Graphics.height / 2.0 if enabled.empty?
+        component = lambda do |key|
+          point = resolve_object_point(obj, key["point"])
+          point[axis].to_f
         end
+        return component.call(enabled.first) if frame <= enabled.first["frame"].to_f
+        return component.call(enabled.last) if frame >= enabled.last["frame"].to_f
+        lo = 0
+        hi = enabled.length - 1
+        while lo + 1 < hi
+          mid = (lo + hi) / 2
+          if enabled[mid]["frame"].to_f <= frame
+            lo = mid
+          else
+            hi = mid
+          end
+        end
+        a = enabled[lo]
+        b = enabled[hi]
+        span = [0.0001, b["frame"].to_f - a["frame"].to_f].max
+        t = ease01((frame - a["frame"].to_f) / span, a["easing"])
+        av = component.call(a)
+        bv = component.call(b)
+        av + (bv - av) * t
       end
-      a = keys[lo]; b = keys[hi]
-      pa = resolve_object_point(obj, a["point"]); pb = resolve_object_point(obj, b["point"])
-      span = [0.0001, b["frame"].to_f - a["frame"].to_f].max
-      t = ease01((frame - a["frame"].to_f) / span, a["easing"])
-      [pa[0] + (pb[0] - pa[0]) * t, pa[1] + (pb[1] - pa[1]) * t]
+      [sample_axis.call(0), sample_axis.call(1)]
     rescue
       [Graphics.width / 2.0, Graphics.height / 2.0]
     end
@@ -3618,6 +3631,88 @@ module BattleAnimationStudioRuntime
       name.to_s
     end
 
+    def play_battler_cry_event(ev)
+      raw_side = ev["side"].to_s.downcase
+      # v1.0.42: Cry is side-based (Player/Foe), not move-role based
+      # (User/Target). Keep legacy events compatible: user=>player, target=>foe.
+      side = ["foe", "target"].include?(raw_side) ? :foe : :player
+      wanted_parity = side == :foe ? 1 : 0
+      battler = [@user, @target].compact.find do |b|
+        idx = BattleAnimationStudioRuntime.safe_battler_index(b, -1).to_i
+        idx >= 0 && idx % 2 == wanted_parity
+      end
+      if !battler
+        battler = runtime_battlers.find do |b|
+          idx = BattleAnimationStudioRuntime.safe_battler_index(b, -1).to_i
+          idx >= 0 && idx % 2 == wanted_parity
+        end
+      end
+      return if !battler
+      pokemon = battler.respond_to?(:pokemon) ? (battler.pokemon rescue nil) : nil
+      volume = (ev["volume"] || 100).to_i
+      pitch = (ev["pitch"] || 100).to_i
+
+      if pokemon && pokemon.respond_to?(:play_cry)
+        begin
+          pokemon.play_cry(volume, pitch)
+          return
+        rescue ArgumentError, TypeError
+          begin
+            pokemon.play_cry
+            return
+          rescue
+          end
+        rescue
+        end
+      end
+
+      if defined?(GameData::Species)
+        if GameData::Species.respond_to?(:play_cry_from_pokemon) && pokemon
+          begin
+            GameData::Species.play_cry_from_pokemon(pokemon, volume, pitch)
+            return
+          rescue ArgumentError, TypeError
+            begin
+              GameData::Species.play_cry_from_pokemon(pokemon)
+              return
+            rescue
+            end
+          rescue
+          end
+        end
+        if GameData::Species.respond_to?(:play_cry)
+          species = pokemon && pokemon.respond_to?(:species) ? pokemon.species : (battler.respond_to?(:species) ? battler.species : nil)
+          form = pokemon && pokemon.respond_to?(:form) ? pokemon.form : (battler.respond_to?(:form) ? battler.form : 0)
+          if species
+            [[species, form, volume, pitch], [species, form], [species]].each do |args|
+              begin
+                GameData::Species.play_cry(*args)
+                return
+              rescue ArgumentError, TypeError
+              rescue
+                break
+              end
+            end
+          end
+        end
+      end
+
+      if respond_to?(:pbPlayCry, true) && pokemon
+        [[pokemon, volume, pitch], [pokemon]].each do |args|
+          begin
+            send(:pbPlayCry, *args)
+            return
+          rescue ArgumentError, TypeError
+          rescue
+            break
+          end
+        end
+      end
+      BattleAnimationStudioRuntime.log("Cry not playable for #{side}")
+    rescue => e
+      BattleAnimationStudioRuntime.log("Cry playback #{e.class}: #{e.message}")
+    end
+
     def play_events(previous_frame, current_frame)
       (@se_events || []).each do |ev|
         ef = (ev["frame"] || 0).to_f
@@ -3627,6 +3722,10 @@ module BattleAnimationStudioRuntime
                     ef > previous_frame + 0.0001 && ef <= current_frame + 0.0001
                   end
         next if !crossed
+        if ev["type"].to_s.downcase == "cry"
+          play_battler_cry_event(ev)
+          next
+        end
         name = resolve_runtime_se_name(ev["name"])
         next if name.empty?
         pbSEPlay(name, (ev["volume"] || 100).to_i, (ev["pitch"] || 100).to_i)
@@ -3818,19 +3917,24 @@ module BattleAnimationStudioRuntime
       focus_offset = camera_focus_offset(camera)
       x += focus_offset[0].to_f
       y += focus_offset[1].to_f
+      # Clamp Focus/Pan first, then apply shake. Otherwise a Focus camera sitting
+      # on a screen bound clips alternating shake frames and makes shake look random.
+      constrained = constrain_camera_state(x, y, zoom, rotation)
+      x = constrained[0]; y = constrained[1]; zoom = constrained[2]
+      x_pattern = [1.0, -0.82, 0.68, -0.58, 0.48, -0.38, 0.28, -0.18]
+      y_pattern = [-0.46, 0.41, -0.36, 0.31, -0.26, 0.21, -0.16, 0.11]
       (@shake_events || []).each do |ev|
         start = (ev["frame"] || 0).to_f
         dur = [(ev["duration"] || 1).to_f, 1.0].max
-        next if @frame < start || @frame > start + dur
+        next if @frame < start || @frame >= start + dur
         local = @frame - start
         falloff = [[1.0 - local / dur, 0.0].max, 1.0].min
         strength = (ev["strength"] || 0).to_f * falloff
         axis = (ev["axis"] || 0).to_i
-        x += Math.sin(local * 2.73 + 0.31) * strength if axis != 2
-        y += Math.cos(local * 3.91 + 0.77) * strength * 0.55 if axis != 1
+        step = [local.floor, 0].max % x_pattern.length
+        x += x_pattern[step] * strength if axis != 2
+        y += y_pattern[step] * strength if axis != 1
       end
-      constrained = constrain_camera_state(x, y, zoom, rotation)
-      x = constrained[0]; y = constrained[1]; zoom = constrained[2]
       state[:x] = x; state[:y] = y; state[:zoom] = zoom; state[:rotation] = rotation
       rad = rotation * Math::PI / 180.0
       state[:cos] = Math.cos(rad); state[:sin] = Math.sin(rad)

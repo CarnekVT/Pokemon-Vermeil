@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio 0.6.25 - Native SOS (Phase 1)
+# Battle Scene Studio 0.6.37 - Native SOS (Phase 1)
 # BSS-owned SOS. Runtime assignments come only from sos_global.json.
 # Dynamic battler creation follows the v21/DBK SOS lifecycle supplied by the
 # user. Growth slots are created by the project's real pbCreateBattler constructor
@@ -24,11 +24,288 @@ end
 
 #===============================================================================
 # Dynamic battlers are intentionally NOT monkey-patched here.
-# BSS 0.6.25 follows the same creation/replacement lifecycle as the supplied
+# BSS 0.6.37 follows the same creation/replacement lifecycle as the supplied
 # SOS source: pbCreateBattler for new slots and pbInitialize only for an already
 # constructed fainted slot. This avoids entering the project's Battler initializer
 # with a hand-built/partially seeded object.
 #===============================================================================
+
+#===============================================================================
+# Bundled BAS SOS Call animation
+# Uses the CarnekVT-authored SOS Call animpack supplied with v0.6.37 whenever
+# Battle Animation Studio Runtime is present. The animation is injected into the
+# BAS in-memory custom catalog only; the user's compiled_animations.json is never
+# edited. Without BAS, the native Growl fallback remains untouched.
+#===============================================================================
+module BSS064
+  BAS_SOS_CALL_FILE = "Data/BattleSceneStudio/BAS/SOSCALL_Foe_V0.animpack.json" unless const_defined?(:BAS_SOS_CALL_FILE)
+
+  class << self
+    def bas_sos_call_animation
+      return @bas_sos_call_animation if @bas_sos_call_animation.is_a?(Hash)
+      return nil if !File.exist?(BAS_SOS_CALL_FILE)
+      raw=File.open(BAS_SOS_CALL_FILE,"rb") { |f| f.read }
+      pack=json_parse(raw)
+      anim=pack.is_a?(Hash) ? pack["animation"] : nil
+      return nil if !anim.is_a?(Hash)
+      src=anim["source"].is_a?(Hash) ? anim["source"] : (anim["source"]={})
+      src["runtimeEnabled"]=true; src["runtimeSelected"]=true
+      @bas_sos_call_animation=anim
+    rescue => e
+      log("SOS BAS animpack load warning: #{e.class}: #{e.message}")
+      nil
+    end
+
+    def ensure_bas_sos_call_animation
+      return false if !defined?(BattleAnimationStudioRuntime)
+      anim=bas_sos_call_animation; return false if !anim
+      begin; BattleAnimationStudioRuntime.load_data if BattleAnimationStudioRuntime.respond_to?(:load_data); rescue; end
+      cache=BattleAnimationStudioRuntime.instance_variable_get(:@cache) rescue nil
+      if !cache.is_a?(Hash)
+        cache={"animations"=>[]}
+        BattleAnimationStudioRuntime.instance_variable_set(:@cache,cache) rescue nil
+      end
+      list=cache["animations"]; list=[] if !list.is_a?(Array); cache["animations"]=list
+      list.delete_if { |a| a.is_a?(Hash) && (a["source"].is_a?(Hash) ? a["source"]["move"].to_s : "") == "SOSCALL" && a["bssBundledSource"].to_s.start_with?("BSS:") }
+      injected=begin Marshal.load(Marshal.dump(anim)) rescue anim.dup end
+      injected["bssBundledSource"]="BSS:SOS Call(1).zip"
+      list << injected
+      if BattleAnimationStudioRuntime.respond_to?(:rebuild_lookup_index)
+        BattleAnimationStudioRuntime.rebuild_lookup_index
+      end
+      true
+    rescue => e
+      log("SOS BAS catalog inject warning: #{e.class}: #{e.message}")
+      false
+    end
+
+    def install_bas_sos_color_compat
+      return false if !defined?(BattleAnimationStudioRuntime::Player)
+      klass=BattleAnimationStudioRuntime::Player
+      return true if klass.ancestors.include?(BSS064BASParticleColorCompat)
+      return false if !klass.method_defined?(:apply_object) && !klass.private_method_defined?(:apply_object)
+      klass.prepend(BSS064BASParticleColorCompat)
+      true
+    rescue => e
+      log("SOS BAS color compat warning: #{e.class}: #{e.message}")
+      false
+    end
+
+    # Main path for BAS 5.1+: inject the supplied animpack into BAS' custom
+    # catalog, then ask BAS itself to resolve and play it. This is deliberately
+    # the same public playback path used by custom/Quick animations. BSS no
+    # longer guesses the animation duration or reimplements Player semantics.
+    def play_bas_sos_call_official(scene, caller)
+      return false if !scene || !caller
+      return false if !defined?(BattleAnimationStudioRuntime)
+      return false if !scene.respond_to?(:pbPlayBattleAnimationStudioCustom)
+      install_bas_sos_color_compat
+      return false if !ensure_bas_sos_call_animation
+      target=begin caller.pbDirectOpposing(true) rescue nil end
+      targets=target ? [target] : []
+      result=scene.pbPlayBattleAnimationStudioCustom("SOSCALL",caller,targets,0)
+      result != false
+    rescue => e
+      log("SOS BAS official playback warning: #{e.class}: #{e.message}")
+      false
+    end
+
+    # Compatibility only. Older BAS builds may expose Player but not the public
+    # custom-animation helper. Even here BSS waits for BAS' own animDone? state
+    # rather than truncating the supplied animation at its metadata duration.
+    def play_bas_sos_call_direct(scene, caller)
+      return false if !scene || !caller
+      return false if !defined?(BattleAnimationStudioRuntime) || !defined?(BattleAnimationStudioRuntime::Player)
+      install_bas_sos_color_compat
+      return false if !scene.respond_to?(:bas_runtime_pump_frame)
+      source=bas_sos_call_animation;return false if !source
+      data=begin Marshal.load(Marshal.dump(source)) rescue source.dup end
+      src=data["source"].is_a?(Hash) ? data["source"] : (data["source"]={})
+      src["runtimeEnabled"]=true;src["runtimeSelected"]=true
+      target=begin caller.pbDirectOpposing(true) rescue nil end
+      sprites=scene.instance_variable_get(:@sprites) rescue nil
+      viewport=scene.instance_variable_get(:@viewport) rescue nil
+      return false if !sprites.is_a?(Hash)
+      player=BattleAnimationStudioRuntime::Player.new(sprites,viewport,caller,target,data,target ? [target] : [])
+      BattleAnimationStudioRuntime.active_player=player if BattleAnimationStudioRuntime.respond_to?(:active_player=)
+      safety=0
+      fallback_duration=(BSS064.clamp_int(data["duration"],1,100000,60) rescue 60)
+      fallback_frames=[fallback_duration,60].max
+      loop do
+        player.update
+        scene.bas_runtime_pump_frame(player)
+        safety+=1
+        break if player.respond_to?(:animDone?) && player.animDone?
+        break if !player.respond_to?(:animDone?) && safety>=fallback_frames
+        break if safety>20000
+      end
+      true
+    rescue => e
+      log("SOS BAS direct playback warning: #{e.class}: #{e.message}")
+      false
+    ensure
+      begin
+        if player && defined?(BattleAnimationStudioRuntime) && BattleAnimationStudioRuntime.respond_to?(:active_player=) && BattleAnimationStudioRuntime.active_player.equal?(player)
+          BattleAnimationStudioRuntime.active_player=nil
+        end
+      rescue;end
+      begin;player.restore_camera! if player;rescue;end
+      begin;player.dispose if player;rescue;end
+    end
+
+    def play_bas_sos_call(scene, caller)
+      return false if !scene || !caller
+      return false if !defined?(BattleAnimationStudioRuntime)
+      # BAS is the authority. BSS only supplies the animpack and participants.
+      return true if play_bas_sos_call_official(scene,caller)
+      play_bas_sos_call_direct(scene,caller)
+    rescue => e
+      log("SOS BAS playback warning: #{e.class}: #{e.message}")
+      false
+    end
+
+  end
+end
+
+# BAS 1.0.32 applies Tone to ordinary effect clips but ignores the authored
+# Essentials SetColor/MoveColor fxOps. The bundled SOS Call uses those ops for
+# its orange rings and yellow zaps. Add only that missing RGSS Color layer while
+# leaving BAS in charge of every other property/timing/graphic.
+module BSS064BASParticleColorCompat
+  # Convert the same color payloads accepted by BAS Studio preview. The
+  # Essentials importer normally stores raw SetColor/MoveColor colors as
+  # RRGGBBAA strings, but hash payloads are accepted too.
+  def bss067_fx_color(raw)
+    if raw.is_a?(String) || raw.is_a?(Symbol)
+      text=raw.to_s.strip.sub(/^#/,"")
+      return nil if text !~ /\A[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?\z/
+      text += "FF" if text.length==6
+      return {
+        "red"=>text[0,2].to_i(16), "green"=>text[2,2].to_i(16),
+        "blue"=>text[4,2].to_i(16), "alpha"=>text[6,2].to_i(16)
+      }
+    end
+    if raw.is_a?(Hash)
+      return {
+        "red"=>(raw["red"].nil? ? raw["r"] : raw["red"]).to_f,
+        "green"=>(raw["green"].nil? ? raw["g"] : raw["green"]).to_f,
+        "blue"=>(raw["blue"].nil? ? raw["b"] : raw["blue"]).to_f,
+        "alpha"=>(raw["alpha"].nil? ? raw["a"] : raw["alpha"]).to_f
+      }
+    end
+    nil
+  rescue
+    nil
+  end
+
+  def bss067_mix_color(a,b,t)
+    a ||= {"red"=>0.0,"green"=>0.0,"blue"=>0.0,"alpha"=>0.0}
+    b ||= {"red"=>0.0,"green"=>0.0,"blue"=>0.0,"alpha"=>0.0}
+    x=[[t.to_f,0.0].max,1.0].min
+    out={}
+    ["red","green","blue","alpha"].each { |k| out[k]=a[k].to_f+((b[k].to_f-a[k].to_f)*x) }
+    out
+  end
+
+  def bss067_ease_color(t,mode)
+    x=[[t.to_f,0.0].max,1.0].min
+    case mode.to_s.downcase
+    when "linear", "" then x
+    when "ease_in", "easein", "in" then x*x
+    when "ease_out", "easeout", "out" then 1.0-((1.0-x)*(1.0-x))
+    else
+      x<0.5 ? 2.0*x*x : 1.0-(((-2.0*x+2.0)**2)/2.0)
+    end
+  rescue
+    x
+  end
+
+  # BAS 1.0.32 runtime fx_at only consumes legacyFx. BAS Studio preview also
+  # consumes imported SetColor/MoveColor (frame may live in op.frame OR args[0])
+  # and then overlays color valueKeys. Reproduce that exact missing layer so an
+  # animpack looks the same in-game as it does in BAS.
+  def bss067_fx_color_at(obj,frame)
+    return nil if !obj.is_a?(Hash)
+    source=begin
+      respond_to?(:replica_visual_source,true) ? replica_visual_source(obj) : obj
+    rescue
+      obj
+    end
+    source=obj if !source.is_a?(Hash)
+    value={"red"=>0.0,"green"=>0.0,"blue"=>0.0,"alpha"=>0.0}
+    seen=false
+    ops=source["fxOps"].is_a?(Array) ? source["fxOps"].select { |op| op.is_a?(Hash) } : []
+    ops=ops.sort_by do |op|
+      args=op["args"].is_a?(Array) ? op["args"] : []
+      (op.key?("frame") ? op["frame"] : args[0]).to_f
+    end
+    fnow=frame.to_f
+    ops.each do |op|
+      args=op["args"].is_a?(Array) ? op["args"] : []
+      f=(op.key?("frame") ? op["frame"] : args[0]).to_f
+      break if f>fnow
+      name=op["name"].to_s
+      if name=="legacyFx"
+        parsed=bss067_fx_color(op["color"])
+        if parsed; value=parsed; seen=true; end
+        next
+      end
+      next if name !~ /Color/i
+      moving=(name =~ /^move/i) ? true : false
+      raw=if op.key?("value")
+        op["value"]
+      elsif moving
+        args.length>2 ? args[2] : args[-1]
+      else
+        args.length>1 ? args[1] : args[-1]
+      end
+      target=bss067_fx_color(raw)
+      next if !target
+      seen=true
+      duration=moving ? [0.0,(op.key?("duration") ? op["duration"] : args[1]).to_f].max : 0.0
+      if moving && duration>0.0 && fnow<f+duration
+        mode=(op["easing"] || args[3] || "linear").to_s
+        t=bss067_ease_color((fnow-f)/duration,mode)
+        return bss067_mix_color(value,target,t)
+      end
+      value=target
+    end
+
+    # Match BAS preview's final colorRed/Green/Blue/Alpha overlay too. This is
+    # harmless for the bundled SOS Call (it uses raw fxOps) and makes the shim
+    # correct for user-authored BAS variants as well.
+    keys=source["valueKeys"].is_a?(Hash) ? source["valueKeys"] : {}
+    keyed=["colorRed","colorGreen","colorBlue","colorAlpha"].any? { |k| keys[k].is_a?(Array) && !keys[k].empty? }
+    if keyed && respond_to?(:sample_value,true)
+      value={
+        "red"=>sample_value(source,"colorRed",fnow,value["red"]),
+        "green"=>sample_value(source,"colorGreen",fnow,value["green"]),
+        "blue"=>sample_value(source,"colorBlue",fnow,value["blue"]),
+        "alpha"=>sample_value(source,"colorAlpha",fnow,value["alpha"])
+      }
+      seen=true
+    end
+    seen ? value : nil
+  rescue => e
+    BattleAnimationStudioRuntime.log("BSS SOS color evaluate #{e.class}: #{e.message}") if defined?(BattleAnimationStudioRuntime) && BattleAnimationStudioRuntime.respond_to?(:log)
+    nil
+  end
+
+  def apply_object(sprite,obj,frame,battler=false,side=nil)
+    result=super
+    if sprite && sprite.respond_to?(:color=)
+      rgba=bss067_fx_color_at(obj,frame)
+      if rgba
+        sprite.color=Color.new(rgba["red"].to_f,rgba["green"].to_f,rgba["blue"].to_f,rgba["alpha"].to_f)
+      end
+    end
+    result
+  rescue => e
+    BattleAnimationStudioRuntime.log("BSS SOS color compat #{e.class}: #{e.message}") if defined?(BattleAnimationStudioRuntime) && BattleAnimationStudioRuntime.respond_to?(:log)
+    result
+  end
+end
+
 class Battle
   attr_accessor :bss_sos_enabled
   attr_accessor :bss_sos_config
@@ -39,22 +316,24 @@ class Battle
   attr_accessor :bss_last_call_answered
   attr_accessor :bss_initial_sos_done
 
-  unless method_defined?(:bss064_initialize_without_native_sos)
+  unless method_defined?(:bss064_initialize_without_native_sos) || private_method_defined?(:bss064_initialize_without_native_sos)
     alias bss064_initialize_without_native_sos initialize
-    def initialize(scene, p1, p2, player, opponent)
-      bss064_initialize_without_native_sos(scene, p1, p2, player, opponent)
-      @bss_sos_enabled        = (wildBattle? rescue false) && BSS064.global_sos_active?
-      @bss_sos_config         = @bss_sos_enabled ? BSS064.global_sos.dup : {}
-      @bss_sos_chain          = 0
-      @bss_adrenaline_orb     = false
-      @bss_original_caller    = nil
-      @bss_last_turn_called   = -99
-      @bss_last_call_answered = nil
-      @bss_initial_sos_done   = false
-      @bss_sos_summoned_indices = {}
-      @bss_sos_fixed_cursor      = 0
-      self.sosBattle = false if respond_to?(:sosBattle=)
-    end
+  end
+  # F12-safe: redefine the wrapper every plugin reload even though the alias
+  # name already exists from the previous script pass.
+  def initialize(scene, p1, p2, player, opponent)
+    bss064_initialize_without_native_sos(scene, p1, p2, player, opponent)
+    @bss_sos_enabled        = (wildBattle? rescue false) && BSS064.global_sos_active?
+    @bss_sos_config         = @bss_sos_enabled ? BSS064.global_sos.dup : {}
+    @bss_sos_chain          = 0
+    @bss_adrenaline_orb     = false
+    @bss_original_caller    = nil
+    @bss_last_turn_called   = -99
+    @bss_last_call_answered = nil
+    @bss_initial_sos_done   = false
+    @bss_sos_summoned_indices = {}
+    @bss_sos_fixed_cursor      = 0
+    self.sosBattle = false if respond_to?(:sosBattle=)
   end
 
   def bss_sos_limit_one?
@@ -746,8 +1025,10 @@ class Battle
     if show_intro
       pbDisplay(bss_sos_message("call","¡{1} pidió ayuda!",caller.pbThis))
       begin
-        @scene.pbAnimation(:GROWL, caller, caller.pbDirectOpposing(true))
+        played_bas=BSS064.play_bas_sos_call(@scene,caller)
+        @scene.pbAnimation(:GROWL, caller, caller.pbDirectOpposing(true)) if !played_bas
       rescue
+        begin; @scene.pbAnimation(:GROWL, caller, caller.pbDirectOpposing(true)); rescue; end
       end
       pbDisplayPaused(bss_sos_message("wait","... ... ..."))
     end
@@ -834,45 +1115,45 @@ class Battle
     success
   end
 
-  unless method_defined?(:bss064_command_phase_without_native_sos)
+  unless method_defined?(:bss064_command_phase_without_native_sos) || private_method_defined?(:bss064_command_phase_without_native_sos)
     alias bss064_command_phase_without_native_sos pbCommandPhase
-    def pbCommandPhase(*args)
-      if @bss_sos_enabled && !@bss_initial_sos_done && @bss_sos_config.is_a?(Hash) && @bss_sos_config["initialCall"]==true
-        wanted=[@bss_sos_config["callRound"].to_i,1].max
-        if @turnCount.to_i+1>=wanted
-          @bss_initial_sos_done=true
-          caller=@battlers[1] || @battlers[3] || @battlers[5]
-          bss_call_for_help_batch(caller,true,true) if caller && caller.bss_can_sos_call_simple?
-        end
+  end
+  def pbCommandPhase(*args)
+    if @bss_sos_enabled && !@bss_initial_sos_done && @bss_sos_config.is_a?(Hash) && @bss_sos_config["initialCall"]==true
+      wanted=[@bss_sos_config["callRound"].to_i,1].max
+      if @turnCount.to_i+1>=wanted
+        @bss_initial_sos_done=true
+        caller=@battlers[1] || @battlers[3] || @battlers[5]
+        bss_call_for_help_batch(caller,true,true) if caller && caller.bss_can_sos_call_simple?
       end
-      if @bss_sos_enabled && @scene.respond_to?(:bss_sync_sos_side_size_state)
-        anchor=[1,3,5].map { |i| @battlers[i] rescue nil }.find { |b| b && !(b.fainted? rescue true) }
-        @scene.bss_sync_sos_side_size_state(anchor.index) if anchor && pbSideSize(anchor.index).to_i>1
-      end
-      bss064_command_phase_without_native_sos(*args)
     end
+    if @bss_sos_enabled && @scene.respond_to?(:bss_sync_sos_side_size_state)
+      anchor=[1,3,5].map { |i| @battlers[i] rescue nil }.find { |b| b && !(b.fainted? rescue true) }
+      @scene.bss_sync_sos_side_size_state(anchor.index) if anchor && pbSideSize(anchor.index).to_i>1
+    end
+    bss064_command_phase_without_native_sos(*args)
   end
 
-  unless method_defined?(:bss064_end_round_without_native_sos)
+  unless method_defined?(:bss064_end_round_without_native_sos) || private_method_defined?(:bss064_end_round_without_native_sos)
     alias bss064_end_round_without_native_sos pbEndOfRoundPhase
-    def pbEndOfRoundPhase(*args)
-      self.sosBattle=false if respond_to?(:sosBattle=)
-      ret=bss064_end_round_without_native_sos(*args)
-      self.sosBattle=false if respond_to?(:sosBattle=)
-      if @bss_sos_enabled && @bss_sos_config.is_a?(Hash) && @bss_sos_config["automaticCalls"]!=false && (!bss_scripted_sos_battle? || @bss_last_call_answered!=true || bss_additional_sos_calls_allowed?) && bss_sos_runtime_battle_allowed?
-        trainer_sos=(trainerBattle? rescue false) && bss_scripted_sos_battle?
-        pbPriority(true).each do |b|
-          next if !b || (b.fainted? rescue true)
-          next if trainer_sos ? !(b.opposes? rescue false) : !(b.wild? rescue false)
-          if b.bss_can_sos_call?
-            bss_call_for_help_batch(b,false,false)
-            b.bss_took_super_effective_damage=false
-            break
-          end
+  end
+  def pbEndOfRoundPhase(*args)
+    self.sosBattle=false if respond_to?(:sosBattle=)
+    ret=bss064_end_round_without_native_sos(*args)
+    self.sosBattle=false if respond_to?(:sosBattle=)
+    if @bss_sos_enabled && @bss_sos_config.is_a?(Hash) && @bss_sos_config["automaticCalls"]!=false && (!bss_scripted_sos_battle? || @bss_last_call_answered!=true || bss_additional_sos_calls_allowed?) && bss_sos_runtime_battle_allowed?
+      trainer_sos=(trainerBattle? rescue false) && bss_scripted_sos_battle?
+      pbPriority(true).each do |b|
+        next if !b || (b.fainted? rescue true)
+        next if trainer_sos ? !(b.opposes? rescue false) : !(b.wild? rescue false)
+        if b.bss_can_sos_call?
+          bss_call_for_help_batch(b,false,false)
+          b.bss_took_super_effective_damage=false
+          break
         end
       end
-      ret
     end
+    ret
   end
 end
 
@@ -1332,16 +1613,16 @@ if defined?(EventHandlers)
 end
 
 class Battle::Move
-  unless method_defined?(:bss064_effectiveness_without_sos_flag)
+  unless method_defined?(:bss064_effectiveness_without_sos_flag) || private_method_defined?(:bss064_effectiveness_without_sos_flag)
     alias bss064_effectiveness_without_sos_flag pbEffectivenessMessage
-    def pbEffectivenessMessage(user, target, numTargets = 1)
-      bss064_effectiveness_without_sos_flag(user, target, numTargets)
-      return if !target || !(target.wild? rescue false)
-      ds = target.damageState rescue nil
-      return if !ds
-      return if (ds.disguise rescue false) || (ds.iceFace rescue false)
-      target.bss_took_super_effective_damage = true if Effectiveness.super_effective?(ds.typeMod) rescue nil
-    end
+  end
+  def pbEffectivenessMessage(user, target, numTargets = 1)
+    bss064_effectiveness_without_sos_flag(user, target, numTargets)
+    return if !target || !(target.wild? rescue false)
+    ds = target.damageState rescue nil
+    return if !ds
+    return if (ds.disguise rescue false) || (ds.iceFace rescue false)
+    target.bss_took_super_effective_damage = true if Effectiveness.super_effective?(ds.typeMod) rescue nil
   end
 end
 

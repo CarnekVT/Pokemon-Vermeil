@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio 0.6.25 - Phase 1 launcher
+# Battle Scene Studio 0.6.37 - Phase 1 launcher
 # Normal battles + BSS-native SOS only.
 #===============================================================================
 module BSS064
@@ -86,6 +86,126 @@ module BSS064
       enabled
     end
 
+    # F12-safe live-test marker. Only tests explicitly launched from the BSS
+    # editor write this file, and it also stores the current OS process id. F12
+    # reloads scripts inside the same process, while closing/reopening the game
+    # creates a new pid. This lets Studio tests resume after F12 without ever
+    # forcing a BSS battle on a normal player or on a later game launch.
+    def active_battle_request
+      return nil if !File.exist?(ACTIVE_BATTLE_FILE)
+      raw=json_parse(File.open(ACTIVE_BATTLE_FILE,"rb"){|f|f.read})
+      return nil if !raw.is_a?(Hash)
+      stamp=raw["bssStartedAt"].to_i
+      if stamp>0 && Time.now.to_i-stamp>3600
+        File.delete(ACTIVE_BATTLE_FILE) rescue nil
+        return nil
+      end
+      raw
+    rescue
+      nil
+    end
+
+    def write_active_battle(key,live_test,token=nil)
+      payload={"key"=>key.to_s,"liveTest"=>(live_test==true),"pid"=>(Process.pid rescue 0),"token"=>(token||"bss_#{Time.now.to_i}_#{rand(1000000)}").to_s,"bssStartedAt"=>Time.now.to_i}
+      Dir.mkdir("Data/BattleSceneStudio") if !Dir.exist?("Data/BattleSceneStudio") rescue nil
+      File.open(ACTIVE_BATTLE_FILE,"wb"){|f|f.write(json_generate(payload))}
+      payload
+    rescue => e
+      log("Active BSS session write failed: #{e.class}: #{e.message}")
+      nil
+    end
+
+    def mark_active_battle_reset(key=nil)
+      raw=active_battle_request || {}
+      raw["key"]=(key||raw["key"]).to_s
+      raw["liveTest"]=true
+      raw["pid"]=(Process.pid rescue raw["pid"].to_i)
+      raw["resumeAfterReset"]=true
+      raw["resetDetectedAt"]=(Time.now.to_f*1000).to_i
+      raw["bssStartedAt"]=Time.now.to_i if raw["bssStartedAt"].to_i<=0
+      raw["token"]="bss_#{Time.now.to_i}_#{rand(1000000)}" if raw["token"].to_s.empty?
+      Dir.mkdir("Data/BattleSceneStudio") if !Dir.exist?("Data/BattleSceneStudio") rescue nil
+      File.open(ACTIVE_BATTLE_FILE,"wb") { |f| f.write(json_generate(raw)) }
+      raw
+    rescue => e
+      log("F12 Reset marker warning: #{e.class}: #{e.message}")
+      nil
+    end
+
+    def clear_active_battle
+      File.delete(ACTIVE_BATTLE_FILE) if File.exist?(ACTIVE_BATTLE_FILE)
+      true
+    rescue
+      false
+    end
+
+    def schedule_active_battle_resume
+      raw=active_battle_request
+      return false if !raw.is_a?(Hash)
+      same_pid=(raw["pid"].to_i>0 && raw["pid"].to_i==(Process.pid rescue -1))
+      live=(raw["liveTest"]==true)
+      key=raw["key"].to_s
+      token=raw["token"].to_s
+      reset_at=raw["resetDetectedAt"].to_i
+      reset_age=reset_at>0 ? ((Time.now.to_f*1000).to_i-reset_at) : 999999
+      explicit_reset=(raw["resumeAfterReset"]==true && reset_age>=0 && reset_age<=120000)
+      recent_same_pid=(same_pid && raw["bssStartedAt"].to_i>0 && Time.now.to_i-raw["bssStartedAt"].to_i<=120)
+      return false if !live || key.empty? || (!explicit_reset && !recent_same_pid)
+      # F12 is a script Reset inside the same game process. Keep the marker and
+      # let the freshly reloaded runtime resume its own live test once the map
+      # stack has had a short settling window. The editor is not used as the
+      # second half of the protocol anymore, so refreshing/reopening BSS cannot
+      # "undo" the test or strand it at resume_needed.
+      @pending_f12_resume={
+        "key"=>key, "token"=>token, "armedAt"=>Time.now.to_f, "readyFrames"=>0
+      }
+      write_status("f12_resuming",{
+        "key"=>key, "resumeToken"=>token,
+        "message"=>"F12 detectado · BSS reanudará el mismo test automáticamente"
+      })
+      true
+    rescue => e
+      log("F12 resume arm failed: #{e.class}: #{e.message}")
+      @pending_f12_resume=nil
+      false
+    end
+
+    def poll_f12_resume
+      req=@pending_f12_resume
+      return false if !req.is_a?(Hash) || req["key"].to_s.empty?
+      return false if @running
+      return false if defined?($game_temp) && $game_temp && ($game_temp.in_battle rescue false)
+      return false if Time.now.to_f-req["armedAt"].to_f<0.20
+      # Require a stable overworld after Reset. F12 can rebuild scripts before
+      # Scene_Map/$game_map are ready, so count several healthy map frames instead
+      # of launching the battle during reconstruction.
+      return false if defined?($game_temp) && !$game_temp
+      return false if defined?($game_map) && !$game_map
+      if defined?(Scene_Map) && defined?($scene) && $scene && !$scene.is_a?(Scene_Map)
+        return false
+      end
+      req["readyFrames"]=req["readyFrames"].to_i+1
+      return false if req["readyFrames"].to_i<12
+      key=req["key"].to_s
+      @pending_f12_resume=nil
+      @f12_resume_armed=false
+      clear_active_battle
+      write_status("f12_resuming",{"key"=>key,"message"=>"Reiniciando Test game tras F12…"})
+      run_blueprint(key,true)
+      true
+    rescue => e
+      log("F12 auto-resume failed: #{e.class}: #{e.message}")
+      @pending_f12_resume=nil
+      @f12_resume_armed=false
+      clear_active_battle
+      write_status("error",{"message"=>"F12 resume: #{e.class}: #{e.message}"})
+      false
+    end
+
+    def resume_active_battle
+      schedule_active_battle_resume
+    end
+
     def run_blueprint(key,live_test=false)
       clear_cache
       bp=find(key)
@@ -140,22 +260,54 @@ module BSS064
       battle.canLose=(hget(bp,"setup","canLose")!=false) if battle.respond_to?(:canLose=)
       begin; $game_temp.clear_battle_rules; rescue; end if defined?($game_temp)&&$game_temp
 
+      # Only an explicit editor Test game session gets an F12 resume marker.
+      # Event-command battles (pbBSSBattle) and ordinary gameplay never do.
       write_status("running",{"key"=>bp["key"],"name"=>bp["name"],"formation"=>mode,"sos"=>sos_enabled,"boss"=>(hget(bp,"boss","enabled")==true)})
       bgm_name=hget(bp,"environment","bgm").to_s.strip
       bgm=if !bgm_name.empty? then bgm_name elsif foe_trainer then pbGetTrainerBattleBGM([foe_trainer]) else pbGetWildBattleBGM(foe_party) end
       anim_type=foe_trainer ? (battle.singleBattle? ? 1 : 3) : (foe_party.length==1 ? 0 : 2)
       subject=foe_trainer ? [foe_trainer] : foe_party
       outcome=0
+      battle_error=nil
+      # Keep a marker only while an editor-launched test is actually inside the
+      # battle. F12 raises Reset (outside StandardError), so that marker survives
+      # the interrupted call and the freshly reloaded BSS runtime can ask Studio
+      # to requeue the exact same test through the normal control bridge.
+      write_active_battle(bp["key"],true) if live_test
       pbBattleAnimation(bgm,anim_type,subject) do
-        pbSceneStandby { outcome=battle.pbStartBattle }
-        BattleCreationHelperMethods.after_battle(outcome,true,battle)
+        begin
+          pbSceneStandby { outcome=battle.pbStartBattle }
+          BattleCreationHelperMethods.after_battle(outcome,true,battle)
+        rescue SystemStackError => e
+          battle_error=e
+          log("Battle runtime SystemStackError: #{e.message}")
+        rescue => e
+          battle_error=e
+          log("Battle runtime failed: #{e.class}: #{e.message}")
+        end
+      end
+      clear_active_battle if live_test
+      if battle_error
+        write_status("error",{"key"=>key.to_s,"message"=>"#{battle_error.class}: #{battle_error.message}","backtrace"=>(battle_error.backtrace||[])[0,16]})
+        return false
       end
       write_status("finished",{"key"=>bp["key"],"decision"=>outcome})
       outcome
     rescue SystemStackError => e
+      clear_active_battle if live_test
       log("SystemStackError: #{e.message}"); write_status("error",{"key"=>key.to_s,"message"=>"SystemStackError: #{e.message}","backtrace"=>(e.backtrace||[])[0,16]}); false
     rescue => e
+      clear_active_battle if live_test
       log("Battle launch failed: #{e.class}: #{e.message}"); write_status("error",{"key"=>key.to_s,"message"=>"#{e.class}: #{e.message}","backtrace"=>(e.backtrace||[])[0,16]}); false
+    rescue Exception => e
+      # Reset/F12 does not inherit StandardError. Mark it explicitly before the
+      # exception returns to Essentials' Main loop, then re-raise so the normal
+      # F12 reload still happens. A normal close/crash never gets this flag.
+      if live_test && e.class.to_s=="Reset"
+        mark_active_battle_reset((defined?(bp) && bp.is_a?(Hash)) ? bp["key"] : key)
+        write_status("f12_resuming",{"key"=>key.to_s,"message"=>"F12 detectado · esperando que el mapa termine de recargar…"}) rescue nil
+      end
+      raise
     ensure
       @running=false
       if live_test && defined?($player)&&$player&&defined?(original_party)&&original_party&&$player.respond_to?(:party=); $player.party=original_party; end
@@ -164,6 +316,29 @@ module BSS064
         if defined?(old_rules)&&old_rules.is_a?(Hash); begin; old_rules.each { |k,v| $game_temp.battle_rules[k]=v }; rescue; end; end
         $game_temp.in_battle=old_in_battle if defined?(old_in_battle)&&$game_temp.respond_to?(:in_battle=)
       end
+    end
+
+    def runtime_ready!
+      clear_cache rescue nil
+      @running=false
+      @last_control_token=nil
+      # Reset itself is not an error. If an editor-launched battle marker survived
+      # F12, arm exactly one runtime-owned resume. on_game_load can fire more than
+      # once during a reload, so keep the pending request rather than duplicating it.
+      return true if @f12_resume_armed==true && @pending_f12_resume.is_a?(Hash)
+      raw=active_battle_request rescue nil
+      if raw.is_a?(Hash) && schedule_active_battle_resume
+        @f12_resume_armed=true
+        return true
+      end
+      clear_active_battle if raw.is_a?(Hash)
+      @pending_f12_resume=nil
+      @f12_resume_armed=false
+      write_status("ready",{"message"=>"BSS 0.6.37 ready · runtime reloaded"})
+      true
+    rescue => e
+      log("Runtime ready bridge warning: #{e.class}: #{e.message}")
+      false
     end
 
     def read_control
@@ -175,8 +350,18 @@ module BSS064
       req=read_control; return false if !req.is_a?(Hash)
       action=req["action"].to_s; return false if action!="test" && action!="start_test"
       return false if defined?($game_temp)&&$game_temp&&($game_temp.in_battle rescue false)
+      stamp=req["requestedAt"].to_i
+      if stamp>0 && ((Time.now.to_f*1000).to_i-stamp)>300000
+        File.delete(CONTROL_FILE) rescue nil
+        return false
+      end
       token=(req["id"]||req["requestedAt"]||req["key"]).to_s; return false if token.empty? || token==@last_control_token
       @last_control_token=token; File.delete(CONTROL_FILE) rescue nil
+      # A fresh editor test replaces any pending F12 resume and arms the bridge
+      # again for the next Reset.
+      @pending_f12_resume=nil
+      @f12_resume_armed=false
+      clear_active_battle
       run_blueprint(req["key"].to_s,true); true
     rescue => e
       log("Control bridge failed: #{e.class}: #{e.message}"); write_status("error",{"message"=>"#{e.class}: #{e.message}"}); false
@@ -184,11 +369,30 @@ module BSS064
   end
 end
 
+# F12 behavior: Reset reloads scripts, then BSS restores the same editor live
+# test from its runtime marker after the overworld has settled. Ordinary gameplay
+# and pbBSSBattle never write that marker and are never auto-launched.
+begin
+  BSS064.runtime_ready!
+rescue
+end
+
 def pbBSSBattle(key)
   BSS064.run_blueprint(key,false)
 end
 
 if defined?(EventHandlers)
-  EventHandlers.add(:on_game_load,:bss_064_ready,proc { BSS064.clear_cache; BSS064.write_status("ready",{"message"=>"BSS 0.6.25 Phase 1 SOS + Boss/Totem ready"}) rescue nil })
-  EventHandlers.add(:on_frame_update,:bss_064_control,proc { BSS064.poll_control rescue nil })
+  EventHandlers.add(:on_game_load,:bss_064_ready,proc do
+    begin
+      BSS064.runtime_ready!
+    rescue
+    end
+  end)
+  EventHandlers.add(:on_frame_update,:bss_064_control,proc do
+    begin
+      resumed=BSS064.poll_f12_resume
+      BSS064.poll_control if !resumed
+    rescue
+    end
+  end)
 end
