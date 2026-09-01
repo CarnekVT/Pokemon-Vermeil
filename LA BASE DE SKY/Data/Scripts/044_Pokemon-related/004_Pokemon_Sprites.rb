@@ -15,17 +15,18 @@ class PokemonSprite < Sprite
 
   def tone_lock=(value)
     @tone_lock = (value == true)
+    refresh_tone if !@tone_lock
   end
 
   def refresh_tone
     return if tone_lock?
-    self.tone = if @show_as_silhouette
-                  Tone.new(-255, -255, -255, 255)
-                elsif @should_be_grey
-                  Tone.new(0, 0, 0, 255)
-                else
-                  Tone.new(0, 0, 0, 0)
-                end
+    if @show_as_silhouette
+      tone.set(-255, -255, -255, 255)
+    elsif @should_be_grey
+      tone.set(0, 0, 0, 255)
+    else
+      tone.set(0, 0, 0, 0)
+    end
   end
 
   def dispose
@@ -111,9 +112,9 @@ class PokemonSprite < Sprite
     super
     if @_iconbitmap
       @_iconbitmap.update
-      self.bitmap = @_iconbitmap.bitmap
+      new_bitmap = @_iconbitmap.bitmap
+      self.bitmap = new_bitmap if bitmap != new_bitmap
     end
-    refresh_tone
   end
 end
 
@@ -166,6 +167,16 @@ class PokemonIconSprite < Sprite
     return unless Settings::GREY_OUT_FAINTED
 
     @should_be_grey = value
+    refresh_tone
+  end
+
+  def refresh_tone
+    # Apply tone when the grey state changes.
+    if @should_be_grey
+      tone.set(0, 0, 0, 255)
+    else
+      tone.set(0, 0, 0, 0)
+    end
   end
 
   def pokemon=(value)
@@ -264,26 +275,25 @@ class PokemonIconSprite < Sprite
 
     super
     @animBitmap.update
-    self.bitmap = @animBitmap.bitmap
+    new_bitmap = @animBitmap.bitmap
+    self.bitmap = new_bitmap if bitmap != new_bitmap
     # Update animation
+    old_frame = @current_frame
     update_frame
-    src_rect.x = src_rect.width * @current_frame
+    src_rect.x = src_rect.width * @current_frame if @current_frame != old_frame
     # Update "jumping" animation (used in party screen)
+    adjusted_x = 0
+    adjusted_y = 0
     if @selected
-      @adjusted_x = 4
-      @adjusted_y = (@current_frame >= @frames_count / 2) ? -2 : 6
-    else
-      @adjusted_x = 0
-      @adjusted_y = 0
+      adjusted_x = 4
+      adjusted_y = (@current_frame >= @frames_count / 2) ? -2 : 6
     end
-    self.x = x
-    self.y = y
-    # Apply tone after any bitmap changes
-    self.tone = if @should_be_grey
-                  Tone.new(0, 0, 0, 255)
-                else
-                  Tone.new(0, 0, 0, 0)
-                end
+    if @adjusted_x != adjusted_x || @adjusted_y != adjusted_y
+      @adjusted_x = adjusted_x
+      @adjusted_y = adjusted_y
+      self.x = @logical_x
+      self.y = @logical_y
+    end
   end
 end
 
@@ -415,9 +425,11 @@ class PokemonSpeciesIconSprite < Sprite
 
     super
     @animBitmap.update
-    self.bitmap = @animBitmap.bitmap
+    new_bitmap = @animBitmap.bitmap
+    self.bitmap = new_bitmap if bitmap != new_bitmap
     # Update animation
+    old_frame = @current_frame
     update_frame
-    src_rect.x = src_rect.width * @current_frame
+    src_rect.x = src_rect.width * @current_frame if @current_frame != old_frame
   end
 end
