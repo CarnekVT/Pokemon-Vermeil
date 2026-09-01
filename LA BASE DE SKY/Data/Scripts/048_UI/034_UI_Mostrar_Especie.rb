@@ -175,7 +175,7 @@ class MostrarPokemonAnimado
 end
 
 EventHandlers.add(:on_frame_update, :poke_animado_overlay,
-                  proc { $poke_animado&.update if defined?($poke_animado) && !$poke_animado.disposed? })
+                  proc { $poke_animado&.update if defined?($poke_animado) && $poke_animado && !$poke_animado&.disposed? })
 
 
 # FUNCIONES PARA USARLO
