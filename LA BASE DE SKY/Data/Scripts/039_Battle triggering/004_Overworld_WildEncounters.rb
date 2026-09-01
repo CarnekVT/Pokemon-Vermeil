@@ -7,6 +7,11 @@ class PokemonEncounters
   def initialize
     @step_chances       = {}
     @encounter_tables   = {}
+    @encounter_chance_totals = {}
+    @has_land_encounters = false
+    @has_normal_land_encounters = false
+    @has_cave_encounters = false
+    @has_water_encounters = false
     @chance_accumulator = 0
   end
 
@@ -14,10 +19,33 @@ class PokemonEncounters
     @step_count       = 0
     @step_chances     = {}
     @encounter_tables = {}
+    @encounter_chance_totals = {}
+    @has_land_encounters = false
+    @has_normal_land_encounters = false
+    @has_cave_encounters = false
+    @has_water_encounters = false
     encounter_data = GameData::Encounter.get(map_ID, $PokemonGlobal.encounter_version)
     if encounter_data
       encounter_data.step_chances.each { |type, value| @step_chances[type] = value }
       @encounter_tables = Marshal.load(Marshal.dump(encounter_data.types))
+      @encounter_tables.each do |type, encounters|
+        encounters.sort! { |a, b| b[0] <=> a[0] }
+        @encounter_chance_totals[type] = encounters.sum { |enc| enc[0] }
+      end
+      GameData::EncounterType.each do |enc_type|
+        next if !has_encounter_type?(enc_type.id)
+        case enc_type.type
+        when :land
+          @has_land_encounters = true
+          @has_normal_land_encounters = true
+        when :contest
+          @has_land_encounters = true
+        when :cave
+          @has_cave_encounters = true
+        when :water
+          @has_water_encounters = true
+        end
+      end
     end
   end
 
@@ -49,39 +77,26 @@ class PokemonEncounters
   # Returns whether land-like encounters have been defined for the current map.
   # Applies only to encounters triggered by moving around.
   def has_land_encounters?
-    GameData::EncounterType.each do |enc_type|
-      next if ![:land, :contest].include?(enc_type.type)
-      return true if has_encounter_type?(enc_type.id)
-    end
-    return false
+    return !!@has_land_encounters
   end
 
   # Returns whether land-like encounters have been defined for the current map
   # (ignoring the Bug-Catching Contest one).
   # Applies only to encounters triggered by moving around.
   def has_normal_land_encounters?
-    GameData::EncounterType.each do |enc_type|
-      return true if enc_type.type == :land && has_encounter_type?(enc_type.id)
-    end
-    return false
+    return !!@has_normal_land_encounters
   end
 
   # Returns whether cave-like encounters have been defined for the current map.
   # Applies only to encounters triggered by moving around.
   def has_cave_encounters?
-    GameData::EncounterType.each do |enc_type|
-      return true if enc_type.type == :cave && has_encounter_type?(enc_type.id)
-    end
-    return false
+    return !!@has_cave_encounters
   end
 
   # Returns whether water-like encounters have been defined for the current map.
   # Applies only to encounters triggered by moving around (i.e. not fishing).
   def has_water_encounters?
-    GameData::EncounterType.each do |enc_type|
-      return true if enc_type.type == :water && has_encounter_type?(enc_type.id)
-    end
-    return false
+    return !!@has_water_encounters
   end
 
   #-----------------------------------------------------------------------------
@@ -276,6 +291,7 @@ class PokemonEncounters
     end
     enc_list = @encounter_tables[enc_type]
     return nil if !enc_list || enc_list.length == 0
+    encounter_chance_total = @encounter_chance_totals&.[](enc_type)
     # Static/Magnet Pull prefer wild encounters of certain types, if possible.
     # If they activate, they remove all Pokémon from the encounter table that do
     # not have the type they favor. If none have that type, nothing is changed.
@@ -306,13 +322,14 @@ class PokemonEncounters
           species_data = GameData::Species.get(enc[1])
           new_enc_list.push(enc) if species_data.types.include?(favored_type)
         end
-        enc_list = new_enc_list if new_enc_list.length > 0
+        if new_enc_list.length > 0
+          enc_list = new_enc_list
+          encounter_chance_total = nil
+        end
       end
     end
-    enc_list.sort! { |a, b| b[0] <=> a[0] }   # Highest probability first
     # Calculate the total probability value
-    chance_total = 0
-    enc_list.each { |a| chance_total += a[0] }
+    chance_total = encounter_chance_total || enc_list.sum { |enc| enc[0] }
     # Choose a random entry in the encounter table based on entry probabilities
     rnd = 0
     chance_rolls.times do
