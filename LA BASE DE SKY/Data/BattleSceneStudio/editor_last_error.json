@@ -1,7 +1,7 @@
 {
-  "version": "0.6.43",
-  "where": "window",
-  "message": "Cannot read properties of undefined (reading 'toLowerCase')",
-  "stack": "TypeError: Cannot read properties of undefined (reading 'toLowerCase')\n    at js (http://tauri.localhost/assets/index-BGKiFfDi.js:3934:19643)\n    at t (http://tauri.localhost/assets/index-BGKiFfDi.js:3940:78257)",
-  "at": "2026-08-29T05:37:56.007Z"
+  "version": "0.6.64",
+  "where": "promise",
+  "message": "Command plugin:dialog|confirm not allowed by ACL",
+  "stack": "",
+  "at": "2026-08-31T02:25:07.030Z"
 }

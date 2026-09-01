@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Scene Studio 0.6.40 - Native SOS (Phase 1)
+# Battle Scene Studio 0.6.56 - Native SOS (Phase 1)
 # BSS-owned SOS. Runtime assignments come only from sos_global.json.
 # Dynamic battler creation follows the v21/DBK SOS lifecycle supplied by the
 # user. Growth slots are created by the project's real pbCreateBattler constructor
@@ -986,8 +986,22 @@ class Battle
     end
   end
 
-  def bss_sos_summoned_battler?(idx_battler)
-    @bss_sos_summoned_indices.is_a?(Hash) && @bss_sos_summoned_indices[idx_battler.to_i] == true
+  def bss_mark_sos_summoned_battler(battler)
+    return false if !battler
+    idx=(battler.index rescue -1).to_i
+    @bss_sos_summoned_indices ||= {}
+    @bss_sos_summoned_indices[idx]=true if idx>=0
+    begin;battler.instance_variable_set(:@bss_sos_summoned,true);rescue;end
+    begin;battler.pokemon.instance_variable_set(:@bss_sos_summoned,true) if battler.respond_to?(:pokemon) && battler.pokemon;rescue;end
+    true
+  end
+
+  def bss_sos_summoned_battler?(idx_or_battler)
+    battler=idx_or_battler.respond_to?(:index) ? idx_or_battler : ((@battlers[idx_or_battler.to_i] rescue nil))
+    begin;return true if battler && battler.instance_variable_get(:@bss_sos_summoned)==true;rescue;end
+    begin;return true if battler && battler.respond_to?(:pokemon) && battler.pokemon && battler.pokemon.instance_variable_get(:@bss_sos_summoned)==true;rescue;end
+    idx=battler ? (battler.index rescue -1).to_i : idx_or_battler.to_i
+    @bss_sos_summoned_indices.is_a?(Hash) && @bss_sos_summoned_indices[idx] == true
   end
 
   def bss_sos_message(key, fallback, *args)
@@ -1051,8 +1065,7 @@ class Battle
           if battler
             @peer.pbOnEnteringBattle(self,battler,pokemon,!((trainerBattle? rescue false) && bss_scripted_sos_battle?)) if @peer && @peer.respond_to?(:pbOnEnteringBattle)
             @bss_last_call_answered=true
-            @bss_sos_summoned_indices ||= {}
-            @bss_sos_summoned_indices[idx] = true
+            bss_mark_sos_summoned_battler(battler)
             cfg=@bss_sos_config.is_a?(Hash) ? @bss_sos_config : {}
             @bss_sos_fixed_cursor=@bss_sos_fixed_cursor.to_i+1 if bss_scripted_sos_battle? && cfg["allySelectionMode"].to_s=="fixed"
             bss_set_sos_chain(caller)
@@ -1158,8 +1171,10 @@ class Battle
       pbPriority(true).each do |b|
         next if !b || (b.fainted? rescue true)
         next if trainer_sos ? !(b.opposes? rescue false) : !(b.wild? rescue false)
-        if b.bss_can_sos_call?
-          bss_call_for_help_batch(b,false,false)
+        guaranteed_scripted=bss_scripted_sos_battle? && b.bss_sos_call_rate.to_i>=100 && bss_sos_answer_rate(b).to_i>=100
+        can_call=guaranteed_scripted ? b.bss_can_sos_call_simple? : b.bss_can_sos_call?
+        if can_call
+          bss_call_for_help_batch(b,guaranteed_scripted,false)
           b.bss_took_super_effective_damage=false
           break
         end
@@ -1190,11 +1205,16 @@ class Battle::Battler
     return false if !trainer_sos && !(wild? rescue false)
     return false if !opposes? || fainted? || usingMultiTurnAttack?
     return false if @battle.bss_live_same_side_count(@index)>=@battle.bss_sos_max_live_same_side
+    rate=bss_sos_call_rate
+    return false if rate<=0
+    # Scripted 100/100 means guaranteed, not "still blocked by the random-call
+    # path". Legality/slot/chain rules remain enforced by the simple predicate.
+    if @battle.bss_scripted_sos_battle? && rate>=100 && @battle.bss_sos_answer_rate(self).to_i>=100
+      return bss_can_sos_call_simple?
+    end
     return false if respond_to?(:pbHasAnyStatus?) && pbHasAnyStatus?
-    return false if bss_sos_call_rate<=0
     return false if @battle.bss_last_call_answered && !@battle.bss_additional_sos_calls_allowed?
     return false if @battle.bss_sos_summoned_battler?(@index) && !@battle.bss_recursive_sos_calls_allowed?
-    rate=bss_sos_call_rate
     rate*=5 if hp<=totalhp/4
     rate*=3 if hp>totalhp/4 && hp<=totalhp/2
     rate*=2 if @battle.bss_adrenaline_orb
@@ -1301,6 +1321,7 @@ class Battle::Scene
   end
 
   def bss_pbPrepNewBattler(idx_battler)
+    boss_snapshot = (respond_to?(:bss_boss_animation_scale_snapshot) ? bss_boss_animation_scale_snapshot : nil) rescue nil
     pbRefresh
     battler = @battle.battlers[idx_battler]
     add_new_battler = !@sprites["dataBox_#{idx_battler}"]
@@ -1337,16 +1358,39 @@ class Battle::Scene
       bat_sprite.sideSize = side_size if bat_sprite && bat_sprite.respond_to?(:sideSize=)
       sha_sprite.sideSize = side_size if sha_sprite && sha_sprite.respond_to?(:sideSize=)
       if add_new_battler
-        begin
-          @sprites["dataBox_#{b.index}"].dispose if @sprites["dataBox_#{b.index}"]
-        rescue
+        # With BossHUD active, keep already-existing helper databox objects alive.
+        # Reconstructing every same-side databox on each SOS arrival resets the
+        # project's DataBoxAppear state and makes the normal box visibly pop.
+        # Only the newly-created SOS needs a fresh box; the Boss' native box is
+        # already owned/hidden by BossHUD and existing helpers keep their style.
+        # Never reconstruct a databox that already belongs to a live battler.
+        # PokemonDataBox#battler= itself toggles visibility in Essentials, and
+        # recreating the object resets DBK/custom DataBoxAppear state. Both made
+        # existing boxes visibly "pop" whenever an SOS changed the side size.
+        keep_existing=(b.index!=idx_battler && @sprites["dataBox_#{b.index}"]) ? true : false
+        if keep_existing
+          box=@sprites["dataBox_#{b.index}"]
+          # Preserve the object's current visibility/animation state. Refresh
+          # content only; BSS' sticky layout handles the special BossHUD offset.
+          box.refresh if box.respond_to?(:refresh)
+        else
+          begin
+            @sprites["dataBox_#{b.index}"].dispose if @sprites["dataBox_#{b.index}"]
+          rescue
+          end
+          @sprites["dataBox_#{b.index}"] = PokemonDataBox.new(b, side_size, @viewport)
+          # The SOS join animation is the sole owner of the appear transition.
+          # Start hidden so there is no one-frame pop before its slide/fade begins.
+          @sprites["dataBox_#{b.index}"].visible=false if b.index==idx_battler && @sprites["dataBox_#{b.index}"].respond_to?(:visible=)
         end
-        @sprites["dataBox_#{b.index}"] = PokemonDataBox.new(b, side_size, @viewport)
       else
         box = @sprites["dataBox_#{b.index}"]
         if box
-          box.battler = b if box.respond_to?(:battler=)
-          box.visible = bat_sprite.visible if bat_sprite
+          box.battler = b if b.index==idx_battler && box.respond_to?(:battler=)
+          # Do not force existing battlers visible here. Their current
+          # DataBoxAppear/DataBoxDisappear animation is authoritative. Only the
+          # incoming/reused SOS starts hidden for BSSSOSJoin to reveal.
+          box.visible = false if b.index==idx_battler && box.respond_to?(:visible=)
           box.refresh if box.respond_to?(:refresh)
         end
       end
@@ -1355,6 +1399,9 @@ class Battle::Scene
     end
     bss_sync_enhanced_ui_icons
     bss_raise_target_menu_z
+    begin;bss_restore_boss_animation_scale(boss_snapshot) if boss_snapshot && respond_to?(:bss_restore_boss_animation_scale);rescue;end
+    begin;bss_reassert_boss_visual_scale(nil,true) if respond_to?(:bss_reassert_boss_visual_scale);rescue;end
+    begin;bss_update_boss_hud(true) if respond_to?(:bss_update_boss_hud);rescue;end
     add_new_battler
   end
 
@@ -1383,6 +1430,8 @@ class Battle::Scene
     end
     bss_raise_target_menu_z
     bss_sync_enhanced_ui_icons
+    begin;bss_update_boss_hud(true) if respond_to?(:bss_update_boss_hud);rescue;end
+    begin;bss_reassert_boss_visual_scale(nil,true) if respond_to?(:bss_reassert_boss_visual_scale);rescue;end
   end
 end
 
@@ -1534,11 +1583,24 @@ class Battle::Scene::Animation::BSSSOSJoin < Battle::Scene::Animation
           sh.moveOpacity(delay, 4, 255)
         end
         if boxsp
-          dir = b.index.even? ? 1 : -1
           bx = addSprite(boxsp)
-          bx.setDelta(delay, dir * Graphics.width / 2, 0)
-          bx.setVisible(delay, true)
-          bx.moveDelta(delay, 8, -dir * Graphics.width / 2, 0)
+          mode=(BSS064.databox_animation_mode rescue "slide")
+          case mode
+          when "pop"
+            bx.setOpacity(delay,255) if bx.respond_to?(:setOpacity)
+            bx.setVisible(delay,true)
+          when "fade"
+            bx.setOpacity(delay,0)
+            bx.setVisible(delay,true)
+            bx.moveOpacity(delay,8,255)
+          else
+            dir = b.index.even? ? 1 : -1
+            BSS064.ensure_databox_slide_driver(boxsp) if BSS064.respond_to?(:ensure_databox_slide_driver)
+            boxsp.bss074_begin_slide(:in,dir) if boxsp.respond_to?(:bss074_begin_slide)
+            bx.setOpacity(delay,255) if bx.respond_to?(:setOpacity)
+            bx.setVisible(delay, true)
+            bx.moveDelta(delay,10,0,0) if bx.respond_to?(:moveDelta)
+          end
         end
       else
         side_size = bat.respond_to?(:sideSize) && bat.sideSize ? bat.sideSize : @battle.pbSideSize(b.index)
@@ -1554,8 +1616,33 @@ class Battle::Scene::Animation::BSSSOSJoin < Battle::Scene::Animation
           sh.moveXY(delay, 4, sx, sy)
         end
         if boxsp
-          bx = addSprite(boxsp)
-          bx.setVisible(delay, true) if !b.fainted?
+          # Move an already-visible native/DBK databox from its previous side-size
+          # coordinates to the newly resolved doubles/triples coordinates. This
+          # preserves the object's DataBoxAppear state and avoids the one-frame
+          # teleport/"pop" that occurred when SOS expanded a normal Boss box.
+          bx=addSprite(boxsp)
+          from=boxsp.instance_variable_get(:@bss656_reflow_from_xy) rescue nil
+          to=boxsp.instance_variable_get(:@bss656_reflow_to_xy) rescue nil
+          if from.is_a?(Array) && to.is_a?(Array)
+            bx.setXY(delay,from[0],from[1])
+            bx.moveXY(delay,4,to[0],to[1])
+            boxsp.instance_variable_set(:@bss656_reflow_from_xy,nil) rescue nil
+            boxsp.instance_variable_set(:@bss656_reflow_to_xy,nil) rescue nil
+          end
+          # The pre-existing box must remain visible during a normal SOS side
+          # expansion. pbRefresh/style rebuilds can otherwise leave it hidden
+          # until the next command refresh, which looks like the original box
+          # vanished. BossHUD's intentionally hidden Boss box is the one exception.
+          hide_for_boss=false
+          begin
+            boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
+            boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
+            cfg=(@battle.bss_boss_hud_config rescue {}) if @battle.respond_to?(:bss_boss_hud_config)
+            hide_for_boss=(boss && boss.equal?(b) && cfg.is_a?(Hash) && cfg["enabled"]!=false)
+          rescue
+            hide_for_boss=false
+          end
+          bx.setVisible(delay,true) if !hide_for_boss
         end
       end
       delay += 1
@@ -1649,4 +1736,1143 @@ if defined?(ItemHandlers) && defined?(GameData::Item) && (GameData::Item.exists?
       battle.bss_adrenaline_orb = true
     end
   })
+end
+
+#===============================================================================
+# BSS v0.6.52 - TRUE Boss-centered SOS formation.
+#
+# v0.6.51 only moved sprites. That made the Boss look centered while targeting,
+# AI and battle logic still saw its old slot. This pass changes the actual
+# Battle::Battler index. For the foe side the canonical formation is:
+#   1 foe   : Boss = 1
+#   2 foes  : helper = 1, Boss = 3
+#   3 foes  : helper = 1, Boss = 3, helper = 5
+# Target selection, AI, animations and rendering now agree on the same slots.
+#===============================================================================
+module BSS064BossActualSOSFormation652
+  def bss652_boss_for_sos_formation
+    return nil if !respond_to?(:bss_boss_enabled?) || !bss_boss_enabled?
+    boss=(bss_find_boss_battler_any rescue nil) if respond_to?(:bss_find_boss_battler_any)
+    boss ||= (bss_find_boss_battler rescue nil) if respond_to?(:bss_find_boss_battler)
+    boss
+  rescue
+    nil
+  end
+
+  def bss652_swap_indexed_row(row,a,b,default=nil)
+    return if !row.is_a?(Array)
+    max=[a.to_i,b.to_i].max
+    row << default while row.length<=max
+    row[a],row[b]=row[b],row[a]
+  rescue
+  end
+
+  def bss652_scene_swap_slot_keys(a,b,battler_a=nil,battler_b=nil)
+    scene=@scene;return if !scene
+    sprites=scene.instance_variable_get(:@sprites) rescue nil
+    if sprites.is_a?(Hash)
+      [["pokemon_",true],["shadow_",true],["dataBox_",false],["info_icon",false]].each do |prefix,has_index|
+        ka="#{prefix}#{a}";kb="#{prefix}#{b}"
+        va=sprites[ka];vb=sprites[kb]
+        if va || vb
+          sprites[ka]=vb
+          sprites[kb]=va
+          sprites.delete(ka) if vb.nil?
+          sprites.delete(kb) if va.nil?
+          begin;sprites[ka].index=a if has_index && sprites[ka] && sprites[ka].respond_to?(:index=);rescue;end
+          begin;sprites[kb].index=b if has_index && sprites[kb] && sprites[kb].respond_to?(:index=);rescue;end
+        end
+      end
+      begin
+        box=sprites["dataBox_#{a}"];box.battler=battler_b if box && battler_b && box.respond_to?(:battler=)
+      rescue;end
+      begin
+        box=sprites["dataBox_#{b}"];box.battler=battler_a if box && battler_a && box.respond_to?(:battler=)
+      rescue;end
+    end
+    [:@lastCmd,:@lastMove].each do |ivar|
+      row=scene.instance_variable_get(ivar) rescue nil;bss652_swap_indexed_row(row,a,b,0)
+    end
+    [:@lastTarget,:@lastMoveUser].each do |ivar|
+      row=scene.instance_variable_get(ivar) rescue nil;bss652_swap_indexed_row(row,a,b,-1)
+    end
+  rescue => e
+    BSS064.log("Boss actual-slot scene remap warning: #{e.class}: #{e.message}")
+  end
+
+  def bss652_refresh_ai_slot(idx)
+    ai=@battleAI rescue nil;return if !ai
+    if ai.respond_to?(:create_new_ai_battler)
+      ai.create_new_ai_battler(idx)
+    elsif ai.respond_to?(:bss_create_new_ai_battler)
+      ai.bss_create_new_ai_battler(idx)
+    end
+  rescue => e
+    BSS064.log("Boss actual-slot AI refresh warning: #{e.class}: #{e.message}")
+  end
+
+  def bss652_swap_battler_slots(a,b)
+    return false if !@battlers.is_a?(Array)
+    a=a.to_i;b=b.to_i;return true if a==b
+    @battlers << nil while @battlers.length<=[a,b].max
+    ba=@battlers[a];bb=@battlers[b]
+    @battlers[a]=bb;@battlers[b]=ba
+    ba.instance_variable_set(:@index,b) if ba
+    bb.instance_variable_set(:@index,a) if bb
+    bss652_swap_indexed_row(@choices,a,b,[:None,0,nil,-1])
+    bss652_scene_swap_slot_keys(a,b,ba,bb)
+    bss652_refresh_ai_slot(a) if bb
+    bss652_refresh_ai_slot(b) if ba
+    true
+  rescue => e
+    BSS064.log("Boss actual-slot swap warning: #{e.class}: #{e.message}")
+    false
+  end
+
+  def bss652_move_battler_slot(from,to)
+    return false if !@battlers.is_a?(Array)
+    from=from.to_i;to=to.to_i
+    return true if from==to
+    return false if @battlers[to] && !(@battlers[to].fainted? rescue false)
+    # A dead object in the destination is intentionally replaced; its active slot
+    # is no longer part of the live formation.
+    @battlers << nil while @battlers.length<=to
+    battler=@battlers[from];return false if !battler
+    old_to=@battlers[to]
+    @battlers[to]=battler;@battlers[from]=old_to
+    battler.instance_variable_set(:@index,to)
+    old_to.instance_variable_set(:@index,from) if old_to
+    bss652_swap_indexed_row(@choices,from,to,[:None,0,nil,-1])
+    bss652_scene_swap_slot_keys(from,to,battler,old_to)
+    bss652_refresh_ai_slot(to)
+    bss652_refresh_ai_slot(from) if old_to
+    true
+  rescue => e
+    BSS064.log("Boss actual-slot move warning: #{e.class}: #{e.message}")
+    false
+  end
+
+  def bss_find_new_battler_slot(caller)
+    boss=bss652_boss_for_sos_formation
+    if caller && boss && ((caller.index rescue 0)&1)==((boss.index rescue 1)&1)
+      return [-1,false] if bss_live_same_side_count(caller.index)>=bss_sos_max_live_same_side
+      side=caller.idxOwnSide.to_i
+      size=@sideSizes.is_a?(Array) ? @sideSizes[side].to_i : (pbSideSize(caller.index) rescue 1).to_i
+      size=[[size,1].max,3].min
+
+      # First summon: grow to doubles and physically move the Boss from foe slot
+      # 1 to foe slot 3. Slot 1 becomes the real SOS helper slot.
+      if size<=1 && (boss.index rescue -1).to_i==1
+        @sideSizes[side]=2 if @sideSizes.is_a?(Array)
+        if bss652_move_battler_slot(1,3)
+          @bss652_pending_first_boss_relocation={:side=>side,:from=>1,:to=>3}
+          return [1,true]
+        end
+        @sideSizes[side]=size if @sideSizes.is_a?(Array)
+      end
+
+      # If a pre-existing doubles formation still has the Boss in slot 1, swap
+      # it with slot 3 before a third foe is ever introduced.
+      boss=bss652_boss_for_sos_formation
+      if size>=2 && boss && (boss.index rescue -1).to_i!=3
+        bss652_swap_battler_slots((boss.index rescue 1).to_i,3)
+        boss=bss652_boss_for_sos_formation
+      end
+
+      if boss && (boss.index rescue -1).to_i==3
+        # Reuse a fainted/empty helper slot before expanding the side.
+        helper_slots=(size>=3 ? [1,5] : [1])
+        helper_slots.each do |idx|
+          b=@battlers[idx] rescue nil
+          return [idx,false] if !b || (b.fainted? rescue false)
+        end
+        # Second live helper expands doubles -> triples. Slot 3 remains the real
+        # center and slot 5 is the new ally.
+        if size<3
+          @sideSizes[side]=size+1 if @sideSizes.is_a?(Array)
+          return [5,true]
+        end
+      end
+    end
+    super
+  end
+
+  def bss_create_fresh_sos_battler(idx_battler,caller,pkmn,change_size)
+    pending=@bss652_pending_first_boss_relocation
+    result=super
+    if !result && pending.is_a?(Hash)
+      # The source lifecycle rolled the side size back. Roll the real Boss slot
+      # back as well so a failed summon cannot leave an invalid singles layout.
+      begin;bss652_move_battler_slot(pending[:to],pending[:from]);rescue;end
+    end
+    @bss652_pending_first_boss_relocation=nil
+    result
+  rescue => e
+    begin
+      if pending.is_a?(Hash);bss652_move_battler_slot(pending[:to],pending[:from]);end
+    rescue;end
+    @bss652_pending_first_boss_relocation=nil
+    raise e
+  end
+end
+
+begin
+  Battle.prepend(BSS064BossActualSOSFormation652) if defined?(Battle) && !Battle.ancestors.include?(BSS064BossActualSOSFormation652)
+rescue => e
+  BSS064.log("Boss actual SOS formation install warning: #{e.class}: #{e.message}")
+end
+
+# BossHUD owns the Boss HP presentation. Helpers get dedicated rows below the
+# top Boss bar; no sprite coordinate trick is used for battler placement here.
+module BSS064BossSOSDataboxLayout652
+  def bss652_hide_native_boss_databox
+    return false if !@battle || !@sprites
+    boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
+    boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
+    return false if !boss
+    box=@sprites["dataBox_#{boss.index}"]
+    box.visible=false if box && box.respond_to?(:visible=)
+    true
+  rescue
+    false
+  end
+
+  def bss652_layout_sos_databoxes
+    return false if !@battle || !@sprites
+    boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
+    boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
+    return false if !boss
+    bss652_hide_native_boss_databox
+    helpers=(@battle.battlers rescue []).compact.select do |b|
+      idx=(b.index rescue -1).to_i
+      idx>=0 && idx.odd? && !b.equal?(boss) && !(b.fainted? rescue false)
+    end.sort_by{|b|(b.index rescue 99).to_i}
+    hud_cfg=@battle.respond_to?(:bss_boss_hud_config) ? @battle.bss_boss_hud_config : {}
+    top_hud=!hud_cfg.is_a?(Hash) || hud_cfg["position"].to_s!="databox"
+    # The top BossHUD is ~104 px high. 118 px leaves a real gap rather than
+    # merely avoiding exact pixel intersection.
+    start_y=top_hud ? 118 : 76
+    helpers.each_with_index do |b,row|
+      box=@sprites["dataBox_#{b.index}"];next if !box
+      box.x=-16 if box.respond_to?(:x=)
+      box.y=start_y+(row*62) if box.respond_to?(:y=)
+      box.update if box.respond_to?(:update)
+    end
+    true
+  rescue => e
+    BSS064.log("SOS databox layout 0.6.52 warning: #{e.class}: #{e.message}")
+    false
+  end
+
+  def bss_pbPrepNewBattler(idx_battler)
+    result=super;bss652_layout_sos_databoxes;result
+  end
+
+  def bss_pbSOSJoin(idx_battler)
+    result=super;bss652_layout_sos_databoxes
+    begin;bss_update_boss_hud(true) if respond_to?(:bss_update_boss_hud);rescue;end
+    result
+  end
+end
+
+begin
+  Battle::Scene.prepend(BSS064BossSOSDataboxLayout652) if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS064BossSOSDataboxLayout652)
+rescue => e
+  BSS064.log("Boss SOS databox layout install warning: #{e.class}: #{e.message}")
+end
+
+
+#===============================================================================
+# BSS v0.6.53 - dynamic slot state + Boss/SOS databox layout.
+# A real Battler relocation must also create the parallel Essentials slot state.
+# Growing @battlers to slot 3/5 without @positions/@successStates is what made
+# DBK Command Menu Refactor call clear on nil after the first SOS.
+#===============================================================================
+module BSS064BossActualSOSFormation652
+  def bss653_ensure_runtime_slot(idx)
+    idx=idx.to_i
+    @battlers << nil while @battlers.is_a?(Array) && @battlers.length<=idx
+    if @positions.is_a?(Array)
+      @positions << nil while @positions.length<=idx
+      @positions[idx]=Battle::ActivePosition.new if @positions[idx].nil? && defined?(Battle::ActivePosition)
+    end
+    if @successStates.is_a?(Array)
+      @successStates << nil while @successStates.length<=idx
+      @successStates[idx]=Battle::SuccessState.new if @successStates[idx].nil? && defined?(Battle::SuccessState)
+    end
+    if @choices.is_a?(Array)
+      @choices << nil while @choices.length<=idx
+      @choices[idx]=[:None,0,nil,-1] if @choices[idx].nil?
+    end
+    true
+  rescue => e
+    BSS064.log("SOS runtime slot state warning idx=#{idx}: #{e.class}: #{e.message}")
+    false
+  end
+
+  def bss652_swap_battler_slots(a,b)
+    return false if !@battlers.is_a?(Array)
+    a=a.to_i;b=b.to_i;return true if a==b
+    bss653_ensure_runtime_slot(a);bss653_ensure_runtime_slot(b)
+    ba=@battlers[a];bb=@battlers[b]
+    @battlers[a]=bb;@battlers[b]=ba
+    ba.instance_variable_set(:@index,b) if ba
+    bb.instance_variable_set(:@index,a) if bb
+    bss652_swap_indexed_row(@choices,a,b,[:None,0,nil,-1])
+    # SuccessState is battler-indexed for attack-phase bookkeeping. Move it with
+    # the Battler exactly like @choices; ActivePosition intentionally stays with
+    # the field slot, matching Essentials' own pbSwapBattlers behavior.
+    bss652_swap_indexed_row(@successStates,a,b,nil)
+    bss653_ensure_runtime_slot(a);bss653_ensure_runtime_slot(b)
+    bss652_scene_swap_slot_keys(a,b,ba,bb)
+    bss652_refresh_ai_slot(a) if bb
+    bss652_refresh_ai_slot(b) if ba
+    true
+  rescue => e
+    BSS064.log("Boss actual-slot swap 0.6.53 warning: #{e.class}: #{e.message}")
+    false
+  end
+
+  def bss652_move_battler_slot(from,to)
+    return false if !@battlers.is_a?(Array)
+    from=from.to_i;to=to.to_i
+    return true if from==to
+    bss653_ensure_runtime_slot(from);bss653_ensure_runtime_slot(to)
+    return false if @battlers[to] && !(@battlers[to].fainted? rescue false)
+    battler=@battlers[from];return false if !battler
+    old_to=@battlers[to]
+    @battlers[to]=battler;@battlers[from]=old_to
+    battler.instance_variable_set(:@index,to)
+    old_to.instance_variable_set(:@index,from) if old_to
+    bss652_swap_indexed_row(@choices,from,to,[:None,0,nil,-1])
+    bss652_swap_indexed_row(@successStates,from,to,nil)
+    bss653_ensure_runtime_slot(from);bss653_ensure_runtime_slot(to)
+    bss652_scene_swap_slot_keys(from,to,battler,old_to)
+    bss652_refresh_ai_slot(to)
+    bss652_refresh_ai_slot(from) if old_to
+    true
+  rescue => e
+    BSS064.log("Boss actual-slot move 0.6.53 warning: #{e.class}: #{e.message}")
+    false
+  end
+end
+
+module BSS064BossSOSDataboxLayout652
+  def bss653_boss_hud_enabled?
+    return false if !@battle || !@battle.respond_to?(:bss_boss_hud_config)
+    cfg=@battle.bss_boss_hud_config
+    cfg.is_a?(Hash) && cfg["enabled"]!=false
+  rescue
+    false
+  end
+
+  def bss652_hide_native_boss_databox
+    return false if !@battle || !@sprites
+    boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
+    boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
+    return false if !boss
+    box=@sprites["dataBox_#{boss.index}"]
+    return false if !box
+    if bss653_boss_hud_enabled?
+      box.visible=false if box.respond_to?(:visible=)
+      return true
+    end
+    # No Boss bar: do not touch `visible` at all. DataBoxAppear/Disappear (and
+    # custom DBK/Enhanced UI equivalents) must retain their native slide/fade
+    # lifecycle; forcing visible every HUD update is what made the box pop.
+    false
+  rescue
+    false
+  end
+
+  def bss652_layout_sos_databoxes
+    return false if !@battle || !@sprites
+    boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
+    boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
+    return false if !boss
+    bss652_hide_native_boss_databox
+    # Without BossHUD, leave every databox at the project's native doubles/
+    # triples positions. This also restores the Boss box when the bar is off.
+    return true if !bss653_boss_hud_enabled?
+    helpers=(@battle.battlers rescue []).compact.select do |b|
+      idx=(b.index rescue -1).to_i
+      idx>=0 && idx.odd? && !b.equal?(boss) && !(b.fainted? rescue false)
+    end.sort_by{|b|(b.index rescue 99).to_i}
+    # BossHUD's visible content ends around base_y+60. Put helper rows beneath
+    # that, and write PokemonDataBox's *source* coordinates. Setting box.y only
+    # was immediately undone by PokemonDataBox#update, which caused SOS #1 to
+    # jump back under the Boss bar while later boxes happened to look correct.
+    hud=@bss_boss_hud rescue nil
+    base_y=(hud && hud.instance_variable_defined?(:@base_y)) ? hud.instance_variable_get(:@base_y).to_i : 6
+    start_y=[base_y+78,84].max
+    helpers.each_with_index do |b,row|
+      box=@sprites["dataBox_#{b.index}"];next if !box
+      y=start_y+(row*56)
+      begin;box.instance_variable_set(:@spriteX,-16);rescue;end
+      begin;box.instance_variable_set(:@spriteY,y);rescue;end
+      box.x=-16 if box.respond_to?(:x=)
+      box.y=y if box.respond_to?(:y=)
+      box.z=3050+row if box.respond_to?(:z=)
+      box.update if box.respond_to?(:update)
+    end
+    true
+  rescue => e
+    BSS064.log("SOS databox layout 0.6.53 warning: #{e.class}: #{e.message}")
+    false
+  end
+end
+
+#===============================================================================
+# BSS v0.6.56 - sticky Boss/SOS databox layout.
+# Vanilla and DBK databoxes recalculate @spriteX/@spriteY during update and some
+# custom styles rebuild those values again after a side-size change. A one-shot
+# x/y assignment therefore cannot be authoritative. The override below is
+# applied AFTER the databox's own update every frame, regardless of skin/style.
+#===============================================================================
+module BSS064StickySOSDatabox654
+  def bss654_set_layout_override(x=nil,y=nil,z=nil)
+    if !instance_variable_defined?(:@bss654_layout_original_z)
+      @bss654_layout_original_z=(self.z rescue nil)
+      @bss654_layout_original_child_z={}
+      begin
+        if @sprites.is_a?(Hash)
+          @sprites.each{|key,sp|@bss654_layout_original_child_z[key]=(sp.z rescue nil) if sp}
+        end
+      rescue
+      end
+    end
+    @bss654_layout_override={:x=>x,:y=>y,:z=>z}
+    bss654_apply_layout_override
+    true
+  rescue
+    false
+  end
+
+  def bss654_clear_layout_override
+    @bss654_layout_override=nil
+    begin;self.z=@bss654_layout_original_z if instance_variable_defined?(:@bss654_layout_original_z) && !@bss654_layout_original_z.nil? && respond_to?(:z=);rescue;end
+    begin
+      if @sprites.is_a?(Hash) && @bss654_layout_original_child_z.is_a?(Hash)
+        @sprites.each{|key,sp|z=@bss654_layout_original_child_z[key];sp.z=z if sp && !z.nil? && sp.respond_to?(:z=)}
+      end
+    rescue
+    end
+    true
+  rescue
+    false
+  end
+
+  def bss654_apply_layout_override
+    row=@bss654_layout_override
+    return if !row.is_a?(Hash)
+    self.x=row[:x] if !row[:x].nil? && respond_to?(:x=)
+    self.y=row[:y] if !row[:y].nil? && respond_to?(:y=)
+    if !row[:z].nil?
+      self.z=row[:z] if respond_to?(:z=)
+      begin
+        if @sprites.is_a?(Hash)
+          @bss654_layout_original_child_z ||= {}
+          @sprites.each do |key,sp|
+            next if !sp || !sp.respond_to?(:z=)
+            @bss654_layout_original_child_z[key]=(sp.z rescue nil) if !@bss654_layout_original_child_z.key?(key)
+            sp.z=row[:z].to_i+1
+          end
+        end
+      rescue
+      end
+    end
+  rescue
+  end
+
+  def update(*args,&block)
+    ret=super
+    bss654_apply_layout_override
+    ret
+  end
+end
+
+begin
+  if defined?(Battle::Scene::PokemonDataBox) && Battle::Scene::PokemonDataBox.ancestors.first != BSS064StickySOSDatabox654
+    Battle::Scene::PokemonDataBox.prepend(BSS064StickySOSDatabox654)
+  end
+rescue => e
+  BSS064.log("Sticky SOS databox install 0.6.56 warning: #{e.class}: #{e.message}")
+end
+
+module BSS064BossSOSDataboxLayout652
+  def bss652_layout_sos_databoxes
+    return false if !@battle || !@sprites
+    boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
+    boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
+    return false if !boss
+
+    # Clear old assignments first. This matters after a helper faints, a side is
+    # rebuilt, BossHUD is toggled off, or a custom databox style swaps objects.
+    @sprites.each do |key,box|
+      next if !key.to_s.start_with?("dataBox_") || !box
+      begin;box.bss654_clear_layout_override if box.respond_to?(:bss654_clear_layout_override);rescue;end
+    end
+
+    bss652_hide_native_boss_databox
+    return true if !bss653_boss_hud_enabled?
+
+    helpers=(@battle.battlers rescue []).compact.select do |b|
+      idx=(b.index rescue -1).to_i
+      idx>=0 && idx.odd? && !b.equal?(boss) && !(b.fainted? rescue false)
+    end.sort_by{|b|(b.index rescue 99).to_i}
+
+    # Match the visible bottom of the supplied long Boss bar rather than the
+    # full 104px backing canvas. top => y 6 + ~68px content; databox => y 34.
+    hud=@bss_boss_hud rescue nil
+    base_y=(hud && hud.instance_variable_defined?(:@base_y)) ? hud.instance_variable_get(:@base_y).to_i : 6
+    start_y=[base_y+78,84].max
+    helper_z=(defined?(BSS064::BossHUD::BASE_Z) ? BSS064::BossHUD::BASE_Z-10 : 2990)
+
+    helpers.each_with_index do |b,row|
+      box=@sprites["dataBox_#{b.index}"]
+      next if !box
+      y=start_y+(row*56)
+      if box.respond_to?(:bss654_set_layout_override)
+        box.bss654_set_layout_override(-16,y,helper_z)
+      else
+        begin;box.instance_variable_set(:@spriteX,-16);box.instance_variable_set(:@spriteY,y);rescue;end
+        box.x=-16 if box.respond_to?(:x=)
+        box.y=y if box.respond_to?(:y=)
+        box.z=helper_z if box.respond_to?(:z=)
+      end
+      # Position/Z only. Never force visibility and never call update here:
+      # doing either bypasses or advances the project's normal databox animation.
+    end
+    true
+  rescue => e
+    BSS064.log("SOS sticky databox layout 0.6.56 warning: #{e.class}: #{e.message}")
+    false
+  end
+end
+
+#===============================================================================
+# BSS v0.6.56 - native databox side-size reflow.
+#
+# SOS changes a side from 1 -> 2 -> 3 without recreating the Battle. Vanilla
+# PokemonDataBox caches its thin/normal graphic, HP-percent flag and source
+# coordinates when it is constructed; DBK styles cache their own offsets too.
+# Keeping an existing box alive preserves its proper DataBoxAppear state, but it
+# must still be reflowed for the NEW side size. This updates the existing object
+# in place instead of replacing it, so native/DBK/custom appear animations are
+# not reset and the enemy HP percentage cannot remain stuck in a triples layout.
+#===============================================================================
+module BSS064DataboxSideSizeReflow656
+  def bss656_reflow_side_size(side_size, force=false)
+    side_size=[[side_size.to_i,1].max,3].min
+    battle_rule=begin
+      b=@battler && @battler.respond_to?(:battle) ? @battler.battle : nil
+      b && b.respond_to?(:databoxStyle) ? b.databoxStyle : nil
+    rescue
+      nil
+    end
+    rule_sig=if battle_rule.is_a?(Array)
+      battle_rule.first.to_s
+    else
+      battle_rule.to_s
+    end
+    sig=[side_size,rule_sig]
+    return false if !force && @bss656_side_size_signature==sig
+
+    old_visible=(visible rescue false)
+    old_opacity=(opacity rescue 255)
+    old_selected=(@selected rescue nil)
+    old_xy=[(x rescue nil),(y rescue nil)]
+
+    # DBK's refresh_style is the authoritative conversion path when e.g. Long
+    # has to fall back to Basic in doubles/triples. It also delegates to vanilla
+    # when no DBK style is active. Otherwise invoke the native graphic resolver.
+    if respond_to?(:refresh_style)
+      refresh_style
+    elsif respond_to?(:initializeDataBoxGraphic,true)
+      send(:initializeDataBoxGraphic,side_size)
+    end
+
+    # Vanilla normal/thin databoxes can change canvas dimensions. DBK refresh_style
+    # already rebuilds the canvas when its style changes, but same-style reflows
+    # need no object replacement. Resize only when the resolved graphic demands it.
+    dbmp=instance_variable_get(:@databoxBitmap) rescue nil
+    style=instance_variable_get(:@style) rescue nil
+    if dbmp
+      extra_w=0;extra_h=0
+      if !style
+        begin;extra_w=self.class.const_get(:CONTENT_WRAPPER_EXTRA_WIDTH).to_i if self.class.const_defined?(:CONTENT_WRAPPER_EXTRA_WIDTH);rescue;end
+        begin;extra_h=self.class.const_get(:CONTENT_WRAPPER_EXTRA_HEIGHT).to_i if self.class.const_defined?(:CONTENT_WRAPPER_EXTRA_HEIGHT);rescue;end
+      end
+      want_w=dbmp.width.to_i+extra_w
+      want_h=dbmp.height.to_i+extra_h
+      cur=bitmap rescue nil
+      if !cur || (cur.width rescue -1).to_i!=want_w || (cur.height rescue -1).to_i!=want_h
+        old_contents=instance_variable_get(:@contents) rescue nil
+        begin;old_contents.dispose if old_contents && !(old_contents.disposed? rescue false);rescue;end
+        contents=Bitmap.new([want_w,1].max,[want_h,1].max)
+        instance_variable_set(:@contents,contents)
+        self.bitmap=contents
+        begin
+          style ? pbSetSmallFont(self.bitmap) : pbSetSystemFont(self.bitmap)
+        rescue
+        end
+      end
+    end
+
+    # initializeDataBoxGraphic/refresh_style updates the source coordinates. Move
+    # to those native coordinates once; the normal DataBox animation remains the
+    # only authority for visibility. BossHUD-specific rows are applied later.
+    sx=instance_variable_get(:@spriteX) rescue nil
+    sy=instance_variable_get(:@spriteY) rescue nil
+    self.x=sx if !sx.nil? && respond_to?(:x=)
+    self.y=sy if !sy.nil? && respond_to?(:y=)
+    new_xy=[(x rescue sx),(y rescue sy)]
+    if old_xy[0] && old_xy[1] && new_xy[0] && new_xy[1] && (old_xy[0].to_i!=new_xy[0].to_i || old_xy[1].to_i!=new_xy[1].to_i)
+      @bss656_reflow_from_xy=[old_xy[0].to_i,old_xy[1].to_i]
+      @bss656_reflow_to_xy=[new_xy[0].to_i,new_xy[1].to_i]
+    end
+    self.selected=old_selected if !old_selected.nil? && respond_to?(:selected=)
+    refresh if respond_to?(:refresh)
+    self.opacity=old_opacity if respond_to?(:opacity=)
+    self.visible=old_visible if respond_to?(:visible=)
+    @bss656_side_size_signature=sig
+    true
+  rescue => e
+    BSS064.log("Databox side-size reflow 0.6.56 warning: #{e.class}: #{e.message}")
+    false
+  end
+end
+
+begin
+  if defined?(Battle::Scene::PokemonDataBox) && !Battle::Scene::PokemonDataBox.ancestors.include?(BSS064DataboxSideSizeReflow656)
+    Battle::Scene::PokemonDataBox.prepend(BSS064DataboxSideSizeReflow656)
+  end
+rescue => e
+  BSS064.log("Databox reflow install 0.6.56 warning: #{e.class}: #{e.message}")
+end
+
+# Replace the prep routine, not the databox objects. Existing boxes are reflowed
+# in place and no manual #update is executed (an extra update advanced/overrode
+# custom databox animation state and caused visible popping).
+class Battle::Scene
+  # Vanilla databoxes cache their normal/thin graphic and position around the
+  # side size they were created with. Rebuilding just those boxes is safer than
+  # mutating their internal bitmap after SOS changes 1 -> 2/3, and avoids the
+  # previous box disappearing or retaining stale HP/name layout. DBK/custom
+  # styles keep the in-place refresh_style path below.
+  def bss672_rebuild_vanilla_databox(battler,side_size,old_box,incoming=false)
+    return nil if !old_box
+    style=(old_box.instance_variable_get(:@style) rescue nil)
+    return nil if !style.nil?
+    old_x=(old_box.x rescue nil)
+    old_y=(old_box.y rescue nil)
+    old_opacity=(old_box.opacity rescue 255)
+    old_selected=(old_box.instance_variable_get(:@selected) rescue nil)
+    begin;old_box.bss654_clear_layout_override if old_box.respond_to?(:bss654_clear_layout_override);rescue;end
+
+    fresh=PokemonDataBox.new(battler,side_size,@viewport)
+    target_x=(fresh.instance_variable_get(:@spriteX) rescue nil)
+    target_y=(fresh.instance_variable_get(:@spriteY) rescue nil)
+    target_x=(fresh.x rescue target_x) if target_x.nil?
+    target_y=(fresh.y rescue target_y) if target_y.nil?
+    fresh.opacity=old_opacity if fresh.respond_to?(:opacity=)
+    fresh.instance_variable_set(:@selected,old_selected) if !old_selected.nil?
+
+    if incoming
+      fresh.visible=false if fresh.respond_to?(:visible=)
+    else
+      # Existing battlers stay visible while their box glides to the new
+      # doubles/triples slot. Never let pbRefresh/reconstruction eat the old box.
+      fresh.x=old_x if !old_x.nil? && fresh.respond_to?(:x=)
+      fresh.y=old_y if !old_y.nil? && fresh.respond_to?(:y=)
+      fresh.visible=true if fresh.respond_to?(:visible=)
+      if !old_x.nil? && !old_y.nil? && !target_x.nil? && !target_y.nil? &&
+         (old_x.to_i!=target_x.to_i || old_y.to_i!=target_y.to_i)
+        fresh.instance_variable_set(:@bss656_reflow_from_xy,[old_x.to_i,old_y.to_i])
+        fresh.instance_variable_set(:@bss656_reflow_to_xy,[target_x.to_i,target_y.to_i])
+      end
+    end
+    begin;old_box.dispose if old_box && !(old_box.disposed? rescue false);rescue;end
+    @sprites["dataBox_#{battler.index}"]=fresh
+    fresh
+  rescue => e
+    BSS064.log("Vanilla SOS databox rebuild 0.6.72 warning: #{e.class}: #{e.message}") if defined?(BSS064)
+    nil
+  end
+
+  def bss_pbPrepNewBattler(idx_battler)
+    boss_snapshot=(respond_to?(:bss_boss_animation_scale_snapshot) ? bss_boss_animation_scale_snapshot : nil) rescue nil
+    pbRefresh
+    battler=@battle.battlers[idx_battler]
+    add_new_battler=!@sprites["dataBox_#{idx_battler}"]
+    if add_new_battler
+      begin;@sprites["targetWindow"].dispose if @sprites["targetWindow"] && !@sprites["targetWindow"].disposed?;rescue;end
+      if defined?(TargetMenu)
+        @sprites["targetWindow"]=TargetMenu.new(@viewport,10000,@battle.sideSizes)
+        @sprites["targetWindow"].visible=false
+        bss_raise_target_menu_z
+      end
+      pbCreatePokemonSprite(idx_battler)
+      bss_ensure_enhanced_ui_icon(idx_battler)
+    else
+      begin;@sprites["pokemon_#{idx_battler}"].dispose if @sprites["pokemon_#{idx_battler}"];rescue;end
+      begin;@sprites["shadow_#{idx_battler}"].dispose if @sprites["shadow_#{idx_battler}"];rescue;end
+      pbCreatePokemonSprite(idx_battler)
+    end
+    @sprites["pokemon_#{idx_battler}"].visible=false if @sprites["pokemon_#{idx_battler}"]
+    @sprites["shadow_#{idx_battler}"].visible=false if @sprites["shadow_#{idx_battler}"]
+    side_size=@battle.pbSideSize(idx_battler)
+    bss_sync_sos_side_size_state(idx_battler)
+
+    @battle.allSameSideBattlers(idx_battler).each do |b|
+      bat_sprite=@sprites["pokemon_#{b.index}"]
+      sha_sprite=@sprites["shadow_#{b.index}"]
+      bat_sprite.sideSize=side_size if bat_sprite && bat_sprite.respond_to?(:sideSize=)
+      sha_sprite.sideSize=side_size if sha_sprite && sha_sprite.respond_to?(:sideSize=)
+      box=@sprites["dataBox_#{b.index}"]
+      if add_new_battler
+        if b.index==idx_battler || !box
+          begin;box.dispose if box;rescue;end
+          box=PokemonDataBox.new(b,side_size,@viewport)
+          @sprites["dataBox_#{b.index}"]=box
+          # The SOS join animation owns the reveal. Hidden now means no one-frame
+          # flash/pop before BSSSOSJoin starts.
+          box.visible=false if b.index==idx_battler && box.respond_to?(:visible=)
+        else
+          rebuilt=bss672_rebuild_vanilla_databox(b,side_size,box,false)
+          box=rebuilt if rebuilt
+          box.bss656_reflow_side_size(side_size) if !rebuilt && box.respond_to?(:bss656_reflow_side_size)
+        end
+      elsif box
+        incoming=(b.index==idx_battler)
+        rebuilt=bss672_rebuild_vanilla_databox(b,side_size,box,incoming)
+        if rebuilt
+          box=rebuilt
+        else
+          if incoming && box.respond_to?(:battler=)
+            box.battler=b
+            box.visible=false if box.respond_to?(:visible=)
+          end
+          box.bss656_reflow_side_size(side_size,true) if box.respond_to?(:bss656_reflow_side_size)
+        end
+      end
+      bss_ensure_enhanced_ui_icon(b.index)
+    end
+    bss_sync_enhanced_ui_icons
+    bss_raise_target_menu_z
+    begin;bss_restore_boss_animation_scale(boss_snapshot) if boss_snapshot && respond_to?(:bss_restore_boss_animation_scale);rescue;end
+    begin;bss_reassert_boss_visual_scale(nil,true) if respond_to?(:bss_reassert_boss_visual_scale);rescue;end
+    begin;bss_update_boss_hud(true) if respond_to?(:bss_update_boss_hud);rescue;end
+    add_new_battler
+  rescue => e
+    BSS064.log("SOS prep 0.6.56 warning: #{e.class}: #{e.message}")
+    raise
+  end
+end
+
+# Native Boss databox mode and BossBar mode share the same side-size reflow.
+# With BossBar OFF we intentionally add no custom coordinates: Vanilla/DBK/the
+# active custom databox style gets its own doubles/triples positions. With the
+# BossBar ON, only SOS helper Y is overridden below the bar; X remains the
+# resolved native/style X instead of being hardcoded to -16.
+module BSS064BossSOSDataboxLayout652
+  def bss652_layout_sos_databoxes
+    return false if !@battle || !@sprites
+    boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
+    boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
+    return false if !boss
+
+    @sprites.each do |key,box|
+      next if !key.to_s.start_with?("dataBox_") || !box
+      begin;box.bss654_clear_layout_override if box.respond_to?(:bss654_clear_layout_override);rescue;end
+    end
+
+    same_side=(@battle.battlers rescue []).compact.select do |b|
+      idx=(b.index rescue -1).to_i
+      properly_finished=(b.instance_variable_get(:@fainted)==true rescue false)
+      idx>=0 && idx.odd? && !properly_finished
+    end
+    same_side.each do |b|
+      box=@sprites["dataBox_#{b.index}"]
+      next if !box
+      ss=(@battle.pbSideSize(b.index) rescue 1)
+      box.bss656_reflow_side_size(ss) if box.respond_to?(:bss656_reflow_side_size)
+    end
+
+    bss652_hide_native_boss_databox
+
+    if !bss653_boss_hud_enabled?
+      # The Boss is physically kept in the true centre battle slot (index 3 in
+      # doubles/triples), but the UI must not inherit that slot order. Build the
+      # available positions from the active databox style itself, then assign
+      # them by logical role: Boss first, SOS below. This works with Vanilla,
+      # DBK Basic/Long fallback and custom PokemonDataBox skins without hardcoded
+      # dimensions or offsets.
+      if same_side.length>1
+        slots=same_side.map do |b|
+          box=@sprites["dataBox_#{b.index}"];next nil if !box
+          sx=(box.instance_variable_get(:@spriteX) rescue nil)
+          sy=(box.instance_variable_get(:@spriteY) rescue nil)
+          sx=(box.x rescue nil) if sx.nil?
+          sy=(box.y rescue nil) if sy.nil?
+          next nil if sx.nil? || sy.nil?
+          [sx.to_i,sy.to_i]
+        end.compact.sort_by{|xy|[xy[1],xy[0]]}
+        ordered=[]
+        ordered << boss if same_side.include?(boss)
+        ordered.concat(same_side.reject{|b|b.equal?(boss)}.sort_by{|b|(b.index rescue 99).to_i})
+        ordered.each_with_index do |b,row|
+          xy=slots[row];next if !xy
+          box=@sprites["dataBox_#{b.index}"];next if !box
+          begin;box.instance_variable_set(:@spriteX,xy[0]);box.instance_variable_set(:@spriteY,xy[1]);rescue;end
+          # If SOS prep already recorded an old->new transition for an existing
+          # box, update only its destination. BSSSOSJoin will animate from the old
+          # singles coordinate instead of teleporting the Boss databox.
+          from=(box.instance_variable_get(:@bss656_reflow_from_xy) rescue nil)
+          if from.is_a?(Array)
+            begin;box.instance_variable_set(:@bss656_reflow_to_xy,[xy[0],xy[1]]);rescue;end
+            # Keep the box on its pre-SOS coordinates until BSSSOSJoin consumes
+            # the transition. Otherwise the reflow can be rendered for one frame
+            # at the new slot and visibly "pop" before the move process begins.
+            box.x=from[0] if box.respond_to?(:x=)
+            box.y=from[1] if box.respond_to?(:y=)
+          else
+            box.x=xy[0] if box.respond_to?(:x=)
+            box.y=xy[1] if box.respond_to?(:y=)
+          end
+        end
+      end
+      return true
+    end
+
+    helpers=same_side.reject{|b|b.equal?(boss)}.sort_by{|b|(b.index rescue 99).to_i}
+    hud=@bss_boss_hud rescue nil
+    base_y=(hud && hud.instance_variable_defined?(:@base_y)) ? hud.instance_variable_get(:@base_y).to_i : 6
+    start_y=[base_y+78,84].max
+    helper_z=(defined?(BSS064::BossHUD::BASE_Z) ? BSS064::BossHUD::BASE_Z-10 : 2990)
+    helpers.each_with_index do |b,row|
+      box=@sprites["dataBox_#{b.index}"];next if !box
+      native_x=(box.respond_to?(:spriteX) ? (box.spriteX rescue nil) : nil)
+      native_x=box.instance_variable_get(:@spriteX) rescue native_x
+      native_x=-16 if native_x.nil?
+      y=start_y+(row*56)
+      if box.respond_to?(:bss654_set_layout_override)
+        box.bss654_set_layout_override(native_x,y,helper_z+row)
+      else
+        begin;box.instance_variable_set(:@spriteY,y);rescue;end
+        box.x=native_x if box.respond_to?(:x=)
+        box.y=y if box.respond_to?(:y=)
+        box.z=helper_z+row if box.respond_to?(:z=)
+      end
+    end
+    true
+  rescue => e
+    BSS064.log("SOS databox layout 0.6.56 warning: #{e.class}: #{e.message}")
+    false
+  end
+end
+
+
+#===============================================================================
+# BSS v0.6.59 - preserve native/DBK DataBoxAppear before SOS actually expands
+# the enemy side. The 0.6.56 reflow correctly updates a 1->2/3 side, but doing
+# that same reflow while the Boss is still alone resets x/y to @spriteX/@spriteY
+# and cancels Essentials' slide-in delta. No dynamic SOS layout = do not touch
+# the box at all.
+#===============================================================================
+module BSS064SingletonDataboxSlide659
+  def bss652_layout_sos_databoxes(*args,&block)
+    battle=@battle rescue nil
+    sprites=@sprites rescue nil
+    boss=nil
+    if battle
+      boss=(battle.bss_find_boss_battler_any rescue nil) if battle.respond_to?(:bss_find_boss_battler_any)
+      boss ||= (battle.bss_find_boss_battler rescue nil) if battle.respond_to?(:bss_find_boss_battler)
+    end
+    return super if !battle || !sprites || !boss
+
+    same_side=(battle.battlers rescue []).compact.select do |b|
+      next false if (b.opposes?(boss) rescue true)
+      next false if (b.instance_variable_get(:@fainted)==true rescue false)
+      true
+    end
+    dynamic_now=same_side.length>1
+    dynamic_before=(@bss659_dynamic_sos_databox_layout==true)
+
+    if !dynamic_now && !dynamic_before
+      # BossHUD still owns hiding the Boss' normal box, but no x/y/style reflow is
+      # allowed here. That leaves Vanilla/DBK DataBoxAppear fully authoritative.
+      begin;bss652_hide_native_boss_databox if respond_to?(:bss652_hide_native_boss_databox);rescue;end
+      return true
+    end
+
+    @bss659_dynamic_sos_databox_layout=true if dynamic_now
+    ret=super
+    @bss659_dynamic_sos_databox_layout=false if !dynamic_now
+    ret
+  rescue => e
+    BSS064.log("Singleton databox slide 0.6.59 warning: #{e.class}: #{e.message}")
+    super
+  end
+end
+begin
+  if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS064SingletonDataboxSlide659)
+    Battle::Scene.prepend(BSS064SingletonDataboxSlide659)
+  end
+rescue => e
+  BSS064.log("Singleton databox slide install 0.6.59 warning: #{e.class}: #{e.message}")
+end
+
+
+#===============================================================================
+# BSS v0.6.73 - live SOS databox integrity pass.
+# pbRefresh and project UI plugins can replace/hide an existing caller databox
+# while the foe side expands from singles to doubles/triples. Repair the actual
+# scene hash both before and after the join animation so the caller and SOS boxes
+# always point at the current Battlers and are refreshed from live HP/name state.
+#===============================================================================
+module BSS073SOSDataboxIntegrity
+  def bss073_boss_hud_hides_databox?(battler)
+    return false if !@battle || !battler
+    boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
+    boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
+    cfg=(@battle.bss_boss_hud_config rescue {}) if @battle.respond_to?(:bss_boss_hud_config)
+    boss && boss.equal?(battler) && cfg.is_a?(Hash) && cfg["enabled"]!=false
+  rescue
+    false
+  end
+
+  def bss073_repair_sos_databoxes(idx_sos,reveal_incoming=false)
+    return false if !@battle || !@sprites
+    side_size=(@battle.pbSideSize(idx_sos) rescue 1)
+    rows=(@battle.allSameSideBattlers(idx_sos) rescue [])
+    rows=[] if !rows.respond_to?(:each)
+    rows.each do |b|
+      next if !b
+      key="dataBox_#{b.index}"
+      box=@sprites[key] rescue nil
+      missing=!box || (box.disposed? rescue false)
+      if missing
+        begin
+          box=PokemonDataBox.new(b,side_size,@viewport)
+          @sprites[key]=box
+        rescue => e
+          BSS064.log("SOS databox recreate #{b.index} warning: #{e.class}: #{e.message}") if defined?(BSS064)
+          next
+        end
+      end
+
+      # A reused dynamic slot may still reference the former Battler. Preserve
+      # visibility while rebinding because PokemonDataBox#battler= may reset it.
+      old_visible=(box.visible rescue true)
+      begin
+        current=(box.battler rescue nil)
+        box.battler=b if !current.equal?(b) && box.respond_to?(:battler=)
+      rescue
+      end
+      begin
+        # Custom DBK styles need their active side-size refreshed in place.
+        # Vanilla boxes were already rebuilt by bss672_rebuild_vanilla_databox.
+        style=(box.instance_variable_get(:@style) rescue nil)
+        box.bss656_reflow_side_size(side_size,true) if !style.nil? && box.respond_to?(:bss656_reflow_side_size)
+      rescue
+      end
+      begin;box.refresh if box.respond_to?(:refresh);rescue;end
+
+      intentional_hide=bss073_boss_hud_hides_databox?(b)
+      incoming=((b.index rescue -1).to_i==idx_sos.to_i)
+      should_show=!intentional_hide && (!incoming || reveal_incoming)
+      if should_show
+        begin;box.visible=true if box.respond_to?(:visible=);rescue;end
+        begin;box.opacity=255 if box.respond_to?(:opacity=) && (box.opacity rescue 255).to_i<=0;rescue;end
+      elsif incoming && !reveal_incoming
+        begin;box.visible=false if box.respond_to?(:visible=);rescue;end
+      elsif intentional_hide
+        begin;box.visible=false if box.respond_to?(:visible=);rescue;end
+      else
+        begin;box.visible=old_visible if box.respond_to?(:visible=);rescue;end
+      end
+    end
+    true
+  rescue => e
+    BSS064.log("SOS databox integrity 0.6.73 warning: #{e.class}: #{e.message}") if defined?(BSS064)
+    false
+  end
+
+  def bss_pbPrepNewBattler(idx_battler,*args,&block)
+    result=super
+    bss073_repair_sos_databoxes(idx_battler,false)
+    result
+  end
+
+  def bss_pbSOSJoin(idx_battler,*args,&block)
+    result=super
+    bss073_repair_sos_databoxes(idx_battler,true)
+    begin;bss_sync_sos_side_size_state(idx_battler) if respond_to?(:bss_sync_sos_side_size_state);rescue;end
+    result
+  end
+end
+begin
+  if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS073SOSDataboxIntegrity)
+    Battle::Scene.prepend(BSS073SOSDataboxIntegrity)
+  end
+rescue => e
+  BSS064.log("SOS databox integrity install 0.6.73 warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+
+#===============================================================================
+# BSS v0.6.74 - SOS BattleBox identity authority.
+# A project pbRefresh may keep the *sprite key* but replace/rebind the underlying
+# PokemonDataBox. Looking up only dataBox_<new index> is therefore insufficient:
+# in ordinary wild SOS the caller can disappear while the new ally survives.
+# Snapshot and restore by the underlying Pokemon identity, then normalize keys.
+#===============================================================================
+module BSS074SOSDataboxIdentityAuthority
+  def bss074_sos_live_rows(idx_sos)
+    side=idx_sos.to_i & 1
+    rows=(@battle.battlers rescue [])
+    return [] if !rows.respond_to?(:compact)
+    rows.compact.select do |b|
+      idx=(b.index rescue -1).to_i
+      next false if idx<0 || (idx & 1)!=side
+      # @fainted is the completed lifecycle marker. A battler at 0 HP whose faint
+      # process has not run yet must still keep its box long enough to animate out.
+      (b.instance_variable_get(:@fainted) rescue false)!=true
+    end
+  rescue
+    []
+  end
+
+  def bss074_box_pokemon_token(box)
+    b=(box.battler rescue nil)
+    pkmn=(b.pokemon rescue nil) if b
+    pkmn ? pkmn.object_id : (b ? b.object_id : nil)
+  rescue
+    nil
+  end
+
+  def bss074_battler_token(b)
+    pkmn=(b.pokemon rescue nil)
+    pkmn ? pkmn.object_id : b.object_id
+  rescue
+    b.object_id
+  end
+
+  def bss074_snapshot_sos_boxes(idx_sos)
+    out={}
+    bss074_sos_live_rows(idx_sos).each do |b|
+      token=bss074_battler_token(b)
+      box=nil
+      @sprites.each do |key,sp|
+        next if !key.to_s.start_with?("dataBox_") || !sp || (sp.disposed? rescue false)
+        if bss074_box_pokemon_token(sp)==token
+          box=sp;break
+        end
+      end
+      box ||= (@sprites["dataBox_#{b.index}"] rescue nil)
+      out[token]={:box=>box,:x=>(box.x rescue nil),:y=>(box.y rescue nil),:visible=>(box.visible rescue true)} if box
+    end
+    out
+  rescue
+    {}
+  end
+
+  def bss074_repair_sos_boxes_by_identity(idx_sos,reveal_incoming=false,snapshot=nil)
+    return false if !@battle || !@sprites.is_a?(Hash)
+    rows=bss074_sos_live_rows(idx_sos)
+    side_size=(@battle.pbSideSize(idx_sos) rescue 1)
+    current={}
+    @sprites.each do |key,sp|
+      next if !key.to_s.start_with?("dataBox_") || !sp || (sp.disposed? rescue false)
+      tok=bss074_box_pokemon_token(sp)
+      current[tok]=sp if tok
+    end
+    assignments={}
+    rows.each do |b|
+      tok=bss074_battler_token(b)
+      box=current[tok]
+      snap=snapshot.is_a?(Hash) ? snapshot[tok] : nil
+      box ||= snap[:box] if snap.is_a?(Hash) && snap[:box] && !(snap[:box].disposed? rescue false)
+      exact=@sprites["dataBox_#{b.index}"] rescue nil
+      box ||= exact if exact && !(exact.disposed? rescue false) && (bss074_box_pokemon_token(exact)==tok || bss074_box_pokemon_token(exact).nil?)
+      if !box
+        begin;box=PokemonDataBox.new(b,side_size,@viewport);rescue=>e;BSS064.log("SOS identity box create warning: #{e.class}: #{e.message}");next;end
+      end
+      assignments[b.index.to_i]=[b,box,snap]
+    end
+
+    # Remove stale key aliases for boxes we are about to reassign, then give each
+    # live battler exactly one dataBox_<current index> key.
+    assigned_boxes=assignments.values.map{|row|row[1]}
+    @sprites.keys.each do |key|
+      next if !key.to_s.start_with?("dataBox_")
+      sp=@sprites[key]
+      @sprites.delete(key) if assigned_boxes.include?(sp)
+    end
+    assignments.each do |idx,row|
+      b,box,snap=row
+      @sprites["dataBox_#{idx}"]=box
+      begin;box.battler=b if box.respond_to?(:battler=) && !(box.battler rescue nil).equal?(b);rescue;end
+      begin
+        style=(box.instance_variable_get(:@style) rescue nil)
+        if style.nil?
+          # Do not replace a recovered caller object here. Reflow the exact live
+          # box so project-specific BattleBox wrappers remain attached to it.
+          box.bss656_reflow_side_size(side_size,true) if box.respond_to?(:bss656_reflow_side_size)
+        else
+          box.bss656_reflow_side_size(side_size,true) if box.respond_to?(:bss656_reflow_side_size)
+        end
+      rescue
+      end
+      begin;box.refresh if box.respond_to?(:refresh);rescue;end
+      incoming=(idx.to_i==idx_sos.to_i)
+      hide=bss073_boss_hud_hides_databox?(b) if respond_to?(:bss073_boss_hud_hides_databox?)
+      hide=false if hide.nil?
+      if hide
+        box.visible=false if box.respond_to?(:visible=)
+      elsif incoming && !reveal_incoming
+        box.visible=false if box.respond_to?(:visible=)
+      else
+        box.visible=true if box.respond_to?(:visible=)
+        box.opacity=255 if box.respond_to?(:opacity=) && (box.opacity rescue 255).to_i<=0
+      end
+      # Preserve the caller's visible old position and give BSSSOSJoin a real
+      # old->new transition instead of a teleport after pbRefresh.
+      if !incoming && snap.is_a?(Hash) && !snap[:x].nil? && !snap[:y].nil?
+        tx=(box.instance_variable_get(:@spriteX) rescue box.x)
+        ty=(box.instance_variable_get(:@spriteY) rescue box.y)
+        if !tx.nil? && !ty.nil? && (snap[:x].to_i!=tx.to_i || snap[:y].to_i!=ty.to_i)
+          box.instance_variable_set(:@bss656_reflow_from_xy,[snap[:x].to_i,snap[:y].to_i])
+          box.instance_variable_set(:@bss656_reflow_to_xy,[tx.to_i,ty.to_i])
+          box.x=snap[:x] if box.respond_to?(:x=)
+          box.y=snap[:y] if box.respond_to?(:y=)
+        end
+      end
+    end
+    true
+  rescue => e
+    BSS064.log("SOS identity authority 0.6.74 warning: #{e.class}: #{e.message}") if defined?(BSS064)
+    false
+  end
+
+  def bss_pbPrepNewBattler(idx_battler,*args,&block)
+    snapshot=bss074_snapshot_sos_boxes(idx_battler)
+    ret=super
+    bss074_repair_sos_boxes_by_identity(idx_battler,false,snapshot)
+    ret
+  end
+
+  def bss_pbSOSJoin(idx_battler,*args,&block)
+    ret=super
+    bss074_repair_sos_boxes_by_identity(idx_battler,true,nil)
+    ret
+  end
+end
+begin
+  if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS074SOSDataboxIdentityAuthority)
+    Battle::Scene.prepend(BSS074SOSDataboxIdentityAuthority)
+  end
+rescue => e
+  BSS064.log("SOS identity authority install 0.6.74 warning: #{e.class}: #{e.message}") if defined?(BSS064)
 end

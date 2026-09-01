@@ -1,0 +1,4 @@
+Name          = [CARNKEVT] ChangeDex
+Version       = 0.11.0
+Essentials    = 21.1
+Credits       = CarnekVT

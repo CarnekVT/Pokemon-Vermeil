@@ -1944,17 +1944,35 @@ module BattleAnimationStudioRuntime
         end
       end
       case anchor
-      when "user", "pbs:user"
+      when "user"
+        if authored_side_opposing? != runtime_side_opposing?
+          # Mirror horizontal side choreography only. Keep vertical authored
+          # motion intact (e.g. Night Slash lifting the Target).
+          ox *= -1.0
+        end
+        a = base_anchor(:user, true); [a[0] + x + ox, a[1] + y + oy]
+      when "pbs:user"
         a = base_anchor(:user, true); [a[0] + x + ox, a[1] + y + oy]
       when "pbs:user_position"
         a = base_anchor(:user, true); s = script_anchor(:user); [a[0] + x + ox, s[1] + y + oy]
-      when "target", "pbs:target"
+      when "target"
+        if authored_side_opposing? != runtime_side_opposing?
+          ox *= -1.0
+        end
+        a = base_anchor(:target, true); [a[0] + x + ox, a[1] + y + oy]
+      when "pbs:target"
         a = base_anchor(:target, true); [a[0] + x + ox, a[1] + y + oy]
       when "pbs:target_position"
         a = base_anchor(:target, true); s = script_anchor(:target); [a[0] + x + ox, s[1] + y + oy]
       when "user_battler"
+        if authored_side_opposing? != runtime_side_opposing?
+          ox *= -1.0
+        end
         a = base_anchor(:user, false); [a[0] + ox, a[1] + oy]
       when "target_battler"
+        if authored_side_opposing? != runtime_side_opposing?
+          ox *= -1.0
+        end
         a = base_anchor(:target, false); [a[0] + ox, a[1] + oy]
       when "user_target", "pbs:user_and_target"
         u = base_anchor(:user, true); t = base_anchor(:target, true)
@@ -2079,6 +2097,124 @@ module BattleAnimationStudioRuntime
       ret
     end
 
+    def authored_side_opposing?
+      src = @data["source"].is_a?(Hash) ? @data["source"] : {}
+      !!src["opposing"] || src["sideContext"].to_s.downcase == "foe"
+    rescue
+      false
+    end
+
+    def runtime_side_opposing?
+      runtime_user_index(0).to_i.odd?
+    rescue
+      false
+    end
+
+    def context_view_key
+      runtime_side_opposing? ? "foe" : "player"
+    end
+
+    def context_override_for_object(obj)
+      return nil if !obj.is_a?(Hash) || !obj["contextOverrides"].is_a?(Hash)
+      ov = obj["contextOverrides"][context_view_key]
+      ov.is_a?(Hash) ? ov : nil
+    rescue
+      nil
+    end
+
+    def context_override_neutral(prop)
+      ["scaleX", "scaleY", "opacity", "cameraZoom"].include?(prop.to_s) ? 100.0 : 0.0
+    end
+
+    def context_override_local_value(obj, prop, frame, neutral = nil)
+      neutral = context_override_neutral(prop) if neutral.nil?
+      ov = context_override_for_object(obj)
+      return neutral.to_f if !ov || !ov["contextKeys"].is_a?(Hash)
+      raw = ov["contextKeys"][prop.to_s]
+      return neutral.to_f if !raw.is_a?(Array) || raw.empty?
+      keys = raw.select { |k| k.is_a?(Hash) }.sort_by { |k| (k["frame"] || 0).to_f }
+      return neutral.to_f if keys.empty?
+      f = frame.to_f
+      first_frame = (keys.first["frame"] || 0).to_f
+      if first_frame > 0.0
+        if f <= 0.0
+          return neutral.to_f
+        elsif f < first_frame
+          t = ease01(f / [first_frame, 0.0001].max, "ease_both")
+          return neutral.to_f + ((keys.first["value"].to_f - neutral.to_f) * t)
+        end
+      end
+      return keys.first["value"].to_f if f <= first_frame
+      return keys.last["value"].to_f if f >= (keys.last["frame"] || 0).to_f
+      lo = 0; hi = keys.length - 1
+      while lo + 1 < hi
+        mid = (lo + hi) / 2
+        if (keys[mid]["frame"] || 0).to_f <= f
+          lo = mid
+        else
+          hi = mid
+        end
+      end
+      a = keys[lo]; b = keys[hi]
+      span = [0.0001, (b["frame"] || 0).to_f - (a["frame"] || 0).to_f].max
+      t = ease01((f - (a["frame"] || 0).to_f) / span, a["easing"] || "ease_both")
+      a["value"].to_f + ((b["value"].to_f - a["value"].to_f) * t)
+    rescue
+      neutral.to_f
+    end
+
+    def context_override_value(obj, prop, frame, neutral = nil)
+      neutral = context_override_neutral(prop) if neutral.nil?
+      ov = context_override_for_object(obj)
+      return neutral.to_f if !ov
+      global = ov[prop.to_s]
+      global = neutral if global.nil? || !global.to_s.match?(/^-?\d+(?:\.\d+)?$/)
+      local = context_override_local_value(obj, prop, frame, neutral)
+      if ["scaleX", "scaleY", "opacity", "cameraZoom"].include?(prop.to_s)
+        global.to_f * local.to_f / 100.0
+      else
+        global.to_f + local.to_f
+      end
+    rescue
+      neutral.to_f
+    end
+
+    def contextual_screen_role_point(obj, point, ret, role)
+      return [ret, false] if !obj.is_a?(Hash) || !point.is_a?(Hash) || role.to_s.empty?
+      return [ret, false] if obj["coordinateSpaceManual"] != true
+      space = (obj["coordinateSpace"] || "auto").to_s.downcase
+      return [ret, false] if !["user", "target"].include?(space) || space != role.to_s
+      return [ret, false] if point["anchor"].to_s.downcase != "screen"
+      return [ret, false] if authored_side_opposing? == runtime_side_opposing?
+      current_user = base_anchor(:user, true); current_target = base_anchor(:target, true)
+      source_user = current_target; source_target = current_user
+      source_anchor = role.to_s == "user" ? source_user : source_target
+      dest_anchor = role.to_s == "user" ? current_user : current_target
+      svx = source_target[0].to_f - source_user[0].to_f; svy = source_target[1].to_f - source_user[1].to_f
+      dvx = current_target[0].to_f - current_user[0].to_f; dvy = current_target[1].to_f - current_user[1].to_f
+      sl = Math.sqrt(svx * svx + svy * svy); dl = Math.sqrt(dvx * dvx + dvy * dvy)
+      return [ret, false] if sl <= 0.0001 || dl <= 0.0001
+      cos = (svx * dvx + svy * dvy) / (sl * dl)
+      sin = (svx * dvy - svy * dvx) / (sl * dl)
+      scale = dl / sl
+      lx = ret[0].to_f - source_anchor[0].to_f; ly = ret[1].to_f - source_anchor[1].to_f
+      [[dest_anchor[0].to_f + (lx * cos - ly * sin) * scale, dest_anchor[1].to_f + (lx * sin + ly * cos) * scale], true]
+    rescue
+      [ret, false]
+    end
+
+    def contextual_screen_rotation_delta(obj)
+      return 0.0 if !obj.is_a?(Hash) || obj["coordinateSpaceManual"] != true
+      space = (obj["coordinateSpace"] || "auto").to_s.downcase
+      return 0.0 if !["user", "target"].include?(space)
+      keys = obj["positionKeys"].is_a?(Array) ? obj["positionKeys"] : []
+      has_screen = keys.any? { |k| k.is_a?(Hash) && k["point"].is_a?(Hash) && k["point"]["anchor"].to_s.downcase == "screen" }
+      return 0.0 if !has_screen
+      authored_side_opposing? == runtime_side_opposing? ? 0.0 : 180.0
+    rescue
+      0.0
+    end
+
     def resolve_object_point(obj, point)
       ret = resolve_point(point)
       anchor = point.is_a?(Hash) ? point["anchor"].to_s.downcase : ""
@@ -2086,7 +2222,9 @@ module BattleAnimationStudioRuntime
       role = context_role_for_object(obj)
       ret = legacy_single_target_screen_point(obj, point, ret) if src["contextAutoAdapt"] != false
       if ["", "screen"].include?(anchor) && src["contextAutoAdapt"] != false
-        if !role.empty?
+        transformed = contextual_screen_role_point(obj, point, ret, role)
+        ret = transformed[0]
+        if !role.empty? && !transformed[1]
           delta = formation_offset_for_role(role)
           ret = [ret[0].to_f + delta[0].to_f, ret[1].to_f + delta[1].to_f]
         end
@@ -2487,12 +2625,25 @@ module BattleAnimationStudioRuntime
       keys = source["valueKeys"].is_a?(Hash) ? source["valueKeys"] : {}
       if kind.to_s == "tone" && ["toneRed", "toneGreen", "toneBlue", "toneGray"].any? { |p| keys[p].is_a?(Array) && !keys[p].empty? }
         base = value.is_a?(Hash) ? value : {}
+        ov = context_override_for_object(source)
         return {
-          "red"   => sample_value(source, "toneRed", frame, base["red"] || 0),
-          "green" => sample_value(source, "toneGreen", frame, base["green"] || 0),
-          "blue"  => sample_value(source, "toneBlue", frame, base["blue"] || 0),
-          "gray"  => sample_value(source, "toneGray", frame, base["gray"] || 0)
+          "red"   => [[sample_value(source, "toneRed", frame, base["red"] || 0) + context_override_value(source, "toneRed", @frame, 0.0), -255.0].max, 255.0].min,
+          "green" => [[sample_value(source, "toneGreen", frame, base["green"] || 0) + context_override_value(source, "toneGreen", @frame, 0.0), -255.0].max, 255.0].min,
+          "blue"  => [[sample_value(source, "toneBlue", frame, base["blue"] || 0) + context_override_value(source, "toneBlue", @frame, 0.0), -255.0].max, 255.0].min,
+          "gray"  => [[sample_value(source, "toneGray", frame, base["gray"] || 0) + context_override_value(source, "toneGray", @frame, 0.0), 0.0].max, 255.0].min
         }
+      end
+      if kind.to_s == "tone"
+        ov = context_override_for_object(source)
+        if ov
+          base = value.is_a?(Hash) ? value : {}
+          value = {
+            "red" => [[(base["red"] || 0).to_f + context_override_value(source, "toneRed", @frame, 0.0), -255.0].max, 255.0].min,
+            "green" => [[(base["green"] || 0).to_f + context_override_value(source, "toneGreen", @frame, 0.0), -255.0].max, 255.0].min,
+            "blue" => [[(base["blue"] || 0).to_f + context_override_value(source, "toneBlue", @frame, 0.0), -255.0].max, 255.0].min,
+            "gray" => [[(base["gray"] || 0).to_f + context_override_value(source, "toneGray", @frame, 0.0), 0.0].max, 255.0].min
+          }
+        end
       end
       value
     end
@@ -2570,7 +2721,11 @@ module BattleAnimationStudioRuntime
       # sprite coordinate and the focus target used by the angle override.
       origin[1] += offset
       target[1] += offset
-      sprite.angle = sample_value(clip, "rotation", frame, 0) + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + (sample_value(clip, "flipY", frame, 0) >= 0.5 ? 180.0 : 0.0)
+      context_override = context_override_for_object(clip)
+      context_rotation = context_override_value(clip, "rotation", @frame, 0.0)
+      effective_flip_y = sample_value(clip, "flipY", frame, 0) >= 0.5
+      effective_flip_y = !effective_flip_y if context_override && runtime_bool(context_override["flipY"])
+      sprite.angle = sample_value(clip, "rotation", frame, 0) + context_rotation + contextual_screen_rotation_delta(clip) + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + (effective_flip_y ? 180.0 : 0.0)
     rescue
     end
 
@@ -2580,7 +2735,11 @@ module BattleAnimationStudioRuntime
     def apply_emitter_angle_override(sprite, clip, frame, desc)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
       mode = pbs["angleOverride"].to_s.downcase
-      base_rotation = sample_value(clip, "rotation", frame, 0).to_f
+      context_override = context_override_for_object(clip)
+      context_rotation = context_override_value(clip, "rotation", @frame, 0.0)
+      base_rotation = sample_value(clip, "rotation", frame, 0).to_f + context_rotation + contextual_screen_rotation_delta(clip)
+      effective_flip_y = sample_value(clip, "flipY", frame, 0) >= 0.5
+      effective_flip_y = !effective_flip_y if context_override && runtime_bool(context_override["flipY"])
       range = (desc[:random_angle_range] || 0).to_i
       angle_offset = (desc[:random_angle] || 0).to_f
       target = pbs_focus_target(clip).dup
@@ -2592,14 +2751,14 @@ module BattleAnimationStudioRuntime
         origin = sample_position(clip, frame).dup
         origin[1] += offset
         target[1] += offset
-        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + angle_offset + (sample_value(clip, "flipY", frame, 0) >= 0.5 ? 180.0 : 0.0)
+        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + angle_offset + (effective_flip_y ? 180.0 : 0.0)
       elsif mode.include?("initial") && mode.include?("focus") && range <= 0
         origin = pbs_initial_angle_origin(clip).dup
         origin[1] += offset
         # InitialAngleToFocus adds get_xy_offset to the source point only.
-        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + (sample_value(clip, "flipY", frame, 0) >= 0.5 ? 180.0 : 0.0)
+        sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + (effective_flip_y ? 180.0 : 0.0)
       else
-        sprite.angle = base_rotation + angle_offset + (sample_value(clip, "flipY", frame, 0) >= 0.5 ? 180.0 : 0.0)
+        sprite.angle = base_rotation + angle_offset + (effective_flip_y ? 180.0 : 0.0)
       end
       sprite.angle *= -1 if desc[:random_angle_invert]
     rescue => e
@@ -2607,7 +2766,8 @@ module BattleAnimationStudioRuntime
     end
 
     def priority_reference(obj, frame)
-      explicit = (obj["priorityReference"] || "auto").to_s.downcase
+      context_override = context_override_for_object(obj)
+      explicit = ((context_override && !context_override["priorityReference"].nil?) ? context_override["priorityReference"] : (obj["priorityReference"] || "auto")).to_s.downcase
       return explicit if explicit != "auto"
       pbs = obj["pbs"].is_a?(Hash) ? obj["pbs"] : {}
       focus = pbs["focus"].to_s.downcase
@@ -2681,7 +2841,8 @@ module BattleAnimationStudioRuntime
 
     def apply_pbs_native_z(sprite, obj, frame)
       return if !sprite || !pbs_native_layer?(obj)
-      z = sample_value(obj, "z", frame, 0).to_f
+      context_override = context_override_for_object(obj)
+      z = sample_value(obj, "z", frame, 0).to_f + context_override_value(obj, "zOffset", @frame, 0.0)
       focus = pbs_z_focus(obj)
       if focus.is_a?(Array)
         distance = -100.0
@@ -2704,8 +2865,9 @@ module BattleAnimationStudioRuntime
 
     def apply_layer_priority(sprite, obj, frame)
       return if !sprite || !obj
-      priority = sample_value(obj, "priority", frame, (obj["priority"] || 0).to_f).to_f
-      explicit = (obj["priorityReference"] || "auto").to_s.downcase
+      context_override = context_override_for_object(obj)
+      priority = sample_value(obj, "priority", frame, (obj["priority"] || 0).to_f).to_f + context_override_value(obj, "priorityOffset", @frame, 0.0)
+      explicit = ((context_override && !context_override["priorityReference"].nil?) ? context_override["priorityReference"] : (obj["priorityReference"] || "auto")).to_s.downcase
       # Never tie an effect to the battler's exact Z: RGSS can resolve equal-Z
       # sprites by creation order. User/Target + 0 is the normal effect layer
       # immediately above the battler; negatives remain behind it.
@@ -2757,16 +2919,23 @@ module BattleAnimationStudioRuntime
     def apply_object(sprite, obj, frame, battler = false, side = nil)
       return if !sprite || !obj
       pos = sample_position(obj, frame)
+      context_override = context_override_for_object(obj)
+      pos = [pos[0].to_f + context_override_value(obj, "offsetX", @frame, 0.0), pos[1].to_f + context_override_value(obj, "offsetY", @frame, 0.0)]
       sprite.x = pos[0]; sprite.y = pos[1]
       size = sample_value(obj, "size", frame, 100) / 100.0
       view_scale = battler ? sample_value(obj, "viewScale", frame, 100) / 100.0 : 1.0
-      sx = sample_value(obj, "scaleX", frame, 100) / 100.0 * size * view_scale
-      sy = sample_value(obj, "scaleY", frame, 100) / 100.0 * size * view_scale
+      context_sx = [context_override_value(obj, "scaleX", @frame, 100.0) / 100.0, 0.01].max
+      context_sy = [context_override_value(obj, "scaleY", @frame, 100.0) / 100.0, 0.01].max
+      context_rotation = context_override_value(obj, "rotation", @frame, 0.0)
+      sx = sample_value(obj, "scaleX", frame, 100) / 100.0 * size * view_scale * context_sx
+      sy = sample_value(obj, "scaleY", frame, 100) / 100.0 * size * view_scale * context_sy
       # RGSS/mkxp-z doesn't reliably render negative zoom_y. Represent local
       # vertical reflection as a 180-degree rotation plus horizontal mirror:
       # V == R(180) * H. H+V becomes a plain 180-degree rotation.
       flip_h = sample_value(obj, "flip", frame, 0) >= 0.5
       flip_v = sample_value(obj, "flipY", frame, 0) >= 0.5
+      flip_h = !flip_h if context_override && runtime_bool(context_override["flip"])
+      flip_v = !flip_v if context_override && runtime_bool(context_override["flipY"])
       if battler
         side ||= sprite.equal?(target_sprite) ? :target : :user
         view_correction = battler_view_profile_correction(side, obj, frame)
@@ -2775,22 +2944,27 @@ module BattleAnimationStudioRuntime
         base = side.to_sym == :target ? @original[:target] : @original[:user]
         sprite.zoom_x = (base && base[:zoom_x] ? base[:zoom_x] : 1.0) * sx
         sprite.zoom_y = (base && base[:zoom_y] ? base[:zoom_y] : 1.0) * sy
-        sprite.angle = (base && base[:angle] ? base[:angle] : 0).to_f + sample_value(obj, "rotation", frame, 0) + (flip_v ? 180.0 : 0.0)
+        sprite.angle = (base && base[:angle] ? base[:angle] : 0).to_f + sample_value(obj, "rotation", frame, 0) + context_rotation + (flip_v ? 180.0 : 0.0)
       else
         sprite.zoom_x = sx; sprite.zoom_y = sy
-        sprite.angle = sample_value(obj, "rotation", frame, 0) + (flip_v ? 180.0 : 0.0)
+        sprite.angle = sample_value(obj, "rotation", frame, 0) + context_rotation + contextual_screen_rotation_delta(obj) + (flip_v ? 180.0 : 0.0)
       end
-      sprite.opacity = [[(sample_value(obj, "opacity", frame, 100) * 2.55).round, 0].max, 255].min
+      context_opacity = [context_override_value(obj, "opacity", @frame, 100.0) / 100.0, 0.0].max
+      is_emitter_object = emitter_type(obj) != "none" rescue false
+      opacity_factor = is_emitter_object ? 1.0 : context_opacity
+      sprite.opacity = [[(sample_value(obj, "opacity", frame, 100) * opacity_factor * 2.55).round, 0].max, 255].min
       sprite.visible = sample_visible(obj, frame)
+      z_offset = context_override_value(obj, "zOffset", @frame, 0.0)
       if battler
         side ||= sprite.equal?(target_sprite) ? :target : :user
         base = side.to_sym == :target ? @original[:target] : @original[:user]
-        sprite.z = ((base && base[:z] ? base[:z] : sprite.z).to_f + sample_value(obj, "z", frame, 0).to_f).round
+        sprite.z = ((base && base[:z] ? base[:z] : sprite.z).to_f + sample_value(obj, "z", frame, 0).to_f + z_offset).round
       else
-        sprite.z = sample_value(obj, "z", frame, sprite.z).round
+        sprite.z = (sample_value(obj, "z", frame, sprite.z).to_f + z_offset).round
         apply_pbs_native_z(sprite, obj, frame)
       end
-      sprite.blend_type = sample_value(obj, "blend", frame, 0).round if sprite.respond_to?(:blend_type=)
+      blend_value = (context_override && !context_override["blend"].nil?) ? context_override["blend"].to_f : sample_value(obj, "blend", frame, 0)
+      sprite.blend_type = blend_value.round if sprite.respond_to?(:blend_type=)
       if sprite.respond_to?(:mirror=)
         base_mirror = false
         if battler
@@ -3309,15 +3483,19 @@ module BattleAnimationStudioRuntime
       # itself can keep following User/Target, but already-spawned particles must
       # continue in their own local trajectory (e.g. vertical Rise + Scatter).
       spawn_pos = sample_emitter_spawn_position(clip, desc[:frame])
-      sprite.x = spawn_pos[0].to_f + extra[:dx].to_f
-      sprite.y = spawn_pos[1].to_f + extra[:dy].to_f
+      context_override = context_override_for_object(clip)
+      context_ox = context_override_value(clip, "offsetX", desc[:frame], 0.0)
+      context_oy = context_override_value(clip, "offsetY", desc[:frame], 0.0)
+      sprite.x = spawn_pos[0].to_f + extra[:dx].to_f + context_ox
+      sprite.y = spawn_pos[1].to_f + extra[:dy].to_f + context_oy
       sprite.z = sprite.z.to_f + extra[:z].to_f
       sprite.zoom_x *= extra[:scale_x].to_f
       sprite.zoom_y *= extra[:scale_y].to_f
       # Opacity has two timelines for emitters: the particle's own opacity is
       # sampled in local lifetime (above), while emitterOpacity is a global
       # animation-frame multiplier controlled by the Studio inspector.
-      emitter_alpha = [[sample_value(clip, "emitterOpacity", @frame, 100).to_f / 100.0, 0.0].max, 1.0].min
+      emitter_alpha = [[sample_value(clip, "emitterOpacity", @frame, 100).to_f / 100.0 * context_override_value(clip, "opacity", @frame, 100.0) / 100.0, 0.0].max, 1.0].min
+      emitter_alpha = [[emitter_alpha, 0.0].max, 1.0].min
       particle_alpha = [[extra[:opacity_mult].nil? ? 1.0 : extra[:opacity_mult].to_f, 0.0].max, 1.0].min
       total_alpha = emitter_alpha * particle_alpha
       sprite.opacity = [[(sprite.opacity.to_f * total_alpha).round, 0].max, 255].min
@@ -3338,8 +3516,10 @@ module BattleAnimationStudioRuntime
       if sprite.respond_to?(:mirror=)
         final_h = sample_value(clip, "flip", local_frame, 0) >= 0.5
         final_h = true if pbs["foeFlip"] && relative_index.to_i >= 0 && relative_index.to_i.odd?
+        final_h = !final_h if context_override && runtime_bool(context_override["flip"])
         final_h = !final_h if desc[:random_flip]
         final_v = sample_value(clip, "flipY", local_frame, 0) >= 0.5
+        final_v = !final_v if context_override && runtime_bool(context_override["flipY"])
         sprite.mirror = final_h ^ final_v
       end
       # RandomFrameMax is a spawn-time choice. Keep it until a Frame process
@@ -3910,10 +4090,17 @@ module BattleAnimationStudioRuntime
       return state if camera && (camera["enabled"] == false || !sample_visible(camera, @frame))
       x = camera ? sample_value(camera, "cameraX", @frame, 0).to_f : 0.0
       y = camera ? sample_value(camera, "cameraY", @frame, 0).to_f : 0.0
+      camera_context = camera ? context_override_for_object(camera) : nil
+      if camera
+        x += context_override_value(camera, "cameraX", @frame, 0.0)
+        y += context_override_value(camera, "cameraY", @frame, 0.0)
+      end
       rs = responsive_scale
       x *= rs[0]; y *= rs[1]
       zoom = camera ? [0.05, sample_value(camera, "cameraZoom", @frame, 100).to_f / 100.0].max : 1.0
+      zoom *= [(camera ? context_override_value(camera, "cameraZoom", @frame, 100.0) / 100.0 : 1.0), 0.01].max
       rotation = camera ? sample_value(camera, "cameraRotation", @frame, 0).to_f : 0.0
+      rotation += context_override_value(camera, "cameraRotation", @frame, 0.0) if camera
       focus_offset = camera_focus_offset(camera)
       x += focus_offset[0].to_f
       y += focus_offset[1].to_f

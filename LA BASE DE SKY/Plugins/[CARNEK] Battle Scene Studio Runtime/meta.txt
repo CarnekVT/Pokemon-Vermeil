@@ -1,4 +1,4 @@
 Name = [CARNEK] Battle Scene Studio Runtime
-Version       = 0.6.42
+Version       = 0.6.74
 Essentials = 21.1
 Credits = CarnekVT

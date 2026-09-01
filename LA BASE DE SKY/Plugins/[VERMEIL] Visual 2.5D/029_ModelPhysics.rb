@@ -251,9 +251,15 @@ module Mode7
 
       # Model streaming may append faces after initial map build. Refresh only
       # fallback worlds; sidecar-authored physics never changes.
-      def refresh_surface_fallback(map_id, geo)
+      def refresh_surface_fallback(map_id, geo, force = false)
         map_id = map_id.to_i
         return @worlds && @worlds[map_id] if @sidecar_authoritative && @sidecar_authoritative[map_id]
+        # Streaming mutates the same SurfaceGeometry object in place. The normal
+        # object_id cache is correct for map revisits, but must be invalidated
+        # when the completed .v25m appended new faces.
+        if force && @surface_geometry_ids
+          @surface_geometry_ids.delete(map_id)
+        end
         register_surface_geometry(map_id, geo)
       end
 

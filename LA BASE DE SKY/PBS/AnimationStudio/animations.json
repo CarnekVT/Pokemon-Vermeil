@@ -71,15 +71,16 @@
     "testBattlerScale": 1,
     "playerBattlerSize": 3,
     "foeBattlerSize": 2,
-    "quickIntensity": 85,
-    "sidePreview": "player",
+    "quickIntensity": 70,
+    "sidePreview": "foe",
     "layout": {
       "leftWidth": 271,
       "rightWidth": 520,
       "timelineHeight": 283,
       "framePixels": 16
     },
-    "onionMode": "off"
+    "onionMode": "off",
+    "contextTransformEdit": "auto"
   },
   "animations": [
     {
@@ -12926,7 +12927,7 @@
         "responsive": true,
         "referenceWidth": 640,
         "referenceHeight": 480,
-        "cameraBoundsMode": "auto"
+        "cameraBoundsMode": "screen"
       },
       "hidesDataBoxes": true,
       "hidesAdjacents": true,
@@ -31680,6 +31681,2282 @@
         "referenceHeight": 480,
         "cameraBoundsMode": "auto"
       }
+    },
+    {
+      "id": "anim_mtgmv18d_az",
+      "name": "Ataque Rápido",
+      "fps": 20,
+      "duration": 36,
+      "source": {
+        "type": "studio",
+        "move": "QUICKATTACK",
+        "version": 0,
+        "catalogType": "move",
+        "opposing": false,
+        "sideContext": "player",
+        "targetMode": "both",
+        "targetScope": "single_other",
+        "allowedTargetScopes": [
+          "single_other"
+        ],
+        "variantScope": "physical",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "None",
+        "detectedCategory": "physical",
+        "detectedTarget": "NearOther",
+        "contextAutoAdapt": true,
+        "previewAffectedTargets": false,
+        "autoReplicateAffected": false,
+        "activeTimelineContext": null,
+        "askBackupOnContextEdit": false,
+        "autoReplicateTouched": false,
+        "commonSubjectRole": "auto",
+        "authors": [],
+        "groupIdentity": "move|QUICKATTACK",
+        "runtimeSelected": true,
+        "runtimeEnabled": true,
+        "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY"
+      },
+      "contextTimelines": [],
+      "battlers": {
+        "user": {
+          "id": "battler_user",
+          "type": "battler",
+          "side": "user",
+          "name": "User",
+          "enabled": true,
+          "locked": true,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mtfdfsva_zd",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mtfdfsva_ze",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              },
+              "axisX": true,
+              "axisY": true
+            },
+            {
+              "id": "key_mtgjxd8a_ns",
+              "frame": 4,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 272,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtgkj6it_qi",
+              "frame": 24,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 272,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtgkia30_qg",
+              "frame": 35,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [
+              {
+                "id": "pkey_mtgoml3z_1tu",
+                "frame": 0,
+                "value": 100,
+                "easing": "ease_both"
+              },
+              {
+                "id": "pkey_mtgjxhyc_nt",
+                "frame": 4,
+                "value": 0,
+                "easing": "ease_both"
+              },
+              {
+                "id": "pkey_mtgkj84x_qj",
+                "frame": 24,
+                "value": 0,
+                "easing": "ease_both"
+              },
+              {
+                "id": "pkey_mtgkif99_qh",
+                "frame": 35,
+                "value": 100,
+                "easing": "ease_both"
+              }
+            ],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": [],
+            "priority": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 35,
+          "contextOverrides": {
+            "player": {
+              "offsetX": 0,
+              "offsetY": 0,
+              "scaleX": 100,
+              "scaleY": 100,
+              "rotation": 0,
+              "flip": false,
+              "flipY": false,
+              "contextKeys": {}
+            }
+          }
+        },
+        "target": {
+          "id": "battler_target",
+          "type": "battler",
+          "side": "target",
+          "name": "Target",
+          "enabled": true,
+          "locked": true,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mtfdfsva_zf",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mtfdfsva_zg",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              },
+              "axisX": true,
+              "axisY": true
+            },
+            {
+              "id": "key_mtgk7nid_p0",
+              "frame": 12,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtgk7se2_p1",
+              "frame": 13,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 4,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtgk7zkx_p2",
+              "frame": 14,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 12.399999999999977,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtgk82bg_p3",
+              "frame": 15,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -2.2999999999999545,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtgk8583_p4",
+              "frame": 16,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 7.5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtgk880t_p5",
+              "frame": 17,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 4,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtgk8at6_p6",
+              "frame": 18,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [
+              {
+                "id": "pkey_mtgore42_1u7",
+                "frame": 13,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgore42_1u8",
+                "frame": 14,
+                "value": 102.8,
+                "easing": "ease_out"
+              },
+              {
+                "id": "pkey_mtgore42_1u9",
+                "frame": 17,
+                "value": 100,
+                "easing": "ease_both"
+              }
+            ],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [
+              {
+                "id": "pkey_mtgopst1_1tv",
+                "frame": 12,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgopz71_1ty",
+                "frame": 13,
+                "value": 50,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgoqah9_1u1",
+                "frame": 15,
+                "value": 120,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgoqozc_1u4",
+                "frame": 18,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "toneGreen": [
+              {
+                "id": "pkey_mtgoptr7_1tw",
+                "frame": 12,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgoq15j_1tz",
+                "frame": 13,
+                "value": 50,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgoqb4a_1u2",
+                "frame": 15,
+                "value": 120,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgoqpk2_1u5",
+                "frame": 18,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "toneBlue": [
+              {
+                "id": "pkey_mtgopuv6_1tx",
+                "frame": 12,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgoq2nx_1u0",
+                "frame": 13,
+                "value": 50,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgoqcxp_1u3",
+                "frame": 15,
+                "value": 120,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtgoqq9x_1u6",
+                "frame": 18,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 18
+        }
+      },
+      "camera": {
+        "id": "camera_main",
+        "type": "camera",
+        "name": "Camera",
+        "enabled": true,
+        "locked": false,
+        "visual": {
+          "cameraX": 0,
+          "cameraY": 0,
+          "cameraZoom": 100,
+          "cameraRotation": 0,
+          "size": 100,
+          "scaleX": 100,
+          "scaleY": 100,
+          "opacity": 100,
+          "rotation": 0,
+          "z": 0,
+          "blend": 0,
+          "flip": 0
+        },
+        "valueKeys": {
+          "size": [],
+          "scaleX": [],
+          "scaleY": [],
+          "viewScale": [],
+          "rotation": [],
+          "opacity": [],
+          "graphicFrame": [],
+          "srcX": [],
+          "srcY": [],
+          "srcW": [],
+          "srcH": [],
+          "z": [],
+          "blend": [],
+          "flip": [],
+          "flipY": [],
+          "facing": [],
+          "toneRed": [],
+          "toneGreen": [],
+          "toneBlue": [],
+          "toneGray": [],
+          "cameraX": [
+            {
+              "id": "pkey_mtgjzmhs_o1",
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgjzquw_o5",
+              "frame": 5,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgkcwsh_pb",
+              "frame": 25,
+              "value": 0,
+              "easing": "ease_both"
+            }
+          ],
+          "cameraY": [
+            {
+              "id": "pkey_mtgjzmhs_o2",
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgjzquw_o6",
+              "frame": 5,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgkcwsh_pc",
+              "frame": 25,
+              "value": 0,
+              "easing": "ease_both"
+            }
+          ],
+          "cameraZoom": [
+            {
+              "id": "pkey_mtgjzmhs_o3",
+              "frame": 0,
+              "value": 100,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgjzquw_o7",
+              "frame": 5,
+              "value": 100,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgjzv4j_o9",
+              "frame": 12,
+              "value": 143,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgoymj5_m0",
+              "frame": 19,
+              "value": 143,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgkcwsh_pd",
+              "frame": 25,
+              "value": 100,
+              "easing": "ease_both"
+            }
+          ],
+          "cameraRotation": [
+            {
+              "id": "pkey_mtgjzmhs_o4",
+              "frame": 0,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgjzquw_o8",
+              "frame": 5,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtgkcwsh_pe",
+              "frame": 25,
+              "value": 0,
+              "easing": "ease_both"
+            }
+          ],
+          "priority": []
+        },
+        "visibleKeys": [
+          {
+            "id": "vkey_mtfdfsva_zh",
+            "frame": 0,
+            "value": true
+          }
+        ],
+        "positionKeys": [
+          {
+            "id": "key_mtfdfsva_zi",
+            "frame": 0,
+            "easing": "linear",
+            "point": {
+              "anchor": "screen",
+              "x": 0,
+              "y": 0,
+              "offsetX": 0,
+              "offsetY": 0
+            },
+            "axisX": true,
+            "axisY": true
+          }
+        ],
+        "startFrame": 0,
+        "endFrame": 0,
+        "logic": [
+          {
+            "type": "focus",
+            "side": "target",
+            "frame": 5,
+            "duration": 8,
+            "easing": "ease_both",
+            "follow": true,
+            "id": "camlogic_mtgjzv4j_oa"
+          },
+          {
+            "type": "focus_clear",
+            "frame": 25,
+            "duration": 8,
+            "easing": "ease_both",
+            "id": "camlogic_mtgkcxvy_pf"
+          }
+        ],
+        "fxOps": [],
+        "contextOverrides": {
+          "player": {
+            "offsetX": 0,
+            "offsetY": 0,
+            "scaleX": 100,
+            "scaleY": 100,
+            "rotation": 0,
+            "opacity": 100,
+            "zOffset": 0,
+            "priorityOffset": 0,
+            "toneRed": 0,
+            "toneGreen": 0,
+            "toneBlue": 0,
+            "toneGray": 0,
+            "cameraX": 0,
+            "cameraY": 0,
+            "cameraZoom": 100,
+            "cameraRotation": 0,
+            "flip": false,
+            "flipY": false,
+            "contextKeys": {
+              "cameraZoom": [
+                {
+                  "id": "ctxkey_mtgqk9mk_az",
+                  "frame": 0,
+                  "value": 100,
+                  "easing": "ease_both",
+                  "implicit": true
+                },
+                {
+                  "id": "ctxkey_mtgqki80_b1",
+                  "frame": 5,
+                  "value": 100,
+                  "easing": "ease_both",
+                  "implicit": false
+                },
+                {
+                  "id": "ctxkey_mtgqk9mk_b0",
+                  "frame": 12,
+                  "value": 113.98601398601397,
+                  "easing": "ease_both",
+                  "implicit": false
+                },
+                {
+                  "id": "ctxkey_mtgql38w_b3",
+                  "frame": 20,
+                  "value": 113.98601398601397,
+                  "easing": "ease_both",
+                  "implicit": false
+                },
+                {
+                  "id": "ctxkey_mtgqkpdi_b2",
+                  "frame": 25,
+                  "value": 100,
+                  "easing": "ease_both",
+                  "implicit": false
+                }
+              ]
+            },
+            "contextKeyVersion": 2
+          }
+        }
+      },
+      "tracks": [
+        {
+          "id": "track_mtfdfsva_zj",
+          "type": "effects",
+          "name": "Effects",
+          "clips": [
+            {
+              "id": "clip_mtgmv18d_b3",
+              "type": "projectile",
+              "name": "dash",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 36,
+              "graphic": {
+                "source": "studio",
+                "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-0.png",
+                "folder": "AnimationStudio",
+                "name": "dash-0",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [
+                {
+                  "id": "gkey_mtgju8b9_na",
+                  "frame": 2,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-1.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-1.png",
+                  "source": "studio",
+                  "name": "dash-1"
+                },
+                {
+                  "id": "gkey_mtgjueop_nc",
+                  "frame": 3,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-2.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-2.png",
+                  "source": "studio",
+                  "name": "dash-2"
+                },
+                {
+                  "id": "gkey_mtgjvggi_ne",
+                  "frame": 4,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-5.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-5.png",
+                  "source": "studio",
+                  "name": "dash-5"
+                },
+                {
+                  "id": "gkey_mtgjvpio_ng",
+                  "frame": 5,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-6.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-6.png",
+                  "source": "studio",
+                  "name": "dash-6"
+                },
+                {
+                  "id": "gkey_mtgjvt6b_ni",
+                  "frame": 6,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-7.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-7.png",
+                  "source": "studio",
+                  "name": "dash-7"
+                },
+                {
+                  "id": "gkey_mtgjvwd5_nk",
+                  "frame": 7,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-8.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-8.png",
+                  "source": "studio",
+                  "name": "dash-8"
+                },
+                {
+                  "id": "gkey_mtgjw2ru_nm",
+                  "frame": 8,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-9.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-9.png",
+                  "source": "studio",
+                  "name": "dash-9"
+                }
+              ],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "auto",
+              "replicateTo": "none",
+              "coordinateSpace": "user",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtgjqcr6_4l",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtgjqcr6_4m",
+                  "frame": 0,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 52.866133445110165,
+                    "y": 232.9590271265945,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  },
+                  "axisX": true,
+                  "axisY": true
+                },
+                {
+                  "id": "key_mtgjr7rl_9b",
+                  "frame": 1,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 56,
+                    "y": 287,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgju41e_n9",
+                  "frame": 2,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 56,
+                    "y": 273,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgjuc41_nb",
+                  "frame": 3,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 74.55441337719299,
+                    "y": 264.7578810307017,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgjv416_nd",
+                  "frame": 4,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 74.55437911184211,
+                    "y": 262.06315104166663,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgjvl5n_nf",
+                  "frame": 5,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 68.7054289688165,
+                    "y": 263.0517447756166,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgjvqnk_nh",
+                  "frame": 6,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 52.69153287921991,
+                    "y": 260.87479232380554,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgjvuda_nj",
+                  "frame": 7,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 49.42120239920106,
+                    "y": 260.4335709355971,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgjvxlk_nl",
+                  "frame": 8,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 49.057493225517184,
+                    "y": 259.9157739345591,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgohja7_1ts",
+                  "frame": 9,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 52.866133445110165,
+                    "y": 232.9590271265945,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  },
+                  "axisX": true,
+                  "axisY": true
+                },
+                {
+                  "id": "key_mtgjqcr6_4n",
+                  "frame": 18,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": -251.69156678082194,
+                    "offsetY": 115.10685237279844
+                  },
+                  "axisX": true,
+                  "axisY": true
+                },
+                {
+                  "id": "key_mtgla7h2_r2",
+                  "frame": 36,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 134.30843321917806,
+                    "y": 229.10685237279844,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_mtgjtwbf_n7",
+                    "frame": 1,
+                    "value": 150,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_mtgjtxjv_n8",
+                    "frame": 1,
+                    "value": 150,
+                    "easing": "linear"
+                  }
+                ],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mtgjtr36_n6",
+                    "frame": 1,
+                    "value": 50,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgjwcw7_no",
+                    "frame": 9,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgjqtv4_9a",
+                    "frame": 18,
+                    "value": 0,
+                    "easing": "ease_both"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [
+                  {
+                    "id": "pkey_mtgowi1e_ly",
+                    "frame": 0,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "emitterOpacity": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "focus": "user",
+                "emitter": "none",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtgkwbsv_qn",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtgkwbsw_qo",
+                      "frame": 8,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ]
+                },
+                "commands": {}
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "contextOverrides": {
+                "player": {
+                  "offsetX": -26.66666666666663,
+                  "offsetY": 79.01234567901236,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "flip": true,
+                  "flipY": false,
+                  "contextKeys": {}
+                },
+                "foe": {
+                  "offsetX": 12.839506172839492,
+                  "offsetY": 25.679012345679013,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "contextKeys": {}
+                }
+              }
+            },
+            {
+              "id": "clip_mtgmv18d_b4",
+              "type": "projectile",
+              "name": "dash copia",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 36,
+              "graphic": {
+                "source": "studio",
+                "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-0.png",
+                "folder": "AnimationStudio",
+                "name": "dash-0",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [
+                {
+                  "id": "gkey_mtgkdji7_py",
+                  "frame": 27,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-1.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-1.png",
+                  "source": "studio",
+                  "name": "dash-1"
+                },
+                {
+                  "id": "gkey_mtgkdji7_pz",
+                  "frame": 28,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-2.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-2.png",
+                  "source": "studio",
+                  "name": "dash-2"
+                },
+                {
+                  "id": "gkey_mtgkdji7_q0",
+                  "frame": 29,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-5.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-5.png",
+                  "source": "studio",
+                  "name": "dash-5"
+                },
+                {
+                  "id": "gkey_mtgkdji7_q1",
+                  "frame": 30,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-6.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-6.png",
+                  "source": "studio",
+                  "name": "dash-6"
+                },
+                {
+                  "id": "gkey_mtgkdji7_q2",
+                  "frame": 31,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-7.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-7.png",
+                  "source": "studio",
+                  "name": "dash-7"
+                },
+                {
+                  "id": "gkey_mtgkdji7_q3",
+                  "frame": 32,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-8.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-8.png",
+                  "source": "studio",
+                  "name": "dash-8"
+                },
+                {
+                  "id": "gkey_mtgkdji7_q4",
+                  "frame": 33,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_dash-9.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_dash-9.png",
+                  "source": "studio",
+                  "name": "dash-9"
+                }
+              ],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 1,
+              "priorityReference": "user",
+              "replicateTo": "none",
+              "coordinateSpace": "user",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtgkdji7_ps",
+                  "frame": 35,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtgma6yo_1u4",
+                  "frame": 0,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 256,
+                    "y": 192,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgmkacy_1z1",
+                  "frame": 17,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 327.4733727810651,
+                    "y": 264.23372781065086,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgmkft9_1z3",
+                  "frame": 25,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 451,
+                    "y": 212,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_pi",
+                  "frame": 26,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 184.49999999999994,
+                    "y": 214.2962962962963,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_pj",
+                  "frame": 27,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 157,
+                    "y": 238,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_pk",
+                  "frame": 28,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 145,
+                    "y": 238,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_pl",
+                  "frame": 29,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 157,
+                    "y": 238,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_pm",
+                  "frame": 30,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 184,
+                    "y": 238,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_pn",
+                  "frame": 31,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 195,
+                    "y": 238,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_po",
+                  "frame": 32,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 205,
+                    "y": 238,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_pp",
+                  "frame": 33,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 215,
+                    "y": 238,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_pq",
+                  "frame": 34,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 216,
+                    "y": 238,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgkdji7_ph",
+                  "frame": 35,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 222,
+                    "offsetY": 40.5
+                  },
+                  "axisX": true,
+                  "axisY": false
+                },
+                {
+                  "id": "key_mtgoiagi_1tt",
+                  "frame": 36,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 451,
+                    "y": 212,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_mtgkdji7_pt",
+                    "frame": 26,
+                    "value": 150,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_mtgkdji7_pu",
+                    "frame": 26,
+                    "value": 150,
+                    "easing": "linear"
+                  }
+                ],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mtgmabsj_1u5",
+                    "frame": 0,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgmkcod_1z2",
+                    "frame": 17,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgmkgsf_1z4",
+                    "frame": 25,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgkdji7_pv",
+                    "frame": 26,
+                    "value": 50,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgkdji7_pw",
+                    "frame": 34,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgkdji7_px",
+                    "frame": 41,
+                    "value": 0,
+                    "easing": "ease_both"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [
+                  {
+                    "id": "pkey_mtgowsni_lz",
+                    "frame": 25,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mtgkfk1v_q5",
+                    "frame": 26,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mtgkflzf_q6",
+                    "frame": 27,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [
+                  {
+                    "id": "pkey_mtgovqaf_lx",
+                    "frame": 25,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "emitterOpacity": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "focus": "user",
+                "emitter": "none",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "emitterCommands": {
+                  "emitting": []
+                },
+                "commands": {}
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "contextOverrides": {
+                "player": {
+                  "offsetX": -11.851851851851848,
+                  "offsetY": 138.27160493827165,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "flip": true,
+                  "flipY": false,
+                  "contextKeys": {}
+                }
+              }
+            },
+            {
+              "id": "clip_mtgmv18d_b5",
+              "type": "projectile",
+              "name": "hit",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 36,
+              "graphic": {
+                "source": "legacy",
+                "projectPath": "",
+                "folder": "Animations",
+                "name": "",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [
+                {
+                  "id": "gkey_mtgk4m50_ol",
+                  "frame": 12,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_hit-0.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_hit-0.png",
+                  "source": "studio",
+                  "name": "hit-0"
+                },
+                {
+                  "id": "gkey_mtgk4uei_on",
+                  "frame": 13,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_hit-1.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_hit-1.png",
+                  "source": "studio",
+                  "name": "hit-1"
+                },
+                {
+                  "id": "gkey_mtgk5n0f_op",
+                  "frame": 14,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_hit-2.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_hit-2.png",
+                  "source": "studio",
+                  "name": "hit-2"
+                },
+                {
+                  "id": "gkey_mtgk5w0e_or",
+                  "frame": 15,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_hit-3.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_hit-3.png",
+                  "source": "studio",
+                  "name": "hit-3"
+                },
+                {
+                  "id": "gkey_mtgk6aoc_ot",
+                  "frame": 16,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_hit-4.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_hit-4.png",
+                  "source": "studio",
+                  "name": "hit-4"
+                },
+                {
+                  "id": "gkey_mtgk6fwt_ov",
+                  "frame": 17,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_hit-5.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_hit-5.png",
+                  "source": "studio",
+                  "name": "hit-5"
+                },
+                {
+                  "id": "gkey_mtgk6tuu_ow",
+                  "frame": 18,
+                  "value": "Graphics/AnimationStudio/QUICKATTACK_hit-6.png",
+                  "projectPath": "Graphics/AnimationStudio/QUICKATTACK_hit-6.png",
+                  "source": "studio",
+                  "name": "hit-6"
+                }
+              ],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 1,
+              "priorityReference": "target",
+              "replicateTo": "none",
+              "coordinateSpace": "target",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtgk17lh_od",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtgk17lh_oe",
+                  "frame": 0,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "screen",
+                    "x": 256,
+                    "y": 192,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  },
+                  "axisX": true,
+                  "axisY": true
+                },
+                {
+                  "id": "key_mtglfj4n_1u3",
+                  "frame": 1,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 385.2086081874084,
+                    "y": 152.33908448977672,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgod5jp_az",
+                  "frame": 12,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 409.46771831289277,
+                    "y": 140.74499156559585,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgoe0op_b0",
+                  "frame": 19,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 409.46771831289277,
+                    "y": 140.74499156559585,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtgl9vui_r1",
+                  "frame": 36,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 387.0584740917328,
+                    "y": 126.51225357185547,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mtgk1sl0_og",
+                    "frame": 0,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgk7a5f_oz",
+                    "frame": 11,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgk4evd_ok",
+                    "frame": 12,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtgk6zvy_oy",
+                    "frame": 19,
+                    "value": 0,
+                    "easing": "ease_both"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [
+                  {
+                    "id": "pkey_mtgk23gs_oh",
+                    "frame": 0,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "emitterOpacity": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "focus": "target",
+                "emitter": "none",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtgl25vp_qr",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtgl25vp_qs",
+                      "frame": 26,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ],
+                  "emitterRate": [
+                    {
+                      "id": "ecmd_mtgl25vp_qt",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": 1
+                    }
+                  ],
+                  "emitterIntensity": [
+                    {
+                      "id": "ecmd_mtgl25vp_qu",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": 18
+                    }
+                  ],
+                  "randomAngleRange": [
+                    {
+                      "id": "ecmd_mtgl25vp_qv",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": 180
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "id": "ecmd_mtgl25vp_qw",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": 70
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "id": "ecmd_mtgl25vp_qx",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": 70
+                    }
+                  ],
+                  "particleSize": [
+                    {
+                      "id": "ecmd_mtgl25vp_qy",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": 100
+                    }
+                  ],
+                  "particleSizeRange": [
+                    {
+                      "id": "ecmd_mtgl25vp_qz",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": 35
+                    }
+                  ],
+                  "emitZoomRange": [
+                    {
+                      "id": "ecmd_mtgl25vq_r0",
+                      "frame": 18,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ]
+                },
+                "commands": {}
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "contextOverrides": {
+                "foe": {
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "scaleX": 125,
+                  "scaleY": 125,
+                  "rotation": 0,
+                  "opacity": 100,
+                  "zOffset": 0,
+                  "priorityOffset": 0,
+                  "toneRed": 0,
+                  "toneGreen": 0,
+                  "toneBlue": 0,
+                  "toneGray": 0,
+                  "cameraX": 0,
+                  "cameraY": 0,
+                  "cameraZoom": 100,
+                  "cameraRotation": 0,
+                  "flip": false,
+                  "flipY": false,
+                  "contextKeys": {}
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "event_mtgkpj44_qk",
+          "type": "se",
+          "frame": 0,
+          "name": "Anim/PRSFX- Razor Wind2",
+          "volume": 100,
+          "pitch": 180
+        },
+        {
+          "id": "event_mtgkprik_ql",
+          "type": "se",
+          "frame": 12,
+          "name": "Anim/PRSFX- Quick Attack",
+          "volume": 100,
+          "pitch": 100
+        },
+        {
+          "id": "event_mtgkqa0c_qm",
+          "type": "se",
+          "frame": 26,
+          "name": "Anim/PRSFX- Razor Wind2",
+          "volume": 100,
+          "pitch": 150
+        },
+        {
+          "id": "event_mtgozu95_m1",
+          "type": "screen_shake",
+          "frame": 12,
+          "duration": 6,
+          "strength": 7,
+          "axis": 0
+        }
+      ],
+      "logic": [],
+      "notes": "",
+      "hidesDataBoxes": true,
+      "hidesAdjacents": true,
+      "scene": {
+        "inheritProject": true,
+        "source": "project",
+        "responsive": true,
+        "referenceWidth": 512,
+        "referenceHeight": 384,
+        "cameraBoundsMode": "screen"
+      }
+    },
+    {
+      "id": "anim_mti2xsw4_sq",
+      "name": "Pistola Agua",
+      "fps": 20,
+      "duration": 30,
+      "source": {
+        "type": "studio",
+        "move": "WATERGUN",
+        "version": 0,
+        "catalogType": "move",
+        "opposing": false,
+        "sideContext": "player",
+        "targetMode": "both",
+        "targetScope": "single_other",
+        "allowedTargetScopes": [
+          "single_other"
+        ],
+        "contextAutoAdapt": true,
+        "previewAffectedTargets": false,
+        "autoReplicateAffected": false,
+        "autoReplicateTouched": false,
+        "askBackupOnContextEdit": false,
+        "commonSubjectRole": "auto",
+        "activeTimelineContext": null,
+        "authors": [
+          "CarnekVT"
+        ],
+        "detectedTraits": [],
+        "detectedFunctionCode": "None",
+        "detectedCategory": "special",
+        "detectedTarget": "NearOther",
+        "variantScope": "special"
+      },
+      "contextTimelines": [],
+      "battlers": {
+        "user": {
+          "id": "battler_user",
+          "type": "battler",
+          "side": "user",
+          "name": "User",
+          "enabled": true,
+          "locked": false,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mti2xsw4_sr",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mti2xsw4_ss",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "priority": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        },
+        "target": {
+          "id": "battler_target",
+          "type": "battler",
+          "side": "target",
+          "name": "Target",
+          "enabled": true,
+          "locked": false,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mti2xsw4_st",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mti2xsw4_su",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        }
+      },
+      "camera": {
+        "id": "camera_main",
+        "type": "camera",
+        "name": "Camera",
+        "enabled": true,
+        "locked": false,
+        "visual": {
+          "cameraX": 0,
+          "cameraY": 0,
+          "cameraZoom": 100,
+          "cameraRotation": 0
+        },
+        "valueKeys": {
+          "size": [],
+          "scaleX": [],
+          "scaleY": [],
+          "viewScale": [],
+          "rotation": [],
+          "opacity": [],
+          "graphicFrame": [],
+          "srcX": [],
+          "srcY": [],
+          "srcW": [],
+          "srcH": [],
+          "z": [],
+          "blend": [],
+          "flip": [],
+          "flipY": [],
+          "facing": [],
+          "toneRed": [],
+          "toneGreen": [],
+          "toneBlue": [],
+          "toneGray": [],
+          "cameraX": [],
+          "cameraY": [],
+          "cameraZoom": [],
+          "cameraRotation": []
+        },
+        "visibleKeys": [
+          {
+            "id": "vkey_mti2xsw4_sv",
+            "frame": 0,
+            "value": true
+          }
+        ],
+        "positionKeys": [
+          {
+            "id": "key_mti2xsw4_sw",
+            "frame": 0,
+            "easing": "linear",
+            "point": {
+              "anchor": "screen",
+              "x": 0,
+              "y": 0,
+              "offsetX": 0,
+              "offsetY": 0
+            }
+          }
+        ],
+        "startFrame": 0,
+        "endFrame": 0,
+        "logic": []
+      },
+      "tracks": [
+        {
+          "id": "track_mti2xsw4_sx",
+          "type": "effects",
+          "name": "Effects",
+          "clips": []
+        }
+      ],
+      "events": [],
+      "logic": [],
+      "notes": "",
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false,
+      "scene": {
+        "inheritProject": true,
+        "source": "project",
+        "responsive": true,
+        "referenceWidth": 640,
+        "referenceHeight": 480,
+        "cameraBoundsMode": "auto"
+      }
     }
   ],
   "reusableClips": [],
@@ -31687,6 +33964,6 @@
   "exportGameDataDir": "PBS/AnimationStudio",
   "exportPackageDir": "C:/Users/nuevo usuario/Downloads/Animaciones/Common Snap Trap",
   "editor": {
-    "lastAnimationId": "anim_mtdbmtgj_5d"
+    "lastAnimationId": "anim_mti2xsw4_sq"
   }
 }

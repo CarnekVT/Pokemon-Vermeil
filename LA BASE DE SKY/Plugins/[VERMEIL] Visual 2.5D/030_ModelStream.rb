@@ -109,9 +109,11 @@ class Mode7Renderer
     step = geo.height_step.to_f
     step = 32.0 if step <= 0.0
     loaded = 0
+    stream_finished = false
     while loaded < budget
       line = io.gets
       if !line
+        stream_finished = true
         nds_close_model_stream
         Console.echoln("[VERMEIL] Model stream ready: #{@nds_model_stream_loaded}/#{@nds_model_stream_total} faces") if defined?(Console) && Mode7::Config::NDS_SHOW_PERFORMANCE_DEBUG
         break
@@ -133,10 +135,13 @@ class Mode7Renderer
         break if elapsed >= time_ms
       end
     end
-    # Force visibility recalc after adding bucket entries.
-    if loaded > 0 && defined?(Mode7::ModelPhysicsWorld) &&
+    # Collision is independent of renderer visibility. Reconcile the complete
+    # mesh footprint once EOF is reached; doing it per chunk would rebuild the
+    # whole collision grid every streaming frame. Sidecar-authored .v25c data
+    # remains authoritative and the call becomes a no-op in that case.
+    if stream_finished && defined?(Mode7::ModelPhysicsWorld) &&
        Mode7::ModelPhysicsWorld.respond_to?(:refresh_surface_fallback)
-      Mode7::ModelPhysicsWorld.refresh_surface_fallback(@map_id, geo)
+      Mode7::ModelPhysicsWorld.refresh_surface_fallback(@map_id, geo, true)
     end
     @nds_object_projection_key = nil
     @nds_object_visibility_key = nil
