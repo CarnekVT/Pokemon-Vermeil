@@ -1627,7 +1627,6 @@ Generation = 6
 #-------------------------------
 [LUCARIO,2]
 FormName = Mega Lucario Z
-Types = FIGHTING,PSYCHIC
 MegaStone = LUCARIONITEZ
 BaseStats = 70,100,70,151,164,70
 BaseExp = 219
