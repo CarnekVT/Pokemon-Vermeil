@@ -401,29 +401,29 @@ class Battle::Battler
     #       mention the Supersweet Syrup ability by name).
     if !hasActiveAbility?(:CONTRARY)
       if pbOwnSide.effects[PBEffects::Mist] > 0
-        @battle.pbDisplay(_INTL("{1} is protected from {2}'s {3} by Mist!",
-                                pbThis, user.pbThis(true), user.abilityName))
+        @battle.pbDisplay(_INTL("¡{1} es protegido de {2} de {3} por la neblina!",
+                                pbThis, user.abilityName, user.pbThis(true)))
         return false
       end
       if abilityActive? &&
          (Battle::AbilityEffects.triggerStatLossImmunity(self.ability, self, :EVASION, @battle, false) ||
           Battle::AbilityEffects.triggerStatLossImmunityNonIgnorable(self.ability, self, :EVASION, @battle, false))
-        @battle.pbDisplay(_INTL("{1}'s {2} prevented {3}'s {4} from working!",
-                                pbThis, abilityName, user.pbThis(true), user.abilityName))
+        @battle.pbDisplay(_INTL("¡{1} de {2} inhabilita {3} de {4}!",
+                                abilityName, pbThis(true), user.abilityName, user.pbThis(true)))
         return false
       end
       allAllies.each do |b|
         next if !b.abilityActive?
         if Battle::AbilityEffects.triggerStatLossImmunityFromAlly(b.ability, b, self, :EVASION, @battle, false)
-          @battle.pbDisplay(_INTL("{1} is protected from {2}'s {3} by {4}'s {5}!",
-                                  pbThis, user.pbThis(true), user.abilityName, b.pbThis(true), b.abilityName))
+          @battle.pbDisplay(_INTL("¡{1} fue protegido de {2} de {3} por {4} de {5}!",
+                                  pbThis, user.abilityName, user.pbThis(true), b.abilityName, b.pbThis(true)))
           return false
         end
       end
       if itemActive? &&
          Battle::ItemEffects.triggerStatLossImmunity(self.item, self, :EVASION, @battle, false)
-        @battle.pbDisplay(_INTL("{1}'s {2} prevented {3}'s {4} from working!",
-                                pbThis, itemName, user.pbThis(true), user.abilityName))
+        @battle.pbDisplay(_INTL("¡{1} de {2} inhabilita {3} de {4}!",
+                                itemName, pbThis(true), user.abilityName, user.pbThis(true)))
         return false
       end
     end
