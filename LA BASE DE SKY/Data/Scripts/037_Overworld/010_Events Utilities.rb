@@ -362,14 +362,14 @@ class Sprite_Character
 
     # IMAGEN COMPLETA
     if @character.respond_to?(:is_full_image) && @character.is_full_image
+      @custom_charset_frame = nil
       self.src_rect.set(0, 0, bmp.width, bmp.height)
       self.ox = bmp.width / 2
       self.oy = bmp.height
 
     # SPRITESHEET
     elsif @character.respond_to?(:custom_frames) && @character.custom_frames.to_i > 0
-      cw = bmp.width / @character.custom_frames
-      ch = bmp.height
+      custom_frames = @character.custom_frames
 
       if @character.custom_speed.to_i > 0
         target_frames = @character.custom_speed
@@ -379,12 +379,32 @@ class Sprite_Character
       end
 
       duration_per_frame = target_frames / 60.0
-      current_frame = (System.uptime / duration_per_frame).to_i % @character.custom_frames 
-      sx = current_frame * cw
-      self.src_rect.set(sx, 0, cw, ch)
-      self.ox = cw / 2
-      self.oy = ch
+      current_frame = (System.uptime / duration_per_frame).to_i % custom_frames
+      # Se comparan tambien las identidades de @charbitmap y @character:
+      # set_charset_graphic y set_tile_graphic recrean el primero y de paso
+      # reescriben ox, y corren antes que este metodo, asi que si el grafico
+      # nuevo mide igual y cae en el mismo frame hay que rehacer el src_rect o
+      # el sprite se queda con el ox que dejaron ellos. Hoy @character no se
+      # reasigna, pero entra en la condicion por si un plugin lo hiciera.
+      if @custom_charset_frame != current_frame ||
+         @custom_charset_frames != custom_frames ||
+         !@custom_charset_source.equal?(@charbitmap) ||
+         !@custom_charset_character.equal?(@character) ||
+         @custom_charset_width != bmp.width || @custom_charset_height != bmp.height
+        cw = bmp.width / custom_frames
+        ch = bmp.height
+        self.src_rect.set(current_frame * cw, 0, cw, ch)
+        self.ox = cw / 2
+        self.oy = ch
+        @custom_charset_frame = current_frame
+        @custom_charset_frames = custom_frames
+        @custom_charset_source = @charbitmap
+        @custom_charset_character = @character
+        @custom_charset_width = bmp.width
+        @custom_charset_height = bmp.height
+      end
     else
+      @custom_charset_frame = nil
       self.ox = @cw / 2 if @cw
       zik_full_update_charset_frame
     end
