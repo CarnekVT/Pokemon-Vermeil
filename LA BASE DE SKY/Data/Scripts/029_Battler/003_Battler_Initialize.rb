@@ -214,10 +214,7 @@ class Battle::Battler
     @effects[PBEffects::ChoiceBand]          = nil
     @effects[PBEffects::CommandedBy]         = -1
     @effects[PBEffects::Commanding]          = -1
-    @battle.allBattlers(true).each do |b|
-      b.effects[PBEffects::CommandedBy] = -1 if b.effects[PBEffects::CommandedBy] == @index
-      b.effects[PBEffects::Commanding] = -1 if b.effects[PBEffects::Commanding] == @index
-    end
+    tatsugiri_out_dondozo
     @effects[PBEffects::Counter]             = -1
     @effects[PBEffects::CounterTarget]       = -1
     @effects[PBEffects::CudChewBerry]        = nil
@@ -352,6 +349,37 @@ class Battle::Battler
     @effects[PBEffects::WeightChange]        = 0
     @effects[PBEffects::Yawn]                = 0
     @effects[PBEffects::SupremeOverlord]     = 0
+  end
+
+  def tatsugiri_out_dondozo
+    commanderMsg = ""
+    commanderIdx = nil
+    @battle.allBattlers(true).each do |b|
+      if b.effects[PBEffects::CommandedBy] == @index
+        b.effects[PBEffects::CommandedBy] = -1
+        commanderMsg = _INTL("¡{1} ha salido de la boca de {2}!", pbThis, b.pbThis(true))
+        commanderIdx = @index
+      end
+      if b.effects[PBEffects::Commanding] == @index
+        b.effects[PBEffects::Commanding] = -1
+        commanderMsg = _INTL("¡{1} ha salido de la boca de {2}!", b.pbThis, pbThis(true))
+        commanderIdx = b.index
+      end
+    end
+
+    if commanderIdx
+      @battle.pbDisplay(commanderMsg)
+      commander = @battle.battlers[commanderIdx]
+      return if commander.fainted?
+      batSprite = @battle.scene.sprites["pokemon_#{commanderIdx}"]
+      shadowSprite = @battle.scene.sprites["shadow_#{commanderIdx}"]
+      batSprite.visible = true
+      if PluginManager.installed?("[DBK] Animated Pokémon System")
+        shadowSprite.visible = true if batSprite.shadowVisible
+      elsif commander.opposes?
+        shadowSprite.visible = true if commander.pokemon.species_data.shows_shadow?
+      end
+    end
   end
 
   #-----------------------------------------------------------------------------

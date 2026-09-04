@@ -586,8 +586,11 @@ class Battle::Scene
   end
 
   def pbCommonAnimation2(animName, user = nil, target = nil)
-    return if nil_or_empty?(animName)
+    return if user && user.effects[PBEffects::Commanding] >= 0
     target = target[0] if target.is_a?(Array)
+    return if target && target.effects[PBEffects::Commanding] >= 0
+
+    return if nil_or_empty?(animName)
     animations = pbLoadBattleAnimations
     return if !animations
     animations.each do |a|

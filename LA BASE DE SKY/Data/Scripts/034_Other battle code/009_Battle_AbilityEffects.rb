@@ -295,6 +295,11 @@ module Battle::AbilityEffects
 
   def self.triggerOnSwitchIn(ability, battler, battle, switch_in = false)
     OnSwitchIn.trigger(ability, battler, battle, switch_in)
+    battle.allSameSideBattlers(battler.index).each do |b|
+      next if !b.hasActiveAbility?(:COMMANDER)
+      next if b.effects[PBEffects::Commanding] >= 0
+      OnSwitchIn.trigger(b.ability, b, battle, switch_in)	  
+    end
   end
 
   def self.triggerOnSwitchInDelayed(ability, battler, battle, switch_in = false)
@@ -1290,6 +1295,14 @@ Battle::AbilityEffects::MoveImmunity.add(:WONDERGUARD,
       end
       battle.pbHideAbilitySplash(target)
     end
+    next true
+  }
+)
+
+Battle::AbilityEffects::MoveImmunity.add(:COMMANDER,
+  proc { |ability, user, target, move, type, battle, show_message|
+    next false if target.effects[PBEffects::Commanding] < 0
+    battle.pbDisplay(_INTL("¡{1} evitó el ataque!", target.pbThis)) if show_message
     next true
   }
 )
@@ -3682,6 +3695,64 @@ Battle::AbilityEffects::OnSwitchIn.add(:OVERGROW, proc { |ability, battler, batt
 })
 
 Battle::AbilityEffects::OnSwitchIn.copy(:OVERGROW, :TORRENT, :BLAZE, :SWARM)
+
+#===============================================================================
+# Commander
+#===============================================================================
+Battle::AbilityEffects::OnSwitchIn.add(:COMMANDER,
+  proc { |ability, battler, battle, switch_in|
+    next if !battler.isSpecies?(:TATSUGIRI)
+    next if battler.effects[PBEffects::Commanding] >= 0
+    next if battler.effects[PBEffects::SkyDrop] >= 0
+    next if battler.mega?
+    next if defined?(battler.dynamax?) && battler.dynamax?
+    battler.allAllies.each{|b|
+      next if !b || !b.near?(battler) || b.fainted?
+      next if battle.choices[b.index][0] == :SwitchOut
+      next if !b.isSpecies?(:DONDOZO)
+      next if b.effects[PBEffects::Transform]
+      next if b.effects[PBEffects::CommandedBy] >= 0
+      next if b.effects[PBEffects::SkyDrop] >= 0
+      next if b.mega?
+      next if battle.pbGetOwnerIndexFromBattlerIndex(battler.index) != battle.pbGetOwnerIndexFromBattlerIndex(b.index)
+      next if defined?(b.dynamax?) && b.dynamax?
+      battle.pbShowAbilitySplash(battler)
+      battle.pbClearChoice(battler.index)
+      battle.pbCommonAnimation("Commander", battler, b)
+      battle.pbDisplay(_INTL("{1} fue engullido por {2} y se convirtió en su comandante!", battler.pbThis, b.pbThis(true)))
+      battle.scene.sprites["pokemon_#{battler.index}"].visible = false
+      battle.scene.sprites["shadow_#{battler.index}"].visible = false
+      battler.effects[PBEffects::Commanding] = b.index
+      b.effects[PBEffects::CommandedBy] = battler.index
+      # Reset various values
+      battle.pbClearChoice(battler.index)
+      battler.effects[PBEffects::Bide] = 0
+      battler.effects[PBEffects::HyperBeam] = 0
+      battler.effects[PBEffects::Outrage] = 0
+      battler.effects[PBEffects::Rollout] = 0
+      battler.effects[PBEffects::TwoTurnAttack] = nil
+      battler.effects[PBEffects::Uproar] = 0
+      battler.currentMove = nil
+      battler.pbBeginTurn(nil)   # To clear all temporary effects
+      battler.effects[PBEffects::Encore]     = 0
+      battler.effects[PBEffects::EncoreMove] = nil
+      battler.effects[PBEffects::BeakBlast] = false
+      battler.effects[PBEffects::GemConsumed] = nil
+      battler.effects[PBEffects::ShellTrap] = false
+      # Raise ally's stats
+      stat_ups = [:ATTACK, 2, :DEFENSE, 2, :SPECIAL_ATTACK, 2, :SPECIAL_DEFENSE, 2, :SPEED, 2]
+      show_anim = true
+      (stat_ups.length / 2).times do |i|
+        next if !b.pbCanRaiseStatStage?(stat_ups[i * 2], battler)
+        if b.pbRaiseStatStage(stat_ups[i * 2], stat_ups[(i * 2) + 1], battler, show_anim)
+          show_anim = false
+        end
+      end
+      battle.pbHideAbilitySplash(battler)
+      break
+    }
+  }
+)
 
 #===============================================================================
 # OnSwitchInDelayed handlers

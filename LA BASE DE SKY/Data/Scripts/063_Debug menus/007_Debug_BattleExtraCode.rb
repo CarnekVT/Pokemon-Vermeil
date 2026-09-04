@@ -46,7 +46,7 @@ module Battle::DebugVariables
     PBEffects::FuryCutter     => {name: "Multiplicador de poder de Corte Furia 2**x (0-4)",default: 0, max: 4},
     PBEffects::GastroAcid     => {name: "Bilis ignora su habilidad",                       default: false},
 #    PBEffects::GemConsumed - only applies during use of move, not suitable for setting via debug
-    PBEffects::GigatonHammer  => {name: "Martillo Colosal/Luna Roja es el último movimiento usado", default: false},
+    PBEffects::GigatonHammer  => {name: "Martillo Colosal/Luna Roja es el último movimiento usado", default: nil, type: :move},
     PBEffects::Grudge         => {name: "Rabia se aplica si el usuario se debilita",       default: false},
     PBEffects::HealBlock      => {name: "Turnos restantes de Anticura",                    default: 0},
     PBEffects::HelpingHand    => {name: "Refuerzo aumenta los movimientos del pokémon",    default: false},
@@ -83,6 +83,7 @@ module Battle::DebugVariables
 #    PBEffects::ParentalBond - only applies during use of move, not suitable for setting via debug
     PBEffects::PerishSong     => {name: "Turnos restantes de Canto Mortal",                default: 0},
     PBEffects::PerishSongUser => {name: "Combatiente que ha usado Canto Mortal en sí mismo",default: -1},   # Battler index
+    PBEffects::ProtosynthesisStat    => { name: "Estadistica aumentada por Paleosíntesis/Carga Cuark",       default: nil, type: :stat },
     PBEffects::PickupItem     => {name: "Objeto recuperable con Recogida",                 default: nil, type: :item},
     PBEffects::PickupUse      => {name: "Tiempo de objeto de recogida consumido (más alto=más reciente)",  default: 0},
     PBEffects::Pinch          => {name: "(Palacio Batalla) Comportamiento cambiado con <50% PS",default: false},
@@ -100,6 +101,7 @@ module Battle::DebugVariables
     PBEffects::SaltCure       => {name: "Salazón se aplica (causa daño cada ronda)",     default: false},
 #    PBEffects::ShellTrap - only applies to use of specific move, not suitable for setting via debug
 #    PBEffects::SkyDrop - only applies to use of specific move, not suitable for setting via debug
+    PBEffects::SilkTrap       => {name: "Telatrampa se aplica este turno",                 default: false },
     PBEffects::SlowStart      => {name: "Turnos restantes de Inicio Lento",                default: 0},
     PBEffects::SmackDown      => {name: "Antiaéreo hace que esté en el suelo",             default: false},
 #    PBEffects::Snatch - only applies to use of specific move, not suitable for setting via debug
@@ -109,6 +111,7 @@ module Battle::DebugVariables
     PBEffects::StockpileDef   => {name: "Cambios de Defensa ganados por Reserva (0-12)",   default: 0, max: 12},
     PBEffects::StockpileSpDef => {name: "Cambios de Def. Esp ganados por Reserva (0-12)",  default: 0, max: 12},
     PBEffects::Substitute     => {name: "PS del sustituto",                                default: 0, max: 999},
+    PBEffects::SupremeOverlord => { name: "General Supremo multiplica 1 + 0.1*x (0-5)",   default: 0, max: 5 },
     PBEffects::SyrupBomb      => {name: "Número de rondas restantes de Bomba Caramelo",           default: 0},
     PBEffects::SyrupBombUser  => {name: "Combatiente que usó Bomba Caramelo",            default: -1},   # Battler index
     PBEffects::TarShot        => {name: "Alquitranazo haciendo al Pkmn débil al Fuego",    default: false},
@@ -127,6 +130,7 @@ module Battle::DebugVariables
 #    PBEffects::ExtraType - set elsewhere
     PBEffects::Unburden       => {name: "El usuario ha perdido su objeto (para Liviano)",  default: false},
     PBEffects::Uproar         => {name: "Turnos restantes de Alboroto",                    default: 0},
+    PBEffects::Vulnerable     => {name: "El usuario esta vulnerable por usar Asalto Espadón",    default: false },
     PBEffects::WaterSport     => {name: "Se ha usado Hidrochorro (Gen 5 y posterior)",     default: false},
     PBEffects::WeightChange   => {name: "Cambio de peso +0.1*x kg",                        default: 0, min: -99_999, max: 99_999},
     PBEffects::Yawn           => {name: "Rondas restantes de Bostezo hasta dormirse",      default: 0}

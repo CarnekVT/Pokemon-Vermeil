@@ -38,7 +38,10 @@ class Battle
   def pbCanSwitchOut?(idxBattler, party_screen = nil)
     battler = @battlers[idxBattler]
     return true if battler.fainted?
-    return false if battler.effects[PBEffects::Commanding] >= 0 || battler.effects[PBEffects::CommandedBy] >= 0
+    if battler.effects[PBEffects::Commanding] >= 0 || battler.effects[PBEffects::CommandedBy] >= 0
+      party_screen&.pbDisplay(_INTL("¡{1} no puede ser cambiado!", @battlers[idxBattler].pbThis))
+      return false 
+    end
     # Ability/item effects that allow switching no matter what
     if battler.abilityActive? && Battle::AbilityEffects.triggerCertainSwitching(battler.ability, battler, self)
       return true

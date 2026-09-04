@@ -111,49 +111,8 @@ class Battle::Battler
       Battle::AbilityEffects.triggerTrace(self.ability, self, @battle, onSwitchIn)
     end
     # Commander
-    if isSpecies?(:TATSUGIRI) && self.ability == :COMMANDER &&
-       @effects[PBEffects::Commanding] < 0 && @effects[PBEffects::SkyDrop] < 0
-      ally = nil
-      allAllies.each do |b|
-        next if !b.isSpecies?(:DONDOZO) || b.effects[PBEffects::Transform]
-        next if @battle.pbGetOwnerIndexFromBattlerIndex(@index) != @battle.pbGetOwnerIndexFromBattlerIndex(b.index)
-        next if b.effects[PBEffects::CommandedBy] >= 0
-        next if b.effects[PBEffects::SkyDrop] >= 0
-        ally = b
-        break
-      end
-      if ally
-        @battle.pbShowAbilitySplash(self)
-        @battle.pbCommonAnimation("Commander", self, ally)
-        @battle.pbDisplay(_INTL("{1} fue engullido por {2} y se convirtió en su comandante!", pbThis, ally.pbThis(true)))
-        @effects[PBEffects::Commanding] = ally.index
-        ally.effects[PBEffects::CommandedBy] = @index
-        # Reset various values
-        @battle.pbClearChoice(@index)
-        @effects[PBEffects::Bide] = 0
-        @effects[PBEffects::HyperBeam] = 0
-        @effects[PBEffects::Outrage] = 0
-        @effects[PBEffects::Rollout] = 0
-        @effects[PBEffects::TwoTurnAttack] = nil
-        @effects[PBEffects::Uproar] = 0
-        @currentMove = nil
-        pbBeginTurn(nil)   # To clear all temporary effects
-        @effects[PBEffects::Encore]     = 0
-        @effects[PBEffects::EncoreMove] = nil
-        @effects[PBEffects::BeakBlast] = false
-        @effects[PBEffects::GemConsumed] = nil
-        @effects[PBEffects::ShellTrap] = false
-        # Raise ally's stats
-        stat_ups = [:ATTACK, 2, :DEFENSE, 2, :SPECIAL_ATTACK, 2, :SPECIAL_DEFENSE, 2, :SPEED, 2]
-        show_anim = true
-        (stat_ups.length / 2).times do |i|
-          next if !ally.pbCanRaiseStatStage?(stat_ups[i * 2], self)
-          if ally.pbRaiseStatStage(stat_ups[i * 2], stat_ups[(i * 2) + 1], self, show_anim)
-            show_anim = false
-          end
-        end
-        @battle.pbHideAbilitySplash(self)
-      end
+    if hasActiveAbility?(:COMMANDER)
+      Battle::AbilityEffects.triggerOnSwitchIn(self.ability, self, @battle)
     end
   end
 
