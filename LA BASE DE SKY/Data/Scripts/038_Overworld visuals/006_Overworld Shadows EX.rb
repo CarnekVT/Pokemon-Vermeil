@@ -13,9 +13,15 @@ $all_ow_shadows = [] if !$all_ow_shadows
 # New Class for Shadow object
 #-------------------------------------------------------------------------------
 class Sprite_OWShadow
+  # Numero maximo de frames que una fusion puede seguir considerandose valida.
+  # Red de seguridad para cambios que la firma no puede observar (plugins que
+  # dibujen sobre un bitmap ajeno). Acota la obsolescencia a ~0,5 s.
+  FUSION_MAX_FRAMES = 30
+
   attr_reader :visible
   attr_reader :sprite
   attr_reader :shadow_data
+  attr_reader :fusion_generation
 
   #-----------------------------------------------------------------------------
   # Initialize a shadow sprite based on the name of the event
@@ -34,6 +40,9 @@ class Sprite_OWShadow
     @shadow_data = nil
     @render_bitmap = nil
     @custom_shadow_bitmap = nil
+    @clipping_signature = nil
+    @fusion_generation = 0
+    @frames_since_fusion = 0
     
     # Track character/bitmap changes to regenerate shadow when needed
     @last_character_name = nil
@@ -283,12 +292,51 @@ class Sprite_OWShadow
 
     return @render_bitmap
   end
+
+  # La firma guarda los Bitmap por identidad, lo que no basta por si solo: si el
+  # vecino tiene recorte activo, su sprite.bitmap es su @render_bitmap, que
+  # apply_shadow_fusion reutiliza con clear + blt en cada re-fusion. El objeto no
+  # cambia aunque su contenido si. Por eso se incluye fusion_generation, que sube
+  # en cada re-fusion y propaga el cambio a quien lo muestrea.
+  def clipping_signature(base_bmp, src_rect)
+    rect = src_rect || base_bmp.rect
+    signature = [base_bmp, rect.x, rect.y, rect.width, rect.height,
+                 @sprite.x, @sprite.y, @sprite.ox, @sprite.oy,
+                 @sprite.zoom_x, @sprite.zoom_y]
+    $all_ow_shadows.each do |other|
+      next if other == self || other.disposed? || other.__id__ > self.__id__
+
+      sprite = other.sprite
+      next if !sprite || sprite.disposed?
+      next if (sprite.x - @sprite.x).abs > 64 || (sprite.y - @sprite.y).abs > 64
+
+      other_rect = sprite.src_rect
+      signature.concat([sprite.visible, sprite.opacity, sprite.bitmap,
+                        other.fusion_generation,
+                        other_rect.x, other_rect.y, other_rect.width, other_rect.height,
+                        sprite.x, sprite.y, sprite.ox, sprite.oy,
+                        sprite.zoom_x, sprite.zoom_y, sprite.mirror])
+    end
+    return signature
+  end
+
+  def update_clipped_bitmap(base_bmp, src_rect = nil)
+    signature = clipping_signature(base_bmp, src_rect)
+    @frames_since_fusion += 1
+    if @clipping_signature != signature || @frames_since_fusion > FUSION_MAX_FRAMES
+      @sprite.bitmap = apply_shadow_fusion(base_bmp, src_rect)
+      @clipping_signature = signature
+      @fusion_generation += 1
+      @frames_since_fusion = 0
+    end
+  end
   #-----------------------------------------------------------------------------
   # Invalidate shadow data to force regeneration
   #-----------------------------------------------------------------------------
   def invalidate_shadow_data
     @shadow_data[:bitmap].dispose if @shadow_data && @shadow_data[:bitmap]
     @shadow_data = nil
+    @clipping_signature = nil
   end
   #-----------------------------------------------------------------------------
   # Override the bitmap of the shadow sprite
@@ -430,10 +478,11 @@ class Sprite_OWShadow
       @sprite.opacity = (base_opacity * (80.0 / 255.0) * @shadow_fade).to_i
       
       if clipping_enabled && @sprite.visible && @sprite.opacity > 0 && is_on_screen
-        @sprite.bitmap = apply_shadow_fusion(@custom_shadow_bitmap, @rsprite.src_rect)
+        update_clipped_bitmap(@custom_shadow_bitmap, @rsprite.src_rect)
         @sprite.src_rect.set(0, 0, @rsprite.src_rect.width, @rsprite.src_rect.height)
       else
         @sprite.bitmap = @custom_shadow_bitmap
+        @clipping_signature = nil
         @sprite.src_rect.set(@rsprite.src_rect.x, @rsprite.src_rect.y, @rsprite.src_rect.width, @rsprite.src_rect.height)
       end
     else
@@ -448,10 +497,11 @@ class Sprite_OWShadow
       @sprite.opacity = (@rsprite.opacity * @shadow_fade).to_i
       
       if clipping_enabled && @sprite.visible && @sprite.opacity > 0 && is_on_screen
-        @sprite.bitmap = apply_shadow_fusion(@shadow_data[:bitmap], nil)
+        update_clipped_bitmap(@shadow_data[:bitmap])
         @sprite.src_rect.set(0, 0, @sprite.bitmap.width, @sprite.bitmap.height)
       else
         @sprite.bitmap = @shadow_data[:bitmap]
+        @clipping_signature = nil
         @sprite.src_rect.set(0, 0, @sprite.bitmap.width, @sprite.bitmap.height)
       end
     end
@@ -596,4 +646,3 @@ end
 class Spriteset_Map
   attr_accessor :character_sprites
 end
-

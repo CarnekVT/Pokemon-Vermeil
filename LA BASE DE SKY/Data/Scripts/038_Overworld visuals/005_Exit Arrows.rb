@@ -23,12 +23,29 @@ class Game_Character
  attr_accessor :direction_fix
 end
 
+module ExitArrows
+ # La cache se invalida por identidad de $game_map, no por map_id, y es a
+ # proposito: Game_MapFactory descarta mapas de @maps (delete_if en
+ # 011_Game classes/006_Game_MapFactory.rb:365, 370 y 374), asi que un mapa
+ # revisitado puede volver como un Game_Map nuevo con el mismo map_id y eventos
+ # distintos. Comparar map_id no lo detectaria y @events se quedaria apuntando a
+ # los eventos del objeto ya descartado.
+ def self.events
+   map_events = $game_map.events
+   if @map != $game_map || @events_count != map_events.length
+     @map = $game_map
+     @events_count = map_events.length
+     @events = map_events.values.select { |event| event.name == "FlechaSalida" }
+   end
+   return @events
+ end
+end
+
 # Checks if the player is standing next to the exit arrow, facing it.
 def pxCheckExitArrows(init=false)
  px = $game_player.x
  py = $game_player.y
- for event in $game_map.events.values
-   next if !event.name[/^FlechaSalida$/]
+ for event in ExitArrows.events
    event.transparent = ! (
      (px==event.x && py==event.y-1) ||
      (px==event.x && py==event.y+1) ||

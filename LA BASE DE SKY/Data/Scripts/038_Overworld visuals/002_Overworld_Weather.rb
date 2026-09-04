@@ -171,6 +171,7 @@ module RPG
             sprite.ox      = @ox + @ox_offset
             sprite.oy      = @oy + @oy_offset
             sprite.opacity = 0
+            sprite.tone.set(*@day_night_tone_values) if @day_night_tone_values
             @sprites[i] = sprite
           end
           @sprites[i].visible = (i < @max)
@@ -186,6 +187,7 @@ module RPG
             sprite.ox      = @ox + @ox_offset
             sprite.oy      = @oy + @oy_offset
             sprite.opacity = 0
+            sprite.tone.set(*@day_night_tone_values) if @day_night_tone_values
             @new_sprites[i] = sprite
           end
           @new_sprites[i].visible = (i < @new_max)
@@ -203,6 +205,7 @@ module RPG
           sprite.ox      = @ox + @ox_offset
           sprite.oy      = @oy + @oy_offset
           sprite.opacity = 0
+          sprite.tone.set(*@day_night_tone_values) if @day_night_tone_values
           @tiles[i] = sprite
         end
         @tiles[i].visible = true
@@ -273,9 +276,8 @@ module RPG
       sprite.opacity = 255
     end
 
-    def update_sprite_position(sprite, index, is_new_sprite = false)
+    def update_sprite_position(sprite, index, delta_t, weather_data, is_new_sprite = false)
       return if !sprite || !sprite.bitmap || !sprite.visible
-      delta_t = Graphics.delta
       lifetimes = (is_new_sprite) ? @new_sprite_lifetimes : @sprite_lifetimes
       if lifetimes[index] >= 0
         lifetimes[index] -= delta_t
@@ -287,11 +289,11 @@ module RPG
       # Determine which weather type this sprite is representing
       weather_type = (is_new_sprite) ? @target_type : @type
       # Update visibility/position/opacity of sprite
-      if @weatherTypes[weather_type][0].category == :Rain && index.odd?   # Splash
+      if weather_data.category == :Rain && index.odd?   # Splash
         sprite.opacity = (lifetimes[index] < 0.2) ? 255 : 0   # 0.2 seconds
       else
-        dist_x = @weatherTypes[weather_type][0].particle_delta_x * delta_t
-        dist_y = @weatherTypes[weather_type][0].particle_delta_y * delta_t
+        dist_x = weather_data.particle_delta_x * delta_t
+        dist_y = weather_data.particle_delta_y * delta_t
         sprite.x += dist_x
         sprite.y += dist_y
         if weather_type == :Snow
@@ -303,7 +305,7 @@ module RPG
         sprite.x += Graphics.width if sprite.x - @ox - @ox_offset < -sprite.width
         sprite.y -= Graphics.height if sprite.y - @oy - @oy_offset > Graphics.height
         sprite.y += Graphics.height if sprite.y - @oy - @oy_offset < -sprite.height
-        sprite.opacity += @weatherTypes[weather_type][0].particle_delta_opacity * delta_t
+        sprite.opacity += weather_data.particle_delta_opacity * delta_t
         x = sprite.x - @ox - @ox_offset
         y = sprite.y - @oy - @oy_offset
         # Check if sprite is off-screen; if so, reset it
@@ -313,8 +315,7 @@ module RPG
       end
     end
 
-    def recalculate_tile_positions
-      delta_t = Graphics.delta
+    def recalculate_tile_positions(delta_t)
       weather_type = @type
       if @fading && @fade_time >= [FADE_OLD_TONE_END - @time_shift, 0].max
         weather_type = @target_type
@@ -360,7 +361,7 @@ module RPG
     end
 
     # Set tone of viewport (general screen brightening/darkening)
-    def update_screen_tone
+    def update_screen_tone(delta_t)
       weather_type = @type
       weather_max = @max
       fraction = 1
@@ -414,7 +415,7 @@ module RPG
         @sun_magnitude = weather_max if @sun_magnitude != weather_max && @sun_magnitude != -weather_max
         @sun_magnitude *= -1 if (@sun_magnitude > 0 && @sun_strength > @sun_magnitude) ||
                                 (@sun_magnitude < 0 && @sun_strength < 0)
-        @sun_strength += @sun_magnitude.to_f * Graphics.delta / 0.8   # 0.8 seconds per half flash
+        @sun_strength += @sun_magnitude.to_f * delta_t / 0.8   # 0.8 seconds per half flash
         tone_red += @sun_strength
         tone_green += @sun_strength
         tone_blue += @sun_strength / 2
@@ -424,10 +425,10 @@ module RPG
                          tone_blue * fraction, tone_gray * fraction)
     end
 
-    def update_fading
+    def update_fading(delta_t)
       return if !@fading
       old_fade_time = @fade_time
-      @fade_time += Graphics.delta
+      @fade_time += delta_t
       # Change tile bitmaps
       if @type != @target_type
         tile_change_threshold = [FADE_OLD_TONE_END - @time_shift, 0].max
@@ -480,13 +481,36 @@ module RPG
       end
     end
 
+    def update_day_night_tint
+      # Igual que pbDayNightTint (037_Overworld/004_Overworld_Time.rb): fuera de
+      # Scene_Map no se toca el tono de los sprites. Se invalida la cache para
+      # que se reaplique al volver al mapa.
+      if !$scene.is_a?(Scene_Map)
+        @day_night_tone_values = nil
+        return
+      end
+      outdoor_map = Settings::TIME_SHADING && $game_map&.metadata&.outdoor_map
+      tone = outdoor_map ? PBDayNight.getTone : nil
+      tone_values = tone ? [tone.red, tone.green, tone.blue, tone.gray] : [0, 0, 0, 0]
+      return if @day_night_tone_values == tone_values
+
+      @day_night_tone_values = tone_values
+      (@sprites + @new_sprites + @tiles).each do |sprite|
+        next if !sprite
+
+        sprite.tone.set(*tone_values)
+      end
+    end
+
     def update
-      update_fading
-      update_screen_tone
+      delta_t = Graphics.delta
+      update_fading(delta_t)
+      update_screen_tone(delta_t)
+      update_day_night_tint
       # Storm flashes
       if @type == :Storm && !@fading
         if @time_until_flash > 0
-          @time_until_flash -= Graphics.delta
+          @time_until_flash -= delta_t
           if @time_until_flash <= 0
             @viewport.flash(Color.new(255, 255, 255, 230), rand(2..4) * 20)
           end
@@ -497,22 +521,22 @@ module RPG
       end
       @viewport.update
       # Update weather particles (raindrops, snowflakes, etc.)
-      if @weatherTypes[@type] && @weatherTypes[@type][1].length > 0
+      weather = @weatherTypes[@type]
+      if weather && weather[1].length > 0
         ensureSprites
         MAX_SPRITES.times do |i|
-          update_sprite_position(@sprites[i], i, false)
-          pbDayNightTint(@sprites[i])
+          update_sprite_position(@sprites[i], i, delta_t, weather[0], false)
         end
       elsif @sprites.length > 0
         @sprites.each { |sprite| sprite&.dispose }
         @sprites.clear
       end
       # Update new weather particles (while fading in only)
-      if @fading && @weatherTypes[@target_type] && @weatherTypes[@target_type][1].length > 0
+      new_weather = @weatherTypes[@target_type]
+      if @fading && new_weather && new_weather[1].length > 0
         ensureSprites
         MAX_SPRITES.times do |i|
-          update_sprite_position(@new_sprites[i], i, true)
-          pbDayNightTint(@new_sprites[i])
+          update_sprite_position(@new_sprites[i], i, delta_t, new_weather[0], true)
         end
       elsif @new_sprites.length > 0
         @new_sprites.each { |sprite| sprite&.dispose }
@@ -521,10 +545,9 @@ module RPG
       # Update weather tiles (sandstorm/blizzard/fog tiled overlay)
       if @tiles_wide > 0 && @tiles_tall > 0
         ensureTiles
-        recalculate_tile_positions
+        recalculate_tile_positions(delta_t)
         @tiles.each_with_index do |sprite, i|
           update_tile_position(sprite, i)
-          pbDayNightTint(sprite)
         end
       elsif @tiles.length > 0
         @tiles.each { |sprite| sprite&.dispose }
