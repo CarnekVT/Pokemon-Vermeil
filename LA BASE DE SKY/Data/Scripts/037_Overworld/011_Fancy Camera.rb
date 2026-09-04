@@ -174,31 +174,40 @@ class Game_Player < Game_Character
       old_update_screen_position(_last_real_x, _last_real_y)
     else
       return if self.map.scrolling?
-      target = [@real_x - SCREEN_CENTER_X,@real_y - SCREEN_CENTER_Y]
-      if $game_temp.camera_pos && $game_temp.camera_pos[0] != 0 && $game_temp.camera_pos[1] != 0
-        target = $game_temp.camera_pos
+      game_temp = $game_temp
+      map = self.map
+      target_x = @real_x - SCREEN_CENTER_X
+      target_y = @real_y - SCREEN_CENTER_Y
+      camera_pos = game_temp.camera_pos
+      if camera_pos[0] != 0 && camera_pos[1] != 0
+        target_x = camera_pos[0]
+        target_y = camera_pos[1]
       end
-      if $game_temp.camera_target_event && $game_temp.camera_target_event != 0
-        event = $game_map.events[$game_temp.camera_target_event]
+      if game_temp.camera_target_event != 0
+        event = $game_map.events[game_temp.camera_target_event]
         if event
-          target = [event.real_x - SCREEN_CENTER_X, event.real_y - SCREEN_CENTER_Y]
+          target_x = event.real_x - SCREEN_CENTER_X
+          target_y = event.real_y - SCREEN_CENTER_Y
         end
       end
-      if $game_temp.camera_shake > 0
-        power = $game_temp.camera_shake * 25
-        target = [target[0] + rand(-power..power), target[1] + rand(-power..power)]
+      if game_temp.camera_shake > 0
+        power = game_temp.camera_shake * 25
+        target_x += rand(-power..power)
+        target_y += rand(-power..power)
       end
-      if $game_temp.camera_offset && $game_temp.camera_offset != [0, 0]
-        target = [target[0] + ($game_temp.camera_offset[0] * Game_Map::REAL_RES_X), target[1] + ($game_temp.camera_offset[1] * Game_Map::REAL_RES_Y)]
+      camera_offset = game_temp.camera_offset
+      if camera_offset[0] != 0 || camera_offset[1] != 0
+        target_x += camera_offset[0] * Game_Map::REAL_RES_X
+        target_y += camera_offset[1] * Game_Map::REAL_RES_Y
       end
-      distance = Math.sqrt((target[0] - self.map.display_x)**2 + (target[1] - self.map.display_y)**2)
-      speed = $game_temp.camera_speed * 0.2
-      if distance < 0.75
-        self.map.display_x = target[0]
-        self.map.display_y = target[1]
+      distance_squared = (target_x - map.display_x)**2 + (target_y - map.display_y)**2
+      speed = game_temp.camera_speed * 0.2
+      if distance_squared < 0.5625
+        map.display_x = target_x
+        map.display_y = target_y
       else
-        self.map.display_x = ease_in_out(self.map.display_x, target[0], speed)
-        self.map.display_y = ease_in_out(self.map.display_y, target[1], speed)
+        map.display_x = ease_in_out(map.display_x, target_x, speed)
+        map.display_y = ease_in_out(map.display_y, target_y, speed)
       end
     end
   end
