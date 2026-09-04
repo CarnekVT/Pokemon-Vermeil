@@ -5,6 +5,16 @@
 #  ($game_screen).
 #===============================================================================
 class Game_Picture
+  # Numeros de picture cuyo nombre de archivo ha cambiado desde la ultima
+  # actualizacion de Spriteset_Global, que es quien lo consume y lo vacia.
+  #
+  # Solo lo marcan show y erase, porque son las unicas operaciones que cambian
+  # @name. El resto (move, start_tone_change, rotate) solo afecta a pictures ya
+  # visibles, que Spriteset_Global mantiene en su lista de activas y actualiza
+  # cada frame igualmente. Cualquier operacion nueva que pueda cambiar @name
+  # tiene que marcarse aqui o su sprite no se enterara.
+  @@changed_picture_numbers = {}
+
   attr_reader   :number                   # picture number
   attr_reader   :name                     # file name
   attr_reader   :origin                   # starting point
@@ -42,6 +52,11 @@ class Game_Picture
     @rotate_speed = 0
   end
 
+
+  def self.changed_picture_numbers
+    return @@changed_picture_numbers
+  end
+
   # Show Picture
   #     name       : file name
   #     origin     : starting point
@@ -72,6 +87,7 @@ class Game_Picture
     @tone_timer_start = nil
     @angle = 0
     @rotate_speed = 0
+    @@changed_picture_numbers[@number] = true
   end
 
   # Move Picture
@@ -123,6 +139,7 @@ class Game_Picture
 
   def erase
     @name = ""
+    @@changed_picture_numbers[@number] = true
   end
 
   def update
@@ -164,4 +181,3 @@ class Game_Picture
     end
   end
 end
-
