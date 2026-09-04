@@ -1898,6 +1898,12 @@ Battle::AbilityEffects::DamageCalcFromTarget.add(:FLUFFY,
   }
 )
 
+Battle::AbilityEffects::DamageCalcFromTarget.add(:AURAGUARD,
+  proc { |ability, user, target, move, mults, power, type|
+    mults[:final_damage_multiplier] /= 2 if move.pbContactMove?(user) && !target.hasActiveItem?(:PROTECTIVEPADS)
+  }
+)
+
 Battle::AbilityEffects::DamageCalcFromTarget.add(:FURCOAT,
   proc { |ability, user, target, move, mults, power, type|
     if move.physicalMove? || move.function_code == "UseTargetDefenseInsteadOfTargetSpDef"   # Psyshock
