@@ -5,6 +5,14 @@
 #  ($game_screen).
 #===============================================================================
 class Game_Picture
+  # Numeros de picture cuyo nombre de archivo ha cambiado desde la ultima
+  # actualizacion de Spriteset_Global, que es quien lo consume y lo vacia.
+  #
+  # Solo lo marcan show y erase, porque son las unicas operaciones que cambian
+  # @name. El resto (move, start_tone_change, rotate) solo afecta a pictures ya
+  # visibles, que Spriteset_Global mantiene en su lista de activas y actualiza
+  # cada frame igualmente. Cualquier operacion nueva que pueda cambiar @name
+  # tiene que marcarse aqui o su sprite no se enterara.
   @@changed_picture_numbers = {}
 
   attr_reader   :number                   # picture number

@@ -1,10 +1,11 @@
 class Sprite_Picture
+  attr_reader :picture
+
   def initialize(viewport, picture)
     @viewport = viewport
     @picture = picture
     @sprite = nil
   end
-
 
   def dispose
     @sprite&.dispose

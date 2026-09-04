@@ -29,6 +29,9 @@ class Spriteset_Global
         @active_picture_sprites[i] = sprite
       end
     end
+    # El bucle anterior ya ha sincronizado los 100 sprites con el estado actual
+    # de las pictures, asi que cualquier marca pendiente sobra.
+    Game_Picture.changed_picture_numbers.clear
     @timer_sprite = Sprite_Timer.new
     update
   end
@@ -69,10 +72,10 @@ class Spriteset_Global
     @weather.update
     changed_pictures = Game_Picture.changed_picture_numbers
     changed_pictures.each_key do |number|
-      picture = $game_screen.pictures[number]
       sprite = @picture_sprites[number - 1]
+      next if !sprite
       sprite.update
-      if picture.name == ""
+      if sprite.picture.name == ""
         @active_picture_sprites.delete(number)
       else
         @active_picture_sprites[number] = sprite
