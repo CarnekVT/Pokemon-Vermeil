@@ -50,7 +50,7 @@ class Battle::Battler
       if choiced_move
         if hasActiveItem?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF])
           if showMessages
-            msg = _INTL("¡A causa de la {1} solo se puede usar {2}!", itemName, choiced_move.name)
+            msg = _INTL("¡A causa de {1} solo se puede usar {2}!", itemName, choiced_move.name)
             (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
           end
           return false
