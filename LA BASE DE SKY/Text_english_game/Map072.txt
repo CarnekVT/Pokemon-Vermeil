@@ -1,0 +1,24 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map072]
+Deoxys está reaccionando al meteorito...
+Deoxys está reaccionando al meteorito...
+¿Quieres acercar al Deoxys de tu equipo al meteorito?
+¿Quieres acercar al Deoxys de tu equipo al meteorito?
+¡\v[1] ha cambiado de forma para tener estadísticas más ofensivas!
+¡\v[1] ha cambiado de forma para tener estadísticas más ofensivas!
+No has hecho nada con el meteorito.
+No has hecho nada con el meteorito.
+Es un meteorito.
+Es un meteorito.
+¡\v[1] ha cambiado de forma para tener estadísticas más defensivas!
+¡\v[1] ha cambiado de forma para tener estadísticas más defensivas!
+¡\v[1] ha cambiado de forma para tener estadísticas más veloces!
+¡\v[1] ha cambiado de forma para tener estadísticas más veloces!
+¡\v[1] ha cambiado de forma para tener estadísticas más equilibradas!
+¡\v[1] ha cambiado de forma para tener estadísticas más equilibradas!
+Sí
+Sí
+No
+No

@@ -1,7 +1,7 @@
 {
   "format": "battle-scene-studio",
-  "formatVersion": 60,
-  "editorVersion": "0.6.74",
+  "formatVersion": 69,
+  "editorVersion": "0.8.36",
   "groups": [
     {
       "id": "wild_main",
@@ -105,7 +105,19 @@
         "basesMode": "inherit",
         "defeatBgm": "",
         "cameraStyle": "inherit",
-        "ebdxBackdrop": "inherit"
+        "ebdxBackdrop": "inherit",
+        "ebdxElements": {
+          "sky": "inherit",
+          "clouds": "inherit",
+          "trees": "inherit",
+          "grass": "inherit",
+          "water": "inherit",
+          "lights": "inherit",
+          "decor": "inherit",
+          "particles": "inherit"
+        },
+        "sceneMode": "inherit",
+        "ebdxCamera": true
       },
       "boss": {
         "enabled": false,
@@ -116,6 +128,8 @@
         "auraMessage": "",
         "introOrder": "shield_first",
         "sosOnBossDefeat": "faint",
+        "expMode": "normal",
+        "expSummaryMessage": "¡{1} ganó un total de {2} Puntos de Experiencia!",
         "stats": {
           "ATTACK": 0,
           "DEFENSE": 0,
@@ -253,7 +267,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       "sos": {
@@ -383,7 +400,19 @@
         "basesMode": "inherit",
         "defeatBgm": "",
         "cameraStyle": "inherit",
-        "ebdxBackdrop": "inherit"
+        "ebdxBackdrop": "inherit",
+        "ebdxElements": {
+          "sky": "inherit",
+          "clouds": "inherit",
+          "trees": "inherit",
+          "grass": "inherit",
+          "water": "inherit",
+          "lights": "inherit",
+          "decor": "inherit",
+          "particles": "inherit"
+        },
+        "sceneMode": "inherit",
+        "ebdxCamera": true
       },
       "boss": {
         "enabled": false,
@@ -394,6 +423,8 @@
         "auraMessage": "",
         "introOrder": "shield_first",
         "sosOnBossDefeat": "faint",
+        "expMode": "normal",
+        "expSummaryMessage": "¡{1} ganó un total de {2} Puntos de Experiencia!",
         "stats": {
           "ATTACK": 0,
           "DEFENSE": 0,
@@ -531,7 +562,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       "sos": {
@@ -726,7 +760,19 @@
         "basesMode": "inherit",
         "defeatBgm": "",
         "cameraStyle": "inherit",
-        "ebdxBackdrop": "inherit"
+        "ebdxBackdrop": "inherit",
+        "ebdxElements": {
+          "sky": "inherit",
+          "clouds": "inherit",
+          "trees": "inherit",
+          "grass": "inherit",
+          "water": "inherit",
+          "lights": "inherit",
+          "decor": "inherit",
+          "particles": "inherit"
+        },
+        "sceneMode": "inherit",
+        "ebdxCamera": true
       },
       "boss": {
         "enabled": false,
@@ -737,6 +783,8 @@
         "auraMessage": "",
         "introOrder": "shield_first",
         "sosOnBossDefeat": "faint",
+        "expMode": "normal",
+        "expSummaryMessage": "¡{1} ganó un total de {2} Puntos de Experiencia!",
         "stats": {
           "ATTACK": 0,
           "DEFENSE": 0,
@@ -874,7 +922,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       "sos": {
@@ -1133,7 +1184,19 @@
         "basesMode": "inherit",
         "defeatBgm": "",
         "cameraStyle": "inherit",
-        "ebdxBackdrop": "inherit"
+        "ebdxBackdrop": "inherit",
+        "ebdxElements": {
+          "sky": "inherit",
+          "clouds": "inherit",
+          "trees": "inherit",
+          "grass": "inherit",
+          "water": "inherit",
+          "lights": "inherit",
+          "decor": "inherit",
+          "particles": "inherit"
+        },
+        "sceneMode": "inherit",
+        "ebdxCamera": true
       },
       "boss": {
         "enabled": false,
@@ -1144,6 +1207,8 @@
         "auraMessage": "",
         "introOrder": "shield_first",
         "sosOnBossDefeat": "faint",
+        "expMode": "normal",
+        "expSummaryMessage": "¡{1} ganó un total de {2} Puntos de Experiencia!",
         "stats": {
           "ATTACK": 0,
           "DEFENSE": 0,
@@ -1281,7 +1346,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       "sos": {
@@ -1508,7 +1576,19 @@
         "basesMode": "inherit",
         "defeatBgm": "",
         "cameraStyle": "inherit",
-        "ebdxBackdrop": "inherit"
+        "ebdxBackdrop": "inherit",
+        "ebdxElements": {
+          "sky": "inherit",
+          "clouds": "inherit",
+          "trees": "inherit",
+          "grass": "inherit",
+          "water": "inherit",
+          "lights": "inherit",
+          "decor": "inherit",
+          "particles": "inherit"
+        },
+        "sceneMode": "inherit",
+        "ebdxCamera": true
       },
       "boss": {
         "enabled": false,
@@ -1519,6 +1599,8 @@
         "auraMessage": "",
         "introOrder": "shield_first",
         "sosOnBossDefeat": "faint",
+        "expMode": "normal",
+        "expSummaryMessage": "¡{1} ganó un total de {2} Puntos de Experiencia!",
         "stats": {
           "ATTACK": 0,
           "DEFENSE": 0,
@@ -1656,7 +1738,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       "sos": {
@@ -1824,7 +1909,19 @@
         "basesMode": "inherit",
         "defeatBgm": "",
         "cameraStyle": "inherit",
-        "ebdxBackdrop": "inherit"
+        "ebdxBackdrop": "inherit",
+        "ebdxElements": {
+          "sky": "inherit",
+          "clouds": "inherit",
+          "trees": "inherit",
+          "grass": "inherit",
+          "water": "inherit",
+          "lights": "inherit",
+          "decor": "inherit",
+          "particles": "inherit"
+        },
+        "sceneMode": "inherit",
+        "ebdxCamera": true
       },
       "boss": {
         "enabled": true,
@@ -1835,6 +1932,8 @@
         "auraMessage": "¡El {1} dominante está rodeado por un aura!",
         "introOrder": "shield_first",
         "sosOnBossDefeat": "faint",
+        "expMode": "normal",
+        "expSummaryMessage": "¡{1} ganó un total de {2} Puntos de Experiencia!",
         "stats": {
           "ATTACK": 1,
           "DEFENSE": 1,
@@ -1972,7 +2071,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       "sos": {
@@ -2219,7 +2321,19 @@
         "basesMode": "inherit",
         "defeatBgm": "",
         "cameraStyle": "inherit",
-        "ebdxBackdrop": "inherit"
+        "ebdxBackdrop": "inherit",
+        "ebdxElements": {
+          "sky": "inherit",
+          "clouds": "inherit",
+          "trees": "inherit",
+          "grass": "inherit",
+          "water": "inherit",
+          "lights": "inherit",
+          "decor": "inherit",
+          "particles": "inherit"
+        },
+        "sceneMode": "inherit",
+        "ebdxCamera": true
       },
       "boss": {
         "enabled": true,
@@ -2230,6 +2344,8 @@
         "auraMessage": "¡El {1} dominante está rodeado por un aura!",
         "introOrder": "aura_first",
         "sosOnBossDefeat": "flee",
+        "expMode": "normal",
+        "expSummaryMessage": "¡{1} ganó un total de {2} Puntos de Experiencia!",
         "stats": {
           "ATTACK": 1,
           "DEFENSE": 1,
@@ -2451,7 +2567,10 @@
           "pulseSpeed": 200,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": true,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       "sos": {
@@ -2566,8 +2685,380 @@
     "mainGroupId": "wild_main",
     "battleBasesEnabled": false,
     "battleBoxAnimation": "slide",
-    "cameraStyle": "project",
-    "ebdxBackdrop": "Auto",
+    "cameraStyle": "ebdx",
+    "battleSceneEngine": "ebdx",
+    "ebdxDefaultBackdrop": "Field",
+    "ebdxMapMetadata": [
+      {
+        "mapId": 79,
+        "mapName": "Map 79",
+        "backdrop": "scene_custom"
+      }
+    ],
+    "ebdxBackdrop": "bss_rocky_highlands",
+    "ebdxElements": {
+      "sky": true,
+      "clouds": true,
+      "trees": true,
+      "grass": true,
+      "water": true,
+      "lights": true,
+      "decor": true,
+      "particles": true
+    },
+    "ebdxCamera": {
+      "preset": "ebdx",
+      "idleStrength": 10,
+      "commandStrength": 18,
+      "fightStrength": 28,
+      "panX": 75,
+      "panY": 75,
+      "angle": 70,
+      "perspective": 90,
+      "zoom": 92,
+      "idleSpeed": 42,
+      "commandSpeed": 52,
+      "fightSpeed": 60,
+      "idleMinFrames": 120,
+      "idleMaxFrames": 220,
+      "commandMinFrames": 70,
+      "commandMaxFrames": 130,
+      "fightMinFrames": 50,
+      "fightMaxFrames": 105,
+      "battlerInfluence": 100,
+      "shadowInfluence": 100,
+      "overscan": 24,
+      "profile": "ebdx",
+      "contexts": {
+        "command": {
+          "enabled": true,
+          "mode": "player",
+          "frames": 46,
+          "strength": 16
+        },
+        "fight": {
+          "enabled": true,
+          "mode": "player",
+          "frames": 38,
+          "strength": 22
+        },
+        "move": {
+          "enabled": true,
+          "mode": "focus",
+          "frames": 30,
+          "strength": 26
+        },
+        "spread": {
+          "enabled": true,
+          "mode": "wide",
+          "frames": 34,
+          "strength": 22
+        },
+        "common": {
+          "enabled": true,
+          "mode": "neutral",
+          "frames": 32,
+          "strength": 10
+        },
+        "sendout": {
+          "enabled": true,
+          "mode": "focus",
+          "frames": 34,
+          "strength": 18
+        },
+        "recall": {
+          "enabled": true,
+          "mode": "focus",
+          "frames": 30,
+          "strength": 16
+        },
+        "sos": {
+          "enabled": true,
+          "mode": "wide",
+          "frames": 38,
+          "strength": 20
+        },
+        "capture": {
+          "enabled": true,
+          "mode": "enemy",
+          "frames": 34,
+          "strength": 20
+        },
+        "faint": {
+          "enabled": true,
+          "mode": "focus",
+          "frames": 30,
+          "strength": 18
+        },
+        "turn_end": {
+          "enabled": true,
+          "mode": "neutral",
+          "frames": 46,
+          "strength": 8
+        },
+        "idle": {
+          "enabled": true,
+          "mode": "drift",
+          "frames": 0,
+          "strength": 72
+        },
+        "bas": {
+          "enabled": true,
+          "mode": "authored",
+          "frames": 0,
+          "strength": 100
+        }
+      },
+      "cameraSchemaVersion": 2
+    },
+    "ebdxIntro": {
+      "style": "nds_biome",
+      "useInVanilla": false,
+      "holdFrames": 16,
+      "moveFrames": 28,
+      "revealFrames": 12,
+      "fadeFrames": 0,
+      "zoomStart": 185,
+      "dim": 72,
+      "flash": 150,
+      "driftX": -7,
+      "driftY": 3,
+      "biomeSource": "auto",
+      "encounterMappings": {
+        "Land": "Grass",
+        "Cave": "Cave",
+        "Water": "Water",
+        "Fishing": "Water"
+      },
+      "mapOverrides": {}
+    },
+    "ebdxSceneLibraries": [
+      {
+        "id": "project",
+        "name": "Proyecto"
+      },
+      {
+        "id": "constructed_nature",
+        "name": "Construidos · Naturaleza"
+      },
+      {
+        "id": "constructed_forest",
+        "name": "Construidos · Bosque / ruinas"
+      },
+      {
+        "id": "constructed_cave",
+        "name": "Construidos · Cuevas / hielo"
+      },
+      {
+        "id": "constructed_city",
+        "name": "Construidos · Ciudad"
+      },
+      {
+        "id": "constructed_special",
+        "name": "Construidos · Especiales"
+      }
+    ],
+    "ebdxCustomEnvironments": [
+      {
+        "id": "scene_custom",
+        "name": "Island",
+        "description": "Island",
+        "libraryId": "project",
+        "data": {
+          "backdrop": "Forest",
+          "wideWorld": true,
+          "water": true,
+          "outdoor": true,
+          "cloudsConfig": {
+            "enabled": true,
+            "cloud1X": 0,
+            "cloud1Y": 38,
+            "cloud1Speed": 1,
+            "cloud1Direction": 1,
+            "cloud1Opacity": 255,
+            "cloud2X": 0,
+            "cloud2Y": 38,
+            "cloud2Speed": 0.5,
+            "cloud2Direction": -1,
+            "cloud2Opacity": 255,
+            "dayColor": "#dfefff",
+            "dawnColor": "#ffd4b3",
+            "nightColor": "#9ebcff"
+          },
+          "skyMode": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/nature_sky_base.png",
+          "sky": true,
+          "windConfig": {
+            "enabled": true,
+            "amplitude": 3,
+            "speed": 1,
+            "rotation": 2
+          },
+          "base": "Water",
+          "img001": {
+            "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+            "x": 320,
+            "y": 128,
+            "z": 3,
+            "zoom": 0.35,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.45,
+            "zoom_y": 0.45,
+            "flat": true,
+            "bssRigid": true,
+            "crop": {
+              "x": 96,
+              "y": 480,
+              "w": 96,
+              "h": 128,
+              "rebase": true
+            },
+            "blurAreas": [],
+            "effect": "wind",
+            "speed": 1,
+            "colorize": true
+          },
+          "img002": {
+            "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+            "x": 304,
+            "y": 112,
+            "z": 2,
+            "zoom": 0.35,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.45,
+            "zoom_y": 0.45,
+            "flat": true,
+            "bssRigid": true,
+            "crop": {
+              "x": 96,
+              "y": 480,
+              "w": 96,
+              "h": 128,
+              "rebase": true
+            },
+            "blurAreas": [],
+            "effect": "wind",
+            "speed": 1,
+            "colorize": true,
+            "hidden": false
+          },
+          "img003": {
+            "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+            "x": 368,
+            "y": 112,
+            "z": 3,
+            "zoom": 0.35,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.45,
+            "zoom_y": 0.45,
+            "flat": true,
+            "bssRigid": true,
+            "crop": {
+              "x": 96,
+              "y": 480,
+              "w": 96,
+              "h": 128,
+              "rebase": true
+            },
+            "blurAreas": [],
+            "effect": "wind",
+            "speed": 1,
+            "colorize": true
+          },
+          "img004": {
+            "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+            "x": 32,
+            "y": 112,
+            "z": 2,
+            "zoom": 0.35,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.45,
+            "zoom_y": 0.45,
+            "flat": true,
+            "bssRigid": true,
+            "crop": {
+              "x": 96,
+              "y": 480,
+              "w": 96,
+              "h": 128,
+              "rebase": true
+            },
+            "blurAreas": [],
+            "effect": "wind",
+            "speed": 1,
+            "colorize": true,
+            "hidden": false
+          },
+          "img005": {
+            "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+            "x": 56,
+            "y": 128,
+            "z": 3,
+            "zoom": 0.35,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.45,
+            "zoom_y": 0.45,
+            "flat": true,
+            "bssRigid": true,
+            "crop": {
+              "x": 96,
+              "y": 480,
+              "w": 96,
+              "h": 128,
+              "rebase": true
+            },
+            "blurAreas": [],
+            "effect": "wind",
+            "speed": 1,
+            "colorize": true
+          },
+          "img006": {
+            "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+            "x": 104,
+            "y": 112,
+            "z": 5,
+            "zoom": 0.35,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.45,
+            "zoom_y": 0.45,
+            "flat": true,
+            "bssRigid": true,
+            "crop": {
+              "x": 96,
+              "y": 480,
+              "w": 96,
+              "h": 128,
+              "rebase": true
+            },
+            "blurAreas": [],
+            "effect": "wind",
+            "speed": 1,
+            "colorize": true
+          },
+          "img007": {
+            "bitmap": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mountain_cluster_2.png",
+            "x": 176,
+            "y": 100,
+            "z": 1,
+            "zoom": 0.2,
+            "opacity": 120,
+            "direction": 1,
+            "zoom_x": 0.6,
+            "zoom_y": 0.2,
+            "flat": true,
+            "bssRigid": true,
+            "blurAreas": [],
+            "canvasLayer": true,
+            "hidden": true
+          }
+        }
+      }
+    ],
     "auraProfiles": [
       {
         "id": "ebdx_default",
@@ -2633,7 +3124,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -2779,7 +3273,10 @@
           "pulseSpeed": 200,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": true,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -2925,7 +3422,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -2992,7 +3492,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3059,7 +3562,10 @@
           "pulseSpeed": 165,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3126,7 +3632,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3193,7 +3702,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3260,7 +3772,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3327,7 +3842,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3394,7 +3912,10 @@
           "pulseSpeed": 220,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3461,7 +3982,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3528,7 +4052,10 @@
           "pulseSpeed": 185,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3595,7 +4122,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3662,7 +4192,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3729,7 +4262,10 @@
           "pulseSpeed": 118,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3796,7 +4332,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3863,7 +4402,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3930,7 +4472,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -3997,7 +4542,10 @@
           "pulseSpeed": 205,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -4064,7 +4612,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -4131,7 +4682,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -4198,7 +4752,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -4265,7 +4822,10 @@
           "pulseSpeed": 190,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -4332,7 +4892,10 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       },
       {
@@ -4399,10 +4962,15 @@
           "pulseSpeed": 100,
           "basZoomEnabled": true,
           "basZoom": 150,
-          "basZoomBounds": "screen"
+          "basZoomBounds": "screen",
+          "ebdxCenterMon": false,
+          "ebdxCenterOffsetX": 0,
+          "ebdxCenterOffsetY": 0
         }
       }
-    ]
+    ],
+    "ebdxMapBackdropsText": "",
+    "ebdxEncounterMetadata": []
   },
-  "_bssSavedAt": 1788237871895
+  "_bssSavedAt": 1788662202547
 }

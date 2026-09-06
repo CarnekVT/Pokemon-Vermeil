@@ -1,0 +1,66 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map060]
+No hay combate grabado.
+No hay combate grabado.
+Bienvenido al Dojo Batalla.
+Bienvenido al Dojo Batalla.
+¿Te gustaría participar en un combate?
+¿Te gustaría participar en un combate?
+¿Te gustaría participar en el reto de Nivel 50, o en el reto de Nivel Abierto?
+¿Te gustaría participar en el reto de Nivel 50, o en el reto de Nivel Abierto?
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar.
+Deben ser de especie diferente y tener equipados objetos distintos.
+Deben ser de especie diferente y tener equipados objetos distintos.
+Algunos Pokémon especiales, así como los Huevos, no se pueden elegir.
+Algunos Pokémon especiales, así como los Huevos, no se pueden elegir.
+Por favor, elige a los tres Pokémon que van a participar.
+Por favor, elige a los tres Pokémon que van a participar.
+Por favor, sígueme.
+Por favor, sígueme.
+Vuelve cuando quieras.
+Vuelve cuando quieras.
+Enhorabuena por tu victoria.
+Enhorabuena por tu victoria.
+Por favor, acepta estos Puntos Batalla.
+Por favor, acepta estos Puntos Batalla.
+\PN obtuvo \v[1] Puntos Batalla.
+\PN obtuvo \v[1] Puntos Batalla.
+¿Quieres grabar tu último combate?
+¿Quieres grabar tu último combate?
+\se[Pkmn exp full]El combate se ha guardado.
+\se[Pkmn exp full]El combate se ha guardado.
+Se van a registrar tus resultados.\wtnp[15]
+Se van a registrar tus resultados.\wtnp[15]
+Gracias por participar.
+Gracias por participar.
+Te estábamos esperando. Por favor, sígueme.
+Te estábamos esperando. Por favor, sígueme.
+Lo siento, pero no guardaste la partida antes de terminar tu último reto.
+Lo siento, pero no guardaste la partida antes de terminar tu último reto.
+Lamento decirte que tu reto se ha cancelado.
+Lamento decirte que tu reto se ha cancelado.
+¿Revisar los resultados de qué reto?
+¿Revisar los resultados de qué reto?
+Resultados de \PN del Dojo Batalla Nivel 50:
+Resultados de \PN del Dojo Batalla Nivel 50:
+Última racha de victorias: \v[1]\nRécord de racha de victorias: \v[2]
+Última racha de victorias: \v[1]\nRécord de racha de victorias: \v[2]
+Resultados de \PN del Dojo Batalla Nivel Abierto:
+Resultados de \PN del Dojo Batalla Nivel Abierto:
+Reproducir combate
+Reproducir combate
+Salir
+Salir
+Sí
+Sí
+No
+No
+Nivel 50
+Nivel 50
+Nivel Abierto
+Nivel Abierto
+Cancelar
+Cancelar

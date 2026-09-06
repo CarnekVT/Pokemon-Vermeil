@@ -1,0 +1,38 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map005]
+¿Quieres aprender como darle un estado alterado a los Pokémon de tu equipo?
+¿Quieres aprender como darle un estado alterado a los Pokémon de tu equipo?
+Ten en cuenta, que se respetarán las inmunidades por tipos o habilidades, es decir no se envenenará a un Pokémon de acero o uno que tenga la habilidad Inmunidad.
+Ten en cuenta, que se respetarán las inmunidades por tipos o habilidades, es decir no se envenenará a un Pokémon de acero o uno que tenga la habilidad Inmunidad.
+Para esto debes llamar a la función $player.give_status_party_pokemon esta función recibe los siguientes parámetros.
+Para esto debes llamar a la función $player.give_status_party_pokemon esta función recibe los siguientes parámetros.
+<b>status:</b> el status que se desea asignar, puede ser un GameData::Status, un String o un Symbol
+<b>status:</b> el status que se desea asignar, puede ser un GameData::Status, un String o un Symbol
+<b>status_count:</b> a cuántos Pokémon se les aplicará el status\n <b>probability:</b> la probalidad de que se le asigne el status entre 1% y 100%\n
+<b>status_count:</b> a cuántos Pokémon se les aplicará el status\n <b>probability:</b> la probalidad de que se le asigne el status entre 1% y 100%\n
+Aquí puedes ver 3 ejemplos
+Aquí puedes ver 3 ejemplos
+Ejemplo 1: 100% de probabilidad de quemar a los primeros 2 Pokémon de tu equipo
+Ejemplo 1: 100% de probabilidad de quemar a los primeros 2 Pokémon de tu equipo
+Ejemplo 2: 50% de probabilidad de domir a los primeros 2 Pokémon de tu equipo
+Ejemplo 2: 50% de probabilidad de domir a los primeros 2 Pokémon de tu equipo
+Ejemplo 3: 100% de probabilidad de envenenar a 2 Pokémon aleatorios de tu equipo
+Ejemplo 3: 100% de probabilidad de envenenar a 2 Pokémon aleatorios de tu equipo
+¡Hecho está! Los dos primeros Pokémon de tu equipo han sido quemados.
+¡Hecho está! Los dos primeros Pokémon de tu equipo han sido quemados.
+¡Hecho está! Los dos primeros Pokémon de tu equipo posiblemente estén dormidos.
+¡Hecho está! Los dos primeros Pokémon de tu equipo posiblemente estén dormidos.
+¡Hecho está! Dos Pokémon de tu equipo han sido quemados.
+¡Hecho está! Dos Pokémon de tu equipo han sido quemados.
+No tienes ningún Pokémon apto en tu equipo
+No tienes ningún Pokémon apto en tu equipo
+Quemar
+Quemar
+Dormir
+Dormir
+Envenenar
+Envenenar
+Cancelar
+Cancelar

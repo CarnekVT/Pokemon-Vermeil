@@ -1,0 +1,16 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map069]
+!Soy una entrenadora nadadora, y funciono como cualquier otro entrenador!
+!Soy una entrenadora nadadora, y funciono como cualquier otro entrenador!
+Asegúrate de que los entrenadores nadadores no estén nunca a rango de detectar al jugador cuando está en la tierra.
+Asegúrate de que los entrenadores nadadores no estén nunca a rango de detectar al jugador cuando está en la tierra.
+Estoy nadando alrededor de este área de tamaño 5x5 ties.
+Estoy nadando alrededor de este área de tamaño 5x5 ties.
+Mi tipo de movimiento custom llama a una función que hace que me mueva de forma aleatoria, pero sin alejarme de 2 casillas en vertical u horizontal.
+Mi tipo de movimiento custom llama a una función que hace que me mueva de forma aleatoria, pero sin alejarme de 2 casillas en vertical u horizontal.
+Este espacio es a partir de mi posición original en la que empiezo, de tal forma que mi evento se coloca en el centro del espacio en el que me puedo mover.
+Este espacio es a partir de mi posición original en la que empiezo, de tal forma que mi evento se coloca en el centro del espacio en el que me puedo mover.
+Puedes llamar también a otras funciones como move_random_UD(range) para solo ir arriba y abajo y move_random_LR(range) para solo ir en horizontal.
+Puedes llamar también a otras funciones como move_random_UD(range) para solo ir arriba y abajo y move_random_LR(range) para solo ir en horizontal.

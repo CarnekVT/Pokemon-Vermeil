@@ -1,0 +1,24 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map010]
+Esto es un ejemplo de Gimnasio Pokémon.
+Esto es un ejemplo de Gimnasio Pokémon.
+Lo único que tienes que tener en cuenta es que los entrenadores se inactivan cuando derrotas al Líder, y el Líder te entrega una medalla y una MT.
+Lo único que tienes que tener en cuenta es que los entrenadores se inactivan cuando derrotas al Líder, y el Líder te entrega una medalla y una MT.
+Has llegado muy lejos, ¿pero crees que puedes derrotarme?
+Has llegado muy lejos, ¿pero crees que puedes derrotarme?
+\me[Badge get]Has ganado la Medalla Roca. \wtnp[110]
+\me[Badge get]Has ganado la Medalla Roca. \wtnp[110]
+Toma, ten también esta MT.
+Toma, ten también esta MT.
+Puede que a partir de ahora encuentres a los Pokémon de la Ruta 1 más desafiantes.
+Puede que a partir de ahora encuentres a los Pokémon de la Ruta 1 más desafiantes.
+Suelo trabajar en las cuevas de la Ruta 7, extrayendo fósiles.
+Suelo trabajar en las cuevas de la Ruta 7, extrayendo fósiles.
+Hay un hombre en el Instituto Pokémon que puede revivir fósiles y convertirlos en Pokémon.
+Hay un hombre en el Instituto Pokémon que puede revivir fósiles y convertirlos en Pokémon.
+¡Enfréntate a mí ahora!
+¡Enfréntate a mí ahora!
+Me haces sudar bastante. ¡Pero Brock me hace sudar más!
+Me haces sudar bastante. ¡Pero Brock me hace sudar más!

@@ -1,0 +1,8 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map017]
+\sign[signskin]¡Exprésate con regalos!\nP4: Regalos de Hombre Sabio
+\sign[signskin]¡Exprésate con regalos!\nP4: Regalos de Hombre Sabio
+\sign[signskin]¡Especial de Evolución!\n¡Piedras evolutivas ahora a la venta!
+\sign[signskin]¡Especial de Evolución!\n¡Piedras evolutivas ahora a la venta!

@@ -1,0 +1,160 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[RIBBON_DESCRIPTIONS]
+¡Ganador de la categoría Normal del Concurso Carisma!
+¡Ganador de la categoría Normal del Concurso Carisma!
+¡Ganador de la categoría Alto del Concurso Carisma!
+¡Ganador de la categoría Alto del Concurso Carisma!
+¡Ganador de la categoría Avanzado del Concurso Carisma!
+¡Ganador de la categoría Avanzado del Concurso Carisma!
+¡Ganador de la categoría Experto del Concurso Carisma!
+¡Ganador de la categoría Experto del Concurso Carisma!
+¡Ganador de la categoría Normal del Concurso de Belleza!
+¡Ganador de la categoría Normal del Concurso de Belleza!
+¡Ganador de la categoría Alto del Concurso de Belleza!
+¡Ganador de la categoría Alto del Concurso de Belleza!
+¡Ganador de la categoría Avanzado del Concurso de Belleza!
+¡Ganador de la categoría Avanzado del Concurso de Belleza!
+¡Ganador de la categoría Experto del Concurso de Belleza!
+¡Ganador de la categoría Experto del Concurso de Belleza!
+¡Ganador de la categoría Normal del Concurso de Dulzura!
+¡Ganador de la categoría Normal del Concurso de Dulzura!
+¡Ganador de la categoría Alto del Concurso de Dulzura!
+¡Ganador de la categoría Alto del Concurso de Dulzura!
+¡Ganador de la categoría Avanzado del Concurso de Dulzura!
+¡Ganador de la categoría Avanzado del Concurso de Dulzura!
+¡Ganador de la categoría Experto del Concurso de Dulzura!
+¡Ganador de la categoría Experto del Concurso de Dulzura!
+¡Ganador de la categoría Normal del Concurso de Ingenio!
+¡Ganador de la categoría Normal del Concurso de Ingenio!
+¡Ganador de la categoría Alto del Concurso de Ingenio!
+¡Ganador de la categoría Alto del Concurso de Ingenio!
+¡Ganador de la categoría Avanzado del Concurso de Ingenio!
+¡Ganador de la categoría Avanzado del Concurso de Ingenio!
+¡Ganador de la categoría Experto del Concurso de Ingenio!
+¡Ganador de la categoría Experto del Concurso de Ingenio!
+¡Ganador de la categoría Normal del Concurso de Dureza!
+¡Ganador de la categoría Normal del Concurso de Dureza!
+¡Ganador de la categoría Alto del Concurso de Dureza!
+¡Ganador de la categoría Alto del Concurso de Dureza!
+¡Ganador de la categoría Avanzado del Concurso de Dureza!
+¡Ganador de la categoría Avanzado del Concurso de Dureza!
+¡Ganador de la categoría Experto del Concurso de Dureza!
+¡Ganador de la categoría Experto del Concurso de Dureza!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Carisma!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Carisma!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Carisma!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Carisma!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Carisma!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Carisma!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Carisma!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Carisma!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Belleza!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Belleza!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Belleza!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Belleza!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Belleza!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Belleza!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Belleza!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Belleza!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Dulzura!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Dulzura!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Dulzura!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Dulzura!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Dulzura!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Dulzura!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Dulzura!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Dulzura!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Ingenio!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Ingenio!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Ingenio!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Ingenio!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Ingenio!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Ingenio!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Ingenio!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Ingenio!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Dureza!
+¡Ganador de la categoría Normal del Súper concurso de Categoría Dureza!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Dureza!
+¡Ganador de la categoría Difícil del Súper concurso de Categoría Dureza!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Dureza!
+¡Ganador de la categoría Superior del Súper concurso de Categoría Dureza!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Dureza!
+¡Ganador de la categoría Experto del Súper concurso de Categoría Dureza!
+Cinta otorgada por superar el desafío de nivel 50 de la Torre Batalla.
+Cinta otorgada por superar el desafío de nivel 50 de la Torre Batalla.
+Cinta otorgada por superar el desafío de nivel 100 de la Torre Batalla.
+Cinta otorgada por superar el desafío de nivel 100 de la Torre Batalla.
+Cinta obtenida por vencer por primera vez al Amo Torre en la Torre Batalla.
+Cinta obtenida por vencer por primera vez al Amo Torre en la Torre Batalla.
+Cinta obtenida por vencer por segunda vez al Amo Torre en la Torre Batalla.
+Cinta obtenida por vencer por segunda vez al Amo Torre en la Torre Batalla.
+Una cinta otorgada por completar el desafío de Doble de la Torre Batalla.
+Una cinta otorgada por completar el desafío de Doble de la Torre Batalla.
+Una cinta otorgada por completar el desafío Multi de la Torre Batalla.
+Una cinta otorgada por completar el desafío Multi de la Torre Batalla.
+Una cinta otorgada por completar el desafío Multi Conexión de la Torre Batalla.
+Una cinta otorgada por completar el desafío Multi Conexión de la Torre Batalla.
+Una cinta otorgada por completar el desafío de la Torre Batalla Wi-Fi.
+Una cinta otorgada por completar el desafío de la Torre Batalla Wi-Fi.
+Cinta por superar la Liga Pokémon e ingresar al Salón de la Fama.
+Cinta por superar la Liga Pokémon e ingresar al Salón de la Fama.
+Cinta otorgada por vencer al Campeón e ingresar al Salón de la Fama de Sinnoh.
+Cinta otorgada por vencer al Campeón e ingresar al Salón de la Fama de Sinnoh.
+Una cinta otorgada por establecer un récord increíble.
+Una cinta otorgada por establecer un récord increíble.
+Una cinta otorgada por establecer un récord histórico.
+Una cinta otorgada por establecer un récord histórico.
+Una cinta otorgada por establecer un récord legendario.
+Una cinta otorgada por establecer un récord legendario.
+Una cinta extremadamente bonita y extravagante.
+Una cinta extremadamente bonita y extravagante.
+Una cinta increíblemente majestuosa y con un aire aristocrático.
+Una cinta increíblemente majestuosa y con un aire aristocrático.
+Una cinta preciosa y majestuosa que es de lo más fabulosa y maravillosa.
+Una cinta preciosa y majestuosa que es de lo más fabulosa y maravillosa.
+Una cinta para recordar un evento vigorizante que creó energía vital.
+Una cinta para recordar un evento vigorizante que creó energía vital.
+Una cinta para recordar un evento emocionante que hizo la vida más interesante.
+Una cinta para recordar un evento emocionante que hizo la vida más interesante.
+Una cinta para recordar sentimientos tristes que añadieron interés a la vida.
+Una cinta para recordar sentimientos tristes que añadieron interés a la vida.
+Una cinta para recordar descuidos que ayudaron a tomar decisiones vitales.
+Una cinta para recordar descuidos que ayudaron a tomar decisiones vitales.
+Una cinta para recordar una anécdota refrescante que añadió chispa a la vida.
+Una cinta para recordar una anécdota refrescante que añadió chispa a la vida.
+Una cinta para recordar un sueño profundo que hizo que la vida fuera calmada.
+Una cinta para recordar un sueño profundo que hizo que la vida fuera calmada.
+Una cinta para recordar que las sonrisas mejoran la calidad de vida.
+Una cinta para recordar que las sonrisas mejoran la calidad de vida.
+Una cinta otorgada a un Pokémon que deja huellas de primera.
+Una cinta otorgada a un Pokémon que deja huellas de primera.
+Cinta otorgada por ser elegido como supermodelo en Hoenn.
+Cinta otorgada por ser elegido como supermodelo en Hoenn.
+Cinta otorgada por ser un excelente trabajador.
+Cinta otorgada por ser un excelente trabajador.
+Una cinta para celebrar un cumpleaños.
+Una cinta para celebrar un cumpleaños.
+Una cinta para conmemorar un día especial.
+Una cinta para conmemorar un día especial.
+Una cinta que proclama amor por los Pokémon.
+Una cinta que proclama amor por los Pokémon.
+Cinta de vacaciones especiales.
+Cinta de vacaciones especiales.
+Una cinta conmemorativa obtenida en un lugar misterioso.
+Una cinta conmemorativa obtenida en un lugar misterioso.
+Una cinta otorgada por superar todos los desafíos difíciles.
+Una cinta otorgada por superar todos los desafíos difíciles.
+Cinta de Campeón.
+Cinta de Campeón.
+Cinta de Campeón de Competición de Batalla.
+Cinta de Campeón de Competición de Batalla.
+Cinta de Campeón Regional del Campeonato Mundial de Videojuegos Pokémon.
+Cinta de Campeón Regional del Campeonato Mundial de Videojuegos Pokémon.
+Una cinta otorgada por ganar 100 combates seguidos.
+Una cinta otorgada por ganar 100 combates seguidos.
+Cinta de Campeón Nacional del Campeonato Mundial de Videojuegos Pokémon.
+Cinta de Campeón Nacional del Campeonato Mundial de Videojuegos Pokémon.
+Cinta de Campeón Mundial del Campeonato Mundial de Videojuegos Pokémon.
+Cinta de Campeón Mundial del Campeonato Mundial de Videojuegos Pokémon.

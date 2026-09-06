@@ -1,0 +1,1586 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[ITEM_NAMES]
+Repelente
+Repelente
+Superrepelente
+Superrepelente
+Repelente Máximo
+Repelente Máximo
+Flauta Negra
+Flauta Negra
+Flauta Blanca
+Flauta Blanca
+Miel
+Miel
+Parte Roja
+Parte Roja
+Parte Amarilla
+Parte Amarilla
+Parte Azul
+Parte Azul
+Parte Verde
+Parte Verde
+Piedra Fuego
+Piedra Fuego
+Piedra Trueno
+Piedra Trueno
+Piedra Agua
+Piedra Agua
+Piedra Hoja
+Piedra Hoja
+Piedra Lunar
+Piedra Lunar
+Piedra Solar
+Piedra Solar
+Piedra Noche
+Piedra Noche
+Piedra Alba
+Piedra Alba
+Piedra Día
+Piedra Día
+Piedra Hielo
+Piedra Hielo
+Manzana Dulce
+Manzana Dulce
+Manzana Ácida
+Manzana Ácida
+Tetera Agrietada
+Tetera Agrietada
+Tetera Rota
+Tetera Rota
+Brazal Galanuez
+Brazal Galanuez
+Corona Galanuez
+Corona Galanuez
+Bonguri Roja
+Bonguri Roja
+Bonguri Amarilla
+Bonguri Amarilla
+Bonguri Azul
+Bonguri Azul
+Bonguri Verde
+Bonguri Verde
+Bonguri Rosa
+Bonguri Rosa
+Bonguri Blanca
+Bonguri Blanca
+Bonguri Negra
+Bonguri Negra
+Fósil Helix
+Fósil Helix
+Fósil Domo
+Fósil Domo
+Ámbar Viejo
+Ámbar Viejo
+Fósil Raíz
+Fósil Raíz
+Fósil Garra
+Fósil Garra
+Fósil Cráneo
+Fósil Cráneo
+Fósil Coraza
+Fósil Coraza
+Fósil Tapa
+Fósil Tapa
+Fósil Pluma
+Fósil Pluma
+Fósil Mandíbula
+Fósil Mandíbula
+Fósil Aleta
+Fósil Aleta
+Ornitofósil
+Ornitofósil
+Ictiofósil
+Ictiofósil
+Dracofósil
+Dracofósil
+Plesiofósil
+Plesiofósil
+Pluma Bella
+Pluma Bella
+Mini Seta
+Mini Seta
+Seta Grande
+Seta Grande
+Seta Aroma
+Seta Aroma
+Perla
+Perla
+Perla Grande
+Perla Grande
+Sarta de perlas
+Sarta de perlas
+Polvoestelar
+Polvoestelar
+Trozo Estrella
+Trozo Estrella
+Fragmento Cometa
+Fragmento Cometa
+Pepita de Oro
+Pepita de Oro
+Maxipepita de Oro
+Maxipepita de Oro
+Escama Corazón
+Escama Corazón
+Cola Slowpoke
+Cola Slowpoke
+Hueso Raro
+Hueso Raro
+Real de cobre
+Real de cobre
+Real de plata
+Real de plata
+Real de oro
+Real de oro
+Ánfora Antigua
+Ánfora Antigua
+Brazal antiguo
+Brazal antiguo
+Efigie Antigua
+Efigie Antigua
+Corona Antigua
+Corona Antigua
+Abono Rápido
+Abono Rápido
+Abono Lento
+Abono Lento
+Abono Fijador
+Abono Fijador
+Abono Brote
+Abono Brote
+Sal Cardumen
+Sal Cardumen
+Concha Cardumen
+Concha Cardumen
+Piedra Espíritu
+Piedra Espíritu
+Néctar Rojo
+Néctar Rojo
+Néctar Amarillo
+Néctar Amarillo
+Néctar Rosa
+Néctar Rosa
+Néctar Violeta
+Néctar Violeta
+Globo Helio
+Globo Helio
+Polvo Brillo
+Polvo Brillo
+Mineral Evolutivo
+Mineral Evolutivo
+Piedra Pómez
+Piedra Pómez
+Lazo Destino
+Lazo Destino
+Casco Dentado
+Casco Dentado
+Chaleco Asalto
+Chaleco Asalto
+Gafa Protectora
+Gafa Protectora
+Paracontacto
+Paracontacto
+Botas Gruesas
+Botas Gruesas
+Parasol Multiuso
+Parasol Multiuso
+Botón Escape
+Botón Escape
+Mochila Escape
+Mochila Escape
+Tarjeta Roja
+Tarjeta Roja
+Muda Concha
+Muda Concha
+Bola de Humo
+Bola de Humo
+Huevo Suerte
+Huevo Suerte
+Repartir Exp
+Repartir Exp
+Repartir Exp Equipo
+Repartir Exp Equipo
+Moneda Amuleto
+Moneda Amuleto
+Cascabel Alivio
+Cascabel Alivio
+Amuleto
+Amuleto
+Cinta Elección
+Cinta Elección
+Gafas Elección
+Gafas Elección
+Pañuelo Elección
+Pañuelo Elección
+Roca Calor
+Roca Calor
+Roca Lluvia
+Roca Lluvia
+Roca Suave
+Roca Suave
+Roca Helada
+Roca Helada
+Cubresuelos
+Cubresuelos
+Refleluz
+Refleluz
+Garra Garfio
+Garra Garfio
+Banda Atadura
+Banda Atadura
+Raíz Grande
+Raíz Grande
+Lodo Negro
+Lodo Negro
+Restos
+Restos
+Cascabel Concha
+Cascabel Concha
+Hierba Mental
+Hierba Mental
+Hierba Blanca
+Hierba Blanca
+Hierba Única
+Hierba Única
+Tubérculo
+Tubérculo
+Pila
+Pila
+Musgo Brillante
+Musgo Brillante
+Bola de Nieve
+Bola de Nieve
+Seguro Debilidad
+Seguro Debilidad
+Seguro Fallo
+Seguro Fallo
+Espray Bucal
+Espray Bucal
+Nerviosfera
+Nerviosfera
+Servicio Raro
+Servicio Raro
+Semilla Electro
+Semilla Electro
+Semilla Hierba
+Semilla Hierba
+Semilla Bruma
+Semilla Bruma
+Semilla Psique
+Semilla Psique
+Vidasfera
+Vidasfera
+Cinturón de Experto
+Cinturón de Experto
+Metrónomo
+Metrónomo
+Cinta Fuerte
+Cinta Fuerte
+Gafas Especiales
+Gafas Especiales
+Garra Afilada
+Garra Afilada
+Periscopio
+Periscopio
+Lupa
+Lupa
+Telescopio
+Telescopio
+Roca del Rey
+Roca del Rey
+Colmillo Agudo
+Colmillo Agudo
+Cola Plúmbea
+Cola Plúmbea
+Garra Rápida
+Garra Rápida
+Cinta Aguante
+Cinta Aguante
+Banda Aguante
+Banda Aguante
+Llamasfera
+Llamasfera
+Toxisfera
+Toxisfera
+Toxiestrella
+Toxiestrella
+Bola Férrea
+Bola Férrea
+Blanco
+Blanco
+Brazal Firme
+Brazal Firme
+Pesa Recia
+Pesa Recia
+Brazal Recio
+Brazal Recio
+Cinto Recio
+Cinto Recio
+Lente Recia
+Lente Recia
+Banda Recia
+Banda Recia
+Franja Recia
+Franja Recia
+Incienso Suave
+Incienso Suave
+Incienso Lento
+Incienso Lento
+Incienso Duplo
+Incienso Duplo
+Incienso Puro
+Incienso Puro
+Incienso Marino
+Incienso Marino
+Incienso Aqua
+Incienso Aqua
+Incienso Floral
+Incienso Floral
+Incienso Raro
+Incienso Raro
+Incienso Roca
+Incienso Roca
+Carbón
+Carbón
+Agua Mística
+Agua Mística
+Imán
+Imán
+Semilla Milagro
+Semilla Milagro
+Hielo Perpetuo
+Hielo Perpetuo
+Cinturón Negro
+Cinturón Negro
+Flecha Venenosa
+Flecha Venenosa
+Arena Fina
+Arena Fina
+Pico Afilado
+Pico Afilado
+Cuchara Torcida
+Cuchara Torcida
+Polvo Plata
+Polvo Plata
+Piedra Dura
+Piedra Dura
+Hechizo
+Hechizo
+Colmillo Dragón
+Colmillo Dragón
+Gafas de Sol
+Gafas de Sol
+Revestim. Metálico
+Revestim. Metálico
+Pañuelo de Seda
+Pañuelo de Seda
+Tabla Llama
+Tabla Llama
+Tabla Linfa
+Tabla Linfa
+Tabla Trueno
+Tabla Trueno
+Tabla Pradal
+Tabla Pradal
+Tabla Helada
+Tabla Helada
+Tabla Fuerte
+Tabla Fuerte
+Tabla Tóxica
+Tabla Tóxica
+Tabla Terrax
+Tabla Terrax
+Tabla Cielo
+Tabla Cielo
+Tabla Mental
+Tabla Mental
+Tabla Bicho
+Tabla Bicho
+Tabla Pétrea
+Tabla Pétrea
+Tabla Terror
+Tabla Terror
+Tabla Draco
+Tabla Draco
+Tabla Oscura
+Tabla Oscura
+Tabla Acero
+Tabla Acero
+Tabla Duende
+Tabla Duende
+Gema Fuego
+Gema Fuego
+Gema Agua
+Gema Agua
+Gema Eléctrico
+Gema Eléctrico
+Gema Planta
+Gema Planta
+Gema Hielo
+Gema Hielo
+Gema Lucha
+Gema Lucha
+Gema Veneno
+Gema Veneno
+Gema Tierra
+Gema Tierra
+Gema Volador
+Gema Volador
+Gema Psíquico
+Gema Psíquico
+Gema Bicho
+Gema Bicho
+Gema Roca
+Gema Roca
+Gema Fantasma
+Gema Fantasma
+Gema Dragón
+Gema Dragón
+Gema Siniestro
+Gema Siniestro
+Gema Acero
+Gema Acero
+Gema Hada
+Gema Hada
+Gema Normal
+Gema Normal
+Bola Luminosa
+Bola Luminosa
+Puño Suerte
+Puño Suerte
+Polvo Metálico
+Polvo Metálico
+Polvo Veloz
+Polvo Veloz
+Hueso Grueso
+Hueso Grueso
+Puerro
+Puerro
+Rocío Bondad
+Rocío Bondad
+Diente Marino
+Diente Marino
+Escama Marina
+Escama Marina
+Diamansfera
+Diamansfera
+Lustresfera
+Lustresfera
+Griseosfera
+Griseosfera
+Espada Oxidada
+Espada Oxidada
+Escudo Oxidado
+Escudo Oxidado
+HidroROM
+HidroROM
+FulgoROM
+FulgoROM
+PiroROM
+PiroROM
+CrioROM
+CrioROM
+Disco Fuego
+Disco Fuego
+Disco Agua
+Disco Agua
+Disco Eléctrico
+Disco Eléctrico
+Disco Planta
+Disco Planta
+Disco Hielo
+Disco Hielo
+Disco Lucha
+Disco Lucha
+Disco Veneno
+Disco Veneno
+Disco Tierra
+Disco Tierra
+Disco Volador
+Disco Volador
+Disco Psíquico
+Disco Psíquico
+Disco Bicho
+Disco Bicho
+Disco Roca
+Disco Roca
+Disco Fantasma
+Disco Fantasma
+Disco Dragón
+Disco Dragón
+Disco Siniestro
+Disco Siniestro
+Disco Acero
+Disco Acero
+Disco Hada
+Disco Hada
+Piedra Eterna
+Piedra Eterna
+Escama de Dragón
+Escama de Dragón
+Mejora
+Mejora
+Disco Extraño
+Disco Extraño
+Protector
+Protector
+Electrizador
+Electrizador
+Magmatizador
+Magmatizador
+Tela Terrible
+Tela Terrible
+Escama Bella
+Escama Bella
+Piedra Oval
+Piedra Oval
+Dulce de Nata
+Dulce de Nata
+Saquito Fragante
+Saquito Fragante
+Confite Fresa
+Confite Fresa
+Confite Corazón
+Confite Corazón
+Confite Fruto
+Confite Fruto
+Confite Trébol
+Confite Trébol
+Confite Flor
+Confite Flor
+Confite Estrella
+Confite Estrella
+Confite Lazo
+Confite Lazo
+Venusaurita
+Venusaurita
+Charizardita X
+Charizardita X
+Charizardita Y
+Charizardita Y
+Blastoisita
+Blastoisita
+Beedrillita
+Beedrillita
+Pidgeotita
+Pidgeotita
+Alakazamita
+Alakazamita
+Slowbronita
+Slowbronita
+Gengarita
+Gengarita
+Kangaskhanita
+Kangaskhanita
+Pinsirita
+Pinsirita
+Gyaradosita
+Gyaradosita
+Aerodactylita
+Aerodactylita
+Mewtwoita X
+Mewtwoita X
+Mewtwoita Y
+Mewtwoita Y
+Ampharosita
+Ampharosita
+Steelixita
+Steelixita
+Scizorita
+Scizorita
+Heracrossita
+Heracrossita
+Houndoomita
+Houndoomita
+Tyranitarita
+Tyranitarita
+Sceptilita
+Sceptilita
+Blazikenita
+Blazikenita
+Swampertita
+Swampertita
+Gardevoirita
+Gardevoirita
+Sableynita
+Sableynita
+Mawilita
+Mawilita
+Aggronita
+Aggronita
+Medichamita
+Medichamita
+Manectricita
+Manectricita
+Sharpedonita
+Sharpedonita
+Cameruptita
+Cameruptita
+Altarianita
+Altarianita
+Banettita
+Banettita
+Absolita
+Absolita
+Glalita
+Glalita
+Salamencita
+Salamencita
+Metagrossita
+Metagrossita
+Latiasita
+Latiasita
+Latiosita
+Latiosita
+Lopunnita
+Lopunnita
+Garchompita
+Garchompita
+Lucarita
+Lucarita
+Abomasnowita
+Abomasnowita
+Galladita
+Galladita
+Audinita
+Audinita
+Diancita
+Diancita
+Prisma Rojo
+Prisma Rojo
+Prisma Azul
+Prisma Azul
+Clefablita
+Clefablita
+Starmita
+Starmita
+Victreebelita
+Victreebelita
+Dragonitita
+Dragonitita
+Meganiumita
+Meganiumita
+Feraligatrita
+Feraligatrita
+Skarmorita
+Skarmorita
+Froslassita
+Froslassita
+Emboarita
+Emboarita
+Excadrilita
+Excadrilita
+Scolipedita
+Scolipedita
+Elektrossita
+Elektrossita
+Scraftita
+Scraftita
+Chandelurita
+Chandelurita
+Chesnaughtita
+Chesnaughtita
+Delphoxita
+Delphoxita
+Greninjanita
+Greninjanita
+Pyroarita
+Pyroarita
+Malamarita
+Malamarita
+Hawluchanita
+Hawluchanita
+Barbaraclita
+Barbaraclita
+Dragalgita
+Dragalgita
+Drampanita
+Drampanita
+Falinksita
+Falinksita
+Zygardita
+Zygardita
+Floettita
+Floettita
+Garchompita Z
+Garchompita Z
+Absolita Z
+Absolita Z
+Lucarita Z
+Lucarita Z
+Scovillainita
+Scovillainita
+Crabominablita
+Crabominablita
+Staraptorita
+Staraptorita
+Golurkita
+Golurkita
+Raichunita X
+Raichunita X
+Raichunita Y
+Raichunita Y
+Darkrainita
+Darkrainita
+Tatsugirita
+Tatsugirita
+Magearnita
+Magearnita
+Golisopodita
+Golisopodita
+Meowsticita
+Meowsticita
+Heatranita
+Heatranita
+Glimmoranita
+Glimmoranita
+Baxcaliburita
+Baxcaliburita
+Chimechita
+Chimechita
+Zeraoranita
+Zeraoranita
+Poción
+Poción
+Superpoción
+Superpoción
+Hiperpoción
+Hiperpoción
+Poción Máxima
+Poción Máxima
+Restaura Todo
+Restaura Todo
+Ceniza Sagrada
+Ceniza Sagrada
+Despertar
+Despertar
+Antídoto
+Antídoto
+Antiquemadura
+Antiquemadura
+Antiparalizante
+Antiparalizante
+Antihielo
+Antihielo
+Cura Total
+Cura Total
+Rokikos
+Rokikos
+Caramelo Furia
+Caramelo Furia
+Galleta Lava
+Galleta Lava
+Barrita Plus
+Barrita Plus
+Porcehelado
+Porcehelado
+Crêpe Luminalia
+Crêpe Luminalia
+Galleta Yantra
+Galleta Yantra
+Malasada Maxi
+Malasada Maxi
+Revivir
+Revivir
+Revivir Máximo
+Revivir Máximo
+Zumo de Baya
+Zumo de Baya
+Corazón Dulce
+Corazón Dulce
+Agua Fresca
+Agua Fresca
+Refresco
+Refresco
+Limonada
+Limonada
+Leche Mu-mu
+Leche Mu-mu
+Polvo Energía
+Polvo Energía
+Raíz Energía
+Raíz Energía
+Polvo Curación
+Polvo Curación
+Hierba Revivir
+Hierba Revivir
+Maxipanal
+Maxipanal
+Éter
+Éter
+Éter Máximo
+Éter Máximo
+Elixir
+Elixir
+Elixir Máximo
+Elixir Máximo
+Más PP
+Más PP
+PP Máximos
+PP Máximos
+Más PS
+Más PS
+Proteína
+Proteína
+Hierro
+Hierro
+Calcio
+Calcio
+Zinc
+Zinc
+Carbohidratos
+Carbohidratos
+Pluma Vigor
+Pluma Vigor
+Pluma Músculo
+Pluma Músculo
+Pluma Aguante
+Pluma Aguante
+Pluma Intelecto
+Pluma Intelecto
+Pluma Mente
+Pluma Mente
+Pluma Ímpetu
+Pluma Ímpetu
+Menta Huraña
+Menta Huraña
+Menta Firme
+Menta Firme
+Menta Pícara
+Menta Pícara
+Menta Audaz
+Menta Audaz
+Menta Osada
+Menta Osada
+Menta Agitada
+Menta Agitada
+Menta Floja
+Menta Floja
+Menta Plácida
+Menta Plácida
+Menta Modesta
+Menta Modesta
+Menta Afable
+Menta Afable
+Menta Alocada
+Menta Alocada
+Menta Mansa
+Menta Mansa
+Menta Serena
+Menta Serena
+Menta Amable
+Menta Amable
+Menta Cauta
+Menta Cauta
+Menta Grosera
+Menta Grosera
+Menta Miedosa
+Menta Miedosa
+Menta Activa
+Menta Activa
+Menta Alegre
+Menta Alegre
+Menta Ingenua
+Menta Ingenua
+Menta Seria
+Menta Seria
+Cápsula Habilidad
+Cápsula Habilidad
+Parche Habilidad
+Parche Habilidad
+Super Cápsula
+Super Cápsula
+Caramelo Exp. XS
+Caramelo Exp. XS
+Caramelo Exp. S
+Caramelo Exp. S
+Caramelo Exp. M
+Caramelo Exp. M
+Caramelo Exp. L
+Caramelo Exp. L
+Caramelo Exp. XL
+Caramelo Exp. XL
+Caramelo Raro
+Caramelo Raro
+Caramelo Malo
+Caramelo Malo
+Poké Ball
+Poké Ball
+Super Ball
+Super Ball
+Ultra Ball
+Ultra Ball
+Master Ball
+Master Ball
+Safari Ball
+Safari Ball
+Competi Ball
+Competi Ball
+Malla Ball
+Malla Ball
+Buceo Ball
+Buceo Ball
+Nido Ball
+Nido Ball
+Acopio Ball
+Acopio Ball
+Turno Ball
+Turno Ball
+Lujo Ball
+Lujo Ball
+Honor Ball
+Honor Ball
+Ocaso Ball
+Ocaso Ball
+Sana Ball
+Sana Ball
+Veloz Ball
+Veloz Ball
+Gloria Ball
+Gloria Ball
+Rapid Ball
+Rapid Ball
+Nivel Ball
+Nivel Ball
+Cebo Ball
+Cebo Ball
+Peso Ball
+Peso Ball
+Amor Ball
+Amor Ball
+Amigo Ball
+Amigo Ball
+Luna Ball
+Luna Ball
+Ensueño Ball
+Ensueño Ball
+Ente Ball
+Ente Ball
+MT01
+MT01
+MT02
+MT02
+MT03
+MT03
+MT04
+MT04
+MT05
+MT05
+MT06
+MT06
+MT07
+MT07
+MT08
+MT08
+MT09
+MT09
+MT10
+MT10
+MT11
+MT11
+MT12
+MT12
+MT13
+MT13
+MT14
+MT14
+MT15
+MT15
+MT16
+MT16
+MT17
+MT17
+MT18
+MT18
+MT19
+MT19
+MT20
+MT20
+MT21
+MT21
+MT22
+MT22
+MT23
+MT23
+MT24
+MT24
+MT25
+MT25
+MT26
+MT26
+MT27
+MT27
+MT28
+MT28
+MT29
+MT29
+MT30
+MT30
+MT31
+MT31
+MT32
+MT32
+MT33
+MT33
+MT34
+MT34
+MT35
+MT35
+MT36
+MT36
+MT37
+MT37
+MT38
+MT38
+MT39
+MT39
+MT40
+MT40
+MT41
+MT41
+MT42
+MT42
+MT43
+MT43
+MT44
+MT44
+MT45
+MT45
+MT46
+MT46
+MT47
+MT47
+MT48
+MT48
+MT49
+MT49
+MT50
+MT50
+MT51
+MT51
+MT52
+MT52
+MT53
+MT53
+MT54
+MT54
+MT55
+MT55
+MT56
+MT56
+MT57
+MT57
+MT58
+MT58
+MT59
+MT59
+MT60
+MT60
+MT61
+MT61
+MT62
+MT62
+MT63
+MT63
+MT64
+MT64
+MT65
+MT65
+MT66
+MT66
+MT67
+MT67
+MT68
+MT68
+MT69
+MT69
+MT70
+MT70
+MT71
+MT71
+MT72
+MT72
+MT73
+MT73
+MT74
+MT74
+MT75
+MT75
+MT76
+MT76
+MT77
+MT77
+MT78
+MT78
+MT79
+MT79
+MT80
+MT80
+MT81
+MT81
+MT82
+MT82
+MT83
+MT83
+MT84
+MT84
+MT85
+MT85
+MT86
+MT86
+MT87
+MT87
+MT88
+MT88
+MT89
+MT89
+MT90
+MT90
+MT91
+MT91
+MT92
+MT92
+MT93
+MT93
+MT94
+MT94
+MT95
+MT95
+MT96
+MT96
+MT97
+MT97
+MT98
+MT98
+MT99
+MT99
+MT100
+MT100
+MO01
+MO01
+MO02
+MO02
+MO03
+MO03
+MO04
+MO04
+MO05
+MO05
+MO06
+MO06
+Baya Zreza
+Baya Zreza
+Baya Atania
+Baya Atania
+Baya Meloc
+Baya Meloc
+Baya Safre
+Baya Safre
+Baya Perasi
+Baya Perasi
+Baya Zanama
+Baya Zanama
+Baya Aranja
+Baya Aranja
+Baya Caquic
+Baya Caquic
+Baya Ziuela
+Baya Ziuela
+Baya Zidra
+Baya Zidra
+Baya Higog
+Baya Higog
+Baya Wiki
+Baya Wiki
+Baya Ango
+Baya Ango
+Baya Guaya
+Baya Guaya
+Baya Pabaya
+Baya Pabaya
+Baya Frambu
+Baya Frambu
+Baya Oram
+Baya Oram
+Baya Latano
+Baya Latano
+Baya Peragu
+Baya Peragu
+Baya Pinia
+Baya Pinia
+Baya Grana
+Baya Grana
+Baya Algama
+Baya Algama
+Baya Ispero
+Baya Ispero
+Baya Meluce
+Baya Meluce
+Baya Uvav
+Baya Uvav
+Baya Tamate
+Baya Tamate
+Baya Mais
+Baya Mais
+Baya Aostan
+Baya Aostan
+Baya Rautan
+Baya Rautan
+Baya Monli
+Baya Monli
+Baya Wikano
+Baya Wikano
+Baya Plama
+Baya Plama
+Baya Sambia
+Baya Sambia
+Baya Rudion
+Baya Rudion
+Baya Andano
+Baya Andano
+Baya Caoca
+Baya Caoca
+Baya Pasio
+Baya Pasio
+Baya Gualot
+Baya Gualot
+Baya Tamar
+Baya Tamar
+Baya Rimoya
+Baya Rimoya
+Baya Pomaro
+Baya Pomaro
+Baya Kebia
+Baya Kebia
+Baya Acardo
+Baya Acardo
+Baya Kouba
+Baya Kouba
+Baya Payapa
+Baya Payapa
+Baya Yecana
+Baya Yecana
+Baya Alcho
+Baya Alcho
+Baya Drasi
+Baya Drasi
+Baya Anjiro
+Baya Anjiro
+Baya Dillo
+Baya Dillo
+Baya Baribá
+Baya Baribá
+Baya Hibis
+Baya Hibis
+Baya Chilan
+Baya Chilan
+Baya Lichi
+Baya Lichi
+Baya Gonlan
+Baya Gonlan
+Baya Aslac
+Baya Aslac
+Baya Yapati
+Baya Yapati
+Baya Aricoc
+Baya Aricoc
+Baya Zonlan
+Baya Zonlan
+Baya Arabol
+Baya Arabol
+Baya Enigma
+Baya Enigma
+Baya Lagro
+Baya Lagro
+Baya Chiri
+Baya Chiri
+Baya Jaboca
+Baya Jaboca
+Baya Magua
+Baya Magua
+Baya Biglia
+Baya Biglia
+Baya Maranga
+Baya Maranga
+Carta Hierba
+Carta Hierba
+Carta Fuego
+Carta Fuego
+Carta Pompas
+Carta Pompas
+Carta Flores
+Carta Flores
+Carta Mina
+Carta Mina
+Carta Acero
+Carta Acero
+Carta Corazón
+Carta Corazón
+Carta Nieve
+Carta Nieve
+Carta Sideral
+Carta Sideral
+Carta Áerea
+Carta Áerea
+Carta Mosaico
+Carta Mosaico
+Carta Pared
+Carta Pared
+Ataque X
+Ataque X
+Ataque X 2
+Ataque X 2
+Ataque X 3
+Ataque X 3
+Ataque X 6
+Ataque X 6
+Defensa X
+Defensa X
+Defensa X 2
+Defensa X 2
+Defensa X 3
+Defensa X 3
+Defensa X 6
+Defensa X 6
+Ataque Especial X
+Ataque Especial X
+Ataque Especial X 2
+Ataque Especial X 2
+Ataque Especial X 3
+Ataque Especial X 3
+Ataque Especial X 6
+Ataque Especial X 6
+Defensa Especial X
+Defensa Especial X
+Defensa Especial X 2
+Defensa Especial X 2
+Defensa Especial X 3
+Defensa Especial X 3
+Defensa Especial X 6
+Defensa Especial X 6
+Velocidad X
+Velocidad X
+Velocidad X 2
+Velocidad X 2
+Velocidad X 3
+Velocidad X 3
+Velocidad X 6
+Velocidad X 6
+Precisión X
+Precisión X
+Precisión X 2
+Precisión X 2
+Precisión X 3
+Precisión X 3
+Precisión X 6
+Precisión X 6
+Maxisetas
+Maxisetas
+Crítico X
+Crítico X
+Crítico X 2
+Crítico X 2
+Crítico X 3
+Crítico X 3
+Protección X
+Protección X
+Quitaestado
+Quitaestado
+Habilitador
+Habilitador
+Activaobjeto
+Activaobjeto
+Tiraobjeto
+Tiraobjeto
+Flauta Azul
+Flauta Azul
+Flauta Amarilla
+Flauta Amarilla
+Flauta Roja
+Flauta Roja
+Pokémuñeco
+Pokémuñeco
+Cola Skitty
+Cola Skitty
+Pokéseñuelo
+Pokéseñuelo
+Bici
+Bici
+Caña Vieja
+Caña Vieja
+Caña Buena
+Caña Buena
+Caña de Pescar
+Caña de Pescar
+Buscaobjetos
+Buscaobjetos
+Zahorí
+Zahorí
+Poké Radar
+Poké Radar
+Mapa
+Mapa
+Cuerda Huida
+Cuerda Huida
+Monedero
+Monedero
+Poké Flauta
+Poké Flauta
+Saco Hollín
+Saco Hollín
+Detector Silph
+Detector Silph
+Detector Devon
+Detector Devon
+Squirgadera
+Squirgadera
+Psydugadera
+Psydugadera
+Wailmegadera
+Wailmegadera
+Lotadgadera
+Lotadgadera
+Gracídea
+Gracídea
+Espejo Veraz
+Espejo Veraz
+Vasija Castigo
+Vasija Castigo
+Catálogo Rotom
+Catálogo Rotom
+Arca de Zygarde
+Arca de Zygarde
+Punta ADN
+Punta ADN
+Necrosol
+Necrosol
+Necroluna
+Necroluna
+Riendas Unión
+Riendas Unión
+Amuleto Oval
+Amuleto Oval
+Amuleto Iris
+Amuleto Iris
+Amuleto Captura
+Amuleto Captura
+Amuleto Exp
+Amuleto Exp
+Mega Aro
+Mega Aro
+Pokémon Box Link
+Pokémon Box Link
+Carné Espacial
+Carné Espacial
+Mapa Viejo
+Mapa Viejo
+Mineral Negro
+Mineral Negro
+Bloque de Turba
+Bloque de Turba
+Cordón Unión
+Cordón Unión
+Gran Diamansfera
+Gran Diamansfera
+Gran Lustresfera
+Gran Lustresfera
+Tabla Legendaria
+Tabla Legendaria
+Tabla Normal
+Tabla Normal
+Gran Griseosfera
+Gran Griseosfera
+Armadura Auspiciosa
+Armadura Auspiciosa
+Armadura Maldita
+Armadura Maldita
+Manuscrito Sombras
+Manuscrito Sombras
+Manuscrito Aguas
+Manuscrito Aguas
+Distintivo de Líder
+Distintivo de Líder
+Energía Potenciadora
+Energía Potenciadora
+Escudo Habilidad
+Escudo Habilidad
+Amuleto Puro
+Amuleto Puro
+Hierba Copia
+Hierba Copia
+Guante de Boxeo
+Guante de Boxeo
+Capa Furtiva
+Capa Furtiva
+Dado Trucado
+Dado Trucado
+Moneda de Gimmighoul
+Moneda de Gimmighoul
+Bambú Pequeño
+Bambú Pequeño
+Bambú Grande
+Bambú Grande
+Libro Escarlata
+Libro Escarlata
+Libro Púrpura
+Libro Púrpura
+Mochi Vigor
+Mochi Vigor
+Mochi Músculo
+Mochi Músculo
+Mochi Aguante
+Mochi Aguante
+Mochi Intelecto
+Mochi Intelecto
+Mochi Mente
+Mochi Mente
+Mochi Ímpetu
+Mochi Ímpetu
+Mochi Reinicio
+Mochi Reinicio
+Pluma Feérica
+Pluma Feérica
+Manzana Melosa
+Manzana Melosa
+Cuenco Mediocre
+Cuenco Mediocre
+Cuenco Exquisito
+Cuenco Exquisito
+Máscara Fuente
+Máscara Fuente
+Máscara Horno
+Máscara Horno
+Máscara Cimiento
+Máscara Cimiento
+Máscara Turquesa
+Máscara Turquesa
+Metal Compuesto
+Metal Compuesto
+Disco Índigo
+Disco Índigo
+Baya Meloc singular
+Baya Meloc singular
+Meteorito
+Meteorito
+Repelente Infinito
+Repelente Infinito
+Encounter Radar
+Encounter Radar
+Curaportátil
+Curaportátil
+Incubadora
+Incubadora
+Typhlosionite
+Typhlosionite
+Sleeping Bag
+Sleeping Bag
+Change Dex
+Change Dex
+Storm Rune
+Storm Rune
+Reality Orb
+Reality Orb
+Ferrous Tar
+Ferrous Tar

@@ -1,0 +1,88 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map011]
+¡Hola! Yo puedo <b>cambiar la Poké Ball</b> de uno de tus Pokémon por otra que tengas en la mochila. ¿Hay algún Pokémon cuya Poké Ball querrías modificar?
+¡Hola! Yo puedo <b>cambiar la Poké Ball</b> de uno de tus Pokémon por otra que tengas en la mochila. ¿Hay algún Pokémon cuya Poké Ball querrías modificar?
+Bien, elige a un Pokémon.
+Bien, elige a un Pokémon.
+Vale, ¡vuelve cuando lo necesites!
+Vale, ¡vuelve cuando lo necesites!
+¿Eh? No puedo cambiar la Poké Ball de un Huevo. Espera a que nazca.
+¿Eh? No puedo cambiar la Poké Ball de un Huevo. Espera a que nazca.
+¡De ninguna manera! No quiero estar cerca de un Pokémon Oscuro.
+¡De ninguna manera! No quiero estar cerca de un Pokémon Oscuro.
+¿Qué Poké Ball te gustaría que tuviese?
+¿Qué Poké Ball te gustaría que tuviese?
+Habla conmigo cuando estés interesado en cambiar la Poké Ball de tu Pokémon.
+Habla conmigo cuando estés interesado en cambiar la Poké Ball de tu Pokémon.
+¡Perfecto! ¡Tu <b>\v[3]</b> ahora está en una <b>\v[2]</b>!
+¡Perfecto! ¡Tu <b>\v[3]</b> ahora está en una <b>\v[2]</b>!
+Oh, hola. Soy un científico.
+Oh, hola. Soy un científico.
+Puedo convertir a los fósiles en Pokémon vivitos y coleando.
+Puedo convertir a los fósiles en Pokémon vivitos y coleando.
+¡Aiyah! ¡Has venido de nuevo!
+¡Aiyah! ¡Has venido de nuevo!
+¿Tienes algún fósil para mí?
+¿Tienes algún fósil para mí?
+¿Qué fósil quieres que reviva?
+¿Qué fósil quieres que reviva?
+Hazme saber cuando quieras que te reviva algún fósil.
+Hazme saber cuando quieras que te reviva algún fósil.
+Bien. Voy a ver si puedo revivir tu \v[3].
+Bien. Voy a ver si puedo revivir tu \v[3].
+He terminado de revivir a tu fósil.
+He terminado de revivir a tu fósil.
+Se trataba de un \v[3], como me imaginaba.
+Se trataba de un \v[3], como me imaginaba.
+Estaré por aquí si necesitas contar con mi ayuda.
+Estaré por aquí si necesitas contar con mi ayuda.
+¡Oh, hola! Mi nombre es Andrés Pistado. Puedo convertir combinaciones de partes de Fósiles en Pokémon vivos. Suena a algo fantástico, ¡pero es cierto!
+¡Oh, hola! Mi nombre es Andrés Pistado. Puedo convertir combinaciones de partes de Fósiles en Pokémon vivos. Suena a algo fantástico, ¡pero es cierto!
+¿Ehm? Parece que llevas algunos fósiles ahí, huh. ¿Quieres enseñármelos a mí, Andrés Pistado?
+¿Ehm? Parece que llevas algunos fósiles ahí, huh. ¿Quieres enseñármelos a mí, Andrés Pistado?
+¿Cuál de tus fósiles crees que entra en los estándares de Andrés Pistado?
+¿Cuál de tus fósiles crees que entra en los estándares de Andrés Pistado?
+Ven a verme cuando tengas Fósiles interesantes.
+Ven a verme cuando tengas Fósiles interesantes.
+¿Debería entonces restaurar el Ornitofósil y el Dracofósil juntos, verdad?
+¿Debería entonces restaurar el Ornitofósil y el Dracofósil juntos, verdad?
+¿Debería entonces restaurar el Ornitofósil y el Plesiofósil juntos, verdad?
+¿Debería entonces restaurar el Ornitofósil y el Plesiofósil juntos, verdad?
+¿Debería entonces restaurar el Ictiofósil y el Dracofósil juntos, verdad?
+¿Debería entonces restaurar el Ictiofósil y el Dracofósil juntos, verdad?
+¿Debería entonces restaurar el Ictiofósil y el Plesiofósil juntos, verdad?
+¿Debería entonces restaurar el Ictiofósil y el Plesiofósil juntos, verdad?
+OK, hora de la restauración. ¡Descubramos los misterios de estos fósiles!
+OK, hora de la restauración. ¡Descubramos los misterios de estos fósiles!
+Bien, junto esto con esto... Así...
+Bien, junto esto con esto... Así...
+Vamoooos... ¡Allá!
+Vamoooos... ¡Allá!
+Objetivo completado. Parece que la restauración ha sido todo un éxito.
+Objetivo completado. Parece que la restauración ha sido todo un éxito.
+Sí, puedo verlo en sus ojos. ¡Este es un Pokémon que caminaba por la región en tiempos antiguos! Cuida bien de este magnífico ejemplar, por favor.
+Sí, puedo verlo en sus ojos. ¡Este es un Pokémon que caminaba por la región en tiempos antiguos! Cuida bien de este magnífico ejemplar, por favor.
+Vaya. Parece que esos dos fósiles no combinan el uno con el otro.
+Vaya. Parece que esos dos fósiles no combinan el uno con el otro.
+En otra ocasión será, supongo.
+En otra ocasión será, supongo.
+Sí
+Sí
+No
+No
+Ornitofósil
+Ornitofósil
+Ictiofósil
+Ictiofósil
+Salir
+Salir
+Dracofósil
+Dracofósil
+Plesiofósil
+Plesiofósil
+Sí, por favor
+Sí, por favor
+Quiero probar algo distinto
+Quiero probar algo distinto

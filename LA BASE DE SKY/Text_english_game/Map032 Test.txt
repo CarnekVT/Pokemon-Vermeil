@@ -1,0 +1,14 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map032]
+Yo soy un evento que cuando habla te muestra un cartel con su nombre. Para que aparezca tienes que poner el comando que sale encima de este mensaje.
+Yo soy un evento que cuando habla te muestra un cartel con su nombre. Para que aparezca tienes que poner el comando que sale encima de este mensaje.
+Añádelo de nuevo para que aparezca el nombre de otro evento.
+Añádelo de nuevo para que aparezca el nombre de otro evento.
+Por último, acuérdate de siempre llamar a "Namebox.dispose" cuando el personaje acabe de hablar para que se quite.
+Por último, acuérdate de siempre llamar a "Namebox.dispose" cuando el personaje acabe de hablar para que se quite.
+¡Ghaaaah!
+¡Ghaaaah!
+¡Psyayay!
+¡Psyayay!

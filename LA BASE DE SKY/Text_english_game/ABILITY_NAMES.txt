@@ -1,0 +1,694 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[ABILITY_NAMES]
+Hedor
+Hedor
+Llovizna
+Llovizna
+Impulso
+Impulso
+Armadura Batalla
+Armadura Batalla
+Robustez
+Robustez
+Humedad
+Humedad
+Flexibilidad
+Flexibilidad
+Velo arena
+Velo arena
+Elec. Estática
+Elec. Estática
+Absorbe Elec.
+Absorbe Elec.
+Absorbe Agua
+Absorbe Agua
+Despiste
+Despiste
+Aclimatación
+Aclimatación
+Ojo Compuesto
+Ojo Compuesto
+Insomnio
+Insomnio
+Cambio Color
+Cambio Color
+Inmunidad
+Inmunidad
+Absorbe Fuego
+Absorbe Fuego
+Polvo Escudo
+Polvo Escudo
+Ritmo Propio
+Ritmo Propio
+Ventosas
+Ventosas
+Intimidación
+Intimidación
+Sombra Trampa
+Sombra Trampa
+Piel Tosca
+Piel Tosca
+Superguarda
+Superguarda
+Levitación
+Levitación
+Efecto Espora
+Efecto Espora
+Sincronía
+Sincronía
+Cuerpo Puro
+Cuerpo Puro
+Cura Natural
+Cura Natural
+Pararrayos
+Pararrayos
+Dicha
+Dicha
+Nado Rápido
+Nado Rápido
+Clorofila
+Clorofila
+Iluminación
+Iluminación
+Calco
+Calco
+Potencia
+Potencia
+Punto Tóxico
+Punto Tóxico
+Fuerza Mental
+Fuerza Mental
+Escudo Magma
+Escudo Magma
+Velo Agua
+Velo Agua
+Imán
+Imán
+Insonorizar
+Insonorizar
+Cura Lluvia
+Cura Lluvia
+Chorro Arena
+Chorro Arena
+Presión
+Presión
+Sebo
+Sebo
+Madrugar
+Madrugar
+Cuerpo Llama
+Cuerpo Llama
+Fuga
+Fuga
+Vista Lince
+Vista Lince
+Corte Fuerte
+Corte Fuerte
+Recogida
+Recogida
+Pereza
+Pereza
+Entusiasmo
+Entusiasmo
+Gran Encanto
+Gran Encanto
+Más
+Más
+Menos
+Menos
+Predicción
+Predicción
+Viscosidad
+Viscosidad
+Mudar
+Mudar
+Agallas
+Agallas
+Escama Especial
+Escama Especial
+Viscosecreción
+Viscosecreción
+Espesura
+Espesura
+Mar Llamas
+Mar Llamas
+Torrente
+Torrente
+Enjambre
+Enjambre
+Cabeza Roca
+Cabeza Roca
+Sequía
+Sequía
+Trampa Arena
+Trampa Arena
+Espíritu Vital
+Espíritu Vital
+Humo Blanco
+Humo Blanco
+Energía Pura
+Energía Pura
+Caparazón
+Caparazón
+Esclusa de Aire
+Esclusa de Aire
+Tumbos
+Tumbos
+Electromotor
+Electromotor
+Rivalidad
+Rivalidad
+Impasible
+Impasible
+Manto Níveo
+Manto Níveo
+Gula
+Gula
+Irascible
+Irascible
+Liviano
+Liviano
+Ignífugo
+Ignífugo
+Simple
+Simple
+Piel Seca
+Piel Seca
+Descarga
+Descarga
+Puño Férreo
+Puño Férreo
+Antídoto
+Antídoto
+Adaptable
+Adaptable
+Encadenado
+Encadenado
+Hidratación
+Hidratación
+Poder Solar
+Poder Solar
+Pies Rápidos
+Pies Rápidos
+Normalidad
+Normalidad
+Francotirador
+Francotirador
+Muro Mágico
+Muro Mágico
+Indefenso
+Indefenso
+Rezagado
+Rezagado
+Experto
+Experto
+Defensa Hoja
+Defensa Hoja
+Zoquete
+Zoquete
+Rompemoldes
+Rompemoldes
+Afortunado
+Afortunado
+Detonación
+Detonación
+Anticipación
+Anticipación
+Alerta
+Alerta
+Ignorante
+Ignorante
+Cromolente
+Cromolente
+Filtro
+Filtro
+Inicio Lento
+Inicio Lento
+Intrépido
+Intrépido
+Colector
+Colector
+Gélido
+Gélido
+Roca Solida
+Roca Solida
+Nevada
+Nevada
+Recogemiel
+Recogemiel
+Cacheo
+Cacheo
+Audaz
+Audaz
+Multitipo
+Multitipo
+Don Floral
+Don Floral
+Mal Sueño
+Mal Sueño
+Hurto
+Hurto
+Potencia Bruta
+Potencia Bruta
+Respondón
+Respondón
+Nerviosismo
+Nerviosismo
+Competitivo
+Competitivo
+Flaqueza
+Flaqueza
+Cuerpo Maldito
+Cuerpo Maldito
+Alma Cura
+Alma Cura
+Compiescolta
+Compiescolta
+Armadura Frágil
+Armadura Frágil
+Metal Pesado
+Metal Pesado
+Metal Liviano
+Metal Liviano
+Compensación
+Compensación
+Ímpetu Tóxico
+Ímpetu Tóxico
+Ímpetu Ardiente
+Ímpetu Ardiente
+Cosecha
+Cosecha
+Telepatía
+Telepatía
+Veleta
+Veleta
+Funda
+Funda
+Toque Tóxico
+Toque Tóxico
+Regeneración
+Regeneración
+Sacapecho
+Sacapecho
+Ímpetu Arena
+Ímpetu Arena
+Piel Milagro
+Piel Milagro
+Cálculo Final
+Cálculo Final
+Ilusión
+Ilusión
+Impostor
+Impostor
+Allanamiento
+Allanamiento
+Momia
+Momia
+Autoestima
+Autoestima
+Justiciero
+Justiciero
+Cobardía
+Cobardía
+Espejo Mágico
+Espejo Mágico
+Herbívoro
+Herbívoro
+Bromista
+Bromista
+Poder Arena
+Poder Arena
+Punta Acero
+Punta Acero
+Modo Daruma
+Modo Daruma
+Tinovictoria
+Tinovictoria
+Turbollama
+Turbollama
+Terravoltaje
+Terravoltaje
+Velo Aroma
+Velo Aroma
+Velo Flor
+Velo Flor
+Carrillo
+Carrillo
+Mutatipo
+Mutatipo
+Pelaje Recio
+Pelaje Recio
+Prestidigitador
+Prestidigitador
+Antibalas
+Antibalas
+Tenacidad
+Tenacidad
+Mandíbula Fuerte
+Mandíbula Fuerte
+Piel Helada
+Piel Helada
+Velo Dulce
+Velo Dulce
+Cambio Táctico
+Cambio Táctico
+Alas Vendaval
+Alas Vendaval
+Megadisparador
+Megadisparador
+Manto Frondoso
+Manto Frondoso
+Simbiosis
+Simbiosis
+Garra Dura
+Garra Dura
+Piel Feérica
+Piel Feérica
+Baba
+Baba
+Piel Celeste
+Piel Celeste
+Amor Filial
+Amor Filial
+Aura Oscura
+Aura Oscura
+Aura Feérica
+Aura Feérica
+Rompeaura
+Rompeaura
+Mar del Albor
+Mar del Albor
+Tierra del Ocaso
+Tierra del Ocaso
+Ráfaga Delta
+Ráfaga Delta
+Firmeza
+Firmeza
+Huida
+Huida
+Retirada
+Retirada
+Hidrorrefuerzo
+Hidrorrefuerzo
+Ensañamiento
+Ensañamiento
+Escudo Limitado
+Escudo Limitado
+Vigilante
+Vigilante
+Pompa
+Pompa
+Acero Templado
+Acero Templado
+Cólera
+Cólera
+Quitanieves
+Quitanieves
+Remoto
+Remoto
+Voz Fluida
+Voz Fluida
+Primer Auxilio
+Primer Auxilio
+Piel Eléctrica
+Piel Eléctrica
+Cola Surf
+Cola Surf
+Banco
+Banco
+Disfraz
+Disfraz
+Fuerte Afecto
+Fuerte Afecto
+Agrupamiento
+Agrupamiento
+Corrosión
+Corrosión
+Letargo Perenne
+Letargo Perenne
+Regia Presencia
+Regia Presencia
+Revés
+Revés
+Pareja de Baile
+Pareja de Baile
+Batería
+Batería
+Peluche
+Peluche
+Cuerpo Vívido
+Cuerpo Vívido
+Coránima
+Coránima
+Rizos Rebeldes
+Rizos Rebeldes
+Receptor
+Receptor
+Reacción Química
+Reacción Química
+Ultraimpulso
+Ultraimpulso
+Sistema Alfa
+Sistema Alfa
+Electrogénesis
+Electrogénesis
+Psicogénesis
+Psicogénesis
+Nebulogénesis
+Nebulogénesis
+Herbogénesis
+Herbogénesis
+Guardia Metálica
+Guardia Metálica
+Guardia Espectro
+Guardia Espectro
+Armadura Prisma
+Armadura Prisma
+Fuerza Cerebral
+Fuerza Cerebral
+Espada Indómita
+Espada Indómita
+Escudo Recio
+Escudo Recio
+Líbero
+Líbero
+Recogebolas
+Recogebolas
+Pelusa
+Pelusa
+Hélice Caudal
+Hélice Caudal
+Coraza Reflejo
+Coraza Reflejo
+Tragamisil
+Tragamisil
+Acérrimo
+Acérrimo
+Combustible
+Combustible
+Punk Rock
+Punk Rock
+Expulsarena
+Expulsarena
+Escama de Hielo
+Escama de Hielo
+Maduración
+Maduración
+Cara de Hielo
+Cara de Hielo
+Fuente Energía
+Fuente Energía
+Mimetismo
+Mimetismo
+Antibarrera
+Antibarrera
+Alma Acerada
+Alma Acerada
+Cuerpo Mortal
+Cuerpo Mortal
+Alma Errante
+Alma Errante
+Monotema
+Monotema
+Gas Reactivo
+Gas Reactivo
+Velo Pastel
+Velo Pastel
+Mutapetito
+Mutapetito
+Mano Rápida
+Mano Rápida
+Puño Invisible
+Puño Invisible
+Medicina Extraña
+Medicina Extraña
+Transistor
+Transistor
+Mandíbula dragón
+Mandíbula dragón
+Relincho Blanco
+Relincho Blanco
+Relincho Negro
+Relincho Negro
+Unidad Ecuestre
+Unidad Ecuestre
+Coraza Ira
+Coraza Ira
+Cola Armadura
+Cola Armadura
+Abalorio Debacle
+Abalorio Debacle
+Comandar
+Comandar
+Unísono
+Unísono
+Rumia
+Rumia
+Geofagia
+Geofagia
+Dinamo
+Dinamo
+Cuerpo Áureo
+Cuerpo Áureo
+Perro Guardián
+Perro Guardián
+Motor Hadrónico
+Motor Hadrónico
+Olor Persistente
+Olor Persistente
+Poder Fúngico
+Poder Fúngico
+Oportunista
+Oportunista
+Latido Oricalco
+Latido Oricalco
+Paleosíntesis
+Paleosíntesis
+Sal Purificadora
+Sal Purificadora
+Carga Cuark
+Carga Cuark
+Transportarrocas
+Transportarrocas
+Disemillar
+Disemillar
+Cortante
+Cortante
+General Supremo
+General Supremo
+Espada Debacle
+Espada Debacle
+Tablilla Debacle
+Tablilla Debacle
+Termoconversión
+Termoconversión
+Capa Tóxica
+Capa Tóxica
+Caldero Debacle
+Caldero Debacle
+Cuerpo Horneado
+Cuerpo Horneado
+Energía Eólica
+Energía Eólica
+Surcavientos
+Surcavientos
+Cambio Heroico
+Cambio Heroico
+Néctar dulce
+Néctar dulce
+Hospitalidad
+Hospitalidad
+Cadena Tóxica
+Cadena Tóxica
+Ojo Mental
+Ojo Mental
+Evocarrecuerdos
+Evocarrecuerdos
+Títere Tóxico
+Títere Tóxico
+Teracambio
+Teracambio
+Teracaparazón
+Teracaparazón
+Teraformación 0
+Teraformación 0
+Piel Dragontina
+Piel Dragontina
+Megasolar
+Megasolar
+Salpicante
+Salpicante
+Turbotaladro
+Turbotaladro
+Impulso Anguila
+Impulso Anguila
+Crin de Fuego
+Crin de Fuego
+Obsidian Shell
+Obsidian Shell
+Burning Rampage
+Burning Rampage
+Frost Edge
+Frost Edge
+Reactive Pollen
+Reactive Pollen
+Blazing Vanguard
+Blazing Vanguard
+Squire's Will
+Squire's Will
+Warlord's Gaze
+Warlord's Gaze
+Folded Guard
+Folded Guard
+Habbakuk Hull
+Habbakuk Hull
+Permafrost Jaw
+Permafrost Jaw
+Delta Plating
+Delta Plating
+Primal Tough
+Primal Tough
+Bludgeon Master
+Bludgeon Master
+Starry Reach
+Starry Reach
+Blessed Corona
+Blessed Corona
+Umbra Veil
+Umbra Veil
+Mineral Drip
+Mineral Drip
+Sky Snare
+Sky Snare
+Overawe
+Overawe
+Striker
+Striker
+Ironclad
+Ironclad
+Precognition
+Precognition
+Hidden Arsenal
+Hidden Arsenal
+Pride
+Pride
+Overcharge
+Overcharge
+Crystal Orbit
+Crystal Orbit
+Fleur de Mal
+Fleur de Mal
+Thermal Front
+Thermal Front
+Feudal Ward
+Feudal Ward
+Storm Lord
+Storm Lord
+Toon Logic
+Toon Logic
+Incandescence
+Incandescence
+Fire Knock
+Fire Knock

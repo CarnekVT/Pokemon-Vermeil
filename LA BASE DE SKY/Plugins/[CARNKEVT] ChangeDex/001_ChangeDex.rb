@@ -1465,7 +1465,7 @@ module VermeilChangeDex
     return localized_behavior_text("moves", move_id, "Notes", raw)
   end
 
-  CANON_LOCALIZATION_EN_PATH = "Data/ChangeDex/canon_localization_en.json"
+  CANON_LOCALIZATION_EN_PATH = "Data/TranslateStudio/canon_localization_en.json"
   @canon_localization_en = nil
   def self.canon_localization_en
     return @canon_localization_en if @canon_localization_en
@@ -1482,7 +1482,7 @@ module VermeilChangeDex
   end
 
 
-  CANON_ITEM_LOCALIZATION_PATH = "Data/ChangeDex/canon_items_localization.json"
+  CANON_ITEM_LOCALIZATION_PATH = "Data/TranslateStudio/canon_items_localization.json"
   @canon_item_localization = nil
   def self.canon_item_localization
     return @canon_item_localization if @canon_item_localization
@@ -1537,8 +1537,10 @@ module VermeilChangeDex
   end
 
   def self.language_code
-    forced = ChangeDexConfig.language_mode
-    return forced if ["es", "en"].include?(forced)
+    begin
+      return CarnekTranslateStudio.language_code if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:language_code)
+    rescue StandardError
+    end
     tokens = []
     begin
       lang = $PokemonSystem.language if defined?($PokemonSystem) && $PokemonSystem && $PokemonSystem.respond_to?(:language)
@@ -1598,27 +1600,29 @@ module VermeilChangeDex
   end
 
   def self.localization_override(lang, bucket, id)
-    doc = CarnekChangeData.document
-    loc = doc["localization"] rescue nil
-    return {} if !loc.is_a?(Hash)
-    row = loc.dig(lang.to_s, bucket.to_s, id.to_s.upcase) rescue nil
-    return row.is_a?(Hash) ? row : {}
+    begin
+      if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:override_row)
+        row = CarnekTranslateStudio.override_row(lang, bucket, id)
+        return row if row.is_a?(Hash)
+      end
+    rescue StandardError
+    end
+    return {}
   end
 
   def self.localized_entity_text(bucket, id, field, fallback = "")
     lang = language_code
     key = id.to_s.upcase
-    over = localization_override(lang, bucket, key)
-    txt = over[field.to_s].to_s.strip
-    return txt if !txt.empty?
+    begin
+      if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:entity_text)
+        return CarnekTranslateStudio.entity_text(bucket, key, field, fallback)
+      end
+    rescue StandardError
+    end
     if lang == "en"
       base = canon_localization_en.dig(bucket.to_s, key) rescue nil
       txt = base[field.to_s].to_s.strip if base.is_a?(Hash)
       return txt if txt && !txt.empty?
-      # Project/custom content has no official English catalog. Until the
-      # author writes a dedicated localization, keep the project's own vanilla
-      # Name/Description/Pokedex as a readable fallback instead of showing an
-      # empty panel. A localization override always wins once it exists.
     end
     return fallback.to_s
   end
@@ -1736,426 +1740,54 @@ module VermeilChangeDex
 
 
   #=============================================================================
-  # Game-wide language layer
-  # ChangeDex localization is no longer limited to the ChangeDex scene.  These
-  # accessors are resolved dynamically from the active game language, so every
-  # menu/battle/Pokédex/plugin that asks GameData for a name/description gets
-  # the same ES/EN text without rewriting the PBS.
+  # Translation compatibility bridge
+  # Language ownership lives in the independent [CARNKEVT] Translate Studio.
+  # This tiny adapter only keeps older ChangeDex calls safe.
   #=============================================================================
   module GameLanguage
-    @installed = false
-    @installed_methods = {}
-    @reverse_index = nil
-    @reverse_signature = nil
-    @session_language = nil
-
-    def self.invalidate!
-      @reverse_index = nil
-      @reverse_signature = nil
-    end
-
-    def self.language_from_tokens(tokens)
-      raw = Array(tokens).compact.map { |v| v.to_s }.join(" ").downcase
-      return "es" if raw.include?("españ") || raw.include?("espan") || raw.include?("spanish") || raw =~ /(^|[^a-z])es([_\-. ]|$)/
-      return "en" if raw.include?("english") || raw =~ /(^|[^a-z])en([_\-. ]|$)/
-      return nil
-    end
-
-    def self.language_for_index(index)
-      return nil if !defined?(Settings::LANGUAGES) || Settings::LANGUAGES.empty?
-      entry = Settings::LANGUAGES[index.to_i] rescue nil
-      return nil if !entry
-      return language_from_tokens(entry.is_a?(Array) ? entry : [entry])
-    rescue StandardError
-      return nil
-    end
-
-    def self.active_language
-      # A language explicitly selected from the game's own Options/Debug menu
-      # wins for this session. This keeps ChangeDex and the rest of the game in
-      # lockstep immediately, even before another save/restart.
-      return @session_language if ["es", "en"].include?(@session_language)
-      forced = ChangeDexConfig.game_language_mode
-      return forced if ["es", "en"].include?(forced)
-      tokens = []
-      begin
-        lang = $PokemonSystem.language if defined?($PokemonSystem) && $PokemonSystem && $PokemonSystem.respond_to?(:language)
-        if lang.is_a?(Integer) && defined?(Settings::LANGUAGES)
-          entry = Settings::LANGUAGES[lang] rescue nil
-          entry.is_a?(Array) ? entry.each { |v| tokens << v.to_s } : tokens << entry.to_s if entry
-        elsif !lang.nil?
-          tokens << lang.to_s
-        end
-      rescue StandardError
-      end
-      return language_from_tokens(tokens)
-    end
-
-    def self.entity_override(lang, bucket, key, field)
-      doc = CarnekChangeData.document rescue nil
-      row = doc.dig("localization", lang.to_s, bucket.to_s, key.to_s.upcase) rescue nil
-      txt = row[field.to_s].to_s.strip if row.is_a?(Hash)
-      return txt if txt && !txt.empty?
-      return nil
-    rescue StandardError
-      return nil
-    end
-
-    def self.entity_text(bucket, key, field, fallback, base_key = nil)
-      return fallback.to_s if !ChangeDexConfig.game_localization_enabled?
-      lang = active_language
-      return fallback.to_s if !["es", "en"].include?(lang)
-      txt = entity_override(lang, bucket, key, field)
-      txt ||= entity_override(lang, bucket, base_key, field) if base_key
-      if (!txt || txt.empty?) && lang == "en"
-        begin
-          row = VermeilChangeDex.canon_localization_en.dig(bucket.to_s, key.to_s.upcase)
-          txt = row[field.to_s].to_s.strip if row.is_a?(Hash)
-          if (!txt || txt.empty?) && base_key
-            row = VermeilChangeDex.canon_localization_en.dig(bucket.to_s, base_key.to_s.upcase)
-            txt = row[field.to_s].to_s.strip if row.is_a?(Hash)
-          end
-        rescue StandardError
-        end
-      end
-      return (txt && !txt.empty?) ? txt : fallback.to_s
-    rescue StandardError
-      return fallback.to_s
-    end
-
-    def self.item_text(key, field, fallback)
-      return fallback.to_s if !ChangeDexConfig.game_localization_enabled?
-      lang = active_language
-      return fallback.to_s if !["es", "en"].include?(lang)
-      txt = entity_override(lang, "items", key, field)
-      if !txt || txt.empty?
-        begin
-          row = VermeilChangeDex.canon_item_localization.dig(lang, key.to_s.upcase)
-          txt = row[field.to_s].to_s.strip if row.is_a?(Hash)
-        rescue StandardError
-        end
-      end
-      return (txt && !txt.empty?) ? txt : fallback.to_s
-    rescue StandardError
-      return fallback.to_s
-    end
-
-    def self.type_text(key, fallback)
-      return fallback.to_s if !ChangeDexConfig.game_localization_enabled?
-      lang = active_language
-      return fallback.to_s if !["es", "en"].include?(lang)
-      txt = entity_override(lang, "types", key, "Name")
-      return txt if txt && !txt.empty?
-      if lang == "en"
-        return VermeilChangeDex::TYPE_NAMES_EN[key.to_sym] || fallback.to_s
-      end
-      return fallback.to_s
-    rescue StandardError
-      return fallback.to_s
-    end
-
-    def self.string_text(source)
-      return source.to_s if !ChangeDexConfig.game_localization_enabled?
-      lang = active_language
-      return source.to_s if !["es", "en"].include?(lang)
-      doc = CarnekChangeData.document rescue nil
-      rows = doc.dig("localization", lang, "strings") rescue nil
-      return source.to_s if !rows.is_a?(Hash)
-      txt = rows[source.to_s].to_s
-      return txt.empty? ? source.to_s : txt
-    rescue StandardError
-      return source.to_s
-    end
-
-    def self.reverse_registry_signature
-      sig = []
-      begin
-        sig << (GameData::Species::DATA.object_id rescue 0) if defined?(GameData::Species)
-        sig << (GameData::Move::DATA.object_id rescue 0) if defined?(GameData::Move)
-        sig << (GameData::Ability::DATA.object_id rescue 0) if defined?(GameData::Ability)
-        sig << (GameData::Item::DATA.object_id rescue 0) if defined?(GameData::Item)
-        sig << (GameData::Type::DATA.object_id rescue 0) if defined?(GameData::Type)
-      rescue StandardError
-      end
-      sig
-    end
-
-    # Build a reverse lookup from the PBS-facing/original string passed to
-    # MessageTypes.getFromHash back to its GameData ID. This is the important
-    # bridge that makes Language Studio affect menus, battles, Pokédex screens
-    # and third-party plugins that use Essentials' native message lookup rather
-    # than calling GameData#name directly.
-    def self.build_reverse_index!
-      sig = reverse_registry_signature
-      return @reverse_index if @reverse_index && @reverse_signature == sig
-      idx = Hash.new { |h, k| h[k] = {} }
-      add = proc do |type, source, payload, overwrite = false|
-        next if type.nil? || source.nil? || source.to_s.empty?
-        key = source.to_s
-        idx[type][key] = payload if overwrite || !idx[type].key?(key)
-      end
-      begin
-        if defined?(MessageTypes) && defined?(GameData::Species)
-          GameData::Species.each do |sp|
-            species = (sp.respond_to?(:species) ? sp.species : sp.id).to_s.upcase
-            form = sp.respond_to?(:form) ? sp.form.to_i : 0
-            key = form > 0 ? "#{species},#{form}" : species
-            base = species
-            add.call(MessageTypes::SPECIES_NAMES, sp.real_name, ["species", key, "Name", base]) if defined?(MessageTypes::SPECIES_NAMES)
-            add.call(MessageTypes::SPECIES_FORM_NAMES, sp.real_form_name, ["species", key, "FormName", nil], true) if defined?(MessageTypes::SPECIES_FORM_NAMES) && sp.respond_to?(:real_form_name)
-            add.call(MessageTypes::SPECIES_CATEGORIES, sp.real_category, ["species", key, "Category", base]) if defined?(MessageTypes::SPECIES_CATEGORIES) && sp.respond_to?(:real_category)
-            add.call(MessageTypes::POKEDEX_ENTRIES, sp.real_pokedex_entry, ["species", key, "Pokedex", base]) if defined?(MessageTypes::POKEDEX_ENTRIES) && sp.respond_to?(:real_pokedex_entry)
-          end
-        end
-        if defined?(MessageTypes) && defined?(GameData::Move)
-          GameData::Move.each do |m|
-            add.call(MessageTypes::MOVE_NAMES, m.real_name, ["moves", m.id.to_s.upcase, "Name", nil]) if defined?(MessageTypes::MOVE_NAMES)
-            add.call(MessageTypes::MOVE_DESCRIPTIONS, m.real_description, ["moves", m.id.to_s.upcase, "Description", nil]) if defined?(MessageTypes::MOVE_DESCRIPTIONS) && m.respond_to?(:real_description)
-          end
-        end
-        if defined?(MessageTypes) && defined?(GameData::Ability)
-          GameData::Ability.each do |a|
-            add.call(MessageTypes::ABILITY_NAMES, a.real_name, ["abilities", a.id.to_s.upcase, "Name", nil]) if defined?(MessageTypes::ABILITY_NAMES)
-            add.call(MessageTypes::ABILITY_DESCRIPTIONS, a.real_description, ["abilities", a.id.to_s.upcase, "Description", nil]) if defined?(MessageTypes::ABILITY_DESCRIPTIONS) && a.respond_to?(:real_description)
-          end
-        end
-        if defined?(MessageTypes) && defined?(GameData::Item)
-          GameData::Item.each do |it|
-            id = it.id.to_s.upcase
-            add.call(MessageTypes::ITEM_NAMES, it.real_name, ["items", id, "Name", nil]) if defined?(MessageTypes::ITEM_NAMES)
-            add.call(MessageTypes::ITEM_NAME_PLURALS, it.real_name_plural, ["items", id, "NamePlural", nil]) if defined?(MessageTypes::ITEM_NAME_PLURALS) && it.respond_to?(:real_name_plural)
-            add.call(MessageTypes::ITEM_DESCRIPTIONS, it.real_description, ["items", id, "Description", nil]) if defined?(MessageTypes::ITEM_DESCRIPTIONS) && it.respond_to?(:real_description)
-          end
-        end
-        if defined?(MessageTypes) && defined?(GameData::Type)
-          GameData::Type.each do |t|
-            add.call(MessageTypes::TYPE_NAMES, t.real_name, ["types", t.id.to_s.upcase, "Name", nil]) if defined?(MessageTypes::TYPE_NAMES)
-          end
-        end
-      rescue StandardError
-      end
-      @reverse_index = idx
-      @reverse_signature = sig
-      return idx
-    end
-
-    def self.message_text(type, source, resolved)
-      return resolved.to_s if !ChangeDexConfig.game_localization_enabled?
-      lang = active_language
-      return resolved.to_s if !["es", "en"].include?(lang)
-      info = build_reverse_index!.dig(type, source.to_s) rescue nil
-      if info
-        bucket, key, field, base_key = info
-        if bucket == "items"
-          return item_text(key, field, resolved)
-        elsif bucket == "types"
-          return type_text(key, resolved)
-        else
-          return entity_text(bucket, key, field, resolved, base_key)
-        end
-      end
-      custom = string_text(source)
-      return custom if custom != source.to_s
-      return resolved.to_s
-    rescue StandardError
-      return resolved.to_s
-    end
-
-    def self.install_method_patch(klass, method_name, &resolver)
-      return if !klass || !klass.instance_methods.include?(method_name)
-      key = [klass.name.to_s, method_name.to_sym]
-      return if @installed_methods[key]
-      mod = Module.new do
-        define_method(method_name) do |*args, &block|
-          raw = super(*args, &block)
-          begin
-            resolver.call(self, raw)
-          rescue StandardError
-            raw
-          end
-        end
-      end
-      klass.prepend(mod)
-      @installed_methods[key] = true
-    rescue StandardError
-    end
-
     def self.install!
-      # Idempotent per method instead of one global early-return. Some projects
-      # load plugin/runtime pieces in a different order; a second call after
-      # GameData/MessageTypes exist must be able to finish installing the bridge.
-      if defined?(GameData::Species)
-        install_method_patch(GameData::Species, :name) do |obj, raw|
-          sp = (obj.respond_to?(:species) ? obj.species : obj.id).to_s.upcase
-          form = obj.respond_to?(:form) ? obj.form.to_i : 0
-          key = form > 0 ? "#{sp},#{form}" : sp
-          entity_text("species", key, "Name", raw, sp)
-        end
-        install_method_patch(GameData::Species, :form_name) do |obj, raw|
-          sp = (obj.respond_to?(:species) ? obj.species : obj.id).to_s.upcase
-          form = obj.respond_to?(:form) ? obj.form.to_i : 0
-          key = form > 0 ? "#{sp},#{form}" : sp
-          entity_text("species", key, "FormName", raw)
-        end
-        if GameData::Species.instance_methods.include?(:category)
-          install_method_patch(GameData::Species, :category) do |obj, raw|
-            sp = (obj.respond_to?(:species) ? obj.species : obj.id).to_s.upcase
-            form = obj.respond_to?(:form) ? obj.form.to_i : 0
-            key = form > 0 ? "#{sp},#{form}" : sp
-            entity_text("species", key, "Category", raw, sp)
-          end
-        end
-        if GameData::Species.instance_methods.include?(:pokedex_entry)
-          install_method_patch(GameData::Species, :pokedex_entry) do |obj, raw|
-            sp = (obj.respond_to?(:species) ? obj.species : obj.id).to_s.upcase
-            form = obj.respond_to?(:form) ? obj.form.to_i : 0
-            key = form > 0 ? "#{sp},#{form}" : sp
-            entity_text("species", key, "Pokedex", raw, sp)
-          end
-        end
-      end
-      if defined?(GameData::Move)
-        install_method_patch(GameData::Move, :name) { |obj, raw| entity_text("moves", obj.id, "Name", raw) }
-        install_method_patch(GameData::Move, :description) { |obj, raw| entity_text("moves", obj.id, "Description", raw) }
-      end
-      if defined?(GameData::Ability)
-        install_method_patch(GameData::Ability, :name) { |obj, raw| entity_text("abilities", obj.id, "Name", raw) }
-        install_method_patch(GameData::Ability, :description) { |obj, raw| entity_text("abilities", obj.id, "Description", raw) }
-      end
-      if defined?(GameData::Item)
-        install_method_patch(GameData::Item, :name) { |obj, raw| item_text(obj.id, "Name", raw) }
-        install_method_patch(GameData::Item, :name_plural) { |obj, raw| item_text(obj.id, "NamePlural", raw) }
-        install_method_patch(GameData::Item, :description) { |obj, raw| item_text(obj.id, "Description", raw) }
-      end
-      if defined?(GameData::Type)
-        install_method_patch(GameData::Type, :name) { |obj, raw| type_text(obj.id, raw) }
-      end
-      install_message_hash_patch!
-      @installed = true
-      return true
-    end
-
-    # Bridge Language Studio into Essentials' native INTL lookup. Native
-    # messages_<fragment>_*.dat still provides all regular translated text; our
-    # layer only replaces an entity/string when Language Studio has a better
-    # value for the currently active language.
-    def self.install_message_hash_patch!
-      return if !defined?(MessageTypes) || !MessageTypes.respond_to?(:getFromHash)
-      singleton = class << MessageTypes; self; end
-      return if singleton.method_defined?(:carnek_changedex_original_getFromHash)
-      singleton.class_eval do
-        alias_method :carnek_changedex_original_getFromHash, :getFromHash
-        define_method(:getFromHash) do |type, text|
-          resolved = carnek_changedex_original_getFromHash(type, text)
-          next VermeilChangeDex::GameLanguage.message_text(type, text, resolved)
-        end
-        if method_defined?(:getFromMapHash) && !method_defined?(:carnek_changedex_original_getFromMapHash)
-          alias_method :carnek_changedex_original_getFromMapHash, :getFromMapHash
-          define_method(:getFromMapHash) do |map_id, text|
-            resolved = carnek_changedex_original_getFromMapHash(map_id, text)
-            source = text.to_s
-            custom = VermeilChangeDex::GameLanguage.string_text(source)
-            next(custom != source ? custom : resolved)
-          end
-        end
-      end
+      return CarnekTranslateStudio.install! if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:install!)
+      true
     rescue StandardError
+      true
     end
-
-    def self.apply_native_language_index!(idx)
-      return false if !defined?($PokemonSystem) || !$PokemonSystem
-      return false if !defined?(Settings::LANGUAGES) || Settings::LANGUAGES.empty?
-      i = idx.to_i
-      return false if i < 0 || i >= Settings::LANGUAGES.length
-      $PokemonSystem.language = i
-      @session_language = language_for_index(i)
-      begin
-        fragment = Settings::LANGUAGES[i][1]
-        MessageTypes.load_message_files(fragment) if defined?(MessageTypes) && fragment
-      rescue StandardError
-      end
-      invalidate!
-      ChangeDexConfig.reload!
-      return true
+    def self.invalidate!
+      CarnekTranslateStudio.invalidate! if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:invalidate!)
+      true
     rescue StandardError
-      return false
+      true
     end
-
+    def self.active_language
+      return CarnekTranslateStudio.language_code if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:language_code)
+      VermeilChangeDex.language_code
+    rescue StandardError
+      "en"
+    end
     def self.choose_language!
-      return false if !defined?(Settings::LANGUAGES) || Settings::LANGUAGES.empty?
-      idx = nil
-      begin
-        if Object.private_method_defined?(:pbChooseLanguage) || Object.method_defined?(:pbChooseLanguage)
-          idx = Object.new.send(:pbChooseLanguage)
-        elsif Kernel.respond_to?(:pbChooseLanguage, true)
-          idx = Kernel.send(:pbChooseLanguage)
-        end
-      rescue StandardError
-        idx = nil
-      end
-      return false if idx.nil?
-      return apply_native_language_index!(idx)
+      return CarnekTranslateStudio.choose_language! if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:choose_language!)
+      false
     rescue StandardError
-      return false
+      false
     end
-
-    def self.current_fragment
-      return nil if !defined?(Settings::LANGUAGES) || Settings::LANGUAGES.empty?
-      idx = ($PokemonSystem && $PokemonSystem.respond_to?(:language)) ? $PokemonSystem.language.to_i : 0 rescue 0
-      entry = Settings::LANGUAGES[idx] rescue nil
-      return entry[1].to_s if entry.is_a?(Array) && entry[1]
-      return nil
+    def self.apply_native_language_index!(value)
+      return CarnekTranslateStudio.apply_native_language_index!(value) if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:apply_native_language_index!)
+      false
     rescue StandardError
-      return nil
+      false
     end
-
-    def self.pick_fragment
-      if defined?(Settings::LANGUAGES) && !Settings::LANGUAGES.empty?
-        names = Settings::LANGUAGES.map { |v| v.is_a?(Array) ? v[0].to_s : v.to_s }
-        idx = pbShowCommands(nil, names, -1) rescue -1
-        return nil if idx.nil? || idx < 0
-        entry = Settings::LANGUAGES[idx]
-        return entry[1].to_s if entry.is_a?(Array) && entry[1]
-      end
-      begin
-        return pbMessageFreeText(_INTL("Language filename fragment (e.g. english or spanish)"), "english", false, 32).to_s.strip
-      rescue StandardError
-        return nil
-      end
+    def self.extract_intl!(core=false)
+      return CarnekTranslateStudio.extract_intl!(core) if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:extract_intl!)
+      false
+    rescue StandardError
+      false
     end
-
-    def self.extract_intl!(core = false)
-      return false if !defined?(Translator) || !Translator.respond_to?(:extract_text)
-      fragment = pick_fragment
-      return false if !fragment || fragment.empty?
-      Translator.extract_text(fragment, core, true)
-      return true
-    rescue StandardError => e
-      pbMessage("ChangeDex Translator: #{e.message}") rescue nil
-      return false
-    end
-
     def self.compile_intl!
-      return false if !defined?(Translator) || !Translator.respond_to?(:compile_text)
-      fragment = pick_fragment
-      return false if !fragment || fragment.empty?
-      did = false
-      [["#{fragment}_game", "#{fragment}_game"], ["#{fragment}_core", "#{fragment}_core"]].each do |dir_name, dat_name|
-        next if !File.directory?("Text_#{dir_name}")
-        Translator.compile_text(dir_name, dat_name)
-        did = true
-      end
-      MessageTypes.load_message_files(fragment) if did && defined?(MessageTypes)
-      @session_language = language_from_tokens([fragment]) if did
-      invalidate! if did
-      return did
-    rescue StandardError => e
-      pbMessage("ChangeDex Translator: #{e.message}") rescue nil
-      return false
+      return CarnekTranslateStudio.compile_intl! if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:compile_intl!)
+      false
+    rescue StandardError
+      false
     end
   end
-
-  GameLanguage.install!
 
   class Scene
     def initialize
@@ -6547,17 +6179,13 @@ ItemHandlers::UseInField.add(:CHANGEDEX, proc { |item| VermeilChangeDex.open; ne
 
 CarnekChangeData.install_hooks!
 
-# v0.11.0: Game.initialize runs after GameData.load_all, so the comparison index
-# can be prepared after compilation but before the player reaches the title/map.
-# ChangeDex itself therefore opens immediately. Game.set_up_system runs later,
-# after Essentials loads the selected messages_<fragment> files; use that point
-# to finalize the language bridge without rebuilding the browser.
+# v0.11.1: ChangeDex only prewarms its comparison index here. Translation is
+# owned by the independent [CARNKEVT] Translate Studio plugin.
 if defined?(Game)
   module ChangeDexBootPrewarm
     def initialize(*args, &block)
       ret = super(*args, &block)
       begin
-        VermeilChangeDex::GameLanguage.install!
         VermeilChangeDex.prewarm_indexes!
       rescue StandardError => e
         echoln("[ChangeDex] Boot preload skipped: #{e.message}") if defined?(echoln) && ChangeDexConfig.debug_logging?
@@ -6565,21 +6193,9 @@ if defined?(Game)
       ret
     end
   end
-  module ChangeDexLanguageAfterSystemSetup
-    def set_up_system(*args, &block)
-      ret = super(*args, &block)
-      begin
-        VermeilChangeDex::GameLanguage.install!
-        VermeilChangeDex::GameLanguage.invalidate!
-      rescue StandardError
-      end
-      ret
-    end
-  end
   begin
     game_singleton = class << Game; self; end
     game_singleton.prepend(ChangeDexBootPrewarm) unless game_singleton.ancestors.include?(ChangeDexBootPrewarm)
-    game_singleton.prepend(ChangeDexLanguageAfterSystemSetup) unless game_singleton.ancestors.include?(ChangeDexLanguageAfterSystemSetup)
   rescue StandardError
   end
 end
@@ -6591,53 +6207,4 @@ if defined?(MenuHandlers)
     "description" => VermeilChangeDex.ui("Open the ChangeDex comparison screen."),
     "effect"      => proc { |sprites, viewport| VermeilChangeDex.open }
   })
-  MenuHandlers.add(:debug_menu, :changedex_language, {
-    "name"        => "ChangeDex Language / Idioma",
-    "parent"      => :main,
-    "description" => "Change the active Essentials language and refresh ChangeDex localization.",
-    "effect"      => proc { |sprites, viewport| VermeilChangeDex::GameLanguage.choose_language! }
-  }) if ChangeDexConfig.language_picker_in_debug?
 end
-
-#===============================================================================
-# Language/Translator integration
-#===============================================================================
-if defined?(MenuHandlers) && defined?(EnumOption) && defined?(Settings::LANGUAGES) && Settings::LANGUAGES.length >= 2
-  begin
-    MenuHandlers.add(:options_menu, :changedex_game_language, {
-      "name"        => _INTL("Language / Idioma"),
-      "order"       => 5,
-      "type"        => EnumOption,
-      "parameters"  => Settings::LANGUAGES.map { |lang| lang[0].to_s },
-      "description" => _INTL("Choose the language used by the game and ChangeDex."),
-      "get_proc"    => proc { next(($PokemonSystem && $PokemonSystem.respond_to?(:language)) ? $PokemonSystem.language.to_i : 0) },
-      "set_proc"    => proc { |value, _scene| VermeilChangeDex::GameLanguage.apply_native_language_index!(value) }
-    })
-  rescue StandardError
-  end
-end
-
-if defined?(MenuHandlers)
-  begin
-    MenuHandlers.add(:debug_menu, :changedex_extract_game_text, {
-      "name"        => "ChangeDex Translator: Extract Game Text",
-      "parent"      => :main,
-      "description" => "Extract the active/selected Essentials INTL game text into Text_<language>_game.",
-      "effect"      => proc { |_sprites, _viewport| VermeilChangeDex::GameLanguage.extract_intl!(false) }
-    })
-    MenuHandlers.add(:debug_menu, :changedex_extract_core_text, {
-      "name"        => "ChangeDex Translator: Extract Core Text",
-      "parent"      => :main,
-      "description" => "Extract the selected Essentials INTL core text into Text_<language>_core.",
-      "effect"      => proc { |_sprites, _viewport| VermeilChangeDex::GameLanguage.extract_intl!(true) }
-    })
-    MenuHandlers.add(:debug_menu, :changedex_compile_language, {
-      "name"        => "ChangeDex Translator: Compile Language Pack",
-      "parent"      => :main,
-      "description" => "Compile Text_<language>_game/core into Data/messages_<language>_game/core.dat and reload it.",
-      "effect"      => proc { |_sprites, _viewport| VermeilChangeDex::GameLanguage.compile_intl! }
-    })
-  rescue StandardError
-  end
-end
-

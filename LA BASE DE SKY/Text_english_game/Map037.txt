@@ -1,0 +1,8 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map037]
+Todo lo que hay aquí usa un Interruptor temporal para decidir qué hacer, en lugar de un Interruptor Local, porque todo tiene que resetearse cada vez que entras.
+Todo lo que hay aquí usa un Interruptor temporal para decidir qué hacer, en lugar de un Interruptor Local, porque todo tiene que resetearse cada vez que entras.
+¡Me has derrotado! Puedes ir al Hall de la Fama.
+¡Me has derrotado! Puedes ir al Hall de la Fama.

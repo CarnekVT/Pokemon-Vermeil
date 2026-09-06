@@ -1,0 +1,38 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map000]
+¡Hola, \PN!\n¡Veo desde aquí cómo me estás llamando!
+¡Hola, \PN!\n¡Veo desde aquí cómo me estás llamando!
+Ven y habla conmigo.
+Ven y habla conmigo.
+Hola soy el Profesor Oak...\n¡Oh, hola, \PN!
+Hola soy el Profesor Oak...\n¡Oh, hola, \PN!
+¿Qué tal llevas la Pokédex?
+¿Qué tal llevas la Pokédex?
+Hmm, déjame ver...\nG¡Has visto \v[1] Pokémon, y \nhas capturado \v[2] Pokémon!\n¡Ya veo!
+Hmm, déjame ver...\nG¡Has visto \v[1] Pokémon, y \nhas capturado \v[2] Pokémon!\n¡Ya veo!
+¡Hmm, todavía tienes un largo camino por delante! \n¡Sigue así!
+¡Hmm, todavía tienes un largo camino por delante! \n¡Sigue así!
+¡Hmm, estás capturando Pokémon a un buen ritmo!
+¡Hmm, estás capturando Pokémon a un buen ritmo!
+¡Has capturado un montón de Pokémon, pero asegúrate de entrenarlos con cuidado!
+¡Has capturado un montón de Pokémon, pero asegúrate de entrenarlos con cuidado!
+¡Ni siquiera sabía que existían tantos Pokémon!
+¡Ni siquiera sabía que existían tantos Pokémon!
+¡Muéstrame la Pokédex de nuevo cuando quieras!
+¡Muéstrame la Pokédex de nuevo cuando quieras!
+¿Quieres que deje de acompañarte?
+¿Quieres que deje de acompañarte?
+Vale, voy a desaparecer.
+Vale, voy a desaparecer.
+¡Entonces sigamos!
+¡Entonces sigamos!
+Evaluar Pokédex
+Evaluar Pokédex
+Colgar
+Colgar
+Sí
+Sí
+No
+No

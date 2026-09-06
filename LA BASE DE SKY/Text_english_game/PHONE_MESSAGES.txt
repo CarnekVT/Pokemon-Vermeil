@@ -1,0 +1,86 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[PHONE_MESSAGES]
+¡Hola! Soy \TN.
+¡Hola! Soy \TN.
+¡Buen día, \PN! ¡Hola! Soy \TN.
+¡Buen día, \PN! ¡Hola! Soy \TN.
+¿Cómo estás? ¡\PN, hola! Soy \TN. ¿No está bonito el día?
+¿Cómo estás? ¡\PN, hola! Soy \TN. ¿No está bonito el día?
+¡\PN, buen día! Soy yo, \TN. ¿Tienes un minuto?
+¡\PN, buen día! Soy yo, \TN. ¿Tienes un minuto?
+Hola, \PN. Soy \TN. ¿Cómo van las cosas?
+Hola, \PN. Soy \TN. ¿Cómo van las cosas?
+Buenos días, \PN. Soy \TN. ¿Te desperté?
+Buenos días, \PN. Soy \TN. ¿Te desperté?
+¡Buenas tardes, \PN! Soy \TN.
+¡Buenas tardes, \PN! Soy \TN.
+¡\PN, buenas noches! ¡Hola! Soy \TN.
+¡\PN, buenas noches! ¡Hola! Soy \TN.
+¿Cómo están tus Pokémon?\m¡Mi \TP está lleno de energía! ¡Es un puñado!\mOh sí, logré vencer a un \TE difícil.\mNecesito fortalecer mi equipo.
+¿Cómo están tus Pokémon?\m¡Mi \TP está lleno de energía! ¡Es un puñado!\mOh sí, logré vencer a un \TE difícil.\mNecesito fortalecer mi equipo.
+Mi \TP se ve realmente genial. Ojalá pudiera mostrártelo.\m¡Oye, escucha! Casi atrapo un \TE el otro día.\m¡Oh, estuvo tan cerca!
+Mi \TP se ve realmente genial. Ojalá pudiera mostrártelo.\m¡Oye, escucha! Casi atrapo un \TE el otro día.\m¡Oh, estuvo tan cerca!
+¿Cómo están tus Pokémon?\m¡Mi \TP está lleno de energía! ¡Es un puñado!
+¿Cómo están tus Pokémon?\m¡Mi \TP está lleno de energía! ¡Es un puñado!
+¿Cómo están tus Pokémon?\mSiempre mantengo a mi \TP en buena forma yendo a los Centros Pokémon.
+¿Cómo están tus Pokémon?\mSiempre mantengo a mi \TP en buena forma yendo a los Centros Pokémon.
+Mi \TP se ve realmente genial. Ojalá pudiera mostrártelo.
+Mi \TP se ve realmente genial. Ojalá pudiera mostrártelo.
+Vestí a mi \TP y se ve aún más lindo que antes.
+Vestí a mi \TP y se ve aún más lindo que antes.
+Oh sí, logré vencer a un \TE difícil.\mNecesito fortalecer mi equipo.
+Oh sí, logré vencer a un \TE difícil.\mNecesito fortalecer mi equipo.
+¡Tienes que escuchar esto! Luché contra \TE el otro día.\m¡Fue fácil! Tenía ventaja de tipo.
+¡Tienes que escuchar esto! Luché contra \TE el otro día.\m¡Fue fácil! Tenía ventaja de tipo.
+¡Oye, escucha! Casi atrapo a \TE el otro día.\mOh, estuvo tan cerca.
+¡Oye, escucha! Casi atrapo a \TE el otro día.\mOh, estuvo tan cerca.
+Adivina qué pasó el otro día. Volví a perder la captura de \TE.\mQuizás no soy muy bueno en esto.
+Adivina qué pasó el otro día. Volví a perder la captura de \TE.\mQuizás no soy muy bueno en esto.
+¿Quieres luchar? No va a ser como la última vez que nos encontramos.\mEstaré esperándote alrededor de \TM.
+¿Quieres luchar? No va a ser como la última vez que nos encontramos.\mEstaré esperándote alrededor de \TM.
+¿Quieres luchar? ¡Esta vez voy a ganar!\mEstaré esperándote alrededor de \TM.\m¡Búscame, ¿de acuerdo? Mi \TP estará esperándote.
+¿Quieres luchar? ¡Esta vez voy a ganar!\mEstaré esperándote alrededor de \TM.\m¡Búscame, ¿de acuerdo? Mi \TP estará esperándote.
+¡Hola! Soy \TN...\m¿Cómo va, \PN?
+¡Hola! Soy \TN...\m¿Cómo va, \PN?
+Mi \TP se parece cada vez más a mí. ¡Se está volviendo más lindo!
+Mi \TP se parece cada vez más a mí. ¡Se está volviendo más lindo!
+¿Y sabes? Ahora podemos derrotar a \TE fácilmente.\mDebería desafiar al Gimnasio de Cedolan.
+¿Y sabes? Ahora podemos derrotar a \TE fácilmente.\mDebería desafiar al Gimnasio de Cedolan.
+¿Y sabes? Acabamos de fallar en vencer a \TE por un margen pequeño.\mSupongo que los niveles de mis Pokémon aún no son lo suficientemente altos...
+¿Y sabes? Acabamos de fallar en vencer a \TE por un margen pequeño.\mSupongo que los niveles de mis Pokémon aún no son lo suficientemente altos...
+Debes ser mucho mejor ahora, ¿verdad?\m¿Qué tal si me muestras tu técnica en una verdadera batalla conmigo?\mEstaré esperando en \TM.
+Debes ser mucho mejor ahora, ¿verdad?\m¿Qué tal si me muestras tu técnica en una verdadera batalla conmigo?\mEstaré esperando en \TM.
+¿Dónde estás? ¡Tengamos nuestra batalla pronto!\mEstaré esperando en \TM.
+¿Dónde estás? ¡Tengamos nuestra batalla pronto!\mEstaré esperando en \TM.
+¡Nos vemos luego!
+¡Nos vemos luego!
+¡Soy \TN!
+¡Soy \TN!
+¡Hola, soy \TN!
+¡Hola, soy \TN!
+¡Soy \TN! ¡Buenos días, \PN!
+¡Soy \TN! ¡Buenos días, \PN!
+¡Hola, soy \TN! ¡Buenos días, \PN!
+¡Hola, soy \TN! ¡Buenos días, \PN!
+¡Soy \TN! ¡Buenas tardes, \PN!
+¡Soy \TN! ¡Buenas tardes, \PN!
+¡Hola, soy \TN! ¡Buenas tardes, \PN!
+¡Hola, soy \TN! ¡Buenas tardes, \PN!
+¡Soy \TN! ¡Buenas noches, \PN!
+¡Soy \TN! ¡Buenas noches, \PN!
+¡Hola, soy \TN! ¡Buenas noches, \PN!
+¡Hola, soy \TN! ¡Buenas noches, \PN!
+Mi \TP y yo nos estamos sincronizando más entre nosotros.
+Mi \TP y yo nos estamos sincronizando más entre nosotros.
+Luchamos contra un \TE salvaje y logramos vencerlo en una batalla reñida.\m¡Nos estamos acostumbrando!
+Luchamos contra un \TE salvaje y logramos vencerlo en una batalla reñida.\m¡Nos estamos acostumbrando!
+Pero, ¿sabes qué? Todavía no he atrapado a \TE.\mEstá empezando a ser frustrante...
+Pero, ¿sabes qué? Todavía no he atrapado a \TE.\mEstá empezando a ser frustrante...
+¿Quieres ser mi compañero de práctica de nuevo?\mEstaré esperando en \TM...\m¿Podrías tomarlo un poco más fácil conmigo la próxima vez?
+¿Quieres ser mi compañero de práctica de nuevo?\mEstaré esperando en \TM...\m¿Podrías tomarlo un poco más fácil conmigo la próxima vez?
+¿Cuándo podré verte?\m¡No olvides, \TM!
+¿Cuándo podré verte?\m¡No olvides, \TM!
+¡Adiós! ¡Hablemos de nuevo!
+¡Adiós! ¡Hablemos de nuevo!

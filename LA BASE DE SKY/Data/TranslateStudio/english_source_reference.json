@@ -1,0 +1,56 @@
+{
+  "version": "1.4.0",
+  "policy": "The user-supplied clean English Essentials v21.1 Data is authoritative for base-script English. Context-sensitive identical Spanish literals are resolved by verified call-site mappings. English plugin packs remain reference-only. No map/CommonEvent text is imported.",
+  "baseEnglishSource": {
+    "name": "Data(20260906-012634).zip",
+    "rubyFiles": 312,
+    "filesWithTranslatableText": 172,
+    "intlLiterals": 4912
+  },
+  "pluginEnglishSources": {
+    "Deluxe Battle Kit": {
+      "rubyFiles": 23,
+      "intlLiterals": 331
+    },
+    "Enhanced Battle UI": {
+      "rubyFiles": 6,
+      "intlLiterals": 238
+    },
+    "Raid Battles": {
+      "rubyFiles": 49,
+      "intlLiterals": 853
+    },
+    "EBDX + bundled plugins": {
+      "rubyFiles": 538,
+      "filesWithTranslatableText": 41,
+      "intlLiterals": 554
+    },
+    "Improved Item AI": {
+      "rubyFiles": 5,
+      "filesWithTranslatableText": 0,
+      "intlLiterals": 0
+    },
+    "SOS Battles": {
+      "rubyFiles": 8,
+      "filesWithTranslatableText": 6,
+      "intlLiterals": 78
+    }
+  },
+  "baseSpanishCatalogUnique": 4449,
+  "baseGapsBefore": 103,
+  "baseGapsFilled": 103,
+  "baseGapsAfter": 0,
+  "eventsImported": 0,
+  "bssSeededTranslations": 35,
+  "pluginReferenceFile": "plugin_english_reference.json",
+  "baseReferenceFile": "base_english_reference.json",
+  "projectPluginSnapshotRemaining": 0,
+  "knownSpanishLeakRepairs": true,
+  "strictContextReference": {
+    "file": "strict_context_english.json",
+    "verifiedCallSites": 348,
+    "files": 35,
+    "policy": "Exact code-skeleton matches plus explicitly verified code anchors; resolves ambiguous base UI strings without forcing one global translation."
+  },
+  "abilitySplashEnglishLayout": "Pokémon possessive name on top, localized ability name below; Spanish project layout remains unchanged."
+}

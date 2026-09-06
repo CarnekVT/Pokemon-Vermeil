@@ -1,0 +1,304 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map003]
+Si pulsas F3 mientras estás en modo debug accederás a un comando para poder escribir scripts en tiempo real. Útil para testear cosas.
+Si pulsas F3 mientras estás en modo debug accederás a un comando para poder escribir scripts en tiempo real. Útil para testear cosas.
+\sh¡HOLA, ESTOY GRITANDO!
+\sh¡HOLA, ESTOY GRITANDO!
+Según tu género puedo decir que eres chic\@.
+Según tu género puedo decir que eres chic\@.
+Elige un destino.
+Elige un destino.
+Elige un tema.
+Elige un tema.
+La variable global $player contiene toda la información sobre el jugador, como su clase de entrenador, ID, nombre, equipo Pokémon y dinero que lleva encima.
+La variable global $player contiene toda la información sobre el jugador, como su clase de entrenador, ID, nombre, equipo Pokémon y dinero que lleva encima.
+Esta información está en la clase Player. (Esta información te vendrá bien si quieres modificar scripts).
+Esta información está en la clase Player. (Esta información te vendrá bien si quieres modificar scripts).
+Las conexiones de mapas se utilizan para que dos mapas contiguos queden conectados y puedas pasar andando de uno a otro.
+Las conexiones de mapas se utilizan para que dos mapas contiguos queden conectados y puedas pasar andando de uno a otro.
+Las conexiones vienen definidas en el PBS "map_connections.txt". En el menú Debug hay una opción para crearlas de forma muy sencilla.
+Las conexiones vienen definidas en el PBS "map_connections.txt". En el menú Debug hay una opción para crearlas de forma muy sencilla.
+Para ello, pulsa F9 (menú Debug), y dentro la opción "Editor de archivos del PBS..." > "Editar map_connections.txt". Dentro tienes las instrucciones, y puedes usar el ratón para mover los mapas.
+Para ello, pulsa F9 (menú Debug), y dentro la opción "Editor de archivos del PBS..." > "Editar map_connections.txt". Dentro tienes las instrucciones, y puedes usar el ratón para mover los mapas.
+Cada tile del tileset (los gráficos para poner en los mapas) tiene un valor númerico asociado, que es el que le da propiedades a ese gráfico (que dejes huellas al pisarlo, que puedas saltar por un borde, etc).
+Cada tile del tileset (los gráficos para poner en los mapas) tiene un valor númerico asociado, que es el que le da propiedades a ese gráfico (que dejes huellas al pisarlo, que puedas saltar por un borde, etc).
+Estos Tags de Terreno o Terrain Tags, como se les conoce en inglés, son números a partir del 1, ya que el terreno 0 no hace nada.
+Estos Tags de Terreno o Terrain Tags, como se les conoce en inglés, son números a partir del 1, ya que el terreno 0 no hace nada.
+Por ejemplo, el tag 1 es el que hace que saltes a través de un bordillo. Sin embargo, el hecho de que solo lo puedas saltar en una única dirección es por las flechas de dirección, que son otra opción distinta.
+Por ejemplo, el tag 1 es el que hace que saltes a través de un bordillo. Sin embargo, el hecho de que solo lo puedas saltar en una única dirección es por las flechas de dirección, que son otra opción distinta.
+En el caso de los tiles de hierba, para que tengan encuentros con Pokémon salvajes al pisarlos, tienen un 2. Si quieres ver más efectos te recomiendo que entre en el editor de tiles y mires los que ya existen.
+En el caso de los tiles de hierba, para que tengan encuentros con Pokémon salvajes al pisarlos, tienen un 2. Si quieres ver más efectos te recomiendo que entre en el editor de tiles y mires los que ya existen.
+Si tienes dudas sobre ellos puedes consultar la wiki, donde viene información en más detalle.
+Si tienes dudas sobre ellos puedes consultar la wiki, donde viene información en más detalle.
+Ten en cuenta que desde el propio editor de tilesets del RPG maker XP no te deja poner un valor mayor que 7, y después pasa a 0. SIn embargo, hay más de 7 tags de terreno que puedes elegir.
+Ten en cuenta que desde el propio editor de tilesets del RPG maker XP no te deja poner un valor mayor que 7, y después pasa a 0. SIn embargo, hay más de 7 tags de terreno que puedes elegir.
+Para acceder al editor de tags de terreno, ve al menú Debug (F9) y puilsa "Otros Editores..." > "Editar Tags de Terreno".
+Para acceder al editor de tags de terreno, ve al menú Debug (F9) y puilsa "Otros Editores..." > "Editar Tags de Terreno".
+Yo soy un evento que cuando habla te muestra un cartel con su nombre. Para que aparezca tienes que poner el comando que sale encima de este mensaje.
+Yo soy un evento que cuando habla te muestra un cartel con su nombre. Para que aparezca tienes que poner el comando que sale encima de este mensaje.
+Añádelo de nuevo para que aparezca el nombre de otro evento.
+Añádelo de nuevo para que aparezca el nombre de otro evento.
+Por último, acuérdate de siempre llamar a "Namebox.dispose" cuando el personaje acabe de hablar para que se quite.
+Por último, acuérdate de siempre llamar a "Namebox.dispose" cuando el personaje acabe de hablar para que se quite.
+Voy a mostrarte más de 4 opciones al mismo tiempo. Para hacer esto puedes poner varias veces el comando "Show Choices".
+Voy a mostrarte más de 4 opciones al mismo tiempo. Para hacer esto puedes poner varias veces el comando "Show Choices".
+Elige una opción:
+Elige una opción:
+Has elegido la Opción 1.
+Has elegido la Opción 1.
+Has elegido la Opción 2.
+Has elegido la Opción 2.
+Has elegido la Opción 3.
+Has elegido la Opción 3.
+Has elegido la Opción 4.
+Has elegido la Opción 4.
+Has elegido la Opción 5.
+Has elegido la Opción 5.
+Has elegido la Opción 6.
+Has elegido la Opción 6.
+Has elegido la Opción 7.
+Has elegido la Opción 7.
+Has cancelado la elección.
+Has cancelado la elección.
+Elige una opción. No puedes cancelar sin elegir una.
+Elige una opción. No puedes cancelar sin elegir una.
+Por favor, elige una. Si cancelas, se elegirá por defecto la opción 3.
+Por favor, elige una. Si cancelas, se elegirá por defecto la opción 3.
+¡Esta opción tiene un nombre muy largo!
+¡Esta opción tiene un nombre muy largo!
+Pociones: {1}
+Pociones: {1}
+Este es un ejemplo sobre cómo modificar opciones, usando los scripts hide_choice y rename_choice.
+Este es un ejemplo sobre cómo modificar opciones, usando los scripts hide_choice y rename_choice.
+Esta opción se ha renombrado con rename_choice.
+Esta opción se ha renombrado con rename_choice.
+Esta opción está oculta si el jugador no es chico.
+Esta opción está oculta si el jugador no es chico.
+Esta opción está oculta si el jugador no es chica.
+Esta opción está oculta si el jugador no es chica.
+El modo Debug es una forma especial de jugar. Te desbloquea varias opciones para hacer más sencillo el acceso a algunas partes del juego para el testeo.
+El modo Debug es una forma especial de jugar. Te desbloquea varias opciones para hacer más sencillo el acceso a algunas partes del juego para el testeo.
+Si juegas en modo Debug puedes abrir el menú Debug pulsando F9 (también puedes acceder desde el menú de pausa).
+Si juegas en modo Debug puedes abrir el menú Debug pulsando F9 (también puedes acceder desde el menú de pausa).
+El menú de equipo y el almacenamiento de Pokémon tienen un menú debug similar para poder modificar a un Pokémon, por ejemplo su nivel o especie.
+El menú de equipo y el almacenamiento de Pokémon tienen un menú debug similar para poder modificar a un Pokémon, por ejemplo su nivel o especie.
+También puedes usar MOs en cualquier momento, y si pulsas la tencla Cntrl al moverte, podrás atravesar cualquier sitio.
+También puedes usar MOs en cualquier momento, y si pulsas la tencla Cntrl al moverte, podrás atravesar cualquier sitio.
+La tecla Cntrl también te permitirá huir de combates contra entrenadores Pokémon si la pulsas mientras le das a la opción de "huir".
+La tecla Cntrl también te permitirá huir de combates contra entrenadores Pokémon si la pulsas mientras le das a la opción de "huir".
+En la wiki puedes encontrar todas las posibles opciones del modo Debug.
+En la wiki puedes encontrar todas las posibles opciones del modo Debug.
+La variable $DEBUG se acaba de poner a true. Esta variable se activa de forma automática al abrir el juego desde dentro del RPG Maker XP.
+La variable $DEBUG se acaba de poner a true. Esta variable se activa de forma automática al abrir el juego desde dentro del RPG Maker XP.
+La activación de esta variable es lo que habilita este modo de juego especial.
+La activación de esta variable es lo que habilita este modo de juego especial.
+Con este comando se obtienen todas las 16 medallas del juego, de ambas regiones.
+Con este comando se obtienen todas las 16 medallas del juego, de ambas regiones.
+El comando para añadir una medalla en concreto es: $player.badges[X]=true, donde tienes que sustituir la X por el número de la medalla.
+El comando para añadir una medalla en concreto es: $player.badges[X]=true, donde tienes que sustituir la X por el número de la medalla.
+Recuerda que la primera medalla es la 0, la segunda la 1, la tercera la 2... El número que pongas en la X es siempre uno menos que el número de medalla.
+Recuerda que la primera medalla es la 0, la segunda la 1, la tercera la 2... El número que pongas en la X es siempre uno menos que el número de medalla.
+Por ejemplo, para desbloquear la tercera medalla del juego, pondrías $player.badges[2]=true.
+Por ejemplo, para desbloquear la tercera medalla del juego, pondrías $player.badges[2]=true.
+También puedes comprobar cuántas medallas tiene el jugador con el comando $player.badges.
+También puedes comprobar cuántas medallas tiene el jugador con el comando $player.badges.
+Si estás en modo Debug, puedes cambiar las medallas que tiene el jugador desde el menú Debug.
+Si estás en modo Debug, puedes cambiar las medallas que tiene el jugador desde el menú Debug.
+Pulsa F8 para hacer una captura de pantalla del juego. Se guardará en la misma carpeta que la partida guardada.
+Pulsa F8 para hacer una captura de pantalla del juego. Se guardará en la misma carpeta que la partida guardada.
+Elige una opción de texto.
+Elige una opción de texto.
+\bEste comando es para texto en azul. Algunos lo usan para personajes masculinos. \rEste otro es para texto en azul. Lo mismo pero para chicas.
+\bEste comando es para texto en azul. Algunos lo usan para personajes masculinos. \rEste otro es para texto en azul. Lo mismo pero para chicas.
+(Spoiler: nadie usa esto para diferenciar géneros, es una cosa muy de tercera generación).
+(Spoiler: nadie usa esto para diferenciar géneros, es una cosa muy de tercera generación).
+\pgEsto te pone el color según el género del jugador. \pogEsto te pone el color del género opuesto al de tu jugador.
+\pgEsto te pone el color según el género del jugador.  \pogEsto te pone el color del género opuesto al de tu jugador.
+(Spoiler: tampoco lo usa nadie).
+(Spoiler: tampoco lo usa nadie).
+\c[0]Default, \c[1]azul, \c[2]rojo, \c[3]verde, \c[4]cyan, \c[5]magenta, \c[6]amarillo, \c[7]gris, \c[8]blanco, \c[9]púrpura, \c[10]naranja, \c[11]oscuro, \c[12]claro.
+\c[0]Default, \c[1]azul, \c[2]rojo, \c[3]verde, \c[4]cyan, \c[5]magenta, \c[6]amarillo, \c[7]gris, \c[8]blanco, \c[9]púrpura, \c[10]naranja, \c[11]oscuro, \c[12]claro.
+<b>Texto en negrita,</b> <i>texto en cursiva,</i> <u>texto subrayado,</u> <s>texto tachado,</s> <outln>outline text,</outln> <outln2>thicker outline text.</outln2>
+<b>Texto en negrita,</b> <i>texto en cursiva,</i> <u>texto subrayado,</u> <s>texto tachado,</s> <outln>outline text,</outln> <outln2>thicker outline text.</outln2>
+<fn=Power Clear Bold>Texto Power Clear Bold,</fn> <fs=25>Texto tamaño 25,</fs> <fs=40>Texto tamaño 40,</fs> <o=128>Texto semi transparente.</o>
+<fn=Power Clear Bold>Texto Power Clear Bold,</fn> <fs=25>Texto tamaño 25,</fs> <fs=40>Texto tamaño 40,</fs> <o=128>Texto semi transparente.</o>
+Esto es un salto\nde línea. Este texto está \n<r>alienado a la derecha hasta el salto de\n línea. El texto está <ac>centrado</ac> aquí. El texto está <ar>alineado a la derecha</ar> aquí.
+Esto es un salto\nde línea. Este texto está \n<r>alienado a la derecha hasta el salto de\n línea. El texto está <ac>centrado</ac> aquí.  El texto está <ar>alineado a la derecha</ar> aquí.
+\PN es el nombre del jugador, \PM es el dinero del jugador, \v[12] es el contenido de la Variable 12.
+\PN es el nombre del jugador, \PM es el dinero del jugador, \v[12] es el contenido de la Variable 12.
+Este es el <icon=bagPocket3> del bolsillo 3, que está en la carpeta Graphics/Icons.
+Este es el <icon=bagPocket3> del bolsillo 3, que está en la carpeta Graphics/Icons.
+\GMostrando la ventana de dinero.
+\GMostrando la ventana de dinero.
+\CNMostrando la ventana de monedas.
+\CNMostrando la ventana de monedas.
+\G\CNMostrando las dos al mismo tiempo. La de monedas tiene que ser la segunda.
+\G\CNMostrando las dos al mismo tiempo. La de monedas tiene que ser la segunda.
+\f[introBoy]Mostrando el dibujo de la intro del chico, que está en Graphics/Pictures.
+\f[introBoy]Mostrando el dibujo de la intro del chico, que está en Graphics/Pictures.
+\ff[introBoy]Mostrando de nuevo la misma imagen, pero ahora recortada a los 96x96 píxeles de la parte superior izquierda de la imagen.
+\ff[introBoy]Mostrando de nuevo la misma imagen, pero ahora recortada a los 96x96 píxeles de la parte superior izquierda de la imagen.
+\w[signskin]La ventana de texto se ha cambiado a "signskin" aquí.
+\w[signskin]La ventana de texto se ha cambiado a "signskin" aquí.
+\l[3]Esta ventana de texto tiene 3 líneas en vez de 2, y así más texto puede ser mostrado al mismo tiempo. Esto se usa en la pantalla de intro.
+\l[3]Esta ventana de texto tiene 3 líneas en vez de 2, y así más texto puede ser mostrado al mismo tiempo. Esto se usa en la pantalla de intro.
+\wuEste mensaje sale arriba.
+\wuEste mensaje sale arriba.
+\wmEste mensaje está en medio.
+\wmEste mensaje está en medio.
+\wuEsta ventana de texto está\wm saltando por la escena\wd de una manera bastante desagradable.
+\wuEsta ventana de texto está\wm saltando por la escena\wd de una manera bastante desagradable.
+\opEsta ventana de texto se desliza hacia el centro al aparecer.
+\opEsta ventana de texto se desliza hacia el centro al aparecer.
+\clEsta otra se desliza al salir.
+\clEsta otra se desliza al salir.
+\ts[]¡Este texto aparece de repente!
+\ts[]¡Este texto aparece de repente!
+\ts[5]Este texto aparece despacio.
+\ts[5]Este texto aparece despacio.
+La velocidad de texto lenta es 4, la normal es 2, la rápida es 1. Se toma 1/80 parte de un segundo para hacer que el siguiente caracter del mensaje aparezca.
+La velocidad de texto lenta es 4, la normal es 2, la rápida es 1. Se toma 1/80 parte de un segundo para hacer que el siguiente caracter del mensaje aparezca.
+\se[Pkmn move learnt]Efecto de sonido "Pkmn move learnt" sonando.
+\se[Pkmn move learnt]Efecto de sonido "Pkmn move learnt" sonando.
+El efecto de sonido "Item get" va a sonar. \me[Item get]
+El efecto de sonido "Item get" va a sonar. \me[Item get]
+Como siempre, en la wiki tienes mucha más información sobre cómo usar todos estos comandos.
+Como siempre, en la wiki tienes mucha más información sobre cómo usar todos estos comandos.
+¡\PN ha recibido la Pokédex!
+¡\PN ha recibido la Pokédex!
+Ya tienes una Pokédex.
+Ya tienes una Pokédex.
+No tienes ningún Pokémon disponible en tu equipo.
+No tienes ningún Pokémon disponible en tu equipo.
+\v[2] es el primer Pokémon de tu equipo.
+\v[2] es el primer Pokémon de tu equipo.
+Tienes a Celebi en tu equipo.
+Tienes a Celebi en tu equipo.
+No tienes a Celebi en tu equipo.
+No tienes a Celebi en tu equipo.
+Recuerda leer la wiki para cualquier duda que tengas. Tienes un acceso directo a ella en la carpeta principal del juego.
+Recuerda leer la wiki para cualquier duda que tengas. Tienes un acceso directo a ella en la carpeta principal del juego.
+¡Has recibido el Pokégear y las Zapatillas de correr!
+¡Has recibido el Pokégear y las Zapatillas de correr!
+¡Has recibido un equipo Pokémon de prueba!
+¡Has recibido un equipo Pokémon de prueba!
+Vaya, ¿te encuentras bien? Espero que la próxima vez tengas más suerte. ¡Deja que te cure!
+Vaya, ¿te encuentras bien? Espero que la próxima vez tengas más suerte. ¡Deja que te cure!
+<<[>>Este mensaje ha aparecido porque el interruptor 1, llamado "Empezar de nuevo", se ha activado de forma automática al haberte debilitado. Ahora volverá a apagarse.]
+<<[>>Este mensaje ha aparecido porque el interruptor 1, llamado "Empezar de nuevo", se ha activado de forma automática al haberte debilitado. Ahora volverá a apagarse.]
+Elige un Pokémon errante.
+Elige un Pokémon errante.
+El interruptor 53 está ON. Latias y Latios están errantes.
+El interruptor 53 está ON. Latias y Latios están errantes.
+El interruptor 53 está OFF. Latias y Latios no están errantes. ¿Quieres hacer que estén errantes?
+El interruptor 53 está OFF. Latias y Latios no están errantes. ¿Quieres hacer que estén errantes?
+Latias y Latios ahora están errantes.
+Latias y Latios ahora están errantes.
+El interruptor 54 está ON. Kyogre está errante.
+El interruptor 54 está ON. Kyogre está errante.
+El interruptor 54 está OFF. Kyogre no están errantes. ¿Quieres hacer que esté errante?
+El interruptor 54 está OFF. Kyogre no están errantes.  ¿Quieres hacer que esté errante?
+Kyogre ahora está errante.
+Kyogre ahora está errante.
+El interruptor 55 está ON. Entei está errante.
+El interruptor 55 está ON. Entei está errante.
+El interruptor 55 está OFF. Entei no está errantes. ¿Quieres hacer que esté errante?
+El interruptor 55 está OFF. Entei no está errantes.  ¿Quieres hacer que esté errante?
+Entei ahora está errante.
+Entei ahora está errante.
+Casino
+Casino
+Zona de Entrenadores
+Zona de Entrenadores
+Zona de Pokémon Oscuros
+Zona de Pokémon Oscuros
+Mapa de puentes
+Mapa de puentes
+Mapa de agua
+Mapa de agua
+Puerto
+Puerto
+Camino de bicis
+Camino de bicis
+Cancelar
+Cancelar
+Sobre el jugador
+Sobre el jugador
+Conexión de mapas
+Conexión de mapas
+Tags de Terreno
+Tags de Terreno
+Opción 1
+Opción 1
+Opción 2
+Opción 2
+Opción 3
+Opción 3
+Opción 4
+Opción 4
+Opción 5
+Opción 5
+Opción 6
+Opción 6
+Opción 7
+Opción 7
+¡No me vas a ver!
+¡No me vas a ver!
+El jugador es chico
+El jugador es chico
+La jugadora es chica
+La jugadora es chica
+Modo Debug
+Modo Debug
+Dar todas las medallas
+Dar todas las medallas
+Captura de pantalla
+Captura de pantalla
+Colores de texto
+Colores de texto
+Formato de texto
+Formato de texto
+Insertar texto y gráficos
+Insertar texto y gráficos
+Ventana de gráfico e info
+Ventana de gráfico e info
+Apariencia de la ventana
+Apariencia de la ventana
+Velocidad de texto y audio
+Velocidad de texto y audio
+Audio
+Audio
+¿Cuál es tu primer Pkmn?
+¿Cuál es tu primer Pkmn?
+¿Tienes a Celebi contigo?
+¿Tienes a Celebi contigo?
+Dar un Celebi
+Dar un Celebi
+Latias/Latios
+Latias/Latios
+Kyogre
+Kyogre
+Entei
+Entei
+Sí
+Sí
+No
+No
+Centro Pokémon
+Centro Pokémon
+Tienda Pokémon
+Tienda Pokémon
+Gimnasio Pokémon
+Gimnasio Pokémon
+Guardería
+Guardería
+Cueva
+Cueva
+Zona Safari
+Zona Safari
+Concurso de Bichos
+Concurso de Bichos
+Frente de Batalla
+Frente de Batalla

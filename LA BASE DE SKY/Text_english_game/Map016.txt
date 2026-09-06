@@ -1,0 +1,6 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map016]
+\sign[signskin]P3: Tienda de juegos de TV
+\sign[signskin]P3: Tienda de juegos de TV

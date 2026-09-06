@@ -1,0 +1,12 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map034]
+Este es otro puzle de tirar piedras en agujeros.
+Este es otro puzle de tirar piedras en agujeros.
+Es idéntico al normal, salvo por el detalle de que la piedra que cae es una piedra que no puede ser movida.
+Es idéntico al normal, salvo por el detalle de que la piedra que cae es una piedra que no puede ser movida.
+A la derecha hay un ejemplo de hielo resquebrajado. Puedes andar por encima de él una vez, pero si lo pisas de nuevo caerás a otro mapa.
+A la derecha hay un ejemplo de hielo resquebrajado. Puedes andar por encima de él una vez, pero si lo pisas de nuevo caerás a otro mapa.
+Para crear un tile con el efecto deslizante hay que ponerle el Tag de Terreno 12.
+Para crear un tile con el efecto deslizante hay que ponerle el Tag de Terreno 12.

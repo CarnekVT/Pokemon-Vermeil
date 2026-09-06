@@ -1,0 +1,84 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map062]
+Bienvenido a la Fábrica Batalla.
+Bienvenido a la Fábrica Batalla.
+¿Te gustaría participar en un combate doble?
+¿Te gustaría participar en un combate doble?
+¿Te gustaría participar en el reto de Nivel 50, o en el reto de Nivel Abierto?
+¿Te gustaría participar en el reto de Nivel 50, o en el reto de Nivel Abierto?
+Por favor, sígueme.
+Por favor, sígueme.
+Vuelve cuando quieras.
+Vuelve cuando quieras.
+Enhorabuena por tu victoria.
+Enhorabuena por tu victoria.
+Voy a recuperar los Pokémon de préstamo y te devolveré tu equipo Pokémon.
+Voy a recuperar los Pokémon de préstamo y te devolveré tu equipo Pokémon.
+Por favor, acepta estos Puntos Batalla.
+Por favor, acepta estos Puntos Batalla.
+\PN obtuvo \v[1] Puntos Batalla.
+\PN obtuvo \v[1] Puntos Batalla.
+¿Quieres grabar tu último combate?
+¿Quieres grabar tu último combate?
+\se[Pkmn exp full]El combate se ha guardado.
+\se[Pkmn exp full]El combate se ha guardado.
+Se van a registrar tus resultados.\wtnp[15]
+Se van a registrar tus resultados.\wtnp[15]
+Gracias por participar.
+Gracias por participar.
+Te estábamos esperando. Por favor, sígueme.
+Te estábamos esperando. Por favor, sígueme.
+Lo siento, pero no guardaste la partida antes de terminar tu último reto.
+Lo siento, pero no guardaste la partida antes de terminar tu último reto.
+Lamento decirte que tu reto se ha cancelado.
+Lamento decirte que tu reto se ha cancelado.
+¿Revisar los resultados de qué reto?
+¿Revisar los resultados de qué reto?
+Resultados de \PN de la Fábrica Batalla Nivel 50 individual:
+Resultados de \PN de la Fábrica Batalla Nivel 50 individual:
+Última racha de victorias: \v[1]\nRécord de racha de victorias: \v[2]
+Última racha de victorias: \v[1]\nRécord de racha de victorias: \v[2]
+Resultados de \PN de la Fábrica Batalla Nivel Libre individual:
+Resultados de \PN de la Fábrica Batalla Nivel Libre individual:
+Resultados de \PN de la Fábrica Batalla Nivel 50 doble:
+Resultados de \PN de la Fábrica Batalla Nivel 50 doble:
+Resultados de \PN de la Fábrica Batalla Nivel Libre doble:
+Resultados de \PN de la Fábrica Batalla Nivel Libre doble:
+¿Sobre qué necesitas información?
+¿Sobre qué necesitas información?
+En la Fábrica Batalla tendrás que combatir usando Pokémon de préstamo. Deberás elegir tres de una selección de seis.
+En la Fábrica Batalla tendrás que combatir usando Pokémon de préstamo. Deberás elegir tres de una selección de seis.
+Según vayas avanzando de ronda te irás encontrando con Pokémon más fuertes que en rondas anteriores, tanto para ti como para tus rivales
+Según vayas avanzando de ronda te irás encontrando con Pokémon más fuertes que en rondas anteriores, tanto para ti como para tus rivales
+Cada vez que derrotes a un Entrenador, tendrás la posibilidad de intercambiar a uno de tus Pokémon con uno de los suyos.
+Cada vez que derrotes a un Entrenador, tendrás la posibilidad de intercambiar a uno de tus Pokémon con uno de los suyos.
+No podrás comprobar los datos de ese Pokémon a la hora de elegir, por lo que deberás recordar sus movimientos en base a los usados en el combate.
+No podrás comprobar los datos de ese Pokémon a la hora de elegir, por lo que deberás recordar sus movimientos en base a los usados en el combate.
+Tu equipo mantendrá el mismo orden incluso tras el intercambio. Por ejemplo, si intercambias a tu segundo Pokémon, el nuevo será ahora el segundo.
+Tu equipo mantendrá el mismo orden incluso tras el intercambio. Por ejemplo, si intercambias a tu segundo Pokémon, el nuevo será ahora el segundo.
+No hay combates guardados.
+No hay combates guardados.
+¿Te gustaría participar en un combate individual?
+¿Te gustaría participar en un combate individual?
+Sí
+Sí
+No
+No
+Nivel 50
+Nivel 50
+Nivel Libre
+Nivel Libre
+Cancelar
+Cancelar
+Reglas Fábrica Batalla
+Reglas Fábrica Batalla
+Reproducir combate
+Reproducir combate
+Reglas básicas
+Reglas básicas
+Intercambios
+Intercambios
+Salir
+Salir

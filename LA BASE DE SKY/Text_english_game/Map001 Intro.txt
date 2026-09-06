@@ -1,0 +1,74 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map001]
+<ac>\c[8]\l[3](Please refer to the\nPokémon Essentials Wiki\nfor documentation.)
+<ac>\c[8]\l[3](Please refer to the\nPokémon Essentials Wiki\nfor documentation.)
+\bHello! Sorry to keep you waiting!
+\bHello! Sorry to keep you waiting!
+\bWelcome to the world of Pokémon.
+\bWelcome to the world of Pokémon.
+\bMy name is Oak.
+\bMy name is Oak.
+\bPeople call me the Pokémon Professor.
+\bPeople call me the Pokémon Professor.
+\bIf you need help, I am certainly capable of giving it.
+\bIf you need help, I am certainly capable of giving it.
+\bWell then, without further ado...
+\bWell then, without further ado...
+<ac>\c[0]\l[3]You are about to enter a world\nwhere you will embark on a grand\nadventure of your very own.
+<ac>\c[0]\l[3]You are about to enter a world\nwhere you will embark on a grand\nadventure of your very own.
+<ac>\c[0]\l[5]Speak to people and check things\n wherever you go, be it in towns,\nroads or caves.\n Gather information and hints from\n every possible source.
+<ac>\c[0]\l[5]Speak to people and check things\n wherever you go, be it in towns,\nroads or caves.\n Gather information and hints from\n every possible source.
+<ac>\c[0]\l[3]New paths will open to you when\n you help people in need, overcome\n challenges, and solve mysteries.
+<ac>\c[0]\l[3]New paths will open to you when\n you help people in need, overcome\n challenges, and solve mysteries.
+<ac>\c[0]\l[7]At times, you will be challenged\n by others to a battle.\n At other times, wild creatures\nmay stand in your way.\n\n By overcoming such hurdles,\nyou will gain great power.
+<ac>\c[0]\l[7]At times, you will be challenged\n by others to a battle.\n At other times, wild creatures\nmay stand in your way.\n\n By overcoming such hurdles,\nyou will gain great power.
+<ac>\c[0]\l[2]However, your adventure is not\n solely about becoming powerful.
+<ac>\c[0]\l[2]However, your adventure is not\n solely about becoming powerful.
+<ac>\c[0]\l[7]On your travels, we hope that\n you will meet countless people\n and, through them, achieve\npersonal growth.\n\n This is the most important\nobjective of this adventure.
+<ac>\c[0]\l[7]On your travels, we hope that\n you will meet countless people\n and, through them, achieve\npersonal growth.\n\n This is the most important\nobjective of this adventure.
+\bThis world is inhabited by creatures we call Pokémon.
+\bThis world is inhabited by creatures we call Pokémon.
+\bPeople and Pokémon live together by supporting each other.
+\bPeople and Pokémon live together by supporting each other.
+\bSome people play with Pokémon, some battle with them.
+\bSome people play with Pokémon, some battle with them.
+\bBut we don't know everything about Pokémon yet.
+\bBut we don't know everything about Pokémon yet.
+\bThere are still many mysteries to solve.
+\bThere are still many mysteries to solve.
+\bThat's why I study Pokémon every day.
+\bThat's why I study Pokémon every day.
+\bAre you a boy or a girl?
+\bAre you a boy or a girl?
+\bNow what did you say your name was?
+\bNow what did you say your name was?
+\bSo you're \PN?
+\bSo you're \PN?
+\bWhat is your name?
+\bWhat is your name?
+\b\PN, are you ready?
+\b\PN, are you ready?
+\bYour very own Pokémon story is about to unfold.
+\bYour very own Pokémon story is about to unfold.
+\bYou'll face fun times and tough challenges.
+\bYou'll face fun times and tough challenges.
+\bA world of dreams and adventures with Pokémon awaits! Let's go!
+\bA world of dreams and adventures with Pokémon awaits! Let's go!
+\bEnjoy the Starter Kit. You should give credit when using it.
+\bEnjoy the Starter Kit. You should give credit when using it.
+Controls
+Controls
+Adventure
+Adventure
+No info needed
+No info needed
+Boy
+Boy
+Girl
+Girl
+Yes
+Yes
+No
+No

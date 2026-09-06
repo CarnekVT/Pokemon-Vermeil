@@ -1,0 +1,36 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map071]
+¡Ahoy! ¿A dónde te gustaría navegar?
+¡Ahoy! ¿A dónde te gustaría navegar?
+Muy bien, partimos a la Región Tiall. ¡Levad anclas!
+Muy bien, partimos a la Región Tiall. ¡Levad anclas!
+Muy bien, partimos a la Isla Origen. ¡Levad anclas!
+Muy bien, partimos a la Isla Origen. ¡Levad anclas!
+Muy bien, partimos a la Isla Dyson. ¡Levad anclas!
+Muy bien, partimos a la Isla Dyson. ¡Levad anclas!
+Hazme saber cuando quieras hacerte a la mar.
+Hazme saber cuando quieras hacerte a la mar.
+Ya te he dado el Ticket Aurora. ¿Has visitado ya la Isla Origen?
+Ya te he dado el Ticket Aurora. ¿Has visitado ya la Isla Origen?
+Toma, ten este Ticket Aurora.
+Toma, ten este Ticket Aurora.
+Puedes usarlo para ir a la Isla Origen.
+Puedes usarlo para ir a la Isla Origen.
+Vaya, no tienes espacio en la Mochila.
+Vaya, no tienes espacio en la Mochila.
+Ya te he dado el Mapa Viejo. ¿Has visitado ya la Isla Origen?
+Ya te he dado el Mapa Viejo. ¿Has visitado ya la Isla Origen?
+Toma, ten este Mapa Viejo.
+Toma, ten este Mapa Viejo.
+Puedes usarlo para visitar la Isla Dyson.
+Puedes usarlo para visitar la Isla Dyson.
+Región Tiall
+Región Tiall
+Isla Origen
+Isla Origen
+Isla Dyson
+Isla Dyson
+Salir
+Salir

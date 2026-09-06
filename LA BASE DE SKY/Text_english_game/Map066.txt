@@ -1,0 +1,10 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map066]
+¡Hola, soy el cambia formas! ¿Deseas cambiar la forma de alguno de tus Pokémon?
+¡Hola, soy el cambia formas! ¿Deseas cambiar la forma de alguno de tus Pokémon?
+Sí
+Sí
+No
+No

@@ -1,0 +1,102 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map031]
+¿Te he visto yo o me has visto tú a mí?
+¿Te he visto yo o me has visto tú a mí?
+¿Deberíamos intercambiar números, para poder pelear de nuevo?
+¿Deberíamos intercambiar números, para poder pelear de nuevo?
+¡Tengamos la revancha!
+¡Tengamos la revancha!
+¡Me haré más fuerte, y te derrotaré la próxima vez!
+¡Me haré más fuerte, y te derrotaré la próxima vez!
+No creo que sea capaz de ganarte nunca.
+No creo que sea capaz de ganarte nunca.
+Esperaré aquí entonces.
+Esperaré aquí entonces.
+Necesitas tener al menos dos Pokémon o un entrenador compañero si quieres pelear contra nosotros.
+Necesitas tener al menos dos Pokémon o un entrenador compañero si quieres pelear contra nosotros.
+Ah, parece que tenemos un rival. ¿Estás listo, Bob?
+Ah, parece que tenemos un rival. ¿Estás listo, Bob?
+¡Has sido muy fuerte!
+¡Has sido muy fuerte!
+¿Quieres hacer equipo conmigo de nuevo?
+¿Quieres hacer equipo conmigo de nuevo?
+¡\PN ha hecho equipo con Aura!\me[Item get]\wtnp[40]
+¡\PN ha hecho equipo con Aura!\me[Item get]\wtnp[40]
+Pues nada.
+Pues nada.
+Veamos si eres capaz de vencerte a ti mismo.
+Veamos si eres capaz de vencerte a ti mismo.
+¡Enhorabuena! Has conseguido vencer a tu gran equipo.
+¡Enhorabuena! Has conseguido vencer a tu gran equipo.
+¡Pelea conmigo ahora!
+¡Pelea conmigo ahora!
+¿Puedo añadirte a mis contactos?
+¿Puedo añadirte a mis contactos?
+Digo lo mismo tras cada combate. ¿Que por qué? ¿Y por qué no?
+Digo lo mismo tras cada combate. ¿Que por qué? ¿Y por qué no?
+Hay algo invisible aquí en medio. ¿Usar el Visor Silph?
+Hay algo invisible aquí en medio. ¿Usar el Visor Silph?
+Hay algo invisible aquí en medio. ¿Usar el Detector Devon?
+Hay algo invisible aquí en medio. ¿Usar el Detector Devon?
+Hay algo invisible en el camino.
+Hay algo invisible en el camino.
+¡El Pokémon invisible se ha vuelto completamente visible!
+¡El Pokémon invisible se ha vuelto completamente visible!
+¡El Pokémon sorprendido te ha atacado!
+¡El Pokémon sorprendido te ha atacado!
+Ah, parece que tenemos un rival. ¿Estás lista, Alice?
+Ah, parece que tenemos un rival. ¿Estás lista, Alice?
+¡Qué gran fuerza la tuya!
+¡Qué gran fuerza la tuya!
+¡Tengo mi propio fondo de combate!
+¡Tengo mi propio fondo de combate!
+Si 2 entrenadores te ven al mismo tiempo, el combate se vuelve un combate Doble.
+Si 2 entrenadores te ven al mismo tiempo, el combate se vuelve un combate Doble.
+En este caso, 3 entrenadores te han visto al mismo tiempo, así que primero has peleado conmigo.
+En este caso, 3 entrenadores te han visto al mismo tiempo, así que primero has peleado conmigo.
+Después, los otros dos entrenadores que te han visto a la vez se han vuelto un combate doble.
+Después, los otros dos entrenadores que te han visto a la vez se han vuelto un combate doble.
+Primero te has enfrentado a mí porque mi número de evento (el 7) viene antes de los números de ID del montañero y del pescador (que son el 8 y el 9).
+Primero te has enfrentado a mí porque mi número de evento (el 7) viene antes de los números de ID del montañero y del pescador (que son el 8 y el 9).
+¿Quieres hacer equipo conmigo?
+¿Quieres hacer equipo conmigo?
+¡Esta batalla transcurrirá sin problemas!
+¡Esta batalla transcurrirá sin problemas!
+¿Cómo has logrado enfrentarnos a los tres?
+¿Cómo has logrado enfrentarnos a los tres?
+¡Voy a usar al Pokémon que acabo de pescar!
+¡Voy a usar al Pokémon que acabo de pescar!
+No sé por qué mi Magikarp no ha sido capaz de derrotarte.
+No sé por qué mi Magikarp no ha sido capaz de derrotarte.
+¡Hola, \PN! ¡Soy tu Rival!
+¡Hola, \PN! ¡Soy tu Rival!
+¿Quieres darme un nombre, o dejar el que viene por defecto en el archivo trainers.txt?
+¿Quieres darme un nombre, o dejar el que viene por defecto en el archivo trainers.txt?
+¿Nombre del Rival?
+¿Nombre del Rival?
+Así que mi nombre es \v[12], ¿eh? Pues vale.
+Así que mi nombre es \v[12], ¿eh? Pues vale.
+¡Vamos directos al combate!
+¡Vamos directos al combate!
+Me doy el piro, vampiro. ¡Nos vemos!
+Me doy el piro, vampiro. ¡Nos vemos!
+¡Hola! ¡Me gustan los pantalones cortos!
+¡Hola! ¡Me gustan los pantalones cortos!
+¡No puedes hacer un evento de entrenador más simple que yo!
+¡No puedes hacer un evento de entrenador más simple que yo!
+¡Prepárate para un combate doble!
+¡Prepárate para un combate doble!
+¡Asegúrate de que los rivales en combates dobles tienen al menos 2 Pokémon!
+¡Asegúrate de que los rivales en combates dobles tienen al menos 2 Pokémon!
+Entrada a la mazmorra de Bosque Aleatorio.
+Entrada a la mazmorra de Bosque Aleatorio.
+Sí
+Sí
+No
+No
+Renombrar
+Renombrar
+Cancelar
+Cancelar

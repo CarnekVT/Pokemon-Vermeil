@@ -1,0 +1,1 @@
+#===============================================================================\n# BSS v0.8.26 - Composer tests are one-shot and never global.\n# Legacy ebdxBackdropForceGlobal is intentionally ignored by this authority.\n#===============================================================================\nmodule BSS102TransientComposerTest\n  VERSION = "0.8.26"\nend\n

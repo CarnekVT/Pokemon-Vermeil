@@ -1,0 +1,100 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map042]
+La Poké Ball contiene un Pokémon capturado por el Profesor.
+La Poké Ball contiene un Pokémon capturado por el Profesor.
+Oak: ¿Quieres elegirlo como tu Pokémon incial?
+Oak: ¿Quieres elegirlo como tu Pokémon incial?
+Oak: ¡Elige con cuidado!
+Oak: ¡Elige con cuidado!
+<b>Prof. Oak</b>: ¿Quieres a \v[3] como Pokémon inicial?
+<b>Prof. Oak</b>: ¿Quieres a \v[3] como Pokémon inicial?
+<b>Prof. Oak</b>: ¡Es un Pokémon muy amigable, te llevarás de maravilla con él!
+<b>Prof. Oak</b>: ¡Es un Pokémon muy amigable, te llevarás de maravilla con él!
+¿Quieres que tu Pokémon te empiece a seguir?
+¿Quieres que tu Pokémon te empiece a seguir?
+Perfecto, ¡pásatelo muy bien con él!
+Perfecto, ¡pásatelo muy bien con él!
+El Pokémon está fuera de su Poké Ball.
+El Pokémon está fuera de su Poké Ball.
+El Pokémon está dentro de su Poké Ball.
+El Pokémon está dentro de su Poké Ball.
+¿Qué te gustaría hacer?
+¿Qué te gustaría hacer?
+¿Sacamos al Pokémon de su Poké Ball?
+¿Sacamos al Pokémon de su Poké Ball?
+¿Cómo quieres hacerlo?
+¿Cómo quieres hacerlo?
+Vamos a sacar al Pokémon de su Ball.
+Vamos a sacar al Pokémon de su Ball.
+¿Guardamos al Pokémon en su Poké Ball?
+¿Guardamos al Pokémon en su Poké Ball?
+Vamos a guardar al Pokémon de su Ball.
+Vamos a guardar al Pokémon de su Ball.
+El comando que viene ahora me permite sacar o guardar al Pokémon en su Poké Ball detectando en qué estado se encuentra, para guardarlo si está fuera o sacarlo si está guardado.
+El comando que viene ahora me permite sacar o guardar al Pokémon en su Poké Ball detectando en qué estado se encuentra, para guardarlo si está fuera o sacarlo si está guardado.
+¿Quieres que lo haga?
+¿Quieres que lo haga?
+¿Quieres que el Pokémon te deje de seguir del todo? (Esto elimina el evento del Pokémon que te sigue, así que tendrás que volver a activarlo con el primer comando).
+¿Quieres que el Pokémon te deje de seguir del todo?  (Esto elimina el evento del Pokémon que te sigue, así que tendrás que volver a activarlo con el primer comando).
+Quitando el evento que te sigue.
+Quitando el evento que te sigue.
+No tienes instalado en tu juego el script del FOLLOW POKÉMON, para que un Pokémon te siga. Añádelo para poder usar estas funciones.
+No tienes instalado en tu juego el script del FOLLOW POKÉMON, para que un Pokémon te siga. Añádelo para poder usar estas funciones.
+Puedes revisar en las Poké Ball de aquí a la derecha como es la elección de iniciales para el modo monotype
+Puedes revisar en las Poké Ball de aquí a la derecha como es la elección de iniciales para el modo monotype
+No tienes instalado en tu juego el script del Monotype o no está actualizado. Añádelo para poder usar estas funciones.
+No tienes instalado en tu juego el script del Monotype o no está actualizado. Añádelo para poder usar estas funciones.
+¿Volver a Pueblo Inicio?
+¿Volver a Pueblo Inicio?
+El modo random está activo. ¿Qué quieres hacer?
+El modo random está activo. ¿Qué quieres hacer?
+¿Quieres activar el modo RANDOM para que los Pokémon que te encuentres, tanto de Entrenadores como salvajes sean al azar?
+¿Quieres activar el modo RANDOM para que los Pokémon que te encuentres, tanto de Entrenadores como salvajes sean al azar?
+Has activado el modo RANDOM.
+Has activado el modo RANDOM.
+Este modo de juego tiene las siguientes opciones predefinidas:
+Este modo de juego tiene las siguientes opciones predefinidas:
+¿Quieres verlas?
+¿Quieres verlas?
+Se han elegido estas reglas para el Modo Random.
+Se han elegido estas reglas para el Modo Random.
+Has cancelado el Modo Random.
+Has cancelado el Modo Random.
+No tienes instalado en tu juego el script del MODO RANDOM. Añádelo para poder usar estas funciones.
+No tienes instalado en tu juego el script del MODO RANDOM. Añádelo para poder usar estas funciones.
+Sí
+Sí
+No
+No
+Sacar al Pokémon
+Sacar al Pokémon
+Guardar al Pokémon
+Guardar al Pokémon
+Hacer el que toca
+Hacer el que toca
+Desactivar el Pokémon
+Desactivar el Pokémon
+Con animación
+Con animación
+Sin animación
+Sin animación
+Cancelar
+Cancelar
+Ir a Pueblo Inicio
+Ir a Pueblo Inicio
+Salir
+Salir
+Editar opciones
+Editar opciones
+Desactivar
+Desactivar
+Nada
+Nada
+Jugar con estas reglas
+Jugar con estas reglas
+Configurar mis reglas
+Configurar mis reglas
+Salir sin modo random
+Salir sin modo random

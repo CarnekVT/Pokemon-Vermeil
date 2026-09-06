@@ -1,0 +1,20 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map050]
+Cuando empujes una piedra a través de un agujero, asegúrate de que no aparece en el mismo lugar en el que caerá el jugador al tirarse.
+Cuando empujes una piedra a través de un agujero, asegúrate de que no aparece en el mismo lugar en el que caerá el jugador al tirarse.
+¡Hola! ¡Soy el Ruimaníaco!
+¡Hola! ¡Soy el Ruimaníaco!
+¿Te gustaría buscar tesoros enterrados?
+¿Te gustaría buscar tesoros enterrados?
+¡Genial! ¡Vamos a excavar en esta pared!
+¡Genial! ¡Vamos a excavar en esta pared!
+¿No? Pues nada.
+¿No? Pues nada.
+Cuando añadas el minijuego de desenterrar objetos es recomendable que limites al jugador las veces que puede jugar para evitar que consiga muchos objetos.
+Cuando añadas el minijuego de desenterrar objetos es recomendable que limites al jugador las veces que puede jugar para evitar que consiga muchos objetos.
+Sí
+Sí
+No
+No

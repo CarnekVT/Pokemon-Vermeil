@@ -132,8 +132,8 @@ module BSSMiniJSON
 end
 
 module BSS064
-  VERSION = "0.6.74"
-  FORMAT_VERSION = 60
+  VERSION = "0.8.6"
+  FORMAT_VERSION = 68
   DATA_FILE = "Data/BattleSceneStudio/battles.json"
   RECOVERY_DATA_FILE = "Data/BattleSceneStudio/battles.recovery.json"
   SOS_GLOBAL_FILE = "Data/BattleSceneStudio/sos_global.json"

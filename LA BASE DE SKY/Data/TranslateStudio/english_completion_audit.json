@@ -1,0 +1,48 @@
+{
+  "version": "1.2.0",
+  "policy": "English mode: zero pending translation rows for audited base scripts and installed plugins/BSS/SDS. ZBox events remain excluded.",
+  "eventsFromZBox": 0,
+  "auditedProjectSnapshot": {
+    "baseScriptLiteralInstances": 6584,
+    "baseScriptUniqueTexts": 4449,
+    "baseScriptPending": 0,
+    "pluginLiteralInstances": 1458,
+    "pluginUniqueTexts": 1189,
+    "pluginPending": 0,
+    "bssLiteralInstances": 15,
+    "bssUniqueTexts": 12,
+    "bssPending": 0,
+    "sdsLiteralInstances": 39,
+    "sdsUniqueTexts": 27,
+    "sdsPending": 0
+  },
+  "baseEnglishReference": {
+    "name": "Data(20260905-033545).zip",
+    "rubyFiles": 312,
+    "filesWithTranslatableText": 172,
+    "translatableLiterals": 4912
+  },
+  "pluginReferencePacks": [
+    "Deluxe Battle Kit",
+    "Enhanced Battle UI",
+    "Raid Battles",
+    "EBDX",
+    "SOS Battles",
+    "Improved Item AI"
+  ],
+  "strictBaseSourceMappingsApplied": 2888,
+  "pluginRowsCompletedInExhaustivePass": 587,
+  "semanticRepairs": 30,
+  "upgradeMigration": [
+    "Empty English rows are filled from the seed.",
+    "Old English rows whose Text was just the Spanish source are replaced by the completed English seed.",
+    "Known reverse-direction ZBox rows and known mismatched older mappings are repaired on load."
+  ],
+  "notes": [
+    "Base scripts use the user-supplied English Data as primary reference and strict structural source matching where possible.",
+    "DBK/EUI/Raid/EBDX/SOS plugin text uses the supplied English plugin packs wherever a safe source pair exists.",
+    "Project-only custom Spanish strings are explicitly localized rather than left as pending.",
+    "Source literals already written in English are explicitly marked complete.",
+    "Events are never imported from ZBox/reference packs."
+  ]
+}

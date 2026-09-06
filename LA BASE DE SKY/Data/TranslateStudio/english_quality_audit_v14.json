@@ -1,0 +1,29 @@
+{
+  "version": "1.4.0",
+  "baseEnglishSource": "Data(20260906-012634).zip",
+  "eventsImported": 0,
+  "cleanEnglish": {
+    "rubyFiles": 312,
+    "filesWithTranslatableText": 172,
+    "translatableLiterals": 4912
+  },
+  "verifiedContext": {
+    "files": 35,
+    "callSites": 348,
+    "examples": {
+      "Pause menu: Guardar": "Save",
+      "Party held item: Guardar": "Take",
+      "Storage: Guardar": "Store",
+      "Egg group: Campo": "Field",
+      "Battle terrain: Hierba": "Grassy",
+      "PC: Salir": "Log off",
+      "Battle Swap: CAMBIAR": "SWAP"
+    }
+  },
+  "abilitySplash": {
+    "spanish": "ability name / de Pokémon",
+    "english": "Pokémon's / ability name",
+    "layoutPatchedOnlyInEnglish": true
+  },
+  "pluginEnglishReferences": "Preserved from the user-supplied DBK/EUI/Raid/EBDX/SOS/Improved Item AI reference packs."
+}

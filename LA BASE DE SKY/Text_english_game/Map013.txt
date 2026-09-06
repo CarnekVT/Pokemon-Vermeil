@@ -1,0 +1,216 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map013]
+Mr. Juego: ¡Enséñame cómo juegas y haz que mi corazón lata con emoción!
+Mr. Juego: ¡Enséñame cómo juegas y haz que mi corazón lata con emoción!
+¡Si tú ganas, te daré una carta de Arceus!
+¡Si tú ganas, te daré una carta de Arceus!
+Oh, no tienes suficientes cartas para jugar. Necesitas por lo menos 5.
+Oh, no tienes suficientes cartas para jugar. Necesitas por lo menos 5.
+Estoy aquí para explicar las reglas del Triple Triad.
+Estoy aquí para explicar las reglas del Triple Triad.
+¿Sobre qué tema quieres que te hable?
+¿Sobre qué tema quieres que te hable?
+Triple Triad es un juego que se juega con cartas especiales en un tablero de 3x3.
+Triple Triad es un juego que se juega con cartas especiales en un tablero de 3x3.
+Cada una de estas cartas tiene 4 números, uno en cada uno de sus lados. Estos números se conocen como las estadísticas de estas cartas.
+Cada una de estas cartas tiene 4 números, uno en cada uno de sus lados. Estos números se conocen como las estadísticas de estas cartas.
+Los jugadores por turnos van poniendo cada uno una carta en el tablero. Al hacerlo, van intentando capturar las cartas del rival e intentando ganar control sobre la mesa.
+Los jugadores por turnos van poniendo cada uno una carta en el tablero. Al hacerlo, van intentando capturar las cartas del rival e intentando ganar control sobre la mesa.
+Aquí es donde entran en juego los números de las cartas. Si un jugador pone una carta con un número mayor al lado de una carta con uno menor, el jugador captura esa carta.
+Aquí es donde entran en juego los números de las cartas. Si un jugador pone una carta con un número mayor al lado de una carta con uno menor, el jugador captura esa carta.
+El objetivo del juego es ganar control sobre más cartas que el otro jugador para cuando termine el juego.
+El objetivo del juego es ganar control sobre más cartas que el otro jugador para cuando termine el juego.
+Hay una serie de reglas opcionales que puedes aplicar a partidas individuales.
+Hay una serie de reglas opcionales que puedes aplicar a partidas individuales.
+Pueden afectar a las estadísticas de las cartas, cómo las cartas capturan otras, los puntos y los premios.
+Pueden afectar a las estadísticas de las cartas, cómo las cartas capturan otras, los puntos y los premios.
+Cuando ganas un juego recibes una carta al azar de entre las cartas de la baraja de tu rival.
+Cuando ganas un juego recibes una carta al azar de entre las cartas de la baraja de tu rival.
+Esto también funciona al contrario: si pierdes tendrás que darle a tu rival una de tus cartas, que será elegido al azar.
+Esto también funciona al contrario: si pierdes tendrás que darle a tu rival una de tus cartas, que será elegido al azar.
+Puedes cambiar lo que ganas o pierdes en una partida usando una regla de juego opcional.
+Puedes cambiar lo que ganas o pierdes en una partida usando una regla de juego opcional.
+\CNCambiamos tus monedas por premios.
+\CNCambiamos tus monedas por premios.
+\CN¿Qué premio quieres?
+\CN¿Qué premio quieres?
+Semilla Milagro - 1000 monedas
+Semilla Milagro - 1000 monedas
+Agua Mística - 1000 monedas
+Agua Mística - 1000 monedas
+Flaura Amarilla - 1000 monedas
+Flaura Amarilla - 1000 monedas
+\CN¡Conserva tus monedas y vuelve pronto!
+\CN¡Conserva tus monedas y vuelve pronto!
+\CN¿Así que eliges \v[3]?
+\CN¿Así que eliges \v[3]?
+\CNLo siento, parece que necesitas más monedas.
+\CNLo siento, parece que necesitas más monedas.
+\CN¡Aquí tienes!\1
+\CN¡Aquí tienes!\1
+\CNNo tienes espacio en tu mochila.
+\CNNo tienes espacio en tu mochila.
+Esta es la Lotería del Casino. Soy Felicia, tu ayudante el día de hoy.
+Esta es la Lotería del Casino. Soy Felicia, tu ayudante el día de hoy.
+Si el número del día coincide con el nº de ID de alguno de tus Pokémon, ganarás fabulosos premios.
+Si el número del día coincide con el nº de ID de alguno de tus Pokémon, ganarás fabulosos premios.
+¿Quieres comprobar el número de hoy?
+¿Quieres comprobar el número de hoy?
+Primero, voy a mirar el número de la Lotería de hoy.
+Primero, voy a mirar el número de la Lotería de hoy.
+...
+...
+Tu número de Lotería es \v[1].
+Tu número de Lotería es \v[1].
+Ahora, déjame ver si coincide con el nº de ID de alguno de tus Pokémon.
+Ahora, déjame ver si coincide con el nº de ID de alguno de tus Pokémon.
+Lo siento. No ha coincidido ninguno...
+Lo siento. No ha coincidido ninguno...
+Por favor, vuelve pronto.
+Por favor, vuelve pronto.
+¡Enhorabuena!
+¡Enhorabuena!
+El número de ID de tu \v[2] en tu equipo coincide con el número del Ticket!
+El número de ID de tu \v[2] en tu equipo coincide con el número del Ticket!
+El número de ID de tu \v[2] en tu PC coincide con el número del Ticket!
+El número de ID de tu \v[2] en tu PC coincide con el número del Ticket!
+¡Oh Dios mío! ¡Todos los dígitos coinciden!
+¡Oh Dios mío! ¡Todos los dígitos coinciden!
+¡Has ganado el premio gordo!
+¡Has ganado el premio gordo!
+¡Por favor, vuelve a visitarnos pronto! ¡Se despide Felicia, tu asistente!
+¡Por favor, vuelve a visitarnos pronto! ¡Se despide Felicia, tu asistente!
+No te queda espacio encima. Haz hueco y ven a verme de nuevo.
+No te queda espacio encima. Haz hueco y ven a verme de nuevo.
+Los últimos cuatro dígitos coinciden, ¡así que has ganado el primer premio!
+Los últimos cuatro dígitos coinciden, ¡así que has ganado el primer premio!
+Los últimos tres dígitos coinciden, ¡así que has ganado el segundo premio!
+Los últimos tres dígitos coinciden, ¡así que has ganado el segundo premio!
+Los últimos dos dígitos coinciden, ¡así que has ganado el tercer premio!
+Los últimos dos dígitos coinciden, ¡así que has ganado el tercer premio!
+El último dígito coincide, ¡así que has ganado el cuarto premio!
+El último dígito coincide, ¡así que has ganado el cuarto premio!
+Oh, ya veo.\nPor favor, visítanos de nuevo pronto.
+Oh, ya veo.\nPor favor, visítanos de nuevo pronto.
+Ya has jugado a la Lotería el día de hoy. Por favor, vuelve mañana.
+Ya has jugado a la Lotería el día de hoy. Por favor, vuelve mañana.
+Te estaba esperando. Aquí tienes el objeto que has ganado.
+Te estaba esperando. Aquí tienes el objeto que has ganado.
+No tienes espacio en tu mochila. Haz hueco y ven a verme de nuevo.
+No tienes espacio en tu mochila. Haz hueco y ven a verme de nuevo.
+Bienvenido a la tienda de Triad Card.
+Bienvenido a la tienda de Triad Card.
+¿Puedo ayudarte con algo más?
+¿Puedo ayudarte con algo más?
+Aquí es donde puedes comprar nuevas cartas para los duelos Triple Triads.
+Aquí es donde puedes comprar nuevas cartas para los duelos Triple Triads.
+La selección crece según capturas y encuentras nuevos Pokémon, así que revísalo con frecuencia.
+La selección crece según capturas y encuentras nuevos Pokémon, así que revísalo con frecuencia.
+Y, por supuesto, cartas de Pokémon más fuertes cuestan más que las cartas débiles.
+Y, por supuesto, cartas de Pokémon más fuertes cuestan más que las cartas débiles.
+No hace falta que uses esta tienda en tu juego. Es solo un ejemplo sobre cómo el jugador podría ganar cartas del Triple Triad. Podrías implementar otras maneras.
+No hace falta que uses esta tienda en tu juego. Es solo un ejemplo sobre cómo el jugador podría ganar cartas del Triple Triad. Podrías implementar otras maneras.
+¡Mi nombre es Mr. Juego!
+¡Mi nombre es Mr. Juego!
+¡Mi corazón palpita con emoción cuando la gente se divierte con mi juego!
+¡Mi corazón palpita con emoción cuando la gente se divierte con mi juego!
+¡De hecho, para eso es para lo que vivo! ¡Adelante, ve y prueba el Giravoltorb!
+¡De hecho, para eso es para lo que vivo! ¡Adelante, ve y prueba el Giravoltorb!
+¡Haz que mi corazón lata con emoción!
+¡Haz que mi corazón lata con emoción!
+¡Adelante, juega mi juego Giravoltorb!
+¡Adelante, juega mi juego Giravoltorb!
+\CN¡Tu equipo está lleno!\nPor favor, haz algo de hueco y vuelve de nuevo.
+\CN¡Tu equipo está lleno!\nPor favor, haz algo de hueco y vuelve de nuevo.
+\CN¿Quieres a \v[3]?
+\CN¿Quieres a \v[3]?
+\CN¡\PN recibió a \v[3]!
+\CN¡\PN recibió a \v[3]!
+Estoy preparado para batirme en duelo contigo.
+Estoy preparado para batirme en duelo contigo.
+\G\CN¡Bienvenido al Casino Rocket!
+\G\CN¡Bienvenido al Casino Rocket!
+\G\CN¿Necesitas algunas monedas?\n¿Quieres comprar alguna?
+\G\CN¿Necesitas algunas monedas?\n¿Quieres comprar alguna?
+\G\CNNo tienes un monedero.
+\G\CNNo tienes un monedero.
+\G\CN¡Whoops!\nTu monedero está lleno.
+\G\CN¡Whoops!\nTu monedero está lleno.
+\G\CNNo tienes dinero suficiente.
+\G\CNNo tienes dinero suficiente.
+\G\CNGracias.\n¡Aquí están tus monedas!
+\G\CNGracias.\n¡Aquí están tus monedas!
+\G\CN¿No?\n¡Vuelve cuando quieras para divertirte!
+\G\CN¿No?\n¡Vuelve cuando quieras para divertirte!
+\CN¿Así que quieres \v[3]?
+\CN¿Así que quieres \v[3]?
+¿Listo para un duelo real?
+¿Listo para un duelo real?
+¡He creado mi baraja especialmente para esto!
+¡He creado mi baraja especialmente para esto!
+¡Bienvenido!
+¡Bienvenido!
+Oh, ¿no tienes un monedero? Toma.
+Oh, ¿no tienes un monedero? Toma.
+Puedes cambiar tus monedas por fabulosos premios en el edifico de al lado.
+Puedes cambiar tus monedas por fabulosos premios en el edifico de al lado.
+No tienes hueco para él. Vuelve cuando tengas más espacio.
+No tienes hueco para él. Vuelve cuando tengas más espacio.
+Lo básico
+Lo básico
+Reglas del juego
+Reglas del juego
+Premios
+Premios
+Salida
+Salida
+Bola Humo - 800 monedas
+Bola Humo - 800 monedas
+Semilla Milagro - 1000 moned
+Semilla Milagro - 1000 moned
+Carbón - 1000 monedas
+Carbón - 1000 monedas
+Agua Mística - 1000 moneda
+Agua Mística - 1000 moneda
+Flauta Amarilla - 1600 mone
+Flauta Amarilla - 1600 mone
+No gracias
+No gracias
+Sí
+Sí
+No
+No
+Comprar cartas
+Comprar cartas
+Vender cartas
+Vender cartas
+Información
+Información
+Abra - 180 monedas
+Abra - 180 monedas
+Clefairy - 500 monedas
+Clefairy - 500 monedas
+Dratini - 2800 monedas
+Dratini - 2800 monedas
+Scyther - 5500 monedas
+Scyther - 5500 monedas
+Porygon - 9999 monedas
+Porygon - 9999 monedas
+50 monedas [$1,000]
+50 monedas [$1,000]
+500 monedas [$10,000]
+500 monedas [$10,000]
+Salir
+Salir
+MT13 - 4000 monedas
+MT13 - 4000 monedas
+MT23 - 3500 monedas
+MT23 - 3500 monedas
+MT24 - 4000 monedas
+MT24 - 4000 monedas
+MT30 - 4500 monedas
+MT30 - 4500 monedas
+MT35 - 4000 monedas
+MT35 - 4000 monedas

@@ -1,0 +1,8 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map015]
+\sign[signskin]¡Items de calidad para Entrenadores!
+\sign[signskin]¡Items de calidad para Entrenadores!
+\sign[signskin]P2: Tienda de Entrenador
+\sign[signskin]P2: Tienda de Entrenador

@@ -1,0 +1,3441 @@
+{
+  "format": "bss-sos-catalog",
+  "formatVersion": 4,
+  "id": "sm_usum",
+  "name": "Sun / Moon + Ultra Sun / Ultra Moon",
+  "kind": "canonical_sos",
+  "canonicalSOS": true,
+  "runtimeUsable": false,
+  "source": "Converted to JSON from the supplied SOS PBS data used as the reference dataset.",
+  "profiles": [],
+  "groups": [
+    {
+      "id": "sm_usum_shared",
+      "name": "SM / USUM · compartidos",
+      "species": [
+        "BAGON",
+        "BARBOACH",
+        "BONSLY",
+        "CARBINK",
+        "CATERPIE",
+        "CORSOLA",
+        "CUBONE",
+        "DRATINI",
+        "EEVEE",
+        "GOLBAT",
+        "GOLDEEN",
+        "HAUNTER",
+        "IGGLYBUFF",
+        "JANGMOO",
+        "MAGIKARP",
+        "METAPOD",
+        "MILTANK",
+        "MUNCHLAX",
+        "PANCHAM",
+        "PICHU",
+        "TAUROS",
+        "WAILMER"
+      ]
+    },
+    {
+      "id": "sm_only",
+      "name": "Sun / Moon",
+      "species": [
+        "CLEFFA",
+        "ELEKID",
+        "MAGBY",
+        "METAPOD",
+        "RIOLU",
+        "SLOWPOKE",
+        "SNORUNT",
+        "STARYU",
+        "TENTACRUEL",
+        "TRUBBISH",
+        "TRUMBEAK"
+      ]
+    },
+    {
+      "id": "usum_only",
+      "name": "Ultra Sun / Ultra Moon",
+      "species": [
+        "AIPOM",
+        "BISHARP",
+        "BUNEARY",
+        "CARVANHA",
+        "CHANSEY",
+        "CHARJABUG",
+        "CHINCHOU",
+        "CLAMPERL",
+        "CLEFFA",
+        "CORPHISH",
+        "DEDENNE",
+        "DRUDDIGON",
+        "DUGTRIO",
+        "ELEKID",
+        "FINNEON",
+        "FLETCHLING",
+        "HOOTHOOT",
+        "KROKOROK",
+        "LARVESTA",
+        "MAGBY",
+        "MANTYKE",
+        "MEOWTH",
+        "MIMEJR",
+        "MUDBRAY",
+        "NATU",
+        "ORANGURU",
+        "PASSIMIAN",
+        "PSYDUCK",
+        "PYUKUMUKU",
+        "RATTATA",
+        "REMORAID",
+        "RIOLU",
+        "SALANDIT",
+        "SCRAGGY",
+        "SLOWPOKE",
+        "SMOOCHUM",
+        "STARYU",
+        "TOGEDEMARU",
+        "TRAPINCH",
+        "TRUMBEAK",
+        "YUNGOOS",
+        "ZUBAT"
+      ]
+    },
+    {
+      "id": "totem_sm",
+      "name": "Totem · Sun / Moon",
+      "species": [
+        "GUMSHOOS",
+        "KOMMOO",
+        "LURANTIS",
+        "MIMIKYU",
+        "RATICATE",
+        "SALAZZLE",
+        "VIKAVOLT",
+        "WISHIWASHI"
+      ]
+    },
+    {
+      "id": "totem_usum",
+      "name": "Totem · USUM",
+      "species": [
+        "ARAQUANID",
+        "GUMSHOOS",
+        "KOMMOO",
+        "LURANTIS",
+        "MAROWAK",
+        "MIMIKYU",
+        "RATICATE",
+        "RIBOMBEE",
+        "TOGEDEMARU"
+      ]
+    }
+  ],
+  "examples": [
+    {
+      "id": "master_sm_usum_shared_sm_usum_caterpie_butterfree",
+      "name": "SM/USUM · Caterpie → Butterfree",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "CATERPIE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CATERPIE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "BUTTERFREE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "fuera de Route 1"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_metapod_caterpie_butterfree",
+      "name": "SM/USUM · Metapod → Caterpie/Butterfree",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "METAPOD",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CATERPIE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "BUTTERFREE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "fuera de Route 1"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_golbat_crobat",
+      "name": "SM/USUM · Golbat → Crobat",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "GOLBAT",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "GOLBAT",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "CROBAT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Resolution Cave / Lush Jungle según versión"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_haunter_gengar",
+      "name": "SM/USUM · Haunter → Gengar",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "HAUNTER",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "HAUNTER",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GENGAR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_cubone_kangaskhan",
+      "name": "SM/USUM · Cubone → Kangaskhan",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "CUBONE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CUBONE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "KANGASKHAN",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_goldeen_seaking",
+      "name": "SM/USUM · Goldeen → Seaking",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "GOLDEEN",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "GOLDEEN",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SEAKING",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_tauros_miltank",
+      "name": "SM/USUM · Tauros → Miltank",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "TAUROS",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TAUROS",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MILTANK",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_miltank_tauros",
+      "name": "SM/USUM · Miltank → Tauros",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "MILTANK",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MILTANK",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TAUROS",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_magikarp_gyarados",
+      "name": "SM/USUM · Magikarp → Gyarados",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "MAGIKARP",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MAGIKARP",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GYARADOS",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_eevee_espeon_d_a",
+      "name": "SM/USUM · Eevee → Espeon (día)",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "EEVEE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "EEVEE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "ESPEON",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "time": "day"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_eevee_umbreon_noche",
+      "name": "SM/USUM · Eevee → Umbreon (noche)",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "EEVEE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "EEVEE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "UMBREON",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "time": "night"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_dratini_dragonair",
+      "name": "SM/USUM · Dratini → Dragonair",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "DRATINI",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "DRATINI",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "DRAGONAIR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_dratini_dragonite_poni_gauntlet",
+      "name": "SM/USUM · Dratini → Dragonite · Poni Gauntlet",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "DRATINI",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "DRATINI",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "DRAGONAIR",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "DRAGONITE",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Poni Gauntlet"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_pichu_pikachu_happiny",
+      "name": "SM/USUM · Pichu → Pikachu/Happiny",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "PICHU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "PICHU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "PIKACHU",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_igglybuff_jigglypuff_happiny",
+      "name": "SM/USUM · Igglybuff → Jigglypuff/Happiny",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "IGGLYBUFF",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "IGGLYBUFF",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "JIGGLYPUFF",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_corsola_mareanie",
+      "name": "SM/USUM · Corsola → Mareanie",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "CORSOLA",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CORSOLA",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MAREANIE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": "Mareanie puede atacar al caller; aparición hostil, no cooperación."
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_wailmer_wailord",
+      "name": "SM/USUM · Wailmer → Wailord",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "WAILMER",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "WAILMER",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "WAILORD",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "encounter": "fishing"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_barboach_whiscash",
+      "name": "SM/USUM · Barboach → Whiscash",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "BARBOACH",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "BARBOACH",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "WHISCASH",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_bagon_shelgon_kala_e_bay",
+      "name": "SM/USUM · Bagon → Shelgon · Kala'e Bay",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "BAGON",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "BAGON",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SHELGON",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Kala'e Bay"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_bagon_salamence_route_3",
+      "name": "SM/USUM · Bagon → Salamence · Route 3",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "BAGON",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "BAGON",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SALAMENCE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 3"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_bonsly_sudowoodo_happiny",
+      "name": "SM/USUM · Bonsly → Sudowoodo/Happiny",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "BONSLY",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "BONSLY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SUDOWOODO",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_munchlax_snorlax_happiny",
+      "name": "SM/USUM · Munchlax → Snorlax/Happiny",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "MUNCHLAX",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MUNCHLAX",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SNORLAX",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_pancham_pangoro",
+      "name": "SM/USUM · Pancham → Pangoro",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "PANCHAM",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "PANCHAM",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "PANGORO",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_carbink_sableye",
+      "name": "SM/USUM · Carbink → Sableye",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "CARBINK",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CARBINK",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SABLEYE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "environment": "cave"
+      },
+      "note": "Sableye puede atacar al caller; aparición hostil."
+    },
+    {
+      "id": "master_sm_usum_shared_sm_usum_jangmo_o_hakamo_o_kommo_o",
+      "name": "SM/USUM · Jangmo-o → Hakamo-o/Kommo-o",
+      "sourceGroup": "sm_usum_shared",
+      "caller": {
+        "species": "JANGMOO",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "HAKAMOO",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "KOMMOO",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_metapod_route_1",
+      "name": "SM · Metapod Route 1",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "METAPOD",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CATERPIE",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 1"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_tentacruel_lumineon",
+      "name": "SM · Tentacruel → Lumineon",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "TENTACRUEL",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TENTACRUEL",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "LUMINEON",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Poni Wilds"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_slowpoke_slowbro_kala_e_bay",
+      "name": "SM · Slowpoke → Slowbro · Kala'e Bay",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "SLOWPOKE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SLOWPOKE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SLOWBRO",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Kala'e Bay"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_staryu_starmie_route_7",
+      "name": "SM · Staryu → Starmie · Route 7",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "STARYU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "STARYU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "STARMIE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 7"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_cleffa_clefairy_chansey",
+      "name": "SM · Cleffa → Clefairy/Chansey",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "CLEFFA",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CLEFFA",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "CLEFAIRY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "CHANSEY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_elekid_electabuzz_chansey",
+      "name": "SM · Elekid → Electabuzz/Chansey",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "ELEKID",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "ELEKID",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "ELECTABUZZ",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "CHANSEY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_magby_magmar",
+      "name": "SM · Magby → Magmar",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "MAGBY",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MAGBY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MAGMAR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_snorunt_glalie",
+      "name": "SM · Snorunt → Glalie",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "SNORUNT",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SNORUNT",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GLALIE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Mount Lanakila"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_riolu_lucario_chansey",
+      "name": "SM · Riolu → Lucario/Chansey",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "RIOLU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "RIOLU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "LUCARIO",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "CHANSEY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_trubbish_garbodor",
+      "name": "SM · Trubbish → Garbodor",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "TRUBBISH",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TRUBBISH",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GARBODOR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_sm_only_sm_trumbeak_pikipek",
+      "name": "SM · Trumbeak → Pikipek",
+      "sourceGroup": "sm_only",
+      "caller": {
+        "species": "TRUMBEAK",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "PIKIPEK",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 8"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_alolan_rattata_raticate",
+      "name": "USUM · Alolan Rattata → Raticate",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "RATTATA",
+        "level": 30,
+        "formTag": "alola"
+      },
+      "pool": [
+        {
+          "species": "RATTATA",
+          "weight": 70,
+          "requirements": [],
+          "formTag": "alola"
+        },
+        {
+          "species": "RATICATE",
+          "weight": 30,
+          "requirements": [],
+          "formTag": "alola"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 8"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_zubat_golbat",
+      "name": "USUM · Zubat → Golbat",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "ZUBAT",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "ZUBAT",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GOLBAT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Diglett's Tunnel / Memorial Hill"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_alolan_dugtrio_golett_ultra_sun",
+      "name": "USUM · Alolan Dugtrio → Golett · Ultra Sun",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "DUGTRIO",
+        "level": 30,
+        "formTag": "alola"
+      },
+      "pool": [
+        {
+          "species": "DUGTRIO",
+          "weight": 70,
+          "requirements": [],
+          "formTag": "alola"
+        },
+        {
+          "species": "GOLETT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Haina Desert",
+        "version": "Ultra Sun"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_alolan_dugtrio_baltoy_ultra_moon",
+      "name": "USUM · Alolan Dugtrio → Baltoy · Ultra Moon",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "DUGTRIO",
+        "level": 30,
+        "formTag": "alola"
+      },
+      "pool": [
+        {
+          "species": "DUGTRIO",
+          "weight": 70,
+          "requirements": [],
+          "formTag": "alola"
+        },
+        {
+          "species": "BALTOY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Haina Desert",
+        "version": "Ultra Moon"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_alolan_meowth_persian",
+      "name": "USUM · Alolan Meowth → Persian",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "MEOWTH",
+        "level": 30,
+        "formTag": "alola"
+      },
+      "pool": [
+        {
+          "species": "MEOWTH",
+          "weight": 70,
+          "requirements": [],
+          "formTag": "alola"
+        },
+        {
+          "species": "PERSIAN",
+          "weight": 30,
+          "requirements": [],
+          "formTag": "alola"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Malie Garden"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_psyduck_zubat",
+      "name": "USUM · Psyduck → Zubat",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "PSYDUCK",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "PSYDUCK",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "ZUBAT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Seaward Cave",
+        "encounter": "surf"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_slowpoke_slowbro_slowking",
+      "name": "USUM · Slowpoke → Slowbro/Slowking",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "SLOWPOKE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SLOWPOKE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SLOWBRO",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "SLOWKING",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Kala'e Bay"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_chansey_blissey",
+      "name": "USUM · Chansey → Blissey",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "CHANSEY",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CHANSEY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "BLISSEY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_staryu_starmie",
+      "name": "USUM · Staryu → Starmie",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "STARYU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "STARYU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "STARMIE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_hoothoot_noctowl",
+      "name": "USUM · Hoothoot → Noctowl",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "HOOTHOOT",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "HOOTHOOT",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "NOCTOWL",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_chinchou_lanturn",
+      "name": "USUM · Chinchou → Lanturn",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "CHINCHOU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CHINCHOU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "LANTURN",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_cleffa_clefairy_happiny",
+      "name": "USUM · Cleffa → Clefairy/Happiny",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "CLEFFA",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CLEFFA",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "CLEFAIRY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_natu_xatu",
+      "name": "USUM · Natu → Xatu",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "NATU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "NATU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "XATU",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_aipom_ambipom",
+      "name": "USUM · Aipom → Ambipom",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "AIPOM",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "AIPOM",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "AMBIPOM",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_remoraid_octillery",
+      "name": "USUM · Remoraid → Octillery",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "REMORAID",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "REMORAID",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "OCTILLERY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_smoochum_jynx_happiny",
+      "name": "USUM · Smoochum → Jynx/Happiny",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "SMOOCHUM",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SMOOCHUM",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "JYNX",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_elekid_electabuzz_happiny",
+      "name": "USUM · Elekid → Electabuzz/Happiny",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "ELEKID",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "ELEKID",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "ELECTABUZZ",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_magby_magmar_happiny",
+      "name": "USUM · Magby → Magmar/Happiny",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "MAGBY",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MAGBY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MAGMAR",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_carvanha_sharpedo",
+      "name": "USUM · Carvanha → Sharpedo",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "CARVANHA",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CARVANHA",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SHARPEDO",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_trapinch_golett_ultra_sun",
+      "name": "USUM · Trapinch → Golett · Ultra Sun",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "TRAPINCH",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TRAPINCH",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GOLETT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "version": "Ultra Sun"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_trapinch_baltoy_ultra_moon",
+      "name": "USUM · Trapinch → Baltoy · Ultra Moon",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "TRAPINCH",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TRAPINCH",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "BALTOY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "version": "Ultra Moon"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_corphish_crawdaunt",
+      "name": "USUM · Corphish → Crawdaunt",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "CORPHISH",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CORPHISH",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "CRAWDAUNT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_clamperl_huntail_noche",
+      "name": "USUM · Clamperl → Huntail · noche",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "CLAMPERL",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CLAMPERL",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "HUNTAIL",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "time": "night"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_clamperl_gorebyss_d_a",
+      "name": "USUM · Clamperl → Gorebyss · día",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "CLAMPERL",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CLAMPERL",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GOREBYSS",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "time": "day"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_buneary_lopunny",
+      "name": "USUM · Buneary → Lopunny",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "BUNEARY",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "BUNEARY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "LOPUNNY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Poni Grove"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_mime_jr_mr_mime_happiny",
+      "name": "USUM · Mime Jr. → Mr. Mime/Happiny",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "MIMEJR",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MIMEJR",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MRMIME",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_riolu_lucario_happiny",
+      "name": "USUM · Riolu → Lucario/Happiny",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "RIOLU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "RIOLU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "LUCARIO",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "HAPPINY",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_finneon_lumineon",
+      "name": "USUM · Finneon → Lumineon",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "FINNEON",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "FINNEON",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "LUMINEON",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 15"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_mantyke_remoraid",
+      "name": "USUM · Mantyke → Remoraid",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "MANTYKE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MANTYKE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "REMORAID",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_krokorok_golett_ultra_sun",
+      "name": "USUM · Krokorok → Golett · Ultra Sun",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "KROKOROK",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "KROKOROK",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GOLETT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "version": "Ultra Sun"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_krokorok_baltoy_ultra_moon",
+      "name": "USUM · Krokorok → Baltoy · Ultra Moon",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "KROKOROK",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "KROKOROK",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "BALTOY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "version": "Ultra Moon"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_scraggy_fearow",
+      "name": "USUM · Scraggy → Fearow",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "SCRAGGY",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SCRAGGY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "FEAROW",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 17",
+        "time": "night"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_druddigon_golbat",
+      "name": "USUM · Druddigon → Golbat",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "DRUDDIGON",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "DRUDDIGON",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GOLBAT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Resolution Cave",
+        "time": "night"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_bisharp_pawniard",
+      "name": "USUM · Bisharp → Pawniard",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "BISHARP",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "PAWNIARD",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_larvesta_volcarona",
+      "name": "USUM · Larvesta → Volcarona",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "LARVESTA",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "LARVESTA",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "VOLCARONA",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_fletchling_fletchinder",
+      "name": "USUM · Fletchling → Fletchinder",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "FLETCHLING",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "FLETCHLING",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "FLETCHINDER",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_dedenne_togedemaru",
+      "name": "USUM · Dedenne → Togedemaru",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "DEDENNE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "DEDENNE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TOGEDEMARU",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_trumbeak_toucannon",
+      "name": "USUM · Trumbeak → Toucannon",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "TRUMBEAK",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TRUMBEAK",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TOUCANNON",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 11 / Poni Grove / Poni Plains"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_yungoos_gumshoos",
+      "name": "USUM · Yungoos → Gumshoos",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "YUNGOOS",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "YUNGOOS",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GUMSHOOS",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 8"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_charjabug_grubbin_vikavolt_d_a",
+      "name": "USUM · Charjabug → Grubbin/Vikavolt · día",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "CHARJABUG",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "GRUBBIN",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "VIKAVOLT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "time": "day"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_mudbray_mudsdale",
+      "name": "USUM · Mudbray → Mudsdale",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "MUDBRAY",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MUDBRAY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "MUDSDALE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 12 / Blush Mountain"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_salandit_salazzle",
+      "name": "USUM · Salandit → Salazzle",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "SALANDIT",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SALANDIT",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "SALAZZLE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Wela Volcano Park / Lush Jungle"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_salandit_stufful_route_8_noche",
+      "name": "USUM · Salandit → Stufful · Route 8 noche",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "SALANDIT",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SALANDIT",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "STUFFUL",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Route 8",
+        "time": "night"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_passimian_trumbeak",
+      "name": "USUM · Passimian → Trumbeak",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "PASSIMIAN",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TRUMBEAK",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "version": "Sun / Ultra Sun"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_oranguru_trumbeak",
+      "name": "USUM · Oranguru → Trumbeak",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "ORANGURU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TRUMBEAK",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "version": "Moon / Ultra Moon"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_pyukumuku_wingull",
+      "name": "USUM · Pyukumuku → Wingull",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "PYUKUMUKU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "PYUKUMUKU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "WINGULL",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "location": "Hano Beach",
+        "time": "night"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_usum_only_usum_togedemaru_dedenne",
+      "name": "USUM · Togedemaru → Dedenne",
+      "sourceGroup": "usum_only",
+      "caller": {
+        "species": "TOGEDEMARU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "TOGEDEMARU",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "DEDENNE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {},
+      "note": ""
+    },
+    {
+      "id": "master_totem_sm_totem_sm_gumshoos",
+      "name": "Totem SM · Gumshoos",
+      "sourceGroup": "totem_sm",
+      "caller": {
+        "species": "GUMSHOOS",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "YUNGOOS",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_sm_totem_sm_alolan_raticate",
+      "name": "Totem SM · Alolan Raticate",
+      "sourceGroup": "totem_sm",
+      "caller": {
+        "species": "RATICATE",
+        "level": 30,
+        "formTag": "alola"
+      },
+      "pool": [
+        {
+          "species": "RATTATA",
+          "weight": 100,
+          "requirements": [],
+          "formTag": "alola"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_sm_totem_sm_wishiwashi_school",
+      "name": "Totem SM · Wishiwashi School",
+      "sourceGroup": "totem_sm",
+      "caller": {
+        "species": "WISHIWASHI",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "ALOMOMOLA",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "WISHIWASHI",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_sm_totem_sm_salazzle",
+      "name": "Totem SM · Salazzle",
+      "sourceGroup": "totem_sm",
+      "caller": {
+        "species": "SALAZZLE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SALANDIT",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_sm_totem_sm_lurantis",
+      "name": "Totem SM · Lurantis",
+      "sourceGroup": "totem_sm",
+      "caller": {
+        "species": "LURANTIS",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CASTFORM",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "TRUMBEAK",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_sm_totem_sm_vikavolt",
+      "name": "Totem SM · Vikavolt",
+      "sourceGroup": "totem_sm",
+      "caller": {
+        "species": "VIKAVOLT",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "CHARJABUG",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_sm_totem_sm_mimikyu",
+      "name": "Totem SM · Mimikyu",
+      "sourceGroup": "totem_sm",
+      "caller": {
+        "species": "MIMIKYU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "HAUNTER",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "GENGAR",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_sm_totem_sm_kommo_o",
+      "name": "Totem SM · Kommo-o",
+      "sourceGroup": "totem_sm",
+      "caller": {
+        "species": "KOMMOO",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SCIZOR",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "HAKAMOO",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_gumshoos",
+      "name": "Totem USUM · Gumshoos",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "GUMSHOOS",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "YUNGOOS",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_alolan_raticate",
+      "name": "Totem USUM · Alolan Raticate",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "RATICATE",
+        "level": 30,
+        "formTag": "alola"
+      },
+      "pool": [
+        {
+          "species": "RATTATA",
+          "weight": 100,
+          "requirements": [],
+          "formTag": "alola"
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_araquanid",
+      "name": "Totem USUM · Araquanid",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "ARAQUANID",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "MASQUERAIN",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "DEWPIDER",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_alolan_marowak",
+      "name": "Totem USUM · Alolan Marowak",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "MAROWAK",
+        "level": 30,
+        "formTag": "alola"
+      },
+      "pool": [
+        {
+          "species": "SALAZZLE",
+          "form": 0,
+          "weight": 100,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_lurantis",
+      "name": "Totem USUM · Lurantis",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "LURANTIS",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "KECLEON",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "COMFEY",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_togedemaru",
+      "name": "Totem USUM · Togedemaru",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "TOGEDEMARU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SKARMORY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "DEDENNE",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_mimikyu",
+      "name": "Totem USUM · Mimikyu",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "MIMIKYU",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "BANETTE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "JELLICENT",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_kommo_o",
+      "name": "Totem USUM · Kommo-o",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "KOMMOO",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "SCIZOR",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "NOIVERN",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "master_totem_usum_totem_usum_ribombee",
+      "name": "Totem USUM · Ribombee",
+      "sourceGroup": "totem_usum",
+      "caller": {
+        "species": "RIBOMBEE",
+        "form": 0,
+        "level": 30
+      },
+      "pool": [
+        {
+          "species": "BLISSEY",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "PELIPPER",
+          "form": 0,
+          "weight": 30,
+          "requirements": []
+        }
+      ],
+      "callRate": 30,
+      "answerRate": 100,
+      "initialCall": true,
+      "canonLevel": "CANON_LITERAL",
+      "relationType": "SOS",
+      "conditions": {
+        "battle": "totem"
+      },
+      "note": ""
+    },
+    {
+      "id": "sm_usum_eevee_daynight",
+      "name": "SM/USUM · Eevee SOS",
+      "caller": {
+        "species": "EEVEE",
+        "level": 15,
+        "form": 0
+      },
+      "pool": [
+        {
+          "species": "EEVEE",
+          "form": 0,
+          "weight": 70,
+          "requirements": []
+        },
+        {
+          "species": "ESPEON",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        },
+        {
+          "species": "UMBREON",
+          "form": 0,
+          "weight": 15,
+          "requirements": []
+        }
+      ],
+      "callRate": 100,
+      "initialCall": true,
+      "sourceProfile": "EEVEE",
+      "answerRate": 100
+    },
+    {
+      "id": "usum_bagon_salamence",
+      "name": "USUM · Bagon → Salamence",
+      "caller": {
+        "species": "BAGON",
+        "level": 10
+      },
+      "pool": [
+        {
+          "species": "BAGON",
+          "form": 0,
+          "weight": 95,
+          "requirements": []
+        },
+        {
+          "species": "SALAMENCE",
+          "form": 0,
+          "weight": 5,
+          "requirements": []
+        }
+      ],
+      "callRate": 100,
+      "initialCall": true,
+      "notes": "Importable BSS example based on the rare Bagon SOS line.",
+      "answerRate": 100
+    }
+  ],
+  "description": "Biblioteca importable curada de SOS reales de Pokémon Sun/Moon y Ultra Sun/Ultra Moon. Solo relaciones de Alola; no usa perfiles de compatibilidad de generaciones posteriores.",
+  "canonPolicy": "CANON_LITERAL"
+}

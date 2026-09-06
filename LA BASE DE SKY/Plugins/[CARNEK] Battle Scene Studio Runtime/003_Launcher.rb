@@ -226,112 +226,6 @@ module BSS064BattleVictoryBGMCompat
   end
 end
 #===============================================================================
-# BSS v0.6.74 - real BattleBox slide driver.
-#
-# PictureEx#setDelta works for Fade/normal sprites, but many project/DBK databox
-# classes recalculate their real x/y from @spriteX/@spriteY every #update. That
-# silently overwrites a PictureEx slide. The driver below applies the horizontal
-# camera-space offset AFTER the databox' own update, so Vanilla, DBK and custom
-# skins cannot erase it. Timing uses the unscaled clock, therefore Sky Turbo
-# cannot compress the slide into an invisible one-frame jump.
-#===============================================================================
-module BSS074DataBoxSlideDriver
-  def bss074_slide_unapply
-    dx=(@bss074_slide_applied_x || 0).to_f
-    if dx!=0.0 && respond_to?(:x) && respond_to?(:x=)
-      self.x=self.x.to_f-dx
-    end
-    @bss074_slide_applied_x=0.0
-  rescue
-    @bss074_slide_applied_x=0.0
-  end
-
-  def bss074_begin_slide(phase,dir,duration=0.22)
-    bss074_slide_unapply
-    @bss074_slide_state={
-      :phase=>phase.to_sym,
-      :dir=>(dir.to_i<0 ? -1 : 1),
-      :started=>(BSS064.respond_to?(:monotonic_seconds) ? BSS064.monotonic_seconds : Time.now.to_f),
-      :duration=>[duration.to_f,0.08].max,
-      :hide_when_done=>false
-    }
-    true
-  rescue
-    false
-  end
-
-  def bss074_slide_active?
-    @bss074_slide_state.is_a?(Hash)
-  end
-
-  def bss074_clear_slide
-    bss074_slide_unapply
-    @bss074_slide_state=nil
-    true
-  rescue
-    @bss074_slide_state=nil
-    false
-  end
-
-  def visible=(value)
-    state=@bss074_slide_state
-    if value==false && state.is_a?(Hash) && state[:phase]==:out
-      now=(BSS064.respond_to?(:monotonic_seconds) ? BSS064.monotonic_seconds : Time.now.to_f)
-      if now-state[:started].to_f < state[:duration].to_f
-        state[:hide_when_done]=true
-        return (visible rescue true)
-      end
-    end
-    ret=super(value)
-    bss074_clear_slide if value==false && @bss074_slide_state
-    ret
-  end
-
-  def bss074_apply_slide
-    state=@bss074_slide_state
-    return if !state.is_a?(Hash)
-    now=(BSS064.respond_to?(:monotonic_seconds) ? BSS064.monotonic_seconds : Time.now.to_f)
-    duration=[state[:duration].to_f,0.001].max
-    p=(now-state[:started].to_f)/duration
-    p=0.0 if p<0.0
-    p=1.0 if p>1.0
-    # ease-out cubic = readable initial motion without a stiff linear glide.
-    ease=1.0-((1.0-p)**3)
-    fraction=(state[:phase]==:in ? (1.0-ease) : ease)
-    dist=(Graphics.width.to_f*0.52)
-    dx=(state[:dir].to_i*dist*fraction)
-    self.x=self.x.to_f+dx if respond_to?(:x) && respond_to?(:x=)
-    @bss074_slide_applied_x=dx
-    return if p<1.0
-    if state[:phase]==:in
-      # At the final frame the offset is already 0, so hand authority back to
-      # the databox class without changing its resolved native/style position.
-      @bss074_slide_state=nil
-      @bss074_slide_applied_x=0.0
-    elsif state[:hide_when_done]
-      @bss074_slide_state=nil
-      bss074_slide_unapply
-      begin
-        @bss074_allow_hide=true
-        self.visible=false
-      ensure
-        @bss074_allow_hide=false
-      end
-    end
-  rescue => e
-    BSS064.log("BattleBox real slide warning: #{e.class}: #{e.message}") if defined?(BSS064)
-    bss074_clear_slide rescue nil
-  end
-
-  def update(*args,&block)
-    bss074_slide_unapply if @bss074_slide_state
-    ret=super
-    bss074_apply_slide if @bss074_slide_state
-    ret
-  end
-end
-
-#===============================================================================
 # BSS v0.6.73 - global BattleBox animation authority and unscaled battle handoff.
 # These hooks are installed only after the full plugin stack has loaded. This is
 # important in projects where DBK/Databox Styles aliases DataBoxAppear later than
@@ -371,16 +265,14 @@ module BSS073GlobalDataBoxAppear
       obj.setVisible(0,true)
       obj.moveOpacity(0,8,255)
     else
-      # 0.6.74: slide the REAL databox after its own update instead of
-      # PictureEx#setDelta (custom/DBK boxes frequently overwrite that x value).
+      # Source-faithful Essentials lateral slide, deliberately applied at the
+      # final project layer so aliases cannot reveal the box only after it moved.
       idx=((box.battler.index rescue @idxBox).to_i rescue @idxBox.to_i)
       dir=idx.even? ? 1 : -1
-      BSS064.ensure_databox_slide_driver(box) if BSS064.respond_to?(:ensure_databox_slide_driver)
-      box.bss074_begin_slide(:in,dir) if box.respond_to?(:bss074_begin_slide)
       obj.setOpacity(0,255) if obj.respond_to?(:setOpacity)
+      obj.setDelta(0,dir*Graphics.width/2,0)
       obj.setVisible(0,true)
-      # Keep the animation process alive while the real-time driver moves it.
-      obj.moveDelta(0,10,0,0) if obj.respond_to?(:moveDelta)
+      obj.moveDelta(0,8,-dir*Graphics.width/2,0)
     end
   rescue => e
     BSS064.log("Global DataBoxAppear 0.6.73 warning: #{e.class}: #{e.message}") if defined?(BSS064)
@@ -406,10 +298,8 @@ module BSS073GlobalDataBoxDisappear
     else
       idx=((box.battler.index rescue @idxBox).to_i rescue @idxBox.to_i)
       dir=idx.even? ? 1 : -1
-      BSS064.ensure_databox_slide_driver(box) if BSS064.respond_to?(:ensure_databox_slide_driver)
-      box.bss074_begin_slide(:out,dir) if box.respond_to?(:bss074_begin_slide)
-      obj.moveDelta(0,10,0,0) if obj.respond_to?(:moveDelta)
-      obj.setVisible(10,false)
+      obj.moveDelta(0,8,dir*Graphics.width/2,0)
+      obj.setVisible(8,false)
     end
   rescue => e
     BSS064.log("Global DataBoxDisappear 0.6.73 warning: #{e.class}: #{e.message}") if defined?(BSS064)
@@ -440,207 +330,15 @@ module BSS073BattleAnimationHandoff
   end
 end
 
-#===============================================================================
-# BSS v0.6.74 - EBDX-inspired camera/backdrop layer.
-# Uses the actual EBDX battlebg assets supplied with the project, while retaining
-# Essentials/DBK battlers, UI and battle lifecycle. It is opt-in globally or per
-# Blueprint and does not require Elite Battle DX to be installed at runtime.
-#===============================================================================
-module BSS074EBDXSceneLayer
-  def bss074_ebdx_enabled?
-    return @bss074_ebdx_enabled if !@bss074_ebdx_enabled.nil?
-    @bss074_ebdx_enabled=(defined?(BSS064) && BSS064.respond_to?(:scene_camera_style) && BSS064.scene_camera_style(@battle)=="ebdx")
-  rescue
-    @bss074_ebdx_enabled=false
-  end
-
-  def bss074_apply_ebdx_backdrop
-    return false if !bss074_ebdx_enabled? || !@sprites
-    name=BSS064.ebdx_backdrop_name(@battle)
-    path="Graphics/BattleSceneStudio/EBDX/battlebg/#{name}.png"
-    bg=@sprites["battle_bg"] || @sprites["battle_bg2"]
-    return false if !bg || !bg.respond_to?(:setBitmap)
-    begin
-      bg.setBitmap(path)
-      bmp=(bg.bitmap rescue nil)
-      if bmp && bmp.width.to_i>0 && bmp.height.to_i>0
-        scale=[Graphics.width.to_f/bmp.width.to_f,Graphics.height.to_f/bmp.height.to_f].max
-        bg.ox=0 if bg.respond_to?(:ox=)
-        bg.oy=0 if bg.respond_to?(:oy=)
-        bg.zoom_x=scale if bg.respond_to?(:zoom_x=)
-        bg.zoom_y=scale if bg.respond_to?(:zoom_y=)
-        bg.x=((Graphics.width-bmp.width*scale)/2.0) if bg.respond_to?(:x=)
-        bg.y=((Graphics.height-bmp.height*scale)/2.0) if bg.respond_to?(:y=)
-      end
-      # EBDX battlebg already contains its floor perspective. Hide the second
-      # native scrolling background layer so it cannot overwrite the authored room.
-      bg2=@sprites["battle_bg2"]
-      if bg2 && !bg2.equal?(bg)
-        bg2.visible=false if bg2.respond_to?(:visible=)
-        bg2.opacity=0 if bg2.respond_to?(:opacity=)
-      end
-      @bss074_ebdx_bg_applied=true
-      true
-    rescue => e
-      BSS064.log("EBDX backdrop warning: #{e.class}: #{e.message}") if defined?(BSS064)
-      false
-    end
-  end
-
-  def bss074_world_sprite?(key,sp)
-    return false if !sp || (sp.disposed? rescue false)
-    s=key.to_s
-    return true if s=="battle_bg" || s=="battle_bg2" || s.start_with?("base_")
-    return true if s.start_with?("pokemon_") || s.start_with?("shadow_")
-    return true if s.start_with?("trainer_") || s.start_with?("player_")
-    false
-  rescue
-    false
-  end
-
-  def bss074_unapply_ebdx_camera
-    rows=@bss074_ebdx_last_transform
-    return if !rows.is_a?(Hash)
-    rows.each_value do |state|
-      sp=state[:sprite] rescue nil
-      next if !sp || (sp.disposed? rescue false)
-      begin;sp.x=sp.x.to_f-state[:dx].to_f if sp.respond_to?(:x=);rescue;end
-      begin;sp.y=sp.y.to_f-state[:dy].to_f if sp.respond_to?(:y=);rescue;end
-      z=state[:zoom].to_f;z=1.0 if z<=0.0001
-      begin;sp.zoom_x=sp.zoom_x.to_f/z if sp.respond_to?(:zoom_x=);rescue;end
-      begin;sp.zoom_y=sp.zoom_y.to_f/z if sp.respond_to?(:zoom_y=);rescue;end
-    end
-    @bss074_ebdx_last_transform={}
-  rescue
-    @bss074_ebdx_last_transform={}
-  end
-
-  def bss074_apply_ebdx_camera
-    return if !bss074_ebdx_enabled? || !@sprites.is_a?(Hash)
-    now=BSS064.respond_to?(:monotonic_seconds) ? BSS064.monotonic_seconds : Time.now.to_f
-    @bss074_ebdx_camera_started ||= now
-    t=now-@bss074_ebdx_camera_started
-    # EBDX's idle vector camera continually reframes the room. This lightweight
-    # native bridge keeps that visual language without replacing the battle scene.
-    zoom=1.022 + Math.sin(t*0.72)*0.012
-    pan_x=Math.sin(t*0.43)*7.0
-    pan_y=Math.cos(t*0.37)*3.5
-    cx=Graphics.width.to_f/2.0
-    cy=Graphics.height.to_f/2.0
-    @bss074_ebdx_last_transform={}
-    @sprites.each do |key,sp|
-      next if !bss074_world_sprite?(key,sp)
-      begin
-        bx=sp.x.to_f;by=sp.y.to_f
-        dx=(bx-cx)*(zoom-1.0)+pan_x
-        dy=(by-cy)*(zoom-1.0)+pan_y
-        sp.x=bx+dx if sp.respond_to?(:x=)
-        sp.y=by+dy if sp.respond_to?(:y=)
-        sp.zoom_x=sp.zoom_x.to_f*zoom if sp.respond_to?(:zoom_x=)
-        sp.zoom_y=sp.zoom_y.to_f*zoom if sp.respond_to?(:zoom_y=)
-        @bss074_ebdx_last_transform[sp.object_id]={:sprite=>sp,:dx=>dx,:dy=>dy,:zoom=>zoom}
-      rescue
-      end
-    end
-  rescue => e
-    BSS064.log("EBDX camera warning: #{e.class}: #{e.message}") if defined?(BSS064)
-  end
-
-  def pbCreateBackdropSprites(*args,&block)
-    ret=super
-    bss074_apply_ebdx_backdrop
-    ret
-  end
-
-  def pbUpdate(*args,&block)
-    bss074_unapply_ebdx_camera if @bss074_ebdx_last_transform
-    ret=super
-    bss074_apply_ebdx_camera
-    ret
-  end
-end
-
 module BSS064
   class << self
-    def fresh_global_visual_config
-      fallback={"blueprints"=>[],"global"=>{}}
-      main=read_json_file(DATA_FILE,fallback)
-      recovery=File.exist?(RECOVERY_DATA_FILE) ? read_json_file(RECOVERY_DATA_FILE,fallback) : nil
-      main_at=(main.is_a?(Hash) ? main["_bssSavedAt"].to_i : 0)
-      recovery_at=(recovery.is_a?(Hash) ? recovery["_bssSavedAt"].to_i : 0)
-      chosen=(recovery && recovery_at>main_at) ? recovery : main
-      row=chosen.is_a?(Hash) ? chosen["global"] : nil
-      row.is_a?(Hash) ? row : {}
-    rescue
-      global=data["global"] rescue nil
-      global.is_a?(Hash) ? global : {}
-    end
-
     def databox_animation_mode
-      # Appear/disappear are infrequent; read the latest saved global value here
-      # so an old runtime cache can never make the UI appear to be ignored.
-      global=fresh_global_visual_config
-      raw=global["battleBoxAnimation"].to_s
+      global=data["global"] rescue nil
+      raw=global.is_a?(Hash) ? global["battleBoxAnimation"].to_s : ""
       return raw if ["pop","slide","fade"].include?(raw)
       "slide"
     rescue
       "slide"
-    end
-
-    def ensure_databox_slide_driver(box)
-      return false if !box
-      klass=box.class
-      klass.prepend(BSS074DataBoxSlideDriver) if klass.respond_to?(:prepend) && !klass.ancestors.include?(BSS074DataBoxSlideDriver)
-      true
-    rescue => e
-      log("BattleBox slide driver install warning: #{e.class}: #{e.message}")
-      false
-    end
-
-    def scene_camera_style(battle=nil)
-      cfg=(battle && battle.respond_to?(:bss_environment_config)) ? battle.bss_environment_config : nil
-      cfg={} if !cfg.is_a?(Hash)
-      per=cfg["cameraStyle"].to_s
-      return per if ["project","ebdx"].include?(per)
-      global=fresh_global_visual_config
-      raw=global["cameraStyle"].to_s
-      ["project","ebdx"].include?(raw) ? raw : "project"
-    rescue
-      "project"
-    end
-
-    def ebdx_backdrop_name(battle=nil)
-      cfg=(battle && battle.respond_to?(:bss_environment_config)) ? battle.bss_environment_config : nil
-      cfg={} if !cfg.is_a?(Hash)
-      requested=cfg["ebdxBackdrop"].to_s.strip
-      global=fresh_global_visual_config
-      requested=global["ebdxBackdrop"].to_s.strip if requested.empty? || requested=="inherit"
-      valid=%w[Auto Field Forest City Cave CaveDark Mountain Sand Snow Water Underwater IndoorA IndoorB Sky Darkness Champion Net DanceFloor Sapphire]
-      return requested if valid.include?(requested) && requested!="Auto"
-      # EBDX itself resolves environment + terrain + indoor/outdoor. Keep this
-      # BSS-native first pass deterministic and source-compatible with those cues.
-      env=""
-      begin;env=pbGetEnvironment.to_s if defined?(pbGetEnvironment);rescue;end
-      terrain=""
-      begin;terrain=$game_player.terrain_tag.id.to_s if defined?($game_player) && $game_player;rescue;end
-      text=(env+" "+terrain).downcase
-      return "Underwater" if text.include?("underwater")
-      return "Water" if text.include?("water") || text.include?("puddle")
-      return "CaveDark" if text.include?("cavedark") || text.include?("dark cave")
-      return "Cave" if text.include?("cave")
-      return "Sand" if text.include?("sand")
-      return "Snow" if text.include?("snow") || text.include?("ice")
-      return "Forest" if text.include?("forest") || text.include?("woods")
-      return "Mountain" if text.include?("rock") || text.include?("mountain")
-      begin
-        meta=GameData::MapMetadata.try_get($game_map.map_id) if defined?(GameData::MapMetadata) && defined?($game_map) && $game_map
-        outdoor=(meta && meta.respond_to?(:outdoor_map)) ? meta.outdoor_map : nil
-        return outdoor ? "Field" : "IndoorA" unless outdoor.nil?
-      rescue
-      end
-      "Field"
-    rescue
-      "Field"
     end
 
     def bss073_real_seconds
@@ -765,9 +463,6 @@ module BSS064
       # Blueprints. Victory methods inside the module self-guard to BSS battles.
       if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS064SceneEnvironmentCompat)
         Battle::Scene.prepend(BSS064SceneEnvironmentCompat)
-      end
-      if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS074EBDXSceneLayer)
-        Battle::Scene.prepend(BSS074EBDXSceneLayer)
       end
       install_general_databox_animation_hooks!
       install_battle_handoff_hook!
@@ -1225,7 +920,18 @@ module BSS064
       if live_test && defined?($player)&&$player&&defined?(original_party)&&original_party&&$player.respond_to?(:party=); $player.party=original_party; end
       if defined?($game_temp)&&$game_temp
         begin; $game_temp.clear_battle_rules; rescue; end
-        if defined?(old_rules)&&old_rules.is_a?(Hash); begin; old_rules.each { |k,v| $game_temp.battle_rules[k]=v }; rescue; end; end
+        if defined?(old_rules)&&old_rules.is_a?(Hash)
+          begin
+            old_rules.each do |k,v|
+              key=k.to_s.downcase
+              # BSS/SOS/Boss rules are one-battle state. Never re-arm them for the
+              # next ordinary encounter when the launcher returns to the map.
+              next if key =~ /(bss|boss|totem|raid|sos|noescape|canrun|setboss|bossbattle|totembattle|sosbattle|setsospokemon|addsospokemon)/
+              $game_temp.battle_rules[k]=v
+            end
+          rescue
+          end
+        end
         $game_temp.in_battle=old_in_battle if defined?(old_in_battle)&&$game_temp.respond_to?(:in_battle=)
       end
     end
@@ -1253,7 +959,7 @@ module BSS064
       end
       @pending_f12_resume=nil
       @f12_resume_armed=false
-      write_status("ready",{"message"=>"BSS 0.6.74 ready · runtime reloaded"})
+      write_status("ready",{"message"=>"BSS 0.7.8 ready · EBDX Core runtime reloaded"})
       true
     rescue => e
       log("Runtime ready bridge warning: #{e.class}: #{e.message}")

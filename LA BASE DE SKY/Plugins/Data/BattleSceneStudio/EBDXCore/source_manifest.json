@@ -1,0 +1,42 @@
+{
+  "bss": "0.7.7",
+  "base": "0.6.73",
+  "ebdx": "1.4.7.1 E21",
+  "sources": [
+    {
+      "source": "Plugins/Elite Battle DX/[000] Scripts/Battle Modifiers/Math Functions.rb",
+      "sha256": "236f1b09ff012955a293f4594573776b4833284f8da85c0b6a47b33efbc5e704",
+      "bytes": 8803
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[000] Scripts/Battle Scenes/Scene Backdrops.rb",
+      "sha256": "adade377ed5b76cab5778bf7dc389c753ceb9651e37b4485a1c7ccb009bff2c4",
+      "bytes": 47335
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[000] Scripts/Battle Scenes/Scene Camera.rb",
+      "sha256": "4db8310890ebf8c0e31eafbc83093713ded362d278a49fc4d54c30fe952513ba",
+      "bytes": 8527
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[000] Scripts/Battle UI/UI Command.rb",
+      "sha256": "32d9d9319d521a66d1704122e9b88a9ced4490933293d7b0f9da24e349f25b54",
+      "bytes": 11591
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[003] Config/Config.rb",
+      "sha256": "7d04e22526f196cc58055887bcf1442aae3f7f433316e62b823b891a0221493d",
+      "bytes": 5004
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[003] Config/Environments.rb",
+      "sha256": "946fa5342ba221c69f9032a1fe32a139439fc338702c95d56cdad1e1bcee33e8",
+      "bytes": 11633
+    },
+    {
+      "source": "Plugins/Luka's Scripting Utilities/script.rb",
+      "sha256": "f1b9a7e46855ec54f4b780a428082904cade9a3743ba4197cd5f8f842d189084",
+      "bytes": 57611
+    }
+  ]
+}

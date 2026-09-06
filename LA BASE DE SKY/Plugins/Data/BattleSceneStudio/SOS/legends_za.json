@@ -1,0 +1,362 @@
+{
+  "format": "bss-sos-catalog",
+  "formatVersion": 4,
+  "id": "legends_za",
+  "name": "Legends: Z-A · plantillas",
+  "kind": "examples",
+  "canonicalSOS": false,
+  "runtimeUsable": false,
+  "source": "Pokémon Legends: Z-A",
+  "sourceKind": "reference/templates",
+  "description": "Catálogo Legends: Z-A: misma especie o familias que comparten Wild Zone; cohabitantes solo como CANON_SAFE_COHABITATION. No se inventan relaciones fuera del pool.",
+  "profiles": [],
+  "groups": [
+    {
+      "id": "wild_zone_1",
+      "name": "Wild Zone 1",
+      "species": [
+        "BUNNELBY",
+        "FLETCHLING",
+        "MAREEP",
+        "PIDGEY",
+        "SCATTERBUG",
+        "WEEDLE",
+        "PICHU"
+      ]
+    },
+    {
+      "id": "wild_zone_2",
+      "name": "Wild Zone 2",
+      "species": [
+        "BUDEW",
+        "MAGIKARP",
+        "PATRAT",
+        "BINACLE",
+        "STARYU",
+        "KAKUNA"
+      ]
+    },
+    {
+      "id": "wild_zone_3",
+      "name": "Wild Zone 3",
+      "species": [
+        "PIKACHU",
+        "FLETCHLING",
+        "LITLEO",
+        "FLABEBE",
+        "SKIDDO",
+        "PANCHAM",
+        "ESPURR"
+      ]
+    },
+    {
+      "id": "wild_zone_4",
+      "name": "Wild Zone 4",
+      "species": [
+        "EKANS",
+        "GASTLY",
+        "SPINARAK",
+        "PATRAT",
+        "SPEWPA",
+        "HONEDGE"
+      ]
+    },
+    {
+      "id": "wild_zone_5",
+      "name": "Wild Zone 5",
+      "species": [
+        "PIDGEY",
+        "PIDGEOTTO",
+        "ABRA",
+        "BELLSPROUT",
+        "ELECTRIKE",
+        "PATRAT",
+        "VENIPEDE",
+        "WHIRLIPEDE",
+        "BUNNELBY",
+        "FLETCHLING",
+        "FLETCHINDER",
+        "BINACLE"
+      ]
+    },
+    {
+      "id": "wild_zone_6",
+      "name": "Wild Zone 6",
+      "species": [
+        "PIKACHU",
+        "MAGIKARP",
+        "FLAAFFY",
+        "HOUNDOUR",
+        "HOUNDOOM",
+        "MEDITITE",
+        "SWABLU",
+        "BUNEARY",
+        "BINACLE"
+      ]
+    },
+    {
+      "id": "wild_zone_7",
+      "name": "Wild Zone 7",
+      "species": [
+        "KAKUNA",
+        "GASTLY",
+        "ROSELIA",
+        "SHUPPET",
+        "HIPPOPOTAS",
+        "AUDINO",
+        "VANILLITE",
+        "FLETCHINDER",
+        "FLOETTE"
+      ]
+    },
+    {
+      "id": "wild_zone_8",
+      "name": "Wild Zone 8",
+      "species": [
+        "MACHOP",
+        "NUMEL",
+        "CAMERUPT",
+        "GIBLE",
+        "DRILBUR",
+        "SANDILE",
+        "KROKOROK"
+      ]
+    },
+    {
+      "id": "wild_zone_9",
+      "name": "Wild Zone 9",
+      "species": [
+        "KADABRA",
+        "SABLEYE",
+        "MAWILE",
+        "FLETCHINDER",
+        "ESPURR",
+        "MEOWSTIC",
+        "CARBINK",
+        "MANECTRIC"
+      ]
+    },
+    {
+      "id": "wild_zone_10",
+      "name": "Wild Zone 10",
+      "species": [
+        "SLOWPOKE",
+        "STARYU",
+        "CARVANHA",
+        "TYNAMO",
+        "BELLSPROUT",
+        "SHARPEDO",
+        "WATCHOG",
+        "ARBOK"
+      ]
+    },
+    {
+      "id": "wild_zone_11",
+      "name": "Wild Zone 11",
+      "species": [
+        "SLOWPOKE",
+        "SLOWBRO",
+        "GYARADOS",
+        "STUNFISK",
+        "FURFROU",
+        "INKAY",
+        "CLAUNCHER",
+        "CLAWITZER"
+      ]
+    },
+    {
+      "id": "wild_zone_12",
+      "name": "Wild Zone 12",
+      "species": [
+        "DELIBIRD",
+        "SNORUNT",
+        "SNOVER",
+        "ABOMASNOW",
+        "VANILLITE",
+        "GOGOAT",
+        "BERGMITE",
+        "AVALUGG",
+        "MACHOP",
+        "MACHOKE"
+      ]
+    },
+    {
+      "id": "wild_zone_13",
+      "name": "Wild Zone 13",
+      "species": [
+        "SCYTHER",
+        "PINSIR",
+        "HERACROSS",
+        "PHANTUMP",
+        "TREVENANT",
+        "WEEPINBELL",
+        "VIVILLON"
+      ]
+    },
+    {
+      "id": "wild_zone_14",
+      "name": "Wild Zone 14",
+      "species": [
+        "ONIX",
+        "ARON",
+        "LAIRON",
+        "DRILBUR",
+        "EXCADRILL",
+        "EMOLGA",
+        "HELIOPTILE"
+      ]
+    },
+    {
+      "id": "wild_zone_15",
+      "name": "Wild Zone 15",
+      "species": [
+        "BEEDRILL",
+        "LARVITAR",
+        "WHIRLIPEDE",
+        "SCOLIPEDE",
+        "HAUNTER",
+        "PUMPKABOO",
+        "GOURGEIST",
+        "SHUPPET",
+        "BANETTE",
+        "TREVENANT",
+        "NOIBAT"
+      ]
+    },
+    {
+      "id": "wild_zone_16",
+      "name": "Wild Zone 16",
+      "species": [
+        "FLAAFFY",
+        "AMPHAROS",
+        "MEDICHAM",
+        "FLORGES",
+        "STARMIE",
+        "BARBARACLE",
+        "FROAKIE",
+        "FALINKS"
+      ]
+    },
+    {
+      "id": "wild_zone_17",
+      "name": "Wild Zone 17",
+      "species": [
+        "CHESPIN",
+        "DIGGERSBY",
+        "PYROAR",
+        "MAWILE",
+        "SKARMORY",
+        "LAMPENT",
+        "KLEFKI"
+      ]
+    },
+    {
+      "id": "wild_zone_18",
+      "name": "Wild Zone 18",
+      "species": [
+        "SWABLU",
+        "ALTARIA",
+        "BAGON",
+        "SALAMENCE",
+        "LOPUNNY",
+        "FENNEKIN",
+        "NOIBAT",
+        "NOIVERN"
+      ]
+    },
+    {
+      "id": "wild_zone_19",
+      "name": "Wild Zone 19",
+      "species": [
+        "CLEFAIRY",
+        "KANGASKHAN",
+        "EEVEE",
+        "CLEFFA",
+        "AUDINO",
+        "FURFROU",
+        "DRAMPA"
+      ]
+    },
+    {
+      "id": "wild_zone_20",
+      "name": "Wild Zone 20",
+      "species": [
+        "AGGRON",
+        "SCRAFTY",
+        "GARBODOR",
+        "BULBASAUR",
+        "CHIKORITA",
+        "ROSERADE",
+        "GARDEVOIR",
+        "CHARMANDER",
+        "TEPIG",
+        "HIPPOWDON",
+        "LUCARIO",
+        "SQUIRTLE",
+        "TOTODILE",
+        "MALAMAR",
+        "DRAGALGE",
+        "RAICHU",
+        "CLEFABLE",
+        "ALAKAZAM",
+        "MACHAMP",
+        "VICTREEBEL",
+        "GENGAR",
+        "KANGASKHAN",
+        "STARMIE",
+        "PINSIR",
+        "GYARADOS",
+        "VAPOREON",
+        "JOLTEON",
+        "FLAREON",
+        "DRAGONITE",
+        "ARIADOS",
+        "HERACROSS",
+        "DELIBIRD",
+        "SKARMORY",
+        "TYRANITAR",
+        "SABLEYE",
+        "MEDICHAM",
+        "ALTARIA",
+        "ABSOL",
+        "METAGROSS",
+        "GARCHOMP",
+        "LEAFEON",
+        "GLACEON",
+        "GALLADE",
+        "FROSLASS",
+        "SIMISAGE",
+        "SIMISEAR",
+        "SIMIPOUR",
+        "SCOLIPEDE",
+        "KROOKODILE",
+        "VANILLUXE",
+        "EELEKTROSS",
+        "CHANDELURE",
+        "STUNFISK",
+        "DIGGERSBY",
+        "TALONFLAME",
+        "VIVILLON",
+        "FLORGES",
+        "GOGOAT",
+        "PANGORO",
+        "FURFROU",
+        "AEGISLASH",
+        "BARBARACLE",
+        "HELIOLISK",
+        "SYLVEON",
+        "HAWLUCHA",
+        "DEDENNE",
+        "CARBINK",
+        "GOODRA",
+        "KLEFKI",
+        "GOURGEIST",
+        "NOIVERN",
+        "DRAMPA",
+        "FALINKS"
+      ]
+    }
+  ],
+  "examples": [],
+  "canonPolicy": "CANON_SAFE"
+}

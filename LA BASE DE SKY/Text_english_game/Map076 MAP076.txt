@@ -1,0 +1,122 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map076]
+¿Quieres acceder al mapa de testeo de Scripts de Plugins? Estos son códigos que no vienen con la base pero que puedes descargar de internet.
+¿Quieres acceder al mapa de testeo de Scripts de Plugins? Estos son códigos que no vienen con la base pero que puedes descargar de internet.
+¿O quieres ir al mapa para probar las funciones de Events Utilities?
+¿O quieres ir al mapa para probar las funciones de Events Utilities?
+Si pulsas la tecla W, podrás activar el modo "pasabilidades" (solo en modo Debug).
+Si pulsas la tecla W, podrás activar el modo "pasabilidades" (solo en modo Debug).
+De esta forma podrás ver si has puesto bien todas las pasabilidades de tus tiles y los valores de los Tags de Terreno (terrain tags).
+De esta forma podrás ver si has puesto bien todas las pasabilidades de tus tiles y los valores de los Tags de Terreno (terrain tags).
+Otra tecla interesante es la D. Si la pulsas accederás al menú de Objetos registrados. También tendrás acceso a todas las MO de tu equipo.
+Otra tecla interesante es la D. Si la pulsas accederás al menú de Objetos registrados. También tendrás acceso a todas las MO de tu equipo.
+Además, con la tecla ALT o Q podrás activar el Turbo. Este tiene tres velocidades. Puedes elegir en el menú opciones si usar turbo siempre o solo en combates.
+Además, con la tecla ALT o Q podrás activar el Turbo.  Este tiene tres velocidades. Puedes elegir en el menú opciones si usar turbo siempre o solo en combates.
+Elige el movimiento de la cámara.
+Elige el movimiento de la cámara.
+Los movimientos de cámara originalmente siempre se han hecho con comandos de evento (para esto no hace falta activar el switch de arriba).
+Los movimientos de cámara originalmente siempre se han hecho con comandos de evento (para esto no hace falta activar el switch de arriba).
+Este es un tipo de movimiento más lineal y sin aceleración.
+Este es un tipo de movimiento más lineal y sin aceleración.
+Aquí hay un ejemplo moviéndose a la derecha con velocidad 4 y hacia la izquierda con velocidad 2.
+Aquí hay un ejemplo moviéndose a la derecha con velocidad 4 y hacia la izquierda con velocidad 2.
+Vamos a mover la cámara de posición.
+Vamos a mover la cámara de posición.
+La movemos dos casillas hacia abajo de ti.
+La movemos dos casillas hacia abajo de ti.
+Ahora 5 casillas a la izquierda de ti.
+Ahora 5 casillas a la izquierda de ti.
+Ahora 3 casillas a la derecha del jugador y 2 arriba.
+Ahora 3 casillas a la derecha del jugador y 2 arriba.
+Redirigimos la cámara a una casilla concreta del mapa, la (9,12).
+Redirigimos la cámara a una casilla concreta del mapa, la (9,12).
+Apuntamos con la cámara al evento con el ID 3.
+Apuntamos con la cámara al evento con el ID 3.
+Si el NPC se mueve, la cámara le sigue.
+Si el NPC se mueve, la cámara le sigue.
+Ahora definimos que se mueva en una dirección a una distancia concreta. En este ejemplo, arriba 4 casillas.
+Ahora definimos que se mueva en una dirección a una distancia concreta. En este ejemplo, arriba 4 casillas.
+También podemos elegir una dirección con una distancia e indicar a qué velocidad se mueve la cámara. En este caso, abajo derecha 5, veloc. 3.
+También podemos elegir una dirección con una distancia e indicar a qué velocidad se mueve la cámara. En este caso, abajo derecha 5, veloc. 3.
+Cambiamos la velocidad de la cámara al máximo y nos movemos a una coordenada con la nueva velocidad.
+Cambiamos la velocidad de la cámara al máximo y nos movemos a una coordenada con la nueva velocidad.
+Nos movemos ahora a otra posición con la mínima velocidad.
+Nos movemos ahora a otra posición con la mínima velocidad.
+Vamos a agitar la cámara. Por defecto la velocidad es 2.
+Vamos a agitar la cámara. Por defecto la velocidad es 2.
+Podemos poner un valor diferente, del 1 al 9.
+Podemos poner un valor diferente, del 1 al 9.
+Y podemos detener el temblor.
+Y podemos detener el temblor.
+Podemos poner la cámara a una distancia del jugador y que se quede a esa distancia al movernos.
+Podemos poner la cámara a una distancia del jugador y que se quede a esa distancia al movernos.
+Podemos centrar de nuevo la cámara con el siguiente comando.
+Podemos centrar de nuevo la cámara con el siguiente comando.
+Ahora devolvemos la cámara a la posición inicial, en caso de que se haya desplazado.
+Ahora devolvemos la cámara a la posición inicial, en caso de que se haya desplazado.
+¡Psyayay!
+¡Psyayay!
+En este mapa puedes encontrar eventos de puertas bien hechos. Cópialos en tus mapas para no tener que hacerlos de cero.
+En este mapa puedes encontrar eventos de puertas bien hechos. Cópialos en tus mapas para no tener que hacerlos de cero.
+Lo único que debes modificar de la puerta es el gráfico del evento en las 2 páginas y el lugar al que te envía, que está al final de la 1ª página.
+Lo único que debes modificar de la puerta es el gráfico del evento en las 2 páginas y el lugar al que te envía, que está al final de la 1ª página.
+Para salir por esta puerta, elige en tu otro mapa que el jugador aparezca en el mismo sitio que la puerta, para que se haga bien la animación.
+Para salir por esta puerta, elige en tu otro mapa que el jugador aparezca en el mismo sitio que la puerta, para que se haga bien la animación.
+¡Hola, yo puedo mostrar opciones con imágenes! Ya sean Pokémon o archivos.
+¡Hola, yo puedo mostrar opciones con imágenes! Ya sean Pokémon o archivos.
+¿Cuál quieres ver?
+¿Cuál quieres ver?
+¿Eres un chico o una chica?
+¿Eres un chico o una chica?
+¿Cuál es tu Pokémon favorito?
+¿Cuál es tu Pokémon favorito?
+Pikachu
+Pikachu
+Charizard
+Charizard
+Mewtwo
+Mewtwo
+Elige un objeto
+Elige un objeto
+Poción
+Poción
+Máster Ball
+Máster Ball
+Repelente
+Repelente
+Ir al mapa de Scripts
+Ir al mapa de Scripts
+Ir al mapa de Events Utilities
+Ir al mapa de Events Utilities
+Salir
+Salir
+Movimientos clásicos
+Movimientos clásicos
+Mover a dist. del jugador
+Mover a dist. del jugador
+Apuntar a coordenada
+Apuntar a coordenada
+Apuntar a NPC
+Apuntar a NPC
+Mover en dir. con dist.
+Mover en dir. con dist.
+Cambiar vel. de cámara
+Cambiar vel. de cámara
+Agitar la cámara
+Agitar la cámara
+Desplazar cámara del jug.
+Desplazar cámara del jug.
+Archivos
+Archivos
+Pokémon
+Pokémon
+Objeto
+Objeto
+Cancelar
+Cancelar
+Chico
+Chico
+Chica
+Chica

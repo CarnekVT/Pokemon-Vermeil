@@ -1,0 +1,8 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map014]
+\sign[signskin]P1: Mostrador de Servicio
+\sign[signskin]P1: Mostrador de Servicio
+¡Hola! Te doy la bienvenida al Centro Comercial de Ciudad Lugano.
+¡Hola! Te doy la bienvenida al Centro Comercial de Ciudad Lugano.

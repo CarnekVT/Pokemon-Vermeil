@@ -1,0 +1,36 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map065]
+Gracias por competir.\nDéjame que cure a tu equipo.
+Gracias por competir.\nDéjame que cure a tu equipo.
+El siguiente combate es el número \v[1]. ¿Estás listo?
+El siguiente combate es el número \v[1]. ¿Estás listo?
+¿Te gustaría cambiar de Pokémon primero?
+¿Te gustaría cambiar de Pokémon primero?
+Muy bien, el intercambio de Pokémon se ha completado.
+Muy bien, el intercambio de Pokémon se ha completado.
+Ven conmigo.
+Ven conmigo.
+¿Te gustaría guardar la partida y seguir más tarde?
+¿Te gustaría guardar la partida y seguir más tarde?
+Has guardado la partida.
+Has guardado la partida.
+¿Estás seguro de que te quieres retirar?
+¿Estás seguro de que te quieres retirar?
+¿Quieres guardar tu último combate?
+¿Quieres guardar tu último combate?
+\se[Pkmn exp full]Se ha guardado el combate.
+\se[Pkmn exp full]Se ha guardado el combate.
+Adelante
+Adelante
+Descansar
+Descansar
+Retirarse
+Retirarse
+Grabar combate
+Grabar combate
+Sí
+Sí
+No
+No

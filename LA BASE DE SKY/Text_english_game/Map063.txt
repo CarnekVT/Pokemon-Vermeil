@@ -1,0 +1,38 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map063]
+Yo me haré cargo de tu equipo.
+Yo me haré cargo de tu equipo.
+Después podrás elegir de nuestra selección de Pokémon.
+Después podrás elegir de nuestra selección de Pokémon.
+Ven conmigo.
+Ven conmigo.
+El siguiente combate es el número \v[1]. ¿Estás listo?
+El siguiente combate es el número \v[1]. ¿Estás listo?
+¿Quieres cambiar primero de Pokémon?
+¿Quieres cambiar primero de Pokémon?
+Bien, el intercambio de datos se ha completado.
+Bien, el intercambio de datos se ha completado.
+¿Quieres guardar la partida y continuar más tarde?
+¿Quieres guardar la partida y continuar más tarde?
+Se ha guardado la partida.
+Se ha guardado la partida.
+¿Seguro que quieres retirarte?
+¿Seguro que quieres retirarte?
+¿Quieres grabar tu último combate?
+¿Quieres grabar tu último combate?
+\se[Pkmn exp full]Se ha guardado el combate.
+\se[Pkmn exp full]Se ha guardado el combate.
+Adelante
+Adelante
+Reiniciar
+Reiniciar
+Retirarse
+Retirarse
+Grabar
+Grabar
+Sí
+Sí
+No
+No

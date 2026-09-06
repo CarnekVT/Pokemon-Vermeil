@@ -1,0 +1,76 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map023]
+¡Ah, eres tú!
+¡Ah, eres tú!
+Hemos estado cuidando de tu Pokémon, ¡y no te imaginas lo que ha ocurrido!
+Hemos estado cuidando de tu Pokémon, ¡y no te imaginas lo que ha ocurrido!
+¡Tu Pokémon ha tenido un Huevo!
+¡Tu Pokémon ha tenido un Huevo!
+No sabemos muy bien de dónde ha salido, pero sí que sabemos que estaba con tu Pokémon.
+No sabemos muy bien de dónde ha salido, pero sí que sabemos que estaba con tu Pokémon.
+Lo quieres, ¿verdad?
+Lo quieres, ¿verdad?
+No tienes hueco para él en estos momentos... Vuelve cuando le hayas hecho espacio.
+No tienes hueco para él en estos momentos... Vuelve cuando le hayas hecho espacio.
+\me[Egg get]\PN ha recibido el Huevo del dueño de la Guardería.
+\me[Egg get]\PN ha recibido el Huevo del dueño de la Guardería.
+¡Cuida mucho de él!
+¡Cuida mucho de él!
+¡Vuelve cuando quieras a retirar tu Huevo!
+¡Vuelve cuando quieras a retirar tu Huevo!
+Si no lo quieres podemos quedárnoslo. ¿O quizá sí que lo quieres?
+Si no lo quieres podemos quedárnoslo. ¿O quizá sí que lo quieres?
+Está bien entonces, yo me lo quedaré. Gracias.
+Está bien entonces, yo me lo quedaré. Gracias.
+Soy el dueño de la Guardería.
+Soy el dueño de la Guardería.
+Me encargo de ayudar a los Entrenadores a cuidar de sus preciados Pokémon.
+Me encargo de ayudar a los Entrenadores a cuidar de sus preciados Pokémon.
+Si quieres dejarnos alguno habla con mi mujer, que está dentro del edificio.
+Si quieres dejarnos alguno habla con mi mujer, que está dentro del edificio.
+¡Ah, eres tú! ¡Me alegro de verte!
+¡Ah, eres tú! ¡Me alegro de verte!
+Tu \v[3] está bastante bien.
+Tu \v[3] está bastante bien.
+Tu \v[3] y \v[4] están bastante bien.
+Tu \v[3] y \v[4] están bastante bien.
+Sin embargo, prefieren jugar con otros Pokémon...
+Sin embargo, prefieren jugar con otros Pokémon...
+Aunque no parece que se compenetren mucho.
+Aunque no parece que se compenetren mucho.
+Parece que se llevan bastante bien.
+Parece que se llevan bastante bien.
+De hecho se llevan estupendamente.
+De hecho se llevan estupendamente.
+Hoy tenemos una oferta. 25% de descuento en todas las Poké Balls.
+Hoy tenemos una oferta. 25% de descuento en todas las Poké Balls.
+\w[signskin]Club de Fans Pokémon
+\w[signskin]Club de Fans Pokémon
+¡Hola! Tengo mucha sed. ¿Tienes una Limonada? Te la cambiaré por una Bicicleta. Tengo muchas Bicicletas.
+¡Hola! Tengo mucha sed. ¿Tienes una Limonada? Te la cambiaré por una Bicicleta. Tengo muchas Bicicletas.
+¡Oh, tienes una Limonada! ¿Considerarías cambiarla por una Bicicleta?
+¡Oh, tienes una Limonada! ¿Considerarías cambiarla por una Bicicleta?
+¡Excelente! Aquí tienes.
+¡Excelente! Aquí tienes.
+¡Gracias! Realmente lo necesitaba.
+¡Gracias! Realmente lo necesitaba.
+No tienes espacio en tu Bolsa. No quiero coger sin más tu Limonada, así que vuelve cuando pueda darte la Bicicleta a cambio.
+No tienes espacio en tu Bolsa. No quiero coger sin más tu Limonada, así que vuelve cuando pueda darte la Bicicleta a cambio.
+Qué mal... Realmente tengo sed.
+Qué mal... Realmente tengo sed.
+¿Estás disfrutando de tu Bicicleta? La limonada que me diste era lo que necesitaba.
+¿Estás disfrutando de tu Bicicleta? La limonada que me diste era lo que necesitaba.
+¡Hola! Parece que te gustan los Pokémon. ¡Voy a hacerte un regalo!
+¡Hola! Parece que te gustan los Pokémon. ¡Voy a hacerte un regalo!
+Es una <b>Incubadora</b>. ¡Espero que la disfrutes!
+Es una <b>Incubadora</b>. ¡Espero que la disfrutes!
+No tienes espacio en tu Bolsa. Habla conmigo cuando lo tengas.
+No tienes espacio en tu Bolsa. Habla conmigo cuando lo tengas.
+Puedes añadir hasta 6 Huevos en la Incubadora. ¡Es la mar de útil!
+Puedes añadir hasta 6 Huevos en la Incubadora. ¡Es la mar de útil!
+Sí
+Sí
+No
+No

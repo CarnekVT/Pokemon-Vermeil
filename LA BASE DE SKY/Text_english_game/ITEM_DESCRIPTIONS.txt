@@ -1,0 +1,1552 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[ITEM_DESCRIPTIONS]
+Repele Pokémon salvajes débiles en un recorrido de 100 pasos.
+Repele Pokémon salvajes débiles en un recorrido de 100 pasos.
+Repele Pokémon salvajes débiles en un recorrido de 200 pasos.
+Repele Pokémon salvajes débiles en un recorrido de 200 pasos.
+Repele Pokémon salvajes débiles en un recorrido de 250 pasos.
+Repele Pokémon salvajes débiles en un recorrido de 250 pasos.
+Flauta de cristal negro cuya melodía reduce las probabilidades de encontrarse con Pokémon salvajes.
+Flauta de cristal negro cuya melodía reduce las probabilidades de encontrarse con Pokémon salvajes.
+Flauta de cristal blanco cuya melodía aumenta las probabilidades de encontrarse con Pokémon salvajes.
+Flauta de cristal blanco cuya melodía aumenta las probabilidades de encontrarse con Pokémon salvajes.
+Su delicioso aroma atrae a Pokémon salvajes si se usa en zonas de hierba alta, cuevas o árboles especiales.
+Su delicioso aroma atrae a Pokémon salvajes si se usa en zonas de hierba alta, cuevas o árboles especiales.
+Un pequeño fragmento rojo. Parece formar parte de algún tipo de herramienta antigua.
+Un pequeño fragmento rojo. Parece formar parte de algún tipo de herramienta antigua.
+Un pequeño fragmento amarillo. Parece formar parte de algún tipo de herramienta antigua.
+Un pequeño fragmento amarillo. Parece formar parte de algún tipo de herramienta antigua.
+Un pequeño fragmento azul. Parece formar parte de algún tipo de herramienta antigua.
+Un pequeño fragmento azul. Parece formar parte de algún tipo de herramienta antigua.
+Un pequeño fragmento verde. Parece formar parte de algún tipo de herramienta antigua.
+Un pequeño fragmento verde. Parece formar parte de algún tipo de herramienta antigua.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Amarilla como el fuego.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Amarilla como el fuego.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Tiene dibujado un rayo.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Tiene dibujado un rayo.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Es azul, como el agua.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Es azul, como el agua.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Tiene dibujada una hoja.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Tiene dibujada una hoja.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Negra como el azabache.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Negra como el azabache.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Es roja como el sol.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Es roja como el sol.
+Una piedra peculiar que permite evolucionar a algunos Pokémon. Es oscura como la noche.
+Una piedra peculiar que permite evolucionar a algunos Pokémon. Es oscura como la noche.
+Una piedra peculiar que permite evolucionar a algunos Pokémon. Brilla como un lucero.
+Una piedra peculiar que permite evolucionar a algunos Pokémon. Brilla como un lucero.
+Una piedra peculiar que permite evolucionar a algunos Pokémon. Tiene un brillo espectacular.
+Una piedra peculiar que permite evolucionar a algunos Pokémon. Tiene un brillo espectacular.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Tiene un patrón nevado.
+Curiosa piedra que permite evolucionar a determinadas especies de Pokémon. Tiene un patrón nevado.
+Curiosa manzana, de sabor particularmente dulce, que permite evolucionar a Applin.
+Curiosa manzana, de sabor particularmente dulce, que permite evolucionar a Applin.
+Curiosa manzana, de sabor particularmente ácido, que permite evolucionar a Applin.
+Curiosa manzana, de sabor particularmente ácido, que permite evolucionar a Applin.
+Tetera agrietada que permite evolucionar a Sinistea (forma Falsificada). Sirve un té exquisito.
+Tetera agrietada que permite evolucionar a Sinistea (forma Falsificada). Sirve un té exquisito.
+Tetera rota que permite evolucionar a Sinistea (forma Genuina). Sirve un té exquisito.
+Tetera rota que permite evolucionar a Sinistea (forma Genuina). Sirve un té exquisito.
+Un brazalete hecho de Ramas de Galanuez trenzadas. Los Slowpoke de Galar lo adoran.
+Un brazalete hecho de Ramas de Galanuez trenzadas. Los Slowpoke de Galar lo adoran.
+Una corona hecha con Ramas de Galanuez. Los Slowpoke de Galar lo adoran.
+Una corona hecha con Ramas de Galanuez. Los Slowpoke de Galar lo adoran.
+Bonguri de color rojo y aroma muy penetrante.
+Bonguri de color rojo y aroma muy penetrante.
+Bonguri de color amarillo y aroma refrescante.
+Bonguri de color amarillo y aroma refrescante.
+Bonguri de color azul y aroma tierno.
+Bonguri de color azul y aroma tierno.
+Bonguri de color verde y aroma peculiar que recuerda al café tostado.
+Bonguri de color verde y aroma peculiar que recuerda al café tostado.
+Bonguri de color rosa y aroma dulce.
+Bonguri de color rosa y aroma dulce.
+Bonguri de color blanco que no desprende aroma alguno.
+Bonguri de color blanco que no desprende aroma alguno.
+Bonguri de color negro y aroma indescriptible.
+Bonguri de color negro y aroma indescriptible.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser un fragmento de concha marina.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser un fragmento de concha marina.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser un fragmento de concha.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser un fragmento de concha.
+Fragmento de ámbar que contiene información genética de un Pokémon ancestral. Es de color amarillo.
+Fragmento de ámbar que contiene información genética de un Pokémon ancestral. Es de color amarillo.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser parte de una raíz.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser parte de una raíz.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser parte de una garra.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser parte de una garra.
+Fósil de un Pokémon prehistórico terrestre. Parece ser parte de una cabeza.
+Fósil de un Pokémon prehistórico terrestre. Parece ser parte de una cabeza.
+Fósil de un Pokémon prehistórico terrestre. Parece ser un fragmento del cuello.
+Fósil de un Pokémon prehistórico terrestre. Parece ser un fragmento del cuello.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser un fragmento de caparazón.
+Fósil de un Pokémon ancestral que vivió en el fondo del mar. Parece ser un fragmento de caparazón.
+Fósil de un Pokémon ancestral que surcó los cielos. Parece ser parte de un ala suya.
+Fósil de un Pokémon ancestral que surcó los cielos. Parece ser parte de un ala suya.
+Fósil de un Pokémon prehistórico terrestre. Parece ser parte de una mandíbula.
+Fósil de un Pokémon prehistórico terrestre. Parece ser parte de una mandíbula.
+Fósil de un Pokémon prehistórico marino. Parece ser parte de una aleta.
+Fósil de un Pokémon prehistórico marino. Parece ser parte de una aleta.
+Parte del fósil de un Pokémon prehistórico que surcaba los cielos. Su apariencia es una incógnita.
+Parte del fósil de un Pokémon prehistórico que surcaba los cielos. Su apariencia es una incógnita.
+Parte del fósil de un Pokémon prehistórico que habitaba en el mar. Su apariencia es una incógnita.
+Parte del fósil de un Pokémon prehistórico que habitaba en el mar. Su apariencia es una incógnita.
+Parte del fósil de un Pokémon prehistórico que habitaba en tierra firme. Su apariencia es una incógnita.
+Parte del fósil de un Pokémon prehistórico que habitaba en tierra firme. Su apariencia es una incógnita.
+Pluma normal y corriente. Muy bonita, pero no sirve para nada.
+Pluma normal y corriente. Muy bonita, pero no sirve para nada.
+Seta pequeña y poco común bastante popular entre determinados grupos de gourmets.
+Seta pequeña y poco común bastante popular entre determinados grupos de gourmets.
+Seta grande y poco común muy popular entre determinados grupos de gourmets.
+Seta grande y poco común muy popular entre determinados grupos de gourmets.
+Extraña seta que desprende un agradable aroma. Muy apreciada por los gourmets.
+Extraña seta que desprende un agradable aroma. Muy apreciada por los gourmets.
+Brillante perla plateada de tamaño más bien pequeño que no alcanza mucho precio en las tiendas.
+Brillante perla plateada de tamaño más bien pequeño que no alcanza mucho precio en las tiendas.
+Brillante perla plateada de gran tamaño que puede venderse a buen precio en las tiendas.
+Brillante perla plateada de gran tamaño que puede venderse a buen precio en las tiendas.
+Brillantes perlas plateadas de gran tamaño. Muy valoradas por los coleccionistas.
+Brillantes perlas plateadas de gran tamaño. Muy valoradas por los coleccionistas.
+Bonita arena roja de tacto sedoso que alcanza un alto precio en las tiendas.
+Bonita arena roja de tacto sedoso que alcanza un alto precio en las tiendas.
+Fragmento de una bonita gema roja que puede venderse muy caro en las tiendas.
+Fragmento de una bonita gema roja que puede venderse muy caro en las tiendas.
+Fragmento de un cometa caído al suelo al atravesar la atmósfera. Muy valorado por los coleccionistas.
+Fragmento de un cometa caído al suelo al atravesar la atmósfera. Muy valorado por los coleccionistas.
+Pepita de oro puro que desprende un brillo espectacular. Puede venderse muy cara en las tiendas.
+Pepita de oro puro que desprende un brillo espectacular. Puede venderse muy cara en las tiendas.
+Pepita grande de oro puro que desprende un brillo espectacular. Muy valorada por los coleccionistas.
+Pepita grande de oro puro que desprende un brillo espectacular. Muy valorada por los coleccionistas.
+Bella escama con forma de corazón que brilla con los colores del arco iris. Es muy poco común.
+Bella escama con forma de corazón que brilla con los colores del arco iris. Es muy poco común.
+Cola de origen desconocido y muy sabrosa. Se vende muy cara.
+Cola de origen desconocido y muy sabrosa. Se vende muy cara.
+Un hueso de gran valor arqueológico que puede alcanzar un alto precio en las tiendas.
+Un hueso de gran valor arqueológico que puede alcanzar un alto precio en las tiendas.
+Moneda de cobre de más de tres mil años de antigüedad. Muy valorada por los coleccionistas.
+Moneda de cobre de más de tres mil años de antigüedad. Muy valorada por los coleccionistas.
+Moneda de plata de más de tres mil años de antigüedad. Muy valorada por los coleccionistas.
+Moneda de plata de más de tres mil años de antigüedad. Muy valorada por los coleccionistas.
+Moneda de oro de más de tres mil años de antigüedad. Muy valorada por los coleccionistas.
+Moneda de oro de más de tres mil años de antigüedad. Muy valorada por los coleccionistas.
+Jarrón de más de tres mil años de antigüedad. Muy valorado por los coleccionistas.
+Jarrón de más de tres mil años de antigüedad. Muy valorado por los coleccionistas.
+Brazalete de más de tres mil años de antigüedad. Muy valorado por los coleccionistas.
+Brazalete de más de tres mil años de antigüedad. Muy valorado por los coleccionistas.
+Efigie de piedra de más de tres mil años de antigüedad. Muy valorado por los coleccionistas.
+Efigie de piedra de más de tres mil años de antigüedad. Muy valorado por los coleccionistas.
+Corona de más de tres mil años de antigüedad. Muy valorada por los coleccionistas.
+Corona de más de tres mil años de antigüedad. Muy valorada por los coleccionistas.
+Un fertilizante que se usa en tierra suelta. Acelera el crecimiento de las bayas, pero también seca el suelo.
+Un fertilizante que se usa en tierra suelta. Acelera el crecimiento de las bayas, pero también seca el suelo.
+Fertilizante para tierra suelta que ralentiza el crecimiento de las bayas y seca el suelo lentamente.
+Fertilizante para tierra suelta que ralentiza el crecimiento de las bayas y seca el suelo lentamente.
+Fertilizante para tierra suelta que retrasa la caída de las bayas maduras.
+Fertilizante para tierra suelta que retrasa la caída de las bayas maduras.
+Fertilizante para tierra suelta que hace que broten más plantas nuevas de las plantas marchitas.
+Fertilizante para tierra suelta que hace que broten más plantas nuevas de las plantas marchitas.
+Sal pura y de sabor intenso procedente de las profundidades de la Cueva Cardumen.
+Sal pura y de sabor intenso procedente de las profundidades de la Cueva Cardumen.
+Hermosa concha marina hallada en lo más profundo de la Cueva Cardumen. Tiene rayas azules y blancas.
+Hermosa concha marina hallada en lo más profundo de la Cueva Cardumen. Tiene rayas azules y blancas.
+Vital para impedir que una torre de piedra se derrumbe. A veces se oyen voces en su interior.
+Vital para impedir que una torre de piedra se derrumbe. A veces se oyen voces en su interior.
+Néctar de ciertas flores de los Jardines de Ula-Ula, capaz de hacer cambiar de forma a Oricorio.
+Néctar de ciertas flores de los Jardines de Ula-Ula, capaz de hacer cambiar de forma a Oricorio.
+Néctar de ciertas flores de los Jardines de Melemele, capaz de hacer cambiar de forma a Oricorio.
+Néctar de ciertas flores de los Jardines de Melemele, capaz de hacer cambiar de forma a Oricorio.
+Néctar de ciertas flores de los parterres de la Avenida Royale, capaz de hacer cambiar de forma a Oricorio.
+Néctar de ciertas flores de los parterres de la Avenida Royale, capaz de hacer cambiar de forma a Oricorio.
+Néctar de ciertas flores de los Jardines de Poni, capaz de hacer cambiar de forma a Oricorio.
+Néctar de ciertas flores de los Jardines de Poni, capaz de hacer cambiar de forma a Oricorio.
+El Pokémon que lo lleve flotará en el aire. Si recibe un golpe, estallará.
+El Pokémon que lo lleve flotará en el aire. Si recibe un golpe, estallará.
+Lanza un destello que baja la precisión del enemigo. Debe llevarlo un Pokémon.
+Lanza un destello que baja la precisión del enemigo. Debe llevarlo un Pokémon.
+Piedra evolutiva. El Pokémon portador aumentará su Defensa y su Defensa Especial si aún puede evolucionar.
+Piedra evolutiva. El Pokémon portador aumentará su Defensa y su Defensa Especial si aún puede evolucionar.
+Piedra muy ligera que reduce el peso del Pokémon que la lleve.
+Piedra muy ligera que reduce el peso del Pokémon que la lleve.
+Un hilo largo y delgado de color rojo que transmite el enamoramiento del Pokémon que lo lleva a su rival.
+Un hilo largo y delgado de color rojo que transmite el enamoramiento del Pokémon que lo lleva a su rival.
+Si el portador es alcanzado por un ataque físico, el agresor también recibe daño.
+Si el portador es alcanzado por un ataque físico, el agresor también recibe daño.
+Chaleco que potencia la Def. Esp. del Pokémon que lo lleva, pero le impide lanzar ataques de estado.
+Chaleco que potencia la Def. Esp. del Pokémon que lo lleva, pero le impide lanzar ataques de estado.
+Gafa que protege de los efectos adversos del clima y del polvo lanzado por los rivales.
+Gafa que protege de los efectos adversos del clima y del polvo lanzado por los rivales.
+Protege al Pokémon de los efectos que le produciría el contacto directo en combate.
+Protege al Pokémon de los efectos que le produciría el contacto directo en combate.
+Anula los efectos de aquello que se coloca a los pies del Pokémon para obstaculizarlo, como las trampas.
+Anula los efectos de aquello que se coloca a los pies del Pokémon para obstaculizarlo, como las trampas.
+El portador se vuelve invulnerable a los efectos de los climas lluvioso y soleado.
+El portador se vuelve invulnerable a los efectos de los climas lluvioso y soleado.
+Si el portador es alcanzado por un ataque, saldrá del combate y será sustituido por otro Pokémon.
+Si el portador es alcanzado por un ataque, saldrá del combate y será sustituido por otro Pokémon.
+Si el portador ve reducidas sus características, será sustituido por otro Pokémon del equipo.
+Si el portador ve reducidas sus características, será sustituido por otro Pokémon del equipo.
+Misteriosa tarjeta que permite al Pokémon que la lleve expulsar al agresor cuando este le cause daño.
+Misteriosa tarjeta que permite al Pokémon que la lleve expulsar al agresor cuando este le cause daño.
+En combate, esta concha desechada sirve para que un Pokémon se cambie por otro que no esté combatiendo.
+En combate, esta concha desechada sirve para que un Pokémon se cambie por otro que no esté combatiendo.
+Debe llevarla un Pokémon. Permite huir de combates contra Pokémon salvajes.
+Debe llevarla un Pokémon. Permite huir de combates contra Pokémon salvajes.
+Es un huevo lleno de felicidad que te hará ganar Puntos de Exp. extra en combate. Debe llevarlo un Pokémon.
+Es un huevo lleno de felicidad que te hará ganar Puntos de Exp. extra en combate. Debe llevarlo un Pokémon.
+El Pokémon que lo lleva obtiene parte de los Puntos de Exp. conseguidos en el combate sin participar en él.
+El Pokémon que lo lleva obtiene parte de los Puntos de Exp. conseguidos en el combate sin participar en él.
+Permite repartir los Puntos de Exp. entre los Pokémon que el entrenador elija desde la opción del equipo.
+Permite repartir los Puntos de Exp. entre los Pokémon que el entrenador elija desde la opción del equipo.
+Si el Pokémon que la lleva lucha en un combate, duplica las ganancias.
+Si el Pokémon que la lleva lucha en un combate, duplica las ganancias.
+Un cascabel con un tañido calmante que reconforta al Pokémon que la lleva y lo vuelve más amistoso.
+Un cascabel con un tañido calmante que reconforta al Pokémon que la lleva y lo vuelve más amistoso.
+Si lo lleva el primer Pokémon del equipo, se reduce la probabilidad de que se acerquen Pokémon salvajes.
+Si lo lleva el primer Pokémon del equipo, se reduce la probabilidad de que se acerquen Pokémon salvajes.
+Aumenta el Ataque un 50% pero solo permite usar un tipo de movimiento un 50%. Debe llevarla un Pokémon.
+Aumenta el Ataque un 50% pero solo permite usar un tipo de movimiento un 50%. Debe llevarla un Pokémon.
+Potencian el At. Esp. un 50% pero solo permiten usar un tipo de movimiento. Debe llevarlas un Pokémon.
+Potencian el At. Esp. un 50% pero solo permiten usar un tipo de movimiento. Debe llevarlas un Pokémon.
+Debe llevarlo un Pokémon. Potencia la Velocidad un 50%, pero solo permite usar un tipo de movimiento.
+Debe llevarlo un Pokémon. Potencia la Velocidad un 50%, pero solo permite usar un tipo de movimiento.
+Prolonga la duración del movimiento Día Soleado que use el Pokémon que la lleva.
+Prolonga la duración del movimiento Día Soleado que use el Pokémon que la lleva.
+Prolonga la duración del movimiento Danza Lluvia que use el Pokémon que la lleva.
+Prolonga la duración del movimiento Danza Lluvia que use el Pokémon que la lleva.
+Prolonga la duración del movimiento Tormenta Arena que use el Pokémon que la lleva.
+Prolonga la duración del movimiento Tormenta Arena que use el Pokémon que la lleva.
+Prolonga la duración del movimiento Granizo del Pokémon que la lleva.
+Prolonga la duración del movimiento Granizo del Pokémon que la lleva.
+Al llevarlo, prolonga la duración de los campos creados por el Pokémon en el terreno de combate.
+Al llevarlo, prolonga la duración de los campos creados por el Pokémon en el terreno de combate.
+Prolonga la duración de barreras como Reflejo y Pantalla de Luz. Debe llevarla un Pokémon.
+Prolonga la duración de barreras como Reflejo y Pantalla de Luz. Debe llevarla un Pokémon.
+Prolonga la duración de ataques multiturno como Atadura y Repetición. Debe llevarla un Pokémon.
+Prolonga la duración de ataques multiturno como Atadura y Repetición. Debe llevarla un Pokémon.
+Banda que potencia los movimientos que estrujan al rival.
+Banda que potencia los movimientos que estrujan al rival.
+Potencia los movimientos que roban PS. Debe llevarla un Pokémon.
+Potencia los movimientos que roban PS. Debe llevarla un Pokémon.
+Restaura gradualmente los PS de los Pokémon de tipo Veneno y daña a todos los demás.
+Restaura gradualmente los PS de los Pokémon de tipo Veneno y daña a todos los demás.
+Restauran gradualmente los PS del Pokémon que los lleva durante el combate.
+Restauran gradualmente los PS del Pokémon que los lleva durante el combate.
+Debe llevarla un Pokémon. Cada vez que este inflija daño, recuperará algunos PS.
+Debe llevarla un Pokémon. Cada vez que este inflija daño, recuperará algunos PS.
+El Pokémon que la lleve se libera del enamoramiento. Solo puede usarse una vez.
+El Pokémon que la lleve se libera del enamoramiento. Solo puede usarse una vez.
+Restaura cualquier característica debilitada en combate. Solo se puede usar una vez.
+Restaura cualquier característica debilitada en combate. Solo se puede usar una vez.
+Permite el uso inmediato de cualquier movimiento en el primer turno. Es de un solo uso.
+Permite el uso inmediato de cualquier movimiento en el primer turno. Es de un solo uso.
+Raíz de usar y tirar que sube el Ataque Especial cuando se recibe un ataque de tipo Agua.
+Raíz de usar y tirar que sube el Ataque Especial cuando se recibe un ataque de tipo Agua.
+Batería de usar y tirar que sube el Ataque de quien la lleva cuando recibe un golpe de tipo Eléctrico.
+Batería de usar y tirar que sube el Ataque de quien la lleva cuando recibe un golpe de tipo Eléctrico.
+Aumenta la Def. Esp. del Pokémon que la lleva si este recibe un ataque de tipo Agua. Es de un solo uso.
+Aumenta la Def. Esp. del Pokémon que la lleva si este recibe un ataque de tipo Agua. Es de un solo uso.
+Aumenta el Ataque del Pokémon que lo lleva si este recibe un ataque de tipo Hielo. Es de un solo uso.
+Aumenta el Ataque del Pokémon que lo lleva si este recibe un ataque de tipo Hielo. Es de un solo uso.
+Aumenta mucho el Atq. y el At. Esp. cuando el Pokémon que lo lleva recibe un ataque frente al cual es débil.
+Aumenta mucho el Atq. y el At. Esp. cuando el Pokémon que lo lleva recibe un ataque frente al cual es débil.
+Aumenta mucho la Velocidad cuando el Pokémon erra el movimiento debido a la precisión.
+Aumenta mucho la Velocidad cuando el Pokémon erra el movimiento debido a la precisión.
+Aumenta el Ataque Especial al emplear un movimiento que se sirva del sonido.
+Aumenta el Ataque Especial al emplear un movimiento que se sirva del sonido.
+Si lo lleva un Pokémon, sube la Velocidad al ser intimidado. Es de un solo uso.
+Si lo lleva un Pokémon, sube la Velocidad al ser intimidado. Es de un solo uso.
+Si lo lleva un Pokémon, reduce la Velocidad cuando se usa Espacio Raro.
+Si lo lleva un Pokémon, reduce la Velocidad cuando se usa Espacio Raro.
+Aumenta la Defensa del portador si el terreno está cubierto por un Campo Eléctrico.
+Aumenta la Defensa del portador si el terreno está cubierto por un Campo Eléctrico.
+Aumenta la Defensa del portador si el terreno está cubierto por un Campo de Hierba.
+Aumenta la Defensa del portador si el terreno está cubierto por un Campo de Hierba.
+Aumenta la Defensa Especial del portador si el terreno está cubierto por un Campo de Niebla.
+Aumenta la Defensa Especial del portador si el terreno está cubierto por un Campo de Niebla.
+Aumenta la Defensa Especial del portador si el terreno está cubierto por un Campo Psíquico.
+Aumenta la Defensa Especial del portador si el terreno está cubierto por un Campo Psíquico.
+Potencia los movimientos, pero consume PS con cada ataque un 30%. Debe llevarla un Pokémon.
+Potencia los movimientos, pero consume PS con cada ataque un 30%. Debe llevarla un Pokémon.
+Potencia ligeramente los movimientos supereficaces un 20%. Debe llevarla un Pokémon.
+Potencia ligeramente los movimientos supereficaces un 20%. Debe llevarla un Pokémon.
+Potencia un movimiento que se use de forma consecutiva. Pero el efecto se pierde si se emplea otro movimiento.
+Potencia un movimiento que se use de forma consecutiva. Pero el efecto se pierde si se emplea otro movimiento.
+Cinta de pelo que aumenta ligeramente la potencia de los movimientos físicos.
+Cinta de pelo que aumenta ligeramente la potencia de los movimientos físicos.
+Potencian ligeramente los movimientos especiales. Debe llevarlas un Pokémon.
+Potencian ligeramente los movimientos especiales. Debe llevarlas un Pokémon.
+Aumenta a la probabilidad de que el Pokémon que la lleva consiga un golpe crítico.
+Aumenta a la probabilidad de que el Pokémon que la lleva consiga un golpe crítico.
+Su lente aumenta la posibilidad que tiene el Pokémon que lo lleva de conseguir un golpe crítico.
+Su lente aumenta la posibilidad que tiene el Pokémon que lo lleva de conseguir un golpe crítico.
+Debe llevarla un Pokémon. Aumenta ligeramente la precisión de los movimientos.
+Debe llevarla un Pokémon. Aumenta ligeramente la precisión de los movimientos.
+Debe llevarlo un Pokémon. Si se mueve después del enemigo, aumenta el índice de precisión del Pokémon.
+Debe llevarlo un Pokémon. Si se mueve después del enemigo, aumenta el índice de precisión del Pokémon.
+Puede amedrentar al enemigo cuando el Pokémon que la lleva le hiera.
+Puede amedrentar al enemigo cuando el Pokémon que la lleva le hiera.
+Si lo lleva un Pokémon cuando hiere a un rival, puede amedrentarlo.
+Si lo lleva un Pokémon cuando hiere a un rival, puede amedrentarlo.
+Es muy pesada y hace que el Pokémon que la lleva se mueva más lento de lo normal.
+Es muy pesada y hace que el Pokémon que la lleva se mueva más lento de lo normal.
+Garra ligera y afilada que permite que el Pokémon que la lleve ataque primero ocasionalmente.
+Garra ligera y afilada que permite que el Pokémon que la lleve ataque primero ocasionalmente.
+El Pokémon que la lleve puede resistir un golpe que lo debilitaría y quedarse con 1 PS.
+El Pokémon que la lleve puede resistir un golpe que lo debilitaría y quedarse con 1 PS.
+Si el Pokémon que la lleva tiene los PS al máximo, resistirá un golpe que potencialmente lo deja KO con 1 PS.
+Si el Pokémon que la lleva tiene los PS al máximo, resistirá un golpe que potencialmente lo deja KO con 1 PS.
+Extraña esfera que causa quemaduras a quien la usa en combate. Debe llevarla un Pokémon.
+Extraña esfera que causa quemaduras a quien la usa en combate. Debe llevarla un Pokémon.
+Extraña esfera que envenena gravemente a quien la usa en combate. Debe llevarla un Pokémon.
+Extraña esfera que envenena gravemente a quien la usa en combate. Debe llevarla un Pokémon.
+Daña en cada turno al Pokémon que la lleva y también puede dañar a los enemigos que toquen al Pokémon.
+Daña en cada turno al Pokémon que la lleva y también puede dañar a los enemigos que toquen al Pokémon.
+Reduce la Velocidad y los movimientos tipo Tierra afectan a Pokémon que levitan y los de tipo Volador.
+Reduce la Velocidad y los movimientos tipo Tierra afectan a Pokémon que levitan y los de tipo Volador.
+El Pokémon que lo lleva es vulnerable frente a movimientos que normalmente no afectan a su tipo.
+El Pokémon que lo lleva es vulnerable frente a movimientos que normalmente no afectan a su tipo.
+Sólido y pesado brazal que fomenta el crecimiento pero reduce la Velocidad. Debe llevarlo un Pokémon.
+Sólido y pesado brazal que fomenta el crecimiento pero reduce la Velocidad. Debe llevarlo un Pokémon.
+Ayuda a conseguir más PS al subir de nivel, pero reduce la Velocidad. Debe llevarla un Pokémon.
+Ayuda a conseguir más PS al subir de nivel, pero reduce la Velocidad. Debe llevarla un Pokémon.
+Ayuda a ganar Ataque al subir de nivel, pero reduce la Velocidad. Debe llevarlo un Pokémon.
+Ayuda a ganar Ataque al subir de nivel, pero reduce la Velocidad. Debe llevarlo un Pokémon.
+Ayuda a ganar Defensa al subir de nivel, pero reduce la Velocidad. Debe llevarlo un Pokémon.
+Ayuda a ganar Defensa al subir de nivel, pero reduce la Velocidad. Debe llevarlo un Pokémon.
+Ayuda a ganar At. Esp. al subir de nivel, pero reduce la Velocidad. Debe llevarla un Pokémon.
+Ayuda a ganar At. Esp. al subir de nivel, pero reduce la Velocidad. Debe llevarla un Pokémon.
+Ayuda a ganar Def. Esp. al subir de nivel, pero reduce la Velocidad. Debe llevarla un Pokémon.
+Ayuda a ganar Def. Esp. al subir de nivel, pero reduce la Velocidad. Debe llevarla un Pokémon.
+Ayuda a ganar Velocidad al subir de nivel, pero reduce la Velocidad en combate. Debe llevarla un Pokémon.
+Ayuda a ganar Velocidad al subir de nivel, pero reduce la Velocidad en combate. Debe llevarla un Pokémon.
+Debe llevarlo un Pokémon. Su peculiar aroma reduce la precisión del rival.
+Debe llevarlo un Pokémon. Su peculiar aroma reduce la precisión del rival.
+Exótica sustancia aromática que hace que el Pokémon que la lleva se mueva más despacio.
+Exótica sustancia aromática que hace que el Pokémon que la lleva se mueva más despacio.
+Incienso de aroma exótico. Si el Pokémon que lo lleva participa en un combate, duplica las ganancias.
+Incienso de aroma exótico. Si el Pokémon que lo lleva participa en un combate, duplica las ganancias.
+Si lo lleva el primer Pokémon del equipo, los Pokémon salvajes se acercarán con menos frecuencia.
+Si lo lleva el primer Pokémon del equipo, los Pokémon salvajes se acercarán con menos frecuencia.
+Tiene un curioso aroma que potencia la energía de los ataques de tipo Agua. Debe llevarlo un Pokémon.
+Tiene un curioso aroma que potencia la energía de los ataques de tipo Agua. Debe llevarlo un Pokémon.
+Incienso exótico que fortalece los movimientos de tipo Agua. Debe llevarlo un Pokémon.
+Incienso exótico que fortalece los movimientos de tipo Agua. Debe llevarlo un Pokémon.
+Incienso de exótico aroma que fortalece los movimientos de tipo Planta. Debe llevarlo un Pokémon.
+Incienso de exótico aroma que fortalece los movimientos de tipo Planta. Debe llevarlo un Pokémon.
+Incienso de exótico aroma que fortalece los movimientos de tipo Psíquico. Debe llevarlo un Pokémon.
+Incienso de exótico aroma que fortalece los movimientos de tipo Psíquico. Debe llevarlo un Pokémon.
+Incienso de exótico aroma que fortalece los movimientos de tipo Roca. Debe llevarlo un Pokémon.
+Incienso de exótico aroma que fortalece los movimientos de tipo Roca. Debe llevarlo un Pokémon.
+Actúa como combustible y potencia la energía de los ataques de tipo Fuego. Debe llevarlo un Pokémon.
+Actúa como combustible y potencia la energía de los ataques de tipo Fuego. Debe llevarlo un Pokémon.
+Gema con forma de lágrima que fortalece los ataques de tipo Agua un 20%. Debe llevarla un Pokémon.
+Gema con forma de lágrima que fortalece los ataques de tipo Agua un 20%. Debe llevarla un Pokémon.
+Debe llevarlo un Pokémon. Su potente magnetismo fortalece los ataques de tipo Eléctrico.
+Debe llevarlo un Pokémon. Su potente magnetismo fortalece los ataques de tipo Eléctrico.
+Debe llevarla un Pokémon. La vitalidad de la semilla fortalece los ataques de tipo Planta.
+Debe llevarla un Pokémon. La vitalidad de la semilla fortalece los ataques de tipo Planta.
+Fragmento de hielo que repele el calor y fortalece los ataques de tipo Hielo. Debe llevarlo un Pokémon.
+Fragmento de hielo que repele el calor y fortalece los ataques de tipo Hielo. Debe llevarlo un Pokémon.
+Debe llevarlo un Pokémon. Aumenta la decisión y fortalece los ataques de tipo Lucha.
+Debe llevarlo un Pokémon. Aumenta la decisión y fortalece los ataques de tipo Lucha.
+Flecha venenosa que refuerza los movimientos de tipo Veneno un 20%. Debe llevarla un Pokémon.
+Flecha venenosa que refuerza los movimientos de tipo Veneno un 20%. Debe llevarla un Pokémon.
+Debe llevarla un Pokémon. La suavidad de la arena fortalece los ataques de tipo Tierra.
+Debe llevarla un Pokémon. La suavidad de la arena fortalece los ataques de tipo Tierra.
+Pico largo y afilado que aumenta la potencia de los movimientos de tipo Volador. Debe llevarlo un Pokémon.
+Pico largo y afilado que aumenta la potencia de los movimientos de tipo Volador. Debe llevarlo un Pokémon.
+Cuchara llena de energía telequinética que potencia los movimientos de tipo Psíquico.
+Cuchara llena de energía telequinética que potencia los movimientos de tipo Psíquico.
+Polvo de brillo argénteo que fortalece los ataques de tipo Bicho. Debe llevarlo un Pokémon.
+Polvo de brillo argénteo que fortalece los ataques de tipo Bicho. Debe llevarlo un Pokémon.
+Debe llevarla un Pokémon. La robustez de la piedra fortalece los ataques de tipo Roca.
+Debe llevarla un Pokémon. La robustez de la piedra fortalece los ataques de tipo Roca.
+Misterioso y oscuro objeto que refuerza los ataques de tipo Fantasma. Debe llevarlo un Pokémon.
+Misterioso y oscuro objeto que refuerza los ataques de tipo Fantasma. Debe llevarlo un Pokémon.
+Colmillo de gran dureza que refuerza los ataques de tipo Dragón. Debe llevarlo un Pokémon.
+Colmillo de gran dureza que refuerza los ataques de tipo Dragón. Debe llevarlo un Pokémon.
+Debe llevarlas un Pokémon. Fortalecen los ataques de tipo Siniestro.
+Debe llevarlas un Pokémon. Fortalecen los ataques de tipo Siniestro.
+Película metálica que fortalece los ataques de tipo Acero. Debe llevarlo un Pokémon.
+Película metálica que fortalece los ataques de tipo Acero. Debe llevarlo un Pokémon.
+La delicadeza del pañuelo fortalece los ataques de tipo Normal. Debe llevarlo un Pokémon.
+La delicadeza del pañuelo fortalece los ataques de tipo Normal. Debe llevarlo un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Fuego. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Fuego. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Agua. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Agua. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Eléctrico. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Eléctrico. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Planta. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Planta. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Hielo. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Hielo. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Lucha. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Lucha. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Veneno. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Veneno. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Tierra. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Tierra. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Volador. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Volador. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Psíquico. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Psíquico. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Bicho. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Bicho. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Roca. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Roca. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Fantasma. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Fantasma. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Dragón. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Dragón. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Siniestro. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Siniestro. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Acero. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Acero. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Hada. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Hada. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Fuego. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Fuego. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Agua. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Agua. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Eléctrico. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Eléctrico. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Planta. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Planta. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Hielo. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Hielo. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Lucha. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Lucha. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Veneno. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Veneno. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Tierra. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Tierra. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Volador. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Volador. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Psíquico. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Psíquico. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Bicho. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Bicho. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Roca. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Roca. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Fantasma. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Fantasma. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Dragón. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Dragón. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Siniestro. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Siniestro. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Acero. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Acero. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Hada. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Hada. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Normal. Debe llevarla un Pokémon.
+Joya de un solo uso que potencia los movimientos de tipo Normal. Debe llevarla un Pokémon.
+Asombrosa esfera que debe llevar Pikachu y que aumenta el Ataque y el Ataque Especial.
+Asombrosa esfera que debe llevar Pikachu y que aumenta el Ataque y el Ataque Especial.
+Debe llevarlo Chansey. Potencia su índice de golpe crítico.
+Debe llevarlo Chansey. Potencia su índice de golpe crítico.
+Debe llevarlo Ditto. Es un polvo muy fino, pero a la vez resistente, que aumentará su Defensa.
+Debe llevarlo Ditto. Es un polvo muy fino, pero a la vez resistente, que aumentará su Defensa.
+Este objeto duplica la Velocidad de Ditto en batalla. Deja de ser efectivo una vez se transforma.
+Este objeto duplica la Velocidad de Ditto en batalla. Deja de ser efectivo una vez se transforma.
+Un extraño tipo de hueso que potencia el Ataque. Suelen llevarlo Cubone o Marowak.
+Un extraño tipo de hueso que potencia el Ataque. Suelen llevarlo Cubone o Marowak.
+Es un puerro muy largo que suele llevar Farfetch'd. Aumenta la probabilidad de un golpe crítico.
+Es un puerro muy largo que suele llevar Farfetch'd. Aumenta la probabilidad de un golpe crítico.
+Un orbe fantástico que deben llevar Latios o Latias. Potencia los movimientos de tipo Dragón y Psíquico en un 20%.
+Un orbe fantástico que deben llevar Latios o Latias. Potencia los movimientos de tipo Dragón y Psíquico en un 20%.
+Tiene el brillo afilado de la plata y debe llevarlo Clamperl. Sube el At. Esp.
+Tiene el brillo afilado de la plata y debe llevarlo Clamperl. Sube el At. Esp.
+Tiene un débil brillo rosado y debe llevarla Clamperl. Sube la Def. Esp.
+Tiene un débil brillo rosado y debe llevarla Clamperl. Sube la Def. Esp.
+Una esfera brillante que potencia los ataques de tipo Acero y Dragón. Debe llevarla Dialga.
+Una esfera brillante que potencia los ataques de tipo Acero y Dragón. Debe llevarla Dialga.
+Una bonita esfera que potencia los ataques de tipo Dragón y Agua. Debe llevarla Palkia.
+Una bonita esfera que potencia los ataques de tipo Dragón y Agua. Debe llevarla Palkia.
+Una esfera brillante que potencia los ataques de tipo Dragón y Fantasma. Debe llevarla Giratina.
+Una esfera brillante que potencia los ataques de tipo Dragón y Fantasma. Debe llevarla Giratina.
+Cuenta una antigua leyenda que un valiente héroe blandió esta espada para hacer frente a un cataclismo.
+Cuenta una antigua leyenda que un valiente héroe blandió esta espada para hacer frente a un cataclismo.
+Cuenta una antigua leyenda que un valiente héroe asió este escudo para hacer frente a un cataclismo.
+Cuenta una antigua leyenda que un valiente héroe asió este escudo para hacer frente a un cataclismo.
+Cartucho que convierte Tecno Shock de Genesect en un movimiento de tipo Agua.
+Cartucho que convierte Tecno Shock de Genesect en un movimiento de tipo Agua.
+Cartucho que convierte Tecno Shock de Genesect en un movimiento de tipo Eléctrico.
+Cartucho que convierte Tecno Shock de Genesect en un movimiento de tipo Eléctrico.
+Cartucho que convierte Tecno Shock de Genesect en un movimiento de tipo Fuego.
+Cartucho que convierte Tecno Shock de Genesect en un movimiento de tipo Fuego.
+Cartucho que convierte Tecno Shock de Genesect en un movimiento de tipo Hielo.
+Cartucho que convierte Tecno Shock de Genesect en un movimiento de tipo Hielo.
+Disco de datos que contiene información relativa al tipo Fuego. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Fuego. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Agua. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Agua. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Eléctrico. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Eléctrico. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Planta. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Planta. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Hielo. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Hielo. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Lucha. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Lucha. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Veneno. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Veneno. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Tierra. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Tierra. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Volador. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Volador. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Psíquico. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Psíquico. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Bicho. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Bicho. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Roca. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Roca. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene info. relativa al tipo Fantasma. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene info. relativa al tipo Fantasma. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Dragón. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Dragón. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Siniestro. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Siniestro. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Acero. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Acero. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Hada. Permite cambiar de tipo a Silvally.
+Disco de datos que contiene información relativa al tipo Hada. Permite cambiar de tipo a Silvally.
+El Pokémon que lleve esta piedra mágica no evolucionará.
+El Pokémon que lleve esta piedra mágica no evolucionará.
+Una gruesa y resistente escama que pueden llevar los Pokémon de tipo Dragón cuando son capturados.
+Una gruesa y resistente escama que pueden llevar los Pokémon de tipo Dragón cuando son capturados.
+Peculiar dispositivo fabricado en Silph S.A. que contiene todo tipo de datos. Permite evolucionar a Porygon.
+Peculiar dispositivo fabricado en Silph S.A. que contiene todo tipo de datos. Permite evolucionar a Porygon.
+Dispositivo transparente que contiene datos misteriosos. Permite evolucionar a Porygon2.
+Dispositivo transparente que contiene datos misteriosos. Permite evolucionar a Porygon2.
+Dispositivo de protección muy pesado. Sirve para evolucionar a Rhydon.
+Dispositivo de protección muy pesado. Sirve para evolucionar a Rhydon.
+Este dispositivo contiene una gran cantidad de energía eléctrica. Sirve para evolucionar a Electabuzz.
+Este dispositivo contiene una gran cantidad de energía eléctrica. Sirve para evolucionar a Electabuzz.
+Esta caja contiene una enorme cantidad de energía magmática. Sirve para evolucionar a Magmar.
+Esta caja contiene una enorme cantidad de energía magmática. Sirve para evolucionar a Magmar.
+Tela imbuida de una energía espiritual muy potente. Sirve para evolucionar a Dusclops.
+Tela imbuida de una energía espiritual muy potente. Sirve para evolucionar a Dusclops.
+Preciosa escama que permite evolucionar a Feebas. Brilla con los colores del arcoíris.
+Preciosa escama que permite evolucionar a Feebas. Brilla con los colores del arcoíris.
+Una piedra peculiar que permite evolucionar a Happiny. Tiene forma de huevo.
+Una piedra peculiar que permite evolucionar a Happiny. Tiene forma de huevo.
+Un dulce a base de suave y esponjosa nata montada. Sirve para evolucionar a Swirlix.
+Un dulce a base de suave y esponjosa nata montada. Sirve para evolucionar a Swirlix.
+Saquito que desprende un aroma peculiar. Sirve para evolucionar a Spritzee.
+Saquito que desprende un aroma peculiar. Sirve para evolucionar a Spritzee.
+Confite con forma de fresa. Permite evolucionar a Milcery.
+Confite con forma de fresa. Permite evolucionar a Milcery.
+Confite con forma de corazón. Permite evolucionar a Milcery.
+Confite con forma de corazón. Permite evolucionar a Milcery.
+Confite con forma de fruto. Permite evolucionar a Milcery.
+Confite con forma de fruto. Permite evolucionar a Milcery.
+Confite con forma de trébol. Permite evolucionar a Milcery.
+Confite con forma de trébol. Permite evolucionar a Milcery.
+Confite con forma de flor. Permite evolucionar a Milcery.
+Confite con forma de flor. Permite evolucionar a Milcery.
+Confite con forma de estrella. Permite evolucionar a Milcery.
+Confite con forma de estrella. Permite evolucionar a Milcery.
+Confite con forma de lazo. Permite evolucionar a Milcery.
+Confite con forma de lazo. Permite evolucionar a Milcery.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Venusaur en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Venusaur en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Charizard en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Charizard en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Blastoise en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Blastoise en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Beedrill en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Beedrill en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Pidgeot en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Pidgeot en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Alakazam en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Alakazam en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Slowbro en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Slowbro en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Gengar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Gengar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Kangaskhan en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Kangaskhan en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Pinsir en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Pinsir en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Gyarados en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Gyarados en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Aerodactyl en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Aerodactyl en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Mewtwo en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Mewtwo en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Ampharos en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Ampharos en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Steelix en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Steelix en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Scizor en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Scizor en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Heracross en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Heracross en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Houndoom en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Houndoom en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Tyranitar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Tyranitar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Sceptile en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Sceptile en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Blaziken en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Blaziken en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Swampert en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Swampert en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Gardevoir en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Gardevoir en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Sableye en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Sableye en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Mawile en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Mawile en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Aggron en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Aggron en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Medicham en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Medicham en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Manectric en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Manectric en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Sharpedo en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Sharpedo en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Camerupt en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Camerupt en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Altaria en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Altaria en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Banette en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Banette en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Absol en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Absol en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Glalie en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Glalie en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Salamence en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Salamence en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Metagross en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Metagross en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Latias en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Latias en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Latios en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Latios en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Lopunny en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Lopunny en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Garchomp en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Garchomp en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Lucario en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Lucario en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Abomasnow en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Abomasnow en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Gallade en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Gallade en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Audino en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Audino en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Diancie en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Diancie en combate.
+Piedra carmesí de la que se dice que guarda una estrecha relación con las leyendas de Hoenn.
+Piedra carmesí de la que se dice que guarda una estrecha relación con las leyendas de Hoenn.
+Piedra añil que, según dicen, guarda una estrecha relación con las leyendas de Hoenn.
+Piedra añil que, según dicen, guarda una estrecha relación con las leyendas de Hoenn.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Clefable en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Clefable en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Starmie en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Starmie en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Victreebel en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Victreebel en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Dragonite en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Dragonite en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Meganium en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Meganium en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Feraligatr en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Feraligatr en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Skarmory en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Skarmory en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Froslass en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Froslass en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Emboar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Emboar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Excadril en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Excadril en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Scolipede en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Scolipede en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Eelektross en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Eelektross en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Scrafty en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Scrafty en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Chandelure en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Chandelure en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Chesnaught en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Chesnaught en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Delphox en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Delphox en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Greninja en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Greninja en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Pyroar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Pyroar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Malamar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Malamar en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Hawlucha en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Hawlucha en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Barbaracle en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Barbaracle en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Dragalge en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Dragalge en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Drampa en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Drampa en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Falinks en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Falinks en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Zygarde en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Zygarde en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Floette Flor Eterna en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Floette Flor Eterna en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Scovillain en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Scovillain en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Crabominable en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Crabominable en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Staraptor en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Staraptor en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Golurk en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Golurk en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Raichu en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Raichu en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Darkrai en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Darkrai en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Tatsugiri en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Tatsugiri en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Magearna en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Magearna en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Golisopod en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Golisopod en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Meowstic en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Meowstic en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Heatran en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Heatran en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Glimmora en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Glimmora en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Baxcalibur en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Baxcalibur en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Chimecho en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Chimecho en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Zeraora en combate.
+Una de las misteriosas Megapiedras. Permite megaevolucionar a Zeraora en combate.
+Medicina en espray que cura heridas y restaura 20 PS de un Pokémon.
+Medicina en espray que cura heridas y restaura 20 PS de un Pokémon.
+Medicina en espray que cura heridas y restaura 60 PS de un Pokémon.
+Medicina en espray que cura heridas y restaura 60 PS de un Pokémon.
+Medicina en espray que cura heridas y restaura 120 PS de un Pokémon.
+Medicina en espray que cura heridas y restaura 120 PS de un Pokémon.
+Medicina en espray que cura heridas y restaura todos los PS de un Pokémon.
+Medicina en espray que cura heridas y restaura todos los PS de un Pokémon.
+Medicina que restaura todos los PS y cura todos los problemas de estado de un Pokémon.
+Medicina que restaura todos los PS y cura todos los problemas de estado de un Pokémon.
+Reanima completamente a los Pokémon debilitados y restaura todos sus PS.
+Reanima completamente a los Pokémon debilitados y restaura todos sus PS.
+Medicina en espray que libera a un Pokémon de las garras del sueño.
+Medicina en espray que libera a un Pokémon de las garras del sueño.
+Medicina en espray que contrarresta los efectos del veneno en un Pokémon.
+Medicina en espray que contrarresta los efectos del veneno en un Pokémon.
+Medicina en espray que cura las quemaduras a un Pokémon.
+Medicina en espray que cura las quemaduras a un Pokémon.
+Medicina en espray que cura a un Pokémon paralizado.
+Medicina en espray que cura a un Pokémon paralizado.
+Medicina en espray que descongela a un Pokémon.
+Medicina en espray que descongela a un Pokémon.
+Medicina en espray que cura todos los problemas de estado de un Pokémon.
+Medicina en espray que cura todos los problemas de estado de un Pokémon.
+Snack crujiente típico de Ciudad Plateada. Cura todos los problemas de estado de un Pokémon.
+Snack crujiente típico de Ciudad Plateada. Cura todos los problemas de estado de un Pokémon.
+Caramelo típico de Pueblo Caoba, muy popular como souvenir.
+Caramelo típico de Pueblo Caoba, muy popular como souvenir.
+Dulce típico de Pueblo Lavacalda que cura todos los problemas de estado de un Pokémon.
+Dulce típico de Pueblo Lavacalda que cura todos los problemas de estado de un Pokémon.
+Especialidad de la Vieja Mansión. Cura los problemas de estado de un Pokémon.
+Especialidad de la Vieja Mansión. Cura los problemas de estado de un Pokémon.
+Especialidad de Ciudad Porcelana. Cura los problemas de estado de un Pokémon.
+Especialidad de Ciudad Porcelana. Cura los problemas de estado de un Pokémon.
+Postre típico de Ciudad Luminalia. Cura los problemas de estado de un Pokémon.
+Postre típico de Ciudad Luminalia. Cura los problemas de estado de un Pokémon.
+Especialidad de Ciudad Yantra. Cura los problemas de estado de un Pokémon.
+Especialidad de Ciudad Yantra. Cura los problemas de estado de un Pokémon.
+Fritura típica de Alola que cura todos los problemas de estado de un Pokémon.
+Fritura típica de Alola que cura todos los problemas de estado de un Pokémon.
+Medicina que reanima a un Pokémon debilitado y restaura la mitad de sus PS.
+Medicina que reanima a un Pokémon debilitado y restaura la mitad de sus PS.
+Medicina que reanima a un Pokémon debilitado y restaura todos sus PS.
+Medicina que reanima a un Pokémon debilitado y restaura todos sus PS.
+Zumo de bayas 100% natural que restaura 20 PS de un Pokémon. Si se equipa el Pokémon lo usará automáticamente.
+Zumo de bayas 100% natural que restaura 20 PS de un Pokémon. Si se equipa el Pokémon lo usará automáticamente.
+Chocolatina de sabor dulce. Restaura 20 PS de un Pokémon.
+Chocolatina de sabor dulce. Restaura 20 PS de un Pokémon.
+Agua de alto contenido mineral que restaura 30 PS de un Pokémon.
+Agua de alto contenido mineral que restaura 30 PS de un Pokémon.
+Chispeante bebida gaseosa que restaura 50 PS de un Pokémon.
+Chispeante bebida gaseosa que restaura 50 PS de un Pokémon.
+Bebida dulce que restaura 70 PS de un Pokémon.
+Bebida dulce que restaura 70 PS de un Pokémon.
+Leche de alto valor nutritivo que restaura 100 PS de un Pokémon.
+Leche de alto valor nutritivo que restaura 100 PS de un Pokémon.
+Polvo medicinal muy amargo que restaura 50 PS de un Pokémon.
+Polvo medicinal muy amargo que restaura 50 PS de un Pokémon.
+Raíz muy amarga que restaura 120 PS de un Pokémon.
+Raíz muy amarga que restaura 120 PS de un Pokémon.
+Polvos muy amargos que curan todos los problemas de estado de un Pokémon.
+Polvos muy amargos que curan todos los problemas de estado de un Pokémon.
+Hierba muy amarga que reanima a un Pokémon debilitado y restaura todos sus PS.
+Hierba muy amarga que reanima a un Pokémon debilitado y restaura todos sus PS.
+Miel producida por un Vespiquen Dinamax. Revive y restaura todos los PS de un Pokémon.
+Miel producida por un Vespiquen Dinamax. Revive y restaura todos los PS de un Pokémon.
+Restaura un máximo de 10 PP del ataque que elijas de un Pokémon.
+Restaura un máximo de 10 PP del ataque que elijas de un Pokémon.
+Restaura completamente los PP del movimiento que elijas de un Pokémon.
+Restaura completamente los PP del movimiento que elijas de un Pokémon.
+Restaura 10 PP de todos los movimientos aprendidos por un Pokémon.
+Restaura 10 PP de todos los movimientos aprendidos por un Pokémon.
+Restaura completamente los PP de todos los movimientos aprendidos por el Pokémon elegido.
+Restaura completamente los PP de todos los movimientos aprendidos por el Pokémon elegido.
+Aumenta ligeramente los PP máximos del ataque que elijas de un Pokémon.
+Aumenta ligeramente los PP máximos del ataque que elijas de un Pokémon.
+Aumenta al máximo los PP del ataque que elijas de un Pokémon.
+Aumenta al máximo los PP del ataque que elijas de un Pokémon.
+Nutritiva bebida que aumenta los PS de un Pokémon.
+Nutritiva bebida que aumenta los PS de un Pokémon.
+Nutritiva bebida que aumenta el Ataque de un Pokémon.
+Nutritiva bebida que aumenta el Ataque de un Pokémon.
+Nutritiva bebida que aumenta la Defensa de un Pokémon.
+Nutritiva bebida que aumenta la Defensa de un Pokémon.
+Nutritiva bebida que sube el At. Esp. de un Pokémon.
+Nutritiva bebida que sube el At. Esp. de un Pokémon.
+Nutritiva bebida que aumenta la Defensa Especial de un Pokémon.
+Nutritiva bebida que aumenta la Defensa Especial de un Pokémon.
+Nutritiva bebida que sube la Velocidad de un Pokémon.
+Nutritiva bebida que sube la Velocidad de un Pokémon.
+Objeto que aumenta los PS base de un Pokémon.
+Objeto que aumenta los PS base de un Pokémon.
+Objeto que aumenta el Ataque base de un Pokémon.
+Objeto que aumenta el Ataque base de un Pokémon.
+Objeto que aumenta la Defensa base de un Pokémon.
+Objeto que aumenta la Defensa base de un Pokémon.
+Objeto que aumenta el Ataque Especial base de un Pokémon.
+Objeto que aumenta el Ataque Especial base de un Pokémon.
+Objeto que aumenta la Defensa Especial base de un Pokémon.
+Objeto que aumenta la Defensa Especial base de un Pokémon.
+Objeto que aumenta la Velocidad base de un Pokémon.
+Objeto que aumenta la Velocidad base de un Pokémon.
+Menta que cambia la naturaleza de tu Pokémon a Huraña (+At., -Def.).
+Menta que cambia la naturaleza de tu Pokémon a Huraña (+At., -Def.).
+Menta que cambia la naturaleza de tu Pokémon a Firme (+At., -At.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Firme (+At., -At.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Pícara (+At., -Def.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Pícara (+At., -Def.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Audaz (+At., -Vel.).
+Menta que cambia la naturaleza de tu Pokémon a Audaz (+At., -Vel.).
+Menta que cambia la naturaleza de tu Pokémon a Osada (+Def., -At.).
+Menta que cambia la naturaleza de tu Pokémon a Osada (+Def., -At.).
+Menta que cambia la naturaleza de tu Pokémon a Agitada (+Def., -At.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Agitada (+Def., -At.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Floja (+Def., -Def.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Floja (+Def., -Def.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Plácida (+Def., -Vel.).
+Menta que cambia la naturaleza de tu Pokémon a Plácida (+Def., -Vel.).
+Menta que cambia la naturaleza de tu Pokémon a Modesta (+At.Esp., -At.).
+Menta que cambia la naturaleza de tu Pokémon a Modesta (+At.Esp., -At.).
+Menta que cambia la naturaleza de tu Pokémon a Afable (+At.Esp., -Def.).
+Menta que cambia la naturaleza de tu Pokémon a Afable (+At.Esp., -Def.).
+Menta que cambia la naturaleza de tu Pokémon a Alocada (+At.Esp., -Def.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Alocada (+At.Esp., -Def.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Mansa (+At.Esp., -Vel.).
+Menta que cambia la naturaleza de tu Pokémon a Mansa (+At.Esp., -Vel.).
+Menta que cambia la naturaleza de tu Pokémon a Serena (+Def.Esp., -At.).
+Menta que cambia la naturaleza de tu Pokémon a Serena (+Def.Esp., -At.).
+Menta que cambia la naturaleza de tu Pokémon a Amable (+Def.Esp., -Def.).
+Menta que cambia la naturaleza de tu Pokémon a Amable (+Def.Esp., -Def.).
+Menta que cambia la naturaleza de tu Pokémon a Cauta (+Def.Esp., -At.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Cauta (+Def.Esp., -At.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Grosera (+Def.Esp., -Vel.).
+Menta que cambia la naturaleza de tu Pokémon a Grosera (+Def.Esp., -Vel.).
+Menta que cambia la naturaleza de tu Pokémon a Miedosa (+Vel., -At.).
+Menta que cambia la naturaleza de tu Pokémon a Miedosa (+Vel., -At.).
+Menta que cambia la naturaleza de tu Pokémon a Activa (+Vel., -Def.).
+Menta que cambia la naturaleza de tu Pokémon a Activa (+Vel., -Def.).
+Menta que cambia la naturaleza de tu Pokémon a Alegre (+Vel., -At.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Alegre (+Vel., -At.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Ingenua (+Vel., -Def.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Ingenua (+Vel., -Def.Esp.).
+Menta que cambia la naturaleza de tu Pokémon a Seria (neutra).
+Menta que cambia la naturaleza de tu Pokémon a Seria (neutra).
+Cápsula que les permite cambiar de habilidad a los Pokémon que poseen dos.
+Cápsula que les permite cambiar de habilidad a los Pokémon que poseen dos.
+Parche que permite cambiar la habilidad normal de un Pokémon por la oculta.
+Parche que permite cambiar la habilidad normal de un Pokémon por la oculta.
+Una cápsula especial que permite a un Pokémon cambiar de habilidad entre todas las que tiene.
+Una cápsula especial que permite a un Pokémon cambiar de habilidad entre todas las que tiene.
+Caramelo energético que aumenta ligerísimamente los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta ligerísimamente los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta ligeramente los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta ligeramente los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta bastante los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta bastante los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta mucho los Puntos de Experiencia de un Pokémon.
+Caramelo energético que aumenta mucho los Puntos de Experiencia de un Pokémon.
+Caramelo energético que sube a un Pokémon de nivel.
+Caramelo energético que sube a un Pokémon de nivel.
+Caramelo energético que baja a un Pokémon de nivel.
+Caramelo energético que baja a un Pokémon de nivel.
+Dispositivo con diseño capsular que atrapa Pokémon salvajes. Se lanza como una bola contra el blanco.
+Dispositivo con diseño capsular que atrapa Pokémon salvajes. Se lanza como una bola contra el blanco.
+Poké Ball de alto rendimiento. Tiene un índice de éxito superior al de la Poké Ball.
+Poké Ball de alto rendimiento. Tiene un índice de éxito superior al de la Poké Ball.
+Poké Ball de rendimiento superior. Tiene más índice de éxito que la Superball.
+Poké Ball de rendimiento superior. Tiene más índice de éxito que la Superball.
+La Poké Ball definitiva. Atrapa a cualquier Pokémon salvaje y no falla nunca.
+La Poké Ball definitiva. Atrapa a cualquier Pokémon salvaje y no falla nunca.
+Poké Ball con un diseño de camuflaje que se utiliza únicamente en el Gran Pantano.
+Poké Ball con un diseño de camuflaje que se utiliza únicamente en el Gran Pantano.
+Poké Ball especial para el Concurso de Captura de Bichos.
+Poké Ball especial para el Concurso de Captura de Bichos.
+Es algo distinta a las demás. Funciona especialmente bien con los Pokémon de tipo Agua y Bicho.
+Es algo distinta a las demás. Funciona especialmente bien con los Pokémon de tipo Agua y Bicho.
+Es algo distinta a las demás. Funciona especialmente bien con los Pokémon que viven en el mar.
+Es algo distinta a las demás. Funciona especialmente bien con los Pokémon que viven en el mar.
+Es algo distinta a las demás. Funciona especialmente bien con los Pokémon salvajes de menor nivel.
+Es algo distinta a las demás. Funciona especialmente bien con los Pokémon salvajes de menor nivel.
+Es algo distinta a las demás. Funciona especialmente bien con los Pokémon iguales a los que ya has capturado.
+Es algo distinta a las demás. Funciona especialmente bien con los Pokémon iguales a los que ya has capturado.
+Una Poké Ball algo distinta que va mejorando su rendimiento con cada turno de combate.
+Una Poké Ball algo distinta que va mejorando su rendimiento con cada turno de combate.
+Acogedora Poké Ball que hace más amistosos a los Pokémon salvajes capturados.
+Acogedora Poké Ball que hace más amistosos a los Pokémon salvajes capturados.
+Es una Poké Ball muy particular que se creó para conmemorar algún acontecimiento.
+Es una Poké Ball muy particular que se creó para conmemorar algún acontecimiento.
+Es algo distinta. Hace que sea más fácil capturar a Pokémon salvajes en la oscuridad.
+Es algo distinta. Hace que sea más fácil capturar a Pokémon salvajes en la oscuridad.
+Poké Ball curativa que restaura los PS de un Pokémon capturado y cura sus problemas de estado.
+Poké Ball curativa que restaura los PS de un Pokémon capturado y cura sus problemas de estado.
+Una Poké Ball que aumenta su eficacia si se usa en el turno 1 del combate.
+Una Poké Ball que aumenta su eficacia si se usa en el turno 1 del combate.
+Poké Ball algo distinta, especialmente indicada para capturar Pokémon con Velocidad muy alta.
+Poké Ball algo distinta, especialmente indicada para capturar Pokémon con Velocidad muy alta.
+Una Poké Ball diseñada para capturar Pokémon de nivel inferior al de tu Pokémon.
+Una Poké Ball diseñada para capturar Pokémon de nivel inferior al de tu Pokémon.
+Poké Ball algo distinta, especialmente indicada para capturar los Pokémon que se han pescado con una Caña.
+Poké Ball algo distinta, especialmente indicada para capturar los Pokémon que se han pescado con una Caña.
+Una Poké Ball diseñada para capturar Pokémon muy pesados.
+Una Poké Ball diseñada para capturar Pokémon muy pesados.
+Una Poké Ball diseñada para capturar Pokémon del género opuesto al de tu Pokémon.
+Una Poké Ball diseñada para capturar Pokémon del género opuesto al de tu Pokémon.
+Una Poké Ball que hace más amistosos a los Pokémon capturados.
+Una Poké Ball que hace más amistosos a los Pokémon capturados.
+Una Poké Ball diseñada para capturar Pokémon que evolucionan con Piedra Lunar.
+Una Poké Ball diseñada para capturar Pokémon que evolucionan con Piedra Lunar.
+Una Poké Ball algo diferente que funciona mejor cuando el Pokémon está dormido.
+Una Poké Ball algo diferente que funciona mejor cuando el Pokémon está dormido.
+Una Poké Ball especial diseñada para capturar Ultraentes. Con otros Pokémon suele fallar.
+Una Poké Ball especial diseñada para capturar Ultraentes. Con otros Pokémon suele fallar.
+Se concentra para dar un puñetazo. Falla si se sufre un golpe antes de su uso.
+Se concentra para dar un puñetazo. Falla si se sufre un golpe antes de su uso.
+Araña al objetivo con garras afiladas.
+Araña al objetivo con garras afiladas.
+Ataca con un potente chorro de agua. Puede confundir al objetivo.
+Ataca con un potente chorro de agua. Puede confundir al objetivo.
+Aumenta la concentración y calma el espíritu para subir el Ataque Especial y la Defensa Especial.
+Aumenta la concentración y calma el espíritu para subir el Ataque Especial y la Defensa Especial.
+Se lleva al objetivo, que es cambiado por otro Pokémon. Si es un Pokémon salvaje, acaba el combate.
+Se lleva al objetivo, que es cambiado por otro Pokémon. Si es un Pokémon salvaje, acaba el combate.
+Envenena gravemente al objetivo y causa un daño mayor en cada turno.
+Envenena gravemente al objetivo y causa un daño mayor en cada turno.
+Tormenta de granizo que dura cinco turnos. Hiere a s, excepto a los de tipo Hielo.
+Tormenta de granizo que dura cinco turnos. Hiere a s, excepto a los de tipo Hielo.
+Robustece el cuerpo para subir el Ataque y la Defensa.
+Robustece el cuerpo para subir el Ataque y la Defensa.
+Dispara rápido de dos a cinco ráfagas de semillas de manera consecutiva.
+Dispara rápido de dos a cinco ráfagas de semillas de manera consecutiva.
+Movimiento que aumenta el Ataque y el Ataque Especial de quien lo usa.
+Movimiento que aumenta el Ataque y el Ataque Especial de quien lo usa.
+Intensifica el sol durante cinco turnos, lo que potencia los movimientos de tipo Fuego.
+Intensifica el sol durante cinco turnos, lo que potencia los movimientos de tipo Fuego.
+Enfurece al objetivo para que solo use movimientos de ataque durante tres turnos.
+Enfurece al objetivo para que solo use movimientos de ataque durante tres turnos.
+Rayo de hielo que puede llegar a congelar.
+Rayo de hielo que puede llegar a congelar.
+Tormenta de hielo que puede llegar a congelar.
+Tormenta de hielo que puede llegar a congelar.
+Un rayo fulminante, pero el atacante deberá descansar en el siguiente turno.
+Un rayo fulminante, pero el atacante deberá descansar en el siguiente turno.
+Pared de luz que reduce durante cinco turnos el daño producido por los ataques especiales.
+Pared de luz que reduce durante cinco turnos el daño producido por los ataques especiales.
+Frena los ataques, pero puede fallar si se usa repetidamente.
+Frena los ataques, pero puede fallar si se usa repetidamente.
+Genera una fuerte lluvia que refuerza los movimientos de tipo Agua durante cinco turnos.
+Genera una fuerte lluvia que refuerza los movimientos de tipo Agua durante cinco turnos.
+Absorbe la mitad del daño producido.
+Absorbe la mitad del daño producido.
+Crea un campo protector que evita problemas de estado durante cinco turnos.
+Crea un campo protector que evita problemas de estado durante cinco turnos.
+Inflige daño a los oponentes con una potente luz.
+Inflige daño a los oponentes con una potente luz.
+Primer turno: absorbe luz. Segundo turno: ataca.
+Primer turno: absorbe luz. Segundo turno: ataca.
+Ataca con una cola férrea y puede bajar la Defensa del objetivo.
+Ataca con una cola férrea y puede bajar la Defensa del objetivo.
+Potente ataque eléctrico que puede paralizar al objetivo.
+Potente ataque eléctrico que puede paralizar al objetivo.
+Un poderoso rayo que daña al objetivo y puede paralizarlo.
+Un poderoso rayo que daña al objetivo y puede paralizarlo.
+Un terremoto que afecta a los Pokémon de alrededor en combate.
+Un terremoto que afecta a los Pokémon de alrededor en combate.
+Un veloz ataque a los pies que reduce la Velocidad del objetivo.
+Un veloz ataque a los pies que reduce la Velocidad del objetivo.
+Primer turno: cava. Segundo turno: ataca. También sirve para salir de ciertas zonas.
+Primer turno: cava. Segundo turno: ataca. También sirve para salir de ciertas zonas.
+Fuerte ataque telequinético que puede bajar la Defensa Especial del objetivo.
+Fuerte ataque telequinético que puede bajar la Defensa Especial del objetivo.
+Lanza una bola oscura que puede bajar la Defensa Especial del objetivo.
+Lanza una bola oscura que puede bajar la Defensa Especial del objetivo.
+Potente ataque que también es capaz de destruir barreras como pantalla de luz y reflejo.
+Potente ataque que también es capaz de destruir barreras como pantalla de luz y reflejo.
+Crea copias de sí mismo para mejorar la Evasión.
+Crea copias de sí mismo para mejorar la Evasión.
+Pared de luz que reduce durante cinco turnos el daño producido por los ataques físicos.
+Pared de luz que reduce durante cinco turnos el daño producido por los ataques físicos.
+Ataque eléctrico muy rápido e ineludible.
+Ataque eléctrico muy rápido e ineludible.
+Ataca con una gran ráfaga de fuego que puede causar quemaduras.
+Ataca con una gran ráfaga de fuego que puede causar quemaduras.
+Arroja residuos al objetivo. Puede llegar a envenenar.
+Arroja residuos al objetivo. Puede llegar a envenenar.
+Tormenta de arena que dura cinco turnos y hiere a s, excepto a los de tipo Roca, Tierra y Acero.
+Tormenta de arena que dura cinco turnos y hiere a s, excepto a los de tipo Roca, Tierra y Acero.
+Llama intensa que lo chamusca y puede causar quemaduras.
+Llama intensa que lo chamusca y puede causar quemaduras.
+Tira rocas que detienen al objetivo y bajan su Velocidad.
+Tira rocas que detienen al objetivo y bajan su Velocidad.
+El usuario lanza un ataque muy rápido e ineludible.
+El usuario lanza un ataque muy rápido e ineludible.
+Atormenta y enfurece al objetivo, que no puede usar dos veces seguidas el mismo movimiento.
+Atormenta y enfurece al objetivo, que no puede usar dos veces seguidas el mismo movimiento.
+Ataca con el doble de potencia si el usuario está quemado, paralizado o envenenado.
+Ataca con el doble de potencia si el usuario está quemado, paralizado o envenenado.
+Tras atacar, vuelve a toda prisa para dar paso a otro Pokémon del equipo.
+Tras atacar, vuelve a toda prisa para dar paso a otro Pokémon del equipo.
+Restaura los PS y cura los problemas de estado del usuario. Duerme los dos próximos turnos.
+Restaura los PS y cura los problemas de estado del usuario. Duerme los dos próximos turnos.
+Si el objetivo es del sexo opuesto, se enamorará y bajará la posibilidad de que ataque.
+Si el objetivo es del sexo opuesto, se enamorará y bajará la posibilidad de que ataque.
+Ataca y le quita al objetivo su objeto. Si el agresor lleva un objeto, no robará el del objetivo.
+Ataca y le quita al objetivo su objeto. Si el agresor lleva un objeto, no robará el del objetivo.
+Alas macizas que golpean al objetivo y pueden subir la Defensa del usuario.
+Alas macizas que golpean al objetivo y pueden subir la Defensa del usuario.
+Usa el poder psíquico para intercambiar habilidades con el objetivo.
+Usa el poder psíquico para intercambiar habilidades con el objetivo.
+Ataca arrojando agua hirviendo al objetivo. Puede causar quemaduras.
+Ataca arrojando agua hirviendo al objetivo. Puede causar quemaduras.
+Ataque en toda regla que baja mucho el Ataque Especial de quien lo usa.
+Ataque en toda regla que baja mucho el Ataque Especial de quien lo usa.
+Aterriza sobre la superficie para descansar. Recupera hasta la mitad del total de sus PS.
+Aterriza sobre la superficie para descansar. Recupera hasta la mitad del total de sus PS.
+Agudiza la concentración mental y libera su poder. Puede disminuir la Def. Esp. del rival.
+Agudiza la concentración mental y libera su poder. Puede disminuir la Def. Esp. del rival.
+Aúna fuerzas de la naturaleza y libera su ataque. Puede disminuir la Defensa Especial del objetivo.
+Aúna fuerzas de la naturaleza y libera su ataque. Puede disminuir la Defensa Especial del objetivo.
+Ataque moderado que no debilita al objetivo y le deja al menos un PS.
+Ataque moderado que no debilita al objetivo y le deja al menos un PS.
+Si al objetivo le queda la mitad o menos de sus PS, el ataque será el doble de fuerte.
+Si al objetivo le queda la mitad o menos de sus PS, el ataque será el doble de fuerte.
+Lanza contra el objetivo su objeto. La fuerza del ataque y su efecto varían según el objeto.
+Lanza contra el objetivo su objeto. La fuerza del ataque y su efecto varían según el objeto.
+Lanza un rayo eléctrico contra el rival. Puede subir el Ataque Especial de quien lo usa.
+Lanza un rayo eléctrico contra el rival. Puede subir el Ataque Especial de quien lo usa.
+Resiste cualquier ataque y deja al menos un PS. Puede fallar si se usa repetidamente.
+Resiste cualquier ataque y deja al menos un PS. Puede fallar si se usa repetidamente.
+Abre mucho la boca y libera una onda de choque que ataca al objetivo.
+Abre mucho la boca y libera una onda de choque que ataca al objetivo.
+Un golpe que drena energía. El Pokémon recupera la mitad de los PS arrebatados al objetivo.
+Un golpe que drena energía. El Pokémon recupera la mitad de los PS arrebatados al objetivo.
+Siniestra llama morada que produce quemaduras.
+Siniestra llama morada que produce quemaduras.
+El movimiento de las alas crea una onda sónica dañina. Puede disminuir la Defensa Especial del objetivo.
+El movimiento de las alas crea una onda sónica dañina. Puede disminuir la Defensa Especial del objetivo.
+Estimula su cerebro pensando en cosas malas. Aumenta considerablemente el Ataque Especial.
+Estimula su cerebro pensando en cosas malas. Aumenta considerablemente el Ataque Especial.
+El atacante explota y hiere a todos a su alrededor. El usuario se debilita de inmediato.
+El atacante explota y hiere a todos a su alrededor. El usuario se debilita de inmediato.
+Ataca con una garra afilada hecha de sombras. Suele ser crítico.
+Ataca con una garra afilada hecha de sombras. Suele ser crítico.
+El usuario contraataca con el doble de fuerza si el objetivo usa un movimiento antes.
+El usuario contraataca con el doble de fuerza si el objetivo usa un movimiento antes.
+Recicla y así recupera el objeto equipado de un solo uso que ya ha sido empleado en el combate.
+Recicla y así recupera el objeto equipado de un solo uso que ya ha sido empleado en el combate.
+Carga contra el rival usando toda la fuerza que tiene. El Pokémon descansa el turno siguiente.
+Carga contra el rival usando toda la fuerza que tiene. El Pokémon descansa el turno siguiente.
+Reduce la resistencia puliendo su cuerpo. Aumenta la Velocidad considerablemente.
+Reduce la resistencia puliendo su cuerpo. Aumenta la Velocidad considerablemente.
+Luz cegadora que baja la Precisión del objetivo. Fuera de combate sirve para iluminar.
+Luz cegadora que baja la Precisión del objetivo. Fuera de combate sirve para iluminar.
+Clava piedras muy afiladas al objetivo. Suele ser crítico.
+Clava piedras muy afiladas al objetivo. Suele ser crítico.
+Este ataque inflige el doble de daño a un objetivo que haya golpeado al usuario en ese mismo turno.
+Este ataque inflige el doble de daño a un objetivo que haya golpeado al usuario en ese mismo turno.
+Una ligera descarga que paraliza al objetivo si lo alcanza.
+Una ligera descarga que paraliza al objetivo si lo alcanza.
+Embiste con un potente ataque giratorio. Cuanto más lento es el usuario, más daño causa.
+Embiste con un potente ataque giratorio. Cuanto más lento es el usuario, más daño causa.
+Baile frenético que aumenta mucho el Ataque.
+Baile frenético que aumenta mucho el Ataque.
+Una trampa de rocas que flota en el aire y daña a los objetivos que entran en combate.
+Una trampa de rocas que flota en el aire y daña a los objetivos que entran en combate.
+Se hipnotiza y copia cualquier cambio que haya en las características de su objetivo.
+Se hipnotiza y copia cualquier cambio que haya en las características de su objetivo.
+Ataca lanzando un chillido insoportable que baja el Ataque Especial de los objetivos.
+Ataca lanzando un chillido insoportable que baja el Ataque Especial de los objetivos.
+Libera una horrible aura llena de malos pensamientos y puede amedrentar al objetivo.
+Libera una horrible aura llena de malos pensamientos y puede amedrentar al objetivo.
+Lanza grandes pedruscos. Puede amedrentar al objetivo.
+Lanza grandes pedruscos. Puede amedrentar al objetivo.
+Cruza las guadañas o las garras para atacar al rival como si fueran unas tijeras.
+Cruza las guadañas o las garras para atacar al rival como si fueran unas tijeras.
+Mientras duerme, usa uno de sus movimientos elegido al azar.
+Mientras duerme, usa uno de sus movimientos elegido al azar.
+Ataca con una sacudida sísmica que afecta a los Pokémon adyacentes y baja su Velocidad.
+Ataca con una sacudida sísmica que afecta a los Pokémon adyacentes y baja su Velocidad.
+Pincha al rival con un tentáculo o brazo envenenado. Puede llegar a envenenar al rival.
+Pincha al rival con un tentáculo o brazo envenenado. Puede llegar a envenenar al rival.
+Restaura al usuario la mitad del daño causado a un objetivo dormido.
+Restaura al usuario la mitad del daño causado a un objetivo dormido.
+Enreda al objetivo con hierba y lo derriba. Cuanto más pesado es el objetivo, más daño inflige.
+Enreda al objetivo con hierba y lo derriba. Cuanto más pesado es el objetivo, más daño inflige.
+Provoca confusión en el objetivo, pero también sube mucho su Ataque.
+Provoca confusión en el objetivo, pero también sube mucho su Ataque.
+Picotea al objetivo. Si este sostiene una Baya, la picotea también y obtiene sus efectos.
+Picotea al objetivo. Si este sostiene una Baya, la picotea también y obtiene sus efectos.
+Utiliza parte de los PS propios para crear un sustituto que actúa como señuelo.
+Utiliza parte de los PS propios para crear un sustituto que actúa como señuelo.
+El usuario concentra toda la luz del cuerpo y la libera. Puede bajar la Defensa Especial del objetivo.
+El usuario concentra toda la luz del cuerpo y la libera. Puede bajar la Defensa Especial del objetivo.
+Se crea un espacio extraño en el que los Pokémon lentos se mueven primero durante cinco turnos.
+Se crea un espacio extraño en el que los Pokémon lentos se mueven primero durante cinco turnos.
+Corta con garras, guadañas, etc. También sirve para cortar árboles finos.
+Corta con garras, guadañas, etc. También sirve para cortar árboles finos.
+Primer turno: vuela. Segundo turno: ataca. Fuera de combate, permite ir a sitios ya conocidos.
+Primer turno: vuela. Segundo turno: ataca. Fuera de combate, permite ir a sitios ya conocidos.
+Inunda el campo de batalla con una ola gigante. Fuera de batalla sirve para moverse sobre el agua.
+Inunda el campo de batalla con una ola gigante. Fuera de batalla sirve para moverse sobre el agua.
+Potente puñetazo. Fuera de combate sirve para mover piedras.
+Potente puñetazo. Fuera de combate sirve para mover piedras.
+Potente viento que barre el reflejo o pantalla de luz del objetivo y puede reducir su Evasión.
+Potente viento que barre el reflejo o pantalla de luz del objetivo y puede reducir su Evasión.
+Ataca con puñetazos que pueden romper rocas. Puede bajar la Defensa del objetivo.
+Ataca con puñetazos que pueden romper rocas. Puede bajar la Defensa del objetivo.
+Embiste con un gran impulso que puede amedrentar. También sirve para remontar cascadas.
+Embiste con un gran impulso que puede amedrentar. También sirve para remontar cascadas.
+Ataca con una gran embestida. Puede confundir al objetivo.
+Ataca con una gran embestida. Puede confundir al objetivo.
+Primer turno: se sumerge en el mar. Segundo turno: emerge y ataca.
+Primer turno: se sumerge en el mar. Segundo turno: emerge y ataca.
+Los Pokémon pueden llevarla o usarla para recuperarse de la parálisis.
+Los Pokémon pueden llevarla o usarla para recuperarse de la parálisis.
+Los Pokémon pueden llevarla o usarla para despertar del sueño.
+Los Pokémon pueden llevarla o usarla para despertar del sueño.
+Los Pokémon pueden llevarla o usarla para curarse del envenenamiento.
+Los Pokémon pueden llevarla o usarla para curarse del envenenamiento.
+Los Pokémon pueden llevarla o usarla para curarse las quemaduras.
+Los Pokémon pueden llevarla o usarla para curarse las quemaduras.
+Los Pokémon pueden llevarla o usarla para descongelarse.
+Los Pokémon pueden llevarla o usarla para descongelarse.
+Los Pokémon pueden llevarla o usarla para restaurar 10 PP de un movimiento.
+Los Pokémon pueden llevarla o usarla para restaurar 10 PP de un movimiento.
+Los Pokémon pueden usarla o llevarla para restaurar 10 PS.
+Los Pokémon pueden usarla o llevarla para restaurar 10 PS.
+Los Pokémon pueden usarla o llevarla para salir del estado de confusión.
+Los Pokémon pueden usarla o llevarla para salir del estado de confusión.
+Los Pokémon pueden llevarla o usarla para recuperarse de problemas de estado.
+Los Pokémon pueden llevarla o usarla para recuperarse de problemas de estado.
+Los Pokémon pueden usarla o llevarla para restaurar algunos PS.
+Los Pokémon pueden usarla o llevarla para restaurar algunos PS.
+Restaura los PS del Pokémon que la usa en un apuro, pero puede causar confusión.
+Restaura los PS del Pokémon que la usa en un apuro, pero puede causar confusión.
+Si la plantas en tierra suelta, saldrá una planta de Frambu.
+Si la plantas en tierra suelta, saldrá una planta de Frambu.
+Si la plantas en tierra suelta, saldrá una planta de Oram.
+Si la plantas en tierra suelta, saldrá una planta de Oram.
+Si la plantas en tierra suelta, saldrá una planta de Latano.
+Si la plantas en tierra suelta, saldrá una planta de Latano.
+Si la plantas en tierra suelta, saldrá una planta de Peragu.
+Si la plantas en tierra suelta, saldrá una planta de Peragu.
+Si la plantas en tierra suelta, saldrá una planta de Pinia.
+Si la plantas en tierra suelta, saldrá una planta de Pinia.
+Si la usas en un Pokémon te ganas su amistad, pero también reduces sus PS.
+Si la usas en un Pokémon te ganas su amistad, pero también reduces sus PS.
+Si la usas en un Pokémon te ganas su amistad, pero reduces su Ataque.
+Si la usas en un Pokémon te ganas su amistad, pero reduces su Ataque.
+Si la usas en un Pokémon te ganas su amistad, pero reduces su Defensa.
+Si la usas en un Pokémon te ganas su amistad, pero reduces su Defensa.
+Si la usas en un Pokémon te ganas su amistad, pero reduces su Ataque Especial.
+Si la usas en un Pokémon te ganas su amistad, pero reduces su Ataque Especial.
+Si la usas en un Pokémon te ganas su amistad, pero reduces su Defensa Especial.
+Si la usas en un Pokémon te ganas su amistad, pero reduces su Defensa Especial.
+Si la usas en un Pokémon te ganas su amistad, pero baja su Velocidad.
+Si la usas en un Pokémon te ganas su amistad, pero baja su Velocidad.
+Si la plantas en tierra suelta, saldrá una planta de Mais.
+Si la plantas en tierra suelta, saldrá una planta de Mais.
+Si la plantas en tierra suelta, saldrá una planta de Aostan.
+Si la plantas en tierra suelta, saldrá una planta de Aostan.
+Si la plantas en tierra suelta, saldrá una planta de Rautan.
+Si la plantas en tierra suelta, saldrá una planta de Rautan.
+Si la plantas en tierra suelta, saldrá una planta de Monli.
+Si la plantas en tierra suelta, saldrá una planta de Monli.
+Si la plantas en tierra suelta, saldrá una planta de Wikano.
+Si la plantas en tierra suelta, saldrá una planta de Wikano.
+Si la plantas en tierra suelta, saldrá una planta de Plama.
+Si la plantas en tierra suelta, saldrá una planta de Plama.
+Si la plantas en tierra suelta, saldrá una planta de Sambia.
+Si la plantas en tierra suelta, saldrá una planta de Sambia.
+Si la plantas en tierra suelta, saldrá una planta de Rudion.
+Si la plantas en tierra suelta, saldrá una planta de Rudion.
+Si la plantas en tierra suelta, saldrá una planta de Andano.
+Si la plantas en tierra suelta, saldrá una planta de Andano.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Fuego.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Fuego.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Agua.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Agua.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Eléctrico.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Eléctrico.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Planta.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Planta.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Hielo.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Hielo.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Lucha.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Lucha.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Veneno.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Veneno.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Tierra.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Tierra.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Volador.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Volador.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Psíquico.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Psíquico.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Bicho.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Bicho.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Roca.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Roca.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Fantasma.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Fantasma.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Dragón.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Dragón.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Siniestro.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Siniestro.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Acero.
+Si la lleva un Pokémon, debilita ataques supereficaces de tipo Acero.
+Debilita ataques super eficaces de tipo Hada.
+Debilita ataques super eficaces de tipo Hada.
+Si la lleva un Pokémon, debilita el ataque de tipo Normal de un enemigo.
+Si la lleva un Pokémon, debilita el ataque de tipo Normal de un enemigo.
+Si la lleva un Pokémon, le subirá el Ataque en un momento de apuro.
+Si la lleva un Pokémon, le subirá el Ataque en un momento de apuro.
+Si la lleva un Pokémon, le subirá la Defensa en un momento de apuro.
+Si la lleva un Pokémon, le subirá la Defensa en un momento de apuro.
+Si la lleva un Pokémon, le subirá la Velocidad en un momento de apuro.
+Si la lleva un Pokémon, le subirá la Velocidad en un momento de apuro.
+Si la lleva un Pokémon, le subirá el At. Esp. en un momento de apuro.
+Si la lleva un Pokémon, le subirá el At. Esp. en un momento de apuro.
+Si la lleva un Pokémon, le subirá la Def. Esp. en un momento de apuro.
+Si la lleva un Pokémon, le subirá la Def. Esp. en un momento de apuro.
+Si la lleva un Pokémon, sube su capacidad de dar un golpe crítico en un apuro.
+Si la lleva un Pokémon, sube su capacidad de dar un golpe crítico en un apuro.
+Si la lleva un Pokémon, aumenta drásticamente 1 característica en un momento de apuro.
+Si la lleva un Pokémon, aumenta drásticamente 1 característica en un momento de apuro.
+Restaura los PS de un Pokémon si la lleva cuando le alcanza un ataque supereficaz.
+Restaura los PS de un Pokémon si la lleva cuando le alcanza un ataque supereficaz.
+Cuando la lleve un Pokémon, le subirá la precisión de un movimiento en un momento de apuro.
+Cuando la lleve un Pokémon, le subirá la precisión de un movimiento en un momento de apuro.
+El Pokémon que la lleve podrá actuar en primer lugar una vez cuando se encuentre en un momento de apuro.
+El Pokémon que la lleve podrá actuar en primer lugar una vez cuando se encuentre en un momento de apuro.
+Si la lleva un Pokémon cuando un enemigo lanza un ataque físico, este también recibirá daño.
+Si la lleva un Pokémon cuando un enemigo lanza un ataque físico, este también recibirá daño.
+Si la lleva un Pokémon cuando un enemigo lanza un ataque especial, este también recibirá daño.
+Si la lleva un Pokémon cuando un enemigo lanza un ataque especial, este también recibirá daño.
+Aumenta la defensa cuando el Pokémon recibe un ataque físico.
+Aumenta la defensa cuando el Pokémon recibe un ataque físico.
+Aumenta la defensa especial cuando el Pokémon recibe un ataque especial.
+Aumenta la defensa especial cuando el Pokémon recibe un ataque especial.
+Carta con un estampado de hierba. Haz que la entregue un Pokémon.
+Carta con un estampado de hierba. Haz que la entregue un Pokémon.
+Carta con los colores del fuego. Haz que la entregue un Pokémon.
+Carta con los colores del fuego. Haz que la entregue un Pokémon.
+Carta con una imagen de burbujas. Haz que la entregue un Pokémon.
+Carta con una imagen de burbujas. Haz que la entregue un Pokémon.
+Carta con un bonito estampado floral. Haz que la entregue un Pokémon.
+Carta con un bonito estampado floral. Haz que la entregue un Pokémon.
+Carta con la imagen de una mina de carbón poco iluminada. Haz que la entregue un Pokémon.
+Carta con la imagen de una mina de carbón poco iluminada. Haz que la entregue un Pokémon.
+Carta con un estupendo diseño de estilo industrial. Haz que la entregue un Pokémon.
+Carta con un estupendo diseño de estilo industrial. Haz que la entregue un Pokémon.
+Carta con un estampado de corazones. Haz que la entregue un Pokémon.
+Carta con un estampado de corazones. Haz que la entregue un Pokémon.
+Carta con la imagen de un bonito mundo cubierto de nieve. Haz que la entregue un Pokémon.
+Carta con la imagen de un bonito mundo cubierto de nieve. Haz que la entregue un Pokémon.
+Carta con la imagen de una galaxia. Haz que la entregue un Pokémon.
+Carta con la imagen de una galaxia. Haz que la entregue un Pokémon.
+Carta con el diseño tradicional del correo aéreo. Haz que la entregue un Pokémon.
+Carta con el diseño tradicional del correo aéreo. Haz que la entregue un Pokémon.
+Carta con un mosaico de arco iris. Haz que la entregue un Pokémon.
+Carta con un mosaico de arco iris. Haz que la entregue un Pokémon.
+Carta con la imagen de una pared de ladrillos. Haz que la entregue un Pokémon.
+Carta con la imagen de una pared de ladrillos. Haz que la entregue un Pokémon.
+Aumenta 1 nivel el Ataque en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel el Ataque en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles el Ataque en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles el Ataque en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles el Ataque en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles el Ataque en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles el Ataque en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles el Ataque en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel la Defensa en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel la Defensa en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles la Defensa en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles la Defensa en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles la Defensa en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles la Defensa en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles la Defensa en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles la Defensa en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel el At. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel el At. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles el At. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles el At. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles el At. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles el At. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles el At. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles el At. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel la Def. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel la Def. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles la Def. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles la Def. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles la Def. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles la Def. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles la Def. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles la Def. Especial en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel la Velocidad en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel la Velocidad en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles la Velocidad en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles la Velocidad en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles la Velocidad en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles la Velocidad en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles la Velocidad en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles la Velocidad en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel la Precisión en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel la Precisión en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles la Precisión en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles la Precisión en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles la Precisión en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles la Precisión en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles la Precisión en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 6 niveles la Precisión en combate. Al cambiar de Pokémon, el efecto desaparece.
+Setas que aumentan todas las estadísticas de un Pokémon en combate.
+Setas que aumentan todas las estadísticas de un Pokémon en combate.
+Aumenta 1 nivel el índice de golpe crítico en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 1 nivel el índice de golpe crítico en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles el índice de golpe crítico en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 2 niveles el índice de golpe crítico en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles el índice de golpe crítico en combate. Al cambiar de Pokémon, el efecto desaparece.
+Aumenta 3 niveles el índice de golpe crítico en combate. Al cambiar de Pokémon, el efecto desaparece.
+Evita que bajen las características del equipo Pokémon durante cinco turnos.
+Evita que bajen las características del equipo Pokémon durante cinco turnos.
+Cuando se usa, se anulan los cambios en las características de un Pokémon de tu equipo.
+Cuando se usa, se anulan los cambios en las características de un Pokémon de tu equipo.
+Al usarlo, activa la habilidad de un Pokémon de tu equipo.
+Al usarlo, activa la habilidad de un Pokémon de tu equipo.
+Cuando se usa, un Pokémon de tu equipo utiliza su objeto inmediatamente.
+Cuando se usa, un Pokémon de tu equipo utiliza su objeto inmediatamente.
+Cuando se usa, un Pokémon de tu equipo pierde su objeto.
+Cuando se usa, un Pokémon de tu equipo pierde su objeto.
+Flauta de cristal azul cuya melodía despierta a los Pokémon dormidos.
+Flauta de cristal azul cuya melodía despierta a los Pokémon dormidos.
+Flauta de cristal amarillo que espabila a los Pokémon confusos.
+Flauta de cristal amarillo que espabila a los Pokémon confusos.
+Flauta de cristal rojo que libera a un Pokémon del enamoramiento.
+Flauta de cristal rojo que libera a un Pokémon del enamoramiento.
+Un muñeco que atrae a los Pokémon. Puedes utilizarlo para huir de un combate con un Pokémon salvaje.
+Un muñeco que atrae a los Pokémon. Puedes utilizarlo para huir de un combate con un Pokémon salvaje.
+Atrae a los Pokémon y sirve para huir de un combate con un Pokémon salvaje.
+Atrae a los Pokémon y sirve para huir de un combate con un Pokémon salvaje.
+Un objeto que atrae a los Pokémon. Puedes utilizarlo para huir de un combate con un Pokémon salvaje.
+Un objeto que atrae a los Pokémon. Puedes utilizarlo para huir de un combate con un Pokémon salvaje.
+Bicicleta plegable con la que se va más rápido que con deportivas.
+Bicicleta plegable con la que se va más rápido que con deportivas.
+Una caña de pescar bastante usada y desgastada. Pesca Pokémon salvajes en todo tipo de aguas.
+Una caña de pescar bastante usada y desgastada. Pesca Pokémon salvajes en todo tipo de aguas.
+Una caña de pescar nuevecita y de gran calidad. Pesca Pokémon salvajes en todo tipo de aguas.
+Una caña de pescar nuevecita y de gran calidad. Pesca Pokémon salvajes en todo tipo de aguas.
+Una increíble caña de pescar de alta tecnología. Pesca Pokémon salvajes en todo tipo de aguas.
+Una increíble caña de pescar de alta tecnología. Pesca Pokémon salvajes en todo tipo de aguas.
+Detector de objetos invisibles por ondas sonoras. Emite una señal cuando encuentra un objeto.
+Detector de objetos invisibles por ondas sonoras. Emite una señal cuando encuentra un objeto.
+Aparato de precisión que reacciona con luz y sonido ante los objetos que no se ven e indica su posición.
+Aparato de precisión que reacciona con luz y sonido ante los objetos que no se ven e indica su posición.
+Busca Pokémon que se esconden en la hierba. La batería se recarga mientras caminas.
+Busca Pokémon que se esconden en la hierba. La batería se recarga mientras caminas.
+Un mapa que puede consultarse en cualquier momento y que te indica dónde te encuentras.
+Un mapa que puede consultarse en cualquier momento y que te indica dónde te encuentras.
+Cuerda larga y resistente que sirve para huir de cuevas y sitios cerrados en general.
+Cuerda larga y resistente que sirve para huir de cuevas y sitios cerrados en general.
+Pequeño monedero para guardar fichas.
+Pequeño monedero para guardar fichas.
+Consigue despertar al instante a cualquier Pokémon y suena de maravilla.
+Consigue despertar al instante a cualquier Pokémon y suena de maravilla.
+Un saco grande y resistente utilizado para transportar la ceniza volcánica.
+Un saco grande y resistente utilizado para transportar la ceniza volcánica.
+Dispositivo hecho en SILPH S.A para ver Pokémon invisibles.
+Dispositivo hecho en SILPH S.A para ver Pokémon invisibles.
+Dispositivo hecho en DEVON para ver Pokémon invisibles.
+Dispositivo hecho en DEVON para ver Pokémon invisibles.
+Una regadera con forma de Squirtle. Ayuda a que las bayas plantadas en tierra suelta crezcan mejor.
+Una regadera con forma de Squirtle. Ayuda a que las bayas plantadas en tierra suelta crezcan mejor.
+Una regadera con forma de Psyduck. Ayuda a que las bayas plantadas en tierra suelta crezcan mejor.
+Una regadera con forma de Psyduck. Ayuda a que las bayas plantadas en tierra suelta crezcan mejor.
+Una regadera con forma de Wailmer. Ayuda a que las bayas plantadas en tierra suelta crezcan mejor.
+Una regadera con forma de Wailmer. Ayuda a que las bayas plantadas en tierra suelta crezcan mejor.
+Una regadera con forma de Lotad. Ayuda a que las bayas plantadas en suelo blandito crezcan mejor.
+Una regadera con forma de Lotad. Ayuda a que las bayas plantadas en suelo blandito crezcan mejor.
+Una flor que se suele regalar para expresar agradecimiento. Permite cambiar a Shaymin a su forma Cielo.
+Una flor que se suele regalar para expresar agradecimiento. Permite cambiar a Shaymin a su forma Cielo.
+Espejo misterioso que refleja la verdad y devuelve los Pokémon a su forma original.
+Espejo misterioso que refleja la verdad y devuelve los Pokémon a su forma original.
+Vasija en la que se halla confinado el poder de cierto Pokémon desde hace mucho tiempo.
+Vasija en la que se halla confinado el poder de cierto Pokémon desde hace mucho tiempo.
+Catálogos con los distintos electrodomésticos que Rotom puede poseer.
+Catálogos con los distintos electrodomésticos que Rotom puede poseer.
+Dispositivo para almacenar células de Zygarde. Permite cambiarle de forma y movs.
+Dispositivo para almacenar células de Zygarde. Permite cambiarle de forma y movs.
+Punta que permite fusionar a Kyurem con cierto Pokémon con el que, originariamente, formaba un solo ser.
+Punta que permite fusionar a Kyurem con cierto Pokémon con el que, originariamente, formaba un solo ser.
+Artefacto que permite fusionar a Necrozma, ávido de luz, con Solgaleo.
+Artefacto que permite fusionar a Necrozma, ávido de luz, con Solgaleo.
+Artefacto que permite fusionar a Necrozma, ávido de luz, con Lunala.
+Artefacto que permite fusionar a Necrozma, ávido de luz, con Lunala.
+Riendas que permiten unir a Calyrex con su montura.
+Riendas que permiten unir a Calyrex con su montura.
+Misterioso amuleto redondo que aumenta la posibilidad de encontrar Huevos en la Guardería Pokémon.
+Misterioso amuleto redondo que aumenta la posibilidad de encontrar Huevos en la Guardería Pokémon.
+Misterioso amuleto brillante que aumenta la probabilidad de encontrar Pokémon variocolores.
+Misterioso amuleto brillante que aumenta la probabilidad de encontrar Pokémon variocolores.
+Misterioso amuleto que aumenta la posibilidad de hacer capturas críticas.
+Misterioso amuleto que aumenta la posibilidad de hacer capturas críticas.
+Amuleto que aumenta los Puntos de Exp. que ganan los Pokémon en combate.
+Amuleto que aumenta los Puntos de Exp. que ganan los Pokémon en combate.
+Aro que sirve para activar el poder de la Mega Evolución.
+Aro que sirve para activar el poder de la Mega Evolución.
+Te permite acceder al sistema de almacenamiento desde el equipo. En algunos lugares falla.
+Te permite acceder al sistema de almacenamiento desde el equipo. En algunos lugares falla.
+Una tarjeta de identificación necesaria para acceder a los Puertos Espaciales.
+Una tarjeta de identificación necesaria para acceder a los Puertos Espaciales.
+Un mapa viejo descolorido que muestra el camino a una determinada isla.
+Un mapa viejo descolorido que muestra el camino a una determinada isla.
+Mineral de color muy oscuro que permite evolucionar a Scyther.
+Mineral de color muy oscuro que permite evolucionar a Scyther.
+Extraño bloque compuesto de carbón fósil. Permite evolucionar a Ursaring.
+Extraño bloque compuesto de carbón fósil. Permite evolucionar a Ursaring.
+Extraño cordón que recuerda a un cable. Permite evolucionar a ciertos Pokémon.
+Extraño cordón que recuerda a un cable. Permite evolucionar a ciertos Pokémon.
+Si se usa en Dialga, esta gran gema le hace cambiar de forma.
+Si se usa en Dialga, esta gran gema le hace cambiar de forma.
+Si se usa en Palkia, esta gran gema le hace cambiar de forma.
+Si se usa en Palkia, esta gran gema le hace cambiar de forma.
+Tabla de piedra que convierte a Arceus en función del tipo del rival.
+Tabla de piedra que convierte a Arceus en función del tipo del rival.
+Tabla de piedra que potencia los movimientos de tipo Normal. Debe llevarla un Pokémon.
+Tabla de piedra que potencia los movimientos de tipo Normal. Debe llevarla un Pokémon.
+Si se usa en Giratina, esta gran gema le hace cambiar de forma.
+Si se usa en Giratina, esta gran gema le hace cambiar de forma.
+Armadura que alberga sentimientos auspiciosos. Permite evolucionar a Charcadet.
+Armadura que alberga sentimientos auspiciosos. Permite evolucionar a Charcadet.
+Armadura que alberga sentimientos de rencor. Permite evolucionar a Charcadet.
+Armadura que alberga sentimientos de rencor. Permite evolucionar a Charcadet.
+Curioso manuscrito que permite cambiar a Urshifu a su forma Estilo brusco.
+Curioso manuscrito que permite cambiar a Urshifu a su forma Estilo brusco.
+Curioso manuscrito que permite cambiar a Urshifu a su forma Estilo fluido.
+Curioso manuscrito que permite cambiar a Urshifu a su forma Estilo fluido.
+Fragmento de lo que parece una cuchilla desgastada. Permite evolucionar a Bisharp.
+Fragmento de lo que parece una cuchilla desgastada. Permite evolucionar a Bisharp.
+Tanque que contiene energía. Si lo lleva un Pokémon que posea cierta habilidad, potenciará su poder.
+Tanque que contiene energía. Si lo lleva un Pokémon que posea cierta habilidad, potenciará su poder.
+Escudo muy bonito que impide que otros Pokémon cambien la habilidad del Pokémon que lo lleva.
+Escudo muy bonito que impide que otros Pokémon cambien la habilidad del Pokémon que lo lleva.
+Amuleto brillante y transparente. Impide que otros Pokémon reduzcan las características de quien lo lleva.
+Amuleto brillante y transparente. Impide que otros Pokémon reduzcan las características de quien lo lleva.
+Quien la lleva aumenta sus características si el rival aumenta las suyas. De un solo uso.
+Quien la lleva aumenta sus características si el rival aumenta las suyas. De un solo uso.
+Guante que aumenta la potencia de los movimientos con puños y evita que hagan contacto con el rival.
+Guante que aumenta la potencia de los movimientos con puños y evita que hagan contacto con el rival.
+Capa con capucha que protege de los efectos secundarios de los movimientos de sus rivales.
+Capa con capucha que protege de los efectos secundarios de los movimientos de sus rivales.
+Dado que siempre cae favorablemente. Los movimientos de ataque múltiple golpearán más veces.
+Dado que siempre cae favorablemente. Los movimientos de ataque múltiple golpearán más veces.
+Moneda perteneciente al cofre de un Gimmighoul. Permite hacerle evolucionar.
+Moneda perteneciente al cofre de un Gimmighoul. Permite hacerle evolucionar.
+Un pequeño y raro trozo de bambú. Es muy popular entre cierta clase de gourmets.
+Un pequeño y raro trozo de bambú. Es muy popular entre cierta clase de gourmets.
+Un trozo grande y raro de bambú. Es muy popular entre cierta clase de gourmets.
+Un trozo grande y raro de bambú. Es muy popular entre cierta clase de gourmets.
+Antiguo libro de la región de Paldea que habla sobre especies de ensueño del pasado.
+Antiguo libro de la región de Paldea que habla sobre especies de ensueño del pasado.
+Antiguo libro de la región de Paldea que habla sobre especies de ensueño del futuro.
+Antiguo libro de la región de Paldea que habla sobre especies de ensueño del futuro.
+Mochi preparado con bayas que aumenta en 10 EVs los PS de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs los PS de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs el Ataque de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs el Ataque de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs la Defensa de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs la Defensa de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs el At. Esp. de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs el At. Esp. de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs la Def. Esp. de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs la Def. Esp. de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs la Velocidad de un Pokémon.
+Mochi preparado con bayas que aumenta en 10 EVs la Velocidad de un Pokémon.
+Mochi preparado con bayas que reinicia todos los EVs un Pokémon.
+Mochi preparado con bayas que reinicia todos los EVs un Pokémon.
+Hermosa pluma que brilla si le da el sol. Fortalece los ataques de tipo Hada.
+Hermosa pluma que brilla si le da el sol. Fortalece los ataques de tipo Hada.
+Curiosa manzana recubierta de sirope que permite evolucionar a Applin.
+Curiosa manzana recubierta de sirope que permite evolucionar a Applin.
+Cuenco mediocre que permite evolucionar a Poltchageist (forma Fraudulenta).
+Cuenco mediocre que permite evolucionar a Poltchageist (forma Fraudulenta).
+Cuenco exquisito que permite evolucionar a Poltchageist (forma Opulenta).
+Cuenco exquisito que permite evolucionar a Poltchageist (forma Opulenta).
+Extraña máscara que permite cambiar a Ogerpon a su forma Máscara Fuente.
+Extraña máscara que permite cambiar a Ogerpon a su forma Máscara Fuente.
+Extraña máscara que permite cambiar a Ogerpon a su forma Máscara Horno.
+Extraña máscara que permite cambiar a Ogerpon a su forma Máscara Horno.
+Extraña máscara que permite cambiar a Ogerpon a su forma Máscara Cimiento.
+Extraña máscara que permite cambiar a Ogerpon a su forma Máscara Cimiento.
+Máscara que se dice que perteneció a un Pokémon muy fuerte de la región de Noroteo.
+Máscara que se dice que perteneció a un Pokémon muy fuerte de la región de Noroteo.
+Metal resultante de la mezcla de otros metales. Permite evolucionar a Duraludon.
+Metal resultante de la mezcla de otros metales. Permite evolucionar a Duraludon.
+Extraño disco que parece estar relacionado con el Área Cero de Paldea.
+Extraño disco que parece estar relacionado con el Área Cero de Paldea.
+Baya Meloc de la más alta calidad. Hay un Pokémon que la adora.
+Baya Meloc de la más alta calidad. Hay un Pokémon que la adora.
+Extraño meteorito proveniente del espacio. Permite cambiar de forma a Deoxys.
+Extraño meteorito proveniente del espacio. Permite cambiar de forma a Deoxys.
+Un repelente que nunca se gasta. Puedes activarlo y desactivarlo.
+Un repelente que nunca se gasta. Puedes activarlo y desactivarlo.
+A device that displays the encounter list for the current area.
+A device that displays the encounter list for the current area.
+Aparato de usos limitados que permite curar a todo tu equipo. Se recarga en Centros Pokémon.
+Aparato de usos limitados que permite curar a todo tu equipo. Se recarga en Centros Pokémon.
+Aparato de usos limitados que permite curar a todo tu equipo. Se recarga en Centros Pokémon. Vacío.
+Aparato de usos limitados que permite curar a todo tu equipo. Se recarga en Centros Pokémon. Vacío.
+Incubadora que permite mantener 6 huevos hasta que eclosionen.
+Incubadora que permite mantener 6 huevos hasta que eclosionen.
+One of a variety of mysterious Mega Stones. Have Typhlosion hold it, and it will be able to Mega Evolve.
+One of a variety of mysterious Mega Stones. Have Typhlosion hold it, and it will be able to Mega Evolve.
+A sleeping bag that allows you to rest and advance time to a specific time of day.
+A sleeping bag that allows you to rest and advance time to a specific time of day.
+A record of canon and Vermeil changes for existing species, including typing, stats, abilities and newly learned moves.
+A record of canon and Vermeil changes for existing species, including typing, stats, abilities and newly learned moves.
+An ancient stone carved with runes that vibrate with electricity. It evolves certain Pokémon and boosts Electric-type moves.
+An ancient stone carved with runes that vibrate with electricity. It evolves certain Pokémon and boosts Electric-type moves.
+A mysterious, shimmering orb created by a master mime. It allows certain Pokémon to materialize their thoughts and evolve.
+A mysterious, shimmering orb created by a master mime. It allows certain Pokémon to materialize their thoughts and evolve.
+A dense, metallic substance hoarded by Durant. It allows a specific Pokémon to forge a steel shell and evolve.
+A dense, metallic substance hoarded by Durant. It allows a specific Pokémon to forge a steel shell and evolve.

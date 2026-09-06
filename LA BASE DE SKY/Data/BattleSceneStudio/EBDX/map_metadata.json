@@ -1,0 +1,10 @@
+{
+  "format": "battle-scene-studio-ebdx-map-metadata",
+  "version": 1,
+  "maps": {
+    "79": {
+      "name": "Map 79",
+      "scene": "scene_custom"
+    }
+  }
+}

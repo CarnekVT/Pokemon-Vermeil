@@ -1,0 +1,1762 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[MOVE_NAMES]
+Megacuerno
+Megacuerno
+Al Ataque
+Al Ataque
+Zumbido
+Zumbido
+Escaramuza
+Escaramuza
+Bola de Polen
+Bola de Polen
+Chupavidas
+Chupavidas
+Plancha
+Plancha
+Tijera X
+Tijera X
+Rayo Señal
+Rayo Señal
+Golpe Rastrero
+Golpe Rastrero
+Ida y Vuelta
+Ida y Vuelta
+Rodillo de Púas
+Rodillo de Púas
+Picadura
+Picadura
+Viento Plata
+Viento Plata
+Aguijón Letal
+Aguijón Letal
+Estoicismo
+Estoicismo
+Corte Furia
+Corte Furia
+Pin Misil
+Pin Misil
+Doble Ataque
+Doble Ataque
+Acoso
+Acoso
+A Defender
+A Defender
+Auxilio
+Auxilio
+Polvo Explosivo
+Polvo Explosivo
+Danza Aleteo
+Danza Aleteo
+Polvo Ira
+Polvo Ira
+Telaraña
+Telaraña
+Red Viscosa
+Red Viscosa
+Disparo Demora
+Disparo Demora
+Luminicola
+Luminicola
+Cerco Dimensión
+Cerco Dimensión
+Juego Sucio
+Juego Sucio
+Furia Candente
+Furia Candente
+Lariat Oscuro
+Lariat Oscuro
+Pulso Noche
+Pulso Noche
+Triturar
+Triturar
+Pulso Umbrío
+Pulso Umbrío
+Irreverencia
+Irreverencia
+Presa Maxilar
+Presa Maxilar
+Golpe Mordaza
+Golpe Mordaza
+Golpe Oscuro
+Golpe Oscuro
+Desahogo
+Desahogo
+Tajo Umbrío
+Tajo Umbrío
+Golpe Bajo
+Golpe Bajo
+Desarme
+Desarme
+Buena Baza
+Buena Baza
+Mordisco
+Mordisco
+Giro Vil
+Giro Vil
+Finta
+Finta
+Ladrón
+Ladrón
+Alarido
+Alarido
+Vendetta
+Vendetta
+Persecución
+Persecución
+Paliza
+Paliza
+Lanzamiento
+Lanzamiento
+Chulería
+Chulería
+Castigo
+Castigo
+Brecha Negra
+Brecha Negra
+Embargo
+Embargo
+Llanto Falso
+Llanto Falso
+Camelo
+Camelo
+Afilagarras
+Afilagarras
+Legado
+Legado
+Maquinación
+Maquinación
+Obstrucción
+Obstrucción
+Última Palabra
+Última Palabra
+Último Lugar
+Último Lugar
+Robo
+Robo
+Trapicheo
+Trapicheo
+Mofa
+Mofa
+Reversión
+Reversión
+Tormento
+Tormento
+Rayo Infinito
+Rayo Infinito
+Dracoenergía
+Dracoenergía
+Distorsión
+Distorsión
+Cometa Draco
+Cometa Draco
+Enfado
+Enfado
+Fragor Escamas
+Fragor Escamas
+Núcleo Castigo
+Núcleo Castigo
+Carga Dragón
+Carga Dragón
+Cañón Dinamax
+Cañón Dinamax
+Corte Vacío
+Corte Vacío
+Martillo Dragón
+Martillo Dragón
+Pulso Dragón
+Pulso Dragón
+Garra Dragón
+Garra Dragón
+Vasto Impacto
+Vasto Impacto
+Dragoaliento
+Dragoaliento
+Cola Dragón
+Cola Dragón
+Dracoflechas
+Dracoflechas
+Golpe Bis
+Golpe Bis
+Ciclón
+Ciclón
+Ráfaga Escamas
+Ráfaga Escamas
+Furia Dragón
+Furia Dragón
+Estruendo Escama
+Estruendo Escama
+Danza Dragón
+Danza Dragón
+Ataque Fulgor
+Ataque Fulgor
+Placaje Eléctrico
+Placaje Eléctrico
+Electrocañón
+Electrocañón
+Rueda Aural
+Rueda Aural
+Trueno
+Trueno
+Rayo Fusión
+Rayo Fusión
+Puños Plasma
+Puños Plasma
+Rayo
+Rayo
+Voltio Cruel
+Voltio Cruel
+Electropico
+Electropico
+Chispazo
+Chispazo
+Amplificador
+Amplificador
+Electrojaula
+Electrojaula
+Electropunzada
+Electropunzada
+Puño Trueno
+Puño Trueno
+Alto Voltaje
+Alto Voltaje
+Voltiocambio
+Voltiocambio
+Carga Parábola
+Carga Parábola
+Chispa
+Chispa
+Colmillo Rayo
+Colmillo Rayo
+Onda Voltio
+Onda Voltio
+Electrotela
+Electrotela
+Rayo Carga
+Rayo Carga
+Impactrueno
+Impactrueno
+Moflete Estático
+Moflete Estático
+Bola Voltio
+Bola Voltio
+Carga
+Carga
+Onda Anómala
+Onda Anómala
+Campo Eléctrico
+Campo Eléctrico
+Electrificación
+Electrificación
+Cortina Plasma
+Cortina Plasma
+Levitón
+Levitón
+Aura Magnética
+Aura Magnética
+Onda Trueno
+Onda Trueno
+Luz Aniquiladora
+Luz Aniquiladora
+Cañón Floral
+Cañón Floral
+Bruma Explosiva
+Bruma Explosiva
+Fuerza Lunar
+Fuerza Lunar
+Carantoña
+Carantoña
+Cautivapor
+Cautivapor
+Brillo Mágico
+Brillo Mágico
+Choque Anímico
+Choque Anímico
+Beso Drenaje
+Beso Drenaje
+Voz Cautivadora
+Voz Cautivadora
+Viento Feérico
+Viento Feérico
+Furia Natural
+Furia Natural
+Niebla Aromática
+Niebla Aromática
+Ojitos Tiernos
+Ojitos Tiernos
+Encanto
+Encanto
+Truco Defensa
+Truco Defensa
+Decoración
+Decoración
+Cerrojo Feérico
+Cerrojo Feérico
+Cura Floral
+Cura Floral
+Defensa Floral
+Defensa Floral
+Geocontrol
+Geocontrol
+Campo de Niebla
+Campo de Niebla
+Luz Lunar
+Luz Lunar
+Beso Dulce
+Beso Dulce
+Puño Certero
+Puño Certero
+Asalto Estelar
+Asalto Estelar
+Patada Salto Alta
+Patada Salto Alta
+A Bocajarro
+A Bocajarro
+Onda Certera
+Onda Certera
+Fuerza Bruta
+Fuerza Bruta
+Tajo Cruzado
+Tajo Cruzado
+Puño Dinámico
+Puño Dinámico
+Plancha Voladora
+Plancha Voladora
+Machada
+Machada
+Patada Salto
+Patada Salto
+Espada Santa
+Espada Santa
+Patada Relámpago
+Patada Relámpago
+Sable Místico
+Sable Místico
+Gancho Alto
+Gancho Alto
+Esfera Aural
+Esfera Aural
+Plancha Corporal
+Plancha Corporal
+Sumisión
+Sumisión
+Demolición
+Demolición
+Puño Drenaje
+Puño Drenaje
+Llave Vital
+Llave Vital
+Espabila
+Espabila
+Puntapié
+Puntapié
+Llave Giro
+Llave Giro
+Palmeo
+Palmeo
+Desquite
+Desquite
+Patada Giro
+Patada Giro
+Llave Corsé
+Llave Corsé
+Golpe Kárate
+Golpe Kárate
+Ultrapuño
+Ultrapuño
+Puño Incremento
+Puño Incremento
+Golpe Roca
+Golpe Roca
+Onda Vacío
+Onda Vacío
+Doble Patada
+Doble Patada
+Empujón
+Empujón
+Triple Patada
+Triple Patada
+Contraataque
+Contraataque
+Sacrificio
+Sacrificio
+Patada Baja
+Patada Baja
+Inversión
+Inversión
+Sísmico
+Sísmico
+Corpulencia
+Corpulencia
+Motivación
+Motivación
+Detección
+Detección
+Escudo Tatami
+Escudo Tatami
+Bastión Final
+Bastión Final
+Octopresa
+Octopresa
+Anticipo
+Anticipo
+V de Fuego
+V de Fuego
+Anillo Ígneo
+Anillo Ígneo
+Estallido
+Estallido
+Cabeza Sorpresa
+Cabeza Sorpresa
+Coraza Trampa
+Coraza Trampa
+Llama Azul
+Llama Azul
+Llama Final
+Llama Final
+Sofoco
+Sofoco
+Envite Ígneo
+Envite Ígneo
+Balón Ígneo
+Balón Ígneo
+Llamarada
+Llamarada
+Llama Fusión
+Llama Fusión
+Infierno
+Infierno
+Lluvia Ígnea
+Lluvia Ígnea
+Fuego Sagrado
+Fuego Sagrado
+Bomba Ígnea
+Bomba Ígnea
+Onda Ígnea
+Onda Ígnea
+Lanzallamas
+Lanzallamas
+Patada Ígnea
+Patada Ígnea
+Danza Llama
+Danza Llama
+Látigo Ígneo
+Látigo Ígneo
+Voto Fuego
+Voto Fuego
+Humareda
+Humareda
+Puño Fuego
+Puño Fuego
+Llama Embrujada
+Llama Embrujada
+Envidia ardiente
+Envidia ardiente
+Pirotecnia
+Pirotecnia
+Colmillo Ígneo
+Colmillo Ígneo
+Rueda Fuego
+Rueda Fuego
+Calcinación
+Calcinación
+Nitrocarga
+Nitrocarga
+Ascuas
+Ascuas
+Giro Fuego
+Giro Fuego
+Golpe Calor
+Golpe Calor
+Día Soleado
+Día Soleado
+Fuego Fatuo
+Fuego Fatuo
+Ataque Aéreo
+Ataque Aéreo
+Pájaro Osado
+Pájaro Osado
+Ascenso Draco
+Ascenso Draco
+Vendaval
+Vendaval
+Aerochorro
+Aerochorro
+Pico Cañón
+Pico Cañón
+Vuelo
+Vuelo
+Bote
+Bote
+Pico Taladro
+Pico Taladro
+Ala Mortífera
+Ala Mortífera
+Tajo Aéreo
+Tajo Aéreo
+Cháchara
+Cháchara
+Golpe Aéreo
+Golpe Aéreo
+Aire Afilado
+Aire Afilado
+Picoteo
+Picoteo
+Caída Libre
+Caída Libre
+Ataque Ala
+Ataque Ala
+Acróbata
+Acróbata
+Ala Bis
+Ala Bis
+Tornado
+Tornado
+Picotazo
+Picotazo
+Despejar
+Despejar
+Danza Pluma
+Danza Pluma
+Espejo
+Espejo
+Respiro
+Respiro
+Viento Afín
+Viento Afín
+Orbes Espectro
+Orbes Espectro
+Golpe Umbrío
+Golpe Umbrío
+Poltergeist
+Poltergeist
+Rayo Umbrío
+Rayo Umbrío
+Golpe Fantasma
+Golpe Fantasma
+Robasombra
+Robasombra
+Hueso Sombrío
+Hueso Sombrío
+Bola Sombra
+Bola Sombra
+Puntada Sombría
+Puntada Sombría
+Garra Umbría
+Garra Umbría
+Infortunio
+Infortunio
+Viento Aciago
+Viento Aciago
+Puño Sombra
+Puño Sombra
+Sombra Vil
+Sombra Vil
+Impresionar
+Impresionar
+Lengüetazo
+Lengüetazo
+Tinieblas
+Tinieblas
+Rayo Confuso
+Rayo Confuso
+Maldición
+Maldición
+Mismo Destino
+Mismo Destino
+Rabia
+Rabia
+Pesadilla
+Pesadilla
+Rencor
+Rencor
+Halloween
+Halloween
+Planta Feroz
+Planta Feroz
+Lluevehojas
+Lluevehojas
+Cuchilla Solar
+Cuchilla Solar
+Danza Pétalo
+Danza Pétalo
+Latigazo
+Latigazo
+Fulgor Semilla
+Fulgor Semilla
+Rayo Solar
+Rayo Solar
+Mazazo
+Mazazo
+Energibola
+Energibola
+Hoja Aguda
+Hoja Aguda
+Tormenta Floral
+Tormenta Floral
+Ácido Málico
+Ácido Málico
+Batería Asalto
+Batería Asalto
+Voto Planta
+Voto Planta
+Fuerza G
+Fuerza G
+Bomba Germen
+Bomba Germen
+Gigadrenado
+Gigadrenado
+Asta Drenaje
+Asta Drenaje
+Fitoimpulso
+Fitoimpulso
+Patada Tropical
+Patada Tropical
+Ciclón de Hojas
+Ciclón de Hojas
+Hoja Mágica
+Hoja Mágica
+Brazo Pincho
+Brazo Pincho
+Hoja Afilada
+Hoja Afilada
+Látigo Cepa
+Látigo Cepa
+Punzada Rama
+Punzada Rama
+Follaje
+Follaje
+Megaagotar
+Megaagotar
+Cepo
+Cepo
+Semilladora
+Semilladora
+Absorber
+Absorber
+Hierba Lazo
+Hierba Lazo
+Aromaterapia
+Aromaterapia
+Rizo Algodón
+Rizo Algodón
+Esporagodón
+Esporagodón
+Condena Silvana
+Condena Silvana
+Silbato
+Silbato
+Campo de Hierba
+Campo de Hierba
+Arraigo
+Arraigo
+Cura Selvática
+Cura Selvática
+Drenadoras
+Drenadoras
+Somnífero
+Somnífero
+Barrera Espinosa
+Barrera Espinosa
+Espora
+Espora
+Absorbefuerza
+Absorbefuerza
+Paralizador
+Paralizador
+Fotosíntesis
+Fotosíntesis
+Abatidoras
+Abatidoras
+Filo del Abismo
+Filo del Abismo
+Terremoto
+Terremoto
+Fuerza Equina
+Fuerza Equina
+Tierra Viva
+Tierra Viva
+Fuerza Telúrica
+Fuerza Telúrica
+Mil Flechas
+Mil Flechas
+Mil Temblores
+Mil Temblores
+Excavar
+Excavar
+Taladradora
+Taladradora
+Pataleta
+Pataleta
+Arenas Ardientes
+Arenas Ardientes
+Hueso Palo
+Hueso Palo
+Bomba Fango
+Bomba Fango
+Terratemblor
+Terratemblor
+Disparo Lodo
+Disparo Lodo
+Huesomerang
+Huesomerang
+Bucle Arena
+Bucle Arena
+Ataque Óseo
+Ataque Óseo
+Bofetón Lodo
+Bofetón Lodo
+Fisura
+Fisura
+Magnitud
+Magnitud
+Chapoteo Lodo
+Chapoteo Lodo
+Fertilizante
+Fertilizante
+Ataque Arena
+Ataque Arena
+Recogearena
+Recogearena
+Púas
+Púas
+Rayo Gélido
+Rayo Gélido
+Llama Gélida
+Llama Gélida
+Lanza Glacial
+Lanza Glacial
+Ventisca
+Ventisca
+Martillo Hielo
+Martillo Hielo
+Rayo Hielo
+Rayo Hielo
+Chuzos
+Chuzos
+Puño Hielo
+Puño Hielo
+Liofilización
+Liofilización
+Rayo Aurora
+Rayo Aurora
+Mundo Gélido
+Mundo Gélido
+Colmillo Hielo
+Colmillo Hielo
+Alud
+Alud
+Vaho Gélido
+Vaho Gélido
+Viento Hielo
+Viento Hielo
+Esquirla Helada
+Esquirla Helada
+Nieve Polvo
+Nieve Polvo
+Bola Hielo
+Bola Hielo
+Carámbano
+Carámbano
+Triple Axel
+Triple Axel
+Frío Polar
+Frío Polar
+Velo Aurora
+Velo Aurora
+Granizo
+Granizo
+Niebla
+Niebla
+Neblina
+Neblina
+Explosion
+Explosion
+Autodestrucción
+Autodestrucción
+Gigaimpacto
+Gigaimpacto
+Hiperrayo
+Hiperrayo
+Estruendo
+Estruendo
+Última Baza
+Última Baza
+Cabezazo
+Cabezazo
+Doble Filo
+Doble Filo
+Ariete
+Ariete
+Megapatada
+Megapatada
+Multiataque
+Multiataque
+Tecno Shock
+Tecno Shock
+Saña
+Saña
+Bomba Huevo
+Bomba Huevo
+Sentencia
+Sentencia
+Vozarrón
+Vozarrón
+Danza Despertar
+Danza Despertar
+Treparrocas
+Treparrocas
+Derribo
+Derribo
+Alboroto
+Alboroto
+Golpe Cuerpo
+Golpe Cuerpo
+Velocidad Extrema
+Velocidad Extrema
+Hipercolmillo
+Hipercolmillo
+Megapuño
+Megapuño
+Viento Cortante
+Viento Cortante
+Atizar
+Atizar
+Fuerza
+Fuerza
+Triataque
+Triataque
+Garra Brutal
+Garra Brutal
+Canto Arcaico
+Canto Arcaico
+Guardia Baja
+Guardia Baja
+Puño Mareo
+Puño Mareo
+Fachada
+Fachada
+Golpe Cabeza
+Golpe Cabeza
+Represalia
+Represalia
+Daño Secreto
+Daño Secreto
+Cuchillada
+Cuchillada
+Estímulo
+Estímulo
+Cornada
+Cornada
+Pisotón
+Pisotón
+Antojo
+Antojo
+Poder Oculto
+Poder Oculto
+Canon
+Canon
+Meteoros
+Meteoros
+Agarre
+Agarre
+Corte
+Corte
+Giro Rápido
+Giro Rápido
+Ronquido
+Ronquido
+Pulso de Campo
+Pulso de Campo
+Meteorobola
+Meteorobola
+Eco Voz
+Eco Voz
+Sorpresa
+Sorpresa
+Falso Tortazo
+Falso Tortazo
+Clemencia
+Clemencia
+Día de Pago
+Día de Pago
+Destructor
+Destructor
+Ataque Rápido
+Ataque Rápido
+Arañazo
+Arañazo
+Placaje
+Placaje
+Doble Golpe
+Doble Golpe
+Amago
+Amago
+Plumerazo
+Plumerazo
+Furia
+Furia
+Clavo Cañón
+Clavo Cañón
+Puño Cometa
+Puño Cometa
+Golpes Furia
+Golpes Furia
+Bombardeo
+Bombardeo
+Atadura
+Atadura
+Doble Bofetón
+Doble Bofetón
+Ataque Furia
+Ataque Furia
+Constricción
+Constricción
+Restricción
+Restricción
+Venganza
+Venganza
+Agarrón
+Agarrón
+Esfuerzo
+Esfuerzo
+Azote
+Azote
+Frustración
+Frustración
+Guillotina
+Guillotina
+Perforador
+Perforador
+Don Natural
+Don Natural
+Presente
+Presente
+Retribución
+Retribución
+Bomba Sónica
+Bomba Sónica
+Escupir
+Escupir
+Superdiente
+Superdiente
+As Oculto
+As Oculto
+Estrujón
+Estrujón
+Acupresión
+Acupresión
+Cede Paso
+Cede Paso
+Ayuda
+Ayuda
+Atracción
+Atracción
+Relevo
+Relevo
+Tambor
+Tambor
+Ofrenda
+Ofrenda
+Bloqueo
+Bloqueo
+Camuflaje
+Camuflaje
+Seducción
+Seducción
+Celebración
+Celebración
+Confidencia
+Confidencia
+Conversión
+Conversión
+Conversión2
+Conversión2
+Copión
+Copión
+Cambio de Cancha
+Cambio de Cancha
+Rizo Defensa
+Rizo Defensa
+Anulación
+Anulación
+Doble Equipo
+Doble Equipo
+Otra Vez
+Otra Vez
+Aguante
+Aguante
+Danza Amiga
+Danza Amiga
+Destello
+Destello
+Foco Energía
+Foco Energía
+Señuelo
+Señuelo
+Profecía
+Profecía
+Deslumbrar
+Deslumbrar
+Gruñido
+Gruñido
+Desarrollo
+Desarrollo
+Paga Extra
+Paga Extra
+Fortaleza
+Fortaleza
+Cascabel Cura
+Cascabel Cura
+Refuerzo
+Refuerzo
+Manos Juntas
+Manos Juntas
+Aullido
+Aullido
+Aguzar
+Aguzar
+Malicioso
+Malicioso
+Fijar Blanco
+Fijar Blanco
+Beso Amoroso
+Beso Amoroso
+Conjuro
+Conjuro
+Yo Primero
+Yo Primero
+Mal de Ojo
+Mal de Ojo
+Metrónomo
+Metrónomo
+Batido
+Batido
+Mimético
+Mimético
+Telépata
+Telépata
+Reducción
+Reducción
+Sol Matinal
+Sol Matinal
+Adaptación
+Adaptación
+Rugido de Guerra
+Rugido de Guerra
+Rastreo
+Rastreo
+Divide Dolor
+Divide Dolor
+Canto Mortal
+Canto Mortal
+Camaradería
+Camaradería
+Protección
+Protección
+Autosugestión
+Autosugestión
+Recuperación
+Recuperación
+Reciclaje
+Reciclaje
+Clonatipo
+Clonatipo
+Alivio
+Alivio
+Rugido
+Rugido
+Velo Sagrado
+Velo Sagrado
+Cara Susto
+Cara Susto
+Chirrido
+Chirrido
+Afilar
+Afilar
+Rompecoraza
+Rompecoraza
+Onda Simple
+Onda Simple
+Canto
+Canto
+Esquema
+Esquema
+Relajo
+Relajo
+Sonámbulo
+Sonámbulo
+Pantalla de Humo
+Pantalla de Humo
+Ovocuración
+Ovocuración
+Salpicadura
+Salpicadura
+Foco
+Foco
+Reserva
+Reserva
+Atiborramiento
+Atiborramiento
+Sustituto
+Sustituto
+Supersónico
+Supersónico
+Fanfarronear
+Fanfarronear
+Tragar
+Tragar
+Dulce Aroma
+Dulce Aroma
+Danza Espada
+Danza Espada
+Agitacola
+Agitacola
+Ojos Llorosos
+Ojos Llorosos
+Hora del Té
+Hora del Té
+Danza Caos
+Danza Caos
+Cosquillas
+Cosquillas
+Transformación
+Transformación
+Remolino
+Remolino
+Deseo
+Deseo
+Avivar
+Avivar
+Bostezo
+Bostezo
+Eructo
+Eructo
+Lanzamugre
+Lanzamugre
+Onda Tóxica
+Onda Tóxica
+Moluscañón
+Moluscañón
+Bomba Lodo
+Bomba Lodo
+Puya Nociva
+Puya Nociva
+Veneno X
+Veneno X
+Residuos
+Residuos
+Carga Tóxica
+Carga Tóxica
+Niebla Clara
+Niebla Clara
+Colmillo Veneno
+Colmillo Veneno
+Cola Veneno
+Cola Veneno
+Ácido
+Ácido
+Bomba Ácida
+Bomba Ácida
+Polución
+Polución
+Picotazo Veneno
+Picotazo Veneno
+Armadura Ácida
+Armadura Ácida
+Búnker
+Búnker
+Enrosque
+Enrosque
+Gas Corrosivo
+Gas Corrosivo
+Bilis
+Bilis
+Gas Venenoso
+Gas Venenoso
+Polvo Veneno
+Polvo Veneno
+Purificación
+Purificación
+Tóxico
+Tóxico
+Púas Tóxicas
+Púas Tóxicas
+Hilo Venenoso
+Hilo Venenoso
+Trampa Venenosa
+Trampa Venenosa
+Láser Prisma
+Láser Prisma
+Psicoataque
+Psicoataque
+Premonición
+Premonición
+Sincrorruido
+Sincrorruido
+Comesueños
+Comesueños
+Géiser Fotónico
+Géiser Fotónico
+Onda Mental
+Onda Mental
+Mirada Heladora
+Mirada Heladora
+Psíquico
+Psíquico
+Psicocolmillo
+Psicocolmillo
+Conjuro Funesto
+Conjuro Funesto
+Vasta Fuerza
+Vasta Fuerza
+Paranormal
+Paranormal
+Paso Dimensional
+Paso Dimensional
+Psicocarga
+Psicocarga
+Cabezazo Zen
+Cabezazo Zen
+Resplandor
+Resplandor
+Bola Neblina
+Bola Neblina
+Psicocorte
+Psicocorte
+Psicorrayo
+Psicorrayo
+Arrumaco
+Arrumaco
+Confusión
+Confusión
+Poder Reserva
+Poder Reserva
+Manto Espejo
+Manto Espejo
+Psicoonda
+Psicoonda
+Agilidad
+Agilidad
+Cambio de Banda
+Cambio de Banda
+Amnesia
+Amnesia
+Barrera
+Barrera
+Paz Mental
+Paz Mental
+Masa Cósmica
+Masa Cósmica
+Gravedad
+Gravedad
+Isoguardia
+Isoguardia
+Cambiadefensa
+Cambiadefensa
+Anticura
+Anticura
+Pulso Cura
+Pulso Cura
+Deseo Cura
+Deseo Cura
+Cambiaalmas
+Cambiaalmas
+Hipnosis
+Hipnosis
+Sellar
+Sellar
+Mandato
+Mandato
+Kinético
+Kinético
+Pantalla de Luz
+Pantalla de Luz
+Danza Lunar
+Danza Lunar
+Capa Mágica
+Capa Mágica
+Polvo Mágico
+Polvo Mágico
+Zona Mágica
+Zona Mágica
+Meditación
+Meditación
+Gran Ojo
+Gran Ojo
+Isofuerza
+Isofuerza
+Cambiafuerza
+Cambiafuerza
+Truco Fuerza
+Truco Fuerza
+Campo Psíquico
+Campo Psíquico
+Psicocambio
+Psicocambio
+Reflejo
+Reflejo
+Descanso
+Descanso
+Imitación
+Imitación
+Intercambio
+Intercambio
+Cambiavelocidad
+Cambiavelocidad
+Telequinesis
+Telequinesis
+Teletransporte
+Teletransporte
+Truco
+Truco
+Espacio Raro
+Espacio Raro
+Zona Extraña
+Zona Extraña
+Testarazo
+Testarazo
+Romperrocas
+Romperrocas
+Rayo Meteórico
+Rayo Meteórico
+Torm. de Diamantes
+Torm. de Diamantes
+Roca Afilada
+Roca Afilada
+Joya de Luz
+Joya de Luz
+Avalancha
+Avalancha
+Poder Pasado
+Poder Pasado
+Tumba Rocas
+Tumba Rocas
+Lanzarrocas
+Lanzarrocas
+Antiaéreo
+Antiaéreo
+Roca Veloz
+Roca Veloz
+Rodar
+Rodar
+Pedrada
+Pedrada
+Pulimento
+Pulimento
+Tormenta Arena
+Tormenta Arena
+Trampa Rocas
+Trampa Rocas
+Alquitranazo
+Alquitranazo
+Vasta Guardia
+Vasta Guardia
+Deseo Oculto
+Deseo Oculto
+Metaláser
+Metaláser
+Allanador Férreo
+Allanador Férreo
+Embate Supremo
+Embate Supremo
+Tajo Supremo
+Tajo Supremo
+Cola Férrea
+Cola Férrea
+Meteoimpacto
+Meteoimpacto
+Puño Meteoro
+Puño Meteoro
+Anclaje
+Anclaje
+Cañón Resplandor
+Cañón Resplandor
+Cabeza de Hierro
+Cabeza de Hierro
+Cuerno Certero
+Cuerno Certero
+Ala de Acero
+Ala de Acero
+Ferropuño Doble
+Ferropuño Doble
+Disparo Espejo
+Disparo Espejo
+Bomba Imán
+Bomba Imán
+Rueda Doble
+Rueda Doble
+Garra Metal
+Garra Metal
+Puño Bala
+Puño Bala
+Giro Bola
+Giro Bola
+Cuerpo Pesado
+Cuerpo Pesado
+Represión Metal
+Represión Metal
+Aligerar
+Aligerar
+Piñón Auxiliar
+Piñón Auxiliar
+Defensa Férrea
+Defensa Férrea
+Escudo Real
+Escudo Real
+Eco Metálico
+Eco Metálico
+Cambio de Marcha
+Cambio de Marcha
+Hidrocañón
+Hidrocañón
+Salpicar
+Salpicar
+Hidrobomba
+Hidrobomba
+Pulso Primigenio
+Pulso Primigenio
+Chorro de Vapor
+Chorro de Vapor
+Martillazo
+Martillazo
+Acua Cola
+Acua Cola
+Agua Lodosa
+Agua Lodosa
+Aria Burbuja
+Aria Burbuja
+Surf
+Surf
+Branquibocado
+Branquibocado
+Hidroariete
+Hidroariete
+Buceo
+Buceo
+Escaldar
+Escaldar
+Disparo Certero
+Disparo Certero
+Voto Agua
+Voto Agua
+Cascada
+Cascada
+Concha Filo
+Concha Filo
+Salmuera
+Salmuera
+Rayo Burbuja
+Rayo Burbuja
+Pulpocañón
+Pulpocañón
+Viraje
+Viraje
+Hidropulso
+Hidropulso
+Acua Jet
+Acua Jet
+Burbuja
+Burbuja
+Pistola Agua
+Pistola Agua
+Tenaza
+Tenaza
+Torbellino
+Torbellino
+Azote Torrencial
+Azote Torrencial
+Shuriken de Agua
+Shuriken de Agua
+Acua Aro
+Acua Aro
+Gota Vital
+Gota Vital
+Danza Lluvia
+Danza Lluvia
+Empapar
+Empapar
+Hidrochorro
+Hidrochorro
+Refugio
+Refugio
+Garra Nociva
+Garra Nociva
+Ciclón Primavera
+Ciclón Primavera
+Erupción de Ira
+Erupción de Ira
+Envite Acuático
+Envite Acuático
+Clorofiláser
+Clorofiláser
+Viento Carámbano
+Viento Carámbano
+Arremetida
+Arremetida
+Mil Púas Tóxicas
+Mil Púas Tóxicas
+Ala Aural
+Ala Aural
+Rencor Reprimido
+Rencor Reprimido
+Triple Flecha
+Triple Flecha
+Vendaval Gélido
+Vendaval Gélido
+Electormenta
+Electormenta
+Simún de Arena
+Simún de Arena
+Plegaria Lunar
+Plegaria Lunar
+Asalto Barrera
+Asalto Barrera
+Cambiapoder
+Cambiapoder
+Hachazo Pétreo
+Hachazo Pétreo
+Poder Místico
+Poder Místico
+Danza Triunfal
+Danza Triunfal
+Retracción
+Retracción
+Marcha Espectral
+Marcha Espectral
+Tajo Metralla
+Tajo Metralla
+Bálsamo Osado
+Bálsamo Osado
+Tajo Acuático
+Tajo Acuático
+Danza Acuática
+Danza Acuática
+Cañón Armadura
+Cañón Armadura
+Patada Hacha
+Patada Hacha
+Espada Lamento
+Espada Lamento
+Pirochoque
+Pirochoque
+Agua Fría
+Agua Fría
+Fría Acogida
+Fría Acogida
+Nitrochoque
+Nitrochoque
+Pugnachoque
+Pugnachoque
+Resarcimiento
+Resarcimiento
+Decalcomanía
+Decalcomanía
+Electropalmas
+Electropalmas
+Electroderrape
+Electroderrape
+Deslome
+Deslome
+Truco Floral
+Truco Floral
+Martillo Colosal
+Martillo Colosal
+Asalto Espadón
+Asalto Espadón
+Hipertaladro
+Hipertaladro
+Pirueta Helada
+Pirueta Helada
+Puño Jet
+Puño Jet
+Genufendiente
+Genufendiente
+Homenaje Póstumo
+Homenaje Póstumo
+Fotocolisión
+Fotocolisión
+Feerichoque
+Feerichoque
+Fiebre Dorada
+Fiebre Dorada
+Giro Mortífero
+Giro Mortífero
+Ponzochoque
+Ponzochoque
+Oído Cocina
+Oído Cocina
+Proliferación
+Proliferación
+Brinco
+Brinco
+Puño Furia
+Puño Furia
+Furia Taurina
+Furia Taurina
+Plegaria Vital
+Plegaria Vital
+Calamidad
+Calamidad
+Salazón
+Salazón
+Autotomía
+Autotomía
+Telatrampa
+Telatrampa
+Paisaje Nevado
+Paisaje Nevado
+Extracto Picante
+Extracto Picante
+Quemarrueda
+Quemarrueda
+Limpieza General
+Limpieza General
+Canto Ardiente
+Canto Ardiente
+Abrecaminos
+Abrecaminos
+Triple Inmersión
+Triple Inmersión
+Láser Doble
+Láser Doble
+Ominochoque
+Ominochoque
+Hidrovapor
+Hidrovapor
+Psicohojas
+Psicohojas
+Luna Roja
+Luna Roja
+Cañón Batidor
+Cañón Batidor
+Bomba Caramelo
+Bomba Caramelo
+Garrote Liana
+Garrote Liana
+Electrorrayo
+Electrorrayo
+Teraclúster
+Teraclúster
+Láser Veleidoso
+Láser Veleidoso
+Llama Protectora
+Llama Protectora
+Relámpago Súbito
+Relámpago Súbito
+Filo Potente
+Filo Potente
+Tajo Taquión
+Tajo Taquión
+Prensa Metalica
+Prensa Metalica
+Bramido Dragón
+Bramido Dragón
+Canto Encantador
+Canto Encantador
+Cólera Ardiente
+Cólera Ardiente
+Plancha Voltaica
+Plancha Voltaica
+Psicorruido
+Psicorruido
+Palma Rauda
+Palma Rauda
+Cadena Virulenta
+Cadena Virulenta
+Teraexplosión
+Teraexplosión
+Luz Devastadora
+Luz Devastadora
+Eevimpacto
+Eevimpacto
+Vapodrenaje
+Vapodrenaje
+Joltioparálisis
+Joltioparálisis
+Flarembestida
+Flarembestida
+Espeaura
+Espeaura
+Umbreozona
+Umbreozona
+Leafitobombas
+Leafitobombas
+Glaceoprisma
+Glaceoprisma
+Sylveotornado
+Sylveotornado
+Pikatormenta
+Pikatormenta
+Pikaturbo
+Pikaturbo
+Salpikasurf
+Salpikasurf
+Pikapicado
+Pikapicado
+Blazing Club
+Blazing Club
+Icicle Slash
+Icicle Slash
+Reactive Thorn
+Reactive Thorn
+Warlord's Crush
+Warlord's Crush
+Bulb Bash
+Bulb Bash
+Stalk Cutter
+Stalk Cutter
+Bergmite Sortie
+Bergmite Sortie
+Glacier Crunch
+Glacier Crunch
+Ancient Vigor
+Ancient Vigor
+Serpent Flare
+Serpent Flare
+Dynastic Fang
+Dynastic Fang
+Spiral Strike
+Spiral Strike
+Aureola Flare
+Aureola Flare
+Shadow Decree
+Shadow Decree
+Stalagmite Fall
+Stalagmite Fall
+Spiky Grasp
+Spiky Grasp
+Webshooter
+Webshooter
+Togebeam
+Togebeam
+Volt Burst
+Volt Burst
+Crag Smash
+Crag Smash
+Lightning Rush
+Lightning Rush
+Ion Pulse
+Ion Pulse
+Pixie Smash
+Pixie Smash
+Crystal Rain
+Crystal Rain
+Tremor Punch
+Tremor Punch
+Bedrock Kick
+Bedrock Kick
+Spectral Slash
+Spectral Slash
+Pyroclasm
+Pyroclasm
+Royal Blight
+Royal Blight
+Sky Splitter
+Sky Splitter
+Surreal Mime
+Surreal Mime
+Molten Slag
+Molten Slag

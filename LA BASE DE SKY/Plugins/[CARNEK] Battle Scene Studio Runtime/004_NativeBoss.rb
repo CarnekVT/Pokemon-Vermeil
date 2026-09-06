@@ -467,7 +467,10 @@ module BSS064
         "pulseSpeed"     => clamp_float(raw["pulseSpeed"], 10.0, 300.0, 100.0),
         "basZoomEnabled" => raw["basZoomEnabled"] != false,
         "basZoom"        => clamp_float(raw["basZoom"], 100.0, 220.0, 150.0),
-        "basZoomBounds"  => (["screen","extended"].include?(raw["basZoomBounds"].to_s) ? raw["basZoomBounds"].to_s : "screen")
+        "basZoomBounds"  => (["screen","extended"].include?(raw["basZoomBounds"].to_s) ? raw["basZoomBounds"].to_s : "screen"),
+        "ebdxCenterMon"     => raw["ebdxCenterMon"] == true,
+        "ebdxCenterOffsetX" => clamp_float(raw["ebdxCenterOffsetX"], -320.0, 320.0, 0.0),
+        "ebdxCenterOffsetY" => clamp_float(raw["ebdxCenterOffsetY"], -240.0, 240.0, 0.0)
       }
     rescue => e
       log("Boss aura config warning: #{e.class}: #{e.message}")
@@ -2014,8 +2017,9 @@ class Battle
 
   def bss_boss_hud_config
     raw=@bss_boss_config.is_a?(Hash) && @bss_boss_config["hud"].is_a?(Hash) ? @bss_boss_config["hud"] : {}
+    boss_active=(@bss_boss_config.is_a?(Hash) && @bss_boss_config["enabled"]==true)
     {
-      "enabled"=>raw["enabled"]!=false,"position"=>(["top","databox"].include?(raw["position"].to_s) ? raw["position"].to_s : "top"),
+      "enabled"=>boss_active && raw["enabled"]!=false,"position"=>(["top","databox"].include?(raw["position"].to_s) ? raw["position"].to_s : "top"),
       "showTitle"=>raw["showTitle"]!=false,"showLevel"=>raw["showLevel"]!=false,"displayName"=>raw["displayName"].to_s,
       "shieldEnabled"=>raw["shieldEnabled"]==true,"shieldSegments"=>BSS064.clamp_int(raw["shieldSegments"],1,24,5),
       "shieldStartMode"=>(raw["shieldStartMode"].to_s=="hp_threshold" ? "hp_threshold" : "battle_start"),
@@ -2171,8 +2175,6 @@ class Battle
   end
 
   def bss_find_boss_battler
-    # Never infer a "Boss" from foe party index 0 in ordinary/global SOS battles.
-    # Every Boss-only mechanic must have an explicitly enabled BSS Boss config.
     return nil if !bss_boss_enabled?
     wanted=bss_boss_target_party_index
     rows=@battlers.is_a?(Array) ? @battlers : []
@@ -2190,9 +2192,6 @@ class Battle
   # is running. The HUD uses this to hide/dispose itself instead of becoming an
   # orphaned overlay after bss_find_boss_battler starts returning nil.
   def bss_find_boss_battler_any
-    # Same guard as bss_find_boss_battler, but keeps the fainted Boss addressable
-    # only while a real Boss battle is active. This prevents global SOS callers
-    # from inheriting Boss terminal-helper rules when party index 0 faints.
     return nil if !bss_boss_enabled?
     wanted=bss_boss_target_party_index
     rows=@battlers.is_a?(Array) ? @battlers : []
@@ -2825,9 +2824,17 @@ class Battle::Scene
       bss_update_boss_aura
     end
     total=intro.total_duration.to_i;BSS064.install_bas_aura_compat
-    use_bas=cfg["basZoomEnabled"] && BSS064.bas_available? && respond_to?(:bas_runtime_pump_frame)
+    center_ebdx=cfg["ebdxCenterMon"] && respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
+    use_bas=(cfg["basZoomEnabled"] || center_ebdx) && BSS064.bas_available? && respond_to?(:bas_runtime_pump_frame)
     if use_bas
-      offset=bss_boss_static_camera_offset(sprite);data=bss_bas_camera_data(total,cfg["basZoom"],cfg["basZoomBounds"],offset[0],offset[1])
+      offset=bss_boss_static_camera_offset(sprite)
+      if center_ebdx
+        # BAS subtracts cameraX/Y. Offset 0/0 therefore puts the battler exactly
+        # in screen center; positive user offsets move the centered composition.
+        offset[0]-=cfg["ebdxCenterOffsetX"].to_f;offset[1]-=cfg["ebdxCenterOffsetY"].to_f
+      end
+      bounds=center_ebdx ? "extended" : cfg["basZoomBounds"]
+      data=bss_bas_camera_data(total,cfg["basZoom"],bounds,offset[0],offset[1])
       player=BattleAnimationStudioRuntime::Player.new(bss_scene_sprites,@viewport,battler,battler,data,[battler])
       BattleAnimationStudioRuntime.active_player=player if BattleAnimationStudioRuntime.respond_to?(:active_player=)
     end
@@ -4138,8 +4145,8 @@ module BSS064BossCaptureStore653
       begin;pkmn.makeUnUltra if pkmn.respond_to?(:ultra?) && pkmn.ultra? && pkmn.respond_to?(:makeUnUltra);rescue;end
       begin;pkmn.dynamax=false if pkmn.respond_to?(:dynamax?) && pkmn.dynamax? && pkmn.respond_to?(:dynamax=);rescue;end
       begin;pkmn.terastallized=false if pkmn.respond_to?(:tera?) && pkmn.tera? && pkmn.respond_to?(:terastallized=);rescue;end
-      begin;pkmn.instance_variable_remove(:@bss_native_boss_immunities) if pkmn.instance_variable_defined?(:@bss_native_boss_immunities);rescue;end
-      begin;pkmn.instance_variable_remove(:@bss_native_boss_hp_multiplier) if pkmn.instance_variable_defined?(:@bss_native_boss_hp_multiplier);rescue;end
+      begin;pkmn.remove_instance_variable(:@bss_native_boss_immunities) if pkmn.instance_variable_defined?(:@bss_native_boss_immunities);rescue;end
+      begin;pkmn.remove_instance_variable(:@bss_native_boss_hp_multiplier) if pkmn.instance_variable_defined?(:@bss_native_boss_hp_multiplier);rescue;end
       begin
         pkmn.calc_stats if pkmn.respond_to?(:calc_stats)
         pkmn.hp=[[pkmn.hp.to_i,1].max,pkmn.totalhp].min if pkmn.respond_to?(:hp=) && pkmn.respond_to?(:totalhp)
@@ -4742,8 +4749,7 @@ module BSS064BossPostFaintSOS656
     battle=@battle rescue nil
     is_boss=false
     capture=false
-    if battle && battle.respond_to?(:bss_boss_enabled?) && battle.bss_boss_enabled? &&
-       battle.respond_to?(:bss_find_boss_battler_any)
+    if battle && battle.respond_to?(:bss_find_boss_battler_any)
       boss=(battle.bss_find_boss_battler_any rescue nil)
       is_boss=!!(boss && boss.equal?(self))
       capture=(battle.bss_boss_capture_enabled? rescue false) if is_boss
@@ -5770,18 +5776,9 @@ class Battle
     # the Boss. wild_flee ends the target lifecycle without necessarily reaching
     # Scene#pbWildBattleSuccess, so trigger the BSS victory sequence explicitly.
     begin
-      # This path does not naturally reach Scene#pbWildBattleSuccess. Call the
-      # project's real success hook so a blank BSS victoryBgm still gets the
-      # project's DEFAULT wild victory theme; the BSS wrapper then applies any
-      # authored override and the Boss celebration/message exactly once.
-      if @scene && @scene.respond_to?(:pbWildBattleSuccess)
-        @scene.pbWildBattleSuccess
-      else
-        @scene.bss_play_custom_victory_bgm if @scene && @scene.respond_to?(:bss_play_custom_victory_bgm)
-        @scene.bss_custom_victory_sequence if @scene && @scene.respond_to?(:bss_custom_victory_sequence)
-      end
+      @scene.bss_custom_victory_sequence if @scene && @scene.respond_to?(:bss_custom_victory_sequence)
     rescue => e
-      BSS064.log("Boss flee victory sequence warning: #{e.class}: #{e.message}") if defined?(BSS064)
+      BSS064.log("Boss flee victory celebration warning: #{e.class}: #{e.message}") if defined?(BSS064)
     end
     :flee
   rescue => e
@@ -5790,12 +5787,7 @@ class Battle
       resolved=flee_msg.to_s
       resolved=bss655_boss_capture_message(resolved,target) if !resolved.empty? && respond_to?(:bss655_boss_capture_message)
       target.wild_flee(resolved.empty? ? nil : resolved) if target
-      if @scene && @scene.respond_to?(:pbWildBattleSuccess)
-        @scene.pbWildBattleSuccess
-      else
-        @scene.bss_play_custom_victory_bgm if @scene && @scene.respond_to?(:bss_play_custom_victory_bgm)
-        @scene.bss_custom_victory_sequence if @scene && @scene.respond_to?(:bss_custom_victory_sequence)
-      end
+      @scene.bss_custom_victory_sequence if @scene && @scene.respond_to?(:bss_custom_victory_sequence)
     rescue
     end
     :flee

@@ -1,0 +1,1496 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[SPECIES_CATEGORIES]
+Semilla
+Semilla
+Lagartija
+Lagartija
+Llama
+Llama
+Tortuguita
+Tortuguita
+Tortuga
+Tortuga
+Marisco
+Marisco
+Gusano
+Gusano
+Capullo
+Capullo
+Mariposa
+Mariposa
+Oruga
+Oruga
+Abeja Veneno
+Abeja Veneno
+Pajarito
+Pajarito
+Pájaro
+Pájaro
+Ratón
+Ratón
+Pico
+Pico
+Serpiente
+Serpiente
+Cobra
+Cobra
+Pin Veneno
+Pin Veneno
+Taladro
+Taladro
+Hada
+Hada
+Zorro
+Zorro
+Globo
+Globo
+Murciélago
+Murciélago
+Hierbajo
+Hierbajo
+Flor
+Flor
+Hongo
+Hongo
+Insecto
+Insecto
+Polilla Veneno
+Polilla Veneno
+Topo
+Topo
+Gato Araña
+Gato Araña
+Gato Fino
+Gato Fino
+Pato
+Pato
+Mono Cerdo
+Mono Cerdo
+Perrito
+Perrito
+Leyenda
+Leyenda
+Renacuajo
+Renacuajo
+Psi
+Psi
+Superpoder
+Superpoder
+Atrapamoscas
+Atrapamoscas
+Medusa
+Medusa
+Roca
+Roca
+Megatón
+Megatón
+Caballo Fuego
+Caballo Fuego
+Atontado
+Atontado
+Ermitaño
+Ermitaño
+Imán
+Imán
+Pato Salvaje
+Pato Salvaje
+Ave Gemela
+Ave Gemela
+Ave Triple
+Ave Triple
+León Marino
+León Marino
+Lodo
+Lodo
+Bivalvo
+Bivalvo
+Gas
+Gas
+Sombra
+Sombra
+Serpiente Roca
+Serpiente Roca
+Hipnosis
+Hipnosis
+Cangrejo
+Cangrejo
+Tenaza
+Tenaza
+Bola
+Bola
+Huevo
+Huevo
+Coco
+Coco
+Solitario
+Solitario
+Apilahueso
+Apilahueso
+Patada
+Patada
+Puñetazo
+Puñetazo
+Lametazo
+Lametazo
+Gas Veneno
+Gas Veneno
+Punzante
+Punzante
+Enredadera
+Enredadera
+Padres
+Padres
+Dragón
+Dragón
+Pez Color
+Pez Color
+Estrellada
+Estrellada
+Misterioso
+Misterioso
+Barrera
+Barrera
+Mantis
+Mantis
+Forma Humana
+Forma Humana
+Eléctrico
+Eléctrico
+Escupefuego
+Escupefuego
+Escarabajo
+Escarabajo
+Toro Bravo
+Toro Bravo
+Pez
+Pez
+Atrocidad
+Atrocidad
+Transporte
+Transporte
+Transformación
+Transformación
+Evolución
+Evolución
+Burbuja
+Burbuja
+Relámpago
+Relámpago
+Virtual
+Virtual
+Espiral
+Espiral
+Fósil
+Fósil
+Dormir
+Dormir
+Congelar
+Congelar
+Flama
+Flama
+Genético
+Genético
+Nueva Especie
+Nueva Especie
+Hoja
+Hoja
+Hierba
+Hierba
+Ratónfuego
+Ratónfuego
+Volcán
+Volcán
+Fauces
+Fauces
+Explorador
+Explorador
+Alargado
+Alargado
+Búho
+Búho
+5estrellas
+5estrellas
+Escupesoga
+Escupesoga
+Pata Larga
+Pata Larga
+Rape
+Rape
+Luz
+Luz
+Ratoncito
+Ratoncito
+Bolapicuda
+Bolapicuda
+Felicidad
+Felicidad
+Místico
+Místico
+Lana
+Lana
+Ratón Agua
+Ratón Agua
+Conejoagua
+Conejoagua
+Imitación
+Imitación
+Rana
+Rana
+Diente León
+Diente León
+Cola Larga
+Cola Larga
+Sol
+Sol
+Ala Clara
+Ala Clara
+Pez Agua
+Pez Agua
+Luz Lunar
+Luz Lunar
+Oscuridad
+Oscuridad
+Regio
+Regio
+Chirrido
+Chirrido
+Símbolo
+Símbolo
+Paciente
+Paciente
+Grancuello
+Grancuello
+Larva
+Larva
+Serptierra
+Serptierra
+Escorpiala
+Escorpiala
+Serpférrea
+Serpférrea
+Moho
+Moho
+Unicornio
+Unicornio
+Garra Filo
+Garra Filo
+Osito
+Osito
+Hibernante
+Hibernante
+Lava
+Lava
+Cerdo
+Cerdo
+Puerco
+Puerco
+Coral
+Coral
+Reactor
+Reactor
+Reparto
+Reparto
+Milano
+Milano
+Coraza Ave
+Coraza Ave
+Siniestro
+Siniestro
+Narizotas
+Narizotas
+Coraza
+Coraza
+Grancuerno
+Grancuerno
+Pintor
+Pintor
+Peleón
+Peleón
+Boca Abajo
+Boca Abajo
+Beso
+Beso
+Ascuas
+Ascuas
+Lechera
+Lechera
+Trueno
+Trueno
+Aurora
+Aurora
+Piel Roca
+Piel Roca
+Caparazón
+Caparazón
+Buceo
+Buceo
+Arco Iris
+Arco Iris
+Viajetiempo
+Viajetiempo
+Geco Bosque
+Geco Bosque
+Bosque
+Bosque
+Polluelo
+Polluelo
+Ave Corral
+Ave Corral
+Llameante
+Llameante
+Pez Lodo
+Pez Lodo
+Mordisco
+Mordisco
+Mapachito
+Mapachito
+Lanzado
+Lanzado
+Alga
+Alga
+Alegre
+Alegre
+Optimista
+Optimista
+Bellota
+Bellota
+Astuto
+Astuto
+Malvado
+Malvado
+Pequebuche
+Pequebuche
+Buche
+Buche
+Gaviota
+Gaviota
+Ave Agua
+Ave Agua
+Sensible
+Sensible
+Sensorio
+Sensorio
+Envolvente
+Envolvente
+Zapatero
+Zapatero
+Globocular
+Globocular
+Gandul
+Gandul
+Mono Feroz
+Mono Feroz
+Holgazán
+Holgazán
+Aprendiz
+Aprendiz
+Ninja
+Ninja
+Muda
+Muda
+Susurro
+Susurro
+Chillón
+Chillón
+Escandaloso
+Escandaloso
+Valiente
+Valiente
+Empuje
+Empuje
+A Topos
+A Topos
+Brújula
+Brújula
+Gatito
+Gatito
+Cursi
+Cursi
+Tramposo
+Tramposo
+Coraza Férrea
+Coraza Férrea
+Meditador
+Meditador
+Calambre
+Calambre
+Descarga
+Descarga
+Ánimo
+Ánimo
+Luciérnaga
+Luciérnaga
+Espina
+Espina
+Estómago
+Estómago
+Bolsa Veneno
+Bolsa Veneno
+Feroz
+Feroz
+Voraz
+Voraz
+Ballenabola
+Ballenabola
+Ballenaflot
+Ballenaflot
+Torpe
+Torpe
+Erupción
+Erupción
+Carbón
+Carbón
+Saltarín
+Saltarín
+Manipulador
+Manipulador
+Panda Topos
+Panda Topos
+Hormigaleón
+Hormigaleón
+Vibrante
+Vibrante
+Cactus
+Cactus
+Espantajo
+Espantajo
+Ave Algodón
+Ave Algodón
+Cantor
+Cantor
+Gato Hurón
+Gato Hurón
+Colmillos
+Colmillos
+Meteorito
+Meteorito
+Bigotudo
+Bigotudo
+Rufián
+Rufián
+Granuja
+Granuja
+Muñeco Barro
+Muñeco Barro
+Lila Mar
+Lila Mar
+Percebe
+Percebe
+Camarón
+Camarón
+Armadura
+Armadura
+Tierno
+Tierno
+Clima
+Clima
+Camaleónico
+Camaleónico
+Títere
+Títere
+Marioneta
+Marioneta
+Réquiem
+Réquiem
+Atrayente
+Atrayente
+Fruto
+Fruto
+Sonido Aire
+Sonido Aire
+Catástrofe
+Catástrofe
+Radiante
+Radiante
+Gorro Nieve
+Gorro Nieve
+Cara
+Cara
+Aplauso
+Aplauso
+Rodabola
+Rodabola
+Rompehielo
+Rompehielo
+Abisal
+Abisal
+Mar Del Sur
+Mar Del Sur
+Longevo
+Longevo
+Cita
+Cita
+Cabeza Roca
+Cabeza Roca
+Resistencia
+Resistencia
+Bola Hierro
+Bola Hierro
+Garrahierro
+Garrahierro
+Pata Hierro
+Pata Hierro
+Pico Roca
+Pico Roca
+Iceberg
+Iceberg
+Hierro
+Hierro
+Eón
+Eón
+Cuenca Mar
+Cuenca Mar
+Continente
+Continente
+Cielo
+Cielo
+Deseo
+Deseo
+ADN
+ADN
+Hojita
+Hojita
+Arboleda
+Arboleda
+Chimpancé
+Chimpancé
+Juguetón
+Juguetón
+Pingüino
+Pingüino
+Emperador
+Emperador
+Estornino
+Estornino
+Depredador
+Depredador
+Gran Ratón
+Gran Ratón
+Castor
+Castor
+Grillo
+Grillo
+Flash
+Flash
+Chispa
+Chispa
+Chispa ojos
+Chispa ojos
+Brote
+Brote
+Ramillete
+Ramillete
+Cabezazo
+Cabezazo
+Escudo
+Escudo
+Polilla
+Polilla
+Abejita
+Abejita
+Colmena
+Colmena
+Ardillalec
+Ardillalec
+Nutria Marina
+Nutria Marina
+Cereza
+Cereza
+Floración
+Floración
+Babosa Marina
+Babosa Marina
+Dirigible
+Dirigible
+Conejo
+Conejo
+Mágico
+Mágico
+Gran Jefe
+Gran Jefe
+Gastuto
+Gastuto
+Tigre Gato
+Tigre Gato
+Campana
+Campana
+Mofeta
+Mofeta
+Bronce
+Bronce
+Campana Bronce
+Campana Bronce
+Bonsái
+Bonsái
+Mimo
+Mimo
+Casita
+Casita
+Corchea
+Corchea
+Prohibido
+Prohibido
+Terrascualo
+Terrascualo
+Cueva
+Cueva
+Mach
+Mach
+Comilón
+Comilón
+Emanación
+Emanación
+Aura
+Aura
+Hipo
+Hipo
+Peso Pesado
+Peso Pesado
+Escorpión
+Escorpión
+Escorpiogro
+Escorpiogro
+Boca Tóxica
+Boca Tóxica
+Caza Bichos
+Caza Bichos
+Pez Ala
+Pez Ala
+Neón
+Neón
+Árbol Nieve
+Árbol Nieve
+Magnético
+Magnético
+Rayo
+Rayo
+Explosión
+Explosión
+Festejo
+Festejo
+Libélula
+Libélula
+Verdor
+Verdor
+Nievefresca
+Nievefresca
+Colmicorpio
+Colmicorpio
+2colmillos
+2colmillos
+Cuchilla
+Cuchilla
+Grilletes
+Grilletes
+Tierra Fría
+Tierra Fría
+Plasma
+Plasma
+Sabiduría
+Sabiduría
+Voluntad
+Voluntad
+Temporal
+Temporal
+Espacial
+Espacial
+Domo Lava
+Domo Lava
+Colosal
+Colosal
+Renegado
+Renegado
+Lunar
+Lunar
+Marino
+Marino
+Náutico
+Náutico
+Gratitud
+Gratitud
+Alfa
+Alfa
+Victoria
+Victoria
+Serp. Hierba
+Serp. Hierba
+Realeza
+Realeza
+Cerdo Fuego
+Cerdo Fuego
+Cerdo Ígneo
+Cerdo Ígneo
+Nutria
+Nutria
+Superación
+Superación
+Majestuoso
+Majestuoso
+Alerta
+Alerta
+Leal
+Leal
+Magnánimo
+Magnánimo
+Malicioso
+Malicioso
+Calculador
+Calculador
+Mono Hierba
+Mono Hierba
+Mono Pincho
+Mono Pincho
+Ardiente
+Ardiente
+Lumbre
+Lumbre
+Salpicadura
+Salpicadura
+Drenaje
+Drenaje
+Comesueños
+Comesueños
+Duermevela
+Duermevela
+Pichón
+Pichón
+Torcaz
+Torcaz
+Altanero
+Altanero
+Electrizado
+Electrizado
+Manto
+Manto
+Mineral
+Mineral
+Presurizado
+Presurizado
+Galante
+Galante
+Subterráneo
+Subterráneo
+Escucha
+Escucha
+Musculoso
+Musculoso
+Judo
+Judo
+Kárate
+Kárate
+Sastre
+Sastre
+Arropado
+Arropado
+Cuidador
+Cuidador
+Ciempiés
+Ciempiés
+Pupaciempiés
+Pupaciempiés
+Megaciempiés
+Megaciempiés
+Bolalgodón
+Bolalgodón
+Vuelalviento
+Vuelalviento
+Bulbo
+Bulbo
+Adornofloral
+Adornofloral
+Manso
+Manso
+Desierdrilo
+Desierdrilo
+Amenazador
+Amenazador
+Daruma
+Daruma
+Candente
+Candente
+Casapiedra
+Casapiedra
+Casarroca
+Casarroca
+Mudapiel
+Mudapiel
+Gamberro
+Gamberro
+Pseudopájaro
+Pseudopájaro
+Espíritu
+Espíritu
+Sepultura
+Sepultura
+Pretortuga
+Pretortuga
+Protopájaro
+Protopájaro
+Bolsabasura
+Bolsabasura
+Vertedero
+Vertedero
+Zorropillo
+Zorropillo
+Disfrazorro
+Disfrazorro
+Chinchilla
+Chinchilla
+Estola
+Estola
+Inquisitivo
+Inquisitivo
+Astro
+Astro
+Célula
+Célula
+Mitosis
+Mitosis
+Ampliación
+Ampliación
+Cisne
+Cisne
+Nievehelada
+Nievehelada
+Nievegélida
+Nievegélida
+Estacional
+Estacional
+Vuelardilla
+Vuelardilla
+Bocado
+Bocado
+Soldado
+Soldado
+Ingrávido
+Ingrávido
+Socorrista
+Socorrista
+Lapa
+Lapa
+Electroaraña
+Electroaraña
+Frutoespina
+Frutoespina
+Bolaespina
+Bolaespina
+Engranaje
+Engranaje
+Electropez
+Electropez
+Cerebro
+Cerebro
+Vela
+Vela
+Farolillo
+Farolillo
+Señuelo
+Señuelo
+Colmillo
+Colmillo
+Bocahacha
+Bocahacha
+Congelación
+Congelación
+Glaciación
+Glaciación
+Cristal
+Cristal
+Caracol
+Caracol
+Sincaparazón
+Sincaparazón
+Trampa
+Trampa
+Artemarcial
+Artemarcial
+Autómata
+Autómata
+Tajo
+Tajo
+Filo
+Filo
+Torocabezazo
+Torocabezazo
+Aguilucho
+Aguilucho
+Aguerrido
+Aguerrido
+Pañal
+Pañal
+Aguilahueso
+Aguilahueso
+Hormiguero
+Hormiguero
+Hormigacero
+Hormigacero
+Tosco
+Tosco
+Violento
+Violento
+Antorcha
+Antorcha
+Tesón Acero
+Tesón Acero
+Gruta
+Gruta
+Prado
+Prado
+Torbellino
+Torbellino
+Centella
+Centella
+Blanco veraz
+Blanco veraz
+Negro Puro
+Negro Puro
+Fertilidad
+Fertilidad
+Frontera
+Frontera
+Potro
+Potro
+Melodía
+Melodía
+Paleozoico
+Paleozoico
+Erizo
+Erizo
+Corazaespín
+Corazaespín
+Burburrana
+Burburrana
+Excavador
+Excavador
+Petirrojo
+Petirrojo
+Flamígero
+Flamígero
+Tiraescamas
+Tiraescamas
+Escamaposa
+Escamaposa
+Leoncito
+Leoncito
+Monoflor
+Monoflor
+Jardín
+Jardín
+Montura
+Montura
+Rostro Fiero
+Rostro Fiero
+Caniche
+Caniche
+Moderación
+Moderación
+Autocontrol
+Autocontrol
+Tizona
+Tizona
+Espada Real
+Espada Real
+Aroma
+Aroma
+Fragancia
+Fragancia
+Chuchería
+Chuchería
+Nata
+Nata
+Rotación
+Rotación
+Revolución
+Revolución
+Dos Manos
+Dos Manos
+Combinación
+Combinación
+Pseudoalga
+Pseudoalga
+Proyectagua
+Proyectagua
+Lanzachorro
+Lanzachorro
+Generador
+Generador
+Heredero
+Heredero
+Tirano
+Tirano
+Tundra
+Tundra
+Vínculo
+Vínculo
+Lucha Libre
+Lucha Libre
+Antenas
+Antenas
+Joya
+Joya
+Molusco
+Molusco
+Llavero
+Llavero
+Tocón
+Tocón
+Árbol Viejo
+Árbol Viejo
+Calabaza
+Calabaza
+Témpano
+Témpano
+Onda Sónica
+Onda Sónica
+Creación
+Creación
+Destrucción
+Destrucción
+Equilibrio
+Equilibrio
+Travesura
+Travesura
+Vapor
+Vapor
+Pluma Hoja
+Pluma Hoja
+Pluma Filo
+Pluma Filo
+Pluma Flecha
+Pluma Flecha
+Gato Fuego
+Gato Fuego
+Rudo
+Rudo
+Fama
+Fama
+Solista
+Solista
+Carpintero
+Carpintero
+Trompeta
+Trompeta
+Tucán
+Tucán
+Patrulla
+Patrulla
+Vigilante
+Vigilante
+Pupa
+Pupa
+Batería
+Batería
+Púgil
+Púgil
+Cangrejopelo
+Cangrejopelo
+Danza
+Danza
+Mosca Abeja
+Mosca Abeja
+Lobo
+Lobo
+Small Fry
+Small Fry
+Estrellatroz
+Estrellatroz
+Asno
+Asno
+Caballo Tiro
+Caballo Tiro
+Pompa
+Pompa
+Filo Hoja
+Filo Hoja
+Filo Flor
+Filo Flor
+Luminiscente
+Luminiscente
+Lagartoxina
+Lagartoxina
+Rabieta
+Rabieta
+Brazo Fuerte
+Brazo Fuerte
+Recogeflores
+Recogeflores
+Sabio
+Sabio
+Cooperación
+Cooperación
+Huidizo
+Huidizo
+Blindaje
+Blindaje
+Montiarena
+Montiarena
+Castiarena
+Castiarena
+Pepino Mar
+Pepino Mar
+Multigénico
+Multigénico
+Meteoro
+Meteoro
+Dormitador
+Dormitador
+Tortugabomba
+Tortugabomba
+Bolita
+Bolita
+Disfraz
+Disfraz
+Rechinante
+Rechinante
+Sosiego
+Sosiego
+Alga Ancla
+Alga Ancla
+Escamas
+Escamas
+Dios Nativo
+Dios Nativo
+Nebulosa
+Nebulosa
+Protostrella
+Protostrella
+Corona Solar
+Corona Solar
+Corona Lunar
+Corona Lunar
+Parásito
+Parásito
+Hinchado
+Hinchado
+Elegancia
+Elegancia
+Luminaria
+Luminaria
+Lanzamiento
+Lanzamiento
+Desenvaine
+Desenvaine
+Tragaldabas
+Tragaldabas
+Prisma
+Prisma
+Artificial
+Artificial
+Morasombra
+Morasombra
+Muro
+Muro
+Pirotecnia
+Pirotecnia
+Fulgor
+Fulgor
+Tuerca
+Tuerca
+Ritmo
+Ritmo
+Percusión
+Percusión
+Delantero
+Delantero
+Acuartija
+Acuartija
+Agente
+Agente
+Abazón
+Abazón
+Avaricia
+Avaricia
+Cuervo
+Cuervo
+Radomo
+Radomo
+Siete puntos
+Siete puntos
+Adornalgodón
+Adornalgodón
+Oveja
+Oveja
+Mordedura
+Mordedura
+Perro
+Perro
+Manzanido
+Manzanido
+Manzanala
+Manzanala
+Manzanéctar
+Manzanéctar
+Serpiente arena
+Serpiente arena
+Tragón
+Tragón
+Arremetida
+Arremetida
+Ensarta
+Ensarta
+Retoño
+Retoño
+Punki
+Punki
+Radiador
+Radiador
+Malcriado
+Malcriado
+Jiu-Jitsu
+Jiu-Jitsu
+Té
+Té
+Calma
+Calma
+Serenidad
+Serenidad
+Sliencio
+Sliencio
+Voluminoso
+Voluminoso
+Bloqueador
+Bloqueador
+Vikingo
+Vikingo
+Cómico
+Cómico
+Resquemor
+Resquemor
+Formación
+Formación
+Erizo de Mar
+Erizo de Mar
+Polillahielo
+Polillahielo
+Megalito
+Megalito
+Dos caras
+Dos caras
+Broncefante
+Broncefante
+Aleación
+Aleación
+Resentido
+Resentido
+Furtivo
+Furtivo
+Guerrero
+Guerrero
+Gigantesco
+Gigantesco
+Kung-fu
+Kung-fu
+Simiestro
+Simiestro
+Electrón
+Electrón
+Dragosfera
+Dragosfera
+Corcel Feroz
+Corcel Feroz
+Corcel Veloz
+Corcel Veloz
+Rey
+Rey
+Gran Cuerno
+Gran Cuerno
+Hacha
+Hacha
+Turba
+Turba
+Gran Pez
+Gran Pez
+Escalada
+Escalada
+Espinoso
+Espinoso
+Amorodio
+Amorodio
+Gato Planta
+Gato Planta
+Mago
+Mago
+Fuegodrilo
+Fuegodrilo
+Cantante
+Cantante
+Patito
+Patito
+Disciplinado
+Disciplinado
+Bailarín
+Bailarín
+Gorrino
+Gorrino
+Ovillo
+Ovillo
+Saltamontes
+Saltamontes
+Palmada
+Palmada
+Pareja
+Pareja
+Familia
+Familia
+Aceituna
+Aceituna
+Loro
+Loro
+Halita
+Halita
+Piroescudo
+Piroescudo
+Piroguerrero
+Piroguerrero
+Piroespada
+Piroespada
+Electrocuajo
+Electrocuajo
+Electrorrana
+Electrorrana
+Paíño
+Paíño
+Fregata
+Fregata
+Rascal
+Rascal
+Jefazo
+Jefazo
+Ratón Veneno
+Ratón Veneno
+Mono Veneno
+Mono Veneno
+Estepicursor
+Estepicursor
+Auricularia
+Auricularia
+Emboscada
+Emboscada
+Habanero
+Habanero
+Pelotero
+Pelotero
+Volantes
+Volantes
+Avestruz
+Avestruz
+Forja
+Forja
+Martillo
+Martillo
+Cóngrigo
+Cóngrigo
+Arrojador
+Arrojador
+Delfín
+Delfín
+Monocilindro
+Monocilindro
+Policilindro
+Policilindro
+Lombriz
+Lombriz
+Can Fantasma
+Can Fantasma
+Sincronizado
+Sincronizado
+Geoballena
+Geoballena
+Sueltalastre
+Sueltalastre
+Gran Siluro
+Gran Siluro
+Mimetismo
+Mimetismo
+Mono Furia
+Mono Furia
+Pez Púas
+Pez Púas
+Gran Cuello
+Gran Cuello
+Serpiente tierra
+Serpiente tierra
+Gran Espada
+Gran Espada
+Paradoja
+Paradoja
+Aleta Hielo
+Aleta Hielo
+Dragón Hielo
+Dragón Hielo
+Cofre
+Cofre
+Tesoro
+Tesoro
+Debacle
+Debacle
+Manzamelo
+Manzamelo
+Matcha
+Matcha
+Esbirro
+Esbirro
+Máscara
+Máscara
+Manzanhidra
+Manzanhidra
+Teracristal
+Teracristal
+Controlador
+Controlador
+Origami
+Origami
+Thorn Guardian
+Thorn Guardian
+Apprentice
+Apprentice
+Primal Duck
+Primal Duck
+Solar Deity
+Solar Deity
+Eclipse
+Eclipse
+Stalagmite
+Stalagmite
+Thunder Beast
+Thunder Beast
+Surreal
+Surreal
+Forge
+Forge
+Unicorne
+Unicorne
+Esfera
+Esfera
+Patas Recias
+Patas Recias
+Malignidad
+Malignidad
+Fuego Fatuo
+Fuego Fatuo
+Bifauces
+Bifauces
+Pez Veneno
+Pez Veneno
+Chamán
+Chamán
+Pirueta
+Pirueta
+Zorro Rencor
+Zorro Rencor
+Maldizorro
+Maldizorro
+Grito Guerra
+Grito Guerra
+Retracción
+Retracción
+Héroe
+Héroe
+Cazatesoros
+Cazatesoros
+Sturdy Shield
+Sturdy Shield
+Warlord
+Warlord

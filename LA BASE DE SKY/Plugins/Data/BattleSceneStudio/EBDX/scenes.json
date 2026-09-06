@@ -1,0 +1,11 @@
+{
+  "format": "battle-scene-studio-ebdx-scenes",
+  "version": 1,
+  "libraries": [
+    {
+      "id": "project",
+      "name": "Proyecto"
+    }
+  ],
+  "scenes": []
+}

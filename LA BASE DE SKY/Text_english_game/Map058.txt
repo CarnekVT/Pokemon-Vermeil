@@ -1,0 +1,168 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map058]
+¿Revisar resultados de qué reto?
+¿Revisar resultados de qué reto?
+Resultados de \PN del Palacio Batalla Nivel 50:
+Resultados de \PN del Palacio Batalla Nivel 50:
+Última racha de victorias: \v[1]\nRécord de racha de victorias: \v[2]
+Última racha de victorias: \v[1]\nRécord de racha de victorias: \v[2]
+Resultados de \PN del Palacio Batalla Nivel Libre:
+Resultados de \PN del Palacio Batalla Nivel Libre:
+Resultados de \PN del Palacio Batalla Nivel 50 Doble:
+Resultados de \PN del Palacio Batalla Nivel 50 Doble:
+Resultados de \PN del Palacio Batalla Nivel Libre Doble:
+Resultados de \PN del Palacio Batalla Nivel Libre Doble:
+¿Sobre qué facilidad te gustaría leer?
+¿Sobre qué facilidad te gustaría leer?
+En el Palacio Batalla, los Pokémon son capaces de combatir y actuar por su propia cuenta.
+En el Palacio Batalla, los Pokémon son capaces de combatir y actuar por su propia cuenta.
+A diferencia de los Pokémon salvajes, los que viven con humanos actúan de forma distinta en función de su naturaleza.
+A diferencia de los Pokémon salvajes, los que viven con humanos actúan de forma distinta en función de su naturaleza.
+Dependiendo de su naturaleza, un Pokémon puede preferir atacar sin importar qué.
+Dependiendo de su naturaleza, un Pokémon puede preferir atacar sin importar qué.
+Otro Pokémon puede preferir protegerse de sufrir daños.
+Otro Pokémon puede preferir protegerse de sufrir daños.
+Otro incluso puede disfrutar molestando o confundiendo a sus rivales.
+Otro incluso puede disfrutar molestando o confundiendo a sus rivales.
+La naturaleza de un Pokémon determina qué movimientos se le dan bien usar, y con cuáles tiene más problemas.
+La naturaleza de un Pokémon determina qué movimientos se le dan bien usar, y con cuáles tiene más problemas.
+Existen movimientos ofensivos que hacen daño directo al rival.
+Existen movimientos ofensivos que hacen daño directo al rival.
+Existen movimientos defensivos que se usan para prepararse ante los ataques enemigos o usados para recuperar PS y similar.
+Existen movimientos defensivos que se usan para prepararse ante los ataques enemigos o usados para recuperar PS y similar.
+Y hay otros movimientos más extraños que pueden debilitar al rival con cambios de estado como pueden ser el veneno o la parálisis.
+Y hay otros movimientos más extraños que pueden debilitar al rival con cambios de estado como pueden ser el veneno o la parálisis.
+Los Pokémon decidirán usar unos movimientos u otros dentro de estas tres categorías.
+Los Pokémon decidirán usar unos movimientos u otros dentro de estas tres categorías.
+Cuando un Pokémon no recibe comandos de su entrenador, podría ser incapaz de usar de forma eficaz ciertos tipos de movimientos.
+Cuando un Pokémon no recibe comandos de su entrenador, podría ser incapaz de usar de forma eficaz ciertos tipos de movimientos.
+A un Pokémon no se le da bien usar movimientos que no le gustan.
+A un Pokémon no se le da bien usar movimientos que no le gustan.
+Si un Pokémon solo conoce movimientos que no concuerdan con su naturaleza, no podrá ser capaz de alcanzar todo su potencial.
+Si un Pokémon solo conoce movimientos que no concuerdan con su naturaleza, no podrá ser capaz de alcanzar todo su potencial.
+Dependiendo de su naturaleza, un Pokémon podría empezar a usar movimientos que no concuerden con su naturaleza si está en peligro.
+Dependiendo de su naturaleza, un Pokémon podría empezar a usar movimientos que no concuerden con su naturaleza si está en peligro.
+Si un Pokémon comienza a comportarse de forma extraña en un apuro, obsérvalo cuidadosamente.
+Si un Pokémon comienza a comportarse de forma extraña en un apuro, obsérvalo cuidadosamente.
+No hay ningún combate guardado.
+No hay ningún combate guardado.
+Esta facilidad te permite llevar a cabo combates similares a Campeonatos de estadio.
+Esta facilidad te permite llevar a cabo combates similares a Campeonatos de estadio.
+Existen varios modos elegibles: Copa Pika, Copa Elegante, Poké Copa y Copa Pequeña. Cada copa tiene sus propias reglas y restricciones.
+Existen varios modos elegibles: Copa Pika, Copa Elegante, Poké Copa y Copa Pequeña. Cada copa tiene sus propias reglas y restricciones.
+La Copa Pika está abierta a Pokémon con niveles entre el 15 y 20.
+La Copa Pika está abierta a Pokémon con niveles entre el 15 y 20.
+Elige tres Pokémon para participar. Sin embargo, la suma de nivel de los tres no puede ser mayor que 50.
+Elige tres Pokémon para participar. Sin embargo, la suma de nivel de los tres no puede ser mayor que 50.
+Además, ciertos Pokémon exóticos no pueden participar.
+Además, ciertos Pokémon exóticos no pueden participar.
+La Copa Elegante está abierta a Pokémon bebés de nivel entre 25 y 30.
+La Copa Elegante está abierta a Pokémon bebés de nivel entre 25 y 30.
+Elige tres Pokémon para participar. Sin embargo, la suma de los niveles de los tres no puede ser mayor que 80.
+Elige tres Pokémon para participar. Sin embargo, la suma de los niveles de los tres no puede ser mayor que 80.
+Además, Pokémon muy grandes o muy altos no pueden particpar en la Copa Elegante.
+Además, Pokémon muy grandes o muy altos no pueden particpar en la Copa Elegante.
+El límite de altura es de 2 metros, y el de peso es de 20 Kg.
+El límite de altura es de 2 metros, y el de peso es de 20 Kg.
+La Poké Copa está abierta para Pokémon de niveles entre 50 y 55.
+La Poké Copa está abierta para Pokémon de niveles entre 50 y 55.
+Elige tres Pokémon para participar. Sin embargo, la suma de niveles de los tres no puede ser mayor que 155.
+Elige tres Pokémon para participar. Sin embargo, la suma de niveles de los tres no puede ser mayor que 155.
+La Copa Pequeña está abierta a Pokémon bebés a nivel 5 que aún pueden evolucionar.
+La Copa Pequeña está abierta a Pokémon bebés a nivel 5 que aún pueden evolucionar.
+Elige tres Pokémon para entrar en un combate individual, o cuatro para un combate doble.
+Elige tres Pokémon para entrar en un combate individual, o cuatro para un combate doble.
+Además, en la Copa Pequeña, los movimientos que reducen una cantidad fija de PS, como Bomba sónica o Furia dragón, siempre fallarán.
+Además, en la Copa Pequeña, los movimientos que reducen una cantidad fija de PS, como Bomba sónica o Furia dragón, siempre fallarán.
+En las Copas del Estadio hay varias reglas que debes tener en cuenta.
+En las Copas del Estadio hay varias reglas que debes tener en cuenta.
+Primero, dos Pokémon del mismo equipo no pueden estar dormidos o congelados al mismo tiempo.
+Primero, dos Pokémon del mismo equipo no pueden estar dormidos o congelados al mismo tiempo.
+Además, no puedes elegir a dos Pokémon de la misma especie, o que lleven equipado el mismo objeto.
+Además, no puedes elegir a dos Pokémon de la misma especie, o que lleven equipado el mismo objeto.
+Por último, si un Pokémon usa Autodestrucción o Explosión, haciendo que se debiliten los últimos Pokémon de todos, el que ha usado el mov. perderá.
+Por último, si un Pokémon usa Autodestrucción o Explosión, haciendo que se debiliten los últimos Pokémon de todos, el que ha usado el mov. perderá.
+Te doy la bienvenida al Palacio Batalla.
+Te doy la bienvenida al Palacio Batalla.
+¿Quieres participar en un combate individual?
+¿Quieres participar en un combate individual?
+¿Quieres participar en el reto Nivel 50, o en el reto de nivel libre?
+¿Quieres participar en el reto Nivel 50, o en el reto de nivel libre?
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar.
+Deben ser de especie diferente y tener equipados objetos distintos.
+Deben ser de especie diferente y tener equipados objetos distintos.
+Algunos Pokémon especiales, así como los Huevos, no se pueden elegir.
+Algunos Pokémon especiales, así como los Huevos, no se pueden elegir.
+Por favor, elige a los tres Pokémon que van a participar.
+Por favor, elige a los tres Pokémon que van a participar.
+Por favor, sígueme.
+Por favor, sígueme.
+Vuelve cuando quieras.
+Vuelve cuando quieras.
+Enhorabuena por tu victoria.
+Enhorabuena por tu victoria.
+Por favor, acepta estos Puntos Batalla.
+Por favor, acepta estos Puntos Batalla.
+\PN obtuvo \v[1] Puntos Batalla.
+\PN obtuvo \v[1] Puntos Batalla.
+¿Quieres grabar tu último combate?
+¿Quieres grabar tu último combate?
+\se[Pkmn exp full]El combate se ha guardado.
+\se[Pkmn exp full]El combate se ha guardado.
+Se van a registrar tus resultados.\wtnp[15]
+Se van a registrar tus resultados.\wtnp[15]
+Gracias por participar.
+Gracias por participar.
+Te estábamos esperando. Por favor, sígueme.
+Te estábamos esperando. Por favor, sígueme.
+Lo siento, pero no guardaste la partida antes de terminar tu último reto.
+Lo siento, pero no guardaste la partida antes de terminar tu último reto.
+Lamento decirte que tu reto se ha cancelado.
+Lamento decirte que tu reto se ha cancelado.
+¿Quieres participar en un combate doble?
+¿Quieres participar en un combate doble?
+Por favor, elige a los cuatro Pokémon que van a participar.
+Por favor, elige a los cuatro Pokémon que van a participar.
+Nivel 50
+Nivel 50
+Nivel Libre
+Nivel Libre
+Cancelar
+Cancelar
+Reglas Palacio Batalla
+Reglas Palacio Batalla
+Reproducir combate
+Reproducir combate
+Conceptos básicos
+Conceptos básicos
+Naturaleza Pokémon
+Naturaleza Pokémon
+Movimientos Pokémon
+Movimientos Pokémon
+Infrapoder
+Infrapoder
+Cuando está en peligro
+Cuando está en peligro
+Salir
+Salir
+Reglas Copa Estadio
+Reglas Copa Estadio
+Copas Estadio
+Copas Estadio
+Copa Pika
+Copa Pika
+Copa Elegante
+Copa Elegante
+Poké Copa
+Poké Copa
+Copa Pequeña
+Copa Pequeña
+Reglas de combate
+Reglas de combate
+Sí
+Sí
+No
+No

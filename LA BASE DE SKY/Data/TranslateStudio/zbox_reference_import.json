@@ -1,0 +1,25 @@
+{
+  "source": "ZBox Translator 1.1.0",
+  "policy": "Import everything except event-command/CommonEvent text; PBS Map Name entries are retained",
+  "pbsRows": 8144,
+  "scriptEventRows": 6224,
+  "scriptPluginRowsImported": 4882,
+  "mapNameRowsImported": 70,
+  "blankEnglishRowsInZBox": 9,
+  "nonEventBlankRowsFilledByTranslateStudio": 6,
+  "eventOnlyRowsExcluded": 1268,
+  "mixedRowsImportedWithoutEventContext": 33,
+  "uiGraphicsCopied": 48,
+  "final": {
+    "final_species_rows": 1949,
+    "final_moves_rows": 834,
+    "final_abilities_rows": 318,
+    "final_items_rows": 790,
+    "final_types_rows": 19,
+    "final_scripts_rows": 4478,
+    "final_plugins_rows": 1060,
+    "final_pbs_categories": 23,
+    "final_pbs_scoped_entries": 8400,
+    "final_events_rows": 0
+  }
+}

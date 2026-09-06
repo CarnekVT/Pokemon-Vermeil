@@ -1,0 +1,231 @@
+{
+  "format": "battle-scene-studio-ebdx-scenes",
+  "version": 1,
+  "libraries": [
+    {
+      "id": "project",
+      "name": "Proyecto"
+    },
+    {
+      "id": "constructed_nature",
+      "name": "Construidos · Naturaleza"
+    },
+    {
+      "id": "constructed_forest",
+      "name": "Construidos · Bosque / ruinas"
+    },
+    {
+      "id": "constructed_cave",
+      "name": "Construidos · Cuevas / hielo"
+    },
+    {
+      "id": "constructed_city",
+      "name": "Construidos · Ciudad"
+    },
+    {
+      "id": "constructed_special",
+      "name": "Construidos · Especiales"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene_custom",
+      "name": "Island",
+      "description": "Island",
+      "libraryId": "project",
+      "data": {
+        "backdrop": "Forest",
+        "wideWorld": true,
+        "water": true,
+        "outdoor": true,
+        "cloudsConfig": {
+          "enabled": true,
+          "cloud1X": 0,
+          "cloud1Y": 38,
+          "cloud1Speed": 1,
+          "cloud1Direction": 1,
+          "cloud1Opacity": 255,
+          "cloud2X": 0,
+          "cloud2Y": 38,
+          "cloud2Speed": 0.5,
+          "cloud2Direction": -1,
+          "cloud2Opacity": 255,
+          "dayColor": "#dfefff",
+          "dawnColor": "#ffd4b3",
+          "nightColor": "#9ebcff"
+        },
+        "skyMode": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/nature_sky_base.png",
+        "sky": true,
+        "windConfig": {
+          "enabled": true,
+          "amplitude": 3,
+          "speed": 1,
+          "rotation": 2
+        },
+        "base": "Water",
+        "img001": {
+          "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+          "x": 320,
+          "y": 128,
+          "z": 3,
+          "zoom": 0.35,
+          "opacity": 255,
+          "direction": 1,
+          "zoom_x": 0.45,
+          "zoom_y": 0.45,
+          "flat": true,
+          "bssRigid": true,
+          "crop": {
+            "x": 96,
+            "y": 480,
+            "w": 96,
+            "h": 128,
+            "rebase": true
+          },
+          "blurAreas": [],
+          "effect": "wind",
+          "speed": 1,
+          "colorize": true
+        },
+        "img002": {
+          "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+          "x": 304,
+          "y": 112,
+          "z": 2,
+          "zoom": 0.35,
+          "opacity": 255,
+          "direction": 1,
+          "zoom_x": 0.45,
+          "zoom_y": 0.45,
+          "flat": true,
+          "bssRigid": true,
+          "crop": {
+            "x": 96,
+            "y": 480,
+            "w": 96,
+            "h": 128,
+            "rebase": true
+          },
+          "blurAreas": [],
+          "effect": "wind",
+          "speed": 1,
+          "colorize": true,
+          "hidden": false
+        },
+        "img003": {
+          "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+          "x": 368,
+          "y": 112,
+          "z": 3,
+          "zoom": 0.35,
+          "opacity": 255,
+          "direction": 1,
+          "zoom_x": 0.45,
+          "zoom_y": 0.45,
+          "flat": true,
+          "bssRigid": true,
+          "crop": {
+            "x": 96,
+            "y": 480,
+            "w": 96,
+            "h": 128,
+            "rebase": true
+          },
+          "blurAreas": [],
+          "effect": "wind",
+          "speed": 1,
+          "colorize": true
+        },
+        "img004": {
+          "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+          "x": 32,
+          "y": 112,
+          "z": 2,
+          "zoom": 0.35,
+          "opacity": 255,
+          "direction": 1,
+          "zoom_x": 0.45,
+          "zoom_y": 0.45,
+          "flat": true,
+          "bssRigid": true,
+          "crop": {
+            "x": 96,
+            "y": 480,
+            "w": 96,
+            "h": 128,
+            "rebase": true
+          },
+          "blurAreas": [],
+          "effect": "wind",
+          "speed": 1,
+          "colorize": true,
+          "hidden": false
+        },
+        "img005": {
+          "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+          "x": 56,
+          "y": 128,
+          "z": 3,
+          "zoom": 0.35,
+          "opacity": 255,
+          "direction": 1,
+          "zoom_x": 0.45,
+          "zoom_y": 0.45,
+          "flat": true,
+          "bssRigid": true,
+          "crop": {
+            "x": 96,
+            "y": 480,
+            "w": 96,
+            "h": 128,
+            "rebase": true
+          },
+          "blurAreas": [],
+          "effect": "wind",
+          "speed": 1,
+          "colorize": true
+        },
+        "img006": {
+          "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
+          "x": 104,
+          "y": 112,
+          "z": 5,
+          "zoom": 0.35,
+          "opacity": 255,
+          "direction": 1,
+          "zoom_x": 0.45,
+          "zoom_y": 0.45,
+          "flat": true,
+          "bssRigid": true,
+          "crop": {
+            "x": 96,
+            "y": 480,
+            "w": 96,
+            "h": 128,
+            "rebase": true
+          },
+          "blurAreas": [],
+          "effect": "wind",
+          "speed": 1,
+          "colorize": true
+        },
+        "img007": {
+          "bitmap": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mountain_cluster_2.png",
+          "x": 176,
+          "y": 100,
+          "z": 1,
+          "zoom": 0.2,
+          "opacity": 120,
+          "direction": 1,
+          "zoom_x": 0.6,
+          "zoom_y": 0.2,
+          "flat": true,
+          "bssRigid": true,
+          "blurAreas": [],
+          "canvasLayer": true,
+          "hidden": true
+        }
+      }
+    }
+  ]
+}

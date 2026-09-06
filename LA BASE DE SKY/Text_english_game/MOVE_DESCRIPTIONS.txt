@@ -1,0 +1,1730 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[MOVE_DESCRIPTIONS]
+Violenta embestida con cuernos imponentes.
+Violenta embestida con cuernos imponentes.
+El usuario llama a sus amigos para que ataquen al rival. Suele ser crítico.
+El usuario llama a sus amigos para que ataquen al rival. Suele ser crítico.
+El movimiento de las alas crea una onda sónica dañina. Puede disminuir la Defensa Especial del objetivo.
+El movimiento de las alas crea una onda sónica dañina. Puede disminuir la Defensa Especial del objetivo.
+Movimiento de gran potencia y prioridad que solo puede usarse en el primer turno del usuario.
+Movimiento de gran potencia y prioridad que solo puede usarse en el primer turno del usuario.
+Ataca al oponente con una bola explosiva. Si esta alcanza a un aliado, le hará recuperar PS.
+Ataca al oponente con una bola explosiva. Si esta alcanza a un aliado, le hará recuperar PS.
+Restaura al usuario la mitad del daño causado al objetivo.
+Restaura al usuario la mitad del daño causado al objetivo.
+Ataca al oponente abalanzándose sobre él con todas sus fuerzas y reduce su Ataque.
+Ataca al oponente abalanzándose sobre él con todas sus fuerzas y reduce su Ataque.
+Cruza las guadañas o las garras para atacar al rival como si fueran unas tijeras.
+Cruza las guadañas o las garras para atacar al rival como si fueran unas tijeras.
+Ataca con un rayo de luz siniestro. Puede confundir al objetivo.
+Ataca con un rayo de luz siniestro. Puede confundir al objetivo.
+Ataca al objetivo por la espalda de forma subrepticia y además reduce su Ataque Especial.
+Ataca al objetivo por la espalda de forma subrepticia y además reduce su Ataque Especial.
+Tras atacar, vuelve a toda prisa para dar paso a otro Pokémon del equipo.
+Tras atacar, vuelve a toda prisa para dar paso a otro Pokémon del equipo.
+El usuario se hace una bola y arrolla al objetivo con su cuerpo. Puede amedrentar.
+El usuario se hace una bola y arrolla al objetivo con su cuerpo. Puede amedrentar.
+Pica al rival. Si el adversario lleva una Baya, el agresor se la come y se beneficia de su efecto.
+Pica al rival. Si el adversario lleva una Baya, el agresor se la come y se beneficia de su efecto.
+Fuerte viento con polvo de escamas. Puede subir todas las características de quien lo usa.
+Fuerte viento con polvo de escamas. Puede subir todas las características de quien lo usa.
+Al derrotar al objetivo utilizando este movimiento, aumenta muchísimo el Ataque del usuario.
+Al derrotar al objetivo utilizando este movimiento, aumenta muchísimo el Ataque del usuario.
+El usuario contraataca. Además baja el Ataque Especial de los oponentes.
+El usuario contraataca. Además baja el Ataque Especial de los oponentes.
+Ataque con garras o guadañas que crece en intensidad si se usa repetidas veces.
+Ataque con garras o guadañas que crece en intensidad si se usa repetidas veces.
+Lanza finas púas que hieren de dos a cinco veces.
+Lanza finas púas que hieren de dos a cinco veces.
+Clava aguijones al rival dos veces. Puede envenenar.
+Clava aguijones al rival dos veces. Puede envenenar.
+Oprime al enemigo de cuatro a cinco turnos, durante los cuales no podrá huir.
+Oprime al enemigo de cuatro a cinco turnos, durante los cuales no podrá huir.
+El usuario llama a sus amigos para que formen un escudo viviente. Sube la Defensa y la Def. Esp.
+El usuario llama a sus amigos para que formen un escudo viviente. Sube la Defensa y la Def. Esp.
+El usuario llama a sus amigos para que lo curen. Recupera hasta la mitad de los PS máximos.
+El usuario llama a sus amigos para que lo curen. Recupera hasta la mitad de los PS máximos.
+Si el objetivo usa un movimiento de tipo Fuego en ese turno, el polvo explota y le inflige daño.
+Si el objetivo usa un movimiento de tipo Fuego en ese turno, el polvo explota y le inflige daño.
+Danza mística que sube el Ataque Especial, la Defensa Especial y la Velocidad.
+Danza mística que sube el Ataque Especial, la Defensa Especial y la Velocidad.
+Usa un polvo que irrita y centra en el usuario la atención y los ataques de los rivales.
+Usa un polvo que irrita y centra en el usuario la atención y los ataques de los rivales.
+Enreda al objetivo para evitar que abandone la batalla.
+Enreda al objetivo para evitar que abandone la batalla.
+Coloca una red pegajosa en el bando rival que baja la Velocidad de cualquier Pokémon que entre.
+Coloca una red pegajosa en el bando rival que baja la Velocidad de cualquier Pokémon que entre.
+Lanza seda al objetivo y reduce su Velocidad.
+Lanza seda al objetivo y reduce su Velocidad.
+Se concentra en una ráfaga de luz que sube muchísimo el Ataque Especial.
+Se concentra en una ráfaga de luz que sube muchísimo el Ataque Especial.
+Ataca ignorando efectos de movimientos como Protección. Baja la Defensa del usuario.
+Ataca ignorando efectos de movimientos como Protección. Baja la Defensa del usuario.
+El usuario emplea el Ataque del objetivo para golpear.
+El usuario emplea el Ataque del objetivo para golpear.
+El usuario transforma su ira en un aura de fuego para atacar. Puede amedrentar al objetivo.
+El usuario transforma su ira en un aura de fuego para atacar. Puede amedrentar al objetivo.
+Gira y golpea al oponente, ignorando los cambios en las características del objetivo.
+Gira y golpea al oponente, ignorando los cambios en las características del objetivo.
+Ataca al objetivo con una onda siniestra. Puede bajar su Precisión.
+Ataca al objetivo con una onda siniestra. Puede bajar su Precisión.
+Tritura con afilados colmillos y puede bajar la Defensa del objetivo.
+Tritura con afilados colmillos y puede bajar la Defensa del objetivo.
+Libera una horrible aura llena de malos pensamientos y puede amedrentar al objetivo.
+Libera una horrible aura llena de malos pensamientos y puede amedrentar al objetivo.
+El usuario finge hacer una reverencia y ensarta al objetivo con su cabello alborotado. No falla.
+El usuario finge hacer una reverencia y ensarta al objetivo con su cabello alborotado. No falla.
+Prohibe al objetivo y al usuario abandonar el combate hasta que uno de los dos se debilite.
+Prohibe al objetivo y al usuario abandonar el combate hasta que uno de los dos se debilite.
+Inflige al rival un dolor tan abrumador que le impide utilizar durante dos turnos ataques sonoros.
+Inflige al rival un dolor tan abrumador que le impide utilizar durante dos turnos ataques sonoros.
+Golpe devastador que requiere un absoluto dominio de las artes siniestras. Siempre es crítico.
+Golpe devastador que requiere un absoluto dominio de las artes siniestras. Siempre es crítico.
+Si el usuario ha sufrido una reducción de características en ese turno duplica la potencia.
+Si el usuario ha sufrido una reducción de características en ese turno duplica la potencia.
+Ataca al objetivo a la primera oportunidad. Suele ser crítico.
+Ataca al objetivo a la primera oportunidad. Suele ser crítico.
+Permite atacar primero. Falla si el objetivo no está preparando ningún ataque.
+Permite atacar primero. Falla si el objetivo no está preparando ningún ataque.
+Impide al objetivo usar el objeto que lleva durante el combate.
+Impide al objetivo usar el objeto que lleva durante el combate.
+Si el objetivo ya ha sufrido daño en ese turno, la fuerza del ataque se duplica.
+Si el objetivo ya ha sufrido daño en ese turno, la fuerza del ataque se duplica.
+Un voraz bocado que puede amedrentar al objetivo.
+Un voraz bocado que puede amedrentar al objetivo.
+Hace pivotar su cuerpo para infligir daño a todos sus rivales.
+Hace pivotar su cuerpo para infligir daño a todos sus rivales.
+Engaña al objetivo para acercarse y dar un puñetazo que no falla.
+Engaña al objetivo para acercarse y dar un puñetazo que no falla.
+Ataca y le quita al objetivo su objeto. Si el agresor lleva un objeto, no robará el del objetivo.
+Ataca y le quita al objetivo su objeto. Si el agresor lleva un objeto, no robará el del objetivo.
+Ataca lanzando un chillido insoportable que baja el Ataque Especial de los objetivos.
+Ataca lanzando un chillido insoportable que baja el Ataque Especial de los objetivos.
+El usuario contraataca con el doble de fuerza si el objetivo usa un movimiento antes.
+El usuario contraataca con el doble de fuerza si el objetivo usa un movimiento antes.
+Hace el doble de daño al objetivo que pide el relevo.
+Hace el doble de daño al objetivo que pide el relevo.
+Ataque de todo el equipo Pokémon. Cuantos más haya, más veces ataca.
+Ataque de todo el equipo Pokémon. Cuantos más haya, más veces ataca.
+Lanza contra el objetivo su objeto. La fuerza del ataque y su efecto varían según el objeto.
+Lanza contra el objetivo su objeto. La fuerza del ataque y su efecto varían según el objeto.
+Cuanto más hayan subido las características del usuario, mayor será el daño.
+Cuanto más hayan subido las características del usuario, mayor será el daño.
+La fuerza del ataque aumenta cuanto más se ha fortalecido el rival con cambios de características.
+La fuerza del ataque aumenta cuanto más se ha fortalecido el rival con cambios de características.
+El objetivo es enviado a un mundo de tinieblas que lo hace dormir.
+El objetivo es enviado a un mundo de tinieblas que lo hace dormir.
+Impide al objetivo usar el objeto que lleva. Su Entrenador tampoco puede usar objetos sobre él.
+Impide al objetivo usar el objeto que lleva. Su Entrenador tampoco puede usar objetos sobre él.
+Lágrimas de cocodrilo que bajan mucho la Defensa Especial del objetivo.
+Lágrimas de cocodrilo que bajan mucho la Defensa Especial del objetivo.
+Halaga al objetivo y lo confunde, pero también sube su Ataque Especial.
+Halaga al objetivo y lo confunde, pero también sube su Ataque Especial.
+El usuario se afila las garras para aumentar su Ataque y Precisión.
+El usuario se afila las garras para aumentar su Ataque y Precisión.
+El usuario se debilita, pero baja mucho tanto el Ataque como el Ataque Especial del objetivo.
+El usuario se debilita, pero baja mucho tanto el Ataque como el Ataque Especial del objetivo.
+Estimula su cerebro pensando en cosas malas. Aumenta considerablemente el Ataque Especial.
+Estimula su cerebro pensando en cosas malas. Aumenta considerablemente el Ataque Especial.
+Frena cualquier ataque y baja mucho la defensa si recibe un golpe de contacto. Si se usa mucho falla.
+Frena cualquier ataque y baja mucho la defensa si recibe un golpe de contacto. Si se usa mucho falla.
+Baja el Ataque y el Ataque Especial del rival y se cambia por otro Pokémon de su equipo.
+Baja el Ataque y el Ataque Especial del rival y se cambia por otro Pokémon de su equipo.
+El usuario intimida a su objetivo logrando que su movimiento sea el último del turno.
+El usuario intimida a su objetivo logrando que su movimiento sea el último del turno.
+Roba el efecto de movimientos de curación o de cambio de características de un combatiente.
+Roba el efecto de movimientos de curación o de cambio de características de un combatiente.
+Intercambia con el objetivo los objetos que llevan tan rápido que es imposible verlo a simple vista.
+Intercambia con el objetivo los objetos que llevan tan rápido que es imposible verlo a simple vista.
+Enfurece al objetivo para que solo use movimientos de ataque durante tres turnos.
+Enfurece al objetivo para que solo use movimientos de ataque durante tres turnos.
+Invierte por completo los cambios en las características del Pokémon objetivo.
+Invierte por completo los cambios en las características del Pokémon objetivo.
+Atormenta y enfurece al objetivo, que no puede usar dos veces seguidas el mismo movimiento.
+Atormenta y enfurece al objetivo, que no puede usar dos veces seguidas el mismo movimiento.
+Ataque más poderoso de Eternatus en su forma original. No se podrá mover en el siguiente turno.
+Ataque más poderoso de Eternatus en su forma original. No se podrá mover en el siguiente turno.
+Ataca con su fuerza vital. Cuanto menos vida tenga el usuario, menos daño hará.
+Ataca con su fuerza vital. Cuanto menos vida tenga el usuario, menos daño hará.
+Ataca usando tal energía que el tiempo se distorsiona. El usuario descansa el siguiente turno.
+Ataca usando tal energía que el tiempo se distorsiona. El usuario descansa el siguiente turno.
+Hace que grandes cometas caigan del cielo. Baja mucho el Ataque Especial de quien lo usa.
+Hace que grandes cometas caigan del cielo. Baja mucho el Ataque Especial de quien lo usa.
+Ataca de dos a tres turnos y acaba confundiendo al agresor.
+Ataca de dos a tres turnos y acaba confundiendo al agresor.
+Frota las escamas de su cuerpo para crear un fuerte sonido, a costa de reducir su Defensa.
+Frota las escamas de su cuerpo para crear un fuerte sonido, a costa de reducir su Defensa.
+Inflige daño al rival, y si este ya ha hecho uso de algún movimiento, pierde su habilidad.
+Inflige daño al rival, y si este ya ha hecho uso de algún movimiento, pierde su habilidad.
+Ataca de forma brutal mientras intimida al objetivo. También puede amedrentarlo.
+Ataca de forma brutal mientras intimida al objetivo. También puede amedrentarlo.
+El usuario lanza un poderoso rayo de energía de su núcleo.
+El usuario lanza un poderoso rayo de energía de su núcleo.
+Desgarra al objetivo y el espacio a su alrededor. Suele ser crítico.
+Desgarra al objetivo y el espacio a su alrededor. Suele ser crítico.
+Usa el cuerpo como un martillo para abalanzarse sobre su rival y causarle daño.
+Usa el cuerpo como un martillo para abalanzarse sobre su rival y causarle daño.
+Abre mucho la boca y libera una onda de choque que ataca al objetivo.
+Abre mucho la boca y libera una onda de choque que ataca al objetivo.
+Araña al objetivo con garras afiladas.
+Araña al objetivo con garras afiladas.
+Azota con ímpetu con su cola al Pokémon enemigo. Esto hace que baje el Ataque del objetivo.
+Azota con ímpetu con su cola al Pokémon enemigo. Esto hace que baje el Ataque del objetivo.
+Poderosa ráfaga de aliento que golpea al objetivo y puede paralizarlo.
+Poderosa ráfaga de aliento que golpea al objetivo y puede paralizarlo.
+Ataca al objetivo y lo obliga a cambiarse por otro Pokémon. Si es uno salvaje, acaba el combate.
+Ataca al objetivo y lo obliga a cambiarse por otro Pokémon. Si es uno salvaje, acaba el combate.
+El usuario ataca dos veces usando Dreepy. Si hay dos enemigos, golpea una vez a cada uno.
+El usuario ataca dos veces usando Dreepy. Si hay dos enemigos, golpea una vez a cada uno.
+Golpea dos veces seguidas con la cola u otras partes de su cuerpo.
+Golpea dos veces seguidas con la cola u otras partes de su cuerpo.
+Crea un violento tornado para hacer trizas al rival. Puede amedrentarlo.
+Crea un violento tornado para hacer trizas al rival. Puede amedrentarlo.
+Lanza escamas de dos a cinco veces. Sube la Velocidad del usuario pero reduce su Defensa.
+Lanza escamas de dos a cinco veces. Sube la Velocidad del usuario pero reduce su Defensa.
+Ráfaga de furiosas ondas de choque que quitan 40 PS.
+Ráfaga de furiosas ondas de choque que quitan 40 PS.
+El usuario aumenta todas sus características a cambio de sus PS.
+El usuario aumenta todas sus características a cambio de sus PS.
+Danza mística que sube el Ataque y la Velocidad.
+Danza mística que sube el Ataque y la Velocidad.
+Ataca envolviéndose de una gran carga eléctrica y embistiendo al objetivo con ella. Puede paralizar.
+Ataca envolviéndose de una gran carga eléctrica y embistiendo al objetivo con ella. Puede paralizar.
+Placaje de alto riesgo que hiere también al atacante.
+Placaje de alto riesgo que hiere también al atacante.
+Dispara una descarga eléctrica que causa daño y parálisis.
+Dispara una descarga eléctrica que causa daño y parálisis.
+Ataca y sube la Velocidad del usuario. Cambia de tipo dependiendo de la forma del usuario.
+Ataca y sube la Velocidad del usuario. Cambia de tipo dependiendo de la forma del usuario.
+Un poderoso rayo que daña al objetivo y puede paralizarlo.
+Un poderoso rayo que daña al objetivo y puede paralizarlo.
+Enorme descarga eléctrica. Aumenta su potencia si es influenciada por una gigantesca llamarada.
+Enorme descarga eléctrica. Aumenta su potencia si es influenciada por una gigantesca llamarada.
+Ataca con los puños. Convierte los movimientos de tipo Normal en tipo Eléctrico.
+Ataca con los puños. Convierte los movimientos de tipo Normal en tipo Eléctrico.
+Potente ataque eléctrico que puede paralizar al objetivo.
+Potente ataque eléctrico que puede paralizar al objetivo.
+Carga eléctrica muy potente que también hiere ligeramente a quien la usa.
+Carga eléctrica muy potente que también hiere ligeramente a quien la usa.
+Ataca con su pico electrificado. Si el usuario ataca antes que el objetivo, duplica la potencia.
+Ataca con su pico electrificado. Si el usuario ataca antes que el objetivo, duplica la potencia.
+Una deslumbradora onda eléctrica afecta a los demás Pokémon del combate. Puede paralizar.
+Una deslumbradora onda eléctrica afecta a los demás Pokémon del combate. Puede paralizar.
+El usuario rasguea su cuerpo para generar enormes vibraciones con las que ataca al objetivo.
+El usuario rasguea su cuerpo para generar enormes vibraciones con las que ataca al objetivo.
+El usuario atrapa al rival en una caja eléctrica que dura entre cuatro y cinco turnos.
+El usuario atrapa al rival en una caja eléctrica que dura entre cuatro y cinco turnos.
+El usuario se lanza contra el objetivo y le suelta una potente descarga que puede amedrentarlo.
+El usuario se lanza contra el objetivo y le suelta una potente descarga que puede amedrentarlo.
+Puñetazo eléctrico. Puede paralizar.
+Puñetazo eléctrico. Puede paralizar.
+La potencia del movimiento se duplica si el rival se ve afectado por un campo eléctrico.
+La potencia del movimiento se duplica si el rival se ve afectado por un campo eléctrico.
+Inflige daño a los Pokémon a su alrededor, absorbiendo la mitad del daño producido.
+Inflige daño a los Pokémon a su alrededor, absorbiendo la mitad del daño producido.
+Ataque eléctrico que puede llegar a paralizar.
+Ataque eléctrico que puede llegar a paralizar.
+Muerde con colmillos electrificados. Puede hacer que el rival se amedrente o paralice.
+Muerde con colmillos electrificados. Puede hacer que el rival se amedrente o paralice.
+Ataque eléctrico muy rápido e ineludible.
+Ataque eléctrico muy rápido e ineludible.
+Atrapa y ataca a los objetivos con una telaraña eléctrica. También reduce su Velocidad.
+Atrapa y ataca a los objetivos con una telaraña eléctrica. También reduce su Velocidad.
+Lanza un rayo eléctrico contra el rival. Puede subir el Ataque Especial de quien lo usa.
+Lanza un rayo eléctrico contra el rival. Puede subir el Ataque Especial de quien lo usa.
+Ataque eléctrico que puede paralizar al objetivo.
+Ataque eléctrico que puede paralizar al objetivo.
+Frota sus mofletes cargados de electricidad contra el Pokémon objetivo y consigue paralizarlo.
+Frota sus mofletes cargados de electricidad contra el Pokémon objetivo y consigue paralizarlo.
+Lanza una bola eléctrica. Cuanto mayor es la Velocidad del usuario, mayor será el daño causado.
+Lanza una bola eléctrica. Cuanto mayor es la Velocidad del usuario, mayor será el daño causado.
+Recarga energía para potenciar el siguiente movimiento Eléctrico. Sube la Defensa Especial.
+Recarga energía para potenciar el siguiente movimiento Eléctrico. Sube la Defensa Especial.
+Irradia unas raras ondas que disminuyen mucho el Ataque Especial del objetivo.
+Irradia unas raras ondas que disminuyen mucho el Ataque Especial del objetivo.
+Durante cinco turnos crea un campo eléctrico que impide dormirse a los Pokémon en el suelo.
+Durante cinco turnos crea un campo eléctrico que impide dormirse a los Pokémon en el suelo.
+Si el Pokémon objetivo queda electrificado antes de usar un movimiento, este será de tipo Eléctrico.
+Si el Pokémon objetivo queda electrificado antes de usar un movimiento, este será de tipo Eléctrico.
+Disemina partículas con carga que convierten los movimientos de tipo Normal en tipo Eléctrico.
+Disemina partículas con carga que convierten los movimientos de tipo Normal en tipo Eléctrico.
+Levita gracias a un campo magnético generado por electricidad durante cinco turnos.
+Levita gracias a un campo magnético generado por electricidad durante cinco turnos.
+Aumentar la Defensa y la Defensa Especial de los aliados con las habilidades Más y Menos.
+Aumentar la Defensa y la Defensa Especial de los aliados con las habilidades Más y Menos.
+Una ligera descarga que paraliza al objetivo si lo alcanza.
+Una ligera descarga que paraliza al objetivo si lo alcanza.
+Emplea el poder de la Flor Eterna para lanzar un potente rayo de luz, pero sufre bastante daño.
+Emplea el poder de la Flor Eterna para lanzar un potente rayo de luz, pero sufre bastante daño.
+El usuario emite un potente rayo, pero su Ataque Especial se reduce mucho.
+El usuario emite un potente rayo, pero su Ataque Especial se reduce mucho.
+Ataca a todos a su alrededor, pero se debilita. Aumenta su potencia en un 50% si hay un campo niebla.
+Ataca a todos a su alrededor, pero se debilita. Aumenta su potencia en un 50% si hay un campo niebla.
+Invoca el poder de la luna para atacar. Puede disminuir el Ataque Especial del objetivo.
+Invoca el poder de la luna para atacar. Puede disminuir el Ataque Especial del objetivo.
+Hace cucamonas al objetivo y lo ataca. Puede disminuir el Ataque del objetivo.
+Hace cucamonas al objetivo y lo ataca. Puede disminuir el Ataque del objetivo.
+El usuario ataca al enemigo emitiendo vapor. Puede dejar confuso al objetivo.
+El usuario ataca al enemigo emitiendo vapor. Puede dejar confuso al objetivo.
+Inflige daño a los oponentes con una potente luz.
+Inflige daño a los oponentes con una potente luz.
+Ataca al objetivo con tal ímpetu que acaba minando su moral y reduce su Ataque Especial.
+Ataca al objetivo con tal ímpetu que acaba minando su moral y reduce su Ataque Especial.
+Absorbe PS del objetivo con un beso y restaura sus PS.
+Absorbe PS del objetivo con un beso y restaura sus PS.
+Obnubila a los oponentes con su voz y les provoca daños emocionales. Siempre acierta.
+Obnubila a los oponentes con su voz y les provoca daños emocionales. Siempre acierta.
+El Pokémon que lo usa desata un vendaval feérico que arremete contra el objetivo.
+El Pokémon que lo usa desata un vendaval feérico que arremete contra el objetivo.
+Golpea al objetivo con la furia de la naturaleza y reduce sus PS a la mitad.
+Golpea al objetivo con la furia de la naturaleza y reduce sus PS a la mitad.
+Consigue aumentar la Defensa Especial de un Pokémon de su equipo con una fragancia misteriosa.
+Consigue aumentar la Defensa Especial de un Pokémon de su equipo con una fragancia misteriosa.
+Lanza una mirada al Pokémon objetivo, reduciendo su Ataque. Siempre va primero.
+Lanza una mirada al Pokémon objetivo, reduciendo su Ataque. Siempre va primero.
+Engatusa al objetivo y reduce bastante su Ataque.
+Engatusa al objetivo y reduce bastante su Ataque.
+Se protege a sí mismo y a sus aliados de ataques de estado, pero no de otro tipo de ataques.
+Se protege a sí mismo y a sus aliados de ataques de estado, pero no de otro tipo de ataques.
+El usuario aumenta el Ataque y el Ataque Especial del objetivo decorándolo.
+El usuario aumenta el Ataque y el Ataque Especial del objetivo decorándolo.
+Consigue que ningún Pokémon pueda huir en el siguiente turno echando un cerrojo.
+Consigue que ningún Pokémon pueda huir en el siguiente turno echando un cerrojo.
+Restaura la mitad de los PS máximos del objetivo. Cura más con campo de hierba.
+Restaura la mitad de los PS máximos del objetivo. Cura más con campo de hierba.
+Aumenta la Defensa de los Pokémon de tipo Planta en combate usando unos misteriosos poderes.
+Aumenta la Defensa de los Pokémon de tipo Planta en combate usando unos misteriosos poderes.
+Concentra energía un turno, y en el segundo aumenta mucho su At. Esp., Def. Esp. y Velocidad.
+Concentra energía un turno, y en el segundo aumenta mucho su At. Esp., Def. Esp. y Velocidad.
+Cubre de niebla el terreno cinco turnos. Los Pokémon en el suelo no reciben cambios de estado.
+Cubre de niebla el terreno cinco turnos. Los Pokémon en el suelo no reciben cambios de estado.
+Restaura PS del usuario. La cantidad varía según el tiempo que haga.
+Restaura PS del usuario. La cantidad varía según el tiempo que haga.
+Da un beso con tal dulzura que causa confusión.
+Da un beso con tal dulzura que causa confusión.
+Se concentra para dar un puñetazo. Falla si se sufre un golpe antes de su uso.
+Se concentra para dar un puñetazo. Falla si se sufre un golpe antes de su uso.
+El usuario arremete con su puerro. El usuario no se podrá mover en el siguiente turno.
+El usuario arremete con su puerro. El usuario no se podrá mover en el siguiente turno.
+Salta muy alto y lanza una patada. Si falla, dañará al usuario.
+Salta muy alto y lanza una patada. Si falla, dañará al usuario.
+Lucha abiertamente contra el rival. Reduce la Defensa y la Defensa Especial del usuario.
+Lucha abiertamente contra el rival. Reduce la Defensa y la Defensa Especial del usuario.
+Agudiza la concentración mental y libera su poder. Puede disminuir la Def. Esp. del rival.
+Agudiza la concentración mental y libera su poder. Puede disminuir la Def. Esp. del rival.
+Ataque de gran potencia, pero que reduce el Ataque y la Defensa del agresor.
+Ataque de gran potencia, pero que reduce el Ataque y la Defensa del agresor.
+Corte doble que suele propinar un golpe crítico.
+Corte doble que suele propinar un golpe crítico.
+Puñetazo con toda la fuerza concentrada. Causa confusión si atina.
+Puñetazo con toda la fuerza concentrada. Causa confusión si atina.
+Se lanza sobre su oponente. Este movimiento es de tipo Lucha y tipo Volador al mismo tiempo.
+Se lanza sobre su oponente. Este movimiento es de tipo Lucha y tipo Volador al mismo tiempo.
+Gira con fuerza el puño y da un gran golpe. No obstante, baja la Velocidad del usuario.
+Gira con fuerza el puño y da un gran golpe. No obstante, baja la Velocidad del usuario.
+Da un salto y pega una patada. Si falla, dañará al usuario.
+Da un salto y pega una patada. Si falla, dañará al usuario.
+El usuario ataca con una espada, ignorando cualquier cambio en las características del objetivo.
+El usuario ataca con una espada, ignorando cualquier cambio en las características del objetivo.
+El usuario arremete contra el rival con una poderosa patada que siempre baja la Defensa.
+El usuario arremete contra el rival con una poderosa patada que siempre baja la Defensa.
+Ensarta al objetivo con un sable, hiriéndolo con su místico poder.
+Ensarta al objetivo con un sable, hiriéndolo con su místico poder.
+Gancho ascendente de gran ímpetu.
+Gancho ascendente de gran ímpetu.
+Libera una descarga de la fuerza del aura desde su interior. Es infalible.
+Libera una descarga de la fuerza del aura desde su interior. Es infalible.
+El usuario embiste al objetivo. Cuanto más alta sea la Defensa del usuario, más daño inflingirá.
+El usuario embiste al objetivo. Cuanto más alta sea la Defensa del usuario, más daño inflingirá.
+Tira al objetivo al suelo. También hiere al agresor.
+Tira al objetivo al suelo. También hiere al agresor.
+Potente ataque que también es capaz de destruir barreras como pantalla de luz y reflejo.
+Potente ataque que también es capaz de destruir barreras como pantalla de luz y reflejo.
+Un golpe que drena energía. El Pokémon recupera la mitad de los PS arrebatados al objetivo.
+Un golpe que drena energía. El Pokémon recupera la mitad de los PS arrebatados al objetivo.
+El usuario ataca el último, pero no falla.
+El usuario ataca el último, pero no falla.
+Inflige gran daño a objetivos dormidos. Sin embargo, los bofetones también los despiertan.
+Inflige gran daño a objetivos dormidos. Sin embargo, los bofetones también los despiertan.
+Un veloz ataque a los pies que reduce la Velocidad del objetivo.
+Un veloz ataque a los pies que reduce la Velocidad del objetivo.
+Lanza por los aires al objetivo y hace que salga otro Pokémon. Si es uno salvaje, acaba el combate.
+Lanza por los aires al objetivo y hace que salga otro Pokémon. Si es uno salvaje, acaba el combate.
+Ataca al objetivo con una onda de choque y puede llegar a paralizarlo.
+Ataca al objetivo con una onda de choque y puede llegar a paralizarlo.
+Ataque que produce el doble de daño si el usuario es herido en el mismo turno.
+Ataque que produce el doble de daño si el usuario es herido en el mismo turno.
+Una patada rápida y circular. También puede amedrentar al objetivo.
+Una patada rápida y circular. También puede amedrentar al objetivo.
+Lanza un golpe fulminante. Siempre resulta en un golpe crítico.
+Lanza un golpe fulminante. Siempre resulta en un golpe crítico.
+Da un golpe cortante. Suele ser crítico.
+Da un golpe cortante. Suele ser crítico.
+Puñetazo que se da rápido para golpear primero.
+Puñetazo que se da rápido para golpear primero.
+Cada vez que golpea se endurecen sus puños. Si acierta, el Ataque del usuario aumenta.
+Cada vez que golpea se endurecen sus puños. Si acierta, el Ataque del usuario aumenta.
+Ataca con puñetazos que pueden romper rocas. Puede bajar la Defensa del objetivo.
+Ataca con puñetazos que pueden romper rocas. Puede bajar la Defensa del objetivo.
+Gira los puños y libera una onda de vacío contra el objetivo. Este movimiento siempre va primero.
+Gira los puños y libera una onda de vacío contra el objetivo. Este movimiento siempre va primero.
+Una patada doble. Golpea dos veces.
+Una patada doble. Golpea dos veces.
+Empujones directos que golpean de dos a cinco veces seguidas.
+Empujones directos que golpean de dos a cinco veces seguidas.
+Patea hasta tres veces seguidas y cada vez más fuerte.
+Patea hasta tres veces seguidas y cada vez más fuerte.
+Devuelve un golpe físico por duplicado.
+Devuelve un golpe físico por duplicado.
+El usuario se sacrifica causándole un daño al objetivo equivalente a sus propios PS perdidos.
+El usuario se sacrifica causándole un daño al objetivo equivalente a sus propios PS perdidos.
+Patada baja. Cuanto más pesa el objetivo, más daño causa.
+Patada baja. Cuanto más pesa el objetivo, más daño causa.
+Ataque desesperado que causa más daño cuantos menos PS tenga el usuario.
+Ataque desesperado que causa más daño cuantos menos PS tenga el usuario.
+La gravedad derriba al objetivo. Se restarán tantos PS como nivel tenga el agresor.
+La gravedad derriba al objetivo. Se restarán tantos PS como nivel tenga el agresor.
+Robustece el cuerpo para subir el Ataque y la Defensa.
+Robustece el cuerpo para subir el Ataque y la Defensa.
+El usuario imparte indicaciones precisas a sus aliados, que ven aumentados su Ataque y su Defensa.
+El usuario imparte indicaciones precisas a sus aliados, que ven aumentados su Ataque y su Defensa.
+Frena los ataques, pero puede fallar si se usa repetidamente.
+Frena los ataques, pero puede fallar si se usa repetidamente.
+El usuario usa un tatami para escudarse de los movimientos enemigos. Protege también a los aliados. No funciona contra ataques de estado.
+El usuario usa un tatami para escudarse de los movimientos enemigos. Protege también a los aliados. No funciona contra ataques de estado.
+El usuario aumenta todas sus características, pero no puede huir ni ser cambiado por otro.
+El usuario aumenta todas sus características, pero no puede huir ni ser cambiado por otro.
+Retiene al objetivo para impedir su huida, a la vez que reduce su Defensa y Defensa Especial cada turno.
+Retiene al objetivo para impedir su huida, a la vez que reduce su Defensa y Defensa Especial cada turno.
+Protege al equipo de ataques con prioridad. Puede fallar si se utiliza repetidamente.
+Protege al equipo de ataques con prioridad. Puede fallar si se utiliza repetidamente.
+Golpea con una V de llamas. Baja la Defensa, la Def. Esp. y la Velocidad del usuario.
+Golpea con una V de llamas. Baja la Defensa, la Def. Esp. y la Velocidad del usuario.
+Explosión de fuego. El atacante debe descansar el siguiente turno.
+Explosión de fuego. El atacante debe descansar el siguiente turno.
+Furia explosiva. Cuanto menor sea el número de PS del usuario, menos daño hará el ataque.
+Furia explosiva. Cuanto menor sea el número de PS del usuario, menos daño hará el ataque.
+Hace explotar su cabeza para atacar a todos a su alrededor, aunque también se hiere a sí mismo.
+Hace explotar su cabeza para atacar a todos a su alrededor, aunque también se hiere a sí mismo.
+Si le alcanza un ataque físico, la trampa del caparazón estalla y el atacante sufre daño.
+Si le alcanza un ataque físico, la trampa del caparazón estalla y el atacante sufre daño.
+Ataca con una bella pero potente llama azul que rodea al objetivo. Puede quemarlo.
+Ataca con una bella pero potente llama azul que rodea al objetivo. Puede quemarlo.
+Usa hasta el último resquicio de llamas de su cuerpo para atacar, pero pierde el tipo Fuego.
+Usa hasta el último resquicio de llamas de su cuerpo para atacar, pero pierde el tipo Fuego.
+Ataque en toda regla que baja mucho el Ataque Especial de quien lo usa.
+Ataque en toda regla que baja mucho el Ataque Especial de quien lo usa.
+El Pokémon se cubre de llamas y carga contra el objetivo, aunque él también recibe daños.
+El Pokémon se cubre de llamas y carga contra el objetivo, aunque él también recibe daños.
+Prende una pequeña piedra para crear una bola de fuego con la que ataca. Puede causar quemaduras.
+Prende una pequeña piedra para crear una bola de fuego con la que ataca. Puede causar quemaduras.
+Llama intensa que lo chamusca y puede causar quemaduras.
+Llama intensa que lo chamusca y puede causar quemaduras.
+Llamarada gigantesca. Aumenta su potencia si es influenciada por una gran energía eléctrica.
+Llamarada gigantesca. Aumenta su potencia si es influenciada por una gran energía eléctrica.
+Ataca con una gran ráfaga de fuego que causa quemaduras.
+Ataca con una gran ráfaga de fuego que causa quemaduras.
+El rival queda atrapado en una tormenta de fuego que dura de dos a cinco turnos.
+El rival queda atrapado en una tormenta de fuego que dura de dos a cinco turnos.
+Fuego místico de gran intensidad que puede causar quemaduras.
+Fuego místico de gran intensidad que puede causar quemaduras.
+Un infierno de llamas daña a los Pokémon de alrededor en combate. Puede quemar.
+Un infierno de llamas daña a los Pokémon de alrededor en combate. Puede quemar.
+Provoca un viento abrasador que puede quemar al objetivo.
+Provoca un viento abrasador que puede quemar al objetivo.
+Ataca con una gran ráfaga de fuego que puede causar quemaduras.
+Ataca con una gran ráfaga de fuego que puede causar quemaduras.
+Patada que suele ser un golpe crítico y puede causar quemaduras.
+Patada que suele ser un golpe crítico y puede causar quemaduras.
+El Pokémon golpea envuelto en llamas. Puede aumentar el Ataque Especial de quien lo usa.
+El Pokémon golpea envuelto en llamas. Puede aumentar el Ataque Especial de quien lo usa.
+Golpea al oponente con un látigo incandescente y reduce su Defensa.
+Golpea al oponente con un látigo incandescente y reduce su Defensa.
+Ataca con columnas de fuego. Combinado con un Voto Planta crea un mar de llamas y aumenta su potencia.
+Ataca con columnas de fuego. Combinado con un Voto Planta crea un mar de llamas y aumenta su potencia.
+Un infierno de llamas daña a los Pokémon adyacentes en combate. Puede quemar.
+Un infierno de llamas daña a los Pokémon adyacentes en combate. Puede quemar.
+Puñetazo ardiente. Puede quemar.
+Puñetazo ardiente. Puede quemar.
+Lanza una llama a gran temperatura a su rival, la cual le baja el Ataque Especial.
+Lanza una llama a gran temperatura a su rival, la cual le baja el Ataque Especial.
+Causa quemaduras a los Pokémon cuyas características hayan aumentado en ese turno.
+Causa quemaduras a los Pokémon cuyas características hayan aumentado en ese turno.
+Golpea al objetivo con una llamarada que afecta a sus Pokémon adyacentes.
+Golpea al objetivo con una llamarada que afecta a sus Pokémon adyacentes.
+Usa colmillos en llamas para morder. Puede hacer que el objetivo se amedrente o se queme.
+Usa colmillos en llamas para morder. Puede hacer que el objetivo se amedrente o se queme.
+Ataca envuelto en fuego. Puede causar quemaduras.
+Ataca envuelto en fuego. Puede causar quemaduras.
+Llamas que golpean a los objetivos adyacentes. Si llevan Bayas, se quemarán y desaparecerán.
+Llamas que golpean a los objetivos adyacentes. Si llevan Bayas, se quemarán y desaparecerán.
+Llamas que golpean al objetivo y aumentan la Velocidad del atacante.
+Llamas que golpean al objetivo y aumentan la Velocidad del atacante.
+Ataca con llamas pequeñas que pueden causar quemaduras.
+Ataca con llamas pequeñas que pueden causar quemaduras.
+Un aro de fuego que atrapa al objetivo de cuatro a cinco turnos.
+Un aro de fuego que atrapa al objetivo de cuatro a cinco turnos.
+Cuanto mayor sea su peso comparado con el del objetivo, más daño causará.
+Cuanto mayor sea su peso comparado con el del objetivo, más daño causará.
+Intensifica el sol durante cinco turnos, lo que potencia los movimientos de tipo Fuego.
+Intensifica el sol durante cinco turnos, lo que potencia los movimientos de tipo Fuego.
+Siniestra llama morada que produce quemaduras.
+Siniestra llama morada que produce quemaduras.
+Ataque en dos turnos que suele ser crítico. Puede amedrentar al objetivo.
+Ataque en dos turnos que suele ser crítico. Puede amedrentar al objetivo.
+Pliega sus alas y ataca con un vuelo rasante. El Pokémon que lo usa también resulta dañado.
+Pliega sus alas y ataca con un vuelo rasante. El Pokémon que lo usa también resulta dañado.
+Se precipita desde el cielo a mucha velocidad, pero hace que bajen la Def. y Def. Esp.
+Se precipita desde el cielo a mucha velocidad, pero hace que bajen la Def. y Def. Esp.
+Golpea al objetivo con un fuerte torbellino que envuelve al rival y puede confundirlo.
+Golpea al objetivo con un fuerte torbellino que envuelve al rival y puede confundirlo.
+Lanza un chorro de aire que suele dar un golpe crítico.
+Lanza un chorro de aire que suele dar un golpe crítico.
+Carga el pico antes de atacar. Quema al rival si recibe un ataque físico durante la carga.
+Carga el pico antes de atacar. Quema al rival si recibe un ataque físico durante la carga.
+Primer turno: vuela. Segundo turno: ataca. Fuera de combate, permite ir a sitios ya conocidos.
+Primer turno: vuela. Segundo turno: ataca. Fuera de combate, permite ir a sitios ya conocidos.
+Primer turno: bota. Segundo turno: golpea. Puede paralizar.
+Primer turno: bota. Segundo turno: golpea. Puede paralizar.
+Picotazo giratorio y perforador muy potente.
+Picotazo giratorio y perforador muy potente.
+Absorbe energía del Pokémon objetivo y recupera más de la mitad del daño infligido.
+Absorbe energía del Pokémon objetivo y recupera más de la mitad del daño infligido.
+Ataca con una hoja de aire que incluso corta el cielo. También puede amedrentar al objetivo.
+Ataca con una hoja de aire que incluso corta el cielo. También puede amedrentar al objetivo.
+Ataca con una onda sónica compuesta por palabras que ha aprendido. Puede confundir al objetivo.
+Ataca con una onda sónica compuesta por palabras que ha aprendido. Puede confundir al objetivo.
+El usuario lanza un ataque muy rápido e ineludible.
+El usuario lanza un ataque muy rápido e ineludible.
+Viento cortante que azota. Suele ser un golpe crítico.
+Viento cortante que azota. Suele ser un golpe crítico.
+Picotea al objetivo. Si este sostiene una Baya, la picotea también y obtiene sus efectos.
+Picotea al objetivo. Si este sostiene una Baya, la picotea también y obtiene sus efectos.
+1º turno: lanza al objetivo al aire. 2º: lo hace caer. En el aire no lo deja moverse.
+1º turno: lanza al objetivo al aire. 2º: lo hace caer. En el aire no lo deja moverse.
+Golpea al objetivo con unas grandes alas.
+Golpea al objetivo con unas grandes alas.
+Golpea ágilmente. Si el usuario no porta ningún objeto, el objetivo resulta seriamente dañado.
+Golpea ágilmente. Si el usuario no porta ningún objeto, el objetivo resulta seriamente dañado.
+Ataca al adversario golpeándolo dos veces con las alas.
+Ataca al adversario golpeándolo dos veces con las alas.
+Crea un tornado con las alas y lo lanza contra el objetivo.
+Crea un tornado con las alas y lo lanza contra el objetivo.
+Ensarta al objetivo con un cuerno o pico punzante.
+Ensarta al objetivo con un cuerno o pico punzante.
+Potente viento que barre el reflejo o pantalla de luz del objetivo y puede reducir su Evasión.
+Potente viento que barre el reflejo o pantalla de luz del objetivo y puede reducir su Evasión.
+Envuelve al objetivo con un manto de plumas para reducir mucho su Ataque.
+Envuelve al objetivo con un manto de plumas para reducir mucho su Ataque.
+Contraataca con el mismo movimiento empleado por el objetivo.
+Contraataca con el mismo movimiento empleado por el objetivo.
+Aterriza sobre la superficie para descansar. Recupera hasta la mitad del total de sus PS.
+Aterriza sobre la superficie para descansar. Recupera hasta la mitad del total de sus PS.
+Fuerte remolino que duplica la Velocidad de los Pokémon de tu equipo durante cuatro turnos.
+Fuerte remolino que duplica la Velocidad de los Pokémon de tu equipo durante cuatro turnos.
+El usuario ataca lanzando una ráfaga de fantasmas que daña a ambos rivales.
+El usuario ataca lanzando una ráfaga de fantasmas que daña a ambos rivales.
+En el primer turno, desaparece. En el segundo, golpea al objetivo aunque se esté protegiendo.
+En el primer turno, desaparece. En el segundo, golpea al objetivo aunque se esté protegiendo.
+El usuario ataca utilizando el objeto que lleva el rival. Si no tiene, falla.
+El usuario ataca utilizando el objeto que lleva el rival. Si no tiene, falla.
+Ataca al objetivo con un rayo misterioso de energía lunar. Este movimiento ignora la habilidad del objetivo.
+Ataca al objetivo con un rayo misterioso de energía lunar. Este movimiento ignora la habilidad del objetivo.
+Desaparece en el primer turno y ataca en el segundo. Acierta aunque el objetivo se proteja.
+Desaparece en el primer turno y ataca en el segundo. Acierta aunque el objetivo se proteja.
+Se esconde en la sombra del objetivo y lo ataca tras robarle las mejoras en sus características.
+Se esconde en la sombra del objetivo y lo ataca tras robarle las mejoras en sus características.
+Golpea al oponente con un hueso poseído por un espíritu. Puede reducir su Defensa.
+Golpea al oponente con un hueso poseído por un espíritu. Puede reducir su Defensa.
+Lanza una bola oscura que puede bajar la Defensa Especial del objetivo.
+Lanza una bola oscura que puede bajar la Defensa Especial del objetivo.
+Ataca al oponente y, al mismo tiempo, fija su sombra al terreno, impidiendo su huida.
+Ataca al oponente y, al mismo tiempo, fija su sombra al terreno, impidiendo su huida.
+Ataca con una garra afilada hecha de sombras. Suele ser crítico.
+Ataca con una garra afilada hecha de sombras. Suele ser crítico.
+Ataque que causa un gran daño a los objetivos que sufren problemas de estado.
+Ataque que causa un gran daño a los objetivos que sufren problemas de estado.
+Produce un viento horripilante. Puede subir de golpe todas las características del usuario.
+Produce un viento horripilante. Puede subir de golpe todas las características del usuario.
+Puñetazo ineludible procedente de las sombras.
+Puñetazo ineludible procedente de las sombras.
+Extiende su sombra y ataca al objetivo por la espalda. Este movimiento siempre va primero.
+Extiende su sombra y ataca al objetivo por la espalda. Este movimiento siempre va primero.
+Impresiona tanto que puede amedrentar al objetivo.
+Impresiona tanto que puede amedrentar al objetivo.
+Una lengua ataca al objetivo. Puede causar parálisis.
+Una lengua ataca al objetivo. Puede causar parálisis.
+Produce un espejismo ante el objetivo, que pierde tantos PS como nivel tenga el agresor.
+Produce un espejismo ante el objetivo, que pierde tantos PS como nivel tenga el agresor.
+Rayo siniestro que confunde al objetivo.
+Rayo siniestro que confunde al objetivo.
+Un movimiento que tiene efectos distintos si el usuario es de tipo Fantasma o no.
+Un movimiento que tiene efectos distintos si el usuario es de tipo Fantasma o no.
+Si el usuario se debilita, el enemigo se debilita también.
+Si el usuario se debilita, el enemigo se debilita también.
+Si el usuario se debilita al recibir un ataque, los PP de este último ataque serán eliminados.
+Si el usuario se debilita al recibir un ataque, los PP de este último ataque serán eliminados.
+El objetivo dormido sufre una pesadilla que le hace perder PS en cada turno.
+El objetivo dormido sufre una pesadilla que le hace perder PS en cada turno.
+Da rienda suelta a su rencor para reducir cuatro PP del último movimiento usado por el rival.
+Da rienda suelta a su rencor para reducir cuatro PP del último movimiento usado por el rival.
+Invita al objetivo a celebrar Halloween, volviéndolo de tipo Fantasma además de los suyos.
+Invita al objetivo a celebrar Halloween, volviéndolo de tipo Fantasma además de los suyos.
+Golpea con una enorme planta. El atacante no puede moverse en el siguiente turno.
+Golpea con una enorme planta. El atacante no puede moverse en el siguiente turno.
+Cae una lluvia de hojas afiladas. Baja mucho el Ataque Especial de quien lo usa.
+Cae una lluvia de hojas afiladas. Baja mucho el Ataque Especial de quien lo usa.
+Dedica un turno a concentrar energía en forma de cuchilla con la que ataca en el segundo turno.
+Dedica un turno a concentrar energía en forma de cuchilla con la que ataca en el segundo turno.
+Lanza pétalos de dos a tres turnos y acaba confundiendo al atacante.
+Lanza pétalos de dos a tres turnos y acaba confundiendo al atacante.
+El usuario agita violentamente sus lianas o tentáculos para golpear al objetivo.
+El usuario agita violentamente sus lianas o tentáculos para golpear al objetivo.
+Una onda de choque se libera del cuerpo. Puede bajar la Defensa Especial del objetivo.
+Una onda de choque se libera del cuerpo. Puede bajar la Defensa Especial del objetivo.
+Primer turno: absorbe luz. Segundo turno: ataca.
+Primer turno: absorbe luz. Segundo turno: ataca.
+Arremete contra el rival con su robusto cuerpo. El agresor también sufre bastante daño.
+Arremete contra el rival con su robusto cuerpo. El agresor también sufre bastante daño.
+Aúna fuerzas de la naturaleza y libera su ataque. Puede disminuir la Defensa Especial del objetivo.
+Aúna fuerzas de la naturaleza y libera su ataque. Puede disminuir la Defensa Especial del objetivo.
+Acuchilla con una hoja fina. Suele dar un golpe crítico.
+Acuchilla con una hoja fina. Suele dar un golpe crítico.
+El usuario desata un intenso vendaval de pétalos que daña a los Pokémon a su alrededor.
+El usuario desata un intenso vendaval de pétalos que daña a los Pokémon a su alrededor.
+Ataca con el fluido corrosivo de una manzana ácida, y reduce la Defensa Especial.
+Ataca con el fluido corrosivo de una manzana ácida, y reduce la Defensa Especial.
+El usuario controla un tocón mediante la percusión y al atacar reduce la Velocidad del objetivo.
+El usuario controla un tocón mediante la percusión y al atacar reduce la Velocidad del objetivo.
+Ataca con columnas de hojas. Combinado con Voto Agua crea un pantano y aumenta su potencia.
+Ataca con columnas de hojas. Combinado con Voto Agua crea un pantano y aumenta su potencia.
+Causa daño dejando caer una manzana desde una gran altura. Baja la Defensa del objetivo.
+Causa daño dejando caer una manzana desde una gran altura. Baja la Defensa del objetivo.
+Lanza al objetivo una descarga de semillas explosivas desde arriba.
+Lanza al objetivo una descarga de semillas explosivas desde arriba.
+Absorbe la mitad del daño producido.
+Absorbe la mitad del daño producido.
+Ataca deslizándose sobre el terreno. Cuando hay campo de hierba tiene prioridad.
+Ataca deslizándose sobre el terreno. Cuando hay campo de hierba tiene prioridad.
+Lanza una patada con la fuerza del trópico que golpea al rival y reduce su Ataque.
+Lanza una patada con la fuerza del trópico que golpea al rival y reduce su Ataque.
+Tritura con afiladas hojas y puede bajar la Precisión del objetivo.
+Tritura con afiladas hojas y puede bajar la Precisión del objetivo.
+Esparce extrañas hojas que persiguen al objetivo. No se puede esquivar.
+Esparce extrañas hojas que persiguen al objetivo. No se puede esquivar.
+Pega con brazos de pinchos y puede amedrentar al objetivo.
+Pega con brazos de pinchos y puede amedrentar al objetivo.
+Corta con hojas afiladas. Suele ser crítico.
+Corta con hojas afiladas. Suele ser crítico.
+Azota al objetivo con ramas finas.
+Azota al objetivo con ramas finas.
+Ataca pinchando al objetivo con una rama afilada.
+Ataca pinchando al objetivo con una rama afilada.
+Ataca al oponente lanzando hojas.
+Ataca al oponente lanzando hojas.
+El usuario ensarta al objetivo en un cepo de cuatro a cinco turnos.
+El usuario ensarta al objetivo en un cepo de cuatro a cinco turnos.
+Dispara rápido de dos a cinco ráfagas de semillas de manera consecutiva.
+Dispara rápido de dos a cinco ráfagas de semillas de manera consecutiva.
+Enreda al objetivo con hierba y lo derriba. Cuanto más pesado es el objetivo, más daño inflige.
+Enreda al objetivo con hierba y lo derriba. Cuanto más pesado es el objetivo, más daño inflige.
+Cura los problemas de estado del equipo con un suave aroma.
+Cura los problemas de estado del equipo con un suave aroma.
+Cubre al Pokémon con una madeja protectora. Aumenta muchísimo la Defensa.
+Cubre al Pokémon con una madeja protectora. Aumenta muchísimo la Defensa.
+Adhiere esporas al objetivo para reducir mucho su Velocidad.
+Adhiere esporas al objetivo para reducir mucho su Velocidad.
+Presa de la maldición del bosque, el rival pasa a ser de tipo Planta, además de los suyos.
+Presa de la maldición del bosque, el rival pasa a ser de tipo Planta, además de los suyos.
+Agradable melodía que adormece al objetivo.
+Agradable melodía que adormece al objetivo.
+Invoca un campo de hierba 5 turnos. Al final del turno los Pokémon en el suelo recuperan PS.
+Invoca un campo de hierba 5 turnos. Al final del turno los Pokémon en el suelo recuperan PS.
+Echa raíces para recuperar PS en cada turno, pero impide el relevo.
+Echa raíces para recuperar PS en cada turno, pero impide el relevo.
+Restaura los PS y cura los problemas de estado del usuario y sus aliados.
+Restaura los PS y cura los problemas de estado del usuario y sus aliados.
+Planta semillas que absorben PS para recuperar la salud del usuario en cada turno.
+Planta semillas que absorben PS para recuperar la salud del usuario en cada turno.
+Esparce polvo que duerme al objetivo.
+Esparce polvo que duerme al objetivo.
+Evita el ataque de su oponente y le inflige daño si ha entrado en contacto con él.
+Evita el ataque de su oponente y le inflige daño si ha entrado en contacto con él.
+Esparce esporas que inducen al sueño.
+Esparce esporas que inducen al sueño.
+Baja el Ataque del rival y restaura una cantidad de PS equivalente al valor de Ataque del rival.
+Baja el Ataque del rival y restaura una cantidad de PS equivalente al valor de Ataque del rival.
+Esparce polvo que paraliza al objetivo.
+Esparce polvo que paraliza al objetivo.
+Restaura PS del usuario. La cantidad varía según el clima.
+Restaura PS del usuario. La cantidad varía según el clima.
+Se planta una semilla en el objetivo que le causa pesar y le induce Insomnio.
+Se planta una semilla en el objetivo que le causa pesar y le induce Insomnio.
+Manifiesta el poder latente de la tierra en forma de hojas afiladas y ataca al objetivo.
+Manifiesta el poder latente de la tierra en forma de hojas afiladas y ataca al objetivo.
+Un terremoto que afecta a los Pokémon de alrededor en combate.
+Un terremoto que afecta a los Pokémon de alrededor en combate.
+Asesta un golpe devastador usando su cuerpo.
+Asesta un golpe devastador usando su cuerpo.
+Erupciona la tierra a los pies del rival. Puede disminuir la Defensa Especial.
+Erupciona la tierra a los pies del rival. Puede disminuir la Defensa Especial.
+Acumula energía de la corteza terrestre y la concentra contra los oponentes, dañándolos.
+Acumula energía de la corteza terrestre y la concentra contra los oponentes, dañándolos.
+Acierta incluso a Pokémon que estén en el aire y los hace caer al suelo.
+Acierta incluso a Pokémon que estén en el aire y los hace caer al suelo.
+Ondas sísmicas que se propagan por el suelo a todos los rivales. Los alcanzados no podrán huir.
+Ondas sísmicas que se propagan por el suelo a todos los rivales. Los alcanzados no podrán huir.
+Primer turno: cava. Segundo turno: ataca. También sirve para salir de ciertas zonas.
+Primer turno: cava. Segundo turno: ataca. También sirve para salir de ciertas zonas.
+El usuario golpea usando su cuerpo como un taladro. Suele ser crítico.
+El usuario golpea usando su cuerpo como un taladro. Suele ser crítico.
+Usa la frustración para atacar, duplicando la potencia si ha fallado su último movimiento.
+Usa la frustración para atacar, duplicando la potencia si ha fallado su último movimiento.
+Ataca al objetivo arrojándole arena a temperaturas muy elevadas. Puede causar quemaduras.
+Ataca al objetivo arrojándole arena a temperaturas muy elevadas. Puede causar quemaduras.
+Aporrea con un hueso. Puede amedrentar al objetivo.
+Aporrea con un hueso. Puede amedrentar al objetivo.
+Ataca lanzando una compacta bola de fango. Puede bajar la Precisión del objetivo.
+Ataca lanzando una compacta bola de fango. Puede bajar la Precisión del objetivo.
+Ataca con una sacudida sísmica que afecta a los Pokémon adyacentes y baja su Velocidad.
+Ataca con una sacudida sísmica que afecta a los Pokémon adyacentes y baja su Velocidad.
+El usuario lanza lodo al objetivo y reduce su Velocidad.
+El usuario lanza lodo al objetivo y reduce su Velocidad.
+Lanza un hueso a modo de bumerán que golpea dos veces.
+Lanza un hueso a modo de bumerán que golpea dos veces.
+Enreda al objetivo en un remolino de arena de cuatro a cinco turnos.
+Enreda al objetivo en un remolino de arena de cuatro a cinco turnos.
+Hueso en ristre, aporrea al objetivo de dos a cinco veces.
+Hueso en ristre, aporrea al objetivo de dos a cinco veces.
+Echa lodo en la cara para bajar la Precisión.
+Echa lodo en la cara para bajar la Precisión.
+Abre una grieta en el suelo y mete al objetivo en ella. Fulmina en un golpe.
+Abre una grieta en el suelo y mete al objetivo en ella. Fulmina en un golpe.
+Sacudida sísmica de intensidad variable que afecta a los Pokémon adyacentes en combate.
+Sacudida sísmica de intensidad variable que afecta a los Pokémon adyacentes en combate.
+Se cubre de lodo y debilita los movimientos de tipo Eléctrico mientras está en combate.
+Se cubre de lodo y debilita los movimientos de tipo Eléctrico mientras está en combate.
+Labra la tierra y consigue que aumente el Ataque y el Ataque Especial de los Pokémon Planta.
+Labra la tierra y consigue que aumente el Ataque y el Ataque Especial de los Pokémon Planta.
+Arroja arena a la cara y baja la Precisión.
+Arroja arena a la cara y baja la Precisión.
+Restaura la mitad de los PS máximos del usuario. Si hay tormentas de arena restaura más PS.
+Restaura la mitad de los PS máximos del usuario. Si hay tormentas de arena restaura más PS.
+Esparce púas en el terreno rival. Las púas hieren a los Pokémon rivales que entran en combate.
+Esparce púas en el terreno rival. Las púas hieren a los Pokémon rivales que entran en combate.
+Carga un bloque de hielo con electricidad en el 1º turno y ataca con él en el 2º. Puede paralizar.
+Carga un bloque de hielo con electricidad en el 1º turno y ataca con él en el 2º. Puede paralizar.
+Ataca al objetivo en el segundo turno rodeándolo de un aire gélido. Puede causar quemaduras.
+Ataca al objetivo en el segundo turno rodeándolo de un aire gélido. Puede causar quemaduras.
+El usuario ataca lanzando una poderosa lanza de hielo que daña a ambos rivales.
+El usuario ataca lanzando una poderosa lanza de hielo que daña a ambos rivales.
+Tormenta de hielo que puede llegar a congelar.
+Tormenta de hielo que puede llegar a congelar.
+Un terrible puño golpea al contrincante, pero la Velocidad del usuario se ve reducida.
+Un terrible puño golpea al contrincante, pero la Velocidad del usuario se ve reducida.
+Rayo de hielo que puede llegar a congelar.
+Rayo de hielo que puede llegar a congelar.
+Lanza grandes carámbanos. Puede amedrentar al objetivo.
+Lanza grandes carámbanos. Puede amedrentar al objetivo.
+Puñetazo helado. Puede congelar.
+Puñetazo helado. Puede congelar.
+Enfría súbitamente al objetivo e incluso puede congelarlo. Es supereficaz contra Pokémon de tipo Agua.
+Enfría súbitamente al objetivo e incluso puede congelarlo. Es supereficaz contra Pokémon de tipo Agua.
+Rayo multicolor que puede reducir el Ataque.
+Rayo multicolor que puede reducir el Ataque.
+Ataque con aire helado que puede bajar la Velocidad del objetivo.
+Ataque con aire helado que puede bajar la Velocidad del objetivo.
+Usa colmillos helados para morder. Puede hacer que el objetivo se amedrente o congelarlo.
+Usa colmillos helados para morder. Puede hacer que el objetivo se amedrente o congelarlo.
+Este ataque inflige el doble de daño a un objetivo que haya golpeado al usuario en ese mismo turno.
+Este ataque inflige el doble de daño a un objetivo que haya golpeado al usuario en ese mismo turno.
+Ataque con aire helado. Siempre resulta en un golpe crítico.
+Ataque con aire helado. Siempre resulta en un golpe crítico.
+Ataque con aire helado que baja la Velocidad del objetivo.
+Ataque con aire helado que baja la Velocidad del objetivo.
+Crea bolas de hielo y las lanza a gran velocidad. Este movimiento siempre va primero.
+Crea bolas de hielo y las lanza a gran velocidad. Este movimiento siempre va primero.
+Lanza nieve que puede llegar a congelar.
+Lanza nieve que puede llegar a congelar.
+El atacante rueda contra el objetivo durante cinco turnos, cada vez con mayor fuerza.
+El atacante rueda contra el objetivo durante cinco turnos, cada vez con mayor fuerza.
+Ataca lanzando de dos a cinco ráfagas consecutivas de carámbanos.
+Ataca lanzando de dos a cinco ráfagas consecutivas de carámbanos.
+Ataque de frío polar que debilita al objetivo si le alcanza.
+Ataque de frío polar que debilita al objetivo si le alcanza.
+Reduce el daño de los ataques físicos y especiales que ejecuta el rival durante cinco turnos. Solo puede usarse cuando está nevando.
+Reduce el daño de los ataques físicos y especiales que ejecuta el rival durante cinco turnos. Solo puede usarse cuando está nevando.
+Tormenta de granizo que dura cinco turnos. Hiere a s, excepto a los de tipo Hielo.
+Tormenta de granizo que dura cinco turnos. Hiere a s, excepto a los de tipo Hielo.
+Neblina que elimina los cambios de características de todos los Pokémon en combate.
+Neblina que elimina los cambios de características de todos los Pokémon en combate.
+Rodea de fina niebla al usuario y protege las características de su equipo durante cinco turnos.
+Rodea de fina niebla al usuario y protege las características de su equipo durante cinco turnos.
+El atacante explota y hiere a todos a su alrededor. El usuario se debilita de inmediato.
+El atacante explota y hiere a todos a su alrededor. El usuario se debilita de inmediato.
+Carga contra el rival usando toda la fuerza que tiene. El Pokémon descansa el turno siguiente.
+Carga contra el rival usando toda la fuerza que tiene. El Pokémon descansa el turno siguiente.
+Un rayo fulminante, pero el atacante deberá descansar en el siguiente turno.
+Un rayo fulminante, pero el atacante deberá descansar en el siguiente turno.
+Ataca a todos los Pokémon a su alrededor con una potentísima onda sonora.
+Ataca a todos los Pokémon a su alrededor con una potentísima onda sonora.
+Este movimiento solo puede usarse tras haber usado los demás conocidos por el Pokémon.
+Este movimiento solo puede usarse tras haber usado los demás conocidos por el Pokémon.
+Primer turno: se prepara y sube la Defensa. Segundo turno: da el cabezazo.
+Primer turno: se prepara y sube la Defensa. Segundo turno: da el cabezazo.
+Ataque arriesgado que también hiere al agresor.
+Ataque arriesgado que también hiere al agresor.
+Propina un tremendo cabezazo. También daña al usuario un poco.
+Propina un tremendo cabezazo. También daña al usuario un poco.
+Patada de extrema fuerza.
+Patada de extrema fuerza.
+Se rodea de una potente energía con la que golpea al rival. El tipo depende del disco que lleva.
+Se rodea de una potente energía con la que golpea al rival. El tipo depende del disco que lleva.
+Ataca al objetivo con un gran láser. El tipo del ataque lo determina el cartucho que porta el usuario.
+Ataca al objetivo con un gran láser. El tipo del ataque lo determina el cartucho que porta el usuario.
+Arroja un huevo al objetivo con gran fuerza.
+Arroja un huevo al objetivo con gran fuerza.
+Emite incontables haces de luz. Varía según el tipo de tabla que lleve el usuario.
+Emite incontables haces de luz. Varía según el tipo de tabla que lleve el usuario.
+Grito desgarrador que inflige daño al objetivo.
+Grito desgarrador que inflige daño al objetivo.
+Baile enérgico cuyo tipo será el primero del Pokémon que lo ejecuta. Si lo pierde, usará el segundo.
+Baile enérgico cuyo tipo será el primero del Pokémon que lo ejecuta. Si lo pierde, usará el segundo.
+Ataca con una gran embestida. Puede confundir al objetivo.
+Ataca con una gran embestida. Puede confundir al objetivo.
+Carga desmedida que también hiere al agresor.
+Carga desmedida que también hiere al agresor.
+Ataca de forma alborotada durante tres turnos. Mantiene despiertos a todos.
+Ataca de forma alborotada durante tres turnos. Mantiene despiertos a todos.
+Salta sobre el objetivo con su peso. Puede paralizar.
+Salta sobre el objetivo con su peso. Puede paralizar.
+Ataque muy rápido que siempre va en primer lugar.
+Ataque muy rápido que siempre va en primer lugar.
+Ataque con finos colmillos. Puede amedrentar.
+Ataque con finos colmillos. Puede amedrentar.
+Un puñetazo de gran potencia.
+Un puñetazo de gran potencia.
+Primer turno: prepara. Segundo turno: ataca. Suele ser crítico.
+Primer turno: prepara. Segundo turno: ataca. Suele ser crítico.
+Golpea con las extremidades.
+Golpea con las extremidades.
+Potente puñetazo. Fuera de combate sirve para mover piedras.
+Potente puñetazo. Fuera de combate sirve para mover piedras.
+Ataque triple que puede paralizar, quemar o congelar al objetivo.
+Ataque triple que puede paralizar, quemar o congelar al objetivo.
+Hace trizas al objetivo con garras afiladas y puede bajar su Defensa.
+Hace trizas al objetivo con garras afiladas y puede bajar su Defensa.
+Ataca conmoviendo a los rivales de alrededor con un antiguo canto. Puede dormirlos.
+Ataca conmoviendo a los rivales de alrededor con un antiguo canto. Puede dormirlos.
+Busca los puntos débiles del objetivo y causa daño aunque cambien sus características.
+Busca los puntos débiles del objetivo y causa daño aunque cambien sus características.
+Rítmicos puñetazos que pueden causar confusión.
+Rítmicos puñetazos que pueden causar confusión.
+Ataca con el doble de potencia si el usuario está quemado, paralizado o envenenado.
+Ataca con el doble de potencia si el usuario está quemado, paralizado o envenenado.
+Lanza un potente cabezazo que puede amedrentar al objetivo.
+Lanza un potente cabezazo que puede amedrentar al objetivo.
+Si en el turno anterior han derrotado a un compañero, la potencia del ataque aumentará.
+Si en el turno anterior han derrotado a un compañero, la potencia del ataque aumentará.
+Ataque con poder secreto cuyos efectos secundarios varían según el entorno de combate.
+Ataque con poder secreto cuyos efectos secundarios varían según el entorno de combate.
+Ataca con cuchillas o con pinzas. Suele ser un golpe crítico.
+Ataca con cuchillas o con pinzas. Suele ser un golpe crítico.
+Hace el doble de daño a objetivos paralizados, pero también cura la parálisis.
+Hace el doble de daño a objetivos paralizados, pero también cura la parálisis.
+Ataca al objetivo con una cornada.
+Ataca al objetivo con una cornada.
+Tremendo pisotón que puede amedrentar al objetivo.
+Tremendo pisotón que puede amedrentar al objetivo.
+Se acerca con ternura al objetivo, pero le ataca pudiendo robar el objeto que lleve.
+Se acerca con ternura al objetivo, pero le ataca pudiendo robar el objeto que lleve.
+Ataque único cuyo tipo y potencia varían según el agresor.
+Ataque único cuyo tipo y potencia varían según el agresor.
+Un canto que ataca al objetivo. Cuantos más Pokémon lo usan, más aumenta de potencia.
+Un canto que ataca al objetivo. Cuantos más Pokémon lo usan, más aumenta de potencia.
+Lanza rayos en forma de estrella que no fallan nunca.
+Lanza rayos en forma de estrella que no fallan nunca.
+Atrapa con potentes pinzas.
+Atrapa con potentes pinzas.
+Corta con garras, guadañas, etc. También sirve para cortar árboles finos.
+Corta con garras, guadañas, etc. También sirve para cortar árboles finos.
+Ataque giratorio que sube la Velocidad y elimina movimientos como atadura, drenadoras o púas.
+Ataque giratorio que sube la Velocidad y elimina movimientos como atadura, drenadoras o púas.
+Fuerte ronquido que debe usarse dormido. Puede amedrentar al objetivo.
+Fuerte ronquido que debe usarse dormido. Puede amedrentar al objetivo.
+Ataca aprovechando la energía del campo activo, que determina el tipo y la potencia del movimiento.
+Ataca aprovechando la energía del campo activo, que determina el tipo y la potencia del movimiento.
+El tipo y fuerza del ataque varían según el clima.
+El tipo y fuerza del ataque varían según el clima.
+Un susurro que aumenta de potencia conforme el usuario y otros Pokémon lo van utilizando.
+Un susurro que aumenta de potencia conforme el usuario y otros Pokémon lo van utilizando.
+Ataca primero y, además, amedrenta al rival. Solo sirve en el primer turno.
+Ataca primero y, además, amedrenta al rival. Solo sirve en el primer turno.
+Ataque moderado que no debilita al objetivo y le deja al menos un PS.
+Ataque moderado que no debilita al objetivo y le deja al menos un PS.
+El usuario se contiene a la hora de atacar y deja al Pokémon objetivo con al menos 1 PS.
+El usuario se contiene a la hora de atacar y deja al Pokémon objetivo con al menos 1 PS.
+Arroja monedas al objetivo. Las recupera al final del combate.
+Arroja monedas al objetivo. Las recupera al final del combate.
+Golpea con las patas o la cola.
+Golpea con las patas o la cola.
+Ataque rápido que permite golpear en primer lugar.
+Ataque rápido que permite golpear en primer lugar.
+Araña con afiladas garras.
+Araña con afiladas garras.
+Embiste con el cuerpo.
+Embiste con el cuerpo.
+Golpea al objetivo dos veces seguidas con la cola u otras partes de su cuerpo.
+Golpea al objetivo dos veces seguidas con la cola u otras partes de su cuerpo.
+Permite golpear a objetivos que usan Protección o Detección y anula dichos movimientos.
+Permite golpear a objetivos que usan Protección o Detección y anula dichos movimientos.
+Golpea con la cola u otras partes de su cuerpo de dos a cinco veces seguidas.
+Golpea con la cola u otras partes de su cuerpo de dos a cinco veces seguidas.
+Al usarse, aumenta el Ataque del usuario cada vez que es golpeado.
+Al usarse, aumenta el Ataque del usuario cada vez que es golpeado.
+Pega de dos a cinco veces seguidas.
+Pega de dos a cinco veces seguidas.
+Araña rápidamente de dos a cinco veces.
+Araña rápidamente de dos a cinco veces.
+Arroja esferas al objetivo entre dos y cinco veces seguidas.
+Arroja esferas al objetivo entre dos y cinco veces seguidas.
+Ata y oprime de cuatro a cinco turnos.
+Ata y oprime de cuatro a cinco turnos.
+Abofetea de dos a cinco veces seguidas.
+Abofetea de dos a cinco veces seguidas.
+Cornea al objetivo de dos a cinco veces.
+Cornea al objetivo de dos a cinco veces.
+Oprime al objetivo de cuatro a cinco turnos con ramas o con su cuerpo.
+Oprime al objetivo de cuatro a cinco turnos con ramas o con su cuerpo.
+Constriñe para herir y puede bajar la Velocidad.
+Constriñe para herir y puede bajar la Velocidad.
+Resiste dos golpes para liberar la energía acumulada.
+Resiste dos golpes para liberar la energía acumulada.
+Cuantos más PS le queden al objetivo, más fuerte será el ataque.
+Cuantos más PS le queden al objetivo, más fuerte será el ataque.
+Reduce los PS del objetivo para que igualen a los del atacante.
+Reduce los PS del objetivo para que igualen a los del atacante.
+Ataque frenético. Cuantos menos PS tenga el usuario, más daño produce.
+Ataque frenético. Cuantos menos PS tenga el usuario, más daño produce.
+Cuanto menor sea la amistad con el Entrenador, más poderoso será este ataque.
+Cuanto menor sea la amistad con el Entrenador, más poderoso será este ataque.
+Ataque con pinzas que debilita al oponente de un golpe si acierta.
+Ataque con pinzas que debilita al oponente de un golpe si acierta.
+Ataque con taladro que fulmina en un golpe al objetivo si le toca.
+Ataque con taladro que fulmina en un golpe al objetivo si le toca.
+La baya que lleva presta su fuerza para atacar. El tipo de ataque y su fuerza dependen de la baya.
+La baya que lleva presta su fuerza para atacar. El tipo de ataque y su fuerza dependen de la baya.
+Regalo con bomba trampa. A veces restaura los PS.
+Regalo con bomba trampa. A veces restaura los PS.
+Cuanto mayor sea la amistad con el Entrenador, más poderoso será este ataque.
+Cuanto mayor sea la amistad con el Entrenador, más poderoso será este ataque.
+Lanza ondas de choque que restan 20 PS al objetivo.
+Lanza ondas de choque que restan 20 PS al objetivo.
+Libera de una vez la energía acumulada con reserva.
+Libera de una vez la energía acumulada con reserva.
+Finos colmillos que reducen a la mitad los PS del objetivo.
+Finos colmillos que reducen a la mitad los PS del objetivo.
+Cuantos menos PP tenga el movimiento, mayor será la fuerza para atacar.
+Cuantos menos PP tenga el movimiento, mayor será la fuerza para atacar.
+Estruja con fuerza al objetivo. Cuantos más PS tenga el objetivo, más fuerza tendrá el ataque.
+Estruja con fuerza al objetivo. Cuantos más PS tenga el objetivo, más fuerza tendrá el ataque.
+La presión en puntos clave del cuerpo potencia una de sus características al azar.
+La presión en puntos clave del cuerpo potencia una de sus características al azar.
+Si el usuario es el más rápido, permite al objetivo usar un movimiento justo tras él.
+Si el usuario es el más rápido, permite al objetivo usar un movimiento justo tras él.
+Usa un movimiento de un miembro del equipo elegido al azar.
+Usa un movimiento de un miembro del equipo elegido al azar.
+Si el objetivo es del sexo opuesto, se enamorará y bajará la posibilidad de que ataque.
+Si el objetivo es del sexo opuesto, se enamorará y bajará la posibilidad de que ataque.
+Cambia el puesto con un compañero y le pasa los cambios de características.
+Cambia el puesto con un compañero y le pasa los cambios de características.
+Reduce la mitad de los PS máximos para mejorar al máximo el Ataque.
+Reduce la mitad de los PS máximos para mejorar al máximo el Ataque.
+Entrega el objeto que lleva al objetivo en caso de que este no tenga ninguno.
+Entrega el objeto que lleva al objetivo en caso de que este no tenga ninguno.
+Le corta el paso al objetivo para que no pueda escapar.
+Le corta el paso al objetivo para que no pueda escapar.
+Modifica el tipo del Pokémon según el terreno de combate donde esté.
+Modifica el tipo del Pokémon según el terreno de combate donde esté.
+Si el objetivo es del sexo opuesto, queda embelesado y baja mucho su Ataque Especial.
+Si el objetivo es del sexo opuesto, queda embelesado y baja mucho su Ataque Especial.
+El Pokémon te felicita en un día muy especial para ti.
+El Pokémon te felicita en un día muy especial para ti.
+Desconcentra al oponente contándole un secreto, disminuyendo así su Ataque Especial.
+Desconcentra al oponente contándole un secreto, disminuyendo así su Ataque Especial.
+Cambia el tipo del usuario por el de uno de sus movimientos.
+Cambia el tipo del usuario por el de uno de sus movimientos.
+El usuario cambia de tipo para hacerse resistente al último tipo de movimiento usado por el objetivo.
+El usuario cambia de tipo para hacerse resistente al último tipo de movimiento usado por el objetivo.
+Imita el movimiento usado justo antes. El movimiento falla si no se ha usado aún ninguno.
+Imita el movimiento usado justo antes. El movimiento falla si no se ha usado aún ninguno.
+Gracias a un poder misterioso, el usuario intercambia los efectos en los extremos del campo.
+Gracias a un poder misterioso, el usuario intercambia los efectos en los extremos del campo.
+Se enrosca para ocultar su punto débil. Sube la Defensa.
+Se enrosca para ocultar su punto débil. Sube la Defensa.
+Desactiva el último movimiento del objetivo durante cuatro turnos.
+Desactiva el último movimiento del objetivo durante cuatro turnos.
+Crea copias de sí mismo para mejorar la Evasión.
+Crea copias de sí mismo para mejorar la Evasión.
+El objetivo repite su último movimiento durante tres turnos.
+El objetivo repite su último movimiento durante tres turnos.
+Resiste cualquier ataque y deja al menos un PS. Puede fallar si se usa repetidamente.
+Resiste cualquier ataque y deja al menos un PS. Puede fallar si se usa repetidamente.
+Una extraña danza que hace que el usuario y el objetivo tengan la misma habilidad.
+Una extraña danza que hace que el usuario y el objetivo tengan la misma habilidad.
+Luz cegadora que baja la Precisión del objetivo. Fuera de combate sirve para iluminar.
+Luz cegadora que baja la Precisión del objetivo. Fuera de combate sirve para iluminar.
+Concentra energía para aumentar las posibilidades de un golpe crítico.
+Concentra energía para aumentar las posibilidades de un golpe crítico.
+Llama la atención para concentrar los ataques de todos los del equipo rival hacia sí mismo.
+Llama la atención para concentrar los ataques de todos los del equipo rival hacia sí mismo.
+Permite atacar con cualquier movimiento a objetivos de tipo Fantasma y golpear a Pokémon evasivos.
+Permite atacar con cualquier movimiento a objetivos de tipo Fantasma y golpear a Pokémon evasivos.
+Intimida y asusta al objetivo con la mirada para dejarlo paralizado.
+Intimida y asusta al objetivo con la mirada para dejarlo paralizado.
+Dulce gruñido que reduce el Ataque del contrincante.
+Dulce gruñido que reduce el Ataque del contrincante.
+El cuerpo del usuario crece a marchas forzadas y aumenta el Ataque y el Ataque Especial.
+El cuerpo del usuario crece a marchas forzadas y aumenta el Ataque y el Ataque Especial.
+Al usar este movimiento se consigue duplicar la recompensa recibida tras el combate.
+Al usar este movimiento se consigue duplicar la recompensa recibida tras el combate.
+Tensa la musculatura del usuario para aumentar la Defensa.
+Tensa la musculatura del usuario para aumentar la Defensa.
+Tañido que cura los problemas de estado de todos los Pokémon del equipo.
+Tañido que cura los problemas de estado de todos los Pokémon del equipo.
+El usuario ayuda a un aliado reforzando la potencia de su ataque.
+El usuario ayuda a un aliado reforzando la potencia de su ataque.
+El Pokémon le da la mano a un aliado y ambos se sienten muy felices.
+El Pokémon le da la mano a un aliado y ambos se sienten muy felices.
+Aullido que sube el ánimo y aumenta el Ataque.
+Aullido que sube el ánimo y aumenta el Ataque.
+El usuario se concentra para que el siguiente ataque propine un golpe crítico.
+El usuario se concentra para que el siguiente ataque propine un golpe crítico.
+Intimida al objetivo para bajar su Defensa.
+Intimida al objetivo para bajar su Defensa.
+Fija el blanco para que el siguiente ataque no falle.
+Fija el blanco para que el siguiente ataque no falle.
+Con una cara que asusta, da un beso al objetivo y lo adormece.
+Con una cara que asusta, da un beso al objetivo y lo adormece.
+Lanza al cielo un conjuro que impide al objetivo asestar golpes críticos.
+Lanza al cielo un conjuro que impide al objetivo asestar golpes críticos.
+Se adelanta al movimiento que pretende usar el objetivo y lo lanza antes con más fuerza. Si el usuario es más lento, falla.
+Se adelanta al movimiento que pretende usar el objetivo y lo lanza antes con más fuerza. Si el usuario es más lento, falla.
+Impide al objetivo huir de la batalla.
+Impide al objetivo huir de la batalla.
+El usuario mueve un dedo y estimula su cerebro para usar al azar casi cualquier movimiento.
+El usuario mueve un dedo y estimula su cerebro para usar al azar casi cualquier movimiento.
+Restaura la mitad de sus PS máximos. Fuera de combate puede transferir sus PS a un aliado.
+Restaura la mitad de sus PS máximos. Fuera de combate puede transferir sus PS a un aliado.
+Copia el último movimiento usado por el objetivo. Solo lo podrá usar si no es cambiado.
+Copia el último movimiento usado por el objetivo. Solo lo podrá usar si no es cambiado.
+El usuario adivina los movimientos del objetivo para hacer que su siguiente ataque no falle.
+El usuario adivina los movimientos del objetivo para hacer que su siguiente ataque no falle.
+El usuario mengua para aumentar mucho la Evasión.
+El usuario mengua para aumentar mucho la Evasión.
+Usa el poder de la naturaleza. Su efecto varía según el entorno de combate.
+Usa el poder de la naturaleza. Su efecto varía según el entorno de combate.
+Intimida a su oponente con un rugido de guerra, bajando su Ataque y su Ataque Especial.
+Intimida a su oponente con un rugido de guerra, bajando su Ataque y su Ataque Especial.
+Suma los PS del usuario a los del objetivo y los reparte a partes iguales.
+Suma los PS del usuario a los del objetivo y los reparte a partes iguales.
+Si un Pokémon escucha este canto y no es cambiado por otro en tres turnos, acaba debilitándose.
+Si un Pokémon escucha este canto y no es cambiado por otro en tres turnos, acaba debilitándose.
+Se hace amigo de su oponente y consigue que no quiera combatir. Además, reduce su Ataque.
+Se hace amigo de su oponente y consigue que no quiera combatir. Además, reduce su Ataque.
+Se hipnotiza y copia cualquier cambio que haya en las características de su objetivo.
+Se hipnotiza y copia cualquier cambio que haya en las características de su objetivo.
+Restaura hasta la mitad de los PS máximos.
+Restaura hasta la mitad de los PS máximos.
+Recicla y así recupera el objeto equipado de un solo uso que ya ha sido empleado en el combate.
+Recicla y así recupera el objeto equipado de un solo uso que ya ha sido empleado en el combate.
+Cambia el tipo del Pokémon al mismo tipo que el del objetivo.
+Cambia el tipo del Pokémon al mismo tipo que el del objetivo.
+Descansa para curar parálisis, envenenamiento o quemaduras.
+Descansa para curar parálisis, envenenamiento o quemaduras.
+Se lleva al objetivo, que es cambiado por otro Pokémon. Si es un Pokémon salvaje, acaba el combate.
+Se lleva al objetivo, que es cambiado por otro Pokémon. Si es un Pokémon salvaje, acaba el combate.
+Crea un campo protector que evita problemas de estado durante cinco turnos.
+Crea un campo protector que evita problemas de estado durante cinco turnos.
+Asusta al objetivo para reducir mucho su Velocidad.
+Asusta al objetivo para reducir mucho su Velocidad.
+Alarido agudo que reduce mucho la Defensa del objetivo.
+Alarido agudo que reduce mucho la Defensa del objetivo.
+El perfil del usuario se hace más afilado y su Ataque mejora.
+El perfil del usuario se hace más afilado y su Ataque mejora.
+Rompe su coraza y baja su Defensa y Def. Esp., pero aumenta mucho su Ataque, At. Esp. y Velocidad.
+Rompe su coraza y baja su Defensa y Def. Esp., pero aumenta mucho su Ataque, At. Esp. y Velocidad.
+Envía una imagen desconcertante al oponente. Cambia la habilidad del oponente a Simple.
+Envía una imagen desconcertante al oponente. Cambia la habilidad del oponente a Simple.
+Cancioncilla que hace dormir profundamente al objetivo.
+Cancioncilla que hace dormir profundamente al objetivo.
+Aprende de forma permanente el último movimiento del objetivo. Es de un solo uso.
+Aprende de forma permanente el último movimiento del objetivo. Es de un solo uso.
+El usuario se relaja y restaura la mitad de sus PS máximos.
+El usuario se relaja y restaura la mitad de sus PS máximos.
+Mientras duerme, usa uno de sus movimientos elegido al azar.
+Mientras duerme, usa uno de sus movimientos elegido al azar.
+Baja la Precisión del objetivo con una nube de humo o tinta.
+Baja la Precisión del objetivo con una nube de humo o tinta.
+Restaura la mitad de los PS máximos del usuario. Fuera de combate transfiere PS a un aliado.
+Restaura la mitad de los PS máximos del usuario. Fuera de combate transfiere PS a un aliado.
+No tiene ningún efecto. Solo salpica.
+No tiene ningún efecto. Solo salpica.
+Convierte a un Pokémon en el foco de atención, haciendo que los ataques se dirijan hacia él.
+Convierte a un Pokémon en el foco de atención, haciendo que los ataques se dirijan hacia él.
+Acumula energía y sube la Defensa y la Defensa Especial. Puede utilizarse hasta tres veces.
+Acumula energía y sube la Defensa y la Defensa Especial. Puede utilizarse hasta tres veces.
+El usuario se come la baya que lleve equipada y sube drásticamente su Defensa.
+El usuario se come la baya que lleve equipada y sube drásticamente su Defensa.
+Utiliza parte de los PS propios para crear un sustituto que actúa como señuelo.
+Utiliza parte de los PS propios para crear un sustituto que actúa como señuelo.
+Raras ondas sónicas que pueden confundir al objetivo.
+Raras ondas sónicas que pueden confundir al objetivo.
+Provoca confusión en el objetivo, pero también sube mucho su Ataque.
+Provoca confusión en el objetivo, pero también sube mucho su Ataque.
+Absorbe la energía acumulada con reserva y restaura PS.
+Absorbe la energía acumulada con reserva y restaura PS.
+Engatusa al rival para reducir su evasión. También atrae Pokémon salvajes.
+Engatusa al rival para reducir su evasión. También atrae Pokémon salvajes.
+Baile frenético que aumenta mucho el Ataque.
+Baile frenético que aumenta mucho el Ataque.
+Agita la cola para bajar la Defensa del contrincante.
+Agita la cola para bajar la Defensa del contrincante.
+Mira al objetivo para hacerle perder su espíritu combativo y reduce su Ataque y Ataque Especial.
+Mira al objetivo para hacerle perder su espíritu combativo y reduce su Ataque y Ataque Especial.
+Invita a tomar el té a todos los presentes en el combate, haciendo que ingieran sus bayas equipadas.
+Invita a tomar el té a todos los presentes en el combate, haciendo que ingieran sus bayas equipadas.
+Danza histérica que confunde a los Pokémon que están alrededor del usuario.
+Danza histérica que confunde a los Pokémon que están alrededor del usuario.
+Hace reír al objetivo para bajar el Ataque y la Defensa.
+Hace reír al objetivo para bajar el Ataque y la Defensa.
+El usuario se transforma en una copia del objetivo, con los mismos movimientos.
+El usuario se transforma en una copia del objetivo, con los mismos movimientos.
+Se lleva al rival, que es cambiado por otro Pokémon. Si es un Pokémon salvaje, acaba el combate.
+Se lleva al rival, que es cambiado por otro Pokémon. Si es un Pokémon salvaje, acaba el combate.
+Cumple el deseo de restaurar la mitad de los PS máximos en el siguiente turno.
+Cumple el deseo de restaurar la mitad de los PS máximos en el siguiente turno.
+Movimiento que aumenta el Ataque y el Ataque Especial de quien lo usa.
+Movimiento que aumenta el Ataque y el Ataque Especial de quien lo usa.
+Gran bostezo que induce al sueño al objetivo en el siguiente turno.
+Gran bostezo que induce al sueño al objetivo en el siguiente turno.
+Causa daño a su oponente lanzándole un eructo. Para usarlo tiene que llevar una Baya y comérsela.
+Causa daño a su oponente lanzándole un eructo. Para usarlo tiene que llevar una Baya y comérsela.
+Lanza contra el objetivo asquerosa basura. Puede envenenar al objetivo.
+Lanza contra el objetivo asquerosa basura. Puede envenenar al objetivo.
+Una onda tóxica que daña a los Pokémon de alrededor. Puede envenenar.
+Una onda tóxica que daña a los Pokémon de alrededor. Puede envenenar.
+Lanza un ataque físico o especial en función de cuál inflija más daño. Puede envenenar.
+Lanza un ataque físico o especial en función de cuál inflija más daño. Puede envenenar.
+Arroja residuos al objetivo. Puede llegar a envenenar.
+Arroja residuos al objetivo. Puede llegar a envenenar.
+Pincha al rival con un tentáculo o brazo envenenado. Puede llegar a envenenar al rival.
+Pincha al rival con un tentáculo o brazo envenenado. Puede llegar a envenenar al rival.
+Tajo que puede envenenar al objetivo. Suele ser crítico.
+Tajo que puede envenenar al objetivo. Suele ser crítico.
+Ataca cubriendo al objetivo con un líquido venenoso. El daño será doble si este ya está envenenado.
+Ataca cubriendo al objetivo con un líquido venenoso. El daño será doble si este ya está envenenado.
+Ataca al objetivo con una extraña niebla que elimina sus cambios de características.
+Ataca al objetivo con una extraña niebla que elimina sus cambios de características.
+Colmillos tóxicos que pueden envenenar gravemente al objetivo.
+Colmillos tóxicos que pueden envenenar gravemente al objetivo.
+Ataque con la cola que puede envenenar y dar un golpe crítico.
+Ataque con la cola que puede envenenar y dar un golpe crítico.
+Rocía con un ácido corrosivo. Puede bajar la Defensa Especial.
+Rocía con un ácido corrosivo. Puede bajar la Defensa Especial.
+Ataca con un líquido corrosivo, reduciendo mucho la Defensa Especial del objetivo.
+Ataca con un líquido corrosivo, reduciendo mucho la Defensa Especial del objetivo.
+El objetivo es atacado con gases tóxicos que pueden llegar a envenenar.
+El objetivo es atacado con gases tóxicos que pueden llegar a envenenar.
+Lanza un aguijón tóxico que puede envenenar al objetivo.
+Lanza un aguijón tóxico que puede envenenar al objetivo.
+Transforma la estructura celular para hacerse líquido y aumenta mucho la Defensa.
+Transforma la estructura celular para hacerse líquido y aumenta mucho la Defensa.
+Protege de ataques y, al mismo tiempo, envenena al que use un movimiento de contacto contra él.
+Protege de ataques y, al mismo tiempo, envenena al que use un movimiento de contacto contra él.
+El usuario se concentra, lo que le permite aumentar su Ataque, Defensa y Precisión.
+El usuario se concentra, lo que le permite aumentar su Ataque, Defensa y Precisión.
+Libera un gas cáustico que envuelve a todos alrededor y derrite los objetos que lleven equipados.
+Libera un gas cáustico que envuelve a todos alrededor y derrite los objetos que lleven equipados.
+El usuario arroja sus jugos biliares al objetivo, lo que anula el efecto de la habilidad en uso.
+El usuario arroja sus jugos biliares al objetivo, lo que anula el efecto de la habilidad en uso.
+Lanza una nube de gas tóxico al objetivo. Produce envenenamiento.
+Lanza una nube de gas tóxico al objetivo. Produce envenenamiento.
+Polvo tóxico que envenena al objetivo.
+Polvo tóxico que envenena al objetivo.
+Cura los problemas de estado del Pokémon rival y a cambio recupera PS propios.
+Cura los problemas de estado del Pokémon rival y a cambio recupera PS propios.
+Envenena gravemente al objetivo y causa un daño mayor en cada turno.
+Envenena gravemente al objetivo y causa un daño mayor en cada turno.
+Lanza una trampa de púas tóxicas a los pies del objetivo. El veneno afecta a los Pokémon que entran.
+Lanza una trampa de púas tóxicas a los pies del objetivo. El veneno afecta a los Pokémon que entran.
+Ataca al oponente con hilillos venenosos que reducen su Velocidad y lo envenenan.
+Ataca al oponente con hilillos venenosos que reducen su Velocidad y lo envenenan.
+Disminuye el Ataque, el Ataque Especial y la Velocidad, pero solo a Pokémon ya envenenados.
+Disminuye el Ataque, el Ataque Especial y la Velocidad, pero solo a Pokémon ya envenenados.
+El usuario utiliza un prisma para emitir un rayo de gran potencia, pero no puede moverse en el turno siguiente.
+El usuario utiliza un prisma para emitir un rayo de gran potencia, pero no puede moverse en el turno siguiente.
+Concentra energía psíquica para golpear al objetivo dos turnos después.
+Concentra energía psíquica para golpear al objetivo dos turnos después.
+Una extraña onda que daña a todos los Pokémon adyacentes del mismo tipo que el que la ejecuta.
+Una extraña onda que daña a todos los Pokémon adyacentes del mismo tipo que el que la ejecuta.
+Restaura al usuario la mitad del daño causado a un objetivo dormido.
+Restaura al usuario la mitad del daño causado a un objetivo dormido.
+Compara sus valores de Ataque y Ataque Especial para infligir daño con el más alto de los dos.
+Compara sus valores de Ataque y Ataque Especial para infligir daño con el más alto de los dos.
+Crea una onda psíquica que golpea al objetivo provocándole un daño físico.
+Crea una onda psíquica que golpea al objetivo provocándole un daño físico.
+El usuario ataca disparando poderes psíquicos por los ojos. Puede congelar.
+El usuario ataca disparando poderes psíquicos por los ojos. Puede congelar.
+Fuerte ataque telequinético que puede bajar la Defensa Especial del objetivo.
+Fuerte ataque telequinético que puede bajar la Defensa Especial del objetivo.
+Ataca con poderes psíquicos que además destruyen barreras como pantalla de luz y reflejo.
+Ataca con poderes psíquicos que además destruyen barreras como pantalla de luz y reflejo.
+El usuario ataca con su poder psíquico y reduce tres PP del último movimiento usado por el objetivo.
+El usuario ataca con su poder psíquico y reduce tres PP del último movimiento usado por el objetivo.
+Ataca al objetivo con sus poderes psíquicos. En campo psíquico aumenta su potencia e inflige daño a todos los rivales.
+Ataca al objetivo con sus poderes psíquicos. En campo psíquico aumenta su potencia e inflige daño a todos los rivales.
+Energía muy extraña que puede amedrentar al objetivo.
+Energía muy extraña que puede amedrentar al objetivo.
+Golpea aunque el rival use Protección, Detección, Vastaguardia o Anticipo ese turno.
+Golpea aunque el rival use Protección, Detección, Vastaguardia o Anticipo ese turno.
+Crea una onda psíquica que golpea al objetivo y provoca un gran daño físico.
+Crea una onda psíquica que golpea al objetivo y provoca un gran daño físico.
+Concentra su energía psíquica en la cabeza para golpear. Puede hacer que el objetivo se amedrente.
+Concentra su energía psíquica en la cabeza para golpear. Puede hacer que el objetivo se amedrente.
+Fogonazo de luz que puede bajar la Defensa Especial del objetivo.
+Fogonazo de luz que puede bajar la Defensa Especial del objetivo.
+Banco de niebla que puede bajar el Ataque Especial del objetivo.
+Banco de niebla que puede bajar el Ataque Especial del objetivo.
+Ataca al objetivo con cuchillas formadas por energía psíquica. Suele ser crítico.
+Ataca al objetivo con cuchillas formadas por energía psíquica. Suele ser crítico.
+Extraño rayo que puede causar confusión.
+Extraño rayo que puede causar confusión.
+Grácil gesto que asesta un golpe tremendo al objetivo y puede amedrentarlo.
+Grácil gesto que asesta un golpe tremendo al objetivo y puede amedrentarlo.
+Débil ataque telequinético que puede causar confusión.
+Débil ataque telequinético que puede causar confusión.
+Cuanto más suban las características del usuario, mayor será el daño.
+Cuanto más suban las características del usuario, mayor será el daño.
+Responde a un ataque especial ocasionando el doble del daño recibido.
+Responde a un ataque especial ocasionando el doble del daño recibido.
+Ataque con una onda de energía de intensidad variable.
+Ataque con una onda de energía de intensidad variable.
+Relaja el cuerpo para ganar mucha Velocidad.
+Relaja el cuerpo para ganar mucha Velocidad.
+Un extraño poder que intercambia las posiciones del usuario y un aliado sobre el terreno de combate.
+Un extraño poder que intercambia las posiciones del usuario y un aliado sobre el terreno de combate.
+El usuario olvida sus preocupaciones y aumenta mucho la Defensa Especial.
+El usuario olvida sus preocupaciones y aumenta mucho la Defensa Especial.
+Crea una barrera para aumentar mucho la Defensa.
+Crea una barrera para aumentar mucho la Defensa.
+Aumenta la concentración y calma el espíritu para subir el Ataque Especial y la Defensa Especial.
+Aumenta la concentración y calma el espíritu para subir el Ataque Especial y la Defensa Especial.
+Sube la Defensa y la Defensa Especial propias con energía mística.
+Sube la Defensa y la Defensa Especial propias con energía mística.
+La gravedad aumenta durante cinco turnos, lo que impide acciones que impliquen volar o levitar.
+La gravedad aumenta durante cinco turnos, lo que impide acciones que impliquen volar o levitar.
+Hace la media de su Defensa y Def. Esp. con las de su objetivo y las comparte.
+Hace la media de su Defensa y Def. Esp. con las de su objetivo y las comparte.
+Con su poder mental intercambia los cambios en Defensa y Def. Especial con el objetivo.
+Con su poder mental intercambia los cambios en Defensa y Def. Especial con el objetivo.
+Impide al objetivo usar movimientos, habilidades y objetos que recuperan PS durante cinco turnos.
+Impide al objetivo usar movimientos, habilidades y objetos que recuperan PS durante cinco turnos.
+Una onda curativa restaura los PS del objetivo a la mitad de su máximo.
+Una onda curativa restaura los PS del objetivo a la mitad de su máximo.
+El Pokémon cae debilitado, pero su sustituto recupera su estado y los PS.
+El Pokémon cae debilitado, pero su sustituto recupera su estado y los PS.
+Usa la fuerza mental para intercambiar con el objetivo los cambios en las características.
+Usa la fuerza mental para intercambiar con el objetivo los cambios en las características.
+Ataque hipnótico que hace dormir profundamente al objetivo.
+Ataque hipnótico que hace dormir profundamente al objetivo.
+Impide a los contrincantes usar ataques conocidos por el usuario durante el combate.
+Impide a los contrincantes usar ataques conocidos por el usuario durante el combate.
+Fuerza al objetivo a repetir inmediatamente su último movimiento.
+Fuerza al objetivo a repetir inmediatamente su último movimiento.
+Dobla una cuchara para distraer al objetivo y bajar su nivel de Precisión.
+Dobla una cuchara para distraer al objetivo y bajar su nivel de Precisión.
+Pared de luz que reduce durante cinco turnos el daño producido por los ataques especiales.
+Pared de luz que reduce durante cinco turnos el daño producido por los ataques especiales.
+El usuario se debilita, pero el Pokémon que lo sustituye recupera su estado, los PS y los PP.
+El usuario se debilita, pero el Pokémon que lo sustituye recupera su estado, los PS y los PP.
+Barrera capaz de devolver al agresor movimientos como drenadoras y que alteran el estado.
+Barrera capaz de devolver al agresor movimientos como drenadoras y que alteran el estado.
+El usuario lanza una nube de polvo mágico que convierte al objetivo en tipo Psíquico.
+El usuario lanza una nube de polvo mágico que convierte al objetivo en tipo Psíquico.
+Crea un espacio misterioso que inutiliza los objetos de los Pokémon durante cinco turnos.
+Crea un espacio misterioso que inutiliza los objetos de los Pokémon durante cinco turnos.
+El usuario reposa y medita para potenciar el Ataque.
+El usuario reposa y medita para potenciar el Ataque.
+Permite atacar con cualquier movimiento a objetivos de tipo Siniestro y golpear a Pokémon evasivos.
+Permite atacar con cualquier movimiento a objetivos de tipo Siniestro y golpear a Pokémon evasivos.
+Hace la media de su Ataque y Ataque Especial con los de su objetivo y los comparte.
+Hace la media de su Ataque y Ataque Especial con los de su objetivo y los comparte.
+Intercambia los cambios en Ataque y At. Especial con el objetivo.
+Intercambia los cambios en Ataque y At. Especial con el objetivo.
+Usa sus poderes mentales para intercambiar su característica de Ataque por Defensa.
+Usa sus poderes mentales para intercambiar su característica de Ataque por Defensa.
+Durante cinco turnos se potencian los movimientos Psíquico y los de prioridad fallan.
+Durante cinco turnos se potencian los movimientos Psíquico y los de prioridad fallan.
+Usa su poder mental para transferir al objetivo sus problemas de estado.
+Usa su poder mental para transferir al objetivo sus problemas de estado.
+Pared de luz que reduce durante cinco turnos el daño producido por los ataques físicos.
+Pared de luz que reduce durante cinco turnos el daño producido por los ataques físicos.
+Restaura los PS y cura los problemas de estado del usuario. Duerme los dos próximos turnos.
+Restaura los PS y cura los problemas de estado del usuario. Duerme los dos próximos turnos.
+Imita al objetivo por completo y copia su habilidad.
+Imita al objetivo por completo y copia su habilidad.
+Usa el poder psíquico para intercambiar habilidades con el objetivo.
+Usa el poder psíquico para intercambiar habilidades con el objetivo.
+Intercambia su Velocidad por la del oponente.
+Intercambia su Velocidad por la del oponente.
+Hace flotar al objetivo, haciéndolo blanco fácil de sus ataques durante tres turnos.
+Hace flotar al objetivo, haciéndolo blanco fácil de sus ataques durante tres turnos.
+Permite al usuario cambiarse por otro Pokémon del equipo, si es posible.
+Permite al usuario cambiarse por otro Pokémon del equipo, si es posible.
+Engaña al objetivo desprevenido e intercambia objetos.
+Engaña al objetivo desprevenido e intercambia objetos.
+Se crea un espacio extraño en el que los Pokémon lentos se mueven primero durante cinco turnos.
+Se crea un espacio extraño en el que los Pokémon lentos se mueven primero durante cinco turnos.
+Crea una zona que intercambia la Defensa y Def. Esp. de todos por 5 turnos.
+Crea una zona que intercambia la Defensa y Def. Esp. de todos por 5 turnos.
+Arriesga su vida y lanza un cabezazo con toda su fuerza. El agresor resulta seriamente dañado.
+Arriesga su vida y lanza un cabezazo con toda su fuerza. El agresor resulta seriamente dañado.
+Lanza una piedra enorme contra el objetivo, pero tiene que descansar el siguiente turno.
+Lanza una piedra enorme contra el objetivo, pero tiene que descansar el siguiente turno.
+1º turno: aumenta su At. Especial. 2º turno: lanza su ofensiva contra el objetivo.
+1º turno: aumenta su At. Especial. 2º turno: lanza su ofensiva contra el objetivo.
+Devastador vendaval de diamantes. Puede aumentar la Defensa del usuario.
+Devastador vendaval de diamantes. Puede aumentar la Defensa del usuario.
+Clava piedras muy afiladas al objetivo. Suele ser crítico.
+Clava piedras muy afiladas al objetivo. Suele ser crítico.
+Ataca con un rayo de luz que centellea como si lo formaran miles de joyas.
+Ataca con un rayo de luz que centellea como si lo formaran miles de joyas.
+Lanza grandes pedruscos. Puede amedrentar al objetivo.
+Lanza grandes pedruscos. Puede amedrentar al objetivo.
+Ataque prehistórico que puede subir todas las características.
+Ataque prehistórico que puede subir todas las características.
+Tira rocas que detienen al objetivo y bajan su Velocidad.
+Tira rocas que detienen al objetivo y bajan su Velocidad.
+Tira una pequeña roca al objetivo.
+Tira una pequeña roca al objetivo.
+Ataca lanzando una piedra o un proyectil. Estrella contra el suelo al objetivo si vuela.
+Ataca lanzando una piedra o un proyectil. Estrella contra el suelo al objetivo si vuela.
+El usuario se lanza contra el objetivo a gran velocidad. Siempre ataca primero.
+El usuario se lanza contra el objetivo a gran velocidad. Siempre ataca primero.
+Consiste en enrollarse y girar como una rueda por el campo de batalla.
+Consiste en enrollarse y girar como una rueda por el campo de batalla.
+Lanza pedruscos al objetivo de dos a cinco veces consecutivas.
+Lanza pedruscos al objetivo de dos a cinco veces consecutivas.
+Reduce la resistencia puliendo su cuerpo. Aumenta la Velocidad considerablemente.
+Reduce la resistencia puliendo su cuerpo. Aumenta la Velocidad considerablemente.
+Tormenta de arena que dura cinco turnos y hiere a s, excepto a los de tipo Roca, Tierra y Acero.
+Tormenta de arena que dura cinco turnos y hiere a s, excepto a los de tipo Roca, Tierra y Acero.
+Una trampa de rocas que flota en el aire y daña a los objetivos que entran en combate.
+Una trampa de rocas que flota en el aire y daña a los objetivos que entran en combate.
+Lanza alquitran sobre el objetivo, bajando su Velocidad y volviéndolo débil ante los movs. Fuego.
+Lanza alquitran sobre el objetivo, bajando su Velocidad y volviéndolo débil ante los movs. Fuego.
+Protege a todo tu bando de golpes que dan a múltiples objetivos. Falla si se usa repetidamente.
+Protege a todo tu bando de golpes que dan a múltiples objetivos. Falla si se usa repetidamente.
+Concentra un haz de luz y ataca dos turnos después.
+Concentra un haz de luz y ataca dos turnos después.
+El usuario lanza un rayo de metal que recolecta de su cuerpo. Esto daña al usuario.
+El usuario lanza un rayo de metal que recolecta de su cuerpo. Esto daña al usuario.
+Lanza su ataque y destruye el campo activo. Falla si no hay ninguno en ese momento.
+Lanza su ataque y destruye el campo activo. Falla si no hay ninguno en ese momento.
+El usuario se convierte en un escudo gigante y arremete contra el objetivo.
+El usuario se convierte en un escudo gigante y arremete contra el objetivo.
+El usuario se convierte en una espada gigante para rebanar al objetivo.
+El usuario se convierte en una espada gigante para rebanar al objetivo.
+Ataca con una cola férrea y puede bajar la Defensa del objetivo.
+Ataca con una cola férrea y puede bajar la Defensa del objetivo.
+Ataca al objetivo con la potencia de un meteoro.
+Ataca al objetivo con la potencia de un meteoro.
+Puñetazo que impacta como un meteorito y puede subir el Ataque del agresor.
+Puñetazo que impacta como un meteorito y puede subir el Ataque del agresor.
+Ataca lanzando un ancla al oponente, que queda atrapado y no puede huir.
+Ataca lanzando un ancla al oponente, que queda atrapado y no puede huir.
+El usuario concentra toda la luz del cuerpo y la libera. Puede bajar la Defensa Especial del objetivo.
+El usuario concentra toda la luz del cuerpo y la libera. Puede bajar la Defensa Especial del objetivo.
+Ataca con su dura cabeza de hierro. Puede hacer que el objetivo se amedrente.
+Ataca con su dura cabeza de hierro. Puede hacer que el objetivo se amedrente.
+Ensarta al adversario con su afilada cornamenta. Este movimiento acierta siempre.
+Ensarta al adversario con su afilada cornamenta. Este movimiento acierta siempre.
+Alas macizas que golpean al objetivo y pueden subir la Defensa del usuario.
+Alas macizas que golpean al objetivo y pueden subir la Defensa del usuario.
+Golpea dos veces seguidas con los puños pudiendo amedrentar al rival.
+Golpea dos veces seguidas con los puños pudiendo amedrentar al rival.
+El usuario libera un haz de energía desde su pulido cuerpo. Puede bajar la Precisión.
+El usuario libera un haz de energía desde su pulido cuerpo. Puede bajar la Precisión.
+Lanza unas bombas de hierro que se pegan al adversario. Este movimiento acierta siempre.
+Lanza unas bombas de hierro que se pegan al adversario. Este movimiento acierta siempre.
+Rota dos engranajes de hierro sobre el objetivo. Golpea dos veces.
+Rota dos engranajes de hierro sobre el objetivo. Golpea dos veces.
+Ataque con garras de acero que puede aumentar el Ataque del usuario.
+Ataque con garras de acero que puede aumentar el Ataque del usuario.
+Fuerte puñetazo tan rápido como un proyectil. Este movimiento siempre va primero.
+Fuerte puñetazo tan rápido como un proyectil. Este movimiento siempre va primero.
+Embiste con un potente ataque giratorio. Cuanto más lento es el usuario, más daño causa.
+Embiste con un potente ataque giratorio. Cuanto más lento es el usuario, más daño causa.
+Devuelve al objetivo el último ataque recibido, pero con mucha más fuerza.
+Devuelve al objetivo el último ataque recibido, pero con mucha más fuerza.
+El usuario se sacude para hacerse más ligero y aumentar mucho su Velocidad.
+El usuario se sacude para hacerse más ligero y aumentar mucho su Velocidad.
+Cambia de marcha y logra aumentar el Ataque y el Ataque Especial de los Pokémon aliados.
+Cambia de marcha y logra aumentar el Ataque y el Ataque Especial de los Pokémon aliados.
+Fortalece el cuerpo como si fuera hierro y sube mucho la Defensa.
+Fortalece el cuerpo como si fuera hierro y sube mucho la Defensa.
+Protege al usuario de cualquier daño y baja el Ataque del rival si lo toca.
+Protege al usuario de cualquier daño y baja el Ataque del rival si lo toca.
+Horrible chirrido metálico que baja mucho la Defensa Especial del objetivo.
+Horrible chirrido metálico que baja mucho la Defensa Especial del objetivo.
+Al hacer girar los engranajes, el usuario mejora su Ataque y aumenta su Velocidad espectacularmente.
+Al hacer girar los engranajes, el usuario mejora su Ataque y aumenta su Velocidad espectacularmente.
+Disparo potente de agua. El atacante debe descansar el siguiente turno.
+Disparo potente de agua. El atacante debe descansar el siguiente turno.
+Chorro de agua. Cuantos menos PS tenga el usuario, menos dañino será.
+Chorro de agua. Cuantos menos PS tenga el usuario, menos dañino será.
+Lanza una gran masa de agua a presión para atacar.
+Lanza una gran masa de agua a presión para atacar.
+Ataca al objetivo con una infinidad de rayos de luz azulada.
+Ataca al objetivo con una infinidad de rayos de luz azulada.
+Envuelve al Pokémon oponente con vapor extremadamente caliente que puede llegar a quemarlo.
+Envuelve al Pokémon oponente con vapor extremadamente caliente que puede llegar a quemarlo.
+Golpea con fuerza con unas pinzas. Suele ser crítico.
+Golpea con fuerza con unas pinzas. Suele ser crítico.
+Ataca agitando la cola como si fuera una ola rabiosa en una tormenta devastadora.
+Ataca agitando la cola como si fuera una ola rabiosa en una tormenta devastadora.
+Ataque con agua lodosa que puede bajar la Precisión.
+Ataque con agua lodosa que puede bajar la Precisión.
+Libera burbujas al cantar. Cura las quemaduras de los Pokémon que reciban daño.
+Libera burbujas al cantar. Cura las quemaduras de los Pokémon que reciban daño.
+Inunda el campo de batalla con una ola gigante. Fuera de batalla sirve para moverse sobre el agua.
+Inunda el campo de batalla con una ola gigante. Fuera de batalla sirve para moverse sobre el agua.
+Ataca al objetivo con sus branquias. Si ataca antes que el objetivo, duplica la potencia.
+Ataca al objetivo con sus branquias. Si ataca antes que el objetivo, duplica la potencia.
+Ataca golpeando gracias a la fuerza del agua. También puede reducir la Defensa del objetivo.
+Ataca golpeando gracias a la fuerza del agua. También puede reducir la Defensa del objetivo.
+Primer turno: se sumerge en el mar. Segundo turno: emerge y ataca.
+Primer turno: se sumerge en el mar. Segundo turno: emerge y ataca.
+Ataca arrojando agua hirviendo al objetivo. Puede causar quemaduras.
+Ataca arrojando agua hirviendo al objetivo. Puede causar quemaduras.
+Atacar al objetivo ignorando habilidades o movimientos que redirigen ataques.
+Atacar al objetivo ignorando habilidades o movimientos que redirigen ataques.
+Ataca con columnas de agua. Combinado con un Voto Fuego crea un arcoíris.
+Ataca con columnas de agua. Combinado con un Voto Fuego crea un arcoíris.
+Embiste con un gran impulso que puede amedrentar. También sirve para remontar cascadas.
+Embiste con un gran impulso que puede amedrentar. También sirve para remontar cascadas.
+Una afilada vieira ataca al objetivo. También puede hacer disminuir su Defensa.
+Una afilada vieira ataca al objetivo. También puede hacer disminuir su Defensa.
+Si al objetivo le queda la mitad o menos de sus PS, el ataque será el doble de fuerte.
+Si al objetivo le queda la mitad o menos de sus PS, el ataque será el doble de fuerte.
+Diluvio de burbujas que puede bajar la Velocidad.
+Diluvio de burbujas que puede bajar la Velocidad.
+Dispara tinta a la cara. Puede bajar la Precisión.
+Dispara tinta a la cara. Puede bajar la Precisión.
+Tras atacar, el usuario da paso a toda prisa a otro Pokémon del equipo.
+Tras atacar, el usuario da paso a toda prisa a otro Pokémon del equipo.
+Ataca con un potente chorro de agua. Puede confundir al objetivo.
+Ataca con un potente chorro de agua. Puede confundir al objetivo.
+Lanza burbujas al contrincante y puede reducir su Velocidad.
+Lanza burbujas al contrincante y puede reducir su Velocidad.
+Ataca disparando agua con gran potencia.
+Ataca disparando agua con gran potencia.
+Atrapa y atenaza con fuerza durante cuatro o cinco turnos.
+Atrapa y atenaza con fuerza durante cuatro o cinco turnos.
+Una tromba de agua atrapa al objetivo durante cuatro o cinco turnos.
+Una tromba de agua atrapa al objetivo durante cuatro o cinco turnos.
+El usuario, dominador absoluto del líquido elemento, golpea hasta tres veces con movimientos fluidos. Siempre asesta un golpe crítico.
+El usuario, dominador absoluto del líquido elemento, golpea hasta tres veces con movimientos fluidos. Siempre asesta un golpe crítico.
+Golpea de dos a cinco veces con estrellas arrojadizas. El que lo usa siempre ataca primero.
+Golpea de dos a cinco veces con estrellas arrojadizas. El que lo usa siempre ataca primero.
+Un manto de agua cubre al Pokémon que lo usa. Recupera algunos PS en cada turno.
+Un manto de agua cubre al Pokémon que lo usa. Recupera algunos PS en cada turno.
+El usuario rocia un agua misteriosa que recupera PS para él y sus aliados en combate.
+El usuario rocia un agua misteriosa que recupera PS para él y sus aliados en combate.
+Genera una fuerte lluvia que refuerza los movimientos de tipo Agua durante cinco turnos.
+Genera una fuerte lluvia que refuerza los movimientos de tipo Agua durante cinco turnos.
+Potente lluvia que transforma al objetivo en un Pokémon de tipo Agua.
+Potente lluvia que transforma al objetivo en un Pokémon de tipo Agua.
+El usuario se moja y, mientras esté en combate, los movimientos de tipo Fuego se debilitan.
+El usuario se moja y, mientras esté en combate, los movimientos de tipo Fuego se debilitan.
+El usuario se protege en su coraza y sube la Defensa.
+El usuario se protege en su coraza y sube la Defensa.
+Ataca al punto débil del objetivo con unas garras letales que pueden envenenarlo, paralizarlo o dormirlo.
+Ataca al punto débil del objetivo con unas garras letales que pueden envenenarlo, paralizarlo o dormirlo.
+Desata una tormenta de amor y odio con la que envuelve al objetivo. Puede reducir su Ataque.
+Desata una tormenta de amor y odio con la que envuelve al objetivo. Puede reducir su Ataque.
+Ataca con unas violentas llamas de dos a tres turnos seguidos y después se queda confuso.
+Ataca con unas violentas llamas de dos a tres turnos seguidos y después se queda confuso.
+El usuario se envuelve en agua y embiste contra el objetivo, pero también se hiere seriamente a sí mismo.
+El usuario se envuelve en agua y embiste contra el objetivo, pero también se hiere seriamente a sí mismo.
+El usuario concentra clorofila y la dispara en forma de rayo, pero también se hiere a sí mismo.
+El usuario concentra clorofila y la dispara en forma de rayo, pero también se hiere a sí mismo.
+Ataca con unos carámbanos grandes como icebergs que pueden amedrentar al objetivo.
+Ataca con unos carámbanos grandes como icebergs que pueden amedrentar al objetivo.
+El usuario arremete con todas sus fuerzas, pero se reducen su Defensa y su Defensa Especial.
+El usuario arremete con todas sus fuerzas, pero se reducen su Defensa y su Defensa Especial.
+Dispara púas tóxicas que pueden envenenar al objetivo. Duplica la potencia si está envenenado.
+Dispara púas tóxicas que pueden envenenar al objetivo. Duplica la potencia si está envenenado.
+Corta con unas alas imbuidas de aura. Suele asestar un golpe crítico y aumenta la Velocidad.
+Corta con unas alas imbuidas de aura. Suele asestar un golpe crítico y aumenta la Velocidad.
+Ataca al objetivo sometiéndolo a su frío rencor y reduce su Ataque.
+Ataca al objetivo sometiéndolo a su frío rencor y reduce su Ataque.
+Asesta un talonazo y lanza tres flechas. Puede amedrentar o bajar la Defensa del objetivo. Alto índice de crítico.
+Asesta un talonazo y lanza tres flechas. Puede amedrentar o bajar la Defensa del objetivo. Alto índice de crítico.
+Viento muy frío que estremece el cuerpo y puede reducir la Velocidad del objetivo.
+Viento muy frío que estremece el cuerpo y puede reducir la Velocidad del objetivo.
+Invoca una tormenta eléctrica que ataca al objetivo con fuertes vientos y relámpagos y puede paralizarlo.
+Invoca una tormenta eléctrica que ataca al objetivo con fuertes vientos y relámpagos y puede paralizarlo.
+Ataca envolviéndo al objetivo en unas arenas tórridas que pueden causar quemaduras.
+Ataca envolviéndo al objetivo en unas arenas tórridas que pueden causar quemaduras.
+Dedica una oración a la luna que restaura PS y los problemas de estado del bando del usuario.
+Dedica una oración a la luna que restaura PS y los problemas de estado del bando del usuario.
+El usuario ataca envuelto en una energía psíquica que además aumenta su Defensa.
+El usuario ataca envuelto en una energía psíquica que además aumenta su Defensa.
+Intercambia su Ataque por su Defensa.
+Intercambia su Ataque por su Defensa.
+Ataca con un hacha de piedra y, al hacerlo, se deprenden fragmentos que rodean al objetivo.
+Ataca con un hacha de piedra y, al hacerlo, se deprenden fragmentos que rodean al objetivo.
+Ataca desatando un misterioso poder, que también aumenta su Ataque Especial.
+Ataca desatando un misterioso poder, que también aumenta su Ataque Especial.
+Ejecuta una danza frenética que invoca la victoria y aumenta el Ataque, la Defensa y la Velocidad.
+Ejecuta una danza frenética que invoca la victoria y aumenta el Ataque, la Defensa y la Velocidad.
+La piel del usuario se vuelve dura como un escudo de acero, lo que aumenta mucho su Defensa.
+La piel del usuario se vuelve dura como un escudo de acero, lo que aumenta mucho su Defensa.
+Bolas de fuego que pueden causar quemaduras. Duplica la potencia si ya tiene un cambio de estado.
+Bolas de fuego que pueden causar quemaduras. Duplica la potencia si ya tiene un cambio de estado.
+Ataca con una espada de forma brusca y, al hacerlo, se desprenden púas que rodean al bando enemigo.
+Ataca con una espada de forma brusca y, al hacerlo, se desprenden púas que rodean al bando enemigo.
+El usuario se cura de problemas de estado. Aumenta su Ataque Especial y su Defensa Especial.
+El usuario se cura de problemas de estado. Aumenta su Ataque Especial y su Defensa Especial.
+Corta al objetivo con agua a presión como si de una hoja se tratara. Suele ser crítico.
+Corta al objetivo con agua a presión como si de una hoja se tratara. Suele ser crítico.
+Ejecuta una elegante y fluida danza y le inflige daño. Aumenta la Velocidad del usuario.
+Ejecuta una elegante y fluida danza y le inflige daño. Aumenta la Velocidad del usuario.
+Arroja partes de su armadura como proyectiles ardientes. Reduce la Def. y la Def. Esp. del usuario.
+Arroja partes de su armadura como proyectiles ardientes. Reduce la Def. y la Def. Esp. del usuario.
+Lanza una patada al aire y golpea con el talón. Si falla, se hiere a sí mismo. Puede confundir.
+Lanza una patada al aire y golpea con el talón. Si falla, se hiere a sí mismo. Puede confundir.
+Asesta una estocada llena de rencor. Recupera la mitad de los PS del daño que produce.
+Asesta una estocada llena de rencor. Recupera la mitad de los PS del daño que produce.
+Puede causar quemaduras.
+Puede causar quemaduras.
+Ataca al objetivo rociándolo con un agua gélida y desalentadora que reduce su Ataque.
+Ataca al objetivo rociándolo con un agua gélida y desalentadora que reduce su Ataque.
+Cuenta un chiste con una acogida tan fría que hace que nieve, y se cambia por un Pokémon del equipo.
+Cuenta un chiste con una acogida tan fría que hace que nieve, y se cambia por un Pokémon del equipo.
+Choca contra el suelo mientras se transforma. La potencia aumenta si es supereficaz.
+Choca contra el suelo mientras se transforma. La potencia aumenta si es supereficaz.
+Puede paralizar al objetivo.
+Puede paralizar al objetivo.
+Devuelve al rival el último ataque recibido, pero con mucha más fuerza.
+Devuelve al rival el último ataque recibido, pero con mucha más fuerza.
+Calca la esencia misma del objetivo para atribuir su habilidad a sí mismo y a sus aliados.
+Calca la esencia misma del objetivo para atribuir su habilidad a sí mismo y a sus aliados.
+Libera toda la electricidad de su cuerpo para atacar. Pierde el tipo Eléctrico.
+Libera toda la electricidad de su cuerpo para atacar. Pierde el tipo Eléctrico.
+Se abalanza mientras se transforma y atraviesa al rival. La potencia aumenta si es supereficaz.
+Se abalanza mientras se transforma y atraviesa al rival. La potencia aumenta si es supereficaz.
+Aumenta mucho el Ataque, el Ataque Especial y la Velocidad del usuario a costa de parte de sus PS.
+Aumenta mucho el Ataque, el Ataque Especial y la Velocidad del usuario a costa de parte de sus PS.
+Lanza un ramo de flores trucado. No falla nunca y siempre asesta un golpe crítico.
+Lanza un ramo de flores trucado. No falla nunca y siempre asesta un golpe crítico.
+Golpea con un enorme martillo. No se puede usar dos veces seguidas.
+Golpea con un enorme martillo. No se puede usar dos veces seguidas.
+En el turno siguiente los ataques del rival no fallarán y causarán el doble de daño.
+En el turno siguiente los ataques del rival no fallarán y causarán el doble de daño.
+Ataca rotando la parte puntiaguda de su cuerpo. Ignora movimientos como Protección.
+Ataca rotando la parte puntiaguda de su cuerpo. Ignora movimientos como Protección.
+Recubre las extremidades con una capa de hielo y golpea al rival. Si hay un campo lo rompe.
+Recubre las extremidades con una capa de hielo y golpea al rival. Si hay un campo lo rompe.
+Envuelve el puño con un torrente y propina un golpe de alta prioridad.
+Envuelve el puño con un torrente y propina un golpe de alta prioridad.
+Se postra en ademán de reverencia para que el objetivo baje la guardia y aprovecha para atacar. No falla.
+Se postra en ademán de reverencia para que el objetivo baje la guardia y aprovecha para atacar. No falla.
+Venga a sus compañeros caídos. Cuantos más se hayan debilitado, mayor será la potencia.
+Venga a sus compañeros caídos. Cuantos más se hayan debilitado, mayor será la potencia.
+Ataca proyectando una extraña luz que afecta a la mente y reduce mucho la Def Especial.
+Ataca proyectando una extraña luz que afecta a la mente y reduce mucho la Def Especial.
+Puede confundir al objetivo.
+Puede confundir al objetivo.
+Ataca arrojando muchas monedas, pero reduce su At. Especial. Aumenta la recompensa.
+Ataca arrojando muchas monedas, pero reduce su At. Especial. Aumenta la recompensa.
+Ataque giratorio que envenena al objetivo y anula efectos como atadura, constricción y drenadoras.
+Ataque giratorio que envenena al objetivo y anula efectos como atadura, constricción y drenadoras.
+Puede envenenar al objetivo.
+Puede envenenar al objetivo.
+Si lleva un Tatsugiri en la boca, aumenta una de sus características en función de su forma.
+Si lleva un Tatsugiri en la boca, aumenta una de sus características en función de su forma.
+Ejecuta un ataque conjunto que golpea al objetivo de una a diez veces seguidas.
+Ejecuta un ataque conjunto que golpea al objetivo de una a diez veces seguidas.
+Ataca abalanzándose sobre el objetivo y le reduce la Velocidad.
+Ataca abalanzándose sobre el objetivo y le reduce la Velocidad.
+Convierte su rabia en energía. Cuantos más golpes haya recibido mayor será la potencia.
+Convierte su rabia en energía. Cuantos más golpes haya recibido mayor será la potencia.
+Este movimiento cambia de tipo en función de la forma del usuario. Destruye barreras.
+Este movimiento cambia de tipo en función de la forma del usuario. Destruye barreras.
+Oración que revive a un Pokémon del equipo que se haya debilitado y restaura la mitad de sus PS.
+Oración que revive a un Pokémon del equipo que se haya debilitado y restaura la mitad de sus PS.
+Provoca una catástrofe devastadora que reduce a la mitad los PS del objetivo.
+Provoca una catástrofe devastadora que reduce a la mitad los PS del objetivo.
+El objetivo pierde PS cada turno. Afecta especialmente a Pokémon de tipo Acero y tipo Agua.
+El objetivo pierde PS cada turno. Afecta especialmente a Pokémon de tipo Acero y tipo Agua.
+El usuario se cambia por otro Pokémon del equipo dejando un sustituto a cambio de sus PS.
+El usuario se cambia por otro Pokémon del equipo dejando un sustituto a cambio de sus PS.
+Trampa sedosa que protege al usuario. Baja la Velocidad de quien lo toca.
+Trampa sedosa que protege al usuario. Baja la Velocidad de quien lo toca.
+Invoca una nevada durante 5 turnos que aumenta la Defensa de los Pokémon de tipo Hielo.
+Invoca una nevada durante 5 turnos que aumenta la Defensa de los Pokémon de tipo Hielo.
+Libera un extracto picante que aumenta mucho su Ataque, pero también reduce mucho su Defensa.
+Libera un extracto picante que aumenta mucho su Ataque, pero también reduce mucho su Defensa.
+Gira violentamente sobre sí. Reduce mucho la Velocidad del usuario.
+Gira violentamente sobre sí. Reduce mucho la Velocidad del usuario.
+Aumenta el Ataque y la Velocidad. Limpia efectos de efectos como Púas, Trampa Rocas o Sustituto.
+Aumenta el Ataque y la Velocidad. Limpia efectos de efectos como Púas, Trampa Rocas o Sustituto.
+Expele tórridas llamaradas como si entonara una canción. Aumenta el Ataque Especial.
+Expele tórridas llamaradas como si entonara una canción. Aumenta el Ataque Especial.
+Ataca como si saltara desde la hierba alta. Aumenta su Velocidad.
+Ataca como si saltara desde la hierba alta. Aumenta su Velocidad.
+Ejecuta una inmersión triple en perfecta sincronía que golpea al objetivo tres veces seguidas.
+Ejecuta una inmersión triple en perfecta sincronía que golpea al objetivo tres veces seguidas.
+Emite dos misteriosos haces lumínicos por los ojos que infligen daño dos veces seguidas.
+Emite dos misteriosos haces lumínicos por los ojos que infligen daño dos veces seguidas.
+Puede dormir al objetivo.
+Puede dormir al objetivo.
+Lanza un potente chorro de agua hirviendo al rival que aumenta su poder si hace sol.
+Lanza un potente chorro de agua hirviendo al rival que aumenta su poder si hace sol.
+El usuario desgarra al objetivo con una espada etérea cuyo poder aumenta en el terreno eléctrico.
+El usuario desgarra al objetivo con una espada etérea cuyo poder aumenta en el terreno eléctrico.
+Ataca con toda su fuerza a través de una luna roja. No puede usarse dos veces seguidas.
+Ataca con toda su fuerza a través de una luna roja. No puede usarse dos veces seguidas.
+Rocía al objetivo con té y recupera la mitad de los PS del daño que produce. Puede quemar.
+Rocía al objetivo con té y recupera la mitad de los PS del daño que produce. Puede quemar.
+Impregna al objetivo con su viscoso néctar, reduciendo su Velocidad durante tres turnos.
+Impregna al objetivo con su viscoso néctar, reduciendo su Velocidad durante tres turnos.
+Golpea con un garrote. El tipo varía según la máscara que lleve. Suele ser crítico.
+Golpea con un garrote. El tipo varía según la máscara que lleve. Suele ser crítico.
+1º turno: acumula electricidad y aumenta At. Esp. 2º turno: ataca. Si llueve ataca el 1º turno.
+1º turno: acumula electricidad y aumenta At. Esp. 2º turno: ataca. Si llueve ataca el 1º turno.
+Si Terapagos lo usa en su Forma Astral, inflige daño a todos los rivales.
+Si Terapagos lo usa en su Forma Astral, inflige daño a todos los rivales.
+En ocasiones el resto de sus cabezas se unen al ataque haciendo el doble de daño.
+En ocasiones el resto de sus cabezas se unen al ataque haciendo el doble de daño.
+Emplea pelaje para protegerse de ataques y causar quemaduras si le tocan.
+Emplea pelaje para protegerse de ataques y causar quemaduras si le tocan.
+Rayo que cae sobre el objetivo con prioridad. Falla si el objetivo no ataca.
+Rayo que cae sobre el objetivo con prioridad. Falla si el objetivo no ataca.
+Rebana al objetivo con la luz que ha acumulado en la testa. Golpea aunque el rival se proteja.
+Rebana al objetivo con la luz que ha acumulado en la testa. Golpea aunque el rival se proteja.
+Ráfaga de cuchillas formadas por partículas que inflige daño dos veces seguidas. No falla.
+Ráfaga de cuchillas formadas por partículas que inflige daño dos veces seguidas. No falla.
+Oprime con los brazos o las pinzas. Cuantos más PS le queden al objetivo, más daño hace.
+Oprime con los brazos o las pinzas. Cuantos más PS le queden al objetivo, más daño hace.
+Bramido que aumenta la probabilidad de golpe crítico de aliados, y en dos niveles si es Dragón.
+Bramido que aumenta la probabilidad de golpe crítico de aliados, y en dos niveles si es Dragón.
+Canto angelical que confunde al objetivo si sus características han aumentado en ese turno.
+Canto angelical que confunde al objetivo si sus características han aumentado en ese turno.
+Su potencia se duplica si el movimiento del usuario falló en el turno anterior.
+Su potencia se duplica si el movimiento del usuario falló en el turno anterior.
+Electrifica su cuerpo y salta en plancha sobre el objetivo. Si falla, se hiere a sí mismo.
+Electrifica su cuerpo y salta en plancha sobre el objetivo. Si falla, se hiere a sí mismo.
+Onda que impide al objetivo recuperar PS durante 2 turnos con movimientos, habilidades y objetos.
+Onda que impide al objetivo recuperar PS durante 2 turnos con movimientos, habilidades y objetos.
+Si el objetivo usa movimientos de prioridad se anticipa golpeándolo antes y lo amedrenta.
+Si el objetivo usa movimientos de prioridad se anticipa golpeándolo antes y lo amedrenta.
+Apresa al objetivo con una cadena para minarle las fuerzas. Puede envenenar gravemente.
+Apresa al objetivo con una cadena para minarle las fuerzas. Puede envenenar gravemente.
+Movimiento cuyo tipo varía al del usuario en caso de que éste haya teracristalizado.
+Movimiento cuyo tipo varía al del usuario en caso de que éste haya teracristalizado.
+Luz devastadora que pega de forma neutra a los Pokémon de tipo Hada. Ignora cambios de Def. Esp. y Evasión.
+Luz devastadora que pega de forma neutra a los Pokémon de tipo Hada. Ignora cambios de Def. Esp. y Evasión.
+Cuanto mayor sea la amistad con el Entrenador, más poderoso será este ataque. No falla.
+Cuanto mayor sea la amistad con el Entrenador, más poderoso será este ataque. No falla.
+El usuario ataca disparando burbujas de agua al objetivo y absorbe la mitad del daño producido.
+El usuario ataca disparando burbujas de agua al objetivo y absorbe la mitad del daño producido.
+El usuario dispara una descarga eléctrica para atacar al objetivo, siempre paraliza.
+El usuario dispara una descarga eléctrica para atacar al objetivo, siempre paraliza.
+El usuario se cubre de fuego y carga contra el objetivo, siempre provoca quemadura.
+El usuario se cubre de fuego y carga contra el objetivo, siempre provoca quemadura.
+El usuario bombardea al objetivo con fuerza telequinética y levanta una Pantalla de Luz.
+El usuario bombardea al objetivo con fuerza telequinética y levanta una Pantalla de Luz.
+El usuario actúa mal, ataca al objetivo y levanta una pantalla de Reflejo.
+El usuario actúa mal, ataca al objetivo y levanta una pantalla de Reflejo.
+El usuario esparce semillas para atacar al objetivo y coloca Drenadoras.
+El usuario esparce semillas para atacar al objetivo y coloca Drenadoras.
+Ataca con un cristal de neblina helada. Elimina los cambios de estadísticas de todos.
+Ataca con un cristal de neblina helada. Elimina los cambios de estadísticas de todos.
+Ataca al objetivo envolviéndolo con un torbellino. Cura todos los problemas de estado del equipo.
+Ataca al objetivo envolviéndolo con un torbellino. Cura todos los problemas de estado del equipo.
+El usuario ataca con ráfagas eléctricas, siempre va en primer lugar y es golpe crítico.
+El usuario ataca con ráfagas eléctricas, siempre va en primer lugar y es golpe crítico.
+El usuario carga una enorme onda eléctrica y golpea al Pokémon rival con ella. Puede paralizar.
+El usuario carga una enorme onda eléctrica y golpea al Pokémon rival con ella. Puede paralizar.
+El usuario flota en el aire y luego se lanza en picado para atacar al objetivo. Puede amedrentar.
+El usuario flota en el aire y luego se lanza en picado para atacar al objetivo. Puede amedrentar.
+The user attacks with a blazing club. Has a high critical-hit ratio. If Burning Rampage is fully charged, this move ignores screens.
+The user attacks with a blazing club. Has a high critical-hit ratio. If Burning Rampage is fully charged, this move ignores screens.
+The user slashes at the target with a sharp icicle. This also lowers the target's Speed stat.
+The user slashes at the target with a sharp icicle. This also lowers the target's Speed stat.
+Attacks with adaptive spines using the higher offensive stat. Super effective against Flying and Bug types.
+Attacks with adaptive spines using the higher offensive stat. Super effective against Flying and Bug types.
+The user ruthlessly crushes the foe with terracotta claws. Deals double damage if the target's Attack stat is lowered.
+The user ruthlessly crushes the foe with terracotta claws. Deals double damage if the target's Attack stat is lowered.
+The user strikes with the thick bulb. This may lower the target's Speed.
+The user strikes with the thick bulb. This may lower the target's Speed.
+The user slices at weak points with a sharp stalk. It has a high critical-hit ratio.
+The user slices at weak points with a sharp stalk. It has a high critical-hit ratio.
+Hits 2-5 times. Each hit may lower the target's Speed.
+Hits 2-5 times. Each hit may lower the target's Speed.
+A permafrost bite. Treated as a biting move and is super effective against Steel.
+A permafrost bite. Treated as a biting move and is super effective against Steel.
+Restores half the damage dealt and may raise the user's Defense and Sp. Def.
+Restores half the damage dealt and may raise the user's Defense and Sp. Def.
+Hits 2-5 times. Each hit may burn the target.
+Hits 2-5 times. Each hit may burn the target.
+A biting strike. Gets +1 priority if the target has less than half HP.
+A biting strike. Gets +1 priority if the target has less than half HP.
+A spiraling burst that strikes the target and raises the user's Speed.
+A spiraling burst that strikes the target and raises the user's Speed.
+The user unleashes a blast of divine solar heat. High chance to burn the target.
+The user unleashes a blast of divine solar heat. High chance to burn the target.
+A definitive strike delivered with the authority of the eclipse. High critical hit ratio and ignores stat changes.
+A definitive strike delivered with the authority of the eclipse. High critical hit ratio and ignores stat changes.
+A crushing cave strike. It may flinch the target or lower its Defense.
+A crushing cave strike. It may flinch the target or lower its Defense.
+The user strikes with a thorny claw that drags the target down. It is super effective against Flying types.
+The user strikes with a thorny claw that drags the target down. It is super effective against Flying types.
+The user attacks opposing Pokémon by shooting sticky webs. This also lowers their Speed stats.
+The user attacks opposing Pokémon by shooting sticky webs. This also lowers their Speed stats.
+The more Togepi loves its Trainer, the greater the power of this move. It never misses.
+The more Togepi loves its Trainer, the greater the power of this move. It never misses.
+The user overloads its body with electricity until it bursts, damaging all around it. The user faints.
+The user overloads its body with electricity until it bursts, damaging all around it. The user faints.
+The user violently smashes the target with a hardened crag. This may also make the target flinch.
+The user violently smashes the target with a hardened crag. This may also make the target flinch.
+The user electrifies its body and rushes the target without guarding. This lowers the user's Defense and Sp. Def stats.
+The user electrifies its body and rushes the target without guarding. This lowers the user's Defense and Sp. Def stats.
+The user attacks with a highly charged pulse of ionized energy. This also leaves the target with a burn.
+The user attacks with a highly charged pulse of ionized energy. This also leaves the target with a burn.
+The user delivers a massive, magically charged strike to the target. This may also make the target flinch.
+The user delivers a massive, magically charged strike to the target. This may also make the target flinch.
+The user summons a heavy rain of glowing crystals. This may also lower the Sp. Def stats of opposing Pokémon.
+The user summons a heavy rain of glowing crystals. This may also lower the Sp. Def stats of opposing Pokémon.
+The user punches the ground, sending a localized tremor into the target. This may also lower the target's Defense.
+The user punches the ground, sending a localized tremor into the target. This may also lower the target's Defense.
+The target is attacked by a kick delivered with the incredible force of bedrock.
+The target is attacked by a kick delivered with the incredible force of bedrock.
+The user slashes the target with a chilling, spectral blade. This may also lower the target's Defense stat.
+The user slashes the target with a chilling, spectral blade. This may also lower the target's Defense stat.
+The user fires a devastating bolt of superheated volcanic ash. This may also leave the target with a burn.
+The user fires a devastating bolt of superheated volcanic ash. This may also leave the target with a burn.
+The user drains the target's life force with a corrupt, royal curse. The user's HP is restored by half the damage taken by the target.
+The user drains the target's life force with a corrupt, royal curse. The user's HP is restored by half the damage taken by the target.
+The user summons a bolt from the heavens. This lowers the target's Speed and may raise the user's Defense in snow or rain.
+The user summons a bolt from the heavens. This lowers the target's Speed and may raise the user's Defense in snow or rain.
+A chaotic performance that traps the target and forces them to follow a nonsensical script.
+A chaotic performance that traps the target and forces them to follow a nonsensical script.
+The user spits molten slag and tar. It is super effective against Steel-type Pokémon and may cause a burn.
+The user spits molten slag and tar. It is super effective against Steel-type Pokémon and may cause a burn.

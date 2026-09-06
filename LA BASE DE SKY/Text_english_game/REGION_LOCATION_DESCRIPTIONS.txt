@@ -1,0 +1,16 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[REGION_LOCATION_DESCRIPTIONS]
+Laboratorio Pokémon
+Laboratorio Pokémon
+Lugano CC
+Lugano CC
+Cueva de Hielo
+Cueva de Hielo
+Carril Bici
+Carril Bici
+Cueva de Roca
+Cueva de Roca
+Fondo marino
+Fondo marino

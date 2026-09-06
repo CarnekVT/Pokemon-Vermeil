@@ -1,0 +1,58 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map029]
+¡Esperamos que participes en el Concurso de Captura de Bichos en el futuro!
+¡Esperamos que participes en el Concurso de Captura de Bichos en el futuro!
+Hoy es \v[1].
+Hoy es \v[1].
+Eso significa que se celebra el Concurso de Captura de Bichos.
+Eso significa que se celebra el Concurso de Captura de Bichos.
+Las reglas son sencillas.
+Las reglas son sencillas.
+Usando uno solo de tus Pokémon, captura un Pokémon de tipo Bicho para que sea juzgado.
+Usando uno solo de tus Pokémon, captura un Pokémon de tipo Bicho para que sea juzgado.
+¿Te gustaría intentarlo?
+¿Te gustaría intentarlo?
+Lo siento, las cajas de tu PC están llenas.
+Lo siento, las cajas de tu PC están llenas.
+Solo puedes llevar contigo un Pokémon al Concurso.
+Solo puedes llevar contigo un Pokémon al Concurso.
+Elige por favor con qué Pokémon quieres entrar.
+Elige por favor con qué Pokémon quieres entrar.
+Ok. Espero que participes en el futuro.
+Ok. Espero que participes en el futuro.
+Entonces vas a participar con \v[2].
+Entonces vas a participar con \v[2].
+Nos encargaremos de cuidar al resto de tus Pokémon mientras compites.
+Nos encargaremos de cuidar al resto de tus Pokémon mientras compites.
+Se ha dejado a los Pokémon de \PN en manos del Ayudante del Concurso.\se[Pkmn exp full]\wtnp[20]
+Se ha dejado a los Pokémon de \PN en manos del Ayudante del Concurso.\se[Pkmn exp full]\wtnp[20]
+Aquí tienes las Competi Ball para el Concurso.
+Aquí tienes las Competi Ball para el Concurso.
+\PN ha recibido 20 Competi Balls.\me[Item get]\wtnp[40]
+\PN ha recibido 20 Competi Balls.\me[Item get]\wtnp[40]
+La persona que consiga el Pokémon de tipo Bicho más fuerte será la vencedora.
+La persona que consiga el Pokémon de tipo Bicho más fuerte será la vencedora.
+Tienes 20 minutos para participar.
+Tienes 20 minutos para participar.
+Si te quedas sin Competi Balls, habrás terminado.
+Si te quedas sin Competi Balls, habrás terminado.
+Podrás quedarte contigo el último Pokémon que captures.
+Podrás quedarte contigo el último Pokémon que captures.
+¡Sal a fuera y captura el Pokémon de tipo Bicho más fuerte que puedas encontrar!
+¡Sal a fuera y captura el Pokémon de tipo Bicho más fuerte que puedas encontrar!
+OK. Esperamos que participes en el reto en el futuro.
+OK. Esperamos que participes en el reto en el futuro.
+Llegamos a cabo concursos regularmente en el Parque. Deberías darle una oportunidad.
+Llegamos a cabo concursos regularmente en el Parque. Deberías darle una oportunidad.
+Aún te queda tiempo para participar. ¿Quieres terminar ahora?
+Aún te queda tiempo para participar. ¿Quieres terminar ahora?
+Ok. Por favor, espera en el pabellón para que los ganadores sean anunciados.
+Ok. Por favor, espera en el pabellón para que los ganadores sean anunciados.
+Ok. Vuelve a fuera y termina de participar.
+Ok. Vuelve a fuera y termina de participar.
+Sí
+Sí
+No
+No

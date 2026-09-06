@@ -1,0 +1,252 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[TRAINER_TYPE_NAMES]
+Entrenador Pokémon
+Entrenador Pokémon
+Rival
+Rival
+Señorita Aroma
+Señorita Aroma
+Modelo
+Modelo
+Ciclista
+Ciclista
+Ornitólogo
+Ornitólogo
+Cazabichos
+Cazabichos
+Ladrón
+Ladrón
+Exorcista
+Exorcista
+Calvo
+Calvo
+Ingeniero
+Ingeniero
+Pescador
+Pescador
+Jugón
+Jugón
+Caballero
+Caballero
+Montañero
+Montañero
+Malabarista
+Malabarista
+Damisela
+Damisela
+Pintora
+Pintora
+Poké maníaco
+Poké maníaco
+Criapokémon
+Criapokémon
+Profesor
+Profesor
+Rockero
+Rockero
+Ruinmaníaco
+Ruinmaníaco
+Marinero
+Marinero
+Científico
+Científico
+Cerebrito
+Cerebrito
+Domador
+Domador
+Karateka
+Karateka
+Luchadora
+Luchadora
+Dominguero
+Dominguero
+Dominguera
+Dominguera
+Entrenador Guay
+Entrenador Guay
+Joven
+Joven
+Chica
+Chica
+Pokémon Ranger
+Pokémon Ranger
+Médium
+Médium
+Nadador
+Nadador
+Nadadora
+Nadadora
+Playero
+Playero
+Playera
+Playera
+Dúo Guay
+Dúo Guay
+Dúo Fuerte
+Dúo Fuerte
+Hermanos
+Hermanos
+Gemelos
+Gemelos
+Pareja Joven
+Pareja Joven
+Team Rocket
+Team Rocket
+Jefe Rocket
+Jefe Rocket
+Líder de Gimnasio
+Líder de Gimnasio
+Alto Mando
+Alto Mando
+Campeón
+Campeón
+Doppelganger
+Doppelganger
+Pokémon Trainer
+Pokémon Trainer
+Professor
+Professor
+Old Man
+Old Man
+Poké Dude
+Poké Dude
+Scientist
+Scientist
+Pokémon Breeder
+Pokémon Breeder
+Backpacker
+Backpacker
+Poké Fan
+Poké Fan
+Preschooler
+Preschooler
+Nursery Aide
+Nursery Aide
+School Kid
+School Kid
+Rich Boy
+Rich Boy
+Socialite
+Socialite
+Parasol Lady
+Parasol Lady
+Clerk
+Clerk
+Janitor
+Janitor
+Maid
+Maid
+Baker
+Baker
+Waiter
+Waiter
+Waitress
+Waitress
+Doctor
+Doctor
+Nurse
+Nurse
+Worker
+Worker
+Depot Agent
+Depot Agent
+Pilot
+Pilot
+Police Man
+Police Man
+Hooligans
+Hooligans
+Guitarist
+Guitarist
+Musician
+Musician
+Dancer
+Dancer
+Artist
+Artist
+Harlequin
+Harlequin
+Cyclist
+Cyclist
+Smasher
+Smasher
+Striker
+Striker
+Infielder
+Infielder
+Hoopster
+Hoopster
+Linebacker
+Linebacker
+Backers
+Backers
+Veteran
+Veteran
+Rocket Admin
+Rocket Admin
+Team Galactic
+Team Galactic
+Galactic Boss
+Galactic Boss
+Team Plasma
+Team Plasma
+Plasma Boss
+Plasma Boss
+Shadow Triad
+Shadow Triad
+Gym Leader
+Gym Leader
+Gym Leaders
+Gym Leaders
+Elite Four
+Elite Four
+Champion
+Champion
+Tower Tycoon
+Tower Tycoon
+Factory Head
+Factory Head
+Arcade Star
+Arcade Star
+Castle Valet
+Castle Valet
+Hall Matron
+Hall Matron
+Subway Boss
+Subway Boss
+Boss Trainer
+Boss Trainer
+Mo-Cap Actor
+Mo-Cap Actor
+Masked Man
+Masked Man
+Mecha Cop
+Mecha Cop
+Black Belt
+Black Belt
+Magical Maid
+Magical Maid
+Magic Queen
+Magic Queen
+Invader
+Invader
+Haunted Kid
+Haunted Kid
+Haunted Man
+Haunted Man
+Giantess
+Giantess
+Plush
+Plush
+Statue
+Statue
+Transporter
+Transporter
+Battleship
+Battleship
+UFO
+UFO
+Red Fog
+Red Fog

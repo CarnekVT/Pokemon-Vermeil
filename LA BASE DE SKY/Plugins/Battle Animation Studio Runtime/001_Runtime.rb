@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Animation Studio Runtime v1.0.30 - LBDS
+# Battle Animation Studio Runtime v1.0.53 - LBDS
 # Plays animations exported by the Maker Studio Battle Animation Studio.
 # Credits: CarnekVT
 # Source data: PBS/AnimationStudio/compiled_animations.json
@@ -217,7 +217,7 @@ module BattleAnimationStudioRuntime
   end
 
   DEFAULT_DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
-  VERSION = 34
+  VERSION = 38
   RUNTIME_PARTICLE_LIMIT = 240
   @cache = nil
   @mtime = nil
@@ -346,6 +346,14 @@ module BattleAnimationStudioRuntime
     ""
   end
 
+  def source_opposing?(animation)
+    src = source_of(animation)
+    side = src["sideContext"].to_s.downcase
+    src["opposing"] == true || side == "foe"
+  rescue
+    false
+  end
+
   def filter_move_variants(list, move_id)
     return list if !list.is_a?(Array) || list.empty?
     category = move_category_scope(move_id)
@@ -384,7 +392,7 @@ module BattleAnimationStudioRuntime
     list = exact_version unless exact_version.empty?
     list = filter_move_variants(list, mid) unless common
     opposing = user_index.to_i.odd?
-    side_matches = list.select { |a| !!source_of(a)["opposing"] == opposing }
+    side_matches = list.select { |a| source_opposing?(a) == opposing }
     list = side_matches unless side_matches.empty?
     selected = list.select { |a| source_of(a)["runtimeSelected"] == true }
     list = selected unless selected.empty?
@@ -401,7 +409,7 @@ module BattleAnimationStudioRuntime
     end
     return studio if studio
 
-    list.find { |a| !source_of(a)["opposing"] } || list.first
+    list.find { |a| !source_opposing?(a) } || list.first
   end
 
   def common_matching(name, user_index)
@@ -516,7 +524,7 @@ module BattleAnimationStudioRuntime
     exact_version = list.select { |a| source_of(a)["version"].to_i == version.to_i }
     list = exact_version unless exact_version.empty?
     opposing = user_index.to_i.odd?
-    side_matches = list.select { |a| !!source_of(a)["opposing"] == opposing }
+    side_matches = list.select { |a| source_opposing?(a) == opposing }
     list = side_matches unless side_matches.empty?
     selected = list.select { |a| source_of(a)["runtimeSelected"] == true }
     list = selected unless selected.empty?
@@ -524,7 +532,7 @@ module BattleAnimationStudioRuntime
       src = source_of(a)
       src["type"].to_s.downcase == "studio" || src["system"].to_s.downcase == "battle_animation_studio"
     end
-    studio || list.find { |a| !source_of(a)["opposing"] } || list.first
+    studio || list.find { |a| !source_opposing?(a) } || list.first
   end
 
   def deep_number(value, fallback = 0.0)
@@ -626,6 +634,11 @@ module BattleAnimationStudioRuntime
    DEFAULT_BATTLER_HEIGHT = 96
    class Player
      def initialize(sprites, viewport, user, target, data, explicit_targets = nil)
+      # Animated Pokémon System/DBK owns the battler spritesheet clock inside
+      # DeluxeBitmapWrapper. Install the wrapper-level Pause/Resume gate lazily
+      # here, after every plugin has finished loading.
+      BattleAnimationStudioRuntime.install_deluxe_bitmap_pause_hook!
+      BattleAnimationStudioRuntime.install_battler_shadow_transform_hook!
       @sprites = sprites || {}
       @viewport = viewport
       @user = user
@@ -674,6 +687,14 @@ module BattleAnimationStudioRuntime
       # battlers' natural views so apply_battler_view only reloads a bitmap when
       # an animation explicitly changes Front/Back (or a form rule requires it).
       @battler_view_state = {}
+      # Timeline-controlled pause of each battler's internal animated bitmap.
+      # Test(48): do not stop BattlerSprite#update. Animated Pokémon System/DBK
+      # advances the spritesheet through DeluxeBitmapWrapper, so BAS marks only
+      # the selected User/Target wrappers (and their cloned shadow wrappers).
+      # All BAS transforms/effects therefore keep updating while the cel freezes.
+      @battler_idle_update_patches = {}
+      @paused_battler_sprite_ids = {} # kept only to neutralize a hot-loaded Test(47) hook
+      @paused_battler_bitmap_refs = []
       begin
         @battler_view_state["user"] = !!(@user.index.to_i.even?) if @user
       rescue
@@ -768,6 +789,17 @@ module BattleAnimationStudioRuntime
 
     def target_sprite
       @target ? @sprites["pokemon_#{@target.index}"] : nil
+    end
+
+    def shadow_sprite_for_battler(battler)
+      return nil if !battler
+      idx = BattleAnimationStudioRuntime.safe_battler_index(battler, -1).to_i
+      return nil if idx < 0
+      @sprites["shadow_#{idx}"] rescue nil
+    end
+
+    def shadow_sprite_for_side(side)
+      shadow_sprite_for_battler(battler_for_side(side))
     end
 
     def battler_for_side(side)
@@ -1031,10 +1063,13 @@ module BattleAnimationStudioRuntime
     def capture_original_battlers
       @original[:user] = capture_sprite(user_sprite)
       @original[:target] = capture_sprite(target_sprite)
+      @original[:user_shadow] = capture_sprite(shadow_sprite_for_battler(@user))
+      @original[:target_shadow] = capture_sprite(shadow_sprite_for_battler(@target))
     end
 
     def capture_secondary_battlers
       @secondary_battler_originals ||= {}
+      @secondary_shadow_originals ||= {}
       ui = runtime_user_index(-1).to_i
       ti = runtime_target_index(-1).to_i
       move_affected_battlers.each do |b|
@@ -1043,15 +1078,22 @@ module BattleAnimationStudioRuntime
         sp = (@sprites["pokemon_#{idx}"] rescue nil)
         next if !sp
         @secondary_battler_originals[idx] = capture_sprite(sp)
+        sh = shadow_sprite_for_battler(b)
+        @secondary_shadow_originals[idx] = capture_sprite(sh) if sh
       end
     rescue
       @secondary_battler_originals ||= {}
+      @secondary_shadow_originals ||= {}
     end
 
     def restore_secondary_battlers
       (@secondary_battler_originals || {}).each do |idx, st|
         sp = (@sprites["pokemon_#{idx}"] rescue nil)
         restore_sprite(sp, st) if sp && st
+      end
+      (@secondary_shadow_originals || {}).each do |idx, st|
+        sh = (@sprites["shadow_#{idx}"] rescue nil)
+        restore_sprite(sh, st) if sh && st
       end
     rescue
     end
@@ -1169,11 +1211,18 @@ module BattleAnimationStudioRuntime
     end
 
     def dispose
+      clear_paused_battler_bitmap_flags!
+      @paused_battler_sprite_ids = {}
+      restore_paused_battler_updates!
       restore_camera!
       restore_visual_forms
       restore_battler_views
       restore_sprite(user_sprite, @original[:user])
       restore_sprite(target_sprite, @original[:target]) if target_sprite != user_sprite
+      restore_sprite(shadow_sprite_for_battler(@user), @original[:user_shadow])
+      if @target && (!@user || @target.index != @user.index)
+        restore_sprite(shadow_sprite_for_battler(@target), @original[:target_shadow])
+      end
       restore_secondary_battlers
       restore_scene_visibility
       @effect_sprites.each_value { |s| s.dispose if s && !s.disposed? }
@@ -1758,7 +1807,10 @@ module BattleAnimationStudioRuntime
       base = fallback if base.nil?
       return base.to_f if keys.empty?
       f = frame.to_f.floor + 0.000001
-      return keys.first["value"].to_f if f <= keys.first["frame"].to_f
+      # Before the first discrete key, preserve the authored base value. A
+      # Pause key at frame 20 must not pause the battler from frame 0.
+      return base.to_f if f < keys.first["frame"].to_f
+      return keys.first["value"].to_f if f == keys.first["frame"].to_f
       return keys.last["value"].to_f if f >= keys.last["frame"].to_f
       lo = 0; hi = keys.length - 1
       while lo + 1 < hi
@@ -2099,7 +2151,8 @@ module BattleAnimationStudioRuntime
 
     def authored_side_opposing?
       src = @data["source"].is_a?(Hash) ? @data["source"] : {}
-      !!src["opposing"] || src["sideContext"].to_s.downcase == "foe"
+      side = src["sideContext"].to_s.downcase
+      src["opposing"] == true || side == "foe"
     rescue
       false
     end
@@ -2177,6 +2230,73 @@ module BattleAnimationStudioRuntime
       end
     rescue
       neutral.to_f
+    end
+
+    def context_absolute_local_value(obj, prop, frame, fallback)
+      ov = context_override_for_object(obj)
+      raw = ov && ov["contextKeys"].is_a?(Hash) ? ov["contextKeys"][prop.to_s] : nil
+      keys = raw.is_a?(Array) ? raw.select { |k| k.is_a?(Hash) && !k["implicit"] }.sort_by { |k| (k["frame"] || 0).to_f } : []
+      return fallback.to_f if keys.empty?
+      f = frame.to_f
+      return fallback.to_f if f < (keys.first["frame"] || 0).to_f
+      return keys.last["value"].to_f if f >= (keys.last["frame"] || 0).to_f
+      (0...(keys.length - 1)).each do |i|
+        a = keys[i]; b = keys[i + 1]
+        af = (a["frame"] || 0).to_f; bf = (b["frame"] || 0).to_f
+        next if f < af || f > bf
+        span = [0.0001, bf - af].max
+        t = ease01((f - af) / span, a["easing"] || "ease_both")
+        return a["value"].to_f + ((b["value"].to_f - a["value"].to_f) * t)
+      end
+      fallback.to_f
+    rescue
+      fallback.to_f
+    end
+
+    def context_emitter_discrete_prop?(prop)
+      ["emitClockwise", "randomInvertFlip", "randomInvertAngle", "waveEnabled", "simpleStopAtDestination", "simpleFaceTravel"].include?(prop.to_s)
+    end
+
+    def context_parameter_value(obj, kind, prop, frame, fallback)
+      source = replica_visual_source(obj) rescue obj
+      ov = context_override_for_object(source) || context_override_for_object(obj)
+      name = "#{kind}:#{prop}"
+      raw = ov && ov["contextKeys"].is_a?(Hash) ? ov["contextKeys"][name] : nil
+      keys = raw.is_a?(Array) ? raw.select { |k| k.is_a?(Hash) && !k["implicit"] }.sort_by { |k| (k["frame"] || 0).to_f } : []
+      return fallback if keys.empty?
+      f = frame.to_f
+      return fallback if f < (keys.first["frame"] || 0).to_f
+      if context_emitter_discrete_prop?(prop)
+        value = fallback
+        keys.each { |k| value = k["value"].to_f >= 0.5 if (k["frame"] || 0).to_f <= f }
+        return value
+      end
+      return keys.last["value"].to_f if f >= (keys.last["frame"] || 0).to_f
+      (0...(keys.length - 1)).each do |i|
+        a = keys[i]; b = keys[i + 1]
+        af = (a["frame"] || 0).to_f; bf = (b["frame"] || 0).to_f
+        next if f < af || f > bf
+        t = ease01((f - af) / [bf - af, 0.0001].max, a["easing"] || "ease_both")
+        return a["value"].to_f + ((b["value"].to_f - a["value"].to_f) * t)
+      end
+      fallback
+    rescue
+      fallback
+    end
+
+    def context_opacity_value(obj, frame, base_opacity)
+      ov = context_override_for_object(obj)
+      return [[base_opacity.to_f, 0.0].max, 100.0].min if !ov
+      global = ov["opacity"]
+      global = 100.0 if global.nil? || !global.to_s.match?(/^-?\d+(?:\.\d+)?$/)
+      inherited = [[base_opacity.to_f * global.to_f / 100.0, 0.0].max, 100.0].min
+      if ov["contextOpacityAbsolute"] == true
+        return [[context_absolute_local_value(obj, "opacity", frame, inherited), 0.0].max, 100.0].min
+      end
+      correction = context_override_value(obj, "opacity", frame, 100.0)
+      [[base_opacity.to_f * [correction.to_f, 0.0].max / 100.0, 0.0].max, 100.0].min
+    rescue
+      [[base_opacity.to_f, 0.0].max, 100.0].min
     end
 
     def contextual_screen_role_point(obj, point, ret, role)
@@ -2922,6 +3042,7 @@ module BattleAnimationStudioRuntime
       context_override = context_override_for_object(obj)
       pos = [pos[0].to_f + context_override_value(obj, "offsetX", @frame, 0.0), pos[1].to_f + context_override_value(obj, "offsetY", @frame, 0.0)]
       sprite.x = pos[0]; sprite.y = pos[1]
+      sync_battler_shadow_position(battler_for_side(side), sprite) if battler
       size = sample_value(obj, "size", frame, 100) / 100.0
       view_scale = battler ? sample_value(obj, "viewScale", frame, 100) / 100.0 : 1.0
       context_sx = [context_override_value(obj, "scaleX", @frame, 100.0) / 100.0, 0.01].max
@@ -2949,10 +3070,11 @@ module BattleAnimationStudioRuntime
         sprite.zoom_x = sx; sprite.zoom_y = sy
         sprite.angle = sample_value(obj, "rotation", frame, 0) + context_rotation + contextual_screen_rotation_delta(obj) + (flip_v ? 180.0 : 0.0)
       end
-      context_opacity = [context_override_value(obj, "opacity", @frame, 100.0) / 100.0, 0.0].max
       is_emitter_object = emitter_type(obj) != "none" rescue false
-      opacity_factor = is_emitter_object ? 1.0 : context_opacity
-      sprite.opacity = [[(sample_value(obj, "opacity", frame, 100) * opacity_factor * 2.55).round, 0].max, 255].min
+      base_opacity = sample_value(obj, "opacity", frame, 100).to_f
+      visible_opacity = is_emitter_object ? base_opacity : context_opacity_value(obj, @frame, base_opacity)
+      sprite.opacity = [[(visible_opacity * 2.55).round, 0].max, 255].min
+      apply_battler_shadow_opacity(battler_for_side(side), visible_opacity.to_f / 100.0) if battler
       sprite.visible = sample_visible(obj, frame)
       z_offset = context_override_value(obj, "zOffset", @frame, 0.0)
       if battler
@@ -2978,6 +3100,116 @@ module BattleAnimationStudioRuntime
       sprite.tone = tone if tone && sprite.respond_to?(:tone=)
     rescue => e
       BattleAnimationStudioRuntime.log("apply_object #{e.class}: #{e.message}")
+    end
+
+    def shadow_original_for_battler(battler)
+      return nil if !battler
+      idx = BattleAnimationStudioRuntime.safe_battler_index(battler, -1).to_i
+      return nil if idx < 0
+      ui = runtime_user_index(-999).to_i
+      ti = runtime_target_index(-998).to_i
+      return @original[:user_shadow] if idx == ui
+      return @original[:target_shadow] if idx == ti
+      (@secondary_shadow_originals || {})[idx]
+    rescue
+      nil
+    end
+
+    # Animated Pokémon System/DBK gives the battler shadow its own Sprite. Its
+    # position is calculated when the bitmap is assigned, but it is not
+    # automatically recomputed when BAS later moves pokemon_N. Preserve DBK's
+    # species/side-specific shadow offset and add the exact BAS battler delta.
+    def sync_battler_shadow_position(battler, battler_sprite = nil)
+      return if !battler
+      battler_sprite ||= (@sprites["pokemon_#{BattleAnimationStudioRuntime.safe_battler_index(battler, -1)}"] rescue nil)
+      shadow = shadow_sprite_for_battler(battler)
+      shadow_state = shadow_original_for_battler(battler)
+      idx = BattleAnimationStudioRuntime.safe_battler_index(battler, -1).to_i
+      battler_state = affected_battler_original(idx)
+      return if !battler_sprite || !shadow || !shadow_state || !battler_state
+      if shadow.respond_to?(:x=) && battler_sprite.respond_to?(:x)
+        dx = battler_sprite.x.to_f - (battler_state[:x] || battler_sprite.x).to_f
+        shadow.x = (shadow_state[:x] || shadow.x).to_f + dx
+      end
+      if shadow.respond_to?(:y=) && battler_sprite.respond_to?(:y)
+        dy = battler_sprite.y.to_f - (battler_state[:y] || battler_sprite.y).to_f
+        shadow.y = (shadow_state[:y] || shadow.y).to_f + dy
+      end
+    rescue => e
+      BattleAnimationStudioRuntime.log("shadow position #{e.class}: #{e.message}")
+    end
+
+
+
+    # Test(48) FIX4: final shadow follower pass. BAS can still alter battler
+    # transforms after the battler track itself has been sampled, so syncing only
+    # inside apply_object is too early for moves such as Quick Attack. Recompute
+    # every captured battler shadow from the battler's FINAL uncammed position at
+    # the render boundary. This keeps DBK's native species/side shadow offset and
+    # makes every BAS X/Y displacement automatically carry its shadow with it.
+    def sync_all_battler_shadows!
+      seen = {}
+      battlers = []
+      battlers << @user if @user
+      battlers << @target if @target
+      battlers.concat(move_affected_battlers) if respond_to?(:move_affected_battlers)
+      battlers.each do |battler|
+        next if !battler
+        idx = BattleAnimationStudioRuntime.safe_battler_index(battler, -1).to_i
+        next if idx < 0 || seen[idx]
+        seen[idx] = true
+        sprite = (@sprites["pokemon_#{idx}"] rescue nil)
+        sync_battler_shadow_position(battler, sprite) if sprite
+      end
+    rescue => e
+      BattleAnimationStudioRuntime.log("shadow final sync #{e.class}: #{e.message}")
+    end
+
+    # Test(48) FIX5: direct transform follower. The Animated Pokémon System
+    # creates shadow_N as an independent Sprite and only positions it when its
+    # bitmap is assigned. There is no live parent/child transform relationship.
+    # The BattlerSprite x=/y= hook below therefore forwards each BAS-authored
+    # delta immediately to the matching shadow. Camera writes are ignored because
+    # BAS transforms both world sprites separately during render.
+    def propagate_shadow_delta_from_sprite(battler_sprite, dx, dy)
+      return if !battler_sprite
+      return if @camera_restore_count.to_i > 0
+      dx = dx.to_f
+      dy = dy.to_f
+      return if dx.abs < 0.000001 && dy.abs < 0.000001
+      @shadow_follow_sprite_indices ||= {}
+      oid = battler_sprite.object_id
+      idx = @shadow_follow_sprite_indices[oid]
+      if idx.nil?
+        active_battler_indices.each do |candidate|
+          sp = (@sprites["pokemon_#{candidate}"] rescue nil)
+          next if !sp || !sp.equal?(battler_sprite)
+          idx = candidate.to_i
+          @shadow_follow_sprite_indices[oid] = idx
+          break
+        end
+      end
+      return if idx.nil?
+      shadow = (@sprites["shadow_#{idx}"] rescue nil)
+      return if !shadow || (shadow.respond_to?(:disposed?) && shadow.disposed?)
+      shadow.x = shadow.x.to_f + dx if dx.abs >= 0.000001 && shadow.respond_to?(:x=)
+      shadow.y = shadow.y.to_f + dy if dy.abs >= 0.000001 && shadow.respond_to?(:y=)
+    rescue => e
+      BattleAnimationStudioRuntime.log("shadow delta follow #{e.class}: #{e.message}")
+    end
+
+    # Animated Pokémon System/DBK caps shadow opacity separately (normally 100).
+    # BAS opacity is authored on the battler, so preserve that cap and apply the
+    # same alpha ratio to the shadow.
+    def apply_battler_shadow_opacity(battler, alpha_ratio)
+      shadow = shadow_sprite_for_battler(battler)
+      state = shadow_original_for_battler(battler)
+      return if !shadow || !state || !shadow.respond_to?(:opacity=)
+      ratio = [[alpha_ratio.to_f, 0.0].max, 1.0].min
+      base_opacity = (state[:opacity] || 100).to_f
+      shadow.opacity = [[(base_opacity * ratio).round, 0].max, 255].min
+    rescue => e
+      BattleAnimationStudioRuntime.log("shadow opacity #{e.class}: #{e.message}")
     end
 
     def affected_battler_original(idx)
@@ -3017,6 +3249,7 @@ module BattleAnimationStudioRuntime
       # channels never overwrite adjacent battlers.
       sprite.x = original[:x].to_f + primary_delta[0].to_f if sprite.respond_to?(:x=) && original.key?(:x)
       sprite.y = original[:y].to_f + primary_delta[1].to_f if sprite.respond_to?(:y=) && original.key?(:y)
+      sync_battler_shadow_position(battler, sprite)
 
       if track_has_visible_keys?(track) && sprite.respond_to?(:visible=)
         sprite.visible = !!original[:visible] && sample_visible(track, frame)
@@ -3024,6 +3257,7 @@ module BattleAnimationStudioRuntime
       if track_has_value_keys?(track, "opacity") && sprite.respond_to?(:opacity=)
         pct = [[sample_value(track, "opacity", frame, 100).to_f, 0.0].max, 100.0].min / 100.0
         sprite.opacity = [[(original[:opacity].to_f * pct).round, 0].max, 255].min
+        apply_battler_shadow_opacity(battler, pct)
       end
       if (track_has_value_keys?(track, "size") || track_has_value_keys?(track, "scaleX") || track_has_value_keys?(track, "viewScale")) && sprite.respond_to?(:zoom_x=)
         size = sample_value(track, "size", frame, 100).to_f / 100.0
@@ -3065,6 +3299,126 @@ module BattleAnimationStudioRuntime
       end
     rescue => e
       BattleAnimationStudioRuntime.log("replicated battler track #{e.class}: #{e.message}")
+    end
+
+    def battler_idle_paused?(side, frame = @frame)
+      track = battler_track(side)
+      return false if !track
+      sample_discrete_value(track, "idlePause", frame, 0).to_f >= 0.5
+    rescue
+      false
+    end
+
+    def paused_battler_sprite_entries
+      out = []
+      if battler_idle_paused?(:user) && @user
+        sp = user_sprite
+        out << [:user, sp] if sp
+      end
+      if battler_idle_paused?(:target) && @target
+        sp = target_sprite
+        out << [:target, sp] if sp && !out.any? { |row| row[1].equal?(sp) }
+      end
+      out
+    rescue
+      []
+    end
+
+    def bitmap_wrapper_for_sprite(sprite)
+      return nil if !sprite
+      if sprite.respond_to?(:iconBitmap)
+        wrapper = sprite.iconBitmap rescue nil
+        return wrapper if wrapper
+      end
+      [:@_iconbitmap, :@_iconBitmap].each do |ivar|
+        begin
+          wrapper = sprite.instance_variable_get(ivar)
+          return wrapper if wrapper
+        rescue
+        end
+      end
+      nil
+    end
+
+    def paused_battler_bitmap_wrappers
+      out = []
+      paused_battler_sprite_entries.each do |entry|
+        side, sprite = entry
+        wrapper = bitmap_wrapper_for_sprite(sprite)
+        out << wrapper if wrapper && !out.any? { |w| w.equal?(wrapper) }
+        shadow = shadow_sprite_for_side(side)
+        shadow_wrapper = bitmap_wrapper_for_sprite(shadow)
+        out << shadow_wrapper if shadow_wrapper && !out.any? { |w| w.equal?(shadow_wrapper) }
+      end
+      out
+    rescue
+      []
+    end
+
+    def set_bas_bitmap_pause_flag(wrapper, paused)
+      return if !wrapper
+      wrapper.instance_variable_set(:@__bas_idle_paused, paused == true)
+    rescue
+    end
+
+    # Propagate the timeline Pause/Resume state directly to the animated bitmap
+    # wrappers. Only the selected User/Target is marked; Target auto-replication
+    # never freezes unrelated affected battlers. The shadow wrapper is marked too
+    # so its cloned strip remains on the same cel.
+    def sync_paused_battler_bitmap_flags!
+      current = paused_battler_bitmap_wrappers
+      previous = @paused_battler_bitmap_refs || []
+      previous.each do |wrapper|
+        next if current.any? { |w| w.equal?(wrapper) }
+        set_bas_bitmap_pause_flag(wrapper, false)
+      end
+      current.each { |wrapper| set_bas_bitmap_pause_flag(wrapper, true) }
+      @paused_battler_bitmap_refs = current
+    rescue => e
+      BattleAnimationStudioRuntime.log("sync paused bitmap wrappers #{e.class}: #{e.message}")
+      clear_paused_battler_bitmap_flags!
+    end
+
+    def clear_paused_battler_bitmap_flags!
+      (@paused_battler_bitmap_refs || []).each { |wrapper| set_bas_bitmap_pause_flag(wrapper, false) }
+      @paused_battler_bitmap_refs = []
+    rescue
+      @paused_battler_bitmap_refs = []
+    end
+
+    # Kept under the old name because Test(47) may still be prepended in a live
+    # debug session. Test(48) intentionally never blocks BattlerSprite#update.
+    def sync_paused_battler_sprite_ids!
+      @paused_battler_sprite_ids = {}
+      sync_paused_battler_bitmap_flags!
+    end
+
+    def battler_sprite_update_paused?(_sprite)
+      false
+    end
+
+    # Legacy singleton patch cleanup retained for hot reload safety only.
+    def suspend_paused_battler_updates!
+      nil
+    end
+
+    def restore_paused_battler_updates!
+      patches = @battler_idle_update_patches || {}
+      patches.each_value do |row|
+        sprite, eigen, alias_name, had_own_update = row
+        begin
+          next if !sprite || !eigen
+          eigen.send(:alias_method, :update, alias_name)
+          eigen.send(:remove_method, alias_name)
+          eigen.send(:remove_method, :update) if !had_own_update
+        rescue
+          begin
+            eigen.send(:remove_method, :update) if eigen && !had_own_update
+          rescue
+          end
+        end
+      end
+      @battler_idle_update_patches = {}
     end
 
     def apply_battlers
@@ -3120,7 +3474,7 @@ module BattleAnimationStudioRuntime
 
     def emitter_value(clip, name, frame, fallback = 0)
       list = cached_emitter_commands(clip, name)
-      return fallback if list.empty?
+      return context_parameter_value(clip, "emitter", name, frame, fallback) if list.empty?
       value = fallback
       list.each do |cmd|
         cf = (cmd["frame"] || 0).to_f
@@ -3129,12 +3483,12 @@ module BattleAnimationStudioRuntime
         target = cmd["value"]
         if dur > 0 && frame < cf + dur
           t = ease01((frame - cf) / [dur, 0.0001].max, cmd["easing"] || "linear")
-          return value.to_f + ((target.to_f - value.to_f) * t) if target.is_a?(Numeric) || value.is_a?(Numeric)
-          return target
+          interpolated = (target.is_a?(Numeric) || value.is_a?(Numeric)) ? value.to_f + ((target.to_f - value.to_f) * t) : target
+          return context_parameter_value(clip, "emitter", name, frame, interpolated)
         end
         value = target
       end
-      value
+      context_parameter_value(clip, "emitter", name, frame, value)
     rescue
       fallback
     end
@@ -3152,7 +3506,7 @@ module BattleAnimationStudioRuntime
 
     def sample_pbs_scalar(clip, name, frame, fallback = 0)
       list = cached_pbs_commands(clip, name)
-      return fallback if list.empty?
+      return context_parameter_value(clip, "particle", name, frame, fallback) if list.empty?
       value = fallback
       list.each do |cmd|
         cf = (cmd["frame"] || 0).to_f
@@ -3161,12 +3515,12 @@ module BattleAnimationStudioRuntime
         target = cmd["value"]
         if dur > 0 && frame < cf + dur
           t = ease01((frame - cf) / [dur, 0.0001].max, cmd["easing"] || "linear")
-          return value.to_f + ((target.to_f - value.to_f) * t) if target.is_a?(Numeric) || value.is_a?(Numeric)
-          return target
+          interpolated = (target.is_a?(Numeric) || value.is_a?(Numeric)) ? value.to_f + ((target.to_f - value.to_f) * t) : target
+          return context_parameter_value(clip, "particle", name, frame, interpolated)
         end
         value = target
       end
-      value
+      context_parameter_value(clip, "particle", name, frame, value)
     rescue
       fallback
     end
@@ -3336,6 +3690,59 @@ module BattleAnimationStudioRuntime
       end
     end
 
+    def semantic_emitter_angle(clip, ef, fallback)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      destination = pbs["emitterDestination"].to_s.downcase
+      return fallback.to_f if destination != "target" && destination != "user"
+      origin = sample_position(clip, ef.to_f)
+      dest = destination == "target" ? base_anchor(:target, true) : base_anchor(:user, true)
+      dx = dest[0].to_f - origin[0].to_f
+      dy = dest[1].to_f - origin[1].to_f
+      return fallback.to_f if dx.abs < 0.0001 && dy.abs < 0.0001
+      Math.atan2(-dy, dx) * 180.0 / Math::PI + context_parameter_value(clip, "emitter", "simpleDirectionOffset", ef, pbs["simpleDirectionOffset"] || 0).to_f
+    rescue
+      fallback.to_f
+    end
+
+
+    # Canonical route distance for simple straight/projectile emitters. Once
+    # simpleDistancePx exists it is never recomputed from angle/speed/target;
+    # target geometry is only a legacy migration fallback.
+    def emitter_route_distance(clip, ef, speed_fallback = 0)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      stored = pbs["simpleDistancePx"].to_f
+      stored = context_parameter_value(clip, "emitter", "simpleDistancePx", ef, stored).to_f
+      return stored if stored > 0.0001
+      destination = pbs["emitterDestination"].to_s.downcase
+      if destination == "target" || destination == "user"
+        origin = sample_position(clip, ef.to_f)
+        dest = destination == "target" ? base_anchor(:target, true) : base_anchor(:user, true)
+        dx = dest[0].to_f - origin[0].to_f
+        dy = dest[1].to_f - origin[1].to_f
+        geometric = Math.sqrt(dx * dx + dy * dy)
+        return geometric if geometric > 0.0001
+      end
+      frames = [(pbs["simpleTravelFrames"] || 8).to_f, 1.0].max
+      speed = speed_fallback.to_f.abs
+      speed = emitter_value(clip, "emitSpeed", ef, 0).to_f.abs if speed <= 0.0001
+      return speed * frames / animation_fps.to_f if speed > 0.0001
+      160.0
+    rescue
+      160.0
+    end
+
+    # Travel time is derived from the persistent distance and current speed.
+    # The stored frame value remains only as a zero-speed/legacy fallback.
+    def emitter_route_travel_frames(clip, ef, speed)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      distance = emitter_route_distance(clip, ef, speed)
+      scalar_speed = speed.to_f.abs
+      return [distance * animation_fps.to_f / scalar_speed, 1.0].max if scalar_speed > 0.0001
+      [(pbs["simpleTravelFrames"] || 8).to_f, 1.0].max
+    rescue
+      8.0
+    end
+
     def build_emitter_descriptor(clip, ef, emission_index, particle_in_emission)
       seed = emitter_seed(clip, ef, particle_in_emission)
       rnd = emitter_seeded_random(seed)
@@ -3348,6 +3755,28 @@ module BattleAnimationStudioRuntime
       desc[:speed] = emitter_randomized(clip, "emitSpeed", "emitSpeedRange", ef, rnd, 0)
       desc[:angle] = emitter_randomized(clip, "emitAngle", "emitAngleRange", ef, rnd, 0)
       desc[:gravity] = emitter_randomized(clip, "emitGravity", "emitGravityRange", ef, rnd, 0)
+      destination = pbs["emitterDestination"].to_s.downcase
+      emitter_kind = emitter_type(clip)
+      desc[:travel_frames] = emitter_route_travel_frames(clip, ef, desc[:speed])
+      if emitter_kind == "straight" || emitter_kind == "projectile"
+        authored_base = emitter_value(clip, "emitAngle", ef, 0).to_f
+        jitter = desc[:angle].to_f - authored_base
+        route_base = (destination == "target" || destination == "user") ? semantic_emitter_angle(clip, ef, authored_base) : authored_base
+        route_angle = route_base + jitter
+        route_distance = emitter_route_distance(clip, ef, desc[:speed])
+        travel_seconds = desc[:travel_frames].to_f / animation_fps.to_f
+        if emitter_kind == "projectile" && travel_seconds > 0 && route_distance > 0
+          route_rad = route_angle * Math::PI / 180.0
+          dx = Math.cos(route_rad) * route_distance
+          dy = -Math.sin(route_rad) * route_distance
+          vx = dx / travel_seconds
+          vy = (dy - desc[:gravity].to_f * travel_seconds * travel_seconds / 2.0) / travel_seconds
+          desc[:speed] = Math.sqrt(vx * vx + vy * vy)
+          desc[:angle] = Math.atan2(-vy, vx) * 180.0 / Math::PI
+        else
+          desc[:angle] = route_angle
+        end
+      end
       desc[:period_x] = [0.0001, emitter_randomized(clip, "emitPeriodX", "emitPeriodXRange", ef, rnd, 100) / 100.0].max
       desc[:period_y] = [0.0001, emitter_randomized(clip, "emitPeriodY", "emitPeriodYRange", ef, rnd, 100) / 100.0].max
       desc[:period_z] = [0.0001, emitter_randomized(clip, "emitPeriodZ", "emitPeriodZRange", ef, rnd, 100) / 100.0].max
@@ -3494,13 +3923,20 @@ module BattleAnimationStudioRuntime
       # Opacity has two timelines for emitters: the particle's own opacity is
       # sampled in local lifetime (above), while emitterOpacity is a global
       # animation-frame multiplier controlled by the Studio inspector.
-      emitter_alpha = [[sample_value(clip, "emitterOpacity", @frame, 100).to_f / 100.0 * context_override_value(clip, "opacity", @frame, 100.0) / 100.0, 0.0].max, 1.0].min
+      emitter_alpha = [[context_opacity_value(clip, @frame, sample_value(clip, "emitterOpacity", @frame, 100).to_f) / 100.0, 0.0].max, 1.0].min
       emitter_alpha = [[emitter_alpha, 0.0].max, 1.0].min
       particle_alpha = [[extra[:opacity_mult].nil? ? 1.0 : extra[:opacity_mult].to_f, 0.0].max, 1.0].min
       total_alpha = emitter_alpha * particle_alpha
       sprite.opacity = [[(sprite.opacity.to_f * total_alpha).round, 0].max, 255].min
       apply_emitter_angle_override(sprite, clip, local_frame, desc)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      if sprite.respond_to?(:angle=)
+        if runtime_bool(context_parameter_value(clip, "emitter", "simpleFaceTravel", desc[:frame].to_f, pbs["simpleFaceTravel"]))
+          face_offset = context_parameter_value(clip, "emitter", "simpleFaceTravelOffset", desc[:frame].to_f, pbs["simpleFaceTravelOffset"] || 0).to_f
+          sprite.angle = sprite.angle.to_f - desc[:angle].to_f + face_offset
+        end
+        sprite.angle = sprite.angle.to_f + extra[:rotation_offset].to_f if extra[:rotation_offset]
+      end
       focus = pbs["focus"].to_s.downcase
       relative_index = if focus.include?("and")
                          -1
@@ -3534,11 +3970,42 @@ module BattleAnimationStudioRuntime
       tone = to_tone(fx_at(clip, "tone", local_frame)); color = to_color(fx_at(clip, "color", local_frame))
       sprite.tone = tone if tone && sprite.respond_to?(:tone=)
       sprite.color = color if color && sprite.respond_to?(:color=)
+      palette = pbs["particleTonePalette"].is_a?(Array) ? pbs["particleTonePalette"].select { |x| x.to_s =~ /^#[0-9a-fA-F]{6}$/ } : []
+      strength = [[(pbs["particleToneStrength"] || 0).to_f, 0.0].max, 100.0].min
+      if !palette.empty? && strength > 0 && sprite.respond_to?(:color=)
+        hex = palette[desc[:seed].to_i.abs % palette.length].to_s.sub(/^#/, "")
+        begin
+          r = hex[0,2].to_i(16); g = hex[2,2].to_i(16); b = hex[4,2].to_i(16)
+          sprite.color = Color.new(r, g, b, (255.0 * strength / 100.0).round)
+        rescue
+        end
+      end
       apply_second_layer(clip, sprite, local_frame, emitter_layer_key(clip, pool_index), desc[:random_angle_invert], total_alpha)
     rescue => e
       BattleAnimationStudioRuntime.log("emitter particle #{e.class}: #{e.message}")
       sprite.visible = false rescue nil
       hide_second_layer(clip, emitter_layer_key(clip, pool_index))
+    end
+
+
+    def contextual_simple_life(clip, frame)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      base = pbs["simpleParticleLife"].is_a?(Hash) ? pbs["simpleParticleLife"] : nil
+      return nil if !base
+      {
+        "duration" => context_parameter_value(clip, "emitter", "life.duration", frame, base["duration"] || 12),
+        "birthScale" => context_parameter_value(clip, "emitter", "life.birthScale", frame, base["birthScale"] || 100),
+        "midScale" => context_parameter_value(clip, "emitter", "life.midScale", frame, base["midScale"] || 100),
+        "deathScale" => context_parameter_value(clip, "emitter", "life.deathScale", frame, base["deathScale"] || 100),
+        "birthOpacity" => context_parameter_value(clip, "emitter", "life.birthOpacity", frame, base["birthOpacity"] || 0),
+        "midOpacity" => context_parameter_value(clip, "emitter", "life.midOpacity", frame, base["midOpacity"] || 100),
+        "deathOpacity" => context_parameter_value(clip, "emitter", "life.deathOpacity", frame, base["deathOpacity"] || 0),
+        "birthRotation" => context_parameter_value(clip, "emitter", "life.birthRotation", frame, base["birthRotation"] || 0),
+        "midRotation" => context_parameter_value(clip, "emitter", "life.midRotation", frame, base["midRotation"] || 0),
+        "deathRotation" => context_parameter_value(clip, "emitter", "life.deathRotation", frame, base["deathRotation"] || 0)
+      }
+    rescue
+      nil
     end
 
     def apply_emitter(clip)
@@ -3547,9 +4014,12 @@ module BattleAnimationStudioRuntime
       update_bitmap(template, clip, @frame)
       template.visible = false
       particles = cached_emitter_particles(clip)
-      life = emitter_particle_lifetime(clip)
-      first = lower_bound_particle(particles, @frame - life - 0.0001)
+      simple_life = contextual_simple_life(clip, @frame)
+      life = simple_life ? [(simple_life["duration"] || 12).to_f, 1.0].max : emitter_particle_lifetime(clip)
       type = emitter_type(clip)
+      route_life = (type == "straight" || type == "projectile") ? particles.inject(0.0) { |m, particle| [m, particle[:travel_frames].to_f].max } : 0.0
+      search_life = [life, route_life].max
+      first = lower_bound_particle(particles, @frame - search_life - 0.0001)
       fps = animation_fps
       particle_index = 0
       i = first
@@ -3559,7 +4029,14 @@ module BattleAnimationStudioRuntime
         break if ef > @frame + 0.000001
         age = @frame - ef
         i += 1
-        next if age < 0 || age > life
+        particle_simple_life = contextual_simple_life(clip, ef)
+        particle_life = particle_simple_life ? [(particle_simple_life["duration"] || 12).to_f, 1.0].max : emitter_particle_lifetime(clip)
+        effective_life = (type == "straight" || type == "projectile") ? [particle_life, desc[:travel_frames].to_f].max : particle_life
+        next if age < 0 || age > effective_life
+        pbs_for_travel = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+        if runtime_bool(context_parameter_value(clip, "emitter", "simpleStopAtDestination", ef, pbs_for_travel["simpleStopAtDestination"]))
+          next if age > [desc[:travel_frames].to_f, 1.0].max
+        end
         sec = age.to_f / fps
         phase = desc[:angle].to_f * Math::PI / 180.0
         dir = desc[:clockwise] ? -1.0 : 1.0
@@ -3572,6 +4049,22 @@ module BattleAnimationStudioRuntime
           dx += Math.cos(phase) * desc[:speed].to_f * sec
           dy -= Math.sin(phase) * desc[:speed].to_f * sec
           dy += desc[:gravity].to_f * sec * sec / 2.0 if type == "projectile"
+          simple_wave = clip["pbs"].is_a?(Hash) && clip["pbs"]["simpleWave"].is_a?(Hash) ? clip["pbs"]["simpleWave"] : nil
+          wave_enabled = context_parameter_value(clip, "emitter", "waveEnabled", ef, simple_wave && runtime_bool(simple_wave["enabled"]))
+          if simple_wave && runtime_bool(wave_enabled)
+            wave_amp = [0.0, context_parameter_value(clip, "emitter", "waveAmplitude", ef, simple_wave["amplitude"] || 0).to_f].max
+            wave_cycles = [0.1, context_parameter_value(clip, "emitter", "waveCycles", ef, simple_wave["cycles"] || 2).to_f].max
+            wave_mode = simple_wave["mode"].to_s.downcase
+            progress = [[age / [desc[:travel_frames].to_f, 1.0].max, 0.0].max, 1.0].min
+            wave_theta = progress * Math::PI * 2.0 * wave_cycles
+            # Wave/zigzag always returns to the route centerline at FIN.
+            wave_envelope = Math.sin(Math::PI * progress)
+            wave_base = Math.sin(wave_theta)
+            wave_base = (2.0 / Math::PI) * Math.asin(Math.sin(wave_theta)) if wave_mode == "zigzag"
+            wave_offset = wave_base * wave_amp * wave_envelope
+            dx += -Math.sin(phase) * wave_offset
+            dy += -Math.cos(phase) * wave_offset
+          end
         elsif type == "risescatter" || type == "rise_scatter"
           rise_frames = [1.0, desc[:rise_frames].to_f].max
           scatter_frames = [0.0, desc[:scatter_frames].to_f].max
@@ -3617,22 +4110,38 @@ module BattleAnimationStudioRuntime
         end
         sprite = ensure_emitter_sprite(clip, particle_index, template)
         next if !sprite
-        opacity_start = [[emitter_value(clip, "particleOpacityStart", ef, 5).to_f, 0.0].max, 100.0].min / 100.0
-        opacity_normal = [[emitter_value(clip, "particleOpacity", ef, 100).to_f, 0.0].max, 100.0].min / 100.0
-        opacity_end = [[emitter_value(clip, "particleOpacityEnd", ef, 0).to_f, 0.0].max, 100.0].min / 100.0
-        opacity_t = [[age.to_f / [life.to_f, 1.0].max, 0.0].max, 1.0].min
-        fade_in_end = 0.22
-        if opacity_t <= fade_in_end
-          local_t = opacity_t / fade_in_end
-          particle_opacity = opacity_start + ((opacity_normal - opacity_start) * local_t)
+        opacity_t = [[age.to_f / [effective_life.to_f, 1.0].max, 0.0].max, 1.0].min
+        simple_scale = 1.0
+        simple_rotation = 0.0
+        if particle_simple_life
+          half_t = opacity_t <= 0.5 ? opacity_t * 2.0 : (opacity_t - 0.5) * 2.0
+          a_scale = opacity_t <= 0.5 ? (particle_simple_life["birthScale"] || 60).to_f : (particle_simple_life["midScale"] || 100).to_f
+          b_scale = opacity_t <= 0.5 ? (particle_simple_life["midScale"] || 100).to_f : (particle_simple_life["deathScale"] || 120).to_f
+          simple_scale = [0.01, (a_scale + ((b_scale - a_scale) * half_t)) / 100.0].max
+          a_opacity = opacity_t <= 0.5 ? (particle_simple_life["birthOpacity"] || 0).to_f : (particle_simple_life["midOpacity"] || 100).to_f
+          b_opacity = opacity_t <= 0.5 ? (particle_simple_life["midOpacity"] || 100).to_f : (particle_simple_life["deathOpacity"] || 0).to_f
+          particle_opacity = [[(a_opacity + ((b_opacity - a_opacity) * half_t)) / 100.0, 0.0].max, 1.0].min
+          a_rot = opacity_t <= 0.5 ? (particle_simple_life["birthRotation"] || 0).to_f : (particle_simple_life["midRotation"] || 0).to_f
+          b_rot = opacity_t <= 0.5 ? (particle_simple_life["midRotation"] || 0).to_f : (particle_simple_life["deathRotation"] || 0).to_f
+          simple_rotation = a_rot + ((b_rot - a_rot) * half_t)
         else
-          local_t = (opacity_t - fade_in_end) / (1.0 - fade_in_end)
-          particle_opacity = opacity_normal + ((opacity_end - opacity_normal) * local_t)
+          opacity_start = [[emitter_value(clip, "particleOpacityStart", ef, 5).to_f, 0.0].max, 100.0].min / 100.0
+          opacity_normal = [[emitter_value(clip, "particleOpacity", ef, 100).to_f, 0.0].max, 100.0].min / 100.0
+          opacity_end = [[emitter_value(clip, "particleOpacityEnd", ef, 0).to_f, 0.0].max, 100.0].min / 100.0
+          fade_in_end = 0.22
+          if opacity_t <= fade_in_end
+            local_t = opacity_t / fade_in_end
+            particle_opacity = opacity_start + ((opacity_normal - opacity_start) * local_t)
+          else
+            local_t = (opacity_t - fade_in_end) / (1.0 - fade_in_end)
+            particle_opacity = opacity_normal + ((opacity_end - opacity_normal) * local_t)
+          end
         end
         apply_emitter_particle(sprite, clip, age,
           { :dx => dx, :dy => dy, :z => zoff,
-            :scale_x => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_x_mult].to_f,
-            :scale_y => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_y_mult].to_f,
+            :scale_x => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_x_mult].to_f * simple_scale,
+            :scale_y => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_y_mult].to_f * simple_scale,
+            :rotation_offset => simple_rotation,
             :opacity_mult => particle_opacity }, desc, particle_index)
         particle_index += 1
       end
@@ -4071,15 +4580,9 @@ module BattleAnimationStudioRuntime
     end
 
     def camera_follow_point(side)
-      sprite = side.to_sym == :target ? target_sprite : user_sprite
-      if sprite && !(sprite.respond_to?(:disposed?) && sprite.disposed?)
-        x = (sprite.x rescue Graphics.width.to_f / 2.0).to_f
-        y = (sprite.y rescue Graphics.height.to_f / 2.0).to_f
-        h = (sprite.bitmap && !sprite.bitmap.disposed?) ? sprite.bitmap.height.to_f : 80.0
-        zy = (sprite.zoom_y rescue 1.0).to_f.abs
-        return [x, y - (h * zy / 2.0)]
-      end
-      base_anchor(side, true)
+      # Focus follows the stable formation slot. Do not read sprite.x/y/zoom here:
+      # those already contain BAS choreography and would cancel Impact/Dash/recoil.
+      base_anchor(side.to_sym, true)
     rescue
       [Graphics.width.to_f / 2.0, Graphics.height.to_f / 2.0]
     end
@@ -4179,6 +4682,9 @@ module BattleAnimationStudioRuntime
     # Hash/Array allocation and the GC hitches those allocations caused.
     def prepare_camera_render
       restore_camera! if @camera_restore_count.to_i > 0
+      # Last possible uncammed pass before the frame is drawn. This is the
+      # authoritative shadow position for every BAS-driven battler transform.
+      sync_all_battler_shadows!
       state = camera_state
       return if camera_neutral?(state)
       seen = @camera_seen
@@ -4256,13 +4762,21 @@ module BattleAnimationStudioRuntime
       current_frame = timeline_frame
       current_frame = @frame if current_frame < @frame
       @frame = current_frame
+      # Resolve Pause/Resume before any scene sprite update for this BAS frame.
+      # The class-level BattlerSprite hook uses this through the whole frame,
+      # including DBK/Animated Pokémon System update paths.
+      sync_paused_battler_sprite_ids!
 
       play_events(@previous_event_frame, @frame)
       apply_conditional_form_rules(@previous_event_frame, @frame)
       apply_battlers
+      # A view/form key can replace @_iconbitmap during apply_battlers. Mark the
+      # replacement before the scene pump so Pause still freezes this very frame.
+      sync_paused_battler_bitmap_flags!
       clips.each { |clip| apply_clip(clip) }
       update_screen_events
       apply_scene_hide_progress(@frame)
+      sync_all_battler_shadows!
 
       if @frame >= duration - 0.0001
         @done = true
@@ -4271,6 +4785,115 @@ module BattleAnimationStudioRuntime
 
       @previous_event_frame = @frame
     end
+  end
+
+  # Test(48): freeze the animated spritesheet at its real owner. Animated
+  # Pokémon System/DBK advances battler cels inside DeluxeBitmapWrapper, not by
+  # BAS transforms. Both #update and #update_pokemon_sprite are intercepted so
+  # different APS/DBK revisions cannot advance a paused wrapper through either
+  # path. Resume shifts @last_uptime by the paused duration, preserving the
+  # exact current cel and remaining frame delay with no catch-up jump.
+  # Test(48) FIX5: Animated/DBK shadows are independent sprites. Follow the
+  # actual BattlerSprite transform at its writer instead of guessing later in
+  # the frame. This makes every BAS movement path (Quick Attack included) inherit
+  # shadow movement automatically.
+  module BattlerShadowTransformHook
+    def x=(value)
+      old_value = (self.x rescue nil)
+      result = super(value)
+      player = (BattleAnimationStudioRuntime.active_player rescue nil)
+      if player && !old_value.nil? && player.respond_to?(:propagate_shadow_delta_from_sprite)
+        new_value = (self.x rescue value)
+        player.propagate_shadow_delta_from_sprite(self, new_value.to_f - old_value.to_f, 0.0)
+      end
+      result
+    end
+
+    def y=(value)
+      old_value = (self.y rescue nil)
+      result = super(value)
+      player = (BattleAnimationStudioRuntime.active_player rescue nil)
+      if player && !old_value.nil? && player.respond_to?(:propagate_shadow_delta_from_sprite)
+        new_value = (self.y rescue value)
+        player.propagate_shadow_delta_from_sprite(self, 0.0, new_value.to_f - old_value.to_f)
+      end
+      result
+    end
+  end
+
+  def self.install_battler_shadow_transform_hook!
+    return false if !defined?(Battle::Scene::BattlerSprite)
+    klass = Battle::Scene::BattlerSprite
+    return true if klass.ancestors.include?(BattlerShadowTransformHook)
+    klass.prepend(BattlerShadowTransformHook)
+    true
+  rescue => e
+    log("install battler shadow transform hook #{e.class}: #{e.message}")
+    false
+  end
+
+  module DeluxeBitmapIdlePauseHook
+    def __bas_idle_pause_now
+      if defined?(System) && System.respond_to?(:uptime)
+        return System.uptime.to_f
+      end
+      if defined?(Process) && Process.respond_to?(:clock_gettime) && defined?(Process::CLOCK_MONOTONIC)
+        return Process.clock_gettime(Process::CLOCK_MONOTONIC).to_f
+      end
+      Time.now.to_f
+    rescue
+      0.0
+    end
+
+    def __bas_idle_pause_hold!
+      if instance_variable_get(:@__bas_idle_pause_started_at).nil?
+        instance_variable_set(:@__bas_idle_pause_started_at, __bas_idle_pause_now)
+      end
+    rescue
+    end
+
+    def __bas_idle_pause_resume_clock!
+      started = instance_variable_get(:@__bas_idle_pause_started_at)
+      return if started.nil?
+      now = __bas_idle_pause_now
+      paused_for = [now.to_f - started.to_f, 0.0].max
+      if instance_variable_defined?(:@last_uptime)
+        last = instance_variable_get(:@last_uptime).to_f
+        # A never-advanced wrapper starts its delay fresh on Resume. Otherwise
+        # preserve the exact fraction of the current cel's delay from Pause.
+        instance_variable_set(:@last_uptime, last > 0.0 ? last + paused_for : now)
+      end
+      remove_instance_variable(:@__bas_idle_pause_started_at) if instance_variable_defined?(:@__bas_idle_pause_started_at)
+    rescue
+    end
+
+    def update_pokemon_sprite(*args)
+      if instance_variable_get(:@__bas_idle_paused) == true
+        __bas_idle_pause_hold!
+        return nil
+      end
+      __bas_idle_pause_resume_clock!
+      super
+    end
+
+    def update(*args)
+      if instance_variable_get(:@__bas_idle_paused) == true
+        __bas_idle_pause_hold!
+        return false
+      end
+      __bas_idle_pause_resume_clock!
+      super
+    end
+  end
+
+  def self.install_deluxe_bitmap_pause_hook!
+    return false if !defined?(DeluxeBitmapWrapper)
+    return true if DeluxeBitmapWrapper.ancestors.include?(DeluxeBitmapIdlePauseHook)
+    DeluxeBitmapWrapper.prepend(DeluxeBitmapIdlePauseHook)
+    true
+  rescue => e
+    log("install DeluxeBitmapWrapper pause hook #{e.class}: #{e.message}")
+    false
   end
 
   module SceneHook
@@ -4306,6 +4929,8 @@ module BattleAnimationStudioRuntime
       else
         Input.update
       end
+      # Pause/Resume is enforced inside DeluxeBitmapWrapper, so the scene and
+      # BattlerSprite keep updating while only the selected spritesheet cel stops.
       if respond_to?(:pbFrameUpdate)
         pbFrameUpdate(nil)
       else
@@ -4334,6 +4959,7 @@ module BattleAnimationStudioRuntime
         player.restore_camera!
       end
       Input.update
+      # Keep wrapper pause flags active across LBDS' complete scene update.
       pbGraphicsUpdate if respond_to?(:pbGraphicsUpdate)
       pbInputUpdate if respond_to?(:pbInputUpdate)
       pbFrameUpdate(nil) if respond_to?(:pbFrameUpdate)

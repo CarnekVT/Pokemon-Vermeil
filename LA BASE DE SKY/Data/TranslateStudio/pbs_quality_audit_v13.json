@@ -1,0 +1,1452 @@
+{
+  "version": "1.3.0",
+  "repairedRows": 327,
+  "idResolvedRows": 8004,
+  "ambiguousSameCategoryRows": 36,
+  "sampleRepairs": [
+    {
+      "category": "Species Category",
+      "source": "Serpiente",
+      "before": "Serpentine",
+      "after": "Snake",
+      "ids": [
+        "EKANS"
+      ],
+      "variants": {
+        "EKANS": "Snake"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Imán",
+      "before": "Magnet Pull",
+      "after": "Magnet",
+      "ids": [
+        "MAGNEMITE",
+        "MAGNETON"
+      ],
+      "variants": {
+        "MAGNEMITE": "Magnet",
+        "MAGNETON": "Magnet"
+      }
+    },
+    {
+      "category": "Item Name",
+      "source": "Imán",
+      "before": "Magnet Pull",
+      "after": "Magnet",
+      "ids": [
+        "MAGNET"
+      ],
+      "variants": {
+        "MAGNET": "Magnet"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Tenaza",
+      "before": "Pincer",
+      "after": "Clamp",
+      "ids": [
+        "CLAMP"
+      ],
+      "variants": {
+        "CLAMP": "Clamp"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Pez",
+      "before": "Finned",
+      "after": "Fish",
+      "ids": [
+        "MAGIKARP",
+        "FEEBAS"
+      ],
+      "variants": {
+        "MAGIKARP": "Fish",
+        "FEEBAS": "Fish"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Burbuja",
+      "before": "Bubble Jet",
+      "after": "Bubble",
+      "ids": [
+        "BUBBLE"
+      ],
+      "variants": {
+        "BUBBLE": "Bubble"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Dormir",
+      "before": "Sleep",
+      "after": "Sleeping",
+      "ids": [
+        "SNORLAX"
+      ],
+      "variants": {
+        "SNORLAX": "Sleeping"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Hierba",
+      "before": "Grass",
+      "after": "Grass",
+      "ids": [
+        "MEGANIUM",
+        "MEGANIUM_1"
+      ],
+      "variants": {
+        "MEGANIUM": "Herb",
+        "MEGANIUM_1": "Grass"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Imitación",
+      "before": "Imitation",
+      "after": "Role Play",
+      "ids": [
+        "ROLEPLAY"
+      ],
+      "variants": {
+        "ROLEPLAY": "Role Play"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Oscuridad",
+      "before": "Darkness",
+      "after": "Darkness",
+      "ids": [
+        "MURKROW",
+        "SABLEYE",
+        "DARKRAI",
+        "SABLEYE_1",
+        "DARKRAI_1"
+      ],
+      "variants": {
+        "MURKROW": "Darkness",
+        "SABLEYE": "Darkness",
+        "DARKRAI": "Pitch-Black",
+        "SABLEYE_1": "Darkness",
+        "DARKRAI_1": "Darkness"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Ascuas",
+      "before": "Live Coal",
+      "after": "Ember",
+      "ids": [
+        "EMBER"
+      ],
+      "variants": {
+        "EMBER": "Ember"
+      }
+    },
+    {
+      "category": "Ability Name",
+      "source": "Caparazón",
+      "before": "Hard Shell",
+      "after": "Shell Armor",
+      "ids": [
+        "SHELLARMOR"
+      ],
+      "variants": {
+        "SHELLARMOR": "Shell Armor"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Buceo",
+      "before": "Diving",
+      "after": "Dive",
+      "ids": [
+        "DIVE"
+      ],
+      "variants": {
+        "DIVE": "Dive"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Descarga",
+      "before": "Download",
+      "after": "Download",
+      "ids": [
+        "MANECTRIC",
+        "MANECTRIC_1"
+      ],
+      "variants": {
+        "MANECTRIC": "Discharge",
+        "MANECTRIC_1": "Download"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Carbón",
+      "before": "Charcoal",
+      "after": "Coal",
+      "ids": [
+        "TORKOAL",
+        "ROLYCOLY",
+        "CARKOL",
+        "COALOSSAL"
+      ],
+      "variants": {
+        "TORKOAL": "Coal",
+        "ROLYCOLY": "Coal",
+        "CARKOL": "Coal",
+        "COALOSSAL": "Coal"
+      }
+    },
+    {
+      "category": "Species Form",
+      "source": "Forma Normal",
+      "before": "Normal Forme",
+      "after": "Normal Forme",
+      "ids": [
+        "CASTFORM_0",
+        "DEOXYS_0",
+        "ROTOM_0",
+        "GENESECT_0",
+        "TERAPAGOS_0"
+      ],
+      "variants": {
+        "CASTFORM_0": "Normal Form",
+        "DEOXYS_0": "Normal Forme",
+        "ROTOM_0": "Rotom",
+        "GENESECT_0": "Normal",
+        "TERAPAGOS_0": "Normal Form"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Cielo",
+      "before": "Sky",
+      "after": "Sky",
+      "ids": [
+        "RAYQUAZA",
+        "RAYQUAZA_1"
+      ],
+      "variants": {
+        "RAYQUAZA": "Sky High",
+        "RAYQUAZA_1": "Sky"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Emperador",
+      "before": "Emperor",
+      "after": "Emperor",
+      "ids": [
+        "EMPOLEON",
+        "CALYREX_1",
+        "CALYREX_2"
+      ],
+      "variants": {
+        "EMPOLEON": "Emperor",
+        "CALYREX_1": "High King",
+        "CALYREX_2": "High King"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Cabezazo",
+      "before": "Skull Bash",
+      "after": "Head Butt",
+      "ids": [
+        "CRANIDOS",
+        "RAMPARDOS"
+      ],
+      "variants": {
+        "CRANIDOS": "Head Butt",
+        "RAMPARDOS": "Head Butt"
+      }
+    },
+    {
+      "category": "Species Form",
+      "source": "Tipo Normal",
+      "before": "Normal Type",
+      "after": "Normal Type",
+      "ids": [
+        "ARCEUS_0",
+        "SILVALLY_0"
+      ],
+      "variants": {
+        "ARCEUS_0": "Normal Type",
+        "SILVALLY_0": "Type: Normal"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Alfa",
+      "before": "Alph",
+      "after": "Alph",
+      "ids": [
+        "ARCEUS",
+        "ARCEUS_1",
+        "ARCEUS_2",
+        "ARCEUS_3",
+        "ARCEUS_4",
+        "ARCEUS_5",
+        "ARCEUS_6",
+        "ARCEUS_7",
+        "ARCEUS_8",
+        "ARCEUS_9",
+        "ARCEUS_10",
+        "ARCEUS_11",
+        "ARCEUS_12",
+        "ARCEUS_13",
+        "ARCEUS_14",
+        "ARCEUS_15",
+        "ARCEUS_16",
+        "ARCEUS_17",
+        "ARCEUS_18"
+      ],
+      "variants": {
+        "ARCEUS": "Alpha",
+        "ARCEUS_1": "Alph",
+        "ARCEUS_2": "Alph",
+        "ARCEUS_3": "Alph",
+        "ARCEUS_4": "Alph",
+        "ARCEUS_5": "Alph",
+        "ARCEUS_6": "Alph",
+        "ARCEUS_7": "Alph",
+        "ARCEUS_8": "Alph",
+        "ARCEUS_9": "Alph",
+        "ARCEUS_10": "Alph",
+        "ARCEUS_11": "Alph",
+        "ARCEUS_12": "Alph",
+        "ARCEUS_13": "Alph",
+        "ARCEUS_14": "Alph",
+        "ARCEUS_15": "Alph",
+        "ARCEUS_16": "Alph",
+        "ARCEUS_17": "Alph",
+        "ARCEUS_18": "Alph"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Victoria",
+      "before": "Win",
+      "after": "Victory",
+      "ids": [
+        "VICTINI"
+      ],
+      "variants": {
+        "VICTINI": "Victory"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Alerta",
+      "before": "Forewarn",
+      "after": "Lookout",
+      "ids": [
+        "WATCHOG"
+      ],
+      "variants": {
+        "WATCHOG": "Lookout"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Malicioso",
+      "before": "Devious",
+      "after": "Leer",
+      "ids": [
+        "LEER"
+      ],
+      "variants": {
+        "LEER": "Leer"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Salpicadura",
+      "before": "Spray",
+      "after": "Splash",
+      "ids": [
+        "SPLASH"
+      ],
+      "variants": {
+        "SPLASH": "Splash"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Mineral",
+      "before": "Mineral",
+      "after": "Mineral",
+      "ids": [
+        "BOLDORE",
+        "GLIMMET",
+        "GLIMMORA",
+        "GLIMMORA_1"
+      ],
+      "variants": {
+        "BOLDORE": "Ore",
+        "GLIMMET": "Ore",
+        "GLIMMORA": "Ore",
+        "GLIMMORA_1": "Mineral"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Cuidador",
+      "before": "Nurturing",
+      "after": "Nurturing",
+      "ids": [
+        "LEAVANNY",
+        "DRAKLOAK"
+      ],
+      "variants": {
+        "LEAVANNY": "Nurturing",
+        "DRAKLOAK": "Caretaker"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Señuelo",
+      "before": "Luring",
+      "after": "Follow Me",
+      "ids": [
+        "FOLLOWME"
+      ],
+      "variants": {
+        "FOLLOWME": "Follow Me"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Violento",
+      "before": "Hostile",
+      "after": "Hostile",
+      "ids": [
+        "ZWEILOUS",
+        "BASCULIN_2",
+        "BASCULIN_3"
+      ],
+      "variants": {
+        "ZWEILOUS": "Hostile",
+        "BASCULIN_2": "Mellow",
+        "BASCULIN_3": "Hostile"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Torbellino",
+      "before": "Cyclone",
+      "after": "Whirlpool",
+      "ids": [
+        "WHIRLPOOL"
+      ],
+      "variants": {
+        "WHIRLPOOL": "Whirlpool"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Nata",
+      "before": "Meringue",
+      "after": "Meringue",
+      "ids": [
+        "SLURPUFF",
+        "MILCERY",
+        "ALCREMIE",
+        "ALCREMIE_7",
+        "ALCREMIE_8",
+        "ALCREMIE_1",
+        "ALCREMIE_2",
+        "ALCREMIE_3",
+        "ALCREMIE_4",
+        "ALCREMIE_5",
+        "ALCREMIE_6",
+        "ALCREMIE_9",
+        "ALCREMIE_10",
+        "ALCREMIE_11",
+        "ALCREMIE_12",
+        "ALCREMIE_13",
+        "ALCREMIE_14",
+        "ALCREMIE_15",
+        "ALCREMIE_16",
+        "ALCREMIE_17",
+        "ALCREMIE_18",
+        "ALCREMIE_19",
+        "ALCREMIE_20",
+        "ALCREMIE_21",
+        "ALCREMIE_22",
+        "ALCREMIE_23",
+        "ALCREMIE_24",
+        "ALCREMIE_25",
+        "ALCREMIE_26",
+        "ALCREMIE_27",
+        "ALCREMIE_28",
+        "ALCREMIE_29",
+        "ALCREMIE_30",
+        "ALCREMIE_31",
+        "ALCREMIE_32",
+        "ALCREMIE_33",
+        "ALCREMIE_34",
+        "ALCREMIE_35",
+        "ALCREMIE_36",
+        "ALCREMIE_37",
+        "ALCREMIE_38",
+        "ALCREMIE_39",
+        "ALCREMIE_40",
+        "ALCREMIE_41",
+        "ALCREMIE_42",
+        "ALCREMIE_43",
+        "ALCREMIE_44",
+        "ALCREMIE_45",
+        "ALCREMIE_46",
+        "ALCREMIE_47",
+        "ALCREMIE_48",
+        "ALCREMIE_49",
+        "ALCREMIE_50",
+        "ALCREMIE_51",
+        "ALCREMIE_52",
+        "ALCREMIE_53",
+        "ALCREMIE_54",
+        "ALCREMIE_55",
+        "ALCREMIE_56",
+        "ALCREMIE_57",
+        "ALCREMIE_58",
+        "ALCREMIE_59",
+        "ALCREMIE_60",
+        "ALCREMIE_61",
+        "ALCREMIE_62"
+      ],
+      "variants": {
+        "SLURPUFF": "Meringue",
+        "MILCERY": "Cream",
+        "ALCREMIE": "Cream",
+        "ALCREMIE_7": "Meringue",
+        "ALCREMIE_8": "Meringue",
+        "ALCREMIE_1": "Meringue",
+        "ALCREMIE_2": "Meringue",
+        "ALCREMIE_3": "Meringue",
+        "ALCREMIE_4": "Meringue",
+        "ALCREMIE_5": "Meringue",
+        "ALCREMIE_6": "Meringue",
+        "ALCREMIE_9": "Meringue",
+        "ALCREMIE_10": "Meringue",
+        "ALCREMIE_11": "Meringue",
+        "ALCREMIE_12": "Meringue",
+        "ALCREMIE_13": "Meringue",
+        "ALCREMIE_14": "Meringue",
+        "ALCREMIE_15": "Meringue",
+        "ALCREMIE_16": "Meringue",
+        "ALCREMIE_17": "Meringue",
+        "ALCREMIE_18": "Meringue",
+        "ALCREMIE_19": "Meringue",
+        "ALCREMIE_20": "Meringue",
+        "ALCREMIE_21": "Meringue",
+        "ALCREMIE_22": "Meringue",
+        "ALCREMIE_23": "Meringue",
+        "ALCREMIE_24": "Meringue",
+        "ALCREMIE_25": "Meringue",
+        "ALCREMIE_26": "Meringue",
+        "ALCREMIE_27": "Meringue",
+        "ALCREMIE_28": "Meringue",
+        "ALCREMIE_29": "Meringue",
+        "ALCREMIE_30": "Meringue",
+        "ALCREMIE_31": "Meringue",
+        "ALCREMIE_32": "Meringue",
+        "ALCREMIE_33": "Meringue",
+        "ALCREMIE_34": "Meringue",
+        "ALCREMIE_35": "Meringue",
+        "ALCREMIE_36": "Meringue",
+        "ALCREMIE_37": "Meringue",
+        "ALCREMIE_38": "Meringue",
+        "ALCREMIE_39": "Meringue",
+        "ALCREMIE_40": "Meringue",
+        "ALCREMIE_41": "Meringue",
+        "ALCREMIE_42": "Meringue",
+        "ALCREMIE_43": "Meringue",
+        "ALCREMIE_44": "Meringue",
+        "ALCREMIE_45": "Meringue",
+        "ALCREMIE_46": "Meringue",
+        "ALCREMIE_47": "Meringue",
+        "ALCREMIE_48": "Meringue",
+        "ALCREMIE_49": "Meringue",
+        "ALCREMIE_50": "Meringue",
+        "ALCREMIE_51": "Meringue",
+        "ALCREMIE_52": "Meringue",
+        "ALCREMIE_53": "Meringue",
+        "ALCREMIE_54": "Meringue",
+        "ALCREMIE_55": "Meringue",
+        "ALCREMIE_56": "Meringue",
+        "ALCREMIE_57": "Meringue",
+        "ALCREMIE_58": "Meringue",
+        "ALCREMIE_59": "Meringue",
+        "ALCREMIE_60": "Meringue",
+        "ALCREMIE_61": "Meringue",
+        "ALCREMIE_62": "Meringue"
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Lanzamiento",
+      "before": "Launch",
+      "after": "Fling",
+      "ids": [
+        "FLING"
+      ],
+      "variants": {
+        "FLING": "Fling"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Pirotecnia",
+      "before": "Flame Burst",
+      "after": "Fireworks",
+      "ids": [
+        "BLACEPHALON"
+      ],
+      "variants": {
+        "BLACEPHALON": "Fireworks"
+      }
+    },
+    {
+      "category": "Species Category",
+      "source": "Arremetida",
+      "before": "Headlong Rush",
+      "after": "Rush",
+      "ids": [
+        "ARROKUDA"
+      ],
+      "variants": {
+        "ARROKUDA": "Rush"
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Las dos toscas hachas le permiten talar árboles mientras su piel pétrea lo protege. Dada su naturaleza agresiva, es aconsejable escapar en caso de verlo.",
+      "before": "This Pokémon is a rough, crude, and violent sort. It swings around its large, heavy stone axes to finish off its prey.",
+      "after": "A violent creature that fells towering trees with its crude axes and shields itself with hard stone. If one should chance upon this Pokémon in the wilds, one's only recourse is to flee.",
+      "ids": [
+        "KLEAVOR"
+      ],
+      "variants": {
+        "KLEAVOR": "A violent creature that fells towering trees with its crude axes and shields itself with hard stone. If one should chance upon this Pokémon in the wilds, one's only recourse is to flee."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Se tiene la teoría de que el terreno pantanoso de Hisui favoreció el desarrollo de su constitución robusta, así como su capacidad de manipular la turba.",
+      "before": "The swampy terrain that Ursaluna lives in gave Ursaluna its burly physique and newfound capacity to manipulate peat at will.",
+      "after": "It is believed that the swampy terrain of its ancient home region that gave Ursaluna its burly physique and newfound capacity to manipulate peat at will.",
+      "ids": [
+        "URSALUNA"
+      ],
+      "variants": {
+        "URSALUNA": "It is believed that the swampy terrain of its ancient home region that gave Ursaluna its burly physique and newfound capacity to manipulate peat at will."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Durante las remontadas de los ríos, se envuelve de las almas de sus congéneres caídos en la ardua travesía. No tiene rival en ninguna de las corrientes que fluyen.",
+      "before": "This Pokémon is cloaked in the souls of its comrades who perished during a punishing journey to the river of their birth.",
+      "after": "This Pokémon is cloaked in the souls of its comrades who perished during a punishing journey to the river of their birth.",
+      "ids": [
+        "BASCULEGION",
+        "BASCULEGION_1"
+      ],
+      "variants": {
+        "BASCULEGION": "Clads itself in the souls of comrades that perished before fulfilling their goals of journeying upstream. No other species throughout other aquatic environments is Basculegion’s equal.",
+        "BASCULEGION_1": "This Pokémon is cloaked in the souls of its comrades who perished during a punishing journey to the river of their birth."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Gracias a su fortaleza física y potente veneno, ninguna especie de las alturas heladas le planta cara. Es de personalidad solitaria y no forma manadas.",
+      "before": "Because of Sneasler's virulent poison and daunting physical prowess, no other species could hope to best it on the frozen highlands. Preferring solitude, this species does not form packs.",
+      "after": "Because of Sneasler’s virulent poison and daunting physical prowess, no other species could hope to best it on frozen highlands. Preferring solitude, this species does not form packs.",
+      "ids": [
+        "SNEASLER"
+      ],
+      "variants": {
+        "SNEASLER": "Because of Sneasler’s virulent poison and daunting physical prowess, no other species could hope to best it on frozen highlands. Preferring solitude, this species does not form packs."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Sus púas, afiladas como lanzas, y su violento carácter le han granjeado el mote de Demonio del Mar. Puede sorber veneno como sustento alimenticio.",
+      "before": "Overqwil's poisonous spikes will reflexively react even while Overqwil sleeps, stabbing any moving thing that approaches.",
+      "after": "Its lancelike spikes and savage temperament have earned it the nickname \"sea fiend.\" It slurps up poison to nourish itself.",
+      "ids": [
+        "OVERQWIL"
+      ],
+      "variants": {
+        "OVERQWIL": "Its lancelike spikes and savage temperament have earned it the nickname \"sea fiend.\" It slurps up poison to nourish itself."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Se sirve de la luz que reflejan los tricomas de su manto de hojas para camuflar la vid y crear la ilusión óptica de que la flor flota en el aire.",
+      "before": "This Pokémon uses the reflective fur lining in its cape to camouflage the stem of its flower, creating the illusion that the flower is floating.",
+      "after": "This Pokémon uses the reflective fur lining its cape to camouflage the stem of its flower, creating the illusion that the flower is floating.",
+      "ids": [
+        "MEOWSCARADA"
+      ],
+      "variants": {
+        "MEOWSCARADA": "This Pokémon uses the reflective fur lining its cape to camouflage the stem of its flower, creating the illusion that the flower is floating."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Yace sobre rocas calientes, cuyo calor transforma en energía ígnea tras absorberlo por sus escamas rectangulares.",
+      "before": "Its flame sac is small, so energy is always leaking out. This energy is released from the dent atop Fuecoco's head and flickers to and fro.",
+      "after": "It lies on warm rocks and uses the heat absorbed by its square-shaped scales to create fire energy.",
+      "ids": [
+        "FUECOCO"
+      ],
+      "variants": {
+        "FUECOCO": "It lies on warm rocks and uses the heat absorbed by its square-shaped scales to create fire energy."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "La mezcla de energía ígnea con el exceso de su propia fuerza vital ha tomado la forma de una bola de fuego de aspecto oval sobre su cabeza.",
+      "before": "The combination of Crocalor's fire energy and overflowing vitality has caused an egg-shaped fireball to appear on the Pokémon's head.",
+      "after": "The combination of Crocalor’s fire energy and overflowing vitality has caused an egg-shaped fireball to appear on the Pokémon’s head.",
+      "ids": [
+        "CROCALOR"
+      ],
+      "variants": {
+        "CROCALOR": "The combination of Crocalor’s fire energy and overflowing vitality has caused an egg-shaped fireball to appear on the Pokémon’s head."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Se dice que el pájaro flamígero al que da forma su canto es un espíritu que moraba en la bola de fuego que le coronaba la cabeza.",
+      "before": "The fiery bird changes shape when Skeledirge sings. Rumor has it that the bird was born when the fireball on Skeledirge's head gained a soul.",
+      "after": "The fiery bird changes shape when Skeledirge sings. Rumor has it that the bird was born when the fireball on Skeledirge’s head gained a soul.",
+      "ids": [
+        "SKELEDIRGE"
+      ],
+      "variants": {
+        "SKELEDIRGE": "The fiery bird changes shape when Skeledirge sings. Rumor has it that the bird was born when the fireball on Skeledirge’s head gained a soul."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Un Pokémon llegado hace tiempo desde tierras lejanas y ya establecido en la región. El gel que secreta por las plumas repele el agua y la mugre.",
+      "before": "Its strong legs let it easily swim around in even fast-flowing rivers. It likes to keep things tidy and is prone to overthinking things.",
+      "after": "This Pokémon migrated to Paldea from distant lands long ago. The gel secreted by its feathers repels water and grime.",
+      "ids": [
+        "QUAXLY"
+      ],
+      "variants": {
+        "QUAXLY": "This Pokémon migrated to Paldea from distant lands long ago. The gel secreted by its feathers repels water and grime."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Posee un olfato muy desarrollado que emplea únicamente para buscar comida, actividad a la que dedica el día entero.",
+      "before": "It searches for food all day. It possesses a keen sense of smell but doesn't use it for anything other than foraging.",
+      "after": "It searches for food all day. It possesses a keen sense of smell but doesn’t use it for anything other than foraging.",
+      "ids": [
+        "LECHONK"
+      ],
+      "variants": {
+        "LECHONK": "It searches for food all day. It possesses a keen sense of smell but doesn’t use it for anything other than foraging."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Su piel suave y lustrosa es su mayor orgullo. Desprende una fragancia concentrada por la punta de la cola.",
+      "before": "Oinkologne is proud of its fine, glossy skin. It emits a concentrated scent from the tip of its tail.",
+      "after": "It entrances female Pokémon with the sweet, alluring scent that wafts from all over its body.",
+      "ids": [
+        "OINKOLOGNE"
+      ],
+      "variants": {
+        "OINKOLOGNE": "It entrances female Pokémon with the sweet, alluring scent that wafts from all over its body."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "La bola de hilo que le rodea el cuerpo es lo bastante elástica como para repeler las guadañas de los Scyther, su enemigo natural.",
+      "before": "The thread it secretes from its rear is as strong as wire. The secret behind the thread's strength is the topic of ongoing research.",
+      "after": "The ball of threads wrapped around its body is elastic enough to deflect the scythes of Scyther, this Pokémon’s natural enemy.",
+      "ids": [
+        "TAROUNTULA"
+      ],
+      "variants": {
+        "TAROUNTULA": "The ball of threads wrapped around its body is elastic enough to deflect the scythes of Scyther, this Pokémon’s natural enemy."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Mantiene plegado su tercer par de patas, cuya fuerza le permite saltar a más de 10 m de altura para huir en caso de apuro.",
+      "before": "It has its third set of legs folded up. When it's in a tough spot, this Pokémon jumps over 30 feet using the strength of its legs.",
+      "after": "It has its third set of legs folded up. When it’s in a tough spot, this Pokémon jumps over 30 feet using the strength of its legs.",
+      "ids": [
+        "NYMBLE"
+      ],
+      "variants": {
+        "NYMBLE": "It has its third set of legs folded up. When it’s in a tough spot, this Pokémon jumps over 30 feet using the strength of its legs."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Construyen grandes nidos que dividen en varias cámaras destinadas a distintas funciones, como dormir o comer.",
+      "before": "The two little ones just appeared one day. The group might be a family of related Pokémon, but nobody knows for sure.",
+      "after": "They build huge nests with many rooms that are used for different purposes, such as eating and sleeping.",
+      "ids": [
+        "MAUSHOLD"
+      ],
+      "variants": {
+        "MAUSHOLD": "They build huge nests with many rooms that are used for different purposes, such as eating and sleeping."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Resulta húmedo y suave al tacto. Hace fermentar las cosas a su alrededor con la levadura de su aliento.",
+      "before": "This Pokémon is smooth and moist to the touch. Yeast in Fidough's breath induces fermentation in the Pokémon's vicinity.",
+      "after": "This Pokémon is smooth and moist to the touch. Yeast in Fidough’s breath induces fermentation in the Pokémon’s vicinity.",
+      "ids": [
+        "FIDOUGH"
+      ],
+      "variants": {
+        "FIDOUGH": "This Pokémon is smooth and moist to the touch. Yeast in Fidough’s breath induces fermentation in the Pokémon’s vicinity."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "El fragante aroma que despide su cuerpo favorece el crecimiento del trigo, por lo que lo aprecian mucho en las comunidades agrícolas.",
+      "before": "The pleasant aroma that emanates from this Pokémon's body helps wheat grow, so Dachsbun has been treasured by farming villages.",
+      "after": "The pleasant aroma that emanates from this Pokémon’s body helps wheat grow, so Dachsbun has been treasured by farming villages.",
+      "ids": [
+        "DACHSBUN"
+      ],
+      "variants": {
+        "DACHSBUN": "The pleasant aroma that emanates from this Pokémon’s body helps wheat grow, so Dachsbun has been treasured by farming villages."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "No duda en compartir su delicioso aceite de fresco aroma. Convive con los seres humanos desde hace mucho tiempo.",
+      "before": "It basks in the sun to its heart's content until the fruits on its head ripen. After that, Dolliv departs from human settlements and goes on a journey.",
+      "after": "Dolliv shares its tasty, fresh-scented oil with others. This species has coexisted with humans since times long gone.",
+      "ids": [
+        "DOLLIV"
+      ],
+      "variants": {
+        "DOLLIV": "Dolliv shares its tasty, fresh-scented oil with others. This species has coexisted with humans since times long gone."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Surgen de estratos salinos subterráneos. Antaño se los tenía en alta estima, pues compartían su sal, un mineral por entonces muy preciado.",
+      "before": "The ground scrapes its body as it travels, causing it to leave salt behind. Salt is constantly being created and replenished inside Nacli's body.",
+      "after": "It was born in a layer of rock salt deep under the earth. This species was particularly treasured in the old days, as they would share precious salt.",
+      "ids": [
+        "NACLI"
+      ],
+      "variants": {
+        "NACLI": "It was born in a layer of rock salt deep under the earth. This species was particularly treasured in the old days, as they would share precious salt."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Escupe sal para recubrir con ella a sus presas y someterlas a un proceso de salazón que extrae la humedad de sus cuerpos.",
+      "before": "This Pokémon dry cures its prey by spraying salt over them. The curing process steals away the water in the prey's body.",
+      "after": "This Pokémon dry cures its prey by spraying salt over them. The curing process steals away the water in the prey’s body.",
+      "ids": [
+        "NACLSTACK"
+      ],
+      "variants": {
+        "NACLSTACK": "This Pokémon dry cures its prey by spraying salt over them. The curing process steals away the water in the prey’s body."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Las afiladas llamas que cubren sus brazos están avivadas por la frustración de un espadachín que cayó antes de poder cumplir su cometido.",
+      "before": "An old set of armor steeped in grudges caused this Pokémon's evolution. Ceruledge cuts its enemies to pieces without mercy.",
+      "after": "The fiery blades on its arms burn fiercely with the lingering resentment of a sword wielder who fell before accomplishing their goal.",
+      "ids": [
+        "CERULEDGE"
+      ],
+      "variants": {
+        "CERULEDGE": "The fiery blades on its arms burn fiercely with the lingering resentment of a sword wielder who fell before accomplishing their goal."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Produce electricidad agitando la cola. Si siente peligro, hace parpadear su cabeza para alertar a sus compañeros.",
+      "before": "It floats using the electricity stored in its body. When thunderclouds are around, Tadbulb will float higher off the ground.",
+      "after": "Tadbulb shakes its tail to generate electricity. If it senses danger, it will make its head blink on and off to alert its allies.",
+      "ids": [
+        "TADBULB"
+      ],
+      "variants": {
+        "TADBULB": "Tadbulb shakes its tail to generate electricity. If it senses danger, it will make its head blink on and off to alert its allies."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Aumenta la intensidad de su electricidad al inflar su saco gular. Es capaz de recorrer 700km en un día impulsado por las corrientes de aire.",
+      "before": "It uses its throat sac to store electricity generated by its wings. There's hardly any oil in its feathers, so it is a poor swimmer.",
+      "after": "Kilowattrel inflates its throat sac to amplify its electricity. By riding the wind, this Pokémon can fly over 430 miles in a day.",
+      "ids": [
+        "KILOWATTREL"
+      ],
+      "variants": {
+        "KILOWATTREL": "Kilowattrel inflates its throat sac to amplify its electricity. By riding the wind, this Pokémon can fly over 430 miles in a day."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Mantiene el ceño fruncido para que sus rivales lo tomen en serio, pero hasta el niño más llorón estallaría en carcajadas al ver su mueca.",
+      "before": "Its well-developed jaw and fangs are strong enough to crunch through boulders, and its thick fat makes for an excellent defense.",
+      "after": "It always scowls in an attempt to make opponents take it seriously, but even crying children will burst into laughter when they see Maschiff’s face.",
+      "ids": [
+        "MASCHIFF"
+      ],
+      "variants": {
+        "MASCHIFF": "It always scowls in an attempt to make opponents take it seriously, but even crying children will burst into laughter when they see Maschiff’s face."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Almacena energía en la papada y la libera toda de golpe para arrasar con sus rivales.",
+      "before": "Mabosstiff loves playing with children. Though usually gentle, it takes on an intimidating look when protecting its family.",
+      "after": "This Pokémon can store energy in its large dewlap. Mabosstiff unleashes this energy all at once to blow away enemies.",
+      "ids": [
+        "MABOSSTIFF"
+      ],
+      "variants": {
+        "MABOSSTIFF": "This Pokémon can store energy in its large dewlap. Mabosstiff unleashes this energy all at once to blow away enemies."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Acecha a sus presas colgado cabeza abajo de los acantilados, pero no puede aguantar así mucho tiempo porque se le sube la sangre a la cabeza.",
+      "before": "Klawf hangs upside-down from cliffs, waiting for prey. But Klawf can't remain in this position for long because its blood rushes to its head.",
+      "after": "Klawf hangs upside-down from cliffs, waiting for prey. But Klawf can’t remain in this position for long because its blood rushes to its head.",
+      "ids": [
+        "KLAWF"
+      ],
+      "variants": {
+        "KLAWF": "Klawf hangs upside-down from cliffs, waiting for prey. But Klawf can’t remain in this position for long because its blood rushes to its head."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "La punta de sus extremidades levita a 1 cm del suelo a causa del poder psíquico que emiten los volantes de su abdomen.",
+      "before": "Flittle's toes levitate about half an inch above the ground because of the psychic power emitted from the frills on the Pokémon's belly.",
+      "after": "Flittle’s toes levitate about half an inch above the ground because of the psychic power emitted from the frills on the Pokémon’s belly.",
+      "ids": [
+        "FLITTLE"
+      ],
+      "variants": {
+        "FLITTLE": "Flittle’s toes levitate about half an inch above the ground because of the psychic power emitted from the frills on the Pokémon’s belly."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Agita su martillo forjado a mano para ahuyentar a posibles amenazas, pero los Pokémon que se alimentan a base de metal suelen robárselo.",
+      "before": "This Pokémon pounds iron scraps together to make a hammer. It will remake the hammer again and again until it's satisfied with the result.",
+      "after": "It swings its handmade hammer around to protect itself, but the hammer is often stolen by Pokémon that eat metal.",
+      "ids": [
+        "TINKATINK"
+      ],
+      "variants": {
+        "TINKATINK": "It swings its handmade hammer around to protect itself, but the hammer is often stolen by Pokémon that eat metal."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Asalta el séquito entero de un Bisharp para reunir metal con el que forjar su enorme y robusto martillo.",
+      "before": "These Pokémon make their homes in piles of scrap metal. They test the strength of each other's hammers by smashing them together.",
+      "after": "This Pokémon will attack groups of Pawniard and Bisharp, gathering metal from them in order to create a large and sturdy hammer.",
+      "ids": [
+        "TINKATUFF"
+      ],
+      "variants": {
+        "TINKATUFF": "This Pokémon will attack groups of Pawniard and Bisharp, gathering metal from them in order to create a large and sturdy hammer."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Mete cosas en su bolsa, fabricada con el plumón de su pecho y con plumas mudadas, para luego dejarlas caer desde las alturas por diversión.",
+      "before": "It gathers things up in an apron made from shed feathers added to the Pokémon's chest feathers, then drops those things from high places for fun.",
+      "after": "It gathers things up in an apron made from shed feathers added to the Pokémon’s chest feathers, then drops those things from high places for fun.",
+      "ids": [
+        "BOMBIRDIER"
+      ],
+      "variants": {
+        "BOMBIRDIER": "It gathers things up in an apron made from shed feathers added to the Pokémon’s chest feathers, then drops those things from high places for fun."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Se dice que surgió cuando un misterioso Pokémon venenoso tomó posesión de un motor abandonado en un desguace.",
+      "before": "The steel section is Varoom's actual body. This Pokémon clings to rocks and converts the minerals within into energy to fuel its activities.",
+      "after": "It is said that this Pokémon was born when an unknown poison Pokémon entered and inspirited an engine left at a scrap-processing factory.",
+      "ids": [
+        "VAROOM"
+      ],
+      "variants": {
+        "VAROOM": "It is said that this Pokémon was born when an unknown poison Pokémon entered and inspirited an engine left at a scrap-processing factory."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Posee ocho cilindros, con los que genera energía haciendo estallar el gas que produce al mezclar los minerales de las rocas con su veneno.",
+      "before": "Revavroom viciously threatens others with the sound of its exhaust. It sticks its tongue out from its cylindrical mouth and sprays toxic fluids.",
+      "after": "Revavroom viciously threatens others with the sound of its exhaust. It sticks its tongue out from its cylindrical mouth and sprays toxic fluids.",
+      "ids": [
+        "REVAVROOM",
+        "REVAVROOM_1",
+        "REVAVROOM_2",
+        "REVAVROOM_3",
+        "REVAVROOM_4",
+        "REVAVROOM_5"
+      ],
+      "variants": {
+        "REVAVROOM": "It creates a gas out of poison and minerals from rocks. It then detonates the gas in its cylinders— now numbering eight—to generate energy.",
+        "REVAVROOM_1": "Revavroom viciously threatens others with the sound of its exhaust. It sticks its tongue out from its cylindrical mouth and sprays toxic fluids.",
+        "REVAVROOM_2": "Revavroom viciously threatens others with the sound of its exhaust. It sticks its tongue out from its cylindrical mouth and sprays toxic fluids.",
+        "REVAVROOM_3": "Revavroom viciously threatens others with the sound of its exhaust. It sticks its tongue out from its cylindrical mouth and sprays toxic fluids.",
+        "REVAVROOM_4": "Revavroom viciously threatens others with the sound of its exhaust. It sticks its tongue out from its cylindrical mouth and sprays toxic fluids.",
+        "REVAVROOM_5": "Revavroom viciously threatens others with the sound of its exhaust. It sticks its tongue out from its cylindrical mouth and sprays toxic fluids."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Cuando lo atacan, usa los pelos de su cuerpo a modo de puños y hace llover un aluvión de puñetazos sobre sus enemigos.",
+      "before": "This Pokémon lives in arid deserts. It maintains its metal body by consuming iron from the soil.",
+      "after": "When attacked, this Pokémon will wield the tendrils on its body like fists and pelt the opponent with a storm of punches.",
+      "ids": [
+        "ORTHWORM"
+      ],
+      "variants": {
+        "ORTHWORM": "When attacked, this Pokémon will wield the tendrils on its body like fists and pelt the opponent with a storm of punches."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Se cree que es la reencarnación de un Pokémon perro vagabundo que murió sin haber tenido contacto con humanos.",
+      "before": "This friendly Pokémon doesn't like being alone. Pay it even the slightest bit of attention, and it will follow you forever.",
+      "after": "It is said that a dog Pokémon that died in the wild without ever interacting with a human was reborn as this Pokémon.",
+      "ids": [
+        "GREAVARD"
+      ],
+      "variants": {
+        "GREAVARD": "It is said that a dog Pokémon that died in the wild without ever interacting with a human was reborn as this Pokémon."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Al parecer, se anudan la base del cuello para impedir que la energía que tienen almacenada en el estómago escape por el pico.",
+      "before": "This Pokémon apparently ties the base of its neck into a knot so that the energy stored in its belly does not escape from its beak.",
+      "after": "This Pokémon apparently ties the base of its neck into a knot so that energy stored in its belly does not escape from its beak.",
+      "ids": [
+        "FLAMIGO"
+      ],
+      "variants": {
+        "FLAMIGO": "This Pokémon apparently ties the base of its neck into a knot so that energy stored in its belly does not escape from its beak."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Los miembros de esta especie, emparentada al parecer con los Wailmer, abandonaron hace ya mucho tiempo el mar para vivir en tierra firme.",
+      "before": "It lives in frigid regions in pods of five or so individuals. It loves the minerals found in snow and ice.",
+      "after": "This species left the ocean and began living on land a very long time ago. It seems to be closely related to Wailmer.",
+      "ids": [
+        "CETODDLE"
+      ],
+      "variants": {
+        "CETODDLE": "This species left the ocean and began living on land a very long time ago. It seems to be closely related to Wailmer."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Le gusta mucho comer, pero no se le da bien cazar, por lo que aúna fuerzas con Tatsugiri con el fin de capturar presas.",
+      "before": "It treats Tatsugiri like its boss and follows it loyally. Though powerful, Dondozo is apparently not very smart.",
+      "after": "This Pokémon is a glutton, but it’s bad at getting food. It teams up with a Tatsugiri to catch prey.",
+      "ids": [
+        "DONDOZO"
+      ],
+      "variants": {
+        "DONDOZO": "This Pokémon is a glutton, but it’s bad at getting food. It teams up with a Tatsugiri to catch prey."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Es un Pokémon de gran astucia. Atrae a sus presas fingiendo estar débil para otorgarle a su compañero la oportunidad de atacar.",
+      "before": "Tatsugiri is an extremely cunning Pokémon. It feigns weakness to lure in prey, then orders its partner to attack.",
+      "after": "This is a small dragon Pokémon. It lives inside the mouth of Dondozo to protect itself from enemies on the outside.",
+      "ids": [
+        "TATSUGIRI"
+      ],
+      "variants": {
+        "TATSUGIRI": "This is a small dragon Pokémon. It lives inside the mouth of Dondozo to protect itself from enemies on the outside."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Cuando se siente amenazado, repele al enemigo con sus gruesas púas retráctiles. Esta técnica tan peligrosa es un arma de doble filo.",
+      "before": "When attacked, this Pokémon will retaliate by sticking thick spines out from its body. It's a risky move that puts everything on the line.",
+      "after": "When attacked, this Pokémon will retaliate by sticking thick spines out from its body. It’s a risky move that puts everything on the line.",
+      "ids": [
+        "CLODSIRE"
+      ],
+      "variants": {
+        "CLODSIRE": "When attacked, this Pokémon will retaliate by sticking thick spines out from its body. It’s a risky move that puts everything on the line."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Las ondas cerebrales de la cola y la cabeza van al compás, lo que le confiere poderes psíquicos diez veces más potentes que los de los Girafarig.",
+      "before": "The hardened head from the tail protects the head of the main body as Farigiraf whips its long neck around to headbutt enemies.",
+      "after": "Now that the brain waves from the head and tail are synced up, the psychic power of this Pokémon is 10 times stronger than Girafarig’s.",
+      "ids": [
+        "FARIGIRAF"
+      ],
+      "variants": {
+        "FARIGIRAF": "Now that the brain waves from the head and tail are synced up, the psychic power of this Pokémon is 10 times stronger than Girafarig’s."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Solo el Bisharp más destacado entre las filas de cada gran ejército tiene el honor de evolucionar a Kingambit.",
+      "before": "Though it commands a massive army in battle, it's not skilled at devising complex strategies. It just uses brute strength to keep pushing.",
+      "after": "Only a Bisharp that stands above all others in its vast army can evolve into Kingambit.",
+      "ids": [
+        "KINGAMBIT"
+      ],
+      "variants": {
+        "KINGAMBIT": "Only a Bisharp that stands above all others in its vast army can evolve into Kingambit."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Guarda un leve parecido con un Pokémon mitad dinosaurio y mitad seta que apareció en un artículo de cierta revista de dudosa veracidad.",
+      "before": "It bears a slight resemblance to a Pokémon described in a dubious magazine as a cross between a dinosaur and a mushroom.",
+      "after": "It is possible that the creature listed as Brute Bonnet in a certain book could actually be this Pokémon.",
+      "ids": [
+        "BRUTEBONNET"
+      ],
+      "variants": {
+        "BRUTEBONNET": "It is possible that the creature listed as Brute Bonnet in a certain book could actually be this Pokémon."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Sus rasgos distintivos se asemejan a los del espíritu de un reptil volador mencionado en una revista esotérica.",
+      "before": "It has similar features to a ghostly pterosaur that was covered in a paranormal magazine, but the two have little else in common.",
+      "after": "This Pokémon has characteristics similar to those of Flutter Mane, a creature mentioned in a certain book.",
+      "ids": [
+        "FLUTTERMANE"
+      ],
+      "variants": {
+        "FLUTTERMANE": "This Pokémon has characteristics similar to those of Flutter Mane, a creature mentioned in a certain book."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Guarda un ligero parecido con un supuesto antepasado de Volcarona publicado en cierta revista de dudosa veracidad.",
+      "before": "This Pokémon somewhat resembles an ancient form of Volcarona that was introduced in a dubious magazine.",
+      "after": "This mysterious Pokémon has some similarities to a creature that an old book introduced as Slither Wing.",
+      "ids": [
+        "SLITHERWING"
+      ],
+      "variants": {
+        "SLITHERWING": "This mysterious Pokémon has some similarities to a creature that an old book introduced as Slither Wing."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Su aspecto recuerda ligeramente a un supuesto Magneton que ha vivido 10000 años y cuya imagen se publicó en una revista esotérica.",
+      "before": "It slightly resembles a Magneton that lived for 10,000 years and was featured in an article in a paranormal magazine.",
+      "after": "No records exist of this Pokémon being caught. Data is lacking, but the Pokémon’s traits match up with a creature shown in an expedition journal.",
+      "ids": [
+        "SANDYSHOCKS"
+      ],
+      "variants": {
+        "SANDYSHOCKS": "No records exist of this Pokémon being caught. Data is lacking, but the Pokémon’s traits match up with a creature shown in an expedition journal."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Absorbe el calor a través de la placa dorsal y lo convierte en energía gélida. Cuanto más alta es la temperatura, más energía acumula.",
+      "before": "This Pokémon lives in forests and craggy areas. Using the power of its dorsal fin, it cools the inside of its nest like a refrigerator.",
+      "after": "Frigibax absorbs heat through its dorsal fin and converts the heat into ice energy. The higher the temperature, the more energy Frigibax stores.",
+      "ids": [
+        "FRIGIBAX"
+      ],
+      "variants": {
+        "FRIGIBAX": "Frigibax absorbs heat through its dorsal fin and converts the heat into ice energy. The higher the temperature, the more energy Frigibax stores."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Este Pokémon nació al imbuirse en hojas marchitas el rencor de una persona castigada por enumerar las fechorías de su rey en unas tablillas.",
+      "before": "It drains the life-force from vegetation, causing nearby forests to instantly wither and fields to turn barren.",
+      "after": "The grudge of a person punished for writing the king’s evil deeds upon wooden tablets has clad itself in dead leaves to become a Pokémon.",
+      "ids": [
+        "WOCHIEN"
+      ],
+      "variants": {
+        "WOCHIEN": "The grudge of a person punished for writing the king’s evil deeds upon wooden tablets has clad itself in dead leaves to become a Pokémon."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Controla a su voluntad llamas de hasta 3000ºC. Nada tranquilamente por los mares de magma que crea al derretir las rocas y la grava a su paso.",
+      "before": "The envy accumulated within curved beads that sparked multiple conflicts has clad itself in fire and become a Pokémon.",
+      "after": "It controls flames burning at over 5,400 degrees Fahrenheit. It casually swims through the sea of lava it creates by melting rock and sand.",
+      "ids": [
+        "CHIYU"
+      ],
+      "variants": {
+        "CHIYU": "It controls flames burning at over 5,400 degrees Fahrenheit. It casually swims through the sea of lava it creates by melting rock and sand."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Comparte varios rasgos con el invento de un científico loco que apareció en un artículo de una revista esotérica.",
+      "before": "It has some similarities to a mad scientist's invention covered in a paranormal magazine.",
+      "after": "It has some similarities to a mad scientist’s invention covered in a paranormal magazine.",
+      "ids": [
+        "IRONVALIANT"
+      ],
+      "variants": {
+        "IRONVALIANT": "It has some similarities to a mad scientist’s invention covered in a paranormal magazine."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Pese a las similitudes con los Cyclizar, es mucho más fuerte y despiadado que ellos. Está rodeado de incógnitas.",
+      "before": "This seems to be the Iron Serpent mentioned in an old book. The Iron Serpent is said to have turned the land to ash with its lightning.",
+      "after": "Much remains unknown about this creature. It resembles Cyclizar, but it is far more ruthless and powerful.",
+      "ids": [
+        "MIRAIDON"
+      ],
+      "variants": {
+        "MIRAIDON": "Much remains unknown about this creature. It resembles Cyclizar, but it is far more ruthless and powerful."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Un Pokémon violento al que se le sube la sangre a la cabeza enseguida. Hace girar en círculos la cadena que lleva al cuello para golpearlo todo.",
+      "before": "Okidogi is a ruffian with a short temper. It can pulverize anything by swinging around the chain on its neck.",
+      "after": "After all its muscles were stimulated by the toxic chain around its neck, Okidogi transformed and gained a powerful physique.",
+      "ids": [
+        "OKIDOGI"
+      ],
+      "variants": {
+        "OKIDOGI": "After all its muscles were stimulated by the toxic chain around its neck, Okidogi transformed and gained a powerful physique."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Utiliza sus poderes psíquicos desde un lugar seguro para provocar fuertes mareos a sus enemigos y divertirse a su costa.",
+      "before": "Munkidori keeps itself somewhere safe while it toys with its foes, using psychokinesis to induce intense dizziness.",
+      "after": "The chain is made from toxins that enhance capabilities. It stimulated Munkidori's brain and caused the Pokémon's psychic powers to bloom.",
+      "ids": [
+        "MUNKIDORI"
+      ],
+      "variants": {
+        "MUNKIDORI": "The chain is made from toxins that enhance capabilities. It stimulated Munkidori's brain and caused the Pokémon's psychic powers to bloom."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Al agitar sus majestuosas alas, libera unas feromonas que dejan embelesados tanto a humanos como a Pokémon.",
+      "before": "Fezandipiti beats its glossy wings to scatter pheromones that captivate people and Pokémon.",
+      "after": "Fezandipiti owes its beautiful looks and lovely voice to the toxic stimulants emanating from the chain wrapped around its body.",
+      "ids": [
+        "FEZANDIPITI"
+      ],
+      "variants": {
+        "FEZANDIPITI": "Fezandipiti owes its beautiful looks and lovely voice to the toxic stimulants emanating from the chain wrapped around its body."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Es bromista y extremadamente curioso. A la hora de combatir, se sirve del tipo de energía que contenga la máscara que lleve puesta.",
+      "before": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+      "after": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+      "ids": [
+        "OGERPON",
+        "OGERPON_4",
+        "OGERPON_5",
+        "OGERPON_6",
+        "OGERPON_7",
+        "OGERPON_8",
+        "OGERPON_9",
+        "OGERPON_10",
+        "OGERPON_11"
+      ],
+      "variants": {
+        "OGERPON": "This Pokémon's type changes based on which mask it's wearing. It confounds its enemies with nimble movements and kicks.",
+        "OGERPON_4": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+        "OGERPON_5": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+        "OGERPON_6": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+        "OGERPON_7": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+        "OGERPON_8": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+        "OGERPON_9": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+        "OGERPON_10": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks.",
+        "OGERPON_11": "This mischief-loving Pokémon is full of curiosity. It battles by drawing out the type-based energy contained within its masks."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Excava hoyos en las montañas para procurarse alimento. Su robustez es tal que apenas se inmuta aunque lo afecte de lleno un derrumbe.",
+      "before": "It gathers static electricity from its surroundings. The beams it launches when down on all fours are tremendously powerful.",
+      "after": "It digs holes on mountains, searching for food. It’s so durable that being caught in a cave-in won’t faze it.",
+      "ids": [
+        "ARCHALUDON"
+      ],
+      "variants": {
+        "ARCHALUDON": "It digs holes on mountains, searching for food. It’s so durable that being caught in a cave-in won’t faze it."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Se trata de siete seres llamados Viborappli que viven juntos en una manzana de caramelo. El del centro es el líder del grupo.",
+      "before": "These capricious syrpents have banded together. On the rare occasion that their moods align, their true power is unleashed.",
+      "after": "Seven syrpents live inside an apple made of syrup. The syrpent in the center is the commander.",
+      "ids": [
+        "HYDRAPPLE"
+      ],
+      "variants": {
+        "HYDRAPPLE": "Seven syrpents live inside an apple made of syrup. The syrpent in the center is the commander."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Su cuerpo parece estar compuesto enteramente de metal. Debe su nombre a un objeto descrito en un tomo antiguo.",
+      "before": "It resembles a Pokémon described in a dubious magazine as a Terrakion that had been modified by an evil organization.",
+      "after": "It was named after a mysterious object recorded in an old book. Its body seems to be metallic.",
+      "ids": [
+        "IRONBOULDER"
+      ],
+      "variants": {
+        "IRONBOULDER": "It was named after a mysterious object recorded in an old book. Its body seems to be metallic."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Patrullan su territorio en pareja. Las rocas ígneas que salpican su pelaje quizá sean el resultado de la actividad volcánica del lugar.",
+      "before": "They patrol their territory in pairs. The igneous rock components in the fur of this species are the result of volcanic activity in its habitat.",
+      "after": "They patrol their territory in pairs. I believe the igneous rock components in the fur of this species are the result of volcanic activity in its habitat.",
+      "ids": [
+        "GROWLITHE_1"
+      ],
+      "variants": {
+        "GROWLITHE_1": "They patrol their territory in pairs. I believe the igneous rock components in the fur of this species are the result of volcanic activity in its habitat."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Lanza dentelladas con colmillos envueltos en un intenso fuego. A pesar de su gran tamaño, es un maestro de las fintas y juguetea alrededor de sus oponentes.",
+      "before": "Snaps at its foes with fangs cloaked in blazing flame. Despite its bulk, it deftly feints every which way, leading opponents on a deceptively merry chase.",
+      "after": "Snaps at its foes with fangs cloaked in blazing flame. Despite its bulk, it deftly feints every which way, leading opponents on a deceptively merry chase as it all but dances around them.",
+      "ids": [
+        "ARCANINE_1"
+      ],
+      "variants": {
+        "ARCANINE_1": "Snaps at its foes with fangs cloaked in blazing flame. Despite its bulk, it deftly feints every which way, leading opponents on a deceptively merry chase as it all but dances around them."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Tras la megaevolución, el volumen de ácido ha aumentado hasta llenarle la boca por completo. Si se descuida, le rebosa.",
+      "before": "The volume of this Pokémon's acid has increased due to Mega Evolution, filling its mouth. If it's not careful, the acid will overflow and spill out.",
+      "after": "The volume of this Pokémon's acid has increased and filling its mouth. If it's not careful, it will overflow and spill out.",
+      "ids": [
+        "VICTREEBEL_1"
+      ],
+      "variants": {
+        "VICTREEBEL_1": "The volume of this Pokémon's acid has increased and filling its mouth. If it's not careful, it will overflow and spill out."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Curioso ejemplar que guarda cierta similitud con una Poké Ball. Cuanto más se altera, mayor es la descarga eléctrica que libera, a la que sigue una carcajada.",
+      "before": "An enigmatic Pokémon that happens to bear a resemblance to a Poké Ball. When excited, it discharges the electric current it has stored in its belly.",
+      "after": "An enigmatic Pokémon that happens to bear a resemblance to a Poké Ball. When excited, it discharges the electric current it has stored in its belly, then lets out a great, uproarious laugh.",
+      "ids": [
+        "VOLTORB_1"
+      ],
+      "variants": {
+        "VOLTORB_1": "An enigmatic Pokémon that happens to bear a resemblance to a Poké Ball. When excited, it discharges the electric current it has stored in its belly, then lets out a great, uproarious laugh."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Su complexión superficial es muy semejante a la de un bonguri. Cuando se enoja, la electricidad que emite es veinte veces más potente que la de un rayo.",
+      "before": "The surface tissue of its body is oddly similar in composition to an Apricorn. When irritated, this Pokémon looses an electric current equal to 20 lightning bolts.",
+      "after": "The tissue on the surface of its body is curiously similar in composition to an Apricorn. When irritated, this Pokémon lets loose an electric current equal to 20 lightning bolts.",
+      "ids": [
+        "ELECTRODE_1"
+      ],
+      "variants": {
+        "ELECTRODE_1": "The tissue on the surface of its body is curiously similar in composition to an Apricorn. When irritated, this Pokémon lets loose an electric current equal to 20 lightning bolts."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "La Variedad Combatiente se distingue por su fornida y poderosa musculatura y por su temperamento especialmente agresivo.",
+      "before": "This Pokémon has a muscular body and excels at close-quarters combat. It uses its short horns to strike the opponent's weak spots.",
+      "after": "This kind of Tauros, known as the Combat Breed, is distinguished by its thick, powerful muscles and its fierce disposition.",
+      "ids": [
+        "TAUROS_1"
+      ],
+      "variants": {
+        "TAUROS_1": "This kind of Tauros, known as the Combat Breed, is distinguished by its thick, powerful muscles and its fierce disposition."
+      }
+    },
+    {
+      "category": "Move Name",
+      "source": "Fuego Fatuo",
+      "before": "Ghost Flame",
+      "after": "Will-O-Wisp",
+      "ids": [
+        "WILLOWISP"
+      ],
+      "variants": {
+        "WILLOWISP": "Will-O-Wisp"
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Se cree que el Monte Corona influyó en su apariencia. Se dice que purifica con sus llamas a las almas errantes y las conduce al otro mundo.",
+      "before": "Said to purify forsaken souls with its flames and guide them to the afterlife. Its form may have been influenced by the energy of a sacred mountain.",
+      "after": "Said to purify lost, forsaken souls with its flames and guide them to the afterlife. I believe its form has been influenced by the energy of the sacred mountain towering at Hisui's center.",
+      "ids": [
+        "TYPHLOSION_1"
+      ],
+      "variants": {
+        "TYPHLOSION_1": "Said to purify lost, forsaken souls with its flames and guide them to the afterlife. I believe its form has been influenced by the energy of the sacred mountain towering at Hisui's center."
+      }
+    },
+    {
+      "category": "Dex Entry",
+      "source": "Segrega veneno a través de las agujas, razón por la que los pescadores lo odian. Los ejemplares de otras regiones presentan una forma diferente.",
+      "before": "This Pokémon eats toxic minerals to build up poison within itself. Get jabbed by it, and you'll face three days and three nights of misery.",
+      "after": "Fishers detest this troublesome Pokémon because it sprays poison from its spines, getting it everywhere. A different form of Qwilfish lives in other regions.",
+      "ids": [
+        "QWILFISH_1"
+      ],
+      "variants": {
+        "QWILFISH_1": "Fishers detest this troublesome Pokémon because it sprays poison from its spines, getting it everywhere. A different form of Qwilfish lives in other regions."
+      }
+    }
+  ]
+}

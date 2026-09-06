@@ -1,0 +1,32 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[TRAINER_SPEECHES_LOSE_F]
+¡Qué gran combate!
+¡Qué gran combate!
+¡Muy bien hecho!
+¡Muy bien hecho!
+¡Eres muy fuerte para mí! Este diálogo de derrota se añade en el archivo PBS trainers.txt
+¡Eres muy fuerte para mí! Este diálogo de derrota se añade en el archivo PBS trainers.txt
+¡Eres muy fuerte para mí!
+¡Eres muy fuerte para mí!
+Vaya, he perdido.
+Vaya, he perdido.
+¡Me has derrotado de nuevo!
+¡Me has derrotado de nuevo!
+¡Derrotada! ¡Oh, no!
+¡Derrotada! ¡Oh, no!
+¡Perdí!
+¡Perdí!
+¡Mi Skitty!
+¡Mi Skitty!
+¡No tienes que ganar de forma tan convincente!
+¡No tienes que ganar de forma tan convincente!
+¡Nuestro trabajo en equipo falló!
+¡Nuestro trabajo en equipo falló!
+...
+...
+Bah, no me he esforzado mucho.
+Bah, no me he esforzado mucho.
+¡Menudo combate!
+¡Menudo combate!

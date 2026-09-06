@@ -1,0 +1,1584 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[ITEM_NAME_PLURALS]
+Repelentes
+Repelentes
+Superrepelentes
+Superrepelentes
+Repelentes Máximos
+Repelentes Máximos
+Flautas Negras
+Flautas Negras
+Flautas Blancas
+Flautas Blancas
+Mieles
+Mieles
+Partes Rojas
+Partes Rojas
+Partes Amarillas
+Partes Amarillas
+Partes Azules
+Partes Azules
+Partes Verdes
+Partes Verdes
+Piedras Fuego
+Piedras Fuego
+Piedras Trueno
+Piedras Trueno
+Piedras Agua
+Piedras Agua
+Piedras Hoja
+Piedras Hoja
+Piedras Lunar
+Piedras Lunar
+Piedras Solar
+Piedras Solar
+Piedras Noche
+Piedras Noche
+Piedras Alba
+Piedras Alba
+Piedras Día
+Piedras Día
+Piedras Hielo
+Piedras Hielo
+Manzanas Dulces
+Manzanas Dulces
+Manzanas Ácidas
+Manzanas Ácidas
+Teteras Agrietadas
+Teteras Agrietadas
+Teteras Rotas
+Teteras Rotas
+Brazales Galanuez
+Brazales Galanuez
+Coronas Galaznuez
+Coronas Galaznuez
+Bonguris Roja
+Bonguris Roja
+Bonguris Amarilla
+Bonguris Amarilla
+Bonguris Azul
+Bonguris Azul
+Bonguris Verde
+Bonguris Verde
+Bonguris Rosa
+Bonguris Rosa
+Bonguris Blanca
+Bonguris Blanca
+Bonguris Negra
+Bonguris Negra
+Fósiles Helix
+Fósiles Helix
+Fósiles Domo
+Fósiles Domo
+Ámbares Viejos
+Ámbares Viejos
+Fósiles Raíz
+Fósiles Raíz
+Fósiles Garra
+Fósiles Garra
+Fósiles Cráneo
+Fósiles Cráneo
+Fósiles Coraza
+Fósiles Coraza
+Fósiles Tapa
+Fósiles Tapa
+Fósiles Pluma
+Fósiles Pluma
+Fósiles Mandíbula
+Fósiles Mandíbula
+Fósiles Aleta
+Fósiles Aleta
+Ornitofósiles
+Ornitofósiles
+Ictiofósiles
+Ictiofósiles
+Dracofósiles
+Dracofósiles
+Plesiofósiles
+Plesiofósiles
+Plumas Bellas
+Plumas Bellas
+Mini Setas
+Mini Setas
+Setas Grandes
+Setas Grandes
+Setas Aroma
+Setas Aroma
+Perlas
+Perlas
+Perlas Grandes
+Perlas Grandes
+Sartas de perlas
+Sartas de perlas
+Polvoestelares
+Polvoestelares
+Trozos Estrella
+Trozos Estrella
+Fragmentos Cometa
+Fragmentos Cometa
+Pepitas de Oro
+Pepitas de Oro
+Maxipepitas de Oro
+Maxipepitas de Oro
+Escamas Corazón
+Escamas Corazón
+Colas Slowpoke
+Colas Slowpoke
+Huesos Raros
+Huesos Raros
+Reales de cobre
+Reales de cobre
+Reales de plata
+Reales de plata
+Reales de oro
+Reales de oro
+Ánforas Antiguas
+Ánforas Antiguas
+Brazales antiguos
+Brazales antiguos
+Efigies Antiguas
+Efigies Antiguas
+Coronas Antiguas
+Coronas Antiguas
+Abonos Rápidos
+Abonos Rápidos
+Abonos Lentos
+Abonos Lentos
+Abonos Fijadores
+Abonos Fijadores
+Abonos Brotes
+Abonos Brotes
+Sales Cardumen
+Sales Cardumen
+Conchas Cardumen
+Conchas Cardumen
+Piedras Espíritu
+Piedras Espíritu
+Néctares Rojos
+Néctares Rojos
+Néctares Amarillos
+Néctares Amarillos
+Néctares Rosas
+Néctares Rosas
+Néctares Violetas
+Néctares Violetas
+Globos Helio
+Globos Helio
+Polvos Brillo
+Polvos Brillo
+Minerales Evolutivos
+Minerales Evolutivos
+Piedras Pómez
+Piedras Pómez
+Lazos Destino
+Lazos Destino
+Cascos Dentados
+Cascos Dentados
+Chalecos Asalto
+Chalecos Asalto
+Gafas Protectoras
+Gafas Protectoras
+Paracontactos
+Paracontactos
+Botas Gruesas
+Botas Gruesas
+Parasoles Multiuso
+Parasoles Multiuso
+Botones Escape
+Botones Escape
+Mochilas Escape
+Mochilas Escape
+Tarjetas Rojas
+Tarjetas Rojas
+Muda Conchas
+Muda Conchas
+Bolas de humo
+Bolas de humo
+Huevos Suerte
+Huevos Suerte
+Repartir Exp
+Repartir Exp
+Repartir Exp Equipo
+Repartir Exp Equipo
+Monedas Amuleto
+Monedas Amuleto
+Cascabeles Alivio
+Cascabeles Alivio
+Amuletos
+Amuletos
+Cintas Elección
+Cintas Elección
+Gafas Elección
+Gafas Elección
+Pañuelos Elección
+Pañuelos Elección
+Rocas Calor
+Rocas Calor
+Rocas Lluvia
+Rocas Lluvia
+Rocas Suave
+Rocas Suave
+Rocas Helada
+Rocas Helada
+Cubresuelos
+Cubresuelos
+Refleluces
+Refleluces
+Garras Garfio
+Garras Garfio
+Bandas Atadura
+Bandas Atadura
+Raíces Grandes
+Raíces Grandes
+Lodos Negros
+Lodos Negros
+Restos
+Restos
+Cascabeles Concha
+Cascabeles Concha
+Hierbas Mentales
+Hierbas Mentales
+Hierbas Blancas
+Hierbas Blancas
+Hierbas Únicas
+Hierbas Únicas
+Tubérculos
+Tubérculos
+Pilas
+Pilas
+Musgos Brillantes
+Musgos Brillantes
+Bolas de Nieve
+Bolas de Nieve
+Seguros Debilidad
+Seguros Debilidad
+Seguros Fallo
+Seguros Fallo
+Esprays Bucales
+Esprays Bucales
+Nerviosferas
+Nerviosferas
+Servicios Raros
+Servicios Raros
+Semillas Electro
+Semillas Electro
+Semillas Hierba
+Semillas Hierba
+Semillas Bruma
+Semillas Bruma
+Semillas Psique
+Semillas Psique
+Vidasfera
+Vidasfera
+Cinturones de Experto
+Cinturones de Experto
+Metrónomos
+Metrónomos
+Cintas Fuertes
+Cintas Fuertes
+Gafas Especiales
+Gafas Especiales
+Garras Afiladas
+Garras Afiladas
+Periscopios
+Periscopios
+Lupas
+Lupas
+Telescopios
+Telescopios
+Rocas del Rey
+Rocas del Rey
+Colmillos Agudos
+Colmillos Agudos
+Colas Plúmbea
+Colas Plúmbea
+Garras Rápidas
+Garras Rápidas
+Cintas Aguante
+Cintas Aguante
+Bandas Aguante
+Bandas Aguante
+Llamasferas
+Llamasferas
+Toxisferas
+Toxisferas
+Toxiestrellas
+Toxiestrellas
+Bolas Férreas
+Bolas Férreas
+Blancos
+Blancos
+Brazales Firmes
+Brazales Firmes
+Pesas Recias
+Pesas Recias
+Brazales Recios
+Brazales Recios
+Cintos Recios
+Cintos Recios
+Lentes Recias
+Lentes Recias
+Bandas Recias
+Bandas Recias
+Franjas Recias
+Franjas Recias
+Inciensos Suaves
+Inciensos Suaves
+Inciensos Lentos
+Inciensos Lentos
+Inciensos Duplo
+Inciensos Duplo
+Inciensos Puros
+Inciensos Puros
+Inciensos Marinos
+Inciensos Marinos
+Inciensos Aqua
+Inciensos Aqua
+Inciensos Florales
+Inciensos Florales
+Inciensos Raros
+Inciensos Raros
+Inciensos Roca
+Inciensos Roca
+Carbones
+Carbones
+Aguas Místicas
+Aguas Místicas
+Imanes
+Imanes
+Semillas Milagros
+Semillas Milagros
+Hielos Perpetuos
+Hielos Perpetuos
+Cinturones Negros
+Cinturones Negros
+Flechas Venenosas
+Flechas Venenosas
+Arenas Finas
+Arenas Finas
+Picos Afilados
+Picos Afilados
+Cucharas Torcidas
+Cucharas Torcidas
+Polvos Plata
+Polvos Plata
+Piedras Duras
+Piedras Duras
+Hechizos
+Hechizos
+Colmillos Dragón
+Colmillos Dragón
+Gafas de Sol
+Gafas de Sol
+Revestim. Metálicos
+Revestim. Metálicos
+Pañuelos de Seda
+Pañuelos de Seda
+Tablas Llama
+Tablas Llama
+Tablas Linfa
+Tablas Linfa
+Tablas Trueno
+Tablas Trueno
+Tablas Pradal
+Tablas Pradal
+Tablas Helada
+Tablas Helada
+Tablas Fuerte
+Tablas Fuerte
+Tablas Tóxica
+Tablas Tóxica
+Tablas Terrax
+Tablas Terrax
+Tablas Cielo
+Tablas Cielo
+Tablas Mental
+Tablas Mental
+Tablas Bicho
+Tablas Bicho
+Tablas Pétrea
+Tablas Pétrea
+Tablas Terror
+Tablas Terror
+Tablas Draco
+Tablas Draco
+Tablas Oscura
+Tablas Oscura
+Tablas Acero
+Tablas Acero
+Tablas Duende
+Tablas Duende
+Gemas Fuego
+Gemas Fuego
+Gemas Agua
+Gemas Agua
+Gemas Eléctrico
+Gemas Eléctrico
+Gemas Planta
+Gemas Planta
+Gemas Hielo
+Gemas Hielo
+Gemas Lucha
+Gemas Lucha
+Gemas Veneno
+Gemas Veneno
+Gemas Tierra
+Gemas Tierra
+Gemas Volador
+Gemas Volador
+Gemas Psíquico
+Gemas Psíquico
+Gemas Bicho
+Gemas Bicho
+Gemas Roca
+Gemas Roca
+Gemas Fantasma
+Gemas Fantasma
+Gemas Dragón
+Gemas Dragón
+Gemas Siniestro
+Gemas Siniestro
+Gemas Acero
+Gemas Acero
+Gemas Hada
+Gemas Hada
+Gemas Normal
+Gemas Normal
+Bolas Luminosas
+Bolas Luminosas
+Puños Suerte
+Puños Suerte
+Polvos Metálicos
+Polvos Metálicos
+Polvos Veloces
+Polvos Veloces
+Huesos Gruesos
+Huesos Gruesos
+Puerros
+Puerros
+Rocíos Bondad
+Rocíos Bondad
+Dientes Marinos
+Dientes Marinos
+Escamas Marinas
+Escamas Marinas
+Diamansferas
+Diamansferas
+Lustresferas
+Lustresferas
+Griseosferas
+Griseosferas
+Espadas Oxidadas
+Espadas Oxidadas
+Escudos Oxidados
+Escudos Oxidados
+HidroROMs
+HidroROMs
+FulgoROMs
+FulgoROMs
+PiroROMs
+PiroROMs
+CrioROMs
+CrioROMs
+Discos Fuego
+Discos Fuego
+Discos Agua
+Discos Agua
+Discos Eléctrico
+Discos Eléctrico
+Discos Planta
+Discos Planta
+Discos Hielo
+Discos Hielo
+Discos Lucha
+Discos Lucha
+Discos Veneno
+Discos Veneno
+Discos Tierra
+Discos Tierra
+Discos Volador
+Discos Volador
+Discos Psíquico
+Discos Psíquico
+Discos Bicho
+Discos Bicho
+Discos Roca
+Discos Roca
+Discos Fantasma
+Discos Fantasma
+Discos Dragón
+Discos Dragón
+Discos Siniestro
+Discos Siniestro
+Discos Acero
+Discos Acero
+Discos Hada
+Discos Hada
+Piedras Eternas
+Piedras Eternas
+Escamas de Dragones
+Escamas de Dragones
+Mejoras
+Mejoras
+Discos Extraños
+Discos Extraños
+Protectores
+Protectores
+Electrizadores
+Electrizadores
+Magmatizadores
+Magmatizadores
+Telas Terribles
+Telas Terribles
+Escamas Bellas
+Escamas Bellas
+Piedras Ovales
+Piedras Ovales
+Dulces de Nata
+Dulces de Nata
+Saquitos Fragantes
+Saquitos Fragantes
+Confites fresa
+Confites fresa
+Confites corazón
+Confites corazón
+Confites fruto
+Confites fruto
+Confites trébol
+Confites trébol
+Confites flor
+Confites flor
+Confites estrella
+Confites estrella
+Confites lazo
+Confites lazo
+Venusauritas
+Venusauritas
+Charizarditas X
+Charizarditas X
+Charizarditas Y
+Charizarditas Y
+Blastoisitas
+Blastoisitas
+Beedrillitas
+Beedrillitas
+Pideotitas
+Pideotitas
+Alakazamitas
+Alakazamitas
+Slowbronitas
+Slowbronitas
+Gengaritas
+Gengaritas
+Kangaskhanitas
+Kangaskhanitas
+Pinsiritas
+Pinsiritas
+Gyaradositas
+Gyaradositas
+Aerodactylitas
+Aerodactylitas
+Mewtwoitas X
+Mewtwoitas X
+Mewtwoitas Y
+Mewtwoitas Y
+Ampharositas
+Ampharositas
+Steelixitas
+Steelixitas
+Scizoritas
+Scizoritas
+Heracrossitas
+Heracrossitas
+Houndoomitas
+Houndoomitas
+Tyranitaritas
+Tyranitaritas
+Sceptilitas
+Sceptilitas
+Blazikenitas
+Blazikenitas
+Swampertitas
+Swampertitas
+Gardevoiritas
+Gardevoiritas
+Sableynitas
+Sableynitas
+Mawilitas
+Mawilitas
+Aggronitas
+Aggronitas
+Medichamitas
+Medichamitas
+Manectricitas
+Manectricitas
+Sharpedonitas
+Sharpedonitas
+Cameruptitas
+Cameruptitas
+Altarianitas
+Altarianitas
+Banettitas
+Banettitas
+Absolitas
+Absolitas
+Glalitas
+Glalitas
+Salamencitas
+Salamencitas
+Metagrossitas
+Metagrossitas
+Latiasitas
+Latiasitas
+Latiositas
+Latiositas
+Lopunnitas
+Lopunnitas
+Garchompitas
+Garchompitas
+Lucaritas
+Lucaritas
+Abomasnowitas
+Abomasnowitas
+Galladitas
+Galladitas
+Audinitas
+Audinitas
+Diancitas
+Diancitas
+Prismas Rojos
+Prismas Rojos
+Prismas Azules
+Prismas Azules
+Clefablitas
+Clefablitas
+Starmitas
+Starmitas
+Victreebelitas
+Victreebelitas
+Dragonititas
+Dragonititas
+Meganiumitas
+Meganiumitas
+Feraligatritas
+Feraligatritas
+Skarmoritas
+Skarmoritas
+Froslassitas
+Froslassitas
+Emboaritas
+Emboaritas
+Excadrilitas
+Excadrilitas
+Scolipeditas
+Scolipeditas
+Elektrositas
+Elektrositas
+Scraftitas
+Scraftitas
+Chandeluritas
+Chandeluritas
+Chesnaughtitas
+Chesnaughtitas
+Delphoxitas
+Delphoxitas
+Greninjanitas
+Greninjanitas
+Pyroaritas
+Pyroaritas
+Malamaritas
+Malamaritas
+Hawluchanitas
+Hawluchanitas
+Barbaraclitas
+Barbaraclitas
+Dragalgitas
+Dragalgitas
+Drampanitas
+Drampanitas
+Falinksitas
+Falinksitas
+Zygarditas
+Zygarditas
+Floettitas
+Floettitas
+Garchompitas Z
+Garchompitas Z
+Absolitas Z
+Absolitas Z
+Lucaritas Z
+Lucaritas Z
+Scovillainitas
+Scovillainitas
+Crabominablitas
+Crabominablitas
+Staraptoritas
+Staraptoritas
+Golurkitas
+Golurkitas
+Raichunitas X
+Raichunitas X
+Raichunitas Y
+Raichunitas Y
+Darkrainitas
+Darkrainitas
+Tatsugiritas
+Tatsugiritas
+Magearnitas
+Magearnitas
+Golisopoditas
+Golisopoditas
+Meowsticitas
+Meowsticitas
+Heatranitas
+Heatranitas
+Glimmoranitas
+Glimmoranitas
+Baxcaliburitas
+Baxcaliburitas
+Chimechitas
+Chimechitas
+Zeraoranitas
+Zeraoranitas
+Pociones
+Pociones
+Superpociones
+Superpociones
+Hiperpociones
+Hiperpociones
+Pociones Máximas
+Pociones Máximas
+Restaura Todo
+Restaura Todo
+Cenizas Sagradas
+Cenizas Sagradas
+Despertares
+Despertares
+Antídotos
+Antídotos
+Antiquemaduras
+Antiquemaduras
+Antiparalizantes
+Antiparalizantes
+Antihielos
+Antihielos
+Curas Totales
+Curas Totales
+Rokikos
+Rokikos
+Caramelos Furia
+Caramelos Furia
+Galletas Lava
+Galletas Lava
+Barritas Plus
+Barritas Plus
+Porcehelados
+Porcehelados
+Crêpes Luminalia
+Crêpes Luminalia
+Galletas Yantra
+Galletas Yantra
+Malasadas Maxi
+Malasadas Maxi
+Revivires
+Revivires
+Revivires Máximos
+Revivires Máximos
+Zumos de Baya
+Zumos de Baya
+Corazones Dulces
+Corazones Dulces
+Aguas Frescas
+Aguas Frescas
+Refrescos
+Refrescos
+Limonadas
+Limonadas
+Leches Mu-mu
+Leches Mu-mu
+Polvos Energía
+Polvos Energía
+Raíces Energías
+Raíces Energías
+Polvos Curación
+Polvos Curación
+Hierbas Revivir
+Hierbas Revivir
+Maxipanales
+Maxipanales
+Éteres
+Éteres
+Éteres Máximos
+Éteres Máximos
+Elíxires
+Elíxires
+Elíxires Máximos
+Elíxires Máximos
+Más PP
+Más PP
+PP Máximos
+PP Máximos
+Más PS
+Más PS
+Proteínas
+Proteínas
+Hierros
+Hierros
+Calcios
+Calcios
+Zincs
+Zincs
+Carbohidratos
+Carbohidratos
+Plumas Vigor
+Plumas Vigor
+Plumas Músculo
+Plumas Músculo
+Plumas Aguante
+Plumas Aguante
+Plumas Intelecto
+Plumas Intelecto
+Plumas Mente
+Plumas Mente
+Plumas Ímpetu
+Plumas Ímpetu
+Mentas Hurañas
+Mentas Hurañas
+Mentas Firme
+Mentas Firme
+Mentas Pícaras
+Mentas Pícaras
+Mentas Audaces
+Mentas Audaces
+Mentas Osadas
+Mentas Osadas
+Mentas Agitadas
+Mentas Agitadas
+Mentas Flojas
+Mentas Flojas
+Mentas Plácidas
+Mentas Plácidas
+Mentas Modestas
+Mentas Modestas
+Mentas Afables
+Mentas Afables
+Mentas Alocadas
+Mentas Alocadas
+Mentas Mansas
+Mentas Mansas
+Mentas Serenas
+Mentas Serenas
+Mentas Amables
+Mentas Amables
+Mentas Cautas
+Mentas Cautas
+Mentas Groseras
+Mentas Groseras
+Mentas Miedosas
+Mentas Miedosas
+Mentas Activas
+Mentas Activas
+Mentas Alegres
+Mentas Alegres
+Mentas Ingenuas
+Mentas Ingenuas
+Mentas Serias
+Mentas Serias
+Cápsulas Habilidad
+Cápsulas Habilidad
+Parches Habilidad
+Parches Habilidad
+Super Cápsulas
+Super Cápsulas
+Caramelos Exp. XS
+Caramelos Exp. XS
+Caramelos Exp. S
+Caramelos Exp. S
+Caramelos Exp. M
+Caramelos Exp. M
+Caramelos Exp. L
+Caramelos Exp. L
+Caramelos Exp. XL
+Caramelos Exp. XL
+Caramelos Raros
+Caramelos Raros
+Caramelos Malos
+Caramelos Malos
+Poké Balls
+Poké Balls
+Super Balls
+Super Balls
+Ultra Balls
+Ultra Balls
+Master Balls
+Master Balls
+Safari Balls
+Safari Balls
+Competi Balls
+Competi Balls
+Malla Balls
+Malla Balls
+Buceo Balls
+Buceo Balls
+Nido Balls
+Nido Balls
+Acopio Balls
+Acopio Balls
+Turno Balls
+Turno Balls
+Lujo Balls
+Lujo Balls
+Honor Balls
+Honor Balls
+Ocaso Balls
+Ocaso Balls
+Sana Balls
+Sana Balls
+Veloz Balls
+Veloz Balls
+Gloria Balls
+Gloria Balls
+Rapid Balls
+Rapid Balls
+Nivel Balls
+Nivel Balls
+Cebo Balls
+Cebo Balls
+Peso Balls
+Peso Balls
+Amor Balls
+Amor Balls
+Amigo Balls
+Amigo Balls
+Luna Balls
+Luna Balls
+Ensueño Balls
+Ensueño Balls
+Ente Balls
+Ente Balls
+MT01s
+MT01s
+MT02s
+MT02s
+MT03s
+MT03s
+MT04s
+MT04s
+MT05s
+MT05s
+MT06s
+MT06s
+MT07s
+MT07s
+MT08s
+MT08s
+MT09s
+MT09s
+MT10s
+MT10s
+MT11s
+MT11s
+MT12s
+MT12s
+MT13s
+MT13s
+MT14s
+MT14s
+MT15s
+MT15s
+MT16s
+MT16s
+MT17s
+MT17s
+MT18s
+MT18s
+MT19s
+MT19s
+MT20s
+MT20s
+MT21s
+MT21s
+MT22s
+MT22s
+MT23s
+MT23s
+MT24s
+MT24s
+MT25s
+MT25s
+MT26s
+MT26s
+MT27s
+MT27s
+MT28s
+MT28s
+MT29s
+MT29s
+MT30s
+MT30s
+MT31s
+MT31s
+MT32s
+MT32s
+MT33s
+MT33s
+MT34s
+MT34s
+MT35s
+MT35s
+MT36s
+MT36s
+MT37s
+MT37s
+MT38s
+MT38s
+MT39s
+MT39s
+MT40s
+MT40s
+MT41s
+MT41s
+MT42s
+MT42s
+MT43s
+MT43s
+MT44s
+MT44s
+MT45s
+MT45s
+MT46s
+MT46s
+MT47s
+MT47s
+MT48s
+MT48s
+MT49s
+MT49s
+MT50s
+MT50s
+MT51s
+MT51s
+MT52s
+MT52s
+MT53s
+MT53s
+MT54s
+MT54s
+MT55s
+MT55s
+MT56s
+MT56s
+MT57s
+MT57s
+MT58s
+MT58s
+MT59s
+MT59s
+MT60s
+MT60s
+MT61s
+MT61s
+MT62s
+MT62s
+MT63s
+MT63s
+MT64s
+MT64s
+MT65s
+MT65s
+MT66s
+MT66s
+MT67s
+MT67s
+MT68s
+MT68s
+MT69s
+MT69s
+MT70s
+MT70s
+MT71s
+MT71s
+MT72s
+MT72s
+MT73s
+MT73s
+MT74s
+MT74s
+MT75s
+MT75s
+MT76s
+MT76s
+MT77s
+MT77s
+MT78s
+MT78s
+MT79s
+MT79s
+MT80s
+MT80s
+MT81s
+MT81s
+MT82s
+MT82s
+MT83s
+MT83s
+MT84s
+MT84s
+MT85s
+MT85s
+MT86s
+MT86s
+MT87s
+MT87s
+MT88s
+MT88s
+MT89s
+MT89s
+MT90s
+MT90s
+MT91s
+MT91s
+MT92s
+MT92s
+MT93s
+MT93s
+MT94s
+MT94s
+MT95s
+MT95s
+MT96s
+MT96s
+MT97s
+MT97s
+MT98s
+MT98s
+MT99s
+MT99s
+MT100s
+MT100s
+MO01s
+MO01s
+MO02s
+MO02s
+MO03s
+MO03s
+MO04s
+MO04s
+MO05s
+MO05s
+MO06s
+MO06s
+Bayas Zreza
+Bayas Zreza
+Bayas Atania
+Bayas Atania
+Bayas Meloc
+Bayas Meloc
+Bayas Safre
+Bayas Safre
+Bayas Perasi
+Bayas Perasi
+Bayas Zanama
+Bayas Zanama
+Bayas Aranja
+Bayas Aranja
+Bayas Caquic
+Bayas Caquic
+Bayas Ziuela
+Bayas Ziuela
+Bayas Zidra
+Bayas Zidra
+Bayas Higog
+Bayas Higog
+Bayas Wiki
+Bayas Wiki
+Bayas Ango
+Bayas Ango
+Bayas Guaya
+Bayas Guaya
+Bayas Pabaya
+Bayas Pabaya
+Bayas Frambu
+Bayas Frambu
+Bayas Oram
+Bayas Oram
+Bayas Latano
+Bayas Latano
+Bayas Peragu
+Bayas Peragu
+Bayas Pinia
+Bayas Pinia
+Bayas Grana
+Bayas Grana
+Bayas Algama
+Bayas Algama
+Bayas Ispero
+Bayas Ispero
+Bayas Meluce
+Bayas Meluce
+Bayas Uvav
+Bayas Uvav
+Bayas Tamate
+Bayas Tamate
+Bayas Mais
+Bayas Mais
+Bayas Aostan
+Bayas Aostan
+Bayas Rautan
+Bayas Rautan
+Bayas Monli
+Bayas Monli
+Bayas Wikano
+Bayas Wikano
+Bayas Plama
+Bayas Plama
+Bayas Sambia
+Bayas Sambia
+Bayas Rudion
+Bayas Rudion
+Bayas Andano
+Bayas Andano
+Bayas Caoca
+Bayas Caoca
+Bayas Pasio
+Bayas Pasio
+Bayas Gualot
+Bayas Gualot
+Bayas Tamar
+Bayas Tamar
+Bayas Rimoya
+Bayas Rimoya
+Bayas Pomaro
+Bayas Pomaro
+Bayas Kebia
+Bayas Kebia
+Bayas Acardo
+Bayas Acardo
+Bayas Kouba
+Bayas Kouba
+Bayas Payapa
+Bayas Payapa
+Bayas Yecana
+Bayas Yecana
+Bayas Alcho
+Bayas Alcho
+Bayas Drasi
+Bayas Drasi
+Bayas Anjiro
+Bayas Anjiro
+Bayas Dillo
+Bayas Dillo
+Bayas Baribá
+Bayas Baribá
+Bayas Hibis
+Bayas Hibis
+Bayas Chilan
+Bayas Chilan
+Bayas Lichi
+Bayas Lichi
+Bayas Gonlan
+Bayas Gonlan
+Bayas Aslac
+Bayas Aslac
+Bayas Yapati
+Bayas Yapati
+Bayas Aricoc
+Bayas Aricoc
+Bayas Zonlan
+Bayas Zonlan
+Bayas Arabol
+Bayas Arabol
+Bayas Enigma
+Bayas Enigma
+Bayas Lagro
+Bayas Lagro
+Bayas Chiri
+Bayas Chiri
+Bayas Jaboca
+Bayas Jaboca
+Bayas Magua
+Bayas Magua
+Bayas Biglia
+Bayas Biglia
+Bayas Maranga
+Bayas Maranga
+Cartas Hierba
+Cartas Hierba
+Cartas Fuego
+Cartas Fuego
+Cartas Pompas
+Cartas Pompas
+Cartas Flores
+Cartas Flores
+Cartas Mina
+Cartas Mina
+Cartas Acero
+Cartas Acero
+Cartas Corazón
+Cartas Corazón
+Cartas Nieve
+Cartas Nieve
+Cartas Sideral
+Cartas Sideral
+Cartas Áerea
+Cartas Áerea
+Cartas Mosaico
+Cartas Mosaico
+Cartas Pared
+Cartas Pared
+Ataques X
+Ataques X
+Ataques X 2
+Ataques X 2
+Ataques X 3
+Ataques X 3
+Ataques X 6
+Ataques X 6
+Defensas X
+Defensas X
+Defensas X 2
+Defensas X 2
+Defensas X 3
+Defensas X 3
+Defensas X 6
+Defensas X 6
+Ataques Especiales X
+Ataques Especiales X
+Ataques Especiales X 2
+Ataques Especiales X 2
+Ataques Especiales X 3
+Ataques Especiales X 3
+Ataques Especiales X 6
+Ataques Especiales X 6
+Defensas Especiales X
+Defensas Especiales X
+Defensas Especiales X 2
+Defensas Especiales X 2
+Defensas Especiales X 3
+Defensas Especiales X 3
+Defensas Especiales X 6
+Defensas Especiales X 6
+Velocidades X
+Velocidades X
+Velocidades X 2
+Velocidades X 2
+Velocidades X 3
+Velocidades X 3
+Velocidades X 6
+Velocidades X 6
+Precisiones X
+Precisiones X
+Precisiones X 2
+Precisiones X 2
+Precisiones X 3
+Precisiones X 3
+Precisiones X 6
+Precisiones X 6
+Maxisetas
+Maxisetas
+Críticos X
+Críticos X
+Críticos X 2
+Críticos X 2
+Críticos X 3
+Críticos X 3
+Protecciones X
+Protecciones X
+Quitaestados
+Quitaestados
+Habilitadores
+Habilitadores
+Activaobjetos
+Activaobjetos
+Tiraobjetos
+Tiraobjetos
+Flautas Azules
+Flautas Azules
+Flautas Amarillas
+Flautas Amarillas
+Flautas Rojas
+Flautas Rojas
+Pokémuñecos
+Pokémuñecos
+Colas Skitty
+Colas Skitty
+Pokéseñuelos
+Pokéseñuelos
+Bicis
+Bicis
+Cañas Viejas
+Cañas Viejas
+Cañas Buenas
+Cañas Buenas
+Cañas de Pescar
+Cañas de Pescar
+Buscaobjetos
+Buscaobjetos
+Zahoríes
+Zahoríes
+Poké Radares
+Poké Radares
+Mapas
+Mapas
+Cuerdas Huida
+Cuerdas Huida
+Monederos
+Monederos
+Poké Flautas
+Poké Flautas
+Sacos Hollín
+Sacos Hollín
+Detectores Silph
+Detectores Silph
+Detectores Devon
+Detectores Devon
+Squirgaderas
+Squirgaderas
+Psydugaderas
+Psydugaderas
+Wailmegaderas
+Wailmegaderas
+Lotadgaderas
+Lotadgaderas
+Gracídeas
+Gracídeas
+Espejos Veraces
+Espejos Veraces
+Vasijas Castigo
+Vasijas Castigo
+Catálogos Rotom
+Catálogos Rotom
+Arcas de Zygarde
+Arcas de Zygarde
+Puntas ADN
+Puntas ADN
+Necrosoles
+Necrosoles
+Necrolunas
+Necrolunas
+Riendas Unión
+Riendas Unión
+Amuletos Ovales
+Amuletos Ovales
+Amuletos Iris
+Amuletos Iris
+Amuletos Captura
+Amuletos Captura
+Amuletos Exp
+Amuletos Exp
+Mega Aros
+Mega Aros
+Pokémon Box Links
+Pokémon Box Links
+Carnés Espaciales
+Carnés Espaciales
+Mapas Viejos
+Mapas Viejos
+Minerales Negros
+Minerales Negros
+Bloques de Turba
+Bloques de Turba
+Cordones Unión
+Cordones Unión
+Grandes Diamansferas
+Grandes Diamansferas
+Grandes Lustresferas
+Grandes Lustresferas
+Tablas Legendarias
+Tablas Legendarias
+Tablas Normal
+Tablas Normal
+Grandes Griseosferas
+Grandes Griseosferas
+Armaduras Auspiciosas
+Armaduras Auspiciosas
+Armaduras Malditas
+Armaduras Malditas
+Manuscritos Sombras
+Manuscritos Sombras
+Manuscritos Aguas
+Manuscritos Aguas
+Distintivos de Líder
+Distintivos de Líder
+Energías Potenciadoras
+Energías Potenciadoras
+Escudos Habilidad
+Escudos Habilidad
+Amuletos Puros
+Amuletos Puros
+Hierbas Copia
+Hierbas Copia
+Guantes de Boxeo
+Guantes de Boxeo
+Capas Furtivas
+Capas Furtivas
+Dados Trucados
+Dados Trucados
+Monedas de Gimmighoul
+Monedas de Gimmighoul
+Bambús Pequeños
+Bambús Pequeños
+Bambús Grandes
+Bambús Grandes
+Libros Escarlata
+Libros Escarlata
+Libros Púrpura
+Libros Púrpura
+Mochis Vigor
+Mochis Vigor
+Mochis Músculo
+Mochis Músculo
+Mochis Aguante
+Mochis Aguante
+Mochis Intelecto
+Mochis Intelecto
+Mochis Mente
+Mochis Mente
+Mochis Ímpetu
+Mochis Ímpetu
+Plumas Feéricas
+Plumas Feéricas
+Manzanas Melosas
+Manzanas Melosas
+Cuencos Mediocres
+Cuencos Mediocres
+Cuencos Exquisitos
+Cuencos Exquisitos
+Máscaras Fuente
+Máscaras Fuente
+Máscaras Horno
+Máscaras Horno
+Máscaras Cimiento
+Máscaras Cimiento
+Máscaras Turquesa
+Máscaras Turquesa
+Metales Compuestos
+Metales Compuestos
+Discos Índigo
+Discos Índigo
+Bayas Meloc singulares
+Bayas Meloc singulares
+Meteoritos
+Meteoritos
+Repelente Infinito
+Repelente Infinito
+Encounter Radars
+Encounter Radars
+Curaportátiles
+Curaportátiles
+Incubadoras
+Incubadoras
+Typhlosionites
+Typhlosionites
+Sleeping Bags
+Sleeping Bags
+Change Dexes
+Change Dexes
+Storm Runes
+Storm Runes
+Reality Orbs
+Reality Orbs
+Ferrous Tars
+Ferrous Tars

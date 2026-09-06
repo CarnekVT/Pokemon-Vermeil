@@ -1,0 +1,692 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[ABILITY_DESCRIPTIONS]
+El Pokémon tiene un 10% de probabilidad de amedrentar al rival al usar un mov. de daño directo. No se acumula con Colmillo agudo o Roca del rey.
+El Pokémon tiene un 10% de probabilidad de amedrentar al rival al usar un mov. de daño directo. No se acumula con Colmillo agudo o Roca del rey.
+Cuando entra en combate invoca una lluvia que dura 5 turnos. Si el Pokémon lleva equipada Roca lluvia durará 8 turnos.
+Cuando entra en combate invoca una lluvia que dura 5 turnos. Si el Pokémon lleva equipada Roca lluvia durará 8 turnos.
+Aumenta en un nivel la Velocidad del usuario al final de cada turno.
+Aumenta en un nivel la Velocidad del usuario al final de cada turno.
+La robusta coraza que lo protege bloquea los golpes críticos.
+La robusta coraza que lo protege bloquea los golpes críticos.
+Evita que el rival pueda debilitarlo de un solo golpe cuando tiene los PS al máximo.
+Evita que el rival pueda debilitarlo de un solo golpe cuando tiene los PS al máximo.
+Aumenta la humedad del entorno y evita que se puedan utilizar movimientos explosivos. También impide que la habilidad Detonación se active.
+Aumenta la humedad del entorno y evita que se puedan utilizar movimientos explosivos. También impide que la habilidad Detonación se active.
+Evita ser paralizado gracias a la flexibilidad de su cuerpo.
+Evita ser paralizado gracias a la flexibilidad de su cuerpo.
+Aumenta la Evasión durante las tormentas de arena en un 20%, y evita que el poseedor reciba daño de Tormenta de arena.
+Aumenta la Evasión durante las tormentas de arena en un 20%, y evita que el poseedor reciba daño de Tormenta de arena.
+Si un Pokémon lo ataca con un ataque de contacto, tiene un 30% de probabilidad de resultar paralizado. También afecta a Pokémon tipo tierra.
+Si un Pokémon lo ataca con un ataque de contacto, tiene un 30% de probabilidad de resultar paralizado. También afecta a Pokémon tipo tierra.
+Si le alcanza un movimiento de tipo Eléctrico, éste no le afecta y recupera 1/4 de sus PS máximos. También funciona con movs. de estado.
+Si le alcanza un movimiento de tipo Eléctrico, éste no le afecta y recupera 1/4 de sus PS máximos. También funciona con movs. de estado.
+Si le alcanza un movimiento de tipo Agua, éste no le afecta y recupera 1/4 de sus PS máximos. También funciona con movs. de estado.
+Si le alcanza un movimiento de tipo Agua, éste no le afecta y recupera 1/4 de sus PS máximos. También funciona con movs. de estado.
+La indiferencia del Pokémon evita que caiga presa del enamoramiento o sea provocado. También evita que sea afectado por Mofa o Intimidación.
+La indiferencia del Pokémon evita que caiga presa del enamoramiento o sea provocado. También evita que sea afectado por Mofa o Intimidación.
+Anula todos los efectos del tiempo atmosférico, aunque no hace que éste desaparezca del campo.
+Anula todos los efectos del tiempo atmosférico, aunque no hace que éste desaparezca del campo.
+Aumenta la precisión de sus movimientos en un 30%. También aumenta la probabilidad de que los Pokémon salvajes lleven un objeto equipado.
+Aumenta la precisión de sus movimientos en un 30%. También aumenta la probabilidad de que los Pokémon salvajes lleven un objeto equipado.
+Su resistencia al sueño le impide quedarse dormido. También le impide el uso de Descanso. Si un Pokémon dormido adquiere esta habilidad, se despertará.
+Su resistencia al sueño le impide quedarse dormido. También le impide el uso de Descanso. Si un Pokémon dormido adquiere esta habilidad, se despertará.
+Adopta el tipo del último movimiento del que se es blanco. Si recibe un movimiento multigolpe, lo adoptará al recibir el último golpe.
+Adopta el tipo del último movimiento del que se es blanco. Si recibe un movimiento multigolpe, lo adoptará al recibir el último golpe.
+Su sistema inmunitario evita el envenenamiento. Si un Pokémon con esta habilidad es envenenado, la baya se activa antes que la habilidad.
+Su sistema inmunitario evita el envenenamiento. Si un Pokémon con esta habilidad es envenenado, la baya se activa antes que la habilidad.
+Si le alcanza un movimiento de tipo Fuego, éste no le afecta y potencia en un 50% sus ataques de fuego. También funciona con movs. de estado.
+Si le alcanza un movimiento de tipo Fuego, éste no le afecta y potencia en un 50% sus ataques de fuego. También funciona con movs. de estado.
+El polvo de escamas que lo envuelve protege al Pokémon de los efectos secundarios de los ataques recibidos.
+El polvo de escamas que lo envuelve protege al Pokémon de los efectos secundarios de los ataques recibidos.
+Evita que el Pokémon sea confundido, incluso cuando es causado por sus propios movimientos. También evita ser afectado por intimidación.
+Evita que el Pokémon sea confundido, incluso cuando es causado por sus propios movimientos. También evita ser afectado por intimidación.
+Sus ventosas se aferran al suelo, con lo cual anula movimientos y objetos que fuerzan el relevo.
+Sus ventosas se aferran al suelo, con lo cual anula movimientos y objetos que fuerzan el relevo.
+Al entrar en combate amilana al rival de tal manera que su Ataque disminuye un nivel.
+Al entrar en combate amilana al rival de tal manera que su Ataque disminuye un nivel.
+Evita que el enemigo huya o sea cambiado por otro, salvo que sea de tipo Fantasma, lleve equipado Muda concha o use un movimiento de cambio.
+Evita que el enemigo huya o sea cambiado por otro, salvo que sea de tipo Fantasma, lleve equipado Muda concha o use un movimiento de cambio.
+Hiere con su piel áspera al rival que lo ataque con un movimiento de contacto, restándole 1/16 de sus PS máximos.
+Hiere con su piel áspera al rival que lo ataque con un movimiento de contacto, restándole 1/16 de sus PS máximos.
+Gracias a un poder misterioso, solo le hacen daño los movimientos supereficaces.
+Gracias a un poder misterioso, solo le hacen daño los movimientos supereficaces.
+Su capacidad de flotar sobre el suelo le proporciona inmunidad frente a los movimientos de tipo Tierra.
+Su capacidad de flotar sobre el suelo le proporciona inmunidad frente a los movimientos de tipo Tierra.
+Hay un 30% de probabilidad de dormir, envenenar o paralizar al Pokémon rival con el que entre en contacto al recibir un ataque.
+Hay un 30% de probabilidad de dormir, envenenar o paralizar al Pokémon rival con el que entre en contacto al recibir un ataque.
+Contagia el envenenamiento, las quemaduras o la parálisis al Pokémon que le cause ese estado, aunque se encuentre tras un sustituto.
+Contagia el envenenamiento, las quemaduras o la parálisis al Pokémon que le cause ese estado, aunque se encuentre tras un sustituto.
+Evita que bajen sus características a causa de movimientos o habilidades de otros Pokémon, pero no de los suyos.
+Evita que bajen sus características a causa de movimientos o habilidades de otros Pokémon, pero no de los suyos.
+Cura problemas de estado al cambiar de Pokémon. También ocurre al finalizar el combate.
+Cura problemas de estado al cambiar de Pokémon. También ocurre al finalizar el combate.
+Además de atraer y neutralizar los movimientos de tipo Eléctrico, se sube un nivel el Ataque Especial, incluso aunque el Pokémon sea tipo Tierra.
+Además de atraer y neutralizar los movimientos de tipo Eléctrico, se sube un nivel el Ataque Especial, incluso aunque el Pokémon sea tipo Tierra.
+Duplica la probabilidad de que los movimientos causen efectos secundarios. También se aplica a los objetos Roca del rey y Colmillo agudo.
+Duplica la probabilidad de que los movimientos causen efectos secundarios. También se aplica a los objetos Roca del rey y Colmillo agudo.
+Mientras haya lluvia en el combate el Pokémon duplica su estadística de Velocidad.
+Mientras haya lluvia en el combate el Pokémon duplica su estadística de Velocidad.
+Mientras haya clima soleado en el combate el Pokémon duplica su estadística de Velocidad.
+Mientras haya clima soleado en el combate el Pokémon duplica su estadística de Velocidad.
+Evita que baje su precisión. Fuera de combate aumenta la probabilidad de encontrar Pokémon salvajes.
+Evita que baje su precisión. Fuera de combate aumenta la probabilidad de encontrar Pokémon salvajes.
+Al entrar en combate copia la habilidad de uno de los rivales adyacentes al azar.
+Al entrar en combate copia la habilidad de uno de los rivales adyacentes al azar.
+Duplica la estadística de Ataque del Pokémon, por lo que sólo afecta a ataques físicos.
+Duplica la estadística de Ataque del Pokémon, por lo que sólo afecta a ataques físicos.
+Si un Pokémon lo ataca con un ataque de contacto, tiene un 30% de probabilidad de resultar envenenado.
+Si un Pokémon lo ataca con un ataque de contacto, tiene un 30% de probabilidad de resultar envenenado.
+Gracias a su profunda concentración, no puede ser amedrentado por los ataques del rival. También evita ser intimidado.
+Gracias a su profunda concentración, no puede ser amedrentado por los ataques del rival. También evita ser intimidado.
+Gracias al magma candente que lo envuelve, evita la congelación. Fuera de combate reduce a la mitad los pasos para eclosionar huevos.
+Gracias al magma candente que lo envuelve, evita la congelación. Fuera de combate reduce a la mitad los pasos para eclosionar huevos.
+Evita las quemaduras gracias a la capa de agua que lo envuelve. Si un Pokémon quemado adquiere esta habilidad se curará de las quemaduras.
+Evita las quemaduras gracias a la capa de agua que lo envuelve. Si un Pokémon quemado adquiere esta habilidad se curará de las quemaduras.
+Evita que el enemigo huya o sea cambiado por otro si es de tipo Acero, salvo que lleve equipado Muda concha o use un movimiento de cambio.
+Evita que el enemigo huya o sea cambiado por otro si es de tipo Acero, salvo que lleve equipado Muda concha o use un movimiento de cambio.
+Su aislamiento acústico lo protege de movimientos que usan sonido, salvo los que use el propio Pokémon.
+Su aislamiento acústico lo protege de movimientos que usan sonido, salvo los que use el propio Pokémon.
+Recupera 1/16 de sus PS al final de cada turno cuando llueve en el combate.
+Recupera 1/16 de sus PS al final de cada turno cuando llueve en el combate.
+Cuando entra en combate invoca una tormenta de arena que dura 5 turnos. Si el Pokémon lleva equipada Roca suave durará 8 turnos.
+Cuando entra en combate invoca una tormenta de arena que dura 5 turnos. Si el Pokémon lleva equipada Roca suave durará 8 turnos.
+Presiona al rival para que sus PP se acaben antes, gastando 2 PP por cada movimiento que use contra este Pokémon.
+Presiona al rival para que sus PP se acaben antes, gastando 2 PP por cada movimiento que use contra este Pokémon.
+Gracias a la gruesa capa de grasa que lo protege, reduce a la mitad el daño recibido por ataques de tipo Fuego y Hielo.
+Gracias a la gruesa capa de grasa que lo protege, reduce a la mitad el daño recibido por ataques de tipo Fuego y Hielo.
+Si el Pokémon se duerme, tardará la mitad de turnos en despertarse. En caso de ser un número impar de turnos, se redondea a la baja.
+Si el Pokémon se duerme, tardará la mitad de turnos en despertarse. En caso de ser un número impar de turnos, se redondea a la baja.
+Si un Pokémon lo ataca con un ataque de contacto, tiene un 30% de probabilidad de resultar quemado.
+Si un Pokémon lo ataca con un ataque de contacto, tiene un 30% de probabilidad de resultar quemado.
+Permite escapar de combate contra todos los Pokémon salvajes, ignorando la habilidad del rival. No tiene efecto al cambiar de Pokémon.
+Permite escapar de combate contra todos los Pokémon salvajes, ignorando la habilidad del rival. No tiene efecto al cambiar de Pokémon.
+La aguda vista de este Pokémon evita que disminuya su Precisión. También ignora aumentos de evasión del Pokémon rival.
+La aguda vista de este Pokémon evita que disminuya su Precisión. También ignora aumentos de evasión del Pokémon rival.
+Evita que el rival le baje el Ataque. Reducciones por ataques propios o por los movimientos Cambia fuerza, Cambia almas e Isofuerta sí tienen efecto.
+Evita que el rival le baje el Ataque. Reducciones por ataques propios o por los movimientos Cambia fuerza, Cambia almas e Isofuerta sí tienen efecto.
+Tras un combate tiene un 10% de probabilidad de encontrar un objeto. Si un Pokémon aliado o enemigo pierde un objeto en combate, también lo recogerá.
+Tras un combate tiene un 10% de probabilidad de encontrar un objeto. Si un Pokémon aliado o enemigo pierde un objeto en combate, también lo recogerá.
+Cada dos turnos el Pokémon estará ausente y no realizará ninguna acción.
+Cada dos turnos el Pokémon estará ausente y no realizará ninguna acción.
+Aumenta el Ataque del usuario en un 50%, pero reduce la Precisión de los movimientos físicos en un 20%. Los movs. especiales o de estado no se ven afectados.
+Aumenta el Ataque del usuario en un 50%, pero reduce la Precisión de los movimientos físicos en un 20%. Los movs. especiales o de estado no se ven afectados.
+Si el rival golpea con un movimiento de contacto al usuario y es del género opuesto, tiene una probabilidad del 30% de quedarse enamorado.
+Si el rival golpea con un movimiento de contacto al usuario y es del género opuesto, tiene una probabilidad del 30% de quedarse enamorado.
+Potencia el Ataque Especial un 50% si un Pokémon aliado tiene la habilidad Más o Menos.
+Potencia el Ataque Especial un 50% si un Pokémon aliado tiene la habilidad Más o Menos.
+Cambia a tipo Agua, Fuego o Hielo en función del tiempo atmosférico. Si éste deja de ejercer efecto cambia a tipo Normal.
+Cambia a tipo Agua, Fuego o Hielo en función del tiempo atmosférico. Si éste deja de ejercer efecto cambia a tipo Normal.
+Protege al Pokémon del robo de objetos ante cualquier ataque del Pokémon rival, al quedarse pegados a su cuerpo.
+Protege al Pokémon del robo de objetos ante cualquier ataque del Pokémon rival, al quedarse pegados a su cuerpo.
+El Pokémon tiene una probabilidad del 30% de curar sus problemas de estado al final de cada turno, al mudar la piel.
+El Pokémon tiene una probabilidad del 30% de curar sus problemas de estado al final de cada turno, al mudar la piel.
+Si sufre un problema de estado, aumenta su Ataque en un 50%, ignorando la reducción de Ataque en caso de estar quemado.
+Si sufre un problema de estado, aumenta su Ataque en un 50%, ignorando la reducción de Ataque en caso de estar quemado.
+Sube la Defensa del poseedor en un 50% si este sufre un problema de estado.
+Sube la Defensa del poseedor en un 50% si este sufre un problema de estado.
+Hiere a los Pokémon que intentan drenarle los PS. Estos pierden tantos PS como los que hubiesen absorbido. No afecta a Comesueños.
+Hiere a los Pokémon que intentan drenarle los PS. Estos pierden tantos PS como los que hubiesen absorbido. No afecta a Comesueños.
+Potencia los movimientos de tipo Planta del Pokémon en un 50% cuando tenga 1/3 o menos de sus PS máximos.
+Potencia los movimientos de tipo Planta del Pokémon en un 50% cuando tenga 1/3 o menos de sus PS máximos.
+Potencia los movimientos de tipo Fuego del Pokémon en un 50% cuando tenga 1/3 o menos de sus PS máximos.
+Potencia los movimientos de tipo Fuego del Pokémon en un 50% cuando tenga 1/3 o menos de sus PS máximos.
+Potencia los movimientos de tipo Agua del Pokémon en un 50% cuando tenga 1/3 o menos de sus PS máximos.
+Potencia los movimientos de tipo Agua del Pokémon en un 50% cuando tenga 1/3 o menos de sus PS máximos.
+Potencia los movimientos de tipo Bicho del Pokémon en un 50% cuando tenga 1/3 o menos de sus PS máximos.
+Potencia los movimientos de tipo Bicho del Pokémon en un 50% cuando tenga 1/3 o menos de sus PS máximos.
+Impide que el Pokémon se dañe con sus propios movimientos, salvo en caso de usar Forcejeo.
+Impide que el Pokémon se dañe con sus propios movimientos, salvo en caso de usar Forcejeo.
+Cuando entra en combate induce clima soleado, que dura 5 turnos. Si el Pokémon lleva equipada Roca calor durará 8 turnos.
+Cuando entra en combate induce clima soleado, que dura 5 turnos. Si el Pokémon lleva equipada Roca calor durará 8 turnos.
+Evita que el enemigo huya o sea cambiado, salvo que sea tipo Fantasma o Volador, levite, lleve equipado Muda concha o use un movimiento de cambio.
+Evita que el enemigo huya o sea cambiado, salvo que sea tipo Fantasma o Volador, levite, lleve equipado Muda concha o use un movimiento de cambio.
+Su determinación le impide quedarse dormido. Si utiliza el movimiento Descanso, este fallará.
+Su determinación le impide quedarse dormido. Si utiliza el movimiento Descanso, este fallará.
+El humo blanco que lo protege evita que otro Pokémon le baje las características, pero no evita que bajen por movimientos propios.
+El humo blanco que lo protege evita que otro Pokémon le baje las características, pero no evita que bajen por movimientos propios.
+Duplica el Ataque del poseedor de la habilidad.
+Duplica el Ataque del poseedor de la habilidad.
+Neutraliza todos los efectos del tiempo atmosférico, salvo la capacidad de negar el cambio de clima de Sol abrasador, Diluvio y Turbulencias.
+Neutraliza todos los efectos del tiempo atmosférico, salvo la capacidad de negar el cambio de clima de Sol abrasador, Diluvio y Turbulencias.
+Disminuye la Precisión de los movimientos del rival usados contra el poseedor de la habilidad a la mitad si este está confuso.
+Disminuye la Precisión de los movimientos del rival usados contra el poseedor de la habilidad a la mitad si este está confuso.
+Si le alcanza un movimiento tipo Eléctrico, aumenta un nivel la Velocidad y no sufre daño. No afecta a Poder oculto, Don natural y Sentencia.
+Si le alcanza un movimiento tipo Eléctrico, aumenta un nivel la Velocidad y no sufre daño. No afecta a Poder oculto, Don natural y Sentencia.
+Aumenta la potencia de sus movimientos en un 25% si el objetivo es del mismo sexo y los reduce en un 25% si es del sexo contrario.
+Aumenta la potencia de sus movimientos en un 25% si el objetivo es del mismo sexo y los reduce en un 25% si es del sexo contrario.
+Cada vez que se amedrenta sube un nivel su Velocidad, debido a su voluntad inquebrantable.
+Cada vez que se amedrenta sube un nivel su Velocidad, debido a su voluntad inquebrantable.
+Disminuye en un 20% la Precisión de los movimientos usados contra él cuando hay clima de Granizo.
+Disminuye en un 20% la Precisión de los movimientos usados contra él cuando hay clima de Granizo.
+El Pokémon utilizará las bayas que se consumen con un 25% o menos de sus PS máximos cuando le queden un 50% o menos de sus PS máximos.
+El Pokémon utilizará las bayas que se consumen con un 25% o menos de sus PS máximos cuando le queden un 50% o menos de sus PS máximos.
+Si recibe un golpe crítico, monta en cólera y sube su Ataque hasta el máximo.
+Si recibe un golpe crítico, monta en cólera y sube su Ataque hasta el máximo.
+El Pokémon duplica la Velocidad si usa o pierde el objeto que lleva. El efecto desaparece al ser cambiado. No se activa con Truco o Trapicheo.
+El Pokémon duplica la Velocidad si usa o pierde el objeto que lleva. El efecto desaparece al ser cambiado. No se activa con Truco o Trapicheo.
+Reduce a la mitad el daño recibido por movimientos de tipo Fuego. Si está quemado perderá cada turno 1/32 de sus PS máximos en lugar de 1/16.
+Reduce a la mitad el daño recibido por movimientos de tipo Fuego. Si está quemado perderá cada turno 1/32 de sus PS máximos en lugar de 1/16.
+Duplica los cambios en las características, tanto positivos como negativos.
+Duplica los cambios en las características, tanto positivos como negativos.
+Cada turno pierde 1/8 de sus PS si hace sol, y los gana si llueve. Los mov. tipo Fuego le hacen un 25% más de daño, y los de agua le recuperan un 25% de sus PS.
+Cada turno pierde 1/8 de sus PS si hace sol, y los gana si llueve. Los mov. tipo Fuego le hacen un 25% más de daño, y los de agua le recuperan un 25% de sus PS.
+Compara la Defensa y la Defensa Especial del rival para ver cuál es inferior y aumenta su propio Ataque o Ataque Especial, según corresponda.
+Compara la Defensa y la Defensa Especial del rival para ver cuál es inferior y aumenta su propio Ataque o Ataque Especial, según corresponda.
+Aumenta la potencia de los movimientos basados en puños en un 20%.
+Aumenta la potencia de los movimientos basados en puños en un 20%.
+Si el Pokémon resulta envenenado, recupera 1/8 de sus PS máximos cada turno.
+Si el Pokémon resulta envenenado, recupera 1/8 de sus PS máximos cada turno.
+Aumenta la bonificación de usar movimientos del mismo tipo del Pokémon x2 en lugar de x1,5.
+Aumenta la bonificación de usar movimientos del mismo tipo del Pokémon x2 en lugar de x1,5.
+Los movimientos múltiples se ejecutarán siempre con el número máximo de golpes.
+Los movimientos múltiples se ejecutarán siempre con el número máximo de golpes.
+Al final de cada turno cura los problemas de estado del Pokémon si está lloviendo.
+Al final de cada turno cura los problemas de estado del Pokémon si está lloviendo.
+Si hace sol, aumenta su Ataque Especial en un 50%, pero pierde 1/8 de sus PS máximos al final de cada turno.
+Si hace sol, aumenta su Ataque Especial en un 50%, pero pierde 1/8 de sus PS máximos al final de cada turno.
+Aumenta la Velocidad en un 50% si sufre problemas de estado. En caso de estar paralizado, no se aplica la reducción de velocidad.
+Aumenta la Velocidad en un 50% si sufre problemas de estado. En caso de estar paralizado, no se aplica la reducción de velocidad.
+Todos sus movs. son tipo Normal y aumentan su potencia en un 20%. No afecta a Pod. oculto, Metereobola, Don natural, Sentencia, Tecno shock y Multiat.
+Todos sus movs. son tipo Normal y aumentan su potencia en un 20%. No afecta a Pod. oculto, Metereobola, Don natural, Sentencia, Tecno shock y Multiat.
+La potencia de los golpes críticos se ve aumenta de x1,5 a x2,25.
+La potencia de los golpes críticos se ve aumenta de x1,5 a x2,25.
+El Pokémon solo recibe daño de ataques directos. No recibe daño indirecto de ataques, habilidades u objetos, ni puede ser atrapado por movimientos.
+El Pokémon solo recibe daño de ataques directos. No recibe daño indirecto de ataques, habilidades u objetos, ni puede ser atrapado por movimientos.
+Todos los movimientos acertarán siempre, tanto del Pokémon como del rival.
+Todos los movimientos acertarán siempre, tanto del Pokémon como del rival.
+El Pokémon se mueve el último, siempre que los movimientos tengan la misma prioridad, salvo que algún otro tenga equipado Cola plúmbea o Incienso lento.
+El Pokémon se mueve el último, siempre que los movimientos tengan la misma prioridad, salvo que algún otro tenga equipado Cola plúmbea o Incienso lento.
+Potencia los movimientos que tengan una Potencia de 60 o menos x1,5.
+Potencia los movimientos que tengan una Potencia de 60 o menos x1,5.
+Evita los problemas de estado si hace sol, al igual que no puede usar descanso o no se activan los objetos llamasfera y toxisfera.
+Evita los problemas de estado si hace sol, al igual que no puede usar descanso o no se activan los objetos llamasfera y toxisfera.
+El Pokémon no puede usar objetos equipados, y anula su efecto. También afecta al uso de lanzamiento. Los objetos que afectan exp. y dinero funcionan.
+El Pokémon no puede usar objetos equipados, y anula su efecto. También afecta al uso de lanzamiento. Los objetos que afectan exp. y dinero funcionan.
+Las habilidades del objetivo no afectan al daño o efectos de los movimientos empleados.
+Las habilidades del objetivo no afectan al daño o efectos de los movimientos empleados.
+Su buena suerte aumenta la probabilidad de asestar golpes críticos en uno.
+Su buena suerte aumenta la probabilidad de asestar golpes críticos en uno.
+Daña al agresor que le ha dado el golpe de gracia con un movimiento de contacto en un 25% de sus PS máximos, salvo que el agresor tenga Humedad.
+Daña al agresor que le ha dado el golpe de gracia con un movimiento de contacto en un 25% de sus PS máximos, salvo que el agresor tenga Humedad.
+Si el rival tiene un movimiento que resulte eficaz contra él, el Pokémon se estremecerá.
+Si el rival tiene un movimiento que resulte eficaz contra él, el Pokémon se estremecerá.
+Determina el movimiento más potente del rival al entrar en combate.
+Determina el movimiento más potente del rival al entrar en combate.
+Ignora los cambios tanto positivos como negativos en las características del rival al atacar, salvo la Velocidad.
+Ignora los cambios tanto positivos como negativos en las características del rival al atacar, salvo la Velocidad.
+Potencia los movimientos que no son muy eficaces, haciendo estos el doble de daño.
+Potencia los movimientos que no son muy eficaces, haciendo estos el doble de daño.
+Mitiga el daño que le infligen los movimientos supereficaces, reduciéndolos a 3/4 del daño inicial.
+Mitiga el daño que le infligen los movimientos supereficaces, reduciéndolos a 3/4 del daño inicial.
+Baja a la mitad el Ataque y la Velocidad durante cinco turnos. Al cambiar de Pokémon se reinicia la cuenta.
+Baja a la mitad el Ataque y la Velocidad durante cinco turnos. Al cambiar de Pokémon se reinicia la cuenta.
+Los movimientos de tipo Normal o Lucha alcanzan a los Pokémon de tipo Fantasma. Además es inmune a la Intimidación.
+Los movimientos de tipo Normal o Lucha alcanzan a los Pokémon de tipo Fantasma. Además es inmune a la Intimidación.
+Atrae los movimientos de tipo Agua, aumenta un nivel el Ataque Especial y no sufre daño. No afecta a Poder oculto, Don natural y Sentencia.
+Atrae los movimientos de tipo Agua, aumenta un nivel el Ataque Especial y no sufre daño. No afecta a Poder oculto, Don natural y Sentencia.
+Recupera 1/16 de sus PS máximos al final de cada turno cuando hay tormentas de granizo.
+Recupera 1/16 de sus PS máximos al final de cada turno cuando hay tormentas de granizo.
+Cuando entra en combate invoca una nevada que dura 5 turnos. Si el Pokémon lleva equipada Roca helada durará 8 turnos.
+Cuando entra en combate invoca una nevada que dura 5 turnos. Si el Pokémon lleva equipada Roca helada durará 8 turnos.
+Es posible que el Pokémon encuentre Miel una vez concluido el combate. La probabilidad aumenta según aumenta el nivel del Pokémon.
+Es posible que el Pokémon encuentre Miel una vez concluido el combate. La probabilidad aumenta según aumenta el nivel del Pokémon.
+El Pokémon puede ver el objeto que lleva el rival al entrar en combate.
+El Pokémon puede ver el objeto que lleva el rival al entrar en combate.
+Potencia la potencia de los movimientos que también dañan al usuario en un 20%.
+Potencia la potencia de los movimientos que también dañan al usuario en un 20%.
+Cambia el tipo del Pokémon al de la tabla o cristal Z que lleve equipado.
+Cambia el tipo del Pokémon al de la tabla o cristal Z que lleve equipado.
+Aumenta el Ataque y la Defensa Especial de todos los Pokémon del equipo en combate si hace sol.
+Aumenta el Ataque y la Defensa Especial de todos los Pokémon del equipo en combate si hace sol.
+Inflige 1/8 de sus PS máximos de daño a cualquier rival que esté dormido en combate al final de cada turno.
+Inflige 1/8 de sus PS máximos de daño a cualquier rival que esté dormido en combate al final de cada turno.
+Si el rival usa un movimiento de contacto al atacar, le roba el objeto si no lleva ya uno equipado. No afecta con ciertos objetos o habilidades.
+Si el rival usa un movimiento de contacto al atacar, le roba el objeto si no lleva ya uno equipado. No afecta con ciertos objetos o habilidades.
+Sube la potencia en un 30% de los movimientos con efectos secundarios, pero anula el efecto.
+Sube la potencia en un 30% de los movimientos con efectos secundarios, pero anula el efecto.
+Invierte los cambios en las características: bajan cuando les toca subir y suben cuando les toca bajar.
+Invierte los cambios en las características: bajan cuando les toca subir y suben cuando les toca bajar.
+Pone nervioso al rival y le impide usar bayas. No impide su uso si es a través de movimientos como Lanzamiento, Picadura o Picoteo.
+Pone nervioso al rival y le impide usar bayas. No impide su uso si es a través de movimientos como Lanzamiento, Picadura o Picoteo.
+Sube dos niveles el Ataque del usuario cuando el rival le baja una de sus características. Se activa tantas veces como reducciones ocurran.
+Sube dos niveles el Ataque del usuario cuando el rival le baja una de sus características. Se activa tantas veces como reducciones ocurran.
+Se debilita tanto cuando sus PS se ven reducidos por debajo del 50% de sus PS máximos que su Ataque y su Ataque Especial bajan a la mitad.
+Se debilita tanto cuando sus PS se ven reducidos por debajo del 50% de sus PS máximos que su Ataque y su Ataque Especial bajan a la mitad.
+Tiene una probabilidad del 30% de anular el movimiento usado en su contra durante 4 turnos.
+Tiene una probabilidad del 30% de anular el movimiento usado en su contra durante 4 turnos.
+Al final de cada turno tiene una probabilidad del 30% de curar los problemas de estado de un compañero Pokémon en combate.
+Al final de cada turno tiene una probabilidad del 30% de curar los problemas de estado de un compañero Pokémon en combate.
+Reduce el daño que sufren los aliados en combate en un 25%, pero no el propio.
+Reduce el daño que sufren los aliados en combate en un 25%, pero no el propio.
+Al recibir daño por un ataque físico, baja un nivel la Defensa, pero sube dos niveles la Velocidad del Pokémon.
+Al recibir daño por un ataque físico, baja un nivel la Defensa, pero sube dos niveles la Velocidad del Pokémon.
+Duplica el peso del Pokémon, lo cual afecta a los movimientos tanto propios como del rival que se basan en el peso.
+Duplica el peso del Pokémon, lo cual afecta a los movimientos tanto propios como del rival que se basan en el peso.
+Reduce a la mitad el peso del Pokémon, lo cual afecta a los movimientos tanto propios como del rival que se basan en el peso.
+Reduce a la mitad el peso del Pokémon, lo cual afecta a los movimientos tanto propios como del rival que se basan en el peso.
+Reduce el daño sufrido a la mitad si los PS están al máximo. No afecta a movimientos de daño fijo como por ejemplo Furia Dragón o Contraataque.
+Reduce el daño sufrido a la mitad si los PS están al máximo. No afecta a movimientos de daño fijo como por ejemplo Furia Dragón o Contraataque.
+Aumenta la potencia de los ataques físicos en un 50% cuando el Pokémon está envenenado.
+Aumenta la potencia de los ataques físicos en un 50% cuando el Pokémon está envenenado.
+Aumenta la potencia de los ataques especiales en un 50% cuando el Pokémon sufre quemaduras.
+Aumenta la potencia de los ataques especiales en un 50% cuando el Pokémon sufre quemaduras.
+El Pokémon tiene un 50% de probabilidad de recuperar la baya usada en combate al final de cada turno. Con clima soleado la recupera siempre.
+El Pokémon tiene un 50% de probabilidad de recuperar la baya usada en combate al final de cada turno. Con clima soleado la recupera siempre.
+Elude los ataques de los aliados durante el combate.
+Elude los ataques de los aliados durante el combate.
+Cada turno sube dos niveles una característica del Pokémon al azar, pero a costa de bajar un nivel otra también al azar.
+Cada turno sube dos niveles una característica del Pokémon al azar, pero a costa de bajar un nivel otra también al azar.
+Protege al Pokémon de las tormentas de arena, el granizo y los movimientos basados en polvos y esporas.
+Protege al Pokémon de las tormentas de arena, el granizo y los movimientos basados en polvos y esporas.
+Puede envenenar al objetivo con solo tocarlo un 30% de las veces.
+Puede envenenar al objetivo con solo tocarlo un 30% de las veces.
+Recupera 1/3 de sus PS máximos cuando el Pokémon vuelve a su Poké Ball en combate, tanto si es un cambio manual como causado por un mov. del rival.
+Recupera 1/3 de sus PS máximos cuando el Pokémon vuelve a su Poké Ball en combate, tanto si es un cambio manual como causado por un mov. del rival.
+Impide que el rival baje la Defensa del Pokémon, pero no que baje por usar movimientos propios.
+Impide que el rival baje la Defensa del Pokémon, pero no que baje por usar movimientos propios.
+Aumenta x2 la Velocidad del Pokémon durante las tormentas de arena, y evita que sufra daño de esta.
+Aumenta x2 la Velocidad del Pokémon durante las tormentas de arena, y evita que sufra daño de esta.
+Reduce la precisión de los movs. de estado dirigidos contra el poseedor de la habilidad al 50%. No baja por debajo del 50%.
+Reduce la precisión de los movs. de estado dirigidos contra el poseedor de la habilidad al 50%. No baja por debajo del 50%.
+Aumenta la potencia del movimiento en un 30% si es el último en atacar.
+Aumenta la potencia del movimiento en un 30% si es el último en atacar.
+Adopta el aspecto del último Pokémon del equipo al entrar en combate para desconcertar al rival.
+Adopta el aspecto del último Pokémon del equipo al entrar en combate para desconcertar al rival.
+El Pokémon se transforma en el que tiene enfrente, copiando todos sus stats a excepción de los PS.
+El Pokémon se transforma en el que tiene enfrente, copiando todos sus stats a excepción de los PS.
+Ataca rodeando la barrera o el sustituto del rival.
+Ataca rodeando la barrera o el sustituto del rival.
+Contagia la habilidad Momia al rival que entre en contacto con él.
+Contagia la habilidad Momia al rival que entre en contacto con él.
+Al debilitar a un objetivo, su confianza se refuerza de tal manera que aumenta en un nivel el Ataque.
+Al debilitar a un objetivo, su confianza se refuerza de tal manera que aumenta en un nivel el Ataque.
+Si le alcanza un movimiento de tipo Siniestro, aumenta en un nivel el Ataque debido a su integridad.
+Si le alcanza un movimiento de tipo Siniestro, aumenta en un nivel el Ataque debido a su integridad.
+Si le alcanza un movimiento de tipo Siniestro, Bicho o Fantasma, sube un nivel la Velocidad. También lo hace al recibir Intimidación.
+Si le alcanza un movimiento de tipo Siniestro, Bicho o Fantasma, sube un nivel la Velocidad. También lo hace al recibir Intimidación.
+Permite devolver los ataques de estado lanzados por el rival, sin verse afectado por ellos.
+Permite devolver los ataques de estado lanzados por el rival, sin verse afectado por ellos.
+Neutraliza los movimientos de tipo Planta y sube el Ataque en un nivel, incluidos movimientos de estado.
+Neutraliza los movimientos de tipo Planta y sube el Ataque en un nivel, incluidos movimientos de estado.
+Permite lanzar ataques de estado en primer lugar. Los Pokémon tipo Siniestro son inmunes a movimientos usados con esta habilidad.
+Permite lanzar ataques de estado en primer lugar. Los Pokémon tipo Siniestro son inmunes a movimientos usados con esta habilidad.
+Potencia los movimientos de tipo Tierra, Acero y Roca durante las tormentas de arena en un 30%.
+Potencia los movimientos de tipo Tierra, Acero y Roca durante las tormentas de arena en un 30%.
+Inflige al rival 1/8 de sus PS máximos de daño si este golpea al Pokémon con un movimiento de contacto.
+Inflige al rival 1/8 de sus PS máximos de daño si este golpea al Pokémon con un movimiento de contacto.
+Cambia de forma si sus PS se ven reducidos a la mitad.
+Cambia de forma si sus PS se ven reducidos a la mitad.
+Sube la Precisión del poseedor y sus aliados en combate en un 10%.
+Sube la Precisión del poseedor y sus aliados en combate en un 10%.
+Las habilidades del objetivo no afectan a los movimientos empleados.
+Las habilidades del objetivo no afectan a los movimientos empleados.
+Protege al poseedor y sus aliados de ataques que impiden elegir movimientos, como anticura, mofa, anulación o la habilidad cuerpo maldito.
+Protege al poseedor y sus aliados de ataques que impiden elegir movimientos, como anticura, mofa, anulación o la habilidad cuerpo maldito.
+Evita que los Pokémon de tipo Planta aliados sufran problemas de estado o que bajen sus características.
+Evita que los Pokémon de tipo Planta aliados sufran problemas de estado o que bajen sus características.
+Recupera 1/3 de sus PS máximos al comer cualquier baya, después de aplicar los efectos de esta.
+Recupera 1/3 de sus PS máximos al comer cualquier baya, después de aplicar los efectos de esta.
+Cambia su tipo al del movimiento que va a usar, antes de usarlo. Aunque el ataque falle cambiará su tipo igualmente.
+Cambia su tipo al del movimiento que va a usar, antes de usarlo. Aunque el ataque falle cambiará su tipo igualmente.
+Reduce a la mitad el daño recibido por ataques físicos del rival o que actúen sobre la defensa del usuario.
+Reduce a la mitad el daño recibido por ataques físicos del rival o que actúen sobre la defensa del usuario.
+Roba el objeto del Pokémon al que alcance con un movimiento de daño directo. No lo hace con ciertos objetos o habilidades.
+Roba el objeto del Pokémon al que alcance con un movimiento de daño directo. No lo hace con ciertos objetos o habilidades.
+EL poseedor es inmune a todos los movimientos basados en balas, cañones, bombas y bolas.
+EL poseedor es inmune a todos los movimientos basados en balas, cañones, bombas y bolas.
+Sube dos niveles el At. Especial del usuario cuando el rival le baja una de sus caract. Se activa tantas veces como reducciones ocurran.
+Sube dos niveles el At. Especial del usuario cuando el rival le baja una de sus caract. Se activa tantas veces como reducciones ocurran.
+Aumenta la potencia de los movimientos basados en mordiscos en un 50%.
+Aumenta la potencia de los movimientos basados en mordiscos en un 50%.
+Convierte los movimientos de tipo Normal en tipo Hielo y aumenta su potencia en un 20%.
+Convierte los movimientos de tipo Normal en tipo Hielo y aumenta su potencia en un 20%.
+Evita que el Pokémon o sus aliados en combate se duerman. También impide el uso de Descanso.
+Evita que el Pokémon o sus aliados en combate se duerman. También impide el uso de Descanso.
+Adopta la Forma Filo al lanzar un ataque de daño directo, o bien la Forma Escudo si usa el movimiento Escudo Real.
+Adopta la Forma Filo al lanzar un ataque de daño directo, o bien la Forma Escudo si usa el movimiento Escudo Real.
+Da prioridad a los movimientos de tipo Volador si los PS del usuario están al máximo.
+Da prioridad a los movimientos de tipo Volador si los PS del usuario están al máximo.
+Aumenta la potencia de los movimientos de pulsos y auras en un 50%.
+Aumenta la potencia de los movimientos de pulsos y auras en un 50%.
+Aumenta la Defensa en un 50% si hay un campo de hierba en el terreno de combate.
+Aumenta la Defensa en un 50% si hay un campo de hierba en el terreno de combate.
+El Pokémon pasa su objeto a su aliado cuando el aliado utiliza el suyo.
+El Pokémon pasa su objeto a su aliado cuando el aliado utiliza el suyo.
+Aumenta la potencia de los movimientos de contacto en 1/3.
+Aumenta la potencia de los movimientos de contacto en 1/3.
+Convierte los movimientos de tipo Normal en tipo Hada y aumenta su potencia en un 20%.
+Convierte los movimientos de tipo Normal en tipo Hada y aumenta su potencia en un 20%.
+Baja la Velocidad del rival en un nivel cuando este ataca al Pokémon con un movimiento de contacto.
+Baja la Velocidad del rival en un nivel cuando este ataca al Pokémon con un movimiento de contacto.
+Convierte los movimientos de tipo Normal en tipo Volador y aumenta su potencia en un 20%.
+Convierte los movimientos de tipo Normal en tipo Volador y aumenta su potencia en un 20%.
+El Pokémon ataca dos veces por turno si usa movimientos de daño, siendo la potencia del segundo un 25% de la del primero.
+El Pokémon ataca dos veces por turno si usa movimientos de daño, siendo la potencia del segundo un 25% de la del primero.
+Aumenta la potencia de todos los movimientos de tipo Siniestro en 1/3.
+Aumenta la potencia de todos los movimientos de tipo Siniestro en 1/3.
+Aumenta la potencia de todos los movimientos de tipo Hada en 1/3.
+Aumenta la potencia de todos los movimientos de tipo Hada en 1/3.
+Invierte los efectos de las auras, por lo que bajan la potencia de los movs. hada y siniestro en 1/3 en vez de subirlos.
+Invierte los efectos de las auras, por lo que bajan la potencia de los movs. hada y siniestro en 1/3 en vez de subirlos.
+Altera el clima con una poderosa lluvia para anular los ataques de tipo Fuego. Los climas básicos no eliminan este clima.
+Altera el clima con una poderosa lluvia para anular los ataques de tipo Fuego. Los climas básicos no eliminan este clima.
+Altera el clima con un abrasador sol para anular los ataques de tipo Agua. Los climas básicos no eliminan este clima.
+Altera el clima con un abrasador sol para anular los ataques de tipo Agua. Los climas básicos no eliminan este clima.
+Altera el clima para anular las vulnerabilidades del tipo Volador. Los climas básicos no eliminan este clima.
+Altera el clima para anular las vulnerabilidades del tipo Volador. Los climas básicos no eliminan este clima.
+Aumenta la Defensa en un nivel al recibir un ataque de daño directo en combate.
+Aumenta la Defensa en un nivel al recibir un ataque de daño directo en combate.
+Se asusta y abandona el terreno de combate cuando sus PS se ven reducidos por debajo del 50%, tanto por daño directo como indirecto.
+Se asusta y abandona el terreno de combate cuando sus PS se ven reducidos por debajo del 50%, tanto por daño directo como indirecto.
+Abandona el terreno de combate cuando sus PS se ven reducidos por debajo del 50% para evitar males mayores.
+Abandona el terreno de combate cuando sus PS se ven reducidos por debajo del 50% para evitar males mayores.
+Aumenta en dos niveles la Defensa si le alcanza un movimiento de tipo Agua, pero no le hace inmune al ataque.
+Aumenta en dos niveles la Defensa si le alcanza un movimiento de tipo Agua, pero no le hace inmune al ataque.
+Hace que los movimientos asesten siempre un golpe crítico si el rival está envenenado.
+Hace que los movimientos asesten siempre un golpe crítico si el rival está envenenado.
+Rompe su coraza cuando sus PS se ven reducidos a la mitad y adopta una forma ofensiva.
+Rompe su coraza cuando sus PS se ven reducidos a la mitad y adopta una forma ofensiva.
+Duplica el daño infligido a un Pokémon que se haya incorporado al combate en ese turno mediante un cambio.
+Duplica el daño infligido a un Pokémon que se haya incorporado al combate en ese turno mediante un cambio.
+Duplica la potencia de los movs. de tipo Agua, reduce a la mitad el daño de los movs. de tipo Fuego e impide que sufra quemaduras.
+Duplica la potencia de los movs. de tipo Agua, reduce a la mitad el daño de los movs. de tipo Fuego e impide que sufra quemaduras.
+Potencia los movimientos de tipo Acero del usuario en un 50%.
+Potencia los movimientos de tipo Acero del usuario en un 50%.
+Aumenta el At. Especial en un nivel cada vez que los ataques del oponente le reduzcan los PS por debajo del 50%, pudiéndose activar más de una vez.
+Aumenta el At. Especial en un nivel cada vez que los ataques del oponente le reduzcan los PS por debajo del 50%, pudiéndose activar más de una vez.
+Duplica la Velocidad del usuario si está granizando, y lo hace inmune al granizo.
+Duplica la Velocidad del usuario si está granizando, y lo hace inmune al granizo.
+Permite usar cualquier movimiento sin entrar en contacto con el rival.
+Permite usar cualquier movimiento sin entrar en contacto con el rival.
+Hace que todos los movimientos del Pokémon basados en sonido pasen a ser de tipo Agua. Los movimientos de estado también se activan.
+Hace que todos los movimientos del Pokémon basados en sonido pasen a ser de tipo Agua. Los movimientos de estado también se activan.
+Aumenta en 3 la prioridad de los movimientos que curan PS directamente al usuario u otros Pokémon.
+Aumenta en 3 la prioridad de los movimientos que curan PS directamente al usuario u otros Pokémon.
+Convierte los movimientos de tipo Normal en tipo Eléctrico y aumenta su potencia en un 20%.
+Convierte los movimientos de tipo Normal en tipo Eléctrico y aumenta su potencia en un 20%.
+Duplica la Velocidad si hay un campo eléctrico en el terreno de combate.
+Duplica la Velocidad si hay un campo eléctrico en el terreno de combate.
+A partir del nivel 20, Wishiwashi se transforma a su forma banco si sus PS están por encima del 25%. Vuelve a su forma individual si bajan del 25%.
+A partir del nivel 20, Wishiwashi se transforma a su forma banco si sus PS están por encima del 25%. Vuelve a su forma individual si bajan del 25%.
+El Pokémon perderá sólo 1/8 de sus PS máximos del primer ataque que reciba del rival, independientemente del daño que reciba.
+El Pokémon perderá sólo 1/8 de sus PS máximos del primer ataque que reciba del rival, independientemente del daño que reciba.
+Al derrotar a un rival, los vínculos con su entrenador se refuerzan y se convierte en Greninja Ash.
+Al derrotar a un rival, los vínculos con su entrenador se refuerzan y se convierte en Greninja Ash.
+Cuando sus PS se ven reducidos a la mitad, las células se reagrupan y adopta su Forma Completa.
+Cuando sus PS se ven reducidos a la mitad, las células se reagrupan y adopta su Forma Completa.
+Permite envenenar incluso a rivales de tipo Acero o Veneno. No permite atacar a Pokémon tipo Acero con movs. tipo Veneno de daño directo.
+Permite envenenar incluso a rivales de tipo Acero o Veneno. No permite atacar a Pokémon tipo Acero con movs. tipo Veneno de daño directo.
+No despierta jamás de su profundo letargo e incluso ataca dormido.
+No despierta jamás de su profundo letargo e incluso ataca dormido.
+Impide al rival usar movimientos con prioridad dirigidos al Pokémon, haciéndoles consumir PP como si el mov. hubiese fallado.
+Impide al rival usar movimientos con prioridad dirigidos al Pokémon, haciéndoles consumir PP como si el mov. hubiese fallado.
+Al caer debilitado, inflige al rival un daño equivalente a los PS que le quedaban. No se activa cuando es debilitado por daño indirecto.
+Al caer debilitado, inflige al rival un daño equivalente a los PS que le quedaban. No se activa cuando es debilitado por daño indirecto.
+Permite copiar cualquier movimiento de baile que haya usado otro Pokémon presente en el combate.
+Permite copiar cualquier movimiento de baile que haya usado otro Pokémon presente en el combate.
+Potencia los movimientos especiales de los aliados en un 30%.
+Potencia los movimientos especiales de los aliados en un 30%.
+Reduce a la mitad el daño provocado por los movimientos de contacto, pero duplica el infligido por los de tipo Fuego.
+Reduce a la mitad el daño provocado por los movimientos de contacto, pero duplica el infligido por los de tipo Fuego.
+Desconcierta al rival y le impide utilizar movimientos con prioridad contra el usuario o sus aliados.
+Desconcierta al rival y le impide utilizar movimientos con prioridad contra el usuario o sus aliados.
+Aumenta el Ataque Especial cada vez que un Pokémon cae debilitado, sea aliado o rival.
+Aumenta el Ataque Especial cada vez que un Pokémon cae debilitado, sea aliado o rival.
+Baja un nivel la Velocidad del rival cuando este ataca al Pokémon con un movimiento de contacto.
+Baja un nivel la Velocidad del rival cuando este ataca al Pokémon con un movimiento de contacto.
+Adquiere la habilidad de un aliado cuando el aliado cae debilitado.
+Adquiere la habilidad de un aliado cuando el aliado cae debilitado.
+Reacciona copiando la habilidad de un aliado cuando este aliado cae debilitado.
+Reacciona copiando la habilidad de un aliado cuando este aliado cae debilitado.
+Si el Pokémon derrota a un rival en ese turno, aumenta su característica más elevada en un nivel.
+Si el Pokémon derrota a un rival en ese turno, aumenta su característica más elevada en un nivel.
+Cambia su tipo según el disco que lleve instalado, cambiando también el tipo del ataque Multiataque.
+Cambia su tipo según el disco que lleve instalado, cambiando también el tipo del ataque Multiataque.
+Crea un campo eléctrico al entrar en combate.
+Crea un campo eléctrico al entrar en combate.
+Crea un campo psíquico al entrar en combate.
+Crea un campo psíquico al entrar en combate.
+Crea un campo de niebla al entrar en combate.
+Crea un campo de niebla al entrar en combate.
+Crea un campo de hierba al entrar en combate.
+Crea un campo de hierba al entrar en combate.
+Evita que bajen sus características a causa de movimientos o habilidades de otros Pokémon.
+Evita que bajen sus características a causa de movimientos o habilidades de otros Pokémon.
+Reduce el daño sufrido a la mitad si los PS están al máximo.
+Reduce el daño sufrido a la mitad si los PS están al máximo.
+Mitiga el daño que le infligen los movimientos supereficaces en 1/4.
+Mitiga el daño que le infligen los movimientos supereficaces en 1/4.
+Potencia los ataques supereficaces en un 25%.
+Potencia los ataques supereficaces en un 25%.
+Aumenta el Ataque del usuario en un nivel la primera vez que entra en combate.
+Aumenta el Ataque del usuario en un nivel la primera vez que entra en combate.
+Aumenta la Defensa del usuario en un nivel la primera vez que entra en combate.
+Aumenta la Defensa del usuario en un nivel la primera vez que entra en combate.
+Cambia el tipo del poseedor al del movimiento a usar antes de ejecutarlo, incluso aunque el movimiento falle.
+Cambia el tipo del poseedor al del movimiento a usar antes de ejecutarlo, incluso aunque el movimiento falle.
+Si no lleva equipado ningún objeto, recupera la Poké Ball del primer intento de captura fallido.
+Si no lleva equipado ningún objeto, recupera la Poké Ball del primer intento de captura fallido.
+Cuando es afectado por un ataque, con su pelusa reduce la Velocidad en un nivel de los demás Pokémon en combate.
+Cuando es afectado por un ataque, con su pelusa reduce la Velocidad en un nivel de los demás Pokémon en combate.
+Los movimientos del usuario ignoran ser atraídos por los movimientos o habilidades del adversario que los atraen.
+Los movimientos del usuario ignoran ser atraídos por los movimientos o habilidades del adversario que los atraen.
+Devuelve los efectos de habilidades o movimientos que reducen las características al Pokémon que los provoque.
+Devuelve los efectos de habilidades o movimientos que reducen las características al Pokémon que los provoque.
+Tras usar Surf o Buceo, si tiene más del 50% de sus PS máximos pasa a su forma tragatodo, mientras que si tiene menos pasa a su forma engulletodo.
+Tras usar Surf o Buceo, si tiene más del 50% de sus PS máximos pasa a su forma tragatodo, mientras que si tiene menos pasa a su forma engulletodo.
+Si le alcanza un movimiento de tipo Fuego o Agua, le sube la Velocidad en seis niveles.
+Si le alcanza un movimiento de tipo Fuego o Agua, le sube la Velocidad en seis niveles.
+Potencia los ataques de sonido en un 30% y, si el poseedor es atacado por uno, el daño recibido será la mitad.
+Potencia los ataques de sonido en un 30% y, si el poseedor es atacado por uno, el daño recibido será la mitad.
+Provoca una Tormenta de Arena al recibir un ataque. Si lleva equipada Roca suave, la tormenta durará 8 turnos.
+Provoca una Tormenta de Arena al recibir un ataque. Si lleva equipada Roca suave, la tormenta durará 8 turnos.
+Las gélidas escamas que protegen su cuerpo reducen a la mitad el daño que le infligen los ataques especiales.
+Las gélidas escamas que protegen su cuerpo reducen a la mitad el daño que le infligen los ataques especiales.
+Hace madurar las bayas, por lo que duplica sus efectos al consumirlas.
+Hace madurar las bayas, por lo que duplica sus efectos al consumirlas.
+Si recibe un ataque físico del rival o suyo por confusión cambiará a su forma cara deshielo. Recupera su anterior forma una vez si graniza.
+Si recibe un ataque físico del rival o suyo por confusión cambiará a su forma cara deshielo. Recupera su anterior forma una vez si graniza.
+Potencia los movimientos de los Pokémon adyacentes en combate en un 30%.
+Potencia los movimientos de los Pokémon adyacentes en combate en un 30%.
+Cambia el tipo del Pokémon según el campo que haya en el terreno de combate. Si se acaba el campo recupera su anterior tipo.
+Cambia el tipo del Pokémon según el campo que haya en el terreno de combate. Si se acaba el campo recupera su anterior tipo.
+Anula los efectos de Pantalla de Luz, Reflejo y Velo Aurora tanto de rivales como de aliados al entrar en combate.
+Anula los efectos de Pantalla de Luz, Reflejo y Velo Aurora tanto de rivales como de aliados al entrar en combate.
+Aumenta el poder de los ataques de tipo Acero tanto del usuario como de sus aliados en un 50%.
+Aumenta el poder de los ataques de tipo Acero tanto del usuario como de sus aliados en un 50%.
+Al ser alcanzado por un movimiento de contacto, tanto el atacante como el Pokémon usuario de la habilidad caerán debilitados tras haber pasado 3 turnos.
+Al ser alcanzado por un movimiento de contacto, tanto el atacante como el Pokémon usuario de la habilidad caerán debilitados tras haber pasado 3 turnos.
+Si le alcanza un movimiento de contacto, intercambia su habilidad con la del agresor, salvo algunas excepciones.
+Si le alcanza un movimiento de contacto, intercambia su habilidad con la del agresor, salvo algunas excepciones.
+Potencia su Ataque en un 50%, pero solo puede usar el primer movimiento escogido.
+Potencia su Ataque en un 50%, pero solo puede usar el primer movimiento escogido.
+Anula las habilidades de los Pokémon en el campo de batalla. Al cambiar o caer debilitado se activan todas de nuevo.
+Anula las habilidades de los Pokémon en el campo de batalla. Al cambiar o caer debilitado se activan todas de nuevo.
+Se protege a sí mismo y a sus aliados del envenenamiento. Al entrar en combate cura del veneno a los aliados.
+Se protege a sí mismo y a sus aliados del envenenamiento. Al entrar en combate cura del veneno a los aliados.
+Alterna entre su Forma Saciada y Forma Voraz al final de cada turno, cambiando el tipo del movimiento Rueda aural.
+Alterna entre su Forma Saciada y Forma Voraz al final de cada turno, cambiando el tipo del movimiento Rueda aural.
+Si usa un movimiento especial o físico tiene un 30% de probabilidad de atacar primero si se usan movimientos con la misma prioridad.
+Si usa un movimiento especial o físico tiene un 30% de probabilidad de atacar primero si se usan movimientos con la misma prioridad.
+Si usa un movimiento de contacto, puede infligir daño al objetivo aunque este se proteja.
+Si usa un movimiento de contacto, puede infligir daño al objetivo aunque este se proteja.
+Cuando entra en combate elimina los cambios de características de los aliados, tanto positivos como negativos.
+Cuando entra en combate elimina los cambios de características de los aliados, tanto positivos como negativos.
+Potencia los movimientos tipo Eléctrico un 30%.
+Potencia los movimientos tipo Eléctrico un 30%.
+Potencia los movimientos tipo Dragón un 50%.
+Potencia los movimientos tipo Dragón un 50%.
+Sube un nivel su Ataque al derrotar a un Pokémon.
+Sube un nivel su Ataque al derrotar a un Pokémon.
+Sube un nivel su Ataque Especial al derrotar a un Pokémon.
+Sube un nivel su Ataque Especial al derrotar a un Pokémon.
+Combina las habilidades Nerviosismo (impide al rival usar bayas) y Relincho Blanco (al derrotar a un objetivo aumenta su Ataque).
+Combina las habilidades Nerviosismo (impide al rival usar bayas) y Relincho Blanco (al derrotar a un objetivo aumenta su Ataque).
+Combina las habilidades Nerviosismo (impide al rival usar bayas) y Relincho Negro (al derrotar a un objetivo aumenta su At. Especial).
+Combina las habilidades Nerviosismo (impide al rival usar bayas) y Relincho Negro (al derrotar a un objetivo aumenta su At. Especial).
+Cuando un ataque reduce sus PS a la mitad, un arrebato de cólera reduce su Defensa y su Defensa Especial, pero aumenta su Ataque, su Ataque Especial y su Velocidad.
+Cuando un ataque reduce sus PS a la mitad, un arrebato de cólera reduce su Defensa y su Defensa Especial, pero aumenta su Ataque, su Ataque Especial y su Velocidad.
+La extraña cola que le envuelve la cabeza impide al rival usar movimientos con prioridad contra él y sus aliados.
+La extraña cola que le envuelve la cabeza impide al rival usar movimientos con prioridad contra él y sus aliados.
+Reduce la Defensa Especial de todos los demás Pokémon con el poder de sus abalorios malditos.
+Reduce la Defensa Especial de todos los demás Pokémon con el poder de sus abalorios malditos.
+Si al entrar en combate coincide con un Dondozo aliado, se cuela en el interior de su boca para tomar el control.
+Si al entrar en combate coincide con un Dondozo aliado, se cuela en el interior de su boca para tomar el control.
+Al entrar en combate, copia los cambios en las características de su aliado.
+Al entrar en combate, copia los cambios en las características de su aliado.
+Cuando ingiere una baya, la regurgita al final del siguiente turno y se la come por segunda vez.
+Cuando ingiere una baya, la regurgita al final del siguiente turno y se la come por segunda vez.
+Si lo alcanza un movimiento de tipo Tierra, recupera PS en vez de sufrir daño.
+Si lo alcanza un movimiento de tipo Tierra, recupera PS en vez de sufrir daño.
+Su cuerpo se carga de electricidad al recibir daño, lo que potencia su siguiente movimiento de tipo Eléctrico.
+Su cuerpo se carga de electricidad al recibir daño, lo que potencia su siguiente movimiento de tipo Eléctrico.
+Su robusto cuerpo de oro inoxidable lo hace inmune frente a movimientos de estado de otros Pokémon.
+Su robusto cuerpo de oro inoxidable lo hace inmune frente a movimientos de estado de otros Pokémon.
+Aumenta su Ataque si sufre los efectos de Intimidación. También anula movimientos y objetos que fuercen el cambio de Pokémon.
+Aumenta su Ataque si sufre los efectos de Intimidación. También anula movimientos y objetos que fuercen el cambio de Pokémon.
+Crea un campo eléctrico al entrar en combate. Si hay un campo eléctrico, su Ataque Especial aumenta gracias a su motor futurista.
+Crea un campo eléctrico al entrar en combate. Si hay un campo eléctrico, su Ataque Especial aumenta gracias a su motor futurista.
+Contagia la habilidad Olor Persistente al Pokémon que lo ataque con un movimiento de contacto.
+Contagia la habilidad Olor Persistente al Pokémon que lo ataque con un movimiento de contacto.
+El Pokémon siempre actúa con lentitud cuando usa movimientos de estado, pero estos no se ven afectados por la habilidad del objetivo.
+El Pokémon siempre actúa con lentitud cuando usa movimientos de estado, pero estos no se ven afectados por la habilidad del objetivo.
+Copia las mejoras en las características del rival, aprovechándose de la situación.
+Copia las mejoras en las características del rival, aprovechándose de la situación.
+El tiempo pasa a ser soleado cuando entra en combate. Si hace mucho sol, su Ataque aumenta gracias a su pulso primigenio.
+El tiempo pasa a ser soleado cuando entra en combate. Si hace mucho sol, su Ataque aumenta gracias a su pulso primigenio.
+Si hace sol o lleva un tanque de Energía Potenciadora, aumenta su característica más alta.
+Si hace sol o lleva un tanque de Energía Potenciadora, aumenta su característica más alta.
+Su sal pura lo protege de los problemas de estado y reduce a la mitad el daño que recibe de ataques de tipo Fantasma.
+Su sal pura lo protege de los problemas de estado y reduce a la mitad el daño que recibe de ataques de tipo Fantasma.
+Si hay un campo eléctrico en el terreno de combate o lleva un tanque de Energía Potenciadora, aumenta su característica más alta.
+Si hay un campo eléctrico en el terreno de combate o lleva un tanque de Energía Potenciadora, aumenta su característica más alta.
+Potencia los movimientos de tipo Roca del usuario en un 50%.
+Potencia los movimientos de tipo Roca del usuario en un 50%.
+Crea un campo de hierba al recibir un ataque.
+Crea un campo de hierba al recibir un ataque.
+Aumenta la potencia de los movimientos cortantes en un 50%.
+Aumenta la potencia de los movimientos cortantes en un 50%.
+Al entrar en combate, su Ataque y su Ataque Especial aumentan un poco por cada miembro del equipo que haya sido derrotado hasta el momento.
+Al entrar en combate, su Ataque y su Ataque Especial aumentan un poco por cada miembro del equipo que haya sido derrotado hasta el momento.
+Reduce la Defensa de todos los demás Pokémon con el poder de su espada maldita.
+Reduce la Defensa de todos los demás Pokémon con el poder de su espada maldita.
+Reduce el Ataque de todos los demás Pokémon con el poder de sus tablillas malditas.
+Reduce el Ataque de todos los demás Pokémon con el poder de sus tablillas malditas.
+Evita las quemaduras y, si lo alcanza un movimiento de tipo Fuego, aumenta su Ataque.
+Evita las quemaduras y, si lo alcanza un movimiento de tipo Fuego, aumenta su Ataque.
+Al recibir daño de un ataque físico, lanza una trampa de púas tóxicas a los pies del rival.
+Al recibir daño de un ataque físico, lanza una trampa de púas tóxicas a los pies del rival.
+Reduce el Ataque Especial de todos los demás Pokémon con el poder de su caldero maldito.
+Reduce el Ataque Especial de todos los demás Pokémon con el poder de su caldero maldito.
+Si lo alcanza un movimiento de tipo Fuego, aumenta mucho su Defensa en vez de sufrir daño.
+Si lo alcanza un movimiento de tipo Fuego, aumenta mucho su Defensa en vez de sufrir daño.
+Su cuerpo se carga de electricidad si lo alcanza un movimiento que usa viento, lo que potencia su siguiente movimiento de tipo Eléctrico.
+Su cuerpo se carga de electricidad si lo alcanza un movimiento que usa viento, lo que potencia su siguiente movimiento de tipo Eléctrico.
+Si sopla un Viento Afín o lo alcanza un movimiento que usa viento, aumenta su Ataque. Tampoco recibe daño de este último.
+Si sopla un Viento Afín o lo alcanza un movimiento que usa viento, aumenta su Ataque. Tampoco recibe daño de este último.
+Adopta la Forma Heroica cuando se retira del combate.
+Adopta la Forma Heroica cuando se retira del combate.
+Al entrar en combate por primera vez, esparce un aroma dulzón a néctar que reduce la Evasión del rival.
+Al entrar en combate por primera vez, esparce un aroma dulzón a néctar que reduce la Evasión del rival.
+Al entrar en combate, restaura algunos PS de su aliado como muestra de hospitalidad.
+Al entrar en combate, restaura algunos PS de su aliado como muestra de hospitalidad.
+Gracias al poder de su cadena impregnada de toxinas, puede envenenar gravemente al Pokémon al que ataque.
+Gracias al poder de su cadena impregnada de toxinas, puede envenenar gravemente al Pokémon al que ataque.
+Alcanza a Pokémon de tipo Fantasma con movimientos de tipo Normal o Lucha. Su Precisión no se puede reducir e ignora los cambios en la Evasión del objetivo.
+Alcanza a Pokémon de tipo Fantasma con movimientos de tipo Normal o Lucha. Su Precisión no se puede reducir e ignora los cambios en la Evasión del objetivo.
+Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Turquesa y aumenta su Velocidad.
+Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Turquesa y aumenta su Velocidad.
+Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Fuente y aumenta su Defensa Especial.
+Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Fuente y aumenta su Defensa Especial.
+Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Horno y aumenta su Ataque.
+Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Horno y aumenta su Ataque.
+Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Cimiento y aumenta su Defensa.
+Al evocar viejos recuerdos, el Pokémon hace brillar la Máscara Cimiento y aumenta su Defensa.
+Los rivales que Pecharunt envenene con sus movimientos también sufrirán confusión.
+Los rivales que Pecharunt envenene con sus movimientos también sufrirán confusión.
+Al entrar en combate, adopta la Forma Teracristal tras absorber la energía de su alrededor.
+Al entrar en combate, adopta la Forma Teracristal tras absorber la energía de su alrededor.
+Su caparazón encierra energía de todos los tipos. Gracias a ello, si sus PS están al máximo, el movimiento que lo alcance no será muy eficaz.
+Su caparazón encierra energía de todos los tipos. Gracias a ello, si sus PS están al máximo, el movimiento que lo alcance no será muy eficaz.
+Cuando Terapagos adopta la Forma Astral, anula todos los efectos del tiempo atmosférico y de los campos que haya en el terreno gracias a su poder oculto.
+Cuando Terapagos adopta la Forma Astral, anula todos los efectos del tiempo atmosférico y de los campos que haya en el terreno gracias a su poder oculto.
+Convierte los movimientos de tipo Normal en tipo Dragón y aumenta su potencia en un 20%.
+Convierte los movimientos de tipo Normal en tipo Dragón y aumenta su potencia en un 20%.
+Cualquier movimiento que el Pokémon haga actúa como si hubiera clima soleado.
+Cualquier movimiento que el Pokémon haga actúa como si hubiera clima soleado.
+Si un Pokémon lo ataca, resulta quemado.
+Si un Pokémon lo ataca, resulta quemado.
+Si usa un movimiento de contacto, puede infligir daño 1/4 del daño original, al objetivo, aunque este se proteja.
+Si usa un movimiento de contacto, puede infligir daño 1/4 del daño original, al objetivo, aunque este se proteja.
+Su capacidad de flotar sobre el suelo le proporciona inmunidad frente a los movimientos de tipo Tierra. Si el Pokémon derrota a un rival en ese turno, aumenta su característica más elevada en un nivel.
+Su capacidad de flotar sobre el suelo le proporciona inmunidad frente a los movimientos de tipo Tierra. Si el Pokémon derrota a un rival en ese turno, aumenta su característica más elevada en un nivel.
+Potencia los movimientos de tipo Fuego del usuario en un 50%.
+Potencia los movimientos de tipo Fuego del usuario en un 50%.
+Reduces damage from Water and Ground type moves. When hit, sharp splinters are dug around the foe, and boosts Defense and Sp.Defense.
+Reduces damage from Water and Ground type moves. When hit, sharp splinters are dug around the foe, and boosts Defense and Sp.Defense.
+Each time the Pokémon is hit, its Fire type moves gain 10% cumulative power per hit (max 50%). Immune to freezing.
+Each time the Pokémon is hit, its Fire type moves gain 10% cumulative power per hit (max 50%). Immune to freezing.
+Slicing and contact moves have a 20% chance to freeze the target if it has any lowered stats. Also, increases the Pokémon's Speed by 20% during the hailstorm.
+Slicing and contact moves have a 20% chance to freeze the target if it has any lowered stats. Also, increases the Pokémon's Speed by 20% during the hailstorm.
+When hit by a Physical attack, releases spores that lower the attacker's Attack and Speed. If hit by a Special attack, lowers their Sp. Atk and Speed.
+When hit by a Physical attack, releases spores that lower the attacker's Attack and Speed. If hit by a Special attack, lowers their Sp. Atk and Speed.
+Protects the Pokémon from recoil damage and reduces damage from physical moves. It also boosts its Attack upon entering battle.
+Protects the Pokémon from recoil damage and reduces damage from physical moves. It also boosts its Attack upon entering battle.
+When HP drops to half or less, Defense and Sp. Def sharply rise, and Attack, Sp. Atk and Speed rises. While HP is low, prevents flinching and being forced out of battle.
+When HP drops to half or less, Defense and Sp. Def sharply rise, and Attack, Sp. Atk and Speed rises. While HP is low, prevents flinching and being forced out of battle.
+Intimidates foes upon entry, lowering their Attack. Ruthlessly strikes any opponent that attempts to flee from battle.
+Intimidates foes upon entry, lowering their Attack. Ruthlessly strikes any opponent that attempts to flee from battle.
+The first time this Pokemon is hit in battle, the damage is halved.
+The first time this Pokemon is hit in battle, the damage is halved.
+Halves damage from Fire, Fighting, and Rock moves. Allies take 25% less damage from spread attacks.
+Halves damage from Fire, Fighting, and Rock moves. Allies take 25% less damage from spread attacks.
+Powers up biting moves and lets them ignore the target's defensive Ability effects.
+Powers up biting moves and lets them ignore the target's defensive Ability effects.
+Halves damage from super-effective moves. Raises Speed by 2 stages when hit by a critical hit.
+Halves damage from super-effective moves. Raises Speed by 2 stages when hit by a critical hit.
+Reduces damage taken from Rock-type moves, but makes Ice-type moves deal more damage.
+Reduces damage taken from Rock-type moves, but makes Ice-type moves deal more damage.
+Powers up hammer moves by 50%.
+Powers up hammer moves by 50%.
+Status and punching moves gain +1 priority. Punching moves have doubled secondary effect chance.
+Status and punching moves gain +1 priority. Punching moves have doubled secondary effect chance.
+Damages foes every turn. Allies are immune to freezing and their Fire moves are empowered.
+Damages foes every turn. Allies are immune to freezing and their Fire moves are empowered.
+Envelops the field in eclipse fog for 5 turns. Allies are immune to critical hits and stat drops, and Light Moves are smothered while the veil lasts.
+Envelops the field in eclipse fog for 5 turns. Allies are immune to critical hits and stat drops, and Light Moves are smothered while the veil lasts.
+Restores HP each turn. In a sandstorm, the healing is stronger.
+Restores HP each turn. In a sandstorm, the healing is stronger.
+Traps Flying-type foes and halves damage from Flying-type moves.
+Traps Flying-type foes and halves damage from Flying-type moves.
+Intimidates opposing Pokemon on entry, lowering their Sp. Atk.
+Intimidates opposing Pokemon on entry, lowering their Sp. Atk.
+Powers up kicking moves by 50%.
+Powers up kicking moves by 50%.
+Halves physical damage taken. Uses Defense instead of Attack for the user's physical moves.
+Halves physical damage taken. Uses Defense instead of Attack for the user's physical moves.
+Immune to priority moves. Fire and Psychic moves always hit and ignore Protect and screens.
+Immune to priority moves. Fire and Psychic moves always hit and ignore Protect and screens.
+Multi-hit moves always strike the maximum number of times. Priority moves are boosted by 50%.
+Multi-hit moves always strike the maximum number of times. Priority moves are boosted by 50%.
+Boosts Sp. Atk each time the Pokémon knocks out a foe.
+Boosts Sp. Atk each time the Pokémon knocks out a foe.
+Raises Attack after landing a contact move or a recoil move.
+Raises Attack after landing a contact move or a recoil move.
+Its rotating petals reflect status moves and scatter poisonous spikes when hit by physical attacks.
+Its rotating petals reflect status moves and scatter poisonous spikes when hit by physical attacks.
+Draining moves heal more HP. If the target is poisoned, draining moves deal more damage.
+Draining moves heal more HP. If the target is poisoned, draining moves deal more damage.
+Gives immunity to Ground-type moves. Electric-type moves can hit Ground-type Pokémon.
+Gives immunity to Ground-type moves. Electric-type moves can hit Ground-type Pokémon.
+Reduces damage at full HP. Its regal presence blocks priority moves.
+Reduces damage at full HP. Its regal presence blocks priority moves.
+Contact may paralyze. Under snow or rain, physical moves also restore HP.
+Contact may paralyze. Under snow or rain, physical moves also restore HP.
+Reality warps when hit. Triggers a random theatrical prank that disrupts the battle.
+Reality warps when hit. Triggers a random theatrical prank that disrupts the battle.
+Boosts Def and Sp. Atk in sun or when hit by a Fire move. May burn attackers on contact.
+Boosts Def and Sp. Atk in sun or when hit by a Fire move. May burn attackers on contact.
+May burn the target when making contact.
+May burn the target when making contact.

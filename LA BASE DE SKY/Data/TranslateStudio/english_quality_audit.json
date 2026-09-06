@@ -1,0 +1,37 @@
+{
+  "version": "1.3.0",
+  "policy": "Prefer supplied/canonical English over imported/generated guesses. Custom intro is curated for tone and neutral Solen references.",
+  "checks": {
+    "movesNameMismatches": [],
+    "abilitiesNameMismatches": [],
+    "itemNameMismatches": [],
+    "introNeutralChecks": {
+      "youngManPresent": false,
+      "masculineSolenLinesPresent": false,
+      "elderSpirit": "Elder Spirit",
+      "wakeUp": "Wake up..."
+    }
+  },
+  "knownExamples": {
+    "WHIRLPOOL": {
+      "Name": "Whirlpool",
+      "Description": "Traps foes in a violent swirling whirlpool for four to five turns.",
+      "_QualitySource": "Supplied canonical English localization"
+    },
+    "LEER": {
+      "Name": "Leer",
+      "Description": "The user gains an intimidating leer with sharp eyes. The target's Defense stat is reduced.",
+      "_QualitySource": "Supplied canonical English localization"
+    },
+    "ROCKTOMB": {
+      "Description": "Boulders are hurled at the target. It also lowers the target's Speed by preventing its movement.",
+      "Name": "Rock Tomb",
+      "_QualitySource": "Supplied canonical English localization"
+    },
+    "SKILLSWAP": {
+      "Description": "The user employs its psychic power to exchange Abilities with the target.",
+      "Name": "Skill Swap",
+      "_QualitySource": "Supplied canonical English localization"
+    }
+  }
+}

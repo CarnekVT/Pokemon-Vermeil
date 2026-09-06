@@ -1,0 +1,44 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map049]
+¿Puedes empujar la piedra encima del interruptor?
+¿Puedes empujar la piedra encima del interruptor?
+¡Oh! ¡La piedra se ha movido sobre el interruptor!
+¡Oh! ¡La piedra se ha movido sobre el interruptor!
+¡Bien hecho!
+¡Bien hecho!
+Oh. La piedra no está sobre el interruptor.
+Oh. La piedra no está sobre el interruptor.
+Esta escalera te conduce a una mazmorra aleatoria.
+Esta escalera te conduce a una mazmorra aleatoria.
+Los niveles de los Pokémon que aparecen se basan en los niveles de los Pokémon que tiene el jugador en el equipo.
+Los niveles de los Pokémon que aparecen se basan en los niveles de los Pokémon que tiene el jugador en el equipo.
+Esto ocurre porque en los metadatos del mapa de la mazmorra está marcada la flag "ScaleWildEncounterLevels".
+Esto ocurre porque en los metadatos del mapa de la mazmorra está marcada la flag "ScaleWildEncounterLevels".
+Las posiciones de las rocas se comprueban mediante un evento con un Proceso Paralelo.
+Las posiciones de las rocas se comprueban mediante un evento con un Proceso Paralelo.
+En el evento del agujero debes activar la opción "Through" (Atravesable) para permitir que la roca se coloque sobre él.
+En el evento del agujero debes activar la opción "Through" (Atravesable) para permitir que la roca se coloque sobre él.
+¿A qué puzle te gustaría jugar?
+¿A qué puzle te gustaría jugar?
+¡Puzle resuelto!
+¡Puzle resuelto!
+Te has rendido...
+Te has rendido...
+Alfa
+Alfa
+Alfa Rotable
+Alfa Rotable
+Cuadrado Místico
+Cuadrado Místico
+Intercambio de Piezas
+Intercambio de Piezas
+Rotador con Intercambio
+Rotador con Intercambio
+Cubo de Rubik
+Cubo de Rubik
+Rotador Estrella
+Rotador Estrella
+Cancelar
+Cancelar

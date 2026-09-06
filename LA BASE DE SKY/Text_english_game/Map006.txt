@@ -1,0 +1,38 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map006]
+¡Hola! ¡Soy César!
+¡Hola! ¡Soy César!
+Me especializo en convertir los Bonguris en Poké Balls. Esto no lo usa ni Peter, pero yo estoy aquí por si quieres ver cómo se hace.
+Me especializo en convertir los Bonguris en Poké Balls. Esto no lo usa ni Peter, pero yo estoy aquí por si quieres ver cómo se hace.
+Si quieres puedo convertir los tuyos en Poké Balls.
+Si quieres puedo convertir los tuyos en Poké Balls.
+Hola de nuevo.
+Hola de nuevo.
+¿Tienes algún Bonguri para mí?
+¿Tienes algún Bonguri para mí?
+¿Qué Bonguri quieres que convierta?
+¿Qué Bonguri quieres que convierta?
+Hazme saber cuando quieras que convierta un Bonguri para ti.
+Hazme saber cuando quieras que convierta un Bonguri para ti.
+Vale. Convertiré tu \v[3] en una Poké Ball para ti.
+Vale. Convertiré tu \v[3] en una Poké Ball para ti.
+Debería terminar mañana.
+Debería terminar mañana.
+Vuelve cuando tengas un Bonguri para mí.
+Vuelve cuando tengas un Bonguri para mí.
+Te estaba esperando. He completado la Poké Ball que querías que hiciera.
+Te estaba esperando. He completado la Poké Ball que querías que hiciera.
+No te queda espacio. Ven a verme cuando hayas hecho hueco.
+No te queda espacio. Ven a verme cuando hayas hecho hueco.
+He intentado hacer una Poké Ball con lo que me has dado pero no ha funcionado.
+He intentado hacer una Poké Ball con lo que me has dado pero no ha funcionado.
+Lo siento.
+Lo siento.
+Aún sigo trabajando en tu Bonguri. Vuelve más tarde.
+Aún sigo trabajando en tu Bonguri. Vuelve más tarde.
+Sí
+Sí
+No
+No

@@ -1,0 +1,100 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map009]
+Bill: ¡Hola! Soy \v[2].
+Bill: ¡Hola! Soy \v[2].
+Yo inventé el Sistema de Almacenamiento de Pokémon.
+Yo inventé el Sistema de Almacenamiento de Pokémon.
+¿Qué quieres saber?
+¿Qué quieres saber?
+Todos los Fondos de Pantalla del PC necesitan estar listados en la clase PokemonStorage, en def allWallpapers.
+Todos los Fondos de Pantalla del PC necesitan estar listados en la clase PokemonStorage, en def allWallpapers.
+Se corresponden a box_0.png, box_1.png, etc. en orden sin espacios. Estas imágenes están en la CarpetaGraphics/Pictures/Storage.
+Se corresponden a box_0.png, box_1.png, etc. en orden sin espacios. Estas imágenes están en la CarpetaGraphics/Pictures/Storage.
+Los Fondos del PC se dividen en dos categorías: basicos y especiales. Todos los fondos básicos aparecen en la lista antes de los fondos especiales.
+Los Fondos del PC se dividen en dos categorías: basicos y especiales. Todos los fondos básicos aparecen en la lista antes de los fondos especiales.
+Los fondos básicos siempre son accesibles, y las cajas usan estos fondos por defecto. Estos tienen los números del 0 al 15, ambos incluidos.
+Los fondos básicos siempre son accesibles, y las cajas usan estos fondos por defecto. Estos tienen los números del 0 al 15, ambos incluidos.
+Los fondos especiales empiezan bloqueados y no disponibles. Puedes desbloquearlos llamando a la función pbUnlockWallpaper(id), donde la id es el número de ese fondo.
+Los fondos especiales empiezan bloqueados y no disponibles. Puedes desbloquearlos llamando a la función pbUnlockWallpaper(id), donde la id es el número de ese fondo.
+El ordenador del centro Pokémon tiene varias acciones especiales que son realmente útiles. Si pulsas la tecla Z, podrás cambiar la función de la mano entre tres opciones.
+El ordenador del centro Pokémon tiene varias acciones especiales que son realmente útiles. Si pulsas la tecla Z, podrás cambiar la función de la mano entre tres opciones.
+La primera de ellas, la que viene por defecto, es la que sirve para seleccionar un Pokémon y que se abra un menú con diferentes opciones que puedes realizar.
+La primera de ellas, la que viene por defecto, es la que sirve para seleccionar un Pokémon y que se abra un menú con diferentes opciones que puedes realizar.
+La segunda volverá la mano de color naranja, y servirá para agarrar y soltar a un Pokémon sin que salga un menú en medio que te pregunte qué quieres hacer.
+La segunda volverá la mano de color naranja, y servirá para agarrar y soltar a un Pokémon sin que salga un menú en medio que te pregunte qué quieres hacer.
+La tercera volverá a la mano de color verde, y te permitirá agarrar a varios Pokémon a la vez y desplazarlos en bloque. Ten en cuenta que para soltarlos debe haber espacio suficiente en la caja.
+La tercera volverá a la mano de color verde, y te permitirá agarrar a varios Pokémon a la vez y desplazarlos en bloque. Ten en cuenta que para soltarlos debe haber espacio suficiente en la caja.
+El PC cuenta con más botones útiles, como son la A y la S, que te permiten cambiar de caja sin tener que subir hasta arriba, o la F, que hará que la mano suba automáticamente arriba.
+El PC cuenta con más botones útiles, como son la A y la S, que te permiten cambiar de caja sin tener que subir hasta arriba, o la F, que hará que la mano suba automáticamente arriba.
+Hola, te doy la bienvenida al Centro Pokémon.
+Hola, te doy la bienvenida al Centro Pokémon.
+Nosotros curamos la salud de tus Pokémon.
+Nosotros curamos la salud de tus Pokémon.
+¿Quieres que curemos a tu equipo?
+¿Quieres que curemos a tu equipo?
+Bien, déjame a tus Pokémon un momento.
+Bien, déjame a tus Pokémon un momento.
+Parece que tus Pokémon están infectados por el Pokérus.
+Parece que tus Pokémon están infectados por el Pokérus.
+Poco se sabe sobre el Pokérus, más allá de que son formas de vida microscópicas que se unen a los Pokémon.
+Poco se sabe sobre el Pokérus, más allá de que son formas de vida microscópicas que se unen a los Pokémon.
+Se dice que, mientras estén infectados, los Pokémon crecen de forma extraordinariamente rápida.
+Se dice que, mientras estén infectados, los Pokémon crecen de forma extraordinariamente rápida.
+Gracias por tu espera.
+Gracias por tu espera.
+Hemos restaurado la salud de tus Pokémon.
+Hemos restaurado la salud de tus Pokémon.
+¡Vuelve pronto!
+¡Vuelve pronto!
+Primero deberías restaurar la salud de tus Pokémon.
+Primero deberías restaurar la salud de tus Pokémon.
+Tus Pokémon se han curado y vuelven a estar en plena forma.
+Tus Pokémon se han curado y vuelven a estar en plena forma.
+¡Sigue esforzándote!
+¡Sigue esforzándote!
+¡Hola! Voy a hacerte entrega del Curaportátil.
+¡Hola! Voy a hacerte entrega del Curaportátil.
+El Curaportátil es un aparato que te permitirá curar a todo tu equipo Pokémon al usarlo.
+El Curaportátil es un aparato que te permitirá curar a todo tu equipo Pokémon al usarlo.
+El límite de veces que puedes usarlo comienza en 1, pero puedes irlo aumentando. Habla conmigo de nuevo si quieres restaurarlo o aumentar el máximo.
+El límite de veces que puedes usarlo comienza en 1, pero puedes irlo aumentando. Habla conmigo de nuevo si quieres restaurarlo o aumentar el máximo.
+¿Qué te gustaría hacer con el Curaportátil?
+¿Qué te gustaría hacer con el Curaportátil?
+Perfecto, voy a recargar los usos de tu Curaportátil. Llama a esta función en los lugares donde quieras que se recargue.
+Perfecto, voy a recargar los usos de tu Curaportátil.  Llama a esta función en los lugares donde quieras que se recargue.
+¡Listo! Normalmente la gente añade esta función en las enfermeras de los Centros Pokémon, pero hemos preferido mostrarlo aquí aparte para que se entienda.
+¡Listo! Normalmente la gente añade esta función en las enfermeras de los Centros Pokémon, pero hemos preferido mostrarlo aquí aparte para que se entienda.
+Muy bien, voy a aumentar el número máximo de cargas que tienes.
+Muy bien, voy a aumentar el número máximo de cargas que tienes.
+¡El número de cargas ha aumentado!
+¡El número de cargas ha aumentado!
+Muy bien, voy a disminuir el número máximo de cargas que tienes.
+Muy bien, voy a disminuir el número máximo de cargas que tienes.
+¡El número de cargas ha disminuido!
+¡El número de cargas ha disminuido!
+Muy bien, voy a bloquear el Curaportátil.
+Muy bien, voy a bloquear el Curaportátil.
+Muy bien, voy a desbloquear el Curaportátil.
+Muy bien, voy a desbloquear el Curaportátil.
+Fondos de Pantalla
+Fondos de Pantalla
+Cancelar
+Cancelar
+Sí
+Sí
+No
+No
+Restaurar usos
+Restaurar usos
+Aumentar cargas máximas
+Aumentar cargas máximas
+Disminuir cargas máximas
+Disminuir cargas máximas
+Bloquear el CuraPortátil
+Bloquear el CuraPortátil
+Desbloquear el Curaportátil
+Desbloquear el Curaportátil
+Salir
+Salir

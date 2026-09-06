@@ -1,0 +1,14 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map075]
+Esta es la Región Tiall.
+Esta es la Región Tiall.
+¿Quieres regresar a la Región de Essen?
+¿Quieres regresar a la Región de Essen?
+Si quieres volver házmelo saber.
+Si quieres volver házmelo saber.
+Sí
+Sí
+No
+No

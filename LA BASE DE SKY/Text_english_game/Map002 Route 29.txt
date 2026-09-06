@@ -1,0 +1,14 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map002]
+<----- Cherrygrove City
+<----- Cherrygrove City
+I shook that tree and a Pineco fell out! My Pokédex says I caught it at a Honey Tree - Route 29. I guess specific trees count as special locations!
+I shook that tree and a Pineco fell out! My Pokédex says I caught it at a Honey Tree - Route 29. I guess specific trees count as special locations!
+Trainer Tips: The type of Pokémon you find changes depending on the time of day. Some nocturnal species only come out when the sun goes down.
+Trainer Tips: The type of Pokémon you find changes depending on the time of day. Some nocturnal species only come out when the sun goes down.
+Those odd yellow trees are teeming with life. If you want to see what's hiding up there, try shaking things up with a Headbutt or slathering Honey on them!
+Those odd yellow trees are teeming with life. If you want to see what's hiding up there, try shaking things up with a Headbutt or slathering Honey on them!
+Route 29: A meadow path where the morning dew meets new trainers
+Route 29: A meadow path where the morning dew meets new trainers

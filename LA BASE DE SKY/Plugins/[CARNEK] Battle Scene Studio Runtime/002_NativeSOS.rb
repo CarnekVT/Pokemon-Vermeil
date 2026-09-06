@@ -1595,11 +1595,10 @@ class Battle::Scene::Animation::BSSSOSJoin < Battle::Scene::Animation
             bx.moveOpacity(delay,8,255)
           else
             dir = b.index.even? ? 1 : -1
-            BSS064.ensure_databox_slide_driver(boxsp) if BSS064.respond_to?(:ensure_databox_slide_driver)
-            boxsp.bss074_begin_slide(:in,dir) if boxsp.respond_to?(:bss074_begin_slide)
             bx.setOpacity(delay,255) if bx.respond_to?(:setOpacity)
+            bx.setDelta(delay, dir * Graphics.width / 2, 0)
             bx.setVisible(delay, true)
-            bx.moveDelta(delay,10,0,0) if bx.respond_to?(:moveDelta)
+            bx.moveDelta(delay, 8, -dir * Graphics.width / 2, 0)
           end
         end
       else
@@ -1638,7 +1637,7 @@ class Battle::Scene::Animation::BSSSOSJoin < Battle::Scene::Animation
             boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
             boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
             cfg=(@battle.bss_boss_hud_config rescue {}) if @battle.respond_to?(:bss_boss_hud_config)
-            hide_for_boss=(boss && boss.equal?(b) && cfg.is_a?(Hash) && cfg["enabled"]!=false)
+            hide_for_boss=(@battle.respond_to?(:bss_boss_enabled?) && @battle.bss_boss_enabled? && boss && boss.equal?(b) && cfg.is_a?(Hash) && cfg["enabled"]!=false)
           rescue
             hide_for_boss=false
           end
@@ -2060,6 +2059,7 @@ end
 module BSS064BossSOSDataboxLayout652
   def bss653_boss_hud_enabled?
     return false if !@battle || !@battle.respond_to?(:bss_boss_hud_config)
+    return false if !@battle.respond_to?(:bss_boss_enabled?) || !@battle.bss_boss_enabled?
     cfg=@battle.bss_boss_hud_config
     cfg.is_a?(Hash) && cfg["enabled"]!=false
   rescue
@@ -2637,7 +2637,7 @@ module BSS073SOSDataboxIntegrity
     boss=(@battle.bss_find_boss_battler_any rescue nil) if @battle.respond_to?(:bss_find_boss_battler_any)
     boss ||= (@battle.bss_find_boss_battler rescue nil) if @battle.respond_to?(:bss_find_boss_battler)
     cfg=(@battle.bss_boss_hud_config rescue {}) if @battle.respond_to?(:bss_boss_hud_config)
-    boss && boss.equal?(battler) && cfg.is_a?(Hash) && cfg["enabled"]!=false
+    @battle.respond_to?(:bss_boss_enabled?) && @battle.bss_boss_enabled? && boss && boss.equal?(battler) && cfg.is_a?(Hash) && cfg["enabled"]!=false
   rescue
     false
   end
@@ -2718,161 +2718,4 @@ begin
   end
 rescue => e
   BSS064.log("SOS databox integrity install 0.6.73 warning: #{e.class}: #{e.message}") if defined?(BSS064)
-end
-
-
-#===============================================================================
-# BSS v0.6.74 - SOS BattleBox identity authority.
-# A project pbRefresh may keep the *sprite key* but replace/rebind the underlying
-# PokemonDataBox. Looking up only dataBox_<new index> is therefore insufficient:
-# in ordinary wild SOS the caller can disappear while the new ally survives.
-# Snapshot and restore by the underlying Pokemon identity, then normalize keys.
-#===============================================================================
-module BSS074SOSDataboxIdentityAuthority
-  def bss074_sos_live_rows(idx_sos)
-    side=idx_sos.to_i & 1
-    rows=(@battle.battlers rescue [])
-    return [] if !rows.respond_to?(:compact)
-    rows.compact.select do |b|
-      idx=(b.index rescue -1).to_i
-      next false if idx<0 || (idx & 1)!=side
-      # @fainted is the completed lifecycle marker. A battler at 0 HP whose faint
-      # process has not run yet must still keep its box long enough to animate out.
-      (b.instance_variable_get(:@fainted) rescue false)!=true
-    end
-  rescue
-    []
-  end
-
-  def bss074_box_pokemon_token(box)
-    b=(box.battler rescue nil)
-    pkmn=(b.pokemon rescue nil) if b
-    pkmn ? pkmn.object_id : (b ? b.object_id : nil)
-  rescue
-    nil
-  end
-
-  def bss074_battler_token(b)
-    pkmn=(b.pokemon rescue nil)
-    pkmn ? pkmn.object_id : b.object_id
-  rescue
-    b.object_id
-  end
-
-  def bss074_snapshot_sos_boxes(idx_sos)
-    out={}
-    bss074_sos_live_rows(idx_sos).each do |b|
-      token=bss074_battler_token(b)
-      box=nil
-      @sprites.each do |key,sp|
-        next if !key.to_s.start_with?("dataBox_") || !sp || (sp.disposed? rescue false)
-        if bss074_box_pokemon_token(sp)==token
-          box=sp;break
-        end
-      end
-      box ||= (@sprites["dataBox_#{b.index}"] rescue nil)
-      out[token]={:box=>box,:x=>(box.x rescue nil),:y=>(box.y rescue nil),:visible=>(box.visible rescue true)} if box
-    end
-    out
-  rescue
-    {}
-  end
-
-  def bss074_repair_sos_boxes_by_identity(idx_sos,reveal_incoming=false,snapshot=nil)
-    return false if !@battle || !@sprites.is_a?(Hash)
-    rows=bss074_sos_live_rows(idx_sos)
-    side_size=(@battle.pbSideSize(idx_sos) rescue 1)
-    current={}
-    @sprites.each do |key,sp|
-      next if !key.to_s.start_with?("dataBox_") || !sp || (sp.disposed? rescue false)
-      tok=bss074_box_pokemon_token(sp)
-      current[tok]=sp if tok
-    end
-    assignments={}
-    rows.each do |b|
-      tok=bss074_battler_token(b)
-      box=current[tok]
-      snap=snapshot.is_a?(Hash) ? snapshot[tok] : nil
-      box ||= snap[:box] if snap.is_a?(Hash) && snap[:box] && !(snap[:box].disposed? rescue false)
-      exact=@sprites["dataBox_#{b.index}"] rescue nil
-      box ||= exact if exact && !(exact.disposed? rescue false) && (bss074_box_pokemon_token(exact)==tok || bss074_box_pokemon_token(exact).nil?)
-      if !box
-        begin;box=PokemonDataBox.new(b,side_size,@viewport);rescue=>e;BSS064.log("SOS identity box create warning: #{e.class}: #{e.message}");next;end
-      end
-      assignments[b.index.to_i]=[b,box,snap]
-    end
-
-    # Remove stale key aliases for boxes we are about to reassign, then give each
-    # live battler exactly one dataBox_<current index> key.
-    assigned_boxes=assignments.values.map{|row|row[1]}
-    @sprites.keys.each do |key|
-      next if !key.to_s.start_with?("dataBox_")
-      sp=@sprites[key]
-      @sprites.delete(key) if assigned_boxes.include?(sp)
-    end
-    assignments.each do |idx,row|
-      b,box,snap=row
-      @sprites["dataBox_#{idx}"]=box
-      begin;box.battler=b if box.respond_to?(:battler=) && !(box.battler rescue nil).equal?(b);rescue;end
-      begin
-        style=(box.instance_variable_get(:@style) rescue nil)
-        if style.nil?
-          # Do not replace a recovered caller object here. Reflow the exact live
-          # box so project-specific BattleBox wrappers remain attached to it.
-          box.bss656_reflow_side_size(side_size,true) if box.respond_to?(:bss656_reflow_side_size)
-        else
-          box.bss656_reflow_side_size(side_size,true) if box.respond_to?(:bss656_reflow_side_size)
-        end
-      rescue
-      end
-      begin;box.refresh if box.respond_to?(:refresh);rescue;end
-      incoming=(idx.to_i==idx_sos.to_i)
-      hide=bss073_boss_hud_hides_databox?(b) if respond_to?(:bss073_boss_hud_hides_databox?)
-      hide=false if hide.nil?
-      if hide
-        box.visible=false if box.respond_to?(:visible=)
-      elsif incoming && !reveal_incoming
-        box.visible=false if box.respond_to?(:visible=)
-      else
-        box.visible=true if box.respond_to?(:visible=)
-        box.opacity=255 if box.respond_to?(:opacity=) && (box.opacity rescue 255).to_i<=0
-      end
-      # Preserve the caller's visible old position and give BSSSOSJoin a real
-      # old->new transition instead of a teleport after pbRefresh.
-      if !incoming && snap.is_a?(Hash) && !snap[:x].nil? && !snap[:y].nil?
-        tx=(box.instance_variable_get(:@spriteX) rescue box.x)
-        ty=(box.instance_variable_get(:@spriteY) rescue box.y)
-        if !tx.nil? && !ty.nil? && (snap[:x].to_i!=tx.to_i || snap[:y].to_i!=ty.to_i)
-          box.instance_variable_set(:@bss656_reflow_from_xy,[snap[:x].to_i,snap[:y].to_i])
-          box.instance_variable_set(:@bss656_reflow_to_xy,[tx.to_i,ty.to_i])
-          box.x=snap[:x] if box.respond_to?(:x=)
-          box.y=snap[:y] if box.respond_to?(:y=)
-        end
-      end
-    end
-    true
-  rescue => e
-    BSS064.log("SOS identity authority 0.6.74 warning: #{e.class}: #{e.message}") if defined?(BSS064)
-    false
-  end
-
-  def bss_pbPrepNewBattler(idx_battler,*args,&block)
-    snapshot=bss074_snapshot_sos_boxes(idx_battler)
-    ret=super
-    bss074_repair_sos_boxes_by_identity(idx_battler,false,snapshot)
-    ret
-  end
-
-  def bss_pbSOSJoin(idx_battler,*args,&block)
-    ret=super
-    bss074_repair_sos_boxes_by_identity(idx_battler,true,nil)
-    ret
-  end
-end
-begin
-  if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS074SOSDataboxIdentityAuthority)
-    Battle::Scene.prepend(BSS074SOSDataboxIdentityAuthority)
-  end
-rescue => e
-  BSS064.log("SOS identity authority install 0.6.74 warning: #{e.class}: #{e.message}") if defined?(BSS064)
 end

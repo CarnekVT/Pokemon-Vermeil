@@ -1,0 +1,96 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map026]
+Estoy buscando un Dragonair hembra.
+Estoy buscando un Dragonair hembra.
+¿Quieres cambiarlo por mi Dodrio?
+¿Quieres cambiarlo por mi Dodrio?
+¿No quieres intercambiar? Vaya...
+¿No quieres intercambiar? Vaya...
+Ok, vamos a empezar.
+Ok, vamos a empezar.
+Doris
+Doris
+Ayana
+Ayana
+¡\PN intercambió a Dragonair por Dodrio!
+¡\PN intercambió a Dragonair por Dodrio!
+¡Gracias!
+¡Gracias!
+¿Estás cuidando bien de Doris?
+¿Estás cuidando bien de Doris?
+Mi Shuckie es un gran Pokémon, pero ya no puedo entrenarlo más.
+Mi Shuckie es un gran Pokémon, pero ya no puedo entrenarlo más.
+¿Quieres quedarte con Shuckie y entrenarle como se merece?
+¿Quieres quedarte con Shuckie y entrenarle como se merece?
+Kirk
+Kirk
+Shuckie
+Shuckie
+¡Cuida bien de Shuckie!
+¡Cuida bien de Shuckie!
+Oh, parece que no tienes espacio para él.
+Oh, parece que no tienes espacio para él.
+Oh, qué decepción.
+Oh, qué decepción.
+¿Estás entrenando bien a mi Shuckie?
+¿Estás entrenando bien a mi Shuckie?
+¡Oh, hola!
+¡Oh, hola!
+¿Te gustaría tener este Huevo Pokémon?
+¿Te gustaría tener este Huevo Pokémon?
+Fan Club President
+Fan Club President
+\me[Egg get]\PN ha recibido un Huevo del Presidente del Club de Fans.
+\me[Egg get]\PN ha recibido un Huevo del Presidente del Club de Fans.
+¡Cuida bien de él!
+¡Cuida bien de él!
+Oh, parece que no puedes llevarlo contigo.
+Oh, parece que no puedes llevarlo contigo.
+Haz algo de espacio en tu equipo y ven a verme de nuevo.
+Haz algo de espacio en tu equipo y ven a verme de nuevo.
+Oh. ¿Encontraré a alguien que quiera hacerse cargo de este Huevo?
+Oh. ¿Encontraré a alguien que quiera hacerse cargo de este Huevo?
+Me preguntó que saldrá de mi Huevo.
+Me preguntó que saldrá de mi Huevo.
+Yo te permito hacer un intercambio seleccionando el Pokémon desde el PC.
+Yo te permito hacer un intercambio seleccionando el Pokémon desde el PC.
+Estoy buscando un Rattata.
+Estoy buscando un Rattata.
+¿Quieres cambiarlo por mi Haunter?
+¿Quieres cambiarlo por mi Haunter?
+¿No quieres intercambiar conmigo? Oh...
+¿No quieres intercambiar conmigo? Oh...
+Bien, vamos a empezar.
+Bien, vamos a empezar.
+HaHa
+HaHa
+Andrea
+Andrea
+¡\PN intercambió a Rattata por Haunter!
+¡\PN intercambió a Rattata por Haunter!
+¡Gracias por intercambiar conmigo!
+¡Gracias por intercambiar conmigo!
+¡No tienes espacio para nuevos Pokémon!
+¡No tienes espacio para nuevos Pokémon!
+Las cajas del PC están llenas y no puedes aceptar más Pokémon.
+Las cajas del PC están llenas y no puedes aceptar más Pokémon.
+¡Tengo un Bulbasaur muy especial! ¡Su habilidad es algo con lo que solo podrías soñar!
+¡Tengo un Bulbasaur muy especial! ¡Su habilidad es algo con lo que solo podrías soñar!
+Sin embargo, no puedo hacerme cargo de él. ¿Querrías quedarte con Bulbasaur?
+Sin embargo, no puedo hacerme cargo de él. ¿Querrías quedarte con Bulbasaur?
+Dorima
+Dorima
+Sauri
+Sauri
+¡Cuida bien de Sauri!
+¡Cuida bien de Sauri!
+Oh, no tienes ningún espacio.
+Oh, no tienes ningún espacio.
+¡Espero que estés cuidando bien de mi Sauri!
+¡Espero que estés cuidando bien de mi Sauri!
+Sí
+Sí
+No
+No

@@ -1,0 +1,18 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[MAP_NAMES]
+Intro
+Intro
+Route 29
+Route 29
+Test
+Test
+New Bark Town
+New Bark Town
+Test 2.5d
+Test 2.5d
+Indoor 2.5D Test
+Indoor 2.5D Test
+New 2.5D Test
+New 2.5D Test

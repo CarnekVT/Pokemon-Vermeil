@@ -1,0 +1,40 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[REGION_LOCATION_NAMES]
+Pueblo Inicio
+Pueblo Inicio
+Ruta 1
+Ruta 1
+Ciudad Lugano
+Ciudad Lugano
+Ruta 2
+Ruta 2
+Pueblo Macabeo
+Pueblo Macabeo
+Parque Natural
+Parque Natural
+Ruta 3
+Ruta 3
+Meseta Añil
+Meseta Añil
+Ruta 4
+Ruta 4
+Ruta 5
+Ruta 5
+Ruta 6
+Ruta 6
+Ruta 7
+Ruta 7
+Frente de Batalla
+Frente de Batalla
+Zona Safari
+Zona Safari
+Ruta 8
+Ruta 8
+Isla Origen
+Isla Origen
+Isla Dyson
+Isla Dyson
+Aquí
+Aquí

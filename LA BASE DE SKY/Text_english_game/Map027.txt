@@ -1,0 +1,74 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map027]
+¡Oh, ahí estás! Mi marido te estaba buscando.
+¡Oh, ahí estás! Mi marido te estaba buscando.
+Soy la Encargada de la Guardería. Podemos cuidar de dos de tus Pokémon.
+Soy la Encargada de la Guardería. Podemos cuidar de dos de tus Pokémon.
+¿Quieres que cuidemos de alguno de ellos?
+¿Quieres que cuidemos de alguno de ellos?
+¿Oh? Pero solo llevas un Pokémon contigo.
+¿Oh? Pero solo llevas un Pokémon contigo.
+No puedes ir por ahí sin Pokémon. Vuelve en otro momento.
+No puedes ir por ahí sin Pokémon. Vuelve en otro momento.
+¿Qué Pokémon quieres que cuidemos por ti?
+¿Qué Pokémon quieres que cuidemos por ti?
+Oh, bien, entiendo.\nVuelve pronto.
+Oh, bien, entiendo.\nVuelve pronto.
+Si me dejas a ese Pokémon, ¿con qué vas a combatir?
+Si me dejas a ese Pokémon, ¿con qué vas a combatir?
+Vuelve en otro momento.
+Vuelve en otro momento.
+Bien, cuidaremos de tu \v[3] por ti.
+Bien, cuidaremos de tu \v[3] por ti.
+Vuelve a por él cuando quieras.
+Vuelve a por él cuando quieras.
+Podemos cuidar de dos de tus Pokémon. ¿Quieres que cuidemos de alguno más?
+Podemos cuidar de dos de tus Pokémon. ¿Quieres que cuidemos de alguno más?
+Muy bien. Vuelve cuando quieras.
+Muy bien. Vuelve cuando quieras.
+Si me dejas a ese Pokémon, ¿con qué vas a poder combatir?
+Si me dejas a ese Pokémon, ¿con qué vas a poder combatir?
+Vuelve cuando quieras.
+Vuelve cuando quieras.
+Parece que ese Pokémon quiere quedarse contigo.
+Parece que ese Pokémon quiere quedarse contigo.
+Oh, bien, entiendo. Vuelve cuando quieras.
+Oh, bien, entiendo. Vuelve cuando quieras.
+¡Oh, eres tú! Me alegro de verte. Quería hablarte sobre tu Pokémon...
+¡Oh, eres tú! Me alegro de verte. Quería hablarte sobre tu Pokémon...
+¡Tu \v[3] ha subido de nivel! ¡Concretamente \v[4]!
+¡Tu \v[3] ha subido de nivel! ¡Concretamente \v[4]!
+¿Quieres recoger a tu Pokémon?
+¿Quieres recoger a tu Pokémon?
+Tu equipo Pokémon está lleno. Haz hueco y ven a verme de nuevo.
+Tu equipo Pokémon está lleno. Haz hueco y ven a verme de nuevo.
+¿Cuál quieres de vuelta?
+¿Cuál quieres de vuelta?
+\G\rSi quieres a tu \v[3] de vuelta, te costará $\v[4].
+\G\rSi quieres a tu \v[3] de vuelta, te costará $\v[4].
+\G\rNo tienes suficiente dinero...
+\G\rNo tienes suficiente dinero...
+\G\r¡Excelente!\nAquí está tu Pokémon.
+\G\r¡Excelente!\nAquí está tu Pokémon.
+\PN ha recogido a \v[3] de la Encargada de la Guardería.
+\PN ha recogido a \v[3] de la Encargada de la Guardería.
+\G\r¿Quieres recoger también a tu otro Pokémon?
+\G\r¿Quieres recoger también a tu otro Pokémon?
+Yo te diré de qué tipo es el Poder Oculto de tu Pokémon.
+Yo te diré de qué tipo es el Poder Oculto de tu Pokémon.
+Mi propio poder oculto me permite verlo.
+Mi propio poder oculto me permite verlo.
+Oh, no. Parece que este Pokémon no es capaz de aprender Poder Oculto.
+Oh, no. Parece que este Pokémon no es capaz de aprender Poder Oculto.
+El Poder Oculto de este Pokémon es de tipo \v[2].
+El Poder Oculto de este Pokémon es de tipo \v[2].
+Si este Pokémon aprendiese Poder Oculto, este sería de tipo \v[2].
+Si este Pokémon aprendiese Poder Oculto, este sería de tipo \v[2].
+Si tienes interés no dudes en preguntarme, y activaré mi poder oculto para ti.
+Si tienes interés no dudes en preguntarme, y activaré mi poder oculto para ti.
+Sí
+Sí
+No
+No

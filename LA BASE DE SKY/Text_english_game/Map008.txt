@@ -1,0 +1,116 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map008]
+¡Hola! ¡Soy la chica concursos!
+¡Hola! ¡Soy la chica concursos!
+Doy cintas de concurso. ¿Quieres que te dé una?
+Doy cintas de concurso. ¿Quieres que te dé una?
+Necesitas al menos 1 Pokémon.
+Necesitas al menos 1 Pokémon.
+Lo siento, tu \v[2] ya tiene la cinta más alta que le puedo dar.
+Lo siento, tu \v[2] ya tiene la cinta más alta que le puedo dar.
+\PN ha recibido \v[3]. \me[Item get]\wtnp[40]
+\PN ha recibido \v[3]. \me[Item get]\wtnp[40]
+\PN puso la \v[3] a \v[2].
+\PN puso la \v[3] a \v[2].
+Es tu decisión.
+Es tu decisión.
+Si quieres puedo juzgar el poder interior de tu Pokémon.
+Si quieres puedo juzgar el poder interior de tu Pokémon.
+¿Qué Pokémon quieres que juzgue?
+¿Qué Pokémon quieres que juzgue?
+¿Oh? Veo que no necesitas que lo juzgue. Lo entiendo.
+¿Oh? Veo que no necesitas que lo juzgue. Lo entiendo.
+Ajá, ya veo...
+Ajá, ya veo...
+Este Pokémon tiene un potencial extraordinario.
+Este Pokémon tiene un potencial extraordinario.
+Este Pokémon tiene un potencial excelente.
+Este Pokémon tiene un potencial excelente.
+El potencial de este Pokémon es superior a la media.
+El potencial de este Pokémon es superior a la media.
+El potencial de este Pokémon es aceptable.
+El potencial de este Pokémon es aceptable.
+Así lo juzgo yo, al menos.
+Así lo juzgo yo, al menos.
+Diría que su potencial radica en su estadística de \v[4].
+Diría que su potencial radica en su estadística de \v[4].
+Y parece que también su Ataque.
+Y parece que también su Ataque.
+Y parece que también su Defensa.
+Y parece que también su Defensa.
+Y parece que también su Velocidad.
+Y parece que también su Velocidad.
+Y parece que también su Ataque Especial.
+Y parece que también su Ataque Especial.
+Y parece que también su Defensa Especial.
+Y parece que también su Defensa Especial.
+Es inmejorable en ese aspecto. Así lo juzgo yo, al menos.
+Es inmejorable en ese aspecto. Así lo juzgo yo, al menos.
+Es fantástico en ese aspecto. Así lo juzgo yo, al menos.
+Es fantástico en ese aspecto. Así lo juzgo yo, al menos.
+Es bastante bueno en ese aspecto. Así lo juzgo yo, al menos.
+Es bastante bueno en ese aspecto. Así lo juzgo yo, al menos.
+No está mal en ese aspecto. Así lo juzgo yo, al menos.
+No está mal en ese aspecto. Así lo juzgo yo, al menos.
+Dalia: ¡Hola, \PN!
+Dalia: ¡Hola, \PN!
+Dalia: ¿Quieres que le dé un masaje a uno de tus Pokémon?
+Dalia: ¿Quieres que le dé un masaje a uno de tus Pokémon?
+Dalia: ¿A qué Pokémon quieres que se lo dé?
+Dalia: ¿A qué Pokémon quieres que se lo dé?
+Dalia: Oh, entonces nada.
+Dalia: Oh, entonces nada.
+Dalia: ¡Listo! ¡A \v[2] se le ve más feliz y bonito!
+Dalia: ¡Listo! ¡A \v[2] se le ve más feliz y bonito!
+Dr. Pisadas: ¡Hola! ¡Yo valoro las pisadas de los Pokémon!
+Dr. Pisadas: ¡Hola! ¡Yo valoro las pisadas de los Pokémon!
+Dr. Pisadas: ¿Quieres que valore a uno de tus Pokémon?
+Dr. Pisadas: ¿Quieres que valore a uno de tus Pokémon?
+Dr. Pisadas: ¿Qué Pokémon quieres que valore?
+Dr. Pisadas: ¿Qué Pokémon quieres que valore?
+Dr. Pisadas: La próxima vez será.
+Dr. Pisadas: La próxima vez será.
+Dr. Pisadas: Por algún casual, tú... ¿Eres una persona muy estricta? Siento que a tu \v[2] no le acabas de gustar...
+Dr. Pisadas: Por algún casual, tú... ¿Eres una persona muy estricta? Siento que a tu \v[2] no le acabas de gustar...
+Dr. Pisadas: Hmmm... Parece que a tu \v[2] no le gustas demasiado.
+Dr. Pisadas: Hmmm... Parece que a tu \v[2] no le gustas demasiado.
+Dr. Pisadas: Vuestra relación no parece ni buena ni mala... Tu \v[2] parece bastante neutral.
+Dr. Pisadas: Vuestra relación no parece ni buena ni mala... Tu \v[2] parece bastante neutral.
+Dr. Pisadas: Parece que \v[2] te aprecia un poco... Eso es lo que puedo ver.
+Dr. Pisadas: Parece que \v[2] te aprecia un poco... Eso es lo que puedo ver.
+Dr. Pisadas: Tu \v[2] te tiene bastante cariño. Debe ser bastante feliz a tu lado.
+Dr. Pisadas: Tu \v[2] te tiene bastante cariño. Debe ser bastante feliz a tu lado.
+Dr. Pisadas: Tu \v[2] parece bastante feliz a tu lado. ¡Debes ser una buena persona!
+Dr. Pisadas: Tu \v[2] parece bastante feliz a tu lado. ¡Debes ser una buena persona!
+Dr. Pisadas: ¡Tu \v[2] es muy feliz a tu lado! ¡Estoy un poco celoso!
+Dr. Pisadas: ¡Tu \v[2] es muy feliz a tu lado! ¡Estoy un poco celoso!
+Dr. Pisadas: ¡Debería premiar a tu \v[2] con una cinta!
+Dr. Pisadas: ¡Debería premiar a tu \v[2] con una cinta!
+\PN ha recibido la Cinta Pisada. \me[Item get]\wtnp[20]
+\PN ha recibido la Cinta Pisada. \me[Item get]\wtnp[20]
+\PN le puso la Cinta Pisada a \v[2].
+\PN le puso la Cinta Pisada a \v[2].
+Necesitas al menos 1 pokemon
+Necesitas al menos 1 pokemon
+¿Oh?\nTu \v[1]...
+¿Oh?\nTu \v[1]...
+¡Oh! ¡Qué bien le sienta la Cinta Esfuerzo a tu \v[1]!
+¡Oh! ¡Qué bien le sienta la Cinta Esfuerzo a tu \v[1]!
+¡Parece que se ha esforzado mucho!
+¡Parece que se ha esforzado mucho!
+Como recompensa, acepta por favor esta Cinta Esfuerzo.
+Como recompensa, acepta por favor esta Cinta Esfuerzo.
+\PN recibió la Cinta Esfuerzo. \me[Item get]\wtnp[20]
+\PN recibió la Cinta Esfuerzo. \me[Item get]\wtnp[20]
+\PN le puso la Cinta Esfuerzo a \v[1].
+\PN le puso la Cinta Esfuerzo a \v[1].
+Tienes que esforzarte un poco más.
+Tienes que esforzarte un poco más.
+Si lo haces, le entregaré a tu Pokémon algo muy chulo.
+Si lo haces, le entregaré a tu Pokémon algo muy chulo.
+Sí
+Sí
+No
+No

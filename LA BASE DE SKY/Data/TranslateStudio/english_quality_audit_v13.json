@@ -1,0 +1,31 @@
+{
+  "version": "1.3.0",
+  "jsonFilesValidated": 35,
+  "canonicalStructuredMismatches": 0,
+  "reportedMoveNameChecks": {
+    "WHIRLPOOL": "Whirlpool",
+    "LEER": "Leer",
+    "ROCKTOMB": "Rock Tomb",
+    "SKILLSWAP": "Skill Swap"
+  },
+  "sds": {
+    "elderSpirit": "Elder Spirit",
+    "wakeUp": "Wake up...",
+    "neutralSolen": true,
+    "orderedBySourceLineInEditor": true
+  },
+  "bssReportedStringsCovered": 8,
+  "blankEnglishRows": {
+    "scripts": 0,
+    "plugins": 0,
+    "bss": 0,
+    "sds": 0
+  },
+  "automaticTranslationModes": [
+    "single entry",
+    "multi-selection",
+    "global English"
+  ],
+  "autoPolicy": "Bundled curated/canonical memory first; layout-derived candidates are not allowed to override trusted rows; manual rows survive global auto.",
+  "eventsPolicy": "ZBox events remain excluded."
+}

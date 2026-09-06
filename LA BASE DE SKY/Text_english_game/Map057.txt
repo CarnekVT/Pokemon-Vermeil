@@ -1,0 +1,180 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map057]
+¿Revisar los resultados de qué reto?
+¿Revisar los resultados de qué reto?
+Resultados de \PN de la Copa Pika de la Torre Batalla individual:
+Resultados de \PN de la Copa Pika de la Torre Batalla individual:
+Última racha de victorias: \v[1]\nRécord de racha de victorias: \v[2]
+Última racha de victorias: \v[1]\nRécord de racha de victorias: \v[2]
+Resultados de \PN de la Copa Elegante de la Torre Batalla individual:
+Resultados de \PN de la Copa Elegante de la Torre Batalla individual:
+Resultados de \PN de la Poké Copa de la Torre Batalla individual:
+Resultados de \PN de la Poké Copa de la Torre Batalla individual:
+Resultados de \PN de la Copa Pequeña de la Torre Batalla individual:
+Resultados de \PN de la Copa Pequeña de la Torre Batalla individual:
+Hola, te doy la bienvenida al Centro Pokémon.
+Hola, te doy la bienvenida al Centro Pokémon.
+Nosotros curamos la salud de tus Pokémon.
+Nosotros curamos la salud de tus Pokémon.
+¿Quieres que curemos a tu equipo?
+¿Quieres que curemos a tu equipo?
+Bien, déjame a tus Pokémon un momento.
+Bien, déjame a tus Pokémon un momento.
+Parece que tus Pokémon están infectados por el Pokérus.
+Parece que tus Pokémon están infectados por el Pokérus.
+Poco se sabe sobre el Pokérus, más allá de que son formas de vida microscópicas que se unen a los Pokémon.
+Poco se sabe sobre el Pokérus, más allá de que son formas de vida microscópicas que se unen a los Pokémon.
+Se dice que, mientras estén infectados, los Pokémon crecen de forma extraordinariamente rápida.
+Se dice que, mientras estén infectados, los Pokémon crecen de forma extraordinariamente rápida.
+Gracias por tu espera.
+Gracias por tu espera.
+Hemos restaurado la salud de tus Pokémon.
+Hemos restaurado la salud de tus Pokémon.
+¡Vuelve pronto!
+¡Vuelve pronto!
+Primero deberías restaurar la salud de tus Pokémon.
+Primero deberías restaurar la salud de tus Pokémon.
+Tus Pokémon se han curado y vuelven a estar en plena forma.
+Tus Pokémon se han curado y vuelven a estar en plena forma.
+¡Sigue esforzándote!
+¡Sigue esforzándote!
+Resultados de \PN de la Copa Pika de la Torre Batalla doble:
+Resultados de \PN de la Copa Pika de la Torre Batalla doble:
+Resultados de \PN de la Copa Elegante de la Torre Batalla doble:
+Resultados de \PN de la Copa Elegante de la Torre Batalla doble:
+Resultados de \PN de la Poké Copa de la Torre Batalla doble:
+Resultados de \PN de la Poké Copa de la Torre Batalla doble:
+Resultados de \PN de la Copa Pequeña de la Torre Batalla doble:
+Resultados de \PN de la Copa Pequeña de la Torre Batalla doble:
+¿Sobre qué facilidad te gustaría leer?
+¿Sobre qué facilidad te gustaría leer?
+Esta facilidad te permite llevar a cabo combates similares a Campeonatos de estadio.
+Esta facilidad te permite llevar a cabo combates similares a Campeonatos de estadio.
+Existen varios modos elegibles: Copa Pika, Copa Elegante, Poké Copa y Copa Pequeña. Cada copa tiene sus propias reglas y restricciones.
+Existen varios modos elegibles: Copa Pika, Copa Elegante, Poké Copa y Copa Pequeña. Cada copa tiene sus propias reglas y restricciones.
+La Copa Pika está abierta a Pokémon con niveles entre el 15 y 20.
+La Copa Pika está abierta a Pokémon con niveles entre el 15 y 20.
+Elige tres Pokémon para participar. Sin embargo, la suma de nivel de los tres no puede ser mayor que 50.
+Elige tres Pokémon para participar. Sin embargo, la suma de nivel de los tres no puede ser mayor que 50.
+Además, ciertos Pokémon exóticos no pueden participar.
+Además, ciertos Pokémon exóticos no pueden participar.
+La Copa Elegante está abierta a Pokémon bebés de nivel entre 25 y 30.
+La Copa Elegante está abierta a Pokémon bebés de nivel entre 25 y 30.
+Elige tres Pokémon para participar. Sin embargo, la suma de los niveles de los tres no puede ser mayor que 80.
+Elige tres Pokémon para participar. Sin embargo, la suma de los niveles de los tres no puede ser mayor que 80.
+Además, Pokémon muy grandes o muy altos no pueden particpar en la Copa Elegante.
+Además, Pokémon muy grandes o muy altos no pueden particpar en la Copa Elegante.
+El límite de altura es de 2 metros, y el de peso es de 20 Kg.
+El límite de altura es de 2 metros, y el de peso es de 20 Kg.
+La Poké Copa está abierta para Pokémon de niveles entre 50 y 55.
+La Poké Copa está abierta para Pokémon de niveles entre 50 y 55.
+Elige tres Pokémon para participar. Sin embargo, la suma de niveles de los tres no puede ser mayor que 155.
+Elige tres Pokémon para participar. Sin embargo, la suma de niveles de los tres no puede ser mayor que 155.
+La Copa Pequeña está abierta a Pokémon bebés a nivel 5 que aún pueden evolucionar.
+La Copa Pequeña está abierta a Pokémon bebés a nivel 5 que aún pueden evolucionar.
+Elige tres Pokémon para entrar en un combate individual, o cuatro para un combate doble.
+Elige tres Pokémon para entrar en un combate individual, o cuatro para un combate doble.
+Además, en la Copa Pequeña, los movimientos que reducen una cantidad fija de PS, como Bomba sónica o Furia dragón, siempre fallarán.
+Además, en la Copa Pequeña, los movimientos que reducen una cantidad fija de PS, como Bomba sónica o Furia dragón, siempre fallarán.
+En las Copas del Estadio hay varias reglas que debes tener en cuenta.
+En las Copas del Estadio hay varias reglas que debes tener en cuenta.
+Primero, dos Pokémon del mismo equipo no pueden estar dormidos o congelados al mismo tiempo.
+Primero, dos Pokémon del mismo equipo no pueden estar dormidos o congelados al mismo tiempo.
+Además, no puedes elegir a dos Pokémon de la misma especie, o que lleven equipado el mismo objeto.
+Además, no puedes elegir a dos Pokémon de la misma especie, o que lleven equipado el mismo objeto.
+Por último, si un Pokémon usa Autodestrucción o Explosión, haciendo que se debiliten los últimos Pokémon de todos, el que ha usado el mov. perderá.
+Por último, si un Pokémon usa Autodestrucción o Explosión, haciendo que se debiliten los últimos Pokémon de todos, el que ha usado el mov. perderá.
+No hay ningún combate guardado.
+No hay ningún combate guardado.
+Bienvenido a la División de la Copa Estadio de la Torre Batalla.
+Bienvenido a la División de la Copa Estadio de la Torre Batalla.
+¿Te gustaría participar en un combate individual?
+¿Te gustaría participar en un combate individual?
+¿En qué Copa del Estadio te gustaría participar?
+¿En qué Copa del Estadio te gustaría participar?
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar de niveles 15 al 20.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar de niveles 15 al 20.
+Deben ser de especie diferente y tener equipados objetos distintos.
+Deben ser de especie diferente y tener equipados objetos distintos.
+Algunos Pokémon especiales, así como los Huevos, no se pueden elegir.
+Algunos Pokémon especiales, así como los Huevos, no se pueden elegir.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar de niveles 25 al 30.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar de niveles 25 al 30.
+Además, deben ser Pokémon bebes, y no pueden ser ni muy altos ni muy pesados.
+Además, deben ser Pokémon bebes, y no pueden ser ni muy altos ni muy pesados.
+Los Huevos no se pueden elegir.
+Los Huevos no se pueden elegir.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar de nivel 50 al 55.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon diferentes para participar de nivel 50 al 55.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon bebé diferentes para participar de nivel 5.
+Lo siento, no puedes participar. Necesitar tener contigo tres Pokémon bebé diferentes para participar de nivel 5.
+Además deben ser bebés Pokémon que sean capaces de evolucionar.
+Además deben ser bebés Pokémon que sean capaces de evolucionar.
+Por favor, elige a los tres Pokémon que participarán.
+Por favor, elige a los tres Pokémon que participarán.
+Por favor, sígueme.
+Por favor, sígueme.
+Vuelve cuando quieras.
+Vuelve cuando quieras.
+Enhorabuena por tu victoria.
+Enhorabuena por tu victoria.
+Por favor, acepta estos Puntos Batalla.
+Por favor, acepta estos Puntos Batalla.
+\PN obtuvo \v[1] Puntos Batalla.
+\PN obtuvo \v[1] Puntos Batalla.
+¿Quieres grabar tu último combate?
+¿Quieres grabar tu último combate?
+\se[Pkmn exp full]El combate se ha guardado.
+\se[Pkmn exp full]El combate se ha guardado.
+Se van a registrar tus resultados.\wtnp[15]
+Se van a registrar tus resultados.\wtnp[15]
+Gracias por participar.
+Gracias por participar.
+Te estábamos esperando. Por favor, sígueme.
+Te estábamos esperando. Por favor, sígueme.
+Lo siento, pero no guardaste la partida antes de terminar tu último reto.
+Lo siento, pero no guardaste la partida antes de terminar tu último reto.
+Lamento decirte que tu reto se ha cancelado.
+Lamento decirte que tu reto se ha cancelado.
+¿Te gustaría participar en un combate doble?
+¿Te gustaría participar en un combate doble?
+¿En qué Copa Estadio te gustaría participar?
+¿En qué Copa Estadio te gustaría participar?
+Lo siento, no puedes participar. Necesitar tener contigo cuatro Pokémon diferentes para participar de niveles 15 al 20.
+Lo siento, no puedes participar. Necesitar tener contigo cuatro Pokémon diferentes para participar de niveles 15 al 20.
+Lo siento, no puedes participar. Necesitar tener contigo cuatro Pokémon diferentes para participar de niveles 25 al 30.
+Lo siento, no puedes participar. Necesitar tener contigo cuatro Pokémon diferentes para participar de niveles 25 al 30.
+Lo siento, no puedes participar. Necesitar tener contigo cuatro Pokémon diferentes para participar de nivel 50 al 55.
+Lo siento, no puedes participar. Necesitar tener contigo cuatro Pokémon diferentes para participar de nivel 50 al 55.
+Lo siento, no puedes participar. Necesitar tener contigo cuatro Pokémon bebé diferentes de nivel 5 o inferior.
+Lo siento, no puedes participar. Necesitar tener contigo cuatro Pokémon bebé diferentes de nivel 5 o inferior.
+Por favor, elige los Pokémon que van a participar.
+Por favor, elige los Pokémon que van a participar.
+Copa Pika
+Copa Pika
+Copa Elegante
+Copa Elegante
+Poké Copa
+Poké Copa
+Copa Pequeña
+Copa Pequeña
+Cancelar
+Cancelar
+Sí
+Sí
+No
+No
+Reglas Copa Estadio
+Reglas Copa Estadio
+Reproducir combate
+Reproducir combate
+Copas Estadio
+Copas Estadio
+Reglas de combate
+Reglas de combate
+Salir
+Salir
+Pika Copa
+Pika Copa

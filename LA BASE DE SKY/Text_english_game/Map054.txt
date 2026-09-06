@@ -1,0 +1,28 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map054]
+Hay un cuestionario.\n¿Te gustaría completarlo?
+Hay un cuestionario.\n¿Te gustaría completarlo?
+\PN ha rellenado el cuestionario.
+\PN ha rellenado el cuestionario.
+¡Oh, hola!\n¿Has rellenado el cuestionario?
+¡Oh, hola!\n¿Has rellenado el cuestionario?
+Eso significa que sabes lo que es el Regalo Misterioso.
+Eso significa que sabes lo que es el Regalo Misterioso.
+De ahora en adelante podrás recibir Regalos Misteriosos.
+De ahora en adelante podrás recibir Regalos Misteriosos.
+\w[signskin]Una vez que guardes la partida podrás acceder al Regalo Misterioso.
+\w[signskin]Una vez que guardes la partida podrás acceder al Regalo Misterioso.
+Hola. Tú debes ser \PN.
+Hola. Tú debes ser \PN.
+He recibido un regalo para ti.\n¡Aquí tienes!
+He recibido un regalo para ti.\n¡Aquí tienes!
+No he recibido más regalos para ti.
+No he recibido más regalos para ti.
+Espero verte de nuevo pronto.
+Espero verte de nuevo pronto.
+Sí
+Sí
+No
+No

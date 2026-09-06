@@ -1,0 +1,176 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map004]
+La Poké Ball contiene un Pokémon capturado por el Profesor.
+La Poké Ball contiene un Pokémon capturado por el Profesor.
+Oak: ¿Así que eliges a Charmander, el Pokémon tipo Fuego?
+Oak: ¿Así que eliges a Charmander, el Pokémon tipo Fuego?
+Oak: ¡Elige con cuidado!
+Oak: ¡Elige con cuidado!
+La variable 7 debe guardar 1 si el jugador ha elegido el inicial de Planta, 2 si ha elegido el de Fuego y 3 si ha elegido el de Agua.
+La variable 7 debe guardar 1 si el jugador ha elegido el inicial de Planta, 2 si ha elegido el de Fuego y 3 si ha elegido el de Agua.
+Esta información puede ser usada más tarde en el juego, por ejemplo para determinar qué Pokémon usa el rival cuando te enfrentas a él o detectar si el jugador ya tiene un inicial con él.
+Esta información puede ser usada más tarde en el juego, por ejemplo para determinar qué Pokémon usa el rival cuando te enfrentas a él o detectar si el jugador ya tiene un inicial con él.
+Oak: ¿Así que eliges a Squirtle, el Pokémon tipo Agua?
+Oak: ¿Así que eliges a Squirtle, el Pokémon tipo Agua?
+Deberías pelear con tu Pokémon para que se haga más fuerte.
+Deberías pelear con tu Pokémon para que se haga más fuerte.
+Si me registras en el Pokégear, puedes llamarme en cualquier momento para valorar tu Pokédex.
+Si me registras en el Pokégear, puedes llamarme en cualquier momento para valorar tu Pokédex.
+Oak: ¡Háblame cuando quieras que la valore!
+Oak: ¡Háblame cuando quieras que la valore!
+Oh, entiendo. Habla conmigo si cambias de opinión.
+Oh, entiendo. Habla conmigo si cambias de opinión.
+¿Con cuál de los tres te quedas?
+¿Con cuál de los tres te quedas?
+¡\PN ha recibido una Pokédex!
+¡\PN ha recibido una Pokédex!
+Ya tienes una Pokédex.
+Ya tienes una Pokédex.
+Oak: ¡Espera, no te vayas aún!
+Oak: ¡Espera, no te vayas aún!
+Puedo controlar los accesos de tu Pokédex. ¿Qué quieres que haga?
+Puedo controlar los accesos de tu Pokédex. ¿Qué quieres que haga?
+¿Qué hacer con ella?
+¿Qué hacer con ella?
+La Pokédex de Kanto se ha desbloqueado.
+La Pokédex de Kanto se ha desbloqueado.
+La Pokédex de Kanto se ha bloqueado.
+La Pokédex de Kanto se ha bloqueado.
+La Pokédex de Johto se ha desbloqueado.
+La Pokédex de Johto se ha desbloqueado.
+La Pokédex de Johto se ha bloqueado.
+La Pokédex de Johto se ha bloqueado.
+La Pokédex de Hoenn se ha desbloqueado.
+La Pokédex de Hoenn se ha desbloqueado.
+La Pokédex de Hoenn se ha bloqueado.
+La Pokédex de Hoenn se ha bloqueado.
+La Pokédex de Sinnoh se ha desbloqueado.
+La Pokédex de Sinnoh se ha desbloqueado.
+La Pokédex de Sinnoh se ha bloqueado.
+La Pokédex de Sinnoh se ha bloqueado.
+La Pokédex de Teselia se ha desbloqueado.
+La Pokédex de Teselia se ha desbloqueado.
+La Pokédex de Teselia se ha bloqueado.
+La Pokédex de Teselia se ha bloqueado.
+La Pokédex de Kalos se ha desbloqueado.
+La Pokédex de Kalos se ha desbloqueado.
+La Pokédex de Kalos se ha bloqueado.
+La Pokédex de Kalos se ha bloqueado.
+La Pokédex de Alola se ha desbloqueado.
+La Pokédex de Alola se ha desbloqueado.
+La Pokédex de Alola se ha bloqueado.
+La Pokédex de Alola se ha bloqueado.
+La Pokédex de Galar se ha desbloqueado.
+La Pokédex de Galar se ha desbloqueado.
+La Pokédex de Galar se ha bloqueado.
+La Pokédex de Galar se ha bloqueado.
+La Pokédex de Paldea se ha desbloqueado.
+La Pokédex de Paldea se ha desbloqueado.
+La Pokédex de Paldea se ha bloqueado.
+La Pokédex de Paldea se ha bloqueado.
+La Pokédex Nacional se ha desbloqueado.
+La Pokédex Nacional se ha desbloqueado.
+La Pokédex Nacional se ha bloqueado.
+La Pokédex Nacional se ha bloqueado.
+Oak: Elige uno de estos raros Pokémon.
+Oak: Elige uno de estos raros Pokémon.
+Oak: Bien, ¡has hecho tu elección!
+Oak: Bien, ¡has hecho tu elección!
+Oak: ¡Bulbasaur, una excelente opción!
+Oak: ¡Bulbasaur, una excelente opción!
+Oak: ¡Charmander, una excelente opción!
+Oak: ¡Charmander, una excelente opción!
+Oak: ¡Squiertle, una excelente opción!
+Oak: ¡Squiertle, una excelente opción!
+Oak: Si tuviese un nieto seguramente también habría querido tener un Pokémon.
+Oak: Si tuviese un nieto seguramente también habría querido tener un Pokémon.
+Hemos descubierto un nuevo Pokémon, ¡mira!
+Hemos descubierto un nuevo Pokémon, ¡mira!
+También hemos descubierto este otro Pokémon, ¡y creo que es de un color especial!
+También hemos descubierto este otro Pokémon, ¡y creo que es de un color especial!
+Pero eso no es todo. ¡Mira a este otro! Parece salido de una película de ciencia ficción.
+Pero eso no es todo. ¡Mira a este otro! Parece salido de una película de ciencia ficción.
+¡Espero que algún día puedas encontrarte con alguno de ellos!
+¡Espero que algún día puedas encontrarte con alguno de ellos!
+¡Este aparato te permitirá saber qué Pokémon salvajes salen en cada ruta!
+¡Este aparato te permitirá saber qué Pokémon salvajes salen en cada ruta!
+Con el Buscasalvajes podrás saber qué Pokémon salvajes salen en cada ruta o lugar. Es muy útil, ¡pruébalo!
+Con el Buscasalvajes podrás saber qué Pokémon salvajes salen en cada ruta o lugar. Es muy útil, ¡pruébalo!
+Oak: ¿Así que eliges a Bulbasaur, el Pokémon tipo Planta?
+Oak: ¿Así que eliges a Bulbasaur, el Pokémon tipo Planta?
+El evento que hay al lado del Profesor contiene comandos en modo Autorun.
+El evento que hay al lado del Profesor contiene comandos en modo Autorun.
+Este evento hace cosas en dos ocasiones: cuando el jugador entra por primera vez en este mapa (la primera hoja del evento) y cuando el jugador ha elegido un inicial.
+Este evento hace cosas en dos ocasiones: cuando el jugador entra por primera vez en este mapa (la primera hoja del evento) y cuando el jugador ha elegido un inicial.
+La segunda vez va en una página con un número de página mayor.
+La segunda vez va en una página con un número de página mayor.
+Las páginas de un evento se van comprobando de derecha a izquierda, por lo que primero se comprueban las condiciones de las de más a la derecha, y si no se cumplen, las de la siguiente.
+Las páginas de un evento se van comprobando de derecha a izquierda, por lo que primero se comprueban las condiciones de las de más a la derecha, y si no se cumplen, las de la siguiente.
+Sí
+Sí
+No
+No
+Acceso Dex Kanto
+Acceso Dex Kanto
+Acceso Dex Johto
+Acceso Dex Johto
+Acceso Dex Hoenn
+Acceso Dex Hoenn
+Acceso Dex Sinnoh
+Acceso Dex Sinnoh
+Desbloquear Dex Kanto
+Desbloquear Dex Kanto
+Bloquear Dex Kanto
+Bloquear Dex Kanto
+Salir
+Salir
+Desbloquear Dex Johto
+Desbloquear Dex Johto
+Bloquear Dex Johto
+Bloquear Dex Johto
+Desbloquear Dex Hoenn
+Desbloquear Dex Hoenn
+Bloquear Dex Hoenn
+Bloquear Dex Hoenn
+Desbloquear Dex Sinnoh
+Desbloquear Dex Sinnoh
+Bloquear Dex Sinnoh
+Bloquear Dex Sinnoh
+Acceso Dex Teselia
+Acceso Dex Teselia
+Acceso Dex Kalos
+Acceso Dex Kalos
+Acceso Dex Alola
+Acceso Dex Alola
+Acceso Dex Galar
+Acceso Dex Galar
+Desbloquear Dex Teselia
+Desbloquear Dex Teselia
+Bloquear Dex Teselia
+Bloquear Dex Teselia
+Desbloquear Dex Kalos
+Desbloquear Dex Kalos
+Bloquear Dex Kalos
+Bloquear Dex Kalos
+Desbloquear Dex Alola
+Desbloquear Dex Alola
+Bloquear Dex Alola
+Bloquear Dex Alola
+Desbloquear Dex Galar
+Desbloquear Dex Galar
+Bloquear Dex Galar
+Bloquear Dex Galar
+Acceso Dex Paldea
+Acceso Dex Paldea
+Acceso Dex Nacional
+Acceso Dex Nacional
+Desbloquear Dex Paldea
+Desbloquear Dex Paldea
+Bloquear Dex Paldea
+Bloquear Dex Paldea
+Desbloquear Dex Nacional
+Desbloquear Dex Nacional
+Bloquear Dex Nacional
+Bloquear Dex Nacional

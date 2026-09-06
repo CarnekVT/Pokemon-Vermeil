@@ -80,7 +80,8 @@
       "framePixels": 16
     },
     "onionMode": "off",
-    "contextTransformEdit": "view"
+    "contextTransformEdit": "view",
+    "emitterSeedDefaults": true
   },
   "animations": [
     {
@@ -33684,7 +33685,7 @@
       "id": "anim_mti2xsw4_sq",
       "name": "Pistola Agua",
       "fps": 20,
-      "duration": 30,
+      "duration": 40,
       "source": {
         "type": "studio",
         "move": "WATERGUN",
@@ -33740,7 +33741,7 @@
             {
               "id": "vkey_mti2xsw4_sr",
               "frame": 0,
-              "value": true
+              "value": false
             }
           ],
           "positionKeys": [
@@ -33925,8 +33926,7 @@
           "cameraX": [],
           "cameraY": [],
           "cameraZoom": [],
-          "cameraRotation": [],
-          "priority": []
+          "cameraRotation": []
         },
         "visibleKeys": [
           {
@@ -33963,22 +33963,22 @@
           "name": "Effects",
           "clips": [
             {
-              "id": "clip_mti4965k_1w2",
+              "id": "clip_mtjl7izm_yf",
               "type": "projectile",
-              "name": "Projectile 1",
+              "name": "Projectile 3",
               "enabled": true,
               "locked": false,
               "startFrame": 0,
-              "endFrame": 13,
+              "endFrame": 30,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/Animations/PRAS- Water.png",
+                "projectPath": "Graphics/Animations/smog 2.png",
                 "folder": "Animations",
-                "name": "PRAS- Water",
+                "name": "smog 2",
                 "relativeHint": "",
                 "externalGameRoot": "",
                 "hue": 0,
-                "spritesheet": "rmxp",
+                "spritesheet": "auto",
                 "frame": 0,
                 "playSheet": false,
                 "sheetFps": 20,
@@ -34007,64 +34007,22 @@
               "coordinateSpaceManual": false,
               "visibleKeys": [
                 {
-                  "id": "vkey_mti4965k_1w4",
+                  "id": "vkey_mtjl7izm_yh",
                   "frame": 0,
                   "value": true
                 }
               ],
               "positionKeys": [
                 {
-                  "id": "key_mti4965k_1w5",
+                  "id": "key_mtjl7n5d_ym",
                   "frame": 0,
                   "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
                   "point": {
-                    "anchor": "user",
+                    "anchor": "pbs:user",
                     "x": 0,
                     "y": 0,
-                    "offsetX": 0,
-                    "offsetY": -48
-                  },
-                  "axisX": true,
-                  "axisY": true
-                },
-                {
-                  "id": "key_mti4c9ji_27y",
-                  "frame": 2,
-                  "easing": "ease_both",
-                  "axisX": true,
-                  "axisY": true,
-                  "point": {
-                    "anchor": "screen",
-                    "x": 151.80144883175186,
-                    "y": 265.05081114172026,
-                    "offsetX": 0,
-                    "offsetY": 0
-                  }
-                },
-                {
-                  "id": "key_mti4byk0_27u",
-                  "frame": 10,
-                  "easing": "ease_both",
-                  "axisX": true,
-                  "axisY": true,
-                  "point": {
-                    "anchor": "screen",
-                    "x": 403.24691358024694,
-                    "y": 181.0185185185185,
-                    "offsetX": 0,
-                    "offsetY": 0
-                  }
-                },
-                {
-                  "id": "key_mti4bzbd_27v",
-                  "frame": 13,
-                  "easing": "ease_both",
-                  "axisX": true,
-                  "axisY": true,
-                  "point": {
-                    "anchor": "screen",
-                    "x": 408.01234567901236,
-                    "y": 179.42592592592592,
                     "offsetX": 0,
                     "offsetY": 0
                   }
@@ -34073,25 +34031,11 @@
               "valueKeys": {
                 "size": [],
                 "scaleX": [],
-                "scaleY": [
-                  {
-                    "id": "pkey_mti4ehi5_281",
-                    "frame": 0,
-                    "value": 100,
-                    "easing": "ease_both"
-                  }
-                ],
+                "scaleY": [],
                 "viewScale": [],
                 "rotation": [],
                 "opacity": [],
-                "graphicFrame": [
-                  {
-                    "id": "pkey_mti49nwc_1w7",
-                    "frame": 0,
-                    "value": 19,
-                    "easing": "ease_both"
-                  }
-                ],
+                "graphicFrame": [],
                 "srcX": [],
                 "srcY": [],
                 "srcW": [],
@@ -34111,6 +34055,7 @@
                 "cameraRotation": [],
                 "priority": [],
                 "invert": [],
+                "emitterOpacity": [],
                 "colorRed": [],
                 "colorGreen": [],
                 "colorBlue": [],
@@ -34121,7 +34066,175 @@
                 "originOffsetY": []
               },
               "fxOps": [],
-              "pbs": null,
+              "pbs": {
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtjlfk8k_153",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtjlfk8k_154",
+                      "frame": 13,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ],
+                  "emitterRate": [
+                    {
+                      "id": "ecmd_mtjleczx_14f",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 6
+                    }
+                  ],
+                  "emitterIntensity": [
+                    {
+                      "id": "ecmd_mtjl7n5d_yo",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 3
+                    },
+                    {
+                      "id": "ecmd_mtjlfax8_14g",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 1
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "id": "ecmd_mtjl7n5d_yp",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 3
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "id": "ecmd_mtjl7n5d_yq",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 5
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtjl7n5d_yr",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 500
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "id": "ecmd_mtjl7n5d_ys",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 45
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtjl7n5d_yt",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 23
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtjl7n5d_yu",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 6
+                    }
+                  ],
+                  "emitGravity": [
+                    {
+                      "id": "ecmd_mtjl7n5d_yv",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitZoomRange": [
+                    {
+                      "id": "ecmd_mtjl7n5d_yw",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 30
+                    }
+                  ]
+                },
+                "commands": {
+                  "zoomX": [
+                    {
+                      "id": "pcmd_mtjl7n5d_yz",
+                      "frame": 0,
+                      "duration": 4,
+                      "value": 100,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtjl7n5d_z0",
+                      "frame": 4,
+                      "duration": 3,
+                      "value": 145,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "id": "pcmd_mtjl7n5d_z2",
+                      "frame": 0,
+                      "duration": 4,
+                      "value": 100,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "id": "pcmd_mtjl7n5d_z4",
+                      "frame": 0,
+                      "duration": 2,
+                      "value": 255,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtjl7n5d_z5",
+                      "frame": 6,
+                      "duration": 3,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ]
+                },
+                "focus": "user",
+                "emitter": "Straight",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "emitterDestination": "manual",
+                "particleCommandSpace": "particle",
+                "simpleParticleLife": {
+                  "duration": 17,
+                  "birthScale": 35,
+                  "midScale": 100,
+                  "deathScale": 135,
+                  "birthOpacity": 0,
+                  "midOpacity": 100,
+                  "deathOpacity": 0,
+                  "birthRotation": 0,
+                  "midRotation": 0,
+                  "deathRotation": 0
+                }
+              },
               "logic": [],
               "imported": null,
               "editorOriginalPosition": {
@@ -34131,6 +34244,7 @@
                 "offsetX": 0,
                 "offsetY": -48
               },
+              "simpleEmitterRecipe": "rapid-stream",
               "contextOverrides": {
                 "player": {
                   "offsetX": 0,
@@ -34154,99 +34268,3447 @@
                   "contextKeys": {
                     "offsetX": [
                       {
-                        "id": "ctxkey_mti4a39k_1w8",
+                        "id": "ctxkey_mtjli9fb_1hx",
                         "frame": 0,
-                        "value": 78.02469135802468,
+                        "value": 28.641975308641975,
                         "easing": "ease_both",
                         "implicit": false
-                      },
-                      {
-                        "id": "ctxkey_mti4aeto_1wa",
-                        "frame": 7,
-                        "value": 91.85185185185182,
-                        "easing": "ease_both",
-                        "implicit": false
-                      },
-                      {
-                        "id": "ctxkey_mti4bmca_27s",
-                        "frame": 11,
-                        "value": 94.81481481481472,
-                        "easing": "ease_both"
                       }
                     ],
                     "offsetY": [
                       {
-                        "id": "ctxkey_mti4a39k_1w9",
+                        "id": "ctxkey_mtjli9fb_1hy",
                         "frame": 0,
-                        "value": 48.395061728395035,
+                        "value": -11.851851851851848,
                         "easing": "ease_both",
                         "implicit": false
-                      },
-                      {
-                        "id": "ctxkey_mti4aeto_1wb",
-                        "frame": 7,
-                        "value": -49.382716049382765,
-                        "easing": "ease_both",
-                        "implicit": false
-                      },
-                      {
-                        "id": "ctxkey_mti4bmca_27t",
-                        "frame": 11,
-                        "value": -2.9629629629630188,
-                        "easing": "ease_both"
                       }
-                    ],
-                    "rotation": [
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "clip_mtjld5mw_13t",
+              "type": "projectile",
+              "name": "Projectile 3 copia",
+              "enabled": true,
+              "locked": true,
+              "startFrame": 2,
+              "endFrame": 30,
+              "graphic": {
+                "source": "legacy",
+                "projectPath": "Graphics/Animations/smog 2.png",
+                "folder": "Animations",
+                "name": "smog 2",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "auto",
+              "replicateTo": "none",
+              "coordinateSpace": "auto",
+              "coordinateSpaceManual": false,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtjld5mw_13v",
+                  "frame": 2,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtjld5mw_13u",
+                  "frame": 2,
+                  "easing": "linear",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "emitterOpacity": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtjld5mw_13w",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtjld5mw_13x",
+                      "frame": 13,
+                      "duration": 0,
+                      "value": false
+                    },
+                    {
+                      "id": "ecmd_mtjld5mw_13y",
+                      "frame": 22,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ],
+                  "emitterRate": [
+                    {
+                      "id": "ecmd_mtjle6az_14e",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 6
+                    },
+                    {
+                      "id": "ecmd_mtjld5mw_13z",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 10
+                    }
+                  ],
+                  "emitterIntensity": [
+                    {
+                      "id": "ecmd_mtjld5mw_140",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 3
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "id": "ecmd_mtjld5mw_141",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 3
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "id": "ecmd_mtjld5mw_142",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 5
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtjld5mw_143",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 500
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "id": "ecmd_mtjld5mw_144",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 45
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtjld5mw_145",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 23
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtjld5mw_146",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 6
+                    }
+                  ],
+                  "emitGravity": [
+                    {
+                      "id": "ecmd_mtjld5mw_147",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitZoomRange": [
+                    {
+                      "id": "ecmd_mtjld5mw_148",
+                      "frame": 4,
+                      "duration": 0,
+                      "value": 30
+                    }
+                  ]
+                },
+                "commands": {
+                  "zoomX": [
+                    {
+                      "id": "pcmd_mtjld5mw_149",
+                      "frame": 0,
+                      "duration": 4,
+                      "value": 100,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtjld5mx_14a",
+                      "frame": 4,
+                      "duration": 3,
+                      "value": 145,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "id": "pcmd_mtjld5mx_14b",
+                      "frame": 0,
+                      "duration": 4,
+                      "value": 100,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "id": "pcmd_mtjld5mx_14c",
+                      "frame": 0,
+                      "duration": 2,
+                      "value": 255,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtjld5mx_14d",
+                      "frame": 6,
+                      "duration": 3,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ]
+                },
+                "focus": "user",
+                "emitter": "Straight",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "emitterDestination": "manual",
+                "particleCommandSpace": "particle",
+                "simpleParticleLife": {
+                  "duration": 10,
+                  "birthScale": 35,
+                  "midScale": 100,
+                  "deathScale": 135,
+                  "birthOpacity": 0,
+                  "midOpacity": 100,
+                  "deathOpacity": 0,
+                  "birthRotation": 0,
+                  "midRotation": 0,
+                  "deathRotation": 0
+                }
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "simpleEmitterRecipe": "rapid-stream",
+              "contextOverrides": {
+                "player": {
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "opacity": 100,
+                  "zOffset": 0,
+                  "priorityOffset": 0,
+                  "toneRed": 0,
+                  "toneGreen": 0,
+                  "toneBlue": 0,
+                  "toneGray": 0,
+                  "cameraX": 0,
+                  "cameraY": 0,
+                  "cameraZoom": 100,
+                  "cameraRotation": 0,
+                  "flip": false,
+                  "flipY": false,
+                  "contextKeys": {
+                    "offsetX": [
                       {
-                        "id": "ctxkey_mti4ankh_1wc",
+                        "id": "ctxkey_mtjli4bq_1ht",
                         "frame": 0,
                         "value": 0,
                         "easing": "ease_both",
                         "implicit": true
                       },
                       {
-                        "id": "ctxkey_mti4ankh_1wd",
-                        "frame": 7,
-                        "value": -6,
-                        "easing": "ease_both",
-                        "implicit": false
-                      },
-                      {
-                        "id": "ctxkey_mti4b9rq_1wf",
-                        "frame": 10,
-                        "value": -39,
+                        "id": "ctxkey_mtjli4bq_1hu",
+                        "frame": 2,
+                        "value": 25.679012345679013,
                         "easing": "ease_both",
                         "implicit": false
                       }
                     ],
-                    "opacity": [
+                    "offsetY": [
                       {
-                        "id": "ctxkey_mti4c3un_27w",
+                        "id": "ctxkey_mtjli4bq_1hv",
                         "frame": 0,
-                        "value": 1,
-                        "easing": "ease_both"
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
                       },
                       {
-                        "id": "ctxkey_mti4cbsa_27z",
+                        "id": "ctxkey_mtjli4bq_1hw",
                         "frame": 2,
-                        "value": 100,
-                        "easing": "ease_both"
-                      },
-                      {
-                        "id": "ctxkey_mti4cns4_280",
-                        "frame": 10,
-                        "value": 99,
-                        "easing": "ease_both"
-                      },
-                      {
-                        "id": "ctxkey_mti4c3un_27x",
-                        "frame": 12,
-                        "value": 1,
-                        "easing": "ease_both"
+                        "value": -4.938271604938279,
+                        "easing": "ease_both",
+                        "implicit": false
                       }
                     ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "clip_mtjlhfet_155",
+              "type": "projectile",
+              "name": "Projectile 3 copia copia",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 2,
+              "endFrame": 30,
+              "graphic": {
+                "source": "legacy",
+                "projectPath": "Graphics/Animations/smog 2.png",
+                "folder": "Animations",
+                "name": "smog 2",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "auto",
+              "replicateTo": "none",
+              "coordinateSpace": "auto",
+              "coordinateSpaceManual": false,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtjlhfet_157",
+                  "frame": 2,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtjlhfet_156",
+                  "frame": 2,
+                  "easing": "linear",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "emitterOpacity": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtjlhfet_158",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtjlhfet_159",
+                      "frame": 15,
+                      "duration": 0,
+                      "value": false
+                    },
+                    {
+                      "id": "ecmd_mtjlhfet_15a",
+                      "frame": 24,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ],
+                  "emitterRate": [
+                    {
+                      "id": "ecmd_mtjlhfet_15b",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 6
+                    },
+                    {
+                      "id": "ecmd_mtjlhfet_15c",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 10
+                    }
+                  ],
+                  "emitterIntensity": [
+                    {
+                      "id": "ecmd_mtjlhfet_15d",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 3
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "id": "ecmd_mtjlhfet_15e",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 3
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "id": "ecmd_mtjlhfet_15f",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 5
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtjlhfet_15g",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 500
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "id": "ecmd_mtjlhfet_15h",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 45
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtjlhfet_15i",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 23
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtjlhfet_15j",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 6
+                    }
+                  ],
+                  "emitGravity": [
+                    {
+                      "id": "ecmd_mtjlhfet_15k",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitZoomRange": [
+                    {
+                      "id": "ecmd_mtjlhfet_15l",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 30
+                    }
+                  ]
+                },
+                "commands": {
+                  "zoomX": [
+                    {
+                      "id": "pcmd_mtjlhfet_15m",
+                      "frame": 0,
+                      "duration": 4,
+                      "value": 100,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtjlhfet_15n",
+                      "frame": 4,
+                      "duration": 3,
+                      "value": 145,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "id": "pcmd_mtjlhfet_15o",
+                      "frame": 0,
+                      "duration": 4,
+                      "value": 100,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "id": "pcmd_mtjlhfet_15p",
+                      "frame": 0,
+                      "duration": 2,
+                      "value": 255,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtjlhfet_15q",
+                      "frame": 6,
+                      "duration": 3,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ]
+                },
+                "focus": "user",
+                "emitter": "Straight",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "emitterDestination": "manual",
+                "particleCommandSpace": "particle",
+                "simpleParticleLife": {
+                  "duration": 10,
+                  "birthScale": 35,
+                  "midScale": 100,
+                  "deathScale": 135,
+                  "birthOpacity": 0,
+                  "midOpacity": 100,
+                  "deathOpacity": 0,
+                  "birthRotation": 0,
+                  "midRotation": 0,
+                  "deathRotation": 0
+                }
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "simpleEmitterRecipe": "rapid-stream",
+              "contextOverrides": {
+                "player": {
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "opacity": 100,
+                  "zOffset": 0,
+                  "priorityOffset": 0,
+                  "toneRed": 0,
+                  "toneGreen": 0,
+                  "toneBlue": 0,
+                  "toneGray": 0,
+                  "cameraX": 0,
+                  "cameraY": 0,
+                  "cameraZoom": 100,
+                  "cameraRotation": 0,
+                  "flip": false,
+                  "flipY": false,
+                  "contextKeys": {
+                    "offsetX": [
+                      {
+                        "id": "ctxkey_mtjlhvzh_15r",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtjlhvzh_15s",
+                        "frame": 2,
+                        "value": 23.703703703703695,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "offsetY": [
+                      {
+                        "id": "ctxkey_mtjlhvzh_15t",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtjlhvzh_15u",
+                        "frame": 2,
+                        "value": -5.925925925925924,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "clip_mtjljcpk_1hz",
+              "type": "projectile",
+              "name": "Projectile 3 copia copia copia",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 2,
+              "endFrame": 30,
+              "graphic": {
+                "source": "legacy",
+                "projectPath": "Graphics/Animations/smog 2.png",
+                "folder": "Animations",
+                "name": "smog 2",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "auto",
+              "replicateTo": "none",
+              "coordinateSpace": "auto",
+              "coordinateSpaceManual": false,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtjljcpk_1i1",
+                  "frame": 2,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtjljcpk_1i0",
+                  "frame": 2,
+                  "easing": "linear",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "emitterOpacity": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtjljl60_1iv",
+                      "frame": 11,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtjljl60_1iw",
+                      "frame": 17,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ],
+                  "emitterRate": [
+                    {
+                      "id": "ecmd_mtjljcpk_1i5",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 6
+                    },
+                    {
+                      "id": "ecmd_mtjljcpk_1i6",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 10
+                    }
+                  ],
+                  "emitterIntensity": [
+                    {
+                      "id": "ecmd_mtjljcpk_1i7",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 3
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "id": "ecmd_mtjljcpk_1i8",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 3
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "id": "ecmd_mtjljcpk_1i9",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 5
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtjljcpk_1ia",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 500
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "id": "ecmd_mtjljcpk_1ib",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 45
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtjljcpk_1ic",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 23
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtjljcpk_1id",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 6
+                    }
+                  ],
+                  "emitGravity": [
+                    {
+                      "id": "ecmd_mtjljcpk_1ie",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitZoomRange": [
+                    {
+                      "id": "ecmd_mtjljcpk_1if",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 30
+                    }
+                  ]
+                },
+                "commands": {
+                  "zoomX": [
+                    {
+                      "id": "pcmd_mtjljcpk_1ig",
+                      "frame": 0,
+                      "duration": 4,
+                      "value": 100,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtjljcpk_1ih",
+                      "frame": 4,
+                      "duration": 3,
+                      "value": 145,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "id": "pcmd_mtjljcpk_1ii",
+                      "frame": 0,
+                      "duration": 4,
+                      "value": 100,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "id": "pcmd_mtjljcpk_1ij",
+                      "frame": 0,
+                      "duration": 2,
+                      "value": 255,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtjljcpk_1ik",
+                      "frame": 6,
+                      "duration": 3,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ]
+                },
+                "focus": "user",
+                "emitter": "Straight",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "emitterDestination": "manual",
+                "particleCommandSpace": "particle",
+                "simpleParticleLife": {
+                  "duration": 6,
+                  "birthScale": 35,
+                  "midScale": 100,
+                  "deathScale": 135,
+                  "birthOpacity": 0,
+                  "midOpacity": 100,
+                  "deathOpacity": 0,
+                  "birthRotation": 0,
+                  "midRotation": 0,
+                  "deathRotation": 0
+                }
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "simpleEmitterRecipe": "rapid-stream",
+              "contextOverrides": {
+                "player": {
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "opacity": 100,
+                  "zOffset": 0,
+                  "priorityOffset": 0,
+                  "toneRed": 0,
+                  "toneGreen": 0,
+                  "toneBlue": 0,
+                  "toneGray": 0,
+                  "cameraX": 0,
+                  "cameraY": 0,
+                  "cameraZoom": 100,
+                  "cameraRotation": 0,
+                  "flip": false,
+                  "flipY": false,
+                  "contextKeys": {
+                    "offsetX": [
+                      {
+                        "id": "ctxkey_mtjlhvzh_15r",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtjlhvzh_15s",
+                        "frame": 2,
+                        "value": 23.703703703703695,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "offsetY": [
+                      {
+                        "id": "ctxkey_mtjlhvzh_15t",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtjlhvzh_15u",
+                        "frame": 2,
+                        "value": -5.925925925925924,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "events": [],
+      "logic": [],
+      "notes": "",
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false,
+      "scene": {
+        "inheritProject": true,
+        "source": "project",
+        "responsive": true,
+        "referenceWidth": 640,
+        "referenceHeight": 480,
+        "cameraBoundsMode": "auto"
+      }
+    },
+    {
+      "id": "anim_mtjlan0m_z6",
+      "name": "DB Animation",
+      "fps": 20,
+      "duration": 49,
+      "source": {
+        "type": "pbs",
+        "move": "WATERGUN",
+        "version": 0,
+        "catalogType": "move",
+        "opposing": false,
+        "sideContext": "player",
+        "targetMode": "both",
+        "targetScope": "single_other",
+        "allowedTargetScopes": [
+          "single_other"
+        ],
+        "variantScope": "special",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "None",
+        "detectedCategory": "special",
+        "detectedTarget": "NearOther",
+        "contextAutoAdapt": true,
+        "previewAffectedTargets": false,
+        "autoReplicateAffected": false,
+        "activeTimelineContext": null,
+        "askBackupOnContextEdit": false,
+        "autoReplicateTouched": false,
+        "commonSubjectRole": "auto",
+        "authors": [],
+        "system": "pbs",
+        "path": "PBS/Animations/Water/Water Gun.txt",
+        "native": true,
+        "external": false,
+        "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
+        "groupIdentity": "move|WATERGUN",
+        "runtimeSelected": false
+      },
+      "contextTimelines": [],
+      "battlers": {
+        "user": {
+          "id": "battler_user",
+          "type": "battler",
+          "side": "user",
+          "name": "User",
+          "enabled": true,
+          "locked": false,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mtjlan0n_zf",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mtjlan0n_ze",
+              "frame": 0,
+              "easing": "linear",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "priority": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0,
+          "imported": {
+            "format": "pbs",
+            "focus": "user",
+            "rawProps": {},
+            "pbsBattlerParticle": true,
+            "graphic": "USER"
+          },
+          "pbs": {
+            "focus": "user",
+            "foeInvertX": false,
+            "foeInvertY": false,
+            "foeFlip": false,
+            "tiled": false,
+            "angleOverride": "None",
+            "secondLayer": false,
+            "maskGraphic": "",
+            "emitter": "None",
+            "emitterRate": 1,
+            "emitterIntensity": 1,
+            "randomFrameMax": 0,
+            "randomAngleRange": 0,
+            "randomInvertAngle": false,
+            "randomInvertFlip": false,
+            "commands": {},
+            "emitterCommands": {}
+          }
+        },
+        "target": {
+          "id": "battler_target",
+          "type": "battler",
+          "side": "target",
+          "name": "Target",
+          "enabled": true,
+          "locked": false,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mtjlan0p_13q",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mtjlan0o_13d",
+              "frame": 17,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13e",
+              "frame": 18,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 3,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13f",
+              "frame": 20,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13g",
+              "frame": 22,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13h",
+              "frame": 24,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13i",
+              "frame": 26,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13j",
+              "frame": 28,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13k",
+              "frame": 30,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13l",
+              "frame": 32,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13m",
+              "frame": 34,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13n",
+              "frame": 36,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": -5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13o",
+              "frame": 38,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 5,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtjlan0o_13p",
+              "frame": 39,
+              "easing": "linear",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 17,
+          "endFrame": 39,
+          "imported": {
+            "format": "pbs",
+            "focus": "target",
+            "rawProps": {},
+            "pbsBattlerParticle": true,
+            "graphic": "TARGET"
+          },
+          "pbs": {
+            "focus": "target",
+            "foeInvertX": false,
+            "foeInvertY": false,
+            "foeFlip": false,
+            "tiled": false,
+            "angleOverride": "None",
+            "secondLayer": false,
+            "maskGraphic": "",
+            "emitter": "None",
+            "emitterRate": 1,
+            "emitterIntensity": 1,
+            "randomFrameMax": 0,
+            "randomAngleRange": 0,
+            "randomInvertAngle": false,
+            "randomInvertFlip": false,
+            "commands": {
+              "x": [
+                {
+                  "id": "pcmd_mtjlan0o_131",
+                  "frame": 17,
+                  "duration": 1,
+                  "value": 3,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_132",
+                  "frame": 18,
+                  "duration": 2,
+                  "value": -5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_133",
+                  "frame": 20,
+                  "duration": 2,
+                  "value": 5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_134",
+                  "frame": 22,
+                  "duration": 2,
+                  "value": -5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_135",
+                  "frame": 24,
+                  "duration": 2,
+                  "value": 5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_136",
+                  "frame": 26,
+                  "duration": 2,
+                  "value": -5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_137",
+                  "frame": 28,
+                  "duration": 2,
+                  "value": 5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_138",
+                  "frame": 30,
+                  "duration": 2,
+                  "value": -5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_139",
+                  "frame": 32,
+                  "duration": 2,
+                  "value": 5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_13a",
+                  "frame": 34,
+                  "duration": 2,
+                  "value": -5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_13b",
+                  "frame": 36,
+                  "duration": 2,
+                  "value": 5,
+                  "easing": "ease_both"
+                },
+                {
+                  "id": "pcmd_mtjlan0o_13c",
+                  "frame": 38,
+                  "duration": 1,
+                  "value": 0,
+                  "easing": "ease_both"
+                }
+              ]
+            },
+            "emitterCommands": {}
+          }
+        }
+      },
+      "camera": {
+        "id": "camera_main",
+        "type": "camera",
+        "name": "Camera",
+        "enabled": true,
+        "locked": false,
+        "visual": {
+          "cameraX": 0,
+          "cameraY": 0,
+          "cameraZoom": 100,
+          "cameraRotation": 0,
+          "size": 100,
+          "scaleX": 100,
+          "scaleY": 100,
+          "opacity": 100,
+          "rotation": 0,
+          "z": 0,
+          "blend": 0,
+          "flip": 0
+        },
+        "valueKeys": {
+          "size": [],
+          "scaleX": [],
+          "scaleY": [],
+          "viewScale": [],
+          "rotation": [],
+          "opacity": [],
+          "graphicFrame": [],
+          "srcX": [],
+          "srcY": [],
+          "srcW": [],
+          "srcH": [],
+          "z": [],
+          "blend": [],
+          "flip": [],
+          "flipY": [],
+          "facing": [],
+          "toneRed": [],
+          "toneGreen": [],
+          "toneBlue": [],
+          "toneGray": [],
+          "cameraX": [],
+          "cameraY": [],
+          "cameraZoom": [],
+          "cameraRotation": []
+        },
+        "visibleKeys": [
+          {
+            "id": "vkey_mtjlan0m_zb",
+            "frame": 0,
+            "value": true
+          }
+        ],
+        "positionKeys": [
+          {
+            "id": "key_mtjlan0m_zc",
+            "frame": 0,
+            "easing": "linear",
+            "point": {
+              "anchor": "screen",
+              "x": 0,
+              "y": 0,
+              "offsetX": 0,
+              "offsetY": 0
+            },
+            "axisX": true,
+            "axisY": true
+          }
+        ],
+        "startFrame": 0,
+        "endFrame": 0,
+        "logic": [],
+        "fxOps": []
+      },
+      "tracks": [
+        {
+          "id": "track_mtjlan0m_zd",
+          "type": "effects",
+          "name": "Effects",
+          "clips": [
+            {
+              "id": "clip_mtjlan0n_zg",
+              "type": "pbs-particle",
+              "name": "Water Stream Emitter",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 49,
+              "graphic": {
+                "source": "new",
+                "projectPath": "Graphics/Animations/smog 2.png",
+                "folder": "Battle animations",
+                "name": "smog 2",
+                "relativeHint": "smog 2",
+                "externalGameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "smog 2",
+                  "smog 2"
+                ],
+                "rawName": "smog 2",
+                "specialBattler": "smog 2",
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "auto",
+              "replicateTo": "none",
+              "coordinateSpace": "auto",
+              "coordinateSpaceManual": false,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtjlan0o_10m",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtjlan0o_109",
+                  "frame": 0,
+                  "easing": "linear",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:user_and_target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "foeInvertX": false,
+                    "foeInvertY": false
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_mtjlan0o_10a",
+                    "frame": 1,
+                    "value": 10,
+                    "easing": "ease_both"
                   },
-                  "priorityReference": "target"
+                  {
+                    "id": "pkey_mtjlan0o_10b",
+                    "frame": 6,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_10c",
+                    "frame": 8,
+                    "value": 150,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_mtjlan0o_10d",
+                    "frame": 1,
+                    "value": 10,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_10e",
+                    "frame": 6,
+                    "value": 100,
+                    "easing": "linear"
+                  }
+                ],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mtjlan0o_10f",
+                    "frame": 1,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_10g",
+                    "frame": 2,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_10h",
+                    "frame": 5,
+                    "value": 88.23529411764706,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_10i",
+                    "frame": 14,
+                    "value": 88.23529411764706,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_10j",
+                    "frame": 17,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [
+                  {
+                    "id": "pkey_mtjlan0o_10k",
+                    "frame": 1,
+                    "value": 10,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_10l",
+                    "frame": 14,
+                    "value": -110,
+                    "easing": "linear"
+                  }
+                ],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "emitterOpacity": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [
+                {
+                  "name": "SetColor",
+                  "args": [
+                    "1",
+                    "906B4400"
+                  ]
+                },
+                {
+                  "name": "MoveColor",
+                  "args": [
+                    "5",
+                    "8",
+                    "0098FF68"
+                  ]
+                }
+              ],
+              "pbs": {
+                "focus": "user_and_target",
+                "foeInvertX": false,
+                "foeInvertY": false,
+                "foeFlip": false,
+                "tiled": false,
+                "angleOverride": "None",
+                "secondLayer": false,
+                "maskGraphic": "",
+                "emitter": "Straight",
+                "emitterRate": 10,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 45,
+                "randomInvertAngle": true,
+                "randomInvertFlip": true,
+                "commands": {
+                  "z": [
+                    {
+                      "id": "pcmd_mtjlan0n_zl",
+                      "frame": 1,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0n_zs",
+                      "frame": 1,
+                      "duration": 13,
+                      "value": -110,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "zoomX": [
+                    {
+                      "id": "pcmd_mtjlan0n_zm",
+                      "frame": 1,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0n_zq",
+                      "frame": 1,
+                      "duration": 5,
+                      "value": 100,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_105",
+                      "frame": 6,
+                      "duration": 2,
+                      "value": 150,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "id": "pcmd_mtjlan0n_zn",
+                      "frame": 1,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0n_zr",
+                      "frame": 1,
+                      "duration": 5,
+                      "value": 100,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "id": "pcmd_mtjlan0n_zo",
+                      "frame": 1,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0n_zt",
+                      "frame": 2,
+                      "duration": 3,
+                      "value": 225,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_106",
+                      "frame": 14,
+                      "duration": 3,
+                      "value": 0,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "color": [
+                    {
+                      "id": "pcmd_mtjlan0n_zp",
+                      "frame": 1,
+                      "duration": 0,
+                      "value": "906B4400",
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0n_zu",
+                      "frame": 5,
+                      "duration": 8,
+                      "value": "0098FF68",
+                      "easing": "ease_both"
+                    }
+                  ]
+                },
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtjlan0n_zw",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "ecmd_mtjlan0o_108",
+                      "frame": 32,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitY": [
+                    {
+                      "id": "ecmd_mtjlan0o_zy",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 39,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtjlan0o_100",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 500,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtjlb82o_13s",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 30
+                    },
+                    {
+                      "id": "ecmd_mtjlan0o_102",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitZoomRange": [
+                    {
+                      "id": "ecmd_mtjlan0o_104",
+                      "frame": 6,
+                      "duration": 0,
+                      "value": 45,
+                      "easing": "linear"
+                    }
+                  ]
+                },
+                "emitterDestination": "manual"
+              },
+              "logic": [],
+              "imported": {
+                "format": "pbs",
+                "focus": "user_and_target",
+                "rawProps": {
+                  "Graphic": "smog 2",
+                  "Focus": "UserAndTarget",
+                  "Emitter": "Straight",
+                  "EmitterRate": "10",
+                  "RandomAngleRange": "45",
+                  "RandomInvertAngle": "true",
+                  "RandomInvertFlip": "true"
+                },
+                "pbsBattlerParticle": false,
+                "graphic": "smog 2"
+              },
+              "editorOriginalPosition": {
+                "anchor": "pbs:user_and_target",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0,
+                "foeInvertX": false,
+                "foeInvertY": false
+              }
+            },
+            {
+              "id": "clip_mtjlan0o_10n",
+              "type": "pbs-particle",
+              "name": "Water Burst Emitter Target",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 49,
+              "graphic": {
+                "source": "new",
+                "projectPath": "Graphics/Animations/smog 1.png",
+                "folder": "Battle animations",
+                "name": "smog 1",
+                "relativeHint": "smog 1",
+                "externalGameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "smog 1",
+                  "smog 1"
+                ],
+                "rawName": "smog 1",
+                "specialBattler": "smog 1",
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "auto",
+              "replicateTo": "none",
+              "coordinateSpace": "auto",
+              "coordinateSpaceManual": false,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtjlan0o_11v",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtjlan0o_11k",
+                  "frame": 0,
+                  "easing": "linear",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "foeInvertX": false,
+                    "foeInvertY": false
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_mtjlan0o_11l",
+                    "frame": 0,
+                    "value": 50,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_11m",
+                    "frame": 5,
+                    "value": 150,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_mtjlan0o_11n",
+                    "frame": 0,
+                    "value": 50,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_11o",
+                    "frame": 5,
+                    "value": 150,
+                    "easing": "linear"
+                  }
+                ],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mtjlan0o_11p",
+                    "frame": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_11q",
+                    "frame": 1,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_11r",
+                    "frame": 4,
+                    "value": 35.294117647058826,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_11s",
+                    "frame": 9,
+                    "value": 35.294117647058826,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_11t",
+                    "frame": 12,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [
+                  {
+                    "id": "pkey_mtjlan0o_11u",
+                    "frame": 0,
+                    "value": 10,
+                    "easing": "linear"
+                  }
+                ],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "emitterOpacity": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "focus": "target",
+                "foeInvertX": false,
+                "foeInvertY": false,
+                "foeFlip": false,
+                "tiled": false,
+                "angleOverride": "None",
+                "secondLayer": false,
+                "maskGraphic": "",
+                "emitter": "Projectile",
+                "emitterRate": 5,
+                "emitterIntensity": 5,
+                "randomFrameMax": 0,
+                "randomAngleRange": 45,
+                "randomInvertAngle": true,
+                "randomInvertFlip": true,
+                "commands": {
+                  "z": [
+                    {
+                      "id": "pcmd_mtjlan0o_10s",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomX": [
+                    {
+                      "id": "pcmd_mtjlan0o_10t",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_10w",
+                      "frame": 0,
+                      "duration": 5,
+                      "value": 150,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "id": "pcmd_mtjlan0o_10u",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_10x",
+                      "frame": 0,
+                      "duration": 5,
+                      "value": 150,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "id": "pcmd_mtjlan0o_10v",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_10y",
+                      "frame": 1,
+                      "duration": 3,
+                      "value": 90,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_11f",
+                      "frame": 9,
+                      "duration": 3,
+                      "value": 0,
+                      "easing": "ease_both"
+                    }
+                  ]
+                },
+                "emitterCommands": {
+                  "emitX": [
+                    {
+                      "id": "ecmd_mtjlan0o_110",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 1,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "id": "ecmd_mtjlan0o_112",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 20,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitY": [
+                    {
+                      "id": "ecmd_mtjlan0o_114",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 52,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "id": "ecmd_mtjlan0o_116",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 20,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtjlan0o_118",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 220,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtjlan0o_11a",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 90,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtjlan0o_11c",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 25,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitGravity": [
+                    {
+                      "id": "ecmd_mtjlan0o_11e",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 500,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtjlan0o_11h",
+                      "frame": 10,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "ecmd_mtjlan0o_11j",
+                      "frame": 35,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    }
+                  ]
+                }
+              },
+              "logic": [],
+              "imported": {
+                "format": "pbs",
+                "focus": "target",
+                "rawProps": {
+                  "Graphic": "smog 1",
+                  "Focus": "Target",
+                  "Emitter": "Projectile",
+                  "EmitterRate": "5",
+                  "EmitterIntensity": "5",
+                  "RandomAngleRange": "45",
+                  "RandomInvertAngle": "true",
+                  "RandomInvertFlip": "true"
+                },
+                "pbsBattlerParticle": false,
+                "graphic": "smog 1"
+              },
+              "editorOriginalPosition": {
+                "anchor": "pbs:target",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0,
+                "foeInvertX": false,
+                "foeInvertY": false
+              }
+            },
+            {
+              "id": "clip_mtjlan0o_11w",
+              "type": "pbs-particle",
+              "name": "Spray Burst Emitter Target",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 49,
+              "graphic": {
+                "source": "new",
+                "projectPath": "Graphics/Animations/grit.png",
+                "folder": "Battle animations",
+                "name": "grit",
+                "relativeHint": "grit",
+                "externalGameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": [
+                  "grit",
+                  "grit"
+                ],
+                "rawName": "grit",
+                "specialBattler": "grit",
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "auto",
+              "replicateTo": "none",
+              "coordinateSpace": "auto",
+              "coordinateSpaceManual": false,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtjlan0o_130",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtjlan0o_12q",
+                  "frame": 0,
+                  "easing": "linear",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": -30,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "foeInvertX": false,
+                    "foeInvertY": false
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [
+                  {
+                    "id": "pkey_mtjlan0o_12r",
+                    "frame": 0,
+                    "value": 50,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_12s",
+                    "frame": 5,
+                    "value": 70,
+                    "easing": "linear"
+                  }
+                ],
+                "scaleY": [
+                  {
+                    "id": "pkey_mtjlan0o_12t",
+                    "frame": 0,
+                    "value": 50,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_12u",
+                    "frame": 5,
+                    "value": 70,
+                    "easing": "linear"
+                  }
+                ],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mtjlan0o_12v",
+                    "frame": 0,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_12w",
+                    "frame": 2,
+                    "value": 100,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_12x",
+                    "frame": 9,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtjlan0o_12y",
+                    "frame": 12,
+                    "value": 0,
+                    "easing": "linear"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [
+                  {
+                    "id": "pkey_mtjlan0o_12z",
+                    "frame": 0,
+                    "value": 10,
+                    "easing": "linear"
+                  }
+                ],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "emitterOpacity": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "focus": "target",
+                "foeInvertX": false,
+                "foeInvertY": false,
+                "foeFlip": false,
+                "tiled": false,
+                "angleOverride": "None",
+                "secondLayer": false,
+                "maskGraphic": "",
+                "emitter": "Straight",
+                "emitterRate": 5,
+                "emitterIntensity": 5,
+                "randomFrameMax": 0,
+                "randomAngleRange": 45,
+                "randomInvertAngle": true,
+                "randomInvertFlip": true,
+                "commands": {
+                  "y": [
+                    {
+                      "id": "pcmd_mtjlan0o_121",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": -30,
+                      "easing": "linear"
+                    }
+                  ],
+                  "z": [
+                    {
+                      "id": "pcmd_mtjlan0o_122",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 10,
+                      "easing": "linear"
+                    }
+                  ],
+                  "zoomX": [
+                    {
+                      "id": "pcmd_mtjlan0o_123",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_127",
+                      "frame": 0,
+                      "duration": 5,
+                      "value": 70,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "id": "pcmd_mtjlan0o_124",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 50,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_128",
+                      "frame": 0,
+                      "duration": 5,
+                      "value": 70,
+                      "easing": "ease_both"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "id": "pcmd_mtjlan0o_125",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 0,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_126",
+                      "frame": 0,
+                      "duration": 2,
+                      "value": 255,
+                      "easing": "ease_both"
+                    },
+                    {
+                      "id": "pcmd_mtjlan0o_12l",
+                      "frame": 9,
+                      "duration": 3,
+                      "value": 0,
+                      "easing": "ease_both"
+                    }
+                  ]
+                },
+                "emitterCommands": {
+                  "emitX": [
+                    {
+                      "id": "ecmd_mtjlan0o_12a",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 1,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitY": [
+                    {
+                      "id": "ecmd_mtjlan0o_12c",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 52,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtjlan0o_12e",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 150,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtjlan0o_12g",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 90,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtjlan0o_12i",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 180,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitGravity": [
+                    {
+                      "id": "ecmd_mtjlan0o_12k",
+                      "frame": 5,
+                      "duration": 0,
+                      "value": 460,
+                      "easing": "linear"
+                    }
+                  ],
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtjlan0o_12n",
+                      "frame": 10,
+                      "duration": 0,
+                      "value": true,
+                      "easing": "linear"
+                    },
+                    {
+                      "id": "ecmd_mtjlan0o_12p",
+                      "frame": 35,
+                      "duration": 0,
+                      "value": false,
+                      "easing": "linear"
+                    }
+                  ]
+                }
+              },
+              "logic": [],
+              "imported": {
+                "format": "pbs",
+                "focus": "target",
+                "rawProps": {
+                  "Graphic": "grit",
+                  "Focus": "Target",
+                  "Emitter": "Straight",
+                  "EmitterRate": "5",
+                  "EmitterIntensity": "5",
+                  "RandomAngleRange": "45",
+                  "RandomInvertAngle": "true",
+                  "RandomInvertFlip": "true"
+                },
+                "pbsBattlerParticle": false,
+                "graphic": "grit"
+              },
+              "editorOriginalPosition": {
+                "anchor": "pbs:target",
+                "x": 0,
+                "y": -30,
+                "offsetX": 0,
+                "offsetY": 0,
+                "foeInvertX": false,
+                "foeInvertY": false
+              }
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "type": "se",
+          "frame": 9,
+          "name": "Water/Water Gun",
+          "volume": 100,
+          "pitch": 100,
+          "id": "event_mtjlaqbn_13r"
+        }
+      ],
+      "logic": [],
+      "notes": "",
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false,
+      "scene": {
+        "inheritProject": true,
+        "source": "project",
+        "responsive": true,
+        "referenceWidth": 640,
+        "referenceHeight": 480,
+        "cameraBoundsMode": "auto"
+      },
+      "noUser": false,
+      "noTarget": false,
+      "credit": "Dawn Bronze"
+    },
+    {
+      "id": "anim_mtng45gj_c3",
+      "name": "Pistola Agua Copy",
+      "fps": 20,
+      "duration": 40,
+      "source": {
+        "type": "studio",
+        "move": "WATERGUN",
+        "version": 0,
+        "catalogType": "move",
+        "opposing": false,
+        "sideContext": "player",
+        "targetMode": "both",
+        "targetScope": "single_other",
+        "allowedTargetScopes": [
+          "single_other"
+        ],
+        "variantScope": "special",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "None",
+        "detectedCategory": "special",
+        "detectedTarget": "NearOther",
+        "contextAutoAdapt": true,
+        "previewAffectedTargets": false,
+        "autoReplicateAffected": false,
+        "activeTimelineContext": null,
+        "askBackupOnContextEdit": false,
+        "autoReplicateTouched": false,
+        "commonSubjectRole": "auto",
+        "authors": [
+          "CarnekVT"
+        ],
+        "runtimeSelected": false,
+        "groupIdentity": "move|WATERGUN",
+        "duplicatedFrom": "anim_mti2xsw4_sq",
+        "duplicatedFromName": "Pistola Agua",
+        "groupName": "Pistola Agua",
+        "runtimeEnabled": false
+      },
+      "contextTimelines": [],
+      "battlers": {
+        "user": {
+          "id": "battler_user",
+          "type": "battler",
+          "side": "user",
+          "name": "User",
+          "enabled": true,
+          "locked": true,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mtng45gj_c5",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mtng45gj_c4",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              },
+              "axisX": true,
+              "axisY": true
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "priority": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        },
+        "target": {
+          "id": "battler_target",
+          "type": "battler",
+          "side": "target",
+          "name": "Target",
+          "enabled": true,
+          "locked": true,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mtng45gj_c7",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mtng45gj_c6",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              },
+              "axisX": true,
+              "axisY": true
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": [],
+            "priority": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        }
+      },
+      "camera": {
+        "id": "camera_main",
+        "type": "camera",
+        "name": "Camera",
+        "enabled": true,
+        "locked": false,
+        "visual": {
+          "cameraX": 0,
+          "cameraY": 0,
+          "cameraZoom": 100,
+          "cameraRotation": 0,
+          "size": 100,
+          "scaleX": 100,
+          "scaleY": 100,
+          "opacity": 100,
+          "rotation": 0,
+          "z": 0,
+          "blend": 0,
+          "flip": 0
+        },
+        "valueKeys": {
+          "size": [],
+          "scaleX": [],
+          "scaleY": [],
+          "viewScale": [],
+          "rotation": [],
+          "opacity": [],
+          "graphicFrame": [],
+          "srcX": [],
+          "srcY": [],
+          "srcW": [],
+          "srcH": [],
+          "z": [],
+          "blend": [],
+          "flip": [],
+          "flipY": [],
+          "facing": [],
+          "toneRed": [],
+          "toneGreen": [],
+          "toneBlue": [],
+          "toneGray": [],
+          "cameraX": [],
+          "cameraY": [],
+          "cameraZoom": [],
+          "cameraRotation": []
+        },
+        "visibleKeys": [
+          {
+            "id": "vkey_mtng45gj_c9",
+            "frame": 0,
+            "value": true
+          }
+        ],
+        "positionKeys": [
+          {
+            "id": "key_mtng45gj_c8",
+            "frame": 0,
+            "easing": "linear",
+            "point": {
+              "anchor": "screen",
+              "x": 0,
+              "y": 0,
+              "offsetX": 0,
+              "offsetY": 0
+            },
+            "axisX": true,
+            "axisY": true
+          }
+        ],
+        "startFrame": 0,
+        "endFrame": 0,
+        "logic": [],
+        "fxOps": []
+      },
+      "tracks": [
+        {
+          "id": "track_mti2xsw4_sx",
+          "type": "effects",
+          "name": "Effects",
+          "clips": [
+            {
+              "id": "clip_mtng4ftj_f2",
+              "type": "projectile",
+              "name": "Projectile 1",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 34,
+              "graphic": {
+                "source": "legacy",
+                "projectPath": "Graphics/Animations/smog 2.png",
+                "folder": "Animations",
+                "name": "smog 2",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "auto",
+              "replicateTo": "none",
+              "coordinateSpace": "auto",
+              "coordinateSpaceManual": false,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtng4ftj_f4",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtng9mzs_2w4",
+                  "frame": 0,
+                  "easing": "linear",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "emitterOpacity": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtng9mzs_2w2",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtng9mzs_2w3",
+                      "frame": 21,
+                      "duration": 0,
+                      "value": false
+                    },
+                    {
+                      "id": "ecmd_mtng9mzs_2wf",
+                      "frame": 25,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ],
+                  "emitterRate": [
+                    {
+                      "id": "ecmd_mtng9mzs_2w5",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 24
+                    }
+                  ],
+                  "emitterIntensity": [
+                    {
+                      "id": "ecmd_mtng9mzs_2w6",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 2
+                    }
+                  ],
+                  "emitXRange": [
+                    {
+                      "id": "ecmd_mtng9mzs_2w7",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 4
+                    }
+                  ],
+                  "emitYRange": [
+                    {
+                      "id": "ecmd_mtng9mzs_2w8",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 5
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtng9mzs_2w9",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 420
+                    }
+                  ],
+                  "emitSpeedRange": [
+                    {
+                      "id": "ecmd_mtng9mzs_2wa",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 22
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtng9mzs_2wb",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtng9mzs_2wc",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 4
+                    }
+                  ],
+                  "emitGravity": [
+                    {
+                      "id": "ecmd_mtng9mzs_2wd",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitZoomRange": [
+                    {
+                      "id": "ecmd_mtng9mzs_2we",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 18
+                    }
+                  ]
+                },
+                "commands": {
+                  "zoomX": [
+                    {
+                      "id": "pcmd_mtng9mzs_2wh",
+                      "frame": 0,
+                      "duration": 2,
+                      "value": 100,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtng9mzs_2wi",
+                      "frame": 5,
+                      "duration": 2,
+                      "value": 120,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "zoomY": [
+                    {
+                      "id": "pcmd_mtng9mzs_2wk",
+                      "frame": 0,
+                      "duration": 2,
+                      "value": 100,
+                      "easing": "ease_out"
+                    }
+                  ],
+                  "opacity": [
+                    {
+                      "id": "pcmd_mtng9mzs_2wm",
+                      "frame": 0,
+                      "duration": 1,
+                      "value": 255,
+                      "easing": "ease_out"
+                    },
+                    {
+                      "id": "pcmd_mtng9mzs_2wn",
+                      "frame": 7,
+                      "duration": 2,
+                      "value": 0,
+                      "easing": "ease_in"
+                    }
+                  ]
+                },
+                "focus": "user",
+                "emitter": "Straight",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "emitterDestination": "target",
+                "particleCommandSpace": "particle",
+                "simplePathMode": "wave",
+                "simpleTravelMode": "frames",
+                "simpleTravelFrames": 9,
+                "simpleStopAtDestination": true,
+                "simpleParticleLife": {
+                  "duration": 12,
+                  "birthScale": 55,
+                  "midScale": 100,
+                  "deathScale": 105,
+                  "birthOpacity": 0,
+                  "midOpacity": 100,
+                  "deathOpacity": 0,
+                  "birthRotation": 0,
+                  "midRotation": 0,
+                  "deathRotation": 0
+                },
+                "simpleWave": {
+                  "enabled": true,
+                  "mode": "wave",
+                  "amplitude": 18,
+                  "cycles": 2.4
+                }
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "simpleEmitterRecipe": "rapid-stream",
+              "contextOverrides": {
+                "player": {
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "opacity": 100,
+                  "zOffset": 0,
+                  "priorityOffset": 0,
+                  "toneRed": 0,
+                  "toneGreen": 0,
+                  "toneBlue": 0,
+                  "toneGray": 0,
+                  "cameraX": 0,
+                  "cameraY": 0,
+                  "cameraZoom": 100,
+                  "cameraRotation": 0,
+                  "flip": false,
+                  "flipY": false,
+                  "contextKeys": {
+                    "rotation": [
+                      {
+                        "id": "ctxkey_mtng7dy7_14h",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ]
+                  }
                 }
               }
             }
@@ -34273,6 +37735,6 @@
   "exportGameDataDir": "PBS/AnimationStudio",
   "exportPackageDir": "C:/Users/nuevo usuario/Downloads/Animaciones/Common Snap Trap",
   "editor": {
-    "lastAnimationId": "anim_mti2xsw4_sq"
+    "lastAnimationId": "anim_mtng45gj_c3"
   }
 }

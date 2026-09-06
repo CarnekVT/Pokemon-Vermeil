@@ -1,0 +1,18 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map020]
+¿A qué piso quieres ir?
+¿A qué piso quieres ir?
+P5
+P5
+P4
+P4
+P3
+P3
+P2
+P2
+P1
+P1
+Cancelar
+Cancelar

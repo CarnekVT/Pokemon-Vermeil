@@ -1,0 +1,32 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map056]
+\v[1]
+\v[1]
+Gracias por participar. Déjame que cure a tu equipo.
+Gracias por participar. Déjame que cure a tu equipo.
+El siguiente combate es el número \v[1]. ¿Quieres continuar?
+El siguiente combate es el número \v[1]. ¿Quieres continuar?
+¿Quieres guardar la partida y seguir en otro momento?
+¿Quieres guardar la partida y seguir en otro momento?
+Se ha guardado la partida.
+Se ha guardado la partida.
+¿Seguro que quieres retirarte del reto?
+¿Seguro que quieres retirarte del reto?
+¿Te gustaría guardar tu último combate?
+¿Te gustaría guardar tu último combate?
+\se[Pkmn exp full]El combate se ha guardado.
+\se[Pkmn exp full]El combate se ha guardado.
+Adelante
+Adelante
+Descansar
+Descansar
+Retirarse
+Retirarse
+Grabar combate
+Grabar combate
+Sí
+Sí
+No
+No

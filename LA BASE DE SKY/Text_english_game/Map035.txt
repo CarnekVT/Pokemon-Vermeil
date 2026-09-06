@@ -1,0 +1,30 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map035]
+Te he detenido mientras pasabas.
+Te he detenido mientras pasabas.
+Al tener "Sight(3)" como nombre de mi evento, y además el Trigger "Event Touch", esto me dice que me active si entras en mi rango de visión, que en este caso son 3 casillas en mi dirección.
+Al tener "Sight(3)" como nombre de mi evento, y además el Trigger "Event Touch", esto me dice que me active si entras en mi rango de visión, que en este caso son 3 casillas en mi dirección.
+Además, "pbExclaim" hace que me salga el símbolo de exclamación sobre la cabeza. "pbNoticePlayer" hace lo mismo, además de hacer que me acerque a ti.
+Además, "pbExclaim" hace que me salga el símbolo de exclamación sobre la cabeza. "pbNoticePlayer" hace lo mismo, además de hacer que me acerque a ti.
+Los entrenadores usan todo esto por defecto, pero otros NPCs como yo también pueden usarlo. Esto se suele usar mucho para eventos que te cortan el paso.
+Los entrenadores usan todo esto por defecto, pero otros NPCs como yo también pueden usarlo. Esto se suele usar mucho para eventos que te cortan el paso.
+¿Quieres que te haga retroceder como si fuese un bloqueo de camino o me desactivo?
+¿Quieres que te haga retroceder como si fuese un bloqueo de camino o me desactivo?
+Ven a verme de nuevo cuando el Interruptor 5 esté en ON.
+Ven a verme de nuevo cuando el Interruptor 5 esté en ON.
+Bien. Voy a cumplir la condición que tengo para bloquearte haciendo que el Interruptor 5 se ponga en ON.
+Bien. Voy a cumplir la condición que tengo para bloquearte haciendo que el Interruptor 5 se ponga en ON.
+Debido a que me he movido con el comando "pbNoticePlayer" y después me he movido de nuevo con el "Move Route", necesito actualizar mi posición actual en memoria.
+Debido a que me he movido con el comando "pbNoticePlayer" y después me he movido de nuevo con el "Move Route", necesito actualizar mi posición actual en memoria.
+Esto importa si guardas la partida y cargas de nuevo el juego en este mapa después de que me haya movido. Mira mi evento para ver el comando que tienes que usar.
+Esto importa si guardas la partida y cargas de nuevo el juego en este mapa después de que me haya movido. Mira mi evento para ver el comando que tienes que usar.
+Me quedaré aquí vigilando como un buen evento de bloqueo de camino.
+Me quedaré aquí vigilando como un buen evento de bloqueo de camino.
+Los eventos de bloqueo de camino normalmente no se quitan a sí mismos la condición de bloqueo, pero yo lo he hecho.
+Los eventos de bloqueo de camino normalmente no se quitan a sí mismos la condición de bloqueo, pero yo lo he hecho.
+Bloqueo de camino
+Bloqueo de camino
+Desactivar
+Desactivar

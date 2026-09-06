@@ -1,0 +1,6 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map040]
+Soy un ejemplo de un evento que se mueve de forma aleatoria dentro de un espacio concreto.
+Soy un ejemplo de un evento que se mueve de forma aleatoria dentro de un espacio concreto.

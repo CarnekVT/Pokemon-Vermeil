@@ -1,0 +1,665 @@
+{
+  "version": 3,
+  "assets": [
+    {
+      "name": "city_smog_far",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/city_smog_far.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "city_smog_near",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/city_smog_near.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "desert_cloud",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/desert_cloud.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "front_cloud",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/front_cloud.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "future_city_light",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/future_city_light.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "glacial_cloudbank",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/glacial_cloudbank.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "glacial_mid_clouds_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/glacial_mid_clouds_1.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "glacial_mid_clouds_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/glacial_mid_clouds_2.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "glacial_mid_clouds_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/glacial_mid_clouds_3.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "high_clouds",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/high_clouds.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "lonely_cloud",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/lonely_cloud.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "single_cloud",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Atmosphere/single_cloud.png",
+      "category": "Atmosphere"
+    },
+    {
+      "name": "crystal_plane_1-1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_1-1.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_1-2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_1-2.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_1-3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_1-3.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_1-4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_1-4.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_1-5",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_1-5.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_2-1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_2-1.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_2-2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_2-2.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_2-3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_2-3.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_2-4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_2-4.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_3-1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_3-1.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_3-2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_3-2.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_3-3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_3-3.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_3-4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_3-4.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_4-1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_4-1.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_4-2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_4-2.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_4-3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_4-3.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_4-4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_4-4.png",
+      "category": "Caves"
+    },
+    {
+      "name": "crystal_plane_4-5",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Caves/crystal_plane_4-5.png",
+      "category": "Caves"
+    },
+    {
+      "name": "desert_cloud_piece_01",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Clouds/desert_cloud_piece_01.png",
+      "category": "Recortes · Nubes"
+    },
+    {
+      "name": "desert_cloud_piece_02",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Clouds/desert_cloud_piece_02.png",
+      "category": "Recortes · Nubes"
+    },
+    {
+      "name": "desert_cloud_piece_03",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Clouds/desert_cloud_piece_03.png",
+      "category": "Recortes · Nubes"
+    },
+    {
+      "name": "desert_cloud_piece_04",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Clouds/desert_cloud_piece_04.png",
+      "category": "Recortes · Nubes"
+    },
+    {
+      "name": "desert_cloud_piece_05",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Clouds/desert_cloud_piece_05.png",
+      "category": "Recortes · Nubes"
+    },
+    {
+      "name": "desert_cloud_piece_06",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Clouds/desert_cloud_piece_06.png",
+      "category": "Recortes · Nubes"
+    },
+    {
+      "name": "forest_light_beam_01",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Lights/forest_light_beam_01.png",
+      "category": "Recortes · Luces"
+    },
+    {
+      "name": "forest_light_beam_02",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Lights/forest_light_beam_02.png",
+      "category": "Recortes · Luces"
+    },
+    {
+      "name": "forest_light_beam_03",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Lights/forest_light_beam_03.png",
+      "category": "Recortes · Luces"
+    },
+    {
+      "name": "desert_moon_piece_01",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/desert_moon_piece_01.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "desert_moon_piece_02",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/desert_moon_piece_02.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "desert_moon_piece_03",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/desert_moon_piece_03.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "desert_moon_piece_04",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/desert_moon_piece_04.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "far_planet_01",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/far_planet_01.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "far_planet_02",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/far_planet_02.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "sky_moon_piece_01",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/sky_moon_piece_01.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "sky_moon_piece_02",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/sky_moon_piece_02.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "sky_moon_piece_03",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/sky_moon_piece_03.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "sky_moon_piece_04",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/Space/sky_moon_piece_04.png",
+      "category": "Recortes · Espacio"
+    },
+    {
+      "name": "forest_back_cluster_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_back_cluster_1.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_back_cluster_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_back_cluster_2.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_back_cluster_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_back_cluster_3.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_back_cluster_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_back_cluster_4.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_long_trees_cluster_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_long_trees_cluster_1.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_long_trees_cluster_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_long_trees_cluster_2.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_long_trees_cluster_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_long_trees_cluster_3.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_long_trees_cluster_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_long_trees_cluster_4.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_long_trees_cluster_5",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_long_trees_cluster_5.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_mid_cluster_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mid_cluster_1.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_mid_cluster_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mid_cluster_2.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_mid_cluster_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mid_cluster_3.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_mid_cluster_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mid_cluster_4.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_mountain_cluster_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mountain_cluster_1.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_mountain_cluster_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mountain_cluster_2.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_mountain_cluster_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mountain_cluster_3.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_mountain_cluster_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mountain_cluster_4.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_short_trees_cluster_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_short_trees_cluster_1.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_short_trees_cluster_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_short_trees_cluster_2.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_short_trees_cluster_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_short_trees_cluster_3.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_short_trees_cluster_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_short_trees_cluster_4.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "forest_short_trees_cluster_5",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_short_trees_cluster_5.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "jungle_ruins_arch_piece",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/jungle_ruins_arch_piece.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "jungle_ruins_back_foliage",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/jungle_ruins_back_foliage.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "jungle_ruins_foliage_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/jungle_ruins_foliage_1.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "jungle_ruins_foliage_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/jungle_ruins_foliage_2.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "jungle_ruins_foliage_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/jungle_ruins_foliage_3.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "jungle_ruins_mid_a_clean",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/jungle_ruins_mid_a_clean.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "jungle_ruins_tree_piece",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/jungle_ruins_tree_piece.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "tall_forest_back_trees",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/tall_forest_back_trees.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "tall_forest_far_clean",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/tall_forest_far_clean.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "tall_forest_middle_clean",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/tall_forest_middle_clean.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_back_trees",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_back_trees.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_front_no_floor",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_front_no_floor.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_front_piece_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_front_piece_1.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_front_piece_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_front_piece_2.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_front_piece_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_front_piece_3.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_front_piece_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_front_piece_4.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_mid_no_floor",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_mid_no_floor.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_mid_piece_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_mid_piece_1.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_mid_piece_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_mid_piece_2.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_mid_piece_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_mid_piece_3.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "web_forest_mid_piece_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/web_forest_mid_piece_4.png",
+      "category": "Recortes · Vegetación"
+    },
+    {
+      "name": "moss_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Props/moss_1.png",
+      "category": "Props"
+    },
+    {
+      "name": "moss_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Props/moss_2.png",
+      "category": "Props"
+    },
+    {
+      "name": "tall_forest_plant",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Props/tall_forest_plant.png",
+      "category": "Props"
+    },
+    {
+      "name": "tall_forest_rock",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Props/tall_forest_rock.png",
+      "category": "Props"
+    },
+    {
+      "name": "city_sky_base",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/city_sky_base.png",
+      "category": "Skies"
+    },
+    {
+      "name": "deep_moon_sky",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/deep_moon_sky.png",
+      "category": "Skies"
+    },
+    {
+      "name": "future_city_atmosphere",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/future_city_atmosphere.png",
+      "category": "Skies"
+    },
+    {
+      "name": "glacial_sky",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/glacial_sky.png",
+      "category": "Skies"
+    },
+    {
+      "name": "hills_day_sky",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/hills_day_sky.png",
+      "category": "Skies"
+    },
+    {
+      "name": "moon_pack_sky_base",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/moon_pack_sky_base.png",
+      "category": "Skies"
+    },
+    {
+      "name": "nature_sky_base",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/nature_sky_base.png",
+      "category": "Skies"
+    },
+    {
+      "name": "summer_sky_base",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Skies/summer_sky_base.png",
+      "category": "Skies"
+    },
+    {
+      "name": "big_planet",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Space/big_planet.png",
+      "category": "Space"
+    },
+    {
+      "name": "desert_moon",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Space/desert_moon.png",
+      "category": "Space"
+    },
+    {
+      "name": "far_planets",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Space/far_planets.png",
+      "category": "Space"
+    },
+    {
+      "name": "moon_earth",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Space/moon_earth.png",
+      "category": "Space"
+    },
+    {
+      "name": "ring_planet",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Space/ring_planet.png",
+      "category": "Space"
+    },
+    {
+      "name": "sky_moon",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Space/sky_moon.png",
+      "category": "Space"
+    },
+    {
+      "name": "space_stars",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Space/space_stars.png",
+      "category": "Space"
+    },
+    {
+      "name": "desert_front_dunes",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/desert_front_dunes.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "desert_mid_dunes",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/desert_mid_dunes.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "desert_mountain",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/desert_mountain.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "glacial_mountains",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/glacial_mountains.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "hills_far_ridge",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/hills_far_ridge.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "hills_mid_ridge",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/hills_mid_ridge.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "hills_near_ridge",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/hills_near_ridge.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "moon_back_terrain",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/moon_back_terrain.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "moon_floor",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/moon_floor.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "moon_front_terrain",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/moon_front_terrain.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "moon_mid_terrain",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/moon_mid_terrain.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "sky_back_mountain",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/sky_back_mountain.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "sky_front_mountain",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/sky_front_mountain.png",
+      "category": "Terrain"
+    },
+    {
+      "name": "city_pack_layer_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Urban/city_pack_layer_2.png",
+      "category": "Urban"
+    },
+    {
+      "name": "city_pack_layer_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Urban/city_pack_layer_4.png",
+      "category": "Urban"
+    },
+    {
+      "name": "city_pack_layer_5",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Urban/city_pack_layer_5.png",
+      "category": "Urban"
+    },
+    {
+      "name": "city_pack_layer_7",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Urban/city_pack_layer_7.png",
+      "category": "Urban"
+    },
+    {
+      "name": "future_city_plan_1",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Urban/future_city_plan_1.png",
+      "category": "Urban"
+    },
+    {
+      "name": "future_city_plan_2",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Urban/future_city_plan_2.png",
+      "category": "Urban"
+    },
+    {
+      "name": "future_city_plan_3",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Urban/future_city_plan_3.png",
+      "category": "Urban"
+    },
+    {
+      "name": "future_city_plan_4",
+      "projectPath": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Urban/future_city_plan_4.png",
+      "category": "Urban"
+    }
+  ]
+}

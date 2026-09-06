@@ -1,0 +1,6 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map064]
+\v[1]
+\v[1]

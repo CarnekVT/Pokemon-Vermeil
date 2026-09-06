@@ -1,7 +1,7 @@
 {
-  "version": "0.6.64",
+  "version": "0.8.24",
   "where": "promise",
-  "message": "Command plugin:dialog|confirm not allowed by ACL",
-  "stack": "",
-  "at": "2026-08-31T02:25:07.030Z"
+  "message": "Cannot set property time of #<Window> which has only a getter",
+  "stack": "TypeError: Cannot set property time of #<Window> which has only a getter\n    at App.bss101LogicalComposite (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:3700:185)\n    at App.bss083EBDXComposite (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:3508:30)\n    at App.bss083EBDXComposite (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:3754:37)\n    at App.bss089RedrawPreview (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2095:136)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2144:164)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2356:30)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2479:1049)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2663:27)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2748:1299)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2836:29)",
+  "at": "2026-09-05T03:33:57.987Z"
 }

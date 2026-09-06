@@ -1,0 +1,798 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[SPECIES_FORM_NAMES]
+Forma Letra A
+Forma Letra A
+Forma Normal
+Forma Normal
+Forma Tronco Planta
+Forma Tronco Planta
+Forma Encapotada
+Forma Encapotada
+Forma Mar Oeste
+Forma Mar Oeste
+Forma Origen
+Forma Origen
+Forma Tierra
+Forma Tierra
+Tipo Normal
+Tipo Normal
+Forma Raya Blanca
+Forma Raya Blanca
+Modo Normal
+Modo Normal
+Forma Primavera
+Forma Primavera
+Forma Avatar
+Forma Avatar
+Forma Habitual
+Forma Habitual
+Forma Lírica
+Forma Lírica
+Motivo Floral
+Motivo Floral
+Forma Flor Roja
+Forma Flor Roja
+Motivo Flor Roja
+Motivo Flor Roja
+Forma Salvaje
+Forma Salvaje
+Forma Macho
+Forma Macho
+Forma Escudo
+Forma Escudo
+Tamaño Pequeño
+Tamaño Pequeño
+Modo Relajado
+Modo Relajado
+Forma 50%
+Forma 50%
+Forma Contenido
+Forma Contenido
+Forma Estilo Apasionado
+Forma Estilo Apasionado
+Forma Diurna
+Forma Diurna
+Forma Individual
+Forma Individual
+Forma Meteorito
+Forma Meteorito
+Forma Encubierta
+Forma Encubierta
+Forma Aguda
+Forma Aguda
+Forma Falsificada
+Forma Falsificada
+Forma Crema de Vainilla Confite fresa
+Forma Crema de Vainilla Confite fresa
+Forma Cara de Hielo
+Forma Cara de Hielo
+Forma Saciada
+Forma Saciada
+Forma Guerrero Avezado
+Forma Guerrero Avezado
+Estilo Brusco
+Estilo Brusco
+Forma Familia de Cuatro
+Forma Familia de Cuatro
+Forma Plumaje Verde
+Forma Plumaje Verde
+Forma Ingenua
+Forma Ingenua
+Forma Curvada
+Forma Curvada
+Forma Binodular
+Forma Binodular
+Forma Cofre
+Forma Cofre
+Forma Fraudulenta
+Forma Fraudulenta
+Forma Mediocre
+Forma Mediocre
+Forma Máscara Turquesa
+Forma Máscara Turquesa
+Mega Venusaur
+Mega Venusaur
+Mega Charizard X
+Mega Charizard X
+Mega Charizard Y
+Mega Charizard Y
+Mega Blastoise
+Mega Blastoise
+Mega Beedrill
+Mega Beedrill
+Mega Pidgeot
+Mega Pidgeot
+Forma Alola
+Forma Alola
+Forma Coqueta
+Forma Coqueta
+Forma Aristócrata
+Forma Aristócrata
+Forma Enmascarada
+Forma Enmascarada
+Forma Erudita
+Forma Erudita
+Forma Superstar
+Forma Superstar
+Forma Roquera
+Forma Roquera
+Forma Gorra Original
+Forma Gorra Original
+Forma Gorra Hoenn
+Forma Gorra Hoenn
+Forma Gorra Sinnoh
+Forma Gorra Sinnoh
+Forma Gorra Teselia
+Forma Gorra Teselia
+Forma Gorra Kalos
+Forma Gorra Kalos
+Forma Gorra Alola
+Forma Gorra Alola
+Forma Gorra Compañero
+Forma Gorra Compañero
+Forma Gorra Trotamundos
+Forma Gorra Trotamundos
+Mega Raichu x
+Mega Raichu x
+Mega Raichu Y
+Mega Raichu Y
+Mega Clefable
+Mega Clefable
+Forma Galar
+Forma Galar
+Forma Hisui
+Forma Hisui
+Mega Alakazam
+Mega Alakazam
+Mega Victreebel
+Mega Victreebel
+Mega Slowbro
+Mega Slowbro
+Mega Gengar
+Mega Gengar
+Mega Kangaskhan
+Mega Kangaskhan
+Mega Starmie
+Mega Starmie
+Mega Pinsir
+Mega Pinsir
+Forma Paldea (Combatiente)
+Forma Paldea (Combatiente)
+Forma Paldea (Ardiente)
+Forma Paldea (Ardiente)
+Forma Paldea (Acuática)
+Forma Paldea (Acuática)
+Mega Gyarados
+Mega Gyarados
+Mega Aerodactyl
+Mega Aerodactyl
+Mega Dragonite
+Mega Dragonite
+Mega Mewtwo X
+Mega Mewtwo X
+Mega Mewtwo Y
+Mega Mewtwo Y
+Mega Meganium
+Mega Meganium
+Mega Feraligatr
+Mega Feraligatr
+Forma Picoreja
+Forma Picoreja
+Mega Ampharos
+Mega Ampharos
+Forma Paldea
+Forma Paldea
+Forma Letra B
+Forma Letra B
+Forma Letra C
+Forma Letra C
+Forma Letra D
+Forma Letra D
+Forma Letra E
+Forma Letra E
+Forma Letra F
+Forma Letra F
+Forma Letra G
+Forma Letra G
+Forma Letra H
+Forma Letra H
+Forma Letra I
+Forma Letra I
+Forma Letra J
+Forma Letra J
+Forma Letra K
+Forma Letra K
+Forma Letra L
+Forma Letra L
+Forma Letra M
+Forma Letra M
+Forma Letra N
+Forma Letra N
+Forma Letra O
+Forma Letra O
+Forma Letra P
+Forma Letra P
+Forma Letra Q
+Forma Letra Q
+Forma Letra R
+Forma Letra R
+Forma Letra S
+Forma Letra S
+Forma Letra T
+Forma Letra T
+Forma Letra U
+Forma Letra U
+Forma Letra V
+Forma Letra V
+Forma Letra W
+Forma Letra W
+Forma Letra X
+Forma Letra X
+Forma Letra Y
+Forma Letra Y
+Forma Letra Z
+Forma Letra Z
+Forma Signo ?
+Forma Signo ?
+Forma Signo !
+Forma Signo !
+Mega Steelix
+Mega Steelix
+Mega Scizor
+Mega Scizor
+Mega Heracross
+Mega Heracross
+Mega Skarmory
+Mega Skarmory
+Mega Houndoom
+Mega Houndoom
+Mega Tyranitar
+Mega Tyranitar
+Mega Sceptile
+Mega Sceptile
+Mega Blaziken
+Mega Blaziken
+Mega Swampert
+Mega Swampert
+Mega Gardevoir
+Mega Gardevoir
+Mega Sableye
+Mega Sableye
+Mega Mawile
+Mega Mawile
+Mega Aggron
+Mega Aggron
+Mega Medicham
+Mega Medicham
+Mega Manectric
+Mega Manectric
+Mega Sharpedo
+Mega Sharpedo
+Mega Camerupt
+Mega Camerupt
+Mega Altaria
+Mega Altaria
+Forma Sol
+Forma Sol
+Forma Lluvia
+Forma Lluvia
+Forma Nieve
+Forma Nieve
+Mega Banette
+Mega Banette
+Mega Chimecho
+Mega Chimecho
+Mega Absol
+Mega Absol
+Mega Absol Z
+Mega Absol Z
+Mega Glalie
+Mega Glalie
+Mega Salamence
+Mega Salamence
+Mega Metagross
+Mega Metagross
+Mega Latias
+Mega Latias
+Mega Latios
+Mega Latios
+Forma Primigenia
+Forma Primigenia
+Mega Rayquaza
+Mega Rayquaza
+Forma Ataque
+Forma Ataque
+Forma Defensa
+Forma Defensa
+Forma Velocidad
+Forma Velocidad
+Mega Staraptor
+Mega Staraptor
+Forma Tronco Arena
+Forma Tronco Arena
+Forma Tronco Basura
+Forma Tronco Basura
+Forma Soleada
+Forma Soleada
+Forma Mar Este
+Forma Mar Este
+Mega Lopunny
+Mega Lopunny
+Mega Garchomp
+Mega Garchomp
+Mega Garchomp Z
+Mega Garchomp Z
+Mega Lucario
+Mega Lucario
+Mega Lucario Z
+Mega Lucario Z
+Mega Abomasnow
+Mega Abomasnow
+Mega Gallade
+Mega Gallade
+Mega Froslass
+Mega Froslass
+Forma Calor
+Forma Calor
+Forma Lavado
+Forma Lavado
+Forma Frío
+Forma Frío
+Forma Ventilador
+Forma Ventilador
+Forma Corte
+Forma Corte
+Mega Heatran
+Mega Heatran
+Mega Darkrai
+Mega Darkrai
+Forma Cielo
+Forma Cielo
+Tipo Lucha
+Tipo Lucha
+Tipo Volador
+Tipo Volador
+Tipo Veneno
+Tipo Veneno
+Tipo Tierra
+Tipo Tierra
+Tipo Roca
+Tipo Roca
+Tipo Bicho
+Tipo Bicho
+Tipo Fantasma
+Tipo Fantasma
+Tipo Acero
+Tipo Acero
+Tipo Desconocido
+Tipo Desconocido
+Tipo Fuego
+Tipo Fuego
+Tipo Agua
+Tipo Agua
+Tipo Planta
+Tipo Planta
+Tipo Eléctrico
+Tipo Eléctrico
+Tipo Psíquico
+Tipo Psíquico
+Tipo Hielo
+Tipo Hielo
+Tipo Dragón
+Tipo Dragón
+Tipo Siniestro
+Tipo Siniestro
+Tipo Hada
+Tipo Hada
+Mega Emboar
+Mega Emboar
+Mega Excadrill
+Mega Excadrill
+Mega Audino
+Mega Audino
+Mega Scolipede
+Mega Scolipede
+Forma Raya Roja
+Forma Raya Roja
+Forma Raya Azul
+Forma Raya Azul
+Forma Daruma
+Forma Daruma
+Forma Daruma de Galar
+Forma Daruma de Galar
+Mega Scrafty
+Mega Scrafty
+Forma Verano
+Forma Verano
+Forma Otoño
+Forma Otoño
+Forma Invierno
+Forma Invierno
+Mega Eelektross
+Mega Eelektross
+Mega Chandelure
+Mega Chandelure
+Mega Golurk
+Mega Golurk
+Forma Tótem
+Forma Tótem
+Forma Blanca
+Forma Blanca
+Forma Negra
+Forma Negra
+Forma Brío
+Forma Brío
+Forma Danza
+Forma Danza
+Forma FulgoROM
+Forma FulgoROM
+Forma PiroROM
+Forma PiroROM
+Forma CrioROM
+Forma CrioROM
+Forma HidroROM
+Forma HidroROM
+Mega Chesnaught
+Mega Chesnaught
+Mega Delphox
+Mega Delphox
+Greninja Ash
+Greninja Ash
+Mega Greninja
+Mega Greninja
+Motivo Isleño
+Motivo Isleño
+Motivo Continental
+Motivo Continental
+Motivo Oriental
+Motivo Oriental
+Motivo Vergel
+Motivo Vergel
+Motivo Estepa
+Motivo Estepa
+Motivo Polar
+Motivo Polar
+Motivo Jungla
+Motivo Jungla
+Motivo Marino
+Motivo Marino
+Motivo Moderno
+Motivo Moderno
+Motivo Monzón
+Motivo Monzón
+Motivo Océano
+Motivo Océano
+Motivo Taiga
+Motivo Taiga
+Motivo Oasis
+Motivo Oasis
+Motivo Desierto
+Motivo Desierto
+Motivo Pantano
+Motivo Pantano
+Motivo Solar
+Motivo Solar
+Motivo Tundra
+Motivo Tundra
+Motivo Fantasía
+Motivo Fantasía
+Motivo Poké Ball
+Motivo Poké Ball
+Mega Pyroar
+Mega Pyroar
+Forma Flor Amarilla
+Forma Flor Amarilla
+Forma Flor Naranja
+Forma Flor Naranja
+Forma Flor Azul
+Forma Flor Azul
+Forma Flor Blanca
+Forma Flor Blanca
+Forma Flor Eterna
+Forma Flor Eterna
+Mega Floette
+Mega Floette
+Forma Corte Corazón
+Forma Corte Corazón
+Forma Corte Estrella
+Forma Corte Estrella
+Forma Corte Rombo
+Forma Corte Rombo
+Forma Corte Señorita
+Forma Corte Señorita
+Forma Corte Dama
+Forma Corte Dama
+Forma Corte Caballero
+Forma Corte Caballero
+Forma Corte Aristocrático
+Forma Corte Aristocrático
+Forma Corte Kabuki
+Forma Corte Kabuki
+Forma Forma Corte Faraónico
+Forma Forma Corte Faraónico
+Forma Hembra
+Forma Hembra
+Mega Meowstic
+Mega Meowstic
+Forma Filo
+Forma Filo
+Mega Malamar
+Mega Malamar
+Mega Barbaracle
+Mega Barbaracle
+Mega Dragalge
+Mega Dragalge
+Mega Hawlucha
+Mega Hawlucha
+Tamaño Normal
+Tamaño Normal
+Tamaño Grande
+Tamaño Grande
+Tamaño Extragrande
+Tamaño Extragrande
+Modo Activo
+Modo Activo
+Forma 10%
+Forma 10%
+Forma Completa
+Forma Completa
+Mega Zygarde
+Mega Zygarde
+Mega Diancie
+Mega Diancie
+Forma Desatada
+Forma Desatada
+Mega Crabominable
+Mega Crabominable
+Estilo Animado
+Estilo Animado
+Estilo Plácido
+Estilo Plácido
+Estilo Refinado
+Estilo Refinado
+Forma Nocturna
+Forma Nocturna
+Forma Crepuscular
+Forma Crepuscular
+Forma Banco
+Forma Banco
+Mega Golisopod
+Mega Golisopod
+Forma Núcleo Rojo
+Forma Núcleo Rojo
+Forma Núcleo Naranja
+Forma Núcleo Naranja
+Forma Núcleo Amarillo
+Forma Núcleo Amarillo
+Forma Núcleo Verde
+Forma Núcleo Verde
+Forma Núcleo Azul
+Forma Núcleo Azul
+Forma Núcleo Añil
+Forma Núcleo Añil
+Forma Núcleo Violeta
+Forma Núcleo Violeta
+Forma Descubierta
+Forma Descubierta
+Mega Drampa
+Mega Drampa
+Forma Melena Crepuscular
+Forma Melena Crepuscular
+Forma Alas del Alba
+Forma Alas del Alba
+Forma Ultra-Necrozma
+Forma Ultra-Necrozma
+Forma Color Vetusta
+Forma Color Vetusta
+Mega Magearna
+Mega Magearna
+Mega Magearna Forma Color Vetusta
+Mega Magearna Forma Color Vetusta
+Mega Zeraora
+Mega Zeraora
+Forma Tragatodo
+Forma Tragatodo
+Forma Engulletodo
+Forma Engulletodo
+Forma Grave
+Forma Grave
+Forma Genuina
+Forma Genuina
+Forma Crema de Vainilla Confite corazón
+Forma Crema de Vainilla Confite corazón
+Forma Crema de Vainilla Confite flor
+Forma Crema de Vainilla Confite flor
+Forma Crema de Vainilla Confite estrella
+Forma Crema de Vainilla Confite estrella
+Forma Crema de Vainilla Confite trébol
+Forma Crema de Vainilla Confite trébol
+Forma Crema de Vainilla Confite fruto
+Forma Crema de Vainilla Confite fruto
+Forma Crema de Vainilla Confite lazo
+Forma Crema de Vainilla Confite lazo
+Forma Crema Rosa Confite fresa
+Forma Crema Rosa Confite fresa
+Forma Crema Rosa Confite corazón
+Forma Crema Rosa Confite corazón
+Forma Crema Rosa Confite flor
+Forma Crema Rosa Confite flor
+Forma Crema Rosa Confite estrella
+Forma Crema Rosa Confite estrella
+Forma Crema Rosa Confite trébol
+Forma Crema Rosa Confite trébol
+Forma Crema Rosa Confite fruto
+Forma Crema Rosa Confite fruto
+Forma Crema Rosa Confite lazo
+Forma Crema Rosa Confite lazo
+Forma Crema de Té Confite fresa
+Forma Crema de Té Confite fresa
+Forma Crema de Té Confite corazón
+Forma Crema de Té Confite corazón
+Forma Crema de Té Confite flor
+Forma Crema de Té Confite flor
+Forma Crema de Té Confite estrella
+Forma Crema de Té Confite estrella
+Forma Crema de Té Confite trébol
+Forma Crema de Té Confite trébol
+Forma Crema de Té Confite fruto
+Forma Crema de Té Confite fruto
+Forma Crema de Té Confite lazo
+Forma Crema de Té Confite lazo
+Forma Crema de Menta Confite fresa
+Forma Crema de Menta Confite fresa
+Forma Crema de Menta Confite corazón
+Forma Crema de Menta Confite corazón
+Forma Crema de Menta Confite flor
+Forma Crema de Menta Confite flor
+Forma Crema de Menta Confite estrella
+Forma Crema de Menta Confite estrella
+Forma Crema de Menta Confite trébol
+Forma Crema de Menta Confite trébol
+Forma Crema de Menta Confite fruto
+Forma Crema de Menta Confite fruto
+Forma Crema de Menta Confite lazo
+Forma Crema de Menta Confite lazo
+Forma Crema de Limón Confite fresa
+Forma Crema de Limón Confite fresa
+Forma Crema de Limón Confite corazón
+Forma Crema de Limón Confite corazón
+Forma Crema de Limón Confite flor
+Forma Crema de Limón Confite flor
+Forma Crema de Limón Confite estrella
+Forma Crema de Limón Confite estrella
+Forma Crema de Limón Confite trébol
+Forma Crema de Limón Confite trébol
+Forma Crema de Limón Confite fruto
+Forma Crema de Limón Confite fruto
+Forma Crema de Limón Confite lazo
+Forma Crema de Limón Confite lazo
+Forma Crema Salada Confite fresa
+Forma Crema Salada Confite fresa
+Forma Crema Salada Confite corazón
+Forma Crema Salada Confite corazón
+Forma Crema Salada Confite flor
+Forma Crema Salada Confite flor
+Forma Crema Salada Confite estrella
+Forma Crema Salada Confite estrella
+Forma Crema Salada Confite trébol
+Forma Crema Salada Confite trébol
+Forma Crema Salada Confite fruto
+Forma Crema Salada Confite fruto
+Forma Crema Salada Confite lazo
+Forma Crema Salada Confite lazo
+Forma Mezcla Rosa Confite fresa
+Forma Mezcla Rosa Confite fresa
+Forma Mezcla Rosa Confite corazón
+Forma Mezcla Rosa Confite corazón
+Forma Mezcla Rosa Confite flor
+Forma Mezcla Rosa Confite flor
+Forma Mezcla Rosa Confite estrella
+Forma Mezcla Rosa Confite estrella
+Forma Mezcla Rosa Confite trébol
+Forma Mezcla Rosa Confite trébol
+Forma Mezcla Rosa Confite fruto
+Forma Mezcla Rosa Confite fruto
+Forma Mezcla Caramelo Confite fresa
+Forma Mezcla Caramelo Confite fresa
+Forma Mezcla Caramelo Confite corazón
+Forma Mezcla Caramelo Confite corazón
+Forma Mezcla Caramelo Confite flor
+Forma Mezcla Caramelo Confite flor
+Forma Mezcla Caramelo Confite estrella
+Forma Mezcla Caramelo Confite estrella
+Forma Mezcla Caramelo Confite trébol
+Forma Mezcla Caramelo Confite trébol
+Forma Mezcla Caramelo Confite fruto
+Forma Mezcla Caramelo Confite fruto
+Forma Mezcla Caramelo Confite lazo
+Forma Mezcla Caramelo Confite lazo
+Forma Mezcla Tres Sabores Confite fresa
+Forma Mezcla Tres Sabores Confite fresa
+Forma Mezcla Tres Sabores Confite corazón
+Forma Mezcla Tres Sabores Confite corazón
+Forma Mezcla Tres Sabores Confite flor
+Forma Mezcla Tres Sabores Confite flor
+Forma Mezcla Tres Sabores Confite estrella
+Forma Mezcla Tres Sabores Confite estrella
+Forma Mezcla Tres Sabores Confite trébol
+Forma Mezcla Tres Sabores Confite trébol
+Forma Mezcla Tres Sabores Confite fruto
+Forma Mezcla Tres Sabores Confite fruto
+Forma Mezcla Tres Sabores Confite lazo
+Forma Mezcla Tres Sabores Confite lazo
+Mega Falinks
+Mega Falinks
+Forma Cara Deshielo
+Forma Cara Deshielo
+Forma Voraz
+Forma Voraz
+Forma Espada Suprema
+Forma Espada Suprema
+Forma Escudo Supremo
+Forma Escudo Supremo
+Estilo Fluido
+Estilo Fluido
+Forma Jinete Glacial
+Forma Jinete Glacial
+Forma Jinete Espectral
+Forma Jinete Espectral
+Forma Luna Carmesí
+Forma Luna Carmesí
+Familia de Tres
+Familia de Tres
+Plumaje Azul
+Plumaje Azul
+Plumaje Amarillo
+Plumaje Amarillo
+Plumaje Blanco
+Plumaje Blanco
+Mega Scovillain
+Mega Scovillain
+Forma Heroica
+Forma Heroica
+Mega Glimmora
+Mega Glimmora
+Forma Lánguida
+Forma Lánguida
+Forma Recta
+Forma Recta
+Mega Tatsugiri Forma Curvada
+Mega Tatsugiri Forma Curvada
+Mega Tatsugiri Forma Lánguida
+Mega Tatsugiri Forma Lánguida
+Mega Tatsugiri Forma Recta
+Mega Tatsugiri Forma Recta
+Forma Trinodular
+Forma Trinodular
+Mega Baxcalibur
+Mega Baxcalibur
+Forma Andante
+Forma Andante
+Forma Opulenta
+Forma Opulenta
+Forma Exquisita
+Forma Exquisita
+Máscara Fuente
+Máscara Fuente
+Máscara Horno
+Máscara Horno
+Máscara Cimiento
+Máscara Cimiento
+Máscara Turquesa teracristalizado
+Máscara Turquesa teracristalizado
+Máscara Fuente teracristalizado
+Máscara Fuente teracristalizado
+Máscara Horno teracristalizado
+Máscara Horno teracristalizado
+Máscara Cimiento teracristalizado
+Máscara Cimiento teracristalizado
+Forma Teracristal
+Forma Teracristal
+Forma Astral
+Forma Astral
+Mega Typhlosion
+Mega Typhlosion
+Johtonian
+Johtonian

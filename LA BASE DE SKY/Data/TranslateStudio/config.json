@@ -1,0 +1,22 @@
+{
+  "schema": 6,
+  "activeLanguage": "auto",
+  "baseLanguage": "es",
+  "applyToGame": true,
+  "showFirstBootLanguageMenu": true,
+  "showLanguageOption": true,
+  "showDebugTools": true,
+  "readDirectTextPacks": false,
+  "preferLocalizedGraphics": true,
+  "graphicRules": {},
+  "autoDiscoverDevelopmentTexts": true,
+  "discoveryOnlyInDebug": true,
+  "languageMenuMode": "graphics",
+  "languageMenuBackground": "Graphics/UI/TranslateStudio/language_bg.png",
+  "languageMenuHeader": "Graphics/UI/TranslateStudio/language_header.png",
+  "languageMenuFooter": "Graphics/UI/TranslateStudio/language_footer.png",
+  "languageMenuCardES": "Graphics/UI/TranslateStudio/language_es.png",
+  "languageMenuCardEN": "Graphics/UI/TranslateStudio/language_en.png",
+  "languageMenuCursor": "Graphics/UI/TranslateStudio/language_cursor.png",
+  "languageMenuCustomCode": "Data/TranslateStudio/language_menu_custom.rb"
+}

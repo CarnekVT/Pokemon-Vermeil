@@ -1,0 +1,32 @@
+{
+  "schema": 6,
+  "generatedBy": "Translate Studio v0.7.0 example",
+  "languages": {
+    "es": {
+      "species": {},
+      "moves": {},
+      "abilities": {},
+      "items": {},
+      "types": {},
+      "general": {},
+      "events": {},
+      "scripts": {},
+      "plugins": {},
+      "bss": {},
+      "sds": {}
+    },
+    "en": {
+      "species": {},
+      "moves": {},
+      "abilities": {},
+      "items": {},
+      "types": {},
+      "general": {},
+      "events": {},
+      "scripts": {},
+      "plugins": {},
+      "bss": {},
+      "sds": {}
+    }
+  }
+}

@@ -1,0 +1,144 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[RIBBON_NAMES]
+Cinta Carisma
+Cinta Carisma
+Cinta Carisma Alto
+Cinta Carisma Alto
+Cinta Carisma Avanzado
+Cinta Carisma Avanzado
+Cinta Carisma Experto
+Cinta Carisma Experto
+Cinta Belleza
+Cinta Belleza
+Cinta Belleza Alto
+Cinta Belleza Alto
+Cinta Belleza Avanzado
+Cinta Belleza Avanzado
+Cinta Belleza Experto
+Cinta Belleza Experto
+Cinta Dulzura
+Cinta Dulzura
+Cinta Dulzura Alto
+Cinta Dulzura Alto
+Cinta Dulzura Avanzado
+Cinta Dulzura Avanzado
+Cinta Dulzura Experto
+Cinta Dulzura Experto
+Cinta Ingenio
+Cinta Ingenio
+Cinta Ingenio Alto
+Cinta Ingenio Alto
+Cinta Ingenio Avanzado
+Cinta Ingenio Avanzado
+Cinta Ingenio Experto
+Cinta Ingenio Experto
+Cinta Dureza
+Cinta Dureza
+Cinta Dureza Alto
+Cinta Dureza Alto
+Cinta Dureza Avanzado
+Cinta Dureza Avanzado
+Cinta Dureza Experto
+Cinta Dureza Experto
+Cinta Carisma Difícil
+Cinta Carisma Difícil
+Cinta Carisma Superior
+Cinta Carisma Superior
+Cinta de Belleza
+Cinta de Belleza
+Cinta Belleza Difícil
+Cinta Belleza Difícil
+Cinta Belleza Superior
+Cinta Belleza Superior
+Cinta Dulzura Difícil
+Cinta Dulzura Difícil
+Cinta Dulzura Superior
+Cinta Dulzura Superior
+Cinta Ingenio Difícil
+Cinta Ingenio Difícil
+Cinta Ingenio Superior
+Cinta Ingenio Superior
+Cinta Dureza Difícil
+Cinta Dureza Difícil
+Cinta Dureza Superior
+Cinta Dureza Superior
+Cinta Ganador
+Cinta Ganador
+Cinta Victoria
+Cinta Victoria
+Cinta Habilidad
+Cinta Habilidad
+Cinta Gran Habilidad
+Cinta Gran Habilidad
+Cinta Doble Habilidad
+Cinta Doble Habilidad
+Cinta Habilidad Múltiple
+Cinta Habilidad Múltiple
+Cinta Habilidad Par
+Cinta Habilidad Par
+Cinta Habilidad Mundial
+Cinta Habilidad Mundial
+Cinta Campeón
+Cinta Campeón
+Cinta Récord
+Cinta Récord
+Cinta Evento
+Cinta Evento
+Cinta Leyenda
+Cinta Leyenda
+Cinta Maravilla
+Cinta Maravilla
+Cinta Realeza
+Cinta Realeza
+Cinta Realeza Maravilla
+Cinta Realeza Maravilla
+Cinta Alerta
+Cinta Alerta
+Cinta Impacto
+Cinta Impacto
+Cinta Abatimiento
+Cinta Abatimiento
+Cinta Descuido
+Cinta Descuido
+Cinta Relax
+Cinta Relax
+Cinta Cabezada
+Cinta Cabezada
+Cinta Sonrisa
+Cinta Sonrisa
+Cinta Huella
+Cinta Huella
+Cinta Artista
+Cinta Artista
+Cinta Esfuerzo
+Cinta Esfuerzo
+Cinta Cumpleaños
+Cinta Cumpleaños
+Cinta Especial
+Cinta Especial
+Cinta Clásica
+Cinta Clásica
+Cinta Principal
+Cinta Principal
+Cinta Recuerdo
+Cinta Recuerdo
+Cinta Deseo
+Cinta Deseo
+Cinta Nacional
+Cinta Nacional
+Cinta Campo
+Cinta Campo
+Cinta de Campeón de Torneo
+Cinta de Campeón de Torneo
+Cinta Campeón de Área
+Cinta Campeón de Área
+Cinta Planeta
+Cinta Planeta
+Cinta Mundo
+Cinta Mundo
+Cinta Campeón Nacional
+Cinta Campeón Nacional
+Cinta Campeón Mundial
+Cinta Campeón Mundial

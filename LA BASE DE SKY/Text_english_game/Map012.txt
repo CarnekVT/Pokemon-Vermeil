@@ -1,0 +1,124 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map012]
+¡Hola! ¡Soy el Tutor de Movimientos!
+¡Hola! ¡Soy el Tutor de Movimientos!
+Puedo enseñarle un movimiento especial y poderoso a tus Pokémon.
+Puedo enseñarle un movimiento especial y poderoso a tus Pokémon.
+¿Qué movimiento especial quieres que les enseñe?
+¿Qué movimiento especial quieres que les enseñe?
+¿Quieres que le enseñe un movimiento especial a otro Pokémon?
+¿Quieres que le enseñe un movimiento especial a otro Pokémon?
+¡Vuelve cuando quieras!
+¡Vuelve cuando quieras!
+Hola, soy el Tutor de Movimientos Huevo.
+Hola, soy el Tutor de Movimientos Huevo.
+Puedo hacer que uno de tus Pokémon aprenda un movimiento Huevo.
+Puedo hacer que uno de tus Pokémon aprenda un movimiento Huevo.
+También colecciono Escamas Corazón.
+También colecciono Escamas Corazón.
+Si me traes una puedo enseñarle un movimiento a un Pokémon.
+Si me traes una puedo enseñarle un movimiento a un Pokémon.
+¡Oh! ¡Eso es! ¡Una auténtica Escama Corazón!
+¡Oh! ¡Eso es! ¡Una auténtica Escama Corazón!
+Déjame adivinar, ¿quieres que le enseñe un movimiento a uno de tus Pokémon?
+Déjame adivinar, ¿quieres que le enseñe un movimiento a uno de tus Pokémon?
+¿Qué Pokémon quieres que lo aprenda?
+¿Qué Pokémon quieres que lo aprenda?
+Si tu Pokémon necesita aprender un movimiento, vuelve con una Escama Corazón.
+Si tu Pokémon necesita aprender un movimiento, vuelve con una Escama Corazón.
+¿Eh? No hay un solo movimiento que pueda enseñarle a un Huevo.
+¿Eh? No hay un solo movimiento que pueda enseñarle a un Huevo.
+¡De ninguna manera! No quiero estar cerca de un Pokémon Oscuro.
+¡De ninguna manera! No quiero estar cerca de un Pokémon Oscuro.
+Lo siento...
+Lo siento...
+Parece que no puedo enseñarle ningún movimiento a tu \v[3].
+Parece que no puedo enseñarle ningún movimiento a tu \v[3].
+¿Qué movimiento debería enseñarle a tu \v[3]?
+¿Qué movimiento debería enseñarle a tu \v[3]?
+Si tu Pokémon necesita recordar un movimiento, vuelve con una Escama Corazón.
+Si tu Pokémon necesita recordar un movimiento, vuelve con una Escama Corazón.
+Uh...\nOh, sí, soy el Olvida Movimientos.
+Uh...\nOh, sí, soy el Olvida Movimientos.
+Puedo hacer que un Pokémon olvide sus movimientos.
+Puedo hacer que un Pokémon olvide sus movimientos.
+¿Quieres que lo haga con alguno de los tuyos?
+¿Quieres que lo haga con alguno de los tuyos?
+¿Qué Pokémon debería olvidar un movimiento?
+¿Qué Pokémon debería olvidar un movimiento?
+Vuelve si necesitas que alguno de tus Pokémon olvide un movimiento.
+Vuelve si necesitas que alguno de tus Pokémon olvide un movimiento.
+¿Cómo? Los Huevos no deberían saber ningún movimiento.
+¿Cómo? Los Huevos no deberían saber ningún movimiento.
+¿Cómo? No puedo hacer que un Pokémon Oscuro olvide un movimiento.
+¿Cómo? No puedo hacer que un Pokémon Oscuro olvide un movimiento.
+Parece que \v[3] solo sabe un movimiento...
+Parece que \v[3] solo sabe un movimiento...
+¿Qué movimiento debería olvidar?
+¿Qué movimiento debería olvidar?
+¡Hm! ¿\v[4] de \v[3]? ¿Quieres que lo olvide?
+¡Hm! ¿\v[4] de \v[3]? ¿Quieres que lo olvide?
+¡Ha salido a la perfección!
+¡Ha salido a la perfección!
+\b\v[3] ha olvidado \v[4] completamente.
+\b\v[3] ha olvidado \v[4] completamente.
+Soy el Tutor de Movimientos.
+Soy el Tutor de Movimientos.
+Conozco todos los movimientos que un Pokémon puede aprender al subir de nivel.
+Conozco todos los movimientos que un Pokémon puede aprender al subir de nivel.
+¡Hola, hola! ¡Soy el Inspector de Motes oficial!
+¡Hola, hola! ¡Soy el Inspector de Motes oficial!
+¿Quieres que valore el mote de alguno de tus Pokémon?
+¿Quieres que valore el mote de alguno de tus Pokémon?
+¿Qué mote de qué Pokémon quieres que valore?
+¿Qué mote de qué Pokémon quieres que valore?
+Ya veo. Vuelve cuando quieras.
+Ya veo. Vuelve cuando quieras.
+No, no... Esto no es más que un Huevo.
+No, no... Esto no es más que un Huevo.
+¡No sería capaz de criticar el nombre de un Pokémon Oscuro!
+¡No sería capaz de criticar el nombre de un Pokémon Oscuro!
+Hmmm... ¡Así que \v[3]!
+Hmmm... ¡Así que \v[3]!
+¡Es un nombre magnífico! ¡No podría pegarle más!
+¡Es un nombre magnífico! ¡No podría pegarle más!
+¡Harías bien en apreciar mucho a \v[3] siempre que puedas!
+¡Harías bien en apreciar mucho a \v[3] siempre que puedas!
+¿\v[3], verdad?\n¡Es un buen mote!
+¿\v[3], verdad?\n¡Es un buen mote!
+Sin embargo, creo que podría tener un mucho mejor.
+Sin embargo, creo que podría tener un mucho mejor.
+¿Quieres cambiarlo?
+¿Quieres cambiarlo?
+¡Genial! En ese caso, ¿cuál quieres que sea el nuevo nombre?
+¡Genial! En ese caso, ¿cuál quieres que sea el nuevo nombre?
+{1}'s nickname?
+{1}'s nickname?
+Ya veo. Tienes razón, no hay necesidad de cambiar el mote de este Pokémon.
+Ya veo. Tienes razón, no hay necesidad de cambiar el mote de este Pokémon.
+¡Ya tiene un mote genial!
+¡Ya tiene un mote genial!
+¡Listo! A partir de ahora este Pokémon será conocido como \v[3]!
+¡Listo! A partir de ahora este Pokémon será conocido como \v[3]!
+No parece muy distinto del anterior, ¡y aún así me parece bastante superior!
+No parece muy distinto del anterior, ¡y aún así me parece bastante superior!
+¡Eres muy afortunado!
+¡Eres muy afortunado!
+¡Listo! A partir de ahora este Pokémon será conocido como \v[5]!
+¡Listo! A partir de ahora este Pokémon será conocido como \v[5]!
+¡Es un mote mucho mejor que el anterior! ¡Qué suerte tienes!
+¡Es un mote mucho mejor que el anterior! ¡Qué suerte tienes!
+Planta Feroz
+Planta Feroz
+Anillo Ígneo
+Anillo Ígneo
+Hidrocañón
+Hidrocañón
+Salir
+Salir
+Sí
+Sí
+No
+No

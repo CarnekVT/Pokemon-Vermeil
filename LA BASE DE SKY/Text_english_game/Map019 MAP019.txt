@@ -1,0 +1,34 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map019]
+\sign[signskin]Plaza de la Azotea: Máquinas Vendedoras.
+\sign[signskin]Plaza de la Azotea: Máquinas Vendedoras.
+Es una máquina expendedora\n¿Qué bebida quieres? \G
+Es una máquina expendedora\n¿Qué bebida quieres? \G
+\G¡Ha caído un Agua Fresca!
+\G¡Ha caído un Agua Fresca!
+\G¡Qué suerte! Ha caído otro Agua Fresca.
+\G¡Qué suerte! Ha caído otro Agua Fresca.
+\GNo te queda espacio en la Mochila.
+\GNo te queda espacio en la Mochila.
+\GNo tienes suficiente dinero.
+\GNo tienes suficiente dinero.
+\G¡Ha caído un Refresco!
+\G¡Ha caído un Refresco!
+\G¡Qué suerte! Ha caído otro Refresco.
+\G¡Qué suerte! Ha caído otro Refresco.
+\G¡Ha caído una Limonada!
+\G¡Ha caído una Limonada!
+\G¡Qué suerte! Ha caído otra Limonada.
+\G¡Qué suerte! Ha caído otra Limonada.
+\GHas decidido no comprar una bebida.
+\GHas decidido no comprar una bebida.
+Agua Fresca - $200
+Agua Fresca - $200
+Refresco - $300
+Refresco - $300
+Limonada - $350
+Limonada - $350
+Cancelar
+Cancelar

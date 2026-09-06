@@ -1,0 +1,42 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map067]
+¡Bienvenido a la Zona Safari!
+¡Bienvenido a la Zona Safari!
+Por solo $500, puedes participar en una partida de Safari.
+Por solo $500, puedes participar en una partida de Safari.
+\GPuedes recorrer toda la Zona Safari y capturar todos los Pokémon que quieras.
+\GPuedes recorrer toda la Zona Safari y capturar todos los Pokémon que quieras.
+\G¿Quieres participar?
+\G¿Quieres participar?
+Lo siento, tienes llenas las cajas del PC.
+Lo siento, tienes llenas las cajas del PC.
+\G¡Vaya! No tienes suficiente dinero.
+\G¡Vaya! No tienes suficiente dinero.
+\GVuelve pronto.
+\GVuelve pronto.
+\G¡Serían entonces $500, por favor!\1
+\G¡Serían entonces $500, por favor!\1
+\GAquí usamos un único tipo de Ball especial.
+\GAquí usamos un único tipo de Ball especial.
+\G\PN recibió 30 Safari Balls del recepcionista. \me[Item get]\wtnp[40]
+\G\PN recibió 30 Safari Balls del recepcionista. \me[Item get]\wtnp[40]
+\GTe avisaremos por megafonía cuando se te acabe el tiempo o las Safari Balls.
+\GTe avisaremos por megafonía cuando se te acabe el tiempo o las Safari Balls.
+\G¡Te deseo la mejor de las suertes!
+\G¡Te deseo la mejor de las suertes!
+\GDe acuerdo.\n¡Vuelve pronto!
+\GDe acuerdo.\n¡Vuelve pronto!
+¿Quieres retirarte ya de tu partida actual del Safari?
+¿Quieres retirarte ya de tu partida actual del Safari?
+Entrégame por favor las Safari Balls que te hayan quedado.
+Entrégame por favor las Safari Balls que te hayan quedado.
+¡Buena suerte!
+¡Buena suerte!
+¿Has podido capturar lo que querías? ¡Espero que vuelvas pronto!
+¿Has podido capturar lo que querías? ¡Espero que vuelvas pronto!
+Sí
+Sí
+No
+No

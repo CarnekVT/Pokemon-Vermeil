@@ -1,0 +1,142 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map043]
+¡Hola!
+¡Hola!
+Yo soy un evento con el comando <b>s:Spritesheet_FRAMES_VEL/RUTA</b>.
+Yo soy un evento con el comando <b>s:Spritesheet_FRAMES_VEL/RUTA</b>.
+Este comando es útil si quieres agregar animaciones mediante un evento sin necesidad de crear un spritesheet inmenso para que se divida en un 4x4.
+Este comando es útil si quieres agregar animaciones mediante un evento sin necesidad de crear un spritesheet inmenso para que se divida en un 4x4.
+Además, mi dirección es fija. Esto significa que, aunque puedas interactuar conmigo, no cambiaré de dirección.
+Además, mi dirección es fija. Esto significa que, aunque puedas interactuar conmigo, no cambiaré de dirección.
+El primer valor define en cuántos segmentos (FRAMES) se dividirá el gráfico a cargar.
+El primer valor define en cuántos segmentos (FRAMES) se dividirá el gráfico a cargar.
+El segundo valor define su velocidad (VEL). Si se omite, tendrá un valor por defecto de 4.
+El segundo valor define su velocidad (VEL). Si se omite, tendrá un valor por defecto de 4.
+La RUTA debe ser una que se encuentre en la carpeta Graphics.
+La RUTA debe ser una que se encuentre en la carpeta Graphics.
+Ten en cuenta que el comando asume que el spritesheet es horizontal.
+Ten en cuenta que el comando asume que el spritesheet es horizontal.
+¿Volver a Pueblo Inicio?
+¿Volver a Pueblo Inicio?
+Yo soy un evento con los comandos <b>s:Offset/X,Y</b> y <b>s:Offset_shadow/X,Y</b>.
+Yo soy un evento con los comandos <b>s:Offset/X,Y</b> y <b>s:Offset_shadow/X,Y</b>.
+Estos comandos son útiles para no tener que andar creando spritesheets enormes por si quieres que visualmente el evento se vea, por ejemplo, "volando".
+Estos comandos son útiles para no tener que andar creando spritesheets enormes por si quieres que visualmente el evento se vea, por ejemplo, "volando".
+Los valores positivos en (X,Y) desplazan el gráfico hacia (Derecha/Abajo).
+Los valores positivos en (X,Y) desplazan el gráfico hacia (Derecha/Abajo).
+Los valores negativos en (X,Y) desplazan el gráfico hacia (Izquierda/Arriba).
+Los valores negativos en (X,Y) desplazan el gráfico hacia (Izquierda/Arriba).
+Yo soy un evento con el comando <b>s:Hitbox/X,Y</b>.
+Yo soy un evento con el comando <b>s:Hitbox/X,Y</b>.
+Este comando es útil cuando quieras que un evento cuyo gráfico es muy grande no sea atravesable a su alrededor.
+Este comando es útil cuando quieras que un evento cuyo gráfico es muy grande no sea atravesable a su alrededor.
+El área se genera desde mi base, pero igual puedes interactuar conmigo.
+El área se genera desde mi base, pero igual puedes interactuar conmigo.
+Los valores en el comando (X,Y) se sumarán al que ya tengo por defecto.
+Los valores en el comando (X,Y) se sumarán al que ya tengo por defecto.
+Por lo que en mi caso, que es (1,1), significa que a mis lados y por encima de mí se sumará un bloque más para que no puedas atravesar.
+Por lo que en mi caso, que es (1,1), significa que a mis lados y por encima de mí se sumará un bloque más para que no puedas atravesar.
+Intenta hablarme a mis costados. Verás que, aunque no puedas atravesar, podrás interactuar igualmente.
+Intenta hablarme a mis costados. Verás que, aunque no puedas atravesar, podrás interactuar igualmente.
+¿Interesante, verdad?
+¿Interesante, verdad?
+Los comandos se limitan a la página del evento en donde están, por lo que recuerda ponerlos en cada página del evento.
+Los comandos se limitan a la página del evento en donde están, por lo que recuerda ponerlos en cada página del evento.
+O usa tu creatividad aprovechando esta característica.
+O usa tu creatividad aprovechando esta característica.
+Estoy aquí para explicarte los comandos: <b>s:pokemon_event/Nombre</b> y <b>s:pokemon_event_shiny/Nombre</b>.
+Estoy aquí para explicarte los comandos: <b>s:pokemon_event/Nombre</b> y <b>s:pokemon_event_shiny/Nombre</b>.
+Como el nombre sugiere, estos comandos pueden cargar el gráfico del Pokémon que incluyen las carpetas de Followers.
+Como el nombre sugiere, estos comandos pueden cargar el gráfico del Pokémon que incluyen las carpetas de Followers.
+La ventaja es que, al interactuar con ellos, también sonará su cry.
+La ventaja es que, al interactuar con ellos, también sonará su cry.
+Notarás que en el editor de mapas de RPG Maker, dos eventos no tienen gráfico, mientras que los otros sí.
+Notarás que en el editor de mapas de RPG Maker, dos eventos no tienen gráfico, mientras que los otros sí.
+Esto se debe a que el comando cargará el gráfico del Pokémon, tenga o no el evento uno asignado.
+Esto se debe a que el comando cargará el gráfico del Pokémon, tenga o no el evento uno asignado.
+Si el evento tiene un gráfico, tomará la posición que le asignes.
+Si el evento tiene un gráfico, tomará la posición que le asignes.
+Si no tiene uno, entonces, por defecto, el evento mirará hacia abajo.
+Si no tiene uno, entonces, por defecto, el evento mirará hacia abajo.
+Para estos casos, puedes incluir _down/up/left/right en el comando. Con esto, el evento mirará en esa dirección.
+Para estos casos, puedes incluir _down/up/left/right en el comando.  Con esto, el evento mirará en esa dirección.
+Yo soy un evento con el comando <b>s:Custom/RUTA</b>.
+Yo soy un evento con el comando <b>s:Custom/RUTA</b>.
+Este comando es útil si quieres agregar un evento con un gráfico que por alguna razón no esté en la carpeta Characters o que esté en una subcarpeta de ella.
+Este comando es útil si quieres agregar un evento con un gráfico que por alguna razón no esté en la carpeta Characters o que esté en una subcarpeta de ella.
+Ten en cuenta que el comando asume que será usado como un gráfico de evento, por lo que será dividido en un 4x4.
+Ten en cuenta que el comando asume que será usado como un gráfico de evento, por lo que será dividido en un 4x4.
+Cuando entras al mapa, probablemente verás que solo está mi sombra.
+Cuando entras al mapa, probablemente verás que solo está mi sombra.
+Pero si has hecho que gire al hablarme, notarás la magia de este comando.
+Pero si has hecho que gire al hablarme, notarás la magia de este comando.
+¿Quieres ver la versión full?
+¿Quieres ver la versión full?
+Recuerda volver a hablarme para que vuelva a la normalidad.
+Recuerda volver a hablarme para que vuelva a la normalidad.
+Ahora uso el comando\n<b>s:Custom_full/RUTA</b>.
+Ahora uso el comando\n<b>s:Custom_full/RUTA</b>.
+Este comando es útil para no tener que andar creando un spritesheet enorme para que se divida en un 4x4 si solo quieres mostrar una imagen.
+Este comando es útil para no tener que andar creando un spritesheet enorme para que se divida en un 4x4 si solo quieres mostrar una imagen.
+Su ventaja es que no se limita a la carpeta Characters.
+Su ventaja es que no se limita a la carpeta Characters.
+Ahora vuelvo a mi estado original.
+Ahora vuelvo a mi estado original.
+Yo soy un evento con el comando <b>s:Hitbox_radius/Rx,Ry</b>.
+Yo soy un evento con el comando <b>s:Hitbox_radius/Rx,Ry</b>.
+Este comando es útil cuando quieras usar un evento que tenga un área a su alrededor que no quieras que sea atravesable.
+Este comando es útil cuando quieras usar un evento que tenga un área a su alrededor que no quieras que sea atravesable.
+A diferencia del comando <b>s:Hitbox/</b>, esta área se formará a mi alrededor, incluyendo la parte inferior, pero igual puedes interactuar conmigo.
+A diferencia del comando <b>s:Hitbox/</b>, esta área se formará a mi alrededor, incluyendo la parte inferior, pero igual puedes interactuar conmigo.
+Los valores en el comando (Rx,Ry) se sumarán al que ya tengo por defecto. Pero puedes omitir el segundo valor si solo quieres un área simétrica.
+Los valores en el comando (Rx,Ry) se sumarán al que ya tengo por defecto. Pero puedes omitir el segundo valor si solo quieres un área simétrica.
+En mi caso, solo estoy usando (1), lo que significa que a mi alrededor se sumará un bloque más para que no puedas atravesar.
+En mi caso, solo estoy usando (1), lo que significa que a mi alrededor se sumará un bloque más para que no puedas atravesar.
+Pero usando los dos valores, se pueden hacer cosas como la siguiente.
+Pero usando los dos valores, se pueden hacer cosas como la siguiente.
+Intenta dar un paso hacia mí e interactua de nuevo conmigo.
+Intenta dar un paso hacia mí e interactua de nuevo conmigo.
+Ahora mi valor es (1,0).
+Ahora mi valor es (1,0).
+Esto significa que ahora solo tengo un bloque de más a mis costados para que no puedas atravesar.
+Esto significa que ahora solo tengo un bloque de más a mis costados para que no puedas atravesar.
+Y eso no es todo. Ahora mi comando incluye <b>_true</b>. Esto significa que la hitbox girará conmigo.
+Y eso no es todo. Ahora mi comando incluye <b>_true</b>. Esto significa que la hitbox girará conmigo.
+Intenta hablarme de nuevo, pero ahora haz que gire.
+Intenta hablarme de nuevo, pero ahora haz que gire.
+Notarás que mi hitbox será lo contrario a la prueba anterior.
+Notarás que mi hitbox será lo contrario a la prueba anterior.
+Por ahora, intenta inspeccionar mi hitbox antes de volver a hablarme.
+Por ahora, intenta inspeccionar mi hitbox antes de volver a hablarme.
+¿Qué te pareció?
+¿Qué te pareció?
+Yo soy un evento con el comando <b>s:doppelganger</b>.
+Yo soy un evento con el comando <b>s:doppelganger</b>.
+Mi utilidad es que cargo el gráfico que actualmente lleva el jugador.
+Mi utilidad es que cargo el gráfico que actualmente lleva el jugador.
+Intenta usar el menú Debug para asignarte el gráfico del personaje contrario al que usas actualmente y vuelve a entrar al mapa.
+Intenta usar el menú Debug para asignarte el gráfico del personaje contrario al que usas actualmente y vuelve a entrar al mapa.
+Observarás que ahora tendré ese gráfico.
+Observarás que ahora tendré ese gráfico.
+Je, je...
+Je, je...
+Seguramente querrás tomar la Poké Ball a mi lado.
+Seguramente querrás tomar la Poké Ball a mi lado.
+Pero lamento informarte que eso es imposible. Y es porque justo a mi lado hay un evento con el comando <b>sizeblock(X,Y)</b>.
+Pero lamento informarte que eso es imposible. Y es porque justo a mi lado hay un evento con el comando <b>sizeblock(X,Y)</b>.
+A diferencia de otros comandos, este debe ponerse en el nombre del evento.
+A diferencia de otros comandos, este debe ponerse en el nombre del evento.
+Su utilidad es simple: bloquear el paso al jugador.
+Su utilidad es simple: bloquear el paso al jugador.
+Perfecto para esas situaciones donde, por "x" o "y" razón, el jugador pueda atravesar tiles y no haya necesidad de crear una copia de ese tile para poder bloquear.
+Perfecto para esas situaciones donde, por "x" o "y" razón, el jugador pueda atravesar tiles y no haya necesidad de crear una copia de ese tile para poder bloquear.
+Ir a Pueblo Inicio
+Ir a Pueblo Inicio
+Salir
+Salir
+Sí
+Sí
+No
+No

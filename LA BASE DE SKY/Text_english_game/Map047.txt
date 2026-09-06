@@ -1,0 +1,96 @@
+﻿# Para traducir este texto a un idioma en concreto, por favor
+# traduce las segundas líneas de este archivo.
+#-------------------------------
+[Map047]
+Soy un entrenador básico con un Pokémon Oscuro.
+Soy un entrenador básico con un Pokémon Oscuro.
+¿Has sido capaz de atrapar a mi Pokémon Oscuro? Porque no podrás pelear de nuevo conmigo si has perdido la oportunidad.
+¿Has sido capaz de atrapar a mi Pokémon Oscuro?  Porque no podrás pelear de nuevo conmigo si has perdido la oportunidad.
+Puedes pelear conmigo de forma repetida, para así tener ilimitados intentos para capturar a mi Pokémon Oscuro.
+Puedes pelear conmigo de forma repetida, para así tener ilimitados intentos para capturar a mi Pokémon Oscuro.
+Te las has ingeniado para capturar mi Electabuzz Oscuro. No voy a hacer nada más.
+Te las has ingeniado para capturar mi Electabuzz Oscuro. No voy a hacer nada más.
+Puedo contarte algunas cosas sobre los Pokémon Oscuros en Pokémon Essentials. SIn embargo, la wiki cuenta con más información sobre ellos.
+Puedo contarte algunas cosas sobre los Pokémon Oscuros en Pokémon Essentials. SIn embargo, la wiki cuenta con más información sobre ellos.
+¿Qué quieres saber?
+¿Qué quieres saber?
+Los Pokémon Oscuros son un tipo especial de Pokémon que aparecen en Pokémon Colosseum y Pokémon XD.
+Los Pokémon Oscuros son un tipo especial de Pokémon que aparecen en Pokémon Colosseum y Pokémon XD.
+Puedes hacer que aparezcan también en tu juego. Consulta la wiki para más información al respecto.
+Puedes hacer que aparezcan también en tu juego.  Consulta la wiki para más información al respecto.
+Los entrenadores con Pokémon Oscuros se crean igual que cualquier otro entrenador.
+Los entrenadores con Pokémon Oscuros se crean igual que cualquier otro entrenador.
+Cualquier Ball del juego se puede usar como Snag Ball, que son las que se usan para capturar a los Pokémon Oscuros en los juegos oficiales.
+Cualquier Ball del juego se puede usar como Snag Ball, que son las que se usan para capturar a los Pokémon Oscuros en los juegos oficiales.
+Si defines $player.has_snag_machine en TRUE, todas las Balls que tengas funcionarán como una Snag Ball.
+Si defines $player.has_snag_machine en TRUE, todas las Balls que tengas funcionarán como una Snag Ball.
+$player.pokedex.owned_shadow es una lista que guarda un registro de qué Pokémon Oscuros han sido capturados.
+$player.pokedex.owned_shadow es una lista que guarda un registro de qué Pokémon Oscuros han sido capturados.
+Existen dos formas de purificar a los Pokémon Oscuros.
+Existen dos formas de purificar a los Pokémon Oscuros.
+El primer método es traerlos al Pilar Legendario que ha aquí, como ocurre en Pokémon Colosseum.
+El primer método es traerlos al Pilar Legendario que ha aquí, como ocurre en Pokémon Colosseum.
+El segundo es colocándolos en la Cámara de Purificación, como ocurre en Pokémon XD. Puedes acceder a ella desde el PC de cualquier Centro Pkmn.
+El segundo es colocándolos en la Cámara de Purificación, como ocurre en Pokémon XD. Puedes acceder a ella desde el PC de cualquier Centro Pkmn.
+Voy a activarte el acceso a la Cámara de Purificación del Centro Pokémon con el comando $player.seen_purify_chamber = true
+Voy a activarte el acceso a la Cámara de Purificación del Centro Pokémon con el comando $player.seen_purify_chamber = true
+Si en algún momento necesitas volver a desactivarlo, es tan sencillo como llamar al comando $player.seen_purify_chamber = false
+Si en algún momento necesitas volver a desactivarlo, es tan sencillo como llamar al comando $player.seen_purify_chamber = false
+Además, los efectos de los objetos que vuelven menos oscuro a un Pokémon están ya definidos en el código de Essentials.
+Además, los efectos de los objetos que vuelven menos oscuro a un Pokémon están ya definidos en el código de Essentials.
+Si quieres usarlos es tan sencillo como añadir dichos objetos en el archivo PBS.
+Si quieres usarlos es tan sencillo como añadir dichos objetos en el archivo PBS.
+Yo puedo controlar el clima. ¿Qué clima te gustaría ver?
+Yo puedo controlar el clima. ¿Qué clima te gustaría ver?
+Este clima ocurre incluso de noche, pero no elimina el efecto visual de día o noche. Es mejor que no lo uses.
+Este clima ocurre incluso de noche, pero no elimina el efecto visual de día o noche. Es mejor que no lo uses.
+Para evitar que el clima de un mapa siga estando en otro al cambiar, se pone en los metadatos del clima de cada mapa un valor de 0, que evita esto.
+Para evitar que el clima de un mapa siga estando en otro al cambiar, se pone en los metadatos del clima de cada mapa un valor de 0, que evita esto.
+¡Haiiiii-yaaaaaah!
+¡Haiiiii-yaaaaaah!
+¡Voy a dar un golpe perfecto!
+¡Voy a dar un golpe perfecto!
+¡Siente mi poder!
+¡Siente mi poder!
+¡AAAAHHHH!
+¡AAAAHHHH!
+¡Golpe de espada maligno!
+¡Golpe de espada maligno!
+Has ganado, ¡bien hecho!
+Has ganado, ¡bien hecho!
+Perdiste, ¡soy imbatible!
+Perdiste, ¡soy imbatible!
+Hola. Esto es lo que digo si hablas conmigo durante el día.
+Hola. Esto es lo que digo si hablas conmigo durante el día.
+¡Espera! ¿Quién anda ahí?
+¡Espera! ¿Quién anda ahí?
+Esto es lo que digo si hablas conmigo por la noche.
+Esto es lo que digo si hablas conmigo por la noche.
+Podría combatir contigo... pero no lo haré.
+Podría combatir contigo... pero no lo haré.
+Información
+Información
+Batallas Pokémon Oscuros
+Batallas Pokémon Oscuros
+Purificar Pokémon
+Purificar Pokémon
+Salir
+Salir
+Ninguno
+Ninguno
+Lluvia
+Lluvia
+Lluvia fuerte
+Lluvia fuerte
+Tormenta
+Tormenta
+Nevada
+Nevada
+Ventisca
+Ventisca
+Tormenta de arena
+Tormenta de arena
+Sol
+Sol
+Niebla
+Niebla
