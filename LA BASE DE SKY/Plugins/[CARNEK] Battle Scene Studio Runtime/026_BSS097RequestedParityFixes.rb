@@ -90,19 +90,19 @@ module BSS097SceneUIParity
   def bss085_enhanced_ui_layers
     super if defined?(super)
     return if !@sprites.is_a?(Hash)
-    main=@sprites["enhancedUI"] rescue nil; main.z=9300 if main && !(main.disposed? rescue true) && main.respond_to?(:z=)
-    prompt=@sprites["enhancedUIPrompts"] rescue nil; prompt.z=9360 if prompt && !(prompt.disposed? rescue true) && prompt.respond_to?(:z=)
+    main=@sprites["enhancedUI"] rescue nil; main.z=11000 if main && !(main.disposed? rescue true) && main.respond_to?(:z=)
+    prompt=@sprites["enhancedUIPrompts"] rescue nil; prompt.z=11060 if prompt && !(prompt.disposed? rescue true) && prompt.respond_to?(:z=)
     ["leftarrow","rightarrow"].each do |k|
       sp=@sprites[k] rescue nil
-      sp.z=9410 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
+      sp.z=11100 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
     end
     @sprites.each do |k,sp|
       next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:z=)
       s=k.to_s
       if s =~ /^(info_icon|ball_icon).*_outline\d+$/i
-        sp.z=9434
+        sp.z=11134
       elsif s =~ /^(info_icon|ball_icon)\d+$/i
-        sp.z=9442
+        sp.z=11142
       end
     end
   rescue

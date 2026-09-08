@@ -78,11 +78,6 @@ if defined?(Battle::Scene::FightMenu)
   module GoldenSystem
     module FightMenuGoldenIndicators
       def refreshButtonNames
-        begin
-          battler = @battler || @active_battler || @user
-          battler.pbSyncGoldenMoveDisplayNames if battler && battler.respond_to?(:pbSyncGoldenMoveDisplayNames)
-        rescue
-        end
         ret = super
         begin
           battler = @battler || @active_battler || @user
@@ -104,12 +99,7 @@ if defined?(Battle::Scene::FightMenu)
               active = move.respond_to?(:golden_variant_data) &&
                        GoldenSystem::GoldenMoves.active_for?(battler,move.id)
               label = if active && move.respond_to?(:golden_display_name)
-                        golden_label = move.golden_display_name(battler)
-                        if defined?(Settings) && Settings.const_defined?(:SHORTEN_MOVES) && Settings::SHORTEN_MOVES &&
-                           golden_label.length > 16
-                          golden_label = golden_label[0..12] + "..."
-                        end
-                        _INTL("✦ {1}", golden_label)
+                        _INTL("✦ {1}",move.golden_display_name(battler))
                       else
                         button.instance_variable_get(:@golden_original_label)
                       end

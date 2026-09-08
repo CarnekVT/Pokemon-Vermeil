@@ -2,7 +2,7 @@
 # Golden Power / Golden Form - configuration from Data/GoldenSystem/*.json
 #===============================================================================
 module GoldenSystem
-  VERSION = "2.6.7"
+  VERSION = "2.7.0"
   DEFAULT_ACTIVATION_LIMIT   = 1
   # Fragment/Stone activation requires the trainer to own the Golden Ring.
   # A trainer profile can still explicitly bypass this requirement.

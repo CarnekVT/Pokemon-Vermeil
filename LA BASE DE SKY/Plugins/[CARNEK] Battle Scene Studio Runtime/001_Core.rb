@@ -401,8 +401,22 @@ module BSS064
     def write_status(state,extra={})
       payload={"state"=>state.to_s,"runtimeVersion"=>VERSION,"formatVersion"=>FORMAT_VERSION,"time"=>Time.now.to_i}
       payload.merge!(extra) if extra.is_a?(Hash)
-      Dir.mkdir("Data/BattleSceneStudio") if !Dir.exist?("Data/BattleSceneStudio") rescue nil
-      File.open(STATUS_FILE,"wb") { |f| f.write(json_generate(payload)) }
+      dir=File.expand_path(File.dirname(STATUS_FILE))
+      begin
+        Dir.mkdir(dir) unless Dir.exist?(dir)
+      rescue Errno::ENOENT
+        Dir.mkdir(File.dirname(dir)) unless Dir.exist?(File.dirname(dir))
+        Dir.mkdir(dir) unless Dir.exist?(dir)
+      end
+      path=File.expand_path(STATUS_FILE)
+      text=json_generate(payload)
+      begin
+        File.binwrite(path,text)
+      rescue Errno::EINVAL, Errno::EACCES, Errno::EPERM
+        # Battle Scene Studio is optional at runtime. A locked/invalid status
+        # file must never abort a battle or mask the real battle exception.
+        return false
+      end
       true
     rescue => e
       log("Status write failed: #{e.class}: #{e.message}")

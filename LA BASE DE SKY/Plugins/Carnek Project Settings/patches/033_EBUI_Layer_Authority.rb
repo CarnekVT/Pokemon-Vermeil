@@ -3,9 +3,9 @@
 # Pokémon Essentials v21.1 / DBK Enhanced Battle UI / BSS compatibility
 #
 # Runtime captures from Vermeil showed databoxes at z=10149 while Enhanced UI
-# prompt sprites were at z=10119.  BSS can also recreate targetWindow at z=200
-# and info_icon sprites at z=300 after the initial scene setup.  That places
-# Enhanced UI elements below the databoxes.
+# prompt sprites were at z=10119. BSS can also recreate targetWindow and
+# info_icon sprites after the initial scene setup. Keep this fix here, rather
+# than in Enhanced Battle UI/BSS, so plugin updates cannot remove it.
 #
 # Keep databoxes below the Enhanced UI band, and promote UI sprites recreated
 # dynamically by BSS.  Uses prepend + super only; no alias chain.
@@ -13,8 +13,8 @@
 
 module CarnekProjectSettings
   module EBUILayerAuthority
-    DATABOX_Z_CEILING = 10_100
-    ENHANCED_UI_Z_MIN = 10_200
+    DATABOX_Z_CEILING = 10_900
+    ENHANCED_UI_Z_MIN = 11_000
 
     def carnek_enforce_ebui_layer_authority
       return if !defined?(@sprites) || !@sprites.is_a?(Hash)
