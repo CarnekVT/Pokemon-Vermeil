@@ -62,9 +62,13 @@ class Pokemon
     nil
   end
   def getGoldenForm
+    return nil if @golden_form_lookup_busy
+    @golden_form_lookup_busy=true
     value=GoldenSystem::Data.form_number(@species,golden_source_form)
     value ||= legacy_golden_value(:golden_form)
     value.nil? ? nil : value.to_i
+  ensure
+    @golden_form_lookup_busy=false
   end
   def golden_form_definition
     GoldenSystem::Data.form_definition(@species,golden_source_form)
@@ -95,6 +99,7 @@ class Pokemon
     had_power=(golden_state==:POWER || !!@golden_power_overlay)
     @pre_golden_form=self.form if golden_state != :FORM
     self.golden_state=:FORM
+    @golden_active_form=target.to_i
     @golden_power_overlay=true if had_power
     self.form=target.to_i
     calc_stats if respond_to?(:calc_stats)
@@ -111,9 +116,16 @@ class Pokemon
     end
     @pre_golden_form=nil
     @golden_power_overlay=false
+    @golden_active_form=nil
   end
   def isOnGoldenPower?; golden_state==:POWER || (golden_state==:FORM && !!@golden_power_overlay); end
-  def isOnGoldenForm?; golden_state==:FORM && !getGoldenForm.nil? && self.form==getGoldenForm; end
+  def isOnGoldenForm?
+    return false if golden_state!=:FORM
+    target=defined?(@golden_active_form) ? @golden_active_form : nil
+    target ||= getGoldenForm unless @golden_form_lookup_busy
+    return false if target.nil?
+    self.form.to_i==target.to_i
+  end
 end
 
 module GoldenSystem

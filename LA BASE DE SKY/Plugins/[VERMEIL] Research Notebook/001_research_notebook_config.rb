@@ -25,9 +25,9 @@ module ResearchNotebook
     GOLDEN_RING_ITEM     = :GOLDENSRING
 
     # Acceso. Durante desarrollo es útil tenerla también en Debug.
-    SHOW_IN_PAUSE_MENU = false
+    SHOW_IN_PAUSE_MENU = true
     SHOW_IN_DEBUG_MENU = true
-    NOTEBOOK_AVAILABLE_FROM_START = true
+    NOTEBOOK_AVAILABLE_FROM_START = false
     MENU_ORDER = 45
 
     # Entradas no capturadas de los sistemas especiales.
@@ -48,9 +48,17 @@ module ResearchNotebook
     ENABLE_FOCUS_BREATH         = false
     ENABLE_GRID_ICON_PULSE      = false
 
-    # Duraciones en frames. Intencionalmente cortas para no entorpecer navegación.
-    OPEN_ANIMATION_FRAMES = 4
-    PAGE_TURN_FRAMES       = 3
+    # Duraciones en frames. Breves, pero lo bastante visibles para que abrir/cerrar
+    # y pasar página se sientan como acciones de una libreta.
+    # Ritmo visual: centralizado para poder ajustar la sensación sin tocar la UI.
+    # 60 frames = 1 segundo en Essentials.
+    OPEN_ANIMATION_FRAMES   = 18
+    PAGE_TURN_FRAMES        = 16
+    CONTENT_FADE_FRAMES     = 6
+    PAGE_TURN_MIN_FRAMES    = 8
+
+    # Gráficos custom para la forma áurea. La ruta es relativa a Graphics/.
+    GOLDEN_FORM_SPRITE_ROOT = "Graphics/Pokemon/GoldenForms"
 
     # Información global mostrada en la página de Forma Dorada.
     GOLDEN_FORM_DRAIN_TEXT = "Pierde 1/4 de sus PS máximos al final de cada turno."
@@ -67,6 +75,11 @@ module ResearchNotebook
       "Graphics/UI/Pokedex/types",
       "Graphics/UI/Pokedex/icon_types"
     ]
+
+    # ChangeDex: ocultar formas listadas en config.json (megas, etc.).
+    USE_CHANGEDEX_HIDDEN_FORMS = true
+    CHANGEDEX_CONFIG_JSON = "Data/ChangeDex/config.json"
+    CHANGEDEX_CHANGES_JSON  = "Data/ChangeDex/pokemon_changes.json"
 
     MENU_NAME = "Libreta"
   end

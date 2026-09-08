@@ -1,6 +1,6 @@
 # encoding: UTF-8
 #===============================================================================
-# Libreta de Investigación - Progreso persistente v1.2.1
+# Libreta de Investigación - Progreso persistente v1.2.2
 #===============================================================================
 module ResearchNotebook
   class Progress

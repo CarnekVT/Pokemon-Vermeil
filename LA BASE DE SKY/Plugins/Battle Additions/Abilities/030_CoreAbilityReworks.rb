@@ -28,11 +28,30 @@ Battle::AbilityEffects::ModifyMoveBaseType.add(:NORMALIZE,
 
 class Battle
   def pbNormalizeFieldActive?
-    allBattlers.each do |b|
-      next if !b || b.fainted?
-      return true if b.hasActiveAbility?(:NORMALIZE)
+    return false if @__normalize_field_active_busy
+    @__normalize_field_active_busy = true
+    begin
+      neutralizing = false
+      allBattlers.each do |b|
+        next if !b || b.fainted?
+        next if b.effects[PBEffects::GastroAcid]
+        abil = b.ability_id rescue nil
+        if abil == :NEUTRALIZINGGAS
+          neutralizing = true
+          break
+        end
+      end
+      allBattlers.each do |b|
+        next if !b || b.fainted?
+        next if b.effects[PBEffects::GastroAcid]
+        abil = b.ability_id rescue nil
+        next if neutralizing && abil != :NEUTRALIZINGGAS
+        return true if abil == :NORMALIZE
+      end
+      return false
+    ensure
+      @__normalize_field_active_busy = false
     end
-    return false
   end
 end
 

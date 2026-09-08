@@ -1,7 +1,7 @@
 {
   "format": "battle-animation-studio-compiled",
   "version": 19,
-  "exportedAt": "2026-09-06T02:02:06.286Z",
+  "exportedAt": "2026-09-08T03:11:04.048Z",
   "animations": [
     {
       "id": "anim_mt3nkm5h_8a",
@@ -21268,7 +21268,7 @@
               "type": "projectile",
               "name": "Cut · Hit · Punch · Punch",
               "enabled": true,
-              "locked": true,
+              "locked": false,
               "startFrame": 6,
               "endFrame": 17,
               "graphic": {
@@ -21604,25 +21604,43 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxymy5_cu",
+                    "frame": 0,
+                    "value": -24,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdby8e0_103",
                     "frame": 6,
-                    "value": 100,
+                    "value": -24,
                     "easing": "linear"
                   }
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxymy5_cv",
+                    "frame": 0,
+                    "value": -151,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdby8e0_107",
                     "frame": 6,
-                    "value": 0,
+                    "value": -151,
                     "easing": "linear"
                   }
                 ],
                 "toneBlue": [
                   {
+                    "id": "pkey_mtpxymy5_cw",
+                    "frame": 0,
+                    "value": -90,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdby8e0_10b",
                     "frame": 6,
-                    "value": 100,
+                    "value": -90,
                     "easing": "linear"
                   }
                 ],
@@ -21651,7 +21669,11 @@
               },
               "fxOps": [],
               "pbs": {
-                "focus": "target"
+                "focus": "target",
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -21668,7 +21690,7 @@
               "type": "projectile",
               "name": "Cut · Hit · Punch · Punch copia",
               "enabled": true,
-              "locked": true,
+              "locked": false,
               "startFrame": 12,
               "endFrame": 23,
               "graphic": {
@@ -22011,25 +22033,43 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxyrw2_cx",
+                    "frame": 0,
+                    "value": -24,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc156d_123",
                     "frame": 12,
-                    "value": 100,
+                    "value": -24,
                     "easing": "linear"
                   }
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxyrw2_cy",
+                    "frame": 0,
+                    "value": -151,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc156d_124",
                     "frame": 12,
-                    "value": 0,
+                    "value": -151,
                     "easing": "linear"
                   }
                 ],
                 "toneBlue": [
                   {
+                    "id": "pkey_mtpxyrw2_cz",
+                    "frame": 0,
+                    "value": -90,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc156d_125",
                     "frame": 12,
-                    "value": 100,
+                    "value": -90,
                     "easing": "linear"
                   }
                 ],
@@ -22058,7 +22098,11 @@
               },
               "fxOps": [],
               "pbs": {
-                "focus": "target"
+                "focus": "target",
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -22075,7 +22119,7 @@
               "type": "projectile",
               "name": "Cut · Hit · Punch · Punch copia copia",
               "enabled": true,
-              "locked": true,
+              "locked": false,
               "startFrame": 17,
               "endFrame": 28,
               "graphic": {
@@ -22430,25 +22474,43 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxyxjl_d0",
+                    "frame": 0,
+                    "value": -24,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc8e78_2vz",
                     "frame": 17,
-                    "value": 100,
+                    "value": -24,
                     "easing": "linear"
                   }
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxyxjl_d1",
+                    "frame": 0,
+                    "value": -151,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc8e78_2w0",
                     "frame": 17,
-                    "value": 0,
+                    "value": -151,
                     "easing": "linear"
                   }
                 ],
                 "toneBlue": [
                   {
+                    "id": "pkey_mtpxyxjl_d2",
+                    "frame": 0,
+                    "value": -90,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc8e78_2w1",
                     "frame": 17,
-                    "value": 100,
+                    "value": -90,
                     "easing": "linear"
                   }
                 ],
@@ -22477,7 +22539,11 @@
               },
               "fxOps": [],
               "pbs": {
-                "focus": "target"
+                "focus": "target",
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -23163,6 +23229,12 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxxnlm_cl",
+                    "frame": 0,
+                    "value": 64,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdhmpoe_4vf",
                     "frame": 12,
                     "value": -10,
@@ -23171,6 +23243,12 @@
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxxnlm_cm",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdhnn73_4vh",
                     "frame": 12,
                     "value": -255,
@@ -23178,6 +23256,12 @@
                   }
                 ],
                 "toneBlue": [
+                  {
+                    "id": "pkey_mtpxxnlm_cn",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
                   {
                     "id": "pkey_mtdhmrur_4vg",
                     "frame": 12,
@@ -23434,7 +23518,11 @@
                 "particleCommandSpace": "animation",
                 "randomAngleRange": 0,
                 "randomInvertAngle": false,
-                "randomInvertFlip": true
+                "randomInvertFlip": true,
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -23560,6 +23648,12 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxxy3t_co",
+                    "frame": 0,
+                    "value": 64,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdi74eq_6q",
                     "frame": 18,
                     "value": -10,
@@ -23568,6 +23662,12 @@
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxxy3t_cp",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdi74eq_6r",
                     "frame": 18,
                     "value": -255,
@@ -23575,6 +23675,12 @@
                   }
                 ],
                 "toneBlue": [
+                  {
+                    "id": "pkey_mtpxxy3t_cq",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
                   {
                     "id": "pkey_mtdi74eq_6s",
                     "frame": 18,
@@ -23831,7 +23937,11 @@
                 "particleCommandSpace": "animation",
                 "randomAngleRange": 0,
                 "randomInvertAngle": false,
-                "randomInvertFlip": true
+                "randomInvertFlip": true,
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -23957,6 +24067,12 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxy5ij_cr",
+                    "frame": 0,
+                    "value": 64,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdi7hbg_7r",
                     "frame": 24,
                     "value": -10,
@@ -23965,6 +24081,12 @@
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxy5ij_cs",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdi7hbg_7s",
                     "frame": 24,
                     "value": -255,
@@ -23972,6 +24094,12 @@
                   }
                 ],
                 "toneBlue": [
+                  {
+                    "id": "pkey_mtpxy5ij_ct",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
                   {
                     "id": "pkey_mtdi7hbg_7t",
                     "frame": 24,
@@ -24228,7 +24356,11 @@
                 "particleCommandSpace": "animation",
                 "randomAngleRange": 0,
                 "randomInvertAngle": false,
-                "randomInvertFlip": true
+                "randomInvertFlip": true,
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -36681,7 +36813,290 @@
       }
     },
     {
-      "id": "anim_mti2xsw4_sq",
+      "id": "anim_mts3av9r_2xj",
+      "name": "Ascuas",
+      "fps": 20,
+      "duration": 30,
+      "source": {
+        "type": "studio",
+        "move": "EMBER",
+        "version": 0,
+        "catalogType": "move",
+        "opposing": false,
+        "sideContext": "player",
+        "targetMode": "both",
+        "targetScope": "single_other",
+        "allowedTargetScopes": [
+          "single_other"
+        ],
+        "contextAutoAdapt": true,
+        "previewAffectedTargets": false,
+        "autoReplicateAffected": false,
+        "autoReplicateTouched": false,
+        "askBackupOnContextEdit": false,
+        "commonSubjectRole": "auto",
+        "activeTimelineContext": null,
+        "authors": [
+          "CarnekVT"
+        ],
+        "detectedTraits": [],
+        "detectedFunctionCode": "BurnTarget",
+        "detectedCategory": "special",
+        "detectedTarget": "NearOther",
+        "variantScope": "special",
+        "groupIdentity": "move|EMBER",
+        "runtimeEnabled": true
+      },
+      "contextTimelines": [],
+      "battlers": {
+        "user": {
+          "id": "battler_user",
+          "type": "battler",
+          "side": "user",
+          "name": "User",
+          "enabled": true,
+          "locked": false,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mts3av9r_2xk",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mts3av9r_2xl",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "idlePause": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "priority": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        },
+        "target": {
+          "id": "battler_target",
+          "type": "battler",
+          "side": "target",
+          "name": "Target",
+          "enabled": true,
+          "locked": false,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mts3av9r_2xm",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mts3av9r_2xn",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "idlePause": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        }
+      },
+      "camera": {
+        "id": "camera_main",
+        "type": "camera",
+        "name": "Camera",
+        "enabled": true,
+        "locked": false,
+        "visual": {
+          "cameraX": 0,
+          "cameraY": 0,
+          "cameraZoom": 100,
+          "cameraRotation": 0
+        },
+        "valueKeys": {
+          "size": [],
+          "scaleX": [],
+          "scaleY": [],
+          "viewScale": [],
+          "rotation": [],
+          "opacity": [],
+          "graphicFrame": [],
+          "srcX": [],
+          "srcY": [],
+          "srcW": [],
+          "srcH": [],
+          "z": [],
+          "blend": [],
+          "flip": [],
+          "flipY": [],
+          "facing": [],
+          "idlePause": [],
+          "toneRed": [],
+          "toneGreen": [],
+          "toneBlue": [],
+          "toneGray": [],
+          "cameraX": [],
+          "cameraY": [],
+          "cameraZoom": [],
+          "cameraRotation": []
+        },
+        "visibleKeys": [
+          {
+            "id": "vkey_mts3av9r_2xo",
+            "frame": 0,
+            "value": true
+          }
+        ],
+        "positionKeys": [
+          {
+            "id": "key_mts3av9r_2xp",
+            "frame": 0,
+            "easing": "linear",
+            "point": {
+              "anchor": "screen",
+              "x": 0,
+              "y": 0,
+              "offsetX": 0,
+              "offsetY": 0
+            }
+          }
+        ],
+        "startFrame": 0,
+        "endFrame": 0,
+        "logic": []
+      },
+      "tracks": [
+        {
+          "id": "track_mts3av9r_2xq",
+          "type": "effects",
+          "name": "Effects",
+          "clips": []
+        }
+      ],
+      "events": [],
+      "logic": [],
+      "notes": "",
+      "hidesDataBoxes": false,
+      "hidesAdjacents": false,
+      "scene": {
+        "inheritProject": true,
+        "source": "project",
+        "responsive": true,
+        "referenceWidth": 640,
+        "referenceHeight": 480,
+        "cameraBoundsMode": "auto"
+      }
+    },
+    {
+      "id": "anim_mts3cylx_2y9",
       "name": "Pistola Agua (Player)",
       "fps": 20,
       "duration": 60,
@@ -36715,7 +37130,8 @@
         ],
         "runtimeSelected": true,
         "groupIdentity": "move|WATERGUN",
-        "runtimeEnabled": true
+        "runtimeEnabled": true,
+        "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY"
       },
       "contextTimelines": [],
       "battlers": {
@@ -37819,7 +38235,7 @@
           "name": "Effects",
           "clips": [
             {
-              "id": "clip_mtnlfuua_c3",
+              "id": "clip_mts3cylx_2yd",
               "type": "projectile",
               "name": "WaterGun",
               "enabled": true,
@@ -37831,7 +38247,7 @@
                 "projectPath": "Graphics/AnimationStudio/smog 2.png",
                 "folder": "Animations",
                 "name": "smog 2",
-                "relativeHint": "",
+                "relativeHint": "smog 2.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -37843,7 +38259,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -37958,7 +38375,7 @@
                       "id": "ecmd_mtnlghm1_cb",
                       "frame": 1,
                       "duration": 0,
-                      "value": 32
+                      "value": 16
                     }
                   ],
                   "emitterIntensity": [
@@ -37966,7 +38383,7 @@
                       "id": "ecmd_mtnlghm1_cc",
                       "frame": 1,
                       "duration": 0,
-                      "value": 3
+                      "value": 2
                     }
                   ],
                   "emitXRange": [
@@ -38191,7 +38608,7 @@
               }
             },
             {
-              "id": "clip_mtnrodjw_dx",
+              "id": "clip_mts3cylx_2ye",
               "type": "projectile",
               "name": "Emitter · scald-steam",
               "enabled": true,
@@ -38200,10 +38617,10 @@
               "endFrame": 60,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/AnimationStudio/smog 1.png",
+                "projectPath": "Graphics/AnimationStudio/smog 1_2.png",
                 "folder": "Animations",
                 "name": "smog 1",
-                "relativeHint": "",
+                "relativeHint": "smog 1.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -38215,7 +38632,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -38354,7 +38772,7 @@
                       "id": "ecmd_mtnrodnl_e8",
                       "frame": 11,
                       "duration": 0,
-                      "value": 14
+                      "value": 8
                     }
                   ],
                   "emitterIntensity": [
@@ -38362,7 +38780,7 @@
                       "id": "ecmd_mtnrodnl_e9",
                       "frame": 11,
                       "duration": 0,
-                      "value": 2
+                      "value": 1
                     }
                   ],
                   "emitXRange": [
@@ -38587,7 +39005,7 @@
               }
             },
             {
-              "id": "clip_mtnrvddn_1d3",
+              "id": "clip_mts3cylx_2yf",
               "type": "projectile",
               "name": "Emitter · spark-impact",
               "enabled": true,
@@ -38599,7 +39017,7 @@
                 "projectPath": "Graphics/AnimationStudio/bubble 2.png",
                 "folder": "Battle animations",
                 "name": "bubble 2",
-                "relativeHint": "",
+                "relativeHint": "bubble 2.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -38611,7 +39029,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -38728,7 +39147,7 @@
                       "id": "ecmd_mtnrvdip_1de",
                       "frame": 11,
                       "duration": 0,
-                      "value": 10
+                      "value": 6
                     }
                   ],
                   "emitterIntensity": [
@@ -38742,7 +39161,7 @@
                       "id": "ecmd_mtnrvdip_1df",
                       "frame": 11,
                       "duration": 0,
-                      "value": 4
+                      "value": 2
                     }
                   ],
                   "energyTravelFrames": [
@@ -38911,7 +39330,7 @@
         }
       ],
       "logic": [],
-      "notes": "",
+      "notes": "Performance tuning: reduced emitter density for ingame playback.",
       "hidesDataBoxes": false,
       "hidesAdjacents": false,
       "scene": {
@@ -38924,7 +39343,7 @@
       }
     },
     {
-      "id": "anim_mtnssluh_bp",
+      "id": "anim_mts3dy74_2yy",
       "name": "Pistola Agua (Foe)",
       "fps": 20,
       "duration": 60,
@@ -38961,7 +39380,8 @@
         "duplicatedFrom": "anim_mti2xsw4_sq",
         "duplicatedFromName": "Pistola Agua",
         "groupName": "Pistola Agua",
-        "runtimeEnabled": true
+        "runtimeEnabled": true,
+        "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY"
       },
       "contextTimelines": [],
       "battlers": {
@@ -40209,7 +40629,7 @@
           "name": "Effects",
           "clips": [
             {
-              "id": "clip_mtnssluh_e2",
+              "id": "clip_mts3dy74_2z2",
               "type": "projectile",
               "name": "WaterGun",
               "enabled": true,
@@ -40221,7 +40641,7 @@
                 "projectPath": "Graphics/AnimationStudio/smog 2.png",
                 "folder": "Animations",
                 "name": "smog 2",
-                "relativeHint": "",
+                "relativeHint": "smog 2.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -40233,7 +40653,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -40334,7 +40755,7 @@
                       "id": "ecmd_mtnssluh_e7",
                       "frame": 1,
                       "duration": 0,
-                      "value": 32
+                      "value": 16
                     }
                   ],
                   "emitterIntensity": [
@@ -40342,7 +40763,7 @@
                       "id": "ecmd_mtnssluh_e8",
                       "frame": 1,
                       "duration": 0,
-                      "value": 3
+                      "value": 2
                     }
                   ],
                   "emitXRange": [
@@ -40595,7 +41016,7 @@
               }
             },
             {
-              "id": "clip_mtnssluh_eq",
+              "id": "clip_mts3dy74_2z3",
               "type": "projectile",
               "name": "Emitter · scald-steam",
               "enabled": true,
@@ -40604,10 +41025,10 @@
               "endFrame": 60,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/AnimationStudio/smog 1.png",
+                "projectPath": "Graphics/AnimationStudio/smog 1_2.png",
                 "folder": "Animations",
                 "name": "smog 1",
-                "relativeHint": "",
+                "relativeHint": "smog 1.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -40619,7 +41040,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -40772,7 +41194,7 @@
                       "id": "ecmd_mtnssluh_ey",
                       "frame": 11,
                       "duration": 0,
-                      "value": 14
+                      "value": 8
                     }
                   ],
                   "emitterIntensity": [
@@ -40786,7 +41208,7 @@
                       "id": "ecmd_mtnssluh_ez",
                       "frame": 11,
                       "duration": 0,
-                      "value": 5
+                      "value": 2
                     }
                   ],
                   "emitXRange": [
@@ -41080,7 +41502,7 @@
               }
             },
             {
-              "id": "clip_mtnssluh_fk",
+              "id": "clip_mts3dy74_2z4",
               "type": "projectile",
               "name": "Emitter · spark-impact",
               "enabled": true,
@@ -41092,7 +41514,7 @@
                 "projectPath": "Graphics/AnimationStudio/bubble 2.png",
                 "folder": "Battle animations",
                 "name": "bubble 2",
-                "relativeHint": "",
+                "relativeHint": "bubble 2.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -41104,7 +41526,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -41221,7 +41644,7 @@
                       "id": "ecmd_mtnssluh_fr",
                       "frame": 11,
                       "duration": 0,
-                      "value": 10
+                      "value": 6
                     }
                   ],
                   "emitterIntensity": [
@@ -41235,7 +41658,7 @@
                       "id": "ecmd_mtnssluh_ft",
                       "frame": 11,
                       "duration": 0,
-                      "value": 4
+                      "value": 2
                     }
                   ],
                   "energyTravelFrames": [
@@ -41426,7 +41849,7 @@
         }
       ],
       "logic": [],
-      "notes": "",
+      "notes": "Performance tuning: reduced emitter density for ingame playback.",
       "hidesDataBoxes": false,
       "hidesAdjacents": false,
       "scene": {

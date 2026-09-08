@@ -1,4 +1,4 @@
-[VERMEIL] RESEARCH NOTEBOOK v1.2.1
+[VERMEIL] RESEARCH NOTEBOOK v1.2.2
 ==================================
 Pokémon Essentials v21.1
 Créditos: CarnekVT
@@ -22,9 +22,18 @@ NAVEGACIÓN
 
 APERTURA / CIERRE
 =================
-La transición representa una libreta cerrada que abre sus páginas desde el
-centro. Ya no usa el fundido del menú de pausa ni una animación de dos puertas.
-La duración es intencionalmente corta.
+La tapa ocupa el mismo bloque que las páginas abiertas y gira sobre el lomo,
+revelando la Libreta que ya está debajo. No usa el fundido del menú de pausa.
+Los cambios de sección y ficha usan un giro de hoja breve.
+
+MENÚ DE PAUSA
+=============
+La opción "Libreta" aparece cuando la Libreta se ha desbloqueado. En partidas
+nuevas no está disponible desde el inicio. Estas llamadas también desbloquean
+la Libreta base al abrir sus respectivas secciones:
+  pbUnlockResearchNotebook
+  pbUnlockArcaneNotebook
+  pbUnlockGoldenNotebook
 
 RENDIMIENTO
 ===========
@@ -84,3 +93,17 @@ DEBUG
 SUMMARY
 =======
 Este plugin no modifica PokemonSummaryScreen ni PokemonSummary_Scene.
+
+
+CAMBIOS v1.2.3
+===============
+- La Forma Dorada ya no cae a la silueta de la forma normal cuando el JSON usa un Hash sin índice.
+- Se admite `goldenFormSprite` / `goldenFormGraphic` por especie para usar una silueta o sprite custom desde `Graphics/Pokemon/GoldenForms`.
+- Las duraciones de apertura, giro y fundido se centralizaron en Configuración para poder ajustar el ritmo sin tocar la lógica de dibujo.
+
+
+IDs DE ESPECIE
+==============
+La Libreta acepta aliases frecuentes de proyectos antiguos (`NIDORANFE`,
+`NIDORANMA`) y entradas con forma (`NINETALES,1`). La forma se separa antes
+de consultar GameData::Species para evitar errores `Unknown ID`.

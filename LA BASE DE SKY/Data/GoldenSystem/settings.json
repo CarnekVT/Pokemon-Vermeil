@@ -6,6 +6,6 @@
     "powerBoost": 3,
     "powerPenalty": 2,
     "sameTypeMultiplier": 1.2,
-    "formHPDrain": 0.25
+    "formHPDrain": 0.15
   }
 }

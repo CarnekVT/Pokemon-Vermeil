@@ -128,9 +128,19 @@ module GoldenSystem
   module Data
     @form_proxy_cache={}
     def self.species_document
+      # Data lookups can be triggered while Essentials is building species and
+      # move objects.  Never recursively re-enter the JSON loader.
+      fallback={"schema"=>1,"species"=>{}}
+      if @species_document_loading
+        return @species_document || fallback
+      end
+      @species_document_loading=true
       doc=CarnekStandaloneJSON.load(GoldenSystem::SPECIES_JSON,{"schema"=>1,"species"=>{}})
       doc["species"]={} unless doc["species"].is_a?(Hash)
+      @species_document=doc
       doc
+    ensure
+      @species_document_loading=false
     end
     def self.raw_entry(species, form=0)
       key=form.to_i==0 ? species.to_s.upcase : "#{species.to_s.upcase},#{form.to_i}"
@@ -199,12 +209,39 @@ module GoldenSystem
         p.instance_variable_set(:@real_form_name,name.to_s)
         p.instance_variable_set(:@form_name,name.to_s)
       end
+      # Golden Form typing is derived from the source form by default.
+      # An explicit goldenForm.types array/string still has priority, but it is
+      # no longer required to duplicate goldenType/goldenTypeReplace in JSON.
       types=definition["types"]
       if types.is_a?(String); types=types.split(","); end
+      ids=nil
       if types.is_a?(Array) && !types.empty?
-        ids=types.map{|x| x.to_s.upcase.to_sym}.select{|x| GameData::Type.exists?(x)}
-        p.instance_variable_set(:@types,ids[0,2]) if !ids.empty?
+        explicit=types.map{|x| x.to_s.upcase.to_sym}.select{|x| GameData::Type.exists?(x)}
+        ids=explicit[0,2] if !explicit.empty?
       end
+      if !ids || ids.empty?
+        source_data=nil
+        begin; source_data=GameData::Species.get_species_form(species,source_form); rescue StandardError; end
+        begin; source_data ||= GameData::Species.get(species); rescue StandardError; end
+        source_types=(source_data && source_data.respond_to?(:types)) ? source_data.types : nil
+        ids=(source_types || []).compact[0,2].clone
+        golden=golden_type(species,source_form)
+        if golden && GameData::Type.exists?(golden) && !ids.include?(golden)
+          if ids.length<=1
+            ids << golden
+          else
+            replace=golden_type_replace(species,source_form)
+            idx=replace ? ids.index(replace) : nil
+            # Legacy/incomplete data should still never create a triple type.
+            # If the requested replacement is absent, use the secondary slot,
+            # matching Golden Power's established fallback behaviour.
+            idx=1 if idx.nil?
+            ids[idx]=golden
+          end
+        end
+        ids=ids.compact.uniq[0,2]
+      end
+      p.instance_variable_set(:@types,ids) if ids && !ids.empty?
       stats=stats_hash(definition["baseStats"])
       if stats && !stats.empty?
         current=(base.base_stats rescue {}).dup
@@ -227,6 +264,8 @@ module GoldenSystem
       CarnekStandaloneJSON.invalidate(GoldenSystem::MOVES_JSON)
       CarnekStandaloneJSON.invalidate(GoldenSystem::SETTINGS_JSON)
       CarnekStandaloneJSON.invalidate(GoldenSystem::TRAINERS_JSON)
+      @species_document=nil
+      @species_document_loading=false
       @form_proxy_cache={}
     end
   end

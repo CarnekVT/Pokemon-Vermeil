@@ -1,5 +1,5 @@
 #===============================================================================
-# Battle Animation Studio Runtime v1.0.53 - LBDS
+# Battle Animation Studio Runtime v1.0.62 - LBDS
 # Plays animations exported by the Maker Studio Battle Animation Studio.
 # Credits: CarnekVT
 # Source data: PBS/AnimationStudio/compiled_animations.json
@@ -217,7 +217,7 @@ module BattleAnimationStudioRuntime
   end
 
   DEFAULT_DATA_FILE = File.join("PBS", "AnimationStudio", "compiled_animations.json")
-  VERSION = 38
+  VERSION = 37
   RUNTIME_PARTICLE_LIMIT = 240
   @cache = nil
   @mtime = nil
@@ -638,7 +638,6 @@ module BattleAnimationStudioRuntime
       # DeluxeBitmapWrapper. Install the wrapper-level Pause/Resume gate lazily
       # here, after every plugin has finished loading.
       BattleAnimationStudioRuntime.install_deluxe_bitmap_pause_hook!
-      BattleAnimationStudioRuntime.install_battler_shadow_transform_hook!
       @sprites = sprites || {}
       @viewport = viewport
       @user = user
@@ -651,6 +650,7 @@ module BattleAnimationStudioRuntime
       @clock_start = monotonic_seconds
       @done = false
       @effect_sprites = {}
+      @afterimage_sprites = {}
       @effect_bitmap_names = {}
       @procedural_bitmaps = {}
       @overlay_sprites = []
@@ -1226,6 +1226,7 @@ module BattleAnimationStudioRuntime
       restore_secondary_battlers
       restore_scene_visibility
       @effect_sprites.each_value { |s| s.dispose if s && !s.disposed? }
+      @afterimage_sprites.each_value { |s| s.dispose if s && !s.disposed? }
       @emitter_sprites.each_value { |pool| pool.each { |s| s.dispose if s && !s.disposed? } }
       @second_layer_sprites.each_value { |s| s.dispose if s && !s.disposed? }
       @overlay_sprites.each { |s| s.dispose if s && !s.disposed? }
@@ -1234,6 +1235,7 @@ module BattleAnimationStudioRuntime
       # here; doing so forced later animations to decode them again and could
       # invalidate a bitmap still referenced elsewhere.
       @effect_sprites.clear
+      @afterimage_sprites.clear
       @emitter_sprites.clear
       @second_layer_sprites.clear
       @overlay_sprites.clear
@@ -1723,6 +1725,13 @@ module BattleAnimationStudioRuntime
           switches.each do |sw|
             name = resolve_runtime_graphic(clip, sw["value"])
             names[name] = true if !name.empty?
+          end
+          pbs = (clip["pbs"].is_a?(Hash) ? clip["pbs"] : {})
+          pattern = pbs["emitterGraphicSequence"].is_a?(Array) ? pbs["emitterGraphicSequence"] : []
+          pattern.each do |raw|
+            raw = raw.is_a?(Hash) ? (raw["projectPath"] || raw["value"]) : raw
+            name = resolve_runtime_graphic(clip, raw)
+            names[name] = true if name && !name.empty?
           end
         end
         pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
@@ -2308,17 +2317,24 @@ module BattleAnimationStudioRuntime
       return [ret, false] if authored_side_opposing? == runtime_side_opposing?
       current_user = base_anchor(:user, true); current_target = base_anchor(:target, true)
       source_user = current_target; source_target = current_user
+      dest_user = current_user; dest_target = current_target
+      # Do not rotate the authored screen route 180 degrees. That flips its
+      # vertical deviation and makes arcs/multi-key paths jump to another height.
+      # Mirror horizontal progress between the battlers and preserve the route's
+      # vertical deviation from the authored User→Target baseline instead.
+      source_dx = source_target[0].to_f - source_user[0].to_f
+      if source_dx.abs > 0.0001
+        alpha = (ret[0].to_f - source_user[0].to_f) / source_dx
+        source_line_y = source_user[1].to_f + alpha * (source_target[1].to_f - source_user[1].to_f)
+        vertical_deviation = ret[1].to_f - source_line_y
+        mapped_x = dest_user[0].to_f + alpha * (dest_target[0].to_f - dest_user[0].to_f)
+        mapped_line_y = dest_user[1].to_f + alpha * (dest_target[1].to_f - dest_user[1].to_f)
+        return [[mapped_x, mapped_line_y + vertical_deviation], true]
+      end
       source_anchor = role.to_s == "user" ? source_user : source_target
-      dest_anchor = role.to_s == "user" ? current_user : current_target
-      svx = source_target[0].to_f - source_user[0].to_f; svy = source_target[1].to_f - source_user[1].to_f
-      dvx = current_target[0].to_f - current_user[0].to_f; dvy = current_target[1].to_f - current_user[1].to_f
-      sl = Math.sqrt(svx * svx + svy * svy); dl = Math.sqrt(dvx * dvx + dvy * dvy)
-      return [ret, false] if sl <= 0.0001 || dl <= 0.0001
-      cos = (svx * dvx + svy * dvy) / (sl * dl)
-      sin = (svx * dvy - svy * dvx) / (sl * dl)
-      scale = dl / sl
-      lx = ret[0].to_f - source_anchor[0].to_f; ly = ret[1].to_f - source_anchor[1].to_f
-      [[dest_anchor[0].to_f + (lx * cos - ly * sin) * scale, dest_anchor[1].to_f + (lx * sin + ly * cos) * scale], true]
+      dest_anchor = role.to_s == "user" ? dest_user : dest_target
+      [[dest_anchor[0].to_f - (ret[0].to_f - source_anchor[0].to_f),
+        dest_anchor[1].to_f + (ret[1].to_f - source_anchor[1].to_f)], true]
     rescue
       [ret, false]
     end
@@ -2528,7 +2544,7 @@ module BattleAnimationStudioRuntime
       end
       return if !sprite.respond_to?(:setBitmap)
       name = latest_graphic(clip, frame)
-      return if name.empty? || @effect_bitmap_names[id] == name
+      return if name.empty? || (@effect_bitmap_names[id] == name && sprite.bitmap && !sprite.bitmap.disposed?)
       sprite.setBitmap(name)
       @effect_bitmap_names[id] = name
     rescue
@@ -2862,6 +2878,12 @@ module BattleAnimationStudioRuntime
       effective_flip_y = !effective_flip_y if context_override && runtime_bool(context_override["flipY"])
       range = (desc[:random_angle_range] || 0).to_i
       angle_offset = (desc[:random_angle] || 0).to_f
+      orientation = emitter_graphic_orientation_mode(clip)
+      if orientation != "legacy"
+        sprite.angle = base_rotation + angle_offset + (effective_flip_y ? 180.0 : 0.0)
+        sprite.angle *= -1 if desc[:random_angle_invert]
+        return
+      end
       target = pbs_focus_target(clip).dup
       graphic = clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
       special = graphic["source"].to_s.start_with?("battler-")
@@ -3137,65 +3159,6 @@ module BattleAnimationStudioRuntime
       end
     rescue => e
       BattleAnimationStudioRuntime.log("shadow position #{e.class}: #{e.message}")
-    end
-
-
-
-    # Test(48) FIX4: final shadow follower pass. BAS can still alter battler
-    # transforms after the battler track itself has been sampled, so syncing only
-    # inside apply_object is too early for moves such as Quick Attack. Recompute
-    # every captured battler shadow from the battler's FINAL uncammed position at
-    # the render boundary. This keeps DBK's native species/side shadow offset and
-    # makes every BAS X/Y displacement automatically carry its shadow with it.
-    def sync_all_battler_shadows!
-      seen = {}
-      battlers = []
-      battlers << @user if @user
-      battlers << @target if @target
-      battlers.concat(move_affected_battlers) if respond_to?(:move_affected_battlers)
-      battlers.each do |battler|
-        next if !battler
-        idx = BattleAnimationStudioRuntime.safe_battler_index(battler, -1).to_i
-        next if idx < 0 || seen[idx]
-        seen[idx] = true
-        sprite = (@sprites["pokemon_#{idx}"] rescue nil)
-        sync_battler_shadow_position(battler, sprite) if sprite
-      end
-    rescue => e
-      BattleAnimationStudioRuntime.log("shadow final sync #{e.class}: #{e.message}")
-    end
-
-    # Test(48) FIX5: direct transform follower. The Animated Pokémon System
-    # creates shadow_N as an independent Sprite and only positions it when its
-    # bitmap is assigned. There is no live parent/child transform relationship.
-    # The BattlerSprite x=/y= hook below therefore forwards each BAS-authored
-    # delta immediately to the matching shadow. Camera writes are ignored because
-    # BAS transforms both world sprites separately during render.
-    def propagate_shadow_delta_from_sprite(battler_sprite, dx, dy)
-      return if !battler_sprite
-      return if @camera_restore_count.to_i > 0
-      dx = dx.to_f
-      dy = dy.to_f
-      return if dx.abs < 0.000001 && dy.abs < 0.000001
-      @shadow_follow_sprite_indices ||= {}
-      oid = battler_sprite.object_id
-      idx = @shadow_follow_sprite_indices[oid]
-      if idx.nil?
-        active_battler_indices.each do |candidate|
-          sp = (@sprites["pokemon_#{candidate}"] rescue nil)
-          next if !sp || !sp.equal?(battler_sprite)
-          idx = candidate.to_i
-          @shadow_follow_sprite_indices[oid] = idx
-          break
-        end
-      end
-      return if idx.nil?
-      shadow = (@sprites["shadow_#{idx}"] rescue nil)
-      return if !shadow || (shadow.respond_to?(:disposed?) && shadow.disposed?)
-      shadow.x = shadow.x.to_f + dx if dx.abs >= 0.000001 && shadow.respond_to?(:x=)
-      shadow.y = shadow.y.to_f + dy if dy.abs >= 0.000001 && shadow.respond_to?(:y=)
-    rescue => e
-      BattleAnimationStudioRuntime.log("shadow delta follow #{e.class}: #{e.message}")
     end
 
     # Animated Pokémon System/DBK caps shadow opacity separately (normally 100).
@@ -3750,6 +3713,8 @@ module BattleAnimationStudioRuntime
       desc = {}
       desc[:frame] = ef
       desc[:seed] = seed
+      desc[:emission_index] = emission_index.to_i
+      desc[:particle_in_emission] = particle_in_emission.to_i
       desc[:ox] = emitter_randomized(clip, "emitX", "emitXRange", ef, rnd, 0)
       desc[:oy] = emitter_randomized(clip, "emitY", "emitYRange", ef, rnd, 0)
       desc[:speed] = emitter_randomized(clip, "emitSpeed", "emitSpeedRange", ef, rnd, 0)
@@ -3830,7 +3795,9 @@ module BattleAnimationStudioRuntime
       frames.each_with_index do |ef, emission_index|
         intensity = [[emitter_value(clip, "emitterIntensity", ef, base_intensity).to_i, 1].max, 100].min
         intensity.times do |j|
-          out << build_emitter_descriptor(clip, ef, emission_index, j)
+          desc = build_emitter_descriptor(clip, ef, emission_index, j)
+          desc[:sequence_index] = out.length
+          out << desc
         end
       end
       @emitter_particle_cache[key] = out
@@ -3887,6 +3854,209 @@ module BattleAnimationStudioRuntime
     rescue
     end
 
+    def emitter_graphic_orientation_mode(clip)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      raw = pbs["emitterGraphicOrientation"].to_s.downcase
+      return raw if ["manual", "travel", "legacy"].include?(raw)
+      return "travel" if runtime_bool(pbs["simpleFaceTravel"])
+      angle_mode = pbs["angleOverride"].to_s.downcase
+      return "legacy" if !angle_mode.empty? && angle_mode != "none"
+      "manual"
+    rescue
+      "manual"
+    end
+
+    def emitter_graphic_sequence_entry(clip, desc, local_frame = 0)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      return nil if !runtime_bool(pbs["emitterGraphicSequenceEnabled"])
+      list = pbs["emitterGraphicSequence"].is_a?(Array) ? pbs["emitterGraphicSequence"] : []
+      list = list.map do |raw|
+        if raw.is_a?(Hash)
+          path = (raw["projectPath"] || raw["value"]).to_s
+          next nil if path.empty?
+          { :path => path, :frame => [[raw["frame"].to_i, 0].max, 9999].min }
+        else
+          path = raw.to_s
+          next nil if path.empty?
+          { :path => path, :frame => 0 }
+        end
+      end.compact
+      return nil if list.empty?
+      mode = pbs["emitterGraphicSequenceMode"].to_s.downcase
+      mode = "animate" if mode.empty?
+      if mode == "assign"
+        basis = pbs["emitterGraphicSequenceBasis"].to_s.downcase
+        index = basis == "emission" ? desc[:emission_index].to_i : desc[:sequence_index].to_i
+      else
+        step_frames = [[(pbs["emitterGraphicSequenceStepFrames"] || 2).to_i, 1].max, 60].min
+        index = (local_frame.to_f / step_frames.to_f).floor
+      end
+      list[index % list.length]
+    rescue
+      nil
+    end
+
+    def emitter_graphic_sequence_path(clip, desc, local_frame = 0)
+      entry = emitter_graphic_sequence_entry(clip, desc, local_frame)
+      entry ? entry[:path].to_s : nil
+    rescue
+      nil
+    end
+
+    def emitter_graphic_sequence_frame(clip, desc, local_frame = 0)
+      entry = emitter_graphic_sequence_entry(clip, desc, local_frame)
+      entry ? entry[:frame] : nil
+    rescue
+      nil
+    end
+
+    def apply_emitter_pattern_bitmap(sprite, clip, desc, local_frame = 0)
+      raw = emitter_graphic_sequence_path(clip, desc, local_frame)
+      return if raw.nil? || raw.to_s.empty?
+      name = resolve_runtime_graphic(clip, raw)
+      return if name.nil? || name.empty?
+      bmp = preload_bitmap_path(name)
+      sprite.bitmap = bmp if bmp && !bmp.disposed?
+    rescue => e
+      BattleAnimationStudioRuntime.log("emitter sequence bitmap #{e.class}: #{e.message}")
+    end
+
+    def clip_afterimage_config(clip)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      raw = pbs["afterimage"].is_a?(Hash) ? pbs["afterimage"] : {}
+      mode = raw["mode"].to_s.downcase == "burst" ? :burst : :trail
+      legacy_enabled = runtime_bool(raw["enabled"])
+      trail_enabled = raw.key?("trailEnabled") ? runtime_bool(raw["trailEnabled"]) : (legacy_enabled && mode != :burst)
+      burst_enabled = raw.key?("burstEnabled") ? runtime_bool(raw["burstEnabled"]) : (legacy_enabled && mode == :burst)
+      return nil if !legacy_enabled && !trail_enabled && !burst_enabled
+      start_default = [(clip["startFrame"] || 0).to_i, 0].max
+      end_default = [(clip["endFrame"] || duration).to_i, start_default].max
+      copies = [[(raw["copies"] || 3).to_i,1].max,8].min; gap=[[(raw["gap"]||1).to_i,1].max,12].min
+      opacity=[[(raw["opacity"]||40).to_f,1.0].max,100.0].min/100.0; scale_decay=[[(raw["scaleDecay"]||8).to_f,0.0].max,90.0].min/100.0
+      ts=[raw.key?("trailStartFrame") ? raw["trailStartFrame"].to_i : start_default,0].max; te=[raw.key?("trailEndFrame") ? raw["trailEndFrame"].to_i : end_default,ts].max
+      bf=[raw.key?("burstFrame") ? raw["burstFrame"].to_i : start_default,0].max; bc=[[(raw["burstCopies"]||4).to_i,1].max,12].min; bl=[[(raw["burstLifetime"]||10).to_i,1].max,120].min; bi=[[(raw["burstInterval"]||0).to_i,0].max,30].min
+      bss=[[(raw["burstStartScale"]||100).to_f,1.0].max,1000.0].min/100.0; bes=[[(raw["burstEndScale"]||150).to_f,1.0].max,1000.0].min/100.0
+      bso=[[(raw["burstStartOpacity"]||60).to_f,0.0].max,100.0].min/100.0; beo=[[(raw["burstEndOpacity"]||0).to_f,0.0].max,100.0].min/100.0
+      bsr=[[(raw["burstStartRadius"]||0).to_f,0.0].max,1000.0].min; ber=[[(raw["burstEndRadius"]||24).to_f,0.0].max,1000.0].min
+      { :trail_enabled=>trail_enabled,:burst_enabled=>burst_enabled,:copies=>copies,:gap=>gap,:opacity=>opacity,:scale_decay=>scale_decay,:trail_start_frame=>ts,:trail_end_frame=>te,:burst_frame=>bf,:burst_copies=>bc,:burst_lifetime=>bl,:burst_interval=>bi,:burst_start_scale=>bss,:burst_end_scale=>bes,:burst_start_opacity=>bso,:burst_end_opacity=>beo,:burst_start_radius=>bsr,:burst_end_radius=>ber }
+    rescue
+      nil
+    end
+
+    def ensure_afterimage_sprite(pool_key, index, template = nil, clip = nil)
+      key = "#{pool_key}#{index}"
+      sprite = @afterimage_sprites[key]
+      if !sprite || sprite.disposed?
+        sprite = if template && template.respond_to?(:setBitmap)
+                   IconSprite.new(0, 0, @viewport)
+                 else
+                   Sprite.new(@viewport)
+                 end
+        setup_mask(sprite, clip) if clip
+        @afterimage_sprites[key] = sprite
+      end
+      if template
+        begin
+          if template.bitmap && !template.bitmap.disposed? && sprite.bitmap != template.bitmap
+            sprite.bitmap = template.bitmap
+          end
+        rescue
+        end
+        begin
+          if sprite.respond_to?(:src_rect) && sprite.src_rect && template.respond_to?(:src_rect) && template.src_rect
+            sprite.src_rect.set(template.src_rect.x, template.src_rect.y, template.src_rect.width, template.src_rect.height)
+          end
+        rescue
+        end
+        sprite.ox = template.ox if sprite.respond_to?(:ox=) && template.respond_to?(:ox)
+        sprite.oy = template.oy if sprite.respond_to?(:oy=) && template.respond_to?(:oy)
+        sprite.mirror = template.mirror if sprite.respond_to?(:mirror=) && template.respond_to?(:mirror)
+      end
+      sprite.visible = false
+      sprite
+    rescue => e
+      BattleAnimationStudioRuntime.log("afterimage sprite #{e.class}: #{e.message}")
+      nil
+    end
+
+    def hide_afterimage_tail(pool_key, from_index)
+      i = from_index.to_i
+      while @afterimage_sprites["#{pool_key}#{i}"]
+        sprite = @afterimage_sprites["#{pool_key}#{i}"]
+        sprite.visible = false if sprite && !sprite.disposed?
+        i += 1
+      end
+    rescue
+    end
+
+    def apply_clip_afterimages(clip, template)
+      cfg=clip_afterimage_config(clip); trail_key="#{clip["id"]}@@after:"; burst_key="#{clip["id"]}@@burst:"
+      if !cfg; hide_afterimage_tail(trail_key,0); hide_afterimage_tail(burst_key,0); return; end
+      # Trail and Burst are independent and may render together.
+      if cfg[:trail_enabled] && @frame.to_f>=cfg[:trail_start_frame].to_f && @frame.to_f<=cfg[:trail_end_frame].to_f
+        used=0; start_f=(clip["startFrame"]||0).to_f; end_f=(clip["endFrame"]||duration).to_f
+        cfg[:copies].downto(1) do |step|
+          gf=@frame-cfg[:gap].to_f*step.to_f; next if gf<start_f || gf>end_f || !sample_visible(clip,gf)
+          sp=ensure_afterimage_sprite(trail_key,used,template,clip); next if !sp
+          update_bitmap(sp,clip,gf); apply_object(sp,clip,gf,false); apply_special_battler_profile_scale(sp,clip); apply_layer_priority(sp,clip,gf); apply_pbs_angle_override(sp,clip,gf); apply_source_frame(sp,clip,gf); apply_origin(sp,clip,gf); apply_mask_properties(sp,clip,gf)
+          tone=to_tone(fx_at(clip,"tone",gf)); color=to_color(fx_at(clip,"color",gf)); sp.tone=tone if tone&&sp.respond_to?(:tone=); sp.color=color if color&&sp.respond_to?(:color=)
+          fade=cfg[:opacity]*((cfg[:copies]-step+1).to_f/cfg[:copies].to_f); sp.opacity=[[(sp.opacity.to_f*fade).round,0].max,255].min if sp.respond_to?(:opacity=); sc=[0.01,1.0-cfg[:scale_decay]*step.to_f].max; sp.zoom_x*=sc if sp.respond_to?(:zoom_x=); sp.zoom_y*=sc if sp.respond_to?(:zoom_y=); sp.z=sp.z.to_f-1.0 if sp.respond_to?(:z=); used+=1
+        end
+        hide_afterimage_tail(trail_key,used)
+      else
+        hide_afterimage_tail(trail_key,0)
+      end
+      if cfg[:burst_enabled]
+        used=0
+        cfg[:burst_copies].times do |j|
+          born=cfg[:burst_frame].to_f+cfg[:burst_interval].to_f*j.to_f; age=@frame.to_f-born; next if age<0 || age>cfg[:burst_lifetime].to_f
+          t=cfg[:burst_lifetime].to_f>0 ? age/cfg[:burst_lifetime].to_f : 1.0; radius=cfg[:burst_start_radius]+(cfg[:burst_end_radius]-cfg[:burst_start_radius])*t; theta=cfg[:burst_copies]<=1 ? 0.0 : (Math::PI*2.0*j.to_f/cfg[:burst_copies].to_f)-Math::PI/2.0; dx=Math.cos(theta)*radius; dy=Math.sin(theta)*radius; sc=cfg[:burst_start_scale]+(cfg[:burst_end_scale]-cfg[:burst_start_scale])*t; fade=cfg[:burst_start_opacity]+(cfg[:burst_end_opacity]-cfg[:burst_start_opacity])*t; next if fade<=0
+          sp=ensure_afterimage_sprite(burst_key,used,template,clip); next if !sp
+          bf=cfg[:burst_frame]; update_bitmap(sp,clip,bf); apply_object(sp,clip,bf,false); apply_special_battler_profile_scale(sp,clip); apply_layer_priority(sp,clip,bf); apply_pbs_angle_override(sp,clip,bf); apply_source_frame(sp,clip,bf); apply_origin(sp,clip,bf); apply_mask_properties(sp,clip,bf)
+          tone=to_tone(fx_at(clip,"tone",bf)); color=to_color(fx_at(clip,"color",bf)); sp.tone=tone if tone&&sp.respond_to?(:tone=); sp.color=color if color&&sp.respond_to?(:color=); sp.x+=dx if sp.respond_to?(:x=); sp.y+=dy if sp.respond_to?(:y=); sp.zoom_x*=sc if sp.respond_to?(:zoom_x=); sp.zoom_y*=sc if sp.respond_to?(:zoom_y=); sp.opacity=[[(sp.opacity.to_f*fade).round,0].max,255].min if sp.respond_to?(:opacity=); sp.z=sp.z.to_f-1.0 if sp.respond_to?(:z=); used+=1
+        end
+        hide_afterimage_tail(burst_key,used)
+      else
+        hide_afterimage_tail(burst_key,0)
+      end
+    rescue => e
+      BattleAnimationStudioRuntime.log("clip afterimage #{e.class}: #{e.message}"); hide_afterimage_tail(trail_key,0); hide_afterimage_tail(burst_key,0)
+    end
+
+    def apply_emitter_particle_afterimages(clip, template, desc, age, particle_index, dx, dy, zoff, scale_x, scale_y, rotation_offset, particle_opacity)
+      cfg = clip_afterimage_config(clip)
+      pool_key = "#{clip["id"]}@@ep#{particle_index}:"
+      if !cfg
+        hide_afterimage_tail(pool_key, 0)
+        return
+      end
+      if !cfg[:trail_enabled] || @frame.to_f < cfg[:trail_start_frame].to_f || @frame.to_f > cfg[:trail_end_frame].to_f
+        hide_afterimage_tail(pool_key, 0)
+        return
+      end
+      used = 0
+      cfg[:copies].downto(1) do |step|
+        ghost_age = age.to_f - cfg[:gap].to_f * step.to_f
+        next if ghost_age < 0
+        t = age.to_f > 0 ? (ghost_age / age.to_f) : 0.0
+        fade = cfg[:opacity] * ((cfg[:copies] - step + 1).to_f / cfg[:copies].to_f)
+        scale = [0.01, 1.0 - cfg[:scale_decay] * step.to_f].max
+        sprite = ensure_afterimage_sprite(pool_key, used, template, clip)
+        next if !sprite
+        apply_emitter_particle(sprite, clip, ghost_age,
+          { :dx => dx.to_f * t, :dy => dy.to_f * t, :z => zoff.to_f * t,
+            :scale_x => scale_x.to_f * scale, :scale_y => scale_y.to_f * scale,
+            :rotation_offset => rotation_offset.to_f,
+            :opacity_mult => particle_opacity.to_f * fade }, desc, "#{particle_index}-#{used}")
+        sprite.z = sprite.z.to_f - 1.0 if sprite.respond_to?(:z=)
+        used += 1
+      end
+      hide_afterimage_tail(pool_key, used)
+    rescue => e
+      BattleAnimationStudioRuntime.log("emitter afterimage #{e.class}: #{e.message}")
+      hide_afterimage_tail(pool_key, 0)
+    end
+
     def sample_emitter_spawn_position(clip, emission_frame)
       old_context = @point_context_frame
       begin
@@ -3920,6 +4090,7 @@ module BattleAnimationStudioRuntime
       sprite.z = sprite.z.to_f + extra[:z].to_f
       sprite.zoom_x *= extra[:scale_x].to_f
       sprite.zoom_y *= extra[:scale_y].to_f
+      apply_emitter_pattern_bitmap(sprite, clip, desc, local_frame)
       # Opacity has two timelines for emitters: the particle's own opacity is
       # sampled in local lifetime (above), while emitterOpacity is a global
       # animation-frame multiplier controlled by the Studio inspector.
@@ -3931,7 +4102,7 @@ module BattleAnimationStudioRuntime
       apply_emitter_angle_override(sprite, clip, local_frame, desc)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
       if sprite.respond_to?(:angle=)
-        if runtime_bool(context_parameter_value(clip, "emitter", "simpleFaceTravel", desc[:frame].to_f, pbs["simpleFaceTravel"]))
+        if emitter_graphic_orientation_mode(clip) == "travel"
           face_offset = context_parameter_value(clip, "emitter", "simpleFaceTravelOffset", desc[:frame].to_f, pbs["simpleFaceTravelOffset"] || 0).to_f
           sprite.angle = sprite.angle.to_f - desc[:angle].to_f + face_offset
         end
@@ -3964,7 +4135,9 @@ module BattleAnimationStudioRuntime
       frame_keys = cached_value_keys(visual_clip, "graphicFrame")
       random_frame = desc[:random_frame]
       use_random_frame = !random_frame.nil? && (frame_keys.empty? || local_frame < frame_keys.first["frame"].to_f)
-      apply_source_frame(sprite, clip, local_frame, nil, use_random_frame ? random_frame : nil)
+      pattern_frame = emitter_graphic_sequence_frame(clip, desc, local_frame)
+      forced_frame = pattern_frame.nil? ? (use_random_frame ? random_frame : nil) : pattern_frame
+      apply_source_frame(sprite, clip, local_frame, nil, forced_frame)
       apply_origin(sprite, clip, local_frame)
       apply_mask_properties(sprite, clip, local_frame)
       tone = to_tone(fx_at(clip, "tone", local_frame)); color = to_color(fx_at(clip, "color", local_frame))
@@ -4002,7 +4175,8 @@ module BattleAnimationStudioRuntime
         "deathOpacity" => context_parameter_value(clip, "emitter", "life.deathOpacity", frame, base["deathOpacity"] || 0),
         "birthRotation" => context_parameter_value(clip, "emitter", "life.birthRotation", frame, base["birthRotation"] || 0),
         "midRotation" => context_parameter_value(clip, "emitter", "life.midRotation", frame, base["midRotation"] || 0),
-        "deathRotation" => context_parameter_value(clip, "emitter", "life.deathRotation", frame, base["deathRotation"] || 0)
+        "deathRotation" => context_parameter_value(clip, "emitter", "life.deathRotation", frame, base["deathRotation"] || 0),
+        "spinSpeed" => context_parameter_value(clip, "emitter", "life.spinSpeed", frame, base["spinSpeed"] || 0)
       }
     rescue
       nil
@@ -4123,7 +4297,7 @@ module BattleAnimationStudioRuntime
           particle_opacity = [[(a_opacity + ((b_opacity - a_opacity) * half_t)) / 100.0, 0.0].max, 1.0].min
           a_rot = opacity_t <= 0.5 ? (particle_simple_life["birthRotation"] || 0).to_f : (particle_simple_life["midRotation"] || 0).to_f
           b_rot = opacity_t <= 0.5 ? (particle_simple_life["midRotation"] || 0).to_f : (particle_simple_life["deathRotation"] || 0).to_f
-          simple_rotation = a_rot + ((b_rot - a_rot) * half_t)
+          simple_rotation = a_rot + ((b_rot - a_rot) * half_t) + (particle_simple_life["spinSpeed"] || 0).to_f * sec
         else
           opacity_start = [[emitter_value(clip, "particleOpacityStart", ef, 5).to_f, 0.0].max, 100.0].min / 100.0
           opacity_normal = [[emitter_value(clip, "particleOpacity", ef, 100).to_f, 0.0].max, 100.0].min / 100.0
@@ -4146,6 +4320,13 @@ module BattleAnimationStudioRuntime
         particle_index += 1
       end
       hide_emitter_tail(clip, particle_index)
+      cfg = clip_afterimage_config(clip)
+      if cfg
+        while particle_index < RUNTIME_PARTICLE_LIMIT
+          hide_afterimage_tail("#{clip["id"]}@@ep#{particle_index}:", 0)
+          particle_index += 1
+        end
+      end
     rescue => e
       BattleAnimationStudioRuntime.log("emitter #{e.class}: #{e.message}")
       hide_emitter_tail(clip, 0)
@@ -4269,6 +4450,7 @@ module BattleAnimationStudioRuntime
       if !active
         sprite.visible = false
         hide_second_layer(clip)
+        apply_clip_afterimages(clip, sprite)
         return
       end
       update_bitmap(sprite, clip, @frame)
@@ -4282,6 +4464,7 @@ module BattleAnimationStudioRuntime
       tone = to_tone(fx_at(clip, "tone", @frame)); color = to_color(fx_at(clip, "color", @frame))
       sprite.tone = tone if tone && sprite.respond_to?(:tone=)
       sprite.color = color if color && sprite.respond_to?(:color=)
+      apply_clip_afterimages(clip, sprite)
       apply_second_layer(clip, sprite, @frame)
     end
 
@@ -4302,7 +4485,10 @@ module BattleAnimationStudioRuntime
         candidates << "Anim/#{raw}"
       end
       candidates << raw.sub(/^SE\//i, "") if raw =~ /^SE\//i
-      candidates.uniq!
+      candidates = candidates.flat_map do |candidate|
+        c = candidate.to_s.tr("\\", "/").sub(/^Audio\/SE\//i, "").sub(/\.(wav|ogg|mp3|m4a)$/i, "")
+        [candidate, c, "Audio/SE/#{c}"].compact
+      end.uniq
       if defined?(pbResolveAudioSE)
         candidates.each do |candidate|
           return candidate if (pbResolveAudioSE(candidate) rescue nil)
@@ -4682,9 +4868,6 @@ module BattleAnimationStudioRuntime
     # Hash/Array allocation and the GC hitches those allocations caused.
     def prepare_camera_render
       restore_camera! if @camera_restore_count.to_i > 0
-      # Last possible uncammed pass before the frame is drawn. This is the
-      # authoritative shadow position for every BAS-driven battler transform.
-      sync_all_battler_shadows!
       state = camera_state
       return if camera_neutral?(state)
       seen = @camera_seen
@@ -4706,6 +4889,13 @@ module BattleAnimationStudioRuntime
       end
       @effect_sprites.each do |id, sprite|
         next if @screen_fixed_clip_ids && @screen_fixed_clip_ids[id.to_s]
+        next if !sprite || seen[sprite.object_id] || !sprite.visible
+        seen[sprite.object_id] = true
+        apply_camera_to_sprite(sprite, state)
+      end
+      @afterimage_sprites.each do |id, sprite|
+        base_id = id.to_s.split("@@")[0]
+        next if @screen_fixed_clip_ids && @screen_fixed_clip_ids[base_id]
         next if !sprite || seen[sprite.object_id] || !sprite.visible
         seen[sprite.object_id] = true
         apply_camera_to_sprite(sprite, state)
@@ -4776,7 +4966,6 @@ module BattleAnimationStudioRuntime
       clips.each { |clip| apply_clip(clip) }
       update_screen_events
       apply_scene_hide_progress(@frame)
-      sync_all_battler_shadows!
 
       if @frame >= duration - 0.0001
         @done = true
@@ -4793,45 +4982,6 @@ module BattleAnimationStudioRuntime
   # different APS/DBK revisions cannot advance a paused wrapper through either
   # path. Resume shifts @last_uptime by the paused duration, preserving the
   # exact current cel and remaining frame delay with no catch-up jump.
-  # Test(48) FIX5: Animated/DBK shadows are independent sprites. Follow the
-  # actual BattlerSprite transform at its writer instead of guessing later in
-  # the frame. This makes every BAS movement path (Quick Attack included) inherit
-  # shadow movement automatically.
-  module BattlerShadowTransformHook
-    def x=(value)
-      old_value = (self.x rescue nil)
-      result = super(value)
-      player = (BattleAnimationStudioRuntime.active_player rescue nil)
-      if player && !old_value.nil? && player.respond_to?(:propagate_shadow_delta_from_sprite)
-        new_value = (self.x rescue value)
-        player.propagate_shadow_delta_from_sprite(self, new_value.to_f - old_value.to_f, 0.0)
-      end
-      result
-    end
-
-    def y=(value)
-      old_value = (self.y rescue nil)
-      result = super(value)
-      player = (BattleAnimationStudioRuntime.active_player rescue nil)
-      if player && !old_value.nil? && player.respond_to?(:propagate_shadow_delta_from_sprite)
-        new_value = (self.y rescue value)
-        player.propagate_shadow_delta_from_sprite(self, 0.0, new_value.to_f - old_value.to_f)
-      end
-      result
-    end
-  end
-
-  def self.install_battler_shadow_transform_hook!
-    return false if !defined?(Battle::Scene::BattlerSprite)
-    klass = Battle::Scene::BattlerSprite
-    return true if klass.ancestors.include?(BattlerShadowTransformHook)
-    klass.prepend(BattlerShadowTransformHook)
-    true
-  rescue => e
-    log("install battler shadow transform hook #{e.class}: #{e.message}")
-    false
-  end
-
   module DeluxeBitmapIdlePauseHook
     def __bas_idle_pause_now
       if defined?(System) && System.respond_to?(:uptime)

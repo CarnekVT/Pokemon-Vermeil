@@ -1,0 +1,6 @@
+Name       = [VERMEIL] Golden Animation Bridge
+Version    = 1.0.0
+Essentials = 21.1
+Credits    = CarnekVT
+Last       = true
+Priority   = 10001

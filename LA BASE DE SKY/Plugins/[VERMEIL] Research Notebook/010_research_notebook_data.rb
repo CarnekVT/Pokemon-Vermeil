@@ -219,6 +219,10 @@ module ResearchNotebook
     @arcane_stamp = nil
     @family_graph = nil
     @family_cache = {}
+    @changedex_hidden_keys = nil
+    @changedex_hidden_stamp = nil
+    @changedex_species_keys = nil
+    @changedex_species_stamp = nil
 
     module_function
 
@@ -278,6 +282,10 @@ module ResearchNotebook
       @family_cache = {}
       @arcane_gamedata_species = nil
       @relevant_species_cache = nil
+      @changedex_hidden_keys = nil
+      @changedex_hidden_stamp = nil
+      @changedex_species_keys = nil
+      @changedex_species_stamp = nil
       golden_data
       arcane_data
     end
@@ -346,26 +354,140 @@ module ResearchNotebook
       return nil
     end
 
+    def normalize_species_key(value)
+      return nil if value.nil?
+      raw = value.respond_to?(:id) ? value.id : value
+      raw = raw.to_s.strip
+      return nil if raw.empty?
+      parts = raw.split(",", 2)
+      species = parts[0].strip
+      form = parts.length > 1 ? parts[1].strip : nil
+      aliases = {
+        "NIDORANFE" => "NIDORANf",
+        "NIDORANF"  => "NIDORANf",
+        "NIDORANMA" => "NIDORANm",
+        "NIDORANM"  => "NIDORANm"
+      }
+      species = aliases[species.upcase] || species
+      return form ? "#{species},#{form}" : species
+    end
+
+    def changedex_hidden_keys
+      return {} if !ResearchNotebook::Settings::USE_CHANGEDEX_HIDDEN_FORMS
+      path = ResearchNotebook::Settings::CHANGEDEX_CONFIG_JSON
+      stamp = file_stamp(path)
+      if @changedex_hidden_keys.nil? || @changedex_hidden_stamp != stamp
+        hidden = {}
+        if ResearchNotebook::Settings::USE_CHANGEDEX_HIDDEN_FORMS && File.exist?(path)
+          doc = load_json_file(path)
+          Array(get_key(doc, "hiddenForms", "HiddenForms")).each do |entry|
+            key = normalize_species_key(entry)
+            hidden[key.upcase] = true if key
+          end
+        end
+        @changedex_hidden_keys = hidden
+        @changedex_hidden_stamp = stamp
+      end
+      return @changedex_hidden_keys || {}
+    end
+
+    def changedex_species_keys
+      path = ResearchNotebook::Settings::CHANGEDEX_CHANGES_JSON
+      stamp = file_stamp(path)
+      if @changedex_species_keys.nil? || @changedex_species_stamp != stamp
+        keys = {}
+        if File.exist?(path)
+          doc = load_json_file(path)
+          species = get_key(doc, "species", "Species")
+          if species.is_a?(Hash)
+            species.keys.each do |key|
+              normalized = normalize_species_key(key)
+              keys[normalized.upcase] = true if normalized
+            end
+          end
+        end
+        @changedex_species_keys = keys
+        @changedex_species_stamp = stamp
+      end
+      return @changedex_species_keys || {}
+    end
+
+    def changedex_hidden?(raw_key)
+      return false if !ResearchNotebook::Settings::USE_CHANGEDEX_HIDDEN_FORMS
+      key = normalize_species_key(raw_key)
+      return false if !key
+      return changedex_hidden_keys.key?(key.upcase)
+    end
+
+    def changedex_has_entry?(raw_key)
+      key = normalize_species_key(raw_key)
+      return false if !key
+      return changedex_species_keys.key?(key.upcase)
+    end
+
+    def notebook_entry_visible?(raw_key)
+      return false if changedex_hidden?(raw_key)
+      return true
+    end
+
+    # Normaliza IDs provenientes de JSON/PBS sin llamar a try_get con valores
+    # que Essentials no conoce. Algunos proyectos escriben NIDORANFE/NIDORANMA
+    # y otros escriben NINETALES,1 para especie + forma.
     def normalize_species_id(value)
       return nil if value.nil?
-      id = value.respond_to?(:id) ? value.id : value
-      id = id.to_sym rescue nil
-      return nil if !id
-      if defined?(GameData::Species)
+      raw = value.respond_to?(:id) ? value.id : value
+      raw = raw.to_s.strip
+      return nil if raw.empty?
+      raw = raw.split(",", 2)[0].strip
+      aliases = {
+        "NIDORANFE" => "NIDORANf",
+        "NIDORANF"  => "NIDORANf",
+        "NIDORANMA" => "NIDORANm",
+        "NIDORANM"  => "NIDORANm"
+      }
+      candidates = [aliases[raw.upcase] || raw, raw.upcase, raw.downcase]
+      candidates = candidates.compact.map { |candidate| candidate.to_sym rescue nil }.compact.uniq
+      return candidates.first if !defined?(GameData::Species)
+
+      # DATA es la tabla canónica y permite comprobar existencia sin generar
+      # el log de Unknown ID que produce try_get en ciertas versiones.
+      known = nil
+      begin
+        table = GameData::Species.const_get(:DATA) if GameData::Species.const_defined?(:DATA)
+        if table.is_a?(Hash)
+          known = candidates.find { |candidate| table.key?(candidate) }
+        end
+      rescue
+        known = nil
+      end
+      if known
         begin
-          data = GameData::Species.try_get(id)
+          data = GameData::Species.get(known)
+          return data.species if data && data.respond_to?(:species)
+          return data.id if data && data.respond_to?(:id)
+        rescue
+        end
+        return known
+      end
+
+      # Fallback para implementaciones que no exponen DATA: solo intenta los
+      # candidatos después de filtrar los alias/formats problemáticos.
+      candidates.each do |candidate|
+        begin
+          data = GameData::Species.try_get(candidate)
           return data.species if data && data.respond_to?(:species)
           return data.id if data && data.respond_to?(:id)
         rescue
         end
       end
-      return id
+      return nil
     end
 
     def species_ids_from(hash)
       return [] if !hash.is_a?(Hash)
       ret = []
       hash.keys.each do |key|
+        next if !notebook_entry_visible?(key)
         id = normalize_species_id(key)
         ret << id if id
       end
@@ -456,6 +578,30 @@ module ResearchNotebook
     # Compatibilidad con llamadas de versiones anteriores de la Libreta.
     def golden_form(species)
       return golden_form_index(species)
+    end
+
+    # Ruta opcional de un gráfico específico para la forma áurea.
+    # Se acepta una ruta completa o un nombre relativo a Settings::GOLDEN_FORM_SPRITE_ROOT.
+    def golden_form_sprite_raw(species)
+      e = golden_entry(species)
+      value = get_key(e, "goldenFormSprite", "GoldenFormSprite",
+        "goldenFormGraphic", "GoldenFormGraphic", "golden_form_sprite",
+        "golden_form_graphic")
+      payload = golden_form_payload(species)
+      value = get_key(payload, "sprite", "Sprite", "graphic", "Graphic",
+        "spritePath", "SpritePath") if value.nil? && payload.is_a?(Hash)
+      return value.to_s if value && value.to_s.strip != ""
+      return nil
+    end
+
+    def golden_form_sprite_path(species)
+      raw = golden_form_sprite_raw(species)
+      return nil if !raw
+      path = raw.to_s.gsub('\\', '/')
+      return path if path.start_with?("Graphics/")
+      root = ResearchNotebook::Settings::GOLDEN_FORM_SPRITE_ROOT.to_s
+      path = "#{root}/#{path}" if !path.start_with?(root)
+      return path
     end
 
     def golden_form_configured?(species)

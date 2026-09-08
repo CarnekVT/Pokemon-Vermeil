@@ -1,4 +1,4 @@
 Name       = [Balance] Golden Power
-Version    = 2.6.5
+Version    = 2.7.0
 Credits    = Dracrixco
 Essentials = 21,21.1

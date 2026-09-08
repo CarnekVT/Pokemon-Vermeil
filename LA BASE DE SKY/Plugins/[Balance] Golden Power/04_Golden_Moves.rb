@@ -95,7 +95,11 @@ module GoldenSystem
 
     def golden_variant_data(user)
       return nil if instance_variable_defined?(:@__golden_function_proxy) && @__golden_function_proxy
+      return nil if @__golden_variant_busy
+      @__golden_variant_busy=true
       user ? GoldenSystem::GoldenMoves.for_battler(user,@id) : nil
+    ensure
+      @__golden_variant_busy=false
     end
 
     def golden_sync_proxy(proxy)
@@ -151,7 +155,11 @@ module GoldenSystem
 
     def pbCalcType(user)
       data=golden_variant_data(user)
-      data && data[:type] ? data[:type] : super
+      # Do not call super here.  Enhanced/MegaSignatureAbilities can route its
+      # own pbCalcType back through this prepend, causing infinite alternation.
+      # @type is the already resolved base move type for non-Golden moves.
+      return data[:type] if data && data[:type]
+      return @type
     end
 
     def pbCalcDamage(user,target,numTargets=1)
@@ -203,21 +211,44 @@ Battle::Move.prepend(GoldenSystem::SameTypeApogee)
 #===============================================================================
 module GoldenSystem
   module BattlerGoldenMoveNameSync
+    def pbGoldenMoveDisplayLabel(move, original)
+      label = original
+      if @pokemon && isOnGoldenForm? &&
+         move.respond_to?(:golden_display_name) &&
+         GoldenSystem::GoldenMoves.active_for?(self, move.id)
+        label = move.golden_display_name(self)
+      end
+      return label
+    end
+
+    def pbGoldenMoveShortLabel(label)
+      if defined?(Settings) && Settings.const_defined?(:SHORTEN_MOVES) && Settings::SHORTEN_MOVES &&
+         label.length > 16
+        return label[0..12] + "..."
+      end
+      return label
+    end
+
+    def pbApplyGoldenMoveDisplayName(move, label)
+      move.instance_variable_set(:@name, label)
+      short = pbGoldenMoveShortLabel(label)
+      if move.respond_to?(:short_name=)
+        move.short_name = short
+      else
+        move.instance_variable_set(:@short_name, short)
+      end
+    end
+
     def pbSyncGoldenMoveDisplayNames
       return if !@moves
       @moves.each do |move|
         next if !move
         unless move.instance_variable_defined?(:@golden_original_name)
-          move.instance_variable_set(:@golden_original_name,move.name)
+          move.instance_variable_set(:@golden_original_name, move.name)
         end
-        original=move.instance_variable_get(:@golden_original_name)
-        label=original
-        if @pokemon && isOnGoldenForm? &&
-           move.respond_to?(:golden_display_name) &&
-           GoldenSystem::GoldenMoves.active_for?(self,move.id)
-          label=move.golden_display_name(self)
-        end
-        move.instance_variable_set(:@name,label)
+        original = move.instance_variable_get(:@golden_original_name)
+        label = pbGoldenMoveDisplayLabel(move, original)
+        pbApplyGoldenMoveDisplayName(move, label)
       end
     end
 
@@ -231,4 +262,3 @@ end
 
 Battle::Battler.prepend(GoldenSystem::BattlerGoldenMoveNameSync) unless
   Battle::Battler.ancestors.include?(GoldenSystem::BattlerGoldenMoveNameSync)
-

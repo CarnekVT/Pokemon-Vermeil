@@ -54,6 +54,159 @@
     },
     "PIDGEOT": {
       "ability": "PRIDE"
+    },
+    "RATTATA": {
+      "ability": "OVERAWE"
+    },
+    "RATICATE": {
+      "ability": "OVERAWE"
+    },
+    "RATTATA,1": {
+      "ability": "FURCOAT"
+    },
+    "RATICATE,1": {
+      "ability": "FURCOAT"
+    },
+    "FEAROW": {
+      "ability": "PIERCINGDRILL"
+    },
+    "SPEAROW": {
+      "ability": "PIERCINGDRILL"
+    },
+    "EKANS": {
+      "ability": "REGENERATOR"
+    },
+    "ARBOK": {
+      "ability": "REGENERATOR"
+    },
+    "PIKACHU": {
+      "ability": "OVERCHARGE"
+    },
+    "RAICHU": {
+      "ability": "OVERCHARGE"
+    },
+    "PICHU": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,2": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,3": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,4": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,5": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,6": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,7": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,8": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,9": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,10": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,11": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,12": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,13": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,14": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,15": {
+      "ability": "OVERCHARGE"
+    },
+    "RAICHU,1": {
+      "ability": "ADAPTABILITY"
+    },
+    "RAICHU,2": {
+      "ability": "OVERCHARGE"
+    },
+    "RAICHU,3": {
+      "ability": "OVERCHARGE"
+    },
+    "PICHU,2": {
+      "ability": "OVERCHARGE"
+    },
+    "PIKACHU,17": {
+      "ability": "OVERCHARGE"
+    },
+    "SANDSHREW": {
+      "ability": "TOUGHCLAWS"
+    },
+    "SANDSLASH": {
+      "ability": "TOUGHCLAWS"
+    },
+    "SANDSHREW,1": {
+      "ability": "TOUGHCLAWS"
+    },
+    "SANDSLASH,1": {
+      "ability": "TOUGHCLAWS"
+    },
+    "NIDORANf": {
+      "ability": "QUEENLYMAJESTY"
+    },
+    "NIDORINA": {
+      "ability": "QUEENLYMAJESTY"
+    },
+    "NIDOQUEEN": {
+      "ability": "QUEENLYMAJESTY"
+    },
+    "NIDORANm": {
+      "ability": "FEUDALWARD"
+    },
+    "NIDORINO": {
+      "ability": "FEUDALWARD"
+    },
+    "NIDOKING": {
+      "ability": "FEUDALWARD"
+    },
+    "CLEFAIRY": {
+      "ability": "AERILATE"
+    },
+    "CLEFABLE": {
+      "ability": "AERILATE"
+    },
+    "CLEFFA": {
+      "ability": "AERILATE"
+    },
+    "CLEFABLE,1": {
+      "ability": "AERILATE"
+    },
+    "VULPIX": {
+      "ability": "PRECOGNITION"
+    },
+    "NINETALES": {
+      "ability": "PRECOGNITION"
+    },
+    "VULPIX,1": {
+      "ability": "SERENEGRACE"
+    },
+    "NINETALES,1": {
+      "ability": "SERENEGRACE"
+    },
+    "JIGGLYPUFF": {
+      "ability": "REFRIGERATE"
+    },
+    "WIGGLYTUFF": {
+      "ability": "REFRIGERATE"
+    },
+    "IGGLYBUFF": {
+      "ability": "REFRIGERATE"
     }
   }
 }

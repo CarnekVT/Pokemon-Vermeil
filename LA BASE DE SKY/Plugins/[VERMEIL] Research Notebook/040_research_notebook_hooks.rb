@@ -1,6 +1,6 @@
 # encoding: UTF-8
 #===============================================================================
-# Libreta de Investigación - integración v1.2.1
+# Libreta de Investigación - integración v1.2.2
 # IMPORTANTE: este archivo NO modifica PokemonSummaryScreen/PokemonSummary_Scene.
 #===============================================================================
 module ResearchNotebook
