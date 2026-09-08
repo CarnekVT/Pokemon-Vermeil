@@ -1,0 +1,9 @@
+ChangeDex v0.11.27 - Species compiler registry repair
+This file is diagnostic only; no PBS data is written.
+
+Species PBS paths seen by repair:
+  - PBS/pokemon.txt
+  - PBS/pokemon_Vermeil.txt
+Registry before repair: count=1035 GOLBAT=true CROBAT=true
+Restored sections: 0
+Registry after repair: count=1035 GOLBAT=true CROBAT=true

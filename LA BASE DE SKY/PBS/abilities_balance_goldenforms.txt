@@ -1,0 +1,19 @@
+#===============================================================================
+# abilities_balance_goldenforms
+# Entradas para PBS/abilities.txt
+#===============================================================================
+# Copia estas entradas a PBS/abilities.txt (o al PBS modular de habilidades de
+# tu proyecto) y recompila. Si un ID ya existe, no lo dupliques.
+
+#-------------------------------
+[UNSTOPPABLECHARGE]
+Name = Carga Imparable
+Description = Potencia un 50 % sus movimientos físicos, pero al usar uno queda fijado en ese movimiento hasta abandonar el combate.
+#-------------------------------
+[DEADLYGRIP]
+Name = Presa Mortal
+Description = Al recibir contacto, impide que ambos Pokémon escapen. Sus ataques contra la presa infligen un 30 % más de daño.
+#-------------------------------
+[SOLARREACTOR]
+Name = Reactor Solar
+Description = Potencia un 40 % los movimientos de tipo Fuego y Eléctrico, pero no puede repetir ese mismo tipo en el turno siguiente.

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "moves": {
+    "HERACROSS|MEGAHORN": {
+      "form": 2,
+      "name": "Cuerno Astral",
+      "type": "DRAGON",
+      "power": 120,
+      "accuracy": 85,
+      "description": "Violenta embestida con cuernos imponentes usando energía dracónica."
+    },
+    "HERACROSS|REVENGE": {
+      "form": 2,
+      "name": "Cornada Implacable",
+      "type": "DRAGON",
+      "power": 80,
+      "accuracy": 100,
+      "description": "Asesta un golpe con el poder de sus antepasados. Produce el doble de daño si el usuario es herido en el mismo turno."
+    },
+    "HERACROSS|ARMTHRUST": {
+      "form": 2,
+      "name": "Metralla Áurea",
+      "type": "DRAGON",
+      "power": 25,
+      "description": "Cornadas directas que golpean de dos a cinco veces seguidas."
+    },
+    "PINSIR|STORMTHROW": {
+      "form": 2,
+      "name": "Pinza Terracota",
+      "type": "GROUND",
+      "power": 70,
+      "accuracy": 100,
+      "functionCode": "AlwaysCriticalHit",
+      "description": "Lanza un golpe fulminante usando sus pinzas. Siempre resulta en un golpe crítico."
+    },
+    "PINSIR|BIND": {
+      "form": 2,
+      "name": "Agarre Sísmico",
+      "type": "GROUND",
+      "power": 60,
+      "accuracy": 100,
+      "functionCode": "BindTarget",
+      "description": "Ata y oprime con sus pinzas de cuatro a cinco turnos."
+    },
+    "PINSIR|THROATCHOP": {
+      "form": 2,
+      "name": "Tenaza Gaia",
+      "type": "GROUND",
+      "power": 80,
+      "accuracy": 100,
+      "functionCode": "SpikyGrasp",
+      "description": "Inflige al rival un dolor abrumador con sus tenazas. Golpea supereficaz al tipo Volador."
+    }
+  }
+}

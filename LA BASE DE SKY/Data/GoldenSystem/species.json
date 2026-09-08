@@ -1,0 +1,494 @@
+{
+  "schema": 1,
+  "species": {
+    "HERACROSS": {
+      "goldenType": "DRAGON",
+      "goldenTypeReplace": "FIGHTING",
+      "goldenForm": {
+        "number": 2,
+        "ability": "UNSTOPPABLECHARGE",
+        "types": [
+          "BUG",
+          "FIGHTING"
+        ],
+        "baseStats": {
+          "HP": 80,
+          "ATTACK": 160,
+          "DEFENSE": 65,
+          "SPEED": 115,
+          "SPECIAL_ATTACK": 30,
+          "SPECIAL_DEFENSE": 75
+        }
+      }
+    },
+    "CHARMANDER": {
+      "goldenType": "DRAGON",
+      "goldenTypeReplace": "FLYING",
+      "goldenForm": {
+        "types": [
+          "FIRE"
+        ],
+        "baseStats": {
+          "HP": 78,
+          "ATTACK": 84,
+          "DEFENSE": 78,
+          "SPEED": 100,
+          "SPECIAL_ATTACK": 109,
+          "SPECIAL_DEFENSE": 85
+        }
+      }
+    },
+    "CHARMELEON": {
+      "goldenType": "DRAGON",
+      "goldenTypeReplace": "FLYING",
+      "goldenForm": {
+        "baseStats": {
+          "HP": 78,
+          "ATTACK": 84,
+          "DEFENSE": 78,
+          "SPEED": 100,
+          "SPECIAL_ATTACK": 109,
+          "SPECIAL_DEFENSE": 85
+        }
+      }
+    },
+    "CHARIZARD": {
+      "goldenType": "DRAGON",
+      "goldenTypeReplace": "FLYING",
+      "goldenForm": {
+        "types": [
+          "FIRE",
+          "FLYING"
+        ],
+        "baseStats": {
+          "HP": 78,
+          "ATTACK": 84,
+          "DEFENSE": 78,
+          "SPEED": 100,
+          "SPECIAL_ATTACK": 109,
+          "SPECIAL_DEFENSE": 85
+        }
+      }
+    },
+    "CHARIZARD,1": {
+      "goldenType": "DRAGON",
+      "goldenTypeReplace": "FLYING",
+      "goldenForm": {
+        "types": [
+          "FIRE",
+          "FLYING"
+        ],
+        "baseStats": {
+          "HP": 78,
+          "ATTACK": 84,
+          "DEFENSE": 78,
+          "SPECIAL_ATTACK": 109,
+          "SPECIAL_DEFENSE": 85,
+          "SPEED": 100
+        }
+      }
+    },
+    "CHARIZARD,2": {
+      "goldenType": "DRAGON",
+      "goldenTypeReplace": "FLYING",
+      "goldenForm": {
+        "types": [
+          "FIRE",
+          "FLYING"
+        ],
+        "baseStats": {
+          "HP": 78,
+          "ATTACK": 84,
+          "DEFENSE": 78,
+          "SPECIAL_ATTACK": 109,
+          "SPECIAL_DEFENSE": 85,
+          "SPEED": 100
+        }
+      }
+    },
+    "CHARIZARD,3": {
+      "goldenType": "DRAGON",
+      "goldenTypeReplace": "FLYING",
+      "goldenForm": {
+        "types": [
+          "FIRE",
+          "FLYING"
+        ],
+        "baseStats": {
+          "HP": 78,
+          "ATTACK": 84,
+          "DEFENSE": 78,
+          "SPECIAL_ATTACK": 109,
+          "SPECIAL_DEFENSE": 85,
+          "SPEED": 100
+        }
+      }
+    },
+    "BULBASAUR": {
+      "goldenType": "POISON"
+    },
+    "IVYSAUR": {
+      "goldenType": "POISON"
+    },
+    "VENUSAUR": {
+      "goldenType": "POISON"
+    },
+    "VENUSAUR,1": {
+      "goldenType": "POISON"
+    },
+    "VENUSAUR,2": {
+      "goldenType": "POISON"
+    },
+    "BLASTOISE": {
+      "goldenType": "STEEL"
+    },
+    "SQUIRTLE": {
+      "goldenType": "STEEL"
+    },
+    "WARTORTLE": {
+      "goldenType": "STEEL"
+    },
+    "BLASTOISE,1": {
+      "goldenType": "STEEL"
+    },
+    "BLASTOISE,2": {
+      "goldenType": "STEEL"
+    },
+    "BUTTERFREE": {
+      "goldenType": "PSYCHIC",
+      "goldenTypeReplace": "FLYING"
+    },
+    "METAPOD": {
+      "goldenType": "PSYCHIC"
+    },
+    "CATERPIE": {
+      "goldenType": "PSYCHIC"
+    },
+    "WEEDLE": {
+      "goldenType": "POISON"
+    },
+    "KAKUNA": {
+      "goldenType": "POISON"
+    },
+    "BEEDRILL": {
+      "goldenType": "POISON"
+    },
+    "BEEDRILL,1": {
+      "goldenType": "POISON"
+    },
+    "PIDGEY": {
+      "goldenType": "FLYING"
+    },
+    "PIDGEOTTO": {
+      "goldenType": "FLYING"
+    },
+    "PIDGEOT": {
+      "goldenType": "FLYING"
+    },
+    "PIDGEOT,1": {
+      "goldenType": "FLYING"
+    },
+    "RATTATA": {
+      "goldenType": "NORMAL"
+    },
+    "RATICATE": {
+      "goldenType": "NORMAL"
+    },
+    "RATTATA,1": {
+      "goldenType": "DARK"
+    },
+    "RATICATE,1": {
+      "goldenType": "DARK"
+    },
+    "SPEAROW": {
+      "goldenType": "DARK"
+    },
+    "FEAROW": {
+      "goldenType": "DARK"
+    },
+    "EKANS": {
+      "goldenType": "POISON"
+    },
+    "ARBOK": {
+      "goldenType": "POISON"
+    },
+    "SANDSHREW": {
+      "goldenType": "STEEL"
+    },
+    "SANDSLASH": {
+      "goldenType": "STEEL"
+    },
+    "PIKACHU": {
+      "goldenType": "ELECTRIC"
+    },
+    "RAICHU": {
+      "goldenType": "ELECTRIC"
+    },
+    "PICHU": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,2": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,3": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,4": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,5": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,6": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,7": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,8": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,9": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,10": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,11": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,12": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,13": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,14": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,15": {
+      "goldenType": "ELECTRIC"
+    },
+    "RAICHU,1": {
+      "goldenType": "ELECTRIC"
+    },
+    "RAICHU,2": {
+      "goldenType": "ELECTRIC"
+    },
+    "RAICHU,3": {
+      "goldenType": "ELECTRIC"
+    },
+    "PICHU,2": {
+      "goldenType": "ELECTRIC"
+    },
+    "PIKACHU,17": {
+      "goldenType": "ELECTRIC"
+    },
+    "SANDSHREW,1": {
+      "goldenType": "STEEL"
+    },
+    "SANDSLASH,1": {
+      "goldenType": "STEEL"
+    },
+    "NIDORANFE": {
+      "goldenType": "POISON"
+    },
+    "NIDORINA": {
+      "goldenType": "POISON"
+    },
+    "NIDOQUEEN": {
+      "goldenType": "POISON"
+    },
+    "NIDORANMA": {
+      "goldenType": "POISON"
+    },
+    "NIDORINO": {
+      "goldenType": "POISON"
+    },
+    "NIDOKING": {
+      "goldenType": "POISON"
+    },
+    "CLEFAIRY": {
+      "goldenType": "FLYING"
+    },
+    "CLEFABLE": {
+      "goldenType": "FLYING"
+    },
+    "CLEFFA": {
+      "goldenType": "FLYING"
+    },
+    "CLEFABLE,1": {
+      "goldenType": "FLYING"
+    },
+    "VULPIX": {
+      "goldenType": "GHOST"
+    },
+    "NINETALES": {
+      "goldenType": "GHOST"
+    },
+    "VULPIX,1": {
+      "goldenType": "FAIRY"
+    },
+    "NINETALES,1": {
+      "goldenType": "FAIRY"
+    },
+    "JIGGLYPUFF": {
+      "goldenType": "ICE",
+      "goldenTypeReplace": "NORMAL"
+    },
+    "WIGGLYTUFF": {
+      "goldenType": "ICE",
+      "goldenTypeReplace": "NORMAL"
+    },
+    "IGGLYBUFF": {
+      "goldenType": "ICE",
+      "goldenTypeReplace": "NORMAL"
+    },
+    "ZUBAT": {
+      "goldenType": "DARK",
+      "goldenTypeReplace": "FLYING"
+    },
+    "GOLBAT": {
+      "goldenType": "DARK",
+      "goldenTypeReplace": "FLYING"
+    },
+    "CROBAT": {
+      "goldenType": "DARK",
+      "goldenTypeReplace": "FLYING"
+    },
+    "ODDISH": {
+      "goldenType": "GRASS"
+    },
+    "GLOOM": {
+      "goldenType": "GRASS"
+    },
+    "VILEPLUME": {
+      "goldenType": "GRASS"
+    },
+    "BELLOSSOM": {
+      "goldenType": "FAIRY"
+    },
+    "PARAS": {
+      "goldenType": "GHOST",
+      "goldenTypeReplace": "GRASS"
+    },
+    "PARASECT": {
+      "goldenType": "GHOST",
+      "goldenTypeReplace": "GRASS"
+    },
+    "VENONAT": {
+      "goldenType": "PSYCHIC",
+      "goldenTypeReplace": "BUG"
+    },
+    "VENOMOTH": {
+      "goldenType": "PSYCHIC",
+      "goldenTypeReplace": "BUG"
+    },
+    "DIGLETT": {
+      "goldenType": "GROUND"
+    },
+    "DUGTRIO": {
+      "goldenType": "GROUND"
+    },
+    "DIGLETT,1": {
+      "goldenType": "GROUND"
+    },
+    "DUGTRIO,1": {
+      "goldenType": "GROUND"
+    },
+    "MEOWTH": {
+      "goldenType": "ROCK"
+    },
+    "PERSIAN": {
+      "goldenType": "ROCK"
+    },
+    "PERRSERKER": {
+      "goldenType": "FIGHTING"
+    },
+    "MEOWTH,1": {
+      "goldenType": "DARK"
+    },
+    "MEOWTH,2": {
+      "goldenType": "FIGHTING"
+    },
+    "PERSIAN,1": {
+      "goldenType": "DARK"
+    },
+    "MEOWTH,3": {
+      "goldenType": "ROCK"
+    },
+    "PSYDUCK": {
+      "goldenType": "PSYCHIC"
+    },
+    "GOLDUCK": {
+      "goldenType": "PSYCHIC"
+    },
+    "MANKEY": {
+      "goldenType": "GHOST"
+    },
+    "PRIMEAPE": {
+      "goldenType": "GHOST"
+    },
+    "ANNIHILAPE": {
+      "goldenType": "GHOST"
+    },
+    "ARCANINE": {
+      "goldenType": "DRAGON"
+    },
+    "GROWLITHE": {
+      "goldenType": "DRAGON"
+    },
+    "GROWLITHE,1": {
+      "goldenType": "FIGHTING",
+      "goldenTypeReplace": "ROCK"
+    },
+    "ARCANINE,1": {
+      "goldenType": "FIGHTING",
+      "goldenTypeReplace": "ROCK"
+    },
+    "PINSIR": {
+      "goldenType": "GROUND",
+      "goldenForm": {
+        "number": 2,
+        "name": "Forma Dorada",
+        "ability": "DEADLYGRIP",
+        "types": [
+          "BUG",
+          "GROUND"
+        ],
+        "baseStats": {
+          "HP": 65,
+          "ATTACK": 150,
+          "DEFENSE": 140,
+          "SPEED": 95,
+          "SPECIAL_ATTACK": 30,
+          "SPECIAL_DEFENSE": 45
+        }
+      }
+    },
+    "HELIOPTILE": {
+      "goldenType": "FIRE",
+      "goldenTypeReplace": "NORMAL"
+    },
+    "HELIOLISK": {
+      "goldenType": "FIRE",
+      "goldenTypeReplace": "NORMAL",
+      "goldenForm": {
+        "number": 1,
+        "name": "Forma Dorada",
+        "types": [
+          "ELECTRIC",
+          "FIRE"
+        ],
+        "baseStats": {
+          "HP": 62,
+          "ATTACK": 35,
+          "DEFENSE": 42,
+          "SPEED": 145,
+          "SPECIAL_ATTACK": 145,
+          "SPECIAL_DEFENSE": 77
+        }
+      }
+    }
+  }
+}

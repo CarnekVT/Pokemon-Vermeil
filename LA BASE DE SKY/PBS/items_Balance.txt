@@ -1,0 +1,31 @@
+﻿#-------------------------------
+[ARCANETEA]
+Name = Té Arcano
+NamePlural = Tés Arcano
+Pocket = 2
+Price = 50000
+FieldUse = OnPokemon
+Description = Misterioso té dorado que despierta la Habilidad Arcana de un Pokémon y evoca el poder de su época dorada.
+#-------------------------------
+[GOLDENFRAGMENT]
+Name = Fragmento Dorado
+NamePlural = Fragmentos Dorados
+Pocket = 1
+Price = 0
+Description = Fragmento de una Piedra Dorada que aún conserva una tenue energía áurea. Parece reaccionar ante cualquier Pokémon.
+#-------------------------------
+[GOLDENSTONE]
+Name = Piedra Dorada
+NamePlural = Piedras Doradas
+Pocket = 1
+Price = 0
+Description = Piedra que canaliza energía áurea y permite despertar la Forma Dorada de ciertos Pokémon.
+#-------------------------------
+[GOLDENSRING]
+Name = Anillo Dorado
+NamePlural = Anillos Dorados
+Pocket = 8
+Price = 0
+Flags = KeyItem
+Description = Anillo que sincroniza al Entrenador con la Piedra Dorada para canalizar energía áurea durante el combate.
+#-------------------------------

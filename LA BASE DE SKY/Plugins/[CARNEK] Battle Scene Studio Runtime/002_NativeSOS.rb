@@ -1159,12 +1159,10 @@ class Battle
     bss064_command_phase_without_native_sos(*args)
   end
 
-  unless method_defined?(:bss064_end_round_without_native_sos) || private_method_defined?(:bss064_end_round_without_native_sos)
-    alias bss064_end_round_without_native_sos pbEndOfRoundPhase
-  end
-  def pbEndOfRoundPhase(*args)
-    self.sosBattle=false if respond_to?(:sosBattle=)
-    ret=bss064_end_round_without_native_sos(*args)
+  # Runs only BSS's post-round SOS work.  Do not alias pbEndOfRoundPhase here:
+  # an alias can capture a method supplied by a prepended plugin (Golden Power)
+  # and create BSS -> Golden -> BSS recursion depending on plugin load order.
+  def bss064_native_sos_after_end_round
     self.sosBattle=false if respond_to?(:sosBattle=)
     if @bss_sos_enabled && @bss_sos_config.is_a?(Hash) && @bss_sos_config["automaticCalls"]!=false && (!bss_scripted_sos_battle? || @bss_last_call_answered!=true || bss_additional_sos_calls_allowed?) && bss_sos_runtime_battle_allowed?
       trainer_sos=(trainerBattle? rescue false) && bss_scripted_sos_battle?
@@ -1180,9 +1178,21 @@ class Battle
         end
       end
     end
-    ret
   end
 end
+
+module BSS064NativeSOSEndRoundHook
+  def pbEndOfRoundPhase(*args,&block)
+    self.sosBattle=false if respond_to?(:sosBattle=)
+    ret=super
+    self.sosBattle=false if respond_to?(:sosBattle=)
+    bss064_native_sos_after_end_round
+    return ret
+  end
+end
+
+Battle.prepend(BSS064NativeSOSEndRoundHook) unless
+  Battle.ancestors.include?(BSS064NativeSOSEndRoundHook)
 
 class Battle::Battler
   attr_accessor :totemBattler unless method_defined?(:totemBattler)

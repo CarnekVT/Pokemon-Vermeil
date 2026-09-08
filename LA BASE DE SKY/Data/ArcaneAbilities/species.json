@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "species": {
+    "BULBASAUR": {
+      "ability": "MEGASOL"
+    },
+    "IVYSAUR": {
+      "ability": "MEGASOL"
+    },
+    "VENUSAUR": {
+      "ability": "MEGASOL"
+    },
+    "CHARMANDER": {
+      "ability": "DROUGHT"
+    },
+    "CHARMELEON": {
+      "ability": "DROUGHT"
+    },
+    "CHARIZARD": {
+      "ability": "DROUGHT"
+    },
+    "SQUIRTLE": {
+      "ability": "DAUNTLESSSHIELD"
+    },
+    "WARTORTLE": {
+      "ability": "DAUNTLESSSHIELD"
+    },
+    "BLASTOISE": {
+      "ability": "DAUNTLESSSHIELD"
+    },
+    "CATERPIE": {
+      "ability": "REACTIVEPOLLEN"
+    },
+    "METAPOD": {
+      "ability": "REACTIVEPOLLEN"
+    },
+    "BUTTERFREE": {
+      "ability": "REACTIVEPOLLEN"
+    },
+    "WEEDLE": {
+      "ability": "PIERCINGDRILL"
+    },
+    "KAKUNA": {
+      "ability": "PIERCINGDRILL"
+    },
+    "BEEDRILL": {
+      "ability": "PIERCINGDRILL"
+    },
+    "PIDGEY": {
+      "ability": "PRIDE"
+    },
+    "PIDGEOTTO": {
+      "ability": "PRIDE"
+    },
+    "PIDGEOT": {
+      "ability": "PRIDE"
+    }
+  }
+}

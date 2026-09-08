@@ -1,0 +1,73 @@
+# encoding: UTF-8
+#===============================================================================
+# Libreta de Investigación - Configuración
+# Pokémon Essentials v21.1
+#===============================================================================
+module ResearchNotebook
+  module Settings
+    SCREEN_WIDTH  = 640
+    SCREEN_HEIGHT = 480
+
+    # Orden del catálogo.
+    # :GAME     -> usa la Pokédex regional/del juego indicada abajo.
+    # :NATIONAL -> usa el número Nacional.
+    DEX_ORDER = :GAME
+    GAME_DEX_INDEX = 0
+
+    # Fuentes de verdad. La Libreta NO duplica la configuración de las mecánicas.
+    GOLDEN_SPECIES_JSON = "Data/GoldenSystem/species.json"
+    ARCANE_SPECIES_JSON = "Data/ArcaneAbilities/species.json"
+
+    # Objetos relacionados con las mecánicas.
+    ARCANE_TEA_ITEM      = :ARCANETEA
+    GOLDEN_FRAGMENT_ITEM = :GOLDENFRAGMENT
+    GOLDEN_STONE_ITEM    = :GOLDENSTONE
+    GOLDEN_RING_ITEM     = :GOLDENSRING
+
+    # Acceso. Durante desarrollo es útil tenerla también en Debug.
+    SHOW_IN_PAUSE_MENU = false
+    SHOW_IN_DEBUG_MENU = true
+    NOTEBOOK_AVAILABLE_FROM_START = true
+    MENU_ORDER = 45
+
+    # Entradas no capturadas de los sistemas especiales.
+    # false = solo lo que el protagonista conoce.
+    # true  = deja huecos/siluetas para todo lo configurado.
+    SHOW_UNOWNED_ENTRIES = true
+
+    REVEAL_ARCANE_POTENTIAL_ON_CAPTURE = true
+    REVEAL_GOLDEN_TYPE_BEFORE_USE      = true
+    REVEAL_GOLDEN_SPRITE_ON_SEEN       = true
+    GOLDEN_DETAILS_REQUIRE_USE         = true
+
+    # Gamefeel. Todo se dibuja por código; no requiere assets adicionales.
+    ENABLE_OPEN_ANIMATION       = true
+    ENABLE_PAGE_TURN_ANIMATION  = true
+    ENABLE_CURSOR_PULSE         = false
+    ENABLE_SECTION_MOTIF        = true
+    ENABLE_FOCUS_BREATH         = false
+    ENABLE_GRID_ICON_PULSE      = false
+
+    # Duraciones en frames. Intencionalmente cortas para no entorpecer navegación.
+    OPEN_ANIMATION_FRAMES = 4
+    PAGE_TURN_FRAMES       = 3
+
+    # Información global mostrada en la página de Forma Dorada.
+    GOLDEN_FORM_DRAIN_TEXT = "Pierde 1/4 de sus PS máximos al final de cada turno."
+
+    # Catálogo estilo MegaDex: vista focal a la izquierda y cuadrícula a la derecha.
+    GRID_COLUMNS = 5
+    GRID_ROWS    = 5
+    DEFAULT_SORT = :DEX       # :DEX / :NAME / :STATUS
+
+    # Usa el spritesheet de tipos del propio proyecto. No se incluyen gráficos
+    # duplicados en este plugin. `Graphics/UI/types` es la ruta principal de v21.1.
+    TYPE_SHEET_CANDIDATES = [
+      "Graphics/UI/types",
+      "Graphics/UI/Pokedex/types",
+      "Graphics/UI/Pokedex/icon_types"
+    ]
+
+    MENU_NAME = "Libreta"
+  end
+end

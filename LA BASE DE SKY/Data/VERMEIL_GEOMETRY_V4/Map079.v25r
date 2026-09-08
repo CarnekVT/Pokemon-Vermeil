@@ -1,8 +1,0 @@
-V25R2
-HO8:S6:formatS22:vermeil-runtime-fast-2S6:map_idN2:79S5:widthN2:90S6:heightN2:98S11:height_stepN2:32S14:inherit_legacyFS12:model_streamS11:Map079.v25mS16:model_face_countN2:52
-PO5:S1:xN2:20S1:yN2:69S5:widthN1:1S6:heightN1:1S7:cornersA4:N1:0N1:0N1:0N1:0
-PO5:S1:xN2:20S1:yN2:72S5:widthN1:1S6:heightN1:1S7:cornersA4:N1:0N1:0N1:0N1:0
-MO13:S4:kindS7:tilesetS10:source_keyS19:ts%3A5%3Atile%3A412S10:tileset_idN1:5S7:graphicS7:nsaeqMZS7:tile_idN3:412S8:src_rectO4:S1:xN3:128S1:yN2:96S1:wN2:32S1:hN2:32S8:rotationN1:0S6:flip_hFS6:flip_vFS7:opacityN3:255S3:hueN1:0S10:saturationN3:100S8:lightingN1:0
-MO13:S4:kindS7:tilesetS10:source_keyS19:ts%3A5%3Atile%3A401S10:tileset_idN1:5S7:graphicS7:nsaeqMZS7:tile_idN3:401S8:src_rectO4:S1:xN2:32S1:yN2:64S1:wN2:32S1:hN2:32S8:rotationN1:0S6:flip_hFS6:flip_vFS7:opacityN3:255S3:hueN1:0S10:saturationN3:100S8:lightingN1:0
-FA20:N6:200000S4:quadS3:topS3:topA4:A3:N2:20N2:69N1:0A3:N2:21N2:69N1:0A3:N2:21N2:70N1:0A3:N2:20N2:70N1:0ZA4:N2:20N2:69N2:21N2:70N1:0N1:1S13:terrain-angleS0:N1:0S11:__terrain__S5:2%2C8N2:20N2:69N2:21N2:70N1:0N1:0
-FA20:N6:200001S4:quadS3:topS3:topA4:A3:N2:20N2:72N1:0A3:N2:21N2:72N1:0A3:N2:21N2:73N1:0A3:N2:20N2:73N1:0ZA4:N2:20N2:72N2:21N2:73N1:1N1:1S13:terrain-angleS0:N1:0S11:__terrain__S5:2%2C9N2:20N2:72N2:21N2:73N1:0N1:0

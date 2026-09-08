@@ -1,7 +1,6 @@
 {
   "schema": 6,
-  "version": "1.4.0",
-  "generatedBy": "Translate Studio v1.4.0",
+  "generatedBy": "Translate Studio v1.4.0 · clean-base contextual English",
   "languages": {
     "es": {
       "species": {
@@ -21114,6 +21113,11 @@
           "Name": "Incubator",
           "NamePlural": "Incubators",
           "Description": "Incubator that allows you to keep 6 eggs until they hatch."
+        },
+        "CHANGEDEX": {
+          "Name": "ChangeDex",
+          "NamePlural": "ChangeDexes",
+          "Description": "A record of canon and Vermeil changes for existing species, including typing, stats, abilities and newly learned moves."
         }
       },
       "types": {
@@ -31321,10 +31325,9 @@
           "SourcePack": "User-supplied English Data (strict structural match)"
         },
         "Precisión": {
-          "Text": "Accuracy",
-          "Reference": "Manual edit · Translate Studio",
-          "SourcePack": "Manual",
-          "Manual": true
+          "Text": "accuracy",
+          "Reference": "English base source: 010_Data/001_Hardcoded data/008_Stat.rb",
+          "SourcePack": "User-supplied English Data (strict structural match)"
         },
         "Pre": {
           "Text": "Acc",
@@ -31332,10 +31335,9 @@
           "SourcePack": "User-supplied English Data (strict structural match)"
         },
         "Evasión": {
-          "Text": "Evasiveness",
-          "Reference": "Manual edit · Translate Studio",
-          "SourcePack": "Manual",
-          "Manual": true
+          "Text": "evasiveness",
+          "Reference": "English base source: 010_Data/001_Hardcoded data/008_Stat.rb",
+          "SourcePack": "User-supplied English Data (strict structural match)"
         },
         "Eva": {
           "Text": "Eva",
@@ -90797,5 +90799,32 @@
     "qualityPolicy": "Supplied/canonical English sources override generated/imported English during v1.3 migration; ZBox events remain excluded.",
     "sdsIntro": "Neutral Solen pronouns; Elder Spirit solemn register; \"Despierta...\" => \"Wake up...\".",
     "structuredRepair": "Canonical English repaired official structured rows, including Whirlpool/Leer and other slot-shift corruption."
+  },
+  "version": "1.4.0",
+  "pbsRepair": {
+    "version": "1.3.0",
+    "policy": "Resolve PBS English by context category + ID before falling back to ZBox. Cross-category literal collisions are never shared. Events remain excluded.",
+    "repairedRows": 327,
+    "idResolvedRows": 8004,
+    "ambiguousSameCategoryRows": 36,
+    "reportedRegressionChecks": {
+      "Move Name/Malicioso": "Leer",
+      "Move Name/Torbellino": "Whirlpool",
+      "Species Category/Malicioso": "Devious",
+      "Species Category/Torbellino": "Cyclone"
+    }
+  },
+  "qualityRepair": {
+    "v1.3.0": {
+      "policy": "Repair known Spanish leaks, swapped helper verbs, grammatical import errors and user-reported localization regressions. Explicit manual rows remain protected by the editor migration.",
+      "rowsUpdated": 23,
+      "examples": {
+        "recordar": "remember",
+        "aprender": "learn",
+        "usando {1}{2}{3}": "using {1}{2}{3}",
+        "Atq. Esp.": "Sp. Atk.",
+        "Habilidad Oculta": "Hidden Ability"
+      }
+    }
   }
 }

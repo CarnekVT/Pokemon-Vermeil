@@ -6,10 +6,10 @@
     "studioName": "Battle Animation Studio",
     "battlers": {
       "user": {
-        "projectPath": "Graphics/Pokemon/Back/YVELTAL.png",
+        "projectPath": "Graphics/Pokemon/Back/CORVIKNIGHT.png",
         "folder": "Pokemon/Back",
-        "name": "YVELTAL",
-        "label": "YVELTAL"
+        "name": "CORVIKNIGHT",
+        "label": "CORVIKNIGHT"
       },
       "target": {
         "projectPath": "Graphics/Pokemon/Front/DRAGONITE.png",
@@ -71,13 +71,13 @@
     "testBattlerScale": 1,
     "playerBattlerSize": 3,
     "foeBattlerSize": 2,
-    "quickIntensity": 175,
+    "quickIntensity": 100,
     "sidePreview": "auto",
     "layout": {
       "leftWidth": 271,
       "rightWidth": 520,
       "timelineHeight": 283,
-      "framePixels": 6
+      "framePixels": 10
     },
     "onionMode": "off",
     "contextTransformEdit": "auto",
@@ -21343,7 +21343,7 @@
               "type": "projectile",
               "name": "Cut · Hit · Punch · Punch",
               "enabled": true,
-              "locked": true,
+              "locked": false,
               "startFrame": 6,
               "endFrame": 17,
               "graphic": {
@@ -21679,25 +21679,43 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxymy5_cu",
+                    "frame": 0,
+                    "value": -24,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdby8e0_103",
                     "frame": 6,
-                    "value": 100,
+                    "value": -24,
                     "easing": "linear"
                   }
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxymy5_cv",
+                    "frame": 0,
+                    "value": -151,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdby8e0_107",
                     "frame": 6,
-                    "value": 0,
+                    "value": -151,
                     "easing": "linear"
                   }
                 ],
                 "toneBlue": [
                   {
+                    "id": "pkey_mtpxymy5_cw",
+                    "frame": 0,
+                    "value": -90,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdby8e0_10b",
                     "frame": 6,
-                    "value": 100,
+                    "value": -90,
                     "easing": "linear"
                   }
                 ],
@@ -21726,7 +21744,11 @@
               },
               "fxOps": [],
               "pbs": {
-                "focus": "target"
+                "focus": "target",
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -21743,7 +21765,7 @@
               "type": "projectile",
               "name": "Cut · Hit · Punch · Punch copia",
               "enabled": true,
-              "locked": true,
+              "locked": false,
               "startFrame": 12,
               "endFrame": 23,
               "graphic": {
@@ -22086,25 +22108,43 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxyrw2_cx",
+                    "frame": 0,
+                    "value": -24,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc156d_123",
                     "frame": 12,
-                    "value": 100,
+                    "value": -24,
                     "easing": "linear"
                   }
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxyrw2_cy",
+                    "frame": 0,
+                    "value": -151,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc156d_124",
                     "frame": 12,
-                    "value": 0,
+                    "value": -151,
                     "easing": "linear"
                   }
                 ],
                 "toneBlue": [
                   {
+                    "id": "pkey_mtpxyrw2_cz",
+                    "frame": 0,
+                    "value": -90,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc156d_125",
                     "frame": 12,
-                    "value": 100,
+                    "value": -90,
                     "easing": "linear"
                   }
                 ],
@@ -22133,7 +22173,11 @@
               },
               "fxOps": [],
               "pbs": {
-                "focus": "target"
+                "focus": "target",
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -22150,7 +22194,7 @@
               "type": "projectile",
               "name": "Cut · Hit · Punch · Punch copia copia",
               "enabled": true,
-              "locked": true,
+              "locked": false,
               "startFrame": 17,
               "endFrame": 28,
               "graphic": {
@@ -22505,25 +22549,43 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxyxjl_d0",
+                    "frame": 0,
+                    "value": -24,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc8e78_2vz",
                     "frame": 17,
-                    "value": 100,
+                    "value": -24,
                     "easing": "linear"
                   }
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxyxjl_d1",
+                    "frame": 0,
+                    "value": -151,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc8e78_2w0",
                     "frame": 17,
-                    "value": 0,
+                    "value": -151,
                     "easing": "linear"
                   }
                 ],
                 "toneBlue": [
                   {
+                    "id": "pkey_mtpxyxjl_d2",
+                    "frame": 0,
+                    "value": -90,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdc8e78_2w1",
                     "frame": 17,
-                    "value": 100,
+                    "value": -90,
                     "easing": "linear"
                   }
                 ],
@@ -22552,7 +22614,11 @@
               },
               "fxOps": [],
               "pbs": {
-                "focus": "target"
+                "focus": "target",
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -23238,6 +23304,12 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxxnlm_cl",
+                    "frame": 0,
+                    "value": 64,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdhmpoe_4vf",
                     "frame": 12,
                     "value": -10,
@@ -23246,6 +23318,12 @@
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxxnlm_cm",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdhnn73_4vh",
                     "frame": 12,
                     "value": -255,
@@ -23253,6 +23331,12 @@
                   }
                 ],
                 "toneBlue": [
+                  {
+                    "id": "pkey_mtpxxnlm_cn",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
                   {
                     "id": "pkey_mtdhmrur_4vg",
                     "frame": 12,
@@ -23509,7 +23593,11 @@
                 "particleCommandSpace": "animation",
                 "randomAngleRange": 0,
                 "randomInvertAngle": false,
-                "randomInvertFlip": true
+                "randomInvertFlip": true,
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -23635,6 +23723,12 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxxy3t_co",
+                    "frame": 0,
+                    "value": 64,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdi74eq_6q",
                     "frame": 18,
                     "value": -10,
@@ -23643,6 +23737,12 @@
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxxy3t_cp",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdi74eq_6r",
                     "frame": 18,
                     "value": -255,
@@ -23650,6 +23750,12 @@
                   }
                 ],
                 "toneBlue": [
+                  {
+                    "id": "pkey_mtpxxy3t_cq",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
                   {
                     "id": "pkey_mtdi74eq_6s",
                     "frame": 18,
@@ -23906,7 +24012,11 @@
                 "particleCommandSpace": "animation",
                 "randomAngleRange": 0,
                 "randomInvertAngle": false,
-                "randomInvertFlip": true
+                "randomInvertFlip": true,
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -24032,6 +24142,12 @@
                 "idlePause": [],
                 "toneRed": [
                   {
+                    "id": "pkey_mtpxy5ij_cr",
+                    "frame": 0,
+                    "value": 64,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdi7hbg_7r",
                     "frame": 24,
                     "value": -10,
@@ -24040,6 +24156,12 @@
                 ],
                 "toneGreen": [
                   {
+                    "id": "pkey_mtpxy5ij_cs",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
+                  {
                     "id": "pkey_mtdi7hbg_7s",
                     "frame": 24,
                     "value": -255,
@@ -24047,6 +24169,12 @@
                   }
                 ],
                 "toneBlue": [
+                  {
+                    "id": "pkey_mtpxy5ij_ct",
+                    "frame": 0,
+                    "value": -116,
+                    "easing": "linear"
+                  },
                   {
                     "id": "pkey_mtdi7hbg_7t",
                     "frame": 24,
@@ -24303,7 +24431,11 @@
                 "particleCommandSpace": "animation",
                 "randomAngleRange": 0,
                 "randomInvertAngle": false,
-                "randomInvertFlip": true
+                "randomInvertFlip": true,
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
               },
               "logic": [],
               "imported": null,
@@ -41495,13 +41627,2131 @@
         "referenceHeight": 480,
         "cameraBoundsMode": "auto"
       }
+    },
+    {
+      "id": "anim_mtqprwrb_cz",
+      "name": "Acupresión copia",
+      "fps": 20,
+      "duration": 83,
+      "source": {
+        "type": "studio",
+        "move": "ACUPRESSURE",
+        "version": 0,
+        "catalogType": "move",
+        "opposing": false,
+        "sideContext": "player",
+        "targetMode": "both",
+        "targetScope": "single_other",
+        "allowedTargetScopes": [
+          "single_other"
+        ],
+        "variantScope": "status",
+        "customSpace": "battlers",
+        "detectedTraits": [],
+        "detectedFunctionCode": "RaiseTargetRandomStat2",
+        "detectedCategory": "status",
+        "detectedTarget": "UserOrNearAlly",
+        "contextAutoAdapt": true,
+        "previewAffectedTargets": false,
+        "autoReplicateAffected": false,
+        "activeTimelineContext": null,
+        "askBackupOnContextEdit": false,
+        "autoReplicateTouched": false,
+        "commonSubjectRole": "auto",
+        "authors": [],
+        "groupIdentity": "move|ACUPRESSURE",
+        "runtimeSelected": true,
+        "runtimeEnabled": true,
+        "duplicatedFrom": "anim_mtql6izj_41e",
+        "duplicatedFromName": "Acupresión",
+        "groupName": "Acupresión",
+        "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY"
+      },
+      "contextTimelines": [],
+      "battlers": {
+        "user": {
+          "id": "battler_user",
+          "type": "battler",
+          "side": "user",
+          "name": "User",
+          "enabled": true,
+          "locked": false,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mtqokaqz_a1",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mtqokaqz_9x",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              },
+              "axisX": true,
+              "axisY": true
+            },
+            {
+              "id": "key_mtqokaqz_9y",
+              "frame": 37,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtqq1cmh_1hp",
+              "frame": 45,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtqokaqz_9z",
+              "frame": 53,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtqqf0q4_28h",
+              "frame": 69,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            },
+            {
+              "id": "key_mtqokaqz_a0",
+              "frame": 74,
+              "easing": "ease_both",
+              "axisX": true,
+              "axisY": true,
+              "point": {
+                "anchor": "user_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              }
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [
+              {
+                "id": "pkey_mtqokaqz_a2",
+                "frame": 0,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_a3",
+                "frame": 37,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqq1cmh_1hq",
+                "frame": 45,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_a4",
+                "frame": 53,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqqf0q4_28i",
+                "frame": 69,
+                "value": 100,
+                "easing": "linear"
+              }
+            ],
+            "scaleY": [
+              {
+                "id": "pkey_mtqokaqz_a5",
+                "frame": 0,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_a6",
+                "frame": 37,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqq1cmh_1hr",
+                "frame": 45,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_a7",
+                "frame": 53,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqqf0q4_28j",
+                "frame": 69,
+                "value": 100,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_a8",
+                "frame": 74,
+                "value": 100,
+                "easing": "linear"
+              }
+            ],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "idlePause": [],
+            "toneRed": [
+              {
+                "id": "pkey_mtqokaqz_a9",
+                "frame": 0,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_aa",
+                "frame": 37,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqq1cmh_1hs",
+                "frame": 45,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_ab",
+                "frame": 53,
+                "value": 157,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqqf0q4_28k",
+                "frame": 69,
+                "value": 157,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_ac",
+                "frame": 74,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "toneGreen": [
+              {
+                "id": "pkey_mtqokaqz_ad",
+                "frame": 0,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_ae",
+                "frame": 37,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqq1cmh_1ht",
+                "frame": 45,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_af",
+                "frame": 53,
+                "value": 137,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqqf0q4_28l",
+                "frame": 69,
+                "value": 137,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_ag",
+                "frame": 74,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "toneBlue": [
+              {
+                "id": "pkey_mtqokaqz_ah",
+                "frame": 0,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_ai",
+                "frame": 37,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqq1cmh_1hu",
+                "frame": 45,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_aj",
+                "frame": 53,
+                "value": -76,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqqf0q4_28m",
+                "frame": 69,
+                "value": -76,
+                "easing": "linear"
+              },
+              {
+                "id": "pkey_mtqokaqz_ak",
+                "frame": 74,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "priority": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 82
+        },
+        "target": {
+          "id": "battler_target",
+          "type": "battler",
+          "side": "target",
+          "name": "Target",
+          "enabled": true,
+          "locked": true,
+          "formRules": [],
+          "visual": {
+            "size": 100,
+            "scaleX": 100,
+            "scaleY": 100,
+            "opacity": 100,
+            "rotation": 0,
+            "z": 0,
+            "blend": 0,
+            "flip": 0
+          },
+          "visibleKeys": [
+            {
+              "id": "vkey_mtqokaqz_am",
+              "frame": 0,
+              "value": true
+            }
+          ],
+          "positionKeys": [
+            {
+              "id": "key_mtqokaqz_al",
+              "frame": 0,
+              "easing": "ease_both",
+              "point": {
+                "anchor": "target_battler",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              },
+              "axisX": true,
+              "axisY": true
+            }
+          ],
+          "valueKeys": {
+            "size": [],
+            "scaleX": [],
+            "scaleY": [],
+            "viewScale": [],
+            "rotation": [],
+            "opacity": [],
+            "graphicFrame": [],
+            "srcX": [],
+            "srcY": [],
+            "srcW": [],
+            "srcH": [],
+            "z": [],
+            "blend": [],
+            "flip": [],
+            "flipY": [],
+            "facing": [],
+            "idlePause": [],
+            "toneRed": [],
+            "toneGreen": [],
+            "toneBlue": [],
+            "toneGray": [],
+            "cameraX": [],
+            "cameraY": [],
+            "cameraZoom": [],
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
+          },
+          "fxOps": [],
+          "logic": [],
+          "startFrame": 0,
+          "endFrame": 0
+        }
+      },
+      "camera": {
+        "id": "camera_main",
+        "type": "camera",
+        "name": "Camera",
+        "enabled": true,
+        "locked": false,
+        "visual": {
+          "cameraX": 0,
+          "cameraY": 0,
+          "cameraZoom": 100,
+          "cameraRotation": 0,
+          "size": 100,
+          "scaleX": 100,
+          "scaleY": 100,
+          "opacity": 100,
+          "rotation": 0,
+          "z": 0,
+          "blend": 0,
+          "flip": 0
+        },
+        "valueKeys": {
+          "size": [],
+          "scaleX": [],
+          "scaleY": [],
+          "viewScale": [],
+          "rotation": [],
+          "opacity": [],
+          "graphicFrame": [],
+          "srcX": [],
+          "srcY": [],
+          "srcW": [],
+          "srcH": [],
+          "z": [],
+          "blend": [],
+          "flip": [],
+          "flipY": [],
+          "facing": [],
+          "idlePause": [],
+          "toneRed": [],
+          "toneGreen": [],
+          "toneBlue": [],
+          "toneGray": [],
+          "cameraX": [
+            {
+              "id": "pkey_mtqokaqz_ap",
+              "frame": 3,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqokaqz_aq",
+              "frame": 67,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqqekry_28d",
+              "frame": 74,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqokaqz_ar",
+              "frame": 81,
+              "value": 0,
+              "easing": "ease_both"
+            }
+          ],
+          "cameraY": [
+            {
+              "id": "pkey_mtqokaqz_as",
+              "frame": 3,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqokaqz_at",
+              "frame": 67,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqqekry_28e",
+              "frame": 74,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqokaqz_au",
+              "frame": 81,
+              "value": 0,
+              "easing": "ease_both"
+            }
+          ],
+          "cameraZoom": [
+            {
+              "id": "pkey_mtqokaqz_av",
+              "frame": 3,
+              "value": 100,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqokaqz_aw",
+              "frame": 11,
+              "value": 145.5,
+              "easing": "ease_out"
+            },
+            {
+              "id": "pkey_mtqokaqz_ax",
+              "frame": 67,
+              "value": 145.5,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqqekry_28f",
+              "frame": 74,
+              "value": 145.5,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqokaqz_ay",
+              "frame": 81,
+              "value": 100,
+              "easing": "ease_both"
+            }
+          ],
+          "cameraRotation": [
+            {
+              "id": "pkey_mtqokaqz_az",
+              "frame": 3,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqokaqz_b0",
+              "frame": 67,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqqekry_28g",
+              "frame": 74,
+              "value": 0,
+              "easing": "ease_both"
+            },
+            {
+              "id": "pkey_mtqokaqz_b1",
+              "frame": 81,
+              "value": 0,
+              "easing": "ease_both"
+            }
+          ],
+          "priority": []
+        },
+        "visibleKeys": [
+          {
+            "id": "vkey_mtqokaqz_ao",
+            "frame": 0,
+            "value": true
+          }
+        ],
+        "positionKeys": [
+          {
+            "id": "key_mtqokaqz_an",
+            "frame": 0,
+            "easing": "linear",
+            "point": {
+              "anchor": "screen",
+              "x": 0,
+              "y": 0,
+              "offsetX": 0,
+              "offsetY": 0
+            },
+            "axisX": true,
+            "axisY": true
+          }
+        ],
+        "startFrame": 0,
+        "endFrame": 0,
+        "logic": [
+          {
+            "type": "focus",
+            "side": "user",
+            "frame": 3,
+            "duration": 8,
+            "easing": "ease_both",
+            "follow": true,
+            "id": "logic_mtqokaqz_b2"
+          },
+          {
+            "type": "focus_clear",
+            "frame": 81,
+            "duration": 8,
+            "easing": "ease_both",
+            "id": "logic_mtqokaqz_b3"
+          }
+        ],
+        "fxOps": []
+      },
+      "tracks": [
+        {
+          "id": "track_mtql6izj_41l",
+          "type": "effects",
+          "name": "Effects",
+          "clips": [
+            {
+              "id": "clip_mtqprwrb_d2",
+              "type": "projectile",
+              "name": "Hand",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 13,
+              "endFrame": 65,
+              "graphic": {
+                "source": "studio",
+                "projectPath": "Graphics/AnimationStudio/ACUPRESSURE_handpoint.png",
+                "folder": "AnimationStudio",
+                "name": "handpoint",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 1,
+              "priorityReference": "user",
+              "replicateTo": "none",
+              "coordinateSpace": "user",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtqokaqz_bd",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtqokaqz_b5",
+                  "frame": 13,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 5.084625467941692,
+                    "offsetY": -67.30015224651726
+                  },
+                  "axisX": true,
+                  "axisY": true
+                },
+                {
+                  "id": "key_mtqokaqz_b6",
+                  "frame": 23,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 133.0846254679417,
+                    "y": 178.19984775348274,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtqokaqz_b7",
+                  "frame": 29,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 132.65086933241201,
+                    "y": 128.75089335827255,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtqokaqz_b8",
+                  "frame": 31,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 132.65086933241201,
+                    "y": 128.75089335827255,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtqokaqz_bb",
+                  "frame": 48,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 129.19904955055353,
+                    "y": 253.81001274690857,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtqq0g05_1hn",
+                  "frame": 53,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 129.19904955055353,
+                    "y": 253.81001274690857,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mtqokaqz_bc",
+                  "frame": 65,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "screen",
+                    "x": 133.03635913565145,
+                    "y": 129.20879300165726,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [
+                  {
+                    "id": "pkey_mtqq2otv_1uy",
+                    "frame": 0,
+                    "value": 400,
+                    "easing": "ease_both"
+                  }
+                ],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mtqokaqz_bf",
+                    "frame": 13,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqokaqz_bg",
+                    "frame": 23,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqokaqz_bh",
+                    "frame": 48,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqq0g05_1ho",
+                    "frame": 53,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqokaqz_bi",
+                    "frame": 65,
+                    "value": 1,
+                    "easing": "ease_both"
+                  }
+                ],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "idlePause": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [
+                  {
+                    "id": "pkey_mtqokaqz_bj",
+                    "frame": 23,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8,
+                "focus": "user",
+                "afterimage": {
+                  "enabled": true,
+                  "copies": 1,
+                  "gap": 1,
+                  "opacity": 55,
+                  "scaleDecay": 0,
+                  "mode": "trail",
+                  "trailEndFrame": 48,
+                  "trailStartFrame": 0,
+                  "burstEnabled": true,
+                  "burstFrame": 48,
+                  "burstCopies": 3,
+                  "burstLifetime": 8,
+                  "burstInterval": 0,
+                  "burstStartScale": 100,
+                  "burstEndScale": 200,
+                  "burstStartOpacity": 60,
+                  "burstEndOpacity": 0,
+                  "burstStartRadius": 0,
+                  "burstEndRadius": 20,
+                  "trailEnabled": true
+                }
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "contextOverrides": {
+                "foe": {
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "opacity": 100,
+                  "zOffset": 0,
+                  "priorityOffset": 0,
+                  "toneRed": 0,
+                  "toneGreen": 0,
+                  "toneBlue": 0,
+                  "toneGray": 0,
+                  "cameraX": 0,
+                  "cameraY": 0,
+                  "cameraZoom": 100,
+                  "cameraRotation": 0,
+                  "flip": false,
+                  "flipY": true,
+                  "contextKeys": {
+                    "offsetX": [
+                      {
+                        "id": "ctxkey_mtqokaqz_bk",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bl",
+                        "frame": 13,
+                        "value": -0.08462546794169157,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bm",
+                        "frame": 23,
+                        "value": 10.084625467941692,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bn",
+                        "frame": 38,
+                        "value": 4.482055561291759,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bo",
+                        "frame": 40,
+                        "value": 5.7167385961985815,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bp",
+                        "frame": 48,
+                        "value": 3.8646669436996604,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "offsetY": [
+                      {
+                        "id": "ctxkey_mtqokaqz_bq",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_br",
+                        "frame": 13,
+                        "value": 0.300152246517257,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bs",
+                        "frame": 23,
+                        "value": -134.30015224651726,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bt",
+                        "frame": 29,
+                        "value": -210.74910664172745,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bu",
+                        "frame": 38,
+                        "value": -63.20451252799248,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bv",
+                        "frame": 40,
+                        "value": -13.888074998492812,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bw",
+                        "frame": 48,
+                        "value": 30.23334031518499,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_bx",
+                        "frame": 60,
+                        "value": -180.29120699834274,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "scaleX": [
+                      {
+                        "id": "ctxkey_mtqqhnmx_28n",
+                        "frame": 0,
+                        "value": 100,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtqqhnmx_28o",
+                        "frame": 13,
+                        "value": 75,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "scaleY": [
+                      {
+                        "id": "ctxkey_mtqqhnmx_28p",
+                        "frame": 0,
+                        "value": 100,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtqqhnmx_28q",
+                        "frame": 13,
+                        "value": 75,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "clip_mtqprwrb_d3",
+              "type": "projectile",
+              "name": "elec",
+              "enabled": false,
+              "locked": false,
+              "startFrame": 45,
+              "endFrame": 84,
+              "graphic": {
+                "source": "new",
+                "projectPath": "Graphics/Battle animations/electricity 1.png",
+                "folder": "Battle animations",
+                "name": "electricity 1",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": true,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "user",
+              "replicateTo": "none",
+              "coordinateSpace": "user",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtqolg7q_ne",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtqokaqz_bz",
+                  "frame": 45,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "pbs:user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 0
+                  },
+                  "axisX": true,
+                  "axisY": true
+                }
+              ],
+              "valueKeys": {
+                "size": [
+                  {
+                    "id": "pkey_mtqokaqz_cb",
+                    "frame": 45,
+                    "value": 20,
+                    "easing": "ease_both"
+                  }
+                ],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [],
+                "graphicFrame": [
+                  {
+                    "id": "pkey_mtqokaqz_ce",
+                    "frame": 45,
+                    "value": 2,
+                    "easing": "ease_both"
+                  }
+                ],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "idlePause": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "emitterOpacity": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "simpleDistancePx": 100,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 16.666666666666668,
+                "focus": "user",
+                "emitter": "Straight",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtqpf92a_o4",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtqpf92a_o5",
+                      "frame": 55,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ],
+                  "emitSpeed": [
+                    {
+                      "id": "ecmd_mtqokaqz_cs",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": 120
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtqokaqz_ct",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtqokaqz_cu",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": 180
+                    }
+                  ],
+                  "emitterIntensity": [
+                    {
+                      "id": "ecmd_mtqp0aii_nn",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": 3
+                    },
+                    {
+                      "id": "ecmd_mtqpejau_o3",
+                      "frame": 55,
+                      "duration": 0,
+                      "value": 4
+                    }
+                  ],
+                  "emitterRate": [
+                    {
+                      "id": "ecmd_mtqom1p4_ni",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": 8
+                    }
+                  ],
+                  "energyTravelFrames": [
+                    {
+                      "id": "ecmd_mtqp0ssl_nr",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": 16
+                    }
+                  ]
+                },
+                "commands": {
+                  "radiusX": [
+                    {
+                      "id": "pcmd_mtqp0ssl_np",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": 96,
+                      "easing": "linear"
+                    }
+                  ],
+                  "radiusY": [
+                    {
+                      "id": "pcmd_mtqp0ssl_nq",
+                      "frame": 45,
+                      "duration": 0,
+                      "value": 64,
+                      "easing": "linear"
+                    }
+                  ]
+                },
+                "emitterDestination": "all",
+                "simplePathMode": "straight",
+                "simpleWave": {
+                  "enabled": false,
+                  "amplitude": 18,
+                  "cycles": 2,
+                  "mode": "wave"
+                },
+                "particleToneStrength": 0,
+                "simpleParticleLife": {
+                  "duration": 20,
+                  "birthScale": 150,
+                  "midScale": 300,
+                  "deathScale": 400,
+                  "birthOpacity": 5,
+                  "midOpacity": 100,
+                  "deathOpacity": 0,
+                  "birthRotation": 0,
+                  "midRotation": 0,
+                  "deathRotation": 0
+                },
+                "particleCommandSpace": "animation",
+                "simpleTravelMode": "speed",
+                "simpleStopAtDestination": true,
+                "simpleDirectionOffset": 0
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              },
+              "contextOverrides": {
+                "foe": {
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "opacity": 100,
+                  "zOffset": 0,
+                  "priorityOffset": 0,
+                  "toneRed": 0,
+                  "toneGreen": 0,
+                  "toneBlue": 0,
+                  "toneGray": 0,
+                  "cameraX": 0,
+                  "cameraY": 0,
+                  "cameraZoom": 100,
+                  "cameraRotation": 0,
+                  "flip": false,
+                  "flipY": false,
+                  "contextKeys": {
+                    "offsetX": [
+                      {
+                        "id": "ctxkey_mtqokaqz_cv",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_cw",
+                        "frame": 45,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_cz",
+                        "frame": 56,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "offsetY": [
+                      {
+                        "id": "ctxkey_mtqokaqz_d0",
+                        "frame": 0,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": true
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_d1",
+                        "frame": 45,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": false
+                      },
+                      {
+                        "id": "ctxkey_mtqokaqz_dc",
+                        "frame": 56,
+                        "value": 0,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:emitAngle": [
+                      {
+                        "id": "ctxkey_mtqp6ana_nw",
+                        "frame": 45,
+                        "value": 2,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:life.midRotation": [
+                      {
+                        "id": "ctxkey_mtqp8151_nx",
+                        "frame": 45,
+                        "value": 90,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:life.deathRotation": [
+                      {
+                        "id": "ctxkey_mtqp8377_ny",
+                        "frame": 45,
+                        "value": 180,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:waveCycles": [
+                      {
+                        "id": "ctxkey_mtqp9851_nz",
+                        "frame": 45,
+                        "value": 0.1,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:waveEnabled": [
+                      {
+                        "id": "ctxkey_mtqp9851_o0",
+                        "frame": 45,
+                        "value": 1,
+                        "easing": "linear",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:simpleDistancePx": [
+                      {
+                        "id": "ctxkey_mtqp9e2v_o1",
+                        "frame": 45,
+                        "value": 68.18936722932662,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:emitterIntensity": [
+                      {
+                        "id": "ctxkey_mtqp9ni2_o2",
+                        "frame": 45,
+                        "value": 1,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ]
+                  }
+                },
+                "player": {
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "scaleX": 100,
+                  "scaleY": 100,
+                  "rotation": 0,
+                  "opacity": 100,
+                  "zOffset": 0,
+                  "priorityOffset": 0,
+                  "toneRed": 0,
+                  "toneGreen": 0,
+                  "toneBlue": 0,
+                  "toneGray": 0,
+                  "cameraX": 0,
+                  "cameraY": 0,
+                  "cameraZoom": 100,
+                  "cameraRotation": 0,
+                  "flip": false,
+                  "flipY": false,
+                  "contextKeys": {
+                    "emitter:emitAngleRange": [
+                      {
+                        "id": "ctxkey_mtqokaqz_dd",
+                        "frame": 45,
+                        "value": 180,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:waveCycles": [
+                      {
+                        "id": "ctxkey_mtqokaqz_de",
+                        "frame": 45,
+                        "value": 0.1,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:waveEnabled": [
+                      {
+                        "id": "ctxkey_mtqokaqz_df",
+                        "frame": 45,
+                        "value": 1,
+                        "easing": "linear",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:emitGravity": [
+                      {
+                        "id": "ctxkey_mtqokaqz_dg",
+                        "frame": 45,
+                        "value": 20,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:emitterRate": [
+                      {
+                        "id": "ctxkey_mtqokaqz_dh",
+                        "frame": 45,
+                        "value": 16,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:emitterIntensity": [
+                      {
+                        "id": "ctxkey_mtqokaqz_dj",
+                        "frame": 45,
+                        "value": 3,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:life.birthScale": [
+                      {
+                        "id": "ctxkey_mtqokaqz_dl",
+                        "frame": 45,
+                        "value": 200,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:life.deathScale": [
+                      {
+                        "id": "ctxkey_mtqokaqz_dm",
+                        "frame": 45,
+                        "value": 400,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:life.deathRotation": [
+                      {
+                        "id": "ctxkey_mtqokaqz_dz",
+                        "frame": 45,
+                        "value": 180,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:life.midRotation": [
+                      {
+                        "id": "ctxkey_mtqokaqz_e0",
+                        "frame": 45,
+                        "value": 90,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:life.duration": [
+                      {
+                        "id": "ctxkey_mtqokaqz_e1",
+                        "frame": 45,
+                        "value": 13,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ],
+                    "emitter:life.midScale": [
+                      {
+                        "id": "ctxkey_mtqpg7xo_o6",
+                        "frame": 45,
+                        "value": 300,
+                        "easing": "ease_both",
+                        "implicit": false
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "clip_mtqpwuzh_1h1",
+              "type": "projectile",
+              "name": "Emitter · impact-burst",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 0,
+              "endFrame": 84,
+              "graphic": {
+                "source": "new",
+                "projectPath": "Graphics/Battle animations/electricity 1.png",
+                "folder": "Battle animations",
+                "name": "electricity 1",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "auto",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 0,
+              "priorityReference": "user",
+              "replicateTo": "none",
+              "coordinateSpace": "user",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtqpwuzh_1h3",
+                  "frame": 0,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtqpwv0u_1hb",
+                  "frame": 0,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 14.320987654321016,
+                    "offsetY": 19.802469135802482
+                  }
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [
+                  {
+                    "id": "pkey_mtqrqngx_d7",
+                    "frame": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "id": "pkey_mtqrr3bv_d9",
+                    "frame": 52,
+                    "value": 0,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqrqngx_d8",
+                    "frame": 59,
+                    "value": 0,
+                    "easing": "ease_both"
+                  }
+                ],
+                "opacity": [],
+                "graphicFrame": [],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "idlePause": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "emitterOpacity": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "focus": "user",
+                "emitter": "EnergyOut",
+                "emitterRate": 8,
+                "emitterIntensity": 1,
+                "emitterCommands": {
+                  "emitting": [
+                    {
+                      "id": "ecmd_mtqqcrrh_28b",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": true
+                    },
+                    {
+                      "id": "ecmd_mtqqcrri_28c",
+                      "frame": 59,
+                      "duration": 0,
+                      "value": false
+                    }
+                  ],
+                  "emitterRate": [
+                    {
+                      "id": "ecmd_mtqpzn2j_1hm",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 8
+                    },
+                    {
+                      "id": "ecmd_mtqpwv0u_1hc",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 24
+                    }
+                  ],
+                  "emitterIntensity": [
+                    {
+                      "id": "ecmd_mtqpzdat_1hl",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 1
+                    },
+                    {
+                      "id": "ecmd_mtqpwv0u_1hd",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 1
+                    }
+                  ],
+                  "energyTravelFrames": [
+                    {
+                      "id": "ecmd_mtqpwv0u_1he",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 10
+                    }
+                  ],
+                  "energyTurns": [
+                    {
+                      "id": "ecmd_mtqpwv0u_1hf",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitAngle": [
+                    {
+                      "id": "ecmd_mtqpwv0u_1hg",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 0
+                    }
+                  ],
+                  "emitAngleRange": [
+                    {
+                      "id": "ecmd_mtqpwv0u_1hh",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 180
+                    }
+                  ],
+                  "randomAngleRange": [
+                    {
+                      "id": "ecmd_mtqq8eis_285",
+                      "frame": 0,
+                      "duration": 0,
+                      "value": 0
+                    },
+                    {
+                      "id": "ecmd_mtqq8eis_286",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 10
+                    }
+                  ]
+                },
+                "commands": {
+                  "radiusX": [
+                    {
+                      "id": "pcmd_mtqpwv0u_1hj",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 85,
+                      "easing": "linear"
+                    }
+                  ],
+                  "radiusY": [
+                    {
+                      "id": "pcmd_mtqpwv0u_1hk",
+                      "frame": 52,
+                      "duration": 0,
+                      "value": 65,
+                      "easing": "linear"
+                    }
+                  ]
+                },
+                "randomFrameMax": 0,
+                "randomAngleRange": 0,
+                "randomInvertAngle": false,
+                "randomInvertFlip": true,
+                "emitterDestination": "expand",
+                "particleCommandSpace": "animation",
+                "simpleParticleLife": {
+                  "duration": 12,
+                  "birthScale": 45,
+                  "midScale": 100,
+                  "deathScale": 135,
+                  "birthOpacity": 100,
+                  "midOpacity": 100,
+                  "deathOpacity": 0,
+                  "birthRotation": 0,
+                  "midRotation": 0,
+                  "deathRotation": 0
+                },
+                "simpleDistancePx": 274.2321496754487,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8,
+                "particleTonePalette": [
+                  "#fff8e5",
+                  "#ffd05c",
+                  "#47c2ff",
+                  "#6c47ff"
+                ],
+                "particleToneStrength": 60,
+                "simpleDirectionOffset": 0,
+                "simpleFaceTravel": true,
+                "simpleFaceTravelOffset": 90,
+                "emitterGraphicSequenceEnabled": true,
+                "emitterGraphicSequence": [
+                  {
+                    "projectPath": "Graphics/Battle animations/electricity 1.png",
+                    "frame": 0
+                  },
+                  {
+                    "projectPath": "Graphics/Battle animations/electricity 1.png",
+                    "frame": 1
+                  },
+                  {
+                    "projectPath": "Graphics/Battle animations/electricity 1.png",
+                    "frame": 2
+                  },
+                  {
+                    "projectPath": "Graphics/Battle animations/electricity 1.png",
+                    "frame": 3
+                  }
+                ],
+                "emitterGraphicSequenceBasis": "emission",
+                "emitterGraphicSequenceStepFrames": 1
+              },
+              "logic": [],
+              "imported": null,
+              "simpleEmitterRecipe": "burst",
+              "editorOriginalPosition": {
+                "anchor": "pbs:target",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": 0
+              },
+              "simpleEmitterExample": "impact-burst"
+            },
+            {
+              "id": "clip_mtqqlqyd_28r",
+              "type": "projectile",
+              "name": "Shine",
+              "enabled": true,
+              "locked": false,
+              "startFrame": 48,
+              "endFrame": 51,
+              "graphic": {
+                "source": "legacy",
+                "projectPath": "Graphics/Animations/PRAS- Leer.png",
+                "folder": "Animations",
+                "name": "PRAS- Leer",
+                "relativeHint": "",
+                "externalGameRoot": "",
+                "hue": 0,
+                "spritesheet": "rmxp",
+                "frame": 0,
+                "playSheet": false,
+                "sheetFps": 20,
+                "cellW": 192,
+                "cellH": 192,
+                "cols": 5,
+                "rows": 0,
+                "origin": "auto",
+                "assetCandidates": []
+              },
+              "graphicSwitches": [],
+              "visual": {
+                "size": 100,
+                "scaleX": 100,
+                "scaleY": 100,
+                "opacity": 100,
+                "rotation": 0,
+                "z": 0,
+                "blend": 0,
+                "flip": 0
+              },
+              "priority": 1,
+              "priorityReference": "user",
+              "replicateTo": "none",
+              "coordinateSpace": "user",
+              "coordinateSpaceManual": true,
+              "visibleKeys": [
+                {
+                  "id": "vkey_mtqqlqyd_28t",
+                  "frame": 48,
+                  "value": true
+                }
+              ],
+              "positionKeys": [
+                {
+                  "id": "key_mtqqlqyd_28u",
+                  "frame": 48,
+                  "easing": "ease_both",
+                  "point": {
+                    "anchor": "user",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 33.94001103050357,
+                    "offsetY": 21.237622502227282
+                  },
+                  "axisX": true,
+                  "axisY": true
+                }
+              ],
+              "valueKeys": {
+                "size": [],
+                "scaleX": [],
+                "scaleY": [],
+                "viewScale": [],
+                "rotation": [],
+                "opacity": [
+                  {
+                    "id": "pkey_mtqqpw4l_29d",
+                    "frame": 48,
+                    "value": 100,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqqpz27_29e",
+                    "frame": 51,
+                    "value": 100,
+                    "easing": "ease_both"
+                  }
+                ],
+                "graphicFrame": [
+                  {
+                    "id": "pkey_mtqqn07k_28w",
+                    "frame": 48,
+                    "value": 1,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqqnwcx_28y",
+                    "frame": 49,
+                    "value": 2,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqqp6uc_299",
+                    "frame": 50,
+                    "value": 3,
+                    "easing": "ease_both"
+                  },
+                  {
+                    "id": "pkey_mtqqpfi4_29a",
+                    "frame": 51,
+                    "value": 4,
+                    "easing": "ease_both"
+                  }
+                ],
+                "srcX": [],
+                "srcY": [],
+                "srcW": [],
+                "srcH": [],
+                "z": [],
+                "blend": [],
+                "flip": [],
+                "flipY": [],
+                "facing": [],
+                "idlePause": [],
+                "toneRed": [],
+                "toneGreen": [],
+                "toneBlue": [],
+                "toneGray": [],
+                "cameraX": [],
+                "cameraY": [],
+                "cameraZoom": [],
+                "cameraRotation": [],
+                "priority": [
+                  {
+                    "id": "pkey_mtqqn57y_28x",
+                    "frame": 48,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
+              },
+              "fxOps": [],
+              "pbs": {
+                "simpleDistancePx": 160,
+                "simpleDistanceMode": "manual",
+                "simpleThroughTargetPx": 0,
+                "simpleTravelFrames": 8
+              },
+              "logic": [],
+              "imported": null,
+              "editorOriginalPosition": {
+                "anchor": "user",
+                "x": 0,
+                "y": 0,
+                "offsetX": 0,
+                "offsetY": -48
+              }
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "event_mtqokaqz_e3",
+          "type": "se",
+          "frame": 23,
+          "name": "Anim/PRSFX- Acupressure1",
+          "volume": 100,
+          "pitch": 100
+        },
+        {
+          "id": "event_mtqokaqz_e4",
+          "type": "se",
+          "frame": 35,
+          "name": "Anim/PRSFX- Acupressure2",
+          "volume": 100,
+          "pitch": 100
+        },
+        {
+          "id": "event_mtqokaqz_e5",
+          "type": "se",
+          "frame": 48,
+          "name": "Anim/Acupressure",
+          "volume": 100,
+          "pitch": 100
+        }
+      ],
+      "logic": [],
+      "notes": "",
+      "hidesDataBoxes": true,
+      "hidesAdjacents": true,
+      "scene": {
+        "inheritProject": true,
+        "source": "project",
+        "responsive": true,
+        "referenceWidth": 512,
+        "referenceHeight": 384,
+        "cameraBoundsMode": "screen"
+      }
     }
   ],
   "reusableClips": [],
   "packages": [],
   "exportGameDataDir": "PBS/AnimationStudio",
-  "exportPackageDir": "C:/Users/nuevo usuario/Downloads/Animaciones/Common Snap Trap",
+  "exportPackageDir": "C:/Users/nuevo usuario/Downloads/Acupreshon",
   "editor": {
-    "lastAnimationId": "anim_mtb00z9c_5m"
+    "lastAnimationId": "anim_mtqprwrb_cz"
   }
 }

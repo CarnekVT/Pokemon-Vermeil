@@ -1,10 +1,13 @@
+#===============================================================================
+# Battle Additions - shared legacy move classes
+#===============================================================================
 module MoveClasses
   KICK_MOVES = [
     :DOUBLEKICK, :JUMPKICK, :HIGHJUMPKICK, :MEGAKICK, :LOWKICK,
     :ROLLINGKICK, :TRIPLEKICK, :BLAZEKICK, :TROPKICK, :THUNDEROUSKICK,
     :AXEKICK, :LOWSWEEP, :STOMP, :HIGHHORSEPOWER, :STOMPINGTANTRUM,
     :CLOSECOMBAT, :BEDROCKKICK, :TRIPLEARROWS
-  ].freeze
+  ].freeze unless const_defined?(:KICK_MOVES)
 
   PUNCH_MOVES = [
     :COMETPUNCH, :MEGAPUNCH, :FIREPUNCH, :ICEPUNCH, :THUNDERPUNCH,
@@ -12,5 +15,5 @@ module MoveClasses
     :DRAINPUNCH, :FOCUSPUNCH, :HAMMERARM, :SHADOWPUNCH, :SUCKERPUNCH,
     :SKYUPPERCUT, :PLASMAFISTS, :DOUBLEIRONBASH, :METEORMASH,
     :COLLISIONCOURSE, :HANDSPRINGS
-  ].freeze
+  ].freeze unless const_defined?(:PUNCH_MOVES)
 end

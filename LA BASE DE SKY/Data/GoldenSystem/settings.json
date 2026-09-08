@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "settings": {
+    "defaultActivationLimit": 1,
+    "requireGoldenRing": false,
+    "powerBoost": 3,
+    "powerPenalty": 2,
+    "sameTypeMultiplier": 1.2,
+    "formHPDrain": 0.25
+  }
+}
