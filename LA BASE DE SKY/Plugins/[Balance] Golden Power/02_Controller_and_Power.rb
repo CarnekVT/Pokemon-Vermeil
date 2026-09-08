@@ -333,8 +333,15 @@ module GoldenSystem
 
   module BattlerTypes
     def pbTypes(withExtraType=false)
+      # Avoid SystemStackError when another battle hook asks for pbTypes while
+      # Golden Form/species data is being resolved.
+      return (@__golden_pb_types_base || []) if @__golden_pb_types_busy
+      @__golden_pb_types_busy=true
       ret=super
-      return ret if !@pokemon
+      if !@pokemon
+        @__golden_pb_types_base=ret
+        return ret
+      end
 
       # Golden Form uses a dynamic GameData::Species proxy.  Other battle
       # systems may keep the battler's old typing cached, so force the first
@@ -343,6 +350,27 @@ module GoldenSystem
       if isOnGoldenForm?
         begin
           form_types=@pokemon.species_data.types
+          # Enhanced battle hooks can return only their replacement type.  For
+          # Golden Form, rebuild the core from the original species/form so a
+          # Heracross Bicho/Lucha becomes Bicho/Dragón, not only Dragón.
+          if @pokemon.respond_to?(:pre_golden_form) && !@pokemon.pre_golden_form.nil?
+            source_data=GameData::Species.get_species_form(@pokemon.species,@pokemon.pre_golden_form) rescue nil
+            source_types=source_data.types if source_data && source_data.respond_to?(:types)
+            form_types=source_types if source_types && source_types.length>=2
+            golden=@pokemon.golden_type
+            if golden && GameData::Type.exists?(golden) && form_types && !form_types.include?(golden)
+              core=form_types[0,2].clone
+              replace=@pokemon.golden_type_replace
+              idx=replace ? core.index(replace) : nil
+              idx=1 if idx.nil? && core.length>1
+              if idx && core.length>1
+                core[idx]=golden
+              else
+                core << golden
+              end
+              form_types=core
+            end
+          end
           if form_types && !form_types.empty?
             extra=(ret.length>2) ? ret[2..-1].clone : []
             ret=(form_types[0,2]+extra).compact.uniq
@@ -353,12 +381,21 @@ module GoldenSystem
 
       # Golden Power overlays its Golden Type after the form typing has been
       # resolved, which also keeps STACKED Power + Form behaviour coherent.
-      return ret if !isOnGoldenPower?
+      if !isOnGoldenPower?
+        @__golden_pb_types_base=ret
+        return ret
+      end
       golden_type=@pokemon.golden_type
-      return ret if !golden_type || !GameData::Type.exists?(golden_type)
+      if !golden_type || !GameData::Type.exists?(golden_type)
+        @__golden_pb_types_base=ret
+        return ret
+      end
       core=ret[0,2].clone
       extra=(ret.length>2) ? ret[2..-1].clone : []
-      return ret if core.include?(golden_type)
+      if core.include?(golden_type)
+        @__golden_pb_types_base=ret
+        return ret
+      end
       if core.length<=1
         core << golden_type
       else
@@ -367,7 +404,11 @@ module GoldenSystem
         idx=1 if idx.nil?
         core[idx]=golden_type
       end
-      return (core+extra).compact.uniq
+      ret=(core+extra).compact.uniq
+      @__golden_pb_types_base=ret
+      return ret
+    ensure
+      @__golden_pb_types_busy=false
     end
   end
 

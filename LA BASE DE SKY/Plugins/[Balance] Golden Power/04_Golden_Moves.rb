@@ -95,7 +95,11 @@ module GoldenSystem
 
     def golden_variant_data(user)
       return nil if instance_variable_defined?(:@__golden_function_proxy) && @__golden_function_proxy
+      return nil if @__golden_variant_busy
+      @__golden_variant_busy=true
       user ? GoldenSystem::GoldenMoves.for_battler(user,@id) : nil
+    ensure
+      @__golden_variant_busy=false
     end
 
     def golden_sync_proxy(proxy)
@@ -151,7 +155,11 @@ module GoldenSystem
 
     def pbCalcType(user)
       data=golden_variant_data(user)
-      data && data[:type] ? data[:type] : super
+      # Do not call super here.  Enhanced/MegaSignatureAbilities can route its
+      # own pbCalcType back through this prepend, causing infinite alternation.
+      # @type is the already resolved base move type for non-Golden moves.
+      return data[:type] if data && data[:type]
+      return @type
     end
 
     def pbCalcDamage(user,target,numTargets=1)
@@ -231,4 +239,3 @@ end
 
 Battle::Battler.prepend(GoldenSystem::BattlerGoldenMoveNameSync) unless
   Battle::Battler.ancestors.include?(GoldenSystem::BattlerGoldenMoveNameSync)
-

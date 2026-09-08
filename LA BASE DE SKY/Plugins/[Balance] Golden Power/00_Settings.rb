@@ -2,9 +2,11 @@
 # Golden Power / Golden Form - configuration from Data/GoldenSystem/*.json
 #===============================================================================
 module GoldenSystem
-  VERSION = "2.6.0"
+  VERSION = "2.7.0"
   DEFAULT_ACTIVATION_LIMIT   = 1
-  REQUIRE_GOLDEN_RING        = false
+  # Fragment/Stone activation requires the trainer to own the Golden Ring.
+  # A trainer profile can still explicitly bypass this requirement.
+  REQUIRE_GOLDEN_RING        = true
   GOLDEN_RING_ITEM           = :GOLDENSRING
   GOLDEN_FRAGMENT_ITEM       = :GOLDENFRAGMENT
   GOLDEN_STONE_ITEM          = :GOLDENSTONE
@@ -29,7 +31,9 @@ module GoldenSystem
       :form_hp_drain=>FORM_HP_DRAIN_NUMERATOR.to_f/FORM_HP_DRAIN_DENOMINATOR
     }
     ret[:default_activation_limit]=[s["defaultActivationLimit"].to_i,0].max if s.key?("defaultActivationLimit")
-    ret[:require_golden_ring]=!!s["requireGoldenRing"] if s.key?("requireGoldenRing")
+    # Ringless activation is opt-in; legacy JSON with requireGoldenRing:false
+    # must not silently make Fragment/Stone usable without the Ring.
+    ret[:require_golden_ring]=false if s["allowRingless"] == true
     ret[:power_boost_stages]=[[s["powerBoost"].to_i,1].max,6].min if s.key?("powerBoost")
     ret[:power_penalty_stages]=[[s["powerPenalty"].to_i.abs,1].max,6].min if s.key?("powerPenalty")
     ret[:same_type_multiplier]=[s["sameTypeMultiplier"].to_f,1.0].max if s.key?("sameTypeMultiplier")

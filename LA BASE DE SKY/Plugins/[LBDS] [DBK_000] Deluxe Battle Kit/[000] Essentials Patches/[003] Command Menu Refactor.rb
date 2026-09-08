@@ -115,7 +115,9 @@ class Battle::Scene::FightMenu < Battle::Scene::MenuBase
     if !USE_GRAPHICS
       commands = []
       [4, moves.length].max.times do |i|
-        commands.push((moves[i]) ? moves[i].name : "-")
+        move=moves[i]
+        name=(move && move.respond_to?(:golden_display_name)) ? move.golden_display_name(@battler) : (move ? move.name : "-")
+        commands.push(name)
       end
       @cmdWindow.commands = commands
       return
@@ -132,7 +134,9 @@ class Battle::Scene::FightMenu < Battle::Scene::MenuBase
       end
       base   = @customUI ? @base_color   : moveNameBase
       shadow = @customUI ? @shadow_color : TEXT_SHADOW_COLOR
-      textPos.push([moves[i].short_name, x, y, :center, base, shadow])
+      move_name=(moves[i].respond_to?(:golden_display_name)) ? moves[i].golden_display_name(@battler) : moves[i].name
+      move_name=move_name.to_s[0, 14] if move_name.to_s.length > 14
+      textPos.push([move_name, x, y, :center, base, shadow])
     end
     pbDrawTextPositions(@overlay.bitmap, textPos)
   end

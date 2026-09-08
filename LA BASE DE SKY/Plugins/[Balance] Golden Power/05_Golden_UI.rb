@@ -80,15 +80,29 @@ if defined?(Battle::Scene::FightMenu)
       def refreshButtonNames
         ret = super
         begin
-          battler = @battler
+          battler = @battler || @active_battler || @user
           buttons = @buttons
           if battler && buttons
             buttons.each_with_index do |button, i|
               move = battler.moves[i] rescue nil
-              next if !move || !move.respond_to?(:golden_variant_data)
-              next if !GoldenSystem::GoldenMoves.active_for?(battler, move.id)
-              label = move.respond_to?(:golden_display_name) ? move.golden_display_name(battler) : move.name
-              label = _INTL("✦ {1}", label)
+              next if !move
+              if !button.instance_variable_defined?(:@golden_original_label)
+                original = if button.respond_to?(:name)
+                             button.name
+                           elsif button.respond_to?(:text)
+                             button.text
+                           else
+                             move.name
+                           end
+                button.instance_variable_set(:@golden_original_label,original)
+              end
+              active = move.respond_to?(:golden_variant_data) &&
+                       GoldenSystem::GoldenMoves.active_for?(battler,move.id)
+              label = if active && move.respond_to?(:golden_display_name)
+                        _INTL("✦ {1}",move.golden_display_name(battler))
+                      else
+                        button.instance_variable_get(:@golden_original_label)
+                      end
               if button.respond_to?(:name=)
                 button.name = label
               elsif button.respond_to?(:text=)

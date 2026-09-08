@@ -17,6 +17,9 @@ class Battle
     pbConsumeGoldenUse(idxBattler,:FORM)
     battler.form=battler.pokemon.form
     battler.pbUpdate(true)
+    # Refresh battle typing and contextual Golden Move names before the next
+    # command is selected; some battle UIs cache both values.
+    battler.pbSyncGoldenMoveDisplayNames if battler.respond_to?(:pbSyncGoldenMoveDisplayNames)
     @scene.pbChangePokemon(battler,battler.pokemon)
     @scene.pbRefreshOne(idxBattler)
     pbCommonAnimation("MegaEvolution2",battler)
@@ -48,6 +51,7 @@ Battle::ItemEffects::OnSwitchIn.add(
     if battler.pokemon.isOnGoldenForm?
       battler.form=battler.pokemon.form
       battler.pbUpdate(true)
+      battler.pbSyncGoldenMoveDisplayNames if battler.respond_to?(:pbSyncGoldenMoveDisplayNames)
       battle.scene.pbChangePokemon(battler,battler.pokemon)
       battle.scene.pbRefreshOne(battler.index)
       next

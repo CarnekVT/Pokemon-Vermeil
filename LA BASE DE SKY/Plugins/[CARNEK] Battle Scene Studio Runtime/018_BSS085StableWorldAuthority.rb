@@ -316,13 +316,15 @@ module BSS085SceneAuthority
   # ---------------------------------------------------------------------------
   def bss085_enhanced_ui_layers
     return if !@sprites.is_a?(Hash)
-    main=@sprites["enhancedUI"] rescue nil; main.z=9300 if main && !(main.disposed? rescue true) && main.respond_to?(:z=)
-    prompt=@sprites["enhancedUIPrompts"] rescue nil; prompt.z=9360 if prompt && !(prompt.disposed? rescue true) && prompt.respond_to?(:z=)
-    ["leftarrow","rightarrow"].each{|k| sp=@sprites[k] rescue nil; sp.z=9410 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)}
+    # TargetMenu/BattleBox use 10000 in Essentials/BSS. Enhanced must be above
+    # them, otherwise its panel is visibly clipped by the native battle UI.
+    main=@sprites["enhancedUI"] rescue nil; main.z=11000 if main && !(main.disposed? rescue true) && main.respond_to?(:z=)
+    prompt=@sprites["enhancedUIPrompts"] rescue nil; prompt.z=11060 if prompt && !(prompt.disposed? rescue true) && prompt.respond_to?(:z=)
+    ["leftarrow","rightarrow"].each{|k| sp=@sprites[k] rescue nil; sp.z=11100 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)}
     @sprites.each do |k,sp|
       next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:z=); s=k.to_s
-      if s =~ /^(info_icon|ball_icon).*_outline\d+$/; sp.z=9440
-      elsif s =~ /^(info_icon|ball_icon)\d+$/; sp.z=9441
+      if s =~ /^(info_icon|ball_icon).*_outline\d+$/; sp.z=11140
+      elsif s =~ /^(info_icon|ball_icon)\d+$/; sp.z=11141
       end
     end
   rescue
