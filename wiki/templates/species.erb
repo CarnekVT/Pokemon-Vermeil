@@ -1,0 +1,136 @@
+<%
+  e = locals[:entry]
+  title(display_name(e))
+  stat_class = ->(v) { v >= 120 ? "s-top" : v >= 90 ? "s-high" : v >= 60 ? "s-mid" : "s-low" }
+%>
+<article class="detail species">
+  <header>
+    <% sp = psprite(e[:id], hero: true) %>
+    <% unless sp.empty? %><div class="hero-sprite"><%= sp %></div><% end %>
+    <div class="headmeta">
+      <h1><%= h(display_name(e)) %><%= badge(e) %></h1>
+      <p class="subtitle">
+        <code><%= h(e[:id]) %></code>
+        <% if e[:generation].to_i > 0 %> · Generación <%= e[:generation] %><% end %>
+        <% if e[:category] && e[:category] != "???" %> · Pokémon <%= h(e[:category]) %><% end %>
+      </p>
+      <span class="types"><%= types_row(e[:types]) %></span>
+      <% if e[:pokedex] && e[:pokedex] != "???" %><p class="pokedex-entry"><%= h(e[:pokedex]) %></p><% end %>
+    </div>
+  </header>
+
+  <div class="grid2">
+    <section class="section-card">
+      <h2>Estadísticas base</h2>
+      <div class="statchart">
+        <% e[:base_stats].each do |sid, v| %>
+          <% sc = stat_change(e, sid) %>
+          <span class="lbl"><%= h(({ "HP" => "PS", "ATTACK" => "Ataque", "DEFENSE" => "Defensa", "SPEED" => "Velocidad", "SPECIAL_ATTACK" => "At. Esp.", "SPECIAL_DEFENSE" => "Def. Esp." }[sid] || sid)) %></span>
+          <span class="val <%= "s-#{sc[:dir]}" if sc %>"><%= v %><% if sc %> <span class="was">antes <%= sc[:from] %></span><% end %></span>
+          <span class="track"><span class="fill <%= sc ? "s-#{sc[:dir]}" : stat_class.call(v) %>" style="width:<%= [(v * 100.0 / 200).round(1), 100].min %>%"></span></span>
+        <% end %>
+        <span class="lbl total">Total</span>
+        <span class="val total"><%= e[:bst] %></span>
+        <span></span>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Datos</h2>
+      <table class="kv">
+        <tr><th>Habilidades</th><td>
+          <% e[:abilities].each { |a| %><%= ability_link(a) %><% } %>
+          <% e[:hidden_abilities].each { |a| %><%= ability_link(a) %><span class="tag">oculta</span><% } %>
+        </td></tr>
+        <tr><th>Altura / Peso</th><td><%= e[:height] %> m · <%= e[:weight] %> kg</td></tr>
+        <tr><th>Ratio de captura</th><td><%= e[:catch_rate] %></td></tr>
+        <tr><th>Exp. base</th><td><%= e[:base_exp] %></td></tr>
+        <tr><th>Crecimiento</th><td><%= h(e[:growth_rate]) %></td></tr>
+        <tr><th>Género</th><td><%= h(e[:gender_ratio]) %></td></tr>
+        <tr><th>Felicidad base</th><td><%= e[:happiness] %></td></tr>
+        <tr><th>Grupos huevo</th><td><%= h(e[:egg_groups].join(", ")) %></td></tr>
+        <tr><th>Pasos de incubación</th><td><%= e[:hatch_steps] %></td></tr>
+        <% unless e[:evs].empty? %><tr><th>EVs que da</th><td><%= h(e[:evs].map { |s, v| "#{v} #{({ 'HP' => 'PS', 'ATTACK' => 'At.', 'DEFENSE' => 'Def.', 'SPEED' => 'Vel.', 'SPECIAL_ATTACK' => 'At.Esp.', 'SPECIAL_DEFENSE' => 'Def.Esp.' }[s] || s)}" }.join(", ")) %></td></tr><% end %>
+        <% unless e[:wild_items].empty? %><tr><th>Objeto salvaje</th><td><% e[:wild_items].each { |w| %><%= item_link(w[:item]) %> <span class="muted">(<%= w[:rarity] %>)</span> <% } %></td></tr><% end %>
+      </table>
+    </section>
+  </div>
+
+  <% if e[:prevo] || e[:evolves_to].any? %>
+  <section class="section-card">
+    <h2>Línea evolutiva</h2>
+    <div class="evoline">
+      <% if e[:prevo] %>
+        <div class="step"><%= mon_link(e[:prevo]) %></div>
+        <div class="arrow">evoluciona a</div>
+      <% end %>
+      <div class="step"><strong><%= h(e[:name]) %></strong></div>
+      <% e[:evolves_to].each do |ev| %>
+        <div class="arrow"><%= h(ev[:text]) %></div>
+        <div class="step"><%= mon_link(ev[:to]) %></div>
+      <% end %>
+    </div>
+  </section>
+  <% end %>
+
+  <section class="section-card">
+    <h2>Movimientos por nivel</h2>
+    <div class="table-scroll">
+    <table class="data">
+      <thead><tr><th class="num">Nv.</th><th>Movimiento</th><th>Tipo</th><th>Cat.</th><th class="num">Pot.</th><th class="num">Prec.</th></tr></thead>
+      <tbody>
+      <% e[:moves].each do |lvl, mv| m = move(mv) %>
+        <tr>
+          <td class="num"><%= lvl.to_i.zero? ? "—" : lvl %></td>
+          <td><%= move_link(mv) %></td>
+          <td><%= m ? type_tag(m[:type], small: true) : "" %></td>
+          <td><%= m ? h(m[:category_name]) : "" %></td>
+          <td class="num"><%= m && m[:power].to_i > 0 ? m[:power] : "—" %></td>
+          <td class="num"><%= m && m[:accuracy].to_i > 0 ? m[:accuracy] : "—" %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <% unless e[:tutor_moves].empty? && e[:egg_moves].empty? %>
+  <section class="section-card">
+    <% unless e[:tutor_moves].empty? %><h2>Movimientos de MT / tutor</h2><%= chiplist(e[:tutor_moves].map { |mv| move_link(mv) }.join, e[:tutor_moves].size, noun: "movimientos") %><% end %>
+    <% unless e[:egg_moves].empty? %><h2>Movimientos huevo</h2><%= chiplist(e[:egg_moves].map { |mv| move_link(mv) }.join, e[:egg_moves].size, noun: "movimientos") %><% end %>
+  </section>
+  <% end %>
+
+  <% unless e[:locations].empty? %>
+  <section class="section-card">
+    <h2>Dónde encontrarlo</h2>
+    <div class="table-scroll">
+    <table class="data">
+      <thead><tr><th>Zona</th><th>Método</th><th>Nivel</th><th class="num">Prob.</th></tr></thead>
+      <tbody>
+      <% e[:locations].each do |loc| %>
+        <tr>
+          <td><a href="<%= asset("ubicaciones/#{loc[:map]}.html") %>"><%= h(loc[:map_name]) %></a></td>
+          <td><%= h(loc[:method]) %></td>
+          <td><%= level_range(loc[:min], loc[:max]) %></td>
+          <td class="num"><%= pct(loc[:chance]) %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <% end %>
+
+  <% unless e[:trainers].empty? %>
+  <section class="section-card">
+    <h2>Aparece en el equipo de</h2>
+    <p class="chiplist">
+      <% e[:trainers].each do |t| %><a class="chip" href="<%= asset("entrenadores/#{t[:key]}.html") %>"><%= h(t[:type_name]) %> <%= h(t[:name]) %> · Nv. <%= t[:level] %></a><% end %>
+    </p>
+  </section>
+  <% end %>
+
+  <%= change_box(e) %>
+  <%= notes(e) %>
+</article>

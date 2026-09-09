@@ -1,0 +1,54 @@
+<% loc = locals[:loc]; title(loc[:name]) %>
+<article class="detail location">
+  <header>
+    <div class="headmeta">
+      <h1><%= h(loc[:name]) %></h1>
+      <p class="subtitle">Mapa #<%= loc[:map] %></p>
+    </div>
+  </header>
+
+  <% loc[:encounters].group_by { |x| x[:version] }.each do |version, group| %>
+    <section class="section-card">
+      <h2>Encuentros<% if loc[:encounters].map { |x| x[:version] }.uniq.size > 1 %> — <%= version.to_i.zero? ? "tabla principal" : "tabla alternativa #{version}" %><% end %></h2>
+      <% group.each do |enc| %>
+        <h3><%= h(enc[:method_name]) %></h3>
+        <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th></th><th>Pokémon</th><th>Nivel</th><th class="num">Probabilidad</th></tr></thead>
+          <tbody>
+          <% enc[:slots].each do |sl| %>
+            <tr>
+              <td class="ic"><%= picon(sl[:species]) %></td>
+              <td><%= mon_link(sl[:species]) %></td>
+              <td><%= level_range(sl[:min], sl[:max]) %></td>
+              <td class="num"><%= pct(sl[:chance]) %></td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% unless loc[:items].empty? %>
+  <section class="section-card">
+    <h2>Objetos</h2>
+    <div class="table-scroll">
+    <table class="data">
+      <thead><tr><th></th><th>Objeto</th><th>Tipo</th><th>Posición</th></tr></thead>
+      <tbody>
+      <% loc[:items].each do |it| %>
+        <tr>
+          <td class="ic"><%= item_icon(it[:item]) %></td>
+          <td><%= item_link(it[:item]) %><%= " (oculto)" if it[:hidden] %></td>
+          <td><%= h(it[:kind]) %></td>
+          <td class="muted">(<%= it[:x] %>, <%= it[:y] %>)</td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <% end %>
+</article>

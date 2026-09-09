@@ -124,6 +124,10 @@ class Color
     @red, @green, @blue, @alpha = red, green, blue, alpha
     self
   end
+
+  # RGSS marshals Color/Tone as four little-endian doubles.
+  def self._load(str) = new(*str.unpack("E4"))
+  def _dump(_ = 0) = [@red, @green, @blue, @alpha].pack("E4")
 end
 
 class Tone
@@ -137,6 +141,9 @@ class Tone
     @red, @green, @blue, @gray = red, green, blue, gray
     self
   end
+
+  def self._load(str) = new(*str.unpack("E4"))
+  def _dump(_ = 0) = [@red, @green, @blue, @gray].pack("E4")
 end
 
 class Font
@@ -184,6 +191,22 @@ class Table
 
   def []=(*args)
     @cells[args[0..-2]] = args[-1]
+  end
+
+  # RMXP's Table marshals itself with a custom binary format: a 5-int header
+  # (dimensions, x, y, z, cell count) followed by int16 cells. Enough of it is
+  # implemented here to Marshal.load a real map (Game_Map, the item scanner).
+  def self._load(str)
+    _dim, xsize, ysize, zsize, _count = str[0, 20].unpack("l5")
+    table = new(xsize, ysize, zsize)
+    table.instance_variable_set(:@raw, str[20..].to_s.unpack("s*"))
+    table
+  end
+
+  def _dump(_depth = 0)
+    dim = @zsize > 1 ? 3 : (@ysize > 1 ? 2 : 1)
+    cells = Array(@raw)
+    [dim, @xsize, @ysize, @zsize, @xsize * @ysize * @zsize].pack("l5") + cells.pack("s*")
   end
 end
 

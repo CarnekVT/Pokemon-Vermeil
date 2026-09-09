@@ -8,6 +8,13 @@
 
 ### [WIKI DE LA BASE](https://la-base-de-sky-wiki-1070f3.gitlab.io/)
 
+### Generador de wiki para tu juego
+
+`ruby wiki/generate.rb` crea una wiki web estática de tu juego (Pokédex, movimientos,
+habilidades, objetos, entrenadores, ubicaciones y tabla de tipos) y marca lo que has
+cambiado respecto a La Base de Sky. Lista para GitHub Pages o GitLab Pages. Detalles en
+[`wiki/README.md`](wiki/README.md).
+
 ### AÑADIDOS V 1.2.0.1
 
 - Corrige un error con las tiendas.

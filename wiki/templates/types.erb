@@ -1,0 +1,45 @@
+<% title("Tabla de tipos") %>
+<% types = data[:types].values.reject { |t| t[:pseudo] } %>
+<h1>Tipos</h1>
+
+<h2>Eficacia defensiva</h2>
+<p class="muted">Multiplicador de daño que recibe el tipo de cada <strong>fila</strong> al ser golpeado por un movimiento del tipo de cada <strong>columna</strong>.
+<strong>2</strong> = ×2 · <strong>½</strong> = ×½ · <strong>0</strong> = sin efecto · vacío = normal.</p>
+
+<div class="typechart-bleed">
+  <table class="typechart">
+    <colgroup><col class="lbl"><% types.each { %><col><% } %></colgroup>
+    <thead>
+      <tr><th></th><% types.each { |t| %><th><%= type_tag(t[:id], fit: true) %></th><% } %></tr>
+    </thead>
+    <tbody>
+    <% types.each do |defn| %>
+      <tr>
+        <th class="rowh"><%= type_tag(defn[:id], fit: true) %></th>
+        <% types.each do |atk| %>
+          <%
+            mult = defn[:immunities].include?(atk[:id]) ? "x0" :
+                   defn[:weaknesses].include?(atk[:id]) ? "x2" :
+                   defn[:resistances].include?(atk[:id]) ? "xh" : ""
+            txt = { "x0" => "0", "x2" => "2", "xh" => "½" }[mult]
+          %>
+          <td class="<%= mult %>"><%= txt %></td>
+        <% end %>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="type-cards">
+  <% types.each do |t| %>
+    <div id="<%= h(t[:id]) %>">
+      <h2 style="border:none;margin-top:.4rem"><%= type_tag(t[:id]) %> <%= h(t[:name]) %></h2>
+      <table class="kv small">
+        <tr><th>Débil a</th><td><span class="types"><%= t[:weaknesses].map { |x| type_tag(x) }.join %></span></td></tr>
+        <tr><th>Resiste</th><td><span class="types"><%= t[:resistances].map { |x| type_tag(x) }.join %></span></td></tr>
+        <tr><th>Inmune a</th><td><%= t[:immunities].empty? ? "—" : %(<span class="types">#{t[:immunities].map { |x| type_tag(x) }.join}</span>) %></td></tr>
+      </table>
+    </div>
+  <% end %>
+</div>

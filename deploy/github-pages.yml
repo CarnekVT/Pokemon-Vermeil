@@ -1,0 +1,52 @@
+# Publica la wiki del juego en GitHub Pages.
+#
+# Instalación:
+#   1. Copia este archivo a  .github/workflows/pages.yml
+#   2. Settings -> Pages -> Source: "GitHub Actions"
+#   3. Haz push a la rama indicada abajo.
+#
+# La wiki queda en  https://<usuario>.github.io/<repo>/
+
+name: Wiki
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - "LA BASE DE SKY/PBS/**"
+      - "LA BASE DE SKY/Data/**"
+      - "wiki/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+      - name: Generar la wiki
+        run: ruby wiki/generate.rb --out _site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

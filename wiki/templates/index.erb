@@ -1,0 +1,17 @@
+<% title("Inicio") %>
+<h1><%= h(meta[:game_title]) %><% if meta[:version] %> <span class="count">v<%= h(meta[:version]) %></span><% end %></h1>
+<p class="lead">Guía de datos del juego: Pokémon, movimientos, habilidades, objetos, entrenadores, ubicaciones y tabla de tipos.</p>
+
+<div class="cards">
+  <a class="card" href="<%= asset('pokemon/index.html') %>"><strong><%= data[:species].size %></strong><span>Pokémon y formas</span></a>
+  <a class="card" href="<%= asset('movimientos/index.html') %>"><strong><%= data[:moves].size %></strong><span>movimientos</span></a>
+  <a class="card" href="<%= asset('habilidades/index.html') %>"><strong><%= data[:abilities].size %></strong><span>habilidades</span></a>
+  <a class="card" href="<%= asset('objetos/index.html') %>"><strong><%= data[:items].size %></strong><span>objetos</span></a>
+  <a class="card" href="<%= asset('entrenadores/index.html') %>"><strong><%= data[:trainers].size %></strong><span>entrenadores</span></a>
+  <a class="card" href="<%= asset('ubicaciones/index.html') %>"><strong><%= data[:locations].size %></strong><span>ubicaciones</span></a>
+</div>
+
+<% unless changes[:empty] %>
+<p class="lead">Lo que difiere de <%= Render::View::BASELINE_LABEL %> aparece marcado en cada ficha
+(<span class="badge badge--mod">Modificado</span> / <span class="badge badge--new">Nuevo</span>).</p>
+<% end %>

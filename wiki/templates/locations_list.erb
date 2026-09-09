@@ -1,0 +1,18 @@
+<% title("Ubicaciones") %>
+<h1>Ubicaciones <span class="count"><%= data[:locations].size %></span></h1>
+<p class="lead">Mapas con Pokémon salvajes u objetos. Los objetos se leen de los eventos del mapa (no de eventos comunes).</p>
+
+<div class="table-scroll">
+<table class="data">
+  <thead><tr><th>Mapa</th><th>Encuentros</th><th class="num">Objetos</th></tr></thead>
+  <tbody>
+  <% data[:locations].each do |loc| %>
+    <tr>
+      <td><a href="<%= asset("ubicaciones/#{loc[:map]}.html") %>"><%= h(loc[:name]) %></a> <span class="muted">#<%= loc[:map] %></span></td>
+      <td class="muted"><%= loc[:encounters].map { |e| e[:method_name] }.uniq.join(", ") %></td>
+      <td class="num"><%= loc[:items].size.zero? ? "—" : loc[:items].size %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+</div>

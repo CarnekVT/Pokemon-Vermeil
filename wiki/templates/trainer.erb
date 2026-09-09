@@ -1,0 +1,45 @@
+<% e = locals[:entry]; title("#{e[:type_name]} #{e[:name]}") %>
+<article class="detail trainer">
+  <header>
+    <% ts = tsprite(e[:trainer_type], hero: true) %>
+    <% unless ts.empty? %><div class="hero-sprite hero-sprite--trainer"><%= ts %></div><% end %>
+    <div class="headmeta">
+      <h1><%= h(e[:type_name]) %> <%= h(e[:name]) %></h1>
+      <p class="subtitle"><code><%= h(e[:trainer_type]) %></code><%= " · versión #{e[:version]}" if e[:version].to_i > 0 %></p>
+      <% unless e[:items].empty? %><p class="muted">Objetos que usa: <%= h(e[:items].join(", ")) %></p><% end %>
+      <% if e[:lose_text] && !e[:lose_text].empty? %><p class="quote">“<%= h(e[:lose_text]) %>”</p><% end %>
+    </div>
+  </header>
+
+  <section class="section-card">
+    <h2>Equipo <span class="count"><%= e[:party].size %></span></h2>
+    <div class="party">
+      <% e[:party].each do |p| s = species(p[:species]) %>
+        <div class="pcard">
+          <div class="top">
+            <%= picon(p[:species]) %>
+            <div>
+              <div class="nm"><%= h(p[:name] || (s ? s[:name] : p[:species])) %> <span class="lv">Nv. <%= p[:level] %></span></div>
+              <% if s %><span class="types"><%= types_row(s[:types], small: true) %></span><% end %>
+            </div>
+          </div>
+          <table class="kv small">
+            <% if p[:ability] %><tr><th>Habilidad</th><td><%= h(p[:ability]) %></td></tr><% end %>
+            <% if p[:item] %><tr><th>Objeto</th><td><%= h(p[:item]) %></td></tr><% end %>
+            <% if p[:nature] %><tr><th>Naturaleza</th><td><%= h(p[:nature]) %></td></tr><% end %>
+            <% if p[:gender] %><tr><th>Género</th><td><%= h(p[:gender]) %></td></tr><% end %>
+            <% if p[:ball] %><tr><th>Poké Ball</th><td><%= h(p[:ball]) %></td></tr><% end %>
+            <% if p[:shiny] %><tr><th>Variocolor</th><td>sí</td></tr><% end %>
+            <% if p[:shadow] %><tr><th>Oscuro</th><td>sí</td></tr><% end %>
+            <% if p[:iv]&.any? { |v| v } %><tr><th>IVs</th><td><%= h(p[:iv].map { |v| v || "-" }.join("/")) %></td></tr><% end %>
+            <% if p[:ev]&.any? { |v| v } %><tr><th>EVs</th><td><%= h(p[:ev].map { |v| v || "-" }.join("/")) %></td></tr><% end %>
+          </table>
+          <% unless p[:moves].empty? %><p class="chiplist" style="line-height:1.7"><% p[:moves].each { |m| %><span class="chip"><%= h(m) %></span><% } %></p><% end %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%= change_box(e) %>
+  <%= notes(e) %>
+</article>
