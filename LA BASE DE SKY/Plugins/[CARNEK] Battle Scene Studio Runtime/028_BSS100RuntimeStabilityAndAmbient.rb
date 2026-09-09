@@ -215,16 +215,16 @@ module BSS100AmbientWorld
   end
 
   def bss070_ebdx_tick(_advance_camera=true, align=true)
-    return false if !bss070_ebdx_ensure_core
-    now=BSS100.frame
-    return true if @bss100_last_world_tick==now
-    # Older BSS authorities can re-enter this method from their pbUpdate
-    # wrappers.  The per-frame timestamp does not protect the active call
-    # itself, so explicitly break that circular prepend chain.
+    # Guard before ensure_core: room/core construction can itself enter an
+    # older tick authority through a callback. Waiting until after ensure_core
+    # still allows that circular chain to grow the Ruby stack.
     return false if @bss100_tick_active
     @bss100_tick_active=true
-    @bss100_last_world_tick=now
     begin
+      return false if !bss070_ebdx_ensure_core
+      now=BSS100.frame
+      return true if @bss100_last_world_tick==now
+      @bss100_last_world_tick=now
       bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
 
       static=BSS100.static_camera?(self)
@@ -529,6 +529,15 @@ module BSS100RecursionGuard
   MAX_PBUPDATE_PER_FRAME = 50
 
   def pbUpdate(*args,&block)
+    # A nested Scene#pbUpdate is never a valid frame update. It is the
+    # signature of the circular prepend chain seen with StableWorld/Golden.
+    # Stop it before calling super, rather than allowing dozens of nested
+    # wrappers to accumulate until SystemStackError.
+    if @bss100_pbupdate_active
+      BSS064.log("BSS100RecursionGuard: nested pbUpdate skipped") if defined?(BSS064)
+      return false
+    end
+    @bss100_pbupdate_active=true
     current_frame = Graphics.frame_count rescue 0
     if @@pbupdate_frame != current_frame
       @@pbupdate_frame = current_frame
@@ -537,11 +546,15 @@ module BSS100RecursionGuard
     @@pbupdate_count += 1
     if @@pbupdate_count > MAX_PBUPDATE_PER_FRAME
       BSS064.log("BSS100RecursionGuard: pbUpdate recursion detected (#{@@pbupdate_count} calls/frame), skipping") if defined?(BSS064)
+      @bss100_pbupdate_active=false
       return
     end
-    ret = super(*args,&block)
-    @@pbupdate_count -= 1
-    ret
+    begin
+      super(*args,&block)
+    ensure
+      @@pbupdate_count -= 1
+      @bss100_pbupdate_active=false
+    end
   end
 end
 
