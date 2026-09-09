@@ -632,7 +632,7 @@ class Battle::Battler
         end
         newTargets.compact!
       end
-      pbProcessMoveHit(move, b, newTargets, 0, false) if success
+      pbProcessMoveHit(move, b, newTargets, 0) if success
       move.hadEffectWhenMagicCoated = success
       b.lastMoveFailed = true if !success
       targets.each { |otherB| otherB.pbFaint if otherB&.fainted? }
