@@ -3007,7 +3007,15 @@ Battle::AbilityEffects::EndOfRoundGainItem.add(:PICKUP,
 # CertainSwitching handlers
 #===============================================================================
 
-# There aren't any!
+# Fuga (Run Away): permite cambiar de Pokémon aunque esté atrapado (Giro Fuego,
+# Sombra Trampa, Trampa Arena, tipo Fantasma reteniendo, etc.). El motor consulta
+# CertainSwitching en pbCanSwitchOut? antes de trappedInBattle? y de las
+# habilidades/objetos de retención, así que basta con devolver true.
+Battle::AbilityEffects::CertainSwitching.add(:RUNAWAY,
+  proc { |ability, switcher, battle|
+    next true
+  }
+)
 
 #===============================================================================
 # TrappingByTarget handlers
