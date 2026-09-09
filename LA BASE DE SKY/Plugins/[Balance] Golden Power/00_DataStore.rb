@@ -159,6 +159,57 @@ module GoldenSystem
       return base if form.to_i==0
       deep_merge(base,raw_entry(species,form) || {})
     end
+    # Editor-only visibility metadata. It follows ChangeDex's "SPECIES,FORM"
+    # convention but remains stored in GoldenSystem/species.json.
+    def self.hidden_form?(species,form)
+      return false if form.to_i<=0
+      key="#{species.to_s.upcase},#{form.to_i}"
+      list=species_document["hiddenForms"]
+      list.is_a?(Array) && list.any?{|v| v.to_s.strip.upcase==key}
+    rescue
+      false
+    end
+    def self.visible_form?(species,form); !hidden_form?(species,form); end
+    def self.hidden_forms
+      list=species_document["hiddenForms"]
+      list.is_a?(Array) ? list.map{|v| v.to_s.upcase}.uniq : []
+    end
+    def self.set_hidden_forms(selection,hidden=true)
+      pairs=selection.is_a?(Hash) ? selection.map{|k,v| [k,v]} : Array(selection).map{|k| [k,hidden]}
+      doc=species_document
+      doc["hiddenForms"]=[] unless doc["hiddenForms"].is_a?(Array)
+      pairs.each do |key,value|
+        normalized=key.to_s.strip.upcase
+        next unless normalized =~ /\A[^,]+,\d+\z/
+        if value
+          doc["hiddenForms"] << normalized unless doc["hiddenForms"].any?{|v| v.to_s.upcase==normalized}
+        else
+          doc["hiddenForms"].delete_if{|v| v.to_s.upcase==normalized}
+        end
+      end
+      save_species_document!(doc)
+      hidden_forms
+    end
+    def self.save_species_document!(doc)
+      require "json" unless defined?(JSON)
+      temp="#{GoldenSystem::SPECIES_JSON}.tmp"
+      File.binwrite(temp,JSON.pretty_generate(doc)+"\n")
+      File.rename(temp,GoldenSystem::SPECIES_JSON)
+      CarnekStandaloneJSON.invalidate(GoldenSystem::SPECIES_JSON)
+      @species_document=nil
+      @form_proxy_cache={}
+      true
+    rescue
+      begin; File.delete(temp) if temp && File.file?(temp); rescue; end
+      false
+    end
+    def self.import_changedex_hidden_forms!
+      path="Data/ChangeDex/config.json"
+      config=CarnekStandaloneJSON.load(path,{})
+      list=config["hiddenForms"]
+      return [] unless list.is_a?(Array)
+      set_hidden_forms(list,true)
+    end
     def self.golden_type(species,form=0)
       v=entry(species,form)["goldenType"]; return nil if v.nil? || v.to_s.strip.empty?
       id=v.to_s.upcase.to_sym; GameData::Type.exists?(id) ? id : nil

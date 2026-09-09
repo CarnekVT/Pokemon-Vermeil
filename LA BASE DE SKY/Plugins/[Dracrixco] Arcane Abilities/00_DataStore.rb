@@ -99,17 +99,22 @@ module ArcaneAbilities
     # Editor metadata only: hidden species remain fully playable and keep their
     # Arcane ability; Arcane Studio simply omits them from its visible list.
     def self.hidden?(species,form=0)
+      key="#{species.to_s.upcase},#{form.to_i}"
+      list=document["hiddenForms"]
+      return true if form.to_i>0 && list.is_a?(Array) && list.any?{|v| v.to_s.strip.upcase==key}
       entry=raw_entry(species,form)
       entry && (entry["hidden"]==true || entry["hidden"]==1)
     end
     def self.visible?(species,form=0); !hidden?(species,form); end
     def self.hidden_species
-      document["species"].each_with_object([]) do |(key,entry),out|
+      listed=(document["hiddenForms"].is_a?(Array) ? document["hiddenForms"].map(&:to_s) : [])
+      document["species"].each_with_object(listed) do |(key,entry),out|
         out << key if entry.is_a?(Hash) && (entry["hidden"]==true || entry["hidden"]==1)
-      end
+      end.uniq
     end
     def self.set_hidden(species,hidden=true,form=0)
-      set_hidden_many({form.to_i==0 ? species.to_s.upcase : "#{species.to_s.upcase},#{form.to_i}"=>hidden})
+      key=form.to_i==0 ? species.to_s.upcase : "#{species.to_s.upcase},#{form.to_i}"
+      set_hidden_many({key=>hidden})
       !!hidden
     end
     # Supports both a checkbox hash ({"PIKACHU"=>true}) and a multi-select
@@ -117,8 +122,16 @@ module ArcaneAbilities
     def self.set_hidden_many(selection,hidden=true)
       pairs=selection.is_a?(Hash) ? selection.map{|k,v| [k,v]} : Array(selection).map{|k| [k,hidden]}
       doc=document
+      doc["hiddenForms"]=[] unless doc["hiddenForms"].is_a?(Array)
       pairs.each do |key,value|
         normalized=key.to_s.upcase
+        if normalized.include?(",")
+          if value
+            doc["hiddenForms"] << normalized unless doc["hiddenForms"].any?{|v| v.to_s.upcase==normalized}
+          else
+            doc["hiddenForms"].delete_if{|v| v.to_s.upcase==normalized}
+          end
+        end
         entry=doc["species"][normalized]
         entry={} unless entry.is_a?(Hash)
         entry["hidden"]=!!value
@@ -139,6 +152,13 @@ module ArcaneAbilities
     rescue
       begin; File.delete(temp) if temp && File.file?(temp); rescue; end
       false
+    end
+    def self.import_changedex_hidden_forms!
+      config=CarnekStandaloneJSON.load("Data/ChangeDex/config.json",{})
+      list=config["hiddenForms"]
+      return [] unless list.is_a?(Array)
+      set_hidden_many(list,true)
+      list.map{|v| v.to_s.upcase}.uniq
     end
     def self.reload!; CarnekStandaloneJSON.invalidate(ArcaneAbilities::SPECIES_JSON); end
   end

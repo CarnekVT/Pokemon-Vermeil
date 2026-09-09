@@ -80,3 +80,17 @@ module GoldenSystem
   end
 end
 Battle::Battler.prepend(GoldenSystem::GoldenUnlosableItems)
+
+# Golden Studio visibility callbacks. The editor uses ChangeDex-compatible
+# keys such as "CHARIZARD,1" but writes only to GoldenSystem/species.json.
+def pbGoldenHideForms(selection)
+  GoldenSystem::Data.set_hidden_forms(selection,true)
+end
+
+def pbGoldenShowForms(selection)
+  GoldenSystem::Data.set_hidden_forms(selection,false)
+end
+
+def pbGoldenImportChangeDexHiddenForms
+  GoldenSystem::Data.import_changedex_hidden_forms!
+end

@@ -83,3 +83,7 @@ end
 def pbArcaneSetSpeciesVisibility(selection,hidden=true)
   ArcaneAbilities::Data.set_hidden_many(selection,hidden)
 end
+
+def pbArcaneImportChangeDexHiddenForms
+  ArcaneAbilities::Data.import_changedex_hidden_forms!
+end
