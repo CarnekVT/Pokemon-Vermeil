@@ -65,11 +65,10 @@ end
 class Battle::Move::SwitchOutUserDamagingMove < Battle::Move
   def pbEndOfMoveUsageEffect(user, targets, numHits, switchedBattlers)
     return if user.fainted? || numHits == 0 || @battle.pbAllFainted?(user.idxOpposingSide)
-    targetSwitched = true
-    targets.each do |b|
-      targetSwitched = false if !switchedBattlers.include?(b.index)
-    end
-    return if targetSwitched
+    # Cambio Pokemon Champions: el usuario cambia aunque el objetivo ya haya cambiado por
+    # Botón Escape / Emergencia (Eject Button/Emergency Exit). En el motor base
+    # esto abortaba el cambio del usuario; aquí U-turn/Viraje/Voltiocambio hacen
+    # que ambos Pokémon vuelvan.
     return if !@battle.pbCanChooseNonActive?(user.index)
     return if user.effects[PBEffects::Commanding] >= 0 || user.effects[PBEffects::CommandedBy] >= 0
     @battle.pbDisplay(_INTL("¡{1} ha vuelto con {2}!", user.pbThis,
