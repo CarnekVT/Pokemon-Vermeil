@@ -1232,7 +1232,7 @@ module Compiler
           if data_hash[:id] == 0
             validate_compiled_global_metadata(data_hash)
             if GameData::Metadata.exists?(data_hash[:id])
-              existing_obj = GameData::Metadata.get(data_hash[:id])
+              existing_obj = GameData::Metadata.get
               if existing_obj.pbs_file_suffix == file_suffix
                 raise _INTL("La ID de los metadatos globales '{1}' se utiliza dos veces.\n{2}", data_hash[:id], FileLineData.linereport)
               else
