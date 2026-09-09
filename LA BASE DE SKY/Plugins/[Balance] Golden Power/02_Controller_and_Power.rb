@@ -308,143 +308,92 @@ end
 module GoldenSystem
   module BattleGoldenPowerSwitchLifecycle
     def pbRecallAndReplace(idxBattler,*args,&block)
-      battler=@battlers[idxBattler] rescue nil
-      battler.pbEndGoldenPower if battler && battler.isOnGoldenPower?
-      return super
+      # safety: re-entrada (otro plugin prepend mismo hook)
+      @__golden_pbRecallAndReplace_depth = (@__golden_pbRecallAndReplace_depth || 0) + 1
+      return super if @__golden_pbRecallAndReplace_depth > 1
+      begin
+        battler=@battlers[idxBattler] rescue nil
+        battler.pbEndGoldenPower if battler && battler.isOnGoldenPower?
+        return super
+      ensure
+        @__golden_pbRecallAndReplace_depth -= 1 if @__golden_pbRecallAndReplace_depth && @__golden_pbRecallAndReplace_depth > 0
+      end
     end
   end
 
   module BattlerGoldenPowerFaintLifecycle
     def pbFaint(*args,&block)
-      pbEndGoldenPower if isOnGoldenPower?
-      return super
+      # safety
+      @__golden_pbFaint_depth = (@__golden_pbFaint_depth || 0) + 1
+      return super if @__golden_pbFaint_depth > 1
+      begin
+        pbEndGoldenPower if isOnGoldenPower?
+        return super
+      ensure
+        @__golden_pbFaint_depth -= 1 if @__golden_pbFaint_depth && @__golden_pbFaint_depth > 0
+      end
     end
   end
 
   module BattlerResetStages
     def pbResetStatStages
-      ret=super
-      @golden_stage_deltas={}
-      @golden_peak_stat=nil
-      @golden_lag_stat=nil
-      return ret
+      # safety
+      @__golden_pbResetStatStages_depth = (@__golden_pbResetStatStages_depth || 0) + 1
+      return super if @__golden_pbResetStatStages_depth > 1
+      begin
+        ret=super
+        @golden_stage_deltas={}
+        @golden_peak_stat=nil
+        @golden_lag_stat=nil
+        return ret
+      ensure
+        @__golden_pbResetStatStages_depth -= 1 if @__golden_pbResetStatStages_depth && @__golden_pbResetStatStages_depth > 0
+      end
     end
   end
 
-  module BattlerTypes
-    def pbTypes(withExtraType=false)
-      # Depth guard: CoreAbilityReworks aliases pbTypes back into this prepend
-      # while checking Normalize, which would otherwise super-loop forever.
-      @__golden_pb_types_depth = (@__golden_pb_types_depth || 0) + 1
-      if @__golden_pb_types_depth > 1
-        cached = @__golden_pb_types_base
-        if cached && !cached.empty?
-          return cached
-        end
-        if @pokemon && @pokemon.respond_to?(:types)
-          return @pokemon.types
-        end
-        return []
-      end
-      ret=super
-      if !@pokemon
-        @__golden_pb_types_base=ret
-        return ret
-      end
-
-      # Golden Form uses a dynamic GameData::Species proxy.  Other battle
-      # systems may keep the battler's old typing cached, so force the first
-      # two battle types to match the active Golden Form while preserving any
-      # temporary extra type appended by Essentials/other plugins.
-      if isOnGoldenForm?
-        begin
-          form_types=@pokemon.species_data.types
-          # Enhanced battle hooks can return only their replacement type.  For
-          # Golden Form, rebuild the core from the original species/form so a
-          # Heracross Bicho/Lucha becomes Bicho/Dragón, not only Dragón.
-          if @pokemon.respond_to?(:pre_golden_form) && !@pokemon.pre_golden_form.nil?
-            source_data=GameData::Species.get_species_form(@pokemon.species,@pokemon.pre_golden_form) rescue nil
-            source_types=source_data.types if source_data && source_data.respond_to?(:types)
-            form_types=source_types if source_types && source_types.length>=2
-            golden=@pokemon.golden_type
-            if golden && GameData::Type.exists?(golden) && form_types && !form_types.include?(golden)
-              core=form_types[0,2].clone
-              replace=@pokemon.golden_type_replace
-              idx=replace ? core.index(replace) : nil
-              idx=1 if idx.nil? && core.length>1
-              if idx && core.length>1
-                core[idx]=golden
-              else
-                core << golden
-              end
-              form_types=core
-            end
-          end
-          if form_types && !form_types.empty?
-            extra=(ret.length>2) ? ret[2..-1].clone : []
-            ret=(form_types[0,2]+extra).compact.uniq
-          end
-        rescue StandardError
-        end
-      end
-
-      # Golden Power overlays its Golden Type after the form typing has been
-      # resolved, which also keeps STACKED Power + Form behaviour coherent.
-      if !isOnGoldenPower?
-        @__golden_pb_types_base=ret
-        return ret
-      end
-      golden_type=@pokemon.golden_type
-      if !golden_type || !GameData::Type.exists?(golden_type)
-        @__golden_pb_types_base=ret
-        return ret
-      end
-      core=ret[0,2].clone
-      extra=(ret.length>2) ? ret[2..-1].clone : []
-      if core.include?(golden_type)
-        @__golden_pb_types_base=ret
-        return ret
-      end
-      if core.length<=1
-        core << golden_type
-      else
-        replace=@pokemon.golden_type_replace
-        idx=replace ? core.index(replace) : nil
-        idx=1 if idx.nil?
-        core[idx]=golden_type
-      end
-      ret=(core+extra).compact.uniq
-      @__golden_pb_types_base=ret
-      return ret
-    ensure
-      @__golden_pb_types_depth -= 1 if @__golden_pb_types_depth && @__golden_pb_types_depth > 0
-    end
-  end
+  # pbTypes moved out of this prepend to the class-level patch below.  A prepend
+  # here let Battle Additions (meta "Last = true", loaded last) alias this method
+  # and then super-loop back into it, stacking a SystemStackError.
 
   # Essentials v21 switch-in hook. Runs after normal held-item/ability effects,
   # then applies explicit boss Overflow assignments that can bypass activators.
   module BattlerOverflowSwitchInLifecycle
     def pbEffectsOnSwitchIn(*args,&block)
-      ret=super
+      # safety
+      @__golden_pbEffectsOnSwitchIn_depth = (@__golden_pbEffectsOnSwitchIn_depth || 0) + 1
+      return super if @__golden_pbEffectsOnSwitchIn_depth > 1
       begin
-        @battle.pbTryGoldenOverflowAssignment(@index) if @battle
-      rescue StandardError => e
-        echoln("[GoldenSystem] Overflow switch-in: #{e.class}: #{e.message}") if defined?(echoln)
+        ret=super
+        begin
+          @battle.pbTryGoldenOverflowAssignment(@index) if @battle
+        rescue StandardError => e
+          echoln("[GoldenSystem] Overflow switch-in: #{e.class}: #{e.message}") if defined?(echoln)
+        end
+        return ret
+      ensure
+        @__golden_pbEffectsOnSwitchIn_depth -= 1 if @__golden_pbEffectsOnSwitchIn_depth && @__golden_pbEffectsOnSwitchIn_depth > 0
       end
-      return ret
     end
   end
 
 
   module BattlerOverflowAbilitySwitchInFallback
     def pbAbilitiesOnSwitchIn(*args,&block)
-      ret=super
+      # safety
+      @__golden_pbAbilitiesOnSwitchIn_depth = (@__golden_pbAbilitiesOnSwitchIn_depth || 0) + 1
+      return super if @__golden_pbAbilitiesOnSwitchIn_depth > 1
       begin
-        @battle.pbTryGoldenOverflowAssignment(@index) if @battle
-      rescue StandardError => e
-        echoln("[GoldenSystem] Overflow ability switch-in: #{e.class}: #{e.message}") if defined?(echoln)
+        ret=super
+        begin
+          @battle.pbTryGoldenOverflowAssignment(@index) if @battle
+        rescue StandardError => e
+          echoln("[GoldenSystem] Overflow ability switch-in: #{e.class}: #{e.message}") if defined?(echoln)
+        end
+        return ret
+      ensure
+        @__golden_pbAbilitiesOnSwitchIn_depth -= 1 if @__golden_pbAbilitiesOnSwitchIn_depth && @__golden_pbAbilitiesOnSwitchIn_depth > 0
       end
-      return ret
     end
   end
 
@@ -452,17 +401,102 @@ module GoldenSystem
   # users continue through ItemEffects, so this hook only services missing items.
   module BattleGoldenItemlessEndOfRound
     def pbEndOfRoundPhase(*args,&block)
-      ret=super
-      @battlers.each do |battler|
-        next if !battler || battler.fainted?
-        if battler.isOnGoldenPower? && !pbGoldenHeldItem?(battler.index,GoldenSystem::GOLDEN_FRAGMENT_ITEM)
-          battler.pbApplyGoldenVane(true)
+      # safety
+      @__golden_pbEndOfRoundPhase_depth = (@__golden_pbEndOfRoundPhase_depth || 0) + 1
+      return super if @__golden_pbEndOfRoundPhase_depth > 1
+      begin
+        ret=super
+        @battlers.each do |battler|
+          next if !battler || battler.fainted?
+          if battler.isOnGoldenPower? && !pbGoldenHeldItem?(battler.index,GoldenSystem::GOLDEN_FRAGMENT_ITEM)
+            battler.pbApplyGoldenVane(true)
+          end
+          if battler.isOnGoldenForm? && !pbGoldenHeldItem?(battler.index,GoldenSystem::GOLDEN_STONE_ITEM)
+            pbApplyGoldenFormDrain(battler) if respond_to?(:pbApplyGoldenFormDrain)
+          end
         end
-        if battler.isOnGoldenForm? && !pbGoldenHeldItem?(battler.index,GoldenSystem::GOLDEN_STONE_ITEM)
-          pbApplyGoldenFormDrain(battler) if respond_to?(:pbApplyGoldenFormDrain)
+        return ret
+      ensure
+        @__golden_pbEndOfRoundPhase_depth -= 1 if @__golden_pbEndOfRoundPhase_depth && @__golden_pbEndOfRoundPhase_depth > 0
+      end
+    end
+  end
+end
+
+#===============================================================================
+# Battle types.  Class-level alias_method patch (NOT a prepend) so that any
+# plugin loaded AFTER this one (e.g. Battle Additions' NORMALIZE rework with
+# meta "Last = true") aliases this exact method and builds a linear chain.
+#===============================================================================
+class Battle::Battler
+  if !method_defined?(:zbox_golden_pbTypes_orig)
+    alias zbox_golden_pbTypes_orig pbTypes
+  end
+
+  def pbTypes(withExtraType = false)
+    # safety: corta re-entrada accidental (LiveReload, otro plugin, etc.)
+    @__golden_pbTypes_depth = (@__golden_pbTypes_depth || 0) + 1
+    return zbox_golden_pbTypes_orig(withExtraType) if @__golden_pbTypes_depth > 1
+
+    begin
+      ret = zbox_golden_pbTypes_orig(withExtraType)
+      return ret if !@pokemon
+
+      # Golden Form uses a dynamic GameData::Species proxy.  Other battle
+      # systems may keep the battler's old typing cached, so force the first
+      # two battle types to match the active Golden Form while preserving any
+      # temporary extra type appended by Essentials/other plugins.
+      if isOnGoldenForm?
+        begin
+          form_types = @pokemon.species_data.types
+          # Enhanced battle hooks can return only their replacement type.  For
+          # Golden Form, rebuild the core from the original species/form so a
+          # Heracross Bicho/Lucha becomes Bicho/Dragón, not only Dragón.
+          if @pokemon.respond_to?(:pre_golden_form) && !@pokemon.pre_golden_form.nil?
+            source_data = GameData::Species.get_species_form(@pokemon.species, @pokemon.pre_golden_form) rescue nil
+            source_types = source_data.types if source_data && source_data.respond_to?(:types)
+            form_types = source_types if source_types && source_types.length >= 2
+            golden = @pokemon.golden_type
+            if golden && GameData::Type.exists?(golden) && form_types && !form_types.include?(golden)
+              core = form_types[0, 2].clone
+              replace = @pokemon.golden_type_replace
+              idx = replace ? core.index(replace) : nil
+              idx = 1 if idx.nil? && core.length > 1
+              if idx && core.length > 1
+                core[idx] = golden
+              else
+                core << golden
+              end
+              form_types = core
+            end
+          end
+          if form_types && !form_types.empty?
+            extra = (ret.length > 2) ? ret[2..-1].clone : []
+            ret = (form_types[0, 2] + extra).compact.uniq
+          end
+        rescue StandardError
         end
       end
-      return ret
+
+      # Golden Power overlays its Golden Type after the form typing has been
+      # resolved, which also keeps STACKED Power + Form behaviour coherent.
+      return ret if !isOnGoldenPower?
+      golden_type = @pokemon.golden_type
+      return ret if !golden_type || !GameData::Type.exists?(golden_type)
+      core = ret[0, 2].clone
+      extra = (ret.length > 2) ? ret[2..-1].clone : []
+      return ret if core.include?(golden_type)
+      if core.length <= 1
+        core << golden_type
+      else
+        replace = @pokemon.golden_type_replace
+        idx = replace ? core.index(replace) : nil
+        idx = 1 if idx.nil?
+        core[idx] = golden_type
+      end
+      return (core + extra).compact.uniq
+    ensure
+      @__golden_pbTypes_depth -= 1 if @__golden_pbTypes_depth && @__golden_pbTypes_depth > 0
     end
   end
 end
@@ -470,7 +504,6 @@ end
 Battle.prepend(GoldenSystem::BattleGoldenPowerSwitchLifecycle)
 Battle::Battler.prepend(GoldenSystem::BattlerGoldenPowerFaintLifecycle)
 Battle::Battler.prepend(GoldenSystem::BattlerResetStages)
-Battle::Battler.prepend(GoldenSystem::BattlerTypes)
 if Battle::Battler.method_defined?(:pbEffectsOnSwitchIn)
   Battle::Battler.prepend(GoldenSystem::BattlerOverflowSwitchInLifecycle)
 elsif Battle::Battler.method_defined?(:pbAbilitiesOnSwitchIn)

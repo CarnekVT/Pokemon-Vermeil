@@ -92,11 +92,19 @@ if defined?(Battle)
   module GoldenSystem
     module BattleGoldenAnimationBridge
       def pbAnimation(move, user, targets, hit_num = 0)
-        if @showAnims != false && user && @scene &&
-           GoldenSystem::AnimationBridge.play_via_bas(@scene, user, move, targets, hit_num)
-          return
+        # safety: corta re-entrada en la cadena de prepends de animación
+        @__golden_anim_bridge_depth = (@__golden_anim_bridge_depth || 0) + 1
+        return super if @__golden_anim_bridge_depth > 1
+
+        begin
+          if @showAnims != false && user && @scene &&
+             GoldenSystem::AnimationBridge.play_via_bas(@scene, user, move, targets, hit_num)
+            return
+          end
+          super
+        ensure
+          @__golden_anim_bridge_depth -= 1 if @__golden_anim_bridge_depth && @__golden_anim_bridge_depth > 0
         end
-        super
       end
     end
   end

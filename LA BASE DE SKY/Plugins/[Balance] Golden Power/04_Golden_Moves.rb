@@ -189,55 +189,117 @@ module GoldenSystem
       end
     end
 
-    def pbCalcType(user)
-      data=golden_variant_data(user)
-      # Do not call super here.  Enhanced/MegaSignatureAbilities can route its
-      # own pbCalcType back through this prepend, causing infinite alternation.
-      # @type is the already resolved base move type for non-Golden moves.
-      return data[:type] if data && data[:type]
-      return @type
-    end
+    # pbCalcType is patched at class level below (alias_method) rather than as
+    # a prepend in this module.  Battle::Move#pbCalcType aliased by a later
+    # plugin (Battle Additions' PRECOGNITION, meta "Last = true") then builds a
+    # linear chain instead of super-looping back into this prepend.
 
     def pbCalcDamage(user,target,numTargets=1)
-      data=golden_variant_data(user); old_power=@power; @power=data[:power] if data && data[:power]
-      GoldenSystem::GoldenMoveEffects.trigger(data[:effect],:before_damage,self,user,target) if data
-      ret=super
-      GoldenSystem::GoldenMoveEffects.trigger(data[:effect],:after_damage,self,user,target) if data
-      ret
-    ensure
-      @power=old_power if defined?(old_power)
+      # safety: re-entrada (otro plugin o proxy) → engine original
+      @__golden_pbCalcDamage_depth = (@__golden_pbCalcDamage_depth || 0) + 1
+      return super if @__golden_pbCalcDamage_depth > 1
+
+      begin
+        data=golden_variant_data(user); old_power=@power; @power=data[:power] if data && data[:power]
+        GoldenSystem::GoldenMoveEffects.trigger(data[:effect],:before_damage,self,user,target) if data
+        ret=super
+        GoldenSystem::GoldenMoveEffects.trigger(data[:effect],:after_damage,self,user,target) if data
+        ret
+      ensure
+        @power=old_power if defined?(old_power)
+        @__golden_pbCalcDamage_depth -= 1 if @__golden_pbCalcDamage_depth && @__golden_pbCalcDamage_depth > 0
+      end
     end
 
     def pbAccuracyCheck(user,target)
-      data=golden_variant_data(user)
-      if data && data[:function_code] && !data.key?(:accuracy)
-        delegated,value=golden_delegate_function(:pbAccuracyCheck,user,user,target)
-        return value if delegated
+      # safety
+      @__golden_pbAccuracyCheck_depth = (@__golden_pbAccuracyCheck_depth || 0) + 1
+      return super if @__golden_pbAccuracyCheck_depth > 1
+
+      begin
+        data=golden_variant_data(user)
+        if data && data[:function_code] && !data.key?(:accuracy)
+          delegated,value=golden_delegate_function(:pbAccuracyCheck,user,user,target)
+          return value if delegated
+        end
+        old_accuracy=@accuracy; @accuracy=data[:accuracy] if data && data.key?(:accuracy); super
+      ensure
+        @accuracy=old_accuracy if defined?(old_accuracy)
+        @__golden_pbAccuracyCheck_depth -= 1 if @__golden_pbAccuracyCheck_depth && @__golden_pbAccuracyCheck_depth > 0
       end
-      old_accuracy=@accuracy; @accuracy=data[:accuracy] if data && data.key?(:accuracy); super
-    ensure
-      @accuracy=old_accuracy if defined?(old_accuracy)
     end
 
-    def display_type(battler); data=golden_variant_data(battler); data && data[:type] ? data[:type] : super; end
-    def display_damage(battler); data=golden_variant_data(battler); data && data[:power] ? data[:power] : super; end
+    def display_type(battler)
+      data=golden_variant_data(battler)
+      return data[:type] if data && data[:type]
+      # safety
+      @__golden_display_type_depth = (@__golden_display_type_depth || 0) + 1
+      return super if @__golden_display_type_depth > 1
+      ret = super
+      @__golden_display_type_depth -= 1 if @__golden_display_type_depth && @__golden_display_type_depth > 0
+      ret
+    end
+
+    def display_damage(battler)
+      data=golden_variant_data(battler)
+      return data[:power] if data && data[:power]
+      # safety
+      @__golden_display_damage_depth = (@__golden_display_damage_depth || 0) + 1
+      return super if @__golden_display_damage_depth > 1
+      ret = super
+      @__golden_display_damage_depth -= 1 if @__golden_display_damage_depth && @__golden_display_damage_depth > 0
+      ret
+    end
     def golden_display_name(battler); data=golden_variant_data(battler); (!data || !data[:name] || data[:name].empty?) ? @name : data[:name]; end
   end
   module SameTypeApogee
     def pbCalcDamageMultipliers(user,target,numTargets,type,baseDmg,multipliers)
-      ret=super
-      if user && user.isOnGoldenPower? && user.pokemon
-        gt=user.pokemon.golden_type
-        if gt && user.pokemon.types.include?(gt) && type==gt
-          multipliers[:power_multiplier] *= GoldenSystem.settings[:same_type_multiplier]
+      # safety
+      @__golden_pbCalcDamageMultipliers_depth = (@__golden_pbCalcDamageMultipliers_depth || 0) + 1
+      return super if @__golden_pbCalcDamageMultipliers_depth > 1
+
+      begin
+        ret=super
+        if user && user.isOnGoldenPower? && user.pokemon
+          gt=user.pokemon.golden_type
+          if gt && user.pokemon.types.include?(gt) && type==gt
+            multipliers[:power_multiplier] *= GoldenSystem.settings[:same_type_multiplier]
+          end
         end
+        ret
+      ensure
+        @__golden_pbCalcDamageMultipliers_depth -= 1 if @__golden_pbCalcDamageMultipliers_depth && @__golden_pbCalcDamageMultipliers_depth > 0
       end
-      ret
     end
   end
 end
 Battle::Move.prepend(GoldenSystem::BattleMoveGoldenProperties)
 Battle::Move.prepend(GoldenSystem::SameTypeApogee)
+
+#===============================================================================
+# Move type.  Class-level alias_method patch (NOT a prepend), same rationale as
+# Battle::Battler#pbTypes above.  Non-Golden moves keep the engine's full type
+# resolution (Ion Deluge/Electrify/base type modifiers).
+#===============================================================================
+class Battle::Move
+  if !method_defined?(:zbox_golden_pbCalcType_orig)
+    alias zbox_golden_pbCalcType_orig pbCalcType
+  end
+
+  def pbCalcType(user)
+    # safety: corta re-entrada accidental (LiveReload, otro plugin, etc.)
+    @__golden_pbCalcType_depth = (@__golden_pbCalcType_depth || 0) + 1
+    return zbox_golden_pbCalcType_orig(user) if @__golden_pbCalcType_depth > 1
+
+    begin
+      data = golden_variant_data(user)
+      return data[:type] if data && data[:type]
+      return zbox_golden_pbCalcType_orig(user)
+    ensure
+      @__golden_pbCalcType_depth -= 1 if @__golden_pbCalcType_depth && @__golden_pbCalcType_depth > 0
+    end
+  end
+end
 
 #===============================================================================
 # Runtime move-name synchronization.

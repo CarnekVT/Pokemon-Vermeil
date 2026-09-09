@@ -5,9 +5,9 @@
     "Data/Map001.rxdata": {
       "sig": [
         57703,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -204,9 +204,9 @@
     "Data/Map002.rxdata": {
       "sig": [
         51639,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -253,9 +253,9 @@
     "Data/Map017.rxdata": {
       "sig": [
         6176,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -277,9 +277,9 @@
     "Data/Map018.rxdata": {
       "sig": [
         8523,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -301,9 +301,9 @@
     "Data/Map019.rxdata": {
       "sig": [
         14713,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -325,9 +325,9 @@
     "Data/Map032.rxdata": {
       "sig": [
         5848,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -374,9 +374,9 @@
     "Data/Map033.rxdata": {
       "sig": [
         2105,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -398,9 +398,9 @@
     "Data/Map042.rxdata": {
       "sig": [
         76061,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -422,9 +422,9 @@
     "Data/Map076.rxdata": {
       "sig": [
         47215,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -747,9 +747,9 @@
     "Data/Map077.rxdata": {
       "sig": [
         215499,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -771,9 +771,9 @@
     "Data/Map078.rxdata": {
       "sig": [
         629422,
-        1787895918,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -795,9 +795,9 @@
     "Data/Map079.rxdata": {
       "sig": [
         2844338,
-        1788875623,
+        1788971693,
         579,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -2118,8 +2118,8 @@
     },
     "Data/Scripts/011_Game classes/004_Game_Picture.rb": {
       "sig": [
-        5550,
-        1783434661
+        5717,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -2426,8 +2426,8 @@
     },
     "Data/Scripts/014_Sprites/002_Sprite_Picture.rb": {
       "sig": [
-        1541,
-        1783434661
+        1600,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -2476,7 +2476,7 @@
     "Data/Scripts/014_Sprites/004_Sprite_Character.rb": {
       "sig": [
         11828,
-        1786492323
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -2541,8 +2541,8 @@
     },
     "Data/Scripts/014_Sprites/007_Spriteset_Global.rb": {
       "sig": [
-        2092,
-        1783434661
+        2158,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -2563,8 +2563,8 @@
     },
     "Data/Scripts/014_Sprites/008_Spriteset_Map.rb": {
       "sig": [
-        5375,
-        1783434661
+        5530,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -2673,8 +2673,8 @@
     },
     "Data/Scripts/016_Map renderer/002_TilemapRenderer.rb": {
       "sig": [
-        21992,
-        1783434661
+        22618,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -6046,7 +6046,7 @@
     "Data/Scripts/028_Battle/006_Battle_ActionSwitching.rb": {
       "sig": [
         23851,
-        1787896843
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -6386,8 +6386,8 @@
     },
     "Data/Scripts/028_Battle/009_Battle_ActionOther.rb": {
       "sig": [
-        7966,
-        1783434661
+        8170,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -6876,7 +6876,7 @@
     "Data/Scripts/029_Battler/002_Battle_Battler.rb": {
       "sig": [
         34736,
-        1787896843
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -7000,7 +7000,7 @@
     "Data/Scripts/029_Battler/003_Battler_Initialize.rb": {
       "sig": [
         17004,
-        1787451550
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -7028,7 +7028,7 @@
     "Data/Scripts/029_Battler/004_Battler_ChangeSelf.rb": {
       "sig": [
         9193,
-        1784000112
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -7365,8 +7365,8 @@
     },
     "Data/Scripts/029_Battler/006_Battler_StatStages.rb": {
       "sig": [
-        20580,
-        1783434661
+        21068,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -7562,7 +7562,7 @@
     "Data/Scripts/029_Battler/007_Battler_AbilityAndItem.rb": {
       "sig": [
         23909,
-        1787896843
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -7812,7 +7812,7 @@
     "Data/Scripts/029_Battler/010_Battler_UseMoveSuccessChecks.rb": {
       "sig": [
         32550,
-        1787451550
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -8674,7 +8674,7 @@
     "Data/Scripts/030_Move/007_MoveEffects_BattlerStats.rb": {
       "sig": [
         100236,
-        1787896843
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -9638,8 +9638,8 @@
     },
     "Data/Scripts/030_Move/011_MoveEffects_Healing.rb": {
       "sig": [
-        27498,
-        1783434661
+        28243,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -10490,7 +10490,7 @@
     "Data/Scripts/031_Scene/005_Scene_PlayAnimations.rb": {
       "sig": [
         25877,
-        1784000112
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -11098,8 +11098,8 @@
     },
     "Data/Scripts/033_AI MoveEffects/003_AI_MoveEffects_BattlerStats.rb": {
       "sig": [
-        95587,
-        1783434661
+        97640,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -11570,7 +11570,7 @@
     "Data/Scripts/034_Other battle code/009_Battle_AbilityEffects.rb": {
       "sig": [
         153595,
-        1787896843
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -13020,7 +13020,7 @@
     "Data/Scripts/037_Overworld/002_Overworld.rb": {
       "sig": [
         30874,
-        1783434661
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -13616,8 +13616,8 @@
     },
     "Data/Scripts/037_Overworld/007_Overworld_BerryPlants.rb": {
       "sig": [
-        16083,
-        1783434661
+        16555,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -13912,7 +13912,7 @@
     "Data/Scripts/037_Overworld/010_Events Utilities.rb": {
       "sig": [
         15126,
-        1786492323
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -13934,7 +13934,7 @@
     "Data/Scripts/037_Overworld/011_Fancy Camera.rb": {
       "sig": [
         11449,
-        1783434661
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -13955,8 +13955,8 @@
     },
     "Data/Scripts/038_Overworld visuals/002_Overworld_Weather.rb": {
       "sig": [
-        22139,
-        1783434661
+        22674,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -13977,8 +13977,8 @@
     },
     "Data/Scripts/038_Overworld visuals/003_Overworld_Overlays.rb": {
       "sig": [
-        14510,
-        1783434661
+        14957,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -14044,8 +14044,8 @@
     },
     "Data/Scripts/038_Overworld visuals/005_Exit Arrows.rb": {
       "sig": [
-        1838,
-        1783434661
+        1895,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -14067,7 +14067,7 @@
     "Data/Scripts/038_Overworld visuals/006_Overworld Shadows EX.rb": {
       "sig": [
         23022,
-        1787896843
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -14111,7 +14111,7 @@
     "Data/Scripts/039_Battle triggering/002_Overworld_BattleStarting.rb": {
       "sig": [
         38902,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -14242,8 +14242,8 @@
     },
     "Data/Scripts/039_Battle triggering/004_Overworld_WildEncounters.rb": {
       "sig": [
-        18684,
-        1783434661
+        19157,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -15701,7 +15701,7 @@
     "Data/Scripts/043_Pokemon/002_Pokemon.rb": {
       "sig": [
         54852,
-        1787451550
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -15866,7 +15866,7 @@
     "Data/Scripts/044_Pokemon-related/002_FormHandlers.rb": {
       "sig": [
         36293,
-        1787451550
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -16103,8 +16103,8 @@
     },
     "Data/Scripts/044_Pokemon-related/004_Pokemon_Sprites.rb": {
       "sig": [
-        11827,
-        1783434661
+        12250,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -16125,8 +16125,8 @@
     },
     "Data/Scripts/044_Pokemon-related/005_PokemonStorage.rb": {
       "sig": [
-        10816,
-        1784232072
+        11259,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -24064,7 +24064,7 @@
     "Data/Scripts/048_UI/034_UI_Mostrar_Especie.rb": {
       "sig": [
         5785,
-        1783434662
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -27752,8 +27752,8 @@
     },
     "Data/Scripts/058_Utilities/010_Turbo.rb": {
       "sig": [
-        28266,
-        1783434662
+        29227,
+        1788987313
       ],
       "catalog": {
         "schema": 2,
@@ -28565,7 +28565,7 @@
     "Data/Scripts/060_Debug/003_Editor_DataTypes.rb": {
       "sig": [
         55900,
-        1787895918
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -34612,8 +34612,8 @@
     },
     "Data/Scripts/063_Debug menus/007_Debug_BattleExtraCode.rb": {
       "sig": [
-        29776,
-        1783434662
+        30290,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -38768,8 +38768,8 @@
     },
     "Plugins/Battle Additions/000_Settings.rb": {
       "sig": [
-        904,
-        1788819413
+        923,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -38791,7 +38791,7 @@
     "Plugins/Battle Additions/001_Core.rb": {
       "sig": [
         3773,
-        1788819381
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -38822,8 +38822,8 @@
     },
     "Plugins/Battle Additions/002_Handlers.rb": {
       "sig": [
-        181,
-        1788819383
+        184,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -38844,8 +38844,8 @@
     },
     "Plugins/Battle Additions/003_Data.rb": {
       "sig": [
-        650,
-        1788819413
+        669,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -38871,8 +38871,8 @@
     },
     "Plugins/Battle Animation Studio Runtime/001_Runtime.rb": {
       "sig": [
-        237757,
-        1788880920
+        237789,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -38894,7 +38894,7 @@
     "Plugins/Carnek Project Settings/002_PBS_Changes.rb": {
       "sig": [
         13496,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -38916,7 +38916,7 @@
     "Plugins/Carnek Project Settings/Pokemon Settings/001_Register.rb": {
       "sig": [
         1962,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -38944,7 +38944,7 @@
     "Plugins/Carnek Project Settings/Settings/Centered_UI_And_Camera.rb": {
       "sig": [
         6359,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -38966,7 +38966,7 @@
     "Plugins/Carnek Project Settings/Settings/PC_640x480_Fix.rb": {
       "sig": [
         36852,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39115,7 +39115,7 @@
     "Plugins/Carnek Project Settings/Settings/PC_Icon_Offset.rb": {
       "sig": [
         192,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39137,7 +39137,7 @@
     "Plugins/Carnek Project Settings/Settings/Settings.rb": {
       "sig": [
         195,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39159,7 +39159,7 @@
     "Plugins/Carnek Project Settings/Settings/Summary.rb": {
       "sig": [
         18421,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39196,7 +39196,7 @@
     "Plugins/Carnek Project Settings/Settings/UI_Party.rb": {
       "sig": [
         53118,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39595,7 +39595,7 @@
     "Plugins/Carnek Project Settings/patches/031_EBUI_ZFix.rb": {
       "sig": [
         662,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39617,7 +39617,7 @@
     "Plugins/Carnek Project Settings/patches/032_FaintedBitmap.rb": {
       "sig": [
         1967,
-        1787936976
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39639,7 +39639,7 @@
     "Plugins/Carnek Project Settings/patches/033_FaintedOverlay.rb": {
       "sig": [
         967,
-        1787936976
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39660,8 +39660,8 @@
     },
     "Plugins/Carnek Project Settings/patches/034_FaintAnimations.rb": {
       "sig": [
-        5516,
-        1787937150
+        5664,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39683,7 +39683,7 @@
     "Plugins/Carnek Project Settings/patches/035_HitBitmap.rb": {
       "sig": [
         2026,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39705,7 +39705,7 @@
     "Plugins/Carnek Project Settings/patches/036_HitOverlay.rb": {
       "sig": [
         1676,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39727,7 +39727,7 @@
     "Plugins/Carnek Project Settings/patches/037_HitAnimations.rb": {
       "sig": [
         4107,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39749,7 +39749,7 @@
     "Plugins/Carnek Project Settings/patches/038_SleepBitmap.rb": {
       "sig": [
         1904,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39771,7 +39771,7 @@
     "Plugins/Carnek Project Settings/patches/039_SleepHitBitmap.rb": {
       "sig": [
         2166,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39792,8 +39792,8 @@
     },
     "Plugins/Carnek Project Settings/patches/040_SleepAnimations.rb": {
       "sig": [
-        7356,
-        1788881237
+        7706,
+        1788987313
       ],
       "catalog": {
         "schema": 2,
@@ -39815,7 +39815,7 @@
     "Plugins/Carnek Project Settings/patches/041_AnimEditorCanvasFix.rb": {
       "sig": [
         7003,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39837,7 +39837,7 @@
     "Plugins/Carnek Project Settings/patches/042_TrainerSpriteEditorShadowFix.rb": {
       "sig": [
         9936,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39923,8 +39923,8 @@
     },
     "Plugins/Carnek Project Settings/patches/043_SnapTrapTrapping.rb": {
       "sig": [
-        1858,
-        1788564550
+        1895,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39951,7 +39951,7 @@
     "Plugins/Interfaces/[000] Settings.rb": {
       "sig": [
         9232,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39973,7 +39973,7 @@
     "Plugins/Interfaces/[001] Suavizado.rb": {
       "sig": [
         8616,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -39995,7 +39995,7 @@
     "Plugins/Interfaces/[002] Lector.rb": {
       "sig": [
         24876,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -40017,7 +40017,7 @@
     "Plugins/Interfaces/[003] Elementos.rb": {
       "sig": [
         40976,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -40039,7 +40039,7 @@
     "Plugins/Interfaces/[004] Acciones.rb": {
       "sig": [
         12193,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -40061,7 +40061,7 @@
     "Plugins/Interfaces/[005] Escena.rb": {
       "sig": [
         26745,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -40098,7 +40098,7 @@
     "Plugins/Interfaces/[006] Comandos.rb": {
       "sig": [
         13097,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -40222,7 +40222,7 @@
     "Plugins/Interfaces/[007] Datos.rb": {
       "sig": [
         9958,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -40864,7 +40864,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/001_Compiler_CompileAnimations.rb": {
       "sig": [
         22421,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41046,7 +41046,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/001_SpeciesMetrics.rb": {
       "sig": [
         1057,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41068,7 +41068,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/002_Compiler_WriteAnimations.rb": {
       "sig": [
         4533,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41110,7 +41110,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/101_Add to debug menu.rb": {
       "sig": [
         898,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41142,7 +41142,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/102_EditorScreens_SpritePositioning.rb": {
       "sig": [
         6111,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41194,7 +41194,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/201_Converter_OldAnimsToNew.rb": {
       "sig": [
         20809,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41216,7 +41216,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/202_Converter_Spritesheets.rb": {
       "sig": [
         3972,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41238,7 +41238,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/301_Battle_ModifyZValues.rb": {
       "sig": [
         45514,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41260,7 +41260,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/302_Battle_PlayAnimation.rb": {
       "sig": [
         11565,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41282,7 +41282,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/303_Battle_Scene_BaseAnimation.rb": {
       "sig": [
         705,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41304,7 +41304,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/304_Battle_Scene_Animations.rb": {
       "sig": [
         18361,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41326,7 +41326,7 @@
     "Plugins/New Animation Editor BETA/001_Compatibility code/310_Other battle types_SafariBattle.rb": {
       "sig": [
         2372,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41348,7 +41348,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/001_BaseControl.rb": {
       "sig": [
         5899,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41370,7 +41370,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/002_Label.rb": {
       "sig": [
         1609,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41392,7 +41392,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/003_ClickableArea.rb": {
       "sig": [
         2626,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41414,7 +41414,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/004_ClickableBitmap.rb": {
       "sig": [
         2201,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41436,7 +41436,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/005_Checkbox.rb": {
       "sig": [
         2987,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41458,7 +41458,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/006_TextBox.rb": {
       "sig": [
         10800,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41480,7 +41480,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/007_NumberSlider.rb": {
       "sig": [
         4872,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41502,7 +41502,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/008_NumberTextBox.rb": {
       "sig": [
         4905,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41524,7 +41524,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/009_HexNumberTextBox.rb": {
       "sig": [
         733,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41546,7 +41546,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/010_Button.rb": {
       "sig": [
         3810,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41568,7 +41568,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/011_FittedButton.rb": {
       "sig": [
         983,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41590,7 +41590,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/012_BitmapButton.rb": {
       "sig": [
         1320,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41612,7 +41612,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/013_List.rb": {
       "sig": [
         9370,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41634,7 +41634,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/013b_CheckboxList.rb": {
       "sig": [
         7057,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41656,7 +41656,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/014_DropdownList.rb": {
       "sig": [
         5717,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41678,7 +41678,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/015_TextBoxDropdownList.rb": {
       "sig": [
         7972,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41700,7 +41700,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/016_ColorPicker.rb": {
       "sig": [
         15999,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41752,7 +41752,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/017_TonePicker.rb": {
       "sig": [
         16120,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41794,7 +41794,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/018_SEPicker.rb": {
       "sig": [
         7973,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41831,7 +41831,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_ControlTypes/101_Scrollbar.rb": {
       "sig": [
         5380,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41853,7 +41853,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/001_UIControls_styles.rb": {
       "sig": [
         7201,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41885,7 +41885,7 @@
     "Plugins/New Animation Editor BETA/701_UI controls/002_ControlContainers.rb": {
       "sig": [
         10779,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -41907,7 +41907,7 @@
     "Plugins/New Animation Editor BETA/801_Anim GameData/001_Animation.rb": {
       "sig": [
         32566,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42187,7 +42187,7 @@
     "Plugins/New Animation Editor BETA/901_Anim utilities/001_NewRubyUtilities.rb": {
       "sig": [
         1512,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42209,7 +42209,7 @@
     "Plugins/New Animation Editor BETA/901_Anim utilities/002_AnimUtilities.rb": {
       "sig": [
         4333,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42236,7 +42236,7 @@
     "Plugins/New Animation Editor BETA/901_Anim utilities/003_FakeBattler.rb": {
       "sig": [
         890,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42258,7 +42258,7 @@
     "Plugins/New Animation Editor BETA/901_Anim utilities/004_ParticleDataHelper.rb": {
       "sig": [
         29148,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42331,7 +42331,7 @@
     "Plugins/New Animation Editor BETA/902_Anim player/001_Anim player.rb": {
       "sig": [
         14492,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42353,7 +42353,7 @@
     "Plugins/New Animation Editor BETA/902_Anim player/002_ParticleSprite.rb": {
       "sig": [
         16520,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42375,7 +42375,7 @@
     "Plugins/New Animation Editor BETA/902_Anim player/003_Emitter.rb": {
       "sig": [
         16587,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42397,7 +42397,7 @@
     "Plugins/New Animation Editor BETA/902_Anim player/010_AnimPlayerHelper.rb": {
       "sig": [
         11819,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42424,7 +42424,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/001_AnimEditor_constants.rb": {
       "sig": [
         4837,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42446,7 +42446,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/001_AnimationSelector/001_AnimationSelector.rb": {
       "sig": [
         27236,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42607,7 +42607,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_SettingsMixin.rb": {
       "sig": [
         1734,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42629,7 +42629,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_components/001_MenuBar.rb": {
       "sig": [
         4286,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42666,7 +42666,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_components/002_BattlersLayout.rb": {
       "sig": [
         3196,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42718,7 +42718,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_components/003_PlayControls.rb": {
       "sig": [
         9351,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42756,7 +42756,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_components/004_Canvas.rb": {
       "sig": [
         50363,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42790,7 +42790,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_components/005_BatchEdits.rb": {
       "sig": [
         5253,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42847,7 +42847,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_components/006_Timeline.rb": {
       "sig": [
         30987,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42869,7 +42869,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_components/007_ListedParticle.rb": {
       "sig": [
         31057,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42926,7 +42926,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/002_AnimEditor_components/008_ListedParticle_draw.rb": {
       "sig": [
         15080,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42968,7 +42968,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/003_AnimEditor/001_AnimEditor_layout.rb": {
       "sig": [
         5668,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -42990,7 +42990,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/003_AnimEditor/002_AnimEditor_initialize.rb": {
       "sig": [
         28346,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43533,7 +43533,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/003_AnimEditor/003_AnimEditor_save.rb": {
       "sig": [
         793,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43555,7 +43555,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/003_AnimEditor/004_AnimEditor_play.rb": {
       "sig": [
         2096,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43577,7 +43577,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/003_AnimEditor/005_AnimEditor_popups.rb": {
       "sig": [
         19862,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43664,7 +43664,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/003_AnimEditor/006_AnimEditor_change_value.rb": {
       "sig": [
         24856,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43691,7 +43691,7 @@
     "Plugins/New Animation Editor BETA/903_AnimEditor/003_AnimEditor/007_AnimEditor_refresh_update.rb": {
       "sig": [
         16435,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43863,7 +43863,7 @@
     "Plugins/OWs More Frames/001_More_Frames_in_OWs.rb": {
       "sig": [
         4567,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43885,7 +43885,7 @@
     "Plugins/OWs More Frames/002_Animation_States.rb": {
       "sig": [
         6812,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43907,7 +43907,7 @@
     "Plugins/OWs More Frames/003_Sprite_Scale.rb": {
       "sig": [
         3742,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43929,7 +43929,7 @@
     "Plugins/[CARNEKVT]Custom Weathers/000_Settings.rb": {
       "sig": [
         344,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43951,7 +43951,7 @@
     "Plugins/[CARNEKVT]Custom Weathers/001_Core.rb": {
       "sig": [
         10860,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43973,7 +43973,7 @@
     "Plugins/[CARNEKVT]Custom Weathers/002_Patch.rb": {
       "sig": [
         10291,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -43995,7 +43995,7 @@
     "Plugins/[CARNEK] Battle Scene Studio Runtime/001_Core.rb": {
       "sig": [
         16228,
-        1788875528
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44016,8 +44016,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/002_NativeSOS.rb": {
       "sig": [
-        119104,
-        1788813222
+        121835,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44048,8 +44048,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/003_Launcher.rb": {
       "sig": [
-        47144,
-        1788899531
+        48226,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44070,8 +44070,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb": {
       "sig": [
-        264231,
-        1788455094
+        270217,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44224,8 +44224,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/005_EBDXCore.rb": {
       "sig": [
-        138,
-        1788354546
+        140,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44246,8 +44246,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/005_EBDXSourceFaithful.rb": {
       "sig": [
-        114090,
-        1788896880
+        116692,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44268,8 +44268,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/006_DataboxAuthorityFix.rb": {
       "sig": [
-        95,
-        1788354546
+        97,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44290,8 +44290,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/007_StabilityAndEBDXCamera.rb": {
       "sig": [
-        95,
-        1788354546
+        97,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44312,8 +44312,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/008_RuntimeRecovery.rb": {
       "sig": [
-        95,
-        1788354546
+        97,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44334,8 +44334,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/009_EBDXContinuousWorld.rb": {
       "sig": [
-        95,
-        1788354546
+        97,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44356,8 +44356,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/009_EBDXGen5Authority.rb": {
       "sig": [
-        95,
-        1788354546
+        97,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44378,8 +44378,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/010_EBDXGen5Integration.rb": {
       "sig": [
-        26608,
-        1788529938
+        27598,
+        1788987313
       ],
       "catalog": {
         "schema": 2,
@@ -44400,8 +44400,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/011_BSS080FinalFixes.rb": {
       "sig": [
-        11573,
-        1788460566
+        11904,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44422,8 +44422,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/012_BSS081RegressionGuards.rb": {
       "sig": [
-        1243,
-        1788458630
+        1278,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44444,8 +44444,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/013_BSS082CoordinateAuthority.rb": {
       "sig": [
-        18127,
-        1788460682
+        18571,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44466,8 +44466,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/014_BSS083CameraAndRenderAuthority.rb": {
       "sig": [
-        21040,
-        1788470654
+        21588,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44488,8 +44488,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/015_BSS083StandaloneWildNDS.rb": {
       "sig": [
-        11749,
-        1788470128
+        12060,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44510,8 +44510,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/016_BSS083WideWorld.rb": {
       "sig": [
-        3216,
-        1788470152
+        3298,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44532,8 +44532,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/017_BSS084CompleteAuthority.rb": {
       "sig": [
-        28663,
-        1788486276
+        29353,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44560,7 +44560,7 @@
     "Plugins/[CARNEK] Battle Scene Studio Runtime/018_BSS085StableWorldAuthority.rb": {
       "sig": [
         26692,
-        1788967272
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44581,8 +44581,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/019_BSS086WorldOriginAndSceneAssets.rb": {
       "sig": [
-        6326,
-        1788488548
+        6497,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44603,8 +44603,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/020_BSS087StableCameraUIAndLifecycle.rb": {
       "sig": [
-        31136,
-        1788502744
+        31973,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44625,8 +44625,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/021_BSS090SceneParityAndCommandFlow.rb": {
       "sig": [
-        4608,
-        1788494687
+        4742,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44647,8 +44647,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/022_BSS091LayerTransformAuthority.rb": {
       "sig": [
-        2481,
-        1788500888
+        2544,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44669,8 +44669,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/023_BSS093WarpMeshAuthority.rb": {
       "sig": [
-        9563,
-        1788530067
+        9835,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44691,8 +44691,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/024_BSS095RuntimeParityLifecycleIntro.rb": {
       "sig": [
-        21066,
-        1788529937
+        21573,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44713,8 +44713,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/025_BSS096UnifiedRuntimeAuthority.rb": {
       "sig": [
-        43175,
-        1788534457
+        44144,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44736,7 +44736,7 @@
     "Plugins/[CARNEK] Battle Scene Studio Runtime/026_BSS097RequestedParityFixes.rb": {
       "sig": [
         11795,
-        1788875528
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44757,8 +44757,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/027_BSS098FidelityArchitecture.rb": {
       "sig": [
-        11217,
-        1788538964
+        11541,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44779,8 +44779,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/028_BSS100RuntimeStabilityAndAmbient.rb": {
       "sig": [
-        20639,
-        1788967195
+        23335,
+        1788972786
       ],
       "catalog": {
         "schema": 2,
@@ -44801,8 +44801,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/029_BSS101ComposerRuntimeParity.rb": {
       "sig": [
-        11654,
-        1788880581
+        11977,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44823,8 +44823,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/030_BSS102ComposerCameraAndSOSFixes.rb": {
       "sig": [
-        16562,
-        1788639222
+        16976,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44846,7 +44846,7 @@
     "Plugins/[CARNEK] Battle Scene Studio Runtime/030_BSS102TransientComposerTest.rb": {
       "sig": [
         368,
-        1788580108
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44867,8 +44867,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/031_BSS103WorldBattlersAndNativeIntro.rb": {
       "sig": [
-        5122,
-        1788578342
+        5253,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44889,8 +44889,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/032_BSS104PartyCameraSync.rb": {
       "sig": [
-        6466,
-        1788580415
+        6627,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44911,8 +44911,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/033_BSS105UnifiedWorldPipeline.rb": {
       "sig": [
-        700,
-        1788635421
+        714,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44933,8 +44933,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/034_BSS106StabilityReset.rb": {
       "sig": [
-        14013,
-        1788658148
+        14396,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -44956,7 +44956,7 @@
     "Plugins/[CARNEK] Scene Director Runtime/001_Runtime.rb": {
       "sig": [
         3079,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45003,7 +45003,7 @@
     "Plugins/[DBK_010] Animated Trainer Intros/[000] Settings.rb": {
       "sig": [
         910,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45025,7 +45025,7 @@
     "Plugins/[DBK_010] Animated Trainer Intros/[001] Sprite Editor.rb": {
       "sig": [
         17930,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45122,7 +45122,7 @@
     "Plugins/[DBK_010] Animated Trainer Intros/[002] Trainer UI.rb": {
       "sig": [
         5710,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45144,7 +45144,7 @@
     "Plugins/[DBK_010] Animated Trainer Intros/[003] Game Data.rb": {
       "sig": [
         2718,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45166,7 +45166,7 @@
     "Plugins/[DBK_010] Animated Trainer Intros/[004] Trainer Sprite.rb": {
       "sig": [
         9271,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45188,7 +45188,7 @@
     "Plugins/[DBK_010] Animated Trainer Intros/[005] Deluxe Bitmap.rb": {
       "sig": [
         6232,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45210,7 +45210,7 @@
     "Plugins/[DBK_010] Animated Trainer Intros/[006] Battle Scene.rb": {
       "sig": [
         5340,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45232,7 +45232,7 @@
     "Plugins/[DBK_010] Animated Trainer Intros/[007] Battle Transitions.rb": {
       "sig": [
         23524,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45254,7 +45254,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[000] Settings.rb": {
       "sig": [
         5203,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45276,7 +45276,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[000] Species_Search_Workaround.rb": {
       "sig": [
         2936,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45298,7 +45298,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[001] Compiler.rb": {
       "sig": [
         8742,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45320,7 +45320,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[002] Sprite Editor.rb": {
       "sig": [
         45160,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45436,7 +45436,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[003] Pokemon UI.rb": {
       "sig": [
         7328,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45478,7 +45478,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[004] Game Data.rb": {
       "sig": [
         13688,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45505,7 +45505,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[005] Pokemon Sprites.rb": {
       "sig": [
         13790,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45527,7 +45527,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[006] Battler Sprites.rb": {
       "sig": [
         35758,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45559,7 +45559,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[007] Substitute Doll.rb": {
       "sig": [
         12727,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45581,7 +45581,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[008] Deluxe Bitmap.rb": {
       "sig": [
         9571,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45603,7 +45603,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[009] Deluxe Additions.rb": {
       "sig": [
         3507,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45625,7 +45625,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[010] Spinda Spots.rb": {
       "sig": [
         5713,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45647,7 +45647,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[011] Patch Super Shiny OW.rb": {
       "sig": [
         3522,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45669,7 +45669,7 @@
     "Plugins/[LBDS] Sprites Animados DBK/[012] Super Shiny Dex Compat.rb": {
       "sig": [
         4522,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45691,7 +45691,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/Settings.rb": {
       "sig": [
         3319,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45713,7 +45713,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[000] Compiler.rb": {
       "sig": [
         12047,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45735,7 +45735,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[001] Trainer Editor Refactor.rb": {
       "sig": [
         6800,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45927,7 +45927,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[002] Damage Calc Refactor.rb": {
       "sig": [
         41392,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -45949,7 +45949,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[003] Command Menu Refactor.rb": {
       "sig": [
         23375,
-        1788875528
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -46031,7 +46031,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[004] Plugin Placholders.rb": {
       "sig": [
         12478,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -46053,7 +46053,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[005] Updated Effects.rb": {
       "sig": [
         45070,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -46215,7 +46215,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[006] Updated AI Effects.rb": {
       "sig": [
         26426,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -46237,7 +46237,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[007] Debug.rb": {
       "sig": [
         33993,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -46991,7 +46991,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[000] PBEffects Hash.rb": {
       "sig": [
         4019,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47013,7 +47013,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[001] Animation Utilities.rb": {
       "sig": [
         37397,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47110,7 +47110,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[002] Misc Utilities.rb": {
       "sig": [
         31466,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47207,7 +47207,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[003] Deluxe Battle Rules.rb": {
       "sig": [
         31824,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47269,7 +47269,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[004] Wild Boss Attributes.rb": {
       "sig": [
         13557,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47347,7 +47347,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[005] Mega Evolution.rb": {
       "sig": [
         21754,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47399,7 +47399,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[006] Primal Reversion.rb": {
       "sig": [
         12615,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47426,7 +47426,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[007] Shadow Pokemon.rb": {
       "sig": [
         7032,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47453,7 +47453,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[001] Deluxe Utilities/[008] Databox Styles.rb": {
       "sig": [
         21685,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47495,7 +47495,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[002] Midbattle Scripting/[000] Midbattle Animations.rb": {
       "sig": [
         21704,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47522,8 +47522,8 @@
     },
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[002] Midbattle Scripting/[001] Midbattle Overwrites.rb": {
       "sig": [
-        40552,
-        1787895927
+        40756,
+        1788987313
       ],
       "catalog": {
         "schema": 2,
@@ -47537,14 +47537,14 @@
         "plugins": {
           "¡Pero no tuvo efecto!": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L262",
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L284",
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L308"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L264",
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L286",
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L310"
             ]
           },
           "¡Pero no hay dónde usar este objeto!": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L287"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L289"
             ]
           }
         },
@@ -47557,7 +47557,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[002] Midbattle Scripting/[002] Midbattle Triggers.rb": {
       "sig": [
         74121,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47713,7 +47713,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[002] Midbattle Scripting/[003] MidbattleScripts Module.rb": {
       "sig": [
         33990,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47735,7 +47735,7 @@
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[002] Midbattle Scripting/[004] MidbattleHandlers Scripts.rb": {
       "sig": [
         14547,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47874,7 +47874,7 @@
     "Plugins/[LBDS] [DBK_001] Enhanced Battle UI/[000] Main.rb": {
       "sig": [
         12954,
-        1788880630
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47906,7 +47906,7 @@
     "Plugins/[LBDS] [DBK_001] Enhanced Battle UI/[001] Outline Utilities.rb": {
       "sig": [
         6734,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47928,7 +47928,7 @@
     "Plugins/[LBDS] [DBK_001] Enhanced Battle UI/[002] Selection Menu.rb": {
       "sig": [
         13568,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -47956,7 +47956,7 @@
     "Plugins/[LBDS] [DBK_001] Enhanced Battle UI/[003] Battler Info UI.rb": {
       "sig": [
         53543,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -48890,7 +48890,7 @@
     "Plugins/[LBDS] [DBK_001] Enhanced Battle UI/[004] Move Info UI.rb": {
       "sig": [
         20452,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49036,7 +49036,7 @@
     "Plugins/[LBDS] [DBK_001] Enhanced Battle UI/[005] Poke Ball UI.rb": {
       "sig": [
         8153,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49088,7 +49088,7 @@
     "Plugins/[LBDS_CUST] Scene Engine/000_Settings.rb": {
       "sig": [
         1244,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49110,7 +49110,7 @@
     "Plugins/[LBDS_CUST] Scene Engine/001_Core.rb": {
       "sig": [
         1323,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49132,7 +49132,7 @@
     "Plugins/[LBDS_CUST] Scene Engine/002_Handlers.rb": {
       "sig": [
         411,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49164,7 +49164,7 @@
     "Plugins/[LBDS_CUST] Scene Engine/003_ScenePlayer.rb": {
       "sig": [
         24444,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49191,7 +49191,7 @@
     "Plugins/[LBDS_CUST] Scene Engine/010_Intro.rb": {
       "sig": [
         10632,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49320,7 +49320,7 @@
     "Plugins/[VERMEIL] Honey Headbutt Trees/HoneyHeadbuttTrees.rb": {
       "sig": [
         6874,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49403,8 +49403,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/001_Settings.rb": {
       "sig": [
-        24278,
-        1788839034
+        24806,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49426,7 +49426,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/002_Core.rb": {
       "sig": [
         33027,
-        1788839034
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49458,7 +49458,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/003_TileDepth.rb": {
       "sig": [
         35779,
-        1788839034
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49480,7 +49480,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/004_CharacterDepth.rb": {
       "sig": [
         6782,
-        1788839034
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49506,8 +49506,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/005_ModeTransition.rb": {
       "sig": [
-        2906,
-        1788839034
+        2996,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49529,7 +49529,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/006_Atmosphere.rb": {
       "sig": [
         1713,
-        1788839034
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49551,7 +49551,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/007_DebugMenu.rb": {
       "sig": [
         8188,
-        1788839034
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49792,7 +49792,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/008_Options.rb": {
       "sig": [
         1117,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49834,7 +49834,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/010_FrontWalls.rb": {
       "sig": [
         60785,
-        1788839034
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49856,7 +49856,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/012_MakerStudioBridge.rb": {
       "sig": [
         20955,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49878,7 +49878,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/013_Heightmap.rb": {
       "sig": [
         3678,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49900,7 +49900,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/014_Passability.rb": {
       "sig": [
         12012,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49922,7 +49922,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/015_OWShadowDepth.rb": {
       "sig": [
         2827,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49944,7 +49944,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/016_ProgressiveZoom.rb": {
       "sig": [
         7170,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49966,7 +49966,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/017_MKXPZExtBridge.rb": {
       "sig": [
         11418,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -49997,8 +49997,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/018_NDSGeometry.rb": {
       "sig": [
-        34972,
-        1788055597
+        35879,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50020,7 +50020,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/019_NDSVolumePerformance.rb": {
       "sig": [
         32053,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50042,7 +50042,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/020_NDSTileCategories.rb": {
       "sig": [
         51899,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50149,7 +50149,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/021_NDSFastPath.rb": {
       "sig": [
         12946,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50221,7 +50221,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/022_NDSNativeGround.rb": {
       "sig": [
         5900,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50243,7 +50243,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/023_NDSSurfaceGeometry.rb": {
       "sig": [
         24561,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50265,7 +50265,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/024_V25BuildFastPath.rb": {
       "sig": [
         9414,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50286,8 +50286,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/025_V25SkyGroundBands.rb": {
       "sig": [
-        14003,
-        1788055597
+        14429,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50308,8 +50308,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/026_NDSGeometryObjects.rb": {
       "sig": [
-        49007,
-        1788055598
+        50314,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50331,7 +50331,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/027_GlobalPerformance.rb": {
       "sig": [
         10044,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50352,8 +50352,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/028_GeometryCollisionAuthority.rb": {
       "sig": [
-        7716,
-        1788055597
+        7908,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50374,8 +50374,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/029_ModelPhysics.rb": {
       "sig": [
-        14229,
-        1788055598
+        14596,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50396,8 +50396,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/030_ModelStream.rb": {
       "sig": [
-        6402,
-        1788055598
+        6554,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50419,7 +50419,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/031_LoadProfiler.rb": {
       "sig": [
         2437,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50440,8 +50440,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/032_GeometryV4Codec.rb": {
       "sig": [
-        15859,
-        1787939571
+        16274,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50463,7 +50463,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/033_V25NativeAccelerator.rb": {
       "sig": [
         11249,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50500,7 +50500,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/034_V25Performance.rb": {
       "sig": [
         3098,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50522,7 +50522,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/035_V25FrameProfiler.rb": {
       "sig": [
         7982,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50544,7 +50544,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/036_V25EntryBuildCache.rb": {
       "sig": [
         15706,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50566,7 +50566,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/037_V25FusedEntryPrepass.rb": {
       "sig": [
         13587,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50588,7 +50588,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/038_V25GroundPlainBlit.rb": {
       "sig": [
         1314,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50609,8 +50609,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/039_V25BillboardModelCollisionFix.rb": {
       "sig": [
-        1879,
-        1788055597
+        1922,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50632,7 +50632,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/040_V25DebugThroughBypass.rb": {
       "sig": [
         2414,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50654,7 +50654,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/041_V25StaticTileSourceCache.rb": {
       "sig": [
         4771,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50675,8 +50675,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/042_V25VisibleFirstGroundLoad.rb": {
       "sig": [
-        9840,
-        1788055597
+        10100,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50698,7 +50698,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/043_V25LoadLifecycleProfiler.rb": {
       "sig": [
         2192,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50719,8 +50719,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/044_V25ColdStartLazyPriority.rb": {
       "sig": [
-        11196,
-        1788055597
+        11505,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50741,8 +50741,8 @@
     },
     "Plugins/[VERMEIL] Visual 2.5D/045_V25MapResumeRefresh.rb": {
       "sig": [
-        6822,
-        1788055597
+        7010,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50764,7 +50764,7 @@
     "Plugins/[VERMEIL] Visual 2.5D/046_V25NextNativeMeshBridge.rb": {
       "sig": [
         3543,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50786,7 +50786,7 @@
     "Plugins/[ZBOX] Evolution Line Giving/evolution_line_debug.rb": {
       "sig": [
         10241,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50950,7 +50950,7 @@
     "Plugins/[ZBOX] Faint Delay/main.rb": {
       "sig": [
         887,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -50972,7 +50972,7 @@
     "Plugins/[ZBOX] Fill Boxes Fix/main.rb": {
       "sig": [
         1584,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51014,7 +51014,7 @@
     "Plugins/[ZBOX] Vibrant Adapted/000_Settings.rb": {
       "sig": [
         4311,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51036,7 +51036,7 @@
     "Plugins/[ZBOX] Vibrant Adapted/001_Core.rb": {
       "sig": [
         13016,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51058,7 +51058,7 @@
     "Plugins/[ZBOX] Vibrant Adapted/002_Entity.rb": {
       "sig": [
         5275,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51080,7 +51080,7 @@
     "Plugins/[ZBOX] Vibrant Adapted/003_AI.rb": {
       "sig": [
         6971,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51102,7 +51102,7 @@
     "Plugins/[ZBOX] Vibrant Adapted/004_Interaction.rb": {
       "sig": [
         14128,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51254,7 +51254,7 @@
     "Plugins/[ZBOX] Vibrant Adapted/005_API.rb": {
       "sig": [
         4699,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51276,7 +51276,7 @@
     "Plugins/[ZBOX] Vibrant Adapted/006_Options.rb": {
       "sig": [
         3689,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51364,7 +51364,7 @@
     "Plugins/[ZBOX] Weather Layer Fix/001_WeatherLayerFix.rb": {
       "sig": [
         2773,
-        1787895927
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51385,8 +51385,8 @@
     },
     "Data/BattleSceneStudio/battles.json": {
       "sig": [
-        149256,
-        1788882779
+        154237,
+        1788971693
       ],
       "catalog": {
         "schema": 2,
@@ -51510,8 +51510,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/035_BSS108WorldContinuity.rb": {
       "sig": [
-        8417,
-        1788659845
+        8669,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51532,8 +51532,8 @@
     },
     "Plugins/Battle Additions/Golden Abilities/001_abilities_balance_goldenforms.rb": {
       "sig": [
-        1806,
-        1788813222
+        1854,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51554,8 +51554,8 @@
     },
     "Plugins/Battle Additions/Golden Abilities/010_Carga_Imparable.rb": {
       "sig": [
-        4081,
-        1788813222
+        4177,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51586,8 +51586,8 @@
     },
     "Plugins/Battle Additions/Golden Abilities/020_Presa_Mortal.rb": {
       "sig": [
-        8376,
-        1788813222
+        8578,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51631,8 +51631,8 @@
     },
     "Plugins/Battle Additions/Golden Abilities/030_Reactor_Solar.rb": {
       "sig": [
-        5783,
-        1788813222
+        5917,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51724,8 +51724,8 @@
     },
     "Plugins/[Balance] Golden Power/00_DataStore.rb": {
       "sig": [
-        10760,
-        1788839394
+        13088,
+        1788972125
       ],
       "catalog": {
         "schema": 2,
@@ -51747,7 +51747,7 @@
     "Plugins/[Balance] Golden Power/00_Settings.rb": {
       "sig": [
         6617,
-        1788875594
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51768,8 +51768,8 @@
     },
     "Plugins/[Balance] Golden Power/01_GameData_Pokemon.rb": {
       "sig": [
-        5312,
-        1788839350
+        5467,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51790,8 +51790,8 @@
     },
     "Plugins/[Balance] Golden Power/02_Controller_and_Power.rb": {
       "sig": [
-        18702,
-        1788875623
+        20998,
+        1788991926
       ],
       "catalog": {
         "schema": 2,
@@ -51822,8 +51822,8 @@
     },
     "Plugins/[Balance] Golden Power/03_Golden_Form.rb": {
       "sig": [
-        3133,
-        1788840596
+        3660,
+        1788972125
       ],
       "catalog": {
         "schema": 2,
@@ -51854,8 +51854,8 @@
     },
     "Plugins/[Balance] Golden Power/04_Golden_Moves.rb": {
       "sig": [
-        12755,
-        1788968512
+        15420,
+        1788991821
       ],
       "catalog": {
         "schema": 2,
@@ -51876,8 +51876,8 @@
     },
     "Plugins/[Balance] Golden Power/05_Golden_UI.rb": {
       "sig": [
-        5458,
-        1788967404
+        5981,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51926,7 +51926,7 @@
           },
           "✦ {1}": {
             "Contexts": [
-              "Plugin: [Balance] Golden Power - 05_Golden_UI.rb:L102"
+              "Plugin: [Balance] Golden Power - 05_Golden_UI.rb:L104"
             ]
           }
         },
@@ -51938,8 +51938,8 @@
     },
     "Plugins/[CARNKEVT]ChangeDex/000_Settings.rb": {
       "sig": [
-        66,
-        1788968675
+        67,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51960,8 +51960,8 @@
     },
     "Plugins/[CARNKEVT]ChangeDex/001_Core.rb": {
       "sig": [
-        66,
-        1788968675
+        67,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -51982,8 +51982,8 @@
     },
     "Plugins/[CARNKEVT]ChangeDex/002_Handlers.rb": {
       "sig": [
-        66,
-        1788968675
+        67,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52004,8 +52004,8 @@
     },
     "Plugins/[CARNKEVT]ChangeDex/003_Scene.rb": {
       "sig": [
-        66,
-        1788968675
+        67,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52026,8 +52026,8 @@
     },
     "Plugins/[Dracrixco] Arcane Abilities/00_DataStore.rb": {
       "sig": [
-        4888,
-        1788795222
+        7885,
+        1788972125
       ],
       "catalog": {
         "schema": 2,
@@ -52048,8 +52048,8 @@
     },
     "Plugins/[Dracrixco] Arcane Abilities/01_GameData.rb": {
       "sig": [
-        845,
-        1788795222
+        867,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52070,8 +52070,8 @@
     },
     "Plugins/[Dracrixco] Arcane Abilities/02_Pokemon.rb": {
       "sig": [
-        3108,
-        1788795222
+        3221,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52092,8 +52092,8 @@
     },
     "Plugins/[Dracrixco] Arcane Abilities/03_Items_and_API.rb": {
       "sig": [
-        2180,
-        1788795222
+        2911,
+        1788972125
       ],
       "catalog": {
         "schema": 2,
@@ -52159,8 +52159,8 @@
     },
     "Plugins/[Dracrixco] Arcane Abilities/04_Summary_UI.rb": {
       "sig": [
-        2084,
-        1788795222
+        2141,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52218,8 +52218,8 @@
     },
     "Plugins/[MakerStudio]/001_ChangeDex.rb": {
       "sig": [
-        66,
-        1788968675
+        67,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52240,8 +52240,8 @@
     },
     "Plugins/[VERMEIL] Research Notebook/001_research_notebook_config.rb": {
       "sig": [
-        4499,
-        1788965900
+        4500,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52262,8 +52262,8 @@
     },
     "Plugins/[VERMEIL] Research Notebook/010_research_notebook_data.rb": {
       "sig": [
-        47475,
-        1788966693
+        47503,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52290,7 +52290,7 @@
     "Plugins/[VERMEIL] Research Notebook/020_research_notebook_progress.rb": {
       "sig": [
         20355,
-        1788875623
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52312,7 +52312,7 @@
     "Plugins/[VERMEIL] Research Notebook/030_research_notebook_ui.rb": {
       "sig": [
         64526,
-        1788966744
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52677,7 +52677,7 @@
     "Plugins/[VERMEIL] Research Notebook/040_research_notebook_hooks.rb": {
       "sig": [
         11010,
-        1788875623
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52760,8 +52760,8 @@
     },
     "Plugins/Carnek Project Settings/patches/032_Party_ItemUse_Compat.rb": {
       "sig": [
-        818,
-        1788796286
+        837,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52782,8 +52782,8 @@
     },
     "Plugins/Carnek Project Settings/patches/033_EBUI_Layer_Authority.rb": {
       "sig": [
-        3462,
-        1788881194
+        3508,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52804,8 +52804,8 @@
     },
     "Plugins/Battle Additions/Abilities/000_VermeilAbilityData.rb": {
       "sig": [
-        857,
-        1788819383
+        876,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52826,8 +52826,8 @@
     },
     "Plugins/Battle Additions/Abilities/005_VermeilMoveClasses.rb": {
       "sig": [
-        1669,
-        1788819414
+        1710,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52848,8 +52848,8 @@
     },
     "Plugins/Battle Additions/Abilities/010_AvaluggAndFeraligatrAbilities.rb": {
       "sig": [
-        2457,
-        1788819381
+        2522,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52870,8 +52870,8 @@
     },
     "Plugins/Battle Additions/Abilities/010_VermeilAbilitySupport.rb": {
       "sig": [
-        1981,
-        1788819381
+        2040,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52892,8 +52892,8 @@
     },
     "Plugins/Battle Additions/Abilities/020_BlazingVanguard.rb": {
       "sig": [
-        982,
-        1788819381
+        1006,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52915,7 +52915,7 @@
     "Plugins/Battle Additions/Abilities/030_CoreAbilityReworks.rb": {
       "sig": [
         8070,
-        1788875623
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52951,8 +52951,8 @@
     },
     "Plugins/Battle Additions/Abilities/040_FireKnock.rb": {
       "sig": [
-        1145,
-        1788819381
+        1170,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -52983,8 +52983,8 @@
     },
     "Plugins/Battle Additions/Abilities/050_FoldedGuard.rb": {
       "sig": [
-        1272,
-        1788819381
+        1301,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53010,8 +53010,8 @@
     },
     "Plugins/Battle Additions/Abilities/060_FrostEdge.rb": {
       "sig": [
-        1440,
-        1788819381
+        1479,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53037,8 +53037,8 @@
     },
     "Plugins/Battle Additions/Abilities/070_HammerMaster.rb": {
       "sig": [
-        2908,
-        1788819381
+        2995,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53059,8 +53059,8 @@
     },
     "Plugins/Battle Additions/Abilities/080_Incandescence.rb": {
       "sig": [
-        2974,
-        1788819381
+        3037,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53093,7 +53093,7 @@
     "Plugins/Battle Additions/Abilities/090_MegaSignatureAbilities.rb": {
       "sig": [
         4671,
-        1788819381
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53125,7 +53125,7 @@
     "Plugins/Battle Additions/Abilities/100_MegaStarterReworks.rb": {
       "sig": [
         5343,
-        1788819381
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53162,8 +53162,8 @@
     },
     "Plugins/Battle Additions/Abilities/110_ObsidianShell.rb": {
       "sig": [
-        2371,
-        1788819381
+        2422,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53200,7 +53200,7 @@
     "Plugins/Battle Additions/Abilities/120_Overawe.rb": {
       "sig": [
         3617,
-        1788819381
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53257,7 +53257,7 @@
     "Plugins/Battle Additions/Abilities/130_Pride.rb": {
       "sig": [
         709,
-        1788819381
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53279,7 +53279,7 @@
     "Plugins/Battle Additions/Abilities/140_PrimalTough.rb": {
       "sig": [
         576,
-        1788819381
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53300,8 +53300,8 @@
     },
     "Plugins/Battle Additions/Abilities/150_ReactivePollen.rb": {
       "sig": [
-        1260,
-        1788819381
+        1294,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53322,8 +53322,8 @@
     },
     "Plugins/Battle Additions/Abilities/160_SquiresWill.rb": {
       "sig": [
-        3776,
-        1788819381
+        3876,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53361,7 +53361,7 @@
     "Plugins/Battle Additions/Abilities/170_MineralDrip.rb": {
       "sig": [
         1026,
-        1788819381
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53392,8 +53392,8 @@
     },
     "Plugins/Battle Additions/Abilities/170_StarryReach.rb": {
       "sig": [
-        1133,
-        1788819381
+        1159,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53414,8 +53414,8 @@
     },
     "Plugins/Battle Additions/Abilities/180_SuncoronaEclipsoraAbilities.rb": {
       "sig": [
-        17227,
-        1788819383
+        17685,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53531,8 +53531,8 @@
     },
     "Plugins/Battle Additions/Abilities/185_ExecutionerShadowFixes.rb": {
       "sig": [
-        959,
-        1788819381
+        982,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53553,8 +53553,8 @@
     },
     "Plugins/Battle Additions/Abilities/190_WarlordsGaze.rb": {
       "sig": [
-        2587,
-        1788819381
+        2654,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53580,8 +53580,8 @@
     },
     "Plugins/Battle Additions/Abilities/200_Striker.rb": {
       "sig": [
-        858,
-        1788819413
+        884,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53602,8 +53602,8 @@
     },
     "Plugins/Battle Additions/Abilities/201_BurningRampage.rb": {
       "sig": [
-        770,
-        1788819381
+        785,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53629,8 +53629,8 @@
     },
     "Plugins/Battle Additions/Abilities/202_Overcharge.rb": {
       "sig": [
-        398,
-        1788819381
+        407,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53651,8 +53651,8 @@
     },
     "Plugins/Battle Additions/Abilities/203_CrystalOrbit.rb": {
       "sig": [
-        555,
-        1788819381
+        566,
+        1788971702
       ],
       "catalog": {
         "schema": 2,
@@ -53678,8 +53678,8 @@
     },
     "Plugins/[VERMEIL] Golden Animation Bridge/001_Bridge.rb": {
       "sig": [
-        3778,
-        1788875623
+        4154,
+        1788993234
       ],
       "catalog": {
         "schema": 2,
@@ -53700,8 +53700,8 @@
     },
     "Plugins/Carnek Project Settings/patches/044_Golden_Move_Name_And_Layer_Fix.rb": {
       "sig": [
-        2298,
-        1788875528
+        2499,
+        1788971817
       ],
       "catalog": {
         "schema": 2,
@@ -53722,8 +53722,8 @@
     },
     "Plugins/[CARNKEVT] ChangeDex/001_ChangeDex.rb": {
       "sig": [
-        276717,
-        1788895799
+        283177,
+        1788971702
       ],
       "catalog": {
         "schema": 2,

@@ -28860,15 +28860,15 @@
     },
     "¡Pero no tuvo efecto!": {
       "Contexts": [
-        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L262",
-        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L284",
-        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L308",
+        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L264",
+        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L286",
+        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L310",
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[002] Midbattle Triggers.rb:L491"
       ]
     },
     "¡Pero no hay dónde usar este objeto!": {
       "Contexts": [
-        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L287"
+        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[001] Midbattle Overwrites.rb:L289"
       ]
     },
     "¡{1} volvió con {2}!": {
@@ -31021,7 +31021,7 @@
     },
     "✦ {1}": {
       "Contexts": [
-        "Plugin: [Balance] Golden Power - 05_Golden_UI.rb:L102"
+        "Plugin: [Balance] Golden Power - 05_Golden_UI.rb:L104"
       ]
     },
     "No tendría ningún efecto.": {
