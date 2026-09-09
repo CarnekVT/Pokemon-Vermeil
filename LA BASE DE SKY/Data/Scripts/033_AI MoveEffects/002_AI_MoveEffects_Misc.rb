@@ -635,6 +635,7 @@ Battle::AI::Handlers::MoveEffectScore.add("AttackTwoTurnsLater",
 #===============================================================================
 Battle::AI::Handlers::MoveFailureCheck.add("UserSwapsPositionsWithAlly",
   proc { |move, user, ai, battle|
+    next true if user.effects[PBEffects::Commanding] >= 0
     num_targets = 0
     idxUserOwner = battle.pbGetOwnerIndexFromBattlerIndex(user.index)
     ai.each_ally(user.index, true) do |b, i|

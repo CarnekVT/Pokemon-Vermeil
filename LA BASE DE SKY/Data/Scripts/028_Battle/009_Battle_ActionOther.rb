@@ -15,6 +15,10 @@ class Battle
       idxOther = (idxBattler.even?) ? 2 : 3
     end
     return false if pbGetOwnerIndexFromBattlerIndex(idxBattler) != pbGetOwnerIndexFromBattlerIndex(idxOther)
+    return false if @battlers[idxBattler].effects[PBEffects::Commanding] >= 0 ||
+                      @battlers[idxBattler].effects[PBEffects::CommandedBy] >= 0 ||
+                      @battlers[idxOther].effects[PBEffects::Commanding] >= 0 ||
+                      @battlers[idxOther].effects[PBEffects::CommandedBy] >= 0
     return true
   end
 
@@ -202,4 +206,3 @@ class Battle
     pbDisplay(_INTL("¡{1} ha experimentado una Regresión Primigenia y ha recobrado su apariencia primitiva!", battler.pbThis))
   end
 end
-

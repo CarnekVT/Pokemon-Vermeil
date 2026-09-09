@@ -713,13 +713,16 @@ class Battle::Move::UserSwapsPositionsWithAlly < Battle::Move
   def pbMoveFailed?(user, targets)
     # Fails if there isn't exactly 1 near ally to switch with
     numTargets = 0
-    @idxAlly = -1
-    idxUserOwner = @battle.pbGetOwnerIndexFromBattlerIndex(user.index)
-    user.allAllies(true).each do |b|
-      next if @battle.pbGetOwnerIndexFromBattlerIndex(b.index) != idxUserOwner
-      next if !b.near?(user)
-      numTargets += 1
-      @idxAlly = b.index
+    if user.effects[PBEffects::Commanding] < 0 && user.effects[PBEffects::CommandedBy] < 0
+      @idxAlly = -1
+      idxUserOwner = @battle.pbGetOwnerIndexFromBattlerIndex(user.index)
+      user.allAllies.each do |b|
+        next if @battle.pbGetOwnerIndexFromBattlerIndex(b.index) != idxUserOwner
+        next if !b.near?(user)
+        next if b.effects[PBEffects::CommandedBy] >= 0
+        numTargets += 1
+        @idxAlly = b.index
+      end
     end
     if numTargets != 1
       user.effects[PBEffects::AllySwitchRate] = 1
