@@ -12,7 +12,9 @@ class Battle
   attr_accessor :midbattleChoices    # Used to store choices to display for a text or speech event.
   attr_accessor :midbattleDecision   # Used to store the player's decision in a text or speech event with choices.
   
-  alias midbattle_initialize initialize
+  # Maker Studio/F12 may evaluate this file repeatedly. Re-aliasing captures
+  # a BSS constructor and can create EBDX -> Midbattle -> NativeSOS -> EBDX.
+  alias midbattle_initialize initialize unless method_defined?(:midbattle_initialize)
   def initialize(*args)
     midbattle_initialize(*args)
     @midbattleScript    = nil

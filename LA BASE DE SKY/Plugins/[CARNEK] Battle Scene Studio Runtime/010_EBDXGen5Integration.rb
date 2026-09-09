@@ -195,11 +195,19 @@ end
 #-------------------------------------------------------------------------------
 module BSS078BattleIsolation
   def initialize(*args, &block)
-    super
-    @bss_boss_config = nil
-    @bss_boss_hud_config = nil
-    @bss_blueprint = nil
-    @bss_boss_active = false
+    # During a Maker Studio/F12 reload an alias can point back to this method,
+    # producing EBDXGen5 -> Midbattle -> NativeSOS -> EBDXGen5 recursion.
+    return if @bss078_initialize_active
+    @bss078_initialize_active=true
+    begin
+      super
+      @bss_boss_config = nil
+      @bss_boss_hud_config = nil
+      @bss_blueprint = nil
+      @bss_boss_active = false
+    ensure
+      @bss078_initialize_active=false
+    end
   end
 end
 begin
