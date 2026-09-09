@@ -11,6 +11,9 @@
 # Golden Power's display name when that API is available.
 module CarnekProjectSettings::GoldenMoveNameRefresh
   def refreshButtonNames
+    # Keep the normal DBK/Essentials renderer alive. The old hook replaced it
+    # entirely, so move names vanished whenever its private overlay was absent.
+    ret = super
     moves = (@battler) ? @battler.moves : []
     if !defined?(USE_GRAPHICS) || !USE_GRAPHICS
       commands = []
@@ -24,13 +27,13 @@ module CarnekProjectSettings::GoldenMoveNameRefresh
         commands << name
       end
       @cmdWindow.commands = commands if defined?(@cmdWindow) && @cmdWindow
-      return
+      return ret
     end
-    return super unless defined?(@overlay) && @overlay && defined?(@buttons) && @buttons
+    return ret unless defined?(@overlay) && @overlay && defined?(@buttons) && @buttons
     @overlay.bitmap.clear
     text_pos = []
     @buttons.each_with_index do |button, i|
-      next if !@visibility["button_#{i}"]
+      next if @visibility && !@visibility["button_#{i}"]
       move = moves[i]
       next if !move
       x = button.x - self.x + (button.src_rect.width / 2)
@@ -42,8 +45,9 @@ module CarnekProjectSettings::GoldenMoveNameRefresh
       text_pos << [move_name, x, y, :center, base, shadow]
     end
     pbDrawTextPositions(@overlay.bitmap, text_pos)
+    ret
   rescue
-    super
+    ret
   end
 end
 

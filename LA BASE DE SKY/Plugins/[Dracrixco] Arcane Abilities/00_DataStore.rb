@@ -96,6 +96,50 @@ module ArcaneAbilities
       end
       nil
     end
+    # Editor metadata only: hidden species remain fully playable and keep their
+    # Arcane ability; Arcane Studio simply omits them from its visible list.
+    def self.hidden?(species,form=0)
+      entry=raw_entry(species,form)
+      entry && (entry["hidden"]==true || entry["hidden"]==1)
+    end
+    def self.visible?(species,form=0); !hidden?(species,form); end
+    def self.hidden_species
+      document["species"].each_with_object([]) do |(key,entry),out|
+        out << key if entry.is_a?(Hash) && (entry["hidden"]==true || entry["hidden"]==1)
+      end
+    end
+    def self.set_hidden(species,hidden=true,form=0)
+      set_hidden_many({form.to_i==0 ? species.to_s.upcase : "#{species.to_s.upcase},#{form.to_i}"=>hidden})
+      !!hidden
+    end
+    # Supports both a checkbox hash ({"PIKACHU"=>true}) and a multi-select
+    # array (["PIKACHU", "EEVEE"]). This is the Arcane Studio hide/show API.
+    def self.set_hidden_many(selection,hidden=true)
+      pairs=selection.is_a?(Hash) ? selection.map{|k,v| [k,v]} : Array(selection).map{|k| [k,hidden]}
+      doc=document
+      pairs.each do |key,value|
+        normalized=key.to_s.upcase
+        entry=doc["species"][normalized]
+        entry={} unless entry.is_a?(Hash)
+        entry["hidden"]=!!value
+        doc["species"][normalized]=entry
+      end
+      save_document!(doc)
+      pairs.map{|key,value| [key.to_s.upcase,!!value]}.to_h
+    end
+    def self.save_document!(doc)
+      require "json" unless defined?(JSON)
+      dir=File.dirname(ArcaneAbilities::SPECIES_JSON)
+      Dir.mkdir(dir) unless Dir.exist?(dir)
+      temp="#{ArcaneAbilities::SPECIES_JSON}.tmp"
+      File.binwrite(temp,JSON.pretty_generate(doc)+"\n")
+      File.rename(temp,ArcaneAbilities::SPECIES_JSON)
+      CarnekStandaloneJSON.invalidate(ArcaneAbilities::SPECIES_JSON)
+      true
+    rescue
+      begin; File.delete(temp) if temp && File.file?(temp); rescue; end
+      false
+    end
     def self.reload!; CarnekStandaloneJSON.invalidate(ArcaneAbilities::SPECIES_JSON); end
   end
 end

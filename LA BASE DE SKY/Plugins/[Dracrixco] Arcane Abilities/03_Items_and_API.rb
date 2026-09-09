@@ -68,3 +68,18 @@ def pbArcaneAbilityChoice(pkmn)
   end
   return false
 end
+
+# Arcane Studio visibility callbacks. The Studio button can call the first
+# helper for the focused row and the second one for checked rows in its
+# multi-selection grid. Visibility is editor-only and never changes gameplay.
+def pbArcaneHideSpecies(species,form=0)
+  ArcaneAbilities::Data.set_hidden(species,true,form)
+end
+
+def pbArcaneShowSpecies(species,form=0)
+  ArcaneAbilities::Data.set_hidden(species,false,form)
+end
+
+def pbArcaneSetSpeciesVisibility(selection,hidden=true)
+  ArcaneAbilities::Data.set_hidden_many(selection,hidden)
+end

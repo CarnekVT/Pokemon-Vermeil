@@ -218,29 +218,39 @@ module BSS100AmbientWorld
     return false if !bss070_ebdx_ensure_core
     now=BSS100.frame
     return true if @bss100_last_world_tick==now
+    # Older BSS authorities can re-enter this method from their pbUpdate
+    # wrappers.  The per-frame timestamp does not protect the active call
+    # itself, so explicitly break that circular prepend chain.
+    return false if @bss100_tick_active
+    @bss100_tick_active=true
     @bss100_last_world_tick=now
-    bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
+    begin
+      bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
 
-    static=BSS100.static_camera?(self)
-    bas=!!@bss070_ebdx_bas_frame
-    suspended=@bss070_ebdx_suspend_depth.to_i>0
-    if !static && !bas && !suspended && @vector
-      @vector.update
-      unless @bss100_ambient_ready
-        @bss100_ambient_ready=true
-        @bss100_ambient_due=48
-        @bss100_ambient_out=false
+      static=BSS100.static_camera?(self)
+      bas=!!@bss070_ebdx_bas_frame
+      suspended=@bss070_ebdx_suspend_depth.to_i>0
+      if !static && !bas && !suspended && @vector
+        @vector.update
+        unless @bss100_ambient_ready
+          @bss100_ambient_ready=true
+          @bss100_ambient_due=48
+          @bss100_ambient_out=false
+        end
+        @bss100_ambient_due=@bss100_ambient_due.to_i-1
+        if @bss100_ambient_due<=0 && (@vector.finished? rescue true)
+          bss100_ambient_pick_target
+        end
       end
-      @bss100_ambient_due=@bss100_ambient_due.to_i-1
-      if @bss100_ambient_due<=0 && (@vector.finished? rescue true)
-        bss100_ambient_pick_target
-      end
+
+      @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
+      bss070_ebdx_apply_world_alignment if align && respond_to?(:bss070_ebdx_apply_world_alignment)
+      true
+    ensure
+      @bss100_tick_active=false
     end
-
-    @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
-    bss070_ebdx_apply_world_alignment if align && respond_to?(:bss070_ebdx_apply_world_alignment)
-    true
   rescue => e
+    @bss100_tick_active=false
     BSS064.log("BSS100 world tick warning: #{e.class}: #{e.message}") if defined?(BSS064)
     false
   end
@@ -500,6 +510,13 @@ if defined?(BSS098)
             next unless k.to_s =~ /^img\d+/i && row.is_a?(Hash)
             if row[:bss_rasterized] || row["bss_rasterized"]
               row.delete(:crop);row.delete("crop")
+            end
+          end
+        end
+        out
+      end
+    end
+  end
 end
 
 #-------------------------------------------------------------------------------
@@ -531,13 +548,6 @@ end
 # Apply the guard to Battle::Scene (last in prepend chain)
 if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS100RecursionGuard)
   Battle::Scene.prepend(BSS100RecursionGuard)
-end
-          end
-        end
-        out
-      end
-    end
-  end
 end
 
 # Install final authorities.
