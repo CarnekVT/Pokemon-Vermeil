@@ -612,8 +612,11 @@ module Graphics
     end
 
     def update
-      _old_update_turbo
-      $buttonframes = TurboConfig::ICON_DURATION if !$buttonframes
+      return if @turbo_update_active
+      @turbo_update_active=true
+      begin
+        _old_update_turbo
+        $buttonframes = TurboConfig::ICON_DURATION if !$buttonframes
 
       # Mostrar icono si el contador está activo.
       if $buttonframes < TurboConfig::ICON_DURATION
@@ -634,6 +637,9 @@ module Graphics
           @boton_turbo = nil
           @last_turbo_speed = nil
         end
+        end
+      ensure
+        @turbo_update_active=false
       end
     end
 

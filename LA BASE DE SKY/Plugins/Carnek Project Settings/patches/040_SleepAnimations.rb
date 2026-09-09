@@ -207,16 +207,24 @@ module Graphics
     # recurre hasta SystemStackError al comenzar una animación de combate.
     alias _carnek_sleep_orig_update update unless method_defined?(:_carnek_sleep_orig_update)
     def update
+      # A bitmap callback can indirectly request Graphics.update again. Never
+      # let that enter the alias chain recursively; the outer render is enough.
+      return if @carnek_sleep_update_active
+      @carnek_sleep_update_active=true
       scene = Battle::Scene.carnek_scene
-      if scene
-        begin
-          scene._carnek_sleep_ensure_bitmaps
-          scene._carnek_hit_apply_pending
-        rescue
-          Battle::Scene.carnek_scene = nil
+      begin
+        if scene
+          begin
+            scene._carnek_sleep_ensure_bitmaps
+            scene._carnek_hit_apply_pending
+          rescue
+            Battle::Scene.carnek_scene = nil
+          end
         end
+        _carnek_sleep_orig_update
+      ensure
+        @carnek_sleep_update_active=false
       end
-      _carnek_sleep_orig_update
     end
   end
 end
