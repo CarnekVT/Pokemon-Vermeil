@@ -509,6 +509,7 @@ class Battle::Scene
     old_shadow_visible_target = []
     old_shadow_opacity_target = []
     if targets then
+      targets = (targets.is_a?(Array)) ? targets : [targets]
       targets.each_with_index do |b, i|
         sprite = sprites["pokemon_#{b.index}"]
         shadow = sprites["shadow_#{b.index}"]
@@ -531,6 +532,7 @@ class Battle::Scene
 
     if targets and moveID != :SKYDROP then
       targets.each_with_index do |b, i|
+        targets = (targets.is_a?(Array)) ? targets : [targets]
         sprite = sprites["pokemon_#{b.index}"]
         shadow = sprites["shadow_#{b.index}"]
         sprite.visible = old_visible_target[i]
