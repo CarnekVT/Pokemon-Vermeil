@@ -1,6 +1,5 @@
 class Pokemon
-  attr_accessor :previous_form       # For tracking form changes
-  attr_accessor :fainted_mega_form   # Mega form held when this Pokémon fainted, for Revival Blessing
+  attr_accessor :previous_form   # For tracking form changes
   #=============================================================================
   # Mega Evolution
   # NOTE: These are treated as form changes in Essentials.
