@@ -1824,7 +1824,7 @@ Description = Se concentra para dar un puñetazo. Falla si se sufre un golpe ant
 Name = Asalto Estelar
 Type = FIGHTING
 Category = Physical
-Power = 150
+Power = 170
 Accuracy = 100
 TotalPP = 5
 Target = NearOther
@@ -5059,7 +5059,7 @@ Description = Ataque con poder secreto cuyos efectos secundarios varían según 
 Name = Cuchillada
 Type = NORMAL
 Category = Physical
-Power = 70
+Power = 80
 Accuracy = 100
 TotalPP = 20
 Target = NearOther
@@ -6135,9 +6135,9 @@ Type = NORMAL
 Category = Status
 Accuracy = 0
 TotalPP = 5
-Target = User
-FunctionCode = HealUserHalfOfTotalHP
-Description = Restaura la mitad de sus PS máximos. Fuera de combate puede transferir sus PS a un aliado.
+Target = UserOrNearAlly
+FunctionCode = HealTargetHalfOfTotalHP
+Description = Restaura la mitad de los PS máximos del objetivo. Fuera de combate puede transferir sus PS a un aliado.
 #-------------------------------
 [MIMIC]
 Name = Mimético
@@ -9172,7 +9172,7 @@ Accuracy = 100
 TotalPP = 5
 Target = NearOther
 FunctionCode = UserLosesElectricType
-Flags = Contact,CanProtect,CanMirrorMove,CannotMetronome
+Flags = Contact,CanProtect,CanMirrorMove,CannotMetronome,Punching
 Description = Libera toda la electricidad de su cuerpo para atacar. Pierde el tipo Eléctrico.
 #-------------------------------
 [ELECTRODRIFT]

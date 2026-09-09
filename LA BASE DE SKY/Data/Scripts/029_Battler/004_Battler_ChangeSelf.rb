@@ -85,7 +85,10 @@ class Battle::Battler
     end
     # Reset form
     @battle.peer.pbOnLeavingBattle(@battle, @pokemon, @battle.usedInBattle[idxOwnSide][@index / 2])
-    @pokemon.makeUnmega if mega?
+    if mega?
+      @pokemon.fainted_mega_form = @pokemon.form   # Remembered by Revival Blessing
+      @pokemon.makeUnmega
+    end
     @pokemon.makeUnprimal if primal?
     # Do other things
     @battle.pbClearChoice(@index)   # Reset choice
