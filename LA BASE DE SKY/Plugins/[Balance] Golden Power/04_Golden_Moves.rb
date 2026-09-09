@@ -70,6 +70,26 @@ module GoldenSystem
     def self.trigger(id,phase,move,user,target=nil); h=@handlers[id.to_s.upcase.to_sym] if id; h.call(phase,move,user,target) if h; end
   end
   module BattleMoveGoldenProperties
+    # Global recursion depth counter to prevent stack overflow across all moves
+    @@golden_recursion_depth = 0
+    MAX_RECURSION_DEPTH = 10
+
+    def self.golden_recursion_depth
+      @@golden_recursion_depth
+    end
+
+    def self.increment_recursion_depth
+      @@golden_recursion_depth += 1
+    end
+
+    def self.decrement_recursion_depth
+      @@golden_recursion_depth -= 1
+      @@golden_recursion_depth = 0 if @@golden_recursion_depth < 0
+    end
+
+    def self.recursion_safe?
+      @@golden_recursion_depth < MAX_RECURSION_DEPTH
+    end
     # A Golden Move can optionally borrow an existing FunctionCode. The proxy
     # is an instance of that Battle::Move subclass, while the original move
     # keeps its ID/PP/animation and the Golden type/power/accuracy overrides.
@@ -96,10 +116,15 @@ module GoldenSystem
     def golden_variant_data(user)
       return nil if instance_variable_defined?(:@__golden_function_proxy) && @__golden_function_proxy
       return nil if @__golden_variant_busy
+      return nil unless GoldenSystem::BattleMoveGoldenProperties.recursion_safe?
       @__golden_variant_busy=true
-      user ? GoldenSystem::GoldenMoves.for_battler(user,@id) : nil
-    ensure
-      @__golden_variant_busy=false
+      GoldenSystem::BattleMoveGoldenProperties.increment_recursion_depth
+      begin
+        user ? GoldenSystem::GoldenMoves.for_battler(user,@id) : nil
+      ensure
+        @__golden_variant_busy=false
+        GoldenSystem::BattleMoveGoldenProperties.decrement_recursion_depth
+      end
     end
 
     def golden_sync_proxy(proxy)
@@ -109,6 +134,7 @@ module GoldenSystem
     end
 
     def golden_function_proxy(user)
+      return nil unless GoldenSystem::BattleMoveGoldenProperties.recursion_safe?
       data=golden_variant_data(user)
       code=data && data[:function_code] ? data[:function_code].to_s.strip : ""
       return nil if code.empty? || code.casecmp("None")==0
@@ -146,10 +172,20 @@ module GoldenSystem
 
     FUNCTION_DELEGATES.each do |method_name,user_index|
       define_method(method_name) do |*args,&block|
-        user=(user_index.nil? ? nil : args[user_index])
-        delegated,value=golden_delegate_function(method_name,user,*args,&block)
-        return value if delegated
-        super(*args,&block)
+        # Guard against infinite recursion in delegate chain (instance + global)
+        return super(*args,&block) if @__golden_delegate_busy
+        return super(*args,&block) unless GoldenSystem::BattleMoveGoldenProperties.recursion_safe?
+        @__golden_delegate_busy = true
+        GoldenSystem::BattleMoveGoldenProperties.increment_recursion_depth
+        begin
+          user=(user_index.nil? ? nil : args[user_index])
+          delegated,value=golden_delegate_function(method_name,user,*args,&block)
+          return value if delegated
+          super(*args,&block)
+        ensure
+          @__golden_delegate_busy = false
+          GoldenSystem::BattleMoveGoldenProperties.decrement_recursion_depth
+        end
       end
     end
 

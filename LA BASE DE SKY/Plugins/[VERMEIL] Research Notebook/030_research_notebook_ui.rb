@@ -405,23 +405,17 @@ module ResearchNotebook
       return 0
     end
 
-    def dex_number(species)
-      return (@display_number[species] || national_number(species)).to_i
+    def dex_number(entry)
+      base = ResearchNotebook::Repository.species_base_and_form(entry)[0]
+      return (@display_number[base] || national_number(base)).to_i
     end
 
     def source_species
       list = []
       if current_section == :arcane
-        list.concat(ResearchNotebook::Repository.species_ids_from(ResearchNotebook::Repository.arcane_data))
-        list.concat(ResearchNotebook::Repository.arcane_species_from_gamedata)
-        list.concat(ResearchNotebook.progress.tracked_arcane_species)
-        # Soporte para el JSON combinado de prototipos.
-        ResearchNotebook::Repository.species_ids_from(ResearchNotebook::Repository.golden_data).each do |sp|
-          list << sp if ResearchNotebook::Repository.arcane_capable?(sp)
-        end
+        list.concat(ResearchNotebook::Repository.arcane_entries_with_forms)
       elsif current_section == :golden
-        list.concat(ResearchNotebook::Repository.species_ids_from(ResearchNotebook::Repository.golden_data))
-        list.concat(ResearchNotebook.progress.tracked_golden_species)
+        list.concat(ResearchNotebook::Repository.golden_entries_with_forms)
       end
       return list.compact.uniq
     end
@@ -442,52 +436,65 @@ module ResearchNotebook
       @grid_signature = nil
     end
 
-    def sort_key(species)
+    def sort_key(entry)
+      # entry puede ser "ESPECIE" o "ESPECIE,FORMA"
+      base, form = ResearchNotebook::Repository.species_base_and_form(entry)
       case @sort_mode
       when :NAME
-        known = species_identity_known?(species)
-        return [known ? 0 : 1, known ? ResearchNotebook::Repository.species_name(species).downcase : "zzz", dex_number(species)]
+        known = species_identity_known?(base)
+        name = known ? ResearchNotebook::Repository.species_name(entry).downcase : "zzz"
+        # Las formas van después de la especie base
+        form_sort = form.to_i
+        return [known ? 0 : 1, name, dex_number(base), form_sort]
       when :STATUS
-        return [-entry_completion(species), @order_map[species] || 999_999, species.to_s]
+        return [-entry_completion(base), @order_map[base] || 999_999, base.to_s, form.to_i]
       else
-        return [@order_map[species] || 999_999, national_number(species), species.to_s]
+        # :DEX - ordenar por número de Pokédex, luego por forma
+        return [@order_map[base] || 999_999, national_number(base), base.to_s, form.to_i]
       end
     end
 
-    def entry_known?(species)
-      return arcane_known?(species) if current_section == :arcane
-      return golden_known?(species) if current_section == :golden
+    def base_species(entry)
+      ResearchNotebook::Repository.species_base_and_form(entry)[0]
+    end
+
+    def entry_known?(entry)
+      base = base_species(entry)
+      return arcane_known?(base) if current_section == :arcane
+      return golden_known?(base) if current_section == :golden
       return false
     end
 
-    def species_identity_known?(species)
-      return true if ResearchNotebook.progress.owned?(species)
-      return entry_known?(species)
+    def species_identity_known?(entry)
+      base = base_species(entry)
+      return true if ResearchNotebook.progress.owned?(base)
+      return entry_known?(entry)
     end
 
-    def arcane_known?(species)
+    def arcane_known?(base)
       p = ResearchNotebook.progress
-      return p.arcane_potential_known?(species) || p.arcane_seen?(species) || p.arcane_used?(species)
+      return p.arcane_potential_known?(base) || p.arcane_seen?(base) || p.arcane_used?(base)
     end
 
-    def golden_known?(species)
+    def golden_known?(base)
       p = ResearchNotebook.progress
-      return p.golden_potential_known?(species) || p.golden_form_seen?(species) ||
-             p.golden_form_used?(species) || p.golden_power_used?(species)
+      return p.golden_potential_known?(base) || p.golden_form_seen?(base) ||
+             p.golden_form_used?(base) || p.golden_power_used?(base)
     end
 
-    def entry_completion(species)
+    def entry_completion(entry)
+      base = base_species(entry)
       if current_section == :arcane
-        return 3 if ResearchNotebook.progress.arcane_used?(species)
-        return 2 if ResearchNotebook.progress.arcane_seen?(species)
-        return 1 if ResearchNotebook.progress.arcane_potential_known?(species)
+        return 3 if ResearchNotebook.progress.arcane_used?(base)
+        return 2 if ResearchNotebook.progress.arcane_seen?(base)
+        return 1 if ResearchNotebook.progress.arcane_potential_known?(base)
         return 0
       end
       score = 0
-      score += 1 if ResearchNotebook.progress.golden_potential_known?(species)
-      score += 1 if ResearchNotebook.progress.golden_power_used?(species)
-      score += 1 if ResearchNotebook.progress.golden_form_seen?(species)
-      score += 1 if ResearchNotebook.progress.golden_form_used?(species)
+      score += 1 if ResearchNotebook.progress.golden_potential_known?(base)
+      score += 1 if ResearchNotebook.progress.golden_power_used?(base)
+      score += 1 if ResearchNotebook.progress.golden_form_seen?(base)
+      score += 1 if ResearchNotebook.progress.golden_form_used?(base)
       return score
     end
 
@@ -588,35 +595,39 @@ module ResearchNotebook
     end
 
     def draw_focus_panel(bmp)
-      species = selected_species
-      known = species_identity_known?(species)
+      entry = selected_species
+      base, form = ResearchNotebook::Repository.species_base_and_form(entry)
+      known = species_identity_known?(entry)
       color = section_color
       draw_card(bmp, FOCUS_X, FOCUS_Y, FOCUS_W, FOCUS_H, PAPER_2)
 
-      num = dex_number(species)
+      num = dex_number(base)
       number = num > 0 ? format("#%03d", num) : "#---"
-      name = known ? ResearchNotebook::Repository.species_name(species) : "???"
+      name = known ? ResearchNotebook::Repository.species_name(entry) : "???"
       draw_text(bmp, FOCUS_X + 14, FOCUS_Y + 10, 62, 20, number, 12, MUTED, 0, true)
       draw_text(bmp, FOCUS_X + 72, FOCUS_Y + 7, FOCUS_W - 88, 28, name, 21, INK, 0, true)
 
-      form = 0
+      # Determinar la forma a mostrar
+      display_form = form
       silhouette = !known
-      if current_section == :golden && ResearchNotebook::Repository.golden_form_configured?(species)
-        if ResearchNotebook.progress.golden_form_seen?(species) || ResearchNotebook.progress.golden_form_used?(species)
-          form = ResearchNotebook::Repository.golden_form_index(species) || 0
+      if current_section == :golden && ResearchNotebook::Repository.golden_form_configured?(base)
+        golden_form_idx = ResearchNotebook::Repository.golden_form_index(base) || 0
+        if display_form == 0
+          display_form = golden_form_idx
+        end
+        if ResearchNotebook.progress.golden_form_seen?(base) || ResearchNotebook.progress.golden_form_used?(base)
           silhouette = false
-        elsif ResearchNotebook.progress.golden_potential_known?(species)
-          form = ResearchNotebook::Repository.golden_form_index(species) || 0
+        elsif ResearchNotebook.progress.golden_potential_known?(base)
           silhouette = true
         end
       end
       # Una forma áurea pendiente debe mostrar su propia silueta, nunca la forma base.
       custom_golden = current_section == :golden && silhouette &&
-                      ResearchNotebook::Repository.golden_form_sprite_path(species)
+                      ResearchNotebook::Repository.golden_form_sprite_path(base)
       if custom_golden
-        show_custom_golden_silhouette(species, custom_golden, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 161, 214, 200)
+        show_custom_golden_silhouette(base, custom_golden, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 161, 214, 200)
       else
-        show_pokemon(species, form, silhouette, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 161, 214, 200)
+        show_pokemon(base, display_form, silhouette, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 161, 214, 200)
       end
 
       # Suelo/halo bajo el Pokémon, más cercano al tratamiento de MegaDex.
@@ -625,42 +636,42 @@ module ResearchNotebook
       draw_ring(bmp, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 248, 49, Color.new(color.red, color.green, color.blue, 65))
 
       if current_section == :arcane
-        draw_arcane_focus_info(bmp, species)
+        draw_arcane_focus_info(bmp, base)
       else
-        draw_golden_focus_info(bmp, species)
+        draw_golden_focus_info(bmp, base)
       end
     end
 
-    def draw_arcane_focus_info(bmp, species)
+    def draw_arcane_focus_info(bmp, base)
       y = FOCUS_Y + 268
-      unlocked = ResearchNotebook.progress.arcane_seen?(species)
-      used = ResearchNotebook.progress.arcane_used?(species)
-      potential = ResearchNotebook.progress.arcane_potential_known?(species)
-      ability = notebook_arcane_ability(species)
+      unlocked = ResearchNotebook.progress.arcane_seen?(base)
+      used = ResearchNotebook.progress.arcane_used?(base)
+      potential = ResearchNotebook.progress.arcane_potential_known?(base)
+      ability = notebook_arcane_ability(base)
       draw_text(bmp, FOCUS_X + 18, y, FOCUS_W - 36, 16, _INTL("HABILIDAD ARCANA"), 10, ARCANE_2, 0, true)
       name = unlocked ? ResearchNotebook::Repository.ability_name(ability) : "????"
       draw_text(bmp, FOCUS_X + 18, y + 17, FOCUS_W - 36, 26, name, 17, INK, 0, true)
       draw_text(bmp, FOCUS_X + 18, y + 54, 70, 15, _INTL("TIPOS"), 9, MUTED, 0, true)
-      draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(species), FOCUS_X + 18, y + 71, 68, 23)
+      draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), FOCUS_X + 18, y + 71, 68, 23)
       status = used ? _INTL("PROBADA") : (unlocked ? _INTL("DESPERTADA") : (potential ? _INTL("POR DESPERTAR") : _INTL("SIN OBSERVAR")))
       draw_text(bmp, FOCUS_X + 166, y + 54, 104, 15, _INTL("ESTADO"), 9, MUTED, 0, true)
       draw_status_chip(bmp, FOCUS_X + 166, y + 71, 104, 23, status, ARCANE)
     end
 
-    def draw_golden_focus_info(bmp, species)
+    def draw_golden_focus_info(bmp, base)
       y = FOCUS_Y + 268
-      potential = ResearchNotebook.progress.golden_potential_known?(species)
-      form_seen = ResearchNotebook.progress.golden_form_seen?(species)
-      form_used = ResearchNotebook.progress.golden_form_used?(species)
+      potential = ResearchNotebook.progress.golden_potential_known?(base)
+      form_seen = ResearchNotebook.progress.golden_form_seen?(base)
+      form_used = ResearchNotebook.progress.golden_form_used?(base)
       draw_text(bmp, FOCUS_X + 18, y, FOCUS_W - 36, 16, _INTL("AFINIDAD ÁUREA"), 10, GOLDEN_2, 0, true)
-      gtype = ResearchNotebook::Repository.golden_type(species)
-      if potential && ResearchNotebook.progress.golden_type_known?(species) && gtype
+      gtype = ResearchNotebook::Repository.golden_type(base)
+      if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
         draw_type_icons(bmp, [gtype], FOCUS_X + 18, y + 19, 68, 23)
       else
         draw_text(bmp, FOCUS_X + 18, y + 19, 74, 23, "????", 15, MUTED, 0, true)
       end
       draw_text(bmp, FOCUS_X + 18, y + 58, 116, 15, _INTL("FORMA DORADA"), 9, MUTED, 0, true)
-      form_text = if !ResearchNotebook::Repository.golden_form_configured?(species)
+      form_text = if !ResearchNotebook::Repository.golden_form_configured?(base)
                     _INTL("NO POSEE")
                   elsif form_used
                     _INTL("UTILIZADA")
@@ -726,18 +737,20 @@ module ResearchNotebook
       draw_card(bmp, x, y, w, h, PAPER_2)
       color = section_color
       bmp.fill_rect(x, y, 6, h, color)
+      entry = selected_species
+      base, form = ResearchNotebook::Repository.species_base_and_form(entry)
       if current_section == :arcane
-        draw_arcane_detail(bmp, selected_species, x + 14, y + 12, w - 28, h - 24)
+        draw_arcane_detail(bmp, base, x + 14, y + 12, w - 28, h - 24)
       else
-        draw_golden_detail(bmp, selected_species, x + 14, y + 12, w - 28, h - 24)
+        draw_golden_detail(bmp, base, x + 14, y + 12, w - 28, h - 24)
       end
     end
 
-    def draw_arcane_detail(bmp, species, x, y, w, h)
-      unlocked = ResearchNotebook.progress.arcane_seen?(species)
-      used = ResearchNotebook.progress.arcane_used?(species)
-      potential = ResearchNotebook.progress.arcane_potential_known?(species)
-      ability = notebook_arcane_ability(species)
+    def draw_arcane_detail(bmp, base, x, y, w, h)
+      unlocked = ResearchNotebook.progress.arcane_seen?(base)
+      used = ResearchNotebook.progress.arcane_used?(base)
+      potential = ResearchNotebook.progress.arcane_potential_known?(base)
+      ability = notebook_arcane_ability(base)
       draw_text(bmp, x, y, w, 25, _INTL("Habilidad Arcana"), 18, ARCANE_2, 0, true)
       state = used ? _INTL("PROBADA") : (unlocked ? _INTL("DESPERTADA") : _INTL("BLOQUEADA"))
       draw_status_chip(bmp, x + w - 106, y + 2, 106, 21, state, ARCANE)
@@ -763,69 +776,69 @@ module ResearchNotebook
       draw_text(bmp, x + half + 12, y + 243, half - 10, 19, used ? _INTL("Probada") : _INTL("Sin probar"), 10, used ? INK : MUTED, 1, true)
       draw_text(bmp, x, y + 281, w, 16, _INTL("CATALIZADOR"), 10, ARCANE_2, 0, true)
       draw_item_card(bmp, x, y + 299, w, 40, ResearchNotebook::Settings::ARCANE_TEA_ITEM, ARCANE, _INTL("Té Arcano"))
-      draw_changedex_note(bmp, species, x, y + 348, w)
+      draw_changedex_note(bmp, base, x, y + 348, w)
     end
 
-    def draw_golden_detail(bmp, species, x, y, w, h)
-      if @detail_page == 0 || !ResearchNotebook::Repository.golden_form_configured?(species)
-        draw_golden_power_detail(bmp, species, x, y, w, h)
+    def draw_golden_detail(bmp, base, x, y, w, h)
+      if @detail_page == 0 || !ResearchNotebook::Repository.golden_form_configured?(base)
+        draw_golden_power_detail(bmp, base, x, y, w, h)
       else
-        draw_golden_form_detail(bmp, species, x, y, w, h)
+        draw_golden_form_detail(bmp, base, x, y, w, h)
       end
     end
 
-    def draw_golden_power_detail(bmp, species, x, y, w, h)
-      potential = ResearchNotebook.progress.golden_potential_known?(species)
-      power_used = ResearchNotebook.progress.golden_power_used?(species)
+    def draw_golden_power_detail(bmp, base, x, y, w, h)
+      potential = ResearchNotebook.progress.golden_potential_known?(base)
+      power_used = ResearchNotebook.progress.golden_power_used?(base)
       draw_text(bmp, x, y, w, 25, _INTL("Poder Dorado"), 18, GOLDEN_2, 0, true)
       state = power_used ? _INTL("UTILIZADO") : (potential ? _INTL("IDENTIFICADO") : _INTL("SIN OBSERVAR"))
       draw_status_chip(bmp, x + w - 108, y + 2, 108, 21, state, GOLDEN)
       draw_text(bmp, x, y + 34, w, 16, _INTL("TIPOS NATURALES"), 10, MUTED, 0, true)
-      draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(species), x, y + 51, 68, 23)
+      draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), x, y + 51, 68, 23)
       draw_text(bmp, x, y + 81, w, 16, _INTL("AFINIDAD ÁUREA"), 10, GOLDEN_2, 0, true)
-      gtype = ResearchNotebook::Repository.golden_type(species)
-      if potential && ResearchNotebook.progress.golden_type_known?(species) && gtype
+      gtype = ResearchNotebook::Repository.golden_type(base)
+      if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
         draw_type_icons(bmp, [gtype], x, y + 98, 68, 23)
       else
         draw_text(bmp, x, y + 98, 74, 23, "????", 16, MUTED, 0, true)
       end
       draw_text(bmp, x, y + 132, w, 16, _INTL("APUNTE"), 10, GOLDEN_2, 0, true)
       draw_card(bmp, x, y + 149, w, 92, PAPER)
-      desc = ResearchNotebook::Repository.golden_power_description(species).to_s
+      desc = ResearchNotebook::Repository.golden_power_description(base).to_s
       if desc.empty?
         desc = potential ? _INTL("El Fragmento Dorado reacciona con esta afinidad y permite manifestarla durante el combate sin alterar la forma del Pokémon.") : _INTL("Todavía no he logrado identificar la afinidad áurea de esta especie.")
       end
       draw_wrapped(bmp, x + 10, y + 160, w - 20, desc, 13, potential ? INK : MUTED, 18, 4)
       draw_text(bmp, x, y + 252, w, 16, _INTL("CATALIZADOR"), 10, GOLDEN_2, 0, true)
       draw_item_card(bmp, x, y + 270, w, 43, ResearchNotebook::Settings::GOLDEN_FRAGMENT_ITEM, GOLDEN, _INTL("Fragmento Dorado"))
-      if ResearchNotebook::Repository.golden_form_configured?(species)
+      if ResearchNotebook::Repository.golden_form_configured?(base)
         draw_text(bmp, x, y + 321, w, 17, _INTL("← Poder        Forma →"), 10, GOLDEN_2, 1, true)
       end
     end
 
-    def draw_golden_form_detail(bmp, species, x, y, w, h)
-      seen = ResearchNotebook.progress.golden_form_seen?(species)
-      used = ResearchNotebook.progress.golden_form_used?(species)
+    def draw_golden_form_detail(bmp, base, x, y, w, h)
+      seen = ResearchNotebook.progress.golden_form_seen?(base)
+      used = ResearchNotebook.progress.golden_form_used?(base)
       reveal_details = used || !ResearchNotebook::Settings::GOLDEN_DETAILS_REQUIRE_USE
       draw_text(bmp, x, y, w, 25, _INTL("Forma Dorada"), 18, GOLDEN_2, 0, true)
       state = used ? _INTL("UTILIZADA") : (seen ? _INTL("OBSERVADA") : _INTL("POR VER"))
       draw_status_chip(bmp, x + w - 104, y + 2, 104, 21, state, GOLDEN)
       draw_text(bmp, x, y + 34, w, 16, _INTL("TIPOS"), 10, MUTED, 0, true)
       if reveal_details
-        draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(species), x, y + 51, 68, 23)
+        draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(base), x, y + 51, 68, 23)
       else
         draw_text(bmp, x, y + 51, 138, 23, "????", 16, MUTED, 0, true)
       end
       draw_text(bmp, x, y + 81, w, 16, _INTL("HABILIDAD"), 10, MUTED, 0, true)
-      ability = reveal_details ? ResearchNotebook::Repository.golden_ability(species) : nil
+      ability = reveal_details ? ResearchNotebook::Repository.golden_ability(base) : nil
       draw_text(bmp, x, y + 97, w, 25, reveal_details ? ResearchNotebook::Repository.ability_name(ability) : "????", 16, INK, 0, true)
       draw_text(bmp, x, y + 128, w, 16, _INTL("ESTADÍSTICAS"), 10, GOLDEN_2, 0, true)
       if reveal_details
-        stats = ResearchNotebook::Repository.golden_stats(species)
-        form_index = ResearchNotebook::Repository.golden_form_index(species) || 0
-        stats ||= ResearchNotebook::Repository.base_stats(species, form_index)
-        base = ResearchNotebook::Repository.base_stats(species, 0)
-        draw_stat_panel(bmp, x, y + 145, w, 92, stats, base, GOLDEN)
+        stats = ResearchNotebook::Repository.golden_stats(base)
+        form_index = ResearchNotebook::Repository.golden_form_index(base) || 0
+        stats ||= ResearchNotebook::Repository.base_stats(base, form_index)
+        base_stats = ResearchNotebook::Repository.base_stats(base, 0)
+        draw_stat_panel(bmp, x, y + 145, w, 92, stats, base_stats, GOLDEN)
       else
         draw_card(bmp, x, y + 145, w, 92, PAPER)
         draw_text(bmp, x + 10, y + 154, w - 20, 15, _INTL("APUNTE"), 9, GOLDEN_2, 0, true)
@@ -833,7 +846,7 @@ module ResearchNotebook
         draw_wrapped(bmp, x + 10, y + 174, w - 20, text, 13, MUTED, 18, 3)
       end
       draw_text(bmp, x, y + 247, w, 15, _INTL("COSTE"), 10, RED, 0, true)
-      draw_wrapped(bmp, x, y + 264, w, ResearchNotebook::Settings::GOLDEN_FORM_DRAIN_TEXT, 10, RED, 16, 2)
+      draw_wrapped(bmp, x, y + 264, w, ResearchNotebook::Repository.golden_form_drain_text, 10, RED, 16, 2)
       draw_text(bmp, x, y + 300, w, 15, _INTL("CATALIZADORES"), 10, GOLDEN_2, 0, true)
       draw_item_pair(bmp, x, y + 317, w, ResearchNotebook::Settings::GOLDEN_STONE_ITEM, ResearchNotebook::Settings::GOLDEN_RING_ITEM)
     end
@@ -1486,6 +1499,18 @@ module ResearchNotebook
         last_x = nx
         last_y = ny
       end
+    end
+
+    def draw_changedex_note(bmp, base, x, y, w)
+      return if !ResearchNotebook::Settings::USE_CHANGEDEX_HIDDEN_FORMS
+      # Verificar si la especie base tiene formas ocultas en ChangeDex
+      hidden_keys = ResearchNotebook::Repository.changedex_hidden_keys
+      species_key = base.to_s.upcase
+      has_hidden = hidden_keys.key?(species_key) ||
+                   hidden_keys.keys.any? { |k| k.start_with?(species_key + ",") }
+      return if !has_hidden
+      
+      draw_text(bmp, x, y, w, 16, _INTL("NOTA: ChangeDex oculta formas de esta especie."), 10, MUTED, 0, true)
     end
 
     def draw_line(bmp, x0, y0, x1, y1, color)

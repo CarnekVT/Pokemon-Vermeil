@@ -1,4 +1,0 @@
-Name       = [ZZZ] Traza Completa Temporal
-Version    = 1.0
-Credits    = Diagnostico temporal
-Essentials = 21,21.1

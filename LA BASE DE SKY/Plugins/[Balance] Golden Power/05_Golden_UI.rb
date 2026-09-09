@@ -91,6 +91,8 @@ if defined?(Battle::Scene::FightMenu)
                              button.name
                            elsif button.respond_to?(:text)
                              button.text
+                           elsif button.respond_to?(:caption)
+                             button.caption
                            else
                              move.name
                            end
@@ -103,12 +105,35 @@ if defined?(Battle::Scene::FightMenu)
                       else
                         button.instance_variable_get(:@golden_original_label)
                       end
+              # Try multiple properties to ensure the label is displayed
+              label_set = false
               if button.respond_to?(:name=)
                 button.name = label
-              elsif button.respond_to?(:text=)
+                label_set = true
+              end
+              if button.respond_to?(:text=)
                 button.text = label
-              elsif button.respond_to?(:setText)
+                label_set = true
+              end
+              if button.respond_to?(:setText)
                 button.setText(label)
+                label_set = true
+              end
+              if button.respond_to?(:caption=)
+                button.caption = label
+                label_set = true
+              end
+              # Fallback: if no property worked, try instance variable
+              if !label_set && button.respond_to?(:instance_variable_set)
+                button.instance_variable_set(:@golden_label_override, label)
+              end
+              
+              # Only change color for golden moves; keep default for normal moves
+              if active && button.respond_to?(:bitmap) && button.bitmap && button.bitmap.respond_to?(:font)
+                button.bitmap.font.color = Color.new(255,215,0)
+              elsif !active && button.respond_to?(:bitmap) && button.bitmap && button.bitmap.respond_to?(:font)
+                # Restore default color (black)
+                button.bitmap.font.color = Color.new(0,0,0)
               end
             end
           end

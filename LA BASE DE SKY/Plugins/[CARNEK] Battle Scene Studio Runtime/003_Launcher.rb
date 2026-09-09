@@ -13,10 +13,12 @@ module BSS064SceneEnvironmentCompat
     custom=cfg["backgroundGraphic"].to_s.strip.tr("\\","/")
     if !custom.empty? && custom =~ /\AGraphics\/.+\.(?:png|gif|jpg|jpeg|webp|bmp)\z/i
       begin
+        # Normalize path for setBitmap: remove Graphics/ prefix and extension
+        clean=custom.sub(%r{\AGraphics/}i,"").sub(/\.(?:png|gif|jpg|jpeg|webp|bmp)\z/i,"")
         bg=@sprites["battle_bg"]
-        bg.setBitmap(custom) if bg && bg.respond_to?(:setBitmap)
+        bg.setBitmap(clean) if bg && bg.respond_to?(:setBitmap)
         bg2=@sprites["battle_bg2"]
-        bg2.setBitmap(custom) if bg2 && bg2.respond_to?(:setBitmap)
+        bg2.setBitmap(clean) if bg2 && bg2.respond_to?(:setBitmap)
       rescue => e
         BSS064.log("Custom battle background warning: #{e.class}: #{e.message}")
       end
@@ -542,6 +544,8 @@ module BSS064
       battle.bss_environment_config=env if battle.respond_to?(:bss_environment_config=)
       battle.bss_setup_config=setup if battle.respond_to?(:bss_setup_config=)
       custom_back=env["battleback"].to_s.strip
+      # Normalize battleback path for Essentials: remove Graphics/ prefix and extension
+      custom_back=custom_back.sub(%r{\AGraphics/}i,"").sub(/\.(?:png|gif|jpg|jpeg|webp|bmp)\z/i,"")
       battle.backdrop=custom_back if !custom_back.empty? && battle.respond_to?(:backdrop=)
       scene=battle.instance_variable_get(:@scene) rescue nil
       if scene && (!defined?(Battle::Scene) || !Battle::Scene.ancestors.include?(BSS064SceneEnvironmentCompat))

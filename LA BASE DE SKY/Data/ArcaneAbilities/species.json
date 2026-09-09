@@ -131,7 +131,7 @@
       "ability": "OVERCHARGE"
     },
     "RAICHU,1": {
-      "ability": "ADAPTABILITY"
+      "ability": "NOGUARD"
     },
     "RAICHU,2": {
       "ability": "OVERCHARGE"
@@ -207,6 +207,63 @@
     },
     "IGGLYBUFF": {
       "ability": "REFRIGERATE"
+    },
+    "NIDORANFE": {
+      "ability": "QUEENLYMAJESTY"
+    },
+    "NIDORANMA": {
+      "ability": "FEUDALWARD"
+    },
+    "ZUBAT": {
+      "ability": "OVERAWE"
+    },
+    "GOLBAT": {
+      "ability": "OVERAWE"
+    },
+    "CROBAT": {
+      "ability": "OVERAWE"
+    },
+    "ODDISH": {
+      "ability": "MEGASOL"
+    },
+    "GLOOM": {
+      "ability": "MEGASOL"
+    },
+    "VILEPLUME": {
+      "ability": "MEGASOL"
+    },
+    "BELLOSSOM": {
+      "ability": "MEGASOL"
+    },
+    "PARAS": {
+      "ability": "FLEURDEMAL"
+    },
+    "PARASECT": {
+      "ability": "FLEURDEMAL"
+    },
+    "VENONAT": {
+      "ability": "MAGICGUARD"
+    },
+    "VENOMOTH": {
+      "ability": "MAGICGUARD"
+    },
+    "DIGLETT": {
+      "ability": "PARENTALBOND"
+    },
+    "DUGTRIO": {
+      "ability": "PARENTALBOND"
+    },
+    "DIGLETT,1": {
+      "ability": "PARENTALBOND"
+    },
+    "DUGTRIO,1": {
+      "ability": "PARENTALBOND"
+    },
+    "PIKACHU,1": {
+      "ability": "NOGUARD"
+    },
+    "PICHU,1": {
+      "ability": "NOGUARD"
     }
   }
 }

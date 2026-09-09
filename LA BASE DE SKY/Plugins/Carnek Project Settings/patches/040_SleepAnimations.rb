@@ -202,7 +202,10 @@ end
 # Graphics.update wrapper — sleep + hit re-apply antes del render
 module Graphics
   class << self
-    alias _carnek_sleep_orig_update update
+    # MakerStudio/F12 puede evaluar este archivo más de una vez. Sin esta
+    # guarda el alias termina apuntando al propio wrapper y cada Graphics.update
+    # recurre hasta SystemStackError al comenzar una animación de combate.
+    alias _carnek_sleep_orig_update update unless method_defined?(:_carnek_sleep_orig_update)
     def update
       scene = Battle::Scene.carnek_scene
       if scene

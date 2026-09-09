@@ -1023,7 +1023,10 @@ class BSS070EBDXRoom
       next if !@data.has_key?(key)
       case key
       when "backdrop" # adds custom background image
-        path = pbResolveBitmap(@data["backdrop"]) ? @data["backdrop"] : "Graphics/BattleSceneStudio/EBDX/Battlebacks/battlebg/" + @data["backdrop"]
+        raw = @data["backdrop"].to_s
+        # Normalize path: remove Graphics/ prefix and extension for pbResolveBitmap
+        clean = raw.sub(%r{\AGraphics/}i, "").sub(/\.(?:png|gif|jpg|jpeg|webp|bmp)\z/i, "")
+        path = pbResolveBitmap(clean) ? clean : "Graphics/BattleSceneStudio/EBDX/Battlebacks/battlebg/" + raw.sub(%r{\AGraphics/}i, "")
         tbmp = pbBitmap(path)
         @sprites["bg"].bitmap = Bitmap.new(tbmp.width, tbmp.height)
         @sprites["bg"].bitmap.blt(0, 0, tbmp, tbmp.rect)

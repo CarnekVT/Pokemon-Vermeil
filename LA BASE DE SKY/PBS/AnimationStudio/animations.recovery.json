@@ -36871,7 +36871,7 @@
       }
     },
     {
-      "id": "anim_mti2xsw4_sq",
+      "id": "anim_mts3cylx_2y9",
       "name": "Pistola Agua (Player)",
       "fps": 20,
       "duration": 60,
@@ -36905,7 +36905,8 @@
         ],
         "runtimeSelected": true,
         "groupIdentity": "move|WATERGUN",
-        "runtimeEnabled": true
+        "runtimeEnabled": true,
+        "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY"
       },
       "contextTimelines": [],
       "battlers": {
@@ -38009,7 +38010,7 @@
           "name": "Effects",
           "clips": [
             {
-              "id": "clip_mtnlfuua_c3",
+              "id": "clip_mts3cylx_2yd",
               "type": "projectile",
               "name": "WaterGun",
               "enabled": true,
@@ -38018,10 +38019,10 @@
               "endFrame": 52,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/Animations/smog 2.png",
+                "projectPath": "Graphics/AnimationStudio/smog 2.png",
                 "folder": "Animations",
                 "name": "smog 2",
-                "relativeHint": "",
+                "relativeHint": "smog 2.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -38033,7 +38034,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -38148,7 +38150,7 @@
                       "id": "ecmd_mtnlghm1_cb",
                       "frame": 1,
                       "duration": 0,
-                      "value": 32
+                      "value": 16
                     }
                   ],
                   "emitterIntensity": [
@@ -38156,7 +38158,7 @@
                       "id": "ecmd_mtnlghm1_cc",
                       "frame": 1,
                       "duration": 0,
-                      "value": 3
+                      "value": 2
                     }
                   ],
                   "emitXRange": [
@@ -38381,7 +38383,7 @@
               }
             },
             {
-              "id": "clip_mtnrodjw_dx",
+              "id": "clip_mts3cylx_2ye",
               "type": "projectile",
               "name": "Emitter · scald-steam",
               "enabled": true,
@@ -38390,10 +38392,10 @@
               "endFrame": 60,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/Animations/smog 1.png",
+                "projectPath": "Graphics/AnimationStudio/smog 1.png",
                 "folder": "Animations",
                 "name": "smog 1",
-                "relativeHint": "",
+                "relativeHint": "smog 1.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -38405,7 +38407,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -38544,7 +38547,7 @@
                       "id": "ecmd_mtnrodnl_e8",
                       "frame": 11,
                       "duration": 0,
-                      "value": 14
+                      "value": 8
                     }
                   ],
                   "emitterIntensity": [
@@ -38552,7 +38555,7 @@
                       "id": "ecmd_mtnrodnl_e9",
                       "frame": 11,
                       "duration": 0,
-                      "value": 2
+                      "value": 1
                     }
                   ],
                   "emitXRange": [
@@ -38777,7 +38780,7 @@
               }
             },
             {
-              "id": "clip_mtnrvddn_1d3",
+              "id": "clip_mts3cylx_2yf",
               "type": "projectile",
               "name": "Emitter · spark-impact",
               "enabled": true,
@@ -38786,10 +38789,10 @@
               "endFrame": 60,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/Battle animations/bubble 2.png",
+                "projectPath": "Graphics/AnimationStudio/bubble 2.png",
                 "folder": "Battle animations",
                 "name": "bubble 2",
-                "relativeHint": "",
+                "relativeHint": "bubble 2.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -38801,7 +38804,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -38918,7 +38922,7 @@
                       "id": "ecmd_mtnrvdip_1de",
                       "frame": 11,
                       "duration": 0,
-                      "value": 10
+                      "value": 6
                     }
                   ],
                   "emitterIntensity": [
@@ -38932,7 +38936,7 @@
                       "id": "ecmd_mtnrvdip_1df",
                       "frame": 11,
                       "duration": 0,
-                      "value": 4
+                      "value": 2
                     }
                   ],
                   "energyTravelFrames": [
@@ -39101,7 +39105,7 @@
         }
       ],
       "logic": [],
-      "notes": "",
+      "notes": "Performance tuning: reduced emitter density for ingame playback.",
       "hidesDataBoxes": false,
       "hidesAdjacents": false,
       "scene": {
@@ -39114,7 +39118,7 @@
       }
     },
     {
-      "id": "anim_mtnssluh_bp",
+      "id": "anim_mts3dy74_2yy",
       "name": "Pistola Agua (Foe)",
       "fps": 20,
       "duration": 60,
@@ -39151,7 +39155,8 @@
         "duplicatedFrom": "anim_mti2xsw4_sq",
         "duplicatedFromName": "Pistola Agua",
         "groupName": "Pistola Agua",
-        "runtimeEnabled": true
+        "runtimeEnabled": true,
+        "gameRoot": "C:\\Users\\nuevo usuario\\OneDrive\\Documentos\\GitHub\\Pokemon-Vermeil\\LA BASE DE SKY"
       },
       "contextTimelines": [],
       "battlers": {
@@ -40399,7 +40404,7 @@
           "name": "Effects",
           "clips": [
             {
-              "id": "clip_mtnssluh_e2",
+              "id": "clip_mts3dy74_2z2",
               "type": "projectile",
               "name": "WaterGun",
               "enabled": true,
@@ -40408,10 +40413,10 @@
               "endFrame": 51,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/Animations/smog 2.png",
+                "projectPath": "Graphics/AnimationStudio/smog 2.png",
                 "folder": "Animations",
                 "name": "smog 2",
-                "relativeHint": "",
+                "relativeHint": "smog 2.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -40423,7 +40428,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -40524,7 +40530,7 @@
                       "id": "ecmd_mtnssluh_e7",
                       "frame": 1,
                       "duration": 0,
-                      "value": 32
+                      "value": 16
                     }
                   ],
                   "emitterIntensity": [
@@ -40532,7 +40538,7 @@
                       "id": "ecmd_mtnssluh_e8",
                       "frame": 1,
                       "duration": 0,
-                      "value": 3
+                      "value": 2
                     }
                   ],
                   "emitXRange": [
@@ -40785,7 +40791,7 @@
               }
             },
             {
-              "id": "clip_mtnssluh_eq",
+              "id": "clip_mts3dy74_2z3",
               "type": "projectile",
               "name": "Emitter · scald-steam",
               "enabled": true,
@@ -40794,10 +40800,10 @@
               "endFrame": 60,
               "graphic": {
                 "source": "legacy",
-                "projectPath": "Graphics/Animations/smog 1.png",
+                "projectPath": "Graphics/AnimationStudio/smog 1.png",
                 "folder": "Animations",
                 "name": "smog 1",
-                "relativeHint": "",
+                "relativeHint": "smog 1.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -40809,7 +40815,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -40962,7 +40969,7 @@
                       "id": "ecmd_mtnssluh_ey",
                       "frame": 11,
                       "duration": 0,
-                      "value": 14
+                      "value": 8
                     }
                   ],
                   "emitterIntensity": [
@@ -40976,7 +40983,7 @@
                       "id": "ecmd_mtnssluh_ez",
                       "frame": 11,
                       "duration": 0,
-                      "value": 5
+                      "value": 2
                     }
                   ],
                   "emitXRange": [
@@ -41270,7 +41277,7 @@
               }
             },
             {
-              "id": "clip_mtnssluh_fk",
+              "id": "clip_mts3dy74_2z4",
               "type": "projectile",
               "name": "Emitter · spark-impact",
               "enabled": true,
@@ -41279,10 +41286,10 @@
               "endFrame": 60,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/Battle animations/bubble 2.png",
+                "projectPath": "Graphics/AnimationStudio/bubble 2.png",
                 "folder": "Battle animations",
                 "name": "bubble 2",
-                "relativeHint": "",
+                "relativeHint": "bubble 2.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -41294,7 +41301,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -41411,7 +41419,7 @@
                       "id": "ecmd_mtnssluh_fr",
                       "frame": 11,
                       "duration": 0,
-                      "value": 10
+                      "value": 6
                     }
                   ],
                   "emitterIntensity": [
@@ -41425,7 +41433,7 @@
                       "id": "ecmd_mtnssluh_ft",
                       "frame": 11,
                       "duration": 0,
-                      "value": 4
+                      "value": 2
                     }
                   ],
                   "energyTravelFrames": [
@@ -41616,7 +41624,7 @@
         }
       ],
       "logic": [],
-      "notes": "",
+      "notes": "Performance tuning: reduced emitter density for ingame playback.",
       "hidesDataBoxes": false,
       "hidesAdjacents": false,
       "scene": {
@@ -41629,7 +41637,7 @@
       }
     },
     {
-      "id": "anim_mtqprwrb_cz",
+      "id": "anim_mts3exj7_2zr",
       "name": "Acupresión copia",
       "fps": 20,
       "duration": 83,
@@ -42288,7 +42296,7 @@
           "name": "Effects",
           "clips": [
             {
-              "id": "clip_mtqprwrb_d2",
+              "id": "clip_mts3exj7_2zw",
               "type": "projectile",
               "name": "Hand",
               "enabled": true,
@@ -42297,7 +42305,7 @@
               "endFrame": 65,
               "graphic": {
                 "source": "studio",
-                "projectPath": "Graphics/AnimationStudio/ACUPRESSURE_handpoint.png",
+                "projectPath": "Graphics/AnimationStudio/ACUPRESSURE_ACUPRESSURE_handpoint.png",
                 "folder": "AnimationStudio",
                 "name": "handpoint",
                 "relativeHint": "",
@@ -42532,19 +42540,21 @@
                   "gap": 1,
                   "opacity": 55,
                   "scaleDecay": 0,
-                  "mode": "burst",
+                  "mode": "trail",
                   "trailEndFrame": 48,
                   "trailStartFrame": 0,
                   "burstEnabled": true,
-                  "burstCopies": 4,
+                  "burstFrame": 48,
+                  "burstCopies": 3,
                   "burstLifetime": 8,
                   "burstInterval": 0,
                   "burstStartScale": 100,
-                  "burstEndScale": 160,
+                  "burstEndScale": 200,
                   "burstStartOpacity": 60,
                   "burstEndOpacity": 0,
                   "burstStartRadius": 0,
-                  "burstEndRadius": 18
+                  "burstEndRadius": 20,
+                  "trailEnabled": true
                 }
               },
               "logic": [],
@@ -42716,7 +42726,7 @@
               }
             },
             {
-              "id": "clip_mtqprwrb_d3",
+              "id": "clip_mts3exj7_2zx",
               "type": "projectile",
               "name": "elec",
               "enabled": false,
@@ -42725,10 +42735,10 @@
               "endFrame": 84,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/Battle animations/electricity 1.png",
+                "projectPath": "Graphics/Animations/electricity 1.png",
                 "folder": "Battle animations",
                 "name": "electricity 1",
-                "relativeHint": "",
+                "relativeHint": "electricity 1.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -42740,7 +42750,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -43233,7 +43244,7 @@
               }
             },
             {
-              "id": "clip_mtqpwuzh_1h1",
+              "id": "clip_mts3exj7_2zy",
               "type": "projectile",
               "name": "Emitter · impact-burst",
               "enabled": true,
@@ -43242,10 +43253,10 @@
               "endFrame": 84,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/Battle animations/electricity 1.png",
+                "projectPath": "Graphics/Animations/electricity 1.png",
                 "folder": "Battle animations",
                 "name": "electricity 1",
-                "relativeHint": "",
+                "relativeHint": "electricity 1.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "auto",
@@ -43257,7 +43268,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -43538,7 +43550,7 @@
               "simpleEmitterExample": "impact-burst"
             },
             {
-              "id": "clip_mtqqlqyd_28r",
+              "id": "clip_mts3exj7_2zz",
               "type": "projectile",
               "name": "Shine",
               "enabled": true,
@@ -43550,7 +43562,7 @@
                 "projectPath": "Graphics/Animations/PRAS- Leer.png",
                 "folder": "Animations",
                 "name": "PRAS- Leer",
-                "relativeHint": "",
+                "relativeHint": "PRAS- Leer.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "rmxp",
@@ -43562,7 +43574,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -43748,8 +43761,8 @@
   "reusableClips": [],
   "packages": [],
   "exportGameDataDir": "PBS/AnimationStudio",
-  "exportPackageDir": "C:/Users/nuevo usuario/Downloads/Animaciones/Common Snap Trap",
+  "exportPackageDir": "C:/Users/nuevo usuario/Downloads/TodoAnim",
   "editor": {
-    "lastAnimationId": "anim_mtqprwrb_cz"
+    "lastAnimationId": "anim_mtb00z9c_5m"
   }
 }

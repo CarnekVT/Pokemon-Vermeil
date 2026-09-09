@@ -262,6 +262,7 @@ module BSS100AmbientWorld
   def pbInitSprites(*args,&block)
     ret=super
     BSS100.active_scene=self
+    bss100_enhanced_z_only
     ret
   end
 
@@ -299,24 +300,24 @@ module BSS100EnhancedZ
     return if !@sprites.is_a?(Hash)
     main=@sprites["enhancedUI"] rescue nil
     prompt=@sprites["enhancedUIPrompts"] rescue nil
-    main.z=9300 if main && !(main.disposed? rescue true) && main.respond_to?(:z=)
-    prompt.z=9360 if prompt && !(prompt.disposed? rescue true) && prompt.respond_to?(:z=)
+    main.z=11500 if main && !(main.disposed? rescue true) && main.respond_to?(:z=)
+    prompt.z=11560 if prompt && !(prompt.disposed? rescue true) && prompt.respond_to?(:z=)
     ["leftarrow","rightarrow"].each do |k|
       sp=@sprites[k] rescue nil
-      sp.z=9410 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
+      sp.z=11610 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
     end
     @sprites.each do |k,sp|
       next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:z=)
       s=k.to_s
       next unless s =~ /\A(info_icon|ball_icon)\d+\z/i
-      sp.z=9442
+      sp.z=11642
     end
     @sprites.each do |k,sp|
       next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:z=)
       s=k.to_s
       next unless s =~ /\A(.+)_outline\d+\z/i
       parent=@sprites[$1] rescue nil
-      sp.z=(parent && parent.respond_to?(:z) ? parent.z.to_i-1 : 9441)
+      sp.z=(parent && parent.respond_to?(:z) ? parent.z.to_i-1 : 11641)
     end
   rescue
   end
@@ -358,6 +359,12 @@ module BSS100EnhancedZ
   end
 
   def pbShowOutline(*args,&block)
+    ret=super
+    bss100_enhanced_z_only
+    ret
+  end
+
+  def pbStartBattle(*args,&block)
     ret=super
     bss100_enhanced_z_only
     ret
@@ -493,7 +500,38 @@ if defined?(BSS098)
             next unless k.to_s =~ /^img\d+/i && row.is_a?(Hash)
             if row[:bss_rasterized] || row["bss_rasterized"]
               row.delete(:crop);row.delete("crop")
-            end
+end
+
+#-------------------------------------------------------------------------------
+# Recursion guard for Battle::Scene#pbUpdate to prevent SystemStackError
+# from circular prepend chains in BSS modules.
+#-------------------------------------------------------------------------------
+module BSS100RecursionGuard
+  @@pbupdate_frame = 0
+  @@pbupdate_count = 0
+  MAX_PBUPDATE_PER_FRAME = 50
+
+  def pbUpdate(*args,&block)
+    current_frame = Graphics.frame_count rescue 0
+    if @@pbupdate_frame != current_frame
+      @@pbupdate_frame = current_frame
+      @@pbupdate_count = 0
+    end
+    @@pbupdate_count += 1
+    if @@pbupdate_count > MAX_PBUPDATE_PER_FRAME
+      BSS064.log("BSS100RecursionGuard: pbUpdate recursion detected (#{@@pbupdate_count} calls/frame), skipping") if defined?(BSS064)
+      return
+    end
+    ret = super(*args,&block)
+    @@pbupdate_count -= 1
+    ret
+  end
+end
+
+# Apply the guard to Battle::Scene (last in prepend chain)
+if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS100RecursionGuard)
+  Battle::Scene.prepend(BSS100RecursionGuard)
+end
           end
         end
         out

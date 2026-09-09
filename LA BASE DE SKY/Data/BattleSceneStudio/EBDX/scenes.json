@@ -85,7 +85,8 @@
           "blurAreas": [],
           "effect": "wind",
           "speed": 1,
-          "colorize": true
+          "colorize": true,
+          "locked": true
         },
         "img002": {
           "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
@@ -110,7 +111,8 @@
           "effect": "wind",
           "speed": 1,
           "colorize": true,
-          "hidden": false
+          "hidden": false,
+          "locked": true
         },
         "img003": {
           "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
@@ -134,7 +136,8 @@
           "blurAreas": [],
           "effect": "wind",
           "speed": 1,
-          "colorize": true
+          "colorize": true,
+          "locked": true
         },
         "img004": {
           "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
@@ -159,7 +162,8 @@
           "effect": "wind",
           "speed": 1,
           "colorize": true,
-          "hidden": false
+          "hidden": false,
+          "locked": true
         },
         "img005": {
           "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
@@ -183,7 +187,8 @@
           "blurAreas": [],
           "effect": "wind",
           "speed": 1,
-          "colorize": true
+          "colorize": true,
+          "locked": true
         },
         "img006": {
           "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
@@ -207,7 +212,8 @@
           "blurAreas": [],
           "effect": "wind",
           "speed": 1,
-          "colorize": true
+          "colorize": true,
+          "locked": true
         },
         "img007": {
           "bitmap": "Graphics/BattleSceneStudio/EBDX/SceneAssets/Cutouts/VegetationClean/forest_mountain_cluster_2.png",

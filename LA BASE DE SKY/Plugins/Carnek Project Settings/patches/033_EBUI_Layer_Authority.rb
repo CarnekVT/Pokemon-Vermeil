@@ -2,19 +2,20 @@
 # Carnek Project Settings - Enhanced Battle UI layer authority
 # Pokémon Essentials v21.1 / DBK Enhanced Battle UI / BSS compatibility
 #
-# Runtime captures from Vermeil showed databoxes at z=10149 while Enhanced UI
-# prompt sprites were at z=10119. BSS can also recreate targetWindow and
-# info_icon sprites after the initial scene setup. Keep this fix here, rather
-# than in Enhanced Battle UI/BSS, so plugin updates cannot remove it.
-#
-# Keep databoxes below the Enhanced UI band, and promote UI sprites recreated
-# dynamically by BSS.  Uses prepend + super only; no alias chain.
+# BSS can recreate or raise UI sprites after the initial scene setup. Keep the
+# requested ordering here, rather than changing DBK or BSS: move information
+# stays behind command windows and all Enhanced UI information behind databoxes.
 #===============================================================================
 
 module CarnekProjectSettings
   module EBUILayerAuthority
-    DATABOX_Z_CEILING = 10_900
-    ENHANCED_UI_Z_MIN = 11_000
+    # BSS places the interactive command window at 10_000 and its databoxes
+    # around 10_149. Keep Enhanced UI visible in the HUD band, but below both.
+    DATABOX_Z_FLOOR       = 10_149
+    ENHANCED_UI_Z         = 9_900
+    ENHANCED_PROMPT_Z     = 9_950
+    ENHANCED_ICON_Z       = 9_970
+    ENHANCED_ARROW_Z      = 9_920
 
     def carnek_enforce_ebui_layer_authority
       return if !defined?(@sprites) || !@sprites.is_a?(Hash)
@@ -25,25 +26,28 @@ module CarnekProjectSettings
         name = key.to_s
         low  = name.downcase
 
-        # Databoxes must remain part of the battle HUD, but never cover the
-        # Enhanced Battle UI overlays/prompts/selection UI.
+        # Databoxes are the foreground HUD layer.
         if low.start_with?("databox_")
-          sprite.z = DATABOX_Z_CEILING if sprite.z > DATABOX_Z_CEILING
+          sprite.z = DATABOX_Z_FLOOR if sprite.z < DATABOX_Z_FLOOR
           next
         end
 
-        # Enhanced Battle UI / DBK selection sprites. BSS may create these
-        # after pbInitSprites, bypassing the initial z normalization.
-        enhanced_key = (
-          low == "targetwindow" ||
-          low.start_with?("info_icon") ||
-          low.include?("battleinfo") ||
-          low.include?("battlerinfo") ||
-          low.include?("moveinfo") ||
-          low.include?("enhancedui") ||
-          low.include?("enhanced_ui")
-        )
-        sprite.z = ENHANCED_UI_Z_MIN if enhanced_key && sprite.z < ENHANCED_UI_Z_MIN
+        # targetWindow is an interactive selector and intentionally retains its
+        # native layer. Everything drawn by Enhanced UI is informational.
+        if low == "enhancedui"
+          sprite.z = ENHANCED_UI_Z
+        elsif low == "enhanceduiprompts"
+          sprite.z = ENHANCED_PROMPT_Z
+        elsif low == "leftarrow" || low == "rightarrow"
+          sprite.z = ENHANCED_ARROW_Z
+        elsif low.start_with?("info_icon") || low.start_with?("ball_icon")
+          sprite.z = ENHANCED_ICON_Z
+        elsif low =~ /\A(.+)_outline\d+\z/
+          parent = @sprites[$1] rescue nil
+          if parent && parent.respond_to?(:z)
+            sprite.z = parent.z.to_i - 1
+          end
+        end
       end
     end
 
@@ -70,6 +74,15 @@ module CarnekProjectSettings
     # Custom databox/UI plugins can restore their own z during updates.
     # Reassert only the small set of HUD/UI sprites above; no viewport changes.
     def pbUpdate(*args)
+      ret = super
+      carnek_enforce_ebui_layer_authority
+      return ret
+    end
+
+    # BSS reapplies its own UI Z after this method's original implementation.
+    # Normalize once more so opening the Fight/Command window cannot raise the
+    # move-information overlay above it.
+    def pbShowWindow(*args)
       ret = super
       carnek_enforce_ebui_layer_authority
       return ret

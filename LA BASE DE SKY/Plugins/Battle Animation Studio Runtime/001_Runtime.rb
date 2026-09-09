@@ -5321,6 +5321,25 @@ if defined?(Battle::Scene)
   Battle::Scene.prepend(BattleAnimationStudioRuntime::SceneHook) unless Battle::Scene.ancestors.include?(BattleAnimationStudioRuntime::SceneHook)
 end
 
+# A Studio animation may run an event that asks the battle scene to play an
+# animation again. BSS and DBK both wrap that entry point, so re-entering it
+# from the active playback creates an unbounded Scene -> Battle -> Scene loop.
+# Let the nested request use the engine's normal fallback instead.
+module BattleAnimationStudioRuntimePlaybackGuard
+  def pbPlayBattleAnimationStudio(*args, &block)
+    return false if @bas_runtime_playback_depth.to_i > 0
+    @bas_runtime_playback_depth = @bas_runtime_playback_depth.to_i + 1
+    super
+  ensure
+    @bas_runtime_playback_depth = [@bas_runtime_playback_depth.to_i - 1, 0].max
+  end
+end
+
+if defined?(Battle::Scene) &&
+   !Battle::Scene.ancestors.include?(BattleAnimationStudioRuntimePlaybackGuard)
+  Battle::Scene.prepend(BattleAnimationStudioRuntimePlaybackGuard)
+end
+
 # Parse/index the exported library when the game is loaded instead of on the
 # first move animation. This moves JSON parsing out of the battle hot path.
 if defined?(EventHandlers)
@@ -5336,7 +5355,11 @@ end
 if defined?(Battle)
   module BattleAnimationStudioRuntimeBattleHook
     def pbAnimation(move, user, targets, hit_num = 0)
-      if @showAnims && @scene && @scene.respond_to?(:pbPlayBattleAnimationStudio)
+      # A move animation can invoke another battle animation from a scripted
+      # callback. Do not route that nested call into the Studio dispatcher a
+      # second time: Scene/BSS wrappers then re-enter this hook until Ruby
+      # exhausts its stack. The nested animation follows the normal engine path.
+      if !BattleAnimationStudioRuntime.active_player && @showAnims && @scene && @scene.respond_to?(:pbPlayBattleAnimationStudio)
         return if @scene.pbPlayBattleAnimationStudio(move, user, targets, hit_num, false)
       end
       super

@@ -795,7 +795,7 @@
     "Data/Map079.rxdata": {
       "sig": [
         2844338,
-        1788840937,
+        1788875623,
         579,
         1787895918
       ],
@@ -38871,8 +38871,8 @@
     },
     "Plugins/Battle Animation Studio Runtime/001_Runtime.rb": {
       "sig": [
-        231246,
-        1788837064
+        237757,
+        1788880920
       ],
       "catalog": {
         "schema": 2,
@@ -39792,8 +39792,8 @@
     },
     "Plugins/Carnek Project Settings/patches/040_SleepAnimations.rb": {
       "sig": [
-        7076,
-        1787895927
+        7356,
+        1788881237
       ],
       "catalog": {
         "schema": 2,
@@ -40699,8 +40699,8 @@
     },
     "Plugins/MakerStudio/003_Editor/Mods/Battle Animation Studio/runtime/001_PreviewBridge.rb": {
       "sig": [
-        35499,
-        1788777314
+        35991,
+        1788881173
       ],
       "catalog": {
         "schema": 2,
@@ -43994,8 +43994,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/001_Core.rb": {
       "sig": [
-        15340,
-        1788488548
+        16228,
+        1788875528
       ],
       "catalog": {
         "schema": 2,
@@ -44048,8 +44048,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/003_Launcher.rb": {
       "sig": [
-        46789,
-        1788445270
+        47144,
+        1788899531
       ],
       "catalog": {
         "schema": 2,
@@ -44246,8 +44246,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/005_EBDXSourceFaithful.rb": {
       "sig": [
-        113889,
-        1788635421
+        114090,
+        1788896880
       ],
       "catalog": {
         "schema": 2,
@@ -44559,8 +44559,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/018_BSS085StableWorldAuthority.rb": {
       "sig": [
-        26030,
-        1788492767
+        26692,
+        1788967272
       ],
       "catalog": {
         "schema": 2,
@@ -44735,8 +44735,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/026_BSS097RequestedParityFixes.rb": {
       "sig": [
-        11491,
-        1788537553
+        11795,
+        1788875528
       ],
       "catalog": {
         "schema": 2,
@@ -44779,8 +44779,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/028_BSS100RuntimeStabilityAndAmbient.rb": {
       "sig": [
-        20517,
-        1788658563
+        20639,
+        1788967195
       ],
       "catalog": {
         "schema": 2,
@@ -44802,7 +44802,7 @@
     "Plugins/[CARNEK] Battle Scene Studio Runtime/029_BSS101ComposerRuntimeParity.rb": {
       "sig": [
         11654,
-        1788635421
+        1788880581
       ],
       "catalog": {
         "schema": 2,
@@ -45948,8 +45948,8 @@
     },
     "Plugins/[LBDS] [DBK_000] Deluxe Battle Kit/[000] Essentials Patches/[003] Command Menu Refactor.rb": {
       "sig": [
-        23073,
-        1787895927
+        23375,
+        1788875528
       ],
       "catalog": {
         "schema": 2,
@@ -45968,57 +45968,57 @@
           },
           "Mochila": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L180"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L184"
             ]
           },
           "Llamar": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L182"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L186"
             ]
           },
           "Huir": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L182"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L186"
             ]
           },
           "Cancelar": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L182"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L186"
             ]
           },
           "Animar": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L185"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L189"
             ]
           },
           "Lanzar": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L188"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L192"
             ]
           },
           "¿Qué debería\nhacer {1}?": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L194"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L198"
             ]
           },
           "Luchar": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L195"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L199"
             ]
           },
           "Pokémon": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L196"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L200"
             ]
           },
           "¡No quedan PP para este movimiento!": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L337"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L341"
             ]
           },
           "¡{1} solo puede usar {2} debido a Otra vez!": {
             "Contexts": [
-              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L344"
+              "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L348"
             ]
           }
         },
@@ -47874,7 +47874,7 @@
     "Plugins/[LBDS] [DBK_001] Enhanced Battle UI/[000] Main.rb": {
       "sig": [
         12954,
-        1787895927
+        1788880630
       ],
       "catalog": {
         "schema": 2,
@@ -51385,8 +51385,8 @@
     },
     "Data/BattleSceneStudio/battles.json": {
       "sig": [
-        149088,
-        1788662202
+        149256,
+        1788882779
       ],
       "catalog": {
         "schema": 2,
@@ -51659,7 +51659,7 @@
     "Plugins/MakerStudio/001_ChangeDex.rb": {
       "sig": [
         66,
-        1788839850
+        1788968675
       ],
       "catalog": {
         "schema": 2,
@@ -51746,8 +51746,8 @@
     },
     "Plugins/[Balance] Golden Power/00_Settings.rb": {
       "sig": [
-        6458,
-        1788838908
+        6617,
+        1788875594
       ],
       "catalog": {
         "schema": 2,
@@ -51790,8 +51790,8 @@
     },
     "Plugins/[Balance] Golden Power/02_Controller_and_Power.rb": {
       "sig": [
-        18203,
-        1788841867
+        18702,
+        1788875623
       ],
       "catalog": {
         "schema": 2,
@@ -51854,8 +51854,8 @@
     },
     "Plugins/[Balance] Golden Power/04_Golden_Moves.rb": {
       "sig": [
-        11049,
-        1788841886
+        12755,
+        1788968512
       ],
       "catalog": {
         "schema": 2,
@@ -51876,8 +51876,8 @@
     },
     "Plugins/[Balance] Golden Power/05_Golden_UI.rb": {
       "sig": [
-        5141,
-        1788841888
+        5458,
+        1788967404
       ],
       "catalog": {
         "schema": 2,
@@ -51926,7 +51926,7 @@
           },
           "✦ {1}": {
             "Contexts": [
-              "Plugin: [Balance] Golden Power - 05_Golden_UI.rb:L112"
+              "Plugin: [Balance] Golden Power - 05_Golden_UI.rb:L102"
             ]
           }
         },
@@ -51939,7 +51939,7 @@
     "Plugins/[CARNKEVT]ChangeDex/000_Settings.rb": {
       "sig": [
         66,
-        1788839851
+        1788968675
       ],
       "catalog": {
         "schema": 2,
@@ -51961,7 +51961,7 @@
     "Plugins/[CARNKEVT]ChangeDex/001_Core.rb": {
       "sig": [
         66,
-        1788839851
+        1788968675
       ],
       "catalog": {
         "schema": 2,
@@ -51983,7 +51983,7 @@
     "Plugins/[CARNKEVT]ChangeDex/002_Handlers.rb": {
       "sig": [
         66,
-        1788839851
+        1788968675
       ],
       "catalog": {
         "schema": 2,
@@ -52005,7 +52005,7 @@
     "Plugins/[CARNKEVT]ChangeDex/003_Scene.rb": {
       "sig": [
         66,
-        1788839851
+        1788968675
       ],
       "catalog": {
         "schema": 2,
@@ -52219,7 +52219,7 @@
     "Plugins/[MakerStudio]/001_ChangeDex.rb": {
       "sig": [
         66,
-        1788839851
+        1788968675
       ],
       "catalog": {
         "schema": 2,
@@ -52240,8 +52240,8 @@
     },
     "Plugins/[VERMEIL] Research Notebook/001_research_notebook_config.rb": {
       "sig": [
-        3292,
-        1788841873
+        4499,
+        1788965900
       ],
       "catalog": {
         "schema": 2,
@@ -52262,8 +52262,8 @@
     },
     "Plugins/[VERMEIL] Research Notebook/010_research_notebook_data.rb": {
       "sig": [
-        34907,
-        1788841899
+        47475,
+        1788966693
       ],
       "catalog": {
         "schema": 2,
@@ -52275,6 +52275,11 @@
         "scripts": {
         },
         "plugins": {
+          "Pierde {1} de sus PS máximos al final de cada turno.": {
+            "Contexts": [
+              "Plugin: [VERMEIL] Research Notebook - 010_research_notebook_data.rb:L968"
+            ]
+          }
         },
         "bss": {
         },
@@ -52284,8 +52289,8 @@
     },
     "Plugins/[VERMEIL] Research Notebook/020_research_notebook_progress.rb": {
       "sig": [
-        19774,
-        1788796612
+        20355,
+        1788875623
       ],
       "catalog": {
         "schema": 2,
@@ -52306,8 +52311,8 @@
     },
     "Plugins/[VERMEIL] Research Notebook/030_research_notebook_ui.rb": {
       "sig": [
-        62273,
-        1788841911
+        64526,
+        1788966744
       ],
       "catalog": {
         "schema": 2,
@@ -52331,330 +52336,335 @@
           },
           "LIBRETA DE INVESTIGACIÓN": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L516"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L523"
             ]
           },
           "Notas sobre energía arcana": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L561"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L568"
             ]
           },
           "Notas sobre energía áurea": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L561"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L568"
             ]
           },
           "Estas páginas todavía están cerradas.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L571"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L578"
             ]
           },
           "Cuando descubras algo relacionado con estas energías, habrá un lugar para anotarlo aquí.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L573"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L580"
             ]
           },
           "Sin apuntes arcanos": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L582"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L589"
             ]
           },
           "Sin apuntes áureos": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L582"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L589"
             ]
           },
           "Aún no hay observaciones suficientes para llenar estas páginas.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L585"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L592"
             ]
           },
           "Quedan páginas por llenar…": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L587"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L594"
             ]
           },
           "HABILIDAD ARCANA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L640"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L651"
             ]
           },
           "TIPOS": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L643",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L813"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L654",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L826"
             ]
           },
           "PROBADA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L645",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L742"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L656",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L755"
             ]
           },
           "DESPERTADA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L645",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L742"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L656",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L755"
             ]
           },
           "POR DESPERTAR": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L645"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L656"
             ]
           },
           "SIN OBSERVAR": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L645",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L672",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L781"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L656",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L683",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L794"
             ]
           },
           "ESTADO": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L646"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L657"
             ]
           },
           "AFINIDAD ÁUREA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L655",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L785"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L666",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L798"
             ]
           },
           "FORMA DORADA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L662"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L673"
             ]
           },
           "NO POSEE": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L664"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L675"
             ]
           },
           "UTILIZADA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L666",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L811"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L677",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L824"
             ]
           },
           "OBSERVADA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L668",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L811"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L679",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L824"
             ]
           },
           "POR VER": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L670",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L811"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L681",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L824"
             ]
           },
           "Especies: {1}": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L680"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L691"
             ]
           },
           "Orden: {1}": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L681"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L692"
             ]
           },
           "{1}/{2}": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L682"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L693"
             ]
           },
           "Habilidad Arcana": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L741"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L754"
             ]
           },
           "BLOQUEADA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L742"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L755"
             ]
           },
           "HABILIDAD": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L744",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L819"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L757",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L832"
             ]
           },
           "APUNTE": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L747",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L792",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L831"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L760",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L805",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L844"
             ]
           },
           "Aún me falta describir con precisión cómo se manifiesta esta habilidad.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L751"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L764"
             ]
           },
           "He detectado una resonancia arcana en esta especie, pero todavía no he logrado despertar ni identificar su habilidad.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L753"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L766"
             ]
           },
           "No he observado todavía ninguna manifestación arcana en esta especie.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L755"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L768"
             ]
           },
           "DESPERTAR": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L758"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L771"
             ]
           },
           "Identificada": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L762"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L775"
             ]
           },
           "Pendiente": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L762"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L775"
             ]
           },
           "Probada": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L763"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L776"
             ]
           },
           "Sin probar": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L763"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L776"
             ]
           },
           "CATALIZADOR": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L764",
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L799"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L777",
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L812"
             ]
           },
           "Té Arcano": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L765"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L778"
             ]
           },
           "Poder Dorado": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L780"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L793"
             ]
           },
           "UTILIZADO": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L781"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L794"
             ]
           },
           "IDENTIFICADO": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L781"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L794"
             ]
           },
           "TIPOS NATURALES": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L783"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L796"
             ]
           },
           "El Fragmento Dorado reacciona con esta afinidad y permite manifestarla durante el combate sin alterar la forma del Pokémon.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L796"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L809"
             ]
           },
           "Todavía no he logrado identificar la afinidad áurea de esta especie.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L796"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L809"
             ]
           },
           "Fragmento Dorado": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L800"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L813"
             ]
           },
           "← Poder        Forma →": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L802"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L815"
             ]
           },
           "Forma Dorada": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L810"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L823"
             ]
           },
           "ESTADÍSTICAS": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L822"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L835"
             ]
           },
           "He observado esta Forma Dorada, pero aún necesito verla en acción para completar sus características.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L832"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L845"
             ]
           },
           "Sé que esta forma puede manifestarse, pero todavía no he logrado observarla directamente.": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L832"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L845"
             ]
           },
           "COSTE": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L835"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L848"
             ]
           },
           "CATALIZADORES": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L837"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L850"
             ]
           },
           "LIBRETA": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1205"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1218"
             ]
           },
           "DE INVESTIGACIÓN": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1206"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1219"
             ]
           },
           "VERMEIL": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1209"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1222"
             ]
           },
           "{1}/{2} registrado": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1416"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1429"
             ]
           },
           "Estadísticas sin registrar": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1449"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1462"
             ]
           },
           "BST {1}": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1474"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1487"
+            ]
+          },
+          "NOTA: ChangeDex oculta formas de esta especie.": {
+            "Contexts": [
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1513"
             ]
           },
           "Atrás · Cerrar": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1514"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1539"
             ]
           },
           "← → · Cambiar hoja      Confirmar / Atrás · Volver": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1516"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1541"
             ]
           },
           "Confirmar / Atrás · Volver": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1516"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1541"
             ]
           },
           "Flechas · Mover    Confirmar · Abrir ficha    Acción · Sección    Especial · Ordenar    Atrás · Cerrar": {
             "Contexts": [
-              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1518"
+              "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1543"
             ]
           }
         },
@@ -52666,8 +52676,8 @@
     },
     "Plugins/[VERMEIL] Research Notebook/040_research_notebook_hooks.rb": {
       "sig": [
-        10750,
-        1788796612
+        11010,
+        1788875623
       ],
       "catalog": {
         "schema": 2,
@@ -52772,8 +52782,8 @@
     },
     "Plugins/Carnek Project Settings/patches/033_EBUI_Layer_Authority.rb": {
       "sig": [
-        2947,
-        1788796286
+        3462,
+        1788881194
       ],
       "catalog": {
         "schema": 2,
@@ -52904,8 +52914,8 @@
     },
     "Plugins/Battle Additions/Abilities/030_CoreAbilityReworks.rb": {
       "sig": [
-        7860,
-        1788841866
+        8070,
+        1788875623
       ],
       "catalog": {
         "schema": 2,
@@ -53666,10 +53676,10 @@
         }
       }
     },
-    "Plugins/[ZZZ] Traza Completa Temporal/001_FullTrace.rb": {
+    "Plugins/[VERMEIL] Golden Animation Bridge/001_Bridge.rb": {
       "sig": [
-        1720,
-        1788838354
+        3778,
+        1788875623
       ],
       "catalog": {
         "schema": 2,
@@ -53688,10 +53698,32 @@
         }
       }
     },
-    "Plugins/[VERMEIL] Golden Animation Bridge/001_Bridge.rb": {
+    "Plugins/Carnek Project Settings/patches/044_Golden_Move_Name_And_Layer_Fix.rb": {
       "sig": [
-        3672,
-        1788841909
+        2298,
+        1788875528
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.0",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/[CARNKEVT] ChangeDex/001_ChangeDex.rb": {
+      "sig": [
+        276717,
+        1788895799
       ],
       "catalog": {
         "schema": 2,

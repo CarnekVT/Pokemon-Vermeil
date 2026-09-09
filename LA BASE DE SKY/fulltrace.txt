@@ -646,3 +646,15 @@ Sin ciclo simple. Primeros 150 frames:
 [2026-09-08 08:35:46 -0500] SystemStackError: stack level too deep
 Total frames: 0
 Sin ciclo simple. Primeros 150 frames:
+
+=================
+
+[2026-09-08 08:54:58 -0500] SystemStackError: stack level too deep
+Total frames: 0
+Sin ciclo simple. Primeros 150 frames:
+
+=================
+
+[2026-09-08 08:57:08 -0500] SystemStackError: stack level too deep
+Total frames: 0
+Sin ciclo simple. Primeros 150 frames:

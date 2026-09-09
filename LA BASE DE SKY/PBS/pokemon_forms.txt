@@ -116,6 +116,14 @@ Generation = 7
 Flags = InheritFormWithEverStone
 WildItemUncommon = PECHABERRY
 #-------------------------------
+[PIKACHU,1]
+Abilities = STATIC
+HiddenAbilities = LEVITATE
+Moves = 1,PSYBEAM,1,NUZZLE,1,NASTYPLOT,1,CHARM,1,SWEETKISS,1,PLAYNICE,1,QUICKATTACK,1,TAILWHIP,1,THUNDERSHOCK,1,GROWL,4,THUNDERWAVE,8,DOUBLETEAM,12,ELECTROBALL,16,FEINT,20,SPARK,24,AGILITY,28,IRONTAIL,32,DISCHARGE,36,THUNDERBOLT,40,LIGHTSCREEN,44,PSYCHIC,50,VOLTTACKLE,55,VOLTBURST
+TutorMoves = AGILITY,ALLURINGVOICE,BODYSLAM,BRICKBREAK,CHARGE,CHARGEBEAM,CHARM,DIG,DISARMINGVOICE,DRAININGKISS,EERIEIMPULSE,ELECTRICTERRAIN,ELECTROBALL,ELECTROWEB,ENCORE,ENDEAVOR,ENDURE,FACADE,FAKETEARS,FLING,FOCUSPUNCH,GRASSKNOT,HELPINGHAND,KNOCKOFF,LIGHTSCREEN,NASTYPLOT,PLAYROUGH,PROTECT,PSYCHIC,PSYBEAM,RAINDANCE,REFLECT,REST,REVERSAL,SLEEPTALK,SUBSTITUTE,SURF,SWIFT,TAKEDOWN,THIEF,THUNDER,THUNDERBOLT,THUNDERPUNCH,THUNDERWAVE,TRAILBLAZE,UPPERHAND,VOLTSWITCH,WILDCHARGE
+Generation = 7
+Evolutions = RAICHU,Item,THUNDERSTONE
+#-------------------------------
 [PIKACHU,2]
 FormName = Forma Coqueta
 Region = 
@@ -727,7 +735,8 @@ Generation = 8
 Flags = InheritFormWithEverStone
 #-------------------------------
 [EXEGGCUTE,1]
-Region = 
+FormName = Forma Alola
+Region = Alola
 UnmegaForm = -2
 Generation = 7
 #-------------------------------
@@ -746,7 +755,8 @@ Pokedex = Los intensos rayos solares que bañan su hábitat le han conferido un 
 Generation = 7
 #-------------------------------
 [CUBONE,1]
-Region = 
+FormName = Forma Alola
+Region = Alola
 UnmegaForm = -2
 Generation = 7
 Evolution = MAROWAK,LevelNight,28
@@ -764,6 +774,13 @@ Weight = 34.0
 Color = Purple
 Pokedex = El hueso que lleva en la mano es de su madre. La pena que siente por su hijo es tan intensa que lo protege con llamas más allá de la muerte.
 Generation = 7
+#-------------------------------
+[KOFFING,1]
+FormName = Forma Galar
+Region = Galar
+UnmegaForm = -2
+Generation = 8
+Moves = 1,POISONGAS,1,TACKLE,4,SMOG,8,FAIRYWIND,12,CLEARSMOG,16,ASSURANCE,20,SLUDGE,24,AROMATICMIST,28,SELFDESTRUCT,32,SLUDGEBOMB,36,PLAYROUGH,40,MISTYTERRAIN,44,EXPLOSION,48,MEMENTO,52,DESTINYBOND
 #-------------------------------
 [WEEZING,1]
 FormName = Forma Galar
@@ -804,6 +821,19 @@ HiddenAbilities = HUGEPOWER
 Height = 2.3
 Pokedex = Sus movimientos se volvieron más humanos. Se desconoce si es para comunicarse con las personas o si busca reemplazar a la humanidad.
 Generation = 9
+#-------------------------------
+[MIMEJR,1]
+FormName = Forma Galar
+Region = Galar
+UnmegaForm = -2
+Types = ICE,PSYCHIC
+BaseStats = 20,25,45,60,70,90
+Abilities = VITALSPIRIT,SCREENCLEANER
+HiddenAbilities = ICEBODY
+Moves = 1,COPYCAT,1,ENCORE,1,ROLEPLAY,1,PROTECT,1,RECYCLE,1,MIMIC,1,LIGHTSCREEN,1,REFLECT,1,SAFEGUARD,1,DAZZLINGGLEAM,1,MISTYTERRAIN,1,POUND,1,RAPIDSPIN,1,BATONPASS,1,ICESHARD,12,CONFUSION,16,ALLYSWITCH,20,ICYWIND,24,DOUBLEKICK,28,PSYBEAM,32,HYPNOSIS,36,MIRRORCOAT,40,SUCKERPUNCH,44,FREEZEDRY,48,PSYCHIC,52,TEETERDANCE
+Evolution = MRMIME,HasMove,MIMIC
+Generation = 8
+
 #-------------------------------
 [MRMIME,1]
 FormName = Forma Galar
@@ -1022,12 +1052,14 @@ Pokedex = El poder del Rayo Solar que proyecta por sus cuatro flores es descomun
 Generation = 9
 #-------------------------------
 [CYNDAQUIL,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
 [QUILAVA,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
@@ -1059,6 +1091,14 @@ Weight = 108.8
 Category = Bifauces
 Pokedex = Al unir ambos brazos y la aleta que le cuelga al lomo cual capucha, crea una colosal mandíbula que multiplica por diez su potencia de mordida.
 Generation = 9
+#-------------------------------
+[PICHU,1]
+Abilities = STATIC
+HiddenAbilities = LEVITATE
+Moves = 1,CONFUSION,1,THUNDERSHOCK,1,TAILWHIP,4,PLAYNICE,8,SWEETKISS,12,NUZZLE,16,NASTYPLOT,20,CHARM,55,VOLTTACKLE,62,VOLTBURST
+TutorMoves = BODYSLAM,CHARGE,CHARM,DISARMINGVOICE,ELECTRICTERRAIN,ELECTROBALL,ELECTROWEB,ENCORE,ENDURE,FACADE,FLING,GRASSKNOT,HELPINGHAND,LIGHTSCREEN,NASTYPLOT,PLAYROUGH,PROTECT,RAINDANCE,REFLECT,REST,REVERSAL,SLEEPTALK,SUBSTITUTE,SURF,SWIFT,TAKEDOWN,THUNDER,THUNDERBOLT,THUNDERPUNCH,THUNDERWAVE,TRAILBLAZE,VOLTSWITCH,WILDCHARGE
+Generation = 7
+Evolutions = PIKACHU,Level,16
 #-------------------------------
 [PICHU,2]
 FormName = Forma Picoreja
@@ -2191,12 +2231,14 @@ Pokedex = Cuando sus compañeros se encuentran en problemas, blande una llama se
 Generation = 9
 #-------------------------------
 [OSHAWOTT,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
 [DEWOTT,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
@@ -2256,7 +2298,8 @@ Pokedex = Su potente veneno, que desprende una luz tenue, le ha afectado a la me
 Generation = 9
 #-------------------------------
 [PETILIL,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
@@ -2513,7 +2556,8 @@ Pokedex = La energía dentro de Golurk ha sido estimulada por la megaevolución.
 Generation = 9
 #-------------------------------
 [RUFFLET,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
@@ -3023,7 +3067,8 @@ Pokedex = Presume su fuerza al exhibir todos los músculos de su cuerpo, los cua
 Generation = 9
 #-------------------------------
 [GOOMY,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
@@ -3122,7 +3167,8 @@ WildItemUncommon = MIRACLESEED
 WildItemRare = MIRACLESEED
 #-------------------------------
 [BERGMITE,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
@@ -3228,12 +3274,14 @@ Weight = 490.0
 Shape = BipedalTail
 #-------------------------------
 [ROWLET,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------
 [DARTRIX,1]
-Region = 
+FormName = Forma Hisui
+Region = Hisui
 UnmegaForm = -2
 Generation = 8
 #-------------------------------

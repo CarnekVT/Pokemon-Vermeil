@@ -363,10 +363,10 @@ module ResearchNotebook
       species = parts[0].strip
       form = parts.length > 1 ? parts[1].strip : nil
       aliases = {
-        "NIDORANFE" => "NIDORANf",
-        "NIDORANF"  => "NIDORANf",
-        "NIDORANMA" => "NIDORANm",
-        "NIDORANM"  => "NIDORANm"
+        "NIDORANFE" => "NIDORANfE",
+        "NIDORANF"  => "NIDORANfE",
+        "NIDORANMA" => "NIDORANmA",
+        "NIDORANM"  => "NIDORANmA"
       }
       species = aliases[species.upcase] || species
       return form ? "#{species},#{form}" : species
@@ -389,6 +389,49 @@ module ResearchNotebook
         @changedex_hidden_stamp = stamp
       end
       return @changedex_hidden_keys || {}
+    end
+
+    # Devuelve true si la forma dada es de tipo "especial" (Mega, Gigamax, etc.)
+    def special_form_type(species, form)
+      return nil if form.to_i == 0
+      return nil if !defined?(GameData::Species)
+      begin
+        data = GameData::Species.get_species_form(species, form)
+        if data && data.respond_to?(:form_name) && !data.form_name.to_s.empty?
+          fname = data.form_name.to_s.downcase
+          # Detectar tipos de forma especial por palabras clave en el nombre
+          return :MEGA if fname.include?("mega")
+          return :GIGANTAMAX if fname.include?("gigantamax") || fname.include?("gmax")
+          return :PRIMAL if fname.include?("primal")
+          return :ULTRA_BURST if fname.include?("ultra burst") || fname.include?("ultraburst")
+          return :ETERNAMAX if fname.include?("eternamax")
+          return :ORIGIN if fname.include?("origin")
+          return :ZEN if fname.include?("zen")
+          return :COMPLETE if fname.include?("complete")
+          return :CROWNED if fname.include?("crowned")
+          return :HERO if fname.include?("hero")
+          return :ETERNAL if fname.include?("eternal")
+          return :DAWN if fname.include?("dawn") || fname.include?("dusk")
+          return :SCHOOL if fname.include?("school")
+          return :SHIELDED if fname.include?("shielded") || fname.include?("blade")
+          # Fallback: usar el nombre completo como símbolo
+          return fname.gsub(/[^a-z0-9_]/, "_").to_sym
+        end
+      rescue
+      end
+      return nil
+    end
+
+    def is_golden_special_form?(species, form)
+      return false if form.to_i == 0
+      type = special_form_type(species, form)
+      return false if !type
+      Array(ResearchNotebook::Settings::GOLDEN_SPECIAL_FORM_TYPES).include?(type)
+    end
+
+    def is_form_one_readonly?(species, form)
+      return false if !ResearchNotebook::Settings::FORM_ONE_READONLY
+      return form.to_i == 1
     end
 
     def changedex_species_keys
@@ -416,7 +459,21 @@ module ResearchNotebook
       return false if !ResearchNotebook::Settings::USE_CHANGEDEX_HIDDEN_FORMS
       key = normalize_species_key(raw_key)
       return false if !key
-      return changedex_hidden_keys.key?(key.upcase)
+      visible = Array(ResearchNotebook::Settings::CHANGEDEX_VISIBLE_FORMS).map do |entry|
+        normalized = normalize_species_key(entry)
+        normalized.upcase if normalized
+      end.compact
+      return false if visible.include?(key.upcase)
+
+      # La Libreta agrupa sus entradas por especie base. Por tanto, si ChangeDex
+      # oculta cualquier forma de esa especie (Mega, Gigamax, etc.), no debe
+      # aparecer la entrada especial agrupada de la Libreta. Una excepción de
+      # Settings para cualquier forma de esa especie la deja visible.
+      species_key = key.split(",", 2)[0].upcase
+      return false if visible.any? { |entry| entry == species_key || entry.start_with?(species_key + ",") }
+      return changedex_hidden_keys.key?(key.upcase) ||
+             changedex_hidden_keys.key?(species_key) ||
+             changedex_hidden_keys.keys.any? { |entry| entry.start_with?(species_key + ",") }
     end
 
     def changedex_has_entry?(raw_key)
@@ -433,6 +490,26 @@ module ResearchNotebook
     # Normaliza IDs provenientes de JSON/PBS sin llamar a try_get con valores
     # que Essentials no conoce. Algunos proyectos escriben NIDORANFE/NIDORANMA
     # y otros escriben NINETALES,1 para especie + forma.
+    # Devuelve el nombre de forma legible (ej: "Hisuian Form", "Alolan Form", "Mega Form")
+    def form_display_name(species, form)
+      return "" if form.to_i == 0
+      return nil if !defined?(GameData::Species)
+      begin
+        data = GameData::Species.get_species_form(species, form)
+        return data.form_name.to_s if data && data.respond_to?(:form_name) && !data.form_name.to_s.empty?
+      rescue
+      end
+      return nil
+    end
+
+    # Devuelve el nombre completo con forma (ej: "Zorua (Hisuian Form)")
+    def species_form_display_name(species, form)
+      base_name = species_name(species)
+      fname = form_display_name(species, form)
+      return base_name if !fname || fname.empty?
+      return "#{base_name} (#{fname})"
+    end
+
     def normalize_species_id(value)
       return nil if value.nil?
       raw = value.respond_to?(:id) ? value.id : value
@@ -440,10 +517,10 @@ module ResearchNotebook
       return nil if raw.empty?
       raw = raw.split(",", 2)[0].strip
       aliases = {
-        "NIDORANFE" => "NIDORANf",
-        "NIDORANF"  => "NIDORANf",
-        "NIDORANMA" => "NIDORANm",
-        "NIDORANM"  => "NIDORANm"
+        "NIDORANFE" => "NIDORANfE",
+        "NIDORANF"  => "NIDORANfE",
+        "NIDORANMA" => "NIDORANmA",
+        "NIDORANM"  => "NIDORANmA"
       }
       candidates = [aliases[raw.upcase] || raw, raw.upcase, raw.downcase]
       candidates = candidates.compact.map { |candidate| candidate.to_sym rescue nil }.compact.uniq
@@ -525,6 +602,178 @@ module ResearchNotebook
       end
       @relevant_species_cache = ids.compact.uniq
       return @relevant_species_cache
+    end
+
+    # Recopila todas las entradas (base + formas) para la sección Áureo.
+    # Devuelve array de strings: "ESPECIE" para base, "ESPECIE,FORMA" para formas.
+    def golden_entries_with_forms
+      return @golden_entries_cache if @golden_entries_cache
+      entries = []
+      
+      # Especies base desde JSON
+      base_species = species_ids_from(golden_data)
+      entries.concat(base_species)
+      
+      # Progreso trackeado - filtrar por ChangeDex
+      ResearchNotebook.progress.tracked_golden_species.each do |sp|
+        entries << sp unless changedex_hidden?(sp)
+      end
+      
+      # Formas especiales (Megas, Gigamax, etc.) si está habilitado
+      if ResearchNotebook::Settings::INCLUDE_SPECIAL_FORMS_IN_GOLDEN
+        if defined?(GameData::Species)
+          begin
+            special_forms = golden_special_forms_from_gamedata
+            special_forms.each do |entry|
+              next if changedex_hidden?(entry)
+              entries << entry unless entries.include?(entry)
+            end
+          rescue => e
+            log("Formas especiales Áureo: #{e.message}")
+          end
+        end
+      end
+      
+      # Forma 1 (Pikachu, Cubone, etc.) - ahora editable vía ChangeDex
+      if ResearchNotebook::Settings::INCLUDE_FORM_ONE_IN_GOLDEN
+        form_one = form_one_forms_from_gamedata
+        form_one.each do |entry|
+          next if changedex_hidden?(entry)
+          entries << entry unless entries.include?(entry)
+        end
+      end
+      
+      @golden_entries_cache = entries.compact.uniq
+      return @golden_entries_cache
+    end
+
+    # Recopila todas las entradas (base + formas) para la sección Habilidades Arcanas.
+    def arcane_entries_with_forms
+      return @arcane_entries_cache if @arcane_entries_cache
+      entries = []
+      
+      # Especies base desde JSON
+      base_species = species_ids_from(arcane_data)
+      entries.concat(base_species)
+      
+      # Especies desde GameData
+      entries.concat(arcane_species_from_gamedata)
+      
+      # Progreso trackeado - filtrar por ChangeDex
+      ResearchNotebook.progress.tracked_arcane_species.each do |sp|
+        entries << sp unless changedex_hidden?(sp)
+      end
+      
+      # Formas alternas si está habilitado
+      if ResearchNotebook::Settings::INCLUDE_ALTERNATE_FORMS_IN_ARCANE
+        if defined?(GameData::Species)
+          begin
+            alt_forms = arcane_alternate_forms_from_gamedata
+            alt_forms.each do |entry|
+              next if changedex_hidden?(entry)
+              entries << entry unless entries.include?(entry)
+            end
+          rescue => e
+            log("Formas alternas Arcanas: #{e.message}")
+          end
+        end
+      end
+      
+      # Forma 1 - ahora editable vía ChangeDex
+      if ResearchNotebook::Settings::INCLUDE_FORM_ONE_IN_ARCANE
+        form_one = form_one_forms_from_gamedata
+        form_one.each do |entry|
+          next if changedex_hidden?(entry)
+          next unless arcane_capable?(entry.split(",")[0])
+          entries << entry unless entries.include?(entry)
+        end
+      end
+      
+      @arcane_entries_cache = entries.compact.uniq
+      return @arcane_entries_cache
+    end
+
+    # Cache para evitar iterar GameData::Species múltiples veces
+    @gamedata_species_cache = nil
+    @gamedata_species_stamp = nil
+
+    def all_gamedata_species
+      if defined?(GameData::Species)
+        # Usar timestamp de compilación como caché simple
+        return @gamedata_species_cache if @gamedata_species_cache
+        ret = []
+        begin
+          GameData::Species.each do |data|
+            ret << data
+          end
+        rescue => e
+          log("Error iterando GameData::Species: #{e.message}")
+        end
+        @gamedata_species_cache = ret
+        return ret
+      end
+      return []
+    end
+
+    def golden_special_forms_from_gamedata
+      ret = []
+      all_gamedata_species.each do |data|
+        next if !data.respond_to?(:form) || data.form.to_i == 0
+        species = data.respond_to?(:species) ? data.species : data.id
+        next if !species
+        base_id = normalize_species_id(species)
+        next if !base_id
+        next unless is_golden_special_form?(base_id, data.form)
+        ret << "#{base_id},#{data.form}"
+      end
+      ret.uniq
+    end
+
+    def arcane_alternate_forms_from_gamedata
+      ret = []
+      all_gamedata_species.each do |data|
+        next if !data.respond_to?(:form) || data.form.to_i == 0
+        species = data.respond_to?(:species) ? data.species : data.id
+        next if !species
+        base_id = normalize_species_id(species)
+        next if !base_id
+        next unless arcane_capable?(base_id)
+        ret << "#{base_id},#{data.form}"
+      end
+      ret.uniq
+    end
+
+    def form_one_forms_from_gamedata
+      ret = []
+      all_gamedata_species.each do |data|
+        next if !data.respond_to?(:form) || data.form.to_i != 1
+        species = data.respond_to?(:species) ? data.species : data.id
+        next if !species
+        base_id = normalize_species_id(species)
+        next if !base_id
+        ret << "#{base_id},1"
+      end
+      ret.uniq
+    end
+
+    def reload!
+      @golden_data = nil
+      @arcane_data = nil
+      @golden_stamp = nil
+      @arcane_stamp = nil
+      @family_graph = nil
+      @family_cache = {}
+      @arcane_gamedata_species = nil
+      @relevant_species_cache = nil
+      @changedex_hidden_keys = nil
+      @changedex_hidden_stamp = nil
+      @changedex_species_keys = nil
+      @changedex_species_stamp = nil
+      @golden_entries_cache = nil
+      @arcane_entries_cache = nil
+      @gamedata_species_cache = nil
+      golden_data
+      arcane_data
     end
 
     def golden_capable?(species)
@@ -701,6 +950,22 @@ module ResearchNotebook
       return value if !value.nil?
       payload = golden_form_payload(species)
       return get_key(payload, "hpDrain", "HPDrain", "goldenHPDrain", "GoldenHPDrain")
+    end
+
+    # Devuelve el texto del drenaje de HP de la Forma Dorada formateado (ej: 0.25 -> "1/4")
+    def golden_form_drain_text
+      return "Pierde 1/4 de sus PS máximos al final de cada turno." if !defined?(GoldenSystem) || !GoldenSystem.respond_to?(:settings)
+      drain = GoldenSystem.settings[:form_hp_drain] rescue 0.25
+      # Convertir decimal a fracción legible
+      fraction = case drain
+      when 0.25 then "1/4"
+      when 0.33, 0.333 then "1/3"
+      when 0.5 then "1/2"
+      when 0.66, 0.666 then "2/3"
+      when 0.75 then "3/4"
+      else drain.to_s
+      end
+      return _INTL("Pierde {1} de sus PS máximos al final de cada turno.", fraction)
     end
 
     def golden_power_raw(species)
@@ -932,6 +1197,25 @@ module ResearchNotebook
     end
 
     def species_name(species)
+      # Acepta "ESPECIE" o "ESPECIE,FORMA"
+      if species.is_a?(String) && species.include?(",")
+        base, form_str = species.split(",", 2)
+        form = form_str.to_i
+        begin
+          data = GameData::Species.get_species_form(base.to_sym, form)
+          return data.name if data
+        rescue
+        end
+        # Fallback: nombre base + nombre de forma
+        base_data = GameData::Species.try_get(base.to_sym)
+        form_name = ""
+        begin
+          form_data = GameData::Species.get_species_form(base.to_sym, form)
+          form_name = form_data.form_name.to_s if form_data && form_data.respond_to?(:form_name)
+        rescue
+        end
+        return base_data ? "#{base_data.name} (#{form_name})" : species.to_s
+      end
       begin
         data = GameData::Species.try_get(species)
         return data.name if data
@@ -940,9 +1224,28 @@ module ResearchNotebook
       return species.to_s
     end
 
-    def normal_types(species)
+    def species_base_and_form(species)
+      # Devuelve [base_species, form] desde "ESPECIE" o "ESPECIE,FORMA"
+      if species.is_a?(String) && species.include?(",")
+        base, form_str = species.split(",", 2)
+        return [base.to_sym, form_str.to_i]
+      end
+      return [species, 0]
+    end
+
+    def form_name(species, form)
+      return "" if form.to_i == 0
       begin
-        data = GameData::Species.try_get(species)
+        data = GameData::Species.get_species_form(species, form)
+        return data.form_name.to_s if data && data.respond_to?(:form_name)
+      rescue
+      end
+      return ""
+    end
+
+    def normal_types(species, form = 0)
+      begin
+        data = species_data(species, form)
         return data.types if data && data.respond_to?(:types)
       rescue
       end
