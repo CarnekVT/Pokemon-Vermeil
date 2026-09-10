@@ -6137,7 +6137,7 @@ Accuracy = 0
 TotalPP = 5
 Target = UserOrNearAlly
 FunctionCode = HealTargetHalfOfTotalHP
-Description = Restaura la mitad de los PS máximos del objetivo. Fuera de combate puede transferir sus PS a un aliado.
+Description = Restaura la mitad de los PS máximos del usuario o el aliado. Fuera de combate puede transferir sus PS a un aliado.
 #-------------------------------
 [MIMIC]
 Name = Mimético
