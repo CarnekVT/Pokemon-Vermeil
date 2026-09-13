@@ -1,4 +1,5 @@
 Name = [VERMEIL] Research Notebook
-Version = 1.2.2
+Version = 2.0.0
 Essentials = 21.1
-Credits = CarnekVT
+Credits = Carnek
+Description = Libreta de investigación vinculada 100% a la Nueva Pokédex habilitada, con memoización y optimización de rendimiento.

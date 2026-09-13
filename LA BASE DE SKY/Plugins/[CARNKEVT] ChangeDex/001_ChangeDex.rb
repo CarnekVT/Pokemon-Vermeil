@@ -741,6 +741,14 @@ module CarnekChangeData
     return true
   end
 
+  def self.evolution_target_identity(target)
+    return VermeilChangeDex.evolution_target_identity(target) rescue (target ? target.to_sym : :NONE)
+  end
+
+  def self.evolution_target_identity_class(target)
+    return VermeilChangeDex.evolution_target_identity_class(target) rescue (target ? target.to_sym : :NONE)
+  end
+
 end
 
 #===============================================================================
@@ -761,7 +769,8 @@ module ChangeDexConfig
     "colorPanelFill" => "#1c2432", "colorPanelEdge" => "#3e4e68", "colorHighlight" => "#dc3c3c",
     "colorText" => "#f5f5f5", "colorMuted" => "#b4b4b4", "colorOriginal" => "#50b4ff",
     "colorResult" => "#ff6464", "colorDifference" => "#ffd700", "colorNew" => "#64ff78",
-    "suppressPbsChangesLogs" => true, "debugLogging" => false, "specialKeyLabel" => ""
+    "suppressPbsChangesLogs" => true, "debugLogging" => false, "specialKeyLabel" => "",
+    "allPbsModeButton" => false
   }
   @data = nil
   @data_signature = nil
@@ -860,6 +869,10 @@ module ChangeDexConfig
   end
   def self.special_key_label
     return data["specialKeyLabel"].to_s.strip
+  end
+  def self.all_pbs_mode_button?
+    v = data["allPbsModeButton"]
+    return v == true || v.to_s.downcase == "true"
   end
   def self.hidden_form?(species, form)
     key = "#{species.to_s.upcase},#{form.to_i}"
@@ -1267,6 +1280,23 @@ module VermeilChangeDex
     res[:egg_moves]   = (!this[:egg_moves].empty?) ? this[:egg_moves] : (base ? base[:egg_moves] : [])
     res[:evolutions]  = (!this[:evolutions].empty?) ? this[:evolutions] : (base ? base[:evolutions] : [])
     return res
+  end
+
+  def self.evolution_target_identity(target)
+    return :NONE if target.nil?
+    raw = target
+    begin
+      id = target.to_sym
+      data = GameData::Species.try_get(id) rescue nil
+      return data.species.to_sym if data && data.respond_to?(:species)
+      return id
+    rescue StandardError
+    end
+    return raw.to_s.strip.upcase.to_sym rescue :NONE
+  end
+
+  def self.evolution_target_identity_class(target)
+    return evolution_target_identity(target)
   end
 
 
@@ -1995,6 +2025,12 @@ module VermeilChangeDex
       @jump_up_input = defined?(Input::JUMPUP) ? Input::JUMPUP : nil
       @jump_down_input = defined?(Input::JUMPDOWN) ? Input::JUMPDOWN : nil
       @category = :pokemon_changes
+      # El modo ALL PBS NO es gameplay: solo lo decide la config del mod de
+      # Maker Studio (Data/ChangeDex/config.json). Sin config, siempre :json.
+      @pokedex_mode = ChangeDexConfig.all_pbs_mode_button? ? :all : :json
+      @changed_keys = nil
+      @changed_shown_count = 0
+      @detail_no_changes = false
       @sort_mode = :dex
       @type_filter = :all
       @generation_filter = nil
@@ -2321,7 +2357,7 @@ module VermeilChangeDex
         @species_learnset_cache[key] = (v_level + v_tutor + v_egg).compact.uniq
 
         if fields.key?("Evolutions")
-          new_evos = evo_rows.call(fields["Evolutions"])
+          new_evos = evo_rows.call(fields["Evolutions"]).reject { |e| e[1].to_s.upcase == "NONE" }
           old_targets = (canon[:evolutions] || []).map { |e| evolution_target_identity(e[0]) }.compact.uniq
           @entry_gained_evos[key] = new_evos.select { |e| !old_targets.include?(evolution_target_identity(e[0])) }.map { |e| e[0] }.compact.uniq
         else
@@ -2625,7 +2661,7 @@ module VermeilChangeDex
     end
 
     def current_category_title
-      case @category
+      base = case @category
       when :pokemon_changes then VermeilChangeDex.ui("Pokemon Changes")
       when :move_changes    then VermeilChangeDex.ui("Move Changes")
       when :ability_changes then VermeilChangeDex.ui("Ability Changes")
@@ -2633,6 +2669,10 @@ module VermeilChangeDex
       when :new_abilities   then VermeilChangeDex.ui("New Abilities")
       else VermeilChangeDex.ui("Change Dex")
       end
+      if @category == :pokemon_changes && @pokedex_mode == :all
+        return base + " · " + VermeilChangeDex.ui("Todos PBS · Cambios: {1}", @changed_shown_count)
+      end
+      return base
     end
 
     def pokemon_category?
@@ -2849,9 +2889,36 @@ module VermeilChangeDex
     end
 
     def apply_filters
-      list = (@all_entries || []).clone
-      list.reject! { |sp, f| locked_new_mega?(sp, f) }
-      list.reject! { |sp, f| excluded_from_pokemon_changes?(sp, f) }
+      @changed_keys = {}
+      (@all_entries || []).each { |k| @changed_keys[k] = true }
+      list = []
+      if @pokedex_mode == :all
+        dex_set = change_dex_pokedex_set
+        GameData::Species.each do |s_data|
+          sp = s_data.species
+          f = s_data.form
+          next if dex_set && !dex_set[[sp, f]]
+          next if s_data.has_flag?("HideFromPokedex")
+          if f > 0
+            next if s_data.real_pokedex_entry.nil? || s_data.real_pokedex_entry.to_s == "???"
+          end
+          next if excluded_from_pokemon_changes?(sp, f)
+          next if base_only_form_family?(sp) && f > 0
+          next if minior_core_form?(sp, f) && f > 1
+          next if mega_form?(sp, f) && !@changed_keys[[sp, f]]
+          list << [sp, f]
+        end
+        list.uniq!
+      else
+        list = (@all_entries || []).clone
+        # La Pokédex activa la define la dex real (Data/SpeciesDex/config.json):
+        # en :json (default) solo se muestran cambios de especies que son slots
+        # de una dex habilitada, nunca de todo el PBS.
+        dex_set = change_dex_pokedex_set
+        list.select! { |sp, f| dex_set[[sp, f]] } if dex_set
+        list.reject! { |sp, f| locked_new_mega?(sp, f) }
+        list.reject! { |sp, f| excluded_from_pokemon_changes?(sp, f) }
+      end
       case @type_filter
       when :mega
         list.select! { |sp, f| mega_form?(sp, f) }
@@ -2870,6 +2937,7 @@ module VermeilChangeDex
       else
         list.sort_by! { |k| [@dex_order[k[0]] || 999_999, k[1]] }
       end
+      @changed_shown_count = list.count { |k| @changed_keys[k] } if @pokedex_mode == :all
       @entries = list
       if @entries.empty?
         @index = 0
@@ -2969,16 +3037,24 @@ module VermeilChangeDex
     end
 
     def category_options
-      return [
+      opts = [
         [:pokemon_changes, VermeilChangeDex.ui("Pokemon Changes")],
         [:move_changes, VermeilChangeDex.ui("Move Changes")],
         [:ability_changes, VermeilChangeDex.ui("Ability Changes")],
         [:new_moves, VermeilChangeDex.ui("New Moves")],
         [:new_abilities, VermeilChangeDex.ui("New Abilities")]
       ]
+      # El toggle ALL PBS no existe en gameplay: el modo lo fija SOLO la configuración
+      # del mod (ChangeDexConfig.all_pbs_mode_button?), nunca el jugador.
+      return opts
+    end
+
+    def mode_toggle_label
+      return (@pokedex_mode == :all) ? VermeilChangeDex.ui("Mode: ChangeDex list") : VermeilChangeDex.ui("Mode: All PBS species")
     end
 
     def open_category_menu(_force_open = false, exit_on_back = true, fullscreen = false)
+      pbPlayDecisionSE
       opts = category_options
       idx = opts.index { |o| o[0] == @category }
       @category_panel_index = idx || 0
@@ -2994,16 +3070,30 @@ module VermeilChangeDex
     end
 
     def close_category_menu(apply_choice = false)
+      if apply_choice
+        pbPlayDecisionSE
+      else
+        pbPlayCancelSE
+      end
       old_category = @category
       if apply_choice
         chosen = category_options[@category_panel_index]
         if chosen
-          @category = chosen[0]
-          if @category != old_category || @startup_category_selection
+          if chosen[0] == :__mode_toggle__
+            @pokedex_mode = (@pokedex_mode == :all) ? :json : :all
             @index = 0
             ensure_change_data_ready if !@data_ready
             @all_entries = (@pokemon_entries || []).clone if pokemon_category?
+            @entries = []
             apply_current_filters
+          else
+            @category = chosen[0]
+            if @category != old_category || @startup_category_selection
+              @index = 0
+              ensure_change_data_ready if !@data_ready
+              @all_entries = (@pokemon_entries || []).clone if pokemon_category?
+              apply_current_filters
+            end
           end
         end
       end
@@ -3105,8 +3195,51 @@ module VermeilChangeDex
         return (@ability_entries_all || []).count { |e| !ChangeDexConfig.hidden_ability?(e[:id]) && !e[:is_new] && (e[:data_changed] || !(e[:added_users_comparable] || []).empty? || !(e[:removed_users] || []).empty?) }
       when :new_moves then return (@new_move_entries_all || []).count { |e| !ChangeDexConfig.hidden_move?(e[:id]) }
       when :new_abilities then return (@new_ability_entries_all || []).count { |e| !ChangeDexConfig.hidden_ability?(e[:id]) }
+      when :__mode_toggle__ then return (@pokedex_mode == :all) ? (@pokemon_entries || []).length : pokedex_all_count
       end
       return 0
+    end
+
+    def pokedex_all_count
+      n = 0
+      dex_set = change_dex_pokedex_set
+      GameData::Species.each do |s_data|
+        sp = s_data.species
+        f = s_data.form
+        next if dex_set && !dex_set[[sp, f]]
+        next if s_data.has_flag?("HideFromPokedex")
+        if f > 0
+          next if s_data.real_pokedex_entry.nil? || s_data.real_pokedex_entry.to_s == "???"
+          next if base_only_form_family?(sp) && f > 0
+          next if minior_core_form?(sp, f) && f > 1
+        end
+        n += 1
+      end
+      return n
+    end
+
+    def change_dex_pokedex_set
+      return @change_dex_pokedex_set if @change_dex_pokedex_set_built
+      @change_dex_pokedex_set_built = true
+      if !defined?(NuevaPokedex) || !NuevaPokedex.respond_to?(:accessible_regions)
+        @change_dex_pokedex_set = nil
+        return nil
+      end
+      # Set de slots EXACTOS de la Pokédex real: [base, form] por slot del
+      # Data/SpeciesDex/config.json. Una forma alternativa solo entra si tiene
+      # slot propio (RATTATA_1) o es la forma base; las formas ocultas quedan fuera.
+      set = {}
+      (NuevaPokedex.accessible_regions || []).each do |r|
+        NuevaPokedex.regional_species(r).each do |entry|
+          begin
+            base, form = NuevaPokedex.entry_base_and_form(entry)
+            set[[base, form]] = true
+          rescue StandardError
+          end
+        end
+      end
+      @change_dex_pokedex_set = set
+      return set
     end
 
     def draw_category_panel
@@ -3181,6 +3314,7 @@ module VermeilChangeDex
     end
 
     def open_filter_menu
+      pbPlayDecisionSE
       if !pokemon_category?
         open_non_pokemon_filter_menu
         return
@@ -3268,15 +3402,11 @@ module VermeilChangeDex
     end
 
     def evolution_target_identity(target)
-      raw = target
-      begin
-        id = target.to_sym
-        data = GameData::Species.try_get(id)
-        return data.species.to_sym if data && data.respond_to?(:species)
-        return id
-      rescue StandardError
-      end
-      return raw.to_s.upcase.to_sym
+      return VermeilChangeDex.evolution_target_identity(target)
+    end
+
+    def evolution_target_identity_class(target)
+      return VermeilChangeDex.evolution_target_identity_class(target)
     end
 
     def evolution_data_changed?(species_data, canon)
@@ -4574,6 +4704,9 @@ module VermeilChangeDex
         s.x = GRID_X + ((i % GRID_COLS) * GRID_CELL) + (GRID_CELL / 2)
         s.y = GRID_Y + ((i / GRID_COLS) * GRID_CELL) + (GRID_CELL / 2) - 2
         s.pbSetParams(sp, 0, f, false); fit_species_icon(s); @sprites["icon_#{real_idx}"] = s
+        if @pokedex_mode == :all && @changed_keys[[sp, f]]
+          grid_bmp.fill_rect(GRID_X + ((i % GRID_COLS) * GRID_CELL) + 8, GRID_Y + ((i / GRID_COLS) * GRID_CELL) + 8, 7, 7, Color.new(240, 190, 60))
+        end
         # True center origin in each 84×84 icon cell.
         frame = hidden_variant_icon_frame(sp, f)
         if !frame.nil?
@@ -4622,6 +4755,9 @@ module VermeilChangeDex
         s.y = GRID_Y + ((GRID_ROWS - 1) * GRID_CELL) + (GRID_CELL / 2) - 2
         s.pbSetParams(sp, 0, f, false); fit_species_icon(s); s.opacity = 120
         @sprites["icon_preview_#{real_idx}"] = s
+        if @pokedex_mode == :all && @changed_keys[[sp, f]]
+          grid_bmp.fill_rect(GRID_X + (i * GRID_CELL) + 8, GRID_Y + ((GRID_ROWS - 1) * GRID_CELL) + 8, 7, 7, Color.new(240, 190, 60, 200))
+        end
         frame = hidden_variant_icon_frame(sp, f)
         if !frame.nil?
           mark = IconSprite.new(0, 0, @viewport)
@@ -5205,6 +5341,7 @@ module VermeilChangeDex
 
     def switch_to_detail
       return if @entries.empty?
+      pbPlayDecisionSE
       @mode = :detail
       ["scroll_up", "scroll_down"].each do |k|
         next if !@sprites[k] || @sprites[k].disposed?
@@ -5223,11 +5360,16 @@ module VermeilChangeDex
       end
       sp = @entries[@index][0]
       form = @entries[@index][1]
+      if @pokedex_mode == :all && !(@changed_keys || {})[[sp, form]]
+        draw_no_changes_view(sp, form)
+        return
+      end
       prepare_detail_form_options(sp, form)
       draw_detail_view(sp, @detail_form_options[@detail_form_option_index] || form)
     end
 
     def switch_to_grid
+      pbPlayCancelSE
       @mode = :grid
       @sprites["grid_bg"].visible = true if @sprites["grid_bg"] && !@sprites["grid_bg"].disposed?
       hide_ability_moves_popup
@@ -5536,7 +5678,29 @@ module VermeilChangeDex
       spr.y = (@detail_variant_mark_base_y + bob).round
     end
 
+    def draw_no_changes_view(species, form)
+      @detail_species = species
+      @detail_form = form
+      @detail_no_changes = true
+      bmp = @sprites["overlay"].bitmap
+      bmp.clear
+      draw_header(VermeilChangeDex.ui("COMPARISON"), changedex_display_name(species, form))
+      draw_panel(bmp, 40, 120, 560, 300)
+      if @sprites["big_icon"] && !@sprites["big_icon"].disposed?
+        @sprites["big_icon"].dispose
+      end
+      @sprites["big_icon"] = PokemonSpeciesIconSprite.new(nil, @viewport)
+      @sprites["big_icon"].setOffset(PictureOrigin::CENTER)
+      @sprites["big_icon"].x, @sprites["big_icon"].y = SCREEN_W / 2, 200
+      @sprites["big_icon"].z = 210
+      @sprites["big_icon"].pbSetParams(species, 0, form, false)
+      fit_species_icon(@sprites["big_icon"])
+      pbDrawTextPositions(bmp, [[VermeilChangeDex.ui("This Pokémon has no changes recorded in the ChangeDex."), SCREEN_W / 2, 310, :center, COLOR_TEXT_GRAY, Color.new(0,0,0,120)],
+                                [VermeilChangeDex.ui("{1}: Back", @back_key_name), SCREEN_W / 2, 345, :center, COLOR_TEXT_MAIN, Color.new(0,0,0,120)]])
+    end
+
     def draw_detail_view(species, form)
+      @detail_no_changes = false
       hide_new_moves_popup
       bmp = @sprites["overlay"].bitmap; bmp.clear; canon = VermeilChangeDex.get_canon_info(species, form)
       canon ||= VermeilChangeDex.get_canon_info(species, 0)
@@ -5565,6 +5729,7 @@ module VermeilChangeDex
         @sprites.delete("detail_variant_mark")
       end
       @detail_variant_mark_base_y = nil
+      @detail_icon_base_y = nil
       @sprites["big_icon"] = PokemonSpeciesIconSprite.new(nil, @viewport)
       @sprites["big_icon"].setOffset(PictureOrigin::CENTER); @sprites["big_icon"].x, @sprites["big_icon"].y = LEFT_PANEL_CENTER_X, 104
       @sprites["big_icon"].z = 210; @sprites["big_icon"].pbSetParams(species, 0, form, false); fit_species_icon(@sprites["big_icon"])
@@ -6236,7 +6401,9 @@ module VermeilChangeDex
           end
           if Input.trigger?(Input::ACTION)
             if pokemon_category?
-              if open_detail_action_menu
+              if @detail_no_changes
+                pbPlayBuzzerSE
+              elsif open_detail_action_menu
                 pbPlayCursorSE
               else
                 pbPlayBuzzerSE
@@ -6289,8 +6456,12 @@ module VermeilChangeDex
         hide_level_movepool_popup if @level_movepool_popup_open
         sp = @entries[@index][0]
         form = @entries[@index][1]
-        prepare_detail_form_options(sp, form)
-        draw_detail_view(sp, @detail_form_options[@detail_form_option_index] || form)
+        if @pokedex_mode == :all && !(@changed_keys || {})[[sp, form]]
+          draw_no_changes_view(sp, form)
+        else
+          prepare_detail_form_options(sp, form)
+          draw_detail_view(sp, @detail_form_options[@detail_form_option_index] || form)
+        end
       else
         hide_carrier_popup if @carrier_popup_open
         hide_ability_moves_popup if @ability_moves_popup_open
@@ -6301,11 +6472,27 @@ module VermeilChangeDex
       end
     end
 
+    def update_cursor_pulse_animation
+      return if !@sprites["cursor"] || @sprites["cursor"].disposed? || !@sprites["cursor"].visible
+      time = defined?(Graphics.frame_count) ? (Graphics.frame_count * 0.16) : ((System.uptime * 7.2) rescue 0)
+      pulse = (215 + Math.sin(time) * 40).round
+      @sprites["cursor"].opacity = [[pulse, 150].max, 255].min
+    end
+
+    def update_detail_icon_bob_animation
+      return if !@sprites["big_icon"] || @sprites["big_icon"].disposed? || !@sprites["big_icon"].visible
+      @detail_icon_base_y ||= @sprites["big_icon"].y
+      bob = Math.sin(System.uptime * 3.6) * 3.0
+      @sprites["big_icon"].y = (@detail_icon_base_y + bob).round
+    end
+
     def pbUpdate
       pbUpdateSpriteHash(@sprites)
       update_evo_mark_animation if @mode == :grid
       update_variant_mark_animation if @mode == :grid
       update_scroll_arrow_animation if @mode == :grid
+      update_cursor_pulse_animation if @mode == :grid
+      update_detail_icon_bob_animation if @mode == :detail
       update_carrier_mark_animation
       update_detail_variant_mark_animation if @mode == :detail
     end

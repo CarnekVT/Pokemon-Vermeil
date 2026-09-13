@@ -12,7 +12,7 @@ module ResearchNotebook
     # :GAME     -> usa la Pokédex regional/del juego indicada abajo.
     # :NATIONAL -> usa el número Nacional.
     DEX_ORDER = :GAME
-    GAME_DEX_INDEX = 0
+    # La Pokédex activa siempre viene del JSON editable (Data/SpeciesDex/config.json).
 
     # Fuentes de verdad. La Libreta NO duplica la configuración de las mecánicas.
     GOLDEN_SPECIES_JSON = "Data/GoldenSystem/species.json"
@@ -68,6 +68,10 @@ module ResearchNotebook
     GRID_COLUMNS = 5
     GRID_ROWS    = 5
     DEFAULT_SORT = :DEX       # :DEX / :NAME / :STATUS
+
+    # Filtro del catálogo de la Libreta.
+    # Siempre :json -> solo lo admitido en la Pokédex activa (Data/SpeciesDex/config.json).
+    DEX_CATALOG_MODE = :json
 
     # Usa el spritesheet de tipos del propio proyecto. No se incluyen gráficos
     # duplicados en este plugin. `Graphics/UI/types` es la ruta principal de v21.1.

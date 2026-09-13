@@ -1,5 +1,14 @@
 #===============================================================================
 # Suncorona / Eclipsora - Custom Abilities
+#
+# Runtime hooks that wrap engine methods (Battle, Battle::Scene, Battle::Move
+# and move subclasses) are implemented as prepended modules with `super`.
+# A flat alias_method captured at load time would grab whatever prepended
+# module sits on top of those classes (Maker Studio BAS, BSS, DBK, Golden) and
+# that module's `super` bounces back into the flat alias → SystemStackError.
+# Prepends chain via `super` in any load order, so no recursion is possible.
+# This is a justified exception to the project's R5 in a plugin ecosystem that
+# is already prepend-based.
 #===============================================================================
 
 module Battle::AbilityEffects
@@ -136,6 +145,51 @@ end
 #===============================================================================
 # Executioner's Shadow pseudo-terrain state (5 turns, independent from terrain/weather)
 #===============================================================================
+module UmbraVeil
+  module BattleHooks
+    def pbStartBattleCore(*args)
+      @exec_shadow_turns = 0
+      @exec_shadow_side  = nil
+      result = super
+      @scene.pbSetExecutionerShadowFog(false) if @scene && @scene.respond_to?(:pbSetExecutionerShadowFog)
+      return result
+    end
+
+    def pbEndOfRoundPhase(*args)
+      super
+      if pbExecutionerShadowActive?
+        allBattlers.each do |b|
+          next if !b || b.fainted?
+          amount = [(b.totalhp / 16.0).floor, 1].max
+          if pbExecutionerShadowFavoredType?(b)
+            next if !b.canHeal?
+            b.pbRecoverHP(amount)
+            pbDisplay(_INTL("{1} draws strength from the Eclipse!", b.pbThis))
+          else
+            next if !b.takesIndirectDamage?(Battle::Scene::USE_ABILITY_SPLASH)
+            @scene.pbDamageAnimation(b) if @scene && @scene.respond_to?(:pbDamageAnimation)
+            b.pbTakeEffectDamage(amount, false) do
+              pbDisplay(_INTL("{1} is worn down by the Eclipse fog!", b.pbThis))
+            end
+          end
+        end
+        @exec_shadow_turns -= 1
+        if @exec_shadow_turns <= 0
+          pbDisplay(_INTL("The Eclipse faded away!"))
+          pbClearExecutionerShadow(true)
+        else
+          @scene.pbSetExecutionerShadowFog(true) if @scene && @scene.respond_to?(:pbSetExecutionerShadowFog)
+        end
+      end
+    end
+
+    def pbEndOfBattle(*args)
+      pbClearExecutionerShadow(true)
+      return super
+    end
+  end
+end
+
 class Battle
   def pbExecutionerShadowActive?
     return @exec_shadow_turns && @exec_shadow_turns > 0
@@ -183,90 +237,33 @@ class Battle
     @scene.pbSetExecutionerShadowFog(false) if @scene && @scene.respond_to?(:pbSetExecutionerShadowFog)
     pbDisplay(_INTL("The eclipse veil faded away!")) if was_active && !silent
   end
-
-  if !method_defined?(:exec_shadow_visual_pbStartBattleCore_original)
-    alias exec_shadow_visual_pbStartBattleCore_original pbStartBattleCore
-  end
-
-  def pbStartBattleCore(*args)
-    @exec_shadow_turns = 0
-    @exec_shadow_side  = nil
-    result = exec_shadow_visual_pbStartBattleCore_original(*args)
-    @scene.pbSetExecutionerShadowFog(false) if @scene && @scene.respond_to?(:pbSetExecutionerShadowFog)
-    return result
-  end
-
-  if !method_defined?(:exec_shadow_visual_pbEndOfRoundPhase_original)
-    alias exec_shadow_visual_pbEndOfRoundPhase_original pbEndOfRoundPhase
-  end
-
-  def pbEndOfRoundPhase(*args)
-    exec_shadow_visual_pbEndOfRoundPhase_original(*args)
-    if pbExecutionerShadowActive?
-      allBattlers.each do |b|
-        next if !b || b.fainted?
-        amount = [(b.totalhp / 16.0).floor, 1].max
-        if pbExecutionerShadowFavoredType?(b)
-          next if !b.canHeal?
-          b.pbRecoverHP(amount)
-          pbDisplay(_INTL("{1} draws strength from the Eclipse!", b.pbThis))
-        else
-          next if !b.takesIndirectDamage?(Battle::Scene::USE_ABILITY_SPLASH)
-          @scene.pbDamageAnimation(b) if @scene && @scene.respond_to?(:pbDamageAnimation)
-          b.pbTakeEffectDamage(amount, false) do
-            pbDisplay(_INTL("{1} is worn down by the Eclipse fog!", b.pbThis))
-          end
-        end
-      end
-      @exec_shadow_turns -= 1
-      if @exec_shadow_turns <= 0
-        pbDisplay(_INTL("The Eclipse faded away!"))
-        pbClearExecutionerShadow(true)
-      else
-        @scene.pbSetExecutionerShadowFog(true) if @scene && @scene.respond_to?(:pbSetExecutionerShadowFog)
-      end
-    end
-  end
-
-  if !method_defined?(:exec_shadow_visual_pbEndOfBattle_original)
-    alias exec_shadow_visual_pbEndOfBattle_original pbEndOfBattle
-  end
-
-  def pbEndOfBattle(*args)
-    pbClearExecutionerShadow(true)
-    return exec_shadow_visual_pbEndOfBattle_original(*args)
-  end
 end
+
+Battle.prepend(UmbraVeil::BattleHooks) unless Battle.ancestors.include?(UmbraVeil::BattleHooks)
 
 #===============================================================================
 # Executioner's Shadow visual layer (fog persists independently of terrain/bg)
 #===============================================================================
+module UmbraVeil
+  module SceneHooks
+    def pbInitSprites(*args)
+      super
+      pbInitExecutionerShadowFog
+    end
+
+    def pbFrameUpdate(*args)
+      super
+      pbUpdateExecutionerShadowFog
+    end
+
+    def pbDisposeSprites(*args)
+      pbDisposeExecutionerShadowFog
+      super
+    end
+  end
+end
+
 class Battle::Scene
-  if !method_defined?(:exec_shadow_fog_pbInitSprites_original)
-    alias exec_shadow_fog_pbInitSprites_original pbInitSprites
-  end
-  if !method_defined?(:exec_shadow_fog_pbFrameUpdate_original)
-    alias exec_shadow_fog_pbFrameUpdate_original pbFrameUpdate
-  end
-  if !method_defined?(:exec_shadow_fog_pbDisposeSprites_original)
-    alias exec_shadow_fog_pbDisposeSprites_original pbDisposeSprites
-  end
-
-  def pbInitSprites(*args)
-    exec_shadow_fog_pbInitSprites_original(*args)
-    pbInitExecutionerShadowFog
-  end
-
-  def pbFrameUpdate(*args)
-    exec_shadow_fog_pbFrameUpdate_original(*args)
-    pbUpdateExecutionerShadowFog
-  end
-
-  def pbDisposeSprites(*args)
-    pbDisposeExecutionerShadowFog
-    exec_shadow_fog_pbDisposeSprites_original(*args)
-  end
-
   def pbInitExecutionerShadowFog
     @exec_shadow_fog_target = false
     @exec_shadow_fog_alpha = 0
@@ -346,113 +343,107 @@ class Battle::Scene
   end
 end
 
+Battle::Scene.prepend(UmbraVeil::SceneHooks) unless Battle::Scene.ancestors.include?(UmbraVeil::SceneHooks)
+
 #===============================================================================
 # Executioner's Shadow field-aura behavior
 #===============================================================================
-class Battle::Move
-  if !method_defined?(:exec_shadow_pbCalcAccuracyModifiers_original)
-    alias exec_shadow_pbCalcAccuracyModifiers_original pbCalcAccuracyModifiers
-  end
-
-  # While Eclipse is active, non-favored attackers from the non-invoker side suffer -10% accuracy.
-  def pbCalcAccuracyModifiers(user, target, modifiers)
-    exec_shadow_pbCalcAccuracyModifiers_original(user, target, modifiers)
-    return if !user || !target
-    return if !Battle::AbilityEffects.exec_shadow_active?(user.battle)
-    return if user.battle.pbExecutionerShadowInvokerSide?(user)
-    return if user.pbHasType?(:DARK) || user.pbHasType?(:GHOST)
-    return if user.hasActiveAbility?(:ILLUMINATE)
-    modifiers[:accuracy_multiplier] *= 0.9
-  end
-
-  if !method_defined?(:exec_shadow_light_pbMoveFailed_original)
-    alias exec_shadow_light_pbMoveFailed_original pbMoveFailed?
-  end
-
-  # Under Umbral Veil, Light Moves from the opposing side are smothered.
-  def pbMoveFailed?(user, targets)
-    if user && user.battle &&
-       Battle::AbilityEffects.exec_shadow_against?(user) &&
-       Battle::AbilityEffects::VermeilLightMoves.light_move_id?(@id)
-      @battle.pbDisplay(_INTL("The eclipse fog smothered the light!"))
-      return true
+module UmbraVeil
+  module MoveHooks
+    # While Eclipse is active, non-favored attackers from the non-invoker side suffer -10% accuracy.
+    def pbCalcAccuracyModifiers(user, target, modifiers)
+      super
+      return if !user || !target
+      return if !Battle::AbilityEffects.exec_shadow_active?(user.battle)
+      return if user.battle.pbExecutionerShadowInvokerSide?(user)
+      return if user.pbHasType?(:DARK) || user.pbHasType?(:GHOST)
+      return if user.hasActiveAbility?(:ILLUMINATE)
+      modifiers[:accuracy_multiplier] *= 0.9
     end
-    return exec_shadow_light_pbMoveFailed_original(user, targets)
-  end
 
-  if !method_defined?(:exec_shadow_pbAccuracyCheck_original)
-    alias exec_shadow_pbAccuracyCheck_original pbAccuracyCheck
-  end
-
-  # If an ally misses under the aura, Eclipsora retaliates immediately.
-  def pbAccuracyCheck(user, target)
-    hit = exec_shadow_pbAccuracyCheck_original(user, target)
-    return hit if hit
-    return hit if !user || !target || !user.battle
-    battle = user.battle
-    return hit if !battle.pbExecutionerShadowInvokerSide?(user)
-    return hit if !target.takesIndirectDamage?(Battle::Scene::USE_ABILITY_SPLASH)
-    source = battle.allSameSideBattlers(user.index).find { |b| b && !b.fainted? && b.hasActiveAbility?(:UMBRAVEIL) }
-    if source
-      battle.pbShowAbilitySplash(source)
-      battle.scene.pbDamageAnimation(target) if battle.scene && battle.scene.respond_to?(:pbDamageAnimation)
-      target.pbTakeEffectDamage([(target.totalhp / 16.0).floor, 1].max, false) do
-        battle.pbDisplay(_INTL("{1} strikes from the shadows!", source.pbThis))
+    # Under Umbral Veil, Light Moves from the opposing side are smothered.
+    def pbMoveFailed?(user, targets)
+      if user && user.battle &&
+         Battle::AbilityEffects.exec_shadow_against?(user) &&
+         Battle::AbilityEffects::VermeilLightMoves.light_move_id?(@id)
+        @battle.pbDisplay(_INTL("The eclipse fog smothered the light!"))
+        return true
       end
-      battle.pbHideAbilitySplash(source)
-    else
-      battle.scene.pbDamageAnimation(target) if battle.scene && battle.scene.respond_to?(:pbDamageAnimation)
-      target.pbTakeEffectDamage([(target.totalhp / 16.0).floor, 1].max, false) do
-        battle.pbDisplay(_INTL("The eclipse veil strikes from the shadows!"))
+      return super
+    end
+
+    # If an ally misses under the aura, Eclipsora retaliates immediately.
+    def pbAccuracyCheck(user, target)
+      hit = super
+      return hit if hit
+      return hit if !user || !target || !user.battle
+      battle = user.battle
+      return hit if !battle.pbExecutionerShadowInvokerSide?(user)
+      return hit if !target.takesIndirectDamage?(Battle::Scene::USE_ABILITY_SPLASH)
+      source = battle.allSameSideBattlers(user.index).find { |b| b && !b.fainted? && b.hasActiveAbility?(:UMBRAVEIL) }
+      if source
+        battle.pbShowAbilitySplash(source)
+        battle.scene.pbDamageAnimation(target) if battle.scene && battle.scene.respond_to?(:pbDamageAnimation)
+        target.pbTakeEffectDamage([(target.totalhp / 16.0).floor, 1].max, false) do
+          battle.pbDisplay(_INTL("{1} strikes from the shadows!", source.pbThis))
+        end
+        battle.pbHideAbilitySplash(source)
+      else
+        battle.scene.pbDamageAnimation(target) if battle.scene && battle.scene.respond_to?(:pbDamageAnimation)
+        target.pbTakeEffectDamage([(target.totalhp / 16.0).floor, 1].max, false) do
+          battle.pbDisplay(_INTL("The eclipse veil strikes from the shadows!"))
+        end
+      end
+      return hit
+    end
+  end
+
+  module DefogHooks
+    def pbEffectAgainstTarget(user, target)
+      super
+      if @battle.pbExecutionerShadowActive?
+        @battle.pbClearExecutionerShadow(true)
+        @battle.pbDisplay(_INTL("{1} blew away the eclipse fog!", user.pbThis))
       end
     end
-    return hit
+  end
+
+  module HealDenyHooks
+    def pbMoveFailed?(user, targets)
+      if Battle::AbilityEffects.exec_shadow_against?(user)
+        @battle.pbDisplay(_INTL("The eclipse veil blocks the healing light!"))
+        return true
+      end
+      return super
+    end
+  end
+
+  module SolarSmotherHooks
+    def pbMoveFailed?(user, targets)
+      if @id == :SOLARBEAM && Battle::AbilityEffects.exec_shadow_against?(user)
+        @battle.pbDisplay(_INTL("The eclipse veil smothers the solar charge!"))
+        return true
+      end
+      return super
+    end
   end
 end
 
+Battle::Move.prepend(UmbraVeil::MoveHooks) unless Battle::Move.ancestors.include?(UmbraVeil::MoveHooks)
+
 # Defog can clear the eclipse fog before its natural duration.
 class Battle::Move::LowerTargetEvasion1RemoveSideEffects < Battle::Move::TargetStatDownMove
-  if !method_defined?(:exec_shadow_defog_pbEffectAgainstTarget_original)
-    alias exec_shadow_defog_pbEffectAgainstTarget_original pbEffectAgainstTarget
-  end
-
-  def pbEffectAgainstTarget(user, target)
-    exec_shadow_defog_pbEffectAgainstTarget_original(user, target)
-    if @battle.pbExecutionerShadowActive?
-      @battle.pbClearExecutionerShadow(true)
-      @battle.pbDisplay(_INTL("{1} blew away the eclipse fog!", user.pbThis))
-    end
-  end
+  prepend UmbraVeil::DefogHooks unless ancestors.include?(UmbraVeil::DefogHooks)
 end
 
 #===============================================================================
 # Light-based healing denial under Executioner's Shadow aura
 #===============================================================================
 class Battle::Move::HealUserDependingOnWeather < Battle::Move::HealingMove
-  if !method_defined?(:exec_shadow_heal_pbMoveFailed_original)
-    alias exec_shadow_heal_pbMoveFailed_original pbMoveFailed?
-  end
-
-  def pbMoveFailed?(user, targets)
-    if Battle::AbilityEffects.exec_shadow_against?(user)
-      @battle.pbDisplay(_INTL("The eclipse veil blocks the healing light!"))
-      return true
-    end
-    return exec_shadow_heal_pbMoveFailed_original(user, targets)
-  end
+  prepend UmbraVeil::HealDenyHooks unless ancestors.include?(UmbraVeil::HealDenyHooks)
 end
 
 # Also deny Solar Beam's sunlight benefit by blocking its use while aura opposes.
 class Battle::Move::TwoTurnAttackOneTurnInSun < Battle::Move::TwoTurnMove
-  if !method_defined?(:exec_shadow_solar_pbMoveFailed_original)
-    alias exec_shadow_solar_pbMoveFailed_original pbMoveFailed?
-  end
-
-  def pbMoveFailed?(user, targets)
-    if @id == :SOLARBEAM && Battle::AbilityEffects.exec_shadow_against?(user)
-      @battle.pbDisplay(_INTL("The eclipse veil smothers the solar charge!"))
-      return true
-    end
-    return exec_shadow_solar_pbMoveFailed_original(user, targets)
-  end
+  prepend UmbraVeil::SolarSmotherHooks unless ancestors.include?(UmbraVeil::SolarSmotherHooks)
 end

@@ -157,6 +157,12 @@ module Mode7
     SURFACE_GEOMETRY_ENABLED     = true
     SURFACE_GEOMETRY_DIRECTORY   = "Data/VERMEIL_GEOMETRY_V4"
     SURFACE_GEOMETRY_HEIGHT_STEP = 32.0
+    # V7 / modo Terrain Tags only (cuarentena modelos 3D):
+    # true  -> el runtime MapXXX.v25r puede sobrescribir la superficie (Geometry v4).
+    # false -> single-source: la altura sale SOLO de los Terrain Tags NDS
+    #          asignados en el tileset. Files .v25r/.v25d se ignoran en runtime;
+    #          SURFACE_GEOMETRY_ENABLED permanece true para la ruta de tags.
+    SURFACE_GEOMETRY_RUNTIME_FILES = false
 
     # Compatibility constant retained for older code paths. Geometry v4 runtime
     # never falls back to editor JSON; it reads MapXXX.v25r only.
@@ -301,6 +307,9 @@ module Mode7
     # Cuantización subpíxel: evita que suelo, paredes y tops se actualicen en
     # frames distintos sin introducir los saltos visibles del umbral de 2 px.
     NDS_GROUND_REPROJECT_STEP    = 2.0
+    # V7: paso de snap del angulo de camara (grados). Arrastrar el slider solo
+    # reconstruye cuando el angulo cruza este paso (0 = sin snap).
+    NDS_ANGLE_REVISION_SNAP      = 0.5
 
     GEOMETRY_PRIORITY_SURFACES = true
     GEOMETRY_WALLS             = true
@@ -350,19 +359,24 @@ module Mode7
     # proporcion; la perspectiva solo aplica una escala uniforme por su pie.
     NDS_WALL_HEIGHT_SCALE          = 0.88
     NDS_MOUNTAIN_WALL_HEIGHT_SCALE = 1.00
-    # El tag MountainWall normal conserva el arte 2D apilado como una sola
-    # fachada rigida. Solo MountainWallPlane fuerza un quad vertical real.
-    # Convertir cada fila normal en plano producia tiras y huecos entre niveles.
-    NDS_MOUNTAIN_WALLS_AS_PLANES   = true
+    # V7: los tiles de montana SON walls con altura (billboard rígido anclado al
+    # pie), no superficies 3D a modificar. false = arte apilado como fachada
+    # rigida, igual que NDSWall; no genera quad/plano por fila.
+    NDS_MOUNTAIN_WALLS_AS_PLANES   = false
 
-    # V5.9: MountainTop es la autoridad geometrica. MountainWall queda como
-    # proveedor de arte/numero de niveles; las caras fisicas se generan desde
-    # el borde REAL de la meseta. Esto permite frentes irregulares y laterales
-    # automaticos sin obligar al mapper a dibujar un mapa pensando en 3D.
-    NDS_MOUNTAIN_AUTO_FACES         = true
-    NDS_MOUNTAIN_AUTO_SIDE_FACES    = true
-    NDS_MOUNTAIN_HEIGHT_COLLISION   = true
+    # V7: genracion de caras fisicas 3D de montana DESACTIVADA. MountainTop sigue
+    # elevando la superficie caminable; MountainWall solo aporta arte/altura,
+    # nunca se convierte en mesh a modificar.
+    NDS_MOUNTAIN_AUTO_FACES         = false
+    NDS_MOUNTAIN_AUTO_SIDE_FACES    = false
+    NDS_MOUNTAIN_HEIGHT_COLLISION   = false
     NDS_MOUNTAIN_COLLISION_EPSILON  = 1.0
+
+    # V7.1: montania = BILLBOARD, igual que NDSBillboard/NDSStructure. No genera
+    # geometry, no eleva superficie ni arrastra tiles adyacentes (altura 0): el
+    # arte apilado se dibuja como un solo billboard anclado al pie, dando
+    # sensacion de altura sin modificar el tile. Requiere AUTO_FACES/lado en false.
+    NDS_MOUNTAIN_AS_BILLBOARD     = true
 
     # La mitad superior de una hierba de dos tiles es billboard mientras el
     # pie sigue siendo bush/suelo. Se alinea matematicamente con el borde norte
@@ -428,10 +442,10 @@ module Mode7
     # -----------------------------------------------------------------------
     # OBJETOS GEOMETRY (cubos/planos del editor 2.5D Geometry)
     # -----------------------------------------------------------------------
-    # Objetos colocados con la herramienta "Objetos" del mod Maker Studio y
-    # guardados en legacy Geometry authoring data (array "objects"). Se dibujan
-    # como quads 3D texturizados y, segun su colision, bloquean el paso.
-    NDS_GEOMETRY_OBJECTS_ENABLED = true
+    # CUARENTENA V7: los objetos del editor (quads 3D) estan aislados en
+    # _CUARENTENA_MODELOS_3D/026_NDSGeometryObjects.off. false = no se dibujan
+    # ni bloquean el paso; el 2.5D queda solo con Terrain Tags de tileset.
+    NDS_GEOMETRY_OBJECTS_ENABLED = false
     NDS_OBJECT_CULL_TILES_X      = 16
     NDS_OBJECT_CULL_TILES_Y      = 14
     NDS_OBJECT_FRONT_SHADE       = 24

@@ -398,28 +398,35 @@ module BSS064
       false
     end
 
-    def write_status(state,extra={})
-      payload={"state"=>state.to_s,"runtimeVersion"=>VERSION,"formatVersion"=>FORMAT_VERSION,"time"=>Time.now.to_i}
+    def write_status(state, extra = {})
+      payload = {"state" => state.to_s, "runtimeVersion" => VERSION, "formatVersion" => FORMAT_VERSION, "time" => Time.now.to_i}
       payload.merge!(extra) if extra.is_a?(Hash)
-      dir=File.expand_path(File.dirname(STATUS_FILE))
-      begin
-        Dir.mkdir(dir) unless Dir.exist?(dir)
-      rescue Errno::ENOENT
-        Dir.mkdir(File.dirname(dir)) unless Dir.exist?(File.dirname(dir))
-        Dir.mkdir(dir) unless Dir.exist?(dir)
+      dir = "Data/BattleSceneStudio"
+      Dir.mkdir(dir) if !Dir.exist?(dir) rescue nil
+      raw = json_generate(payload)
+      written = false
+      target_paths = [STATUS_FILE.to_s.tr("\\", "/"), STATUS_FILE.to_s.tr("/", "\\")]
+      target_paths.uniq.each do |target_p|
+        break if written
+        begin
+          File.open(target_p, "wb") { |f| f.write(raw) }
+          written = true
+        rescue SystemCallError, StandardError, Exception
+        end
       end
-      path=File.expand_path(STATUS_FILE)
-      text=json_generate(payload)
-      begin
-        File.binwrite(path,text)
-      rescue Errno::EINVAL, Errno::EACCES, Errno::EPERM
-        # Battle Scene Studio is optional at runtime. A locked/invalid status
-        # file must never abort a battle or mask the real battle exception.
-        return false
+      if !written
+        begin
+          tmp = "#{STATUS_FILE}.tmp_#{341 || rand(99999)}"
+          File.open(tmp, "wb") { |f| f.write(raw) }
+          File.delete(STATUS_FILE) rescue nil
+          File.rename(tmp, STATUS_FILE) rescue nil
+          File.delete(tmp) rescue nil if File.exist?(tmp)
+          written = true
+        rescue SystemCallError, StandardError, Exception
+        end
       end
-      true
-    rescue => e
-      log("Status write failed: #{e.class}: #{e.message}")
+      written
+    rescue SystemCallError, StandardError, Exception
       false
     end
   end

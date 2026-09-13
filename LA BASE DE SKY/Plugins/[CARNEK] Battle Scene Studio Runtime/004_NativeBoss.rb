@@ -5448,7 +5448,7 @@ module BSS064BossBattleStartState663
     begin
       # Never carry BSS per-hit compatibility flags into a new battle. They are
       # meaningful only while one damage call is on the stack.
-      (@battlers rescue []).compact.each do |b|
+      (@battlers || []).compact.each do |b|
         begin;b.stopBoostedHPScaling=false if b.respond_to?(:stopBoostedHPScaling=);rescue;end
         begin;b.instance_variable_set(:@stopBoostedHPScaling,false) if b.instance_variable_defined?(:@stopBoostedHPScaling);rescue;end
       end

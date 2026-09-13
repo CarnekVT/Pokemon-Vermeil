@@ -66,6 +66,7 @@ module ResearchNotebook
       @species = []
       @index = 0
       @sort_mode = ResearchNotebook::Settings::DEFAULT_SORT
+      @admission_set = nil
       @detail_open = false
       @detail_page = 0
       @frame_count = 0
@@ -378,17 +379,21 @@ module ResearchNotebook
       @order_map.clear
       @display_number.clear
       if ResearchNotebook::Settings::DEX_ORDER == :GAME
-        begin
-          regional = pbAllRegionalSpecies(ResearchNotebook::Settings::GAME_DEX_INDEX)
-          regional.each_with_index do |species, i|
-            next if !species
-            id = ResearchNotebook::Repository.normalize_species_id(species)
+        # La Pokédex activa la define el JSON editable (Data/SpeciesDex/config.json),
+        # no un índice fijo del motor.
+        if defined?(NuevaPokedex) && NuevaPokedex.respond_to?(:enabled_dexes) &&
+           NuevaPokedex.respond_to?(:regional_species)
+          dex_list = []
+          NuevaPokedex.enabled_dexes.each do |region|
+            dex_list.concat(NuevaPokedex.regional_species(region))
+          end
+          dex_list.uniq.each_with_index do |slot, i|
+            base, = ResearchNotebook::Repository.species_base_and_form(slot)
+            id = ResearchNotebook::Repository.normalize_species_id(base)
             next if !id
             @order_map[id] = i
-            num = pbGetRegionalNumber(ResearchNotebook::Settings::GAME_DEX_INDEX, id) rescue i + 1
-            @display_number[id] = num.to_i > 0 ? num.to_i : i + 1
+            @display_number[id] = i + 1
           end
-        rescue
         end
       end
       ResearchNotebook::Repository.relevant_species.each do |species|
@@ -417,7 +422,30 @@ module ResearchNotebook
       elsif current_section == :golden
         list.concat(ResearchNotebook::Repository.golden_entries_with_forms)
       end
-      return list.compact.uniq
+      list = list.compact.uniq
+      admitted = catalog_admission_set
+      return list.select { |entry| admitted.key?(catalog_slot_id(entry)) }
+    end
+
+    # Admisiones de la Pokédex activa: slots del Data/SpeciesDex/config.json de
+    # las dexes habilitadas. Misma lógica que la Libreta (regional_species +
+    # form_shown?). Se construye una vez por escena: las dexes no cambian con la
+    # Libreta abierta.
+    def catalog_admission_set
+      return @admission_set if @admission_set
+      @admission_set = {}
+      if defined?(NuevaPokedex) && NuevaPokedex.respond_to?(:enabled_dexes) &&
+         NuevaPokedex.respond_to?(:regional_species)
+        NuevaPokedex.enabled_dexes.each do |region|
+          NuevaPokedex.regional_species(region).each { |slot| @admission_set[slot] = true }
+        end
+      end
+      return @admission_set
+    end
+
+    def catalog_slot_id(entry)
+      base, form = ResearchNotebook::Repository.species_base_and_form(entry)
+      return form.to_i > 0 ? "#{base}_#{form}".to_sym : base.to_sym
     end
 
     def rebuild_species(preferred = nil)
@@ -566,7 +594,7 @@ module ResearchNotebook
         draw_text(bmp, xx + 4, 13, w - 12, 26, label, 12, active ? INK : WHITE, 1, true)
       end
       subtitle = current_section == :arcane ? _INTL("Notas sobre energía arcana") : _INTL("Notas sobre energía áurea")
-      draw_text(bmp, 20, 38, 278, 15, subtitle, 10, Color.new(218, 205, 184), 0, false)
+      draw_text(bmp, 20, 38, 132, 15, subtitle, 10, Color.new(218, 205, 184), 0, false)
     end
 
     def draw_empty_state
@@ -1540,7 +1568,7 @@ module ResearchNotebook
       elsif @detail_open
         text = current_section == :golden && detail_page_count > 1 ? _INTL("← → · Cambiar hoja      Confirmar / Atrás · Volver") : _INTL("Confirmar / Atrás · Volver")
       else
-        text = _INTL("Flechas · Mover    Confirmar · Abrir ficha    Acción · Sección    Especial · Ordenar    Atrás · Cerrar")
+        text = _INTL("Flechas · Mover    Confirmar · Abrir ficha    Acción · Sección    Especial · Ordenar    L/R · Modo    Atrás · Cerrar")
       end
       draw_text(bmp, 12, FOOTER_Y + 6, WIDTH - 24, 23, text, 10, WHITE, 1, false)
     end

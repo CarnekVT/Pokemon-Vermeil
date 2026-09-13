@@ -50,6 +50,33 @@
       "accuracy": 100,
       "functionCode": "SpikyGrasp",
       "description": "Inflige al rival un dolor abrumador con sus tenazas. Golpea supereficaz al tipo Volador."
+    },
+    "HELIOLISK|WEATHERBALL": {
+      "form": 1,
+      "name": "Llama Solar",
+      "type": "FIRE",
+      "power": 80,
+      "accuracy": 100,
+      "functionCode": "RaiseUserSpAtk1",
+      "description": "Lanza un proyectil formado por la energía del sol para atacar al objetivo. También puede aumentar el Ataque Especial del usuario."
+    },
+    "HELIOLISK|PARABOLICCHARGE": {
+      "form": 1,
+      "name": "Carga Supernova",
+      "type": "FIRE",
+      "power": 95,
+      "accuracy": 100,
+      "functionCode": "HealUserByHalfOfDamageDone",
+      "description": "El usuario ataca a todo lo que le rodea con llamas solares. Los PS del usuario se restaura en la mitad del daño infligido."
+    },
+    "HELIOLISK|QUICKATTACK": {
+      "form": 1,
+      "name": "Destello Ígneo",
+      "type": "FIRE",
+      "power": 55,
+      "accuracy": 100,
+      "functionCode": "None",
+      "description": "Destello rápido y cegador que golpea al objetivo a una Velocidad imparable. Este movimiento siempre golpea primero."
     }
   }
 }

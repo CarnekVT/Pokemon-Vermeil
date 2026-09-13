@@ -361,13 +361,29 @@ module Mode7
     end
 
     def configure(alpha = nil, zoom = nil, distance_h = nil, cylindrical_radius = nil)
+      snap = if Mode7::Config.const_defined?(:NDS_ANGLE_REVISION_SNAP)
+               Mode7::Config::NDS_ANGLE_REVISION_SNAP.to_f
+             else
+               0.0
+             end
+      prev_alpha, prev_zoom = @current_alpha, @camera_zoom
+      prev_dh, prev_radius = @distance_h, @cylindrical_radius
       @current_alpha = (alpha || @current_alpha || context_default_alpha).to_f
+      # V7: snap a pasos finos. Arrastrar un slider no dispara rebuild cada
+      # frame: solo cuando el angulo realmente cruza el paso.
+      @current_alpha = ((@current_alpha / snap).round * snap).round(6) if snap > 0.0
       @camera_zoom = (zoom || @camera_zoom || Config::DEFAULT_ZOOM).to_f
       @zoom = (@zoom_effect_override || @camera_zoom).to_f
       @distance_h = (distance_h || @distance_h || Config::DISTANCE_H).to_f
       @cylindrical_radius = (
         cylindrical_radius || @cylindrical_radius || Config::CYLINDRICAL_RADIUS
       ).to_f
+      changed = (@current_alpha - prev_alpha.to_f).abs > 1e-9 ||
+                @camera_zoom != prev_zoom.to_f ||
+                @distance_h != prev_dh.to_f ||
+                @cylindrical_radius != prev_radius.to_f
+      return if !changed && @projection_revision
+
       @projection_revision = (@projection_revision || 0) + 1
 
       @a = @current_alpha * Math::PI / 180.0

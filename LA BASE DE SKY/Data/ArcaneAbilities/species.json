@@ -264,6 +264,36 @@
     },
     "PICHU,1": {
       "ability": "NOGUARD"
+    },
+    "MEOWTH": {
+      "ability": "OPPORTUNIST"
+    },
+    "PERSIAN": {
+      "ability": "OPPORTUNIST"
+    },
+    "PERRSERKER": {
+      "ability": "FURCOAT"
+    },
+    "MEOWTH,2": {
+      "ability": "FURCOAT"
+    },
+    "PSYDUCK": {
+      "ability": "DRIZZLE"
+    },
+    "GOLDUCK": {
+      "ability": "DRIZZLE"
+    },
+    "TENKIFETCHD": {
+      "ability": "WARLORDSGAZE"
+    },
+    "FARFETCHD": {
+      "ability": "WARLORDSGAZE"
+    },
+    "SIRFETCHD": {
+      "ability": "WARLORDSGAZE"
+    },
+    "NAUSSITCHD": {
+      "ability": "WARLORDSGAZE"
     }
   }
 }

@@ -2686,7 +2686,7 @@
     "battleBasesEnabled": false,
     "battleBoxAnimation": "slide",
     "cameraStyle": "ebdx",
-    "battleSceneEngine": "ebdx",
+    "battleSceneEngine": "vanilla",
     "ebdxDefaultBackdrop": "Field",
     "ebdxMapMetadata": [
       {
@@ -2809,7 +2809,11 @@
           "strength": 100
         }
       },
-      "cameraSchemaVersion": 2
+      "cameraSchemaVersion": 2,
+      "commandOverviewEnabled": false,
+      "commandOverviewZoomOut": 12,
+      "commandOverviewLift": 22,
+      "commandOverviewFrames": 24
     },
     "ebdxIntro": {
       "style": "nds_biome",
@@ -4978,5 +4982,5 @@
     "ebdxMapBackdropsText": "",
     "ebdxEncounterMetadata": []
   },
-  "_bssSavedAt": 1788882779441
+  "_bssSavedAt": 1789005780220
 }

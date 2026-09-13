@@ -215,42 +215,32 @@ module BSS100AmbientWorld
   end
 
   def bss070_ebdx_tick(_advance_camera=true, align=true)
-    # Guard before ensure_core: room/core construction can itself enter an
-    # older tick authority through a callback. Waiting until after ensure_core
-    # still allows that circular chain to grow the Ruby stack.
-    return false if @bss100_tick_active
-    @bss100_tick_active=true
-    begin
-      return false if !bss070_ebdx_ensure_core
-      now=BSS100.frame
-      return true if @bss100_last_world_tick==now
-      @bss100_last_world_tick=now
-      bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
+    return false if !bss070_ebdx_ensure_core
+    now=BSS100.frame
+    return true if @bss100_last_world_tick==now
+    @bss100_last_world_tick=now
+    bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
 
-      static=BSS100.static_camera?(self)
-      bas=!!@bss070_ebdx_bas_frame
-      suspended=@bss070_ebdx_suspend_depth.to_i>0
-      if !static && !bas && !suspended && @vector
-        @vector.update
-        unless @bss100_ambient_ready
-          @bss100_ambient_ready=true
-          @bss100_ambient_due=48
-          @bss100_ambient_out=false
-        end
-        @bss100_ambient_due=@bss100_ambient_due.to_i-1
-        if @bss100_ambient_due<=0 && (@vector.finished? rescue true)
-          bss100_ambient_pick_target
-        end
+    static=BSS100.static_camera?(self)
+    bas=!!@bss070_ebdx_bas_frame
+    suspended=@bss070_ebdx_suspend_depth.to_i>0
+    if !static && !bas && !suspended && @vector
+      @vector.update
+      unless @bss100_ambient_ready
+        @bss100_ambient_ready=true
+        @bss100_ambient_due=48
+        @bss100_ambient_out=false
       end
-
-      @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
-      bss070_ebdx_apply_world_alignment if align && respond_to?(:bss070_ebdx_apply_world_alignment)
-      true
-    ensure
-      @bss100_tick_active=false
+      @bss100_ambient_due=@bss100_ambient_due.to_i-1
+      if @bss100_ambient_due<=0 && (@vector.finished? rescue true)
+        bss100_ambient_pick_target
+      end
     end
+
+    @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
+    bss070_ebdx_apply_world_alignment if align && respond_to?(:bss070_ebdx_apply_world_alignment)
+    true
   rescue => e
-    @bss100_tick_active=false
     BSS064.log("BSS100 world tick warning: #{e.class}: #{e.message}") if defined?(BSS064)
     false
   end
@@ -272,7 +262,6 @@ module BSS100AmbientWorld
   def pbInitSprites(*args,&block)
     ret=super
     BSS100.active_scene=self
-    bss100_enhanced_z_only
     ret
   end
 
@@ -310,24 +299,24 @@ module BSS100EnhancedZ
     return if !@sprites.is_a?(Hash)
     main=@sprites["enhancedUI"] rescue nil
     prompt=@sprites["enhancedUIPrompts"] rescue nil
-    main.z=11500 if main && !(main.disposed? rescue true) && main.respond_to?(:z=)
-    prompt.z=11560 if prompt && !(prompt.disposed? rescue true) && prompt.respond_to?(:z=)
+    main.z=9300 if main && !(main.disposed? rescue true) && main.respond_to?(:z=)
+    prompt.z=9360 if prompt && !(prompt.disposed? rescue true) && prompt.respond_to?(:z=)
     ["leftarrow","rightarrow"].each do |k|
       sp=@sprites[k] rescue nil
-      sp.z=11610 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
+      sp.z=9410 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
     end
     @sprites.each do |k,sp|
       next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:z=)
       s=k.to_s
       next unless s =~ /\A(info_icon|ball_icon)\d+\z/i
-      sp.z=11642
+      sp.z=9442
     end
     @sprites.each do |k,sp|
       next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:z=)
       s=k.to_s
       next unless s =~ /\A(.+)_outline\d+\z/i
       parent=@sprites[$1] rescue nil
-      sp.z=(parent && parent.respond_to?(:z) ? parent.z.to_i-1 : 11641)
+      sp.z=(parent && parent.respond_to?(:z) ? parent.z.to_i-1 : 9441)
     end
   rescue
   end
@@ -369,12 +358,6 @@ module BSS100EnhancedZ
   end
 
   def pbShowOutline(*args,&block)
-    ret=super
-    bss100_enhanced_z_only
-    ret
-  end
-
-  def pbStartBattle(*args,&block)
     ret=super
     bss100_enhanced_z_only
     ret
@@ -517,50 +500,6 @@ if defined?(BSS098)
       end
     end
   end
-end
-
-#-------------------------------------------------------------------------------
-# Recursion guard for Battle::Scene#pbUpdate to prevent SystemStackError
-# from circular prepend chains in BSS modules.
-#-------------------------------------------------------------------------------
-module BSS100RecursionGuard
-  @@pbupdate_frame = 0
-  @@pbupdate_count = 0
-  MAX_PBUPDATE_PER_FRAME = 50
-
-  def pbUpdate(*args,&block)
-    # A nested Scene#pbUpdate is never a valid frame update. It is the
-    # signature of the circular prepend chain seen with StableWorld/Golden.
-    # Stop it before calling super, rather than allowing dozens of nested
-    # wrappers to accumulate until SystemStackError.
-    if @bss100_pbupdate_active
-      BSS064.log("BSS100RecursionGuard: nested pbUpdate skipped") if defined?(BSS064)
-      return false
-    end
-    @bss100_pbupdate_active=true
-    current_frame = Graphics.frame_count rescue 0
-    if @@pbupdate_frame != current_frame
-      @@pbupdate_frame = current_frame
-      @@pbupdate_count = 0
-    end
-    @@pbupdate_count += 1
-    if @@pbupdate_count > MAX_PBUPDATE_PER_FRAME
-      BSS064.log("BSS100RecursionGuard: pbUpdate recursion detected (#{@@pbupdate_count} calls/frame), skipping") if defined?(BSS064)
-      @bss100_pbupdate_active=false
-      return
-    end
-    begin
-      super(*args,&block)
-    ensure
-      @@pbupdate_count -= 1
-      @bss100_pbupdate_active=false
-    end
-  end
-end
-
-# Apply the guard to Battle::Scene (last in prepend chain)
-if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSS100RecursionGuard)
-  Battle::Scene.prepend(BSS100RecursionGuard)
 end
 
 # Install final authorities.

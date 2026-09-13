@@ -22,53 +22,14 @@
       }
     },
     "CHARMANDER": {
-      "goldenType": "DRAGON",
-      "goldenTypeReplace": "FLYING",
-      "goldenForm": {
-        "types": [
-          "FIRE"
-        ],
-        "baseStats": {
-          "HP": 78,
-          "ATTACK": 84,
-          "DEFENSE": 78,
-          "SPEED": 100,
-          "SPECIAL_ATTACK": 109,
-          "SPECIAL_DEFENSE": 85
-        }
-      }
+      "goldenType": "DRAGON"
     },
     "CHARMELEON": {
-      "goldenType": "DRAGON",
-      "goldenTypeReplace": "FLYING",
-      "goldenForm": {
-        "baseStats": {
-          "HP": 78,
-          "ATTACK": 84,
-          "DEFENSE": 78,
-          "SPEED": 100,
-          "SPECIAL_ATTACK": 109,
-          "SPECIAL_DEFENSE": 85
-        }
-      }
+      "goldenType": "DRAGON"
     },
     "CHARIZARD": {
       "goldenType": "DRAGON",
-      "goldenTypeReplace": "FLYING",
-      "goldenForm": {
-        "types": [
-          "FIRE",
-          "FLYING"
-        ],
-        "baseStats": {
-          "HP": 78,
-          "ATTACK": 84,
-          "DEFENSE": 78,
-          "SPEED": 100,
-          "SPECIAL_ATTACK": 109,
-          "SPECIAL_DEFENSE": 85
-        }
-      }
+      "goldenTypeReplace": "FLYING"
     },
     "CHARIZARD,1": {
       "goldenType": "DRAGON",
@@ -489,6 +450,23 @@
           "SPECIAL_DEFENSE": 77
         }
       }
+    },
+    "NAUSSITCHD": {
+      "goldenType": "FIGHTING"
+    },
+    "FARFETCHD": {
+      "goldenType": "FIGHTING",
+      "goldenTypeReplace": "NORMAL"
+    },
+    "SIRFETCHD": {
+      "goldenType": "STEEL"
+    },
+    "FARFETCHD,1": {
+      "goldenType": "STEEL"
+    },
+    "TENKIFETCHD": {
+      "goldenType": "FIGHTING",
+      "goldenTypeReplace": "FLYING"
     }
   }
 }

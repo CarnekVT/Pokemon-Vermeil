@@ -25056,7 +25056,8 @@
         "Plugin: Carnek Project Settings - Settings/PC_640x480_Fix.rb:L206",
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L18",
         "Plugin: [LBDS] [DBK_001] Enhanced Battle UI - [003] Battler Info UI.rb:L305",
-        "Plugin: [LBDS] [DBK_001] Enhanced Battle UI - [004] Move Info UI.rb:L98"
+        "Plugin: [LBDS] [DBK_001] Enhanced Battle UI - [004] Move Info UI.rb:L98",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L248"
       ]
     },
     "{1}: Atrás": {
@@ -25555,7 +25556,8 @@
     "Normal": {
       "Contexts": [
         "Plugin: Carnek Project Settings - patches/042_TrainerSpriteEditorShadowFix.rb:L146",
-        "Plugin: [LBDS] Sprites Animados DBK - [002] Sprite Editor.rb:L186"
+        "Plugin: [LBDS] Sprites Animados DBK - [002] Sprite Editor.rb:L186",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1283"
       ]
     },
     "Slow": {
@@ -27511,7 +27513,8 @@
     },
     "Shiny": {
       "Contexts": [
-        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[001] Trainer Editor Refactor.rb:L56"
+        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[001] Trainer Editor Refactor.rb:L56",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1284"
       ]
     },
     "Si está activado, el Pokémon es variocolor.": {
@@ -28988,7 +28991,8 @@
       "Contexts": [
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[004] MidbattleHandlers Scripts.rb:L103",
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[004] MidbattleHandlers Scripts.rb:L205",
-        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[004] MidbattleHandlers Scripts.rb:L28"
+        "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[004] MidbattleHandlers Scripts.rb:L28",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1309"
       ]
     },
     "{1} emitió un poderoso pulso magnético!": {
@@ -30210,13 +30214,13 @@
     },
     "ON": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L717",
+        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L733",
         "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L51"
       ]
     },
     "OFF": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L718",
+        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L734",
         "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L51"
       ]
     },
@@ -30461,89 +30465,89 @@
     },
     "19 NDSFloor: suelo/decal horizontal. Priority no lo convierte en pared.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L170"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L171"
       ]
     },
     "20 NDSWall: fachada o muro vertical. 21 NDSRoof: techo a 48 px.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L171"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L172"
       ]
     },
     "22 NDSBillboard: arbol/prop rigido. 23 NDSVolume: grosor de terreno.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L172"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L173"
       ]
     },
     "24 NDSStructure: casa completa 2D; billboard anclado por su fila inferior.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L173"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L174"
       ]
     },
     "25 NDSIndoorWall / 26 NDSIndoorProp: categorias indoor principales.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L174"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L175"
       ]
     },
     "27 IndoorBorder, 28 IndoorBlack, 29 MountainTop, 30 MountainWall.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L175"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L176"
       ]
     },
     "31 RoofHigh, 32 VolumeHigh, 33 Overlay (copas/aleros/foreground).": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L176"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L177"
       ]
     },
     "34 RoofPlane / 35 WallPlane / 36 MountainWallPlane: geometria 3D real.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L177"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L178"
       ]
     },
     "V5: todos comparten camara/zoom. Usa Plane solo para superficies geometricas.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L178"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L179"
       ]
     },
     "Abre un mapa primero.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L187",
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L188",
         "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L308"
       ]
     },
     "Renderer 2.5D no disponible.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L189",
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L190",
         "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L310"
       ]
     },
     "{1} {2}: {3}": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L206"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L207"
       ]
     },
     "No se pudo auditar: {1}": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L208"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L209"
       ]
     },
     "Guia Terrain Tags NDS V5": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1291"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1318"
       ]
     },
     "Muestra el esquema de Terrain Tags 19-36.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1293"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1320"
       ]
     },
     "Auditar Terrain Tags NDS V5": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1297"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1324"
       ]
     },
     "Cuenta cuantos tiles de cada categoria usa el mapa actual.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1299"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1326"
       ]
     },
     "Build: {1} ms": {
@@ -31108,345 +31112,346 @@
     },
     "Habilidades Arcanas": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L246"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L247"
       ]
     },
     "Áureo": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L249"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L250"
       ]
     },
     "LIBRETA DE INVESTIGACIÓN": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L523"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L551"
       ]
     },
     "Notas sobre energía arcana": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L568"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L596"
       ]
     },
     "Notas sobre energía áurea": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L568"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L596"
       ]
     },
     "Estas páginas todavía están cerradas.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L578"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L606"
       ]
     },
     "Cuando descubras algo relacionado con estas energías, habrá un lugar para anotarlo aquí.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L580"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L608"
       ]
     },
     "Sin apuntes arcanos": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L589"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L617"
       ]
     },
     "Sin apuntes áureos": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L589"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L617"
       ]
     },
     "Aún no hay observaciones suficientes para llenar estas páginas.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L592"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L620"
       ]
     },
     "Quedan páginas por llenar…": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L594"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L622"
       ]
     },
     "HABILIDAD ARCANA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L651"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L679"
       ]
     },
     "TIPOS": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L654",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L826"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L682",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L854"
       ]
     },
     "PROBADA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L656",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L755"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L684",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L783"
       ]
     },
     "DESPERTADA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L656",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L755"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L684",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L783"
       ]
     },
     "POR DESPERTAR": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L656"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L684"
       ]
     },
     "SIN OBSERVAR": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L656",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L683",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L794"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L684",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L711",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L822"
       ]
     },
     "ESTADO": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L657"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L685"
       ]
     },
     "AFINIDAD ÁUREA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L666",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L798"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L694",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L826"
       ]
     },
     "FORMA DORADA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L673"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L701"
       ]
     },
     "NO POSEE": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L675"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L703"
       ]
     },
     "UTILIZADA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L677",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L824"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L705",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L852"
       ]
     },
     "OBSERVADA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L679",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L824"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L707",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L852"
       ]
     },
     "POR VER": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L681",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L824"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L709",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L852"
       ]
     },
     "Especies: {1}": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L691"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L719"
       ]
     },
     "Orden: {1}": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L692"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L720"
       ]
     },
     "{1}/{2}": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L693"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L721",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1063"
       ]
     },
     "Habilidad Arcana": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L754"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L782"
       ]
     },
     "BLOQUEADA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L755"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L783"
       ]
     },
     "HABILIDAD": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L757",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L832"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L785",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L860"
       ]
     },
     "APUNTE": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L760",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L805",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L844"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L788",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L833",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L872"
       ]
     },
     "Aún me falta describir con precisión cómo se manifiesta esta habilidad.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L764"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L792"
       ]
     },
     "He detectado una resonancia arcana en esta especie, pero todavía no he logrado despertar ni identificar su habilidad.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L766"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L794"
       ]
     },
     "No he observado todavía ninguna manifestación arcana en esta especie.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L768"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L796"
       ]
     },
     "DESPERTAR": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L771"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L799"
       ]
     },
     "Identificada": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L775"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L803"
       ]
     },
     "Pendiente": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L775"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L803"
       ]
     },
     "Probada": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L776"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L804"
       ]
     },
     "Sin probar": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L776"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L804"
       ]
     },
     "CATALIZADOR": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L777",
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L812"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L805",
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L840"
       ]
     },
     "Té Arcano": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L778"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L806"
       ]
     },
     "Poder Dorado": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L793"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L821"
       ]
     },
     "UTILIZADO": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L794"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L822"
       ]
     },
     "IDENTIFICADO": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L794"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L822"
       ]
     },
     "TIPOS NATURALES": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L796"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L824"
       ]
     },
     "El Fragmento Dorado reacciona con esta afinidad y permite manifestarla durante el combate sin alterar la forma del Pokémon.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L809"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L837"
       ]
     },
     "Todavía no he logrado identificar la afinidad áurea de esta especie.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L809"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L837"
       ]
     },
     "Fragmento Dorado": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L813"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L841"
       ]
     },
     "← Poder        Forma →": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L815"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L843"
       ]
     },
     "Forma Dorada": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L823"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L851"
       ]
     },
     "ESTADÍSTICAS": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L835"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L863"
       ]
     },
     "He observado esta Forma Dorada, pero aún necesito verla en acción para completar sus características.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L845"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L873"
       ]
     },
     "Sé que esta forma puede manifestarse, pero todavía no he logrado observarla directamente.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L845"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L873"
       ]
     },
     "COSTE": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L848"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L876"
       ]
     },
     "CATALIZADORES": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L850"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L878"
       ]
     },
     "LIBRETA": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1218"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1246"
       ]
     },
     "DE INVESTIGACIÓN": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1219"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1247"
       ]
     },
     "VERMEIL": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1222"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1250"
       ]
     },
     "{1}/{2} registrado": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1429"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1457"
       ]
     },
     "Estadísticas sin registrar": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1462"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1490"
       ]
     },
     "BST {1}": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1487"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1515"
       ]
     },
     "NOTA: ChangeDex oculta formas de esta especie.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1513"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1541"
       ]
     },
     "Atrás · Cerrar": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1539"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1567"
       ]
     },
     "← → · Cambiar hoja      Confirmar / Atrás · Volver": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1541"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1569"
       ]
     },
     "Confirmar / Atrás · Volver": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1541"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1569"
       ]
     },
-    "Flechas · Mover    Confirmar · Abrir ficha    Acción · Sección    Especial · Ordenar    Atrás · Cerrar": {
+    "Flechas · Mover    Confirmar · Abrir ficha    Acción · Sección    Especial · Ordenar    L/R · Modo    Atrás · Cerrar": {
       "Contexts": [
-        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1543"
+        "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L1571"
       ]
     },
     "Libreta de Investigación": {
@@ -31501,7 +31506,7 @@
         "Plugin: Battle Additions - Abilities/090_MegaSignatureAbilities.rb:L96",
         "Plugin: Battle Additions - Abilities/100_MegaStarterReworks.rb:L124",
         "Plugin: Battle Additions - Abilities/100_MegaStarterReworks.rb:L81",
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L79"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L88"
       ]
     },
     "{1}'s {2} made {3} ineffective!": {
@@ -31616,92 +31621,92 @@
     },
     "{1} is scorched by Blessed Corona!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L45"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L54"
       ]
     },
     "{1} is scorched by {2}'s {3}!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L47"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L56"
       ]
     },
     "{1}'s {2} evaporated the Water-type attack!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L81"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L90"
       ]
     },
     "An Umbral Veil spreads across the field!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L105"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L114"
       ]
     },
     "{1} is protected by the shadows!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L117"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L126"
       ]
     },
     "{1}'s {2} protects {3}'s stats!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L119"
-      ]
-    },
-    "{1} seized control of the Eclipse!": {
-      "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L164"
-      ]
-    },
-    "{1} reinforced the Eclipse!": {
-      "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L166"
-      ]
-    },
-    "The eclipse veil faded away!": {
-      "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L184"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L128"
       ]
     },
     "{1} draws strength from the Eclipse!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L212"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L167"
       ]
     },
     "{1} is worn down by the Eclipse fog!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L217"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L172"
       ]
     },
     "The Eclipse faded away!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L223"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L178"
+      ]
+    },
+    "{1} seized control of the Eclipse!": {
+      "Contexts": [
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L218"
+      ]
+    },
+    "{1} reinforced the Eclipse!": {
+      "Contexts": [
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L220"
+      ]
+    },
+    "The eclipse veil faded away!": {
+      "Contexts": [
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L238"
       ]
     },
     "The eclipse fog smothered the light!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L377"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L369"
       ]
     },
     "{1} strikes from the shadows!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L400"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L388"
       ]
     },
     "The eclipse veil strikes from the shadows!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L406"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L394"
       ]
     },
     "{1} blew away the eclipse fog!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L423"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L406"
       ]
     },
     "The eclipse veil blocks the healing light!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L438"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L414"
       ]
     },
     "The eclipse veil smothers the solar charge!": {
       "Contexts": [
-        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L453"
+        "Plugin: Battle Additions - Abilities/180_SuncoronaEclipsoraAbilities.rb:L424"
       ]
     },
     "{1} took damage from {2}'s {3}!": {
@@ -31717,6 +31722,302 @@
     "{1} surrounds itself with a crystal orbit!": {
       "Contexts": [
         "Plugin: Battle Additions - Abilities/203_CrystalOrbit.rb:L8"
+      ]
+    },
+    "Eclipse": {
+      "Contexts": [
+        "Plugin: [ZBOX] Enhanced Battle UI Integration - [002]_Eclipse_Fog_Display.rb:L16",
+        "Plugin: [ZBOX] Enhanced Battle UI Integration - [002]_Eclipse_Fog_Display.rb:L22"
+      ]
+    },
+    "El Pokémon es protegido por el velo del eclipse. Los tipos Siniestro y Fantasma se fortalecen, mientras que la luz es suprimida.": {
+      "Contexts": [
+        "Plugin: [ZBOX] Enhanced Battle UI Integration - [002]_Eclipse_Fog_Display.rb:L18"
+      ]
+    },
+    "El Pokémon es debilitado por el velo del eclipse. Los tipos Siniestro y Fantasma se fortalecen a costa de los demás.": {
+      "Contexts": [
+        "Plugin: [ZBOX] Enhanced Battle UI Integration - [002]_Eclipse_Fog_Display.rb:L24"
+      ]
+    },
+    "Pokédex Nacional": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L110"
+      ]
+    },
+    "Región {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L111"
+      ]
+    },
+    "No se pudo guardar la config de la Pokédex.": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L231"
+      ]
+    },
+    "Graphics/UI/Pokedex/icon_types": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L256"
+      ]
+    },
+    "{1} (Forma {2})": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L271",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L302"
+      ]
+    },
+    "{1} [mostrar]": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L272",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L303"
+      ]
+    },
+    "GUARDAR": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L274",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L305"
+      ]
+    },
+    "Config guardada.": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L280"
+      ]
+    },
+    "Ocultar forma": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L286"
+      ]
+    },
+    "Mostrar forma": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L286"
+      ]
+    },
+    "Quitar slot propio": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L288"
+      ]
+    },
+    "Dar slot propio": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L288"
+      ]
+    },
+    "VISTOS: {1}/{2}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L753"
+      ]
+    },
+    "OBTENIDOS: {1}/{2}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L756"
+      ]
+    },
+    "POKÉDEX · {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L773"
+      ]
+    },
+    "{1} ·F{2}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L805"
+      ]
+    },
+    "Nº {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1277",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1314",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L930"
+      ]
+    },
+    "OBTENIDO": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L952"
+      ]
+    },
+    "VISTO": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L952"
+      ]
+    },
+    "NO VISTO": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L952"
+      ]
+    },
+    "Categoría: {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1321",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L954"
+      ]
+    },
+    "Altura: {1} m": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1324",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L957"
+      ]
+    },
+    "Peso: {1} kg": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1325",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L959"
+      ]
+    },
+    "POKÉDEX": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L965"
+      ]
+    },
+    "Zona · {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1080"
+      ]
+    },
+    "Graphics/UI/Town Map/{1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1087"
+      ]
+    },
+    "No se encuentra en estado salvaje.": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1140"
+      ]
+    },
+    "Localizaciones: {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1160",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1166"
+      ]
+    },
+    "Sin mapa de la región": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1164"
+      ]
+    },
+    "Formas de {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1262"
+      ]
+    },
+    "Forma base": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1271"
+      ]
+    },
+    "Forma {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1272",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1308"
+      ]
+    },
+    "Super Shiny": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1285"
+      ]
+    },
+    "Estado visual: {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1288"
+      ]
+    },
+    "Forma": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1317"
+      ]
+    },
+    "Orden numérico": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1571"
+      ]
+    },
+    "Nombre A-Z": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1571"
+      ]
+    },
+    "Más pesado": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1572"
+      ]
+    },
+    "Más liviano": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1572"
+      ]
+    },
+    "Más alto": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1573"
+      ]
+    },
+    "Más bajo": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1573"
+      ]
+    },
+    "Pokédex N": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1606"
+      ]
+    },
+    "Nueva Pokédex (Comandos)": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L5"
+      ]
+    },
+    "Herramientas de depuración, recarga de JSONs y prueba de la Nueva Pokédex.": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L7"
+      ]
+    },
+    "Abrir Nueva Pokédex": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L10"
+      ]
+    },
+    "Recargar Dex JSONs": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L11"
+      ]
+    },
+    "Desbloquear todas las Dexes regionales": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L12"
+      ]
+    },
+    "Marcar Dex activa como completada (Vistos/Atrapados)": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L13"
+      ]
+    },
+    "Ver lista de especies habilitadas": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L14"
+      ]
+    },
+    "Editor de formas y slots": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L15"
+      ]
+    },
+    "¡Datos de Dex JSONs recargados con éxito!": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L25"
+      ]
+    },
+    "Todas las dexes regionales han sido desbloqueadas.": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L30"
+      ]
+    },
+    "¡Se han registrado {1} especies como vistas y atrapadas!": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L39"
+      ]
+    },
+    "Especies habilitadas actualmente: {1}": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - 004_DebugMenu.rb:L43"
       ]
     }
   },

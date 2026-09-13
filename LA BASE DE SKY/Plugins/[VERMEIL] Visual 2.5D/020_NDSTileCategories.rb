@@ -57,7 +57,8 @@ module Mode7
       when Config::NDS_VOLUME_HIGH_TERRAIN_TAG
         Config::NDS_VOLUME_HIGH_HEIGHT.to_f
       when Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
-        Config::NDS_MOUNTAIN_HEIGHT.to_f
+        # V7.1 billboard: la montaña no eleva superficie en absoluto.
+        Config::NDS_MOUNTAIN_AS_BILLBOARD ? 0.0 : Config::NDS_MOUNTAIN_HEIGHT.to_f
       else
         0.0
       end
@@ -397,6 +398,9 @@ class Mode7Renderer
   end
 
   def nds_mountain_height_at(tx, ty)
+    # V7.1 billboard: las montañas no tienen altura de superficie. Esto elimina
+    # el arrastre de tiles adyacentes y las subidas de cámara por Terrain Tag.
+    return 0.0 if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
     if !@nds_mountain_height_cache_complete
       nds_build_mountain_height_cache
     end
@@ -519,6 +523,13 @@ class Mode7Renderer
 
   def nds_billboard_entry?(entry)
     id = nds_category_id(entry)
+    # V7.1 billboard: los tags de montaña se renderizan como arbol/estructura,
+    # no como paredes ni como superficie elevada.
+    if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
+      return true if id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG ||
+                     id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
+                     id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+    end
     id == Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG ||
       id == Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG ||
       id == Mode7::Config::NDS_OVERLAY_TERRAIN_TAG
@@ -655,7 +666,9 @@ class Mode7Renderer
     id = nds_category_id(entry)
     id == Mode7::Config::NDS_VOLUME_TERRAIN_TAG ||
       id == Mode7::Config::NDS_VOLUME_HIGH_TERRAIN_TAG ||
-      id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
+      # V7.1 billboard: MountainTop ya no es volumen elevado.
+      (id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG &&
+       !Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD)
   end
 
   def nds_stair_entry?(entry)
@@ -775,6 +788,10 @@ class Mode7Renderer
     # Un WallPlane ya es una cara completa. Con escalera, se conserva cualquier
     # WallPlane generico pero se elimina MountainWallPlane de esa celda.
     plane_entries = entries.select { |entry| nds_wall_plane_entry?(entry) }
+    if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
+      # V7.1: los planos de montaña no son paredes; van por el billboard.
+      plane_entries = plane_entries.reject { |entry| nds_mountain_wall_entry?(entry) }
+    end
     if has_stair
       plane_entries.reject! do |entry|
         nds_category_id(entry) == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
@@ -786,6 +803,8 @@ class Mode7Renderer
     # el hueco real del acceso y por tanto no renderiza wall detras.
     if !has_stair
       mountain_entries = entries.select { |entry| nds_mountain_wall_entry?(entry) }
+      # V7.1 billboard: la montaña deja la fachada de muro; dibuja billboard.
+      return [] if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD && !mountain_entries.empty?
       return mountain_entries if !mountain_entries.empty?
     end
 
@@ -837,6 +856,13 @@ class Mode7Renderer
 
   def nds_component_kind(component)
     ids = component.values.flatten.map { |e| nds_category_id(e) }.compact
+    # V7.1 billboard: una celda de montaña forma un solo billboard anclado al pie, nunca un muro ni un plano.
+    return :nds_billboard if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD &&
+                            ids.any? do |id|
+                              id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG ||
+                                id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
+                                id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+                            end
     return :nds_structure if ids.include?(Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG)
     return :nds_overlay if ids.include?(Mode7::Config::NDS_OVERLAY_TERRAIN_TAG)
     return :nds_billboard if ids.include?(Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG)
@@ -859,7 +885,8 @@ class Mode7Renderer
       # casilla fisica delante de la meseta. Si los dejamos en @wall_cells la
       # colision queda 1..N tiles mas cerca que la cara 3D y el error crece con
       # la altura. La barrera real es ahora el cambio de altura del height grid.
-      if Mode7::Config::NDS_MOUNTAIN_AUTO_FACES
+      if Mode7::Config::NDS_MOUNTAIN_AUTO_FACES ||
+         Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
         direct_walls = direct_walls.reject do |entry|
           id = nds_category_id(entry)
           id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||

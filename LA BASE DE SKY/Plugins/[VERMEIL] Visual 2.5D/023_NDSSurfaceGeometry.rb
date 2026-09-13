@@ -461,15 +461,21 @@ class Mode7Renderer
     @nds_surface_geometry = nil
     return if !Mode7::Config::SURFACE_GEOMETRY_ENABLED
 
-    # Read the explicit Geometry V4 file first. If it is fully authored, it is
-    # authoritative. Otherwise its compatibility inherit flag overlays the
-    # NDS Terrain Tag surface generated below.
-    overlay = Mode7::SurfaceGeometry.from_file(@map_id, @map.width, @map.height)
-    if overlay && !overlay.inherit_legacy
-      @nds_surface_geometry = overlay
-      Mode7.register_geometry_collision_source(@nds_surface_geometry, @map_id) if Mode7.respond_to?(:register_geometry_collision_source)
-      Console.echo_li("[VERMEIL] Runtime Geometry: #{overlay.path}") if defined?(Console) rescue nil
-      return
+    # V7 / single-source Terrain Tags: con SURFACE_GEOMETRY_RUNTIME_FILES=false
+    # el archivo .v25r no se lee (cuarentena de modelos 3D). La superficie se
+    # deriva siempre de los Terrain Tags NDS asignados en el tileset.
+    overlay = nil
+    if Mode7::Config::SURFACE_GEOMETRY_RUNTIME_FILES
+      # Read the explicit Geometry V4 file first. If it is fully authored, it is
+      # authoritative. Otherwise its compatibility inherit flag overlays the
+      # NDS Terrain Tag surface generated below.
+      overlay = Mode7::SurfaceGeometry.from_file(@map_id, @map.width, @map.height)
+      if overlay && !overlay.inherit_legacy
+        @nds_surface_geometry = overlay
+        Mode7.register_geometry_collision_source(@nds_surface_geometry, @map_id) if Mode7.respond_to?(:register_geometry_collision_source)
+        Console.echo_li("[VERMEIL] Runtime Geometry: #{overlay.path}") if defined?(Console) rescue nil
+        return
+      end
     end
 
     nds_tags = Mode7::SurfaceGeometry.new(
@@ -585,6 +591,8 @@ class Mode7Renderer
   end
 
   def nds_mountain_height_at(tx, ty)
+    # V7.1 billboard: montaña sin altura de superficie; no arrastra vecinos.
+    return 0.0 if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
     if @nds_surface_geometry
       h = @nds_surface_geometry.height_at(tx, ty).to_f
       return h if @nds_surface_geometry.explicit_cell?(tx, ty) || h.abs >= 0.001

@@ -495,7 +495,7 @@ end
 #-------------------------------------------------------------------------------
 module BSS096SOSSceneAuthority
   def bss_pbSOSJoin(*args,&block)
-    vec=(@vector.get.clone rescue nil)
+    vec=((@vector.get.clone rescue nil) if @vector)
     @bss096_battler_anim_depth=@bss096_battler_anim_depth.to_i+1
     @bss096_native_formation_depth=@bss096_native_formation_depth.to_i+1
     @bss083_camera_freeze=@bss083_camera_freeze.to_i+1
