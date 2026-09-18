@@ -14,6 +14,7 @@ class PokemonBox
     @name = name
     @background = 0
     @pokemon = []
+    @nitems = 0
     maxPokemon.times { |i| @pokemon[i] = nil }
   end
 
@@ -22,9 +23,8 @@ class PokemonBox
   end
 
   def nitems
-    ret = 0
-    @pokemon.each { |pkmn| ret += 1 if !pkmn.nil? }
-    return ret
+    @nitems = @pokemon.count { |pkmn| !pkmn.nil? } if @nitems.nil?
+    return @nitems
   end
 
   def full?
@@ -40,7 +40,12 @@ class PokemonBox
   end
 
   def []=(i, value)
+    old_empty = @pokemon[i].nil?
+    new_empty = value.nil?
+    count = nitems
     @pokemon[i] = value
+    @nitems = count + 1 if old_empty && !new_empty
+    @nitems = count - 1 if !old_empty && new_empty
   end
 
   def each
@@ -49,6 +54,7 @@ class PokemonBox
 
   def clear
     @pokemon.clear
+    @nitems = 0
   end
 end
 
@@ -172,8 +178,10 @@ class PokemonStorage
     if y.nil?
       return (x == -1) ? self.party : @boxes[x]
     else
-      @boxes.each do |i|
-        raise "Box is a Pokémon, not a box" if i.is_a?(Pokemon)
+      if $DEBUG
+        @boxes.each do |i|
+          raise "Box is a Pokémon, not a box" if i.is_a?(Pokemon)
+        end
       end
       return (x == -1) ? self.party[y] : @boxes[x][y]
     end
@@ -440,4 +448,3 @@ end
 def pbEachNonEggPokemon
   pbEachPokemon { |pkmn, box| yield(pkmn, box) if !pkmn.egg? }
 end
-

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= h(@title) %> · <%= h(meta[:game_title]) %></title>
+<meta name="generator" content="Wiki generada el <%= h(meta[:generated]) %><%= " · #{meta[:version]}" if meta[:version] %>">
+<link rel="stylesheet" href="<%= asset('style.css') %>">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem('wiki-theme') ||
+            (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="<%= asset('index.html') %>"><%= h(meta[:game_title]) %></a>
+  <nav>
+    <a href="<%= asset('pokemon/index.html') %>">Pokédex</a>
+    <a href="<%= asset('movimientos/index.html') %>">Movimientos</a>
+    <a href="<%= asset('habilidades/index.html') %>">Habilidades</a>
+    <a href="<%= asset('objetos/index.html') %>">Objetos</a>
+    <a href="<%= asset('entrenadores/index.html') %>">Entrenadores</a>
+    <a href="<%= asset('ubicaciones/index.html') %>">Ubicaciones</a>
+    <a href="<%= asset('tipos.html') %>">Tipos</a>
+  </nav>
+  <div class="tools">
+    <input type="search" id="q" placeholder="Buscar…" autocomplete="off" aria-label="Buscar">
+    <button type="button" id="theme-toggle" aria-label="Cambiar tema">Tema</button>
+  </div>
+  <div id="results" hidden></div>
+</header>
+<main><%= content %></main>
+<script>window.WIKI_ROOT = "<%= @root %>";</script>
+<script src="<%= asset('buscar.js') %>"></script>
+<script src="<%= asset('search.js') %>"></script>
+<script src="<%= asset('theme.js') %>"></script>
+</body>
+</html>

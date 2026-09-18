@@ -21,6 +21,7 @@ Sin dependencias: no hace falta instalar ninguna gema.
 | Que `GameData` cargue | Overworld, eventos de mapa, cutscenes |
 | Integridad de los datos PBS (referencias colgadas) | Gráficos, audio, input |
 | Mecánicas de combate (daño, estados, habilidades, prioridad) | Guardado/carga real |
+| Aridad de las llamadas resolubles (nº de argumentos) | Llamadas dinámicas (`send`, receiver variable) |
 
 Lo no cubierto se sigue probando a mano. Correr mkxp-z headless no es viable:
 necesita un contexto OpenGL.
@@ -76,3 +77,9 @@ Los tests que no tocan combate heredan de `EngineTest`.
 - Las excepciones de dentro del combate se relanzan en vez de registrarse, para
   que el test enseñe la traza real.
 - `tests/` vive fuera de `LA BASE DE SKY/`, así que no entra en el zip de release.
+- `cases/test_call_arity.rb` parsea cada `.rb` con Prism, resuelve el método de
+  cada llamada contra el motor ya booteado y comprueba que el nº de argumentos
+  posicionales encaje. Sólo mira llamadas sin receiver, `self` o una constante;
+  salta splats, kwargs y lo que no resuelve. Los casos límite conocidos (una
+  llamada con guarda `if defined?`) están en la lista `IGNORE` del archivo, cada
+  uno con su motivo.

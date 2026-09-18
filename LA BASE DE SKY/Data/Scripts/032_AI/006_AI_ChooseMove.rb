@@ -232,6 +232,8 @@ class Battle::AI
     # Substitute
     return true if @target.effects[PBEffects::Substitute] > 0 && @move.statusMove? &&
                    !@move.move.ignoresSubstitute?(@user.battler) && @user.index != @target.index
+    # Immunity because of Commander
+      return true if target.has_active_ability?(:COMMANDER) && target.battler.effects[PBEffects::Commanding] >= 0
     return false
   end
 

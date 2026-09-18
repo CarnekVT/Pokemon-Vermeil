@@ -144,12 +144,11 @@ class Spriteset_Map
     @@viewport3.color = $game_screen.flash_color
     @@viewport1.update
     @@viewport3.update
-    # Only update events that are on-screen
+    # Update footsteps for event sprites skipped by Sprite_Character's anti-lag guard.
     for sprite in @character_sprites
-      if sprite.character.is_a?(Game_Event)
+      if sprite.character.is_a?(Game_Event) && !sprite.character.should_update?
         sprite.update_footsteps
       end
     end
   end
 end
-

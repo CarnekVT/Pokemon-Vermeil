@@ -8,9 +8,11 @@ module LUTS
     # Base class structure
     class BaseError
       def initialize
-        raise NotImplementedError
+        ::Kernel.raise NotImplementedError
       end
 
+      # `raise` here shadows `Kernel#raise` for the whole class, so the stubs
+      # above and below have to qualify the call.
       def raise
         ::LUTS::Logger.send(level, message)
       end
@@ -18,11 +20,11 @@ module LUTS
       private
 
       def level
-        raise NotImplementedError
+        ::Kernel.raise NotImplementedError
       end
 
       def message
-        raise NotImplementedError
+        ::Kernel.raise NotImplementedError
       end
     end
 

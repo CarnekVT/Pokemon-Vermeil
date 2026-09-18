@@ -509,6 +509,7 @@ class Battle::Scene
     old_shadow_visible_target = []
     old_shadow_opacity_target = []
     if targets then
+      targets = (targets.is_a?(Array)) ? targets : [targets]
       targets.each_with_index do |b, i|
         sprite = sprites["pokemon_#{b.index}"]
         shadow = sprites["shadow_#{b.index}"]
@@ -531,6 +532,7 @@ class Battle::Scene
 
     if targets and moveID != :SKYDROP then
       targets.each_with_index do |b, i|
+        targets = (targets.is_a?(Array)) ? targets : [targets]
         sprite = sprites["pokemon_#{b.index}"]
         shadow = sprites["shadow_#{b.index}"]
         sprite.visible = old_visible_target[i]
@@ -586,8 +588,11 @@ class Battle::Scene
   end
 
   def pbCommonAnimation2(animName, user = nil, target = nil)
-    return if nil_or_empty?(animName)
+    return if user && user.effects[PBEffects::Commanding] >= 0
     target = target[0] if target.is_a?(Array)
+    return if target && target.effects[PBEffects::Commanding] >= 0
+
+    return if nil_or_empty?(animName)
     animations = pbLoadBattleAnimations
     return if !animations
     animations.each do |a|

@@ -14,6 +14,15 @@ class BerryPlantData
   attr_accessor :moisture_level       # Gen 4 mechanics
   attr_accessor :yield_penalty        # Gen 4 mechanics
 
+  def self.current_time
+    frame_count = Graphics.frame_count
+    if @time_frame != frame_count
+      @time_frame = frame_count
+      @current_time = pbGetTimeNow
+    end
+    return @current_time
+  end
+
   def initialize
     reset
   end
@@ -94,9 +103,8 @@ class BerryPlantData
 
   # Old mechanics only update a plant when its map is loaded. New mechanics
   # update it every frame while its map is loaded.
-  def update
+  def update(time_now = self.class.current_time)
     return if !planted?
-    time_now = pbGetTimeNow
     time_delta = time_now.to_i - @time_last_updated
     return if time_delta <= 0
     new_time_alive = @time_alive + time_delta
@@ -164,6 +172,23 @@ end
 #
 #===============================================================================
 class BerryPlantMoistureSprite
+  def self.day_night_tint
+    frame_count = Graphics.frame_count
+    return @day_night_tint if @tint_frame == frame_count
+    @tint_frame = frame_count
+    @day_night_tint ||= [0, 0, 0, 0]
+    if $scene.is_a?(Scene_Map) && Settings::TIME_SHADING && $game_map.metadata&.outdoor_map
+      tone = PBDayNight.getTone
+      @day_night_tint[0] = tone.red
+      @day_night_tint[1] = tone.green
+      @day_night_tint[2] = tone.blue
+      @day_night_tint[3] = tone.gray
+    else
+      @day_night_tint.fill(0)
+    end
+    return @day_night_tint
+  end
+
   def initialize(event, map, viewport = nil)
     @event          = event
     @map            = map
@@ -171,6 +196,7 @@ class BerryPlantMoistureSprite
     @sprite.ox      = 16
     @sprite.oy      = 24
     @moisture_stage = -1   # -1 = none, 0 = dry, 1 = damp, 2 = wet
+    @tint_red       = nil
     @disposed       = false
     update_graphic
   end
@@ -211,7 +237,15 @@ class BerryPlantMoistureSprite
     @sprite.y      = ScreenPosHelper.pbScreenY(@event)
     @sprite.zoom_x = ScreenPosHelper.pbScreenZoomX(@event)
     @sprite.zoom_y = @sprite.zoom_x
-    pbDayNightTint(@sprite)
+    tint = self.class.day_night_tint
+    if @tint_red != tint[0] || @tint_green != tint[1] ||
+       @tint_blue != tint[2] || @tint_gray != tint[3]
+      @sprite.tone.set(tint[0], tint[1], tint[2], tint[3])
+      @tint_red = tint[0]
+      @tint_green = tint[1]
+      @tint_blue = tint[2]
+      @tint_gray = tint[3]
+    end
   end
 end
 
@@ -469,4 +503,3 @@ def pbPickBerry(berry, qty = 1)
   pbSetSelfSwitch(this_event.id, "A", true)
   return true
 end
-

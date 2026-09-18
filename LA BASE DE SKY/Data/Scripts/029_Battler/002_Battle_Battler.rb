@@ -818,6 +818,7 @@ class Battle::Battler
     return true if @effects[PBEffects::Ingrain]
     return true if @effects[PBEffects::NoRetreat]
     return true if @battle.field.effects[PBEffects::FairyLock] > 0
+    return true if @effects[PBEffects::Commanding] >= 0 || @effects[PBEffects::CommandedBy] >= 0
     return false
   end
 
@@ -840,7 +841,18 @@ class Battle::Battler
       end
       return false
     end
-    return false if hasActiveAbility?(:GUARDDOG) && !beingMoldBroken?
+    if hasActiveAbility?(:GUARDDOG) && !beingMoldBroken?
+      if show_message
+        @battle.pbShowAbilitySplash(self)
+        if Battle::Scene::USE_ABILITY_SPLASH
+          @battle.pbDisplay(_INTL("¡{1} se ancló!", pbThis))
+        else
+          @battle.pbDisplay(_INTL("¡{1} se ancló con {2}!", pbThis, abilityName))
+        end
+        @battle.pbHideAbilitySplash(self)
+      end
+      return false
+    end
     if @effects[PBEffects::Ingrain]
       @battle.pbDisplay(_INTL("{1} se ancla con sus raíces!", pbThis)) if show_message
       return false

@@ -588,7 +588,7 @@ Battle::AI::Handlers::MoveFailureCheck.add("RaiseUserStatDependingOnCommander1",
 )
 Battle::AI::Handlers::MoveEffectScore.add("RaiseUserStatDependingOnCommander1",
   proc { |score, move, user, ai, battle|
-    next score if user.effects[PBEffects::CommandedBy] <= 0
+    next score if user.effects[PBEffects::CommandedBy] < 0
     next ai.get_score_for_target_stat_raise(score, user, move.move.statUp)
   }
 )
@@ -2047,6 +2047,21 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DamageAndResetAllBattler
           score += (stage < 0) ? score_change : -score_change
         end
       end
+    end
+    next score
+  }
+)
+
+#===============================================================================
+# Order Up
+#===============================================================================
+Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RaiseUserStatDependingOnCommander1",
+  proc { |score, move, user, target, ai, battle|
+    if user.battler.effects[PBEffects::CommandedBy] >= 0
+      form = battle.battlers[user.effects[PBEffects::CommandedBy]].form
+      stat = [:ATTACK, :DEFENSE, :SPEED][form]
+      # Score for user's stat changes
+      score = ai.get_score_for_target_stat_raise(score, user, [stat, 1], false)
     end
     next score
   }

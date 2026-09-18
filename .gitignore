@@ -2,6 +2,9 @@
 .cursor
 .ruby-lsp
 */.ruby-lsp
+
+# Sitio generado por wiki/generate.rb
+wiki/site/
 LA BASE DE SKY/Data/Enemies.rxdata
 LA BASE DE SKY/Data/Actors.rxdata
 LA BASE DE SKY/Data/Armors.rxdata

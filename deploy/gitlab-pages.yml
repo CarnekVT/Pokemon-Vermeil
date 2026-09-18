@@ -1,0 +1,15 @@
+# Publica la wiki del juego en GitLab Pages.
+#
+# Instalación: pega este job en tu .gitlab-ci.yml (ajusta la rama si hace falta).
+# La wiki queda en  https://<grupo>.gitlab.io/<proyecto>/
+
+pages:
+  stage: deploy
+  image: ruby:3.4
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+  script:
+    - ruby wiki/generate.rb --out public
+  artifacts:
+    paths:
+      - public

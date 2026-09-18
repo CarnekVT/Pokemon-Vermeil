@@ -15,6 +15,10 @@ class Battle
       idxOther = (idxBattler.even?) ? 2 : 3
     end
     return false if pbGetOwnerIndexFromBattlerIndex(idxBattler) != pbGetOwnerIndexFromBattlerIndex(idxOther)
+    return false if @battlers[idxBattler].effects[PBEffects::Commanding] >= 0 ||
+                      @battlers[idxBattler].effects[PBEffects::CommandedBy] >= 0 ||
+                      @battlers[idxOther].effects[PBEffects::Commanding] >= 0 ||
+                      @battlers[idxOther].effects[PBEffects::CommandedBy] >= 0
     return true
   end
 
@@ -95,6 +99,7 @@ class Battle
     return false if @battlers[idxBattler].wild?
     return true if $DEBUG && Input.press?(Input::CTRL)
     return false if @battlers[idxBattler].effects[PBEffects::SkyDrop] >= 0
+    return false if @battlers[idxBattler].effects[PBEffects::Commanding] >= 0
     return false if !pbHasMegaRing?(idxBattler)
     side  = @battlers[idxBattler].idxOwnSide
     owner = pbGetOwnerIndexFromBattlerIndex(idxBattler)
@@ -201,4 +206,3 @@ class Battle
     pbDisplay(_INTL("¡{1} ha experimentado una Regresión Primigenia y ha recobrado su apariencia primitiva!", battler.pbThis))
   end
 end
-

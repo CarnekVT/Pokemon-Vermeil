@@ -1,0 +1,22 @@
+<% e = locals[:entry]; title(e[:name]) %>
+<article class="detail ability">
+  <header>
+    <div class="headmeta">
+      <h1><%= h(e[:name]) %><%= badge(e) %></h1>
+      <p class="subtitle"><code><%= h(e[:id]) %></code></p>
+      <p class="pokedex-entry"><%= h(e[:description]) %></p>
+      <% unless e[:flags].empty? %><p class="muted">Propiedades: <%= h(e[:flags].join(", ")) %></p><% end %>
+    </div>
+  </header>
+
+  <section class="section-card">
+    <h2>Pokémon con esta habilidad</h2>
+    <% n = e[:pokemon][:normal].uniq; hid = e[:pokemon][:hidden].uniq %>
+    <% if n.any? %><h3>Normal</h3><%= chiplist(n.map { |sp| mon_link(sp) }.join, n.size) %><% end %>
+    <% if hid.any? %><h3>Oculta</h3><%= chiplist(hid.map { |sp| mon_link(sp) }.join, hid.size) %><% end %>
+    <% if n.empty? && hid.empty? %><p class="muted">Ningún Pokémon la tiene actualmente.</p><% end %>
+  </section>
+
+  <%= change_box(e) %>
+  <%= notes(e) %>
+</article>

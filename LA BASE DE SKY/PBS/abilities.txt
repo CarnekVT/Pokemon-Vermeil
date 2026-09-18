@@ -1279,3 +1279,7 @@ Description = Su capacidad de flotar sobre el suelo le proporciona inmunidad fre
 [FIREMANE]
 Name = Crin de Fuego
 Description = Potencia los movimientos de tipo Fuego del usuario en un 50%.
+#-------------------------------
+[AURAGUARD]
+Name = Protección Aural
+Description = Reduce a la mitad el daño provocado por los movimientos de contacto.

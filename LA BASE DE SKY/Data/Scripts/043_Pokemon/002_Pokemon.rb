@@ -37,6 +37,12 @@ class Pokemon
   # If defined, is the time (in Integer form) when this Pokémon's form was set.
   # @return [Integer, nil] the time this Pokémon's form was set
   attr_accessor :time_form_set
+  # The form this Pokémon had at the exact moment it fainted (before any
+  # end-of-battle-form reset, e.g. Mega/Primal reverting or a MultipleForms
+  # "getFormOnLeavingBattle" handler kicking in). Used by Revival Blessing to
+  # bring it back in the same form. Cleared once consumed.
+  # @return [Integer, nil] the form this Pokémon had when it fainted
+  attr_accessor :fainted_battle_form
   # @return [Integer] the current experience points
   attr_reader   :exp
   # @return [Integer] the number of steps until this Pokémon hatches, 0 if this Pokémon is not an egg

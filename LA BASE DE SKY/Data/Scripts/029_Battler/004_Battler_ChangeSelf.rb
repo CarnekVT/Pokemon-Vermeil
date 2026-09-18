@@ -84,6 +84,7 @@ class Battle::Battler
       @pokemon.changeHappiness((badLoss) ? "faintbad" : "faint")
     end
     # Reset form
+    @pokemon.fainted_battle_form = @pokemon.form if @pokemon   # Remembered by Revival Blessing
     @battle.peer.pbOnLeavingBattle(@battle, @pokemon, @battle.usedInBattle[idxOwnSide][@index / 2])
     @pokemon.makeUnmega if mega?
     @pokemon.makeUnprimal if primal?

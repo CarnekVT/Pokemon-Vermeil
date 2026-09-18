@@ -1,9 +1,10 @@
 class Sprite_Picture
+  attr_reader :picture
+
   def initialize(viewport, picture)
     @viewport = viewport
     @picture = picture
     @sprite = nil
-    update
   end
 
   def dispose
@@ -56,4 +57,3 @@ class Sprite_Picture
     @sprite.tone = @picture.tone
   end
 end
-

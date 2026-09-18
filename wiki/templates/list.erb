@@ -1,0 +1,89 @@
+<%
+  key    = locals[:list_key]
+  folder = locals[:folder]
+  titles = { species: "Pokédex", moves: "Movimientos", abilities: "Habilidades",
+             items: "Objetos", trainers: "Entrenadores" }
+  title(titles[key])
+
+  entries =
+    if key == :species
+      by_base = data[:species].values.group_by { |s| s[:species] }
+      seen = {}
+      ordered = data[:dex_order].flat_map { |sp| seen[sp] = true; by_base[sp] || [] }
+      ordered + by_base.reject { |sp, _| seen[sp] }.values.flatten
+    else
+      data[key].values.sort_by { |e| (e[:name] || e[:key]).to_s.downcase }
+    end
+  url = ->(e) { asset("#{folder}/#{e[:key] || e[:id]}.html") }
+%>
+<h1><%= h(titles[key]) %> <span class="count"><%= entries.size %></span></h1>
+
+<% if key == :species %>
+<div class="dexgrid">
+  <% entries.each_with_index do |e, i| %>
+    <a class="dexcard" href="<%= url.call(e) %>">
+      <span class="no"><%= format("%03d", i + 1) %></span>
+      <%= badge(e) %>
+      <%= picon(e[:id]) %>
+      <span class="nm"><%= h(display_name(e)) %></span>
+      <span class="types"><%= types_row(e[:types], small: true, link: false) %></span>
+      <span class="bst"><%= e[:bst] %> total</span>
+    </a>
+  <% end %>
+</div>
+
+<% elsif key == :trainers %>
+<div class="party">
+  <% entries.each do |e| %>
+    <a class="dexcard" href="<%= url.call(e) %>" style="align-items:center">
+      <%= tsprite(e[:trainer_type]) %>
+      <span class="nm"><%= h(e[:name]) %><%= " (#{e[:version]})" if e[:version].to_i > 0 %></span>
+      <span class="bst"><%= h(e[:type_name]) %> · <%= e[:party].size %> Pokémon</span>
+    </a>
+  <% end %>
+</div>
+
+<% else %>
+<div class="table-scroll">
+<table class="data">
+  <thead>
+    <tr>
+      <% case key
+         when :moves %>
+        <th>Nombre</th><th>Tipo</th><th>Cat.</th><th class="num">Pot.</th><th class="num">Prec.</th><th class="num">PP</th><th></th>
+      <% when :abilities %>
+        <th>Nombre</th><th>Descripción</th><th></th>
+      <% when :items %>
+        <th></th><th>Nombre</th><th>Bolsillo</th><th class="num">Precio</th><th></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+  <% entries.each do |e| %>
+    <tr>
+      <% case key
+         when :moves %>
+        <td><a href="<%= url.call(e) %>"><%= h(e[:name]) %></a></td>
+        <td><%= type_tag(e[:type], small: true) %></td>
+        <td><%= h(e[:category_name]) %></td>
+        <td class="num"><%= e[:power].to_i.zero? ? "—" : e[:power] %></td>
+        <td class="num"><%= e[:accuracy].to_i.zero? ? "—" : e[:accuracy] %></td>
+        <td class="num"><%= e[:total_pp] %></td>
+        <td><%= badge(e) %></td>
+      <% when :abilities %>
+        <td><a href="<%= url.call(e) %>"><%= h(e[:name]) %></a></td>
+        <td class="muted"><%= h(e[:description]) %></td>
+        <td><%= badge(e) %></td>
+      <% when :items %>
+        <td class="ic"><%= item_icon(e[:id]) %></td>
+        <td><a href="<%= url.call(e) %>"><%= h(e[:name]) %></a></td>
+        <td><%= h(e[:pocket_name]) %></td>
+        <td class="num"><%= e[:price].to_i.zero? ? "—" : e[:price] %></td>
+        <td><%= badge(e) %></td>
+      <% end %>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+</div>
+<% end %>

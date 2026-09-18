@@ -274,21 +274,21 @@ class Sprite_Character < RPG::Sprite
   end
 
   def update_footsteps
-    if @steps
-      for i in 0...@steps.size
-        next unless @steps[i]
-        sprite, map, x, y, ox = @steps[i]
-        sprite.x = -map.display_x / Game_Map::X_SUBPIXELS + x * Game_Map::TILE_WIDTH
-        sprite.y = -map.display_y / Game_Map::Y_SUBPIXELS + (y + 1) * Game_Map::TILE_HEIGHT
-        sprite.y -= Game_Map::TILE_HEIGHT
-        sprite.opacity -= FootprintsSettings::FADE_OUT_SPEED
-        if sprite.opacity <= 0
-          sprite.dispose
-          @steps[i] = nil
-        end
+    return if !@steps || @steps.empty?
+
+    for i in 0...@steps.size
+      next unless @steps[i]
+      sprite, map, x, y, ox = @steps[i]
+      sprite.x = -map.display_x / Game_Map::X_SUBPIXELS + x * Game_Map::TILE_WIDTH
+      sprite.y = -map.display_y / Game_Map::Y_SUBPIXELS + (y + 1) * Game_Map::TILE_HEIGHT
+      sprite.y -= Game_Map::TILE_HEIGHT
+      sprite.opacity -= FootprintsSettings::FADE_OUT_SPEED
+      if sprite.opacity <= 0
+        sprite.dispose
+        @steps[i] = nil
       end
-      @steps.compact!
     end
+    @steps.compact!
   end
 
   #-----------------------------------------------------------------------------

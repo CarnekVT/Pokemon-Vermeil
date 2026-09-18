@@ -196,8 +196,9 @@ class LocationWindow
   def update
     return if disposed? || $game_temp.fly_destination
 
+    now = System.uptime
     if @delayed
-      @timer_start = System.uptime
+      @timer_start = now
       @delayed = false
     end
     @graphic&.update
@@ -210,16 +211,16 @@ class LocationWindow
     end
 
     # Calculate animation offset
-    if System.uptime - @timer_start >= APPEAR_TIME + LINGER_TIME
+    if now - @timer_start >= APPEAR_TIME + LINGER_TIME
       # Disappearing
       if @animate_from_bottom
-        y_offset = lerp(0, appear_distance, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, System.uptime)
+        y_offset = lerp(0, appear_distance, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, now)
         if y_offset >= appear_distance
           dispose
           return
         end
       else
-        y_offset = lerp(0, -appear_distance, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, System.uptime)
+        y_offset = lerp(0, -appear_distance, APPEAR_TIME, @timer_start + APPEAR_TIME + LINGER_TIME, now)
         if y_offset <= -appear_distance
           dispose
           return
@@ -228,9 +229,9 @@ class LocationWindow
     else
       # Appearing
       y_offset = if @animate_from_bottom
-                   lerp(appear_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
+                   lerp(appear_distance, 0, APPEAR_TIME, @timer_start, now)
                  else
-                   lerp(-appear_distance, 0, APPEAR_TIME, @timer_start, System.uptime)
+                   lerp(-appear_distance, 0, APPEAR_TIME, @timer_start, now)
                  end
     end
 
@@ -317,6 +318,7 @@ class LightEffect
     @light.z = 1000
     @event = event
     @map = map ? map : $game_map
+    @uses_screen_pos_helper = Object.const_defined?(:ScreenPosHelper)
     @disposed = false
   end
 
@@ -370,7 +372,7 @@ class LightEffect_Basic < LightEffect
     return if !@light || !@event
 
     super
-    if (Object.const_defined?(:ScreenPosHelper) rescue false)
+    if @uses_screen_pos_helper
       @light.x      = ScreenPosHelper.pbScreenX(@event)
       @light.y      = ScreenPosHelper.pbScreenY(@event) - (@event.height * Game_Map::TILE_HEIGHT / 2)
       @light.zoom_x = ScreenPosHelper.pbScreenZoomX(@event)
@@ -407,7 +409,7 @@ class LightEffect_DayNight < LightEffect
             end
     @light.opacity = 255 - shade
     if @light.opacity > 0
-      if (Object.const_defined?(:ScreenPosHelper) rescue false)
+      if @uses_screen_pos_helper
         @light.x      = ScreenPosHelper.pbScreenX(@event)
         @light.y      = ScreenPosHelper.pbScreenY(@event) - (@event.height * Game_Map::TILE_HEIGHT / 2)
         @light.zoom_x = ScreenPosHelper.pbScreenZoomX(@event)

@@ -50,7 +50,7 @@ class Battle::Battler
       if choiced_move
         if hasActiveItem?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF])
           if showMessages
-            msg = _INTL("¡A causa de la {1} solo se puede usar {2}!", itemName, choiced_move.name)
+            msg = _INTL("¡A causa de {1} solo se puede usar {2}!", itemName, choiced_move.name)
             (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
           end
           return false
@@ -699,6 +699,8 @@ class Battle::Battler
                    target.hasActiveAbility?(:NOGUARD)
     # Semi-invulnerable target
     return false if target.damageState.invulnerable
+    # Commanding
+    return false if target.effects[PBEffects::Commanding] >= 0
 
     # Accuracy check
     return true if move.pbAccuracyCheck(user, target)   # Includes Counter/Mirror Coat

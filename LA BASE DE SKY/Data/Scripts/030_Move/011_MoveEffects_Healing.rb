@@ -740,6 +740,10 @@ class Battle::Move::RevivePokemonToHalfHP < Battle::Move
     pkmn.hp = (pkmn.totalhp / 2).floor
     pkmn.hp = 1 if pkmn.hp <= 0
     pkmn.heal_status
+    if pkmn.fainted_battle_form && pkmn.fainted_battle_form != pkmn.form
+      pkmn.form = pkmn.fainted_battle_form
+    end
+    pkmn.fainted_battle_form = nil
     @battle.pbDisplay(_INTL("¡{1} fue revivido y está listo para luchar de nuevo!", pkmn.name))
   end
 end

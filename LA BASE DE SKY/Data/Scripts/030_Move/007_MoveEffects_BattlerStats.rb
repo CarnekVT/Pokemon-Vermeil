@@ -730,7 +730,7 @@ class Battle::Move::RaiseUserStatDependingOnCommander1 < Battle::Move::StatUpMov
   end
 
   def pbOnStartUse(user, targets)
-    return if user.effects[PBEffects::CommandedBy] <= 0
+    return if user.effects[PBEffects::CommandedBy] < 0
     commander = @battle.battlers[user.effects[PBEffects::CommandedBy]]
     @statUp[0] = [:ATTACK, :DEFENSE, :SPEED][commander.form]
   end
@@ -741,6 +741,12 @@ class Battle::Move::RaiseUserStatDependingOnCommander1 < Battle::Move::StatUpMov
       user.pbRaiseStatStage(@statUp[0], @statUp[1], user)
     end
     @statUp[0] = nil
+  end
+  
+  def pbShowAnimation(id, user, targets, hitNum = 0, showAnimation = true)
+    effectCommand = user.effects[PBEffects::CommandedBy]
+    hitNum = @battle.battlers[effectCommand].form + 1 if effectCommand >= 0 # Different animation based on Tatsugiri's form
+    super
   end
 end
 
@@ -1451,7 +1457,7 @@ class Battle::Move::StartSyrupBombTarget < Battle::Move
   def pbAdditionalEffect(user, target)
     return if !target.affectedByAdditionalEffects?
     return if target.effects[PBEffects::SyrupBomb] > 0
-    target.effects[PBEffects::SyrupBomb]     = 4
+    target.effects[PBEffects::SyrupBomb]     = 3
     target.effects[PBEffects::SyrupBombUser] = user.index
     @battle.pbDisplay(_INTL("¡{1} fue cubierto de jarabe de caramelo pegajoso!", target.pbThis))
   end
@@ -2334,27 +2340,35 @@ class Battle::Move::AddMoneyGainedFromBattleLowerUserSpAtk1 < Battle::Move
   end
 end
 
-
 #===============================================================================
-# Order Up
+# Make it Rain
 #===============================================================================
-# Increase the user's stat by 1 stage depending on the commanding Tatsugiri.
-# This move can have different animations based on Tatsugiri's form.
+# Lowers the user's Sp.Atk by 1 stage. Also scatters coins to be picked up.
 #-------------------------------------------------------------------------------
-class Battle::Move::RaiseUserStat1Commander < Battle::Move
-  def pbEffectGeneral(user)
-    if user.isCommanderHost?
-      form = user.effects[PBEffects::Commander][1]
-      stat = [:ATTACK, :DEFENSE, :SPEED][form]
-      if user.pbCanRaiseStatStage?(stat, user, self)
-        user.pbRaiseStatStage(stat, 1, user, true)
-      end
-    end
+class Battle::Move::AddMoneyGainedFromBattleLowerUserSpAtk2 < Battle::Move
+  attr_reader :statDown
+  def initialize(battle, move)
+    super
+    @statDown = [:SPECIAL_ATTACK, 2]
   end
 
-  def pbShowAnimation(id, user, targets, hitNum = 0, showAnimation = true)
-    hitNum = user.effects[PBEffects::Commander][1] + 1 if user.isCommanderHost? # Different animation based on Tatsugiri's form
-    super
+  def pbEndOfMoveUsageEffect(user, targets, numHits, switchedBattlers)
+    return if @battle.pbAllFainted?(user.idxOpposingSide)
+    hit_target = false
+    targets.each do |b|
+      next if b.damageState.missed
+      next if b.damageState.protected
+      next if b.damageState.unaffected
+      hit_target = true
+      # Money modifier
+      next if !user.pbOwnedByPlayer?
+      @battle.field.effects[PBEffects::PayDay] += 5 * user.level
+    end
+    @battle.pbDisplay(_INTL("¡Se esparcieron monedas por todos lados!")) if hit_target
+    # Stats modifier
+    if user.pbCanLowerStatStage?(@statDown[0], user, self) && hit_target
+      user.pbLowerStatStage(@statDown[0], @statDown[1], user)
+    end
   end
 end
 

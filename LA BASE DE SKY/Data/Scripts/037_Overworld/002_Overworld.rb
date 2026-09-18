@@ -4,7 +4,13 @@
 # Pokérus check
 EventHandlers.add(:on_frame_update, :pokerus_counter,
   proc {
-    next if !$player || $player.party.none? { |pkmn| pkmn.pokerusStage == 1 }
+    next if !$player
+    # Reloj real: System.uptime lo escala el turbo y da saltos al entrar/salir
+    # de combate, lo que dejaría este plazo en un futuro inalcanzable.
+    uptime = System.unscaled_uptime
+    next if $game_temp.pokerus_next_check && uptime < $game_temp.pokerus_next_check
+    $game_temp.pokerus_next_check = uptime + 1
+    next if $player.party.none? { |pkmn| pkmn.pokerusStage == 1 }
     last = $PokemonGlobal.pokerusTime
     next if !last
     now = pbGetTimeNow
@@ -27,6 +33,9 @@ end
 
 class Game_Temp
   attr_accessor :warned_low_battery
+  attr_accessor :low_battery_warning_pending
+  attr_accessor :low_battery_next_check
+  attr_accessor :pokerus_next_check
   attr_accessor :cue_bgm
   attr_accessor :cue_bgm_timer_start
   attr_accessor :cue_bgm_delay
@@ -46,7 +55,14 @@ end
 
 EventHandlers.add(:on_frame_update, :low_battery_warning,
   proc {
-    next if $game_temp.warned_low_battery || !pbBatteryLow?
+    next if $game_temp.warned_low_battery
+    uptime = System.unscaled_uptime   # tiempo real, no escalado por el turbo
+    if !$game_temp.low_battery_warning_pending &&
+       (!$game_temp.low_battery_next_check || uptime >= $game_temp.low_battery_next_check)
+      $game_temp.low_battery_warning_pending = pbBatteryLow?
+      $game_temp.low_battery_next_check = uptime + 30
+    end
+    next if !$game_temp.low_battery_warning_pending
     next if $game_temp.in_menu || $game_temp.in_battle || $game_player.move_route_forcing ||
             $game_temp.message_window_showing || pbMapInterpreterRunning?
     $game_temp.warned_low_battery = true

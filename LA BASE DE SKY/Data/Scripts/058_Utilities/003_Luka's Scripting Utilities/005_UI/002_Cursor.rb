@@ -16,7 +16,7 @@ module LUTS
         src_rect.x  = 0
         src_rect.y  = 0
 
-        set_bitmap(sel_bitmap(@filename, rect), vertical)
+        set_bitmap(sel_bitmap(@filename, rect), vertical: vertical)
         center!
       end
       #-------------------------------------------------------------------------

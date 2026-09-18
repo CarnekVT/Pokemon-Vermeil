@@ -1,0 +1,37 @@
+<% e = locals[:entry]; title(e[:name]) %>
+<article class="detail move">
+  <header>
+    <div class="headmeta">
+      <h1><%= h(e[:name]) %><%= badge(e) %></h1>
+      <p class="subtitle"><code><%= h(e[:id]) %></code></p>
+      <span class="types"><%= type_tag(e[:type]) %> <span class="tag"><%= h(e[:category_name]) %></span></span>
+      <p class="pokedex-entry"><%= h(e[:description]) %></p>
+    </div>
+  </header>
+
+  <section class="section-card">
+    <table class="kv">
+      <tr><th>Potencia</th><td><%= e[:power].to_i.zero? ? "—" : e[:power] %></td></tr>
+      <tr><th>Precisión</th><td><%= e[:accuracy].to_i.zero? ? "No falla" : e[:accuracy] %></td></tr>
+      <tr><th>PP</th><td><%= e[:total_pp] %></td></tr>
+      <tr><th>Prioridad</th><td><%= e[:priority] %></td></tr>
+      <tr><th>Objetivo</th><td><%= h(e[:target]) %></td></tr>
+      <% if e[:effect_chance].to_i > 0 %><tr><th>Prob. de efecto secundario</th><td><%= e[:effect_chance] %> %</td></tr><% end %>
+      <tr><th>Código de efecto</th><td><code><%= h(e[:function_code]) %></code></td></tr>
+      <% unless e[:flags].empty? %><tr><th>Propiedades</th><td><%= h(e[:flags].join(", ")) %></td></tr><% end %>
+      <% if e[:machine] %><tr><th>Se enseña con</th><td><%= item_link(e[:machine][:item]) %> (<%= e[:machine][:kind] %>)</td></tr><% end %>
+    </table>
+  </section>
+
+  <section class="section-card">
+    <h2>Lo aprenden</h2>
+    <% lv = e[:learned_by][:level]; tu = e[:learned_by][:tutor].uniq; eg = e[:learned_by][:egg].uniq %>
+    <% if lv.any? %><h3>Por nivel</h3><%= chiplist(lv.sort_by { |_, l| l }.map { |sp, l| mon_link(sp) }.join, lv.size) %><% end %>
+    <% if tu.any? %><h3>Por MT / tutor</h3><%= chiplist(tu.map { |sp| mon_link(sp) }.join, tu.size) %><% end %>
+    <% if eg.any? %><h3>Como movimiento huevo</h3><%= chiplist(eg.map { |sp| mon_link(sp) }.join, eg.size) %><% end %>
+    <% if lv.empty? && tu.empty? && eg.empty? %><p class="muted">Ningún Pokémon lo aprende actualmente.</p><% end %>
+  </section>
+
+  <%= change_box(e) %>
+  <%= notes(e) %>
+</article>
