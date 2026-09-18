@@ -294,6 +294,15 @@
     },
     "NAUSSITCHD": {
       "ability": "WARLORDSGAZE"
+    },
+    "CYNDAQUIL": {
+      "ability": "THERMALFRONT"
+    },
+    "QUILAVA": {
+      "ability": "THERMALFRONT"
+    },
+    "TYPHLOSION": {
+      "ability": "THERMALFRONT"
     }
   }
 }

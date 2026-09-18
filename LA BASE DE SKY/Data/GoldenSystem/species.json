@@ -467,6 +467,60 @@
     "TENKIFETCHD": {
       "goldenType": "FIGHTING",
       "goldenTypeReplace": "FLYING"
+    },
+    "CYNDAQUIL": {
+      "goldenType": "ELECTRIC"
+    },
+    "QUILAVA": {
+      "goldenType": "ELECTRIC"
+    },
+    "TYPHLOSION": {
+      "goldenType": "ELECTRIC"
+    },
+    "SAMUROTT": {
+      "goldenType": "GHOST"
+    },
+    "DEWOTT": {
+      "goldenType": "GHOST"
+    },
+    "OSHAWOTT": {
+      "goldenType": "GHOST"
+    },
+    "SNIVY": {
+      "goldenType": "POISON"
+    },
+    "SERVINE": {
+      "goldenType": "POISON"
+    },
+    "SERPERIOR": {
+      "goldenType": "POISON"
+    },
+    "CHESNAUGHT": {
+      "goldenType": "STEEL"
+    },
+    "CHESPIN": {
+      "goldenType": "STEEL"
+    },
+    "QUILLADIN": {
+      "goldenType": "STEEL"
+    },
+    "DELPHOX": {
+      "goldenType": "FAIRY"
+    },
+    "BRAIXEN": {
+      "goldenType": "FAIRY"
+    },
+    "FENNEKIN": {
+      "goldenType": "FAIRY"
+    },
+    "GRENINJA": {
+      "goldenType": "DARK"
+    },
+    "FROGADIER": {
+      "goldenType": "DARK"
+    },
+    "FROAKIE": {
+      "goldenType": "DARK"
     }
   }
 }

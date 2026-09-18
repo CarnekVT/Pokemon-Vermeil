@@ -123,37 +123,9 @@ class Mode7Renderer
     @need_ground_redraw = true
   end
 
-  def update
-    @tilesets.update
-    @autotiles.update
-    if @need_build || @map_id != $game_map.map_id
-      build
-    elsif @autotiles.changed && !@autotile_cells.empty?
-      recomposite_autotiles
-      @need_ground_redraw = true
-    end
-    cx = Mode7.cam_x
-    cy = Mode7.cam_y
-    ce = Mode7.respond_to?(:projection_cam_elevation) ? Mode7.projection_cam_elevation.to_f : 0.0
-    redraw_step = Mode7::Config::GROUND_REDRAW_WORLD_STEP.to_f
-    redraw_step = 1.0 if redraw_step <= 0.0
-    camera_moved = @need_ground_redraw || (@last_cam_x.nil? || @last_cam_y.nil? || @last_cam_elevation.nil?) ||
-                   (@last_cam_x - cx).abs >= redraw_step ||
-                   (@last_cam_y - cy).abs >= redraw_step ||
-                   (@last_cam_elevation - ce).abs >= 0.01
-    if camera_moved
-      draw_ground
-      @last_cam_x = cx
-      @last_cam_y = cy
-      @last_cam_elevation = ce
-      @need_ground_redraw = false
-    end
-    update_ms_fog
-    update_walls
-    update_priority_surfaces
-    apply_tone_color
-    @autotiles.changed = false
-  end
+  # NOTA: update vivia aqui hasta v5.15. 021_NDSFastPath lo reemplaza por
+  # completo (misma estructura + culling por buckets); esta version jamas se
+  # ejecuta. El wrapper del profiler (043) envuelve la de 021.
 
   private
 
@@ -195,7 +167,6 @@ class Mode7Renderer
     # cada refresh. La altura de una meseta se resuelve por componente.
     @nds_mountain_height_cache = nil
     @nds_mountain_height_cache_complete = false
-    @nds_mountain_component_cache = {}
     @nds_mountain_wall_source_cache = {}
     @nds_underlay_cache = {}
     @wall_visual_components = nil
@@ -505,14 +476,15 @@ class Mode7Renderer
   def v25_underlay_volume_tag?(id)
     @v25_underlay_volume_tags ||= begin
       h = {}
-      [
+      ids = [
         Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG,
         Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG,
         Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG,
         Mode7::Config::NDS_STAIR_TERRAIN_TAG,
         Mode7::Config::NDS_VOLUME_TERRAIN_TAG,
         Mode7::Config::NDS_VOLUME_HIGH_TERRAIN_TAG
-      ].each { |tag_id| h[tag_id] = true }
+      ]
+      ids.each { |tag_id| h[tag_id] = true }
       h
     end
     !!@v25_underlay_volume_tags[id]
@@ -546,7 +518,10 @@ class Mode7Renderer
     return false if !entries || entries.empty?
     entries.any? do |entry|
       id = respond_to?(:nds_category_id, true) ? nds_category_id(entry) : nil
-      v25_underlay_volume_tag?(id)
+      v25_underlay_volume_tag?(id) ||
+        (defined?(Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED) &&
+         Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED &&
+         entry_visual_priority(entry).to_i > 0)
     end
   rescue Exception
     false
@@ -772,6 +747,15 @@ class Mode7Renderer
   end
 
 
+  def resolve_tileset_priority_override(tileset_id, tid, base_priority)
+    return base_priority unless defined?(Mode7::Config::TILESET_PRIORITY_OVERRIDES)
+    overrides = Mode7::Config::TILESET_PRIORITY_OVERRIDES[tileset_id]
+    return overrides[tid] if overrides && overrides.key?(tid)
+    base_priority
+  rescue Exception
+    base_priority
+  end
+
   def make_native_entry(tid, layer)
     if tid < TilemapRenderer::TILESET_START_ID
       filename = autotile_name_for(tid)
@@ -780,12 +764,14 @@ class Mode7Renderer
       return nil if !bmp
       @scratch.filename = filename
       @autotiles.set_src_rect(@scratch, tid)
-      return { bitmap: bmp, src_rect: @scratch.src_rect.clone, priority: @map.priorities[tid] || 0,
+      p = resolve_tileset_priority_override(@map.tileset_id, tid, @map.priorities[tid] || 0)
+      return { bitmap: bmp, src_rect: @scratch.src_rect.clone, priority: p,
                animated: @autotiles.animated?(filename), filename: filename, tid: tid, unify: layer }
     end
     ts = $data_tilesets[@map.tileset_id]
     return nil if !ts
-    entry_from_tileset(ts, tid, @map.priorities[tid] || 0, layer)
+    p = resolve_tileset_priority_override(ts.id, tid, @map.priorities[tid] || 0)
+    entry_from_tileset(ts, tid, p, layer)
   end
 
   def append_entry(entries, seen, entry)
@@ -799,6 +785,7 @@ class Mode7Renderer
 
   def entry_from_tileset(ts, tid, priority, unify)
     return nil if !ts
+    priority = resolve_tileset_priority_override(ts.id, tid, priority)
     ts_name = ts.tileset_name
     if ts_name == @map.tileset_name
       bmp = @tilesets[@map.tileset_name]

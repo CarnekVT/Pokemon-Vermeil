@@ -25,8 +25,7 @@ class Battle
     #       trainer, it's possible that battlers will be unable to move close
     #       enough to hit each other if there are multiple trainers on both
     #       sides.
-    if trainerBattle? && (@sideSizes[0] > 2 || @sideSizes[1] > 2) &&
-       @player.length > 1 && @opponent.length > 1
+    if trainerBattle? && (@player && @player.length > 1) && (@opponent && @opponent.length > 1) && (@sideSizes[0] > 2 || @sideSizes[1] > 2)
       raise _INTL("No se pueden tener batallas de más de 2 contra 2 en las que ambos bandos tengan varios entrenadores.")
     end
     # Find out how many Pokémon each trainer has
@@ -305,9 +304,8 @@ class Battle
     end
     logMsg += "wild " if wildBattle?
     logMsg += "trainer " if trainerBattle?
-    logMsg += "battle (#{@player.length} trainer(s) vs. "
-    logMsg += "#{pbParty(1).length} wild Pokémon)" if wildBattle?
-    logMsg += "#{@opponent.length} trainer(s))" if trainerBattle?
+    logMsg += "#{(pbParty(1) || []).length} wild Pokémon)" if wildBattle?
+    logMsg += "#{(@opponent || []).length} trainer(s))" if trainerBattle?
     PBDebug.log(logMsg)
     pbEnsureParticipants
     pbParty(0).each { |pkmn| @peer.pbOnStartingBattle(self, pkmn, wildBattle?) if pkmn }

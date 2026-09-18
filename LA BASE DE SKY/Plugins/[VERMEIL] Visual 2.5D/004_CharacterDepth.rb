@@ -9,25 +9,9 @@ class Game_Character
   alias_method :_VERMEIL_25D_orig_screen_y_ground, :screen_y_ground unless method_defined?(:_VERMEIL_25D_orig_screen_y_ground)
   alias_method :_VERMEIL_25D_orig_screen_z, :screen_z unless method_defined?(:_VERMEIL_25D_orig_screen_z)
 
-  def screen_x
-    return _VERMEIL_25D_orig_screen_x if !mode7_active_for_self?
-    wx = @real_x.to_f / Game_Map::X_SUBPIXELS + (@width * Game_Map::TILE_WIDTH / 2)
-    wy = mode7_world_y_ground
-    # El actor comparte la proyeccion X/Y exacta del plano. Usar billboard o
-    # screen_x vanilla lo dejaba visualmente fuera de su casilla al curvar Sky.
-    # Sprite_Character toma la escala F/depth de este mismo punto de apoyo.
-    elevation = mode7_world_elevation
-    pr = Mode7.project(wx, wy, elevation)
-    return -1000 if !pr
-    return pr[0] + self.x_offset
-  end
-
-  def screen_y_ground
-    return _VERMEIL_25D_orig_screen_y_ground if !mode7_active_for_self?
-    wy = mode7_world_y_ground
-    elevation = mode7_world_elevation
-    return Mode7.overworld_project_y(wy, elevation)
-  end
+  # NOTA: screen_x/screen_y_ground vivian aqui hasta v5.15. 017_MKXPZExtBridge
+  # los redefine (subpixel) y estas versiones jamas se ejecutan. Solo quedan
+  # los alias _orig_* de arriba, que 017 necesita para llamar al motor.
 
   def screen_z(height = 0)
     if mode7_active_for_self?

@@ -286,3 +286,44 @@ module Passability_2p5D
 end
 
 Passability_2p5D.patch_base!
+
+# --- Debug Ctrl autoritario (antes 040_V25DebugThroughBypass.rb) ---
+# El atravesado de paredes de Debug debe ganar a toda colision V25. Corre
+# despues de movement_blocked_cached? (definido arriba en este archivo).
+module Mode7
+  class << self
+    def v25_debug_through_active?
+      return false if !$DEBUG
+      return false if !defined?(Input) || !Input.respond_to?(:press?)
+
+      keys = []
+      keys << Input::CTRL    if defined?(Input::CTRL)
+      keys << Input::CONTROL if defined?(Input::CONTROL)
+      keys << Input::LCTRL   if defined?(Input::LCTRL)
+      keys << Input::RCTRL   if defined?(Input::RCTRL)
+      keys.each do |key|
+        begin
+          return true if Input.press?(key)
+        rescue Exception
+        end
+      end
+      false
+    rescue Exception
+      false
+    end
+  end
+end
+
+module Mode7
+  class << self
+    if method_defined?(:movement_blocked_cached?) &&
+       !method_defined?(:_VERMEIL_V25_4117_movement_blocked_cached)
+      alias_method :_VERMEIL_V25_4117_movement_blocked_cached, :movement_blocked_cached?
+    end
+
+    def movement_blocked_cached?(x, y, dir)
+      return false if v25_debug_through_active?
+      _VERMEIL_V25_4117_movement_blocked_cached(x, y, dir)
+    end
+  end
+end

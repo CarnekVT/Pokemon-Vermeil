@@ -1134,6 +1134,7 @@ Pocket = 1
 Price = 300
 BPPrice = 10
 Flags = Fling_30
+BattleUse = Direct
 Description = Si lo lleva un Pokémon, sube la Velocidad al ser intimidado. Es de un solo uso.
 #-------------------------------
 [ROOMSERVICE]

@@ -133,11 +133,18 @@ module CarnekTranslateStudio
   end
 
   def self.write_json(path, data)
-    ensure_data_dir!
-    File.open(path, "wb") { |f| f.write(JSON.pretty_generate(data)) }
-    true
-  rescue StandardError
-    false
+    begin
+      project_root = File.expand_path(File.join(__dir__, '..', '..', '..'))
+      full_path = File.expand_path(path, project_root)
+      dir = File.dirname(full_path)
+      require 'fileutils'
+      FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
+      File.delete(full_path) if File.exist?(full_path) rescue nil
+      File.write(full_path, JSON.pretty_generate(data), mode: 'wb')
+      true
+    rescue Exception
+      false
+    end
   end
 
   def self.sig(path)

@@ -403,10 +403,15 @@ module Mode7
       geo ? geo.source : nil
     end
 
-    # V5.10 override: todos los consumidores leen la misma rejilla.
+    # V5.12 override: todos los consumidores leen la misma rejilla unificada.
     def nds_surface_height_at(x, y)
+      # Prioridad: Geometry explícita > HeightCache unificado > fallback 0
       geo = current_surface_geometry
-      return geo.height_at(x, y) if geo
+      if geo
+        h = geo.height_at(x, y).to_f
+        return h if h.abs >= 0.001
+      end
+      return Mode7.height_cache.height_at(x, y) if Mode7.respond_to?(:height_cache) && Mode7.height_cache.built
       0.0
     rescue Exception
       0.0
@@ -421,31 +426,37 @@ module Mode7
 
     def nds_surface_height_at_real(world_x, world_y)
       geo = current_surface_geometry
-      return 0.0 if !geo
-      renderer = $scene.instance_variable_get(:@map_renderer)
-      # Las ramps legacy se construyen despues del height grid y conservan su
-      # interpolacion continua. Un JSON con ramps explicitas tiene prioridad.
-      if geo.instance_variable_get(:@ramps) && !geo.instance_variable_get(:@ramps).empty?
-        return geo.real_height_at(world_x, world_y,
-                                  Game_Map::TILE_WIDTH.to_f,
-                                  Game_Map::TILE_HEIGHT.to_f)
-      end
-      ramps = renderer.instance_variable_get(:@nds_stair_ramps)
-      if ramps
-        wx = world_x.to_f
-        wy = world_y.to_f
-        ramps.each do |ramp|
-          next if wx < ramp[:west_wx] - 0.001 || wx > ramp[:east_wx] + 0.001
-          next if wy < ramp[:north_wy] - 0.001 || wy > ramp[:south_wy] + 0.001
-          span = ramp[:south_wy] - ramp[:north_wy]
-          next if span.abs <= 0.001
-          t = ((ramp[:south_wy] - wy) / span).clamp(0.0, 1.0)
-          return ramp[:south_z] + (ramp[:north_z] - ramp[:south_z]) * t
+      if geo
+        # Ramps explícitas del Geometry file tienen prioridad
+        ramps = geo.instance_variable_get(:@ramps)
+        if ramps && !ramps.empty?
+          return geo.real_height_at(world_x, world_y,
+                                    Game_Map::TILE_WIDTH.to_f,
+                                    Game_Map::TILE_HEIGHT.to_f)
         end
       end
-      geo.real_height_at(world_x, world_y,
-                         Game_Map::TILE_WIDTH.to_f,
-                         Game_Map::TILE_HEIGHT.to_f)
+      # Usar el caché unificado (incluye stair ramps por grid espacial)
+      return Mode7.height_cache.height_at_real(world_x, world_y) if Mode7.respond_to?(:height_cache) && Mode7.height_cache.built
+      # Fallback: ramps del renderer
+      renderer = $scene.instance_variable_get(:@map_renderer)
+      if renderer
+        ramps = renderer.instance_variable_get(:@nds_stair_ramps)
+        if ramps
+          wx = world_x.to_f
+          wy = world_y.to_f
+          ramps.each do |ramp|
+            next if wx < ramp[:west_wx] - 0.001 || wx > ramp[:east_wx] + 0.001
+            next if wy < ramp[:north_wy] - 0.001 || wy > ramp[:south_wy] + 0.001
+            span = ramp[:south_wy] - ramp[:north_wy]
+            next if span.abs <= 0.001
+            t = ((ramp[:south_wy] - wy) / span).clamp(0.0, 1.0)
+            return ramp[:south_z] + (ramp[:north_z] - ramp[:south_z]) * t
+          end
+        end
+      end
+      geo ? geo.real_height_at(world_x, world_y,
+                               Game_Map::TILE_WIDTH.to_f,
+                               Game_Map::TILE_HEIGHT.to_f) : 0.0
     rescue Exception
       0.0
     end
@@ -591,8 +602,9 @@ class Mode7Renderer
   end
 
   def nds_mountain_height_at(tx, ty)
-    # V7.1 billboard: montaña sin altura de superficie; no arrastra vecinos.
-    return 0.0 if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
+    # Solo las mesetas de NDS_REAL_MOUNTAIN_MAP_IDS tienen altura de
+    # superficie; no arrastra vecinos en el resto.
+    return 0.0 if Mode7.nds_mountain_billboard?(@map_id)
     if @nds_surface_geometry
       h = @nds_surface_geometry.height_at(tx, ty).to_f
       return h if @nds_surface_geometry.explicit_cell?(tx, ty) || h.abs >= 0.001
@@ -659,5 +671,540 @@ class Mode7Renderer
     end
   rescue Exception
     false
+  end
+end
+# >>> [VERMEIL] Visual 2.5D - 028_NDSUnifiedHeight.rb
+#===============================================================================
+# [VERMEIL] Visual 2.5D - 028_NDSUnifiedHeight.rb
+# Sistema centralizado de alturas con caché plano O(1).
+#
+# Reemplaza las múltiples rutas de lookup distribuidas en 020/023 por una
+# sola fuente de verdad. Cada celda tiene exactamente un valor de altura
+# cacheado; las consultas en coordenadas de mundo interpolan entre celdas
+# vecinas sin recorrer arrays.
+#
+# Jerarquía de resolución (la primera que devuelve > 0 gana):
+#   1. SurfaceGeometry explícita (Geometry v4 / .v25r)
+#   2. Terrain Tags NDS (Volume/MountainTop/Stair)
+#   3. Stair ramp interpolation (continua entre celdas)
+#===============================================================================
+
+# --- Supresión de spam de consola ---
+# Evita que el mismo mensaje de error se imprima repetidamente.
+module Mode7
+  @@_console_error_last = nil
+  @@_console_error_count = 0
+
+  def self._console_suppress(msg)
+    if msg == @@_console_error_last
+      @@_console_error_count += 1
+      return
+    end
+    @@_console_error_last = msg
+    @@_console_error_count = 0
+    Console.echo_error(msg) if defined?(Console)
+  end
+
+  def self._console_suppress_reset
+    @@_console_error_last = nil
+    @@_console_error_count = 0
+  end
+end
+
+module Mode7
+  # ---------------------------------------------------------------------------
+  # HeightCache — caché plano de alturas por celda
+  # ---------------------------------------------------------------------------
+  class HeightCache
+    attr_reader :width, :height, :built
+
+    def initialize
+      @cells = {}         # [tx,ty] => Float (altura discreta)
+      @ramps = []         # rampas de escalera (rango de world coordinates)
+      @ramp_grid = nil    # Hash [grid_x,grid_y] => ramp index (búsqueda espacial)
+      @width = 0
+      @height = 0
+      @built = false
+    end
+
+    def clear
+      @cells.clear
+      @ramps.clear
+      @ramp_grid = nil
+      @width = 0
+      @height = 0
+      @built = false
+    end
+
+    # ---------------------------------------------------------------------------
+    # Construcción desde el renderer
+    # ---------------------------------------------------------------------------
+    def build(renderer)
+      clear
+      Mode7._console_suppress_reset
+      map = renderer.instance_variable_get(:@map)
+      return if !map
+      @width = map.width.to_i
+      @height = map.height.to_i
+      entry_cache = renderer.instance_variable_get(:@entry_cache)
+      return if !entry_cache
+
+      build_cells_from_entries(renderer, entry_cache)
+      build_ramps_from_renderer(renderer)
+      build_ramp_grid
+      @built = true
+    rescue Exception => e
+      clear
+      Mode7._console_suppress("2.5D HeightCache build: #{e.message}")
+    end
+
+    # ---------------------------------------------------------------------------
+    # Consulta discreta (tile coordinates) — O(1)
+    # ---------------------------------------------------------------------------
+    def height_at(tx, ty)
+      @cells[[tx.to_i, ty.to_i]] || 0.0
+    end
+
+    # ---------------------------------------------------------------------------
+    # Consulta continua (world coordinates) — O(1) amortizado
+    # Interpola bilinealmente entre las 4 celdas vecinas.
+    # ---------------------------------------------------------------------------
+    def height_at_real(wx, wy, tile_w = 32.0, tile_h = 32.0)
+      # 1) Buscar rampa de escalera (O(1) con grid espacial)
+      ramp = find_ramp_at(wx, wy)
+      return interpolate_ramp(ramp, wx, wy) if ramp
+
+      # 2) Interpolación bilineal entre celdas vecinas
+      tx0 = (wx / tile_w).floor
+      ty0 = (wy / tile_h).floor
+      tx1 = tx0 + 1
+      ty1 = ty0 + 1
+
+      frac_x = (wx / tile_w) - tx0.to_f
+      frac_y = (wy / tile_h) - ty0.to_f
+      frac_x = frac_x.clamp(0.0, 1.0)
+      frac_y = frac_y.clamp(0.0, 1.0)
+
+      h00 = height_at(tx0, ty0)
+      h10 = height_at(tx1, ty0)
+      h01 = height_at(tx0, ty1)
+      h11 = height_at(tx1, ty1)
+
+      top = h00 + (h10 - h00) * frac_x
+      bot = h01 + (h11 - h01) * frac_x
+      top + (bot - top) * frac_y
+    end
+
+    # Retorna la rampa en (wx,wy) o nil.
+    def find_ramp_at(wx, wy)
+      return nil if !@ramp_grid || @ramps.empty?
+      tw = Game_Map::TILE_WIDTH.to_f
+      th = Game_Map::TILE_HEIGHT.to_f
+      gx = (wx / tw / Mode7::Config::NDS_RUNTIME_BUCKET_SIZE).floor
+      gy = (wy / th / Mode7::Config::NDS_RUNTIME_BUCKET_SIZE).floor
+      (-1..1).each do |dy|
+        (-1..1).each do |dx|
+          key = [gx + dx, gy + dy]
+          indices = @ramp_grid[key]
+          next if !indices
+          indices.each do |i|
+            r = @ramps[i]
+            next if wx < r[:west_wx] - 0.001 || wx > r[:east_wx] + 0.001
+            next if wy < r[:north_wy] - 0.001 || wy > r[:south_wy] + 0.001
+            return r
+          end
+        end
+      end
+      nil
+    end
+
+    private
+
+    # ---------------------------------------------------------------------------
+    # Construcción de celdas desde entry_cache
+    # ---------------------------------------------------------------------------
+    def build_cells_from_entries(renderer, entry_cache)
+      entry_cache.each do |(tx, ty), entries|
+        next if !entries || entries.empty?
+        h = compute_cell_height(renderer, entries, tx, ty)
+        @cells[[tx, ty]] = h if h.abs >= 0.001
+      end
+    end
+
+    def compute_cell_height(renderer, entries, tx, ty)
+      mountain_h = 0.0
+
+      entries.each do |entry|
+        id = renderer.send(:nds_category_id, entry) rescue nil
+        next if id.nil?
+
+        case id
+        when Mode7::Config::NDS_STAIR_TERRAIN_TAG
+          next
+        when Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG,
+             Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
+          next
+        when Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
+          mh = renderer.send(:nds_mountain_height_at, tx, ty).to_f rescue 0.0
+          mountain_h = mh if mh > mountain_h
+        else
+          mid = renderer.instance_variable_get(:@map_id)
+          h = Mode7.nds_volume_height_for_tag(id, mid).to_f
+          roof_h = Mode7.nds_roof_height_for_tag(id).to_f
+          h = roof_h if roof_h > h
+          mountain_h = h if h > mountain_h
+        end
+      end
+
+      mountain_h
+    end
+
+    # ---------------------------------------------------------------------------
+    # Construcción de rampas de escalera
+    # ---------------------------------------------------------------------------
+    def build_ramps_from_renderer(renderer)
+      raw_ramps = renderer.instance_variable_get(:@nds_stair_ramps)
+      return if !raw_ramps
+      @ramps = raw_ramps.dup
+    end
+
+    def build_ramp_grid
+      @ramp_grid = {}
+      bucket = Mode7::Config::NDS_RUNTIME_BUCKET_SIZE.to_i
+      bucket = 8 if bucket <= 0
+      tw = Game_Map::TILE_WIDTH.to_f
+      th = Game_Map::TILE_HEIGHT.to_f
+
+      @ramps.each_with_index do |ramp, idx|
+        min_gx = (ramp[:west_wx] / tw / bucket).floor
+        max_gx = (ramp[:east_wx] / tw / bucket).floor
+        min_gy = (ramp[:north_wy] / th / bucket).floor
+        max_gy = (ramp[:south_wy] / th / bucket).floor
+
+        min_gx.upto(max_gx) do |gx|
+          min_gy.upto(max_gy) do |gy|
+            key = [gx, gy]
+            @ramp_grid[key] ||= []
+            @ramp_grid[key] << idx
+          end
+        end
+      end
+    end
+
+    def interpolate_ramp(ramp, wx, wy)
+      span = ramp[:south_wy] - ramp[:north_wy]
+      return ramp[:south_z].to_f if span.abs <= 0.001
+      t = ((ramp[:south_wy] - wy) / span).clamp(0.0, 1.0)
+      ramp[:south_z] + (ramp[:north_z] - ramp[:south_z]) * t
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Integración con Mode7 module — delegación unificada
+  # ---------------------------------------------------------------------------
+  class << self
+    def height_cache
+      @@height_cache ||= HeightCache.new
+    end
+
+    def rebuild_height_cache(renderer)
+      height_cache.build(renderer)
+    end
+
+  end
+end
+
+#===============================================================================
+# Integración con Mode7Renderer — rebuild del caché al cargar mapa
+#===============================================================================
+class Mode7Renderer
+  private
+
+  if private_method_defined?(:build_nds_surface_geometry)
+    alias_method :_VERMEIL_UH_orig_build_surface, :build_nds_surface_geometry
+  end
+
+  def build_nds_surface_geometry
+    _VERMEIL_UH_orig_build_surface if respond_to?(:_VERMEIL_UH_orig_build_surface, true)
+    Mode7.rebuild_height_cache(self)
+  end
+end
+# >>> [VERMEIL] Visual 2.5D - 022_NDSNativeGround.rb
+#===============================================================================
+# [VERMEIL] Visual 2.5D - 022_NDSNativeGround.rb
+# V5.5 - Plano de suelo persistente proyectado en GPU para mkxp-z-ext.
+#
+# Reemplaza las bandas Sprite#corners por un unico quad con perspectiva exacta.
+# Ruby solo actualiza cinco uniforms cuando cambia la camara; el bitmap del mapa
+# permanece en GPU y no se vuelve a rasterizar durante el movimiento.
+#===============================================================================
+
+class Mode7Renderer
+  NDS_NATIVE_GROUND_SHADER_PATH =
+    "Plugins/[VERMEIL] Visual 2.5D/Shaders/nds_ground.frag"
+
+  if private_method_defined?(:update_nds_ground) &&
+     !private_method_defined?(:_VERMEIL_V55_band_update_nds_ground)
+    alias_method :_VERMEIL_V55_band_update_nds_ground, :update_nds_ground
+  end
+  if private_method_defined?(:dispose_nds_ground) &&
+     !private_method_defined?(:_VERMEIL_V55_band_dispose_nds_ground)
+    alias_method :_VERMEIL_V55_band_dispose_nds_ground, :dispose_nds_ground
+  end
+  if private_method_defined?(:apply_tone_color) &&
+     !private_method_defined?(:_VERMEIL_V55_orig_apply_tone_color)
+    alias_method :_VERMEIL_V55_orig_apply_tone_color, :apply_tone_color
+  end
+
+  private
+
+  def nds_native_ground_enabled?
+    return false if @nds_native_ground_failed
+    return false if !Mode7::Config::NDS_NATIVE_GROUND_SHADER
+    Mode7::MKXPZExt.shader? && Mode7.perspective_mode?
+  rescue Exception
+    false
+  end
+
+  def ensure_nds_native_ground
+    return false if !nds_native_ground_enabled?
+    if @nds_native_ground_sprite && !@nds_native_ground_sprite.disposed? &&
+       @nds_native_ground_shader && !@nds_native_ground_shader.disposed?
+      if @nds_native_ground_sprite.bitmap != @ground
+        @nds_native_ground_sprite.bitmap = @ground
+      end
+      return true
+    end
+
+    dispose_nds_native_ground
+    @nds_native_ground_shader = Shader.new(NDS_NATIVE_GROUND_SHADER_PATH)
+    @nds_native_ground_sprite = Sprite.new(@viewport)
+    @nds_native_ground_sprite.bitmap = @ground
+    @nds_native_ground_sprite.shader = @nds_native_ground_shader
+    @nds_native_ground_sprite.x = 0
+    @nds_native_ground_sprite.y = 0
+    @nds_native_ground_sprite.ox = 0
+    @nds_native_ground_sprite.oy = 0
+    @nds_native_ground_sprite.z = -1000
+    @nds_native_ground_sprite.visible = false
+    true
+  rescue Exception => e
+    nds_disable_native_ground(e)
+    false
+  end
+
+  def dispose_nds_native_ground
+    spr = @nds_native_ground_sprite
+    shader = @nds_native_ground_shader
+    if spr && !spr.disposed?
+      begin
+        spr.shader = nil
+      rescue Exception
+      end
+      spr.dispose
+    end
+    shader.dispose if shader && !shader.disposed?
+    @nds_native_ground_sprite = nil
+    @nds_native_ground_shader = nil
+    @nds_native_ground_key = nil
+  rescue Exception
+    @nds_native_ground_sprite = nil
+    @nds_native_ground_shader = nil
+    @nds_native_ground_key = nil
+  end
+
+  def dispose_nds_ground
+    dispose_nds_native_ground
+    _VERMEIL_V55_band_dispose_nds_ground
+  end
+
+  def nds_disable_native_ground(error)
+    @nds_native_ground_failed = true
+    dispose_nds_native_ground
+    return if @nds_native_ground_error_logged
+    @nds_native_ground_error_logged = true
+    if defined?(Console)
+      Console.echo_error("2.5D GPU ground fallback: #{error.message}")
+    end
+  rescue Exception
+  end
+
+  def nds_native_ground_key
+    [
+      Mode7.cam_x.to_f.round(4),
+      Mode7.projection_cam_y.to_f.round(4),
+      Mode7.perspective_pivot_world_y.to_f.round(4),
+      Mode7.projection_cam_elevation.to_f.round(4),
+      Mode7.projection_revision
+    ]
+  end
+
+  def update_nds_native_ground_uniforms
+    math = Mode7.nds_camera_math
+    shader = @nds_native_ground_shader
+    shader.set_vec2("u_camera", Mode7.cam_x.to_f,
+                    Mode7.perspective_pivot_world_y.to_f)
+    shader.set_vec2("u_optics", math[:distance].to_f, math[:focal].to_f)
+    shader.set_vec2("u_angle", math[:sin].to_f, math[:cos_raw].to_f)
+    shader.set_vec2("u_screen", Mode7.center_x.to_f, Mode7.pivot_y.to_f)
+    shader.set_float("u_camera_elevation", Mode7.projection_cam_elevation.to_f)
+    near = Mode7::Config::PERSPECTIVE_NEAR_CLIP.to_f
+    near = 8.0 if near <= 0.0
+    shader.set_float("u_near", near)
+  end
+
+  def update_nds_ground(force = false)
+    return _VERMEIL_V55_band_update_nds_ground(force) if !nds_native_ground_enabled?
+    return if !nds_ground_active?
+    build_nds_ground if !@nds_ground_pool ||
+                        @nds_ground_bitmap_id != @ground.object_id
+    return _VERMEIL_V55_band_update_nds_ground(force) if !ensure_nds_native_ground
+
+    key = nds_native_ground_key
+    return if !force && @nds_native_ground_key == key
+    @nds_native_ground_key = key
+
+    min_y, max_y = nds_visible_world_y_range
+    x0, x1 = nds_visible_world_x_range(min_y, max_y)
+    sx0 = x0.floor.clamp(0, @ground.width)
+    sx1 = x1.ceil.clamp(0, @ground.width)
+    sy0 = min_y.floor.clamp(0, @ground.height)
+    sy1 = max_y.ceil.clamp(0, @ground.height)
+
+    spr = @nds_native_ground_sprite
+    if sx1 <= sx0 || sy1 <= sy0
+      spr.visible = false
+      hide_unused_nds_ground(0)
+      return
+    end
+
+    spr.bitmap = @ground if spr.bitmap != @ground
+    spr.src_rect.set(sx0, sy0, sx1 - sx0, sy1 - sy0)
+    spr.z = -1000
+    spr.tone = @tone
+    spr.color = @color
+    update_nds_native_ground_uniforms
+    spr.visible = true
+    hide_unused_nds_ground(0)
+  rescue Exception => e
+    nds_disable_native_ground(e)
+    _VERMEIL_V55_band_update_nds_ground(force)
+  end
+
+  def apply_tone_color
+    _VERMEIL_V55_orig_apply_tone_color
+    spr = @nds_native_ground_sprite
+    return if !spr || spr.disposed?
+    spr.tone = @tone
+    spr.color = @color
+  end
+end
+# >>> [VERMEIL] Visual 2.5D - 013_Heightmap.rb
+#===============================================================================
+# [VERMEIL] Visual 2.5D - 013_Heightmap.rb
+# CAMARA 3D / RELIEVE REAL DEL TERRENO (nuevo, distinto al render plano previo)
+# Referencia: H-Mode7.update_camera (V.1.4.2) y Neo Mode 7 cam altitude.
+#
+# Un PNG de relieve (Graphics/Heightmaps/Heightmap_XXX.png, XXX = id del mapa)
+# guarda la altura del terreno por pixel (0=negro, 255=blanco). Este modulo:
+#   1) Carga y cachea el heightmap por mapa.
+#   2) Eleva el suelo: las filas de pantalla se desplazan en Y segun el relieve
+#      que atraviesan (proyeccion en picada mas alta si el terreno sube).
+#   3) Mueve la camara (altura del ojo) siguiendo la elevacion bajo el jugador,
+#      interpolada con Config::ALTITUDE_SMOOTH.
+#
+# Es OPT-IN: solo actua en mapas que tengan un heightmap. Sin PNG, no cambia
+# nada del render anterior.
+#===============================================================================
+module Mode7
+  module Heightmap
+    module_function
+
+    # Obtiene (o carga y cachea) la tabla de alturas del mapa actual.
+    # Devuelve un Array[Array[Float]] [x][y] con la altura en px de mundo,
+    # o nil si no hay heightmap para el mapa.
+    def data
+      return @data if @data && @map_id == $game_map.map_id
+      load_current
+    end
+
+    def dispose
+      @bitmap&.dispose
+      @bitmap = nil
+      @data = nil
+      @map_id = nil
+    end
+
+    # Altura (px de mundo) en el tile (tx, ty) del mapa actual.
+    def altitude_at(x, y)
+      d = data
+      return 0 if !d
+      d[[x, 0].max, [y, 0].max]
+    end
+
+    # Altura bajo el jugador (px de mundo).
+    def player_altitude
+      return 0 if !$game_player
+      tx = $game_player.x
+      ty = $game_player.y
+      return altitude_at(tx, ty)
+    end
+
+    # La altura actual aplicada a la camara (px de mundo), suavizado.
+    def camera_altitude
+      return @camera_altitude || 0
+    end
+
+    # Avanza el seguimiento suave de la camara hacia la altura del jugador.
+    # Llamar cada frame desde Scene_Map cuando el heightmap este activo.
+    def update_camera
+      d = data
+      return if !d
+      target = player_altitude
+      return if @camera_altitude.nil?
+      @camera_altitude += (target - @camera_altitude) * Config::ALTITUDE_SMOOTH
+      @camera_altitude = target if (target - @camera_altitude).abs < 0.5
+    end
+
+    # ------- carga y cache -------
+    def load_current
+      @bitmap&.dispose
+      @data = nil
+      @map_id = $game_map.map_id
+      @camera_altitude = 0
+      filename = sprintf("Graphics/%s/Heightmap_%03d.png",
+        Config::HEIGHTMAP_FOLDER, @map_id)
+      return nil if !safe_exist?(filename)
+      bmp = Bitmap.new(filename)
+      @bitmap = bmp
+      build_data(bmp)
+      @data
+    rescue
+      @data = nil
+      nil
+    end
+
+    def safe_exist?(path)
+      return FileTest.exist?(path)
+    end
+
+    # Reduce el PNG a una tabla de tierra. Re-muestrea a px por tile (nueva
+    # altura en horizonte por pixel de mapa => altura por tile).
+    def build_data(bmp)
+      w = $game_map.width
+      h = $game_map.height
+      max = Config::HEIGHT_RANGE_PX
+      scale = Config::HEIGHT_SCALE
+      @data = Array.new(w) { Array.new(h, 0) }
+      w.times do |tx|
+        h.times do |ty|
+          sx = ((tx + 0.5) * bmp.width / w.to_f).floor.clamp(0, bmp.width - 1)
+          sy = ((ty + 0.5) * bmp.height / h.to_f).floor.clamp(0, bmp.height - 1)
+          c = bmp.get_pixel(sx, sy)
+          lum = (c.red + c.green + c.blue) / 3.0
+          @data[tx][ty] = (lum / 255.0 * max * scale).round
+        end
+      end
+    end
   end
 end

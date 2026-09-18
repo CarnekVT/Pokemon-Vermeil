@@ -389,8 +389,9 @@ class Battle
   # For the given side of the field (0=player's, 1=opponent's), returns an array
   # containing the number of able Pokémon in each team.
   def pbAbleTeamCounts(side)
-    party = pbParty(side)
-    partyStarts = pbPartyStarts(side)
+    # side 0 = player, 1 = opponent
+    party = (side == 0 ? @party1 : @party2) || []
+    partyStarts = (side == 0 ? @party1starts : @party2starts) || [0]
     ret = []
     idxTeam = -1
     nextStart = 0

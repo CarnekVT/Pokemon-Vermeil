@@ -50,15 +50,16 @@ module Mode7
       end
     end
 
-    def nds_volume_height_for_tag(tag_id)
+    def nds_volume_height_for_tag(tag_id, map_id = nil)
       case tag_id
       when Config::NDS_VOLUME_TERRAIN_TAG
         nds_volume_height.to_f
       when Config::NDS_VOLUME_HIGH_TERRAIN_TAG
         Config::NDS_VOLUME_HIGH_HEIGHT.to_f
       when Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
-        # V7.1 billboard: la montaña no eleva superficie en absoluto.
-        Config::NDS_MOUNTAIN_AS_BILLBOARD ? 0.0 : Config::NDS_MOUNTAIN_HEIGHT.to_f
+        # Solo las mesetas de NDS_REAL_MOUNTAIN_MAP_IDS elevan; el resto
+        # queda plano (billboard decorativo).
+        nds_mountain_billboard?(map_id) ? 0.0 : Config::NDS_MOUNTAIN_HEIGHT.to_f
       else
         0.0
       end
@@ -76,14 +77,17 @@ module Mode7
     # Altura de la superficie caminable V4. Solo volumen/meseta; tejados no
     # elevan personajes porque son decoracion visual salvo que el mapa use otra
     # mecanica especifica.
+    # V5.12: delega al HeightCache unificado cuando esta disponible.
     def nds_surface_height_at(x, y)
       return 0.0 if !$scene.is_a?(Scene_Map) || !$game_map
+      # Usar el caché unificado si ya fue construido
+      if Mode7.respond_to?(:height_cache) && Mode7.height_cache.built
+        return Mode7.height_cache.height_at(x, y)
+      end
       renderer = $scene.instance_variable_get(:@map_renderer)
       return 0.0 if !renderer.is_a?(Mode7Renderer) || renderer.disposed?
       sx = x.to_i
       sy = y.to_i
-      # Compatibilidad para llamadas discretas. La altura continua de una rampa
-      # se resuelve en nds_surface_height_at_real(), usando el pie real del actor.
       stair_h = renderer.instance_variable_get(:@nds_stair_elevations)
       if stair_h && (value = stair_h[[sx, sy]])
         return value.to_f
@@ -108,9 +112,13 @@ module Mode7
 
     # Altura de superficie en coordenadas de mundo (px). A diferencia de la API
     # discreta, una NDSStair interpola continuamente entre su borde sur y norte.
-    # Esto evita el salto de prioridad/altura a mitad de una escalera de 1 tile.
+    # V5.12: delega al HeightCache unificado cuando esta disponible.
     def nds_surface_height_at_real(world_x, world_y)
       return 0.0 if !$scene.is_a?(Scene_Map) || !$game_map
+      # Usar el caché unificado si ya fue construido
+      if Mode7.respond_to?(:height_cache) && Mode7.height_cache.built
+        return Mode7.height_cache.height_at_real(world_x, world_y)
+      end
       renderer = $scene.instance_variable_get(:@map_renderer)
       return 0.0 if !renderer.is_a?(Mode7Renderer) || renderer.disposed?
       wx = world_x.to_f
@@ -129,7 +137,6 @@ module Mode7
       tw = Game_Map::TILE_WIDTH.to_f
       th = Game_Map::TILE_HEIGHT.to_f
       tx = (wx / tw).floor
-      # El pie de un personaje cae exactamente en el borde sur de su celda.
       ty = ((wy - 0.001) / th).floor
       nds_surface_height_at(tx, ty)
     rescue Exception
@@ -141,20 +148,26 @@ module Mode7
     # De esta forma P4 en Z=0 nunca puede saltar por encima de un actor/top que
     # se encuentra realmente a Z=32/64/96.
     def physical_depth_z(wy, elevation = 0.0, priority = 0, bias = 0)
+      p = priority.to_i
+      # En 2.5D visual height, la prioridad ya es elevación física 3D en la proyección,
+      # no un desplazamiento falso hacia el sur.
+      effective_wy = if defined?(Config::PRIORITY_VISUAL_HEIGHT_ENABLED) && Config::PRIORITY_VISUAL_HEIGHT_ENABLED
+                       wy.to_f
+                     else
+                       wy.to_f + p * Game_Map::TILE_HEIGHT
+                     end
       if perspective_mode? && respond_to?(:perspective_depth_for)
-        depth = perspective_depth_for(wy.to_f, elevation.to_f)
+        depth = perspective_depth_for(effective_wy, elevation.to_f)
         base = Config::PHYSICAL_DEPTH_Z_BASE.to_i
         scale = Config::PHYSICAL_DEPTH_Z_SCALE.to_f
         scale = 64.0 if scale <= 0.0
         pstep = Config::PRIORITY_DEPTH_BIAS_STEP.to_i
-        return base - (depth * scale).round + priority.to_i * pstep + bias.to_i
+        return base - (depth * scale).round + p * pstep + bias.to_i
       end
 
-      sy = project_y(wy.to_f, elevation.to_f)
+      sy = project_y(effective_wy, elevation.to_f)
       return bias.to_i if sy.nil?
-      # Incluso en Affine, Priority es solo un desempate local. Usar un paso de
-      # fila completo volvia a permitir que P2/P4 ganara contra altura fisica.
-      sy.round + priority.to_i * Config::PRIORITY_DEPTH_BIAS_STEP.to_i + bias.to_i
+      sy.round + p * Config::PRIORITY_DEPTH_BIAS_STEP.to_i + bias.to_i
     end
 
     def depth_z_at_elevation(wy, elevation = 0.0, priority = 0, bias = 0)
@@ -327,31 +340,37 @@ class Mode7Renderer
     false
   end
 
+  # V5.13: connected-component con BFS optimizado.
+  # Cada componente MountainTop asigna la misma altura (max wall stack debajo
+  # de cualquier borde sur del componente). Sin componente_id tracking.
   def nds_build_mountain_height_cache
     @nds_mountain_height_cache = {}
-    @nds_mountain_component_cache = {}
     @nds_mountain_wall_source_cache = {}
     @nds_mountain_height_cache_complete = false
     base = Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
     base = 32.0 if base <= 0.0
 
+    # 1) Recopilar celdas MountainTop
     top_cells = {}
     @entry_cache.each do |(tx, ty), entries|
       if entries.any? { |entry| nds_category_id(entry) == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG }
         top_cells[[tx, ty]] = true
       end
     end
+    return if top_cells.empty?
 
+    # 2) BFS connected-components (4-direcciones)
     visited = {}
-    component_id = 0
     top_cells.each_key do |start|
       next if visited[start]
       component = {}
       queue = [start]
       visited[start] = true
+      head = 0
 
-      until queue.empty?
-        cx, cy = queue.shift
+      while head < queue.length
+        cx, cy = queue[head]
+        head += 1
         component[[cx, cy]] = true
         [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]].each do |nx, ny|
           pos = [nx, ny]
@@ -361,32 +380,26 @@ class Mode7Renderer
         end
       end
 
-      # El borde sur aporta la ALTURA y el ARTE, pero no la geometria. Cada
-      # componente MountainTop se convierte en un volumen unico; una forma en L
-      # conserva su silueta porque las caras se generaran desde sus bordes.
-      wall_levels = []
-      wall_sources = []
+      # 3) Altura = max pila de MountainWall debajo del borde sur del componente
+      max_count = 0
+      best_source = nil
       component.each_key do |cx, cy|
         next if component[[cx, cy + 1]]
         count = 0
         wy = cy + 1
         while wy < @map.height && nds_mountain_wall_cell?(cx, wy)
-          wall_sources << nds_mountain_wall_entry_at(cx, wy) if count == 0
           count += 1
+          best_source = nds_mountain_wall_entry_at(cx, wy) if count == 1 && best_source.nil?
           wy += 1
         end
-        wall_levels << count if count > 0
+        max_count = count if count > max_count
       end
 
-      levels = wall_levels.empty? ? 1 : wall_levels.max
-      levels = 1 if levels <= 0
+      levels = [max_count, 1].max
       height = base * levels
-      source = wall_sources.compact.first
-      component_id += 1
       component.each_key do |pos|
         @nds_mountain_height_cache[pos] = height
-        @nds_mountain_component_cache[pos] = component_id
-        @nds_mountain_wall_source_cache[pos] = source if source
+        @nds_mountain_wall_source_cache[pos] = best_source if best_source
       end
     end
 
@@ -394,13 +407,12 @@ class Mode7Renderer
   rescue Exception => e
     @nds_mountain_height_cache ||= {}
     @nds_mountain_height_cache_complete = true
-    Console.echo_error("2.5D V5.7 mountain height cache: #{e.message}") if defined?(Console)
   end
 
   def nds_mountain_height_at(tx, ty)
-    # V7.1 billboard: las montañas no tienen altura de superficie. Esto elimina
-    # el arrastre de tiles adyacentes y las subidas de cámara por Terrain Tag.
-    return 0.0 if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
+    # Solo las mesetas de NDS_REAL_MOUNTAIN_MAP_IDS tienen altura de
+    # superficie. El resto queda plano (sin arrastre ni subidas de camara).
+    return 0.0 if Mode7.nds_mountain_billboard?(@map_id)
     if !@nds_mountain_height_cache_complete
       nds_build_mountain_height_cache
     end
@@ -408,13 +420,6 @@ class Mode7Renderer
     @nds_mountain_height_cache[key] || Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
   rescue Exception
     Mode7::Config::NDS_MOUNTAIN_HEIGHT.to_f
-  end
-
-  def nds_mountain_component_id_at(tx, ty)
-    nds_build_mountain_height_cache if !@nds_mountain_height_cache_complete
-    (@nds_mountain_component_cache || {})[[tx.to_i, ty.to_i]]
-  rescue Exception
-    nil
   end
 
   # Fuente de pared para una cara generada. Primero busca la pila local justo
@@ -523,11 +528,10 @@ class Mode7Renderer
 
   def nds_billboard_entry?(entry)
     id = nds_category_id(entry)
-    # V7.1 billboard: los tags de montaña se renderizan como arbol/estructura,
-    # no como paredes ni como superficie elevada.
-    if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
-      return true if id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG ||
-                     id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
+    # Los tags de montaña se renderizan como arbol/estructura, no como
+    # paredes ni como superficie elevada (salvo mesetas reales por mapa).
+    if Mode7.nds_mountain_billboard?(@map_id)
+      return true if id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
                      id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
     end
     id == Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG ||
@@ -610,7 +614,7 @@ class Mode7Renderer
   rescue Exception => e
     @nds_bush_cap_owned ||= {}
     @nds_bush_cap_specs ||= []
-    Console.echo_error("2.5D V5.8 bush caps: #{e.message}") if defined?(Console)
+    Mode7._console_suppress("2.5D V5.8 bush caps: #{e.message}") if defined?(Mode7)
     @nds_bush_cap_specs
   end
 
@@ -666,9 +670,9 @@ class Mode7Renderer
     id = nds_category_id(entry)
     id == Mode7::Config::NDS_VOLUME_TERRAIN_TAG ||
       id == Mode7::Config::NDS_VOLUME_HIGH_TERRAIN_TAG ||
-      # V7.1 billboard: MountainTop ya no es volumen elevado.
+      # MountainTop solo es volumen elevado en mesetas reales por mapa.
       (id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG &&
-       !Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD)
+       !Mode7.nds_mountain_billboard?(@map_id))
   end
 
   def nds_stair_entry?(entry)
@@ -713,6 +717,9 @@ class Mode7Renderer
     # puede convertir su P1/P2/P3/P4 en P0 por el ground cap de la celda.
     return entry[:priority].to_i if nds_billboard_entry?(entry) ||
                                     nds_protected_roof_entry?(entry)
+    if defined?(Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED) && Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED
+      return entry[:priority].to_i if entry[:priority].to_i > 0
+    end
     _VERMEIL_V5_orig_entry_visual_priority(entry)
   end
 
@@ -788,8 +795,8 @@ class Mode7Renderer
     # Un WallPlane ya es una cara completa. Con escalera, se conserva cualquier
     # WallPlane generico pero se elimina MountainWallPlane de esa celda.
     plane_entries = entries.select { |entry| nds_wall_plane_entry?(entry) }
-    if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
-      # V7.1: los planos de montaña no son paredes; van por el billboard.
+    if Mode7.nds_mountain_billboard?(@map_id)
+      # Los planos de montaña no son paredes; van por el billboard.
       plane_entries = plane_entries.reject { |entry| nds_mountain_wall_entry?(entry) }
     end
     if has_stair
@@ -803,8 +810,8 @@ class Mode7Renderer
     # el hueco real del acceso y por tanto no renderiza wall detras.
     if !has_stair
       mountain_entries = entries.select { |entry| nds_mountain_wall_entry?(entry) }
-      # V7.1 billboard: la montaña deja la fachada de muro; dibuja billboard.
-      return [] if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD && !mountain_entries.empty?
+      # En modo billboard la montaña deja la fachada de muro; dibuja billboard.
+      return [] if Mode7.nds_mountain_billboard?(@map_id) && !mountain_entries.empty?
       return mountain_entries if !mountain_entries.empty?
     end
 
@@ -849,7 +856,7 @@ class Mode7Renderer
     id = nds_category_id(entry)
     roof_h = Mode7.nds_roof_height_for_tag(id)
     return roof_h if roof_h > 0.0
-    volume_h = Mode7.nds_volume_height_for_tag(id)
+    volume_h = Mode7.nds_volume_height_for_tag(id, @map_id)
     return volume_h if volume_h > 0.0
     _VERMEIL_V4_orig_entry_tag_height(entry)
   end
@@ -857,12 +864,6 @@ class Mode7Renderer
   def nds_component_kind(component)
     ids = component.values.flatten.map { |e| nds_category_id(e) }.compact
     # V7.1 billboard: una celda de montaña forma un solo billboard anclado al pie, nunca un muro ni un plano.
-    return :nds_billboard if Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD &&
-                            ids.any? do |id|
-                              id == Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG ||
-                                id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
-                                id == Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
-                            end
     return :nds_structure if ids.include?(Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG)
     return :nds_overlay if ids.include?(Mode7::Config::NDS_OVERLAY_TERRAIN_TAG)
     return :nds_billboard if ids.include?(Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG)
@@ -886,7 +887,7 @@ class Mode7Renderer
       # colision queda 1..N tiles mas cerca que la cara 3D y el error crece con
       # la altura. La barrera real es ahora el cambio de altura del height grid.
       if Mode7::Config::NDS_MOUNTAIN_AUTO_FACES ||
-         Mode7::Config::NDS_MOUNTAIN_AS_BILLBOARD
+         Mode7.nds_mountain_billboard?(@map_id)
         direct_walls = direct_walls.reject do |entry|
           id = nds_category_id(entry)
           id == Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG ||
@@ -931,7 +932,7 @@ class Mode7Renderer
                            priority, unify, depth_wyb, :wall_component)
     end
   rescue Exception => e
-    Console.echo_error("2.5D V5 build walls: #{e.message}") if defined?(Console)
+    Mode7._console_suppress("2.5D V5 build walls: #{e.message}") if defined?(Mode7)
   end
 
   # ---------------------------------------------------------------------------
@@ -991,8 +992,58 @@ class Mode7Renderer
     other + merged
   end
 
+  # Muros de montaña contiguos EN EL MAPA forman un solo sprite. Cada tile
+  # suelto abria una junta de 1px contra su vecino al proyectar por separado.
+  def nds_merge_mountain_components(components)
+    mountains = []
+    other = []
+    components.each do |component, elevation|
+      kind = nds_component_kind(component)
+      if kind == :nds_mountain_wall || kind == :nds_mountain_wall_plane
+        mountains << [component, elevation]
+      else
+        other << [component, elevation]
+      end
+    end
+    return components if mountains.length <= 1
+
+    pending = (0...mountains.length).to_a
+    merged = []
+    until pending.empty?
+      seed_i = pending.shift
+      seed, seed_e = mountains[seed_i]
+      combined = {}
+      seed.each { |pos, entries| combined[pos] = entries.dup }
+      elev = seed_e.to_f
+      changed = true
+      while changed
+        changed = false
+        pending.dup.each do |idx|
+          candidate, candidate_e = mountains[idx]
+          next if !nds_structure_components_compatible?(combined, elev, candidate, candidate_e)
+          touches = candidate.keys.any? do |x, y|
+            combined.key?([x, y]) || combined.key?([x - 1, y]) ||
+              combined.key?([x + 1, y]) || combined.key?([x, y - 1]) ||
+              combined.key?([x, y + 1])
+          end
+          next if !touches
+          candidate.each do |pos, entries|
+            combined[pos] ||= []
+            combined[pos].concat(entries)
+          end
+          elev = candidate_e.to_f if candidate_e.to_f < elev
+          pending.delete(idx)
+          changed = true
+        end
+      end
+      merged << [combined, elev]
+    end
+    other + merged
+  end
+
   def nds_merge_billboard_rows(components)
     components = nds_merge_structure_components(components)
+    components = nds_merge_mountain_components(components)
     rows = Hash.new { |hash, key| hash[key] = [] }
     output = []
     components.each do |component, elevation|
@@ -1060,12 +1111,22 @@ class Mode7Renderer
       support = nds_component_support_height(component)
       elevation = support if support > elevation.to_f
 
-      # Un arbol o edificio es una sola malla vertical ordenada por su pie.
-      # Separarlo por Priority duplicaba sprites y abria columnas entre piezas.
+      # Un arbol, edificio o frente de montaña es una sola malla vertical
+      # ordenada por su pie. Separarlo por Priority duplicaba sprites y abria
+      # columnas entre piezas.
       if [:nds_billboard, :nds_structure].include?(kind)
         unify = all_entries.map { |entry| entry[:unify].to_i }.min || 0
         make_rigid_component(component, elevation, bounds,
                              0, unify, depth_wyb, kind)
+        next
+      end
+      # La montaña conserva su prioridad maxima (P0/P1 del tileset) para que
+      # la fachada ordene bien contra props y tejados vecinos.
+      if [:nds_mountain_wall, :nds_mountain_wall_plane].include?(kind)
+        unify = all_entries.map { |entry| entry[:unify].to_i }.min || 0
+        priority = all_entries.map { |entry| entry_visual_priority(entry).to_i }.max || 0
+        make_rigid_component(component, elevation, bounds,
+                             priority, unify, depth_wyb, kind)
         next
       end
 
@@ -1088,7 +1149,7 @@ class Mode7Renderer
       end
     end
   rescue Exception => e
-    Console.echo_error("2.5D V5 build rigid: #{e.message}") if defined?(Console)
+    Mode7._console_suppress("2.5D V5 build rigid: #{e.message}") if defined?(Mode7)
   end
 
   # ---------------------------------------------------------------------------
@@ -1215,7 +1276,7 @@ class Mode7Renderer
 
     build_nds_stair_ramps
   rescue Exception => e
-    Console.echo_error("2.5D V5 build surfaces: #{e.message}") if defined?(Console)
+    Mode7._console_suppress("2.5D V5 build surfaces: #{e.message}") if defined?(Mode7)
     _VERMEIL_V5_orig_build_priority_surfaces
   end
 
@@ -1254,7 +1315,7 @@ class Mode7Renderer
       make_nds_stair_ramp(region)
     end
   rescue Exception => e
-    Console.echo_error("2.5D V5 stairs build: #{e.message}") if defined?(Console)
+    Mode7._console_suppress("2.5D V5 stairs build: #{e.message}") if defined?(Mode7)
   end
 
   def make_nds_stair_ramp(region)

@@ -821,26 +821,39 @@ class Mode7Renderer
         anchor_ty = anchor_tys.empty? ? bounds.map { |_tx, ty| ty }.max : anchor_tys.max
         depth_wyb = (anchor_ty + 1) * Game_Map::TILE_HEIGHT
       else
-        # Priority generica conserva la semantica RMXP: P1 ancla una fila al
-        # sur, P2 dos, etc. Solo NDSBillboard usa la autoridad de pie rigido.
-        component.each do |(_tx, ty), entries|
-          entries.each do |entry|
-            p = entry_visual_priority(entry).to_i
-            logical_wyb = (ty + 1 + [p, 0].max) * Game_Map::TILE_HEIGHT
-            depth_wyb = logical_wyb if depth_wyb.nil? || logical_wyb > depth_wyb
+        # Priority generica: si PRIORITY_VISUAL_HEIGHT_ENABLED esta activo,
+        # el pie fisico no se desplaza artificialmente hacia el sur; la elevacion
+        # 3D real calcula la profundidad Z.
+        if defined?(Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED) && Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED
+          depth_wyb = (bounds.map { |_tx, ty| ty }.max + 1) * Game_Map::TILE_HEIGHT
+        else
+          component.each do |(_tx, ty), entries|
+            entries.each do |entry|
+              p = entry_visual_priority(entry).to_i
+              logical_wyb = (ty + 1 + [p, 0].max) * Game_Map::TILE_HEIGHT
+              depth_wyb = logical_wyb if depth_wyb.nil? || logical_wyb > depth_wyb
+            end
           end
+          depth_wyb ||= (bounds.map { |_tx, ty| ty }.max + 1) * Game_Map::TILE_HEIGHT
         end
-        depth_wyb ||= (bounds.map { |_tx, ty| ty }.max + 1) * Game_Map::TILE_HEIGHT
       end
 
-      # El layer/unify SOLO ordena piezas internas. En empate exacto de pie el
-      # actor gana, por eso el objeto usa bias global -1.
+      # V5.10 / RMXP Priority 2D: la prioridad del componente se conserva para
+      # que P1/P2/P3/P4 defina la altura/capa visual contra otros objetos y arboles.
+      comp_priority = 0
+      component.each_value do |entries|
+        entries.each do |entry|
+          p = entry_visual_priority(entry).to_i
+          comp_priority = p if p > comp_priority
+        end
+      end
+      bias = comp_priority > 0 ? Mode7::Config::WALL_TOP_Z_BIAS.to_i : -1
       make_rigid_component(
         component,
         elevation,
         bounds,
-        0,
-        -1,
+        comp_priority,
+        bias,
         depth_wyb,
         :priority_object
       )
@@ -897,7 +910,15 @@ class Mode7Renderer
 
   def entry_world_elevation(e)
     elevation = e.key?(:elevation) && !e[:elevation].nil? ? e[:elevation].to_f : 0.0
-    elevation + entry_terrain_tag_height(e)
+    tag_h = entry_terrain_tag_height(e)
+    if defined?(Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED) && Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED
+      pri = entry_visual_priority(e).to_i
+      pri_step = defined?(Mode7::Config::PRIORITY_HEIGHT_STEP) ? Mode7::Config::PRIORITY_HEIGHT_STEP.to_f : 32.0
+      pri_h = [pri, 0].max * pri_step
+      elevation + [tag_h, pri_h].max
+    else
+      elevation + tag_h
+    end
   end
 
   # Columna fisica de UNA celda. Forma original del volumen 2.5D: nunca usa
@@ -1204,10 +1225,19 @@ class Mode7Renderer
     top = Mode7.project_y(world_top, elevation)
     bottom = Mode7.project_y(wyb, elevation)
     return false if top.nil? || bottom.nil?
-    height = bottom - top
+    # Tamano natural del plano: la altura solo desplaza la posicion, nunca
+    # reescala el dibujo. El zoom sale del mismo tramo a elevacion 0.
+    g_top = Mode7.project_y(world_top, 0)
+    g_bottom = Mode7.project_y(wyb, 0)
+    if g_top && g_bottom
+      height = g_bottom - g_top
+      middle = (g_top + g_bottom) / 2.0
+    else
+      height = bottom - top
+      middle = (top + bottom) / 2.0
+    end
     return false if height <= 0.001
 
-    middle = (top + bottom) / 2.0
     scale_x = Mode7.hscale(middle)
     return false if !scale_x || scale_x <= 0.001
 
@@ -1241,10 +1271,19 @@ class Mode7Renderer
     bottom = Mode7.project_y(world_bottom, elevation)
     return nil if top.nil? || bottom.nil?
 
-    height = bottom - top
+    # Tamano natural del plano: la altura solo desplaza la posicion, nunca
+    # reescala el dibujo. El zoom sale del mismo tramo a elevacion 0.
+    g_top = Mode7.project_y(world_top, 0)
+    g_bottom = Mode7.project_y(world_bottom, 0)
+    if g_top && g_bottom
+      height = g_bottom - g_top
+      middle = (g_top + g_bottom) / 2.0
+    else
+      height = bottom - top
+      middle = (top + bottom) / 2.0
+    end
     return nil if height <= 0.001
 
-    middle = (top + bottom) / 2.0
     scale_x = Mode7.hscale(middle)
     return nil if !scale_x || scale_x <= 0.001
 
@@ -1342,11 +1381,14 @@ class Mode7Renderer
       #   P1 -> pie en (ty + 2)
       #   P2 -> pie en (ty + 3) ...
       #
-      # La geometria visual NO se mueve: solo cambia el ancla usada para Z.
-      # Esto hace que P1 de la fila superior y P0 de la fila inferior cambien
-      # delante/detras del actor en el mismo punto, sin que P0 desaparezca.
+      # Si PRIORITY_VISUAL_HEIGHT_ENABLED esta activo, la prioridad ya es elevación 3D
+      # real en la escena, por lo que el pie de profundidad es su base Y real.
       effective_priority = [priority.to_i, 0].max
-      logical_wyb = (ty + 1 + effective_priority) * Game_Map::TILE_HEIGHT
+      logical_wyb = if defined?(Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED) && Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED
+                      (ty + 1) * Game_Map::TILE_HEIGHT
+                    else
+                      (ty + 1 + effective_priority) * Game_Map::TILE_HEIGHT
+                    end
 
       # `unify` identifica el layer de origen, NO una prioridad contra actors.
       # Sumirlo al Z global hacia que un P1 de layer 2/3 venciera al personaje
@@ -1606,7 +1648,9 @@ class Mode7Renderer
         bias = depth_unify.to_i
         bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority.to_i > 0
       end
-      sprite.z = Mode7.depth_z(depth_wyb, depth_priority, bias)
+      # El Z incluye la elevacion del apoyo: al caminar a otra altura el
+      # objeto pisa su prioridad contra el actor. Con elevacion 0 es identico.
+      sprite.z = Mode7.depth_z_at_elevation(depth_wyb, elevation, depth_priority, bias)
 
       apply_depth_fog_to_sprite(sprite, syb)
       sprite.visible = true

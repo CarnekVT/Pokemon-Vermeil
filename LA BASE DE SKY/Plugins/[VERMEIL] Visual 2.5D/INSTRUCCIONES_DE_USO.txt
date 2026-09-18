@@ -99,3 +99,95 @@ RENDIMIENTO DE CARGA (PHASE 2.5.2)
 - progressive_zoom.json se lee una sola vez por ejecución. Para herramientas Debug que
   lo editen en caliente puede usarse Mode7::ProgressiveZoom.reload_runtime_data!.
 - El log [VERMEIL LOAD] separa Game_Map#setup del [VERMEIL PERF] del renderer.
+
+OPTIMIZACION V5.13 - SISTEMA UNIFICADO DE ALTURAS
+---------------------------------------------------
+- Nuevo archivo 028_NDSUnifiedHeight.rb: caché plano O(1) de alturas por celda.
+- Las consultas de altura (nds_surface_height_at / nds_surface_height_at_real) usan
+  el caché unificado cuando esta disponible, evitando recorrer entry_cache cada frame.
+- Mountain height cache con connected-components por BFS: todas las celdas de la
+  misma meseta comparten una sola altura (max pila de MountainWall del borde sur).
+- Rampas de escalera indexadas en grid espacial para búsqueda O(1) en vez de lineal.
+- Interpolación bilineal entre celdas vecinas para alturas continuas.
+- Supresion de spam de consola: cada error unico se imprime una sola vez.
+- La API pública mantiene compatibilidad total: los mapas existentes funcionan sin cambios.
+
+V5.14 - MESETAS REALES POR MAPA + JUNTAS
+----------------------------------------
+- NDS_REAL_MOUNTAIN_MAP_IDS (001_Settings.rb): lista los mapas con meseta
+  caminable. Solo esos mapas usan altura real (top 32px + caras + rampa);
+  el resto conserva billboard plano. Por defecto incluye el 79.
+- Muros de montaña contiguos se fusionan en un solo sprite (sin juntas de 1px).
+- GEOMETRY_GROUND_OVERLAP y EXT_CORNERS_OVERLAP a 0.75: cierran las juntas
+  entre bandas/quads adyacentes sin emborronar el pixel art.
+- Receta para una meseta con escalera (tileset BW Tiles, mapa 79):
+  1. Top plano (tiles 508/509/516/517/524/525/532/533/542/550/558/566) -> tag 29.
+  2. Bordes/cara del acantilado -> tag 30 (el tileset aun no tiene ninguno).
+  3. Escalera -> tag 37 (ya existen 2678/2679/2686/2687/2694/2695/2702/2703).
+  4. Pasajes: bloquear laterales (X), permitir top y escalera.
+  5. El mapa debe estar en NDS_REAL_MOUNTAIN_MAP_IDS.
+
+V5.15 - REORGANIZACION (menos archivos, sin cuarentena)
+------------------------------------------------------
+- 38 -> 30 archivos .rb. Fusiones (mismo orden de carga, cero cambios de
+  comportamiento): 031+034+035+043 en 043_V25Profilers; 008 en 007; 040
+  en 014; 005 en 002; 015 en 006; 038+041 en 024.
+- Eliminada la carpeta _CUARENTENA_MODELOS_3D (6 .off, ~83 KB muertos que
+  nunca cargaban). El codigo 3D vive solo en el historial de git.
+- Los wraps con guarda (next if !method_defined?) siguen pasando aunque el
+  metodo envuelto no exista: el profiler ignora los hooks del 3D ausente.
+
+V5.16 - MAPA DE ARCHIVOS (21 .rb, orden de carga = orden alfabetico)
+--------------------------------------------------------------------
+Nucleo (camara, proyeccion, modo):
+  001_Settings      constantes + tags 19-37 + NDS_REAL_MOUNTAIN_MAP_IDS
+  002_Core          Mode7 (proyeccion, camara, Z) + transicion + zoom por zonas
+  027_GlobalPerformance  caches de consultas calientes (envuelve a 002/018)
+  033_V25NativeAccelerator  puente DLL nativa (batch de proyeccion)
+Suelo (un solo bitmap @ground,.backends encadenados 003->018->042):
+  003_TileDepth     renderer base: build/dispose/ground bitmap
+  018_NDSGeometry   backend NDS (bandas/quads/walls) + caras de volumen (era 019)
+  042_V25VisibleFirstGroundLoad  bandas Sky (path vivo) + carga visible-primero
+  022->023  shader GPU de suelo (vive en 023)
+Alturas (una sola rejilla logica):
+  023_NDSSurfaceGeometry  SurfaceGeometry + HeightCache + shader suelo + heightmap PNG
+  020_NDSTileCategories   clasificacion por tag, superficies, escaleras, montanas
+Construccion del mapa (cachés de build, en este orden):
+  012_MakerStudioBridge   capas extendidas, autotiles extra, sombras
+  024_V25BuildFastPath    indices, blits, clasificacion con flags, prepass
+  010_FrontWalls    muros, rigidos, strips de prioridad
+  021_NDSFastPath   culling por buckets + update/build finales
+Actores y reglas:
+  004_CharacterDepth  screen_x/y/z de eventos y escala billboard
+  014_Passability   colision (muros, desniveles, bypass Ctrl en debug)
+  017_MKXPZExtBridge  subpixel, corners, capacidades del runtime
+Extras:
+  006_Atmosphere  clima al frente + sombra OW
+  007_DebugMenu   menús F3/debug + opcion de jugador
+  032_GeometryV4Codec  lector .v25r/.v25d (solo si el mapa trae fichero)
+  043_V25Profilers  PERF/FRAME/LOAD (solo consola)
+  046_V25LazyLifecycle  bitmaps bajo demanda + refresco al volver de combate
+Shaders/  quad de suelo GPU (solo con mkxp-z-ext con Shader).
+
+Regla de oro: cada metodo vive UNA vez como definicion final; el resto son
+wraps con guarda que capturan la version anterior. No dupliques metodos en
+archivos nuevos: extiende con alias + guarda en el archivo de su dominio.
+
+V5.17 - ALTURA = SOLO DESPLAZAMIENTO (sin reescalado)
+-----------------------------------------------------
+- Los tiles con prioridad/altura (strips y superficies) conservan su tamano
+  natural del plano: el zoom sale de proyectar el tramo a elevacion 0.
+- La altura solo mueve la posicion en pantalla + orden Z. A elevacion 0 el
+  resultado es identico al anterior (mismo codigo por la otra rama).
+- Rigids (muros, billboards, escaleras) ya usaban zoom constante: sin cambio.
+- Personajes y path corners (solo mkxp-z-ext): sin cambio.
+
+V5.18 - PISAR ALTURA NO MUEVE TILES (solo pisa prioridades)
+----------------------------------------------------------
+- CAMERA_FOLLOW_SURFACE_ELEVATION = false: la camara ya no sube con el
+  jugador; ningun tile se recoloca/reproyecta al cambiar de altura. El
+  personaje sube en pantalla de forma clasica.
+- El Z de muros/rigids (010 update_walls) y de superficies sueltas (046
+  update_priority_objects) incluye la elevacion del apoyo: al caminar a
+  otra altura, cada objeto pisa su prioridad contra el actor.
+- Con elevacion 0 todo es identico al anterior: sin riesgo en mapas planos.

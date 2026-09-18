@@ -531,7 +531,7 @@ class Battle::Battler
   alias animated_pbEndTurn pbEndTurn
   def pbEndTurn(_choice)
     if self.battlerSprite.vanishMode > 0 &&
-	   !(semiInvulnerable? || @effects[PBEffects::SkyDrop] >= 0)
+       !(semiInvulnerable? || @effects[PBEffects::SkyDrop] >= 0)
       @battle.scene.pbChangePokemon(self, self.visiblePokemon, 0)
     end
     animated_pbEndTurn(_choice)

@@ -479,7 +479,7 @@ class AnimationEditor
                                  audio_chooser.y + CHOOSER_FILE_LIST_Y,
                                  list)
     # Volume and pitch sliders
-    [[:volume, _INTL("Volume"), 0, 100], [:pitch, _INTL("Pitch"), 0, 200]].each_with_index do |option, i|
+    [[:volume, _INTL("Volume"), 0, 100], [:pitch, _INTL("Pitch"), 0, 400]].each_with_index do |option, i|
       label = UIControls::Label.new(AUDIO_CHOOSER_LABEL_WIDTH, 28, audio_chooser.viewport, option[1])
       audio_chooser.add_control_at((option[0].to_s + "_label").to_sym,
                                    list.x + list.width + 6, list.y + (28 * i), label)

@@ -2722,354 +2722,354 @@
     },
     "El {1} enemigo": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L694"
+        "Script: 028_Battle/002_Battle.rb:L695"
       ]
     },
     "El {1} salvaje": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L695",
+        "Script: 028_Battle/002_Battle.rb:L696",
         "Script: 029_Battler/002_Battle_Battler.rb:L235",
         "Script: 035_Other battle types/002_SafariBattle.rb:L46"
       ]
     },
     "El {1} aliado": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L697",
+        "Script: 028_Battle/002_Battle.rb:L698",
         "Script: 029_Battler/002_Battle_Battler.rb:L238"
       ]
     },
     "¡El sol pega fuerte!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L843",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L336"
+        "Script: 028_Battle/002_Battle.rb:L844",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L334"
       ]
     },
     "¡Ha empezado a llover!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L844",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L337"
+        "Script: 028_Battle/002_Battle.rb:L845",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L335"
       ]
     },
     "¡Se ha desatado una tormenta de arena!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L845",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L338"
+        "Script: 028_Battle/002_Battle.rb:L846",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L336"
       ]
     },
     "¡Ha empezado a granizar!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L846",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L339"
+        "Script: 028_Battle/002_Battle.rb:L847",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L337"
       ]
     },
     "¡Ha empezado a nevar!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L847",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L340"
+        "Script: 028_Battle/002_Battle.rb:L848",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L338"
       ]
     },
     "¡El sol que hace ahora es realmente abrasador!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L848",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L341"
+        "Script: 028_Battle/002_Battle.rb:L849",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L339"
       ]
     },
     "¡Ha empezado a diluviar!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L849",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L342"
+        "Script: 028_Battle/002_Battle.rb:L850",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L340"
       ]
     },
     "¡Las misteriosas turbulencias protegen a los Pokémon de tipo Volador!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L850",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L343"
+        "Script: 028_Battle/002_Battle.rb:L851",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L341"
       ]
     },
     "¡El cielo se volvió oscuro!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L851",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L344"
+        "Script: 028_Battle/002_Battle.rb:L852",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L342"
       ]
     },
     "¡El sol vuelve a brillar como siempre!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L866"
+        "Script: 028_Battle/002_Battle.rb:L867"
       ]
     },
     "¡Ha dejado de llover!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L867"
+        "Script: 028_Battle/002_Battle.rb:L868"
       ]
     },
     "La tormenta de arena ha amainado.": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L868"
+        "Script: 028_Battle/002_Battle.rb:L869"
       ]
     },
     "¡Ha dejado de granizar!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L869"
+        "Script: 028_Battle/002_Battle.rb:L870"
       ]
     },
     "¡Ha dejado de nevar!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L870"
+        "Script: 028_Battle/002_Battle.rb:L871"
       ]
     },
     "Ha dejado de granizar.": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L873",
-        "Script: 028_Battle/002_Battle.rb:L875"
+        "Script: 028_Battle/002_Battle.rb:L874",
+        "Script: 028_Battle/002_Battle.rb:L876"
       ]
     },
     "Ha dejado de nevar.": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L874"
+        "Script: 028_Battle/002_Battle.rb:L875"
       ]
     },
     "¡Las misteriosas turbulencias han amainado!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L877"
+        "Script: 028_Battle/002_Battle.rb:L878"
       ]
     },
     "El cielo sombrío se desvaneció.": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L878"
+        "Script: 028_Battle/002_Battle.rb:L879"
       ]
     },
     "¡{2} de {1} se activó!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L922",
-        "Script: 028_Battle/002_Battle.rb:L999"
+        "Script: 028_Battle/002_Battle.rb:L1000",
+        "Script: 028_Battle/002_Battle.rb:L923"
       ]
     },
     "¡Se ha formado un campo de corriente eléctrica en el terreno de combate!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L965",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L352"
+        "Script: 028_Battle/002_Battle.rb:L966",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L350"
       ]
     },
     "¡El terreno de combate se ha cubierto de hierba!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L966",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L354"
+        "Script: 028_Battle/002_Battle.rb:L967",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L352"
       ]
     },
     "¡La niebla ha envuelto el terreno de combate!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L967",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L356"
+        "Script: 028_Battle/002_Battle.rb:L968",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L354"
       ]
     },
     "¡El terreno de combate se ha vuelto muy extraño!": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L968",
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L358"
+        "Script: 028_Battle/002_Battle.rb:L969",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L356"
       ]
     },
     "El campo de corriente eléctrica ha desaparecido.": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L983",
+        "Script: 028_Battle/002_Battle.rb:L984",
         "Script: 030_Move/006_MoveEffects_Misc.rb:L345",
         "Script: 030_Move/007_MoveEffects_BattlerStats.rb:L1612"
       ]
     },
     "La hierba ha desaparecido.": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L984",
+        "Script: 028_Battle/002_Battle.rb:L985",
         "Script: 030_Move/006_MoveEffects_Misc.rb:L347",
         "Script: 030_Move/007_MoveEffects_BattlerStats.rb:L1614"
       ]
     },
     "La niebla se ha disipado.": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L985",
+        "Script: 028_Battle/002_Battle.rb:L986",
         "Script: 030_Move/006_MoveEffects_Misc.rb:L349",
         "Script: 030_Move/007_MoveEffects_BattlerStats.rb:L1616"
       ]
     },
     "Ha desaparecido la extraña sensación que se percibía en el terreno de combate.": {
       "Contexts": [
-        "Script: 028_Battle/002_Battle.rb:L986",
+        "Script: 028_Battle/002_Battle.rb:L987",
         "Script: 030_Move/006_MoveEffects_Misc.rb:L351",
         "Script: 030_Move/007_MoveEffects_BattlerStats.rb:L1618"
       ]
     },
     "No se pueden tener batallas de más de 2 contra 2 en las que ambos bandos tengan varios entrenadores.": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L30"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L29"
       ]
     },
     "Error: def pbGetOwnerIndexFromBattlerIndex proporciona un índice de propietario no válido ({1} para el tipo de batalla {2} contra {3}, entrenadores {4} contra {5})": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L61"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L60"
       ]
     },
     "El entrenador del lado del jugador {1} no tiene una posición asignada para que sus Pokémon combatan (intentando una batalla {2} contra {3})": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L68"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L67"
       ]
     },
     "El entrenador rival {1} no tiene una posición asignada para que sus Pokémon combatan (intentando una batalla {2} contra {3})": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L71"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L70"
       ]
     },
     "El entrenador del lado del jugador {1} no tiene Pokémon válidos": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L77"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L76"
       ]
     },
     "El entrenador rival {1} no tiene Pokémon válidos": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L78"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L77"
       ]
     },
     "No se pudo reducir más el tamaño de ninguno de los bandos, la batalla no es posible": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L98"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L97"
       ]
     },
     "El índice de batalla {1} ya existe": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L115"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L114"
       ]
     },
     "¡Un {1} salvaje te corta el paso!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L201"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L200"
       ]
     },
     "¡Dos {1} salvajes te cortan el paso!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L205"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L204"
       ]
     },
     "¡Un {1} y un {2} salvajes te cortan el paso!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L207"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L206"
       ]
     },
     "¡Tres {1} salvajes te cortan el paso!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L212"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L211"
       ]
     },
     "¡Un {1}, un {2} y un {3} salvajes te cortan el paso!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L215"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L214"
       ]
     },
     "¡Dos {1} y un {2} salvajes te cortan el paso!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L220"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L219"
       ]
     },
     "¡{1} te desafía!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L227"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L226"
       ]
     },
     "¡{1} y {2} te desafían!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L229"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L228"
       ]
     },
     "¡{1}, {2} y {3} te desafían!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L232"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L231"
       ]
     },
     "¡Adelante, {1}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L265",
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L264",
         "Script: 028_Battle/006_Battle_ActionSwitching.rb:L263"
       ]
     },
     "¡Adelante, {1} y {2}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L267"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L266"
       ]
     },
     "¡Adelante, {1}, {2} y {3}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L270"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L269"
       ]
     },
     "{1} saca a {2}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L276"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L275"
       ]
     },
     "{1} saca a {2} y {3}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L278"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L277"
       ]
     },
     "{1} saca a {2}, {3} y {4}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L281"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L280"
       ]
     },
     "¡Has ganado {1}$ por vencer!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L415"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L413"
       ]
     },
     "¡Has recogido {1}$!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L427"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L425"
       ]
     },
     "Has pagado {1}$ por haber perdido el combate.": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L446"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L444"
       ]
     },
     "Te has desconcentrado y se te han caído {1}$...": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L448"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L446"
       ]
     },
     "¡{1} ha perdido!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L465"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L463"
       ]
     },
     "¡{1} y {2} han perdido!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L467"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L465"
       ]
     },
     "¡{1}, {2} y {3} han perdido!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L470"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L468"
       ]
     },
     "¡No te quedan Pokémon!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L492"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L490"
       ]
     },
     "¡Has perdido contra {1}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L496"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L494"
       ]
     },
     "¡Has perdido contra {1} y {2}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L498"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L496"
       ]
     },
     "¡Has perdido contra {1}, {2} y {3}!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L501"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L499"
       ]
     },
     "¡Estás fuera de combate!": {
       "Contexts": [
-        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L508"
+        "Script: 028_Battle/003_Battle_StartAndEnd.rb:L506"
       ]
     },
     "¡Tus otros Pokémon también ganaron puntos de experiencia!": {
@@ -25057,7 +25057,7 @@
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[003] Command Menu Refactor.rb:L18",
         "Plugin: [LBDS] [DBK_001] Enhanced Battle UI - [003] Battler Info UI.rb:L305",
         "Plugin: [LBDS] [DBK_001] Enhanced Battle UI - [004] Move Info UI.rb:L98",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L248"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L250"
       ]
     },
     "{1}: Atrás": {
@@ -25557,7 +25557,7 @@
       "Contexts": [
         "Plugin: Carnek Project Settings - patches/042_TrainerSpriteEditorShadowFix.rb:L146",
         "Plugin: [LBDS] Sprites Animados DBK - [002] Sprite Editor.rb:L186",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1283"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1319"
       ]
     },
     "Slow": {
@@ -25795,12 +25795,12 @@
     },
     "No se encuentra la clase {1} en el módulo GameData.": {
       "Contexts": [
-        "Plugin: MakerStudio - 003_Editor/Mods/Translate Studio/runtime/001_TranslateStudio.rb:L1626"
+        "Plugin: MakerStudio - 003_Editor/Mods/Translate Studio/runtime/001_TranslateStudio.rb:L1627"
       ]
     },
     "{1}'s": {
       "Contexts": [
-        "Plugin: MakerStudio - 003_Editor/Mods/Translate Studio/runtime/001_TranslateStudio.rb:L2764"
+        "Plugin: MakerStudio - 003_Editor/Mods/Translate Studio/runtime/001_TranslateStudio.rb:L2765"
       ]
     },
     "Compiling animation PBS files...": {
@@ -27514,7 +27514,7 @@
     "Shiny": {
       "Contexts": [
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [000] Essentials Patches/[001] Trainer Editor Refactor.rb:L56",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1284"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1320"
       ]
     },
     "Si está activado, el Pokémon es variocolor.": {
@@ -28992,7 +28992,7 @@
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[004] MidbattleHandlers Scripts.rb:L103",
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[004] MidbattleHandlers Scripts.rb:L205",
         "Plugin: [LBDS] [DBK_000] Deluxe Battle Kit - [002] Midbattle Scripting/[004] MidbattleHandlers Scripts.rb:L28",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1309"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1345"
       ]
     },
     "{1} emitió un poderoso pulso magnético!": {
@@ -30214,19 +30214,19 @@
     },
     "ON": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L733",
+        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L718",
         "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L51"
       ]
     },
     "OFF": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L734",
+        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L719",
         "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L51"
       ]
     },
     "El grafico del evento es un tile fuera de rango (evento {1}, mapa {2})": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 004_CharacterDepth.rb:L43"
+        "Plugin: [VERMEIL] Visual 2.5D - 004_CharacterDepth.rb:L27"
       ]
     },
     "Indoor": {
@@ -30435,22 +30435,22 @@
     },
     "Camara 2.5D": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 008_Options.rb:L10"
+        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L205"
       ]
     },
     "Activada": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 008_Options.rb:L14"
+        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L209"
       ]
     },
     "Desactivada": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 008_Options.rb:L14"
+        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L209"
       ]
     },
     "Activa o desactiva la camara en perspectiva 2.5D de los mapas.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 008_Options.rb:L15"
+        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L210"
       ]
     },
     "Estado MKXP-Z EXT / 2.5D": {
@@ -30465,89 +30465,89 @@
     },
     "19 NDSFloor: suelo/decal horizontal. Priority no lo convierte en pared.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L171"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L184"
       ]
     },
     "20 NDSWall: fachada o muro vertical. 21 NDSRoof: techo a 48 px.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L172"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L185"
       ]
     },
     "22 NDSBillboard: arbol/prop rigido. 23 NDSVolume: grosor de terreno.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L173"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L186"
       ]
     },
     "24 NDSStructure: casa completa 2D; billboard anclado por su fila inferior.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L174"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L187"
       ]
     },
     "25 NDSIndoorWall / 26 NDSIndoorProp: categorias indoor principales.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L175"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L188"
       ]
     },
     "27 IndoorBorder, 28 IndoorBlack, 29 MountainTop, 30 MountainWall.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L176"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L189"
       ]
     },
     "31 RoofHigh, 32 VolumeHigh, 33 Overlay (copas/aleros/foreground).": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L177"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L190"
       ]
     },
     "34 RoofPlane / 35 WallPlane / 36 MountainWallPlane: geometria 3D real.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L178"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L191"
       ]
     },
     "V5: todos comparten camara/zoom. Usa Plane solo para superficies geometricas.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L179"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L192"
       ]
     },
     "Abre un mapa primero.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L188",
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L201",
         "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L308"
       ]
     },
     "Renderer 2.5D no disponible.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L190",
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L203",
         "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L310"
       ]
     },
     "{1} {2}: {3}": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L207"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L220"
       ]
     },
     "No se pudo auditar: {1}": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L209"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L222"
       ]
     },
     "Guia Terrain Tags NDS V5": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1318"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1379"
       ]
     },
     "Muestra el esquema de Terrain Tags 19-36.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1320"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1381"
       ]
     },
     "Auditar Terrain Tags NDS V5": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1324"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1385"
       ]
     },
     "Cuenta cuantos tiles de cada categoria usa el mapa actual.": {
       "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1326"
+        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1387"
       ]
     },
     "Build: {1} ms": {
@@ -31252,7 +31252,7 @@
     "{1}/{2}": {
       "Contexts": [
         "Plugin: [VERMEIL] Research Notebook - 030_research_notebook_ui.rb:L721",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1063"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1099"
       ]
     },
     "Habilidad Arcana": {
@@ -31742,222 +31742,222 @@
     },
     "Pokédex Nacional": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L110"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L112"
       ]
     },
     "Región {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L111"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L113"
       ]
     },
     "No se pudo guardar la config de la Pokédex.": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L231"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L233"
       ]
     },
     "Graphics/UI/Pokedex/icon_types": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L256"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L258"
       ]
     },
     "{1} (Forma {2})": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L271",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L302"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L273",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L304"
       ]
     },
     "{1} [mostrar]": {
-      "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L272",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L303"
-      ]
-    },
-    "GUARDAR": {
       "Contexts": [
         "Plugin: [ZBOX] Nueva Pokedex - main.rb:L274",
         "Plugin: [ZBOX] Nueva Pokedex - main.rb:L305"
       ]
     },
+    "GUARDAR": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L276",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L307"
+      ]
+    },
     "Config guardada.": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L280"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L282"
       ]
     },
     "Ocultar forma": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L286"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L288"
       ]
     },
     "Mostrar forma": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L286"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L288"
       ]
     },
     "Quitar slot propio": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L288"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L290"
       ]
     },
     "Dar slot propio": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L288"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L290"
+      ]
+    },
+    "Buscar...": {
+      "Contexts": [
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L587"
       ]
     },
     "VISTOS: {1}/{2}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L753"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L783"
       ]
     },
     "OBTENIDOS: {1}/{2}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L756"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L786"
       ]
     },
     "POKÉDEX · {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L773"
-      ]
-    },
-    "{1} ·F{2}": {
-      "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L805"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L803"
       ]
     },
     "Nº {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1277",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1314",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L930"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1313",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1350",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L968"
       ]
     },
     "OBTENIDO": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L952"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L990"
       ]
     },
     "VISTO": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L952"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L990"
       ]
     },
     "NO VISTO": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L952"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L990"
       ]
     },
     "Categoría: {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1321",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L954"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1357",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L992"
       ]
     },
     "Altura: {1} m": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1324",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L957"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1360",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L995"
       ]
     },
     "Peso: {1} kg": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1325",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L959"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1361",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L997"
       ]
     },
     "POKÉDEX": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L965"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1001"
       ]
     },
     "Zona · {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1080"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1116"
       ]
     },
     "Graphics/UI/Town Map/{1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1087"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1123"
       ]
     },
     "No se encuentra en estado salvaje.": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1140"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1176"
       ]
     },
     "Localizaciones: {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1160",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1166"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1196",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1202"
       ]
     },
     "Sin mapa de la región": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1164"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1200"
       ]
     },
     "Formas de {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1262"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1298"
       ]
     },
     "Forma base": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1271"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1307"
       ]
     },
     "Forma {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1272",
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1308"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1308",
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1344"
       ]
     },
     "Super Shiny": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1285"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1321"
       ]
     },
     "Estado visual: {1}": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1288"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1324"
       ]
     },
     "Forma": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1317"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1353"
       ]
     },
     "Orden numérico": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1571"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1607"
       ]
     },
     "Nombre A-Z": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1571"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1607"
       ]
     },
     "Más pesado": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1572"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1608"
       ]
     },
     "Más liviano": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1572"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1608"
       ]
     },
     "Más alto": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1573"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1609"
       ]
     },
     "Más bajo": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1573"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1609"
       ]
     },
     "Pokédex N": {
       "Contexts": [
-        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1606"
+        "Plugin: [ZBOX] Nueva Pokedex - main.rb:L1642"
       ]
     },
     "Nueva Pokédex (Comandos)": {
@@ -32022,160 +32022,6 @@
     }
   },
   "bss": {
-    "¡Pero no tuvo efecto!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/002_NativeSOS.rb:L1741"
-      ]
-    },
-    "¡El {1} pone nervioso al Pokémon salvaje!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/002_NativeSOS.rb:L1744"
-      ]
-    },
-    "¡{1} es inmune a ese estado!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3466"
-      ]
-    },
-    "¡{1} es inmune a la confusión!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3471"
-      ]
-    },
-    "¡{1} es inmune al enamoramiento!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3472"
-      ]
-    },
-    "¡{1} es inmune a las bajadas de estadísticas!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3474"
-      ]
-    },
-    "¡{1} es inmune al daño indirecto!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3476"
-      ]
-    },
-    "¡{1} es inmune a ese efecto!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3486"
-      ]
-    },
-    "¡{1} es inmune a los movimientos de KO directo!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3494"
-      ]
-    },
-    "¡Pero falló!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3540",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3568",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3578",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3589"
-      ]
-    },
-    "¡{1} es inmune a ser copiado!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3547"
-      ]
-    },
-    "¡{1} ignora el estado!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L3743"
-      ]
-    },
-    "No te quedaban Poké Balls. ¡Has recibido una {1} para intentar la captura!": {
-      "Contexts": [
-        "BSS · PokéRogue · Abyss · plantilla de refuerzos · boss · capture · emergencyBallMessage",
-        "BSS · SOS Bagon · boss · capture · emergencyBallMessage",
-        "BSS · TSOST · boss · capture · emergencyBallMessage",
-        "BSS · TotemTest · boss · capture · emergencyBallMessage",
-        "BSS · TotemTestBossBar · boss · capture · emergencyBallMessage",
-        "BSS · Trainer SOS · boss · capture · emergencyBallMessage",
-        "BSS · Wild Encounter · boss · capture · emergencyBallMessage",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4001"
-      ]
-    },
-    "¡{1} está débil!\n¡Es el momento de capturarlo!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4062",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4476"
-      ]
-    },
-    "¿Quieres capturar a {1}?": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4066",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4480"
-      ]
-    },
-    "¡No hay espacio en el PC!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4080",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4490"
-      ]
-    },
-    "No hay ninguna Poké Ball disponible.": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4089",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4497"
-      ]
-    },
-    "Elige una Poké Ball o selecciona \"No capturar\" para dejarlo ir.": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4105"
-      ]
-    },
-    "¿Quieres ponerle un mote a {1}?": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4157"
-      ]
-    },
-    "¿Mote de {1}?": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4158"
-      ]
-    },
-    "¡{1} se ha enviado a la Caja \"{2}\"!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4170"
-      ]
-    },
-    "¡Ya está! ¡{1} atrapado!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4179"
-      ]
-    },
-    "Elige una Poké Ball o selecciona \"No capturar\" para terminar la oportunidad.": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L4511"
-      ]
-    },
-    "¡Al romperse el escudo, bajaron las características de {1}!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L5051"
-      ]
-    },
-    "¡Al romperse el escudo, aumentaron las características de {1}!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L5056"
-      ]
-    },
-    "#{msg}": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L5208"
-      ]
-    },
-    "¡{1} ha huido!": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/004_NativeBoss.rb:L5210"
-      ]
-    },
-    "Pokémon": {
-      "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/017_BSS084CompleteAuthority.rb:L628"
-      ]
-    },
     "Island": {
       "Contexts": [
         "BSS General · ebdxCustomEnvironments[1] · description"
@@ -32210,6 +32056,18 @@
         "BSS · TotemTestBossBar · boss · capture · fleeMessage",
         "BSS · Trainer SOS · boss · capture · fleeMessage",
         "BSS · Wild Encounter · boss · capture · fleeMessage"
+      ]
+    },
+    "No te quedaban Poké Balls. ¡Has recibido una {1} para intentar la captura!": {
+      "Contexts": [
+        "BSS · PokéRogue · Abyss · plantilla de refuerzos · boss · capture · emergencyBallMessage",
+        "BSS · SOS Bagon · boss · capture · emergencyBallMessage",
+        "BSS · TSOST · boss · capture · emergencyBallMessage",
+        "BSS · TotemTest · boss · capture · emergencyBallMessage",
+        "BSS · TotemTestBossBar · boss · capture · emergencyBallMessage",
+        "BSS · Trainer SOS · boss · capture · emergencyBallMessage",
+        "BSS · Wild Encounter · boss · capture · emergencyBallMessage",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4001"
       ]
     },
     "¡Una barrera misteriosa protege a {1}!": {
@@ -32266,6 +32124,149 @@
     "{1} el Dominante Indomable": {
       "Contexts": [
         "BSS · TotemTestBossBar · boss · hud · displayName"
+      ]
+    },
+    "¡Pero no tuvo efecto!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1758",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1770"
+      ]
+    },
+    "¡La {1} pone nervioso al Pokémon salvaje!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1768"
+      ]
+    },
+    "¡{1} es inmune a ese estado!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3466"
+      ]
+    },
+    "¡{1} es inmune a la confusión!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3471"
+      ]
+    },
+    "¡{1} es inmune al enamoramiento!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3472"
+      ]
+    },
+    "¡{1} es inmune a las bajadas de estadísticas!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3474"
+      ]
+    },
+    "¡{1} es inmune al daño indirecto!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3476"
+      ]
+    },
+    "¡{1} es inmune a ese efecto!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3486"
+      ]
+    },
+    "¡{1} es inmune a los movimientos de KO directo!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3494"
+      ]
+    },
+    "¡Pero falló!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3540",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3568",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3578",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3589"
+      ]
+    },
+    "¡{1} es inmune a ser copiado!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3547"
+      ]
+    },
+    "¡{1} ignora el estado!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3743"
+      ]
+    },
+    "¡{1} está débil!\n¡Es el momento de capturarlo!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4062",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4476"
+      ]
+    },
+    "¿Quieres capturar a {1}?": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4066",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4480"
+      ]
+    },
+    "¡No hay espacio en el PC!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4080",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4490"
+      ]
+    },
+    "No hay ninguna Poké Ball disponible.": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4089",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4497"
+      ]
+    },
+    "Elige una Poké Ball o selecciona \"No capturar\" para dejarlo ir.": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4105"
+      ]
+    },
+    "¿Quieres ponerle un mote a {1}?": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4157"
+      ]
+    },
+    "¿Mote de {1}?": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4158"
+      ]
+    },
+    "¡{1} se ha enviado a la Caja \"{2}\"!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4170"
+      ]
+    },
+    "¡Ya está! ¡{1} atrapado!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4179"
+      ]
+    },
+    "Elige una Poké Ball o selecciona \"No capturar\" para terminar la oportunidad.": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4511"
+      ]
+    },
+    "¡Al romperse el escudo, bajaron las características de {1}!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5051"
+      ]
+    },
+    "¡Al romperse el escudo, aumentaron las características de {1}!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5056"
+      ]
+    },
+    "#{msg}": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5208"
+      ]
+    },
+    "¡{1} ha huido!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5210"
+      ]
+    },
+    "Pokémon": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/40_Camera_World/017_Consolidated_Authority.rb:L628"
       ]
     }
   },

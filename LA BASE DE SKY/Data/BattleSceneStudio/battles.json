@@ -2686,13 +2686,13 @@
     "battleBasesEnabled": false,
     "battleBoxAnimation": "slide",
     "cameraStyle": "ebdx",
-    "battleSceneEngine": "vanilla",
+    "battleSceneEngine": "ebdx",
     "ebdxDefaultBackdrop": "Field",
     "ebdxMapMetadata": [
       {
         "mapId": 79,
         "mapName": "Map 79",
-        "backdrop": "scene_custom"
+        "backdrop": "MountainLake"
       }
     ],
     "ebdxBackdrop": "bss_rocky_highlands",
@@ -2728,79 +2728,79 @@
       "battlerInfluence": 100,
       "shadowInfluence": 100,
       "overscan": 24,
-      "profile": "ebdx",
+      "profile": "static",
       "contexts": {
         "command": {
-          "enabled": true,
-          "mode": "player",
-          "frames": 46,
-          "strength": 16
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "fight": {
-          "enabled": true,
-          "mode": "player",
-          "frames": 38,
-          "strength": 22
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "move": {
-          "enabled": true,
-          "mode": "focus",
-          "frames": 30,
-          "strength": 26
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "spread": {
-          "enabled": true,
-          "mode": "wide",
-          "frames": 34,
-          "strength": 22
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "common": {
-          "enabled": true,
-          "mode": "neutral",
-          "frames": 32,
-          "strength": 10
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "sendout": {
-          "enabled": true,
-          "mode": "focus",
-          "frames": 34,
-          "strength": 18
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "recall": {
-          "enabled": true,
-          "mode": "focus",
-          "frames": 30,
-          "strength": 16
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "sos": {
-          "enabled": true,
-          "mode": "wide",
-          "frames": 38,
-          "strength": 20
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "capture": {
-          "enabled": true,
-          "mode": "enemy",
-          "frames": 34,
-          "strength": 20
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "faint": {
-          "enabled": true,
-          "mode": "focus",
-          "frames": 30,
-          "strength": 18
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "turn_end": {
-          "enabled": true,
-          "mode": "neutral",
-          "frames": 46,
-          "strength": 8
+          "enabled": false,
+          "mode": "hold",
+          "frames": 0,
+          "strength": 0
         },
         "idle": {
           "enabled": true,
           "mode": "drift",
           "frames": 0,
-          "strength": 72
+          "strength": 100
         },
         "bas": {
           "enabled": true,
@@ -2810,7 +2810,7 @@
         }
       },
       "cameraSchemaVersion": 2,
-      "commandOverviewEnabled": false,
+      "commandOverviewEnabled": true,
       "commandOverviewZoomOut": 12,
       "commandOverviewLift": 22,
       "commandOverviewFrames": 24
@@ -3065,6 +3065,109 @@
             "blurAreas": [],
             "canvasLayer": true,
             "hidden": true
+          }
+        }
+      },
+      {
+        "id": "scene_custom_2",
+        "name": "SnowLand",
+        "description": "",
+        "libraryId": "project",
+        "data": {
+          "backdrop": "Snow",
+          "cloudsConfig": {
+            "enabled": true,
+            "cloud1X": 0,
+            "cloud1Y": 98,
+            "cloud1Speed": 1,
+            "cloud1Direction": 1,
+            "cloud1Opacity": 255,
+            "cloud2X": 0,
+            "cloud2Y": 91,
+            "cloud2Speed": 0.5,
+            "cloud2Direction": -1,
+            "cloud2Opacity": 255,
+            "dayColor": "#dfefff",
+            "dawnColor": "#ffd4b3",
+            "nightColor": "#9ebcff"
+          },
+          "windConfig": {
+            "enabled": true,
+            "amplitude": 2.5,
+            "speed": 0.8,
+            "rotation": 1.5
+          },
+          "base": "Dirt",
+          "sky": true,
+          "img001": {
+            "bitmap": "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/treeB.png",
+            "x": 112,
+            "y": 144,
+            "z": 3,
+            "zoom": 0.75,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.75,
+            "zoom_y": 0.75,
+            "flat": false,
+            "blurAreas": [],
+            "hidden": false
+          },
+          "img002": {
+            "bitmap": "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/treeB.png",
+            "x": 72,
+            "y": 160,
+            "z": 3,
+            "zoom": 0.75,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.75,
+            "zoom_y": 0.75,
+            "flat": false,
+            "blurAreas": [],
+            "hidden": false
+          },
+          "img003": {
+            "bitmap": "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/treeB.png",
+            "x": 168,
+            "y": 144,
+            "z": 3,
+            "zoom": 0.75,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.75,
+            "zoom_y": 0.75,
+            "flat": false,
+            "blurAreas": [],
+            "hidden": false
+          },
+          "img004": {
+            "bitmap": "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/treeB.png",
+            "x": 24,
+            "y": 144,
+            "z": 4,
+            "zoom": 0.75,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.75,
+            "zoom_y": 0.75,
+            "flat": false,
+            "blurAreas": [],
+            "hidden": false
+          },
+          "img005": {
+            "bitmap": "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/treeB.png",
+            "x": 360,
+            "y": 168,
+            "z": 3,
+            "zoom": 0.75,
+            "opacity": 255,
+            "direction": 1,
+            "zoom_x": 0.75,
+            "zoom_y": 0.75,
+            "flat": false,
+            "blurAreas": [],
+            "hidden": false
           }
         }
       }
@@ -4982,5 +5085,5 @@
     "ebdxMapBackdropsText": "",
     "ebdxEncounterMetadata": []
   },
-  "_bssSavedAt": 1789005780220
+  "_bssSavedAt": 1789695110942
 }

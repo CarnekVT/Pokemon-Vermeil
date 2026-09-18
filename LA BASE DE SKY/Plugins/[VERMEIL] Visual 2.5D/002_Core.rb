@@ -165,6 +165,20 @@ module Mode7
       :perspective
     end
 
+    # Meseta REAL (altura + caras + rampa) solo en los mapas listados en
+    # Config::NDS_REAL_MOUNTAIN_MAP_IDS. El resto usa billboard plano.
+    def nds_real_mountains?(map_id = nil)
+      return true if !Config::NDS_MOUNTAIN_AS_BILLBOARD
+      id = map_id
+      id = $game_map.map_id if id.nil? && $game_map
+      return false if id.nil?
+      Config::NDS_REAL_MOUNTAIN_MAP_IDS.include?(id.to_i)
+    end
+
+    def nds_mountain_billboard?(map_id = nil)
+      !nds_real_mountains?(map_id)
+    end
+
     def map_mode; :perspective; end
     def perspective_mode?; true; end
     def affine_mode?; false; end
@@ -637,26 +651,6 @@ module Mode7
       )
     end
 
-    # Unidad Z de prioridad.
-    #
-    # Geometricamente sigue el alto de la fila proyectada para responder a
-    # cambios de angulo/zoom, pero NUNCA baja de PRIORITY_Z_MIN_STEP cuando
-    # zoom <= 1.0. De ese modo P1/P2/P4 conserva la precedencia RPG Maker a
-    # zoom 0.9, 0.8, etc. y no queda por debajo del personaje por redondeo.
-    def priority_screen_step(wy)
-      # La prioridad de RPG Maker es logica, no perspectiva. Pero si el paso Z
-      # NO reacciona al angulo, al inclinarlo las filas se comprimen y los
-      # paredones de un lado llegan a pisar las prioridades de otro: un P1 del
-      # mismo objeto pasa delante/atras segun la fila en la que caiga.
-      min_step = Config::PRIORITY_Z_MIN_STEP.to_f
-      floor = project_y(wy.to_f, 0)
-      ceil = project_y(wy.to_f - Game_Map::TILE_HEIGHT, 0)
-      return min_step if !floor || !ceil
-      step = (floor - ceil).abs
-      return min_step if step < min_step
-      step
-    end
-
     # Solape de raster/sprite para prioridad. Crece con zoom y con la cantidad
     # de inclinacion activa, pero queda limitado para no emborronar pixel art.
     def priority_edge_overlap
@@ -668,17 +662,8 @@ module Mode7
       [[base * z * factor, 0.5].max, maxv].min
     end
 
-    # Clave de profundidad compatible con RPG Maker, pero adaptada a la
-    # proyeccion ACTUAL. Priority N avanza N altos-de-fila proyectados desde
-    # su base. Al interpolar angulo/zoom, el Z cambia en el mismo frame que
-    # cambia la geometria y no hay saltos de orden ni prioridad "encogida".
-    def depth_z(wy, priority = 0, bias = 0)
-      sy = project_y(wy.to_f, 0)
-      return bias.to_i if sy.nil?
-      p = priority.to_i
-      sy += priority_screen_step(wy) * p if p > 0
-      sy.round + bias.to_i
-    end
+    # NOTA: depth_z vivia aqui hasta v5.15. 020_NDSTileCategories lo redefine
+    # (physical_depth_z) y esta version jamas se ejecuta.
     def world_y_for_row(sy)
       return _cylindrical_world_y_for_row(sy) if cylindrical_mode?
 
@@ -869,3 +854,286 @@ class Game_Map
     end
   end
 end
+
+# --- Transicion suave vanilla <-> 2.5D (antes 005_ModeTransition.rb) ---
+module Mode7
+  class << self
+    def init_mode_state
+      # Plugin scripts are evaluated before a save has restored $game_switches.
+      # Remember whether the gameplay state was actually available; otherwise
+      # treating nil as OFF makes a loaded 2.5D save start at vanilla camera and
+      # animate into perspective during the first visible frames.
+      @mode_state_hydrated = !!$game_switches
+      @last_mode_state = active_now?
+      @mode_blend = 1.0
+      if @last_mode_state
+        configure(context_default_alpha, Config::DEFAULT_ZOOM)
+      else
+        configure(0.0, 1.0)
+      end
+    end
+
+    def hydrate_mode_state!
+      return false if @mode_state_hydrated
+      return false if !$game_switches
+      @mode_state_hydrated = true
+      @last_mode_state = active_now?
+      @mode_blend = 1.0
+      @transition_frames = 0
+      if @last_mode_state
+        # Do this synchronously before Mode7Renderer is constructed.  The first
+        # rendered map frame therefore already uses the authored perspective.
+        configure(context_default_alpha, Config::DEFAULT_ZOOM)
+      else
+        configure(0.0, 1.0)
+      end
+      true
+    end
+
+    def check_mode_state_change
+      hydrate_mode_state!
+      state = active_now?
+      if @last_mode_state.nil?
+        init_mode_state
+        return
+      end
+      return if state == @last_mode_state
+      @last_mode_state = state
+      begin_mode_transition(state)
+    end
+
+    # No existe swap de renderer. Encender/apagar solo interpola la camara.
+    def begin_mode_transition(turning_on)
+      frames = Config::MODE_TRANSITION_FRAMES
+      target_alpha = turning_on ? context_default_alpha : 0.0
+      target_zoom  = turning_on ? Config::DEFAULT_ZOOM  : 1.0
+      set_camera(target_alpha, target_zoom, frames)
+    end
+
+    def update_mode_transition
+      check_mode_state_change
+    end
+  end
+
+  init_mode_state
+end
+
+class Scene_Map
+  alias_method :_VERMEIL_25D_mode_update, :update unless method_defined?(:_VERMEIL_25D_mode_update)
+
+  def update
+    _VERMEIL_25D_mode_update
+    Mode7.update_transition
+    Mode7.update_mode_transition if $game_map
+  end
+end
+
+
+# Load/save hydration must happen before the renderer is allocated, not after
+# Scene_Map has already presented one vanilla-looking frame.
+class Scene_Map
+  if method_defined?(:createSpritesets) &&
+     !method_defined?(:_VERMEIL_V25_FIX2_mode_createSpritesets)
+    alias_method :_VERMEIL_V25_FIX2_mode_createSpritesets, :createSpritesets
+  end
+
+  def createSpritesets
+    Mode7.hydrate_mode_state! if Mode7.respond_to?(:hydrate_mode_state!)
+    _VERMEIL_V25_FIX2_mode_createSpritesets
+  end
+end
+
+# --- Zoom espacial por zonas (antes 016_ProgressiveZoom.rb) ---
+# Perfiles de zoom configurados desde Maker Studio. Todo diferido a runtime;
+# sin dependencias de carga mas alla de Mode7/Config.
+require "json"
+
+module Mode7
+  module ProgressiveZoom
+    FILE_PATH = File.join("Plugins", "[VERMEIL] Visual 2.5D",
+                          "progressive_zoom.json")
+    DIRECTIONS = {
+      "left"  => [-1.0, 0.0],
+      "right" => [1.0, 0.0],
+      "up"    => [0.0, -1.0],
+      "down"  => [0.0, 1.0]
+    }.freeze
+
+    @map_id = nil
+    @profiles = []
+    @zones = []
+    @document_loaded = false
+    @document = nil
+
+    class << self
+      def setup(map_id)
+        if defined?(Mode7::Config::PROGRESSIVE_ZOOM_ENABLED) && !Mode7::Config::PROGRESSIVE_ZOOM_ENABLED
+          Mode7.zoom_effect_override = nil
+          @map_id = map_id.to_i
+          @profiles = []
+          @zones = []
+          return
+        end
+        Mode7.zoom_effect_override = nil
+        @map_id = map_id.to_i
+        @profiles, @zones = load_map_data(@map_id)
+      end
+
+      def update
+        if defined?(Mode7::Config::PROGRESSIVE_ZOOM_ENABLED) && !Mode7::Config::PROGRESSIVE_ZOOM_ENABLED
+          Mode7.zoom_effect_override = nil
+          return
+        end
+        if !$game_map || !$game_player || !Mode7.active_now?
+          Mode7.zoom_effect_override = nil
+          return
+        end
+        setup($game_map.map_id) if @map_id != $game_map.map_id
+
+        real_x = $game_player.real_x.to_f / Game_Map::REAL_RES_X
+        real_y = $game_player.real_y.to_f / Game_Map::REAL_RES_Y
+        cell = "#{real_x.round},#{real_y.round}"
+        # ponytail: pocos tramos/zonas por mapa; indexar por celda si crece.
+        zone = zone_for_cell(cell)
+        base = zone ? zone[:zoom] : Mode7.camera_zoom.to_f
+        profile = @profiles.find { |candidate| candidate[:cells][cell] }
+        if !profile
+          Mode7.zoom_effect_override = zone ? base : nil
+          return
+        end
+        axis = real_x * profile[:direction][0] + real_y * profile[:direction][1]
+        if axis <= profile[:middle_axis]
+          weight = (axis - profile[:start_axis]) /
+                   (profile[:middle_axis] - profile[:start_axis])
+          start_zoom = profile[:start_zoom]
+          target_zoom = profile[:middle_zoom]
+        else
+          weight = (axis - profile[:middle_axis]) /
+                   (profile[:end_axis] - profile[:middle_axis])
+          start_zoom = profile[:middle_zoom]
+          target_zoom = profile[:end_zoom]
+        end
+        weight = weight.clamp(0.0, 1.0)
+        weight = weight * weight * (3.0 - 2.0 * weight)
+        Mode7.zoom_effect_override = start_zoom + (target_zoom - start_zoom) * weight
+      rescue Exception
+        Mode7.zoom_effect_override = nil
+      end
+
+      private
+
+      # Runtime data is immutable while the game is running. Reading/parsing the
+      # same authoring JSON on every transfer added avoidable disk I/O exactly on
+      # the loading frame. Keep one in-memory document and only normalize the
+      # current map section. Debug/editor code may call reload_runtime_data! after
+      # changing progressive_zoom.json.
+      def runtime_document
+        return @document if @document_loaded
+        @document_loaded = true
+        @document = JSON.parse(File.read(FILE_PATH))
+        @document = {} if !@document.is_a?(Hash)
+        @document
+      rescue Exception
+        @document = {}
+      end
+
+      def reload_runtime_data!
+        @document_loaded = false
+        @document = nil
+        @map_id = nil
+        @profiles = []
+        @zones = []
+        true
+      end
+
+      def load_map_data(map_id)
+        data = runtime_document
+        maps = data.is_a?(Hash) ? data["maps"] : nil
+        map = maps.is_a?(Hash) ? maps[map_id.to_s] : nil
+        return [[], []] if !map.is_a?(Hash)
+        zones = map["zones"]
+        normalized_zones = zones.is_a?(Hash) ?
+                           zones.filter_map { |_id, zone| normalize_zone(zone) } : []
+        @zones = normalized_zones
+        profiles = map["profiles"]
+        normalized_profiles = profiles.is_a?(Hash) ?
+                              profiles.filter_map { |_id, profile| normalize_profile(profile) } : []
+        [normalized_profiles, normalized_zones]
+      rescue Exception
+        [[], []]
+      end
+
+      def normalize_profile(profile)
+        return nil if !profile.is_a?(Hash)
+        direction = DIRECTIONS[profile["direction"].to_s]
+        start = normalize_point(profile["start"])
+        middle = normalize_point(profile["middle"])
+        finish = normalize_point(profile["end"])
+        cells = profile["cells"]
+        zoom = profile["middleZoom"]
+        return nil if !direction || !start || !middle || !finish
+        return nil if !cells.is_a?(Array) || !zoom.is_a?(Numeric)
+
+        start_axis = point_axis(start, direction)
+        middle_axis = point_axis(middle, direction)
+        end_axis = point_axis(finish, direction)
+        return nil if !(start_axis < middle_axis && middle_axis < end_axis)
+
+        {
+          direction: direction,
+          start_axis: start_axis,
+          middle_axis: middle_axis,
+          end_axis: end_axis,
+          start_zoom: zone_zoom_for_point(start),
+          end_zoom: zone_zoom_for_point(finish),
+          middle_zoom: zoom.to_f.clamp(Config::CAMERA_ZOOM_MIN.to_f,
+                                       Config::CAMERA_ZOOM_MAX.to_f),
+          cells: normalize_cells(cells)
+        }
+      end
+
+      def normalize_zone(zone)
+        return nil if !zone.is_a?(Hash)
+        zoom = zone["zoom"]
+        cells = zone["cells"]
+        return nil if !zoom.is_a?(Numeric) || !cells.is_a?(Array)
+        {
+          zoom: zoom.to_f.clamp(Config::CAMERA_ZOOM_MIN.to_f,
+                                Config::CAMERA_ZOOM_MAX.to_f),
+          cells: normalize_cells(cells)
+        }
+      end
+
+      def normalize_cells(cells)
+        cells.each_with_object({}) { |cell, index| index[cell.to_s] = true }
+      end
+
+      def zone_for_cell(cell)
+        @zones.find { |candidate| candidate[:cells][cell] }
+      end
+
+      def zone_zoom_for_point(point)
+        zone = zone_for_cell("#{point[0].round},#{point[1].round}")
+        zone ? zone[:zoom] : Mode7.camera_zoom.to_f
+      end
+
+      def normalize_point(point)
+        return nil if !point.is_a?(Array) || point.length < 2
+        return nil if !point[0].is_a?(Numeric) || !point[1].is_a?(Numeric)
+        [point[0].to_f, point[1].to_f]
+      end
+
+      def point_axis(point, direction)
+        point[0] * direction[0] + point[1] * direction[1]
+      end
+    end
+  end
+end
+
+EventHandlers.add(:on_game_map_setup, :vermeil_2p5d_progressive_zoom_setup,
+  proc { |map_id, _map, _tileset| next Mode7::ProgressiveZoom.setup(map_id) }
+)
+
+EventHandlers.add(:on_frame_update, :vermeil_2p5d_progressive_zoom_update,
+  proc { next Mode7::ProgressiveZoom.update }
+)

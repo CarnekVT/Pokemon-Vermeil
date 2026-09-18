@@ -137,6 +137,25 @@ module Mode7
     PRIORITY_RIGID_MIN = 2
     PRIORITY_Z_MIN_STEP = 32.0
 
+    # =======================================================================
+    # PRIORIDAD COMO ALTURA VISUAL 2.5D (Perspectiva NDS)
+    # =======================================================================
+    # true: La prioridad de tileset (1..5) representa elevación física 3D
+    # (PRIORITY_HEIGHT_STEP px por nivel: P1=32px, P2=64px, etc.) en lugar
+    # del truco plano 2D de RMXP (wy + p * 32).
+    PRIORITY_VISUAL_HEIGHT_ENABLED = true
+    PRIORITY_HEIGHT_STEP           = 32.0
+
+    # Overrides manuales de prioridad por tileset_id => { tile_id => priority }.
+    # Permite ajustar prioridades en runtime sin mutar Data/Tilesets.rxdata.
+    # Map 79 (Montaña, tileset 5): tiles 820 y 821 (meseta) con Prioridad 1 (+32px).
+    TILESET_PRIORITY_OVERRIDES = {
+      5 => {
+        820 => 1,
+        821 => 1
+      }
+    }.freeze
+
     # V5.8: profundidad fisica primero, Priority solo desempata objetos que
     # comparten practicamente la misma superficie. Ya no puede saltar por
     # encima de una montana/plataforma solo por ser P2/P4.
@@ -144,17 +163,16 @@ module Mode7
     PHYSICAL_DEPTH_Z_SCALE   = 64.0
     PRIORITY_DEPTH_BIAS_STEP = 4
 
-    # La camara acompana la elevacion real bajo los pies del jugador. En una
-    # escalera el valor es continuo, por lo que al llegar a una meseta la
-    # pantalla mantiene al jugador en el mismo nivel visual en vez de dejarlo
-    # subir hacia el borde superior.
-    CAMERA_FOLLOW_SURFACE_ELEVATION = true
+    # La camara NO acompana la elevacion: pisar una altura jamas recoloca
+    # tiles (toda la escena respiraba al subir/bajar). El personaje sube en
+    # pantalla de forma clasica y solo el orden Z (prioridades) reacciona.
+    CAMERA_FOLLOW_SURFACE_ELEVATION = false
 
     # V6 / Geometry v4: explicit Geometry data uses the clean V25 files under
     # Data/VERMEIL_GEOMETRY_V4. The old legacy Geometry JSON folder is not a
     # runtime source anymore. Maps without a v4 runtime can still use Visual
     # 2.5D Terrain Tags normally; authored v4 maps are authoritative.
-    SURFACE_GEOMETRY_ENABLED     = true
+    SURFACE_GEOMETRY_ENABLED     = false
     SURFACE_GEOMETRY_DIRECTORY   = "Data/VERMEIL_GEOMETRY_V4"
     SURFACE_GEOMETRY_HEIGHT_STEP = 32.0
     # V7 / modo Terrain Tags only (cuarentena modelos 3D):
@@ -187,8 +205,8 @@ module Mode7
 
     # Mantener suelo y sprites en el mismo subpixel evita juntas al detenerse.
     # ponytail: raster exacto; subir a 1.0 solo si Cylindrical pierde FPS.
-    GROUND_REDRAW_WORLD_STEP = 2.0
-    PRIORITY_REPROJECT_WORLD_STEP = 2.0
+    GROUND_REDRAW_WORLD_STEP = 0.5
+    PRIORITY_REPROJECT_WORLD_STEP = 0.5
 
     # Una muestra por fila evita cortes horizontales en tiles altos.
     CYLINDRICAL_RASTER_SCAN_STEP = 2
@@ -275,9 +293,9 @@ module Mode7
     EXT_CORNERS_ENABLED    = true
     EXT_CORNERS_WALLS      = true
     EXT_CORNERS_PRIORITIES = true
-    # ponytail: solape subpixel minimo; subirlo solo si otro backend rasteriza
-    # juntas mayores entre quads que comparten exactamente el mismo borde.
-    EXT_CORNERS_OVERLAP    = 0.0
+    # Solape subpixel entre quads (muros, prioridades, rampas). Cierra las
+    # juntas de 1px entre sprites vecinos proyectados por separado.
+    EXT_CORNERS_OVERLAP    = 0.75
 
     # -----------------------------------------------------------------------
     # RENDERER V4.0 - NDS TILE SPACE / ALTO RENDIMIENTO
@@ -295,8 +313,13 @@ module Mode7
     # cada vez que avanza la cámara. Es el único camino viable para mantener
     # FPS estables en exterior; las bandas runtime se adaptan al perfil NDS.
     GEOMETRY_GROUND_ENABLED      = true
-    GEOMETRY_GROUND_BAND_HEIGHT  = 32
-    GEOMETRY_GROUND_OVERLAP      = 0.0
+    GEOMETRY_GROUND_BAND_HEIGHT  = 1
+    V25_SKY_AFFINE_ADAPTIVE_BANDS = false
+    V25_SKY_AFFINE_BAND_HEIGHT   = 1
+    # Solape subpixel entre bandas del suelo. 0 abria juntas de 1px entre
+    # quads adyacentes al proyectar por separado; 0.75 las cierra sin
+    # emborronar el pixel art.
+    GEOMETRY_GROUND_OVERLAP      = 0.75
     GEOMETRY_GROUND_CULL_MARGIN  = 48
     GEOMETRY_GROUND_X_MARGIN     = 48
     GEOMETRY_GROUND_POOL_MAX     = 96
@@ -306,7 +329,7 @@ module Mode7
     NDS_NATIVE_GROUND_SHADER     = true
     # Cuantización subpíxel: evita que suelo, paredes y tops se actualicen en
     # frames distintos sin introducir los saltos visibles del umbral de 2 px.
-    NDS_GROUND_REPROJECT_STEP    = 2.0
+    NDS_GROUND_REPROJECT_STEP    = 0.5
     # V7: paso de snap del angulo de camara (grados). Arrastrar el slider solo
     # reconstruye cuando el angulo cruza este paso (0 = sin snap).
     NDS_ANGLE_REVISION_SNAP      = 0.5
@@ -378,6 +401,12 @@ module Mode7
     # sensacion de altura sin modificar el tile. Requiere AUTO_FACES/lado en false.
     NDS_MOUNTAIN_AS_BILLBOARD     = true
 
+    # Mapas con MESETAS REALES (MountainTop eleva + MountainWall son caras +
+    # NDSStair genera rampa). El resto de mapas conserva el modo billboard
+    # plano. Anade aqui el id del mapa cuando su meseta tenga tags 29/30/37
+    # asignados en el tileset.
+    NDS_REAL_MOUNTAIN_MAP_IDS = [79].freeze
+
     # La mitad superior de una hierba de dos tiles es billboard mientras el
     # pie sigue siendo bush/suelo. Se alinea matematicamente con el borde norte
     # del tile base y se deja este pequeno solape para ocultar raster seams.
@@ -402,7 +431,7 @@ module Mode7
     # -----------------------------------------------------------------------
     # NDSVolume genera grosor ligero; NDSVolumeHigh y NDSMountainTop tienen
     # alturas propias. El TOP conserva la textura original.
-    NDS_VOLUME_ENABLED          = true
+    NDS_VOLUME_ENABLED          = false
     NDS_VOLUME_DEFAULT_HEIGHT   = 8.0
     NDS_VOLUME_MAX_HEIGHT       = 64.0
     NDS_VOLUME_FRONT_FACES      = true
@@ -413,7 +442,7 @@ module Mode7
     NDS_VOLUME_CULL_TILES_X     = 14
     NDS_VOLUME_CULL_TILES_Y     = 12
     NDS_VOLUME_BUCKET_SIZE      = 8
-    NDS_VOLUME_REPROJECT_STEP   = 2.0
+    NDS_VOLUME_REPROJECT_STEP   = 0.5
 
     # V4.1 Fast Path
     # Las caras de volumen se preparan como metadata al cargar el mapa y sus
@@ -425,7 +454,7 @@ module Mode7
     # Buckets espaciales para no iterar todas las fachadas/props del mapa en
     # cada frame. 8 tiles es un buen compromiso para mapas grandes.
     NDS_RUNTIME_BUCKET_SIZE      = 8
-    NDS_WALL_REPROJECT_STEP      = 2.0
+    NDS_WALL_REPROJECT_STEP      = 0.5
 
     # Los tags normales protegen arte Pokemon ya perspectivado. Usa los tags
     # Plane solo cuando quieras una superficie geometricamente 3D.
@@ -437,14 +466,14 @@ module Mode7
     # queda a ras del suelo y el borde norte sube hasta la elevacion vecina.
     # NDS_STAIR_HEIGHT es la subida por defecto si no hay meseta/volumen al norte.
     NDS_STAIR_TERRAIN_TAG = :NDSStair
-    NDS_STAIR_HEIGHT      = 32.0
+    NDS_STAIR_HEIGHT      = 0.0
 
     # -----------------------------------------------------------------------
     # OBJETOS GEOMETRY (cubos/planos del editor 2.5D Geometry)
     # -----------------------------------------------------------------------
-    # CUARENTENA V7: los objetos del editor (quads 3D) estan aislados en
-    # _CUARENTENA_MODELOS_3D/026_NDSGeometryObjects.off. false = no se dibujan
-    # ni bloquean el paso; el 2.5D queda solo con Terrain Tags de tileset.
+    # V5.14: el subsistema 3D (meshes, fisica de modelos, objetos Geometry) se
+    # elimino del plugin; solo quedan Terrain Tags de tileset. false = no se
+    # dibujan ni bloquean el paso. Recuperable via historial de git.
     NDS_GEOMETRY_OBJECTS_ENABLED = false
     NDS_OBJECT_CULL_TILES_X      = 16
     NDS_OBJECT_CULL_TILES_Y      = 14

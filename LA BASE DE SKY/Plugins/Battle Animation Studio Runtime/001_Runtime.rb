@@ -1253,7 +1253,11 @@ module BattleAnimationStudioRuntime
       @clips_cache = []
       @tracks_cache.each do |track|
         next if !track.is_a?(Hash) || !track["clips"].is_a?(Array)
-        track["clips"].each { |clip| @clips_cache << clip if clip.is_a?(Hash) }
+        track["clips"].each do |clip|
+          next if !clip.is_a?(Hash)
+          next if clip["enabled"] == false
+          @clips_cache << clip
+        end
       end
       expand_replicated_clips
       @clip_by_id_cache = {}
@@ -1842,7 +1846,8 @@ module BattleAnimationStudioRuntime
         raw.is_a?(Array) ? raw.sort_by { |k| (k["frame"] || 0).to_f } : []
       end
       base = source["enabled"] != false
-      return base if keys.empty? || frame < keys.first["frame"].to_f
+      return false if !base
+      return true if keys.empty? || frame < keys.first["frame"].to_f
       return !!keys.last["value"] if frame >= keys.last["frame"].to_f
       lo = 0; hi = keys.length - 1
       while lo + 1 < hi
@@ -2380,6 +2385,18 @@ module BattleAnimationStudioRuntime
         follow_frame = @point_context_frame.nil? ? (@frame || 0) : @point_context_frame
         follow = authored_role_follow_delta(role, follow_frame)
         ret = [ret[0].to_f + follow[0].to_f, ret[1].to_f + follow[1].to_f]
+        # Split-coordinate elements bound to a role (emitters whose points are
+        # anchored to another battler as absolute screen placeholders) only get
+        # the role's authored track motion, which is ~0 for a static battler.
+        # Translate them by the live slot so they follow the actual User/Target
+        # instead of freezing at the authored coordinates when the target moves.
+        point_anchor = point.is_a?(Hash) ? point["anchor"].to_s.downcase : ""
+        target_native = point_anchor.include?("target")
+        user_native = point_anchor.include?("user") && !point_anchor.include?("target") && role.to_s == "user"
+        if !target_native && !user_native && !["", "screen"].include?(point_anchor)
+          slot = formation_offset_for_role(role)
+          ret = [ret[0].to_f + slot[0].to_f, ret[1].to_f + slot[1].to_f]
+        end
       end
       imported = obj.is_a?(Hash) ? (obj["imported"] || {}) : {}
       if obj["type"].to_s == "battler" && imported["pbsBattlerParticle"] && point.is_a?(Hash) && point["anchor"].to_s.start_with?("pbs:")
@@ -4185,6 +4202,7 @@ module BattleAnimationStudioRuntime
     def apply_emitter(clip)
       template = @effect_sprites[clip["id"].to_s]
       return if !template
+      return if clip["enabled"] == false
       update_bitmap(template, clip, @frame)
       template.visible = false
       particles = cached_emitter_particles(clip)
