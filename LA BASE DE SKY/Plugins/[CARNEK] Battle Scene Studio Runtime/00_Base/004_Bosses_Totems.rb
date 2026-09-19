@@ -101,6 +101,56 @@ module BSS064
       battle.instance_variable_set(:@bss653_boss_capture_visuals_locked,false)
       battle.instance_variable_set(:@bss665_boss_hud_ready,false)
       battle.instance_variable_set(:@bss665_retired_helper_indices,{})
+      if cfg.key?("aiSkill") || cfg.key?("skill")
+        boss_skill = (cfg["aiSkill"] || cfg["skill"]).to_i
+        battle.opponent_ai_skill = boss_skill if battle.respond_to?(:opponent_ai_skill=)
+      end
+      if cfg.key?("midbattleScript")
+        mb_script = cfg["midbattleScript"]
+        if mb_script.is_a?(String) && !mb_script.empty?
+          mb_script = mb_script.to_sym rescue mb_script
+        end
+        if mb_script.is_a?(Symbol)
+          if defined?(MidbattleScripts) && hasConst?(MidbattleScripts, mb_script)
+            battle.midbattleScript = getConst(MidbattleScripts, mb_script).clone if battle.respond_to?(:midbattleScript=)
+          elsif defined?(MidbattleHandlers) && MidbattleHandlers.exists?(:midbattle_scripts, mb_script)
+            battle.midbattleScript = mb_script if battle.respond_to?(:midbattleScript=)
+          end
+        elsif mb_script.is_a?(Hash)
+          battle.midbattleScript = mb_script if battle.respond_to?(:midbattleScript=)
+        end
+      end
+      if cfg["midbattleTriggers"].is_a?(Array) && !cfg["midbattleTriggers"].empty?
+        custom_script = {}
+        ev_counts = Hash.new(0)
+        cfg["midbattleTriggers"].each do |entry|
+          next unless entry.is_a?(Hash)
+          ev = entry["event"].to_s.strip
+          txt = entry["text"].to_s.strip
+          speaker = entry["speaker"].to_s.strip.downcase
+          next if ev.empty? || txt.empty?
+          lines = txt.split("\n").map(&:strip).reject(&:empty?)
+          next if lines.empty?
+          is_narrator = (speaker == "narrator" || (battle.respond_to?(:wildBattle?) && battle.wildBattle?))
+          custom_script[ev] ||= {}
+          ev_counts[ev] += 1
+          k_suffix = ev_counts[ev] > 1 ? "_#{ev_counts[ev]}" : ""
+          if is_narrator
+            custom_script[ev]["text#{k_suffix}"] = lines.length == 1 ? lines.first : lines
+          else
+            custom_script[ev]["speech#{k_suffix}"] = lines.length == 1 ? lines.first : lines
+            custom_script[ev].delete("endSpeech")
+            custom_script[ev]["endSpeech"] = true
+          end
+        end
+        if !custom_script.empty?
+          if battle.respond_to?(:midbattleScript) && battle.midbattleScript.is_a?(Hash)
+            battle.midbattleScript.merge!(custom_script)
+          elsif battle.respond_to?(:midbattleScript=)
+            battle.midbattleScript = custom_script
+          end
+        end
+      end
       # Optional DBK databox style selected by the Blueprint. Apply it before
       # Battle::Scene constructs PokemonDataBox objects. "inherit" leaves any
       # project/battle-rule choice untouched. Long keeps DBK's own fallback to
@@ -4340,9 +4390,9 @@ class Battle
       self.raidCaptureMode=false if respond_to?(:raidCaptureMode=)
       target.hp=0 if target && target.respond_to?(:hp=)
       if target && target.respond_to?(:dx_pbFaint,true)
-        target.send(:dx_pbFaint,true)
+        target.send(:dx_pbFaint,false)
       elsif target
-        target.pbFaint(true)
+        target.pbFaint(false)
       end
       return :faint
     end
@@ -4448,8 +4498,11 @@ module BSS064BossRaidCaptureFlow654
     end
     return if fainted_count>=battle.pbSideSize(0)
 
+    if battle && battle.respond_to?(:pbDeluxeTriggers)
+      battle.pbDeluxeTriggers(target.index, nil, "BattlerFainted", target.species, *(target.pokemon.types rescue []))
+    end
     # The dominant Pokémon is the only foe that participates in the Raid-style
-    # finish. Existing SOS allies use their real faint path first.
+    # finish. Existing SOS allies flee before the capture sequence.
     battle.bss654_retire_sos_for_boss_capture(target) if battle.respond_to?(:bss654_retire_sos_for_boss_capture)
     if battle.pbAbleCount(target.index)<=1
       battle.raidCaptureMode=true if battle.respond_to?(:raidCaptureMode=)
@@ -4556,9 +4609,9 @@ class Battle
   def bss656_sos_on_boss_defeat
     cfg=@bss_boss_config.is_a?(Hash) ? @bss_boss_config : {}
     mode=cfg["sosOnBossDefeat"].to_s
-    %w[faint flee continue].include?(mode) ? mode : "faint"
+    %w[faint flee continue].include?(mode) ? mode : "flee"
   rescue
-    "faint"
+    "flee"
   end
 
   def bss656_live_boss_helpers(target=nil)
@@ -4580,7 +4633,7 @@ class Battle
     []
   end
 
-  def bss656_flee_boss_helper(battler)
+  def bss656_flee_boss_helper(battler, flee_msg = false)
     return false if !battler
     old_decision=(@decision rescue 0)
     # Mark the slot before the flee animation starts. Any DBK/global databox toggle
@@ -4590,14 +4643,14 @@ class Battle
       bss665_mark_retired_helper_index(battler.index) if respond_to?(:bss665_mark_retired_helper_index)
     rescue
     end
-    if battler.respond_to?(:wild_flee)
-      battler.wild_flee(nil)
+    if battler.respond_to?(:wild_flee) && (battler.wild? rescue false)
+      battler.wild_flee(flee_msg)
       # DBK wild_flee writes Battler @hp directly. Sync through the public
       # writer as well so the underlying party Pokémon is no longer counted
       # as able if this helper happened to be the last battler on the side.
       battler.hp=0 if battler.respond_to?(:hp=)
     else
-      begin;@scene.pbBattlerFlee(battler,nil) if @scene && @scene.respond_to?(:pbBattlerFlee);rescue;end
+      begin;@scene.pbBattlerFlee(battler,flee_msg) if @scene && @scene.respond_to?(:pbBattlerFlee);rescue;end
       battler.hp=0 if battler.respond_to?(:hp=)
       battler.pbInitEffects(false) if battler.respond_to?(:pbInitEffects)
       pbClearChoice(battler.index) if respond_to?(:pbClearChoice)
@@ -4623,13 +4676,13 @@ class Battle
     @bss656_resolving_boss_helpers=true
     helpers.each do |b|
       if mode=="flee"
-        bss656_flee_boss_helper(b)
+        bss656_flee_boss_helper(b, false)
       else
         begin
           b.hp=0 if b.respond_to?(:hp=)
-          # Use the public faint lifecycle so the project's current databox and
-          # battler animations run normally. Do not hard-hide sprites afterward.
-          b.pbFaint(true)
+          # Use the public faint lifecycle with showMessage = false so helpers
+          # do not spam faint messages after the Boss narrative climax.
+          b.pbFaint(false)
         rescue => e
           BSS064.log("Boss helper faint 0.6.56 warning: #{e.class}: #{e.message}")
           begin;b.hp=0 if b.respond_to?(:hp=);rescue;end
@@ -4694,12 +4747,15 @@ class Battle
     @bss656_deferred_capture_running=false
   end
 
-  # Replaces the v0.6.56 one-size-fits-all helper retirement. Capture callers
-  # can keep the same API while the Blueprint decides the actual finish policy.
   def bss654_retire_sos_for_boss_capture(target)
-    mode=bss656_sos_on_boss_defeat
-    return false if mode=="continue" && !bss656_live_boss_helpers(target).empty?
-    bss656_resolve_boss_helpers(target,mode)
+    helpers = bss656_live_boss_helpers(target)
+    return true if helpers.empty?
+    helpers.each do |b|
+      bss656_flee_boss_helper(b, nil)
+    end
+    begin; @scene.bss652_layout_sos_databoxes if @scene && @scene.respond_to?(:bss652_layout_sos_databoxes); rescue; end
+    begin; pbCalculatePriority(true) if respond_to?(:pbCalculatePriority); rescue; end
+    true
   end
 end
 
@@ -5204,7 +5260,9 @@ module BSS064SmoothBossHelperFleeScene658
       box.visible=false if box && box.respond_to?(:visible=)
     rescue
     end
-    if msg.is_a?(String)
+    if msg == false || msg == ""
+      # Message is suppressed
+    elsif msg.is_a?(String)
       @battle.pbDisplayPaused(_INTL("#{msg}",battler.pbThis))
     else
       @battle.pbDisplayPaused(_INTL("¡{1} ha huido!",battler.pbThis))
@@ -5221,9 +5279,9 @@ rescue => e
 end
 
 module BSS064SmoothBossHelperFleeState658
-  def bss656_flee_boss_helper(battler)
+  def bss656_flee_boss_helper(battler, flee_msg = false)
     @bss658_smooth_helper_flee_target=battler
-    super
+    super(battler, flee_msg)
   ensure
     @bss658_smooth_helper_flee_target=nil
   end
@@ -5758,7 +5816,7 @@ class Battle
         # lifecycle calls Battle#pbGainExp at its normal native checkpoint.
         @bss668_force_native_boss_faint=true
         begin
-          target.pbFaint(true)
+          target.pbFaint(false)
         ensure
           @bss668_force_native_boss_faint=false
         end

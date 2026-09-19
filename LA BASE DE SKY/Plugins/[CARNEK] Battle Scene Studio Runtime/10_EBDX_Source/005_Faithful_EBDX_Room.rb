@@ -1378,11 +1378,11 @@ class BSS070EBDXRoom
       next if key.include?("trainer") || key.include?("battler")
       next if key.include?("sky") || key.include?("sun") || key.include?("star") || key.include?("cloud") ||  key.include?("Light") || (@data[key].is_a?(Hash) && @data[key].has_key?(:shading) && !@data[key][:shading])
       if PBDayNight.isNight? && !@sunny
-        @sprites[key].tone = Tone.new(-120, -100, -60)
+        @sprites[key].tone = Tone.new(-70, -30, 45, 0)
       elsif (PBDayNight.isEvening? || PBDayNight.isMorning?) && !@sunny
-        @sprites[key].tone = Tone.new(-16, -52, -56)
+        @sprites[key].tone = Tone.new(75, 18, -65, 0)
       else
-        @sprites[key].tone = Tone.new(0, 0, 0)
+        @sprites[key].tone = Tone.new(0, 0, 0, 0)
       end
     end
   end

@@ -77,20 +77,50 @@ module BSS102RuntimeRasterSafety
   def prepare_scene(data)
     out=BSS098.deep_copy(data)
     return out unless out.is_a?(Hash)
+    if out[:sky] || out["sky"] || out[:skyMode] || out["skyMode"] || out[:cloudsConfig] || out["cloudsConfig"]
+      out[:outdoor] = true
+      out["outdoor"] = true
+    end
+    BSS106.prune_hidden!(out) if defined?(BSS106) && BSS106.respond_to?(:prune_hidden!)
     out.each do |raw_key,row|
       next unless raw_key.to_s =~ /^img\d+/i && row.is_a?(Hash)
+      BSS106.apply_authored_tint!(row, out) if defined?(BSS106) && BSS106.respond_to?(:apply_authored_tint!)
+      warp=BSS098.hash_get(row,:warp)
+      has_warp=warp.is_a?(Hash) && warp[:enabled] != false && warp["enabled"] != false
+      areas=BSS098.hash_get(row,:blurAreas)
+      has_blur=(areas.is_a?(Array) && areas.any?{|a| a.is_a?(Hash) && (BSS102.num(a[:radius]||a["radius"],0)>0 || (a[:mode]||a["mode"]).to_s.start_with?("band") || (a[:mode]||a["mode"]).to_s=="total")}) || BSS102.num(BSS098.hash_get(row,:blur),0) > 0
       rr=BSS098.hash_get(row,:runtimeRaster)
       if rr.is_a?(Hash)
         path=BSS098.hash_get(rr,:bitmap).to_s.strip
-        if BSS102.file_bitmap_exists?(path)
+        if !has_warp && !has_blur
+          row.delete(:runtimeRaster); row.delete("runtimeRaster")
+        elsif BSS102.file_bitmap_exists?(path)
           row[:bitmap]=path
-          row[:ox]=BSS102.num(BSS098.hash_get(rr,:ox), BSS098.hash_get(row,:ox) || 0)
-          row[:oy]=BSS102.num(BSS098.hash_get(rr,:oy), BSS098.hash_get(row,:oy) || 0)
+          row["bitmap"]=path
+          crop=BSS098.hash_get(row,:crop)
+          def_ox=crop.is_a?(Hash) ? BSS102.num(crop[:w]||crop["w"],32)/2 : (BSS098.hash_get(row,:ox) || 0)
+          def_oy=crop.is_a?(Hash) ? BSS102.num(crop[:h]||crop["h"],32) : (BSS098.hash_get(row,:oy) || 0)
+          ox=BSS102.num(BSS098.hash_get(rr,:ox), def_ox)
+          oy=BSS102.num(BSS098.hash_get(rr,:oy), def_oy)
+          row[:ox]=ox; row["ox"]=ox
+          row[:oy]=oy; row["oy"]=oy
           [:warp,"warp",:blurAreas,"blurAreas",:blur,"blur",:crop,"crop",:runtimeRaster,"runtimeRaster"].each{|k|row.delete(k)}
           row[:bss_rasterized]=true
+          row["bss_rasterized"]=true
         else
           row.delete(:runtimeRaster); row.delete("runtimeRaster")
         end
+      end
+      # Protect against 100% entered as 100 instead of 1.0
+      zx=BSS102.num(row[:zoom_x] || row["zoom_x"], 0)
+      zy=BSS102.num(row[:zoom_y] || row["zoom_y"], 0)
+      if zx >= 50.0
+        zx = [[zx / 100.0, 0.05].max, 8.0].min
+        row[:zoom_x]=zx; row["zoom_x"]=zx
+      end
+      if zy >= 50.0
+        zy = [[zy / 100.0, 0.05].max, 8.0].min
+        row[:zoom_y]=zy; row["zoom_y"]=zy
       end
       effect=BSS098.hash_get(row,:effect).to_s
       row[:effect]="bss_wind" if effect=="wind"
@@ -116,7 +146,11 @@ module BSS102RoomAuthoringParity
       row=@data[key] || @data[key.to_s] || @data[key.to_sym]
       sp=@sprites[key.to_s] || @sprites[key]
       if row.is_a?(Hash) && sp && !(sp.disposed? rescue true)
-        color=BSS102.color_from_hex(BSS102.hget(row,:tintColor),BSS102.num(BSS102.hget(row,:tintAlpha),0).round)
+        slot=defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : :day
+        prefix=(slot==:night ? 'Night' : (slot==:dawn ? 'Dawn' : 'Day'))
+        color_val=row["tint#{prefix}Color"] || row["tint#{prefix}Color".to_sym] || BSS102.hget(row,:tintColor)
+        alpha_val=row["tint#{prefix}Alpha"] || row["tint#{prefix}Alpha".to_sym] || BSS102.hget(row,:tintAlpha)
+        color=BSS102.color_from_hex(color_val,BSS102.num(alpha_val,0).round)
         sp.color=color if color && sp.respond_to?(:color=)
       end
     rescue => e
@@ -159,6 +193,8 @@ module BSS102RoomAuthoringParity
       if bg && @data.is_a?(Hash)
         uniform=Math.sqrt((bg.zoom_x.to_f*bg.zoom_y.to_f).abs)
         uniform=(bg.zoom_x.to_f.abs+bg.zoom_y.to_f.abs)/2.0 if uniform<=0.001
+        slot=defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : :day
+        prefix=(slot==:night ? 'Night' : (slot==:dawn ? 'Dawn' : 'Day'))
         @data.each do |raw_key,row|
           next unless raw_key.to_s =~ /^img\d+/i && row.is_a?(Hash)
           bitmap=BSS102.hget(row,:bitmap).to_s.tr("\\","/")
@@ -173,7 +209,9 @@ module BSS102RoomAuthoringParity
           sy=BSS102.hget(row,:zoom_y).nil? ? general : BSS102.num(BSS102.hget(row,:zoom_y),general)
           sp.zoom_x=uniform*sx if sp.respond_to?(:zoom_x=)
           sp.zoom_y=uniform*sy if sp.respond_to?(:zoom_y=)
-          color=BSS102.color_from_hex(BSS102.hget(row,:tintColor),BSS102.num(BSS102.hget(row,:tintAlpha),0).round)
+          color_val=row["tint#{prefix}Color"] || row["tint#{prefix}Color".to_sym] || BSS102.hget(row,:tintColor)
+          alpha_val=row["tint#{prefix}Alpha"] || row["tint#{prefix}Alpha".to_sym] || BSS102.hget(row,:tintAlpha)
+          color=BSS102.color_from_hex(color_val,BSS102.num(alpha_val,0).round)
           sp.color=color if color && sp.respond_to?(:color=)
         end
       end
@@ -331,13 +369,14 @@ end
 #-------------------------------------------------------------------------------
 module BSS102SOSFleeInsteadOfFaint
   def pbFaint(showMessage=true)
+    return if @fainted || @bss_fainting
     battle=@battle rescue nil
     if battle && !battle.instance_variable_get(:@bss102_helper_flee_in_progress) && battle.respond_to?(:bss_find_boss_battler_any) && battle.respond_to?(:bss656_sos_on_boss_defeat)
       boss=(battle.bss_find_boss_battler_any rescue nil)
       if boss && !boss.equal?(self) && !(opposes?(boss.index) rescue true) && (boss.hp rescue 1).to_i<=0 && (battle.bss656_sos_on_boss_defeat rescue "faint").to_s=="flee" && battle.respond_to?(:bss656_flee_boss_helper)
         begin
           battle.instance_variable_set(:@bss102_helper_flee_in_progress,true)
-          ok=battle.bss656_flee_boss_helper(self)
+          ok=battle.bss656_flee_boss_helper(self,false)
           @fainted=true if ok
           return true if ok
         ensure
@@ -345,7 +384,14 @@ module BSS102SOSFleeInsteadOfFaint
         end
       end
     end
-    super
+    @bss_fainting=true
+    begin
+      ret=super(showMessage)
+      @fainted=true
+      ret
+    ensure
+      @bss_fainting=false
+    end
   end
 end
 
@@ -382,3 +428,370 @@ begin
 rescue => e
   BSS064.log("BSS102 SOS flee install warning: #{e.class}: #{e.message}") if defined?(BSS064)
 end
+
+#-------------------------------------------------------------------------------
+# BSS Clean Flee Message Suppression
+# Moves flee suppression out of DBK and into BSS Runtime.
+# When a flee is triggered narratively (wildFlee: true, midbattle scripts, or
+# silent helper retirement), msg == false or "" suppresses the generic text.
+#-------------------------------------------------------------------------------
+module BSSFleeMessageControl
+  def pbBattlerFlee(battler, msg = nil)
+    # Allow BSS064SmoothBossHelperFleeScene658 to handle smooth boss helper flee animations
+    marked = @battle && @battle.instance_variable_get(:@bss658_smooth_helper_flee_target)
+    return super(battler, msg) if marked && battler && marked.equal?(battler)
+    if msg == false || msg == ""
+      @briefMessage = false if instance_variable_defined?(:@briefMessage)
+      anim_cls = (defined?(Battle::Scene::Animation::BattlerFlee) rescue nil)
+      box_cls  = (defined?(Battle::Scene::Animation::DataBoxDisappear) rescue nil)
+      fleeAnim = anim_cls ? anim_cls.new(@sprites, @viewport, battler.index, @battle) : nil rescue nil
+      dataBoxAnim = box_cls ? box_cls.new(@sprites, @viewport, battler.index) : nil rescue nil
+      pbAnimateSubstitute(battler, :break) if respond_to?(:pbAnimateSubstitute)
+      if fleeAnim && dataBoxAnim
+        loop do
+          begin; fleeAnim.update; rescue; end
+          begin; dataBoxAnim.update; rescue; end
+          pbUpdate rescue nil
+          break if (fleeAnim.animDone? rescue true) && (dataBoxAnim.animDone? rescue true)
+        end
+        begin; fleeAnim.dispose; rescue; end
+        begin; dataBoxAnim.dispose; rescue; end
+      end
+      return
+    end
+    super(battler, msg)
+  end
+end
+
+module BSSBattlerWildFleeControl
+  def wild_flee(fleeMsg = nil)
+    # If called with boolean true (e.g. from wildFlee: true in DBK midbattle triggers),
+    # convert to false to suppress the duplicate "¡{1} huyó!" after scripted text.
+    fleeMsg = false if fleeMsg == true
+    super(fleeMsg)
+  end
+end
+
+begin
+  if defined?(Battle::Scene)
+    Battle::Scene.prepend(BSSFleeMessageControl) unless Battle::Scene.ancestors.include?(BSSFleeMessageControl)
+  end
+rescue => e
+  BSS064.log("BSS flee message scene install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+begin
+  if defined?(Battle::Battler)
+    Battle::Battler.prepend(BSSBattlerWildFleeControl) unless Battle::Battler.ancestors.include?(BSSBattlerWildFleeControl)
+  end
+rescue => e
+  BSS064.log("BSS battler wild flee install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+# Re-register DBK's wildFlee trigger handler cleanly so it passes false if params == true
+begin
+  if defined?(MidbattleHandlers)
+    MidbattleHandlers.add(:midbattle_triggers, "wildFlee",
+      proc { |battle, idxBattler, idxTarget, params|
+        battler = battle.battlers[idxBattler]
+        next if battle.decided? || !battler || !battler.wild?
+        PBDebug.log("     'wildFlee': forcing the wild #{battler.name} (#{battler.index}) to flee")
+        battle.scene.pbForceEndSpeech if battle.scene && battle.scene.respond_to?(:pbForceEndSpeech)
+        flee_msg = (params == true ? false : (params.is_a?(String) ? params : nil))
+        battler.wild_flee(flee_msg)
+      }
+    )
+  end
+rescue => e
+  BSS064.log("BSS midbattle wildFlee override warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+#-------------------------------------------------------------------------------
+# BSS DBK Bridge: AI Skill & Boss Difficulty Extension
+# Migrated from Deluxe Battle Kit into BSS Runtime.
+#-------------------------------------------------------------------------------
+class Battle
+  attr_accessor :opponent_ai_skill unless method_defined?(:opponent_ai_skill)
+  attr_writer :canLose unless method_defined?(:canLose=)
+
+  def canLose
+    return @canLose if defined?(@canLose) && !@canLose.nil?
+    return @rules[:continue_if_lose] if @rules.is_a?(Hash) && @rules.key?(:continue_if_lose)
+    false
+  end unless method_defined?(:canLose)
+
+  alias canLose? canLose unless method_defined?(:canLose?)
+end
+
+module BSSAITrainerSkillExtension
+  def set_up_skill
+    super
+    if @side == 1
+      # 1. Battle rule or explicit battle property
+      if @ai.battle.respond_to?(:opponent_ai_skill) && !@ai.battle.opponent_ai_skill.nil?
+        @skill = @ai.battle.opponent_ai_skill.to_i
+      # 2. BSS Boss configuration (Trainer or Wild boss)
+      elsif @ai.battle.respond_to?(:bss_boss_config) && @ai.battle.bss_boss_config.is_a?(Hash) &&
+            (@ai.battle.bss_boss_config.key?("aiSkill") || @ai.battle.bss_boss_config.key?("skill"))
+        @skill = (@ai.battle.bss_boss_config["aiSkill"] || @ai.battle.bss_boss_config["skill"]).to_i
+      # 3. Wild Boss battle
+      elsif !@trainer
+        wild_battler = @ai.battle.battlers[@side] rescue nil
+        is_boss = (wild_battler.respond_to?(:hasBossImmunity?) && wild_battler.hasBossImmunity?) ||
+                  (wild_battler && wild_battler.pokemon && wild_battler.pokemon.respond_to?(:hp_level) && wild_battler.pokemon.hp_level > 0) ||
+                  (@ai.battle.respond_to?(:bss_boss_config) && @ai.battle.bss_boss_config.is_a?(Hash) && @ai.battle.bss_boss_config["enabled"] == true)
+        if is_boss
+          @skill = 100
+        elsif @skill == 0 && !@ai.battle.wildBattleMode.nil?
+          @skill = 32
+        end
+      end
+    end
+  end
+end
+
+begin
+  if defined?(Battle::AI::AITrainer)
+    Battle::AI::AITrainer.prepend(BSSAITrainerSkillExtension) unless Battle::AI::AITrainer.ancestors.include?(BSSAITrainerSkillExtension)
+  end
+rescue => e
+  BSS064.log("BSS AI skill install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+#-------------------------------------------------------------------------------
+# BSS DBK Bridge: Battle Rules Extension (aiskill, opponentskill)
+#-------------------------------------------------------------------------------
+module BSSBattleRulesAI
+  def add_battle_rule(rule, var = nil)
+    case rule.to_s.downcase
+    when "aiskill", "opponentskill"
+      rules = self.battle_rules
+      rules["aiSkill"] = var.to_i
+      return
+    end
+    super(rule, var)
+  end
+end
+
+module BSSPrepareBattleAI
+  def prepare_battle(battle)
+    ret = super(battle)
+    if defined?($game_temp) && $game_temp.respond_to?(:battle_rules)
+      battleRules = $game_temp.battle_rules
+      battle.opponent_ai_skill = battleRules["aiSkill"] if battle.respond_to?(:opponent_ai_skill=) && !battleRules["aiSkill"].nil?
+    end
+    ret
+  end
+end
+
+begin
+  if defined?(Game_Temp)
+    Game_Temp.prepend(BSSBattleRulesAI) unless Game_Temp.ancestors.include?(BSSBattleRulesAI)
+  end
+rescue => e
+  BSS064.log("BSS battle rules AI install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+begin
+  if defined?(BattleCreationHelperMethods)
+    BattleCreationHelperMethods.prepend(BSSPrepareBattleAI) unless BattleCreationHelperMethods.ancestors.include?(BSSPrepareBattleAI)
+  end
+rescue => e
+  BSS064.log("BSS prepare battle AI install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+#-------------------------------------------------------------------------------
+# BSS DBK Bridge: Midbattle Script & Symbol Resolution Fix
+# Ensures Midbattle symbol scripts correctly load their Hash from MidbattleScripts,
+# and fixes the HP thresholds (75%, 50%, 25%) in pbFinalizeMoveTriggers.
+#-------------------------------------------------------------------------------
+module BSSMidbattleSymbolResolver
+  def pbDeluxeTriggers(idxBattler, idxTarget, *triggers)
+    if @midbattleScript.is_a?(Symbol) && defined?(MidbattleScripts) && hasConst?(MidbattleScripts, @midbattleScript)
+      @midbattleScript = getConst(MidbattleScripts, @midbattleScript).clone
+    end
+    super(idxBattler, idxTarget, *triggers)
+  end
+end
+
+begin
+  if defined?(Battle)
+    Battle.prepend(BSSMidbattleSymbolResolver) unless Battle.ancestors.include?(BSSMidbattleSymbolResolver)
+  end
+rescue => e
+  BSS064.log("BSS midbattle symbol resolver install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+module BSSMoveMidbattleTriggersFix
+  def pbFinalizeMoveTriggers(user, target)
+    if !user.fainted?
+      if user.hp <= (user.totalhp * 3 / 4)
+        lowHP = user.hp <= user.totalhp / 4
+        halfHP = user.hp <= user.totalhp / 2
+        is_last = (@battle.pbParty(user.index).length > @battle.pbSideSize(user.index)) ?
+                  (@battle.pbAbleNonActiveCount(user.index) == 0) : true
+        prefix = is_last ? "LastUser" : "User"
+        @battler_triggers[:user].push("#{prefix}HP75", user.species, *user.pokemon.types)
+        @battler_triggers[:user].push("#{prefix}HPHalf", user.species, *user.pokemon.types) if halfHP
+        @battler_triggers[:user].push("#{prefix}HPLow", user.species, *user.pokemon.types) if lowHP
+        if !is_last && @battle.pbParty(user.index).length <= @battle.pbSideSize(user.index)
+          @battler_triggers[:user].push("UserHP75", user.species, *user.pokemon.types)
+          @battler_triggers[:user].push("UserHPHalf", user.species, *user.pokemon.types) if halfHP
+          @battler_triggers[:user].push("UserHPLow", user.species, *user.pokemon.types) if lowHP
+        end
+      end
+    end
+    if !target.fainted? && user.opposes?(target.index)
+      if target.hp <= (target.totalhp * 3 / 4)
+        lowHP = target.hp <= target.totalhp / 4
+        halfHP = target.hp <= target.totalhp / 2
+        is_last = (@battle.pbParty(target.index).length > @battle.pbSideSize(target.index)) ?
+                  (@battle.pbAbleNonActiveCount(target.index) == 0) : true
+        prefix = is_last ? "LastTarget" : "Target"
+        @battler_triggers[:targ].push("#{prefix}HP75", target.species, *target.pokemon.types)
+        @battler_triggers[:targ].push("#{prefix}HPHalf", target.species, *target.pokemon.types) if halfHP
+        @battler_triggers[:targ].push("#{prefix}HPLow", target.species, *target.pokemon.types) if lowHP
+        if !is_last && @battle.pbParty(target.index).length <= @battle.pbSideSize(target.index)
+          @battler_triggers[:targ].push("TargetHP75", target.species, *target.pokemon.types)
+          @battler_triggers[:targ].push("TargetHPHalf", target.species, *target.pokemon.types) if halfHP
+          @battler_triggers[:targ].push("TargetHPLow", target.species, *target.pokemon.types) if lowHP
+        end
+      end
+    end
+    @battler_triggers.each do |battler, triggers|
+      next if triggers.empty?
+      case battler
+      when :user then @battle.pbDeluxeTriggers(user, target.index, *triggers)
+      when :targ then @battle.pbDeluxeTriggers(target, user.index, *triggers)
+      end
+    end
+    @battler_triggers[:user].clear
+    @battler_triggers[:targ].clear
+  end
+end
+
+begin
+  if defined?(Battle::Move)
+    Battle::Move.prepend(BSSMoveMidbattleTriggersFix) unless Battle::Move.ancestors.include?(BSSMoveMidbattleTriggersFix)
+  end
+rescue => e
+  BSS064.log("BSS move midbattle triggers fix install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+#-------------------------------------------------------------------------------
+# BSS DBK Bridge: Substitute Doll Scene Safety Fix
+# Fixes undefined method `index' for nil:NilClass in pbAnimateSubstitute
+# without modifying Deluxe Battle Kit / Animated Pokémon System scripts.
+#-------------------------------------------------------------------------------
+module BSSSubstituteDollSceneExtension
+  def pbUpdateSubstituteSprite(idxBattler, mode)
+    return if !@battle
+    battler = (idxBattler.respond_to?("index")) ? idxBattler : (@battle.battlers ? @battle.battlers[idxBattler] : nil)
+    return if !battler
+    pkmnSprite = battler.respond_to?(:battlerSprite) ? battler.battlerSprite : nil
+    return if !pkmnSprite
+    if [:create, :show].include?(mode)
+      return if !battler.respond_to?(:effects) || battler.effects[PBEffects::Substitute] <= 0
+      pkmnSprite.substitute = true if pkmnSprite.respond_to?(:substitute=)
+    else
+      pkmnSprite.substitute = false if pkmnSprite.respond_to?(:substitute=)
+    end
+  end
+
+  def pbAnimateSubstitute(idxBattler, mode, delay = false)
+    return if respond_to?(:pbInSafari?) && pbInSafari?
+    return if idxBattler.nil? || !@battle || (@battle.decision && @battle.decision > 0)
+    battler = (idxBattler.respond_to?("index")) ? idxBattler : (@battle.battlers ? @battle.battlers[idxBattler] : nil)
+    return if !battler
+    # If Substitute is not active and not breaking, do not animate
+    return if !battler.respond_to?(:effects) || (battler.effects[PBEffects::Substitute] == 0 && mode != :broken)
+    return if battler.respond_to?(:semiInvulnerable?) && battler.semiInvulnerable?
+    opposing = battler.pbDirectOpposing rescue nil
+    return if opposing && @battle.respond_to?(:pbAllFainted?) && @battle.pbAllFainted?(opposing.index)
+    pbPauseScene if delay && respond_to?(:pbPauseScene)
+    substituteAnim = nil
+    if defined?(Animation::SubstituteAppear)
+      case mode
+      when :create then substituteAnim = Animation::SubstituteAppear.new(@sprites, @viewport, battler)
+      when :show   then substituteAnim = Animation::SubstituteSwapIn.new(@sprites, @viewport, battler)
+      when :hide   then substituteAnim = Animation::SubstituteSwapOut.new(@sprites, @viewport, battler)
+      when :broken then substituteAnim = Animation::SubstituteSwapOut.new(@sprites, @viewport, battler, true)
+      end
+    end
+    if substituteAnim
+      loop do
+        substituteAnim.update
+        pbUpdate if respond_to?(:pbUpdate)
+        break if substituteAnim.animDone?
+      end
+      substituteAnim.dispose
+    end
+    pbUpdateSubstituteSprite(battler, mode)
+    if @sprites && battler.respond_to?(:index) && @sprites["pokemon_#{battler.index}"]
+      @sprites["pokemon_#{battler.index}"].visible = true
+    end
+    pbChangePokemon(battler.index, battler.visiblePokemon) if respond_to?(:pbChangePokemon) && battler.respond_to?(:visiblePokemon)
+  end
+end
+
+begin
+  if defined?(Battle::Scene)
+    Battle::Scene.prepend(BSSSubstituteDollSceneExtension) unless Battle::Scene.ancestors.include?(BSSSubstituteDollSceneExtension)
+  end
+rescue => e
+  BSS064.log("BSS substitute doll scene install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+#===============================================================================
+# BSS Core Battle & Environment Safety Extensions
+# Migrated from Data/Scripts to keep core Essentials 100% untouched.
+#===============================================================================
+
+# Ensure Ruby 3.3 x64-mingw-ucrt library path is available
+begin
+  ucrt_lib = File.join(Dir.pwd, "Data", "Ruby Library 3.3.0", "x64-mingw-ucrt")
+  $:.push(ucrt_lib) if File.directory?(ucrt_lib) && !$:.include?(ucrt_lib)
+rescue => e
+  # ignore
+end
+
+module BSSCoreBattleSafetyExtensions
+  # For the given side of the field (0=player's, 1=opponent's), returns an array
+  # containing the number of able Pokémon in each team, safe against nil parties.
+  def pbAbleTeamCounts(side)
+    party = (side == 0 ? @party1 : @party2) || []
+    partyStarts = (side == 0 ? @party1starts : @party2starts) || [0]
+    ret = []
+    idxTeam = -1
+    nextStart = 0
+    party.each_with_index do |pkmn, i|
+      if i >= nextStart
+        idxTeam += 1
+        nextStart = (idxTeam < partyStarts.length - 1) ? partyStarts[idxTeam + 1] : party.length
+      end
+      next if !pkmn || !pkmn.able?
+      ret[idxTeam] = 0 if !ret[idxTeam]
+      ret[idxTeam] += 1
+    end
+    return ret
+  end
+
+  def pbEnsureParticipants
+    if trainerBattle?
+      @player ||= []
+      @opponent ||= []
+    end
+    super
+  end
+end
+
+begin
+  if defined?(Battle)
+    Battle.prepend(BSSCoreBattleSafetyExtensions) unless Battle.ancestors.include?(BSSCoreBattleSafetyExtensions)
+  end
+rescue => e
+  BSS064.log("BSS core battle safety install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+
+

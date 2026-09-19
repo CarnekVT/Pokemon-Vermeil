@@ -776,8 +776,12 @@ class Mode7Renderer
       else
         depth_wyb, depth_priority, depth_unify = depth || [base_wy, 0, 0]
         depth_wyb = base_wy if project_as_plane
-        bias = depth_unify.to_i
-        bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority.to_i > 0
+        if [:nds_billboard, :nds_structure, :component, :wall_component, :indoor_prop].include?(rigid_kind)
+          bias = -1
+        else
+          bias = depth_unify.to_i
+          bias += Mode7::Config::WALL_TOP_Z_BIAS if depth_priority.to_i > 0
+        end
         sprite.z = Mode7.depth_z_at_elevation(
           depth_wyb, sort_elevation, depth_priority, bias
         )

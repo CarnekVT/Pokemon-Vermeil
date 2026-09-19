@@ -1,5 +1,4 @@
 $:.push File.join(Dir.pwd, "Data", "Ruby Library 3.3.0")
-$:.push File.join(Dir.pwd, "Data", "Ruby Library 3.3.0", "x64-mingw-ucrt")
 
 
 # Define a mapping of accented characters to unaccented characters

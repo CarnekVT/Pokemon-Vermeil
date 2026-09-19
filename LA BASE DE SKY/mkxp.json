@@ -77,7 +77,7 @@
     // If you think text tends to be too large or too small,
     // try fiddling with this.
     // (default: 1.0)
-    "fontScale": 1.0,
+    "fontScale": 0.9,
 
     // Snap font pixel sizes to the nearest size where pixel fonts (like
     // Power Green Small) render with zero anti-aliased edges. Fixes blurry

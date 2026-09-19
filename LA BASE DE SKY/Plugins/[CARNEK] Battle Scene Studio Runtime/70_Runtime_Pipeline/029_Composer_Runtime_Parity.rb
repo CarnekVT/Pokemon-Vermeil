@@ -110,26 +110,150 @@ end
 
 if defined?(BSS070EBDXSheetSprite)
   class BSS070EBDXSheetSprite
-    def update
-      return if !bitmap
-      now=BSS101.frame
-      if @bss101_sheet_frame.nil?
-        @bss101_sheet_frame=now; @bss101_sheet_tick=0.0
+    attr_accessor :frames, :cur, :vertical, :pingpong, :loop, :sequence_bitmaps
+
+    def speed
+      @speed || 4
+    end
+
+    def width
+      if @sequence_bitmaps && !@sequence_bitmaps.empty?
+        b = @sequence_bitmaps[@cur] || @sequence_bitmaps[0]
+        return b ? b.width : 0
+      end
+      return src_rect.width if src_rect && src_rect.width > 0
+      bitmap ? (bitmap.width / (@vertical ? 1 : [@frames.to_i, 1].max)) : 0
+    end
+
+    def height
+      if @sequence_bitmaps && !@sequence_bitmaps.empty?
+        b = @sequence_bitmaps[@cur] || @sequence_bitmaps[0]
+        return b ? b.height : 0
+      end
+      return src_rect.height if src_rect && src_rect.height > 0
+      bitmap ? (bitmap.height / (@vertical ? [@frames.to_i, 1].max : 1)) : 0
+    end
+
+    def bottom!
+      self.ox = width / 2
+      self.oy = height
+    end
+
+    def center!(snap=false)
+      self.ox = width / 2
+      self.oy = height / 2
+      if snap && viewport
+        self.x = viewport.rect.width / 2
+        self.y = viewport.rect.height / 2
+      end
+    end
+
+    def setBitmap(file, vertical=false, frame_list=nil)
+      @vertical = !!vertical
+      @cur = 0
+      @tick = 0
+      @dir = 1
+      @speed ||= 4
+      @loop = true if @loop.nil?
+      @pingpong = false if @pingpong.nil?
+
+      if frame_list.is_a?(Array) && frame_list.length > 1
+        @sequence_bitmaps = frame_list.map do |f|
+          next f if f.is_a?(Bitmap)
+          p = pbResolveBitmap(f) ? f : "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/#{f}"
+          pbBitmap(p)
+        end.compact
+        @frames = [@sequence_bitmaps.length, 1].max
+        self.bitmap = @sequence_bitmaps[0]
+        src_rect.set(0, 0, bitmap.width, bitmap.height) if bitmap
         return
       end
-      elapsed=now-@bss101_sheet_frame
-      return if elapsed<=0
-      elapsed=12 if elapsed>12
-      @bss101_sheet_frame=now
-      @bss101_sheet_tick=@bss101_sheet_tick.to_f+BSS101.source_step(elapsed)
-      wait=[@speed.to_f,1.0].max
-      steps=(@bss101_sheet_tick/wait).floor
-      @bss101_sheet_tick-=steps*wait
-      return if steps<=0
-      @cur=(@cur+steps)%@frames
-      if @vertical; src_rect.y=@cur*src_rect.height
-      else; src_rect.x=@cur*src_rect.width
+
+      # Check for multi-file sequence on disk: e.g. name_0..name_4 or name_1..name_5
+      if file.is_a?(String) && @frames.to_i > 1
+        stem = file.sub(/\.[^.]+\z/, '')
+        candidates_0 = (0...@frames).map { |i| "#{stem}_#{i}" }
+        candidates_1 = (1..@frames).map { |i| "#{stem}_#{i}" }
+        found = nil
+        if candidates_0.all? { |c| pbResolveBitmap(c) }
+          found = candidates_0
+        elsif candidates_1.all? { |c| pbResolveBitmap(c) }
+          found = candidates_1
+        end
+        if found
+          @sequence_bitmaps = found.map { |c| pbBitmap(c) }
+          self.bitmap = @sequence_bitmaps[0]
+          src_rect.set(0, 0, bitmap.width, bitmap.height) if bitmap
+          return
+        end
       end
+
+      # Spritesheet mode
+      raw_bmp = file.is_a?(Bitmap) ? file : pbBitmap(file)
+      self.bitmap = raw_bmp
+      f_count = [@frames.to_i, 1].max
+      if @vertical
+        fw = bitmap ? bitmap.width : 0
+        fh = bitmap ? (bitmap.height / f_count) : 0
+      else
+        fw = bitmap ? (bitmap.width / f_count) : 0
+        fh = bitmap ? bitmap.height : 0
+      end
+      src_rect.set(0, 0, fw, fh)
+    end
+
+    def update
+      return if !bitmap
+      now = BSS101.frame rescue (Graphics.frame_count rescue 0)
+      if @bss101_sheet_frame.nil?
+        @bss101_sheet_frame = now; @bss101_sheet_tick = 0.0
+        return
+      end
+      elapsed = now - @bss101_sheet_frame
+      return if elapsed <= 0
+      elapsed = 12 if elapsed > 12
+      @bss101_sheet_frame = now
+      step = (defined?(BSS101) && BSS101.respond_to?(:source_step)) ? BSS101.source_step(elapsed) : elapsed.to_f
+      @bss101_sheet_tick = @bss101_sheet_tick.to_f + step
+      wait = [(@speed || 4).to_f, 1.0].max
+      steps = (@bss101_sheet_tick / wait).floor
+      @bss101_sheet_tick -= steps * wait
+      return if steps <= 0
+
+      f_count = [@frames.to_i, 1].max
+      if f_count > 1
+        if @pingpong
+          steps.times do
+            @dir = 1 if @cur <= 0
+            @dir = -1 if @cur >= f_count - 1
+            @cur += @dir
+          end
+        else
+          if @loop != false
+            @cur = (@cur + steps) % f_count
+          else
+            @cur = [@cur + steps, f_count - 1].min
+          end
+        end
+      end
+
+      if @sequence_bitmaps && !@sequence_bitmaps.empty?
+        self.bitmap = @sequence_bitmaps[@cur]
+      else
+        if @vertical
+          src_rect.y = @cur * src_rect.height
+        else
+          src_rect.x = @cur * src_rect.width
+        end
+      end
+    end
+
+    def dispose
+      if @sequence_bitmaps
+        @sequence_bitmaps.each { |b| begin; b.dispose if b && !(b.disposed? rescue true); rescue; end }
+        @sequence_bitmaps = nil
+      end
+      super
     end
   end
 end
@@ -223,8 +347,12 @@ module BSS101CustomLayerParity
         # layers must inherit its -100 offset instead of restoring authored Z
         # on every position() call. Warp micro-tiles copy this root Z later.
         bg=@sprites["bg"] rescue nil
-        defocused=((@focused == false) || (bg && bg.respond_to?(:z) && bg.z.to_i < 0))
-        z_offset=defocused ? -100 : 0
+        if @bss106_force_behind || (bg && bg.respond_to?(:z) && bg.z.to_i <= -5_000)
+          z_offset = -10_000
+        else
+          defocused=((@focused == false) || (bg && bg.respond_to?(:z) && bg.z.to_i < 0))
+          z_offset=defocused ? -100 : 0
+        end
         sp.z=[[-500,z].max,40].min + z_offset if sp.respond_to?(:z=)
         hidden=(BSS098.hash_get(row,:visible)==false rescue false)
         sp.visible=true if !hidden && sp.respond_to?(:visible=)

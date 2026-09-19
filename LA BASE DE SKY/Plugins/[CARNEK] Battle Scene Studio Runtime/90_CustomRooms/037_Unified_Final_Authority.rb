@@ -357,15 +357,26 @@ if defined?(Battle::Scene::Animation::BSSSOSJoin)
           end
         else
           # EXISTING BATTLER (Caller): slide horizontally without vertical movement to final combat position
-          caller_y = bat.y
+          from = bat.instance_variable_get(:@bss087_sos_from_xy) rescue nil
+          start_x = (from.is_a?(Array) ? from[0] : bat.x).to_f
+          saved_y = bat.instance_variable_get(:@bss_caller_locked_baseline_y) || (from.is_a?(Array) ? from[1] : nil) || bat.y
+          bat.instance_variable_set(:@bss_caller_locked_baseline_y, saved_y)
+
           obj = addSprite(bat, PictureOrigin::BOTTOM)
+          obj.setXY(0, start_x, saved_y) if obj.respond_to?(:setXY)
           obj.setZ(0, nz) if obj.respond_to?(:setZ)
-          obj.moveXY(0, duration, nx, caller_y)
+          obj.moveXY(0, duration, nx, saved_y)
 
           if sha
+            sfrom = sha.instance_variable_get(:@bss087_sos_from_xy) rescue nil
+            s_start_x = (sfrom.is_a?(Array) ? sfrom[0] : sha.x).to_f
+            saved_sha_y = sha.instance_variable_get(:@bss_caller_locked_baseline_y) || (sfrom.is_a?(Array) ? sfrom[1] : nil) || sha.y
+            sha.instance_variable_set(:@bss_caller_locked_baseline_y, saved_sha_y)
+
             sh = addSprite(sha, PictureOrigin::CENTER)
+            sh.setXY(0, s_start_x, saved_sha_y) if sh.respond_to?(:setXY)
             sh.setZ(0, sz) if sh.respond_to?(:setZ)
-            sh.moveXY(0, duration, sx, sha.y)
+            sh.moveXY(0, duration, sx, saved_sha_y)
           end
 
           if boxsp
@@ -392,6 +403,8 @@ if defined?(BSS070CustomRoom)
   class BSS070CustomRoom < BSS070EBDXRoom
     def refresh(*args)
       bss076_dispose_owned_sprites! rescue nil
+      @data = BSS098.prepare_scene(args[0]) if args[0].is_a?(Hash) && defined?(BSS098)
+      @data = BSS098.prepare_scene(@data) if defined?(BSS098) && @data.is_a?(Hash)
       sx, sy = @scene.vector.spoof(@defaultvector)
 
       # Void (Padding)

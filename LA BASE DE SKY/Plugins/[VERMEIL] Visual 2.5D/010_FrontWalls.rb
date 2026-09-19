@@ -1642,7 +1642,7 @@ class Mode7Renderer
       # En empate de pie dejamos el billboard una unidad debajo del actor. Al
       # estar el actor al norte/sur, la profundidad fisica Y vuelve a decidir
       # normalmente. Otros rigid kinds conservan su comportamiento anterior.
-      if _z_behavior == :nds_billboard
+      if [:nds_billboard, :nds_structure, :component, :wall_component, :indoor_prop].include?(_z_behavior)
         bias = -1
       else
         bias = depth_unify.to_i

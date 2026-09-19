@@ -774,25 +774,12 @@ module Mode7
       ramp = find_ramp_at(wx, wy)
       return interpolate_ramp(ramp, wx, wy) if ramp
 
-      # 2) Interpolación bilineal entre celdas vecinas
-      tx0 = (wx / tile_w).floor
-      ty0 = (wy / tile_h).floor
-      tx1 = tx0 + 1
-      ty1 = ty0 + 1
-
-      frac_x = (wx / tile_w) - tx0.to_f
-      frac_y = (wy / tile_h) - ty0.to_f
-      frac_x = frac_x.clamp(0.0, 1.0)
-      frac_y = frac_y.clamp(0.0, 1.0)
-
-      h00 = height_at(tx0, ty0)
-      h10 = height_at(tx1, ty0)
-      h01 = height_at(tx0, ty1)
-      h11 = height_at(tx1, ty1)
-
-      top = h00 + (h10 - h00) * frac_x
-      bot = h01 + (h11 - h01) * frac_x
-      top + (bot - top) * frac_y
+      # 2) Consulta discreta de la celda sobre la que se apoya el pie.
+      # Usar (wy - 0.001) para que el pie en el borde sur de la celda (y + 32)
+      # pertenezca a la celda actual (ty) y no a la celda inferior (ty + 1).
+      tx = (wx / tile_w).floor
+      ty = ((wy - 0.001) / tile_h).floor
+      height_at(tx, ty)
     end
 
     # Retorna la rampa en (wx,wy) o nil.
@@ -836,7 +823,6 @@ module Mode7
 
       entries.each do |entry|
         id = renderer.send(:nds_category_id, entry) rescue nil
-        next if id.nil?
 
         case id
         when Mode7::Config::NDS_STAIR_TERRAIN_TAG
@@ -844,15 +830,35 @@ module Mode7
         when Mode7::Config::NDS_MOUNTAIN_WALL_TERRAIN_TAG,
              Mode7::Config::NDS_MOUNTAIN_WALL_PLANE_TERRAIN_TAG
           next
+        when Mode7::Config::NDS_BILLBOARD_TERRAIN_TAG,
+             Mode7::Config::NDS_STRUCTURE_TERRAIN_TAG
+          next
         when Mode7::Config::NDS_MOUNTAIN_TOP_TERRAIN_TAG
           mh = renderer.send(:nds_mountain_height_at, tx, ty).to_f rescue 0.0
           mountain_h = mh if mh > mountain_h
         else
-          mid = renderer.instance_variable_get(:@map_id)
-          h = Mode7.nds_volume_height_for_tag(id, mid).to_f
-          roof_h = Mode7.nds_roof_height_for_tag(id).to_f
-          h = roof_h if roof_h > h
-          mountain_h = h if h > mountain_h
+          if !id.nil?
+            mid = renderer.instance_variable_get(:@map_id)
+            h = Mode7.nds_volume_height_for_tag(id, mid).to_f
+            roof_h = Mode7.nds_roof_height_for_tag(id).to_f
+            h = roof_h if roof_h > h
+            mountain_h = h if h > mountain_h
+          end
+
+          # Superficies de prioridad (P1..P5) que no son muros ni billboards
+          # representan relieve transitable cuando PRIORITY_VISUAL_HEIGHT_ENABLED está activo.
+          if defined?(Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED) &&
+             Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED
+            is_wall = renderer.send(:entry_is_wall?, entry) rescue false
+            if !is_wall
+              pri = renderer.send(:entry_visual_priority, entry).to_i rescue 0
+              if pri > 0
+                step = defined?(Mode7::Config::PRIORITY_HEIGHT_STEP) ? Mode7::Config::PRIORITY_HEIGHT_STEP.to_f : 32.0
+                pri_h = pri * step
+                mountain_h = pri_h if pri_h > mountain_h
+              end
+            end
+          end
         end
       end
 

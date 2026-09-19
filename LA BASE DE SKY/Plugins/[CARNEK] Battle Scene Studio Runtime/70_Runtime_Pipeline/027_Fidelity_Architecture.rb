@@ -54,12 +54,17 @@ module BSS098
         ok=!path.empty? && (pbResolveBitmap(path) rescue false)
         if ok
           row[:bitmap]=path
-          row[:ox]=num(hash_get(rr,:ox), row[:ox] || 0)
-          row[:oy]=num(hash_get(rr,:oy), row[:oy] || 0)
+          row["bitmap"]=path
+          ox=num(hash_get(rr,:ox), hash_get(row,:ox) || 0)
+          oy=num(hash_get(rr,:oy), hash_get(row,:oy) || 0)
+          row[:ox]=ox; row["ox"]=ox
+          row[:oy]=oy; row["oy"]=oy
           row.delete(:warp); row.delete("warp")
           row.delete(:blurAreas); row.delete("blurAreas")
           row.delete(:blur); row.delete("blur")
+          row.delete(:crop); row.delete("crop")
           row[:bss_rasterized]=true
+          row["bss_rasterized"]=true
         end
       end
       # Source EBDX's wind rebuilds/skews bitmaps and rotate increments on every
@@ -156,26 +161,65 @@ module BSS098SingleFrameEnvironment
     ret
   end
 
-  # Source values were dark enough to crush most pixel detail. Keep time-of-day
-  # readable while still visibly different.
+  # Readable atmospheric lighting. Custom scenes with sky, skyMode, outdoor or
+  # cloudsConfig are outdoor scenes and respond to scene skyMode or real clock.
   def daylightTint
-    return if !@data.try_key?("sky", "outdoor") rescue nil
+    if @data.is_a?(Hash)
+      out_flag = @data.has_key?(:outdoor) ? @data[:outdoor] : @data["outdoor"]
+      return if out_flag == false
+      has_sky = @data[:sky] || @data["sky"] || @data[:skyMode] || @data["skyMode"] || @data[:cloudsConfig] || @data["cloudsConfig"]
+      return if !out_flag && !has_sky
+    else
+      return
+    end
+
+    slot = defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : nil
+    if slot.nil?
+      mode = @data.is_a?(Hash) ? (@data[:skyMode] || @data["skyMode"]).to_s.downcase : ""
+      slot = if mode == "night"
+        :night
+      elsif mode == "dawn" || mode == "evening"
+        :dawn
+      elsif mode == "day"
+        :day
+      elsif (PBDayNight.isNight? rescue false)
+        :night
+      elsif ((PBDayNight.isEvening? rescue false) || (PBDayNight.isMorning? rescue false))
+        :dawn
+      else
+        :day
+      end
+    end
+
+    custom = (@data["lighting"] || @data[:lighting]) rescue nil
+    target_tone = if custom.is_a?(Hash)
+      if slot == :night && !@sunny
+        n = custom[:night] || custom["night"]
+        n.is_a?(Array) && n.length >= 3 ? Tone.new(n[0].to_i, n[1].to_i, n[2].to_i) : Tone.new(-120, -100, -60)
+      elsif slot == :dawn && !@sunny
+        t = custom[:twilight] || custom["twilight"] || custom[:dawn] || custom["dawn"]
+        t.is_a?(Array) && t.length >= 3 ? Tone.new(t[0].to_i, t[1].to_i, t[2].to_i) : Tone.new(-16, -52, -56)
+      else
+        Tone.new(0, 0, 0)
+      end
+    elsif slot == :night && !@sunny
+      Tone.new(-120, -100, -60, 0)
+    elsif slot == :dawn && !@sunny
+      Tone.new(-16, -52, -56, 0)
+    else
+      Tone.new(0, 0, 0, 0)
+    end
+
     (@sprites || {}).each do |key,sp|
       next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:tone=)
       s=key.to_s
       next if s.include?("trainer") || s.include?("battler") || s.include?("sky") || s.include?("sun") || s.include?("star") || s.include?("cloud") || s.include?("Light")
-      row=@data[key] rescue nil
+      row=@data[key] || @data[key.to_s] || @data[key.to_sym] rescue nil
       next if row.is_a?(Hash) && BSS098.hash_get(row,:shading) == false
-      if (PBDayNight.isNight? rescue false) && !@sunny
-        sp.tone=Tone.new(-34,-30,-18,0)
-      elsif ((PBDayNight.isEvening? rescue false) || (PBDayNight.isMorning? rescue false)) && !@sunny
-        sp.tone=Tone.new(-8,-20,-20,0)
-      else
-        sp.tone=Tone.new(0,0,0,0)
-      end
+      sp.tone=target_tone
     end
-  rescue
-    super
+  rescue => e
+    BSS064.log("BSS098 daylightTint warning: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 end
 
@@ -299,7 +343,10 @@ module BSS098CustomSky
     ret=super
     begin
       mode=(@data["skyMode"] || @data[:skyMode] || "dynamic").to_s
-      return ret if mode.empty? || mode=="dynamic"
+      if mode.empty? || mode=="dynamic"
+        slot = defined?(BSS106) ? BSS106.time_slot(@data).to_s : (defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && PBDayNight.isNight? ? "night" : "day")
+        mode = slot
+      end
       path=case mode
            when "day" then "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/skyDay"
            when "dawn" then "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/skyDawn"

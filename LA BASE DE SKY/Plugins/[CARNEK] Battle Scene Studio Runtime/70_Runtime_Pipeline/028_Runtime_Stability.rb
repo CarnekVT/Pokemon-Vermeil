@@ -510,7 +510,7 @@ module BSS100SourceCrop
       row=@data[key] || @data[key.to_s] || @data[key.to_sym]
       next_ret=ret
       return ret unless row.is_a?(Hash)
-      return ret if row[:bss_rasterized] || row["bss_rasterized"]
+      return ret if row[:bss_rasterized] || row["bss_rasterized"] || row[:bss_cropped] || row["bss_cropped"]
       crop=(row[:crop] || row["crop"])
       return ret unless crop.is_a?(Hash)
       sp=@sprites[key.to_s] || @sprites[key]

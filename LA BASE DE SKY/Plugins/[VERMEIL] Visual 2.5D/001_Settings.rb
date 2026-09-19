@@ -151,6 +151,7 @@ module Mode7
     # Map 79 (Montaña, tileset 5): tiles 820 y 821 (meseta) con Prioridad 1 (+32px).
     TILESET_PRIORITY_OVERRIDES = {
       5 => {
+        819 => 1,
         820 => 1,
         821 => 1
       }

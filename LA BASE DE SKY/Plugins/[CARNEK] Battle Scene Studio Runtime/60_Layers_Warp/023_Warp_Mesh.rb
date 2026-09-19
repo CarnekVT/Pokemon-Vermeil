@@ -35,11 +35,11 @@ module BSS093WarpMeshAuthority
 
   def bss093_warp_config(data)
     return nil if !data.is_a?(Hash)
-    w=data[:warp]
-    return nil if !w.is_a?(Hash) || w[:enabled] != true
-    cols=[[bss093_num(w[:cols],2).to_i,2].max,5].min
-    rows=[[bss093_num(w[:rows],2).to_i,2].max,5].min
-    raw=w[:points]
+    w=data[:warp] || data["warp"]
+    return nil if !w.is_a?(Hash) || (w[:enabled] != true && w["enabled"] != true)
+    cols=[[bss093_num(w[:cols] || w["cols"],2).to_i,2].max,5].min
+    rows=[[bss093_num(w[:rows] || w["rows"],2).to_i,2].max,5].min
+    raw=w[:points] || w["points"]
     return nil if !raw.is_a?(Array) || raw.length < cols*rows
     pts=[]
     (cols*rows).times do |i|
@@ -47,8 +47,8 @@ module BSS093WarpMeshAuthority
       return nil if !p.is_a?(Array) || p.length < 2
       pts << [bss093_num(p[0],0.0),bss093_num(p[1],0.0)]
     end
-    quality=[[bss093_num(w[:quality],4).to_i,1].max,6].min
-    {:cols=>cols,:rows=>rows,:quality=>quality,:points=>pts,:mode=>w[:mode].to_s}
+    quality=[[bss093_num(w[:quality] || w["quality"],4).to_i,1].max,6].min
+    {:cols=>cols,:rows=>rows,:quality=>quality,:points=>pts,:mode=>(w[:mode] || w["mode"]).to_s}
   rescue
     nil
   end
@@ -160,8 +160,13 @@ module BSS093WarpMeshAuthority
         }
       end
     end
-    root.visible=false
-    @bss093_warp_layers[key]={:root=>root,:data=>data,:config=>cfg,:tiles=>tiles}
+    if tiles.empty?
+      root.visible=true
+    else
+      root.visible=false
+      @bss093_warp_layers[key]={:root=>root,:data=>data,:config=>cfg,:tiles=>tiles}
+      bss093_update_warp_tiles!
+    end
   end
 
   def bss093_project_point(root,data,cfg,u,v)
@@ -219,8 +224,8 @@ module BSS093WarpMeshAuthority
         # Slight overlap hides sampling seams produced by bilinear filtering.
         sp.x=pc[0]; sp.y=pc[1]
         sp.angle=angle*180.0/Math::PI
-        sp.zoom_x=[hlen/[entry[:sw],0.001].max*1.018,0.001].max
-        sp.zoom_y=[vproj/[entry[:sh],0.001].max*1.018,0.001].max
+        sp.zoom_x=[hlen/[entry[:sw],0.001].max*1.04,0.001].max
+        sp.zoom_y=[vproj/[entry[:sh],0.001].max*1.04,0.001].max
         bss093_copy_sprite_visuals(root,sp)
         sp.visible=visible_state
       end

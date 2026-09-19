@@ -1130,23 +1130,32 @@ class Mode7Renderer
         next
       end
 
-      groups = Hash.new { |hash, priority| hash[priority] = {} }
-      component.each do |position, entries|
-        entries.each do |entry|
-          priority = entry_visual_priority(entry)
-          groups[priority][position] ||= []
-          groups[priority][position].push(entry)
+      # Solo NDSOverlay debe separarse por Priority para actuar como capa aérea/foreground.
+      # Todos los demás objetos/props rígidos (árboles, buzones, troncos, etc.) deben mantenerse
+      # unidos en una sola malla vertical anclada al pie (depth_wyb) con prioridad 0 para evitar
+      # que el jugador quede cortado por la mitad.
+      if kind == :nds_overlay
+        groups = Hash.new { |hash, priority| hash[priority] = {} }
+        component.each do |position, entries|
+          entries.each do |entry|
+            priority = entry_visual_priority(entry)
+            groups[priority][position] ||= []
+            groups[priority][position].push(entry)
+          end
         end
+
+        groups.each do |priority, group_cells|
+          unify = group_cells.values.flatten.map { |entry| entry[:unify].to_i }.min || 0
+          make_rigid_component(group_cells, elevation, bounds,
+                               priority, unify, depth_wyb, :nds_overlay)
+        end
+        next
       end
 
-      # Todas las mascaras conservan bitmap, origen, pie, escala y bounds del
-      # objeto completo. Solo cambia Z; por eso P4 vuelve a funcionar sin que
-      # una copa/tejado se agrande, se encoja o se separe del resto.
-      groups.each do |priority, group_cells|
-        unify = group_cells.values.flatten.map { |entry| entry[:unify].to_i }.min || 0
-        make_rigid_component(group_cells, elevation, bounds,
-                             priority, unify, depth_wyb, kind || :component)
-      end
+      # Props generales y componentes rígidos:
+      unify = all_entries.map { |entry| entry[:unify].to_i }.min || 0
+      make_rigid_component(component, elevation, bounds,
+                           0, unify, depth_wyb, kind || :nds_billboard)
     end
   rescue Exception => e
     Mode7._console_suppress("2.5D V5 build rigid: #{e.message}") if defined?(Mode7)

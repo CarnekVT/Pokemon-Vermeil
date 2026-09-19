@@ -217,7 +217,11 @@ class Mode7Renderer
       end
 
       effective_priority = [priority.to_i, 0].max
-      logical_wyb = (ty + 1 + effective_priority) * Game_Map::TILE_HEIGHT
+      logical_wyb = if defined?(Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED) && Mode7::Config::PRIORITY_VISUAL_HEIGHT_ENABLED
+                      (ty + 1) * Game_Map::TILE_HEIGHT
+                    else
+                      (ty + 1 + effective_priority) * Game_Map::TILE_HEIGHT
+                    end
       sprite.z = Mode7.depth_z_at_elevation(logical_wyb, elevation, 0, -1)
       apply_depth_fog_to_sprite(sprite, sprite.y)
       sprite.visible = true

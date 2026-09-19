@@ -1765,6 +1765,37 @@ if defined?(ItemHandlers)
       battle.bss_sos_config = (BSS064.global_sos.dup rescue {})
     end
     battle.bss_adrenaline_orb = true
+    # Animación de 2 brinquitos con SE "Player jump" para el afectado
+    if battle.scene && battle.scene.sprites
+      sp = battle.scene.sprites["pokemon_#{caller.index}"] rescue nil
+      if sp && !(sp.disposed? rescue true)
+        orig_y = sp.y
+        2.times do |i|
+          pbSEPlay("Player jump") rescue nil
+          2.times do
+            sp.y -= 6
+            battle.scene.pbUpdate rescue nil
+            Graphics.update
+          end
+          2.times do
+            sp.y += 6
+            battle.scene.pbUpdate rescue nil
+            Graphics.update
+          end
+          sp.y = orig_y
+          if i == 0
+            battle.scene.pbUpdate rescue nil
+            Graphics.update
+          end
+        end
+        sp.y = orig_y
+      else
+        2.times do
+          pbSEPlay("Player jump") rescue nil
+          2.times { Graphics.update }
+        end
+      end
+    end
     battle.pbDisplay(_INTL("¡La {1} pone nervioso al Pokémon salvaje!", GameData::Item.get(item).portion_name))
     if !battle.bss_call_for_help(caller, true)
       battle.pbDisplay(_INTL("¡Pero no tuvo efecto!"))
@@ -1810,6 +1841,7 @@ module BSS064BossActualSOSFormation652
         ka="#{prefix}#{a}";kb="#{prefix}#{b}"
         va=sprites[ka];vb=sprites[kb]
         if va || vb
+          va.instance_variable_set(:@bss_caller_locked_baseline_y, va.y) if va && va.respond_to?(:y)
           sprites[ka]=vb
           sprites[kb]=va
           sprites.delete(ka) if vb.nil?

@@ -103,7 +103,7 @@ module BSS085WideRoomAuthority
         if sp.respond_to?(:zoom_y=) && sp.respond_to?(:zoom_y)
           sp.zoom_y=1.0+(sp.zoom_y.to_f-1.0)*factor
         end
-        sp.z=[[sp.z.to_i,-500].max,14].min if sp.respond_to?(:z=)
+        sp.z=[[sp.z.to_i,-500].max,14].min if sp.respond_to?(:z=) && !@bss106_force_behind && sp.z.to_i >= -500
       end
     rescue
     end

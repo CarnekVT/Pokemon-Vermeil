@@ -74,7 +74,13 @@ module BSS106
     nil
   end
 
-  def time_slot
+  def time_slot(data=nil)
+    if data.is_a?(Hash)
+      mode = (data[:skyMode] || data["skyMode"]).to_s.downcase
+      return :night if mode == "night"
+      return :dawn if mode == "dawn" || mode == "evening"
+      return :day if mode == "day"
+    end
     return :night if defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && PBDayNight.isNight?
     if defined?(PBDayNight) && ((PBDayNight.respond_to?(:isEvening?) && PBDayNight.isEvening?) || (PBDayNight.respond_to?(:isMorning?) && PBDayNight.isMorning?))
       return :dawn
@@ -84,9 +90,9 @@ module BSS106
     :day
   end
 
-  def apply_authored_tint!(row)
+  def apply_authored_tint!(row, data=nil)
     return row unless row.is_a?(Hash)
-    slot=time_slot
+    slot=time_slot(data)
     prefix=(slot==:night ? 'Night' : (slot==:dawn ? 'Dawn' : 'Day'))
     color=row[("tint#{prefix}Color").to_sym] || row["tint#{prefix}Color"] || row[:tintColor] || row["tintColor"]
     alpha=row[("tint#{prefix}Alpha").to_sym] || row["tint#{prefix}Alpha"] || row[:tintAlpha] || row["tintAlpha"]
@@ -108,17 +114,18 @@ module BSS106
           data.delete(k)
           next
         end
-        apply_authored_tint!(row)
+        apply_authored_tint!(row, data)
         # Visible deformations require the editor-rasterized PNG. If it wasn't
         # written, prefer the intact source art over the seam-heavy micro mesh.
         warp=row[:warp] || row["warp"]
         rr=row[:runtimeRaster] || row["runtimeRaster"]
-        if warp.is_a?(Hash)
+        if warp.is_a?(Hash) && (warp[:enabled] == true || warp["enabled"] == true)
           path=(rr.is_a?(Hash) ? (rr[:bitmap] || rr["bitmap"]).to_s : "")
           valid=!path.empty? && (pbResolveBitmap(path) rescue false)
           unless valid
-            row.delete(:warp); row.delete("warp")
-            row[:bss_warp_fallback]=true
+            # Generated PNG missing: preserve warp so 023_Warp_Mesh renders the deformation dynamically
+            row[:warp]=warp
+            row["warp"]=warp
           end
         end
       elsif (k.to_s=="trees" || k.to_s=="tallGrass") && row.is_a?(Hash)
@@ -154,6 +161,10 @@ if defined?(BSS098)
     end
     def prepare_scene(data)
       out=bss106_prepare_scene_before(data)
+      if out.is_a?(Hash) && (out[:sky] || out["sky"] || out[:skyMode] || out["skyMode"] || out[:cloudsConfig] || out["cloudsConfig"])
+        out[:outdoor] = true
+        out["outdoor"] = true
+      end
       BSS106.prune_hidden!(out)
     end
   end
@@ -182,7 +193,7 @@ module BSS106RoomPriority
     (@sprites || {}).each do |k,sp|
       next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:z) && sp.respond_to?(:z=)
       @bss106_saved_z[k]=sp.z.to_i
-      sp.z=[sp.z.to_i-10_000,-5_000].min
+      sp.z=sp.z.to_i-10_000
     end
     @bss106_force_behind=true
     true
@@ -198,11 +209,31 @@ module BSS106RoomPriority
       next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
       sp.z=saved[k] if saved.key?(k)
     end
+    if @bss093_warp_layers.is_a?(Hash)
+      @bss093_warp_layers.each_value do |row|
+        root=row[:root]
+        root_z=(root && root.respond_to?(:z)) ? root.z.to_i : 0
+        (row[:tiles] || []).each do |entry|
+          sp=entry[:sprite] rescue nil
+          sp.z=root_z if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
+        end
+      end
+    end
     @bss106_saved_z=nil
     @bss106_force_behind=false
     true
   rescue
     false
+  end
+
+  def defocus
+    return if @bss106_force_behind
+    super
+  end
+
+  def focus
+    return if @bss106_force_behind
+    super
   end
 
   def drawWater
@@ -221,10 +252,76 @@ module BSS106RoomPriority
     ret=super
     begin
       cfg=BSS098.hash_get(@data,:cloudsConfig) rescue nil
+      slot=(BSS098.hash_get(@data,:skyMode).to_s rescue '')
+      slot=(BSS106.time_slot(@data).to_s if slot.empty? || slot=='dynamic')
+      sky_key=case slot.to_s.downcase; when 'night' then 'Night'; when 'dawn' then 'Dawn'; else 'Day'; end
+      sky_path="Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/sky#{sky_key}"
+      custom_mode=(BSS098.hash_get(@data,:skyMode).to_s rescue '')
+      if !custom_mode.empty? && custom_mode!='dynamic' && custom_mode!='day' && custom_mode!='dawn' && custom_mode!='night'
+        sky_path=custom_mode if (pbResolveBitmap(custom_mode) rescue false)
+      end
+      if @sprites && @sprites["sky"] && !(pbResolveBitmap(sky_path) rescue false).nil?
+        bmp=pbBitmap(sky_path)
+        @sprites["sky"].bitmap=bmp
+        @sprites["sky"].oy=bmp.height
+        @sprites["sky"].ex=0
+        @sprites["sky"].ey=bmp.height
+        @sprites["sky"].param=1
+      end
+      if slot=='night'
+        @sprites["sun"].visible=false if @sprites["sun"] && @sprites["sun"].respond_to?(:visible=)
+        # In default EBDX scenes at night, clouds are hidden unless an authored cloudsConfig is present
+        if !cfg.is_a?(Hash)
+          @sprites["cloud0"].visible=false if @sprites["cloud0"] && @sprites["cloud0"].respond_to?(:visible=)
+          @sprites["cloud1"].visible=false if @sprites["cloud1"] && @sprites["cloud1"].respond_to?(:visible=)
+        end
+        if !@sprites["star0"] && @sprites["sky"] && @sprites["sky"].bitmap
+          for i in 0...24
+            @sprites["star#{i}"]=BSS070EBDXSprite.new(@viewport)
+            @sprites["star#{i}"].bitmap=pbBitmap("Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/star")
+            @sprites["star#{i}"].center!
+            @sprites["star#{i}"].ex=rand(@sprites["sky"].bitmap.width)
+            @sprites["star#{i}"].ey=rand([@sprites["sky"].bitmap.height-24, 1].max)
+            @sprites["star#{i}"].speed=rand(4)+1
+            @sprites["star#{i}"].param=0.6+rand(41)/100.0
+            @sprites["star#{i}"].opacity=125
+            @sprites["star#{i}"].end_x=185+rand(71)
+            @sprites["star#{i}"].toggle=2
+            @sprites["star#{i}"].z=-4
+            @sprites["star#{i}"].visible=true
+          end
+        else
+          for i in 0...24
+            sp=@sprites["star#{i}"]
+            sp.visible=true if sp && sp.respond_to?(:visible=)
+          end
+        end
+      else
+        @sprites["sun"].visible=true if @sprites["sun"] && @sprites["sun"].respond_to?(:visible=)
+        if !cfg.is_a?(Hash)
+          @sprites["cloud0"].visible=true if @sprites["cloud0"] && @sprites["cloud0"].respond_to?(:visible=)
+          @sprites["cloud1"].visible=true if @sprites["cloud1"] && @sprites["cloud1"].respond_to?(:visible=)
+        end
+        for i in 0...24
+          sp=@sprites["star#{i}"]
+          sp.visible=false if sp && sp.respond_to?(:visible=)
+        end
+      end
+      sky_cfg=BSS098.hash_get(@data,:skyConfig) rescue nil
+      c_val=nil
+      if sky_cfg.is_a?(Hash)
+        sky_col_key=(slot=='night' ? :nightColor : (slot=='dawn' ? :dawnColor : :dayColor))
+        c_val=BSS098.hash_get(sky_cfg,sky_col_key) || BSS098.hash_get(sky_cfg,:color)
+      end
+      if cfg.is_a?(Hash) && !c_val
+        c_val=BSS098.hash_get(cfg,("sky#{slot.to_s.capitalize}Color").to_sym) || BSS098.hash_get(cfg,:skyColor)
+      end
+      if c_val
+        c=BSS106.hex_color(c_val,255)
+        @sprites["sky"].colorize(c,255) if c && @sprites["sky"] && @sprites["sky"].respond_to?(:colorize)
+      end
       if cfg.is_a?(Hash)
         enabled=BSS098.hash_get(cfg,:enabled)
-        slot=(BSS098.hash_get(@data,:skyMode).to_s rescue '')
-        slot=(BSS106.time_slot.to_s if slot.empty? || slot=='dynamic')
         key=(slot=='night' ? :nightColor : (slot=='dawn' ? :dawnColor : :dayColor))
         color=BSS106.hex_color(BSS098.hash_get(cfg,key) || '#dfefff',255)
         for i in 0..1
@@ -245,7 +342,72 @@ module BSS106RoomPriority
         end
       end
     rescue => e
-      BSS064.log("BSS106 cloud config warning: #{e.class}: #{e.message}") if defined?(BSS064)
+      BSS064.log("BSS106 sky/cloud config warning: #{e.class}: #{e.message}") if defined?(BSS064)
+    end
+    ret
+  end
+
+  def updateSky
+    ret=super
+    begin
+      slot=(defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data).to_s : '')
+      if slot=='night'
+        d=(self.respond_to?(:delta) ? self.delta : 1.0)
+        d=1.0 if !d.is_a?(Numeric) || d<=0
+        for i in 0...24
+          sp=@sprites["star#{i}"]
+          next if !sp || (sp.disposed? rescue true) || (sp.visible==false rescue false)
+          speed=(sp.speed rescue 2).to_f
+          toggle=(sp.toggle rescue 2).to_f
+          end_x=(sp.end_x rescue 220).to_f
+          sp.opacity+=toggle*speed/d
+          if sp.opacity<=125 || sp.opacity>=end_x
+            sp.toggle=-toggle if sp.respond_to?(:toggle=)
+          end
+        end
+      end
+    rescue => e
+      BSS064.log("BSS106 updateSky star warning: #{e.class}: #{e.message}") if defined?(BSS064)
+    end
+    ret
+  end
+
+  def drawImg(key)
+    row=@data[key] || @data[key.to_s] || @data[key.to_sym]
+    if row.is_a?(Hash)
+      is_sheet=row[:sheet] || row["sheet"]
+      is_anim=row[:animated] || row["animated"]
+      is_seq=row[:sequence] || row["sequence"]
+      f_count=(row[:frames] || row["frames"] || row[:frameCount] || row["frameCount"]).to_i
+      is_arr=(row[:frames] || row["frames"]).is_a?(Array)
+      if is_sheet || is_anim || is_seq || f_count > 1 || is_arr
+        row[:sheet]=true
+        row["sheet"]=true
+        total_frames=is_arr ? (row[:frames] || row["frames"]).length : (f_count > 1 ? f_count : (is_sheet.is_a?(Numeric) ? is_sheet.to_i : 4))
+        row[:frames]=[total_frames,1].max
+        row["frames"]=row[:frames]
+        row[:speed]=(row[:speed] || row["speed"] || 4).to_f
+        row["speed"]=row[:speed]
+      end
+    end
+    ret=super(key)
+    begin
+      sp=@sprites[key.to_s] || @sprites[key]
+      if sp.is_a?(BSS070EBDXSheetSprite) && row.is_a?(Hash)
+        sp.speed=BSS098.num(BSS098.hash_get(row,:speed),4).to_f
+        sp.vertical=!!BSS098.hash_get(row,:vertical)
+        sp.pingpong=!!BSS098.hash_get(row,:pingpong)
+        sp.loop=BSS098.hash_get(row,:loop) != false
+        f_arr=BSS098.hash_get(row,:frames)
+        if f_arr.is_a?(Array) && f_arr.length > 1
+          sp.setBitmap(nil,sp.vertical,f_arr)
+        end
+        has_ox=row.key?(:ox) || row.key?("ox")
+        has_oy=row.key?(:oy) || row.key?("oy")
+        sp.bottom! if !has_ox && !has_oy
+      end
+    rescue => e
+      BSS064.log("BSS106 animated layer warning: #{e.class}: #{e.message}") if defined?(BSS064)
     end
     ret
   end
@@ -253,17 +415,23 @@ module BSS106RoomPriority
   def position
     ret=super
     if @bss106_force_behind
-      (@sprites || {}).each_value do |sp|
-        next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:z) && sp.respond_to?(:z=)
-        sp.z=[sp.z.to_i,-5_000].min
+      (@sprites || {}).each do |k,sp|
+        next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
+        base_z=@bss106_saved_z ? @bss106_saved_z[k] : nil
+        if base_z.nil?
+          base_z=sp.z.to_i < -5_000 ? (sp.z.to_i + 10_000) : sp.z.to_i
+          @bss106_saved_z[k]=base_z if @bss106_saved_z
+        end
+        sp.z=base_z - 10_000
       end
-      # Warp tiles are not part of @sprites, so force those too if a legacy
-      # scene still reached the mesh authority.
+      # Warp tiles copy root Z to preserve layer order
       if @bss093_warp_layers.is_a?(Hash)
         @bss093_warp_layers.each_value do |row|
+          root=row[:root]
+          root_z=(root && root.respond_to?(:z)) ? root.z.to_i : -10_000
           (row[:tiles] || []).each do |entry|
             sp=entry[:sprite] rescue nil
-            sp.z=-5_000 if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
+            sp.z=root_z if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
           end
         end
       end

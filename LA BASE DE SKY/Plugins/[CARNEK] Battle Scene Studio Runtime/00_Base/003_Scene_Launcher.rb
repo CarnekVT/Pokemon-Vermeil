@@ -478,6 +478,14 @@ class Battle
   attr_accessor :bss_blueprint unless method_defined?(:bss_blueprint)
   attr_accessor :bss_environment_config unless method_defined?(:bss_environment_config)
   attr_accessor :bss_setup_config unless method_defined?(:bss_setup_config)
+  attr_writer :canLose unless method_defined?(:canLose=)
+
+  def canLose
+    return @canLose if defined?(@canLose) && !@canLose.nil?
+    return @rules[:continue_if_lose] if defined?(@rules) && @rules.is_a?(Hash) && @rules.key?(:continue_if_lose)
+    false
+  end unless method_defined?(:canLose)
+  alias canLose? canLose unless method_defined?(:canLose?)
 end
 
 module BSS064
@@ -800,7 +808,13 @@ module BSS064
       configure_bss_scene_environment(battle,bp)
       configure_native_sos(battle,bp)
       configure_native_boss(battle,bp) if respond_to?(:configure_native_boss)
-      battle.canLose=(hget(bp,"setup","canLose")!=false) if battle.respond_to?(:canLose=)
+      setup_ai = hget(bp,"setup","aiSkill")
+      if !setup_ai.nil? && setup_ai.to_s != ""
+        battle.opponent_ai_skill = setup_ai.to_i if battle.respond_to?(:opponent_ai_skill=)
+      end
+      can_lose_rule = (hget(bp,"setup","canLose") != false)
+      battle.canLose = can_lose_rule if battle.respond_to?(:canLose=)
+      battle.rules[:continue_if_lose] = can_lose_rule if battle.respond_to?(:rules) && battle.rules.is_a?(Hash)
       begin; $game_temp.clear_battle_rules; rescue; end if defined?($game_temp)&&$game_temp
 
       # Only an explicit editor Test game session gets an F12 resume marker.

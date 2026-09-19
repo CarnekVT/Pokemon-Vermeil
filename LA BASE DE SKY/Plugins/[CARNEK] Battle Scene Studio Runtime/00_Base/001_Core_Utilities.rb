@@ -4,6 +4,13 @@
 # JSON parser architecture is the same minimal, dependency-free reader shipped
 # by the supplied Battle Animation Studio runtime.
 #===============================================================================
+begin
+  ucrt_lib = File.join(Dir.pwd, "Data", "Ruby Library 3.3.0", "x64-mingw-ucrt")
+  $:.push(ucrt_lib) if File.directory?(ucrt_lib) && !$:.include?(ucrt_lib)
+rescue => e
+  # ignore
+end
+
 module BSSMiniJSON
   class Parser
     def initialize(text)

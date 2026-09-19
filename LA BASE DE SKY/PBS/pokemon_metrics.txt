@@ -862,9 +862,9 @@ ShadowSprite = 4,11,9
 #-------------------------------
 [DRATINI]
 BackSprite = 3,16
-FrontSprite = 4,-1
-ShadowSprite = -1,0,6
-AnimationSpeed = 3
+FrontSprite = 4,12
+ShadowSprite = 5,0,4
+AnimationSpeed = 3,2
 #-------------------------------
 [DRAGONAIR]
 BackSprite = 4,17

@@ -163,7 +163,7 @@ end
 module BSS095RoomParityAuthority
   def bss095_regular_custom_layer?(data)
     return false unless data.is_a?(Hash)
-    return false if data[:scrolling] == true || data[:sheet] == true || data[:animated] == true || data[:rainbow] == true
+    return false if data[:scrolling] == true || data[:rainbow] == true
     true
   end
 
@@ -226,7 +226,8 @@ module BSS095RoomParityAuthority
   # Readable dynamic lighting. The old source night tone (-120,-100,-60) is too
   # dark for modern 640x480 battlebacks and hides pixel-art detail.
   def daylightTint
-    return if !@data.try_key?("sky", "outdoor")
+    has_outdoor = @data.is_a?(Hash) && (@data[:outdoor] || @data["outdoor"] || @data[:sky] || @data["sky"] || @data[:skyMode] || @data["skyMode"] || @data[:cloudsConfig] || @data["cloudsConfig"])
+    return unless has_outdoor
     custom=@data["lighting"] rescue nil
     nt=[-52,-44,-28]; tw=[-10,-24,-22]
     if custom.is_a?(Hash)
@@ -235,20 +236,26 @@ module BSS095RoomParityAuthority
       tw=t.map{|x| BSS095.num(x,0).to_i}[0,3] if t.is_a?(Array) && t.length>=3
     end
     (@sprites || {}).each do |key,sp|
-      next if !sp || (sp.disposed? rescue true)
+      next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:tone=)
       k=key.to_s
       next if k.include?("trainer") || k.include?("battler")
       next if k.include?("sky") || k.include?("sun") || k.include?("star") || k.include?("cloud") || k.include?("Light")
-      d=@data[k] rescue nil
-      next if d.is_a?(Hash) && d.has_key?(:shading) && !d[:shading]
+      d=@data[k] || @data[k.to_s] || @data[k.to_sym] rescue nil
+      if d.is_a?(Hash)
+        shading = d.has_key?(:shading) ? d[:shading] : d["shading"]
+        next if shading == false
+      end
       begin
-        if PBDayNight.isNight? && !@sunny
-          sp.tone=Tone.new(nt[0],nt[1],nt[2])
-        elsif (PBDayNight.isEvening? || PBDayNight.isMorning?) && !@sunny
-          sp.tone=Tone.new(tw[0],tw[1],tw[2])
+        slot = (defined?(BSS106) && BSS106.respond_to?(:time_slot)) ? BSS106.time_slot(@data) : (PBDayNight.isNight? ? :night : ((PBDayNight.isEvening? || PBDayNight.isMorning?) ? :dawn : :day))
+        tone_for_slot = case slot
+        when :night
+          Tone.new(-70, -30, 45, 0)
+        when :dawn
+          Tone.new(75, 18, -65, 0)
         else
-          sp.tone=Tone.new(0,0,0)
+          Tone.new(0, 0, 0, 0)
         end
+        sp.tone = tone_for_slot
       rescue
       end
     end
@@ -259,21 +266,170 @@ module BSS095RoomParityAuthority
   def bss095_apply_layer_blur!(key)
     data=@data[key] || @data[key.to_s]
     return unless data.is_a?(Hash)
-    amount=[[BSS095.num(data[:blur],0).round,0].max,6].min
-    return if amount<=0
+    blur_val = data[:blur] || data["blur"]
+    areas = data[:blurAreas] || data["blurAreas"]
+    has_areas = areas.is_a?(Array) && areas.any? { |a| a.is_a?(Hash) && (BSS095.num(a[:radius] || a["radius"], 0) > 0 || (a[:mode] || a["mode"]).to_s.start_with?("band") || (a[:mode] || a["mode"]).to_s == "total") }
+    amount=[[BSS095.num(blur_val,0).round,0].max,6].min
+    return if amount<=0 && !has_areas
     sp=@sprites[key.to_s] || @sprites[key]
     return if !sp || (sp.disposed? rescue true) || !sp.bitmap || (sp.bitmap.disposed? rescue true)
+
+    # 1. Source-linked crop: if layer is cropped (e.g. from a huge tileset),
+    # extract the cropped slice FIRST so we process ~1000 px instead of 2.8 million.
+    crop = data[:crop] || data["crop"]
+    if crop.is_a?(Hash) && !data[:bss_cropped] && !data["bss_cropped"]
+      src_raw = sp.bitmap
+      sw = src_raw.width
+      sh = src_raw.height
+      cx = BSS095.num(crop[:x] || crop["x"], 0).round
+      cy = BSS095.num(crop[:y] || crop["y"], 0).round
+      cw = BSS095.num(crop[:w] || crop["w"], sw).round
+      ch = BSS095.num(crop[:h] || crop["h"], sh).round
+      cx = [[cx, 0].max, sw - 1].min
+      cy = [[cy, 0].max, sh - 1].min
+      cw = [[cw, 1].max, sw - cx].min
+      ch = [[ch, 1].max, sh - cy].min
+      cut = Bitmap.new(cw, ch)
+      cut.blt(0, 0, src_raw, Rect.new(cx, cy, cw, ch))
+      sp.bitmap = cut
+      data[:bss_cropped] = true
+      data["bss_cropped"] = true
+      ox = data[:ox] || data["ox"]
+      oy = data[:oy] || data["oy"]
+      sp.ox = ox.nil? ? cw / 2 : ox.to_f - cx if sp.respond_to?(:ox=)
+      sp.oy = oy.nil? ? ch : oy.to_f - cy if sp.respond_to?(:oy=)
+    end
+
     src=sp.bitmap
     bmp=Bitmap.new(src.width,src.height)
     bmp.blt(0,0,src,src.rect)
-    amount.times do
-      if bmp.respond_to?(:blur)
-        bmp.blur
-      else
-        # Fallback for RGSS-compatible builds without Bitmap#blur.
-        w=[bmp.width/2,1].max; h=[bmp.height/2,1].max
-        tmp=Bitmap.new(w,h); tmp.stretch_blt(tmp.rect,bmp,bmp.rect)
-        bmp.clear; bmp.stretch_blt(bmp.rect,tmp,tmp.rect); tmp.dispose
+    if amount > 0
+      amount.times do
+        if bmp.respond_to?(:blur)
+          bmp.blur
+        else
+          w=[bmp.width/2,1].max; h=[bmp.height/2,1].max
+          tmp=Bitmap.new(w,h); tmp.stretch_blt(tmp.rect,bmp,bmp.rect)
+          bmp.clear; bmp.stretch_blt(bmp.rect,tmp,tmp.rect); tmp.dispose
+        end
+      end
+    end
+    if has_areas
+      w = bmp.width; h = bmp.height
+      areas.each do |a|
+        next unless a.is_a?(Hash)
+        mode = (a[:mode] || a["mode"] || "radial").to_s
+        style = (a[:style] || a["style"] || "high").to_s
+        strength = [[BSS095.num(a[:strength] || a["strength"], 4).round, 1].max, 24].min
+        feather = [BSS095.num(a[:feather] || a["feather"], 18).round, 1].max
+        ay = (data[:oy] || data["oy"] || h).to_f
+        cy = (ay + BSS095.num(a[:y] || a["y"], 0)).round
+
+        blurred = Bitmap.new(w, h)
+        blurred.blt(0, 0, bmp, bmp.rect)
+        if style == "jumble"
+          rad = [[strength, 1].max, 24].min
+          passes = (w * h <= 4096) ? [[(rad * 0.5).round, 1].max, 4].min : 1
+          step = (w * h > 10000) ? 2 : 1
+          rng = 0x5a5a5a
+          swaps = 0
+          max_swaps = 15000
+
+          # Area-constrained bounds to prevent running on unneeded pixels
+          min_x = 0; max_x = w - 1
+          min_y = 0; max_y = h - 1
+          if mode == "radial"
+            rad_b = BSS095.num(a[:radius] || a["radius"], 48).round
+            ax = (data[:ox] || data["ox"] || w / 2).to_f
+            c_x = (ax + BSS095.num(a[:x] || a["x"], 0)).round
+            min_x = [[c_x - rad_b, 0].max, w - 1].min
+            max_x = [[c_x + rad_b, 0].max, w - 1].min
+            min_y = [[cy - rad_b, 0].max, h - 1].min
+            max_y = [[cy + rad_b, 0].max, h - 1].min
+          elsif mode == "band_top"
+            max_y = [[cy + feather, 0].max, h - 1].min
+          elsif mode == "band_bottom"
+            min_y = [[cy - feather, 0].max, h - 1].min
+          end
+
+          passes.times do
+            (min_y..max_y).step(step) do |y|
+              (min_x..max_x).step(step) do |x|
+                break if swaps >= max_swaps
+                c1 = blurred.get_pixel(x, y)
+                next if !c1 || c1.alpha == 0
+                wave = Math.sin(x * 0.05 + y * 0.035) * Math.cos(x * 0.03 - y * 0.06) +
+                       0.35 * Math.sin((x + y) * 0.09) + 0.2 * Math.cos((x - y) * 0.14)
+                norm = (wave + 1.55) / 3.1
+                rng = (rng * 1664525 + 1013904223) & 0xffffffff
+                chance = rng.to_f / 0xffffffff
+                next if chance > norm * 0.85 + 0.1
+                local_rad = [[(rad * (0.35 + 0.85 * norm)).round, 1].max, 24].min
+                rng = (rng * 1664525 + 1013904223) & 0xffffffff
+                ang = (rng.to_f / 0xffffffff) * Math::PI * 2
+                rng = (rng * 1664525 + 1013904223) & 0xffffffff
+                dist_ratio = rng.to_f / 0xffffffff
+                dist = (dist_ratio**1.4) * local_rad
+                nx = [[(x + Math.cos(ang) * dist).round, min_x].max, max_x].min
+                ny = [[(y + Math.sin(ang) * dist).round, min_y].max, max_y].min
+                c2 = blurred.get_pixel(nx, ny)
+                next if !c2 || c2.alpha == 0
+                blurred.set_pixel(x, y, c2)
+                blurred.set_pixel(nx, ny, c1)
+                swaps += 1
+                if norm > 0.6 && x + 1 <= max_x && nx + 1 <= max_x
+                  c1n = blurred.get_pixel(x + 1, y)
+                  c2n = blurred.get_pixel(nx + 1, ny)
+                  if c1n && c1n.alpha > 0 && c2n && c2n.alpha > 0
+                    blurred.set_pixel(x + 1, y, c2n)
+                    blurred.set_pixel(nx + 1, ny, c1n)
+                  end
+                end
+              end
+            end
+          end
+        else
+          strength.times do
+            if blurred.respond_to?(:blur)
+              blurred.blur
+            else
+              tw = [blurred.width / 2, 1].max; th = [blurred.height / 2, 1].max
+              tmp = Bitmap.new(tw, th); tmp.stretch_blt(tmp.rect, blurred, blurred.rect)
+              blurred.clear; blurred.stretch_blt(blurred.rect, tmp, tmp.rect); tmp.dispose
+            end
+          end
+
+          if style == "few_tones"
+            qw = [w / 3, 1].max; qh = [h / 3, 1].max
+            qtmp = Bitmap.new(qw, qh)
+            qtmp.stretch_blt(qtmp.rect, blurred, blurred.rect)
+            blurred.clear
+            blurred.stretch_blt(blurred.rect, qtmp, qtmp.rect)
+            qtmp.dispose rescue nil
+          end
+        end
+
+        if mode == "total"
+          bmp.clear
+          bmp.blt(0, 0, blurred, Rect.new(0, 0, w, h))
+        elsif mode == "band_bottom"
+          y_start = [[cy - feather, 0].max, h].min
+          rect_h = [h - y_start, 0].max
+          bmp.blt(0, y_start, blurred, Rect.new(0, y_start, w, rect_h)) if rect_h > 0
+        elsif mode == "band_top"
+          y_end = [[cy + feather, 0].max, h].min
+          bmp.blt(0, 0, blurred, Rect.new(0, 0, w, y_end)) if y_end > 0
+        elsif mode == "radial"
+          ax = (data[:ox] || data["ox"] || w / 2).to_f
+          cx = (ax + BSS095.num(a[:x] || a["x"], 0)).round
+          rad = BSS095.num(a[:radius] || a["radius"], 48).round
+          rx = [[cx - rad, 0].max, w].min
+          ry = [[cy - rad, 0].max, h].min
+          rw = [cx + rad - rx, 0].max
+          rh = [cy + rad - ry, 0].max
+          bmp.blt(rx, ry, blurred, Rect.new(rx, ry, rw, rh)) if rw > 0 && rh > 0
+        end
+        blurred.dispose rescue nil
       end
     end
     @bss095_blur_bitmaps||=[]
@@ -289,7 +445,8 @@ module BSS095RoomParityAuthority
     begin
       bss095_apply_layer_blur!(key)
       data=@data[key] || @data[key.to_s]
-      if data.is_a?(Hash) && data[:warp].is_a?(Hash) && data[:warp][:enabled] == true && respond_to?(:bss093_build_warp_layer!)
+      warp = data.is_a?(Hash) ? (data[:warp] || data["warp"]) : nil
+      if warp.is_a?(Hash) && (warp[:enabled] == true || warp["enabled"] == true) && respond_to?(:bss093_build_warp_layer!)
         bss093_build_warp_layer!(key)
       end
     rescue

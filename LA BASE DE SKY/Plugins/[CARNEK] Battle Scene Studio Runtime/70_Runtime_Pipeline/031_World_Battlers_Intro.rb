@@ -43,7 +43,12 @@ module BSS103WorldSpaceBattlers
       # The invisible EBDX metric anchor is authored from Essentials' real
       # pbBattlerPosition and projected by the same room matrix as scenery.
       sp.x=anchor.x if sp.respond_to?(:x=)
-      sp.y=anchor.y if sp.respond_to?(:y=)
+      locked_y=(sp.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
+      if locked_y
+        sp.y=locked_y if sp.respond_to?(:y=)
+      else
+        sp.y=anchor.y if sp.respond_to?(:y=)
+      end
       base=(bss070_ebdx_anchor_scale(i) rescue [1.0,1.0])
       factor=((anchor.zoom_x rescue scale0).to_f/scale0)
       factor=1.0 if !factor.finite? || factor<=0
@@ -59,7 +64,12 @@ module BSS103WorldSpaceBattlers
           sa=(@bss070_ebdx_room.shadow(i) rescue nil)
           if sa && !(sa.disposed? rescue false)
             sh.x=sa.x if sh.respond_to?(:x=)
-            sh.y=sa.y if sh.respond_to?(:y=)
+            locked_sha_y=(sh.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
+            if locked_sha_y
+              sh.y=locked_sha_y if sh.respond_to?(:y=)
+            else
+              sh.y=sa.y if sh.respond_to?(:y=)
+            end
             sb=(bss070_ebdx_shadow_anchor_scale(i) rescue [1.0,0.25])
             sf=((sa.zoom_x rescue scale0).to_f/scale0)
             sf=1.0 if !sf.finite? || sf<=0

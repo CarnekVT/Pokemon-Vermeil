@@ -1,7 +1,7 @@
 {
-  "version": "0.8.24",
-  "where": "promise",
-  "message": "Cannot set property time of #<Window> which has only a getter",
-  "stack": "TypeError: Cannot set property time of #<Window> which has only a getter\n    at App.bss101LogicalComposite (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:3700:185)\n    at App.bss083EBDXComposite (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:3508:30)\n    at App.bss083EBDXComposite (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:3754:37)\n    at App.bss089RedrawPreview (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2095:136)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2144:164)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2356:30)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2479:1049)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2663:27)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2748:1299)\n    at App.onClick (blob:http://tauri.localhost/31c887c1-6c93-449a-b1a7-7e7e70164645:2836:29)",
-  "at": "2026-09-05T03:33:57.987Z"
+  "version": "0.8.36",
+  "where": "input",
+  "message": "Failed to execute 'replaceChild' on 'Node': The node to be removed is no longer a child of this node. Perhaps it was moved in a 'blur' event handler?",
+  "stack": "NotFoundError: Failed to execute 'replaceChild' on 'Node': The node to be removed is no longer a child of this node. Perhaps it was moved in a 'blur' event handler?\n    at App.bss100RefreshAssetBrowser (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3243:409)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3334:152)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3346:219)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3557:364)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3768:22)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3888:25)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:4133:22)\n    at guarded (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:67:51)\n    at HTMLDivElement.onInputBound (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:68:211)",
+  "at": "2026-09-18T02:16:08.602Z"
 }

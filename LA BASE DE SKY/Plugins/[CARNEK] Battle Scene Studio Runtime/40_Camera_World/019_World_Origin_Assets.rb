@@ -110,7 +110,7 @@ module BSS086LogicalWorldOrigin
         zy=(sp.respond_to?(:zy) && sp.zy) ? sp.zy.to_f : 1.0
         sp.zoom_x=bg.zoom_x*zx if sp.respond_to?(:zoom_x=)
         sp.zoom_y=bg.zoom_y*zy if sp.respond_to?(:zoom_y=)
-        sp.z=[[sp.z.to_i,-500].max,14].min if sp.respond_to?(:z=)
+        sp.z=[[sp.z.to_i,-500].max,14].min if sp.respond_to?(:z=) && !@bss106_force_behind && sp.z.to_i >= -500
       rescue
       end
     end
