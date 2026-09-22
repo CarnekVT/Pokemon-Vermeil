@@ -37,7 +37,14 @@ class RPG::Weather
     end
   end
 
-  def update_sprite_position(sprite, index, is_new_sprite = false)
+  def update_sprite_position(sprite, index, *args)
+    if args.length >= 3
+      is_new_sprite = args[2]
+    elsif args.length == 1
+      is_new_sprite = args[0]
+    else
+      is_new_sprite = false
+    end
     weather_type = (is_new_sprite) ? @target_type : @type
     if !@weatherTypes[weather_type] && GameData::Weather.exists?(weather_type)
       prepare_bitmaps(weather_type)
@@ -55,10 +62,10 @@ class RPG::Weather
         when :spin, :whirl then update_spinning_particle(sprite, index, is_new_sprite, weather_type)
         when :rise then update_rising_particle(sprite, index, is_new_sprite, weather_type)
         when :custom then update_custom_generic(sprite, index, is_new_sprite, weather_type)
-        else _CARNEKVT_cw_orig_update_sprite_position(sprite, index, is_new_sprite)
+        else _CARNEKVT_cw_orig_update_sprite_position(sprite, index, *args)
         end
     else
-      _CARNEKVT_cw_orig_update_sprite_position(sprite, index, is_new_sprite)
+      _CARNEKVT_cw_orig_update_sprite_position(sprite, index, *args)
     end
   end
 

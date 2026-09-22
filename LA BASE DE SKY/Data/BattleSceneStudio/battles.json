@@ -303,6 +303,11 @@
         "primary": "",
         "secondary": ""
       },
+      "dialogues": {
+        "enabled": true,
+        "midbattleScript": "",
+        "triggers": []
+      },
       "layout": {
         "battlers": {}
       },
@@ -666,6 +671,11 @@
         ],
         "primary": "BAGON",
         "secondary": "SALAMENCE"
+      },
+      "dialogues": {
+        "enabled": true,
+        "midbattleScript": "",
+        "triggers": []
       },
       "layout": {
         "battlers": {}
@@ -1095,6 +1105,11 @@
         "primary": "",
         "secondary": ""
       },
+      "dialogues": {
+        "enabled": true,
+        "midbattleScript": "",
+        "triggers": []
+      },
       "layout": {
         "battlers": {}
       },
@@ -1491,6 +1506,11 @@
         "primary": "",
         "secondary": ""
       },
+      "dialogues": {
+        "enabled": true,
+        "midbattleScript": "",
+        "triggers": []
+      },
       "layout": {
         "battlers": {}
       },
@@ -1822,6 +1842,11 @@
         ],
         "primary": "",
         "secondary": ""
+      },
+      "dialogues": {
+        "enabled": true,
+        "midbattleScript": "",
+        "triggers": []
       },
       "layout": {
         "battlers": {}
@@ -2239,6 +2264,11 @@
         "primary": "",
         "secondary": ""
       },
+      "dialogues": {
+        "enabled": true,
+        "midbattleScript": "",
+        "triggers": []
+      },
       "layout": {
         "battlers": {}
       },
@@ -2375,28 +2405,106 @@
         "midbattleScript": "BOSS_WILD_EXAMPLE",
         "midbattleTriggers": [
           {
-            "id": "mbt_mu8tiygg_g9ep",
+            "id": "dia_w1",
             "event": "RoundStartAttack_foe",
             "text": "¡El Pokémon dominante emite un rugido ensordecedor que hace temblar el terreno!",
-            "speaker": "narrator"
+            "speaker": "narrator",
+            "target": "boss",
+            "style": "cinematic",
+            "textboxType": "cinematic",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": true,
+            "screenShake": false,
+            "repeat": false,
+            "turn": 1
           },
           {
-            "id": "mbt_mu8tiygg_n0vv",
+            "id": "dia_w2",
             "event": "TargetHPHalf_foe",
             "text": "¡El Pokémon dominante jadea furioso ante la presión del combate!\n¡Una intensa aura de furia comienza a emanar de su cuerpo!",
-            "speaker": "narrator"
+            "speaker": "narrator",
+            "target": "boss",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": false,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": true,
+            "screenShake": true,
+            "repeat": false,
+            "turn": 0
           },
           {
-            "id": "mbt_mu8tiygg_nii4",
+            "id": "dia_w3",
             "event": "TargetHPLow_foe",
             "text": "¡El Pokémon dominante reúne sus últimas fuerzas para un contraataque desesperado!",
-            "speaker": "narrator"
+            "speaker": "narrator",
+            "target": "boss",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": true,
+            "screenShake": true,
+            "repeat": false,
+            "turn": 0
           },
           {
-            "id": "mbt_mu8tiygg_pr1x",
+            "id": "dia_w4",
+            "event": "ShieldBreak_foe",
+            "text": "¡La barrera protectora del Pokémon dominante se ha hecho añicos!",
+            "speaker": "narrator",
+            "target": "boss",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": false,
+            "screenShake": true,
+            "repeat": false,
+            "turn": 0
+          },
+          {
+            "id": "dia_w5",
+            "event": "SOSSuccess_foe",
+            "text": "¡El Pokémon dominante pide ayuda y un aliado responde a su llamado!",
+            "speaker": "narrator",
+            "target": "boss",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": true,
+            "screenShake": false,
+            "repeat": false,
+            "turn": 0
+          },
+          {
+            "id": "dia_w6",
             "event": "BattlerFainted_foe",
             "text": "¡El Pokémon dominante cae exhausto tras una feroz batalla!",
-            "speaker": "narrator"
+            "speaker": "narrator",
+            "target": "boss",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": false,
+            "screenShake": false,
+            "repeat": false,
+            "turn": 0
           }
         ],
         "stats": {
@@ -2727,11 +2835,131 @@
         "primary": "",
         "secondary": ""
       },
+      "dialogues": {
+        "enabled": true,
+        "midbattleScript": "BOSS_WILD_EXAMPLE",
+        "triggers": [
+          {
+            "id": "dia_w1",
+            "event": "RoundStartAttack",
+            "rawEvent": "RoundStartAttack",
+            "target": "boss",
+            "speaker": "narrator",
+            "speakerName": "",
+            "text": "¡El Pokémon dominante emite un rugido ensordecedor que hace temblar el terreno!",
+            "style": "cinematic",
+            "textboxType": "cinematic",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": true,
+            "screenShake": false,
+            "repeat": false,
+            "turn": 1
+          },
+          {
+            "id": "dia_w2",
+            "event": "TargetHPHalf",
+            "rawEvent": "TargetHPHalf",
+            "target": "boss",
+            "speaker": "narrator",
+            "speakerName": "",
+            "text": "¡El Pokémon dominante jadea furioso ante la presión del combate!\n¡Una intensa aura de furia comienza a emanar de su cuerpo!",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": false,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": true,
+            "screenShake": true,
+            "repeat": false,
+            "turn": 0
+          },
+          {
+            "id": "dia_w3",
+            "event": "TargetHPLow",
+            "rawEvent": "TargetHPLow",
+            "target": "boss",
+            "speaker": "narrator",
+            "speakerName": "",
+            "text": "¡El Pokémon dominante reúne sus últimas fuerzas para un contraataque desesperado!",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": true,
+            "screenShake": true,
+            "repeat": false,
+            "turn": 0
+          },
+          {
+            "id": "dia_w4",
+            "event": "ShieldBreak",
+            "rawEvent": "ShieldBreak",
+            "target": "boss",
+            "speaker": "narrator",
+            "speakerName": "",
+            "text": "¡La barrera protectora del Pokémon dominante se ha hecho añicos!",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": false,
+            "screenShake": true,
+            "repeat": false,
+            "turn": 0
+          },
+          {
+            "id": "dia_w5",
+            "event": "SOSSuccess",
+            "rawEvent": "SOSSuccess",
+            "target": "boss",
+            "speaker": "narrator",
+            "speakerName": "",
+            "text": "¡El Pokémon dominante pide ayuda y un aliado responde a su llamado!",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": true,
+            "screenShake": false,
+            "repeat": false,
+            "turn": 0
+          },
+          {
+            "id": "dia_w6",
+            "event": "BattlerFainted",
+            "rawEvent": "BattlerFainted",
+            "target": "boss",
+            "speaker": "narrator",
+            "speakerName": "",
+            "text": "¡El Pokémon dominante cae exhausto tras una feroz batalla!",
+            "style": "narrative",
+            "textboxType": "default",
+            "showNamebox": true,
+            "choices": [],
+            "choiceResponses": [],
+            "choiceEffects": [],
+            "playCry": false,
+            "screenShake": false,
+            "repeat": false,
+            "turn": 0
+          }
+        ]
+      },
       "layout": {
         "battlers": {}
       },
       "notes": "",
-      "updatedAt": 1789848402928
+      "updatedAt": 1789871215353
     }
   ],
   "global": {
@@ -2745,7 +2973,7 @@
       {
         "mapId": 79,
         "mapName": "Map 79",
-        "backdrop": "scene_custom"
+        "backdrop": "Field"
       }
     ],
     "ebdxBackdrop": "bss_rocky_highlands",
@@ -5501,5 +5729,5 @@
     "ebdxMapBackdropsText": "",
     "ebdxEncounterMetadata": []
   },
-  "_bssSavedAt": 1789848428986
+  "_bssSavedAt": 1789880802548
 }

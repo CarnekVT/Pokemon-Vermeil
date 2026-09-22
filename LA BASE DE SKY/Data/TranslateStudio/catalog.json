@@ -30167,9 +30167,7 @@
     },
     "Volver": {
       "Contexts": [
-        "Plugin: [LBDS] [DBK_001] Enhanced Battle UI - [005] Poke Ball UI.rb:L48",
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L59",
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L96"
+        "Plugin: [LBDS] [DBK_001] Enhanced Battle UI - [005] Poke Ball UI.rb:L48"
       ]
     },
     "Volver al menú.": {
@@ -30237,394 +30235,6 @@
     "You can't use that here.": {
       "Contexts": [
         "Plugin: [VERMEIL] Honey Headbutt Trees - HoneyHeadbuttTrees.rb:L167"
-      ]
-    },
-    "ON": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L718",
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L51"
-      ]
-    },
-    "OFF": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 002_Core.rb:L719",
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L51"
-      ]
-    },
-    "El grafico del evento es un tile fuera de rango (evento {1}, mapa {2})": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 004_CharacterDepth.rb:L27"
-      ]
-    },
-    "Indoor": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L11"
-      ]
-    },
-    "Outdoor": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L11"
-      ]
-    },
-    "Camara NDS [Fija/{1}]": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L12"
-      ]
-    },
-    "Calidad": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L17"
-      ]
-    },
-    "Balanceado": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L18"
-      ]
-    },
-    "Rendimiento": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L19",
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L22"
-      ]
-    },
-    "Visual 2.5D usa Camara NDS en todos los mapas. Affine y Cylindrical ya no son modos seleccionables.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L26"
-      ]
-    },
-    "Rendimiento - 16px, menos caras laterales": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L33"
-      ]
-    },
-    "Balanceado - 12px, volumen completo": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L34"
-      ]
-    },
-    "Calidad - 8px, mas subdivision": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L35"
-      ]
-    },
-    "Perfil: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L53"
-      ]
-    },
-    "FPS medio: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L54",
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L322"
-      ]
-    },
-    "Graphics.frame_rate: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L55"
-      ]
-    },
-    "Tramo suelo efectivo: {1}px": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L56",
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L92"
-      ]
-    },
-    "Caras laterales de volumen: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L57"
-      ]
-    },
-    "Volumen 23: {1}px | Alto 32: {2}px | Montana 29: {3}px": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L58"
-      ]
-    },
-    "Estos valores son de diagnostico. Para buscar FPS de tres cifras usa el perfil Rendimiento y los ajustes High FPS de mkxp.json incluidos en el plugin.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L67"
-      ]
-    },
-    "Altura del Terrain Tag 23 NDSVolume:": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L72"
-      ]
-    },
-    "Camara: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L87"
-      ]
-    },
-    "Angulo actual: {1} grados": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L88"
-      ]
-    },
-    "Distancia: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L89"
-      ]
-    },
-    "Pivote vertical: {1}%": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L90"
-      ]
-    },
-    "Balance perspectiva: {1}%": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L91"
-      ]
-    },
-    "Altura billboard ref.: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L93"
-      ]
-    },
-    "Angulo Indoor: {1} grados": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L94"
-      ]
-    },
-    "Angulo Outdoor: {1} grados": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L95"
-      ]
-    },
-    "Angulo de camara NDS:": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L108"
-      ]
-    },
-    "Distancia de camara:": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L117"
-      ]
-    },
-    "Pivote vertical (%):": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L127"
-      ]
-    },
-    "Balance perspectiva (%): 38 = recomendado para pixel art": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L135"
-      ]
-    },
-    "El tramo se adapta al perfil y al angulo. Rendimiento prioriza estabilidad.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L139"
-      ]
-    },
-    "Billboards y estructuras mantienen escala 1:1.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L141"
-      ]
-    },
-    "Elige el angulo {1}:": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L149"
-      ]
-    },
-    "2.5D ({1})": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L167",
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L179"
-      ]
-    },
-    "Alternar 2.5D (Mode 7)": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L174"
-      ]
-    },
-    "Activa o desactiva la camara 2.5D del mapa actual.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L176"
-      ]
-    },
-    "Configurar Camara NDS / 2.5D": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L184"
-      ]
-    },
-    "Ajusta una sola camara compartida por suelo, volumen, walls y personajes.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L186"
-      ]
-    },
-    "Rendimiento NDS / FPS": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L191"
-      ]
-    },
-    "Cambia perfil, revisa FPS y ajusta el volumen global de tiles.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L193"
-      ]
-    },
-    "Camara 2.5D": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L205"
-      ]
-    },
-    "Activada": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L209"
-      ]
-    },
-    "Desactivada": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L209"
-      ]
-    },
-    "Activa o desactiva la camara en perspectiva 2.5D de los mapas.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 007_DebugMenu.rb:L210"
-      ]
-    },
-    "Estado MKXP-Z EXT / 2.5D": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 017_MKXPZExtBridge.rb:L294"
-      ]
-    },
-    "Comprueba subpixel, corners y renderer NDS.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 017_MKXPZExtBridge.rb:L296"
-      ]
-    },
-    "19 NDSFloor: suelo/decal horizontal. Priority no lo convierte en pared.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L184"
-      ]
-    },
-    "20 NDSWall: fachada o muro vertical. 21 NDSRoof: techo a 48 px.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L185"
-      ]
-    },
-    "22 NDSBillboard: arbol/prop rigido. 23 NDSVolume: grosor de terreno.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L186"
-      ]
-    },
-    "24 NDSStructure: casa completa 2D; billboard anclado por su fila inferior.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L187"
-      ]
-    },
-    "25 NDSIndoorWall / 26 NDSIndoorProp: categorias indoor principales.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L188"
-      ]
-    },
-    "27 IndoorBorder, 28 IndoorBlack, 29 MountainTop, 30 MountainWall.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L189"
-      ]
-    },
-    "31 RoofHigh, 32 VolumeHigh, 33 Overlay (copas/aleros/foreground).": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L190"
-      ]
-    },
-    "34 RoofPlane / 35 WallPlane / 36 MountainWallPlane: geometria 3D real.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L191"
-      ]
-    },
-    "V5: todos comparten camara/zoom. Usa Plane solo para superficies geometricas.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L192"
-      ]
-    },
-    "Abre un mapa primero.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L201",
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L308"
-      ]
-    },
-    "Renderer 2.5D no disponible.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L203",
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L310"
-      ]
-    },
-    "{1} {2}: {3}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L220"
-      ]
-    },
-    "No se pudo auditar: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L222"
-      ]
-    },
-    "Guia Terrain Tags NDS V5": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1388"
-      ]
-    },
-    "Muestra el esquema de Terrain Tags 19-36.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1390"
-      ]
-    },
-    "Auditar Terrain Tags NDS V5": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1394"
-      ]
-    },
-    "Cuenta cuantos tiles de cada categoria usa el mapa actual.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 020_NDSTileCategories.rb:L1396"
-      ]
-    },
-    "Build: {1} ms": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L321"
-      ]
-    },
-    "Walls activos/total: {1}/{2}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L323"
-      ]
-    },
-    "Surfaces activas/total: {1}/{2}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L324"
-      ]
-    },
-    "Volume activo/total: {1}/{2}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L325"
-      ]
-    },
-    "Stats no disponibles: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L328"
-      ]
-    },
-    "Perfil rapido NDS V5": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L335"
-      ]
-    },
-    "Muestra tiempo de build y objetos activos/total.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 021_NDSFastPath.rb:L337"
-      ]
-    },
-    "V25 Native DLL: ON/OFF": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 033_V25NativeAccelerator.rb:L324"
-      ]
-    },
-    "Alterna el acelerador DLL sin cambiar el Game.exe de Sky.": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 033_V25NativeAccelerator.rb:L326"
-      ]
-    },
-    "V25 Native DLL: {1}": {
-      "Contexts": [
-        "Plugin: [VERMEIL] Visual 2.5D - 033_V25NativeAccelerator.rb:L330"
       ]
     },
     "Opciones de Debug Carnek...": {
@@ -32169,7 +31779,7 @@
         "BSS · TotemTestBossBar · boss · capture · emergencyBallMessage",
         "BSS · Trainer SOS · boss · capture · emergencyBallMessage",
         "BSS · Wild Encounter · boss · capture · emergencyBallMessage",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4051"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4073"
       ]
     },
     "¡Una barrera misteriosa protege a {1}!": {
@@ -32225,7 +31835,8 @@
     },
     "¡El Pokémon dominante emite un rugido ensordecedor que hace temblar el terreno!": {
       "Contexts": [
-        "BSS · TotemTestBossBar · boss · midbattleTriggers[1] · text"
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[1] · text",
+        "BSS · TotemTestBossBar · dialogues · triggers[1] · text"
       ]
     },
     "narrator": {
@@ -32233,22 +31844,45 @@
         "BSS · TotemTestBossBar · boss · midbattleTriggers[1] · speaker",
         "BSS · TotemTestBossBar · boss · midbattleTriggers[2] · speaker",
         "BSS · TotemTestBossBar · boss · midbattleTriggers[3] · speaker",
-        "BSS · TotemTestBossBar · boss · midbattleTriggers[4] · speaker"
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[4] · speaker",
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[5] · speaker",
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[6] · speaker",
+        "BSS · TotemTestBossBar · dialogues · triggers[1] · speaker",
+        "BSS · TotemTestBossBar · dialogues · triggers[2] · speaker",
+        "BSS · TotemTestBossBar · dialogues · triggers[3] · speaker",
+        "BSS · TotemTestBossBar · dialogues · triggers[4] · speaker",
+        "BSS · TotemTestBossBar · dialogues · triggers[5] · speaker",
+        "BSS · TotemTestBossBar · dialogues · triggers[6] · speaker"
       ]
     },
     "¡El Pokémon dominante jadea furioso ante la presión del combate!\n¡Una intensa aura de furia comienza a emanar de su cuerpo!": {
       "Contexts": [
-        "BSS · TotemTestBossBar · boss · midbattleTriggers[2] · text"
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[2] · text",
+        "BSS · TotemTestBossBar · dialogues · triggers[2] · text"
       ]
     },
     "¡El Pokémon dominante reúne sus últimas fuerzas para un contraataque desesperado!": {
       "Contexts": [
-        "BSS · TotemTestBossBar · boss · midbattleTriggers[3] · text"
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[3] · text",
+        "BSS · TotemTestBossBar · dialogues · triggers[3] · text"
+      ]
+    },
+    "¡La barrera protectora del Pokémon dominante se ha hecho añicos!": {
+      "Contexts": [
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[4] · text",
+        "BSS · TotemTestBossBar · dialogues · triggers[4] · text"
+      ]
+    },
+    "¡El Pokémon dominante pide ayuda y un aliado responde a su llamado!": {
+      "Contexts": [
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[5] · text",
+        "BSS · TotemTestBossBar · dialogues · triggers[5] · text"
       ]
     },
     "¡El Pokémon dominante cae exhausto tras una feroz batalla!": {
       "Contexts": [
-        "BSS · TotemTestBossBar · boss · midbattleTriggers[4] · text"
+        "BSS · TotemTestBossBar · boss · midbattleTriggers[6] · text",
+        "BSS · TotemTestBossBar · dialogues · triggers[6] · text"
       ]
     },
     "{1} el Dominante Indomable": {
@@ -32258,145 +31892,161 @@
     },
     "¡Pero no tuvo efecto!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1758",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1801"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1760",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1803"
       ]
     },
     "¡La {1} pone nervioso al Pokémon salvaje!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1799"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/002_Native_SOS.rb:L1801"
       ]
     },
     "¡{1} es inmune a ese estado!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3516"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3538"
       ]
     },
     "¡{1} es inmune a la confusión!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3521"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3543"
       ]
     },
     "¡{1} es inmune al enamoramiento!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3522"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3544"
       ]
     },
     "¡{1} es inmune a las bajadas de estadísticas!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3524"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3546"
       ]
     },
     "¡{1} es inmune al daño indirecto!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3526"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3548"
       ]
     },
     "¡{1} es inmune a ese efecto!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3536"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3558"
       ]
     },
     "¡{1} es inmune a los movimientos de KO directo!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3544"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3566"
       ]
     },
     "¡Pero falló!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3590",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3618",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3628",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3639"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3612",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3640",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3650",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3661"
       ]
     },
     "¡{1} es inmune a ser copiado!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3597"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3619"
       ]
     },
     "¡{1} ignora el estado!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3793"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L3815"
       ]
     },
     "¡{1} está débil!\n¡Es el momento de capturarlo!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4112",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4529"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4134",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4551"
       ]
     },
     "¿Quieres capturar a {1}?": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4116",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4533"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4138",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4555"
       ]
     },
     "¡No hay espacio en el PC!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4130",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4543"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4152",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4565"
       ]
     },
     "No hay ninguna Poké Ball disponible.": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4139",
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4550"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4161",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4572"
       ]
     },
     "Elige una Poké Ball o selecciona \"No capturar\" para dejarlo ir.": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4155"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4177"
       ]
     },
     "¿Quieres ponerle un mote a {1}?": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4207"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4229"
       ]
     },
     "¿Mote de {1}?": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4208"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4230"
       ]
     },
     "¡{1} se ha enviado a la Caja \"{2}\"!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4220"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4242"
       ]
     },
     "¡Ya está! ¡{1} atrapado!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4229"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4251"
       ]
     },
     "Elige una Poké Ball o selecciona \"No capturar\" para terminar la oportunidad.": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4564"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4586"
+      ]
+    },
+    "¡Los Pokémon aliados huyeron aterrados al ver caer al dominante!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4791"
+      ]
+    },
+    "¡El Pokémon aliado huyó al ver caer al dominante!": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L4791"
       ]
     },
     "¡Al romperse el escudo, bajaron las características de {1}!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5107"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5149"
       ]
     },
     "¡Al romperse el escudo, aumentaron las características de {1}!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5112"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5154"
       ]
     },
     "#{msg}": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5266"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5311"
       ]
     },
     "¡{1} ha huido!": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5268"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/00_Base/004_Bosses_Totems.rb:L5313"
       ]
     },
     "Pokémon": {
       "Contexts": [
-        "BSS: [CARNEK] Battle Scene Studio Runtime/40_Camera_World/017_Consolidated_Authority.rb:L628"
+        "BSS: [CARNEK] Battle Scene Studio Runtime/40_Camera_World/017_Consolidated_Authority.rb:L675",
+        "BSS: [CARNEK] Battle Scene Studio Runtime/40_Camera_World/017_Consolidated_Authority.rb:L682"
+      ]
+    },
+    "Tu equipo": {
+      "Contexts": [
+        "BSS: [CARNEK] Battle Scene Studio Runtime/40_Camera_World/017_Consolidated_Authority.rb:L682"
       ]
     }
   },

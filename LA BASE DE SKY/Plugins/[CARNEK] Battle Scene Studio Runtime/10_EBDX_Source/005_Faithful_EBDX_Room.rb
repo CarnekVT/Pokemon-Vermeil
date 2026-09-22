@@ -1369,21 +1369,59 @@ class BSS070EBDXRoom
     end
   end
   #-----------------------------------------------------------------------------
-  # tints all the elements inside of the scene based on daytime conditions
+  # tints all the elements inside of the scene based on daytime conditions (EBDX Authentic)
   #-----------------------------------------------------------------------------
   def daylightTint
-    return if !@data.try_key?("sky", "outdoor")
-    # apply daytime shading
+    return if @data.is_a?(Hash) && @data["outdoor"] == false
+    is_outdoor = true
+    if @data.is_a?(Hash)
+      if @data.key?("outdoor")
+        is_outdoor = !!@data["outdoor"]
+      elsif @data.key?(:outdoor)
+        is_outdoor = !!@data[:outdoor]
+      else
+        is_outdoor = @data["sky"] || @data[:sky] || @data["skyMode"] || @data[:skyMode] || (defined?(EliteBattle) && EliteBattle.respond_to?(:outdoor_map?) && EliteBattle.outdoor_map?)
+      end
+    end
+    return unless is_outdoor
+
+    slot = defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : nil
+    if slot.nil?
+      mode = @data.is_a?(Hash) ? (@data[:skyMode] || @data["skyMode"]).to_s.downcase : ""
+      slot = if mode == "night"
+        :night
+      elsif mode == "dawn" || mode == "evening"
+        :dawn
+      elsif mode == "day"
+        :day
+      elsif (defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && PBDayNight.isNight?)
+        :night
+      elsif (defined?(PBDayNight) && ((PBDayNight.respond_to?(:isEvening?) && PBDayNight.isEvening?) || (PBDayNight.respond_to?(:isMorning?) && PBDayNight.isMorning?)))
+        :dawn
+      else
+        :day
+      end
+    end
+
+    target_tone = if slot == :night && !@sunny
+                    Tone.new(-120, -100, -60)
+                  elsif slot == :dawn && !@sunny
+                    Tone.new(-16, -52, -56)
+                  else
+                    Tone.new(0, 0, 0)
+                  end
+
     for key in @sprites.keys
       next if key.include?("trainer") || key.include?("battler")
-      next if key.include?("sky") || key.include?("sun") || key.include?("star") || key.include?("cloud") ||  key.include?("Light") || (@data[key].is_a?(Hash) && @data[key].has_key?(:shading) && !@data[key][:shading])
-      if PBDayNight.isNight? && !@sunny
-        @sprites[key].tone = Tone.new(-70, -30, 45, 0)
-      elsif (PBDayNight.isEvening? || PBDayNight.isMorning?) && !@sunny
-        @sprites[key].tone = Tone.new(75, 18, -65, 0)
-      else
-        @sprites[key].tone = Tone.new(0, 0, 0, 0)
+      next if key.include?("sky") || key.include?("sun") || key.include?("star") || key.include?("cloud") || key.include?("Light")
+      row = @data[key] || @data[key.to_s] || @data[key.to_sym] rescue nil
+      next if row.is_a?(Hash) && (row[:shading] == false || row["shading"] == false)
+      sp = @sprites[key]
+      next if !sp || (sp.disposed? rescue true) || !sp.respond_to?(:tone=)
+      if sp.respond_to?(:color=) && slot != :day
+        sp.color = Color.new(0, 0, 0, 0)
       end
+      sp.tone = target_tone
     end
   end
   #-----------------------------------------------------------------------------
@@ -1500,6 +1538,7 @@ class BSS070EBDXRoom
     return if !data.has_key?(:elements)
     bmp = data.has_key?(:bitmap) ? data[:bitmap] : "tree"
     bmp = pbBitmap("Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/#{bmp}")
+    slot = defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : (defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && PBDayNight.isNight? ? :night : :day)
     for i in 0...data[:elements]
       @sprites["tree#{i}"] = BSS070EBDXSprite.new(@viewport)
       x0 = data.has_key?(:mirror) && data[:mirror][i] ? bmp.width : 0
@@ -1512,7 +1551,9 @@ class BSS070EBDXRoom
       @sprites["tree#{i}"].z = data.has_key?(:z) ? data[:z][i] : 1
       @sprites["tree#{i}"].param = data.has_key?(:zoom) ? data[:zoom][i] : 1
       color = data.has_key?(:colorize) ? data[:colorize] : true
-      self.setColor(@sprites["bg"], @sprites["tree#{i}"], color) if color
+      if color && slot == :day
+        self.setColor(@sprites["bg"], @sprites["tree#{i}"], color)
+      end
       @sprites["tree#{i}"].memorize_bitmap
     end; bmp.dispose
   end
@@ -1523,6 +1564,7 @@ class BSS070EBDXRoom
     return if !data.has_key?(:elements)
     bmp = data.has_key?(:bitmap) ? data[:bitmap] : "tallGrass"
     bmp = pbBitmap("Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/#{bmp}")
+    slot = defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : (defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && PBDayNight.isNight? ? :night : :day)
     for i in 0...data[:elements]
       @sprites["grass#{i}"] = BSS070EBDXSprite.new(@viewport)
       x0 = data.has_key?(:mirror) && data[:mirror][i] ? bmp.width : 0
@@ -1535,7 +1577,9 @@ class BSS070EBDXRoom
       @sprites["grass#{i}"].z = data[:z][i] if data.has_key?(:z)
       @sprites["grass#{i}"].param = data.has_key?(:zoom) ? data[:zoom][i] : 1
       color = data.has_key?(:colorize) ? data[:colorize] : true
-      self.setColor(@sprites["bg"], @sprites["grass#{i}"], color) if color
+      if color && slot == :day
+        self.setColor(@sprites["bg"], @sprites["grass#{i}"], color)
+      end
       @sprites["grass#{i}"].memorize_bitmap
     end; bmp.dispose
   end

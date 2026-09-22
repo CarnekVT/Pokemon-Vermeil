@@ -808,6 +808,7 @@ module BSS064
       configure_bss_scene_environment(battle,bp)
       configure_native_sos(battle,bp)
       configure_native_boss(battle,bp) if respond_to?(:configure_native_boss)
+      BSS064.configure_bss_dialogues(battle, bp) if BSS064.respond_to?(:configure_bss_dialogues)
       setup_ai = hget(bp,"setup","aiSkill")
       if !setup_ai.nil? && setup_ai.to_s != ""
         battle.opponent_ai_skill = setup_ai.to_i if battle.respond_to?(:opponent_ai_skill=)

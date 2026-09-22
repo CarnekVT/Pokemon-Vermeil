@@ -1043,6 +1043,7 @@ class Battle
     end
     if show_intro
       pbDisplay(bss_sos_message("call","¡{1} pidió ayuda!",caller.pbThis))
+      pbDeluxeTriggers(caller.index, nil, "SOSCall") if respond_to?(:pbDeluxeTriggers)
       begin
         # The public BAS custom-animation path does not necessarily pass through
         # Scene#pbAnimation. Snapshot the caller here so SOS Call itself can never
@@ -1083,6 +1084,7 @@ class Battle
             # the caller/Totem's captured on-screen dimensions after that refresh.
             @scene.bss_reassert_boss_visual_scale(caller,true) if @scene.respond_to?(:bss_reassert_boss_visual_scale)
             pbDisplay(bss_sos_message("success","¡Apareció {1}!",battler.name,caller.pbThis))
+            pbDeluxeTriggers(battler.index, caller.index, "SOSSuccess") if respond_to?(:pbDeluxeTriggers)
             begin
               @scene.pbAnimateSubstitute(caller,:show) if show_intro && @scene.respond_to?(:pbAnimateSubstitute)
             rescue

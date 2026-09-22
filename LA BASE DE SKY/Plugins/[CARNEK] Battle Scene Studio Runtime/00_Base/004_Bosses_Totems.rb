@@ -105,7 +105,11 @@ module BSS064
         boss_skill = (cfg["aiSkill"] || cfg["skill"]).to_i
         battle.opponent_ai_skill = boss_skill if battle.respond_to?(:opponent_ai_skill=)
       end
-      if cfg.key?("midbattleScript")
+      has_bss_dialogues = bp.is_a?(Hash) && (
+        (bp["dialogues"].is_a?(Hash) && bp["dialogues"]["enabled"] != false && Array(bp["dialogues"]["triggers"]).any?) ||
+        (cfg["midbattleTriggers"].is_a?(Array) && !cfg["midbattleTriggers"].empty?)
+      )
+      if cfg.key?("midbattleScript") && !has_bss_dialogues
         mb_script = cfg["midbattleScript"]
         if mb_script.is_a?(String) && !mb_script.empty?
           mb_script = mb_script.to_sym rescue mb_script
@@ -120,7 +124,9 @@ module BSS064
           battle.midbattleScript = mb_script if battle.respond_to?(:midbattleScript=)
         end
       end
-      if cfg["midbattleTriggers"].is_a?(Array) && !cfg["midbattleTriggers"].empty?
+      # When BSSDialogueEngine is active, BSS manages its dialogue triggers natively
+      # so they are not duplicated by DBK's midbattle engine.
+      if !has_bss_dialogues && cfg["midbattleTriggers"].is_a?(Array) && !cfg["midbattleTriggers"].empty?
         custom_script = {}
         ev_counts = Hash.new(0)
         cfg["midbattleTriggers"].each do |entry|
@@ -191,6 +197,7 @@ module BSS064
         install_scene_aura_compat(battle)
         ensure_boss_recoil_hooks! if respond_to?(:ensure_boss_recoil_hooks!)
         configure_boss_capture(battle,cfg)
+        BSS064.configure_bss_dialogues(battle, bp) if BSS064.respond_to?(:configure_bss_dialogues)
       end
     rescue => e
       log("Boss configure failed: #{e.class}: #{e.message}")
@@ -3085,6 +3092,21 @@ module BSS064BossShieldBattlerCompat
     elsif is_boss && battle && battle.respond_to?(:bss_try_start_boss_shield) && (@hp rescue oldhp).to_i<oldhp
       battle.bss_try_start_boss_shield(self,false)
     end
+    # Ensure HP threshold triggers (75%, 50%, 25%) fire reliably across all damage types
+    newhp = (@hp rescue 0).to_i
+    if oldhp > 0 && (@totalhp rescue 0).to_i > 0 && newhp > 0 && battle && battle.respond_to?(:pbDeluxeTriggers)
+      old_pct = (oldhp.to_f / @totalhp.to_f) * 100.0
+      new_pct = (newhp.to_f / @totalhp.to_f) * 100.0
+      if old_pct > 75.0 && new_pct <= 75.0
+        battle.pbDeluxeTriggers(self, nil, "TargetHP75", "LastTargetHP75")
+      end
+      if old_pct > 50.0 && new_pct <= 50.0
+        battle.pbDeluxeTriggers(self, nil, "TargetHPHalf", "LastTargetHPHalf")
+      end
+      if old_pct > 25.0 && new_pct <= 25.0
+        battle.pbDeluxeTriggers(self, nil, "TargetHPLow", "LastTargetHPLow")
+      end
+    end
     result
   end
 end
@@ -4750,10 +4772,27 @@ class Battle
   def bss654_retire_sos_for_boss_capture(target)
     helpers = bss656_live_boss_helpers(target)
     return true if helpers.empty?
+    PBDebug.log("[BSS] Retiring #{helpers.length} SOS helper(s) before Boss capture scene") if defined?(PBDebug)
     helpers.each do |b|
-      bss656_flee_boss_helper(b, nil)
+      bss656_flee_boss_helper(b, false)
+      b.hp = 0 if b.respond_to?(:hp=)
+      b.instance_variable_set(:@fainted, true)
+      if @scene && @scene.sprites
+        bat = @scene.sprites["pokemon_#{b.index}"]
+        bat.visible = false if bat && bat.respond_to?(:visible=)
+        sha = @scene.sprites["shadow_#{b.index}"]
+        sha.visible = false if sha && sha.respond_to?(:visible=)
+        box = @scene.sprites["dataBox_#{b.index}"]
+        box.visible = false if box && box.respond_to?(:visible=)
+      end
+      begin; pbRemoveFromParty(b.index, b.pokemonIndex) if respond_to?(:pbRemoveFromParty); rescue; end
+      begin; pbClearChoice(b.index) if respond_to?(:pbClearChoice); rescue; end
     end
+    msg = helpers.length > 1 ? _INTL("¡Los Pokémon aliados huyeron aterrados al ver caer al dominante!") : _INTL("¡El Pokémon aliado huyó al ver caer al dominante!")
+    pbDisplayPaused(msg)
+    @decision = 0 if (@decision rescue 0).to_i != 0
     begin; @scene.bss652_layout_sos_databoxes if @scene && @scene.respond_to?(:bss652_layout_sos_databoxes); rescue; end
+    begin; @scene.bss665_hide_retired_helper_databoxes if @scene && @scene.respond_to?(:bss665_hide_retired_helper_databoxes); rescue; end
     begin; pbCalculatePriority(true) if respond_to?(:pbCalculatePriority); rescue; end
     true
   end
@@ -4814,6 +4853,9 @@ module BSS064BossPostFaintSOS656
         battle.instance_variable_set(:@bss656_capture_animation_snapshot,snap)
         battle.instance_variable_set(:@bss656_boss_faint_animation_snapshot,snap)
       end
+    end
+    if is_boss && capture && battle && battle.respond_to?(:bss654_retire_sos_for_boss_capture)
+      battle.bss654_retire_sos_for_boss_capture(self)
     end
     ret=super
     if is_boss && !capture && battle && battle.respond_to?(:bss656_resolve_boss_helpers)
@@ -5124,7 +5166,10 @@ class Battle
     before=(respond_to?(:bss_boss_shield_segments) ? bss_boss_shield_segments.to_i : 0) rescue 0
     ret=bss658_orig_damage_boss_shield(battler,count,*args)
     after=(respond_to?(:bss_boss_shield_segments) ? bss_boss_shield_segments.to_i : 0) rescue before
-    bss658_apply_shield_break_stats(battler) if before>0 && after<=0
+    if before > 0 && after <= 0
+      bss658_apply_shield_break_stats(battler)
+      pbDeluxeTriggers(battler.index, nil, "ShieldBreak") if respond_to?(:pbDeluxeTriggers)
+    end
     ret
   end
 end

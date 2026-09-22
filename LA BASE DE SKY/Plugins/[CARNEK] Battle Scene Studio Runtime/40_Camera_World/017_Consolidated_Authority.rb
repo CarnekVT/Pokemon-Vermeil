@@ -598,9 +598,25 @@ end
 module BSS084BossEXP
   def bss084_global_exp_mode?
     cfg = @bss_boss_config
-    cfg.is_a?(Hash) && cfg["enabled"] == true && cfg["expMode"].to_s == "global"
+    return false unless cfg.is_a?(Hash) && cfg["enabled"] == true
+    mode = cfg["expMode"].to_s.downcase
+    %w[global single single_team participants silent].include?(mode)
   rescue
     false
+  end
+
+  def pbGainExp(*args, &block)
+    @bss084_in_boss_exp = true
+    super
+  ensure
+    @bss084_in_boss_exp = false
+  end
+
+  def pbDisplayPaused(msg, *args, &block)
+    if @bss084_in_boss_exp && bss084_global_exp_mode? && msg.to_s.include?("otros Pokémon también ganaron")
+      return
+    end
+    super
   end
 
   def pbGainExpOne(idxParty, defeatedBattler, numPartic, expShare, expAll, showMessages=true)
@@ -611,9 +627,11 @@ module BSS084BossEXP
     if pkmn && before
       gained = [pkmn.exp.to_i - before, 0].max
       @bss084_exp_totals ||= {}
-      row = (@bss084_exp_totals[idxParty] ||= { :pokemon => pkmn, :exp => 0 })
+      is_partic = defeatedBattler.respond_to?(:participants) && defeatedBattler.participants.include?(idxParty)
+      row = (@bss084_exp_totals[idxParty] ||= { :pokemon => pkmn, :exp => 0, :partic => false })
       row[:pokemon] = pkmn
       row[:exp] += gained
+      row[:partic] ||= is_partic
     end
     ret
   end
@@ -621,12 +639,49 @@ module BSS084BossEXP
   def bss084_show_exp_summary
     return if @bss084_exp_summary_shown || !bss084_global_exp_mode?
     @bss084_exp_summary_shown = true
+    cfg = @bss_boss_config.is_a?(Hash) ? @bss_boss_config : {}
+    mode = cfg["expMode"].to_s.downcase
+    return if mode == "silent"
+
     rows = @bss084_exp_totals
     return if !rows.is_a?(Hash) || rows.empty?
-    rows.keys.sort.each do |idx|
-      row=rows[idx]; next if !row || row[:exp].to_i<=0
-      pkmn=row[:pokemon]; name=(pkmn.name rescue _INTL("Pokémon"))
-      msg=((@bss_boss_config.is_a?(Hash) && @bss_boss_config["expSummaryMessage"]) rescue nil).to_s; msg="¡{1} ganó un total de {2} Puntos de Experiencia!" if msg.empty?; pbDisplay(_INTL(msg,name,row[:exp].to_i))
+
+    raw_msg = (cfg["expSummaryMessage"]).to_s.strip
+    raw_msg = "¡{1} ganó un total de {2} Puntos de Experiencia!" if raw_msg.empty?
+
+    total_team_exp = 0
+    rows.each_value { |r| total_team_exp += r[:exp].to_i if r }
+    return if total_team_exp <= 0
+
+    # If the message does not use {1} (specific Pokémon name), or if configured as single_team:
+    # show ONE single message for the whole team!
+    if !raw_msg.include?("{1}") || mode == "single_team"
+      team_msg = raw_msg.dup
+      team_msg.gsub!("{1}", "Tu equipo")
+      team_msg.gsub!("{2}", total_team_exp.to_s)
+      pbDisplay(_INTL(team_msg))
+    else
+      # If {1} is present, only show messages for actual combat participants
+      # to prevent spamming 6 separate modal windows for bench Pokémon
+      shown_any = false
+      rows.keys.sort.each do |idx|
+        row = rows[idx]
+        next if !row || row[:exp].to_i <= 0
+        # If participants mode, skip non-participants
+        next if mode == "participants" && !row[:partic]
+        # In global mode with {1}, only show for participants unless none participated
+        next if mode == "global" && !row[:partic] && rows.values.any? { |v| v[:partic] }
+        pkmn = row[:pokemon]
+        name = (pkmn.name rescue _INTL("Pokémon"))
+        pbDisplay(_INTL(raw_msg, name, row[:exp].to_i))
+        shown_any = true
+      end
+      # Fallback if no participant message was shown
+      if !shown_any
+        lead = pbParty(0).first rescue nil
+        name = lead ? (lead.name rescue _INTL("Pokémon")) : _INTL("Tu equipo")
+        pbDisplay(_INTL(raw_msg, name, total_team_exp))
+      end
     end
   rescue => e
     BSS064.log("BSS084 EXP summary warning: #{e.class}: #{e.message}") if defined?(BSS064)

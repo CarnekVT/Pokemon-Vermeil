@@ -217,6 +217,7 @@ module BSS098SingleFrameEnvironment
       row=@data[key] || @data[key.to_s] || @data[key.to_sym] rescue nil
       next if row.is_a?(Hash) && BSS098.hash_get(row,:shading) == false
       sp.tone=target_tone
+      sp.color=Color.new(0, 0, 0, 0) if sp.respond_to?(:color=) && slot != :day
     end
   rescue => e
     BSS064.log("BSS098 daylightTint warning: #{e.class}: #{e.message}") if defined?(BSS064)

@@ -602,15 +602,80 @@ end
 
 #-------------------------------------------------------------------------------
 # BSS DBK Bridge: Midbattle Script & Symbol Resolution Fix
-# Ensures Midbattle symbol scripts correctly load their Hash from MidbattleScripts,
+## Ensures Midbattle symbol scripts correctly load their Hash from MidbattleScripts,
 # and fixes the HP thresholds (75%, 50%, 25%) in pbFinalizeMoveTriggers.
 #-------------------------------------------------------------------------------
 module BSSMidbattleSymbolResolver
   def pbDeluxeTriggers(idxBattler, idxTarget, *triggers)
+    return if triggers.empty?
+    return unless triggers[0].is_a?(String) || triggers[0].is_a?(Symbol)
+
+    u_idx = idxBattler.respond_to?(:index) ? idxBattler.index : idxBattler
+    t_idx = idxTarget.respond_to?(:index) ? idxTarget.index : idxTarget
+
+    handled_triggers = []
+
+    # 1. Evaluate BSS Native Dialogue Engine
+    if respond_to?(:bss_dialogue_engine) && bss_dialogue_engine && bss_dialogue_engine.enabled?
+      triggers.each do |trig|
+        next unless trig.is_a?(String) || trig.is_a?(Symbol)
+        if bss_dialogue_engine.process_event(trig, u_idx, t_idx)
+          handled_triggers << trig.to_s
+        end
+      end
+    end
+
+    # 2. Ensure Midbattle symbol scripts correctly load their Hash
     if @midbattleScript.is_a?(Symbol) && defined?(MidbattleScripts) && hasConst?(MidbattleScripts, @midbattleScript)
       @midbattleScript = getConst(MidbattleScripts, @midbattleScript).clone
     end
-    super(idxBattler, idxTarget, *triggers)
+
+    # 2b. If BSSDialogueEngine handled triggers, eliminate them from @midbattleScript
+    # to guarantee DBK does not replay the same text a second time!
+    if !handled_triggers.empty? && @midbattleScript.is_a?(Hash)
+      handled_triggers.each do |ht|
+        clean = ht.sub(/_(foe\d*|player\d*|sos\d*)$/i, "")
+        @midbattleScript.keys.each do |k|
+          k_clean = k.to_s.sub(/_(foe\d*|player\d*|sos\d*)$/i, "")
+          if k.to_s.casecmp?(ht) || k_clean.casecmp?(clean) || k_clean.sub(/^Last/i, "").casecmp?(clean.sub(/^Last/i, ""))
+            @midbattleScript.delete(k)
+          end
+        end
+      end
+    end
+
+    # If BSS Dialogue Engine handled this trigger, do NOT delegate to DBK!
+    # DBK's pbDeluxeTriggers expects triggers[0] to be a String trigger name.
+    # Passing filtered triggers or orphaned modifiers causes NoMethodError in DBK (e.g. 1.include?("Turn")).
+    # Returning early here completely eliminates the double-message replay bug.
+    return if !handled_triggers.empty?
+
+    # Prepare safe triggers for DBK (ensure triggers[0] is a String, not a Symbol)
+    clean_triggers = triggers.dup
+    clean_triggers[0] = clean_triggers[0].to_s if clean_triggers[0].is_a?(Symbol)
+
+    # 3. Shield DBK from SOS / Boss cross-contamination
+    if @midbattleScript.is_a?(Hash) && respond_to?(:bss_boss_enabled?) && bss_boss_enabled?
+      boss = (bss_find_boss_battler_any rescue nil)
+      is_sos = boss && u_idx && u_idx != boss.index && (opposes?(u_idx) rescue false)
+
+      if is_sos
+        # SOS helper active: temporarily shield Boss triggers so DBK does not fire or delete them
+        shielded = {}
+        @midbattleScript.keys.each do |k|
+          if k =~ /_(foe|foe1)$/ || k =~ /TargetHP/ || k =~ /BattlerFainted/
+            shielded[k] = @midbattleScript.delete(k)
+          end
+        end
+        begin
+          return super(idxBattler, idxTarget, *clean_triggers)
+        ensure
+          shielded.each { |k, v| @midbattleScript[k] = v }
+        end
+      end
+    end
+
+    super(idxBattler, idxTarget, *clean_triggers)
   end
 end
 
@@ -622,40 +687,27 @@ rescue => e
   BSS064.log("BSS midbattle symbol resolver install warning: #{e.class}: #{e.message}") if defined?(BSS064)
 end
 
+#-------------------------------------------------------------------------------
+# Move Midbattle Triggers & HP Threshold Fix
+#-------------------------------------------------------------------------------
 module BSSMoveMidbattleTriggersFix
   def pbFinalizeMoveTriggers(user, target)
     if !user.fainted?
       if user.hp <= (user.totalhp * 3 / 4)
         lowHP = user.hp <= user.totalhp / 4
         halfHP = user.hp <= user.totalhp / 2
-        is_last = (@battle.pbParty(user.index).length > @battle.pbSideSize(user.index)) ?
-                  (@battle.pbAbleNonActiveCount(user.index) == 0) : true
-        prefix = is_last ? "LastUser" : "User"
-        @battler_triggers[:user].push("#{prefix}HP75", user.species, *user.pokemon.types)
-        @battler_triggers[:user].push("#{prefix}HPHalf", user.species, *user.pokemon.types) if halfHP
-        @battler_triggers[:user].push("#{prefix}HPLow", user.species, *user.pokemon.types) if lowHP
-        if !is_last && @battle.pbParty(user.index).length <= @battle.pbSideSize(user.index)
-          @battler_triggers[:user].push("UserHP75", user.species, *user.pokemon.types)
-          @battler_triggers[:user].push("UserHPHalf", user.species, *user.pokemon.types) if halfHP
-          @battler_triggers[:user].push("UserHPLow", user.species, *user.pokemon.types) if lowHP
-        end
+        @battler_triggers[:user].push("UserHP75", "LastUserHP75", user.species, *user.pokemon.types)
+        @battler_triggers[:user].push("UserHPHalf", "LastUserHPHalf", user.species, *user.pokemon.types) if halfHP
+        @battler_triggers[:user].push("UserHPLow", "LastUserHPLow", user.species, *user.pokemon.types) if lowHP
       end
     end
     if !target.fainted? && user.opposes?(target.index)
       if target.hp <= (target.totalhp * 3 / 4)
         lowHP = target.hp <= target.totalhp / 4
         halfHP = target.hp <= target.totalhp / 2
-        is_last = (@battle.pbParty(target.index).length > @battle.pbSideSize(target.index)) ?
-                  (@battle.pbAbleNonActiveCount(target.index) == 0) : true
-        prefix = is_last ? "LastTarget" : "Target"
-        @battler_triggers[:targ].push("#{prefix}HP75", target.species, *target.pokemon.types)
-        @battler_triggers[:targ].push("#{prefix}HPHalf", target.species, *target.pokemon.types) if halfHP
-        @battler_triggers[:targ].push("#{prefix}HPLow", target.species, *target.pokemon.types) if lowHP
-        if !is_last && @battle.pbParty(target.index).length <= @battle.pbSideSize(target.index)
-          @battler_triggers[:targ].push("TargetHP75", target.species, *target.pokemon.types)
-          @battler_triggers[:targ].push("TargetHPHalf", target.species, *target.pokemon.types) if halfHP
-          @battler_triggers[:targ].push("TargetHPLow", target.species, *target.pokemon.types) if lowHP
-        end
+        @battler_triggers[:targ].push("TargetHP75", "LastTargetHP75", target.species, *target.pokemon.types)
+        @battler_triggers[:targ].push("TargetHPHalf", "LastTargetHPHalf", target.species, *target.pokemon.types) if halfHP
+        @battler_triggers[:targ].push("TargetHPLow", "LastTargetHPLow", target.species, *target.pokemon.types) if lowHP
       end
     end
     @battler_triggers.each do |battler, triggers|
@@ -791,6 +843,111 @@ begin
   end
 rescue => e
   BSS064.log("BSS core battle safety install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+#-------------------------------------------------------------------------------
+# BSS Cinematic Black Bars & Textbox Z-Order and Namebox Positioning Fix
+# Ensures black bars fill Graphics.width and Graphics.height completely,
+# all cinematic dialogue elements are layered on top of all battler sprites,
+# and the namebox is always anchored cleanly ABOVE the message window.
+#-------------------------------------------------------------------------------
+module BSSCinematicSceneFix
+  def bss_reposition_name_window!
+    return unless @sprites && @sprites["nameWindow"] && @sprites["messageWindow"]
+    nw = @sprites["nameWindow"]
+    mw = @sprites["messageWindow"]
+    nw.z = 99995
+    mw.z = 99995
+    nw.y = mw.y - nw.height + 4
+    nw.x = [mw.x + 8, 16].max
+  end
+
+  def pbToggleBlackBars(toggle = false)
+    path = Settings::DELUXE_GRAPHICS_PATH
+    pbAddSprite("topBar", Graphics.width, 0, path + "blackbar_top", @viewport) if !@sprites["topBar"]
+    pbAddSprite("bottomBar", 0, Graphics.height, path + "blackbar_bottom", @viewport) if !@sprites["bottomBar"]
+
+    if @sprites["topBar"] && @sprites["topBar"].bitmap
+      @sprites["topBar"].zoom_x = Graphics.width.to_f / @sprites["topBar"].bitmap.width.to_f
+      @sprites["topBar"].z = 99990
+    end
+    if @sprites["bottomBar"] && @sprites["bottomBar"].bitmap
+      @sprites["bottomBar"].zoom_x = Graphics.width.to_f / @sprites["bottomBar"].bitmap.width.to_f
+      @sprites["bottomBar"].y = Graphics.height
+      @sprites["bottomBar"].z = 99990
+    end
+    if @sprites["nameWindow"]
+      @sprites["nameWindow"].z = 99995
+    end
+    if @sprites["messageWindow"]
+      @sprites["messageWindow"].z = 99995
+    end
+    if @sprites["midbattle_speaker"]
+      @sprites["midbattle_speaker"].z = 99980
+    end
+
+    super(toggle)
+
+    bss_reposition_name_window!
+  end
+
+  def pbUpdateSpeakerWindows(*args)
+    super(*args)
+    bss_reposition_name_window!
+  end
+
+  def pbShowSpeakerWindows(*args)
+    super(*args)
+    bss_reposition_name_window!
+  end
+end
+
+begin
+  if defined?(Battle::Scene)
+    Battle::Scene.prepend(BSSCinematicSceneFix) unless Battle::Scene.ancestors.include?(BSSCinematicSceneFix)
+  end
+rescue => e
+  BSS064.log("BSS cinematic scene fix install warning: #{e.class}: #{e.message}") if defined?(BSS064)
+end
+
+module BSSCinematicToggleBlackBarsAnimFix
+  def createProcesses
+    delay = 5
+    topBar = addSprite(@sprites["topBar"], PictureOrigin::TOP_LEFT)
+    topBar.setZ(0, 99990)
+    bottomBar = addSprite(@sprites["bottomBar"], PictureOrigin::BOTTOM_RIGHT)
+    bottomBar.setZ(0, 99990)
+
+    top_zoom = ((Graphics.width.to_f / @sprites["topBar"].bitmap.width.to_f) * 100.0).round rescue 100
+    bottom_zoom = ((Graphics.width.to_f / @sprites["bottomBar"].bitmap.width.to_f) * 100.0).round rescue 100
+    topBar.setZoom(0, top_zoom)
+    bottomBar.setZoom(0, bottom_zoom)
+
+    toMoveBottom = Graphics.width
+    toMoveTop = Graphics.width
+
+    if @toggle
+      topBar.setOpacity(0, 255)
+      bottomBar.setOpacity(0, 255)
+      topBar.setXY(0, Graphics.width, 0)
+      bottomBar.setXY(0, 0, Graphics.height)
+      topBar.moveXY(delay, 5, 0, 0)
+      bottomBar.moveXY(delay, 5, toMoveBottom, Graphics.height)
+    else
+      topBar.moveOpacity(delay, 4, 0)
+      bottomBar.moveOpacity(delay, 4, 0)
+      topBar.setXY(delay + 5, Graphics.width, 0)
+      bottomBar.setXY(delay + 5, 0, Graphics.height)
+    end
+  end
+end
+
+begin
+  if defined?(Battle::Scene::Animation::ToggleBlackBars)
+    Battle::Scene::Animation::ToggleBlackBars.prepend(BSSCinematicToggleBlackBarsAnimFix) unless Battle::Scene::Animation::ToggleBlackBars.ancestors.include?(BSSCinematicToggleBlackBarsAnimFix)
+  end
+rescue => e
+  BSS064.log("BSS cinematic black bars anim fix install warning: #{e.class}: #{e.message}") if defined?(BSS064)
 end
 
 

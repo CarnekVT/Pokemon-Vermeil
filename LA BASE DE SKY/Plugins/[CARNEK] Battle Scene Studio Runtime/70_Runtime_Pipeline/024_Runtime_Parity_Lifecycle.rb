@@ -223,13 +223,12 @@ module BSS095RoomParityAuthority
     ret
   end
 
-  # Readable dynamic lighting. The old source night tone (-120,-100,-60) is too
-  # dark for modern 640x480 battlebacks and hides pixel-art detail.
+  # Readable dynamic lighting using authentic EBDX tone palette (-120, -100, -60).
   def daylightTint
     has_outdoor = @data.is_a?(Hash) && (@data[:outdoor] || @data["outdoor"] || @data[:sky] || @data["sky"] || @data[:skyMode] || @data["skyMode"] || @data[:cloudsConfig] || @data["cloudsConfig"])
     return unless has_outdoor
     custom=@data["lighting"] rescue nil
-    nt=[-52,-44,-28]; tw=[-10,-24,-22]
+    nt=[-120,-100,-60]; tw=[-16,-52,-56]
     if custom.is_a?(Hash)
       n=custom[:night] || custom["night"]; t=custom[:twilight] || custom["twilight"]
       nt=n.map{|x| BSS095.num(x,0).to_i}[0,3] if n.is_a?(Array) && n.length>=3
@@ -249,13 +248,14 @@ module BSS095RoomParityAuthority
         slot = (defined?(BSS106) && BSS106.respond_to?(:time_slot)) ? BSS106.time_slot(@data) : (PBDayNight.isNight? ? :night : ((PBDayNight.isEvening? || PBDayNight.isMorning?) ? :dawn : :day))
         tone_for_slot = case slot
         when :night
-          Tone.new(-70, -30, 45, 0)
+          Tone.new(nt[0], nt[1], nt[2], 0)
         when :dawn
-          Tone.new(75, 18, -65, 0)
+          Tone.new(tw[0], tw[1], tw[2], 0)
         else
           Tone.new(0, 0, 0, 0)
         end
         sp.tone = tone_for_slot
+        sp.color = Color.new(0, 0, 0, 0) if sp.respond_to?(:color=) && slot != :day
       rescue
       end
     end
