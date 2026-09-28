@@ -16,19 +16,20 @@ module Diff
     "base_exp" => "Experiencia base", "happiness" => "Felicidad base", "height" => "Altura", "weight" => "Peso",
     "generation" => "Generación", "category" => "Categoría", "pokedex" => "Entrada Pokédex",
     "wild_items" => "Objetos salvajes", "evolves_to" => "Evoluciones", "prevo" => "Preevolución",
-    "mega_stone" => "Piedra Mega", "mega_move" => "Movimiento Mega", "hidden_from_dex" => "Oculto en la Pokédex",
+    "mega_stone" => "Piedra Mega", "mega_move" => "Movimiento Mega",
     "type" => "Tipo", "power" => "Potencia", "accuracy" => "Precisión",
     "total_pp" => "PP", "priority" => "Prioridad", "target" => "Objetivo", "function_code" => "Código de efecto",
     "flags" => "Propiedades", "effect_chance" => "Probabilidad de efecto", "description" => "Descripción",
     "name_plural" => "Nombre plural", "pocket" => "Bolsillo", "price" => "Precio", "sell_price" => "Precio de venta",
     "bp_price" => "Precio en PC", "field_use" => "Uso en el mapa", "battle_use" => "Uso en combate",
     "consumable" => "Consumible", "machine" => "MT/MO", "type_name" => "Tipo de entrenador",
-    "version" => "Versión", "lose_text" => "Frase de derrota", "items" => "Objetos", "party" => "Equipo"
+    "version" => "Versión", "lose_text" => "Frase de derrota", "items" => "Objetos", "party" => "Equipo",
+    "weaknesses" => "Debilidades", "resistances" => "Resistencias", "immunities" => "Inmunidades"
   }.freeze
 
   CATEGORY_LABELS = {
     "species" => "Pokémon", "moves" => "Movimientos", "abilities" => "Habilidades",
-    "items" => "Objetos", "trainers" => "Entrenadores"
+    "items" => "Objetos", "trainers" => "Entrenadores", "types" => "Tipos"
   }.freeze
 
   module_function
@@ -56,7 +57,9 @@ module Diff
     result = { empty: false, counts: Hash.new(0), removed: {} }
 
     current.each do |cat, entries|
-      base_cat = baseline[cat] || {}
+      next unless baseline.key?(cat)
+
+      base_cat = baseline[cat]
       per_entity = {}
 
       entries.each do |id, fields|
@@ -74,7 +77,14 @@ module Diff
 
       removed = base_cat.keys - entries.keys
       unless removed.empty?
-        result[:removed][cat] = removed
+        result[:removed][cat] = removed.map do |id|
+          fields = base_cat[id] || {}
+          name = fields["name"].to_s
+          form = fields["form_name"]
+          name = id if name.empty?
+          name = "#{name} — #{form}" if cat == "species" && form && !form.empty?
+          { id: id, name: name }
+        end
         result[:counts]["eliminadas"] += removed.size
       end
 
@@ -85,11 +95,26 @@ module Diff
     result
   end
 
+  def comparison_value(value)
+    case value
+    when Hash
+      value.transform_values { |nested| comparison_value(nested) }
+    when Array
+      value.map { |nested| comparison_value(nested) }
+    when String
+      value.encode(Encoding::UTF_8, invalid: :replace, undef: :replace, replace: "�")
+           .unicode_normalize(:nfd).gsub(/\p{Mn}/, "")
+    else
+      value
+    end
+  end
+
   def diff_fields(before, after)
     (before.keys | after.keys).filter_map do |k|
       b = before[k]
       a = after[k]
-      next if b == a
+      next if k == "hidden_from_dex" # Campo interno de Pokédex; no es un cambio de juego.
+      next if comparison_value(b) == comparison_value(a)
 
       { field: k, label: FIELD_LABELS[k] || k, from: b, to: a }
     end

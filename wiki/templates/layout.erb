@@ -6,6 +6,7 @@
 <title><%= h(@title) %> · <%= h(meta[:game_title]) %></title>
 <meta name="generator" content="Wiki generada el <%= h(meta[:generated]) %><%= " · #{meta[:version]}" if meta[:version] %>">
 <link rel="stylesheet" href="<%= asset('style.css') %>">
+<link rel="stylesheet" href="<%= asset('accent.css') %>">
 <script>
 (function () {
   try {
@@ -19,7 +20,7 @@
 <body>
 <header class="topbar">
   <a class="brand" href="<%= asset('index.html') %>"><%= h(meta[:game_title]) %></a>
-  <nav>
+  <nav aria-label="Secciones de la wiki">
     <a href="<%= asset('pokemon/index.html') %>">Pokédex</a>
     <a href="<%= asset('movimientos/index.html') %>">Movimientos</a>
     <a href="<%= asset('habilidades/index.html') %>">Habilidades</a>
@@ -27,10 +28,19 @@
     <a href="<%= asset('entrenadores/index.html') %>">Entrenadores</a>
     <a href="<%= asset('ubicaciones/index.html') %>">Ubicaciones</a>
     <a href="<%= asset('tipos.html') %>">Tipos</a>
+    <a href="<%= asset('cambios.html') %>">Cambios</a>
   </nav>
   <div class="tools">
-    <input type="search" id="q" placeholder="Buscar…" autocomplete="off" aria-label="Buscar">
-    <button type="button" id="theme-toggle" aria-label="Cambiar tema">Tema</button>
+    <input type="search" id="q" placeholder="Buscar Pokémon, objeto…" autocomplete="off" aria-label="Buscar Pokémon, movimientos, habilidades, objetos o tipos">
+    <button type="button" id="theme-toggle" aria-label="Tema oscuro" aria-pressed="false">
+      <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+      </svg>
+      <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M20.2 15.3A8.5 8.5 0 0 1 8.7 3.8 8.6 8.6 0 1 0 20.2 15.3Z"></path>
+      </svg>
+    </button>
   </div>
   <div id="results" hidden></div>
 </header>
@@ -38,6 +48,9 @@
 <script>window.WIKI_ROOT = "<%= @root %>";</script>
 <script src="<%= asset('buscar.js') %>"></script>
 <script src="<%= asset('search.js') %>"></script>
+<script src="<%= asset('filter.js') %>"></script>
+<script src="<%= asset('sort-items.js') %>"></script>
+<script src="<%= asset('sort-moves.js') %>"></script>
 <script src="<%= asset('theme.js') %>"></script>
 </body>
 </html>

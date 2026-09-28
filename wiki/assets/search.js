@@ -9,7 +9,7 @@
   var root = window.WIKI_ROOT || '';
   var COMBINING = new RegExp('[\\u0300-\\u036f]', 'g');
   var norm = function (s) { return s.toLowerCase().normalize('NFD').replace(COMBINING, ''); };
-  var keys = items.map(function (it) { return norm(it.n); });
+  var keys = items.map(function (it) { return norm(it.n + ' ' + (it.s || '')); });
 
   function run() {
     var q = norm(input.value.trim());
@@ -18,7 +18,9 @@
     for (var i = 0; i < items.length && hits.length < 40; i++) {
       if (keys[i].indexOf(q) !== -1) hits.push(items[i]);
     }
-    hits.sort(function (a, b) { return norm(a.n).indexOf(q) - norm(b.n).indexOf(q); });
+    hits.sort(function (a, b) {
+      return norm(a.n + ' ' + (a.s || '')).indexOf(q) - norm(b.n + ' ' + (b.s || '')).indexOf(q);
+    });
     box.innerHTML = hits.map(function (it) {
       var extra = it.x ? ' · ' + it.x : '';
       return '<a href="' + root + it.u + '"><span>' + it.n + '</span>' +

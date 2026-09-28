@@ -5,29 +5,92 @@
              items: "Objetos", trainers: "Entrenadores" }
   title(titles[key])
 
+  form_groups = data[:species].values.group_by { |s| s[:species] } if key == :species
+  item_pbs_order = data[:items].keys.each_with_index.to_h if key == :items
   entries =
     if key == :species
-      by_base = data[:species].values.group_by { |s| s[:species] }
-      seen = {}
-      ordered = data[:dex_order].flat_map { |sp| seen[sp] = true; by_base[sp] || [] }
-      ordered + by_base.reject { |sp, _| seen[sp] }.values.flatten
+      species_order = data[:dex_order].uniq
+      species_order.concat(form_groups.keys - species_order)
+      species_order.filter_map do |species|
+        forms = form_groups[species]
+        next if forms.nil? || forms.empty?
+
+        forms.find { |form| form[:form].to_i.zero? } || forms.min_by { |form| form[:form].to_i }
+      end
     else
       data[key].values.sort_by { |e| (e[:name] || e[:key]).to_s.downcase }
     end
   url = ->(e) { asset("#{folder}/#{e[:key] || e[:id]}.html") }
+  relevant_fields = %w[base_stats types abilities hidden_abilities]
+  modified_species_count = if key == :species
+    form_groups.count do |_, forms|
+      forms.any? do |form|
+        change = form[:change]
+        change && change[:status] == "modificado" && Array(change[:fields]).any? { |field| relevant_fields.include?(field[:field].to_s) }
+      end
+    end
+  end
+  has_changes = entries.any? do |e|
+    key == :species ? form_groups[e[:species]].any? { |form| form[:change] } : e[:change]
+  end
 %>
-<h1><%= h(titles[key]) %> <span class="count"><%= entries.size %></span></h1>
+<h1><%= h(titles[key]) %> <span class="count"><%= entries.size %></span><% if key == :species && has_changes %><span class="modified-count"><%= modified_species_count %> Pokémon modificados</span><% end %></h1>
+<div class="list-tools">
+  <label class="page-search" for="page-search">Buscar en esta página
+    <input id="page-search" type="search" placeholder="Escribe un nombre…" autocomplete="off">
+  </label>
+  <% if key == :species && has_changes %>
+    <label class="list-sort" for="dex-change-filter">Mostrar
+      <select id="dex-change-filter" aria-label="Filtrar la Pokédex por cambios">
+        <option value="all">Toda la Pokédex</option>
+        <option value="relevant">Solo cambios relevantes</option>
+        <option value="changed">Todos los Pokémon con cambios</option>
+      </select>
+    </label>
+  <% end %>
+  <% if key == :items %>
+    <label class="list-sort" for="item-sort">Ordenar por
+      <select id="item-sort" aria-label="Ordenar objetos">
+        <option value="pocket" selected>Bolsillo</option>
+        <option value="pbs">Orden original del juego</option>
+        <option value="name">Nombre (A–Z)</option>
+      </select>
+    </label>
+  <% end %>
+  <% if key != :trainers && key != :species && has_changes %>
+    <label><input type="checkbox" id="changes-only"> Mostrar solo cambios</label>
+  <% end %>
+  <span id="list-count" role="status"><%= entries.size %> resultados</span>
+</div>
+<p class="muted" id="filter-empty" hidden>No se encontraron resultados en esta página.</p>
 
 <% if key == :species %>
 <div class="dexgrid">
   <% entries.each_with_index do |e, i| %>
-    <a class="dexcard" href="<%= url.call(e) %>">
+    <% forms = form_groups[e[:species]] || [e] %>
+    <% has_any_change = forms.any? { |form| form[:change] } %>
+    <% relevant_modified_form = forms.find do |form|
+         change = form[:change]
+         change && change[:status] == "modificado" && Array(change[:fields]).any? { |field| relevant_fields.include?(field[:field].to_s) }
+       end %>
+    <% new_forms = forms.select { |form| form.dig(:change, :status) == "nuevo" } %>
+    <% species_is_new = new_forms.size == forms.size %>
+    <% has_relevant_change = !relevant_modified_form.nil? || new_forms.any? %>
+    <% search_text = page_search_text(display_name(e), forms.map { |form| form_label(form) }, e[:types].map { |type_id| type(type_id)&.dig(:name) }) %>
+    <% card_entry = if relevant_modified_form
+         e.merge(change: relevant_modified_form[:change])
+       elsif species_is_new
+         e.merge(change: new_forms.first[:change])
+       else
+         e
+       end %>
+    <a class="dexcard" data-change-entry data-change-status="<%= card_entry.dig(:change, :status) || 'sin-cambios' %>" data-has-change="<%= has_any_change %>" data-change-relevant="<%= has_relevant_change %>" data-page-search-entry data-search-text="<%= h(search_text) %>" href="<%= url.call(e) %>">
       <span class="no"><%= format("%03d", i + 1) %></span>
-      <%= badge(e) %>
+      <% if relevant_modified_form %><%= badge(card_entry) %><% elsif species_is_new %><%= badge(card_entry) %><% elsif new_forms.any? %><span class="badge badge--new">Forma nueva</span><% elsif has_any_change %><span class="badge badge--other">Cambios menores</span><% end %>
       <%= picon(e[:id]) %>
       <span class="nm"><%= h(display_name(e)) %></span>
       <span class="types"><%= types_row(e[:types], small: true, link: false) %></span>
-      <span class="bst"><%= e[:bst] %> total</span>
+      <span class="bst"><%= e[:bst] %> total<%= " · #{forms.size} formas" if forms.size > 1 %></span>
     </a>
   <% end %>
 </div>
@@ -35,7 +98,9 @@
 <% elsif key == :trainers %>
 <div class="party">
   <% entries.each do |e| %>
-    <a class="dexcard" href="<%= url.call(e) %>" style="align-items:center">
+    <% party_names = e[:party].filter_map { |pkmn| species(pkmn[:species])&.dig(:name) } %>
+    <% search_text = page_search_text(e[:name], e[:type_name], party_names) %>
+    <a class="dexcard" data-page-search-entry data-search-text="<%= h(search_text) %>" href="<%= url.call(e) %>" style="align-items:center">
       <%= tsprite(e[:trainer_type]) %>
       <span class="nm"><%= h(e[:name]) %><%= " (#{e[:version]})" if e[:version].to_i > 0 %></span>
       <span class="bst"><%= h(e[:type_name]) %> · <%= e[:party].size %> Pokémon</span>
@@ -58,9 +123,12 @@
       <% end %>
     </tr>
   </thead>
-  <tbody>
+  <tbody<%= ' id="item-list"' if key == :items %>>
   <% entries.each do |e| %>
-    <tr>
+    <% search_parts = [e[:name], e[:description], e[:pocket_name], e[:category_name]]
+       search_parts << type(e[:type])&.dig(:name) if key == :moves
+       search_text = page_search_text(search_parts) %>
+    <tr data-page-search-entry data-search-text="<%= h(search_text) %>" data-change-entry data-change-status="<%= e.dig(:change, :status) || 'sin-cambios' %>"<%= %( data-sort-pbs="#{item_pbs_order[e[:id]]}" data-sort-pocket="#{e[:pocket].to_i}" data-sort-name="#{h(e[:name])}") if key == :items %>>
       <% case key
          when :moves %>
         <td><a href="<%= url.call(e) %>"><%= h(e[:name]) %></a></td>

@@ -1,11 +1,44 @@
 stages:
   - test
+  - build
   - notify
   - release
-  # - build
 
 # Boots Essentials headlessly and runs tests/. No gems to install: the runner is
 # tests/framework.rb and everything else ships with Ruby.
+wiki-baseline:
+  stage: build
+  image: ruby:3.4
+  tags:
+    - self-hosted
+  rules:
+    - if: '$CI_PROJECT_PATH == "la-base-de-sky/La-Base-de-Sky" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH'
+      changes:
+        - "LA BASE DE SKY/PBS/**/*"
+        - "wiki/lib/extract.rb"
+        - "wiki/generate.rb"
+        - ".gitlab-ci.yml"
+      when: always
+  script:
+    - |
+      set -euo pipefail
+
+      SNAPSHOT="$(mktemp)"
+      trap 'rm -f "$SNAPSHOT"' EXIT
+      ruby wiki/generate.rb --snapshot "$SNAPSHOT"
+
+      if cmp -s "$SNAPSHOT" wiki/baseline.json; then
+        echo "PBS snapshot unchanged."
+        exit 0
+      fi
+
+      cp "$SNAPSHOT" wiki/baseline.json
+      git config user.name "Wiki Baseline Bot"
+      git config user.email "wiki-baseline-bot@users.noreply.gitlab.com"
+      git add wiki/baseline.json
+      git commit -m "chore(wiki): refresh PBS baseline"
+      git push "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "HEAD:${CI_COMMIT_REF_NAME}"
+
 tests:
   stage: test
   image: ruby:3.4

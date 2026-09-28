@@ -3,9 +3,7 @@
   <header>
     <div class="headmeta">
       <h1><%= h(e[:name]) %><%= badge(e) %></h1>
-      <p class="subtitle"><code><%= h(e[:id]) %></code></p>
       <p class="pokedex-entry"><%= h(e[:description]) %></p>
-      <% unless e[:flags].empty? %><p class="muted">Propiedades: <%= h(e[:flags].join(", ")) %></p><% end %>
     </div>
   </header>
 

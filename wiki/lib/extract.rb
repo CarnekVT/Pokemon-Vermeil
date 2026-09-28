@@ -238,10 +238,18 @@ module Extract
     {
       species: p[:species].to_s, level: p[:level], form: p[:form],
       name: p[:name],
-      moves: Array(p[:moves]).map { |mv| GameData::Move.try_get(mv)&.name || mv.to_s },
+      moves: Array(p[:moves]).map do |move_id|
+        move = GameData::Move.try_get(move_id)
+        {
+          id: move_id.to_s, name: move&.name || "Movimiento desconocido",
+          type: move&.type&.to_s, category_name: (CATEGORY_NAMES[move.category] if move),
+          power: move&.power, accuracy: move&.accuracy, total_pp: move&.total_pp
+        }
+      end,
       ability: (GameData::Ability.try_get(p[:ability])&.name if p[:ability]),
       ability_index: p[:ability_index],
-      item: (GameData::Item.try_get(p[:item])&.name if p[:item]),
+      item: (GameData::Item.try_get(p[:item])&.name || "Objeto desconocido" if p[:item]),
+      item_id: (p[:item].to_s if p[:item]),
       gender: gender_name(p[:gender]),
       nature: (GameData::Nature.try_get(p[:nature])&.name if p[:nature]),
       iv: stat_line(p[:iv]), ev: stat_line(p[:ev]),
@@ -254,7 +262,7 @@ module Extract
   def stat_line(h)
     return nil unless h.is_a?(Hash)
 
-    main_stats.map { |s| h[s.id] }
+    main_stats.map { |s| [s.id.to_s, h[s.id]] }
   end
 
   def gender_name(g)
@@ -312,14 +320,26 @@ module Snapshot
               flags effect_chance description],
     abilities: %i[name description flags],
     items: %i[name name_plural pocket price sell_price bp_price field_use battle_use
-              flags consumable machine description]
+              flags consumable machine description],
+    types: %i[weaknesses resistances immunities]
     # Los entrenadores no se comparan: son propios de cada juego, no "cambios"
     # respecto a nada.
   }.freeze
 
   def reduce(data)
     FIELDS.each_with_object({}) do |(cat, fields), out|
-      out[cat.to_s] = data[cat].transform_values { |e| e.slice(*fields) }
+      entries = data[cat]
+      entries = entries.reject { |_, entry| entry[:pseudo] } if cat == :types
+      out[cat.to_s] = entries.transform_values { |e| e.slice(*fields) }
     end
+  end
+
+  def document(data)
+    reduce(data).merge(
+      "_meta" => {
+        "source" => "#{data[:meta][:game_title]} PBS",
+        "version" => data[:meta][:version]
+      }
+    )
   end
 end

@@ -1,6 +1,8 @@
 <%
   e = locals[:entry]
   title(display_name(e))
+  forms = species_forms(e).sort_by { |form| form[:form].to_i }
+  paths = evolution_paths(e)
   stat_class = ->(v) { v >= 120 ? "s-top" : v >= 90 ? "s-high" : v >= 60 ? "s-mid" : "s-low" }
 %>
 <article class="detail species">
@@ -8,16 +10,31 @@
     <% sp = psprite(e[:id], hero: true) %>
     <% unless sp.empty? %><div class="hero-sprite"><%= sp %></div><% end %>
     <div class="headmeta">
-      <h1><%= h(display_name(e)) %><%= badge(e) %></h1>
-      <p class="subtitle">
-        <code><%= h(e[:id]) %></code>
-        <% if e[:generation].to_i > 0 %> · Generación <%= e[:generation] %><% end %>
-        <% if e[:category] && e[:category] != "???" %> · Pokémon <%= h(e[:category]) %><% end %>
-      </p>
+      <h1><%= h(display_name(e)) %><%= badge(e) %><% if e[:change] && e[:change][:status] == "modificado" %> <a class="change-jump" href="#cambios">Ver cambios</a><% end %></h1>
+      <% if e[:generation].to_i > 0 || (e[:category] && e[:category] != "???") %>
+        <p class="subtitle">
+          <% if e[:generation].to_i > 0 %>Generación <%= e[:generation] %><% end %>
+          <% if e[:category] && e[:category] != "???" %> · Pokémon <%= h(e[:category]) %><% end %>
+        </p>
+      <% end %>
       <span class="types"><%= types_row(e[:types]) %></span>
       <% if e[:pokedex] && e[:pokedex] != "???" %><p class="pokedex-entry"><%= h(e[:pokedex]) %></p><% end %>
     </div>
   </header>
+
+  <% if forms.size > 1 %>
+  <nav class="form-switcher" aria-label="Formas de <%= h(e[:name]) %>">
+    <span class="form-switcher__label">Forma</span>
+    <div class="form-options">
+      <% forms.each do |form| label = form_label(form) %>
+        <a class="form-option" href="<%= h(asset("pokemon/#{form[:id]}.html")) %>" title="<%= h(label) %>" aria-label="Forma: <%= h(label) %>"<%= ' aria-current="page"' if form[:id] == e[:id] %>>
+          <%= picon(form[:id]) %>
+          <span class="form-option__name"><%= h(label) %></span>
+        </a>
+      <% end %>
+    </div>
+  </nav>
+  <% end %>
 
   <div class="grid2">
     <section class="section-card">
@@ -56,54 +73,95 @@
     </section>
   </div>
 
-  <% if e[:prevo] || e[:evolves_to].any? %>
+  <% unless paths.empty? %>
   <section class="section-card">
     <h2>Línea evolutiva</h2>
     <div class="evoline">
-      <% if e[:prevo] %>
-        <div class="step"><%= mon_link(e[:prevo]) %></div>
-        <div class="arrow">evoluciona a</div>
-      <% end %>
-      <div class="step"><strong><%= h(e[:name]) %></strong></div>
-      <% e[:evolves_to].each do |ev| %>
-        <div class="arrow"><%= h(ev[:text]) %></div>
-        <div class="step"><%= mon_link(ev[:to]) %></div>
+      <% paths.each do |path| %>
+      <div class="evolution-path">
+        <% path.each do |step| %>
+          <div class="step">
+            <%= mon_link(step[:species] == e[:species] ? e[:id] : step[:id], current: step[:species] == e[:species]) %>
+          </div>
+          <% if step[:method] %><div class="arrow"><%= h(step[:method]) %></div><% end %>
+        <% end %>
+      </div>
       <% end %>
     </div>
   </section>
   <% end %>
 
-  <section class="section-card">
-    <h2>Movimientos por nivel</h2>
+  <details class="section-card">
+    <summary class="section-toggle"><h2>Movimientos por nivel</h2><span><%= e[:moves].size %> movimientos</span></summary>
+    <label class="move-sort">Ordenar por
+      <select data-move-sort="level" data-target="level-moves" aria-label="Ordenar movimientos por nivel">
+        <option value="level" selected>Nivel</option>
+        <option value="name">Nombre (A–Z)</option>
+        <option value="type">Tipo</option>
+      </select>
+    </label>
     <div class="table-scroll">
     <table class="data">
-      <thead><tr><th class="num">Nv.</th><th>Movimiento</th><th>Tipo</th><th>Cat.</th><th class="num">Pot.</th><th class="num">Prec.</th></tr></thead>
-      <tbody>
-      <% e[:moves].each do |lvl, mv| m = move(mv) %>
-        <tr>
+      <thead><tr><th class="num">Nv.</th><th>Movimiento</th><th>Tipo</th><th>Cat.</th><th class="num">Pot.</th><th class="num">Prec.</th><th class="num">PP</th></tr></thead>
+      <tbody id="level-moves">
+      <% e[:moves].each_with_index do |(lvl, mv), index| m = move(mv) %>
+        <tr data-sort-pbs="<%= index %>" data-sort-level="<%= lvl.to_i %>" data-sort-name="<%= h(m ? m[:name] : mv) %>" data-sort-type="<%= h(m ? (type(m[:type])&.dig(:name) || m[:type]) : '') %>">
           <td class="num"><%= lvl.to_i.zero? ? "—" : lvl %></td>
           <td><%= move_link(mv) %></td>
           <td><%= m ? type_tag(m[:type], small: true) : "" %></td>
           <td><%= m ? h(m[:category_name]) : "" %></td>
           <td class="num"><%= m && m[:power].to_i > 0 ? m[:power] : "—" %></td>
-          <td class="num"><%= m && m[:accuracy].to_i > 0 ? m[:accuracy] : "—" %></td>
+          <td class="num"><%= m ? (m[:accuracy].to_i.zero? ? "No falla" : m[:accuracy]) : "—" %></td>
+          <td class="num"><%= m ? m[:total_pp] : "—" %></td>
         </tr>
       <% end %>
       </tbody>
     </table>
     </div>
-  </section>
+  </details>
 
-  <% unless e[:tutor_moves].empty? && e[:egg_moves].empty? %>
+  <% unless e[:tutor_moves].empty? %>
+  <details class="section-card">
+    <summary class="section-toggle"><h2>Movimientos de MT / tutor</h2><span><%= e[:tutor_moves].size %> movimientos</span></summary>
+    <label class="move-sort">Ordenar por
+      <select data-move-sort="tutor" data-target="tutor-moves" aria-label="Ordenar movimientos de MT o tutor">
+        <option value="pbs" selected>Orden original del juego</option>
+        <option value="name">Nombre (A–Z)</option>
+        <option value="type">Tipo</option>
+      </select>
+    </label>
+    <div class="table-scroll">
+    <table class="data">
+      <thead><tr><th>Movimiento</th><th>Tipo</th><th>Cat.</th><th class="num">Pot.</th><th class="num">Prec.</th><th class="num">PP</th></tr></thead>
+      <tbody id="tutor-moves">
+      <% e[:tutor_moves].each_with_index do |mv, index| m = move(mv) %>
+        <tr data-sort-pbs="<%= index %>" data-sort-name="<%= h(m ? m[:name] : mv) %>" data-sort-type="<%= h(m ? (type(m[:type])&.dig(:name) || m[:type]) : '') %>">
+          <td><%= move_link(mv) %></td>
+          <td><%= m ? type_tag(m[:type], small: true) : "" %></td>
+          <td><%= m ? h(m[:category_name]) : "" %></td>
+          <td class="num"><%= m && m[:power].to_i > 0 ? m[:power] : "—" %></td>
+          <td class="num"><%= m ? (m[:accuracy].to_i.zero? ? "No falla" : m[:accuracy]) : "—" %></td>
+          <td class="num"><%= m ? m[:total_pp] : "—" %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+    </div>
+  </details>
+  <% end %>
+
+  <% unless e[:egg_moves].empty? %>
   <section class="section-card">
-    <% unless e[:tutor_moves].empty? %><h2>Movimientos de MT / tutor</h2><%= chiplist(e[:tutor_moves].map { |mv| move_link(mv) }.join, e[:tutor_moves].size, noun: "movimientos") %><% end %>
-    <% unless e[:egg_moves].empty? %><h2>Movimientos huevo</h2><%= chiplist(e[:egg_moves].map { |mv| move_link(mv) }.join, e[:egg_moves].size, noun: "movimientos") %><% end %>
+    <h2>Movimientos huevo</h2>
+    <%= chiplist(e[:egg_moves].map { |mv| move_link(mv) }.join, e[:egg_moves].size, noun: "movimientos") %>
   </section>
   <% end %>
 
-  <% unless e[:locations].empty? %>
   <section class="section-card">
     <h2>Dónde encontrarlo</h2>
+    <% if e[:locations].empty? %>
+      <p class="muted">Ubicación no confirmada.</p>
+    <% else %>
     <div class="table-scroll">
     <table class="data">
       <thead><tr><th>Zona</th><th>Método</th><th>Nivel</th><th class="num">Prob.</th></tr></thead>
@@ -119,8 +177,8 @@
       </tbody>
     </table>
     </div>
+    <% end %>
   </section>
-  <% end %>
 
   <% unless e[:trainers].empty? %>
   <section class="section-card">

@@ -1,10 +1,11 @@
 <% title("Tabla de tipos") %>
 <% types = data[:types].values.reject { |t| t[:pseudo] } %>
-<h1>Tipos</h1>
-
-<h2>Eficacia defensiva</h2>
-<p class="muted">Multiplicador de daño que recibe el tipo de cada <strong>fila</strong> al ser golpeado por un movimiento del tipo de cada <strong>columna</strong>.
-<strong>2</strong> = ×2 · <strong>½</strong> = ×½ · <strong>0</strong> = sin efecto · vacío = normal.</p>
+<h1>Tabla de tipos</h1>
+<p class="lead">Consulta qué tipos resisten, reciben daño extra o son inmunes.</p>
+<p class="muted">Cada fila es el tipo que recibe el golpe; cada columna, el tipo del movimiento. ×2 = daño doble · ×½ = mitad · ×0 = sin efecto · vacío = normal.</p>
+<% if types.any? { |t| t[:change] } %>
+  <p class="type-change-note">El punto y el borde rojo marcan eficacia distinta a <%= h(Render::View::BASELINE_LABEL) %>.</p>
+<% end %>
 
 <div class="typechart-bleed">
   <table class="typechart">
@@ -22,8 +23,11 @@
                    defn[:weaknesses].include?(atk[:id]) ? "x2" :
                    defn[:resistances].include?(atk[:id]) ? "xh" : ""
             txt = { "x0" => "0", "x2" => "2", "xh" => "½" }[mult]
+            change = type_cell_change(defn, atk[:id])
+            cell_class = [mult, ("changed" if change)].compact.join(" ")
+            cell_title = "Antes: #{multiplier_label(change[:from])}; ahora: #{multiplier_label(change[:to])}" if change
           %>
-          <td class="<%= mult %>"><%= txt %></td>
+          <td class="<%= cell_class %>"<% if change %> title="<%= h(cell_title) %>" aria-label="<%= h(cell_title) %>"<% end %>><%= txt %><% if change %><span class="sr-only"> <%= h(cell_title) %></span><% end %></td>
         <% end %>
       </tr>
     <% end %>
@@ -34,12 +38,13 @@
 <div class="type-cards">
   <% types.each do |t| %>
     <div id="<%= h(t[:id]) %>">
-      <h2 style="border:none;margin-top:.4rem"><%= type_tag(t[:id]) %> <%= h(t[:name]) %></h2>
+      <h2 style="border:none;margin-top:.4rem"><%= type_tag(t[:id]) %> <%= h(t[:name]) %><%= badge(t) %></h2>
       <table class="kv small">
         <tr><th>Débil a</th><td><span class="types"><%= t[:weaknesses].map { |x| type_tag(x) }.join %></span></td></tr>
         <tr><th>Resiste</th><td><span class="types"><%= t[:resistances].map { |x| type_tag(x) }.join %></span></td></tr>
         <tr><th>Inmune a</th><td><%= t[:immunities].empty? ? "—" : %(<span class="types">#{t[:immunities].map { |x| type_tag(x) }.join}</span>) %></td></tr>
       </table>
+      <%= change_box(t) %>
     </div>
   <% end %>
 </div>

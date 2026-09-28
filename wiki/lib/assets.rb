@@ -20,11 +20,12 @@ module Assets
     img = File.join(out, "img")
     FileUtils.mkdir_p(img)
 
-    manifest = { icons: {}, front: {}, trainers: {}, items: [], type_sheet: copy_type_sheet(game, img, data) }
+    manifest = { icons: {}, icons_shiny: {}, front: {}, trainers: {}, items: [], type_sheet: copy_type_sheet(game, img, data) }
     return manifest unless sprites
 
     species = data[:species].values
     manifest[:icons] = copy_sprites(species, File.join(game, "Graphics", "Pokemon", "Icons"), File.join(img, "icons"))
+    manifest[:icons_shiny] = copy_sprites(species, File.join(game, "Graphics", "Pokemon", "Icons shiny"), File.join(img, "icons-shiny"))
     manifest[:front] = copy_sprites(species, File.join(game, "Graphics", "Pokemon", "Front"), File.join(img, "front"))
     manifest[:trainers] = copy_trainer_sprites(data[:trainers].values, File.join(game, "Graphics", "Trainers"), File.join(img, "trainers"))
     manifest[:items] = copy_items(data[:items].keys, File.join(game, "Graphics", "Items"), File.join(img, "items"))

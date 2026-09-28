@@ -5,7 +5,7 @@
     <% unless icon.empty? %><div class="hero-sprite hero-sprite--trainer" style="min-height:auto;width:auto"><%= icon %></div><% end %>
     <div class="headmeta">
       <h1><%= h(e[:name]) %><%= badge(e) %></h1>
-      <p class="subtitle"><code><%= h(e[:id]) %></code> · <%= h(e[:pocket_name]) %></p>
+      <p class="subtitle"><%= h(e[:pocket_name]) %></p>
       <p class="pokedex-entry"><%= h(e[:description]) %></p>
     </div>
   </header>
@@ -18,7 +18,6 @@
       <% if e[:field_use] %><tr><th>Uso fuera de combate</th><td><%= h(e[:field_use]) %></td></tr><% end %>
       <% if e[:battle_use] %><tr><th>Uso en combate</th><td><%= h(e[:battle_use]) %></td></tr><% end %>
       <% if e[:machine] %><tr><th>Enseña</th><td><%= move_link(e[:machine][:move]) %> (<%= e[:machine][:kind] %>)</td></tr><% end %>
-      <% unless e[:flags].empty? %><tr><th>Propiedades</th><td><%= h(e[:flags].join(", ")) %></td></tr><% end %>
     </table>
   </section>
 
@@ -29,16 +28,18 @@
   </section>
   <% end %>
 
-  <% unless e[:found_at].empty? %>
   <section class="section-card">
     <h2>Dónde encontrarlo</h2>
-    <ul class="chiplist" style="list-style:none;padding:0;margin:0">
-      <% e[:found_at].each do |f| %>
-        <li><a href="<%= asset("ubicaciones/#{f[:map]}.html") %>"><%= h(f[:map_name]) %></a> — <%= h(f[:kind]) %><%= " (oculto)" if f[:hidden] %></li>
-      <% end %>
-    </ul>
+    <% if e[:found_at].empty? %>
+      <p class="muted">Ubicación no confirmada.</p>
+    <% else %>
+      <ul class="chiplist" style="list-style:none;padding:0;margin:0">
+        <% e[:found_at].each do |f| %>
+          <li><a href="<%= asset("ubicaciones/#{f[:map]}.html") %>"><%= h(f[:map_name]) %></a> — <%= h(f[:kind]) %><%= " (oculto)" if f[:hidden] %></li>
+        <% end %>
+      </ul>
+    <% end %>
   </section>
-  <% end %>
 
   <%= change_box(e) %>
   <%= notes(e) %>

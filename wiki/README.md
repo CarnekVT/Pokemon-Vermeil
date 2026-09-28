@@ -15,7 +15,7 @@ Desde la raíz del repositorio:
 ruby wiki/generate.rb
 ```
 
-Genera el sitio en `wiki/site/`. Abre `wiki/site/index.html` en el navegador.
+En una terminal, abre un asistente con opciones recomendadas y pregunta por separado los accents claro y oscuro. Enter conserva `#1a3d5c` y `#5ba0d6`. También acepta los argumentos de abajo. Genera el sitio en `wiki/site/`; abre `wiki/site/index.html` en el navegador.
 
 No hace falta instalar nada: usa el mismo arranque headless del motor que la
 suite de tests (`tests/harness.rb`). La primera vez tarda un poco porque compila
@@ -25,8 +25,11 @@ los PBS.
 
 | Opción | Efecto |
 | --- | --- |
-| `--out CARPETA` | Carpeta de salida (por defecto `wiki/site/`). |
+| `--out CARPETA` | Carpeta de salida (por defecto `wiki/site/`). Las carpetas existentes deben ser una wiki marcada como generada. |
 | `--no-sprites` | No copia imágenes (wiki mucho más ligera). |
+| `--accent-light COLOR` | Accent del tema claro; por defecto `#1a3d5c`. |
+| `--accent-dark COLOR` | Accent del tema oscuro; por defecto `#5ba0d6`. |
+| `--accent COLOR` | Atajo para usar el mismo accent en ambos temas. |
 | `--baseline none` | No marca los cambios; genera la wiki completa a secas. |
 | `--baseline RUTA` | Usa otro archivo de referencia en vez de `wiki/baseline.json`. |
 | `--snapshot RUTA` | No genera la wiki: vuelca el estado actual como archivo de referencia. |
@@ -38,23 +41,35 @@ los PBS.
 
 ## Cómo se marcan los cambios
 
-`wiki/baseline.json` es una foto de datos de referencia (por defecto, los de La
-Base de Sky). El generador compara el estado de tu juego contra esa foto y marca
-cada Pokémon / movimiento / etc. como **Nuevo** o **Modificado** directamente en
-su ficha, con el detalle de qué campos cambiaron y sus valores antes/después.
+`wiki/baseline.json` es la referencia versionada en Git. Guarda datos de la
+versión canónica de los PBS de La Base de Sky, incluida la tabla de tipos. El
+campo `_meta` registra el juego fuente y su versión. El generador compara cada
+ficha completa con esa referencia y resalta los campos distintos.
 
-El texto de esas anotaciones ("Cambios respecto a los juegos oficiales") se ajusta
-en la constante `BASELINE_LABEL` de `wiki/lib/render.rb`.
+En el repo canónico, el job `wiki-baseline` actualiza el archivo si un push cambia
+PBS. Se ejecuta aunque falle otra etapa del pipeline; compila los datos y, si la
+compilación funciona, genera el snapshot y confirma el cambio en la misma rama.
+También se ejecuta cuando cambia el extractor o el propio job, para migrar el
+formato. Los forks no pasan la validación `CI_PROJECT_PATH` y conservan su baseline.
 
-Cuando actualices tu copia de La Base de Sky, `wiki/baseline.json` se actualizará
-con ella y el diff se recalcula solo.
+El job usa `CI_JOB_TOKEN`. En GitLab, habilita la escritura del repositorio con
+job tokens para que pueda confirmar `wiki/baseline.json`. Los listados permiten
+filtrar solo cambios; la página «Cambios» reúne las diferencias detectadas.
 
-Si mantienes tú La Base de Sky, regenera la referencia en cada versión:
+Para generar una referencia manual desde una copia canónica, revisa primero una
+vista previa fuera del repo:
+
+```bash
+ruby wiki/generate.rb --snapshot /tmp/wiki-baseline-preview.json
+```
+
+Para regenerarlo directamente desde la raíz del repo canónico y sobrescribirlo:
 
 ```bash
 ruby wiki/generate.rb --snapshot wiki/baseline.json
-git add wiki/baseline.json && git commit -m "Actualiza baseline de la wiki"
 ```
+
+Este comando recompila los PBS actuales antes de crear el baseline.
 
 ## Corregir cosas a mano
 

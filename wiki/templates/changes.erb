@@ -1,0 +1,73 @@
+<%
+  title("Diferencias con los datos oficiales")
+  groups = [
+    { key: :species, label: "Pokémon", folder: "pokemon" },
+    { key: :moves, label: "Movimientos", folder: "movimientos" },
+    { key: :abilities, label: "Habilidades", folder: "habilidades" },
+    { key: :items, label: "Objetos", folder: "objetos" },
+    { key: :types, label: "Tipos", folder: nil }
+  ]
+%>
+<h1>Diferencias con los datos oficiales</h1>
+<p class="lead">Compara los datos del juego con la referencia de <%= h(Render::View::BASELINE_LABEL) %>.</p>
+<p class="change-explanation">Se muestran diferencias de juego, como estadísticas, habilidades o movimientos. Las diferencias que solo cambian tildes se ignoran. «Nuevo» significa que no aparece en la referencia; «Modificado» indica que cambiaron los datos que se enumeran. Abre una categoría y filtra por nombre o por dato.</p>
+
+<% if changes[:empty] %>
+  <section class="home-section"><p>No se encontraron diferencias relevantes.</p></section>
+<% else %>
+  <label class="change-filter">Filtrar diferencias <input id="change-query" type="search" placeholder="Ej.: Pikachu, estadísticas, habilidad…" autocomplete="off"></label>
+  <% groups.each do |group| entries = changes[group[:key]] || {}; next if entries.empty? %>
+    <% modified_count = entries.values.count { |change| change[:status] == "modificado" }
+       new_count = entries.size - modified_count %>
+    <details class="change-group change-category">
+      <summary><span class="change-category-name"><%= group[:label] %></span><span class="count"><%= entries.size %></span><span class="change-category-summary"><%= modified_count %> modificados<% if new_count.positive? %> · <%= new_count %> nuevos<% end %></span></summary>
+      <ul class="change-list">
+        <% entries.each do |id, change|
+          entry = data[group[:key]][id]
+          next unless entry
+          name = group[:key] == :species ? display_name(entry) : (entry[:name] || entry[:id])
+          href = group[:folder] ? "#{group[:folder]}/#{(entry[:key] || entry[:id])}.html" : "tipos.html##{id}"
+          fields = change[:fields].map { |field| field[:label] }.uniq
+        %>
+          <li class="change-entry">
+            <div class="change-entry-heading"><a href="<%= asset(href) %>"><%= h(name) %></a><span class="badge <%= change[:status] == "nuevo" ? "badge--new" : "badge--mod" %>"><%= change[:status] == "nuevo" ? "Nuevo" : "Modificado" %></span></div>
+            <% if fields.any? %><p class="change-entry-meta"><strong>Datos distintos:</strong> <%= h(fields.join(" · ")) %></p><% else %><p class="change-entry-meta">No aparece en la referencia oficial.</p><% end %>
+          </li>
+        <% end %>
+      </ul>
+    </details>
+  <% end %>
+  <% unless changes[:removed].empty? %>
+    <section class="change-group removed-group">
+      <h2>Entradas que no aparecen en el juego</h2>
+      <p>Estas entradas sí están en la referencia oficial, pero no figuran en los datos actuales del juego. Puede que se hayan retirado o que ahora estén registradas con otro nombre. Los nombres repetidos se agrupan; en Pokémon se indica cuántas formas representan.</p>
+      <% changes[:removed].each do |category, entries| %>
+        <% unique_names = entries.group_by { |entry| entry[:name] } %>
+        <details class="removed-details">
+          <summary><%= h(category == "species" ? "Pokémon y formas" : (Diff::CATEGORY_LABELS[category] || category)) %> <span class="count"><%= entries.size %> fichas</span></summary>
+          <ul><% unique_names.each do |name, same_name| %><li><%= h(name) %><% if category == "species" && same_name.size > 1 %> <span class="removed-form-count">(<%= same_name.size %> formas)</span><% end %></li><% end %></ul>
+        </details>
+      <% end %>
+    </section>
+  <% end %>
+  <script>
+    (function () {
+      var input = document.getElementById("change-query");
+      if (!input) return;
+      var groups = Array.from(document.querySelectorAll(".change-category"));
+      input.addEventListener("input", function () {
+        var query = input.value.trim().toLocaleLowerCase();
+        groups.forEach(function (group) {
+          var visible = 0;
+          group.querySelectorAll(".change-entry").forEach(function (entry) {
+            var match = !query || entry.textContent.toLocaleLowerCase().includes(query);
+            entry.hidden = !match;
+            if (match) visible += 1;
+          });
+          group.hidden = visible === 0;
+          group.open = query.length > 0 && visible > 0;
+        });
+      });
+    })();
+  </script>
+<% end %>

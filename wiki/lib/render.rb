@@ -4,12 +4,15 @@ require "erb"
 require "cgi"
 require "json"
 require "fileutils"
+require "tmpdir"
 require_relative "assets"
 require_relative "diff"
 
 module Render
   TEMPLATE_DIR = File.join(__dir__, "..", "templates")
   ASSET_DIR    = File.join(__dir__, "..", "assets")
+  SITE_MARKER  = ".wiki-generated"
+  NATIVE_FILE_RENAME = File.method(:rename)
 
   DETAIL_PAGES = {
     species:   ["pokemon",      "species"],
@@ -21,31 +24,100 @@ module Render
 
   module_function
 
-  def site(data:, changes:, out:, sprites:)
+  def site(data:, changes:, out:, sprites:, accent_light:, accent_dark:)
     attach_changes!(data, changes)
+    target = File.expand_path(out)
+    validate_output!(target)
+    FileUtils.mkdir_p(File.dirname(target))
+    stage = Dir.mktmpdir(".wiki-stage-", File.dirname(target))
+    backup = nil
 
-    FileUtils.rm_rf(out)
-    FileUtils.mkdir_p(out)
-    FileUtils.cp_r(Dir[File.join(ASSET_DIR, "*")], out)
-    manifest = Assets.copy(out, data, sprites: sprites)
+    begin
+      FileUtils.cp_r(Dir[File.join(ASSET_DIR, "*")], stage)
+      manifest = Assets.copy(stage, data, sprites: sprites)
+      ctx = View.new(data: data, changes: changes, manifest: manifest)
 
-    ctx = View.new(data: data, changes: changes, manifest: manifest)
-
-    write(out, "index.html", ctx.render("index", root: ""))
-    write(out, "tipos.html", ctx.render("types", root: ""))
-    write(out, "ubicaciones/index.html", ctx.render("locations_list", root: "../"))
-    data[:locations].each do |loc|
-      write(out, "ubicaciones/#{loc[:map]}.html", ctx.render("location", root: "../", loc: loc))
-    end
-
-    DETAIL_PAGES.each do |key, (folder, tmpl)|
-      write(out, "#{folder}/index.html", ctx.render("list", root: "../", list_key: key, folder: folder))
-      data[key].each_value do |entry|
-        write(out, "#{folder}/#{entry_id(entry)}.html", ctx.render(tmpl, root: "../", entry: entry))
+      write(stage, "accent.css", accent_stylesheet(accent_light, accent_dark))
+      write(stage, "index.html", ctx.render("index", root: ""))
+      write(stage, "cambios.html", ctx.render("changes", root: ""))
+      write(stage, "tipos.html", ctx.render("types", root: ""))
+      write(stage, "ubicaciones/index.html", ctx.render("locations_list", root: "../"))
+      data[:locations].each do |loc|
+        write(stage, "ubicaciones/#{loc[:map]}.html", ctx.render("location", root: "../", loc: loc))
       end
+
+      DETAIL_PAGES.each do |key, (folder, tmpl)|
+        write(stage, "#{folder}/index.html", ctx.render("list", root: "../", list_key: key, folder: folder))
+        data[key].each_value do |entry|
+          write(stage, "#{folder}/#{entry_id(entry)}.html", ctx.render(tmpl, root: "../", entry: entry))
+        end
+      end
+
+      write(stage, "buscar.js", "window.WIKI_SEARCH=#{JSON.generate(search_index(data))};")
+      File.write(File.join(stage, SITE_MARKER), "Generado por wiki/generate.rb\n")
+
+      if File.exist?(target)
+        backup = "#{target}.backup-#{Process.pid}"
+        raise "Ya existe el respaldo temporal #{backup}" if File.exist?(backup)
+
+        NATIVE_FILE_RENAME.call(target, backup)
+      end
+      NATIVE_FILE_RENAME.call(stage, target)
+    rescue StandardError
+      NATIVE_FILE_RENAME.call(backup, target) if backup && File.exist?(backup) && !File.exist?(target)
+      raise
+    ensure
+      FileUtils.remove_entry_secure(stage) if File.exist?(stage)
     end
 
-    write(out, "buscar.js", "window.WIKI_SEARCH=#{JSON.generate(search_index(data))};")
+    FileUtils.remove_entry_secure(backup) if backup && File.exist?(backup)
+  end
+
+  def accent_stylesheet(light, dark)
+    <<~CSS
+      :root {
+        --accent-light: #{light};
+        --accent-dark: #{dark};
+        --accent-on-light: #{accent_foreground(light)};
+        --accent-on-dark: #{accent_foreground(dark)};
+      }
+    CSS
+  end
+
+  def accent_foreground(color)
+    channels = color.delete_prefix("#").scan(/../).map { |channel| channel.to_i(16) }
+    luminance = channels.map do |value|
+      normalized = value / 255.0
+      normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055)**2.4
+    end
+    brightness = luminance.zip([0.2126, 0.7152, 0.0722]).sum { |value, weight| value * weight }
+    brightness > 0.179 ? "#1b1d21" : "#ffffff"
+  end
+
+  # ponytail: solo se reemplazan wiki/site o salidas marcadas; ampliar el destino permitido si Pages usa otra carpeta existente.
+  def validate_output!(target)
+    root = File.expand_path(File::SEPARATOR)
+    repo = File.expand_path("../..", __dir__)
+    if target == root || target == repo || repo.start_with?("#{target}#{File::SEPARATOR}")
+      raise ArgumentError, "La salida no puede ser la raíz ni contener el repositorio: #{target}"
+    end
+
+    current = File::SEPARATOR
+    target.split(File::SEPARATOR).reject(&:empty?).each do |part|
+      current = File.join(current, part)
+      raise ArgumentError, "La ruta de salida atraviesa un enlace simbólico: #{current}" if File.symlink?(current)
+    end
+
+    return unless File.exist?(target)
+    raise ArgumentError, "La salida existe y no es una carpeta: #{target}" unless File.directory?(target)
+
+    default_output = File.expand_path(File.join(repo, "wiki", "site"))
+    marker = File.join(target, SITE_MARKER)
+    marked = File.file?(marker) && !File.symlink?(marker)
+    has_content = !Dir.children(target).empty?
+    if has_content && !marked && target != default_output
+      raise ArgumentError, "La carpeta de salida no parece una wiki generada: #{target}"
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -53,7 +125,7 @@ module Render
   def attach_changes!(data, changes)
     return if changes[:empty]
 
-    %i[species moves abilities items].each do |cat|
+    %i[species moves abilities items types].each do |cat|
       (changes[cat] || {}).each do |id, info|
         e = data[cat][id]
         e[:change] = info if e
@@ -74,15 +146,35 @@ module Render
     { species: ["pokemon", "Pokémon"], moves: ["movimientos", "Movimiento"],
       abilities: ["habilidades", "Habilidad"], items: ["objetos", "Objeto"],
       trainers: ["entrenadores", "Entrenador"] }.each do |key, (folder, label)|
-      data[key].each_value do |e|
+      entries = if key == :species
+                  groups = data[:species].values.group_by { |entry| entry[:species] }
+                  order = data[:dex_order].uniq
+                  order.concat(groups.keys - order)
+                  order.filter_map do |species|
+                    forms = groups[species]
+                    next if forms.nil? || forms.empty?
+
+                    base = forms.find { |form| form[:form].to_i.zero? } || forms.min_by { |form| form[:form].to_i }
+                    [base, forms]
+                  end
+                else
+                  data[key].values.map { |entry| [entry, [entry]] }
+                end
+      entries.each do |e, forms|
         name = e[:name] || e[:id]
-        name = "#{name} · #{e[:form_name]}" if key == :species && e[:form_name] && !e[:form_name].to_s.empty?
         name = "#{e[:type_name]} #{name}" if key == :trainers
-        idx << { n: name, c: label, u: "#{folder}/#{entry_id(e)}.html",
-                 x: (e[:change] ? e[:change][:status] : nil) }
+        aliases = key == :species ? forms.filter_map { |form| form[:form_name] }.uniq : []
+        changed = forms.find { |form| form[:change] }
+        idx << { n: name, s: aliases.join(" "), c: label, u: "#{folder}/#{entry_id(e)}.html",
+                 x: (changed ? changed[:change][:status] : nil) }
       end
     end
     data[:locations].each { |l| idx << { n: l[:name], c: "Ubicación", u: "ubicaciones/#{l[:map]}.html" } }
+    data[:types].each_value do |t|
+      next if t[:pseudo]
+
+      idx << { n: t[:name], c: "Tipo", u: "tipos.html##{t[:id]}", x: (t[:change] ? t[:change][:status] : nil) }
+    end
     idx
   end
 
@@ -99,6 +191,18 @@ module Render
 
     def initialize(data:, changes:, manifest:)
       @data = data
+      @species_forms = data[:species].values.group_by { |form| form[:species] }
+      @evolution_outgoing = Hash.new { |hash, key| hash[key] = [] }
+      @evolution_incoming = Hash.new { |hash, key| hash[key] = [] }
+      @species_forms.each do |from, forms|
+        forms.flat_map { |form| form[:evolves_to] }.uniq { |edge| [edge[:to], edge[:text]] }.each do |edge|
+          next unless @species_forms.key?(edge[:to])
+
+          relation = { from: from, to: edge[:to], text: edge[:text] }
+          @evolution_outgoing[from] << relation
+          @evolution_incoming[edge[:to]] << relation
+        end
+      end
       @changes = changes
       @manifest = manifest
       @erb = {}
@@ -127,14 +231,98 @@ module Render
 
     def meta = @data[:meta]
     def species(id) = @data[:species][id.to_s]
+    def species_forms(entry) = @species_forms[entry[:species]] || [entry]
+
+    def evolution_paths(entry)
+      current = entry[:species]
+      ancestors = evolution_ancestors(current)
+      descendants = evolution_descendants(current)
+      (ancestors.product(descendants).map { |before, after| before + after }).uniq.filter_map do |edges|
+        next if edges.empty?
+
+        ids = [edges.first[:from]] + edges.map { |edge| edge[:to] }
+        ids.each_with_index.map do |species_id, index|
+          base = @species_forms[species_id]&.find { |form| form[:form].to_i.zero? }
+          base ||= @species_forms[species_id]&.first
+          next unless base
+
+          { id: base[:id], species: species_id, method: edges[index]&.dig(:text) }
+        end.compact
+      end
+    end
+
+    def form_label(entry)
+      return entry[:form_name] if entry[:form_name] && !entry[:form_name].to_s.empty?
+
+      entry[:form].to_i.zero? ? "Normal" : "Forma #{entry[:form]}"
+    end
+
+    def evolution_ancestors(species_id, visited = [])
+      return [[]] if visited.include?(species_id)
+
+      edges = @evolution_incoming[species_id]
+      return [[]] if edges.empty?
+
+      edges.flat_map do |edge|
+        evolution_ancestors(edge[:from], visited + [species_id]).map { |path| path + [edge] }
+      end
+    end
+
+    def evolution_descendants(species_id, visited = [])
+      return [[]] if visited.include?(species_id)
+
+      edges = @evolution_outgoing[species_id]
+      return [[]] if edges.empty?
+
+      edges.flat_map do |edge|
+        evolution_descendants(edge[:to], visited + [species_id]).map { |path| [edge] + path }
+      end
+    end
+
     def move(id) = @data[:moves][id.to_s]
     def ability(id) = @data[:abilities][id.to_s]
     def item(id) = @data[:items][id.to_s]
     def type(id) = @data[:types][id.to_s]
     def has_changes? = !@changes[:empty]
 
+    def type_multiplier(definition, attack_id, fields: nil)
+      values = {
+        "weaknesses" => definition[:weaknesses],
+        "resistances" => definition[:resistances],
+        "immunities" => definition[:immunities]
+      }
+      fields&.each do |field|
+        values[field[:field]] = field[:from] if field[:field] && field[:from]
+      end
+      return 0 if Array(values["immunities"]).include?(attack_id)
+      return 2 if Array(values["weaknesses"]).include?(attack_id)
+      return 0.5 if Array(values["resistances"]).include?(attack_id)
+
+      1
+    end
+
+    def type_cell_change(definition, attack_id)
+      change = definition[:change]
+      return nil unless change && change[:status] == "modificado"
+
+      before = type_multiplier(definition, attack_id, fields: change[:fields])
+      after = type_multiplier(definition, attack_id)
+      return nil if before == after
+
+      { from: before, to: after }
+    end
+
+    def multiplier_label(value)
+      { 0 => "×0", 0.5 => "×½", 1 => "×1", 2 => "×2" }[value] || "×#{value}"
+    end
+
     # -- texto ------------------------------------------------------------
-    def h(str) = CGI.escapeHTML(str.to_s)
+    def h(str) = CGI.escapeHTML(str.to_s.encode(Encoding::UTF_8, invalid: :replace, undef: :replace, replace: "�"))
+    def page_search_text(*values)
+      values.flatten.compact.map do |value|
+        value.to_s.encode(Encoding::UTF_8, invalid: :replace, undef: :replace, replace: "�")
+      end.join(" ")
+    end
     def asset(path) = "#{@root}#{path}"
 
     def page(kind, id)
@@ -157,9 +345,23 @@ module Render
       %(<span class="#{cls}" style="--s:#{side}px;--n:#{n};background-image:url(#{url});#{extra_style}"></span>)
     end
 
-    def picon(id)
+    def picon(id, shiny: false)
+      shiny_sprite = @manifest.fetch(:icons_shiny, {})[id.to_s] if shiny
+      if shiny_sprite
+        side, n = shiny_sprite
+        return sprite_span("picon", asset("img/icons-shiny/#{id}.png"), side, n)
+      end
+
       side, n = @manifest[:icons][id.to_s]
       sprite_span("picon", asset("img/icons/#{id}.png"), side, n)
+    end
+
+    def stat_values(values, omit_zero: false)
+      Array(values).filter_map do |stat, value|
+        next if value.nil? || (omit_zero && value.to_i.zero?)
+
+        "#{STAT_LABELS[stat] || stat}: #{value}"
+      end.join(" · ")
     end
 
     def psprite(id, hero: false)
@@ -225,9 +427,11 @@ module Render
     def types_row(ids, small: false, link: true) = ids.map { |t| type_tag(t, small: small, link: link) }.join
 
     # -- enlaces con icono ---------------------------------------------
-    def mon_link(id)
+    def mon_link(id, current: false)
       s = species(id)
-      %(<a class="chip mon" href="#{page(:species, id)}">#{picon(id)}<span>#{h(s ? display_name(s) : id.to_s)}</span></a>)
+      cls = current ? "chip mon evolution-current" : "chip mon"
+      current_attr = current ? ' aria-current="page"' : ""
+      %(<a class="#{cls}" href="#{page(:species, id)}"#{current_attr}>#{picon(id)}<span>#{h(s ? display_name(s) : id.to_s)}</span></a>)
     end
 
     def move_link(id)
@@ -282,7 +486,7 @@ module Render
         "<tr><th>#{h(f[:label])}</th><td>#{render_change(f[:field], f[:from], f[:to])}</td></tr>"
       end.join
       <<~HTML
-        <section class="changebox">
+        <section class="changebox" id="cambios">
           <h2>Cambios respecto a #{BASELINE_LABEL}</h2>
           <table>#{rows}</table>
         </section>
@@ -300,7 +504,7 @@ module Render
       when "evs"        then hash_delta(from, to) { |k| STAT_ABBR[k] || k }
       when "moves"      then pair_delta(from, to) { |lvl, mv| "Nv.#{lvl} #{move_name(mv)}" }
       when "evolves_to" then evo_delta(from, to)
-      when "types", "abilities", "hidden_abilities", "egg_groups", "flags", "tutor_moves", "egg_moves"
+      when "types", "weaknesses", "resistances", "immunities", "abilities", "hidden_abilities", "egg_groups", "flags", "tutor_moves", "egg_moves"
         list_delta(from, to)
       when "wild_items"
         list_delta((from || []).map { |x| x["item"] }, (to || []).map { |x| x["item"] })

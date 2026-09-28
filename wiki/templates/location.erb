@@ -14,11 +14,10 @@
         <h3><%= h(enc[:method_name]) %></h3>
         <div class="table-scroll">
         <table class="data">
-          <thead><tr><th></th><th>Pokémon</th><th>Nivel</th><th class="num">Probabilidad</th></tr></thead>
+          <thead><tr><th>Pokémon</th><th>Nivel</th><th class="num">Probabilidad</th></tr></thead>
           <tbody>
           <% enc[:slots].each do |sl| %>
             <tr>
-              <td class="ic"><%= picon(sl[:species]) %></td>
               <td><%= mon_link(sl[:species]) %></td>
               <td><%= level_range(sl[:min], sl[:max]) %></td>
               <td class="num"><%= pct(sl[:chance]) %></td>
