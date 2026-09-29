@@ -3,7 +3,7 @@
 <h1>Tabla de tipos</h1>
 <p class="lead">Consulta qué tipos resisten, reciben daño extra o son inmunes.</p>
 <p class="muted">Cada fila es el tipo que recibe el golpe; cada columna, el tipo del movimiento. ×2 = daño doble · ×½ = mitad · ×0 = sin efecto · vacío = normal.</p>
-<% if types.any? { |t| t[:change] } %>
+<% if feature?("changes") && types.any? { |t| t[:change] } %>
   <p class="type-change-note">El punto y el borde rojo marcan eficacia distinta a <%= h(Render::View::BASELINE_LABEL) %>.</p>
 <% end %>
 

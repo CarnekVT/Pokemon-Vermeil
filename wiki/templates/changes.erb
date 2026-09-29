@@ -9,7 +9,7 @@
   ]
 %>
 <h1>Diferencias con los datos oficiales</h1>
-<p class="lead">Compara los datos del juego con la referencia de <%= h(Render::View::BASELINE_LABEL) %>.</p>
+<p class="lead">Compara los datos de <%= h(meta[:game_title]) %> con la referencia de <%= h(Render::View::BASELINE_LABEL) %>.</p>
 <p class="change-explanation">Se muestran diferencias de juego, como estadísticas, habilidades o movimientos. Las diferencias que solo cambian tildes se ignoran. «Nuevo» significa que no aparece en la referencia; «Modificado» indica que cambiaron los datos que se enumeran. Abre una categoría y filtra por nombre o por dato.</p>
 
 <% if changes[:empty] %>
@@ -39,8 +39,8 @@
   <% end %>
   <% unless changes[:removed].empty? %>
     <section class="change-group removed-group">
-      <h2>Entradas que no aparecen en el juego</h2>
-      <p>Estas entradas sí están en la referencia oficial, pero no figuran en los datos actuales del juego. Puede que se hayan retirado o que ahora estén registradas con otro nombre. Los nombres repetidos se agrupan; en Pokémon se indica cuántas formas representan.</p>
+      <h2>Formas y variantes sin ficha equivalente</h2>
+      <p>Esta lista señala formas concretas de la referencia que no tienen un registro equivalente en los datos actuales. La especie base puede seguir presente en <%= h(meta[:game_title]) %>; aquí se muestran las formas que faltan, no especies completas.</p>
       <% changes[:removed].each do |category, entries| %>
         <% unique_names = entries.group_by { |entry| entry[:name] } %>
         <details class="removed-details">

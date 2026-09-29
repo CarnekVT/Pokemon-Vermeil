@@ -7,11 +7,13 @@ require "fileutils"
 require "tmpdir"
 require_relative "assets"
 require_relative "diff"
+require_relative "trainer_variants"
 
 module Render
   TEMPLATE_DIR = File.join(__dir__, "..", "templates")
   ASSET_DIR    = File.join(__dir__, "..", "assets")
   SITE_MARKER  = ".wiki-generated"
+  FEATURE_DEFAULTS = TrainerVariants::FEATURE_DEFAULTS
   NATIVE_FILE_RENAME = File.method(:rename)
 
   DETAIL_PAGES = {
@@ -24,7 +26,7 @@ module Render
 
   module_function
 
-  def site(data:, changes:, out:, sprites:, accent_light:, accent_dark:)
+  def site(data:, changes:, out:, sprites:, accent_light:, accent_dark:, trainer_config: {}, features: {})
     attach_changes!(data, changes)
     target = File.expand_path(out)
     validate_output!(target)
@@ -35,25 +37,31 @@ module Render
     begin
       FileUtils.cp_r(Dir[File.join(ASSET_DIR, "*")], stage)
       manifest = Assets.copy(stage, data, sprites: sprites)
-      ctx = View.new(data: data, changes: changes, manifest: manifest)
+      ctx = View.new(data: data, changes: changes, manifest: manifest, trainer_config: trainer_config, features: features)
 
       write(stage, "accent.css", accent_stylesheet(accent_light, accent_dark))
       write(stage, "index.html", ctx.render("index", root: ""))
-      write(stage, "cambios.html", ctx.render("changes", root: ""))
-      write(stage, "tipos.html", ctx.render("types", root: ""))
-      write(stage, "ubicaciones/index.html", ctx.render("locations_list", root: "../"))
-      data[:locations].each do |loc|
-        write(stage, "ubicaciones/#{loc[:map]}.html", ctx.render("location", root: "../", loc: loc))
+      write(stage, "cambios.html", ctx.render("changes", root: "")) if ctx.feature?("changes")
+      write(stage, "tipos.html", ctx.render("types", root: "")) if ctx.feature?("types")
+      if ctx.feature?("locations")
+        write(stage, "ubicaciones/index.html", ctx.render("locations_list", root: "../"))
+        data[:locations].each do |loc|
+          write(stage, "ubicaciones/#{loc[:map]}.html", ctx.render("location", root: "../", loc: loc))
+        end
       end
 
       DETAIL_PAGES.each do |key, (folder, tmpl)|
+        feature_key = key == :species ? "pokemon" : key.to_s
+        next unless ctx.feature?(feature_key)
+
         write(stage, "#{folder}/index.html", ctx.render("list", root: "../", list_key: key, folder: folder))
-        data[key].each_value do |entry|
+        entries = key == :trainers ? data[:trainer_groups] : data[key].values
+        entries.each do |entry|
           write(stage, "#{folder}/#{entry_id(entry)}.html", ctx.render(tmpl, root: "../", entry: entry))
         end
       end
 
-      write(stage, "buscar.js", "window.WIKI_SEARCH=#{JSON.generate(search_index(data))};")
+      write(stage, "buscar.js", "window.WIKI_SEARCH=#{JSON.generate(search_index(data, ctx.features))};")
       File.write(File.join(stage, SITE_MARKER), "Generado por wiki/generate.rb\n")
 
       if File.exist?(target)
@@ -133,7 +141,7 @@ module Render
     end
   end
 
-  def entry_id(entry) = entry[:key] || entry[:id]
+  def entry_id(entry) = entry[:page_id] || entry[:key] || entry[:id]
 
   def write(out, rel, html)
     path = File.join(out, rel)
@@ -141,11 +149,14 @@ module Render
     File.write(path, html)
   end
 
-  def search_index(data)
+  def search_index(data, features = FEATURE_DEFAULTS)
     idx = []
     { species: ["pokemon", "Pokémon"], moves: ["movimientos", "Movimiento"],
       abilities: ["habilidades", "Habilidad"], items: ["objetos", "Objeto"],
       trainers: ["entrenadores", "Entrenador"] }.each do |key, (folder, label)|
+      feature_key = key == :species ? "pokemon" : key.to_s
+      next unless features.fetch(feature_key, true)
+
       entries = if key == :species
                   groups = data[:species].values.group_by { |entry| entry[:species] }
                   order = data[:dex_order].uniq
@@ -157,6 +168,8 @@ module Render
                     base = forms.find { |form| form[:form].to_i.zero? } || forms.min_by { |form| form[:form].to_i }
                     [base, forms]
                   end
+                elsif key == :trainers
+                  data[:trainer_groups].map { |group| [group, group[:variants]] }
                 else
                   data[key].values.map { |entry| [entry, [entry]] }
                 end
@@ -164,16 +177,19 @@ module Render
         name = e[:name] || e[:id]
         name = "#{e[:type_name]} #{name}" if key == :trainers
         aliases = key == :species ? forms.filter_map { |form| form[:form_name] }.uniq : []
-        changed = forms.find { |form| form[:change] }
+        changed = forms.find { |form| features.fetch("changes", true) && form[:change] }
         idx << { n: name, s: aliases.join(" "), c: label, u: "#{folder}/#{entry_id(e)}.html",
                  x: (changed ? changed[:change][:status] : nil) }
       end
     end
-    data[:locations].each { |l| idx << { n: l[:name], c: "Ubicación", u: "ubicaciones/#{l[:map]}.html" } }
+    if features.fetch("locations", true)
+      data[:locations].each { |l| idx << { n: l[:name], c: "Ubicación", u: "ubicaciones/#{l[:map]}.html" } }
+    end
     data[:types].each_value do |t|
+      next unless features.fetch("types", true)
       next if t[:pseudo]
 
-      idx << { n: t[:name], c: "Tipo", u: "tipos.html##{t[:id]}", x: (t[:change] ? t[:change][:status] : nil) }
+      idx << { n: t[:name], c: "Tipo", u: "tipos.html##{t[:id]}", x: (features.fetch("changes", true) && t[:change] ? t[:change][:status] : nil) }
     end
     idx
   end
@@ -189,7 +205,9 @@ module Render
       "SPECIAL_ATTACK" => "At. Esp.", "SPECIAL_DEFENSE" => "Def. Esp."
     }.freeze
 
-    def initialize(data:, changes:, manifest:)
+    attr_reader :features
+
+    def initialize(data:, changes:, manifest:, trainer_config: {}, features: {})
       @data = data
       @species_forms = data[:species].values.group_by { |form| form[:species] }
       @evolution_outgoing = Hash.new { |hash, key| hash[key] = [] }
@@ -205,6 +223,8 @@ module Render
       end
       @changes = changes
       @manifest = manifest
+      @trainer_config = trainer_config
+      @features = FEATURE_DEFAULTS.merge(features.is_a?(Hash) ? features.transform_keys(&:to_s).slice(*FEATURE_DEFAULTS.keys) : {})
       @erb = {}
       @type_color_cache = {}
       @root = ""
@@ -283,7 +303,9 @@ module Render
     def ability(id) = @data[:abilities][id.to_s]
     def item(id) = @data[:items][id.to_s]
     def type(id) = @data[:types][id.to_s]
-    def has_changes? = !@changes[:empty]
+    def has_changes? = feature?("changes") && !@changes[:empty]
+    def trainer_default_mode = @trainer_config["default_mode"]
+    def feature?(key) = @features.fetch(key.to_s, true)
 
     def type_multiplier(definition, attack_id, fields: nil)
       values = {
@@ -302,6 +324,8 @@ module Render
     end
 
     def type_cell_change(definition, attack_id)
+      return nil unless feature?("changes")
+
       change = definition[:change]
       return nil unless change && change[:status] == "modificado"
 
@@ -399,6 +423,7 @@ module Render
     # scale < 1 encoge el icono (para la matriz de tipos, donde a tamaño real no
     # caben las 19 columnas).
     def type_tag(type_id, small: false, link: true, scale: nil, fit: false)
+      link = false unless feature?("types")
       scale ||= small ? 0.82 : 1.0
       t = type(type_id)
       label = t ? t[:name] : type_id.to_s
@@ -436,22 +461,25 @@ module Render
 
     def move_link(id)
       m = move(id)
-      %(<a class="chip" href="#{page(:moves, id)}">#{h(m ? m[:name] : id.to_s)}</a>)
+      text = h(m ? m[:name] : id.to_s)
+      feature?("moves") ? %(<a class="chip" href="#{page(:moves, id)}">#{text}</a>) : %(<span class="chip">#{text}</span>)
     end
 
     def ability_link(id)
       a = ability(id)
-      %(<a class="chip" href="#{page(:abilities, id)}">#{h(a ? a[:name] : id.to_s)}</a>)
+      text = h(a ? a[:name] : id.to_s)
+      feature?("abilities") ? %(<a class="chip" href="#{page(:abilities, id)}">#{text}</a>) : %(<span class="chip">#{text}</span>)
     end
 
     def item_link(id)
       i = item(id)
-      %(<a class="chip" href="#{page(:items, id)}">#{item_icon(id)}#{h(i ? i[:name] : id.to_s)}</a>)
+      content = %(#{item_icon(id)}#{h(i ? i[:name] : id.to_s)})
+      feature?("items") ? %(<a class="chip" href="#{page(:items, id)}">#{content}</a>) : %(<span class="chip">#{content}</span>)
     end
 
     # -- cambios --------------------------------------------------------
     def badge(entry)
-      return "" unless entry[:change]
+      return "" unless feature?("changes") && entry[:change]
 
       if entry[:change][:status] == "nuevo"
         %( <span class="badge badge--new">Nuevo</span>)
@@ -463,7 +491,7 @@ module Render
 
     # @return [Hash, nil] { from:, to:, dir: "up"|"down" } si esa stat cambió
     def stat_change(entry, stat_id)
-      return nil unless entry[:change] && entry[:change][:status] == "modificado"
+      return nil unless feature?("changes") && entry[:change] && entry[:change][:status] == "modificado"
 
       f = entry[:change][:fields].find { |x| x[:field] == "base_stats" }
       return nil unless f && f[:from].is_a?(Hash)
@@ -476,6 +504,8 @@ module Render
     end
 
     def change_box(entry)
+      return "" unless feature?("changes")
+
       c = entry[:change]
       return "" unless c && c[:status] == "modificado" && c[:fields].any?
 
@@ -569,7 +599,9 @@ module Render
     end
 
     def notes(entry)
-      entry[:notes_html] ? %(<section class="notes"><h2>Notas</h2>#{entry[:notes_html]}</section>) : ""
+      return "" unless feature?("notes") && entry[:notes_html]
+
+      %(<section class="notes"><h2>Notas</h2>#{entry[:notes_html]}</section>)
     end
 
     # -- utilidades -----------------------------------------------------

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Configurar la wiki</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/configurator.css">
+  <script>
+  (function () {
+    try {
+      var theme = localStorage.getItem('wiki-theme') ||
+                  (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    } catch (e) {}
+  })();
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">Configura la wiki</span>
+    <span class="muted">Editor local del proyecto</span>
+    <div class="tools">
+      <button type="button" id="theme-toggle" aria-label="Tema oscuro" aria-pressed="false">
+        <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+        </svg>
+        <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M20.2 15.3A8.5 8.5 0 0 1 8.7 3.8 8.6 8.6 0 1 0 20.2 15.3Z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+  <main class="config-shell">
+    <header class="config-intro">
+      <h1>Prepara la wiki para tus jugadores</h1>
+      <p class="lead">Ajusta su aspecto y explica qué equipo usa cada entrenador según el modo y el inicial.</p>
+    </header>
+
+    <div class="config-tabs" role="tablist" aria-label="Secciones del configurador">
+      <button id="tab-appearance" type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" tabindex="0">Opciones generales</button>
+      <button id="tab-modes" type="button" role="tab" aria-selected="false" aria-controls="panel-modes" tabindex="-1">Modos de juego</button>
+      <button id="tab-content" type="button" role="tab" aria-selected="false" aria-controls="panel-content" tabindex="-1">Contenido</button>
+      <button id="tab-trainers" type="button" role="tab" aria-selected="false" aria-controls="panel-trainers" tabindex="-1">Entrenadores</button>
+    </div>
+
+    <section id="panel-appearance" class="section-card config-section" role="tabpanel" aria-labelledby="tab-appearance" tabindex="0">
+      <h2 id="appearance-heading">Opciones generales</h2>
+      <div class="config-grid">
+        <label>Carpeta de salida<input id="setting-out" type="text"></label>
+        <label>Baseline<input id="setting-baseline" type="text" spellcheck="false"></label>
+        <label>Accent para modo claro<input id="setting-accent-light" type="color"></label>
+        <label>Accent para modo oscuro<input id="setting-accent-dark" type="color"></label>
+      </div>
+      <div class="config-checks">
+        <label><input id="setting-sprites" type="checkbox"> Copiar imágenes de Pokémon y objetos</label>
+        <label><input id="setting-recompile" type="checkbox"> Recompilar PBS al generar</label>
+        <label><input id="setting-compare" type="checkbox"> Comparar con los juegos oficiales</label>
+      </div>
+      <p class="muted config-help">Deja «Baseline» vacío para usar wiki/baseline.json. Desactiva la comparación para generar sin marcar cambios.</p>
+    </section>
+
+    <section id="panel-modes" class="section-card config-section" role="tabpanel" aria-labelledby="tab-modes" tabindex="0" hidden>
+      <h2 id="modes-heading">Modos de juego</h2>
+      <p class="muted">Añade los modos que tenga tu juego. Puedes escribir tantos como necesites.</p>
+      <div id="mode-list" class="mode-list"></div>
+      <div class="mode-add"><label for="new-mode">Nuevo modo</label><input id="new-mode" type="text" maxlength="60" placeholder="Ej.: Nuzlocke"><button id="add-mode" type="button">Añadir modo</button></div>
+      <label class="default-mode">Modo inicial de la wiki<select id="default-mode"></select></label>
+      <section class="mode-fallback-panel" aria-labelledby="mode-fallback-heading">
+        <h3 id="mode-fallback-heading">Si falta un equipo en un modo</h3>
+        <p class="muted">Ejemplo: configura un modo para reutilizar los equipos de otro modo cuando el entrenador no tenga un equipo asignado directamente.</p>
+        <div id="mode-fallback-list" class="mode-fallback-list"></div>
+      </section>
+    </section>
+
+    <section id="panel-content" class="section-card config-section" role="tabpanel" aria-labelledby="tab-content" tabindex="0" hidden>
+      <h2>Contenido de la wiki</h2>
+      <p class="muted">Activa las páginas y los datos que quieras compartir con tus jugadores. Todo está activado por defecto.</p>
+      <div class="feature-groups">
+        <fieldset class="feature-group">
+          <legend>Páginas principales</legend>
+          <div class="feature-grid">
+            <label><input type="checkbox" data-feature="pokemon"><span><strong>Pokédex</strong><small>Índice y fichas de Pokémon.</small></span></label>
+            <label><input type="checkbox" data-feature="moves"><span><strong>Movimientos</strong><small>Fichas y lista de movimientos.</small></span></label>
+            <label><input type="checkbox" data-feature="abilities"><span><strong>Habilidades</strong><small>Fichas y lista de habilidades.</small></span></label>
+            <label><input type="checkbox" data-feature="items"><span><strong>Objetos</strong><small>Índice y fichas de objetos.</small></span></label>
+            <label><input type="checkbox" data-feature="trainers"><span><strong>Entrenadores</strong><small>Índice y fichas de entrenadores.</small></span></label>
+            <label><input type="checkbox" data-feature="locations"><span><strong>Ubicaciones</strong><small>Índice y páginas de mapas.</small></span></label>
+            <label><input type="checkbox" data-feature="types"><span><strong>Tabla de tipos</strong><small>Efectividad y resistencias.</small></span></label>
+            <label><input type="checkbox" data-feature="changes"><span><strong>Cambios oficiales</strong><small>Comparación, marcas y resúmenes.</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="feature-group">
+          <legend>Datos de Pokémon</legend>
+          <div class="feature-grid">
+            <label><input type="checkbox" data-feature="pokemon_evolution"><span><strong>Línea evolutiva</strong><small>Métodos y formas relacionadas.</small></span></label>
+            <label><input type="checkbox" data-feature="pokemon_level_moves"><span><strong>Movimientos por nivel</strong><small>Tabla de aprendizaje por nivel.</small></span></label>
+            <label><input type="checkbox" data-feature="pokemon_tutor_moves"><span><strong>MT y tutor</strong><small>Movimientos aprendidos por esos métodos.</small></span></label>
+            <label><input type="checkbox" data-feature="pokemon_egg_moves"><span><strong>Movimientos huevo</strong><small>Movimientos heredados.</small></span></label>
+            <label><input type="checkbox" data-feature="pokemon_locations"><span><strong>Dónde capturar Pokémon</strong><small>Encuentros mostrados en cada ficha.</small></span></label>
+            <label><input type="checkbox" data-feature="pokemon_trainers"><span><strong>Entrenadores que los usan</strong><small>Combates que incluyen cada Pokémon.</small></span></label>
+            <label><input type="checkbox" data-feature="pokemon_wild_items"><span><strong>Objetos de Pokémon salvajes</strong><small>Objetos que pueden llevar.</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="feature-group">
+          <legend>Datos relacionados</legend>
+          <div class="feature-grid">
+            <label><input type="checkbox" data-feature="move_learners"><span><strong>Quién aprende cada movimiento</strong><small>Relaciones inversas en las fichas.</small></span></label>
+            <label><input type="checkbox" data-feature="ability_pokemon"><span><strong>Pokémon con cada habilidad</strong><small>Relaciones inversas en las fichas.</small></span></label>
+            <label><input type="checkbox" data-feature="item_locations"><span><strong>Dónde encontrar objetos</strong><small>Oculta la ubicación del objeto en ambas direcciones.</small></span></label>
+            <label><input type="checkbox" data-feature="item_held_by"><span><strong>Quién lleva cada objeto</strong><small>Pokémon salvajes que pueden llevarlo.</small></span></label>
+            <label><input type="checkbox" data-feature="location_encounters"><span><strong>Encuentros por ubicación</strong><small>Pokémon salvajes en las páginas de mapas.</small></span></label>
+            <label><input type="checkbox" data-feature="location_items"><span><strong>Tabla de objetos en los mapas</strong><small>Ocúltala sin quitar las ubicaciones de las fichas de objetos.</small></span></label>
+            <label><input type="checkbox" data-feature="trainer_teams"><span><strong>Equipos de entrenadores</strong><small>Pokémon de cada combate.</small></span></label>
+            <label><input type="checkbox" data-feature="trainer_items"><span><strong>Objetos que usan los entrenadores</strong><small>Objetos del entrenador y de sus Pokémon.</small></span></label>
+            <label><input type="checkbox" data-feature="trainer_quotes"><span><strong>Frases de derrota</strong><small>Texto mostrado al perder el combate.</small></span></label>
+            <label><input type="checkbox" data-feature="notes"><span><strong>Notas personalizadas</strong><small>Comentarios añadidos a las fichas.</small></span></label>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+
+    <section id="panel-trainers" class="section-card config-section" role="tabpanel" aria-labelledby="tab-trainers" tabindex="0" hidden>
+      <div class="section-heading">
+        <div><h2 id="trainer-heading">Equipos de entrenadores</h2><p class="muted">Define qué modo usa cada equipo y personaliza las excepciones.</p></div>
+      </div>
+      <p class="trainer-flow-note">Una versión representa un equipo de ese entrenador. Varias versiones pueden pertenecer al mismo modo, por ejemplo, el combate inicial y la revancha.</p>
+      <section class="setup-panel setup-panel--types" aria-labelledby="starter-heading">
+        <div class="setup-panel-heading">
+          <div><h3 id="starter-heading">Tipos iniciales del juego <span class="optional-label">Opcional</span></h3>
+          <p class="muted">Elige los tipos que puede escoger el jugador. Solo estos aparecerán en el filtro de la wiki.</p></div>
+        </div>
+        <div class="mode-add starter-add">
+          <label for="starter-type-candidate">Añadir tipo</label>
+          <select id="starter-type-candidate"></select>
+          <button id="add-starter-type" type="button">Añadir</button>
+        </div>
+        <div id="player-starter-type-list" class="mode-list" aria-live="polite"></div>
+        <p id="starter-type-status" class="muted" role="status" aria-live="polite"></p>
+      </section>
+      <section class="setup-panel setup-panel--mapping" aria-labelledby="bulk-heading">
+        <div class="setup-panel-heading">
+          <div><h3 id="bulk-heading">Asignación general de modos</h3>
+          <p class="muted">Marca en qué modos aparece cada versión del entrenador. Al aplicar, se reemplazan las asignaciones de todos los entrenadores. Puedes marcar el mismo modo en varias versiones para incluir combates adicionales o revanchas.</p></div>
+        </div>
+        <div id="bulk-version-map" class="bulk-version-map" role="group" aria-label="Asignación de modos por versión PBS"></div>
+        <div class="bulk-actions">
+          <button id="bulk-clear-modes" type="button" class="button-secondary">Quitar todas las asignaciones</button>
+          <button id="bulk-apply" type="button" class="button-primary">Aplicar a todos los entrenadores</button>
+        </div>
+        <p id="bulk-status" class="muted" role="status" aria-live="polite"></p>
+      </section>
+      <div class="section-heading trainer-list-heading">
+        <div><h3>Ajustes por entrenador</h3><p class="muted">Cada equipo hereda la asignación general. Abre un entrenador y activa «Personalizar» si sus modos, tipo inicial o nombre son distintos.</p></div>
+        <label class="family-search">Buscar entrenador<input id="family-search" type="search" placeholder="Nombre o tipo…"></label>
+      </div>
+      <p id="family-count" class="muted" role="status"></p>
+      <div id="family-list" class="family-list"></div>
+    </section>
+
+    <footer class="config-footer">
+      <p id="save-status" role="status" aria-live="polite">Los cambios se guardarán en wiki/config.json.</p>
+      <div><button id="save-button" type="button" class="button-secondary">Guardar</button><button id="finish-button" type="button" class="button-primary">Guardar y generar wiki</button></div>
+    </footer>
+  </main>
+  <script src="/configurator.js"></script>
+  <script src="/theme.js"></script>
+</body>
+</html>

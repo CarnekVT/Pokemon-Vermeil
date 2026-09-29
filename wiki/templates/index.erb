@@ -6,49 +6,68 @@
   <div class="home-intro">
     <p class="home-kicker">Guía para jugadores</p>
     <h1><%= h(meta[:game_title]) %><% if meta[:version] %> <span class="count">v<%= h(meta[:version]) %></span><% end %></h1>
-    <p>Consulta los datos del juego, descubre dónde encontrar Pokémon y objetos y revisa qué cambió respecto a los juegos oficiales.</p>
+    <p>Consulta los datos disponibles del juego<%= ", descubre dónde encontrar Pokémon" if feature?("pokemon_locations") %><%= " y objetos" if feature?("item_locations") %><%= " y revisa qué cambió respecto a los juegos oficiales" if feature?("changes") %>.</p>
     <p class="home-search-hint">Busca por nombre desde el campo de búsqueda de arriba.</p>
   </div>
+  <% if feature?("pokemon") || feature?("items") || feature?("trainers") %>
   <div class="home-actions">
-    <a class="home-action home-action--primary" href="<%= asset('pokemon/index.html') %>">
-      <strong>Explorar Pokémon</strong><span><%= data[:species].size %> Pokémon y formas</span>
-    </a>
-    <a class="home-action" href="<%= asset('objetos/index.html') %>">
-      <strong>Buscar objetos</strong><span><%= data[:items].size %> objetos y dónde encontrarlos</span>
-    </a>
+    <% if feature?("pokemon") %>
+      <a class="home-action home-action--primary" href="<%= asset('pokemon/index.html') %>">
+        <strong>Explorar Pokémon</strong><span><%= data[:species].size %> Pokémon y formas</span>
+      </a>
+    <% end %>
+    <% if feature?("items") %>
+      <a class="home-action" href="<%= asset('objetos/index.html') %>">
+        <strong>Buscar objetos</strong><span><%= data[:items].size %> objetos<%= " y dónde encontrarlos" if feature?("item_locations") %></span>
+      </a>
+    <% end %>
+    <% if feature?("trainers") %>
+      <a class="home-action" href="<%= asset('entrenadores/index.html') %>">
+        <strong>Guía de combates</strong><span>Equipos, modos y variantes por entrenador</span>
+      </a>
+    <% end %>
   </div>
+  <% end %>
 </section>
 
 <div class="home-grid">
+  <% if %w[moves abilities types locations trainers].any? { |key| feature?(key) } %>
   <section class="home-section">
     <h2>Explora el juego</h2>
     <ul class="home-links">
-      <li><a href="<%= asset('movimientos/index.html') %>">Movimientos</a><span><%= data[:moves].size %></span></li>
-      <li><a href="<%= asset('habilidades/index.html') %>">Habilidades</a><span><%= data[:abilities].size %></span></li>
-      <li><a href="<%= asset('tipos.html') %>">Tabla de tipos</a><span><%= type_count %> tipos</span></li>
-      <li><a href="<%= asset('ubicaciones/index.html') %>">Ubicaciones</a><span><%= data[:locations].size %> zonas</span></li>
-      <li><a href="<%= asset('entrenadores/index.html') %>">Entrenadores</a><span><%= data[:trainers].size %></span></li>
+      <% if feature?("moves") %><li><a href="<%= asset('movimientos/index.html') %>">Movimientos</a><span><%= data[:moves].size %></span></li><% end %>
+      <% if feature?("abilities") %><li><a href="<%= asset('habilidades/index.html') %>">Habilidades</a><span><%= data[:abilities].size %></span></li><% end %>
+      <% if feature?("types") %><li><a href="<%= asset('tipos.html') %>">Tabla de tipos</a><span><%= type_count %> tipos</span></li><% end %>
+      <% if feature?("locations") %><li><a href="<%= asset('ubicaciones/index.html') %>">Ubicaciones</a><span><%= data[:locations].size %> zonas</span></li><% end %>
+      <% if feature?("trainers") %><li><a href="<%= asset('entrenadores/index.html') %>">Entrenadores</a><span><%= data[:trainers].size %></span></li><% end %>
     </ul>
   </section>
+  <% end %>
 
+  <% if feature?("changes") %>
   <section class="home-section home-changes">
     <div class="home-section-heading">
       <div><h2>Diferencias con los juegos oficiales</h2>
         <% if changes[:empty] %>
           <p>No se detectaron diferencias respecto a <%= Render::View::BASELINE_LABEL %>.</p>
         <% else %>
-          <p>Hay diferencias en varios datos del juego. Puedes revisarlas agrupadas por categoría.</p>
+          <p>Estas cifras comparan los datos de <%= h(meta[:game_title]) %> con los juegos oficiales.</p>
         <% end %>
       </div>
       <% unless changes[:empty] %><a class="home-change-link" href="<%= asset('cambios.html') %>">Ver cambios</a><% end %>
     </div>
     <% unless changes[:empty] %>
       <ul class="change-counts">
-        <% count_labels = { "modificadas" => "Fichas con cambios", "nuevas" => "Añadidas", "eliminadas" => "No aparecen en el juego" } %>
+        <% count_labels = {
+          "modificadas" => "Elementos con datos distintos",
+          "nuevas" => "Elementos nuevos en #{meta[:game_title]}",
+          "eliminadas" => "Elementos oficiales que faltan en #{meta[:game_title]}"
+        } %>
         <% changes[:counts].each do |label, count| %>
           <li><strong><%= count %></strong><span><%= h(count_labels[label] || label.capitalize) %></span></li>
         <% end %>
       </ul>
     <% end %>
   </section>
+  <% end %>
 </div>

@@ -14,11 +14,12 @@ module Boot
     attr_reader :game_dir
 
     def load_engine(recompile: true)
-      require File.join(REPO_ROOT, "tests", "harness")
+      require File.join(REPO_ROOT, "wiki", "lib", "headless_support", "harness")
 
       TestGame.boot
-      TestGame.new_state   # $player / $game_temp: los necesitan pbGetMapNameFromId y la carga de mapas
       @game_dir = TestGame::GAME_DIR
+      # Los scripts de aleatorización consultan este estado al identificar MTs.
+      $PokemonGlobal = Struct.new(:tm_move_map, :random_enabled).new({}, false)
 
       report_load_errors
 
@@ -62,12 +63,27 @@ module Boot
 
     def recompile_pbs
       puts "Compilando los PBS para reflejar los .txt actuales..."
-      TestGame.capture_output do
-        WriteGuard.unguarded do
-          FileLineData.clear
-          Compiler.compile_pbs_files
+      data_dir = File.join(@game_dir, "Data")
+      # ponytail: restaura solo Data/*.dat; ampliar si compile_pbs_files escribe otros tipos.
+      WriteGuard.unguarded do
+        Dir.mktmpdir("wiki-pbs-") do |backup_dir|
+          original = Dir[File.join(data_dir, "*.dat")]
+          original.each { |path| FileUtils.cp(path, File.join(backup_dir, File.basename(path))) }
+          begin
+            TestGame.capture_output do
+              FileLineData.clear
+              Compiler.compile_pbs_files
+              GameData.load_all
+            end
+          ensure
+            Dir[File.join(data_dir, "*.dat")].each do |path|
+              File.delete(path) unless File.file?(File.join(backup_dir, File.basename(path)))
+            end
+            original.each do |path|
+              FileUtils.cp(File.join(backup_dir, File.basename(path)), path)
+            end
+          end
         end
-        GameData.load_all
       end
     end
   end

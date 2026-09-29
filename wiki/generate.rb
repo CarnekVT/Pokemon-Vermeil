@@ -11,6 +11,7 @@
 #   ruby wiki/generate.rb --accent "#336699"   # mismo accent en ambos temas
 #   ruby wiki/generate.rb --accent-light "#1a3d5c" --accent-dark "#5ba0d6"
 #   ruby wiki/generate.rb --no-recompile       # usa los Data/*.dat existentes tal cual
+#   ruby wiki/generate.rb --configure          # abre el editor visual local
 #
 # No hay nada que instalar: arranca el motor con tests/harness.rb (igual que la
 # suite de tests) y lee GameData directamente, así que los PBS divididos
@@ -25,6 +26,8 @@ require_relative "lib/extract"
 require_relative "lib/overrides"
 require_relative "lib/diff"
 require_relative "lib/render"
+require_relative "lib/trainer_variants"
+require_relative "lib/configurator"
 
 module Wiki
   DEFAULTS = {
@@ -34,11 +37,26 @@ module Wiki
     sprites: true,
     recompile: true,
     accent_light: "#1a3d5c",
-    accent_dark: "#5ba0d6"
+    accent_dark: "#5ba0d6",
+    configure: false
   }.freeze
 
+  def self.configured_options(config = TrainerVariants.load)
+    settings = config["settings"] || {}
+    out = File.expand_path(settings.fetch("out", "wiki/site"), REPO_ROOT)
+    baseline_value = settings.fetch("baseline", "wiki/baseline.json")
+    baseline = baseline_value == "none" ? "none" : File.expand_path(baseline_value, REPO_ROOT)
+    DEFAULTS.merge(
+      out: out, baseline: baseline,
+      sprites: settings.fetch("sprites", true),
+      recompile: settings.fetch("recompile", true),
+      accent_light: settings.fetch("accent_light", "#1a3d5c"),
+      accent_dark: settings.fetch("accent_dark", "#5ba0d6")
+    )
+  end
+
   def self.parse_args(argv)
-    opts = DEFAULTS.dup
+    opts = configured_options
     until argv.empty?
       case (arg = argv.shift)
       when "--out"        then opts[:out] = File.expand_path(option_value!(argv, arg), Dir.pwd)
@@ -53,6 +71,7 @@ module Wiki
       when "--accent-dark"
         opts[:accent_dark] = accent_option_value!(argv, arg)
       when "--no-sprites" then opts[:sprites] = false
+      when "--configure" then opts[:configure] = true
       when "--no-recompile" then opts[:recompile] = false
       when "-h", "--help" then puts(File.read(__FILE__)[/\A(?:#.*\n)+/].gsub(/^# ?/, "")); exit
       else abort("Opción desconocida: #{arg}")
@@ -84,13 +103,16 @@ module Wiki
   # ponytail: el asistente expone opciones frecuentes; la CLI conserva el resto.
   def self.interactive_options
     puts "Generador de wiki para jugadores"
-    puts "1. Generar wiki con opciones recomendadas"
-    puts "2. Ajustar opciones"
-    puts "3. Salir"
-    choice = prompt_choice("Elige una opción", %w[1 2 3], "1")
-    return nil if choice.nil? || choice == "3"
+    puts "1. Generar wiki con la configuración guardada"
+    puts "2. Ajustar opciones en terminal"
+    puts "3. Configurar la wiki en el navegador"
+    puts "4. Salir"
+    choice = prompt_choice("Elige una opción", %w[1 2 3 4], "1")
+    return nil if choice.nil? || choice == "4"
 
-    opts = DEFAULTS.dup
+    opts = configured_options
+    return opts.merge(configure: true, persist_settings: true) if choice == "3"
+
     if choice == "2"
       out = prompt_text("Carpeta de salida", opts[:out])
       return nil if out.nil?
@@ -104,9 +126,9 @@ module Wiki
       return nil if recompile.nil?
       opts[:recompile] = recompile
 
-      baseline = prompt_yes_no("Marcar cambios respecto a los juegos oficiales", true)
+      baseline = prompt_yes_no("Marcar cambios respecto a los juegos oficiales", opts[:baseline] != "none")
       return nil if baseline.nil?
-      opts[:baseline] = "none" unless baseline
+      opts[:baseline] = baseline ? File.join(REPO_ROOT, "wiki", "baseline.json") : "none"
     end
 
     accent_light = prompt_accent("modo claro", opts[:accent_light])
@@ -123,7 +145,7 @@ module Wiki
     puts "Accent oscuro: #{opts[:accent_dark]}"
     puts "PBS: #{opts[:recompile] ? 'se recompilan' : 'usar datos compilados'}"
     puts "Imágenes: #{opts[:sprites] ? 'incluidas' : 'omitidas'}"
-    prompt_yes_no("Generar la wiki con estas opciones", true) ? opts : nil
+    prompt_yes_no("Generar la wiki con estas opciones", true) ? opts.merge(persist_settings: true) : nil
   end
 
   def self.prompt_accent(theme, default)
@@ -176,15 +198,43 @@ module Wiki
     end
   end
 
+  def self.config_settings(opts)
+    relative = lambda do |path|
+      expanded = File.expand_path(path, REPO_ROOT)
+      expanded.start_with?("#{REPO_ROOT}/") ? expanded.delete_prefix("#{REPO_ROOT}/") : expanded
+    end
+    {
+      "out" => relative.call(opts[:out]),
+      "baseline" => opts[:baseline] == "none" ? "none" : relative.call(opts[:baseline]),
+      "sprites" => opts[:sprites], "recompile" => opts[:recompile],
+      "accent_light" => opts[:accent_light], "accent_dark" => opts[:accent_dark]
+    }
+  end
+
   def self.run(argv)
     opts = argv.empty? && $stdin.tty? ? interactive_options : parse_args(argv)
     return unless opts
 
     started = Time.now
+    config = TrainerVariants.load
 
-    Boot.load_engine(recompile: opts[:recompile])
+    initially_recompiled = opts[:recompile]
+    Boot.load_engine(recompile: initially_recompiled)
     data = Extract.all
 
+    if opts[:configure]
+      groups = TrainerVariants.build_groups(data[:trainers], config, data[:species])
+      config = WikiConfigurator.open(config: config, groups: groups, species: data[:species])
+      opts = configured_options(config).merge(persist_settings: true)
+      if opts[:recompile] && !initially_recompiled
+        Boot.load_engine(recompile: true)
+        data = Extract.all
+      end
+    end
+
+    if opts[:persist_settings]
+      Boot.unguarded { TrainerVariants.save(config.merge("settings" => config_settings(opts))) }
+    end
     if opts[:snapshot]
       snapshot = Snapshot.reduce(data)
       Boot.unguarded { File.write(opts[:snapshot], JSON.pretty_generate(Snapshot.document(data))) }
@@ -195,16 +245,18 @@ module Wiki
     baseline = (opts[:baseline] == "none") ? nil : Diff.load(opts[:baseline])
     changes  = baseline ? Diff.compare(Snapshot.reduce(data), baseline) : Diff.empty
     Overrides.apply!(data, File.join(REPO_ROOT, "wiki", "overrides"))
+    data[:trainer_groups] = TrainerVariants.build_groups(data[:trainers], config, data[:species])
 
     Boot.unguarded do
       Render.site(data: data, changes: changes, out: opts[:out], sprites: opts[:sprites],
-                  accent_light: opts[:accent_light], accent_dark: opts[:accent_dark])
+                  accent_light: opts[:accent_light], accent_dark: opts[:accent_dark],
+                  trainer_config: config, features: config["features"])
     end
 
     puts format("Wiki generada en %s  (%.1fs)", opts[:out], Time.now - started)
     puts "  #{data[:species].size} especies · #{data[:moves].size} movimientos · " \
          "#{data[:abilities].size} habilidades · #{data[:items].size} objetos · " \
-         "#{data[:trainers].size} entrenadores · #{data[:locations].size} mapas"
+         "#{data[:trainer_groups].size} combates · #{data[:locations].size} mapas"
     unless changes[:empty]
       puts "  cambios respecto a la baseline: #{changes[:counts].map { |k, v| "#{v} #{k}" }.join(', ')}"
     end

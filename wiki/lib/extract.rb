@@ -3,6 +3,7 @@
 require "json"
 require_relative "evolution"
 require_relative "locations"
+require_relative "trainer_variants"
 
 # Recorre GameData::* y devuelve estructuras de datos planas (Hash/Array de
 # tipos JSON) listas para renderizar. Nada de lógica de presentación aquí.
@@ -47,8 +48,7 @@ module Extract
   # comentarios //). Si falla, cae al título de RPG Maker.
   def game_title
     raw = File.read(File.join(Dir.pwd, "mkxp.json"))
-    json = raw.gsub(%r{^[ \t]*//.*$}, "").gsub(%r{/\*.*?\*/}m, "")
-    title = JSON.parse(json)["windowTitle"].to_s.strip
+    title = raw[/^\s*"windowTitle"\s*:\s*"([^"\r\n]+)"/, 1].to_s.strip
     return title unless title.empty?
 
     raise "sin windowTitle"
@@ -109,7 +109,7 @@ module Extract
         },
         prevo: (s.get_previous_species.to_s if s.get_previous_species != s.species),
         mega_stone: s.mega_stone&.to_s, mega_move: s.mega_move&.to_s,
-        hidden_from_dex: s.hide_from_dex?,
+        hidden_from_dex: (s.hide_from_dex? if s.respond_to?(:hide_from_dex?)),
         # rellenados por link_reverse_indices
         locations: [], trainers: []
       }
@@ -161,8 +161,9 @@ module Extract
     GameData::Trainer.each do |t|
       tt = GameData::TrainerType.try_get(t.trainer_type)
       key = trainer_key(t)
+      family_key = TrainerVariants.family_key(t.trainer_type, t.real_name)
       out[key] = {
-        key: key, trainer_type: t.trainer_type.to_s,
+        key: key, family_key: family_key, family_page_id: TrainerVariants.page_id(t.name, family_key), trainer_type: t.trainer_type.to_s,
         type_name: (tt&.name || t.trainer_type.to_s),
         name: t.name, version: t.version,
         lose_text: t.lose_text,
@@ -209,7 +210,7 @@ module Extract
     end
 
     trainers.each_value do |t|
-      t[:party].each { |p| species.dig(p[:species], :trainers)&.push(key: t[:key], name: t[:name], type_name: t[:type_name], level: p[:level]) }
+      t[:party].each { |p| species.dig(p[:species], :trainers)&.push(key: t[:family_page_id], name: t[:name], type_name: t[:type_name], level: p[:level]) }
     end
   end
 
@@ -315,7 +316,7 @@ module Snapshot
     species: %i[name form_name types base_stats bst evs abilities hidden_abilities moves
                 tutor_moves egg_moves egg_groups hatch_steps gender_ratio growth_rate
                 catch_rate base_exp happiness height weight generation category pokedex
-                wild_items evolves_to prevo mega_stone mega_move hidden_from_dex],
+                wild_items evolves_to prevo mega_stone mega_move],
     moves: %i[name type category power accuracy total_pp priority target function_code
               flags effect_chance description],
     abilities: %i[name description flags],

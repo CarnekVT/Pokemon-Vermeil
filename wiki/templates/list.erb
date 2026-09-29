@@ -7,6 +7,7 @@
 
   form_groups = data[:species].values.group_by { |s| s[:species] } if key == :species
   item_pbs_order = data[:items].keys.each_with_index.to_h if key == :items
+  starter_types = data[:trainer_groups].flat_map { |group| group[:starters] }.uniq if key == :trainers
   entries =
     if key == :species
       species_order = data[:dex_order].uniq
@@ -17,10 +18,12 @@
 
         forms.find { |form| form[:form].to_i.zero? } || forms.min_by { |form| form[:form].to_i }
       end
+    elsif key == :trainers
+      data[:trainer_groups]
     else
       data[key].values.sort_by { |e| (e[:name] || e[:key]).to_s.downcase }
     end
-  url = ->(e) { asset("#{folder}/#{e[:key] || e[:id]}.html") }
+  url = ->(e) { asset("#{folder}/#{e[:page_id] || e[:key] || e[:id]}.html") }
   relevant_fields = %w[base_stats types abilities hidden_abilities]
   modified_species_count = if key == :species
     form_groups.count do |_, forms|
@@ -30,12 +33,12 @@
       end
     end
   end
-  has_changes = entries.any? do |e|
+  has_changes = feature?("changes") && entries.any? do |e|
     key == :species ? form_groups[e[:species]].any? { |form| form[:change] } : e[:change]
   end
 %>
-<h1><%= h(titles[key]) %> <span class="count"><%= entries.size %></span><% if key == :species && has_changes %><span class="modified-count"><%= modified_species_count %> Pokémon modificados</span><% end %></h1>
-<div class="list-tools">
+<h1<%= ' class="dex-title"' if key == :species %>><span><%= h(titles[key]) %></span><span class="count"><%= entries.size %></span><% if key == :species && has_changes %><span class="dex-title-separator" aria-hidden="true">·</span><span class="modified-count"><%= modified_species_count %> Pokémon modificados</span><% end %></h1>
+<div class="list-tools<%= ' list-tools--dex' if key == :species %><%= ' list-tools--trainers' if key == :trainers %>">
   <label class="page-search" for="page-search">Buscar en esta página
     <input id="page-search" type="search" placeholder="Escribe un nombre…" autocomplete="off">
   </label>
@@ -47,6 +50,16 @@
         <option value="changed">Todos los Pokémon con cambios</option>
       </select>
     </label>
+  <% end %>
+  <% if key == :trainers %>
+    <% if data[:trainer_groups].any? { |group| group[:modes].any? } %>
+      <label class="list-sort" for="trainer-mode-filter">Modo
+        <select id="trainer-mode-filter" aria-label="Filtrar entrenadores por modo">
+          <option value="all">Todos los modos</option>
+          <% data[:trainer_groups].flat_map { |group| group[:modes] }.uniq.each do |mode| %><option value="<%= h(mode) %>"<%= ' selected' if mode == trainer_default_mode %>><%= h(mode) %></option><% end %>
+        </select>
+      </label>
+    <% end %>
   <% end %>
   <% if key == :items %>
     <label class="list-sort" for="item-sort">Ordenar por
@@ -62,18 +75,36 @@
   <% end %>
   <span id="list-count" role="status"><%= entries.size %> resultados</span>
 </div>
+<% if key == :trainers && feature?("trainer_teams") && starter_types.any? %>
+  <fieldset class="starter-picker" data-trainer-starter-picker>
+    <legend>Elige el tipo de tu inicial</legend>
+    <div class="starter-picker-options">
+      <label class="starter-choice">
+        <input type="radio" name="trainer-starter-index" value="all" data-trainer-starter-option checked>
+        <span class="starter-choice-content">Todos</span>
+      </label>
+      <% starter_types.each do |type_id, type_name| %>
+        <label class="starter-choice">
+          <input type="radio" name="trainer-starter-index" value="<%= h(type_id) %>" data-trainer-starter-option>
+          <span class="starter-choice-content"><%= type_tag(type_id, scale: 0.75, link: false) %><span><%= h(type_name) %></span></span>
+        </label>
+      <% end %>
+    </div>
+    <p class="muted trainer-starter-hint">Se guarda tu elección y se aplica a los combates con equipos distintos según tu inicial.</p>
+  </fieldset>
+<% end %>
 <p class="muted" id="filter-empty" hidden>No se encontraron resultados en esta página.</p>
 
 <% if key == :species %>
 <div class="dexgrid">
   <% entries.each_with_index do |e, i| %>
     <% forms = form_groups[e[:species]] || [e] %>
-    <% has_any_change = forms.any? { |form| form[:change] } %>
-    <% relevant_modified_form = forms.find do |form|
+    <% has_any_change = feature?("changes") && forms.any? { |form| form[:change] } %>
+    <% relevant_modified_form = feature?("changes") && forms.find do |form|
          change = form[:change]
          change && change[:status] == "modificado" && Array(change[:fields]).any? { |field| relevant_fields.include?(field[:field].to_s) }
        end %>
-    <% new_forms = forms.select { |form| form.dig(:change, :status) == "nuevo" } %>
+    <% new_forms = feature?("changes") ? forms.select { |form| form.dig(:change, :status) == "nuevo" } : [] %>
     <% species_is_new = new_forms.size == forms.size %>
     <% has_relevant_change = !relevant_modified_form.nil? || new_forms.any? %>
     <% search_text = page_search_text(display_name(e), forms.map { |form| form_label(form) }, e[:types].map { |type_id| type(type_id)&.dig(:name) }) %>
@@ -96,14 +127,16 @@
 </div>
 
 <% elsif key == :trainers %>
-<div class="party">
+<div class="party trainer-list-grid">
   <% entries.each do |e| %>
-    <% party_names = e[:party].filter_map { |pkmn| species(pkmn[:species])&.dig(:name) } %>
-    <% search_text = page_search_text(e[:name], e[:type_name], party_names) %>
-    <a class="dexcard" data-page-search-entry data-search-text="<%= h(search_text) %>" href="<%= url.call(e) %>" style="align-items:center">
+    <% party_names = e[:variants].flat_map { |variant| variant[:party].filter_map { |pkmn| species(pkmn[:species])&.dig(:name) } } %>
+    <% search_text = page_search_text(e[:label], e[:type_name], party_names, e[:modes], e[:starters].map(&:last)) %>
+    <% mode_names = JSON.generate(e[:modes]) %>
+    <a class="dexcard trainer-list-card" data-page-search-entry data-search-text="<%= h(search_text) %>" data-trainer-modes="<%= h(mode_names) %>" data-trainer-common="<%= e[:unconfigured_variants].positive? %>" href="<%= url.call(e) %>">
       <%= tsprite(e[:trainer_type]) %>
-      <span class="nm"><%= h(e[:name]) %><%= " (#{e[:version]})" if e[:version].to_i > 0 %></span>
-      <span class="bst"><%= h(e[:type_name]) %> · <%= e[:party].size %> Pokémon</span>
+      <span class="nm"><%= h(e[:label]) %></span>
+      <span class="bst"><%= h(e[:type_name]) %> · <%= e[:variants].size %> <%= e[:variants].size == 1 ? "equipo" : "equipos" %></span>
+      <% if e[:modes].any? %><span class="trainer-mode-tags"><% e[:modes].each do |mode| %><span class="tag"><%= h(mode) %></span><% end %></span><% elsif e[:variants].size > 1 %><span class="bst">Variantes de equipo</span><% end %>
     </a>
   <% end %>
 </div>

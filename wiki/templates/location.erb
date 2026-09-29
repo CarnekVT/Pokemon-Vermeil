@@ -7,6 +7,7 @@
     </div>
   </header>
 
+  <% if feature?("location_encounters") %>
   <% loc[:encounters].group_by { |x| x[:version] }.each do |version, group| %>
     <section class="section-card">
       <h2>Encuentros<% if loc[:encounters].map { |x| x[:version] }.uniq.size > 1 %> — <%= version.to_i.zero? ? "tabla principal" : "tabla alternativa #{version}" %><% end %></h2>
@@ -29,8 +30,9 @@
       <% end %>
     </section>
   <% end %>
+  <% end %>
 
-  <% unless loc[:items].empty? %>
+  <% if feature?("item_locations") && feature?("location_items") && !loc[:items].empty? %>
   <section class="section-card">
     <h2>Objetos</h2>
     <div class="table-scroll">

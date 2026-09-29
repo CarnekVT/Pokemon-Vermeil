@@ -1,70 +1,132 @@
-<% e = locals[:entry]; title("#{e[:type_name]} #{e[:name]}") %>
-<article class="detail trainer">
+<%
+  e = locals[:entry]
+  all_starter_types = data[:trainer_groups].flat_map { |group| group[:starters] }.uniq
+  title(e[:label])
+  default_mode = trainer_default_mode
+  default_mode = e[:modes].first unless e[:modes].include?(default_mode)
+%>
+<article class="detail trainer" data-trainer-detail data-default-mode="<%= h(default_mode.to_s) %>">
   <header>
     <% ts = tsprite(e[:trainer_type], hero: true) %>
     <% unless ts.empty? %><div class="hero-sprite hero-sprite--trainer"><%= ts %></div><% end %>
     <div class="headmeta">
-      <h1><%= h(e[:type_name]) %> <%= h(e[:name]) %></h1>
-      <% unless e[:items].empty? %><p class="muted">Objetos que usa: <%= h(e[:items].join(", ")) %></p><% end %>
-      <% if e[:lose_text] && !e[:lose_text].empty? %><p class="quote">“<%= h(e[:lose_text]) %>”</p><% end %>
+      <h1><%= h(e[:label]) %></h1>
+      <p class="subtitle"><%= h(e[:type_name]) %></p>
     </div>
   </header>
 
-  <section class="section-card">
-    <h2>Equipo <span class="count"><%= e[:party].size %></span></h2>
-    <div class="party">
-      <% e[:party].each do |p|
-        form_id = p[:form].to_i.positive? ? "#{p[:species]}_#{p[:form]}" : p[:species]
-        s = species(form_id) || species(p[:species])
-        icon_id = s ? s[:id] : form_id
-        display = p[:name].to_s.empty? ? (s ? display_name(s) : "Pokémon no registrado") : p[:name]
-      %>
-        <div class="pcard">
-          <div class="top">
-            <%= picon(icon_id, shiny: p[:shiny]) %>
-            <div class="pcard-heading">
-              <div class="nm"><%= h(display) %> <span class="lv">Nv. <%= p[:level] %></span></div>
-              <% if s %><span class="types"><%= types_row(s[:types], small: true) %></span><% end %>
-              <% if p[:shiny] %><span class="tag shiny-tag">Variocolor</span><% end %>
-            </div>
-          </div>
-          <table class="kv small">
-            <% if p[:ability] %><tr><th>Habilidad</th><td><%= h(p[:ability]) %></td></tr><% end %>
-            <% if p[:item] %>
-              <tr><th>Objeto</th><td><span class="held-item"><%= item_icon(p[:item_id], size: 28) %><%= h(p[:item]) %></span></td></tr>
-            <% end %>
-            <% if p[:nature] %><tr><th>Naturaleza</th><td><%= h(p[:nature]) %></td></tr><% end %>
-            <% if p[:gender] %><tr><th>Género</th><td><%= h(p[:gender]) %></td></tr><% end %>
-            <% if p[:ball] %><tr><th>Poké Ball</th><td><%= h(p[:ball]) %></td></tr><% end %>
-            <% if p[:shadow] %><tr><th>Oscuro</th><td>sí</td></tr><% end %>
-            <% if p[:iv]&.any? { |_, v| !v.nil? } %><tr><th>IVs</th><td class="stat-values"><%= h(stat_values(p[:iv])) %></td></tr><% end %>
-            <% if p[:ev]&.any? { |_, v| v.to_i.positive? } %><tr><th>EVs</th><td class="stat-values"><%= h(stat_values(p[:ev], omit_zero: true)) %></td></tr><% end %>
-          </table>
-          <% unless p[:moves].empty? %>
-            <ul class="trainer-moves">
-              <% p[:moves].each do |move| %>
-                <li class="trainer-move">
-                  <div class="trainer-move__heading">
-                    <a href="<%= page(:moves, move[:id]) %>"><%= h(move[:name]) %></a>
-                    <span class="trainer-move__type">
-                      <% if move[:type] %><%= type_tag(move[:type], small: true) %><% end %>
-                      <% if move[:category_name] %><span class="tag"><%= h(move[:category_name]) %></span><% end %>
-                    </span>
-                  </div>
-                  <div class="trainer-move__stats">
-                    <span>Pot. <%= move[:power].to_i.zero? ? "—" : move[:power] %></span>
-                    <span>Prec. <%= move[:accuracy].to_i.zero? ? "No falla" : move[:accuracy] %></span>
-                    <span>PP <%= move[:total_pp] || "—" %></span>
-                  </div>
-                </li>
+  <% if feature?("trainer_teams") %>
+  <section class="section-card trainer-team-section">
+    <h2>Equipo <span class="count"><%= e[:variants].size %></span></h2>
+    <% if e[:modes].any? %>
+      <div class="trainer-variant-controls">
+        <label>Modo
+          <select data-trainer-mode aria-label="Elegir modo de juego">
+            <option value="all">Todos los modos</option>
+            <% e[:modes].each do |mode| %><option value="<%= h(mode) %>"<%= ' selected' if mode == default_mode %>><%= h(mode) %></option><% end %>
+          </select>
+        </label>
+        <% if e[:starters].any? %>
+          <fieldset class="starter-picker trainer-starter-picker" data-trainer-starter-picker>
+            <legend>Tipo de tu inicial</legend>
+            <div class="starter-picker-options">
+              <label class="starter-choice">
+                <input type="radio" name="trainer-starter-detail" value="all" data-trainer-starter-option checked>
+                <span class="starter-choice-content">Todos</span>
+              </label>
+              <% all_starter_types.each do |starter_type_id, starter_type_name| %>
+                <label class="starter-choice">
+                  <input type="radio" name="trainer-starter-detail" value="<%= h(starter_type_id) %>" data-trainer-starter-option>
+                  <span class="starter-choice-content"><%= type_tag(starter_type_id, scale: 0.75, link: false) %><span><%= h(starter_type_name) %></span></span>
+                </label>
               <% end %>
-            </ul>
+            </div>
+          </fieldset>
+        <% end %>
+      </div>
+      <p class="trainer-no-match" data-trainer-no-match hidden>No hay un equipo configurado para esta combinación.</p>
+    <% end %>
+
+    <% if e[:unconfigured_variants] > 1 %>
+      <p class="muted trainer-unconfigured-note">Los siguientes equipos aún no están asociados a un modo o tipo inicial.</p>
+    <% end %>
+    <% e[:variants].each do |variant| %>
+      <% mapped = variant[:modes].any? %>
+      <% alternative = !mapped && e[:variants].size > 1 %>
+      <% if mapped %>
+        <div class="trainer-variant" data-trainer-variant data-modes="<%= h(JSON.generate(variant[:modes])) %>" data-starter="<%= h(variant[:starter_type_id].to_s) %>" hidden>
+      <% elsif alternative %>
+        <details class="trainer-alternative">
+          <summary><%= h(variant[:alternative_label]) %></summary>
+          <div class="trainer-variant trainer-variant--alternative">
+      <% else %>
+        <div class="trainer-variant trainer-variant--common">
+      <% end %>
+        <% if variant[:variant_label] %><h3 class="trainer-variant-label"><%= h(variant[:variant_label]) %></h3><% end %>
+        <% if mapped %>
+          <% direct_modes = variant[:modes] - Array(variant[:fallback_modes]) %>
+          <p class="variant-context"><strong><%= h(direct_modes.join(" · ")) %></strong><% if variant[:starter_type_name] %> · Si elegiste un inicial de tipo <%= h(variant[:starter_type_name]) %><% else %> · Equipo compartido entre tipos iniciales<% end %><% if variant[:fallback_modes]&.any? %> · También se usa en <%= h(variant[:fallback_modes].join(" · ")) %> porque no hay un equipo propio para ese modo<% end %></p>
+        <% end %>
+        <% if feature?("trainer_items") && !variant[:items].empty? %><p class="muted">Objetos que usa: <%= h(variant[:items].join(", ")) %></p><% end %>
+        <% if feature?("trainer_quotes") && variant[:lose_text] && !variant[:lose_text].empty? %><p class="quote">“<%= h(variant[:lose_text]) %>”</p><% end %>
+        <div class="party">
+          <% variant[:party].each do |p|
+            form_id = p[:form].to_i.positive? ? "#{p[:species]}_#{p[:form]}" : p[:species]
+            s = species(form_id) || species(p[:species])
+            icon_id = s ? s[:id] : form_id
+            display = p[:name].to_s.empty? ? (s ? display_name(s) : "Pokémon no registrado") : p[:name]
+          %>
+            <div class="pcard">
+              <div class="top">
+                <%= picon(icon_id, shiny: p[:shiny]) %>
+                <div class="pcard-heading">
+                  <div class="nm"><%= h(display) %> <span class="lv">Nv. <%= p[:level] %></span></div>
+                  <% if s %><span class="types"><%= types_row(s[:types], small: true) %></span><% end %>
+                  <% if p[:shiny] %><span class="tag shiny-tag">Variocolor</span><% end %>
+                </div>
+              </div>
+              <table class="kv small">
+                <% if p[:ability] %><tr><th>Habilidad</th><td><%= h(p[:ability]) %></td></tr><% end %>
+                <% if feature?("trainer_items") && p[:item] %><tr><th>Objeto</th><td><span class="held-item"><%= item_icon(p[:item_id], size: 28) %><%= h(p[:item]) %></span></td></tr><% end %>
+                <% if p[:nature] %><tr><th>Naturaleza</th><td><%= h(p[:nature]) %></td></tr><% end %>
+                <% if p[:gender] %><tr><th>Género</th><td><%= h(p[:gender]) %></td></tr><% end %>
+                <% if p[:ball] %><tr><th>Poké Ball</th><td><%= h(p[:ball]) %></td></tr><% end %>
+                <% if p[:shadow] %><tr><th>Oscuro</th><td>sí</td></tr><% end %>
+                <% if p[:iv]&.any? { |_, v| !v.nil? } %><tr><th>IVs</th><td class="stat-values"><%= h(stat_values(p[:iv])) %></td></tr><% end %>
+                <% if p[:ev]&.any? { |_, v| v.to_i.positive? } %><tr><th>EVs</th><td class="stat-values"><%= h(stat_values(p[:ev], omit_zero: true)) %></td></tr><% end %>
+              </table>
+              <% unless p[:moves].empty? %>
+                <ul class="trainer-moves">
+                  <% p[:moves].each do |move| %>
+                    <li class="trainer-move">
+                      <div class="trainer-move__heading">
+                        <a href="<%= page(:moves, move[:id]) %>"><%= h(move[:name]) %></a>
+                        <span class="trainer-move__type">
+                          <% if move[:type] %><%= type_tag(move[:type], small: true) %><% end %>
+                          <% if move[:category_name] %><span class="tag"><%= h(move[:category_name]) %></span><% end %>
+                        </span>
+                      </div>
+                      <div class="trainer-move__stats">
+                        <span>Pot. <%= move[:power].to_i.zero? ? "—" : move[:power] %></span>
+                        <span>Prec. <%= move[:accuracy].to_i.zero? ? "No falla" : move[:accuracy] %></span>
+                        <span>PP <%= move[:total_pp] || "—" %></span>
+                      </div>
+                    </li>
+                  <% end %>
+                </ul>
+              <% end %>
+            </div>
           <% end %>
         </div>
+      <% if mapped || !alternative %>
+        </div>
+      <% else %>
+          </div>
+        </details>
       <% end %>
-    </div>
+    <% end %>
   </section>
+  <% end %>
 
-  <%= change_box(e) %>
-  <%= notes(e) %>
+  <%= notes(e[:variants].find { |variant| variant[:notes_html] } || e[:variants].first) %>
 </article>

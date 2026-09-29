@@ -21,13 +21,14 @@
     </table>
   </section>
 
-  <% unless e[:held_by].empty? %>
+  <% if feature?("item_held_by") && !e[:held_by].empty? %>
   <section class="section-card">
     <h2>Lo llevan Pokémon salvajes</h2>
     <p class="chiplist"><% e[:held_by].each { |w| %><%= mon_link(w[:id]) %><% } %></p>
   </section>
   <% end %>
 
+  <% if feature?("item_locations") %>
   <section class="section-card">
     <h2>Dónde encontrarlo</h2>
     <% if e[:found_at].empty? %>
@@ -35,11 +36,12 @@
     <% else %>
       <ul class="chiplist" style="list-style:none;padding:0;margin:0">
         <% e[:found_at].each do |f| %>
-          <li><a href="<%= asset("ubicaciones/#{f[:map]}.html") %>"><%= h(f[:map_name]) %></a> — <%= h(f[:kind]) %><%= " (oculto)" if f[:hidden] %></li>
+          <li><% if feature?("locations") %><a href="<%= asset("ubicaciones/#{f[:map]}.html") %>"><%= h(f[:map_name]) %></a><% else %><%= h(f[:map_name]) %><% end %> — <%= h(f[:kind]) %><%= " (oculto)" if f[:hidden] %></li>
         <% end %>
       </ul>
     <% end %>
   </section>
+  <% end %>
 
   <%= change_box(e) %>
   <%= notes(e) %>

@@ -1,99 +1,149 @@
-# Wiki web del juego
+# Generador de la wiki para jugadores
 
-Genera un sitio web estático con todos los datos de tu juego (Pokémon,
-movimientos, habilidades, objetos, entrenadores, ubicaciones y tabla de tipos) y
-resalta lo que has cambiado respecto a La Base de Sky.
+El generador crea un sitio estático para que los jugadores consulten Pokémon,
+movimientos, habilidades, objetos, entrenadores, encuentros, ubicaciones y
+cambios respecto a los datos oficiales. La wiki puede personalizarse desde una
+interfaz visual, sin editar Ruby ni PBS.
 
-Está pensado para publicarse en **GitHub Pages**, **GitLab Pages**, Netlify o
-cualquier hosting de archivos estáticos.
+## Empezar
 
-## Uso
+Ejecuta los comandos desde la raíz del repositorio, donde está `wiki/generate.rb`.
+El generador localiza el juego por `mkxp.json`, `PBS/` y `Data/Scripts/`, aunque esté
+en una subcarpeta o tenga otro nombre. Si el repositorio contiene varios juegos,
+define `WIKI_GAME_DIR` con la ruta de la carpeta elegida. Por ejemplo, en macOS/Linux:
 
-Desde la raíz del repositorio:
+```bash
+WIKI_GAME_DIR="ruta/al/juego" ruby wiki/generate.rb
+```
+
+En PowerShell:
+
+```powershell
+$env:WIKI_GAME_DIR = "C:\ruta\al\juego"
+ruby wiki/generate.rb
+```
+
+Necesitas Ruby 3.1 o superior; no hace falta instalar gems ni abrir el juego.
 
 ```bash
 ruby wiki/generate.rb
 ```
 
-En una terminal, abre un asistente con opciones recomendadas y pregunta por separado los accents claro y oscuro. Enter conserva `#1a3d5c` y `#5ba0d6`. También acepta los argumentos de abajo. Genera el sitio en `wiki/site/`; abre `wiki/site/index.html` en el navegador.
+En una terminal interactiva verás un menú. Elige **Configurar la wiki en el
+navegador** para abrir el configurador visual. También puedes abrirlo directamente:
 
-No hace falta instalar nada: usa el mismo arranque headless del motor que la
-suite de tests (`tests/harness.rb`). La primera vez tarda un poco porque compila
-los PBS.
+```bash
+ruby wiki/generate.rb --configure
+```
 
-### Opciones
+En el configurador, revisa las pestañas, pulsa **Guardar y generar wiki** y
+espera a que termine la compilación. La configuración se guarda en
+`wiki/config.json`; la wiki resultante queda en `wiki/site/`.
+
+## Previsualizar en VS Code
+
+La forma recomendada es usar la extensión [Live Server de Ritwick Dey](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer):
+
+1. Abre en VS Code la carpeta del repositorio.
+2. Instala **Live Server** desde la vista de Extensiones.
+3. En el Explorador, abre `wiki/site/index.html` con el botón derecho y selecciona **Open with Live Server**. También puedes abrir el archivo y pulsar **Go Live** en la barra inferior.
+4. El navegador abre la wiki en una dirección local y recarga la página cuando cambian los archivos.
+
+Pulsa **Port: …** o **Go Live** de nuevo para detener el servidor. No abras el HTML con `file://`: servir el sitio localmente permite que funcionen todas las funciones de búsqueda.
+
+Al volver a ejecutar `ruby wiki/generate.rb`, se conservan las opciones guardadas.
+Añade `wiki/config.json` al control de versiones de tu proyecto para compartir la
+configuración con el resto del equipo.
+
+## Configurar los combates
+
+En la pestaña **Entrenadores** puedes configurar las variantes de equipo:
+
+1. Define los modos disponibles para tu juego, por ejemplo «Historia» y
+   «Difícil». Los nombres son libres; puede haber uno o varios.
+2. Indica qué tipo corresponde a cada inicial del juego.
+3. Asigna modos a las versiones de entrenador del PBS. Puedes asignar una misma
+   versión a varios modos. La asignación masiva por versión ahorra trabajo cuando
+   los PBS siguen una convención, por ejemplo versión 0 para clásico y versión 1
+   para completo.
+4. Si un modo no tiene una versión propia, configura que herede los equipos de
+   otro modo. Las excepciones se pueden ajustar por entrenador.
+5. Personaliza el nombre visible de cada combate cuando lo necesites, por
+   ejemplo «Primer combate» o «Revancha».
+
+La versión PBS es el número interno del equipo del entrenador; los jugadores no
+verán ese número. Si un entrenador tiene equipos adicionales para una revancha,
+puedes mantenerlos en versiones aparte aunque usen el mismo modo.
+
+En la wiki generada, el jugador puede elegir una vez el tipo de su inicial desde
+la lista de entrenadores. La elección se guarda en el navegador y filtra las
+variantes correspondientes; también puede cambiarla desde una ficha individual.
+
+## Elegir qué información publicar
+
+La pestaña **Contenido** permite ocultar secciones completas, como ubicaciones,
+objetos encontrados en mapas, encuentros salvajes o equipos de entrenadores.
+Esto sirve, por ejemplo, para no revelar dónde se encuentran los objetos y dejar
+que el jugador los descubra.
+
+En **Apariencia** puedes elegir acentos distintos para los temas claro y oscuro.
+Las opciones generales incluyen la carpeta de salida, recompilar PBS y copiar o
+omitir imágenes.
+
+## Generar por terminal
+
+El asistente permite cambiar la carpeta de salida, incluir imágenes, recompilar
+PBS y configurar ambos colores. También puedes usar opciones de línea de comandos:
 
 | Opción | Efecto |
 | --- | --- |
-| `--out CARPETA` | Carpeta de salida (por defecto `wiki/site/`). Las carpetas existentes deben ser una wiki marcada como generada. |
-| `--no-sprites` | No copia imágenes (wiki mucho más ligera). |
-| `--accent-light COLOR` | Accent del tema claro; por defecto `#1a3d5c`. |
-| `--accent-dark COLOR` | Accent del tema oscuro; por defecto `#5ba0d6`. |
-| `--accent COLOR` | Atajo para usar el mismo accent en ambos temas. |
-| `--baseline none` | No marca los cambios; genera la wiki completa a secas. |
-| `--baseline RUTA` | Usa otro archivo de referencia en vez de `wiki/baseline.json`. |
-| `--snapshot RUTA` | No genera la wiki: vuelca el estado actual como archivo de referencia. |
-| `--no-recompile` | No recompila los PBS; usa los `Data/*.dat` que haya. |
+| `--configure` | Abre el configurador visual local. |
+| `--out CARPETA` | Elige otra carpeta para el sitio generado. |
+| `--no-sprites` | Omite imágenes para reducir el tamaño de la wiki. |
+| `--accent-light COLOR` | Cambia el acento del tema claro. |
+| `--accent-dark COLOR` | Cambia el acento del tema oscuro. |
+| `--accent COLOR` | Usa el mismo acento en ambos temas. |
+| `--baseline none` | Genera sin destacar diferencias. |
+| `--baseline RUTA` | Usa otro archivo de referencia. |
+| `--snapshot RUTA` | Exporta los datos actuales como snapshot. |
+| `--no-recompile` | Usa los datos compilados existentes en `Data/`. |
 
-> `generate.rb` recompila los PBS antes de leerlos (como hace el juego al
-> arrancar en modo debug), así que la wiki siempre refleja tus `.txt`, incluidos
-> los archivos divididos tipo `pokemon_custom.txt` y las secciones parciales.
+Por defecto, la generación compila los PBS actuales antes de extraer los datos.
+El juego no se inicia: el soporte headless compila los datos y restaura los
+archivos `Data/*.dat` originales al terminar. Usa `--no-recompile` solo cuando
+quieras reutilizar una compilación existente.
 
-## Cómo se marcan los cambios
+## Baseline y diferencias
 
-`wiki/baseline.json` es la referencia versionada en Git. Guarda datos de la
-versión canónica de los PBS de La Base de Sky, incluida la tabla de tipos. El
-campo `_meta` registra el juego fuente y su versión. El generador compara cada
-ficha completa con esa referencia y resalta los campos distintos.
+`wiki/baseline.json` contiene la referencia versionada contra la que se comparan
+los PBS del proyecto. En juegos basados en La Base de Sky, conserva el baseline
+de la base para que la wiki muestre qué cambió respecto a los juegos oficiales.
+No lo regeneres desde el juego derivado: pasaría a tratar sus cambios como parte
+de la referencia.
 
-En el repo canónico, el job `wiki-baseline` actualiza el archivo si un push cambia
-PBS. Se ejecuta aunque falle otra etapa del pipeline; compila los datos y, si la
-compilación funciona, genera el snapshot y confirma el cambio en la misma rama.
-También se ejecuta cuando cambia el extractor o el propio job, para migrar el
-formato. Los forks no pasan la validación `CI_PROJECT_PATH` y conservan su baseline.
+En el repositorio canónico, el job `wiki-baseline` de GitLab actualiza el snapshot
+automáticamente cuando hay un push a una rama que modifica PBS, el extractor o el
+generador. Si los datos cambiaron, el job confirma `wiki/baseline.json` en esa misma
+rama. En forks no se ejecuta esta actualización automática.
 
-El job usa `CI_JOB_TOKEN`. En GitLab, habilita la escritura del repositorio con
-job tokens para que pueda confirmar `wiki/baseline.json`. Los listados permiten
-filtrar solo cambios; la página «Cambios» reúne las diferencias detectadas.
-
-Para generar una referencia manual desde una copia canónica, revisa primero una
-vista previa fuera del repo:
+El snapshot manual se usa para mantener o actualizar el baseline canónico, no
+para crear el baseline de un juego derivado:
 
 ```bash
 ruby wiki/generate.rb --snapshot /tmp/wiki-baseline-preview.json
 ```
 
-Para regenerarlo directamente desde la raíz del repo canónico y sobrescribirlo:
-
-```bash
-ruby wiki/generate.rb --snapshot wiki/baseline.json
-```
-
-Este comando recompila los PBS actuales antes de crear el baseline.
-
-## Corregir cosas a mano
-
-Dos formas, de menos a más técnica:
-
-1. **`wiki/overrides/`** — un archivo Markdown por entrada a corregir. No hay que
-   saber programar. Ver `wiki/overrides/EXAMPLE.md`. Sirve para arreglar un texto
-   que salió mal y para añadir notas propias a una ficha. Se conserva al
-   regenerar.
-2. **Editar el HTML de `wiki/site/`** directamente. El HTML es limpio y sin
-   minificar. Ojo: al volver a generar la wiki se sobrescribe; para cambios
-   permanentes usa `overrides/`.
+Los archivos de `wiki/overrides/` permiten corregir o ampliar textos de fichas a
+mano. Se conservan al regenerar la wiki.
 
 ## Publicar
 
-### GitHub Pages
+`wiki/site/` es un sitio estático. El repositorio incluye plantillas para publicar
+con CI:
 
-Copia `deploy/github-pages.yml` a `.github/workflows/pages.yml` en tu repo,
-haz push, y en *Settings → Pages* elige *GitHub Actions* como origen.
-
-### GitLab Pages
-
-Añade el contenido de `deploy/gitlab-pages.yml` a tu `.gitlab-ci.yml`.
-
-### A mano
-
-Sube el contenido de `wiki/site/` a cualquier hosting estático.
+- **GitHub Pages:** copia `deploy/github-pages.yml` a `.github/workflows/pages.yml`.
+  En *Settings → Pages*, selecciona *GitHub Actions*. Ajusta las rutas PBS/Data y
+  ramas del workflow a la estructura de tu repo.
+- **GitLab Pages:** incorpora el job de `deploy/gitlab-pages.yml` en
+  `.gitlab-ci.yml` y ajusta la etapa, la rama y las rutas del juego si hace falta.
+- **Otro hosting:** sube el contenido de `wiki/site/` como sitio estático.

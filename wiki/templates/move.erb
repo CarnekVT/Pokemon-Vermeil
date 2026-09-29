@@ -20,6 +20,7 @@
     </table>
   </section>
 
+  <% if feature?("move_learners") %>
   <section class="section-card">
     <h2>Lo aprenden</h2>
     <% lv = e[:learned_by][:level]; tu = e[:learned_by][:tutor].uniq; eg = e[:learned_by][:egg].uniq %>
@@ -28,6 +29,7 @@
     <% if eg.any? %><h3>Como movimiento huevo</h3><%= chiplist(eg.map { |sp| mon_link(sp) }.join, eg.size) %><% end %>
     <% if lv.empty? && tu.empty? && eg.empty? %><p class="muted">Ningún Pokémon lo aprende actualmente.</p><% end %>
   </section>
+  <% end %>
 
   <%= change_box(e) %>
   <%= notes(e) %>

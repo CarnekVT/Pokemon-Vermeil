@@ -21,17 +21,16 @@
 <header class="topbar">
   <a class="brand" href="<%= asset('index.html') %>"><%= h(meta[:game_title]) %></a>
   <nav aria-label="Secciones de la wiki">
-    <a href="<%= asset('pokemon/index.html') %>">Pokédex</a>
-    <a href="<%= asset('movimientos/index.html') %>">Movimientos</a>
-    <a href="<%= asset('habilidades/index.html') %>">Habilidades</a>
-    <a href="<%= asset('objetos/index.html') %>">Objetos</a>
-    <a href="<%= asset('entrenadores/index.html') %>">Entrenadores</a>
-    <a href="<%= asset('ubicaciones/index.html') %>">Ubicaciones</a>
-    <a href="<%= asset('tipos.html') %>">Tipos</a>
-    <a href="<%= asset('cambios.html') %>">Cambios</a>
+    <% { "pokemon" => ["pokemon/index.html", "Pokédex"], "moves" => ["movimientos/index.html", "Movimientos"],
+         "abilities" => ["habilidades/index.html", "Habilidades"], "items" => ["objetos/index.html", "Objetos"],
+         "trainers" => ["entrenadores/index.html", "Entrenadores"], "locations" => ["ubicaciones/index.html", "Ubicaciones"],
+         "types" => ["tipos.html", "Tipos"], "changes" => ["cambios.html", "Cambios"] }.each do |key, (href, label)|
+         next unless feature?(key) %>
+      <a href="<%= asset(href) %>"><%= label %></a>
+    <% end %>
   </nav>
   <div class="tools">
-    <input type="search" id="q" placeholder="Buscar Pokémon, objeto…" autocomplete="off" aria-label="Buscar Pokémon, movimientos, habilidades, objetos o tipos">
+    <input type="search" id="q" placeholder="Buscar en la wiki…" autocomplete="off" aria-label="Buscar en el contenido visible de la wiki">
     <button type="button" id="theme-toggle" aria-label="Tema oscuro" aria-pressed="false">
       <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <circle cx="12" cy="12" r="4"></circle>
@@ -49,6 +48,7 @@
 <script src="<%= asset('buscar.js') %>"></script>
 <script src="<%= asset('search.js') %>"></script>
 <script src="<%= asset('filter.js') %>"></script>
+<script src="<%= asset('trainer-variants.js') %>"></script>
 <script src="<%= asset('sort-items.js') %>"></script>
 <script src="<%= asset('sort-moves.js') %>"></script>
 <script src="<%= asset('theme.js') %>"></script>

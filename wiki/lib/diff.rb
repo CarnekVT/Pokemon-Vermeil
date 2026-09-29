@@ -61,9 +61,18 @@ module Diff
 
       base_cat = baseline[cat]
       per_entity = {}
+      renamed = cat == "abilities" ? renamed_abilities(base_cat, entries) : {}
 
       entries.each do |id, fields|
         if !base_cat.key?(id)
+          if (old_id = renamed[id])
+            changed = diff_fields(base_cat[old_id], fields)
+            unless changed.empty?
+              per_entity[id] = { status: "modificado", fields: changed }
+              result[:counts]["modificadas"] += 1
+            end
+            next
+          end
           per_entity[id] = { status: "nuevo", fields: [] }
           result[:counts]["nuevas"] += 1
         else
@@ -75,7 +84,18 @@ module Diff
         end
       end
 
-      removed = base_cat.keys - entries.keys
+      removed = base_cat.keys - entries.keys - renamed.values
+      if cat == "species"
+        removed.reject! do |id|
+          entry = base_cat[id]
+          same_form_present = entries.values.any? do |current_entry|
+            comparison_value(current_entry["name"]) == comparison_value(entry["name"]) &&
+              comparison_value(current_entry["form_name"]) == comparison_value(entry["form_name"])
+          end
+          base_id = id.sub(/_\d+\z/, "")
+          same_form_present || (entry["form_name"].to_s.empty? && base_id != id && entries.key?(base_id))
+        end
+      end
       unless removed.empty?
         result[:removed][cat] = removed.map do |id|
           fields = base_cat[id] || {}
@@ -117,6 +137,23 @@ module Diff
       next if comparison_value(b) == comparison_value(a)
 
       { field: k, label: FIELD_LABELS[k] || k, from: b, to: a }
+    end
+  end
+
+  # PBS distintos pueden usar IDs diferentes para la misma habilidad. Solo
+  # empareja nombres y descripciones únicos; así conserva las diferencias reales.
+  def renamed_abilities(baseline, current)
+    old_groups = (baseline.keys - current.keys).group_by do |id|
+      entry = baseline[id]
+      [comparison_value(entry["name"]), comparison_value(entry["description"])]
+    end
+    new_groups = (current.keys - baseline.keys).group_by do |id|
+      entry = current[id]
+      [comparison_value(entry["name"]), comparison_value(entry["description"])]
+    end
+    old_groups.each_with_object({}) do |(signature, old_ids), matches|
+      new_ids = new_groups[signature]
+      matches[new_ids.first] = old_ids.first if old_ids&.one? && new_ids&.one?
     end
   end
 end
