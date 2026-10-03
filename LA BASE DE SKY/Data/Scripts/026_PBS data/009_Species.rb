@@ -373,7 +373,8 @@ module GameData
     def self.form_is_mega_with_item?(species, form, item)
       return false if !item
       GameData::Species.each do |data|
-        next if data.species != species || data.unmega_form != form
+        next if data.species != species
+        next if data.unmega_form != form && data.unmega_form != -2
         return true if data.mega_stone == item
       end
       return false
