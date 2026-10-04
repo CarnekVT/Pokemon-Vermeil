@@ -26,7 +26,8 @@ module Render
 
   module_function
 
-  def site(data:, changes:, out:, sprites:, accent_light:, accent_dark:, trainer_config: {}, features: {})
+  def site(data:, changes:, out:, sprites:, accent_light: "#1a3d5c", accent_dark: "#5ba0d6",
+           trainer_config: {}, features: {})
     attach_changes!(data, changes)
     target = File.expand_path(out)
     validate_output!(target)
