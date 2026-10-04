@@ -51,13 +51,11 @@ tests:
   script:
     - ruby tests/run.rb
 
-notify-discord:
+.notify-discord:
   stage: notify
   image: alpine:latest
   tags:
     - self-hosted
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "dev"
   before_script:
     - apk add --no-cache curl git
   script:
@@ -70,17 +68,16 @@ notify-discord:
         exit 1
       fi
 
-      COMMIT_URL="${CI_PROJECT_URL}/-/commit/${CI_COMMIT_SHA}"
-
-      # Build commit list from all commits in this push
       ZERO_SHA="0000000000000000000000000000000000000000"
-      if [ "${CI_COMMIT_BEFORE_SHA}" = "${ZERO_SHA}" ]; then
+      FROM_SHA="${DISCORD_REPLAY_FROM:-${CI_COMMIT_BEFORE_SHA}}"
+      TO_SHA="${DISCORD_REPLAY_TO:-${CI_COMMIT_SHA}}"
+      if [ "${FROM_SHA}" = "${ZERO_SHA}" ]; then
         # First push to branch — just show the HEAD commit
-        COMMIT_LIST=$(git log -1 --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s")
-        TITLE_URL="${COMMIT_URL}"
+        COMMIT_LIST=$(git log -1 "${TO_SHA}" --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s")
+        TITLE_URL="${CI_PROJECT_URL}/-/commit/${TO_SHA}"
       else
-        COMMIT_LIST=$(git log --reverse --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s" "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}")
-        TITLE_URL="${CI_PROJECT_URL}/-/compare/${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA}"
+        COMMIT_LIST=$(git log --reverse --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s" "${FROM_SHA}..${TO_SHA}")
+        TITLE_URL="${CI_PROJECT_URL}/-/compare/${FROM_SHA}...${TO_SHA}"
       fi
 
       # Truncate to 4096 chars (Discord embed description limit)
@@ -128,6 +125,22 @@ notify-discord:
         "${DISCORD_COMMIT_WEBHOOK_URL}"
 
       echo "Discord notification sent!"
+
+notify-discord:
+  extends: .notify-discord
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "dev"
+
+# Reenvía a Discord commits que no se notificaron porque falló su pipeline.
+notify-discord-replay:
+  extends: .notify-discord
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "dev"
+      when: manual
+      allow_failure: true
+  variables:
+    DISCORD_REPLAY_FROM: "bce734f8"
+    DISCORD_REPLAY_TO: "473957e8"
 
 release:
   stage: release
