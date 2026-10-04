@@ -57,7 +57,8 @@ class TestWikiGenerator < EngineTest
       js = File.read(File.join(out, "buscar.js"))
       index = JSON.parse(js.sub(/\Awindow\.WIKI_SEARCH=/, "").chomp(";"))
       species_rows = index.count { |row| row["c"] == "Pokémon" }
-      assert_equal @data[:species].size, species_rows
+      species_count = @data[:species].values.map { |entry| entry[:species] }.uniq.size
+      assert_equal species_count, species_rows
     end
   end
 

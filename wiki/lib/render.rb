@@ -14,7 +14,7 @@ module Render
   ASSET_DIR    = File.join(__dir__, "..", "assets")
   SITE_MARKER  = ".wiki-generated"
   FEATURE_DEFAULTS = TrainerVariants::FEATURE_DEFAULTS
-  NATIVE_FILE_RENAME = File.method(:rename)
+  NATIVE_FILE_RENAME = File.method(File.respond_to?(:unguarded_rename) ? :unguarded_rename : :rename)
 
   DETAIL_PAGES = {
     species:   ["pokemon",      "species"],
@@ -29,6 +29,8 @@ module Render
   def site(data:, changes:, out:, sprites:, accent_light: "#1a3d5c", accent_dark: "#5ba0d6",
            trainer_config: {}, features: {})
     attach_changes!(data, changes)
+    # ponytail: grupos omitidos omiten fichas de combate; usar TrainerVariants.build_groups antes si hacen falta.
+    data[:trainer_groups] ||= []
     target = File.expand_path(out)
     validate_output!(target)
     FileUtils.mkdir_p(File.dirname(target))

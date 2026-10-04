@@ -34,6 +34,7 @@ end
 class File
   class << self
     alias_method :unguarded_open, :open
+    alias_method :unguarded_rename, :rename
     alias_method :unguarded_write, :write
     alias_method :unguarded_delete, :delete
 
