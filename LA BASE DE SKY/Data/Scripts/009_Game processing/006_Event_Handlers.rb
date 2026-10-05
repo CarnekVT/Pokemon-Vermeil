@@ -105,7 +105,7 @@ class HandlerHash
   end
 
   def keys
-    return @hash.keys.clone
+    return @hash.keys
   end
 
   def add(id, handler = nil, &handlerBlock)
