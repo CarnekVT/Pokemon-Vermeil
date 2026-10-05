@@ -54,12 +54,12 @@ class PokemonBoxIcon < IconSprite
 
   def update
     super
-    self.color = Color.new(0, 0, 0, 0)
+    self.color.set(0, 0, 0, 0)
     # Apply tone after any bitmap changes
     if @should_be_grey
-      self.tone = Tone.new(0, 0, 0, 255)
+      self.tone.set(0, 0, 0, 255)
     else
-      self.tone = Tone.new(0, 0, 0, 0)
+      self.tone.set(0, 0, 0, 0)
     end
     if releasing?
       self.zoom_x = lerp(1.0, 0.0, 1.5, @release_timer_start, System.uptime)
@@ -183,9 +183,9 @@ class AutoMosaicPokemonSprite < MosaicPokemonSprite
     end
     # Apply tone after any bitmap changes
     if @should_be_grey
-      self.tone = Tone.new(0, 0, 0, 255)
+      self.tone.set(0, 0, 0, 255)
     else
-      self.tone = Tone.new(0, 0, 0, 0)
+      self.tone.set(0, 0, 0, 0)
     end
   end
 end
