@@ -168,7 +168,7 @@ class Scene_Map
     $map_factory.maps.each do |map|
       @spritesets[map.map_id] = Spriteset_Map.new(map) if !@spritesets[map.map_id]
     end
-    keys = @spritesets.keys.clone
+    keys = @spritesets.keys
     keys.each do |i|
       if $map_factory.hasMap?(i)
         @spritesets[i].update
