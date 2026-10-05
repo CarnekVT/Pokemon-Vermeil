@@ -73,7 +73,7 @@ class PokemonSprite < Sprite
     @_iconbitmap&.dispose
     @_iconbitmap = pokemon ? GameData::Species.sprite_bitmap_from_pokemon(pokemon, back) : nil
     self.bitmap = @_iconbitmap&.bitmap
-    self.color = Color.new(0, 0, 0, 0)
+    self.color.set(0, 0, 0, 0)
     self.make_grey_if_fainted = pokemon.fainted?
     refresh_tone
     changeOrigin
