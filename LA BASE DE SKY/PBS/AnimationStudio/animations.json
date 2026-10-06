@@ -33,7 +33,7 @@
       "source": "project"
     },
     "contextMode": "auto",
-    "battleFormat": "1v3",
+    "battleFormat": "1v1",
     "activeUserSlot": 0,
     "activeTargetSlot": 0,
     "activeTargetIndex": 1,
@@ -13009,7 +13009,14 @@
         "contextAutoAdapt": true,
         "previewAffectedTargets": false,
         "autoReplicateAffected": false,
-        "activeTimelineContext": null,
+        "activeTimelineContext": {
+          "battleFormat": "1v1",
+          "userSlot": 0,
+          "targetSlot": 0,
+          "targetIndex": 1,
+          "targetScope": "single_other",
+          "targetExplicit": false
+        },
         "askBackupOnContextEdit": false,
         "autoReplicateTouched": false,
         "commonSubjectRole": "auto",
@@ -13174,7 +13181,8 @@
             "colorRed": [],
             "colorGreen": [],
             "colorBlue": [],
-            "colorAlpha": []
+            "colorAlpha": [],
+            "priority": []
           },
           "fxOps": [],
           "logic": [],
@@ -13616,7 +13624,8 @@
               "value": 0,
               "easing": "ease_both"
             }
-          ]
+          ],
+          "priority": []
         },
         "visibleKeys": [
           {
@@ -14786,6 +14795,22 @@
           "name": "Anim/PRSFX- Bite",
           "volume": 100,
           "pitch": 100
+        },
+        {
+          "id": "event_muk1gdrb_gd",
+          "type": "screen_shake",
+          "frame": 32,
+          "duration": 6,
+          "strength": 7,
+          "axis": 0
+        },
+        {
+          "id": "event_muk1gk6i_ge",
+          "type": "screen_shake",
+          "frame": 46,
+          "duration": 6,
+          "strength": 7,
+          "axis": 0
         }
       ],
       "logic": [],
@@ -18378,10 +18403,10 @@
               "endFrame": 200,
               "graphic": {
                 "source": "new",
-                "projectPath": "Graphics/Battle animations/LegacyGraphics/PRAS- Hyper Beam.png",
+                "projectPath": "Graphics/AnimationStudio/PRAS- Hyper Beam.png",
                 "folder": "Battle animations",
                 "name": "PRAS- Hyper Beam",
-                "relativeHint": "",
+                "relativeHint": "PRAS- Hyper Beam.png",
                 "externalGameRoot": "",
                 "hue": 0,
                 "spritesheet": "rmxp",
@@ -18393,7 +18418,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -24550,7 +24576,7 @@
       "id": "anim_mtdiyguv_6t",
       "name": "Essentials",
       "fps": 20,
-      "duration": 36,
+      "duration": 24,
       "source": {
         "type": "pbs",
         "move": "GROWL",
@@ -24559,14 +24585,18 @@
         "opposing": false,
         "sideContext": "player",
         "targetMode": "foe",
-        "targetScope": "single_foe",
-        "allowedTargetScopes": [],
-        "variantScope": "auto",
+        "targetScope": "multiple_foes",
+        "allowedTargetScopes": [
+          "multiple_foes"
+        ],
+        "variantScope": "status",
         "customSpace": "battlers",
-        "detectedTraits": [],
-        "detectedFunctionCode": "",
-        "detectedCategory": "",
-        "detectedTarget": "",
+        "detectedTraits": [
+          "multi-target"
+        ],
+        "detectedFunctionCode": "LowerTargetAttack1",
+        "detectedCategory": "status",
+        "detectedTarget": "AllNearFoes",
         "contextAutoAdapt": true,
         "previewAffectedTargets": true,
         "autoReplicateAffected": true,
@@ -24651,7 +24681,16 @@
             "cameraX": [],
             "cameraY": [],
             "cameraZoom": [],
-            "cameraRotation": []
+            "cameraRotation": [],
+            "priority": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
           },
           "fxOps": [],
           "logic": [],
@@ -24712,7 +24751,7 @@
           "positionKeys": [
             {
               "id": "key_mtdiyguw_78",
-              "frame": 28,
+              "frame": 13,
               "easing": "ease_both",
               "axisX": true,
               "axisY": true,
@@ -24726,7 +24765,7 @@
             },
             {
               "id": "key_mtdiyguw_79",
-              "frame": 29,
+              "frame": 14,
               "easing": "ease_both",
               "axisX": true,
               "axisY": true,
@@ -24740,7 +24779,7 @@
             },
             {
               "id": "key_mtdiyguw_7a",
-              "frame": 31,
+              "frame": 16,
               "easing": "ease_both",
               "axisX": true,
               "axisY": true,
@@ -24754,7 +24793,7 @@
             },
             {
               "id": "key_mtdiyguw_7b",
-              "frame": 33,
+              "frame": 18,
               "easing": "ease_both",
               "axisX": true,
               "axisY": true,
@@ -24768,7 +24807,7 @@
             },
             {
               "id": "key_mtdiyguw_7c",
-              "frame": 35,
+              "frame": 20,
               "easing": "ease_both",
               "axisX": true,
               "axisY": true,
@@ -24782,7 +24821,7 @@
             },
             {
               "id": "key_mtdiyguw_7d",
-              "frame": 36,
+              "frame": 21,
               "easing": "linear",
               "axisX": true,
               "axisY": true,
@@ -24820,11 +24859,20 @@
             "cameraX": [],
             "cameraY": [],
             "cameraZoom": [],
-            "cameraRotation": []
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": [],
+            "priority": []
           },
           "fxOps": [],
           "logic": [],
-          "startFrame": 28,
+          "startFrame": 13,
           "endFrame": 36,
           "imported": {
             "format": "pbs",
@@ -24985,7 +25033,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/circle.png",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -25006,7 +25054,8 @@
                 ],
                 "rawName": "circle",
                 "specialBattler": "circle",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -25131,7 +25180,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": []
               },
               "fxOps": [
                 {
@@ -25171,13 +25230,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiygux_7l",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_7q",
                       "frame": 0,
                       "duration": 18,
@@ -25187,13 +25239,6 @@
                   ],
                   "zoomY": [
                     {
-                      "id": "pcmd_mtdiygux_7m",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_7r",
                       "frame": 0,
                       "duration": 18,
@@ -25202,13 +25247,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiygux_7n",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiygux_7o",
                       "frame": 0,
@@ -25267,7 +25305,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/circle.png",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -25288,7 +25326,8 @@
                 ],
                 "rawName": "circle",
                 "specialBattler": "circle",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -25419,7 +25458,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": []
               },
               "fxOps": [
                 {
@@ -25459,13 +25508,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiygux_8b",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_8f",
                       "frame": 0,
                       "duration": 18,
@@ -25474,13 +25516,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiygux_8c",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiygux_8g",
                       "frame": 0,
@@ -25555,7 +25590,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/circle.png",
                 "folder": "Battle animations",
                 "name": "circle",
                 "relativeHint": "circle",
@@ -25576,7 +25611,8 @@
                 ],
                 "rawName": "circle",
                 "specialBattler": "circle",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -25707,7 +25743,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": []
               },
               "fxOps": [
                 {
@@ -25747,13 +25793,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiygux_92",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_96",
                       "frame": 0,
                       "duration": 18,
@@ -25762,13 +25801,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiygux_93",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiygux_97",
                       "frame": 0,
@@ -25843,7 +25875,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -25864,7 +25896,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -26005,7 +26038,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -26035,13 +26078,6 @@
                 "commands": {
                   "y": [
                     {
-                      "id": "pcmd_mtdiygux_9s",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": -8,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_9z",
                       "frame": 0,
                       "duration": 12,
@@ -26060,13 +26096,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiygux_9u",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 40,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_a0",
                       "frame": 0,
                       "duration": 12,
@@ -26076,13 +26105,6 @@
                   ],
                   "zoomY": [
                     {
-                      "id": "pcmd_mtdiygux_9v",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 50,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_a1",
                       "frame": 0,
                       "duration": 12,
@@ -26091,13 +26113,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiygux_9w",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiygux_9y",
                       "frame": 0,
@@ -26156,7 +26171,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -26177,7 +26192,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -26323,7 +26339,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -26353,13 +26379,6 @@
                 "commands": {
                   "y": [
                     {
-                      "id": "pcmd_mtdiygux_al",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": -52,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_as",
                       "frame": 8,
                       "duration": 10,
@@ -26378,13 +26397,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiygux_an",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 60,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_at",
                       "frame": 8,
                       "duration": 10,
@@ -26394,13 +26406,6 @@
                   ],
                   "zoomY": [
                     {
-                      "id": "pcmd_mtdiygux_ao",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 75,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_au",
                       "frame": 8,
                       "duration": 10,
@@ -26409,13 +26414,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiygux_ap",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiygux_ar",
                       "frame": 8,
@@ -26474,7 +26472,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -26495,7 +26493,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -26643,7 +26642,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -26673,13 +26682,6 @@
                 "commands": {
                   "x": [
                     {
-                      "id": "pcmd_mtdiygux_bf",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": -3,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_bo",
                       "frame": 0,
                       "duration": 12,
@@ -26688,13 +26690,6 @@
                     }
                   ],
                   "y": [
-                    {
-                      "id": "pcmd_mtdiygux_bg",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": -4,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiygux_bp",
                       "frame": 0,
@@ -26714,13 +26709,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiygux_bi",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 40,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiygux_bq",
                       "frame": 0,
                       "duration": 12,
@@ -26729,13 +26717,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiygux_bj",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 50,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiygux_br",
                       "frame": 0,
@@ -26754,13 +26735,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiygux_bl",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiygux_bn",
                       "frame": 0,
@@ -26819,7 +26793,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -26840,7 +26814,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -26993,7 +26968,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -27023,13 +27008,6 @@
                 "commands": {
                   "x": [
                     {
-                      "id": "pcmd_mtdiyguy_cc",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": -39,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_cl",
                       "frame": 8,
                       "duration": 10,
@@ -27038,13 +27016,6 @@
                     }
                   ],
                   "y": [
-                    {
-                      "id": "pcmd_mtdiyguy_cd",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": -26,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_cm",
                       "frame": 8,
@@ -27064,13 +27035,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_cf",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 60,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_cn",
                       "frame": 8,
                       "duration": 10,
@@ -27079,13 +27043,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiyguy_cg",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 75,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_co",
                       "frame": 8,
@@ -27104,13 +27061,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_ci",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_ck",
                       "frame": 8,
@@ -27169,7 +27119,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -27190,7 +27140,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -27338,7 +27289,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -27368,13 +27329,6 @@
                 "commands": {
                   "x": [
                     {
-                      "id": "pcmd_mtdiyguy_da",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": -3,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_di",
                       "frame": 0,
                       "duration": 12,
@@ -27383,13 +27337,6 @@
                     }
                   ],
                   "y": [
-                    {
-                      "id": "pcmd_mtdiyguy_db",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 4,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_dj",
                       "frame": 0,
@@ -27409,13 +27356,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_dd",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 40,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_dk",
                       "frame": 0,
                       "duration": 12,
@@ -27424,13 +27364,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiyguy_de",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 50,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_dl",
                       "frame": 0,
@@ -27449,13 +27382,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_dg",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_dh",
                       "frame": 0,
@@ -27514,7 +27440,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -27535,7 +27461,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -27688,7 +27615,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -27718,13 +27655,6 @@
                 "commands": {
                   "x": [
                     {
-                      "id": "pcmd_mtdiyguy_e7",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": -39,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_eg",
                       "frame": 8,
                       "duration": 10,
@@ -27733,13 +27663,6 @@
                     }
                   ],
                   "y": [
-                    {
-                      "id": "pcmd_mtdiyguy_e8",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 26,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_eh",
                       "frame": 8,
@@ -27759,13 +27682,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_ea",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 60,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_ei",
                       "frame": 8,
                       "duration": 10,
@@ -27774,13 +27690,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiyguy_eb",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 75,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_ej",
                       "frame": 8,
@@ -27799,13 +27708,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_ed",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_ef",
                       "frame": 8,
@@ -27864,7 +27766,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -27885,7 +27787,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -28026,7 +27929,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -28056,13 +27969,6 @@
                 "commands": {
                   "y": [
                     {
-                      "id": "pcmd_mtdiyguy_f5",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 8,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_fc",
                       "frame": 0,
                       "duration": 12,
@@ -28081,13 +27987,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_f7",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 40,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_fd",
                       "frame": 0,
                       "duration": 12,
@@ -28097,13 +27996,6 @@
                   ],
                   "zoomY": [
                     {
-                      "id": "pcmd_mtdiyguy_f8",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 50,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_fe",
                       "frame": 0,
                       "duration": 12,
@@ -28112,13 +28004,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_f9",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_fb",
                       "frame": 0,
@@ -28177,7 +28062,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -28198,7 +28083,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -28351,7 +28237,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -28381,13 +28277,6 @@
                 "commands": {
                   "y": [
                     {
-                      "id": "pcmd_mtdiyguy_fy",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 50,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_g6",
                       "frame": 8,
                       "duration": 10,
@@ -28406,13 +28295,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_g0",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 60,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_g7",
                       "frame": 8,
                       "duration": 10,
@@ -28421,13 +28303,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiyguy_g1",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 75,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_g8",
                       "frame": 8,
@@ -28446,13 +28321,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_g3",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_g5",
                       "frame": 8,
@@ -28511,7 +28379,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -28532,7 +28400,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -28680,7 +28549,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -28710,13 +28589,6 @@
                 "commands": {
                   "x": [
                     {
-                      "id": "pcmd_mtdiyguy_gu",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 3,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_h3",
                       "frame": 0,
                       "duration": 12,
@@ -28725,13 +28597,6 @@
                     }
                   ],
                   "y": [
-                    {
-                      "id": "pcmd_mtdiyguy_gv",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 4,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_h4",
                       "frame": 0,
@@ -28751,13 +28616,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_gx",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 40,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_h5",
                       "frame": 0,
                       "duration": 12,
@@ -28766,13 +28624,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiyguy_gy",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 50,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_h6",
                       "frame": 0,
@@ -28791,13 +28642,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_h0",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_h2",
                       "frame": 0,
@@ -28856,7 +28700,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -28877,7 +28721,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -29030,7 +28875,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -29060,13 +28915,6 @@
                 "commands": {
                   "x": [
                     {
-                      "id": "pcmd_mtdiyguy_hr",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 39,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_i0",
                       "frame": 8,
                       "duration": 10,
@@ -29075,13 +28923,6 @@
                     }
                   ],
                   "y": [
-                    {
-                      "id": "pcmd_mtdiyguy_hs",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 26,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_i1",
                       "frame": 8,
@@ -29101,13 +28942,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_hu",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 60,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_i2",
                       "frame": 8,
                       "duration": 10,
@@ -29116,13 +28950,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiyguy_hv",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 75,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_i3",
                       "frame": 8,
@@ -29141,13 +28968,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_hx",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_hz",
                       "frame": 8,
@@ -29206,7 +29026,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -29227,7 +29047,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -29375,7 +29196,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -29405,13 +29236,6 @@
                 "commands": {
                   "x": [
                     {
-                      "id": "pcmd_mtdiyguy_ip",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 3,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_iy",
                       "frame": 0,
                       "duration": 12,
@@ -29420,13 +29244,6 @@
                     }
                   ],
                   "y": [
-                    {
-                      "id": "pcmd_mtdiyguy_iq",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": -4,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_iz",
                       "frame": 0,
@@ -29446,13 +29263,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_is",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 40,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_j0",
                       "frame": 0,
                       "duration": 12,
@@ -29461,13 +29271,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiyguy_it",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 50,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_j1",
                       "frame": 0,
@@ -29486,13 +29289,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_iv",
-                      "frame": 0,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_ix",
                       "frame": 0,
@@ -29551,7 +29347,7 @@
               "endFrame": 36,
               "graphic": {
                 "source": "new",
-                "projectPath": "",
+                "projectPath": "Graphics/AnimationStudio/zap.png",
                 "folder": "Battle animations",
                 "name": "zap",
                 "relativeHint": "zap",
@@ -29572,7 +29368,8 @@
                 ],
                 "rawName": "zap",
                 "specialBattler": "zap",
-                "maskGraphic": ""
+                "maskGraphic": "",
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -29725,7 +29522,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -29755,13 +29562,6 @@
                 "commands": {
                   "x": [
                     {
-                      "id": "pcmd_mtdiyguy_jm",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 39,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_jv",
                       "frame": 8,
                       "duration": 10,
@@ -29770,13 +29570,6 @@
                     }
                   ],
                   "y": [
-                    {
-                      "id": "pcmd_mtdiyguy_jn",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": -26,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_jw",
                       "frame": 8,
@@ -29796,13 +29589,6 @@
                   ],
                   "zoomX": [
                     {
-                      "id": "pcmd_mtdiyguy_jp",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 60,
-                      "easing": "linear"
-                    },
-                    {
                       "id": "pcmd_mtdiyguy_jx",
                       "frame": 8,
                       "duration": 10,
@@ -29811,13 +29597,6 @@
                     }
                   ],
                   "zoomY": [
-                    {
-                      "id": "pcmd_mtdiyguy_jq",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 75,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_jy",
                       "frame": 8,
@@ -29836,13 +29615,6 @@
                     }
                   ],
                   "opacity": [
-                    {
-                      "id": "pcmd_mtdiyguy_js",
-                      "frame": 8,
-                      "duration": 0,
-                      "value": 0,
-                      "easing": "linear"
-                    },
                     {
                       "id": "pcmd_mtdiyguy_ju",
                       "frame": 8,
@@ -29897,7 +29669,8 @@
       "events": [
         {
           "type": "user_cry",
-          "frame": 0
+          "frame": 0,
+          "id": "event_muk1vmpo_gf"
         }
       ],
       "logic": [],
@@ -29908,8 +29681,8 @@
         "inheritProject": true,
         "source": "project",
         "responsive": true,
-        "referenceWidth": 0,
-        "referenceHeight": 0,
+        "referenceWidth": 640,
+        "referenceHeight": 480,
         "cameraBoundsMode": "auto"
       },
       "noUser": false,
@@ -56197,6 +55970,6 @@
   "exportGameDataDir": "PBS/AnimationStudio",
   "exportPackageDir": "C:/Users/nuevo usuario/Downloads/Acupreshon",
   "editor": {
-    "lastAnimationId": "anim_mu1dora5_69c"
+    "lastAnimationId": "anim_mtdiyguv_6t"
   }
 }

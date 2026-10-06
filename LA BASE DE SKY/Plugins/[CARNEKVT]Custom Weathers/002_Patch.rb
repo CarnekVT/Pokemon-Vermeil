@@ -62,7 +62,21 @@ class RPG::Weather
         when :spin, :whirl then update_spinning_particle(sprite, index, is_new_sprite, weather_type)
         when :rise then update_rising_particle(sprite, index, is_new_sprite, weather_type)
         when :custom then update_custom_generic(sprite, index, is_new_sprite, weather_type)
-        else _CARNEKVT_cw_orig_update_sprite_position(sprite, index, *args)
+        else
+          # Call the original method with the correct number of arguments.
+          # Some versions expect only three arguments (sprite, index, is_new_sprite),
+          # while others accept a variable number. Determine the method arity to forward appropriately.
+          orig_method = method(:_CARNEKVT_cw_orig_update_sprite_position)
+          arity = orig_method.arity
+          if arity < 0
+            # Variable‑arity: forward all received arguments.
+            _CARNEKVT_cw_orig_update_sprite_position(sprite, index, *args)
+          else
+            # Fixed‑arity: pass only the expected number of arguments.
+            expected = arity - 2  # subtract receiver and the first two explicit parameters
+            _CARNEKVT_cw_orig_update_sprite_position(sprite, index, *args[0, expected])
+          end
+
         end
     else
       _CARNEKVT_cw_orig_update_sprite_position(sprite, index, *args)

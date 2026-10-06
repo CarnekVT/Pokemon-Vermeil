@@ -1,7 +1,7 @@
 {
   "format": "battle-animation-studio-compiled",
   "version": 19,
-  "exportedAt": "2026-09-15T03:17:53.862Z",
+  "exportedAt": "2026-09-27T16:45:09.190Z",
   "animations": [
     {
       "id": "anim_mt3nkm5h_8a",
@@ -481,7 +481,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "resolvedAtExport": true
               },
               "graphicSwitches": [
                 {
@@ -12932,7 +12933,14 @@
         "contextAutoAdapt": true,
         "previewAffectedTargets": false,
         "autoReplicateAffected": false,
-        "activeTimelineContext": null,
+        "activeTimelineContext": {
+          "battleFormat": "1v1",
+          "userSlot": 0,
+          "targetSlot": 0,
+          "targetIndex": 1,
+          "targetScope": "single_other",
+          "targetExplicit": false
+        },
         "askBackupOnContextEdit": false,
         "autoReplicateTouched": false,
         "commonSubjectRole": "auto",
@@ -13097,7 +13105,8 @@
             "colorRed": [],
             "colorGreen": [],
             "colorBlue": [],
-            "colorAlpha": []
+            "colorAlpha": [],
+            "priority": []
           },
           "fxOps": [],
           "logic": [],
@@ -13539,7 +13548,8 @@
               "value": 0,
               "easing": "ease_both"
             }
-          ]
+          ],
+          "priority": []
         },
         "visibleKeys": [
           {
@@ -14709,6 +14719,22 @@
           "name": "Anim/PRSFX- Bite",
           "volume": 100,
           "pitch": 100
+        },
+        {
+          "id": "event_muk1gdrb_gd",
+          "type": "screen_shake",
+          "frame": 32,
+          "duration": 6,
+          "strength": 7,
+          "axis": 0
+        },
+        {
+          "id": "event_muk1gk6i_ge",
+          "type": "screen_shake",
+          "frame": 46,
+          "duration": 6,
+          "strength": 7,
+          "axis": 0
         }
       ],
       "logic": [],
@@ -18317,7 +18343,8 @@
                 "cols": 5,
                 "rows": 0,
                 "origin": "auto",
-                "assetCandidates": []
+                "assetCandidates": [],
+                "resolvedAtExport": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -49271,18 +49298,20 @@
         "catalogType": "move",
         "opposing": false,
         "sideContext": "player",
-        "targetMode": "foe",
-        "targetScope": "single_foe",
-        "allowedTargetScopes": [],
-        "variantScope": "auto",
+        "targetMode": "both",
+        "targetScope": "single_other",
+        "allowedTargetScopes": [
+          "single_other"
+        ],
+        "variantScope": "physical",
         "customSpace": "battlers",
         "detectedTraits": [],
-        "detectedFunctionCode": "",
-        "detectedCategory": "",
-        "detectedTarget": "",
+        "detectedFunctionCode": "None",
+        "detectedCategory": "physical",
+        "detectedTarget": "Other",
         "contextAutoAdapt": true,
-        "previewAffectedTargets": true,
-        "autoReplicateAffected": true,
+        "previewAffectedTargets": false,
+        "autoReplicateAffected": false,
         "activeTimelineContext": null,
         "askBackupOnContextEdit": false,
         "autoReplicateTouched": false,
@@ -49446,7 +49475,16 @@
             "cameraX": [],
             "cameraY": [],
             "cameraZoom": [],
-            "cameraRotation": []
+            "cameraRotation": [],
+            "priority": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
           },
           "fxOps": [
             {
@@ -49740,7 +49778,15 @@
             "cameraX": [],
             "cameraY": [],
             "cameraZoom": [],
-            "cameraRotation": []
+            "cameraRotation": [],
+            "originX": [],
+            "originY": [],
+            "originOffsetX": [],
+            "originOffsetY": [],
+            "colorRed": [],
+            "colorGreen": [],
+            "colorBlue": [],
+            "colorAlpha": []
           },
           "fxOps": [
             {
@@ -49965,7 +50011,7 @@
                 "rawName": "black_screen",
                 "specialBattler": "black_screen",
                 "maskGraphic": "",
-                "resolvedAtExport": true
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -50076,7 +50122,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [],
               "pbs": {
@@ -50184,7 +50240,7 @@
                 "rawName": "spark",
                 "specialBattler": "spark",
                 "maskGraphic": "",
-                "resolvedAtExport": true
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -50327,7 +50383,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -50500,7 +50566,7 @@
                 "rawName": "spark",
                 "specialBattler": "spark",
                 "maskGraphic": "",
-                "resolvedAtExport": true
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -50643,7 +50709,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -50816,7 +50892,7 @@
                 "rawName": "spark",
                 "specialBattler": "spark",
                 "maskGraphic": "",
-                "resolvedAtExport": true
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -50952,7 +51028,17 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -51109,7 +51195,7 @@
                 "rawName": "Energy1",
                 "specialBattler": "Energy1",
                 "maskGraphic": "",
-                "resolvedAtExport": true
+                "legacyResourceRepaired": true
               },
               "graphicSwitches": [],
               "visual": {
@@ -51211,7 +51297,18 @@
                 "cameraX": [],
                 "cameraY": [],
                 "cameraZoom": [],
-                "cameraRotation": []
+                "cameraRotation": [],
+                "priority": [],
+                "emitterOpacity": [],
+                "invert": [],
+                "colorRed": [],
+                "colorGreen": [],
+                "colorBlue": [],
+                "colorAlpha": [],
+                "originX": [],
+                "originY": [],
+                "originOffsetX": [],
+                "originOffsetY": []
               },
               "fxOps": [
                 {
@@ -51355,28 +51452,32 @@
           "frame": 6,
           "name": "Wind1",
           "volume": 100,
-          "pitch": 100
+          "pitch": 100,
+          "id": "event_mu4z41w4_gd"
         },
         {
           "type": "se",
           "frame": 12,
           "name": "PRSFX- Slash",
           "volume": 100,
-          "pitch": 100
+          "pitch": 100,
+          "id": "event_mu4z41w4_ge"
         },
         {
           "type": "se",
           "frame": 13,
           "name": "PRSFX- Focus Punch2",
           "volume": 100,
-          "pitch": 100
+          "pitch": 100,
+          "id": "event_mu4z41w4_gf"
         },
         {
           "type": "se",
           "frame": 20,
           "name": "Wind1",
           "volume": 80,
-          "pitch": 150
+          "pitch": 150,
+          "id": "event_mu4z41w4_gg"
         }
       ],
       "logic": [],
@@ -53634,7 +53735,14 @@
         "contextAutoAdapt": true,
         "previewAffectedTargets": false,
         "autoReplicateAffected": false,
-        "activeTimelineContext": null,
+        "activeTimelineContext": {
+          "battleFormat": "1v3",
+          "userSlot": 0,
+          "targetSlot": 0,
+          "targetIndex": 1,
+          "targetScope": "single_other",
+          "targetExplicit": false
+        },
         "askBackupOnContextEdit": false,
         "autoReplicateTouched": false,
         "commonSubjectRole": "auto",
@@ -53653,7 +53761,7 @@
           "side": "user",
           "name": "User",
           "enabled": true,
-          "locked": false,
+          "locked": true,
           "formRules": [],
           "visual": {
             "size": 100,
@@ -53810,7 +53918,7 @@
           "side": "target",
           "name": "Target",
           "enabled": true,
-          "locked": false,
+          "locked": true,
           "formRules": [],
           "visual": {
             "size": 100,
@@ -54178,7 +54286,7 @@
               "name": "Burn",
               "enabled": true,
               "locked": false,
-              "startFrame": 2,
+              "startFrame": 0,
               "endFrame": 52,
               "graphic": {
                 "source": "studio",
@@ -54224,17 +54332,45 @@
               ],
               "positionKeys": [
                 {
-                  "id": "key_mu1dpuf2_69x",
-                  "frame": 2,
+                  "id": "key_mu4bhtus_29s",
+                  "frame": 0,
                   "easing": "linear",
                   "axisX": true,
                   "axisY": true,
                   "point": {
-                    "anchor": "pbs:user",
+                    "anchor": "pbs:target",
                     "x": 0,
                     "y": 0,
-                    "offsetX": 371.3580246913581,
-                    "offsetY": -89.87654320987656
+                    "offsetX": 0,
+                    "offsetY": 0
+                  }
+                },
+                {
+                  "id": "key_mu1dpuf2_69x",
+                  "frame": 2,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": true,
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": 0,
+                    "offsetY": 41
+                  }
+                },
+                {
+                  "id": "key_mu4biuzh_29t",
+                  "frame": 6,
+                  "easing": "ease_both",
+                  "axisX": true,
+                  "axisY": false,
+                  "point": {
+                    "anchor": "pbs:target",
+                    "x": 0,
+                    "y": 0,
+                    "offsetX": -18,
+                    "offsetY": 41
                   }
                 }
               ],
@@ -54889,8 +55025,8 @@
                     "anchor": "pbs:target",
                     "x": 0,
                     "y": 0,
-                    "offsetX": -287.2345679012345,
-                    "offsetY": 113.66666666666669
+                    "offsetX": -324.76543209876536,
+                    "offsetY": 143.2962962962963
                   },
                   "axisX": true,
                   "axisY": true
@@ -55043,7 +55179,7 @@
               "type": "projectile",
               "name": "Emitter · spark-impact",
               "enabled": true,
-              "locked": false,
+              "locked": true,
               "startFrame": 0,
               "endFrame": 39,
               "graphic": {
@@ -55332,7 +55468,7 @@
           "frame": 0,
           "name": "Anim/Wind1",
           "volume": 50,
-          "pitch": 200
+          "pitch": 400
         },
         {
           "id": "event_mu1jg3qe_8mt",

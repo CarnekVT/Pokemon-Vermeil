@@ -43977,8 +43977,8 @@
     },
     "Plugins/[CARNEKVT]Custom Weathers/002_Patch.rb": {
       "sig": [
-        10422,
-        1789879645
+        11193,
+        1790200297
       ],
       "catalog": {
         "schema": 2,
@@ -49025,8 +49025,8 @@
     },
     "Data/BattleSceneStudio/battles.json": {
       "sig": [
-        170047,
-        1789871684
+        171235,
+        1789880802
       ],
       "catalog": {
         "schema": 2,
@@ -52532,8 +52532,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/70_Runtime_Pipeline/030_Composer_Camera_Fixes.rb": {
       "sig": [
-        39046,
-        1789872134
+        39678,
+        1789881097
       ],
       "catalog": {
         "schema": 2,
@@ -52977,6 +52977,28 @@
               "Plugin: [CARNEK] Shiny Variants Runtime - 005_Debug_Integration.rb:L114"
             ]
           }
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/[CARNEKVT]Custom Weathers/999_Fix_Autotile.rb": {
+      "sig": [
+        1576,
+        1790207479
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.0",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
         },
         "bss": {
         },

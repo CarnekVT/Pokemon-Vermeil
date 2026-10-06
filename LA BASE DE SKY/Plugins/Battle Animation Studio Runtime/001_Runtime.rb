@@ -1277,7 +1277,7 @@ module BattleAnimationStudioRuntime
         @screen_fixed_clip_ids[clip["id"].to_s] = true if fixed
       end
       events = @data["events"].is_a?(Array) ? @data["events"] : []
-      @se_events = events.select { |ev| ev.is_a?(Hash) && ["se", "cry"].include?(ev["type"].to_s.downcase) }.sort_by { |ev| (ev["frame"] || 0).to_f }
+      @se_events = events.select { |ev| ev.is_a?(Hash) && ["se", "cry", "user_cry", "target_cry"].include?(ev["type"].to_s.downcase) }.sort_by { |ev| (ev["frame"] || 0).to_f }
       @screen_events = events.select { |ev| ev.is_a?(Hash) && ["screen_black_envelope", "screen_white_envelope", "screen_flash", "flash", "darken"].include?(ev["type"].to_s) }
       @shake_events = events.select { |ev| ev.is_a?(Hash) && ev["type"].to_s == "screen_shake" }
     end
@@ -3441,20 +3441,120 @@ module BattleAnimationStudioRuntime
       "none"
     end
 
+    EMITTER_COMMAND_ALIASES = {
+      "emitAngle" => ["emitDirection", "direction", "moveEmitAngle", "moveEmitDirection"],
+      "emitDirection" => ["emitAngle", "direction", "moveEmitAngle", "moveEmitDirection"],
+      "direction" => ["emitDirection", "emitAngle"],
+      "emitAngleRange" => ["emitDirectionRange", "directionRange", "moveEmitAngleRange", "moveEmitDirectionRange"],
+      "emitDirectionRange" => ["emitAngleRange", "directionRange", "moveEmitAngleRange", "moveEmitDirectionRange"],
+      "directionRange" => ["emitDirectionRange", "emitAngleRange"],
+      "emitSpeed" => ["speed", "moveEmitSpeed"],
+      "speed" => ["emitSpeed", "moveEmitSpeed"],
+      "emitSpeedRange" => ["speedRange", "moveEmitSpeedRange"],
+      "speedRange" => ["emitSpeedRange", "moveEmitSpeedRange"],
+      "emitGravity" => ["gravity", "moveEmitGravity"],
+      "gravity" => ["emitGravity", "moveEmitGravity"],
+      "emitGravityRange" => ["gravityRange", "moveEmitGravityRange"],
+      "gravityRange" => ["emitGravityRange", "moveEmitGravityRange"],
+      "emitDeceleration" => ["deceleration", "moveEmitDeceleration"],
+      "deceleration" => ["emitDeceleration", "moveEmitDeceleration"],
+      "emitDecelerationRange" => ["decelerationRange", "moveEmitDecelerationRange"],
+      "decelerationRange" => ["emitDecelerationRange", "moveEmitDecelerationRange"],
+      "emitX" => ["spawnX", "moveSpawnX", "moveEmitX"],
+      "spawnX" => ["emitX", "moveSpawnX", "moveEmitX"],
+      "emitXRange" => ["spawnXRange", "moveSpawnXRange", "moveEmitXRange"],
+      "spawnXRange" => ["emitXRange", "moveSpawnXRange", "moveEmitXRange"],
+      "emitY" => ["spawnY", "moveSpawnY", "moveEmitY"],
+      "spawnY" => ["emitY", "moveSpawnY", "moveEmitY"],
+      "emitYRange" => ["spawnYRange", "moveSpawnYRange", "moveEmitYRange"],
+      "spawnYRange" => ["emitYRange", "moveSpawnYRange", "moveEmitYRange"],
+      "emitR" => ["spawnR", "moveSpawnR", "moveEmitR"],
+      "spawnR" => ["emitR", "moveSpawnR", "moveEmitR"],
+      "emitRRange" => ["spawnRRange", "moveSpawnRRange", "moveEmitRRange"],
+      "spawnRRange" => ["emitRRange", "moveSpawnRRange", "moveEmitRRange"],
+      "emitTheta" => ["spawnTheta", "moveSpawnTheta", "moveEmitTheta"],
+      "spawnTheta" => ["emitTheta", "moveSpawnTheta", "moveEmitTheta"],
+      "emitThetaRange" => ["spawnThetaRange", "moveSpawnThetaRange", "moveEmitThetaRange"],
+      "spawnThetaRange" => ["emitThetaRange", "moveSpawnThetaRange", "moveEmitThetaRange"],
+      "particleSize" => ["emitZoomMultiplier", "zoomMultiplier", "moveEmitZoomMultiplier"],
+      "emitZoomMultiplier" => ["particleSize", "zoomMultiplier", "moveEmitZoomMultiplier"],
+      "zoomMultiplier" => ["particleSize", "emitZoomMultiplier"],
+      "particleSizeRange" => ["emitZoomRange", "zoomRange", "moveEmitZoomRange"],
+      "emitZoomRange" => ["particleSizeRange", "zoomRange", "moveEmitZoomRange"],
+      "zoomRange" => ["particleSizeRange", "emitZoomRange"],
+      "emitZoomXRange" => ["zoomXRange", "moveEmitZoomXRange"],
+      "zoomXRange" => ["emitZoomXRange", "moveEmitZoomXRange"],
+      "emitZoomYRange" => ["zoomYRange", "moveEmitZoomYRange"],
+      "zoomYRange" => ["emitZoomYRange", "moveEmitZoomYRange"],
+      "emitPeriodX" => ["periodX", "movePeriodX", "moveEmitPeriodX"],
+      "periodX" => ["emitPeriodX", "movePeriodX", "moveEmitPeriodX"],
+      "emitPeriodXRange" => ["periodXRange", "movePeriodXRange", "moveEmitPeriodXRange"],
+      "periodXRange" => ["emitPeriodXRange", "movePeriodXRange", "moveEmitPeriodXRange"],
+      "emitPeriodY" => ["periodY", "movePeriodY", "moveEmitPeriodY"],
+      "periodY" => ["emitPeriodY", "movePeriodY", "moveEmitPeriodY"],
+      "emitPeriodYRange" => ["periodYRange", "movePeriodYRange", "moveEmitPeriodYRange"],
+      "periodYRange" => ["emitPeriodYRange", "movePeriodYRange", "moveEmitPeriodYRange"],
+      "emitPeriodZ" => ["periodZ", "movePeriodZ", "moveEmitPeriodZ"],
+      "periodZ" => ["emitPeriodZ", "movePeriodZ", "moveEmitPeriodZ"],
+      "emitPeriodZRange" => ["periodZRange", "movePeriodZRange", "moveEmitPeriodZRange"],
+      "periodZRange" => ["emitPeriodZRange", "movePeriodZRange", "moveEmitPeriodZRange"],
+      "emitRadiusXRange" => ["radiusXRange", "moveRadiusXRange", "moveEmitRadiusXRange"],
+      "radiusXRange" => ["emitRadiusXRange", "moveRadiusXRange", "moveEmitRadiusXRange"],
+      "emitRadiusYRange" => ["radiusYRange", "moveRadiusYRange", "moveEmitRadiusYRange"],
+      "radiusYRange" => ["emitRadiusYRange", "moveRadiusYRange", "moveEmitRadiusYRange"],
+      "emitRadiusZRange" => ["radiusZRange", "moveRadiusZRange", "moveEmitRadiusZRange"],
+      "radiusZRange" => ["emitRadiusZRange", "moveRadiusZRange", "moveEmitRadiusZRange"],
+      "emitClockwise" => ["clockwise", "moveEmitClockwise", "moveClockwise"],
+      "clockwise" => ["emitClockwise", "moveEmitClockwise", "moveClockwise"],
+      "emitXMultiplier" => ["xMultiplier"],
+      "xMultiplier" => ["emitXMultiplier"],
+      "emitYMultiplier" => ["yMultiplier"],
+      "yMultiplier" => ["emitYMultiplier"],
+      "emitOpacityMultiplier" => ["opacityMultiplier"],
+      "opacityMultiplier" => ["emitOpacityMultiplier"]
+    }.freeze
+
     def cached_emitter_commands(clip, name)
       source = replica_visual_source(clip)
       key = [source.object_id, name.to_s]
       @emitter_command_cache[key] ||= begin
         pbs = source["pbs"].is_a?(Hash) ? source["pbs"] : {}
         map = pbs["emitterCommands"].is_a?(Hash) ? pbs["emitterCommands"] : {}
-        raw = map[name.to_s] || []
+        raw = map[name.to_s]
+        if (!raw || raw.empty?) && (aliases = EMITTER_COMMAND_ALIASES[name.to_s])
+          aliases.each do |alt|
+            if map[alt] && !map[alt].empty?
+              raw = map[alt]
+              break
+            end
+          end
+        end
+        raw ||= []
         raw.is_a?(Array) ? raw.sort_by { |cmd| (cmd["frame"] || 0).to_f } : []
       end
     end
 
     def emitter_value(clip, name, frame, fallback = 0)
       list = cached_emitter_commands(clip, name)
-      return context_parameter_value(clip, "emitter", name, frame, fallback) if list.empty?
+      if list.empty?
+        ctx = context_parameter_value(clip, "emitter", name, frame, nil)
+        if ctx.nil? && (aliases = EMITTER_COMMAND_ALIASES[name.to_s])
+          aliases.each do |alt|
+            ctx = context_parameter_value(clip, "emitter", alt, frame, nil)
+            break unless ctx.nil?
+          end
+        end
+        return ctx unless ctx.nil?
+        source = replica_visual_source(clip)
+        pbs = source["pbs"].is_a?(Hash) ? source["pbs"] : {}
+        return pbs[name.to_s] if pbs.key?(name.to_s)
+        if (aliases = EMITTER_COMMAND_ALIASES[name.to_s])
+          aliases.each do |alt|
+            return pbs[alt] if pbs.key?(alt)
+          end
+        end
+        return fallback
+      end
       value = fallback
       list.each do |cmd|
         cf = (cmd["frame"] || 0).to_f
@@ -3734,13 +3834,21 @@ module BattleAnimationStudioRuntime
       desc[:particle_in_emission] = particle_in_emission.to_i
       desc[:ox] = emitter_randomized(clip, "emitX", "emitXRange", ef, rnd, 0)
       desc[:oy] = emitter_randomized(clip, "emitY", "emitYRange", ef, rnd, 0)
+      spawn_r = emitter_randomized(clip, "emitR", "emitRRange", ef, rnd, 0).to_f
+      spawn_theta = emitter_randomized(clip, "emitTheta", "emitThetaRange", ef, rnd, 0).to_f
+      if spawn_r != 0 || spawn_theta != 0
+        theta_rad = spawn_theta * Math::PI / 180.0
+        desc[:ox] += (spawn_r * Math.cos(theta_rad)).round
+        desc[:oy] += (-spawn_r * Math.sin(theta_rad)).round
+      end
       desc[:speed] = emitter_randomized(clip, "emitSpeed", "emitSpeedRange", ef, rnd, 0)
       desc[:angle] = emitter_randomized(clip, "emitAngle", "emitAngleRange", ef, rnd, 0)
       desc[:gravity] = emitter_randomized(clip, "emitGravity", "emitGravityRange", ef, rnd, 0)
+      desc[:deceleration] = [0.0, emitter_randomized(clip, "emitDeceleration", "emitDecelerationRange", ef, rnd, 0).to_f].max
       destination = pbs["emitterDestination"].to_s.downcase
       emitter_kind = emitter_type(clip)
       desc[:travel_frames] = emitter_route_travel_frames(clip, ef, desc[:speed])
-      if emitter_kind == "straight" || emitter_kind == "projectile"
+      if emitter_kind == "straight" || emitter_kind == "projectile" || emitter_kind == "dampened"
         authored_base = emitter_value(clip, "emitAngle", ef, 0).to_f
         jitter = desc[:angle].to_f - authored_base
         route_base = (destination == "target" || destination == "user") ? semantic_emitter_angle(clip, ef, authored_base) : authored_base
@@ -3773,6 +3881,9 @@ module BattleAnimationStudioRuntime
       desc[:zoom_x_mult] = (100.0 + ((rnd.call * 2.0 - 1.0) * [0.0, emitter_value(clip, "emitZoomXRange", ef, 0).to_f].max)) / 100.0
       desc[:zoom_y_mult] = (100.0 + ((rnd.call * 2.0 - 1.0) * [0.0, emitter_value(clip, "emitZoomYRange", ef, 0).to_f].max)) / 100.0
       desc[:clockwise] = runtime_bool(emitter_value(clip, "emitClockwise", ef, false))
+      desc[:x_multiplier] = emitter_value(clip, "emitXMultiplier", ef, 100).to_f / 100.0
+      desc[:y_multiplier] = emitter_value(clip, "emitYMultiplier", ef, 100).to_f / 100.0
+      desc[:opacity_multiplier] = emitter_value(clip, "emitOpacityMultiplier", ef, 100).to_f / 100.0
 
       # drawClip() deliberately starts a fresh PRNG for visual-only spawn
       # choices. Reproduce that exact sequence here instead of continuing the
@@ -4209,7 +4320,7 @@ module BattleAnimationStudioRuntime
       simple_life = contextual_simple_life(clip, @frame)
       life = simple_life ? [(simple_life["duration"] || 12).to_f, 1.0].max : emitter_particle_lifetime(clip)
       type = emitter_type(clip)
-      route_life = (type == "straight" || type == "projectile") ? particles.inject(0.0) { |m, particle| [m, particle[:travel_frames].to_f].max } : 0.0
+      route_life = (type == "straight" || type == "projectile" || type == "dampened") ? particles.inject(0.0) { |m, particle| [m, particle[:travel_frames].to_f].max } : 0.0
       search_life = [life, route_life].max
       first = lower_bound_particle(particles, @frame - search_life - 0.0001)
       fps = animation_fps
@@ -4223,7 +4334,7 @@ module BattleAnimationStudioRuntime
         i += 1
         particle_simple_life = contextual_simple_life(clip, ef)
         particle_life = particle_simple_life ? [(particle_simple_life["duration"] || 12).to_f, 1.0].max : emitter_particle_lifetime(clip)
-        effective_life = (type == "straight" || type == "projectile") ? [particle_life, desc[:travel_frames].to_f].max : particle_life
+        effective_life = (type == "straight" || type == "projectile" || type == "dampened") ? [particle_life, desc[:travel_frames].to_f].max : particle_life
         next if age < 0 || age > effective_life
         pbs_for_travel = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
         if runtime_bool(context_parameter_value(clip, "emitter", "simpleStopAtDestination", ef, pbs_for_travel["simpleStopAtDestination"]))
@@ -4299,6 +4410,27 @@ module BattleAnimationStudioRuntime
           wobble = Math.sin((t * Math::PI * 2.0) + phase) * 10.0 * (1.0 - t)
           dx += wobble
           dy += Math.cos((t * Math::PI * 2.0) + phase) * 5.0 * (1.0 - t)
+        elsif type == "dampened"
+          decel = [0.0, desc[:deceleration].to_f].max
+          speed_x = Math.cos(phase) * desc[:speed].to_f
+          speed_y = -Math.sin(phase) * desc[:speed].to_f
+          decel_x = decel * Math.cos(phase).abs
+          decel_y = decel * Math.sin(phase).abs
+          decel_x *= -1.0 if speed_x > 0
+          decel_y *= -1.0 if speed_y > 0
+          use_time = sec
+          if decel > 0
+            balance_time = (desc[:speed].to_f / decel).abs
+            use_time = balance_time if use_time > balance_time
+          end
+          dx += (speed_x * use_time) + (decel_x * use_time * use_time / 2.0)
+          dy += (speed_y * use_time) + (decel_y * use_time * use_time / 2.0)
+        end
+        if desc[:x_multiplier] && desc[:x_multiplier] != 1.0
+          dx = desc[:ox].to_f + ((dx - desc[:ox].to_f) * desc[:x_multiplier].to_f)
+        end
+        if desc[:y_multiplier] && desc[:y_multiplier] != 1.0
+          dy = desc[:oy].to_f + ((dy - desc[:oy].to_f) * desc[:y_multiplier].to_f)
         end
         sprite = ensure_emitter_sprite(clip, particle_index, template)
         next if !sprite
@@ -4329,6 +4461,7 @@ module BattleAnimationStudioRuntime
             particle_opacity = opacity_normal + ((opacity_end - opacity_normal) * local_t)
           end
         end
+        particle_opacity *= desc[:opacity_multiplier].to_f if desc[:opacity_multiplier]
         apply_emitter_particle(sprite, clip, age,
           { :dx => dx, :dy => dy, :z => zoff,
             :scale_x => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_x_mult].to_f * simple_scale,
@@ -4526,19 +4659,37 @@ module BattleAnimationStudioRuntime
 
     def play_battler_cry_event(ev)
       raw_side = ev["side"].to_s.downcase
-      # v1.0.42: Cry is side-based (Player/Foe), not move-role based
-      # (User/Target). Keep legacy events compatible: user=>player, target=>foe.
-      side = ["foe", "target"].include?(raw_side) ? :foe : :player
-      wanted_parity = side == :foe ? 1 : 0
-      battler = [@user, @target].compact.find do |b|
-        idx = BattleAnimationStudioRuntime.safe_battler_index(b, -1).to_i
-        idx >= 0 && idx % 2 == wanted_parity
-      end
-      if !battler
-        battler = runtime_battlers.find do |b|
+      type = ev["type"].to_s.downcase
+
+      battler = nil
+      # Move-role based (User / Target): Recommended for moves like Growl, Roar, etc.
+      # When Foe uses Growl, @user is the Foe; when Player uses Growl, @user is the Player.
+      if type == "user_cry" || raw_side == "user"
+        battler = @user
+      elsif type == "target_cry" || raw_side == "target"
+        battler = @target || (defined?(@targets) && @targets && @targets.first)
+      elsif raw_side == "foe"
+        # Explicit/fixed battle side: Foe (odd index)
+        battler = [@target, @user].compact.find do |b|
           idx = BattleAnimationStudioRuntime.safe_battler_index(b, -1).to_i
-          idx >= 0 && idx % 2 == wanted_parity
+          idx >= 0 && idx % 2 == 1
         end
+        battler ||= runtime_battlers.find do |b|
+          idx = BattleAnimationStudioRuntime.safe_battler_index(b, -1).to_i
+          idx >= 0 && idx % 2 == 1
+        end
+      elsif raw_side == "player"
+        # Explicit/fixed battle side: Player (even index)
+        battler = [@user, @target].compact.find do |b|
+          idx = BattleAnimationStudioRuntime.safe_battler_index(b, -1).to_i
+          idx >= 0 && idx % 2 == 0
+        end
+        battler ||= runtime_battlers.find do |b|
+          idx = BattleAnimationStudioRuntime.safe_battler_index(b, -1).to_i
+          idx >= 0 && idx % 2 == 0
+        end
+      else
+        battler = @user || @target
       end
       return if !battler
       pokemon = battler.respond_to?(:pokemon) ? (battler.pokemon rescue nil) : nil
@@ -4551,9 +4702,11 @@ module BattleAnimationStudioRuntime
           return
         rescue ArgumentError, TypeError
           begin
-            pokemon.play_cry
+            pokemon.play_cry(volume)
             return
           rescue
+            pokemon.play_cry rescue nil
+            return
           end
         rescue
         end
@@ -4590,6 +4743,18 @@ module BattleAnimationStudioRuntime
         end
       end
 
+      if defined?(Pokemon) && Pokemon.respond_to?(:play_cry)
+        species = pokemon && pokemon.respond_to?(:species) ? pokemon.species : (battler.respond_to?(:species) ? battler.species : nil)
+        form = pokemon && pokemon.respond_to?(:form) ? pokemon.form : (battler.respond_to?(:form) ? battler.form : 0)
+        if species
+          begin
+            Pokemon.play_cry(species, form, volume, pitch)
+            return
+          rescue
+          end
+        end
+      end
+
       if respond_to?(:pbPlayCry, true) && pokemon
         [[pokemon, volume, pitch], [pokemon]].each do |args|
           begin
@@ -4601,7 +4766,7 @@ module BattleAnimationStudioRuntime
           end
         end
       end
-      BattleAnimationStudioRuntime.log("Cry not playable for #{side}")
+      BattleAnimationStudioRuntime.log("Cry not playable for #{raw_side} (#{battler})")
     rescue => e
       BattleAnimationStudioRuntime.log("Cry playback #{e.class}: #{e.message}")
     end
@@ -4615,7 +4780,7 @@ module BattleAnimationStudioRuntime
                     ef > previous_frame + 0.0001 && ef <= current_frame + 0.0001
                   end
         next if !crossed
-        if ev["type"].to_s.downcase == "cry"
+        if ["cry", "user_cry", "target_cry"].include?(ev["type"].to_s.downcase)
           play_battler_cry_event(ev)
           next
         end
