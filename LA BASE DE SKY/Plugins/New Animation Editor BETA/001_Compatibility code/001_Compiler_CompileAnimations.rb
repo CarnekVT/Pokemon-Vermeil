@@ -151,9 +151,9 @@ module Compiler
           if !data_hash
             raise _INTL("Expected a section at the beginning of the file.") + "\n" + FileLineData.linereport
           end
-          key = $~[1]
+          key, raw_value = GameData::Animation.normalize_legacy_pbs_property($~[1], $~[2])
           if schema[key]   # Property of the animation
-            value = get_csv_record($~[2], schema[key])
+            value = get_csv_record(raw_value, schema[key])
             if schema[key][1][0] == "^"
               value = nil if value.is_a?(Array) && value.empty?
               data_hash[schema[key][0]] ||= []
@@ -166,7 +166,7 @@ module Compiler
             if !current_particle
               raise _INTL("Particle hasn't been defined yet!") + "\n" + FileLineData.linereport
             end
-            value = get_csv_record($~[2], sub_schema[key])
+            value = get_csv_record(raw_value, sub_schema[key])
             if sub_schema[key][1][0] == "^"
               value = nil if value.is_a?(Array) && value.empty?
               current_particle[sub_schema[key][0]] ||= []
@@ -336,12 +336,12 @@ module Compiler
         raise _INTL("Particle \"{1}\" can't can't set \"TiledGraphic\" if it is an emitter or has a non-screen focus.",
                     particle[:name]) + "\n" + FileLineData.linereport
       end
-      # Ensure that only particles that have an entity as a focus can have a
-      # smart angle
-      if (particle[:angle_override] || :none) != :none &&
+      # Ensure smart initial-angle modes only target a meaningful focus.
+      initial_angle = particle[:initial_angle] || :none
+      if ![:none, :emitted_direction].include?(initial_angle) &&
          !GameData::Animation::FOCUS_TYPES_WITH_USER.include?(particle[:focus]) &&
          !GameData::Animation::FOCUS_TYPES_WITH_TARGET.include?(particle[:focus])
-        raise _INTL("Particle \"{1}\" can't set \"AngleOverride\" if its focus isn't a specific thing(s).",
+        raise _INTL("Particle \"{1}\" can't set \"InitialAngle\" to this mode if its focus isn't a specific thing(s).",
                     particle[:name]) + "\n" + FileLineData.linereport
       end
       # Ensure that a particle with a user's/target's graphic doesn't have any
