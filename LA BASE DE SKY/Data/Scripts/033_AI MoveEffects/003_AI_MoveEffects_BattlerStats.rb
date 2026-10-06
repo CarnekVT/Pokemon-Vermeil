@@ -731,6 +731,18 @@ Battle::AI::Handlers::MoveEffectScore.add("StartRaiseUserAtk1WhenDamaged",
       before = foes.map do |foe|
         ai.ai_improvements_best_damage(user, foe, &usable_attack)
       end
+      opportunity_cost = 0.0
+      direct_rage = user.battler.moves.any? do |candidate|
+        candidate.equal?(move.move) ||
+          (move.move.realMove && candidate.realMove.equal?(move.move.realMove))
+      end
+      if battle.singleBattle? && direct_rage
+        rage_damage = ai.ai_improvements_best_damage(user, foes.first) do |candidate|
+          next false unless candidate.move.realMove.equal?(move.move.realMove)
+          next usable_attack.call(candidate)
+        end
+        opportunity_cost = ([before.first, foes.first.hp].min - [rage_damage, foes.first.hp].min).clamp(0.0, foes.first.hp)
+      end
       benefit = nil
       begin
         user.stages[:ATTACK] = raised_stage
@@ -745,6 +757,13 @@ Battle::AI::Handlers::MoveEffectScore.add("StartRaiseUserAtk1WhenDamaged",
       survival = (remaining_hp / user.hp.to_f).clamp(0.0, 1.0)
       # Conserva como techo la magnitud del antiguo bonus conjunto (+10/+7).
       bonus = (100.0 * benefit * trigger_chance * survival).clamp(-17.0, 17.0)
+      if battle.singleBattle? && direct_rage && bonus > 0
+        # ponytail: one future activation, not a chain; current damage already scores separately.
+        credit_before_cost = bonus
+        bonus = [bonus - 100.0 * opportunity_cost / foes.first.totalhp, 0.0].max
+        PBDebug.log_ai_decision("Coste Furia: alternativa #{before.first.round(1)}, Furia #{rage_damage.round(1)}, " \
+                               "dano sacrificado #{opportunity_cost.round(1)}, credito #{credit_before_cost.round(2)} -> #{bonus.round(2)}.")
+      end
       PBDebug.log_ai_decision("Furia: entrante #{incoming.round(1)}, beneficio #{(100.0 * benefit).round(2)}% HP rival, " \
                              "probabilidad activacion #{trigger_chance.round(3)}, ajuste #{bonus.round(2)}.")
       next score + bonus

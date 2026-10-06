@@ -145,12 +145,21 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("FailsIfUserDamagedThisTu
 #===============================================================================
 #
 #===============================================================================
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.add("FailsIfTargetActed",
+  proc { |move, user, target, ai, battle|
+    next ai.ai_improvements_sucker_punch_fails?(target)
+  }
+)
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("FailsIfTargetActed",
   proc { |score, move, user, target, ai, battle|
-    # Check whether user is faster than the target and could use this move
-    next Battle::AI::MOVE_USELESS_SCORE if target.faster_than?(user)
-    # Check whether the target has any damaging moves it could use
-    next Battle::AI::MOVE_USELESS_SCORE if !target.check_for_move { |m| m.damagingMove? }
+    # Compare possible attacking actions, never the opponent's registered action.
+    if ai.trainer.high_skill? && ai.trainer.has_skill_flag?("HPAware")
+      next Battle::AI::MOVE_USELESS_SCORE if ai.ai_improvements_sucker_punch_fails?(target)
+      next Battle::AI::MOVE_USELESS_SCORE if ai.ai_improvements_sucker_punch_outsped?(move, user, target)
+    else
+      next Battle::AI::MOVE_USELESS_SCORE if target.faster_than?(user)
+      next Battle::AI::MOVE_USELESS_SCORE if !target.check_for_move { |m| m.damagingMove? }
+    end
     # Don't risk using this move if target is weak
     if ai.trainer.has_skill_flag?("HPAware")
       score -= 10 if target.hp <= target.totalhp / 2

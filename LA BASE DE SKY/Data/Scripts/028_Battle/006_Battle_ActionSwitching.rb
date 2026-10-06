@@ -224,6 +224,7 @@ class Battle
 
   # Actually performs the recalling and sending out in all situations.
   def pbRecallAndReplace(idxBattler, idxParty, randomReplacement = false, batonPass = false)
+    switch_memory_event = ai_switch_memory_snapshot(idxBattler, idxParty, randomReplacement)
     trace_hp = $DEBUG && Settings::AI_DECISION_LOGGING
     outgoing = @battlers[idxBattler].pokemon
     incoming = pbParty(idxBattler)[idxParty]
@@ -244,6 +245,7 @@ class Battle
     @scene.pbShowPartyLineup(idxBattler & 1) if pbSideSize(idxBattler) == 1
     pbMessagesOnReplace(idxBattler, idxParty) if !randomReplacement
     pbReplace(idxBattler, idxParty, batonPass)
+    ai_switch_memory_record(switch_memory_event, idxBattler)
     if trace_hp
       b = @battlers[idxBattler]
       PBDebug.log_battle_event("Tras reemplazo: #{b.name}, HP activo #{b.hp}/#{b.totalhp}, " \

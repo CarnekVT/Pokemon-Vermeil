@@ -317,7 +317,10 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:predicted_damage,
         hp_source = substitute ? "Substitute" : "HP"
         PBDebug.log("     predicted damage #{dmg}; useful #{useful_damage}/#{target_hp} #{hp_source}; accuracy #{acc}%; expected useful damage #{(useful_damage * hit_chance).round(1)}")
         PBDebug.log_score_change(score - old_score, "accuracy-weighted useful damage (capped before hit chance)")
-        if !substitute && dmg > target.hp * 1.1
+        # A 1 HP, un golpe dañino viable basta; no necesita margen por variación.
+        minimum_damage_ko = target.hp == 1 && dmg >= 1 && move.move.pbDamagingMove? &&
+                            !ai.pbPredictMoveFailure && !ai.pbPredictMoveFailureAgainstTarget
+        if !substitute && (dmg > target.hp * 1.1 || minimum_damage_ko)
           sturdy = target.hp == target.totalhp && target.has_active_ability?(:STURDY) &&
                    !target.being_mold_broken?
           focus_sash = target.hp == target.totalhp && target.has_active_item?(:FOCUSSASH)
@@ -339,7 +342,8 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:predicted_damage,
           else
             old_score = score
             score += (15 * hit_chance).to_i
-            PBDebug.log("     predicted KO (>110% HP); accuracy #{acc}%; KO bonus #{score - old_score}/15")
+            ko_reason = minimum_damage_ko ? "1 HP, viable damaging hit" : ">110% HP"
+            PBDebug.log("     predicted KO (#{ko_reason}); accuracy #{acc}%; KO bonus #{score - old_score}/15")
             PBDebug.log_score_change(score - old_score, "accuracy-weighted predicted KO")
             if (sturdy || focus_sash) && multi_hit
               old_score = score

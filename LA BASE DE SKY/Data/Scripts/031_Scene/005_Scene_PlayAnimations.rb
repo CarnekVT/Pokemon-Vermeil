@@ -449,7 +449,8 @@ class Battle::Scene
       anim = pbFindMoveAnimDetails(move2anim, moveID, idxUser, hitNum)
       return anim if anim
       # Actual animation not found, get the default animation for the move's type
-      moveData = GameData::Move.get(moveID)
+      moveData = GameData::Move.try_get(moveID)
+      return nil if moveData.nil?
       target_data = GameData::Target.get(moveData.target)
       moveType = moveData.type
       moveKind = moveData.category
