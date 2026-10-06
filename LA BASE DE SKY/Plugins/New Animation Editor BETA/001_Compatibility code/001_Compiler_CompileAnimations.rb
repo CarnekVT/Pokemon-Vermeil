@@ -244,6 +244,40 @@ module Compiler
                       particle[:name]) + "\n" + FileLineData.linereport
         end
       end
+      # Ensure each particle/emitter uses only one coordinate system.
+      if particle[:polar_coordinates]
+        if particle[:x] || particle[:y]
+          raise _INTL("Particle \"{1}\" uses polar coordinates but has an X/Y command.",
+                      particle[:name]) + "\n" + FileLineData.linereport
+        end
+      elsif particle[:r] || particle[:theta]
+        raise _INTL("Particle \"{1}\" doesn't use polar coordinates but has an R/Theta command.",
+                    particle[:name]) + "\n" + FileLineData.linereport
+      end
+      if particle[:emitter_position_polar_coordinates]
+        if particle[:emitter_x] || particle[:emitter_y]
+          raise _INTL("Emitter \"{1}\" uses position polar coordinates but has an EmitterX/EmitterY command.",
+                      particle[:name]) + "\n" + FileLineData.linereport
+        end
+      elsif particle[:emitter_r] || particle[:emitter_theta]
+        raise _INTL("Emitter \"{1}\" doesn't use position polar coordinates but has an EmitterR/EmitterTheta command.",
+                    particle[:name]) + "\n" + FileLineData.linereport
+      end
+      if particle[:emitter_spawn_polar_coordinates]
+        if particle[:spawn_x] || particle[:spawn_x_range] ||
+           particle[:spawn_y] || particle[:spawn_y_range] ||
+           particle[:spawn_x_offset] || particle[:spawn_x_multiplier] ||
+           particle[:spawn_y_offset] || particle[:spawn_y_multiplier]
+          raise _INTL("Emitter \"{1}\" uses spawn polar coordinates but has a Spawn X/Y command.",
+                      particle[:name]) + "\n" + FileLineData.linereport
+        end
+      elsif particle[:spawn_r] || particle[:spawn_r_range] ||
+            particle[:spawn_theta] || particle[:spawn_theta_range] ||
+            particle[:spawn_r_offset] || particle[:spawn_r_multiplier] ||
+            particle[:spawn_theta_offset]
+        raise _INTL("Emitter \"{1}\" doesn't use spawn polar coordinates but has a Spawn R/Theta command.",
+                    particle[:name]) + "\n" + FileLineData.linereport
+      end
       # Ensure the "Play"-type commands are exclusive to the "SE" particle, and
       # that the "SE" particle has no other commands
       if particle[:name] == "SE"
@@ -314,7 +348,8 @@ module Compiler
       # Ensure that none of the particle's "alter something if focus is a
       # battler on the foe's side" properties are set if the particle doesn't
       # have such a focus
-      if GameData::Animation::FOCUS_TYPES_WITH_USER.include?(particle[:focus]) == GameData::Animation::FOCUS_TYPES_WITH_TARGET.include?(particle[:focus])
+      if GameData::Animation::FOCUS_TYPES_WITH_USER_AND_TARGET.include?(particle[:focus]) ||
+         (GameData::Animation::FOCUS_TYPES_OF_SCREEN.include?(particle[:focus]) && hash[:no_user])
         if particle[:foe_invert_x]
           raise _INTL("Particle \"{1}\" can't set \"FoeInvertX\" if its focus isn't exactly 1 thing.",
                       particle[:name]) + "\n" + FileLineData.linereport
@@ -331,8 +366,7 @@ module Compiler
       # Ensure that the particle isn't a tiled graphic if it is an emitter or
       # has a non-screen focus
       if particle[:tiled_graphic] && ((particle[:emitter_type] || :none) != :none ||
-         GameData::Animation::FOCUS_TYPES_WITH_USER.include?(particle[:focus]) ||
-         GameData::Animation::FOCUS_TYPES_WITH_TARGET.include?(particle[:focus]))
+         !GameData::Animation::FOCUS_TYPES_OF_SCREEN.include?(particle[:focus]))
         raise _INTL("Particle \"{1}\" can't can't set \"TiledGraphic\" if it is an emitter or has a non-screen focus.",
                     particle[:name]) + "\n" + FileLineData.linereport
       end
