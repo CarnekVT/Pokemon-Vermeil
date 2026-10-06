@@ -176,7 +176,7 @@ class AnimationPlayer
   #-----------------------------------------------------------------------------
 
   def create_particle_sprite(particle, target_idx = -1)
-    particle_sprite = AnimationPlayer::ParticleSprite.new
+    particle_sprite = AnimationPlayer::ParticleSprite.new(particle[:name])
     @particle_sprites.push(particle_sprite)
     create_particle_sprite_assign_sprite(particle_sprite, particle, target_idx)
     create_particle_sprite_set_coordinates(particle_sprite, particle, target_idx)
@@ -247,27 +247,32 @@ class AnimationPlayer
   # opposing side.
   def create_particle_sprite_set_flips(particle_sprite, particle, target_idx = -1)
     relative_to_index = index_of_particle_focus(particle, target_idx)
-    return if relative_to_index < 0 || relative_to_index.even?   # No focus/focus on player's side
-    return if GameData::Animation::FOCUS_TYPES_WITH_USER_AND_TARGET.include?(particle[:focus])
-    particle_sprite.foe_invert_x = particle[:foe_invert_x]
-    particle_sprite.foe_invert_y = particle[:foe_invert_y]
-    particle_sprite.foe_flip     = particle[:foe_flip]
+    no_user = (@animation.is_a?(GameData::Animation)) ? @animation.no_user : @animation[:no_user]
+    if (relative_to_index >= 0 && relative_to_index.odd?) ||   # Focus is on opposing side
+       (relative_to_index < 0 && !no_user && @user.index.odd?)   # Focus is screen and user exists on opposing side
+      particle_sprite.foe_invert_z = particle[:foe_invert_z]
+      return if GameData::Animation::FOCUS_TYPES_WITH_USER_AND_TARGET.include?(particle[:focus])
+      particle_sprite.foe_invert_x = particle[:foe_invert_x]
+      particle_sprite.foe_invert_y = particle[:foe_invert_y]
+      particle_sprite.foe_flip     = particle[:foe_flip]
+    end
   end
 
   def create_particle_sprite_set_base_property_offsets(particle_sprite, particle, target_idx = -1)
+    particle_sprite.initial_angle = particle[:initial_angle] || :none
     relative_to_index = index_of_particle_focus(particle, target_idx)
     if relative_to_index >= 0
-      if (particle[:angle_override] || :none) == :initial_angle_to_focus
-        particle_sprite.property_offsets[:angle] = AnimationPlayer::Helper.initial_angle_between(
+      case particle[:initial_angle] || :none
+      when :particle_to_focus
+        val = AnimationPlayer::Helper.initial_angle_between(
           particle, particle_sprite.focus_xy, particle_sprite.offset_xy
         )
-      else
-        particle_sprite.set_base_property_offset(:angle, particle[:angle_override])
+        particle_sprite.set_base_property_offset(:angle, val)
       end
     end
     if particle[:random_angle_range] && particle[:random_angle_range] != GameData::Animation::PARTICLE_KEYFRAME_DEFAULT_VALUES[:random_angle_range]
       ang = rand(-particle[:random_angle_range], particle[:random_angle_range])
-      particle_sprite.property_offsets[:angle] = ang
+      particle_sprite.set_base_property_offset(:angle, ang)
     end
     particle_sprite.random_invert_angle = particle[:random_invert_angle]
     particle_sprite.random_invert_flip = particle[:random_invert_flip]
@@ -286,6 +291,8 @@ class AnimationPlayer
     # Add all commands
     particle.each_pair do |property, cmds|
       next if !cmds.is_a?(Array) || cmds.empty?
+      next if [:x, :y].include?(property) && particle[:polar_coordinates]
+      next if [:r, :theta].include?(property) && !particle[:polar_coordinates]
       cmds.each do |cmd|
         if cmd[1] > 0
           particle_sprite.add_move_process(property, cmd[0] * @slowdown / @fps.to_f, cmd[1] * @slowdown / @fps.to_f, cmd[2], cmd[3] || :linear)
@@ -324,7 +331,15 @@ class AnimationPlayer
     emitter.set_battler_filenames(@battler_filenames)
     emitter.set_focus_coords(@user_coords, @target_coords)
     emitter.set_side_sizes(@side_sizes)
+    emitter.no_user = (@animation.is_a?(GameData::Animation)) ? @animation.no_user : @animation[:no_user]
+    emitter.no_target = (@animation.is_a?(GameData::Animation)) ? @animation.no_target : @animation[:no_target]
+    set_up_emitter_parameters(emitter, particle)
     add_emitter_commands(emitter, particle)
+  end
+
+  def set_up_emitter_parameters(emitter, particle)
+    emitter.emitter_position_polar_coordinates = particle[:emitter_position_polar_coordinates]
+    emitter.emitter_spawn_polar_coordinates = particle[:emitter_spawn_polar_coordinates]
   end
 
   def add_emitter_commands(emitter, particle)
@@ -336,6 +351,8 @@ class AnimationPlayer
     # Add all commands
     particle.each_pair do |property, cmds|
       next if !cmds.is_a?(Array) || cmds.empty?
+      next if [:x, :y].include?(property) && particle[:polar_coordinates]
+      next if [:r, :theta].include?(property) && !particle[:polar_coordinates]
       cmds.each do |cmd|
         if AnimationPlayer::Emitter::PARTICLE_PROPERTIES.include?(property)
           if cmd[1] > 0
