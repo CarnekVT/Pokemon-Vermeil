@@ -2859,12 +2859,25 @@ module BattleAnimationStudioRuntime
       uf
     end
 
+    def pbs_initial_angle_mode(clip)
+      pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
+      raw = pbs["initialAngle"] || pbs["angleOverride"] || pbs["initial_angle"] || pbs["angle_override"]
+      mode = raw.to_s.downcase.gsub(/[^a-z]/, "")
+      return :always_particle_to_focus if mode == "alwaysparticletofocus" || mode == "alwayspointatfocus"
+      return :particle_to_focus if mode == "particletofocus" || mode == "initialangletofocus"
+      return :emitter_to_focus if mode == "emittertofocus"
+      return :emitted_direction if mode == "emitteddirection"
+      return :none
+    rescue
+      :none
+    end
+
     def apply_pbs_angle_override(sprite, clip, frame)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
-      mode = pbs["angleOverride"].to_s.downcase
-      return if !mode.include?("focus")
+      mode = pbs_initial_angle_mode(clip)
+      return if ![:particle_to_focus, :always_particle_to_focus, :emitter_to_focus].include?(mode)
       target = pbs_focus_target(clip).dup
-      initial = mode.include?("initial")
+      initial = [:particle_to_focus, :emitter_to_focus].include?(mode)
       origin = initial ? pbs_initial_angle_origin(clip) : sample_position(clip, frame)
       origin = origin.dup
       graphic = clip["graphic"].is_a?(Hash) ? clip["graphic"] : {}
@@ -2887,7 +2900,7 @@ module BattleAnimationStudioRuntime
     # is the same order used by the Studio preview/New Animation Editor.
     def apply_emitter_angle_override(sprite, clip, frame, desc)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
-      mode = pbs["angleOverride"].to_s.downcase
+      mode = pbs_initial_angle_mode(clip)
       context_override = context_override_for_object(clip)
       context_rotation = context_override_value(clip, "rotation", @frame, 0.0)
       base_rotation = sample_value(clip, "rotation", frame, 0).to_f + context_rotation + contextual_screen_rotation_delta(clip)
@@ -2906,12 +2919,12 @@ module BattleAnimationStudioRuntime
       special = graphic["source"].to_s.start_with?("battler-")
       offset = (special && sprite.bitmap && !sprite.bitmap.disposed?) ? sprite.bitmap.height / 2.0 : 0.0
 
-      if mode.include?("always") && mode.include?("focus")
+      if mode == :always_particle_to_focus
         origin = sample_position(clip, frame).dup
         origin[1] += offset
         target[1] += offset
         sprite.angle = base_rotation + rgss_angle_between(origin[0], origin[1], target[0], target[1]) + angle_offset + (effective_flip_y ? 180.0 : 0.0)
-      elsif mode.include?("initial") && mode.include?("focus") && range <= 0
+      elsif [:particle_to_focus, :emitter_to_focus].include?(mode) && range <= 0
         origin = pbs_initial_angle_origin(clip).dup
         origin[1] += offset
         # InitialAngleToFocus adds get_xy_offset to the source point only.
