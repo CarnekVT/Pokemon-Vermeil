@@ -43,24 +43,17 @@ class AnimationEditor
     files.delete_if { |file| !pbResolveBitmap("Graphics/Battlebacks/" + file.sub(/_eve$/, "").sub(/_night$/, "") + "_message") }
     files.map! { |file| [file, file] }
     ctrls.get_control(:canvas_bg).options = files.to_h
-    ctrls.get_control(:canvas_bg).value = @settings[:canvas_bg]
+    ctrls.get_control(:canvas_bg).value = @settings[:anim_editor][:canvas_bg]
     # User and target sprite graphics
     files = get_all_files_in_folder("Graphics/Pokemon/Front", [".png", ".jpg", ".jpeg"])
     files.delete_if { |file| !GameData::Species.exists?(file[0]) }
     files.map! { |file| [file[0], file[0]] }
-    # Add AnimTest before Abomasnow
-    abomasnow_idx = files.index { |f| f[0] == "ABOMASNOW" }
-    if abomasnow_idx
-      files.insert(abomasnow_idx, ["AnimTest", "AnimTest"])
-    else
-      files.push(["AnimTest", "AnimTest"])
-    end
     ctrls.get_control(:user_sprite_name).options = files.to_h
-    ctrls.get_control(:user_sprite_name).value = @settings[:user_sprite_name]
+    ctrls.get_control(:user_sprite_name).value = @settings[:anim_editor][:user_sprite_name]
     ctrls.get_control(:target_sprite_name).options = files.to_h
-    ctrls.get_control(:target_sprite_name).value = @settings[:target_sprite_name]
+    ctrls.get_control(:target_sprite_name).value = @settings[:anim_editor][:target_sprite_name]
     # Default interpolation
-    ctrls.get_control(:default_interpolation).value = @settings[:default_interpolation] || :linear
+    ctrls.get_control(:default_interpolation).value = @settings[:anim_editor][:default_interpolation] || :linear
   end
 
   def refresh_animation_property_options
@@ -90,6 +83,7 @@ class AnimationEditor
     ctrls.get_control(:fps).value = @anim[:fps] || 20
     ctrls.get_control(:hides_data_boxes).value = @anim[:hides_data_boxes] || false
     ctrls.get_control(:usable).value = !(@anim[:ignore] || false)
+    ctrls.get_control(:scripts).value = @anim[:scripts].join(",") || ""
     ctrls.get_control(:credit).value = @anim[:credit] || "Anon"
   end
 
@@ -150,7 +144,8 @@ class AnimationEditor
     end
     ctrls.get_control(:focus).options = focus_values
     # "If on opposing side..." properties
-    if GameData::Animation::FOCUS_TYPES_WITH_USER.include?(this_particle[:focus]) == GameData::Animation::FOCUS_TYPES_WITH_TARGET.include?(this_particle[:focus])
+    if GameData::Animation::FOCUS_TYPES_WITH_USER_AND_TARGET.include?(this_particle[:focus]) ||
+       (GameData::Animation::FOCUS_TYPES_OF_SCREEN.include?(this_particle[:focus]) && @anim[:no_user])
       ctrls.get_control(:foe_invert_x).disable
       ctrls.get_control(:foe_invert_y).disable
       ctrls.get_control(:foe_flip).disable
@@ -170,21 +165,17 @@ class AnimationEditor
       ctrls.get_control(:tiled_graphic).value = this_particle[:tiled_graphic]
       ctrls.get_control(:tiled_graphic).disable
     end
-    # Angle override
-    if GameData::Animation::FOCUS_TYPES_WITH_USER.include?(this_particle[:focus]) ||
-       GameData::Animation::FOCUS_TYPES_WITH_TARGET.include?(this_particle[:focus])
-      ctrls.get_control(:angle_override).enable
-    else
-      this_particle[:angle_override] = :none
-      ctrls.get_control(:angle_override).disable
-    end
     # Emitter quantity
     if (this_particle[:emitter_type] || :none) == :none
       ctrls.get_control(:emitter_rate).disable
       ctrls.get_control(:emitter_intensity).disable
+      ctrls.get_control(:emitter_position_polar_coordinates).disable
+      ctrls.get_control(:emitter_spawn_polar_coordinates).disable
     else
       ctrls.get_control(:emitter_rate).enable
       ctrls.get_control(:emitter_intensity).enable
+      ctrls.get_control(:emitter_position_polar_coordinates).enable
+      ctrls.get_control(:emitter_spawn_polar_coordinates).enable
     end
     # Duplicate button
     ctrls.get_control(:duplicate).enabled = (@anim[:particles][idx_particle][:name] != "SE")
@@ -212,28 +203,29 @@ class AnimationEditor
     editor.get_control(:end_keyframe).value = @components[:timeline].duration
     # Set all value boxes to 0
     properties = []
-    AnimationEditor::ListedParticle::PROPERTY_GROUPS.each_value do |props|
+    AnimationEditor::ListedParticle::PROPERTY_GROUPS.each_pair do |key, props|
+      next if [:mask_group, :second_layer_group].include?(key)
       props.each do |prop|
         next if [:color, :tone].include?(prop)
         properties.push(prop) if GameData::Animation.property_can_interpolate?(prop)
       end
     end
-    properties.each { |property| editor.get_control(property).value = 0 }
+    properties.each { |property| editor.get_control(property)&.value = 0 }
   end
 
   def refresh_component_values(component_sym, extra_value = nil)
     component = @components[component_sym]
     case component_sym
     when :battlers_layout
-      component.get_control(:side_size_1).value = @settings[:side_sizes][0]
-      component.get_control(:side_size_2).value = @settings[:side_sizes][1]
+      component.get_control(:side_size_1).value = @settings[:anim_editor][:side_sizes][0]
+      component.get_control(:side_size_2).value = @settings[:anim_editor][:side_sizes][1]
       user_indices = { 0 => "0" }
-      user_indices[2] = "2" if @settings[:side_sizes][0] >= 2
-      user_indices[4] = "4" if @settings[:side_sizes][0] >= 3
+      user_indices[2] = "2" if @settings[:anim_editor][:side_sizes][0] >= 2
+      user_indices[4] = "4" if @settings[:anim_editor][:side_sizes][0] >= 3
       component.get_control(:user_index).options = user_indices
-      component.get_control(:user_index).value = @settings[:user_index]
-      component.get_control(:target_indices).value = @settings[:target_indices].join(",")
-      component.get_control(:user_opposes).value = @settings[:user_opposes]
+      component.get_control(:user_index).value = @settings[:anim_editor][:user_index]
+      component.get_control(:target_indices).value = @settings[:anim_editor][:target_indices].join(",")
+      component.get_control(:user_opposes).value = @settings[:anim_editor][:user_opposes]
     when :play_controls
       component.duration = @components[:timeline].duration
     when :canvas
@@ -300,13 +292,14 @@ class AnimationEditor
           new_cmds = AnimationEditor::ParticleDataHelper.add_command(particle, property, keyframe, value)
           if new_cmds
             particle[property] = new_cmds
-            # NOTE: Intentionally not adding @settings[:default_interpolation]
+            # NOTE: Intentionally not adding @settings[:anim_editor][:default_interpolation]
             #       here, because the inserted command will have the same value as
             #       the one before it and won't need interpolating anyway.
           else
             particle.delete(property)
           end
           refresh
+          add_to_change_history
         end
       end
     elsif Input.triggerex?(:DELETE)
@@ -320,6 +313,7 @@ class AnimationEditor
           particle.delete(property)
         end
         refresh
+        add_to_change_history
       end
     elsif Input.pressex?(:LCTRL) || Input.pressex?(:RCTRL)
       if Input.triggerex?(:Z) || Input.repeatex?(:Z)
@@ -333,27 +327,34 @@ class AnimationEditor
   def update
     old_keyframe = keyframe
     old_particle_index = particle_index
+    old_captured = @captured
+    # Update captured control (if there is one)
+    if @captured
+      @captured.update
+      @captured = nil if !@captured.busy?
+    end
+    # Update controls (except the captured control)
+    if !@captured || !@captured.respond_to?("mouse_in_control?") ||
+       !@captured.mouse_in_control?
+      @components.each_value do |c|
+        next if old_captured && c == old_captured
+        c.update
+        @captured = c if c.busy?
+      end
+    end
+    # Check for updated controls
     @components.each_pair do |sym, component|
-      next if @captured && @captured != sym
-      next if !component.visible
-      component.update
-      @captured = sym if component.busy?
-      if component.changed?
-        if component.respond_to?("changed_controls")
-          changed_ctrls = component.changed_controls
-          if changed_ctrls
-            changed_ctrls.each_pair do |property, value|
-              apply_changed_value(sym, property, value)
-            end
+      next if !component.changed?
+      if component.respond_to?("changed_controls")
+        changed_ctrls = component.changed_controls
+        if changed_ctrls
+          changed_ctrls.each_pair do |property, value|
+            apply_changed_value(sym, property, value)
           end
         end
-        component.clear_changed
       end
+      component.clear_changed
       component.repaint if [:timeline, :menu_bar].include?(sym)
-      if @captured
-        @captured = nil if !component.busy?
-        break
-      end
     end
     update_input if !@captured
     refresh if keyframe != old_keyframe || particle_index != old_particle_index
