@@ -38,6 +38,9 @@ module GameData
       "TargetSideForeground"          => :target_side_foreground,
       "TargetSideBackground"          => :target_side_background
     }
+    FOCUS_TYPES_OF_SCREEN = [   # Neither user nor target
+      :foreground, :midground, :background
+    ]
     FOCUS_TYPES_WITH_USER = [
       :user, :user_position, :user_and_target, :user_position_and_target,
       :user_and_target_position, :user_position_and_target_position,
@@ -65,22 +68,25 @@ module GameData
       "NoMovement" => :no_movement,   # Doesn't move once spawned
       "Straight"   => :straight,      # Moves in a straight line
       "Projectile" => :projectile,    # Moved under gravity
+      "Dampened"   => :dampened,      # Slows to a halt
       "Helix"      => :helix,         # Sine movement in x, straight movement in y
       "Polar"      => :polar          # Sine movement in x/y
     }
-    ANGLE_OVERRIDES = {
-      "None"                => :none,
-      "InitialAngleToFocus" => :initial_angle_to_focus,
-      "AlwaysPointAtFocus"  => :always_point_at_focus
+    PARTICLE_INITIAL_ANGLES = {
+      "None"                  => :none,
+      "ParticleToFocus"       => :particle_to_focus,
+      "AlwaysParticleToFocus" => :always_particle_to_focus,
+      "EmitterToFocus"        => :emitter_to_focus,
+      "EmittedDirection"      => :emitted_direction   # :emit_direction or away from emitter
     }
     # NOTE: These are all the same properties as the base layer, minus :visible.
-    #       :frame2, :blending2, :color2 and :tone2 are standalone and are not
-    #       affected by changes to the base layer.
-    #       :x2, :y2, :z2, :zoom_x2, :zoom_y2, :angle2, :opacity2 are all
-    #       offsets relative to those properties of the base layer.
-    SECOND_LAYER_PROPERTIES = [:frame2, :blending2, :flip2, :x2, :y2, :z2,
-                               :zoom_x2, :zoom_y2, :angle2, :opacity2,
-                               :color2, :tone2, :invert_color2]
+    #       * :frame2, :blending2, :color2 and :tone2 are standalone and are not
+    #         affected by changes to the base layer.
+    #       * :x2, :y2, :z2, :zoom_x2, :zoom_y2, :angle2, :opacity2 are all
+    #         offsets relative to those properties of the base layer.
+    SECOND_LAYER_PROPERTIES = [:x2, :y2, :z2, :zoom_x2, :zoom_y2, :angle2,
+                               :flip2, :opacity2, :color2, :tone2,
+                               :invert_color2, :frame2, :blending2]
 
     # Properties that apply to the animation in general, not to individual
     # particles. They don't change during the animation.
@@ -102,304 +108,422 @@ module GameData
       # These properties cannot be changed partway through the animation.
       # NOTE: "Name" isn't a property here, because the particle's name comes
       #       from the "Particle" property above.
-      "Graphic"              => [:graphic,             "s"],
-      "MaskGraphic"          => [:mask_graphic,        "s"],
-      "Focus"                => [:focus,               "e", FOCUS_TYPES],
-      "SecondLayer"          => [:second_layer,        "b"],
-      "FoeInvertX"           => [:foe_invert_x,        "b"],
-      "FoeInvertY"           => [:foe_invert_y,        "b"],
-      "FoeFlip"              => [:foe_flip,            "b"],
-      "Emitter"              => [:emitter_type,        "e", EMITTER_TYPES],
-      "EmitterRate"          => [:emitter_rate,        "v"],   # Emissions/second
-      "EmitterIntensity"     => [:emitter_intensity,   "v"],   # Sprites/emission
-      "TiledGraphic"         => [:tiled_graphic,       "b"],
-      "AngleOverride"        => [:angle_override,      "e", ANGLE_OVERRIDES],
-      "RandomFrameMax"       => [:random_frame_max,    "u"],
-      "RandomAngleRange"     => [:random_angle_range,  "u"],
-      "RandomInvertAngle"    => [:random_invert_angle, "b"],
-      "RandomInvertFlip"     => [:random_invert_flip,  "b"],
+      "Focus"                           => [:focus,                              "e", FOCUS_TYPES],
+      "PolarCoordinates"                => [:polar_coordinates,                  "b"],
+      "Graphic"                         => [:graphic,                            "s"],
+      "MaskGraphic"                     => [:mask_graphic,                       "s"],
+      "TiledGraphic"                    => [:tiled_graphic,                      "b"],
+      "SecondLayer"                     => [:second_layer,                       "b"],
+      "FoeInvertX"                      => [:foe_invert_x,                       "b"],
+      "FoeInvertY"                      => [:foe_invert_y,                       "b"],
+      "FoeInvertZ"                      => [:foe_invert_z,                       "b"],
+      "FoeFlip"                         => [:foe_flip,                           "b"],
+      "InitialAngle"                    => [:initial_angle,                      "e", PARTICLE_INITIAL_ANGLES],
+      "RandomAngleRange"                => [:random_angle_range,                 "u"],
+      "RandomInvertAngle"               => [:random_invert_angle,                "b"],
+      "RandomInvertFlip"                => [:random_invert_flip,                 "b"],
+      "RandomFrameMax"                  => [:random_frame_max,                   "u"],
+      "Emitter"                         => [:emitter_type,                       "e", EMITTER_TYPES],
+      "EmitterRate"                     => [:emitter_rate,                       "v"],   # Emissions/second
+      "EmitterIntensity"                => [:emitter_intensity,                  "v"],   # Sprites/emission
+      "EmitterPositionPolarCoordinates" => [:emitter_position_polar_coordinates, "b"],
+      "EmitterSpawnPolarCoordinates"    => [:emitter_spawn_polar_coordinates,    "b"],
       # All properties below are "SetXYZ" or "MoveXYZ". "SetXYZ" has the
       # keyframe and the value, and "MoveXYZ" has the keyframe, duration and the
       # value. All have "^" in their schema. "SetXYZ" is turned into "MoveXYZ"
       # when compiling by inserting a duration (second value) of 0.
-      "SetFrame"             => [:frame,               "^uu"],   # Frame within the graphic if it's a spritesheet
-      "MoveFrame"            => [:frame,               "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetBlending"          => [:blending,            "^uu"],   # 0, 1 or 2
-      "SetFlip"              => [:flip,                "^ub"],
-      "SetX"                 => [:x,                   "^ui"],
-      "MoveX"                => [:x,                   "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetY"                 => [:y,                   "^ui"],
-      "MoveY"                => [:y,                   "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetZ"                 => [:z,                   "^ui"],
-      "MoveZ"                => [:z,                   "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetZoomX"             => [:zoom_x,              "^uu"],
-      "MoveZoomX"            => [:zoom_x,              "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetZoomY"             => [:zoom_y,              "^uu"],
-      "MoveZoomY"            => [:zoom_y,              "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetAngle"             => [:angle,               "^ui"],
-      "MoveAngle"            => [:angle,               "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetVisible"           => [:visible,             "^ub"],
-      "SetOpacity"           => [:opacity,             "^uu"],
-      "MoveOpacity"          => [:opacity,             "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetColor"             => [:color,               "^us"],
-      "MoveColor"            => [:color,               "^uusE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetTone"              => [:tone,                "^us"],
-      "MoveTone"             => [:tone,                "^uusE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetInvertColor"       => [:invert_color,        "^ub"],
+      "SetX"           => [:x,            "^ui"],
+      "MoveX"          => [:x,            "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetY"           => [:y,            "^ui"],
+      "MoveY"          => [:y,            "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetR"           => [:r,            "^uu"],
+      "MoveR"          => [:r,            "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetTheta"       => [:theta,        "^ui"],
+      "MoveTheta"      => [:theta,        "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetZ"           => [:z,            "^ui"],
+      "MoveZ"          => [:z,            "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetZoomX"       => [:zoom_x,       "^uu"],
+      "MoveZoomX"      => [:zoom_x,       "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetZoomY"       => [:zoom_y,       "^uu"],
+      "MoveZoomY"      => [:zoom_y,       "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetAngle"       => [:angle,        "^ui"],
+      "MoveAngle"      => [:angle,        "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetFlip"        => [:flip,         "^ub"],
+      "SetVisible"     => [:visible,      "^ub"],
+      "SetOpacity"     => [:opacity,      "^uu"],
+      "MoveOpacity"    => [:opacity,      "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetColor"       => [:color,        "^us"],
+      "MoveColor"      => [:color,        "^uusE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetTone"        => [:tone,         "^us"],
+      "MoveTone"       => [:tone,         "^uusE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetInvertColor" => [:invert_color, "^ub"],
+      "SetFrame"       => [:frame,        "^uu"],   # Frame within the graphic if it's a spritesheet
+      "MoveFrame"      => [:frame,        "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetBlending"    => [:blending,     "^uu"],   # 0, 1 or 2
       # These properties are for the bitmap mask of a particle.
-      "SetMaskBlending"      => [:mask_blending,       "^uu"],   # 0, 1 or 2
-      "SetMaskOpacity"       => [:mask_opacity,        "^uu"],
-      "MoveMaskOpacity"      => [:mask_opacity,        "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetMaskX"             => [:mask_x,              "^ui"],
-      "MoveMaskX"            => [:mask_x,              "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetMaskY"             => [:mask_y,              "^ui"],
-      "MoveMaskY"            => [:mask_y,              "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetMaskZoomX"         => [:mask_zoom_x,         "^uu"],
-      "MoveMaskZoomX"        => [:mask_zoom_x,         "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetMaskZoomY"         => [:mask_zoom_y,         "^uu"],
-      "MoveMaskZoomY"        => [:mask_zoom_y,         "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetMaskOpacity"  => [:mask_opacity,  "^uu"],
+      "MoveMaskOpacity" => [:mask_opacity,  "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetMaskX"        => [:mask_x,        "^ui"],
+      "MoveMaskX"       => [:mask_x,        "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetMaskY"        => [:mask_y,        "^ui"],
+      "MoveMaskY"       => [:mask_y,        "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetMaskZoomX"    => [:mask_zoom_x,   "^uu"],
+      "MoveMaskZoomX"   => [:mask_zoom_x,   "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetMaskZoomY"    => [:mask_zoom_y,   "^uu"],
+      "MoveMaskZoomY"   => [:mask_zoom_y,   "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetMaskBlending" => [:mask_blending, "^uu"],   # 0, 1 or 2
       # These properties are for the second layer of a particle. It has all the
       # same properties as the base layer, except for :visible.
-      "SetFrame2"            => [:frame2,              "^uu"],   # Frame within the graphic if it's a spritesheet
-      "MoveFrame2"           => [:frame2,              "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetBlending2"         => [:blending2,           "^uu"],   # 0, 1 or 2
-      "SetFlip2"             => [:flip2,               "^ub"],
-      "SetX2"                => [:x2,                  "^ui"],
-      "MoveX2"               => [:x2,                  "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetY2"                => [:y2,                  "^ui"],
-      "MoveY2"               => [:y2,                  "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetZ2"                => [:z2,                  "^ui"],
-      "MoveZ2"               => [:z2,                  "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetZoomX2"            => [:zoom_x2,             "^uu"],
-      "MoveZoomX2"           => [:zoom_x2,             "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetZoomY2"            => [:zoom_y2,             "^uu"],
-      "MoveZoomY2"           => [:zoom_y2,             "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetAngle2"            => [:angle2,              "^ui"],
-      "MoveAngle2"           => [:angle2,              "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetOpacity2"          => [:opacity2,            "^uu"],
-      "MoveOpacity2"         => [:opacity2,            "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetColor2"            => [:color2,              "^us"],
-      "MoveColor2"           => [:color2,              "^uusE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetTone2"             => [:tone2,               "^us"],
-      "MoveTone2"            => [:tone2,               "^uusE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetInvertColor2"      => [:invert_color2,       "^ub"],
+      "SetX2"           => [:x2,            "^ui"],
+      "MoveX2"          => [:x2,            "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetY2"           => [:y2,            "^ui"],
+      "MoveY2"          => [:y2,            "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetZ2"           => [:z2,            "^ui"],
+      "MoveZ2"          => [:z2,            "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetZoomX2"       => [:zoom_x2,       "^uu"],
+      "MoveZoomX2"      => [:zoom_x2,       "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetZoomY2"       => [:zoom_y2,       "^uu"],
+      "MoveZoomY2"      => [:zoom_y2,       "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetAngle2"       => [:angle2,        "^ui"],
+      "MoveAngle2"      => [:angle2,        "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetFlip2"        => [:flip2,         "^ub"],
+      "SetOpacity2"     => [:opacity2,      "^ui"],
+      "MoveOpacity2"    => [:opacity2,      "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetColor2"       => [:color2,        "^us"],
+      "MoveColor2"      => [:color2,        "^uusE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetTone2"        => [:tone2,         "^us"],
+      "MoveTone2"       => [:tone2,         "^uusE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetInvertColor2" => [:invert_color2, "^ub"],
+      "SetFrame2"       => [:frame2,        "^uu"],   # Frame within the graphic if it's a spritesheet
+      "MoveFrame2"      => [:frame2,        "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetBlending2"    => [:blending2,     "^uu"],   # 0, 1 or 2
       # These properties are specifically for emitter particles.
-      "SetEmitting"          => [:emitting,            "^ub"],
-      "SetEmitX"             => [:emit_x,              "^ui"],
-      "MoveEmitX"            => [:emit_x,              "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitXRange"        => [:emit_x_range,        "^uu"],
-      "MoveEmitXRange"       => [:emit_x_range,        "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitY"             => [:emit_y,              "^ui"],
-      "MoveEmitY"            => [:emit_y,              "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitYRange"        => [:emit_y_range,        "^uu"],
-      "MoveEmitYRange"       => [:emit_y_range,        "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitSpeed"         => [:emit_speed,          "^ui"],
-      "MoveEmitSpeed"        => [:emit_speed,          "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitSpeedRange"    => [:emit_speed_range,    "^uu"],
-      "MoveEmitSpeedRange"   => [:emit_speed_range,    "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitAngle"         => [:emit_angle,          "^ui"],
-      "MoveEmitAngle"        => [:emit_angle,          "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitAngleRange"    => [:emit_angle_range,    "^uu"],
-      "MoveEmitAngleRange"   => [:emit_angle_range,    "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitGravity"       => [:emit_gravity,        "^ui"],
-      "MoveEmitGravity"      => [:emit_gravity,        "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetEmitGravityRange"  => [:emit_gravity_range,  "^uu"],
-      "MoveEmitGravityRange" => [:emit_gravity_range,  "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetPeriodX"           => [:emit_period_x,       "^uv"],   # NOTE: Actually time for 100 periods.
-      "MovePeriodX"          => [:emit_period_x,       "^uuvE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetPeriodXRange"      => [:emit_period_x_range, "^uu"],
-      "MovePeriodXRange"     => [:emit_period_x_range, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetPeriodY"           => [:emit_period_y,       "^uv"],   # NOTE: Actually time for 100 periods.
-      "MovePeriodY"          => [:emit_period_y,       "^uuvE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetPeriodYRange"      => [:emit_period_y_range, "^uu"],
-      "MovePeriodYRange"     => [:emit_period_y_range, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetPeriodZ"           => [:emit_period_z,       "^uv"],   # NOTE: Actually time for 100 periods.
-      "MovePeriodZ"          => [:emit_period_z,       "^uuvE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetPeriodZRange"      => [:emit_period_z_range, "^uu"],
-      "MovePeriodZRange"     => [:emit_period_z_range, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetRadiusXRange"      => [:emit_radius_x_range, "^uu"],
-      "MoveRadiusXRange"     => [:emit_radius_x_range, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetRadiusYRange"      => [:emit_radius_y_range, "^uu"],
-      "MoveRadiusYRange"     => [:emit_radius_y_range, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetRadiusZRange"      => [:emit_radius_z_range, "^uu"],
-      "MoveRadiusZRange"     => [:emit_radius_z_range, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetClockwise"         => [:emit_clockwise,      "^ub"],
-      "SetZoomRange"         => [:emit_zoom_range,     "^uu"],
-      "MoveZoomRange"        => [:emit_zoom_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetZoomXRange"        => [:emit_zoom_x_range,   "^uu"],
-      "MoveZoomXRange"       => [:emit_zoom_x_range,   "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetZoomYRange"        => [:emit_zoom_y_range,   "^uu"],
-      "MoveZoomYRange"       => [:emit_zoom_y_range,   "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetRadiusX"           => [:radius_x,            "^uu"],
-      "MoveRadiusX"          => [:radius_x,            "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetRadiusY"           => [:radius_y,            "^uu"],
-      "MoveRadiusY"          => [:radius_y,            "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
-      "SetRadiusZ"           => [:radius_z,            "^uu"],
-      "MoveRadiusZ"          => [:radius_z,            "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      # Location of emitter and whether it is emitting.
+      "SetEmitterX"      => [:emitter_x,     "^ui"],
+      "MoveEmitterX"     => [:emitter_x,     "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitterY"      => [:emitter_y,     "^ui"],
+      "MoveEmitterY"     => [:emitter_y,     "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitterR"      => [:emitter_r,     "^uu"],
+      "MoveEmitterR"     => [:emitter_r,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitterTheta"  => [:emitter_theta, "^ui"],
+      "MoveEmitterTheta" => [:emitter_theta, "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitting"      => [:emitting,      "^ub"],
+      # Spawn area of emitted particles.
+      "SetSpawnX"           => [:spawn_x,           "^ui"],
+      "MoveSpawnX"          => [:spawn_x,           "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnXRange"      => [:spawn_x_range,     "^uu"],
+      "MoveSpawnXRange"     => [:spawn_x_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnY"           => [:spawn_y,           "^ui"],
+      "MoveSpawnY"          => [:spawn_y,           "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnYRange"      => [:spawn_y_range,     "^uu"],
+      "MoveSpawnYRange"     => [:spawn_y_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnR"           => [:spawn_r,           "^uu"],
+      "MoveSpawnR"          => [:spawn_r,           "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnRRange"      => [:spawn_r_range,     "^uu"],
+      "MoveSpawnRRange"     => [:spawn_r_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnTheta"       => [:spawn_theta,       "^ui"],
+      "MoveSpawnTheta"      => [:spawn_theta,       "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnThetaRange"  => [:spawn_theta_range, "^uu"],
+      "MoveSpawnThetaRange" => [:spawn_theta_range, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      # Automated movement of emitted particles.
+      "SetEmitSpeed"              => [:emit_speed,              "^ui"],
+      "MoveEmitSpeed"             => [:emit_speed,              "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitSpeedRange"         => [:emit_speed_range,        "^uu"],
+      "MoveEmitSpeedRange"        => [:emit_speed_range,        "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitDirection"          => [:emit_direction,          "^ui"],
+      "MoveEmitDirection"         => [:emit_direction,          "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitDirectionRange"     => [:emit_direction_range,    "^uu"],
+      "MoveEmitDirectionRange"    => [:emit_direction_range,    "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitGravity"            => [:emit_gravity,            "^ui"],
+      "MoveEmitGravity"           => [:emit_gravity,            "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitGravityRange"       => [:emit_gravity_range,      "^uu"],
+      "MoveEmitGravityRange"      => [:emit_gravity_range,      "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitDeceleration"       => [:emit_deceleration,       "^ui"],
+      "MoveEmitDeceleration"      => [:emit_deceleration,       "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitDecelerationRange"  => [:emit_deceleration_range, "^uu"],
+      "MoveEmitDecelerationRange" => [:emit_deceleration_range, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitRadiusXRange"       => [:emit_radius_x_range,     "^uu"],
+      "MoveEmitRadiusXRange"      => [:emit_radius_x_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitRadiusYRange"       => [:emit_radius_y_range,     "^uu"],
+      "MoveEmitRadiusYRange"      => [:emit_radius_y_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitRadiusZRange"       => [:emit_radius_z_range,     "^uu"],
+      "MoveEmitRadiusZRange"      => [:emit_radius_z_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitPeriodX"            => [:emit_period_x,           "^uu"],   # NOTE: Actually time for 100 periods.
+      "MoveEmitPeriodX"           => [:emit_period_x,           "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitPeriodXRange"       => [:emit_period_x_range,     "^uu"],
+      "MoveEmitPeriodXRange"      => [:emit_period_x_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitPeriodY"            => [:emit_period_y,           "^uu"],   # NOTE: Actually time for 100 periods.
+      "MoveEmitPeriodY"           => [:emit_period_y,           "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitPeriodYRange"       => [:emit_period_y_range,     "^uu"],
+      "MoveEmitPeriodYRange"      => [:emit_period_y_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitPeriodZ"            => [:emit_period_z,           "^uv"],   # NOTE: Actually time for 100 periods.
+      "MoveEmitPeriodZ"           => [:emit_period_z,           "^uuvE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitPeriodZRange"       => [:emit_period_z_range,     "^uu"],
+      "MoveEmitPeriodZRange"      => [:emit_period_z_range,     "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitClockwise"          => [:emit_clockwise,          "^ub"],
+      # Property modifiers for emitted particles.
+      "SetEmitXMultiplier"        => [:emit_x_multiplier,       "^uu"],
+      "MoveEmitXMultiplier"       => [:emit_x_multiplier,       "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitYMultiplier"        => [:emit_y_multiplier,       "^uu"],
+      "MoveEmitYMultiplier"       => [:emit_y_multiplier,       "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitZoomRange"          => [:emit_zoom_range,         "^uu"],
+      "MoveEmitZoomRange"         => [:emit_zoom_range,         "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitZoomMultiplier"     => [:emit_zoom_multiplier,    "^uu"],
+      "MoveEmitZoomMultiplier"    => [:emit_zoom_multiplier,    "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitZoomXRange"         => [:emit_zoom_x_range,       "^uu"],
+      "MoveEmitZoomXRange"        => [:emit_zoom_x_range,       "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitZoomYRange"         => [:emit_zoom_y_range,       "^uu"],
+      "MoveEmitZoomYRange"        => [:emit_zoom_y_range,       "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetEmitOpacityMultiplier"  => [:emit_opacity_multiplier, "^uu"],
+      "MoveEmitOpacityMultiplier" => [:emit_opacity_multiplier, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      # Extra particle properties for emitted particles. (Radii used by :helix/
+      # :polar emitter types.)
+      "SetSpawnXOffset"      => [:spawn_x_offset,     "^ui"],
+      "MoveSpawnXOffset"     => [:spawn_x_offset,     "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnXMultiplier"  => [:spawn_x_multiplier, "^uu"],
+      "MoveSpawnXMultiplier" => [:spawn_x_multiplier, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnYOffset"      => [:spawn_y_offset,     "^ui"],
+      "MoveSpawnYOffset"     => [:spawn_y_offset,     "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnYMultiplier"  => [:spawn_y_multiplier, "^uu"],
+      "MoveSpawnYMultiplier" => [:spawn_y_multiplier, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnROffset"      => [:spawn_r_offset,     "^ui"],
+      "MoveSpawnROffset"     => [:spawn_r_offset,     "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnRMultiplier"  => [:spawn_r_multiplier, "^uu"],
+      "MoveSpawnRMultiplier" => [:spawn_r_multiplier, "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetSpawnThetaOffset"  => [:spawn_theta_offset, "^ui"],
+      "MoveSpawnThetaOffset" => [:spawn_theta_offset, "^uuiE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetRadiusX"           => [:radius_x,           "^uu"],
+      "MoveRadiusX"          => [:radius_x,           "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetRadiusY"           => [:radius_y,           "^uu"],
+      "MoveRadiusY"          => [:radius_y,           "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
+      "SetRadiusZ"           => [:radius_z,           "^uu"],
+      "MoveRadiusZ"          => [:radius_z,           "^uuuE", nil, nil, nil, INTERPOLATION_TYPES],
       # These properties are specifically for the "SE" particle.
-      "Play"                 => [:se,                  "^usUU"],   # Filename, volume, pitch
-      "PlayUserCry"          => [:user_cry,            "^uUU"],   # Volume, pitch
-      "PlayTargetCry"        => [:target_cry,          "^uUU"]   # Volume, pitch
+      "Play"          => [:se,         "^usUU"],   # Filename, volume, pitch
+      "PlayUserCry"   => [:user_cry,   "^uUU"],   # Volume, pitch
+      "PlayTargetCry" => [:target_cry, "^uUU"]   # Volume, pitch
     }
     PARTICLE_DEFAULT_VALUES = {
-      :name                => "",
-      :graphic             => "",
-      :mask_graphic        => "",
-      :focus               => :foreground,
-      :second_layer        => false,
-      :foe_invert_x        => false,
-      :foe_invert_y        => false,
-      :foe_flip            => false,
-      :tiled_graphic       => false,
-      :angle_override      => :none,
-      :random_frame_max    => 0,
-      :random_angle_range  => 0,
-      :random_invert_angle => false,
-      :random_invert_flip  => false,
-      :emitter_type        => :none,
-      :emitter_rate        => 1,
-      :emitter_intensity   => 1
+      :name                               => "",
+      :focus                              => :foreground,
+      :polar_coordinates                  => false,
+      :graphic                            => "",
+      :mask_graphic                       => "",
+      :tiled_graphic                      => false,
+      :second_layer                       => false,
+      :foe_invert_x                       => false,
+      :foe_invert_y                       => false,
+      :foe_invert_z                       => false,
+      :foe_flip                           => false,
+      :initial_angle                      => :none,
+      :random_angle_range                 => 0,
+      :random_invert_angle                => false,
+      :random_invert_flip                 => false,
+      :random_frame_max                   => 0,
+      :emitter_type                       => :none,
+      :emitter_rate                       => 1,
+      :emitter_intensity                  => 1,
+      :emitter_position_polar_coordinates => false,
+      :emitter_spawn_polar_coordinates    => false
     }
     # NOTE: Particles are invisible until their first command, and automatically
     #       become visible then. "User" and "Target" are visible from the start,
     #       though.
     PARTICLE_KEYFRAME_DEFAULT_VALUES = {
-      :frame               => 0,
-      :blending            => 0,
-      :flip                => false,
-      :x                   => 0,
-      :y                   => 0,
-      :z                   => 0,
-      :zoom_x              => 100,
-      :zoom_y              => 100,
-      :angle               => 0,
-      :visible             => false,
-      :opacity             => 255,
-      :color               => "00000000",
-      :tone                => "+00+00+00+00",
-      :invert_color        => false,
+      :x                       => 0,
+      :y                       => 0,
+      :r                       => 0,
+      :theta                   => 0,
+      :z                       => 0,
+      :zoom_x                  => 100,
+      :zoom_y                  => 100,
+      :angle                   => 0,
+      :flip                    => false,
+      :visible                 => false,
+      :opacity                 => 255,
+      :color                   => "00000000",
+      :tone                    => "+00+00+00+00",
+      :invert_color            => false,
+      :frame                   => 0,
+      :blending                => 0,
       # These properties are for the bitmap mask of a particle.
-      :mask_blending       => 0,
-      :mask_opacity        => 0,
-      :mask_x              => 0,
-      :mask_y              => 0,
-      :mask_zoom_x         => 100,
-      :mask_zoom_y         => 100,
+      :mask_opacity            => 0,
+      :mask_x                  => 0,
+      :mask_y                  => 0,
+      :mask_zoom_x             => 100,
+      :mask_zoom_y             => 100,
+      :mask_blending           => 0,
       # These properties are for the second layer of a particle. It has all the
       # same properties as the base layer, except for :visible.
-      :frame2              => 0,
-      :blending2           => 0,
-      :flip2               => false,
-      :x2                  => 0,
-      :y2                  => 0,
-      :z2                  => 0,
-      :zoom_x2             => 100,
-      :zoom_y2             => 100,
-      :angle2              => 0,
-      :opacity2            => 0,
-      :color2              => "00000000",
-      :tone2               => "+00+00+00+00",
-      :invert_color2       => false,
+      :x2                      => 0,
+      :y2                      => 0,
+      :z2                      => 0,
+      :zoom_x2                 => 100,
+      :zoom_y2                 => 100,
+      :angle2                  => 0,
+      :flip2                   => false,
+      :opacity2                => 0,
+      :color2                  => "00000000",
+      :tone2                   => "+00+00+00+00",
+      :invert_color2           => false,
+      :frame2                  => 0,
+      :blending2               => 0,
       # These properties are specifically for emitter particles.
-      :emitting            => false,
-      :emit_x              => 0,
-      :emit_x_range        => 0,
-      :emit_y              => 0,
-      :emit_y_range        => 0,
-      :emit_speed          => 0,
-      :emit_speed_range    => 0,
-      :emit_angle          => 0,
-      :emit_angle_range    => 0,
-      :emit_gravity        => 0,
-      :emit_gravity_range  => 0,
-      :emit_period_x       => 100,
-      :emit_period_x_range => 0,
-      :emit_period_y       => 100,
-      :emit_period_y_range => 0,
-      :emit_period_z       => 100,
-      :emit_period_z_range => 0,
-      :emit_radius_x_range => 0,
-      :emit_radius_y_range => 0,
-      :emit_radius_z_range => 0,
-      :emit_clockwise      => false,
-      :emit_zoom_range     => 0,
-      :emit_zoom_x_range   => 0,
-      :emit_zoom_y_range   => 0,
-      :radius_x            => 0,
-      :radius_y            => 0,
-      :radius_z            => 0,
+      # Location of emitter and whether it is emitting.
+      :emitter_x               => 0,
+      :emitter_y               => 0,
+      :emitter_r               => 0,
+      :emitter_theta           => 0,
+      :emitting                => false,
+      # Spawn area of emitted particles.
+      :spawn_x                 => 0,
+      :spawn_x_range           => 0,
+      :spawn_y                 => 0,
+      :spawn_y_range           => 0,
+      :spawn_r                 => 0,
+      :spawn_r_range           => 0,
+      :spawn_theta             => 0,
+      :spawn_theta_range       => 0,
+      # Automated movement of emitted particles.
+      :emit_speed              => 0,
+      :emit_speed_range        => 0,
+      :emit_direction          => 0,
+      :emit_direction_range    => 0,
+      :emit_gravity            => 0,
+      :emit_gravity_range      => 0,
+      :emit_deceleration       => 0,
+      :emit_deceleration_range => 0,
+      :emit_radius_x_range     => 0,
+      :emit_radius_y_range     => 0,
+      :emit_radius_z_range     => 0,
+      :emit_period_x           => 100,
+      :emit_period_x_range     => 0,
+      :emit_period_y           => 100,
+      :emit_period_y_range     => 0,
+      :emit_period_z           => 100,
+      :emit_period_z_range     => 0,
+      :emit_clockwise          => false,
+      # Property modifiers for emitted particles.
+      :emit_x_multiplier       => 100,
+      :emit_y_multiplier       => 100,
+      :emit_zoom_range         => 0,
+      :emit_zoom_multiplier    => 100,
+      :emit_zoom_x_range       => 0,
+      :emit_zoom_y_range       => 0,
+      :emit_opacity_multiplier => 100,
+      # Extra particle properties for emitted particles. (Radii used by :helix/
+      # :polar emitter types.)
+      :spawn_x_offset          => 0,
+      :spawn_x_multiplier      => 100,
+      :spawn_y_offset          => 0,
+      :spawn_y_multiplier      => 100,
+      :spawn_r_offset          => 0,
+      :spawn_r_multiplier      => 100,
+      :spawn_theta_offset      => 0,
+      :radius_x                => 0,
+      :radius_y                => 0,
+      :radius_z                => 0,
       # These properties are specifically for the "SE" particle.
-      :se                  => nil,
-      :user_cry            => nil,
-      :target_cry          => nil
+      :se                      => nil,
+      :user_cry                => nil,
+      :target_cry              => nil
     }
 
     def self.property_display_name(property)
       return {
-        :frame               => _INTL("Frame"),
-        :blending            => _INTL("Blending"),
-        :flip                => _INTL("Flip"),
-        :x                   => _INTL("X"),
-        :y                   => _INTL("Y"),
-        :z                   => _INTL("Priority"),
-        :zoom_x              => _INTL("Zoom X"),
-        :zoom_y              => _INTL("Zoom Y"),
-        :angle               => _INTL("Angle"),
-        :visible             => _INTL("Visible"),
-        :opacity             => _INTL("Opacity"),
-        :color               => _INTL("Color"),
-        :tone                => _INTL("Tone"),
-        :invert_color        => _INTL("Invert color"),
+        :x                       => _INTL("X"),
+        :y                       => _INTL("Y"),
+        :r                       => _INTL("R"),
+        :theta                   => _INTL("θ"),
+        :z                       => _INTL("Priority"),
+        :zoom_x                  => _INTL("Zoom X"),
+        :zoom_y                  => _INTL("Zoom Y"),
+        :angle                   => _INTL("Angle"),
+        :flip                    => _INTL("Flip"),
+        :visible                 => _INTL("Visible"),
+        :opacity                 => _INTL("Opacity"),
+        :color                   => _INTL("Color"),
+        :tone                    => _INTL("Tone"),
+        :invert_color            => _INTL("Invert color"),
+        :frame                   => _INTL("Frame"),
+        :blending                => _INTL("Blending"),
         # These properties are for the bitmap mask of a particle.
-        :mask_blending       => _INTL("Blending"),
-        :mask_opacity        => _INTL("Opacity"),
-        :mask_x              => _INTL("X"),
-        :mask_y              => _INTL("Y"),
-        :mask_zoom_x         => _INTL("Zoom X"),
-        :mask_zoom_y         => _INTL("Zoom Y"),
+        :mask_opacity            => _INTL("Opacity"),
+        :mask_x                  => _INTL("X"),
+        :mask_y                  => _INTL("Y"),
+        :mask_zoom_x             => _INTL("Zoom X"),
+        :mask_zoom_y             => _INTL("Zoom Y"),
+        :mask_blending           => _INTL("Blending"),
         # These properties are for the second layer of a particle. It has all
         # the same properties as the base layer, except for :visible.
-        :frame2              => _INTL("Frame"),
-        :blending2           => _INTL("Blending"),
-        :flip2               => _INTL("Flip"),
-        :x2                  => _INTL("X ±"),
-        :y2                  => _INTL("Y ±"),
-        :z2                  => _INTL("Priority ±"),
-        :zoom_x2             => _INTL("Zoom X ×%"),
-        :zoom_y2             => _INTL("Zoom Y ×%"),
-        :angle2              => _INTL("Angle ±"),
-        :opacity2            => _INTL("Opacity ±"),
-        :color2              => _INTL("Color"),
-        :tone2               => _INTL("Tone"),
-        :invert_color2       => _INTL("Invert color"),
+        :x2                      => _INTL("X ±"),
+        :y2                      => _INTL("Y ±"),
+        :z2                      => _INTL("Priority ±"),
+        :zoom_x2                 => _INTL("Zoom X ×%"),
+        :zoom_y2                 => _INTL("Zoom Y ×%"),
+        :angle2                  => _INTL("Angle ±"),
+        :flip2                   => _INTL("Flip"),
+        :opacity2                => _INTL("Opacity ±"),
+        :color2                  => _INTL("Color"),
+        :tone2                   => _INTL("Tone"),
+        :invert_color2           => _INTL("Invert color"),
+        :frame2                  => _INTL("Frame"),
+        :blending2               => _INTL("Blending"),
         # These properties are specifically for emitter particles
-        :emitting            => _INTL("Emitting"),
-        :emit_x              => _INTL("X"),
-        :emit_x_range        => _INTL("X ±"),
-        :emit_y              => _INTL("Y"),
-        :emit_y_range        => _INTL("Y ±"),
-        :emit_speed          => _INTL("Speed"),
-        :emit_speed_range    => _INTL("Speed ±"),
-        :emit_angle          => _INTL("Angle"),
-        :emit_angle_range    => _INTL("Angle ±"),
-        :emit_gravity        => _INTL("Gravity"),
-        :emit_gravity_range  => _INTL("Gravity ±"),
-        :emit_period_x       => _INTL("Period X"),
-        :emit_period_x_range => _INTL("Period X ±"),
-        :emit_period_y       => _INTL("Period Y"),
-        :emit_period_y_range => _INTL("Period Y ±"),
-        :emit_period_z       => _INTL("Period Z"),
-        :emit_period_z_range => _INTL("Period Z ±"),
-        :emit_radius_x_range => _INTL("Rad. X ±%"),
-        :emit_radius_y_range => _INTL("Rad. Y ±%"),
-        :emit_radius_z_range => _INTL("Rad. Z ±%"),
-        :emit_clockwise      => _INTL("Clockwise"),
-        :emit_zoom_range     => _INTL("Zoom ±%"),
-        :emit_zoom_x_range   => _INTL("Zoom X ±%"),
-        :emit_zoom_y_range   => _INTL("Zoom Y ±%"),
-        :radius_x            => _INTL("Radius X"),
-        :radius_y            => _INTL("Radius Y"),
-        :radius_z            => _INTL("Radius Z"),
+        # Location of emitter and whether it is emitting.
+        :emitter_x               => _INTL("Emitter X"),
+        :emitter_y               => _INTL("Emitter Y"),
+        :emitter_r               => _INTL("Emitter R"),
+        :emitter_theta           => _INTL("Emitter θ"),
+        :emitting                => _INTL("Emitting"),
+        # Spawn area of emitted particles.
+        :spawn_x                 => _INTL("Spawn X"),
+        :spawn_x_range           => _INTL("Spawn X ±"),
+        :spawn_y                 => _INTL("Spawn Y"),
+        :spawn_y_range           => _INTL("Spawn Y ±"),
+        :spawn_r                 => _INTL("Spawn R"),
+        :spawn_r_range           => _INTL("Spawn R ±"),
+        :spawn_theta             => _INTL("Spawn θ"),
+        :spawn_theta_range       => _INTL("Spawn θ ±"),
+        # Automated movement of emitted particles.
+        :emit_speed              => _INTL("Speed"),
+        :emit_speed_range        => _INTL("Speed ±"),
+        :emit_direction          => _INTL("Direction"),
+        :emit_direction_range    => _INTL("Direction ±"),
+        :emit_gravity            => _INTL("Gravity"),
+        :emit_gravity_range      => _INTL("Gravity ±"),
+        :emit_deceleration       => _INTL("Decel'n"),
+        :emit_deceleration_range => _INTL("Decel'n ±"),
+        :emit_radius_x_range     => _INTL("Radius X ±%"),
+        :emit_radius_y_range     => _INTL("Radius Y ±%"),
+        :emit_radius_z_range     => _INTL("Radius Z ±%"),
+        :emit_period_x           => _INTL("Period X"),
+        :emit_period_x_range     => _INTL("Period X ±"),
+        :emit_period_y           => _INTL("Period Y"),
+        :emit_period_y_range     => _INTL("Period Y ±"),
+        :emit_period_z           => _INTL("Period Z"),
+        :emit_period_z_range     => _INTL("Period Z ±"),
+        :emit_clockwise          => _INTL("Clockwise"),
+        # Property modifiers for emitted particles.
+        :emit_x_multiplier       => _INTL("X ×%"),
+        :emit_y_multiplier       => _INTL("Y ×%"),
+        :emit_zoom_range         => _INTL("Zoom ±%"),
+        :emit_zoom_multiplier    => _INTL("Zoom ×%"),
+        :emit_zoom_x_range       => _INTL("Zoom X ±%"),
+        :emit_zoom_y_range       => _INTL("Zoom Y ±%"),
+        :emit_opacity_multiplier => _INTL("Opacity ×%"),
+        # Extra particle properties for emitted particles. (Radii used by :helix/
+        # :polar emitter types.)
+        :spawn_x_offset          => _INTL("Spawn X ±"),
+        :spawn_x_multiplier      => _INTL("Spawn X ×%"),
+        :spawn_y_offset          => _INTL("Spawn Y ±"),
+        :spawn_y_multiplier      => _INTL("Spawn Y ×%"),
+        :spawn_r_offset          => _INTL("Spawn R ±"),
+        :spawn_r_multiplier      => _INTL("Spawn R ×%"),
+        :spawn_theta_offset      => _INTL("Spawn θ ±"),
+        :radius_x                => _INTL("Radius X"),
+        :radius_y                => _INTL("Radius Y"),
+        :radius_z                => _INTL("Radius Z")
       }[property] || property.to_s.capitalize
     end
 
@@ -556,25 +680,25 @@ module GameData
       ret = @particles[index][SUB_SCHEMA[key][0]] if SUB_SCHEMA[key]
       ret = nil if ret == false || (ret.is_a?(Array) && ret.length == 0) || ret == ""
       case key
-      when "Graphic", "Focus", "SecondLayer"
+      when "Focus", "Graphic", "SecondLayer"
         # The User and Target particles have hardcoded graphics/foci and can't
         # have a second layer, so they don't need writing to PBS
         ret = nil if ["User", "Target"].include?(@particles[index][:name])
-      when "Emitter"
-        ret = nil if ret == PARTICLE_DEFAULT_VALUES[SUB_SCHEMA[key][0]]
-      when "EmitterRate", "EmitterIntensity"
-        ret = nil if @particles[index][:emitter_type].nil? || @particles[index][:emitter_type] == :none
-        ret = nil if ret == PARTICLE_DEFAULT_VALUES[SUB_SCHEMA[key][0]]
       when "TiledGraphic"
         ret = nil if @particles[index][:second_layer]
         ret = nil if (@particles[index][:emitter_type] || :none) != :none
         ret = nil if FOCUS_TYPES_WITH_USER.include?(@particles[index][:focus]) ||
                      FOCUS_TYPES_WITH_TARGET.include?(@particles[index][:focus])
-      when "AngleOverride"
+      when "InitialAngle"
         ret = nil if ret == :none
-        ret = nil if !FOCUS_TYPES_WITH_USER.include?(@particles[index][:focus]) &&
-                     !FOCUS_TYPES_WITH_TARGET.include?(@particles[index][:focus])
-      when "RandomFrameMax", "RandomAngleRange"
+        if ret && ![:emitted_direction].include?(ret)
+          ret = nil if !FOCUS_TYPES_WITH_USER.include?(@particles[index][:focus]) &&
+                       !FOCUS_TYPES_WITH_TARGET.include?(@particles[index][:focus])
+        end
+      when "RandomAngleRange", "RandomFrameMax", "Emitter"
+        ret = nil if ret == PARTICLE_DEFAULT_VALUES[SUB_SCHEMA[key][0]]
+      when "EmitterRate", "EmitterIntensity"
+        ret = nil if @particles[index][:emitter_type].nil? || @particles[index][:emitter_type] == :none
         ret = nil if ret == PARTICLE_DEFAULT_VALUES[SUB_SCHEMA[key][0]]
       when "AllCommands"
         # Get translations of all properties to their names as seen in PBS
@@ -596,9 +720,24 @@ module GameData
         @particles[index].each_pair do |key, val|
           next if !val.is_a?(Array)
           next if key.to_s[0, 4] == "mask" && (@particles[index][:mask_graphic] || "") == ""
-          next if key.to_s[0, 4] == "emit" && (@particles[index][:emitter_type] || :none) == :none
-          next if key.to_s[0, 6] == "radius" && (@particles[index][:emitter_type] || :none) == :none
+          if (@particles[index][:emitter_type] || :none) == :none
+            next if key.to_s[0, 4] == "emit"
+            next if key.to_s[0, 5] == "spawn"
+            next if key.to_s[0, 6] == "radius"
+          end
           next if SECOND_LAYER_PROPERTIES.include?(key) && !@particles[index][:second_layer]
+          next if @particles[index][:polar_coordinates] && [:x, :y].include?(key)
+          next if !@particles[index][:polar_coordinates] && [:r, :theta].include?(key)
+          next if @particles[index][:emitter_position_polar_coordinates] &&
+                  [:emitter_x, :emitter_y].include?(key)
+          next if !@particles[index][:emitter_position_polar_coordinates] &&
+                  [:emitter_r, :emitter_theta].include?(key)
+          next if @particles[index][:emitter_spawn_polar_coordinates] &&
+                  [:spawn_x, :spawn_x_range, :spawn_y, :spawn_y_range,
+                   :spawn_x_offset, :spawn_x_multiplier, :spawn_y_offset, :spawn_y_multiplier].include?(key)
+          next if !@particles[index][:emitter_spawn_polar_coordinates] &&
+                  [:spawn_r, :spawn_r_range, :spawn_theta, :spawn_theta_range,
+                   :spawn_r_offset, :spawn_r_multiplier, :spawn_theta_offset].include?(key)
           val.each do |cmd|
             new_cmd = cmd.clone
             if @particles[index][:name] != "SE" && new_cmd[1] > 0
