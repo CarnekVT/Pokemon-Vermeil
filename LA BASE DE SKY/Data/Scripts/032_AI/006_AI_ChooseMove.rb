@@ -373,7 +373,7 @@ class Battle::AI
     choices.each { |c| c[3] = [c[1] - threshold, 0].max }
     total_score = choices.sum { |c| c[3] }
     # Log the available choices
-    if $INTERNAL
+    if $INTERNAL || PBDebug.ai_logging?
       PBDebug.log_ai("Move choices for #{@user.name}:")
       choices.each_with_index do |c, i|
         chance = sprintf("%5.1f", (c[3] > 0) ? 100.0 * c[3] / total_score : 0)

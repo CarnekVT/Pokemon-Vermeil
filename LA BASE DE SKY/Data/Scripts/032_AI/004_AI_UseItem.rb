@@ -99,9 +99,15 @@ class Battle::AI
   #     index otherwise)
   #   move index (for items usable on moves only)
   def choose_item_to_use
-    return nil if !@battle.internalBattle
+    if !@battle.internalBattle
+      PBDebug.log_ai_decision("Objetos descartados: combate sin uso de objetos de entrenador.")
+      return nil
+    end
     items = @battle.pbGetOwnerItems(@user.index)
-    return nil if !items || items.length == 0
+    if !items || items.length == 0
+      PBDebug.log_ai_decision("Objetos descartados: el entrenador no tiene objetos disponibles.")
+      return nil
+    end
     # Find all items usable on the Pokémon choosing this action
     pkmn = @user.battler.pokemon
     usable_items = {}
@@ -122,24 +128,30 @@ class Battle::AI
         PBDebug.log_ai("#{@user.name} NO se cura: el rival lo noquea igual (Fix #13)")
         return nil
       end
+      PBDebug.log_ai_decision("Se prioriza curar HP: #{pkmn.hp}/#{pkmn.totalhp}; se compara prioridad y cantidad curada.")
       usable_items[:hp_heal].sort! { |a, b| (a[2] == b[2]) ? a[3] <=> b[3] : a[2] <=> b[2] }
-      usable_items[:hp_heal].each do |item|
-        return item[0], item[1] if item[3] >= (pkmn.totalhp - pkmn.hp) * 0.75
+      candidate = usable_items[:hp_heal].find do |item|
+        item[3] >= (pkmn.totalhp - pkmn.hp) * 0.75
       end
-      return usable_items[:hp_heal].last[0], usable_items[:hp_heal].last[1]
+      candidate ||= usable_items[:hp_heal].last
+      return nil if ai_improvements_hp_heal_loses_race?(candidate)
+      return candidate[0], candidate[1]
     end
     # Next prioritise using a status-curing item
     if usable_items[:status_cure] &&
        ([:SLEEP, :FROZEN].include?(pkmn.status) || pbAIRandom(100) < 40)
+      PBDebug.log_ai_decision("Se prioriza curar el estado #{pkmn.status}.")
       usable_items[:status_cure].sort! { |a, b| a[2] <=> b[2] }
       return usable_items[:status_cure].first[0], usable_items[:status_cure].first[1]
     end
     # Next try using an item that raises all stats (Max Mushrooms)
     if usable_items[:all_stats_raise] && pbAIRandom(100) < 30
+      PBDebug.log_ai_decision("Se intenta usar un objeto para subir todas las estadisticas; paso aleatorio superado.")
       return usable_items[:stat_raise].first[0], usable_items[:stat_raise].first[1]
     end
     # Next try using an X item
     if usable_items[:stat_raise] && pbAIRandom(100) < 30
+      PBDebug.log_ai_decision("Se prioriza un objeto X; paso aleatorio superado.")
       usable_items[:stat_raise].sort! { |a, b| (a[2] == b[2]) ? a[3] <=> b[3] : a[2] <=> b[2] }
       return usable_items[:stat_raise].last[0], usable_items[:stat_raise].last[1]
     end
@@ -159,10 +171,94 @@ class Battle::AI
     # Try using a Revive (prefer Max Revive-type items over Revive)
     if usable_items[:revive] &&
        (@battle.pbAbleNonActiveCount(@user.index) == 0 || pbAIRandom(100) < 40)
+      PBDebug.log_ai_decision("Se prioriza revivir una reserva; se compara tipo de revivir y posicion en el equipo.")
       usable_items[:revive].sort! { |a, b| (a[2] == b[2]) ? a[1] <=> b[1] : a[2] <=> b[2] }
       return usable_items[:revive].last[0], usable_items[:revive].last[1]
     end
+    PBDebug.log_ai_decision("Ningun objeto supera los criterios de uso y los filtros aleatorios.")
     return nil
+  end
+
+  # Conserva objetos HP si comprar turnos no permite aprovecharlos en individuales.
+  # No modifica el veto fullHP previo ni la selección/prioridad de objetos.
+  def ai_improvements_hp_heal_loses_race?(candidate)
+    return false if !@trainer.high_skill? || !@trainer.has_skill_flag?("HPAware")
+    return false if @battle.pbSideSize(0) != 1 || @battle.pbSideSize(1) != 1
+    if @user.status != :NONE || @user.effects[PBEffects::Confusion] > 0
+      PBDebug.log_ai_decision("Cura HP conservada: el activo tiene estado o confusion; no se aplica carrera ofensiva.")
+      return false
+    end
+    rival = nil
+    each_foe_battler(@user.idxOwnSide) { |b, _i| rival ||= b }
+    return false if rival.nil?
+    # ponytail: no proyecta el daño después de romper Sustituto; conserva la cura
+    # hasta disponer de un horizonte de acciones.
+    if rival.effects[PBEffects::Substitute] > 0
+      PBDebug.log_ai_decision("Cura HP conservada: Sustituto rival requiere una secuencia de ataques.")
+      return false
+    end
+    incoming = ai_improvements_best_damage(rival, @user)
+    # La política ofensiva usa el HP actual, no simula habilidades activadas
+    # por HP tras curar; ampliar el contexto si estas carreras lo requieren.
+    attack_pressure = ai_improvements_attack_pressure(@user, rival)
+    return false if attack_pressure.nil?
+    outgoing, recoil = attack_pressure
+    heal_amount = candidate[3]
+    if FULL_RESTORE_ITEMS.include?(candidate[0]) || candidate[0] == :MAXPOTION
+      heal_amount = @user.totalhp - @user.hp
+    elsif candidate[0] == :SITRUSBERRY
+      heal_amount = @user.totalhp / 4
+    end
+    healed_hp = [@user.hp + heal_amount, @user.totalhp].min
+    own_residual = @user.rough_end_of_round_damage
+    foe_residual = rival.rough_end_of_round_damage
+    hp_after = [[healed_hp - incoming - own_residual, 0].max, @user.totalhp].min
+    pressure = incoming + own_residual + recoil
+    PBDebug.log_ai_decision("Cura HP #{candidate[0]}: HP #{@user.hp}/#{@user.totalhp}, cura efectiva #{healed_hp - @user.hp}, " \
+                           "daño entrante #{incoming.round(1)}, saliente #{outgoing.round(1)}, " \
+                           "retroceso al atacar #{recoil.round(1)}, residual propio #{own_residual}, rival #{foe_residual}, HP tras turno #{hp_after.round(1)}.")
+    defensive_recovery = @user.battler.moves.each_with_index.any? do |move, i|
+      move && move.healingMove? && @battle.pbCanChooseMove?(@user.index, i, false)
+    end
+    if rival.status != :NONE || rival.effects[PBEffects::Confusion] > 0 || foe_residual > 0 ||
+       own_residual < 0 || defensive_recovery || ai_improvements_has_progress_status?(@user)
+      PBDebug.log_ai_decision("Cura HP conservada: existe estado, residual, recuperacion defensiva o movimiento de progreso.")
+      return false
+    end
+    if pressure <= 0
+      PBDebug.log_ai_decision("Cura HP conservada: no hay desgaste neto estimado.")
+      return false
+    end
+    # ponytail: carrera de daño constante, sin PP ni secuencias de movimientos;
+    # concede incluso el ataque del turno letal (optimista). Usar un horizonte de
+    # acciones con prioridad/velocidad y cambios de estado si se necesita más precisión.
+    turns_before = (@user.hp / pressure.to_f).ceil
+    useful_turns = (hp_after / pressure.to_f).ceil
+    bought_turns = useful_turns - turns_before
+    turns_to_ko = (outgoing > 0) ? (rival.hp / outgoing.to_f).ceil : Float::INFINITY
+    clearly_lost = turns_to_ko > useful_turns + 2 && turns_to_ko > useful_turns * 2
+    PBDebug.log_ai_decision("Cura HP carrera: turnos antes #{turns_before}, utiles tras cura #{useful_turns}, " \
+                           "comprados #{bought_turns}, necesarios para KO #{turns_to_ko}, claramente perdida #{clearly_lost}.")
+    if !clearly_lost
+      PBDebug.log_ai_decision("Cura HP conservada: margen insuficiente para declarar perdida la carrera.")
+      return false
+    end
+    useful_reserve = nil
+    @battle.eachInTeamFromBattlerIndex(@user.index) do |pkmn, i|
+      next if !pkmn || !@battle.pbCanSwitch?(@user.index, i)
+      next if calculate_entry_hazard_damage(pkmn, @user.side) >= pkmn.hp
+      next if !pkmn.moves.any? { |move| move.pp > 0 || move.total_pp == 0 }
+      next if rate_replacement_pokemon(@user.index, pkmn, 100) < 100
+      useful_reserve = i
+      break
+    end
+    if useful_reserve.nil?
+      PBDebug.log_ai_decision("Cura HP conservada: no hay reserva viva legal con movimientos y valoracion util.")
+      return false
+    end
+    PBDebug.log_ai_decision("Cura HP descartada: carrera ofensiva claramente perdida incluso tras curar; " \
+                           "se conserva #{candidate[0]} para reserva util (party #{useful_reserve}).")
+    return true
   end
 
   # AI Improvements (Fix #13): ¿el rival noquea al activo este turno aunque curemos
@@ -260,4 +356,3 @@ class Battle::AI
     return ret
   end
 end
-

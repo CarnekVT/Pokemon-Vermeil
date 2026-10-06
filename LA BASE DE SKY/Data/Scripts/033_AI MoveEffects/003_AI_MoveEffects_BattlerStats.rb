@@ -659,6 +659,96 @@ Battle::AI::Handlers::MoveEffectScore.add("RaiseUserMainStats1TrapUserInBattle",
 #===============================================================================
 Battle::AI::Handlers::MoveEffectScore.add("StartRaiseUserAtk1WhenDamaged",
   proc { |score, move, user, ai, battle|
+    if ai.trainer.high_skill? && ai.trainer.has_skill_flag?("HPAware")
+      # El motor delega a pbCanLowerStatStage? con Contrary incluso en Ataque máximo.
+      next score unless user.battler.pbCanRaiseStatStage?(:ATTACK, user.battler)
+      foes = []
+      ai.each_foe_battler(user.side) { |foe, _i| foes << foe }
+      next score if foes.empty?
+      rage_priority = ai.ai_improvements_with_move_context(user, foes.first) do
+        move.rough_priority(user)
+      end
+      incoming = 0.0
+      trigger_chance = 0.0
+      threats = []
+      foes.each do |foe|
+        next unless foe.can_attack?
+        foe_damage = 0.0
+        foe_trigger = 0.0
+        attacks = []
+        ai.ai_improvements_best_damage(foe, user) do |candidate|
+          next false if candidate.move.is_a?(Battle::Move::TwoTurnMove) &&
+                        candidate.move.pbIsChargingTurn?(foe.battler)
+          next false unless candidate.move.pbDamagingMove?
+          damage = candidate.rough_damage.to_f
+          next false if damage <= 0
+          priority = candidate.rough_priority(foe)
+          attacks << [priority, damage]
+          foe_damage = [foe_damage, damage].max
+          if user.effects[PBEffects::Rage] || rage_priority > priority ||
+             (rage_priority == priority && user.rough_stat(:SPEED) != foe.rough_stat(:SPEED) &&
+              user.faster_than?(foe))
+            foe_trigger = [foe_trigger, candidate.rough_accuracy.clamp(0, 100) / 100.0].max
+          end
+          next false
+        end
+        incoming += foe_damage
+        trigger_chance = 1.0 - (1.0 - trigger_chance) * (1.0 - foe_trigger)
+        threats << [foe, attacks]
+      end
+      remaining_hp = user.hp - incoming - user.rough_end_of_round_damage
+      if incoming <= 0 || incoming >= user.hp || trigger_chance <= 0 || remaining_hp <= 0
+        PBDebug.log_ai_decision("Furia: entrante #{incoming.round(1)}, beneficio 0% HP rival, " \
+                               "probabilidad activacion #{trigger_chance.round(3)}, ajuste 0 (sin activacion aprovechable).")
+        next score
+      end
+      original_stage = user.stages[:ATTACK]
+      increment = 1
+      unless user.being_mold_broken?
+        increment *= 2 if user.has_active_ability?(:SIMPLE)
+        increment *= -1 if user.has_active_ability?(:CONTRARY)
+      end
+      maximum = Battle::Battler::STAT_STAGE_MAXIMUM
+      raised_stage = (original_stage + increment).clamp(-maximum, maximum)
+      next score if raised_stage == original_stage
+      # ponytail: una activación y amenazas actuales, sin elecciones rivales,
+      # críticos aleatorios, multigolpes acumulados ni cambios de HP/estado;
+      # ampliar a una secuencia de acciones para esos casos o encadenar Furia.
+      usable_attack = proc { |candidate|
+        next false if candidate.move.is_a?(Battle::Move::TwoTurnMove) &&
+                      candidate.move.pbIsChargingTurn?(user.battler)
+        next false unless candidate.move.pbDamagingMove?
+        priority = candidate.rough_priority(user)
+        before_action = threats.sum do |foe, attacks|
+          attacks.filter_map do |foe_priority, damage|
+            tied_speed = user.rough_stat(:SPEED) == foe.rough_stat(:SPEED)
+            damage if foe_priority > priority ||
+                      (foe_priority == priority && (tied_speed || !user.faster_than?(foe)))
+          end.max || 0.0
+        end
+        next before_action < remaining_hp
+      }
+      before = foes.map do |foe|
+        ai.ai_improvements_best_damage(user, foe, &usable_attack)
+      end
+      benefit = nil
+      begin
+        user.stages[:ATTACK] = raised_stage
+        foes.each_with_index do |foe, index|
+          after = ai.ai_improvements_best_damage(user, foe, &usable_attack)
+          gain = ([after, foe.hp].min - [before[index], foe.hp].min) / foe.totalhp.to_f
+          benefit = benefit.nil? ? gain : [benefit, gain].max
+        end
+      ensure
+        user.stages[:ATTACK] = original_stage
+      end
+      survival = (remaining_hp / user.hp.to_f).clamp(0.0, 1.0)
+      # Conserva como techo la magnitud del antiguo bonus conjunto (+10/+7).
+      bonus = (100.0 * benefit * trigger_chance * survival).clamp(-17.0, 17.0)
+      PBDebug.log_ai_decision("Furia: entrante #{incoming.round(1)}, beneficio #{(100.0 * benefit).round(2)}% HP rival, " \
+                             "probabilidad activacion #{trigger_chance.round(3)}, ajuste #{bonus.round(2)}.")
+      next score + bonus
+    end
     # Ignore the stat-raising effect if user is at a low HP and likely won't
     # benefit from it
     if ai.trainer.has_skill_flag?("HPAware")

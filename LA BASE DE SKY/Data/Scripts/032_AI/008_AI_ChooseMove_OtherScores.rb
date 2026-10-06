@@ -283,7 +283,11 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:predicted_accuracy,
     if acc < 90
       old_score = score
       score -= (0.25 * (100 - acc)).to_i   # -2 (89%) to -24 (1%)
-      PBDebug.log_score_change(score - old_score, "accuracy (predicted #{acc}%)")
+      if ai.trainer.high_skill? && ai.trainer.has_skill_flag?("HPAware") && move.damagingMove?
+        PBDebug.log_score_change(score - old_score, "accuracy (predicted #{acc}%; damage/KO bonuses also weighted by hit chance)")
+      else
+        PBDebug.log_score_change(score - old_score, "accuracy (predicted #{acc}%)")
+      end
     end
     next score
   }
@@ -298,6 +302,56 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:predicted_damage,
   proc { |score, move, user, target, ai, battle|
     if move.damagingMove?
       dmg = move.rough_damage
+      if ai.trainer.high_skill? && ai.trainer.has_skill_flag?("HPAware")
+        next score if target.hp <= 0
+        acc = [[move.rough_accuracy, 0].max, 100].min
+        hit_chance = acc / 100.0
+        substitute = target.effects[PBEffects::Substitute] > 0 &&
+                     !move.move.ignoresSubstitute?(user.battler) && user.index != target.index
+        target_hp = substitute ? target.effects[PBEffects::Substitute] : target.hp
+        useful_damage = [[dmg, 0].max, target_hp].min
+        damage_weight = substitute ? 25.0 : 35.0
+        damage_cap = substitute ? 30 : 40
+        old_score = score
+        score += ([damage_weight * useful_damage / target_hp, damage_cap].min * hit_chance).to_i
+        hp_source = substitute ? "Substitute" : "HP"
+        PBDebug.log("     predicted damage #{dmg}; useful #{useful_damage}/#{target_hp} #{hp_source}; accuracy #{acc}%; expected useful damage #{(useful_damage * hit_chance).round(1)}")
+        PBDebug.log_score_change(score - old_score, "accuracy-weighted useful damage (capped before hit chance)")
+        if !substitute && dmg > target.hp * 1.1
+          sturdy = target.hp == target.totalhp && target.has_active_ability?(:STURDY) &&
+                   !target.being_mold_broken?
+          focus_sash = target.hp == target.totalhp && target.has_active_item?(:FOCUSSASH)
+          multi_hit = move.move.multiHitMove?
+          if move.function_code == "HitOncePerUserTeamMember"
+            num_hits = 0
+            battle.eachInTeamFromBattlerIndex(user.index) do |pkmn, _i|
+              num_hits += 1 if pkmn.able? && pkmn.status == :NONE
+            end
+            multi_hit = num_hits > 1
+          end
+          multi_hit ||= user.has_active_ability?(:PARENTALBOND) &&
+                        !move.move.chargingTurnMove? && !move.targets_multiple_battlers? &&
+                        move.move.method(:pbNumHits).owner == Battle::Move
+          # ponytail: use rough damage and hit chance, not per-hit KO probabilities; refine if needed.
+          if (sturdy || focus_sash) && !multi_hit
+            protection = focus_sash ? "Focus Sash" : "Sturdy"
+            PBDebug.log("     KO bonus withheld: full-HP #{protection} survives a single hit (accuracy #{acc}%)")
+          else
+            old_score = score
+            score += (15 * hit_chance).to_i
+            PBDebug.log("     predicted KO (>110% HP); accuracy #{acc}%; KO bonus #{score - old_score}/15")
+            PBDebug.log_score_change(score - old_score, "accuracy-weighted predicted KO")
+            if (sturdy || focus_sash) && multi_hit
+              old_score = score
+              score += (8 * hit_chance).to_i
+              PBDebug.log_score_change(score - old_score, "accuracy-weighted multihit bypass of Sturdy/Focus Sash (#{acc}%)")
+            end
+          end
+        elsif substitute
+          PBDebug.log("     KO bonus withheld: damage is absorbed by Substitute (accuracy #{acc}%)")
+        end
+        next score
+      end
       old_score = score
       if target.effects[PBEffects::Substitute] > 0
         target_hp = target.effects[PBEffects::Substitute]

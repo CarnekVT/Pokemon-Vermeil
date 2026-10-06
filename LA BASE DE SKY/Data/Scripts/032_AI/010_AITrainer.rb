@@ -40,15 +40,13 @@ class Battle::AI::AITrainer
   def set_up_skill
     if @trainer
       @skill = @trainer.skill_level
-    elsif Settings::SMARTER_WILD_LEGENDARY_POKEMON
-      # Give wild legendary/mythical Pokémon a higher skill
-      wild_battler = @ai.battle.battlers[@side]
-      sp_data = wild_battler.pokemon.species_data
-      if sp_data.has_flag?("Legendary") ||
-         sp_data.has_flag?("Mythical") ||
-         sp_data.has_flag?("UltraBeast")
-        @skill = 32   # Medium skill
+    else
+      skill = Settings::WILD_POKEMON_SKILL_LEVEL
+      if !skill.is_a?(Integer) || !skill.between?(0, 255)
+        raise ArgumentError, "Settings::WILD_POKEMON_SKILL_LEVEL must be an integer from 0 to 255."
       end
+      @skill = skill
+      PBDebug.log_ai("Wild Pokemon AI skill level: #{@skill}")
     end
   end
 

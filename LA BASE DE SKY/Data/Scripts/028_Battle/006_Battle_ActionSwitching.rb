@@ -224,11 +224,31 @@ class Battle
 
   # Actually performs the recalling and sending out in all situations.
   def pbRecallAndReplace(idxBattler, idxParty, randomReplacement = false, batonPass = false)
+    trace_hp = $DEBUG && Settings::AI_DECISION_LOGGING
+    outgoing = @battlers[idxBattler].pokemon
+    incoming = pbParty(idxBattler)[idxParty]
+    if trace_hp
+      b = @battlers[idxBattler]
+      PBDebug.log_battle_event("Cambio battler #{idxBattler}: sale #{b.name} (party #{b.pokemonIndex}), " \
+                              "HP activo #{b.hp}/#{b.totalhp}, Pokemon #{outgoing.hp}/#{outgoing.totalhp}, " \
+                              "habilidad #{b.ability_id}, objeto #{b.item_id}, Pokemon ID #{outgoing.object_id}; " \
+                              "entra #{incoming.name} (party #{idxParty}), HP guardado #{incoming.hp}/#{incoming.totalhp}, " \
+                              "habilidad #{incoming.ability_id}, objeto #{incoming.item_id}, Pokemon ID #{incoming.object_id}.")
+    end
     @scene.pbRecall(idxBattler) if !@battlers[idxBattler].fainted?
     @battlers[idxBattler].pbAbilitiesOnSwitchOut   # Inc. primordial weather check
+    if trace_hp
+      PBDebug.log_battle_event("Tras efectos de salida: #{outgoing.name}, HP guardado #{outgoing.hp}/#{outgoing.totalhp}; " \
+                              "#{incoming.name}, HP antes de entrar #{incoming.hp}/#{incoming.totalhp}.")
+    end
     @scene.pbShowPartyLineup(idxBattler & 1) if pbSideSize(idxBattler) == 1
     pbMessagesOnReplace(idxBattler, idxParty) if !randomReplacement
     pbReplace(idxBattler, idxParty, batonPass)
+    if trace_hp
+      b = @battlers[idxBattler]
+      PBDebug.log_battle_event("Tras reemplazo: #{b.name}, HP activo #{b.hp}/#{b.totalhp}, " \
+                              "Pokemon #{b.pokemon.hp}/#{b.pokemon.totalhp}, Pokemon ID #{b.pokemon.object_id}.")
+    end
   end
 
   def pbMessageOnRecall(battler)
@@ -374,8 +394,8 @@ class Battle
         Battle::ItemEffects.triggerOnSwitchIn(b.item, b, self)   # Air Balloon message
       end
       # Healing/curing items (most berries, Berry Juice, Mental Herb)
-      b.pbItemHPHealCheck(b.item)
-      b.pbItemStatusCureCheck(b.item)
+      b.pbItemHPHealCheck
+      b.pbItemStatusCureCheck
     end
     # For each battler that entered battle, in speed order
     pbPriority(true).each do |b|
