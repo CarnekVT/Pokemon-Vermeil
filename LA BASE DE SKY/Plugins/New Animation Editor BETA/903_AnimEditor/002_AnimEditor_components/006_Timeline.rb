@@ -18,7 +18,7 @@ class AnimationEditor::Timeline < UIControls::BaseContainer
   TIME_BAR_HEIGHT = ADD_PARTICLE_BUTTON_Y + BUTTON_SIZE + (VIEWPORT_SPACING * 2)   # Not including separator line
   LIST_X          = 0
   LIST_Y          = TIME_BAR_HEIGHT + VIEWPORT_SPACING   # After black horizontal line
-  LIST_WIDTH      = 200   # Not including the last pixel between particle list and black line
+  LIST_WIDTH      = 210   # Not including the last pixel between particle list and black line
 
   TIMELINE_X = LIST_X + LIST_WIDTH + (VIEWPORT_SPACING * 2)
   TIMELINE_Y = LIST_Y
@@ -27,7 +27,7 @@ class AnimationEditor::Timeline < UIControls::BaseContainer
   TIME_BAR_TEXT_SIZE   = 16
   KEYFRAME_SPACING     = 20
 
-  DURATION_BUFFER = 20   # Extra keyframes shown after the animation's end
+  DURATION_BUFFER = 36   # Extra keyframes shown after the animation's end
 
   def initialize(x, y, width, height, viewport, particles)
     @particles         = particles
@@ -633,24 +633,31 @@ class AnimationEditor::Timeline < UIControls::BaseContainer
   #-----------------------------------------------------------------------------
 
   def update_controls_and_particles
-    # Update only a thing that is being interacted with
+    old_captured = @captured
+    # Update captured control (if there is one)
     if @captured
       @captured.update
       @captured = nil if !@captured.busy?
       update_time_bar_control
-      return
     end
-    # Update controls
-    @controls.each_value do |c|
-      c.update
-      @captured = c if c.busy?
+    # Update controls (except the captured control)
+    if !@captured ||
+       (!(@captured.respond_to?("mouse_in_control?") && @captured.mouse_in_control?) &&
+        !(@captured.respond_to?("mouse_in_container?") && @captured.mouse_in_container?))
+      @controls.each_value do |c|
+        next if old_captured && c == old_captured
+        c.update
+        @captured = c if c.busy?
+      end
     end
     # Update listed particles
-    @display_particles.each_with_index do |particle, i|
-      particle.update
-      if particle.busy?
-        @captured = particle
-        @captured_index = i
+    if !@captured ||
+       (!(@captured.respond_to?("mouse_in_control?") && @captured.mouse_in_control?) &&
+        !(@captured.respond_to?("mouse_in_container?") && @captured.mouse_in_container?))
+      @display_particles.each_with_index do |particle, i|
+        next if old_captured && particle == old_captured
+        particle.update
+        @captured = particle if particle.busy?
       end
     end
   end
@@ -753,8 +760,6 @@ class AnimationEditor::Timeline < UIControls::BaseContainer
 
   # Scroll timeline with mouse scroll wheel.
   def update_input_scroll_wheel
-    # TODO: mkxp-z has a bug whereby holding Shift stops the scroll wheel from
-    #       being updated. Await the implementation of its fix.
     wheel_v = Input.scroll_v
     return if wheel_v == 0
     if @scrollable_rect.contains?(*mouse_pos)
