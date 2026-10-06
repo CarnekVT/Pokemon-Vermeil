@@ -23,42 +23,40 @@ class AnimationEditor
   def apply_changed_battlers_layout_value(property, value)
     case property
     when :side_size_1
-      old_val = @settings[:anim_editor][:side_sizes][0]
-      @settings[:anim_editor][:side_sizes][0] = value
-      if @settings[:anim_editor][:user_index] >= value * 2
-        @settings[:anim_editor][:user_index] = (value - 1) * 2
-        @components[:battlers_layout].get_control(:user_index).value = @settings[:anim_editor][:user_index]
-        @settings[:anim_editor][:target_indices].delete_if { |val| val == @settings[:anim_editor][:user_index] }
+      old_val = @settings[:side_sizes][0]
+      @settings[:side_sizes][0] = value
+      if @settings[:user_index] >= value * 2
+        @settings[:user_index] = (value - 1) * 2
+        @components[:battlers_layout].get_control(:user_index).value = @settings[:user_index]
+        @settings[:target_indices].delete_if { |val| val == @settings[:user_index] }
       end
-      @settings[:anim_editor][:target_indices].delete_if { |val| val.even? && val >= value * 2 }
-      @settings[:anim_editor][:target_indices].push(1) if @settings[:anim_editor][:target_indices].empty?
-      @components[:battlers_layout].get_control(:target_indices).value = @settings[:anim_editor][:target_indices].join(",")
+      @settings[:target_indices].delete_if { |val| val.even? && val >= value * 2 }
+      @settings[:target_indices].push(1) if @settings[:target_indices].empty?
+      @components[:battlers_layout].get_control(:target_indices).value = @settings[:target_indices].join(",")
     when :side_size_2
-      old_val = @settings[:anim_editor][:side_sizes][1]
-      @settings[:anim_editor][:side_sizes][1] = value
-      @settings[:anim_editor][:target_indices].delete_if { |val| val == @settings[:anim_editor][:user_index] }
-      @settings[:anim_editor][:target_indices].delete_if { |val| val.odd? && val >= value * 2 }
-      @settings[:anim_editor][:target_indices].push(1) if @settings[:anim_editor][:target_indices].empty?
-      @components[:battlers_layout].get_control(:target_indices).value = @settings[:anim_editor][:target_indices].join(",")
+      old_val = @settings[:side_sizes][1]
+      @settings[:side_sizes][1] = value
+      @settings[:target_indices].delete_if { |val| val == @settings[:user_index] }
+      @settings[:target_indices].delete_if { |val| val.odd? && val >= value * 2 }
+      @settings[:target_indices].push(1) if @settings[:target_indices].empty?
+      @components[:battlers_layout].get_control(:target_indices).value = @settings[:target_indices].join(",")
     when :user_index
-      @settings[:anim_editor][:user_index] = value
-      @settings[:anim_editor][:target_indices].delete_if { |val| val == @settings[:anim_editor][:user_index] }
-      @settings[:anim_editor][:target_indices].push(1) if @settings[:anim_editor][:target_indices].empty?
-      @components[:battlers_layout].get_control(:target_indices).value = @settings[:anim_editor][:target_indices].join(",")
+      @settings[:user_index] = value
+      @settings[:target_indices].delete_if { |val| val == @settings[:user_index] }
+      @settings[:target_indices].push(1) if @settings[:target_indices].empty?
+      @components[:battlers_layout].get_control(:target_indices).value = @settings[:target_indices].join(",")
     when :target_indices
-      @settings[:anim_editor][:target_indices] = value.split(",")
-      @settings[:anim_editor][:target_indices].map! { |val| val.to_i }
-      @settings[:anim_editor][:target_indices].sort!
-      @settings[:anim_editor][:target_indices].uniq!
-      @settings[:anim_editor][:target_indices].delete_if { |val| val == @settings[:anim_editor][:user_index] }
-      @settings[:anim_editor][:target_indices].delete_if { |val| val.even? && val >= @settings[:anim_editor][:side_sizes][0] * 2 }
-      @settings[:anim_editor][:target_indices].delete_if { |val| val.odd? && val >= @settings[:anim_editor][:side_sizes][1] * 2 }
-      @settings[:anim_editor][:target_indices].push(1) if @settings[:anim_editor][:target_indices].empty?
-      @components[:battlers_layout].get_control(:target_indices).value = @settings[:anim_editor][:target_indices].join(",")
-    when :color_scheme
-      @settings[property] = value
+      @settings[:target_indices] = value.split(",")
+      @settings[:target_indices].map! { |val| val.to_i }
+      @settings[:target_indices].sort!
+      @settings[:target_indices].uniq!
+      @settings[:target_indices].delete_if { |val| val == @settings[:user_index] }
+      @settings[:target_indices].delete_if { |val| val.even? && val >= @settings[:side_sizes][0] * 2 }
+      @settings[:target_indices].delete_if { |val| val.odd? && val >= @settings[:side_sizes][1] * 2 }
+      @settings[:target_indices].push(1) if @settings[:target_indices].empty?
+      @components[:battlers_layout].get_control(:target_indices).value = @settings[:target_indices].join(",")
     else
-      @settings[:anim_editor][property] = value
+      @settings[property] = value
     end
     save_settings
     refresh_component(:battlers_layout)
@@ -77,7 +75,7 @@ class AnimationEditor
     when :particle_index
       @components[:timeline].particle_index = value
       refresh
-    when :x, :y, :r, :theta, :emitter_x, :emitter_y, :emitter_r, :emitter_theta, :angle
+    when :x, :y, :emit_x, :emit_y, :angle
       particle = @anim[:particles][particle_index]
       before_all = particle[property] && particle[property].none? { |cmd| cmd[0] <= keyframe }
       after_all = particle[property] && particle[property].none? { |cmd| cmd[0] + cmd[1] >= keyframe }
@@ -87,11 +85,11 @@ class AnimationEditor
         if GameData::Animation.property_can_interpolate?(property)
           if before_all
             AnimationEditor::ParticleDataHelper.set_interpolation(
-              particle, property, keyframe, @settings[:anim_editor][:default_interpolation] || :linear
+              particle, property, keyframe, @settings[:default_interpolation] || :linear
             )
           elsif after_all
             AnimationEditor::ParticleDataHelper.set_interpolation(
-              particle, property, keyframe - 1, @settings[:anim_editor][:default_interpolation] || :linear
+              particle, property, keyframe - 1, @settings[:default_interpolation] || :linear
             )
           end
         end
@@ -117,11 +115,11 @@ class AnimationEditor
           if GameData::Animation.property_can_interpolate?(prop)
             if before_all
               AnimationEditor::ParticleDataHelper.set_interpolation(
-                particle, prop, keyframe, @settings[:anim_editor][:default_interpolation] || :linear
+                particle, prop, keyframe, @settings[:default_interpolation] || :linear
               )
             elsif after_all
               AnimationEditor::ParticleDataHelper.set_interpolation(
-                particle, prop, keyframe - 1, @settings[:anim_editor][:default_interpolation] || :linear
+                particle, prop, keyframe - 1, @settings[:default_interpolation] || :linear
               )
             end
           end
@@ -328,11 +326,11 @@ class AnimationEditor
           if GameData::Animation.property_can_interpolate?(property)
             if before_all
               AnimationEditor::ParticleDataHelper.set_interpolation(
-                particle, property, keyframe, @settings[:anim_editor][:default_interpolation] || :linear
+                particle, property, keyframe, @settings[:default_interpolation] || :linear
               )
             elsif after_all
               AnimationEditor::ParticleDataHelper.set_interpolation(
-                particle, property, keyframe - 1, @settings[:anim_editor][:default_interpolation] || :linear
+                particle, property, keyframe - 1, @settings[:default_interpolation] || :linear
               )
             end
           end
@@ -353,7 +351,7 @@ class AnimationEditor
       @settings[:color_scheme] = value
       self.color_scheme = value
     else
-      @settings[:anim_editor][property] = value
+      @settings[property] = value
     end
     save_settings
     refresh_component(:canvas)
@@ -420,17 +418,15 @@ class AnimationEditor
       refresh
     when :usable
       @anim[:ignore] = !value
-    when :scripts
-      text = @components[:animation_properties].get_control(:scripts).value
-      texts = text.split(",")
-      texts.select! { |txt| txt && txt != "" }
-      @anim[property] = texts
-      @components[:animation_properties].get_control(:scripts).value = texts.join(",")
     else
       @anim[property] = value
     end
   end
 
+  # TODO: If :emitter_type is changed from :none to an emitter type, and the
+  #       ListedParticle for this particle needs to create new group rows for
+  #       the emitter properties, those rows will not have their expand arrow
+  #       until the particle properties pop-up window is closed.
   def apply_changed_particle_properties_value(property, value)
     idx_particle = (value.is_a?(Array)) ? value[0] : particle_index
     value = value[1] if value.is_a?(Array)
@@ -506,15 +502,13 @@ class AnimationEditor
       editor.get_control(:particles).deselect_all
     when :apply
       target_particles = editor.get_control(:particles).value
-      return if !target_particles || target_particles.empty?
       start_frame = editor.get_control(:start_keyframe).value
       end_frame = editor.get_control(:end_keyframe).value
       if end_frame < start_frame
         start_frame, end_frame = end_frame, start_frame
       end
       properties = []
-      AnimationEditor::ListedParticle::PROPERTY_GROUPS.each_pair do |key, props|
-        next if [:mask_group, :second_layer_group].include?(key)
+      AnimationEditor::ListedParticle::PROPERTY_GROUPS.each_value do |props|
         props.each do |prop|
           next if [:color, :tone].include?(prop)
           properties.push(prop) if GameData::Animation.property_can_interpolate?(prop)
