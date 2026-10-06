@@ -6,10 +6,22 @@ class Battle::AI
   # if the only moves known are bad ones (the latter forces a switch if
   # possible). Also aliased by the Battle Palace and Battle Arena.
   def pbChooseToSwitchOut(terrible_moves = false)
-    return false if @battle.rules[:cannot_switch]
-    return false if @user.wild?
-    return false if !@battle.pbCanSwitchOut?(@user.index)
-    return false if !@trainer.has_skill_flag?("ConsiderSwitching")
+    if @battle.rules[:cannot_switch]
+      PBDebug.log_ai_decision("Cambio descartado: prohibido por las reglas del combate.")
+      return false
+    end
+    if @user.wild?
+      PBDebug.log_ai_decision("Cambio descartado: Pokemon salvaje.")
+      return false
+    end
+    if !@battle.pbCanSwitchOut?(@user.index)
+      PBDebug.log_ai_decision("Cambio descartado: el motor no permite retirar al activo.")
+      return false
+    end
+    if !@trainer.has_skill_flag?("ConsiderSwitching")
+      PBDebug.log_ai_decision("Cambio descartado: falta el flag ConsiderSwitching.")
+      return false
+    end
     # Don't switch if all foes are unable to do anything, e.g. resting after
     # Hyper Beam, will Truant (i.e. free turn)
     if @trainer.high_skill?
@@ -19,7 +31,10 @@ class Battle::AI
         foe_can_act = true
         break
       end
-      return false if !foe_can_act
+      if !foe_can_act
+        PBDebug.log_ai_decision("Cambio descartado: los rivales no pueden actuar; se aprovecha el turno.")
+        return false
+      end
     end
     # AI Improvements (anti-ping-pong): un mon recién entrado con solo movimientos
     # malos rebota de inmediato por la rama de switch forzado (max_score <= USELESS),
@@ -27,29 +42,62 @@ class Battle::AI
     # Si lleva <2 turnos en pista y sigue vivo, que juegue al menos un turno antes de
     # poder plantearse el cambio forzado. (Issue #229 ya está cubierto por el guard
     # ConsiderSwitching del top de este método, así que aquí solo falta esto.)
-    return false if terrible_moves && @user.turnCount < 2 && !@user.fainted?
+    if terrible_moves && @user.turnCount < 2 && !@user.fainted?
+      PBDebug.log_ai_decision("Cambio forzado descartado: proteccion contra cambios consecutivos al entrar.")
+      return false
+    end
     # Various calculations to decide whether to switch
+    stalled_matchup = false
+    urgent_switch = false
     if terrible_moves
       PBDebug.log_ai("#{@user.name} is being forced to switch out")
     else
       return false if !@trainer.has_skill_flag?("ConsiderSwitching")
       reserves = get_non_active_party_pokemon(@user.index)
-      return false if reserves.empty?
-      should_switch = Battle::AI::Handlers.should_switch?(@user, reserves, self, @battle)
+      if reserves.empty?
+        PBDebug.log_ai_decision("Cambio descartado: no hay reservas disponibles.")
+        return false
+      end
+      # Reutiliza los filtros del cambio por presión: legalidad, hazards, ace,
+      # veto de boosts y mejora mínima. La urgencia no espera dos turnos.
+      urgent_switch = ai_improvements_imminent_ko?
+      stalled_matchup = urgent_switch
+      should_switch = stalled_matchup || Battle::AI::Handlers.should_switch?(@user, reserves, self, @battle)
+      if !should_switch
+        stalled_matchup = ai_improvements_stalled_matchup?
+        should_switch = stalled_matchup
+      end
       if should_switch && @trainer.medium_skill?
-        should_switch = false if Battle::AI::Handlers.should_not_switch?(@user, reserves, self, @battle)
+        if Battle::AI::Handlers.should_not_switch?(@user, reserves, self, @battle, stalled_matchup, urgent_switch)
+          PBDebug.log_ai_decision("Cambio por presion rechazado: veto should_not_switch.") if stalled_matchup
+          should_switch = false
+        end
       end
       return false if !should_switch
     end
     # Want to switch; find the best replacement Pokémon
-    idxParty = choose_best_replacement_pokemon(@user.index, terrible_moves)
+    idxParty = choose_best_replacement_pokemon(@user.index, terrible_moves, stalled_matchup)
     if idxParty < 0   # No good replacement Pokémon found
       PBDebug.log("   => no good replacement Pokémon, will not switch after all")
+      PBDebug.log_ai_decision("Cambio por presion rechazado: relevo normal sin candidato suficiente; se conserva el umbral de mejora.") if stalled_matchup
       return false
     end
-    # Prefer using Baton Pass instead of switching
+    if stalled_matchup
+      replacement = @battle.pbParty(@user.index)[idxParty]
+      if !replacement || !@battle.pbCanSwitch?(@user.index, idxParty)
+        PBDebug.log_ai_decision("Cambio por presion rechazado: el relevo elegido no es legal.")
+        return false
+      end
+      if calculate_entry_hazard_damage(replacement, @user.side) >= replacement.hp
+        PBDebug.log_ai_decision("Cambio por presion rechazado: #{replacement.name} muere al entrar por hazards.")
+        return false
+      end
+    end
+    # Baton Pass elige otro relevo al ejecutarse; por estancamiento se conserva
+    # el candidato que acaba de superar los filtros del cambio voluntario.
     baton_pass = -1
     @user.battler.eachMoveWithIndex do |m, i|
+      next if stalled_matchup
       next if m.function_code != "SwitchOutUserPassOnEffects"   # Baton Pass
       next if !@battle.pbCanChooseMove?(@user.index, i, false)
       baton_pass = i
@@ -65,6 +113,84 @@ class Battle::AI
     return false
   end
 
+  def ai_improvements_imminent_ko?
+    return false if !@trainer.high_skill? || !@trainer.has_skill_flag?("HPAware")
+    return false if @battle.pbSideSize(0) != 1 || @battle.pbSideSize(1) != 1
+    rival = nil
+    each_foe_battler(@user.side) { |foe, _i| rival ||= foe }
+    return false if rival.nil?
+    foe_priority = ai_improvements_ko_priority(rival, @user)
+    return false if foe_priority.nil?
+    own_priority = ai_improvements_ko_priority(@user, rival)
+    if own_priority && (own_priority > foe_priority ||
+       (own_priority == foe_priority && @user.rough_stat(:SPEED) != rival.rough_stat(:SPEED) && @user.faster_than?(rival)))
+      PBDebug.log_ai_decision("Peligro inmediato: se conserva al activo porque dispone de KO fiable antes del rival.")
+      return false
+    end
+    PBDebug.log_ai_decision("Cambio por peligro inmediato: #{@user.name} HP #{@user.hp}/#{@user.totalhp}, " \
+                           "prioridad KO rival #{foe_priority}, propia #{own_priority.inspect}; se busca relevo sin sorteo de retirada.")
+    return true
+  end
+
+  def ai_improvements_stalled_matchup?
+    return false if !@trainer.high_skill? || !@trainer.has_skill_flag?("HPAware")
+    return false if @battle.pbSideSize(0) != 1 || @battle.pbSideSize(1) != 1
+    return false if @user.nil? || @user.fainted?
+    if @user.turnCount < 2
+      PBDebug.log_ai_decision("Estancamiento no evaluado: el activo lleva menos de dos turnos.")
+      return false
+    end
+    rival = nil
+    each_foe_battler(@user.side) { |b, _i| rival ||= b }
+    return false if rival.nil?
+    # ponytail: no simula romper Sustituto y atacar después; omite esta carrera
+    # hasta disponer de un horizonte de acciones.
+    if rival.effects[PBEffects::Substitute] > 0
+      PBDebug.log_ai_decision("Estancamiento no evaluado: Sustituto rival requiere una secuencia de ataques.")
+      return false
+    end
+    attack_pressure = ai_improvements_attack_pressure(@user, rival)
+    return false if attack_pressure.nil?
+    outgoing, recoil = attack_pressure
+    incoming = ai_improvements_best_damage(rival, @user)
+    own_residual = @user.rough_end_of_round_damage
+    foe_residual = rival.rough_end_of_round_damage
+    PBDebug.log_ai_decision("Presion #{@user.name} vs #{rival.name}: saliente #{outgoing.round(1)}, " \
+                           "entrante #{incoming.round(1)}, retroceso propio #{recoil.round(1)}, residual propio #{own_residual}, rival #{foe_residual}.")
+    if outgoing >= rival.hp || outgoing > rival.totalhp * 0.2
+      PBDebug.log_ai_decision("Estancamiento rechazado: el activo puede lograr KO inmediato o ejerce presion ofensiva suficiente.")
+      return false
+    end
+    if ai_improvements_has_progress_status?(@user) ||
+       [:SLEEP, :FROZEN, :PARALYSIS].include?(rival.status) || rival.effects[PBEffects::Confusion] > 0
+      PBDebug.log_ai_decision("Estancamiento rechazado: hay un movimiento de progreso viable o un estado util en el rival.")
+      return false
+    end
+    pressure = incoming + own_residual + recoil
+    if pressure <= 0
+      PBDebug.log_ai_decision("Estancamiento rechazado: el activo no pierde HP neto; bajo daño no basta para cambiar.")
+      return false
+    end
+    # ponytail: carrera con medias constantes, sin PP futuros, recuperacion activa
+    # ni orden de acciones; concede el ataque del turno letal. Simular secuencias
+    # si hace falta resolver carreras ajustadas en lugar de conservar al activo.
+    survival_turns = (@user.hp / pressure.to_f).ceil
+    net_damage = outgoing + foe_residual
+    turns_to_ko = (net_damage > 0) ? (rival.hp / net_damage.to_f).ceil : Float::INFINITY
+    residual_turns = (foe_residual > 0) ? (rival.hp / foe_residual.to_f).ceil : Float::INFINITY
+    if residual_turns <= survival_turns
+      PBDebug.log_ai_decision("Estancamiento rechazado: residual ganador en #{residual_turns} turnos; supervivencia #{survival_turns}.")
+      return false
+    end
+    PBDebug.log_ai_decision("Carrera por estancamiento: supervivencia #{survival_turns}, KO rival #{turns_to_ko}.")
+    if turns_to_ko <= survival_turns + 1
+      PBDebug.log_ai_decision("Estancamiento rechazado: el activo puede ganar la carrera o el margen es insuficiente.")
+      return false
+    end
+    PBDebug.log_ai_decision("Cambio voluntario por estancamiento: poca presion real y carrera desfavorable; se busca relevo normal.")
+    return true
+  end
+
   def get_non_active_party_pokemon(idxBattler)
     ret = []
     @battle.pbParty(idxBattler).each_with_index do |pkmn, i|
@@ -75,13 +201,17 @@ class Battle::AI
 
   #-----------------------------------------------------------------------------
 
-  def choose_best_replacement_pokemon(idxBattler, terrible_moves = false)
+  def choose_best_replacement_pokemon(idxBattler, terrible_moves = false, stalled_matchup = false)
     # Get all possible replacement Pokémon
     party = @battle.pbParty(idxBattler)
     idxPartyStart, idxPartyEnd = @battle.pbTeamIndexRangeFromBattlerIndex(idxBattler)
     reserves = []
-    party.each_with_index do |_pkmn, i|
+    party.each_with_index do |pkmn, i|
       next if !@battle.pbCanSwitchIn?(idxBattler, i)
+      if stalled_matchup
+        next if !@battle.pbCanSwitch?(idxBattler, i)
+        next if calculate_entry_hazard_damage(pkmn, @user.side) >= pkmn.hp
+      end
       if !terrible_moves   # Not terrible_moves means choosing an action for the round
         ally_will_switch_with_i = false
         @battle.allSameSideBattlers(idxBattler).each do |b|
@@ -93,7 +223,11 @@ class Battle::AI
       end
       # Ignore ace if possible
       if @trainer.has_skill_flag?("ReserveLastPokemon") && i == idxPartyEnd - 1
-        next if !terrible_moves || reserves.length > 0
+        if stalled_matchup
+          PBDebug.log_ai_decision("Reserva del ultimo Pokemon flexibilizada por presion: se valora #{pkmn.name} sin saltar el umbral de mejora.")
+        else
+          next if !terrible_moves || reserves.length > 0
+        end
       end
       reserves.push([i, 100])
       break if @trainer.has_skill_flag?("UsePokemonInOrder") && reserves.length > 0
@@ -102,6 +236,7 @@ class Battle::AI
     # Rate each possible replacement Pokémon
     reserves.each_with_index do |reserve, i|
       reserves[i][1] = rate_replacement_pokemon(idxBattler, party[reserve[0]], reserve[1])
+      PBDebug.log_ai_decision("Relevo candidato #{party[reserve[0]].name} (party #{reserve[0]}): score #{reserves[i][1]}.")
     end
     reserves.sort! { |a, b| b[1] <=> a[1] }   # Sort from highest to lowest rated
     # Don't bother choosing to switch if all replacements are poorly rated
@@ -168,6 +303,8 @@ class Battle::AI
         score -= 15
       end
     end
+    hp_aware = @trainer.high_skill? && @trainer.has_skill_flag?("HPAware")
+    last_move_threat = 0
     # Predict effectiveness of foe's last used move against pkmn
     each_foe_battler(@user.side) do |b, i|
       next if !b.battler.lastMoveUsed
@@ -176,6 +313,25 @@ class Battle::AI
       move_type = move_data.type
       eff = Effectiveness.calculate(move_type, *pkmn_types)
       score -= move_data.power * eff / 5
+      last_move_threat = [last_move_threat, move_data.power * eff].max if hp_aware
+    end
+    if hp_aware && pkmn.totalhp > 0
+      hp_penalty = (40 * (1 - pkmn.hp.to_f / pkmn.totalhp).clamp(0, 1)).round
+      remaining_hp = [pkmn.hp - entry_hazard_damage, 0].max
+      fragile_penalty = 0
+      # ponytail: survival proxy, NOT damage or a KO prediction. At <=25% HP,
+      # penalize up to 20 points if known last power * type effectiveness >=70.
+      # Ignores stats, STAB, abilities, accuracy, fixed damage and move effects;
+      # use a side-effect-free reserve damage API if one becomes available.
+      if last_move_threat >= 70 && remaining_hp < pkmn.totalhp * 0.25
+        fragile_penalty = (20 * (1 - remaining_hp / (pkmn.totalhp * 0.25))).round
+      end
+      adjustment = hp_penalty + fragile_penalty
+      score -= adjustment
+      PBDebug.log_ai_decision("Valoracion HP #{pkmn.name}: HP #{pkmn.hp}/#{pkmn.totalhp}, " \
+                             "hazards #{entry_hazard_damage}, restante #{remaining_hp}, " \
+                             "amenaza proxy #{last_move_threat}, ajuste -#{adjustment} " \
+                             "(HP -#{hp_penalty}, fragilidad -#{fragile_penalty}).")
     end
     # Add power * effectiveness / 10 of all pkmn's moves to score
     pkmn.moves.each do |m|
@@ -692,7 +848,8 @@ Battle::AI::Handlers::ShouldNotSwitch.add(:lethal_entry_hazards,
 # move.
 #===============================================================================
 Battle::AI::Handlers::ShouldNotSwitch.add(:battler_has_super_effective_move,
-  proc { |battler, reserves, ai, battle|
+  proc { |battler, reserves, ai, battle, _pressure_switch, urgent_switch|
+    next false if urgent_switch
     next false if battler.effects[PBEffects::PerishSong] == 1
     next false if battler.rough_end_of_round_damage >= battler.hp * 2 / 3
     next false if battle.rules["suddendeath"]
@@ -727,10 +884,14 @@ Battle::AI::Handlers::ShouldNotSwitch.add(:battler_has_super_effective_move,
 # Negative stat stages are ignored.
 #===============================================================================
 Battle::AI::Handlers::ShouldNotSwitch.add(:battler_has_very_raised_stats,
-  proc { |battler, reserves, ai, battle|
-    next false if battle.rules["suddendeath"]
+  proc { |battler, reserves, ai, battle, stalled_matchup|
     stat_raises = 0
     battler.stages.each_value { |val| stat_raises += val if val > 0 }
+    if stalled_matchup
+      PBDebug.log_ai_decision("Boosts no vetan el cambio: la evaluacion de presion incluye los stages actuales.") if stat_raises >= 4
+      next false
+    end
+    next false if battle.rules["suddendeath"]
     if stat_raises >= 4
       PBDebug.log_ai("#{battler.name} won't switch after all because it has a lot of raised stats")
       next true

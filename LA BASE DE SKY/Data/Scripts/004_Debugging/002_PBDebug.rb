@@ -1,5 +1,38 @@
+# encoding: utf-8
 module PBDebug
   @@log = []
+  @@ai_logging_depth = 0
+  @@silent_logging_depth = 0
+
+  def self.ai_logging?
+    return $DEBUG && Settings::AI_DECISION_LOGGING && @@ai_logging_depth > 0
+  end
+
+  # El ámbito limita la salida ampliada a decisiones de IA, no al resto del combate.
+  def self.with_ai_logging
+    return yield unless $DEBUG && Settings::AI_DECISION_LOGGING
+    @@ai_logging_depth += 1
+    begin
+      yield
+    ensure
+      @@ai_logging_depth -= 1
+    end
+  end
+
+  def self.with_silent_logging
+    @@silent_logging_depth += 1
+    begin
+      yield
+    ensure
+      @@silent_logging_depth -= 1
+    end
+  end
+
+  def self.log_ai_decision(msg)
+    return if @@silent_logging_depth > 0
+    return unless ai_logging?
+    log_ai("[TRACE] #{msg}")
+  end
 
   def self.logonerr
     begin
@@ -23,8 +56,15 @@ module PBDebug
     @@log.clear
   end
 
+  def self.log_battle_event(msg)
+    with_ai_logging { log("[BATTLE] [TRACE] #{msg}") }
+  end
+
   def self.log(msg)
-    if $DEBUG && $INTERNAL
+    return if @@silent_logging_depth > 0
+    battle_event = Settings::AI_DECISION_LOGGING &&
+                   msg.start_with?("[HP change]", "[Item triggered]", "[Ability triggered]", "[Lingering effect]")
+    if $DEBUG && ($INTERNAL || ai_logging? || battle_event)
       echoln msg.gsub("%", "%%")
       @@log.push(msg + "\r\n")
       PBDebug.flush   # if @@log.length > 1024
@@ -49,7 +89,8 @@ module PBDebug
   end
 
   def self.log_ai(msg)
-    if $DEBUG && $INTERNAL
+    return if @@silent_logging_depth > 0
+    if $DEBUG && ($INTERNAL || ai_logging?)
       msg = "[AI] " + msg
       echoln msg.gsub("%", "%%")
       @@log.push(msg + "\r\n")
@@ -58,8 +99,8 @@ module PBDebug
   end
 
   def self.log_score_change(amt, msg)
-    return if amt == 0
-    if $DEBUG && $INTERNAL
+    return if @@silent_logging_depth > 0 || amt == 0
+    if $DEBUG && ($INTERNAL || ai_logging?)
       sign = (amt > 0) ? "+" : "-"
       amt_text = sprintf("%3d", amt.abs)
       msg = "     #{sign}#{amt_text}: #{msg}"
@@ -75,4 +116,3 @@ module PBDebug
     end
   end
 end
-

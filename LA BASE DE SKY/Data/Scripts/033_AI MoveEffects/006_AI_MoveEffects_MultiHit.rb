@@ -138,6 +138,11 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("HitTwoToFiveTimes",
 Battle::AI::Handlers::MoveBasePower.add("HitTwoToFiveTimesOrThreeForAshGreninja",
   proc { |power, move, user, target, ai, battle|
     if user.battler.isSpecies?(:GRENINJA) && user.battler.form == 2
+      if ai.trainer.high_skill? && ai.trainer.has_skill_flag?("HPAware")
+        # Estimación estable: Loaded Dice usa 4 o 5 golpes; sin él, Ash usa 3.
+        hits = user.has_active_item?(:LOADEDDICE) ? 4.5 : 3
+        next move.move.pbBasePower(power, user.battler, target.battler) * hits
+      end
       next move.move.pbBasePower(power, user.battler, target.battler) * move.move.pbNumHits(user.battler, [target.battler])
     end
     next power * 5 if user.has_active_ability?(:SKILLLINK)

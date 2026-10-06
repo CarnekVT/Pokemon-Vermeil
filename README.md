@@ -8,12 +8,16 @@
 
 ### [WIKI DE LA BASE](https://la-base-de-sky-wiki-1070f3.gitlab.io/)
 
-### Generador de wiki para tu juego
+### Generador visual de wiki para tu juego
 
-`ruby wiki/generate.rb` crea una wiki web estática de tu juego (Pokédex, movimientos,
-habilidades, objetos, entrenadores, ubicaciones y tabla de tipos) y marca lo que has
-cambiado respecto a La Base de Sky. Lista para GitHub Pages o GitLab Pages. Detalles en
-[`wiki/README.md`](wiki/README.md).
+`ruby wiki/generate.rb` abre un asistente para crear una wiki web estática de tu juego.
+Incluye Pokédex, movimientos, habilidades, objetos, ubicaciones y una guía de combates.
+Con `ruby wiki/generate.rb --configure` puedes configurar modos de juego, variantes de
+entrenadores, tipos iniciales, contenido visible y apariencia desde el navegador.
+El generador localiza el juego por `mkxp.json` y compila los PBS sin iniciar el juego.
+
+La guía completa está en [`wiki/README.md`](wiki/README.md) y en la
+[wiki de La Base de Sky](https://la-base-de-sky-wiki-1070f3.gitlab.io/pages/generador-wiki.html).
 
 ### AÑADIDOS V 1.2.0.1
 

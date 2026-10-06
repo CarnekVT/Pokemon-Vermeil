@@ -822,7 +822,7 @@ end
 module Essentials
   VERSION = '21.1'
   ERROR_TEXT = ''
-  MKXPZ_VERSION = '2.4.2/349d3813'
+  MKXPZ_VERSION = '2.4.2/1ba25ab1'
 end
 
 

@@ -1,11 +1,44 @@
 stages:
   - test
+  - build
   - notify
   - release
-  # - build
 
 # Boots Essentials headlessly and runs tests/. No gems to install: the runner is
 # tests/framework.rb and everything else ships with Ruby.
+wiki-baseline:
+  stage: build
+  image: ruby:3.4
+  tags:
+    - self-hosted
+  rules:
+    - if: '$CI_PROJECT_PATH == "la-base-de-sky/La-Base-de-Sky" && $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH'
+      changes:
+        - "LA BASE DE SKY/PBS/**/*"
+        - "wiki/lib/extract.rb"
+        - "wiki/generate.rb"
+        - ".gitlab-ci.yml"
+      when: always
+  script:
+    - |
+      set -euo pipefail
+
+      SNAPSHOT="$(mktemp)"
+      trap 'rm -f "$SNAPSHOT"' EXIT
+      ruby wiki/generate.rb --snapshot "$SNAPSHOT"
+
+      if cmp -s "$SNAPSHOT" wiki/baseline.json; then
+        echo "PBS snapshot unchanged."
+        exit 0
+      fi
+
+      cp "$SNAPSHOT" wiki/baseline.json
+      git config user.name "Wiki Baseline Bot"
+      git config user.email "wiki-baseline-bot@users.noreply.gitlab.com"
+      git add wiki/baseline.json
+      git commit -m "chore(wiki): refresh PBS baseline"
+      git push "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "HEAD:${CI_COMMIT_REF_NAME}"
+
 tests:
   stage: test
   image: ruby:3.4
@@ -18,15 +51,13 @@ tests:
   script:
     - ruby tests/run.rb
 
-notify-discord:
+.notify-discord:
   stage: notify
   image: alpine:latest
   tags:
     - self-hosted
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "dev"
   before_script:
-    - apk add --no-cache curl git
+    - apk add --no-cache curl git jq
   script:
     - |
       set -euo pipefail
@@ -37,17 +68,42 @@ notify-discord:
         exit 1
       fi
 
-      COMMIT_URL="${CI_PROJECT_URL}/-/commit/${CI_COMMIT_SHA}"
-
-      # Build commit list from all commits in this push
       ZERO_SHA="0000000000000000000000000000000000000000"
-      if [ "${CI_COMMIT_BEFORE_SHA}" = "${ZERO_SHA}" ]; then
-        # First push to branch — just show the HEAD commit
-        COMMIT_LIST=$(git log -1 --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s")
-        TITLE_URL="${COMMIT_URL}"
+      if [ -n "${DISCORD_REPLAY_PIPELINE_ID:-}" ]; then
+        case "${DISCORD_REPLAY_PIPELINE_ID}" in
+          *[!0-9]*|"") echo "ERROR: DISCORD_REPLAY_PIPELINE_ID must be numeric."; exit 1 ;;
+        esac
+
+        PIPELINE=$(curl -fsS --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${DISCORD_REPLAY_PIPELINE_ID}")
+        PIPELINE_STATUS=$(printf '%s' "${PIPELINE}" | jq -r '.status // empty')
+        PIPELINE_REF=$(printf '%s' "${PIPELINE}" | jq -r '.ref // empty')
+        if [ "${PIPELINE_STATUS}" != "failed" ] || [ "${PIPELINE_REF}" != "dev" ]; then
+          echo "ERROR: pipeline must be failed and belong to dev."
+          exit 1
+        fi
+
+        FROM_SHA=$(printf '%s' "${PIPELINE}" | jq -r '.before_sha // empty')
+        TO_SHA=$(printf '%s' "${PIPELINE}" | jq -r '.sha // empty')
+        if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+          git fetch --quiet --unshallow origin dev
+        fi
       else
-        COMMIT_LIST=$(git log --reverse --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s" "${CI_COMMIT_BEFORE_SHA}..${CI_COMMIT_SHA}")
-        TITLE_URL="${CI_PROJECT_URL}/-/compare/${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA}"
+        FROM_SHA="${CI_COMMIT_BEFORE_SHA}"
+        TO_SHA="${CI_COMMIT_SHA}"
+      fi
+
+      if [ "${FROM_SHA}" = "${ZERO_SHA}" ]; then
+        # First push to branch — just show the HEAD commit
+        COMMIT_LIST=$(git log -1 "${TO_SHA}" --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s")
+        TITLE_URL="${CI_PROJECT_URL}/-/commit/${TO_SHA}"
+      else
+        COMMIT_LIST=$(git log --reverse --format="[\`%h\`](${CI_PROJECT_URL}/-/commit/%H) — %s" "${FROM_SHA}..${TO_SHA}")
+        TITLE_URL="${CI_PROJECT_URL}/-/compare/${FROM_SHA}...${TO_SHA}"
+      fi
+      if [ -z "${COMMIT_LIST}" ]; then
+        echo "ERROR: no commits found for the notification range."
+        exit 1
       fi
 
       # Truncate to 4096 chars (Discord embed description limit)
@@ -95,6 +151,19 @@ notify-discord:
         "${DISCORD_COMMIT_WEBHOOK_URL}"
 
       echo "Discord notification sent!"
+
+notify-discord:
+  extends: .notify-discord
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "dev"
+
+# Reenvía a Discord commits que no se notificaron porque falló su pipeline.
+notify-discord-replay:
+  extends: .notify-discord
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == "dev"
+      when: manual
+      allow_failure: true
 
 release:
   stage: release

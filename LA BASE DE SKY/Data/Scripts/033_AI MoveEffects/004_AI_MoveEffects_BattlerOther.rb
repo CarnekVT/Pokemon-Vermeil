@@ -1096,6 +1096,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("SetTargetAbilityToSimple
 #===============================================================================
 #
 #===============================================================================
+
 Battle::AI::Handlers::MoveFailureAgainstTargetCheck.add("SetTargetAbilityToInsomnia",
   proc { |move, user, target, ai, battle|
     next true if !GameData::Ability.exists?(:INSOMNIA)
@@ -1108,6 +1109,127 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("SetTargetAbilityToInsomn
     old_ability_rating = target.wants_ability?(target.ability_id)
     new_ability_rating = target.wants_ability?(:INSOMNIA)
     side_mult = (target.opposes?(user)) ? 1 : -1
+    absorbed_type = case target.ability_id
+                    when :WATERABSORB, :STORMDRAIN, :DRYSKIN then :WATER
+                    when :VOLTABSORB, :LIGHTNINGROD, :MOTORDRIVE then :ELECTRIC
+                    when :FLASHFIRE then :FIRE
+                    when :SAPSIPPER then :GRASS
+                    end
+    if ai.trainer.high_skill? && ai.trainer.has_skill_flag?("HPAware") &&
+       (target.ability_id == :STURDY || (absorbed_type && target.opposes?(user)))
+      if absorbed_type
+        immunity_useful = false
+        if user.opposes?(target) && !user.fainted? && user.effects[PBEffects::HyperBeam] == 0
+          immunity_useful = ai.ai_improvements_with_move_context(user, target) do
+            user.moves.each_with_index.any? do |candidate, index|
+              next false if candidate.nil? || !candidate.damagingMove?
+              next false if !ai.ai_improvements_move_available?(user, candidate, index)
+              ai.set_up_move_check(candidate.clone)
+              next false if battle.moldBreaker || ai.move.rough_type != absorbed_type
+              next false if !battle.pbMoveCanTarget?(user.index, target.index, ai.move.pbTarget(user.battler))
+              next false if ai.pbPredictMoveFailure
+              next false if ai.move.move.is_a?(Battle::Move::TwoTurnMove) && ai.move.move.pbIsChargingTurn?(user.battler)
+              next false if !ai.move.move.pbDamagingMove?
+              # ponytail: proxy de tipo/legalidad sin mutar habilidades ni scoring recursivo;
+              # no simula todas las defensas del objetivo. Usar contexto hipotetico si se necesita exactitud.
+              next false if Battle::AI::Handlers.move_will_fail_against_target?(ai.move.function_code,
+                ai.move, user, target, ai, battle)
+              type_mod = ai.move.move.pbCalcTypeMod(ai.move.rough_type, user.battler, target.battler)
+              next false if Effectiveness.ineffective?(type_mod)
+              next false if battle.field.terrain == :Psychic && target.battler.affectedByTerrain? &&
+                            ai.move.rough_priority(user) > 0
+              ai.move.rough_accuracy > 0 && ai.move.base_power > 0
+            end
+          end
+        end
+        if !immunity_useful
+          PBDebug.log_score_change(Battle::AI::MOVE_USELESS_SCORE - score,
+            "Abatidoras: sin ataque actual util del usuario contra la inmunidad")
+          next Battle::AI::MOVE_USELESS_SCORE
+        end
+      else
+        # Robustez también bloquea OHKO con HP parciales. Conserva la valoración
+        # original en este caso; predecir OHKO después de borrar la habilidad requeriría otro contexto.
+        ohko_available = false
+        ai.each_foe_battler(target.side) do |attacker, _i|
+          next if attacker.effects[PBEffects::HyperBeam] > 0 || attacker.has_mold_breaker?
+          ohko_available ||= attacker.moves.each_with_index.any? do |candidate, index|
+            candidate && candidate.is_a?(Battle::Move::OHKO) &&
+              ai.ai_improvements_move_available?(attacker, candidate, index)
+          end
+        end
+        if ohko_available
+          change = 0
+          if old_ability_rating > new_ability_rating
+            change = 5 * side_mult * [old_ability_rating - new_ability_rating, 3].max
+          elsif old_ability_rating < new_ability_rating
+            change = -5 * side_mult * [new_ability_rating - old_ability_rating, 3].max
+          end
+          PBDebug.log_ai_decision("Abatidoras: OHKO disponible; se conserva valoracion original de Robustez.")
+          next score + change
+        end
+        single_hit_threat = false
+        bypass_threat = false
+        if target.hp == target.totalhp
+          ai.each_foe_battler(target.side) do |attacker, _i|
+            next if !attacker.can_attack?
+            ai.ai_improvements_best_damage(attacker, target) do |candidate|
+              next false if candidate.move.is_a?(Battle::Move::OHKO)
+              next false if candidate.move.is_a?(Battle::Move::TwoTurnMove) &&
+                            candidate.move.pbIsChargingTurn?(attacker.battler)
+              next false if !candidate.move.pbDamagingMove?
+              parental_bond = attacker.has_active_ability?(:PARENTALBOND) &&
+                              !candidate.move.chargingTurnMove? && !candidate.targets_multiple_battlers? &&
+                              candidate.move.method(:pbNumHits).owner == Battle::Move
+              bypass = attacker.has_mold_breaker? || candidate.move.multiHitMove? || parental_bond ||
+                       ["IgnoreTargetAbility", "CategoryDependsOnHigherDamageIgnoreTargetAbility"].include?(candidate.function_code)
+              next false if bypass ? bypass_threat : single_hit_threat
+              if candidate.rough_damage >= target.hp
+                if bypass
+                  bypass_threat = true
+                else
+                  single_hit_threat = true
+                end
+              end
+              # Inspect raw KO damage once, without the helper's accuracy/turn averaging.
+              next false
+            end
+          end
+        end
+        sturdy_useful = single_hit_threat && !bypass_threat
+        old_ability_rating = 0 if !sturdy_useful
+      end
+      sleep_threat = target.battler.asleep? || target.effects[PBEffects::Yawn] > 0
+      ai.each_battler do |b, _i|
+        next if sleep_threat || !b.opposes?(target) || b.fainted?
+        next if b.effects[PBEffects::HyperBeam] > 0
+        sleep_threat = ai.ai_improvements_with_move_context(b, target) do
+          b.moves.each_with_index.any? do |candidate, index|
+            next false if candidate.nil?
+            next false if !["SleepTarget", "SleepTargetIfUserDarkrai",
+                           "SleepTargetChangeUserMeloettaForm", "SleepTargetNextTurn"].include?(candidate.function_code)
+            next false if !ai.ai_improvements_move_available?(b, candidate, index)
+            ai.set_up_move_check(candidate.clone)
+            next false if !battle.pbMoveCanTarget?(b.index, target.index, ai.move.pbTarget(b.battler))
+            next false if ai.pbPredictMoveFailure || ai.pbPredictMoveFailureAgainstTarget
+            ai.move.rough_accuracy > 0 && target.battler.pbCanSleep?(b.battler, false, ai.move.move)
+          end
+        end
+      end
+      new_ability_rating = 0 if !sleep_threat
+      change = 5 * side_mult * (old_ability_rating - new_ability_rating)
+      if absorbed_type
+        PBDebug.log_ai_decision("Abatidoras contra #{target.name}: #{target.ability_id} util=#{immunity_useful}, amenaza de sueno=#{sleep_threat}, cambio=#{change}.")
+      else
+        PBDebug.log_ai_decision("Abatidoras contra #{target.name}: Sturdy util=#{sturdy_useful}, HP=#{target.hp}/#{target.totalhp}, amenaza monogolpe=#{single_hit_threat}, amenaza bypass=#{bypass_threat}, amenaza de sueno=#{sleep_threat}, cambio=#{change}.")
+      end
+      if change == 0
+        PBDebug.log_score_change(Battle::AI::MOVE_USELESS_SCORE - score, "Abatidoras: sin utilidad contextual al cambiar la habilidad")
+        next Battle::AI::MOVE_USELESS_SCORE
+      end
+      PBDebug.log_score_change(change, "Abatidoras: valor contextual de la habilidad/Insomnia")
+      next score + change
+    end
     if old_ability_rating > new_ability_rating
       score += 5 * side_mult * [old_ability_rating - new_ability_rating, 3].max
     elsif old_ability_rating < new_ability_rating

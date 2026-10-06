@@ -16,6 +16,7 @@ class Battle::AI
       PBDebug.log_ai("#{@user.name} will Mega Evolve")
       return true
     end
+    PBDebug.log_ai_decision("Mega descartada: el motor no permite megaevolucionar al activo.")
     return false
   end
 

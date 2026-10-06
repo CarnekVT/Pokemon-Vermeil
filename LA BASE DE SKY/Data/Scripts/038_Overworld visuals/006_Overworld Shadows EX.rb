@@ -324,7 +324,8 @@ class Sprite_OWShadow
     signature = clipping_signature(base_bmp, src_rect)
     @frames_since_fusion += 1
     if @clipping_signature != signature || @frames_since_fusion > FUSION_MAX_FRAMES
-      @sprite.bitmap = apply_shadow_fusion(base_bmp, src_rect)
+      new_bitmap = apply_shadow_fusion(base_bmp, src_rect)
+      @sprite.bitmap = new_bitmap if @sprite.bitmap != new_bitmap
       @clipping_signature = signature
       @fusion_generation += 1
       @frames_since_fusion = 0
@@ -481,7 +482,7 @@ class Sprite_OWShadow
         update_clipped_bitmap(@custom_shadow_bitmap, @rsprite.src_rect)
         @sprite.src_rect.set(0, 0, @rsprite.src_rect.width, @rsprite.src_rect.height)
       else
-        @sprite.bitmap = @custom_shadow_bitmap
+        @sprite.bitmap = @custom_shadow_bitmap if @sprite.bitmap != @custom_shadow_bitmap
         @clipping_signature = nil
         @sprite.src_rect.set(@rsprite.src_rect.x, @rsprite.src_rect.y, @rsprite.src_rect.width, @rsprite.src_rect.height)
       end
@@ -490,19 +491,20 @@ class Sprite_OWShadow
         @shadow_data = generate_shadow_data
       end
       return unless @shadow_data
-      
-      @sprite.ox = (@shadow_data[:bitmap].width / 2) - @shadow_data[:offset]
-      @sprite.oy = @shadow_data[:bitmap].height
-      @sprite.z  = @event.screen_z(@shadow_data[:bitmap].height) - 1      
+
+      shadow_bitmap = @shadow_data[:bitmap]
+      @sprite.ox = (shadow_bitmap.width / 2) - @shadow_data[:offset]
+      @sprite.oy = shadow_bitmap.height
+      @sprite.z  = @event.screen_z(shadow_bitmap.height) - 1
       @sprite.opacity = (@rsprite.opacity * @shadow_fade).to_i
       
       if clipping_enabled && @sprite.visible && @sprite.opacity > 0 && is_on_screen
-        update_clipped_bitmap(@shadow_data[:bitmap])
+        update_clipped_bitmap(shadow_bitmap)
         @sprite.src_rect.set(0, 0, @sprite.bitmap.width, @sprite.bitmap.height)
       else
-        @sprite.bitmap = @shadow_data[:bitmap]
+        @sprite.bitmap = shadow_bitmap if @sprite.bitmap != shadow_bitmap
         @clipping_signature = nil
-        @sprite.src_rect.set(0, 0, @sprite.bitmap.width, @sprite.bitmap.height)
+        @sprite.src_rect.set(0, 0, shadow_bitmap.width, shadow_bitmap.height)
       end
     end
   end

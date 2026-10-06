@@ -250,9 +250,9 @@ class PokemonBoxIcon < IconSprite
     do_colours
     # Apply tone after any bitmap changes
     if @should_be_grey
-      self.tone = Tone.new(0, 0, 0, 255)
+      self.tone.set(0, 0, 0, 255)
     else
-      self.tone = Tone.new(0, 0, 0, 0)
+      self.tone.set(0, 0, 0, 0)
     end
     if releasing?
       self.zoom_x = lerp(1.0, 0.0, 1.5, @release_timer_start, System.uptime)
@@ -269,11 +269,11 @@ class PokemonBoxIcon < IconSprite
   def do_colours
     case @type
     when :Clear
-      self.color = Color.new(0, 0, 0, 0)
+      self.color.set(0, 0, 0, 0)
     when :Green
-      self.color = Color.new(0, 128, 0, 192)
+      self.color.set(0, 128, 0, 192)
     when :Grey
-      self.color = Color.new(128, 128, 128, 255)
+      self.color.set(128, 128, 128, 255)
     end
   end
 end

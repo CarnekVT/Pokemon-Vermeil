@@ -106,6 +106,11 @@ class Battle::AI
     # Check if target won't benefit from the stat being raised
     return true if target.has_move_with_function?("SwitchOutUserPassOnEffects",
                                                   "PowerHigherWithUserPositiveStatStages")
+    if @trainer.high_skill? && @trainer.has_skill_flag?("HPAware") &&
+       [:DEFENSE, :SPECIAL_DEFENSE].include?(stat)
+      return true if stat == :DEFENSE && target.has_move_with_function?("UseUserDefenseInsteadOfUserAttack")
+      return ai_improvements_defensive_stat_worthwhile?(target, stat)
+    end
     case stat
     when :ATTACK
       return false if !target.check_for_move { |m| m.physicalMove?(m.type) &&
@@ -165,7 +170,14 @@ class Battle::AI
 
   # Make score changes based on the general concept of raising stats at all.
   def get_target_stat_raise_score_generic(score, target, stat_changes, desire_mult = 1)
-    total_increment = stat_changes.sum { |change| change[1] }
+    # Defensive stages use damage saved, not first-turn/high-HP setup bonuses.
+    total_increment = stat_changes.sum do |stat, increment|
+      if @trainer.high_skill? && @trainer.has_skill_flag?("HPAware") &&
+         [:DEFENSE, :SPECIAL_DEFENSE].include?(stat)
+        next 0
+      end
+      next increment
+    end
     # Prefer if move is a status move and it's the user's first/second turn
     if @user.turnCount < 2 && @move.statusMove?
       score += total_increment * desire_mult * 4
@@ -211,8 +223,11 @@ class Battle::AI
         score += inc * inc_mult
       end
     when :DEFENSE
-      # Modify score depending on current stat stage
-      if old_stage >= 2 && increment == 1
+      if @trainer.high_skill? && @trainer.has_skill_flag?("HPAware")
+        score += ai_improvements_defensive_setup_delta(target, stat, increment) * desire_mult
+        # Body Press also converts Defense into offensive pressure.
+        score += 10 * inc_mult if target.has_move_with_function?("UseUserDefenseInsteadOfUserAttack")
+      elsif old_stage >= 2 && increment == 1
         score -= 10 * ((target.opposes?(@user)) ? 1 : desire_mult)
       else
         score += 10 * inc_mult
@@ -230,8 +245,9 @@ class Battle::AI
         score += inc * inc_mult
       end
     when :SPECIAL_DEFENSE
-      # Modify score depending on current stat stage
-      if old_stage >= 2 && increment == 1
+      if @trainer.high_skill? && @trainer.has_skill_flag?("HPAware")
+        score += ai_improvements_defensive_setup_delta(target, stat, increment) * desire_mult
+      elsif old_stage >= 2 && increment == 1
         score -= 10 * ((target.opposes?(@user)) ? 1 : desire_mult)
       else
         score += 10 * inc_mult

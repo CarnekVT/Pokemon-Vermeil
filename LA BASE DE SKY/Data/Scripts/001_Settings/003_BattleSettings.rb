@@ -165,10 +165,12 @@ module Settings
 
   #=============================================================================
 
-  # Si es true, los Pokémon salvajes marcados como "Legendario", "Mítico" o
-  # "Ultraente" (según se define en pokemon.txt) tienen una IA más inteligente.
-  # Su nivel de habilidad se establece en 32, que es un nivel de habilidad medio.
-  SMARTER_WILD_LEGENDARY_POKEMON = true
+  # Nivel de habilidad para todos los Pokémon salvajes, incluidos legendarios y Ultraentes.
+  # Entero entre 0 y 255: 0 sin scoring, 1-31 básico, 32-47 medio, 48-99 alto, 100+ máximo.
+  WILD_POKEMON_SKILL_LEVEL = 0
+
+  # Traza de decisiones de la IA en consola. Solo con $DEBUG; no requiere $INTERNAL.
+  AI_DECISION_LOGGING = false
 
   # El mensaje del repartir experiencia será "¡Tus otros Pokémon también ganaron puntos de experiencia!"
   # En lugar de mostrar cuanta experiencia ha ganado cada Pokémon que tenga el Repartir Experiencia activo.
@@ -210,14 +212,14 @@ module Settings
 
   # Activa o desactiva el cambio de tono (Hue) para los Pokémon Super Shiny.
   SUPER_SHINY_HUE_SHIFT = false
-  
+
   # Valores de tono (Hue) disponibles para la asignación aleatoria.
   # NOTA: Puedes usar SuperShinyHue = VALOR en los PBS de pokemon para asignar un valor
   # especifico. Pede ser un valor individual (SuperShinyHue = 20) o multiples
   # (SuperShinyHue = 20, 120, 85). Esto le dice al sitema que ignore esto y use
   # los que asignes.
   SUPER_SHINY_HUES = [75, 90, 105, 120, 135, 150, 165, 180]
-  
+
   # Si es true, todos los Pokémon de la misma especie tendrán el mismo tono.
   # Si es false, el tono será único por cada Pokémon.
   SUPER_SHINY_HUE_BY_SPECIES = true
@@ -227,7 +229,7 @@ module Settings
   #=============================================================================
   # ** CONFIGURACIÓN BARRAS DE ENTRENADORES **
   #=============================================================================
-  
+
   # FORMA DE LAS BARRAS
   #    :SLANTED    - Triángulos inclinados en las esquinas
   #    :SQUARE     - Marco que abarca toda la pantalla
@@ -249,11 +251,11 @@ module Settings
   #    true  : Activa el uso del color CUSTOM_RGB y la transparencia CUSTOM_ALPHA.
   #    false : Utiliza el degradado oscuro cinemático por defecto.
   CUSTOM_RGB_ENABLED = false
-  
+
   # Color RGB [Rojo, Verde, Azul] (Valores entre 0 y 255)
   # Ejemplos: [10, 12, 16] (Negro mate), [210, 35, 35] (Rojo), [20, 50, 150] (Azul)
   CUSTOM_RGB   = [10, 12, 16]
-  
+
   # Transparencia / Opacidad máxima (0 a 255, donde 255 es sólido y 0 invisible)
   CUSTOM_ALPHA = 240
 
@@ -304,4 +306,3 @@ module Settings
   SELF_SWITCH  = "A"
   BAR_GRAPHIC  = ""
 end
-

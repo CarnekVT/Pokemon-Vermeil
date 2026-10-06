@@ -46,35 +46,52 @@ class Battle::AI
 
   # Choose an action.
   def pbDefaultChooseEnemyCommand(idxBattler)
-    set_up(idxBattler)
-    ret = false
-    PBDebug.logonerr { ret = pbChooseToSwitchOut }
-    if ret
+    PBDebug.with_ai_logging do
+      set_up(idxBattler)
+      PBDebug.log_ai_decision("Turno #{@battle.turnCount + 1} | #{@user.name} (#{idxBattler}) | skill #{@trainer.skill} | HP #{@user.hp}/#{@user.totalhp} | estado #{@user.status}")
+      ret = false
+      PBDebug.logonerr { ret = pbChooseToSwitchOut }
+      if ret
+        PBDebug.log_ai_decision("Cambio registrado; tiene prioridad sobre objetos y movimientos.")
+        PBDebug.log("")
+        return
+      end
+      ret = false
+      PBDebug.logonerr { ret = pbChooseToUseItem }
+      if ret
+        PBDebug.log_ai_decision("Objeto registrado; tiene prioridad sobre movimientos.")
+        PBDebug.log("")
+        return
+      end
+      PBDebug.log_ai_decision("Sin cambio ni objeto registrado; se evalua atacar.")
+      if @battle.pbAutoFightMenu(idxBattler)
+        PBDebug.log_ai_decision("Accion resuelta por el modo de combate automatico.")
+        PBDebug.log("")
+        return
+      end
+      @battle.pbRegisterMegaEvolution(idxBattler) if pbEnemyShouldMegaEvolve?
+      choices = pbGetMoveScores
+      pbChooseMove(choices)
       PBDebug.log("")
-      return
     end
-    ret = false
-    PBDebug.logonerr { ret = pbChooseToUseItem }
-    if ret
-      PBDebug.log("")
-      return
-    end
-    if @battle.pbAutoFightMenu(idxBattler)
-      PBDebug.log("")
-      return
-    end
-    @battle.pbRegisterMegaEvolution(idxBattler) if pbEnemyShouldMegaEvolve?
-    choices = pbGetMoveScores
-    pbChooseMove(choices)
-    PBDebug.log("")
   end
 
   # Choose a replacement Pokémon (called directly from @battle, not part of
   # action choosing). Must return the party index of a replacement Pokémon if
   # possible.
   def pbDefaultChooseNewEnemy(idxBattler)
-    set_up(idxBattler)
-    return choose_best_replacement_pokemon(idxBattler, true)
+    PBDebug.with_ai_logging do
+      set_up(idxBattler)
+      PBDebug.log_ai_decision("Relevo para #{@user.name} (#{idxBattler}) | skill #{@trainer.skill}")
+      idxParty = choose_best_replacement_pokemon(idxBattler, true)
+      if idxParty >= 0
+        pkmn = @battle.pbParty(idxBattler)[idxParty]
+        PBDebug.log_ai_decision("Relevo elegido: #{pkmn.name} (party #{idxParty}).") if pkmn
+      else
+        PBDebug.log_ai_decision("No hay relevo valido.")
+      end
+      idxParty
+    end
   end
 end
 
@@ -97,11 +114,15 @@ module Battle::AI::Handlers
   module_function
 
   def move_will_fail?(function_code, *args)
-    return MoveFailureCheck.trigger(function_code, *args) || false
+    ret = MoveFailureCheck.trigger(function_code, *args)
+    PBDebug.log_ai_decision("Fallo previsto por function code #{function_code}.") if ret
+    return ret || false
   end
 
   def move_will_fail_against_target?(function_code, *args)
-    return MoveFailureAgainstTargetCheck.trigger(function_code, *args) || false
+    ret = MoveFailureAgainstTargetCheck.trigger(function_code, *args)
+    PBDebug.log_ai_decision("Fallo previsto contra el objetivo por function code #{function_code}.") if ret
+    return ret || false
   end
 
   def apply_move_effect_score(function_code, score, *args)
@@ -122,6 +143,9 @@ module Battle::AI::Handlers
   def apply_general_move_score_modifiers(score, *args)
     GeneralMoveScore.each do |id, score_proc|
       new_score = score_proc.call(score, *args)
+      if new_score && PBDebug.ai_logging?
+        PBDebug.log_score_change(new_score - score, "[TRACE] regla #{id}: #{score} -> #{new_score}")
+      end
       score = new_score if new_score
     end
     return score
@@ -130,6 +154,9 @@ module Battle::AI::Handlers
   def apply_general_move_against_target_score_modifiers(score, *args)
     GeneralMoveAgainstTargetScore.each do |id, score_proc|
       new_score = score_proc.call(score, *args)
+      if new_score && PBDebug.ai_logging?
+        PBDebug.log_score_change(new_score - score, "[TRACE] regla #{id}: #{score} -> #{new_score}")
+      end
       score = new_score if new_score
     end
     return score
@@ -139,8 +166,10 @@ module Battle::AI::Handlers
     ret = false
     ShouldSwitch.each do |id, switch_proc|
       ret ||= switch_proc.call(*args)
+      PBDebug.log_ai_decision("Cambio recomendado por regla #{id}.") if ret
       break if ret
     end
+    PBDebug.log_ai_decision("Ninguna regla recomienda cambiar.") if !ret
     return ret
   end
 
@@ -148,6 +177,7 @@ module Battle::AI::Handlers
     ret = false
     ShouldNotSwitch.each do |id, switch_proc|
       ret ||= switch_proc.call(*args)
+      PBDebug.log_ai_decision("Cambio vetado por regla #{id}.") if ret
       break if ret
     end
     return ret
