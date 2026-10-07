@@ -27,7 +27,12 @@ LA BASE DE SKY/Data/Tilesets.rxdata
 LA BASE DE SKY/Data/System.rxdata
 LA BASE DE SKY/Data/States.rxdata
 LA BASE DE SKY/Data/Skills.rxdata
-LA BASE DE SKY/Plugins/MakerStudio
+# MakerStudio: keep generated/vendor contents ignored, but allow editor Mods to be versioned.
+LA BASE DE SKY/Plugins/MakerStudio/*
+!LA BASE DE SKY/Plugins/MakerStudio/003_Editor/
+LA BASE DE SKY/Plugins/MakerStudio/003_Editor/*
+!LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/
+!LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/**
 LA BASE DE SKY/Data/map-backups
 Gemfile
 Gemfile.lock
