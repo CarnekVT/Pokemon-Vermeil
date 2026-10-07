@@ -2887,7 +2887,12 @@ module BattleAnimationStudioRuntime
     # is the same order used by the Studio preview/New Animation Editor.
     def apply_emitter_angle_override(sprite, clip, frame, desc)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
-      mode = pbs["angleOverride"].to_s.downcase
+      # Prefer the modern InitialAngle property while still honoring BAS'
+      # historical AngleOverride values.
+      mode = (pbs["initialAngle"] || pbs["angleOverride"]).to_s.downcase
+      mode = "initial_angle_to_focus" if mode == "particletofocus" || mode == "particle_to_focus"
+      mode = "always_point_at_focus" if mode == "alwaysparticletofocus" || mode == "always_particle_to_focus"
+      mode = "emitter_to_focus" if mode == "emittertofocus"
       context_override = context_override_for_object(clip)
       context_rotation = context_override_value(clip, "rotation", @frame, 0.0)
       base_rotation = sample_value(clip, "rotation", frame, 0).to_f + context_rotation + contextual_screen_rotation_delta(clip)
@@ -3476,6 +3481,19 @@ module BattleAnimationStudioRuntime
       "spawnTheta" => ["emitTheta", "moveSpawnTheta", "moveEmitTheta"],
       "emitThetaRange" => ["spawnThetaRange", "moveSpawnThetaRange", "moveEmitThetaRange"],
       "spawnThetaRange" => ["emitThetaRange", "moveSpawnThetaRange", "moveEmitThetaRange"],
+      # Modern Essentials dev emitter position/spawn model. Keep the legacy BAS
+      # aliases above so old AnimationStudio JSON continues to play unchanged.
+      "emitterX" => ["moveEmitterX"],
+      "emitterY" => ["moveEmitterY"],
+      "emitterR" => ["moveEmitterR"],
+      "emitterTheta" => ["moveEmitterTheta"],
+      "spawnXOffset" => ["moveSpawnXOffset"],
+      "spawnXMultiplier" => ["moveSpawnXMultiplier"],
+      "spawnYOffset" => ["moveSpawnYOffset"],
+      "spawnYMultiplier" => ["moveSpawnYMultiplier"],
+      "spawnROffset" => ["moveSpawnROffset"],
+      "spawnRMultiplier" => ["moveSpawnRMultiplier"],
+      "spawnThetaOffset" => ["moveSpawnThetaOffset"],
       "particleSize" => ["emitZoomMultiplier", "zoomMultiplier", "moveEmitZoomMultiplier"],
       "emitZoomMultiplier" => ["particleSize", "zoomMultiplier", "moveEmitZoomMultiplier"],
       "zoomMultiplier" => ["particleSize", "emitZoomMultiplier"],
@@ -3832,15 +3850,45 @@ module BattleAnimationStudioRuntime
       desc[:seed] = seed
       desc[:emission_index] = emission_index.to_i
       desc[:particle_in_emission] = particle_in_emission.to_i
-      desc[:ox] = emitter_randomized(clip, "emitX", "emitXRange", ef, rnd, 0)
-      desc[:oy] = emitter_randomized(clip, "emitY", "emitYRange", ef, rnd, 0)
-      spawn_r = emitter_randomized(clip, "emitR", "emitRRange", ef, rnd, 0).to_f
-      spawn_theta = emitter_randomized(clip, "emitTheta", "emitThetaRange", ef, rnd, 0).to_f
-      if spawn_r != 0 || spawn_theta != 0
-        theta_rad = spawn_theta * Math::PI / 180.0
-        desc[:ox] += (spawn_r * Math.cos(theta_rad)).round
-        desc[:oy] += (-spawn_r * Math.sin(theta_rad)).round
+      # Modern Essentials separates the emitter's position from the emitted
+      # particle's spawn area. BAS historically used EmitX/EmitY for the latter,
+      # so SpawnX/SpawnY deliberately fall back through EMITTER_COMMAND_ALIASES.
+      position_polar = runtime_bool(pbs["emitterPositionPolarCoordinates"])
+      spawn_polar = runtime_bool(pbs["emitterSpawnPolarCoordinates"])
+
+      if position_polar
+        emitter_r = emitter_value(clip, "emitterR", ef, 0).to_f
+        emitter_theta = emitter_value(clip, "emitterTheta", ef, 0).to_f
+        emitter_theta_rad = emitter_theta * Math::PI / 180.0
+        desc[:emitter_ox] = emitter_r * Math.cos(emitter_theta_rad)
+        desc[:emitter_oy] = -emitter_r * Math.sin(emitter_theta_rad)
+      else
+        desc[:emitter_ox] = emitter_value(clip, "emitterX", ef, 0).to_f
+        desc[:emitter_oy] = emitter_value(clip, "emitterY", ef, 0).to_f
       end
+
+      if spawn_polar
+        spawn_r = emitter_randomized(clip, "spawnR", "spawnRRange", ef, rnd, 0).to_f
+        spawn_theta = emitter_randomized(clip, "spawnTheta", "spawnThetaRange", ef, rnd, 0).to_f
+        theta_rad = spawn_theta * Math::PI / 180.0
+        desc[:ox] = spawn_r * Math.cos(theta_rad)
+        desc[:oy] = -spawn_r * Math.sin(theta_rad)
+        desc[:spawn_r] = spawn_r
+        desc[:spawn_theta] = spawn_theta
+      else
+        desc[:ox] = emitter_randomized(clip, "spawnX", "spawnXRange", ef, rnd, 0).to_f
+        desc[:oy] = emitter_randomized(clip, "spawnY", "spawnYRange", ef, rnd, 0).to_f
+        desc[:spawn_r] = Math.sqrt(desc[:ox] * desc[:ox] + desc[:oy] * desc[:oy])
+        desc[:spawn_theta] = Math.atan2(-desc[:oy], desc[:ox]) * 180.0 / Math::PI
+      end
+      desc[:spawn_polar] = spawn_polar
+      desc[:spawn_x_offset] = emitter_value(clip, "spawnXOffset", ef, 0).to_f
+      desc[:spawn_x_multiplier] = emitter_value(clip, "spawnXMultiplier", ef, 100).to_f / 100.0
+      desc[:spawn_y_offset] = emitter_value(clip, "spawnYOffset", ef, 0).to_f
+      desc[:spawn_y_multiplier] = emitter_value(clip, "spawnYMultiplier", ef, 100).to_f / 100.0
+      desc[:spawn_r_offset] = emitter_value(clip, "spawnROffset", ef, 0).to_f
+      desc[:spawn_r_multiplier] = emitter_value(clip, "spawnRMultiplier", ef, 100).to_f / 100.0
+      desc[:spawn_theta_offset] = emitter_value(clip, "spawnThetaOffset", ef, 0).to_f
       desc[:speed] = emitter_randomized(clip, "emitSpeed", "emitSpeedRange", ef, rnd, 0)
       desc[:angle] = emitter_randomized(clip, "emitAngle", "emitAngleRange", ef, rnd, 0)
       desc[:gravity] = emitter_randomized(clip, "emitGravity", "emitGravityRange", ef, rnd, 0)
@@ -3884,6 +3932,7 @@ module BattleAnimationStudioRuntime
       desc[:x_multiplier] = emitter_value(clip, "emitXMultiplier", ef, 100).to_f / 100.0
       desc[:y_multiplier] = emitter_value(clip, "emitYMultiplier", ef, 100).to_f / 100.0
       desc[:opacity_multiplier] = emitter_value(clip, "emitOpacityMultiplier", ef, 100).to_f / 100.0
+      desc[:zoom_multiplier] = emitter_value(clip, "emitZoomMultiplier", ef, 100).to_f / 100.0
 
       # drawClip() deliberately starts a fresh PRNG for visual-only spawn
       # choices. Reproduce that exact sequence here instead of continuing the
@@ -3987,7 +4036,7 @@ module BattleAnimationStudioRuntime
       raw = pbs["emitterGraphicOrientation"].to_s.downcase
       return raw if ["manual", "travel", "legacy"].include?(raw)
       return "travel" if runtime_bool(pbs["simpleFaceTravel"])
-      angle_mode = pbs["angleOverride"].to_s.downcase
+      angle_mode = (pbs["initialAngle"] || pbs["angleOverride"]).to_s.downcase
       return "legacy" if !angle_mode.empty? && angle_mode != "none"
       "manual"
     rescue
@@ -4213,8 +4262,8 @@ module BattleAnimationStudioRuntime
       context_override = context_override_for_object(clip)
       context_ox = context_override_value(clip, "offsetX", desc[:frame], 0.0)
       context_oy = context_override_value(clip, "offsetY", desc[:frame], 0.0)
-      sprite.x = spawn_pos[0].to_f + extra[:dx].to_f + context_ox
-      sprite.y = spawn_pos[1].to_f + extra[:dy].to_f + context_oy
+      sprite.x = spawn_pos[0].to_f + desc[:emitter_ox].to_f + extra[:dx].to_f + context_ox
+      sprite.y = spawn_pos[1].to_f + desc[:emitter_oy].to_f + extra[:dy].to_f + context_oy
       sprite.z = sprite.z.to_f + extra[:z].to_f
       sprite.zoom_x *= extra[:scale_x].to_f
       sprite.zoom_y *= extra[:scale_y].to_f
@@ -4426,11 +4475,26 @@ module BattleAnimationStudioRuntime
           dx += (speed_x * use_time) + (decel_x * use_time * use_time / 2.0)
           dy += (speed_y * use_time) + (decel_y * use_time * use_time / 2.0)
         end
+        # Modern Spawn*Offset/Multiplier values alter the spawn point while the
+        # EmitX/YMultiplier values alter auto-movement. Legacy BAS animations do
+        # not define these fields, so their defaults are exact no-ops.
+        if desc[:spawn_polar]
+          adjusted_r = (desc[:spawn_r].to_f + desc[:spawn_r_offset].to_f) * desc[:spawn_r_multiplier].to_f
+          adjusted_theta = desc[:spawn_theta].to_f + desc[:spawn_theta_offset].to_f
+          adjusted_rad = adjusted_theta * Math::PI / 180.0
+          adjusted_spawn_x = adjusted_r * Math.cos(adjusted_rad)
+          adjusted_spawn_y = -adjusted_r * Math.sin(adjusted_rad)
+        else
+          adjusted_spawn_x = (desc[:ox].to_f + desc[:spawn_x_offset].to_f) * desc[:spawn_x_multiplier].to_f
+          adjusted_spawn_y = (desc[:oy].to_f + desc[:spawn_y_offset].to_f) * desc[:spawn_y_multiplier].to_f
+        end
+        dx += adjusted_spawn_x - desc[:ox].to_f
+        dy += adjusted_spawn_y - desc[:oy].to_f
         if desc[:x_multiplier] && desc[:x_multiplier] != 1.0
-          dx = desc[:ox].to_f + ((dx - desc[:ox].to_f) * desc[:x_multiplier].to_f)
+          dx = adjusted_spawn_x + ((dx - adjusted_spawn_x) * desc[:x_multiplier].to_f)
         end
         if desc[:y_multiplier] && desc[:y_multiplier] != 1.0
-          dy = desc[:oy].to_f + ((dy - desc[:oy].to_f) * desc[:y_multiplier].to_f)
+          dy = adjusted_spawn_y + ((dy - adjusted_spawn_y) * desc[:y_multiplier].to_f)
         end
         sprite = ensure_emitter_sprite(clip, particle_index, template)
         next if !sprite
@@ -4464,8 +4528,8 @@ module BattleAnimationStudioRuntime
         particle_opacity *= desc[:opacity_multiplier].to_f if desc[:opacity_multiplier]
         apply_emitter_particle(sprite, clip, age,
           { :dx => dx, :dy => dy, :z => zoff,
-            :scale_x => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_x_mult].to_f * simple_scale,
-            :scale_y => desc[:particle_size_mult].to_f * desc[:zoom_mult].to_f * desc[:zoom_y_mult].to_f * simple_scale,
+            :scale_x => desc[:particle_size_mult].to_f * desc[:zoom_multiplier].to_f * desc[:zoom_mult].to_f * desc[:zoom_x_mult].to_f * simple_scale,
+            :scale_y => desc[:particle_size_mult].to_f * desc[:zoom_multiplier].to_f * desc[:zoom_mult].to_f * desc[:zoom_y_mult].to_f * simple_scale,
             :rotation_offset => simple_rotation,
             :opacity_mult => particle_opacity }, desc, particle_index)
         particle_index += 1
