@@ -3440,14 +3440,15 @@ module BattleAnimationStudioRuntime
 
     def emitter_type(clip)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
-      type = (pbs["emitter"] || pbs["emitterType"] || "none").to_s.downcase
+      type = emitter_static_value(clip, "emitter", "none", ["emitterType", "emitter_type"]).to_s.downcase
       type.gsub(/[^a-z]/, "")
     rescue
       "none"
     end
 
     EMITTER_COMMAND_ALIASES = {
-      "emitterRate" => ["rate", "emitRate", "spawnRate", "moveEmitterRate", "moveEmitRate"],
+      "emitterRate" => ["rate", "emitRate", "spawnRate", "emissionsPerSecond", "moveEmitterRate", "moveEmitRate"],
+      "emitterIntensity" => ["intensity", "spritesPerEmission", "particlesPerEmission", "moveEmitterIntensity"],
       "emitting" => ["emit", "isEmitting", "emitterEnabled"],
       "emitAngle" => ["emitDirection", "direction", "moveEmitAngle", "moveEmitDirection"],
       "emitDirection" => ["emitAngle", "direction", "moveEmitAngle", "moveEmitDirection"],
@@ -3550,6 +3551,24 @@ module BattleAnimationStudioRuntime
         return [true, value] if normalized_emitter_property_name(candidate) == normalized
       end
       [false, nil]
+    end
+
+    # Read a non-keyframed emitter setting using the same migration rules as
+    # animated emitter commands. This keeps modern Essentials dev field names
+    # and older BAS spellings interchangeable.
+    def emitter_static_value(clip, name, fallback = nil, aliases = nil)
+      source = replica_visual_source(clip)
+      pbs = source["pbs"].is_a?(Hash) ? source["pbs"] : {}
+      found, value = emitter_hash_lookup(pbs, name)
+      return value if found
+      candidates = aliases || EMITTER_COMMAND_ALIASES[name.to_s] || []
+      candidates.each do |alt|
+        alt_found, alt_value = emitter_hash_lookup(pbs, alt)
+        return alt_value if alt_found
+      end
+      fallback
+    rescue
+      fallback
     end
 
     def cached_emitter_commands(clip, name)
@@ -3698,7 +3717,7 @@ module BattleAnimationStudioRuntime
       cached = @emitter_frame_cache[key]
       return cached if cached
       list = cached_emitter_commands(clip, "emitting")
-      base_rate = [((clip["pbs"] || {})["emitterRate"] || 1).to_f, 0.01].max
+      base_rate = [emitter_static_value(clip, "emitterRate", 1).to_f, 0.01].max
       out = []
       state = false
       active_start = nil
@@ -3876,8 +3895,10 @@ module BattleAnimationStudioRuntime
       # Modern Essentials separates the emitter's position from the emitted
       # particle's spawn area. BAS historically used EmitX/EmitY for the latter,
       # so SpawnX/SpawnY deliberately fall back through EMITTER_COMMAND_ALIASES.
-      position_polar = runtime_bool(pbs["emitterPositionPolarCoordinates"])
-      spawn_polar = runtime_bool(pbs["emitterSpawnPolarCoordinates"])
+      position_polar = runtime_bool(emitter_static_value(clip, "emitterPositionPolarCoordinates", false,
+        ["emitter_position_polar_coordinates", "positionPolarCoordinates", "emitterPositionPolar"]))
+      spawn_polar = runtime_bool(emitter_static_value(clip, "emitterSpawnPolarCoordinates", false,
+        ["emitter_spawn_polar_coordinates", "spawnPolarCoordinates", "emitterSpawnPolar"]))
 
       if position_polar
         emitter_r = emitter_value(clip, "emitterR", ef, 0).to_f
@@ -3990,7 +4011,7 @@ module BattleAnimationStudioRuntime
       return @emitter_particle_cache[key] if @emitter_particle_cache[key]
       frames = cached_emitter_frames(clip)
       pbs = clip["pbs"].is_a?(Hash) ? clip["pbs"] : {}
-      base_intensity = [[(pbs["emitterIntensity"] || 1).to_i, 1].max, 100].min
+      base_intensity = [[emitter_static_value(clip, "emitterIntensity", 1).to_i, 1].max, 100].min
       out = []
       frames.each_with_index do |ef, emission_index|
         intensity = [[emitter_value(clip, "emitterIntensity", ef, base_intensity).to_i, 1].max, 100].min
