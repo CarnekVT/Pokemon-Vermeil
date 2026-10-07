@@ -377,12 +377,13 @@ class Battle::AI
     if @battle.sides[side].effects[PBEffects::StealthRock] && GameData::Type.exists?(:ROCK)
       pkmn_types = pkmn.types
       eff = Effectiveness.calculate(:ROCK, *pkmn_types)
-      ret += pkmn.totalhp * eff / 8 if !Effectiveness.ineffective?(eff)
+      # Match pbReduceHP rounding and minimum damage for each hazard separately.
+      ret += [(pkmn.totalhp * eff / 8).round, 1].max if !Effectiveness.ineffective?(eff)
     end
     # Spikes
     if @battle.sides[side].effects[PBEffects::Spikes] > 0 && !pokemon_airborne?(pkmn)
       spikes_div = [8, 6, 4][@battle.sides[side].effects[PBEffects::Spikes] - 1]
-      ret += pkmn.totalhp / spikes_div
+      ret += [(pkmn.totalhp / spikes_div).round, 1].max
     end
     return ret
   end

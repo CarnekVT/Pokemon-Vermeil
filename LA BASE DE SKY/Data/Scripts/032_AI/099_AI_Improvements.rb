@@ -618,6 +618,9 @@ class Battle::AI
       next false if ["FailsIfTargetActed", "FlinchTargetFailsIfTargetNotUsingPriorityMove",
                      "UseMoveTargetIsAboutToUse"].include?(candidate.function_code)
       next false if candidate.rough_accuracy < AIImprovements::IMMEDIATE_KO_MIN_ACCURACY
+      crit = candidate.rough_critical_hit_stage
+      ratios = Battle::Move::CRITICAL_HIT_RATIOS
+      next false if crit >= 0 && crit < ratios.length && ratios[crit] == 2
       next false if candidate.rough_damage <= defender.hp * AIImprovements::IMMEDIATE_KO_DAMAGE_MARGIN
       next false if defender.effects[PBEffects::Substitute] > 0 &&
                     !candidate.move.ignoresSubstitute?(attacker.battler)
@@ -1068,9 +1071,9 @@ class Battle::AI
           attacks_before = (target.hp / before_pressure).ceil
           remaining_hp = [target.hp - first_hit - residual, 0.0].max
           attacks_after = (remaining_hp / after_pressure).ceil
-          # No acreditar turnos posteriores al KO que ya se podía conseguir.
+          # Each horizon ends at its own KO; remaining_hp already pays for setup.
           attacks_before = [attacks_before, (foes[0].hp / attack_before).ceil].min if attack_before > 0
-          attacks_after = [attacks_after, [attacks_before - 1, 0].max].min
+          attacks_after = [attacks_after, (foes[0].hp / attack_after).ceil].min if attack_after > 0
           useful_before = [attack_before * attacks_before, foes[0].hp].min
           useful_after = [attack_after * attacks_after, foes[0].hp].min
           gain = useful_after - useful_before

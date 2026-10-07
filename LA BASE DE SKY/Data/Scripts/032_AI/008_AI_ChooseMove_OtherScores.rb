@@ -335,8 +335,13 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:predicted_damage,
           multi_hit ||= user.has_active_ability?(:PARENTALBOND) &&
                         !move.move.chargingTurnMove? && !move.targets_multiple_battlers? &&
                         move.move.method(:pbNumHits).owner == Battle::Move
+          ice_face = target.battler.isSpecies?(:EISCUE) && target.battler.form == 0 &&
+                     target.has_active_ability?(:ICEFACE) && !target.being_mold_broken? &&
+                     move.physicalMove?
           # ponytail: use rough damage and hit chance, not per-hit KO probabilities; refine if needed.
-          if (sturdy || focus_sash) && !multi_hit
+          if ice_face && !multi_hit
+            PBDebug.log("     KO bonus withheld: damage is absorbed by Ice Face (accuracy #{acc}%)")
+          elsif (sturdy || focus_sash) && !multi_hit
             protection = focus_sash ? "Focus Sash" : "Sturdy"
             PBDebug.log("     KO bonus withheld: full-HP #{protection} survives a single hit (accuracy #{acc}%)")
           else
