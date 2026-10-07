@@ -1,0 +1,19 @@
+{
+  "id": "battle-scene-studio",
+  "name": "Battle Scene Studio",
+  "version": "0.8.36",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Battle Scene Studio Phase 1: normal battles, BSS-native JSON SOS and Boss/Totem battles with Aura Studio, smooth EBDX-style persistent aura, BAS-aware camera and source-faithful dynamic battlers.",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.dialogs",
+    "ui.toasts"
+  ]
+}

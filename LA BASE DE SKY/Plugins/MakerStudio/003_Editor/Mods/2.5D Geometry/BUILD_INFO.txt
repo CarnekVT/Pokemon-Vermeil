@@ -1,0 +1,8 @@
+2.5D Geometry v4.2.0
+- Direct model placement inside the 3D Studio viewport
+- Select and drag placed model instances
+- Numeric instance position/rotation/scale controls
+- Import .bbmodel directly from Models inspector
+- Ctrl+Z/Y now includes model instance placement/moves
+- Runtime compiler writes V25R2/V25C2 line records (no gameplay JSON)
+- Model faces remain lazy V25M1 stream

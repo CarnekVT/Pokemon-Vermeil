@@ -1,0 +1,19 @@
+{
+  "id": "translate-studio",
+  "name": "Translate Studio",
+  "version": "1.4.0",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Translate Studio v1.4.0: uses the user-supplied clean English Essentials base as authoritative base-script reference, resolves context-sensitive strings such as Guardar = Save/Take/Store, and fixes English Ability Splash grammar/layout while preserving plugin English references, BSS custom titles and SDS ordering.",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.dialogs",
+    "ui.toasts"
+  ]
+}

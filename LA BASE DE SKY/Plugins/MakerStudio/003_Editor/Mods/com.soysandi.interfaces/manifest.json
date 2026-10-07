@@ -1,0 +1,35 @@
+{
+    "id": "com.soysandi.interfaces",
+    "name": "Editor de Interfaces",
+    "version": "2.0.1",
+    "authors": [
+        {
+            "name": "SoySandi"
+        }
+    ],
+    "description": "Editor visual de interfaces para Pokemon Essentials con resolucion configurable, anchors, pixel perfect, condiciones multiples, botones deshabilitados, huecos dinamicos y navegacion mejorada del lienzo.",
+    "homepage": "https://github.com/yobrantoro/ms-interfaces",
+    "tags": [
+        "essentials",
+        "ui",
+        "editor",
+        "pokemon",
+        "rpg-maker-xp"
+    ],
+    "apiVersion": "1.0.0",
+    "main": "index.js",
+    "permissions": [
+        "fs.project",
+        "fs.write.project",
+        "ui.dialogs",
+        "ui.toasts"
+    ],
+    "requires": [
+        {
+            "type": "plugin",
+            "name": "Interfaces",
+            "url": "https://github.com/yobrantoro/essentials-interfaces",
+            "enforcement": "none"
+        }
+    ]
+}

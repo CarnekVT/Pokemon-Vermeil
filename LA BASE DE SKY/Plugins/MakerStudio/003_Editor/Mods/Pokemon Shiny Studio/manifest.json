@@ -1,0 +1,18 @@
+{
+  "id": "pokemon-shiny-studio",
+  "name": "Pokémon Shiny Studio",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Editor visual de Shiny, SuperShiny y variantes personalizadas para Pokémon y sus iconos.",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.toasts"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "golden-systems-studio",
+  "name": "Golden Systems Studio",
+  "version": "2.6.4",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Editor privado para Poder Dorado, Formas Doradas, Golden Moves y Desbordamiento. Biblioteca visual de habilidades y FunctionCodes con filtros por fuente/orden, auditoría de Fragment/Stone/Ring, BST total de Forma Dorada, PBS por capas y ChangeDex.",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.toasts"
+  ]
+}

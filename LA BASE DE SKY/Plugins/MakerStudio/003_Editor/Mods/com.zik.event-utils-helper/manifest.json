@@ -1,0 +1,11 @@
+{
+  "id": "com.zik.event-utils-helper",
+  "name": "Event Utilities Helper",
+  "version": "1.0.0",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [{ "name": "Essentie" }],
+  "description": "Panel visual para insertar comandos de Event Utilities (s:Hitbox, s:Float, s:pokemon_event…) con gizmo de hitbox en tiempo real.",
+  "permissions": ["ui.panels", "ui.overlays", "clipboard", "ui.toasts", "ui.contextMenus"],
+  "requires": []
+}

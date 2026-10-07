@@ -1,0 +1,19 @@
+{
+  "id": "com.carnek.geometry-2p5d",
+  "name": "2.5D Geometry — Unity Placement + Fast Runtime",
+  "version": "4.2.0",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Direct model placement and transform editing in the 3D viewport, Unity-style interaction, Blockbench cuboid/free-mesh import, Ctrl+Z/Y, and fast non-JSON V25R2/V25C2 runtime sidecars.",
+  "apiVersion": "1.0.0",
+  "main": "index_v420.js",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.toasts",
+    "ui.dialogs"
+  ]
+}
