@@ -3447,6 +3447,8 @@ module BattleAnimationStudioRuntime
     end
 
     EMITTER_COMMAND_ALIASES = {
+      "emitterRate" => ["rate", "emitRate", "spawnRate", "moveEmitterRate", "moveEmitRate"],
+      "emitting" => ["emit", "isEmitting", "emitterEnabled"],
       "emitAngle" => ["emitDirection", "direction", "moveEmitAngle", "moveEmitDirection"],
       "emitDirection" => ["emitAngle", "direction", "moveEmitAngle", "moveEmitDirection"],
       "direction" => ["emitDirection", "emitAngle"],
@@ -3532,23 +3534,42 @@ module BattleAnimationStudioRuntime
       "opacityMultiplier" => ["emitOpacityMultiplier"]
     }.freeze
 
+    # Normalize emitter property names across BAS revisions and Essentials dev.
+    # This intentionally ignores case, spaces, dashes and underscores so data such
+    # as "Spawn_X", "spawn-x" and "spawnX" resolves to the same authored property.
+    def normalized_emitter_property_name(name)
+      name.to_s.gsub(/[^a-zA-Z0-9]/, "").downcase
+    end
+
+    def emitter_hash_lookup(map, name)
+      return [false, nil] if !map.is_a?(Hash)
+      key = name.to_s
+      return [true, map[key]] if map.key?(key)
+      normalized = normalized_emitter_property_name(key)
+      map.each_pair do |candidate, value|
+        return [true, value] if normalized_emitter_property_name(candidate) == normalized
+      end
+      [false, nil]
+    end
+
     def cached_emitter_commands(clip, name)
       source = replica_visual_source(clip)
       key = [source.object_id, name.to_s]
       @emitter_command_cache[key] ||= begin
         pbs = source["pbs"].is_a?(Hash) ? source["pbs"] : {}
         map = pbs["emitterCommands"].is_a?(Hash) ? pbs["emitterCommands"] : {}
-        raw = map[name.to_s]
-        if (!raw || raw.empty?) && (aliases = EMITTER_COMMAND_ALIASES[name.to_s])
+        found, raw = emitter_hash_lookup(map, name)
+        if (!found || !raw.is_a?(Array) || raw.empty?) && (aliases = EMITTER_COMMAND_ALIASES[name.to_s])
           aliases.each do |alt|
-            if map[alt] && !map[alt].empty?
-              raw = map[alt]
-              break
-            end
+            alt_found, alt_raw = emitter_hash_lookup(map, alt)
+            next if !alt_found || !alt_raw.is_a?(Array) || alt_raw.empty?
+            raw = alt_raw
+            found = true
+            break
           end
         end
         raw ||= []
-        raw.is_a?(Array) ? raw.sort_by { |cmd| (cmd["frame"] || 0).to_f } : []
+        raw.is_a?(Array) ? raw.sort_by { |cmd| (cmd["frame"] || cmd["Frame"] || 0).to_f } : []
       end
     end
 
@@ -3565,22 +3586,24 @@ module BattleAnimationStudioRuntime
         return ctx unless ctx.nil?
         source = replica_visual_source(clip)
         pbs = source["pbs"].is_a?(Hash) ? source["pbs"] : {}
-        return pbs[name.to_s] if pbs.key?(name.to_s)
+        found, direct = emitter_hash_lookup(pbs, name)
+        return direct if found
         if (aliases = EMITTER_COMMAND_ALIASES[name.to_s])
           aliases.each do |alt|
-            return pbs[alt] if pbs.key?(alt)
+            alt_found, alt_value = emitter_hash_lookup(pbs, alt)
+            return alt_value if alt_found
           end
         end
         return fallback
       end
       value = fallback
       list.each do |cmd|
-        cf = (cmd["frame"] || 0).to_f
+        cf = (cmd["frame"] || cmd["Frame"] || 0).to_f
         break if frame < cf
-        dur = (cmd["duration"] || 0).to_f
-        target = cmd["value"]
+        dur = (cmd["duration"] || cmd["Duration"] || 0).to_f
+        target = cmd.key?("value") ? cmd["value"] : cmd["Value"]
         if dur > 0 && frame < cf + dur
-          t = ease01((frame - cf) / [dur, 0.0001].max, cmd["easing"] || "linear")
+          t = ease01((frame - cf) / [dur, 0.0001].max, cmd["easing"] || cmd["Easing"] || "linear")
           interpolated = (target.is_a?(Numeric) || value.is_a?(Numeric)) ? value.to_f + ((target.to_f - value.to_f) * t) : target
           return context_parameter_value(clip, "emitter", name, frame, interpolated)
         end
@@ -3598,7 +3621,7 @@ module BattleAnimationStudioRuntime
         pbs = source["pbs"].is_a?(Hash) ? source["pbs"] : {}
         map = pbs["commands"].is_a?(Hash) ? pbs["commands"] : {}
         raw = map[name.to_s] || []
-        raw.is_a?(Array) ? raw.sort_by { |cmd| (cmd["frame"] || 0).to_f } : []
+        raw.is_a?(Array) ? raw.sort_by { |cmd| (cmd["frame"] || cmd["Frame"] || 0).to_f } : []
       end
     end
 
@@ -3607,12 +3630,12 @@ module BattleAnimationStudioRuntime
       return context_parameter_value(clip, "particle", name, frame, fallback) if list.empty?
       value = fallback
       list.each do |cmd|
-        cf = (cmd["frame"] || 0).to_f
+        cf = (cmd["frame"] || cmd["Frame"] || 0).to_f
         break if frame < cf
-        dur = (cmd["duration"] || 0).to_f
-        target = cmd["value"]
+        dur = (cmd["duration"] || cmd["Duration"] || 0).to_f
+        target = cmd.key?("value") ? cmd["value"] : cmd["Value"]
         if dur > 0 && frame < cf + dur
-          t = ease01((frame - cf) / [dur, 0.0001].max, cmd["easing"] || "linear")
+          t = ease01((frame - cf) / [dur, 0.0001].max, cmd["easing"] || cmd["Easing"] || "linear")
           interpolated = (target.is_a?(Numeric) || value.is_a?(Numeric)) ? value.to_f + ((target.to_f - value.to_f) * t) : target
           return context_parameter_value(clip, "particle", name, frame, interpolated)
         end
@@ -3631,7 +3654,7 @@ module BattleAnimationStudioRuntime
       # Compatibility with BAS 1.9.4-1.9.6. Studio-created emitter radius keys
       # were written on the animation timeline; native PBS keeps them particle-local.
       emitting = pbs["emitterCommands"].is_a?(Hash) ? (pbs["emitterCommands"]["emitting"] || []) : []
-      emitting = emitting.is_a?(Array) ? emitting.sort_by { |cmd| (cmd["frame"] || 0).to_f } : []
+      emitting = emitting.is_a?(Array) ? emitting.sort_by { |cmd| (cmd["frame"] || cmd["Frame"] || 0).to_f } : []
       start_cmd = emitting.find { |cmd| runtime_bool(cmd["value"]) }
       start_frame = start_cmd ? (start_cmd["frame"] || 0).to_f : 0.0
       min_radius_frame = nil
@@ -3640,7 +3663,7 @@ module BattleAnimationStudioRuntime
         list = commands[prop]
         next if !list.is_a?(Array)
         list.each do |cmd|
-          cf = (cmd["frame"] || 0).to_f
+          cf = (cmd["frame"] || cmd["Frame"] || 0).to_f
           min_radius_frame = cf if min_radius_frame.nil? || cf < min_radius_frame
         end
       end
@@ -3696,7 +3719,7 @@ module BattleAnimationStudioRuntime
       end
 
       list.each do |cmd|
-        f = (cmd["frame"] || 0).to_f
+        f = (cmd["frame"] || cmd["Frame"] || 0).to_f
         break if f > duration.to_f + 0.000001
         flush_interval.call(f - 0.0000001)
         state = runtime_bool(cmd["value"])
@@ -3746,7 +3769,7 @@ module BattleAnimationStudioRuntime
       commands.each_value do |list|
         next if !list.is_a?(Array)
         list.each do |cmd|
-          max_end = [max_end, (cmd["frame"] || 0).to_f + (cmd["duration"] || 0).to_f].max
+          max_end = [max_end, (cmd["frame"] || cmd["Frame"] || 0).to_f + (cmd["duration"] || cmd["Duration"] || 0).to_f].max
         end
       end
       # If the particle ends invisible/transparent, its last process marks its
