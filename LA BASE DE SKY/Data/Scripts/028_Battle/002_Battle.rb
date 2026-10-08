@@ -196,6 +196,10 @@ class Battle
     return Outcome.decided?(@decision)
   end
 
+  def expGain
+    !@rules[:no_exp_gain]
+  end
+
   #-----------------------------------------------------------------------------
   # Information about the type and size of the battle.
   #-----------------------------------------------------------------------------
