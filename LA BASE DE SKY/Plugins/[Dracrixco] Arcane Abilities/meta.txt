@@ -1,0 +1,4 @@
+Name       = [Dracrixco] Arcane Abilities
+Version    = 2.6.4
+Credits    = Dracrixco
+Essentials = 21,21.1

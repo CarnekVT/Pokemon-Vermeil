@@ -1,0 +1,132 @@
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
+#-------------------------------
+[Move,BULBBASH]
+Name = PRAS Bulb Bash
+Credit = Anon
+<User>
+    MoveX = 0,4,-12,EaseOut
+    MoveX = 4,3,30,EaseIn
+    MoveX = 7,3,-8,EaseOut
+    MoveX = 10,4,0,EaseBoth
+<Target>
+    MoveX = 7,2,18,EaseOut
+    MoveZoomX = 7,2,130,EaseOut
+    MoveZoomY = 7,2,50,EaseOut
+    MoveTone = 7,2,+80+50+20+00
+    MoveX = 9,3,-18,EaseBoth
+    MoveZoomX = 9,5,100,EaseBoth
+    MoveZoomY = 9,5,100,EaseBoth
+    MoveTone = 11,10,+00+00+00+00
+    MoveX = 12,3,0,EaseBoth
+<SE>
+    Play = 7,PRSFX- Focus Punch2
+<Impact Strike>
+    Graphic = hit half
+    Focus = Target
+    SetZ = 0,760
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetY = 7,76
+    SetVisible = 7,true
+    MoveZoomX = 7,3,250,EaseOut
+    MoveZoomY = 7,3,250,EaseOut
+    MoveOpacity = 10,4,0
+    SetVisible = 14,false
+<Dirt & Rocks Emitter>
+    Graphic = stealth_rock
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 60
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZ = 0,765
+    SetZoomX = 0,25
+    SetZoomY = 0,25
+    SetEmitSpeed = 0,400
+    SetEmitSpeedRange = 0,150
+    SetEmitAngle = 0,90
+    SetEmitAngleRange = 0,60
+    SetEmitGravity = 0,600
+    SetEmitting = 7,true
+    MoveOpacity = 7,12,0
+    SetEmitting = 9,false
+<Damaged Leaves Emitter>
+    Graphic = leaf
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 30
+    RandomInvertAngle = true
+    SetZ = 0,762
+    SetZoomX = 0,50
+    SetZoomY = 0,50
+    SetEmitSpeed = 0,300
+    SetEmitAngle = 0,180
+    SetEmitAngleRange = 0,40
+    SetEmitting = 7,true
+    MoveOpacity = 7,15,0
+    SetEmitting = 10,false
+#-------------------------------
+[OppMove,BULBBASH]
+Name = PRAS Bulb Bash
+Credit = Anon
+<User>
+    MoveX = 0,4,12,EaseOut
+    MoveX = 4,3,-30,EaseIn
+    MoveX = 7,3,8,EaseOut
+    MoveX = 10,4,0,EaseBoth
+<Target>
+    MoveX = 7,2,-18,EaseOut
+    MoveZoomX = 7,2,130,EaseOut
+    MoveZoomY = 7,2,50,EaseOut
+    MoveTone = 7,2,+80+50+20+00
+    MoveX = 9,3,18,EaseBoth
+    MoveZoomX = 9,5,100,EaseBoth
+    MoveZoomY = 9,5,100,EaseBoth
+    MoveTone = 11,10,+00+00+00+00
+    MoveX = 12,3,0,EaseBoth
+<SE>
+    Play = 7,PRSFX- Focus Punch2
+<Impact Strike>
+    Graphic = hit half
+    Focus = Target
+    SetZ = 0,760
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetY = 7,80
+    SetVisible = 7,true
+    MoveZoomX = 7,3,250,EaseOut
+    MoveZoomY = 7,3,250,EaseOut
+    MoveOpacity = 10,4,0
+    SetVisible = 14,false
+<Dirt & Rocks Emitter>
+    Graphic = stealth_rock
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 60
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZ = 0,765
+    SetZoomX = 0,25
+    SetZoomY = 0,25
+    SetEmitSpeed = 0,400
+    SetEmitSpeedRange = 0,150
+    SetEmitAngle = 0,-90
+    SetEmitAngleRange = 0,60
+    SetEmitGravity = 0,600
+    SetEmitting = 7,true
+    MoveOpacity = 7,12,0
+    SetEmitting = 9,false
+<Damaged Leaves Emitter>
+    Graphic = leaf
+    Focus = Target
+    Emitter = Projectile
+    EmitterRate = 30
+    RandomInvertAngle = true
+    SetZ = 0,762
+    SetZoomX = 0,50
+    SetZoomY = 0,50
+    SetEmitSpeed = 0,300
+    SetEmitAngleRange = 0,40
+    SetEmitting = 7,true
+    MoveOpacity = 7,15,0
+    SetEmitting = 10,false

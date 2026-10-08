@@ -1,0 +1,116 @@
+[Move,QUICKATTACK]
+Name = PRAS Quick Attack
+<User>
+    MoveX = 2,3,-15,EaseOut
+    MoveX = 6,2,60,EaseIn
+    MoveX = 8,3,0,EaseOut
+<Target>
+    MoveX = 7,2,15,EaseBoth
+    MoveX = 9,2,-15,EaseBoth
+    MoveX = 11,2,10,EaseBoth
+    MoveX = 13,2,-10,EaseBoth
+    MoveX = 15,2,0,EaseBoth
+    MoveColor = 7,2,FFFFFFFF
+    MoveColor = 9,4,00000000
+<SE>
+    Play = 2,Wind1
+    Play = 7,Super Damage
+<DashBlur1>
+    Graphic = swish
+    Focus = User
+    SetZ = 0,710
+    SetVisible = 0,false
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,200
+    SetZoomY = 0,50
+    SetX = 0,-30
+    SetVisible = 6,true
+    MoveX = 6,4,80,EaseOut
+    MoveOpacity = 6,4,0
+    SetVisible = 10,false
+<DashBlur2>
+    Graphic = swish
+    Focus = User
+    SetZ = 0,710
+    SetVisible = 0,false
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,150
+    SetZoomY = 0,80
+    SetX = 0,-50
+    SetY = 0,-20
+    SetVisible = 7,true
+    MoveX = 7,4,70,EaseOut
+    MoveOpacity = 7,4,0
+    SetVisible = 11,false
+<ImpactFlash>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,50
+    SetZoomY = 0,50
+    SetVisible = 7,true
+    MoveZoomX = 7,3,250,EaseOut
+    MoveZoomY = 7,3,250,EaseOut
+    MoveOpacity = 7,4,0
+    SetVisible = 11,false
+
+
+[OppMove,QUICKATTACK]
+Name = PRAS Quick Attack
+<User>
+    MoveX = 2,3,15,EaseOut
+    MoveX = 6,2,-60,EaseIn
+    MoveX = 8,3,0,EaseOut
+<Target>
+    MoveX = 7,2,-15,EaseBoth
+    MoveX = 9,2,15,EaseBoth
+    MoveX = 11,2,-10,EaseBoth
+    MoveX = 13,2,10,EaseBoth
+    MoveX = 15,2,0,EaseBoth
+    MoveColor = 7,2,FFFFFFFF
+    MoveColor = 9,4,00000000
+<SE>
+    Play = 2,Wind1
+    Play = 7,Super Damage
+<DashBlur1>
+    Graphic = swish
+    Focus = User
+    SetZ = 0,710
+    SetVisible = 0,false
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,200
+    SetZoomY = 0,50
+    SetX = 0,30
+    SetVisible = 6,true
+    MoveX = 6,4,-80,EaseOut
+    MoveOpacity = 6,4,0
+    SetVisible = 10,false
+<DashBlur2>
+    Graphic = swish
+    Focus = User
+    SetZ = 0,710
+    SetVisible = 0,false
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,150
+    SetZoomY = 0,80
+    SetX = 0,50
+    SetY = 0,-20
+    SetVisible = 7,true
+    MoveX = 7,4,-70,EaseOut
+    MoveOpacity = 7,4,0
+    SetVisible = 11,false
+<ImpactFlash>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetColor = 0,FFFFFFFF
+    SetZoomX = 0,50
+    SetZoomY = 0,50
+    SetVisible = 7,true
+    MoveZoomX = 7,3,250,EaseOut
+    MoveZoomY = 7,3,250,EaseOut
+    MoveOpacity = 7,4,0
+    SetVisible = 11,false

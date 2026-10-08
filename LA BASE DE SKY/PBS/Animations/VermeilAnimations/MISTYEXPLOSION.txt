@@ -1,0 +1,184 @@
+[Move,MISTYEXPLOSION]
+Name = PRAS Misty Explosion
+<User>
+    MoveColor = 0,20,FFD8FFFF,Linear
+<Target>
+    MoveX = 20,2,24,EaseOut
+    MoveX = 22,3,0,EaseIn
+<SE>
+    Play = 0,PRSFX- Focus Punch1
+    Play = 10,PRSFX- Focus Punch2
+    Play = 20,Explosion1
+    Play = 21,PRSFX- Rock Wrecker1
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetOpacity = 0,0
+    MoveOpacity = 0,4,160,Linear
+    SetVisible = 35,false
+<Terrain>
+    Graphic = terrain_mist_bg
+    Focus = Background
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveOpacity = 30,10,0,Linear
+<Fairy Wind Charge>
+    Graphic = smog 2
+    Focus = User
+    Emitter = Helix
+    EmitterRate = 20
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    # Negative speed creates a converging vortex
+    SetEmitSpeed = 0,-150
+    SetEmitAngleRange = 0,180
+    SetPeriodX = 0,75
+    SetPeriodZ = 0,1
+    SetRadiusX = 0,150
+    SetRadiusZ = 0,10
+    SetOpacity = 0,180
+    SetColor = 0,FFD8FFFF
+    SetEmitting = 0,true
+    SetEmitting = 18,false
+    SetVisible = 20,false
+<Fairy Sparkle Charge>
+    Graphic = shine 2
+    Focus = User
+    Emitter = Helix
+    EmitterRate = 25
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetEmitSpeed = 0,-150
+    SetEmitAngleRange = 0,180
+    SetPeriodX = 0,75
+    SetRadiusX = 0,180
+    SetColor = 0,FFFF70FF
+    SetEmitting = 0,true
+    SetEmitting = 18,false
+    SetVisible = 20,false
+<Blast Core>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetZ = 0,30
+    SetColor = 20,FFFF9080
+    SetZoomX = 20,10
+    SetZoomY = 20,10
+    MoveZoomX = 20,6,900,EaseOut
+    MoveZoomY = 20,6,900,EaseOut
+    MoveOpacity = 20,10,0,Linear
+    SetVisible = 32,false
+<Dazzling Blast Emitter>
+    Graphic = shine 1
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 50
+    RandomInvertAngle = true
+    SetZ = 0,25
+    SetZoomX = 0,120
+    SetZoomY = 0,120
+    SetColor = 0,FFECA4CC
+    SetEmitSpeed = 0,350
+    SetEmitSpeedRange = 0,100
+    SetEmitAngleRange = 0,180
+    SetEmitting = 0,false
+    SetEmitting = 20,true
+    SetEmitting = 22,false
+    MoveOpacity = 20,10,0,Linear
+
+
+[OppMove,MISTYEXPLOSION]
+Name = PRAS Misty Explosion
+<User>
+    MoveColor = 0,20,FFD8FFFF,Linear
+<Target>
+    MoveX = 20,2,-24,EaseOut
+    MoveX = 22,3,0,EaseIn
+<SE>
+    Play = 0,PRSFX- Focus Punch1
+    Play = 10,PRSFX- Focus Punch2
+    Play = 20,Explosion1
+    Play = 21,PRSFX- Rock Wrecker1
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetOpacity = 0,0
+    MoveOpacity = 0,4,160,Linear
+    SetVisible = 35,false
+<Terrain>
+    Graphic = terrain_mist_bg
+    Focus = Background
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveOpacity = 30,10,0,Linear
+<Fairy Wind Charge>
+    Graphic = smog 2
+    Focus = User
+    Emitter = Helix
+    EmitterRate = 20
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    # Negative speed creates a converging vortex
+    SetEmitSpeed = 0,-150
+    SetEmitAngleRange = 0,180
+    SetPeriodX = 0,75
+    SetPeriodZ = 0,1
+    SetRadiusX = 0,150
+    SetRadiusZ = 0,10
+    SetOpacity = 0,180
+    SetColor = 0,FFD8FFFF
+    SetEmitting = 0,true
+    SetEmitting = 18,false
+    SetVisible = 20,false
+<Fairy Sparkle Charge>
+    Graphic = shine 2
+    Focus = User
+    Emitter = Helix
+    EmitterRate = 25
+    RandomInvertAngle = true
+    RandomInvertFlip = true
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetEmitSpeed = 0,-150
+    SetEmitAngleRange = 0,180
+    SetPeriodX = 0,75
+    SetRadiusX = 0,180
+    SetColor = 0,FFFF70FF
+    SetEmitting = 0,true
+    SetEmitting = 18,false
+    SetVisible = 20,false
+<Blast Core>
+    Graphic = spark
+    Focus = User
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetZ = 0,30
+    SetColor = 20,FFFF9080
+    SetZoomX = 20,10
+    SetZoomY = 20,10
+    MoveZoomX = 20,6,900,EaseOut
+    MoveZoomY = 20,6,900,EaseOut
+    MoveOpacity = 20,10,0,Linear
+    SetVisible = 32,false
+<Dazzling Blast Emitter>
+    Graphic = shine 1
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 50
+    RandomInvertAngle = true
+    SetZ = 0,25
+    SetZoomX = 0,120
+    SetZoomY = 0,120
+    SetColor = 0,FFECA4CC
+    SetEmitSpeed = 0,350
+    SetEmitSpeedRange = 0,100
+    SetEmitAngleRange = 0,180
+    SetEmitting = 0,false
+    SetEmitting = 20,true
+    SetEmitting = 22,false
+    MoveOpacity = 20,10,0,Linear

@@ -1,0 +1,64 @@
+﻿# See the documentation on the wiki to learn how to edit this file.
+#-------------------------------
+[TYPHLOSIONITE]
+Name = Typhlosionite
+NamePlural = Typhlosionites
+Pocket = 1
+Price = 0
+BPPrice = 50
+Flags = MegaStone,Fling_80
+Description = One of a variety of mysterious Mega Stones. Have Typhlosion hold it, and it will be able to Mega Evolve.
+#-------------------------------
+[SLEEPINGBAG]
+Name = Sleeping Bag
+NamePlural = Sleeping Bags
+Pocket = 8
+Price = 0
+Flags = KeyItem,Fling_0
+Description = A sleeping bag that allows you to rest and advance time to a specific time of day.
+#-------------------------------
+[RADAR]
+Name = Encounter Radar
+NamePlural = Encounter Radars
+Pocket = 8
+Price = 0
+FieldUse = Direct
+Flags = KeyItem,Fling_0
+Description = A device that displays the encounter list for the current area.
+#-------------------------------
+[CHANGEDEX]
+Name = Change Dex
+NamePlural = Change Dexes
+Pocket = 8
+Price = 0
+FieldUse = Direct
+Flags = KeyItem,Fling_0
+Description = A record of canon and Vermeil changes for existing species, including typing, stats, abilities and newly learned moves.
+#-------------------------------
+[STORMRUNE]
+Name = Storm Rune
+NamePlural = Storm Runes
+Pocket = 4
+Price = 3000
+Description = An ancient stone carved with runes that vibrate with electricity. It evolves certain Pokémon and boosts Electric-type moves.
+FieldUse = OnPokemon
+Flags = EvolutionStone
+#-------------------------------
+[REALITYORB]
+Name = Reality Orb
+NamePlural = Reality Orbs
+Pocket = 4
+Price = 5000
+Description = A mysterious, shimmering orb created by a master mime. It allows certain Pokémon to materialize their thoughts and evolve.
+FieldUse = OnPokemon
+Flags = EvolutionStone
+#-------------------------------
+[FERROUSTAR]
+Name = Ferrous Tar
+NamePlural = Ferrous Tars
+Pocket = 4
+Price = 4000
+Description = A dense, metallic substance hoarded by Durant. It allows a specific Pokémon to forge a steel shell and evolve.
+FieldUse = OnPokemon
+Flags = EvolutionStone
+#-------------------------------

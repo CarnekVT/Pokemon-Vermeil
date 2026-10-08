@@ -1,0 +1,89 @@
+{
+  "format": "bss-ebdx-element-catalog",
+  "version": 1,
+  "runtimeFolder": "Graphics/BattleSceneStudio/EBDX/Battlebacks/elements",
+  "note": "EBDX runtime keeps this folder flat. Categories are metadata only so filenames stay source-faithful.",
+  "categories": {
+    "Trees": [
+      "tree",
+      "treeB",
+      "treeC",
+      "treePine",
+      "cluster"
+    ],
+    "Vegetation": [
+      "tallGrass",
+      "seaWeed"
+    ],
+    "Mountains_Rocks": [
+      "mountain",
+      "mountainB",
+      "mountainC",
+      "rocks"
+    ],
+    "Sky_Atmosphere": [
+      "skyDay",
+      "skyDawn",
+      "skyNight",
+      "cloud1",
+      "cloud2",
+      "sun",
+      "star",
+      "fog",
+      "darkFog",
+      "forestShade",
+      "snow",
+      "shade"
+    ],
+    "Water": [
+      "water0",
+      "water1",
+      "bubble",
+      "bubbleDark",
+      "bubbleRed"
+    ],
+    "Structures": [
+      "pillars",
+      "pillars001",
+      "pillars002"
+    ],
+    "Lights": [
+      "lightA",
+      "lightB",
+      "lightC1",
+      "lightC2",
+      "lightC3",
+      "lightDecor"
+    ],
+    "Crowd_Stage": [
+      "crowd",
+      "crowd_d",
+      "discoBg"
+    ],
+    "Decor": [
+      "decor",
+      "decor001",
+      "decor002",
+      "decor003",
+      "decor003a",
+      "decor003d",
+      "decor004",
+      "decor005",
+      "decor006",
+      "decor007",
+      "decor008",
+      "decor009",
+      "base001",
+      "base001a",
+      "base001c"
+    ],
+    "Dark_Effects": [
+      "dark001",
+      "dark002",
+      "dark003",
+      "dark004",
+      "dark005",
+      "dark006"
+    ]
+  }
+}

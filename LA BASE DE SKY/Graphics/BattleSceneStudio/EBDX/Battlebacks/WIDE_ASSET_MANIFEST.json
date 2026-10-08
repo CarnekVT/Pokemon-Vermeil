@@ -1,0 +1,700 @@
+{
+  "format": "bss-ebdx-wide-asset-manifest",
+  "version": 1,
+  "targetViewport": [
+    640,
+    480
+  ],
+  "logicalEBDXWorld": [
+    384,
+    308
+  ],
+  "filesChanged": 57,
+  "changes": [
+    {
+      "path": "battlebg/Cave.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/CaveDark.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Champion.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/City.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/DanceFloor.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Darkness.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Field.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Forest.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/IndoorA.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/IndoorB.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Mountain.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Net.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Sand.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Sapphire.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Sky.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Snow.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Underwater.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "battlebg/Water.png",
+      "original": [
+        384,
+        308
+      ],
+      "runtime": [
+        1280,
+        480
+      ],
+      "method": "mirrored-horizontal+edge-vertical-extension"
+    },
+    {
+      "path": "base/Concrete.png",
+      "original": [
+        384,
+        182
+      ],
+      "runtime": [
+        1280,
+        182
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "base/Dirt.png",
+      "original": [
+        384,
+        182
+      ],
+      "runtime": [
+        1280,
+        182
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "base/Puddle.png",
+      "original": [
+        384,
+        182
+      ],
+      "runtime": [
+        1280,
+        182
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "base/Water.png",
+      "original": [
+        384,
+        182
+      ],
+      "runtime": [
+        1280,
+        182
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/base001.png",
+      "original": [
+        708,
+        167
+      ],
+      "runtime": [
+        1280,
+        167
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/base001a.png",
+      "original": [
+        708,
+        167
+      ],
+      "runtime": [
+        1280,
+        167
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/base001c.png",
+      "original": [
+        708,
+        167
+      ],
+      "runtime": [
+        1280,
+        167
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/cloud1.png",
+      "original": [
+        384,
+        18
+      ],
+      "runtime": [
+        1280,
+        18
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/cloud2.png",
+      "original": [
+        384,
+        18
+      ],
+      "runtime": [
+        1280,
+        18
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/crowd.png",
+      "original": [
+        384,
+        64
+      ],
+      "runtime": [
+        1280,
+        64
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/crowd_d.png",
+      "original": [
+        384,
+        102
+      ],
+      "runtime": [
+        1280,
+        102
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/darkFog.png",
+      "original": [
+        708,
+        167
+      ],
+      "runtime": [
+        1280,
+        167
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor.png",
+      "original": [
+        384,
+        98
+      ],
+      "runtime": [
+        1280,
+        98
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor001.png",
+      "original": [
+        420,
+        98
+      ],
+      "runtime": [
+        1280,
+        98
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor002.png",
+      "original": [
+        420,
+        98
+      ],
+      "runtime": [
+        1280,
+        98
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor003.png",
+      "original": [
+        384,
+        180
+      ],
+      "runtime": [
+        1280,
+        180
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor003a.png",
+      "original": [
+        384,
+        180
+      ],
+      "runtime": [
+        1280,
+        180
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor003d.png",
+      "original": [
+        384,
+        188
+      ],
+      "runtime": [
+        1280,
+        188
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor004.png",
+      "original": [
+        384,
+        100
+      ],
+      "runtime": [
+        1280,
+        100
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor005.png",
+      "original": [
+        420,
+        98
+      ],
+      "runtime": [
+        1280,
+        98
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor006.png",
+      "original": [
+        420,
+        98
+      ],
+      "runtime": [
+        1280,
+        98
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor007.png",
+      "original": [
+        500,
+        96
+      ],
+      "runtime": [
+        1280,
+        96
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor008.png",
+      "original": [
+        500,
+        96
+      ],
+      "runtime": [
+        1280,
+        96
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/decor009.png",
+      "original": [
+        500,
+        96
+      ],
+      "runtime": [
+        1280,
+        96
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/discoBg.png",
+      "original": [
+        384,
+        140
+      ],
+      "runtime": [
+        1280,
+        140
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/fog.png",
+      "original": [
+        708,
+        120
+      ],
+      "runtime": [
+        1280,
+        120
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/forestShade.png",
+      "original": [
+        768,
+        194
+      ],
+      "runtime": [
+        1536,
+        194
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/mountain.png",
+      "original": [
+        384,
+        102
+      ],
+      "runtime": [
+        1280,
+        102
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/mountainB.png",
+      "original": [
+        384,
+        102
+      ],
+      "runtime": [
+        1280,
+        102
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/mountainC.png",
+      "original": [
+        384,
+        102
+      ],
+      "runtime": [
+        1280,
+        102
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/pillars.png",
+      "original": [
+        384,
+        192
+      ],
+      "runtime": [
+        1280,
+        192
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/pillars001.png",
+      "original": [
+        384,
+        128
+      ],
+      "runtime": [
+        1280,
+        128
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/pillars002.png",
+      "original": [
+        402,
+        192
+      ],
+      "runtime": [
+        1280,
+        192
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/shade.png",
+      "original": [
+        384,
+        100
+      ],
+      "runtime": [
+        1280,
+        100
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/skyDawn.png",
+      "original": [
+        384,
+        105
+      ],
+      "runtime": [
+        1280,
+        105
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/skyDay.png",
+      "original": [
+        384,
+        105
+      ],
+      "runtime": [
+        1280,
+        105
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/skyNight.png",
+      "original": [
+        384,
+        105
+      ],
+      "runtime": [
+        1280,
+        105
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/water0.png",
+      "original": [
+        512,
+        192
+      ],
+      "runtime": [
+        1536,
+        192
+      ],
+      "method": "mirrored-horizontal-extension"
+    },
+    {
+      "path": "elements/water1.png",
+      "original": [
+        512,
+        192
+      ],
+      "runtime": [
+        1536,
+        192
+      ],
+      "method": "mirrored-horizontal-extension"
+    }
+  ],
+  "note": "Core authored pixels are preserved at the center; added width is real file data, not runtime-only stretching."
+}

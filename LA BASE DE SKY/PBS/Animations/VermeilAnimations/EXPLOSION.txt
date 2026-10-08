@@ -1,0 +1,244 @@
+[Move,EXPLOSION]
+Name = PRAS Explosion (Quantum)
+<User>
+    MoveColor = 0,20,FFFFFFFF,EaseIn
+    SetColor = 25,00000000
+    MoveX = 0,2,4,Linear
+    MoveX = 2,2,-4,Linear
+    MoveX = 4,2,4,Linear
+    MoveX = 6,2,-4,Linear
+    MoveX = 8,2,4,Linear
+    MoveX = 10,2,-4,Linear
+    MoveX = 12,2,4,Linear
+    MoveX = 14,2,-4,Linear
+    MoveX = 16,2,4,Linear
+    MoveX = 18,2,-4,Linear
+    MoveX = 20,2,4,Linear
+    MoveX = 22,2,-4,Linear
+    MoveX = 24,1,0,Linear
+<Target>
+    MoveX = 25,2,24,EaseOut
+    MoveX = 27,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Focus Punch1
+    Play = 12,PRSFX- Focus Punch2
+    Play = 25,Explosion1
+    Play = 26,PRSFX- Rock Wrecker1
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetVisible = 0,true
+    SetOpacity = 0,0
+    MoveOpacity = 0,10,200,Linear
+    SetVisible = 40,false
+<Burning Terrain>
+    Graphic = LegacyGraphics/PRAS- Burning BG
+    Focus = Background
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetVisible = 25,true
+    SetOpacity = 25,255
+    MoveOpacity = 40,15,0,Linear
+<Kinetic Vacuum>
+    Graphic = spark
+    Focus = User
+    Emitter = Straight
+    EmitterRate = 70
+    AngleOverride = AlwaysPointAtFocus
+    RandomInvertFlip = true
+    SetZ = 0,20
+    SetZoomX = 0,10
+    SetZoomY = 0,400
+    SetColor = 0,FFFFFFFF
+    SetEmitSpeed = 0,-500
+    SetEmitSpeedRange = 0,200
+    SetEmitAngleRange = 0,180
+    SetRadiusXRange = 0,220
+    SetRadiusYRange = 0,220
+    SetEmitting = 0,true
+    SetEmitting = 22,false
+    MoveOpacity = 20,5,0,Linear
+<Unstable Core>
+    Graphic = spark
+    Focus = User
+    SetZ = 0,25
+    SetColor = 0,FFFF00FF
+    SetVisible = 0,true
+    SetOpacity = 0,0
+    SetZoomX = 0,10
+    SetZoomY = 0,10
+    MoveOpacity = 0,20,255,EaseIn
+    MoveZoomX = 0,20,180,EaseIn
+    MoveZoomY = 0,20,180,EaseIn
+    MoveColor = 15,5,FFFFFFFF,Linear
+    SetVisible = 25,false
+<Kinetic Pulse Burst>
+    Graphic = spark
+    Focus = User
+    SecondLayer = true
+    SetZ = 0,30
+    SetZoomX = 0,300
+    SetZoomY = 0,300
+    SetColor = 0,FFFFFFFF
+    SetZ2 = 0,29
+    SetZoomX2 = 0,150
+    SetZoomY2 = 0,150
+    SetColor2 = 0,FFFF00FF
+    SetVisible = 0,false
+    SetVisible = 25,true
+    MoveOpacity = 25,15,0,Linear
+    SetVisible = 41,false
+<Quantum Shockwave>
+    Graphic = circle wave
+    Focus = User
+    SetZ = 0,35
+    SetColor = 0,00FFFFFF
+    SetVisible = 0,false
+    SetVisible = 25,true
+    SetZoomX = 25,10
+    SetZoomY = 25,10
+    MoveZoomX = 25,6,800,EaseOut
+    MoveZoomY = 25,6,800,EaseOut
+    MoveOpacity = 25,6,0,Linear
+    SetVisible = 33,false
+<Photon Shrapnel>
+    Graphic = spark
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 100
+    AngleOverride = AlwaysPointAtFocus
+    RandomInvertFlip = true
+    SetZ = 0,32
+    SetZoomX = 0,15
+    SetZoomY = 0,500
+    SetColor = 0,FFFFFFFF
+    SetEmitSpeed = 0,900
+    SetEmitSpeedRange = 0,300
+    SetEmitAngleRange = 0,180
+    SetEmitting = 0,false
+    SetEmitting = 25,true
+    SetEmitting = 28,false
+    MoveOpacity = 25,15,0,Linear
+
+
+[OppMove,EXPLOSION]
+Name = PRAS Explosion (Quantum)
+<User>
+    MoveColor = 0,20,FFFFFFFF,EaseIn
+    SetColor = 25,00000000
+    MoveX = 0,2,-4,Linear
+    MoveX = 2,2,4,Linear
+    MoveX = 4,2,-4,Linear
+    MoveX = 6,2,4,Linear
+    MoveX = 8,2,-4,Linear
+    MoveX = 10,2,4,Linear
+    MoveX = 12,2,-4,Linear
+    MoveX = 14,2,4,Linear
+    MoveX = 16,2,-4,Linear
+    MoveX = 18,2,4,Linear
+    MoveX = 20,2,-4,Linear
+    MoveX = 22,2,4,Linear
+    MoveX = 24,1,0,Linear
+<Target>
+    MoveX = 25,2,-24,EaseOut
+    MoveX = 27,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Focus Punch1
+    Play = 12,PRSFX- Focus Punch2
+    Play = 25,Explosion1
+    Play = 26,PRSFX- Rock Wrecker1
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetVisible = 0,true
+    SetOpacity = 0,0
+    MoveOpacity = 0,10,200,Linear
+    SetVisible = 40,false
+<Burning Terrain>
+    Graphic = LegacyGraphics/PRAS- Burning BG
+    Focus = Background
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetVisible = 25,true
+    SetOpacity = 25,255
+    MoveOpacity = 40,15,0,Linear
+<Kinetic Vacuum>
+    Graphic = spark
+    Focus = User
+    Emitter = Straight
+    EmitterRate = 70
+    AngleOverride = AlwaysPointAtFocus
+    RandomInvertFlip = true
+    SetZ = 0,20
+    SetZoomX = 0,10
+    SetZoomY = 0,400
+    SetColor = 0,FFFFFFFF
+    SetEmitSpeed = 0,-500
+    SetEmitSpeedRange = 0,200
+    SetEmitAngleRange = 0,180
+    SetRadiusXRange = 0,220
+    SetRadiusYRange = 0,220
+    SetEmitting = 0,true
+    SetEmitting = 22,false
+    MoveOpacity = 20,5,0,Linear
+<Unstable Core>
+    Graphic = spark
+    Focus = User
+    SetZ = 0,25
+    SetColor = 0,FFFF00FF
+    SetVisible = 0,true
+    SetOpacity = 0,0
+    SetZoomX = 0,10
+    SetZoomY = 0,10
+    MoveOpacity = 0,20,255,EaseIn
+    MoveZoomX = 0,20,180,EaseIn
+    MoveZoomY = 0,20,180,EaseIn
+    MoveColor = 15,5,FFFFFFFF,Linear
+    SetVisible = 25,false
+<Kinetic Pulse Burst>
+    Graphic = spark
+    Focus = User
+    SecondLayer = true
+    SetZ = 0,30
+    SetZoomX = 0,300
+    SetZoomY = 0,300
+    SetColor = 0,FFFFFFFF
+    SetZ2 = 0,29
+    SetZoomX2 = 0,150
+    SetZoomY2 = 0,150
+    SetColor2 = 0,FFFF00FF
+    SetVisible = 0,false
+    SetVisible = 25,true
+    MoveOpacity = 25,15,0,Linear
+    SetVisible = 41,false
+<Quantum Shockwave>
+    Graphic = circle wave
+    Focus = User
+    SetZ = 0,35
+    SetColor = 0,00FFFFFF
+    SetVisible = 0,false
+    SetVisible = 25,true
+    SetZoomX = 25,10
+    SetZoomY = 25,10
+    MoveZoomX = 25,6,800,EaseOut
+    MoveZoomY = 25,6,800,EaseOut
+    MoveOpacity = 25,6,0,Linear
+    SetVisible = 33,false
+<Photon Shrapnel>
+    Graphic = spark
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 100
+    AngleOverride = AlwaysPointAtFocus
+    RandomInvertFlip = true
+    SetZ = 0,32
+    SetZoomX = 0,15
+    SetZoomY = 0,500
+    SetColor = 0,FFFFFFFF
+    SetEmitSpeed = 0,900
+    SetEmitSpeedRange = 0,300
+    SetEmitAngleRange = 0,180
+    SetEmitting = 0,false
+    SetEmitting = 25,true
+    SetEmitting = 28,false
+    MoveOpacity = 25,15,0,Linear

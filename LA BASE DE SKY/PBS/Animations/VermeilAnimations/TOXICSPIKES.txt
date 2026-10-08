@@ -1,0 +1,377 @@
+[Move,TOXICSPIKES]
+Name = PRAS Toxic Spikes
+<User>
+    MoveX = 0,3,-10,EaseOut
+    MoveY = 0,3,4,EaseOut
+    MoveX = 3,3,0,EaseIn
+    MoveY = 3,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Toxic Spikes1,82,105
+    Play = 12,PRSFX- Toxic Spikes2,90,98
+<Particle 1>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,-58,Linear
+    MoveY = 2,5,-40,EaseOut
+    MoveY = 7,5,32,EaseIn
+    MoveAngle = 2,10,540,Linear
+    # Rebote
+    MoveY = 12,3,17,EaseOut
+    MoveY = 15,3,32,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 2>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,-36,Linear
+    MoveY = 3,5,-40,EaseOut
+    MoveY = 8,5,38,EaseIn
+    MoveAngle = 3,10,570,Linear
+    # Rebote
+    MoveY = 13,3,23,EaseOut
+    MoveY = 16,3,38,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 3>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,-14,Linear
+    MoveY = 4,5,-40,EaseOut
+    MoveY = 9,5,30,EaseIn
+    MoveAngle = 4,10,600,Linear
+    # Rebote
+    MoveY = 14,3,15,EaseOut
+    MoveY = 17,3,30,EaseIn
+    MoveOpacity = 26,6,0,Linear
+<Particle 4>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,10,Linear
+    MoveY = 2,5,-40,EaseOut
+    MoveY = 7,5,39,EaseIn
+    MoveAngle = 2,10,630,Linear
+    # Rebote
+    MoveY = 12,3,24,EaseOut
+    MoveY = 15,3,39,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 5>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,34,Linear
+    MoveY = 3,5,-40,EaseOut
+    MoveY = 8,5,31,EaseIn
+    MoveAngle = 3,10,660,Linear
+    # Rebote
+    MoveY = 13,3,16,EaseOut
+    MoveY = 16,3,31,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 6>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,56,Linear
+    MoveY = 4,5,-40,EaseOut
+    MoveY = 9,5,36,EaseIn
+    MoveAngle = 4,10,690,Linear
+    # Rebote
+    MoveY = 14,3,21,EaseOut
+    MoveY = 17,3,36,EaseIn
+    MoveOpacity = 26,6,0,Linear
+<Particle 7>
+    Graphic = spark
+    Focus = Target
+    SetTone = 0,+96-40+C8+00
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,56
+    SetZoomY = 0,56
+    SetX = 12,-28
+    SetY = 12,30
+    SetVisible = 12,true
+    MoveOpacity = 12,2,150,Linear
+    MoveX = 12,7,-35,EaseOut
+    # Las burbujas siempre flotan hacia arriba
+    MoveY = 12,7,6,EaseOut
+    MoveOpacity = 16,6,0,Linear
+<Particle 8>
+    Graphic = spark
+    Focus = Target
+    SetTone = 0,+96-40+C8+00
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,62
+    SetZoomY = 0,62
+    SetX = 14,-14
+    SetY = 14,30
+    SetVisible = 14,true
+    MoveOpacity = 14,2,150,Linear
+    MoveX = 14,7,-7,EaseOut
+    # Las burbujas siempre flotan hacia arriba
+    MoveY = 14,7,6,EaseOut
+    MoveOpacity = 18,6,0,Linear
+<Particle 9>
+    Graphic = spark
+    Focus = Target
+    SetTone = 0,+96-40+C8+00
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,56
+    SetZoomY = 0,56
+    SetX = 16,0
+    SetY = 16,30
+    SetVisible = 16,true
+    MoveOpacity = 16,2,150,Linear
+    MoveX = 16,7,-7,EaseOut
+    # Las burbujas siempre flotan hacia arriba
+    MoveY = 16,7,6,EaseOut
+    MoveOpacity = 20,6,0,Linear
+<Particle 10>
+    Graphic = spark
+    Focus = Target
+    SetTone = 0,+96-40+C8+00
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,62
+    SetZoomY = 0,62
+    SetX = 18,14
+    SetY = 18,30
+    SetVisible = 18,true
+    MoveOpacity = 18,2,150,Linear
+    MoveX = 18,7,21,EaseOut
+    # Las burbujas siempre flotan hacia arriba
+    MoveY = 18,7,6,EaseOut
+    MoveOpacity = 22,6,0,Linear
+
+[OppMove,TOXICSPIKES]
+Name = PRAS Toxic Spikes
+<User>
+    MoveX = 0,3,10,EaseOut
+    MoveY = 0,3,-4,EaseOut
+    MoveX = 3,3,0,EaseIn
+    MoveY = 3,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Toxic Spikes1,82,105
+    Play = 12,PRSFX- Toxic Spikes2,90,98
+<Particle 1>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,58,Linear
+    MoveY = 2,5,-160,EaseOut
+    MoveY = 7,5,48,EaseIn
+    MoveAngle = 2,10,-540,Linear
+    # Rebote
+    MoveY = 12,3,33,EaseOut
+    MoveY = 15,3,48,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 2>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,36,Linear
+    MoveY = 3,5,-160,EaseOut
+    MoveY = 8,5,42,EaseIn
+    MoveAngle = 3,10,-570,Linear
+    # Rebote
+    MoveY = 13,3,27,EaseOut
+    MoveY = 16,3,42,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 3>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,14,Linear
+    MoveY = 4,5,-160,EaseOut
+    MoveY = 9,5,50,EaseIn
+    MoveAngle = 4,10,-600,Linear
+    # Rebote
+    MoveY = 14,3,35,EaseOut
+    MoveY = 17,3,50,EaseIn
+    MoveOpacity = 26,6,0,Linear
+<Particle 4>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,-10,Linear
+    MoveY = 2,5,-160,EaseOut
+    MoveY = 7,5,41,EaseIn
+    MoveAngle = 2,10,-630,Linear
+    # Rebote
+    MoveY = 12,3,26,EaseOut
+    MoveY = 15,3,41,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 5>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,-34,Linear
+    MoveY = 3,5,-160,EaseOut
+    MoveY = 8,5,49,EaseIn
+    MoveAngle = 3,10,-660,Linear
+    # Rebote
+    MoveY = 13,3,34,EaseOut
+    MoveY = 16,3,49,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 6>
+    Graphic = toxic_spikes
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,78
+    SetZoomY = 0,78
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,-56,Linear
+    MoveY = 4,5,-160,EaseOut
+    MoveY = 9,5,44,EaseIn
+    MoveAngle = 4,10,-690,Linear
+    # Rebote
+    MoveY = 14,3,29,EaseOut
+    MoveY = 17,3,44,EaseIn
+    MoveOpacity = 26,6,0,Linear
+<Particle 7>
+    Graphic = spark
+    Focus = Target
+    SetTone = 0,+96-40+C8+00
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,56
+    SetZoomY = 0,56
+    SetX = 12,28
+    SetY = 12,30
+    SetVisible = 12,true
+    MoveOpacity = 12,2,150,Linear
+    MoveX = 12,7,35,EaseOut
+    # Las burbujas siempre flotan hacia arriba
+    MoveY = 12,7,6,EaseOut
+    MoveOpacity = 16,6,0,Linear
+<Particle 8>
+    Graphic = spark
+    Focus = Target
+    SetTone = 0,+96-40+C8+00
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,62
+    SetZoomY = 0,62
+    SetX = 14,14
+    SetY = 14,30
+    SetVisible = 14,true
+    MoveOpacity = 14,2,150,Linear
+    MoveX = 14,7,7,EaseOut
+    # Las burbujas siempre flotan hacia arriba
+    MoveY = 14,7,6,EaseOut
+    MoveOpacity = 18,6,0,Linear
+<Particle 9>
+    Graphic = spark
+    Focus = Target
+    SetTone = 0,+96-40+C8+00
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,56
+    SetZoomY = 0,56
+    SetX = 16,0
+    SetY = 16,30
+    SetVisible = 16,true
+    MoveOpacity = 16,2,150,Linear
+    MoveX = 16,7,7,EaseOut
+    # Las burbujas siempre flotan hacia arriba
+    MoveY = 16,7,6,EaseOut
+    MoveOpacity = 20,6,0,Linear
+<Particle 10>
+    Graphic = spark
+    Focus = Target
+    SetTone = 0,+96-40+C8+00
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,62
+    SetZoomY = 0,62
+    SetX = 18,-14
+    SetY = 18,30
+    SetVisible = 18,true
+    MoveOpacity = 18,2,150,Linear
+    MoveX = 18,7,-21,EaseOut
+    # Las burbujas siempre flotan hacia arriba
+    MoveY = 18,7,6,EaseOut
+    MoveOpacity = 22,6,0,Linear

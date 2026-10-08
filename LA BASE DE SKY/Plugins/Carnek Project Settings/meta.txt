@@ -1,0 +1,5 @@
+﻿Name       = Carnek Project Settings
+Version    = 1
+Essentials = 21.1
+Credits    = Carnek
+Last = true

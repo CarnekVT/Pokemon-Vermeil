@@ -1,0 +1,70 @@
+.idea
+.cursor
+.ruby-lsp
+*/.ruby-lsp
+
+# Sitio generado por wiki/generate.rb
+wiki/site/
+LA BASE DE SKY/Data/Enemies.rxdata
+LA BASE DE SKY/Data/Actors.rxdata
+LA BASE DE SKY/Data/Armors.rxdata
+LA BASE DE SKY/Data/Skills.rxdata
+LA BASE DE SKY/Data/States.rxdata
+LA BASE DE SKY/Data/Weapons.rxdata
+LA BASE DE SKY/rgss-compiler.json
+LA BASE DE SKY/Data/Animations.rxdata
+Scripts.code-workspace
+**/*.dat
+LA BASE DE SKY\Data\*.dat
+LA BASE DE SKY/Data/PluginScripts.rxdata
+LA BASE DE SKY/Data/Weapons.rxdata
+LA BASE DE SKY/Data/Tilesets.rxdata
+LA BASE DE SKY/Data/System.rxdata
+LA BASE DE SKY/Data/States.rxdata
+LA BASE DE SKY/Data/Skills.rxdata
+LA BASE DE SKY/Data/Weapons.rxdata
+LA BASE DE SKY/Data/Tilesets.rxdata
+LA BASE DE SKY/Data/System.rxdata
+LA BASE DE SKY/Data/States.rxdata
+LA BASE DE SKY/Data/Skills.rxdata
+# MakerStudio: keep generated/vendor contents ignored, but allow editor Mods to be versioned.
+LA BASE DE SKY/Plugins/MakerStudio/*
+!LA BASE DE SKY/Plugins/MakerStudio/003_Editor/
+LA BASE DE SKY/Plugins/MakerStudio/003_Editor/*
+!LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/
+!LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/**
+LA BASE DE SKY/Data/map-backups
+Gemfile
+Gemfile.lock
+rakefile
+# Pre-commit configuration (personal use only)
+.pre-commit-config.yaml
+check-ruby-syntax-local.ps1
+ruby-style-suggestions.ps1
+PRE-COMMIT-SETUP-GUIDE.md
+.ruby-version
+LA BASE DE SKY/luts_log.txt
+.agents
+.claude
+AGENTS.md
+CLAUDE.md
+node_modules
+JUEGO/node_modules
+.opencode
+opencode.json
+docs
+/mkxp-z-3ds
+skills-lock.json
+LA BASE DE SKY/skills-lock.json
+
+# Generated caches/backups - never version these
+**/.rubynod/
+**/desktop.ini
+LA BASE DE SKY/Game_backup*.exe
+LA BASE DE SKY/Data/*Backup.rxdata
+LA BASE DE SKY/Data/*.rxdata.bak
+LA BASE DE SKY/Data/PkmnAnimations_old*.rxdata
+LA BASE DE SKY/PBS/AnimationStudio/animations.recovery.json
+LA BASE DE SKY/Data/TranslateStudio/discovery_cache.json
+LA BASE DE SKY/Data/ChangeDex/*.cache
+LA BASE DE SKY/Data/Ruby Library 3.3.0/

@@ -1,0 +1,7 @@
+{
+  "version": "0.8.36",
+  "where": "input",
+  "message": "Failed to execute 'replaceChild' on 'Node': The node to be removed is no longer a child of this node. Perhaps it was moved in a 'blur' event handler?",
+  "stack": "NotFoundError: Failed to execute 'replaceChild' on 'Node': The node to be removed is no longer a child of this node. Perhaps it was moved in a 'blur' event handler?\n    at App.bss100RefreshAssetBrowser (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3243:409)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3334:152)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3346:219)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3557:364)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3768:22)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:3888:25)\n    at App.onInput (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:4133:22)\n    at guarded (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:67:51)\n    at HTMLDivElement.onInputBound (blob:http://tauri.localhost/3c8abb8b-4302-49da-8fc7-031c9a458838:68:211)",
+  "at": "2026-09-18T02:16:08.602Z"
+}

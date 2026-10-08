@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "readme": "Optional aliases for Golden Animation Bridge. Keys are Studio move IDs; values are alternate BAS IDs.",
+  "aliases": {
+    "GOLDEN|HERACROSS|MEGAHORN": "GOLDEN|HERACROSS|2|MEGAHORN"
+  }
+}

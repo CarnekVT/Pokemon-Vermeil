@@ -1,0 +1,173 @@
+﻿# Zippy Zap - Fast direct strikes + evasion buff
+[Move,ZIPPYZAP]
+Name = PRAS Zippy Zap
+<User>
+    MoveColor = 2,3,FFFF00B4
+    MoveZoom = 2,3,115
+    MoveColor = 8,3,00FFFFC8
+    MoveTone = 8,3,+00+64+64+1E
+    MoveColor = 11,4,00000000
+    MoveTone = 11,4,+00+00+00+00
+<Target>
+    MoveX = 5,2,12,EaseOut
+    MoveColor = 5,2,FFFFFFFF
+    MoveX = 7,2,-24,EaseBoth
+    MoveColor = 7,2,00000000
+    MoveX = 9,2,0,EaseBoth
+<SE>
+    Play = 2,PRSFX- Spark1
+    Play = 5,Thunder3
+<Charge Aura>
+    Graphic = electricity 1
+    Focus = User
+    SetZ = 0,710
+    SetZoom = 0,80
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 2,true
+    MoveZoom = 2,3,120
+    MoveOpacity = 5,3,0
+<Strike 1>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetAngle = 0,45
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 5,true
+    MoveZoom = 5,2,150
+    MoveOpacity = 7,2,0
+<Strike 2>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetAngle = 0,-45
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 7,true
+    MoveZoom = 7,2,150
+    MoveOpacity = 9,2,0
+<Strike 3>
+    Graphic = spark
+    Focus = Target
+    SetZ = 0,750
+    SetAngle = 0,90
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 9,true
+    MoveZoom = 9,2,150
+    MoveOpacity = 11,2,0
+<Evasion Aura>
+    Graphic = spark
+    Focus = User
+    SetZ = 0,590
+    SetZoom = 0,100
+    SetVisible = 0,false
+    SetTone = 0,+00+32+32+00
+    SetVisible = 11,true
+    MoveZoom = 11,4,140
+    MoveOpacity = 15,4,0
+#-------------------------------
+[OppMove,ZIPPYZAP]
+Name = PRAS Zippy Zap
+Credit = Anon
+<User>
+    MoveX = 2,2,-60,EaseIn
+    MoveOpacity = 2,2,0
+    MoveColor = 2,2,FFFF00FF
+    SetX = 28,0
+    SetY = 28,0
+    MoveOpacity = 28,3,255
+    MoveColor = 28,4,00FFFFC8
+    MoveColor = 32,8,00000000
+    MoveX = 40,5,0,EaseBoth
+<Target>
+    MoveX = 8,2,-12,EaseOut
+    MoveY = 8,2,5
+    MoveColor = 8,2,FFFFFFFF
+    MoveTone = 8,2,-32-32-32+32
+    MoveX = 10,2,24,EaseBoth
+    MoveY = 10,2,-5
+    MoveColor = 10,3,00000000
+    MoveX = 12,2,0,EaseBoth
+    MoveY = 12,2,0,EaseBoth
+    MoveTone = 15,8,+00+00+00+00
+<SE>
+    Play = 2,PRSFX- Spark1
+    Play = 10,Thunder3
+<Cinematic Background>
+    Graphic = black_screen
+    Focus = Background
+    SetZ = 0,540
+    SetOpacity = 0,0
+    MoveOpacity = 0,4,180
+    MoveOpacity = 28,8,0
+<Flash Step Aura>
+    Graphic = ballBurst_dazzle
+    Focus = User
+    SetZ = 0,750
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetZoomX = 2,50
+    SetZoomY = 2,50
+    SetVisible = 2,true
+    MoveZoomX = 2,4,300,EaseOut
+    MoveZoomY = 2,4,300,EaseOut
+    MoveOpacity = 2,4,0
+    SetVisible = 6,false
+<Z-Strike 1>
+    Graphic = spark
+    Focus = Target
+    SetX = 0,40
+    SetY = 0,-40
+    SetZ = 0,750
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetAngle = 0,45
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 8,true
+    MoveZoomX = 8,2,150,EaseOut
+    MoveZoomY = 8,2,150,EaseOut
+    MoveOpacity = 9,2,0
+<Z-Strike 2>
+    Graphic = spark
+    Focus = Target
+    SetX = 0,-40
+    SetY = 0,0
+    SetZ = 0,750
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetAngle = 0,-45
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 10,true
+    MoveZoomX = 10,2,150,EaseOut
+    MoveZoomY = 10,2,150,EaseOut
+    MoveOpacity = 11,2,0
+<Z-Strike 3>
+    Graphic = spark
+    Focus = Target
+    SetX = 0,0
+    SetY = 0,40
+    SetZ = 0,750
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetAngle = 0,90
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 12,true
+    MoveZoomX = 12,2,150,EaseOut
+    MoveZoomY = 12,2,150,EaseOut
+    MoveOpacity = 13,2,0
+<Electric Shrapnel>
+    Graphic = electricity 1
+    Focus = Target
+    SetZ = 0,760
+    SetZoomX = 0,150
+    SetZoomY = 0,150
+    SetVisible = 0,false
+    SetColor = 0,FFFF00FF
+    SetVisible = 10,true
+    MoveOpacity = 10,8,0
+    SetVisible = 18,false

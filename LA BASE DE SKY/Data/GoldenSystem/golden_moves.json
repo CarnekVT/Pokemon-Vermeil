@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "moves": {
+    "HERACROSS|MEGAHORN": {
+      "form": 2,
+      "name": "Cuerno Astral",
+      "type": "DRAGON",
+      "power": 120,
+      "accuracy": 85,
+      "description": "Violenta embestida con cuernos imponentes usando energía dracónica."
+    },
+    "HERACROSS|REVENGE": {
+      "form": 2,
+      "name": "Cornada Implacable",
+      "type": "DRAGON",
+      "power": 80,
+      "accuracy": 100,
+      "description": "Asesta un golpe con el poder de sus antepasados. Produce el doble de daño si el usuario es herido en el mismo turno."
+    },
+    "HERACROSS|ARMTHRUST": {
+      "form": 2,
+      "name": "Metralla Áurea",
+      "type": "DRAGON",
+      "power": 25,
+      "description": "Cornadas directas que golpean de dos a cinco veces seguidas."
+    },
+    "PINSIR|STORMTHROW": {
+      "form": 2,
+      "name": "Pinza Terracota",
+      "type": "GROUND",
+      "power": 70,
+      "accuracy": 100,
+      "functionCode": "AlwaysCriticalHit",
+      "description": "Lanza un golpe fulminante usando sus pinzas. Siempre resulta en un golpe crítico."
+    },
+    "PINSIR|BIND": {
+      "form": 2,
+      "name": "Agarre Sísmico",
+      "type": "GROUND",
+      "power": 60,
+      "accuracy": 100,
+      "functionCode": "BindTarget",
+      "description": "Ata y oprime con sus pinzas de cuatro a cinco turnos."
+    },
+    "PINSIR|THROATCHOP": {
+      "form": 2,
+      "name": "Tenaza Gaia",
+      "type": "GROUND",
+      "power": 80,
+      "accuracy": 100,
+      "functionCode": "SpikyGrasp",
+      "description": "Inflige al rival un dolor abrumador con sus tenazas. Golpea supereficaz al tipo Volador."
+    },
+    "HELIOLISK|WEATHERBALL": {
+      "form": 1,
+      "name": "Llama Solar",
+      "type": "FIRE",
+      "power": 80,
+      "accuracy": 100,
+      "functionCode": "RaiseUserSpAtk1",
+      "description": "Lanza un proyectil formado por la energía del sol para atacar al objetivo. También puede aumentar el Ataque Especial del usuario."
+    },
+    "HELIOLISK|PARABOLICCHARGE": {
+      "form": 1,
+      "name": "Carga Supernova",
+      "type": "FIRE",
+      "power": 95,
+      "accuracy": 100,
+      "functionCode": "HealUserByHalfOfDamageDone",
+      "description": "El usuario ataca a todo lo que le rodea con llamas solares. Los PS del usuario se restaura en la mitad del daño infligido."
+    },
+    "HELIOLISK|QUICKATTACK": {
+      "form": 1,
+      "name": "Destello Ígneo",
+      "type": "FIRE",
+      "power": 55,
+      "accuracy": 100,
+      "functionCode": "None",
+      "description": "Destello rápido y cegador que golpea al objetivo a una Velocidad imparable. Este movimiento siempre golpea primero."
+    }
+  }
+}

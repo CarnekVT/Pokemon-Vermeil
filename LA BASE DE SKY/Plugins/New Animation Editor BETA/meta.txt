@@ -1,0 +1,103 @@
+﻿Name       = New Animation Editor
+Version    = 2.1.11
+Essentials = 21.1
+Website    = https://github.com/Maruno17/pokemon-essentials
+Credits    = Maruno
+Optional   = [DBK] Animated Pokémon System
+#=====================================================================
+# About this plugin
+#=====================================================================
+#
+# This is a plugin version of the new Battle Animation Editor that
+# will be added to the next version of Essentials (v22). It is
+# provided as a plugin to give people the opportunity to try it out,
+# find bugs and make suggestions for improvements. It can also be used
+# to make new animations that will be included with Essentials.
+#
+# This is considered to be a BETA version of the new Battle Animation
+# Editor. Further changes will be made to add functionality and in
+# response to feedback. While you can use this plugin as-is, I would
+# strongly recommend upgrading to the next version of Essentials (when
+# it comes out) to use this Editor properly.
+#
+# This plugin's contents are also in the Essentials GitHub repo, in
+# the "dev" branch. You can discuss this Battle Animation Editor in
+# the #project-animations channel of the Game Dev Café server on
+# Discord: https://discord.gg/PFpYTrgKES
+#
+#=====================================================================
+# How to use the Editor
+#=====================================================================
+#
+# The Battle Animation Editor is accessible from the main Debug menu.
+# Choose "Other editors..." and then "New battle animation editor".
+#
+# The Battle Animation Editor uses a mouse input, and cannot be used
+# solely with the keyboard. It deliberately has little documentation,
+# as it is designed to be intuitive to use - if something confuses
+# you, bring it up as feedback and it can be improved.
+#
+# For particles with a focus of "User and target" (or similar), the
+# user is considered to be at position 0,0 and have a priority (z) of
+# 0, and the target is considered to be at position 200,-200 and have
+# a priority of -100.
+#
+# Keyboard shortcuts:
+#
+# The Battle Animation Editor has a number of keyboard shortcuts to
+# help your workflow. These are shown in the help window accessed from
+# the "Help" button at the top left of the screen while editing an
+# animation.
+#
+# In addition:
+#
+# - The mouse scroll wheel will scroll various things (including a
+#   horizontal scrollbar if hovering over that). Scrollbars are fully
+#   interactive.
+# - "Home"/"End", "Backspace"/"Delete" and "Return"/"Escape" work as
+#   you'd expect while entering text into a text box. If the text box
+#   is for a number, "+"/"-" can be typed anywhere in the number to
+#   change its sign.
+# - You can click to select a particle in the canvas, and click-drag
+#   a selected particle in the canvas to move it.
+#
+#=====================================================================
+# Files
+#=====================================================================
+#
+# Animations have three kinds of files:
+#
+# - PBS files in the "PBS\Animations\" folder.
+# - Graphic files in the "Graphics\Battle animations\" folder.
+# - Audio files in the "Audio\SE\Anim" folder.
+#
+# In all cases, these files may go in subfolders within the folders
+# mentioned above.
+#
+# If an animation particle's graphic is over 2 times wider than it is
+# tall (strictly over, not "equal to or wider than"), it is assumed to
+# be a spritesheet rather than a single graphic. This means it is made
+# up of square images (frames) placed side by side, and an animation
+# particle using that graphic will only show one frame.
+#
+#=====================================================================
+# Example content
+#=====================================================================
+#
+# This plugin is shipped with a lot of example animations. Their PBS
+# files live in the "PBS\Animations\Example anims\" folder, and their
+# spritesheets live in the "Graphics\Battle animations\Examples\"
+# folder. They make use of existing audio files.
+#
+# These animations are ones that already existed in Essentials, and
+# were converted from the old animation format to the new one. This
+# conversion was by no means perfect, and these animations only exist
+# (for now) to serve as examples. They will all be replaced by new
+# animations in the end. They all have an animation name of "Example
+# anim".
+#
+# This plugin is also shipped with whatever new animations have been
+# made so far. They all have an animation name of "Essentials", which
+# you can filter for.
+#
+#=====================================================================

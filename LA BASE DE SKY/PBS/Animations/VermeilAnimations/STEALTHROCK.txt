@@ -1,0 +1,249 @@
+[Move,STEALTHROCK]
+Name = PRAS Stealth Rock
+<User>
+    MoveX = 0,3,-10,EaseOut
+    MoveY = 0,3,4,EaseOut
+    MoveX = 3,3,0,EaseIn
+    MoveY = 3,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Rock Throw1,85,102
+    Play = 12,PRSFX- Rock Smash,92,100
+<Particle 1>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,70
+    SetZoomY = 0,70
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,-44,Linear
+    MoveY = 2,5,-40,EaseOut
+    MoveY = 7,5,46,EaseIn
+    MoveAngle = 2,10,580,Linear
+    # Rebote
+    MoveY = 12,3,31,EaseOut
+    MoveY = 15,3,46,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 2>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,75
+    SetZoomY = 0,75
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,-26,Linear
+    MoveY = 3,5,-40,EaseOut
+    MoveY = 8,5,32,EaseIn
+    MoveAngle = 3,10,615,Linear
+    # Rebote
+    MoveY = 13,3,17,EaseOut
+    MoveY = 16,3,32,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 3>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,-6,Linear
+    MoveY = 4,5,-40,EaseOut
+    MoveY = 9,5,50,EaseIn
+    MoveAngle = 4,10,650,Linear
+    # Rebote
+    MoveY = 14,3,35,EaseOut
+    MoveY = 17,3,50,EaseIn
+    MoveOpacity = 26,6,0,Linear
+<Particle 4>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,70
+    SetZoomY = 0,70
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,16,Linear
+    MoveY = 2,5,-40,EaseOut
+    MoveY = 7,5,34,EaseIn
+    MoveAngle = 2,10,685,Linear
+    # Rebote
+    MoveY = 12,3,19,EaseOut
+    MoveY = 15,3,34,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 5>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,75
+    SetZoomY = 0,75
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,34,Linear
+    MoveY = 3,5,-40,EaseOut
+    MoveY = 8,5,44,EaseIn
+    MoveAngle = 3,10,720,Linear
+    # Rebote
+    MoveY = 13,3,29,EaseOut
+    MoveY = 16,3,44,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 6>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetX = 0,-160
+    SetY = 0,80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,52,Linear
+    MoveY = 4,5,-40,EaseOut
+    MoveY = 9,5,30,EaseIn
+    MoveAngle = 4,10,755,Linear
+    # Rebote
+    MoveY = 14,3,15,EaseOut
+    MoveY = 17,3,30,EaseIn
+    MoveOpacity = 26,6,0,Linear
+
+[OppMove,STEALTHROCK]
+Name = PRAS Stealth Rock
+<User>
+    MoveX = 0,3,10,EaseOut
+    MoveY = 0,3,-4,EaseOut
+    MoveX = 3,3,0,EaseIn
+    MoveY = 3,3,0,EaseIn
+<SE>
+    Play = 2,PRSFX- Rock Throw1,85,102
+    Play = 12,PRSFX- Rock Smash,92,100
+<Particle 1>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,70
+    SetZoomY = 0,70
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,44,Linear
+    MoveY = 2,5,-160,EaseOut
+    MoveY = 7,5,34,EaseIn
+    MoveAngle = 2,10,-580,Linear
+    # Rebote
+    MoveY = 12,3,19,EaseOut
+    MoveY = 15,3,34,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 2>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,75
+    SetZoomY = 0,75
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,26,Linear
+    MoveY = 3,5,-160,EaseOut
+    MoveY = 8,5,48,EaseIn
+    MoveAngle = 3,10,-615,Linear
+    # Rebote
+    MoveY = 13,3,33,EaseOut
+    MoveY = 16,3,48,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 3>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,6,Linear
+    MoveY = 4,5,-160,EaseOut
+    MoveY = 9,5,30,EaseIn
+    MoveAngle = 4,10,-650,Linear
+    # Rebote
+    MoveY = 14,3,15,EaseOut
+    MoveY = 17,3,30,EaseIn
+    MoveOpacity = 26,6,0,Linear
+<Particle 4>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,70
+    SetZoomY = 0,70
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 2,true
+    MoveOpacity = 2,2,255,Linear
+    MoveX = 2,10,-16,Linear
+    MoveY = 2,5,-160,EaseOut
+    MoveY = 7,5,46,EaseIn
+    MoveAngle = 2,10,-685,Linear
+    # Rebote
+    MoveY = 12,3,31,EaseOut
+    MoveY = 15,3,46,EaseIn
+    MoveOpacity = 24,6,0,Linear
+<Particle 5>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,75
+    SetZoomY = 0,75
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 3,true
+    MoveOpacity = 3,2,255,Linear
+    MoveX = 3,10,-34,Linear
+    MoveY = 3,5,-160,EaseOut
+    MoveY = 8,5,36,EaseIn
+    MoveAngle = 3,10,-720,Linear
+    # Rebote
+    MoveY = 13,3,21,EaseOut
+    MoveY = 16,3,36,EaseIn
+    MoveOpacity = 25,6,0,Linear
+<Particle 6>
+    Graphic = stealth_rock
+    Focus = Target
+    SetVisible = 0,false
+    SetOpacity = 0,0
+    SetZoomX = 0,80
+    SetZoomY = 0,80
+    SetX = 0,160
+    SetY = 0,-80
+    SetVisible = 4,true
+    MoveOpacity = 4,2,255,Linear
+    MoveX = 4,10,-52,Linear
+    MoveY = 4,5,-160,EaseOut
+    MoveY = 9,5,50,EaseIn
+    MoveAngle = 4,10,-755,Linear
+    # Rebote
+    MoveY = 14,3,35,EaseOut
+    MoveY = 17,3,50,EaseIn
+    MoveOpacity = 26,6,0,Linear

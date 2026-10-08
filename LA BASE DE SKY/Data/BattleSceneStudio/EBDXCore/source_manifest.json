@@ -1,0 +1,84 @@
+{
+  "bss": "0.7.8",
+  "base": "0.6.73",
+  "ebdx": "1.4.7.1 E21",
+  "sources": [
+    {
+      "source": "Plugins/Elite Battle DX/[000] Scripts/Battle Modifiers/Math Functions.rb",
+      "sha256": "236f1b09ff012955a293f4594573776b4833284f8da85c0b6a47b33efbc5e704",
+      "bytes": 8803
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[000] Scripts/Battle Scenes/Scene Backdrops.rb",
+      "sha256": "adade377ed5b76cab5778bf7dc389c753ceb9651e37b4485a1c7ccb009bff2c4",
+      "bytes": 47335
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[000] Scripts/Battle Scenes/Scene Camera.rb",
+      "sha256": "4db8310890ebf8c0e31eafbc83093713ded362d278a49fc4d54c30fe952513ba",
+      "bytes": 8527
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[000] Scripts/Battle UI/UI Command.rb",
+      "sha256": "32d9d9319d521a66d1704122e9b88a9ced4490933293d7b0f9da24e349f25b54",
+      "bytes": 11591
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[003] Config/Config.rb",
+      "sha256": "7d04e22526f196cc58055887bcf1442aae3f7f433316e62b823b891a0221493d",
+      "bytes": 5004
+    },
+    {
+      "source": "Plugins/Elite Battle DX/[003] Config/Environments.rb",
+      "sha256": "946fa5342ba221c69f9032a1fe32a139439fc338702c95d56cdad1e1bcee33e8",
+      "bytes": 11633
+    },
+    {
+      "source": "Plugins/Luka's Scripting Utilities/script.rb",
+      "sha256": "f1b9a7e46855ec54f4b780a428082904cade9a3743ba4197cd5f8f842d189084",
+      "bytes": 57611
+    }
+  ],
+  "wildIntroReference": {
+    "source": "WildIntroNDS.rb (user supplied)",
+    "sha256": "934b04a5a84c9cb2aa0937e039c8cde849d28ceefc10a6bd1d47da1a3d2aa5cb",
+    "bytes": 27660
+  },
+  "wildIntroAssets": [
+    {
+      "file": "CaveIntro.png",
+      "sha256": "482e53f45a377c7bf1f0fe3feb7ee2ed479e169ba66ab3069107aabca22952b3",
+      "bytes": 13655
+    },
+    {
+      "file": "GrassIntro.png",
+      "sha256": "001ae48451f3c19d6ed66a539d5cf077c8483d5b76a1790d33abfe13c1dca7fe",
+      "bytes": 9149
+    },
+    {
+      "file": "GrassIntro_eve.png",
+      "sha256": "751b4f04edc5606ff4ceefd2b8783ee32cdcb23b50a9cd67938e34408048ef4c",
+      "bytes": 9111
+    },
+    {
+      "file": "GrassIntro_night.png",
+      "sha256": "8d0d25a2ad2c0d3dd6ab994b9e57390c307efcec3644a52b8ca7eb23b3e66e6e",
+      "bytes": 9141
+    },
+    {
+      "file": "WaterIntro.png",
+      "sha256": "2b2329571e3e32d5366b9197dde6ac97824664aa7253973848b167af689103f5",
+      "bytes": 9276
+    },
+    {
+      "file": "WaterIntro_eve.png",
+      "sha256": "26690e179acc0a5473f99c1f10bec6297f09c52f489fa3b3198d5abe4365168a",
+      "bytes": 9296
+    },
+    {
+      "file": "WaterIntro_night.png",
+      "sha256": "d3e2fd19b7ae7729a1d1ee04644108e9203782b6f0996f6783e2f64cb6ff4edf",
+      "bytes": 9242
+    }
+  ]
+}

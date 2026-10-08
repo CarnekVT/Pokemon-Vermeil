@@ -1,0 +1,44 @@
+﻿# Consulta la documentación en la wiki para aprender cómo editar este archivo.
+#-------------------------------
+[001]   # Intro
+Name = Intro
+#-------------------------------
+[002]   # Route 29
+Name = Route 29
+Outdoor = true
+LocationSign = HGSS route
+ShowArea = true
+Weather = GreenLeavesPresentColor,100
+MapPosition = 0,18,17
+SnapEdges = true
+BattleBack = indoor1
+#-------------------------------
+[032]   # Test
+Name = Test
+Weather = SakuraPetals,100
+#-------------------------------
+[042]   # New Bark Town
+Name = New Bark Town
+Outdoor = true
+LocationSign = HGSS town
+ShowArea = true
+HealingSpot = 42,32,16
+Weather = GreenLeavesPresentColor,100
+MapPosition = 0,20,17
+SnapEdges = true
+BattleBack = NewBark
+WildBattleBGM = HGSS Wild Pokemon Pokestir
+Environment = Grass
+#-------------------------------
+[077]   # Test 2.5d
+Name = Test 2.5d
+Outdoor = true
+Weather = SakuraPetalsPresentColor,100
+#-------------------------------
+[078]   # Test 2.5d (Indoor)
+Name = Indoor 2.5D Test
+#-------------------------------
+[079]   # New 2.5D Test
+Name = New 2.5D Test
+Weather = FeathersPresentColor,100
+SnapEdges = true

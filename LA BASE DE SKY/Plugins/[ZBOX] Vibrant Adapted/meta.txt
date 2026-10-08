@@ -1,0 +1,4 @@
+Name        = Vibrant Adapted
+Version     = 1.2.0
+Essentials  = 21.1
+Credits     = Zik, FPEX

@@ -1,0 +1,25 @@
+{
+  "variants": [
+    {
+      "id": "shiny",
+      "name": "Variocolor (Shiny)",
+      "folder": "shiny",
+      "color": "#facc15",
+      "rate": 65536
+    },
+    {
+      "id": "supershiny",
+      "name": "Super Variocolor",
+      "folder": "supershiny",
+      "color": "#c084fc",
+      "rate": 655360
+    },
+    {
+      "id": "ancientshiny",
+      "name": "Ancient Shiny",
+      "folder": "ancientshiny",
+      "color": "#f9a748",
+      "rate": 655360
+    }
+  ]
+}

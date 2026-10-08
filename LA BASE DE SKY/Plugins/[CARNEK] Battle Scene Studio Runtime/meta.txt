@@ -1,0 +1,7 @@
+Name = [CARNEK] Battle Scene Studio Runtime
+Version = 0.8.36
+Essentials = 21.1
+Credits = CarnekVT
+
+Last = true
+Priority = 9999

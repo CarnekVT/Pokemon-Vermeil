@@ -1,0 +1,196 @@
+[Move,VOLTBURST]
+Name = PRAS Voltburst
+<User>
+    MoveColor = 0,2,F8F800FF,Linear
+    MoveColor = 2,2,FFFFFFFF,Linear
+    MoveColor = 4,2,F8F800FF,Linear
+    MoveColor = 6,2,00000000Linear
+    MoveColor = 8,2,F8F800FF,Linear
+    MoveColor = 10,2,FFFFFFFF,Linear
+    MoveColor = 12,2,00000000Linear
+    MoveColor = 14,2,F8F800FF,Linear
+    MoveColor = 16,2,FFFFFFFF,Linear
+    MoveColor = 18,2,F8F800FF,Linear
+<Target>
+    MoveX = 20,2,24,EaseOut
+    MoveX = 22,3,0,EaseIn
+<SE>
+    Play = 0,PRSFX- Charge
+    Play = 20,PRSFX- Thunder1
+    Play = 21,PRSFX- Rock Wrecker1
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetOpacity = 0,0
+    MoveOpacity = 0,4,160,Linear
+    SetVisible = 35,false
+<Terrain>
+    Graphic = terrain_electric_bg
+    Focus = Background
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveOpacity = 30,10,0,Linear
+<Electric Charge>
+    Graphic = electricity 1
+    Focus = User
+    Emitter = Straight
+    EmitterRate = 15
+    AngleOverride = AlwaysPointAtFocus
+    RandomInvertFlip = true
+    SetZ = 0,20
+    SetZoomX = 0,150
+    SetZoomY = 0,150
+    SetEmitAngleRange = 0,180
+    SetRadiusXRange = 0,180
+    SetRadiusYRange = 0,180
+    # Negative speed makes it fly INWARDS to the user
+    SetEmitSpeed = 0,-180
+    SetColor = 0,F8F800FF
+    MoveColor = 0,20,FFFFFFFF,Linear
+    SetEmitting = 0,true
+    SetEmitting = 18,false
+    SetVisible = 20,false
+<Volt Blast Core>
+    Graphic = Volt
+    Focus = User
+    SetZ = 0,30
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    SetZoomX = 20,20
+    SetZoomY = 20,20
+    SetTone = 20,+FF+FF+00+00
+    MoveZoomX = 20,5,500,EaseOut
+    MoveZoomY = 20,5,500,EaseOut
+    MoveOpacity = 20,10,0,Linear
+    SetVisible = 32,false
+<Electric Burst>
+    Graphic = electricity 1
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 40
+    RandomInvertFlip = true
+    SetZ = 0,25
+    SetZoomX = 0,200
+    SetZoomY = 0,200
+    SetEmitAngleRange = 0,180
+    SetEmitSpeed = 0,400
+    SetEmitSpeedRange = 0,150
+    SetColor = 0,FFFFFFFF
+    SetEmitting = 0,false
+    SetEmitting = 20,true
+    SetEmitting = 22,false
+    MoveOpacity = 20,10,0,Linear
+<Shockwave>
+    Graphic = circle wave
+    Focus = User
+    SetZ = 0,22
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetColor = 20,F8F800FF
+    SetZoomX = 20,10
+    SetZoomY = 20,10
+    MoveZoomX = 20,8,600,EaseOut
+    MoveZoomY = 20,8,600,EaseOut
+    MoveOpacity = 20,8,0,Linear
+    SetVisible = 28,false
+
+
+[OppMove,VOLTBURST]
+Name = PRAS Voltburst
+<User>
+    MoveColor = 0,2,F8F800FF,Linear
+    MoveColor = 2,2,FFFFFFFF,Linear
+    MoveColor = 4,2,F8F800FF,Linear
+    MoveColor = 6,2,00000000Linear
+    MoveColor = 8,2,F8F800FF,Linear
+    MoveColor = 10,2,FFFFFFFF,Linear
+    MoveColor = 12,2,00000000Linear
+    MoveColor = 14,2,F8F800FF,Linear
+    MoveColor = 16,2,FFFFFFFF,Linear
+    MoveColor = 18,2,F8F800FF,Linear
+<Target>
+    MoveX = 20,2,-24,EaseOut
+    MoveX = 22,3,0,EaseIn
+<SE>
+    Play = 0,PRSFX- Charge
+    Play = 20,PRSFX- Thunder1
+    Play = 21,PRSFX- Rock Wrecker1
+<Background>
+    Graphic = black_screen
+    Focus = Background
+    SetOpacity = 0,0
+    MoveOpacity = 0,4,160,Linear
+    SetVisible = 35,false
+<Terrain>
+    Graphic = terrain_electric_bg
+    Focus = Background
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    MoveOpacity = 30,10,0,Linear
+<Electric Charge>
+    Graphic = electricity 1
+    Focus = User
+    Emitter = Straight
+    EmitterRate = 15
+    AngleOverride = AlwaysPointAtFocus
+    RandomInvertFlip = true
+    SetZ = 0,20
+    SetZoomX = 0,150
+    SetZoomY = 0,150
+    SetEmitAngleRange = 0,180
+    SetRadiusXRange = 0,180
+    SetRadiusYRange = 0,180
+    # Negative speed makes it fly INWARDS to the user
+    SetEmitSpeed = 0,-180
+    SetColor = 0,F8F800FF
+    MoveColor = 0,20,FFFFFFFF,Linear
+    SetEmitting = 0,true
+    SetEmitting = 18,false
+    SetVisible = 20,false
+<Volt Blast Core>
+    Graphic = Volt
+    Focus = User
+    SetZ = 0,30
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetOpacity = 20,255
+    SetZoomX = 20,20
+    SetZoomY = 20,20
+    SetTone = 20,+FF+FF+00+00
+    MoveZoomX = 20,5,500,EaseOut
+    MoveZoomY = 20,5,500,EaseOut
+    MoveOpacity = 20,10,0,Linear
+    SetVisible = 32,false
+<Electric Burst>
+    Graphic = electricity 1
+    Focus = User
+    Emitter = Projectile
+    EmitterRate = 40
+    RandomInvertFlip = true
+    SetZ = 0,25
+    SetZoomX = 0,200
+    SetZoomY = 0,200
+    SetEmitAngleRange = 0,180
+    SetEmitSpeed = 0,400
+    SetEmitSpeedRange = 0,150
+    SetColor = 0,FFFFFFFF
+    SetEmitting = 0,false
+    SetEmitting = 20,true
+    SetEmitting = 22,false
+    MoveOpacity = 20,10,0,Linear
+<Shockwave>
+    Graphic = circle wave
+    Focus = User
+    SetZ = 0,22
+    SetVisible = 0,false
+    SetVisible = 20,true
+    SetColor = 20,F8F800FF
+    SetZoomX = 20,10
+    SetZoomY = 20,10
+    MoveZoomX = 20,8,600,EaseOut
+    MoveZoomY = 20,8,600,EaseOut
+    MoveOpacity = 20,8,0,Linear
+    SetVisible = 28,false

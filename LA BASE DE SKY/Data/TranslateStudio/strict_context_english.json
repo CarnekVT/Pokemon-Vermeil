@@ -1,0 +1,3075 @@
+{
+  "schema": 2,
+  "version": "1.4.0",
+  "policy": "Verified clean-English call-site mappings only. Exact-code-skeleton matches plus explicitly verified code anchors. Events excluded. Used before global source-string translations to resolve context-sensitive UI wording.",
+  "sourceEnglish": "Data(20260906-012634).zip",
+  "sourceSpanishSnapshot": "Data_Plus_Plugins_20260829.zip",
+  "matchedFiles": 32,
+  "entries": 348,
+  "files": {
+    "004_debugging/006_deprecation.rb": {
+      "path": "Data/Scripts/004_Debugging/006_Deprecation.rb",
+      "basenameKey": "deprecation.rb",
+      "englishPath": "Data/Scripts/001_Technical/001_Debugging/005_Deprecation.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Uso de un método obsoleto \"{1}\" o su alias.",
+          "target": "Usage of deprecated method \"{1}\" or its alias.",
+          "line": 11,
+          "englishPath": "Data/Scripts/001_Technical/001_Debugging/005_Deprecation.rb",
+          "englishLine": 11,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "El método está programado para eliminarse en Essentials {1}.",
+          "target": "The method is slated to be removed in Essentials {1}.",
+          "line": 13,
+          "englishPath": "Data/Scripts/001_Technical/001_Debugging/005_Deprecation.rb",
+          "englishLine": 13,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Usa \"{1}\" en su lugar.",
+          "target": "Use \"{1}\" instead.",
+          "line": 16,
+          "englishPath": "Data/Scripts/001_Technical/001_Debugging/005_Deprecation.rb",
+          "englishLine": 16,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/002_growthrate.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/002_GrowthRate.rb",
+      "basenameKey": "growthrate.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/001_GrowthRate.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Medio",
+          "target": "Medium",
+          "line": 79,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/001_GrowthRate.rb",
+          "englishLine": 79,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Errático",
+          "target": "Erratic",
+          "line": 101,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/001_GrowthRate.rb",
+          "englishLine": 101,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Fluctuante",
+          "target": "Fluctuating",
+          "line": 122,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/001_GrowthRate.rb",
+          "englishLine": 122,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Parabólico",
+          "target": "Parabolic",
+          "line": 141,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/001_GrowthRate.rb",
+          "englishLine": 141,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Rápido",
+          "target": "Fast",
+          "line": 158,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/001_GrowthRate.rb",
+          "englishLine": 158,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Lento",
+          "target": "Slow",
+          "line": 175,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/001_GrowthRate.rb",
+          "englishLine": 175,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/003_genderratio.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/003_GenderRatio.rb",
+      "basenameKey": "genderratio.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Siempre Macho",
+          "target": "Always Male",
+          "line": 42,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+          "englishLine": 42,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Siempre Hembra",
+          "target": "Always Female",
+          "line": 47,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+          "englishLine": 47,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sin Género",
+          "target": "Genderless",
+          "line": 52,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+          "englishLine": 52,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Hembra 1 de cada 8",
+          "target": "Female One Eighth",
+          "line": 57,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+          "englishLine": 57,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "25% Hembra",
+          "target": "Female 25 Percent",
+          "line": 63,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+          "englishLine": 63,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "50% Hembra",
+          "target": "Female 50 Percent",
+          "line": 69,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+          "englishLine": 69,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "75% Hembra",
+          "target": "Female 75 Percent",
+          "line": 75,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+          "englishLine": 75,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Hembra 7 de cada 8",
+          "target": "Female Seven Eighths",
+          "line": 81,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/002_GenderRatio.rb",
+          "englishLine": 81,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/004_egggroup.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/004_EggGroup.rb",
+      "basenameKey": "egggroup.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Desconocido",
+          "target": "Undiscovered",
+          "line": 30,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 30,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Monstruo",
+          "target": "Monster",
+          "line": 35,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 35,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Agua 1",
+          "target": "Water 1",
+          "line": 40,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 40,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Bicho",
+          "target": "Bug",
+          "line": 45,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 45,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Volador",
+          "target": "Flying",
+          "line": 50,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 50,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Campo",
+          "target": "Field",
+          "line": 55,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 55,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Hada",
+          "target": "Fairy",
+          "line": 60,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 60,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Planta",
+          "target": "Grass",
+          "line": 65,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 65,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Humanoide",
+          "target": "Humanlike",
+          "line": 70,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 70,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Agua 3",
+          "target": "Water 3",
+          "line": 75,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 75,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Amorfo",
+          "target": "Amorphous",
+          "line": 85,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 85,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Agua 2",
+          "target": "Water 2",
+          "line": 90,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 90,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Dragón",
+          "target": "Dragon",
+          "line": 100,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/003_EggGroup.rb",
+          "englishLine": 100,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/005_bodyshape.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/005_BodyShape.rb",
+      "basenameKey": "bodyshape.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Cabeza",
+          "target": "Head",
+          "line": 36,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 36,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Serpiente",
+          "target": "Serpentine",
+          "line": 42,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 42,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Pez",
+          "target": "Finned",
+          "line": 48,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 48,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cabeza y brazos",
+          "target": "Head and arms",
+          "line": 54,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 54,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cabeza y cuerpo",
+          "target": "Head and base",
+          "line": 60,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 60,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Bípeda con cola",
+          "target": "Bipedal with tail",
+          "line": 66,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 66,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Bípeda sin extremidades",
+          "target": "Head and legs",
+          "line": 72,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 72,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cuadrúpeda",
+          "target": "Quadruped",
+          "line": 78,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 78,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Dos alas",
+          "target": "Winged",
+          "line": 84,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 84,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Varias extremidades",
+          "target": "Multiped",
+          "line": 90,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 90,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Varios cuerpos",
+          "target": "Multi Body",
+          "line": 96,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 96,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Bípeda sin cola",
+          "target": "Bipedal",
+          "line": 102,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 102,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Varias alas",
+          "target": "Multi Winged",
+          "line": 108,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 108,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Insectoide",
+          "target": "Insectoid",
+          "line": 114,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/004_BodyShape.rb",
+          "englishLine": 114,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/006_bodycolor.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/006_BodyColor.rb",
+      "basenameKey": "bodycolor.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Rojo",
+          "target": "Red",
+          "line": 32,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 32,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Azul",
+          "target": "Blue",
+          "line": 37,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 37,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Amarillo",
+          "target": "Yellow",
+          "line": 42,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 42,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Verde",
+          "target": "Green",
+          "line": 47,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 47,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Negro",
+          "target": "Black",
+          "line": 52,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 52,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Marrón",
+          "target": "Brown",
+          "line": 57,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 57,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Morado",
+          "target": "Purple",
+          "line": 62,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 62,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Gris",
+          "target": "Gray",
+          "line": 67,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 67,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Blanco",
+          "target": "White",
+          "line": 72,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 72,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Rosa",
+          "target": "Pink",
+          "line": 77,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/005_BodyColor.rb",
+          "englishLine": 77,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/007_habitat.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/007_Habitat.rb",
+      "basenameKey": "habitat.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Ninguno",
+          "target": "None",
+          "line": 30,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 30,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Pradera",
+          "target": "Grassland",
+          "line": 35,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 35,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Bosque",
+          "target": "Forest",
+          "line": 40,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 40,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Agua dulce",
+          "target": "Water's Edge",
+          "line": 45,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 45,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Agua salada",
+          "target": "Sea",
+          "line": 50,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 50,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cueva",
+          "target": "Cave",
+          "line": 55,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 55,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Montaña",
+          "target": "Mountain",
+          "line": 60,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 60,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Campo",
+          "target": "Rough Terrain",
+          "line": 65,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 65,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Ciudad",
+          "target": "Urban",
+          "line": 70,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 70,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Raros",
+          "target": "Rare",
+          "line": 75,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/006_Habitat.rb",
+          "englishLine": 75,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/009_stat.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/009_Stat.rb",
+      "basenameKey": "stat.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "PS",
+          "target": "HP",
+          "line": 61,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 61,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "PS",
+          "target": "HP",
+          "line": 62,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 62,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Ataque",
+          "target": "Attack",
+          "line": 69,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 69,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "At",
+          "target": "Atk",
+          "line": 70,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 70,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Defensa",
+          "target": "Defense",
+          "line": 77,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 77,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Ataque Especial",
+          "target": "Special Attack",
+          "line": 85,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 85,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "AtEsp",
+          "target": "SpAtk",
+          "line": 86,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 86,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Defensa Especial",
+          "target": "Special Defense",
+          "line": 93,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 93,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "DefEsp",
+          "target": "SpDef",
+          "line": 94,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 94,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Velocidad",
+          "target": "Speed",
+          "line": 101,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 101,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Vel",
+          "target": "Spd",
+          "line": 102,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 102,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Precisión",
+          "target": "accuracy",
+          "line": 109,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 109,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Pre",
+          "target": "Acc",
+          "line": 110,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 110,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Evasión",
+          "target": "evasiveness",
+          "line": 116,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/008_Stat.rb",
+          "englishLine": 116,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/010_nature.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/010_Nature.rb",
+      "basenameKey": "nature.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Fuerte",
+          "target": "Hardy",
+          "line": 32,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 32,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Huraña",
+          "target": "Lonely",
+          "line": 37,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 37,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Audaz",
+          "target": "Brave",
+          "line": 43,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 43,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Firme",
+          "target": "Adamant",
+          "line": 49,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 49,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Pícara",
+          "target": "Naughty",
+          "line": 55,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 55,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Osada",
+          "target": "Bold",
+          "line": 61,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 61,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Dócil",
+          "target": "Docile",
+          "line": 67,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 67,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Plácida",
+          "target": "Relaxed",
+          "line": 72,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 72,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Agitada",
+          "target": "Impish",
+          "line": 78,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 78,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Floja",
+          "target": "Lax",
+          "line": 84,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 84,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Miedosa",
+          "target": "Timid",
+          "line": 90,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 90,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Activa",
+          "target": "Hasty",
+          "line": 96,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 96,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Seria",
+          "target": "Serious",
+          "line": 102,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 102,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Alegre",
+          "target": "Jolly",
+          "line": 107,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 107,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Ingenua",
+          "target": "Naive",
+          "line": 113,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 113,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Modesta",
+          "target": "Modest",
+          "line": 119,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 119,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Afable",
+          "target": "Mild",
+          "line": 125,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 125,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Mansa",
+          "target": "Quiet",
+          "line": 131,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 131,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Tímida",
+          "target": "Bashful",
+          "line": 137,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 137,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Alocada",
+          "target": "Rash",
+          "line": 142,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 142,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Serena",
+          "target": "Calm",
+          "line": 148,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 148,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Amable",
+          "target": "Gentle",
+          "line": 154,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 154,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Grosera",
+          "target": "Sassy",
+          "line": 160,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 160,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cauta",
+          "target": "Careful",
+          "line": 166,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 166,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Rara",
+          "target": "Quirky",
+          "line": 172,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/009_Nature.rb",
+          "englishLine": 172,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/015_environment.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/015_Environment.rb",
+      "basenameKey": "environment.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Ninguno",
+          "target": "None",
+          "line": 32,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 32,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Hierba",
+          "target": "Grass",
+          "line": 37,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 37,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Hierba alta",
+          "target": "Tall grass",
+          "line": 43,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 43,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Agua móvil",
+          "target": "Moving water",
+          "line": 49,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 49,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Agua estática",
+          "target": "Still water",
+          "line": 55,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 55,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Charco",
+          "target": "Puddle",
+          "line": 61,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 61,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Submarino",
+          "target": "Underwater",
+          "line": 67,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 67,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cueva",
+          "target": "Cave",
+          "line": 72,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 72,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Roca",
+          "target": "Rock",
+          "line": 77,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 77,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Arena",
+          "target": "Sand",
+          "line": 82,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 82,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Bosque",
+          "target": "Forest",
+          "line": 88,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 88,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Hierba de bosque",
+          "target": "Forest grass",
+          "line": 93,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 93,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Nieve",
+          "target": "Snow",
+          "line": 99,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 99,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Hielo",
+          "target": "Ice",
+          "line": 104,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 104,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Volcán",
+          "target": "Volcano",
+          "line": 110,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 110,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cementerio",
+          "target": "Graveyard",
+          "line": 115,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 115,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cielo",
+          "target": "Sky",
+          "line": 120,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 120,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Espacio",
+          "target": "Space",
+          "line": 125,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 125,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Ultraespacio",
+          "target": "Ultra Space",
+          "line": 130,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/014_Environment.rb",
+          "englishLine": 130,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/017_battleterrain.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/017_BattleTerrain.rb",
+      "basenameKey": "battleterrain.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/016_BattleTerrain.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Ninguno",
+          "target": "None",
+          "line": 33,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/016_BattleTerrain.rb",
+          "englishLine": 33,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Eléctrico",
+          "target": "Electric",
+          "line": 38,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/016_BattleTerrain.rb",
+          "englishLine": 38,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Hierba",
+          "target": "Grassy",
+          "line": 44,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/016_BattleTerrain.rb",
+          "englishLine": 44,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Niebla",
+          "target": "Misty",
+          "line": 50,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/016_BattleTerrain.rb",
+          "englishLine": 50,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Psíquico",
+          "target": "Psychic",
+          "line": 56,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/016_BattleTerrain.rb",
+          "englishLine": 56,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "025_hardcoded data/018_target.rb": {
+      "path": "Data/Scripts/025_Hardcoded data/018_Target.rb",
+      "basenameKey": "target.rb",
+      "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Ninguno",
+          "target": "None",
+          "line": 56,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 56,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Usuario",
+          "target": "User",
+          "line": 61,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 61,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Aliado Cercano",
+          "target": "Near Ally",
+          "line": 67,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 67,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Usuario o Aliado Cercano",
+          "target": "User or Near Ally",
+          "line": 74,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 74,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Todos los Aliados",
+          "target": "All Allies",
+          "line": 81,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 81,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Usuario y Aliados",
+          "target": "User and Allies",
+          "line": 90,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 90,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Rival Cercano",
+          "target": "Near Foe",
+          "line": 98,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 98,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Rival Cercano al Azar",
+          "target": "Random Near Foe",
+          "line": 106,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 106,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Todos los Rivales Cercanos",
+          "target": "All Near Foes",
+          "line": 113,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 113,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Rival",
+          "target": "Foe",
+          "line": 121,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 121,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Todos los Rivales",
+          "target": "All Foes",
+          "line": 130,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 130,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Combatiente Cercano",
+          "target": "Near Other",
+          "line": 138,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 138,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Todos los Combatientes Cercanos",
+          "target": "All Near Others",
+          "line": 145,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 145,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Otros",
+          "target": "Other",
+          "line": 153,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 153,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Todos los Combatientes",
+          "target": "All Battlers",
+          "line": 162,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 162,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Bando del Usuario",
+          "target": "User Side",
+          "line": 171,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 171,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Bando Rival",
+          "target": "Foe Side",
+          "line": 177,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 177,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Ambos Bandos",
+          "target": "Both Sides",
+          "line": 183,
+          "englishPath": "Data/Scripts/010_Data/001_Hardcoded data/017_Target.rb",
+          "englishLine": 183,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "026_pbs data/011_speciesmetrics.rb": {
+      "path": "Data/Scripts/026_PBS data/011_SpeciesMetrics.rb",
+      "basenameKey": "speciesmetrics.rb",
+      "englishPath": "Data/Scripts/010_Data/002_PBS data/010_SpeciesMetrics.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Especie no definida {1}.",
+          "target": "Undefined species {1}.",
+          "line": 36,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/010_SpeciesMetrics.rb",
+          "englishLine": 36,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "026_pbs data/017_metadata.rb": {
+      "path": "Data/Scripts/026_PBS data/017_Metadata.rb",
+      "basenameKey": "metadata.rb",
+      "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "La cantidad de dinero con la que el jugador comienza el juego.",
+          "target": "The amount of money that the player starts the game with.",
+          "line": 41,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 41,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Objetos que ya están en el PC del jugador al comienzo del juego.",
+          "target": "Items that are already in the player's PC at the start of the game.",
+          "line": 42,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 42,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "ID del mapa y coordenadas X/Y de dónde va el jugador después de una pérdida si no se visitó ningún Centro Pokémon.",
+          "target": "Map ID and X/Y coordinates of where the player goes after a loss if no Pokémon Center was visited.",
+          "line": 43,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 43,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Nombre del creador del Sistema de Almacenamiento Pokémon (la opción de almacenamiento se llama \"PC de XXX\").",
+          "target": "Name of the Pokémon Storage creator (the storage option is named \"XXX's PC\").",
+          "line": 44,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 44,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo predeterminada para combates de Pokémon salvajes.",
+          "target": "Default BGM for wild Pokémon battles.",
+          "line": 45,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 45,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo predeterminada para los combates de entrenadores.",
+          "target": "Default BGM for Trainer battles.",
+          "line": 46,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 46,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo predeterminada que se reproduce después de ganar un combate de Pokémon salvajes.",
+          "target": "Default BGM played after winning a wild Pokémon battle.",
+          "line": 47,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 47,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo predeterminada que se reproduce después de ganar un combate de entrenador.",
+          "target": "Default BGM played after winning a Trainer battle.",
+          "line": 48,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 48,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Efecto musical predeterminado que se reproduce después de atrapar un Pokémon.",
+          "target": "Default ME played after catching a Pokémon.",
+          "line": 49,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 49,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo reproducida mientras surfeas.",
+          "target": "BGM played while surfing.",
+          "line": 50,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 50,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo reproducida mientras montas en bicicleta.",
+          "target": "BGM played while on a bicycle.",
+          "line": 51,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/016_Metadata.rb",
+          "englishLine": 51,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "026_pbs data/018_playermetadata.rb": {
+      "path": "Data/Scripts/026_PBS data/018_PlayerMetadata.rb",
+      "basenameKey": "playermetadata.rb",
+      "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "ID de este jugador.",
+          "target": "ID number of this player.",
+          "line": 30,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 30,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Tipo de entrenador de este jugador.",
+          "target": "Trainer type of this player.",
+          "line": 31,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 31,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sprites usados mientras el jugador está quieto o caminando.",
+          "target": "Charset used while the player is still or walking.",
+          "line": 32,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 32,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sprites usados mientras el jugador está corriendo. Utiliza el sprite de caminar (WalkCharset) si no está definido.",
+          "target": "Charset used while the player is running. Uses WalkCharset if undefined.",
+          "line": 33,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 33,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sprites usados mientras el jugador está montado en bici. Utiliza el sprite de correr (RunCharset) si no está definido.",
+          "target": "Charset used while the player is cycling. Uses RunCharset if undefined.",
+          "line": 34,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 34,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sprites usados mientras el jugador está surfeando. Utiliza el sprite de montar en bici (CycleCharset) si no está definido.",
+          "target": "Charset used while the player is surfing. Uses CycleCharset if undefined.",
+          "line": 35,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 35,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sprites usados mientras el jugador está haciendo buceo.Utiliza el sprite de surfear (SurfCharset) si no está definido.",
+          "target": "Charset used while the player is diving. Uses SurfCharset if undefined.",
+          "line": 36,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 36,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sprites usados mientras el jugador está pescando. Utiliza el sprite de caminar (WalkCharset) si no está definido.",
+          "target": "Charset used while the player is fishing. Uses WalkCharset if undefined.",
+          "line": 37,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 37,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sprites usados mientras el jugador está pescando mientras surfea. Utiliza el sprite de pescar (FishCharset) si no está definido.",
+          "target": "Charset used while the player is fishing while surfing. Uses FishCharset if undefined.",
+          "line": 38,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 38,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "ID del mapa y coordenadas X/Y de dónde va el jugador después de una pérdida si no se visitó ningún Centro Pokémon.",
+          "target": "Map ID and X/Y coordinates of where the player goes after a loss if no Pokémon Center was visited.",
+          "line": 39,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/017_PlayerMetadata.rb",
+          "englishLine": 39,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "026_pbs data/019_mapmetadata.rb": {
+      "path": "Data/Scripts/026_PBS data/019_MapMetadata.rb",
+      "basenameKey": "mapmetadata.rb",
+      "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "ID de este mapa.",
+          "target": "ID number of this map.",
+          "line": 67,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 67,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "El nombre del mapa, tal como lo ve el jugador. Puede ser diferente al nombre del mapa como se ve en RMXP.",
+          "target": "The name of the map, as seen by the player. Can be different to the map's name as seen in RMXP.",
+          "line": 68,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 68,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, este mapa es un mapa de exteriores y se coloreará según la hora del día.",
+          "target": "If true, this map is an outdoor map and will be tinted according to time of day.",
+          "line": 69,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 69,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, el juego mostrará el nombre del mapa al ingresar.",
+          "target": "If true, the game will display the map's name upon entry.",
+          "line": 70,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 70,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Nombre de archivo en 'Graphics/UI/Location/' que se utilizará como el letrero de ubicación.",
+          "target": "Filename in 'Graphics/UI/Location/' to use as the location sign graphic.",
+          "line": 71,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 71,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, la bicicleta se puede utilizar en este mapa.",
+          "target": "If true, the bicycle can be used on this map.",
+          "line": 72,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 72,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, la bicicleta se montará automáticamente en este mapa y no se podrá desmontar.",
+          "target": "If true, the bicycle will be mounted automatically on this map and cannot be dismounted.",
+          "line": 73,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 73,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "ID del mapa de la ciudad de este Centro Pokémon y coordenadas X e Y de su entrada dentro de esa ciudad.",
+          "target": "Map ID of this Pokémon Center's town, and X and Y coordinates of its entrance within that town.",
+          "line": 74,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 74,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Condiciones meteorológicas vigentes para este mapa.",
+          "target": "Weather conditions in effect for this map.",
+          "line": 75,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 75,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Identifica el punto en el mapa regional para este mapa.",
+          "target": "Identifies the point on the regional map for this map.",
+          "line": 76,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 76,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Especifica la capa submarina de este mapa. Úselo solo si este mapa tiene aguas profundas.",
+          "target": "Specifies the underwater layer of this map. Use only if this map has deep water.",
+          "line": 77,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 77,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, este mapa está oscuro y aparece un círculo de luz alrededor del jugador. Se puede utilizar Flash para ampliar el círculo.",
+          "target": "If true, this map is dark and a circle of light appears around the player. Flash can be used to expand the circle.",
+          "line": 78,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 78,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, este mapa es parte de la Zona Safari (tanto interior como exterior). No debe utilizarse en el mostrador de recepción.",
+          "target": "If true, this map is part of the Safari Zone (both indoor and outdoor). Not to be used in the reception desk.",
+          "line": 79,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 79,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, cuando el jugador se acerca al borde de este mapa, el juego no centra al jugador como de costumbre.",
+          "target": "If true, when the player goes near this map's edge, the game doesn't center the player as usual.",
+          "line": 80,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 80,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, Los reflejos de los eventos y el jugador no se se extenderán horizontalmente.",
+          "target": "If true, reflections of events and the player will not ripple horizontally.",
+          "line": 81,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 81,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Si su valor es true, este mapa tiene un diseño generado aleatoriamente. Consulta la wiki para obtener más información.",
+          "target": "If true, this map has a randomly generated layout. See the wiki for more information.",
+          "line": 82,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 82,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Archivos PNG llamados 'XXX_bg', 'XXX_base0', 'XXX_base1', 'XXX_message' en la carpeta Battlebacks, donde XXX es el valor de esta propiedad.",
+          "target": "PNG files named 'XXX_bg', 'XXX_base0', 'XXX_base1', 'XXX_message' in Battlebacks folder, where XXX is this property's value.",
+          "line": 83,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 83,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo predeterminada para combates de Pokémon salvajes en este mapa.",
+          "target": "Default BGM for wild Pokémon battles on this map.",
+          "line": 84,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 84,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo predeterminada para los combates de entrenadores en este mapa.",
+          "target": "Default BGM for trainer battles on this map.",
+          "line": 85,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 85,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo predeterminada reproducida después de ganar un combate de Pokémon salvajes en este mapa.",
+          "target": "Default BGM played after winning a wild Pokémon battle on this map.",
+          "line": 86,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 86,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Música de fondo predeterminada reproducida después de ganar un combate de entrenador en este mapa.",
+          "target": "Default BGM played after winning a Trainer battle on this map.",
+          "line": 87,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 87,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Efecto musical predeterminado que se reproduce después de capturar un Pokémon salvaje en este mapa.",
+          "target": "Default ME played after catching a wild Pokémon on this map.",
+          "line": 88,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 88,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "El ancho del mapa en los cuadrados del mapa de la ciudad y una cadena que indica qué cuadrados forman parte de este mapa.",
+          "target": "The width of the map in Town Map squares, and a string indicating which squares are part of this map.",
+          "line": 89,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 89,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "El entorno de batalla predeterminado para los combates en este mapa.",
+          "target": "The default battle environment for battles on this map.",
+          "line": 90,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 90,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Palabras/frases que distinguen este mapa de otros.",
+          "target": "Words/phrases that distinguish this map from others.",
+          "line": 91,
+          "englishPath": "Data/Scripts/010_Data/002_PBS data/018_MapMetadata.rb",
+          "englishLine": 91,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "034_other battle code/005_battle_peers.rb": {
+      "path": "Data/Scripts/034_Other battle code/005_Battle_Peers.rb",
+      "basenameKey": "battle_peers.rb",
+      "englishPath": "Data/Scripts/011_Battle/007_Other battle code/004_Battle_Peers.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "No se pueden capturar más Pokémon...",
+          "target": "Can't catch any more...",
+          "line": 20,
+          "englishPath": "Data/Scripts/011_Battle/007_Other battle code/004_Battle_Peers.rb",
+          "englishLine": 20,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "037_overworld/006_overworld_fishing.rb": {
+      "path": "Data/Scripts/037_Overworld/006_Overworld_Fishing.rb",
+      "basenameKey": "overworld_fishing.rb",
+      "englishPath": "Data/Scripts/012_Overworld/005_Overworld_Fishing.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Parece que no pican...",
+          "target": "Not even a nibble...",
+          "line": 45,
+          "englishPath": "Data/Scripts/012_Overworld/005_Overworld_Fishing.rb",
+          "englishLine": 45,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡Oh! ¡Han picado!",
+          "target": "Oh! A bite!",
+          "line": 51,
+          "englishPath": "Data/Scripts/012_Overworld/005_Overworld_Fishing.rb",
+          "englishLine": 51,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "El Pokémon ha escapado...",
+          "target": "The Pokémon got away...",
+          "line": 52,
+          "englishPath": "Data/Scripts/012_Overworld/005_Overworld_Fishing.rb",
+          "englishLine": 52,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡Un Pokémon ha picado el anzuelo!",
+          "target": "Landed a Pokémon!",
+          "line": 57,
+          "englishPath": "Data/Scripts/012_Overworld/005_Overworld_Fishing.rb",
+          "englishLine": 57,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Parece que no pican...",
+          "target": "Not even a nibble...",
+          "line": 65,
+          "englishPath": "Data/Scripts/012_Overworld/005_Overworld_Fishing.rb",
+          "englishLine": 65,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "041_items/007_item_mail.rb": {
+      "path": "Data/Scripts/041_Items/007_Item_Mail.rb",
+      "basenameKey": "item_mail.rb",
+      "englishPath": "Data/Scripts/013_Items/006_Item_Mail.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "El Pokémon ya tiene una carta",
+          "target": "Pokémon already has mail",
+          "line": 30,
+          "englishPath": "Data/Scripts/013_Items/006_Item_Mail.rb",
+          "englishLine": 30,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Por favor introduce un mensaje (máx. 250 caracteres).",
+          "target": "Please enter a message (max. 250 characters).",
+          "line": 103,
+          "englishPath": "Data/Scripts/013_Items/006_Item_Mail.rb",
+          "englishLine": 103,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Dejar de darle la Carta al Pokémon?",
+          "target": "Stop giving the Pokémon Mail?",
+          "line": 123,
+          "englishPath": "Data/Scripts/013_Items/006_Item_Mail.rb",
+          "englishLine": 123,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "043_pokemon/004_pokemon_shadowpokemon.rb": {
+      "path": "Data/Scripts/043_Pokemon/004_Pokemon_ShadowPokemon.rb",
+      "basenameKey": "pokemon_shadowpokemon.rb",
+      "englishPath": "Data/Scripts/014_Pokemon/003_Pokemon_ShadowPokemon.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Cambio de medidor de la puerta del corazón desconocido: {1}",
+          "target": "Unknown heart gauge-changing method: {1}",
+          "line": 88,
+          "englishPath": "Data/Scripts/014_Pokemon/003_Pokemon_ShadowPokemon.rb",
+          "englishLine": 88,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡{1} ahora puede ser purificado!",
+          "target": "{1} can now be purified!",
+          "line": 197,
+          "englishPath": "Data/Scripts/014_Pokemon/003_Pokemon_ShadowPokemon.rb",
+          "englishLine": 197,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "046_trainers and player/003_trainer_loadandnew.rb": {
+      "path": "Data/Scripts/046_Trainers and player/003_Trainer_LoadAndNew.rb",
+      "basenameKey": "trainer_loadandnew.rb",
+      "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Por favor introduce el primer Pokémon.",
+          "target": "Please enter the first Pokémon.",
+          "line": 16,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 16,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Añadir otro Pokémon?",
+          "target": "Add another Pokémon?",
+          "line": 17,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 17,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Elige el nivel para {1} (máx. {2}).",
+          "target": "Set the level for {1} (max. {2}).",
+          "line": 26,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 26,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡Este entrenador debe tener al menos 1 Pokémon!",
+          "target": "This trainer must have at least 1 Pokémon!",
+          "line": 32,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 32,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Los datos del Entrenador han sido añadidos a la lista de batallas y en PBS/trainers.txt.",
+          "target": "The Trainer's data was added to the list of battles and in PBS/trainers.txt.",
+          "line": 57,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 57,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Añadir nuevo tipo de entrenador {1}?",
+          "target": "Add new trainer type {1}?",
+          "line": 73,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 73,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Añadir nueva variante de entrenador {1} (de {2}) para {3} {4}?",
+          "target": "Add new trainer variant {1} (of {2}) for {3} {4}?",
+          "line": 91,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 91,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "El tipo de entrenador {1} no existe.",
+          "target": "Trainer type {1} does not exist.",
+          "line": 100,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 100,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "El tipo de entrenador {1} no existe.",
+          "target": "Trainer type {1} does not exist.",
+          "line": 110,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 110,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "No se encuentra el entrenador ({1}, {2}, ID {3})",
+          "target": "Can't find trainer ({1}, {2}, ID {3})",
+          "line": 113,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 113,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Añadir nuevo entrenador ({1}, {2})?",
+          "target": "Add new trainer ({1}, {2})?",
+          "line": 117,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 117,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Añadir nuevo entrenador ({1}, {2}, ID {3})?",
+          "target": "Add new trainer ({1}, {2}, ID {3})?",
+          "line": 119,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 119,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sí",
+          "target": "Yes",
+          "line": 121,
+          "englishPath": "Data/Scripts/015_Trainers and player/002_Trainer_LoadAndNew.rb",
+          "englishLine": 121,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "048_ui/002_ui_pausemenu.rb": {
+      "path": "Data/Scripts/048_UI/002_UI_PauseMenu.rb",
+      "basenameKey": "ui_pausemenu.rb",
+      "englishPath": "Data/Scripts/016_UI/001_UI_PauseMenu.rb",
+      "verifiedStructure": false,
+      "entries": [
+        {
+          "source": "Guardar",
+          "target": "Save",
+          "line": 269,
+          "englishPath": "Data/Scripts/016_UI/001_UI_PauseMenu.rb",
+          "englishLine": 315,
+          "method": "verified-code-anchor"
+        }
+      ]
+    },
+    "048_ui/007_ui_party.rb": {
+      "path": "Data/Scripts/048_UI/007_UI_Party.rb",
+      "basenameKey": "ui_party.rb",
+      "englishPath": "Data/Scripts/016_UI/005_UI_Party.rb",
+      "verifiedStructure": false,
+      "entries": [
+        {
+          "source": "Guardar",
+          "target": "Take",
+          "line": 1483,
+          "englishPath": "Data/Scripts/016_UI/005_UI_Party.rb",
+          "englishLine": 1530,
+          "method": "verified-code-anchor"
+        }
+      ]
+    },
+    "048_ui/022_ui_pokemonstorage.rb": {
+      "path": "Data/Scripts/048_UI/022_UI_PokemonStorage.rb",
+      "basenameKey": "ui_pokemonstorage.rb",
+      "englishPath": "Data/Scripts/016_UI/017_UI_PokemonStorage.rb",
+      "verifiedStructure": false,
+      "entries": [
+        {
+          "source": "Guardar",
+          "target": "Store",
+          "line": 1787,
+          "englishPath": "Data/Scripts/016_UI/017_UI_PokemonStorage.rb",
+          "englishLine": 1554,
+          "method": "verified-code-anchor"
+        },
+        {
+          "source": "Guardar",
+          "target": "Store",
+          "line": 2355,
+          "englishPath": "Data/Scripts/016_UI/017_UI_PokemonStorage.rb",
+          "englishLine": 1994,
+          "method": "verified-code-anchor"
+        }
+      ]
+    },
+    "048_ui/024_ui_pc.rb": {
+      "path": "Data/Scripts/048_UI/024_UI_PC.rb",
+      "basenameKey": "ui_pc.rb",
+      "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Sacar Objeto",
+          "target": "Withdraw Item",
+          "line": 8,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 8,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Dejar Objeto",
+          "target": "Deposit Item",
+          "line": 9,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 9,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Tirar Objeto",
+          "target": "Toss Item",
+          "line": 10,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 10,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Salir",
+          "target": "Exit",
+          "line": 11,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 11,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sacar objetos del PC.",
+          "target": "Take out items from the PC.",
+          "line": 12,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 12,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Dejar objetos en el PC.",
+          "target": "Store items in the PC.",
+          "line": 13,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 13,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Tirar objetos almacenados en el PC.",
+          "target": "Throw away items stored in the PC.",
+          "line": 14,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 14,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Volver al menú anterior.",
+          "target": "Go back to the previous menu.",
+          "line": 15,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 15,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "No hay objetos.",
+          "target": "There are no items.",
+          "line": 22,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 22,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "No hay objetos.",
+          "target": "There are no items.",
+          "line": 41,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 41,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "No tienes cartas guardadas.",
+          "target": "There's no Mail here.",
+          "line": 60,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 60,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cancelar",
+          "target": "Cancel",
+          "line": 68,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 68,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Qué quieres hacer con la Carta de {1}?",
+          "target": "What do you want to do with {1}'s Mail?",
+          "line": 73,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 73,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Leer",
+          "target": "Read",
+          "line": 74,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 74,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Mover a Mochila",
+          "target": "Move to Bag",
+          "line": 75,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 75,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Dar",
+          "target": "Give",
+          "line": 76,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 76,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cancelar",
+          "target": "Cancel",
+          "line": 77,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 77,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "El mensaje se perderá. ¿Te parece bien?",
+          "target": "The message will be lost. Is that OK?",
+          "line": 85,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 85,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "La Carta ha vuelto a la Mochila y su mensaje se ha eliminado.",
+          "target": "The Mail was returned to the Bag with its message erased.",
+          "line": 87,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 87,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "La Mochila está llena.",
+          "target": "The Bag is full.",
+          "line": 90,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 90,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "{1} encendió el PC.",
+          "target": "{1} booted up the PC.",
+          "line": 111,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 111,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Qué quieres hacer?",
+          "target": "What do you want to do?",
+          "line": 119,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 119,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Almacenamiento de Objetos",
+          "target": "Item Storage",
+          "line": 120,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 120,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Buzón",
+          "target": "Mailbox",
+          "line": 121,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 121,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Apagar",
+          "target": "Turn Off",
+          "line": 122,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 122,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "{1} encendió el PC.",
+          "target": "{1} booted up the PC.",
+          "line": 135,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 135,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿A qué PC quieres acceder?",
+          "target": "Which PC should be accessed?",
+          "line": 146,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 146,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "PC de {1}",
+          "target": "{1}'s PC",
+          "line": 165,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 165,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "PC de alguien",
+          "target": "Someone's PC",
+          "line": 165,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 165,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Abriendo el Sistema de Almacenamiento de Pokémon.",
+          "target": "The Pokémon Storage System was opened.",
+          "line": 169,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 169,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Organizar Cajas",
+          "target": "Organize Boxes",
+          "line": 173,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 173,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Sacar Pokémon",
+          "target": "Withdraw Pokémon",
+          "line": 174,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 174,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Dejar Pokémon",
+          "target": "Deposit Pokémon",
+          "line": 175,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 175,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡Nos vemos!",
+          "target": "See ya!",
+          "line": 176,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 176,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Organiza a los Pokémon en las Cajas y en tu equipo.",
+          "target": "Organize the Pokémon in Boxes and in your party.",
+          "line": 177,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 177,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Mover Pokémon del almacenamiento a tu equipo.",
+          "target": "Move Pokémon stored in Boxes to your party.",
+          "line": 178,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 178,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Dejar Pokémon de tu equipo en las Cajas.",
+          "target": "Store Pokémon in your party in Boxes.",
+          "line": 179,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 179,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Vuelve al menú anterior.",
+          "target": "Return to the previous menu.",
+          "line": 180,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 180,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡Tu equipo está lleno!",
+          "target": "Your party is full!",
+          "line": 191,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 191,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡No puedes dejar a tu último Pokémon!",
+          "target": "Can't deposit the last Pokémon!",
+          "line": 205,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 205,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "PC de {1}",
+          "target": "{1}'s PC",
+          "line": 222,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 222,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Has accedido al PC de {1}.",
+          "target": "Accessed {1}'s PC.",
+          "line": 225,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 225,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Salir",
+          "target": "Log off",
+          "line": 232,
+          "englishPath": "Data/Scripts/016_UI/019_UI_PC.rb",
+          "englishLine": 232,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "051_minigames/004_minigame_slotmachine.rb": {
+      "path": "Data/Scripts/051_Minigames/004_Minigame_SlotMachine.rb",
+      "basenameKey": "minigame_slotmachine.rb",
+      "englishPath": "Data/Scripts/017_Minigames/003_Minigame_SlotMachine.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Has obtenido {1} Monedas.",
+          "target": "You've got {1} Coins.",
+          "line": 321,
+          "englishPath": "Data/Scripts/017_Minigames/003_Minigame_SlotMachine.rb",
+          "englishLine": 321,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Te has quedado sin Monedas.\nGame over!",
+          "target": "You've run out of Coins.\nGame over!",
+          "line": 324,
+          "englishPath": "Data/Scripts/017_Minigames/003_Minigame_SlotMachine.rb",
+          "englishLine": 324,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Es una Máquina Tragaperras.",
+          "target": "It's a Slot Machine.",
+          "line": 444,
+          "englishPath": "Data/Scripts/017_Minigames/003_Minigame_SlotMachine.rb",
+          "englishLine": 444,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡No tienes Monedas para jugar!",
+          "target": "You don't have any Coins to play!",
+          "line": 446,
+          "englishPath": "Data/Scripts/017_Minigames/003_Minigame_SlotMachine.rb",
+          "englishLine": 446,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡Tu Monedero está lleno!",
+          "target": "Your Coin Case is full!",
+          "line": 448,
+          "englishPath": "Data/Scripts/017_Minigames/003_Minigame_SlotMachine.rb",
+          "englishLine": 448,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "054_battle frontier/006_ui_battleswap.rb": {
+      "path": "Data/Scripts/054_Battle Frontier/006_UI_BattleSwap.rb",
+      "basenameKey": "ui_battleswap.rb",
+      "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "POKÉMON DE PRÉSTAMO",
+          "target": "RENTAL POKéMON",
+          "line": 16,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 16,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "INTERCAMBIO POKÉMON",
+          "target": "POKéMON SWAP",
+          "line": 42,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 42,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "CANCELAR",
+          "target": "CANCEL",
+          "line": 61,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 61,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Elige un Pokémon para intercambiar.",
+          "target": "Select Pokémon to swap.",
+          "line": 62,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 62,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Elige el primer Pokémon.",
+          "target": "Choose the first Pokémon.",
+          "line": 124,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 124,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Elige el segundo Pokémon.",
+          "target": "Choose the second Pokémon.",
+          "line": 126,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 126,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Elige el tercer Pokémon.",
+          "target": "Choose the third Pokémon.",
+          "line": 128,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 128,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "PKMN PARA CAMBIAR",
+          "target": "PKMN FOR SWAP",
+          "line": 135,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 135,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "CANCELAR",
+          "target": "CANCEL",
+          "line": 136,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 136,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Selecciona Pokémon para aceptar.",
+          "target": "Select Pokémon to accept.",
+          "line": 137,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 137,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "DATOS",
+          "target": "SUMMARY",
+          "line": 174,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 174,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "DESELECCIONAR",
+          "target": "DESELECT",
+          "line": 176,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 176,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "PRESTAR",
+          "target": "RENT",
+          "line": 178,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 178,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "OTROS",
+          "target": "OTHERS",
+          "line": 180,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 180,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Te parecen bien estos tres Pokémon?",
+          "target": "Are these three Pokémon OK?",
+          "line": 193,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 193,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "DATOS",
+          "target": "SUMMARY",
+          "line": 213,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 213,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "CAMBIAR",
+          "target": "SWAP",
+          "line": 213,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 213,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "REELEGIR",
+          "target": "RECHOOSE",
+          "line": 213,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 213,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Aceptar este Pokémon?",
+          "target": "Accept this Pokémon?",
+          "line": 224,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 224,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Salir del intercambio?",
+          "target": "Quit swapping?",
+          "line": 233,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 233,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Salir del intercambio?",
+          "target": "Quit swapping?",
+          "line": 240,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/001_Battle Frontier/005_UI_BattleSwap.rb",
+          "englishLine": 240,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "055_battle frontier rules/003_challenge_rulesets.rb": {
+      "path": "Data/Scripts/055_Battle Frontier rules/003_Challenge_Rulesets.rb",
+      "basenameKey": "challenge_rulesets.rb",
+      "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Elige un Pokémon.",
+          "target": "Choose a Pokémon.",
+          "line": 196,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 196,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Se necesitan {1} Pokémon.",
+          "target": "{1} Pokémon are needed.",
+          "line": 197,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 197,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "No pueden entrar más de {1} Pokémon.",
+          "target": "No more than {1} Pokémon may enter.",
+          "line": 200,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 200,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "{1} no está permitido.",
+          "target": "{1} is not allowed.",
+          "line": 206,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 206,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Este equipo no está permitido.",
+          "target": "This team is not allowed.",
+          "line": 208,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 208,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Copa Estándar",
+          "target": "Standard Cup",
+          "line": 250,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 250,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Copa Doble",
+          "target": "Double Cup",
+          "line": 263,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 263,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Copa Elegante",
+          "target": "Fancy Cup",
+          "line": 284,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 284,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Copa Pequeña",
+          "target": "Little Cup",
+          "line": 302,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 302,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Copa Ligera",
+          "target": "Light Cup",
+          "line": 321,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/002_Challenge_Rulesets.rb",
+          "englishLine": 321,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "055_battle frontier rules/004_challenge_entryrestrictions.rb": {
+      "path": "Data/Scripts/055_Battle Frontier rules/004_Challenge_EntryRestrictions.rb",
+      "basenameKey": "challenge_entryrestrictions.rb",
+      "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/003_Challenge_EntryRestrictions.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "No motes iguales.",
+          "target": "No identical nicknames.",
+          "line": 138,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/003_Challenge_EntryRestrictions.rb",
+          "englishLine": 138,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Los Pokémon deben ser de la misma especie.",
+          "target": "Pokémon must be the same species.",
+          "line": 247,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/003_Challenge_EntryRestrictions.rb",
+          "englishLine": 247,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Los Pokémon no pueden ser de la misma especie.",
+          "target": "Pokémon can't be the same species.",
+          "line": 266,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/003_Challenge_EntryRestrictions.rb",
+          "englishLine": 266,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Los niveles combinados exceden {1}.",
+          "target": "The combined levels exceed {1}.",
+          "line": 317,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/003_Challenge_EntryRestrictions.rb",
+          "englishLine": 317,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "No se pueden llevar objetos repetidos.",
+          "target": "No identical hold items.",
+          "line": 371,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/002_Battle Frontier rules/003_Challenge_EntryRestrictions.rb",
+          "englishLine": 371,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "056_battle frontier generator/002_challengegenerator_data.rb": {
+      "path": "Data/Scripts/056_Battle Frontier generator/002_ChallengeGenerator_Data.rb",
+      "basenameKey": "challengegenerator_data.rb",
+      "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Preparándose para generar los equipos",
+          "target": "Preparing to generate teams",
+          "line": 173,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 173,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Generando equipos ({1} de {2})",
+          "target": "Generating teams ({1} of {2})",
+          "line": 197,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 197,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Simulando combates ({1} de {2})",
+          "target": "Simulating battles ({1} of {2})",
+          "line": 228,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 228,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Escribiendo resultados",
+          "target": "Writing results",
+          "line": 266,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 266,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Generar equipos de Pokémon para este reto?",
+          "target": "Generate Pokémon teams for this challenge?",
+          "line": 290,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 290,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "SÍ",
+          "target": "YES",
+          "line": 291,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 291,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Generar equipos de Pokémon para este reto?",
+          "target": "Generate Pokémon teams for this challenge?",
+          "line": 299,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 299,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "SÍ, USAR EXISTENTE",
+          "target": "YES, USE EXISTING",
+          "line": 300,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 300,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "SÍ, USAR NUEVO",
+          "target": "YES, USE NEW",
+          "line": 300,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 300,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Elige un reto.",
+          "target": "Choose a challenge.",
+          "line": 305,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 305,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Este reto usará la lista de Pokémon de {1}.",
+          "target": "This challenge will use the Pokémon list from {1}.",
+          "line": 307,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 307,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Esto puede llevar un buen rato. ¿Estás seguro?",
+          "target": "This may take a long time. Are you sure?",
+          "line": 321,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 321,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Generación de equipo completada.",
+          "target": "Team generation complete.",
+          "line": 336,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/001_ChallengeGenerator_Data.rb",
+          "englishLine": 336,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "056_battle frontier generator/004_challengegenerator_trainers.rb": {
+      "path": "Data/Scripts/056_Battle Frontier generator/004_ChallengeGenerator_Trainers.rb",
+      "basenameKey": "challengegenerator_trainers.rb",
+      "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/003_ChallengeGenerator_Trainers.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "¡Aquí vengo!",
+          "target": "Here I come!",
+          "line": 38,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/003_ChallengeGenerator_Trainers.rb",
+          "englishLine": 38,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡Sí, he ganado!",
+          "target": "Yes, I won!",
+          "line": 38,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/003_ChallengeGenerator_Trainers.rb",
+          "englishLine": 38,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¡Vaya, he perdido!",
+          "target": "Man, I lost!",
+          "line": 39,
+          "englishPath": "Data/Scripts/018_Alternate battle modes/003_Battle Frontier generator/003_ChallengeGenerator_Trainers.rb",
+          "englishLine": 39,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "061_editor screens/004_editorscreens_mapconnections.rb": {
+      "path": "Data/Scripts/061_Editor screens/004_EditorScreens_MapConnections.rb",
+      "basenameKey": "editorscreens_mapconnections.rb",
+      "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "D: Ayuda",
+          "target": "D: Help",
+          "line": 326,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 326,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "A: Agregar mapa al lienzo",
+          "target": "A: Add map to canvas",
+          "line": 353,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 353,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "S: Ir a otro mapa",
+          "target": "S: Go to another map",
+          "line": 355,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 355,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Clic para seleccionar un mapa",
+          "target": "Click to select a map",
+          "line": 356,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 356,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Doble clic: Editar metadatos del mapa",
+          "target": "Double-click: Edit map's metadata",
+          "line": 357,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 357,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Arrastrar mapa para moverlo",
+          "target": "Drag map to move it",
+          "line": 358,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 358,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Teclas de flecha/arrastrar lienzo: Moverse por el lienzo",
+          "target": "Arrow keys/drag canvas: Move around canvas",
+          "line": 359,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 359,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "D: Ayuda [{1:03d}: {2:s}]",
+          "target": "D: Help [{1:03d}: {2:s}]",
+          "line": 437,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 437,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "D: Ayuda",
+          "target": "D: Help",
+          "line": 446,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 446,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "D: Ayuda [{1:03d}: {2:s}]",
+          "target": "D: Help [{1:03d}: {2:s}]",
+          "line": 449,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 449,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "D: Ayuda",
+          "target": "D: Help",
+          "line": 451,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 451,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Añadir Mapa",
+          "target": "Add Map",
+          "line": 515,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 515,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Ir a Mapa",
+          "target": "Go to Map",
+          "line": 522,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 522,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Guardar cambios?",
+          "target": "Save changes?",
+          "line": 552,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 552,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "¿Salir del editor?",
+          "target": "Exit from the editor?",
+          "line": 558,
+          "englishPath": "Data/Scripts/020_Debug/001_Editor screens/003_EditorScreens_MapConnections.rb",
+          "englishLine": 558,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "062_animation editor/002_animeditor_sceneelements.rb": {
+      "path": "Data/Scripts/062_Animation editor/002_AnimEditor_SceneElements.rb",
+      "basenameKey": "animeditor_sceneelements.rb",
+      "englishPath": "Data/Scripts/020_Debug/002_Animation editor/001_AnimEditor_SceneElements.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Nombre: {1}",
+          "target": "Name: {1}",
+          "line": 992,
+          "englishPath": "Data/Scripts/020_Debug/002_Animation editor/001_AnimEditor_SceneElements.rb",
+          "englishLine": 993,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Nombre: {1}",
+          "target": "Name: {1}",
+          "line": 999,
+          "englishPath": "Data/Scripts/020_Debug/002_Animation editor/001_AnimEditor_SceneElements.rb",
+          "englishLine": 1000,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "062_animation editor/004_animeditor_interpolation.rb": {
+      "path": "Data/Scripts/062_Animation editor/004_AnimEditor_Interpolation.rb",
+      "basenameKey": "animeditor_interpolation.rb",
+      "englishPath": "Data/Scripts/020_Debug/002_Animation editor/003_AnimEditor_Interpolation.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Número de frames:",
+          "target": "Number of frames:",
+          "line": 232,
+          "englishPath": "Data/Scripts/020_Debug/002_Animation editor/003_AnimEditor_Interpolation.rb",
+          "englishLine": 232,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Definir Curva Suave",
+          "target": "Define Smooth Curve",
+          "line": 234,
+          "englishPath": "Data/Scripts/020_Debug/002_Animation editor/003_AnimEditor_Interpolation.rb",
+          "englishLine": 234,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Definir Ruta a Mano Alzada",
+          "target": "Define Freehand Path",
+          "line": 235,
+          "englishPath": "Data/Scripts/020_Debug/002_Animation editor/003_AnimEditor_Interpolation.rb",
+          "englishLine": 235,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Cancelar",
+          "target": "Cancel",
+          "line": 237,
+          "englishPath": "Data/Scripts/020_Debug/002_Animation editor/003_AnimEditor_Interpolation.rb",
+          "englishLine": 237,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    },
+    "063_debug menus/009_debug_filenameupdater.rb": {
+      "path": "Data/Scripts/063_Debug menus/009_Debug_FilenameUpdater.rb",
+      "basenameKey": "debug_filenameupdater.rb",
+      "englishPath": "Data/Scripts/020_Debug/003_Debug menus/008_Debug_FilenameUpdater.rb",
+      "verifiedStructure": true,
+      "entries": [
+        {
+          "source": "Renombrando charsets de árboles de bayas...",
+          "target": "Renaming berry tree charsets...",
+          "line": 20,
+          "englishPath": "Data/Scripts/020_Debug/003_Debug menus/008_Debug_FilenameUpdater.rb",
+          "englishLine": 20,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Revisando {1} mapas en busca de charsets de árboles de bayas...",
+          "target": "Checking {1} maps for used berry tree charsets...",
+          "line": 41,
+          "englishPath": "Data/Scripts/020_Debug/003_Debug menus/008_Debug_FilenameUpdater.rb",
+          "englishLine": 41,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Mapa {1}: '{2}' se ha modificado y guardado.",
+          "target": "Map {1}: '{2}' was modified and saved.",
+          "line": 67,
+          "englishPath": "Data/Scripts/020_Debug/003_Debug menus/008_Debug_FilenameUpdater.rb",
+          "englishLine": 67,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Actualizando nombres de archivos y localizaciones",
+          "target": "Updating file names and locations",
+          "line": 74,
+          "englishPath": "Data/Scripts/020_Debug/003_Debug menus/008_Debug_FilenameUpdater.rb",
+          "englishLine": 74,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Los archivos del charset de los árboles de bayas se han renombrado.",
+          "target": "Berry plant charset files were renamed.",
+          "line": 78,
+          "englishPath": "Data/Scripts/020_Debug/003_Debug menus/008_Debug_FilenameUpdater.rb",
+          "englishLine": 78,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Los datos de RMXP se han alterado. Cierra RMXP ahora para asegurarte de que los cambios se apliquen.",
+          "target": "RMXP data was altered. Close RMXP now to ensure changes are applied.",
+          "line": 84,
+          "englishPath": "Data/Scripts/020_Debug/003_Debug menus/008_Debug_FilenameUpdater.rb",
+          "englishLine": 84,
+          "method": "exact-code-skeleton"
+        },
+        {
+          "source": "Se ha terminado de actualizar los nombres de archivos y localizaciones",
+          "target": "Finished updating file names and locations",
+          "line": 87,
+          "englishPath": "Data/Scripts/020_Debug/003_Debug menus/008_Debug_FilenameUpdater.rb",
+          "englishLine": 87,
+          "method": "exact-code-skeleton"
+        }
+      ]
+    }
+  }
+}
