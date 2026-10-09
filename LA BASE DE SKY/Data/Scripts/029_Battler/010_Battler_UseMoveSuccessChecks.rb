@@ -48,13 +48,13 @@ class Battle::Battler
        move.id != @battle.struggle.id
       choiced_move = GameData::Move.try_get(@effects[PBEffects::ChoiceBand])
       if choiced_move
-        if hasActiveItem?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF])
+        if Battle::ItemEffects.triggerChoiceLock(self.item, self)
           if showMessages
             msg = _INTL("¡A causa de {1} solo se puede usar {2}!", itemName, choiced_move.name)
             (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
           end
           return false
-        elsif hasActiveAbility?(:GORILLATACTICS)
+        elsif Battle::AbilityEffects.triggerChoiceLock(self)
           if showMessages
             msg = _INTL("¡{1} solo puede usar {2}!", pbThis, choiced_move.name)
             (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)

@@ -143,8 +143,8 @@ class Battle::Battler
   def pbEndTurn(choice)
     @lastRoundMoved = @battle.turnCount   # Done something this round
     if !@effects[PBEffects::ChoiceBand] &&
-       (hasActiveItem?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) ||
-       hasActiveAbility?(:GORILLATACTICS))
+       (Battle::ItemEffects.triggerChoiceLock(item, self) ||
+       Battle::AbilityEffects.triggerChoiceLock(self))
       if @lastMoveUsed && pbHasMove?(@lastMoveUsed)
         @effects[PBEffects::ChoiceBand] = @lastMoveUsed
       elsif @lastRegularMoveUsed && pbHasMove?(@lastRegularMoveUsed)

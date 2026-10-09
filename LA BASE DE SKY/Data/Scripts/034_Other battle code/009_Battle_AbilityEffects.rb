@@ -5,6 +5,7 @@ module Battle::AbilityEffects
   SpeedCalc                        = AbilityHandlerHash.new
   WeightCalc                       = AbilityHandlerHash.new
   HealingPower                     = AbilityHandlerHash.new
+  ChoiceLock                       = AbilityHandlerHash.new
   Trace                            = AbilityHandlerHash.new
   # Battler's HP changed
   OnHPDroppedBelowHalf             = AbilityHandlerHash.new
@@ -93,6 +94,11 @@ module Battle::AbilityEffects
   def self.triggerHealingPower(battler, mult = 1.0)
     return mult if !battler.abilityActive?
     return trigger(HealingPower, battler.ability, battler, mult, ret: mult)
+  end
+
+  def self.triggerChoiceLock(battler)
+    return false if !battler.abilityActive?
+    return trigger(ChoiceLock, battler.ability, battler)
   end
 
   def self.triggerTrace(ability, battler, battle, on_switch_in = false)
@@ -346,6 +352,8 @@ end
 #===============================================================================
 # SpeedCalc handlers
 #===============================================================================
+
+Battle::AbilityEffects::ChoiceLock.add(:GORILLATACTICS, proc { |ability, battler| next true })
 
 Battle::AbilityEffects::SpeedCalc.add(:CHLOROPHYLL,
   proc { |ability, battler, mult|

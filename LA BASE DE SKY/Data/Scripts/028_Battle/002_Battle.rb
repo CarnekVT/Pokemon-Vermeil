@@ -728,7 +728,7 @@ class Battle
     else
       pbPlayer.pokedex.register_defeated(battler.species)
     end
-    
+
     # Add counter for evolution method Bisharp -> Kingambit
     return if battler.lastFoeAttacker.empty?
     attacker = @battlers[battler.lastFoeAttacker.last]
@@ -753,10 +753,14 @@ class Battle
       @used_items << [battler2.pokemon, item2]
     end
     battler1.item = item2
-    battler1.effects[PBEffects::ChoiceBand] = nil if !battler1.hasActiveAbility?(:GORILLATACTICS)
+    battler1.effects[PBEffects::ChoiceBand] = nil if
+      !Battle::ItemEffects.triggerChoiceLock(battler1.item, battler1) &&
+      !Battle::AbilityEffects.triggerChoiceLock(battler1)
     battler1.effects[PBEffects::Unburden]   = (item1 && !battler1.item) if battler1.hasActiveAbility?(:UNBURDEN)
     battler2.item = item1
-    battler2.effects[PBEffects::ChoiceBand] = nil if !battler2.hasActiveAbility?(:GORILLATACTICS)
+    battler2.effects[PBEffects::ChoiceBand] = nil if
+      !Battle::ItemEffects.triggerChoiceLock(battler2.item, battler2) &&
+      !Battle::AbilityEffects.triggerChoiceLock(battler2)
     battler2.effects[PBEffects::Unburden]   = (item2 && !battler2.item) if battler2.hasActiveAbility?(:UNBURDEN)
     s1 = battler1.idxOwnSide
     p1 = battler1.pokemonIndex
@@ -960,7 +964,7 @@ class Battle
     @field.terrainDuration = duration
     terrain_data = GameData::BattleTerrain.try_get(@field.terrain)
     pbCommonAnimation(terrain_data.animation) if terrain_data
-    
+
     pbHideAbilitySplash(user) if user
     if message
       pbDisplay(message)
@@ -1062,7 +1066,7 @@ class Battle
     return if !Scene::USE_ABILITY_SPLASH
     @scene.pbReplaceAbilitySplash(battler)
   end
-  
+
   #-----------------------------------------------------------------------------
   # Type calculation
   #-----------------------------------------------------------------------------
@@ -1070,7 +1074,7 @@ class Battle
   # Calcula el tipo ideal contra el enemigo
   # Randomiza el tipo si hay multiples con el mismo poder
   # No cambiará el tipo si check_type ya es uno de los mejores tipos a usar.
-  # Si el usuario no tiene tipo, por ejemplo un tipo fuego puro que haya usado 
+  # Si el usuario no tiene tipo, por ejemplo un tipo fuego puro que haya usado
   # el movimiento Llama Final
   # y el objetivo no tiene habilidades, objetos o efectos en juego que
   # pudieran afectar el tipo elegido, entonces el tipo Normal será el elegido
@@ -1118,7 +1122,7 @@ class Battle
     bestType = pbCalcOptimalType(user, target, move, best_types, target_types, check_type)
     return bestType
   end
-  
+
   #-----------------------------------------------------------------------------
   # Checks if the target is immune to a given type by its typing, ability, or effect.
   #-----------------------------------------------------------------------------
@@ -1132,7 +1136,7 @@ class Battle
     end
     return false
   end
-  
+
   #-----------------------------------------------------------------------------
   # Calculates the effectiveness of a given type used against the target.
   #-----------------------------------------------------------------------------
@@ -1185,7 +1189,7 @@ class Battle
       multipliers[:final_damage_multiplier] /= 2   if type == :WATER
     end
   end
-  
+
   #-----------------------------------------------------------------------------
   # Determina la selección óptima del array de tipos más efectivos.
   #-----------------------------------------------------------------------------
@@ -1218,4 +1222,3 @@ class Battle
     @rules[:disable_poke_balls] = value
   end
 end
-
