@@ -279,6 +279,11 @@ class Battle::AI::AIBattler
     return battler.hasActiveAbility?(ability, ignore_fainted)
   end
 
+  def choice_locked?
+    return Battle::ItemEffects.triggerChoiceLock(battler.item, battler) ||
+           Battle::AbilityEffects.triggerChoiceLock(battler)
+  end
+
   def has_mold_breaker?
     return battler.hasMoldBreaker?
   end

@@ -774,8 +774,7 @@ class Battle::AI
     # Survival with a one-hit protection needs a separate hit-by-hit forecast.
     return false if user.hp == user.totalhp &&
                     (user.has_active_item?(:FOCUSSASH) || user.has_active_ability?(:STURDY))
-    return false if user.has_active_item?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) ||
-                    user.has_active_ability?(:GORILLATACTICS)
+    return false if user.choice_locked?
     [user, foe].each do |battler|
       return false if battler.pbOwnSide.effects[PBEffects::Tailwind] == 1 ||
                       battler.pbOwnSide.effects[PBEffects::Swamp] == 1 ||
@@ -1052,8 +1051,7 @@ class Battle::AI
         # active must survive another estimated hit before handing off the boosts.
         can_pass = target.hp - first_hit - target.rough_end_of_round_damage > 0
         can_pass &&= target.hp - first_hit - target.rough_end_of_round_damage > reduced if !moves_first
-        can_pass = false if target.has_active_item?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) ||
-                            target.has_active_ability?(:GORILLATACTICS)
+        can_pass = false if target.choice_locked?
         credit = 0.0 if !can_pass || haze
         adjustment = credit - AIImprovements::DEFENSIVE_SETUP_TURN_COST
         delta += adjustment

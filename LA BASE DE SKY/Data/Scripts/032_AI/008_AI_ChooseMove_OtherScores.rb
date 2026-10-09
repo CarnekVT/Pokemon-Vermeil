@@ -150,8 +150,7 @@ Battle::AI::Handlers::GeneralMoveScore.add(:any_battler_can_Snatch_move,
 Battle::AI::Handlers::GeneralMoveScore.add(:good_move_for_choice_item,
   proc { |score, move, user, ai, battle|
     next score if !ai.trainer.medium_skill?
-    next score if !user.has_active_item?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) &&
-                  !user.has_active_ability?(:GORILLATACTICS)
+    next score if !user.choice_locked?
     old_score = score
     # Really don't prefer status moves (except Trick)
     if move.statusMove? && move.function_code != "UserTargetSwapItems"
