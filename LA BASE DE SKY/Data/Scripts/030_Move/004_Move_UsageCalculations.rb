@@ -288,6 +288,11 @@ class Battle::Move
       pbCalcDamageMultipliersGlobalAbilities(user, target, numTargets, type, baseDmg, multipliers)
       pbCalcDamageMultipliersAbilities(user, target, numTargets, type, baseDmg, multipliers)
       pbCalcDamageMultipliersHeldItems(user, target, numTargets, type, baseDmg, multipliers)
+      if target.damageState.protected &&
+         (Battle::AbilityEffects.triggerPiercesProtection(user, self) ||
+          Battle::ItemEffects.triggerPiercesProtection(user.item, user, self))
+        multipliers[:final_damage_multiplier] *= 0.25
+      end
       pbCalcDamageMultipliersGymBadges(user, target, numTargets, type, baseDmg, multipliers)
       pbCalcDamageMultipliersLingeringEffects(user, target, numTargets, type, baseDmg, multipliers)
       pbCalcDamageMultipliersStatusConditions(user, target, numTargets, type, baseDmg, multipliers)

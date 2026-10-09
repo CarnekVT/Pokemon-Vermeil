@@ -5,6 +5,8 @@ module Battle::ItemEffects
   SpeedCalc                       = ItemHandlerHash.new
   WeightCalc                      = ItemHandlerHash.new   # Float Stone
   ChoiceLock                      = ItemHandlerHash.new
+  BypassProtection                = ItemHandlerHash.new
+  PiercesProtection               = ItemHandlerHash.new
   # Battler's HP changed
   HPHeal                          = ItemHandlerHash.new
   # Battler's status condition
@@ -76,6 +78,16 @@ module Battle::ItemEffects
   def self.triggerChoiceLock(item, battler)
     return false if !battler.itemActive?
     return trigger(ChoiceLock, item, battler)
+  end
+
+  def self.triggerBypassProtection(item, battler, move = nil)
+    return false if !battler.itemActive?
+    return trigger(BypassProtection, item, battler, move)
+  end
+
+  def self.triggerPiercesProtection(item, battler, move = nil)
+    return false if !battler.itemActive?
+    return trigger(PiercesProtection, item, battler, move)
   end
 
   #-----------------------------------------------------------------------------

@@ -240,8 +240,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("TwoTurnAttack",
       score -= 10 if user.hp < user.totalhp / 2
     end
     # Don't prefer if target has a protecting move
-    if ai.trainer.high_skill? && !(user.can_make_contact_through_protection? &&
-	       move.move.pbContactMove?(user.battler))
+    if ai.trainer.high_skill? && !user.can_bypass_protection?(move.move)
       has_protect_move = false
       if move.pbTarget(user).num_targets > 1 &&
          (Settings::MECHANICS_GENERATION >= 7 || move.damagingMove?)

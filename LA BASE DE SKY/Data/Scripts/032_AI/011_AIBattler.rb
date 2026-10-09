@@ -291,6 +291,10 @@ class Battle::AI::AIBattler
     return battler.hasAirborneAbility?
   end
 
+  def can_bypass_protection?(move)
+    return battler.canBypassProtection?(move)
+  end
+
   def can_make_contact_through_protection?
     return battler.canMakeContactThroughProtection?
   end

@@ -6,6 +6,8 @@ module Battle::AbilityEffects
   WeightCalc                       = AbilityHandlerHash.new
   HealingPower                     = AbilityHandlerHash.new
   ChoiceLock                       = AbilityHandlerHash.new
+  BypassProtection                 = AbilityHandlerHash.new
+  PiercesProtection                = AbilityHandlerHash.new
   Trace                            = AbilityHandlerHash.new
   # Battler's HP changed
   OnHPDroppedBelowHalf             = AbilityHandlerHash.new
@@ -99,6 +101,16 @@ module Battle::AbilityEffects
   def self.triggerChoiceLock(battler)
     return false if !battler.abilityActive?
     return trigger(ChoiceLock, battler.ability, battler)
+  end
+
+  def self.triggerBypassProtection(battler, move = nil)
+    return false if !battler.abilityActive?
+    return trigger(BypassProtection, battler.ability, battler, move)
+  end
+
+  def self.triggerPiercesProtection(battler, move = nil)
+    return false if !battler.abilityActive?
+    return trigger(PiercesProtection, battler.ability, battler, move)
   end
 
   def self.triggerTrace(ability, battler, battle, on_switch_in = false)
@@ -354,6 +366,12 @@ end
 #===============================================================================
 
 Battle::AbilityEffects::ChoiceLock.add(:GORILLATACTICS, proc { |ability, battler| next true })
+Battle::AbilityEffects::PiercesProtection.add(:UNSEENFIST,
+  proc { |ability, battler, move| next true if move && move.pbContactMove?(battler) }
+)
+Battle::AbilityEffects::PiercesProtection.add(:PIERCINGDRILL,
+  proc { |ability, battler, move| next true if move && move.pbContactMove?(battler) }
+)
 
 Battle::AbilityEffects::SpeedCalc.add(:CHLOROPHYLL,
   proc { |ability, battler, mult|
@@ -1828,13 +1846,6 @@ Battle::AbilityEffects::DamageCalcFromUser.add(:WATERBUBBLE,
   }
 )
 
-Battle::AbilityEffects::DamageCalcFromUser.add(:PIERCINGDRILL,
-  proc { |ability, user, target, move, mults, power, type|
-    if move.pbContactMove?(user) && target.damageState.protected
-      mults[:final_damage_multiplier] *= 0.25
-    end
-  }
-)
 
 #===============================================================================
 # DamageCalcFromAlly handlers
