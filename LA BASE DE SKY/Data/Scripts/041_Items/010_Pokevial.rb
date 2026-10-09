@@ -10,11 +10,11 @@ end
 
 INITIAL_CHARGES_POKEVIAL = 1
 INFINITE_POKEVIAL = false
-
-ItemHandlers::UseFromBag.add(:VIAL, proc { |item| use_pokevial; next 1 })
-ItemHandlers::UseInField.add(:VIAL, proc { |item| use_pokevial; next 1 })
-ItemHandlers::UseFromBag.copy(:VIAL, :EMPTYVIAL)
-ItemHandlers::UseInField.copy(:VIAL, :EMPTYVIAL)
+ITEM_KEY = :VIAL
+ItemHandlers::UseFromBag.add(ITEM_KEY, proc { |item| use_pokevial; next 1 })
+ItemHandlers::UseInField.add(ITEM_KEY, proc { |item| use_pokevial; next 1 })
+ItemHandlers::UseFromBag.copy(ITEM_KEY, :EMPTYVIAL)
+ItemHandlers::UseInField.copy(ITEM_KEY, :EMPTYVIAL)
 
 def init_pokevial
   $PokemonGlobal.vial_charges ||= INITIAL_CHARGES_POKEVIAL
@@ -23,7 +23,7 @@ def init_pokevial
 end
 
 def player_has_pokevial?
-  $bag.has?(:VIAL) || $bag.has?(:EMPTYVIAL)
+  $bag.has?(ITEM_KEY) || $bag.has?(:EMPTYVIAL)
 end
 
 
@@ -31,7 +31,7 @@ def give_vial
   return if player_has_pokevial?
 
   pbGetKeyItem('VIAL_key') if defined?(pbGetKeyItem)
-  pbReceiveItem(:VIAL)
+  pbReceiveItem(ITEM_KEY)
   init_pokevial
 end
 
@@ -39,14 +39,18 @@ def lock_vial
   return unless ensure_pokevial_initialized
 
   $PokemonGlobal.vial_locked = true
-  pbMessage(_INTL('El Curaportátil ha sido bloqueado.'))
+  pbMessage(_INTL("El #{vial_item_name} ha sido bloqueado."))
+end
+
+def vial_item_name
+  GameData::Item.get(ITEM_KEY).name
 end
 
 def unlock_vial
   return unless ensure_pokevial_initialized
 
   $PokemonGlobal.vial_locked = false
-  pbMessage(_INTL('El Curaportátil ha sido desbloqueado.'))
+  pbMessage(_INTL("El #{vial_item_name} ha sido desbloqueado."))
 end
 
 def ensure_pokevial_initialized
@@ -58,7 +62,7 @@ end
 
 def show_message_pokevial
   if $PokemonGlobal.vial_charges <= 0
-    pbMessage(_INTL('El Curaportátil está vacío. Recárgalo en el Centro Pokémon.'))
+    pbMessage(_INTL("El #{vial_item_name} está vacío. Recárgalo en el Centro Pokémon."))
     return false
   end
   unless INFINITE_POKEVIAL
@@ -91,7 +95,7 @@ def use_pokevial
   return false unless ensure_pokevial_initialized
 
   if $PokemonGlobal.vial_locked
-    pbMessage(_INTL('El Curaportátil está bloqueado.'))
+    pbMessage(_INTL("El #{vial_item_name} está bloqueado."))
     return false
   end
   return false unless show_message_pokevial
@@ -115,7 +119,7 @@ def recharge_vial
   return unless ensure_pokevial_initialized
 
   $PokemonGlobal.vial_charges = max_vial_charges
-  pbMessage(_INTL('¡Tu Curaportátil ha sido recargado!')) unless INFINITE_POKEVIAL
+  pbMessage(_INTL("¡Tu #{vial_item_name} ha sido recargado!")) unless INFINITE_POKEVIAL
   $bag.replace_item(:EMPTYVIAL, :VIAL) if $bag.has?(:EMPTYVIAL)
 end
 
@@ -125,7 +129,7 @@ def add_new_vial_charge
   $PokemonGlobal.max_vial_charges += 1
   # Se hace de esta forma para que recibir una nueva carga no restaure completamente el vial
   $PokemonGlobal.vial_charges += 1
-  pbMessage(_INTL("¡Ahora tu Curaportátil puede almacenar {1} carga#{$PokemonGlobal.max_vial_charges > 1 ? 's' : ''}!",$PokemonGlobal.max_vial_charges))
+  pbMessage(_INTL("¡Ahora tu #{vial_item_name} puede almacenar {1} carga#{$PokemonGlobal.max_vial_charges > 1 ? 's' : ''}!",$PokemonGlobal.max_vial_charges))
 end
 
 def remove_vial_charge
@@ -135,7 +139,7 @@ def remove_vial_charge
     $PokemonGlobal.max_vial_charges -= 1
     # Se hace de esta forma para que al eliminar una carga no restaure completamente el vial
     $PokemonGlobal.vial_charges -= 1 if vial_charges.positive?
-    pbMessage(_INTL("¡Ahora tu Curaportátil puede almacenar {1} carga#{$PokemonGlobal.max_vial_charges > 1 ? 's' : ''}!",
+    pbMessage(_INTL("¡Ahora tu #{vial_item_name} puede almacenar {1} carga#{$PokemonGlobal.max_vial_charges > 1 ? 's' : ''}!",
                     max_vial_charges))
   end
 end
