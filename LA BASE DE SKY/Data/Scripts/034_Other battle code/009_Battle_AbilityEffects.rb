@@ -4,6 +4,7 @@
 module Battle::AbilityEffects
   SpeedCalc                        = AbilityHandlerHash.new
   WeightCalc                       = AbilityHandlerHash.new
+  HealingPower                     = AbilityHandlerHash.new
   Trace                            = AbilityHandlerHash.new
   # Battler's HP changed
   OnHPDroppedBelowHalf             = AbilityHandlerHash.new
@@ -87,6 +88,11 @@ module Battle::AbilityEffects
 
   def self.triggerWeightCalc(ability, battler, weight)
     return trigger(WeightCalc, ability, battler, weight, ret: weight)
+  end
+
+  def self.triggerHealingPower(battler, mult = 1.0)
+    return mult if !battler.abilityActive?
+    return trigger(HealingPower, battler.ability, battler, mult, ret: mult)
   end
 
   def self.triggerTrace(ability, battler, battle, on_switch_in = false)
@@ -298,7 +304,7 @@ module Battle::AbilityEffects
     battle.allSameSideBattlers(battler.index).each do |b|
       next if !b.hasActiveAbility?(:COMMANDER)
       next if b.effects[PBEffects::Commanding] >= 0
-      OnSwitchIn.trigger(b.ability, b, battle, switch_in)	  
+      OnSwitchIn.trigger(b.ability, b, battle, switch_in)
     end
   end
 
@@ -1818,7 +1824,7 @@ Battle::AbilityEffects::DamageCalcFromUser.add(:PIERCINGDRILL,
   proc { |ability, user, target, move, mults, power, type|
     if move.pbContactMove?(user) && target.damageState.protected
       mults[:final_damage_multiplier] *= 0.25
-    end 
+    end
   }
 )
 
@@ -1860,8 +1866,8 @@ Battle::AbilityEffects::DamageCalcFromUser.add(:MEGASOL,
       when :FIRE
         mults[:final_damage_multiplier] *= 1.5
       when :WATER
-        if move.function_code == "IncreasePowerInSun" 
-          mults[:final_damage_multiplier] *= 1.5 
+        if move.function_code == "IncreasePowerInSun"
+          mults[:final_damage_multiplier] *= 1.5
         else
           mults[:final_damage_multiplier] /= 2
         end
@@ -2170,7 +2176,7 @@ Battle::AbilityEffects::OnBeingHit.add(:CUTECHARM,
     battle.pbShowAbilitySplash(target)
     msg = nil
     if !Battle::Scene::USE_ABILITY_SPLASH
-      msg = _INTL("¡{1} de {2} hizo que {3} se enamorara!", 
+      msg = _INTL("¡{1} de {2} hizo que {3} se enamorara!",
                     target.pbThis, target.abilityName, user.pbThis(true))
     end
     user.pbAttract(target, msg)
@@ -2195,13 +2201,13 @@ Battle::AbilityEffects::OnBeingHit.add(:EFFECTSPORE,
     case r
     when 0
       if !Battle::Scene::USE_ABILITY_SPLASH
-        msg = _INTL("¡{1} de {2} durmió a {3}!", 
+        msg = _INTL("¡{1} de {2} durmió a {3}!",
                       target.pbThis, target.abilityName, user.pbThis(true))
       end
       user.pbSleep(target, msg)
     when 1
       if !Battle::Scene::USE_ABILITY_SPLASH
-        msg = _INTL("¡{1} de {2} envenenó a {3}!", 
+        msg = _INTL("¡{1} de {2} envenenó a {3}!",
                       target.pbThis, target.abilityName, user.pbThis(true))
       end
       user.pbPoison(target, msg)
@@ -2284,7 +2290,7 @@ Battle::AbilityEffects::OnBeingHit.add(:INNARDSOUT,
     if Battle::Scene::USE_ABILITY_SPLASH
       battle.pbDisplay(_INTL("¡{1} sufrió daño!", user.pbThis))
     else
-      battle.pbDisplay(_INTL("¡{1} sufrió daño por parte de la habilidad {3} de {2}!", 
+      battle.pbDisplay(_INTL("¡{1} sufrió daño por parte de la habilidad {3} de {2}!",
                                 user.pbThis, target.pbThis(true), target.abilityName))
     end
     battle.pbHideAbilitySplash(target)
@@ -2301,7 +2307,7 @@ Battle::AbilityEffects::OnBeingHit.add(:IRONBARBS,
     if Battle::Scene::USE_ABILITY_SPLASH
       battle.pbDisplay(_INTL("¡{1} sufrió daño!", user.pbThis))
     else
-      battle.pbDisplay(_INTL("¡{1} sufrió daño por parte de la habilidad {3} de {2}!", 
+      battle.pbDisplay(_INTL("¡{1} sufrió daño por parte de la habilidad {3} de {2}!",
                                 user.pbThis, target.pbThis(true), target.abilityName))
     end
     battle.pbHideAbilitySplash(target)
@@ -4015,7 +4021,7 @@ Battle::AbilityEffects::OnTerrainChange.add(:QUARKDRIVE,
         battle.pbDisplay(_INTL("¡La {1} de {2} aumentó!", GameData::Stat.get(best[0]).name, battler.pbThis))
         battle.pbHideAbilitySplash(battler)
       end
-      
+
     elsif battler.effects[PBEffects::ProtosynthesisStat]
       battler.effects[PBEffects::ProtosynthesisStat] = nil
       battle.pbDisplay(_INTL("Los efectos de {1} han desaparecido...", battler.abilityName))

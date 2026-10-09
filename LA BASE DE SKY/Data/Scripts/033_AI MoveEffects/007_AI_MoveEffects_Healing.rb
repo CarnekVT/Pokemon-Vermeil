@@ -146,11 +146,13 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("HealUserByTargetAttackLo
     if target.has_active_ability?(:LIQUIDOOZE)
       score -= 20
     elsif user.battler.canHeal?
-      score += 5 if user.has_active_item?(:BIGROOT)
+      heal_mult = user.has_active_item?(:BIGROOT) ? 1.3 : 1.0
+      heal_mult = Battle::AbilityEffects.triggerHealingPower(user.battler, heal_mult)
+      score += 5 if heal_mult > 1.0
       if ai.trainer.has_skill_flag?("HPAware")
         # Consider how much HP will be restored
         heal_amt = target.rough_stat(:ATTACK)
-        heal_amt *= 1.3 if user.has_active_item?(:BIGROOT)
+        heal_amt *= heal_mult
         heal_amt = [heal_amt, user.totalhp - user.hp].min
         if heal_amt > user.totalhp * 0.2   # Only modify the score if it'll heal a decent amount
           if user.hp < user.totalhp * 0.5
@@ -173,11 +175,13 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("HealUserByHalfOfDamageDo
     if target.has_active_ability?(:LIQUIDOOZE)
       score -= 20 if rough_dmg < target.hp
     elsif user.battler.canHeal?
-      score += 5 if user.has_active_item?(:BIGROOT)
+      heal_mult = user.has_active_item?(:BIGROOT) ? 1.3 : 1.0
+      heal_mult = Battle::AbilityEffects.triggerHealingPower(user.battler, heal_mult)
+      score += 5 if heal_mult > 1.0
       if ai.trainer.has_skill_flag?("HPAware")
         # Consider how much HP will be restored
         heal_amt = rough_dmg / 2
-        heal_amt *= 1.3 if user.has_active_item?(:BIGROOT)
+        heal_amt *= heal_mult
         heal_amt = [heal_amt, user.totalhp - user.hp].min
         if heal_amt > user.totalhp * 0.2   # Only modify the score if it'll heal a decent amount
           if user.hp < user.totalhp * 0.5
@@ -226,11 +230,13 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("HealUserByThreeQuartersO
     if target.has_active_ability?(:LIQUIDOOZE)
       score -= 20 if rough_dmg < target.hp
     elsif user.battler.canHeal?
-      score += 5 if user.has_active_item?(:BIGROOT)
+      heal_mult = user.has_active_item?(:BIGROOT) ? 1.3 : 1.0
+      heal_mult = Battle::AbilityEffects.triggerHealingPower(user.battler, heal_mult)
+      score += 5 if heal_mult > 1.0
       if ai.trainer.has_skill_flag?("HPAware")
         # Consider how much HP will be restored
         heal_amt = rough_dmg * 0.75
-        heal_amt *= 1.3 if user.has_active_item?(:BIGROOT)
+        heal_amt *= heal_mult
         heal_amt = [heal_amt, user.totalhp - user.hp].min
         if heal_amt > user.totalhp * 0.2   # Only modify the score if it'll heal a decent amount
           if user.hp < user.totalhp * 0.5
@@ -373,7 +379,9 @@ Battle::AI::Handlers::MoveFailureCheck.add("StartHealUserEachTurn",
 Battle::AI::Handlers::MoveEffectScore.add("StartHealUserEachTurn",
   proc { |score, move, user, ai, battle|
     score += 15
-    score += 5 if user.has_active_item?(:BIGROOT)
+    heal_mult = user.has_active_item?(:BIGROOT) ? 1.3 : 1.0
+    heal_mult = Battle::AbilityEffects.triggerHealingPower(user.battler, heal_mult)
+    score += 5 if heal_mult > 1.0
     next score
   }
 )
@@ -390,7 +398,9 @@ Battle::AI::Handlers::MoveEffectScore.add("StartHealUserEachTurnTrapUserInBattle
   proc { |score, move, user, ai, battle|
     score += 8
     score += 15 if user.turnCount < 2
-    score += 5 if user.has_active_item?(:BIGROOT)
+    heal_mult = user.has_active_item?(:BIGROOT) ? 1.3 : 1.0
+    heal_mult = Battle::AbilityEffects.triggerHealingPower(user.battler, heal_mult)
+    score += 5 if heal_mult > 1.0
     next score
   }
 )

@@ -165,8 +165,9 @@ class Battle
       next if !battler.canHeal?
       pbCommonAnimation("AquaRing", battler)
       hpGain = battler.totalhp / 16
-      hpGain = (hpGain * 1.3).floor if battler.hasActiveItem?(:BIGROOT)
-      battler.pbRecoverHP(hpGain)
+      mult = battler.hasActiveItem?(:BIGROOT) ? 1.3 : 1.0
+      mult = Battle::AbilityEffects.triggerHealingPower(battler, mult)
+      battler.pbRecoverHP((hpGain * mult).floor)
       pbDisplay(_INTL("¡{1} ha recuperado algunos PS gracias al manto de agua que rodea su cuerpo!", battler.pbThis))
     end
     # Ingrain
@@ -175,8 +176,9 @@ class Battle
       next if !battler.canHeal?
       pbCommonAnimation("Ingrain", battler)
       hpGain = battler.totalhp / 16
-      hpGain = (hpGain * 1.3).floor if battler.hasActiveItem?(:BIGROOT)
-      battler.pbRecoverHP(hpGain)
+      mult = battler.hasActiveItem?(:BIGROOT) ? 1.3 : 1.0
+      mult = Battle::AbilityEffects.triggerHealingPower(battler, mult)
+      battler.pbRecoverHP((hpGain * mult).floor)
       pbDisplay(_INTL("¡{1} ha absorbido nutrientes gracias a sus raíces!", battler.pbThis))
     end
     # Leech Seed
@@ -247,7 +249,7 @@ class Battle
       battler.droppedBelowHalfHP = false
       battler.droppedBelowThirdHP = false
     end
-    
+
     # Damage from frostbite
     priority.each do |battler|
       next if battler.status != :FROSTBITE || !battler.takesIndirectDamage?
@@ -285,7 +287,7 @@ class Battle
         pbDisplay(_INTL("¡{1} es víctima de una maldición!", battler.pbThis))
       end
     end
-    
+
     # priority.each do |battler|
     #   next if battler.effects[PBEffects::Splinters] == 0 || !battler.takesIndirectDamage?
     #   pbCommonAnimation("Splinters", battler)
@@ -490,7 +492,7 @@ class Battle
     # Pledge Rainbow
     pbEORCountDownSideEffect(side, PBEffects::Rainbow,
                              _INTL("El arcoíris sobre {1} ha desaparecido.", @battlers[side].pbTeam(true)))
-    
+
     # NOTE: Pledge Sea of Fire's counter is counted down above.
 
     # Pledge Swamp
