@@ -345,7 +345,7 @@ module Translator
       pbMessageDisplay(msg_window, _INTL("Todo el texto del juego se extrajo a archivos en la carpeta \"{1}\".", dir_name) + "\1")
     end
     pbMessageDisplay(msg_window, _INTL("Para localizar este texto, traduzca cada segunda línea de esos archivos.") + "\1")
-    pbMessageDisplay(msg_window, _INTL("Después de traducir, elije \"Compilar texto traducido\" en el menú Debug."))
+    pbMessageDisplay(msg_window, _INTL("Después de traducir, elige \"Compilar texto traducido\" en el menú Debug."))
     pbDisposeMessageWindow(msg_window)
   end
 
