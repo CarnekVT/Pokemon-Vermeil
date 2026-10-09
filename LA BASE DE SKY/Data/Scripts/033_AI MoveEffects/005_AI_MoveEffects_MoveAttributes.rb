@@ -1391,7 +1391,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("HoopaRemoveProtectionsBy
 #===============================================================================
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilQuarterOfDamageDealt",
   proc { |score, move, user, target, ai, battle|
-    next score if !user.battler.takesIndirectDamage? || user.has_active_ability?(:ROCKHEAD)
+    next score if !user.battler.takesIndirectDamage? || user.recoil_immune?
     dmg = move.rough_damage / 4
     if dmg >= user.hp
       reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)
@@ -1409,7 +1409,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilQuarterOfDamageDea
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilThirdOfDamageDealtParalyzeTarget",
   proc { |score, move, user, target, ai, battle|
     # Score for being a recoil move
-    if user.battler.takesIndirectDamage? && !user.has_active_ability?(:ROCKHEAD)
+    if user.battler.takesIndirectDamage? && !user.recoil_immune?
       dmg = move.rough_damage / 3
       if dmg >= user.hp
         reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)
@@ -1433,7 +1433,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilThirdOfDamageDealt
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilThirdOfDamageDealtBurnTarget",
   proc { |score, move, user, target, ai, battle|
     # Score for being a recoil move
-    if user.battler.takesIndirectDamage? && !user.has_active_ability?(:ROCKHEAD)
+    if user.battler.takesIndirectDamage? && !user.recoil_immune?
       dmg = move.rough_damage / 3
       if dmg >= user.hp
         reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)
@@ -1456,7 +1456,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilThirdOfDamageDealt
 #===============================================================================
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilHalfOfDamageDealt",
   proc { |score, move, user, target, ai, battle|
-    next score if !user.battler.takesIndirectDamage? || user.has_active_ability?(:ROCKHEAD)
+    next score if !user.battler.takesIndirectDamage? || user.recoil_immune?
     dmg = (move.rough_damage / 2.0).round
     if dmg >= user.hp
       reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)
@@ -1473,7 +1473,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilHalfOfDamageDealt"
 #===============================================================================
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilHalfOfTotalHP",
   proc { |score, move, user, target, ai, battle|
-    next score if !user.battler.takesIndirectDamage? || user.has_active_ability?(:ROCKHEAD)
+    next score if !user.battler.takesIndirectDamage? || user.recoil_immune?
     dmg = (user.totalhp / 2.0).round
     if dmg >= user.hp
       reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)

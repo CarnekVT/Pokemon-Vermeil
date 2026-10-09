@@ -663,7 +663,7 @@ class Battle::AI
           recoil = 0.0
           unavoidable_loss = 0.0
           if attacker.battler.takesIndirectDamage?
-            if !attacker.has_active_ability?(:ROCKHEAD)
+            if !attacker.recoil_immune?
               divisor = AIImprovements::RECOIL_DAMAGE_DIVISORS[candidate.function_code]
               recoil = [(damage / divisor).round, 1].max if divisor
               recoil = (attacker.totalhp / 2.0).round if candidate.function_code == "RecoilHalfOfTotalHP"

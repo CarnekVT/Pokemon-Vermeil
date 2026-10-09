@@ -8,6 +8,7 @@ module Battle::AbilityEffects
   ChoiceLock                       = AbilityHandlerHash.new
   BypassProtection                 = AbilityHandlerHash.new
   PiercesProtection                = AbilityHandlerHash.new
+  RecoilImmunity                   = AbilityHandlerHash.new
   Trace                            = AbilityHandlerHash.new
   # Battler's HP changed
   OnHPDroppedBelowHalf             = AbilityHandlerHash.new
@@ -111,6 +112,15 @@ module Battle::AbilityEffects
   def self.triggerPiercesProtection(battler, move = nil)
     return false if !battler.abilityActive?
     return trigger(PiercesProtection, battler.ability, battler, move)
+  end
+
+  def self.triggerRecoilImmunity(ability, battler)
+    return trigger(RecoilImmunity, ability, battler)
+  end
+
+  def self.recoilImmune?(battler)
+    return false if !battler.abilityActive?
+    return triggerRecoilImmunity(battler.ability, battler)
   end
 
   def self.triggerTrace(ability, battler, battle, on_switch_in = false)
@@ -366,6 +376,7 @@ end
 #===============================================================================
 
 Battle::AbilityEffects::ChoiceLock.add(:GORILLATACTICS, proc { |ability, battler| next true })
+Battle::AbilityEffects::RecoilImmunity.add(:ROCKHEAD, proc { |ability, battler| next true })
 Battle::AbilityEffects::PiercesProtection.add(:UNSEENFIST,
   proc { |ability, battler, move| next true if move && move.pbContactMove?(battler) }
 )

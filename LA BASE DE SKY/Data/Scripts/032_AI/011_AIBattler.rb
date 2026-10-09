@@ -304,6 +304,10 @@ class Battle::AI::AIBattler
     return battler.canMakeContactThroughProtection?
   end
 
+  def recoil_immune?
+    return Battle::AbilityEffects.recoilImmune?(battler)
+  end
+
   #-----------------------------------------------------------------------------
 
   def item_id; return battler.item_id; end
@@ -445,6 +449,13 @@ class Battle::AI::AIBattler
     end
     # Modify the rating based on ability-specific contexts
     if @ai.trainer.medium_skill?
+      if Battle::AbilityEffects.triggerRecoilImmunity(ability, battler)
+        has_recoil_move = check_for_move do |m|
+          m.recoilMove? && !m.is_a?(Battle::Move::CrashDamageIfFails) &&
+            !m.is_a?(Battle::Move::CrashDamageIfFailsUnusableInGravity)
+        end
+        ret = has_recoil_move ? [ret, 5].max : 0
+      end
       ret = Battle::AI::Handlers.modify_ability_ranking(ability, ret, self, @ai)
     end
     return ret

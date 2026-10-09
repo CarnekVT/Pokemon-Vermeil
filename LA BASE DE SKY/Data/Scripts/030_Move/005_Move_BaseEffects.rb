@@ -436,7 +436,7 @@ class Battle::Move::RecoilMove < Battle::Move
   def pbEffectAfterAllHits(user, target)
     return if target.damageState.unaffected
     return if !user.takesIndirectDamage?
-    return if user.hasActiveAbility?(:ROCKHEAD)
+    return if Battle::AbilityEffects.recoilImmune?(user)
     amt = pbRecoilDamage(user, target)
     amt = 1 if amt < 1
     if user.pokemon.isSpecies?(:BASCULIN) && [2, 3].include?(user.pokemon.form)
