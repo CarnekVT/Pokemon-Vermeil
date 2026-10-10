@@ -2,7 +2,7 @@
 # Evolution screen
 #===============================================================================
 class PokemonEvolutionScene
-  EVOLUTION_ME = ""
+  EVOLUTION_ME = "Evolution start"
   EVOLUTION_BGM = "Evolution"
 
   SPRITE_1_Y_OFFSET = -64
