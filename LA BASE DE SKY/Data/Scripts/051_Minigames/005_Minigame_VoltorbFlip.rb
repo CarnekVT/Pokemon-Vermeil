@@ -5,6 +5,10 @@
 # Run with:      pbVoltorbFlip
 #===============================================================================
 class VoltorbFlip
+  MARK_SE            = "Voltorb Flip mark"
+  EXPLOSION_SE       = "Voltorb Flip explosion"
+  POINT_SE           = "Voltorb Flip point"
+  TILE_SE            = "Voltorb Flip tile"
   GRAPHICS_DIRECTORY = "Graphics/UI/Voltorb Flip/"
   NUM_ROWS           = 5
   NUM_COLUMNS        = 5
@@ -399,7 +403,7 @@ class VoltorbFlip
       if @cursor[0][3] == 64   # If in mark mode
         @squares.length.times do |i|
           if (@index[0] * 64) + 128 == @squares[i][0] && @index[1] * 64 == @squares[i][1] && @squares[i][3] == false
-            pbSEPlay("Voltorb Flip mark")
+            pbSEPlay(MARK_SE)
           end
         end
         (@marks.length + 1).times do |i|
@@ -423,7 +427,7 @@ class VoltorbFlip
             @squares[i][3] = true
             # If Voltorb (0), display all tiles on the board
             if @squares[i][2] == 0
-              pbSEPlay("Voltorb Flip explosion")
+              pbSEPlay(EXPLOSION_SE)
               # Play explosion animation
               # Part1
               animation = []
@@ -481,10 +485,10 @@ class VoltorbFlip
               end
               if @points == 0
                 @points += @squares[i][2]
-                pbSEPlay("Voltorb Flip point")
+                pbSEPlay(POINT_SE)
               elsif @squares[i][2] > 1
                 @points *= @squares[i][2]
-                pbSEPlay("Voltorb Flip point")
+                pbSEPlay(POINT_SE)
               end
               break
             end
@@ -618,7 +622,7 @@ class VoltorbFlip
     end
     icons[3] = [GRAPHICS_DIRECTORY + "tiles", x, y, tile * 64, 0, 64, 64]
     pbDrawImagePositions(@sprites["icon"].bitmap, icons)
-    pbSEPlay("Voltorb Flip tile")
+    pbSEPlay(TILE_SE)
   end
 
   def pbShowAndDispose
@@ -629,7 +633,7 @@ class VoltorbFlip
       @sprites[i].bitmap.clear
       @sprites[i].z = 99997
     end
-    pbSEPlay("Voltorb Flip tile")
+    pbSEPlay(TILE_SE)
     @sprites[5].visible = true
     @sprites["mark"].bitmap.clear
     pbWait(0.1)
@@ -645,7 +649,7 @@ class VoltorbFlip
     # "Dispose" of tiles by column
     NUM_COLUMNS.times do |i|
       icons = []
-      pbSEPlay("Voltorb Flip tile")
+      pbSEPlay(TILE_SE)
       NUM_ROWS.times do |j|
         icons[j] = [GRAPHICS_DIRECTORY + "tiles", @squares[i + (j * NUM_COLUMNS)][0], @squares[i + (j * NUM_COLUMNS)][1],
                     448 + (@squares[i + (j * NUM_COLUMNS)][2] * 64), 0, 64, 64]
