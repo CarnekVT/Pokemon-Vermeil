@@ -56,7 +56,7 @@ if Settings::USE_NEW_EXP_SHARE
 		"condition" => proc { next expshare_enabled? },
 		"effect"    => proc { |screen, party, party_idx|
 			pokemon = party[party_idx]
-			
+
 			txt_individual = pokemon.expshare ? _INTL("Desactivar a {1}", pokemon.name) : _INTL("Activar a {1}", pokemon.name)
 			txt_individual_msg = pokemon.expshare ? _INTL("desactivado") : _INTL("activado")
 			txt_all_on     = _INTL("Activar a todos")
@@ -80,19 +80,19 @@ if Settings::USE_NEW_EXP_SHARE
 			commands.push(txt_cancel)
 			cmd_cancel = commands.length - 1
 			cmd = screen.pbShowCommands(_INTL("¿Qué hacer?"), commands, 0)
-			
+
 
 			if cmd >= 0
 				if cmd == cmd_individual
 					pokemon.expshare = !pokemon.expshare
 					screen.scene.pbRefresh
-					screen.pbDisplay( _INTL("Se ha {1} el Repartir Exp. en {2}.", txt_individual_msg, pokemon.name))						
+					screen.pbDisplay( _INTL("Se ha {1} el Repartir Exp. en {2}.", txt_individual_msg, pokemon.name))
 				elsif cmd == cmd_all_on
-					party.each do |pkmn| 
-						pkmn.expshare = true if !pkmn.egg? 
+					party.each do |pkmn|
+						pkmn.expshare = true if !pkmn.egg?
 					end
 					screen.scene.pbRefresh
-					screen.pbDisplay(_INTL("Se ha activado el Repartir Exp. para todo el equipo."))					
+					screen.pbDisplay(_INTL("Se ha activado el Repartir Exp. para todo el equipo."))
 				elsif cmd == cmd_all_off
 					party.each { |pkmn| pkmn.expshare = false }
 					screen.scene.pbRefresh
@@ -101,9 +101,9 @@ if Settings::USE_NEW_EXP_SHARE
 					# No hace nada (Inserte meme del gato)
 				end
 			end
-			
+
 			next true
-		}   
+		}
 	})
 
 	def toggle_expshare
@@ -111,7 +111,7 @@ if Settings::USE_NEW_EXP_SHARE
 		$PokemonGlobal.expshare_enabled = !$PokemonGlobal.expshare_enabled
 		$player.party.each { |pokemon| pokemon.expshare = $PokemonGlobal.expshare_enabled }
 	end
-	
+
 	class Pokemon
 		attr_accessor(:expshare)    # Repartir experiencia
 		alias initialize_old initialize
@@ -119,9 +119,9 @@ if Settings::USE_NEW_EXP_SHARE
 			initialize_old(species, level, player, withMoves, recheck_form)
 			$PokemonSystem.expshareon ||= 0
 			@expshare = expshare_enabled? && $PokemonSystem.expshareon == 0
-		end 
+		end
 	end
-	
+
 	class PokemonPartyPanel < Sprite
 		alias initialize_old initialize
 		def initialize(pokemon,index,viewport=nil)
@@ -142,7 +142,7 @@ if Settings::USE_NEW_EXP_SHARE
 
 		def draw_exp_icon
 			return if !@pokemon.expshare || @pokemon.egg?
-			pbDrawImagePositions(@overlaysprite.bitmap, 
+			pbDrawImagePositions(@overlaysprite.bitmap,
 			[["Graphics/Pictures/expicon", 226, 70, 0, 0]])
 		end
 
@@ -166,7 +166,7 @@ if Settings::USE_NEW_EXP_SHARE
 			@expicon.dispose if @expicon
 			super
 		end
-		
+
 		def refresh
 			return if disposed?
 			return if @refreshing
@@ -190,11 +190,11 @@ if Settings::USE_NEW_EXP_SHARE
 		alias update_old update
 		def update
 			update_old
-			@expicon.update if @expicon 
+			@expicon.update if @expicon
 		end
 	end
-	
-	class Battle 
+
+	class Battle
 	################################################################################
 	# Experiencia en captura reducida
 	################################################################################
@@ -227,26 +227,34 @@ if Settings::USE_NEW_EXP_SHARE
 				end
 				# Calculate EV and Exp gains for the participants
 				if numPartic > 0 || expShare.length > 0 || expAll
-				unGroupMessage = !Settings::GROUP_EXP_SHARE_MESSAGE && expShare.length > 0 && expShare.length > b.participants.length ? true : false
-				# Gain EVs and Exp for participants
-				eachInTeam(0, 0) do |pkmn, i|
-					next if !pkmn.able?
-					next unless b.participants.include?(i) || expShare.include?(i)
-					showMessage = b.participants.include?(i) || unGroupMessage ? true : false
-					pbGainEVsOne(i, b)
-					pbGainExpOne(i, b, numPartic, expShare, expAll, showMessage)
+				unGroupMessage = !Settings::GROUP_EXP_SHARE_MESSAGE && expShare.length > 0 && expShare.length > b.participants.length
+				hasOtherExpGainers = expShare.any? { |i| !b.participants.include?(i) }
+				if expAll
+					hasOtherExpGainers ||= p1.each_with_index.any? do |pkmn, i|
+						pkmn&.able? && pbIsOwner?(0, i) && !b.participants.include?(i) && !expShare.include?(i)
+					end
 				end
-				if !unGroupMessage && (expShare.length > numPartic && pbParty(0).length > 1)
+				# Gain EVs and Exp for participants before announcing shared Exp.
+				eachInTeam(0, 0) do |pkmn, i|
+					next if !pkmn.able? || !b.participants.include?(i)
+					pbGainEVsOne(i, b)
+					pbGainExpOne(i, b, numPartic, expShare, expAll, true)
+				end
+				if !unGroupMessage && hasOtherExpGainers && p1.length > 1
 					pbDisplayPaused(_INTL("¡Tus otros Pokémon también ganaron puntos de experiencia!"))
 				end
+				# Gain Exp for Pokémon with Exp Share that didn't participate.
+				eachInTeam(0, 0) do |pkmn, i|
+					next if !pkmn.able? || b.participants.include?(i) || !expShare.include?(i)
+					pbGainEVsOne(i, b)
+					pbGainExpOne(i, b, numPartic, expShare, expAll, unGroupMessage)
+				end
+
 				# Gain EVs and Exp for all other Pokémon because of Exp All
 				if expAll
-					showMessage = true
 					eachInTeam(0, 0) do |pkmn, i|
 						next if !pkmn.able?
 						next if b.participants.include?(i) || expShare.include?(i)
-						pbDisplayPaused(_INTL("¡Tus otros Pokémon también ganaron puntos de experiencia!")) if showMessage && (expShare.length > numPartic && pbParty(0).length > 1)
-						showMessage = false
 						pbGainEVsOne(i, b)
 						pbGainExpOne(i, b, numPartic, expShare, expAll, false)
 					end
