@@ -1,4 +1,3 @@
-require "json"
 
 module EventTextExporter
   DIRECTORY = "Text_Events"
@@ -326,14 +325,14 @@ module EventTextExporter
   end
 
   def read_json(filename)
-    JSON.parse(File.read(filename, encoding: "UTF-8"))
-  rescue JSON::ParserError => e
+    HTTPLite::JSON.parse(File.read(filename, encoding: "UTF-8"))
+  rescue HTTPLite::JSON::ParserError => e
     raise "JSON inválido en #{filename}: #{e.message}"
   end
 
   def write_json(filename, payload)
     File.open(filename, "wb") do |file|
-      file.write(JSON.pretty_generate(payload))
+      file.write(HTTPLite::JSON.pretty_generate(payload))
       file.write("\n")
     end
   end
