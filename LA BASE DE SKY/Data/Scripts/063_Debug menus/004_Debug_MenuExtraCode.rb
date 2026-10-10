@@ -45,6 +45,11 @@ class SpriteWindow_DebugVariables < Window_DrawableCommand
   attr_reader :mode
   attr_accessor :visible_ids
 
+  BASE_COLOR   = Color.new(96, 96, 96)
+  RED_COLOR    = Color.new(168, 48, 56)
+  GREEN_COLOR  = Color.new(0, 144, 0)
+  SHADOW_COLOR = Color.new(208, 208, 200)
+
   def initialize(viewport)
     @visible_ids = nil
     super(0, 0, Graphics.width, Graphics.height, viewport)
@@ -69,14 +74,14 @@ class SpriteWindow_DebugVariables < Window_DrawableCommand
       x += (w / 2) - (width / 2)
     end
     y += 8   # TEXT OFFSET
-    base = Color.new(96, 96, 96)
+    base = BASE_COLOR
     case colors
     when 1   # Red
-      base = Color.new(168, 48, 56)
+      base = RED_COLOR
     when 2   # Green
-      base = Color.new(0, 144, 0)
+      base = GREEN_COLOR
     end
-    pbDrawShadowText(self.contents, x, y, [width, w].max, h, t, base, Color.new(208, 208, 200))
+    pbDrawShadowText(self.contents, x, y, [width, w].max, h, t, base, SHADOW_COLOR)
   end
 
   def drawItem(index, _count, rect)
