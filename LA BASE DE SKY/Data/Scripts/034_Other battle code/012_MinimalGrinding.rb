@@ -3,7 +3,7 @@
 # Usa MinimalGrinding.on / MinimalGrinding.off / MinimalGrinding.toggle
 #===============================================================================
 class PokemonGlobalMetadata
-  attr_accessor :minimal_griding
+  attr_accessor :minimal_grinding
 end
 
 module MinimalGrinding
