@@ -1,3 +1,19 @@
+- **v1.0.87 · Editor visual de emitters + ejemplo Gen 5:** Tiradores azules para dirección, naranja para apertura, morado para área de salida y blanco para distancia, todos con arrastre izquierdo y ayuda visible. El panel rápido reúne cinco controles numéricos equivalentes; las opciones PBS avanzadas continúan en su pestaña. Sludge Bomb cambia de arco lento/repetido a un único glóbulo morado con expansión y desvanecimiento breve al alcanzar el objetivo, tomando como referencia el video proporcionado (56:24–56:28). Este ajuste del ejemplo no sustituye un sistema independiente de efectos de impacto.
+
+## ¿Para qué sirve Battle Animation Studio?
+
+Battle Animation Studio es el editor visual de animaciones de combate para Pokémon Vermeil dentro de Maker Studio. Permite combinar gráficos, partículas o emitters, movimientos, líneas de tiempo, keyframes, efectos de cámara, sonido y vista previa, además de importar/exportar animaciones y trabajar con parámetros compatibles con su runtime Ruby. El editor se encuentra en `Plugins/MakerStudio/003_Editor/Mods/Battle Animation Studio`, y el runtime jugable en `Plugins/Battle Animation Studio Runtime`.
+
+### Editar un emitter (v1.0.87)
+
+1. Selecciona un emitter y activa **RUTA**. En el escenario arrastra con clic izquierdo: **centro = origen**, **azul = dirección**, **naranja = apertura (grados)**, **morado = área de aparición**, **blanco / FIN = distancia**. La rueda cambia velocidad, Mayús + rueda cambia apertura. No necesitas el botón derecho.
+2. Para precisión, abre **Rápido** y cambia directamente dirección, apertura, distancia, ancho o alto. La pestaña **Ruta** ofrece desplazamiento y trayectoria; **Partícula** reúne apariencia y vida; **Técnico / PBS** conserva los campos de compatibilidad.
+3. Guarda y prueba los resultados en Maker Studio y dentro del juego. No edites archivos de animaciones reales sin una copia de seguridad previa.
+
+### Nota de distribución
+
+Esta carpeta es un **mod del editor de Maker Studio**. No contiene la aplicación completa Maker Studio: instálala sobre una copia de Maker Studio compatible y mantén la carpeta de runtime junto a los demás plugins del juego. Los demás mods personales NO forman parte del paquete de BAS.
+
 - **v1.0.86:** reconstruye el estado de **Afterimage de Element**: **Trail y Burst se activan por separado**, ninguno bloquea al otro, pueden coexistir, los frames activos del Trail usan rangos válidos por defecto y el Burst puede terminar su vida aunque el Element original ya haya acabado.
 - **v1.0.85:** corrige el bloqueo del **Burst de Afterimage**. El modo Burst, su checkbox y los botones **Activar/Desactivar burst** ya no dependen de que el afterimage maestro esté activado antes; al elegir/activar Burst, BAS habilita automáticamente lo necesario.
 - **v1.0.84:** el **Burst de Afterimage de Element** ahora tiene **BURST activo**, botones **Activar burst / Desactivar burst** y conserva su frame/parámetros al apagarlo.

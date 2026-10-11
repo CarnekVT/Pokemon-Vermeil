@@ -2663,6 +2663,18 @@ var BattlePreview = /** @class */ (function () {
                 c.arc(gx, gy, 7, 0, Math.PI * 2);
                 c.fill();
                 c.stroke();
+                // Distinct, always-visible handles replace undocumented right-click gestures.
+                var dhx = Math.cos(guideRad) * 46, dhy = -Math.sin(guideRad) * 46;
+                c.fillStyle = "#43cfff"; c.strokeStyle = "#172633"; c.lineWidth = 2;
+                c.beginPath(); c.arc(dhx, dhy, 9, 0, Math.PI * 2); c.fill(); c.stroke();
+                c.font = "bold 10px sans-serif"; c.fillText("DIR", dhx + 12, dhy - 9);
+                var spreadRad = (guideAngle + Math.max(16, guideRange)) * Math.PI / 180;
+                var spx = Math.cos(spreadRad) * 78, spy = -Math.sin(spreadRad) * 78;
+                c.fillStyle = "#ffae55"; c.beginPath(); c.arc(spx, spy, 9, 0, Math.PI * 2); c.fill(); c.stroke();
+                c.fillText("±" + Math.round(guideRange) + "°", spx + 11, spy - 8);
+                var areaHX = Math.max(28, guideXRange), areaHY = -Math.max(24, guideYRange);
+                c.fillStyle = "#d19cff"; c.beginPath(); c.arc(areaHX, areaHY, 9, 0, Math.PI * 2); c.fill(); c.stroke();
+                c.fillText("ÁREA", areaHX + 10, areaHY - 10);
                 c.restore();
             }
             if (type === "risescatter" || type === "rise_scatter") {
@@ -3661,17 +3673,43 @@ var BattlePreview = /** @class */ (function () {
         }
         return n;
     };
+    // Hit-test the visual editor handles in the same inverse-camera coordinate
+    // space as the emitter. No opaque keyboard/mouse gesture is necessary.
+    BattlePreview.prototype.emitterHandleAt = function (clip, point) {
+        if (!clip || !point || this.emitterEditMode !== "emission" || !clip.pbs ||
+            String(clip.pbs.emitter || clip.pbs.emitterType || "none").toLowerCase() === "none") return null;
+        var g = this.emitterGuideGeometry(clip, this.frame);
+        if (!g) return null;
+        var rad = Number(g.angle || 0) * Math.PI / 180;
+        var spread = Math.max(0, Number(this.emitterValue(clip, "emitAngleRange", this.frame, 0) || 0));
+        var xr = Math.max(0, Number(this.emitterValue(clip, "emitXRange", this.frame, 0) || 0));
+        var yr = Math.max(0, Number(this.emitterValue(clip, "emitYRange", this.frame, 0) || 0));
+        var sr = (Number(g.angle || 0) + Math.max(16, spread)) * Math.PI / 180;
+        var handles = [
+            {kind:"emitter-angle", x:g.center.x + Math.cos(rad)*46, y:g.center.y - Math.sin(rad)*46},
+            {kind:"emitter-spread", x:g.center.x + Math.cos(sr)*78, y:g.center.y - Math.sin(sr)*78},
+            {kind:"emitter-spawn", x:g.center.x + Math.max(28,xr), y:g.center.y - Math.max(24,yr)},
+            {kind:"emitter-distance", x:g.x, y:g.y}
+        ];
+        var best = null, nearest = 19;
+        handles.forEach(function (handle) {
+            var d = Math.hypot(point.x - handle.x, point.y - handle.y);
+            if (d < nearest) { nearest = d; best = handle; }
+        });
+        return best ? { kind:best.kind, center:g.center, angle:g.angle, xRange:xr, yRange:yr } : null;
+    };
     BattlePreview.prototype.pointerDown = function (e) {
         var _a, _b, _c, _d, _e, _f;
         if (!this.animation || this.playing)
             return;
         var p = this.eventLogical(e), selectedForPointer = getAnimatable(this.animation, this.selectedObjectId), keyPoint = this.pointerPointForObject(selectedForPointer, p), key = this.nearestSelectedKey(keyPoint);
-        if (e.button === 0 && selectedForPointer && !selectedForPointer.locked && this.emitterEditMode === "emission" && selectedForPointer.pbs && String(selectedForPointer.pbs.emitter || selectedForPointer.pbs.emitterType || "none").toLowerCase() !== "none") {
-            var finGeometry = this.emitterGuideGeometry(selectedForPointer, this.frame);
-            if (finGeometry && keyPoint && Math.hypot(keyPoint.x - finGeometry.x, keyPoint.y - finGeometry.y) <= 18) {
+        if (e.button === 0 && selectedForPointer && !selectedForPointer.locked) {
+            var handle = this.emitterHandleAt(selectedForPointer, keyPoint);
+            if (handle) {
                 this.editFrame = Math.round(this.frame);
-                this.dragging = "emitter-distance";
-                this.dragStart = { objectId: selectedForPointer.id, center: finGeometry.center, angle: finGeometry.angle };
+                this.dragging = handle.kind;
+                this.dragStart = { objectId: selectedForPointer.id, center: handle.center, angle: handle.angle,
+                    p: keyPoint, xRange: handle.xRange, yRange: handle.yRange };
                 e.preventDefault();
                 (_b = (_a = this.canvas).setPointerCapture) === null || _b === void 0 ? void 0 : _b.call(_a, e.pointerId);
                 return;
@@ -3721,8 +3759,21 @@ var BattlePreview = /** @class */ (function () {
     };
     BattlePreview.prototype.pointerMove = function (e) {
         var _a, _b, _c, _d;
-        if (!this.dragging || !this.animation || !this.dragStart)
+        if (!this.dragging || !this.animation || !this.dragStart) {
+            if (this.animation && !this.playing) {
+                var hoverObj = getAnimatable(this.animation, this.selectedObjectId);
+                var hoverP = this.eventLogical(e);
+                var hoverHandle = this.emitterHandleAt(hoverObj, this.pointerPointForObject(hoverObj, hoverP));
+                this.canvas.style.cursor = hoverHandle ? "grab" : "";
+                this.canvas.title = hoverHandle
+                    ? (hoverHandle.kind === "emitter-angle" ? "Dirección · arrastra con clic izquierdo"
+                        : hoverHandle.kind === "emitter-spread" ? "Apertura · arrastra con clic izquierdo"
+                        : hoverHandle.kind === "emitter-spawn" ? "Área de salida · arrastra con clic izquierdo"
+                        : "Distancia · arrastra con clic izquierdo")
+                    : "Selecciona el emitter; en RUTA, arrastra los controles de colores";
+            }
             return;
+        }
         var o = getAnimatable(this.animation, this.dragStart.objectId);
         if (!o || o.locked)
             return;
@@ -3743,6 +3794,23 @@ var BattlePreview = /** @class */ (function () {
             while (angle > 180) angle -= 360;
             while (angle <= -180) angle += 360;
             (_d = (_c = this.callbacks).onEmitterAngle) === null || _d === void 0 ? void 0 : _d.call(_c, o.id, angle);
+        }
+        else if (this.dragging === "emitter-spread") {
+            var bc = this.dragStart.center;
+            var dragAngle = Math.atan2(-(objectPoint.y - bc.y), objectPoint.x - bc.x) * 180 / Math.PI;
+            var deltaAngle = dragAngle - Number(this.dragStart.angle || 0);
+            while (deltaAngle > 180) deltaAngle -= 360;
+            while (deltaAngle < -180) deltaAngle += 360;
+            if (this.callbacks.onEmitterSpread) this.callbacks.onEmitterSpread(o.id, Math.min(180, Math.abs(deltaAngle)));
+        }
+        else if (this.dragging === "emitter-spawn") {
+            var startPoint = this.dragStart.p;
+            var nextX = Math.max(0, Number(this.dragStart.xRange || 0) + (objectPoint.x - startPoint.x));
+            var nextY = Math.max(0, Number(this.dragStart.yRange || 0) - (objectPoint.y - startPoint.y));
+            if (this.callbacks.onEmitterSpawnRange) {
+                this.callbacks.onEmitterSpawnRange(o.id, "x", nextX);
+                this.callbacks.onEmitterSpawnRange(o.id, "y", nextY);
+            }
         }
         else {
             var cc = this.dragStart.center, a0 = Math.atan2(this.dragStart.p.y - cc.y, this.dragStart.p.x - cc.x), a1 = Math.atan2(objectPoint.y - cc.y, objectPoint.x - cc.x);

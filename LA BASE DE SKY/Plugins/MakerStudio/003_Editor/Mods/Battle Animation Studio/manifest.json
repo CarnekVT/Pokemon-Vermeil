@@ -1,13 +1,13 @@
 {
   "id": "battle-animation-studio",
   "name": "Battle Animation Studio",
-  "version": "1.0.86",
+  "version": "1.0.87",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Battle Animation Studio v1.0.86: fixes Element Afterimage state so Trail and Burst are independently activatable, never deadlock their controls, can run together, use reliable active-frame defaults, and Burst copies continue through their lifetime even after the source element ends.",
+  "description": "Battle Animation Studio: visual Pokémon battle animation editor with mouse-driven emitter handles, grouped quick controls, editable keyframes, animation preview, and Ruby runtime compatibility.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

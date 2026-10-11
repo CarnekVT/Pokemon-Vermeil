@@ -2283,6 +2283,29 @@ function renderStudio(ctx, host) {
             preview.draw();
             updateDirtyUi();
         },
+        onEmitterSpread: function (objectId, value) {
+            var object = getAnimatable(activeAnimation(), objectId);
+            if (!object || !isEmitterObject(object)) return;
+            ensureEmitterFirstFrameDefault(object, "emitter", "emitAngleRange", frame);
+            var cmd = setEmitterEditorCommand(object, "emitAngleRange", Math.round(frame), Math.round(clampNumber(value, 0, 180, 0) * 10) / 10);
+            if (cmd) selectEmitterTimelineKey(cmd);
+            selectedObjectId = objectId;
+            renderProperties(); updateTimelineFrameState();
+            preview.setState(activeAnimation(), selectedObjectId, frame, { playing: false });
+            preview.draw(); updateDirtyUi();
+        },
+        onEmitterSpawnRange: function (objectId, axis, value) {
+            var object = getAnimatable(activeAnimation(), objectId);
+            if (!object || !isEmitterObject(object)) return;
+            var key = axis === "y" ? "emitYRange" : "emitXRange";
+            ensureEmitterFirstFrameDefault(object, "emitter", key, frame);
+            var cmd = setEmitterEditorCommand(object, key, Math.round(frame), Math.round(clampNumber(value, 0, 1000, 0) * 10) / 10);
+            if (cmd) selectEmitterTimelineKey(cmd);
+            selectedObjectId = objectId;
+            renderProperties(); updateTimelineFrameState();
+            preview.setState(activeAnimation(), selectedObjectId, frame, { playing: false });
+            preview.draw(); updateDirtyUi();
+        },
         onEditEnd: function () { renderTimeline(); renderProperties(); }
     });
     wireStaticEvents();
@@ -6959,12 +6982,32 @@ function renderStudio(ctx, host) {
             finish("Dragon pulse"); return;
         }
         if (key === "sludge-bomb") {
+            // Gen 5 video reference (56:24–56:28): one concentrated purple glob
+            // shoots toward the opponent and expands/fades on contact; this is
+            // NOT Sludge Wave's sustained ground-level purple cloud.
             applyEmitterRecipe(object, start, "shots");
-            object.pbs.simplePathMode = "arc"; object.pbs.simpleTravelMode = "frames"; object.pbs.simpleTravelFrames = 11; object.pbs.simpleStopAtDestination = true;
-            ek("emitterRate", 4); ek("emitterIntensity", 1); ek("emitGravity", 160); ek("emitAngleRange", 3); ek("particleSize", 130);
-            setEmitterParticleTonePalette(object, ["#c555ff", "#8b24bf", "#5bd651"]); object.pbs.particleToneStrength = 70;
-            setEmitterSimpleLifeValue(object, "duration", 14);
-            finish("Sludge bomb"); return;
+            object.pbs.simplePathMode = "straight"; object.pbs.simpleTravelMode = "frames";
+            object.pbs.simpleTravelFrames = 8; object.pbs.simpleStopAtDestination = true;
+            object.pbs.simpleSpawnShape = "point";
+            ek("emitterRate", 1); ek("emitterIntensity", 1);
+            ek("emitGravity", 0); ek("emitXRange", 0); ek("emitYRange", 0);
+            ek("emitSpeedRange", 0); ek("emitAngleRange", 0); ek("emitZoomRange", 0);
+            ek("particleSize", 140); ek("particleSizeRange", 0);
+            // Exactly one launch. No accidental repeated blobs.
+            ek("emitting", true, start); ek("emitting", false, start + 1);
+            setEmitterParticleTonePalette(object, ["#6b158c", "#9d28c4", "#c662ef"]);
+            object.pbs.particleToneStrength = 68;
+            setEmitterSimpleLifeValue(object, "duration", 10);
+            setEmitterSimpleLifeValue(object, "birthScale", 75);
+            setEmitterSimpleLifeValue(object, "midScale", 125);
+            setEmitterSimpleLifeValue(object, "deathScale", 150);
+            setEmitterSimpleLifeValue(object, "birthOpacity", 100);
+            setEmitterSimpleLifeValue(object, "midOpacity", 100);
+            setEmitterSimpleLifeValue(object, "deathOpacity", 0);
+            setParticleProcessList(object, "zoomX", [{frame:0,value:75},{frame:6,duration:2,value:145,easing:"ease_out"}]);
+            setParticleProcessList(object, "zoomY", [{frame:0,value:75},{frame:6,duration:2,value:145,easing:"ease_out"}]);
+            setParticleProcessList(object, "opacity", [{frame:0,value:255},{frame:8,duration:2,value:0,easing:"ease_in"}]);
+            finish("Sludge Bomb · Gen 5"); return;
         }
         if (key === "energy-ball") {
             applyEmitterRecipe(object, start, "shots");
@@ -7223,7 +7266,18 @@ function renderStudio(ctx, host) {
             quickHtml += '<div class="bas-example-timing"><b>' + (english ? 'Example timing' : 'Frames del ejemplo') + '</b><span>' + (english ? 'Start' : 'Inicio') + ' F' + emitStart + '</span><span>' + (english ? 'Emission end' : 'Fin emisión') + ' F' + emitEnd + '</span><span>' + (english ? 'Travel' : 'Viaje') + ' ' + Math.max(1, Math.round(travelFrames)) + 'f</span><span>' + (english ? 'Life' : 'Vida') + ' ' + Math.max(1, Math.round(Number(life.duration || 12))) + 'f</span><span>' + (english ? 'Visible until' : 'Visible hasta') + ' ~F' + Math.ceil(visibleUntil) + '</span></div>';
         }
 
-        quickHtml += '<div class="bas-emitter-preview-first bas-emitter-compact-tools"><div class="bas-emitter-mode-buttons"><button type="button" class="bas-button ' + (emitterPreviewEditMode === 'emission' ? 'primary' : '') + '" data-emitter-direct-button="emission">↗ ' + (english ? 'ROUTE' : 'RUTA') + '</button><button type="button" class="bas-button ' + (emitterPreviewEditMode === 'particle' ? 'primary' : '') + '" data-emitter-direct-button="particle">✦ ' + (english ? 'PARTICLE' : 'PARTÍCULA') + '</button></div><div class="bas-emitter-mouse-cheat"><span>' + (english ? 'Drag: origin' : 'Arrastrar: origen') + '</span><span>' + (english ? 'Right-drag: direction/rotation' : 'Clic der.: dirección/rotación') + '</span><span>' + (english ? 'Wheel: speed/size' : 'Rueda: velocidad/tamaño') + '</span></div><label class="bas-toggle"><input type="checkbox" data-emitter-solo-preview ' + (project.preview.emitterSoloPreview ? 'checked' : '') + '> ' + (english ? 'Isolate emitter' : 'Aislar emitter') + '</label></div>';
+        // Essential numbers live together. Advanced PBS commands remain in their own tab.
+        quickHtml += '<section class="bas-emitter-visual-controls" aria-label="' + (english ? 'Visual emitter controls' : 'Controles visuales del emitter') + '">'
+            + '<div class="bas-emitter-visual-head"><b>① ' + (english ? 'ADJUST WITH THE MOUSE' : 'AJUSTAR CON EL MOUSE') + '</b><small>' + (english ? 'Select ROUTE; drag the colored handles on the stage.' : 'Selecciona RUTA y arrastra los tiradores de color del escenario.') + '</small></div>'
+            + '<div class="bas-emitter-visual-legend"><span>● ' + (english ? 'CENTER: origin' : 'CENTRO: origen') + '</span><span>🔵 ' + (english ? 'BLUE: direction' : 'AZUL: dirección') + '</span><span>🟠 ' + (english ? 'ORANGE: spread' : 'NARANJA: apertura') + '</span><span>🟣 ' + (english ? 'PURPLE: spawn area' : 'MORADO: área de salida') + '</span><span>⚪ ' + (english ? 'WHITE: distance' : 'BLANCO: distancia') + '</span></div>'
+            + '<div class="bas-emitter-visual-grid">'
+            + '<label>' + (english ? 'Direction' : 'Dirección') + ' <input type="number" class="bas-input" min="-180" max="180" step="1" data-emitter-visual="angle" value="' + Math.round(resolvedDirection) + '">°</label>'
+            + '<label>' + (english ? 'Spread each side' : 'Apertura por lado') + ' <input type="number" class="bas-input" min="0" max="180" step="1" data-emitter-visual="spread" value="' + Math.round(spread) + '">°</label>'
+            + '<label>' + (english ? 'Distance' : 'Distancia') + ' <input type="number" class="bas-input" min="1" max="10000" step="1" data-emitter-visual="distance" value="' + Math.round(distancePx) + '">px</label>'
+            + '<label>' + (english ? 'Spawn width ±' : 'Ancho salida ±') + ' <input type="number" class="bas-input" min="0" max="1000" step="1" data-emitter-visual="spawn-x" value="' + Math.round(areaX) + '">px</label>'
+            + '<label>' + (english ? 'Spawn height ±' : 'Alto salida ±') + ' <input type="number" class="bas-input" min="0" max="1000" step="1" data-emitter-visual="spawn-y" value="' + Math.round(areaY) + '">px</label>'
+            + '</div><small class="bas-muted">' + (english ? 'Each field updates the active frame. The ROUTE and PARTICLE tabs contain the next steps; PBS is for advanced tuning.' : 'Cada campo modifica el frame actual. RUTA y PARTÍCULA contienen los siguientes pasos; PBS es sólo para ajustes avanzados.') + '</small></section>';
+        quickHtml += '<div class="bas-emitter-preview-first bas-emitter-compact-tools"><div class="bas-emitter-mode-buttons"><button type="button" class="bas-button ' + (emitterPreviewEditMode === 'emission' ? 'primary' : '') + '" data-emitter-direct-button="emission">↗ ' + (english ? 'ROUTE' : 'RUTA') + '</button><button type="button" class="bas-button ' + (emitterPreviewEditMode === 'particle' ? 'primary' : '') + '" data-emitter-direct-button="particle">✦ ' + (english ? 'PARTICLE' : 'PARTÍCULA') + '</button></div><div class="bas-emitter-mouse-cheat"><span>' + (english ? 'Drag: origin' : 'Arrastrar: origen') + '</span><span>' + (english ? 'Drag BLUE circle: direction' : 'Arrastrar círculo AZUL: dirección') + '</span><span>' + (english ? 'ORANGE: spread · PURPLE: spawn' : 'NARANJA: apertura · MORADO: salida') + '</span></div><label class="bas-toggle"><input type="checkbox" data-emitter-solo-preview ' + (project.preview.emitterSoloPreview ? 'checked' : '') + '> ' + (english ? 'Isolate emitter' : 'Aislar emitter') + '</label></div>';
 
         // Archetypes & Core Sliders for fast, intuitive configuration
         var activeArchetype = null;
@@ -7455,6 +7509,19 @@ function renderStudio(ctx, host) {
             return;
         if (preview && typeof preview.setEmitterEditMode === "function") preview.setEmitterEditMode(emitterPreviewEditMode);
         if (preview && typeof preview.setEmitterSoloPreview === "function") preview.setEmitterSoloPreview(!!project.preview.emitterSoloPreview);
+        // Explicit numeric equivalents for every visible mouse handle.
+        h.querySelectorAll('[data-emitter-visual]').forEach(function (el) {
+            el.onchange = function () {
+                var val = Number(el.value);
+                if (!Number.isFinite(val) || !preview || !preview.callbacks) return;
+                var op = el.dataset.emitterVisual;
+                if (op === 'angle') preview.callbacks.onEmitterAngle(object.id, Math.max(-180, Math.min(180, val)));
+                else if (op === 'spread') preview.callbacks.onEmitterSpread(object.id, Math.max(0, Math.min(180, val)));
+                else if (op === 'distance') preview.callbacks.onEmitterDistance(object.id, Math.max(1, Math.min(10000, val)));
+                else if (op === 'spawn-x') preview.callbacks.onEmitterSpawnRange(object.id, 'x', Math.max(0, Math.min(1000, val)));
+                else if (op === 'spawn-y') preview.callbacks.onEmitterSpawnRange(object.id, 'y', Math.max(0, Math.min(1000, val)));
+            };
+        });
         var switchEmitterTab = function (tabName) {
             emitterActiveTab = tabName || "quick";
             if (emitterActiveTab === "technical") emitterTechnicalOpen = true;
@@ -17793,7 +17860,7 @@ function renderStudio(ctx, host) {
                     + '<button data-emitter-action-example="shadow-ball"><strong>● ' + (english ? 'Slow energy sphere' : 'Esfera de energía lenta') + '</strong><small>' + (english ? 'Large slow rhythmic shadow projectile.' : 'Proyectil esférico sombrío de avance lento.') + '</small></button>'
                     + '<button data-emitter-action-example="energy-ball"><strong>🟢 ' + (english ? 'Energy ball' : 'Bola de energía') + '</strong><small>' + (english ? 'Pulsing nature sphere with aura.' : 'Esfera concentrada de energía con aura.') + '</small></button>'
                     + '<button data-emitter-action-example="electro-ball"><strong>⚡ ' + (english ? 'Electro ball' : 'Bola eléctrica') + '</strong><small>' + (english ? 'Fast high-voltage electric sphere.' : 'Esfera de alto voltaje con chispas.') + '</small></button>'
-                    + '<button data-emitter-action-example="sludge-bomb"><strong>🟣 ' + (english ? 'Sludge bomb' : 'Bomba de lodo') + '</strong><small>' + (english ? 'Toxic glob hurled with heavy gravity arc.' : 'Proyectil tóxico lanzado en parábola pesada.') + '</small></button>'
+                    + '<button data-emitter-action-example="sludge-bomb"><strong>🟣 ' + (english ? 'Sludge bomb' : 'Bomba de lodo') + '</strong><small>' + (english ? 'One purple glob launched toward the foe; short toxic impact.' : 'Un glóbulo morado al rival y un impacto tóxico breve.') + '</small></button>'
                     + '<button data-emitter-action-example="ember"><strong>🔥 ' + (english ? 'Arc embers' : 'Brasas en arco') + '</strong><small>' + (english ? 'Small fire projectiles launched in gravity arcs.' : 'Pequeñas ascuas de fuego con arco de caída.') + '</small></button>'
                     + '<button data-emitter-action-example="rock-throw"><strong>🪨 ' + (english ? 'Rock throw' : 'Lanzarrocas con gravedad') + '</strong><small>' + (english ? 'Heavy boulder launched in prominent arc.' : 'Rocas pesadas lanzadas con arco marcado.') + '</small></button>'
                     + '<button data-emitter-action-example="seed-barrage"><strong>🌱 ' + (english ? 'Seed barrage' : 'Ráfaga de semillas') + '</strong><small>' + (english ? 'Rapid-fire directional bullet barrage.' : 'Disparos veloces en línea recta.') + '</small></button>'
