@@ -1,4 +1,4 @@
-# Pokémon Vermeil · Battle Animation Studio v1.0.88
+# Pokémon Vermeil · Battle Animation Studio v1.0.89
 ## ¿Qué hace este programa?
 Battle Animation Studio es un **mod del editor Maker Studio** para crear y retocar animaciones de combate Pokémon sin editar directamente los parámetros Ruby/PBS. Incluye timeline con keyframes, gráficos, sonido, cámara y emitters/partículas (trayectoria, aparición, dispersión y vida).
 ## Contenido del paquete
@@ -17,3 +17,16 @@ Sludge Bomb se reconstruyó con TRES clips: proyectil único usando PRAS- Sludge
 ## Origen y versión
 Fuente: CarnekVT/Pokemon-Vermeil · rama de rescate de mods.
 No sustituye al resto de mods del usuario.
+
+## Mejoras globales de Acciones v1.0.89
+Los 77 ejemplos de emitters existentes se han auditado en su conjunto: usan el recurso original del proyecto al insertarlos desde Acciones, una ventana de emisión finita y duración visible suficiente. Los ejemplos de ataque dirigido incorporan una capa independiente de impacto por familia (agua, fuego, rayo, roca, hielo, planta, oscuro, arcano); los emisores orbitales, auras, estados y nieblas no reciben un impacto inventado. Algunos movimientos tienen sonidos originales del juego donde la ruta fue verificada. El menú Acciones conserva sus animaciones rápidas manuales ya existentes.
+
+## Controles de mouse por tipo
+- Straight/Projectile/Drain: centro = origen; azul = dirección; naranja = apertura; blanco FIN = dirección y distancia; Mayús+FIN bloquea dirección.
+- EnergyOut/EnergyIn/Orbit/Polar/Helix: azul = radio horizontal y verde = radio vertical.
+- RiseScatter: verde = altura de ascenso.
+- Todos: morado = amplitud horizontal/vertical del área de nacimiento.
+- Mayús durante un giro ajusta ángulos de 15° y aperturas de 5°. Ctrl + rueda sobre el emitter modifica velocidad; rueda sin Ctrl no altera el efecto.
+Los números del inspector cambian según la geometría escogida. Se conserva la pestaña Técnica/PBS.
+
+**Pruebas**: Se comprobó que los dos archivos JS editados son sintácticamente válidos tras retirar declaraciones de import/export para su análisis, y se contrastaron las 77 rutas gráficas con el árbol de GitHub. Aún no se ha ejecutado la interfaz ni el runtime en una sesión real de Maker Studio.

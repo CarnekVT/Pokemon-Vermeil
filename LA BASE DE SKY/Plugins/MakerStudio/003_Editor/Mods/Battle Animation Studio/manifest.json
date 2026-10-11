@@ -1,13 +1,13 @@
 {
   "id": "battle-animation-studio",
   "name": "Battle Animation Studio",
-  "version": "1.0.88",
+  "version": "1.0.89",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Visual Pokémon battle animation editor for Maker Studio, with keyframed particles, improved emitter mouse controls and a three-stage Gen 5 Sludge Bomb example (flight, bubbles, vapor).",
+  "description": "Visual battle animation editor for Pokémon Vermeil: 77 action examples with real sprites, contextual mouse handles (route, orbit, rise and spawn), editable layered impacts, synchronized audio and Ruby runtime support.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

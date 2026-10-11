@@ -2234,7 +2234,7 @@ function renderStudio(ctx, host) {
             }
             if (String(object.pbs.simpleDistanceMode || "") === "custom") emitterUpdateCustomOffsetFromRoute(object, frame);
             selectedObjectId = objectId;
-            renderProperties();
+            if (!preview.dragging) renderProperties();
             updateTimelineFrameState();
             preview.setState(activeAnimation(), selectedObjectId, frame, { playing: false });
             preview.draw();
@@ -2250,8 +2250,8 @@ function renderStudio(ctx, host) {
             emitterSyncTravelFramesFromSpeed(object, frame);
             selectEmitterTimelineKey(cmd);
             selectedObjectId = objectId;
-            renderProperties();
-            renderTimeline();
+            if (!preview.dragging) renderProperties();
+            if (!preview.dragging) renderTimeline();
             preview.setState(activeAnimation(), selectedObjectId, frame, { playing: false });
             preview.draw();
             updateDirtyUi();
@@ -2262,8 +2262,8 @@ function renderStudio(ctx, host) {
             emitterSetDistanceKeepingTimingMode(object, frame, value);
             if (String((object.pbs || {}).simpleDistanceMode || "") === "custom") emitterUpdateCustomOffsetFromRoute(object, frame);
             selectedObjectId = objectId;
-            renderProperties();
-            renderTimeline();
+            if (!preview.dragging) renderProperties();
+            if (!preview.dragging) renderTimeline();
             preview.setState(activeAnimation(), selectedObjectId, frame, { playing: false });
             preview.draw();
             updateDirtyUi();
@@ -2277,8 +2277,8 @@ function renderStudio(ctx, host) {
             var cmd = setEmitterCommand(object, "emitAngleRange", Math.round(frame), Math.round(next * 10) / 10);
             selectEmitterTimelineKey(cmd);
             selectedObjectId = objectId;
-            renderProperties();
-            renderTimeline();
+            if (!preview.dragging) renderProperties();
+            if (!preview.dragging) renderTimeline();
             preview.setState(activeAnimation(), selectedObjectId, frame, { playing: false });
             preview.draw();
             updateDirtyUi();
@@ -2290,7 +2290,7 @@ function renderStudio(ctx, host) {
             var cmd = setEmitterEditorCommand(object, "emitAngleRange", Math.round(frame), Math.round(clampNumber(value, 0, 180, 0) * 10) / 10);
             if (cmd) selectEmitterTimelineKey(cmd);
             selectedObjectId = objectId;
-            renderProperties(); updateTimelineFrameState();
+            if (!preview.dragging) if (!preview.dragging) renderProperties(); updateTimelineFrameState();
             preview.setState(activeAnimation(), selectedObjectId, frame, { playing: false });
             preview.draw(); updateDirtyUi();
         },
@@ -2302,9 +2302,50 @@ function renderStudio(ctx, host) {
             var cmd = setEmitterEditorCommand(object, key, Math.round(frame), Math.round(clampNumber(value, 0, 1000, 0) * 10) / 10);
             if (cmd) selectEmitterTimelineKey(cmd);
             selectedObjectId = objectId;
-            renderProperties(); updateTimelineFrameState();
+            if (!preview.dragging) if (!preview.dragging) renderProperties(); updateTimelineFrameState();
             preview.setState(activeAnimation(), selectedObjectId, frame, { playing: false });
             preview.draw(); updateDirtyUi();
+        },
+        onEmitterArea: function(id,x,y){
+            var o=getAnimatable(activeAnimation(),id);if(!o||!isEmitterObject(o))return;
+            ensureEmitterFirstFrameDefault(o,"emitter","emitXRange",frame);
+            ensureEmitterFirstFrameDefault(o,"emitter","emitYRange",frame);
+            setEmitterEditorCommand(o,"emitXRange",Math.round(frame),Math.round(clampNumber(x,0,1000,0)*10)/10);
+            setEmitterEditorCommand(o,"emitYRange",Math.round(frame),Math.round(clampNumber(y,0,1000,0)*10)/10);
+            selectedObjectId=id;if(!preview.dragging)renderProperties();
+            preview.setState(activeAnimation(),id,frame,{playing:false});preview.draw();updateDirtyUi();
+        },
+        onEmitterRouteEnd: function(id,angle,distance){
+            var o=getAnimatable(activeAnimation(),id);if(!o||!isEmitterObject(o))return;
+            o.pbs||(o.pbs={});emitterDistanceState(o,frame);
+            var dest=emitterSimpleDestination(o,frame),desired=clampNumber(angle,-180,180,0);
+            if(dest==="target"||dest==="user"){
+                var offset=Number(emitterEditorSpecialValue(o,"simpleDirectionOffset",frame,Number(o.pbs.simpleDirectionOffset||0)));
+                var resolved=Number(preview.emitterSemanticAngle(o,frame,Number(emitterEditorCommandValue(o,"emitAngle",frame,0)||0))||0);
+                var next=desired-resolved+offset;while(next>180)next-=360;while(next<=-180)next+=360;
+                if(currentContextTransformEditMode()==="view")setContextEmitterParam(o,"emitter","simpleDirectionOffset",frame,next);
+                else o.pbs.simpleDirectionOffset=Math.round(next*10)/10;
+            }else{
+                ensureEmitterFirstFrameDefault(o,"emitter","emitAngle",frame);
+                setEmitterEditorCommand(o,"emitAngle",Math.round(frame),Math.round(desired*10)/10);
+            }
+            emitterSetDistanceKeepingTimingMode(o,frame,Math.max(1,Math.min(10000,distance)));
+            if(String(o.pbs.simpleDistanceMode||"")==="custom")emitterUpdateCustomOffsetFromRoute(o,frame);
+            selectedObjectId=id;if(!preview.dragging){renderProperties();renderTimeline();}
+            preview.setState(activeAnimation(),id,frame,{playing:false});preview.draw();updateDirtyUi();
+        },
+        onEmitterRadius: function(id,axis,value){
+            var o=getAnimatable(activeAnimation(),id);if(!o||!isEmitterObject(o))return;
+            setParticleCommand(o,axis==="y"?"radiusY":"radiusX",Math.round(frame),Math.round(clampNumber(value,1,2000,65)*10)/10);
+            selectedObjectId=id;if(!preview.dragging){renderProperties();renderTimeline();}
+            preview.setState(activeAnimation(),id,frame,{playing:false});preview.draw();updateDirtyUi();
+        },
+        onEmitterHeight: function(id,value){
+            var o=getAnimatable(activeAnimation(),id);if(!o||!isEmitterObject(o))return;
+            ensureEmitterFirstFrameDefault(o,"emitter","riseHeight",frame);
+            setEmitterEditorCommand(o,"riseHeight",Math.round(frame),Math.round(clampNumber(value,1,2000,64)*10)/10);
+            selectedObjectId=id;if(!preview.dragging){renderProperties();renderTimeline();}
+            preview.setState(activeAnimation(),id,frame,{playing:false});preview.draw();updateDirtyUi();
         },
         onEditEnd: function () { renderTimeline(); renderProperties(); }
     });
@@ -6896,11 +6937,156 @@ function renderStudio(ctx, host) {
         parent.pbs.sludgeBombImpactFrame = hit;
         a.duration = Math.max(Number(a.duration || 1), hit + 15);
     }
-    function applyEmitterGen5Example(object, f, key) {
+    // Action examples use real project graphics, not arbitrary theme matches.
+    function setActionGraphicFromProject(clip, path) {
+        if (!clip || !path) return;
+        var tokens = String(path).split("/");
+        var file = tokens.pop() || "circle.png";
+        clip.graphic = Object.assign({}, clip.graphic || {}, {
+            source:"project", projectPath:path, name:file.replace(/\.[^.]+$/, ""),
+            folder:tokens.slice(1).join("/"), origin:"center", spritesheet:"auto",
+            assetCandidates:[path]
+        });
+    }
+    function clearActionExampleSidecars(parent) {
+        var a = activeAnimation();
+        if (!a || !parent) return;
+        var track = getEffectsTrack(a);
+        if (track && Array.isArray(track.clips)) {
+            track.clips = track.clips.filter(function (clip) {
+                return !(clip && clip.pbs && clip.pbs.actionExampleParentId === parent.id);
+            });
+        }
+        if (Array.isArray(a.events)) {
+            a.events = a.events.filter(function (event) {
+                return !(event && event.actionExampleParentId === parent.id);
+            });
+        }
+    }
+    // The 77 Action emitter entries are resolved by type. A stream stays a
+    // stream; an orbit never gets a projectile impact; a launched attack gets
+    // target-side feedback instead of just vanishing at its endpoint.
+    function completeActionEmitterExample(parent, key, start) {
+        if (!parent || !parent.pbs) return;
+        var a = activeAnimation(), pbs = parent.pbs;
+        if (!a) return;
+        clearActionExampleSidecars(parent);
+        var theme = (typeof EMITTER_THEMES !== "undefined" && EMITTER_THEMES) ? EMITTER_THEMES[key] : null;
+        if ((!Array.isArray(pbs.particleTonePalette) || !pbs.particleTonePalette.length) && theme && theme.color) {
+            setEmitterParticleTonePalette(parent, [theme.color, "#ffffff"]);
+            pbs.particleToneStrength = 32;
+        }
+        // Ensure even advanced/manual action presets have a finite, visible
+        // emission window and enough timeline to show their particle tails.
+        pbs.emitterCommands || (pbs.emitterCommands = {});
+        var on = Array.isArray(pbs.emitterCommands.emitting) ? pbs.emitterCommands.emitting.slice().sort(function(x,y){return Number(x.frame||0)-Number(y.frame||0);}) : [];
+        if (!on.some(function(x){return x && x.value && Number(x.frame) >= start;})) {
+            setEmitterCommand(parent, "emitting", start, true);
+            on = pbs.emitterCommands.emitting.slice();
+        }
+        var hasOff = on.some(function(x){return x && x.value === false && Number(x.frame) > start;});
+        if (!hasOff) setEmitterCommand(parent, "emitting", start + 16, false);
+        var allEmissions = (pbs.emitterCommands.emitting || []).filter(function(c){return c && c.value === false && Number(c.frame)>=start;});
+        var release = allEmissions.length ? Math.max.apply(null, allEmissions.map(function(c){return Number(c.frame)||start;})) : start+16;
+        var life = pbs.simpleParticleLife || {}, tail = Math.max(5,Math.min(60,Number(life.duration||14)));
+        parent.endFrame = Math.max(Number(parent.endFrame||0),release + tail);
+        a.duration = Math.max(Number(a.duration||1),parent.endFrame);
+        // A selected Action is editable in existing animations: sidecars are
+        // linked only by ID, and no existing authored clips are deleted.
+        var direct = new Set([
+            "water-gun","bubble-beam","hydro-pump","psybeam","flamethrower",
+            "ember","razor-leaf","swift","thunder-shock","shadow-ball",
+            "rock-throw","seed-barrage","ice-shard","wind-gust","leaf-storm",
+            "meteor-arc","beam-core","multi-shot","web-spread","solar-beam",
+            "dragon-pulse","energy-ball","electro-ball","pin-missile",
+            "water-pulse"
+        ]);
+        // Project resources validated against Graphics/Animations and
+        // Graphics/AnimationStudio. Keep sprites and palettes distinct.
+        var impactProfiles = {
+            water: {graphic:"Graphics/AnimationStudio/bubble 2.png",color:["#5edcff","#ffffff","#2574ca"],count:9,radius:29},
+            fire: {graphic:"Graphics/AnimationStudio/flame.png",color:["#ffef8a","#ff9432","#e84b24"],count:11,radius:32},
+            electric: {graphic:"Graphics/AnimationStudio/spark.png",color:["#ffffff","#f7e54c","#61dafa"],count:12,radius:40},
+            ice: {graphic:"Graphics/Animations/snowball.png",color:["#ffffff","#99dcfb","#4e8cda"],count:9,radius:34},
+            rock: {graphic:"Graphics/Animations/rock.png",color:["#dfcb9f","#9a765d","#696268"],count:6,radius:28},
+            grass: {graphic:"Graphics/Animations/seed.png",color:["#d4f779","#5aaf64","#238e51"],count:9,radius:32},
+            arcane: {graphic:"Graphics/AnimationStudio/Energy1.png",color:["#ffffff","#be86f8","#5b55bf"],count:10,radius:35},
+            dark: {graphic:"Graphics/Animations/PRAS- Shadow Ball.png",color:["#cf8ded","#5c3e93","#30245e"],count:10,radius:31},
+            neutral: {graphic:"Graphics/AnimationStudio/spark.png",color:["#ffffff","#fff2ba","#abcedf"],count:9,radius:30}
+        };
+        var families = {
+            water:"water-gun bubble-beam hydro-pump water-pulse",
+            fire:"flamethrower ember",
+            electric:"thunder-shock electro-ball",
+            ice:"ice-shard",
+            rock:"rock-throw meteor-arc",
+            grass:"razor-leaf seed-barrage leaf-storm web-spread",
+            dark:"shadow-ball",
+            arcane:"psybeam solar-beam dragon-pulse energy-ball",
+            neutral:"swift wind-gust beam-core multi-shot pin-missile"
+        };
+        var family = Object.keys(families).find(function(f){return families[f].split(" ").includes(key);}) || "neutral";
+        if (direct.has(key)) {
+            var profile = impactProfiles[family], hit = start + Math.max(4,Math.round(Number(pbs.simpleTravelFrames||10)));
+            var impact = createProjectile({id:uid("clip"),name:"Action · "+key+" · impact"});
+            impact.startFrame=hit;impact.endFrame=hit+13;impact.positionKeys=[];
+            setPositionKey(impact,hit,{anchor:"pbs:target",x:0,y:0,offsetX:0,offsetY:0},"linear","pbs:target");
+            setActionGraphicFromProject(impact,profile.graphic);
+            var e=ensureEmitter(impact,hit,"EnergyOut");
+            e.emitter="EnergyOut";e.focus="target";e.emitterDestination="expand";e.particleCommandSpace="animation";
+            e.actionExampleParentId=parent.id;
+            e.emitterCommands={};e.commands={};
+            setEmitterCommand(impact,"emitting",hit,true);
+            setEmitterCommand(impact,"emitting",hit+1,false);
+            setEmitterCommand(impact,"emitterRate",hit,1);
+            setEmitterCommand(impact,"emitterIntensity",hit,profile.count);
+            setEmitterCommand(impact,"energyTravelFrames",hit,9);
+            setEmitterCommand(impact,"energyTurns",hit,0);
+            setEmitterCommand(impact,"emitAngle",hit,0);
+            setEmitterCommand(impact,"emitAngleRange",hit,180);
+            setEmitterCommand(impact,"particleSize",hit,70);
+            setEmitterCommand(impact,"particleSizeRange",hit,20);
+            setParticleCommand(impact,"radiusX",hit,profile.radius);
+            setParticleCommand(impact,"radiusY",hit,Math.round(profile.radius*.72));
+            e.simpleParticleLife={duration:10,birthScale:35,midScale:95,deathScale:140,birthOpacity:100,midOpacity:85,deathOpacity:0,birthRotation:0,midRotation:0,deathRotation:0};
+            setEmitterParticleTonePalette(impact,profile.color);
+            e.particleToneStrength=55;
+            getEffectsTrack(a).clips.push(impact);
+            a.duration=Math.max(a.duration,impact.endFrame);
+        }
+        // Match optional sound cues to actual named audio files in this repo.
+        // Deliberately no guessed audio path for unnamed/generic presets.
+        var audio = {
+            "water-gun":["Water Gun"],"bubble-beam":["Bubblebeam"],"hydro-pump":["Hydro Pump"],
+            "flamethrower":["Flamethrower"],"ember":["Ember"],"razor-leaf":["Razor Leaf1","Razor Leaf2"],
+            "swift":["Swift1","Swift2"],"shadow-ball":["Shadow Ball1","Shadow Ball2"],
+            "rock-throw":["Rock Throw1","Rock Throw2"],"ice-shard":["Ice Shard"],
+            "solar-beam":["Solar Beam1","Solar Beam2"],"dragon-pulse":["Dragon Pulse"],
+            "energy-ball":["Energy Ball1","Energy Ball2"],"electro-ball":["Electro Ball1","Electro Ball2"],
+            "water-pulse":["Water Pulse","Water Pulse2"],"scald-steam":["Scald1","Scald2"],
+            "dark-pulse":["Dark Pulse1","Dark Pulse2"],"fire-spin":["Fire Spin"],
+            "blizzard-swirl":["Blizzard"],"leaf-storm":["Leaf Storm1","Leaf Storm2"],
+            "sandstorm":["Sandstorm"],"recover-stars":["Recover"],"overheat-blast":["Overheat1","Overheat2"],
+            "toxic-spikes":["Toxic Spikes1","Toxic Spikes2"]
+        };
+        var names = audio[key];
+        if (names && names.length) {
+            a.events||(a.events=[]);
+            var soundFrames=[start,start+Math.max(4,Math.round(Number(pbs.simpleTravelFrames||10)))];
+            names.forEach(function(name,i) {
+                a.events.push({id:uid("event"),type:"se",frame:soundFrames[Math.min(i,1)],
+                    name:"Anim/PRSFX- "+name,volume:95,pitch:100,actionExampleParentId:parent.id});
+            });
+        }
+    }
+    function applyEmitterGen5Example(object, f, key, forceProjectAsset) {
         if (!object) return;
         key = String(key || "water-gun");
         var start = Math.max(0, Math.round(Number(f || 0)));
-        if (!object.graphic || !object.graphic.projectPath || object.graphic.source === "procedural" || !object.graphic.name) {
+        if (forceProjectAsset && EMITTER_EXAMPLE_DEFAULT_GRAPHICS && EMITTER_EXAMPLE_DEFAULT_GRAPHICS[key]) {
+            setActionGraphicFromProject(object, EMITTER_EXAMPLE_DEFAULT_GRAPHICS[key]);
+        }
+        else if (!object.graphic || !object.graphic.projectPath || object.graphic.source === "procedural" || !object.graphic.name) {
             setClipDefaultGraphic(object, (EMITTER_EXAMPLE_DEFAULT_GRAPHICS && EMITTER_EXAMPLE_DEFAULT_GRAPHICS[key]) || "Graphics/AnimationStudio/circle.png", key);
         }
         var setFocus = function (focus) {
@@ -6916,6 +7102,7 @@ function renderStudio(ctx, host) {
             if ((finalEmitterKind === "straight" || finalEmitterKind === "projectile") && String(object.pbs.simpleTravelMode || "").toLowerCase() === "frames")
                 emitterSetTravelFramesKeepingDistance(object, start, Math.max(1, Number(object.pbs.simpleTravelFrames || 8)));
             emitterEnsureRouteCoverage(object, start);
+            completeActionEmitterExample(object, key, start);
             object.simpleEmitterExample = key;
             // When changing from Sludge Bomb to another preset, remove only
             // the generated sidecar clips (never unrelated authored project clips).
@@ -7365,18 +7552,31 @@ function renderStudio(ctx, host) {
             quickHtml += '<div class="bas-example-timing"><b>' + (english ? 'Example timing' : 'Frames del ejemplo') + '</b><span>' + (english ? 'Start' : 'Inicio') + ' F' + emitStart + '</span><span>' + (english ? 'Emission end' : 'Fin emisión') + ' F' + emitEnd + '</span><span>' + (english ? 'Travel' : 'Viaje') + ' ' + Math.max(1, Math.round(travelFrames)) + 'f</span><span>' + (english ? 'Life' : 'Vida') + ' ' + Math.max(1, Math.round(Number(life.duration || 12))) + 'f</span><span>' + (english ? 'Visible until' : 'Visible hasta') + ' ~F' + Math.ceil(visibleUntil) + '</span></div>';
         }
 
-        // Essential numbers live together. Advanced PBS commands remain in their own tab.
-        quickHtml += '<section class="bas-emitter-visual-controls" aria-label="' + (english ? 'Visual emitter controls' : 'Controles visuales del emitter') + '">'
-            + '<div class="bas-emitter-visual-head"><b>① ' + (english ? 'ADJUST WITH THE MOUSE' : 'AJUSTAR CON EL MOUSE') + '</b><small>' + (english ? 'Select ROUTE; drag the colored handles on the stage.' : 'Selecciona RUTA y arrastra los tiradores de color del escenario.') + '</small></div>'
-            + '<div class="bas-emitter-visual-legend"><span>● ' + (english ? 'CENTER: origin' : 'CENTRO: origen') + '</span><span>🔵 ' + (english ? 'BLUE: direction' : 'AZUL: dirección') + '</span><span>🟠 ' + (english ? 'ORANGE: spread' : 'NARANJA: apertura') + '</span><span>🟣 ' + (english ? 'PURPLE: spawn area' : 'MORADO: área de salida') + '</span><span>⚪ ' + (english ? 'WHITE: distance' : 'BLANCO: distancia') + '</span></div>'
-            + '<div class="bas-emitter-visual-grid">'
-            + '<label>' + (english ? 'Direction' : 'Dirección') + ' <input type="number" class="bas-input" min="-180" max="180" step="1" data-emitter-visual="angle" value="' + Math.round(resolvedDirection) + '">°</label>'
-            + '<label>' + (english ? 'Spread each side' : 'Apertura por lado') + ' <input type="number" class="bas-input" min="0" max="180" step="1" data-emitter-visual="spread" value="' + Math.round(spread) + '">°</label>'
-            + '<label>' + (english ? 'Distance' : 'Distancia') + ' <input type="number" class="bas-input" min="1" max="10000" step="1" data-emitter-visual="distance" value="' + Math.round(distancePx) + '">px</label>'
-            + '<label>' + (english ? 'Spawn width ±' : 'Ancho salida ±') + ' <input type="number" class="bas-input" min="0" max="1000" step="1" data-emitter-visual="spawn-x" value="' + Math.round(areaX) + '">px</label>'
-            + '<label>' + (english ? 'Spawn height ±' : 'Alto salida ±') + ' <input type="number" class="bas-input" min="0" max="1000" step="1" data-emitter-visual="spawn-y" value="' + Math.round(areaY) + '">px</label>'
-            + '</div><small class="bas-muted">' + (english ? 'Each field updates the active frame. The ROUTE and PARTICLE tabs contain the next steps; PBS is for advanced tuning.' : 'Cada campo modifica el frame actual. RUTA y PARTÍCULA contienen los siguientes pasos; PBS es sólo para ajustes avanzados.') + '</small></section>';
-        quickHtml += '<div class="bas-emitter-preview-first bas-emitter-compact-tools"><div class="bas-emitter-mode-buttons"><button type="button" class="bas-button ' + (emitterPreviewEditMode === 'emission' ? 'primary' : '') + '" data-emitter-direct-button="emission">↗ ' + (english ? 'ROUTE' : 'RUTA') + '</button><button type="button" class="bas-button ' + (emitterPreviewEditMode === 'particle' ? 'primary' : '') + '" data-emitter-direct-button="particle">✦ ' + (english ? 'PARTICLE' : 'PARTÍCULA') + '</button></div><div class="bas-emitter-mouse-cheat"><span>' + (english ? 'Drag: origin' : 'Arrastrar: origen') + '</span><span>' + (english ? 'Drag BLUE circle: direction' : 'Arrastrar círculo AZUL: dirección') + '</span><span>' + (english ? 'ORANGE: spread · PURPLE: spawn' : 'NARANJA: apertura · MORADO: salida') + '</span></div><label class="bas-toggle"><input type="checkbox" data-emitter-solo-preview ' + (project.preview.emitterSoloPreview ? 'checked' : '') + '> ' + (english ? 'Isolate emitter' : 'Aislar emitter') + '</label></div>';
+        // Mouse quick controls match each emitter's actual geometry.
+        var visualKind=String(pbs.emitter||pbs.emitterType||"none").toLowerCase();
+        var visualRadial=/^(energyout|energyin|orbit|polar|helix)$/.test(visualKind);
+        var visualRise=/^(risescatter|rise_scatter)$/.test(visualKind);
+        var readRadius=function(name,defaultValue){var cs=((pbs.commands||{})[name]||[]).slice().sort(function(a,b){return Number(a.frame||0)-Number(b.frame||0);}),v=defaultValue;cs.forEach(function(c){if(Number(c.frame||0)<=f)v=Number(c.value||defaultValue)});return Math.max(1,v);};
+        var vf=function(label,id,n,min,max,u){return '<label>'+label+'<input class="bas-input" type="number" step="1" min="'+min+'" max="'+max+'" data-emitter-visual="'+id+'" value="'+Math.round(n)+'">'+u+'</label>';};
+        var fieldHtml="",legend='<span>● '+(english?'CENTER: origin':'CENTRO: origen')+'</span>';
+        if(visualRadial){
+            legend+='<span>🔵 '+(english?'X radius':'Radio X')+'</span><span>🟢 '+(english?'Y radius':'Radio Y')+'</span>';
+            fieldHtml+=vf(english?'X radius':'Radio X','radius-x',readRadius('radiusX',65),1,2000,'px');
+            fieldHtml+=vf(english?'Y radius':'Radio Y','radius-y',readRadius('radiusY',45),1,2000,'px');
+        }else if(visualRise){
+            legend+='<span>🟢 '+(english?'Rise height':'Altura')+'</span>';
+            fieldHtml+=vf(english?'Rise height':'Altura de ascenso','rise-height',Number(setting('riseHeight',64)||64),1,2000,'px');
+        }else if(visualKind!=='nomovement'&&visualKind!=='no_movement'){
+            legend+='<span>🔵 '+(english?'Direction':'Dirección')+'</span><span>🟠 '+(english?'Spread':'Apertura')+'</span><span>⚪ FIN</span>';
+            fieldHtml+=vf(english?'Direction':'Dirección','angle',resolvedDirection,-180,180,'°');
+            fieldHtml+=vf(english?'Spread ±':'Apertura ±','spread',spread,0,180,'°');
+            fieldHtml+=vf(english?'Distance':'Distancia','distance',distancePx,1,10000,'px');
+        }
+        legend+='<span>🟣 '+(english?'Spawn area':'Área de salida')+'</span>';
+        fieldHtml+=vf(english?'Spawn width ±':'Ancho de salida ±','spawn-x',areaX,0,1000,'px');
+        fieldHtml+=vf(english?'Spawn height ±':'Alto de salida ±','spawn-y',areaY,0,1000,'px');
+        quickHtml+='<section class="bas-emitter-visual-controls"><div class="bas-emitter-visual-head"><b>① '+(english?'EDIT ON THE CANVAS':'EDITAR EN EL ESCENARIO')+'</b><small>'+(english?'LEFT drag moves handles. Drag FIN to adjust endpoint; Shift locks angle.':'Arrastra los tiradores con CLIC IZQUIERDO. FIN ajusta el destino; Mayús bloquea dirección.')+'</small></div><div class="bas-emitter-visual-legend">'+legend+'</div><div class="bas-emitter-visual-grid">'+fieldHtml+'</div><small class="bas-muted">'+(english?'Shift snaps directions by 15°. Ctrl + wheel changes speed. PBS remains optional.':'Mayús ajusta dirección de 15° en 15°. Ctrl + rueda cambia velocidad. PBS es opcional.')+'</small></section>';
+        quickHtml += '<div class="bas-emitter-preview-first bas-emitter-compact-tools"><div class="bas-emitter-mode-buttons"><button type="button" class="bas-button ' + (emitterPreviewEditMode === 'emission' ? 'primary' : '') + '" data-emitter-direct-button="emission">↗ ' + (english ? 'ROUTE' : 'RUTA') + '</button><button type="button" class="bas-button ' + (emitterPreviewEditMode === 'particle' ? 'primary' : '') + '" data-emitter-direct-button="particle">✦ ' + (english ? 'PARTICLE' : 'PARTÍCULA') + '</button></div><div class="bas-emitter-mouse-cheat"><span>' + (english ? 'Drag: origin' : 'Arrastrar: origen') + '</span><span>' + (english ? 'LEFT drag color handles' : 'Clic IZQUIERDO en tiradores de color') + '</span><span>' + (english ? 'Shift: snap/lock · Ctrl+wheel: speed' : 'Mayús: ajustar/bloquear · Ctrl+rueda: velocidad') + '</span></div><label class="bas-toggle"><input type="checkbox" data-emitter-solo-preview ' + (project.preview.emitterSoloPreview ? 'checked' : '') + '> ' + (english ? 'Isolate emitter' : 'Aislar emitter') + '</label></div>';
 
         // Archetypes & Core Sliders for fast, intuitive configuration
         var activeArchetype = null;
@@ -7619,6 +7819,9 @@ function renderStudio(ctx, host) {
                 else if (op === 'distance') preview.callbacks.onEmitterDistance(object.id, Math.max(1, Math.min(10000, val)));
                 else if (op === 'spawn-x') preview.callbacks.onEmitterSpawnRange(object.id, 'x', Math.max(0, Math.min(1000, val)));
                 else if (op === 'spawn-y') preview.callbacks.onEmitterSpawnRange(object.id, 'y', Math.max(0, Math.min(1000, val)));
+                else if (op === 'radius-x') preview.callbacks.onEmitterRadius(object.id, 'x', Math.max(1, Math.min(2000, val)));
+                else if (op === 'radius-y') preview.callbacks.onEmitterRadius(object.id, 'y', Math.max(1, Math.min(2000, val)));
+                else if (op === 'rise-height') preview.callbacks.onEmitterHeight(object.id, Math.max(1, Math.min(2000, val)));
             };
         });
         var switchEmitterTab = function (tabName) {
@@ -17904,7 +18107,7 @@ function renderStudio(ctx, host) {
         getEffectsTrack(a).clips.push(c);
         ensureEmitter(c, f, "Straight");
         selectedObjectId = c.id; selectedKeyId = null; selectedKeyIds.clear();
-        applyEmitterGen5Example(c, f, key);
+        applyEmitterGen5Example(c, f, key, true);
         ensureClipAsset(c, true);
         renderElements(); renderTimeline(); renderProperties(); preview.setState(a, c.id, frame, { playing: false }); preview.draw(); updateDirtyUi();
     }

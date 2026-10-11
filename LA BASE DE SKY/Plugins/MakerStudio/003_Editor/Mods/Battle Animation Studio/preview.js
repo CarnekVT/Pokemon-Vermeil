@@ -2603,78 +2603,58 @@ var BattlePreview = /** @class */ (function () {
             c.textBaseline = "middle";
             c.fillText("+", 0, 0);
             if (this.emitterEditMode === "emission") {
-                var guideAngle = this.emitterSemanticAngle(clip, now, Number(this.emitterValue(clip, "emitAngle", now, 0) || 0));
-                var guideRange = Math.max(0, Math.min(180, Number(this.emitterValue(clip, "emitAngleRange", now, 0) || 0)));
-                var guideSpeed = Number(this.emitterValue(clip, "emitSpeed", now, 0) || 0);
-                var guideXRange = Math.max(0, Number(this.emitterValue(clip, "emitXRange", now, 0) || 0));
-                var guideYRange = Math.max(0, Number(this.emitterValue(clip, "emitYRange", now, 0) || 0));
-                var guideTravelFrames = this.emitterTravelFrames(clip, now, guideSpeed);
-                var guideLen = this.emitterDistancePx(clip, now, guideSpeed);
-                var guideRad = guideAngle * Math.PI / 180;
-                var gx = Math.cos(guideRad) * guideLen, gy = -Math.sin(guideRad) * guideLen;
+                // Visible mouse-editable tools for every emitter family.
+                // Route controls are NOT shown on radial/rise emitters.
+                var g=this.emitterGuideGeometry(clip,now), radiusType=/^(energyout|energyin|orbit|polar|helix)$/.test(type);
+                var riseType=/^(risescatter|rise_scatter)$/.test(type);
+                var xRange=Math.max(0,Number(this.emitterValue(clip,"emitXRange",now,0)||0));
+                var yRange=Math.max(0,Number(this.emitterValue(clip,"emitYRange",now,0)||0));
+                var guideAngle=g.angle, spread=Math.max(0,Math.min(180,Number(this.emitterValue(clip,"emitAngleRange",now,0)||0)));
+                var guideDistance=g.distance, guideRad=guideAngle*Math.PI/180;
+                var compactDist=Math.max(45,Math.min(180,guideDistance));
+                var ax=Math.max(36,xRange),ay=-Math.max(34,yRange);
+                var mark=function(x,y,color,label) {
+                    c.save();c.setLineDash([]);c.lineWidth=2;c.strokeStyle="#152433";c.fillStyle=color;
+                    c.beginPath();c.arc(x,y,10,0,Math.PI*2);c.fill();c.stroke();
+                    c.font="bold 10px sans-serif";c.textAlign="left";c.textBaseline="bottom";
+                    c.shadowBlur=4;c.shadowColor="#000";c.fillStyle="#fff";
+                    c.fillText(label,x+12,y-8);c.restore();
+                };
                 c.save();
-                c.strokeStyle = "rgba(255,255,255,.92)";
-                c.fillStyle = "rgba(255,255,255,.92)";
-                c.lineWidth = 2;
+                c.lineWidth=1.5;
+                c.strokeStyle="rgba(201,153,255,.65)";c.setLineDash([5,5]);
+                if(xRange>0||yRange>0)c.strokeRect(-xRange,-yRange,2*xRange,2*yRange);
                 c.setLineDash([]);
-                if (guideXRange > 0 || guideYRange > 0) {
-                    c.strokeStyle = "rgba(255,255,255,.42)";
-                    c.setLineDash([4, 4]);
-                    c.strokeRect(-guideXRange, -guideYRange, guideXRange * 2, guideYRange * 2);
+                if(radiusType) {
+                    var rx=this.emitterRadiusValue(clip,"radiusX",now,65);
+                    var ry=this.emitterRadiusValue(clip,"radiusY",now,45);
+                    c.strokeStyle="rgba(125,192,255,.75)";c.setLineDash([5,4]);
+                    c.beginPath();c.ellipse(0,0,Math.max(1,rx),Math.max(1,ry),0,0,Math.PI*2);c.stroke();
                     c.setLineDash([]);
-                    c.strokeStyle = "rgba(255,255,255,.92)";
+                    mark(Math.max(26,rx),0,"#48c3ff","RADIO X · "+Math.round(rx));
+                    mark(0,-Math.max(28,ry),"#52dcab","RADIO Y · "+Math.round(ry));
+                } else if(riseType) {
+                    var rise=Math.max(1,Number(this.emitterValue(clip,"riseHeight",now,64)||64));
+                    c.strokeStyle="rgba(82,220,171,.85)";
+                    c.beginPath();c.moveTo(0,0);c.lineTo(0,-Math.max(30,Math.min(170,rise)));c.stroke();
+                    mark(0,-Math.max(30,Math.min(170,rise)),"#52dcab","ALTURA · "+Math.round(rise)+"px");
+                } else if(type!=="nomovement"&&type!=="no_movement") {
+                    var dirX=Math.cos(guideRad),dirY=-Math.sin(guideRad);
+                    c.strokeStyle="rgba(255,255,255,.86)";
+                    c.beginPath();c.moveTo(0,0);c.lineTo(dirX*compactDist,dirY*compactDist);c.stroke();
+                    if(spread>0){
+                        var sr1=(guideAngle-spread)*Math.PI/180,sr2=(guideAngle+spread)*Math.PI/180;
+                        c.fillStyle="rgba(255,172,76,.10)";
+                        c.beginPath();c.moveTo(0,0);
+                        c.lineTo(Math.cos(sr1)*compactDist,-Math.sin(sr1)*compactDist);
+                        c.arc(0,0,compactDist,-sr1,-sr2,true);c.closePath();c.fill();
+                    }
+                    var spreadRad=(guideAngle+Math.max(16,spread))*Math.PI/180;
+                    mark(dirX*58,dirY*58,"#48c3ff","DIRECCIÓN");
+                    mark(Math.cos(spreadRad)*100,-Math.sin(spreadRad)*100,"#ffae55","APERTURA ±"+Math.round(spread)+"°");
+                    mark(dirX*compactDist,dirY*compactDist,"#f4f4ff","FIN · "+Math.round(guideDistance)+"px");
                 }
-                if (guideRange > 0) {
-                    var aMin = (guideAngle - guideRange) * Math.PI / 180, aMax = (guideAngle + guideRange) * Math.PI / 180;
-                    c.fillStyle = "rgba(255,255,255,.08)";
-                    c.beginPath();
-                    c.moveTo(0, 0);
-                    c.lineTo(Math.cos(aMin) * guideLen, -Math.sin(aMin) * guideLen);
-                    c.arc(0, 0, guideLen, -aMin, -aMax, true);
-                    c.closePath();
-                    c.fill();
-                    c.strokeStyle = "rgba(255,255,255,.38)";
-                    c.beginPath();
-                    c.moveTo(0, 0);
-                    c.lineTo(Math.cos(aMin) * guideLen, -Math.sin(aMin) * guideLen);
-                    c.moveTo(0, 0);
-                    c.lineTo(Math.cos(aMax) * guideLen, -Math.sin(aMax) * guideLen);
-                    c.stroke();
-                }
-                c.strokeStyle = "rgba(255,255,255,.95)";
-                c.beginPath();
-                c.moveTo(0, 0);
-                c.lineTo(gx, gy);
-                c.stroke();
-                var arrowAngle = Math.atan2(gy, gx);
-                c.beginPath();
-                c.moveTo(gx, gy);
-                c.lineTo(gx - Math.cos(arrowAngle - .45) * 12, gy - Math.sin(arrowAngle - .45) * 12);
-                c.lineTo(gx - Math.cos(arrowAngle + .45) * 12, gy - Math.sin(arrowAngle + .45) * 12);
-                c.closePath();
-                c.fill();
-                c.font = "bold 10px sans-serif";
-                c.textAlign = "left";
-                c.textBaseline = "bottom";
-                c.fillText("FIN · " + Math.round(guideLen) + " px · " + Math.round(guideTravelFrames) + "f", gx + 9, gy - 5);
-                // FIN is always visible and draggable. It represents only the route
-                // distance; dragging it does not modify angle or any other parameter.
-                c.beginPath();
-                c.arc(gx, gy, 7, 0, Math.PI * 2);
-                c.fill();
-                c.stroke();
-                // Distinct, always-visible handles replace undocumented right-click gestures.
-                var dhx = Math.cos(guideRad) * 46, dhy = -Math.sin(guideRad) * 46;
-                c.fillStyle = "#43cfff"; c.strokeStyle = "#172633"; c.lineWidth = 2;
-                c.beginPath(); c.arc(dhx, dhy, 9, 0, Math.PI * 2); c.fill(); c.stroke();
-                c.font = "bold 10px sans-serif"; c.fillText("DIR", dhx + 12, dhy - 9);
-                var spreadRad = (guideAngle + Math.max(16, guideRange)) * Math.PI / 180;
-                var spx = Math.cos(spreadRad) * 78, spy = -Math.sin(spreadRad) * 78;
-                c.fillStyle = "#ffae55"; c.beginPath(); c.arc(spx, spy, 9, 0, Math.PI * 2); c.fill(); c.stroke();
-                c.fillText("±" + Math.round(guideRange) + "°", spx + 11, spy - 8);
-                var areaHX = Math.max(28, guideXRange), areaHY = -Math.max(24, guideYRange);
-                c.fillStyle = "#d19cff"; c.beginPath(); c.arc(areaHX, areaHY, 9, 0, Math.PI * 2); c.fill(); c.stroke();
-                c.fillText("ÁREA", areaHX + 10, areaHY - 10);
+                mark(ax,ay,"#c595ff","ÁREA ±"+Math.round(xRange)+"/"+Math.round(yRange));
                 c.restore();
             }
             if (type === "risescatter" || type === "rise_scatter") {
@@ -3675,28 +3655,45 @@ var BattlePreview = /** @class */ (function () {
     };
     // Hit-test the visual editor handles in the same inverse-camera coordinate
     // space as the emitter. No opaque keyboard/mouse gesture is necessary.
+    // Radius values are read from this animation frame, not blindly from
+    // the first radius key. This also preserves legacy imported emitters.
+    BattlePreview.prototype.emitterRadiusValue = function(clip,key,frame,fallback) {
+        var commands=clip&&clip.pbs&&clip.pbs.commands?clip.pbs.commands:{};
+        var list=Array.isArray(commands[key])?commands[key].slice().sort(function(a,b){return Number(a.frame||0)-Number(b.frame||0);}):[];
+        var value=fallback;
+        list.forEach(function(cmd){if(Number(cmd.frame||0)<=frame)value=Number(cmd.value||0);});
+        return Math.max(1,Number(value||fallback));
+    };
     BattlePreview.prototype.emitterHandleAt = function (clip, point) {
         if (!clip || !point || this.emitterEditMode !== "emission" || !clip.pbs ||
             String(clip.pbs.emitter || clip.pbs.emitterType || "none").toLowerCase() === "none") return null;
-        var g = this.emitterGuideGeometry(clip, this.frame);
-        if (!g) return null;
-        var rad = Number(g.angle || 0) * Math.PI / 180;
-        var spread = Math.max(0, Number(this.emitterValue(clip, "emitAngleRange", this.frame, 0) || 0));
-        var xr = Math.max(0, Number(this.emitterValue(clip, "emitXRange", this.frame, 0) || 0));
-        var yr = Math.max(0, Number(this.emitterValue(clip, "emitYRange", this.frame, 0) || 0));
-        var sr = (Number(g.angle || 0) + Math.max(16, spread)) * Math.PI / 180;
-        var handles = [
-            {kind:"emitter-angle", x:g.center.x + Math.cos(rad)*46, y:g.center.y - Math.sin(rad)*46},
-            {kind:"emitter-spread", x:g.center.x + Math.cos(sr)*78, y:g.center.y - Math.sin(sr)*78},
-            {kind:"emitter-spawn", x:g.center.x + Math.max(28,xr), y:g.center.y - Math.max(24,yr)},
-            {kind:"emitter-distance", x:g.x, y:g.y}
-        ];
-        var best = null, nearest = 19;
-        handles.forEach(function (handle) {
-            var d = Math.hypot(point.x - handle.x, point.y - handle.y);
-            if (d < nearest) { nearest = d; best = handle; }
-        });
-        return best ? { kind:best.kind, center:g.center, angle:g.angle, xRange:xr, yRange:yr } : null;
+        var g=this.emitterGuideGeometry(clip,this.frame);
+        if(!g)return null;
+        var type=String(clip.pbs.emitter||clip.pbs.emitterType||"").toLowerCase();
+        var radiusType=/^(energyout|energyin|orbit|polar|helix)$/.test(type);
+        var riseType=/^(risescatter|rise_scatter)$/.test(type);
+        var rad=g.angle*Math.PI/180, spread=Math.max(0,Math.min(180,Number(this.emitterValue(clip,"emitAngleRange",this.frame,0)||0)));
+        var xr=Math.max(0,Number(this.emitterValue(clip,"emitXRange",this.frame,0)||0)),yr=Math.max(0,Number(this.emitterValue(clip,"emitYRange",this.frame,0)||0));
+        var handles=[{kind:"emitter-area",x:g.center.x+Math.max(36,xr),y:g.center.y-Math.max(34,yr)}];
+        if(radiusType) {
+            handles.push({kind:"emitter-radius-x",x:g.center.x+Math.max(26,this.emitterRadiusValue(clip,"radiusX",this.frame,65)),y:g.center.y});
+            handles.push({kind:"emitter-radius-y",x:g.center.x,y:g.center.y-Math.max(28,this.emitterRadiusValue(clip,"radiusY",this.frame,45))});
+        }else if(riseType) {
+            var rise=Math.max(1,Number(this.emitterValue(clip,"riseHeight",this.frame,64)||64));
+            handles.push({kind:"emitter-height",x:g.center.x,y:g.center.y-Math.max(30,Math.min(170,rise))});
+        }else if(type!=="nomovement"&&type!=="no_movement") {
+            var spreadRad=(g.angle+Math.max(16,spread))*Math.PI/180;
+            var clampedDistance=Math.max(45,Math.min(180,g.distance));
+            handles.push({kind:"emitter-route-end",x:g.center.x+Math.cos(rad)*clampedDistance,y:g.center.y-Math.sin(rad)*clampedDistance});
+            handles.push({kind:"emitter-direction",x:g.center.x+Math.cos(rad)*58,y:g.center.y-Math.sin(rad)*58});
+            handles.push({kind:"emitter-spread",x:g.center.x+Math.cos(spreadRad)*100,y:g.center.y-Math.sin(spreadRad)*100});
+        }
+        var best=null,dist=22;
+        handles.forEach(function(h){var d=Math.hypot(point.x-h.x,point.y-h.y);if(d<dist){best=h;dist=d;}});
+        return best ? {kind:best.kind,center:g.center,angle:g.angle,distance:g.distance,xRange:xr,yRange:yr,
+            radiusX:this.emitterRadiusValue(clip,"radiusX",this.frame,65),
+            radiusY:this.emitterRadiusValue(clip,"radiusY",this.frame,45),
+            riseHeight:Number(this.emitterValue(clip,"riseHeight",this.frame,64)||64)} : null;
     };
     BattlePreview.prototype.pointerDown = function (e) {
         var _a, _b, _c, _d, _e, _f;
@@ -3709,7 +3706,8 @@ var BattlePreview = /** @class */ (function () {
                 this.editFrame = Math.round(this.frame);
                 this.dragging = handle.kind;
                 this.dragStart = { objectId: selectedForPointer.id, center: handle.center, angle: handle.angle,
-                    p: keyPoint, xRange: handle.xRange, yRange: handle.yRange };
+                    p: keyPoint, xRange: handle.xRange, yRange: handle.yRange,
+                    radiusX:handle.radiusX,radiusY:handle.radiusY,riseHeight:handle.riseHeight,distance:handle.distance };
                 e.preventDefault();
                 (_b = (_a = this.canvas).setPointerCapture) === null || _b === void 0 ? void 0 : _b.call(_a, e.pointerId);
                 return;
@@ -3765,12 +3763,16 @@ var BattlePreview = /** @class */ (function () {
                 var hoverP = this.eventLogical(e);
                 var hoverHandle = this.emitterHandleAt(hoverObj, this.pointerPointForObject(hoverObj, hoverP));
                 this.canvas.style.cursor = hoverHandle ? "grab" : "";
-                this.canvas.title = hoverHandle
-                    ? (hoverHandle.kind === "emitter-angle" ? "Dirección · arrastra con clic izquierdo"
-                        : hoverHandle.kind === "emitter-spread" ? "Apertura · arrastra con clic izquierdo"
-                        : hoverHandle.kind === "emitter-spawn" ? "Área de salida · arrastra con clic izquierdo"
-                        : "Distancia · arrastra con clic izquierdo")
-                    : "Selecciona el emitter; en RUTA, arrastra los controles de colores";
+                var hints={
+                    "emitter-route-end":"FIN: arrastra para dirección + distancia. MAYÚS bloquea dirección.",
+                    "emitter-direction":"DIRECCIÓN: gira con clic izquierdo. MAYÚS: saltos de 15°.",
+                    "emitter-spread":"APERTURA: arrastra el borde naranja. MAYÚS: saltos de 5°.",
+                    "emitter-area":"ÁREA: ajusta el nacimiento en X e Y.",
+                    "emitter-radius-x":"RADIO X: arrastra para ampliar o reducir la órbita.",
+                    "emitter-radius-y":"RADIO Y: arrastra para ampliar o reducir la órbita.",
+                    "emitter-height":"ALTURA: arrastra para subir o bajar el emisor."
+                };
+                this.canvas.title=hoverHandle?(hints[hoverHandle.kind]||"Arrastra el tirador con clic izquierdo"):"Arrastra el centro para mover el origen; no necesitas clic derecho.";
             }
             return;
         }
@@ -3780,37 +3782,59 @@ var BattlePreview = /** @class */ (function () {
         var p = this.eventLogical(e), objectPoint = this.pointerPointForObject(o, p), _q = this.logicalSize(), width = _q.width, height = _q.height;
         if (this.dragging === "move")
             (_b = (_a = this.callbacks).onMove) === null || _b === void 0 ? void 0 : _b.call(_a, { objectId: o.id, frame: this.editFrame, x: clamp(objectPoint.x + Number(this.dragStart.offsetX || 0), 0, width), y: clamp(objectPoint.y + Number(this.dragStart.offsetY || 0), 0, height) });
-        else if (this.dragging === "emitter-distance") {
-            var dc = this.dragStart.center;
-            var distanceAngle = Number(this.dragStart.angle || 0) * Math.PI / 180;
-            var dux = Math.cos(distanceAngle), duy = -Math.sin(distanceAngle);
-            // Project onto the existing route axis: FIN changes only scalar distance.
-            var distance = Math.max(1, (objectPoint.x - dc.x) * dux + (objectPoint.y - dc.y) * duy);
-            (_d = (_c = this.callbacks).onEmitterDistance) === null || _d === void 0 ? void 0 : _d.call(_c, o.id, distance);
+        else if (this.dragging === "emitter-route-end" || this.dragging === "emitter-distance") {
+            var startPoint=this.dragStart.p, center=this.dragStart.center;
+            var deltaX=objectPoint.x-startPoint.x,deltaY=objectPoint.y-startPoint.y;
+            var currentRad=Number(this.dragStart.angle||0)*Math.PI/180;
+            var distance,angle;
+            if(e.shiftKey || this.dragging === "emitter-distance") {
+                distance=Math.max(1,Number(this.dragStart.distance||1)+deltaX*Math.cos(currentRad)-deltaY*Math.sin(currentRad));
+                angle=this.dragStart.angle;
+            }else {
+                var unclampedDist=Math.max(45,Math.min(180,Number(this.dragStart.distance||45)));
+                var endX=center.x+Math.cos(currentRad)*unclampedDist+deltaX;
+                var endY=center.y-Math.sin(currentRad)*unclampedDist+deltaY;
+                angle=Math.atan2(-(endY-center.y),endX-center.x)*180/Math.PI;
+                var projected=Math.max(1,Math.hypot(endX-center.x,endY-center.y));
+                distance=Math.max(1,Number(this.dragStart.distance||1)+projected-unclampedDist);
+            }
+            if(this.callbacks.onEmitterRouteEnd)this.callbacks.onEmitterRouteEnd(o.id,angle,distance);
+            else {
+                if(this.callbacks.onEmitterAngle)this.callbacks.onEmitterAngle(o.id,angle);
+                if(this.callbacks.onEmitterDistance)this.callbacks.onEmitterDistance(o.id,distance);
+            }
         }
-        else if (this.dragging === "emitter-angle") {
-            var ec = this.dragStart.center;
-            var angle = Math.atan2(-(objectPoint.y - ec.y), objectPoint.x - ec.x) * 180 / Math.PI;
-            while (angle > 180) angle -= 360;
-            while (angle <= -180) angle += 360;
-            (_d = (_c = this.callbacks).onEmitterAngle) === null || _d === void 0 ? void 0 : _d.call(_c, o.id, angle);
+        else if (this.dragging === "emitter-direction" || this.dragging === "emitter-angle") {
+            var center=this.dragStart.center;
+            var angle=Math.atan2(-(objectPoint.y-center.y),objectPoint.x-center.x)*180/Math.PI;
+            if(e.shiftKey)angle=Math.round(angle/15)*15;
+            while(angle>180)angle-=360;
+            while(angle<=-180)angle+=360;
+            if(this.callbacks.onEmitterAngle)this.callbacks.onEmitterAngle(o.id,angle);
         }
         else if (this.dragging === "emitter-spread") {
-            var bc = this.dragStart.center;
-            var dragAngle = Math.atan2(-(objectPoint.y - bc.y), objectPoint.x - bc.x) * 180 / Math.PI;
-            var deltaAngle = dragAngle - Number(this.dragStart.angle || 0);
-            while (deltaAngle > 180) deltaAngle -= 360;
-            while (deltaAngle < -180) deltaAngle += 360;
-            if (this.callbacks.onEmitterSpread) this.callbacks.onEmitterSpread(o.id, Math.min(180, Math.abs(deltaAngle)));
+            var bc=this.dragStart.center;
+            var dragAngle=Math.atan2(-(objectPoint.y-bc.y),objectPoint.x-bc.x)*180/Math.PI;
+            var deltaAngle=dragAngle-Number(this.dragStart.angle||0);
+            while(deltaAngle>180)deltaAngle-=360;
+            while(deltaAngle< -180)deltaAngle+=360;
+            if(this.callbacks.onEmitterSpread)this.callbacks.onEmitterSpread(o.id,Math.min(180,Math.abs(e.shiftKey?Math.round(deltaAngle/5)*5:deltaAngle)));
         }
-        else if (this.dragging === "emitter-spawn") {
-            var startPoint = this.dragStart.p;
-            var nextX = Math.max(0, Number(this.dragStart.xRange || 0) + (objectPoint.x - startPoint.x));
-            var nextY = Math.max(0, Number(this.dragStart.yRange || 0) - (objectPoint.y - startPoint.y));
-            if (this.callbacks.onEmitterSpawnRange) {
-                this.callbacks.onEmitterSpawnRange(o.id, "x", nextX);
-                this.callbacks.onEmitterSpawnRange(o.id, "y", nextY);
-            }
+        else if (this.dragging === "emitter-area" || this.dragging === "emitter-spawn") {
+            var sp=this.dragStart.p;
+            var nextX=Math.max(0,Number(this.dragStart.xRange||0)+(objectPoint.x-sp.x));
+            var nextY=Math.max(0,Number(this.dragStart.yRange||0)-(objectPoint.y-sp.y));
+            if(this.callbacks.onEmitterArea)this.callbacks.onEmitterArea(o.id,nextX,nextY);
+        }
+        else if (this.dragging === "emitter-radius-x" || this.dragging === "emitter-radius-y") {
+            var vertical=this.dragging === "emitter-radius-y";
+            var v=vertical?Number(this.dragStart.radiusY||1)-(objectPoint.y-this.dragStart.p.y):
+                Number(this.dragStart.radiusX||1)+(objectPoint.x-this.dragStart.p.x);
+            if(this.callbacks.onEmitterRadius)this.callbacks.onEmitterRadius(o.id,vertical?"y":"x",Math.max(1,v));
+        }
+        else if (this.dragging === "emitter-height") {
+            var nextHeight=Math.max(1,Number(this.dragStart.riseHeight||64)-(objectPoint.y-this.dragStart.p.y));
+            if(this.callbacks.onEmitterHeight)this.callbacks.onEmitterHeight(o.id,nextHeight);
         }
         else {
             var cc = this.dragStart.center, a0 = Math.atan2(this.dragStart.p.y - cc.y, this.dragStart.p.x - cc.x), a1 = Math.atan2(objectPoint.y - cc.y, objectPoint.x - cc.x);
@@ -3823,12 +3847,13 @@ var BattlePreview = /** @class */ (function () {
             return;
         this.dragging = null;
         this.dragStart = null;
+        this.canvas.style.cursor = "";
         (_b = (_a = this.callbacks).onEditEnd) === null || _b === void 0 ? void 0 : _b.call(_a);
     };
     BattlePreview.prototype.wheel = function (e) {
         var _a, _b, _c, _d;
-        if (!this.animation || this.playing)
-            return;
+        if (!this.animation || this.playing || !e.ctrlKey)
+            return; // Normal wheel scroll must NEVER mutate an emitter by accident.
         var p = this.eventLogical(e), hit = this.hitObject(p);
         if (!hit)
             return;
