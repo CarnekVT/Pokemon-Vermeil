@@ -1,13 +1,13 @@
 {
   "id": "battle-animation-studio",
   "name": "Battle Animation Studio",
-  "version": "1.0.87",
+  "version": "1.0.88",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Battle Animation Studio: visual Pokémon battle animation editor with mouse-driven emitter handles, grouped quick controls, editable keyframes, animation preview, and Ruby runtime compatibility.",
+  "description": "Visual Pokémon battle animation editor for Maker Studio, with keyframed particles, improved emitter mouse controls and a three-stage Gen 5 Sludge Bomb example (flight, bubbles, vapor).",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [

@@ -1,4 +1,4 @@
-# Pokémon Vermeil · Battle Animation Studio v1.0.87
+# Pokémon Vermeil · Battle Animation Studio v1.0.88
 ## ¿Qué hace este programa?
 Battle Animation Studio es un **mod del editor Maker Studio** para crear y retocar animaciones de combate Pokémon sin editar directamente los parámetros Ruby/PBS. Incluye timeline con keyframes, gráficos, sonido, cámara y emitters/partículas (trayectoria, aparición, dispersión y vida).
 ## Contenido del paquete
@@ -13,7 +13,7 @@ Battle Animation Studio es un **mod del editor Maker Studio** para crear y retoc
 ## Control de emitters
 En la vista RUTA usa clic izquierdo: punto central = origen, tirador AZUL = dirección, NARANJA = apertura, MORADO = área de nacimiento y BLANCO (FIN) = distancia. La pestaña Rápido expone estos cinco parámetros por número. La pestaña Técnico/PBS conserva controles avanzados.
 ## Ejemplo Gen 5
-Sludge Bomb se cambió para mostrar un glóbulo morado breve dirigido al rival (video suministrado: aprox. 56:24–56:28) en vez de una trayectoria arqueada con salvas repetidas. La previsualización no se ha comparado automáticamente con el motor en ejecución.
+Sludge Bomb se reconstruyó con TRES clips: proyectil único usando PRAS- Sludge Bomb.png; impacto de burbujas violetas cerca del objetivo, y vapor morado breve al desaparecer. Se sincronizan los sonidos Sludge Bomb1 y Sludge Bomb2. Referencia de video: aprox. 56:24.5–56:28.5. El movimiento Sludge Wave aparece después y NO debe confundirse con Sludge Bomb. La previsualización aún requiere verificación dentro de Maker Studio y del juego.
 ## Origen y versión
 Fuente: CarnekVT/Pokemon-Vermeil · rama de rescate de mods.
 No sustituye al resto de mods del usuario.

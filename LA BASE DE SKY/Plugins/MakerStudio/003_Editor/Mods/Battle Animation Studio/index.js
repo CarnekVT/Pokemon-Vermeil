@@ -439,7 +439,7 @@ export var EMITTER_EXAMPLE_DEFAULT_GRAPHICS = {
     "mud-splash": "Graphics/Animations/toxic.png",
     "solar-beam": "Graphics/AnimationStudio/Energy1.png",
     "dragon-pulse": "Graphics/AnimationStudio/circle.png",
-    "sludge-bomb": "Graphics/Animations/toxic.png",
+    "sludge-bomb": "Graphics/Animations/PRAS- Sludge Bomb.png",
     "energy-ball": "Graphics/AnimationStudio/Energy1.png",
     "electro-ball": "Graphics/AnimationStudio/electric1.png",
     "blizzard-swirl": "Graphics/Animations/snowball.png",
@@ -519,7 +519,7 @@ export var EMITTER_THEMES = {
 
     // Poison / Toxic
     "poison-cloud": { keywords: ["toxic", "poison", "sludge", "acid", "gas", "smog"], color: "#a855f7", defaultPath: "Graphics/Animations/toxic.png" },
-    "sludge-bomb": { keywords: ["toxic", "sludge", "mud", "poison", "acid", "blob"], color: "#7e22ce", defaultPath: "Graphics/Animations/toxic.png" },
+    "sludge-bomb": { keywords: ["sludge bomb", "poison", "sludge", "toxic", "blob"], color: "#a348c4", defaultPath: "Graphics/Animations/PRAS- Sludge Bomb.png" },
     "mud-splash": { keywords: ["toxic", "mud", "splash", "sludge", "dirt", "brown"], color: "#78350f", defaultPath: "Graphics/Animations/toxic.png" },
     "toxic-spikes": { keywords: ["toxic", "spikes", "poison", "thorn", "needle"], color: "#9333ea", defaultPath: "Graphics/Animations/toxic.png" },
 
@@ -6806,6 +6806,96 @@ function renderStudio(ctx, host) {
             });
         }
     }
+    // Multi-stage Gen 5 Sludge Bomb: projectile -> target impact -> fading mist.
+    // Uses the same separate-clip structure already present in Vermeil's
+    // Pistola Agua and Lanzallamas project animations. Nothing is flattened.
+    function removeSludgeBombExampleLayers(parent) {
+        var a = activeAnimation();
+        if (!a || !parent) return;
+        var effects = getEffectsTrack(a);
+        if (effects && Array.isArray(effects.clips)) {
+            effects.clips = effects.clips.filter(function (c) {
+                return !(c && c.pbs && c.pbs.sludgeBombParentId === parent.id);
+            });
+        }
+        if (Array.isArray(a.events)) {
+            a.events = a.events.filter(function (event) {
+                return !(event && event.sludgeBombParentId === parent.id);
+            });
+        }
+    }
+    function appendSludgeBombExampleLayers(parent, start, travelFrames) {
+        var a = activeAnimation();
+        if (!a) return;
+        var effects = getEffectsTrack(a), hit = start + Math.max(1, Math.round(travelFrames || 10));
+        if (!effects || !Array.isArray(effects.clips)) return;
+        removeSludgeBombExampleLayers(parent);
+        var spawn = function (name, graphic, time, type) {
+            var clip = createProjectile({ id: uid("clip"), name: name });
+            clip.startFrame = time; clip.endFrame = time + 16; clip.positionKeys = [];
+            setPositionKey(clip, time, { anchor:"pbs:target", x:0, y:0, offsetX:0, offsetY:-8 }, "linear", "pbs:target");
+            setClipDefaultGraphic(clip, graphic, "sludge-bomb");
+            var pbs = ensureEmitter(clip, time, type);
+            pbs.focus = "target"; pbs.emitterDestination = type === "EnergyOut" ? "expand" : "rise";
+            pbs.sludgeBombParentId = parent.id;
+            pbs.emitterCommands = {};
+            pbs.commands = {};
+            setEmitterCommand(clip, "emitting", time, true);
+            effects.clips.push(clip);
+            return clip;
+        };
+        // Frame 1 after arrival: a compact purple-magenta bubble eruption,
+        // NOT a Sludge Wave-style horizontal carpet or green particle spray.
+        var impact = spawn("Sludge Bomb · toxic bubble impact", "Graphics/AnimationStudio/bubble 2.png", hit, "EnergyOut");
+        var ec = function (key,value) { setEmitterCommand(impact,key,hit,value); };
+        ec("emitterRate", 1); ec("emitterIntensity", 12);
+        ec("emitXRange", 6); ec("emitYRange", 6);
+        ec("emitAngle", 0); ec("emitAngleRange", 180);
+        ec("emitSpeed", 0); ec("emitGravity", 0);
+        ec("energyTravelFrames", 8); ec("energyTurns", 0);
+        ec("particleSize", 72); ec("particleSizeRange", 30);
+        setEmitterCommand(impact, "emitting", hit + 1, false);
+        setParticleCommand(impact, "radiusX", hit, 36);
+        setParticleCommand(impact, "radiusY", hit, 25);
+        impact.pbs.simpleParticleLife = {
+            duration: 9, birthScale: 45, midScale: 110, deathScale: 145,
+            birthOpacity: 100, midOpacity: 86, deathOpacity: 0,
+            birthRotation: 0, midRotation: 0, deathRotation: 10
+        };
+        setEmitterParticleTonePalette(impact, ["#db7bdd","#b54acb","#7e298d","#efb5f2"]);
+        impact.pbs.particleToneStrength = 84;
+        impact.endFrame = hit + 11;
+        // Following frames: small vapor cloud that disperses instead of
+        // replacing the entire battlefield with Sludge Wave's ground sheet.
+        var mist = spawn("Sludge Bomb · impact vapor", "Graphics/AnimationStudio/smog 1.png", hit + 1, "RiseScatter");
+        var m = function (key,value) { setEmitterCommand(mist,key,hit + 1,value); };
+        m("emitterRate", 18); m("emitterIntensity", 2);
+        m("emitXRange", 24); m("emitYRange", 11);
+        m("riseFrames", 3); m("riseHeight", 22);
+        m("scatterFrames", 4); m("scatterSpeed", 30);
+        m("particleSize", 70); m("particleSizeRange", 26);
+        m("emitSpeed", 0); m("emitGravity", 0);
+        setEmitterCommand(mist, "emitting", hit + 4, false);
+        mist.pbs.simpleSpawnShape = "area";
+        mist.pbs.simpleParticleLife = {
+            duration: 8, birthScale: 60, midScale: 110, deathScale: 140,
+            birthOpacity: 15, midOpacity: 65, deathOpacity: 0,
+            birthRotation: 0, midRotation: 0, deathRotation: 0
+        };
+        setEmitterParticleTonePalette(mist, ["#c957c9","#9423a0","#d27cdb"]);
+        mist.pbs.particleToneStrength = 82;
+        mist.endFrame = hit + 14;
+        // Use actual game audio assets; keep the two parts editable separately.
+        a.events || (a.events = []);
+        [{ f:start, name:"Anim/PRSFX- Sludge Bomb1" },
+         { f:hit, name:"Anim/PRSFX- Sludge Bomb2" }].forEach(function (se) {
+            a.events.push({ id:uid("event"), type:"se", frame:se.f, name:se.name,
+                volume:100, pitch:100, sludgeBombParentId:parent.id });
+        });
+        parent.pbs || (parent.pbs = {});
+        parent.pbs.sludgeBombImpactFrame = hit;
+        a.duration = Math.max(Number(a.duration || 1), hit + 15);
+    }
     function applyEmitterGen5Example(object, f, key) {
         if (!object) return;
         key = String(key || "water-gun");
@@ -6827,6 +6917,9 @@ function renderStudio(ctx, host) {
                 emitterSetTravelFramesKeepingDistance(object, start, Math.max(1, Number(object.pbs.simpleTravelFrames || 8)));
             emitterEnsureRouteCoverage(object, start);
             object.simpleEmitterExample = key;
+            // When changing from Sludge Bomb to another preset, remove only
+            // the generated sidecar clips (never unrelated authored project clips).
+            if (key !== "sludge-bomb") removeSludgeBombExampleLayers(object);
             renderProperties(); renderTimeline(); preview.setState(activeAnimation(), object.id, frame, { playing: false }); preview.draw(); updateDirtyUi();
             try { ensureClipAsset(object, true).then(function () { preview.draw(); }); } catch (_) { }
             setStatus((uiLanguage === "en" ? "Emitter preset: " : "Preset de emitter: ") + name + (uiLanguage === "en" ? " · every parameter stays editable" : " · todos los parámetros siguen editables"));
@@ -6982,32 +7075,38 @@ function renderStudio(ctx, host) {
             finish("Dragon pulse"); return;
         }
         if (key === "sludge-bomb") {
-            // Gen 5 video reference (56:24–56:28): one concentrated purple glob
-            // shoots toward the opponent and expands/fades on contact; this is
-            // NOT Sludge Wave's sustained ground-level purple cloud.
+            // Gen 5 source: 56:24.5–56:28.5, Venusaur -> Golbat.
+            // Phase 1: a single mauve projectile crosses to the foe.
+            // Phase 2: purple bubbles bloom at the target, then thin vapor.
             applyEmitterRecipe(object, start, "shots");
-            object.pbs.simplePathMode = "straight"; object.pbs.simpleTravelMode = "frames";
-            object.pbs.simpleTravelFrames = 8; object.pbs.simpleStopAtDestination = true;
+            if (!object.graphic || !object.graphic.projectPath ||
+                /(?:^|\/)toxic(?:_\d+)?\.png$/i.test(String(object.graphic.projectPath || ""))) {
+                setClipDefaultGraphic(object, "Graphics/Animations/PRAS- Sludge Bomb.png", key);
+            }
+            object.pbs.simplePathMode = "straight";
+            object.pbs.emitter = "Straight"; object.pbs.emitterDestination = "target";
+            object.pbs.simpleTravelMode = "frames"; object.pbs.simpleTravelFrames = 10;
+            object.pbs.simpleStopAtDestination = true;
             object.pbs.simpleSpawnShape = "point";
             ek("emitterRate", 1); ek("emitterIntensity", 1);
             ek("emitGravity", 0); ek("emitXRange", 0); ek("emitYRange", 0);
-            ek("emitSpeedRange", 0); ek("emitAngleRange", 0); ek("emitZoomRange", 0);
-            ek("particleSize", 140); ek("particleSizeRange", 0);
-            // Exactly one launch. No accidental repeated blobs.
+            ek("emitSpeedRange", 0); ek("emitAngleRange", 0);
+            ek("emitZoomRange", 0); ek("particleSize", 116); ek("particleSizeRange", 0);
             ek("emitting", true, start); ek("emitting", false, start + 1);
-            setEmitterParticleTonePalette(object, ["#6b158c", "#9d28c4", "#c662ef"]);
-            object.pbs.particleToneStrength = 68;
-            setEmitterSimpleLifeValue(object, "duration", 10);
-            setEmitterSimpleLifeValue(object, "birthScale", 75);
-            setEmitterSimpleLifeValue(object, "midScale", 125);
-            setEmitterSimpleLifeValue(object, "deathScale", 150);
+            setEmitterParticleTonePalette(object, ["#a734bb","#87309f","#cb64d7"]);
+            object.pbs.particleToneStrength = 28;
+            setEmitterSimpleLifeValue(object, "duration", 12);
+            setEmitterSimpleLifeValue(object, "birthScale", 80);
+            setEmitterSimpleLifeValue(object, "midScale", 108);
+            setEmitterSimpleLifeValue(object, "deathScale", 110);
             setEmitterSimpleLifeValue(object, "birthOpacity", 100);
             setEmitterSimpleLifeValue(object, "midOpacity", 100);
             setEmitterSimpleLifeValue(object, "deathOpacity", 0);
-            setParticleProcessList(object, "zoomX", [{frame:0,value:75},{frame:6,duration:2,value:145,easing:"ease_out"}]);
-            setParticleProcessList(object, "zoomY", [{frame:0,value:75},{frame:6,duration:2,value:145,easing:"ease_out"}]);
-            setParticleProcessList(object, "opacity", [{frame:0,value:255},{frame:8,duration:2,value:0,easing:"ease_in"}]);
-            finish("Sludge Bomb · Gen 5"); return;
+            setParticleProcessList(object, "zoomX", [{frame:0,value:75},{frame:7,duration:3,value:110,easing:"ease_out"}]);
+            setParticleProcessList(object, "zoomY", [{frame:0,value:75},{frame:7,duration:3,value:110,easing:"ease_out"}]);
+            setParticleProcessList(object, "opacity", [{frame:0,value:255},{frame:10,duration:2,value:0,easing:"ease_in"}]);
+            appendSludgeBombExampleLayers(object, start, 10);
+            finish("Sludge Bomb · Gen 5 · projectile + hit + vapor"); return;
         }
         if (key === "energy-ball") {
             applyEmitterRecipe(object, start, "shots");
@@ -17860,7 +17959,7 @@ function renderStudio(ctx, host) {
                     + '<button data-emitter-action-example="shadow-ball"><strong>● ' + (english ? 'Slow energy sphere' : 'Esfera de energía lenta') + '</strong><small>' + (english ? 'Large slow rhythmic shadow projectile.' : 'Proyectil esférico sombrío de avance lento.') + '</small></button>'
                     + '<button data-emitter-action-example="energy-ball"><strong>🟢 ' + (english ? 'Energy ball' : 'Bola de energía') + '</strong><small>' + (english ? 'Pulsing nature sphere with aura.' : 'Esfera concentrada de energía con aura.') + '</small></button>'
                     + '<button data-emitter-action-example="electro-ball"><strong>⚡ ' + (english ? 'Electro ball' : 'Bola eléctrica') + '</strong><small>' + (english ? 'Fast high-voltage electric sphere.' : 'Esfera de alto voltaje con chispas.') + '</small></button>'
-                    + '<button data-emitter-action-example="sludge-bomb"><strong>🟣 ' + (english ? 'Sludge bomb' : 'Bomba de lodo') + '</strong><small>' + (english ? 'One purple glob launched toward the foe; short toxic impact.' : 'Un glóbulo morado al rival y un impacto tóxico breve.') + '</small></button>'
+                    + '<button data-emitter-action-example="sludge-bomb"><strong>🟣 ' + (english ? 'Sludge bomb' : 'Bomba de lodo') + '</strong><small>' + (english ? 'Purple projectile, target-side bubble splash and fading violet vapor.' : 'Proyectil violeta, salpicadura de burbujas y vapor al impactar.') + '</small></button>'
                     + '<button data-emitter-action-example="ember"><strong>🔥 ' + (english ? 'Arc embers' : 'Brasas en arco') + '</strong><small>' + (english ? 'Small fire projectiles launched in gravity arcs.' : 'Pequeñas ascuas de fuego con arco de caída.') + '</small></button>'
                     + '<button data-emitter-action-example="rock-throw"><strong>🪨 ' + (english ? 'Rock throw' : 'Lanzarrocas con gravedad') + '</strong><small>' + (english ? 'Heavy boulder launched in prominent arc.' : 'Rocas pesadas lanzadas con arco marcado.') + '</small></button>'
                     + '<button data-emitter-action-example="seed-barrage"><strong>🌱 ' + (english ? 'Seed barrage' : 'Ráfaga de semillas') + '</strong><small>' + (english ? 'Rapid-fire directional bullet barrage.' : 'Disparos veloces en línea recta.') + '</small></button>'
