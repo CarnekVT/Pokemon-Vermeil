@@ -1,0 +1,5 @@
+# Todo con finales de linea LF. El workflow zipea en Linux y calcula el SHA-256:
+# si los ficheros llegaran con CRLF desde Windows, el zip tendria otros bytes y el
+# hash del registro no cuadraria con el del release.
+* text=auto eol=lf
+*.png binary

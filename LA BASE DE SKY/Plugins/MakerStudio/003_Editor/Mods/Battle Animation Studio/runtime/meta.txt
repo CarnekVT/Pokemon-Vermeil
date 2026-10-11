@@ -1,0 +1,4 @@
+Name       = Battle Animation Studio Preview Bridge
+Version    = 1.0.30
+Essentials = 21.1
+Credits    = CarnekVT

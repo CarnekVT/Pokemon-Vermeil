@@ -1,0 +1,19 @@
+{
+  "id": "changedex-studio",
+  "name": "ChangeDex Studio",
+  "version": "0.11.28",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "ChangeDex Studio v0.11.28: fixes evolution tuple parsing, distinguishes added methods from genuinely new evolution targets, and localizes evolution method/item text.",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.dialogs",
+    "ui.toasts"
+  ]
+}

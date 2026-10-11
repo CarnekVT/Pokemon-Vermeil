@@ -1,0 +1,10 @@
+{
+  "id": "dex-catalog-studio",
+  "name": "Dex Catalog Studio",
+  "version": "0.1.0",
+  "authors": [{ "name": "Vermeil" }],
+  "description": "Editor de orden, Pokédex regionales habilitadas y disponibilidad de la Pokédex Nacional.",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "permissions": ["fs.project", "fs.write.project", "ui.toasts"]
+}

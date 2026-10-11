@@ -1,0 +1,16 @@
+{
+  "id": "vermeil.pbs-v16-v17-to-v21",
+  "name": "PBS v16/v17 -> v21 Studio",
+  "version": "1.0.0",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [
+    { "name": "Vermeil" }
+  ],
+  "description": "Convierte bloques PBS de Essentials v16/v17 a formato v21 para copiar, pegar o guardar.",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.toasts"
+  ]
+}
