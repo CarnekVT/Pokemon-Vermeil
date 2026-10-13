@@ -41,6 +41,7 @@ module GameData
       303 => "EMBODYASPECTATTACK",
       304 => "EMBODYASPECTDEFENSE"
     })
+    TYPE_NAMES = load_translations("Translations/types.json", "names")
     ITEM_NAMES = load_translations("Translations/items.json", "names")
     ITEM_DESCRIPTIONS = load_translations("Translations/item_descriptions.json", "descriptions")
     POKEDEX_DESCRIPTIONS = load_translations("Translations/pokedex_descriptions.json", "descriptions", "key")
@@ -51,6 +52,14 @@ module GameData
       key = "nidoranf" if key == "nidoranfe"
       key = "nidoranm" if key == "nidoranma"
       return translate(key, translated_text, POKEDEX_DESCRIPTIONS)
+    end
+  end
+
+  class Type
+    alias_method :_LBDS_glossary_orig_name, :name
+
+    def name
+      PBSGlossaryNames.translate(@id, _LBDS_glossary_orig_name, PBSGlossaryNames::TYPE_NAMES)
     end
   end
 
