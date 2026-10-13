@@ -350,7 +350,7 @@ module Settings
   # Pokédex con solo haber visto una de ellas (true) o necesitas ver cada forma
   # por separado para que esa forma en concreto se vea en la Pokédex (falso).
   DEX_SHOWS_ALL_FORMS = false
-  # Una lista de números, donde cada número es el de una de las Pokédex (en el 
+  # Una lista de números, donde cada número es el de una de las Pokédex (en el
   # mismo orden que las que hay arriba, salvo la Nacional, que es -1). Todas las
   # diferentes Pokédex que pongas aquí empezarán su número en 0 en lugar de en
   # 1 (como pasa en Teselia con Victini, que es el nº 0 de la Pokédex).
@@ -598,8 +598,8 @@ module Settings
   # carpeta Data llamados messages_FRAGMENT_core.dat y messages_FRAGMENT_game.dat
   # (en caso de que existan).
   LANGUAGES = [
-    #  ["Español", "español"],
-    #  ["English", "english"]
+    ["Español (España)", "es_ES"],
+    ["Español (Latinoamérica)", "es_latam"]
   ]
 
   #=============================================================================
@@ -824,5 +824,3 @@ module Essentials
   ERROR_TEXT = ''
   MKXPZ_VERSION = '2.4.2/1ba25ab1'
 end
-
-
