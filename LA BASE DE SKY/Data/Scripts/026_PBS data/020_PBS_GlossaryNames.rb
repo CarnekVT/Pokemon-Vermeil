@@ -45,6 +45,7 @@ module GameData
     ITEM_NAMES = load_translations("Translations/items.json", "names")
     ITEM_DESCRIPTIONS = load_translations("Translations/item_descriptions.json", "descriptions")
     POKEDEX_DESCRIPTIONS = load_translations("Translations/pokedex_descriptions.json", "descriptions", "key")
+    SPECIES_CATEGORIES = load_translations("Translations/pokemon_categories.json", "categories")
 
     def self.translate_pokedex(species, translated_text)
       key = species.to_s.downcase.gsub(/[^a-z0-9]/, "")
@@ -104,6 +105,16 @@ module GameData
 
   class Species
     alias_method :_LBDS_glossary_orig_pokedex_entry, :pokedex_entry
+    alias_method :_LBDS_glossary_orig_category, :category
+
+    def category
+      translated_text = _LBDS_glossary_orig_category
+      if @form != 0
+        base_species = GameData::Species.try_get(@species)
+        return translated_text if !base_species || base_species.real_category != @real_category
+      end
+      PBSGlossaryNames.translate(@species, translated_text, PBSGlossaryNames::SPECIES_CATEGORIES)
+    end
 
     def pokedex_entry
       translated_text = _LBDS_glossary_orig_pokedex_entry
