@@ -14,14 +14,14 @@ module Scripts
     FileUtils.mkdir_p(path)
     clear_directory(path)
 
-    folder_id = [1, 1]
-    file_id = 1
+    folder_ids = Hash.new(0)
+    folder_names = {}
+    file_ids = Hash.new(0)
     folder_path = path
-    level = 0   # 0=main path, 1=subfolder, 2=sub-subfolder
 
     scripts.each_with_index do |entry, index|
       _, title, script = entry
-      title = title_to_filename(title).strip
+      title = title.strip
       script = Zlib::Inflate.inflate(script)
 
       # Skip titles with only '=' characters and more than three of them
@@ -30,22 +30,23 @@ module Scripts
       if title.match?(/\[\[\s*(.+)\s*\]\]$/) # Section for folder creation
         # Extract the section name
         section_name = title[/\[\[\s*(.+)\s*\]\]$/, 1]&.strip || "Unnamed Section"
-
-        # Folder logic: Create folder, then reset path for next section
-        folder_num   = (index < scripts.length - 2) ? sprintf("%03d", folder_id[level]) : "999"
-        folder_name  = "#{folder_num}_#{section_name}"
-        folder_path = File.join(path, folder_name)
+        sections = section_name.split('/').map { |part| title_to_filename(part) }
+        folder_path = path
+        sections.each do |part|
+          key = [folder_path, part]
+          unless folder_names.key?(key)
+            folder_ids[folder_path] += 1
+            folder_names[key] = format("%03d_%s", folder_ids[folder_path], part)
+          end
+          folder_path = File.join(folder_path, folder_names[key])
+        end
         FileUtils.mkdir_p(folder_path)
-
-        # Reset for the next set of scripts in this folder
-        folder_id[level] += 1
-        file_id = 1 # Reset file numbering for the new folder
       else
         next if script.empty? # Skip empty scripts
-        file_num = sprintf("%03d", file_id)
-        file_name = "#{file_num}_#{title}.rb"
+        file_ids[folder_path] += 1
+        file_num = sprintf("%03d", file_ids[folder_path])
+        file_name = "#{file_num}_#{title_to_filename(title)}.rb"
         create_script(File.join(folder_path, file_name), script)
-        file_id += 1
       end
     end
 
