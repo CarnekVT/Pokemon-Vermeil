@@ -2,6 +2,7 @@
 # Evolution screen
 #===============================================================================
 class PokemonEvolutionScene
+  EVOLUTION_ME = "Evolution start"
   EVOLUTION_BGM = "Evolution"
 
   SPRITE_1_Y_OFFSET = -64
@@ -118,8 +119,8 @@ class PokemonEvolutionScene
       pbUpdate
       break if System.uptime - timer_start >= DELAY_SHORT
     end
-    pbMEPlay("Evolution start")
-    pbBGMPlay(EVOLUTION_BGM)
+    pbMEPlay(EVOLUTION_ME) if !nil_or_empty?(EVOLUTION_ME)
+    pbBGMPlay(EVOLUTION_BGM) if !nil_or_empty?(EVOLUTION_BGM)
     canceled = false
     timer_start = System.uptime
     loop do

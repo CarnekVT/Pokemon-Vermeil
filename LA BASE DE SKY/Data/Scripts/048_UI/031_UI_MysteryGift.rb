@@ -675,7 +675,7 @@ def pbDownloadMysteryGift(trainer)
   pbBGMPlay("Regalo Misterioso", 70)
   loop do
     # Menú de opciones: regalos con contraseña o sin contraseña
-    command = pbMessage("Elige qué tipo de Regalo Misterioso descargar.", [
+    command = pbMessage(_INTL("Elige qué tipo de Regalo Misterioso descargar."), [
           _INTL("Sin contraseña"),
           _INTL("Con contraseña"),
           _INTL("Cancelar")

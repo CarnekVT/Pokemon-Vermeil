@@ -453,6 +453,18 @@ class Battle
   def pbEndOfBattle
     oldDecision = @decision
     @decision = Outcome::CATCH if @decision == Outcome::WIN && wildBattle? && @caughtPokemon.length > 0
+    pbHandleEndOfBattleOutcome(oldDecision)
+    pbRestoreInitialBattleItems
+    # Register captured Pokémon in the Pokédex, and store them
+    pbRecordAndStoreCaughtPokemon
+    # Collect Pay Day money in a wild battle that ended in a capture
+    pbGainMoney if @decision == Outcome::CATCH
+    pbPassPokerus
+    pbCleanupAfterBattle
+    return @decision
+  end
+
+  def pbHandleEndOfBattleOutcome(oldDecision)
     case oldDecision
     when Outcome::WIN
       PBDebug.log("")
@@ -523,6 +535,9 @@ class Battle
       PBDebug.log("")
       @scene.pbWildBattleSuccess if !Settings::GAIN_EXP_FOR_CAPTURE
     end
+  end
+
+  def pbRestoreInitialBattleItems
     # Swap held items back to their original holders (in trainer battles only)
     if trainerBattle?
       2.times do |side|
@@ -561,10 +576,9 @@ class Battle
         end
       end
     end
-    # Register captured Pokémon in the Pokédex, and store them
-    pbRecordAndStoreCaughtPokemon
-    # Collect Pay Day money in a wild battle that ended in a capture
-    pbGainMoney if @decision == Outcome::CATCH
+  end
+
+  def pbPassPokerus
     # Pass on Pokérus within the party
     if @internalBattle
       infected = []
@@ -581,6 +595,9 @@ class Battle
         end
       end
     end
+  end
+
+  def pbCleanupAfterBattle
     # Clean up battle stuff
     @scene.pbEndBattle(@decision)
     @battlers.each do |b|
@@ -606,8 +623,6 @@ class Battle
     end
     # Restore consumed items (RestoreItemsAfterBattle feature)
     pbRestoreUsedItems if Settings::RESTORE_HELD_ITEMS_AFTER_BATTLE
-
-    return @decision
   end
 
   # Restores items consumed during battle to the Pokémon that used them

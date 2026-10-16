@@ -122,8 +122,7 @@ class Battle::AI
     foe_priority = ai_improvements_ko_priority(rival, @user)
     return false if foe_priority.nil?
     own_priority = ai_improvements_ko_priority(@user, rival)
-    if own_priority && (own_priority > foe_priority ||
-       (own_priority == foe_priority && @user.rough_stat(:SPEED) != rival.rough_stat(:SPEED) && @user.faster_than?(rival)))
+    if own_priority && ai_improvements_first_action?(@user, rival, own_priority, foe_priority) == true
       PBDebug.log_ai_decision("Peligro inmediato: se conserva al activo porque dispone de KO fiable antes del rival.")
       return false
     end
@@ -149,10 +148,10 @@ class Battle::AI
       PBDebug.log_ai_decision("Estancamiento no evaluado: Sustituto rival requiere una secuencia de ataques.")
       return false
     end
-    attack_pressure = ai_improvements_attack_pressure(@user, rival)
+    attack_pressure = ai_improvements_attack_pressure(@user, rival, true)
     return false if attack_pressure.nil?
-    outgoing, recoil = attack_pressure
-    incoming = ai_improvements_best_damage(rival, @user)
+    outgoing, recoil, own_priority = attack_pressure
+    incoming, incoming_profile = ai_improvements_incoming_pressure(rival, @user)
     own_residual = @user.rough_end_of_round_damage
     foe_residual = rival.rough_end_of_round_damage
     PBDebug.log_ai_decision("Presion #{@user.name} vs #{rival.name}: saliente #{outgoing.round(1)}, " \
@@ -171,10 +170,18 @@ class Battle::AI
       PBDebug.log_ai_decision("Estancamiento rechazado: el activo no pierde HP neto; bajo daño no basta para cambiar.")
       return false
     end
-    # ponytail: carrera con medias constantes, sin PP futuros, recuperacion activa
-    # ni orden de acciones; concede el ataque del turno letal. Simular secuencias
-    # si hace falta resolver carreras ajustadas en lugar de conservar al activo.
+    # ponytail: constant averages, not future PP/healing or changing residuals;
+    # correct only a clear lethal hit before the final action, not a full sequence.
     survival_turns = (@user.hp / pressure.to_f).ceil
+    useful_attacks = survival_turns
+    if own_priority && incoming_profile && incoming_profile[:reliable] &&
+       ai_improvements_first_action?(@user, rival, own_priority, incoming_profile[:priority]) == false
+      terminal_hp = @user.hp - (survival_turns - 1) * pressure
+      if incoming >= terminal_hp &&
+         incoming_profile[:raw_damage] > terminal_hp * AIImprovements::IMMEDIATE_KO_DAMAGE_MARGIN
+        useful_attacks -= 1
+      end
+    end
     net_damage = outgoing + foe_residual
     turns_to_ko = (net_damage > 0) ? (rival.hp / net_damage.to_f).ceil : Float::INFINITY
     residual_turns = (foe_residual > 0) ? (rival.hp / foe_residual.to_f).ceil : Float::INFINITY
@@ -182,8 +189,8 @@ class Battle::AI
       PBDebug.log_ai_decision("Estancamiento rechazado: residual ganador en #{residual_turns} turnos; supervivencia #{survival_turns}.")
       return false
     end
-    PBDebug.log_ai_decision("Carrera por estancamiento: supervivencia #{survival_turns}, KO rival #{turns_to_ko}.")
-    if turns_to_ko <= survival_turns + 1
+    PBDebug.log_ai_decision("Carrera por estancamiento: supervivencia #{survival_turns}, ataques utiles #{useful_attacks}, KO rival #{turns_to_ko}.")
+    if turns_to_ko <= useful_attacks + 1
       PBDebug.log_ai_decision("Estancamiento rechazado: el activo puede ganar la carrera o el margen es insuficiente.")
       return false
     end
@@ -293,7 +300,8 @@ class Battle::AI
     elsif entry_hazard_damage > 0
       score -= 50 * entry_hazard_damage / pkmn.hp
     end
-    if !pkmn.hasItem?(:HEAVYDUTYBOOTS) && !pokemon_airborne?(pkmn)
+    boots_active = pkmn.hasItem?(:HEAVYDUTYBOOTS) && ai_improvements_pokemon_item_active?(idxBattler, pkmn)
+    if !boots_active && !pokemon_airborne?(pkmn)
       # Toxic Spikes
       if @user.pbOwnSide.effects[PBEffects::ToxicSpikes] > 0
         score -= 20 if pokemon_can_be_poisoned?(pkmn)
@@ -319,18 +327,24 @@ class Battle::AI
       hp_penalty = (40 * (1 - pkmn.hp.to_f / pkmn.totalhp).clamp(0, 1)).round
       remaining_hp = [pkmn.hp - entry_hazard_damage, 0].max
       fragile_penalty = 0
-      # ponytail: survival proxy, NOT damage or a KO prediction. At <=25% HP,
-      # penalize up to 20 points if known last power * type effectiveness >=70.
-      # Ignores stats, STAB, abilities, accuracy, fixed damage and move effects;
-      # use a side-effect-free reserve damage API if one becomes available.
-      if last_move_threat >= 70 && remaining_hp < pkmn.totalhp * 0.25
+      threat = ai_improvements_reserve_threat(idxBattler, pkmn, entry_hazard_damage)
+      if threat && remaining_hp > 0
+        # ponytail: immediate incoming damage only; entry callbacks and unsupported
+        # move functions retain the proxy until an isolated entry model is available.
+        ratio = threat[:expected] / remaining_hp.to_f
+        fragile_penalty = (AIReserveDamage::FRAGILITY_MAX_PENALTY *
+                           ((ratio - 0.5) * 2).clamp(0, 1)).round
+        PBDebug.log_ai_decision("Amenaza calculada #{pkmn.name}: movimiento #{threat[:move].inspect}, " \
+                               "dano #{threat[:damage]}, esperado #{threat[:expected].round(1)}, " \
+                               "HP tras hazards #{remaining_hp}, KO fiable #{threat[:reliable_ko]}.")
+      elsif last_move_threat >= 70 && remaining_hp < pkmn.totalhp * 0.25
         fragile_penalty = (20 * (1 - remaining_hp / (pkmn.totalhp * 0.25))).round
       end
       adjustment = hp_penalty + fragile_penalty
       score -= adjustment
       PBDebug.log_ai_decision("Valoracion HP #{pkmn.name}: HP #{pkmn.hp}/#{pkmn.totalhp}, " \
                              "hazards #{entry_hazard_damage}, restante #{remaining_hp}, " \
-                             "amenaza proxy #{last_move_threat}, ajuste -#{adjustment} " \
+                             "modelo #{threat ? 'calculado' : 'proxy'}, amenaza proxy #{last_move_threat}, ajuste -#{adjustment} " \
                              "(HP -#{hp_penalty}, fragilidad -#{fragile_penalty}).")
     end
     # Add power * effectiveness / 10 of all pkmn's moves to score
@@ -356,18 +370,20 @@ class Battle::AI
   end
 
   def calculate_entry_hazard_damage(pkmn, side)
-    return 0 if pkmn.hasAbility?(:MAGICGUARD) || pkmn.hasItem?(:HEAVYDUTYBOOTS)
+    return 0 if pkmn.hasAbility?(:MAGICGUARD)
+    return 0 if pkmn.hasItem?(:HEAVYDUTYBOOTS) && ai_improvements_pokemon_item_active?(side, pkmn)
     ret = 0
     # Stealth Rock
     if @battle.sides[side].effects[PBEffects::StealthRock] && GameData::Type.exists?(:ROCK)
       pkmn_types = pkmn.types
       eff = Effectiveness.calculate(:ROCK, *pkmn_types)
-      ret += pkmn.totalhp * eff / 8 if !Effectiveness.ineffective?(eff)
+      # Match pbReduceHP rounding and minimum damage for each hazard separately.
+      ret += [(pkmn.totalhp * eff / 8).round, 1].max if !Effectiveness.ineffective?(eff)
     end
     # Spikes
     if @battle.sides[side].effects[PBEffects::Spikes] > 0 && !pokemon_airborne?(pkmn)
       spikes_div = [8, 6, 4][@battle.sides[side].effects[PBEffects::Spikes] - 1]
-      ret += pkmn.totalhp / spikes_div
+      ret += [(pkmn.totalhp / spikes_div).round, 1].max
     end
     return ret
   end

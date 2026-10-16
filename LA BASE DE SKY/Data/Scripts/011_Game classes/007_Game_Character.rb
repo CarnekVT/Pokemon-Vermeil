@@ -2,6 +2,8 @@
 #
 #===============================================================================
 class Game_Character
+  MOVE_SPEED = 3
+  JUMP_SPEED = 3
   attr_reader   :id
   attr_reader   :original_x
   attr_reader   :original_y
@@ -75,9 +77,9 @@ class Game_Character
     @original_direction        = 2
     @original_pattern          = 0
     @move_type                 = 0
-    self.move_speed            = 3
+    self.move_speed            = MOVE_SPEED
     self.move_frequency        = 6
-    self.jump_speed            = 3
+    self.jump_speed            = JUMP_SPEED
     @move_route                = nil
     @move_route_index          = 0
     @original_move_route       = nil
@@ -229,10 +231,6 @@ class Game_Character
     return @bush_depth || 0
   end
 
-  #-----------------------------------------------------------------------------
-  # Always on bush by DPertierra - Integrado
-  # https://github.com/dpertierra
-  #-----------------------------------------------------------------------------
   def calculate_bush_depth
     if @tile_id > 0 || @always_on_top || jumping?
       @bush_depth = 0

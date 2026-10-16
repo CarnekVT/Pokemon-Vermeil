@@ -58,7 +58,9 @@ module Compiler
     [":XSPECIAL3",                   ":XSPATK3"],
     [":XSPECIAL6",                   ":XSPATK6"],
     ["$PokemonGlobal.coins",         "$player.coins"],
-    ["pbHasType?",                   "$player.has_pokemon_of_type?"]
+    ["pbHasType?",                   "$player.has_pokemon_of_type?"],
+    ["$GameSpeed = 0",               "Turbo.reset!"],
+    ["$GameSpeed=0",                 "Turbo.reset!"],
   ]
 
   module_function
@@ -333,7 +335,7 @@ module Compiler
     end
 
     def mapFilename(mapID)
-      return sprintf("Data/map%03d.rxdata", mapID)
+      return sprintf("Data/Map%03d.rxdata", mapID)
     end
 
     def getMap(mapID)

@@ -37,7 +37,8 @@ class Battle::AI
     end
     # Don't make score changes if foes have Unaware and target can't make use of
     # extra stat stages
-    if !target.has_move_with_function?("PowerHigherWithUserPositiveStatStages")
+    if !(@trainer.high_skill? && @trainer.has_skill_flag?("HPAware")) &&
+       !target.has_move_with_function?("PowerHigherWithUserPositiveStatStages")
       foe_is_aware = false
       each_foe_battler(target.side) do |b, i|
         foe_is_aware = true if !b.has_active_ability?(:UNAWARE)
@@ -104,8 +105,34 @@ class Battle::AI
       return false if !target.battler.pbCanRaiseStatStage?(stat, @user.battler, @move.move)
     end
     # Check if target won't benefit from the stat being raised
-    return true if target.has_move_with_function?("SwitchOutUserPassOnEffects",
-                                                  "PowerHigherWithUserPositiveStatStages")
+    return true if target.has_move_with_function?("PowerHigherWithUserPositiveStatStages")
+    if target.has_move_with_function?("SwitchOutUserPassOnEffects")
+      return true if ![:DEFENSE, :SPECIAL_DEFENSE].include?(stat) ||
+                     ai_improvements_has_usable_baton_pass?(target)
+    end
+    return true if stat == :SPEED && ai_improvements_speed_setup_scope?(target)
+    if @trainer.high_skill? && @trainer.has_skill_flag?("HPAware") && stat != :SPEED
+      useful_against_unaware = false
+      each_foe_battler(target.side) do |foe, _i|
+        useful_against_unaware = true if !foe.has_active_ability?(:UNAWARE)
+        # Mold Breaker bypasses defensive Unaware, not the attacker's Unaware.
+        if target.has_mold_breaker? &&
+           ([:ATTACK, :SPECIAL_ATTACK, :ACCURACY].include?(stat) ||
+            (stat == :DEFENSE && target.has_move_with_function?("UseUserDefenseInsteadOfUserAttack")))
+          useful_against_unaware = true
+        end
+        # Unaware only ignores accuracy/evasion stages for damaging moves.
+        if stat == :ACCURACY
+          useful_against_unaware = true if target.check_for_move { |m| m.statusMove? && m.accuracy > 0 }
+        elsif stat == :EVASION
+          useful_against_unaware = true if foe.check_for_move { |m| m.statusMove? && m.accuracy > 0 }
+        end
+      end
+      if !useful_against_unaware
+        PBDebug.log("     ignore raising #{stat} (target's foes have Unaware)")
+        return false
+      end
+    end
     if @trainer.high_skill? && @trainer.has_skill_flag?("HPAware") &&
        [:DEFENSE, :SPECIAL_DEFENSE].include?(stat)
       return true if stat == :DEFENSE && target.has_move_with_function?("UseUserDefenseInsteadOfUserAttack")
@@ -170,8 +197,9 @@ class Battle::AI
 
   # Make score changes based on the general concept of raising stats at all.
   def get_target_stat_raise_score_generic(score, target, stat_changes, desire_mult = 1)
-    # Defensive stages use damage saved, not first-turn/high-HP setup bonuses.
+    # Contextual setup uses damage saved or turn order, not generic stage bonuses.
     total_increment = stat_changes.sum do |stat, increment|
+      next 0 if stat == :SPEED && ai_improvements_speed_setup_scope?(target)
       if @trainer.high_skill? && @trainer.has_skill_flag?("HPAware") &&
          [:DEFENSE, :SPECIAL_DEFENSE].include?(stat)
         next 0
@@ -226,7 +254,10 @@ class Battle::AI
       if @trainer.high_skill? && @trainer.has_skill_flag?("HPAware")
         score += ai_improvements_defensive_setup_delta(target, stat, increment) * desire_mult
         # Body Press also converts Defense into offensive pressure.
-        score += 10 * inc_mult if target.has_move_with_function?("UseUserDefenseInsteadOfUserAttack")
+        if target.has_move_with_function?("UseUserDefenseInsteadOfUserAttack") &&
+           !ai_improvements_offensive_setup_cost?(target)
+          score += 10 * inc_mult
+        end
       elsif old_stage >= 2 && increment == 1
         score -= 10 * ((target.opposes?(@user)) ? 1 : desire_mult)
       else
@@ -253,6 +284,9 @@ class Battle::AI
         score += 10 * inc_mult
       end
     when :SPEED
+      if ai_improvements_speed_setup_scope?(target)
+        return score + ai_improvements_speed_setup_delta(target, increment) * desire_mult
+      end
       # Prefer if target is slower than a foe
       target_speed = target.rough_stat(:SPEED)
       each_foe_battler(target.side) do |b, i|
@@ -312,7 +346,8 @@ class Battle::AI
       end
     end
     # Prefer if target has Stored Power
-    if target.has_move_with_function?("PowerHigherWithUserPositiveStatStages")
+    if target.has_move_with_function?("PowerHigherWithUserPositiveStatStages") &&
+       !ai_improvements_offensive_setup_cost?(target)
       score += 5 * increment * desire_mult
     end
     # Don't prefer if any foe has Punishment

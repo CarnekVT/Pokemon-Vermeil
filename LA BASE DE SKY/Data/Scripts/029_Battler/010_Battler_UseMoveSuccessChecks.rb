@@ -48,13 +48,13 @@ class Battle::Battler
        move.id != @battle.struggle.id
       choiced_move = GameData::Move.try_get(@effects[PBEffects::ChoiceBand])
       if choiced_move
-        if hasActiveItem?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF])
+        if Battle::ItemEffects.triggerChoiceLock(self.item, self)
           if showMessages
             msg = _INTL("¡A causa de {1} solo se puede usar {2}!", itemName, choiced_move.name)
             (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
           end
           return false
-        elsif hasActiveAbility?(:GORILLATACTICS)
+        elsif Battle::AbilityEffects.triggerChoiceLock(self)
           if showMessages
             msg = _INTL("¡{1} solo puede usar {2}!", pbThis, choiced_move.name)
             (commandPhase) ? @battle.pbDisplayPaused(msg) : @battle.pbDisplay(msg)
@@ -384,11 +384,13 @@ class Battle::Battler
       @battle.successStates[user.index].protected = true
       return true
     end
-    if user.hasActiveAbility?(:PIERCINGDRILL) && move.pbContactMove?(user) && target.used_protect_move?(move, user)
+    if (Battle::AbilityEffects.triggerPiercesProtection(user, move) ||
+        Battle::ItemEffects.triggerPiercesProtection(user.item, user, move)) &&
+       target.used_protect_move?(move, user)
       @battle.successStates[user.index].protected = true
       target.damageState.protected = true
     end
-    if !(move.pbContactMove?(user) && user.canMakeContactThroughProtection?)
+    if !user.canBypassProtection?(move)
       # Wide Guard
       if target.pbOwnSide.effects[PBEffects::WideGuard] && user.index != target.index &&
          move.pbTarget(user).num_targets > 1 &&

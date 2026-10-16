@@ -251,7 +251,7 @@ class Battle::Battler
   end
 
   def pbRemoveItem
-    @effects[PBEffects::ChoiceBand] = nil if !hasActiveAbility?(:GORILLATACTICS)
+    @effects[PBEffects::ChoiceBand] = nil if !Battle::AbilityEffects.triggerChoiceLock(self)
     @effects[PBEffects::Unburden]   = true if self.item && hasActiveAbility?(:UNBURDEN)
     if Settings::RESTORE_HELD_ITEMS_AFTER_BATTLE && @battle.used_items && pbOwnedByPlayer?
       @battle.used_items << [self.pokemon, @item_id]

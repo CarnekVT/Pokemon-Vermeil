@@ -831,7 +831,7 @@ Battle::AI::Handlers::MoveEffectScore.add("ProtectUser",
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?
       next if !b.check_for_move { |m| m.canProtectAgainst? }
-      next if b.can_make_contact_through_protection? && b.check_for_move { |m| m.pbContactMove?(b.battler) }
+      next if b.check_for_move { |m| m.canProtectAgainst? && b.can_bypass_protection?(m) }
       useless = false
       # General preference
       score += 7
@@ -875,7 +875,7 @@ Battle::AI::Handlers::MoveEffectScore.add("ProtectUserBanefulBunker",
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?
       next if !b.check_for_move { |m| m.canProtectAgainst? }
-      next if b.can_make_contact_through_protection? && b.check_for_move { |m| m.pbContactMove?(b.battler) }
+      next if b.check_for_move { |m| m.canProtectAgainst? && b.can_bypass_protection?(m) }
       useless = false
       # General preference
       score += 7
@@ -932,7 +932,7 @@ Battle::AI::Handlers::MoveEffectScore.add("ProtectUserFromDamagingMovesBurningBu
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?
       next if !b.check_for_move { |m| m.damagingMove? && m.canProtectAgainst? }
-      next if b.can_make_contact_through_protection? && b.check_for_move { |m| m.pbContactMove?(b.battler) }
+      next if b.check_for_move { |m| m.canProtectAgainst? && b.can_bypass_protection?(m) }
       useless = false
       # General preference
       score += 7
@@ -984,7 +984,7 @@ Battle::AI::Handlers::MoveEffectScore.add("ProtectUserFromDamagingMovesKingsShie
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?
       next if !b.check_for_move { |m| m.damagingMove? && m.canProtectAgainst? }
-      next if b.can_make_contact_through_protection? && b.check_for_move { |m| m.pbContactMove?(b.battler) }
+      next if b.check_for_move { |m| m.canProtectAgainst? && b.can_bypass_protection?(m) }
       useless = false
       # General preference
       score += 7
@@ -1037,7 +1037,7 @@ Battle::AI::Handlers::MoveEffectScore.add("ProtectUserFromDamagingMovesObstruct"
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?
       next if !b.check_for_move { |m| m.damagingMove? && m.canProtectAgainst? }
-      next if b.can_make_contact_through_protection? && b.check_for_move { |m| m.pbContactMove?(b.battler) }
+      next if b.check_for_move { |m| m.canProtectAgainst? && b.can_bypass_protection?(m) }
       useless = false
       # General preference
       score += 7
@@ -1086,7 +1086,7 @@ Battle::AI::Handlers::MoveEffectScore.add("ProtectUserFromDamagingMovesSilkTrap"
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?
       next if !b.check_for_move { |m| m.damagingMove? && m.canProtectAgainst? }
-      next if b.can_make_contact_through_protection? && b.check_for_move { |m| m.pbContactMove?(b.battler) }
+      next if b.check_for_move { |m| m.canProtectAgainst? && b.can_bypass_protection?(m) }
       useless = false
       # General preference
       score += 7
@@ -1135,7 +1135,7 @@ Battle::AI::Handlers::MoveEffectScore.add("ProtectUserFromTargetingMovesSpikyShi
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?
       next if !b.check_for_move { |m| m.canProtectAgainst? }
-      next if b.can_make_contact_through_protection? && b.check_for_move { |m| m.pbContactMove?(b.battler) }
+      next if b.check_for_move { |m| m.canProtectAgainst? && b.can_bypass_protection?(m) }
       useless = false
       # General preference
       score += 7
@@ -1186,7 +1186,7 @@ Battle::AI::Handlers::MoveEffectScore.add("ProtectUserSideFromDamagingMovesIfUse
     ai.each_foe_battler(user.side) do |b, i|
       next if !b.can_attack?
       next if !b.check_for_move { |m| m.damagingMove? && m.canProtectAgainst? }
-      next if b.can_make_contact_through_protection? && b.check_for_move { |m| m.pbContactMove?(b.battler) }
+      next if b.check_for_move { |m| m.canProtectAgainst? && b.can_bypass_protection?(m) }
       useless = false
       # General preference
       score += 7
@@ -1391,7 +1391,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("HoopaRemoveProtectionsBy
 #===============================================================================
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilQuarterOfDamageDealt",
   proc { |score, move, user, target, ai, battle|
-    next score if !user.battler.takesIndirectDamage? || user.has_active_ability?(:ROCKHEAD)
+    next score if !user.battler.takesIndirectDamage? || user.recoil_immune?
     dmg = move.rough_damage / 4
     if dmg >= user.hp
       reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)
@@ -1409,7 +1409,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilQuarterOfDamageDea
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilThirdOfDamageDealtParalyzeTarget",
   proc { |score, move, user, target, ai, battle|
     # Score for being a recoil move
-    if user.battler.takesIndirectDamage? && !user.has_active_ability?(:ROCKHEAD)
+    if user.battler.takesIndirectDamage? && !user.recoil_immune?
       dmg = move.rough_damage / 3
       if dmg >= user.hp
         reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)
@@ -1433,7 +1433,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilThirdOfDamageDealt
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilThirdOfDamageDealtBurnTarget",
   proc { |score, move, user, target, ai, battle|
     # Score for being a recoil move
-    if user.battler.takesIndirectDamage? && !user.has_active_ability?(:ROCKHEAD)
+    if user.battler.takesIndirectDamage? && !user.recoil_immune?
       dmg = move.rough_damage / 3
       if dmg >= user.hp
         reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)
@@ -1456,7 +1456,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilThirdOfDamageDealt
 #===============================================================================
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilHalfOfDamageDealt",
   proc { |score, move, user, target, ai, battle|
-    next score if !user.battler.takesIndirectDamage? || user.has_active_ability?(:ROCKHEAD)
+    next score if !user.battler.takesIndirectDamage? || user.recoil_immune?
     dmg = (move.rough_damage / 2.0).round
     if dmg >= user.hp
       reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)
@@ -1473,7 +1473,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilHalfOfDamageDealt"
 #===============================================================================
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("RecoilHalfOfTotalHP",
   proc { |score, move, user, target, ai, battle|
-    next score if !user.battler.takesIndirectDamage? || user.has_active_ability?(:ROCKHEAD)
+    next score if !user.battler.takesIndirectDamage? || user.recoil_immune?
     dmg = (user.totalhp / 2.0).round
     if dmg >= user.hp
       reserves = battle.pbAbleNonActiveCount(user.idxOwnSide)

@@ -71,6 +71,10 @@ module AIImprovements
   DEFENSIVE_SETUP_TURN_COST     = 10
   DEFENSIVE_SETUP_NO_SAVING     = 40
 
+  SPEED_SETUP_ORDER_BONUS = 20
+  SPEED_SETUP_TURN_COST   = 10
+  SPEED_SETUP_NO_BENEFIT  = 40
+
   RECOIL_DAMAGE_DIVISORS = {
     "RecoilQuarterOfDamageDealt"             => 4.0,
     "RecoilThirdOfDamageDealt"               => 3.0,
@@ -237,18 +241,36 @@ module AIImprovements
 
   # Ajuste basado solo en el moveset conocido del rival (sin datos de HP: el core
   # ya pondera el HP en sentido opuesto en su handler FailsIfTargetActed).
-  def self.sucker_punch_delta(target)
+  def self.sucker_punch_delta(target, ai = nil)
+    available_only = ai && ai.trainer.high_skill? && ai.trainer.has_skill_flag?("HPAware")
     moves = target.battler.moves
+    if available_only
+      moves = moves.each_with_index.filter_map do |candidate, index|
+        next if candidate.nil? || !ai.ai_improvements_move_available?(target, candidate, index)
+        next candidate
+      end
+    end
     total = moves.length
-    return 0 if total == 0
-    status_ratio = moves.count(&:statusMove?).to_f / total
+    if total == 0
+      PBDebug.log_ai_decision("Riesgo Golpe Bajo: sin opciones seleccionables; Forcejeo, ajuste 0.") if available_only
+      return 0
+    end
+    status_count = moves.count do |candidate|
+      candidate.statusMove? && (!available_only || candidate.function_code != "UseMoveTargetIsAboutToUse")
+    end
+    # ponytail: ratio of options, not action probability; model a policy only if needed.
+    status_ratio = status_count.to_f / total
     delta = 0
     if status_ratio >= 0.5
       delta -= SUCKER_RATIO_HIGH_PENALTY
     elsif status_ratio >= 0.25
       delta -= SUCKER_RATIO_MID_PENALTY
     end
-    delta -= SUCKER_PROTECT_PENALTY if moves.any? { |m| PROTECT_FUNCTION_CODES.include?(m.function_code) }
+    has_protect = moves.any? { |m| PROTECT_FUNCTION_CODES.include?(m.function_code) }
+    delta -= SUCKER_PROTECT_PENALTY if has_protect
+    if available_only
+      PBDebug.log_ai_decision("Riesgo Golpe Bajo: opciones #{total}, estado #{status_count}, proteccion #{has_protect}, ajuste #{delta}.")
+    end
     delta
   end
 
@@ -366,6 +388,7 @@ class Battle::AI
     original_prankster = attacker.effects[PBEffects::Prankster]
     original_gem = attacker.effects[PBEffects::GemConsumed]
     original_bond = attacker.effects[PBEffects::ParentalBond]
+    original_choice = attacker.effects[PBEffects::ChoiceBand]
     begin
       @user, @target = attacker, defender
       @move = Battle::AI::AIMove.new(self)
@@ -376,12 +399,102 @@ class Battle::AI
       attacker.effects[PBEffects::Prankster] = original_prankster
       attacker.effects[PBEffects::GemConsumed] = original_gem
       attacker.effects[PBEffects::ParentalBond] = original_bond
+      attacker.effects[PBEffects::ChoiceBand] = original_choice
     end
   end
 
   def ai_improvements_move_available?(battler, candidate, index)
     return candidate.id == battler.battler.currentMove if battler.battler.usingMultiTurnAttack?
     return @battle.pbCanChooseMove?(battler.index, index, false)
+  end
+
+  def ai_improvements_sucker_punch_fails?(target)
+    return false unless @trainer.high_skill? && @trainer.has_skill_flag?("HPAware")
+    return false if target.nil?
+    has_available_move = false
+    # Inspect selected moves, not called moves or the opponent's registered action.
+    target.battler.moves.each_with_index do |candidate, index|
+      next if candidate.nil?
+      available = ai_improvements_move_available?(target, candidate, index)
+      attacking_option = candidate.damagingMove? || candidate.function_code == "UseMoveTargetIsAboutToUse"
+      PBDebug.log_ai_decision("Golpe Bajo: opcion #{candidate.id}, PP #{candidate.pp}, seleccionable #{available}, ataque o Yo Primero #{attacking_option}.")
+      next unless available
+      has_available_move = true
+      return false if attacking_option
+    end
+    # No selectable move means Struggle, which can be hit by Sucker Punch.
+    # ponytail: only proves absence of attacking options; forecast move order separately if needed.
+    PBDebug.log_ai_decision("Golpe Bajo: solo estado seleccionable #{has_available_move}; sin opciones se conserva Forcejeo.")
+    return has_available_move
+  end
+
+  def ai_improvements_sucker_punch_outsped?(move, user, target)
+    return false if user.nil? || target.nil?
+    # Prediction clones retain realMove; Copycat/Nature Power create a new one.
+    direct_move = user.battler.moves.any? do |candidate|
+      candidate.equal?(move.move) ||
+        (move.move.realMove && candidate.realMove.equal?(move.move.realMove))
+    end
+    return target.faster_than?(user) unless direct_move
+    # After You/Quash override ordinary priority; don't infer an order here.
+    return false if [user, target].any? do |battler|
+      battler.effects[PBEffects::MoveNext] || battler.effects[PBEffects::Quash] > 0
+    end
+    available_moves = []
+    target.battler.moves.each_with_index do |candidate, index|
+      next if candidate.nil? || !ai_improvements_move_available?(target, candidate, index)
+      available_moves << candidate
+    end
+    attacks = available_moves.select do |candidate|
+      candidate.damagingMove? || candidate.function_code == "UseMoveTargetIsAboutToUse"
+    end
+    attacks << @battle.struggle if available_moves.empty?
+    return false if attacks.empty?
+    user_priority = ai_improvements_with_move_context(user, target) do
+      @battle.moldBreaker = user.has_mold_breaker?
+      @move.set_up(move.move.clone)
+      @move.rough_priority(user)
+    end
+    user_speed = user.rough_stat(:SPEED)
+    target_speed = target.rough_stat(:SPEED)
+    trick_room = @battle.field.effects[PBEffects::TrickRoom] > 0
+    target_faster = trick_room ? target_speed < user_speed : target_speed > user_speed
+    uncertain_bracket = [user, target].any? do |battler|
+      battler.has_active_ability?([:QUICKDRAW, :STALL, :MYCELIUMMIGHT]) ||
+        battler.has_active_item?([:QUICKCLAW, :CUSTAPBERRY, :LAGGINGTAIL, :FULLINCENSE])
+    end
+    ai_improvements_with_move_context(target, user) do
+      attacks.all? do |candidate|
+        # Runtime permits Me First even if its user has already acted.
+        next false if candidate.function_code == "UseMoveTargetIsAboutToUse"
+        @battle.moldBreaker = target.has_mold_breaker?
+        @move.set_up(candidate.clone)
+        target_priority = @move.rough_priority(target)
+        # ponytail: no bracket RNG or tie forecast; only veto a clear loss of order.
+        target_first = target_priority > user_priority ||
+                       (target_priority == user_priority && !uncertain_bracket && target_faster)
+        PBDebug.log_ai_decision("Orden Golpe Bajo: prioridad #{user_priority}/#{target_priority}, velocidad #{user_speed}/#{target_speed}, Espacio Raro #{trick_room}, rival #{candidate.id}, rival primero #{target_first}.")
+        next target_first
+      end
+    end
+  end
+
+  def ai_improvements_upper_hand_fails?(user, target)
+    return false unless @trainer.high_skill? && @trainer.has_skill_flag?("HPAware")
+    return false if user.nil? || target.nil?
+    # Check legal possibilities, never the opponent's registered action.
+    has_priority = ai_improvements_with_move_context(target, user) do
+      target.battler.moves.each_with_index.any? do |candidate, index|
+        next false if candidate.nil?
+        next false unless ai_improvements_move_available?(target, candidate, index)
+        # Priority belongs to the selected move, not the move called by Copycat/Nature Power.
+        @battle.moldBreaker = target.has_mold_breaker?
+        @move.set_up(candidate.clone)
+        @battle.moldBreaker ||= target.has_active_ability?(:MYCELIUMMIGHT) && @move.statusMove?
+        next @move.rough_priority(target) > 0
+      end
+    end
+    return !has_priority
   end
 
   # Float: mejor daño esperado por turno entre movimientos seleccionables.
@@ -432,6 +545,67 @@ class Battle::AI
     end
   end
 
+  # nil means tied or uncertain order; never resolve brackets with their RNG.
+  def ai_improvements_first_action?(attacker, defender, attacker_priority, defender_priority)
+    return nil if attacker_priority.nil? || defender_priority.nil?
+    return nil if [attacker, defender].any? do |b|
+      b.effects[PBEffects::MoveNext] || b.effects[PBEffects::Quash] > 0
+    end
+    return attacker_priority > defender_priority if attacker_priority != defender_priority
+    return nil if [attacker, defender].any? do |b|
+      b.has_active_ability?([:QUICKDRAW, :STALL, :MYCELIUMMIGHT]) ||
+        b.has_active_item?([:QUICKCLAW, :CUSTAPBERRY, :LAGGINGTAIL, :FULLINCENSE])
+    end
+    speed, foe_speed = attacker.rough_stat(:SPEED), defender.rough_stat(:SPEED)
+    return nil if speed == foe_speed
+    return (@battle.field.effects[PBEffects::TrickRoom] > 0) ? speed < foe_speed : speed > foe_speed
+  end
+
+  # Only ordinary fixed-power attacks support projecting the terminal action.
+  def ai_improvements_repeatable_attack?(candidate)
+    return AIReserveDamage::FUNCTIONS.include?(candidate.function_code) && candidate.move.power > 1 &&
+           !candidate.move.is_a?(Battle::Move::TwoTurnMove)
+  end
+
+  def ai_improvements_incoming_pressure(attacker, defender)
+    profile = nil
+    damage = ai_improvements_best_damage(attacker, defender) do |candidate|
+      accuracy = candidate.rough_accuracy.clamp(0, 100)
+      raw_damage = candidate.rough_damage.to_f
+      turns = 1.0
+      if candidate.move.is_a?(Battle::Move::TwoTurnMove)
+        turns = 2.0 if candidate.move.pbIsChargingTurn?(attacker.battler)
+      elsif candidate.function_code == "AttackAndSkipNextTurn"
+        turns = 2.0
+      end
+      expected = raw_damage * accuracy / 100.0 / turns
+      crit = candidate.rough_critical_hit_stage
+      uncertain_crit = crit >= 0 && crit < Battle::Move::CRITICAL_HIT_RATIOS.length &&
+                       Battle::Move::CRITICAL_HIT_RATIOS[crit] == 2
+      priority = candidate.rough_priority(attacker)
+      reliable = ai_improvements_repeatable_attack?(candidate) && attacker.can_attack? &&
+                 accuracy >= AIImprovements::IMMEDIATE_KO_MIN_ACCURACY && !uncertain_crit &&
+                 attacker.status != :PARALYSIS && attacker.effects[PBEffects::Confusion] == 0 &&
+                 attacker.effects[PBEffects::Attract] < 0
+      reliable = false if defender.effects[PBEffects::Substitute] > 0 &&
+                          !candidate.move.ignoresSubstitute?(attacker.battler)
+      if defender.hp == defender.totalhp
+        reliable = false if defender.has_active_item?(:FOCUSSASH) ||
+                            (defender.has_active_ability?(:STURDY) && !defender.being_mold_broken?)
+      end
+      if profile.nil? || expected > profile[:damage]
+        profile = { :damage => expected, :raw_damage => raw_damage,
+                    :priority => priority, :reliable => reliable }
+      elsif expected == profile[:damage]
+        # Any equally strong option must support the same definite order and KO.
+        profile[:reliable] &&= reliable && priority == profile[:priority]
+        profile[:raw_damage] = [profile[:raw_damage], raw_damage].min
+      end
+      next true
+    end
+    return [damage, profile]
+  end
+
   # Prioridad máxima de un KO inmediato razonablemente fiable; nil si no existe.
   def ai_improvements_ko_priority(attacker, defender)
     return nil if !attacker.can_attack? || attacker.fainted? || defender.fainted?
@@ -440,7 +614,13 @@ class Battle::AI
       next false if candidate.move.is_a?(Battle::Move::TwoTurnMove) &&
                     candidate.move.pbIsChargingTurn?(attacker.battler)
       next false unless candidate.move.pbDamagingMove?
+      # These attacks require a particular opposing action, not just move availability.
+      next false if ["FailsIfTargetActed", "FlinchTargetFailsIfTargetNotUsingPriorityMove",
+                     "UseMoveTargetIsAboutToUse"].include?(candidate.function_code)
       next false if candidate.rough_accuracy < AIImprovements::IMMEDIATE_KO_MIN_ACCURACY
+      crit = candidate.rough_critical_hit_stage
+      ratios = Battle::Move::CRITICAL_HIT_RATIOS
+      next false if crit >= 0 && crit < ratios.length && ratios[crit] == 2
       next false if candidate.rough_damage <= defender.hp * AIImprovements::IMMEDIATE_KO_DAMAGE_MARGIN
       next false if defender.effects[PBEffects::Substitute] > 0 &&
                     !candidate.move.ignoresSubstitute?(attacker.battler)
@@ -461,7 +641,7 @@ class Battle::AI
   # sin elegir acciones ni registrar movimientos. El daño entrante conserva su
   # estimación máxima para no asumir que el rival elegirá un ataque débil.
   # nil indica una política de sacrificio que la carrera constante no representa.
-  def ai_improvements_attack_pressure(attacker, defender)
+  def ai_improvements_attack_pressure(attacker, defender, with_order = false)
     choices = []
     return [0.0, 0.0] if attacker.nil? || defender.nil?
     original_bond = attacker.effects[PBEffects::ParentalBond]
@@ -483,7 +663,7 @@ class Battle::AI
           recoil = 0.0
           unavoidable_loss = 0.0
           if attacker.battler.takesIndirectDamage?
-            if !attacker.has_active_ability?(:ROCKHEAD)
+            if !attacker.recoil_immune?
               divisor = AIImprovements::RECOIL_DAMAGE_DIVISORS[candidate.function_code]
               recoil = [(damage / divisor).round, 1].max if divisor
               recoil = (attacker.totalhp / 2.0).round if candidate.function_code == "RecoilHalfOfTotalHP"
@@ -500,7 +680,9 @@ class Battle::AI
           sacrifice = candidate.function_code.start_with?("UserFaints")
           loss = (chance * [recoil + unavoidable_loss, attacker.hp].min +
                   (1 - chance) * [unavoidable_loss, attacker.hp].min) / turns
-          choices << [candidate.name, score, damage * chance / turns, loss, sacrifice]
+          priority = with_order ? candidate.rough_priority(attacker) : nil
+          repeatable = with_order && ai_improvements_repeatable_attack?(candidate)
+          choices << [candidate.name, score, damage * chance / turns, loss, sacrifice, priority, repeatable]
           next false
         end
       end
@@ -525,7 +707,14 @@ class Battle::AI
     end
     # ponytail: política ofensiva del estado actual; no simula boosts, curas,
     # críticos ni PP futuros. Ampliar a secuencias si las carreras ajustadas lo requieren.
-    return [damage, recoil]
+    return [damage, recoil] unless with_order
+    weighted_choices = choices.select { |choice| choice[1] > threshold }
+    priority = nil
+    if weighted_choices.all? { |choice| choice[6] } &&
+       weighted_choices.map { |choice| choice[5] }.uniq.length == 1
+      priority = weighted_choices.first[5]
+    end
+    return [damage, recoil, priority]
   end
 
   # Progreso de estado seleccionable y viable contra al menos un rival actual.
@@ -572,13 +761,231 @@ class Battle::AI
            threat >= incoming * AIImprovements::DEFENSIVE_THREAT_MIN_SHARE
   end
 
+  def ai_improvements_speed_setup_scope?(user)
+    return false unless @trainer.high_skill? && @trainer.has_skill_flag?("HPAware") &&
+                        @battle.singleBattle? && user.index == @user.index && @move.statusMove?
+    return false unless ["RaiseUserSpeed1", "RaiseUserSpeed2", "RaiseUserSpeed3"].include?(@move.function_code)
+    foes = []
+    each_foe_battler(user.side) { |foe, _i| foes << foe }
+    return false unless foes.length == 1
+    return false if @battle.field.effects[PBEffects::TrickRoom] == 1 ||
+                    @battle.field.weatherDuration == 1 || @battle.field.terrainDuration == 1
+    foe = foes[0]
+    # Survival with a one-hit protection needs a separate hit-by-hit forecast.
+    return false if user.hp == user.totalhp &&
+                    (user.has_active_item?(:FOCUSSASH) || user.has_active_ability?(:STURDY))
+    return false if user.choice_locked?
+    [user, foe].each do |battler|
+      return false if battler.pbOwnSide.effects[PBEffects::Tailwind] == 1 ||
+                      battler.pbOwnSide.effects[PBEffects::Swamp] == 1 ||
+                      (battler.has_active_ability?(:SLOWSTART) && battler.effects[PBEffects::SlowStart] == 1)
+      return false if battler.effects[PBEffects::Substitute] > 0 || !battler.can_attack?
+      return false if battler.has_active_ability?([:SPEEDBOOST, :QUICKDRAW, :STALL, :MYCELIUMMIGHT])
+      return false if battler.has_active_item?([:QUICKCLAW, :CUSTAPBERRY, :LAGGINGTAIL, :FULLINCENSE])
+      return false if battler.has_move_with_function?("SwitchOutUserPassOnEffects",
+                       "PowerHigherWithUserFasterThanTarget", "PowerHigherWithUserPositiveStatStages",
+                       "PowerHigherWithTargetFasterThanUser", "PowerHigherWithTargetPositiveStatStages")
+    end
+    # Priority handlers are deterministic here; do not run bracket handlers/RNG.
+    setup_code = @move.function_code
+    compatible_priority = true
+    [[user, foe], [foe, user]].each do |attacker, defender|
+      ai_improvements_with_move_context(attacker, defender) do
+        attacker.battler.moves.each_with_index do |candidate, index|
+          next if candidate.nil? || !(candidate.damagingMove? ||
+                                     (attacker.index == user.index && candidate.function_code == setup_code))
+          next unless ai_improvements_move_available?(attacker, candidate, index)
+          if candidate.is_a?(Battle::Move::TwoTurnMove) || candidate.function_code == "AttackAndSkipNextTurn"
+            compatible_priority = false
+            break
+          end
+          # Conditional priority needs an action forecast, not just Speed.
+          if ["FailsIfTargetActed", "FlinchTargetFailsIfTargetNotUsingPriorityMove",
+              "FlinchTargetFailsIfNotUserFirstTurn"].include?(candidate.function_code)
+            compatible_priority = false
+            break
+          end
+          set_up_move_check(candidate.clone)
+          priority = @move.rough_priority(attacker)
+          if priority < 0 || (attacker.index == user.index && priority != 0)
+            compatible_priority = false
+            break
+          end
+        end
+      end
+      break if !compatible_priority
+    end
+    return compatible_priority
+  end
+
+  def ai_improvements_speed_setup_delta(user, increment)
+    foe = nil
+    each_foe_battler(user.side) { |battler, _i| foe ||= battler }
+    return -AIImprovements::SPEED_SETUP_NO_BENEFIT if foe.nil?
+    speed_before = user.rough_stat(:SPEED)
+    foe_speed = foe.rough_stat(:SPEED)
+    trick_room = @battle.field.effects[PBEffects::TrickRoom] > 0
+    before_first = trick_room ? speed_before < foe_speed : speed_before > foe_speed
+    original_stage = user.stages[:SPEED]
+    begin
+      user.stages[:SPEED] = [original_stage + increment, Battle::Battler::STAT_STAGE_MAXIMUM].min
+      speed_after = user.rough_stat(:SPEED)
+    ensure
+      user.stages[:SPEED] = original_stage
+    end
+    after_first = trick_room ? speed_after < foe_speed : speed_after > foe_speed
+    # ponytail: crédito de orden, no simulación de futuros rivales ni secuencias;
+    # ampliar el horizonte si los logs justifican valorar el sweep completo.
+    lethal_hit = false
+    incoming = ai_improvements_best_damage(foe, user) do |candidate|
+      if candidate.move.pbDamagingMove? && candidate.rough_accuracy >= AIImprovements::IMMEDIATE_KO_MIN_ACCURACY &&
+         candidate.rough_damage >= user.hp
+        lethal_hit = true
+      end
+      next true
+    end
+    normal_threat = ai_improvements_best_damage(foe, user) do |candidate|
+      next candidate.rough_priority(foe) == 0
+    end
+    priority_threat = ai_improvements_best_damage(foe, user) do |candidate|
+      next candidate.rough_priority(foe) > 0
+    end
+    own_ko = ai_improvements_ko_priority(user, foe)
+    reason = nil
+    if before_first && !own_ko.nil? && priority_threat <= 0
+      reason = "ya tiene KO fiable anterior"
+    elsif before_first || !after_first || speed_before == foe_speed
+      reason = "no gana un orden claro"
+    elsif lethal_hit || user.hp - incoming - user.rough_end_of_round_damage <= 0
+      reason = "no sobrevive al turno de setup"
+    elsif incoming <= 0
+      reason = "sin presion entrante que justifique gastar el turno"
+    elsif normal_threat <= 0
+      reason = "solo hay amenaza de prioridad; Velocidad no la adelanta"
+    end
+    # ponytail: peso proxy por máximos de daño, no probabilidad de elección;
+    # usar una política rival estimada si los logs justifican más precisión.
+    order_credit = normal_threat > 0 ? AIImprovements::SPEED_SETUP_ORDER_BONUS *
+                                      normal_threat / (normal_threat + priority_threat) : 0.0
+    delta = reason ? -AIImprovements::SPEED_SETUP_NO_BENEFIT :
+                     order_credit - AIImprovements::SPEED_SETUP_TURN_COST
+    PBDebug.log_ai_decision("Setup SPEED: velocidad #{speed_before}/#{speed_after}, rival #{foe_speed}, " \
+                           "Espacio Raro #{trick_room}, primero #{before_first}/#{after_first}, " \
+                           "entrante #{incoming.round(1)}, normal #{normal_threat.round(1)}, prioridad #{priority_threat.round(1)}, " \
+                           "credito orden #{order_credit.round(1)}, motivo #{reason || 'gana orden y paga turno'}, ajuste #{delta.round(1)}.")
+    return delta
+  end
+
+  def ai_improvements_pure_defensive_setup?(target)
+    return @move.statusMove? && target.index == @user.index &&
+           AIImprovements::BOOST_USER_STAT_CODES.include?(@move.function_code) &&
+           @move.move.statUp.each_slice(2).all? { |stat, _inc| [:DEFENSE, :SPECIAL_DEFENSE].include?(stat) }
+  end
+
+  def ai_improvements_offensive_setup_cost?(target)
+    return false unless @trainer.high_skill? && @trainer.has_skill_flag?("HPAware") &&
+                        @battle.singleBattle? && ai_improvements_pure_defensive_setup?(target)
+    return false if target.effects[PBEffects::Substitute] > 0 ||
+                    ai_improvements_has_usable_baton_pass?(target)
+    return false unless target.has_move_with_function?("UseUserDefenseInsteadOfUserAttack",
+                                                       "PowerHigherWithUserPositiveStatStages")
+    foes = []
+    each_foe_battler(target.side) { |foe, _i| foes << foe }
+    return foes.length == 1 && foes[0].effects[PBEffects::Substitute] == 0
+  end
+
+  def ai_improvements_baton_pass_defensive_scope?(user)
+    return false unless @trainer.high_skill? && @trainer.has_skill_flag?("HPAware") &&
+                        @battle.singleBattle? && user.index == @user.index
+    return false if user.stages.any? { |stat, stage| stage < 0 ||
+                                      (stage != 0 && ![:DEFENSE, :SPECIAL_DEFENSE].include?(stat)) }
+    # These passed effects change grounding, ability/item activity or protection.
+    return user.effects[PBEffects::Substitute] == 0 &&
+           !user.effects[PBEffects::Ingrain] && user.effects[PBEffects::MagnetRise] == 0 &&
+           user.effects[PBEffects::Telekinesis] == 0 &&
+           !user.effects[PBEffects::GastroAcid] && user.effects[PBEffects::Embargo] == 0
+  end
+
+  def ai_improvements_has_usable_baton_pass?(user)
+    return false unless user.has_move_with_function?("SwitchOutUserPassOnEffects")
+    return true unless ai_improvements_baton_pass_defensive_scope?(user)
+    return ai_improvements_baton_pass_defensive_value(user)[:usable]
+  end
+
+  def ai_improvements_baton_pass_defensive_value(user)
+    result = { :credit => 0.0, :usable => false, :index => -1, :remaining => 0 }
+    return result if user.effects[PBEffects::Commanding] >= 0 || user.effects[PBEffects::CommandedBy] >= 0
+    pass_available = user.battler.moves.each_with_index.any? do |candidate, index|
+      candidate && candidate.function_code == "SwitchOutUserPassOnEffects" &&
+        ai_improvements_move_available?(user, candidate, index)
+    end
+    return result unless pass_available
+    # Same policy as actual Baton Pass replacement, without re-entering scoring.
+    index = PBDebug.with_silent_logging { choose_best_replacement_pokemon(user.index, true) }
+    return result if index < 0
+    recipient = @battle.pbParty(user.index)[index]
+    return result if recipient.nil? || !@battle.pbCanSwitchIn?(user.index, index)
+    hazards = calculate_entry_hazard_damage(recipient, user.side)
+    remaining = [recipient.hp - hazards, 0].max
+    result[:index], result[:remaining] = index, remaining
+    rating = PBDebug.with_silent_logging { rate_replacement_pokemon(user.index, recipient, 100) }
+    return result if remaining <= 0 || rating < 100
+    result[:usable] = true
+    weights = { :DEFENSE => 0.0, :SPECIAL_DEFENSE => 0.0 }
+    each_foe_battler(user.side) do |foe, _i|
+      next if foe.has_active_ability?(:UNAWARE)
+      foe.battler.moves.each_with_index do |candidate, move_index|
+        next if candidate.nil? || !candidate.damagingMove? || candidate.power <= 0
+        next unless ai_improvements_move_available?(foe, candidate, move_index)
+        next if candidate.is_a?(Battle::Move::FixedDamageMove) ||
+                ["IgnoreTargetDefSpDefEvaStatStages", "CategoryDependsOnHigherDamagePoisonTarget",
+                 "CategoryDependsOnHigherDamageIgnoreTargetAbility", "TerapagosCategoryDependsOnHigherDamage"].include?(candidate.function_code)
+        ignores_ability = foe.has_mold_breaker? || candidate.function_code == "IgnoreTargetAbility"
+        next if !ignores_ability && pokemon_can_absorb_move?(recipient, candidate, candidate.type)
+        effectiveness = Effectiveness.calculate(candidate.type, *recipient.types)
+        next if Effectiveness.ineffective?(effectiveness)
+        stat = (candidate.specialMove?(candidate.type) &&
+                candidate.function_code != "UseTargetDefenseInsteadOfTargetSpDef") ? :SPECIAL_DEFENSE : :DEFENSE
+        weights[stat] = [weights[stat], candidate.power * effectiveness].max
+      end
+    end
+    # ponytail: proxy de ahorro relativo por categoría y HP restante, no daño ni
+    # carrera del receptor; usar una API aislada de reservas si se necesita precisión.
+    total_weight = weights.values.sum
+    if total_weight > 0
+      max_stage = Battle::Battler::STAT_STAGE_MAXIMUM
+      weights.each do |stat, weight|
+        stage = user.stages[stat].clamp(0, max_stage) + max_stage
+        multiplier = Battle::Battler::STAT_STAGE_MULTIPLIERS[stage].to_f /
+                     Battle::Battler::STAT_STAGE_DIVISORS[stage]
+        result[:credit] += AIImprovements::DEFENSIVE_SETUP_MAX_BONUS *
+                           (1 - 1 / multiplier) * weight / total_weight
+      end
+      result[:credit] *= remaining.to_f / recipient.totalhp
+    end
+    return result
+  end
+
+  def ai_improvements_baton_pass_defensive_stage_score(user)
+    value = ai_improvements_baton_pass_defensive_value(user)
+    PBDebug.log_ai_decision("Relevo defensivo: receptor party #{value[:index]}, " \
+                           "HP tras hazards #{value[:remaining]}, util #{value[:usable]}, " \
+                           "credito #{value[:credit].round(1)}.")
+    return value[:credit]
+  end
+
   def ai_improvements_defensive_setup_delta(target, stat, increment)
     foes = []
     each_foe_battler(target.side) { |foe, _i| foes << foe }
     incoming = foes.sum { |foe| ai_improvements_best_damage(foe, target) }
-    defensive_only = @move.statusMove? && target.index == @user.index &&
-                     AIImprovements::BOOST_USER_STAT_CODES.include?(@move.function_code) &&
-                     @move.move.statUp.each_slice(2).all? { |raised_stat, _inc| [:DEFENSE, :SPECIAL_DEFENSE].include?(raised_stat) }
+    defensive_only = ai_improvements_pure_defensive_setup?(target)
+    offensive_synergy = ai_improvements_offensive_setup_cost?(target)
+    if defensive_only && target.has_move_with_function?("SwitchOutUserPassOnEffects") &&
+       ai_improvements_baton_pass_defensive_scope?(target)
+      baton_before = ai_improvements_baton_pass_defensive_value(target)
+    end
+    baton_synergy = baton_before && baton_before[:usable]
+    attack_before = ai_improvements_best_damage(target, foes[0]) if offensive_synergy
     changes = { stat => increment }
     if defensive_only
       @move.move.statUp.each_slice(2) do |raised_stat, amount|
@@ -594,6 +1001,8 @@ class Battle::AI
         target.stages[raised_stat] = [original_stages[raised_stat] + amount, Battle::Battler::STAT_STAGE_MAXIMUM].min
       end
       reduced = foes.sum { |foe| ai_improvements_best_damage(foe, target) }
+      attack_after = ai_improvements_best_damage(target, foes[0]) if offensive_synergy
+      baton_after = ai_improvements_baton_pass_defensive_value(target) if baton_synergy
       haze = foes.any? do |foe|
         next false if foe.rough_end_of_round_damage >= foe.hp
         ai_improvements_with_move_context(foe, target) do
@@ -623,7 +1032,8 @@ class Battle::AI
       end
       delta -= AIImprovements::DEFENSIVE_SETUP_MAX_BONUS if reduced + target.rough_end_of_round_damage >= target.hp
       synergy = target.has_move_with_function?("UseUserDefenseInsteadOfUserAttack",
-                                              "PowerHigherWithUserPositiveStatStages", "SwitchOutUserPassOnEffects")
+                                              "PowerHigherWithUserPositiveStatStages") ||
+                ai_improvements_has_usable_baton_pass?(target)
       if defensive_only
         # ponytail: horizonte de golpes medios; sin críticos ni prioridades.
         # Usar una secuencia de acciones si hace falta resolver el orden exacto.
@@ -633,6 +1043,49 @@ class Battle::AI
         if first_hit >= target.hp
           PBDebug.log_ai_decision("Setup descartado: el primer golpe estimado #{first_hit.round(1)} supera HP #{target.hp} antes de aprovechar la mejora.")
           return -AIImprovements::DEFENSIVE_SETUP_NO_SAVING.to_f / changes.length
+        end
+      end
+      if baton_synergy
+        credit = [baton_after[:credit] - baton_before[:credit], 0.0].max
+        # Setup and passing are separate actions; without speed advantage, the
+        # active must survive another estimated hit before handing off the boosts.
+        can_pass = target.hp - first_hit - target.rough_end_of_round_damage > 0
+        can_pass &&= target.hp - first_hit - target.rough_end_of_round_damage > reduced if !moves_first
+        can_pass = false if target.choice_locked?
+        credit = 0.0 if !can_pass || haze
+        adjustment = credit - AIImprovements::DEFENSIVE_SETUP_TURN_COST
+        delta += adjustment
+        PBDebug.log_ai_decision("Coste setup Relevo: receptor party #{baton_after[:index]}, " \
+                               "HP tras hazards #{baton_after[:remaining]}, util #{baton_after[:usable]}, " \
+                               "credito marginal #{credit.round(1)}, puede pasar #{can_pass}, ajuste #{adjustment.round(1)}.")
+      end
+      if offensive_synergy
+        # ponytail: presupuesto de ataques medios en individuales, sin PP futuros,
+        # retroceso ni secuencias; ampliar a acciones completas si los logs lo exigen.
+        residual = target.rough_end_of_round_damage
+        before_pressure = incoming + residual
+        after_pressure = reduced + residual
+        if before_pressure > 0 && after_pressure > 0
+          attacks_before = (target.hp / before_pressure).ceil
+          remaining_hp = [target.hp - first_hit - residual, 0.0].max
+          attacks_after = (remaining_hp / after_pressure).ceil
+          # Each horizon ends at its own KO; remaining_hp already pays for setup.
+          attacks_before = [attacks_before, (foes[0].hp / attack_before).ceil].min if attack_before > 0
+          attacks_after = [attacks_after, (foes[0].hp / attack_after).ceil].min if attack_after > 0
+          useful_before = [attack_before * attacks_before, foes[0].hp].min
+          useful_after = [attack_after * attacks_after, foes[0].hp].min
+          gain = useful_after - useful_before
+          adjustment = (100.0 * gain / foes[0].totalhp).clamp(
+            -AIImprovements::DEFENSIVE_SETUP_MAX_BONUS, AIImprovements::DEFENSIVE_SETUP_MAX_BONUS
+          )
+          adjustment = [adjustment, -AIImprovements::DEFENSIVE_SETUP_TURN_COST.to_f].min if gain <= 0
+          delta += adjustment
+          PBDebug.log_ai_decision("Coste setup ofensivo: dano antes #{attack_before.round(1)}, tras boost #{attack_after.round(1)}, " \
+                                 "ataques #{attacks_before}/#{attacks_after}, dano util #{useful_before.round(1)}/#{useful_after.round(1)}, " \
+                                 "ajuste #{adjustment.round(1)}.")
+        else
+          # Sin horizonte finito, no inventar una recompensa ofensiva.
+          synergy = false if attack_after <= attack_before
         end
       end
       if defensive_only && !synergy
@@ -652,9 +1105,8 @@ class Battle::AI
                    0
                  end
           delta -= cost
-          # Sin sinergia, el ahorro de HP no basta si cuesta oportunidades de atacar.
-          delta = [delta, -cost.to_f].min if extra_attacks < 0
-          delta = [delta, 0.0].min if extra_attacks == 0
+          # Sin sinergia, el turno gastado debe comprar oportunidades de atacar.
+          delta = [delta, -cost.to_f].min if extra_attacks <= 0
           PBDebug.log_ai_decision("Coste setup #{stat}: ataques antes #{turns_before}, tras gastar turno #{turns_after}, " \
                                  "ganancia #{extra_attacks}, penalizacion #{cost}.")
         elsif saved <= 0
@@ -748,6 +1200,7 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:redundant_status_with_r
 #===============================================================================
 Battle::AI::Handlers::GeneralMoveScore.add(:boost_diminishing_returns,
   proc { |score, move, user, ai, battle|
+    next score if ai.ai_improvements_speed_setup_scope?(user)
     next score unless AIImprovements::BOOST_USER_STAT_CODES.include?(move.function_code)
     stat_ups = move.move.statUp
     next score if stat_ups.nil? || stat_ups.empty?
@@ -769,6 +1222,8 @@ Battle::AI::Handlers::GeneralMoveScore.add(:boost_diminishing_returns,
 Battle::AI::Handlers::GeneralMoveScore.add(:favorable_setup_bonus,
   proc { |score, move, user, ai, battle|
     next score unless ai.trainer.has_skill_flag?("HPAware")
+    next score if ai.trainer.high_skill? && score <= Battle::AI::MOVE_USELESS_SCORE
+    next score if ai.ai_improvements_speed_setup_scope?(user)
     next score unless AIImprovements::BOOST_USER_STAT_CODES.include?(move.function_code)
     stat_ups = move.move.statUp
     next score if stat_ups.nil? || stat_ups.empty?
@@ -925,7 +1380,7 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:sucker_punch_risk,
   proc { |score, move, user, target, ai, battle|
     next score unless ai.trainer.medium_skill?
     next score unless move.id == :SUCKERPUNCH
-    next score + AIImprovements.sucker_punch_delta(target)
+    next score + AIImprovements.sucker_punch_delta(target, ai)
   }
 )
 

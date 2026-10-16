@@ -150,8 +150,7 @@ Battle::AI::Handlers::GeneralMoveScore.add(:any_battler_can_Snatch_move,
 Battle::AI::Handlers::GeneralMoveScore.add(:good_move_for_choice_item,
   proc { |score, move, user, ai, battle|
     next score if !ai.trainer.medium_skill?
-    next score if !user.has_active_item?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) &&
-                  !user.has_active_ability?(:GORILLATACTICS)
+    next score if !user.choice_locked?
     old_score = score
     # Really don't prefer status moves (except Trick)
     if move.statusMove? && move.function_code != "UserTargetSwapItems"
@@ -317,7 +316,10 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:predicted_damage,
         hp_source = substitute ? "Substitute" : "HP"
         PBDebug.log("     predicted damage #{dmg}; useful #{useful_damage}/#{target_hp} #{hp_source}; accuracy #{acc}%; expected useful damage #{(useful_damage * hit_chance).round(1)}")
         PBDebug.log_score_change(score - old_score, "accuracy-weighted useful damage (capped before hit chance)")
-        if !substitute && dmg > target.hp * 1.1
+        # A 1 HP, un golpe dañino viable basta; no necesita margen por variación.
+        minimum_damage_ko = target.hp == 1 && dmg >= 1 && move.move.pbDamagingMove? &&
+                            !ai.pbPredictMoveFailure && !ai.pbPredictMoveFailureAgainstTarget
+        if !substitute && (dmg > target.hp * 1.1 || minimum_damage_ko)
           sturdy = target.hp == target.totalhp && target.has_active_ability?(:STURDY) &&
                    !target.being_mold_broken?
           focus_sash = target.hp == target.totalhp && target.has_active_item?(:FOCUSSASH)
@@ -332,14 +334,20 @@ Battle::AI::Handlers::GeneralMoveAgainstTargetScore.add(:predicted_damage,
           multi_hit ||= user.has_active_ability?(:PARENTALBOND) &&
                         !move.move.chargingTurnMove? && !move.targets_multiple_battlers? &&
                         move.move.method(:pbNumHits).owner == Battle::Move
+          ice_face = target.battler.isSpecies?(:EISCUE) && target.battler.form == 0 &&
+                     target.has_active_ability?(:ICEFACE) && !target.being_mold_broken? &&
+                     move.physicalMove?
           # ponytail: use rough damage and hit chance, not per-hit KO probabilities; refine if needed.
-          if (sturdy || focus_sash) && !multi_hit
+          if ice_face && !multi_hit
+            PBDebug.log("     KO bonus withheld: damage is absorbed by Ice Face (accuracy #{acc}%)")
+          elsif (sturdy || focus_sash) && !multi_hit
             protection = focus_sash ? "Focus Sash" : "Sturdy"
             PBDebug.log("     KO bonus withheld: full-HP #{protection} survives a single hit (accuracy #{acc}%)")
           else
             old_score = score
             score += (15 * hit_chance).to_i
-            PBDebug.log("     predicted KO (>110% HP); accuracy #{acc}%; KO bonus #{score - old_score}/15")
+            ko_reason = minimum_damage_ko ? "1 HP, viable damaging hit" : ">110% HP"
+            PBDebug.log("     predicted KO (#{ko_reason}); accuracy #{acc}%; KO bonus #{score - old_score}/15")
             PBDebug.log_score_change(score - old_score, "accuracy-weighted predicted KO")
             if (sturdy || focus_sash) && multi_hit
               old_score = score

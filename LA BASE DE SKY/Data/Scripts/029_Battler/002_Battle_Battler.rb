@@ -257,7 +257,7 @@ class Battle::Battler
   #-----------------------------------------------------------------------------
   # Calculated properties.
   #-----------------------------------------------------------------------------
-  
+
   def plainStats
     ret = {}
     ret[:ATTACK]          = self.attack
@@ -348,7 +348,7 @@ class Battle::Battler
   #-----------------------------------------------------------------------------
   # Queries about what the battler has.
   #-----------------------------------------------------------------------------
-  
+
   # Returns the active types of this Pokémon. The array should not include the
   # same type more than once, and should not include any invalid types.
   def pbTypes(withExtraType = false)
@@ -805,8 +805,15 @@ class Battle::Battler
     return true
   end
 
-  def canMakeContactThroughProtection?
-    return hasActiveAbility?([:UNSEENFIST, :PIERCINGDRILL])
+  def canBypassProtection?(move = nil)
+    return true if Battle::AbilityEffects.triggerBypassProtection(self, move)
+    return true if Battle::ItemEffects.triggerBypassProtection(item, self, move)
+    return true if Battle::AbilityEffects.triggerPiercesProtection(self, move)
+    return Battle::ItemEffects.triggerPiercesProtection(item, self, move)
+  end
+
+  def canMakeContactThroughProtection?(move = nil)
+    return canBypassProtection?(move)
   end
 
   def trappedInBattle?
@@ -1009,9 +1016,9 @@ class Battle::Battler
     end
     return @battle.battlers[(@index ^ 1)]
   end
-  
+
   def pbGetJudgmentType(check_type = nil)
-    if pbOwnedByPlayer? && hasLegendPlateJudgment? 
+    if pbOwnedByPlayer? && hasLegendPlateJudgment?
       target = nil
       @battle.pbGetOpposingIndicesInOrder(@index).each do |i|
         battler = @battle.battlers[i]
@@ -1023,15 +1030,14 @@ class Battle::Battler
     end
     return :NORMAL
   end
-  
+
   #-----------------------------------------------------------------------------
   # Used to simplify checking for a valid Pokemon using the Legend Plate.
   #-----------------------------------------------------------------------------
   def hasLegendPlateJudgment?
-    return isSpecies?(:ARCEUS) && 
-           hasActiveAbility?(:MULTITYPE) && 
+    return isSpecies?(:ARCEUS) &&
+           hasActiveAbility?(:MULTITYPE) &&
            hasActiveItem?(:LEGENDPLATE) &&
            pbHasMove?(:JUDGMENT)
   end
 end
-

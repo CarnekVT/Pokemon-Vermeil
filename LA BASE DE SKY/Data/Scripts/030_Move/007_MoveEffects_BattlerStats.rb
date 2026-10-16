@@ -1624,6 +1624,7 @@ class Battle::Move::LowerTargetEvasion1RemoveSideEffects < Battle::Move::TargetS
         @battle.pbDisplay(_INTL("Ha desaparecido la extraña sensación que se percibía en el terreno de combate."))
       end
       @battle.field.terrain = :None
+      @battle.pbRefreshTerrainBackground if @battle.respond_to?(:pbRefreshTerrainBackground)
     end
   end
 end

@@ -155,7 +155,9 @@ class Battle::Move::HealUserByTargetAttackLowerTargetAttack1 < Battle::Move
       @battle.pbHideAbilitySplash(target)
       user.pbItemHPHealCheck
     elsif user.canHeal?
-      healAmt = (healAmt * 1.3).floor if user.hasActiveItem?(:BIGROOT)
+      mult = user.hasActiveItem?(:BIGROOT) ? 1.3 : 1.0
+      mult = Battle::AbilityEffects.triggerHealingPower(user, mult)
+      healAmt = (healAmt * mult).floor if mult != 1.0
       user.pbRecoverHP(healAmt)
       @battle.pbDisplay(_INTL("Los PS de {1} han sido restaurados.", user.pbThis(true)))
     end

@@ -111,14 +111,16 @@ class Battle::AI::AIBattler
     # Aqua Ring
     if self.effects[PBEffects::AquaRing] && battler.canHeal?
       amt = self.totalhp / 16
-      amt = (amt * 1.3).floor if has_active_item?(:BIGROOT)
-      ret -= [amt, 1].max
+      mult = has_active_item?(:BIGROOT) ? 1.3 : 1.0
+      mult = Battle::AbilityEffects.triggerHealingPower(battler, mult)
+      ret -= [(amt * mult).floor, 1].max
     end
     # Ingrain
     if self.effects[PBEffects::Ingrain] && battler.canHeal?
       amt = self.totalhp / 16
-      amt = (amt * 1.3).floor if has_active_item?(:BIGROOT)
-      ret -= [amt, 1].max
+      mult = has_active_item?(:BIGROOT) ? 1.3 : 1.0
+      mult = Battle::AbilityEffects.triggerHealingPower(battler, mult)
+      ret -= [(amt * mult).floor, 1].max
     end
     # Leech Seed
     if self.effects[PBEffects::LeechSeed] >= 0
@@ -129,8 +131,9 @@ class Battle::AI::AIBattler
       @ai.each_battler(true) do |b, i|
         next if i == @index || b.effects[PBEffects::LeechSeed] != @index
         amt = [[b.totalhp / 8, b.hp].min, 1].max
-        amt = (amt * 1.3).floor if has_active_item?(:BIGROOT)
-        ret -= [amt, 1].max
+        mult = has_active_item?(:BIGROOT) ? 1.3 : 1.0
+        mult = Battle::AbilityEffects.triggerHealingPower(battler, mult)
+        ret -= [(amt * mult).floor, 1].max
       end
     end
     # Hyper Mode (Shadow Pokémon)
@@ -276,6 +279,11 @@ class Battle::AI::AIBattler
     return battler.hasActiveAbility?(ability, ignore_fainted)
   end
 
+  def choice_locked?
+    return Battle::ItemEffects.triggerChoiceLock(battler.item, battler) ||
+           Battle::AbilityEffects.triggerChoiceLock(battler)
+  end
+
   def has_mold_breaker?
     return battler.hasMoldBreaker?
   end
@@ -288,8 +296,16 @@ class Battle::AI::AIBattler
     return battler.hasAirborneAbility?
   end
 
+  def can_bypass_protection?(move)
+    return battler.canBypassProtection?(move)
+  end
+
   def can_make_contact_through_protection?
     return battler.canMakeContactThroughProtection?
+  end
+
+  def recoil_immune?
+    return Battle::AbilityEffects.recoilImmune?(battler)
   end
 
   #-----------------------------------------------------------------------------
@@ -433,6 +449,13 @@ class Battle::AI::AIBattler
     end
     # Modify the rating based on ability-specific contexts
     if @ai.trainer.medium_skill?
+      if Battle::AbilityEffects.triggerRecoilImmunity(ability, battler)
+        has_recoil_move = check_for_move do |m|
+          m.recoilMove? && !m.is_a?(Battle::Move::CrashDamageIfFails) &&
+            !m.is_a?(Battle::Move::CrashDamageIfFailsUnusableInGravity)
+        end
+        ret = has_recoil_move ? [ret, 5].max : 0
+      end
       ret = Battle::AI::Handlers.modify_ability_ranking(ability, ret, self, @ai)
     end
     return ret

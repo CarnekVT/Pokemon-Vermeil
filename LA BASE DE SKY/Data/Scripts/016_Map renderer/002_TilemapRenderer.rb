@@ -134,6 +134,11 @@ class TilemapRenderer
     def []=(filename, value)
       super
       return if nil_or_empty?(filename)
+      if !@frame_durations[filename]
+        duration = AUTOTILE_FRAME_DURATION
+        duration = $~[1].to_i if filename[/\[\s*(\d+?)\s*\]\s*$/]
+        @frame_durations[filename] = duration.to_f / 20
+      end
       frame_count(filename, true)
       set_current_frame(filename)
     end
@@ -156,7 +161,8 @@ class TilemapRenderer
       if bitmap.height > SOURCE_TILE_HEIGHT && bitmap.height < TILES_PER_AUTOTILE * SOURCE_TILE_HEIGHT
         @bitmap_wraps[filename] = true
       end
-      @animated[filename] = true if animated?(filename)
+      frame_count(filename, true)
+      set_current_frame(filename)
       orig_bitmap.dispose if orig_bitmap != bitmap
       @load_counts[filename] = 1
     end
@@ -177,6 +183,11 @@ class TilemapRenderer
         @frame_counts[filename] = [bitmap.width / SOURCE_TILE_WIDTH, 1].max
         if bitmap.height > SOURCE_TILE_HEIGHT && @bitmap_wraps[filename]
           @frame_counts[filename] /= 2
+        end
+        if @frame_counts[filename] > 1
+          @animated[filename] = true
+        else
+          @animated.delete(filename)
         end
       end
       return @frame_counts[filename]

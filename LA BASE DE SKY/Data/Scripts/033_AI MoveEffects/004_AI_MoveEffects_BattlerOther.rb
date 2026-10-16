@@ -694,9 +694,18 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.copy("FlinchTarget",
 #===============================================================================
 #
 #===============================================================================
+Battle::AI::Handlers::MoveFailureAgainstTargetCheck.add("FlinchTargetFailsIfTargetNotUsingPriorityMove",
+  proc { |move, user, target, ai, battle|
+    next ai.ai_improvements_upper_hand_fails?(user, target)
+  }
+)
 Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("FlinchTargetFailsIfTargetNotUsingPriorityMove",
   proc { |score, move, user, target, ai, battle|
-    next Battle::AI::MOVE_USELESS_SCORE if !target.check_for_move { |m| m.pbPriority(target.battler) > 0 }
+    if ai.trainer.high_skill? && ai.trainer.has_skill_flag?("HPAware")
+      next Battle::AI::MOVE_USELESS_SCORE if ai.ai_improvements_upper_hand_fails?(user, target)
+    else
+      next Battle::AI::MOVE_USELESS_SCORE if !target.check_for_move { |m| m.pbPriority(target.battler) > 0 }
+    end
     score = Battle::AI::Handlers.apply_move_effect_against_target_score("FlinchTarget",
        score, move, user, target, ai, battle)
     # Inherent disfavour because target may not use a priority move

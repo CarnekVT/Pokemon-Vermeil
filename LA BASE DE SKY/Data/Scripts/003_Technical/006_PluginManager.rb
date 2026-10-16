@@ -580,7 +580,7 @@ module PluginManager
       dname = dname[0] if dname.is_a?(Array) && dname.length == 2
       dname = dname[1] if dname.is_a?(Array) && dname.length == 3
       # capturar problema de bucle con dependencia
-      self.error("El plugin '#{og[0]}' tiene dependencias en bucle que no se pueden resolver automáticamente.") if !og.nil? && og.include?(dname)
+      self.error("Se detectó una dependencia circular entre plugins: #{(og + [dname]).join(' -> ')}. Revisa los campos 'Requires' y 'Exact' de sus archivos meta.txt.") if !og.nil? && og.include?(dname)
       new_og = og.clone
       new_og.push(dname)
       self.validateDependencies(dname, meta, new_og)
@@ -685,14 +685,14 @@ module PluginManager
       meta = self.readMeta(dir, "meta.txt")
       meta[:dir] = dir
       # generar error si no se define un nombre para el plugin
-      self.error("No se ha definido metadatos 'Name' para el plugin ubicado en '#{dir}'.") if !meta[:name]
+      self.error("Falta el campo obligatorio 'Name' en el archivo '#{dir}/meta.txt'. Añade una línea como: Name = Mi Plugin.") if !meta[:name]
       # generar error si el plugin ya está incluido en La Base De Sky
       if EXCLUDED_REQUIRES.include?(meta[:name])
         self.error("El plugin '#{meta[:name]}' ya está incluido por defecto en La Base De Sky V#{LBDSKY::VERSION}. " +
                    "Por favor, elimina la carpeta '#{dir}' para evitar conflictos.")
       end
       # generar error si no se define un script para el plugin
-      self.error("No se han definido metadatos 'Scripts' para el plugin ubicado en '#{dir}'.") if !meta[:scripts]
+      self.error("No se encontraron scripts Ruby para el plugin '#{meta[:name]}' en '#{dir}'. Añade al menos un archivo .rb dentro de la carpeta del plugin.") if !meta[:scripts] || meta[:scripts].empty?
       plugins[meta[:name]] = meta
       # generar error si ya existe un plugin con el mismo nombre
       self.error("Ya existe un plugin llamado '#{meta[:name]}' en el orden de carga.") if order.include?(meta[:name])

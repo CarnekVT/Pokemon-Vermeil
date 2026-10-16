@@ -4,6 +4,9 @@
 module Battle::ItemEffects
   SpeedCalc                       = ItemHandlerHash.new
   WeightCalc                      = ItemHandlerHash.new   # Float Stone
+  ChoiceLock                      = ItemHandlerHash.new
+  BypassProtection                = ItemHandlerHash.new
+  PiercesProtection               = ItemHandlerHash.new
   # Battler's HP changed
   HPHeal                          = ItemHandlerHash.new
   # Battler's status condition
@@ -70,6 +73,21 @@ module Battle::ItemEffects
 
   def self.triggerWeightCalc(item, battler, w)
     return trigger(WeightCalc, item, battler, w, ret: w)
+  end
+
+  def self.triggerChoiceLock(item, battler)
+    return false if !battler.itemActive?
+    return trigger(ChoiceLock, item, battler)
+  end
+
+  def self.triggerBypassProtection(item, battler, move = nil)
+    return false if !battler.itemActive?
+    return trigger(BypassProtection, item, battler, move)
+  end
+
+  def self.triggerPiercesProtection(item, battler, move = nil)
+    return false if !battler.itemActive?
+    return trigger(PiercesProtection, item, battler, move)
   end
 
   #-----------------------------------------------------------------------------
@@ -250,6 +268,10 @@ end
 #===============================================================================
 # SpeedCalc handlers
 #===============================================================================
+
+[:CHOICEBAND, :CHOICESPECS, :CHOICESCARF].each do |item|
+  Battle::ItemEffects::ChoiceLock.add(item, proc { |item, battler| next true })
+end
 
 Battle::ItemEffects::SpeedCalc.add(:CHOICESCARF,
   proc { |item, battler, mult|

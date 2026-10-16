@@ -1,0 +1,333 @@
+{
+  "languages": [
+    "es_ES",
+    "es_latam",
+    "ja",
+    "en",
+    "fr",
+    "de",
+    "it",
+    "ko",
+    "zh_Hans",
+    "zh_Hant"
+  ],
+  "notes": "IDs simbólicos de PBS/types.txt. es_ES procede del Name local; los demás idiomas proceden de los nombres oficiales de PokeAPI, incluido es-419 para es_latam. Incluye únicamente los tipos definidos en el PBS local. null indica nombre no verificado; el runtime conserva la traducción antigua. Los tipos no tienen campo Description en esta base.",
+  "sources": {
+    "pokeapi": {
+      "url": "https://pokeapi.co/",
+      "data_url": "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/type_names.csv",
+      "language_mapping_url": "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/languages.csv",
+      "license": "BSD-3-Clause"
+    },
+    "la_base_de_sky_pbs": {
+      "file": "PBS/types.txt",
+      "license": "La Base de Sky"
+    }
+  },
+  "entries": [
+    {
+      "id": "NORMAL",
+      "pokeapi_id": 1,
+      "names": {
+        "es_ES": "Normal",
+        "es_latam": "Normal",
+        "ja": "ノーマル",
+        "en": "Normal",
+        "fr": "Normal",
+        "de": "Normal",
+        "it": "Normale",
+        "ko": "노말",
+        "zh_Hans": "一般",
+        "zh_Hant": "一般"
+      }
+    },
+    {
+      "id": "FIGHTING",
+      "pokeapi_id": 2,
+      "names": {
+        "es_ES": "Lucha",
+        "es_latam": "Pelea",
+        "ja": "かくとう",
+        "en": "Fighting",
+        "fr": "Combat",
+        "de": "Kampf",
+        "it": "Lotta",
+        "ko": "격투",
+        "zh_Hans": "格斗",
+        "zh_Hant": "格鬥"
+      }
+    },
+    {
+      "id": "FLYING",
+      "pokeapi_id": 3,
+      "names": {
+        "es_ES": "Volador",
+        "es_latam": "Volador",
+        "ja": "ひこう",
+        "en": "Flying",
+        "fr": "Vol",
+        "de": "Flug",
+        "it": "Volante",
+        "ko": "비행",
+        "zh_Hans": "飞行",
+        "zh_Hant": "飛行"
+      }
+    },
+    {
+      "id": "POISON",
+      "pokeapi_id": 4,
+      "names": {
+        "es_ES": "Veneno",
+        "es_latam": "Veneno",
+        "ja": "どく",
+        "en": "Poison",
+        "fr": "Poison",
+        "de": "Gift",
+        "it": "Veleno",
+        "ko": "독",
+        "zh_Hans": "毒",
+        "zh_Hant": "毒"
+      }
+    },
+    {
+      "id": "GROUND",
+      "pokeapi_id": 5,
+      "names": {
+        "es_ES": "Tierra",
+        "es_latam": "Tierra",
+        "ja": "じめん",
+        "en": "Ground",
+        "fr": "Sol",
+        "de": "Boden",
+        "it": "Terra",
+        "ko": "땅",
+        "zh_Hans": "地面",
+        "zh_Hant": "地面"
+      }
+    },
+    {
+      "id": "ROCK",
+      "pokeapi_id": 6,
+      "names": {
+        "es_ES": "Roca",
+        "es_latam": "Roca",
+        "ja": "いわ",
+        "en": "Rock",
+        "fr": "Roche",
+        "de": "Gestein",
+        "it": "Roccia",
+        "ko": "바위",
+        "zh_Hans": "岩石",
+        "zh_Hant": "岩石"
+      }
+    },
+    {
+      "id": "BUG",
+      "pokeapi_id": 7,
+      "names": {
+        "es_ES": "Bicho",
+        "es_latam": "Insecto",
+        "ja": "むし",
+        "en": "Bug",
+        "fr": "Insecte",
+        "de": "Käfer",
+        "it": "Coleottero",
+        "ko": "벌레",
+        "zh_Hans": "虫",
+        "zh_Hant": "蟲"
+      }
+    },
+    {
+      "id": "GHOST",
+      "pokeapi_id": 8,
+      "names": {
+        "es_ES": "Fantasma",
+        "es_latam": "Fantasma",
+        "ja": "ゴースト",
+        "en": "Ghost",
+        "fr": "Spectre",
+        "de": "Geist",
+        "it": "Spettro",
+        "ko": "고스트",
+        "zh_Hans": "幽灵",
+        "zh_Hant": "幽靈"
+      }
+    },
+    {
+      "id": "STEEL",
+      "pokeapi_id": 9,
+      "names": {
+        "es_ES": "Acero",
+        "es_latam": "Acero",
+        "ja": "はがね",
+        "en": "Steel",
+        "fr": "Acier",
+        "de": "Stahl",
+        "it": "Acciaio",
+        "ko": "강철",
+        "zh_Hans": "钢",
+        "zh_Hant": "鋼"
+      }
+    },
+    {
+      "id": "QMARKS",
+      "pokeapi_id": 10001,
+      "names": {
+        "es_ES": "???",
+        "es_latam": "???",
+        "ja": "？？？",
+        "en": "???",
+        "fr": "???",
+        "de": "???",
+        "it": "???",
+        "ko": "???",
+        "zh_Hans": "???",
+        "zh_Hant": "???"
+      }
+    },
+    {
+      "id": "FIRE",
+      "pokeapi_id": 10,
+      "names": {
+        "es_ES": "Fuego",
+        "es_latam": "Fuego",
+        "ja": "ほのお",
+        "en": "Fire",
+        "fr": "Feu",
+        "de": "Feuer",
+        "it": "Fuoco",
+        "ko": "불꽃",
+        "zh_Hans": "火",
+        "zh_Hant": "火"
+      }
+    },
+    {
+      "id": "WATER",
+      "pokeapi_id": 11,
+      "names": {
+        "es_ES": "Agua",
+        "es_latam": "Agua",
+        "ja": "みず",
+        "en": "Water",
+        "fr": "Eau",
+        "de": "Wasser",
+        "it": "Acqua",
+        "ko": "물",
+        "zh_Hans": "水",
+        "zh_Hant": "水"
+      }
+    },
+    {
+      "id": "GRASS",
+      "pokeapi_id": 12,
+      "names": {
+        "es_ES": "Planta",
+        "es_latam": "Planta",
+        "ja": "くさ",
+        "en": "Grass",
+        "fr": "Plante",
+        "de": "Pflanze",
+        "it": "Erba",
+        "ko": "풀",
+        "zh_Hans": "草",
+        "zh_Hant": "草"
+      }
+    },
+    {
+      "id": "ELECTRIC",
+      "pokeapi_id": 13,
+      "names": {
+        "es_ES": "Eléctrico",
+        "es_latam": "Eléctrico",
+        "ja": "でんき",
+        "en": "Electric",
+        "fr": "Électrik",
+        "de": "Elektro",
+        "it": "Elettro",
+        "ko": "전기",
+        "zh_Hans": "电",
+        "zh_Hant": "電"
+      }
+    },
+    {
+      "id": "PSYCHIC",
+      "pokeapi_id": 14,
+      "names": {
+        "es_ES": "Psíquico",
+        "es_latam": "Psíquico",
+        "ja": "エスパー",
+        "en": "Psychic",
+        "fr": "Psy",
+        "de": "Psycho",
+        "it": "Psico",
+        "ko": "에스퍼",
+        "zh_Hans": "超能力",
+        "zh_Hant": "超能力"
+      }
+    },
+    {
+      "id": "ICE",
+      "pokeapi_id": 15,
+      "names": {
+        "es_ES": "Hielo",
+        "es_latam": "Hielo",
+        "ja": "こおり",
+        "en": "Ice",
+        "fr": "Glace",
+        "de": "Eis",
+        "it": "Ghiaccio",
+        "ko": "얼음",
+        "zh_Hans": "冰",
+        "zh_Hant": "冰"
+      }
+    },
+    {
+      "id": "DRAGON",
+      "pokeapi_id": 16,
+      "names": {
+        "es_ES": "Dragón",
+        "es_latam": "Dragón",
+        "ja": "ドラゴン",
+        "en": "Dragon",
+        "fr": "Dragon",
+        "de": "Drache",
+        "it": "Drago",
+        "ko": "드래곤",
+        "zh_Hans": "龙",
+        "zh_Hant": "龍"
+      }
+    },
+    {
+      "id": "DARK",
+      "pokeapi_id": 17,
+      "names": {
+        "es_ES": "Siniestro",
+        "es_latam": "Siniestro",
+        "ja": "あく",
+        "en": "Dark",
+        "fr": "Ténèbres",
+        "de": "Unlicht",
+        "it": "Buio",
+        "ko": "악",
+        "zh_Hans": "恶",
+        "zh_Hant": "惡"
+      }
+    },
+    {
+      "id": "FAIRY",
+      "pokeapi_id": 18,
+      "names": {
+        "es_ES": "Hada",
+        "es_latam": "Hada",
+        "ja": "フェアリー",
+        "en": "Fairy",
+        "fr": "Fée",
+        "de": "Fee",
+        "it": "Folletto",
+        "ko": "페어리",
+        "zh_Hans": "妖精",
+        "zh_Hant": "妖精"
+      }
+    }
+  ]
+}

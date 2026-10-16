@@ -34,10 +34,20 @@ def pbSetResizeFactor(factor, refresh = true)
     Graphics.fullscreen = true if !Graphics.fullscreen
   else
     Graphics.fullscreen = false if Graphics.fullscreen
-    Graphics.scale = (factor + 1) * 0.5
+    desired = (factor + 1) * 0.5
+    Graphics.scale = desired
     Graphics.center
+    # Mediana es escala 1.0, la misma con la que mkxp crea la ventana. Si ni
+    # la escala ni el búfer cambian, la ventana no se adapta a 640x440 y deja
+    # bandas. Un alto de 1 px obliga a reajustar y se restaura enseguida, sin
+    # dejar la escala en Grande.
+    if refresh && desired == 1.0 && !Graphics.fullscreen
+      Graphics.resize_screen(Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT + 1)
+      Graphics.resize_screen(Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
+      Graphics.center
+    end
   end
-  
+
   if !$ResizeInitialized
     Graphics.center if !Graphics.fullscreen
     $ResizeInitialized = true

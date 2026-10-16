@@ -51,6 +51,40 @@ module TrainerSensor
   @rel_y              = 0
   entrenadorMasCercano = nil
   @last_update_time = Time.now
+  @trainer_events         = []
+  @trainer_events_map     = nil
+  @trainer_events_map_id  = nil
+  @trainer_events_count   = nil
+  @trainer_events_source  = nil
+
+
+  # Devuelve los eventos de entrenador del mapa actual junto con su rango ya
+  # convertido a número, para no repetir la comprobación con expresión regular
+  # sobre todos los eventos del mapa en cada frame.
+  # La caché se invalida al cambiar el mapa (se comparan tanto el map_id como el
+  # propio objeto $game_map, porque $map_factory puede reconstruirlo), al
+  # reemplazar la colección de eventos o al variar su número de eventos.
+  def self.trainer_events
+    map = $game_map
+    return [] if !map
+    events = map.events
+    return [] if !events
+    if @trainer_events_map_id != map.map_id || !@trainer_events_map.equal?(map) ||
+       !@trainer_events_source.equal?(events) || @trainer_events_count != events.length
+      @trainer_events_map_id = map.map_id
+      @trainer_events_map    = map
+      @trainer_events_count  = events.length
+      @trainer_events_source = events
+      @trainer_events        = []
+      events.each_value do |event|
+        next if !event.name[/^Trainer\((\d+)\)$/]
+        # Se conserva el comportamiento original, que sólo lee el primer dígito
+        # del rango indicado en el nombre del evento.
+        @trainer_events.push([event, event.name[8...9].to_i])
+      end
+    end
+    return @trainer_events
+  end
   
   
   def self.create(distance, direction = 2, rel_x = 0, rel_y = 0)
@@ -334,27 +368,35 @@ def update_trainer_bars
   rel_x                = 0
   rel_y                = 0
   
-  for event in $game_map.events.values
-    if event.name[/^Trainer\((\d+)\)$/] && event.isOff?(Settings::SELF_SWITCH)
+  player_x = $game_player.x
+  player_y = $game_player.y
+  for event, rango_entrenador in TrainerSensor.trainer_events
+    next if !event.isOff?(Settings::SELF_SWITCH)
 
-      # Obtenemos la distancia a la que mira el entrenador.
-      rango_entrenador = event.name[8...9].to_i
-      
-      dx, dy = case event.direction
-               when 8 then [0, -1]
-               when 2 then [0, 1]
-               when 6 then [1, 0]
-               when 4 then [-1, 0]
-               else next
-               end
-      for i in 0..rango_entrenador+1
-        distance = ($game_player.x - (event.x + dx * i)).abs + ($game_player.y - (event.y + dy * i)).abs
-        if entrenadorMasCercano > distance
-          entrenadorMasCercano = distance
-          dirMasCercano        = event.direction
-          rel_x                = $game_player.x - event.x
-          rel_y                = $game_player.y - event.y
-        end
+    # Obtenemos la dirección a la que mira el entrenador.
+    case event.direction
+    when 8 then dx = 0;  dy = -1
+    when 2 then dx = 0;  dy = 1
+    when 6 then dx = 1;  dy = 0
+    when 4 then dx = -1; dy = 0
+    else next
+    end
+
+    event_x = event.x
+    event_y = event.y
+    # Cada casilla de la línea de visión está como mucho a rango+1 pasos del
+    # entrenador, así que si el propio entrenador ya está demasiado lejos
+    # ninguna de ellas puede mejorar la distancia mínima actual.
+    distancia_evento = (player_x - event_x).abs + (player_y - event_y).abs
+    next if distancia_evento - (rango_entrenador + 1) >= entrenadorMasCercano
+
+    for i in 0..rango_entrenador+1
+      distance = (player_x - (event_x + dx * i)).abs + (player_y - (event_y + dy * i)).abs
+      if entrenadorMasCercano > distance
+        entrenadorMasCercano = distance
+        dirMasCercano        = event.direction
+        rel_x                = player_x - event_x
+        rel_y                = player_y - event_y
       end
     end
   end
@@ -385,6 +427,12 @@ class Scene_Map
     update_barras
     update_trainer_bars
   end
+
+  alias miniupdate_barras miniupdate
+  def miniupdate
+    miniupdate_barras
+    update_trainer_bars
+  end
   
   alias transfer_player_barras transfer_player if method_defined?(:transfer_player)
   def transfer_player(*args)
@@ -394,13 +442,6 @@ class Scene_Map
 end
 
 
-
-
-# Change it to Events.onStepTaken if you want this to scan the events on each step
-# the player gives. Before: Events.onMapUpdate  
-EventHandlers.add(:on_step_taken, :barras_entrenadores, proc{|sender,e|
-  update_trainer_bars
-})
 
 
 end # if principal

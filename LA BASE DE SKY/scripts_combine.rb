@@ -26,7 +26,7 @@ module Scripts
     FileUtils.rm_rf(path)
   end
 
-  def self.aggregate_from_folder(path, scripts, level = 0)
+  def self.aggregate_from_folder(path, scripts, level = 0, relative_path = [])
     files = []
     folders = []
 
@@ -57,11 +57,12 @@ module Scripts
     folders.sort!
     folders.each do |folder|
       section_name = filename_to_title(folder)
+      folder_path = relative_path + [section_name]
       if level.zero?
         scripts << [rand(999_999), "==================", Zlib::Deflate.deflate("")]
       end
-      scripts << [rand(999_999), "[[ " + section_name + " ]]", Zlib::Deflate.deflate("")]
-      aggregate_from_folder(File.join(path, folder), scripts, level + 1)
+      scripts << [rand(999_999), "[[ " + folder_path.join('/') + " ]]", Zlib::Deflate.deflate("")]
+      aggregate_from_folder(File.join(path, folder), scripts, level + 1, folder_path)
     end
   end
 

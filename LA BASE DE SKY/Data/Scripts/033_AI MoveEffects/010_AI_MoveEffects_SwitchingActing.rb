@@ -142,7 +142,9 @@ Battle::AI::Handlers::MoveEffectScore.add("SwitchOutUserPassOnEffects",
     score += 8 if user.effects[PBEffects::MagnetRise] > 1
     score += 10 if user.effects[PBEffects::Substitute] > 0
     # Consider the user's stat stages
-    if user.stages.any? { |key, val| val >= 4 }
+    if ai.ai_improvements_baton_pass_defensive_scope?(user)
+      score += ai.ai_improvements_baton_pass_defensive_stage_score(user)
+    elsif user.stages.any? { |key, val| val >= 4 }
       score += 25
     elsif user.stages.any? { |key, val| val >= 2 }
       score += 15
@@ -719,9 +721,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DisableTargetLastMoveUse
     # Inherent preference
     score += 5
     # Prefer if the target is locked into using a single move, or will be
-    if target.effects[PBEffects::ChoiceBand] ||
-       target.has_active_item?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) ||
-       target.has_active_ability?(:GORILLATACTICS)
+    if target.effects[PBEffects::ChoiceBand] || target.choice_locked?
       score += 10
     end
     # Prefer disabling a damaging move
@@ -746,9 +746,7 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DisableTargetUsingSameMo
     # Inherent preference
     score += 10
     # Prefer if the target is locked into using a single move, or will be
-    if target.effects[PBEffects::ChoiceBand] ||
-       target.has_active_item?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) ||
-       target.has_active_ability?(:GORILLATACTICS)
+    if target.effects[PBEffects::ChoiceBand] || target.choice_locked?
       score += 10
     end
     next score
@@ -835,11 +833,8 @@ Battle::AI::Handlers::MoveEffectAgainstTargetScore.add("DisableTargetStatusMoves
     end
     # Move is likely useless if the target will lock themselves into a move,
     # because they'll likely lock themselves into a damaging move
-    if !target.effects[PBEffects::ChoiceBand]
-      if target.has_active_item?([:CHOICEBAND, :CHOICESPECS, :CHOICESCARF]) ||
-         target.has_active_ability?(:GORILLATACTICS)
-        next Battle::AI::MOVE_USELESS_SCORE
-      end
+    if !target.effects[PBEffects::ChoiceBand] && !target.choice_locked?
+      next Battle::AI::MOVE_USELESS_SCORE
     end
     # Prefer based on how many status moves the target knows
     target.battler.eachMove do |m|

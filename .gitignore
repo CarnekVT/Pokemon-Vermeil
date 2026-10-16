@@ -34,6 +34,7 @@ LA BASE DE SKY/Plugins/MakerStudio/003_Editor/*
 !LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/
 !LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/**
 LA BASE DE SKY/Data/map-backups
+LA BASE DE SKY/Text_Events
 Gemfile
 Gemfile.lock
 rakefile

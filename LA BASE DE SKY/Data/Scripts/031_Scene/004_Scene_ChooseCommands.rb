@@ -24,28 +24,27 @@ class Battle::Scene
   def pbCheckMouseButtons(buttons, mouseState, validationProc = nil)
     return nil if !Settings::ENABLE_MOUSE_INPUT_IN_BATTLE
     return nil if !defined?(Mouse) || !Mouse
-    return nil if mouseState[:waitForRelease]
-    
+
     clickedIndex = nil
-    
+
     begin
       # Clear the wait flag once mouse is released
       if mouseState[:waitForRelease] && !Mouse.press?
         mouseState[:waitForRelease] = false
       end
-      
+
       # Only process mouse input if we're not waiting for initial release
       if !mouseState[:waitForRelease]
         buttons.each_with_index do |button, i|
           # Skip invalid buttons (e.g., moves that don't exist)
           next if validationProc && !validationProc.call(i)
-          
+
           # Mouse pressed on this button
           if Mouse.over?(button) && Mouse.press? && !mouseState[:pressed]
             mouseState[:pressed] = true
             mouseState[:pressedIndex] = i
           end
-          
+
           # Mouse released on same button it was pressed on
           if Mouse.over?(button) && mouseState[:pressed] && mouseState[:pressedIndex] == i
             if Mouse.release? || !Mouse.press?  # Released or no longer pressing
@@ -56,7 +55,7 @@ class Battle::Scene
             end
           end
         end
-        
+
         # Reset mouse state if released anywhere or no longer pressing
         if Mouse.release? || (mouseState[:pressed] && !Mouse.press?)
           mouseState[:pressed] = false
@@ -67,7 +66,7 @@ class Battle::Scene
       # Silently ignore any mouse-related errors
       return nil
     end
-    
+
     return clickedIndex
   end
 
@@ -151,7 +150,7 @@ class Battle::Scene
     newMode = (@battle.pbRegisteredMegaEvolution?(idxBattler)) ? 2 : 1
     if MultipleForms.hasFunction?(battler.pokemon, "getMegaMoves")
       megaMoves = MultipleForms.call("getMegaMoves", battler.pokemon)
-      newMode == 2 ? battler.display_mega_moves : battler.display_base_moves(true) 
+      newMode == 2 ? battler.display_mega_moves : battler.display_base_moves(true)
       cw.refresh(true) # Refresh button names too
       return true
     end
@@ -211,7 +210,7 @@ class Battle::Scene
         cw.index += 2 if battler.moves[cw.index + 2]&.id && (cw.index & 2) == 0
       end
       pbPlayCursorSE if cw.index != oldIndex
-      
+
       # Mouse input
       clickedIndex = pbCheckMouseButtons(cw.buttons, mouseState, proc { |i| battler.moves[i]&.id })
       if clickedIndex
@@ -225,7 +224,7 @@ class Battle::Scene
           needRefresh = true
         end
       end
-      
+
       # Actions
       if Input.trigger?(Input::USE)      # Confirm choice
         pbPlayDecisionSE
@@ -523,10 +522,10 @@ class Battle::Scene
     loop do
       oldIndex = cw.index
       pbUpdate(cw)
-      
+
       # Mouse input
-      clickedIndex = pbCheckMouseButtons(cw.buttons, mouseState, proc { |i| 
-        cw.buttons[i] && !texts[i].nil? 
+      clickedIndex = pbCheckMouseButtons(cw.buttons, mouseState, proc { |i|
+        cw.buttons[i] && !texts[i].nil?
       })
       if clickedIndex
         cw.index = clickedIndex
@@ -535,7 +534,7 @@ class Battle::Scene
         pbPlayDecisionSE
         break
       end
-      
+
       # Update selected command
       if mode == 0   # Choosing just one target, can change index
         if Input.trigger?(Input::LEFT) || Input.trigger?(Input::RIGHT)
@@ -612,4 +611,3 @@ class Battle::Scene
     end
   end
 end
-

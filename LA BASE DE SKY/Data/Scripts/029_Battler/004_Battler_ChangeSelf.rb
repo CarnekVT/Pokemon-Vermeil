@@ -47,7 +47,9 @@ class Battle::Battler
       msg = _INTL("¡{1} ha perdido energía!", target.pbThis) if nil_or_empty?(msg)
       @battle.pbDisplay(msg)
       if canHeal?
-        amt = (amt * 1.3).floor if hasActiveItem?(:BIGROOT)
+        mult = hasActiveItem?(:BIGROOT) ? 1.3 : 1.0
+        mult = Battle::AbilityEffects.triggerHealingPower(self, mult)
+        amt = (amt * mult).floor if mult != 1.0
         pbRecoverHP(amt)
       end
     end
