@@ -787,7 +787,33 @@ module PluginManager
   end
 
   # Comprobar si los plugins necesitan compilarse
+  # Bootstrap JSON before evaluating any plugins, including MakerStudio.
+  # The portable shim is packaged in Data/Compatibility and needs no native gem.
+  def self.prepare_json_for_plugins!
+    unless defined?(JSON) && JSON.respond_to?(:parse) &&
+           JSON.respond_to?(:generate) && JSON.respond_to?(:pretty_generate)
+      begin
+        require "json"
+      rescue LoadError
+        path = "Data/Compatibility/JsonCompat.rb"
+        raise LoadError, "JSON fallback missing: #{path}" unless File.file?(path)
+        load path
+      end
+    end
+    unless defined?(JSON) && JSON.respond_to?(:parse) &&
+           JSON.respond_to?(:generate) && JSON.respond_to?(:pretty_generate)
+      raise LoadError, "Cannot initialize JSON for project plugins"
+    end
+    # require "json" consults loaded features, not the JSON constant.
+    # Expose the compatibility implementation to later plugin requires.
+    $LOADED_FEATURES << "json.rb" unless $LOADED_FEATURES.any? do |feature|
+      feature.to_s.tr("\\", "/").split("/").last == "json.rb"
+    end
+    true
+  end
+
   def self.runPlugins
+    self.prepare_json_for_plugins!
     Console.echo_h1("Comprobando plugins")
     # obtener el orden de los plugins a interpretar
     order, plugins = self.getPluginOrder
