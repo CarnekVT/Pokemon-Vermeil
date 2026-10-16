@@ -20,13 +20,21 @@ class Battle::Scene
   end
   
   def pbDeleteField(bg = 'terrain_bg', base1 = 'base_terrain_0', base2 = 'base_terrain_1')
-    if @sprites[bg]&.visible
-      20.times do
-        @sprites[bg].opacity -= 8
-        @sprites[base1].opacity -= 8
-        @sprites[base2].opacity -= 8
+    sprites = [bg, base1, base2].filter_map { |id| @sprites[id] }
+    sprites.reject! { |spr| spr.respond_to?(:disposed?) && spr.disposed? }
+    fading = sprites.select { |spr| spr.visible && spr.opacity.to_i > 0 }
+    unless fading.empty?
+      # 8 por frame, como el fade de entrada. Hasta 32 por si el overlay
+      # arrancó por encima de 160 (el de apertura usa ~178).
+      32.times do
+        fading.each { |spr| spr.opacity -= 8 }
         sceneWait(2)
+        break if fading.all? { |spr| spr.opacity.to_i <= 0 }
       end
+    end
+    sprites.each do |spr|
+      spr.opacity = 0
+      spr.visible = false
     end
   end
 
@@ -228,6 +236,12 @@ class Battle
   alias pbEndTerrain_bg pbEndTerrain
   def pbEndTerrain
     pbEndTerrain_bg
-    @scene.pbSetFieldBackground
+    pbRefreshTerrainBackground
+  end
+
+  # Despejar, Pirueta Helada y Allanador Férreo ponen el terreno a :None
+  # sin pasar por pbEndTerrain. Sin esto el overlay se queda en pantalla.
+  def pbRefreshTerrainBackground
+    @scene.pbSetFieldBackground if @scene&.respond_to?(:pbSetFieldBackground)
   end
 end
