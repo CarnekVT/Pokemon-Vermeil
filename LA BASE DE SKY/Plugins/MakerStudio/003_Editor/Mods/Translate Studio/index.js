@@ -1,7 +1,7 @@
 import { CSS } from './styles.js';
 import { parseMapInfos, parseMapEventTexts, parseCommonEventTexts } from './rxdata_reader.js';
 
-const VERSION='1.4.0';
+const VERSION='1.4.1';
 const PANEL_ID='translate-studio.main';
 const DATA_PATH='Data/TranslateStudio/translations.json';
 const CONFIG_PATH='Data/TranslateStudio/config.json';
@@ -9,6 +9,7 @@ const DISCOVERY_PATH='Data/TranslateStudio/catalog.json';
 const CHANGEDEX_PATH='Data/ChangeDex/pokemon_changes.json';
 const RUNTIME_DIR='Plugins/[CARNKEVT] Translate Studio';
 const MOD_RUNTIME='runtime/001_TranslateStudio.rb';
+const MOD_JSON_COMPAT='runtime/000_JsonCompat.rb';
 const MOD_META='runtime/meta.txt';
 const MOD_CANON_EN='runtime/canon_localization_en.json';
 const MOD_CANON_ITEMS='runtime/canon_items_localization.json';
@@ -52,7 +53,7 @@ const FIELDS={
   species:['Name','FormName','Category','Pokedex'],
   moves:['Name','Description','BeforeText','AfterText','Notes'],
   abilities:['Name','Description','BeforeText','AfterText','Notes'],
-  items:['Name','NamePlural','Description'],
+  items:['Name','NamePlural','PortionName','PortionNamePlural','Description'],
   types:['Name'],
   general:['Text'],events:['Text'],scripts:['Text'],plugins:['Text'],bss:['Text'],sds:['Text']
 };
@@ -984,8 +985,8 @@ end
   async function installRuntime({silent=false}={}){
     try{
       await ctx.fs.projectMkdir?.(RUNTIME_DIR);await ctx.fs.projectMkdir?.('Data/TranslateStudio');
-      const [runtime,meta,canonEn,canonItems,contextSeed,langCode,pluginEnRef,baseEnRef,strictContextEn]=await Promise.all([ctx.fs.readModFile(MOD_RUNTIME),ctx.fs.readModFile(MOD_META),ctx.fs.readModFile(MOD_CANON_EN),ctx.fs.readModFile(MOD_CANON_ITEMS),ctx.fs.readModFile(MOD_CONTEXT_SEED),ctx.fs.readModFile(MOD_LANG_CODE),ctx.fs.readModFile(MOD_PLUGIN_EN_REF),ctx.fs.readModFile(MOD_BASE_EN_REF),ctx.fs.readModFile(MOD_STRICT_CONTEXT_EN)]);
-      await ctx.fs.writeProjectFile(RUNTIME_DIR+'/001_TranslateStudio.rb',runtime);await ctx.fs.writeProjectFile(RUNTIME_DIR+'/meta.txt',meta);await ctx.fs.writeProjectFile(PROJECT_CANON_EN,canonEn);await ctx.fs.writeProjectFile(PROJECT_CANON_ITEMS,canonItems);await ctx.fs.writeProjectFile(PROJECT_CONTEXT_SEED,contextSeed);await ctx.fs.writeProjectFile(PROJECT_PLUGIN_EN_REF,pluginEnRef);await ctx.fs.writeProjectFile(PROJECT_BASE_EN_REF,baseEnRef);await ctx.fs.writeProjectFile(PROJECT_STRICT_CONTEXT_EN,strictContextEn);
+      const [jsonCompat,runtime,meta,canonEn,canonItems,contextSeed,langCode,pluginEnRef,baseEnRef,strictContextEn]=await Promise.all([ctx.fs.readModFile(MOD_JSON_COMPAT),ctx.fs.readModFile(MOD_RUNTIME),ctx.fs.readModFile(MOD_META),ctx.fs.readModFile(MOD_CANON_EN),ctx.fs.readModFile(MOD_CANON_ITEMS),ctx.fs.readModFile(MOD_CONTEXT_SEED),ctx.fs.readModFile(MOD_LANG_CODE),ctx.fs.readModFile(MOD_PLUGIN_EN_REF),ctx.fs.readModFile(MOD_BASE_EN_REF),ctx.fs.readModFile(MOD_STRICT_CONTEXT_EN)]);
+      await ctx.fs.writeProjectFile(RUNTIME_DIR+'/000_JsonCompat.rb',jsonCompat);await ctx.fs.writeProjectFile(RUNTIME_DIR+'/001_TranslateStudio.rb',runtime);await ctx.fs.writeProjectFile(RUNTIME_DIR+'/meta.txt',meta);await ctx.fs.writeProjectFile(PROJECT_CANON_EN,canonEn);await ctx.fs.writeProjectFile(PROJECT_CANON_ITEMS,canonItems);await ctx.fs.writeProjectFile(PROJECT_CONTEXT_SEED,contextSeed);await ctx.fs.writeProjectFile(PROJECT_PLUGIN_EN_REF,pluginEnRef);await ctx.fs.writeProjectFile(PROJECT_BASE_EN_REF,baseEnRef);await ctx.fs.writeProjectFile(PROJECT_STRICT_CONTEXT_EN,strictContextEn);
       if(!(await exists('Data/TranslateStudio/language_menu_custom.rb')))await ctx.fs.writeProjectFile('Data/TranslateStudio/language_menu_custom.rb',langCode);
       await installLanguageUiAssets();
       state.autoInstalled=true;if(!silent)toast(`Runtime v${VERSION} instalado/actualizado.`,'info');return true;

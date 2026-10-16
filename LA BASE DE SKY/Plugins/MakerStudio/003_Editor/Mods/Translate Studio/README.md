@@ -110,3 +110,10 @@ Base scripts and plugins now use supplied English source references directly dur
 - Corrige `Invalid regular expression: missing /` al abrir el mod en Maker Studio.
 - La restauración de placeholders ya no construye una regex de escape innecesaria; los tokens internos son alfanuméricos y se buscan directamente.
 - Se sincroniza también la copia runtime incluida en `Plugins/[CARNKEVT] Translate Studio`.
+
+## v1.4.1 — compatibilidad con LA BASE DE SKY 1.2.1.1
+
+- El runtime ya no falla con `LoadError: cannot load such file -- json` si el Ruby integrado no dispone de la gema JSON: intenta usar el JSON nativo y, si no está disponible, carga `000_JsonCompat.rb` (implementación Ruby pura). El mod instala ambos archivos.
+- Se elimina la dependencia de `fileutils` para guardar JSON y se evita que `__dir__` desvíe preferencias/catálogos fuera de la raíz del proyecto.
+- Se incluyen las nuevas propiedades de objetos `PortionName` y `PortionNamePlural` del sistema de traducción de La Base de Sky, diferenciadas de `Name` y `NamePlural` tanto en la interfaz como en las búsquedas por `MessageTypes` y `GameData::Item`.
+- No se modifican los archivos de idioma existentes; las nuevas columnas usan el texto original si no existe override.

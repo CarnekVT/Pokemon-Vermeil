@@ -1,6 +1,6 @@
 # encoding: UTF-8
 #===============================================================================
-# [CARNKEVT] Translate Studio v1.4.0
+# [CARNKEVT] Translate Studio v1.4.1
 # Direct contextual localization runtime for Pokémon Essentials v21.1.
 #
 # - Español / English selector with first-boot gamefeel.
@@ -11,14 +11,22 @@
 # - GameData + MessageTypes + Debug listers follow the active language.
 # - Localized graphics support *_ESP / *_ENG and legacy suffixes.
 #===============================================================================
-require "json" if !defined?(JSON)
+# Some mkxp-z/RGSS builds do not ship json in their embedded Ruby load path.
+# Keep native JSON when available; otherwise load the bundled pure-Ruby shim.
+unless defined?(JSON) && JSON.respond_to?(:parse) && JSON.respond_to?(:generate) && JSON.respond_to?(:pretty_generate)
+  begin
+    require "json"
+  rescue LoadError
+    load "Plugins/[CARNKEVT] Translate Studio/000_JsonCompat.rb"
+  end
+end
 begin
   require "zlib" if !defined?(Zlib)
 rescue LoadError
 end
 
 module CarnekTranslateStudio
-  VERSION = "1.4.0"
+  VERSION = "1.4.1"
   DATA_PATH = "Data/TranslateStudio/translations.json"
   CONFIG_PATH = "Data/TranslateStudio/config.json"
   PREF_PATH = "Data/TranslateStudio/language.json"
@@ -132,12 +140,13 @@ module CarnekTranslateStudio
     false
   end
 
+  # Save to the active project, not to the parent of the plugin's folder.
+  # Avoid fileutils, which may also be missing from embedded Ruby builds.
   def self.write_json(path, data)
-    ensure_data_dir!
-    File.delete(path) if File.exist?(path) rescue nil
-    File.open(path, "wb") { |f| f.write(JSON.pretty_generate(data)) }
+    return false if !ensure_data_dir!
+    File.open(path, "wb") { |f| f.write(JSON.pretty_generate(data) + "\n") }
     true
-  rescue Exception
+  rescue StandardError
     false
   end
 
@@ -1191,6 +1200,8 @@ module CarnekTranslateStudio
           id = it.id.to_s.upcase
           add.call(MessageTypes::ITEM_NAMES, it.real_name, ["items", id, "Name", nil]) if defined?(MessageTypes::ITEM_NAMES) && it.respond_to?(:real_name)
           add.call(MessageTypes::ITEM_NAME_PLURALS, it.real_name_plural, ["items", id, "NamePlural", nil]) if defined?(MessageTypes::ITEM_NAME_PLURALS) && it.respond_to?(:real_name_plural)
+          add.call(MessageTypes::ITEM_PORTION_NAMES, it.real_portion_name, ["items", id, "PortionName", nil]) if defined?(MessageTypes::ITEM_PORTION_NAMES) && it.respond_to?(:real_portion_name)
+          add.call(MessageTypes::ITEM_PORTION_NAME_PLURALS, it.real_portion_name_plural, ["items", id, "PortionNamePlural", nil]) if defined?(MessageTypes::ITEM_PORTION_NAME_PLURALS) && it.respond_to?(:real_portion_name_plural)
           add.call(MessageTypes::ITEM_DESCRIPTIONS, it.real_description, ["items", id, "Description", nil]) if defined?(MessageTypes::ITEM_DESCRIPTIONS) && it.respond_to?(:real_description)
         end
       end
@@ -1214,6 +1225,8 @@ module CarnekTranslateStudio
   ZBOX_PBS_MESSAGE_TYPES = {
     "Item Name"         => :ITEM_NAMES,
     "Item Plural"       => :ITEM_NAME_PLURALS,
+    "Item Portion Name" => :ITEM_PORTION_NAMES,
+    "Item Portion Plural" => :ITEM_PORTION_NAME_PLURALS,
     "Item Desc"         => :ITEM_DESCRIPTIONS,
     "Species Name"      => :SPECIES_NAMES,
     "Species Form"      => :SPECIES_FORM_NAMES,
@@ -1449,6 +1462,8 @@ module CarnekTranslateStudio
     if defined?(GameData::Item)
       install_method_patch(GameData::Item, :name) { |obj, raw| item_text(obj.id, "Name", raw) }
       install_method_patch(GameData::Item, :name_plural) { |obj, raw| item_text(obj.id, "NamePlural", raw) }
+      install_method_patch(GameData::Item, :portion_name) { |obj, raw| item_text(obj.id, "PortionName", raw) }
+      install_method_patch(GameData::Item, :portion_name_plural) { |obj, raw| item_text(obj.id, "PortionNamePlural", raw) }
       install_method_patch(GameData::Item, :description) { |obj, raw| item_text(obj.id, "Description", raw) }
     end
     if defined?(GameData::Type)
