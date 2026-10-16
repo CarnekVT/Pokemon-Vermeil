@@ -1,7 +1,7 @@
 Name       = [CARNKEVT] JSON Compatibility
-Version    = 1.0.0
+Version    = 1.1.0
 Essentials = 21.1
 Credits    = CarnekVT
 First      = true
 Priority   = 999999
-Scripts    = 000_JsonBootstrap.rb
+Scripts    = 000_JsonBootstrap.rb,001_FileUtilsBootstrap.rb

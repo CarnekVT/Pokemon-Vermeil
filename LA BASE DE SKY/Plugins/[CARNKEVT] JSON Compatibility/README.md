@@ -17,3 +17,16 @@ game in Debug and force a plugin recompile (hold Ctrl on startup).
 This compatibility layer handles the JSON API needed for basic MakerStudio
 configuration/storage. It is not a complete replacement for the standard Ruby
 JSON gem's advanced extensions.
+
+## 1.1.0 — fileutils / Battle Scene Studio
+
+Early startup also supplies `FileUtils.mkdir_p` (and its `mkpath` alias)
+when the embedded Ruby interpreter cannot `require "fileutils"`.
+The shim registers `fileutils.rb` in `$LOADED_FEATURES`, so unchanged
+plugins such as Battle Scene Studio Runtime (001_Core_Utilities.rb:411) can
+still `require 'fileutils'` and create the required status directory.
+
+The native Ruby implementation remains preferred whenever it is available.
+This fallback implements directory creation only, not the whole FileUtils API.
+It deliberately does not modify `Data`, Essentials scripts, MakerStudio core,
+or any MakerStudio mod.
