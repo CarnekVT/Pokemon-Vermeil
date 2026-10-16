@@ -1,4 +1,13 @@
 # encoding: UTF-8
+# Prefer the native Ruby JSON implementation when this file is auto-loaded by
+# PluginManager before 001_TranslateStudio.rb. A missing gem is not fatal.
+unless defined?(JSON) && JSON.respond_to?(:parse) && JSON.respond_to?(:generate) && JSON.respond_to?(:pretty_generate)
+  begin
+    require "json"
+  rescue LoadError
+  end
+end
+
 # Pure Ruby JSON fallback for embedded Ruby runtimes without the json gem.
 module CarnekTranslateJSONFallback
   class ParseError < StandardError; end
