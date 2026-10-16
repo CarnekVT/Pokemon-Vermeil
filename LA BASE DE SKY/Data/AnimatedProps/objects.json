@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "definitions": [
+    {
+      "id": "demo_molino",
+      "name": "Molino de viento (ejemplo)",
+      "sheet": "demo_molino.png",
+      "width": 4,
+      "height": 5,
+      "frames": 4,
+      "fps": 4,
+      "cells": [
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 0,
+          "terrainTag": 0
+        }
+      ],
+      "loop": true
+    },
+    {
+      "id": "demo_arbol",
+      "name": "Árbol al viento (ejemplo)",
+      "sheet": "demo_arbol.png",
+      "width": 3,
+      "height": 4,
+      "frames": 25,
+      "fps": 3,
+      "cells": [
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 4,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 4,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 4,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        }
+      ],
+      "loop": true
+    }
+  ],
+  "placements": {}
+}
