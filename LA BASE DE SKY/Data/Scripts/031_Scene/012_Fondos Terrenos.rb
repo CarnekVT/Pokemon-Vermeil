@@ -1,6 +1,6 @@
-HAZARD_OPACITY = 180
-# Mayor a BATTLER_BASE_Z (50): para que los hazards no queden por debajo del sprite del Pokémon
-PLAYER_HAZARD_Z = 51 
+HAZARD_OPACITY = 200
+HAZARD_Z_OFFSET = -1
+PLAYER_HAZARD_Z = 49
 ENEMY_HAZARD_Z = 4
 OFFSET_X_SPIKES = [[0, -25, 25], [0, -25, 25]]
 OFFSET_Y_SPIKES = [[-20, -15, -25], [0, 5, -5]]
@@ -8,17 +8,17 @@ OFFSET_X_TOXIC_SPIKES = [[25, -25], [25, -25]]
 OFFSET_Y_TOXIC_SPIKES = [[-10, -10], [-20, -20]]
 OFFSET_X_STICKY_WEB = [10, 0]
 OFFSET_Y_STICKY_WEB = [-20, -20]
-OFFSET_X_STEALTH_ROCK = [10, 10]
-OFFSET_Y_STEALTH_ROCK = [-30, -10]
+OFFSET_X_STEALTH_ROCK = [-45, 10]
+OFFSET_Y_STEALTH_ROCK = [-10, -10]
 
 class Battle::Scene
-  
+
   def sceneWait(numframes)
     numframes.times do
       pbUpdate
     end
   end
-  
+
   def pbDeleteField(bg = 'terrain_bg', base1 = 'base_terrain_0', base2 = 'base_terrain_1')
     sprites = [bg, base1, base2].filter_map { |id| @sprites[id] }
     sprites.reject! { |spr| spr.respond_to?(:disposed?) && spr.disposed? }
@@ -63,14 +63,14 @@ class Battle::Scene
       end
     end
   end
-  
+
   def pbSetFieldBackground
-    if @battle.field.terrain == :None 
+    if @battle.field.terrain == :None
       pbCreateBackdropSprites
       pbDeleteField
     else
       pbDeleteField
-      
+
       if @battle.field.terrain == :Grassy
         field = "Grassy Terrain"
         sound = "PRSFX- Grassy Terrain"
@@ -84,7 +84,7 @@ class Battle::Scene
         field = "Electric Terrain"
         sound = "PRSFX- Electric Terrain"
       end
-      
+
       bg = pbAddSprite("terrain_bg", 0, 0, "Graphics/Animations/PRAS- #{field} BG", @viewport)
       bg.z = 2
       bg.opacity = 0
@@ -114,7 +114,7 @@ class Battle::Scene
         sceneWait(2)
       end
     end
-    
+
     # Update hazard visuals after setting terrain
     pbUpdateHazardSprites
   end
@@ -139,26 +139,28 @@ class Battle::Scene
     return if !Settings::SHOW_HAZARDS_IN_BATTLE
 
     hazards_folder = File.join("Graphics", "UI", "Battle", "hazards")
-    
+
     begin
       pbDeleteHazardSprites
     rescue
       # Silently handle any errors in deleting sprites
     end
-    
+
     2.times do |side|
       sideData = @battle.sides[side]
       baseX, baseY = Battle::Scene.pbBattlerPosition(side)
-      
+      battler_sprite = @sprites["pokemon_#{side}"]
+      hazard_z = battler_sprite ? battler_sprite.z + HAZARD_Z_OFFSET : (side.zero? ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z)
 
-      
+
+
       # Stealth Rock - appears floating around the field
       if sideData.effects[PBEffects::StealthRock]
         offset_x = OFFSET_X_STEALTH_ROCK[side]           # Spread horizontally
         offset_y = OFFSET_Y_STEALTH_ROCK[side]         # Keep near the base level
         stealth = pbAddSprite("stealthrock_#{side}", baseX + offset_x, baseY + offset_y,
                              File.join(hazards_folder, "stealth_rock"), @viewport)
-        stealth.z = (side.zero?) ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z
+        stealth.z = hazard_z
         stealth.opacity = HAZARD_OPACITY
         stealth.visible = true
         if stealth.bitmap
@@ -166,41 +168,41 @@ class Battle::Scene
           stealth.oy = stealth.bitmap.height / 2
         end
       end
-      
+
       # Spikes - appears on the ground (up to 3 layers)
       spikes_count = sideData.effects[PBEffects::Spikes]
       spikes_count.times do |layer|
           # Position spikes in different locations for each layer
           offset_x = OFFSET_X_SPIKES[side][layer]        # Spread horizontally
           offset_y = OFFSET_Y_SPIKES[side][layer]          # Keep near the base level
-          
+
           final_x = baseX + offset_x
           final_y = baseY + offset_y
-        
+
         # Try the custom hazards folder first, fallback to original graphics
         spikes_graphic = File.join(hazards_folder, "spikes")
-        
+
         spikes = pbAddSprite("spikes_#{side}_#{layer}", final_x, final_y, spikes_graphic, @viewport)
-        spikes.z = ((side.zero?) ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z) + layer * 0.1  # Slight z-ordering for layers
+        spikes.z = hazard_z + layer * 0.1
         spikes.opacity = HAZARD_OPACITY  # Each layer more visible: 150, 175, 200
         spikes.visible = true
-        
+
         if spikes.bitmap
           spikes.ox = spikes.bitmap.width / 2
           spikes.oy = (side == 0) ? spikes.bitmap.height : spikes.bitmap.height / 2
         end
       end
-      
+
       # Toxic Spikes - appears on the ground (up to 2 layers)
       toxic_count = sideData.effects[PBEffects::ToxicSpikes]
       toxic_count.times do |layer|
-        # Position toxic spikes in different locations for each layer  
+        # Position toxic spikes in different locations for each layer
         offset_x = OFFSET_X_TOXIC_SPIKES[side][layer]           # Spread horizontally
         offset_y = OFFSET_Y_TOXIC_SPIKES[side][layer]            # Keep near the base level
-        
+
         toxic = pbAddSprite("toxicspikes_#{side}_#{layer}", baseX + offset_x, baseY + offset_y,
                            File.join(hazards_folder, "toxic_spikes"), @viewport)
-        toxic.z = ((side.zero?) ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z) + layer * 0.1  # Slight z-ordering for layers
+        toxic.z = hazard_z + layer * 0.1
         toxic.opacity = HAZARD_OPACITY  # Each layer more visible: 140, 180
         toxic.visible = true
 
@@ -209,14 +211,14 @@ class Battle::Scene
           toxic.oy = (side == 0) ? toxic.bitmap.height : toxic.bitmap.height / 2
         end
       end
-      
+
       # Sticky Web - appears as webbing on the ground
       if sideData.effects[PBEffects::StickyWeb]
         offset_x = OFFSET_X_STICKY_WEB[side]           # Spread horizontally
         offset_y = OFFSET_Y_STICKY_WEB[side]            # Keep near the base level
         web = pbAddSprite("stickyweb_#{side}", baseX + offset_x, baseY + offset_y,
                          File.join(hazards_folder, "sticky_web"), @viewport)
-        web.z = (side.zero?) ? PLAYER_HAZARD_Z : ENEMY_HAZARD_Z
+        web.z = hazard_z
         web.opacity = HAZARD_OPACITY
         web.visible = true
         if web.bitmap
