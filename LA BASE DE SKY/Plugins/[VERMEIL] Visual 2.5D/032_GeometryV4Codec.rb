@@ -9,10 +9,25 @@
 #
 # MapXXX.v25d is editor-only and is NEVER opened by gameplay.
 #===============================================================================
-require "uri"
 
 module Mode7
   module V25Codec
+    # Maker Studio serializes strings with JavaScript encodeURIComponent.
+    # Decode percent-encoded UTF-8 bytes without Ruby's optional URI library.
+    # Literal '+' must remain '+': unlike query strings, encodeURIComponent
+    # encodes spaces as %20 and plus signs as %2B.
+    def self.decode_component(value)
+      encoded = value.to_s
+      decoded = encoded.gsub(/%([0-9a-fA-F]{2})/) do
+        [Regexp.last_match(1).to_i(16)].pack("C")
+      end
+      decoded.force_encoding(Encoding::UTF_8) if defined?(Encoding)
+      if decoded.respond_to?(:valid_encoding?) && !decoded.valid_encoding?
+        raise "V25 invalid UTF-8 encoded string"
+      end
+      decoded
+    end
+
     class Parser
       def initialize(text)
         @s = text.to_s
@@ -44,7 +59,7 @@ module Mode7
           n = read_len
           raw = @s.byteslice(@i, n).to_s
           @i += n
-          URI.decode_www_form_component(raw)
+          Mode7::V25Codec.decode_component(raw)
         when "A"
           n = read_len
           Array.new(n) { read }
