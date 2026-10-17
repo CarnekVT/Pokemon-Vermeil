@@ -173,7 +173,7 @@ module Mode7
     # Data/VERMEIL_GEOMETRY_V4. The old legacy Geometry JSON folder is not a
     # runtime source anymore. Maps without a v4 runtime can still use Visual
     # 2.5D Terrain Tags normally; authored v4 maps are authoritative.
-    SURFACE_GEOMETRY_ENABLED     = false
+    SURFACE_GEOMETRY_ENABLED     = true
     SURFACE_GEOMETRY_DIRECTORY   = "Data/VERMEIL_GEOMETRY_V4"
     SURFACE_GEOMETRY_HEIGHT_STEP = 32.0
     # V7 / modo Terrain Tags only (cuarentena modelos 3D):
@@ -181,7 +181,7 @@ module Mode7
     # false -> single-source: la altura sale SOLO de los Terrain Tags NDS
     #          asignados en el tileset. Files .v25r/.v25d se ignoran en runtime;
     #          SURFACE_GEOMETRY_ENABLED permanece true para la ruta de tags.
-    SURFACE_GEOMETRY_RUNTIME_FILES = false
+    SURFACE_GEOMETRY_RUNTIME_FILES = true
 
     # Compatibility constant retained for older code paths. Geometry v4 runtime
     # never falls back to editor JSON; it reads MapXXX.v25r only.
@@ -315,8 +315,8 @@ module Mode7
     # FPS estables en exterior; las bandas runtime se adaptan al perfil NDS.
     GEOMETRY_GROUND_ENABLED      = true
     GEOMETRY_GROUND_BAND_HEIGHT  = 1
-    V25_SKY_AFFINE_ADAPTIVE_BANDS = false
-    V25_SKY_AFFINE_BAND_HEIGHT   = 1
+    V25_SKY_AFFINE_ADAPTIVE_BANDS = true
+    V25_SKY_AFFINE_BAND_HEIGHT   = 2
     # Solape subpixel entre bandas del suelo. 0 abria juntas de 1px entre
     # quads adyacentes al proyectar por separado; 0.75 las cierra sin
     # emborronar el pixel art.
@@ -475,7 +475,7 @@ module Mode7
     # V5.14: el subsistema 3D (meshes, fisica de modelos, objetos Geometry) se
     # elimino del plugin; solo quedan Terrain Tags de tileset. false = no se
     # dibujan ni bloquean el paso. Recuperable via historial de git.
-    NDS_GEOMETRY_OBJECTS_ENABLED = false
+    NDS_GEOMETRY_OBJECTS_ENABLED = true
     NDS_OBJECT_CULL_TILES_X      = 16
     NDS_OBJECT_CULL_TILES_Y      = 14
     NDS_OBJECT_FRONT_SHADE       = 24
