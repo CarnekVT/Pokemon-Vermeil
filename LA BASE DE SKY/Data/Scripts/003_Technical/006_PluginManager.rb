@@ -787,31 +787,7 @@ module PluginManager
   end
 
   # Comprobar si los plugins necesitan compilarse
-  # JSON must be available before ANY compiled plugin executes. MakerStudio's
-  # DataStore requires it even when the Translate Studio plugin loads later.
-  def self.prepare_json_for_plugins!
-    begin
-      require "json"
-      return true
-    rescue LoadError
-      # Bundled Ruby may lack JSON, or contain incompatible native extensions.
-    end
-    path = "Data/Compatibility/JsonCompat.rb"
-    raise LoadError, "JSON unavailable and fallback missing: #{path}" if !File.file?(path)
-    load path
-    valid = defined?(JSON) && JSON.respond_to?(:parse) &&
-            JSON.respond_to?(:generate) && JSON.respond_to?(:pretty_generate)
-    raise LoadError, "JSON fallback could not initialize: #{path}" if !valid
-    # Defining JSON alone is insufficient: require checks $LOADED_FEATURES.
-    registered = $LOADED_FEATURES.any? { |feature|
-      feature.to_s.tr("\\", "/").split("/").last == "json.rb"
-    }
-    $LOADED_FEATURES << "json.rb" if !registered
-    true
-  end
-
   def self.runPlugins
-    self.prepare_json_for_plugins!
     Console.echo_h1("Comprobando plugins")
     # obtener el orden de los plugins a interpretar
     order, plugins = self.getPluginOrder
