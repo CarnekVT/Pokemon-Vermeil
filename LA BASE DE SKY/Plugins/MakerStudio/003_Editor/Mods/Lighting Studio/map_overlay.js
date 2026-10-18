@@ -54,7 +54,7 @@ export function paint(g,info,v){
     if(editing && v.mode==='place' && v.hover && live && allEnabled && !v.drag){
       const draft=v.brush||{};
       const ghost={
-        id:'lighting-studio-ghost',enabled:true,blendMode:draft.blendMode||'add',
+        id:'lighting-studio-ghost',enabled:true,type:draft.type||'radial',blendMode:draft.blendMode||'add',
         x:v.hover.x,y:v.hover.y,
         color:draft.color||'#FFCF86',
         radiusPx:v.brushRadius||96,intensity:draft.intensity??0.8,
