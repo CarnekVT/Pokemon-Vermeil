@@ -1,3 +1,5 @@
+# Lighting Studio 0.2.0 — rediseño del editor (sin validar en ejecución)
+
 # Lighting Studio — MVP 0.1.0 (prototipo no validado en juego)
 
 ## Alcance realizado
@@ -36,3 +38,11 @@ Abrir un mapa en Maker Studio y entrar a **Mods > Lighting Studio**. El ID del m
 
 ## Siguiente paso técnico
 Antes de implementar sombras/timeline, reemplazar el sistema aproximado de halos por un compositor de luz probado en la versión real de RGSS/mkxp del proyecto; añadir preview fiel basado en la misma matemática, interacciones de selección/arrastre, y sincronización robusta con la selección del mapa.
+
+## Rediseño 0.2.0
+- El mapa original de Maker Studio es el visor principal (se eliminó la pequeña vista esquemática del panel).
+- Barra Seleccionar / Añadir luz / Borrar, selección directa, arrastre del centro y tirador de radio.
+- Inspector visual con sliders sincronizados, lista compacta, duplicación, presets iniciales y visibilidad.
+- Modificación de propiedades con preview inmediata y persistencia automática tras cada operación.
+- La sintaxis de index.js, styles.js y model.js se comprobó. NO se ha ejecutado Maker Studio ni el runtime.
+- Pendiente: validar callbacks de arrastre, teclas globales, fidelidad de luz y sombras en juego.
