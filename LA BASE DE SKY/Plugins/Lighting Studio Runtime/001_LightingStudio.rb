@@ -74,6 +74,7 @@ module LightingStudioSpriteset
     return unless @map && @map.respond_to?(:map_id)
     data = LightingStudio.load_map(@map.map_id)
     return unless data
+    return if data['enabled'] == false
     ambient = data['ambient'].is_a?(Hash) ? data['ambient'] : {}
     darkness = LightingStudio.number(ambient['darkness'],0,0,1)
     if darkness > 0
