@@ -18,10 +18,11 @@ function tag(g,x,y,text,bg){g.save();g.font='bold 12px sans-serif';const w=g.mea
 function center(g,p,on,selected){g.save();g.beginPath();g.arc(p.x,p.y,selected?9:7,0,Math.PI*2);g.fillStyle='#222B39';g.fill();g.lineWidth=selected?3:2;g.strokeStyle=on?(selected?'#FFFFFF':'#FFCB75'):'#AAAAAA';g.stroke();g.beginPath();g.moveTo(p.x-4,p.y);g.lineTo(p.x+4,p.y);g.moveTo(p.x,p.y-4);g.lineTo(p.x,p.y+4);g.stroke();g.restore();}
 export function paint(g,info,v){
   if(!g||!info||!v?.map)return;
+  const allEnabled=v.map.enabled!==false;
   const ls=v.map.lights||[],w=info.canvasWidth,h=info.canvasHeight;
   g.save();
   try{
-    if(v.showPreview){
+    if(v.showPreview&&allEnabled){
       const darkness=Math.min(1,Math.max(0,Number(v.map.ambient?.darkness)||0));
       const tint=rgb(v.map.ambient?.color||'#142439');
       if(darkness){g.globalAlpha=darkness*.8;g.fillStyle='rgb('+tint.join(',')+')';g.fillRect(0,0,w,h);}
