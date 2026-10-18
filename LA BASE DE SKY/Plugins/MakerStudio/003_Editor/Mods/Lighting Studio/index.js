@@ -11,6 +11,7 @@ function current(){return getMap(state.data,state.mapId,false);}
 function active(){return current()?.lights.find(l=>l.id===state.selected)||null;}
 function record(){state.undo.push(deepCopy(state.data));if(state.undo.length>60)state.undo.shift();state.redo=[];}
 function redraw(){state?.ctx.editor.requestRedraw?.();}
+function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Overlay activo · mapa '+stats.lastMap+' · '+stats.calls+' fotogramas':'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
 function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();redraw();refresh();void persist().catch(fail);}
 function undo(){if(!state.undo.length)return;state.redo.push(deepCopy(state.data));state.data=state.undo.pop();redraw();refresh();void persist().catch(fail);}
 function redo(){if(!state.redo.length)return;state.undo.push(deepCopy(state.data));state.data=state.redo.pop();redraw();refresh();void persist().catch(fail);}
@@ -29,6 +30,7 @@ function refresh(){if(!state?.host)return;const root=state.host;const oldScroll=
 const head=element('div','ls-head');shell.append(head);const brand=element('div','ls-brand');head.append(brand);brand.append(element('div','ls-logo','☀'));const info=node('div');brand.append(info);info.append(element('div','ls-title','Lighting Studio'),element('div','ls-sub','Iluminación del mapa · edición directa'));
 const toolbar=element('div','ls-toolbar');shell.append(toolbar);
 for(const [id,label] of [['select','↖ Seleccionar'],['place','✦ Añadir luz'],['erase','⌫ Borrar']])toolbar.append(mini(label,()=>setMode(id),state.mode===id));
+const layerStatus=element('div','ls-layer-status');shell.append(layerStatus);const status=element('span','ls-layer-live','Comprobando overlay del mapa…');layerStatus.append(status);state.statusNode=status;const diagnostic=mini('Prueba visual',()=>{state.diagnostic=!state.diagnostic;redraw();refresh();});layerStatus.append(diagnostic);diagnostic.classList.toggle('active',!!state.diagnostic);updateDiagnosticStatus();
 const actions=element('div','ls-actions');shell.append(actions);actions.append(mini('↶ Deshacer',undo),mini('↷ Rehacer',redo),mini('Duplicar',()=>{const l=active();if(!l)return;change(()=>{const copy=deepCopy(l);copy.id='light_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);copy.x+=.5;copy.y+=.5;copy.name+=' copia';current().lights.push(copy);state.selected=copy.id;});}));
 const mapId=state.ctx.editor.activeMapId?.();if(Number(mapId)>0)state.mapId=Number(mapId);
 const title=element('div','ls-hint','Mapa #'+state.mapId+' · '+(state.mode==='select'?'Clic: seleccionar · arrastrar: mover luz o radio':state.mode==='place'?'Clic y arrastra para crear una luz del tamaño deseado':'Clic en una luz para eliminarla')+' · Ctrl + rueda: zoom del editor');shell.append(title);
@@ -56,15 +58,23 @@ const coords=element('div','ls-two');insp.append(coords);for(const axis of ['x',
 const buttons=element('div','ls-inline');insp.append(buttons);buttons.append(mini('⌫ Eliminar',()=>change(()=>{const map=current();map.lights=map.lights.filter(l=>l.id!==selected.id);state.selected=null;})));
 }
 const wipe=element('div','ls-inline');ambient.append(wipe);wipe.append(mini('Restablecer iluminación del mapa',()=>{const n=(current()?.lights?.length||0);const message='Se eliminarán '+n+' luces y se restaurará el ambiente de este mapa. ¿Continuar?';const confirm=state.ctx.ui.showConfirmDialog({title:'Restablecer iluminación',message,confirmLabel:'Restablecer',cancelLabel:'Cancelar'});Promise.resolve(confirm).then(ok=>{if(ok)change(()=>{state.data.maps[String(state.mapId)]={enabled:true,ambient:{color:'#142439',darkness:0},lights:[]};state.selected=null;});}).catch(fail);}));
-const hint=element('div','ls-preview-legend','Preview en el mapa: las luces y su animación se dibujan sobre el escenario de Maker Studio. El inspector solo controla parámetros.');shell.append(hint);
+const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el mapa mediante un overlay independiente de Fog, Panorama y Sombras. Prueba visual muestra una marca amarilla para comprobar si Maker Studio lo está renderizando.');shell.append(hint);
 const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));shell.scrollTop=oldScroll;
 }
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number.isFinite(v)?v:a));
 function editValue(fn,final){if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}fn();state.ctx.editor.requestRedraw?.();if(final){state.undo.push(state.editSnapshot);state.editSnapshot=null;void persist().catch(fail);redraw();refresh();}}
 
-function overlay(draw,info){if(!state||state.readError)return;
-const map=getMap(state.data,info.mapId,false);
-paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:state.showOverlay,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,time:performance.now()/1000});}
+function overlay(draw,info){if(!state||!draw||!info)return;
+const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;
+try{
+ const map=getMap(state.data,info.mapId,false);
+ paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,time:performance.now()/1000});
+ if(state.diagnostic){draw.save();try{
+  draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
+ }finally{draw.restore();}}
+ stats.errors=0;stats.lastError='';
+}catch(error){stats.errors++;stats.lastError=String(error?.message||error);if(stats.errors===1){state.ctx.log.error('[Lighting Studio] Error en overlay',error);notify('Error en preview: '+stats.lastError,'error');}}
+}
 function selectMap(id){const n=Number(id);if(n>0&&state.mapId!==n){state.mapId=n;state.selected=null;state.hover=null;state.hoverHit=null;redraw();refresh();}}
 
 function pointerDown(e){if(!state||state.readError||e.buttons&&!(e.buttons&1))return;selectMap(e.mapId);const pt=pointerPoint(e);state.hover=pt;state.lastCursor=pt;const found=hitTest(current()?.lights,pt,state.selected);state.hoverHit=found;
@@ -75,14 +85,18 @@ function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
 redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,selected:null,mode:'select',showOverlay:true,showGuides:true,brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:''},statusNode:null,selected:null,mode:'select',showOverlay:true,showGuides:true,brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
 ctx.tools.registerTool({id:TOOL,label:'Lighting Studio',icon:'☀',onActivate(){ctx.ui.openPanel(PANEL);redraw();},onPointerDown:pointerDown,onPointerMove:pointerMove,onPointerUp:pointerUp,onDeactivate(){pointerUp();if(state){state.hover=null;state.hoverHit=null;redraw();}}});
-const item={id:'lighting-studio.overlay',zOrder:65,render:overlay};
-if(ctx.ui.registerAdvancedOverlay)ctx.ui.registerAdvancedOverlay(item);else ctx.ui.registerOverlay(item);
+// The baseline Overlay API is used deliberately: it is the most compatible canvas
+// drawing hook and, unlike advanced overlays, does not depend on animation metadata.
+const item={id:'lighting-studio.overlay',zOrder:500,render:overlay};
+if(ctx.ui.registerOverlay)ctx.ui.registerOverlay(item);
+else if(ctx.ui.registerAdvancedOverlay)ctx.ui.registerAdvancedOverlay(item);
+else notify('Esta versión de Maker Studio no admite overlays de mods.','error');
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
-redraw();state.ticker=setInterval(()=>{if(!state)return;redraw();},100);
+redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();redraw();},100);
 }
 export function deactivate(){if(state?.ticker)clearInterval(state.ticker);state=null;}
