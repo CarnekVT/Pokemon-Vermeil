@@ -1,0 +1,24 @@
+{
+  "id": "com.carnekvt.lighting-studio",
+  "name": "Lighting Studio",
+  "version": "0.1.0",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Editor de iluminación 2D por mapa: ambiente, fuentes radiales, edición directa, vista previa y exportación al runtime.",
+  "tags": [
+    "mapping",
+    "lighting",
+    "graphics"
+  ],
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.dialogs",
+    "ui.toasts"
+  ]
+}
