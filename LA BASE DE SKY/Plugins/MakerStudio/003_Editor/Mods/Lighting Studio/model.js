@@ -3,6 +3,9 @@
 export const DATA_PATH = 'Data/LightingStudio/maps.json';
 export const SCHEMA = 1;
 export const BLEND_MODES = ['normal','add','subtract'];
+export const LIGHT_TYPES = ['radial','cone','ellipse','rectangle'];
+export const TYPE_NAMES = {radial:'Radial',cone:'Cono / foco',ellipse:'Elíptica',rectangle:'Rectangular'};
+export const parseCoordinate = v => { const str=String(v).trim().replace(',', '.'); if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(str))return null; const n=Number(str);return Number.isFinite(n)&&n>=-2048&&n<=2048?Math.round(n*1000)/1000:null; };
 export const deepCopy = v => JSON.parse(JSON.stringify(v));
 export const newId = () => 'light_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
 const num = (v,lo,hi,def) => Number.isFinite(Number(v)) ? Math.min(hi,Math.max(lo,Number(v))) : def;
@@ -16,10 +19,12 @@ export function normalizeLight(raw={}){
   const s=raw&&typeof raw==='object'?raw:{},p=s.pulse||{},px=s.pixel||{};
   return {
     id:String(s.id||newId()).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,80)||newId(),
-    name:String(s.name||'Luz radial').slice(0,80),type:'radial',
+    name:String(s.name||'Luz radial').slice(0,80),type:LIGHT_TYPES.includes(s.type)?s.type:'radial',
     x:num(s.x,-2048,2048,0),y:num(s.y,-2048,2048,0),
     radiusPx:num(s.radiusPx,8,512,96),intensity:num(s.intensity,0,1,.8),
     color:hex(s.color),softness:num(s.softness,.05,1,.75),
+    rotation:num(s.rotation,-360,360,0),angle:num(s.angle,5,170,70),
+    widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
     enabled:s.enabled!==false,
     blendMode:BLEND_MODES.includes(s.blendMode)?s.blendMode:'add',
     pulse:{enabled:p.enabled===true,speedHz:num(p.speedHz,.05,12,1),
@@ -47,4 +52,4 @@ export function getMap(data,mapId,create=false){
   if(!data.maps[k]&&create)data.maps[k]=defaultMap();
   return data.maps[k]||null;
 }
-export function makeLight(x=0,y=0){return normalizeLight({id:newId(),name:'Luz radial',x,y});}
+export function makeLight(x=0,y=0,type='radial'){const t=LIGHT_TYPES.includes(type)?type:'radial';return normalizeLight({id:newId(),name:TYPE_NAMES[t],type:t,x,y});}
