@@ -34,3 +34,9 @@ export const LIGHTING_EXTRA_CSS = `
 .ls-section{background:var(--bg-primary)}
 .ls-head{background:var(--bg-secondary)}
 `;
+
+export const LIGHTING_LAYER_DIAGNOSTIC_CSS = `
+.ls-layer-status{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:9px 14px;background:#1e2630;border-bottom:1px solid var(--border);font-size:11px;}
+.ls-layer-live{flex:1;min-width:140px;font-weight:600;}
+.ls-layer-status .ls-btn{font-size:11px;padding:4px 8px;}
+`;
