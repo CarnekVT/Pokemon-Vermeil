@@ -1,5 +1,6 @@
 import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy} from './model.js';
 import {STYLES} from './styles.js';
+import {drawLights} from './render.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
 const PANEL='lighting-studio.main', TOOL='lighting-studio.place';
 let state=null;
@@ -25,7 +26,7 @@ function labeled(parent,name,control){const r=element('label','ls-field');r.appe
 function slider(parent,name,value,min,max,step,cb){const wrap=element('div','ls-field');wrap.append(element('span','ls-field-label',name),element('span','ls-field-val',Math.round(value*100)/100));const row=element('div','ls-range-row');const range=element('input','ls-range'),num=element('input','ls-input ls-number');range.type='range';num.type='number';for(const v of [range,num]){v.min=min;v.max=max;v.step=step;v.value=value;}const valueEl=wrap.children[1];range.addEventListener('input',()=>{num.value=range.value;valueEl.textContent=range.value;cb(Number(range.value),false);});range.addEventListener('change',()=>cb(Number(range.value),true));num.addEventListener('change',()=>{range.value=num.value;cb(Number(num.value),true);});row.append(range,num);wrap.append(row);parent.append(wrap);}
 function mini(label,fn,selected=false){const b=btn(label,fn);b.className='ls-btn ls-small'+(selected?' active':'');return b;}
 function setMode(mode){state.mode=mode;state.ctx.editor.setTool(TOOL);redraw();refresh();}
-function refresh(){if(!state?.host)return;const root=state.host;root.replaceChildren();const style=node('style',css);root.append(style);const shell=element('div','ls-root');root.append(shell);
+function refresh(){if(!state?.host)return;const root=state.host;const oldScroll=root.querySelector('.ls-root')?.scrollTop||0;state.previewCanvas=null;root.replaceChildren();const style=node('style',css);root.append(style);const shell=element('div','ls-root');root.append(shell);shell.scrollTop=oldScroll;
 const head=element('div','ls-head');shell.append(head);const brand=element('div','ls-brand');head.append(brand);brand.append(element('div','ls-logo','☀'));const info=node('div');brand.append(info);info.append(element('div','ls-title','Lighting Studio'),element('div','ls-sub','Iluminación del mapa · edición directa'));
 const toolbar=element('div','ls-toolbar');shell.append(toolbar);
 for(const [id,label] of [['select','↖ Seleccionar'],['place','✦ Añadir luz'],['erase','⌫ Borrar']])toolbar.append(mini(label,()=>setMode(id),state.mode===id));
@@ -49,18 +50,24 @@ const c=node('input');c.type='color';c.className='ls-color';c.value=selected.col
 slider(insp,'Intensidad',selected.intensity,0,1,.01,(v,final)=>editValue(()=>selected.intensity=clamp(v,0,1),final));
 slider(insp,'Radio · píxeles',selected.radiusPx,8,512,1,(v,final)=>editValue(()=>selected.radiusPx=clamp(v,8,512),final));
 slider(insp,'Suavidad',selected.softness,.05,1,.01,(v,final)=>editValue(()=>selected.softness=clamp(v,.05,1),final));
+const blend=node('select');blend.className='ls-input';for(const [value,label] of [['normal','Normal'],['add','Aditiva / Suma'],['subtract','Multiplicativa / Oscurecer']]){const opt=node('option',label);opt.value=value;blend.append(opt);}blend.value=selected.blendMode||'add';blend.onchange=()=>change(()=>selected.blendMode=blend.value);labeled(insp,'Modo de mezcla',blend);
+const pulse=element('div','ls-effect-group');insp.append(pulse);pulse.append(element('b',null,'Pulsación'));const on=node('input');on.type='checkbox';on.checked=selected.pulse.enabled;on.onchange=()=>change(()=>selected.pulse.enabled=on.checked);labeled(pulse,'Activar pulsación',on);slider(pulse,'Velocidad (Hz)',selected.pulse.speedHz,.05,12,.05,(v,final)=>editValue(()=>selected.pulse.speedHz=v,final));slider(pulse,'Oscilación intensidad',selected.pulse.intensity,0,1,.01,(v,final)=>editValue(()=>selected.pulse.intensity=v,final));slider(pulse,'Oscilación tamaño',selected.pulse.radius,0,.9,.01,(v,final)=>editValue(()=>selected.pulse.radius=v,final));
+const pixel=element('div','ls-effect-group');insp.append(pixel);pixel.append(element('b',null,'Pixel Art'));const pixelOn=node('input');pixelOn.type='checkbox';pixelOn.checked=selected.pixel.enabled;pixelOn.onchange=()=>change(()=>selected.pixel.enabled=pixelOn.checked);labeled(pixel,'Pixelar luz',pixelOn);slider(pixel,'Tamaño de píxel',selected.pixel.size,2,32,1,(v,final)=>editValue(()=>selected.pixel.size=Math.round(v),final));slider(pixel,'Niveles de degradado',selected.pixel.steps,2,24,1,(v,final)=>editValue(()=>selected.pixel.steps=Math.round(v),final));
 const coords=element('div','ls-two');insp.append(coords);for(const axis of ['x','y']){const input=node('input');input.type='number';input.step=.25;input.className='ls-input';input.value=selected[axis];input.onchange=()=>change(()=>selected[axis]=clamp(Number(input.value),-2048,2048));labeled(coords,axis.toUpperCase()+' (tiles)',input);}
 const buttons=element('div','ls-inline');insp.append(buttons);buttons.append(mini('⌫ Eliminar',()=>change(()=>{const map=current();map.lights=map.lights.filter(l=>l.id!==selected.id);state.selected=null;})));
 }
 const wipe=element('div','ls-inline');ambient.append(wipe);wipe.append(mini('Restablecer iluminación del mapa',()=>{const n=(current()?.lights?.length||0);const message='Se eliminarán '+n+' luces y se restaurará el ambiente de este mapa. ¿Continuar?';const confirm=state.ctx.ui.showConfirmDialog({title:'Restablecer iluminación',message,confirmLabel:'Restablecer',cancelLabel:'Cancelar'});Promise.resolve(confirm).then(ok=>{if(ok)change(()=>{state.data.maps[String(state.mapId)]={enabled:true,ambient:{color:'#142439',darkness:0},lights:[]};state.selected=null;});}).catch(fail);}));
+const previewSection=element('section','ls-section');shell.append(previewSection);previewSection.append(element('div','ls-section-heading','PREVIEW · tiempo real'));const canvas=element('canvas','ls-live-preview');canvas.width=360;canvas.height=190;canvas.style.cssText='display:block;width:100%;height:190px;background:#253343;border:1px solid var(--border);border-radius:6px;image-rendering:pixelated';previewSection.append(canvas);state.previewCanvas=canvas;drawPanelPreview();
 const hint=element('div','ls-preview-legend','Vista real del mapa: activa la herramienta y utiliza los tiradores. El halo es aproximado; la fidelidad con el runtime será mejorada en otra fase.');shell.append(hint);
 const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));
 }
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number.isFinite(v)?v:a));
-function editValue(fn,final){if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}fn();state.ctx.editor.requestRedraw?.();if(final){state.undo.push(state.editSnapshot);state.editSnapshot=null;void persist().catch(fail);redraw();refresh();}}
+function editValue(fn,final){if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}fn();state.ctx.editor.requestRedraw?.();drawPanelPreview();if(final){state.undo.push(state.editSnapshot);state.editSnapshot=null;void persist().catch(fail);redraw();refresh();}}
 
+function drawPanelPreview(){if(!state?.previewCanvas)return;const g=state.previewCanvas.getContext('2d');if(!g)return;const w=g.canvas.width,h=g.canvas.height;g.fillStyle='#33485C';g.fillRect(0,0,w,h);g.fillStyle='#43617A';for(let yy=0;yy<h;yy+=32)for(let xx=0;xx<w;xx+=32)if((xx/32+yy/32)%2===0)g.fillRect(xx,yy,32,32);
+ const map=current();if(map?.enabled===false)return;const darkness=map?.ambient?.darkness||0;if(darkness){g.fillStyle='rgba(4,10,20,'+darkness+')';g.fillRect(0,0,w,h);}const lights=active()?[{...active(),x:0,y:0}]:[];drawLights(g,lights,{x:()=>w/2,y:()=>h/2,scale:()=>1},w,h,state.clock||0);}
 function overlay(draw,info){if(!state||state.readError||Number(info.mapId)!==Number(state.mapId))return;
-paint(draw,info,{map:current()||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:state.showOverlay,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL,selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius});}
+paint(draw,info,{map:current()||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:state.showOverlay,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL,selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,time:state.clock||0});}
 function selectMap(id){const n=Number(id);if(n>0&&state.mapId!==n){state.mapId=n;state.selected=null;state.hover=null;state.hoverHit=null;redraw();refresh();}}
 
 function pointerDown(e){if(!state||state.readError||e.buttons&&!(e.buttons&1))return;selectMap(e.mapId);const pt=pointerPoint(e);state.hover=pt;state.lastCursor=pt;const found=hitTest(current()?.lights,pt,state.selected);state.hoverHit=found;
@@ -71,7 +78,7 @@ function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
 redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,selected:null,mode:'select',showOverlay:true,showGuides:true,brushRadius:96,hover:null,hoverHit:null,drag:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,selected:null,mode:'select',showOverlay:true,showGuides:true,brushRadius:96,hover:null,hoverHit:null,drag:null,previewCanvas:null,clock:0,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
@@ -79,6 +86,6 @@ ctx.tools.registerTool({id:TOOL,label:'Lighting Studio',icon:'☀',onActivate(){
 const item={id:'lighting-studio.overlay',zOrder:65,render:overlay};
 if(ctx.ui.registerAdvancedOverlay)ctx.ui.registerAdvancedOverlay(item);else ctx.ui.registerOverlay(item);
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
-redraw();
+redraw();state.ticker=setInterval(()=>{if(!state)return;state.clock+=.08;drawPanelPreview();redraw();},80);
 }
-export function deactivate(){state=null;}
+export function deactivate(){if(state?.ticker)clearInterval(state.ticker);state=null;}
