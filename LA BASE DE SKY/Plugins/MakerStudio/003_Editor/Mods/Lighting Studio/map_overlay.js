@@ -4,14 +4,22 @@ export const TILE=32;
 export function point(ev){return {x:Math.floor(Number(ev.tileX))+.5,y:Math.floor(Number(ev.tileY))+.5};}
 export function toScreen(x,y,info){const t=Number(info.tileSize)||32,z=Number(info.zoom)||1;return {x:(x*t-(Number(info.viewportX)||0))*z,y:(y*t-(Number(info.viewportY)||0))*z};}
 export function screenRadius(radius,info){return radius*(Number(info.tileSize)||32)/32*(Number(info.zoom)||1);}
-export function hitTest(lights,p,selectedId){
-  const list=Array.isArray(lights)?lights:[], d=l=>Math.hypot((l.x-p.x)*32,(l.y-p.y)*32);
-  const centers=list.filter(l=>d(l)<29).sort((a,b)=>(a.id===selectedId?-100:0)-(b.id===selectedId?-100:0)||d(a)-d(b));
-  if(centers.length)return {light:centers[0],part:'move'};
+export function hitTest(lights,p,selectedId,shiftRadius=false){
+  const list=Array.isArray(lights)?lights:[], distance=l=>Math.hypot((l.x-p.x)*32,(l.y-p.y)*32);
   const chosen=list.find(l=>l.id===selectedId);
-  if(chosen&&Math.abs(d(chosen)-chosen.radiusPx)<22)return {light:chosen,part:'radius'};
-  const inside=list.filter(l=>d(l)<l.radiusPx&&l.enabled!==false).sort((a,b)=>d(a)/a.radiusPx-d(b)/b.radiusPx);
-  return inside.length?{light:inside[0],part:'move'}:null;
+  // Shift + drag anywhere within the selected halo changes its radius.
+  if(chosen&&shiftRadius&&distance(chosen)<Math.max(28,chosen.radiusPx+24))return {light:chosen,part:'radius'};
+  // Selected light remains the preferred target, even if its halo overlaps others.
+  if(chosen&&distance(chosen)<=26)return {light:chosen,part:'move'};
+  const centers=list.map((light,index)=>({light,index,d:distance(light)}))
+    .filter(x=>x.d<=26).sort((a,b)=>a.d-b.d||b.index-a.index);
+  if(centers.length)return {light:centers[0].light,part:'move'};
+  if(chosen&&Math.abs(distance(chosen)-chosen.radiusPx)<=28)return {light:chosen,part:'radius'};
+  // A click inside the illuminated area selects its source, not empty space.
+  const halos=list.map((light,index)=>({light,index,d:distance(light)}))
+    .filter(x=>x.d<=Math.max(16,x.light.radiusPx)&&x.light.enabled!==false)
+    .sort((a,b)=>a.d/Math.max(a.light.radiusPx,1)-b.d/Math.max(b.light.radiusPx,1)||b.index-a.index);
+  return halos.length?{light:halos[0].light,part:'move'}:null;
 }
 function rgb(hex){return /^#[0-9a-f]{6}$/i.test(String(hex))?[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)):[255,207,134];}
 function disc(g,x,y,r,col){g.save();g.strokeStyle=col;g.lineWidth=2;g.setLineDash([7,5]);g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.stroke();g.restore();}
