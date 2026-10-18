@@ -4,7 +4,7 @@ export const SCHEMA = 1;
 const clamp = (n,min,max,fallback=min) => Number.isFinite(Number(n)) ? Math.min(max,Math.max(min,Number(n))) : fallback;
 export const deepCopy = v => JSON.parse(JSON.stringify(v));
 export const newId = () => 'light_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
-export function defaultMap() { return { ambient:{ color:'#142439', darkness:0.42 }, lights:[] }; }
+export function defaultMap() { return { enabled:true, ambient:{ color:'#142439', darkness:0 }, lights:[] }; }
 export function defaultProject() { return { schema:SCHEMA, maps:{} }; }
 export function normalizeHex(v,fallback='#FFFFFF') {
   const s=String(v||'').toUpperCase(); return /^#[A-F0-9]{6}$/.test(s)?s:fallback;
@@ -31,7 +31,8 @@ export function normalizeProject(raw) {
     const lights=Array.isArray(map.lights)?map.lights:[];
     const seen=new Set();
     result.maps[String(Number(id))]={
-      ambient:{color:normalizeHex(ambient.color,'#142439'),darkness:clamp(ambient.darkness,0,1,0.42)},
+      enabled:map.enabled!==false,
+      ambient:{color:normalizeHex(ambient.color,'#142439'),darkness:clamp(ambient.darkness,0,1,0)},
       lights:lights.slice(0,500).map(normalizeLight).filter(light=>{if(seen.has(light.id))return false;seen.add(light.id);return true;}),
     };
   }
