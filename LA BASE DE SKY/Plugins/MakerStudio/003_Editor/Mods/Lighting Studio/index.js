@@ -49,7 +49,7 @@ right.append(btn(selected.enabled?'Desactivar luz':'Activar luz',()=>change(()=>
 right.append(btn('Eliminar luz',()=>change(()=>{const m=current();m.lights=m.lights.filter(l=>l.id!==state.selected);state.selected=null;})));
 }
 const canvas=node('canvas');canvas.className='ls-preview';right.append(canvas);right.append(node('p','Preview esquemático; la vista real se proyecta sobre el mapa abierto de Maker Studio.'));right.lastChild.className='ls-note';drawCanvas(canvas,current());
-shell.append(node('p','Fase 0/1: luces radiales y ambiente. Sombras, shaders, formas y timeline permanecen fuera de este MVP.')).className='ls-note';
+const note=node('p','Fase 0/1: luces radiales y ambiente. Sombras, shaders, formas y timeline permanecen fuera de este MVP.');note.className='ls-note';shell.append(note);
 }
 function overlay(draw,info){if(!state||state.readError||Number(info.mapId)!==Number(state.mapId))return;const m=current();if(!m)return;
 const zoom=Number(info.zoom)||1,tile=Number(info.tileSize)||32;
