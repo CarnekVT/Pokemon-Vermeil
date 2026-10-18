@@ -24,3 +24,13 @@ export const STYLES = [
 ".ls-inline-note{font-size:11px;color:var(--text-secondary);line-height:1.45;margin:5px 0}",
 ".ls-ambient-chip{width:24px;height:24px;display:inline-block;vertical-align:middle;border:1px solid var(--border);border-radius:5px}"
 ].join("");
+
+export const LIGHTING_EXTRA_CSS = `
+.ls-live-preview{box-shadow:inset 0 0 20px rgba(0,0,0,.28)}
+.ls-effect-group{padding:10px 9px 3px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);margin:12px 0}
+.ls-effect-group>b{display:block;margin-bottom:9px;font-size:12px;letter-spacing:.2px}
+.ls-root{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.ls-root .ls-btn{min-height:30px;white-space:normal}
+.ls-section{background:var(--bg-primary)}
+.ls-head{background:var(--bg-secondary)}
+`;
