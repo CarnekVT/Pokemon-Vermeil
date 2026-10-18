@@ -1,3 +1,4 @@
+import {drawLights} from './render.js';
 // On-map visual overlay. Maker Studio pointer events expose tile coordinates only.
 export const TILE=32;
 export function point(ev){return {x:Math.floor(Number(ev.tileX))+.5,y:Math.floor(Number(ev.tileY))+.5};}
@@ -26,17 +27,7 @@ export function paint(g,info,v){
       const darkness=Math.min(1,Math.max(0,Number(v.map.ambient?.darkness)||0));
       const tint=rgb(v.map.ambient?.color||'#142439');
       if(darkness){g.globalAlpha=darkness*.8;g.fillStyle='rgb('+tint.join(',')+')';g.fillRect(0,0,w,h);}
-      g.globalAlpha=1;g.globalCompositeOperation='screen';
-      for(const l of ls){
-        if(l.enabled===false)continue;
-        const p=toScreen(l.x,l.y,info),r=screenRadius(l.radiusPx,info);
-        if(r<1||p.x+r<0||p.y+r<0||p.x-r>w||p.y-r>h)continue;
-        const a=Math.max(0,Math.min(1,Number(l.intensity)||0)),c=rgb(l.color),s=Math.max(.05,Math.min(.95,Number(l.softness)||.7));
-        const color=(alpha)=>'rgba('+c.join(',')+','+alpha+')';
-        const grad=g.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
-        grad.addColorStop(0,color(.87*a));grad.addColorStop(s,color(.23*a));grad.addColorStop(1,color(0));
-        g.fillStyle=grad;g.fillRect(p.x-r,p.y-r,r*2,r*2);
-      }
+      g.globalAlpha=1;drawLights(g,ls,{x:x=>toScreen(x,0,info).x,y:y=>toScreen(0,y,info).y,scale:()=>screenRadius(32,info)/32},w,h,v.time||0);
       g.globalCompositeOperation='source-over';
     }
     if(!v.showGuides&&!v.editing)return;
