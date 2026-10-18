@@ -1,48 +1,50 @@
-// Shared Lighting Studio data schema. Coordinates are map tiles; radius is base game pixels.
+// Lighting Studio data contract: schema 1, backward compatible with v0.1-v0.3.
+// x/y are tile coordinates; radii are game pixels at a 32px reference tile.
 export const DATA_PATH = 'Data/LightingStudio/maps.json';
 export const SCHEMA = 1;
-const clamp = (n,min,max,fallback=min) => Number.isFinite(Number(n)) ? Math.min(max,Math.max(min,Number(n))) : fallback;
+export const BLEND_MODES = ['normal','add','subtract'];
 export const deepCopy = v => JSON.parse(JSON.stringify(v));
 export const newId = () => 'light_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
-export function defaultMap() { return { enabled:true, ambient:{ color:'#142439', darkness:0 }, lights:[] }; }
-export function defaultProject() { return { schema:SCHEMA, maps:{} }; }
-export function normalizeHex(v,fallback='#FFFFFF') {
-  const s=String(v||'').toUpperCase(); return /^#[A-F0-9]{6}$/.test(s)?s:fallback;
-}
-export function normalizeLight(src={}) {
-  const s=src&&typeof src==='object'?src:{};
-  const id=String(s.id||newId()).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,80)||newId();
-  const anchor=s.anchor&&typeof s.anchor==='object'?s.anchor:{};
+const num = (v,lo,hi,def) => Number.isFinite(Number(v)) ? Math.min(hi,Math.max(lo,Number(v))) : def;
+export const clamp = (v,lo,hi) => num(v,lo,hi,lo);
+export const hex = (v,def='#FFCE8A') => /^#[a-fA-F0-9]{6}$/.test(String(v)) ? String(v).toUpperCase() : def;
+export const defaultMap = () => ({enabled:true,ambient:{color:'#142439',darkness:0},lights:[]});
+export const defaultProject = () => ({schema:SCHEMA,maps:{}});
+export const defaultPulse = () => ({enabled:false,speedHz:1,intensity:0.25,radius:0.12,phase:0});
+export const defaultPixel = () => ({enabled:false,size:6,steps:6});
+export function normalizeLight(raw={}){
+  const s=raw&&typeof raw==='object'?raw:{},p=s.pulse||{},px=s.pixel||{};
   return {
-    id, name:String(s.name||'Luz radial').trim().slice(0,80), type:'radial',
-    x:clamp(s.x,-2048,2048,0), y:clamp(s.y,-2048,2048,0),
-    radiusPx:clamp(s.radiusPx,8,512,96), intensity:clamp(s.intensity,0,1,0.8),
-    color:normalizeHex(s.color,'#FFCF86'), softness:clamp(s.softness,0.05,1,0.75),
-    enabled:s.enabled!==false, anchor:{type:'static'},
+    id:String(s.id||newId()).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,80)||newId(),
+    name:String(s.name||'Luz radial').slice(0,80),type:'radial',
+    x:num(s.x,-2048,2048,0),y:num(s.y,-2048,2048,0),
+    radiusPx:num(s.radiusPx,8,512,96),intensity:num(s.intensity,0,1,.8),
+    color:hex(s.color),softness:num(s.softness,.05,1,.75),
+    enabled:s.enabled!==false,
+    blendMode:BLEND_MODES.includes(s.blendMode)?s.blendMode:'add',
+    pulse:{enabled:p.enabled===true,speedHz:num(p.speedHz,.05,12,1),
+      intensity:num(p.intensity,0,1,.25),radius:num(p.radius,0,.9,.12),phase:num(p.phase,0,360,0)},
+    pixel:{enabled:px.enabled===true,size:Math.round(num(px.size,2,32,6)),steps:Math.round(num(px.steps,2,24,6))},
+    anchor:{type:'static'}
   };
 }
-export function normalizeProject(raw) {
-  if (!raw||typeof raw!=='object'||raw.schema!==SCHEMA||!raw.maps||typeof raw.maps!=='object'||Array.isArray(raw.maps))
-    throw new Error('Formato Lighting Studio no reconocido; no se sobrescribirá el archivo.');
-  const result=defaultProject();
-  for (const [id,map] of Object.entries(raw.maps)) {
-    if (!/^\d+$/.test(id)||!map||typeof map!=='object') continue;
-    const ambient=map.ambient&&typeof map.ambient==='object'?map.ambient:{};
-    const lights=Array.isArray(map.lights)?map.lights:[];
-    const seen=new Set();
-    result.maps[String(Number(id))]={
-      enabled:map.enabled!==false,
-      ambient:{color:normalizeHex(ambient.color,'#142439'),darkness:clamp(ambient.darkness,0,1,0)},
-      lights:lights.slice(0,500).map(normalizeLight).filter(light=>{if(seen.has(light.id))return false;seen.add(light.id);return true;}),
-    };
+export function normalizeProject(src){
+  if(!src||src.schema!==SCHEMA||typeof src.maps!=='object'||!src.maps||Array.isArray(src.maps))
+    throw Error('Datos incompatibles: se bloqueó la escritura para evitar pérdida de datos.');
+  const res=defaultProject();
+  for(const [id,value] of Object.entries(src.maps)){
+    if(!/^\d+$/.test(id)||!value||typeof value!=='object')continue;
+    const ambient=value.ambient||{},seen=new Set();
+    res.maps[String(Number(id))]={enabled:value.enabled!==false,
+      ambient:{color:hex(ambient.color,'#142439'),darkness:num(ambient.darkness,0,1,0)},
+      lights:(Array.isArray(value.lights)?value.lights:[]).slice(0,500).map(normalizeLight)
+      .filter(l=>{if(seen.has(l.id))return false;seen.add(l.id);return true;})};
   }
-  return result;
+  return res;
 }
-export function getMap(project,mapId,create=false) {
-  const key=String(Number(mapId)||0); if(key==='0')return null;
-  if(!project.maps[key]&&create)project.maps[key]=defaultMap();
-  return project.maps[key]||null;
+export function getMap(data,mapId,create=false){
+  const k=String(Number(mapId)||0);if(k==='0')return null;
+  if(!data.maps[k]&&create)data.maps[k]=defaultMap();
+  return data.maps[k]||null;
 }
-export function makeLight(x=0,y=0) {
-  return normalizeLight({id:newId(),name:'Luz '+(new Date()).toLocaleTimeString(),x,y});
-}
+export function makeLight(x=0,y=0){return normalizeLight({id:newId(),name:'Luz radial',x,y});}
