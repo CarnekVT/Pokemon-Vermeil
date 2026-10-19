@@ -21,10 +21,12 @@ module VermeilMovement
 
   def self.reload!
     @sections = nil
-    @map_cache = nil
+    @last_mtime = nil
+    @last_poll = nil
   end
 
   def self.sections
+    poll_changes!
     return @sections if @sections
     parsed = { "global" => DEFAULTS.dup }
     section = "global"
@@ -48,6 +50,23 @@ module VermeilMovement
       # La configuracion de fabrica mantiene jugable el proyecto.
     end
     @sections = parsed
+    @last_mtime = config_mtime
+  end
+
+  # Detecta cambios guardados por Maker Studio sin reiniciar la partida.
+  # El chequeo se limita a dos veces por segundo para no hacer I/O por frame.
+  def self.config_mtime
+    File.mtime(CONFIG_PATH)
+  rescue Errno::ENOENT, Errno::EACCES
+    nil
+  end
+
+  def self.poll_changes!
+    return unless @sections
+    now = System.uptime
+    return if @last_poll && now - @last_poll < 0.5
+    @last_poll = now
+    @sections = nil if config_mtime != @last_mtime
   end
 
   def self.option(name, map_id = nil)
