@@ -12,6 +12,7 @@ module LightingStudio
   CHUNK_PX = 64
   MAX_CHUNKS = 32
   BUILDS_PER_FRAME = 1
+  MASKS_PER_FRAME = 2
   # Static lights use channel-wise MAX in chunks. Pulsing union lights are
   # drawn as dynamic additive sprites to avoid rebuilding chunks at runtime.
   module_function
@@ -79,6 +80,18 @@ module LightingStudio
     core*edge*(center+(1-center)*[1.0,d*2].min)
   end
 
+  # World-space bounds can be calculated without rasterizing a light mask.
+  def shape_dimensions(spec)
+    type = %w[radial cone ellipse rectangle].include?(spec['type']) ? spec['type'] : 'radial'
+    r = number(spec['radiusPx'], 96, 8, 512)
+    w = %w[ellipse rectangle].include?(type) ? number(spec['widthPx'],160,8,1024) : 2*r
+    h = %w[ellipse rectangle].include?(type) ? number(spec['heightPx'],96,8,1024) : 2*r
+    rad = number(spec['rotation'],0,-360,360)*Math::PI/180
+    cos = Math.cos(rad).abs
+    sin = Math.sin(rad).abs
+    [cos*w+sin*h, sin*w+cos*h]
+  end
+
   def shape_bitmap(spec)
     type = %w[radial cone ellipse rectangle].include?(spec['type']) ? spec['type'] : 'radial'
     r = number(spec['radiusPx'],96,8,512)
@@ -132,6 +145,8 @@ module LightingStudioSpriteset
     super
     @ls_sprites = []
     @ls_bitmaps = []
+    @ls_mask_cache = {}
+    @ls_masks_built_this_frame = 0
     @ls_union_sources = []
     @ls_chunks = {}
     @ls_chunk_tick = 0
@@ -161,10 +176,8 @@ module LightingStudioSpriteset
     end
 
     lights = data['lights'].is_a?(Array) ? data['lights'].first(LightingStudio::MAX_SOURCES) : []
-    cache = {}
     lights.each do |source|
       next unless source.is_a?(Hash) && source['enabled'] != false
-
       key = [
         source['type'], source['radiusPx'], source['widthPx'],
         source['heightPx'], source['angle'], source['rotation'],
@@ -172,44 +185,41 @@ module LightingStudioSpriteset
         source['fadeMode'], source['fadeX'], source['fadeY'],
         source['pixel']
       ].inspect
-
-      image = cache[key]
-      unless image
-        image = LightingStudio.shape_bitmap(source)
-        cache[key] = image
-        @ls_bitmaps << image[0]
-      end
-
-      bmp, world_w, world_h = image
+      width, height = LightingStudio.shape_dimensions(source)
       entry = {
-        :bitmap => bmp, :w => world_w, :h => world_h,
-        :cx => LightingStudio.number(source['x'], 0, -2048, 2048) * Game_Map::TILE_WIDTH,
-        :cy => LightingStudio.number(source['y'], 0, -2048, 2048) * Game_Map::TILE_HEIGHT,
-        :intensity => LightingStudio.number(source['intensity'], 0.8, 0, 1),
+        :bitmap => nil, :spec => source, :key => key, :w => width, :h => height,
+        :cx => LightingStudio.number(source['x'],0,-2048,2048)*Game_Map::TILE_WIDTH,
+        :cy => LightingStudio.number(source['y'],0,-2048,2048)*Game_Map::TILE_HEIGHT,
+        :intensity => LightingStudio.number(source['intensity'],0.8,0,1),
         :pulse => source['pulse'].is_a?(Hash) ? source['pulse'] : {}
       }
-
       mode = source['blendMode'].to_s
       if data['overlapMode'] == 'sum' && ['', 'union', 'add'].include?(mode)
         mode = 'sum'
       end
       mode = 'union' if mode.empty? || mode == 'add'
 
-      # Only static union lights are baked into cached world chunks.
-      # Pulsing sources use a direct Sprite to avoid per-frame pixel work.
       if mode == 'union' && entry[:pulse]['enabled'] != true
+        # Defer mask generation until this source enters a visible world chunk.
         @ls_union_sources << entry
       else
+        # Animated/normal/sum modes remain individual Sprites.
+        image = @ls_mask_cache[key]
+        unless image
+          image = LightingStudio.shape_bitmap(source)
+          @ls_mask_cache[key] = image
+          @ls_bitmaps << image[0]
+        end
+        entry[:bitmap] = image[0]
         sprite = Sprite.new(Spriteset_Map.viewport)
-        sprite.bitmap = bmp
-        sprite.ox = bmp.width / 2
-        sprite.oy = bmp.height / 2
+        sprite.bitmap = image[0]
+        sprite.ox = image[0].width / 2
+        sprite.oy = image[0].height / 2
         sprite.z = 8501
         sprite.blend_type = mode == 'subtract' ? 2 : (mode == 'normal' ? 0 : 1)
         @ls_sprites << [sprite, entry]
       end
     end
-
     ls_update
   end
 
@@ -282,6 +292,20 @@ module LightingStudioSpriteset
       x2 = [[((max_x - origin_x) / pixel_unit).ceil, 0].max, resolution].min
       y2 = [[((max_y - origin_y) / pixel_unit).ceil, 0].max, resolution].min
       bmp = entry[:bitmap]
+      unless bmp
+        # Hard per-frame budget prevents the first camera view creating dozens
+        # of bitmaps at once. Retry this chunk on the next update.
+        return :pending if @ls_masks_built_this_frame >= LightingStudio::MASKS_PER_FRAME
+        image = @ls_mask_cache[entry[:key]]
+        unless image
+          image = LightingStudio.shape_bitmap(entry[:spec])
+          @ls_mask_cache[entry[:key]] = image
+          @ls_bitmaps << image[0]
+          @ls_masks_built_this_frame += 1
+        end
+        entry[:bitmap] = image[0]
+        bmp = image[0]
+      end
 
       y = y1
       while y < y2
@@ -329,6 +353,7 @@ module LightingStudioSpriteset
 
   def ls_chunk_build(cx, cy)
     bmp = ls_chunk_bitmap(cx, cy)
+    return if bmp == :pending
     sprite = nil
     if bmp
       sprite = Sprite.new(Spriteset_Map.viewport)
@@ -350,6 +375,7 @@ module LightingStudioSpriteset
 
   def ls_update_chunks(mx, my, zx, zy)
     return if @ls_union_sources.empty?
+    @ls_masks_built_this_frame = 0
     @ls_chunk_tick += 1
     needed = ls_visible_keys(mx, my, zx, zy)
     visible = {}
@@ -377,7 +403,7 @@ module LightingStudioSpriteset
       break unless key
       ls_chunk_build(key[0], key[1])
       entry = @ls_chunks[key]
-      next unless entry[:sprite]
+      next unless entry && entry[:sprite]
       world_x = key[0] * LightingStudio::CHUNK_WORLD
       world_y = key[1] * LightingStudio::CHUNK_WORLD
       sx, sy = ls_world_screen(world_x, world_y, mx, my, zx, zy)
@@ -439,6 +465,7 @@ module LightingStudioSpriteset
     end
     @ls_bitmaps&.each { |bitmap| bitmap.dispose unless bitmap.disposed? }
     @ls_bitmaps = nil
+    @ls_mask_cache = nil
     super
   end
 end
