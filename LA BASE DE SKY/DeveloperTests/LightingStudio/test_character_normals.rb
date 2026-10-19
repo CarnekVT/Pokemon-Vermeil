@@ -46,11 +46,12 @@ class Sprite_Character < Sprite
 end
 class Game_Map
   TILE_WIDTH=32;TILE_HEIGHT=32
+  X_SUBPIXELS=4;Y_SUBPIXELS=4
   def map_id;79;end
 end
 module LightingStudio
   def self.load_map(map_id)
-    {'enabled'=>true,'lights'=>[{'x'=>5.5,'y'=>5.5,'radiusPx'=>192,
+    @mock_map || {'enabled'=>true,'lights'=>[{'x'=>5.5,'y'=>5.5,'radiusPx'=>192,
       'color'=>'#FFD080','intensity'=>0.8,'pulse'=>{
         'enabled'=>true,'speedHz'=>1.0,'intensity'=>0.5,
         'radius'=>0.3,'phase'=>0
@@ -70,8 +71,8 @@ module LightingStudio
 end
 $game_map=Game_Map.new
 class CharacterMock
-  attr_accessor :x,:y
-  def initialize(x,y);@x,@y=x,y;end
+  attr_accessor :x,:y,:real_x,:real_y
+  def initialize(x,y);@x,@y=x,y;@real_x=x*128;@real_y=y*128;end
   def map;$game_map;end
   def character_name;'trainer_POKEMONTRAINER_Red';end
 end
@@ -92,9 +93,47 @@ raise "pulse did not dim normal lighting" unless dim_strength<normal_strength
 System.uptime=0.0
 
 # The falloff reaches zero smoothly instead of abruptly disappearing at radius.
-values=[0.5,0.7,0.9,1.0].map{|t| mod.smooth_edge(t)}
+values=[0.8,0.85,0.92,1.0].map{|t| mod.smooth_edge(t)}
 raise "falloff does not taper correctly" unless values[0]>values[1] && values[1]>values[2] && values[2]==0.0 && values[3]==0.0
 raise "falloff not monotonic" unless values[0]>=values[1] && values[1]>=values[2] && values[2]>=values[3]
+
+# REGRESSION: Narrow ellipse/rectangle zones were excluding the player
+# even though the edge of the sprite was visibly illuminated in-game.
+['ellipse','rectangle'].each do |kind|
+  LightingStudio.instance_variable_set(:@mock_map,{
+    'enabled'=>true,
+    'lights'=>[{'x'=>5.5,'y'=>5.5,'type'=>kind,'widthPx'=>64,
+      'heightPx'=>64,'intensity'=>0.9,'radiusPx'=>96,'color'=>'#FFD080'}]
+  })
+  mod.clear_lights
+  near=CharacterMock.new(6.5,5.0) # center is 48px from lamp; area half-width=32px
+  influence=mod.nearby_light(near)
+  raise "#{kind} normal lighting disappeared at sprite boundary" unless
+    influence && influence[2]>0.1
+end
+LightingStudio.instance_variable_set(:@mock_map,nil)
+mod.clear_lights
+# Live sprite update should keep the baked overlay while leaving the light.
+Graphics.advance
+sprite=Sprite_Character.new
+sprite.character=$game_player
+sprite.bitmap=Bitmap.new(4,4)
+System.uptime=0.12
+sprite.update
+normal_overlay=sprite.instance_variable_get(:@ls_normal_overlay)
+raise "normal lighting invisible near lamp" unless normal_overlay &&
+  normal_overlay.visible && normal_overlay.opacity>0
+$game_player.x=20
+$game_player.real_x=20*128
+System.uptime=0.2
+Graphics.advance
+sprite.update
+raise "normal layer disappeared instead of fading" unless
+  normal_overlay.visible && normal_overlay.opacity>0
+$game_player.x=5
+$game_player.real_x=5*128
+sprite.dispose
+
 
 # Retain the existing baked layer during fade-out, even after the light is gone.
 fake=Sprite.new
