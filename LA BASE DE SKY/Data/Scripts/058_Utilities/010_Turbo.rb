@@ -76,7 +76,10 @@ module Turbo
     $_turbo_internal_speed_set = true
     $GameSpeed = idx
     $_turbo_internal_speed_set = false
-    $SpeedDifference = virtual_now - (real_now * TurboConfig.multiplier)
+    new_multiplier = TurboConfig.multiplier
+    $SpeedDifference = virtual_now - (real_now * new_multiplier)
+    # set_speed ya preservo el tiempo virtual, no volver a ajustar en uptime.
+    $_turbo_timebase_multiplier = new_multiplier
     $RefreshEventsForTurbo = true
     $buttonframes = 0
   end
@@ -104,6 +107,9 @@ $buttonframes = TurboConfig::ICON_DURATION  # Inicializar oculto; set_speed lo p
 $CanToggle = true
 $RefreshEventsForTurbo = false
 $SpeedDifference = 0
+# Multiplicador efectivo del ultimo reloj; no necesariamente equivale a
+# $GameSpeed cuando cambia $game_temp.in_battle.
+$_turbo_timebase_multiplier = nil
 $_turbo_internal_speed_set = false
 $_TurboMsgWindowStack ||= []
 $CurrentMsgWindow ||= nil
@@ -136,8 +142,19 @@ module System
   end
 
   def self.uptime
-    # (Tiempo Real * Velocidad) + Diferencia acumulada
-    return (unscaled_uptime * TurboConfig.multiplier) + $SpeedDifference
+    real_now = unscaled_uptime
+    new_multiplier = TurboConfig.multiplier
+    old_multiplier = $_turbo_timebase_multiplier
+    # SPEED_BATTLE_STAGES y SPEED_STAGES utilizan distintos multiplicadores
+    # con el mismo $GameSpeed. Sin rebasar $SpeedDifference, entrar/salir
+    # de batalla mueve System.uptime bruscamente hacia delante/atras.
+    # Conservamos el tiempo virtual incluso si cambia el contexto sin
+    # llamar a Turbo.set_speed (modo "Siempre").
+    if old_multiplier && old_multiplier != new_multiplier
+      $SpeedDifference += real_now * (old_multiplier - new_multiplier)
+    end
+    $_turbo_timebase_multiplier = new_multiplier
+    return (real_now * new_multiplier) + $SpeedDifference
   end
 end
 
