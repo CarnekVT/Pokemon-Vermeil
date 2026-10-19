@@ -63,7 +63,7 @@ export function paint(g,info,v){
         g.fillRect(0,0,w,h);
         g.globalAlpha=1;
       }
-      drawLights(g,ls,projection,w,h,seconds,v.fastPreview?'fast':(map.overlapMode||'union'));
+      drawLights(g,ls,projection,w,h,seconds,(v.fastPreview||v.previewQuality==='fast')?'fast':(map.overlapMode||'union'));
     }
     // Preview a light at the cursor BEFORE insertion using the actual light renderer.
     // Animated Props follows the same overlay/pointer-state approach.
