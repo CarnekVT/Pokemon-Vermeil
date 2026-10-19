@@ -21,18 +21,47 @@ export function dimensions(l){
 }
 // Shape defines the illuminated area; fade direction is a separate gradient.
 // 'bottom' means darkening TOWARDS the bottom (bright plateau on top).
+const smoothstep=(lo,hi,x)=>{
+  const q=clamp((x-lo)/(hi-lo),0,1);
+  return q*q*(3-2*q);
+};
+// The cone source stays at nx=0,ny=0. The beam projects toward +nx,
+// within a circular reach of 1. Do NOT move it to nx=-1: that would shift
+// lights already positioned over lamps on existing game maps.
 export function falloff(l,nx,ny){
   const t=l.type||'radial',soft=clamp(l.softness??.75,.05,1);
-  let d;
-  if(t==='rectangle')d=Math.max(Math.abs(nx),Math.abs(ny));
-  else if(t==='cone')d=Math.max(Math.hypot(nx,ny),Math.abs(Math.atan2(ny,nx))/(clamp(l.angle??70,5,170)*Math.PI/360));
-  else d=Math.hypot(nx,ny);
-  if(d>=1)return 0;
   const mode=l.fadeMode||'center',center=clamp(l.centerStrength??.65,0,1);
+  let d;
+  if(t==='cone'){
+    d=Math.hypot(nx,ny);
+    if(nx<0||d>=1)return 0;
+    const halfAngle=clamp(l.angle??70,5,170)*Math.PI/360;
+    const relativeAngle=Math.abs(Math.atan2(ny,nx))/halfAngle;
+    if(relativeAngle>=1)return 0;
+    const feather=clamp(l.coneFeather??.28,.03,.9);
+    const side=1-smoothstep(1-feather,1,relativeAngle);
+    if(mode==='center'){
+      // A readable spotlight: evenly lit core, smooth distance falloff,
+      // and a separate feather around the lateral cone edges.
+      const reachStart=clamp(l.fadeStart??.58,0,.95);
+      return side*(1-smoothstep(reachStart,1,d))*center;
+    }
+    // For directional fades the distance mask only feathers the very tip;
+    // a full second radial falloff used to produce a cloudy triangle.
+    const tip=1-smoothstep(.88,1,d);
+    return side*tip*directionalFade(l,nx,ny)*center;
+  }
+  d=t==='rectangle'?Math.max(Math.abs(nx),Math.abs(ny)):Math.hypot(nx,ny);
+  if(d>=1)return 0;
   if(mode==='center'){
     const radial=Math.pow(Math.max(0,1-d),1/soft);
     return radial*(center+(1-center)*Math.min(1,d*2));
   }
+  const boundary=clamp((1-d)/.045,0,1);
+  return directionalFade(l,nx,ny)*boundary*center;
+}
+function directionalFade(l,nx,ny){
+  const mode=l.fadeMode||'center';
   let direction;
   if(mode==='bottom')direction=(ny+1)*.5;
   else if(mode==='top')direction=(1-ny)*.5;
@@ -42,14 +71,8 @@ export function falloff(l,nx,ny){
     const ox=clamp(l.fadeX??0,-1,1),oy=clamp(l.fadeY??0,-1,1);
     direction=Math.hypot(nx-ox,ny-oy)/(1+Math.hypot(ox,oy));
   }
-  // Keep an even luminous plateau, then smoothly attenuate to the chosen edge.
   const start=clamp(l.fadeStart??.58,0,.95);
-  const q=clamp((direction-start)/(1-start),0,1);
-  const transition=1-q*q*(3-2*q);
-  // Shape is a clipping silhouette only; avoid a second radial fade that
-  // destroys linear/stepped directional gradients.
-  const boundary=clamp((1-d)/.045,0,1);
-  return transition*boundary*center;
+  return 1-smoothstep(start,1,direction);
 }
 function newCanvas(w,h){
   // Use an ordinary canvas, as Animated Props does with DOM-backed images.
@@ -60,7 +83,7 @@ function newCanvas(w,h){
 }
 function maskKey(l){
   const p=l.pixel||{};
-  return [l.type,l.radiusPx,l.widthPx,l.heightPx,l.angle,l.color,l.softness,l.centerStrength,
+  return [l.type,l.radiusPx,l.widthPx,l.heightPx,l.angle,l.coneFeather,l.color,l.softness,l.centerStrength,
     l.fadeMode,l.fadeStart,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps].join('|');
 }
 // A pixel-art light uses one texel per logical block. Never downscale
