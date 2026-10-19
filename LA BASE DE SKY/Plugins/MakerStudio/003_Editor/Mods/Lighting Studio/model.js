@@ -31,6 +31,7 @@ export function normalizeLight(raw={}){
     fadeStart:num(s.fadeStart,0,0.95,0.58),
     fadeX:num(s.fadeX,-1,1,0),fadeY:num(s.fadeY,-1,1,0),
     rotation:num(s.rotation,-360,360,0),angle:num(s.angle,5,170,70),
+    coneFeather:num(s.coneFeather,.03,.9,.28),
     widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
     enabled:s.enabled!==false,
     blendMode:s.blendMode==='add'?'union':BLEND_MODES.includes(s.blendMode)?s.blendMode:'union',
