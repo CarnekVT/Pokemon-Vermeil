@@ -1,0 +1,20 @@
+{
+  "id": "com.vermeil.movement-studio",
+  "name": "Movement Studio",
+  "version": "0.1.0",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Editor visual del movimiento de Vermeil por proyecto y por mapa.",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.panels",
+    "ui.toasts"
+  ],
+  "requires": []
+}
