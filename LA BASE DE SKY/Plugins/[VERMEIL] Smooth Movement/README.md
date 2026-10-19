@@ -1,4 +1,4 @@
-# Vermeil Movement Studio 0.4.0 — Pokémon Essentials 21.1 / Base de Sky
+# Vermeil Movement Studio 0.5.0 — Pokémon Essentials 21.1 / Base de Sky
 
 Un plugin real de movimiento para el personaje, editable desde Maker Studio.
 Archivo de configuración: `Plugins/[VERMEIL] Smooth Movement/config.ini`.
@@ -51,3 +51,30 @@ La configuración que existe actualmente en el proyecto **no se cambia automáti
 6. Con Fancy Camera (switch 59) tanto ON como OFF, probar look-ahead 0/16/32 con suavidad 35; después cambiar a cámara final 0 y 100.
 
 **Estado:** sintaxis/configuración verificables en código; el comportamiento real en mkxp debe validarse dentro del juego antes de declarar la versión estable.
+
+
+## 0.5.0 — Diagonales, zona muerta, diagnostico
+
+Se han incorporado cinco opciones nuevas al plugin y a Maker Studio. Todas estan apagadas o configuradas con valores equivalentes al comportamiento anterior hasta que el creador las cambie.
+
+- `diagonal_facing=keep|horizontal|vertical`: prioridad de orientacion del sprite en diagonales. `keep` preserva la orientacion existente siempre que sea compatible.
+- `wall_slide_priority=horizontal|vertical|facing`: prueba primero el eje indicado si la diagonal esta bloqueada y el deslizamiento estaba activado; se mantiene el `move_generic` cardinal nativo. Por defecto horizontal, igual que 0.4.
+- `camera_deadzone=0|8|16|24|32`: zona muerta de camara, cuadrada, medida en pixeles. Valor 0 conserva la camara original; los valores positivos dejan avanzar un poco al jugador en el encuadre sin mover cada pixel del mapa.
+- `camera_lead_response=60|120|200`: respuesta de look-ahead en milisegundos. 120 reproduce la velocidad visual anterior; 60 = mas rapida, 200 = mas suave. Look-ahead se activa solo durante movimiento real, no al presionar contra paredes.
+- `debug_hud=0|1`: HUD de datos en modo Debug (nunca en version final), con mapa, tile del jugador, direccion, movimiento, Turbo, Flow, camara y FPS; limitado a cinco refrescos por segundo y oculto al entrar en batalla o menus.
+
+Se protege tambien la camara de eventos que usan solo un eje (X o Y). **Ninguna opcion agrega esperas, input buffer o retencion de botones.** Clasico sigue disponible y no cambia.
+
+### Lista de pruebas recomendadas
+
+1. Comparar Clásico (4 direcciones originales) y Moderno (4/8 direcciones) caminando varias casillas y girando frente a paredes.
+2. Con Moderno y 8 direcciones, probar las tres preferencias de facing y slide en esquinas, NPCs y eventos de contacto.
+3. Con Fancy Camera (switch 59) ON/OFF, comparar Dead Zone 0 vs 8/32, Lookahead 0/16 y Response 60/120/200.
+4. Probar seguimiento de camara de eventos, scroll, bordes y transferencias de mapa.
+5. Activar HUD solo en Debug y comprobar salida de combate con Turbo. En juego publicado no debe aparecer.
+6. Cambiar valores Global/map:ID en Maker Studio y comprobar que guardan y cargan correctamente.
+
+### Siguiente fase mayor
+
+Movimiento sub-tile autentico requiere reescribir colisiones, disparadores, followers y escaleras por separado; no debe activarse como una preferencia falsa en el panel. Despues, spritesheets opcionales de ocho orientaciones y perfiles especificos por terreno. Estas funcionalidades **no forman parte de 0.5.0**.
+
