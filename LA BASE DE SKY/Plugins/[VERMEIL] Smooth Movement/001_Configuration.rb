@@ -1,0 +1,79 @@
+# Vermeil Smooth Movement - configuracion INI sin JSON, FileUtils ni gemas.
+module VermeilMovement
+  CONFIG_PATH = "Plugins/[VERMEIL] Smooth Movement/config.ini"
+  DEFAULTS = {
+    "directions"        => "4",
+    "mode"              => "grid",
+    "subtile_divisions" => "4",
+    "instant_turn"      => "1",
+    "wall_slide"        => "0",
+    "smooth_movement"   => "1",
+    "camera_smoothing"  => "35"
+  }
+  ALLOWED = {
+    "directions"        => ["4", "8"],
+    "mode"              => ["grid", "free"],
+    "subtile_divisions" => ["4", "8"],
+    "instant_turn"      => ["0", "1"],
+    "wall_slide"        => ["0", "1"],
+    "smooth_movement"   => ["0", "1"]
+  }
+
+  def self.reload!
+    @sections = nil
+    @map_cache = nil
+  end
+
+  def self.sections
+    return @sections if @sections
+    parsed = { "global" => DEFAULTS.dup }
+    section = "global"
+    begin
+      File.foreach(CONFIG_PATH) do |line|
+        line = line.sub(/[;#].*$/, "").strip
+        next if line.empty?
+        if line =~ /^\[(global|map:\d+)\]$/i
+          section = $1.downcase
+          parsed[section] ||= {}
+        elsif line =~ /^([a-z_]+)\s*=\s*(.*?)\s*$/i
+          key = $1.downcase
+          value = $2
+          next unless DEFAULTS.key?(key)
+          next if ALLOWED[key] && !ALLOWED[key].include?(value)
+          next if key == "camera_smoothing" && !(0..100).include?(value.to_i)
+          parsed[section][key] = value
+        end
+      end
+    rescue Errno::ENOENT, Errno::EACCES
+      # La configuracion de fabrica mantiene jugable el proyecto.
+    end
+    @sections = parsed
+  end
+
+  def self.option(name, map_id = nil)
+    id = map_id || ($game_map.map_id if defined?($game_map) && $game_map)
+    map = id ? sections["map:#{id}"] : nil
+    return map[name] if map && map.key?(name)
+    sections["global"][name] || DEFAULTS[name]
+  end
+
+  def self.enabled?(name)
+    option(name) == "1"
+  end
+
+  def self.directions
+    option("directions").to_i
+  end
+
+  def self.free?
+    option("mode") == "free"
+  end
+
+  def self.subtiles
+    option("subtile_divisions").to_i
+  end
+
+  def self.camera_smoothing
+    option("camera_smoothing").to_i
+  end
+end
