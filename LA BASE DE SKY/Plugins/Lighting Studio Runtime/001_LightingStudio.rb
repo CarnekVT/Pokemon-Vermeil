@@ -55,29 +55,36 @@ module LightingStudio
   end
 
   # Same falloff shape used in Maker Studio Canvas.
+  # Direction describes the edge TOWARDS which the brightness fades.
+  # 'bottom': bright plateau at the top, then darker toward the bottom.
   def falloff(spec, nx, ny)
     type = spec['type'] || 'radial'
-    softness = number(spec['softness'],0.75,0.05,1)
-    aperture = number(spec['angle'],70,5,170)*Math::PI/360
-    d = shape_distance(type,nx,ny,aperture)
-    return 0.0 if d >= 1
+    softness = number(spec['softness'], 0.75, 0.05, 1)
+    aperture = number(spec['angle'], 70, 5, 170) * Math::PI / 360
+    d = shape_distance(type, nx, ny, aperture)
+    return 0.0 if d >= 1.0
     mode = spec['fadeMode'] || 'center'
-    dist = case mode
-           when 'top' then (ny+1)/2.0
-           when 'bottom' then (1-ny)/2.0
-           when 'left' then (nx+1)/2.0
-           when 'right' then (1-nx)/2.0
-           when 'custom'
-             ox = number(spec['fadeX'],0,-1,1)
-             oy = number(spec['fadeY'],0,-1,1)
-             Math.sqrt((nx-ox)**2+(ny-oy)**2)/(1+Math.sqrt(ox*ox+oy*oy))
-           else d
-           end
-    dist = [[dist, 0].max,1].min
-    core = (1-dist)**(1.0/softness)
-    edge = mode == 'center' ? 1.0 : [[(1-d)/[0.035,0.18*softness].max,0].max,1].min
-    center = number(spec['centerStrength'],0.65,0,1)
-    core*edge*(center+(1-center)*[1.0,d*2].min)
+    center = number(spec['centerStrength'], 0.65, 0, 1)
+    if mode == 'center'
+      radial = (1.0 - d)**(1.0 / softness)
+      return radial * (center + (1.0 - center) * [d * 2.0, 1.0].min)
+    end
+    direction = case mode
+      when 'bottom' then (ny + 1.0) / 2.0
+      when 'top' then (1.0 - ny) / 2.0
+      when 'left' then (1.0 - nx) / 2.0
+      when 'right' then (nx + 1.0) / 2.0
+      else
+        ox = number(spec['fadeX'], 0, -1, 1)
+        oy = number(spec['fadeY'], 0, -1, 1)
+        Math.sqrt((nx - ox)**2 + (ny - oy)**2) / (1 + Math.sqrt(ox*ox + oy*oy))
+      end
+    start = number(spec['fadeStart'], 0.58, 0, 0.95)
+    q = [[(direction - start) / (1.0 - start), 0].max, 1].min
+    smooth = 1.0 - q*q*(3.0 - 2.0*q)
+    # Edge is only a very narrow shape clip; don't apply a second radial fade.
+    edge = [[(1.0 - d)/0.045, 0].max, 1].min
+    smooth * edge * center
   end
 
   # World-space bounds can be calculated without rasterizing a light mask.
@@ -182,7 +189,7 @@ module LightingStudioSpriteset
         source['type'], source['radiusPx'], source['widthPx'],
         source['heightPx'], source['angle'], source['rotation'],
         source['color'], source['softness'], source['centerStrength'],
-        source['fadeMode'], source['fadeX'], source['fadeY'],
+        source['fadeMode'], source['fadeStart'], source['fadeX'], source['fadeY'],
         source['pixel']
       ].inspect
       width, height = LightingStudio.shape_dimensions(source)
