@@ -75,3 +75,15 @@ class Game_Player
     return true
   end
 end
+
+# Las batallas pueden iniciarse y terminar sin abandonar el mismo update del
+# jugador (pbOnStepTaken). Nunca reutilizar el paso pendiente de ese update.
+EventHandlers.add(:on_start_battle, :vermeil_flow_cancel_on_battle_start, proc {
+  $game_player&.instance_variable_set(:@_vermeil_flow_finished_step, nil)
+})
+EventHandlers.add(:on_end_battle, :vermeil_flow_cancel_on_battle_end, proc {
+  $game_player&.instance_variable_set(:@_vermeil_flow_finished_step, nil)
+})
+EventHandlers.add(:on_enter_map, :vermeil_flow_cancel_on_map_change, proc { |_map_id|
+  $game_player&.instance_variable_set(:@_vermeil_flow_finished_step, nil)
+})
