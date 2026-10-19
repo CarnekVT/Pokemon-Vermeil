@@ -26,8 +26,8 @@ Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · 
 Antes, el runtime ejecutaba bucles Ruby con `Bitmap#get_pixel` y `Bitmap#set_pixel` para cada fuente **cada vez que la cámara cambiaba**. Esto podía producir picos severos.
 
 Ahora:
-- Se calculan fragmentos por coordenada del mundo y se mantienen en caché (máximo habitual: 32 fragmentos).
-- Se construye **como máximo un fragmento nuevo por fotograma**.
+- Se calculan fragmentos por coordenada del mundo y se mantienen en caché (máximo: 48 fragmentos).
+- Se construye **como máximo un fragmento nuevo por fotograma**. Con zoom extremadamente alejado se priorizan los 48 fragmentos más cercanos al centro de la cámara para evitar picos; las zonas más exteriores pueden no verse iluminadas a ese nivel de alejamiento.
 - Las máscaras de fuentes estáticas se construyen a demanda, **como máximo dos máscaras nuevas por fotograma**.
 - El coste de lectura/escritura de píxeles se paga al construir un fragmento, **no en cada desplazamiento**.
 - La posición/zoom de los sprites se actualiza por fotograma con operaciones baratas, siguiendo Animated Props.
