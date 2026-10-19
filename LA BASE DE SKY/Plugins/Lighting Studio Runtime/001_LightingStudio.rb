@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio Runtime 0.7.0 for Pokemon Essentials 21.1 / mkxp.
+# Lighting Studio Runtime 0.7.1 for Pokemon Essentials 21.1 / mkxp.
 # Shared additive lightmap: merge sources normally, add a single sprite to the map.
 # No shaders required; uses Bitmap#stretch_blt for camera/animation updates.
 module LightingStudio
@@ -13,8 +13,9 @@ module LightingStudio
   CHUNK_WORLD = 256
   CHUNK_PX = 64
   MAX_CHUNKS = 48
-  BUILDS_PER_FRAME = 1
-  MASKS_PER_FRAME = 2
+  BUILDS_PER_FRAME = 2
+  INITIAL_CHUNKS = 12
+  MASKS_PER_FRAME = 12
   # Static lights use channel-wise MAX in chunks. Pulsing union lights are
   # drawn as dynamic additive sprites to avoid rebuilding chunks at runtime.
   module_function
@@ -246,7 +247,9 @@ module LightingStudioSpriteset
     @ls_chunks = {}
     @ls_chunk_tick = 0
     @ls_ambient_sprite = nil
+    @ls_initial_pass = true
     ls_setup
+    @ls_initial_pass = false
   end
 
   def ls_setup
@@ -509,7 +512,8 @@ module LightingStudioSpriteset
     end
 
     pending = needed.reject { |key| @ls_chunks.key?(key) }
-    LightingStudio::BUILDS_PER_FRAME.times do
+    budget = @ls_initial_pass ? LightingStudio::INITIAL_CHUNKS : LightingStudio::BUILDS_PER_FRAME
+    budget.times do
       key = pending.shift
       break unless key
       ls_chunk_build(key[0], key[1])
