@@ -16,7 +16,11 @@ export const clamp = (v,lo,hi) => num(v,lo,hi,lo);
 export const hex = (v,def='#FFCE8A') => /^#[a-fA-F0-9]{6}$/.test(String(v)) ? String(v).toUpperCase() : def;
 export const NORMAL_CATEGORIES = {tilesets:'Tilesets',autotiles:'Autotiles',characters:'Characters'};
 export const NORMAL_DIR='Graphics/LightingStudio/Normals';
-export const defaultNormals = () => ({enabled:false,strength:1,tilesets:[],autotiles:[],characters:[]});
+export const defaultNormals = () => ({
+  enabled:false,strength:1,
+  auto:{tilesets:true,autotiles:true,characters:true},
+  suffix:'_n',tilesets:[],autotiles:[],characters:[]
+});
 // Source and normal filenames are relative game assets; reject path traversal.
 export function assetName(v){
   const value=String(v||'').trim();
@@ -30,6 +34,10 @@ export function normalizeNormalBinding(raw,category){
 export function normalizeNormals(raw){
   const v=raw&&typeof raw==='object'?raw:{};
   const out=defaultNormals();out.enabled=v.enabled===true;out.strength=num(v.strength,0,2,1);
+  const auto=v.auto&&typeof v.auto==='object'?v.auto:{};
+  for(const category of Object.keys(NORMAL_CATEGORIES))
+    out.auto[category]=auto[category]!==false;
+  out.suffix=/^_[a-z0-9]{1,12}$/i.test(String(v.suffix||'_n'))?String(v.suffix||'_n'):'_n';
   for(const category of Object.keys(NORMAL_CATEGORIES)){
     const seen=new Set();
     out[category]=(Array.isArray(v[category])?v[category]:[]).slice(0,300)
@@ -39,7 +47,7 @@ export function normalizeNormals(raw){
   return out;
 }
 export const defaultMap = () => ({enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},normalMaps:defaultNormals(),lights:[]});
-export const defaultProject = () => ({schema:SCHEMA,maps:{}});
+export const defaultProject = () => ({schema:SCHEMA,normalSettings:defaultNormals(),maps:{}});
 export const defaultPulse = () => ({enabled:false,speedHz:1,intensity:0.25,radius:0.12,phase:0});
 export const defaultPixel = () => ({enabled:false,size:6,steps:6});
 export function normalizeLight(raw={}){
@@ -69,6 +77,9 @@ export function normalizeProject(src){
   if(!src||src.schema!==SCHEMA||typeof src.maps!=='object'||!src.maps||Array.isArray(src.maps))
     throw Error('Datos incompatibles: se bloqueó la escritura para evitar pérdida de datos.');
   const res=defaultProject();
+  // Global rules work for every map and every player/follower graphic without
+  // per-species switches or a manually maintained Pokemon list.
+  res.normalSettings=normalizeNormals(src.normalSettings);
   for(const [id,value] of Object.entries(src.maps)){
     if(!/^\d+$/.test(id)||!value||typeof value!=='object')continue;
     const ambient=value.ambient||{},seen=new Set();
@@ -87,3 +98,22 @@ export function getMap(data,mapId,create=false){
   return data.maps[k]||null;
 }
 export function makeLight(x=0,y=0,type='radial'){const t=LIGHT_TYPES.includes(type)?type:'radial';return normalizeLight({id:newId(),name:TYPE_NAMES[t],type:t,x,y});}
+
+// Resolve by the actual graphic in use, not by a Pokémon species/form variable.
+// This supports the player, followers, gender/forms, and arbitrary characters.
+// Manual bindings are rare overrides; the default is "<graphic>_n.png".
+export function normalGraphicName(name){
+  let n=String(name||'').trim().replace(/\\/g,'/');
+  n=n.replace(/^(?:Graphics\/)?(?:Characters|Tilesets|Autotiles)\//i,'');
+  n=n.replace(/\.(?:png|gif|bmp|jpg|jpeg)$/i,'');
+  if(n.length>180||!n||n.startsWith('/')||n.split('/').some(x=>x==='..'||x===''||x==='.')||/[^\p{L}\p{N}_ .()!+@$\-[\]/]/u.test(n))return '';
+  return n;
+}
+export function normalCandidate(settings,category,graphic){
+  const cfg=normalizeNormals(settings),name=normalGraphicName(graphic);
+  if(!cfg.enabled||!NORMAL_CATEGORIES[category]||!name)return null;
+  const manual=cfg[category].find(e=>e.source===name);
+  if(manual)return manual.enabled!==false?NORMAL_DIR+'/'+NORMAL_CATEGORIES[category]+'/'+manual.normal+'.png':null;
+  return cfg.auto[category]?
+    NORMAL_DIR+'/'+NORMAL_CATEGORIES[category]+'/'+name+cfg.suffix+'.png':null;
+}
