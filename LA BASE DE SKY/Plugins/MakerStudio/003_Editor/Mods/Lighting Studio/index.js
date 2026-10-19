@@ -148,7 +148,29 @@ const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el
 const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));shell.scrollTop=oldScroll;
 }
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number.isFinite(v)?v:a));
-function editValue(fn,final){if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}fn();invalidate();redraw();if(final){state.undo.push(state.editSnapshot);state.editSnapshot=null;void persist().catch(fail);}}
+// While dragging, cap costly full-map redraws to ~10 per second rather than
+// queueing one per input event. The current value is still committed on release.
+function schedulePreview(){
+ const owner=state;if(!owner||owner.previewScheduled)return;
+ owner.previewScheduled=true;
+ owner.previewTimer=setTimeout(()=>{
+  if(state!==owner)return;
+  owner.previewScheduled=false;owner.previewTimer=null;
+  invalidate();redraw();
+ },95);
+}
+function editValue(fn,final){
+ if(!state)return;
+ if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}
+ fn();
+ if(!final){schedulePreview();return;}
+ if(state.previewTimer!=null){clearTimeout(state.previewTimer);state.previewTimer=null;state.previewScheduled=false;}
+ invalidate();redraw();
+ state.undo.push(state.editSnapshot);
+ if(state.undo.length>60)state.undo.shift();
+ state.editSnapshot=null;
+ void persist().catch(fail);
+}
 
 function overlay(draw,info){if(!state||!draw||!info)return;
 const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;const renderStarted=performance.now();if(state.awaitingOverlay){stats.requestDelayMs=Math.max(0,renderStarted-state.lastRequestAt);state.awaitingOverlay=false;state.redrawDirty=false;}
@@ -173,7 +195,7 @@ state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,s
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
 if(d)invalidate();redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',previewNight:false,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',previewNight:false,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
@@ -186,6 +208,6 @@ if(ctx.ui.registerOverlay){ctx.ui.registerOverlay(item);state.advancedOverlay=fa
 else if(ctx.ui.registerAdvancedOverlay){ctx.ui.registerAdvancedOverlay(item);state.advancedOverlay=true;}
 else notify('Esta versión de Maker Studio no admite overlays de mods.','error');
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
-redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if(hasPendingChunks()||(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled)))redraw();},250);
+redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if((!state.drag&&!state.editSnapshot&&hasPendingChunks())||(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled)))redraw();},250);
 }
-export function deactivate(){if(state?.ticker)clearInterval(state.ticker);clearLightCache();state=null;}
+export function deactivate(){if(state?.ticker)clearInterval(state.ticker);if(state?.previewTimer!=null)clearTimeout(state.previewTimer);clearLightCache();state=null;}
