@@ -1,5 +1,5 @@
 Name = Vermeil Smooth Movement
-Version = 0.3.0
+Version = 0.4.0
 Essentials = 21.1
 Credits = CarnekVT
 Last = true
