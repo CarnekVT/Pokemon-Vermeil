@@ -1,4 +1,4 @@
-# Lighting Studio v0.4.7 — suavizado, rendimiento y normal maps
+# Lighting Studio v0.4.8 — normales automáticas y edición rápida
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -114,3 +114,21 @@ Referencia: `Graphics/LightingStudio/Normals/README.md`. Las normales deben tene
 - `tests/cone-falloff.test.mjs` — falloff y control lateral del cono.
 - `tests/render-quality.test.mjs` — suavizado, caché de fragmentos y serialización de normales.
 - **Pendiente:** pruebas integradas en Maker Studio y Essentials 21.1. No se garantiza eliminación del lag de 10 segundos hasta probarlo en la instalación del usuario.
+
+
+## v0.4.8 — Normales automáticas, sin cientos de asignaciones
+
+- **Catálogo global:** `normalSettings` está en la raíz de `Data/LightingStudio/maps.json`. Una sola configuración sirve para todos los mapas. Los vínculos manuales heredados de versiones anteriores se migran como excepciones, sin borrarse de sus mapas originales.
+- **Reconocimiento automático:** al habilitar los normal maps en el panel, por defecto se busca `Graphics/LightingStudio/Normals/Characters/<nombre real del gráfico>_n.png` y lo mismo en `Tilesets/` y `Autotiles/`. No se enumera ningún Pokémon ni se crea una variable por especie, sexo, forma o follower.
+- Ejemplo: cuando el motor muestre `Graphics/Characters/Followers/VENUSAUR.png`, el recurso esperado es `Graphics/LightingStudio/Normals/Characters/Followers/VENUSAUR_n.png`. Si el gráfico cambia, el resolvedor toma el nuevo nombre.
+- **Excepciones**: la lista de vínculos manuales ahora es opcional y únicamente sirve para archivos que no respetan el sufijo `_n`. Se admiten subcarpetas seguras.
+- **Ruby:** `Lighting Studio Runtime/002_NormalCatalog.rb` contiene `LightingStudio.normal_map_path(category, graphic)`, `normal_for_character(character)` y `normal_for_character_sprite(sprite)`. Cachea existencias y restablece esa caché al transferir mapa; no analiza especies ni fuerza lectura de archivos por frame.
+- **Importante:** el catálogo resuelve rutas, pero NO hay sombreado por normal maps en RGSS/mkxp todavía. El siguiente paso es integrar shader/materiales con sprites de personajes, followers y tiles. Esta etapa no altera sus gráficos ni el rendimiento del juego.
+
+## v0.4.8 — Lag al cambiar los parámetros de luz
+
+- **Invalidación espacial:** mover, redimensionar o modificar una luz ya no reinicia todos los fragmentos de iluminación fusionada. `invalidateLightRegions(before, after)` borra únicamente los fragmentos que intersectan su posición anterior o la actual.
+- **Edición inmediata:** mientras se manipula un control se representa una preview rápida; la unión definitiva se recupera tras 350 ms sin interacción. Los fragmentos no afectados permanecen en caché.
+- **Autosave diferido:** las escrituras de `maps.json` se agrupan tras 700 ms de inactividad para no provocar recargas del sistema de archivos por cada deslizador; el botón **Guardar** continúa forzando la escritura.
+- **Regresión reproducible**: `node tests/automatic-normals-and-cache.test.mjs`. Incluye nombres del jugador/follower, migración de datos y edición localizada de una de dos luces distantes.
+- **Pendiente de medición real:** la desaparición del bloqueo de ~10 segundos necesita comprobarse en Maker Studio y con datos de diagnóstico; no hay cifras de FPS verificadas.
