@@ -80,6 +80,24 @@ export function normalizeProject(src){
   // Global rules work for every map and every player/follower graphic without
   // per-species switches or a manually maintained Pokemon list.
   res.normalSettings=normalizeNormals(src.normalSettings);
+  if(!src.normalSettings){
+    // Upgrade older per-map assignments to the one global catalog without
+    // discarding any manual exceptions users already added.
+    for(const map of Object.values(src.maps)){
+      const legacy=map?.normalMaps;
+      if(!legacy || legacy.enabled!==true)continue;
+      res.normalSettings.enabled=true;
+      const normalized=normalizeNormals(legacy);
+      for(const category of Object.keys(NORMAL_CATEGORIES)){
+        const seen=new Set(res.normalSettings[category].map(v=>v.source));
+        for(const binding of normalized[category]){
+          if(seen.has(binding.source))continue;
+          res.normalSettings[category].push(binding);
+          seen.add(binding.source);
+        }
+      }
+    }
+  }
   for(const [id,value] of Object.entries(src.maps)){
     if(!/^\d+$/.test(id)||!value||typeof value!=='object')continue;
     const ambient=value.ambient||{},seen=new Set();
