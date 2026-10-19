@@ -94,13 +94,13 @@ function normalBindingsUI(shell,scene){
  cat.value=state.normalCategory;
  cat.onchange=()=>{state.normalCategory=cat.value;refresh();};
  labeled(section,'Tipo de recurso',cat);
+ const category=state.normalCategory,folder=NORMAL_CATEGORIES[category];
  const auto=node('input');auto.type='checkbox';auto.checked=normals.auto[category]!==false;
  auto.onchange=()=>change(()=>normals.auto[category]=auto.checked);
  labeled(section,'Detección automática por nombre de sprite',auto);
  section.append(element('p','ls-inline-note',
   'Jugador y follower: se usa el nombre del gráfico activo. Por ejemplo, Followers/VENUSAUR → Followers/VENUSAUR'+normals.suffix+'.png. No necesitas un vínculo por Pokémon.'));
 
- const category=state.normalCategory,folder=NORMAL_CATEGORIES[category];
  section.append(element('p','ls-inline-note',
   'Normal PNG: '+NORMAL_DIR+'/'+folder+'/Nombre'+normals.suffix+'.png. Los sprites del jugador/follower se resuelven por su gráfico actual.'));
  const list=element('div','ls-list');section.append(list);
