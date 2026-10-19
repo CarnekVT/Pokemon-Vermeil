@@ -1,4 +1,4 @@
-import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES} from './model.js';
+import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES} from './model.js';
 import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
 const PANEL='lighting-studio.main', TOOL='lighting-studio.place';
@@ -10,12 +10,21 @@ function fail(e){const msg=String(e?.message||e);state?.ctx.log.error(msg);notif
 function current(){return getMap(state.data,state.mapId,false);}
 function active(){return current()?.lights.find(l=>l.id===state.selected)||null;}
 function record(){state.undo.push(deepCopy(state.data));if(state.undo.length>60)state.undo.shift();state.redo=[];}
-function redraw(){if(!state?.ctx)return;if(state.redrawPending)return;state.redrawPending=true;requestAnimationFrame(()=>{if(!state)return;state.redrawPending=false;state.ctx.editor.requestRedraw?.();});}
+function invalidate(){if(state)state.revision=(state.revision||0)+1;}
+function redraw(){if(!state?.ctx||state.redrawPending)return;
+ const elapsed=performance.now()-(state.lastRedraw||0),wait=Math.max(0,70-elapsed);
+ state.redrawPending=true;setTimeout(()=>{if(!state)return;state.redrawPending=false;state.lastRedraw=performance.now();state.ctx.editor.requestRedraw?.();},wait);
+}
 function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Overlay activo · mapa '+stats.lastMap+' · '+stats.calls+' fotogramas':'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
-function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();redraw();refresh();void persist().catch(fail);}
-function undo(){if(!state.undo.length)return;state.redo.push(deepCopy(state.data));state.data=state.undo.pop();redraw();refresh();void persist().catch(fail);}
-function redo(){if(!state.redo.length)return;state.undo.push(deepCopy(state.data));state.data=state.redo.pop();redraw();refresh();void persist().catch(fail);}
-async function persist(){const data=JSON.stringify(state.data,null,2)+'\n';state.writer=state.writer.catch(()=>{}).then(async()=>{await state.ctx.fs.projectMkdir('Data/LightingStudio');await state.ctx.fs.writeProjectFile(DATA_PATH,data);});return state.writer;}
+function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();invalidate();redraw();refresh();void persist().catch(fail);}
+function undo(){if(!state.undo.length)return;state.redo.push(deepCopy(state.data));state.data=state.undo.pop();invalidate();redraw();refresh();void persist().catch(fail);}
+function redo(){if(!state.redo.length)return;state.undo.push(deepCopy(state.data));state.data=state.redo.pop();invalidate();redraw();refresh();void persist().catch(fail);}
+function persist(){if(!state)return Promise.resolve();state.saveRequested=true;if(state.saving)return state.writer;state.saving=true;
+ const owner=state;
+ owner.writer=(async()=>{try{
+ await owner.ctx.fs.projectMkdir('Data/LightingStudio');
+ while(owner.saveRequested){owner.saveRequested=false;const data=JSON.stringify(owner.data,null,2)+'\n';await owner.ctx.fs.writeProjectFile(DATA_PATH,data);}
+ }finally{owner.saving=false;}})();return owner.writer;}
 async function load(){if(!(await state.ctx.fs.projectExists(DATA_PATH)))return defaultProject();return normalizeProject(JSON.parse(await state.ctx.fs.readProjectFile(DATA_PATH)));}
 function btn(text,run){const b=node('button',text);b.className='ls-btn';b.type='button';b.addEventListener('click',()=>{try{run();}catch(e){fail(e);}});return b;}
 function field(host,label,type,value,onChange,settings={}){const row=node('label');row.className='ls-field';row.append(node('span',label));const input=node('input');input.type=type;input.value=String(value);if(settings.min!==undefined)input.min=settings.min;if(settings.max!==undefined)input.max=settings.max;if(settings.step!==undefined)input.step=settings.step;input.addEventListener('change',()=>{try{onChange(type==='number'?Number(input.value):input.value);}catch(e){fail(e);}});row.append(input);host.append(row);}
@@ -23,7 +32,7 @@ function drawCanvas(canvas,map){const rect=canvas.getBoundingClientRect();canvas
 
 function element(tag,cls,text){const n=node(tag,text);if(cls)n.className=cls;return n;}
 function labeled(parent,name,control){const r=element('label','ls-field');r.append(element('span','ls-field-label',name),control);parent.append(r);return r;}
-function slider(parent,name,value,min,max,step,cb){const wrap=element('div','ls-field');wrap.append(element('span','ls-field-label',name),element('span','ls-field-val',Math.round(value*100)/100));const row=element('div','ls-range-row');const range=element('input','ls-range'),num=element('input','ls-input ls-number');range.type='range';num.type='number';for(const v of [range,num]){v.min=min;v.max=max;v.step=step;v.value=value;}const valueEl=wrap.children[1];range.addEventListener('input',()=>{num.value=range.value;valueEl.textContent=range.value;cb(Number(range.value),false);});range.addEventListener('change',()=>cb(Number(range.value),true));num.addEventListener('change',()=>{range.value=num.value;cb(Number(num.value),true);});row.append(range,num);wrap.append(row);parent.append(wrap);}
+function slider(parent,name,value,min,max,step,cb){const wrap=element('div','ls-field');wrap.append(element('span','ls-field-label',name),element('span','ls-field-val',Math.round(value*100)/100));const row=element('div','ls-range-row');const range=element('input','ls-range'),num=element('input','ls-input ls-number');range.type='range';num.type='number';for(const v of [range,num]){v.min=min;v.max=max;v.step=step;v.value=value;}const valueEl=wrap.children[1];range.addEventListener('input',()=>{num.value=range.value;valueEl.textContent=range.value;cb(Number(range.value),false);});range.addEventListener('change',()=>cb(Number(range.value),true));num.addEventListener('change',()=>{range.value=num.value;valueEl.textContent=num.value;cb(Number(num.value),true);});row.append(range,num);wrap.append(row);parent.append(wrap);}
 function mini(label,fn,selected=false){const b=btn(label,fn);b.className='ls-btn ls-small'+(selected?' active':'');return b;}
 function setMode(mode){state.mode=mode;state.ctx.editor.setTool(TOOL);redraw();refresh();}
 function refresh(){if(!state?.host)return;const root=state.host;const oldScroll=root.querySelector('.ls-root')?.scrollTop||0;root.replaceChildren();const style=node('style',css);root.append(style);const shell=element('div','ls-root');root.append(shell);
@@ -44,37 +53,57 @@ const ambient=element('section','ls-section');shell.append(ambient);ambient.appe
 const zero=element('div','ls-inline');ambient.append(zero);zero.append(mini('Quitar oscuridad',()=>change(()=>scene.ambient.darkness=0)),mini('Apagar todas las luces',()=>change(()=>{scene.lights.forEach(l=>l.enabled=false);})),mini('Encender todas',()=>change(()=>{scene.lights.forEach(l=>l.enabled=true);})));const settings=scene.ambient;
 slider(ambient,'Oscuridad',settings.darkness,0,1,.01,(v,final)=>editValue(()=>settings.darkness=clamp(v,0,1),final));
 const color=node('input');color.type='color';color.className='ls-color';color.value=settings.color;color.addEventListener('input',()=>editValue(()=>settings.color=color.value,false));color.addEventListener('change',()=>editValue(()=>settings.color=color.value,true));labeled(ambient,'Color ambiental',color);
-const insp=element('section','ls-section');shell.append(insp);insp.append(element('div','ls-section-heading','Inspector de luz'));const selected=active();
+const insp=element('section','ls-section ls-inspector');shell.append(insp);
+const insHead=element('div','ls-section-heading');insHead.append(node('span','INSPECTOR DE LUZ'),element('span','ls-count',active()?.name||'Sin selección'));insp.append(insHead);
+const nav=element('div','ls-inspector-tabs');insp.append(nav);
+for(const [key,label] of [['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art']]){
+ nav.append(mini(label,()=>{state.inspectorTab=key;refresh();},state.inspectorTab===key));
+}
+const selected=active();
 if(!selected)insp.append(element('div','ls-empty','Selecciona una luz en el mapa o en la biblioteca.'));
 else{
-const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;});labeled(insp,'Geometría',typeSelect);
-if(selected.type==='cone'){slider(insp,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editValue(()=>selected.angle=v,final));}
-if(selected.type==='ellipse'||selected.type==='rectangle'){slider(insp,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editValue(()=>selected.widthPx=v,final));slider(insp,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editValue(()=>selected.heightPx=v,final));}
-if(selected.type!=='radial')slider(insp,'Rotación',selected.rotation,-360,360,1,(v,final)=>editValue(()=>selected.rotation=v,final));
-const name=node('input');name.type='text';name.className='ls-input';name.value=selected.name;name.onchange=()=>change(()=>selected.name=name.value.slice(0,80));labeled(insp,'Nombre',name);
-const c=node('input');c.type='color';c.className='ls-color';c.value=selected.color;c.oninput=()=>editValue(()=>selected.color=c.value,false);c.onchange=()=>editValue(()=>selected.color=c.value,true);labeled(insp,'Color',c);
-slider(insp,'Intensidad',selected.intensity,0,1,.01,(v,final)=>editValue(()=>selected.intensity=clamp(v,0,1),final));
-slider(insp,'Brillo del centro',selected.centerStrength??.65,0,1,.01,(v,final)=>editValue(()=>selected.centerStrength=clamp(v,0,1),final));
-slider(insp,'Radio · píxeles',selected.radiusPx,8,512,1,(v,final)=>editValue(()=>selected.radiusPx=clamp(v,8,512),final));
-slider(insp,'Suavidad',selected.softness,.05,1,.01,(v,final)=>editValue(()=>selected.softness=clamp(v,.05,1),final));
-const blend=node('select');blend.className='ls-input';for(const [value,label] of [['normal','Normal'],['add','Aditiva / Suma'],['subtract','Multiplicativa / Oscurecer']]){const opt=node('option',label);opt.value=value;blend.append(opt);}blend.value=selected.blendMode||'add';blend.onchange=()=>change(()=>selected.blendMode=blend.value);labeled(insp,'Modo de mezcla',blend);
-const pulse=element('div','ls-effect-group');insp.append(pulse);pulse.append(element('b',null,'Pulsación'));const on=node('input');on.type='checkbox';on.checked=selected.pulse.enabled;on.onchange=()=>change(()=>selected.pulse.enabled=on.checked);labeled(pulse,'Activar pulsación',on);slider(pulse,'Velocidad (Hz)',selected.pulse.speedHz,.05,12,.05,(v,final)=>editValue(()=>selected.pulse.speedHz=v,final));slider(pulse,'Oscilación intensidad',selected.pulse.intensity,0,1,.01,(v,final)=>editValue(()=>selected.pulse.intensity=v,final));slider(pulse,'Oscilación tamaño',selected.pulse.radius,0,.9,.01,(v,final)=>editValue(()=>selected.pulse.radius=v,final));
-const pixel=element('div','ls-effect-group');insp.append(pixel);pixel.append(element('b',null,'Pixel Art'));const pixelOn=node('input');pixelOn.type='checkbox';pixelOn.checked=selected.pixel.enabled;pixelOn.onchange=()=>change(()=>selected.pixel.enabled=pixelOn.checked);labeled(pixel,'Pixelar luz',pixelOn);slider(pixel,'Tamaño de píxel',selected.pixel.size,2,32,1,(v,final)=>editValue(()=>selected.pixel.size=Math.round(v),final));slider(pixel,'Niveles de degradado',selected.pixel.steps,2,24,1,(v,final)=>editValue(()=>selected.pixel.steps=Math.round(v),final));
-const coords=element('div','ls-two');insp.append(coords);for(const axis of ['x','y']){const input=node('input');input.type='text';input.inputMode='decimal';input.className='ls-input';input.placeholder='Ej. 25.30';input.value=String(selected[axis]);input.onchange=()=>{const n=parseCoordinate(input.value);if(n===null){input.value=String(selected[axis]);notify('Introduce una coordenada entre -2048 y 2048, con decimales libres.','warn');return;}change(()=>selected[axis]=n);};labeled(coords,axis.toUpperCase()+' (tiles)',input);}
-const buttons=element('div','ls-inline');insp.append(buttons);buttons.append(mini('⌫ Eliminar',()=>change(()=>{const map=current();map.lights=map.lights.filter(l=>l.id!==selected.id);state.selected=null;})));
+const tabs={};
+for(const id of ['shape','fade','pulse','pixel']){const panel=element('div','ls-tab-body');panel.hidden=state.inspectorTab!==id;insp.append(panel);tabs[id]=panel;}
+const shapePanel=tabs.shape,fadePanel=tabs.fade,pulsePanel=tabs.pulse,pixelPanel=tabs.pixel;
+shapePanel.append(element('div','ls-group-label','PROPIEDADES GENERALES'));
+fadePanel.append(element('p','ls-inline-note','Elige dónde comienza el brillo y hacia qué dirección se atenúa. Las geometrías conservan su contorno.'));
+const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;});labeled(shapePanel,'Geometría',typeSelect);
+if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editValue(()=>selected.angle=v,final));}
+if(selected.type==='ellipse'||selected.type==='rectangle'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editValue(()=>selected.heightPx=v,final));}
+if(selected.type!=='radial')slider(shapePanel,'Rotación',selected.rotation,-360,360,1,(v,final)=>editValue(()=>selected.rotation=v,final));
+const name=node('input');name.type='text';name.className='ls-input';name.value=selected.name;name.onchange=()=>change(()=>selected.name=name.value.slice(0,80));labeled(shapePanel,'Nombre',name);
+const c=node('input');c.type='color';c.className='ls-color';c.value=selected.color;c.oninput=()=>editValue(()=>selected.color=c.value,false);c.onchange=()=>editValue(()=>selected.color=c.value,true);labeled(shapePanel,'Color',c);
+slider(shapePanel,'Intensidad',selected.intensity,0,1,.01,(v,final)=>editValue(()=>selected.intensity=clamp(v,0,1),final));
+slider(fadePanel,'Brillo del centro',selected.centerStrength??.65,0,1,.01,(v,final)=>editValue(()=>selected.centerStrength=clamp(v,0,1),final));
+slider(shapePanel,'Radio · píxeles',selected.radiusPx,8,512,1,(v,final)=>editValue(()=>selected.radiusPx=clamp(v,8,512),final));
+slider(fadePanel,'Suavidad',selected.softness,.05,1,.01,(v,final)=>editValue(()=>selected.softness=clamp(v,.05,1),final));
+const blend=node('select');blend.className='ls-input';for(const [value,label] of [['normal','Normal'],['add','Aditiva / Suma'],['subtract','Multiplicativa / Oscurecer']]){const opt=node('option',label);opt.value=value;blend.append(opt);}blend.value=selected.blendMode||'add';blend.onchange=()=>change(()=>selected.blendMode=blend.value);labeled(shapePanel,'Modo de mezcla',blend);
+const fadeSelect=node('select');fadeSelect.className='ls-input';
+for(const id of FADE_MODES){const o=node('option',FADE_NAMES[id]);o.value=id;fadeSelect.append(o);}
+fadeSelect.value=selected.fadeMode||'center';
+fadeSelect.onchange=()=>change(()=>selected.fadeMode=fadeSelect.value);
+labeled(fadePanel,'Origen del difuminado',fadeSelect);
+if(selected.fadeMode==='custom'){
+ slider(fadePanel,'Origen horizontal',selected.fadeX??0,-1,1,.05,(v,final)=>editValue(()=>selected.fadeX=v,final));
+ slider(fadePanel,'Origen vertical',selected.fadeY??0,-1,1,.05,(v,final)=>editValue(()=>selected.fadeY=v,final));
+}
+const pulse=element('div','ls-effect-group');pulsePanel.append(pulse);pulse.append(element('b',null,'Pulsación'));const on=node('input');on.type='checkbox';on.checked=selected.pulse.enabled;on.onchange=()=>change(()=>selected.pulse.enabled=on.checked);labeled(pulse,'Activar pulsación',on);slider(pulse,'Velocidad (Hz)',selected.pulse.speedHz,.05,12,.05,(v,final)=>editValue(()=>selected.pulse.speedHz=v,final));slider(pulse,'Oscilación intensidad',selected.pulse.intensity,0,1,.01,(v,final)=>editValue(()=>selected.pulse.intensity=v,final));slider(pulse,'Oscilación tamaño',selected.pulse.radius,0,.9,.01,(v,final)=>editValue(()=>selected.pulse.radius=v,final));
+const pixel=element('div','ls-effect-group');pixelPanel.append(pixel);pixel.append(element('b',null,'Pixel Art'));const pixelOn=node('input');pixelOn.type='checkbox';pixelOn.checked=selected.pixel.enabled;pixelOn.onchange=()=>change(()=>selected.pixel.enabled=pixelOn.checked);labeled(pixel,'Pixelar luz',pixelOn);slider(pixel,'Tamaño de píxel',selected.pixel.size,2,32,1,(v,final)=>editValue(()=>selected.pixel.size=Math.round(v),final));slider(pixel,'Niveles de degradado',selected.pixel.steps,2,24,1,(v,final)=>editValue(()=>selected.pixel.steps=Math.round(v),final));
+const coords=element('div','ls-two');shapePanel.append(coords);for(const axis of ['x','y']){const input=node('input');input.type='text';input.inputMode='decimal';input.className='ls-input';input.placeholder='Ej. 25.30';input.value=String(selected[axis]);input.onchange=()=>{const n=parseCoordinate(input.value);if(n===null){input.value=String(selected[axis]);notify('Introduce una coordenada entre -2048 y 2048, con decimales libres.','warn');return;}change(()=>selected[axis]=n);};labeled(coords,axis.toUpperCase()+' (tiles)',input);}
+const buttons=element('div','ls-inline');shapePanel.append(buttons);buttons.append(mini('⌫ Eliminar',()=>change(()=>{const map=current();map.lights=map.lights.filter(l=>l.id!==selected.id);state.selected=null;})));
 }
 const wipe=element('div','ls-inline');ambient.append(wipe);wipe.append(mini('Restablecer iluminación del mapa',()=>{const n=(current()?.lights?.length||0);const message='Se eliminarán '+n+' luces y se restaurará el ambiente de este mapa. ¿Continuar?';const confirm=state.ctx.ui.showConfirmDialog({title:'Restablecer iluminación',message,confirmLabel:'Restablecer',cancelLabel:'Cancelar'});Promise.resolve(confirm).then(ok=>{if(ok)change(()=>{state.data.maps[String(state.mapId)]={enabled:true,ambient:{color:'#142439',darkness:0},lights:[]};state.selected=null;});}).catch(fail);}));
 const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el mapa mediante un overlay independiente de Fog, Panorama y Sombras. Prueba visual muestra una marca amarilla para comprobar si Maker Studio lo está renderizando.');shell.append(hint);
 const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));shell.scrollTop=oldScroll;
 }
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number.isFinite(v)?v:a));
-function editValue(fn,final){if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}fn();redraw();if(final){state.undo.push(state.editSnapshot);state.editSnapshot=null;void persist().catch(fail);redraw();refresh();}}
+function editValue(fn,final){if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}fn();invalidate();redraw();if(final){state.undo.push(state.editSnapshot);state.editSnapshot=null;void persist().catch(fail);}}
 
 function overlay(draw,info){if(!state||!draw||!info)return;
 const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;
 try{
  const map=getMap(state.data,info.mapId,false);
- paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},time:performance.now()/1000});
+ paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
  if(state.diagnostic){draw.save();try{
   draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
  }finally{draw.restore();}}
@@ -86,12 +115,12 @@ function selectMap(id){const n=Number(id);if(n>0&&state.mapId!==n){state.mapId=n
 function pointerDown(e){if(!state||state.readError||e.buttons&&!(e.buttons&1))return;selectMap(e.mapId);const pt=pointerPoint(e);state.hover=pt;state.lastCursor=pt;const found=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);state.hoverHit=found;
 if(state.mode==='erase'){if(found)change(()=>{const m=current();m.lights=m.lights.filter(l=>l.id!==found.light.id);if(state.selected===found.light.id)state.selected=null;});redraw();return;}
 if(state.mode==='select'){state.selected=found?.light.id||null;if(found){state.drag={id:found.light.id,part:found.part,start:pt,origin:{x:found.light.x,y:found.light.y,radius:found.light.radiusPx},before:deepCopy(state.data)};}redraw();refresh();return;}
-if(state.mode==='place'){const l=makeLight(pt.x,pt.y,state.newType);record();const m=getMap(state.data,state.mapId,true);m.lights.push(l);state.selected=l.id;state.drag={id:l.id,part:'radius',start:pt,origin:{x:pt.x,y:pt.y,radius:state.brushRadius},before:null};l.radiusPx=state.brushRadius;redraw();refresh();}}
+if(state.mode==='place'){const l=makeLight(pt.x,pt.y,state.newType);record();const m=getMap(state.data,state.mapId,true);m.lights.push(l);state.selected=l.id;state.drag={id:l.id,part:'radius',start:pt,origin:{x:pt.x,y:pt.y,radius:state.brushRadius},before:null};l.radiusPx=state.brushRadius;invalidate();redraw();refresh();}}
 function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;const pt=pointerPoint(e);state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);const d=state.drag;
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
-redraw();}
+if(d)invalidate();redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:''},statusNode:null,selected:null,mode:'select',showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:''},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',revision:0,lastRedraw:0,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
@@ -103,6 +132,6 @@ if(ctx.ui.registerOverlay)ctx.ui.registerOverlay(item);
 else if(ctx.ui.registerAdvancedOverlay)ctx.ui.registerAdvancedOverlay(item);
 else notify('Esta versión de Maker Studio no admite overlays de mods.','error');
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
-redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();const map=current();if(state.diagnostic||map?.lights?.some(l=>l.enabled&&l.pulse?.enabled))redraw();},125);
+redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();const map=current();if(state.diagnostic||map?.lights?.some(l=>l.enabled&&l.pulse?.enabled))redraw();},250);
 }
 export function deactivate(){if(state?.ticker)clearInterval(state.ticker);state=null;}
