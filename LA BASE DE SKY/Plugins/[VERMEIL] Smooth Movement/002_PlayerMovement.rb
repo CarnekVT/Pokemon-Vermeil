@@ -8,6 +8,9 @@ class Game_Player < Game_Character
     return vermeil_movement_original_input if @move_route_forcing
     return vermeil_movement_original_input if pbMapInterpreterRunning? ||
       $game_temp.message_window_showing || $game_temp.in_mini_update || $game_temp.in_menu
+    # Clásico es una excepcion deliberada: el motor original maneja
+    # absolutamente todo el input, incluidas las cuatro direcciones.
+    return vermeil_movement_original_input unless VermeilMovement.enabled?("instant_turn")
 
     # El control moderno siempre lee el estado ACTUAL; nunca ejecuta
     # teclas almacenadas o pulsaciones que el jugador ya haya soltado.
