@@ -1,4 +1,4 @@
-# Lighting Studio v0.5.3 — iluminación real por normales en overworlds
+# Lighting Studio v0.5.4 — interpolación angular de normales
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -209,3 +209,16 @@ El test independiente se ha trasladado a `LA BASE DE SKY/DeveloperTests/Lighting
 - El test independiente `DeveloperTests/LightingStudio/test_character_normals.rb` comprueba ahora luces elípticas y rectangulares cerca del borde, visualización activa junto a la luz, salida suave y oscilación de pulsación. Ninguna prueba Ruby se ubica dentro de `Plugins/`.
 
 **Pendiente:** comprobar la visibilidad en el juego y ejecutar los tests en Ruby/mkxp. Esta revisión se ha verificado por lectura del código, matemáticas del alcance y validaciones del repositorio; no hay confirmación visual del resultado real.
+
+
+## v0.5.4 — Normal maps fluidos al acercarse a luces
+
+- La influencia de normales se prolonga hasta el **122 % del alcance normalizado**, con caída suave desde el **72 %**. El margen de contacto del sprite (24 px) se conserva. Esto permite que el relieve reaccione también al acercarse desde fuera del halo.
+- Se sustituyen los saltos entre 8 orientaciones por **16 direcciones de caché** y mezcla ponderada de dos fotogramas vecinos mediante dos capas RGSS sincronizadas con el sprite. El ángulo de la luz se interpola sin volver a procesar píxeles por cada frame.
+- La opacidad de ambos overlays suma la misma intensidad temporal compartida; se mantiene el pulso de tamaño e intensidad de la fuente y la entrada/salida progresiva. No se recrean texturas si el fotograma y las direcciones ya están cacheados.
+- Los normal maps siguen resolviéndose automáticamente por gráfico: jugador y Pokémon seguidores. Al cambiar de gráfico se reinician ambas capas para evitar mantener normales del Pokémon anterior.
+- Diagnóstico: `LightingStudioNormals.mode = :normals` muestra el PNG en la primera capa; `LightingStudioNormals.mode = :lit` usa la iluminación interpolada; `p LightingStudioNormals.debug_status` indica la intensidad.
+- **Nota de compatibilidad:** ahora se crean dos sprites auxiliares por personaje en lugar de uno. El runtime desecha los dos al liberar el spriteset; las 96 imágenes direccionales como máximo se siguen administrando en la caché. Puede requerir hasta dos fotogramas para crear un par de direcciones inédito.
+- Prueba Ruby independiente actualizada: `ruby "DeveloperTests/LightingStudio/test_character_normals.rb"`. No colocar tests `.rb` dentro de Plugins.
+
+**Estado de validación:** pendientes la ejecución del test Ruby y la comprobación visual en Essentials 21.1/mkxp-z. No se ha medido el impacto en FPS en el juego real.
