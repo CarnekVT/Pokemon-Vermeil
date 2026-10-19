@@ -63,31 +63,35 @@ function maskKey(l){
   return [l.type,l.radiusPx,l.widthPx,l.heightPx,l.angle,l.color,l.softness,l.centerStrength,
     l.fadeMode,l.fadeStart,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps].join('|');
 }
+// A pixel-art light uses one texel per logical block. Never downscale
+// the whole shape to MASK_MAX and then quantize again: cones and ellipses lose
+// their silhouette when both reductions are applied.
+export function pixelGridDimensions(l){
+  const d=dimensions(l),block=clamp(l.pixel?.size??6,2,32);
+  const limit=128;
+  return {w:Math.max(2,Math.min(limit,Math.ceil(d.w/block))),
+          h:Math.max(2,Math.min(limit,Math.ceil(d.h/block)))};
+}
 function createMask(l){
-  const dims=dimensions(l),factor=Math.min(1,MASK_MAX/Math.max(dims.w,dims.h));
-  const w=Math.max(2,Math.round(dims.w*factor)),h=Math.max(2,Math.round(dims.h*factor));
-  const c=newCanvas(w,h),ctx=c.getContext('2d');
+  const dims=dimensions(l),p=l.pixel||{},pixelated=p.enabled===true;
+  const size=pixelated?pixelGridDimensions(l):{
+    w:Math.max(2,Math.round(dims.w*Math.min(1,MASK_MAX/Math.max(dims.w,dims.h)))),
+    h:Math.max(2,Math.round(dims.h*Math.min(1,MASK_MAX/Math.max(dims.w,dims.h))))
+  };
+  const w=size.w,h=size.h,canvas=newCanvas(w,h),ctx=canvas.getContext('2d');
   if(!ctx)return null;
-  const [r,g,b]=rgb(l.color),p=l.pixel||{};
-  if(p.enabled){
-    const cell=Math.max(1,Math.round((p.size||6)*factor)),steps=Math.max(2,p.steps||6);
-    for(let y=0;y<h;y+=cell)for(let x=0;x<w;x+=cell){
-      const nx=((x+cell/2)/w-.5)*2,ny=((y+cell/2)/h-.5)*2;
-      const a=Math.round(falloff(l,nx,ny)*steps)/steps;
-      if(a<1/255)continue;
-      ctx.fillStyle='rgba('+r+','+g+','+b+','+a+')';
-      ctx.fillRect(x,y,Math.min(cell,w-x),Math.min(cell,h-y));
-    }
-  }else{
-    const img=ctx.createImageData(w,h),buf=img.data;
-    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-      const alpha=Math.round(falloff(l,((x+.5)/w-.5)*2,((y+.5)/h-.5)*2)*255);
-      const pos=(y*w+x)*4;
-      buf[pos]=r;buf[pos+1]=g;buf[pos+2]=b;buf[pos+3]=alpha;
-    }
-    ctx.putImageData(img,0,0);
+  const [r,g,b]=rgb(l.color),img=ctx.createImageData(w,h),data=img.data;
+  const levels=clamp(p.steps??6,2,24);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const nx=((x+.5)/w-.5)*2,ny=((y+.5)/h-.5)*2;
+    let alpha=falloff(l,nx,ny);
+    if(pixelated)alpha=Math.round(alpha*levels)/levels;
+    const pos=(y*w+x)*4;
+    data[pos]=r;data[pos+1]=g;data[pos+2]=b;
+    data[pos+3]=Math.round(alpha*255);
   }
-  return c;
+  ctx.putImageData(img,0,0);
+  return canvas;
 }
 function getMask(l){
   const key=maskKey(l);
@@ -97,15 +101,21 @@ function getMask(l){
   return m;
 }
 function stamp(g,l,project,t,blend){
-  const mask=getMask(l);if(!mask)return;
   const d=dimensions(l),a=evaluated(l,t),scale=a.scale*project.scale();
   const w=d.w*scale,h=d.h*scale;
+  const x=project.x(l.x),y=project.y(l.y);
+  const theta=(Number(l.rotation)||0)*Math.PI/180;
+  const extentX=(Math.abs(Math.cos(theta))*w+Math.abs(Math.sin(theta))*h)/2;
+  const extentY=(Math.abs(Math.sin(theta))*w+Math.abs(Math.cos(theta))*h)/2;
+  if(project.viewWidth!=null && project.viewHeight!=null &&
+    (x+extentX<0||x-extentX>project.viewWidth||y+extentY<0||y-extentY>project.viewHeight))return;
+  const mask=getMask(l);if(!mask)return;
   g.save();
   g.globalCompositeOperation=blend;
   g.globalAlpha=a.intensity;
   g.imageSmoothingEnabled=!l.pixel?.enabled;
-  g.translate(project.x(l.x),project.y(l.y));
-  g.rotate((Number(l.rotation)||0)*Math.PI/180);
+  g.translate(x,y);
+  g.rotate(theta);
   if(l.blendMode==='subtract')g.filter='brightness(0)';
   g.drawImage(mask,-w/2,-h/2,w,h);
   g.restore();
