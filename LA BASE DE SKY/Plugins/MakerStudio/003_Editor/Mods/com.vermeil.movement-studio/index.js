@@ -55,9 +55,9 @@ export function activate(ctx) {
     ["directions", "Direcciones", [["4", "4 direcciones (clásico)"], ["8", "8 direcciones (diagonal opcional)"]]],
     ["mode", "Desplazamiento", [["grid", "Por casillas (compatible)"]]],
     ["subtile_divisions", "Precisión futura sub-tile", [["4", "1/4"], ["8", "1/8"]]],
-    ["instant_turn", "Respuesta al girar", [["1", "Inmediata"], ["0", "Retardo clásico"]]],
+    ["instant_turn", "Respuesta al girar", [["1", "Inmediata (giro + paso)"], ["0", "Clásica (giro y espera 75 ms)"]]],
     ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]],
-    ["smooth_movement", "Movimiento suave", [["1", "Suavizado activado"], ["0", "Lineal (Essentials)"]]]
+    ["smooth_movement", "Continuidad de pasos", [["1", "Continua (sin pausa de 1 frame)"], ["0", "Original (por casillas)"]]]
   ];
   function option(key, value, label) {
     return '<option value="' + value + '">' + label + '</option>';
@@ -71,16 +71,16 @@ export function activate(ctx) {
     const values = { ...global, ...local };
     host.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--text-primary);height:100%;overflow:auto;box-sizing:border-box">' +
       '<h3 style="margin:0 0 8px">Vermeil Movement Studio</h3>' +
-      '<p style="color:var(--text-secondary);line-height:1.5">4 direcciones por defecto. Las diagonales se activan sin alterar los eventos normales.</p>' +
+      '<p style="color:var(--text-secondary);line-height:1.5">4 direcciones por defecto. Giro clasico: primero mira, espera 75 ms y avanza. Inmediato: inicia el paso al girar. La continuidad evita el frame vacio al terminar cada casilla.</p>' +
       '<label>Configuración a editar</label><select data-scope style="' + inputStyle + '">' +
       option("global", "global", "Global (todos los mapas)") +
       option("map", "map", "Mapa actual: " + String(ctx.editor.activeMapId() ?? "sin mapa")) + '</select>' +
       fields.map(([id, title, items]) => '<label>' + title + '</label><select data-key="' + id + '" style="' + inputStyle + '">' +
         items.map(([value, label]) => option(id, value, label)).join("") + '</select>').join("") +
-      '<label>Suavizado de Fancy Camera (0-100%)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
+      '<label>Suavizado de camara (0 = clasica, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="display:flex;gap:6px;margin:15px 0"><button data-save style="' + buttonStyle + ';flex:1">Guardar</button>' +
       '<button data-reset style="' + buttonStyle + '">Restablecer</button></div>' +
-      '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan automáticamente durante la partida. Sub-tile real todavía no está disponible; la precisión queda reservada para una versión futura.</p></div>';
+      '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan durante la partida. La camara usa este valor incluso si Fancy Camera (switch 59) esta apagada. El movimiento libre sub-tile real no esta disponible.</p></div>';
     const scope = host.querySelector("[data-scope]");
     scope.value = state.mapId === null ? "global" : "map";
     scope.addEventListener("change", () => {
@@ -104,8 +104,11 @@ export function activate(ctx) {
     host.querySelector("[data-camera-value]").textContent = values.camera_smoothing + "%";
     host.querySelector("[data-save]").addEventListener("click", async () => {
       try {
-        await ctx.fs.writeProjectFile(PATH, serialize(state.config));
-        notify("Configuración guardada. Se aplicará en la partida abierta.");
+        const data = serialize(state.config);
+        await ctx.fs.writeProjectFile(PATH, data);
+        const verified = parse(await ctx.fs.readProjectFile(PATH));
+        if (JSON.stringify(verified) !== JSON.stringify(parse(data))) throw new Error("El archivo guardado no coincide con lo solicitado");
+        notify("Configuración comprobada en " + PATH + ". Se aplica durante la partida.");
       } catch (error) {
         ctx.log.error(error);
         notify("No se pudo guardar config.ini", "error");
