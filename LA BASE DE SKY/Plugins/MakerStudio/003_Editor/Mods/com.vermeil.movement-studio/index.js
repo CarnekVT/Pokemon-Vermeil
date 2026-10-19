@@ -1,12 +1,12 @@
 const PATH = "Plugins/[VERMEIL] Smooth Movement/config.ini";
 const DEFAULTS = {
   directions: "4", mode: "grid", subtile_divisions: "4",
-  instant_turn: "1", wall_slide: "0", smooth_movement: "1",
+  instant_turn: "1", input_buffer_ms: "0", wall_slide: "0", smooth_movement: "1",
   camera_smoothing: "35"
 };
 const RULES = {
   directions: ["4", "8"], mode: ["grid", "free"], subtile_divisions: ["4", "8"],
-  instant_turn: ["0", "1"], wall_slide: ["0", "1"], smooth_movement: ["0", "1"]
+  instant_turn: ["0", "1"], input_buffer_ms: ["0", "60", "100", "150"], wall_slide: ["0", "1"], smooth_movement: ["0", "1"]
 };
 function parse(text) {
   const sections = { global: { ...DEFAULTS } };
@@ -54,6 +54,7 @@ export function activate(ctx) {
   const fields = [
     ["directions", "Direcciones", [["4", "4 direcciones (clásico)"], ["8", "8 direcciones (diagonal opcional)"]]],
     ["instant_turn", "Respuesta al girar", [["1", "Inmediata (giro + paso)"], ["0", "Clásica (giro y espera 75 ms)"]]],
+    ["input_buffer_ms", "Anticipación de giro (solo modo inmediato)", [["0", "Desactivada (original)"], ["60", "60 ms (precisa)"], ["100", "100 ms (equilibrada)"], ["150", "150 ms (permisiva)"]]],
     ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]]
   ];
   function option(key, value, label) {
@@ -68,12 +69,14 @@ export function activate(ctx) {
     const values = { ...global, ...local };
     host.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--text-primary);height:100%;overflow:auto;box-sizing:border-box">' +
       '<h3 style="margin:0 0 8px">Vermeil Movement Studio</h3>' +
-      '<p style="color:var(--text-secondary);line-height:1.5">4 direcciones por defecto. La diferencia de giro se aprecia principalmente al comenzar a caminar desde parado: inmediato inicia el paso al girar; clasico conserva la pausa original. Al caminar de forma seguida, ambos usan las mismas casillas.</p>' +
+      '<p style="color:var(--text-secondary);line-height:1.5">Mantiene colisiones por casillas. El buffer recuerda una direccion pulsada cerca del final de un paso, sin adelantar eventos o encuentros. Desactivado por defecto.</p>' +
       '<label>Configuración a editar</label><select data-scope style="' + inputStyle + '">' +
       option("global", "global", "Global (todos los mapas)") +
       option("map", "map", "Mapa actual: " + String(ctx.editor.activeMapId() ?? "sin mapa")) + '</select>' +
       fields.map(([id, title, items]) => '<label>' + title + '</label><select data-key="' + id + '" style="' + inputStyle + '">' +
         items.map(([value, label]) => option(id, value, label)).join("") + '</select>').join("") +
+      '<div style="margin:10px 0 6px;font-weight:600">Perfiles rápidos (aplicar y luego guardar)</div>' +
+      '<div style="display:flex;gap:6px;margin-bottom:12px"><button data-preset="classic" style="' + buttonStyle + ';flex:1">Clásico</button><button data-preset="responsive" style="' + buttonStyle + ';flex:1">Ágil</button></div>' +
       '<label>Camara (0 = rapida, 35 = original, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="display:flex;gap:6px;margin:15px 0"><button data-save style="' + buttonStyle + ';flex:1">Guardar</button>' +
       '<button data-reset style="' + buttonStyle + '">Restablecer</button></div>' +
@@ -99,6 +102,17 @@ export function activate(ctx) {
       });
     });
     host.querySelector("[data-camera-value]").textContent = values.camera_smoothing + "%";
+    host.querySelectorAll("[data-preset]").forEach(button => {
+      button.addEventListener("click", () => {
+        const key = currentKey();
+        const preset = button.dataset.preset === "classic" ?
+          { directions:"4", instant_turn:"0", input_buffer_ms:"0", wall_slide:"0", camera_smoothing:"35" } :
+          { directions:"8", instant_turn:"1", input_buffer_ms:"100", wall_slide:"1", camera_smoothing:"35" };
+        state.config[key] = { ...(state.config[key] || {}), ...preset };
+        draw();
+        notify("Perfil aplicado en el panel. Pulsa Guardar para llevarlo al juego.");
+      });
+    });
     host.querySelector("[data-save]").addEventListener("click", async () => {
       try {
         const data = serialize(state.config);
