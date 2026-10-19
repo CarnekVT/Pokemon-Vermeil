@@ -1,85 +1,56 @@
-# Lighting Studio v0.4.2 — Maker Studio / Pokémon Essentials 21.1
+# Lighting Studio v0.4.2 — Pokémon Essentials 21.1
 
-Estado: prototipo experimental, **sin pruebas de interfaz ni de runtime dentro del juego**. No distribuir como release estable.
+**Estado:** desarrollo experimental. Cambios en la rama `new-MK-for-2.5D-Testeo`. La API y las pruebas dentro de Maker Studio y Pokémon Essentials todavía requieren validación local.
 
-## Archivos
-- Mod del editor: `Plugins/MakerStudio/003_Editor/Mods/Lighting Studio/`
-- Plugin Ruby: `Plugins/Lighting Studio Runtime/`
-- Datos por mapa: `Data/LightingStudio/maps.json` (se conserva el esquema 1).
-- Se requiere JSON Compatibility si el Ruby embebido no dispone de `JSON.parse`.
+## Flujo de trabajo
 
-## Flujo de edición (referencia BAS/BSS)
-1. Abre un mapa y elige **Mods > Lighting Studio**.
-2. Usa la herramienta **Seleccionar / Añadir luz / Borrar** sobre el propio mapa.
-3. En la biblioteca, elige una fuente existente o crea una nueva (radial, cono, elipse o rectángulo).
-4. En el inspector, usa las pestañas:
-   - **Forma**: tipo, tamaño, rotación, color, intensidad y modo de mezcla.
-   - **Difuminado**: origen **Centro, Arriba, Abajo, Izquierda, Derecha o Personalizado** (origen X/Y entre -1 y 1), suavidad y brillo central.
-   - **Pulsación**: velocidad, variación de intensidad y tamaño.
-   - **Pixel art**: tamaño de bloque y niveles de degradado.
-5. La iluminación se previsualiza **sobre el mapa**, no en un canvas separado. Los cambios se guardan en `maps.json`.
+1. Abre un mapa y entra en **Mods > Lighting Studio**.
+2. Comprueba que estén marcados **Iluminación activada para este mapa** y **Ver luces en mapa**.
+3. Usa **Añadir luz** para colocar una fuente en el mapa; **Seleccionar** para arrastrarla o editarla; **Borrar** para eliminarla. La selección desde la lista también activa la herramienta.
+4. Si el mapa es claro y no distingues la iluminación, activa **Vista nocturna (solo editor)**. El efecto temporal no altera `maps.json` ni el juego.
+5. En **Superposición de luces** elige:
+   - **Fusionar áreas · farolas (recomendado)**: dos fuentes amplían el área iluminada. Se aplica el máximo por canal, sin sumarse entre sí.
+   - **Acumular brillo · suma**: las intensidades se añaden en la intersección.
+6. El **Modo de mezcla** de cada luz determina si participa en la unión, si se suma independientemente, si se dibuja en modo normal o si oscurece.
 
-Las coordenadas X/Y del inspector admiten decimales hasta tres cifras (`25.30`, `30,75`, etc.). La herramienta de puntero todavía trabaja por casillas.
+## Inspector
 
-## Composición de luces
-- **Aditiva (predeterminada)**: las fuentes se componen sobre **una sola superficie** y se aplican al mapa una única vez.
-- En el editor, la mezcla del mapa compartido prioriza el brillo máximo por canal (`lighten`) en lugar de acumular todas las pasadas (`lighter`).
-- En el runtime, el bitmap compartido utiliza mezcla normal de alpha de máscaras y una sola pasada aditiva. Es una unión más suave, pero **no equivale exactamente a la mezcla por máximo del editor**.
-- **Normal** y **Sustractiva** mantienen el modo de composición individual. No hay sombras físicas ni oclusión todavía.
+Pestañas: **Forma**, **Difuminado**, **Pulsación**, **Pixel art**.
 
-## Mejoras de rendimiento
-- Las máscaras 2D se generan una sola vez por configuración y se reutilizan (máximo 16 máscaras en el editor).
-- La composición del editor usa una superficie de media resolución y caché de hasta tres vistas por mapa/cámara/revisión.
-- Las peticiones de repintado se agrupan; hay control para no acumular redibujados cuando Maker Studio está ocupado.
-- El mouse no solicita un nuevo repintado si permanece en la misma casilla.
-- El runtime crea un bitmap compartido a un cuarto de resolución y lo recompone cuando se mueve la cámara o cambia el estado de pulsación. La velocidad nominal de pulsación es 6 actualizaciones de bitmap por segundo.
-- El inspector muestra tiempo de dibujo del overlay y demora hasta que Maker Studio ejecuta el repintado.
+- Geometrías: radial, cono, elipse y rectángulo.
+- Difuminado: desde centro, arriba, abajo, izquierda, derecha u origen personalizado.
+- Pulsación independiente de intensidad y tamaño.
+- Pixel art: tamaño de bloque y niveles del degradado.
+- X/Y admite decimales hasta tres cifras. Los clics con el mouse todavía se ajustan a casillas.
 
-## Validación indispensable
-1. Verifica que las geometrías radial, cono, elipse y rectángulo se ven en editor y juego.
-2. Superpón dos luces **Aditivas** del mismo color; confirma que se ven como una iluminación continua.
-3. Alterna el origen de difuminado Arriba/Abajo e Izquierda/Derecha. Verifica orientación en ambas vistas.
-4. Edita rápidamente radio, intensidad, color, suavidad y brillo central. Revisa que no se reinicie el scroll del panel.
-5. Comprueba los indicadores de latencia del overlay y el FPS del editor, tanto con mapa vacío como con 5/20 fuentes, con y sin pulsación.
-6. Comprueba F12, cambios de mapa, scrolling, condiciones meteorológicas y Animated Props.
-7. Revisa rendimiento de carga del mapa y de movimiento de cámara en el juego.
+## Ubicaciones
 
-## Limitaciones declaradas
-- No se han medido FPS ni tiempos de carga en una instancia real de Maker Studio; **la eliminación del lag no está confirmada**.
-- La unión de luces en el juego usa alpha-composition, no un shader MAX ni un lightmap físicamente correcto.
-- El color del ambiente en juego sigue utilizando una capa oscura y puede diferir del editor.
-- Las luces no tienen sombras de geometría ni seguimiento de eventos/jugador.
-- El plugin no edita el núcleo de Maker Studio y puede verse afectado por su API o por otros overlays.
-- Los cambios del editor se guardan, pero el juego recarga datos al entrar en el mapa.
+- Editor: `Plugins/MakerStudio/003_Editor/Mods/Lighting Studio/`.
+- Runtime: `Plugins/Lighting Studio Runtime/`.
+- Datos: `Data/LightingStudio/maps.json`.
 
-## v0.4.1 — Zoom, Ruby SyntaxError y repintado
+El esquema de datos se mantiene en versión 1. Las antiguas luces con `blendMode: 'add'` se interpretan como `union`.
 
-- **Corrección del error Ruby**: reemplazadas las expresiones inválidas `/h-.5` y `/w-.5` por `/h - 0.5` y `/w - 0.5`. Los siguientes mensajes sobre `end` eran errores en cascada de ese parseo.
-- **Zoom de Maker Studio**: la coordenada de cada luz utiliza la transformación de Animated Props: `(tile * tileSize - viewportOffset) * zoom`. Una única luz se dibuja directamente en el canvas del mapa; las luces fusionadas usan una superficie compartida con escalado exacto, sin ajustar su tamaño al ancho del viewport (que provocaba redondeos de posición).
-- **Zoom del juego**: el runtime redondea el desplazamiento del mapa antes de proyectar y aplica zoom respecto al centro de pantalla, como LBDS Animated Props. El lightmap compartido se fija a la esquina superior izquierda de la viewport, y sus fuentes redondean coordenadas como los sprites normales.
-- **Reducción del lag**: se reutiliza **una sola** superficie de composición del editor, sin reasignar una imagen completa por cada rueda de zoom. Se usa overlay avanzado como Animated Props (con fallback). No se fuerza un redibujado completo con cada actualización periódica; las solicitudes se coalescen hasta que Maker Studio acepta el dibujo, con recuperación si no hay respuesta. El mouse no redibuja al permanecer en la misma casilla.
-- **Comprobación**: pruebas simuladas de 50%, 75%, 100%, 125%, 150% y 200% verificaron coincidencia matemática entre luz directa, luz combinada y la fórmula de Animated Props. La prueba de un fragmento Ruby con el literal corregido pasó `ruby -c`; **todavía no se ha ejecutado la validación de sintaxis del archivo Ruby completo ni Maker Studio/Essentials**.
+## Render y rendimiento
 
-### Verificación manual
+- El editor utiliza canvas DOM en lugar de OffscreenCanvas; mantiene una única superficie compartida y caché de máscaras, y conserva un fallback de dibujo si falla la composición.
+- Las luces en modo `union` usan un máximo real por canal. `sum` aumenta el brillo intencionadamente.
+- El runtime genera una superficie compartida a una cuarta parte de resolución y compone máximos leyendo las regiones iluminadas; es más costoso con muchas fuentes grandes.
+- Las solicitudes de redibujado se agrupan. La barra de diagnóstico distingue tiempo de render y espera del editor.
+- El zoom se proyecta siguiendo el cálculo de Animated Props. El posicionamiento preciso por píxel del mouse sigue pendiente.
 
-1. En el equipo del proyecto, ejecutar `ruby -c "LA BASE DE SKY/Plugins/Lighting Studio Runtime/001_LightingStudio.rb"` usando una instalación de Ruby, o iniciar el juego y confirmar que el plugin carga.
-2. En Maker Studio, fijar una luz encima de un tile de referencia y cambiar zoom entre 50%, 75%, 100%, 125%, 150% y 200%. Probar con **una** luz y con **dos** luces fusionadas, moviendo la cámara.
-3. Probar edición de propiedades y apuntar **ms de dibujo** y **ms de espera** en el indicador de Lighting Studio. No se han medido FPS reales en Maker Studio: optimizaciones implementadas, resultados pendientes de validar.
-4. En juego, probar zoom, scrolling, transferencia de mapa, F12 y efectos meteorológicos para descartar interacciones con otros plugins.
+## Comprobaciones antes de darlo por cerrado
 
-## v0.4.2 — Recuperación del preview y fusión real
+1. Abre un mapa, crea una farola y actívala. Si no se ve, enciende **Vista nocturna (solo editor)**. Revisa los avisos de visibilidad.
+2. Crea otra farola con solapamiento parcial. Compara **Fusionar áreas** y **Acumular brillo**.
+3. Confirma que los colores, el radio, la geometría y el modo de difuminado cambian sobre el mapa.
+4. Prueba zoom 50 %, 75 %, 100 %, 125 %, 150 % y 200 %, desplazando la cámara.
+5. En el juego, prueba las mismas farolas, el scrolling, la transferencia entre mapas y F12.
+6. Revisa los FPS y el diagnóstico del editor con 1, 5 y 20 luces.
 
-- **Superposición del mapa:** selector **Fusionar áreas / Acumular brillo**. Fusión es la opción predeterminada: la luz A y la B amplían el contorno y conservan el máximo por canal en los cruces. Suma permite intensidades superpuestas deliberadamente.
-- **Por fuente:** modos **Unir con otras luces**, **Sumar brillo (independiente)**, **Normal** y **Oscurecer**. Las luces guardadas con el modo antiguo `add` se interpretan como `union`.
-- **Render del editor:** la fusión usa máximos por canal de píxeles premultiplicados, no `lighten` (que acumulaba brillo). La preview utiliza lienzos DOM compatibles con Tauri/WebView y el overlay básico, ya utilizado en las versiones que mostraban las luces.
-- **Vista nocturna solo editor:** fuerza una ligera oscuridad únicamente durante el preview. No altera el JSON ni el resultado del juego; facilita ver farolas sobre mapas claros.
-- **Estados de visibilidad:** avisos cuando la vista está oculta, el mapa tiene iluminación desactivada o todas las luces están apagadas.
-- **Runtime:** las fuentes `union` comparten un mapa de luces de composición por máximos; `sum` usa sprites aditivos independientes. El mapa compartido baja su resolución a 25 % y la composición animada a 6 Hz para limitar el coste de la unión pixel a pixel.
-- **Limitación**: la composición por máximo en Ruby requiere leer/escribir píxeles de las zonas iluminadas y puede ser costosa con demasiadas fuentes grandes o movimiento constante de cámara. No se ha medido el FPS real. La iluminación del editor y el juego todavía pueden diferir por la mezcla final.
+## Limitaciones conocidas
 
-### Prueba recomendada
-1. Comprueba que **Ver luces en mapa** y **Iluminación activada** están encendidos.
-2. Activa **Vista nocturna (solo editor)** si el mapa está claro.
-3. Crea dos fuentes radiales cálidas, con un solapamiento parcial, y elige **Fusionar áreas · farolas**.
-4. Comprueba que las zonas iluminadas se conectan sin duplicar brillo central. Cambia a **Acumular brillo · suma** para contrastar.
-5. Comprueba el juego con esas mismas dos luces y el monitor de FPS. Si no se ven luces, prueba primero un mapa interior con oscuridad 0.4.
+- La preview y el runtime no tienen todavía equivalencia exacta de color, gamma, transparencia y tono ambiental.
+- El runtime no utiliza shaders: la fusión por máximos tiene coste de CPU, especialmente con movimiento de cámara.
+- Falta probar realmente Maker Studio y el plugin Ruby completo; **la visibilidad en el equipo del usuario no está confirmada**.
+- No hay sombras físicas, oclusión de geometría ni seguimiento de eventos.
