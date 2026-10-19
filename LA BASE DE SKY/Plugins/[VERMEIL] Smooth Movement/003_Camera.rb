@@ -22,7 +22,9 @@ class Game_Player
     return if $game_temp.camera_offset && $game_temp.camera_offset != [0, 0]
 
     smoothing = VermeilMovement.camera_smoothing
-    return if smoothing == 35 # 35 = camara original del proyecto (baseline).
+    deadzone = VermeilMovement.camera_deadzone
+    # Con cero margen y 35% conservamos el camino de camara original.
+    return if smoothing == 35 && deadzone == 0
 
     # En el primer frame/cambio de mapa no arrastrar la camara desde otro mapa.
     if @_vermeil_smoothing_map_id != map.map_id
@@ -35,9 +37,41 @@ class Game_Player
     center_y = respond_to?(:carnek_screen_center_y) ? carnek_screen_center_y : SCREEN_CENTER_Y
     target_x = @real_x - center_x
     target_y = @real_y - center_y
+    # Un salto de mapa o una teletransportacion en el mismo mapa nunca se
+    # suaviza: la camara debe seguir la logica nativa.
     return if (target_x - previous_x).abs > Game_Map::REAL_RES_X * 6 ||
               (target_y - previous_y).abs > Game_Map::REAL_RES_Y * 6
 
+    if deadzone > 0
+      # Zona muerta real: el jugador puede desplazarse dentro de un
+      # rectangulo alrededor del centro sin que la camara se recoloque.
+      # Distancias en pixeles de pantalla convertidas a subpixeles RGSS.
+      zone_x = deadzone * Game_Map::X_SUBPIXELS
+      zone_y = deadzone * Game_Map::Y_SUBPIXELS
+      dx = target_x - previous_x
+      dy = target_y - previous_y
+      target_x = if dx > zone_x
+                   target_x - zone_x
+                 elsif dx < -zone_x
+                   target_x + zone_x
+                 else
+                   previous_x
+                 end
+      target_y = if dy > zone_y
+                   target_y - zone_y
+                 elsif dy < -zone_y
+                   target_y + zone_y
+                 else
+                   previous_y
+                 end
+    end
+
+    if smoothing == 35
+      # Solo se aplica el margen. Sin margen ya devolvimos arriba.
+      map.display_x = target_x
+      map.display_y = target_y
+      return
+    end
     dt = @delta_t || Graphics.delta
     dt = [[dt.to_f, 0.001].max, 0.05].min
     # Menor valor = seguimiento mas rapido, mayor = camara mas suave/rezagada.
