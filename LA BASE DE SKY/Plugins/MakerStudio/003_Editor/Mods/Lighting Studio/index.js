@@ -102,8 +102,8 @@ function normalBindingsUI(shell,scene){
  const actions=element('div','ls-inline');section.append(actions);
  actions.append(mini('＋ Vincular normal map',()=>{void addNormalBinding(category).catch(fail);}));
  actions.append(mini('Comprobar archivos',()=>{void verifyNormalBindings(category).catch(fail);}));
- slider(section,'Fuerza normal (reservada)',normals.strength,0,2,.05,
-   (v,final)=>editValue(()=>normals.strength=clamp(v,0,2),final));
+ field(section,'Fuerza normal (para el futuro shader)','number',normals.strength,
+   v=>change(()=>normals.strength=clamp(v,0,2)),{min:0,max:2,step:.05});
 }
 async function addNormalBinding(category){
  const owner=state;if(!owner||owner.readError)return;
@@ -297,6 +297,6 @@ if(ctx.ui.registerOverlay){ctx.ui.registerOverlay(item);state.advancedOverlay=fa
 else if(ctx.ui.registerAdvancedOverlay){ctx.ui.registerAdvancedOverlay(item);state.advancedOverlay=true;}
 else notify('Esta versión de Maker Studio no admite overlays de mods.','error');
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
-redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if((!state.drag&&!state.editSnapshot&&hasPendingChunks())||(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled)))redraw();},250);
+redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if((!state.drag&&!state.editSnapshot&&hasPendingChunks())||(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled)))redraw();},120);
 }
 export function deactivate(){if(state?.ticker)clearInterval(state.ticker);if(state?.previewTimer!=null)clearTimeout(state.previewTimer);if(state?.settleTimer!=null)clearTimeout(state.settleTimer);clearLightCache();state=null;}
