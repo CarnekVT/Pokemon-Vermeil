@@ -47,7 +47,18 @@ function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state
 function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();invalidate();redraw();refresh();void persist().catch(fail);}
 function undo(){if(!state.undo.length)return;state.redo.push(deepCopy(state.data));state.data=state.undo.pop();invalidate();redraw();refresh();void persist().catch(fail);}
 function redo(){if(!state.redo.length)return;state.undo.push(deepCopy(state.data));state.data=state.redo.pop();invalidate();redraw();refresh();void persist().catch(fail);}
-function persist(){if(!state)return Promise.resolve();state.saveRequested=true;if(state.saving)return state.writer;state.saving=true;
+function schedulePersist(){
+ const owner=state;if(!owner)return;
+ if(owner.autosaveTimer!=null)clearTimeout(owner.autosaveTimer);
+ owner.autosaveTimer=setTimeout(()=>{
+  if(state!==owner)return;
+  owner.autosaveTimer=null;
+  void persist().catch(fail);
+ },700);
+}
+function persist(){
+ if(state?.autosaveTimer!=null){clearTimeout(state.autosaveTimer);state.autosaveTimer=null;}
+ if(!state)return Promise.resolve();state.saveRequested=true;if(state.saving)return state.writer;state.saving=true;
  const owner=state;
  owner.writer=(async()=>{try{
  await owner.ctx.fs.projectMkdir('Data/LightingStudio');
@@ -268,7 +279,7 @@ function editValue(fn,final,lightOnly=false){
  state.undo.push(state.editSnapshot);
  if(state.undo.length>60)state.undo.shift();
  state.editSnapshot=null;
- void persist().catch(fail);
+ schedulePersist();
 }
 
 function overlay(draw,info){if(!state||!draw||!info)return;
@@ -292,8 +303,8 @@ function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;
 if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}redraw();}
-function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();schedulePersist();}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
@@ -308,4 +319,4 @@ else notify('Esta versión de Maker Studio no admite overlays de mods.','error')
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
 redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if((!state.drag&&!state.editSnapshot&&hasPendingChunks())||(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled)))redraw();},120);
 }
-export function deactivate(){if(state?.ticker)clearInterval(state.ticker);if(state?.previewTimer!=null)clearTimeout(state.previewTimer);if(state?.settleTimer!=null)clearTimeout(state.settleTimer);clearLightCache();state=null;}
+export function deactivate(){if(state?.autosaveTimer!=null){clearTimeout(state.autosaveTimer);state.autosaveTimer=null;void persist().catch(fail);}if(state?.ticker)clearInterval(state.ticker);if(state?.previewTimer!=null)clearTimeout(state.previewTimer);if(state?.settleTimer!=null)clearTimeout(state.settleTimer);clearLightCache();state=null;}
