@@ -39,12 +39,11 @@ export function falloff(l,nx,ny){
   return main*edge*(center+(1-center)*Math.min(1,d*2));
 }
 function newCanvas(w,h){
-  let c;
-  if(typeof OffscreenCanvas!=='undefined'){
-    try{c=new OffscreenCanvas(w,h);}catch(e){}
-  }
-  if(!c){c=document.createElement('canvas');c.width=w;c.height=h;}
-  return c;
+  // Use an ordinary canvas, as Animated Props does with DOM-backed images.
+  // OffscreenCanvas can be unsupported or incompatible with the map renderer
+  // in some Tauri/WebView builds, resulting in entirely invisible lightmaps.
+  const c=document.createElement('canvas');
+  c.width=w;c.height=h;return c;
 }
 function maskKey(l){
   const p=l.pixel||{};
@@ -128,28 +127,38 @@ function getUnion(lights,project,width,height,t){
 }
 export function clearLightCache(){masks.clear();sharedView=null;sharedKey=null;}
 export function cacheSize(){return {masks:masks.size,views:sharedView?1:0};}
-export function drawLights(g,lights,project,width,height,t=0){
+export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'){
   const visible=(lights||[]).filter(l=>l.enabled!==false);
   if(!visible.length)return;
-  const additive=visible.filter(l=>(l.blendMode||'add')==='add');
-  if(additive.length===1){
-    // Match Animated Props: place a single sprite directly at the map-projected
-    // position. No full-viewport intermediate scaling when zoom != 100%.
-    stamp(g,additive[0],project,t,'screen');
-  }else if(additive.length>1){
-    const union=getUnion(additive,project,width,height,t);
-    if(union){
-      g.save();
-      g.globalAlpha=1;g.globalCompositeOperation='screen';g.imageSmoothingEnabled=true;
-      // Offscreen coordinates use COMPOSITE_SCALE; undo that scale exactly.
-      // Drawing to the viewport width caused a subpixel shift at odd sizes / zooms.
-      g.drawImage(union,0,0,union.width/COMPOSITE_SCALE,union.height/COMPOSITE_SCALE);
-      g.restore();
+  const union=visible.filter(l=>['union','add',''].includes(l.blendMode||'union'));
+  const sums=visible.filter(l=>l.blendMode==='sum');
+  // The map-level selector enables intentional accumulation where requested.
+  const merged=overlapMode==='sum'?[]:union;
+  const summed=overlapMode==='sum'?[...union,...sums]:sums;
+  if(merged.length===1){
+    // A single light does not need an offscreen compositor. This also
+    // guarantees a visible fallback if the platform cannot make canvases.
+    stamp(g,merged[0],project,t,'screen');
+  }else if(merged.length>1){
+    try{
+      const surface=getUnion(merged,project,width,height,t);
+      if(surface){
+        g.save();g.globalAlpha=1;g.globalCompositeOperation='screen';g.imageSmoothingEnabled=true;
+        g.drawImage(surface,0,0,surface.width/COMPOSITE_SCALE,surface.height/COMPOSITE_SCALE);
+        g.restore();
+      }else{
+        // Never silently hide all sources if canvas allocation fails.
+        for(const l of merged)stamp(g,l,project,t,'screen');
+      }
+    }catch(error){
+      // Render fallback; the editor's overlay is responsible for logging errors.
+      for(const l of merged)stamp(g,l,project,t,'screen');
     }
   }
+  for(const l of summed)stamp(g,l,project,t,'lighter');
   for(const l of visible){
-    const mode=l.blendMode||'add';
-    if(mode==='add')continue;
+    const mode=l.blendMode||'union';
+    if(mode==='union'||mode==='add'||mode==='sum')continue;
     stamp(g,l,project,t,mode==='subtract'?'multiply':'source-over');
   }
 }
