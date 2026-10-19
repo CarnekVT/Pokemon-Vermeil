@@ -28,6 +28,7 @@ export function normalizeLight(raw={}){
     color:hex(s.color),softness:num(s.softness,.05,1,.75),
     centerStrength:num(s.centerStrength,0,1,0.65),
     fadeMode:FADE_MODES.includes(s.fadeMode)?s.fadeMode:'center',
+    fadeStart:num(s.fadeStart,0,0.95,0.58),
     fadeX:num(s.fadeX,-1,1,0),fadeY:num(s.fadeY,-1,1,0),
     rotation:num(s.rotation,-360,360,0),angle:num(s.angle,5,170,70),
     widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
