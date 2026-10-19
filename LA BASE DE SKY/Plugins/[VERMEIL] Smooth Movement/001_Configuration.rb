@@ -6,6 +6,7 @@ module VermeilMovement
     "mode"              => "grid",
     "subtile_divisions" => "4",
     "instant_turn"      => "1",
+    "input_buffer_ms"   => "0",
     "wall_slide"        => "0",
     "smooth_movement"   => "1",
     "camera_smoothing"  => "35"
@@ -15,6 +16,7 @@ module VermeilMovement
     "mode"              => ["grid", "free"],
     "subtile_divisions" => ["4", "8"],
     "instant_turn"      => ["0", "1"],
+    "input_buffer_ms"   => ["0", "60", "100", "150"],
     "wall_slide"        => ["0", "1"],
     "smooth_movement"   => ["0", "1"]
   }
@@ -93,6 +95,10 @@ module VermeilMovement
 
   def self.subtiles
     option("subtile_divisions").to_i
+  end
+
+  def self.input_buffer_ms
+    option("input_buffer_ms").to_i
   end
 
   def self.camera_smoothing
