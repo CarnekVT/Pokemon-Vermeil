@@ -9,7 +9,19 @@ class Game_Player < Game_Character
     return vermeil_movement_original_input if pbMapInterpreterRunning? ||
       $game_temp.message_window_showing || $game_temp.in_mini_update || $game_temp.in_menu
 
-    direction = (VermeilMovement.directions == 8 && Input.respond_to?(:dir8)) ? Input.dir8 : Input.dir4(@moved_last_frame)
+    direction = vermeil_live_direction
+    # Solo consume el buffer si ya no hay input: un giro nuevo tiene prioridad.
+    if direction.nil? || direction == 0
+      if VermeilMovement.enabled?("instant_turn") && VermeilMovement.input_buffer_ms > 0 &&
+         @_vermeil_buffer_direction && @_vermeil_buffer_deadline &&
+         vermeil_real_uptime <= @_vermeil_buffer_deadline &&
+         !$game_temp.encounter_triggered &&
+         !$game_map.events.values.any? { |event| event.starting }
+        direction = @_vermeil_buffer_direction
+      end
+    end
+    @_vermeil_buffer_direction = nil
+    @_vermeil_buffer_deadline = nil
     if [1, 3, 7, 9].include?(direction)
       return vermeil_movement_original_input unless vermeil_diagonal_eligible?
       vermeil_move_diagonal(direction)
@@ -32,6 +44,37 @@ class Game_Player < Game_Character
       return
     end
     vermeil_movement_original_input
+  end
+
+  # El buffer captura solo la parte FINAL del desplazamiento nativo. Nunca
+  # cambia las coordenadas ni procesa eventos un frame antes de lo habitual.
+  def vermeil_real_uptime
+    System.respond_to?(:unscaled_uptime) ? System.unscaled_uptime : System.uptime
+  end
+
+  def vermeil_live_direction
+    return Input.dir8 if VermeilMovement.directions == 8 && Input.respond_to?(:dir8)
+    Input.dir4(@moved_last_frame)
+  end
+
+  def vermeil_capture_input_buffer
+    milliseconds = VermeilMovement.input_buffer_ms
+    return if milliseconds <= 0 || !VermeilMovement.enabled?("instant_turn")
+    return if @move_route_forcing || @direction_fix || @through || @bumping
+    return if !moving? || jumping? || on_stair? || on_spiral?
+    return if $game_temp.in_battle || $game_temp.in_menu ||
+              $game_temp.message_window_showing || pbMapInterpreterRunning?
+    return if $PokemonGlobal.forced_movement? || $PokemonGlobal.ice_sliding ||
+              $PokemonGlobal.ascending_waterfall || $PokemonGlobal.descending_waterfall
+    return if @last_terrain_tag && (@last_terrain_tag.ice || @last_terrain_tag.ledge)
+    return if $game_map.check_stair_zones(@x, @y)
+    remaining = @move_time.to_f - @move_timer.to_f
+    window = milliseconds / 1000.0
+    return unless remaining > 0 && remaining <= window
+    dir = vermeil_live_direction
+    return unless [1, 2, 3, 4, 6, 7, 8, 9].include?(dir)
+    @_vermeil_buffer_direction = dir
+    @_vermeil_buffer_deadline = vermeil_real_uptime + window
   end
 
   def vermeil_diagonal_eligible?
@@ -92,6 +135,7 @@ class Game_Player < Game_Character
 
   alias vermeil_movement_move_end update_move unless method_defined?(:vermeil_movement_move_end)
   def update_move
+    vermeil_capture_input_buffer
     diagonal_step = @_vermeil_diagonal_active
     vermeil_movement_move_end
     # Nunca imponer smoothstep a @real_x/@real_y por casilla: introduce
