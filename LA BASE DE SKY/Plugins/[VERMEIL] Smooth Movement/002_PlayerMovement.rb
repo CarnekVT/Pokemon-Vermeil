@@ -18,7 +18,10 @@ class Game_Player < Game_Character
 
     # En el modo original, el primer toque tras un giro solo cambia el facing;
     # este ajuste elimina esa espera sin tocar la logica de Game_Player#move_generic.
-    if VermeilMovement.enabled?("instant_turn") && [2, 4, 6, 8].include?(direction)
+    # Retraso clásico = implementación ORIGINAL de Essentials, sin pausas extras.
+    # Inmediato = comienza el paso directamente al pulsar o cambiar dirección.
+    return vermeil_movement_original_input unless VermeilMovement.enabled?("instant_turn")
+    if [2, 4, 6, 8].include?(direction)
       case direction
       when 2 then move_down
       when 4 then move_left
@@ -91,17 +94,12 @@ class Game_Player < Game_Character
   def update_move
     diagonal_step = @_vermeil_diagonal_active
     vermeil_movement_move_end
-    # Easing visual sobre la interpolacion nativa; no altera tiles ni triggers.
-    if moving? && @move_timer && @move_time && @move_time > 0 &&
-       @move_initial_x && @move_initial_y && VermeilMovement.enabled?("smooth_movement")
-      fraction = [[@move_timer / @move_time, 0.0].max, 1.0].min
-      eased = fraction * fraction * (3.0 - 2.0 * fraction)
-      @real_x = (@move_initial_x + (@x - @move_initial_x) * eased) * Game_Map::REAL_RES_X
-      @real_y = (@move_initial_y + (@y - @move_initial_y) * eased) * Game_Map::REAL_RES_Y
-    end
+    # Nunca imponer smoothstep a @real_x/@real_y por casilla: introduce
+    # frenazo en cada limite y empeora el movimiento al caminar seguido.
     if diagonal_step && !moving?
       @_vermeil_diagonal_active = false
       self.move_speed = @move_speed
     end
   end
+
 end
