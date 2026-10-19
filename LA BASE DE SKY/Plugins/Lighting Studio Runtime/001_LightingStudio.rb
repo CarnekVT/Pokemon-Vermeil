@@ -251,16 +251,20 @@ module LightingStudioSpriteset
   def ls_setup
     return unless @map && @map.respond_to?(:map_id)
     LightingStudio.normal_reset_cache if LightingStudio.respond_to?(:normal_reset_cache)
+    LightingStudioDayNight.reset_cache if defined?(LightingStudioDayNight)
     LightingStudioNormals.release if defined?(LightingStudioNormals)
     data = LightingStudio.load_map(@map.map_id)
     return unless data.is_a?(Hash) && data['enabled'] != false
 
+    @ls_map_data = data
     ambient = data['ambient'].is_a?(Hash) ? data['ambient'] : {}
     darkness = LightingStudio.number(ambient['darkness'], 0, 0, 1)
-    if darkness > 0
+    dynamic_day = defined?(LightingStudioDayNight) && LightingStudioDayNight.active_on_map?(data)
+    if darkness > 0 || dynamic_day
       @ls_ambient_sprite = Sprite.new(Spriteset_Map.viewport)
       @ls_ambient_sprite.bitmap = Bitmap.new(1, 1)
-      @ls_ambient_sprite.bitmap.set_pixel(0, 0, Color.new(0, 0, 0, 255))
+      rgb=LightingStudio.hex_color(ambient['color'])
+      @ls_ambient_sprite.bitmap.set_pixel(0, 0, Color.new(rgb[0],rgb[1],rgb[2],255))
       @ls_ambient_sprite.zoom_x = Graphics.width
       @ls_ambient_sprite.zoom_y = Graphics.height
       @ls_ambient_sprite.opacity = (darkness * 230).round
@@ -533,6 +537,17 @@ module LightingStudioSpriteset
     zy = defined?(TilemapRenderer::ZOOM_Y) ? TilemapRenderer::ZOOM_Y : 1
     now = System.uptime
 
+    if defined?(LightingStudioDayNight) && @ls_ambient_sprite && @ls_map_data &&
+       LightingStudioDayNight.active_on_map?(@ls_map_data) &&
+       (!@ls_next_daynight_update || now >= @ls_next_daynight_update)
+      @ls_next_daynight_update=now+0.2
+      value=LightingStudioDayNight.ambient(@ls_map_data)
+      if value
+        color,darkness=value
+        @ls_ambient_sprite.bitmap.set_pixel(0,0,Color.new(color[0],color[1],color[2],255))
+        @ls_ambient_sprite.opacity=(darkness*230).round
+      end
+    end
     ls_update_chunks(mx, my, zx, zy)
     @ls_sprites.each do |sprite, entry|
       size, energy = LightingStudio.pulse_values(entry[:pulse], now)
