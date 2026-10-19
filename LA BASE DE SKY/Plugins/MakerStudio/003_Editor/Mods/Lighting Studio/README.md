@@ -175,7 +175,14 @@ Para observar la diferencia, coloca al protagonista junto a la farola cálida de
 ### Prueba automatizada independiente
 
 ```bash
-ruby "Plugins/Lighting Studio Runtime/tests/test_character_normals.rb"
+ruby "DeveloperTests/LightingStudio/test_character_normals.rb"
 ```
 
 El test usa mocks RGSS para comparar una normal orientada a la derecha ante luz derecha/izquierda, comprobar que se reutiliza la imagen de la caché y que se crea el overlay en el sprite del protagonista. No sustituye una prueba en el juego.
+
+
+## v0.5.1 — Corrección de inicio (LoadError)
+
+**Importante:** Pokémon Essentials recopila recursivamente archivos `.rb` dentro de cada carpeta de plugin. El archivo de pruebas `test_character_normals.rb` se había colocado por error en `Plugins/Lighting Studio Runtime/tests/` y su `load` se ejecutaba al iniciar el juego. Por eso aparecía el error intentando cargar `003_CharacterNormals.rb` desde la raíz.
+
+El test independiente se ha trasladado a `LA BASE DE SKY/DeveloperTests/LightingStudio/test_character_normals.rb` y su ruta relativa se ha corregido. Solo se ejecuta voluntariamente desde `LA BASE DE SKY`, con el comando indicado arriba. Dentro de `Plugins/Lighting Studio Runtime` solo deben existir los scripts de runtime `001_`, `002_` y `003_` y el `meta.txt`.
