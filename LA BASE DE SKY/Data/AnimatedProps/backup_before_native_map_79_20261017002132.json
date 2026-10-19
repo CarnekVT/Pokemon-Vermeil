@@ -1,0 +1,397 @@
+{
+  "schema": 1,
+  "definitions": [
+    {
+      "id": "demo_molino",
+      "name": "Molino de viento (ejemplo)",
+      "sheet": "demo_molino.png",
+      "width": 5,
+      "height": 8,
+      "frames": 6,
+      "fps": 9,
+      "cells": [
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 2,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        }
+      ],
+      "loop": true
+    },
+    {
+      "id": "demo_arbol",
+      "name": "Árbol al viento (ejemplo)",
+      "sheet": "demo_arbol.png",
+      "width": 3,
+      "height": 4,
+      "frames": 25,
+      "fps": 10,
+      "cells": [
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 3,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 4,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 4,
+          "terrainTag": 0
+        },
+        {
+          "passage": 0,
+          "priority": 4,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        },
+        {
+          "passage": 15,
+          "priority": 0,
+          "terrainTag": 0
+        }
+      ],
+      "loop": true
+    }
+  ],
+  "placements": {
+    "79": [
+      {
+        "id": "mvbmkjap_1",
+        "defId": "demo_arbol",
+        "x": 20,
+        "y": 70,
+        "layer": 1,
+        "crop": {
+          "x": 0,
+          "y": 2,
+          "w": 3,
+          "h": 2
+        }
+      },
+      {
+        "id": "mvbmkjt4_2",
+        "defId": "demo_arbol",
+        "x": 23,
+        "y": 70,
+        "layer": 1,
+        "crop": {
+          "x": 0,
+          "y": 2,
+          "w": 3,
+          "h": 2
+        }
+      },
+      {
+        "id": "mvbmkxrg_5",
+        "defId": "demo_arbol",
+        "x": 20,
+        "y": 66,
+        "layer": 2,
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "w": 3,
+          "h": 2
+        }
+      },
+      {
+        "id": "mvbmky7h_6",
+        "defId": "demo_arbol",
+        "x": 23,
+        "y": 66,
+        "layer": 2,
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "w": 3,
+          "h": 2
+        }
+      },
+      {
+        "id": "mvbmlhf1_8",
+        "defId": "demo_arbol",
+        "x": 20,
+        "y": 68,
+        "layer": 1,
+        "crop": {
+          "x": 0,
+          "y": 2,
+          "w": 3,
+          "h": 2
+        }
+      },
+      {
+        "id": "mvbmligm_9",
+        "defId": "demo_arbol",
+        "x": 23,
+        "y": 68,
+        "layer": 1,
+        "crop": {
+          "x": 0,
+          "y": 2,
+          "w": 3,
+          "h": 2
+        }
+      },
+      {
+        "id": "mvbmx4db_1",
+        "defId": "demo_arbol",
+        "x": 17,
+        "y": 66,
+        "layer": 2,
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "w": 3,
+          "h": 2
+        }
+      },
+      {
+        "id": "mvbn73o4_5",
+        "defId": "demo_molino",
+        "x": 28,
+        "y": 59,
+        "layer": 2,
+        "crop": {
+          "x": 0,
+          "y": 0,
+          "w": 7,
+          "h": 8
+        }
+      }
+    ]
+  }
+}

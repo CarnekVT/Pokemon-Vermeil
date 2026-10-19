@@ -1,11 +1,24 @@
 {
   "id": "com.lbds.animated-props",
   "name": "Animated Props - La Base de Sky",
-  "version": "0.1.0",
-  "apiVersion": "1.0.0",
+  "version": "0.6.3",
+  "apiVersion": "1.0.1",
   "main": "index.js",
-  "authors": [{"name": "LBDS Animated Props (prototype)"}],
-  "description": "Objetos animados de gran formato: pincel, fotogramas y propiedades por celda para Maker Studio.",
-  "tags": ["tilesets", "animations", "mapping"],
-  "permissions": ["fs.project", "fs.write.project", "ui.toasts", "ui.dialogs"]
+  "authors": [
+    {
+      "name": "LBDS Animated Props (prototype)"
+    }
+  ],
+  "description": "Editor visual y mapa optimizados: cambios de capa instantáneos, renderizado cacheado y runtime de sprites visibles.",
+  "tags": [
+    "tilesets",
+    "animations",
+    "mapping"
+  ],
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.toasts",
+    "ui.dialogs"
+  ]
 }

@@ -40807,6 +40807,12 @@
           "Text": "You put the {1} in\\\nyour Bag's <icon=bagPocket{2}>\\c[1]{3}\\c[0] pocket.",
           "Reference": "English base source: 012_Overworld/001_Overworld.rb",
           "SourcePack": "User-supplied English Data (strict structural match)"
+        },
+        "Después de traducir, elige \"Compilar texto traducido\" en el menú Debug.": {
+          "Text": "After translating, choose \"Compile Translated Text\" in the Debug menu.",
+          "Reference": "Data/Scripts/001_Technical/003_Intl_Messages.rb",
+          "SourcePack": "Clean English base Data (user-supplied 2026-09-06)",
+          "ReferenceFallback": true
         }
       },
       "plugins": {
@@ -90798,7 +90804,12 @@
     },
     "qualityPolicy": "Supplied/canonical English sources override generated/imported English during v1.3 migration; ZBox events remain excluded.",
     "sdsIntro": "Neutral Solen pronouns; Elder Spirit solemn register; \"Despierta...\" => \"Wake up...\".",
-    "structuredRepair": "Canonical English repaired official structured rows, including Whirlpool/Leer and other slot-shift corruption."
+    "structuredRepair": "Canonical English repaired official structured rows, including Whirlpool/Leer and other slot-shift corruption.",
+    "pluginEnglishAutoFill": {
+      "version": "1.4.1",
+      "added": 1,
+      "policy": "English source-slot references fill missing rows only; existing/manual rows are never overwritten; events excluded."
+    }
   },
   "version": "1.4.0",
   "pbsRepair": {

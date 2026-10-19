@@ -1,0 +1,9 @@
+{
+  "id": "com.lbds.ap-zoom-inspector",
+  "name": "AP Zoom Inspector (diagnóstico)",
+  "version": "0.1.0",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [{"name": "LBDS Animated Props — diagnóstico"}],
+  "description": "Compara la alineación del overlay con tiles nativos a distintos zooms, sin modificar mapas ni recursos."
+}
