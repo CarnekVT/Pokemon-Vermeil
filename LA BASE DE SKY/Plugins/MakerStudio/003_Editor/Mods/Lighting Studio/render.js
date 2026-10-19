@@ -194,7 +194,9 @@ function drawUnionChunks(g,lights,project,width,height){
   const top=Math.floor(worldTop/CHUNK_WORLD),bottom=Math.floor(worldBottom/CHUNK_WORLD);
   let built=0;
   pendingChunks=false;
-  g.save();g.globalCompositeOperation='screen';g.globalAlpha=1;g.imageSmoothingEnabled=true;
+  g.save();g.globalCompositeOperation='screen';g.globalAlpha=1;
+  // Preserve hard logical-pixel edges when union chunks contain pixel-art lights.
+  g.imageSmoothingEnabled=!lights.some(l=>l.pixel?.enabled);
   for(let cy=top;cy<=bottom;cy++)for(let cx=left;cx<=right;cx++){
     const key=cx+':'+cy;
     if(!chunks.has(key)){
