@@ -1,7 +1,7 @@
 {
   "id": "com.carnekvt.lighting-studio",
   "name": "Lighting Studio",
-  "version": "0.5.4",
+  "version": "0.7.0",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Lighting Studio con normal maps activos para jugador/followers mediante overlays RGSS cacheados.",
+  "description": "Iluminación con normales regulables, máscaras PNG y ciclo día/noche real o interno.",
   "tags": [
     "mapping",
     "lighting",
