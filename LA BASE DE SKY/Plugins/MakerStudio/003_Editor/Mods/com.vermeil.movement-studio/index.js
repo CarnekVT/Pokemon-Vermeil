@@ -18,7 +18,7 @@ function parse(text) {
       sections[section] ||= {};
     } else {
       const match = /^([a-z_]+)\s*=\s*(.*?)\s*$/.exec(line);
-      if (match && Object.hasOwn(DEFAULTS, match[1])) {
+      if (match && Object.prototype.hasOwnProperty.call(DEFAULTS, match[1])) {
         sections[section][match[1]] = match[2];
       }
     }
@@ -26,7 +26,7 @@ function parse(text) {
   return sections;
 }
 function serialize(sections) {
-  const lines = ["; Vermeil Movement Studio v0.1", "; Cambios: reinicia el juego para aplicarlos.", ""];
+  const lines = ["; Vermeil Movement Studio v0.1", "; Cambios detectados automaticamente por el runtime.", ""];
   for (const [name, opts] of Object.entries(sections)) {
     lines.push("[" + name + "]");
     for (const [key, value] of Object.entries(opts)) lines.push(key + "=" + value);
@@ -53,11 +53,11 @@ export function activate(ctx) {
   const inputStyle = "display:block;width:100%;margin:4px 0 10px;padding:7px;box-sizing:border-box;background:var(--input-bg);color:var(--text-primary);border:1px solid var(--border);border-radius:5px";
   const fields = [
     ["directions", "Direcciones", [["4", "4 direcciones (clásico)"], ["8", "8 direcciones (diagonal opcional)"]]],
-    ["mode", "Desplazamiento", [["grid", "Por casillas (compatible)"], ["free", "Sub-tile (reservado, sin motor activo)"]]],
+    ["mode", "Desplazamiento", [["grid", "Por casillas (compatible)"]]],
     ["subtile_divisions", "Precisión futura sub-tile", [["4", "1/4"], ["8", "1/8"]]],
     ["instant_turn", "Respuesta al girar", [["1", "Inmediata"], ["0", "Retardo clásico"]]],
     ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]],
-    ["smooth_movement", "Interpolación original", [["1", "Activada"], ["0", "Reservado; se mantiene Essentials"]]]
+    ["smooth_movement", "Movimiento suave", [["1", "Suavizado activado"], ["0", "Lineal (Essentials)"]]]
   ];
   function option(key, value, label) {
     return '<option value="' + value + '">' + label + '</option>';
@@ -80,7 +80,7 @@ export function activate(ctx) {
       '<label>Suavizado de Fancy Camera (0-100%)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="display:flex;gap:6px;margin:15px 0"><button data-save style="' + buttonStyle + ';flex:1">Guardar</button>' +
       '<button data-reset style="' + buttonStyle + '">Restablecer</button></div>' +
-      '<p style="color:var(--text-secondary);font-size:11px">Los cambios necesitan reiniciar el juego. El desplazamiento sub-tile todavía es experimental y queda reservado para una versión futura; no se aplica al seleccionar Free.</p></div>';
+      '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan automáticamente durante la partida. Sub-tile real todavía no está disponible; la precisión queda reservada para una versión futura.</p></div>';
     const scope = host.querySelector("[data-scope]");
     scope.value = state.mapId === null ? "global" : "map";
     scope.addEventListener("change", () => {
@@ -105,7 +105,7 @@ export function activate(ctx) {
     host.querySelector("[data-save]").addEventListener("click", async () => {
       try {
         await ctx.fs.writeProjectFile(PATH, serialize(state.config));
-        notify("Configuración guardada; reinicia el juego.");
+        notify("Configuración guardada. Se aplicará en la partida abierta.");
       } catch (error) {
         ctx.log.error(error);
         notify("No se pudo guardar config.ini", "error");
