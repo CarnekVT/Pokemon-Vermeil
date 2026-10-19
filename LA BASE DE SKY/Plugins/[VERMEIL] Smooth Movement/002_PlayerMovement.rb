@@ -9,7 +9,7 @@ class Game_Player < Game_Character
     return vermeil_movement_original_input if pbMapInterpreterRunning? ||
       $game_temp.message_window_showing || $game_temp.in_mini_update || $game_temp.in_menu
 
-    direction = (VermeilMovement.directions == 8) ? Input.dir8 : Input.dir4(@moved_last_frame)
+    direction = (VermeilMovement.directions == 8 && Input.respond_to?(:dir8)) ? Input.dir8 : Input.dir4(@moved_last_frame)
     if [1, 3, 7, 9].include?(direction)
       return vermeil_movement_original_input unless vermeil_diagonal_eligible?
       vermeil_move_diagonal(direction)
@@ -91,6 +91,14 @@ class Game_Player < Game_Character
   def update_move
     diagonal_step = @_vermeil_diagonal_active
     vermeil_movement_move_end
+    # Easing visual sobre la interpolacion nativa; no altera tiles ni triggers.
+    if moving? && @move_timer && @move_time && @move_time > 0 &&
+       @move_initial_x && @move_initial_y && VermeilMovement.enabled?("smooth_movement")
+      fraction = [[@move_timer / @move_time, 0.0].max, 1.0].min
+      eased = fraction * fraction * (3.0 - 2.0 * fraction)
+      @real_x = (@move_initial_x + (@x - @move_initial_x) * eased) * Game_Map::REAL_RES_X
+      @real_y = (@move_initial_y + (@y - @move_initial_y) * eased) * Game_Map::REAL_RES_Y
+    end
     if diagonal_step && !moving?
       @_vermeil_diagonal_active = false
       self.move_speed = @move_speed
