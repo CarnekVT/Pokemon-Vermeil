@@ -26,7 +26,7 @@ function parse(text) {
   return sections;
 }
 function serialize(sections) {
-  const lines = ["; Vermeil Movement Studio v0.2.2", "; Cambios detectados automaticamente por el runtime.", ""];
+  const lines = ["; Vermeil Movement Studio v0.3.0", "; Cambios detectados automaticamente por el runtime.", ""];
   for (const [name, opts] of Object.entries(sections)) {
     lines.push("[" + name + "]");
     for (const [key, value] of Object.entries(opts)) lines.push(key + "=" + value);
