@@ -196,8 +196,13 @@ module LightingStudioSpriteset
   def ls_position(tx,ty,mx,my,zx,zy)
     sx = tx*Game_Map::TILE_WIDTH-mx
     sy = ty*Game_Map::TILE_HEIGHT-my
-    sx = (sx-Graphics.width/2.0)*zx+Graphics.width/2.0 if zx!=1
-    sy = (sy-Graphics.height/2.0)*zy+Graphics.height/2.0 if zy!=1
+    # Mirror LBDS Animated Props map-to-screen transform for game zoom.
+    if zx != 1
+      sx = (sx - Graphics.width / 2) * zx + Graphics.width / 2
+    end
+    if zy != 1
+      sy = (sy - Graphics.height / 2) * zy + Graphics.height / 2
+    end
     [sx,sy]
   end
 
@@ -226,8 +231,8 @@ module LightingStudioSpriteset
 
   def ls_update
     return unless @ls_sprites && @map
-    mx=@map.display_x.to_f/Game_Map::X_SUBPIXELS
-    my=@map.display_y.to_f/Game_Map::Y_SUBPIXELS
+    mx=(@map.display_x.to_f/Game_Map::X_SUBPIXELS).round
+    my=(@map.display_y.to_f/Game_Map::Y_SUBPIXELS).round
     zx=defined?(TilemapRenderer::ZOOM_X) ? TilemapRenderer::ZOOM_X : 1
     zy=defined?(TilemapRenderer::ZOOM_Y) ? TilemapRenderer::ZOOM_Y : 1
     now=System.uptime
