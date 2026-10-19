@@ -75,19 +75,24 @@ class Game_Player < Game_Character
     @x += dx
     @y += dy
     @move_timer = 0.0
-    # Distancia equivalente euclidea, evitando que la diagonal sea mas rapida.
-    @move_time = (@move_time || 0.25) * Math.sqrt(2)
+    @_vermeil_diagonal_active = true
     add_move_distance_to_stats(2)
     increase_steps
   end
 
+  alias vermeil_movement_original_movement_type set_movement_type unless method_defined?(:vermeil_movement_original_movement_type)
+  def set_movement_type(type)
+    vermeil_movement_original_movement_type(type)
+    # Conservar velocidad fisica equivalente en una diagonal (distancia sqrt(2)).
+    @move_time *= Math.sqrt(2) if @_vermeil_diagonal_active
+  end
+
   alias vermeil_movement_move_end update_move unless method_defined?(:vermeil_movement_move_end)
   def update_move
-    diagonal_step = (@move_initial_x && @move_initial_y &&
-      @x != @move_initial_x && @y != @move_initial_y && moving?)
+    diagonal_step = @_vermeil_diagonal_active
     vermeil_movement_move_end
     if diagonal_step && !moving?
-      # Restaurar duracion de casilla, normalmente reestablecida por set_movement_type.
+      @_vermeil_diagonal_active = false
       self.move_speed = @move_speed
     end
   end
