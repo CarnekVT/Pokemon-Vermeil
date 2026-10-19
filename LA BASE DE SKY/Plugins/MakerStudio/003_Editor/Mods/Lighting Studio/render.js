@@ -224,6 +224,23 @@ function cachedChunk(cx,cy,lights){
   return result;
 }
 export function clearLightCache(){masks.clear();chunks.clear();cachedMapKey=null;pendingChunks=false;}
+// Targeted invalidation: editing one light must not throw away the entire
+// scene's baked illumination. Keep all chunks unaffected by its old/new bounds.
+export function invalidateLightRegions(before,after){
+  if(!cachedMapKey||!chunks.size)return 0;
+  const regions=[before,after].filter(Boolean).map(bounds).map(b=>({
+    left:b.x-b.w/2,right:b.x+b.w/2,top:b.y-b.h/2,bottom:b.y+b.h/2
+  }));
+  let count=0;
+  for(const key of [...chunks.keys()]){
+    const [x,y]=key.split(':').map(Number),left=x*CHUNK_WORLD,top=y*CHUNK_WORLD;
+    if(regions.some(b=>b.right>left&&b.left<left+CHUNK_WORLD&&b.bottom>top&&b.top<top+CHUNK_WORLD)){
+      chunks.delete(key);count++;
+    }
+  }
+  if(count)pendingChunks=true;
+  return count;
+}
 export function hasPendingChunks(){return pendingChunks;}
 export function cacheSize(){return {masks:masks.size,views:chunks.size};}
 function drawUnionChunks(g,lights,project,width,height){
