@@ -49,7 +49,7 @@ export function paint(g,info,v){
   if(w<=0||h<=0)return;
   const live=!!v.showPreview, editing=!!v.editing;
   const projection={x:x=>toScreen(x,0,info).x,y:y=>toScreen(0,y,info).y,scale:()=>screenRadius(32,info)/32,
-    viewportKey:[info.mapId,info.tileSize,info.zoom,info.viewportX,info.viewportY].join(':'),mapId:info.mapId,revision:v.revision??0};
+    viewportKey:[info.mapId,info.tileSize,info.zoom,info.viewportX,info.viewportY].join(':'),mapId:info.mapId,revision:v.revision??0,viewWidth:w,viewHeight:h};
   const seconds=Number.isFinite(v.time)?v.time:performance.now()/1000;
   g.save();
   try{
@@ -77,7 +77,7 @@ export function paint(g,info,v){
         pixel:draft.pixel||{enabled:false},pulse:{enabled:false}
       };
       g.save();g.globalAlpha=.78;drawLights(g,[ghost],{x:projection.x,y:projection.y,scale:projection.scale,
-        viewportKey:['ghost',projection.viewportKey,ghost.x,ghost.y,ghost.type,ghost.radiusPx].join(':'),revision:0},w,h,seconds,'union');g.restore();
+        viewportKey:['ghost',projection.viewportKey,ghost.x,ghost.y,ghost.type,ghost.radiusPx].join(':'),revision:0,viewWidth:w,viewHeight:h},w,h,seconds,'union');g.restore();
     }
     if(!v.showGuides&&!editing)return;
     // Visual handles stay readable even with all lights disabled/preview off.
