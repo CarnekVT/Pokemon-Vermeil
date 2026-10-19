@@ -69,7 +69,13 @@ const typePicker=node('select');typePicker.className='ls-input';for(const t of L
 const list=element('div','ls-list');section.append(list);
 if(!m?.lights.length)list.append(element('div','ls-empty','Todavía no hay luces. Usa «Añadir luz» sobre el mapa.'));
 for(const l of m?.lights||[]){const row=element('div','ls-item'+(l.id===state.selected?' selected':''));list.append(row);const sw=element('span','ls-swatch');sw.style.background=l.color;sw.style.color=l.color;row.append(sw);const main=element('button','ls-item-main');main.type='button';main.append(element('div','ls-item-name',l.name),element('div','ls-item-meta',Math.round(l.radiusPx)+' px · '+Math.round(l.intensity*100)+'%'));main.onclick=()=>{state.selected=l.id;state.mode='select';state.ctx.editor.setTool(TOOL);redraw();refresh();};row.append(main);const eye=element('button','ls-ghost',l.enabled?'◉':'◌');eye.title=l.enabled?'Ocultar':'Mostrar';eye.onclick=()=>change(()=>{l.enabled=!l.enabled;});row.append(eye);}
-const ambient=element('section','ls-section');shell.append(ambient);ambient.append(element('div','ls-section-heading','Ambiente y control general'));const enabled=node('input');enabled.type='checkbox';enabled.checked=scene.enabled!==false;enabled.onchange=()=>change(()=>scene.enabled=enabled.checked);labeled(ambient,'Iluminación activada para este mapa',enabled);
+const ambient=element('section','ls-section');shell.append(ambient);ambient.append(element('div','ls-section-heading','Ambiente y control general'));
+const previewOptions=element('div','ls-inline');ambient.append(previewOptions);
+const night=mini(state.previewNight?'◐ Vista nocturna activa':'◐ Vista nocturna (solo editor)',()=>{
+ state.previewNight=!state.previewNight;invalidate();redraw();refresh();
+},state.previewNight);
+previewOptions.append(night);
+ambient.append(element('p','ls-inline-note','La vista nocturna oscurece el mapa solo en Maker Studio para distinguir las luces sobre tiles claros. No modifica los datos del juego.'));const enabled=node('input');enabled.type='checkbox';enabled.checked=scene.enabled!==false;enabled.onchange=()=>change(()=>scene.enabled=enabled.checked);labeled(ambient,'Iluminación activada para este mapa',enabled);
 const zero=element('div','ls-inline');ambient.append(zero);zero.append(mini('Quitar oscuridad',()=>change(()=>scene.ambient.darkness=0)),mini('Apagar todas las luces',()=>change(()=>{scene.lights.forEach(l=>l.enabled=false);})),mini('Encender todas',()=>change(()=>{scene.lights.forEach(l=>l.enabled=true);})));const settings=scene.ambient;
 const overlap=node('select');overlap.className='ls-input';
 for(const [value,label] of [['union','Fusionar áreas · farolas (recomendado)'],['sum','Acumular brillo · suma']]){
@@ -130,7 +136,7 @@ function overlay(draw,info){if(!state||!draw||!info)return;
 const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;const renderStarted=performance.now();if(state.awaitingOverlay){stats.requestDelayMs=Math.max(0,renderStarted-state.lastRequestAt);state.awaitingOverlay=false;state.redrawDirty=false;}
 try{
  const map=getMap(state.data,info.mapId,false);
- paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
+ paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
  if(state.diagnostic){draw.save();try{
   draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
  }finally{draw.restore();}}
@@ -149,7 +155,7 @@ state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,s
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
 if(d)invalidate();redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',previewNight:false,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
@@ -157,10 +163,11 @@ ctx.tools.registerTool({id:TOOL,label:'Lighting Studio',icon:'☀',onActivate(){
 // The baseline Overlay API is used deliberately: it is the most compatible canvas
 // drawing hook and, unlike advanced overlays, does not depend on animation metadata.
 const item={id:'lighting-studio.overlay',zOrder:500,render:overlay};
-if(ctx.ui.registerAdvancedOverlay){ctx.ui.registerAdvancedOverlay(item);state.advancedOverlay=true;}
-else if(ctx.ui.registerOverlay){ctx.ui.registerOverlay(item);state.advancedOverlay=false;}
+// The basic overlay was the version known to draw reliably in this project.
+if(ctx.ui.registerOverlay){ctx.ui.registerOverlay(item);state.advancedOverlay=false;}
+else if(ctx.ui.registerAdvancedOverlay){ctx.ui.registerAdvancedOverlay(item);state.advancedOverlay=true;}
 else notify('Esta versión de Maker Studio no admite overlays de mods.','error');
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
-redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))redraw();},650);
+redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))redraw();},250);
 }
 export function deactivate(){if(state?.ticker)clearInterval(state.ticker);clearLightCache();state=null;}
