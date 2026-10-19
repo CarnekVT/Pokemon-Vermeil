@@ -1,4 +1,4 @@
-# Vermeil Smooth Movement 0.1.0 (Essentials v21.1)
+# Vermeil Smooth Movement 0.1.1 (Essentials v21.1)
 
 Panel: Maker Studio > **Movement Studio**. Guarda `config.ini` junto al plugin.
 
@@ -10,12 +10,12 @@ Panel: Maker Studio > **Movement Studio**. Guarda `config.ini` junto al plugin.
 - Deslizamiento cardinal opcional si una diagonal queda bloqueada.
 - Interpolación nativa de movimiento de La Base de Sky y animaciones OWs More Frames sin modificarlas.
 - Ajuste de cámara sobre Fancy Camera existente. El switch 59 activa Fancy Camera; 35 mantiene suavizado original.
-- Valores globales y overrides por mapa en `[map:17]`; reinicia el juego al editar.
+- Valores globales y overrides por mapa en `[map:17]`; se recarga mientras se ejecuta el juego (comprobación del archivo cada 0.5 s).
 
 ## Limitaciones importantes
 
 - `mode=free` y `subtile_divisions` **están reservados**. Elegirlos no activa aún desplazamiento libre real: se conserva el desplazamiento lógico por tiles para proteger eventos, escaleras, encuentros y followers.
-- `smooth_movement=0` está reservado: la interpolación existente de Essentials sigue activa.
+- `smooth_movement=1` activa easing visual; `0` vuelve a la interpolación lineal de Essentials.
 - El desplazamiento diagonal utiliza las cuatro orientaciones gráficas tradicionales (sin filas diagonales nuevas).
 - Las diagonales se prueban solamente en terreno normal. No sustituyen la lógica de salto, agua ni movimiento forzado.
 - No hay pruebas de ejecución dentro del cliente RPG Maker/mkxp; verifica mapas y eventos antes de integrarlo a una build estable.
@@ -27,3 +27,7 @@ Panel: Maker Studio > **Movement Studio**. Guarda `config.ini` junto al plugin.
 3. Comprueba escalera lateral/espiral, hielo, bici, agua, seguidores y encuentros.
 4. Prueba Fancy Camera con switch 59 activado y desactivado.
 5. Guarda un perfil [map:ID] y vuelve al global; prueba reinicio y carga partida.
+
+## Importante al actualizar
+
+Ejecuta el juego en modo debug para forzar la recompilación del plugin si se encuentra el archivo `Data/PluginScripts.rxdata` anterior. La versión 0.1.1 modifica meta.txt para detectar actualización. El editor escribe en el proyecto abierto, no en otro directorio del juego.
