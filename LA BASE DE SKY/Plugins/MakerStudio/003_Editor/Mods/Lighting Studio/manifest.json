@@ -1,7 +1,7 @@
 {
   "id": "com.carnekvt.lighting-studio",
   "name": "Lighting Studio",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Máscaras pixel art coherentes para cono y elipse, preview de sliders regulada y descarte de luces fuera de pantalla.",
+  "description": "Conos con difuminado longitudinal y lateral independiente; ajustes coherentes entre editor y runtime.",
   "tags": [
     "mapping",
     "lighting",
