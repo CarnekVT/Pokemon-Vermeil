@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio Runtime 0.4.8 for Pokemon Essentials 21.1 / mkxp.
+# Lighting Studio Runtime 0.5.0 for Pokemon Essentials 21.1 / mkxp.
 # Shared additive lightmap: merge sources normally, add a single sprite to the map.
 # No shaders required; uses Bitmap#stretch_blt for camera/animation updates.
 module LightingStudio
