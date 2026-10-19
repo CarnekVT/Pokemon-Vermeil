@@ -10,7 +10,12 @@ module VermeilMovement
     "camera_lookahead"  => "0",
     "wall_slide"        => "0",
     "smooth_movement"   => "1",
-    "camera_smoothing"  => "35"
+    "camera_smoothing"  => "35",
+    "diagonal_facing"    => "keep",
+    "wall_slide_priority"=> "horizontal",
+    "camera_deadzone"    => "0",
+    "camera_lead_response" => "120",
+    "debug_hud"          => "0"
   }
   ALLOWED = {
     "directions"        => ["4", "8"],
@@ -20,7 +25,12 @@ module VermeilMovement
     "flow_motion"       => ["0", "1"],
     "camera_lookahead"  => ["0", "8", "16", "24", "32"],
     "wall_slide"        => ["0", "1"],
-    "smooth_movement"   => ["0", "1"]
+    "smooth_movement"   => ["0", "1"],
+    "diagonal_facing"    => ["keep", "horizontal", "vertical"],
+    "wall_slide_priority" => ["horizontal", "vertical", "facing"],
+    "camera_deadzone"    => ["0", "8", "16", "24", "32"],
+    "camera_lead_response" => ["60", "120", "200"],
+    "debug_hud"          => ["0", "1"]
   }
 
   def self.reload!
@@ -109,5 +119,21 @@ module VermeilMovement
 
   def self.camera_smoothing
     option("camera_smoothing").to_i
+  end
+
+  def self.camera_deadzone
+    option("camera_deadzone").to_i
+  end
+
+  def self.camera_lead_response
+    option("camera_lead_response").to_i / 1000.0
+  end
+
+  def self.diagonal_facing
+    option("diagonal_facing")
+  end
+
+  def self.wall_slide_priority
+    option("wall_slide_priority")
   end
 end
