@@ -12,16 +12,19 @@ function current(){return getMap(state.data,state.mapId,false);}
 function active(){return current()?.lights.find(l=>l.id===state.selected)||null;}
 function record(){state.undo.push(deepCopy(state.data));if(state.undo.length>60)state.undo.shift();state.redo=[];}
 function invalidate(){if(state)state.revision=(state.revision||0)+1;}
-function redraw(){if(!state?.ctx||state.redrawPending)return;
- const now=performance.now();
- // Do not stack full-map redraws while Maker Studio is processing a previous one.
- if(state.awaitingOverlay && now-(state.lastRequestAt||0)<2500)return;
- const wait=Math.max(0,85-(now-(state.lastRedraw||0)));
- state.redrawPending=true;setTimeout(()=>{
-  if(!state)return;state.redrawPending=false;
-  state.lastRedraw=performance.now();state.lastRequestAt=state.lastRedraw;state.awaitingOverlay=true;
-  state.ctx.editor.requestRedraw?.();
- },wait);
+function redraw(){
+ if(!state?.ctx||state.redrawPending)return;
+ const owner=state,elapsed=performance.now()-(owner.lastRedraw||0);
+ owner.redrawPending=true;
+ // Bound update frequency, but NEVER block waiting for an overlay acknowledgement.
+ // Animated Props already gets animation frames from registerAdvancedOverlay.
+ setTimeout(()=>{
+  if(state!==owner)return;
+  owner.redrawPending=false;
+  owner.lastRedraw=performance.now();
+  owner.lastRequestAt=owner.lastRedraw;
+  owner.ctx.editor.requestRedraw?.();
+ },Math.max(0,110-elapsed));
 }
 function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Mapa '+stats.lastMap+' · '+(stats.lastMs||0).toFixed(1)+' ms · espera '+Math.round(stats.requestDelayMs||0)+' ms · caché '+cacheSize().masks+'/'+cacheSize().views:'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
 function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();invalidate();redraw();refresh();void persist().catch(fail);}
@@ -138,10 +141,10 @@ ctx.tools.registerTool({id:TOOL,label:'Lighting Studio',icon:'☀',onActivate(){
 // The baseline Overlay API is used deliberately: it is the most compatible canvas
 // drawing hook and, unlike advanced overlays, does not depend on animation metadata.
 const item={id:'lighting-studio.overlay',zOrder:500,render:overlay};
-if(ctx.ui.registerOverlay)ctx.ui.registerOverlay(item);
-else if(ctx.ui.registerAdvancedOverlay)ctx.ui.registerAdvancedOverlay(item);
+if(ctx.ui.registerAdvancedOverlay){ctx.ui.registerAdvancedOverlay(item);state.advancedOverlay=true;}
+else if(ctx.ui.registerOverlay){ctx.ui.registerOverlay(item);state.advancedOverlay=false;}
 else notify('Esta versión de Maker Studio no admite overlays de mods.','error');
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
-redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();const map=current();if(state.diagnostic||map?.lights?.some(l=>l.enabled&&l.pulse?.enabled))redraw();},250);
+redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))redraw();},650);
 }
 export function deactivate(){if(state?.ticker)clearInterval(state.ticker);clearLightCache();state=null;}
