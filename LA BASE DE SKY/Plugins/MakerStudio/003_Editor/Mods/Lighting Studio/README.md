@@ -1,4 +1,4 @@
-# Lighting Studio v0.4.3 · Hotfix de zoom y rendimiento
+# Lighting Studio v0.4.7 — suavizado, rendimiento y normal maps
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -87,3 +87,30 @@ No se ha ejecutado Maker Studio ni el juego desde este entorno. No afirmar FPS n
 - Las máscaras del editor y del runtime Ruby aplican la misma ecuación especializada. Las claves de caché incluyen `coneFeather` para que cambios en el inspector no reutilicen una máscara antigua.
 - Pruebas JavaScript: `node tests/cone-falloff.test.mjs`. Comprueban origen, límite angular, simetría, caída hacia el extremo, intensidad lateral, rejilla pixel art y persistencia del ajuste.
 - **Pendiente de validar en ejecución real**: la apariencia del cono en el mapa, la sintaxis y el arranque completos del plugin Ruby y los FPS de Maker Studio / Essentials. No se cambiaron los límites de construcción de fragmentos ni los cálculos de zoom en esta versión.
+
+## v0.4.7 — Conos y elipses sin pixel art
+
+- Los focos y elipses suaves del editor ahora usan máscaras de hasta **256 px**, diferenciadas de la rejilla lógica de pixel art (que no se modifica).
+- La fusión de iluminación en el editor pasa a **128 × 128 muestras** por fragmento de 256 px del mundo (antes 64 × 64). Se conserva el contorno correcto con zoom.
+- Se eliminó del algoritmo de unión la secuencia repetitiva `drawImage → getImageData` por fuente. La composición por máximo de RGB ahora se calcula directamente en un solo buffer por chunk, sin readbacks del canvas.
+- Se limita la construcción de fragmentos por pasada y se reutiliza su caché; la preview se actualiza directamente mientras se mueve un slider y la unión exacta se reconstruye después de **350 ms de inactividad**.
+- El redibujado no espera ya confirmaciones del overlay para poder recibir cambios posteriores. Las actualizaciones de fragmentos pendientes se comprueban cada 120 ms.
+- El runtime Ruby usa máscaras suaves de hasta 128 px para conos y elipses, y fragmentos de iluminación de mayor resolución solo si el mapa incluye geometrías suaves de esos tipos. **Advertencia:** esto puede incrementar el coste de construcción inicial en ciertos mapas; sigue siendo necesario medir el FPS real del juego.
+
+## Normal maps (fase 1: vinculación de recursos)
+
+En el editor encontrarás la sección **NORMAL MAPS · Tiles y Overworld**. Permite:
+- Seleccionar un gráfico original de `Graphics/Tilesets`, `Graphics/Autotiles` o `Graphics/Characters`.
+- Seleccionar una textura de normales PNG en `Graphics/LightingStudio/Normals/Tilesets`, `Autotiles` o `Characters`.
+- Vincular ambas por nombre, habilitar/deshabilitar el vínculo, guardar la convención de canal verde invertido y comprobar si los PNG existen.
+- Mantener los vínculos al guardar, cargar o deshacer el mapa, con compatibilidad con proyectos anteriores.
+
+**Importante:** aún NO hay sombreado por normal maps en mkxp. El módulo actual solo registra y valida texturas. No debe confundirse con soporte de iluminación por normales en OWs y tiles; esa etapa requiere integración con su dibujado y un pipeline shader o equivalente eficiente.
+
+Referencia: `Graphics/LightingStudio/Normals/README.md`. Las normales deben tener el mismo tamaño y distribución de fotogramas/tiles que sus gráficos originales.
+
+## Pruebas de regresión
+
+- `tests/cone-falloff.test.mjs` — falloff y control lateral del cono.
+- `tests/render-quality.test.mjs` — suavizado, caché de fragmentos y serialización de normales.
+- **Pendiente:** pruebas integradas en Maker Studio y Essentials 21.1. No se garantiza eliminación del lag de 10 segundos hasta probarlo en la instalación del usuario.
