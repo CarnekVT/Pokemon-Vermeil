@@ -5,6 +5,8 @@
 module LightingStudio
   DATA_PATH = 'Data/LightingStudio/maps.json'
   MASK_LIMIT = 64
+  SMOOTH_MASK_LIMIT = 128
+  SMOOTH_CHUNK_PX = 128
   MAX_SOURCES = 160
   # World-space cached chunks. Source masks are rasterized ONCE; chunks are built
   # only as they become visible, at a strict budget per frame.
@@ -141,9 +143,11 @@ module LightingStudio
     world_h = sin.abs*orig_w + cos.abs*orig_h
     pixel = spec['pixel'].is_a?(Hash) && spec['pixel']['enabled'] == true ? spec['pixel'] : {}
     if pixel.empty?
-      scale = [1.0, MASK_LIMIT.to_f / [world_w,world_h].max].min
-      w = [[(world_w*scale).round,2].max,MASK_LIMIT].min
-      h = [[(world_h*scale).round,2].max,MASK_LIMIT].min
+      # Smooth cone/ellipse masks must not use the 64px pixel-art budget.
+      limit = %w[cone ellipse].include?(type) ? SMOOTH_MASK_LIMIT : MASK_LIMIT
+      scale = [1.0, limit.to_f / [world_w,world_h].max].min
+      w = [[(world_w*scale).round,2].max,limit].min
+      h = [[(world_h*scale).round,2].max,limit].min
     else
       # One source texel per pixel-art block, matching the Maker Studio preview.
       # Applying MASK_LIMIT first and then stepping pixels destroys ellipse and
@@ -193,6 +197,7 @@ module LightingStudioSpriteset
     @ls_mask_cache = {}
     @ls_masks_built_this_frame = 0
     @ls_union_sources = []
+    @ls_chunk_resolution = LightingStudio::CHUNK_PX
     @ls_chunks = {}
     @ls_chunk_tick = 0
     @ls_ambient_sprite = nil
@@ -245,7 +250,11 @@ module LightingStudioSpriteset
       mode = 'union' if mode.empty? || mode == 'add'
 
       if mode == 'union' && entry[:pulse]['enabled'] != true
-        # Defer mask generation until this source enters a visible world chunk.
+        # Only smooth cone/ellipse sources increase chunk resolution; retain
+        # the cheaper 64px chunks for pixel-art and ordinary map lighting.
+        if ['cone','ellipse'].include?(source['type']) && !(source['pixel'].is_a?(Hash) && source['pixel']['enabled'] == true)
+          @ls_chunk_resolution = LightingStudio::SMOOTH_CHUNK_PX
+        end
         @ls_union_sources << entry
       else
         # Animated/normal/sum modes remain individual Sprites.
@@ -313,7 +322,7 @@ module LightingStudioSpriteset
 
   def ls_chunk_bitmap(cx, cy)
     unit = LightingStudio::CHUNK_WORLD
-    resolution = LightingStudio::CHUNK_PX
+    resolution = @ls_chunk_resolution || LightingStudio::CHUNK_PX
     origin_x = cx * unit
     origin_y = cy * unit
     pixel_unit = unit.to_f / resolution
