@@ -163,8 +163,9 @@ module LightingStudio
       end
       bitmap=Bitmap.new(w,h)
       bitmap.raw_data=result.pack('C*')
-      dims=shape_dimensions(spec)
-      [bitmap,dims[0],dims[1]]
+      world_w=number(spec['widthPx'],160,8,1024)
+      world_h=number(spec['heightPx'],96,8,1024)
+      [bitmap,world_w,world_h]
     ensure
       source.dispose unless source.disposed?
     end
@@ -286,6 +287,10 @@ module LightingStudioSpriteset
         source['pixel'],source['maskFile']
       ].inspect
       width, height = LightingStudio.shape_dimensions(source)
+      if source['type'] == 'mask'
+        width=LightingStudio.number(source['widthPx'],160,8,1024)
+        height=LightingStudio.number(source['heightPx'],96,8,1024)
+      end
       entry = {
         :bitmap => nil, :spec => source, :key => key, :w => width, :h => height,
         :cx => LightingStudio.number(source['x'],0,-2048,2048)*Game_Map::TILE_WIDTH,
@@ -320,6 +325,7 @@ module LightingStudioSpriteset
         sprite.ox = image[0].width / 2
         sprite.oy = image[0].height / 2
         sprite.z = 8501
+        sprite.angle = LightingStudio.number(source['rotation'],0,-360,360) if source['type'] == 'mask'
         sprite.blend_type = mode == 'subtract' ? 2 : (mode == 'normal' ? 0 : 1)
         @ls_sprites << [sprite, entry]
       end
