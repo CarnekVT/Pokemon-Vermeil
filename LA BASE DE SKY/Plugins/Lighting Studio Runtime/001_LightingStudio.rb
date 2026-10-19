@@ -93,9 +93,9 @@ module LightingStudio
     color = hex_color(spec['color'])
     bmp = Bitmap.new(w,h)
     (0...h).step(step) do |y|
-      py = ((y+step/2.0)/h-.5)*world_h
+      py = ((y+step/2.0)/h - 0.5)*world_h
       (0...w).step(step) do |x|
-        px = ((x+step/2.0)/w-.5)*world_w
+        px = ((x+step/2.0)/w - 0.5)*world_w
         local_x = cos*px + sin*py
         local_y = -sin*px + cos*py
         nx = local_x/(orig_w/2.0)
