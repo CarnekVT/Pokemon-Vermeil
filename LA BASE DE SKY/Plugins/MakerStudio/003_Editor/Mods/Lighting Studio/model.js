@@ -2,7 +2,8 @@
 // x/y are tile coordinates; radii are game pixels at a 32px reference tile.
 export const DATA_PATH = 'Data/LightingStudio/maps.json';
 export const SCHEMA = 1;
-export const BLEND_MODES = ['normal','add','subtract'];
+export const BLEND_MODES = ['normal','union','sum','subtract'];
+export const BLEND_NAMES = {union:'Fusionar área iluminada',sum:'Sumar brillo',normal:'Normal',subtract:'Oscurecer'};
 export const LIGHT_TYPES = ['radial','cone','ellipse','rectangle'];
 export const FADE_MODES = ['center','top','bottom','left','right','custom'];
 export const FADE_NAMES = {center:'Desde el centro',top:'Desde arriba',bottom:'Desde abajo',left:'Desde la izquierda',right:'Desde la derecha',custom:'Origen personalizado'};
@@ -13,7 +14,7 @@ export const newId = () => 'light_'+Date.now().toString(36)+'_'+Math.random().to
 const num = (v,lo,hi,def) => Number.isFinite(Number(v)) ? Math.min(hi,Math.max(lo,Number(v))) : def;
 export const clamp = (v,lo,hi) => num(v,lo,hi,lo);
 export const hex = (v,def='#FFCE8A') => /^#[a-fA-F0-9]{6}$/.test(String(v)) ? String(v).toUpperCase() : def;
-export const defaultMap = () => ({enabled:true,ambient:{color:'#142439',darkness:0},lights:[]});
+export const defaultMap = () => ({enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},lights:[]});
 export const defaultProject = () => ({schema:SCHEMA,maps:{}});
 export const defaultPulse = () => ({enabled:false,speedHz:1,intensity:0.25,radius:0.12,phase:0});
 export const defaultPixel = () => ({enabled:false,size:6,steps:6});
@@ -31,7 +32,7 @@ export function normalizeLight(raw={}){
     rotation:num(s.rotation,-360,360,0),angle:num(s.angle,5,170,70),
     widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
     enabled:s.enabled!==false,
-    blendMode:BLEND_MODES.includes(s.blendMode)?s.blendMode:'add',
+    blendMode:s.blendMode==='add'?'union':BLEND_MODES.includes(s.blendMode)?s.blendMode:'union',
     pulse:{enabled:p.enabled===true,speedHz:num(p.speedHz,.05,12,1),
       intensity:num(p.intensity,0,1,.25),radius:num(p.radius,0,.9,.12),phase:num(p.phase,0,360,0)},
     pixel:{enabled:px.enabled===true,size:Math.round(num(px.size,2,32,6)),steps:Math.round(num(px.steps,2,24,6))},
@@ -46,6 +47,7 @@ export function normalizeProject(src){
     if(!/^\d+$/.test(id)||!value||typeof value!=='object')continue;
     const ambient=value.ambient||{},seen=new Set();
     res.maps[String(Number(id))]={enabled:value.enabled!==false,
+      overlapMode:value.overlapMode==='sum'?'sum':'union',
       ambient:{color:hex(ambient.color,'#142439'),darkness:num(ambient.darkness,0,1,0)},
       lights:(Array.isArray(value.lights)?value.lights:[]).slice(0,500).map(normalizeLight)
       .filter(l=>{if(seen.has(l.id))return false;seen.add(l.id);return true;})};
