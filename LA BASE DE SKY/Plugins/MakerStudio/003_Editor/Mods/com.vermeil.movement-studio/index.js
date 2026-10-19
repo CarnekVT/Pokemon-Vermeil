@@ -26,7 +26,7 @@ function parse(text) {
   return sections;
 }
 function serialize(sections) {
-  const lines = ["; Vermeil Movement Studio v0.1", "; Cambios detectados automaticamente por el runtime.", ""];
+  const lines = ["; Vermeil Movement Studio v0.2", "; Cambios detectados automaticamente por el runtime.", ""];
   for (const [name, opts] of Object.entries(sections)) {
     lines.push("[" + name + "]");
     for (const [key, value] of Object.entries(opts)) lines.push(key + "=" + value);
@@ -53,8 +53,6 @@ export function activate(ctx) {
   const inputStyle = "display:block;width:100%;margin:4px 0 10px;padding:7px;box-sizing:border-box;background:var(--input-bg);color:var(--text-primary);border:1px solid var(--border);border-radius:5px";
   const fields = [
     ["directions", "Direcciones", [["4", "4 direcciones (clásico)"], ["8", "8 direcciones (diagonal opcional)"]]],
-    ["mode", "Desplazamiento", [["grid", "Por casillas (compatible)"]]],
-    ["subtile_divisions", "Precisión futura sub-tile", [["4", "1/4"], ["8", "1/8"]]],
     ["instant_turn", "Respuesta al girar", [["1", "Inmediata (giro + paso)"], ["0", "Clásica (giro y espera 75 ms)"]]],
     ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]],
     ["smooth_movement", "Continuidad de pasos", [["1", "Continua (sin pausa de 1 frame)"], ["0", "Original (por casillas)"]]]
@@ -77,7 +75,7 @@ export function activate(ctx) {
       option("map", "map", "Mapa actual: " + String(ctx.editor.activeMapId() ?? "sin mapa")) + '</select>' +
       fields.map(([id, title, items]) => '<label>' + title + '</label><select data-key="' + id + '" style="' + inputStyle + '">' +
         items.map(([value, label]) => option(id, value, label)).join("") + '</select>').join("") +
-      '<label>Suavizado de camara (0 = clasica, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
+      '<label>Suavizado de camara (0 = rapida, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="display:flex;gap:6px;margin:15px 0"><button data-save style="' + buttonStyle + ';flex:1">Guardar</button>' +
       '<button data-reset style="' + buttonStyle + '">Restablecer</button></div>' +
       '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan durante la partida. La camara usa este valor incluso si Fancy Camera (switch 59) esta apagada. El movimiento libre sub-tile real no esta disponible.</p></div>';
