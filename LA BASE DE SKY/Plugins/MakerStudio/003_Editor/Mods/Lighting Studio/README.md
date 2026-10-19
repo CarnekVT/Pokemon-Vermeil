@@ -1,4 +1,4 @@
-# Lighting Studio v0.5.4 — interpolación angular de normales
+# Lighting Studio v0.7.0 — normals, máscaras PNG y ciclo día/noche
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -222,3 +222,61 @@ El test independiente se ha trasladado a `LA BASE DE SKY/DeveloperTests/Lighting
 - Prueba Ruby independiente actualizada: `ruby "DeveloperTests/LightingStudio/test_character_normals.rb"`. No colocar tests `.rb` dentro de Plugins.
 
 **Estado de validación:** pendientes la ejecución del test Ruby y la comprobación visual en Essentials 21.1/mkxp-z. No se ha medido el impacto en FPS en el juego real.
+
+## v0.7.0 — Cambios implementados
+
+### 1. Optimización de normals y control real de brillo
+
+- Las normales del jugador y followers tienen intensidad configurable: `normalSettings.intensity`, rango 0–1.5, valor predeterminado **0.5** (antes se imponía un brillo máximo fijo).
+- `normalSettings.warmup` precarga el PNG de normales al dibujar el personaje, antes de entrar en una luz; se pueden generar **dos orientaciones nuevas por fotograma** en lugar de una, por lo que ambas capas pueden aparecer al mismo tiempo.
+- No se hornean todas las animaciones en cada frame: caché de hasta 128 bitmaps, liberada al cambiar de mapa. La primera vez que aparece una orientación nueva todavía puede producirse una pequeña carga.
+- En Maker Studio, panel «NORMAL MAPS · Catálogo global»: slider **Intensidad visual de normales** y casilla de precarga.
+- La iluminación de normales de una fuente personalizada PNG comprueba además si el personaje se encuentra dentro de una zona clara de su máscara, evitando respuesta donde la imagen es negra/transparente.
+
+### 2. Mejoras de rendimiento de Maker Studio
+
+- Editor: tres modos **Calidad de previsualización** (Rápida / Equilibrada / Completa).
+- Se ralentizan los repintados en los modos económicos y las actualizaciones del diagnóstico. La vista previa usa chunks de 96×96 y caché acotada para reducir coste.
+- Las ediciones por slider se guardan con retardo, no con una escritura del archivo por cada tick de ratón. Los controles mantienen su configuración al guardar.
+- No se ha medido el FPS real del editor en esta revisión; es preciso probar mapas con bastantes luces y Animated Props.
+
+### 3. Luces con máscaras de forma personalizada
+
+- Tipo de luz **«Máscara PNG (forma personalizada)»**.
+- Directorio: `Graphics/LightingStudio/Masks/`. Ejemplo: `cueva_salida.png`.
+- Los valores RGBA y la escala de grises del PNG definen la forma y su intensidad, tanto en la vista previa como en el runtime.
+- Configuración: nombre del archivo, ancho y alto de proyección, rotación, color, potencia y pulsación. Se conservan los mapas con luces geométricas anteriores.
+- El editor carga el archivo mediante la misma lectura binaria de Maker Studio que Animated Props.
+- **Para una salida de cueva:** dibuja en blanco/gris el área iluminada hacia fuera, con transparencia detrás del muro. La luz resultante no se extiende fuera de la silueta dibujada.
+- Se aceptan nombres PNG simples, tamaño máximo 512×512. Consulta `Graphics/LightingStudio/Masks/README.md`.
+
+### 4. Ciclo horario (fuente real o reloj interno)
+
+- Configuración global `timeOfDay` en `Data/LightingStudio/maps.json`. **Desactivado por defecto**, para no cambiar la iluminación ya creada.
+- `source: "real"`: hora local del ordenador. `source: "internal"`: reloj interno que avanza con la variable `minutesPerSecond` y se conserva en la partida mediante `$PokemonGlobal`.
+- `keyframes`: tabla editable de horas (0–24), color ambiente `#RRGGBB` y oscuridad 0–1. La transición entre entradas es suave e incluye el tramo de 23:59 a 00:00.
+- Modo por mapa `dayNightMode: "follow" | "ignore"`: útil para que las cuevas e interiores conserven su iluminación configurada.
+- En Maker Studio → «Ciclo de día y noche»: origen, hora inicial, velocidad, colores por hora, oscuridad por hora, anulación por mapa y una hora de previsualización que **no modifica el reloj ingame**.
+- En eventos Ruby: `LightingStudioDayNight.current_hour` y `LightingStudioDayNight.set_internal_time(18,30)`.
+- En esta etapa controla la **luz ambiental**; no ajusta automáticamente niebla, clima ni el encendido/apagado de cada farola.
+
+### Ejemplo de esquema añadido
+
+```json
+{
+  "normalSettings": {"enabled":true,"intensity":0.5,"warmup":true},
+  "timeOfDay": {
+    "enabled":true,"source":"internal","startHour":8,"minutesPerSecond":0.1,
+    "keyframes":[
+      {"hour":0,"color":"#182440","darkness":0.68},
+      {"hour":12,"color":"#FFFFFF","darkness":0.0}
+    ]
+  }
+}
+```
+
+### Validación y límites
+
+- **JS:** syntax-check de módulos editados; comprobada migración de mapa antiguo, lectura de máscara y cálculo horario en pruebas de modelo.
+- **Ruby:** pendiente `ruby -c` del plugin y prueba real en Essentials/mkxp-z. No hay confirmación de FPS ni del aspecto visual dentro del juego.
+- Los PNG y colores son autorales; el plugin no genera automáticamente una máscara a partir de tiles existentes. Los mapas existentes mantienen su configuración cuando `timeOfDay.enabled=false`.
