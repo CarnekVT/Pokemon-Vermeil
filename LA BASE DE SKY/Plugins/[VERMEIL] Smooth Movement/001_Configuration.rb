@@ -6,7 +6,8 @@ module VermeilMovement
     "mode"              => "grid",
     "subtile_divisions" => "4",
     "instant_turn"      => "1",
-    "input_buffer_ms"   => "0",
+    "flow_motion"       => "0",
+    "camera_lookahead"  => "0",
     "wall_slide"        => "0",
     "smooth_movement"   => "1",
     "camera_smoothing"  => "35"
@@ -16,7 +17,8 @@ module VermeilMovement
     "mode"              => ["grid", "free"],
     "subtile_divisions" => ["4", "8"],
     "instant_turn"      => ["0", "1"],
-    "input_buffer_ms"   => ["0", "60", "100", "150"],
+    "flow_motion"       => ["0", "1"],
+    "camera_lookahead"  => ["0", "8", "16", "24", "32"],
     "wall_slide"        => ["0", "1"],
     "smooth_movement"   => ["0", "1"]
   }
@@ -97,8 +99,12 @@ module VermeilMovement
     option("subtile_divisions").to_i
   end
 
-  def self.input_buffer_ms
-    option("input_buffer_ms").to_i
+  def self.flow?
+    enabled?("instant_turn") && enabled?("flow_motion")
+  end
+
+  def self.camera_lookahead
+    option("camera_lookahead").to_i
   end
 
   def self.camera_smoothing
