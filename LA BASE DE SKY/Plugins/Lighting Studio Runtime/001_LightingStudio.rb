@@ -39,30 +39,40 @@ module LightingStudio
     [s[1,2],s[3,2],s[5,2]].map { |v| v.to_i(16) }
   end
 
-  # Precalculated per-source halo bitmaps; avoid allocating them every frame.
-  def gradient(radius, rgb, softness, pixel_size = 1, steps = 255)
-    pixel_size = [[pixel_size.to_i, 1].max, 32].min
-    steps = [[steps.to_i, 2].max, 255].min
-    diameter = radius * 2
-    bitmap = Bitmap.new(diameter, diameter)
-    radius_sq = radius * radius
-    # Sparse concentric rings reduce Bitmap#set_pixel calls on larger lights.
-    # The prototype prioritizes correctness over GPU-optimized lightmaps.
-    (0...diameter).step(pixel_size) do |y|
-      dy = y - radius + pixel_size / 2.0
-      (0...diameter).step(pixel_size) do |x|
-        dx = x - radius + pixel_size / 2.0
-        fraction = (dx*dx + dy*dy) / radius_sq.to_f
-        next if fraction >= 1.0
-        falloff = (1.0 - Math.sqrt(fraction)) ** (1.0 / softness)
-        alpha = (235 * ((falloff * steps).round.to_f / steps)).round
-        if alpha > 0
-          color = Color.new(rgb[0],rgb[1],rgb[2],alpha)
-          bitmap.fill_rect(x, y, [pixel_size,diameter-x].min, [pixel_size,diameter-y].min, color)
-        end
+  # Generates a low-resolution cached bitmap; sprites scale to world dimensions.
+  def gradient(spec, pixel_size = 1, steps = 255)
+    type = %w[radial cone ellipse rectangle].include?(spec['type']) ? spec['type'] : 'radial'
+    radius = number(spec['radiusPx'],96,8,512)
+    width = %w[ellipse rectangle].include?(type) ? number(spec['widthPx'],160,8,1024) : radius*2
+    height = %w[ellipse rectangle].include?(type) ? number(spec['heightPx'],96,8,1024) : radius*2
+    ratio = [1.0, 128.0/[width,height].max].min
+    w = [[(width*ratio).round,2].max,128].min
+    h = [[(height*ratio).round,2].max,128].min
+    bitmap = Bitmap.new(w,h)
+    color = hex_color(spec['color'])
+    softness = number(spec['softness'],0.75,0.05,1)
+    center = number(spec['centerStrength'],0.65,0,1)
+    aperture = number(spec['angle'],70,5,170)*Math::PI/360.0
+    pixel_size = [[(pixel_size*ratio).round,1].max,32].min
+    (0...h).step(pixel_size) do |y|
+      ny = ((y + pixel_size/2.0)/h - 0.5)*2
+      (0...w).step(pixel_size) do |x|
+        nx = ((x + pixel_size/2.0)/w - 0.5)*2
+        dist = case type
+               when 'rectangle' then [nx.abs,ny.abs].max
+               when 'ellipse' then Math.sqrt(nx*nx+ny*ny)
+               when 'cone' then [Math.sqrt(nx*nx+ny*ny), Math.atan2(ny,nx).abs/aperture].max
+               else Math.sqrt(nx*nx+ny*ny)
+               end
+        next if dist>=1
+        falloff = (1-dist)**(1.0/softness)
+        alpha = ((falloff*(center+(1-center)*[dist*2,1].min))*steps).round.to_f/steps
+        alpha = (alpha*255).round
+        next if alpha<=0
+        bitmap.fill_rect(x,y,[pixel_size,w-x].min,[pixel_size,h-y].min,Color.new(*color,alpha))
       end
     end
-    bitmap
+    [bitmap,width,height]
   end
 end
 
@@ -95,30 +105,30 @@ module LightingStudioSpriteset
     cache = {}
     lights.each do |l|
       next unless l.is_a?(Hash) && l['enabled'] != false
-      radius = LightingStudio.number(l['radiusPx'],96,8,512).round
-      softness = LightingStudio.number(l['softness'],0.75,0.05,1)
-      rgb = LightingStudio.hex_color(l['color'])
-      pixel = l['pixel'].is_a?(Hash) && l['pixel']['enabled'] == true ? l['pixel'] : {}
+      radius = LightingStudio.number(l['radiusPx'],96,8,512)
+      pixel = l['pixel'].is_a?(Hash) && l['pixel']['enabled']==true ? l['pixel'] : {}
       ps = LightingStudio.number(pixel['size'],1,1,32).round
       steps = LightingStudio.number(pixel['steps'],255,2,255).round
-      key = [radius,rgb,softness,ps,steps]
-      bitmap = cache[key]
-      unless bitmap
-        bitmap = LightingStudio.gradient(radius,rgb,softness,ps,steps)
-        cache[key] = bitmap
-        @ls_bitmaps << bitmap
+      key = [l['type'],radius,l['widthPx'],l['heightPx'],l['angle'],l['color'],l['softness'],l['centerStrength'],ps,steps]
+      entry = cache[key]
+      unless entry
+        entry = LightingStudio.gradient(l,ps,steps)
+        cache[key] = entry
+        @ls_bitmaps << entry[0]
       end
+      bitmap,width,height = entry
       sprite = Sprite.new(Spriteset_Map.viewport)
       sprite.bitmap = bitmap
-      sprite.ox = radius
-      sprite.oy = radius
+      sprite.ox = bitmap.width/2
+      sprite.oy = bitmap.height/2
       mode = l['blendMode'].to_s
-      sprite.blend_type = mode == 'normal' ? 0 : mode == 'subtract' ? 2 : 1
+      sprite.blend_type = mode=='normal' ? 0 : mode=='subtract' ? 2 : 1
       sprite.z = 8501
-      sprite.opacity = (LightingStudio.number(l['intensity'],0.8,0,1) * 255).round
       pulse = l['pulse'].is_a?(Hash) ? l['pulse'] : {}
-      @ls_sprites << [sprite, LightingStudio.number(l['x'],0,-2048,2048), LightingStudio.number(l['y'],0,-2048,2048), radius,
-                      LightingStudio.number(l['intensity'],0.8,0,1), pulse]
+      @ls_sprites << [sprite,LightingStudio.number(l['x'],0,-2048,2048),
+          LightingStudio.number(l['y'],0,-2048,2048),width,height,
+          LightingStudio.number(l['intensity'],0.8,0,1),pulse,
+          LightingStudio.number(l['rotation'],0,-360,360)]
     end
     ls_update
   end
@@ -131,7 +141,7 @@ module LightingStudioSpriteset
     zx = defined?(TilemapRenderer::ZOOM_X) ? TilemapRenderer::ZOOM_X : 1
     zy = defined?(TilemapRenderer::ZOOM_Y) ? TilemapRenderer::ZOOM_Y : 1
     now = System.uptime
-    @ls_sprites.each do |sprite,tx,ty,radius,base_intensity,pulse|
+    @ls_sprites.each do |sprite,tx,ty,width,height,base_intensity,pulse,rotation|
       sx = tx * Game_Map::TILE_WIDTH - mx
       sy = ty * Game_Map::TILE_HEIGHT - my
       sx = (sx - Graphics.width / 2) * zx + Graphics.width / 2 if zx != 1
@@ -139,13 +149,14 @@ module LightingStudioSpriteset
       wave = pulse['enabled'] == true ? Math.sin(now * Math::PI * 2 * LightingStudio.number(pulse['speedHz'],1,0.05,12) + LightingStudio.number(pulse['phase'],0,0,360) * Math::PI / 180) : 0
       size_mult = 1 + wave * LightingStudio.number(pulse['radius'],0,0,0.9)
       intensity_mult = 1 + wave * LightingStudio.number(pulse['intensity'],0,0,1)
-      sprite.zoom_x = zx * size_mult
-      sprite.zoom_y = zy * size_mult
+      sprite.zoom_x = zx * size_mult * width/sprite.bitmap.width.to_f
+      sprite.zoom_y = zy * size_mult * height/sprite.bitmap.height.to_f
+      sprite.angle = rotation
       sprite.opacity = [[(255 * base_intensity * intensity_mult).round,0].max,255].min
       sprite.x = sx.round
       sprite.y = sy.round
-      sprite.visible = sx + radius*zx*size_mult > 0 && sy + radius*zy*size_mult > 0 &&
-                       sx - radius*zx*size_mult < Graphics.width && sy - radius*zy*size_mult < Graphics.height
+      bound = [width,height].max * [zx,zy].max * size_mult
+      sprite.visible = sx + bound > 0 && sy + bound > 0 && sx - bound < Graphics.width && sy - bound < Graphics.height
     end
   end
 
