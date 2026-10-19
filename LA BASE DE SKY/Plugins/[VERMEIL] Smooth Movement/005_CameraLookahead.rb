@@ -59,7 +59,7 @@ class Game_Player
     goal_y = dy * pixels * Game_Map::Y_SUBPIXELS * scale
 
     # Tiempo REAL: el Turbo no acelera ni salta la transicion visual.
-    alpha = 1.0 - Math.exp(-dt / 0.12)
+    alpha = 1.0 - Math.exp(-dt / VermeilMovement.camera_lead_response)
     desired_x = old_x + (goal_x - old_x) * alpha
     desired_y = old_y + (goal_y - old_y) * alpha
 
