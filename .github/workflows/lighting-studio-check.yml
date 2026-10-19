@@ -21,6 +21,9 @@ jobs:
       - name: Run Ruby normals regression
         working-directory: LA BASE DE SKY
         run: ruby "DeveloperTests/LightingStudio/test_character_normals.rb"
+      - name: Test internal clock and Sleeping Bag
+        working-directory: LA BASE DE SKY
+        run: ruby "DeveloperTests/LightingStudio/test_daynight.rb"
       - name: Check editor JavaScript syntax
         working-directory: LA BASE DE SKY
         run: |
