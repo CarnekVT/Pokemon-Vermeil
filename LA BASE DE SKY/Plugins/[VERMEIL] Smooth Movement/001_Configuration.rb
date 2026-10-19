@@ -64,8 +64,9 @@ module VermeilMovement
 
   def self.poll_changes!
     return unless @sections
-    now = System.uptime
-    return if @last_poll && now - @last_poll < 0.5
+    # Leer el INI con reloj real para no depender de la velocidad del Turbo.
+    now = System.respond_to?(:unscaled_uptime) ? System.unscaled_uptime : System.uptime
+    return if @last_poll && now >= @last_poll && now - @last_poll < 0.5
     @last_poll = now
     @sections = nil if config_mtime != @last_mtime
   end
