@@ -5,7 +5,13 @@ class Game_Player
 
   def update_screen_position(last_real_x, last_real_y)
     map = self.map
-    if !map || map.scrolling?
+    return vermeil_lead_native_camera_update(last_real_x, last_real_y) unless map
+    if map.scrolling?
+      # Devolver el control al scroll de eventos sin dejar un offset residual.
+      previous_x = @_vermeil_lead_x || 0.0
+      previous_y = @_vermeil_lead_y || 0.0
+      map.display_x -= previous_x if previous_x != 0
+      map.display_y -= previous_y if previous_y != 0
       @_vermeil_lead_x = @_vermeil_lead_y = 0.0
       return vermeil_lead_native_camera_update(last_real_x, last_real_y)
     end
