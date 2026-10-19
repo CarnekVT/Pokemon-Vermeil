@@ -1,4 +1,4 @@
-# Vermeil Smooth Movement 0.2.3 (Pokémon Essentials 21.1)
+# Vermeil Smooth Movement 0.3.0 (Pokémon Essentials 21.1)
 
 Plugin Ruby + panel **Movement Studio** para Maker Studio, con opciones globales y por mapa. Editor y juego usan `Plugins/[VERMEIL] Smooth Movement/config.ini` sin depender de JSON ni FileUtils. Los cambios de configuracion se detectan durante la partida (hasta dos comprobaciones por segundo).
 
@@ -33,3 +33,27 @@ El movimiento verdaderamente fluido entre casillas y el modo sub-tile (1/4, 1/8)
 - El parche no reinicia el Turbo al acabar una batalla si se eligio el modo `Siempre`: conserva la velocidad escogida por el jugador. En modo `Solo combates`, los handlers originales siguen restaurando la velocidad normal.
 
 Prueba: inicia Turbo a x2 en el mapa, entra en combate (etapa equivalente x3), termina el combate y verifica que el movimiento de jugador/NPC, el scroll y el cambio de velocidad no saltan ni se congelan. Repite en modo `Solo combates` y con Turbo desactivado. Los cambios se han validado mediante una simulacion aislada del reloj; falta ejecutarlos en mkxp.
+
+## Versión 0.3.0 - Primera mejora de respuesta sin alterar el grid
+
+Se incorpora el **buffer de giro opcional**: `input_buffer_ms=0|60|100|150`. Con `instant_turn=1`, si se pulsa una dirección durante los ultimos milisegundos de un paso y se suelta antes de terminar, se recordará durante el intervalo elegido para ejecutarla en la siguiente oportunidad permitida. La entrada todavía pulsada siempre tiene prioridad frente al buffer. Cada intención se consume una sola vez, y caduca segun el reloj **real** (`System.unscaled_uptime`), no el tiempo acelerado por Turbo.
+
+La captura se omite en condiciones delicadas: combates, intérprete activo, mensajes, movimiento forzado, saltos, escaleras, hielo, cascadas, movimiento `through` y colisiones especiales. Antes de consumirla se comprueba si hay eventos pendientes o encuentros. No se adelantan los eventos ni se realiza un update extra del jugador.
+
+El valor predeterminado es **0** (sin buffer), para que las partidas existentes conserven el comportamiento validado. Aunque la opción no exista en un `config.ini` anterior, se interpreta como 0. Movement Studio agrega cuatro opciones y dos presets editables:
+
+- **Clásico:** 4 direcciones, giro original, buffer 0, deslizamiento diagonal apagado y cámara 35.
+- **Ágil:** 8 direcciones, giro inmediato, buffer 100 ms, deslizamiento diagonal activado y cámara 35.
+
+Los perfiles solo alteran los controles del panel. **Debes pulsar Guardar** para aplicar sus valores; no se cambia automáticamente la configuración existente del proyecto.
+
+### Prueba de regresión 0.3.0
+
+1. Con buffer en 0, verifica que nada cambia respecto a 0.2.3.
+2. Con giro inmediato y buffer 100, pulsa brevemente otra dirección justo antes del final de una casilla, y suéltala. El siguiente paso debería recoger esa intención.
+3. Repite con el personaje mirando hacia una pared: no debe atravesarla ni perder la colisión.
+4. Repite en hierba alta junto a un NPC o evento de contacto, y prueba un combate y retorno con Turbo activado.
+5. Prueba hielo, bici, Surf, escalera, movimiento forzado y transiciones. En estos casos el buffer no debe reemplazar el movimiento original.
+6. Selecciona un perfil por mapa, guarda y verifica que el perfil global no cambia.
+
+Pendiente de implementación: movimiento sub-tile con colisiones continuas, actualización segura de eventos/followers y animaciones de 8 direcciones opcionales. No ofrecer estas funciones como activas antes de desarrollarlas y validarlas.
