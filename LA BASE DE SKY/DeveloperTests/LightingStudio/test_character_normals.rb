@@ -140,9 +140,15 @@ Graphics.advance
 sprite=Sprite_Character.new
 sprite.character=$game_player
 sprite.bitmap=Bitmap.new(4,4)
+sprite.z=420
 sprite.update
 layers=sprite.instance_variable_get(:@ls_normal_overlays)
 raise "pair not created" unless layers && layers.length==2
+# A normal pass must share the character's map depth (trees/priorities
+# render in front); it must never be forced above all tiles at z=8502.
+mod.sync_overlay(sprite,layers[0])
+raise "normal map ignores tile priority" unless layers[0].z==421
+
 Graphics.advance
 System.uptime=0.14
 sprite.update
