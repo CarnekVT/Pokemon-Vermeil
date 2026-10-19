@@ -1,4 +1,4 @@
-# Vermeil Smooth Movement 0.1.1 (Essentials v21.1)
+# Vermeil Smooth Movement 0.1.2 (Essentials v21.1)
 
 Panel: Maker Studio > **Movement Studio**. Guarda `config.ini` junto al plugin.
 
@@ -31,3 +31,7 @@ Panel: Maker Studio > **Movement Studio**. Guarda `config.ini` junto al plugin.
 ## Importante al actualizar
 
 Ejecuta el juego en modo debug para forzar la recompilación del plugin si se encuentra el archivo `Data/PluginScripts.rxdata` anterior. La versión 0.1.1 modifica meta.txt para detectar actualización. El editor escribe en el proyecto abierto, no en otro directorio del juego.
+
+### Hotfix 0.1.2
+
+Se soluciono el NoMethodError `undefined method [] for Time` al leer `config.ini`: la lectura de secciones devuelve explicitamente un Hash, no la fecha de modificacion del archivo. El metodo `option` consulta una sola instantanea de configuracion. Reinicia la ejecucion de Game.exe para recompilar y recargar el plugin.
