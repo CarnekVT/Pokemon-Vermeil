@@ -1,4 +1,4 @@
-# Vermeil Smooth Movement 0.2.2 (Pokémon Essentials 21.1)
+# Vermeil Smooth Movement 0.2.3 (Pokémon Essentials 21.1)
 
 Plugin Ruby + panel **Movement Studio** para Maker Studio, con opciones globales y por mapa. Editor y juego usan `Plugins/[VERMEIL] Smooth Movement/config.ini` sin depender de JSON ni FileUtils. Los cambios de configuracion se detectan durante la partida (hasta dos comprobaciones por segundo).
 
@@ -24,3 +24,12 @@ El movimiento verdaderamente fluido entre casillas y el modo sub-tile (1/4, 1/8)
 5. Prueba eventos de contacto, encuentros, followers, escaleras, hielo, bicicleta, Surf y transiciones de mapa. No activar diagonales en maniobras especiales.
 
 **Nota:** Los archivos se han revisado en GitHub, pero la ejecucion dentro de mkxp/RPG Maker requiere pruebas locales.
+
+## Hotfix 0.2.3 - Turbo y transiciones de combate
+
+- En `Data/Scripts/058_Utilities/010_Turbo.rb` se reajusta el offset de `System.uptime` al pasar de `SPEED_STAGES` (overworld) a `SPEED_BATTLE_STAGES` (batalla), y viceversa. Evita saltos masivos hacia adelante/atras del reloj virtual cuando el multiplicador cambia sin llamar a `Turbo.set_speed`.
+- `Turbo.set_speed` actualiza tambien el multiplicador de referencia para evitar una doble correccion de tiempo.
+- Movement Studio consulta cambios de `config.ini` usando `System.unscaled_uptime`, independientemente de la velocidad del Turbo.
+- El parche no reinicia el Turbo al acabar una batalla si se eligio el modo `Siempre`: conserva la velocidad escogida por el jugador. En modo `Solo combates`, los handlers originales siguen restaurando la velocidad normal.
+
+Prueba: inicia Turbo a x2 en el mapa, entra en combate (etapa equivalente x3), termina el combate y verifica que el movimiento de jugador/NPC, el scroll y el cambio de velocidad no saltan ni se congelan. Repite en modo `Solo combates` y con Turbo desactivado. Los cambios se han validado mediante una simulacion aislada del reloj; falta ejecutarlos en mkxp.
