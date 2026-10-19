@@ -97,14 +97,52 @@ function stamp(g,l,project,t,blend){
   g.drawImage(mask,-w/2,-h/2,w,h);
   g.restore();
 }
+// Channel-wise maximum, not Canvas "lighten" (which still accumulates alpha).
+// The output is opaque pre-multiplied RGB; black adds zero with screen blending.
+export function mergeColorMax(dst,pos,r,g,b,alpha){
+  const a=alpha/255;
+  dst[pos]=Math.max(dst[pos],Math.round(r*a));
+  dst[pos+1]=Math.max(dst[pos+1],Math.round(g*a));
+  dst[pos+2]=Math.max(dst[pos+2],Math.round(b*a));
+  dst[pos+3]=255;
+}
+let scratchView=null;
 function fillUnified(buffer,ctx,lights,project,width,height,t){
-  ctx.save();
-  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.fillStyle='#000';
-  ctx.fillRect(0,0,width,height);
   const p={x:x=>project.x(x)*COMPOSITE_SCALE,y:y=>project.y(y)*COMPOSITE_SCALE,
     scale:()=>project.scale()*COMPOSITE_SCALE};
-  for(const l of lights)stamp(ctx,l,p,t,'lighten');
-  ctx.restore();
+  if(!scratchView||scratchView.width!==width||scratchView.height!==height)
+    scratchView=newCanvas(width,height);
+  const work=scratchView.getContext('2d');
+  if(!work)return;
+  const result=ctx.createImageData(width,height),dest=result.data;
+  // Opaque black pixels are neutral in final screen blend.
+  for(let i=3;i<dest.length;i+=4)dest[i]=255;
+  for(const l of lights){
+    const dims=dimensions(l),anim=evaluated(l,t),scale=anim.scale*p.scale();
+    const w=dims.w*scale,h=dims.h*scale;
+    const rotation=(Number(l.rotation)||0)*Math.PI/180;
+    const c=Math.abs(Math.cos(rotation)),si=Math.abs(Math.sin(rotation));
+    const bw=c*w+si*h,bh=si*w+c*h;
+    const cx=p.x(l.x),cy=p.y(l.y);
+    const left=Math.max(0,Math.floor(cx-bw*.5)-1);
+    const top=Math.max(0,Math.floor(cy-bh*.5)-1);
+    const right=Math.min(width,Math.ceil(cx+bw*.5)+1);
+    const bottom=Math.min(height,Math.ceil(cy+bh*.5)+1);
+    if(left>=right||top>=bottom)continue;
+    work.save();work.globalCompositeOperation='source-over';work.clearRect(left,top,right-left,bottom-top);work.restore();
+    stamp(work,l,p,t,'source-over');
+    const area=work.getImageData(left,top,right-left,bottom-top).data;
+    const stride=(right-left),rows=(bottom-top);
+    for(let row=0;row<rows;row++){
+      const outRow=((top+row)*width+left)*4,srcRow=row*stride*4;
+      for(let col=0;col<stride;col++){
+        const si=srcRow+col*4,a=area[si+3];
+        if(a===0)continue;
+        mergeColorMax(dest,outRow+col*4,area[si],area[si+1],area[si+2],a);
+      }
+    }
+  }
+  ctx.save();ctx.globalCompositeOperation='copy';ctx.putImageData(result,0,0);ctx.restore();
 }
 function getUnion(lights,project,width,height,t){
   const w=Math.max(1,Math.ceil(width*COMPOSITE_SCALE));
@@ -125,7 +163,7 @@ function getUnion(lights,project,width,height,t){
   sharedKey=key;
   return sharedView;
 }
-export function clearLightCache(){masks.clear();sharedView=null;sharedKey=null;}
+export function clearLightCache(){masks.clear();sharedView=null;scratchView=null;sharedKey=null;}
 export function cacheSize(){return {masks:masks.size,views:sharedView?1:0};}
 export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'){
   const visible=(lights||[]).filter(l=>l.enabled!==false);
