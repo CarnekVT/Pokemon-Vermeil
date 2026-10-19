@@ -1,7 +1,7 @@
 {
   "id": "com.carnekvt.lighting-studio",
   "name": "Lighting Studio",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Editor de iluminación 2D con previsualización del cursor, marcadores y gizmos sobre el mapa de Maker Studio.",
+  "description": "Iluminación 2D sobre mapas con luces unificadas, difuminado direccional y editor tabulado.",
   "tags": [
     "mapping",
     "lighting",
