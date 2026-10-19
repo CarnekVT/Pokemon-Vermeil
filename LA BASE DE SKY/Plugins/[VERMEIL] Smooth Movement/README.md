@@ -1,59 +1,53 @@
-# Vermeil Smooth Movement 0.3.0 (Pokémon Essentials 21.1)
+# Vermeil Movement Studio 0.4.0 — Pokémon Essentials 21.1 / Base de Sky
 
-Plugin Ruby + panel **Movement Studio** para Maker Studio, con opciones globales y por mapa. Editor y juego usan `Plugins/[VERMEIL] Smooth Movement/config.ini` sin depender de JSON ni FileUtils. Los cambios de configuracion se detectan durante la partida (hasta dos comprobaciones por segundo).
+Un plugin real de movimiento para el personaje, editable desde Maker Studio.
+Archivo de configuración: `Plugins/[VERMEIL] Smooth Movement/config.ini`.
+Admite configuración global y por mapa. No necesita JSON, FileUtils ni URI.
 
-## Opciones funcionales
+## Tres avances funcionales
 
-- **4 u 8 direcciones.** Cuatro por defecto; diagonales opcionales para terreno normal. Las diagonales comprueban ambas rutas ortogonales y mantienen sprites tradicionales de cuatro filas.
-- **Giro inmediato / giro clasico.** En inmediato, si el jugador esta quieto y presiona otra direccion, gira e inicia el movimiento en ese mismo update. En clasico se utiliza literalmente `Game_Player#update_command_new` original de Essentials, incluido su retardo inicial de 75 ms. **Mientras ya camina, ambos modos funcionan casi igual por la naturaleza del grid original**; esto no es movimiento libre.
-- **Deslizamiento en diagonales.** Si la diagonal esta bloqueada, opcion para intentar uno de los ejes cardinales.
-- **Camara 0-100.** El valor 35 respeta el movimiento de camara previo del proyecto. Valores menores siguen antes y valores mayores siguen con mas rezago. Se aplica al resultado de la camara existente, tambien cuando Fancy Camera (switch 59) esta desactivada. La implementacion preserva scroll de mapa y camaras de eventos/cutscenes.
+**1. Controles modernos (siempre inmediatos).** El sistema toma la pulsación ACTUAL para mover en 4 u 8 direcciones; no guarda entradas anteriores ni introduce pausas artificiales. La alternativa **Clásica** conserva íntegra la respuesta y el giro original de Pokémon Essentials para quien la prefiera. Ninguna otra opción degrada intencionadamente la respuesta de los botones.
 
-## Correccion de suavidad
+**2. Continuous Flow (nuevo, opcional).** Cuando el jugador termina un paso y mantiene pulsada una dirección, se prepara el siguiente después de que Essentials procese `on_step_taken`, eventos de contacto, seguidores y encuentros. Se arrastra únicamente la fracción de tiempo sobrante del paso anterior para evitar el fotograma vacío. Los tiles lógicos siguen intactos y NO se fuerza un segundo `update_move` en el mismo fotograma. Solo está activo en el modo Moderno y caminando/corriendo por suelo normal; no se usa en hielo, Surf, bicicleta, escaleras, rutas forzadas o cutscenes.
 
-Se quito la interpolacion `smoothstep` por tile: frenaba el sprite al final de *cada* casilla y hacia caminar seguido mas entrecortado. El jugador vuelve a la interpolacion lineal nativa de Essentials. El control `smooth_movement` en INI queda como dato heredado **sin efecto**, y se ha retirado del panel. Se ha eliminado tambien el intento de arrancar un segundo paso fuera del ciclo de actualizacion original, por riesgo de desincronizar eventos, encuentros o followers.
+**3. Look-ahead de cámara (nuevo, opcional).** La cámara puede anticipar visualmente 8, 16, 24 o 32 píxeles en la dirección ACTUAL de movimiento, con interpolación basada en el tiempo real e independiente de Turbo. No modifica movimiento, colisiones ni orientación. Respeta el sistema preexistente Fancy Camera/Carnek Project Settings, movimientos forzados de mapa y objetivos de cámara de los eventos. El valor 0 desactiva el efecto.
 
-El movimiento verdaderamente fluido entre casillas y el modo sub-tile (1/4, 1/8) requieren una implementacion especifica con colisiones y eventos; **todavia no estan disponibles**. No se muestran como funciones activas en Movement Studio.
+## Ajustes disponibles en Maker Studio
 
-## Pruebas manuales
+| Parámetro | Valores | Inicial |
+|---|---|---|
+| Direcciones | 4 / 8 | 4 |
+| Control | Moderno inmediato / Clásico Essentials | Moderno |
+| Continuous Flow | Activado / Desactivado | Desactivado |
+| Deslizamiento diagonal ante paredes | Sí / No | No |
+| Anticipación de cámara | 0 / 8 / 16 / 24 / 32 píxeles | 0 |
+| Suavidad de cámara final | 0–100 (35=base de Vermeil) | 35 |
+| Perfil por mapa | Sobrescritura local o Global | Global |
 
-1. Actualiza esta rama, cierra el juego y abrelo en modo Debug para que compile el plugin 0.2.2.
-2. En Maker Studio selecciona **Global**, cambia a giro clasico, guarda y verifica su confirmacion de lectura de `config.ini`. Compara la pausa al girar **desde parado** con el giro inmediato.
-3. Camina varias casillas de corrido: comprueba que desaparecieron los frenazos del viejo easing.
-4. En un mapa amplio, prueba camara **0, 35 y 100** con switch 59 apagado y encendido. Evita cutscenes para esta prueba.
-5. Prueba eventos de contacto, encuentros, followers, escaleras, hielo, bicicleta, Surf y transiciones de mapa. No activar diagonales en maniobras especiales.
+**No hay búfer de pulsaciones.** El antiguo `input_buffer_ms` se ignora al leer configuraciones antiguas y se descarta al guardarlas de nuevo. El campo heredado `smooth_movement` tampoco ejecuta efectos y se ha retirado del panel.
 
-**Nota:** Los archivos se han revisado en GitHub, pero la ejecucion dentro de mkxp/RPG Maker requiere pruebas locales.
+Perfiles rápidos, ambos editables y requieren pulsar **Guardar**:
+- **Clásico**: 4 direcciones, control original, Flow apagado, cámara centrada.
+- **Moderno**: 8 direcciones, respuesta inmediata, Flow encendido, deslizamiento diagonal y look-ahead de 16 px.
 
-## Hotfix 0.2.3 - Turbo y transiciones de combate
+La configuración que existe actualmente en el proyecto **no se cambia automáticamente** al actualizar el plugin ni al abrir el panel.
 
-- En `Data/Scripts/058_Utilities/010_Turbo.rb` se reajusta el offset de `System.uptime` al pasar de `SPEED_STAGES` (overworld) a `SPEED_BATTLE_STAGES` (batalla), y viceversa. Evita saltos masivos hacia adelante/atras del reloj virtual cuando el multiplicador cambia sin llamar a `Turbo.set_speed`.
-- `Turbo.set_speed` actualiza tambien el multiplicador de referencia para evitar una doble correccion de tiempo.
-- Movement Studio consulta cambios de `config.ini` usando `System.unscaled_uptime`, independientemente de la velocidad del Turbo.
-- El parche no reinicia el Turbo al acabar una batalla si se eligio el modo `Siempre`: conserva la velocidad escogida por el jugador. En modo `Solo combates`, los handlers originales siguen restaurando la velocidad normal.
+## Compatibilidad y seguridad
 
-Prueba: inicia Turbo a x2 en el mapa, entra en combate (etapa equivalente x3), termina el combate y verifica que el movimiento de jugador/NPC, el scroll y el cambio de velocidad no saltan ni se congelan. Repite en modo `Solo combates` y con Turbo desactivado. Los cambios se han validado mediante una simulacion aislada del reloj; falta ejecutarlos en mkxp.
+- La lógica de Turbo y su continuidad entre combate/overworld **no se modifica** en esta actualización. Continuous Flow usa el `@delta_t` que ya calcula Turbo; look-ahead utiliza `System.unscaled_uptime`.
+- Cada casilla termina y dispara sus eventos/encuentros mediante el motor original ANTES de encadenar el siguiente paso.
+- Se cancela Flow si aparecen eventos pendientes, encuentro, menú, diálogo, intérprete, transición de mapa, movimiento especial o movimiento forzado.
+- Los seguidores reciben las actualizaciones nativas del jugador, sin moverlos dos veces por fotograma.
+- La cámara extra no se aplica a las cutscenes con seguimiento de eventos, sacudidas y scroll manual.
+- No se implementa todavía movimiento sub-tile real; requiere una nueva lógica de colisiones y eventos, separada de esta versión.
 
-## Versión 0.3.0 - Primera mejora de respuesta sin alterar el grid
+## Plan mínimo de pruebas dentro del juego
 
-Se incorpora el **buffer de giro opcional**: `input_buffer_ms=0|60|100|150`. Con `instant_turn=1`, si se pulsa una dirección durante los ultimos milisegundos de un paso y se suelta antes de terminar, se recordará durante el intervalo elegido para ejecutarla en la siguiente oportunidad permitida. La entrada todavía pulsada siempre tiene prioridad frente al buffer. Cada intención se consume una sola vez, y caduca segun el reloj **real** (`System.unscaled_uptime`), no el tiempo acelerado por Turbo.
+1. Comprobar Clásico: girar parado debe comportarse exactamente como en Essentials. Probar también 4 direcciones con Flow desactivado.
+2. Probar Moderno, 8 direcciones, Flow activado y una pulsación mantenida por muchas casillas: continuidad sin aceleraciones anómalas ni pasos saltados.
+3. Soltar la dirección en medio de una casilla: **no debe generarse otro paso por recordar teclas antiguas**.
+4. Caminar contra paredes, NPC y eventos de contacto; pisar hierba alta y entrar/salir de combate con Turbo activado.
+5. Comprobar seguidor, puerta de transferencia, escalera lateral/espiral, hielo, bicicleta, Surf, corte de movimiento y cambio de mapa.
+6. Con Fancy Camera (switch 59) tanto ON como OFF, probar look-ahead 0/16/32 con suavidad 35; después cambiar a cámara final 0 y 100.
 
-La captura se omite en condiciones delicadas: combates, intérprete activo, mensajes, movimiento forzado, saltos, escaleras, hielo, cascadas, movimiento `through` y colisiones especiales. Antes de consumirla se comprueba si hay eventos pendientes o encuentros. No se adelantan los eventos ni se realiza un update extra del jugador.
-
-El valor predeterminado es **0** (sin buffer), para que las partidas existentes conserven el comportamiento validado. Aunque la opción no exista en un `config.ini` anterior, se interpreta como 0. Movement Studio agrega cuatro opciones y dos presets editables:
-
-- **Clásico:** 4 direcciones, giro original, buffer 0, deslizamiento diagonal apagado y cámara 35.
-- **Ágil:** 8 direcciones, giro inmediato, buffer 100 ms, deslizamiento diagonal activado y cámara 35.
-
-Los perfiles solo alteran los controles del panel. **Debes pulsar Guardar** para aplicar sus valores; no se cambia automáticamente la configuración existente del proyecto.
-
-### Prueba de regresión 0.3.0
-
-1. Con buffer en 0, verifica que nada cambia respecto a 0.2.3.
-2. Con giro inmediato y buffer 100, pulsa brevemente otra dirección justo antes del final de una casilla, y suéltala. El siguiente paso debería recoger esa intención.
-3. Repite con el personaje mirando hacia una pared: no debe atravesarla ni perder la colisión.
-4. Repite en hierba alta junto a un NPC o evento de contacto, y prueba un combate y retorno con Turbo activado.
-5. Prueba hielo, bici, Surf, escalera, movimiento forzado y transiciones. En estos casos el buffer no debe reemplazar el movimiento original.
-6. Selecciona un perfil por mapa, guarda y verifica que el perfil global no cambia.
-
-Pendiente de implementación: movimiento sub-tile con colisiones continuas, actualización segura de eventos/followers y animaciones de 8 direcciones opcionales. No ofrecer estas funciones como activas antes de desarrollarlas y validarlas.
+**Estado:** sintaxis/configuración verificables en código; el comportamiento real en mkxp debe validarse dentro del juego antes de declarar la versión estable.
