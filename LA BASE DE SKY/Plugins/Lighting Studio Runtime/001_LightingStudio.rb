@@ -8,6 +8,8 @@ module LightingStudio
   LIGHTMAP_SCALE = 0.5
   MAX_SOURCES = 160
   MERGE_FPS = 8
+  # Shared union is intentionally low-res; every source broadens the same area
+  # without summing its brightness on overlaps.
   module_function
 
   def number(value, fallback, min, max)
@@ -129,6 +131,7 @@ module LightingStudioSpriteset
     @ls_add_sources = []
     @ls_ambient_sprite = nil
     @ls_lightmap = nil
+    @ls_workmap = nil
     @ls_lightmap_sprite = nil
     @ls_last_frame_key = nil
     ls_setup
@@ -167,14 +170,14 @@ module LightingStudioSpriteset
       intensity = LightingStudio.number(s['intensity'],0.8,0,1)
       pulse = s['pulse'].is_a?(Hash) ? s['pulse'] : {}
       mode = s['blendMode'].to_s
-      if mode.empty? || mode == 'add'
+      if ['','add','union'].include?(mode)
         @ls_add_sources << [bmp,w,h,x,y,intensity,pulse]
       else
         sprite = Sprite.new(Spriteset_Map.viewport)
         sprite.bitmap = bmp
         sprite.ox = bmp.width/2
         sprite.oy = bmp.height/2
-        sprite.blend_type = mode=='subtract' ? 2 : 0
+        sprite.blend_type = mode=='subtract' ? 2 : mode=='sum' ? 1 : 0
         sprite.z = 8501
         @ls_sprites << [sprite,w,h,x,y,intensity,pulse]
       end
@@ -183,6 +186,7 @@ module LightingStudioSpriteset
       width = [(Graphics.width*LightingStudio::LIGHTMAP_SCALE).ceil,1].max
       height = [(Graphics.height*LightingStudio::LIGHTMAP_SCALE).ceil,1].max
       @ls_lightmap = Bitmap.new(width,height)
+      @ls_workmap = Bitmap.new(width,height)
       @ls_lightmap_sprite = Sprite.new(Spriteset_Map.viewport)
       @ls_lightmap_sprite.bitmap = @ls_lightmap
       @ls_lightmap_sprite.zoom_x = Graphics.width.to_f/width
@@ -232,7 +236,32 @@ module LightingStudioSpriteset
       next if x+sw/2<0 || y+sh/2<0 || x-sw/2>Graphics.width || y-sh/2>Graphics.height
       dx=((x-sw/2)*rx).round;dy=((y-sh/2)*ry).round
       dw=[(sw*rx).round,1].max;dh=[(sh*ry).round,1].max
-      @ls_lightmap.stretch_blt(Rect.new(dx,dy,dw,dh),bmp,Rect.new(0,0,bmp.width,bmp.height),alpha)
+      # Render each lantern into a temporary mask, then apply per-channel MAX.
+      # This makes overlap widen the lit area without doubling its intensity.
+      left = [[dx,0].max,@ls_lightmap.width].min
+      top = [[dy,0].max,@ls_lightmap.height].min
+      right = [[dx+dw,0].max,@ls_lightmap.width].min
+      bottom = [[dy+dh,0].max,@ls_lightmap.height].min
+      next if right<=left || bottom<=top
+      @ls_workmap.clear
+      @ls_workmap.stretch_blt(Rect.new(dx,dy,dw,dh),bmp,Rect.new(0,0,bmp.width,bmp.height),alpha)
+      yy=top
+      while yy<bottom
+        xx=left
+        while xx<right
+          source=@ls_workmap.get_pixel(xx,yy)
+          if source.alpha>0
+            dest=@ls_lightmap.get_pixel(xx,yy)
+            factor=source.alpha/255.0
+            r=[dest.red,(source.red*factor).round].max
+            g=[dest.green,(source.green*factor).round].max
+            b=[dest.blue,(source.blue*factor).round].max
+            @ls_lightmap.set_pixel(xx,yy,Color.new(r,g,b,255))
+          end
+          xx+=1
+        end
+        yy+=1
+      end
     end
   end
 
@@ -272,6 +301,10 @@ module LightingStudioSpriteset
     if @ls_lightmap
       @ls_lightmap.dispose unless @ls_lightmap.disposed?
       @ls_lightmap=nil
+    end
+    if @ls_workmap
+      @ls_workmap.dispose unless @ls_workmap.disposed?
+      @ls_workmap=nil
     end
     if @ls_ambient_sprite
       bmp=@ls_ambient_sprite.bitmap
