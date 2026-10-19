@@ -23,8 +23,8 @@ export const defaultNormals = () => ({
 });
 // Source and normal filenames are relative game assets; reject path traversal.
 export function assetName(v){
-  const value=String(v||'').trim();
-  return value.length<=150&&/^[\p{L}\p{N}_ .()!+@\-]+$/u.test(value)&&value!=='.'&&value!=='..'?value:'';
+  const value=normalGraphicName(v);
+  return value&&value.length<=150?value:'';
 }
 export function normalizeNormalBinding(raw,category){
   if(!NORMAL_CATEGORIES[category]||!raw||typeof raw!=='object')return null;
