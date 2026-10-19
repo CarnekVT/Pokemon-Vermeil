@@ -22,6 +22,7 @@ module LightingStudioNormals
   @mode = :lit
   @normal_raw = {}
   @normal_bitmaps = {}
+  @mask_samples = {}
   @frames = {}
   @attached = {}
   @last_build_frame = nil
@@ -82,6 +83,8 @@ module LightingStudioNormals
     @frames.clear
     @normal_bitmaps.clear
     @normal_raw.clear
+    @mask_samples.each_value { |row| row[0].dispose if row[0] && !row[0].disposed? }
+    @mask_samples.clear
     @last_build_frame = nil
     @build_count = 0
     clear_lights
@@ -128,7 +131,7 @@ module LightingStudioNormals
       angle = LightingStudio.number(src['angle'], 70, 5, 170) * Math::PI / 360.0
       @lights << [cx, cy, radius, color,
                   LightingStudio.number(src['intensity'], 0.8, 0, 1),
-                  pulse, type, rotation, width, height, angle]
+                  pulse, type, rotation, width, height, angle, src['maskFile']]
     end
     @lights
   rescue StandardError => e
@@ -166,7 +169,7 @@ module LightingStudioNormals
     cx,cy = character_world_position(character)
     best = nil
     score = 0.0
-    light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity,pulse,type,rotation,width,height,angle|
+    light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity,pulse,type,rotation,width,height,angle,mask_name|
       size, energy = LightingStudio.pulse_values(pulse, now)
       next if energy <= 0.0 || intensity <= 0.0
       dx=lx-cx
@@ -187,6 +190,12 @@ module LightingStudioNormals
                  when 'rectangle'
                    [(local_x/(width*size/2.0+margin)).abs,
                     (local_y/(height*size/2.0+margin)).abs].max
+                 when 'mask'
+                   # Mask PNG is projected with the same world dimensions and
+                   # rotation as Lighting Studio's mask Sprite in the map.
+                   half_w=width*size/2.0;half_h=height*size/2.0
+                   next if local_x.abs>half_w || local_y.abs>half_h
+                   0.0
                  when 'cone'
                    # Light-to-character direction is the negative of dx/dy.
                    fx=-local_x
@@ -202,7 +211,9 @@ module LightingStudioNormals
       next if progress >= 1.0 + OUTER_CONTACT_MARGIN
       # No hard cutoff at the light's radius: both shape and strength taper
       # continuously to zero. Radius AND intensity obey the pulse waveform.
-      strength = [[intensity*energy*smooth_edge(progress),0.0].max,1.0].min
+      mask_power=type=='mask' ? mask_power_at(mask_name,local_x,local_y,width*size,height*size) : 1.0
+      next if mask_power<=0.0
+      strength = [[intensity*energy*mask_power*smooth_edge(progress),0.0].max,1.0].min
       next if strength <= score
       score = strength
       theta = Math.atan2(dy,dx)
@@ -210,6 +221,31 @@ module LightingStudioNormals
       best = [direction_a,direction_b,mix,rgb,strength]
     end
     best
+  end
+
+  def mask_power_at(name,dx,dy,width,height)
+    return 0.0 unless /\A[a-zA-Z0-9_-]{1,70}\.png\z/i.match?(name.to_s)
+    path="Graphics/LightingStudio/Masks/#{name}"
+    unless @mask_samples.key?(path)
+      return 0.0 unless File.file?(path)
+      bitmap=Bitmap.new(path)
+      raw=bitmap.respond_to?(:raw_data) ? bitmap.raw_data : nil
+      unless raw && raw.respond_to?(:getbyte)
+        bitmap.dispose unless bitmap.disposed?
+        return 0.0
+      end
+      @mask_samples[path]=[bitmap,raw]
+    end
+    image,raw=@mask_samples[path]
+    u=0.5-dx/width.to_f;v=0.5-dy/height.to_f
+    return 0.0 unless u>=0 && u<1 && v>=0 && v<1
+    x=(u*image.width).floor;y=(v*image.height).floor
+    i=(y*image.width+x)*4
+    alpha=raw.getbyte(i+3).to_f/255.0
+    gray=(raw.getbyte(i)*54+raw.getbyte(i+1)*183+raw.getbyte(i+2)*19)/65280.0
+    [[alpha*gray,0.0].max,1.0].min
+  rescue StandardError
+    0.0
   end
 
   # Two cached directions with continuous angular weights; no per-frame
