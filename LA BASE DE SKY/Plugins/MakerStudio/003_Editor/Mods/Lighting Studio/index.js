@@ -15,25 +15,33 @@ function invalidate(){if(state)state.revision=(state.revision||0)+1;}
 function redraw(){
  const owner=state;if(!owner?.ctx)return;
  owner.redrawDirty=true;
- if(owner.redrawPending||owner.awaitingOverlay)return;
+ if(owner.redrawPending)return;
  owner.redrawPending=true;
+ // Do not wait for an overlay acknowledgement: Maker Studio can coalesce
+ // callback invocations while a different pane/tool is active.
  const elapsed=performance.now()-(owner.lastRedraw||0);
  setTimeout(()=>{
   if(state!==owner)return;
   owner.redrawPending=false;
-  if(!owner.redrawDirty||owner.awaitingOverlay)return;
+  if(!owner.redrawDirty)return;
   owner.redrawDirty=false;
   owner.lastRedraw=performance.now();
   owner.lastRequestAt=owner.lastRedraw;
-  owner.awaitingOverlay=true;
+  owner.awaitingOverlay=true; // diagnostics only, never blocks redraw
   owner.ctx.editor.requestRedraw?.();
-  // Fail-safe if this Maker Studio build does not signal completion.
-  setTimeout(()=>{
-   if(state!==owner||!owner.awaitingOverlay)return;
-   owner.awaitingOverlay=false;
-   if(owner.redrawDirty)redraw();
-  },700);
- },Math.max(0,110-elapsed));
+ },Math.max(0,65-elapsed));
+}
+function settleFastPreview(){
+ const owner=state;if(!owner)return;
+ owner.fastPreviewUntil=performance.now()+350;
+ if(owner.settleTimer!=null)clearTimeout(owner.settleTimer);
+ owner.settleTimer=setTimeout(()=>{
+   if(state!==owner)return;
+   owner.fastPreviewUntil=0;
+   owner.settleTimer=null;
+   // Rebuild the exact merged illumination only after editing has stopped.
+   invalidate();redraw();
+ },370);
 }
 function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Mapa '+stats.lastMap+' · '+(stats.lastMs||0).toFixed(1)+' ms · espera '+Math.round(stats.requestDelayMs||0)+' ms · caché '+cacheSize().masks+'/'+cacheSize().views:'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
 function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();invalidate();redraw();refresh();void persist().catch(fail);}
@@ -223,7 +231,7 @@ const pixel=element('div','ls-effect-group');pixelPanel.append(pixel);pixel.appe
 const coords=element('div','ls-two');shapePanel.append(coords);for(const axis of ['x','y']){const input=node('input');input.type='text';input.inputMode='decimal';input.className='ls-input';input.placeholder='Ej. 25.30';input.value=String(selected[axis]);input.onchange=()=>{const n=parseCoordinate(input.value);if(n===null){input.value=String(selected[axis]);notify('Introduce una coordenada entre -2048 y 2048, con decimales libres.','warn');return;}change(()=>selected[axis]=n);};labeled(coords,axis.toUpperCase()+' (tiles)',input);}
 const buttons=element('div','ls-inline');shapePanel.append(buttons);buttons.append(mini('⌫ Eliminar',()=>change(()=>{const map=current();map.lights=map.lights.filter(l=>l.id!==selected.id);state.selected=null;})));
 }
-const wipe=element('div','ls-inline');ambient.append(wipe);wipe.append(mini('Restablecer iluminación del mapa',()=>{const n=(current()?.lights?.length||0);const message='Se eliminarán '+n+' luces y se restaurará el ambiente de este mapa. ¿Continuar?';const confirm=state.ctx.ui.showConfirmDialog({title:'Restablecer iluminación',message,confirmLabel:'Restablecer',cancelLabel:'Cancelar'});Promise.resolve(confirm).then(ok=>{if(ok)change(()=>{state.data.maps[String(state.mapId)]={enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},lights:[]};state.selected=null;});}).catch(fail);}));
+const wipe=element('div','ls-inline');ambient.append(wipe);wipe.append(mini('Restablecer iluminación del mapa',()=>{const n=(current()?.lights?.length||0);const message='Se eliminarán '+n+' luces y se restaurará el ambiente de este mapa. ¿Continuar?';const confirm=state.ctx.ui.showConfirmDialog({title:'Restablecer iluminación',message,confirmLabel:'Restablecer',cancelLabel:'Cancelar'});Promise.resolve(confirm).then(ok=>{if(ok)change(()=>{state.data.maps[String(state.mapId)]=defaultMap();state.selected=null;});}).catch(fail);}));
 normalBindingsUI(shell,scene);
 const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el mapa mediante un overlay independiente de Fog, Panorama y Sombras. Prueba visual muestra una marca amarilla para comprobar si Maker Studio lo está renderizando.');shell.append(hint);
 const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));shell.scrollTop=oldScroll;
@@ -246,7 +254,7 @@ function editValue(fn,final){
  fn();
  if(!final){schedulePreview();return;}
  if(state.previewTimer!=null){clearTimeout(state.previewTimer);state.previewTimer=null;state.previewScheduled=false;}
- invalidate();redraw();
+ settleFastPreview();invalidate();redraw();
  state.undo.push(state.editSnapshot);
  if(state.undo.length>60)state.undo.shift();
  state.editSnapshot=null;
@@ -257,7 +265,7 @@ function overlay(draw,info){if(!state||!draw||!info)return;
 const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;const renderStarted=performance.now();if(state.awaitingOverlay){stats.requestDelayMs=Math.max(0,renderStarted-state.lastRequestAt);state.awaitingOverlay=false;state.redrawDirty=false;}
 try{
  const map=getMap(state.data,info.mapId,false);
- paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,fastPreview:!!state.drag||!!state.editSnapshot,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
+ paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
  if(state.diagnostic){draw.save();try{
   draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
  }finally{draw.restore();}}
@@ -275,8 +283,8 @@ if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
 if(d)invalidate();redraw();}
-function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
@@ -291,4 +299,4 @@ else notify('Esta versión de Maker Studio no admite overlays de mods.','error')
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
 redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if((!state.drag&&!state.editSnapshot&&hasPendingChunks())||(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled)))redraw();},250);
 }
-export function deactivate(){if(state?.ticker)clearInterval(state.ticker);if(state?.previewTimer!=null)clearTimeout(state.previewTimer);clearLightCache();state=null;}
+export function deactivate(){if(state?.ticker)clearInterval(state.ticker);if(state?.previewTimer!=null)clearTimeout(state.previewTimer);if(state?.settleTimer!=null)clearTimeout(state.settleTimer);clearLightCache();state=null;}
