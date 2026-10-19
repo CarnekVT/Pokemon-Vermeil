@@ -1,4 +1,4 @@
-# Lighting Studio v0.4.8 — normales automáticas y edición rápida
+# Lighting Studio v0.5.0 — iluminación real por normales en overworlds
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -132,3 +132,50 @@ Referencia: `Graphics/LightingStudio/Normals/README.md`. Las normales deben tene
 - **Autosave diferido:** las escrituras de `maps.json` se agrupan tras 700 ms de inactividad para no provocar recargas del sistema de archivos por cada deslizador; el botón **Guardar** continúa forzando la escritura.
 - **Regresión reproducible**: `node tests/automatic-normals-and-cache.test.mjs`. Incluye nombres del jugador/follower, migración de datos y edición localizada de una de dos luces distantes.
 - **Pendiente de medición real:** la desaparición del bloqueo de ~10 segundos necesita comprobarse en Maker Studio y con datos de diagnóstico; no hay cifras de FPS verificadas.
+
+## v0.5.0 — Primera iluminación por normal maps del protagonista y followers
+
+### Estado: integración RGSS experimental
+
+`Plugins/Lighting Studio Runtime/003_CharacterNormals.rb` agrega una pasada **visible** de iluminación a los sprites `Sprite_Character` del protagonista y followers (no a todos los NPC). Se calcula a partir de los datos RGB del PNG de normales en la dirección de la luz más fuerte y cercana, para el **fotograma realmente visible** de la hoja de animaciones.
+
+El resultado se muestra como un Sprite RGSS adicional, sincronizado con posición, zoom y origen del personaje. Se genera un máximo de un fotograma de luz por frame de Graphics; los resultados se cachean por gráfico, celda del sprite, ocho orientaciones discretas y color. El cambio de intensidad de luz solo altera la opacidad de la capa cacheada.
+
+**Esta etapa NO es un shader GPU.** La API pública RGSS de mkxp-z no expone un enlace universal de shader personalizado por sprite. Se usa `Bitmap.raw_data` (RGSS/mkxp-z) para calcular de forma diferida texturas pequeñas que se reutilizan. No hay lectura de normales por píxel en cada tick. La superposición utiliza la luz dominante (máximo **una** fuente direccional por sprite). Los mapas normales de tiles y autotiles todavía NO participan en el render.
+
+### Activación de los recursos
+
+`Data/LightingStudio/maps.json` ahora incluye `normalSettings.enabled=true` y `normalSettings.auto.characters=true`. Esta configuración global permite usar el recurso ya subido:
+
+```
+Graphics/Characters/trainer_POKEMONTRAINER_Red.png
+Graphics/LightingStudio/Normals/Characters/trainer_POKEMONTRAINER_Red_n.png
+```
+
+Los followers funcionan sin añadir variables por especie; su `character_name` determina el archivo de normales buscado. Si no existe, se usa el sprite original sin error.
+
+### Modos de diagnóstico ingame (llamada de script)
+
+```ruby
+LightingStudioNormals.mode = :original # Solo el OW original; sin respuesta de normales
+LightingStudioNormals.mode = :normals  # Muestra los colores RGB del normal map visible
+LightingStudioNormals.mode = :lit      # Original + iluminación calculada (predeterminado)
+```
+
+Para observar la diferencia, coloca al protagonista junto a la farola cálida del mapa 79, cambia entre original y lit y desplázate alrededor de la fuente. Al entrar en un mapa se libera la caché de normales anteriores. La primera aparición de un fotograma o dirección nuevos puede generar un trabajo de CPU puntual; las apariciones siguientes usan caché.
+
+### Limitaciones que requieren validación y mejoras futuras
+
+- La capa se dibuja en `z = 8502` para que se distinga sobre la oscuridad ambiental; esto **puede alterar la oclusión frente a objetos/tiles altos**. Un render totalmente integrado en la composición de cada personaje necesita modificar el renderer o disponer de un shader.
+- Si se activa otro plugin que reemplace el bitmap de un OW, la compatibilidad debe probarse.
+- El seguimiento de luces utiliza una sola fuente predominante con influencia por distancia, no una solución físicamente exacta de varias luces y geometrías.
+- Para limitar el coste, la dirección se discretiza en ocho ángulos y hay un máximo de 96 fotogramas iluminados en caché. Las transparencias, tono del OW, hue y reflejos todavía requieren pruebas.
+- Aún NO se ha podido arrancar Pokémon Essentials/mkxp desde este entorno ni verificar sus FPS. Se requiere prueba real y captura. **No está confirmado que sea visualmente correcto sin ajustar opacidades y orden de capas.**
+
+### Prueba automatizada independiente
+
+```bash
+ruby "Plugins/Lighting Studio Runtime/tests/test_character_normals.rb"
+```
+
+El test usa mocks RGSS para comparar una normal orientada a la derecha ante luz derecha/izquierda, comprobar que se reutiliza la imagen de la caché y que se crea el overlay en el sprite del protagonista. No sustituye una prueba en el juego.
