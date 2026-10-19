@@ -1,4 +1,4 @@
-import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,MASK_DIR,maskFilename,assetName,normalCandidate} from './model.js';
+import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,MASK_DIR,maskFilename,assetName,normalCandidate,evaluateTimeOfDay} from './model.js';
 import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
 import {cacheSize,clearLightCache,hasPendingChunks,invalidateLightRegions,setMaskImage,forgetMaskImages} from './render.js';
@@ -231,6 +231,57 @@ labeled(ambient,'Superposición de luces',overlap);
 ambient.append(element('p','ls-inline-note','Fusionar amplía la zona iluminada sin duplicar la potencia en los cruces. Sumar aumenta el brillo donde coinciden.'));
 slider(ambient,'Oscuridad',settings.darkness,0,1,.01,(v,final)=>editValue(()=>settings.darkness=clamp(v,0,1),final));
 const color=node('input');color.type='color';color.className='ls-color';color.value=settings.color;color.addEventListener('input',()=>editValue(()=>settings.color=color.value,false));color.addEventListener('change',()=>editValue(()=>settings.color=color.value,true));labeled(ambient,'Color ambiental',color);
+const daytime=element('section','ls-section');shell.append(daytime);
+ daytime.append(element('div','ls-section-heading','Ciclo de día y noche · global'));
+ const tod=state.data.timeOfDay;
+ const clockEnabled=node('input');clockEnabled.type='checkbox';clockEnabled.checked=tod.enabled;
+ clockEnabled.onchange=()=>change(()=>tod.enabled=clockEnabled.checked);
+ labeled(daytime,'Habilitar hora y tinte ambiental',clockEnabled);
+ const clockSelect=node('select');clockSelect.className='ls-input';
+ for(const [value,label] of [['real','Hora real del sistema'],['internal','Reloj interno de la partida']]){
+  const opt=node('option',label);opt.value=value;clockSelect.append(opt);
+ }
+ clockSelect.value=tod.source;clockSelect.onchange=()=>change(()=>tod.source=clockSelect.value);
+ labeled(daytime,'Fuente horaria',clockSelect);
+ if(tod.source==='internal'){
+  slider(daytime,'Hora inicial',tod.startHour,0,23.75,.25,(v,final)=>editValue(()=>tod.startHour=v,final));
+  slider(daytime,'Minutos del juego por segundo real',tod.minutesPerSecond,.001,1,.01,(v,final)=>editValue(()=>tod.minutesPerSecond=clamp(v,.001,1),final));
+ }
+ const mapTimeSelect=node('select');mapTimeSelect.className='ls-input';
+ for(const [value,label] of [['follow','Seguir ciclo global'],['ignore','Ignorar ciclo (cuevas / interiores)']]){
+  const opt=node('option',label);opt.value=value;mapTimeSelect.append(opt);
+ }
+ mapTimeSelect.value=scene.dayNightMode||'follow';
+ mapTimeSelect.onchange=()=>change(()=>scene.dayNightMode=mapTimeSelect.value);
+ labeled(daytime,'Ciclo en este mapa',mapTimeSelect);
+ const previewTime=node('input');previewTime.type='checkbox';previewTime.checked=state.previewDayNight;
+ previewTime.onchange=()=>{state.previewDayNight=previewTime.checked;redraw();refresh();};
+ labeled(daytime,'Previsualizar ciclo en Maker Studio',previewTime);
+ if(state.previewDayNight)slider(daytime,'Hora de previsualización',state.previewHour,0,23.75,.25,(v,final)=>{state.previewHour=v;redraw();});
+ daytime.append(element('p','ls-inline-note','Los horarios interpolan color y oscuridad. El reloj interno se guarda con la partida. La previsualización no cambia la hora de la partida.'));
+ const keyHeading=element('div','ls-section-heading','Colores por hora');daytime.append(keyHeading);
+ for(const key of tod.keyframes){
+  const row=element('div','ls-two');daytime.append(row);
+  const hourInput=node('input');hourInput.type='number';hourInput.className='ls-input';
+  hourInput.min=0;hourInput.max=23.99;hourInput.step=.25;hourInput.value=String(key.hour);
+  hourInput.onchange=()=>change(()=>{key.hour=clamp(Number(hourInput.value),0,23.99);tod.keyframes.sort((a,b)=>a.hour-b.hour);});
+  labeled(row,'Hora',hourInput);
+  const colorInput=node('input');colorInput.type='color';colorInput.className='ls-color';colorInput.value=key.color;
+  colorInput.oninput=()=>{key.color=colorInput.value;redraw();};
+  colorInput.onchange=()=>change(()=>key.color=colorInput.value);
+  labeled(row,'Tinte',colorInput);
+  slider(daytime,'Oscuridad a las '+String(key.hour).padStart(2,'0')+'h',key.darkness,0,1,.01,
+    (v,final)=>editValue(()=>key.darkness=clamp(v,0,1),final));
+  daytime.append(mini('Quitar fotograma '+key.hour+'h',()=>{if(tod.keyframes.length<3)return notify('Mínimo dos horarios','warn');
+    change(()=>{tod.keyframes=tod.keyframes.filter(k=>k!==key);});
+  }));
+ }
+ daytime.append(mini('＋ Añadir hora',()=>change(()=>{if(tod.keyframes.length>=48)return notify('Máximo 48 horarios','warn');
+  const hr=Number(state.previewHour)||12;let t=hr;
+  while(tod.keyframes.some(k=>Math.abs(k.hour-t)<.01))t=(t+.25)%24;
+  tod.keyframes.push({hour:t,color:'#FFFFFF',darkness:.25});
+  tod.keyframes.sort((a,b)=>a.hour-b.hour);
+ })));
 const insp=element('section','ls-section ls-inspector');shell.append(insp);
 const insHead=element('div','ls-section-heading');insHead.append(node('span','INSPECTOR DE LUZ'),element('span','ls-count',active()?.name||'Sin selección'));insp.append(insHead);
 const nav=element('div','ls-inspector-tabs');insp.append(nav);
@@ -326,7 +377,9 @@ function overlay(draw,info){if(!state||!draw||!info)return;
 const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;const renderStarted=performance.now();if(state.awaitingOverlay){stats.requestDelayMs=Math.max(0,renderStarted-state.lastRequestAt);state.awaitingOverlay=false;state.redrawDirty=false;}
 try{
  const map=getMap(state.data,info.mapId,false);
- paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
+ paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},
+  ambientOverride:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?
+    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
  if(state.diagnostic){draw.save();try{
   draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
  }finally{draw.restore();}}
@@ -344,7 +397,7 @@ if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();schedulePersist();}
-export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),previewDayNight:false,previewHour:12,mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
 void preloadMasks().catch(fail);
  ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
