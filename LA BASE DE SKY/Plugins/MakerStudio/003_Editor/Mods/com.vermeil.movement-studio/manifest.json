@@ -1,7 +1,7 @@
 {
   "id": "com.vermeil.movement-studio",
   "name": "Movement Studio",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
