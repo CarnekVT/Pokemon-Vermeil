@@ -1,4 +1,4 @@
-# Lighting Studio v0.7.0 — normals, máscaras PNG y ciclo día/noche
+# Lighting Studio v0.7.1 — render inmediato, editor ancho, prioridad de normales y saco de dormir
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -280,3 +280,33 @@ El test independiente se ha trasladado a `LA BASE DE SKY/DeveloperTests/Lighting
 - **JS:** syntax-check de módulos editados; comprobada migración de mapa antiguo, lectura de máscara y cálculo horario en pruebas de modelo.
 - **Ruby:** pendiente `ruby -c` del plugin y prueba real en Essentials/mkxp-z. No hay confirmación de FPS ni del aspecto visual dentro del juego.
 - Los PNG y colores son autorales; el plugin no genera automáticamente una máscara a partir de tiles existentes. Los mapas existentes mantienen su configuración cuando `timeOfDay.enabled=false`.
+
+ 
+## v0.7.1 — correcciones ingame y nueva interfaz de Maker Studio
+
+### Luces inmediatas al cargar el mapa
+- Se precalculan hasta **12 chunks cercanos** durante la creación del spriteset del mapa; después continúa a **2 chunks por frame** (antes era 1).
+- Máscaras y chunks escriben y leen píxeles por buffers `Bitmap.raw_data` cuando están disponibles, con fallback a `get_pixel/set_pixel`. Se evita ejecutar un método gráfico por cada texel.
+- Al precalcular al inicio puede aumentar ligeramente el tiempo del fotograma de carga, a cambio de eliminar la aparición escalonada durante el primer segundo. Los valores exactos de FPS están pendientes de prueba ingame.
+
+### Normales con profundidad correcta
+- Las dos capas de iluminación por normales utilizan `overlay.z = base.z + 1`, conservando el orden de personajes y tiles con prioridad, en lugar de `z = 8502`.
+- Las copas de árboles, techos y tiles situados delante del OW pueden ocultar su relieve luminoso. **Limitación:** el overlay queda ahora por debajo de la capa ambiental que Lighting Studio dibuja a `z = 8500`, por lo que su efecto puede parecer más tenue de noche; hará falta integración de composición por sprite para un resultado ideal.
+
+### Editor ancho y navegación por categorías
+- Lighting Studio abre una ventana de **1050×810 px** por defecto (el usuario puede cambiar su tamaño).
+- Pestañas de trabajo: **Luces e inspector, Ambiente, Día y noche, Normal maps**.
+- En «Luces e inspector», la biblioteca de luces queda a la izquierda y las propiedades a la derecha. El diseño baja a una columna cuando el panel se estrecha; las secciones de otros sistemas dejan de amontonarse unas debajo de otras.
+
+### Nuevo objeto clave: Saco de dormir
+- Nuevo ID en `PBS/items.txt`: `SLEEPINGBAG` (FieldUse Direct, KeyItem).
+- Manejador `Plugins/Lighting Studio Runtime/005_SleepingBag.rb`, disponible desde bolsa y menú de acceso rápido.
+- Permite **descansar 1, 6 o 12 horas** o fijar la hora a **06:00, 12:00, 18:00 y 00:00**. Es reutilizable.
+- Solo funciona si `timeOfDay.enabled=true` y `timeOfDay.source="internal"`. No modifica el reloj real.
+- Su hora se guarda con `$PokemonGlobal` y se refleja en el mapa al actualizar la iluminación ambiental.
+- Para probar: recompila PBS desde Debug, activa «Ciclo de día y noche» en Maker Studio, selecciona «Reloj interno» y concede el objeto desde un evento:
+  `pbReceiveItem(:SLEEPINGBAG)`.
+- Su imagen está en `Graphics/Items/SLEEPINGBAG.png` (icono pixel art de 48×48).
+- Test independiente `ruby "DeveloperTests/LightingStudio/test_daynight.rb"` para opciones del saco, persistencia en objeto de guardado y transiciones horarias; cubierto también por CI.
+
+**Validación:** los archivos se subieron a la rama `new-MK-for-2.5D-Testeo`; queda por comprobar visualmente la prioridad y la carga inicial dentro de Essentials 21.1. Si los normales se vuelven demasiado oscuros por el orden de composición, se requerirá una solución que combine la iluminación en la capa del personaje y no otro aumento de z.
