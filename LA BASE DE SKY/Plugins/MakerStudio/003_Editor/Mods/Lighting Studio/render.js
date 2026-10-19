@@ -141,7 +141,9 @@ export function drawLights(g,lights,project,width,height,t=0){
     if(union){
       g.save();
       g.globalAlpha=1;g.globalCompositeOperation='screen';g.imageSmoothingEnabled=true;
-      g.drawImage(union,0,0,width,height);
+      // Offscreen coordinates use COMPOSITE_SCALE; undo that scale exactly.
+      // Drawing to the viewport width caused a subpixel shift at odd sizes / zooms.
+      g.drawImage(union,0,0,union.width/COMPOSITE_SCALE,union.height/COMPOSITE_SCALE);
       g.restore();
     }
   }
