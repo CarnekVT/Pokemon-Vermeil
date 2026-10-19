@@ -1,13 +1,10 @@
 const PATH = "Plugins/[VERMEIL] Smooth Movement/config.ini";
 const DEFAULTS = {
   directions: "4", mode: "grid", subtile_divisions: "4",
-  instant_turn: "1", input_buffer_ms: "0", wall_slide: "0", smooth_movement: "1",
+  instant_turn: "1", flow_motion: "0", camera_lookahead: "0", wall_slide: "0",
   camera_smoothing: "35"
 };
-const RULES = {
-  directions: ["4", "8"], mode: ["grid", "free"], subtile_divisions: ["4", "8"],
-  instant_turn: ["0", "1"], input_buffer_ms: ["0", "60", "100", "150"], wall_slide: ["0", "1"], smooth_movement: ["0", "1"]
-};
+
 function parse(text) {
   const sections = { global: { ...DEFAULTS } };
   let section = "global";
@@ -26,7 +23,7 @@ function parse(text) {
   return sections;
 }
 function serialize(sections) {
-  const lines = ["; Vermeil Movement Studio v0.3.0", "; Cambios detectados automaticamente por el runtime.", ""];
+  const lines = ["; Vermeil Movement Studio v0.4.0", "; Cambios detectados automaticamente por el runtime.", ""];
   for (const [name, opts] of Object.entries(sections)) {
     lines.push("[" + name + "]");
     for (const [key, value] of Object.entries(opts)) lines.push(key + "=" + value);
@@ -53,8 +50,9 @@ export function activate(ctx) {
   const inputStyle = "display:block;width:100%;margin:4px 0 10px;padding:7px;box-sizing:border-box;background:var(--input-bg);color:var(--text-primary);border:1px solid var(--border);border-radius:5px";
   const fields = [
     ["directions", "Direcciones", [["4", "4 direcciones (clásico)"], ["8", "8 direcciones (diagonal opcional)"]]],
-    ["instant_turn", "Respuesta al girar", [["1", "Inmediata (giro + paso)"], ["0", "Clásica (giro y espera 75 ms)"]]],
-    ["input_buffer_ms", "Anticipación de giro (solo modo inmediato)", [["0", "Desactivada (original)"], ["60", "60 ms (precisa)"], ["100", "100 ms (equilibrada)"], ["150", "150 ms (permisiva)"]]],
+    ["instant_turn", "Control", [["1", "Moderno: inmediato (sin espera)"], ["0", "Clásico: Essentials original"]]],
+    ["flow_motion", "Movimiento continuo (solo Moderno)", [["0", "Estándar: pasos separados"], ["1", "Fluido: encadenar pasos con tiempo sobrante"]]],
+    ["camera_lookahead", "Anticipación visual de cámara", [["0", "Centrada (original)"], ["8", "8 píxeles"], ["16", "16 píxeles"], ["24", "24 píxeles"], ["32", "32 píxeles"]]],
     ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]]
   ];
   function option(key, value, label) {
@@ -69,18 +67,20 @@ export function activate(ctx) {
     const values = { ...global, ...local };
     host.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--text-primary);height:100%;overflow:auto;box-sizing:border-box">' +
       '<h3 style="margin:0 0 8px">Vermeil Movement Studio</h3>' +
-      '<p style="color:var(--text-secondary);line-height:1.5">Mantiene colisiones por casillas. El buffer recuerda una direccion pulsada cerca del final de un paso, sin adelantar eventos o encuentros. Desactivado por defecto.</p>' +
+      '<p style="color:var(--text-secondary);line-height:1.5">Movimiento inmediato: no retiene teclas ni introduce espera. Fluid Motion enlaza pasos respetando eventos, seguidores y encuentros. El modo Clásico conserva el comportamiento original de Essentials.</p>' +
       '<label>Configuración a editar</label><select data-scope style="' + inputStyle + '">' +
       option("global", "global", "Global (todos los mapas)") +
       option("map", "map", "Mapa actual: " + String(ctx.editor.activeMapId() ?? "sin mapa")) + '</select>' +
+      '<div style="font-weight:600;margin:12px 0 6px">CONTROL DEL JUGADOR</div>' +
       fields.map(([id, title, items]) => '<label>' + title + '</label><select data-key="' + id + '" style="' + inputStyle + '">' +
         items.map(([value, label]) => option(id, value, label)).join("") + '</select>').join("") +
-      '<div style="margin:10px 0 6px;font-weight:600">Perfiles rápidos (aplicar y luego guardar)</div>' +
-      '<div style="display:flex;gap:6px;margin-bottom:12px"><button data-preset="classic" style="' + buttonStyle + ';flex:1">Clásico</button><button data-preset="responsive" style="' + buttonStyle + ';flex:1">Ágil</button></div>' +
+      '<div style="margin:10px 0 6px;font-weight:600">Perfiles rápidos (aplicar, luego guardar)</div>' +
+      '<div style="display:flex;gap:6px;margin-bottom:12px"><button data-preset="classic" style="' + buttonStyle + ';flex:1">Clásico</button><button data-preset="responsive" style="' + buttonStyle + ';flex:1">Moderno</button></div>' +
+      '<div style="font-weight:600;margin:12px 0 6px">CAMARA</div>' +
       '<label>Camara (0 = rapida, 35 = original, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="display:flex;gap:6px;margin:15px 0"><button data-save style="' + buttonStyle + ';flex:1">Guardar</button>' +
       '<button data-reset style="' + buttonStyle + '">Restablecer</button></div>' +
-      '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan durante la partida. La camara aplica este ajuste al seguimiento final, con Fancy Camera (switch 59) activa o desactivada. Continuidad fisica y sub-tile real aun no implementados.</p></div>';
+      '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan durante la partida. Continuidad entre casillas disponible con Control Moderno; conserva colisiones y eventos por tiles. Movimiento libre sub-tile todavia no disponible.</p></div>';
     const scope = host.querySelector("[data-scope]");
     scope.value = state.mapId === null ? "global" : "map";
     scope.addEventListener("change", () => {
@@ -106,8 +106,8 @@ export function activate(ctx) {
       button.addEventListener("click", () => {
         const key = currentKey();
         const preset = button.dataset.preset === "classic" ?
-          { directions:"4", instant_turn:"0", input_buffer_ms:"0", wall_slide:"0", camera_smoothing:"35" } :
-          { directions:"8", instant_turn:"1", input_buffer_ms:"100", wall_slide:"1", camera_smoothing:"35" };
+          { directions:"4", instant_turn:"0", flow_motion:"0", camera_lookahead:"0", wall_slide:"0", camera_smoothing:"35" } :
+          { directions:"8", instant_turn:"1", flow_motion:"1", camera_lookahead:"16", wall_slide:"1", camera_smoothing:"35" };
         state.config[key] = { ...(state.config[key] || {}), ...preset };
         draw();
         notify("Perfil aplicado en el panel. Pulsa Guardar para llevarlo al juego.");
