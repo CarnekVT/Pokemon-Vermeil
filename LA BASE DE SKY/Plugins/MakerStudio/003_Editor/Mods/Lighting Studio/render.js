@@ -1,6 +1,6 @@
 // Lighting Studio Canvas preview. Native light masks are cached (LRU), not rasterized per frame.
 // Radius pulsing reuses the same image, applying only a draw-time scale.
-const CACHE_LIMIT=24, MASK_MAX=256;
+const CACHE_LIMIT=12, MASK_MAX=128;
 const maskCache=new Map();
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,Number(v)||0));
 const rgb=(hex)=>/^#[0-9A-F]{6}$/i.test(String(hex||''))?[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)):[255,206,138];
@@ -25,7 +25,9 @@ function strength(l,x,y){
   const angular=Math.abs(Math.atan2(y,x))/angle;
   d=Math.max(Math.hypot(x,y),angular);
  }else{d=Math.hypot(x,y);}
- return d>=1?0:Math.pow(Math.max(0,1-d),1/soft);
+ const shaped=d>=1?0:Math.pow(Math.max(0,1-d),1/soft);
+ const center=Math.max(0,Math.min(1,l.centerStrength??0.65));
+ return shaped*(center+(1-center)*Math.min(1,d*2));
 }
 function newCanvas(w,h){
  const c=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(w,h):document.createElement('canvas');
@@ -33,7 +35,7 @@ function newCanvas(w,h){
 }
 function maskKey(l){
  const p=l.pixel||{};
- return [l.type||'radial',l.radiusPx,l.widthPx,l.heightPx,l.angle,l.color,l.softness,p.enabled?1:0,p.size,p.steps].join('|');
+ return [l.type||'radial',l.radiusPx,l.widthPx,l.heightPx,l.angle,l.color,l.softness,l.centerStrength,p.enabled?1:0,p.size,p.steps].join('|');
 }
 function createMask(l){
  const dims=dimensions(l),factor=Math.min(1,MASK_MAX/Math.max(dims.w,dims.h));
