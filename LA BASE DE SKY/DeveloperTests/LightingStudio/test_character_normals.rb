@@ -1,4 +1,4 @@
-# Run from LA BASE DE SKY: ruby "Plugins/Lighting Studio Runtime/tests/test_character_normals.rb"
+# Run from LA BASE DE SKY: ruby "DeveloperTests/LightingStudio/test_character_normals.rb"
 # A tiny RGSS mock that checks cached normal illumination without booting mkxp.
 class Color
   attr_accessor :red,:green,:blue,:alpha
@@ -22,6 +22,10 @@ end
 module Graphics
   def self.frame_count; @frames||=1; end
   def self.advance; @frames=frame_count+1; end
+end
+module System
+  def self.uptime; @time||=0.0; end
+  def self.uptime=(n); @time=n; end
 end
 class Sprite
   attr_accessor :bitmap,:visible,:x,:y,:z,:ox,:oy,:zoom_x,:zoom_y,:angle,:mirror,:opacity,:blend_type
@@ -47,13 +51,22 @@ end
 module LightingStudio
   def self.load_map(map_id)
     {'enabled'=>true,'lights'=>[{'x'=>5.5,'y'=>5.5,'radiusPx'=>192,
-      'color'=>'#FFD080','intensity'=>0.9}]}
+      'color'=>'#FFD080','intensity'=>0.8,'pulse'=>{
+        'enabled'=>true,'speedHz'=>1.0,'intensity'=>0.5,
+        'radius'=>0.3,'phase'=>0
+      }}]}
   end
   def self.number(v,d,lo,hi); [[(v||d).to_f,lo].max,hi].min;end
   def self.hex_color(hex)
     [hex[1,2],hex[3,2],hex[5,2]].map{|c| c.to_i(16)}
   end
   def self.normal_for_character(c);'mock.png';end
+  def self.pulse_values(pulse,now)
+    return [1.0,1.0] unless pulse.is_a?(Hash) && pulse['enabled']
+    wave=Math.sin(now*2.0*Math::PI*pulse['speedHz'].to_f)
+    [[0.1,1.0+wave*pulse['radius'].to_f].max,
+     [0.0,1.0+wave*pulse['intensity'].to_f].max]
+  end
 end
 $game_map=Game_Map.new
 class CharacterMock
@@ -67,6 +80,33 @@ source=File.expand_path('../../Plugins/Lighting Studio Runtime/003_CharacterNorm
 load source
 mod=LightingStudioNormals
 raise "direction selection failed" unless (info=mod.nearby_light($game_player)) && info[2]>0
+# A bright pulse must affect normal lighting strength, using map pulse values.
+System.uptime=0.0
+normal_strength=mod.nearby_light($game_player)[2]
+System.uptime=0.25
+bright_strength=mod.nearby_light($game_player)[2]
+raise "pulse intensity not reflected in normal lighting" unless bright_strength>normal_strength
+System.uptime=0.75
+dim_strength=mod.nearby_light($game_player)[2]
+raise "pulse did not dim normal lighting" unless dim_strength<normal_strength
+System.uptime=0.0
+
+# The falloff reaches zero smoothly instead of abruptly disappearing at radius.
+values=[0.5,0.7,0.9,1.0].map{|t| mod.smooth_edge(t)}
+raise "falloff does not taper correctly" unless values[0]>values[1] && values[1]>values[2] && values[2]==0.0 && values[3]==0.0
+raise "falloff not monotonic" unless values[0]>=values[1] && values[1]>=values[2] && values[2]>=values[3]
+
+# Retain the existing baked layer during fade-out, even after the light is gone.
+fake=Sprite.new
+a=mod.eased_opacity(fake,180,0.0)
+b=mod.eased_opacity(fake,180,0.08)
+c=mod.eased_opacity(fake,0,0.16)
+raise "no smooth attack" unless b>a && a>0 && b<180
+raise "normal layer popping on exit" unless c>0 && c<b
+d=c
+30.times{|i| d=mod.eased_opacity(fake,0,0.24+0.08*i)}
+raise "normal overlay never fades out" unless d==0
+
 path='mock.png'
 left=mod.frame_bitmap(path,[0,0,4,4],0,[255,200,150])
 raise "no lit frame" if !left||left.raw_data.bytesize!=64
