@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio — asset name resolver (does NOT implement normal-map shading).
+# Lighting Studio — cached asset-name resolver for character normal-map shading.
 # One global naming rule works for player, follower and changing Pokémon forms.
 # An active sprite's graphic name selects the matching normal resource.
 module LightingStudio
