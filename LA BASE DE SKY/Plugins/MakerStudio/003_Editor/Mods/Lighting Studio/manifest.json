@@ -1,7 +1,7 @@
 {
   "id": "com.carnekvt.lighting-studio",
   "name": "Lighting Studio",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Iluminación de mapas con fusión MAX, fragmentos anclados al mundo y runtime sin recomposición por fotograma.",
+  "description": "Difuminado direccional con zona uniforme, caché de luces optimizada y render anclado al mapa.",
   "tags": [
     "mapping",
     "lighting",
