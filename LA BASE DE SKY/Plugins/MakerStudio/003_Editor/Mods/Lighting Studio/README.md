@@ -1,4 +1,4 @@
-# Lighting Studio v0.5.0 — iluminación real por normales en overworlds
+# Lighting Studio v0.5.2 — iluminación real por normales en overworlds
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -186,3 +186,16 @@ El test usa mocks RGSS para comparar una normal orientada a la derecha ante luz 
 **Importante:** Pokémon Essentials recopila recursivamente archivos `.rb` dentro de cada carpeta de plugin. El archivo de pruebas `test_character_normals.rb` se había colocado por error en `Plugins/Lighting Studio Runtime/tests/` y su `load` se ejecutaba al iniciar el juego. Por eso aparecía el error intentando cargar `003_CharacterNormals.rb` desde la raíz.
 
 El test independiente se ha trasladado a `LA BASE DE SKY/DeveloperTests/LightingStudio/test_character_normals.rb` y su ruta relativa se ha corregido. Solo se ejecuta voluntariamente desde `LA BASE DE SKY`, con el comando indicado arriba. Dentro de `Plugins/Lighting Studio Runtime` solo deben existir los scripts de runtime `001_`, `002_` y `003_` y el `meta.txt`.
+
+ 
+## v0.5.2 — Normales sin popping y compatibles con pulsación
+
+- **Salida suave:** la pasada normal ya no desaparece inmediatamente cuando el protagonista abandona una luz; conserva el último bitmap renderizado y reduce gradualmente la opacidad hasta cero.
+- **Entrada suave:** el efecto aparece progresivamente, evitando cambios bruscos al cruzar el límite.
+- **Pulsación sincronizada:** el cálculo de normales utiliza `LightingStudio.pulse_values(pulse, System.uptime)`, exactamente la misma función y reloj que el runtime principal. Se animan intensidad **y** radio; la intensidad solo modifica `Sprite#opacity`, sin regenerar bitmaps del normal map.
+- **Frontera continua:** antes se utilizaba una caída lineal con corte. Ahora se añade una curva suave hacia cero entre el 60 % y el 100 % de influencia de la luz, respetando la geometría radial, elíptica, rectangular y el alcance del cono.
+- **Movimiento:** el muestreo de la distancia prioriza `real_x` y `real_y` del personaje para evitar saltos por cambios de tile a tile.
+- **Rendimiento:** las texturas calculadas siguen almacenadas en caché; solo se actualiza su opacidad y posición durante el movimiento. Una luz dominante controla la dirección del normal map.
+- **Test de regresión:** `ruby "DeveloperTests/LightingStudio/test_character_normals.rb"` comprueba progresión de pulsación, aparición, desaparición y caché.
+ 
+**Validación:** lógica inspeccionada y pruebas de regresión incluidas en GitHub; falta comprobar visualmente el resultado y rendimiento dentro de mkxp/Pokémon Essentials. El cambio no añade un shader GPU.
