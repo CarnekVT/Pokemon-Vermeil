@@ -2,7 +2,9 @@ const PATH = "Plugins/[VERMEIL] Smooth Movement/config.ini";
 const DEFAULTS = {
   directions: "4", mode: "grid", subtile_divisions: "4",
   instant_turn: "1", flow_motion: "0", camera_lookahead: "0", wall_slide: "0",
-  camera_smoothing: "35"
+  camera_smoothing: "35",
+  diagonal_facing: "keep", wall_slide_priority: "horizontal",
+  camera_deadzone: "0", camera_lead_response: "120", debug_hud: "0"
 };
 
 function parse(text) {
@@ -23,7 +25,7 @@ function parse(text) {
   return sections;
 }
 function serialize(sections) {
-  const lines = ["; Vermeil Movement Studio v0.4.0", "; Cambios detectados automaticamente por el runtime.", ""];
+  const lines = ["; Vermeil Movement Studio v0.5.0", "; Cambios detectados automaticamente por el runtime.", ""];
   for (const [name, opts] of Object.entries(sections)) {
     lines.push("[" + name + "]");
     for (const [key, value] of Object.entries(opts)) lines.push(key + "=" + value);
@@ -53,8 +55,19 @@ export function activate(ctx) {
     ["instant_turn", "Control", [["1", "Moderno: inmediato (sin espera)"], ["0", "Clásico: Essentials original"]]],
     ["flow_motion", "Movimiento continuo (solo Moderno)", [["0", "Estándar: pasos separados"], ["1", "Fluido: encadenar pasos con tiempo sobrante"]]],
     ["camera_lookahead", "Anticipación visual de cámara", [["0", "Centrada (original)"], ["8", "8 píxeles"], ["16", "16 píxeles"], ["24", "24 píxeles"], ["32", "32 píxeles"]]],
-    ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]]
+    ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]],
+    ["wall_slide_priority", "Eje preferente al deslizar", [["horizontal", "Horizontal (original)"], ["vertical", "Vertical"], ["facing", "Según orientación del personaje"]]],
+    ["diagonal_facing", "Orientación visual en diagonales", [["keep", "Mantener dirección (original)"], ["horizontal", "Priorizar izquierda / derecha"], ["vertical", "Priorizar arriba / abajo"]]]
   ];
+  const cameraFields = [
+    ["camera_deadzone", "Zona muerta de cámara", [["0", "Desactivada (original)"], ["8", "8 píxeles"], ["16", "16 píxeles"], ["24", "24 píxeles"], ["32", "32 píxeles"]]],
+    ["camera_lead_response", "Respuesta de anticipación visual", [["60", "Rápida (60 ms)"], ["120", "Normal (120 ms)"], ["200", "Suave (200 ms)"]]]
+  ];
+  const debugFields = [
+    ["debug_hud", "HUD de diagnóstico (solo en Debug)", [["0", "Oculto"], ["1", "Mostrar métricas en pantalla"]]]
+  ];
+  const renderField = ([id, title, items]) => '<label>' + title + '</label><select data-key="' + id + '" style="' + inputStyle + '">' +
+    items.map(([value, label]) => option(id, value, label)).join("") + '</select>';
   function option(key, value, label) {
     return '<option value="' + value + '">' + label + '</option>';
   }
@@ -72,12 +85,14 @@ export function activate(ctx) {
       option("global", "global", "Global (todos los mapas)") +
       option("map", "map", "Mapa actual: " + String(ctx.editor.activeMapId() ?? "sin mapa")) + '</select>' +
       '<div style="font-weight:600;margin:12px 0 6px">CONTROL DEL JUGADOR</div>' +
-      fields.map(([id, title, items]) => '<label>' + title + '</label><select data-key="' + id + '" style="' + inputStyle + '">' +
-        items.map(([value, label]) => option(id, value, label)).join("") + '</select>').join("") +
+      fields.map(renderField).join("") +
       '<div data-preview style="margin:8px 0;padding:8px;border:1px solid var(--border);border-radius:4px;color:var(--text-secondary);font-size:12px"></div>' +
       '<div style="margin:10px 0 6px;font-weight:600">Perfiles rápidos (aplicar, luego guardar)</div>' +
       '<div style="display:flex;gap:6px;margin-bottom:12px"><button data-preset="classic" style="' + buttonStyle + ';flex:1">Clásico</button><button data-preset="responsive" style="' + buttonStyle + ';flex:1">Moderno</button></div>' +
       '<div style="font-weight:600;margin:12px 0 6px">CAMARA</div>' +
+      cameraFields.map(renderField).join("") +
+      '<div style="font-weight:600;margin:12px 0 6px">DIAGNÓSTICO</div>' +
+      debugFields.map(renderField).join("") +
       '<label>Camara (0 = rapida, 35 = original, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="display:flex;gap:6px;margin:15px 0"><button data-save style="' + buttonStyle + ';flex:1">Guardar</button>' +
       '<button data-reset style="' + buttonStyle + '">Restablecer</button></div>' +
@@ -109,8 +124,10 @@ export function activate(ctx) {
       const directions = classic ? "4 direcciones" : settings.directions + " direcciones";
       const flow = !classic && settings.flow_motion === "1" ? "Flow activo" : "Flow desactivado";
       const camera = settings.camera_lookahead + "px de anticipación";
+      const zone = settings.camera_deadzone + "px zona muerta";
+      const hud = settings.debug_hud === "1" ? " · HUD Debug" : "";
       host.querySelector("[data-preview]").textContent =
-        (classic ? "Clásico original" : "Moderno inmediato") + " · " + directions + " · " + flow + " · " + camera;
+        (classic ? "Clásico original" : "Moderno inmediato") + " · " + directions + " · " + flow + " · " + camera + " · " + zone + hud;
     }
     updatePreview();
     host.querySelector("[data-camera-value]").textContent = values.camera_smoothing + "%";
@@ -118,8 +135,8 @@ export function activate(ctx) {
       button.addEventListener("click", () => {
         const key = currentKey();
         const preset = button.dataset.preset === "classic" ?
-          { directions:"4", instant_turn:"0", flow_motion:"0", camera_lookahead:"0", wall_slide:"0", camera_smoothing:"35" } :
-          { directions:"8", instant_turn:"1", flow_motion:"1", camera_lookahead:"16", wall_slide:"1", camera_smoothing:"35" };
+          { directions:"4", instant_turn:"0", flow_motion:"0", camera_lookahead:"0", wall_slide:"0", wall_slide_priority:"horizontal", diagonal_facing:"keep", camera_deadzone:"0", camera_lead_response:"120", camera_smoothing:"35", debug_hud:"0" } :
+          { directions:"8", instant_turn:"1", flow_motion:"1", camera_lookahead:"16", wall_slide:"1", wall_slide_priority:"facing", diagonal_facing:"keep", camera_deadzone:"8", camera_lead_response:"120", camera_smoothing:"35", debug_hud:"0" };
         state.config[key] = { ...(state.config[key] || {}), ...preset };
         draw();
         notify("Perfil aplicado en el panel. Pulsa Guardar para llevarlo al juego.");
