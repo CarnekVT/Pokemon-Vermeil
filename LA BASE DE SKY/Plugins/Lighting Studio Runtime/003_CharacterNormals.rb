@@ -1,11 +1,13 @@
 # encoding: UTF-8
-# Lighting Studio / Character normals v0.5.4
+# Lighting Studio / Character normals v0.5.5
 # Experimental, visible RGSS overlay for player and follower sprites.
 # This is a CACHED SOFTWARE NORMAL-LIGHT PASS, not a GPU shader.
 # It computes at most one small sprite frame per graphics frame and reuses
 # directional masks afterwards; there is no per-pixel processing in update.
 module LightingStudioNormals
-  MAX_BITMAPS = 96
+  MAX_BITMAPS = 128
+  BUILDS_PER_FRAME = 2
+  DEFAULT_NORMAL_INTENSITY = 0.50
   MAX_FRAME_SIDE = 192
   LIGHT_HEIGHT = 0.76
   LIGHT_HORIZONTAL = 0.65
@@ -23,6 +25,7 @@ module LightingStudioNormals
   @frames = {}
   @attached = {}
   @last_build_frame = nil
+  @build_count = 0
   @last_light_map = nil
   @lights = []
   @warned = {}
@@ -80,7 +83,21 @@ module LightingStudioNormals
     @normal_bitmaps.clear
     @normal_raw.clear
     @last_build_frame = nil
+    @build_count = 0
     clear_lights
+  end
+
+  def normal_intensity
+    settings = LightingStudio.respond_to?(:normal_settings) ? LightingStudio.normal_settings : {}
+    value = settings.is_a?(Hash) ? settings['intensity'] : nil
+    [[(value.nil? ? DEFAULT_NORMAL_INTENSITY : Float(value)),0.0].max,1.5].min
+  rescue StandardError
+    DEFAULT_NORMAL_INTENSITY
+  end
+
+  def normal_warmup_enabled?
+    settings = LightingStudio.respond_to?(:normal_settings) ? LightingStudio.normal_settings : {}
+    settings.is_a?(Hash) && settings['warmup'] != false
   end
 
   def clock_seconds
@@ -270,8 +287,12 @@ module LightingStudioNormals
       return found
     end
     frame_id=Graphics.respond_to?(:frame_count) ? Graphics.frame_count : nil
-    return nil if !frame_id.nil? && @last_build_frame == frame_id
-    @last_build_frame=frame_id
+    if frame_id != @last_build_frame
+      @last_build_frame = frame_id
+      @build_count = 0
+    end
+    return nil if @build_count >= BUILDS_PER_FRAME
+    @build_count += 1
 
     # Cache a finite set of light directions; blend adjacent frames at runtime.
     # Result never changes with each camera update; only the sprite's opacity.
@@ -386,7 +407,7 @@ module LightingStudioNormals
 
     now=clock_seconds
     info=nearby_light(base.character,now)
-    target=info ? [[(info[4]*MAX_OVERLAY_OPACITY).round,0].max,255].min : 0
+    target=info ? [[(info[4]*MAX_OVERLAY_OPACITY*normal_intensity).round,0].max,255].min : 0
     if info && target>0
       direction_a,direction_b,mix,color,strength=info
       dims=[rect.x,rect.y,rect.width,rect.height]
