@@ -29,7 +29,7 @@ function redraw(){
   owner.lastRequestAt=owner.lastRedraw;
   owner.awaitingOverlay=true; // diagnostics only, never blocks redraw
   owner.ctx.editor.requestRedraw?.();
- },Math.max(0,65-elapsed));
+ },Math.max(0,(owner.previewQuality==='full'?70:owner.previewQuality==='fast'?160:115)-elapsed));
 }
 function settleFastPreview(){
  const owner=state;if(!owner)return;
@@ -216,7 +216,14 @@ if(!m?.lights.length)list.append(element('div','ls-empty','Todavía no hay luces
 for(const l of m?.lights||[]){const row=element('div','ls-item'+(l.id===state.selected?' selected':''));list.append(row);const sw=element('span','ls-swatch');sw.style.background=l.color;sw.style.color=l.color;row.append(sw);const main=element('button','ls-item-main');main.type='button';main.append(element('div','ls-item-name',l.name),element('div','ls-item-meta',Math.round(l.radiusPx)+' px · '+Math.round(l.intensity*100)+'%'));main.onclick=()=>{state.selected=l.id;state.mode='select';state.ctx.editor.setTool(TOOL);redraw();refresh();};row.append(main);const eye=element('button','ls-ghost',l.enabled?'◉':'◌');eye.title=l.enabled?'Ocultar':'Mostrar';eye.onclick=()=>change(()=>{l.enabled=!l.enabled;});row.append(eye);}
 const ambient=element('section','ls-section');shell.append(ambient);ambient.append(element('div','ls-section-heading','Ambiente y control general'));
 const previewOptions=element('div','ls-inline');ambient.append(previewOptions);
-const night=mini(state.previewNight?'◐ Vista nocturna activa':'◐ Vista nocturna (solo editor)',()=>{
+const quality=node('select');quality.className='ls-input';
+ for(const [value,label] of [['fast','Rápida · menos repintados'],['balanced','Equilibrada'],['full','Completa']]){
+  const opt=node('option',label);opt.value=value;quality.append(opt);
+ }
+ quality.value=state.previewQuality;
+ quality.onchange=()=>{state.previewQuality=quality.value;redraw();};
+ labeled(ambient,'Calidad de previsualización',quality);
+ const night=mini(state.previewNight?'◐ Vista nocturna activa':'◐ Vista nocturna (solo editor)',()=>{
  state.previewNight=!state.previewNight;invalidate();redraw();refresh();
 },state.previewNight);
 previewOptions.append(night);
@@ -379,7 +386,7 @@ try{
  const map=getMap(state.data,info.mapId,false);
  paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},
   ambientOverride:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?
-    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
+    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,previewQuality:state.previewQuality,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
  if(state.diagnostic){draw.save();try{
   draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
  }finally{draw.restore();}}
@@ -397,7 +404,7 @@ if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();schedulePersist();}
-export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),previewDayNight:false,previewHour:12,mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),previewDayNight:false,previewHour:12,previewQuality:'balanced',mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
 void preloadMasks().catch(fail);
  ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
