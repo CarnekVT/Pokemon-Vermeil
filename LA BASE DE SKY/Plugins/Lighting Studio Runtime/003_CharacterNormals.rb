@@ -62,6 +62,10 @@ module LightingStudioNormals
       begin
         sprite.bitmap = nil
         sprite.visible = false
+        sprite.instance_variable_set(:@ls_normal_baked,false)
+        sprite.instance_variable_set(:@ls_normal_source_path,nil)
+        sprite.instance_variable_set(:@ls_normal_smooth_opacity,0.0)
+        sprite.instance_variable_set(:@ls_normal_last_time,nil)
       rescue StandardError
       end
     end
@@ -295,8 +299,22 @@ module LightingStudioNormals
     path = LightingStudio.normal_for_character(base.character)
     unless path
       overlay.visible=false
+      overlay.instance_variable_set(:@ls_normal_baked,false)
+      overlay.instance_variable_set(:@ls_normal_source_path,nil)
+      overlay.instance_variable_set(:@ls_normal_smooth_opacity,0.0)
+      overlay.instance_variable_set(:@ls_normal_last_time,nil)
       return
     end
+    # Changing follower Pokémon or player outfit must never retain the
+    # previous character's baked normal frame while the new one is pending.
+    previous_path=overlay.instance_variable_get(:@ls_normal_source_path)
+    if previous_path && previous_path!=path
+      overlay.bitmap=nil
+      overlay.instance_variable_set(:@ls_normal_baked,false)
+      overlay.instance_variable_set(:@ls_normal_smooth_opacity,0.0)
+      overlay.instance_variable_set(:@ls_normal_last_time,nil)
+    end
+    overlay.instance_variable_set(:@ls_normal_source_path,path)
     rect = base.src_rect
     return unless rect && rect.width>0 && rect.height>0
 
