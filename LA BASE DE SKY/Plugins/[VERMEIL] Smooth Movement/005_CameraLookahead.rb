@@ -51,7 +51,9 @@ class Game_Player
     @_vermeil_lead_updated_at = now
     dt = 0.0 if dt < 0 || dt > 0.3
     dt = [dt, 0.05].min
-    dir = pixels > 0 ? vermeil_live_direction : 0
+    # Evita desplazar la camara al pulsar contra una pared sin caminar.
+    # No filtra ni retrasa el input real del jugador.
+    dir = (pixels > 0 && @move_timer) ? vermeil_live_direction : 0
     dx = [1, 4, 7].include?(dir) ? -1 : ([3, 6, 9].include?(dir) ? 1 : 0)
     dy = [1, 2, 3].include?(dir) ? 1 : ([7, 8, 9].include?(dir) ? -1 : 0)
     scale = (dx != 0 && dy != 0) ? (1.0 / Math.sqrt(2)) : 1.0
