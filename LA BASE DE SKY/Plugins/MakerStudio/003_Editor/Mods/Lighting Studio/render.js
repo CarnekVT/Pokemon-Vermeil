@@ -1,9 +1,9 @@
-// Lighting Studio: cached source masks + one unified add-light canvas per map frame.
-// Add lights are merged with MAX-like "lighten", then applied ONCE with "screen".
-// Geometry and fading mirror the Ruby runtime; the 2D editor is an approximation.
-const MASK_LIMIT=16, MASK_MAX=128, COMPOSITE_SCALE=0.5;
-const masks=new Map();
-let sharedView=null,sharedKey=null;
+// Lighting Studio: world-space light chunks; zoom never changes chunk contents.
+// Each source is merged using per-channel MAX, not additive stacking.
+// World-to-screen projection is exactly the one used by LBDS Animated Props.
+const MASK_LIMIT=16, MASK_MAX=64, CHUNK_WORLD=256, CHUNK_PX=64, CHUNK_LIMIT=48;
+const masks=new Map(),chunks=new Map();
+let cachedMapKey=null;
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number.isFinite(+v)?+v:min));
 const rgb=(hex)=>/^#[0-9A-F]{6}$/i.test(String(hex||''))?[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)):[255,206,138];
 export function evaluated(l,t){
@@ -97,8 +97,7 @@ function stamp(g,l,project,t,blend){
   g.drawImage(mask,-w/2,-h/2,w,h);
   g.restore();
 }
-// Channel-wise maximum, not Canvas "lighten" (which still accumulates alpha).
-// The output is opaque pre-multiplied RGB; black adds zero with screen blending.
+// Lighting union in WORLD coordinates. Static light overlap is max(R,G,B).
 export function mergeColorMax(dst,pos,r,g,b,alpha){
   const a=alpha/255;
   dst[pos]=Math.max(dst[pos],Math.round(r*a));
@@ -106,97 +105,99 @@ export function mergeColorMax(dst,pos,r,g,b,alpha){
   dst[pos+2]=Math.max(dst[pos+2],Math.round(b*a));
   dst[pos+3]=255;
 }
-let scratchView=null;
-function fillUnified(buffer,ctx,lights,project,width,height,t){
-  const p={x:x=>project.x(x)*COMPOSITE_SCALE,y:y=>project.y(y)*COMPOSITE_SCALE,
-    scale:()=>project.scale()*COMPOSITE_SCALE};
-  if(!scratchView||scratchView.width!==width||scratchView.height!==height)
-    scratchView=newCanvas(width,height);
-  const work=scratchView.getContext('2d');
-  if(!work)return;
-  const result=ctx.createImageData(width,height),dest=result.data;
-  // Opaque black pixels are neutral in final screen blend.
-  for(let i=3;i<dest.length;i+=4)dest[i]=255;
+let scratch=null;
+function bounds(l){
+  const dims=dimensions(l),angle=(Number(l.rotation)||0)*Math.PI/180;
+  const c=Math.abs(Math.cos(angle)),s=Math.abs(Math.sin(angle));
+  return {x:l.x*32,y:l.y*32,w:dims.w*c+dims.h*s,h:dims.w*s+dims.h*c};
+}
+function makeChunk(cx,cy,lights){
+  if(!scratch)scratch=newCanvas(CHUNK_PX,CHUNK_PX);
+  const work=scratch.getContext('2d',{willReadFrequently:true});
+  if(!work)return null;
+  const result=newCanvas(CHUNK_PX,CHUNK_PX),destCtx=result.getContext('2d');
+  if(!destCtx)return null;
+  const img=destCtx.createImageData(CHUNK_PX,CHUNK_PX),dest=img.data;
+  const worldX=cx*CHUNK_WORLD,worldY=cy*CHUNK_WORLD;
+  let nonzero=false;
+  const scale=CHUNK_PX/CHUNK_WORLD;
   for(const l of lights){
-    const dims=dimensions(l),anim=evaluated(l,t),scale=anim.scale*p.scale();
-    const w=dims.w*scale,h=dims.h*scale;
-    const rotation=(Number(l.rotation)||0)*Math.PI/180;
-    const c=Math.abs(Math.cos(rotation)),si=Math.abs(Math.sin(rotation));
-    const bw=c*w+si*h,bh=si*w+c*h;
-    const cx=p.x(l.x),cy=p.y(l.y);
-    const left=Math.max(0,Math.floor(cx-bw*.5)-1);
-    const top=Math.max(0,Math.floor(cy-bh*.5)-1);
-    const right=Math.min(width,Math.ceil(cx+bw*.5)+1);
-    const bottom=Math.min(height,Math.ceil(cy+bh*.5)+1);
-    if(left>=right||top>=bottom)continue;
-    work.save();work.globalCompositeOperation='source-over';work.clearRect(left,top,right-left,bottom-top);work.restore();
-    stamp(work,l,p,t,'source-over');
-    const area=work.getImageData(left,top,right-left,bottom-top).data;
-    const stride=(right-left),rows=(bottom-top);
-    for(let row=0;row<rows;row++){
-      const outRow=((top+row)*width+left)*4,srcRow=row*stride*4;
-      for(let col=0;col<stride;col++){
-        const si=srcRow+col*4,a=area[si+3];
-        if(a===0)continue;
-        mergeColorMax(dest,outRow+col*4,area[si],area[si+1],area[si+2],a);
-      }
+    const b=bounds(l),halfW=b.w/2,halfH=b.h/2;
+    if(b.x+halfW<=worldX||b.x-halfW>=worldX+CHUNK_WORLD||
+       b.y+halfH<=worldY||b.y-halfH>=worldY+CHUNK_WORLD)continue;
+    const mask=getMask(l);if(!mask)continue;
+    const d=dimensions(l);
+    work.clearRect(0,0,CHUNK_PX,CHUNK_PX);
+    work.save();
+    work.globalCompositeOperation='source-over';
+    work.globalAlpha=clamp(l.intensity??.8,0,1);
+    work.translate((b.x-worldX)*scale,(b.y-worldY)*scale);
+    work.rotate((Number(l.rotation)||0)*Math.PI/180);
+    work.imageSmoothingEnabled=!l.pixel?.enabled;
+    work.drawImage(mask,-d.w*scale/2,-d.h*scale/2,d.w*scale,d.h*scale);
+    work.restore();
+    const src=work.getImageData(0,0,CHUNK_PX,CHUNK_PX).data;
+    for(let pos=0;pos<src.length;pos+=4){
+      if(src[pos+3]<1)continue;
+      mergeColorMax(dest,pos,src[pos],src[pos+1],src[pos+2],src[pos+3]);
+      nonzero=true;
     }
   }
-  ctx.save();ctx.globalCompositeOperation='copy';ctx.putImageData(result,0,0);ctx.restore();
+  if(!nonzero)return null;
+  destCtx.putImageData(img,0,0);
+  return result;
 }
-function getUnion(lights,project,width,height,t){
-  const w=Math.max(1,Math.ceil(width*COMPOSITE_SCALE));
-  const h=Math.max(1,Math.ceil(height*COMPOSITE_SCALE));
-  const animated=lights.some(l=>l.pulse?.enabled);
-  const stable=project.viewportKey!==undefined&&project.revision!==undefined;
-  const key=stable?[project.viewportKey,project.revision,animated?Math.floor(t*8):0,w,h].join('~'):null;
-  // A single viewport surface is reused across camera/zoom changes.
-  // Reallocating a whole canvas at every wheel tick creates severe editor stalls.
-  if(sharedView&&sharedView.width===w&&sharedView.height===h&&key&&key===sharedKey)return sharedView;
-  if(!sharedView||sharedView.width!==w||sharedView.height!==h)sharedView=newCanvas(w,h);
-  const ctx=sharedView.getContext('2d');
-  if(!ctx)return null;
-  ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
-  ctx.clearRect(0,0,w,h);
-  ctx.restore();
-  fillUnified(sharedView,ctx,lights,project,w,h,t);
-  sharedKey=key;
-  return sharedView;
+function cachedChunk(cx,cy,lights){
+  const key=cx+':'+cy;
+  if(chunks.has(key)){
+    const value=chunks.get(key);chunks.delete(key);chunks.set(key,value);
+    return value;
+  }
+  const result=makeChunk(cx,cy,lights);
+  chunks.set(key,result);
+  while(chunks.size>CHUNK_LIMIT)chunks.delete(chunks.keys().next().value);
+  return result;
 }
-export function clearLightCache(){masks.clear();sharedView=null;scratchView=null;sharedKey=null;}
-export function cacheSize(){return {masks:masks.size,views:sharedView?1:0};}
+export function clearLightCache(){masks.clear();chunks.clear();scratch=null;cachedMapKey=null;}
+export function cacheSize(){return {masks:masks.size,views:chunks.size};}
+function drawUnionChunks(g,lights,project,width,height){
+  const scale=project.scale();if(!(scale>0))return;
+  const worldLeft=Math.max(0,-project.x(0)/scale);
+  const worldRight=Math.max(0,(width-project.x(0))/scale);
+  const worldTop=Math.max(0,-project.y(0)/scale);
+  const worldBottom=Math.max(0,(height-project.y(0))/scale);
+  const left=Math.floor(worldLeft/CHUNK_WORLD),right=Math.floor(worldRight/CHUNK_WORLD);
+  const top=Math.floor(worldTop/CHUNK_WORLD),bottom=Math.floor(worldBottom/CHUNK_WORLD);
+  g.save();g.globalCompositeOperation='screen';g.globalAlpha=1;g.imageSmoothingEnabled=true;
+  for(let cy=top;cy<=bottom;cy++)for(let cx=left;cx<=right;cx++){
+    const bitmap=cachedChunk(cx,cy,lights);if(!bitmap)continue;
+    // Exact Animated Props transform; no viewport-sized image or double zoom.
+    const x=project.x(cx*CHUNK_WORLD/32),y=project.y(cy*CHUNK_WORLD/32);
+    const d=CHUNK_WORLD*scale;
+    g.drawImage(bitmap,x,y,d,d);
+  }
+  g.restore();
+}
 export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'){
   const visible=(lights||[]).filter(l=>l.enabled!==false);
   if(!visible.length)return;
+  const key=String(project.mapId??'map')+':'+String(project.revision??0);
+  if(key!==cachedMapKey){chunks.clear();cachedMapKey=key;}
   const union=visible.filter(l=>['union','add',''].includes(l.blendMode||'union'));
   const sums=visible.filter(l=>l.blendMode==='sum');
-  // The map-level selector enables intentional accumulation where requested.
   const merged=overlapMode==='sum'?[]:union;
   const summed=overlapMode==='sum'?[...union,...sums]:sums;
-  if(merged.length===1){
-    // A single light does not need an offscreen compositor. This also
-    // guarantees a visible fallback if the platform cannot make canvases.
-    stamp(g,merged[0],project,t,'screen');
-  }else if(merged.length>1){
-    try{
-      const surface=getUnion(merged,project,width,height,t);
-      if(surface){
-        g.save();g.globalAlpha=1;g.globalCompositeOperation='screen';g.imageSmoothingEnabled=true;
-        g.drawImage(surface,0,0,surface.width/COMPOSITE_SCALE,surface.height/COMPOSITE_SCALE);
-        g.restore();
-      }else{
-        // Never silently hide all sources if canvas allocation fails.
-        for(const l of merged)stamp(g,l,project,t,'screen');
-      }
-    }catch(error){
-      // Render fallback; the editor's overlay is responsible for logging errors.
-      for(const l of merged)stamp(g,l,project,t,'screen');
-    }
-  }
+  const staticLights=merged.filter(l=>!l.pulse?.enabled);
+  const pulsing=merged.filter(l=>l.pulse?.enabled);
+  if(staticLights.length===1)stamp(g,staticLights[0],project,t,'screen');
+  else if(staticLights.length>1)drawUnionChunks(g,staticLights,project,width,height);
+  // Animated lights are sprites; rebuilding world chunks every pulse frame would
+  // cause spikes. In this prototype animated overlaps use screen blending.
+  for(const l of pulsing)stamp(g,l,project,t,'screen');
   for(const l of summed)stamp(g,l,project,t,'lighter');
   for(const l of visible){
     const mode=l.blendMode||'union';
-    if(mode==='union'||mode==='add'||mode==='sum')continue;
+    if(['union','add','sum'].includes(mode))continue;
     stamp(g,l,project,t,mode==='subtract'?'multiply':'source-over');
   }
 }
