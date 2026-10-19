@@ -1,4 +1,4 @@
-import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES} from './model.js';
+import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,assetName} from './model.js';
 import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
 import {cacheSize,clearLightCache,hasPendingChunks} from './render.js';
@@ -55,6 +55,82 @@ function labeled(parent,name,control){const r=element('label','ls-field');r.appe
 function slider(parent,name,value,min,max,step,cb){const wrap=element('div','ls-field');wrap.append(element('span','ls-field-label',name),element('span','ls-field-val',Math.round(value*100)/100));const row=element('div','ls-range-row');const range=element('input','ls-range'),num=element('input','ls-input ls-number');range.type='range';num.type='number';for(const v of [range,num]){v.min=min;v.max=max;v.step=step;v.value=value;}const valueEl=wrap.children[1];range.addEventListener('input',()=>{num.value=range.value;valueEl.textContent=range.value;cb(Number(range.value),false);});range.addEventListener('change',()=>cb(Number(range.value),true));num.addEventListener('change',()=>{range.value=num.value;valueEl.textContent=num.value;cb(Number(num.value),true);});row.append(range,num);wrap.append(row);parent.append(wrap);}
 function mini(label,fn,selected=false){const b=btn(label,fn);b.className='ls-btn ls-small'+(selected?' active':'');return b;}
 function setMode(mode){state.mode=mode;state.ctx.editor.setTool(TOOL);redraw();refresh();}
+// Normal maps are resource bindings, not a renderer claim. The Ruby lightmap
+// does not yet implement normal-vector illumination. Keep this clearly visible.
+function normalBindingsUI(shell,scene){
+ const section=element('section','ls-section ls-normal-maps');
+ shell.append(section);
+ section.append(element('div','ls-section-heading','NORMAL MAPS · Tiles y Overworld'));
+ section.append(element('p','ls-inline-note',
+   'Asigna mapas normales PNG a tilesets, autotiles y sprites OW. Esta etapa registra los recursos; el shader de iluminación por normales todavía NO está activo en el juego.'));
+ const normals=scene.normalMaps;
+ const toggle=node('input');toggle.type='checkbox';toggle.checked=normals.enabled;
+ toggle.onchange=()=>change(()=>{normals.enabled=toggle.checked;});
+ labeled(section,'Habilitar asignaciones de normales (experimental)',toggle);
+ const cat=node('select');cat.className='ls-input';
+ for(const [key,name] of Object.entries(NORMAL_CATEGORIES)){
+   const option=node('option',name==='Characters'?'OWs / Characters':name);
+   option.value=key;cat.append(option);
+ }
+ cat.value=state.normalCategory;
+ cat.onchange=()=>{state.normalCategory=cat.value;refresh();};
+ labeled(section,'Tipo de recurso',cat);
+ const category=state.normalCategory,folder=NORMAL_CATEGORIES[category];
+ section.append(element('p','ls-inline-note',
+  'Normal PNG: '+NORMAL_DIR+'/'+folder+'/Nombre_n.png. Usa una imagen con el mismo tamaño y distribución de fotogramas que la original.'));
+ const list=element('div','ls-list');section.append(list);
+ const entries=normals[category]||[];
+ if(!entries.length)list.append(element('div','ls-empty','No hay normales vinculadas en esta categoría.'));
+ for(const binding of entries){
+   const line=element('div','ls-item');list.append(line);
+   const text=element('div','ls-item-main');
+   text.append(element('div','ls-item-name',binding.source),
+               element('div','ls-item-meta',binding.normal+'.png'));
+   line.append(text);
+   line.append(mini(binding.enabled===false?'Activar':'Desactivar',()=>change(()=>{binding.enabled=binding.enabled===false;})));
+   line.append(mini(binding.invertY?'Y invertida':'Invertir Y',()=>change(()=>{binding.invertY=!binding.invertY;})));
+   line.append(mini('×',()=>change(()=>{normals[category]=normals[category].filter(x=>x!==binding);})));
+ }
+ const actions=element('div','ls-inline');section.append(actions);
+ actions.append(mini('＋ Vincular normal map',()=>{void addNormalBinding(category).catch(fail);}));
+ actions.append(mini('Comprobar archivos',()=>{void verifyNormalBindings(category).catch(fail);}));
+ slider(section,'Fuerza normal (reservada)',normals.strength,0,2,.05,
+   (v,final)=>editValue(()=>normals.strength=clamp(v,0,2),final));
+}
+async function addNormalBinding(category){
+ const owner=state;if(!owner||owner.readError)return;
+ const dir=NORMAL_CATEGORIES[category],picker=owner.ctx.selectors?.pickGraphic;
+ if(typeof picker!=='function'){notify('Esta versión de Maker Studio no admite el selector de imágenes.','warn');return;}
+ const diffuse=await owner.ctx.selectors.pickGraphic(dir,{title:'Selecciona el '+dir+' original',fields:[]});
+ if(!diffuse||state!==owner)return;
+ const normal=await owner.ctx.selectors.pickGraphic('LightingStudio/Normals/'+dir,
+   {title:'Selecciona el PNG normal correspondiente',fields:[]});
+ if(!normal||state!==owner)return;
+ const source=assetName(diffuse.name),normalName=assetName(normal.name);
+ if(!source||!normalName){notify('Nombre de recurso inválido.','error');return;}
+ if(!(await owner.ctx.fs.projectExists(NORMAL_DIR+'/'+dir+'/'+normalName+'.png'))){
+   notify('No existe el PNG de normales seleccionado en Graphics.','warn');return;
+ }
+ if(state!==owner)return;
+ const map=getMap(owner.data,owner.mapId,true),entries=map.normalMaps[category];
+ change(()=>{
+   const entry={source,normal:normalName,invertY:false,enabled:true};
+   const existing=entries.findIndex(x=>x.source===source);
+   if(existing>=0)entries[existing]=entry;else entries.push(entry);
+ });
+ notify('Normal map asociado: '+source+' → '+normalName);
+}
+async function verifyNormalBindings(category){
+ const owner=state;if(!owner)return;
+ const entries=[...getMap(owner.data,owner.mapId,true).normalMaps[category]];
+ const folder=NORMAL_CATEGORIES[category];
+ const missing=[];
+ for(const entry of entries){
+   if(!(await owner.ctx.fs.projectExists(NORMAL_DIR+'/'+folder+'/'+entry.normal+'.png')))missing.push(entry.normal+'.png');
+ }
+ if(state!==owner)return;
+ notify(missing.length?'Faltan PNG: '+missing.slice(0,4).join(', '):'Todos los PNG normales asociados están presentes.',missing.length?'warn':'info');
+}
 function refresh(){if(!state?.host)return;const root=state.host;const oldScroll=root.querySelector('.ls-root')?.scrollTop||0;root.replaceChildren();const style=node('style',css);root.append(style);const shell=element('div','ls-root');root.append(shell);
 const head=element('div','ls-head');shell.append(head);const brand=element('div','ls-brand');head.append(brand);brand.append(element('div','ls-logo','☀'));const info=node('div');brand.append(info);info.append(element('div','ls-title','Lighting Studio'),element('div','ls-sub','Iluminación del mapa · edición directa'));
 const toolbar=element('div','ls-toolbar');shell.append(toolbar);
@@ -148,6 +224,7 @@ const coords=element('div','ls-two');shapePanel.append(coords);for(const axis of
 const buttons=element('div','ls-inline');shapePanel.append(buttons);buttons.append(mini('⌫ Eliminar',()=>change(()=>{const map=current();map.lights=map.lights.filter(l=>l.id!==selected.id);state.selected=null;})));
 }
 const wipe=element('div','ls-inline');ambient.append(wipe);wipe.append(mini('Restablecer iluminación del mapa',()=>{const n=(current()?.lights?.length||0);const message='Se eliminarán '+n+' luces y se restaurará el ambiente de este mapa. ¿Continuar?';const confirm=state.ctx.ui.showConfirmDialog({title:'Restablecer iluminación',message,confirmLabel:'Restablecer',cancelLabel:'Cancelar'});Promise.resolve(confirm).then(ok=>{if(ok)change(()=>{state.data.maps[String(state.mapId)]={enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},lights:[]};state.selected=null;});}).catch(fail);}));
+normalBindingsUI(shell,scene);
 const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el mapa mediante un overlay independiente de Fog, Panorama y Sombras. Prueba visual muestra una marca amarilla para comprobar si Maker Studio lo está renderizando.');shell.append(hint);
 const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));shell.scrollTop=oldScroll;
 }
@@ -199,7 +276,7 @@ state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,s
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
 if(d)invalidate();redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',previewNight:false,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
