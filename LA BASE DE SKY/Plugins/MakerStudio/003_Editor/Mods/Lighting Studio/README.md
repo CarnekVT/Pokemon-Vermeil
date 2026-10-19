@@ -1,4 +1,4 @@
-# Lighting Studio v0.5.2 — iluminación real por normales en overworlds
+# Lighting Studio v0.5.3 — iluminación real por normales en overworlds
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -199,3 +199,13 @@ El test independiente se ha trasladado a `LA BASE DE SKY/DeveloperTests/Lighting
 - **Test de regresión:** `ruby "DeveloperTests/LightingStudio/test_character_normals.rb"` comprueba progresión de pulsación, aparición, desaparición y caché.
  
 **Validación:** lógica inspeccionada y pruebas de regresión incluidas en GitHub; falta comprobar visualmente el resultado y rendimiento dentro de mkxp/Pokémon Essentials. El cambio no añade un shader GPU.
+
+## v0.5.3 — Normales invisibles tras el suavizado
+
+- Corrige una **regresión de alcance** introducida en v0.5.2: las luces rectangulares y elípticas excluían al personaje demasiado pronto, porque el muestreo solo utilizaba el centro del sprite y el área estricta de la luz. Se añade un margen de contacto de 24 píxeles de mundo a la influencia sobre personajes, sin modificar la luz visible del mapa.
+- El desvanecimiento espacial se concentra en el borde exterior (a partir de 82 % del alcance efectivo), conservando mayor brillo en la zona iluminada. El brillo máximo de la pasada normal se ajusta a 225/255.
+- Se conserva la entrada/salida temporal gradual y la pulsación de tamaño e intensidad, con el mismo reloj `System.uptime` que el runtime de las luces.
+- **Diagnóstico ingame**: desde un evento de script, ejecutar `p LightingStudioNormals.debug_status`. El resultado muestra `normal_path`, `normal_exists`, `light_count`, `light_strength`, `baked_frames` y `cached_normals`. Con `LightingStudioNormals.mode = :normals` se puede comprobar la carga del PNG independientemente de las luces.
+- El test independiente `DeveloperTests/LightingStudio/test_character_normals.rb` comprueba ahora luces elípticas y rectangulares cerca del borde, visualización activa junto a la luz, salida suave y oscilación de pulsación. Ninguna prueba Ruby se ubica dentro de `Plugins/`.
+
+**Pendiente:** comprobar la visibilidad en el juego y ejecutar los tests en Ruby/mkxp. Esta revisión se ha verificado por lectura del código, matemáticas del alcance y validaciones del repositorio; no hay confirmación visual del resultado real.
