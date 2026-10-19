@@ -78,3 +78,12 @@ No se ha ejecutado Maker Studio ni el juego desde este entorno. No afirmar FPS n
 - **Optimización adicional:** se omite la generación/dibujo de máscaras de fuentes individuales completamente fuera del viewport y se preservan las aristas de pixel art en la unión de chunks.
 - **Validación estática:** sintaxis de `render.js`, `index.js`, `map_overlay.js` y `model.js`; muestras iluminadas de rejillas cono 32×32 y elipse 27×16; omisión de fuentes fuera de pantalla; confirmación de temporizador/cancelación de preview.
 - **Sin validación en ejecución:** no se han ejecutado Maker Studio ni Essentials/mkxp desde este entorno. No se garantiza FPS ni coincidencia 1:1 de las texturas en el juego. Probar con y sin fusión, en varios niveles de zoom, y medir tiempos de render del overlay antes de dar por terminado el fix.
+
+## v0.4.6 — Corrección del haz cónico
+
+- Las luces cónicas tienen **falloff especializado**: distancia frontal, apertura angular y atenuación lateral independiente. La fuente conserva su origen en el centro del sprite/mapa; no se desplaza de forma incompatible con luces guardadas.
+- Se mantiene el alcance circular delante del origen, con un centro luminoso y una salida gradual en el extremo del foco. El modo de difuminado direccional sigue pudiéndose combinar con el cono.
+- **Difuminado > Suavidad lateral del cono**: parámetro opcional `coneFeather` (0.03 a 0.90, predeterminado 0.28). Con valores bajos, bordes marcados; con valores altos, bordes más suaves.
+- Las máscaras del editor y del runtime Ruby aplican la misma ecuación especializada. Las claves de caché incluyen `coneFeather` para que cambios en el inspector no reutilicen una máscara antigua.
+- Pruebas JavaScript: `node tests/cone-falloff.test.mjs`. Comprueban origen, límite angular, simetría, caída hacia el extremo, intensidad lateral, rejilla pixel art y persistencia del ajuste.
+- **Pendiente de validar en ejecución real**: la apariencia del cono en el mapa, la sintaxis y el arranque completos del plugin Ruby y los FPS de Maker Studio / Essentials. No se cambiaron los límites de construcción de fragmentos ni los cálculos de zoom en esta versión.
