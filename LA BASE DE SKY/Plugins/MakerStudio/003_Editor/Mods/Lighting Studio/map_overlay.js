@@ -25,6 +25,20 @@ function rgb(hex){return /^#[0-9a-f]{6}$/i.test(String(hex))?[1,3,5].map(i=>pars
 function disc(g,x,y,r,col){g.save();g.strokeStyle=col;g.lineWidth=2;g.setLineDash([7,5]);g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.stroke();g.restore();}
 function tag(g,x,y,text,bg){g.save();g.font='bold 12px sans-serif';const w=g.measureText(text).width+14;const yy=Math.max(23,y-17),xx=Math.max(4,x+12);g.fillStyle=bg||'#202836';g.fillRect(xx,yy-20,w,24);g.fillStyle='#fff7db';g.fillText(text,xx+7,yy-4);g.restore();}
 function center(g,p,on,selected){g.save();g.beginPath();g.arc(p.x,p.y,selected?9:7,0,Math.PI*2);g.fillStyle='#222B39';g.fill();g.lineWidth=selected?3:2;g.strokeStyle=on?(selected?'#FFFFFF':'#FFCB75'):'#AAAAAA';g.stroke();g.beginPath();g.moveTo(p.x-4,p.y);g.lineTo(p.x+4,p.y);g.moveTo(p.x,p.y-4);g.lineTo(p.x,p.y+4);g.stroke();g.restore();}
+function lightOutline(g,source,p,info,color){
+  const sc=screenRadius(32,info)/32,rot=(source.rotation||0)*Math.PI/180;
+  const rr=(source.radiusPx||96)*sc;
+  const w=(source.widthPx||160)*sc,h=(source.heightPx||96)*sc;
+  g.save();g.translate(p.x,p.y);g.rotate(rot);g.strokeStyle=color;g.lineWidth=2;
+  g.setLineDash([7,5]);g.beginPath();
+  if(source.type==='rectangle')g.rect(-w/2,-h/2,w,h);
+  else if(source.type==='ellipse')g.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);
+  else if(source.type==='cone'){
+    const half=(source.angle||70)*Math.PI/360;
+    g.moveTo(0,0);g.arc(0,0,rr,-half,half);g.closePath();
+  }else g.arc(0,0,rr,0,Math.PI*2);
+  g.stroke();g.restore();
+}
 export function paint(g,info,v){
   if(!g || !info || !v)return;
   // Draw on the exact map canvas given by Maker Studio, just like Animated Props.
@@ -34,7 +48,8 @@ export function paint(g,info,v){
   const w=Number(info.canvasWidth)||0,h=Number(info.canvasHeight)||0;
   if(w<=0||h<=0)return;
   const live=!!v.showPreview, editing=!!v.editing;
-  const projection={x:x=>toScreen(x,0,info).x,y:y=>toScreen(0,y,info).y,scale:()=>screenRadius(32,info)/32};
+  const projection={x:x=>toScreen(x,0,info).x,y:y=>toScreen(0,y,info).y,scale:()=>screenRadius(32,info)/32,
+    viewportKey:[info.mapId,info.tileSize,info.zoom,info.viewportX,info.viewportY].join(':'),revision:v.revision??0};
   const seconds=Number.isFinite(v.time)?v.time:performance.now()/1000;
   g.save();
   try{
@@ -61,7 +76,7 @@ export function paint(g,info,v){
         softness:draft.softness??0.75,
         pixel:draft.pixel||{enabled:false},pulse:{enabled:false}
       };
-      g.save();g.globalAlpha=.78;drawLights(g,[ghost],projection,w,h,seconds);g.restore();
+      g.save();g.globalAlpha=.78;drawLights(g,[ghost],{x:projection.x,y:projection.y,scale:projection.scale},w,h,seconds);g.restore();
     }
     if(!v.showGuides&&!editing)return;
     // Visual handles stay readable even with all lights disabled/preview off.
@@ -71,10 +86,10 @@ export function paint(g,info,v){
       const r=screenRadius(radius,info),selected=l.id===v.selectedId,hovered=l.id===v.hoverHit?.light?.id;
       if(p.x+r<0||p.y+r<0||p.x-r>w||p.y-r>h)continue;
       if(selected){
-        disc(g,p.x,p.y,r,'#FFE078');
+        lightOutline(g,l,p,info,'#FFE078');
         g.save();g.strokeStyle='#FFE078';g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p.x+r,p.y);g.stroke();
         g.fillStyle='#1B2C39';g.fillRect(p.x+r-7,p.y-7,14,14);g.strokeRect(p.x+r-7,p.y-7,14,14);g.restore();
-      }else if(hovered)disc(g,p.x,p.y,r,'#98F2FF');
+      }else if(hovered)lightOutline(g,l,p,info,'#98F2FF');
       center(g,p,l.enabled!==false,selected);
       if(selected)tag(g,p.x,p.y,l.name+' · '+Math.round(radius)+' px');
     }
@@ -82,7 +97,7 @@ export function paint(g,info,v){
       const p=toScreen(v.hover.x,v.hover.y,info);
       if(v.mode==='place'){
         const r=screenRadius(v.brushRadius||96,info);
-        disc(g,p.x,p.y,r,'#A9FFB7');
+        lightOutline(g,{type:v.brush?.type||'radial',radiusPx:v.brushRadius||96},p,info,'#A9FFB7');
         center(g,p,true,false);
         tag(g,p.x,p.y,allEnabled?'Nueva luz · '+Math.floor(v.hover.x)+','+Math.floor(v.hover.y):'Activa iluminación del mapa','#1D5540');
       }else if(v.mode==='erase'&&v.hoverHit){
