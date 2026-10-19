@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio / Character normals v0.5.0
+# Lighting Studio / Character normals v0.5.2
 # Experimental, visible RGSS overlay for player and follower sprites.
 # This is a CACHED SOFTWARE NORMAL-LIGHT PASS, not a GPU shader.
 # It computes at most one small sprite frame per graphics frame and reuses
@@ -9,6 +9,9 @@ module LightingStudioNormals
   MAX_FRAME_SIDE = 192
   LIGHT_HEIGHT = 0.76
   LIGHT_HORIZONTAL = 0.65
+  ATTACK_SECONDS = 0.10
+  RELEASE_SECONDS = 0.24
+  EDGE_FADE_START = 0.60
   NORMAL_LIGHT_Z = 8502
   @mode = :lit
   @normal_raw = {}
@@ -71,6 +74,13 @@ module LightingStudioNormals
     clear_lights
   end
 
+  def clock_seconds
+    return System.uptime if defined?(System) && System.respond_to?(:uptime)
+    Time.now.to_f
+  end
+
+  # Cache only static light settings. Evaluate pulse on each update using
+  # LightingStudio.pulse_values, the SAME clock/radius/intensity as map lights.
   def light_sources(map_id)
     return @lights if @last_light_map == map_id
     data = LightingStudio.load_map(map_id)
@@ -81,10 +91,18 @@ module LightingStudioNormals
     list.first(80).each do |src|
       next unless src.is_a?(Hash) && src['enabled'] != false
       radius = LightingStudio.number(src['radiusPx'], 96, 8, 512)
-      cx = LightingStudio.number(src['x'], 0, -2048, 2048)*Game_Map::TILE_WIDTH
-      cy = LightingStudio.number(src['y'], 0, -2048, 2048)*Game_Map::TILE_HEIGHT
+      cx = LightingStudio.number(src['x'], 0, -2048, 2048) * Game_Map::TILE_WIDTH
+      cy = LightingStudio.number(src['y'], 0, -2048, 2048) * Game_Map::TILE_HEIGHT
       color = LightingStudio.hex_color(src['color'])
-      @lights << [cx, cy, radius, color, LightingStudio.number(src['intensity'],0.8,0,1)]
+      pulse = src['pulse'].is_a?(Hash) ? src['pulse'] : {}
+      type = src['type'].to_s
+      rotation = LightingStudio.number(src['rotation'], 0, -360, 360) * Math::PI / 180.0
+      width = LightingStudio.number(src['widthPx'], 160, 8, 1024)
+      height = LightingStudio.number(src['heightPx'], 96, 8, 1024)
+      angle = LightingStudio.number(src['angle'], 70, 5, 170) * Math::PI / 360.0
+      @lights << [cx, cy, radius, color,
+                  LightingStudio.number(src['intensity'], 0.8, 0, 1),
+                  pulse, type, rotation, width, height, angle]
     end
     @lights
   rescue StandardError => e
@@ -92,28 +110,90 @@ module LightingStudioNormals
     @lights = []
   end
 
-  def nearby_light(character)
+  def smooth_edge(progress)
+    return 1.0 if progress <= EDGE_FADE_START
+    return 0.0 if progress >= 1.0
+    t = (progress - EDGE_FADE_START) / (1.0 - EDGE_FADE_START)
+    1.0 - t*t*(3.0 - 2.0*t)
+  end
+
+  def character_world_position(character)
+    if character.respond_to?(:real_x) && character.respond_to?(:real_y) &&
+       !character.real_x.nil? && !character.real_y.nil?
+      width = character.respond_to?(:width) ? character.width : 1
+      cx = character.real_x.to_f / Game_Map::X_SUBPIXELS +
+           width.to_f * Game_Map::TILE_WIDTH / 2.0
+      cy = character.real_y.to_f / Game_Map::Y_SUBPIXELS +
+           Game_Map::TILE_HEIGHT / 2.0
+    else
+      cx = (character.x.to_f + 0.5) * Game_Map::TILE_WIDTH
+      cy = (character.y.to_f + 0.5) * Game_Map::TILE_HEIGHT
+    end
+    [cx, cy]
+  end
+
+  def nearby_light(character, now = nil)
     map = character.respond_to?(:map) ? character.map : $game_map
     return nil unless map && map.respond_to?(:map_id)
-    cx = (character.x.to_f+0.5)*Game_Map::TILE_WIDTH
-    cy = (character.y.to_f+0.5)*Game_Map::TILE_HEIGHT
+    now ||= clock_seconds
+    cx,cy = character_world_position(character)
     best = nil
     score = 0.0
-    light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity|
+    light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity,pulse,type,rotation,width,height,angle|
+      size, energy = LightingStudio.pulse_values(pulse, now)
+      next if energy <= 0.0 || intensity <= 0.0
       dx=lx-cx
       dy=ly-cy
-      distance=Math.sqrt(dx*dx+dy*dy)
-      next if distance>=radius+24.0
-      # A deliberately conservative one-light budget for the initial runtime:
-      # nearest/strongest light governs surface normals without additive stacking.
-      strength=intensity*(1.0-distance/(radius+24.0))
-      next if strength<=score
-      score=strength
-      theta=Math.atan2(dy,dx)
-      direction=((theta*4.0/Math::PI).round) % 8
-      best=[direction,rgb,strength]
+      # Rotate into the light's local space, matching the static masks.
+      cos=Math.cos(rotation)
+      sin=Math.sin(rotation)
+      local_x=cos*dx+sin*dy
+      local_y=-sin*dx+cos*dy
+      progress = case type
+                 when 'ellipse'
+                   Math.sqrt((local_x/(width*size/2.0))**2 +
+                             (local_y/(height*size/2.0))**2)
+                 when 'rectangle'
+                   [(local_x/(width*size/2.0)).abs,
+                    (local_y/(height*size/2.0)).abs].max
+                 when 'cone'
+                   # The cone emits along +X; dx/dy point from character to light,
+                   # so the character's position relative to the light is negated.
+                   fx=-local_x
+                   fy=-local_y
+                   next if fx < 0
+                   reach=Math.sqrt(fx*fx+fy*fy)/(radius*size)
+                   azimuth=Math.atan2(fy,fx).abs
+                   next if azimuth >= angle
+                   reach
+                 else
+                   Math.sqrt(dx*dx+dy*dy)/(radius*size)
+                 end
+      next if progress >= 1.0
+      # No hard cutoff at the light's radius: both shape and strength taper
+      # continuously to zero. Radius AND intensity obey the pulse waveform.
+      strength = [[intensity*energy*smooth_edge(progress),0.0].max,1.0].min
+      next if strength <= score
+      score = strength
+      theta = Math.atan2(dy,dx)
+      direction = ((theta*4.0/Math::PI).round) % 8
+      best = [direction,rgb,strength]
     end
     best
+  end
+
+  def eased_opacity(overlay, target, now)
+    current = overlay.instance_variable_get(:@ls_normal_smooth_opacity)
+    current = 0.0 if current.nil?
+    previous = overlay.instance_variable_get(:@ls_normal_last_time)
+    delta = previous ? [[now-previous, 0.0].max,0.1].min : 1.0/60.0
+    duration = target > current ? ATTACK_SECONDS : RELEASE_SECONDS
+    coefficient = 1.0 - Math.exp(-delta/duration)
+    current += (target-current)*coefficient
+    current = target if (target-current).abs < 0.5
+    overlay.instance_variable_set(:@ls_normal_last_time,now)
+    overlay.instance_variable_set(:@ls_normal_smooth_opacity,current)
+    [[current.round,0].max,255].min
   end
 
   def normal_bitmap(path)
@@ -202,35 +282,63 @@ module LightingStudioNormals
 
   def update_character(base, overlay)
     return unless valid_sprite?(overlay)
-    overlay.visible=false
-    return if @mode==:original || !base.visible || !base.bitmap
-    return unless base.character && base.character.respond_to?(:character_name)
-    path=LightingStudio.normal_for_character(base.character)
-    return unless path
-    rect=base.src_rect
+    if @mode == :original || !base.visible || !base.bitmap
+      overlay.visible = false
+      overlay.instance_variable_set(:@ls_normal_smooth_opacity,0.0)
+      overlay.instance_variable_set(:@ls_normal_last_time,nil)
+      return
+    end
+    unless base.character && base.character.respond_to?(:character_name)
+      overlay.visible=false
+      return
+    end
+    path = LightingStudio.normal_for_character(base.character)
+    unless path
+      overlay.visible=false
+      return
+    end
+    rect = base.src_rect
     return unless rect && rect.width>0 && rect.height>0
-    if @mode==:normals
-      bmp=normal_bitmap(path)
-      return unless bmp && rect.x+rect.width<=bmp.width && rect.y+rect.height<=bmp.height
-      overlay.bitmap=bmp if overlay.bitmap!=bmp
+
+    if @mode == :normals
+      bitmap = normal_bitmap(path)
+      return unless bitmap && rect.x+rect.width<=bitmap.width && rect.y+rect.height<=bitmap.height
+      overlay.bitmap=bitmap if overlay.bitmap!=bitmap
       overlay.src_rect.set(rect.x,rect.y,rect.width,rect.height)
       overlay.blend_type=0
       overlay.opacity=255
+      overlay.instance_variable_set(:@ls_normal_baked,false)
     else
-      info=nearby_light(base.character)
-      return unless info
-      direction,color,strength=info
-      bmp=frame_bitmap(path,[rect.x,rect.y,rect.width,rect.height],direction,color)
-      return unless bmp
-      overlay.bitmap=bmp if overlay.bitmap!=bmp
-      overlay.src_rect.set(0,0,bmp.width,bmp.height)
+      now=clock_seconds
+      info=nearby_light(base.character,now)
+      target=info ? [[(info[2]*190).round,0].max,255].min : 0
+      if info && target > 0
+        direction,color,strength=info
+        bitmap=frame_bitmap(path,[rect.x,rect.y,rect.width,rect.height],direction,color)
+        if bitmap
+          overlay.bitmap=bitmap if overlay.bitmap!=bitmap
+          overlay.src_rect.set(0,0,bitmap.width,bitmap.height)
+          overlay.instance_variable_set(:@ls_normal_baked,true)
+        end
+        # One bitmap may be generated per frame; retain the previous cached
+        # frame instead of blinking when the new direction is still baking.
+      end
+      baked=overlay.instance_variable_get(:@ls_normal_baked)
+      if !baked || !overlay.bitmap
+        overlay.visible=false
+        return
+      end
       overlay.blend_type=1
-      overlay.opacity=[[((strength*190).round),0].max,255].min
+      opacity=eased_opacity(overlay,target,now)
+      overlay.opacity=opacity
+      # Keep the old illumination frame while fading out beyond light radius.
+      # Do NOT clear its bitmap or hide at the beginning of update.
+      if opacity <= 0
+        overlay.visible=false
+        return
+      end
     end
 
-    # Draw the overlay over the same frame/anchor as the original Sprite_Character.
-    # At z=8502 it appears above Lighting Studio's ambient/halo layers so the
-    # surface response is visible; strict occlusion still requires engine shaders.
     overlay.x=base.x
     overlay.y=base.y
     overlay.ox=base.ox
@@ -245,6 +353,7 @@ module LightingStudioNormals
     warn_once(:update,"Normal overlay disabled after error: #{e.message}")
     overlay.visible=false
   end
+
 end
 
 module LightingStudioCharacterNormalSprites
