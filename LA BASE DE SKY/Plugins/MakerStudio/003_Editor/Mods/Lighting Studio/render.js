@@ -1,100 +1,146 @@
-// Lighting Studio Canvas preview. Native light masks are cached (LRU), not rasterized per frame.
-// Radius pulsing reuses the same image, applying only a draw-time scale.
-const CACHE_LIMIT=12, MASK_MAX=128;
-const maskCache=new Map();
-const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,Number(v)||0));
+// Lighting Studio: cached source masks + one unified add-light canvas per map frame.
+// Add lights are merged with MAX-like "lighten", then applied ONCE with "screen".
+// Geometry and fading mirror the Ruby runtime; the 2D editor is an approximation.
+const MASK_LIMIT=16, MASK_MAX=128, VIEW_LIMIT=3, COMPOSITE_SCALE=0.5;
+const masks=new Map(),views=new Map();
+const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number.isFinite(+v)?+v:min));
 const rgb=(hex)=>/^#[0-9A-F]{6}$/i.test(String(hex||''))?[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)):[255,206,138];
-export function evaluated(light,t){
- const p=light.pulse||{},wave=p.enabled?Math.sin(t*Math.PI*2*(p.speedHz||1)+(p.phase||0)*Math.PI/180):0;
- const factor=1+wave*(p.radius||0);
- return {radius:Math.max(8,light.radiusPx*factor),scale:Math.max(.1,factor),
-  intensity:clamp(light.intensity*(1+wave*(p.intensity||0)),0,1)};
+export function evaluated(l,t){
+  const p=l.pulse||{},wave=p.enabled?Math.sin(t*2*Math.PI*(p.speedHz||1)+(p.phase||0)*Math.PI/180):0;
+  const factor=Math.max(.1,1+wave*(p.radius||0));
+  return {radius:Math.max(8,(l.radiusPx||96)*factor),scale:factor,
+    intensity:clamp((l.intensity??.8)*(1+wave*(p.intensity||0)),0,1)};
 }
 export function dimensions(l){
- return (l.type==='ellipse'||l.type==='rectangle')
-   ? {w:Math.max(8,Number(l.widthPx)||160),h:Math.max(8,Number(l.heightPx)||96)}
-   : {w:Math.max(8,Number(l.radiusPx)||96)*2,h:Math.max(8,Number(l.radiusPx)||96)*2};
+  return l.type==='ellipse'||l.type==='rectangle'
+    ?{w:Math.max(8,Number(l.widthPx)||160),h:Math.max(8,Number(l.heightPx)||96)}
+    :{w:Math.max(8,Number(l.radiusPx)||96)*2,h:Math.max(8,Number(l.radiusPx)||96)*2};
 }
-function strength(l,x,y){
- const soft=clamp(l.softness||.75,.05,1),type=l.type||'radial';
- let d;
- if(type==='rectangle'){d=Math.max(Math.abs(x),Math.abs(y));}
- else if(type==='ellipse'){d=Math.hypot(x,y);}
- else if(type==='cone'){
-  const angle=clamp(l.angle||70,5,170)*Math.PI/360;
-  const angular=Math.abs(Math.atan2(y,x))/angle;
-  d=Math.max(Math.hypot(x,y),angular);
- }else{d=Math.hypot(x,y);}
- const shaped=d>=1?0:Math.pow(Math.max(0,1-d),1/soft);
- const center=Math.max(0,Math.min(1,l.centerStrength??0.65));
- return shaped*(center+(1-center)*Math.min(1,d*2));
+export function falloff(l,nx,ny){
+  let d;const t=l.type||'radial',soft=clamp(l.softness??.75,.05,1);
+  if(t==='rectangle')d=Math.max(Math.abs(nx),Math.abs(ny));
+  else if(t==='cone')d=Math.max(Math.hypot(nx,ny),Math.abs(Math.atan2(ny,nx))/(clamp(l.angle??70,5,170)*Math.PI/360));
+  else d=Math.hypot(nx,ny);
+  if(d>=1)return 0;
+  const mode=l.fadeMode||'center';
+  let fadeDist=d;
+  if(mode==='top')fadeDist=(ny+1)*.5;
+  else if(mode==='bottom')fadeDist=(1-ny)*.5;
+  else if(mode==='left')fadeDist=(nx+1)*.5;
+  else if(mode==='right')fadeDist=(1-nx)*.5;
+  else if(mode==='custom'){
+    const ox=clamp(l.fadeX??0,-1,1),oy=clamp(l.fadeY??0,-1,1);
+    fadeDist=Math.hypot(nx-ox,ny-oy)/(1+Math.hypot(ox,oy));
+  }
+  const main=Math.pow(Math.max(0,1-clamp(fadeDist,0,1)),1/soft);
+  const edge=mode==='center'?1:clamp((1-d)/Math.max(.035,.18*soft),0,1);
+  const center=clamp(l.centerStrength??.65,0,1);
+  return main*edge*(center+(1-center)*Math.min(1,d*2));
 }
 function newCanvas(w,h){
- const c=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(w,h):document.createElement('canvas');
- c.width=w;c.height=h;return c;
+  let c;
+  if(typeof OffscreenCanvas!=='undefined'){
+    try{c=new OffscreenCanvas(w,h);}catch(e){}
+  }
+  if(!c){c=document.createElement('canvas');c.width=w;c.height=h;}
+  return c;
 }
 function maskKey(l){
- const p=l.pixel||{};
- return [l.type||'radial',l.radiusPx,l.widthPx,l.heightPx,l.angle,l.color,l.softness,l.centerStrength,p.enabled?1:0,p.size,p.steps].join('|');
+  const p=l.pixel||{};
+  return [l.type,l.radiusPx,l.widthPx,l.heightPx,l.angle,l.color,l.softness,l.centerStrength,
+    l.fadeMode,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps].join('|');
 }
 function createMask(l){
- const dims=dimensions(l),factor=Math.min(1,MASK_MAX/Math.max(dims.w,dims.h));
- const w=Math.max(2,Math.round(dims.w*factor)),h=Math.max(2,Math.round(dims.h*factor));
- const c=newCanvas(w,h),ctx=c.getContext('2d');
- if(!ctx)return null;
- const [red,green,blue]=rgb(l.color),pixel=l.pixel||{};
- if(pixel.enabled){
-   const cell=Math.max(1,Math.round((pixel.size||6)*factor)),steps=Math.max(2,Math.round(pixel.steps||6));
-   ctx.fillStyle='transparent';ctx.clearRect(0,0,w,h);
-   for(let py=0;py<h;py+=cell)for(let px=0;px<w;px+=cell){
-     const normX=((px+cell*.5)/w-.5)*2,normY=((py+cell*.5)/h-.5)*2;
-     const a=Math.round(strength(l,normX,normY)*steps)/steps;
-     if(a<=0)continue;
-     ctx.fillStyle='rgba('+red+','+green+','+blue+','+a+')';
-     ctx.fillRect(px,py,Math.min(cell,w-px),Math.min(cell,h-py));
-   }
- }else{
-   const im=ctx.createImageData(w,h),a=im.data;
-   for(let py=0;py<h;py++)for(let px=0;px<w;px++){
-     const normX=((px+.5)/w-.5)*2,normY=((py+.5)/h-.5)*2;
-     const alpha=Math.round(255*strength(l,normX,normY)),at=(py*w+px)*4;
-     a[at]=red;a[at+1]=green;a[at+2]=blue;a[at+3]=alpha;
-   }
-   ctx.putImageData(im,0,0);
- }
- return c;
+  const dims=dimensions(l),factor=Math.min(1,MASK_MAX/Math.max(dims.w,dims.h));
+  const w=Math.max(2,Math.round(dims.w*factor)),h=Math.max(2,Math.round(dims.h*factor));
+  const c=newCanvas(w,h),ctx=c.getContext('2d');
+  if(!ctx)return null;
+  const [r,g,b]=rgb(l.color),p=l.pixel||{};
+  if(p.enabled){
+    const cell=Math.max(1,Math.round((p.size||6)*factor)),steps=Math.max(2,p.steps||6);
+    for(let y=0;y<h;y+=cell)for(let x=0;x<w;x+=cell){
+      const nx=((x+cell/2)/w-.5)*2,ny=((y+cell/2)/h-.5)*2;
+      const a=Math.round(falloff(l,nx,ny)*steps)/steps;
+      if(a<1/255)continue;
+      ctx.fillStyle='rgba('+r+','+g+','+b+','+a+')';
+      ctx.fillRect(x,y,Math.min(cell,w-x),Math.min(cell,h-y));
+    }
+  }else{
+    const img=ctx.createImageData(w,h),buf=img.data;
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      const alpha=Math.round(falloff(l,((x+.5)/w-.5)*2,((y+.5)/h-.5)*2)*255);
+      const pos=(y*w+x)*4;
+      buf[pos]=r;buf[pos+1]=g;buf[pos+2]=b;buf[pos+3]=alpha;
+    }
+    ctx.putImageData(img,0,0);
+  }
+  return c;
 }
-function cachedMask(l){
- const key=maskKey(l);
- if(maskCache.has(key)){
-   const value=maskCache.get(key);maskCache.delete(key);maskCache.set(key,value);return value;
- }
- const value=createMask(l);
- if(!value)return null;
- maskCache.set(key,value);
- if(maskCache.size>CACHE_LIMIT)maskCache.delete(maskCache.keys().next().value);
- return value;
+function getMask(l){
+  const key=maskKey(l);
+  if(masks.has(key)){const m=masks.get(key);masks.delete(key);masks.set(key,m);return m;}
+  const m=createMask(l);if(!m)return null;
+  masks.set(key,m);if(masks.size>MASK_LIMIT)masks.delete(masks.keys().next().value);
+  return m;
 }
-export function clearLightCache(){maskCache.clear();}
-export function cacheSize(){return maskCache.size;}
-export function drawLights(g,lights,project,width,height,t=0){
- for(const l of lights||[]){
-  if(l.enabled===false)continue;
-  const dims=dimensions(l),animated=evaluated(l,t),scale=animated.scale*project.scale();
-  const x=project.x(l.x),y=project.y(l.y);
-  const maxR=Math.hypot(dims.w,dims.h)*scale*.5;
-  if(x+maxR<0||y+maxR<0||x-maxR>width||y-maxR>height)continue;
-  const bitmap=cachedMask(l);if(!bitmap)continue;
+function stamp(g,l,project,t,blend){
+  const mask=getMask(l);if(!mask)return;
+  const d=dimensions(l),a=evaluated(l,t),scale=a.scale*project.scale();
+  const w=d.w*scale,h=d.h*scale;
   g.save();
-  g.globalCompositeOperation=l.blendMode==='normal'?'source-over':l.blendMode==='subtract'?'multiply':'lighter';
-  g.globalAlpha=animated.intensity;
+  g.globalCompositeOperation=blend;
+  g.globalAlpha=a.intensity;
   g.imageSmoothingEnabled=!l.pixel?.enabled;
-  g.translate(x,y);
+  g.translate(project.x(l.x),project.y(l.y));
   g.rotate((Number(l.rotation)||0)*Math.PI/180);
-  const w=dims.w*scale,h=dims.h*scale;
-  // For multiply, an alpha-black mask darkens map pixels without covering whole screen.
   if(l.blendMode==='subtract')g.filter='brightness(0)';
-  g.drawImage(bitmap,-w/2,-h/2,w,h);
+  g.drawImage(mask,-w/2,-h/2,w,h);
   g.restore();
- }
+}
+function fillUnified(buffer,ctx,lights,project,width,height,t){
+  ctx.save();
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.fillStyle='#000';
+  ctx.fillRect(0,0,width,height);
+  const p={x:x=>project.x(x)*COMPOSITE_SCALE,y:y=>project.y(y)*COMPOSITE_SCALE,
+    scale:()=>project.scale()*COMPOSITE_SCALE};
+  for(const l of lights)stamp(ctx,l,p,t,'lighten');
+  ctx.restore();
+}
+function getUnion(lights,project,width,height,t){
+  const w=Math.max(1,Math.ceil(width*COMPOSITE_SCALE)),h=Math.max(1,Math.ceil(height*COMPOSITE_SCALE));
+  const animated=lights.some(l=>l.pulse?.enabled);
+  // A revision is supplied by the editor on each edit; camera position is in viewportKey.
+  // When absent, skip caching rather than accidentally serving a stale lightmap.
+  const stable=project.viewportKey!==undefined&&project.revision!==undefined;
+  const key=stable?[project.viewportKey,project.revision,animated?Math.floor(t*8):0,w,h].join('~'):null;
+  if(key&&views.has(key)){const v=views.get(key);views.delete(key);views.set(key,v);return v;}
+  const buffer=newCanvas(w,h),ctx=buffer.getContext('2d');
+  if(!ctx)return null;
+  fillUnified(buffer,ctx,lights,project,w,h,t);
+  if(key){
+    views.set(key,buffer);
+    while(views.size>VIEW_LIMIT)views.delete(views.keys().next().value);
+  }
+  return buffer;
+}
+export function clearLightCache(){masks.clear();views.clear();}
+export function cacheSize(){return {masks:masks.size,views:views.size};}
+export function drawLights(g,lights,project,width,height,t=0){
+  const visible=(lights||[]).filter(l=>l.enabled!==false);
+  if(!visible.length)return;
+  const additive=visible.filter(l=>(l.blendMode||'add')==='add');
+  if(additive.length){
+    const union=getUnion(additive,project,width,height,t);
+    if(union){
+      g.save();
+      g.globalAlpha=1;g.globalCompositeOperation='screen';g.imageSmoothingEnabled=true;
+      g.drawImage(union,0,0,width,height);
+      g.restore();
+    }
+  }
+  for(const l of visible){
+    const mode=l.blendMode||'add';
+    if(mode==='add')continue;
+    stamp(g,l,project,t,mode==='subtract'?'multiply':'source-over');
+  }
 }
