@@ -1,7 +1,7 @@
 {
   "id": "com.carnekvt.lighting-studio",
   "name": "Lighting Studio",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Conos con difuminado longitudinal y lateral independiente; ajustes coherentes entre editor y runtime.",
+  "description": "Luces suaves de cono/elipse con más detalle, preview optimizada y asignación experimental de normal maps para tiles/OWs.",
   "tags": [
     "mapping",
     "lighting",
