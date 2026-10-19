@@ -1,4 +1,4 @@
-# Lighting Studio v0.4.0 — Maker Studio / Pokémon Essentials 21.1
+# Lighting Studio v0.4.2 — Maker Studio / Pokémon Essentials 21.1
 
 Estado: prototipo experimental, **sin pruebas de interfaz ni de runtime dentro del juego**. No distribuir como release estable.
 
@@ -32,7 +32,7 @@ Las coordenadas X/Y del inspector admiten decimales hasta tres cifras (`25.30`, 
 - La composición del editor usa una superficie de media resolución y caché de hasta tres vistas por mapa/cámara/revisión.
 - Las peticiones de repintado se agrupan; hay control para no acumular redibujados cuando Maker Studio está ocupado.
 - El mouse no solicita un nuevo repintado si permanece en la misma casilla.
-- El runtime crea un bitmap compartido a media resolución y lo recompone cuando se mueve la cámara o cambia el estado de pulsación. La velocidad nominal de pulsación es 8 actualizaciones de bitmap por segundo.
+- El runtime crea un bitmap compartido a un cuarto de resolución y lo recompone cuando se mueve la cámara o cambia el estado de pulsación. La velocidad nominal de pulsación es 6 actualizaciones de bitmap por segundo.
 - El inspector muestra tiempo de dibujo del overlay y demora hasta que Maker Studio ejecuta el repintado.
 
 ## Validación indispensable
@@ -66,3 +66,20 @@ Las coordenadas X/Y del inspector admiten decimales hasta tres cifras (`25.30`, 
 2. En Maker Studio, fijar una luz encima de un tile de referencia y cambiar zoom entre 50%, 75%, 100%, 125%, 150% y 200%. Probar con **una** luz y con **dos** luces fusionadas, moviendo la cámara.
 3. Probar edición de propiedades y apuntar **ms de dibujo** y **ms de espera** en el indicador de Lighting Studio. No se han medido FPS reales en Maker Studio: optimizaciones implementadas, resultados pendientes de validar.
 4. En juego, probar zoom, scrolling, transferencia de mapa, F12 y efectos meteorológicos para descartar interacciones con otros plugins.
+
+## v0.4.2 — Recuperación del preview y fusión real
+
+- **Superposición del mapa:** selector **Fusionar áreas / Acumular brillo**. Fusión es la opción predeterminada: la luz A y la B amplían el contorno y conservan el máximo por canal en los cruces. Suma permite intensidades superpuestas deliberadamente.
+- **Por fuente:** modos **Unir con otras luces**, **Sumar brillo (independiente)**, **Normal** y **Oscurecer**. Las luces guardadas con el modo antiguo `add` se interpretan como `union`.
+- **Render del editor:** la fusión usa máximos por canal de píxeles premultiplicados, no `lighten` (que acumulaba brillo). La preview utiliza lienzos DOM compatibles con Tauri/WebView y el overlay básico, ya utilizado en las versiones que mostraban las luces.
+- **Vista nocturna solo editor:** fuerza una ligera oscuridad únicamente durante el preview. No altera el JSON ni el resultado del juego; facilita ver farolas sobre mapas claros.
+- **Estados de visibilidad:** avisos cuando la vista está oculta, el mapa tiene iluminación desactivada o todas las luces están apagadas.
+- **Runtime:** las fuentes `union` comparten un mapa de luces de composición por máximos; `sum` usa sprites aditivos independientes. El mapa compartido baja su resolución a 25 % y la composición animada a 6 Hz para limitar el coste de la unión pixel a pixel.
+- **Limitación**: la composición por máximo en Ruby requiere leer/escribir píxeles de las zonas iluminadas y puede ser costosa con demasiadas fuentes grandes o movimiento constante de cámara. No se ha medido el FPS real. La iluminación del editor y el juego todavía pueden diferir por la mezcla final.
+
+### Prueba recomendada
+1. Comprueba que **Ver luces en mapa** y **Iluminación activada** están encendidos.
+2. Activa **Vista nocturna (solo editor)** si el mapa está claro.
+3. Crea dos fuentes radiales cálidas, con un solapamiento parcial, y elige **Fusionar áreas · farolas**.
+4. Comprueba que las zonas iluminadas se conectan sin duplicar brillo central. Cambia a **Acumular brillo · suma** para contrastar.
+5. Comprueba el juego con esas mismas dos luces y el monitor de FPS. Si no se ven luces, prueba primero un mapa interior con oscuridad 0.4.
