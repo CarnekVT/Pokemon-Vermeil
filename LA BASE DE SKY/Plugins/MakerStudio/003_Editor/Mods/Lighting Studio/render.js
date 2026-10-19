@@ -189,7 +189,11 @@ export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'
   const summed=overlapMode==='sum'?[...union,...sums]:sums;
   const staticLights=merged.filter(l=>!l.pulse?.enabled);
   const pulsing=merged.filter(l=>l.pulse?.enabled);
-  if(staticLights.length===1)stamp(g,staticLights[0],project,t,'screen');
+  if(overlapMode==='fast'){
+    // Editing sliders/dragging: immediate sprite preview; no world-chunk rebuild
+    // until mouse release, preventing repeated 2D getImageData stalls.
+    for(const l of staticLights)stamp(g,l,project,t,'screen');
+  }else if(staticLights.length===1)stamp(g,staticLights[0],project,t,'screen');
   else if(staticLights.length>1)drawUnionChunks(g,staticLights,project,width,height);
   // Animated lights are sprites; rebuilding world chunks every pulse frame would
   // cause spikes. In this prototype animated overlaps use screen blending.
