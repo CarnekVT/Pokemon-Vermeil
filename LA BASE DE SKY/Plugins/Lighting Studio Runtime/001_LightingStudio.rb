@@ -205,21 +205,42 @@ module LightingStudio
     step = 1
     steps = pixel.empty? ? 255 : number(pixel['steps'],6,2,24).round
     color = hex_color(spec['color'])
-    bmp = Bitmap.new(w,h)
-    (0...h).step(step) do |y|
-      py = ((y+step/2.0)/h - 0.5)*world_h
-      (0...w).step(step) do |x|
-        px = ((x+step/2.0)/w - 0.5)*world_w
-        local_x = cos*px + sin*py
-        local_y = -sin*px + cos*py
-        nx = local_x/(orig_w/2.0)
-        ny = local_y/(orig_h/2.0)
-        a = falloff(spec,nx,ny)
-        next if a <= 0
-        a = (a*steps).round.to_f/steps
-        alpha = (a*255).round
-        next if alpha <= 0
-        bmp.fill_rect(x,y,[step,w-x].min,[step,h-y].min,Color.new(color[0],color[1],color[2],alpha))
+    # Building a mask with fill_rect for each pixel invokes tens of
+    # thousands of native RGSS calls. Bake RGBA in Ruby, then transfer once.
+    bytes = Array.new(w*h*4,0)
+    y=0
+    while y<h
+      py=((y+0.5)/h-0.5)*world_h
+      x=0
+      while x<w
+        px=((x+0.5)/w-0.5)*world_w
+        local_x=cos*px+sin*py
+        local_y=-sin*px+cos*py
+        a=falloff(spec,local_x/(orig_w/2.0),local_y/(orig_h/2.0))
+        if a>0
+          alpha=((a*steps).round.to_f/steps*255).round
+          if alpha>0
+            i=(y*w+x)*4
+            bytes[i]=color[0]
+            bytes[i+1]=color[1]
+            bytes[i+2]=color[2]
+            bytes[i+3]=alpha
+          end
+        end
+        x+=1
+      end
+      y+=1
+    end
+    bmp=Bitmap.new(w,h)
+    if bmp.respond_to?(:raw_data=)
+      bmp.raw_data=bytes.pack('C*')
+    else
+      h.times do |row|
+        w.times do |col|
+          i=(row*w+col)*4
+          next if bytes[i+3]==0
+          bmp.set_pixel(col,row,Color.new(bytes[i],bytes[i+1],bytes[i+2],bytes[i+3]))
+        end
       end
     end
     [bmp,world_w,world_h]
@@ -420,6 +441,11 @@ module LightingStudioSpriteset
         entry[:bitmap] = image[0]
         bmp = image[0]
       end
+      # Cache byte-buffer access instead of allocating Color on every sampled texel.
+      unless entry.key?(:raw_pixels)
+        entry[:raw_pixels]=bmp.respond_to?(:raw_data) ? bmp.raw_data : nil
+      end
+      rgba=entry[:raw_pixels]
 
       y = y1
       while y < y2
@@ -431,17 +457,33 @@ module LightingStudioSpriteset
             world_x = origin_x + (x + 0.5) * pixel_unit
             sx = (((world_x - min_x) / entry[:w]) * bmp.width).floor
             if sx >= 0 && sx < bmp.width
-              pixel = bmp.get_pixel(sx, sy)
-              if pixel.alpha > 0
-                alpha = pixel.alpha / 255.0 * entry[:intensity]
-                idx = y * resolution + x
-                nr = (pixel.red * alpha).round
-                ng = (pixel.green * alpha).round
-                nb = (pixel.blue * alpha).round
-                red[idx] = nr if nr > red[idx]
-                green[idx] = ng if ng > green[idx]
-                blue[idx] = nb if nb > blue[idx]
-                has_light = true
+              if rgba && rgba.respond_to?(:getbyte)
+                pix=(sy*bmp.width+sx)*4
+                opa=rgba.getbyte(pix+3)
+                if opa && opa>0
+                  alpha=opa / 255.0 * entry[:intensity]
+                  idx=y*resolution+x
+                  nr=(rgba.getbyte(pix)*alpha).round
+                  ng=(rgba.getbyte(pix+1)*alpha).round
+                  nb=(rgba.getbyte(pix+2)*alpha).round
+                  red[idx]=nr if nr>red[idx]
+                  green[idx]=ng if ng>green[idx]
+                  blue[idx]=nb if nb>blue[idx]
+                  has_light=true
+                end
+              else
+                pixel=bmp.get_pixel(sx,sy)
+                if pixel.alpha>0
+                  alpha=pixel.alpha/255.0*entry[:intensity]
+                  idx=y*resolution+x
+                  nr=(pixel.red*alpha).round
+                  ng=(pixel.green*alpha).round
+                  nb=(pixel.blue*alpha).round
+                  red[idx]=nr if nr>red[idx]
+                  green[idx]=ng if ng>green[idx]
+                  blue[idx]=nb if nb>blue[idx]
+                  has_light=true
+                end
               end
             end
             x += 1
@@ -453,13 +495,29 @@ module LightingStudioSpriteset
 
     return nil unless has_light
     result = Bitmap.new(resolution, resolution)
-    idx = 0
-    resolution.times do |y|
-      resolution.times do |x|
-        if red[idx] > 0 || green[idx] > 0 || blue[idx] > 0
-          result.set_pixel(x, y, Color.new(red[idx], green[idx], blue[idx], 255))
+    if result.respond_to?(:raw_data=)
+      bytes=Array.new(resolution*resolution*4,0)
+      idx=0
+      while idx<red.length
+        if red[idx]>0 || green[idx]>0 || blue[idx]>0
+          j=idx*4
+          bytes[j]=red[idx]
+          bytes[j+1]=green[idx]
+          bytes[j+2]=blue[idx]
+          bytes[j+3]=255
         end
-        idx += 1
+        idx+=1
+      end
+      result.raw_data=bytes.pack('C*')
+    else
+      idx=0
+      resolution.times do |y|
+        resolution.times do |x|
+          if red[idx]>0 || green[idx]>0 || blue[idx]>0
+            result.set_pixel(x,y,Color.new(red[idx],green[idx],blue[idx],255))
+          end
+          idx+=1
+        end
       end
     end
     result
