@@ -1,58 +1,26 @@
-# Vermeil Smooth Movement 0.2.0 (Essentials v21.1)
+# Vermeil Smooth Movement 0.2.2 (Pokémon Essentials 21.1)
 
-Panel: Maker Studio > **Movement Studio**. Guarda `config.ini` junto al plugin.
+Plugin Ruby + panel **Movement Studio** para Maker Studio, con opciones globales y por mapa. Editor y juego usan `Plugins/[VERMEIL] Smooth Movement/config.ini` sin depender de JSON ni FileUtils. Los cambios de configuracion se detectan durante la partida (hasta dos comprobaciones por segundo).
 
-## Disponible
+## Opciones funcionales
 
-- 4 direcciones por defecto, 8 direcciones opcionales mediante Input.dir8.
-- Giros inmediatos opcionales; desactivados se mantiene la pausa tradicional.
-- Diagonales conservadoras: comprueban ambas rutas ortogonales y excluyen bicicleta, Surf, buceo, hielo, escaleras, rampas, espirales y movimientos forzados.
-- Deslizamiento cardinal opcional si una diagonal queda bloqueada.
-- Interpolación nativa de movimiento de La Base de Sky y animaciones OWs More Frames sin modificarlas.
-- Ajuste de cámara sobre Fancy Camera existente. El switch 59 activa Fancy Camera; 35 mantiene suavizado original.
-- Valores globales y overrides por mapa en `[map:17]`; se recarga mientras se ejecuta el juego (comprobación del archivo cada 0.5 s).
+- **4 u 8 direcciones.** Cuatro por defecto; diagonales opcionales para terreno normal. Las diagonales comprueban ambas rutas ortogonales y mantienen sprites tradicionales de cuatro filas.
+- **Giro inmediato / giro clasico.** En inmediato, si el jugador esta quieto y presiona otra direccion, gira e inicia el movimiento en ese mismo update. En clasico se utiliza literalmente `Game_Player#update_command_new` original de Essentials, incluido su retardo inicial de 75 ms. **Mientras ya camina, ambos modos funcionan casi igual por la naturaleza del grid original**; esto no es movimiento libre.
+- **Deslizamiento en diagonales.** Si la diagonal esta bloqueada, opcion para intentar uno de los ejes cardinales.
+- **Camara 0-100.** El valor 35 respeta el movimiento de camara previo del proyecto. Valores menores siguen antes y valores mayores siguen con mas rezago. Se aplica al resultado de la camara existente, tambien cuando Fancy Camera (switch 59) esta desactivada. La implementacion preserva scroll de mapa y camaras de eventos/cutscenes.
 
-## Limitaciones importantes
+## Correccion de suavidad
 
-- `mode=free` y `subtile_divisions` **están reservados**. Elegirlos no activa aún desplazamiento libre real: se conserva el desplazamiento lógico por tiles para proteger eventos, escaleras, encuentros y followers.
-- `smooth_movement=1` enlaza los pasos consecutivos sin el frame vacio habitual; `0` conserva el paso original. Ambas opciones usan interpolacion lineal, sin frenado artificial por casilla.
-- El desplazamiento diagonal utiliza las cuatro orientaciones gráficas tradicionales (sin filas diagonales nuevas).
-- Las diagonales se prueban solamente en terreno normal. No sustituyen la lógica de salto, agua ni movimiento forzado.
-- No hay pruebas de ejecución dentro del cliente RPG Maker/mkxp; verifica mapas y eventos antes de integrarlo a una build estable.
+Se quito la interpolacion `smoothstep` por tile: frenaba el sprite al final de *cada* casilla y hacia caminar seguido mas entrecortado. El jugador vuelve a la interpolacion lineal nativa de Essentials. El control `smooth_movement` en INI queda como dato heredado **sin efecto**, y se ha retirado del panel. Se ha eliminado tambien el intento de arrancar un segundo paso fuera del ciclo de actualizacion original, por riesgo de desincronizar eventos, encuentros o followers.
 
-## Verificación manual recomendada
+El movimiento verdaderamente fluido entre casillas y el modo sub-tile (1/4, 1/8) requieren una implementacion especifica con colisiones y eventos; **todavia no estan disponibles**. No se muestran como funciones activas en Movement Studio.
 
-1. Prueba 4 direcciones en pueblo, cueva, hierba, eventos y transiciones.
-2. Activa 8 direcciones y comprueba esquinas estrechas, paredes y NPCs.
-3. Comprueba escalera lateral/espiral, hielo, bici, agua, seguidores y encuentros.
-4. Prueba Fancy Camera con switch 59 activado y desactivado.
-5. Guarda un perfil [map:ID] y vuelve al global; prueba reinicio y carga partida.
+## Pruebas manuales
 
-## Importante al actualizar
+1. Actualiza esta rama, cierra el juego y abrelo en modo Debug para que compile el plugin 0.2.2.
+2. En Maker Studio selecciona **Global**, cambia a giro clasico, guarda y verifica su confirmacion de lectura de `config.ini`. Compara la pausa al girar **desde parado** con el giro inmediato.
+3. Camina varias casillas de corrido: comprueba que desaparecieron los frenazos del viejo easing.
+4. En un mapa amplio, prueba camara **0, 35 y 100** con switch 59 apagado y encendido. Evita cutscenes para esta prueba.
+5. Prueba eventos de contacto, encuentros, followers, escaleras, hielo, bicicleta, Surf y transiciones de mapa. No activar diagonales en maniobras especiales.
 
-Ejecuta el juego en modo debug para forzar la recompilación del plugin si se encuentra el archivo `Data/PluginScripts.rxdata` anterior. La version 0.2.0 modifica meta.txt para detectar la actualizacion y ordena cargar este plugin al final. El editor escribe en el proyecto abierto, no en otro directorio del juego.
-
-### Hotfix 0.1.2
-
-Se soluciono el NoMethodError `undefined method [] for Time` al leer `config.ini`: la lectura de secciones devuelve explicitamente un Hash, no la fecha de modificacion del archivo. El metodo `option` consulta una sola instantanea de configuracion. Reinicia la ejecucion de Game.exe para recompilar y recargar el plugin.
-
-## Actualizacion 0.2.0: giros, continuidad y camara
-
-- Giro inmediato: cambia la orientacion e inicia el paso en el mismo update, sin esperar 75 ms.
-- Giro clasico: primero cambia la orientacion y espera 75 ms, incluso al girar entre casillas al caminar.
-- Continuidad de pasos: con una direccion pulsada, arranca el siguiente paso tras procesar eventos/encuentros y evita el fotograma vacio entre tiles. Desactivado conserva el ritmo original.
-- Interpolacion: se elimina el easing smoothstep por casilla que frenaba repetidamente al personaje. Se conserva la interpolacion lineal de Essentials.
-- Camara Fancy activa (switch 59): el porcentaje modifica Fancy Camera; 35% mantiene su velocidad original.
-- Camara Fancy apagada: 0% usa seguimiento original, 1-100% activa un seguimiento suave propio, independiente de los FPS.
-- La camara conserva el scroll de eventos, camaras fijadas a eventos y saltos de mapa.
-- Movement Studio verifica que config.ini se ha escrito y comunica la ruta; el juego relee cambios periodicamente.
-- Last = true posiciona el plugin despues de otros parches de movimiento y camara.
-
-### Como comparar
-
-1. Estando quieto, pulsa una direccion diferente de la que mira el jugador. Compara giro inmediato con clasico (75 ms).
-2. Manten una flecha durante varias casillas y compara continuidad activada vs desactivada.
-3. Con switch 59 apagado, compara camara 0% vs 100% en un mapa amplio.
-4. Con switch 59 encendido, compara 0%, 35% y 100% (35% = velocidad Fancy original).
-
-Esta version aun no implementa movimiento libre sub-tile ni orientaciones graficas de ocho filas. Verificar manualmente en RPG Maker/mkxp.
+**Nota:** Los archivos se han revisado en GitHub, pero la ejecucion dentro de mkxp/RPG Maker requiere pruebas locales.
