@@ -10,7 +10,7 @@ function fail(e){const msg=String(e?.message||e);state?.ctx.log.error(msg);notif
 function current(){return getMap(state.data,state.mapId,false);}
 function active(){return current()?.lights.find(l=>l.id===state.selected)||null;}
 function record(){state.undo.push(deepCopy(state.data));if(state.undo.length>60)state.undo.shift();state.redo=[];}
-function redraw(){state?.ctx.editor.requestRedraw?.();}
+function redraw(){if(!state?.ctx)return;if(state.redrawPending)return;state.redrawPending=true;requestAnimationFrame(()=>{if(!state)return;state.redrawPending=false;state.ctx.editor.requestRedraw?.();});}
 function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Overlay activo · mapa '+stats.lastMap+' · '+stats.calls+' fotogramas':'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
 function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();redraw();refresh();void persist().catch(fail);}
 function undo(){if(!state.undo.length)return;state.redo.push(deepCopy(state.data));state.data=state.undo.pop();redraw();refresh();void persist().catch(fail);}
@@ -54,6 +54,7 @@ if(selected.type!=='radial')slider(insp,'Rotación',selected.rotation,-360,360,1
 const name=node('input');name.type='text';name.className='ls-input';name.value=selected.name;name.onchange=()=>change(()=>selected.name=name.value.slice(0,80));labeled(insp,'Nombre',name);
 const c=node('input');c.type='color';c.className='ls-color';c.value=selected.color;c.oninput=()=>editValue(()=>selected.color=c.value,false);c.onchange=()=>editValue(()=>selected.color=c.value,true);labeled(insp,'Color',c);
 slider(insp,'Intensidad',selected.intensity,0,1,.01,(v,final)=>editValue(()=>selected.intensity=clamp(v,0,1),final));
+slider(insp,'Brillo del centro',selected.centerStrength??.65,0,1,.01,(v,final)=>editValue(()=>selected.centerStrength=clamp(v,0,1),final));
 slider(insp,'Radio · píxeles',selected.radiusPx,8,512,1,(v,final)=>editValue(()=>selected.radiusPx=clamp(v,8,512),final));
 slider(insp,'Suavidad',selected.softness,.05,1,.01,(v,final)=>editValue(()=>selected.softness=clamp(v,.05,1),final));
 const blend=node('select');blend.className='ls-input';for(const [value,label] of [['normal','Normal'],['add','Aditiva / Suma'],['subtract','Multiplicativa / Oscurecer']]){const opt=node('option',label);opt.value=value;blend.append(opt);}blend.value=selected.blendMode||'add';blend.onchange=()=>change(()=>selected.blendMode=blend.value);labeled(insp,'Modo de mezcla',blend);
@@ -90,7 +91,7 @@ function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
 redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:''},statusNode:null,selected:null,mode:'select',showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:''},statusNode:null,selected:null,mode:'select',showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
