@@ -16,8 +16,8 @@ class Game_Player
     return unless defined?(VermeilMovement)
     # No suavizar cutscenes, seguimiento de eventos, shakes ni scroll manual.
     return if $game_temp.camera_target_event && $game_temp.camera_target_event != 0
-    return if $game_temp.camera_pos && $game_temp.camera_pos[0] != 0 &&
-              $game_temp.camera_pos[1] != 0
+    return if $game_temp.camera_pos &&
+              ($game_temp.camera_pos[0] != 0 || $game_temp.camera_pos[1] != 0)
     return if $game_temp.camera_shake && $game_temp.camera_shake > 0
     return if $game_temp.camera_offset && $game_temp.camera_offset != [0, 0]
 
