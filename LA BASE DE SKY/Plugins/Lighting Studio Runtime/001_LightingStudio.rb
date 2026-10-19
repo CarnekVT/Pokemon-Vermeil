@@ -207,6 +207,7 @@ module LightingStudioSpriteset
   def ls_setup
     return unless @map && @map.respond_to?(:map_id)
     LightingStudio.normal_reset_cache if LightingStudio.respond_to?(:normal_reset_cache)
+    LightingStudioNormals.release if defined?(LightingStudioNormals)
     data = LightingStudio.load_map(@map.map_id)
     return unless data.is_a?(Hash) && data['enabled'] != false
 
