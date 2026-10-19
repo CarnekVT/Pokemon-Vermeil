@@ -187,6 +187,10 @@ module LightingStudioSpriteset
       @ls_lightmap_sprite.bitmap = @ls_lightmap
       @ls_lightmap_sprite.zoom_x = Graphics.width.to_f/width
       @ls_lightmap_sprite.zoom_y = Graphics.height.to_f/height
+      @ls_lightmap_sprite.x = 0
+      @ls_lightmap_sprite.y = 0
+      @ls_lightmap_sprite.ox = 0
+      @ls_lightmap_sprite.oy = 0
       @ls_lightmap_sprite.blend_type = 1
       @ls_lightmap_sprite.z = 8501
     end
@@ -221,6 +225,9 @@ module LightingStudioSpriteset
       alpha = [[(255*intensity*energy).round,0].max,255].min
       next if alpha<=0
       x,y = ls_position(tx,ty,mx,my,zx,zy)
+      # Match LBDS Animated Props sprite.x/y integer rounding at non-100% zoom.
+      x = x.round
+      y = y.round
       sw=w*zx*size;sh=h*zy*size
       next if x+sw/2<0 || y+sh/2<0 || x-sw/2>Graphics.width || y-sh/2>Graphics.height
       dx=((x-sw/2)*rx).round;dy=((y-sh/2)*ry).round
