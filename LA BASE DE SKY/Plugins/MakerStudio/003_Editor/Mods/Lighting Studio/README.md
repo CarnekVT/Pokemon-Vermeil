@@ -51,3 +51,18 @@ Las coordenadas X/Y del inspector admiten decimales hasta tres cifras (`25.30`, 
 - Las luces no tienen sombras de geometría ni seguimiento de eventos/jugador.
 - El plugin no edita el núcleo de Maker Studio y puede verse afectado por su API o por otros overlays.
 - Los cambios del editor se guardan, pero el juego recarga datos al entrar en el mapa.
+
+## v0.4.1 — Zoom, Ruby SyntaxError y repintado
+
+- **Corrección del error Ruby**: reemplazadas las expresiones inválidas `/h-.5` y `/w-.5` por `/h - 0.5` y `/w - 0.5`. Los siguientes mensajes sobre `end` eran errores en cascada de ese parseo.
+- **Zoom de Maker Studio**: la coordenada de cada luz utiliza la transformación de Animated Props: `(tile * tileSize - viewportOffset) * zoom`. Una única luz se dibuja directamente en el canvas del mapa; las luces fusionadas usan una superficie compartida con escalado exacto, sin ajustar su tamaño al ancho del viewport (que provocaba redondeos de posición).
+- **Zoom del juego**: el runtime redondea el desplazamiento del mapa antes de proyectar y aplica zoom respecto al centro de pantalla, como LBDS Animated Props. El lightmap compartido se fija a la esquina superior izquierda de la viewport, y sus fuentes redondean coordenadas como los sprites normales.
+- **Reducción del lag**: se reutiliza **una sola** superficie de composición del editor, sin reasignar una imagen completa por cada rueda de zoom. Se usa overlay avanzado como Animated Props (con fallback). No se fuerza un redibujado completo con cada actualización periódica; las solicitudes se coalescen hasta que Maker Studio acepta el dibujo, con recuperación si no hay respuesta. El mouse no redibuja al permanecer en la misma casilla.
+- **Comprobación**: pruebas simuladas de 50%, 75%, 100%, 125%, 150% y 200% verificaron coincidencia matemática entre luz directa, luz combinada y la fórmula de Animated Props. La prueba de un fragmento Ruby con el literal corregido pasó `ruby -c`; **todavía no se ha ejecutado la validación de sintaxis del archivo Ruby completo ni Maker Studio/Essentials**.
+
+### Verificación manual
+
+1. En el equipo del proyecto, ejecutar `ruby -c "LA BASE DE SKY/Plugins/Lighting Studio Runtime/001_LightingStudio.rb"` usando una instalación de Ruby, o iniciar el juego y confirmar que el plugin carga.
+2. En Maker Studio, fijar una luz encima de un tile de referencia y cambiar zoom entre 50%, 75%, 100%, 125%, 150% y 200%. Probar con **una** luz y con **dos** luces fusionadas, moviendo la cámara.
+3. Probar edición de propiedades y apuntar **ms de dibujo** y **ms de espera** en el indicador de Lighting Studio. No se han medido FPS reales en Maker Studio: optimizaciones implementadas, resultados pendientes de validar.
+4. En juego, probar zoom, scrolling, transferencia de mapa, F12 y efectos meteorológicos para descartar interacciones con otros plugins.
