@@ -386,6 +386,9 @@ module LightingStudioNormals
     previous=overlay_a.instance_variable_get(:@ls_normal_source_path)
     reset_overlays(overlays) if previous && previous!=path
     overlays.each { |o| o.instance_variable_set(:@ls_normal_source_path,path) }
+    # Load the source normal texture in advance even when its light is still
+    # outside the sprite. Actual directional baking has a separate fixed budget.
+    normal_bitmap(path) if normal_warmup_enabled?
     rect=base.src_rect
     return unless rect && rect.width>0 && rect.height>0
     if @mode==:normals
