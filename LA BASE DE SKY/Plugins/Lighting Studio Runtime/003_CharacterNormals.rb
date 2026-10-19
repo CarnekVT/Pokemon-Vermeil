@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio / Character normals v0.7.0
+# Lighting Studio / Character normals v0.7.1
 # Experimental, visible RGSS overlay for player and follower sprites.
 # This is a CACHED SOFTWARE NORMAL-LIGHT PASS, not a GPU shader.
 # It computes at most one small sprite frame per graphics frame and reuses
@@ -403,7 +403,10 @@ module LightingStudioNormals
     overlay.zoom_y=base.zoom_y
     overlay.angle=base.angle if base.respond_to?(:angle)
     overlay.mirror=base.mirror if base.respond_to?(:mirror)
-    overlay.z=NORMAL_LIGHT_Z
+    # Match the parent sprite's depth. Higher-priority trees, walls and tiles
+    # can occlude normal illumination, instead of the overlay being forced
+    # above the entire map at z=8502.
+    overlay.z=base.z+1
   end
 
   def update_character(base, overlay_a, overlay_b)
