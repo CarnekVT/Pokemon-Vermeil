@@ -23,6 +23,7 @@ export function normalizeLight(raw={}){
     x:num(s.x,-2048,2048,0),y:num(s.y,-2048,2048,0),
     radiusPx:num(s.radiusPx,8,512,96),intensity:num(s.intensity,0,1,.8),
     color:hex(s.color),softness:num(s.softness,.05,1,.75),
+    centerStrength:num(s.centerStrength,0,1,0.65),
     rotation:num(s.rotation,-360,360,0),angle:num(s.angle,5,170,70),
     widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
     enabled:s.enabled!==false,
