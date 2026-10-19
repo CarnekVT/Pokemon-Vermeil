@@ -68,3 +68,13 @@ No se ha ejecutado Maker Studio ni el juego desde este entorno. No afirmar FPS n
 - Pruebas JavaScript realizadas: sintaxis de model/render/map_overlay/index, muestra descendente del degradado, simetría arriba-abajo, datos antiguos y unión MAX sin sobreexposición.
 
 **Pendiente:** no se ha ejecutado Maker Studio ni el runtime Ruby en un proyecto Essentials real; la mejoría real de FPS, ausencia de picos y ubicación durante zoom necesitan validación práctica. No cambiar ni garantizar el sistema de chunks del juego basándose solo en la prueba estática.
+
+
+## v0.4.5 — Pixel art de cono/elipse y respuesta de los sliders
+
+- **Pixel art en editor:** la máscara se rasteriza en una rejilla lógica de bloques del tamaño elegido (`pixel.size`). Se elimina la doble reducción previa (`MASK_MAX` seguida de agrupación de celdas) que deterioraba conos y elipses. La rejilla tiene un máximo de 128×128 texeles para mantener un límite de CPU/memoria.
+- **Pixel art ingame:** el runtime Ruby aplica la misma técnica de texeles lógicos antes de ampliar la máscara. El compositor por fragmentos continúa limitado a 64×64 por chunk; aún pueden aparecer diferencias visuales entre editor y juego, especialmente con zoom y mezclas.
+- **Preview de parámetros:** los eventos `input` se agrupan hasta aproximadamente 10 actualizaciones por segundo; el valor final se aplica y guarda al soltar el slider. No se ocultan las otras luces durante el ajuste.
+- **Optimización adicional:** se omite la generación/dibujo de máscaras de fuentes individuales completamente fuera del viewport y se preservan las aristas de pixel art en la unión de chunks.
+- **Validación estática:** sintaxis de `render.js`, `index.js`, `map_overlay.js` y `model.js`; muestras iluminadas de rejillas cono 32×32 y elipse 27×16; omisión de fuentes fuera de pantalla; confirmación de temporizador/cancelación de preview.
+- **Sin validación en ejecución:** no se han ejecutado Maker Studio ni Essentials/mkxp desde este entorno. No se garantiza FPS ni coincidencia 1:1 de las texturas en el juego. Probar con y sin fusión, en varios niveles de zoom, y medir tiempos de render del overlay antes de dar por terminado el fix.
