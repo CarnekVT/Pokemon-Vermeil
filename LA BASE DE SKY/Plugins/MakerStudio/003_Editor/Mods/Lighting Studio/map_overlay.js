@@ -62,7 +62,7 @@ export function paint(g,info,v){
         g.fillRect(0,0,w,h);
         g.globalAlpha=1;
       }
-      drawLights(g,ls,projection,w,h,seconds);
+      drawLights(g,ls,projection,w,h,seconds,map.overlapMode||'union');
     }
     // Preview a light at the cursor BEFORE insertion using the actual light renderer.
     // Animated Props follows the same overlay/pointer-state approach.
@@ -77,7 +77,7 @@ export function paint(g,info,v){
         pixel:draft.pixel||{enabled:false},pulse:{enabled:false}
       };
       g.save();g.globalAlpha=.78;drawLights(g,[ghost],{x:projection.x,y:projection.y,scale:projection.scale,
-        viewportKey:['ghost',projection.viewportKey,ghost.x,ghost.y,ghost.type,ghost.radiusPx].join(':'),revision:0},w,h,seconds);g.restore();
+        viewportKey:['ghost',projection.viewportKey,ghost.x,ghost.y,ghost.type,ghost.radiusPx].join(':'),revision:0},w,h,seconds,'union');g.restore();
     }
     if(!v.showGuides&&!editing)return;
     // Visual handles stay readable even with all lights disabled/preview off.
