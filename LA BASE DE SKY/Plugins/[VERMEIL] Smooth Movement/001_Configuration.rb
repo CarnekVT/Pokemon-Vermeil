@@ -51,6 +51,7 @@ module VermeilMovement
     end
     @sections = parsed
     @last_mtime = config_mtime
+    return @sections   # Nunca devolver File.mtime (objeto Time).
   end
 
   # Detecta cambios guardados por Maker Studio sin reiniciar la partida.
@@ -71,9 +72,10 @@ module VermeilMovement
 
   def self.option(name, map_id = nil)
     id = map_id || ($game_map.map_id if defined?($game_map) && $game_map)
-    map = id ? sections["map:#{id}"] : nil
+    config = sections
+    map = id ? config["map:#{id}"] : nil
     return map[name] if map && map.key?(name)
-    sections["global"][name] || DEFAULTS[name]
+    config["global"][name] || DEFAULTS[name]
   end
 
   def self.enabled?(name)
