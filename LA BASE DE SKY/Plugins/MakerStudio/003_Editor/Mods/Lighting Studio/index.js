@@ -1,7 +1,7 @@
-import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,assetName,normalCandidate} from './model.js';
+import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,MASK_DIR,maskFilename,assetName,normalCandidate} from './model.js';
 import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
-import {cacheSize,clearLightCache,hasPendingChunks,invalidateLightRegions} from './render.js';
+import {cacheSize,clearLightCache,hasPendingChunks,invalidateLightRegions,setMaskImage,forgetMaskImages} from './render.js';
 const PANEL='lighting-studio.main', TOOL='lighting-studio.place';
 let state=null;
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);return e;};
@@ -44,7 +44,7 @@ function settleFastPreview(){
  },370);
 }
 function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Mapa '+stats.lastMap+' · '+(stats.lastMs||0).toFixed(1)+' ms · espera '+Math.round(stats.requestDelayMs||0)+' ms · caché '+cacheSize().masks+'/'+cacheSize().views:'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
-function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();invalidate();redraw();refresh();void persist().catch(fail);}
+function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();invalidate();redraw();refresh();schedulePersist();void preloadMasks().catch(fail);}
 function undo(){if(!state.undo.length)return;state.redo.push(deepCopy(state.data));state.data=state.undo.pop();invalidate();redraw();refresh();void persist().catch(fail);}
 function redo(){if(!state.redo.length)return;state.undo.push(deepCopy(state.data));state.data=state.redo.pop();invalidate();redraw();refresh();void persist().catch(fail);}
 function schedulePersist(){
@@ -81,7 +81,7 @@ function normalBindingsUI(shell,scene){
  shell.append(section);
  section.append(element('div','ls-section-heading','NORMAL MAPS · Catálogo global'));
  section.append(element('p','ls-inline-note',
-   'Regla automática global por nombre del gráfico, incluidos jugador y seguidores. Los vínculos manuales son excepciones. El shader de normales todavía NO está activo en el juego.'));
+   'Regla automática global por nombre del gráfico, incluidos jugador y seguidores. Los vínculos manuales son excepciones. Las normales del jugador y followers están activas en el runtime RGSS (sin shader GPU).'));
  const normals=state.data.normalSettings; // One global automatic catalog, not a list per map.
  const toggle=node('input');toggle.type='checkbox';toggle.checked=normals.enabled;
  toggle.onchange=()=>change(()=>{normals.enabled=toggle.checked;});
@@ -119,8 +119,10 @@ function normalBindingsUI(shell,scene){
  const actions=element('div','ls-inline');section.append(actions);
  actions.append(mini('＋ Vincular normal map',()=>{void addNormalBinding(category).catch(fail);}));
  actions.append(mini('Comprobar archivos',()=>{void verifyNormalBindings(category).catch(fail);}));
- field(section,'Fuerza normal (para el futuro shader)','number',normals.strength,
-   v=>change(()=>normals.strength=clamp(v,0,2)),{min:0,max:2,step:.05});
+ slider(section,'Intensidad visual de normales',normals.intensity??0.5,0,1.5,.05,(v,final)=>editValue(()=>normals.intensity=clamp(v,0,1.5),final));
+  const warm=node('input');warm.type='checkbox';warm.checked=normals.warmup!==false;
+  warm.onchange=()=>change(()=>normals.warmup=warm.checked);
+  labeled(section,'Precargar normales del personaje/followers',warm);
 }
 async function addNormalBinding(category){
  const owner=state;if(!owner||owner.readError)return;
@@ -156,6 +158,34 @@ async function verifyNormalBindings(category){
  if(state!==owner)return;
  notify(missing.length?'Faltan PNG: '+missing.slice(0,4).join(', '):'Todos los PNG normales asociados están presentes.',missing.length?'warn':'info');
 }
+
+async function preloadMasks(){
+ const owner=state;if(!owner)return;
+ const names=[...new Set(Object.values(owner.data.maps||{}).flatMap(m=>(m.lights||[])
+   .filter(l=>l.type==='mask'&&maskFilename(l.maskFile)).map(l=>l.maskFile)))];
+ for(const name of names){
+  if(owner.maskLoading.has(name))continue;
+  owner.maskLoading.add(name);
+  try{
+   const rel=MASK_DIR+'/'+name;
+   if(!await owner.ctx.fs.projectExists(rel))continue;
+   const invoke=window.__TAURI__?.core?.invoke,root=owner.ctx.editor.gameRoot?.();
+   if(typeof invoke!=='function'||!root)continue;
+   const sep=root.includes('\\')?'\\':'/';
+   const abs=root.replace(/[\\/]+$/,'')+sep+rel.replaceAll('/',sep);
+   const bytes=await invoke('read_binary_file',{path:abs});
+   const url=URL.createObjectURL(new Blob([Uint8Array.from(bytes)],{type:'image/png'}));
+   try{
+    const img=new Image();
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
+    if(owner!==state)return;
+    if(img.width>512||img.height>512)throw Error('Máscara '+name+' supera 512×512.');
+    setMaskImage(name,img);redraw();
+   }finally{URL.revokeObjectURL(url);}
+  }catch(error){owner.ctx.log.warn?.('[Lighting Studio] PNG mask '+name,error);owner.maskLoading.delete(name);}
+ }
+}
+
 function refresh(){if(!state?.host)return;const root=state.host;const oldScroll=root.querySelector('.ls-root')?.scrollTop||0;root.replaceChildren();const style=node('style',css);root.append(style);const shell=element('div','ls-root');root.append(shell);
 const head=element('div','ls-head');shell.append(head);const brand=element('div','ls-brand');head.append(brand);brand.append(element('div','ls-logo','☀'));const info=node('div');brand.append(info);info.append(element('div','ls-title','Lighting Studio'),element('div','ls-sub','Iluminación del mapa · edición directa'));
 const toolbar=element('div','ls-toolbar');shell.append(toolbar);
@@ -217,8 +247,18 @@ shapePanel.append(element('div','ls-group-label','PROPIEDADES GENERALES'));
 fadePanel.append(element('p','ls-inline-note','Elige hacia qué borde se atenúa la luz. «Hacia abajo» conserva una zona luminosa arriba y la oscurece progresivamente hacia abajo.'));
 const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;});labeled(shapePanel,'Geometría',typeSelect);
 if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editLightValue(()=>selected.angle=v,final));}
-if(selected.type==='ellipse'||selected.type==='rectangle'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editLightValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editLightValue(()=>selected.heightPx=v,final));}
-if(selected.type!=='radial')slider(shapePanel,'Rotación',selected.rotation,-360,360,1,(v,final)=>editLightValue(()=>selected.rotation=v,final));
+if(selected.type==='ellipse'||selected.type==='rectangle'||selected.type==='mask'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editLightValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editLightValue(()=>selected.heightPx=v,final));}
+if(selected.type==='mask'){
+  shapePanel.append(element('p','ls-inline-note','PNG blanco/gris con transparencia: el alfa recorta la luz y el gris controla su intensidad. Colócalo en '+MASK_DIR+'/'));
+  const mask=node('input');mask.type='text';mask.className='ls-input';mask.placeholder='cueva_salida.png';mask.value=selected.maskFile||'';
+  mask.onchange=()=>{const filename=maskFilename(mask.value.trim());
+    if(!filename)return notify('Nombre inválido; ejemplo: cueva_salida.png','warn');
+    change(()=>selected.maskFile=filename);
+  };
+  labeled(shapePanel,'PNG de máscara',mask);
+  shapePanel.append(mini('Comprobar PNG',()=>{void state.ctx.fs.projectExists(MASK_DIR+'/'+selected.maskFile).then(ok=>notify(ok?'PNG encontrado':'Falta: '+MASK_DIR+'/'+selected.maskFile,ok?'info':'warn')).catch(fail);}));
+ }
+ if(selected.type!=='radial')slider(shapePanel,'Rotación',selected.rotation,-360,360,1,(v,final)=>editLightValue(()=>selected.rotation=v,final));
 const name=node('input');name.type='text';name.className='ls-input';name.value=selected.name;name.onchange=()=>change(()=>selected.name=name.value.slice(0,80));labeled(shapePanel,'Nombre',name);
 const c=node('input');c.type='color';c.className='ls-color';c.value=selected.color;c.oninput=()=>editLightValue(()=>selected.color=c.value,false);c.onchange=()=>editLightValue(()=>selected.color=c.value,true);labeled(shapePanel,'Color',c);
 slider(shapePanel,'Intensidad',selected.intensity,0,1,.01,(v,final)=>editLightValue(()=>selected.intensity=clamp(v,0,1),final));
@@ -304,8 +344,9 @@ if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();schedulePersist();}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
-ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
+export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+void preloadMasks().catch(fail);
+ ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
 ctx.tools.registerTool({id:TOOL,label:'Lighting Studio',icon:'☀',onActivate(){ctx.ui.openPanel(PANEL);redraw();},onPointerDown:pointerDown,onPointerMove:pointerMove,onPointerUp:pointerUp,onDeactivate(){pointerUp();if(state){state.hover=null;state.hoverHit=null;redraw();}}});
@@ -319,4 +360,4 @@ else notify('Esta versión de Maker Studio no admite overlays de mods.','error')
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
 redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if((!state.drag&&!state.editSnapshot&&hasPendingChunks())||(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled)))redraw();},120);
 }
-export function deactivate(){if(state?.autosaveTimer!=null){clearTimeout(state.autosaveTimer);state.autosaveTimer=null;void persist().catch(fail);}if(state?.ticker)clearInterval(state.ticker);if(state?.previewTimer!=null)clearTimeout(state.previewTimer);if(state?.settleTimer!=null)clearTimeout(state.settleTimer);clearLightCache();state=null;}
+export function deactivate(){if(state?.autosaveTimer!=null){clearTimeout(state.autosaveTimer);state.autosaveTimer=null;void persist().catch(fail);}if(state?.ticker)clearInterval(state.ticker);if(state?.previewTimer!=null)clearTimeout(state.previewTimer);if(state?.settleTimer!=null)clearTimeout(state.settleTimer);forgetMaskImages();state=null;}
