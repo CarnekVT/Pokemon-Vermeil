@@ -129,7 +129,11 @@ export function drawLights(g,lights,project,width,height,t=0){
   const visible=(lights||[]).filter(l=>l.enabled!==false);
   if(!visible.length)return;
   const additive=visible.filter(l=>(l.blendMode||'add')==='add');
-  if(additive.length){
+  if(additive.length===1){
+    // Match Animated Props: place a single sprite directly at the map-projected
+    // position. No full-viewport intermediate scaling when zoom != 100%.
+    stamp(g,additive[0],project,t,'screen');
+  }else if(additive.length>1){
     const union=getUnion(additive,project,width,height,t);
     if(union){
       g.save();
