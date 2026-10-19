@@ -4,10 +4,10 @@ export const DATA_PATH = 'Data/LightingStudio/maps.json';
 export const SCHEMA = 1;
 export const BLEND_MODES = ['normal','union','sum','subtract'];
 export const BLEND_NAMES = {union:'Fusionar área iluminada',sum:'Sumar brillo',normal:'Normal',subtract:'Oscurecer'};
-export const LIGHT_TYPES = ['radial','cone','ellipse','rectangle'];
+export const LIGHT_TYPES = ['radial','cone','ellipse','rectangle','mask'];
 export const FADE_MODES = ['center','top','bottom','left','right','custom'];
 export const FADE_NAMES = {center:'Desde el centro',top:'Hacia arriba (luz abajo)',bottom:'Hacia abajo (luz arriba)',left:'Hacia la izquierda (luz derecha)',right:'Hacia la derecha (luz izquierda)',custom:'Desde un origen personalizado'};
-export const TYPE_NAMES = {radial:'Radial',cone:'Cono / foco',ellipse:'Elíptica',rectangle:'Rectangular'};
+export const TYPE_NAMES = {radial:'Radial',cone:'Cono / foco',ellipse:'Elíptica',rectangle:'Rectangular',mask:'Máscara PNG (forma personalizada)'};
 export const parseCoordinate = v => { const str=String(v).trim().replace(',', '.'); if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(str))return null; const n=Number(str);return Number.isFinite(n)&&n>=-2048&&n<=2048?Math.round(n*1000)/1000:null; };
 export const deepCopy = v => JSON.parse(JSON.stringify(v));
 export const newId = () => 'light_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
@@ -16,6 +16,8 @@ export const clamp = (v,lo,hi) => num(v,lo,hi,lo);
 export const hex = (v,def='#FFCE8A') => /^#[a-fA-F0-9]{6}$/.test(String(v)) ? String(v).toUpperCase() : def;
 export const NORMAL_CATEGORIES = {tilesets:'Tilesets',autotiles:'Autotiles',characters:'Characters'};
 export const NORMAL_DIR='Graphics/LightingStudio/Normals';
+export const MASK_DIR='Graphics/LightingStudio/Masks';
+export const maskFilename = v => /^[a-zA-Z0-9_-]{1,70}\.png$/i.test(String(v||'')) ? String(v) : '';
 export const defaultNormals = () => ({
   enabled:false,strength:1,intensity:0.5,warmup:true,
   auto:{tilesets:true,autotiles:true,characters:true},
@@ -64,6 +66,7 @@ export function normalizeLight(raw={}){
     fadeX:num(s.fadeX,-1,1,0),fadeY:num(s.fadeY,-1,1,0),
     rotation:num(s.rotation,-360,360,0),angle:num(s.angle,5,170,70),
     coneFeather:num(s.coneFeather,.03,.9,.28),
+    maskFile:maskFilename(s.maskFile),
     widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
     enabled:s.enabled!==false,
     blendMode:s.blendMode==='add'?'union':BLEND_MODES.includes(s.blendMode)?s.blendMode:'union',
