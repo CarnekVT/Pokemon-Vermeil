@@ -46,3 +46,21 @@ Antes de implementar sombras/timeline, reemplazar el sistema aproximado de halos
 - Modificación de propiedades con preview inmediata y persistencia automática tras cada operación.
 - La sintaxis de index.js, styles.js y model.js se comprobó. NO se ha ejecutado Maker Studio ni el runtime.
 - Pendiente: validar callbacks de arrastre, teclas globales, fidelidad de luz y sombras en juego.
+
+
+## v0.4.0 — Difuminado, composición y rendimiento
+
+- **Difuminado**: pestaña propia con origen Centro/Arriba/Abajo/Izquierda/Derecha/Personalizado. El origen personalizado usa valores normalizados (-1..1) en X/Y. Se conserva Suavidad y Brillo del centro.
+- **Inspector BAS/BSS**: pestañas Forma, Difuminado, Pulsación y Pixel art. El mapa es la preview principal; el panel solo edita propiedades.
+- **Unión de fuentes**: las luces con mezcla **Aditiva** se componen en un mismo mapa de iluminación. El editor emplea una unión visual tipo máximo por canal; el runtime emplea alpha-composition con Bitmap#stretch_blt en un bitmap compartido y suma ese resultado una sola vez. No es todavía una equivalencia exacta entre motores ni un lightmap de shaders.
+- **Mezcla Normal y Sustractiva**: permanecen independientes de la composición aditiva.
+- **Rendimiento**: caché de máscaras, caché de composición por mapa+cámara+revisión, preview aditiva a media resolución, fotogramas de animación discretizados y protección contra peticiones repetidas de redibujado. En runtime la composición se recalcula al desplazar la cámara o en los fotogramas necesarios para pulsación (máximo nominal 8 fps).
+- **Diagnóstico**: la barra informa del tiempo de dibujo del overlay, la demora desde la solicitud de repintado y el número de entradas en caché. Esto facilita saber si el lag proviene del overlay o de la composición general de Maker Studio.
+
+### Cómo validar
+
+1. Crea dos luces aditivas del mismo color, parcialmente solapadas, y confirma que forman una zona suave y no dos círculos sumados al máximo.
+2. En Difuminado, selecciona **Desde arriba** y después **Desde la derecha**; verifica la orientación en Maker Studio y en el juego.
+3. Modifica varias veces Suavidad, Radio y Color. Comprueba que el inspector mantiene su posición, que el mapa repinta y que la barra muestra una demora razonable.
+4. Pon una pulsación y comprueba el mapa con y sin desplazamiento de cámara; verifica FPS y recursos liberados al transferir mapa.
+5. Si persiste una demora larga: apunta el número de **ms** de dibujo y **ms** de espera del panel, junto con el número de luces activas. No se han realizado mediciones en una instancia real de Maker Studio.
