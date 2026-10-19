@@ -121,6 +121,18 @@ raise "halfway interpolation" unless a==0 && b==1 && (mix-0.25).abs<0.0001
 a,b,mix=mod.direction_pair(-0.00001)
 raise "direction wrap discontinuity" unless a==15 && b==0 && mix>0.999
 raise "outside halo contact missing" unless mod.smooth_edge(1.08)>0.0
+# A character just outside the visible radius must start receiving light
+# before physically entering the halo; no hard cutoff at normalized 1.0.
+LightingStudio.instance_variable_set(:@mock_map,{
+  'enabled'=>true,
+  'lights'=>[{'x'=>5.5,'y'=>5.5,'radiusPx'=>64,'intensity'=>0.8,'color'=>'#FFD080'}]
+})
+mod.clear_lights
+outside=CharacterMock.new(8.0,5.0) # 96px away; reach=64+24=88px
+outside_info=mod.nearby_light(outside)
+raise "outer contact did not reach character" unless outside_info && outside_info[4]>0.0
+LightingStudio.instance_variable_set(:@mock_map,nil)
+mod.clear_lights
 
 # Two RGSS overlays must blend a normal map, then fade out continuously.
 System.uptime=0.12
