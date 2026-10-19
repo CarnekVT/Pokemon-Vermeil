@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio day/night v0.7.0 — additive to 001_LightingStudio.rb.
+# Lighting Studio day/night v0.7.1 — additive to 001_LightingStudio.rb.
 # The real clock is local system time. Internal minutes are stored on
 # $PokemonGlobal, which is serialized with save data by Essentials.
 module LightingStudioDayNight
