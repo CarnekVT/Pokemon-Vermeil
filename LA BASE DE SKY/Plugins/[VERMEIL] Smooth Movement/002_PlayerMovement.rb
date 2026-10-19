@@ -73,6 +73,14 @@ class Game_Player < Game_Character
     return unless remaining > 0 && remaining <= window
     dir = vermeil_live_direction
     return unless [1, 2, 3, 4, 6, 7, 8, 9].include?(dir)
+    return if @move_initial_x.nil? || @move_initial_y.nil?
+    # No recordar la MISMA direccion del paso en curso: si el jugador
+    # suelta una flecha al final, no debe producir un paso fantasma.
+    dx = @x <=> @move_initial_x
+    dy = @y <=> @move_initial_y
+    wanted_dx = [1, 4, 7].include?(dir) ? -1 : ([3, 6, 9].include?(dir) ? 1 : 0)
+    wanted_dy = [1, 2, 3].include?(dir) ? 1 : ([7, 8, 9].include?(dir) ? -1 : 0)
+    return if dx == wanted_dx && dy == wanted_dy
     @_vermeil_buffer_direction = dir
     @_vermeil_buffer_deadline = vermeil_real_uptime + window
   end
