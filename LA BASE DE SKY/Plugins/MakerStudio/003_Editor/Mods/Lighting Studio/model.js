@@ -48,8 +48,48 @@ export function normalizeNormals(raw){
   }
   return out;
 }
-export const defaultMap = () => ({enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},normalMaps:defaultNormals(),lights:[]});
-export const defaultProject = () => ({schema:SCHEMA,normalSettings:defaultNormals(),maps:{}});
+// A data-driven 24-hour color timeline; values are saved globally in maps.json.
+export const defaultTimeOfDay = () => ({
+ enabled:false,source:'real',startHour:8,minutesPerSecond:0.1,
+ previewHour:12,
+ keyframes:[
+  {hour:0,color:'#182440',darkness:0.68},
+  {hour:5,color:'#415275',darkness:0.53},
+  {hour:7,color:'#FFCF9A',darkness:0.24},
+  {hour:12,color:'#FFFFFF',darkness:0},
+  {hour:17,color:'#FFC58A',darkness:0.20},
+  {hour:19,color:'#6879B1',darkness:0.48},
+  {hour:22,color:'#24314C',darkness:0.63}
+ ]
+});
+export function normalizeTimeOfDay(raw){
+ const cfg=raw&&typeof raw==='object'?raw:{};
+ const def=defaultTimeOfDay();
+ const source=['real','internal'].includes(cfg.source)?cfg.source:'real';
+ const seen=new Set();
+ const keys=(Array.isArray(cfg.keyframes)?cfg.keyframes:def.keyframes).slice(0,48)
+  .map(k=>({hour:num(k?.hour,0,23.999,0),color:hex(k?.color,'#FFFFFF'),
+    darkness:num(k?.darkness,0,1,0)}))
+  .filter(k=>{const h=k.hour.toFixed(3);if(seen.has(h))return false;seen.add(h);return true;})
+  .sort((a,b)=>a.hour-b.hour);
+ return {enabled:cfg.enabled===true,source,startHour:num(cfg.startHour,0,23.999,8),
+  minutesPerSecond:num(cfg.minutesPerSecond,0.001,5,0.1),
+  previewHour:num(cfg.previewHour,0,23.999,12),keyframes:keys.length>=2?keys:def.keyframes};
+}
+export function evaluateTimeOfDay(config,hour){
+ const keys=normalizeTimeOfDay(config).keyframes,h=((hour%24)+24)%24;
+ let hi=keys.findIndex(k=>k.hour>h);
+ if(hi<0)hi=0;
+ const high=keys[hi],low=keys[(hi-1+keys.length)%keys.length];
+ const start=low.hour,end=high.hour+(hi===0?24:0),value=h+(h<low.hour?24:0);
+ const t=Math.min(1,Math.max(0,(value-start)/(end-start)));
+ const cols=[1,3,5].map(i=>Math.round(parseInt(low.color.slice(i,i+2),16)*(1-t)+parseInt(high.color.slice(i,i+2),16)*t));
+ return {color:'#'+cols.map(n=>n.toString(16).padStart(2,'0')).join('').toUpperCase(),
+  darkness:low.darkness*(1-t)+high.darkness*t};
+}
+
+export const defaultMap = () => ({enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},normalMaps:defaultNormals(),dayNightMode:'follow',lights:[]});
+export const defaultProject = () => ({schema:SCHEMA,normalSettings:defaultNormals(),timeOfDay:defaultTimeOfDay(),maps:{}});
 export const defaultPulse = () => ({enabled:false,speedHz:1,intensity:0.25,radius:0.12,phase:0});
 export const defaultPixel = () => ({enabled:false,size:6,steps:6});
 export function normalizeLight(raw={}){
@@ -83,6 +123,7 @@ export function normalizeProject(src){
   // Global rules work for every map and every player/follower graphic without
   // per-species switches or a manually maintained Pokemon list.
   res.normalSettings=normalizeNormals(src.normalSettings);
+  res.timeOfDay=normalizeTimeOfDay(src.timeOfDay);
   if(!src.normalSettings){
     // Upgrade older per-map assignments to the one global catalog without
     // discarding any manual exceptions users already added.
@@ -108,6 +149,7 @@ export function normalizeProject(src){
       overlapMode:value.overlapMode==='sum'?'sum':'union',
       ambient:{color:hex(ambient.color,'#142439'),darkness:num(ambient.darkness,0,1,0)},
       normalMaps:normalizeNormals(value.normalMaps),
+      dayNightMode:['follow','ignore'].includes(value.dayNightMode)?value.dayNightMode:'follow',
       lights:(Array.isArray(value.lights)?value.lights:[]).slice(0,500).map(normalizeLight)
       .filter(l=>{if(seen.has(l.id))return false;seen.add(l.id);return true;})};
   }
