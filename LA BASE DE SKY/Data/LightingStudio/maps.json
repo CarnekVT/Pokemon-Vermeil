@@ -170,5 +170,18 @@
         }
       ]
     }
+  },
+  "normalSettings": {
+    "enabled": true,
+    "strength": 1,
+    "auto": {
+      "tilesets": false,
+      "autotiles": false,
+      "characters": true
+    },
+    "suffix": "_n",
+    "tilesets": [],
+    "autotiles": [],
+    "characters": []
   }
 }
