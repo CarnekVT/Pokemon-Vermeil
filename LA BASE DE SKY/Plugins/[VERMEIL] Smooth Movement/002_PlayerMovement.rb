@@ -56,6 +56,28 @@ class Game_Player < Game_Character
     true
   end
 
+  # Sólo controla la representación gráfica en sprites de cuatro filas.
+  # Nunca cambia el eje real de movimiento ni la dirección pulsada.
+  def vermeil_diagonal_facing_direction(horiz, vert)
+    case VermeilMovement.diagonal_facing
+    when "horizontal" then horiz
+    when "vertical" then vert
+    else
+      (@direction == horiz || @direction == vert) ? @direction : vert
+    end
+  end
+
+  def vermeil_slide_axes(horiz, vert)
+    case VermeilMovement.wall_slide_priority
+    when "vertical" then [vert, horiz]
+    when "facing"
+      return [vert, horiz] if @direction == vert
+      [horiz, vert]
+    else
+      [horiz, vert]
+    end
+  end
+
   def vermeil_move_diagonal(dir)
     horiz = (dir == 1 || dir == 7) ? 4 : 6
     vert  = (dir == 1 || dir == 3) ? 2 : 8
@@ -70,11 +92,11 @@ class Game_Player < Game_Character
               can_move_from_coordinate?(@x, @y + dy, horiz)
     if !x_first || !y_first
       if VermeilMovement.enabled?("wall_slide")
-        if can_move_in_direction?(horiz)
-          return move_generic(horiz)
-        elsif can_move_in_direction?(vert)
-          return move_generic(vert)
-        end
+        # Prioridad configurable: no guarda teclas ni altera los tiempos.
+        # Se usa el movimiento cardinal nativo para respetar las colisiones.
+        primary, secondary = vermeil_slide_axes(horiz, vert)
+        return move_generic(primary) if can_move_in_direction?(primary)
+        return move_generic(secondary) if can_move_in_direction?(secondary)
       end
       return
     end
@@ -82,7 +104,7 @@ class Game_Player < Game_Character
     # No cruzar diagonales con zonas de escalera.
     return if $game_map.check_stair_zones(@x + dx, @y + dy)
     # Facing cardinal para sprites tradicionales de cuatro filas.
-    turn_generic((@direction == horiz || @direction == vert) ? @direction : vert, true)
+    turn_generic(vermeil_diagonal_facing_direction(horiz, vert), true)
     @move_initial_x = @x
     @move_initial_y = @y
     @x += dx
