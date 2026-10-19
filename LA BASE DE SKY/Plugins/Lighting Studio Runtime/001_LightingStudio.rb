@@ -10,7 +10,7 @@ module LightingStudio
   # only as they become visible, at a strict budget per frame.
   CHUNK_WORLD = 256
   CHUNK_PX = 64
-  MAX_CHUNKS = 32
+  MAX_CHUNKS = 48
   BUILDS_PER_FRAME = 1
   MASKS_PER_FRAME = 2
   # Static lights use channel-wise MAX in chunks. Pulsing union lights are
@@ -262,7 +262,8 @@ module LightingStudioSpriteset
     middle_x = (x0+x1) / (2*unit)
     middle_y = (y0+y1) / (2*unit)
     result.sort_by! { |key| (key[0]+0.5-middle_x)**2 + (key[1]+0.5-middle_y)**2 }
-    result
+    # Bound sprite count even with extreme zoom-out: prefer nearby chunks.
+    result.first(LightingStudio::MAX_CHUNKS)
   end
 
   def ls_chunk_bitmap(cx, cy)
