@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio / Character normals v0.5.3
+# Lighting Studio / Character normals v0.5.4
 # Experimental, visible RGSS overlay for player and follower sprites.
 # This is a CACHED SOFTWARE NORMAL-LIGHT PASS, not a GPU shader.
 # It computes at most one small sprite frame per graphics frame and reuses
@@ -11,7 +11,9 @@ module LightingStudioNormals
   LIGHT_HORIZONTAL = 0.65
   ATTACK_SECONDS = 0.10
   RELEASE_SECONDS = 0.24
-  EDGE_FADE_START = 0.82
+  EDGE_FADE_START = 0.72
+  OUTER_CONTACT_MARGIN = 0.22
+  DIRECTION_STEPS = 16
   SPRITE_INFLUENCE_MARGIN = 24.0
   MAX_OVERLAY_OPACITY = 225
   NORMAL_LIGHT_Z = 8502
@@ -68,6 +70,7 @@ module LightingStudioNormals
         sprite.instance_variable_set(:@ls_normal_source_path,nil)
         sprite.instance_variable_set(:@ls_normal_smooth_opacity,0.0)
         sprite.instance_variable_set(:@ls_normal_last_time,nil)
+        sprite.instance_variable_set(:@ls_normal_pair_ready,false)
       rescue StandardError
       end
     end
@@ -118,8 +121,9 @@ module LightingStudioNormals
 
   def smooth_edge(progress)
     return 1.0 if progress <= EDGE_FADE_START
-    return 0.0 if progress >= 1.0
-    t = (progress - EDGE_FADE_START) / (1.0 - EDGE_FADE_START)
+    end_at = 1.0 + OUTER_CONTACT_MARGIN
+    return 0.0 if progress >= end_at
+    t = (progress - EDGE_FADE_START) / (end_at - EDGE_FADE_START)
     1.0 - t*t*(3.0 - 2.0*t)
   end
 
@@ -178,17 +182,25 @@ module LightingStudioNormals
                  else
                    Math.sqrt(dx*dx+dy*dy)/(radius*size+margin)
                  end
-      next if progress >= 1.0
+      next if progress >= 1.0 + OUTER_CONTACT_MARGIN
       # No hard cutoff at the light's radius: both shape and strength taper
       # continuously to zero. Radius AND intensity obey the pulse waveform.
       strength = [[intensity*energy*smooth_edge(progress),0.0].max,1.0].min
       next if strength <= score
       score = strength
       theta = Math.atan2(dy,dx)
-      direction = ((theta*4.0/Math::PI).round) % 8
-      best = [direction,rgb,strength]
+      direction_a,direction_b,mix = direction_pair(theta)
+      best = [direction_a,direction_b,mix,rgb,strength]
     end
     best
+  end
+
+  # Two cached directions with continuous angular weights; no per-frame
+  # bitmap bake is necessary once adjacent directions are cached.
+  def direction_pair(theta)
+    steps = (theta / (2.0*Math::PI) * DIRECTION_STEPS) % DIRECTION_STEPS
+    first = steps.floor
+    [first,(first+1)%DIRECTION_STEPS,steps-first]
   end
 
   # Debug from a game Script command:
@@ -207,7 +219,7 @@ module LightingStudioNormals
       :normal_exists => !!(path && File.file?(path)),
       :character_position => character ? character_world_position(character) : nil,
       :light_count => lights ? lights.length : 0,
-      :light_strength => nearest ? nearest[2].round(3) : 0.0,
+      :light_strength => nearest ? nearest[4].round(3) : 0.0,
       :baked_frames => @frames.length,
       :cached_normals => @normal_bitmaps.length
     }
@@ -261,9 +273,9 @@ module LightingStudioNormals
     return nil if !frame_id.nil? && @last_build_frame == frame_id
     @last_build_frame=frame_id
 
-    # Quantize to eight light directions and keep their baked frames.
+    # Cache a finite set of light directions; blend adjacent frames at runtime.
     # Result never changes with each camera update; only the sprite's opacity.
-    angle=direction*Math::PI/4.0
+    angle=direction*2.0*Math::PI/DIRECTION_STEPS
     lx=Math.cos(angle)*LIGHT_HORIZONTAL
     ly=Math.sin(angle)*LIGHT_HORIZONTAL
     lz=LIGHT_HEIGHT
@@ -313,79 +325,19 @@ module LightingStudioNormals
     nil
   end
 
-  def update_character(base, overlay)
-    return unless valid_sprite?(overlay)
-    if @mode == :original || !base.visible || !base.bitmap
-      overlay.visible = false
-      overlay.instance_variable_set(:@ls_normal_smooth_opacity,0.0)
-      overlay.instance_variable_set(:@ls_normal_last_time,nil)
-      return
-    end
-    unless base.character && base.character.respond_to?(:character_name)
+  def reset_overlays(overlays)
+    overlays.each do |overlay|
+      next unless valid_sprite?(overlay)
       overlay.visible=false
-      return
-    end
-    path = LightingStudio.normal_for_character(base.character)
-    unless path
-      overlay.visible=false
-      overlay.instance_variable_set(:@ls_normal_baked,false)
-      overlay.instance_variable_set(:@ls_normal_source_path,nil)
-      overlay.instance_variable_set(:@ls_normal_smooth_opacity,0.0)
-      overlay.instance_variable_set(:@ls_normal_last_time,nil)
-      return
-    end
-    # Changing follower Pokémon or player outfit must never retain the
-    # previous character's baked normal frame while the new one is pending.
-    previous_path=overlay.instance_variable_get(:@ls_normal_source_path)
-    if previous_path && previous_path!=path
       overlay.bitmap=nil
-      overlay.instance_variable_set(:@ls_normal_baked,false)
+      overlay.instance_variable_set(:@ls_normal_source_path,nil)
+      overlay.instance_variable_set(:@ls_normal_pair_ready,false)
       overlay.instance_variable_set(:@ls_normal_smooth_opacity,0.0)
       overlay.instance_variable_set(:@ls_normal_last_time,nil)
     end
-    overlay.instance_variable_set(:@ls_normal_source_path,path)
-    rect = base.src_rect
-    return unless rect && rect.width>0 && rect.height>0
+  end
 
-    if @mode == :normals
-      bitmap = normal_bitmap(path)
-      return unless bitmap && rect.x+rect.width<=bitmap.width && rect.y+rect.height<=bitmap.height
-      overlay.bitmap=bitmap if overlay.bitmap!=bitmap
-      overlay.src_rect.set(rect.x,rect.y,rect.width,rect.height)
-      overlay.blend_type=0
-      overlay.opacity=255
-      overlay.instance_variable_set(:@ls_normal_baked,false)
-    else
-      now=clock_seconds
-      info=nearby_light(base.character,now)
-      target=info ? [[(info[2]*MAX_OVERLAY_OPACITY).round,0].max,255].min : 0
-      if info && target > 0
-        direction,color,strength=info
-        bitmap=frame_bitmap(path,[rect.x,rect.y,rect.width,rect.height],direction,color)
-        if bitmap
-          overlay.bitmap=bitmap if overlay.bitmap!=bitmap
-          overlay.src_rect.set(0,0,bitmap.width,bitmap.height)
-          overlay.instance_variable_set(:@ls_normal_baked,true)
-        end
-        # One bitmap may be generated per frame; retain the previous cached
-        # frame instead of blinking when the new direction is still baking.
-      end
-      baked=overlay.instance_variable_get(:@ls_normal_baked)
-      if !baked || !overlay.bitmap
-        overlay.visible=false
-        return
-      end
-      overlay.blend_type=1
-      opacity=eased_opacity(overlay,target,now)
-      overlay.opacity=opacity
-      # Keep the old illumination frame while fading out beyond light radius.
-      # Do NOT clear its bitmap or hide at the beginning of update.
-      if opacity <= 0
-        overlay.visible=false
-        return
-      end
-    end
-
+  def sync_overlay(base,overlay)
     overlay.x=base.x
     overlay.y=base.y
     overlay.ox=base.ox
@@ -395,12 +347,85 @@ module LightingStudioNormals
     overlay.angle=base.angle if base.respond_to?(:angle)
     overlay.mirror=base.mirror if base.respond_to?(:mirror)
     overlay.z=NORMAL_LIGHT_Z
-    overlay.visible=true
-  rescue StandardError => e
-    warn_once(:update,"Normal overlay disabled after error: #{e.message}")
-    overlay.visible=false
   end
 
+  def update_character(base, overlay_a, overlay_b)
+    overlays=[overlay_a,overlay_b]
+    return unless overlays.all? { |o| valid_sprite?(o) }
+    unless @mode!=:original && base.visible && base.bitmap &&
+           base.character && base.character.respond_to?(:character_name)
+      reset_overlays(overlays)
+      return
+    end
+    path=LightingStudio.normal_for_character(base.character)
+    unless path
+      reset_overlays(overlays)
+      return
+    end
+    previous=overlay_a.instance_variable_get(:@ls_normal_source_path)
+    reset_overlays(overlays) if previous && previous!=path
+    overlays.each { |o| o.instance_variable_set(:@ls_normal_source_path,path) }
+    rect=base.src_rect
+    return unless rect && rect.width>0 && rect.height>0
+    if @mode==:normals
+      bmp=normal_bitmap(path)
+      unless bmp && rect.x+rect.width<=bmp.width && rect.y+rect.height<=bmp.height
+        overlays.each { |o| o.visible=false }
+        return
+      end
+      overlay_a.bitmap=bmp if overlay_a.bitmap!=bmp
+      overlay_a.src_rect.set(rect.x,rect.y,rect.width,rect.height)
+      overlay_a.blend_type=0
+      overlay_a.opacity=255
+      overlay_a.instance_variable_set(:@ls_normal_pair_ready,false)
+      overlay_b.visible=false
+      sync_overlay(base,overlay_a)
+      overlay_a.visible=true
+      return
+    end
+
+    now=clock_seconds
+    info=nearby_light(base.character,now)
+    target=info ? [[(info[4]*MAX_OVERLAY_OPACITY).round,0].max,255].min : 0
+    if info && target>0
+      direction_a,direction_b,mix,color,strength=info
+      dims=[rect.x,rect.y,rect.width,rect.height]
+      # A missing direction is baked over the next frame, not every update;
+      # preserve the previous complete pair until BOTH new frames are ready.
+      bmp_a=frame_bitmap(path,dims,direction_a,color)
+      bmp_b=frame_bitmap(path,dims,direction_b,color)
+      if bmp_a && bmp_b
+        overlay_a.bitmap=bmp_a if overlay_a.bitmap!=bmp_a
+        overlay_b.bitmap=bmp_b if overlay_b.bitmap!=bmp_b
+        overlay_a.src_rect.set(0,0,bmp_a.width,bmp_a.height)
+        overlay_b.src_rect.set(0,0,bmp_b.width,bmp_b.height)
+        overlay_a.instance_variable_set(:@ls_normal_pair_ready,true)
+        overlay_a.instance_variable_set(:@ls_normal_mix,mix)
+      end
+    end
+
+    unless overlay_a.instance_variable_get(:@ls_normal_pair_ready) &&
+           overlay_a.bitmap && overlay_b.bitmap
+      overlays.each { |o| o.visible=false }
+      return
+    end
+    # Temporal fade is SHARED between both directions; otherwise their two
+    # attacks could add up to more than one full light.
+    opacity=eased_opacity(overlay_a,target,now)
+    mix=overlay_a.instance_variable_get(:@ls_normal_mix) || 0.0
+    mix=[[mix.to_f,0.0].max,1.0].min
+    op_a=(opacity*(1.0-mix)).round
+    op_b=(opacity*mix).round
+    [[overlay_a,op_a],[overlay_b,op_b]].each do |o,op|
+      o.opacity=op
+      o.blend_type=1
+      sync_overlay(base,o)
+      o.visible=op>0
+    end
+  rescue StandardError => e
+    warn_once(:update,"Normal overlays disabled after error: #{e.message}")
+    overlays.each { |o| o.visible=false if valid_sprite?(o) } if overlays
+  end
 end
 
 module LightingStudioCharacterNormalSprites
@@ -408,24 +433,38 @@ module LightingStudioCharacterNormalSprites
     super
     return unless @character
     eligible=(@character==$game_player || @follower==true)
-    if !eligible
-      @ls_normal_overlay.visible=false if @ls_normal_overlay && !@ls_normal_overlay.disposed?
+    unless eligible
+      @ls_normal_overlays&.each do |overlay|
+        overlay.visible=false if overlay && !overlay.disposed?
+      end
       return
     end
-    if !@ls_normal_overlay || @ls_normal_overlay.disposed?
-      @ls_normal_overlay=Sprite.new(self.viewport)
-      @ls_normal_overlay.visible=false
-      LightingStudioNormals.register(@ls_normal_overlay)
+    if !@ls_normal_overlays || @ls_normal_overlays.any? { |o| !o || o.disposed? }
+      @ls_normal_overlays&.each do |o|
+        if o && !o.disposed?
+          LightingStudioNormals.unregister(o)
+          o.dispose
+        end
+      end
+      @ls_normal_overlays=Array.new(2) do
+        sprite=Sprite.new(self.viewport)
+        sprite.visible=false
+        LightingStudioNormals.register(sprite)
+        sprite
+      end
     end
-    LightingStudioNormals.update_character(self,@ls_normal_overlay)
+    LightingStudioNormals.update_character(self,*@ls_normal_overlays)
   end
 
   def dispose
-    if @ls_normal_overlay && !@ls_normal_overlay.disposed?
-      LightingStudioNormals.unregister(@ls_normal_overlay)
-      @ls_normal_overlay.dispose
+    if @ls_normal_overlays
+      @ls_normal_overlays.each do |o|
+        next unless o
+        LightingStudioNormals.unregister(o)
+        o.dispose unless o.disposed?
+      end
     end
-    @ls_normal_overlay=nil
+    @ls_normal_overlays=nil
     super
   end
 end
