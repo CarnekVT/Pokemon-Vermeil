@@ -49,7 +49,7 @@ export function activate(ctx) {
   const buttonStyle = "border:1px solid var(--border);border-radius:5px;padding:7px;background:var(--bg-secondary);color:var(--text-primary);cursor:pointer";
   const inputStyle = "display:block;width:100%;margin:4px 0 10px;padding:7px;box-sizing:border-box;background:var(--input-bg);color:var(--text-primary);border:1px solid var(--border);border-radius:5px";
   const fields = [
-    ["directions", "Direcciones", [["4", "4 direcciones (clásico)"], ["8", "8 direcciones (diagonal opcional)"]]],
+    ["directions", "Direcciones (solo control Moderno)", [["4", "4 cardinales"], ["8", "8 con diagonales"]]],
     ["instant_turn", "Control", [["1", "Moderno: inmediato (sin espera)"], ["0", "Clásico: Essentials original"]]],
     ["flow_motion", "Movimiento continuo (solo Moderno)", [["0", "Estándar: pasos separados"], ["1", "Fluido: encadenar pasos con tiempo sobrante"]]],
     ["camera_lookahead", "Anticipación visual de cámara", [["0", "Centrada (original)"], ["8", "8 píxeles"], ["16", "16 píxeles"], ["24", "24 píxeles"], ["32", "32 píxeles"]]],
@@ -74,6 +74,7 @@ export function activate(ctx) {
       '<div style="font-weight:600;margin:12px 0 6px">CONTROL DEL JUGADOR</div>' +
       fields.map(([id, title, items]) => '<label>' + title + '</label><select data-key="' + id + '" style="' + inputStyle + '">' +
         items.map(([value, label]) => option(id, value, label)).join("") + '</select>').join("") +
+      '<div data-preview style="margin:8px 0;padding:8px;border:1px solid var(--border);border-radius:4px;color:var(--text-secondary);font-size:12px"></div>' +
       '<div style="margin:10px 0 6px;font-weight:600">Perfiles rápidos (aplicar, luego guardar)</div>' +
       '<div style="display:flex;gap:6px;margin-bottom:12px"><button data-preset="classic" style="' + buttonStyle + ';flex:1">Clásico</button><button data-preset="responsive" style="' + buttonStyle + ';flex:1">Moderno</button></div>' +
       '<div style="font-weight:600;margin:12px 0 6px">CAMARA</div>' +
@@ -97,10 +98,21 @@ export function activate(ctx) {
         const k = currentKey();
         state.config[k] ||= {};
         state.config[k][el.dataset.key] = el.value;
+        updatePreview();
         const out = host.querySelector("[data-camera-value]");
         if (out) out.textContent = host.querySelector('[data-key="camera_smoothing"]').value + "%";
       });
     });
+    function updatePreview() {
+      const settings = { ...DEFAULTS, ...(state.config.global || {}), ...(state.config[currentKey()] || {}) };
+      const classic = settings.instant_turn === "0";
+      const directions = classic ? "4 direcciones" : settings.directions + " direcciones";
+      const flow = !classic && settings.flow_motion === "1" ? "Flow activo" : "Flow desactivado";
+      const camera = settings.camera_lookahead + "px de anticipación";
+      host.querySelector("[data-preview]").textContent =
+        (classic ? "Clásico original" : "Moderno inmediato") + " · " + directions + " · " + flow + " · " + camera;
+    }
+    updatePreview();
     host.querySelector("[data-camera-value]").textContent = values.camera_smoothing + "%";
     host.querySelectorAll("[data-preset]").forEach(button => {
       button.addEventListener("click", () => {
