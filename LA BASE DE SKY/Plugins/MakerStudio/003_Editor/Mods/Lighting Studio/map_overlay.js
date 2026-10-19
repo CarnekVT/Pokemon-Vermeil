@@ -54,7 +54,7 @@ export function paint(g,info,v){
   g.save();
   try{
     if(live&&allEnabled){
-      const darkness=Math.max(0,Math.min(1,Number(map.ambient?.darkness)||0));
+      const darkness=Math.max(v.previewNight?0.42:0,Math.max(0,Math.min(1,Number(map.ambient?.darkness)||0)));
       if(darkness){
         const tint=rgb(map.ambient?.color||'#142439');
         g.fillStyle='rgb('+tint.join(',')+')';
