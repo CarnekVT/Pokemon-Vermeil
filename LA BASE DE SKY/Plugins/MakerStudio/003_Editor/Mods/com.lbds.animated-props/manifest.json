@@ -1,7 +1,7 @@
 {
   "id": "com.lbds.animated-props",
   "name": "Animated Props - La Base de Sky",
-  "version": "0.6.3",
+  "version": "0.6.5",
   "apiVersion": "1.0.1",
   "main": "index.js",
   "authors": [

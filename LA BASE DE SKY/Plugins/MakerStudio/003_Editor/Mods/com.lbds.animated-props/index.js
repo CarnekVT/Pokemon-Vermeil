@@ -6,7 +6,8 @@ import {lineCells,rectangleCells,brushFootprint,floodCells,strokeCells} from './
 import {occupiedPropCells,matchPropCells,changeSelection} from './prop-tools.js';
 import { isMapPointer, normalizedViewport } from './map-canvas.js';
 import { overlayCanvasRect, nativeScreenRect } from './overlay-transform.js';
-import { getProfile, dueTick, frameAt, visibleMapRect } from './performance.js';
+import { getProfile, dueTick, frameAt } from './performance.js';
+import { createSpatialIndex, queryVisible, viewportCacheKey } from './spatial-index.js';
 import {resolveTile} from './pointer-router.js';
 import {pickProp, movable, tileFromRenderedCanvas} from './interaction.js';
 import {paintableLayers, layerInfo, choosePaintLayer, adjacentPaintLayer} from './paint-layers.js';
@@ -285,7 +286,7 @@ function renderEntries(mapId){
  if(cached?.list===list)return cached;
  const defs=new Map(state.data.definitions.map(d=>[d.id,d]));
  const ordered=[...list].sort((a,b)=>(a.layer||0)-(b.layer||0)).map(p=>({p,d:defs.get(p.defId)})).filter(x=>x.d);
- const entry={list,ordered,defs};state.renderIndex.set(mapId,entry);
+ const entry={list,ordered,defs,spatial:createSpatialIndex(ordered)};state.renderIndex.set(mapId,entry);
  return entry;
 }
 function invalidateRenderIndex(){
@@ -419,10 +420,9 @@ function tickVisuals(){
     if(profile.mapFps>0){
       const info=state.lastRenderInfo?.mapId===mapId?state.lastRenderInfo:null;
       const render=renderEntries(mapId);
-      const geo=info ? `${mapId}/${info.viewportX}/${info.viewportY}/${info.tileSize}/${info.canvasWidth}/${info.canvasHeight}`:'unavailable';
+      const geo=viewportCacheKey(mapId,info);
       const cached=state.visibleCandidates;
-      const visible=cached?.geo===geo&&cached?.render===render ? cached.entries :
-        render.ordered.filter(({p,d})=>visibleMapRect(p,d,info));
+      const visible=cached?.geo===geo&&cached?.render===render ? cached.entries : queryVisible(render.spatial,info);
       if(!cached||cached.geo!==geo||cached.render!==render)state.visibleCandidates={geo,render,entries:visible};
       const key=visible.map(({p,d})=>{const f=frameFor(d,now);return `${p.id}:${d.timingMode==='independent'?(f+phaseFromId(p.id,d.frames))%d.frames:f}:${d.parallel?.enabled?parallelFrame(d,now,p.id):'-'}`;}).join('|');
       if(key!==state.lastMapFrameKey){state.lastMapFrameKey=key;if(visible.length)redraw();}
@@ -1686,6 +1686,11 @@ function drawOverlay(draw,info){
   state.overlayCalls++;
   const render=renderEntries(info.mapId);
   const view=normalizedViewport(info);
+  // The animation scheduler and overlay share a cached spatial viewport query.
+  const geo=viewportCacheKey(info.mapId,view);
+  const cached=state.visibleCandidates;
+  const visible=cached?.geo===geo&&cached?.render===render ? cached.entries : queryVisible(render.spatial,view);
+  if(!cached||cached.geo!==geo||cached.render!==render)state.visibleCandidates={geo,render,entries:visible};
   // In this Maker Studio build the overlay surface already inherits the native
   // canvas zoom. Coordinates supplied to drawImage must remain in logical
   // tile pixels, otherwise the graphics scale a second time.
@@ -1697,13 +1702,17 @@ function drawOverlay(draw,info){
   const tilesByLayer=snapshot.byIndex;
   const currentPaintLayer=selectedPaintLayer(info.mapId);
   draw.save();
-  for(const {p,d} of render.ordered){
+  const viewOptions=state.ctx.editor.viewOptions?.()||{};
+  const now=performance.now();
+  const primaryFrames=new Map(),secondaryFrames=new Map();
+  const collisionVisible=!!viewOptions.showCollision;
+  for(const {p,d} of visible){
     if(state.isolateLayer&&p.layer!==currentPaintLayer)continue;
     const layer=tilesByLayer.get(p.layer)||{visible:true,opacity:1};
     if(layer.visible===false)continue;
     const rawOpacity=Number(layer.opacity??1);
     const layerOpacity=Math.max(0,Math.min(1,rawOpacity>1?rawOpacity/255:rawOpacity));
-    const dimmed=state.ctx.editor.viewOptions?.().showDim && p.layer!==currentPaintLayer;
+    const dimmed=viewOptions.showDim && p.layer!==currentPaintLayer;
     draw.globalAlpha=layerOpacity*(dimmed?0.35:1);
     const crop=cropFor(d,p.crop);
     const moving=state.drag?.id===p.id && state.drag.mapId===info.mapId ? state.drag : null;
@@ -1713,14 +1722,14 @@ function drawOverlay(draw,info){
     if(displayed.x+displayed.w<0||displayed.y+displayed.h<0||
        displayed.x>view.canvasWidth||displayed.y>view.canvasHeight)continue;
     const c=state.images.get(d.sheet);
-    const visible=cachedHigherMask(info.mapId,p,crop,mapRows);
+    const mask=cachedHigherMask(info.mapId,p,crop,mapRows);
     const paintTrack=(picture,frame,opacity)=>{
       if(!picture?.ok||!picture.img)return;
       draw.save();draw.globalAlpha*=opacity;
       draw.imageSmoothingEnabled=false;
-      if(!visible.all && typeof draw.clip==='function'){
-        if(!(visible.count>0)){draw.restore();return;}
-        draw.beginPath();for(const cell of visible.cells)draw.rect(r.x+cell.x*scale,r.y+cell.y*scale,scale,scale);
+      if(!mask.all && typeof draw.clip==='function'){
+        if(!(mask.count>0)){draw.restore();return;}
+        draw.beginPath();for(const cell of mask.cells)draw.rect(r.x+cell.x*scale,r.y+cell.y*scale,scale,scale);
         draw.clip();
       }
       draw.drawImage(picture.img,(frame*d.width+crop.x)*32,crop.y*32,crop.w*32,crop.h*32,r.x,r.y,r.w,r.h);
@@ -1728,7 +1737,8 @@ function drawOverlay(draw,info){
     };
     if(c?.ok&&c.img){
       const phase=d.timingMode==='independent'?phaseFromId(p.id,d.frames):0;
-      const baseFrame=frameFor(d);
+      let baseFrame=primaryFrames.get(d.id);
+      if(baseFrame==null){baseFrame=frameFor(d,now);primaryFrames.set(d.id,baseFrame);}
       const frame=d.loop?(baseFrame+phase)%d.frames:Math.min(d.frames-1,baseFrame+phase);
       paintTrack(c,frame,1);
     } else {
@@ -1742,11 +1752,17 @@ function drawOverlay(draw,info){
       if(secondary?.ok && secondary.img){
         const dimensions=expectedTrackDimensions(d,d.parallel);
         if(secondary.img.width===dimensions.width&&secondary.img.height===dimensions.height){
-          paintTrack(secondary,parallelFrame(d,performance.now(),p.id),d.parallel.opacity/100);
+          let secondaryFrame;
+          if(d.timingMode==='independent')secondaryFrame=parallelFrame(d,now,p.id);
+          else {
+            secondaryFrame=secondaryFrames.get(d.id);
+            if(secondaryFrame==null){secondaryFrame=parallelFrame(d,now,p.id);secondaryFrames.set(d.id,secondaryFrame);}
+          }
+          paintTrack(secondary,secondaryFrame,d.parallel.opacity/100);
         }
       }
     }
-    if(state.ctx.editor.viewOptions?.().showCollision){
+    if(collisionVisible){
       const collision=collisionCells(d,crop,{...p,x:moving?.x??p.x,y:moving?.y??p.y});
       // Props are stored outside the native tile stack, so Col must show their
       // own passability markers. Do not claim to replace native stack resolution.
