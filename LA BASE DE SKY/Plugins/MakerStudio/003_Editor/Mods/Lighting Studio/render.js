@@ -1,8 +1,8 @@
 // Lighting Studio: world-space light chunks; zoom never changes chunk contents.
 // Each source is merged using per-channel MAX, not additive stacking.
 // World-to-screen projection is exactly the one used by LBDS Animated Props.
-const MASK_LIMIT=16, MASK_MAX=64, CHUNK_WORLD=256, CHUNK_PX=64, CHUNK_LIMIT=48;
-const CHUNKS_PER_PASS=2;
+const MASK_LIMIT=16, MASK_MAX=128, SMOOTH_SHAPE_MAX=256, CHUNK_WORLD=256, CHUNK_PX=128, CHUNK_LIMIT=32;
+const CHUNKS_PER_PASS=1;
 const masks=new Map(),chunks=new Map();
 let pendingChunks=false;
 let cachedMapKey=null;
@@ -97,9 +97,11 @@ export function pixelGridDimensions(l){
 }
 function createMask(l){
   const dims=dimensions(l),p=l.pixel||{},pixelated=p.enabled===true;
+  const maxSmooth=(l.type==='cone'||l.type==='ellipse')?SMOOTH_SHAPE_MAX:MASK_MAX;
+  const factor=Math.min(1,maxSmooth/Math.max(dims.w,dims.h));
   const size=pixelated?pixelGridDimensions(l):{
-    w:Math.max(2,Math.round(dims.w*Math.min(1,MASK_MAX/Math.max(dims.w,dims.h)))),
-    h:Math.max(2,Math.round(dims.h*Math.min(1,MASK_MAX/Math.max(dims.w,dims.h))))
+    w:Math.max(2,Math.round(dims.w*factor)),
+    h:Math.max(2,Math.round(dims.h*factor))
   };
   const w=size.w,h=size.h,canvas=newCanvas(w,h),ctx=canvas.getContext('2d');
   if(!ctx)return null;
@@ -151,47 +153,64 @@ export function mergeColorMax(dst,pos,r,g,b,alpha){
   dst[pos+2]=Math.max(dst[pos+2],Math.round(b*a));
   dst[pos+3]=255;
 }
-let scratch=null;
+// A static world chunk is calculated directly into one ImageData buffer.
+// Avoid drawing each light to an auxiliary canvas and reading it back via
+// getImageData on every parameter change (a large WebView/GPU sync stall).
 function bounds(l){
-  const dims=dimensions(l),angle=(Number(l.rotation)||0)*Math.PI/180;
-  const c=Math.abs(Math.cos(angle)),s=Math.abs(Math.sin(angle));
-  return {x:l.x*32,y:l.y*32,w:dims.w*c+dims.h*s,h:dims.w*s+dims.h*c};
+  const d=dimensions(l),theta=(Number(l.rotation)||0)*Math.PI/180;
+  const c=Math.abs(Math.cos(theta)),si=Math.abs(Math.sin(theta));
+  return {x:l.x*32,y:l.y*32,w:d.w*c+d.h*si,h:d.w*si+d.h*c};
 }
 function makeChunk(cx,cy,lights){
-  if(!scratch)scratch=newCanvas(CHUNK_PX,CHUNK_PX);
-  const work=scratch.getContext('2d',{willReadFrequently:true});
-  if(!work)return null;
-  const result=newCanvas(CHUNK_PX,CHUNK_PX),destCtx=result.getContext('2d');
-  if(!destCtx)return null;
-  const img=destCtx.createImageData(CHUNK_PX,CHUNK_PX),dest=img.data;
-  const worldX=cx*CHUNK_WORLD,worldY=cy*CHUNK_WORLD;
-  let nonzero=false;
-  const scale=CHUNK_PX/CHUNK_WORLD;
+  const c=newCanvas(CHUNK_PX,CHUNK_PX),ctx=c.getContext('2d');
+  if(!ctx)return null;
+  const image=ctx.createImageData(CHUNK_PX,CHUNK_PX),dst=image.data;
+  const chunkX=cx*CHUNK_WORLD,chunkY=cy*CHUNK_WORLD;
+  const scale=CHUNK_WORLD/CHUNK_PX;
+  let lit=false;
   for(const l of lights){
-    const b=bounds(l),halfW=b.w/2,halfH=b.h/2;
-    if(b.x+halfW<=worldX||b.x-halfW>=worldX+CHUNK_WORLD||
-       b.y+halfH<=worldY||b.y-halfH>=worldY+CHUNK_WORLD)continue;
-    const mask=getMask(l);if(!mask)continue;
-    const d=dimensions(l);
-    work.clearRect(0,0,CHUNK_PX,CHUNK_PX);
-    work.save();
-    work.globalCompositeOperation='source-over';
-    work.globalAlpha=clamp(l.intensity??.8,0,1);
-    work.translate((b.x-worldX)*scale,(b.y-worldY)*scale);
-    work.rotate((Number(l.rotation)||0)*Math.PI/180);
-    work.imageSmoothingEnabled=!l.pixel?.enabled;
-    work.drawImage(mask,-d.w*scale/2,-d.h*scale/2,d.w*scale,d.h*scale);
-    work.restore();
-    const src=work.getImageData(0,0,CHUNK_PX,CHUNK_PX).data;
-    for(let pos=0;pos<src.length;pos+=4){
-      if(src[pos+3]<1)continue;
-      mergeColorMax(dest,pos,src[pos],src[pos+1],src[pos+2],src[pos+3]);
-      nonzero=true;
+    const a=clamp(l.intensity??.8,0,1);
+    if(a<=0)continue;
+    const d=dimensions(l),b=bounds(l);
+    const bw=b.w/2,bh=b.h/2;
+    if(b.x+bw<=chunkX||b.x-bw>=chunkX+CHUNK_WORLD||
+       b.y+bh<=chunkY||b.y-bh>=chunkY+CHUNK_WORLD)continue;
+    const x0=Math.max(0,Math.floor((b.x-bw-chunkX)/scale)-1);
+    const x1=Math.min(CHUNK_PX,Math.ceil((b.x+bw-chunkX)/scale)+1);
+    const y0=Math.max(0,Math.floor((b.y-bh-chunkY)/scale)-1);
+    const y1=Math.min(CHUNK_PX,Math.ceil((b.y+bh-chunkY)/scale)+1);
+    const theta=(Number(l.rotation)||0)*Math.PI/180;
+    const cos=Math.cos(theta),sin=Math.sin(theta);
+    const normal=rgb(l.color),px=l.pixel||{},pixel=px.enabled===true;
+    const block=clamp(px.size??6,2,32);
+    const levels=clamp(px.steps??6,2,24);
+    const halfW=d.w/2,halfH=d.h/2;
+    for(let y=y0;y<y1;y++){
+      const wy=chunkY+(y+.5)*scale-b.y,row=y*CHUNK_PX*4;
+      for(let x=x0;x<x1;x++){
+        const wx=chunkX+(x+.5)*scale-b.x;
+        let lx=cos*wx+sin*wy,ly=-sin*wx+cos*wy;
+        if(pixel){
+          lx=Math.floor((lx+halfW)/block)*block+block*.5-halfW;
+          ly=Math.floor((ly+halfH)/block)*block+block*.5-halfH;
+        }
+        let power=falloff(l,lx/halfW,ly/halfH);
+        if(pixel)power=Math.round(power*levels)/levels;
+        const alpha=power*a;
+        if(alpha<=0)continue;
+        lit=true;
+        const i=row+x*4;
+        const nr=Math.round(normal[0]*alpha),ng=Math.round(normal[1]*alpha),nb=Math.round(normal[2]*alpha);
+        if(nr>dst[i])dst[i]=nr;
+        if(ng>dst[i+1])dst[i+1]=ng;
+        if(nb>dst[i+2])dst[i+2]=nb;
+        dst[i+3]=255;
+      }
     }
   }
-  if(!nonzero)return null;
-  destCtx.putImageData(img,0,0);
-  return result;
+  if(!lit)return null;
+  ctx.putImageData(image,0,0);
+  return c;
 }
 function cachedChunk(cx,cy,lights){
   const key=cx+':'+cy;
@@ -204,7 +223,7 @@ function cachedChunk(cx,cy,lights){
   while(chunks.size>CHUNK_LIMIT)chunks.delete(chunks.keys().next().value);
   return result;
 }
-export function clearLightCache(){masks.clear();chunks.clear();scratch=null;cachedMapKey=null;pendingChunks=false;}
+export function clearLightCache(){masks.clear();chunks.clear();cachedMapKey=null;pendingChunks=false;}
 export function hasPendingChunks(){return pendingChunks;}
 export function cacheSize(){return {masks:masks.size,views:chunks.size};}
 function drawUnionChunks(g,lights,project,width,height){
