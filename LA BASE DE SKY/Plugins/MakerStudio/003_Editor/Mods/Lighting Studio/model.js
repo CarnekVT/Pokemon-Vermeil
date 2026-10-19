@@ -14,7 +14,31 @@ export const newId = () => 'light_'+Date.now().toString(36)+'_'+Math.random().to
 const num = (v,lo,hi,def) => Number.isFinite(Number(v)) ? Math.min(hi,Math.max(lo,Number(v))) : def;
 export const clamp = (v,lo,hi) => num(v,lo,hi,lo);
 export const hex = (v,def='#FFCE8A') => /^#[a-fA-F0-9]{6}$/.test(String(v)) ? String(v).toUpperCase() : def;
-export const defaultMap = () => ({enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},lights:[]});
+export const NORMAL_CATEGORIES = {tilesets:'Tilesets',autotiles:'Autotiles',characters:'Characters'};
+export const NORMAL_DIR='Graphics/LightingStudio/Normals';
+export const defaultNormals = () => ({enabled:false,strength:1,tilesets:[],autotiles:[],characters:[]});
+// Source and normal filenames are relative game assets; reject path traversal.
+export function assetName(v){
+  const value=String(v||'').trim();
+  return value.length<=150&&/^[\p{L}\p{N}_ .()!+@\-]+$/u.test(value)&&value!=='.'&&value!=='..'?value:'';
+}
+export function normalizeNormalBinding(raw,category){
+  if(!NORMAL_CATEGORIES[category]||!raw||typeof raw!=='object')return null;
+  const source=assetName(raw.source),normal=assetName(raw.normal);
+  return source&&normal?{source,normal,invertY:raw.invertY===true,enabled:raw.enabled!==false}:null;
+}
+export function normalizeNormals(raw){
+  const v=raw&&typeof raw==='object'?raw:{};
+  const out=defaultNormals();out.enabled=v.enabled===true;out.strength=num(v.strength,0,2,1);
+  for(const category of Object.keys(NORMAL_CATEGORIES)){
+    const seen=new Set();
+    out[category]=(Array.isArray(v[category])?v[category]:[]).slice(0,300)
+      .map(x=>normalizeNormalBinding(x,category))
+      .filter(x=>{if(!x||seen.has(x.source))return false;seen.add(x.source);return true;});
+  }
+  return out;
+}
+export const defaultMap = () => ({enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},normalMaps:defaultNormals(),lights:[]});
 export const defaultProject = () => ({schema:SCHEMA,maps:{}});
 export const defaultPulse = () => ({enabled:false,speedHz:1,intensity:0.25,radius:0.12,phase:0});
 export const defaultPixel = () => ({enabled:false,size:6,steps:6});
@@ -51,6 +75,7 @@ export function normalizeProject(src){
     res.maps[String(Number(id))]={enabled:value.enabled!==false,
       overlapMode:value.overlapMode==='sum'?'sum':'union',
       ambient:{color:hex(ambient.color,'#142439'),darkness:num(ambient.darkness,0,1,0)},
+      normalMaps:normalizeNormals(value.normalMaps),
       lights:(Array.isArray(value.lights)?value.lights:[]).slice(0,500).map(normalizeLight)
       .filter(l=>{if(seen.has(l.id))return false;seen.add(l.id);return true;})};
   }
