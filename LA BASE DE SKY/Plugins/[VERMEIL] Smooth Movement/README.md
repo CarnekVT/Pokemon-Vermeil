@@ -15,7 +15,7 @@ Panel: Maker Studio > **Movement Studio**. Guarda `config.ini` junto al plugin.
 ## Limitaciones importantes
 
 - `mode=free` y `subtile_divisions` **están reservados**. Elegirlos no activa aún desplazamiento libre real: se conserva el desplazamiento lógico por tiles para proteger eventos, escaleras, encuentros y followers.
-- `smooth_movement=1` activa easing visual; `0` vuelve a la interpolación lineal de Essentials.
+- `smooth_movement=1` enlaza los pasos consecutivos sin el frame vacio habitual; `0` conserva el paso original. Ambas opciones usan interpolacion lineal, sin frenado artificial por casilla.
 - El desplazamiento diagonal utiliza las cuatro orientaciones gráficas tradicionales (sin filas diagonales nuevas).
 - Las diagonales se prueban solamente en terreno normal. No sustituyen la lógica de salto, agua ni movimiento forzado.
 - No hay pruebas de ejecución dentro del cliente RPG Maker/mkxp; verifica mapas y eventos antes de integrarlo a una build estable.
@@ -30,7 +30,7 @@ Panel: Maker Studio > **Movement Studio**. Guarda `config.ini` junto al plugin.
 
 ## Importante al actualizar
 
-Ejecuta el juego en modo debug para forzar la recompilación del plugin si se encuentra el archivo `Data/PluginScripts.rxdata` anterior. La versión 0.1.1 modifica meta.txt para detectar actualización. El editor escribe en el proyecto abierto, no en otro directorio del juego.
+Ejecuta el juego en modo debug para forzar la recompilación del plugin si se encuentra el archivo `Data/PluginScripts.rxdata` anterior. La version 0.2.0 modifica meta.txt para detectar la actualizacion y ordena cargar este plugin al final. El editor escribe en el proyecto abierto, no en otro directorio del juego.
 
 ### Hotfix 0.1.2
 
