@@ -20,3 +20,17 @@ En el panel **Lighting Studio > Normal Maps** selecciona el original y después 
 **Requisitos de producción:** PNG con dimensiones, rejilla y fotogramas idénticos a la textura original; normales RGB en espacio tangente, por defecto orientadas en +Z (color neutro #8080FF aproximadamente). `invertY` guarda la convención para un shader posterior.
 
 **Estado actual — experimental:** los vínculos se guardan y se verifican, pero el runtime RGSS/mkxp de Lighting Studio **todavía no aplica esos normal maps al sombreado**. Se necesita una etapa de integración con los sprites del mapa, sprites OW y renderizador/shader de materiales. No se simula ese comportamiento con per-pixel Ruby en cada fotograma para evitar nuevos picos de FPS.
+
+
+## Resolución automática para jugador, Pokémon seguidor y formas
+
+No registres manualmente cada especie ni agregues switches por Pokémon. Activa la **detección automática global** en Lighting Studio. El resolvedor toma el gráfico que el juego ya haya elegido y busca un PNG con el mismo nombre más `_n` dentro de la carpeta correspondiente. Se admiten subcarpetas, por ejemplo:
+
+```
+Graphics/Characters/Followers/VENUSAUR.png
+Graphics/LightingStudio/Normals/Characters/Followers/VENUSAUR_n.png
+```
+
+Cambiar el Pokémon seguido hace que la siguiente consulta de recurso use el nuevo gráfico; la lista manual solo se usa para nombres excepcionales. Los resultados de existencia se cachean y pueden refrescarse con `LightingStudio.normal_reset_cache` o al cambiar de mapa.
+
+**Límite:** la detección dinámica de rutas está lista, pero no hay aún renderizado de normales en pantalla ni shader conectado al sprite.
