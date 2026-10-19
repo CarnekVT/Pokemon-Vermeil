@@ -6,7 +6,7 @@ export const BLEND_MODES = ['normal','union','sum','subtract'];
 export const BLEND_NAMES = {union:'Fusionar área iluminada',sum:'Sumar brillo',normal:'Normal',subtract:'Oscurecer'};
 export const LIGHT_TYPES = ['radial','cone','ellipse','rectangle'];
 export const FADE_MODES = ['center','top','bottom','left','right','custom'];
-export const FADE_NAMES = {center:'Desde el centro',top:'Desde arriba',bottom:'Desde abajo',left:'Desde la izquierda',right:'Desde la derecha',custom:'Origen personalizado'};
+export const FADE_NAMES = {center:'Desde el centro',top:'Hacia arriba (luz abajo)',bottom:'Hacia abajo (luz arriba)',left:'Hacia la izquierda (luz derecha)',right:'Hacia la derecha (luz izquierda)',custom:'Desde un origen personalizado'};
 export const TYPE_NAMES = {radial:'Radial',cone:'Cono / foco',ellipse:'Elíptica',rectangle:'Rectangular'};
 export const parseCoordinate = v => { const str=String(v).trim().replace(',', '.'); if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(str))return null; const n=Number(str);return Number.isFinite(n)&&n>=-2048&&n<=2048?Math.round(n*1000)/1000:null; };
 export const deepCopy = v => JSON.parse(JSON.stringify(v));
