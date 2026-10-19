@@ -7239,3 +7239,13 @@ FieldUse = Direct
 Flags = KeyItem
 Description = Incubadora que permite mantener 6 huevos hasta que eclosionen.
 #-------------------------------
+#-------------------------------
+[SLEEPINGBAG]
+Name = Saco de dormir
+NamePlural = Sacos de dormir
+Pocket = 8
+Price = 0
+FieldUse = Direct
+Flags = KeyItem
+Description = Un saco cómodo que permite descansar y adelantar el reloj interno de día y noche.
+#-------------------------------
