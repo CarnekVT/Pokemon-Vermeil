@@ -18,7 +18,18 @@ class Game_Player < Game_Character
 
     # En el modo original, el primer toque tras un giro solo cambia el facing;
     # este ajuste elimina esa espera sin tocar la logica de Game_Player#move_generic.
-    if VermeilMovement.enabled?("instant_turn") && [2, 4, 6, 8].include?(direction)
+    if [2, 4, 6, 8].include?(direction)
+      if !VermeilMovement.enabled?("instant_turn")
+        # Giro clasico deliberado: primero cambiar de facing y esperar
+        # el retardo original (75ms), incluso al cambiar de eje al caminar.
+        if direction != @direction && !@direction_fix
+          turn_generic(direction, true)
+          @last_input_time = System.uptime
+          return
+        end
+        return vermeil_movement_original_input
+      end
+      # Respuesta inmediata: girar y comenzar el paso en el mismo update.
       case direction
       when 2 then move_down
       when 4 then move_left
@@ -91,17 +102,38 @@ class Game_Player < Game_Character
   def update_move
     diagonal_step = @_vermeil_diagonal_active
     vermeil_movement_move_end
-    # Easing visual sobre la interpolacion nativa; no altera tiles ni triggers.
-    if moving? && @move_timer && @move_time && @move_time > 0 &&
-       @move_initial_x && @move_initial_y && VermeilMovement.enabled?("smooth_movement")
-      fraction = [[@move_timer / @move_time, 0.0].max, 1.0].min
-      eased = fraction * fraction * (3.0 - 2.0 * fraction)
-      @real_x = (@move_initial_x + (@x - @move_initial_x) * eased) * Game_Map::REAL_RES_X
-      @real_y = (@move_initial_y + (@y - @move_initial_y) * eased) * Game_Map::REAL_RES_Y
-    end
+    # Nunca imponer smoothstep a @real_x/@real_y por casilla: introduce
+    # frenazo en cada limite y empeora el movimiento al caminar seguido.
     if diagonal_step && !moving?
       @_vermeil_diagonal_active = false
       self.move_speed = @move_speed
     end
+  end
+
+  # El motor habitual espera un frame completo entre un paso terminado y
+  # la siguiente orden de movimiento. Opcionalmente iniciar el siguiente
+  # paso DESPUES de que Game_Player#update procese eventos/touch/encuentros.
+  # No se mueve el destino ni se omite la casilla logica.
+  alias vermeil_movement_base_update update unless method_defined?(:vermeil_movement_base_update)
+  def update
+    vermeil_movement_base_update
+    return unless VermeilMovement.enabled?("smooth_movement")
+    return unless @stopped_this_frame && @moved_this_frame && !moving? && !jumping?
+    return if @move_route_forcing || @direction_fix || @bumping || @through
+    return if $PokemonGlobal.forced_movement?
+    return if pbMapInterpreterRunning? || $game_temp.message_window_showing ||
+              $game_temp.in_mini_update || $game_temp.in_menu || $game_temp.in_battle
+    return if $game_temp.encounter_triggered
+    return if on_stair? || on_spiral? || $game_map.check_stair_zones(@x, @y)
+    return if @last_terrain_tag && (@last_terrain_tag.ice || @last_terrain_tag.ledge)
+    return if $PokemonGlobal.ice_sliding || $PokemonGlobal.ascending_waterfall ||
+              $PokemonGlobal.descending_waterfall
+    # Evitar iniciar el nuevo paso si un evento acaba de activarse en la
+    # casilla actual y el interprete todavia no ha comenzado a ejecutarlo.
+    return if $game_map.events.values.any? { |event| event.starting }
+    dir = (VermeilMovement.directions == 8 && Input.respond_to?(:dir8)) ?
+      Input.dir8 : Input.dir4(@moved_last_frame)
+    return if dir.nil? || dir == 0
+    update_command_new
   end
 end
