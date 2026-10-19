@@ -64,7 +64,21 @@ const actions=element('div','ls-actions');shell.append(actions);actions.append(m
 const mapId=state.ctx.editor.activeMapId?.();if(Number(mapId)>0)state.mapId=Number(mapId);
 const title=element('div','ls-hint','Mapa #'+state.mapId+' · '+(state.mode==='select'?'Clic en luz: seleccionar · arrastra para mover · Shift+arrastra: radio':state.mode==='place'?'Clic y arrastra para crear una luz del tamaño deseado':'Clic en una luz para eliminarla')+' · Ctrl + rueda: zoom del editor');shell.append(title);
 if(state.readError){shell.append(element('div','ls-hint','ERROR al leer los datos: '+state.readError+' · Edición bloqueada.'));return;}
-const m=current();const scene=getMap(state.data,state.mapId,true);const section=element('section','ls-section');shell.append(section);const heading=element('div','ls-section-heading');section.append(heading);heading.append(node('span','Fuentes luminosas'),element('span','ls-count',String(m?.lights.length||0)));const library=element('div','ls-inline');section.append(library);library.append(mini('＋ Nueva',()=>{const cx=state.lastCursor?.x??8,cy=state.lastCursor?.y??6;change(()=>{const d=getMap(state.data,state.mapId,true),l=makeLight(cx,cy,state.newType);d.lights.push(l);state.selected=l.id;});}),mini('▤ Presets',()=>{const light=active();if(!light)return notify('Selecciona primero una luz','warn');change(()=>{Object.assign(active(),{color:'#FFAD51',intensity:.85,radiusPx:112,softness:.8,name:'Farola cálida'});});}));
+const m=current();const scene=getMap(state.data,state.mapId,true);
+if(!state.showOverlay){
+ const warning=element('div','ls-hint','La previsualización está desactivada. Actívala para ver las luces sobre el mapa.');
+ shell.append(warning);
+ const restore=mini('Mostrar luces en el mapa',()=>{state.showOverlay=true;invalidate();redraw();refresh();});
+ shell.append(restore);
+}
+if(scene.enabled===false){
+ const warning=element('div','ls-hint','La iluminación está DESACTIVADA para este mapa.');
+ shell.append(warning);shell.append(mini('Activar iluminación del mapa',()=>change(()=>scene.enabled=true)));
+}
+if(scene.lights.length && scene.lights.every(l=>l.enabled===false)){
+ shell.append(element('div','ls-hint','Todas las fuentes están apagadas. Usa «Encender todas» para verlas.'));
+}
+const section=element('section','ls-section');shell.append(section);const heading=element('div','ls-section-heading');section.append(heading);heading.append(node('span','Fuentes luminosas'),element('span','ls-count',String(m?.lights.length||0)));const library=element('div','ls-inline');section.append(library);library.append(mini('＋ Nueva',()=>{const cx=state.lastCursor?.x??8,cy=state.lastCursor?.y??6;change(()=>{const d=getMap(state.data,state.mapId,true),l=makeLight(cx,cy,state.newType);d.lights.push(l);state.selected=l.id;});}),mini('▤ Presets',()=>{const light=active();if(!light)return notify('Selecciona primero una luz','warn');change(()=>{Object.assign(active(),{color:'#FFAD51',intensity:.85,radiusPx:112,softness:.8,name:'Farola cálida'});});}));
 const typePicker=node('select');typePicker.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typePicker.append(o);}typePicker.value=state.newType;typePicker.onchange=()=>{state.newType=typePicker.value;redraw();};labeled(section,'Tipo para luces nuevas',typePicker);
 const list=element('div','ls-list');section.append(list);
 if(!m?.lights.length)list.append(element('div','ls-empty','Todavía no hay luces. Usa «Añadir luz» sobre el mapa.'));
