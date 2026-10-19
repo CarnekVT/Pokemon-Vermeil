@@ -139,6 +139,9 @@
     //
     "pathCache": true,
 
+    // Ruby 3.1 (mkxp-z-ext Luka): no usar Ruby Library 3.3.0 con ruby310.
+    "rubyLoadpath": [".", "stdlib", "stdlib/x64-mingw32", "stdlib/x64-msvcrt"],
+
     //==========================================================================
     // Window size, scaling, rendering and frame rate.
     // You shouldn't need to change any of these.
