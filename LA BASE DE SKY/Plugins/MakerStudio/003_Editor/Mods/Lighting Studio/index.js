@@ -348,6 +348,25 @@ const buttons=element('div','ls-inline');shapePanel.append(buttons);buttons.appe
 }
 const wipe=element('div','ls-inline');ambient.append(wipe);wipe.append(mini('Restablecer iluminación del mapa',()=>{const n=(current()?.lights?.length||0);const message='Se eliminarán '+n+' luces y se restaurará el ambiente de este mapa. ¿Continuar?';const confirm=state.ctx.ui.showConfirmDialog({title:'Restablecer iluminación',message,confirmLabel:'Restablecer',cancelLabel:'Cancelar'});Promise.resolve(confirm).then(ok=>{if(ok)change(()=>{state.data.maps[String(state.mapId)]=defaultMap();state.selected=null;});}).catch(fail);}));
 normalBindingsUI(shell,scene);
+// Wide workspace: separate library + active light inspector instead of
+// stacking every control into one endless 390px sidebar.
+const normalsSection=shell.querySelector('.ls-normal-maps');
+const workspaceNav=element('div','ls-workspace-nav');
+const workspace=element('div','ls-workspace');
+const lightView=element('div','ls-workspace-view ls-workspace-lights');
+const lightLayout=element('div','ls-wide-light-layout');
+lightLayout.append(section,insp);
+lightView.append(lightLayout);
+const ambientView=element('div','ls-workspace-view');ambientView.append(ambient);
+const timeView=element('div','ls-workspace-view');timeView.append(daytime);
+const normalsView=element('div','ls-workspace-view');if(normalsSection)normalsView.append(normalsSection);
+const views={lights:lightView,ambient:ambientView,time:timeView,normals:normalsView};
+for(const [id,label] of [['lights','✦ Luces e inspector'],['ambient','◐ Ambiente'],['time','◷ Día y noche'],['normals','◇ Normal maps']]){
+ const b=mini(label,()=>{state.workspaceTab=id;refresh();},state.workspaceTab===id);
+ b.classList.add('ls-workspace-tab');workspaceNav.append(b);
+}
+for(const [id,view] of Object.entries(views)){view.hidden=state.workspaceTab!==id;workspace.append(view);}
+shell.append(workspaceNav,workspace);
 const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el mapa mediante un overlay independiente de Fog, Panorama y Sombras. Prueba visual muestra una marca amarilla para comprobar si Maker Studio lo está renderizando.');shell.append(hint);
 const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));shell.scrollTop=oldScroll;
 }
@@ -404,9 +423,9 @@ if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();schedulePersist();}
-export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),previewDayNight:false,previewHour:12,previewQuality:'balanced',mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),workspaceTab:'lights',previewDayNight:false,previewHour:12,previewQuality:'balanced',mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
 void preloadMasks().catch(fail);
- ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
+ ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:1050,height:810},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
 ctx.tools.registerTool({id:TOOL,label:'Lighting Studio',icon:'☀',onActivate(){ctx.ui.openPanel(PANEL);redraw();},onPointerDown:pointerDown,onPointerMove:pointerMove,onPointerUp:pointerUp,onDeactivate(){pointerUp();if(state){state.hover=null;state.hoverHit=null;redraw();}}});
