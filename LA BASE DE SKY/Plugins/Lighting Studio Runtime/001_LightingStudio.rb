@@ -57,34 +57,63 @@ module LightingStudio
   # Same falloff shape used in Maker Studio Canvas.
   # Direction describes the edge TOWARDS which the brightness fades.
   # 'bottom': bright plateau at the top, then darker toward the bottom.
+  # Keep the cone emitter anchored at normalized origin (0, 0), projecting
+  # to +X. Both the editor and runtime use the same two independent fades:
+  # forward distance and angular side feather.
+  def smoothstep(lo, hi, value)
+    q = [[(value - lo) / (hi - lo), 0.0].max, 1.0].min
+    q*q*(3.0 - 2.0*q)
+  end
+
+  def directional_fade(spec, nx, ny)
+    mode = spec['fadeMode'] || 'center'
+    direction = case mode
+                when 'bottom' then (ny + 1.0) / 2.0
+                when 'top' then (1.0 - ny) / 2.0
+                when 'left' then (1.0 - nx) / 2.0
+                when 'right' then (nx + 1.0) / 2.0
+                else
+                  ox = number(spec['fadeX'], 0, -1, 1)
+                  oy = number(spec['fadeY'], 0, -1, 1)
+                  Math.sqrt((nx - ox)**2 + (ny - oy)**2) /
+                    (1.0 + Math.sqrt(ox*ox + oy*oy))
+                end
+    start = number(spec['fadeStart'], 0.58, 0, 0.95)
+    1.0 - smoothstep(start, 1.0, direction)
+  end
+
   def falloff(spec, nx, ny)
     type = spec['type'] || 'radial'
     softness = number(spec['softness'], 0.75, 0.05, 1)
-    aperture = number(spec['angle'], 70, 5, 170) * Math::PI / 360
-    d = shape_distance(type, nx, ny, aperture)
-    return 0.0 if d >= 1.0
     mode = spec['fadeMode'] || 'center'
     center = number(spec['centerStrength'], 0.65, 0, 1)
-    if mode == 'center'
-      radial = (1.0 - d)**(1.0 / softness)
-      return radial * (center + (1.0 - center) * [d * 2.0, 1.0].min)
-    end
-    direction = case mode
-      when 'bottom' then (ny + 1.0) / 2.0
-      when 'top' then (1.0 - ny) / 2.0
-      when 'left' then (1.0 - nx) / 2.0
-      when 'right' then (nx + 1.0) / 2.0
-      else
-        ox = number(spec['fadeX'], 0, -1, 1)
-        oy = number(spec['fadeY'], 0, -1, 1)
-        Math.sqrt((nx - ox)**2 + (ny - oy)**2) / (1 + Math.sqrt(ox*ox + oy*oy))
+
+    if type == 'cone'
+      distance = Math.sqrt(nx*nx + ny*ny)
+      return 0.0 if nx < 0.0 || distance >= 1.0
+      half_angle = number(spec['angle'], 70, 5, 170) * Math::PI / 360.0
+      relative_angle = Math.atan2(ny, nx).abs / half_angle
+      return 0.0 if relative_angle >= 1.0
+      feather = number(spec['coneFeather'], 0.28, 0.03, 0.9)
+      side = 1.0 - smoothstep(1.0 - feather, 1.0, relative_angle)
+      if mode == 'center'
+        reach_start = number(spec['fadeStart'], 0.58, 0, 0.95)
+        return side * (1.0 - smoothstep(reach_start, 1.0, distance)) * center
       end
-    start = number(spec['fadeStart'], 0.58, 0, 0.95)
-    q = [[(direction - start) / (1.0 - start), 0].max, 1].min
-    smooth = 1.0 - q*q*(3.0 - 2.0*q)
-    # Edge is only a very narrow shape clip; don't apply a second radial fade.
-    edge = [[(1.0 - d)/0.045, 0].max, 1].min
-    smooth * edge * center
+      tip = 1.0 - smoothstep(0.88, 1.0, distance)
+      return side * tip * directional_fade(spec, nx, ny) * center
+    end
+
+    aperture = number(spec['angle'], 70, 5, 170) * Math::PI / 360.0
+    distance = shape_distance(type, nx, ny, aperture)
+    return 0.0 if distance >= 1.0
+    if mode == 'center'
+      radial = (1.0 - distance)**(1.0 / softness)
+      return radial *
+        (center + (1.0 - center) * [distance * 2.0, 1.0].min)
+    end
+    edge = [[(1.0 - distance) / 0.045, 0.0].max, 1.0].min
+    directional_fade(spec, nx, ny) * edge * center
   end
 
   # World-space bounds can be calculated without rasterizing a light mask.
@@ -196,7 +225,7 @@ module LightingStudioSpriteset
       next unless source.is_a?(Hash) && source['enabled'] != false
       key = [
         source['type'], source['radiusPx'], source['widthPx'],
-        source['heightPx'], source['angle'], source['rotation'],
+        source['heightPx'], source['angle'], source['coneFeather'], source['rotation'],
         source['color'], source['softness'], source['centerStrength'],
         source['fadeMode'], source['fadeStart'], source['fadeX'], source['fadeY'],
         source['pixel']
