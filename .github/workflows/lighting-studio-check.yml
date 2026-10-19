@@ -1,0 +1,32 @@
+name: Lighting Studio checks
+on:
+  push:
+    branches: [new-MK-for-2.5D-Testeo]
+    paths:
+      - 'LA BASE DE SKY/Plugins/Lighting Studio Runtime/**'
+      - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Lighting Studio/**'
+      - 'LA BASE DE SKY/DeveloperTests/LightingStudio/**'
+      - '.github/workflows/lighting-studio-check.yml'
+  workflow_dispatch:
+
+jobs:
+  ruby_and_javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Ruby runtime syntax
+        working-directory: LA BASE DE SKY
+        run: |
+          for f in "Plugins/Lighting Studio Runtime/"*.rb; do ruby -c "$f"; done
+      - name: Run Ruby normals regression
+        working-directory: LA BASE DE SKY
+        run: ruby "DeveloperTests/LightingStudio/test_character_normals.rb"
+      - name: Check editor JavaScript syntax
+        working-directory: LA BASE DE SKY
+        run: |
+          for f in "Plugins/MakerStudio/003_Editor/Mods/Lighting Studio/"*.js; do
+            node --experimental-default-type=module --check "$f"
+          done
+      - name: Test model, masks and day-night timeline
+        working-directory: LA BASE DE SKY
+        run: node --experimental-default-type=module "DeveloperTests/LightingStudio/test_model.mjs"
