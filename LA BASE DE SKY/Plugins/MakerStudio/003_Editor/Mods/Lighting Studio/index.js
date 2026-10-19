@@ -1,7 +1,7 @@
 import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES} from './model.js';
 import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
-import {cacheSize,clearLightCache} from './render.js';
+import {cacheSize,clearLightCache,hasPendingChunks} from './render.js';
 const PANEL='lighting-studio.main', TOOL='lighting-studio.place';
 let state=null;
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);return e;};
@@ -113,7 +113,7 @@ const tabs={};
 for(const id of ['shape','fade','pulse','pixel']){const panel=element('div','ls-tab-body');panel.hidden=state.inspectorTab!==id;insp.append(panel);tabs[id]=panel;}
 const shapePanel=tabs.shape,fadePanel=tabs.fade,pulsePanel=tabs.pulse,pixelPanel=tabs.pixel;
 shapePanel.append(element('div','ls-group-label','PROPIEDADES GENERALES'));
-fadePanel.append(element('p','ls-inline-note','Elige dónde comienza el brillo y hacia qué dirección se atenúa. Las geometrías conservan su contorno.'));
+fadePanel.append(element('p','ls-inline-note','Elige hacia qué borde se atenúa la luz. «Hacia abajo» conserva una zona luminosa arriba y la oscurece progresivamente hacia abajo.'));
 const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;});labeled(shapePanel,'Geometría',typeSelect);
 if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editValue(()=>selected.angle=v,final));}
 if(selected.type==='ellipse'||selected.type==='rectangle'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editValue(()=>selected.heightPx=v,final));}
@@ -129,7 +129,11 @@ const fadeSelect=node('select');fadeSelect.className='ls-input';
 for(const id of FADE_MODES){const o=node('option',FADE_NAMES[id]);o.value=id;fadeSelect.append(o);}
 fadeSelect.value=selected.fadeMode||'center';
 fadeSelect.onchange=()=>change(()=>selected.fadeMode=fadeSelect.value);
-labeled(fadePanel,'Origen del difuminado',fadeSelect);
+labeled(fadePanel,'Dirección de atenuación',fadeSelect);
+if(selected.fadeMode!=='center'){
+ slider(fadePanel,'Inicio del difuminado',selected.fadeStart??.58,0,.95,.01,(v,final)=>editValue(()=>selected.fadeStart=v,final));
+ fadePanel.append(element('p','ls-inline-note','Cuanto mayor sea el valor, más amplia será la zona iluminada antes de comenzar la transición.'));
+}
 if(selected.fadeMode==='custom'){
  slider(fadePanel,'Origen horizontal',selected.fadeX??0,-1,1,.05,(v,final)=>editValue(()=>selected.fadeX=v,final));
  slider(fadePanel,'Origen vertical',selected.fadeY??0,-1,1,.05,(v,final)=>editValue(()=>selected.fadeY=v,final));
@@ -182,6 +186,6 @@ if(ctx.ui.registerOverlay){ctx.ui.registerOverlay(item);state.advancedOverlay=fa
 else if(ctx.ui.registerAdvancedOverlay){ctx.ui.registerAdvancedOverlay(item);state.advancedOverlay=true;}
 else notify('Esta versión de Maker Studio no admite overlays de mods.','error');
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
-redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))redraw();},250);
+redraw();state.ticker=setInterval(()=>{if(!state)return;updateDiagnosticStatus();if(hasPendingChunks()||(!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled)))redraw();},250);
 }
 export function deactivate(){if(state?.ticker)clearInterval(state.ticker);clearLightCache();state=null;}
