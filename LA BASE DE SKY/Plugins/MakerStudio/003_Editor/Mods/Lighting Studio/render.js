@@ -2,7 +2,9 @@
 // Each source is merged using per-channel MAX, not additive stacking.
 // World-to-screen projection is exactly the one used by LBDS Animated Props.
 const MASK_LIMIT=16, MASK_MAX=64, CHUNK_WORLD=256, CHUNK_PX=64, CHUNK_LIMIT=48;
+const CHUNKS_PER_PASS=2;
 const masks=new Map(),chunks=new Map();
+let pendingChunks=false;
 let cachedMapKey=null;
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number.isFinite(+v)?+v:min));
 const rgb=(hex)=>/^#[0-9A-F]{6}$/i.test(String(hex||''))?[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)):[255,206,138];
@@ -17,26 +19,37 @@ export function dimensions(l){
     ?{w:Math.max(8,Number(l.widthPx)||160),h:Math.max(8,Number(l.heightPx)||96)}
     :{w:Math.max(8,Number(l.radiusPx)||96)*2,h:Math.max(8,Number(l.radiusPx)||96)*2};
 }
+// Shape defines the illuminated area; fade direction is a separate gradient.
+// 'bottom' means darkening TOWARDS the bottom (bright plateau on top).
 export function falloff(l,nx,ny){
-  let d;const t=l.type||'radial',soft=clamp(l.softness??.75,.05,1);
+  const t=l.type||'radial',soft=clamp(l.softness??.75,.05,1);
+  let d;
   if(t==='rectangle')d=Math.max(Math.abs(nx),Math.abs(ny));
   else if(t==='cone')d=Math.max(Math.hypot(nx,ny),Math.abs(Math.atan2(ny,nx))/(clamp(l.angle??70,5,170)*Math.PI/360));
   else d=Math.hypot(nx,ny);
   if(d>=1)return 0;
-  const mode=l.fadeMode||'center';
-  let fadeDist=d;
-  if(mode==='top')fadeDist=(ny+1)*.5;
-  else if(mode==='bottom')fadeDist=(1-ny)*.5;
-  else if(mode==='left')fadeDist=(nx+1)*.5;
-  else if(mode==='right')fadeDist=(1-nx)*.5;
-  else if(mode==='custom'){
-    const ox=clamp(l.fadeX??0,-1,1),oy=clamp(l.fadeY??0,-1,1);
-    fadeDist=Math.hypot(nx-ox,ny-oy)/(1+Math.hypot(ox,oy));
+  const mode=l.fadeMode||'center',center=clamp(l.centerStrength??.65,0,1);
+  if(mode==='center'){
+    const radial=Math.pow(Math.max(0,1-d),1/soft);
+    return radial*(center+(1-center)*Math.min(1,d*2));
   }
-  const main=Math.pow(Math.max(0,1-clamp(fadeDist,0,1)),1/soft);
-  const edge=mode==='center'?1:clamp((1-d)/Math.max(.035,.18*soft),0,1);
-  const center=clamp(l.centerStrength??.65,0,1);
-  return main*edge*(center+(1-center)*Math.min(1,d*2));
+  let direction;
+  if(mode==='bottom')direction=(ny+1)*.5;
+  else if(mode==='top')direction=(1-ny)*.5;
+  else if(mode==='left')direction=(1-nx)*.5;
+  else if(mode==='right')direction=(nx+1)*.5;
+  else {
+    const ox=clamp(l.fadeX??0,-1,1),oy=clamp(l.fadeY??0,-1,1);
+    direction=Math.hypot(nx-ox,ny-oy)/(1+Math.hypot(ox,oy));
+  }
+  // Keep an even luminous plateau, then smoothly attenuate to the chosen edge.
+  const start=clamp(l.fadeStart??.58,0,.95);
+  const q=clamp((direction-start)/(1-start),0,1);
+  const transition=1-q*q*(3-2*q);
+  // Shape is a clipping silhouette only; avoid a second radial fade that
+  // destroys linear/stepped directional gradients.
+  const boundary=clamp((1-d)/.045,0,1);
+  return transition*boundary*center;
 }
 function newCanvas(w,h){
   // Use an ordinary canvas, as Animated Props does with DOM-backed images.
@@ -48,7 +61,7 @@ function newCanvas(w,h){
 function maskKey(l){
   const p=l.pixel||{};
   return [l.type,l.radiusPx,l.widthPx,l.heightPx,l.angle,l.color,l.softness,l.centerStrength,
-    l.fadeMode,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps].join('|');
+    l.fadeMode,l.fadeStart,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps].join('|');
 }
 function createMask(l){
   const dims=dimensions(l),factor=Math.min(1,MASK_MAX/Math.max(dims.w,dims.h));
@@ -158,7 +171,8 @@ function cachedChunk(cx,cy,lights){
   while(chunks.size>CHUNK_LIMIT)chunks.delete(chunks.keys().next().value);
   return result;
 }
-export function clearLightCache(){masks.clear();chunks.clear();scratch=null;cachedMapKey=null;}
+export function clearLightCache(){masks.clear();chunks.clear();scratch=null;cachedMapKey=null;pendingChunks=false;}
+export function hasPendingChunks(){return pendingChunks;}
 export function cacheSize(){return {masks:masks.size,views:chunks.size};}
 function drawUnionChunks(g,lights,project,width,height){
   const scale=project.scale();if(!(scale>0))return;
@@ -168,10 +182,16 @@ function drawUnionChunks(g,lights,project,width,height){
   const worldBottom=Math.max(0,(height-project.y(0))/scale);
   const left=Math.floor(worldLeft/CHUNK_WORLD),right=Math.floor(worldRight/CHUNK_WORLD);
   const top=Math.floor(worldTop/CHUNK_WORLD),bottom=Math.floor(worldBottom/CHUNK_WORLD);
+  let built=0;
+  pendingChunks=false;
   g.save();g.globalCompositeOperation='screen';g.globalAlpha=1;g.imageSmoothingEnabled=true;
   for(let cy=top;cy<=bottom;cy++)for(let cx=left;cx<=right;cx++){
+    const key=cx+':'+cy;
+    if(!chunks.has(key)){
+      if(built>=CHUNKS_PER_PASS){pendingChunks=true;continue;}
+      built++;
+    }
     const bitmap=cachedChunk(cx,cy,lights);if(!bitmap)continue;
-    // Exact Animated Props transform; no viewport-sized image or double zoom.
     const x=project.x(cx*CHUNK_WORLD/32),y=project.y(cy*CHUNK_WORLD/32);
     const d=CHUNK_WORLD*scale;
     g.drawImage(bitmap,x,y,d,d);
@@ -182,7 +202,7 @@ export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'
   const visible=(lights||[]).filter(l=>l.enabled!==false);
   if(!visible.length)return;
   const key=String(project.mapId??'map')+':'+String(project.revision??0);
-  if(key!==cachedMapKey){chunks.clear();cachedMapKey=key;}
+  if(key!==cachedMapKey){chunks.clear();cachedMapKey=key;pendingChunks=false;}
   const union=visible.filter(l=>['union','add',''].includes(l.blendMode||'union'));
   const sums=visible.filter(l=>l.blendMode==='sum');
   const merged=overlapMode==='sum'?[]:union;
