@@ -13,10 +13,17 @@ function active(){return current()?.lights.find(l=>l.id===state.selected)||null;
 function record(){state.undo.push(deepCopy(state.data));if(state.undo.length>60)state.undo.shift();state.redo=[];}
 function invalidate(){if(state)state.revision=(state.revision||0)+1;}
 function redraw(){if(!state?.ctx||state.redrawPending)return;
- const elapsed=performance.now()-(state.lastRedraw||0),wait=Math.max(0,70-elapsed);
- state.redrawPending=true;setTimeout(()=>{if(!state)return;state.redrawPending=false;state.lastRedraw=performance.now();state.ctx.editor.requestRedraw?.();},wait);
+ const now=performance.now();
+ // Do not stack full-map redraws while Maker Studio is processing a previous one.
+ if(state.awaitingOverlay && now-(state.lastRequestAt||0)<2500)return;
+ const wait=Math.max(0,85-(now-(state.lastRedraw||0)));
+ state.redrawPending=true;setTimeout(()=>{
+  if(!state)return;state.redrawPending=false;
+  state.lastRedraw=performance.now();state.lastRequestAt=state.lastRedraw;state.awaitingOverlay=true;
+  state.ctx.editor.requestRedraw?.();
+ },wait);
 }
-function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Mapa '+stats.lastMap+' · '+(stats.lastMs||0).toFixed(1)+' ms · caché '+cacheSize().masks+'/'+cacheSize().views:'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
+function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Mapa '+stats.lastMap+' · '+(stats.lastMs||0).toFixed(1)+' ms · espera '+Math.round(stats.requestDelayMs||0)+' ms · caché '+cacheSize().masks+'/'+cacheSize().views:'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
 function change(fn){if(state.readError)throw Error('Archivo dañado: edición bloqueada.');record();fn();invalidate();redraw();refresh();void persist().catch(fail);}
 function undo(){if(!state.undo.length)return;state.redo.push(deepCopy(state.data));state.data=state.undo.pop();invalidate();redraw();refresh();void persist().catch(fail);}
 function redo(){if(!state.redo.length)return;state.undo.push(deepCopy(state.data));state.data=state.redo.pop();invalidate();redraw();refresh();void persist().catch(fail);}
@@ -101,7 +108,7 @@ const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number.isFinite(v)?v:a));
 function editValue(fn,final){if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}fn();invalidate();redraw();if(final){state.undo.push(state.editSnapshot);state.editSnapshot=null;void persist().catch(fail);}}
 
 function overlay(draw,info){if(!state||!draw||!info)return;
-const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;const renderStarted=performance.now();
+const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;const renderStarted=performance.now();if(state.awaitingOverlay){stats.requestDelayMs=Math.max(0,renderStarted-state.lastRequestAt);state.awaitingOverlay=false;}
 try{
  const map=getMap(state.data,info.mapId,false);
  paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},showPreview:!state.readError&&state.showOverlay,showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
@@ -117,11 +124,13 @@ function pointerDown(e){if(!state||state.readError||e.buttons&&!(e.buttons&1))re
 if(state.mode==='erase'){if(found)change(()=>{const m=current();m.lights=m.lights.filter(l=>l.id!==found.light.id);if(state.selected===found.light.id)state.selected=null;});redraw();return;}
 if(state.mode==='select'){state.selected=found?.light.id||null;if(found){state.drag={id:found.light.id,part:found.part,start:pt,origin:{x:found.light.x,y:found.light.y,radius:found.light.radiusPx},before:deepCopy(state.data)};}redraw();refresh();return;}
 if(state.mode==='place'){const l=makeLight(pt.x,pt.y,state.newType);record();const m=getMap(state.data,state.mapId,true);m.lights.push(l);state.selected=l.id;state.drag={id:l.id,part:'radius',start:pt,origin:{x:pt.x,y:pt.y,radius:state.brushRadius},before:null};l.radiusPx=state.brushRadius;invalidate();redraw();refresh();}}
-function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;const pt=pointerPoint(e);state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);const d=state.drag;
+function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;const pt=pointerPoint(e);const previous=state.hover;const d=state.drag;
+if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
+state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
 if(d)invalidate();redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
-export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',revision:0,lastRedraw:0,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
 ctx.commands.register('lighting-studio.open',()=>ctx.ui.openPanel(PANEL));
