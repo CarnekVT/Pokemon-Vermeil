@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio / Character normals v0.5.5
+# Lighting Studio / Character normals v0.7.0
 # Experimental, visible RGSS overlay for player and follower sprites.
 # This is a CACHED SOFTWARE NORMAL-LIGHT PASS, not a GPU shader.
 # It computes at most one small sprite frame per graphics frame and reuses
