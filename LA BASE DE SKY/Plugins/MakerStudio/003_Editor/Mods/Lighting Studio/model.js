@@ -17,7 +17,7 @@ export const hex = (v,def='#FFCE8A') => /^#[a-fA-F0-9]{6}$/.test(String(v)) ? St
 export const NORMAL_CATEGORIES = {tilesets:'Tilesets',autotiles:'Autotiles',characters:'Characters'};
 export const NORMAL_DIR='Graphics/LightingStudio/Normals';
 export const defaultNormals = () => ({
-  enabled:false,strength:1,
+  enabled:false,strength:1,intensity:0.5,warmup:true,
   auto:{tilesets:true,autotiles:true,characters:true},
   suffix:'_n',tilesets:[],autotiles:[],characters:[]
 });
@@ -33,7 +33,7 @@ export function normalizeNormalBinding(raw,category){
 }
 export function normalizeNormals(raw){
   const v=raw&&typeof raw==='object'?raw:{};
-  const out=defaultNormals();out.enabled=v.enabled===true;out.strength=num(v.strength,0,2,1);
+  const out=defaultNormals();out.enabled=v.enabled===true;out.strength=num(v.strength,0,2,1);out.intensity=num(v.intensity,0,1.5,0.5);out.warmup=v.warmup!==false;
   const auto=v.auto&&typeof v.auto==='object'?v.auto:{};
   for(const category of Object.keys(NORMAL_CATEGORIES))
     out.auto[category]=auto[category]!==false;
