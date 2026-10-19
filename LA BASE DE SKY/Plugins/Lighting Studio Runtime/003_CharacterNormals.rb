@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio / Character normals v0.5.2
+# Lighting Studio / Character normals v0.5.3
 # Experimental, visible RGSS overlay for player and follower sprites.
 # This is a CACHED SOFTWARE NORMAL-LIGHT PASS, not a GPU shader.
 # It computes at most one small sprite frame per graphics frame and reuses
@@ -11,7 +11,9 @@ module LightingStudioNormals
   LIGHT_HORIZONTAL = 0.65
   ATTACK_SECONDS = 0.10
   RELEASE_SECONDS = 0.24
-  EDGE_FADE_START = 0.60
+  EDGE_FADE_START = 0.82
+  SPRITE_INFLUENCE_MARGIN = 24.0
+  MAX_OVERLAY_OPACITY = 225
   NORMAL_LIGHT_Z = 8502
   @mode = :lit
   @normal_raw = {}
@@ -153,25 +155,28 @@ module LightingStudioNormals
       sin=Math.sin(rotation)
       local_x=cos*dx+sin*dy
       local_y=-sin*dx+cos*dy
+      # The influence is sampled at the center of the overworld sprite.
+      # Include its visible half-width: the sprite can already be lit while its
+      # center remains just outside a narrow rectangle/ellipse boundary.
+      margin=SPRITE_INFLUENCE_MARGIN
       progress = case type
                  when 'ellipse'
-                   Math.sqrt((local_x/(width*size/2.0))**2 +
-                             (local_y/(height*size/2.0))**2)
+                   Math.sqrt((local_x/(width*size/2.0+margin))**2 +
+                             (local_y/(height*size/2.0+margin))**2)
                  when 'rectangle'
-                   [(local_x/(width*size/2.0)).abs,
-                    (local_y/(height*size/2.0)).abs].max
+                   [(local_x/(width*size/2.0+margin)).abs,
+                    (local_y/(height*size/2.0+margin)).abs].max
                  when 'cone'
-                   # The cone emits along +X; dx/dy point from character to light,
-                   # so the character's position relative to the light is negated.
+                   # Light-to-character direction is the negative of dx/dy.
                    fx=-local_x
                    fy=-local_y
-                   next if fx < 0
-                   reach=Math.sqrt(fx*fx+fy*fy)/(radius*size)
+                   reach=Math.sqrt(fx*fx+fy*fy)/(radius*size+margin)
                    azimuth=Math.atan2(fy,fx).abs
-                   next if azimuth >= angle
+                   next if fx < -margin
+                   next if azimuth >= angle && fx > margin
                    reach
                  else
-                   Math.sqrt(dx*dx+dy*dy)/(radius*size)
+                   Math.sqrt(dx*dx+dy*dy)/(radius*size+margin)
                  end
       next if progress >= 1.0
       # No hard cutoff at the light's radius: both shape and strength taper
@@ -184,6 +189,30 @@ module LightingStudioNormals
       best = [direction,rgb,strength]
     end
     best
+  end
+
+  # Debug from a game Script command:
+  # p LightingStudioNormals.debug_status
+  # Use :normals mode to see whether the texture is loaded independently
+  # of any local light; :lit tests the geometry/intensity.
+  def debug_status(character = $game_player)
+    path = LightingStudio.normal_for_character(character) if character
+    map = character.respond_to?(:map) ? character.map : $game_map if character
+    lights = map && map.respond_to?(:map_id) ? light_sources(map.map_id) : []
+    nearest = character ? nearby_light(character) : nil
+    {
+      :mode => @mode,
+      :graphic => character && character.respond_to?(:character_name) ? character.character_name : nil,
+      :normal_path => path,
+      :normal_exists => !!(path && File.file?(path)),
+      :character_position => character ? character_world_position(character) : nil,
+      :light_count => lights ? lights.length : 0,
+      :light_strength => nearest ? nearest[2].round(3) : 0.0,
+      :baked_frames => @frames.length,
+      :cached_normals => @normal_bitmaps.length
+    }
+  rescue StandardError => e
+    {:error => e.message}
   end
 
   def eased_opacity(overlay, target, now)
@@ -329,7 +358,7 @@ module LightingStudioNormals
     else
       now=clock_seconds
       info=nearby_light(base.character,now)
-      target=info ? [[(info[2]*190).round,0].max,255].min : 0
+      target=info ? [[(info[2]*MAX_OVERLAY_OPACITY).round,0].max,255].min : 0
       if info && target > 0
         direction,color,strength=info
         bitmap=frame_bitmap(path,[rect.x,rect.y,rect.width,rect.height],direction,color)
