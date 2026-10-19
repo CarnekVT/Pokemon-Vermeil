@@ -1,7 +1,7 @@
 // Lighting Studio: world-space light chunks; zoom never changes chunk contents.
 // Each source is merged using per-channel MAX, not additive stacking.
 // World-to-screen projection is exactly the one used by LBDS Animated Props.
-const MASK_LIMIT=16, MASK_MAX=128, SMOOTH_SHAPE_MAX=256, CHUNK_WORLD=256, CHUNK_PX=128, CHUNK_LIMIT=32;
+const MASK_LIMIT=16, MASK_MAX=128, SMOOTH_SHAPE_MAX=192, CHUNK_WORLD=256, CHUNK_PX=96, CHUNK_LIMIT=24;
 const CHUNKS_PER_PASS=1;
 const masks=new Map(),chunks=new Map(),maskSources=new Map();
 export function setMaskImage(filename,img){if(!filename)return;maskSources.set(filename,img);clearLightCache();}
