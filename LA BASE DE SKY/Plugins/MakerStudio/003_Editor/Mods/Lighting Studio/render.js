@@ -1,8 +1,9 @@
 // Lighting Studio: cached source masks + one unified add-light canvas per map frame.
 // Add lights are merged with MAX-like "lighten", then applied ONCE with "screen".
 // Geometry and fading mirror the Ruby runtime; the 2D editor is an approximation.
-const MASK_LIMIT=16, MASK_MAX=128, VIEW_LIMIT=3, COMPOSITE_SCALE=0.5;
-const masks=new Map(),views=new Map();
+const MASK_LIMIT=16, MASK_MAX=128, COMPOSITE_SCALE=0.5;
+const masks=new Map();
+let sharedView=null,sharedKey=null;
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number.isFinite(+v)?+v:min));
 const rgb=(hex)=>/^#[0-9A-F]{6}$/i.test(String(hex||''))?[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)):[255,206,138];
 export function evaluated(l,t){
@@ -107,24 +108,26 @@ function fillUnified(buffer,ctx,lights,project,width,height,t){
   ctx.restore();
 }
 function getUnion(lights,project,width,height,t){
-  const w=Math.max(1,Math.ceil(width*COMPOSITE_SCALE)),h=Math.max(1,Math.ceil(height*COMPOSITE_SCALE));
+  const w=Math.max(1,Math.ceil(width*COMPOSITE_SCALE));
+  const h=Math.max(1,Math.ceil(height*COMPOSITE_SCALE));
   const animated=lights.some(l=>l.pulse?.enabled);
-  // A revision is supplied by the editor on each edit; camera position is in viewportKey.
-  // When absent, skip caching rather than accidentally serving a stale lightmap.
   const stable=project.viewportKey!==undefined&&project.revision!==undefined;
   const key=stable?[project.viewportKey,project.revision,animated?Math.floor(t*8):0,w,h].join('~'):null;
-  if(key&&views.has(key)){const v=views.get(key);views.delete(key);views.set(key,v);return v;}
-  const buffer=newCanvas(w,h),ctx=buffer.getContext('2d');
+  // A single viewport surface is reused across camera/zoom changes.
+  // Reallocating a whole canvas at every wheel tick creates severe editor stalls.
+  if(sharedView&&sharedView.width===w&&sharedView.height===h&&key&&key===sharedKey)return sharedView;
+  if(!sharedView||sharedView.width!==w||sharedView.height!==h)sharedView=newCanvas(w,h);
+  const ctx=sharedView.getContext('2d');
   if(!ctx)return null;
-  fillUnified(buffer,ctx,lights,project,w,h,t);
-  if(key){
-    views.set(key,buffer);
-    while(views.size>VIEW_LIMIT)views.delete(views.keys().next().value);
-  }
-  return buffer;
+  ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  ctx.clearRect(0,0,w,h);
+  ctx.restore();
+  fillUnified(sharedView,ctx,lights,project,w,h,t);
+  sharedKey=key;
+  return sharedView;
 }
-export function clearLightCache(){masks.clear();views.clear();}
-export function cacheSize(){return {masks:masks.size,views:views.size};}
+export function clearLightCache(){masks.clear();sharedView=null;sharedKey=null;}
+export function cacheSize(){return {masks:masks.size,views:sharedView?1:0};}
 export function drawLights(g,lights,project,width,height,t=0){
   const visible=(lights||[]).filter(l=>l.enabled!==false);
   if(!visible.length)return;
