@@ -91,9 +91,9 @@ export function activate(ctx) {
       '<div style="display:flex;gap:6px;margin-bottom:12px"><button data-preset="classic" style="' + buttonStyle + ';flex:1">Clásico</button><button data-preset="responsive" style="' + buttonStyle + ';flex:1">Moderno</button></div>' +
       '<div style="font-weight:600;margin:12px 0 6px">CAMARA</div>' +
       cameraFields.map(renderField).join("") +
+      '<label>Camara (0 = rapida, 35 = original, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="font-weight:600;margin:12px 0 6px">DIAGNÓSTICO</div>' +
       debugFields.map(renderField).join("") +
-      '<label>Camara (0 = rapida, 35 = original, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="display:flex;gap:6px;margin:15px 0"><button data-save style="' + buttonStyle + ';flex:1">Guardar</button>' +
       '<button data-reset style="' + buttonStyle + '">Restablecer</button></div>' +
       '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan durante la partida. Continuidad entre casillas disponible con Control Moderno; conserva colisiones y eventos por tiles. Movimiento libre sub-tile todavia no disponible.</p></div>';
