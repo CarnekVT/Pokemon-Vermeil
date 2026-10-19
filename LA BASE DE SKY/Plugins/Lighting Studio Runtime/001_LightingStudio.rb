@@ -110,11 +110,20 @@ module LightingStudio
     # Enlarged mask contains the rotated shape (stretch_blt itself has no rotation).
     world_w = cos.abs*orig_w + sin.abs*orig_h
     world_h = sin.abs*orig_w + cos.abs*orig_h
-    scale = [1.0, MASK_LIMIT/[world_w,world_h].max].min
-    w = [[(world_w*scale).round,2].max,MASK_LIMIT].min
-    h = [[(world_h*scale).round,2].max,MASK_LIMIT].min
     pixel = spec['pixel'].is_a?(Hash) && spec['pixel']['enabled'] == true ? spec['pixel'] : {}
-    step = pixel.empty? ? 1 : [[(number(pixel['size'],6,2,32)*scale).round,1].max,32].min
+    if pixel.empty?
+      scale = [1.0, MASK_LIMIT.to_f / [world_w,world_h].max].min
+      w = [[(world_w*scale).round,2].max,MASK_LIMIT].min
+      h = [[(world_h*scale).round,2].max,MASK_LIMIT].min
+    else
+      # One source texel per pixel-art block, matching the Maker Studio preview.
+      # Applying MASK_LIMIT first and then stepping pixels destroys ellipse and
+      # cone silhouettes; cap the logical grid instead to bound CPU work.
+      block_size = number(pixel['size'],6,2,32)
+      w = [[(world_w/block_size).ceil,2].max,128].min
+      h = [[(world_h/block_size).ceil,2].max,128].min
+    end
+    step = 1
     steps = pixel.empty? ? 255 : number(pixel['steps'],6,2,24).round
     color = hex_color(spec['color'])
     bmp = Bitmap.new(w,h)
