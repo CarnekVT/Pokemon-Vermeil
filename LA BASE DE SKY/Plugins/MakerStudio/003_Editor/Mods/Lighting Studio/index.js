@@ -124,6 +124,10 @@ slider(shapePanel,'Intensidad',selected.intensity,0,1,.01,(v,final)=>editValue((
 slider(fadePanel,'Brillo del centro',selected.centerStrength??.65,0,1,.01,(v,final)=>editValue(()=>selected.centerStrength=clamp(v,0,1),final));
 slider(shapePanel,'Radio · píxeles',selected.radiusPx,8,512,1,(v,final)=>editValue(()=>selected.radiusPx=clamp(v,8,512),final));
 slider(fadePanel,'Suavidad',selected.softness,.05,1,.01,(v,final)=>editValue(()=>selected.softness=clamp(v,.05,1),final));
+if(selected.type==='cone'){
+ slider(fadePanel,'Suavidad lateral del cono',selected.coneFeather??.28,.03,.9,.01,(v,final)=>editValue(()=>selected.coneFeather=clamp(v,.03,.9),final));
+ fadePanel.append(element('p','ls-inline-note','Bordes: un valor menor conserva el haz más definido; uno mayor difumina los laterales sin alterar su alcance.'));
+}
 const blend=node('select');blend.className='ls-input';for(const [value,label] of [['union','Unir con otras luces'],['sum','Sumar brillo (independiente)'],['normal','Normal'],['subtract','Oscurecer']]){const opt=node('option',label);opt.value=value;blend.append(opt);}blend.value=selected.blendMode==='add'?'union':(selected.blendMode||'union');blend.onchange=()=>change(()=>selected.blendMode=blend.value);labeled(shapePanel,'Modo de mezcla',blend);
 const fadeSelect=node('select');fadeSelect.className='ls-input';
 for(const id of FADE_MODES){const o=node('option',FADE_NAMES[id]);o.value=id;fadeSelect.append(o);}
