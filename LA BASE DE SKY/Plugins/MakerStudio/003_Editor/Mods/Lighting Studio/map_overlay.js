@@ -76,7 +76,8 @@ export function paint(g,info,v){
         softness:draft.softness??0.75,
         pixel:draft.pixel||{enabled:false},pulse:{enabled:false}
       };
-      g.save();g.globalAlpha=.78;drawLights(g,[ghost],{x:projection.x,y:projection.y,scale:projection.scale},w,h,seconds);g.restore();
+      g.save();g.globalAlpha=.78;drawLights(g,[ghost],{x:projection.x,y:projection.y,scale:projection.scale,
+        viewportKey:['ghost',projection.viewportKey,ghost.x,ghost.y,ghost.type,ghost.radiusPx].join(':'),revision:0},w,h,seconds);g.restore();
     }
     if(!v.showGuides&&!editing)return;
     // Visual handles stay readable even with all lights disabled/preview off.
