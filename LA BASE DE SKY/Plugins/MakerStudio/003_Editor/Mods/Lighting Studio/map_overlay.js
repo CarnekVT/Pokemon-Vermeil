@@ -31,7 +31,7 @@ function lightOutline(g,source,p,info,color){
   const w=(source.widthPx||160)*sc,h=(source.heightPx||96)*sc;
   g.save();g.translate(p.x,p.y);g.rotate(rot);g.strokeStyle=color;g.lineWidth=2;
   g.setLineDash([7,5]);g.beginPath();
-  if(source.type==='rectangle')g.rect(-w/2,-h/2,w,h);
+  if(source.type==='rectangle'||source.type==='mask')g.rect(-w/2,-h/2,w,h);
   else if(source.type==='ellipse')g.ellipse(0,0,w/2,h/2,0,0,Math.PI*2);
   else if(source.type==='cone'){
     const half=(source.angle||70)*Math.PI/360;
