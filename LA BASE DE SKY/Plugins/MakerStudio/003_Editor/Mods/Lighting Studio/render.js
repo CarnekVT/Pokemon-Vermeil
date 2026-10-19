@@ -3,7 +3,9 @@
 // World-to-screen projection is exactly the one used by LBDS Animated Props.
 const MASK_LIMIT=16, MASK_MAX=128, SMOOTH_SHAPE_MAX=256, CHUNK_WORLD=256, CHUNK_PX=128, CHUNK_LIMIT=32;
 const CHUNKS_PER_PASS=1;
-const masks=new Map(),chunks=new Map();
+const masks=new Map(),chunks=new Map(),maskSources=new Map();
+export function setMaskImage(filename,img){if(!filename)return;maskSources.set(filename,img);clearLightCache();}
+export function forgetMaskImages(){maskSources.clear();clearLightCache();}
 let pendingChunks=false;
 let cachedMapKey=null;
 const clamp=(v,min,max)=>Math.min(max,Math.max(min,Number.isFinite(+v)?+v:min));
@@ -15,7 +17,7 @@ export function evaluated(l,t){
     intensity:clamp((l.intensity??.8)*(1+wave*(p.intensity||0)),0,1)};
 }
 export function dimensions(l){
-  return l.type==='ellipse'||l.type==='rectangle'
+  return l.type==='ellipse'||l.type==='rectangle'||l.type==='mask'
     ?{w:Math.max(8,Number(l.widthPx)||160),h:Math.max(8,Number(l.heightPx)||96)}
     :{w:Math.max(8,Number(l.radiusPx)||96)*2,h:Math.max(8,Number(l.radiusPx)||96)*2};
 }
@@ -84,7 +86,7 @@ function newCanvas(w,h){
 function maskKey(l){
   const p=l.pixel||{};
   return [l.type,l.radiusPx,l.widthPx,l.heightPx,l.angle,l.coneFeather,l.color,l.softness,l.centerStrength,
-    l.fadeMode,l.fadeStart,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps].join('|');
+    l.fadeMode,l.fadeStart,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps,l.maskFile].join('|');
 }
 // A pixel-art light uses one texel per logical block. Never downscale
 // the whole shape to MASK_MAX and then quantize again: cones and ellipses lose
@@ -96,6 +98,18 @@ export function pixelGridDimensions(l){
           h:Math.max(2,Math.min(limit,Math.ceil(d.h/block)))};
 }
 function createMask(l){
+  if(l.type==='mask'){
+    const src=maskSources.get(l.maskFile);
+    if(!src)return null;
+    const output=newCanvas(src.width,src.height),ctx=output.getContext('2d');
+    if(!ctx)return null;
+    ctx.drawImage(src,0,0);
+    const frame=ctx.getImageData(0,0,src.width,src.height),data=frame.data;
+    const [r,g,b]=rgb(l.color);
+    for(let i=0;i<data.length;i+=4){const gray=(data[i]*54+data[i+1]*183+data[i+2]*19)/256;
+      data[i]=r;data[i+1]=g;data[i+2]=b;data[i+3]=Math.round(data[i+3]*gray/255);}
+    ctx.putImageData(frame,0,0);return output;
+  }
   const dims=dimensions(l),p=l.pixel||{},pixelated=p.enabled===true;
   const maxSmooth=(l.type==='cone'||l.type==='ellipse')?SMOOTH_SHAPE_MAX:MASK_MAX;
   const factor=Math.min(1,maxSmooth/Math.max(dims.w,dims.h));
@@ -278,8 +292,8 @@ export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'
   const sums=visible.filter(l=>l.blendMode==='sum');
   const merged=overlapMode==='sum'?[]:union;
   const summed=overlapMode==='sum'?[...union,...sums]:sums;
-  const staticLights=merged.filter(l=>!l.pulse?.enabled);
-  const pulsing=merged.filter(l=>l.pulse?.enabled);
+  const staticLights=merged.filter(l=>!l.pulse?.enabled&&l.type!=='mask');
+  const pulsing=merged.filter(l=>l.pulse?.enabled||l.type==='mask');
   if(overlapMode==='fast'){
     // Editing sliders/dragging: immediate sprite preview; no world-chunk rebuild
     // until mouse release, preventing repeated 2D getImageData stalls.
