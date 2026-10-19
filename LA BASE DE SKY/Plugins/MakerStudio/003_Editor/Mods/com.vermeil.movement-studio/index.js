@@ -26,7 +26,7 @@ function parse(text) {
   return sections;
 }
 function serialize(sections) {
-  const lines = ["; Vermeil Movement Studio v0.2", "; Cambios detectados automaticamente por el runtime.", ""];
+  const lines = ["; Vermeil Movement Studio v0.2.2", "; Cambios detectados automaticamente por el runtime.", ""];
   for (const [name, opts] of Object.entries(sections)) {
     lines.push("[" + name + "]");
     for (const [key, value] of Object.entries(opts)) lines.push(key + "=" + value);
@@ -54,8 +54,7 @@ export function activate(ctx) {
   const fields = [
     ["directions", "Direcciones", [["4", "4 direcciones (clásico)"], ["8", "8 direcciones (diagonal opcional)"]]],
     ["instant_turn", "Respuesta al girar", [["1", "Inmediata (giro + paso)"], ["0", "Clásica (giro y espera 75 ms)"]]],
-    ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]],
-    ["smooth_movement", "Continuidad de pasos", [["1", "Continua (sin pausa de 1 frame)"], ["0", "Original (por casillas)"]]]
+    ["wall_slide", "Deslizar al bloquearse en diagonal", [["0", "No"], ["1", "Sí"]]]
   ];
   function option(key, value, label) {
     return '<option value="' + value + '">' + label + '</option>';
@@ -69,16 +68,16 @@ export function activate(ctx) {
     const values = { ...global, ...local };
     host.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--text-primary);height:100%;overflow:auto;box-sizing:border-box">' +
       '<h3 style="margin:0 0 8px">Vermeil Movement Studio</h3>' +
-      '<p style="color:var(--text-secondary);line-height:1.5">4 direcciones por defecto. Giro clasico: primero mira, espera 75 ms y avanza. Inmediato: inicia el paso al girar. La continuidad evita el frame vacio al terminar cada casilla.</p>' +
+      '<p style="color:var(--text-secondary);line-height:1.5">4 direcciones por defecto. La diferencia de giro se aprecia principalmente al comenzar a caminar desde parado: inmediato inicia el paso al girar; clasico conserva la pausa original. Al caminar de forma seguida, ambos usan las mismas casillas.</p>' +
       '<label>Configuración a editar</label><select data-scope style="' + inputStyle + '">' +
       option("global", "global", "Global (todos los mapas)") +
       option("map", "map", "Mapa actual: " + String(ctx.editor.activeMapId() ?? "sin mapa")) + '</select>' +
       fields.map(([id, title, items]) => '<label>' + title + '</label><select data-key="' + id + '" style="' + inputStyle + '">' +
         items.map(([value, label]) => option(id, value, label)).join("") + '</select>').join("") +
-      '<label>Suavizado de camara (0 = rapida, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
+      '<label>Camara (0 = rapida, 35 = original, 100 = lenta)</label><input type="range" min="0" max="100" step="5" data-key="camera_smoothing" style="width:100%"><output data-camera-value></output>' +
       '<div style="display:flex;gap:6px;margin:15px 0"><button data-save style="' + buttonStyle + ';flex:1">Guardar</button>' +
       '<button data-reset style="' + buttonStyle + '">Restablecer</button></div>' +
-      '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan durante la partida. La camara usa este valor incluso si Fancy Camera (switch 59) esta apagada. El movimiento libre sub-tile real no esta disponible.</p></div>';
+      '<p style="color:var(--text-secondary);font-size:11px">Los cambios se recargan durante la partida. La camara aplica este ajuste al seguimiento final, con Fancy Camera (switch 59) activa o desactivada. Continuidad fisica y sub-tile real aun no implementados.</p></div>';
     const scope = host.querySelector("[data-scope]");
     scope.value = state.mapId === null ? "global" : "map";
     scope.addEventListener("change", () => {
