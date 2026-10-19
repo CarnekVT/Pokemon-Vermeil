@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio Runtime 0.5.4 for Pokemon Essentials 21.1 / mkxp.
+# Lighting Studio Runtime 0.6.0 for Pokemon Essentials 21.1 / mkxp.
 # Shared additive lightmap: merge sources normally, add a single sprite to the map.
 # No shaders required; uses Bitmap#stretch_blt for camera/animation updates.
 module LightingStudio
@@ -120,21 +120,65 @@ module LightingStudio
 
   # World-space bounds can be calculated without rasterizing a light mask.
   def shape_dimensions(spec)
-    type = %w[radial cone ellipse rectangle].include?(spec['type']) ? spec['type'] : 'radial'
+    type = %w[radial cone ellipse rectangle mask].include?(spec['type']) ? spec['type'] : 'radial'
     r = number(spec['radiusPx'], 96, 8, 512)
-    w = %w[ellipse rectangle].include?(type) ? number(spec['widthPx'],160,8,1024) : 2*r
-    h = %w[ellipse rectangle].include?(type) ? number(spec['heightPx'],96,8,1024) : 2*r
+    w = %w[ellipse rectangle mask].include?(type) ? number(spec['widthPx'],160,8,1024) : 2*r
+    h = %w[ellipse rectangle mask].include?(type) ? number(spec['heightPx'],96,8,1024) : 2*r
     rad = number(spec['rotation'],0,-360,360)*Math::PI/180
     cos = Math.cos(rad).abs
     sin = Math.sin(rad).abs
     [cos*w+sin*h, sin*w+cos*h]
   end
 
+  # Grayscale/alpha PNG forms the exact custom light silhouette. Tint once,
+  # reuse the bitmap across frames; restrict paths to Graphics/LightingStudio/Masks.
+  def mask_bitmap(spec)
+    name=spec['maskFile'].to_s
+    unless /\A[a-zA-Z0-9_-]{1,70}\.png\z/i.match?(name)
+      warn "[Lighting Studio] Invalid mask filename: #{name.inspect}"
+      return [Bitmap.new(1,1),1.0,1.0]
+    end
+    path="Graphics/LightingStudio/Masks/#{name}"
+    unless File.file?(path)
+      warn "[Lighting Studio] Missing PNG mask #{path}"
+      return [Bitmap.new(1,1),1.0,1.0]
+    end
+    source=Bitmap.new(path)
+    begin
+      w=source.width; h=source.height
+      raise 'Mask exceeds 512x512 pixels' if w<=0 || h<=0 || w>512 || h>512
+      raw=source.raw_data
+      raise 'Bitmap.raw_data unavailable' unless raw && raw.respond_to?(:getbyte)
+      color=hex_color(spec['color'])
+      result=Array.new(w*h*4,0)
+      i=0
+      while i<w*h*4
+        alpha=raw.getbyte(i+3)
+        if alpha && alpha>0
+          value=(raw.getbyte(i)*54+raw.getbyte(i+1)*183+raw.getbyte(i+2)*19)/256.0
+          result[i]=color[0]; result[i+1]=color[1];result[i+2]=color[2]
+          result[i+3]=[[((alpha*value)/255.0).round,0].max,255].min
+        end
+        i+=4
+      end
+      bitmap=Bitmap.new(w,h)
+      bitmap.raw_data=result.pack('C*')
+      dims=shape_dimensions(spec)
+      [bitmap,dims[0],dims[1]]
+    ensure
+      source.dispose unless source.disposed?
+    end
+  rescue StandardError => e
+    warn "[Lighting Studio] Mask #{name}: #{e.message}"
+    [Bitmap.new(1,1),1.0,1.0]
+  end
+
   def shape_bitmap(spec)
-    type = %w[radial cone ellipse rectangle].include?(spec['type']) ? spec['type'] : 'radial'
+    type = %w[radial cone ellipse rectangle mask].include?(spec['type']) ? spec['type'] : 'radial'
+    return mask_bitmap(spec) if type == 'mask'
     r = number(spec['radiusPx'],96,8,512)
-    orig_w = %w[ellipse rectangle].include?(type) ? number(spec['widthPx'],160,8,1024) : 2*r
-    orig_h = %w[ellipse rectangle].include?(type) ? number(spec['heightPx'],96,8,1024) : 2*r
+    orig_w = %w[ellipse rectangle mask].include?(type) ? number(spec['widthPx'],160,8,1024) : 2*r
+    orig_h = %w[ellipse rectangle mask].include?(type) ? number(spec['heightPx'],96,8,1024) : 2*r
     degrees = number(spec['rotation'],0,-360,360)
     rad = degrees*Math::PI/180
     cos = Math.cos(rad); sin = Math.sin(rad)
@@ -235,7 +279,7 @@ module LightingStudioSpriteset
         source['heightPx'], source['angle'], source['coneFeather'], source['rotation'],
         source['color'], source['softness'], source['centerStrength'],
         source['fadeMode'], source['fadeStart'], source['fadeX'], source['fadeY'],
-        source['pixel']
+        source['pixel'],source['maskFile']
       ].inspect
       width, height = LightingStudio.shape_dimensions(source)
       entry = {
@@ -251,7 +295,7 @@ module LightingStudioSpriteset
       end
       mode = 'union' if mode.empty? || mode == 'add'
 
-      if mode == 'union' && entry[:pulse]['enabled'] != true
+      if mode == 'union' && entry[:pulse]['enabled'] != true && source['type'] != 'mask'
         # Only smooth cone/ellipse sources increase chunk resolution; retain
         # the cheaper 64px chunks for pixel-art and ordinary map lighting.
         if ['cone','ellipse'].include?(source['type']) && !(source['pixel'].is_a?(Hash) && source['pixel']['enabled'] == true)
