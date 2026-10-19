@@ -5,9 +5,9 @@
 module LightingStudio
   DATA_PATH = 'Data/LightingStudio/maps.json'
   MASK_LIMIT = 128
-  LIGHTMAP_SCALE = 0.5
+  LIGHTMAP_SCALE = 0.25
   MAX_SOURCES = 160
-  MERGE_FPS = 8
+  MERGE_FPS = 6
   # Shared union is intentionally low-res; every source broadens the same area
   # without summing its brightness on overlaps.
   module_function
@@ -170,6 +170,9 @@ module LightingStudioSpriteset
       intensity = LightingStudio.number(s['intensity'],0.8,0,1)
       pulse = s['pulse'].is_a?(Hash) ? s['pulse'] : {}
       mode = s['blendMode'].to_s
+      if data['overlapMode']=='sum' && ['','add','union'].include?(mode)
+        mode = 'sum'
+      end
       if ['','add','union'].include?(mode)
         @ls_add_sources << [bmp,w,h,x,y,intensity,pulse]
       else
