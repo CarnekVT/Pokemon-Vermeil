@@ -55,3 +55,16 @@ Ahora:
 6. Si hay lag, revisa en Maker Studio los milisegundos de render y espera en el panel.
 
 No se ha ejecutado Maker Studio ni el juego desde este entorno. No afirmar FPS ni ausencia de picos hasta medirlos localmente.
+
+
+## v0.4.4 — Difuminado y rendimiento (2026-10-19)
+
+- Corregido el sentido del degradado: **Hacia abajo** significa luz fuerte arriba, zona uniforme y transición hacia abajo. **Hacia arriba**, izquierda y derecha siguen el sentido hacia el borde al que se atenúa.
+- Nuevo control **Inicio del difuminado** (0 a 0.95; predeterminado 0.58), que decide cuánto área conserva su brillo antes de comenzar la transición. Separación de la máscara de silueta y el gradiente direccional.
+- El degradado direccional usa una atenuación suave y solo recorta los bordes de la geometría para evitar que otra caída radial deforme las bandas. El pixel art cuantiza los niveles al generar la máscara.
+- El parámetro se serializa conservando los mapas anteriores. Lo comparten Canvas Maker Studio y Ruby runtime; se incluye en las claves de caché para evitar conservar máscaras obsoletas.
+- La unión del editor construye **máximo dos fragmentos del mundo por pasada de dibujo**. Los fragmentos pendientes solicitan actualizaciones incrementales desde el temporizador de Lighting Studio.
+- La preview directa en arrastre y edición de sliders sigue siendo rápida y no reconstruye la composición fusionada hasta finalizar.
+- Pruebas JavaScript realizadas: sintaxis de model/render/map_overlay/index, muestra descendente del degradado, simetría arriba-abajo, datos antiguos y unión MAX sin sobreexposición.
+
+**Pendiente:** no se ha ejecutado Maker Studio ni el runtime Ruby en un proyecto Essentials real; la mejoría real de FPS, ausencia de picos y ubicación durante zoom necesitan validación práctica. No cambiar ni garantizar el sistema de chunks del juego basándose solo en la prueba estática.
