@@ -1,7 +1,7 @@
-import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,assetName} from './model.js';
+import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,assetName,normalCandidate} from './model.js';
 import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
-import {cacheSize,clearLightCache,hasPendingChunks} from './render.js';
+import {cacheSize,clearLightCache,hasPendingChunks,invalidateLightRegions} from './render.js';
 const PANEL='lighting-studio.main', TOOL='lighting-studio.place';
 let state=null;
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);return e;};
@@ -40,7 +40,7 @@ function settleFastPreview(){
    owner.fastPreviewUntil=0;
    owner.settleTimer=null;
    // Rebuild the exact merged illumination only after editing has stopped.
-   invalidate();redraw();
+   redraw();
  },370);
 }
 function updateDiagnosticStatus(){if(!state?.statusNode)return;const stats=state.overlayStats,age=stats.lastAt?Date.now()-stats.lastAt:Infinity;state.statusNode.textContent=stats.errors?'Error al dibujar: '+stats.lastError:age<2500?'Mapa '+stats.lastMap+' · '+(stats.lastMs||0).toFixed(1)+' ms · espera '+Math.round(stats.requestDelayMs||0)+' ms · caché '+cacheSize().masks+'/'+cacheSize().views:'Sin respuesta del overlay · usa «Prueba visual»';state.statusNode.style.color=stats.errors?'#ff8e80':age<2500?'#82e2ae':'#f0c784';}
@@ -68,10 +68,10 @@ function setMode(mode){state.mode=mode;state.ctx.editor.setTool(TOOL);redraw();r
 function normalBindingsUI(shell,scene){
  const section=element('section','ls-section ls-normal-maps');
  shell.append(section);
- section.append(element('div','ls-section-heading','NORMAL MAPS · Tiles y Overworld'));
+ section.append(element('div','ls-section-heading','NORMAL MAPS · Catálogo global'));
  section.append(element('p','ls-inline-note',
-   'Asigna mapas normales PNG a tilesets, autotiles y sprites OW. Esta etapa registra los recursos; el shader de iluminación por normales todavía NO está activo en el juego.'));
- const normals=scene.normalMaps;
+   'Regla automática global por nombre del gráfico, incluidos jugador y seguidores. Los vínculos manuales son excepciones. El shader de normales todavía NO está activo en el juego.'));
+ const normals=state.data.normalSettings; // One global automatic catalog, not a list per map.
  const toggle=node('input');toggle.type='checkbox';toggle.checked=normals.enabled;
  toggle.onchange=()=>change(()=>{normals.enabled=toggle.checked;});
  labeled(section,'Habilitar asignaciones de normales (experimental)',toggle);
@@ -83,9 +83,15 @@ function normalBindingsUI(shell,scene){
  cat.value=state.normalCategory;
  cat.onchange=()=>{state.normalCategory=cat.value;refresh();};
  labeled(section,'Tipo de recurso',cat);
+ const auto=node('input');auto.type='checkbox';auto.checked=normals.auto[category]!==false;
+ auto.onchange=()=>change(()=>normals.auto[category]=auto.checked);
+ labeled(section,'Detección automática por nombre de sprite',auto);
+ section.append(element('p','ls-inline-note',
+  'Jugador y follower: se usa el nombre del gráfico activo. Por ejemplo, Followers/VENUSAUR → Followers/VENUSAUR'+normals.suffix+'.png. No necesitas un vínculo por Pokémon.'));
+
  const category=state.normalCategory,folder=NORMAL_CATEGORIES[category];
  section.append(element('p','ls-inline-note',
-  'Normal PNG: '+NORMAL_DIR+'/'+folder+'/Nombre_n.png. Usa una imagen con el mismo tamaño y distribución de fotogramas que la original.'));
+  'Normal PNG: '+NORMAL_DIR+'/'+folder+'/Nombre'+normals.suffix+'.png. Los sprites del jugador/follower se resuelven por su gráfico actual.'));
  const list=element('div','ls-list');section.append(list);
  const entries=normals[category]||[];
  if(!entries.length)list.append(element('div','ls-empty','No hay normales vinculadas en esta categoría.'));
@@ -120,7 +126,7 @@ async function addNormalBinding(category){
    notify('No existe el PNG de normales seleccionado en Graphics.','warn');return;
  }
  if(state!==owner)return;
- const map=getMap(owner.data,owner.mapId,true),entries=map.normalMaps[category];
+ const entries=owner.data.normalSettings[category];
  change(()=>{
    const entry={source,normal:normalName,invertY:false,enabled:true};
    const existing=entries.findIndex(x=>x.source===source);
@@ -130,7 +136,7 @@ async function addNormalBinding(category){
 }
 async function verifyNormalBindings(category){
  const owner=state;if(!owner)return;
- const entries=[...getMap(owner.data,owner.mapId,true).normalMaps[category]];
+ const entries=[...owner.data.normalSettings[category]];
  const folder=NORMAL_CATEGORIES[category];
  const missing=[];
  for(const entry of entries){
@@ -199,17 +205,17 @@ const shapePanel=tabs.shape,fadePanel=tabs.fade,pulsePanel=tabs.pulse,pixelPanel
 shapePanel.append(element('div','ls-group-label','PROPIEDADES GENERALES'));
 fadePanel.append(element('p','ls-inline-note','Elige hacia qué borde se atenúa la luz. «Hacia abajo» conserva una zona luminosa arriba y la oscurece progresivamente hacia abajo.'));
 const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;});labeled(shapePanel,'Geometría',typeSelect);
-if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editValue(()=>selected.angle=v,final));}
-if(selected.type==='ellipse'||selected.type==='rectangle'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editValue(()=>selected.heightPx=v,final));}
-if(selected.type!=='radial')slider(shapePanel,'Rotación',selected.rotation,-360,360,1,(v,final)=>editValue(()=>selected.rotation=v,final));
+if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editLightValue(()=>selected.angle=v,final));}
+if(selected.type==='ellipse'||selected.type==='rectangle'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editLightValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editLightValue(()=>selected.heightPx=v,final));}
+if(selected.type!=='radial')slider(shapePanel,'Rotación',selected.rotation,-360,360,1,(v,final)=>editLightValue(()=>selected.rotation=v,final));
 const name=node('input');name.type='text';name.className='ls-input';name.value=selected.name;name.onchange=()=>change(()=>selected.name=name.value.slice(0,80));labeled(shapePanel,'Nombre',name);
-const c=node('input');c.type='color';c.className='ls-color';c.value=selected.color;c.oninput=()=>editValue(()=>selected.color=c.value,false);c.onchange=()=>editValue(()=>selected.color=c.value,true);labeled(shapePanel,'Color',c);
-slider(shapePanel,'Intensidad',selected.intensity,0,1,.01,(v,final)=>editValue(()=>selected.intensity=clamp(v,0,1),final));
-slider(fadePanel,'Brillo del centro',selected.centerStrength??.65,0,1,.01,(v,final)=>editValue(()=>selected.centerStrength=clamp(v,0,1),final));
-slider(shapePanel,'Radio · píxeles',selected.radiusPx,8,512,1,(v,final)=>editValue(()=>selected.radiusPx=clamp(v,8,512),final));
-slider(fadePanel,'Suavidad',selected.softness,.05,1,.01,(v,final)=>editValue(()=>selected.softness=clamp(v,.05,1),final));
+const c=node('input');c.type='color';c.className='ls-color';c.value=selected.color;c.oninput=()=>editLightValue(()=>selected.color=c.value,false);c.onchange=()=>editLightValue(()=>selected.color=c.value,true);labeled(shapePanel,'Color',c);
+slider(shapePanel,'Intensidad',selected.intensity,0,1,.01,(v,final)=>editLightValue(()=>selected.intensity=clamp(v,0,1),final));
+slider(fadePanel,'Brillo del centro',selected.centerStrength??.65,0,1,.01,(v,final)=>editLightValue(()=>selected.centerStrength=clamp(v,0,1),final));
+slider(shapePanel,'Radio · píxeles',selected.radiusPx,8,512,1,(v,final)=>editLightValue(()=>selected.radiusPx=clamp(v,8,512),final));
+slider(fadePanel,'Suavidad',selected.softness,.05,1,.01,(v,final)=>editLightValue(()=>selected.softness=clamp(v,.05,1),final));
 if(selected.type==='cone'){
- slider(fadePanel,'Suavidad lateral del cono',selected.coneFeather??.28,.03,.9,.01,(v,final)=>editValue(()=>selected.coneFeather=clamp(v,.03,.9),final));
+ slider(fadePanel,'Suavidad lateral del cono',selected.coneFeather??.28,.03,.9,.01,(v,final)=>editLightValue(()=>selected.coneFeather=clamp(v,.03,.9),final));
  fadePanel.append(element('p','ls-inline-note','Bordes: un valor menor conserva el haz más definido; uno mayor difumina los laterales sin alterar su alcance.'));
 }
 const blend=node('select');blend.className='ls-input';for(const [value,label] of [['union','Unir con otras luces'],['sum','Sumar brillo (independiente)'],['normal','Normal'],['subtract','Oscurecer']]){const opt=node('option',label);opt.value=value;blend.append(opt);}blend.value=selected.blendMode==='add'?'union':(selected.blendMode||'union');blend.onchange=()=>change(()=>selected.blendMode=blend.value);labeled(shapePanel,'Modo de mezcla',blend);
@@ -219,15 +225,15 @@ fadeSelect.value=selected.fadeMode||'center';
 fadeSelect.onchange=()=>change(()=>selected.fadeMode=fadeSelect.value);
 labeled(fadePanel,'Dirección de atenuación',fadeSelect);
 if(selected.fadeMode!=='center'){
- slider(fadePanel,'Inicio del difuminado',selected.fadeStart??.58,0,.95,.01,(v,final)=>editValue(()=>selected.fadeStart=v,final));
+ slider(fadePanel,'Inicio del difuminado',selected.fadeStart??.58,0,.95,.01,(v,final)=>editLightValue(()=>selected.fadeStart=v,final));
  fadePanel.append(element('p','ls-inline-note','Cuanto mayor sea el valor, más amplia será la zona iluminada antes de comenzar la transición.'));
 }
 if(selected.fadeMode==='custom'){
- slider(fadePanel,'Origen horizontal',selected.fadeX??0,-1,1,.05,(v,final)=>editValue(()=>selected.fadeX=v,final));
- slider(fadePanel,'Origen vertical',selected.fadeY??0,-1,1,.05,(v,final)=>editValue(()=>selected.fadeY=v,final));
+ slider(fadePanel,'Origen horizontal',selected.fadeX??0,-1,1,.05,(v,final)=>editLightValue(()=>selected.fadeX=v,final));
+ slider(fadePanel,'Origen vertical',selected.fadeY??0,-1,1,.05,(v,final)=>editLightValue(()=>selected.fadeY=v,final));
 }
-const pulse=element('div','ls-effect-group');pulsePanel.append(pulse);pulse.append(element('b',null,'Pulsación'));const on=node('input');on.type='checkbox';on.checked=selected.pulse.enabled;on.onchange=()=>change(()=>selected.pulse.enabled=on.checked);labeled(pulse,'Activar pulsación',on);slider(pulse,'Velocidad (Hz)',selected.pulse.speedHz,.05,12,.05,(v,final)=>editValue(()=>selected.pulse.speedHz=v,final));slider(pulse,'Oscilación intensidad',selected.pulse.intensity,0,1,.01,(v,final)=>editValue(()=>selected.pulse.intensity=v,final));slider(pulse,'Oscilación tamaño',selected.pulse.radius,0,.9,.01,(v,final)=>editValue(()=>selected.pulse.radius=v,final));
-const pixel=element('div','ls-effect-group');pixelPanel.append(pixel);pixel.append(element('b',null,'Pixel Art'));const pixelOn=node('input');pixelOn.type='checkbox';pixelOn.checked=selected.pixel.enabled;pixelOn.onchange=()=>change(()=>selected.pixel.enabled=pixelOn.checked);labeled(pixel,'Pixelar luz',pixelOn);slider(pixel,'Tamaño de píxel',selected.pixel.size,2,32,1,(v,final)=>editValue(()=>selected.pixel.size=Math.round(v),final));slider(pixel,'Niveles de degradado',selected.pixel.steps,2,24,1,(v,final)=>editValue(()=>selected.pixel.steps=Math.round(v),final));
+const pulse=element('div','ls-effect-group');pulsePanel.append(pulse);pulse.append(element('b',null,'Pulsación'));const on=node('input');on.type='checkbox';on.checked=selected.pulse.enabled;on.onchange=()=>change(()=>selected.pulse.enabled=on.checked);labeled(pulse,'Activar pulsación',on);slider(pulse,'Velocidad (Hz)',selected.pulse.speedHz,.05,12,.05,(v,final)=>editLightValue(()=>selected.pulse.speedHz=v,final));slider(pulse,'Oscilación intensidad',selected.pulse.intensity,0,1,.01,(v,final)=>editLightValue(()=>selected.pulse.intensity=v,final));slider(pulse,'Oscilación tamaño',selected.pulse.radius,0,.9,.01,(v,final)=>editLightValue(()=>selected.pulse.radius=v,final));
+const pixel=element('div','ls-effect-group');pixelPanel.append(pixel);pixel.append(element('b',null,'Pixel Art'));const pixelOn=node('input');pixelOn.type='checkbox';pixelOn.checked=selected.pixel.enabled;pixelOn.onchange=()=>change(()=>selected.pixel.enabled=pixelOn.checked);labeled(pixel,'Pixelar luz',pixelOn);slider(pixel,'Tamaño de píxel',selected.pixel.size,2,32,1,(v,final)=>editLightValue(()=>selected.pixel.size=Math.round(v),final));slider(pixel,'Niveles de degradado',selected.pixel.steps,2,24,1,(v,final)=>editLightValue(()=>selected.pixel.steps=Math.round(v),final));
 const coords=element('div','ls-two');shapePanel.append(coords);for(const axis of ['x','y']){const input=node('input');input.type='text';input.inputMode='decimal';input.className='ls-input';input.placeholder='Ej. 25.30';input.value=String(selected[axis]);input.onchange=()=>{const n=parseCoordinate(input.value);if(n===null){input.value=String(selected[axis]);notify('Introduce una coordenada entre -2048 y 2048, con decimales libres.','warn');return;}change(()=>selected[axis]=n);};labeled(coords,axis.toUpperCase()+' (tiles)',input);}
 const buttons=element('div','ls-inline');shapePanel.append(buttons);buttons.append(mini('⌫ Eliminar',()=>change(()=>{const map=current();map.lights=map.lights.filter(l=>l.id!==selected.id);state.selected=null;})));
 }
@@ -245,16 +251,20 @@ function schedulePreview(){
  owner.previewTimer=setTimeout(()=>{
   if(state!==owner)return;
   owner.previewScheduled=false;owner.previewTimer=null;
-  invalidate();redraw();
- },95);
+  redraw();
+ },65);
 }
-function editValue(fn,final){
+function editLightValue(fn,final){return editValue(fn,final,true);}
+function editValue(fn,final,lightOnly=false){
  if(!state)return;
  if(!state.editSnapshot){state.editSnapshot=deepCopy(state.data);state.redo=[];}
+ const before=lightOnly&&active()?{...active()}:null;
  fn();
+ if(lightOnly&&before)invalidateLightRegions(before,active());
+ else invalidate();
  if(!final){schedulePreview();return;}
  if(state.previewTimer!=null){clearTimeout(state.previewTimer);state.previewTimer=null;state.previewScheduled=false;}
- settleFastPreview();invalidate();redraw();
+ settleFastPreview();redraw();
  state.undo.push(state.editSnapshot);
  if(state.undo.length>60)state.undo.shift();
  state.editSnapshot=null;
@@ -281,8 +291,7 @@ if(state.mode==='place'){const l=makeLight(pt.x,pt.y,state.newType);record();con
 function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;const pt=pointerPoint(e);const previous=state.hover;const d=state.drag;
 if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
-if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}}}
-if(d)invalidate();redraw();}
+if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();void persist().catch(fail);}
 export async function activate(ctx){state={ctx,data:defaultProject(),mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();}catch(e){state.readError=String(e.message||e);fail(e);}
 ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:390,height:850},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
