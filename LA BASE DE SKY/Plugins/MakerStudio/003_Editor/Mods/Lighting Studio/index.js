@@ -1,11 +1,11 @@
 import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,MASK_DIR,maskFilename,assetName,normalCandidate,evaluateTimeOfDay} from './model.js';
-import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS} from './styles.js';
+import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS,LIGHTING_WIDE_WORKSPACE_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
 import {cacheSize,clearLightCache,hasPendingChunks,invalidateLightRegions,setMaskImage,forgetMaskImages} from './render.js';
 const PANEL='lighting-studio.main', TOOL='lighting-studio.place';
 let state=null;
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);return e;};
-const css=STYLES+LIGHTING_EXTRA_CSS+LIGHTING_LAYER_DIAGNOSTIC_CSS+LIGHTING_WORKSPACE_CSS;
+const css=STYLES+LIGHTING_EXTRA_CSS+LIGHTING_LAYER_DIAGNOSTIC_CSS+LIGHTING_WORKSPACE_CSS+LIGHTING_WIDE_WORKSPACE_CSS;
 function notify(message,level='info'){state?.ctx.ui.showToast({message,level,durationMs:4000});}
 function fail(e){const msg=String(e?.message||e);state?.ctx.log.error(msg);notify(msg,'error');}
 function current(){return getMap(state.data,state.mapId,false);}
