@@ -1,56 +1,57 @@
-# Lighting Studio v0.4.2 — Pokémon Essentials 21.1
+# Lighting Studio v0.4.3 · Hotfix de zoom y rendimiento
 
-**Estado:** desarrollo experimental. Cambios en la rama `new-MK-for-2.5D-Testeo`. La API y las pruebas dentro de Maker Studio y Pokémon Essentials todavía requieren validación local.
+Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
-## Flujo de trabajo
+**Estado:** cambios subidos a `new-MK-for-2.5D-Testeo`, probados en lógica de JS y matemáticas de zoom; falta comprobación de ejecución real de Maker Studio y Pokémon Essentials. Prototipo, no release estable.
 
-1. Abre un mapa y entra en **Mods > Lighting Studio**.
-2. Comprueba que estén marcados **Iluminación activada para este mapa** y **Ver luces en mapa**.
-3. Usa **Añadir luz** para colocar una fuente en el mapa; **Seleccionar** para arrastrarla o editarla; **Borrar** para eliminarla. La selección desde la lista también activa la herramienta.
-4. Si el mapa es claro y no distingues la iluminación, activa **Vista nocturna (solo editor)**. El efecto temporal no altera `maps.json` ni el juego.
-5. En **Superposición de luces** elige:
-   - **Fusionar áreas · farolas (recomendado)**: dos fuentes amplían el área iluminada. Se aplica el máximo por canal, sin sumarse entre sí.
-   - **Acumular brillo · suma**: las intensidades se añaden en la intersección.
-6. El **Modo de mezcla** de cada luz determina si participa en la unión, si se suma independientemente, si se dibuja en modo normal o si oscurece.
+## Fallos tratados
 
-## Inspector
+### 1. Luces descolocadas al acercar o alejar Maker Studio
 
-Pestañas: **Forma**, **Difuminado**, **Pulsación**, **Pixel art**.
+- Las luces con modo **Fusionar áreas** ya no se rasterizan sobre una superficie de tamaño de viewport dependiente del zoom.
+- Se generan fragmentos fijos del **mundo** de 256 × 256 píxeles base, con 64 × 64 píxeles de datos por fragmento.
+- Cada fragmento se coloca usando la transformación del overlay de Animated Props: `(tile * tileSize - viewportX) * zoom`.
+- El zoom y el scrolling solo cambian la posición/tamaño de los fragmentos en pantalla, **no su contenido**.
+- Una sola fuente se dibuja directamente con la misma transformación de mapa.
+- La preview rápida para arrastre/sliders evita recomponer los fragmentos en cada movimiento de mouse; al soltar se muestra el modo de fusión exacto.
 
-- Geometrías: radial, cono, elipse y rectángulo.
-- Difuminado: desde centro, arriba, abajo, izquierda, derecha u origen personalizado.
-- Pulsación independiente de intensidad y tamaño.
-- Pixel art: tamaño de bloque y niveles del degradado.
-- X/Y admite decimales hasta tres cifras. Los clics con el mouse todavía se ajustan a casillas.
+### 2. Luces que se mueven ingame
 
-## Ubicaciones
+- El runtime dibuja la fusión con sprites de fragmentos anclados a coordenadas del mapa, **no con una pantalla de luz que necesita recomposición según la cámara**.
+- El cálculo de posición de cada sprite usa el mismo zoom centrado y el mismo redondeo de `display_x/display_y` que el runtime de Animated Props.
+- La cámara solo transforma la ubicación de esos sprites; el patrón de iluminación del mundo permanece fijo.
 
-- Editor: `Plugins/MakerStudio/003_Editor/Mods/Lighting Studio/`.
-- Runtime: `Plugins/Lighting Studio Runtime/`.
-- Datos: `Data/LightingStudio/maps.json`.
+### 3. Picos de FPS y lag
 
-El esquema de datos se mantiene en versión 1. Las antiguas luces con `blendMode: 'add'` se interpretan como `union`.
+Antes, el runtime ejecutaba bucles Ruby con `Bitmap#get_pixel` y `Bitmap#set_pixel` para cada fuente **cada vez que la cámara cambiaba**. Esto podía producir picos severos.
 
-## Render y rendimiento
+Ahora:
+- Se calculan fragmentos por coordenada del mundo y se mantienen en caché (máximo habitual: 32 fragmentos).
+- Se construye **como máximo un fragmento nuevo por fotograma**.
+- Las máscaras de fuentes estáticas se construyen a demanda, **como máximo dos máscaras nuevas por fotograma**.
+- El coste de lectura/escritura de píxeles se paga al construir un fragmento, **no en cada desplazamiento**.
+- La posición/zoom de los sprites se actualiza por fotograma con operaciones baratas, siguiendo Animated Props.
+- Máscaras limitadas a 64 píxeles de dimensión máxima para reducir el coste inicial.
 
-- El editor utiliza canvas DOM en lugar de OffscreenCanvas; mantiene una única superficie compartida y caché de máscaras, y conserva un fallback de dibujo si falla la composición.
-- Las luces en modo `union` usan un máximo real por canal. `sum` aumenta el brillo intencionadamente.
-- El runtime genera una superficie compartida a una cuarta parte de resolución y compone máximos leyendo las regiones iluminadas; es más costoso con muchas fuentes grandes.
-- Las solicitudes de redibujado se agrupan. La barra de diagnóstico distingue tiempo de render y espera del editor.
-- El zoom se proyecta siguiendo el cálculo de Animated Props. El posicionamiento preciso por píxel del mouse sigue pendiente.
+**Limitación:** la aparición progresiva de fragmentos nuevos puede ser visible durante unos fotogramas al entrar en un mapa o alejar mucho el zoom. El modo de fusión por máximo se conserva para luces estáticas. Para evitar recalcular fragmentos constantemente, las luces con pulsación usan sprites dinámicos aditivos; cuando se superponen no mantienen una unión MAX exacta en esta revisión.
 
-## Comprobaciones antes de darlo por cerrado
+## Controles actuales
 
-1. Abre un mapa, crea una farola y actívala. Si no se ve, enciende **Vista nocturna (solo editor)**. Revisa los avisos de visibilidad.
-2. Crea otra farola con solapamiento parcial. Compara **Fusionar áreas** y **Acumular brillo**.
-3. Confirma que los colores, el radio, la geometría y el modo de difuminado cambian sobre el mapa.
-4. Prueba zoom 50 %, 75 %, 100 %, 125 %, 150 % y 200 %, desplazando la cámara.
-5. En el juego, prueba las mismas farolas, el scrolling, la transferencia entre mapas y F12.
-6. Revisa los FPS y el diagnóstico del editor con 1, 5 y 20 luces.
+- Editor de luces directamente sobre el mapa.
+- Fuentes: radial, cono, elipse y rectángulo.
+- Difuminado desde centro, arriba, abajo, izquierda, derecha o posición personalizada.
+- Intensidad, brillo central, color, suavidad, rotación, tamaño, pixel art y pulsación.
+- Por mapa: ambiente, interruptor global, vista nocturna solo editor, **Fusionar áreas** / **Acumular brillo**.
+- Por luz: **Unir con otras luces**, **Sumar brillo**, Normal, Oscurecer.
+- X/Y admite coordenadas con decimales.
 
-## Limitaciones conocidas
+## Pruebas imprescindibles
 
-- La preview y el runtime no tienen todavía equivalencia exacta de color, gamma, transparencia y tono ambiental.
-- El runtime no utiliza shaders: la fusión por máximos tiene coste de CPU, especialmente con movimiento de cámara.
-- Falta probar realmente Maker Studio y el plugin Ruby completo; **la visibilidad en el equipo del usuario no está confirmada**.
-- No hay sombras físicas, oclusión de geometría ni seguimiento de eventos.
+1. En Maker Studio, ancla una luz a un tile concreto y prueba zoom **50 %, 75 %, 100 %, 125 %, 150 % y 200 %** con una luz y luego dos luces fusionadas. Debe permanecer en el mismo punto del mapa.
+2. Desplaza la cámara manteniendo la luz inmóvil: el centro visual debe seguir el tile.
+3. Ingresa al juego, mueve al jugador/cámara y prueba el zoom del mundo con las mismas luces. No deben acompañar al jugador.
+4. Compara **FPS en mapa vacío** contra 1, 5 y 20 luces estáticas y con pulsación.
+5. Verifica las transiciones de mapa, reinicio con F12 y liberación de recursos.
+6. Si hay lag, revisa en Maker Studio los milisegundos de render y espera en el panel.
+
+No se ha ejecutado Maker Studio ni el juego desde este entorno. No afirmar FPS ni ausencia de picos hasta medirlos localmente.
