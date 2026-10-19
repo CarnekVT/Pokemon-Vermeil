@@ -27,6 +27,9 @@ class Game_Player < Game_Character
           @last_input_time = System.uptime
           return
         end
+        # La rutina original omite el retardo si @moved_last_frame==true.
+        # Asegurar aqui los 75ms aun al girar entre casillas.
+        return if @last_input_time && System.uptime - @last_input_time < 0.075
         return vermeil_movement_original_input
       end
       # Respuesta inmediata: girar y comenzar el paso en el mismo update.
