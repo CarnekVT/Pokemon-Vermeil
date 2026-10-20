@@ -419,14 +419,67 @@ const typeSelect=node('select');typeSelect.className='ls-input';for(const t of L
 if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editLightValue(()=>selected.angle=v,final));}
 if(selected.type==='ellipse'||selected.type==='rectangle'||selected.type==='mask'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editLightValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editLightValue(()=>selected.heightPx=v,final));}
 if(selected.type==='mask'){
-  shapePanel.append(element('p','ls-inline-note','PNG blanco/gris con transparencia: el alfa recorta la luz y el gris controla su intensidad. Colócalo en '+MASK_DIR+'/'));
-  const mask=node('input');mask.type='text';mask.className='ls-input';mask.placeholder='cueva_salida.png';mask.value=selected.maskFile||'';
-  mask.onchange=()=>{const filename=maskFilename(mask.value.trim());
-    if(!filename)return notify('Nombre inválido; ejemplo: cueva_salida.png','warn');
-    change(()=>selected.maskFile=filename);
+  const maskTitle=element('div','ls-mask-inspector-title','MÁSCARA DE LUZ · EDICIÓN VISUAL');
+  shapePanel.append(maskTitle);
+  shapePanel.append(element('p','ls-inline-note','Para una cueva: crea un haz que salga de la abertura. Usa la plantilla, pinta dónde quieres luz y borra detrás de las paredes. El blanco ilumina y lo transparente no.'));
+  const maskInput=node('input');maskInput.type='text';maskInput.className='ls-input';
+  maskInput.placeholder='cueva_salida.png';maskInput.value=selected.maskFile||'';
+  const lightId=selected.id;
+  maskInput.onchange=()=>{
+    const name=maskFilename(maskInput.value.trim());
+    if(!name){maskInput.value=selected.maskFile||'';return notify('Usa un nombre como cueva_salida.png','warn');}
+    if(name===selected.maskFile)return;
+    change(()=>selected.maskFile=name);
+    void loadMaskFile(name,{force:true}).then(ok=>{
+      notify(ok?'Máscara actualizada en el mapa':'Sin PNG todavía: usa «Crear salida de cueva».',ok?'info':'warn');
+    }).catch(fail);
   };
-  labeled(shapePanel,'PNG de máscara',mask);
-  shapePanel.append(mini('Comprobar PNG',()=>{void state.ctx.fs.projectExists(MASK_DIR+'/'+selected.maskFile).then(ok=>notify(ok?'PNG encontrado':'Falta: '+MASK_DIR+'/'+selected.maskFile,ok?'info':'warn')).catch(fail);}));
+  labeled(shapePanel,'Archivo PNG',maskInput);
+  const maskTools=element('div','ls-mask-load-actions');
+  shapePanel.append(maskTools);
+  maskTools.append(mini('▣ Elegir gráfico',()=>{void pickMaskGraphic(lightId).catch(fail);}));
+  maskTools.append(mini('↻ Recargar PNG',()=>{const name=selected.maskFile;
+    if(!maskFilename(name))return notify('Elige primero un archivo PNG.','warn');
+    void loadMaskFile(name,{force:true}).then(ok=>{
+      notify(ok?'PNG recargado y actualizado en el mapa.':'No se pudo leer el PNG.','warn');
+    }).catch(fail);
+  }));
+  maskTools.append(mini('＋ Crear salida de cueva',()=>{
+    const name=maskFilename(maskInput.value.trim())||'cueva_salida.png';
+    // Keep a separate canvas per graphic so edits are not lost when switching
+    // between inspector tabs and lighting sources.
+    const draft=caveTemplate(256,128,'right');
+    state.maskDrafts.set(name,draft);
+    setMaskImage(name,draft);
+    change(()=>selected.maskFile=name);
+  }));
+  const name=selected.maskFile;
+  const source=maskFilename(name)?(state.maskDrafts.get(name)||getMaskImage(name)):null;
+  if(source){
+    mountMaskPainter(shapePanel,{
+      filename:name,
+      getSource:()=>state.maskDrafts.get(name)||getMaskImage(name),
+      onCreate:canvas=>{state.maskDrafts.set(name,canvas);setMaskImage(name,canvas);redraw();},
+      onPreview:canvas=>{state.maskDrafts.set(name,canvas);setMaskImage(name,canvas);redraw();},
+      onSave:async(filename,canvas)=>{
+        const owner=state;
+        const result=await saveMaskPng(owner.ctx,filename,canvas,MASK_DIR);
+        if(owner!==state)return result;
+        if(result.saved){
+          owner.maskReady.delete(filename);
+          await loadMaskFile(filename,{force:true});
+        }else{
+          // In older Maker Studio versions the binary API is absent. The
+          // export still previews instantly and remains editable in session.
+          owner.maskDrafts.set(filename,canvas);
+        }
+        return result;
+      },
+      notify
+    });
+  }else{
+    shapePanel.append(element('p','ls-mask-empty','Puedes seleccionar un PNG ya existente o usar «Crear salida de cueva» para empezar directamente con una forma lista para pintar.'));
+  }
  }
  if(selected.type!=='radial')slider(shapePanel,'Rotación',selected.rotation,-360,360,1,(v,final)=>editLightValue(()=>selected.rotation=v,final));
 const name=node('input');name.type='text';name.className='ls-input';name.value=selected.name;name.onchange=()=>change(()=>selected.name=name.value.slice(0,80));labeled(shapePanel,'Nombre',name);
