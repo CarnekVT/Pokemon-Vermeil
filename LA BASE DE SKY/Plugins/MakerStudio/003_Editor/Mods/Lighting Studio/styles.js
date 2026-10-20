@@ -163,4 +163,40 @@ export const LIGHTING_WIDE_WORKSPACE_CSS = `
  }
 }
 
+/* Mask authoring workbench: drawing lives alongside the selected light. */
+.ls-mask-inspector-title{font-size:12px;font-weight:800;letter-spacing:.55px;color:var(--text-primary,#dbe6f6);
+ padding:9px 11px;background:var(--bg-tertiary,#2b3546);border-radius:7px;margin:12px 0 6px}
+.ls-mask-load-actions,.ls-mask-tools,.ls-mask-actions{display:flex;flex-wrap:wrap;gap:7px}
+.ls-mask-load-actions{margin:9px 0 14px}
+.ls-mask-load-actions .ls-btn{flex:1 1 125px}
+.ls-mask-empty{padding:15px;background:var(--bg-secondary,#1c2633);border-radius:8px;
+ color:var(--text-secondary,#b6c0cf);font-size:12px;line-height:1.5}
+.ls-mask-workbench{margin:12px 0;padding:14px;border:1px solid var(--border,#354258);
+ border-radius:10px;background:var(--bg-secondary,#1d2734);display:grid;gap:11px;min-width:0}
+.ls-mask-workbench .ls-inline-note{margin:0}
+.ls-mask-tools{align-items:center;gap:6px}
+.ls-mask-tools .ls-btn{font-size:11px;flex:1 1 106px}
+.ls-mask-tools .ls-btn.active{box-shadow:inset 0 -2px 0 var(--accent,#9ac2fa)}
+.ls-mask-brush{display:flex;align-items:center;gap:7px;flex:1 1 130px;font-size:11px}
+.ls-mask-brush>input{width:100%;min-width:55px}
+.ls-mask-canvas-frame{position:relative;width:100%;min-width:0;overflow:hidden;cursor:crosshair;
+ border:1px solid #536782;border-radius:7px;background-color:#314257;
+ background-image:linear-gradient(45deg,#394c64 25%,transparent 25%,transparent 75%,#394c64 75%),
+ linear-gradient(45deg,#394c64 25%,transparent 25%,transparent 75%,#394c64 75%);
+ background-size:24px 24px;background-position:0 0,12px 12px}
+.ls-mask-reference{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;
+ opacity:.52;pointer-events:none;filter:saturate(.8)}
+.ls-mask-reference[hidden]{display:none}
+.ls-mask-canvas{position:relative;display:block;width:100%;height:auto;image-rendering:pixelated;
+ touch-action:none;cursor:crosshair;z-index:1}
+.ls-mask-poly-preview{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.ls-mask-actions>.ls-btn{flex:1 1 128px}
+.ls-mask-actions>.ls-btn:last-of-type{background:#315a61;color:#f0fcff;font-weight:700}
+.ls-mask-status{font-size:11px;line-height:1.55;padding:8px 10px;
+ border-left:3px solid #7ba9c6;background:var(--bg-primary,#141c27);border-radius:4px}
+@container (max-width:640px){
+ .ls-mask-workbench{padding:8px;gap:7px}
+ .ls-mask-tools>.ls-btn,.ls-mask-actions>.ls-btn{flex:1 1 112px}
+}
+
 `;
