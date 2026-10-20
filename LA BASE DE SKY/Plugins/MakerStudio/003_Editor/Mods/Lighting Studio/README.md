@@ -1,4 +1,4 @@
-# Lighting Studio v0.7.2 — ciclo horario activo y nuevo editor
+# Lighting Studio v0.8.0 — luz diurna vanilla, horarios y saco de dormir
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -326,3 +326,48 @@ El test independiente se ha trasladado a `LA BASE DE SKY/DeveloperTests/Lighting
 Actualiza desde la rama `new-MK-for-2.5D-Testeo`, abre Lighting Studio → «Día y noche» y comprueba que están activados el ciclo y el modo «Reloj interno». Asegúrate de probar el **mapa 79**. Da el saco mediante `pbReceiveItem(:SLEEPINGBAG)` (recompila PBS si nunca lo hiciste) y cambia a 06:00 y 21:00. La capa ambiental debería cambiar al instante. Si no sucede, ejecuta `p LightingStudioDayNight.debug_status`.
 
 **Validación:** modelos JavaScript y estructura de cambios revisados. Pruebas Ruby añadidas al workflow, pero aún no hay confirmación ingame del efecto o del diseño final de la interfaz.
+
+ 
+## v0.8.0 — Cambio de ambientación y activación horaria de luces
+
+### Ciclo visual inspirado en RPG 2D y Pokémon vanilla
+
+- **Luz del día neutra:** a las 11:00 el ambiente tiene oscuridad 0 y color blanco sin opacidad, por lo que conserva los colores originales del pixel art sin capa blanca.
+- **Tarde poco invasiva:** a las 15:00 y 17:00 el ambiente añade solo un matiz cálido suave, sin teñir el mapa de amarillo ni verde.
+- **Anochecer y noche:** transición progresiva a una tonalidad azul grisácea. Las sombras se mantienen moderadas para conservar la legibilidad de vegetación, agua y casas.
+- El renderizador del reloj utiliza un máximo de **170 puntos de opacidad para oscuridad=1** (el ambiente manual sin reloj no cambia), en lugar de 230. Los presets pueden modificarse desde Día y noche.
+- El perfil se guarda en `Data/LightingStudio/maps.json` del mapa 79. Los demás mapas mantienen su configuración.
+
+### Inspector → «Horario»
+
+Cada luz puede tener un horario propio `schedule`:
+```json
+"schedule": {
+  "enabled": true,
+  "startHour": 19,
+  "endHour": 7,
+  "fadeMinutes": 20
+}
+```
+
+- **Siempre encendida**: comportamiento de antes. **Solo día**: 07:00–19:00. **Solo noche**: 19:00–07:00. **Personalizado**: cualquier intervalo con cruce de medianoche. **Transición**: 0 a 120 minutos del juego.
+- Una luz con horario se dibuja mediante sprite dinámico, sin tener que regenerar chunks estáticos al cambiar la hora; su opacidad multiplica la intensidad programada por la pulsación (si la hay).
+- Los normales de jugador/followers **también consideran el horario** de la luz; no continuarán brillando bajo una farola apagada.
+- El inspector incorpora la quinta pestaña «Horario». En Día y noche, al activar la hora de previsualización se ven encendidas las fuentes que corresponden a ese horario.
+- Las **dos farolas cálidas existentes** del mapa 79 están configuradas para funcionar de **19:00 a 07:00**, con 20 minutos de transición. Las demás luces siguen encendidas todo el día. Cambia estos horarios desde su inspector.
+
+### Saco de dormir — seis horas exactas de la referencia
+
+Reproduce el esquema de las dos ventanas de «Show Choices» que compartiste:
+- **Página 1:** 7 a.m., 11 a.m., 3 p.m., ---->
+- **Página 2:** 5 p.m., 7 p.m., 11 p.m., <----
+
+Tras elegir: **10 fotogramas hacia blanco**, **espera de 10**, cambio de hora, **ME Pokémon Healing**, **espera de 30**, **10 fotogramas de vuelta**, espera de 20 y un texto contextual corto y distinto por hora (sin usar la frase sobre la determinación).
+
+La transición blanca se hace con un sprite blanco temporal, para no cambiar permanentemente los tonos del mapa o interferir con las capas de otras modificaciones. El reloj cambia con `LightingStudioDayNight.skip_to_hour(7)`; está disponible además `LightingStudioDayNight.time_in_text`.
+
+### Pruebas y limitaciones
+
+- `DeveloperTests/LightingStudio/test_day_night.rb`: valida los seis horarios, el menú de dos páginas, 80 fotogramas de animación por elección, la ME, el refresco inmediato y los horarios nocturnos atravesando medianoche.
+- `DeveloperTests/LightingStudio/test_model.mjs`: comprueba conservación de horarios en JSON, reglas nocturnas y ausencia de tinte diurno.
+- **Pendiente probar el resultado dentro de Pokémon Essentials y revisar FPS**. Las variantes de iluminación de escenarios particulares pueden requerir ajustes artísticos por mapa; no se han cambiado sprites, tilesets ni normals.
