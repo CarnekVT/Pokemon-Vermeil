@@ -53,13 +53,14 @@ export const defaultTimeOfDay = () => ({
  enabled:false,source:'real',startHour:8,minutesPerSecond:0.1,
  previewHour:12,
  keyframes:[
-  {hour:0,color:'#182440',darkness:0.68},
-  {hour:5,color:'#415275',darkness:0.53},
-  {hour:7,color:'#FFCF9A',darkness:0.24},
-  {hour:12,color:'#FFFFFF',darkness:0},
-  {hour:17,color:'#FFC58A',darkness:0.20},
-  {hour:19,color:'#6879B1',darkness:0.48},
-  {hour:22,color:'#24314C',darkness:0.63}
+  {hour:0,color:'#25334F',darkness:0.37},
+  {hour:5,color:'#40516D',darkness:0.26},
+  {hour:7,color:'#E7CBA4',darkness:0.025},
+  {hour:11,color:'#FFFFFF',darkness:0},
+  {hour:15,color:'#F4D6B2',darkness:0.025},
+  {hour:17,color:'#D9B59C',darkness:0.055},
+  {hour:19,color:'#53658D',darkness:0.18},
+  {hour:23,color:'#263956',darkness:0.34}
  ]
 });
 export function normalizeTimeOfDay(raw){
@@ -90,6 +91,30 @@ export function evaluateTimeOfDay(config,hour){
 
 export const defaultMap = () => ({enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},normalMaps:defaultNormals(),dayNightMode:'follow',lights:[]});
 export const defaultProject = () => ({schema:SCHEMA,normalSettings:defaultNormals(),timeOfDay:defaultTimeOfDay(),maps:{}});
+// Hours follow the global day-night clock; unconfigured lights remain always on.
+// fadeMinutes softens turn-on/turn-off on both sides (including overnight windows).
+export const defaultSchedule = () => ({
+ enabled:false,startHour:19,endHour:7,fadeMinutes:20
+});
+export function normalizeSchedule(raw){
+ const s=raw&&typeof raw==='object'?raw:{};
+ return {enabled:s.enabled===true,
+  startHour:num(s.startHour,0,23.999,19),
+  endHour:num(s.endHour,0,23.999,7),
+  fadeMinutes:num(s.fadeMinutes,0,120,20)};
+}
+export function scheduleFactor(schedule,hour){
+ const s=normalizeSchedule(schedule);
+ if(!s.enabled)return 1;
+ const start=s.startHour*60,duration=(s.endHour*60-start+1440)%1440;
+ if(duration<.0001)return 1;
+ const elapsed=(((hour%24+24)%24)*60-start+1440)%1440;
+ if(elapsed>=duration)return 0;
+ const fade=Math.min(s.fadeMinutes,duration/2);
+ if(fade<=0)return 1;
+ const k=Math.max(0,Math.min(1,elapsed/fade,(duration-elapsed)/fade));
+ return k*k*(3-2*k);
+}
 export const defaultPulse = () => ({enabled:false,speedHz:1,intensity:0.25,radius:0.12,phase:0});
 export const defaultPixel = () => ({enabled:false,size:6,steps:6});
 export function normalizeLight(raw={}){
@@ -109,6 +134,7 @@ export function normalizeLight(raw={}){
     maskFile:maskFilename(s.maskFile),
     widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
     enabled:s.enabled!==false,
+    schedule:normalizeSchedule(s.schedule),
     blendMode:s.blendMode==='add'?'union':BLEND_MODES.includes(s.blendMode)?s.blendMode:'union',
     pulse:{enabled:p.enabled===true,speedHz:num(p.speedHz,.05,12,1),
       intensity:num(p.intensity,0,1,.25),radius:num(p.radius,0,.9,.12),phase:num(p.phase,0,360,0)},
