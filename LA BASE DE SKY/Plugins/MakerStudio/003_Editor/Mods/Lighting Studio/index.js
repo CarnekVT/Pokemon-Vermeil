@@ -469,7 +469,9 @@ if(selected.type==='mask'){
   }));
   const name=selected.maskFile;
   const source=maskFilename(name)?(state.maskDrafts.get(name)||getMaskImage(name)):null;
-  if(source){
+  if(source && state.inspectorTab==='mask'){
+    // Avoid cloning and re-rendering the PNG painter while browsing other
+    // inspector sections. Only the active tab gets a costly canvas.
     mountMaskPainter(maskPanel,{
       filename:name,
       getSource:()=>state.maskDrafts.get(name)||getMaskImage(name),
@@ -491,7 +493,7 @@ if(selected.type==='mask'){
       },
       notify
     });
-  }else{
+  }else if(!source){
     maskPanel.append(element('p','ls-mask-empty','Puedes seleccionar un PNG ya existente o usar «Crear salida de cueva» para empezar directamente con una forma lista para pintar.'));
   }
  }
