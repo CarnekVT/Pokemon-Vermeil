@@ -62,6 +62,21 @@ def pbDayNightTint(object)
   object.tone.set(-70,-90,15,55)
 end
 
+
+class LightTestViewport
+  attr_accessor :tone
+  def disposed?;false;end
+end
+class Spriteset_Map
+  def self.viewport; @viewport ||= LightTestViewport.new;end
+end
+class Scene_Map
+  def updateSpritesets(refresh=false)
+    Spriteset_Map.viewport.tone=Tone.new(0,0,0,0)
+  end
+end
+$game_screen=Struct.new(:tone).new(Tone.new(-5,-3,2,3))
+
 load 'Plugins/Lighting Studio Runtime/004_DayNight.rb'
 time=LightingStudioDayNight
 raise 'RGBG native Tone not selected' unless time.native_tone?
@@ -72,6 +87,11 @@ raise 'Evening Tone should darken red and green gently' unless night[0]<0 && nig
 composed=time.compose_tone(Tone.new(-8,5,2,8),night)
 raise 'RGSS event tone lost' unless composed.red==night[0]-8 &&
   composed.green==night[1]+5 && composed.blue==night[2]+2 && composed.gray==night[3]+8
+Scene_Map.new.updateSpritesets
+final_tone=Spriteset_Map.viewport.tone
+raise 'Final viewport tone not applied after spritesets' unless
+  [final_tone.red,final_tone.green,final_tone.blue,final_tone.gray]==
+  [night[0]-5,night[1]-3,night[2]+2,night[3]+3]
 renderer=TileToneTest.new
 pbDayNightTint(renderer)
 raise 'Vanilla tone duplicated custom cycle' unless [renderer.tone.red,renderer.tone.green,renderer.tone.blue,renderer.tone.gray]==[0,0,0,0]
