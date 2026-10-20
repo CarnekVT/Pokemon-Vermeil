@@ -30,7 +30,7 @@ function redraw(){
   owner.lastRequestAt=owner.lastRedraw;
   owner.awaitingOverlay=true; // diagnostics only, never blocks redraw
   owner.ctx.editor.requestRedraw?.();
- },Math.max(0,(owner.previewQuality==='full'?70:owner.previewQuality==='fast'?160:115)-elapsed));
+ },Math.max(0,(owner.previewQuality==='full'?85:owner.previewQuality==='fast'?110:65)-elapsed));
 }
 function settleFastPreview(){
  const owner=state;if(!owner)return;
@@ -573,6 +573,14 @@ const lightLayout=element('div','ls-wide-light-layout');
 lightLayout.append(section,insp);
 const quickTools=element('div','ls-light-quickbar');
 quickTools.append(toolbar,actions);
+const viewQuality=element('label','ls-light-quality');viewQuality.append(node('span','Vista del mapa'));
+const viewSelect=node('select');viewSelect.className='ls-input';
+for(const [value,label] of [['fast','Rápida'],['balanced','Equilibrada'],['full','Exacta (más lenta)']]){
+ const option=node('option',label);option.value=value;viewSelect.append(option);
+}
+viewSelect.value=state.previewQuality;
+viewSelect.onchange=()=>{state.previewQuality=viewSelect.value;redraw();refresh();};
+viewQuality.append(viewSelect);quickTools.append(viewQuality);
 title.classList.add('ls-context-hint');
 lightView.append(quickTools,title,lightLayout);
 const ambientView=element('div','ls-workspace-view');ambientView.append(ambient);
@@ -646,6 +654,13 @@ if(state.mode==='place'){const l=makeLight(pt.x,pt.y,state.newType);record();con
 function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;const pt=pointerPoint(e);const previous=state.hover;const d=state.drag;
 if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
+if(!d&&state.mode==='select'){
+ const prior=state.lastHoverId||null,now=state.hoverHit?.light?.id||null;
+ state.lastHoverId=now;
+ // No visual change when moving between empty tiles: leave the native
+ // canvas alone, just like the cached autotile renderer.
+ if(prior===now)return;
+}
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();schedulePersist();}
 export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),maskPromises:new Map(),maskReady:new Set(),maskDrafts:new Map(),workspaceTab:'lights',previewDayNight:false,previewHour:12,previewQuality:'balanced',mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
@@ -668,8 +683,8 @@ redraw();state.ticker=setInterval(()=>{
  if(now-(state.lastStatusAt||0)>650){state.lastStatusAt=now;updateDiagnosticStatus();}
  const wait=state.previewQuality==='full'?120:state.previewQuality==='fast'?320:210;
  if(now-(state.lastTickRedraw||0)<wait)return;
- if((!state.drag&&!state.editSnapshot&&hasPendingChunks())||
-    (!state.advancedOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))){
+ if((state.previewQuality==='full'&&!state.drag&&!state.editSnapshot&&hasPendingChunks())||
+    (!state.advancedOverlay&&state.showOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))){
    state.lastTickRedraw=now;redraw();
  }
 },120);
