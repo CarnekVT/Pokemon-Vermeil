@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio day/night v0.7.2 — additive to 001_LightingStudio.rb.
+# Lighting Studio day/night v0.8.0 — additive to 001_LightingStudio.rb.
 # The real clock is local system time. Internal minutes are stored on
 # $PokemonGlobal, which is serialized with save data by Essentials.
 module LightingStudioDayNight
@@ -100,6 +100,31 @@ module LightingStudioDayNight
     t=span>0 ? [[(value-start)/span,0.0].max,1.0].min : 0.0
     rgb=3.times.map { |c| (low[:rgb][c]*(1.0-t)+high[:rgb][c]*t).round }
     [rgb, low[:darkness]*(1.0-t)+high[:darkness]*t]
+  end
+
+  # A scheduled light fades in and out in GAME minutes. Works across
+  # midnight (e.g. 19:00 -> 05:00) without rebuilding light masks or chunks.
+  # Disabled/unconfigured schedules preserve legacy lights.
+  def schedule_factor(schedule, at_hour=nil)
+    return 1.0 unless schedule.is_a?(Hash) && schedule['enabled']==true
+    return 1.0 unless settings['enabled']==true
+    current = ((at_hour.nil? ? hour : at_hour).to_f % 24.0) * 60.0
+    first = clamp(schedule['startHour'], 0.0, 23.999, 19.0) * 60.0
+    last  = clamp(schedule['endHour'], 0.0, 23.999, 7.0) * 60.0
+    span = (last-first) % 1440.0
+    return 1.0 if span < 0.0001 # identical endpoints mean all day
+    elapsed = (current-first) % 1440.0
+    return 0.0 if elapsed >= span
+    fade = [clamp(schedule['fadeMinutes'],0.0,120.0,20.0),span/2.0].min
+    return 1.0 if fade <= 0.0
+    weight = [[elapsed/fade,(span-elapsed)/fade,1.0].min,0.0].max
+    weight*weight*(3.0-2.0*weight)
+  end
+
+  def ambient_opacity(darkness)
+    # A night overlay should shade rather than recolor the entire pixel-art
+    # palette; the manual ambient layer (without a clock) is unchanged.
+    (clamp(darkness,0.0,1.0,0.0)*170).round
   end
 
   def ambient(map_data)
