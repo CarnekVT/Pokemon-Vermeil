@@ -391,7 +391,7 @@ const pulse=element('div','ls-effect-group');pulsePanel.append(pulse);pulse.appe
 const pixel=element('div','ls-effect-group');pixelPanel.append(pixel);pixel.append(element('b',null,'Pixel Art'));const pixelOn=node('input');pixelOn.type='checkbox';pixelOn.checked=selected.pixel.enabled;pixelOn.onchange=()=>change(()=>selected.pixel.enabled=pixelOn.checked);labeled(pixel,'Pixelar luz',pixelOn);slider(pixel,'Tamaño de píxel',selected.pixel.size,2,32,1,(v,final)=>editLightValue(()=>selected.pixel.size=Math.round(v),final));slider(pixel,'Niveles de degradado',selected.pixel.steps,2,24,1,(v,final)=>editLightValue(()=>selected.pixel.steps=Math.round(v),final));
 // SCHEDULE — time-based lamp activation (incl. cross-midnight ranges).
 schedulePanel.append(element('div','ls-group-label','HORARIO DE ACTIVACIÓN'));
-const cfg=selected.schedule||{enabled:false,startHour:19,endHour:7,fadeMinutes:20};
+const cfg=selected.schedule||{enabled:false,startHour:19,endHour:7,fadeMinutes:0};
 const preset=node('select');preset.className='ls-input';
 const isDay=cfg.enabled&&Math.abs(cfg.startHour-7)<.001&&Math.abs(cfg.endHour-19)<.001;
 const isNight=cfg.enabled&&Math.abs(cfg.startHour-19)<.001&&Math.abs(cfg.endHour-7)<.001;
@@ -401,13 +401,13 @@ for(const [value,label] of [['always','Siempre encendida'],['day','Solo día (07
 }
 preset.value=presetMode;
 preset.onchange=()=>change(()=>{
- if(!selected.schedule)selected.schedule={enabled:false,startHour:19,endHour:7,fadeMinutes:20};
+ if(!selected.schedule)selected.schedule={enabled:false,startHour:19,endHour:7,fadeMinutes:0};
  const v=preset.value;selected.schedule.enabled=v!=='always';selected.schedule.mode=v;
  if(v==='day'){selected.schedule.startHour=7;selected.schedule.endHour=19;}
  if(v==='night'){selected.schedule.startHour=19;selected.schedule.endHour=7;}
 });
 labeled(schedulePanel,'Cuándo aparece',preset);
-schedulePanel.append(element('p','ls-inline-note','Aparece y desaparece gradualmente. Puede cruzar medianoche. El reloj debe estar activado para aplicar el horario.'));
+schedulePanel.append(element('p','ls-inline-note','Se activa a la hora exacta con una transición visual breve. Puedes ampliar esa transición por minutos del juego. Admite horarios que cruzan medianoche.'));
 if(cfg.enabled){
  const row=element('div','ls-two');schedulePanel.append(row);
  for(const [label,prop] of [['Hora de encendido','startHour'],['Hora de apagado','endHour']]){
@@ -421,7 +421,7 @@ if(cfg.enabled){
   };
   labeled(row,label,input);
  }
- slider(schedulePanel,'Transición (minutos del juego)',cfg.fadeMinutes??20,0,120,5,
+ slider(schedulePanel,'Transición (minutos del juego)',cfg.fadeMinutes??0,0,120,5,
    (v,final)=>editLightValue(()=>selected.schedule.fadeMinutes=v,final));
 }
 schedulePanel.append(mini('Ver en ciclo día y noche',()=>{state.workspaceTab='time';state.previewDayNight=true;refresh();redraw();}));
