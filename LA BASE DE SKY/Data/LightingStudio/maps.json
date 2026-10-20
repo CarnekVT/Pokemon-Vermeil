@@ -209,43 +209,114 @@
       {
         "hour": 0,
         "color": "#25334F",
-        "darkness": 0.37
+        "darkness": 0.37,
+        "tone": {
+          "red": -58,
+          "green": -58,
+          "blue": 9,
+          "gray": 30
+        }
       },
       {
         "hour": 5,
         "color": "#40516D",
-        "darkness": 0.26
+        "darkness": 0.26,
+        "tone": {
+          "red": -47,
+          "green": -47,
+          "blue": 7,
+          "gray": 26
+        }
       },
       {
         "hour": 7,
         "color": "#E7CBA4",
-        "darkness": 0.025
+        "darkness": 0.025,
+        "tone": {
+          "red": -16,
+          "green": -28,
+          "blue": -34,
+          "gray": 9
+        }
+      },
+      {
+        "hour": 9,
+        "color": "#FFFFFF",
+        "darkness": 0,
+        "tone": {
+          "red": 0,
+          "green": 0,
+          "blue": 0,
+          "gray": 0
+        }
       },
       {
         "hour": 11,
         "color": "#FFFFFF",
-        "darkness": 0
+        "darkness": 0,
+        "tone": {
+          "red": 0,
+          "green": 0,
+          "blue": 0,
+          "gray": 0
+        }
       },
       {
         "hour": 15,
-        "color": "#F4D6B2",
-        "darkness": 0.025
+        "color": "#FFFFFF",
+        "darkness": 0,
+        "tone": {
+          "red": 0,
+          "green": 0,
+          "blue": 0,
+          "gray": 0
+        }
       },
       {
         "hour": 17,
         "color": "#D9B59C",
-        "darkness": 0.055
+        "darkness": 0.055,
+        "tone": {
+          "red": -12,
+          "green": -27,
+          "blue": -32,
+          "gray": 9
+        }
       },
       {
         "hour": 19,
         "color": "#53658D",
-        "darkness": 0.18
+        "darkness": 0.18,
+        "tone": {
+          "red": -29,
+          "green": -33,
+          "blue": 4,
+          "gray": 20
+        }
+      },
+      {
+        "hour": 21,
+        "color": "#263956",
+        "darkness": 0.34,
+        "tone": {
+          "red": -52,
+          "green": -52,
+          "blue": 8,
+          "gray": 27
+        }
       },
       {
         "hour": 23,
         "color": "#263956",
-        "darkness": 0.34
+        "darkness": 0.34,
+        "tone": {
+          "red": -58,
+          "green": -58,
+          "blue": 9,
+          "gray": 30
+        }
       }
-    ]
+    ],
+    "blendMode": "tone"
   }
 }
