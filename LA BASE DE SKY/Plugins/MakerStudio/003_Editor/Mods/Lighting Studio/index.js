@@ -186,6 +186,15 @@ async function preloadMasks(){
  }
 }
 
+// Medium-green tile color used only for showing the RGBG look in swatches.
+function tonePreviewHex(tone){
+ const source=[124,151,119],gray=Math.max(0,Math.min(1,(tone?.gray||0)/255));
+ const lum=source[0]*.299+source[1]*.587+source[2]*.114;
+ return '#'+['red','green','blue'].map((k,i)=>{
+  const value=Math.round(source[i]*(1-gray)+lum*gray+(tone?.[k]||0));
+  return Math.max(0,Math.min(255,value)).toString(16).padStart(2,'0');
+ }).join('');
+}
 function refresh(){if(!state?.host)return;const root=state.host;const oldScroll=root.querySelector('.ls-root')?.scrollTop||0;root.replaceChildren();const style=node('style',css);root.append(style);const shell=element('div','ls-root');root.append(shell);
 const head=element('div','ls-head');shell.append(head);const brand=element('div','ls-brand');head.append(brand);brand.append(element('div','ls-logo','☀'));const info=node('div');brand.append(info);info.append(element('div','ls-title','Lighting Studio'),element('div','ls-sub','Iluminación del mapa · edición directa'));
 const toolbar=element('div','ls-toolbar');shell.append(toolbar);
@@ -250,6 +259,13 @@ const daytime=element('section','ls-section');shell.append(daytime);
  }
  clockSelect.value=tod.source;clockSelect.onchange=()=>change(()=>tod.source=clockSelect.value);
  labeled(daytime,'Fuente horaria',clockSelect);
+ const blendSelect=node('select');blendSelect.className='ls-input';
+ for(const [value,label] of [['tone','Tono nativo Pokémon (RGB + gris)'],['overlay','Capa RGB antigua (compatibilidad)']]){
+  const o=node('option',label);o.value=value;blendSelect.append(o);
+ }
+ blendSelect.value=tod.blendMode||'tone';
+ blendSelect.onchange=()=>change(()=>tod.blendMode=blendSelect.value);
+ labeled(daytime,'Cómo se mezcla el color',blendSelect);
  if(tod.source==='internal'){
   slider(daytime,'Hora inicial',tod.startHour,0,23.75,.25,(v,final)=>editValue(()=>tod.startHour=v,final));
   slider(daytime,'Minutos del juego por segundo real',tod.minutesPerSecond,.001,1,.01,(v,final)=>editValue(()=>tod.minutesPerSecond=clamp(v,.001,1),final));
@@ -265,28 +281,28 @@ const daytime=element('section','ls-section');shell.append(daytime);
  previewTime.onchange=()=>{state.previewDayNight=previewTime.checked;redraw();refresh();};
  labeled(daytime,'Previsualizar ciclo en Maker Studio',previewTime);
  if(state.previewDayNight)slider(daytime,'Hora de previsualización',state.previewHour,0,23.75,.25,(v,final)=>{state.previewHour=v;redraw();});
- daytime.append(element('p','ls-inline-note','Los horarios interpolan color y oscuridad. El reloj interno se guarda con la partida. La previsualización no cambia la hora de la partida.'));
+ daytime.append(element('p','ls-inline-note','El modo nativo ajusta los canales RGB y gris como Pokémon Essentials, sin una capa de color plano. El reloj se guarda con la partida.'));
  const timelineTitle=element('div','ls-section-heading','Paleta de iluminación por horas');daytime.append(timelineTitle);
  const clockStatus=element('div','ls-time-preview-status');daytime.append(clockStatus);
  function updateTimePreview(){
   const sample=evaluateTimeOfDay(tod,state.previewHour);
-  clockStatus.textContent='Vista previa · '+Math.floor(state.previewHour).toString().padStart(2,'0')+':'+Math.round((state.previewHour%1)*60).toString().padStart(2,'0')+' · oscuridad '+Math.round(sample.darkness*100)+' %';
-  clockStatus.style.borderLeftColor=sample.color;
+  clockStatus.textContent='Vista previa · '+Math.floor(state.previewHour).toString().padStart(2,'0')+':'+Math.round((state.previewHour%1)*60).toString().padStart(2,'0')+(tod.blendMode==='tone'?' · RGBG '+['red','green','blue','gray'].map(k=>Math.round(sample.tone[k])).join(' / '):' · oscuridad '+Math.round(sample.darkness*100)+' %');
+  clockStatus.style.borderLeftColor=tod.blendMode==='tone'?tonePreviewHex(sample.tone):sample.color;
  }
  const track=element('div','ls-time-track');daytime.append(track);
  for(let index=0;index<24;index++){
   const sample=evaluateTimeOfDay(tod,index+0.5);
   const slot=element('button','ls-time-slot');slot.type='button';
   slot.title=String(index).padStart(2,'0')+':00 · clic para previsualizar';
-  slot.style.backgroundColor=sample.color;
-  slot.style.opacity=String(Math.max(.25,1-sample.darkness*.6));
+  slot.style.backgroundColor=tod.blendMode==='tone'?tonePreviewHex(sample.tone):sample.color;
+  slot.style.opacity=tod.blendMode==='tone'?'1':String(Math.max(.25,1-sample.darkness*.6));
   slot.onclick=()=>{state.previewDayNight=true;state.previewHour=index+0.5;state.workspaceTab='time';refresh();redraw();};
   if(Math.floor(state.previewHour)===index)slot.classList.add('active');
   track.append(slot);
  }
- const table=element('div','ls-time-table');daytime.append(table);
+ const table=element('div','ls-time-table');if(tod.blendMode==='tone')table.classList.add('ls-tone-table');daytime.append(table);
  const header=element('div','ls-time-table-head');
- for(const name of ['HORA','COLOR','OSCURIDAD',''])header.append(element('span',null,name));
+ for(const name of (tod.blendMode==='tone'?['HORA','ROJO','VERDE','AZUL','GRIS','']:['HORA','COLOR','OSCURIDAD','']))header.append(element('span',null,name));
  table.append(header);
  for(const key of tod.keyframes){
   const row=element('div','ls-time-row');table.append(row);
@@ -299,6 +315,17 @@ const daytime=element('section','ls-section');shell.append(daytime);
     change(()=>{key.hour=clamp(bits[0]+bits[1]/60,0,23.99);tod.keyframes.sort((x,y)=>x.hour-y.hour);});
   };
   row.append(clock);
+  if(tod.blendMode==='tone'){
+    if(!key.tone)key.tone={red:0,green:0,blue:0,gray:0};
+    for(const channel of ['red','green','blue','gray']){
+      const input=node('input');input.type='number';input.className='ls-input ls-tone-input';
+      input.min=channel==='gray'?'0':'-255';input.max='255';input.step='1';
+      input.value=String(Math.round(key.tone[channel]||0));
+      input.title=channel==='gray'?'Gris: 0 conserva colores, 255 escala de grises':'Canal '+channel+' (−255 a +255)';
+      input.onchange=()=>change(()=>{key.tone[channel]=clamp(Number(input.value),channel==='gray'?0:-255,255);});
+      row.append(input);
+    }
+  }else{
   const colorCell=element('div','ls-time-color-cell');
   const colorInput=node('input');colorInput.type='color';colorInput.className='ls-color';
   colorInput.value=key.color;colorInput.title='Color del ambiente';
@@ -313,6 +340,7 @@ const daytime=element('section','ls-section');shell.append(daytime);
   darknessInput.oninput=()=>{const v=Number(darknessInput.value);darknessText.textContent=v+'%';editValue(()=>key.darkness=v/100,false);};
   darknessInput.onchange=()=>{editValue(()=>key.darkness=Number(darknessInput.value)/100,true);refresh();};
   opacityCell.append(darknessInput,darknessText);row.append(opacityCell);
+  }
   const remove=mini('×',()=>{if(tod.keyframes.length<=2)return notify('Se necesitan al menos dos horarios.','warn');
     change(()=>{tod.keyframes=tod.keyframes.filter(k=>k!==key);});
   });remove.title='Quitar esta hora';remove.classList.add('ls-time-remove');row.append(remove);
@@ -321,7 +349,7 @@ const daytime=element('section','ls-section');shell.append(daytime);
   const hr=Number(state.previewHour)||12;let t=hr;
   while(tod.keyframes.some(k=>Math.abs(k.hour-t)<.01))t=(t+.25)%24;
   const v=evaluateTimeOfDay(tod,t);
-  tod.keyframes.push({hour:t,color:v.color,darkness:Math.round(v.darkness*100)/100});
+  tod.keyframes.push({hour:t,color:v.color,darkness:Math.round(v.darkness*100)/100,tone:Object.fromEntries(Object.entries(v.tone).map(([k,val])=>[k,Math.round(val)]))});
   tod.keyframes.sort((x,y)=>x.hour-y.hour);
  }));
  addTime.classList.add('ls-add-keyframe');daytime.append(addTime);
