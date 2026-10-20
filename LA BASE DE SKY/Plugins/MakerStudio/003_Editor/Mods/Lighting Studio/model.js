@@ -94,7 +94,7 @@ export const defaultProject = () => ({schema:SCHEMA,normalSettings:defaultNormal
 // Hours follow the global day-night clock; unconfigured lights remain always on.
 // fadeMinutes softens turn-on/turn-off on both sides (including overnight windows).
 export const defaultSchedule = () => ({
- enabled:false,startHour:19,endHour:7,fadeMinutes:20
+ enabled:false,startHour:19,endHour:7,fadeMinutes:0
 });
 export function normalizeSchedule(raw){
  const s=raw&&typeof raw==='object'?raw:{};
@@ -102,7 +102,7 @@ export function normalizeSchedule(raw){
  const startHour=num(s.startHour,0,23.999,19),endHour=num(s.endHour,0,23.999,7);
  const derived=!enabled?'always':Math.abs(startHour-7)<.001&&Math.abs(endHour-19)<.001?'day':
    Math.abs(startHour-19)<.001&&Math.abs(endHour-7)<.001?'night':'custom';
- return {enabled,startHour,endHour,fadeMinutes:num(s.fadeMinutes,0,120,20),
+ return {enabled,startHour,endHour,fadeMinutes:num(s.fadeMinutes,0,120,0),
   mode:['always','day','night','custom'].includes(s.mode)?s.mode:derived};
 }
 export function scheduleFactor(schedule,hour){
