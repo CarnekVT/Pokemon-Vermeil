@@ -1,4 +1,4 @@
-# Lighting Studio v0.10.0 — editor visual de máscaras y recarga en vivo
+# Lighting Studio v0.10.0 — editor de luces fluido y zoom nativo
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -503,3 +503,34 @@ Las máscaras se limitan a PNG de 512 × 512 como máximo y nombres sin rutas ex
 - `node --experimental-default-type=module DeveloperTests/LightingStudio/test_mask_editor.mjs`: plantilla derecha/izquierda, transparencia de las paredes, atenuación y contrato de guardado PNG.
 - Los módulos JS editados también se verifican mediante comprobación de sintaxis desde GitHub Actions.
 - Pendiente: validación visual, ergonomía y detección de permisos de escritura binaria en la instalación real de Maker Studio del proyecto.
+
+## v0.10.0 — Rendimiento y zoom de Maker Studio
+
+### Corrección de zoom y ubicación
+
+- Maker Studio entrega `renderInfo.tileSize` **ya escalado con zoom** (ejemplo: 24 píxeles al 75 %, 32 al 100 %, 48 al 150 %). Además, `viewportX/Y` son desplazamientos en píxeles de pantalla.
+- La proyección correcta es `screenX = light.x * tileSize - viewportX`; **no se vuelve a multiplicar por zoom**. Se aplica la misma regla de `com.lbds.animated-props/overlay-transform.js`, utilizada para alinear los autotiles/props con los tiles nativos.
+- El radio también utiliza únicamente `radius * tileSize / 32` y se mantiene proporcional a 50, 75, 100, 150 y 200 %.
+- Seleccionar una máscara usa sus dimensiones y orientación reales, no el radio de un círculo ajeno.
+
+### Rendimiento de la edición
+
+- Por defecto, los perfiles **Equilibrada** y **Rápida** previsualizan luces con **texturas 2D reutilizadas**; evitan reconstruir los chunks CPU de fusión mientras mueves o editas fuentes. Sigue habiendo diferencia visual menor con la mezcla `union` exacta, disponible en **Exacta (más lenta)**.
+- El modo Exacta sigue utilizando los chunks de fusión por canales, pero descarta los chunks vacíos que no contienen focos y reconstruye hasta dos chunks afectados por pasada.
+- Modificar una imagen máscara invalida solo las texturas derivadas de ese archivo, **no toda la caché de luces**.
+- Al mover el cursor por tiles vacíos con la herramienta Seleccionar no se solicita un repintado si el hover visual no ha cambiado.
+- El pintor de máscaras solo se monta cuando su pestaña está abierta, no cuando se editan otras propiedades del foco.
+- El selector de calidad se ofrece ahora directamente en **Luces e inspector → Vista del mapa**. El módulo `Animated Props` emplea un enfoque comparable: caché de superficies y limitación de redraw/fps en lugar de cálculos por cada cambio de puntero.
+
+### Edición de formas
+
+- Las luces `mask` abren una pestaña **«Dibujar máscara»** dedicada, separada de las propiedades geométricas. El lienzo queda accesible sin bajar por la altura/radio.
+- Zoom del lienzo de forma: **Ajustar, 1×, 2× y 4×**, con scroll cuando excede el ancho. No modifica el zoom del mapa ni la resolución del PNG.
+- El área de trabajo se ensancha al editar una máscara. La biblioteca de focos permanece visible a un lado y los campos nuevos se muestran verticalmente en pantallas estrechas.
+- El editor de la forma sigue usando PNG de hasta 512×512 píxeles, reutilizable en el juego.
+
+### Pruebas
+
+- `DeveloperTests/LightingStudio/test_zoom_lighting.mjs`: compara con la proyección real de `com.lbds.animated-props/overlay-transform.js`, comprueba escalas de 50–200 %, offsets de cámara, hitboxes rotadas y la gestión independiente de caché de máscaras.
+- Workflow `.github/workflows/lighting-studio-check.yml` actualizado con esa prueba.
+- **Pendiente**: benchmark de FPS y validación visual con Maker Studio en Windows, incluidos zoom y lienzo de máscaras. Las pruebas JS de sintaxis y cálculo geométrico no sustituyen una prueba de interacción manual en la aplicación.
