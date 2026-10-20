@@ -48,21 +48,30 @@ export function normalizeNormals(raw){
   }
   return out;
 }
-// A data-driven 24-hour color timeline; values are saved globally in maps.json.
-export const defaultTimeOfDay = () => ({
+// Pixel-art-preserving native RGSS Tone; retains legacy overlay mode.
+export const defaultTimeOfDay=()=>({
  enabled:false,source:'real',startHour:8,minutesPerSecond:0.1,
- previewHour:12,
- keyframes:[
-  {hour:0,color:'#25334F',darkness:0.37},
-  {hour:5,color:'#40516D',darkness:0.26},
-  {hour:7,color:'#E7CBA4',darkness:0.025},
-  {hour:11,color:'#FFFFFF',darkness:0},
-  {hour:15,color:'#F4D6B2',darkness:0.025},
-  {hour:17,color:'#D9B59C',darkness:0.055},
-  {hour:19,color:'#53658D',darkness:0.18},
-  {hour:23,color:'#263956',darkness:0.34}
- ]
-});
+ previewHour:12,blendMode:'tone',keyframes:[
+ {hour:0,color:'#25334F',darkness:.37,tone:{red:-58,green:-58,blue:9,gray:30}},
+ {hour:5,color:'#40516D',darkness:.26,tone:{red:-47,green:-47,blue:7,gray:26}},
+ {hour:7,color:'#E7CBA4',darkness:.025,tone:{red:-16,green:-28,blue:-34,gray:9}},
+ {hour:9,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
+ {hour:11,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
+ {hour:15,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
+ {hour:17,color:'#D9B59C',darkness:.055,tone:{red:-12,green:-27,blue:-32,gray:9}},
+ {hour:19,color:'#53658D',darkness:.18,tone:{red:-29,green:-33,blue:4,gray:20}},
+ {hour:21,color:'#263956',darkness:.34,tone:{red:-52,green:-52,blue:8,gray:27}},
+ {hour:23,color:'#263956',darkness:.34,tone:{red:-58,green:-58,blue:9,gray:30}}
+]});
+const TONE_CHANNELS=['red','green','blue','gray'];
+export function normalizeTone(t,legacy){
+ const v=t&&typeof t==='object'?t:{};
+ const darkness=num(legacy?.darkness,0,1,0),color=hex(legacy?.color,'#FFFFFF');
+ const rgb=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16));
+ const fb=rgb.map(c=>Math.round(-85*darkness+(c-170)*darkness*.12));
+ return {red:num(v.red,-255,255,fb[0]),green:num(v.green,-255,255,fb[1]),
+  blue:num(v.blue,-255,255,fb[2]),gray:num(v.gray,0,255,0)};
+}
 export function normalizeTimeOfDay(raw){
  const cfg=raw&&typeof raw==='object'?raw:{};
  const def=defaultTimeOfDay();
@@ -70,10 +79,10 @@ export function normalizeTimeOfDay(raw){
  const seen=new Set();
  const keys=(Array.isArray(cfg.keyframes)?cfg.keyframes:def.keyframes).slice(0,48)
   .map(k=>({hour:num(k?.hour,0,23.999,0),color:hex(k?.color,'#FFFFFF'),
-    darkness:num(k?.darkness,0,1,0)}))
+    darkness:num(k?.darkness,0,1,0),tone:normalizeTone(k?.tone,k)}))
   .filter(k=>{const h=k.hour.toFixed(3);if(seen.has(h))return false;seen.add(h);return true;})
   .sort((a,b)=>a.hour-b.hour);
- return {enabled:cfg.enabled===true,source,startHour:num(cfg.startHour,0,23.999,8),
+ return {enabled:cfg.enabled===true,source,blendMode:cfg.blendMode==='overlay'?'overlay':'tone',startHour:num(cfg.startHour,0,23.999,8),
   minutesPerSecond:num(cfg.minutesPerSecond,0.001,5,0.1),
   previewHour:num(cfg.previewHour,0,23.999,12),keyframes:keys.length>=2?keys:def.keyframes};
 }
@@ -86,7 +95,8 @@ export function evaluateTimeOfDay(config,hour){
  const t=Math.min(1,Math.max(0,(value-start)/(end-start)));
  const cols=[1,3,5].map(i=>Math.round(parseInt(low.color.slice(i,i+2),16)*(1-t)+parseInt(high.color.slice(i,i+2),16)*t));
  return {color:'#'+cols.map(n=>n.toString(16).padStart(2,'0')).join('').toUpperCase(),
-  darkness:low.darkness*(1-t)+high.darkness*t};
+  darkness:low.darkness*(1-t)+high.darkness*t,
+  tone:Object.fromEntries(TONE_CHANNELS.map(ch=>[ch,low.tone[ch]*(1-t)+high.tone[ch]*t]))};
 }
 
 export const defaultMap = () => ({enabled:true,overlapMode:'union',ambient:{color:'#142439',darkness:0},normalMaps:defaultNormals(),dayNightMode:'follow',lights:[]});
