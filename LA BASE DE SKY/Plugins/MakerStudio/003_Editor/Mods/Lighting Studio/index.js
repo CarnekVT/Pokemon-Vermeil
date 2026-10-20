@@ -402,7 +402,10 @@ const workspace=element('div','ls-workspace');
 const lightView=element('div','ls-workspace-view ls-workspace-lights');
 const lightLayout=element('div','ls-wide-light-layout');
 lightLayout.append(section,insp);
-lightView.append(lightLayout);
+const quickTools=element('div','ls-light-quickbar');
+quickTools.append(toolbar,actions);
+title.classList.add('ls-context-hint');
+lightView.append(quickTools,title,lightLayout);
 const ambientView=element('div','ls-workspace-view');ambientView.append(ambient);
 const timeView=element('div','ls-workspace-view');timeView.append(daytime);
 const normalsView=element('div','ls-workspace-view');if(normalsSection)normalsView.append(normalsSection);
@@ -412,8 +415,12 @@ for(const [id,label] of [['lights','✦ Luces e inspector'],['ambient','◐ Ambi
  b.classList.add('ls-workspace-tab');workspaceNav.append(b);
 }
 for(const [id,view] of Object.entries(views)){view.hidden=state.workspaceTab!==id;workspace.append(view);}
-shell.insertBefore(workspaceNav,title);
+shell.insertBefore(workspaceNav,head.nextSibling);
 shell.append(workspace);
+const diagnostics=element('details','ls-debug-details');
+const diagnosticsHeading=node('summary','Diagnóstico de iluminación y vista previa');
+diagnostics.append(diagnosticsHeading,layerStatus);
+shell.append(diagnostics);
 if(state.resetWorkspaceScroll){shell.scrollTop=0;state.resetWorkspaceScroll=false;}
 const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el mapa mediante un overlay independiente de Fog, Panorama y Sombras. Prueba visual muestra una marca amarilla para comprobar si Maker Studio lo está renderizando.');shell.append(hint);
 const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));if(!state.resetWorkspaceScroll && state.workspaceTab===state.lastRenderedTab)shell.scrollTop=oldScroll;
