@@ -1,192 +1,10 @@
 {
   "schema": 1,
-  "maps": {
-    "79": {
-      "enabled": true,
-      "overlapMode": "union",
-      "ambient": {
-        "color": "#0A1119",
-        "darkness": 0.83
-      },
-      "normalMaps": {
-        "enabled": false,
-        "strength": 1,
-        "tilesets": [],
-        "autotiles": [],
-        "characters": []
-      },
-      "lights": [
-        {
-          "id": "light_mve8h6hb_lfu564",
-          "name": "Luz radial",
-          "type": "radial",
-          "x": 31.5,
-          "y": 68,
-          "radiusPx": 96,
-          "intensity": 0.8,
-          "color": "#FFCE8A",
-          "softness": 0.75,
-          "centerStrength": 0.65,
-          "fadeMode": "center",
-          "fadeStart": 0.58,
-          "fadeX": 0,
-          "fadeY": 0,
-          "rotation": 0,
-          "angle": 70,
-          "coneFeather": 0.28,
-          "widthPx": 160,
-          "heightPx": 96,
-          "enabled": true,
-          "blendMode": "union",
-          "pulse": {
-            "enabled": true,
-            "speedHz": 0.2,
-            "intensity": 0.25,
-            "radius": 0.12,
-            "phase": 0
-          },
-          "pixel": {
-            "enabled": false,
-            "size": 3,
-            "steps": 10
-          },
-          "anchor": {
-            "type": "static"
-          }
-        },
-        {
-          "id": "light_mveh1wka_1mz0ol",
-          "name": "Farola cálida",
-          "type": "rectangle",
-          "x": 35.5,
-          "y": 78.5,
-          "radiusPx": 112,
-          "intensity": 0.56,
-          "color": "#FFAD51",
-          "softness": 0.8,
-          "centerStrength": 0.65,
-          "fadeMode": "center",
-          "fadeStart": 0.58,
-          "fadeX": 0,
-          "fadeY": 0,
-          "rotation": 0,
-          "angle": 70,
-          "coneFeather": 0.28,
-          "widthPx": 50,
-          "heightPx": 64,
-          "enabled": true,
-          "blendMode": "union",
-          "pulse": {
-            "enabled": false,
-            "speedHz": 1,
-            "intensity": 0.25,
-            "radius": 0.12,
-            "phase": 0
-          },
-          "pixel": {
-            "enabled": true,
-            "size": 2,
-            "steps": 2
-          },
-          "anchor": {
-            "type": "static"
-          },
-          "schedule": {
-            "enabled": true,
-            "startHour": 19,
-            "endHour": 7,
-            "fadeMinutes": 0
-          }
-        },
-        {
-          "id": "light_mvelfkzobhj",
-          "name": "Farola cálida copia",
-          "type": "rectangle",
-          "x": 35.55,
-          "y": 80,
-          "radiusPx": 112,
-          "intensity": 0.52,
-          "color": "#FFAD51",
-          "softness": 0.8,
-          "centerStrength": 0.7,
-          "fadeMode": "bottom",
-          "fadeStart": 0.58,
-          "fadeX": 0,
-          "fadeY": 0,
-          "rotation": 0,
-          "angle": 70,
-          "coneFeather": 0.28,
-          "widthPx": 60,
-          "heightPx": 88,
-          "enabled": true,
-          "blendMode": "union",
-          "pulse": {
-            "enabled": false,
-            "speedHz": 1,
-            "intensity": 0.21,
-            "radius": 0.12,
-            "phase": 0
-          },
-          "pixel": {
-            "enabled": true,
-            "size": 5,
-            "steps": 8
-          },
-          "anchor": {
-            "type": "static"
-          },
-          "schedule": {
-            "enabled": true,
-            "startHour": 19,
-            "endHour": 7,
-            "fadeMinutes": 0
-          }
-        },
-        {
-          "id": "light_mvetotj5_yr08o4",
-          "name": "Cono",
-          "type": "ellipse",
-          "x": 29,
-          "y": 78,
-          "radiusPx": 175,
-          "intensity": 0.8,
-          "color": "#FFCE8A",
-          "softness": 0.75,
-          "centerStrength": 0.65,
-          "fadeMode": "center",
-          "fadeStart": 0.58,
-          "fadeX": 0,
-          "fadeY": 0,
-          "rotation": 90,
-          "angle": 70,
-          "coneFeather": 0.28,
-          "widthPx": 160,
-          "heightPx": 96,
-          "enabled": true,
-          "blendMode": "union",
-          "pulse": {
-            "enabled": false,
-            "speedHz": 1,
-            "intensity": 0.25,
-            "radius": 0.12,
-            "phase": 0
-          },
-          "pixel": {
-            "enabled": true,
-            "size": 4,
-            "steps": 10
-          },
-          "anchor": {
-            "type": "static"
-          }
-        }
-      ],
-      "dayNightMode": "follow"
-    }
-  },
   "normalSettings": {
     "enabled": true,
     "strength": 1,
+    "intensity": 0.5,
+    "warmup": true,
     "auto": {
       "tilesets": false,
       "autotiles": false,
@@ -195,13 +13,12 @@
     "suffix": "_n",
     "tilesets": [],
     "autotiles": [],
-    "characters": [],
-    "intensity": 0.5,
-    "warmup": true
+    "characters": []
   },
   "timeOfDay": {
     "enabled": true,
     "source": "internal",
+    "blendMode": "tone",
     "startHour": 8,
     "minutesPerSecond": 0.1,
     "previewHour": 12,
@@ -305,7 +122,218 @@
           "gray": 68
         }
       }
-    ],
-    "blendMode": "tone"
+    ]
+  },
+  "maps": {
+    "79": {
+      "enabled": true,
+      "overlapMode": "union",
+      "ambient": {
+        "color": "#0A1119",
+        "darkness": 0.83
+      },
+      "normalMaps": {
+        "enabled": false,
+        "strength": 1,
+        "intensity": 0.5,
+        "warmup": true,
+        "auto": {
+          "tilesets": true,
+          "autotiles": true,
+          "characters": true
+        },
+        "suffix": "_n",
+        "tilesets": [],
+        "autotiles": [],
+        "characters": []
+      },
+      "dayNightMode": "follow",
+      "lights": [
+        {
+          "id": "light_mve8h6hb_lfu564",
+          "name": "Luz radial",
+          "type": "radial",
+          "x": 31.5,
+          "y": 68,
+          "radiusPx": 96,
+          "intensity": 0.8,
+          "color": "#FFCE8A",
+          "softness": 0.75,
+          "centerStrength": 0.65,
+          "fadeMode": "center",
+          "fadeStart": 0.58,
+          "fadeX": 0,
+          "fadeY": 0,
+          "rotation": 0,
+          "angle": 70,
+          "coneFeather": 0.28,
+          "maskFile": "",
+          "widthPx": 160,
+          "heightPx": 96,
+          "enabled": true,
+          "schedule": {
+            "enabled": true,
+            "startHour": 19,
+            "endHour": 7,
+            "fadeMinutes": 0,
+            "mode": "night"
+          },
+          "blendMode": "union",
+          "pulse": {
+            "enabled": true,
+            "speedHz": 0.2,
+            "intensity": 0.25,
+            "radius": 0.12,
+            "phase": 0
+          },
+          "pixel": {
+            "enabled": true,
+            "size": 3,
+            "steps": 10
+          },
+          "anchor": {
+            "type": "static"
+          }
+        },
+        {
+          "id": "light_mveh1wka_1mz0ol",
+          "name": "Farola cálida",
+          "type": "rectangle",
+          "x": 35.5,
+          "y": 78.5,
+          "radiusPx": 112,
+          "intensity": 0.56,
+          "color": "#FFAD51",
+          "softness": 0.8,
+          "centerStrength": 0.65,
+          "fadeMode": "center",
+          "fadeStart": 0.58,
+          "fadeX": 0,
+          "fadeY": 0,
+          "rotation": 0,
+          "angle": 70,
+          "coneFeather": 0.28,
+          "maskFile": "",
+          "widthPx": 50,
+          "heightPx": 64,
+          "enabled": true,
+          "schedule": {
+            "enabled": true,
+            "startHour": 19,
+            "endHour": 7,
+            "fadeMinutes": 0,
+            "mode": "night"
+          },
+          "blendMode": "union",
+          "pulse": {
+            "enabled": false,
+            "speedHz": 1,
+            "intensity": 0.25,
+            "radius": 0.12,
+            "phase": 0
+          },
+          "pixel": {
+            "enabled": true,
+            "size": 2,
+            "steps": 2
+          },
+          "anchor": {
+            "type": "static"
+          }
+        },
+        {
+          "id": "light_mvelfkzobhj",
+          "name": "Farola cálida copia",
+          "type": "rectangle",
+          "x": 35.55,
+          "y": 80,
+          "radiusPx": 112,
+          "intensity": 0.52,
+          "color": "#FFAD51",
+          "softness": 0.8,
+          "centerStrength": 0.7,
+          "fadeMode": "bottom",
+          "fadeStart": 0.58,
+          "fadeX": 0,
+          "fadeY": 0,
+          "rotation": 0,
+          "angle": 70,
+          "coneFeather": 0.28,
+          "maskFile": "",
+          "widthPx": 60,
+          "heightPx": 88,
+          "enabled": true,
+          "schedule": {
+            "enabled": true,
+            "startHour": 19,
+            "endHour": 7,
+            "fadeMinutes": 0,
+            "mode": "night"
+          },
+          "blendMode": "union",
+          "pulse": {
+            "enabled": false,
+            "speedHz": 1,
+            "intensity": 0.21,
+            "radius": 0.12,
+            "phase": 0
+          },
+          "pixel": {
+            "enabled": true,
+            "size": 5,
+            "steps": 8
+          },
+          "anchor": {
+            "type": "static"
+          }
+        },
+        {
+          "id": "light_mvetotj5_yr08o4",
+          "name": "Cono",
+          "type": "ellipse",
+          "x": 29,
+          "y": 78,
+          "radiusPx": 175,
+          "intensity": 0.8,
+          "color": "#FFCE8A",
+          "softness": 0.75,
+          "centerStrength": 0.65,
+          "fadeMode": "center",
+          "fadeStart": 0.58,
+          "fadeX": 0,
+          "fadeY": 0,
+          "rotation": 90,
+          "angle": 70,
+          "coneFeather": 0.28,
+          "maskFile": "",
+          "widthPx": 160,
+          "heightPx": 96,
+          "enabled": true,
+          "schedule": {
+            "enabled": true,
+            "startHour": 19,
+            "endHour": 7,
+            "fadeMinutes": 0,
+            "mode": "night"
+          },
+          "blendMode": "union",
+          "pulse": {
+            "enabled": false,
+            "speedHz": 1,
+            "intensity": 0.25,
+            "radius": 0.12,
+            "phase": 0
+          },
+          "pixel": {
+            "enabled": true,
+            "size": 4,
+            "steps": 10
+          },
+          "anchor": {
+            "type": "static"
+          }
+        }
+      ]
+    }
   }
 }

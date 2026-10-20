@@ -1,7 +1,8 @@
 {
   "schema": 2,
   "generatedBy": "Translate Studio 1.4.1",
-  "general": {},
+  "general": {
+  },
   "events": {
     "<ac>\\c[8]\\l[3](Please refer to the\\nPokémon  Essentials Wiki\\nfor documentation.)": {
       "Contexts": [
@@ -17069,23 +17070,23 @@
     },
     "Modo turbo": {
       "Contexts": [
-        "Script: 058_Utilities/010_Turbo.rb:L196"
+        "Script: 058_Utilities/010_Turbo.rb:L213"
       ]
     },
     "Siempre": {
       "Contexts": [
-        "Script: 058_Utilities/010_Turbo.rb:L200"
+        "Script: 058_Utilities/010_Turbo.rb:L217"
       ]
     },
     "Combates": {
       "Contexts": [
-        "Script: 058_Utilities/010_Turbo.rb:L200",
+        "Script: 058_Utilities/010_Turbo.rb:L217",
         "Script: 069_MUI/003_MUI Enhanced Pokemon UI/007_Summary UI.rb:L198"
       ]
     },
     "Define si el turbo se activa siempre o solo en combates.": {
       "Contexts": [
-        "Script: 058_Utilities/010_Turbo.rb:L201"
+        "Script: 058_Utilities/010_Turbo.rb:L218"
       ]
     },
     "¿Qué deseas buscar?": {
@@ -31799,6 +31800,36 @@
     "Elige si se puede interactuar con el Pokémon que te sigue.": {
       "Contexts": [
         "Plugin: [ZBOX] Vibrant Adapted - 006_Options.rb:L82"
+      ]
+    },
+    "la mañana": {
+      "Contexts": [
+        "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L22"
+      ]
+    },
+    "el día": {
+      "Contexts": [
+        "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L23"
+      ]
+    },
+    "el atardecer": {
+      "Contexts": [
+        "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L24"
+      ]
+    },
+    "la noche": {
+      "Contexts": [
+        "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L25"
+      ]
+    },
+    "El saco de dormir necesita un ciclo de día y noche con reloj interno.": {
+      "Contexts": [
+        "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L81"
+      ]
+    },
+    "¿A qué hora quieres despertar?": {
+      "Contexts": [
+        "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L86"
       ]
     }
   },

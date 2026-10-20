@@ -795,7 +795,7 @@
     "Data/Map079.rxdata": {
       "sig": [
         2819034,
-        1792419743,
+        1792465631,
         579,
         1792185538
       ],
@@ -27871,8 +27871,8 @@
     },
     "Data/Scripts/058_Utilities/010_Turbo.rb": {
       "sig": [
-        29227,
-        1792185538
+        30141,
+        1792425113
       ],
       "catalog": {
         "schema": 2,
@@ -27884,22 +27884,22 @@
         "scripts": {
           "Modo turbo": {
             "Contexts": [
-              "Script: 058_Utilities/010_Turbo.rb:L196"
+              "Script: 058_Utilities/010_Turbo.rb:L213"
             ]
           },
           "Siempre": {
             "Contexts": [
-              "Script: 058_Utilities/010_Turbo.rb:L200"
+              "Script: 058_Utilities/010_Turbo.rb:L217"
             ]
           },
           "Combates": {
             "Contexts": [
-              "Script: 058_Utilities/010_Turbo.rb:L200"
+              "Script: 058_Utilities/010_Turbo.rb:L217"
             ]
           },
           "Define si el turbo se activa siempre o solo en combates.": {
             "Contexts": [
-              "Script: 058_Utilities/010_Turbo.rb:L201"
+              "Script: 058_Utilities/010_Turbo.rb:L218"
             ]
           }
         },
@@ -41537,8 +41537,8 @@
     },
     "Plugins/LBDS Animated Props/001_Animated_Props.rb": {
       "sig": [
-        18554,
-        1792290837
+        20019,
+        1792448442
       ],
       "catalog": {
         "schema": 2,
@@ -53231,8 +53231,8 @@
     },
     "Plugins/Lighting Studio Runtime/001_LightingStudio.rb": {
       "sig": [
-        21052,
-        1792418094
+        29389,
+        1792465485
       ],
       "catalog": {
         "schema": 2,
@@ -53254,7 +53254,7 @@
     "Plugins/Lighting Studio Runtime/002_NormalCatalog.rb": {
       "sig": [
         4093,
-        1792417851
+        1792422281
       ],
       "catalog": {
         "schema": 2,
@@ -53275,8 +53275,8 @@
     },
     "Plugins/[VERMEIL] Smooth Movement/001_Configuration.rb": {
       "sig": [
-        2856,
-        1792419578
+        4123,
+        1792455620
       ],
       "catalog": {
         "schema": 2,
@@ -53297,8 +53297,8 @@
     },
     "Plugins/[VERMEIL] Smooth Movement/002_PlayerMovement.rb": {
       "sig": [
-        4650,
-        1792419110
+        5754,
+        1792455620
       ],
       "catalog": {
         "schema": 2,
@@ -53319,8 +53319,170 @@
     },
     "Plugins/[VERMEIL] Smooth Movement/003_Camera.rb": {
       "sig": [
-        700,
-        1792417851
+        3703,
+        1792455620
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Lighting Studio Runtime/003_CharacterNormals.rb": {
+      "sig": [
+        20479,
+        1792460546
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Lighting Studio Runtime/004_DayNight.rb": {
+      "sig": [
+        10671,
+        1792465485
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Lighting Studio Runtime/005_SleepingBag.rb": {
+      "sig": [
+        3820,
+        1792460546
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+          "la mañana": {
+            "Contexts": [
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L22"
+            ]
+          },
+          "el día": {
+            "Contexts": [
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L23"
+            ]
+          },
+          "el atardecer": {
+            "Contexts": [
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L24"
+            ]
+          },
+          "la noche": {
+            "Contexts": [
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L25"
+            ]
+          },
+          "El saco de dormir necesita un ciclo de día y noche con reloj interno.": {
+            "Contexts": [
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L81"
+            ]
+          },
+          "¿A qué hora quieres despertar?": {
+            "Contexts": [
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L86"
+            ]
+          }
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/[VERMEIL] Smooth Movement/004_ContinuousFlow.rb": {
+      "sig": [
+        4663,
+        1792451171
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/[VERMEIL] Smooth Movement/005_CameraLookahead.rb": {
+      "sig": [
+        3609,
+        1792455620
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/[VERMEIL] Smooth Movement/006_Diagnostics.rb": {
+      "sig": [
+        3219,
+        1792455620
       ],
       "catalog": {
         "schema": 2,
