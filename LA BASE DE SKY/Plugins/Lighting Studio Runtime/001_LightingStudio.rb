@@ -642,6 +642,7 @@ module LightingStudioSpriteset
 
     ls_update_day_night(false, now)
     ls_update_chunks(mx, my, zx, zy)
+    elapsed=@ls_last_light_update ? [[now-@ls_last_light_update,0.0].max,0.10].min : 0.0
     @ls_sprites.each do |sprite, entry|
       size, energy = LightingStudio.pulse_values(entry[:pulse], now)
       sx, sy = ls_world_screen(entry[:cx], entry[:cy], mx, my, zx, zy)
@@ -649,6 +650,17 @@ module LightingStudioSpriteset
       sprite.zoom_y = zy * size * entry[:h] / sprite.bitmap.height.to_f
       scheduled = defined?(LightingStudioDayNight) ?
         LightingStudioDayNight.schedule_factor(entry[:schedule]) : 1.0
+      if entry[:schedule]['enabled']==true
+        previous=entry[:ls_schedule_alpha]
+        previous=scheduled if previous.nil?
+        # Smooth the visual switch in real seconds so jumping to 19:00
+        # never forces players to wait game-hours to see a streetlamp.
+        coefficient=1.0-Math.exp(-elapsed/0.28)
+        displayed=previous+(scheduled-previous)*coefficient
+        displayed=scheduled if (displayed-scheduled).abs<0.002
+        entry[:ls_schedule_alpha]=displayed
+        scheduled=displayed
+      end
       sprite.opacity = [[(255 * entry[:intensity] * energy * scheduled).round, 0].max, 255].min
       sprite.x = sx
       sprite.y = sy
@@ -656,6 +668,7 @@ module LightingStudioSpriteset
       sprite.visible = sprite.opacity > 0 && sx+bound > 0 && sy+bound > 0 &&
                        sx-bound < Graphics.width && sy-bound < Graphics.height
     end
+    @ls_last_light_update=now
   end
 
   def update
