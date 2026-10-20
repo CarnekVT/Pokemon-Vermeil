@@ -1,10 +1,12 @@
 # encoding: UTF-8
-# Lighting Studio day/night v0.7.1 — additive to 001_LightingStudio.rb.
+# Lighting Studio day/night v0.7.2 — additive to 001_LightingStudio.rb.
 # The real clock is local system time. Internal minutes are stored on
 # $PokemonGlobal, which is serialized with save data by Essentials.
 module LightingStudioDayNight
   @cached = nil
   @last_tick = nil
+  @revision = 0
+  @cached_keyframes = nil
   module_function
 
   def settings
@@ -25,6 +27,12 @@ module LightingStudioDayNight
   def reset_cache
     @cached = nil
     @last_tick = nil
+    @cached_keyframes = nil
+    @revision = (@revision || 0) + 1
+  end
+
+  def revision
+    @revision ||= 0
   end
 
   def active_on_map?(map_data)
@@ -67,9 +75,10 @@ module LightingStudioDayNight
   end
 
   def keyframes
+    return @cached_keyframes if @cached_keyframes
     raw = settings['keyframes']
     return [] unless raw.is_a?(Array)
-    raw.first(48).select { |p| p.is_a?(Hash) && p['color'].to_s =~ /\A#[0-9a-fA-F]{6}\z/ }
+    @cached_keyframes = raw.first(48).select { |p| p.is_a?(Hash) && p['color'].to_s =~ /\A#[0-9a-fA-F]{6}\z/ }
        .map do |p|
       { :hour => clamp(p['hour'],0,23.999,0),
         :rgb => LightingStudio.hex_color(p['color']),
@@ -107,9 +116,29 @@ module LightingStudioDayNight
       @fallback_minutes=minutes
     end
     @last_tick=System.uptime
+    @revision = revision + 1  # Force map overlay refresh after any time jump.
+    # Call the attached spriteset directly where available; otherwise the
+    # revision makes the next ls_update refresh regardless of its 0.2s timer.
+    if defined?($scene) && $scene && $scene.respond_to?(:spriteset)
+      scene_spriteset = $scene.spriteset
+      scene_spriteset.ls_update_day_night(true) if scene_spriteset.respond_to?(:ls_update_day_night)
+    end
+  rescue StandardError => e
+    warn "[Lighting Studio Time] Immediate update deferred: #{e.message}"
   end
 
   def current_hour
     hour
+  end
+
+  def debug_status(map_data = nil)
+    map_data ||= (defined?($game_map) && $game_map) ? LightingStudio.load_map($game_map.map_id) : nil
+    lighting = ambient(map_data)
+    { :source => settings['source'], :enabled => settings['enabled'],
+      :map_id => (defined?($game_map) && $game_map) ? $game_map.map_id : nil,
+      :map_mode => map_data.is_a?(Hash) ? map_data['dayNightMode'] : nil,
+      :hour => hour.round(3), :ambient => lighting, :revision => revision }
+  rescue StandardError => e
+    { :error => e.message }
   end
 end
