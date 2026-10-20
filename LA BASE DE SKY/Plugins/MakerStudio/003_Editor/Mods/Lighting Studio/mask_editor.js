@@ -45,16 +45,18 @@ export async function saveMaskPng(ctx,name,canvas,folder){
  if(canvas.width>512||canvas.height>512)throw Error('La máscara no puede superar 512×512.');
  const rel=folder+'/'+name;
  const bytes=dataUrlToBytes(canvas.toDataURL('image/png'));
- await ctx.fs.projectMkdir(folder);
+ try{await ctx.fs.projectMkdir(folder);}catch(_err){
+  // Read-only projects can still export a reusable PNG.
+ }
  const fs=ctx.fs;
  // Some Maker Studio builds expose binary project writes through the mod FS.
  if(typeof fs.writeProjectBinaryFile==='function'){
-  await fs.writeProjectBinaryFile(rel,bytes);
-  return {saved:true,path:rel};
+  try{await fs.writeProjectBinaryFile(rel,bytes);return {saved:true,path:rel};}
+  catch(_err){/* Try alternate API or portable PNG export. */}
  }
  if(typeof fs.writeProjectBytes==='function'){
-  await fs.writeProjectBytes(rel,bytes);
-  return {saved:true,path:rel};
+  try{await fs.writeProjectBytes(rel,bytes);return {saved:true,path:rel};}
+  catch(_err){/* Try alternate API or portable PNG export. */}
  }
  // Maker Studio Tauri builds may expose the same binary API used by the PNG
  // reader. If the write command is unavailable, use safe export below.
