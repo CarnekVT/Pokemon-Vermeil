@@ -155,15 +155,15 @@ def pbMEPlay(name)
   $me_count+=1
 end
 
-hours=[7,11,15,17,19,23]
+hours=[5,7,11,15,17,19,23]
 hours.each_with_index do |hour,index|
   time.set_internal_time(8,0)
   $bag_responses=[index]
   before=spriteset.calls
   raise "Sleeping Bag did not change time for slot #{index}" unless time.use_sleeping_bag
   raise "Sleeping Bag hour #{index} incorrect" unless (time.current_hour-hour).abs<0.0001
-  raise "Sleeping Bag must display all six slots" unless $bag_choices.length==6
-  raise "Sleeping Bag choice order changed" unless $bag_choices==['7 a.m.','11 a.m.','3 p.m.','5 p.m.','7 p.m.','11 p.m.']
+  raise "Sleeping Bag must display all seven slots" unless $bag_choices.length==7
+  raise "Sleeping Bag choice order changed" unless $bag_choices==['5 a.m. — Madrugada','7 a.m.','11 a.m.','3 p.m.','5 p.m.','7 p.m.','11 p.m.']
   raise "Sleeping Bag prompt differs from the reference" unless $bag_prompts[-2].include?('¿A qué hora quieres despertar?')
   raise "Sleeping Bag did not request ambient refresh" unless spriteset.calls>before
 end
@@ -182,8 +182,8 @@ raise "Lamp should light at exactly 19:00" unless time.schedule_factor(instant,1
 raise "Lamp should remain lit at 06:59" unless time.schedule_factor(instant,6.99)==1.0
 raise "Lamp should switch off at 07:00" unless time.schedule_factor(instant,7)==0.0
 
-raise 'Sleeping Bag forced no map refresh' unless spriteset.calls>=14
-raise 'Sleeping Bag ME did not play 6 times' unless $me_count==6
-raise 'Sleep transition did not use 80 graphics frames per skip' unless Graphics.updates==6*80
+raise 'Sleeping Bag forced no map refresh' unless spriteset.calls>=16
+raise 'Sleeping Bag ME did not play 6 times' unless $me_count==7
+raise 'Sleep transition did not use 80 graphics frames per skip' unless Graphics.updates==7*80
 
-puts 'Lighting Studio day/night, single-page sleeping bag hours and immediate refresh tests passed'
+puts 'Lighting Studio day/night, single-page seven sleeping bag hours and immediate refresh tests passed'
