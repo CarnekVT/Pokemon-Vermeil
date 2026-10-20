@@ -265,11 +265,11 @@ if(scene.enabled===false){
 if(scene.lights.length && scene.lights.every(l=>l.enabled===false)){
  shell.append(element('div','ls-hint','Todas las fuentes están apagadas. Usa «Encender todas» para verlas.'));
 }
-const section=element('section','ls-section');shell.append(section);const heading=element('div','ls-section-heading');section.append(heading);heading.append(node('span','Fuentes luminosas'),element('span','ls-count',String(m?.lights.length||0)));const library=element('div','ls-inline');section.append(library);library.append(mini('＋ Nueva',()=>{const cx=state.lastCursor?.x??8,cy=state.lastCursor?.y??6;change(()=>{const d=getMap(state.data,state.mapId,true),l=makeLight(cx,cy,state.newType);d.lights.push(l);state.selected=l.id;});}),mini('▤ Presets',()=>{const light=active();if(!light)return notify('Selecciona primero una luz','warn');change(()=>{Object.assign(active(),{color:'#FFAD51',intensity:.85,radiusPx:112,softness:.8,name:'Farola cálida'});});}));
+const section=element('section','ls-section ls-light-library');shell.append(section);const heading=element('div','ls-section-heading');section.append(heading);heading.append(node('span','Fuentes luminosas'),element('span','ls-count',String(m?.lights.length||0)));const library=element('div','ls-inline');section.append(library);library.append(mini('＋ Nueva',()=>{const cx=state.lastCursor?.x??8,cy=state.lastCursor?.y??6;change(()=>{const d=getMap(state.data,state.mapId,true),l=makeLight(cx,cy,state.newType);d.lights.push(l);state.selected=l.id;state.inspectorTab=l.type==='mask'?'mask':'shape';});}),mini('▤ Presets',()=>{const light=active();if(!light)return notify('Selecciona primero una luz','warn');change(()=>{Object.assign(active(),{color:'#FFAD51',intensity:.85,radiusPx:112,softness:.8,name:'Farola cálida'});});}));
 const typePicker=node('select');typePicker.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typePicker.append(o);}typePicker.value=state.newType;typePicker.onchange=()=>{state.newType=typePicker.value;redraw();};labeled(section,'Tipo para luces nuevas',typePicker);
 const list=element('div','ls-list');section.append(list);
 if(!m?.lights.length)list.append(element('div','ls-empty','Todavía no hay luces. Usa «Añadir luz» sobre el mapa.'));
-for(const l of m?.lights||[]){const row=element('div','ls-item'+(l.id===state.selected?' selected':''));list.append(row);const sw=element('span','ls-swatch');sw.style.background=l.color;sw.style.color=l.color;row.append(sw);const main=element('button','ls-item-main');main.type='button';main.append(element('div','ls-item-name',l.name),element('div','ls-item-meta',Math.round(l.radiusPx)+' px · '+Math.round(l.intensity*100)+'%'));main.onclick=()=>{state.selected=l.id;state.mode='select';state.ctx.editor.setTool(TOOL);redraw();refresh();};row.append(main);const eye=element('button','ls-ghost',l.enabled?'◉':'◌');eye.title=l.enabled?'Ocultar':'Mostrar';eye.onclick=()=>change(()=>{l.enabled=!l.enabled;});row.append(eye);}
+for(const l of m?.lights||[]){const row=element('div','ls-item'+(l.id===state.selected?' selected':''));list.append(row);const sw=element('span','ls-swatch');sw.style.background=l.color;sw.style.color=l.color;row.append(sw);const main=element('button','ls-item-main');main.type='button';main.append(element('div','ls-item-name',l.name),element('div','ls-item-meta',Math.round(l.radiusPx)+' px · '+Math.round(l.intensity*100)+'%'));main.onclick=()=>{state.selected=l.id;state.inspectorTab=l.type==='mask'?'mask':'shape';state.mode='select';state.ctx.editor.setTool(TOOL);redraw();refresh();};row.append(main);const eye=element('button','ls-ghost',l.enabled?'◉':'◌');eye.title=l.enabled?'Ocultar':'Mostrar';eye.onclick=()=>change(()=>{l.enabled=!l.enabled;});row.append(eye);}
 const ambient=element('section','ls-section');shell.append(ambient);ambient.append(element('div','ls-section-heading','Ambiente y control general'));
 const previewOptions=element('div','ls-inline');ambient.append(previewOptions);
 const quality=node('select');quality.className='ls-input';
@@ -413,24 +413,29 @@ const daytime=element('section','ls-section');shell.append(daytime);
 const insp=element('section','ls-section ls-inspector');shell.append(insp);
 const insHead=element('div','ls-section-heading');insHead.append(node('span','INSPECTOR DE LUZ'),element('span','ls-count',active()?.name||'Sin selección'));insp.append(insHead);
 const nav=element('div','ls-inspector-tabs');insp.append(nav);
-for(const [key,label] of [['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art'],['schedule','◷ Horario']]){
+const maskSelected=active()?.type==='mask';
+if(!maskSelected&&state.inspectorTab==='mask')state.inspectorTab='shape';
+if(maskSelected)insp.classList.add('ls-mask-editor-active');
+const inspectorTabs=maskSelected?[['mask','✎ Dibujar máscara'],['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art'],['schedule','◷ Horario']]:
+ [['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art'],['schedule','◷ Horario']];
+for(const [key,label] of inspectorTabs){
  nav.append(mini(label,()=>{state.inspectorTab=key;refresh();},state.inspectorTab===key));
 }
 const selected=active();
 if(!selected)insp.append(element('div','ls-empty','Selecciona una luz en el mapa o en la biblioteca.'));
 else{
 const tabs={};
-for(const id of ['shape','fade','pulse','pixel','schedule']){const panel=element('div','ls-tab-body');panel.hidden=state.inspectorTab!==id;insp.append(panel);tabs[id]=panel;}
-const shapePanel=tabs.shape,fadePanel=tabs.fade,pulsePanel=tabs.pulse,pixelPanel=tabs.pixel,schedulePanel=tabs.schedule;
+for(const [id] of inspectorTabs){const panel=element('div','ls-tab-body');panel.hidden=state.inspectorTab!==id;insp.append(panel);tabs[id]=panel;}
+const shapePanel=tabs.shape,fadePanel=tabs.fade,pulsePanel=tabs.pulse,pixelPanel=tabs.pixel,schedulePanel=tabs.schedule,maskPanel=tabs.mask;
 shapePanel.append(element('div','ls-group-label','PROPIEDADES GENERALES'));
 fadePanel.append(element('p','ls-inline-note','Elige hacia qué borde se atenúa la luz. «Hacia abajo» conserva una zona luminosa arriba y la oscurece progresivamente hacia abajo.'));
-const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;});labeled(shapePanel,'Geometría',typeSelect);
+const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;state.inspectorTab=selected.type==='mask'?'mask':'shape';});labeled(shapePanel,'Geometría',typeSelect);
 if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editLightValue(()=>selected.angle=v,final));}
 if(selected.type==='ellipse'||selected.type==='rectangle'||selected.type==='mask'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editLightValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editLightValue(()=>selected.heightPx=v,final));}
 if(selected.type==='mask'){
-  const maskTitle=element('div','ls-mask-inspector-title','MÁSCARA DE LUZ · EDICIÓN VISUAL');
-  shapePanel.append(maskTitle);
-  shapePanel.append(element('p','ls-inline-note','Para una cueva: crea un haz que salga de la abertura. Usa la plantilla, pinta dónde quieres luz y borra detrás de las paredes. El blanco ilumina y lo transparente no.'));
+  const maskTitle=element('div','ls-mask-inspector-title','DIBUJAR FORMA DE LA LUZ');
+  maskPanel.append(maskTitle);
+  maskPanel.append(element('p','ls-inline-note','Usa la plantilla para la salida de la cueva, pinta dónde llega la luz y borra detrás de las paredes. El zoom de aquí es independiente del mapa.'));
   const maskInput=node('input');maskInput.type='text';maskInput.className='ls-input';
   maskInput.placeholder='cueva_salida.png';maskInput.value=selected.maskFile||'';
   const lightId=selected.id;
@@ -438,14 +443,14 @@ if(selected.type==='mask'){
     const name=maskFilename(maskInput.value.trim());
     if(!name){maskInput.value=selected.maskFile||'';return notify('Usa un nombre como cueva_salida.png','warn');}
     if(name===selected.maskFile)return;
-    change(()=>selected.maskFile=name);
+    change(()=>{selected.maskFile=name;state.inspectorTab='mask';});
     void loadMaskFile(name,{force:true}).then(ok=>{
       notify(ok?'Máscara actualizada en el mapa':'Sin PNG todavía: usa «Crear salida de cueva».',ok?'info':'warn');
     }).catch(fail);
   };
   labeled(shapePanel,'Archivo PNG',maskInput);
   const maskTools=element('div','ls-mask-load-actions');
-  shapePanel.append(maskTools);
+  maskPanel.append(maskTools);
   maskTools.append(mini('▣ Elegir gráfico',()=>{void pickMaskGraphic(lightId).catch(fail);}));
   maskTools.append(mini('↻ Recargar PNG',()=>{const name=selected.maskFile;
     if(!maskFilename(name))return notify('Elige primero un archivo PNG.','warn');
@@ -460,12 +465,12 @@ if(selected.type==='mask'){
     const draft=caveTemplate(256,128,'right');
     state.maskDrafts.set(name,draft);
     setMaskImage(name,draft);
-    change(()=>selected.maskFile=name);
+    change(()=>{selected.maskFile=name;state.inspectorTab='mask';});
   }));
   const name=selected.maskFile;
   const source=maskFilename(name)?(state.maskDrafts.get(name)||getMaskImage(name)):null;
   if(source){
-    mountMaskPainter(shapePanel,{
+    mountMaskPainter(maskPanel,{
       filename:name,
       getSource:()=>state.maskDrafts.get(name)||getMaskImage(name),
       onCreate:canvas=>{state.maskDrafts.set(name,canvas);setMaskImage(name,canvas);redraw();},
@@ -487,7 +492,7 @@ if(selected.type==='mask'){
       notify
     });
   }else{
-    shapePanel.append(element('p','ls-mask-empty','Puedes seleccionar un PNG ya existente o usar «Crear salida de cueva» para empezar directamente con una forma lista para pintar.'));
+    maskPanel.append(element('p','ls-mask-empty','Puedes seleccionar un PNG ya existente o usar «Crear salida de cueva» para empezar directamente con una forma lista para pintar.'));
   }
  }
  if(selected.type!=='radial')slider(shapePanel,'Rotación',selected.rotation,-360,360,1,(v,final)=>editLightValue(()=>selected.rotation=v,final));
@@ -636,8 +641,8 @@ function selectMap(id){const n=Number(id);if(n>0&&state.mapId!==n){state.mapId=n
 
 function pointerDown(e){if(!state||state.readError||e.buttons&&!(e.buttons&1))return;selectMap(e.mapId);const pt=pointerPoint(e);state.hover=pt;state.lastCursor=pt;const found=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);state.hoverHit=found;
 if(state.mode==='erase'){if(found)change(()=>{const m=current();m.lights=m.lights.filter(l=>l.id!==found.light.id);if(state.selected===found.light.id)state.selected=null;});redraw();return;}
-if(state.mode==='select'){state.selected=found?.light.id||null;if(found){state.drag={id:found.light.id,part:found.part,start:pt,origin:{x:found.light.x,y:found.light.y,radius:found.light.radiusPx},before:deepCopy(state.data)};}redraw();refresh();return;}
-if(state.mode==='place'){const l=makeLight(pt.x,pt.y,state.newType);record();const m=getMap(state.data,state.mapId,true);m.lights.push(l);state.selected=l.id;state.drag={id:l.id,part:'radius',start:pt,origin:{x:pt.x,y:pt.y,radius:state.brushRadius},before:null};l.radiusPx=state.brushRadius;invalidate();redraw();refresh();}}
+if(state.mode==='select'){state.selected=found?.light.id||null;state.inspectorTab=found?.light.type==='mask'?'mask':'shape';if(found){state.drag={id:found.light.id,part:found.part,start:pt,origin:{x:found.light.x,y:found.light.y,radius:found.light.radiusPx},before:deepCopy(state.data)};}redraw();refresh();return;}
+if(state.mode==='place'){const l=makeLight(pt.x,pt.y,state.newType);record();const m=getMap(state.data,state.mapId,true);m.lights.push(l);state.selected=l.id;state.inspectorTab=l.type==='mask'?'mask':'shape';state.drag={id:l.id,part:'radius',start:pt,origin:{x:pt.x,y:pt.y,radius:state.brushRadius},before:null};l.radiusPx=state.brushRadius;invalidate();redraw();refresh();}}
 function pointerMove(e){if(!state||Number(e.mapId)!==Number(state.mapId))return;const pt=pointerPoint(e);const previous=state.hover;const d=state.drag;
 if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
