@@ -1,4 +1,4 @@
-# Lighting Studio v0.8.0 — luz diurna vanilla, horarios y saco de dormir
+# Lighting Studio v0.9.0 — día, tarde y noche con tonos nativos de Pokémon Essentials
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -379,3 +379,46 @@ Quien desee una transición gradual basada en el tiempo del juego puede elevar �
 ### Ajuste UX del saco de dormir (menú único)
 
 Las seis horas fijas se muestran en **una sola selección** de Pokémon Essentials, en lugar de repartirlas en dos páginas. Orden: 07:00, 11:00, 15:00, 17:00, 19:00 y 23:00. La transición blanca, la ME y los mensajes por hora se conservan. El test `DeveloperTests/LightingStudio/test_day_night.rb` comprueba que la ventana contiene las seis opciones, en su orden correcto, sin flechas.
+
+
+## v0.9.0 — Cambio del mezclado ambiental a Tone (RGBG) nativo
+
+**Motivo:** la superposición translúcida de un color RGB con alpha en toda la pantalla alteraba la saturación y lavaba los colores originales del pixel art, incluso usando paletas menos intensas.
+
+**Referencias técnicas:**
+- Deo's Custom Day & Night Tones: https://eeveeexpo.com/resources/50/ . Usa Tone.new(red,green,blue,gray), busca legibilidad nocturna y conserva los colores de los tiles; estos presets están adaptados, no copiados exactamente.
+- Godot CanvasModulate / 2D Lights: separar modulación ambiental de luces de puntos, que son aditivas.
+- Unity URP 2D: Multiply para cambiar la energía del fondo y Additive para luces locales; evitar sumar múltiples passes de tinte similares.
+
+### Motor ingame
+
+- El modo `timeOfDay.blendMode: "tone"` es ahora el predeterminado. Lighting Studio **ya no dibuja un rectángulo semitransparente** para su ciclo día-noche en este modo.
+- Aplica valores RGSS `Tone.new(R,G,B,Gray)` sobre el viewport del mapa. La hora interpola los cuatro canales por separado, conservando el color de fondo en el día.
+- La integración suma el Tone de eventos `$game_screen.tone` al del reloj, con clamp RGSS. Los mapas marcados `dayNightMode: "ignore"` siguen usando los efectos de la base.
+- **Evita doble coloración:** la base dispone de `pbDayNightTint(@map_renderer)` independiente, gobernado por la hora real. Si el ciclo nativo de Lighting Studio está activo en el mapa, se neutraliza solo el Tone vanilla del renderer (sin alterar el Tone de eventos). Cuando se apaga el ciclo, ese comportamiento vanilla vuelve a utilizarse.
+- En mapas conectados, el Tone definitivo se establece después de actualizar todos los Spriteset_Map.
+- El modo antiguo `blendMode: "overlay"` permanece para compatibilidad con proyectos que dependan de RGB `color + darkness`.
+- Los mapas sin el ciclo habilitado y los controles manuales de oscuridad no han sido modificados.
+
+### Editor Maker Studio
+
+- Sección **Día y noche → Cómo se mezcla el color**: “Tono nativo Pokémon (RGB + gris)” o “Capa RGB antigua”.
+- En modo nativo, cada hora tiene controles directos **Rojo, Verde, Azul** (-255 a 255) y **Gris** (0 a 255), además del horario.
+- La franja de 24 horas utiliza muestras de referencia RGBG, no bloques del color elegido.
+- La previsualización sobre el mapa usa mezclas Canvas *multiply* (oscurecimiento de canales) y *screen* (valores positivos), sin leer píxeles de toda la pantalla. **Es aproximada**: el gris nativo de Essentials solo se representa exactamente en el juego.
+
+### Configuración de prueba (mapa 79)
+
+- 00:00 — RGBG (-58, -58, +9, 30)
+- 07:00 — RGBG (-16, -28, -34, 9)
+- 11:00 a 15:00 — RGBG (0, 0, 0, 0)
+- 17:00 — RGBG (-12, -27, -32, 9)
+- 19:00 — RGBG (-29, -33, +4, 20)
+- 23:00 — RGBG (-58, -58, +9, 30)
+
+Se conservan los presets, pulsación, horarios de las farolas y el saco de dormir con seis horas en una única página.
+
+### Validación
+
+- Comprobación de sintaxis JavaScript de los módulos y cálculo del modelo de horarios; agregados tests de mezcla RGBG, compatibilidad con el formato anterior, Tone de eventos y eliminación del doble tinte vanilla.
+- **Falta ejecutar el plugin dentro de Essentials / mkxp y confirmar visualmente el resultado y FPS.** Para aislar si el problema es la paleta o el mezclado, compara 11:00 y 23:00, con las luces locales desactivadas temporalmente, y después actívalas.
