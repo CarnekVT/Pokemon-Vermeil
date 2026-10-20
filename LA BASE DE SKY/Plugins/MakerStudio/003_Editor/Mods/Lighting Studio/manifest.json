@@ -1,7 +1,7 @@
 {
   "id": "com.carnekvt.lighting-studio",
   "name": "Lighting Studio",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Editor ancho, normales con prioridad de tiles, luces precargadas y reloj interno con saco de dormir.",
+  "description": "Corrección del reloj interno, menú horario del saco de dormir e interfaz compacta por secciones",
   "tags": [
     "mapping",
     "lighting",
