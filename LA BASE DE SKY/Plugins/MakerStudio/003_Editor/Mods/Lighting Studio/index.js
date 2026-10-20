@@ -395,14 +395,14 @@ const cfg=selected.schedule||{enabled:false,startHour:19,endHour:7,fadeMinutes:2
 const preset=node('select');preset.className='ls-input';
 const isDay=cfg.enabled&&Math.abs(cfg.startHour-7)<.001&&Math.abs(cfg.endHour-19)<.001;
 const isNight=cfg.enabled&&Math.abs(cfg.startHour-19)<.001&&Math.abs(cfg.endHour-7)<.001;
-const presetMode=!cfg.enabled?'always':isDay?'day':isNight?'night':'custom';
+const presetMode=cfg.mode||(!cfg.enabled?'always':isDay?'day':isNight?'night':'custom');
 for(const [value,label] of [['always','Siempre encendida'],['day','Solo día (07:00–19:00)'],['night','Solo noche (19:00–07:00)'],['custom','Personalizado']]){
  const opt=node('option',label);opt.value=value;preset.append(opt);
 }
 preset.value=presetMode;
 preset.onchange=()=>change(()=>{
  if(!selected.schedule)selected.schedule={enabled:false,startHour:19,endHour:7,fadeMinutes:20};
- const v=preset.value;selected.schedule.enabled=v!=='always';
+ const v=preset.value;selected.schedule.enabled=v!=='always';selected.schedule.mode=v;
  if(v==='day'){selected.schedule.startHour=7;selected.schedule.endHour=19;}
  if(v==='night'){selected.schedule.startHour=19;selected.schedule.endHour=7;}
 });
