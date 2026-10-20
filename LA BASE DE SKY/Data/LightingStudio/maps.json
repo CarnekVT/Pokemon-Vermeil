@@ -168,7 +168,8 @@
             "type": "static"
           }
         }
-      ]
+      ],
+      "dayNightMode": "follow"
     }
   },
   "normalSettings": {
@@ -182,6 +183,52 @@
     "suffix": "_n",
     "tilesets": [],
     "autotiles": [],
-    "characters": []
+    "characters": [],
+    "intensity": 0.5,
+    "warmup": true
+  },
+  "timeOfDay": {
+    "enabled": true,
+    "source": "internal",
+    "startHour": 8,
+    "minutesPerSecond": 0.1,
+    "previewHour": 12,
+    "keyframes": [
+      {
+        "hour": 0,
+        "color": "#182440",
+        "darkness": 0.68
+      },
+      {
+        "hour": 5,
+        "color": "#415275",
+        "darkness": 0.53
+      },
+      {
+        "hour": 7,
+        "color": "#FFCF9A",
+        "darkness": 0.24
+      },
+      {
+        "hour": 12,
+        "color": "#FFFFFF",
+        "darkness": 0
+      },
+      {
+        "hour": 17,
+        "color": "#FFC58A",
+        "darkness": 0.2
+      },
+      {
+        "hour": 19,
+        "color": "#6879B1",
+        "darkness": 0.48
+      },
+      {
+        "hour": 22,
+        "color": "#24314C",
+        "darkness": 0.63
+      }
+    ]
   }
 }
