@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio day/night v0.8.0 — additive to 001_LightingStudio.rb.
+# Lighting Studio day/night v0.9.0 — additive to 001_LightingStudio.rb.
 # The real clock is local system time. Internal minutes are stored on
 # $PokemonGlobal, which is serialized with save data by Essentials.
 module LightingStudioDayNight
@@ -28,6 +28,7 @@ module LightingStudioDayNight
     @cached = nil
     @last_tick = nil
     @cached_keyframes = nil
+    @cached_tone_keys = nil
     @revision = (@revision || 0) + 1
   end
 
@@ -105,6 +106,64 @@ module LightingStudioDayNight
   # A scheduled light fades in and out in GAME minutes. Works across
   # midnight (e.g. 19:00 -> 05:00) without rebuilding light masks or chunks.
   # Disabled/unconfigured schedules preserve legacy lights.
+  # Native Pokémon Essentials RGSS tone. Unlike a colored opacity overlay,
+  # Tone alters the sprite/map channels without replacing the original palette
+  # with a flat blue/green color. Values follow Deo's Eevee Expo technique.
+  def native_tone?
+    settings['blendMode'] == 'tone'
+  end
+
+  def tone_keys
+    return @cached_tone_keys if @cached_tone_keys
+    raw=settings['keyframes']
+    raw=[] unless raw.is_a?(Array)
+    @cached_tone_keys=raw.first(48).filter_map do |item|
+      next unless item.is_a?(Hash)
+      hr=clamp(item['hour'],0.0,23.999,0.0)
+      v=item['tone']
+      if v.is_a?(Hash)
+        channels=[
+          clamp(v['red'],-255,255,0).round,
+          clamp(v['green'],-255,255,0).round,
+          clamp(v['blue'],-255,255,0).round,
+          clamp(v['gray'],0,255,0).round
+        ]
+      else
+        # Legacy color/darkness keyframes (pre-v0.9) remain valid: best-effort
+        # shade conversion avoids their former color-overpaint appearance.
+        rgb=LightingStudio.hex_color(item['color'])
+        darkness=clamp(item['darkness'],0,1,0)
+        neutral=[-85*darkness,-85*darkness,-85*darkness]
+        channels=3.times.map { |i| [[neutral[i]+(rgb[i]-170)*darkness*0.12,-255].max,255].min.round }
+        channels << 0
+      end
+      {:hour=>hr,:tone=>channels}
+    end.sort_by { |key| key[:hour] }
+  end
+
+  def tone_values(at_hour=nil)
+    keys=tone_keys
+    return [0,0,0,0] if keys.length < 2
+    h=((at_hour.nil? ? hour : at_hour).to_f % 24.0)
+    hi=keys.index { |p| p[:hour]>h } || 0
+    high=keys[hi];low=keys[(hi-1)%keys.length]
+    start=low[:hour];finish=high[:hour]+(hi==0 ? 24.0 : 0.0)
+    value=h<start ? h+24.0 : h
+    span=finish-start
+    t=span>0 ? [[(value-start)/span,0.0].max,1.0].min : 0.0
+    4.times.map { |i| (low[:tone][i]*(1.0-t)+high[:tone][i]*t).round }
+  end
+
+  def compose_tone(screen_tone,values)
+    original=screen_tone || Tone.new(0,0,0,0)
+    Tone.new(
+      [[original.red+values[0],-255].max,255].min,
+      [[original.green+values[1],-255].max,255].min,
+      [[original.blue+values[2],-255].max,255].min,
+      [[original.gray+values[3],0].max,255].min
+    )
+  end
+
   def schedule_factor(schedule, at_hour=nil)
     return 1.0 unless schedule.is_a?(Hash) && schedule['enabled']==true
     return 1.0 unless settings['enabled']==true
@@ -129,7 +188,7 @@ module LightingStudioDayNight
 
   def ambient(map_data)
     return nil unless active_on_map?(map_data)
-    interpolate(hour)
+    native_tone? ? tone_values : interpolate(hour)
   end
 
   # Public script hooks. Internal clock time persists in the game save.
@@ -162,7 +221,8 @@ module LightingStudioDayNight
     { :source => settings['source'], :enabled => settings['enabled'],
       :map_id => (defined?($game_map) && $game_map) ? $game_map.map_id : nil,
       :map_mode => map_data.is_a?(Hash) ? map_data['dayNightMode'] : nil,
-      :hour => hour.round(3), :ambient => lighting, :revision => revision }
+      :hour => hour.round(3), :ambient => lighting,
+      :blend_mode => settings['blendMode'], :revision => revision }
   rescue StandardError => e
     { :error => e.message }
   end
