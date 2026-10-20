@@ -60,7 +60,25 @@ export function paint(g,info,v){
     if(live&&allEnabled){
       const ambient=v.ambientOverride||map.ambient||{};
       const darkness=Math.max(v.previewNight?0.42:0,Math.max(0,Math.min(1,Number(ambient.darkness)||0)));
-      if(darkness){
+      if(v.ambientOverride && v.toneMode==='tone' && ambient.tone){
+        // GPU-backed Canvas multiply/screen approximates RGSS Tone without
+        // reading each pixel. This preserves original pixel-art contrast,
+        // unlike a flat semi-transparent blue/green overlay. The gray channel
+        // is shown in RGBG controls; its exact desaturation is runtime-only.
+        const t=ambient.tone;
+        const values=['red','green','blue'].map(k=>Math.max(-255,Math.min(255,Number(t[k])||0)));
+        if(values.some(n=>n<0)){
+          g.globalCompositeOperation='multiply';
+          g.fillStyle='rgb('+values.map(n=>Math.max(0,255+Math.min(0,n))).join(',')+')';
+          g.fillRect(0,0,w,h);
+        }
+        if(values.some(n=>n>0)){
+          g.globalCompositeOperation='screen';
+          g.fillStyle='rgb('+values.map(n=>Math.max(0,n)).join(',')+')';
+          g.fillRect(0,0,w,h);
+        }
+        g.globalCompositeOperation='source-over';
+      }else if(darkness){
         const tint=rgb(ambient.color||'#142439');
         g.fillStyle='rgb('+tint.join(',')+')';
         g.globalAlpha=darkness*(v.ambientOverride?170/255:.8);
