@@ -3,8 +3,15 @@ import {scheduleFactor} from './model.js';
 // On-map visual overlay. Maker Studio pointer events expose tile coordinates only.
 export const TILE=32;
 export function point(ev){return {x:Math.floor(Number(ev.tileX))+.5,y:Math.floor(Number(ev.tileY))+.5};}
-export function toScreen(x,y,info){const t=Number(info.tileSize)||32,z=Number(info.zoom)||1;return {x:(x*t-(Number(info.viewportX)||0))*z,y:(y*t-(Number(info.viewportY)||0))*z};}
-export function screenRadius(radius,info){return radius*(Number(info.tileSize)||32)/32*(Number(info.zoom)||1);}
+// Match Maker Studio's native autotile renderer: tileSize is ALREADY scaled
+// by zoom and viewportX/Y are screen-pixel offsets. Applying zoom again is
+// why lights drift away from their tiles at 75%, 150%, 200%, etc.
+export function toScreen(x,y,info){
+ const tileSize=Number(info.tileSize)||32;
+ return {x:x*tileSize-(Number(info.viewportX)||0),
+         y:y*tileSize-(Number(info.viewportY)||0)};
+}
+export function screenRadius(radius,info){return radius*(Number(info.tileSize)||32)/32;}
 export function hitTest(lights,p,selectedId,shiftRadius=false){
   const list=Array.isArray(lights)?lights:[], distance=l=>Math.hypot((l.x-p.x)*32,(l.y-p.y)*32);
   const chosen=list.find(l=>l.id===selectedId);
