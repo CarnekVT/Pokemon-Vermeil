@@ -374,7 +374,7 @@ export function activate(ctx) {
     icon:"move",
     defaultPosition:"right",
     defaultSize:{width:1400,height:860},
-    showInMenu:false,
+    showInMenu:!(ctx.menu && typeof ctx.menu.registerMenuItem==="function"),
     render(host){return new MovementStudio(ctx,host);}
   });
   if(ctx.menu && typeof ctx.menu.registerMenuItem==="function"){
