@@ -199,4 +199,40 @@ export const LIGHTING_WIDE_WORKSPACE_CSS = `
  .ls-mask-tools>.ls-btn,.ls-mask-actions>.ls-btn{flex:1 1 112px}
 }
 
+/* Mask painting is now its own workspace tab, not buried below width/height
+   sliders. Favor editor canvas space and keep its controls in sight. */
+.ls-wide-light-layout:has(.ls-mask-editor-active){
+ grid-template-columns:minmax(175px,24%) minmax(0,1fr);
+ align-items:start;
+}
+.ls-mask-editor-active .ls-inspector-tabs{
+ display:flex;flex-wrap:wrap;gap:5px;
+ position:sticky;top:0;z-index:3;padding:8px 10px;
+ background:var(--bg-secondary,#171b24);
+}
+.ls-mask-editor-active .ls-inspector-tabs .ls-btn{flex:1 1 104px;min-height:32px}
+.ls-mask-editor-active .ls-tab-body{padding:10px 12px}
+.ls-mask-editor-active .ls-mask-workbench{margin:9px 0;padding:9px;min-width:0}
+.ls-mask-editor-active .ls-mask-canvas-frame{
+ overflow:auto;overscroll-behavior:contain;
+ min-height:145px;max-height:min(56vh,620px);
+ border:1px solid var(--border,#36475b);border-radius:8px;
+}
+.ls-mask-canvas-stage{position:relative;display:block;width:100%;min-width:1px;box-sizing:border-box}
+.ls-mask-canvas-stage .ls-mask-canvas{display:block;width:100%;height:auto;touch-action:none}
+.ls-mask-canvas-stage .ls-mask-reference,
+.ls-mask-canvas-stage .ls-mask-poly-preview{
+ position:absolute;inset:0;width:100%;height:100%;object-fit:fill;
+}
+.ls-mask-zoom{display:flex;align-items:center;gap:5px;flex:0 1 170px;min-width:120px;font-size:11px}
+.ls-mask-zoom select{max-width:105px;flex:1}
+.ls-mask-editor-active .ls-mask-tools{margin-bottom:8px}
+.ls-mask-editor-active .ls-mask-actions{margin-top:8px}
+.ls-mask-editor-active .ls-mask-actions .ls-btn{min-height:32px}
+.ls-mask-editor-active .ls-mask-status{margin-top:8px}
+@container (max-width:770px){
+ .ls-wide-light-layout:has(.ls-mask-editor-active){grid-template-columns:minmax(0,1fr)}
+ .ls-mask-editor-active .ls-mask-canvas-frame{max-height:45vh}
+}
+
 `;
