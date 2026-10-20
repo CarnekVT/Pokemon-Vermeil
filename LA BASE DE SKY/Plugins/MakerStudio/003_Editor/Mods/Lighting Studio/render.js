@@ -2,16 +2,21 @@
 // Each source is merged using per-channel MAX, not additive stacking.
 // World-to-screen projection is exactly the one used by LBDS Animated Props.
 const MASK_LIMIT=16, MASK_MAX=128, SMOOTH_SHAPE_MAX=192, CHUNK_WORLD=256, CHUNK_PX=96, CHUNK_LIMIT=24;
-const CHUNKS_PER_PASS=1;
+const CHUNKS_PER_PASS=2;
 const masks=new Map(),chunks=new Map(),maskSources=new Map();
+// Keep separate texture caches, as native animated autotiles do: a mask
+// brush edit should not discard all static illumination chunks.
+function evictMask(name){
+ for(const key of masks.keys())if(key.startsWith('mask|')&&key.endsWith('|'+name))masks.delete(key);
+}
 export function setMaskImage(filename,img){
  if(!filename||!img)return;
  maskSources.set(filename,img);
- clearLightCache();
+ evictMask(filename);
 }
 export function getMaskImage(filename){return maskSources.get(filename)||null;}
 export function removeMaskImage(filename){
- if(maskSources.delete(filename))clearLightCache();
+ if(maskSources.delete(filename))evictMask(filename);
 }
 export function forgetMaskImages(){maskSources.clear();clearLightCache();}
 let pendingChunks=false;
@@ -280,6 +285,15 @@ function drawUnionChunks(g,lights,project,width,height){
   g.imageSmoothingEnabled=!lights.some(l=>l.pixel?.enabled);
   for(let cy=top;cy<=bottom;cy++)for(let cx=left;cx<=right;cx++){
     const key=cx+':'+cy;
+    // Avoid building empty regions; native autotiles do the same kind of
+    // visibility/cell culling rather than resampling blank map pixels.
+    const worldX=cx*CHUNK_WORLD,worldY=cy*CHUNK_WORLD;
+    const intersects=lights.some(l=>{
+      const b=bounds(l);
+      return b.x+b.w/2>worldX&&b.x-b.w/2<worldX+CHUNK_WORLD&&
+        b.y+b.h/2>worldY&&b.y-b.h/2<worldY+CHUNK_WORLD;
+    });
+    if(!intersects)continue;
     if(!chunks.has(key)){
       if(built>=CHUNKS_PER_PASS){pendingChunks=true;continue;}
       built++;
