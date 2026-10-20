@@ -1,4 +1,4 @@
-# Lighting Studio v0.7.1 — render inmediato, editor ancho, prioridad de normales y saco de dormir
+# Lighting Studio v0.7.2 — ciclo horario activo y nuevo editor
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -310,3 +310,19 @@ El test independiente se ha trasladado a `LA BASE DE SKY/DeveloperTests/Lighting
 - Test independiente `ruby "DeveloperTests/LightingStudio/test_daynight.rb"` para opciones del saco, persistencia en objeto de guardado y transiciones horarias; cubierto también por CI.
 
 **Validación:** los archivos se subieron a la rama `new-MK-for-2.5D-Testeo`; queda por comprobar visualmente la prioridad y la carga inicial dentro de Essentials 21.1. Si los normales se vuelven demasiado oscuros por el orden de composición, se requerirá una solución que combine la iluminación en la capa del personaje y no otro aumento de z.
+
+## v0.7.2 — Corrección de salto horario y reorganización de interfaz
+
+- **Reloj funcional en mapa 79:** `Data/LightingStudio/maps.json` incorpora el perfil horario `timeOfDay` activado en **modo interno**, y el mapa 79 sigue ese perfil. Antes faltaba `timeOfDay` en el archivo de datos del juego y no podía reaccionar aunque el saco cambiara la hora.
+- **Actualización inmediata:** `LightingStudioDayNight.set_internal_time` incrementa una revisión y solicita un repintado de la capa ambiental del mapa sin volver a entrar. El renderizador ya no depende exclusivamente del temporizador de 0,2 s; evita volver a dibujar el píxel ambiental si el color no cambia.
+- **Diagnóstico:** `p LightingStudioDayNight.debug_status` permite ver `source`, `enabled`, `map_mode`, `hour`, `ambient` y `revision`.
+- **Saco de dormir:** selector de seis horas fijas **06:00 Amanecer, 09:00 Mañana, 12:00 Mediodía, 15:00 Tarde, 18:00 Atardecer, 21:00 Noche**. Pregunta: «¿A qué hora quieres despertar?». No permite avanzar la hora del sistema real.
+- **Nueva experiencia Maker Studio:** navegación superior por secciones, herramientas de editar luces solo en «Luces e inspector», diagnósticos plegables, biblioteca e inspector en dos columnas, ciclo horario dividido en configuración y tabla editable de colores/oscuridad. La franja visual de 24 horas permite previsualizar una hora pulsando directamente en su segmento.
+- **Undo/Redo:** los controles de color y oscuridad de la línea temporal crean y consolidan ediciones, en lugar de mutar datos sin historial.
+- **Tests:** `DeveloperTests/LightingStudio/test_day_night.rb` comprueba configuración activa, salto horario, la tabla de seis horas y solicitud de actualización inmediata; se ejecuta en CI.
+
+### Activación / pruebas rápidas
+
+Actualiza desde la rama `new-MK-for-2.5D-Testeo`, abre Lighting Studio → «Día y noche» y comprueba que están activados el ciclo y el modo «Reloj interno». Asegúrate de probar el **mapa 79**. Da el saco mediante `pbReceiveItem(:SLEEPINGBAG)` (recompila PBS si nunca lo hiciste) y cambia a 06:00 y 21:00. La capa ambiental debería cambiar al instante. Si no sucede, ejecuta `p LightingStudioDayNight.debug_status`.
+
+**Validación:** modelos JavaScript y estructura de cambios revisados. Pruebas Ruby añadidas al workflow, pero aún no hay confirmación ingame del efecto o del diseño final de la interfaz.
