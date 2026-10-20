@@ -45,8 +45,40 @@ def pbMessage(message,choices=nil,*_rest)
   0
 end
 
+# Native Tone and vanilla tile tint mock. In-game these are provided by RGSS
+# and PBDayNight; the Lighting Studio plugin must compose/suppress correctly.
+class Tone
+  attr_accessor :red,:green,:blue,:gray
+  def initialize(r=0,g=0,b=0,a=0)
+    set(r,g,b,a)
+  end
+  def set(r,g,b,a);@red,@green,@blue,@gray=r,g,b,a;end
+end
+class TileToneTest
+  attr_reader :tone
+  def initialize;@tone=Tone.new;end
+end
+def pbDayNightTint(object)
+  object.tone.set(-70,-90,15,55)
+end
+
 load 'Plugins/Lighting Studio Runtime/004_DayNight.rb'
 time=LightingStudioDayNight
+raise 'RGBG native Tone not selected' unless time.native_tone?
+raise 'Neutral daytime tone must not wash tiles' unless time.tone_values(12)==[0,0,0,0]
+night=time.tone_values(23)
+raise 'Evening Tone should darken red and green gently' unless night[0]<0 && night[1]<0 &&
+  night[2]>=0 && night[3]>0
+composed=time.compose_tone(Tone.new(-8,5,2,8),night)
+raise 'RGSS event tone lost' unless composed.red==night[0]-8 &&
+  composed.green==night[1]+5 && composed.blue==night[2]+2 && composed.gray==night[3]+8
+renderer=TileToneTest.new
+pbDayNightTint(renderer)
+raise 'Vanilla tone duplicated custom cycle' unless [renderer.tone.red,renderer.tone.green,renderer.tone.blue,renderer.tone.gray]==[0,0,0,0]
+time.settings['enabled']=false
+pbDayNightTint(renderer)
+raise 'Vanilla tone failed to recover outside custom clock' unless renderer.tone.red==-70
+time.settings['enabled']=true
 raise 'Clock config was not saved' unless time.settings['enabled']==true &&
   time.settings['source']=='internal'
 raise 'Map 79 ignores the clock' unless time.active_on_map?(LightingStudio.load_map(79))
