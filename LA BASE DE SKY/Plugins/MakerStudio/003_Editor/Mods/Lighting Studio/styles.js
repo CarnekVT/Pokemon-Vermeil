@@ -235,4 +235,22 @@ export const LIGHTING_WIDE_WORKSPACE_CSS = `
  .ls-mask-editor-active .ls-mask-canvas-frame{max-height:45vh}
 }
 
+/* Light list shouldn't wrap form labels into unreadable vertical text */
+.ls-light-library{min-width:0}
+.ls-light-library>.ls-field{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.ls-light-library>.ls-field .ls-field-label{min-width:0;white-space:normal}
+.ls-light-library>.ls-field select{width:100%;min-width:0}
+.ls-light-library .ls-item{min-height:39px;display:flex}
+.ls-light-library .ls-item-main{min-width:0;flex:1}
+.ls-light-quality{display:flex;align-items:center;gap:9px;padding:6px 10px;
+ border:1px solid var(--border,#354057);background:var(--bg-secondary,#202733);
+ border-radius:8px;font-size:11px;min-height:34px;min-width:0}
+.ls-light-quality select{width:min(180px,100%);min-width:100px}
+.ls-light-quickbar{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.ls-light-quality{grid-column:1/-1}
+@container (max-width:870px){
+ .ls-light-quality{grid-column:auto}
+ .ls-light-quickbar{grid-template-columns:1fr}
+}
+
 `;
