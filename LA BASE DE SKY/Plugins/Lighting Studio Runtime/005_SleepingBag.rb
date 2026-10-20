@@ -1,8 +1,9 @@
 # encoding: UTF-8
-# Lighting Studio: event-style Sleeping Bag test item and six fixed time slots.
+# Lighting Studio: event-style Sleeping Bag test item and seven fixed time slots.
 # Scriptable via LightingStudioDayNight.skip_to_hour(7).
 module LightingStudioDayNight
   SLEEPING_BAG_SLOTS = [
+    [5,  0, "5 a.m. — Madrugada", "La calma de la madrugada envuelve el ambiente."],
     [7,  0, "7 a.m.",  "La frescura de la mañana te invita a explorar."],
     [11, 0, "11 a.m.", "La luz del día ilumina el camino que tienes por delante."],
     [15, 0, "3 p.m.",  "La tarde transcurre tranquila. Es hora de continuar."],
@@ -81,7 +82,7 @@ module LightingStudioDayNight
       pbMessage(_INTL("El saco de dormir necesita un ciclo de día y noche con reloj interno."))
       return false
     end
-    # Show all six fixed hours at once; cancel with the usual Back button.
+    # Show all seven fixed hours at once; cancel with the usual Back button.
     names=SLEEPING_BAG_SLOTS.map { |row| _INTL(row[2]) }
     selected=pbMessage(_INTL("¿A qué hora quieres despertar?"),names,-1,nil,0)
     return false if selected.nil? || selected<0 || selected>=SLEEPING_BAG_SLOTS.length
