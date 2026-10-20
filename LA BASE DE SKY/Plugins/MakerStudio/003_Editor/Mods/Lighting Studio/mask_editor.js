@@ -88,16 +88,37 @@ export function mountMaskPainter(host,opts){
  const canvas=el('canvas','ls-mask-canvas');canvas.width=draft.width;canvas.height=draft.height;
  canvas.style.aspectRatio=draft.width+'/'+draft.height;
  canvasFrame.append(canvas);
+ const guide=el('img','ls-mask-reference');guide.alt='Gráfico de la cueva (referencia no exportada)';
+ guide.hidden=true;canvasFrame.prepend(guide);
+ const polyLayer=el('canvas','ls-mask-poly-preview');
+ polyLayer.width=canvas.width;polyLayer.height=canvas.height;
+ canvasFrame.append(polyLayer);
+ const polyCtx=polyLayer.getContext('2d');
  const brush=canvas.getContext('2d');brush.drawImage(draft,0,0);
  const status=el('div','ls-mask-status','Pinta con el ratón y observa la forma encima del mapa.');root.append(status);
  const group=(label,callback)=>{const b=el('button','ls-btn ls-small',label);b.type='button';b.onclick=callback;toolbar.append(b);return b;};
- let mode='paint',radius=10,strength=1,drag=false,last=null,dirty=false;
+ let mode='paint',radius=10,drag=false,last=null;
+ let polygon=[];
+ const renderPolygon=()=>{
+  polyCtx.clearRect(0,0,polyLayer.width,polyLayer.height);
+  if(!polygon.length)return;
+  polyCtx.lineWidth=2;polyCtx.strokeStyle='#F8D78A';polyCtx.setLineDash([5,4]);
+  polyCtx.beginPath();polygon.forEach((p,i)=>{if(i)polyCtx.lineTo(p.x,p.y);else polyCtx.moveTo(p.x,p.y);});
+  polyCtx.stroke();polyCtx.setLineDash([]);
+ };
+ const completePolygon=()=>{
+  if(polygon.length<3)return;
+  snapshot();
+  brush.save();brush.globalCompositeOperation='source-over';brush.fillStyle='rgba(255,255,255,1)';
+  brush.beginPath();polygon.forEach((p,i)=>{if(i)brush.lineTo(p.x,p.y);else brush.moveTo(p.x,p.y);});
+  brush.closePath();brush.fill();brush.restore();polygon=[];renderPolygon();signal();
+ };
  const history=[],future=[];
  const snapshot=()=>{history.push(brush.getImageData(0,0,canvas.width,canvas.height));if(history.length>15)history.shift();future.length=0;};
  const signal=()=>{onPreview(canvas);status.textContent='Vista previa actualizada · pulsa «Guardar PNG» para usarla ingame.';};
  const toolButtons=[];
- for(const [id,label] of [['paint','✎ Añadir luz'],['dim','◐ Luz tenue'],['erase','⌫ Borrar']]){
-  const b=group(label,()=>{mode=id;toolButtons.forEach(([x,v])=>v.classList.toggle('active',x===id));});
+ for(const [id,label] of [['paint','✎ Añadir luz'],['dim','◐ Luz tenue'],['erase','⌫ Borrar'],['polygon','⬡ Delimitar forma']]){
+  const b=group(label,()=>{mode=id;polygon=[];renderPolygon();toolButtons.forEach(([x,v])=>v.classList.toggle('active',x===id));status.textContent=id==='polygon'?'Marca el contorno por puntos. Doble clic para rellenarlo.':'Arrastra sobre la imagen para modificar la luz.';});
   toolButtons.push([id,b]);
  }
  toolButtons[0][1].classList.add('active');
@@ -112,16 +133,29 @@ export function mountMaskPainter(host,opts){
   brush.lineWidth=radius*2;brush.lineCap='round';brush.lineJoin='round';
   brush.beginPath();brush.moveTo(from.x,from.y);brush.lineTo(to.x,to.y);brush.stroke();brush.restore();
  };
- canvas.addEventListener('pointerdown',ev=>{if(ev.button!==0)return;ev.preventDefault();snapshot();drag=true;last=point(ev);canvas.setPointerCapture?.(ev.pointerId);stroke(last,last);});
+ canvas.addEventListener('pointerdown',ev=>{if(ev.button!==0)return;ev.preventDefault();
+  if(mode==='polygon'){if(ev.detail>=2){completePolygon();return;}polygon.push(point(ev));renderPolygon();return;}
+  snapshot();drag=true;last=point(ev);canvas.setPointerCapture?.(ev.pointerId);stroke(last,last);});
  canvas.addEventListener('pointermove',ev=>{if(!drag)return;ev.preventDefault();const p=point(ev);stroke(p,last);last=p;});
- const release=()=>{if(!drag)return;drag=false;last=null;dirty=true;signal();};
+ const release=()=>{if(!drag)return;drag=false;last=null;signal();};
  canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);
  const actions=el('div','ls-mask-actions');root.append(actions);
  const action=(label,callback)=>{const b=el('button','ls-btn ls-small',label);b.type='button';b.onclick=callback;actions.append(b);return b;};
- const replaceWith=created=>{snapshot();draft=created;canvas.width=created.width;canvas.height=created.height;canvas.style.aspectRatio=created.width+'/'+created.height;canvas.getContext('2d').drawImage(created,0,0);signal();};
+ const replaceWith=created=>{snapshot();draft=created;canvas.width=created.width;canvas.height=created.height;polyLayer.width=created.width;polyLayer.height=created.height;polygon=[];canvas.style.aspectRatio=created.width+'/'+created.height;canvas.getContext('2d').drawImage(created,0,0);signal();};
  action('➜ Salida de cueva',()=>replaceWith(caveTemplate(256,128,'right')));
  action('⬅ Cueva hacia izquierda',()=>replaceWith(caveTemplate(256,128,'left')));
  action('Lienzo vacío',()=>replaceWith(blankMask(canvas.width,canvas.height)));
+ const guideInput=el('input');guideInput.type='file';guideInput.accept='image/png,image/jpeg,image/webp';guideInput.hidden=true;root.append(guideInput);
+ action('▣ Calcar sobre imagen de cueva',()=>guideInput.click());
+ guideInput.onchange=()=>{
+  const file=guideInput.files?.[0];if(!file)return;
+  if(!file.type.startsWith('image/'))return notify('Elige PNG, JPG o WEBP.','warn');
+  const url=URL.createObjectURL(file);
+  guide.onload=()=>{URL.revokeObjectURL(url);guide.hidden=false;status.textContent='Guía cargada. Pinta o delimita la zona luminosa encima; la imagen de referencia no se exportará.';};
+  guide.onerror=()=>{URL.revokeObjectURL(url);notify('No se pudo cargar la imagen de referencia.','warn');};
+  guide.src=url;
+ };
+ action('Mostrar / ocultar guía',()=>{if(guide.src)guide.hidden=!guide.hidden;});
  action('Deshacer trazo',()=>{if(!history.length)return;future.push(brush.getImageData(0,0,canvas.width,canvas.height));brush.putImageData(history.pop(),0,0);signal();});
  action('Rehacer trazo',()=>{if(!future.length)return;history.push(brush.getImageData(0,0,canvas.width,canvas.height));brush.putImageData(future.pop(),0,0);signal();});
  const save=action('Guardar PNG',async()=>{save.disabled=true;try{const result=await onSave(filename,canvas);status.textContent=result.saved?'Guardado en '+result.path:'PNG exportado: cópialo a '+result.path;notify(status.textContent,result.saved?'info':'warn');}catch(e){status.textContent='Error: '+e.message;notify(status.textContent,'error');}finally{save.disabled=false;}});
