@@ -123,6 +123,11 @@ raise "Lamp must fade in at 19:10" unless (time.schedule_factor(schedule,19+10.0
 raise "Lamp must fade out at 06:50" unless (time.schedule_factor(schedule,6+50.0/60)-0.5).abs<0.00001
 raise "Legacy light must stay on" unless time.schedule_factor(nil,12)==1.0
 raise "Manual clock disabled should ignore schedule" unless time.schedule_factor({'enabled'=>false},12)==1.0
+instant={'enabled'=>true,'startHour'=>19,'endHour'=>7,'fadeMinutes'=>0}
+raise "Lamp should light at exactly 19:00" unless time.schedule_factor(instant,19)==1.0
+raise "Lamp should remain lit at 06:59" unless time.schedule_factor(instant,6.99)==1.0
+raise "Lamp should switch off at 07:00" unless time.schedule_factor(instant,7)==0.0
+
 raise 'Sleeping Bag forced no map refresh' unless spriteset.calls>=14
 raise 'Sleeping Bag ME did not play 6 times' unless $me_count==6
 raise 'Sleep transition did not use 80 graphics frames per skip' unless Graphics.updates==6*80
