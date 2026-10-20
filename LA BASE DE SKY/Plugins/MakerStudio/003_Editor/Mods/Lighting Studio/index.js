@@ -325,6 +325,7 @@ const daytime=element('section','ls-section');shell.append(daytime);
   tod.keyframes.sort((x,y)=>x.hour-y.hour);
  }));
  addTime.classList.add('ls-add-keyframe');daytime.append(addTime);
+ updateTimePreview();
  const timeChildren=[...daytime.children];
  const paletteIndex=timeChildren.indexOf(timelineTitle);
  const timeGroup=element('div','ls-time-editor-grid');
