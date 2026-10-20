@@ -24,8 +24,19 @@ export function hitTest(lights,p,selectedId,shiftRadius=false){
   if(centers.length)return {light:centers[0].light,part:'move'};
   if(chosen&&Math.abs(distance(chosen)-chosen.radiusPx)<=28)return {light:chosen,part:'radius'};
   // A click inside the illuminated area selects its source, not empty space.
+  const inside=light=>{
+    if(light.type!=='mask'&&light.type!=='rectangle'&&light.type!=='ellipse')return distance(light)<=Math.max(16,light.radiusPx);
+    // Hit-test the actual oriented projection instead of a radial halo.
+    const angle=-(Number(light.rotation)||0)*Math.PI/180;
+    const dx=(p.x-light.x)*32,dy=(p.y-light.y)*32;
+    const lx=Math.cos(angle)*dx-Math.sin(angle)*dy;
+    const ly=Math.sin(angle)*dx+Math.cos(angle)*dy;
+    const x=lx/Math.max(4,(light.widthPx||160)/2);
+    const y=ly/Math.max(4,(light.heightPx||96)/2);
+    return light.type==='ellipse'?x*x+y*y<=1:Math.abs(x)<=1&&Math.abs(y)<=1;
+  };
   const halos=list.map((light,index)=>({light,index,d:distance(light)}))
-    .filter(x=>x.d<=Math.max(16,x.light.radiusPx)&&x.light.enabled!==false)
+    .filter(x=>inside(x.light)&&x.light.enabled!==false)
     .sort((a,b)=>a.d/Math.max(a.light.radiusPx,1)-b.d/Math.max(b.light.radiusPx,1)||b.index-a.index);
   return halos.length?{light:halos[0].light,part:'move'}:null;
 }
@@ -92,7 +103,9 @@ export function paint(g,info,v){
         g.fillRect(0,0,w,h);
         g.globalAlpha=1;
       }
-      drawLights(g,timedLights,projection,w,h,seconds,(v.fastPreview||v.previewQuality==='fast')?'fast':(map.overlapMode||'union'));
+      drawLights(g,timedLights,projection,w,h,seconds,// Balanced reuses sprite textures, just like animated autotiles.
+      // Full alone enables expensive channel-wise MAX union chunk baking.
+      (v.fastPreview||v.previewQuality!=='full')?'fast':(map.overlapMode||'union'));
     }
     // Preview a light at the cursor BEFORE insertion using the actual light renderer.
     // Animated Props follows the same overlay/pointer-state approach.
