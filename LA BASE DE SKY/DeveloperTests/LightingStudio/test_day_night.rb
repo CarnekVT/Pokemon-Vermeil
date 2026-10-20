@@ -119,11 +119,16 @@ raise 'Clock diagnostic not working' unless time.debug_status[:enabled]==true
 load 'Plugins/Lighting Studio Runtime/005_SleepingBag.rb'
 # Minimal RGSS mock to validate event-like white fade, sound and timing.
 class Color
-  def initialize(*rgba);@rgba=rgba;end
+  attr_reader :red,:green,:blue,:alpha
+  def initialize(r,g,b,a);@red,@green,@blue,@alpha=r,g,b,a;end
 end
 class Bitmap
   def initialize(w,h);@disposed=false;end
-  def set_pixel(*args);end
+  def set_pixel(_x,_y,color)
+    raise 'Sleeping Bag fade must be BLACK, not white' unless
+      [color.red,color.green,color.blue,color.alpha]==[0,0,0,255]
+    $black_fade_bitmap_created=true
+  end
   def disposed?;@disposed;end
   def dispose;@disposed=true;end
 end
@@ -135,7 +140,7 @@ class Viewport
 end
 class Sprite
   attr_accessor :bitmap,:zoom_x,:zoom_y,:opacity
-  def initialize(*args);@disposed=false;end
+  def initialize(*args);@disposed=false;$sleep_overlay=self;end
   def disposed?;@disposed;end
   def dispose;@disposed=true;end
 end
@@ -150,24 +155,34 @@ module Input
   def self.update;end
 end
 $me_count=0
+$black_fade_bitmap_created=false
+$sleep_overlay=nil
+$expected_wake_hour=nil
 def pbMEPlay(name)
   raise 'Incorrect sleep ME' unless name=='Pokemon Healing'
+  raise 'Healing ME should play during full blackout' unless
+    $black_fade_bitmap_created && $sleep_overlay && $sleep_overlay.opacity==255
+  raise 'Clock should change while black, before the ME' unless
+    (LightingStudioDayNight.current_hour-$expected_wake_hour).abs<0.0001
   $me_count+=1
 end
 
 hours=[5,7,11,15,17,19,23]
 hours.each_with_index do |hour,index|
   time.set_internal_time(8,0)
+  $expected_wake_hour=hour
   $bag_responses=[index]
   before=spriteset.calls
   raise "Sleeping Bag did not change time for slot #{index}" unless time.use_sleeping_bag
   raise "Sleeping Bag hour #{index} incorrect" unless (time.current_hour-hour).abs<0.0001
   raise "Sleeping Bag must display all seven slots" unless $bag_choices.length==7
-  raise "Sleeping Bag choice order changed" unless $bag_choices==['5 a.m. — Madrugada','7 a.m.','11 a.m.','3 p.m.','5 p.m.','7 p.m.','11 p.m.']
+  raise "Sleeping Bag choice order changed" unless $bag_choices==['5 a.m.','7 a.m.','11 a.m.','3 p.m.','5 p.m.','7 p.m.','11 p.m.']
   raise "Sleeping Bag prompt differs from the reference" unless $bag_prompts[-2].include?('¿A qué hora quieres despertar?')
   raise "Sleeping Bag did not request ambient refresh" unless spriteset.calls>before
 end
-raise "Wrong six slots" unless LightingStudioDayNight::SLEEPING_BAG_SLOTS.map{|a|a[0]}==hours
+raise "Wrong seven slots" unless LightingStudioDayNight::SLEEPING_BAG_SLOTS.map{|a|a[0]}==hours
+raise '05:00 must display only its hour, with no added text' unless
+  LightingStudioDayNight::SLEEPING_BAG_SLOTS.first[2,2]==['5 a.m.','5 a.m.']
 
 # Directional lighting windows: overnight, daytime, gradual edges.
 schedule={'enabled'=>true,'startHour'=>19,'endHour'=>7,'fadeMinutes'=>20}
@@ -183,7 +198,8 @@ raise "Lamp should remain lit at 06:59" unless time.schedule_factor(instant,6.99
 raise "Lamp should switch off at 07:00" unless time.schedule_factor(instant,7)==0.0
 
 raise 'Sleeping Bag forced no map refresh' unless spriteset.calls>=16
-raise 'Sleeping Bag ME did not play 6 times' unless $me_count==7
+raise 'Sleeping Bag ME did not play 7 times' unless $me_count==7
 raise 'Sleep transition did not use 80 graphics frames per skip' unless Graphics.updates==7*80
+raise 'Sleeping Bag overlay did not fade back to transparent' unless $sleep_overlay.opacity==0
 
 puts 'Lighting Studio day/night, single-page seven sleeping bag hours and immediate refresh tests passed'
