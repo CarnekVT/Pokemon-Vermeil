@@ -4,7 +4,15 @@
 const MASK_LIMIT=16, MASK_MAX=128, SMOOTH_SHAPE_MAX=192, CHUNK_WORLD=256, CHUNK_PX=96, CHUNK_LIMIT=24;
 const CHUNKS_PER_PASS=1;
 const masks=new Map(),chunks=new Map(),maskSources=new Map();
-export function setMaskImage(filename,img){if(!filename)return;maskSources.set(filename,img);clearLightCache();}
+export function setMaskImage(filename,img){
+ if(!filename||!img)return;
+ maskSources.set(filename,img);
+ clearLightCache();
+}
+export function getMaskImage(filename){return maskSources.get(filename)||null;}
+export function removeMaskImage(filename){
+ if(maskSources.delete(filename))clearLightCache();
+}
 export function forgetMaskImages(){maskSources.clear();clearLightCache();}
 let pendingChunks=false;
 let cachedMapKey=null;
