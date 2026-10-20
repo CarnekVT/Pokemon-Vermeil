@@ -3,7 +3,7 @@
 # Scriptable via LightingStudioDayNight.skip_to_hour(7).
 module LightingStudioDayNight
   SLEEPING_BAG_SLOTS = [
-    [5,  0, "5 a.m. — Madrugada", "La calma de la madrugada envuelve el ambiente."],
+    [5,  0, "5 a.m.", "5 a.m."],
     [7,  0, "7 a.m.",  "La frescura de la mañana te invita a explorar."],
     [11, 0, "11 a.m.", "La luz del día ilumina el camino que tienes por delante."],
     [15, 0, "3 p.m.",  "La tarde transcurre tranquila. Es hora de continuar."],
@@ -35,9 +35,10 @@ module LightingStudioDayNight
   end
 
   def sleeping_bag_transition(hour,minute)
-    # Mirror the supplied Essentials event: 10 frames to white, short wait,
-    # change time, play Pokemon Healing ME, 30 frames, 10 frames back,
-    # 20 frames before the line of text. A disposable overlay avoids
+    # Sleep sequence: fade to BLACK over 10 frames, rest briefly,
+    # change time under blackout, play Pokemon Healing ME, hold for 30 frames,
+    # and fade back to the map over another 10 frames.
+    # Wait 20 frames before the final text. A disposable overlay avoids
     # permanently modifying the game's Screen Tone or other lighting mods.
     if defined?(Graphics) && defined?(Sprite) && defined?(Viewport)
       viewport=nil
@@ -47,7 +48,7 @@ module LightingStudioDayNight
         viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
         viewport.z=999999
         bitmap=Bitmap.new(1,1)
-        bitmap.set_pixel(0,0,Color.new(255,255,255,255))
+        bitmap.set_pixel(0,0,Color.new(0,0,0,255))
         overlay=Sprite.new(viewport)
         overlay.bitmap=bitmap
         overlay.zoom_x=Graphics.width
