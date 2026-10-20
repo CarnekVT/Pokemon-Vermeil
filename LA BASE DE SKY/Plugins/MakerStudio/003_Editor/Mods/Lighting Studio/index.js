@@ -173,7 +173,10 @@ async function loadMaskFile(name,{force=false}={}){
  try{
   const rel=MASK_DIR+'/'+name;
   if(!await owner.ctx.fs.projectExists(rel)){
-    owner.maskReady.delete(name);removeMaskImage(name);
+    owner.maskReady.delete(name);
+    // An unsaved mask drawn in the editor is valid for live preview even
+    // before its PNG exists on disk. Do not replace it with a blank mask.
+    if(!owner.maskDrafts.has(name))removeMaskImage(name);
     return false;
   }
   const invoke=window.__TAURI__?.core?.invoke,root=owner.ctx.editor.gameRoot?.();
