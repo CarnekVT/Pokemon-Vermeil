@@ -89,9 +89,11 @@ raise 'RGSS event tone lost' unless composed.red==night[0]-8 &&
   composed.green==night[1]+5 && composed.blue==night[2]+2 && composed.gray==night[3]+8
 Scene_Map.new.updateSpritesets
 final_tone=Spriteset_Map.viewport.tone
+actual_clock_tone=time.tone_values
 raise 'Final viewport tone not applied after spritesets' unless
   [final_tone.red,final_tone.green,final_tone.blue,final_tone.gray]==
-  [night[0]-5,night[1]-3,night[2]+2,night[3]+3]
+  [actual_clock_tone[0]-5,actual_clock_tone[1]-3,
+   actual_clock_tone[2]+2,actual_clock_tone[3]+3]
 renderer=TileToneTest.new
 pbDayNightTint(renderer)
 raise 'Vanilla tone duplicated custom cycle' unless [renderer.tone.red,renderer.tone.green,renderer.tone.blue,renderer.tone.gray]==[0,0,0,0]
