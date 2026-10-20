@@ -1,4 +1,4 @@
-# Lighting Studio v0.9.3 — descanso con fundido negro
+# Lighting Studio v0.10.0 — editor visual de máscaras y recarga en vivo
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -465,3 +465,41 @@ Para probar: alterna con el saco **17:00, 19:00 y 23:00**, además de la nueva o
 - Añadí pruebas a `DeveloperTests/LightingStudio/test_day_night.rb` que comprueban el negro RGBA `(0,0,0,255)`, la opacidad máxima mientras suena la curación, la actualización previa de la hora y el regreso a opacidad cero.
 
 Pendiente: comprobar que el fundido y la ME encajan visualmente con la duración del sonido en Pokémon Essentials 21.1.
+
+
+## v0.10.0 — Máscaras de cuevas más fáciles de crear
+
+### Error de recarga corregido
+
+Antes, `preloadMasks()` almacenaba permanentemente el nombre de cada máscara en el conjunto `maskLoading`, incluso después de una carga correcta. Cambiar el archivo o seleccionar otro gráfico no garantizaba una nueva lectura hasta cerrar Maker Studio.
+
+Ahora:
+- `maskLoading` solo representa cargas en curso y **se limpia siempre** al terminar, incluso si ocurre un error.
+- `maskReady` recuerda lo cargado y `maskPromises` evita recargas paralelas duplicadas.
+- Cambiar **Archivo PNG**, seleccionar **Elegir gráfico** o pulsar **Recargar PNG** actualiza el bitmap y la vista previa **sin reiniciar**.
+- El cargador trabaja únicamente con máscaras utilizadas por el mapa abierto (no recorre todos los mapas al mover cada control), para evitar lag.
+- `setMaskImage` invalida las máscaras y los chunks guardados en la caché del renderizador.
+
+### Crear una forma sin dibujar un PNG manualmente
+
+Con una luz de tipo **Máscara PNG**, en el inspector → Forma:
+
+1. Pulsa **＋ Crear salida de cueva**. Se genera una plantilla RGBA con una abertura estrecha y proyección irregular hacia fuera. El resultado aparece en el mapa.
+2. En el lienzo puedes usar **Añadir luz**, **Luz tenue**, **Borrar** o **Delimitar forma** (haz clic en los vértices y doble clic para cerrar el polígono).
+3. Si tienes el tile de la cueva o una captura, selecciona **Calcar sobre imagen de cueva**. La referencia se muestra bajo la máscara, pero **NO se exporta** con ella.
+4. Puedes usar las plantillas **Salida de cueva →** o **Cueva hacia izquierda ←**, limpiar el lienzo, deshacer y rehacer trazos.
+5. Ajusta **Anchura**, **Altura** y **Rotación** de la fuente en el inspector, sin rehacer el PNG. Guarda la máscara cuando el contorno esté listo.
+
+La máscara siempre es blanco/gris con transparencia. Blanco = emisión, tonos grises = menor emisión y transparencia = zona bloqueada por las paredes.
+
+### Guardar/exportar PNG
+
+El editor intenta guardar el PNG dentro de `Graphics/LightingStudio/Masks/` mediante el sistema de archivos binarios disponible en la instalación. Si Maker Studio no tiene una API de escritura binaria expuesta al mod, descarga el PNG y muestra la ruta donde debes colocarlo manualmente. **En ese caso se previsualiza de inmediato, pero el juego no podrá leer los cambios hasta que pongas el PNG exportado en la carpeta**.
+
+Las máscaras se limitan a PNG de 512 × 512 como máximo y nombres sin rutas externas.
+
+### Pruebas
+
+- `node --experimental-default-type=module DeveloperTests/LightingStudio/test_mask_editor.mjs`: plantilla derecha/izquierda, transparencia de las paredes, atenuación y contrato de guardado PNG.
+- Los módulos JS editados también se verifican mediante comprobación de sintaxis desde GitHub Actions.
+- Pendiente: validación visual, ergonomía y detección de permisos de escritura binaria en la instalación real de Maker Studio del proyecto.
