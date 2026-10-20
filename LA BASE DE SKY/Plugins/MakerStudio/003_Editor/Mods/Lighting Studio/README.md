@@ -1,4 +1,4 @@
-# Lighting Studio v0.9.0 — día, tarde y noche con tonos nativos de Pokémon Essentials
+# Lighting Studio v0.9.1 — tonos Pokémon Fable (día y noche)
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -422,3 +422,23 @@ Se conservan los presets, pulsación, horarios de las farolas y el saco de dormi
 
 - Comprobación de sintaxis JavaScript de los módulos y cálculo del modelo de horarios; agregados tests de mezcla RGBG, compatibilidad con el formato anterior, Tone de eventos y eliminación del doble tinte vanilla.
 - **Falta ejecutar el plugin dentro de Essentials / mkxp y confirmar visualmente el resultado y FPS.** Para aislar si el problema es la paleta o el mezclado, compara 11:00 y 23:00, con las luces locales desactivadas temporalmente, y después actívalas.
+
+## v0.9.1 — Preset Pokémon Fable (Deo, Eevee Expo)
+
+**Fuente:** https://eeveeexpo.com/resources/50/ — sección «Pokémon Fable Tone».
+
+Se sustituyen los tonos predeterminados de `model.js` y los del `Data/LightingStudio/maps.json` del mapa de prueba por los **valores RGGB exactos** del recurso para noche, mañana, día y tarde:
+
+| Hora clave | Rojo | Verde | Azul | Gris | Tramo |
+|---|---:|---:|---:|---:|---|
+| 00:00 | -30 | -70 | +11 | 68 | Noche púrpura |
+| 05:00 | -20 | -60 | -30 | 17 | Amanecer |
+| 09:00 | 0 | 0 | 0 | 0 | Día neutro |
+| 17:00 | +2 | -20 | +3 | 17 | Tarde |
+| 21:00 | -30 | -70 | +11 | 68 | Noche |
+
+**Importante:** la fuente original define una tabla de 24 tonos horarios. Lighting Studio mantiene cinco **puntos clave exactos** e interpola suavemente entre ellos; a horas intermedias sus valores pueden diferir de los escalones del recurso original. La noche ya alcanza el tono Fable completo desde las 21:00 hasta las 05:00 del ciclo. Se mantiene el mezclado `blendMode: 'tone'`, que usa el sistema nativo de Pokémon Essentials (sin capa RGB superpuesta).
+
+No se han modificado las cuatro luces del mapa 79, los horarios de las farolas, los normal maps, los tiempos del reloj ni el saco de dormir. Los mapas antiguos que ya hayan guardado otra paleta conservarán sus valores personalizados; el preset nuevo se aplica a proyectos nuevos y al `maps.json` de esta rama.
+
+Validación: pruebas del modelo para las cinco horas, la interpolación vespertina y la compatibilidad con el modo legado; pendiente comprobar tonalidad y FPS en el juego.
