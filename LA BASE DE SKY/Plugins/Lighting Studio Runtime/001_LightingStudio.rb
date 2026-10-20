@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio Runtime 0.7.2 for Pokemon Essentials 21.1 / mkxp.
+# Lighting Studio Runtime 0.8.0 for Pokemon Essentials 21.1 / mkxp.
 # Shared additive lightmap: merge sources normally, add a single sprite to the map.
 # No shaders required; uses Bitmap#stretch_blt for camera/animation updates.
 module LightingStudio
@@ -320,7 +320,8 @@ module LightingStudioSpriteset
         :cx => LightingStudio.number(source['x'],0,-2048,2048)*Game_Map::TILE_WIDTH,
         :cy => LightingStudio.number(source['y'],0,-2048,2048)*Game_Map::TILE_HEIGHT,
         :intensity => LightingStudio.number(source['intensity'],0.8,0,1),
-        :pulse => source['pulse'].is_a?(Hash) ? source['pulse'] : {}
+        :pulse => source['pulse'].is_a?(Hash) ? source['pulse'] : {},
+        :schedule => source['schedule'].is_a?(Hash) ? source['schedule'] : {}
       }
       mode = source['blendMode'].to_s
       if data['overlapMode'] == 'sum' && ['', 'union', 'add'].include?(mode)
@@ -328,7 +329,8 @@ module LightingStudioSpriteset
       end
       mode = 'union' if mode.empty? || mode == 'add'
 
-      if mode == 'union' && entry[:pulse]['enabled'] != true && source['type'] != 'mask'
+      if mode == 'union' && entry[:pulse]['enabled'] != true &&
+         source['type'] != 'mask' && entry[:schedule]['enabled'] != true
         # Only smooth cone/ellipse sources increase chunk resolution; retain
         # the cheaper 64px chunks for pixel-art and ordinary map lighting.
         if ['cone','ellipse'].include?(source['type']) && !(source['pixel'].is_a?(Hash) && source['pixel']['enabled'] == true)
@@ -619,7 +621,7 @@ module LightingStudioSpriteset
       @ls_ambient_sprite.z=8500
     end
     color = color.map { |v| [[v.round,0].max,255].min }
-    opacity=[[(darkness*230).round,0].max,255].min
+    opacity=LightingStudioDayNight.ambient_opacity(darkness)
     if @ls_ambient_last_rgb!=color
       @ls_ambient_sprite.bitmap.set_pixel(0,0,Color.new(*color,255))
       @ls_ambient_last_rgb=color
@@ -645,11 +647,13 @@ module LightingStudioSpriteset
       sx, sy = ls_world_screen(entry[:cx], entry[:cy], mx, my, zx, zy)
       sprite.zoom_x = zx * size * entry[:w] / sprite.bitmap.width.to_f
       sprite.zoom_y = zy * size * entry[:h] / sprite.bitmap.height.to_f
-      sprite.opacity = [[(255 * entry[:intensity] * energy).round, 0].max, 255].min
+      scheduled = defined?(LightingStudioDayNight) ?
+        LightingStudioDayNight.schedule_factor(entry[:schedule]) : 1.0
+      sprite.opacity = [[(255 * entry[:intensity] * energy * scheduled).round, 0].max, 255].min
       sprite.x = sx
       sprite.y = sy
       bound = [entry[:w], entry[:h]].max * [zx, zy].max * size / 2
-      sprite.visible = sx+bound > 0 && sy+bound > 0 &&
+      sprite.visible = sprite.opacity > 0 && sx+bound > 0 && sy+bound > 0 &&
                        sx-bound < Graphics.width && sy-bound < Graphics.height
     end
   end
