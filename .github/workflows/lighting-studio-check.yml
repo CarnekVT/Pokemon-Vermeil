@@ -39,3 +39,6 @@ jobs:
       - name: Test mask painter cave silhouettes and PNG export
         working-directory: LA BASE DE SKY
         run: node --experimental-default-type=module "DeveloperTests/LightingStudio/test_mask_editor.mjs"
+      - name: Match native autotile zoom and mask hitboxes
+        working-directory: LA BASE DE SKY
+        run: node --experimental-default-type=module "DeveloperTests/LightingStudio/test_zoom_lighting.mjs"
