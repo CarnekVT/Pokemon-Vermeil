@@ -354,7 +354,7 @@ Cada luz puede tener un horario propio `schedule`:
 - Una luz con horario se dibuja mediante sprite dinámico, sin tener que regenerar chunks estáticos al cambiar la hora; su opacidad multiplica la intensidad programada por la pulsación (si la hay).
 - Los normales de jugador/followers **también consideran el horario** de la luz; no continuarán brillando bajo una farola apagada.
 - El inspector incorpora la quinta pestaña «Horario». En Día y noche, al activar la hora de previsualización se ven encendidas las fuentes que corresponden a ese horario.
-- Las **dos farolas cálidas existentes** del mapa 79 están configuradas para funcionar de **19:00 a 07:00**, con 20 minutos de transición. Las demás luces siguen encendidas todo el día. Cambia estos horarios desde su inspector.
+- Las **dos farolas cálidas existentes** del mapa 79 están configuradas para funcionar de **19:00 a 07:00**, encendiendo y apagando a la hora exacta. El cambio de opacidad se suaviza en aproximadamente 0,28 segundos reales para no mostrar saltos. Las demás luces siguen encendidas todo el día. Cambia estos horarios desde su inspector.
 
 ### Saco de dormir — seis horas exactas de la referencia
 
@@ -371,3 +371,9 @@ La transición blanca se hace con un sprite blanco temporal, para no cambiar per
 - `DeveloperTests/LightingStudio/test_day_night.rb`: valida los seis horarios, el menú de dos páginas, 80 fotogramas de animación por elección, la ME, el refresco inmediato y los horarios nocturnos atravesando medianoche.
 - `DeveloperTests/LightingStudio/test_model.mjs`: comprueba conservación de horarios en JSON, reglas nocturnas y ausencia de tinte diurno.
 - **Pendiente probar el resultado dentro de Pokémon Essentials y revisar FPS**. Las variantes de iluminación de escenarios particulares pueden requerir ajustes artísticos por mapa; no se han cambiado sprites, tilesets ni normals.
+
+### Ajuste final de activación horaria
+
+La programación de las farolas de prueba utiliza `fadeMinutes: 0`: **al cambiar con el saco directamente a las 19:00 se activan** (sin esperar 20 minutos del reloj interno). El runtime interpola la opacidad durante unos 0,28 segundos del tiempo real cuando una fuente programada cambia de estado.
+
+Quien desee una transición gradual basada en el tiempo del juego puede elevar «Transición (minutos del juego)» en el inspector de cada luz. Esta opción tiene prioridad sobre la transición visual breve y acepta periodos que cruzan medianoche.
