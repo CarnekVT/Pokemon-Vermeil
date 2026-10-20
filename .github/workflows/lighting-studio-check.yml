@@ -24,6 +24,9 @@ jobs:
       - name: Test internal clock and Sleeping Bag
         working-directory: LA BASE DE SKY
         run: ruby "DeveloperTests/LightingStudio/test_daynight.rb"
+      - name: Test day-night clock and fixed Sleeping Bag hours
+        working-directory: LA BASE DE SKY
+        run: ruby "DeveloperTests/LightingStudio/test_day_night.rb"
       - name: Check editor JavaScript syntax
         working-directory: LA BASE DE SKY
         run: |
