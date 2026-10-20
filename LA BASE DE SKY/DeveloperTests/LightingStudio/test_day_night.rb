@@ -63,6 +63,44 @@ raise 'Hour is incorrect' unless (time.current_hour-12.0).abs<0.0001
 raise 'Clock diagnostic not working' unless time.debug_status[:enabled]==true
 
 load 'Plugins/Lighting Studio Runtime/005_SleepingBag.rb'
+# Minimal RGSS mock to validate event-like white fade, sound and timing.
+class Color
+  def initialize(*rgba);@rgba=rgba;end
+end
+class Bitmap
+  def initialize(w,h);@disposed=false;end
+  def set_pixel(*args);end
+  def disposed?;@disposed;end
+  def dispose;@disposed=true;end
+end
+class Viewport
+  attr_accessor :z
+  def initialize(*bounds);@disposed=false;end
+  def disposed?;@disposed;end
+  def dispose;@disposed=true;end
+end
+class Sprite
+  attr_accessor :bitmap,:zoom_x,:zoom_y,:opacity
+  def initialize(*args);@disposed=false;end
+  def disposed?;@disposed;end
+  def dispose;@disposed=true;end
+end
+module Graphics
+  @updates=0
+  def self.width;640;end
+  def self.height;480;end
+  def self.update;@updates+=1;end
+  def self.updates;@updates;end
+end
+module Input
+  def self.update;end
+end
+$me_count=0
+def pbMEPlay(name)
+  raise 'Incorrect sleep ME' unless name=='Pokemon Healing'
+  $me_count+=1
+end
+
 hours=[7,11,15,17,19,23]
 hours.each_with_index do |hour,index|
   time.set_internal_time(8,0)
@@ -86,4 +124,7 @@ raise "Lamp must fade out at 06:50" unless (time.schedule_factor(schedule,6+50.0
 raise "Legacy light must stay on" unless time.schedule_factor(nil,12)==1.0
 raise "Manual clock disabled should ignore schedule" unless time.schedule_factor({'enabled'=>false},12)==1.0
 raise 'Sleeping Bag forced no map refresh' unless spriteset.calls>=14
+raise 'Sleeping Bag ME did not play 6 times' unless $me_count==6
+raise 'Sleep transition did not use 80 graphics frames per skip' unless Graphics.updates==6*80
+
 puts 'Lighting Studio day/night, fixed sleeping hours and immediate refresh tests passed'
