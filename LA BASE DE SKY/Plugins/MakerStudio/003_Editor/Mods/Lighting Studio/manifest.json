@@ -1,7 +1,7 @@
 {
   "id": "com.carnekvt.lighting-studio",
   "name": "Lighting Studio",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Ciclo día/tarde/noche vanilla, horarios por luz y saco con transición visual y seis horas de eventos.",
+  "description": "Tonos nativos RGBG de Pokémon Essentials para ciclos horarios; combinación aditiva de eventos y luces locales",
   "tags": [
     "mapping",
     "lighting",
