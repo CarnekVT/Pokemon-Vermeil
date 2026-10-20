@@ -1,4 +1,5 @@
 import {drawLights, evaluated} from './render.js';
+import {scheduleFactor} from './model.js';
 // On-map visual overlay. Maker Studio pointer events expose tile coordinates only.
 export const TILE=32;
 export function point(ev){return {x:Math.floor(Number(ev.tileX))+.5,y:Math.floor(Number(ev.tileY))+.5};}
@@ -45,6 +46,9 @@ export function paint(g,info,v){
   // Data lookup is keyed by info.mapId at the call site (not by a potentially stale tab).
   const map=v.map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]};
   const allEnabled=map.enabled!==false,ls=map.lights||[];
+   const timedLights=Number.isFinite(v.previewHour)?
+     ls.map(l=>{const factor=scheduleFactor(l.schedule,v.previewHour);
+       return factor===1?l:{...l,intensity:l.intensity*factor};}):ls;
   const w=Number(info.canvasWidth)||0,h=Number(info.canvasHeight)||0;
   if(w<=0||h<=0)return;
   const live=!!v.showPreview, editing=!!v.editing;
@@ -59,11 +63,11 @@ export function paint(g,info,v){
       if(darkness){
         const tint=rgb(ambient.color||'#142439');
         g.fillStyle='rgb('+tint.join(',')+')';
-        g.globalAlpha=darkness*.8;
+        g.globalAlpha=darkness*(v.ambientOverride?170/255:.8);
         g.fillRect(0,0,w,h);
         g.globalAlpha=1;
       }
-      drawLights(g,ls,projection,w,h,seconds,(v.fastPreview||v.previewQuality==='fast')?'fast':(map.overlapMode||'union'));
+      drawLights(g,timedLights,projection,w,h,seconds,(v.fastPreview||v.previewQuality==='fast')?'fast':(map.overlapMode||'union'));
     }
     // Preview a light at the cursor BEFORE insertion using the actual light renderer.
     // Animated Props follows the same overlay/pointer-state approach.
