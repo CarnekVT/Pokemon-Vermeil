@@ -46,6 +46,11 @@ assert.equal(scheduleFactor(overnight,3),1);
 assert.ok(Math.abs(scheduleFactor(overnight,19+10/60)-0.5)<1e-6);
 assert.ok(Math.abs(scheduleFactor(overnight,6+50/60)-0.5)<1e-6);
 assert.equal(scheduleFactor(normalizeSchedule({enabled:false}),12),1);
+const instant=normalizeSchedule({enabled:true,startHour:19,endHour:7,fadeMinutes:0,mode:'night'});
+assert.equal(scheduleFactor(instant,19),1);
+assert.equal(scheduleFactor(instant,7),0);
+assert.equal(instant.mode,'night');
+
 const scheduled=normalizeLight({type:'rectangle',schedule:overnight});
 assert.equal(scheduled.schedule.enabled,true);
 assert.equal(normalizeProject({schema:1,maps:{"79":{lights:[scheduled]}}}).maps["79"].lights[0].schedule.startHour,19);
