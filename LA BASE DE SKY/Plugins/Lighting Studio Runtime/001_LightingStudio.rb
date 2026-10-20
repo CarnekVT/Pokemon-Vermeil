@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio Runtime 0.8.0 for Pokemon Essentials 21.1 / mkxp.
+# Lighting Studio Runtime 0.9.0 for Pokemon Essentials 21.1 / mkxp.
 # Shared additive lightmap: merge sources normally, add a single sprite to the map.
 # No shaders required; uses Bitmap#stretch_blt for camera/animation updates.
 module LightingStudio
@@ -285,7 +285,8 @@ module LightingStudioSpriteset
     ambient = data['ambient'].is_a?(Hash) ? data['ambient'] : {}
     darkness = LightingStudio.number(ambient['darkness'], 0, 0, 1)
     dynamic_day = defined?(LightingStudioDayNight) && LightingStudioDayNight.active_on_map?(data)
-    if darkness > 0 || dynamic_day
+    native_tone = dynamic_day && LightingStudioDayNight.native_tone?
+    if !native_tone && (darkness > 0 || dynamic_day)
       @ls_ambient_sprite = Sprite.new(Spriteset_Map.viewport)
       @ls_ambient_sprite.bitmap = Bitmap.new(1, 1)
       rgb=LightingStudio.hex_color(ambient['color'])
@@ -612,6 +613,16 @@ module LightingStudioSpriteset
     @ls_next_daynight_update=now+0.2
     data=LightingStudioDayNight.ambient(@ls_map_data)
     return unless data
+    if LightingStudioDayNight.native_tone?
+      # Preserve existing event tones ($game_screen.tone) and apply a
+      # channel-based RGB/gray tint instead of an alpha colored rectangle.
+      # The base Spriteset_Map#update resets viewport.tone every frame;
+      # this plugin restores the combined result afterward.
+      @ls_native_values=data
+      @ls_ambient_sprite.visible=false if @ls_ambient_sprite
+      ls_apply_native_day_night
+      return
+    end
     color,darkness=data
     if !@ls_ambient_sprite
       @ls_ambient_sprite=Sprite.new(Spriteset_Map.viewport)
@@ -632,6 +643,22 @@ module LightingStudioSpriteset
     warn "[Lighting Studio Time] Ambient refresh failed: #{e.message}"
   end
 
+  def ls_apply_native_day_night
+    return unless defined?(LightingStudioDayNight) && @ls_map_data &&
+                  LightingStudioDayNight.active_on_map?(@ls_map_data) &&
+                  LightingStudioDayNight.native_tone?
+    # Connected map spritesets share the same viewport. Only the active map
+    # should set it, otherwise an indoor neighbor might replace outdoor tone.
+    return if defined?($game_map) && $game_map && @map.map_id!=$game_map.map_id
+    viewport=Spriteset_Map.viewport
+    return if !viewport || viewport.disposed?
+    tone_values=@ls_native_values || LightingStudioDayNight.tone_values
+    screen_tone=defined?($game_screen) && $game_screen ? $game_screen.tone : nil
+    viewport.tone=LightingStudioDayNight.compose_tone(screen_tone,tone_values)
+  rescue StandardError => e
+    warn "[Lighting Studio Time] RGSS tone composition failed: #{e.message}"
+  end
+
   def ls_update
     return unless @ls_sprites && @map
     mx = (@map.display_x.to_f / Game_Map::X_SUBPIXELS).round
@@ -641,6 +668,7 @@ module LightingStudioSpriteset
     now = System.uptime
 
     ls_update_day_night(false, now)
+    ls_apply_native_day_night
     ls_update_chunks(mx, my, zx, zy)
     elapsed=@ls_last_light_update ? [[now-@ls_last_light_update,0.0].max,0.10].min : 0.0
     @ls_sprites.each do |sprite, entry|
