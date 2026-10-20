@@ -81,23 +81,14 @@ module LightingStudioDayNight
       pbMessage(_INTL("El saco de dormir necesita un ciclo de día y noche con reloj interno."))
       return false
     end
-    page=0
-    loop do
-      offset=page*3
-      names=SLEEPING_BAG_SLOTS.slice(offset,3).map{|row|_INTL(row[2])}
-      names << (page==0 ? "---->" : "<----")
-      selected=pbMessage(_INTL("¿A qué hora quieres despertar?"), names, -1, nil, 0)
-      return false if selected.nil? || selected < 0
-      if selected==3
-        page=1-page
-        next
-      end
-      return false if selected>2
-      h,m,label,description=SLEEPING_BAG_SLOTS[offset+selected]
-      sleeping_bag_transition(h,m)
-      pbMessage(_INTL(description))
-      return true
-    end
+    # Show all six fixed hours at once; cancel with the usual Back button.
+    names=SLEEPING_BAG_SLOTS.map { |row| _INTL(row[2]) }
+    selected=pbMessage(_INTL("¿A qué hora quieres despertar?"),names,-1,nil,0)
+    return false if selected.nil? || selected<0 || selected>=SLEEPING_BAG_SLOTS.length
+    h,m,label,description=SLEEPING_BAG_SLOTS[selected]
+    sleeping_bag_transition(h,m)
+    pbMessage(_INTL(description))
+    true
   end
 end
 
