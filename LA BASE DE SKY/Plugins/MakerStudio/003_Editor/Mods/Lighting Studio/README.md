@@ -437,7 +437,7 @@ Se sustituyen los tonos predeterminados de `model.js` y los del `Data/LightingSt
 | 17:00 | +2 | -20 | +3 | 17 | Tarde |
 | 21:00 | -30 | -70 | +11 | 68 | Noche |
 
-**Importante:** la fuente original define una tabla de 24 tonos horarios. Lighting Studio mantiene cinco **puntos clave exactos** e interpola suavemente entre ellos; a horas intermedias sus valores pueden diferir de los escalones del recurso original. La noche ya alcanza el tono Fable completo desde las 21:00 hasta las 05:00 del ciclo. Se mantiene el mezclado `blendMode: 'tone'`, que usa el sistema nativo de Pokémon Essentials (sin capa RGB superpuesta).
+**Importante:** la fuente original define una tabla de 24 tonos horarios. Lighting Studio conserva los **cinco tonos clave exactos** y añade cuatro puntos de mantenimiento a las 04:45, 08:45, 16:45 y 20:45. Así mantiene los tonos Fable durante la noche, mañana, día y tarde, con transiciones suaves de 15 minutos del juego. El mediodía queda completamente neutro y la noche alcanza el tono Fable desde las 21:00 hasta las 04:45. Se mantiene el mezclado `blendMode: 'tone'`, que usa el sistema nativo de Pokémon Essentials (sin capa RGB superpuesta).
 
 No se han modificado las cuatro luces del mapa 79, los horarios de las farolas, los normal maps, los tiempos del reloj ni el saco de dormir. Los mapas antiguos que ya hayan guardado otra paleta conservarán sus valores personalizados; el preset nuevo se aplica a proyectos nuevos y al `maps.json` de esta rama.
 
