@@ -1,6 +1,7 @@
 // Run from LA BASE DE SKY:
 // node --experimental-default-type=module DeveloperTests/LightingStudio/test_model.mjs
 import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
 import {defaultProject,normalizeProject,normalizeLight,maskFilename,
   defaultTimeOfDay,normalizeTimeOfDay,evaluateTimeOfDay,normalizeSchedule,scheduleFactor} from "../../Plugins/MakerStudio/003_Editor/Mods/Lighting Studio/model.js";
 
@@ -60,6 +61,14 @@ for(const [hour,rgba] of expectedFable){
   const t=evaluateTimeOfDay(defaultTimeOfDay(),hour).tone;
   assert.deepEqual([t.red,t.green,t.blue,t.gray],rgba);
 }
+const twilight=evaluateTimeOfDay(defaultTimeOfDay(),18).tone;
+assert.deepEqual([twilight.red,twilight.green,twilight.blue,twilight.gray],[-8,-35,-6,28]);
+const earlyNight=evaluateTimeOfDay(defaultTimeOfDay(),19).tone;
+assert.deepEqual([earlyNight.red,earlyNight.green,earlyNight.blue,earlyNight.gray],[-18,-52,2,42]);
+assert.ok(earlyNight.green<twilight.green);
+assert.ok(earlyNight.gray>twilight.gray);
+assert.deepEqual(evaluateTimeOfDay(defaultTimeOfDay(),20.75).tone,earlyNight);
+assert.deepEqual(evaluateTimeOfDay(defaultTimeOfDay(),12).tone,{red:0,green:0,blue:0,gray:0});
 const evening=evaluateTimeOfDay(defaultTimeOfDay(),19).tone;
 assert.ok(evening.green<-20 && evening.green>-70);
 assert.equal(evaluateTimeOfDay(defaultTimeOfDay(),23).tone.gray,68);
@@ -88,3 +97,11 @@ assert.equal(scheduled.schedule.enabled,true);
 assert.equal(normalizeProject({schema:1,maps:{"79":{lights:[scheduled]}}}).maps["79"].lights[0].schedule.startHour,19);
 assert.equal(evaluateTimeOfDay(defaultTimeOfDay(),11).darkness,0);
 assert.ok(evaluateTimeOfDay(defaultTimeOfDay(),15).darkness<0.06);
+
+
+// Prevent the editor defaults drifting from the actual 79 map's clock data.
+const savedClock=JSON.parse(readFileSync("Data/LightingStudio/maps.json","utf8")).timeOfDay;
+const defined=defaultTimeOfDay().keyframes;
+assert.deepEqual(savedClock.keyframes,defined);
+assert.equal(savedClock.source,"internal");
+assert.equal(savedClock.enabled,true);
