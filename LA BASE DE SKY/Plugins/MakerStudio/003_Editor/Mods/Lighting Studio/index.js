@@ -1,7 +1,8 @@
 import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,parseCoordinate,LIGHT_TYPES,TYPE_NAMES,FADE_MODES,FADE_NAMES,NORMAL_CATEGORIES,NORMAL_DIR,MASK_DIR,maskFilename,assetName,normalCandidate,evaluateTimeOfDay} from './model.js';
 import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS,LIGHTING_WIDE_WORKSPACE_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
-import {cacheSize,clearLightCache,hasPendingChunks,invalidateLightRegions,setMaskImage,forgetMaskImages} from './render.js';
+import {cacheSize,clearLightCache,hasPendingChunks,invalidateLightRegions,setMaskImage,getMaskImage,removeMaskImage,forgetMaskImages} from './render.js';
+import {mountMaskPainter,saveMaskPng,caveTemplate} from './mask_editor.js';
 const PANEL='lighting-studio.main', TOOL='lighting-studio.place';
 let state=null;
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);return e;};
@@ -159,31 +160,68 @@ async function verifyNormalBindings(category){
  notify(missing.length?'Faltan PNG: '+missing.slice(0,4).join(', '):'Todos los PNG normales asociados están presentes.',missing.length?'warn':'info');
 }
 
+// Mask PNG source caching is independent of in-flight IO. The old maskLoading
+// Set never released names after success, so editing a PNG could require
+// closing/reopening the editor to refresh it.
+async function loadMaskFile(name,{force=false}={}){
+ const owner=state;
+ if(!owner||!maskFilename(name))return false;
+ if(owner.maskLoading.has(name))return false;
+ if(owner.maskReady.has(name)&&!force)return true;
+ owner.maskLoading.add(name);
+ try{
+  const rel=MASK_DIR+'/'+name;
+  if(!await owner.ctx.fs.projectExists(rel)){
+    owner.maskReady.delete(name);removeMaskImage(name);
+    return false;
+  }
+  const invoke=window.__TAURI__?.core?.invoke,root=owner.ctx.editor.gameRoot?.();
+  if(typeof invoke!=='function'||!root)throw Error('La edición actual de Maker Studio no expone el lector PNG. Usa la exportación PNG.');
+  const sep=root.includes('\\')?'\\':'/';
+  const abs=root.replace(/[\\/]+$/,'')+sep+rel.replaceAll('/',sep);
+  const bytes=await invoke('read_binary_file',{path:abs});
+  const url=URL.createObjectURL(new Blob([Uint8Array.from(bytes)],{type:'image/png'}));
+  try{
+   const img=new Image();
+   await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
+   if(owner!==state)return false;
+   if(img.width>512||img.height>512)throw Error('Máscara '+name+' supera 512×512.');
+   owner.maskReady.add(name);
+   if(force)owner.maskDrafts.delete(name);
+   setMaskImage(name,img);
+   redraw();
+   return true;
+  }finally{URL.revokeObjectURL(url);}
+ }catch(error){
+  owner.ctx.log.warn?.('[Lighting Studio] PNG mask '+name,error);
+  if(force)notify('No se pudo actualizar '+name+': '+String(error.message||error),'warn');
+  return false;
+ }finally{
+  owner.maskLoading.delete(name);
+ }
+}
 async function preloadMasks(){
  const owner=state;if(!owner)return;
- const names=[...new Set(Object.values(owner.data.maps||{}).flatMap(m=>(m.lights||[])
-   .filter(l=>l.type==='mask'&&maskFilename(l.maskFile)).map(l=>l.maskFile)))];
- for(const name of names){
-  if(owner.maskLoading.has(name))continue;
-  owner.maskLoading.add(name);
-  try{
-   const rel=MASK_DIR+'/'+name;
-   if(!await owner.ctx.fs.projectExists(rel)){owner.maskLoading.delete(name);continue;}
-   const invoke=window.__TAURI__?.core?.invoke,root=owner.ctx.editor.gameRoot?.();
-   if(typeof invoke!=='function'||!root){owner.maskLoading.delete(name);continue;}
-   const sep=root.includes('\\')?'\\':'/';
-   const abs=root.replace(/[\\/]+$/,'')+sep+rel.replaceAll('/',sep);
-   const bytes=await invoke('read_binary_file',{path:abs});
-   const url=URL.createObjectURL(new Blob([Uint8Array.from(bytes)],{type:'image/png'}));
-   try{
-    const img=new Image();
-    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
-    if(owner!==state)return;
-    if(img.width>512||img.height>512)throw Error('Máscara '+name+' supera 512×512.');
-    setMaskImage(name,img);redraw();
-   }finally{URL.revokeObjectURL(url);}
-  }catch(error){owner.ctx.log.warn?.('[Lighting Studio] PNG mask '+name,error);owner.maskLoading.delete(name);}
- }
+ // Load only the current map, rather than scanning every map on each slider
+ // change. Other assets are loaded when switching to their map.
+ const names=[...new Set((current()?.lights||[]).filter(l=>l.type==='mask'&&
+   maskFilename(l.maskFile)).map(l=>l.maskFile))];
+ await Promise.all(names.map(name=>loadMaskFile(name)));
+}
+async function pickMaskGraphic(lightId){
+ const owner=state;if(!owner)return;
+ const picker=owner.ctx.selectors?.pickGraphic;
+ if(typeof picker!=='function')return notify('El selector de gráficos no está disponible. Puedes escribir el nombre del PNG.','warn');
+ const chosen=await picker('LightingStudio/Masks',{title:'Selecciona la silueta de luz PNG',fields:[]});
+ if(!chosen||owner!==state)return;
+ const raw=String(chosen.name||'').split(/[\\/]/).pop().replace(/\.png$/i,'');
+ const name=maskFilename(raw+'.png');
+ if(!name)return notify('Selecciona un PNG válido dentro de Graphics/LightingStudio/Masks.','warn');
+ const light=owner.data.maps?.[String(owner.mapId)]?.lights?.find(l=>l.id===lightId);
+ if(!light)return;
+ change(()=>light.maskFile=name);
+ const found=await loadMaskFile(name,{force:true});
+ notify(found?'Máscara '+name+' cargada en el mapa.':'PNG no disponible; puedes crear la forma con el editor.',found?'info':'warn');
 }
 
 // Medium-green tile color used only for showing the RGBG look in swatches.
@@ -543,7 +581,7 @@ if(!d&&previous?.x===pt.x&&previous?.y===pt.y)return;
 state.lastCursor=pt;state.hover=pt;state.hoverHit=hitTest(current()?.lights,pt,state.selected,!!e.shiftKey);
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();schedulePersist();}
-export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),workspaceTab:'lights',previewDayNight:false,previewHour:12,previewQuality:'balanced',mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),maskReady:new Set(),maskDrafts:new Map(),workspaceTab:'lights',previewDayNight:false,previewHour:12,previewQuality:'balanced',mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
 void preloadMasks().catch(fail);
  ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:1050,height:810},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
