@@ -143,4 +143,24 @@ export const LIGHTING_WIDE_WORKSPACE_CSS = `
  .ls-light-quickbar .ls-btn{flex:1 1 auto}
 }
 
+/* True RGSS Tone RGB+gray editor: compact six-column keyframe rows */
+.ls-time-table.ls-tone-table .ls-time-table-head,
+.ls-time-table.ls-tone-table .ls-time-row{
+ display:grid;
+ grid-template-columns:minmax(110px,1.4fr) repeat(4,minmax(55px,.83fr)) 38px;
+ gap:7px;align-items:center;min-width:455px;
+}
+.ls-time-table.ls-tone-table .ls-tone-input{
+ min-width:0;width:100%;text-align:center;padding:7px 4px;
+ font-family:ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums;
+}
+.ls-tone-table .ls-time-table-head>span{white-space:nowrap;text-align:center}
+.ls-tone-table .ls-time-table-head>span:first-child{text-align:left}
+@container (max-width:680px){
+ .ls-time-table.ls-tone-table .ls-time-table-head,
+ .ls-time-table.ls-tone-table .ls-time-row{
+  min-width:450px;grid-template-columns:102px repeat(4,68px) 36px;gap:6px;
+ }
+}
+
 `;
