@@ -2,7 +2,7 @@
 // node --experimental-default-type=module DeveloperTests/LightingStudio/test_model.mjs
 import assert from "node:assert/strict";
 import {defaultProject,normalizeProject,normalizeLight,maskFilename,
-  defaultTimeOfDay,normalizeTimeOfDay,evaluateTimeOfDay} from "../../Plugins/MakerStudio/003_Editor/Mods/Lighting Studio/model.js";
+  defaultTimeOfDay,normalizeTimeOfDay,evaluateTimeOfDay,normalizeSchedule,scheduleFactor} from "../../Plugins/MakerStudio/003_Editor/Mods/Lighting Studio/model.js";
 
 const old={schema:1,maps:{"79":{enabled:true,ambient:{color:"#142439",darkness:.6},
  lights:[{id:"old_lamp",type:"radial",x:1,y:2,radiusPx:96} ]}}};
@@ -38,3 +38,16 @@ assert.equal(atNoon.darkness,0);
 assert.equal(evaluateTimeOfDay(timeline,18).darkness>atNoon.darkness,true);
 assert.equal(normalizeTimeOfDay({enabled:true,source:"garbage"}).source,"real");
 console.log("Lighting Studio model, masks and day/night tests passed");
+
+const overnight=normalizeSchedule({enabled:true,startHour:19,endHour:7,fadeMinutes:20});
+assert.equal(scheduleFactor(overnight,12),0);
+assert.equal(scheduleFactor(overnight,0),1);
+assert.equal(scheduleFactor(overnight,3),1);
+assert.ok(Math.abs(scheduleFactor(overnight,19+10/60)-0.5)<1e-6);
+assert.ok(Math.abs(scheduleFactor(overnight,6+50/60)-0.5)<1e-6);
+assert.equal(scheduleFactor(normalizeSchedule({enabled:false}),12),1);
+const scheduled=normalizeLight({type:'rectangle',schedule:overnight});
+assert.equal(scheduled.schedule.enabled,true);
+assert.equal(normalizeProject({schema:1,maps:{"79":{lights:[scheduled]}}}).maps["79"].lights[0].schedule.startHour,19);
+assert.equal(evaluateTimeOfDay(defaultTimeOfDay(),11).darkness,0);
+assert.ok(evaluateTimeOfDay(defaultTimeOfDay(),15).darkness<0.06);
