@@ -1,5 +1,5 @@
 Name = Lighting Studio Runtime
-Version = 0.9.0
+Version = 0.9.1
 Essentials = 21.1
 Website = https://github.com/CarnekVT/Pokemon-Vermeil
 Credits = CarnekVT
