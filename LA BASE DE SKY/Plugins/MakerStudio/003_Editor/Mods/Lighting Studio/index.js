@@ -266,29 +266,67 @@ const daytime=element('section','ls-section');shell.append(daytime);
  labeled(daytime,'Previsualizar ciclo en Maker Studio',previewTime);
  if(state.previewDayNight)slider(daytime,'Hora de previsualización',state.previewHour,0,23.75,.25,(v,final)=>{state.previewHour=v;redraw();});
  daytime.append(element('p','ls-inline-note','Los horarios interpolan color y oscuridad. El reloj interno se guarda con la partida. La previsualización no cambia la hora de la partida.'));
- const keyHeading=element('div','ls-section-heading','Colores por hora');daytime.append(keyHeading);
- for(const key of tod.keyframes){
-  const row=element('div','ls-two');daytime.append(row);
-  const hourInput=node('input');hourInput.type='number';hourInput.className='ls-input';
-  hourInput.min=0;hourInput.max=23.99;hourInput.step=.25;hourInput.value=String(key.hour);
-  hourInput.onchange=()=>change(()=>{key.hour=clamp(Number(hourInput.value),0,23.99);tod.keyframes.sort((a,b)=>a.hour-b.hour);});
-  labeled(row,'Hora',hourInput);
-  const colorInput=node('input');colorInput.type='color';colorInput.className='ls-color';colorInput.value=key.color;
-  colorInput.oninput=()=>{key.color=colorInput.value;redraw();};
-  colorInput.onchange=()=>change(()=>key.color=colorInput.value);
-  labeled(row,'Tinte',colorInput);
-  slider(daytime,'Oscuridad a las '+String(key.hour).padStart(2,'0')+'h',key.darkness,0,1,.01,
-    (v,final)=>editValue(()=>key.darkness=clamp(v,0,1),final));
-  daytime.append(mini('Quitar fotograma '+key.hour+'h',()=>{if(tod.keyframes.length<3)return notify('Mínimo dos horarios','warn');
-    change(()=>{tod.keyframes=tod.keyframes.filter(k=>k!==key);});
-  }));
+ const timelineTitle=element('div','ls-section-heading','Paleta de iluminación por horas');daytime.append(timelineTitle);
+ const clockStatus=element('div','ls-time-preview-status');daytime.append(clockStatus);
+ function updateTimePreview(){
+  const sample=evaluateTimeOfDay(tod,state.previewHour);
+  clockStatus.textContent='Vista previa · '+Math.floor(state.previewHour).toString().padStart(2,'0')+':'+Math.round((state.previewHour%1)*60).toString().padStart(2,'0')+' · oscuridad '+Math.round(sample.darkness*100)+' %';
+  clockStatus.style.borderLeftColor=sample.color;
+  redraw();
  }
- daytime.append(mini('＋ Añadir hora',()=>change(()=>{if(tod.keyframes.length>=48)return notify('Máximo 48 horarios','warn');
+ const track=element('div','ls-time-track');daytime.append(track);
+ for(let index=0;index<24;index++){
+  const sample=evaluateTimeOfDay(tod,index+0.5);
+  const slot=element('button','ls-time-slot');slot.type='button';
+  slot.title=String(index).padStart(2,'0')+':00 · clic para previsualizar';
+  slot.style.backgroundColor=sample.color;
+  slot.style.opacity=String(Math.max(.25,1-sample.darkness*.6));
+  slot.onclick=()=>{state.previewDayNight=true;state.previewHour=index+0.5;refresh();redraw();};
+  if(Math.floor(state.previewHour)===index)slot.classList.add('active');
+  track.append(slot);
+ }
+ const table=element('div','ls-time-table');daytime.append(table);
+ const header=element('div','ls-time-table-head');
+ for(const name of ['HORA','COLOR','OSCURIDAD',''])header.append(element('span',null,name));
+ table.append(header);
+ for(const key of tod.keyframes){
+  const row=element('div','ls-time-row');table.append(row);
+  const clock=node('input');clock.type='time';clock.step=900;clock.className='ls-input ls-clock-input';
+  const hour=Math.floor(key.hour),minute=Math.round((key.hour-hour)*60);
+  clock.value=String(hour).padStart(2,'0')+':'+String(minute).padStart(2,'0');
+  clock.title='Hora de este color';
+  clock.onchange=()=>{const bits=clock.value.split(':').map(Number);
+    if(bits.length!==2||bits.some(n=>!Number.isFinite(n)))return;
+    change(()=>{key.hour=clamp(bits[0]+bits[1]/60,0,23.99);tod.keyframes.sort((x,y)=>x.hour-y.hour);});
+  };
+  row.append(clock);
+  const colorCell=element('div','ls-time-color-cell');
+  const colorInput=node('input');colorInput.type='color';colorInput.className='ls-color';
+  colorInput.value=key.color;colorInput.title='Color del ambiente';
+  const hexLabel=element('span','ls-hex-value',key.color);
+  colorInput.oninput=()=>{hexLabel.textContent=colorInput.value;key.color=colorInput.value;redraw();};
+  colorInput.onchange=()=>{key.color=colorInput.value;record();schedulePersist();redraw();};
+  colorCell.append(colorInput,hexLabel);row.append(colorCell);
+  const opacityCell=element('div','ls-time-darkness-cell');
+  const darknessInput=node('input');darknessInput.type='range';darknessInput.min=0;darknessInput.max=100;darknessInput.step=1;
+  darknessInput.value=String(Math.round(key.darkness*100));darknessInput.className='ls-range';
+  const darknessText=element('span','ls-time-percent',darknessInput.value+'%');
+  darknessInput.oninput=()=>{const v=Number(darknessInput.value);key.darkness=v/100;darknessText.textContent=v+'%';redraw();};
+  darknessInput.onchange=()=>{schedulePersist();};
+  opacityCell.append(darknessInput,darknessText);row.append(opacityCell);
+  const remove=mini('×',()=>{if(tod.keyframes.length<=2)return notify('Se necesitan al menos dos horarios.','warn');
+    change(()=>{tod.keyframes=tod.keyframes.filter(k=>k!==key);});
+  });remove.title='Quitar esta hora';remove.classList.add('ls-time-remove');row.append(remove);
+ }
+ const addTime=mini('＋ Añadir hora',()=>change(()=>{if(tod.keyframes.length>=48)return notify('Máximo 48 horarios.','warn');
   const hr=Number(state.previewHour)||12;let t=hr;
   while(tod.keyframes.some(k=>Math.abs(k.hour-t)<.01))t=(t+.25)%24;
-  tod.keyframes.push({hour:t,color:'#FFFFFF',darkness:.25});
-  tod.keyframes.sort((a,b)=>a.hour-b.hour);
- })));
+  const v=evaluateTimeOfDay(tod,t);
+  tod.keyframes.push({hour:t,color:v.color,darkness:Math.round(v.darkness*100)/100});
+  tod.keyframes.sort((x,y)=>x.hour-y.hour);
+ }));
+ addTime.classList.add('ls-add-keyframe');daytime.append(addTime);
+ updateTimePreview();
 const insp=element('section','ls-section ls-inspector');shell.append(insp);
 const insHead=element('div','ls-section-heading');insHead.append(node('span','INSPECTOR DE LUZ'),element('span','ls-count',active()?.name||'Sin selección'));insp.append(insHead);
 const nav=element('div','ls-inspector-tabs');insp.append(nav);
@@ -362,13 +400,16 @@ const timeView=element('div','ls-workspace-view');timeView.append(daytime);
 const normalsView=element('div','ls-workspace-view');if(normalsSection)normalsView.append(normalsSection);
 const views={lights:lightView,ambient:ambientView,time:timeView,normals:normalsView};
 for(const [id,label] of [['lights','✦ Luces e inspector'],['ambient','◐ Ambiente'],['time','◷ Día y noche'],['normals','◇ Normal maps']]){
- const b=mini(label,()=>{state.workspaceTab=id;refresh();},state.workspaceTab===id);
+ const b=mini(label,()=>{state.workspaceTab=id;state.resetWorkspaceScroll=true;refresh();},state.workspaceTab===id);
  b.classList.add('ls-workspace-tab');workspaceNav.append(b);
 }
 for(const [id,view] of Object.entries(views)){view.hidden=state.workspaceTab!==id;workspace.append(view);}
-shell.append(workspaceNav,workspace);
+shell.insertBefore(workspaceNav,title);
+shell.append(workspace);
+if(state.resetWorkspaceScroll){shell.scrollTop=0;state.resetWorkspaceScroll=false;}
 const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el mapa mediante un overlay independiente de Fog, Panorama y Sombras. Prueba visual muestra una marca amarilla para comprobar si Maker Studio lo está renderizando.');shell.append(hint);
-const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));shell.scrollTop=oldScroll;
+const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));if(!state.resetWorkspaceScroll && state.workspaceTab===state.lastRenderedTab)shell.scrollTop=oldScroll;
+state.lastRenderedTab=state.workspaceTab;
 }
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number.isFinite(v)?v:a));
 // While dragging, cap costly full-map redraws to ~10 per second rather than
