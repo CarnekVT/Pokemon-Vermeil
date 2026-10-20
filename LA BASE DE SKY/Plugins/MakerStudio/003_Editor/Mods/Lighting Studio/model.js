@@ -52,16 +52,13 @@ export function normalizeNormals(raw){
 export const defaultTimeOfDay=()=>({
  enabled:false,source:'real',startHour:8,minutesPerSecond:0.1,
  previewHour:12,blendMode:'tone',keyframes:[
- {hour:0,color:'#25334F',darkness:.37,tone:{red:-58,green:-58,blue:9,gray:30}},
- {hour:5,color:'#40516D',darkness:.26,tone:{red:-47,green:-47,blue:7,gray:26}},
- {hour:7,color:'#E7CBA4',darkness:.025,tone:{red:-16,green:-28,blue:-34,gray:9}},
+ // Exact RGBG values from Deo's publicly shared Pokémon Fable tone preset.
+ // The five anchors interpolate smoothly; the original preset uses hourly steps.
+ {hour:0,color:'#4B3F69',darkness:.27,tone:{red:-30,green:-70,blue:11,gray:68}},
+ {hour:5,color:'#8C7AA0',darkness:.07,tone:{red:-20,green:-60,blue:-30,gray:17}},
  {hour:9,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
- {hour:11,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
- {hour:15,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
- {hour:17,color:'#D9B59C',darkness:.055,tone:{red:-12,green:-27,blue:-32,gray:9}},
- {hour:19,color:'#53658D',darkness:.18,tone:{red:-29,green:-33,blue:4,gray:20}},
- {hour:21,color:'#263956',darkness:.34,tone:{red:-52,green:-52,blue:8,gray:27}},
- {hour:23,color:'#263956',darkness:.34,tone:{red:-58,green:-58,blue:9,gray:30}}
+ {hour:17,color:'#C7B6D8',darkness:.07,tone:{red:2,green:-20,blue:3,gray:17}},
+ {hour:21,color:'#4B3F69',darkness:.27,tone:{red:-30,green:-70,blue:11,gray:68}}
 ]});
 const TONE_CHANNELS=['red','green','blue','gray'];
 export function normalizeTone(t,legacy){
