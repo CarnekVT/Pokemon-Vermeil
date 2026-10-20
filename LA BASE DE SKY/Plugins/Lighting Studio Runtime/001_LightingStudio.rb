@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio Runtime 0.7.1 for Pokemon Essentials 21.1 / mkxp.
+# Lighting Studio Runtime 0.7.2 for Pokemon Essentials 21.1 / mkxp.
 # Shared additive lightmap: merge sources normally, add a single sprite to the map.
 # No shaders required; uses Bitmap#stretch_blt for camera/animation updates.
 module LightingStudio
@@ -597,6 +597,39 @@ module LightingStudioSpriteset
     end
   end
 
+  # Public to the Sleeping Bag test item; forces the same ambient layer used
+  # by the ordinary runtime even if the update budget hasn't elapsed.
+  def ls_update_day_night(force=false, now=nil)
+    return unless defined?(LightingStudioDayNight) && @ls_map_data
+    return unless LightingStudioDayNight.active_on_map?(@ls_map_data)
+    now ||= System.uptime
+    revision=LightingStudioDayNight.revision
+    return if !force && @ls_last_clock_revision==revision &&
+              @ls_next_daynight_update && now<@ls_next_daynight_update
+    @ls_last_clock_revision=revision
+    @ls_next_daynight_update=now+0.2
+    data=LightingStudioDayNight.ambient(@ls_map_data)
+    return unless data
+    color,darkness=data
+    if !@ls_ambient_sprite
+      @ls_ambient_sprite=Sprite.new(Spriteset_Map.viewport)
+      @ls_ambient_sprite.bitmap=Bitmap.new(1,1)
+      @ls_ambient_sprite.zoom_x=Graphics.width
+      @ls_ambient_sprite.zoom_y=Graphics.height
+      @ls_ambient_sprite.z=8500
+    end
+    color = color.map { |v| [[v.round,0].max,255].min }
+    opacity=[[(darkness*230).round,0].max,255].min
+    if @ls_ambient_last_rgb!=color
+      @ls_ambient_sprite.bitmap.set_pixel(0,0,Color.new(*color,255))
+      @ls_ambient_last_rgb=color
+    end
+    @ls_ambient_sprite.opacity=opacity
+    @ls_ambient_sprite.visible=opacity>0
+  rescue StandardError => e
+    warn "[Lighting Studio Time] Ambient refresh failed: #{e.message}"
+  end
+
   def ls_update
     return unless @ls_sprites && @map
     mx = (@map.display_x.to_f / Game_Map::X_SUBPIXELS).round
@@ -605,17 +638,7 @@ module LightingStudioSpriteset
     zy = defined?(TilemapRenderer::ZOOM_Y) ? TilemapRenderer::ZOOM_Y : 1
     now = System.uptime
 
-    if defined?(LightingStudioDayNight) && @ls_ambient_sprite && @ls_map_data &&
-       LightingStudioDayNight.active_on_map?(@ls_map_data) &&
-       (!@ls_next_daynight_update || now >= @ls_next_daynight_update)
-      @ls_next_daynight_update=now+0.2
-      value=LightingStudioDayNight.ambient(@ls_map_data)
-      if value
-        color,darkness=value
-        @ls_ambient_sprite.bitmap.set_pixel(0,0,Color.new(color[0],color[1],color[2],255))
-        @ls_ambient_sprite.opacity=(darkness*230).round
-      end
-    end
+    ls_update_day_night(false, now)
     ls_update_chunks(mx, my, zx, zy)
     @ls_sprites.each do |sprite, entry|
       size, energy = LightingStudio.pulse_values(entry[:pulse], now)
