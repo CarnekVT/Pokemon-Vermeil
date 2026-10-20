@@ -90,6 +90,12 @@
           },
           "anchor": {
             "type": "static"
+          },
+          "schedule": {
+            "enabled": true,
+            "startHour": 19,
+            "endHour": 7,
+            "fadeMinutes": 20
           }
         },
         {
@@ -128,6 +134,12 @@
           },
           "anchor": {
             "type": "static"
+          },
+          "schedule": {
+            "enabled": true,
+            "startHour": 19,
+            "endHour": 7,
+            "fadeMinutes": 20
           }
         },
         {
@@ -196,38 +208,43 @@
     "keyframes": [
       {
         "hour": 0,
-        "color": "#182440",
-        "darkness": 0.68
+        "color": "#25334F",
+        "darkness": 0.37
       },
       {
         "hour": 5,
-        "color": "#415275",
-        "darkness": 0.53
+        "color": "#40516D",
+        "darkness": 0.26
       },
       {
         "hour": 7,
-        "color": "#FFCF9A",
-        "darkness": 0.24
+        "color": "#E7CBA4",
+        "darkness": 0.025
       },
       {
-        "hour": 12,
+        "hour": 11,
         "color": "#FFFFFF",
         "darkness": 0
       },
       {
+        "hour": 15,
+        "color": "#F4D6B2",
+        "darkness": 0.025
+      },
+      {
         "hour": 17,
-        "color": "#FFC58A",
-        "darkness": 0.2
+        "color": "#D9B59C",
+        "darkness": 0.055
       },
       {
         "hour": 19,
-        "color": "#6879B1",
-        "darkness": 0.48
+        "color": "#53658D",
+        "darkness": 0.18
       },
       {
-        "hour": 22,
-        "color": "#24314C",
-        "darkness": 0.63
+        "hour": 23,
+        "color": "#263956",
+        "darkness": 0.34
       }
     ]
   }
