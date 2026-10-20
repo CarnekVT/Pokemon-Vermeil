@@ -10,33 +10,27 @@ module LightingStudioDayNight
       pbMessage(_INTL("El saco de dormir solo puede adelantar el reloj cuando el ciclo de día y noche usa un reloj interno."))
       return false
     end
-    hour_now=current_hour
-    current_minutes=(hour_now*60).round
-    h=(current_minutes / 60) % 24
-    m=current_minutes % 60
-    commands=[
-      _INTL("Descansar 1 hora"),
-      _INTL("Descansar 6 horas"),
-      _INTL("Descansar 12 horas"),
-      _INTL("Despertar a las 06:00"),
-      _INTL("Despertar a las 12:00"),
-      _INTL("Despertar a las 18:00"),
-      _INTL("Despertar a las 00:00"),
-      _INTL("Cancelar")
+    now_minutes=(current_hour*60).round % 1440
+    now_label=format('%02d:%02d',now_minutes/60,now_minutes%60)
+    # Six fixed wake-up presets, rather than relative sleep durations.
+    # Edit this small table to adjust the six slots displayed to players.
+    slots=[
+      [6,0,_INTL("Amanecer")],
+      [9,0,_INTL("Mañana")],
+      [12,0,_INTL("Mediodía")],
+      [15,0,_INTL("Tarde")],
+      [18,0,_INTL("Atardecer")],
+      [21,0,_INTL("Noche")]
     ]
-    selected=pbMessage(_INTL("Son las {1}:{2}. ¿Hasta cuándo quieres descansar?",
-      format('%02d',h),format('%02d',m)),commands,-1,nil,0)
-    return false if selected.nil? || selected<0 || selected>=7
-    minutes=case selected
-            when 0 then current_minutes+60
-            when 1 then current_minutes+360
-            when 2 then current_minutes+720
-            when 3 then 360
-            when 4 then 720
-            when 5 then 1080
-            when 6 then 0
-            end
-    minutes %= 1440
+    commands=slots.map do |h,m,label|
+      _INTL("{1} — {2}:{3}",label,format('%02d',h),format('%02d',m))
+    end
+    commands << _INTL("Cancelar")
+    selected=pbMessage(_INTL("Ahora son las {1}. ¿A qué hora quieres despertar?",now_label),
+                       commands,-1,nil,0)
+    return false if selected.nil? || selected<0 || selected>=slots.length
+    hour,minute=slots[selected][0],slots[selected][1]
+    minutes=hour*60+minute
     set_internal_time(minutes / 60, minutes % 60)
     pbMessage(_INTL("¡Has descansado! Ahora son las {1}:{2}.",
       format('%02d',minutes/60),format('%02d',minutes%60)))
