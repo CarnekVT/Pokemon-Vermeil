@@ -190,6 +190,7 @@ async function loadMaskFile(name,{force=false}={}){
    if(force)owner.maskDrafts.delete(name);
    setMaskImage(name,img);
    redraw();
+   if(owner.host && active()?.maskFile===name)refresh();
    return true;
   }finally{URL.revokeObjectURL(url);}
  }catch(error){
