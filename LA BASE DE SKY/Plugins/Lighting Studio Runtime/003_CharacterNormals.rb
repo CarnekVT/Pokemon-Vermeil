@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio / Character normals v0.7.1
+# Lighting Studio / Character normals v0.8.0
 # Experimental, visible RGSS overlay for player and follower sprites.
 # This is a CACHED SOFTWARE NORMAL-LIGHT PASS, not a GPU shader.
 # It computes at most one small sprite frame per graphics frame and reuses
@@ -131,7 +131,7 @@ module LightingStudioNormals
       angle = LightingStudio.number(src['angle'], 70, 5, 170) * Math::PI / 360.0
       @lights << [cx, cy, radius, color,
                   LightingStudio.number(src['intensity'], 0.8, 0, 1),
-                  pulse, type, rotation, width, height, angle, src['maskFile']]
+                  pulse, type, rotation, width, height, angle, src['maskFile'], src['schedule']]
     end
     @lights
   rescue StandardError => e
@@ -169,9 +169,13 @@ module LightingStudioNormals
     cx,cy = character_world_position(character)
     best = nil
     score = 0.0
-    light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity,pulse,type,rotation,width,height,angle,mask_name|
+    light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity,pulse,type,rotation,width,height,angle,mask_name,schedule|
       size, energy = LightingStudio.pulse_values(pulse, now)
       next if energy <= 0.0 || intensity <= 0.0
+      if defined?(LightingStudioDayNight)
+        energy *= LightingStudioDayNight.schedule_factor(schedule)
+      end
+      next if energy <= 0.0
       dx=lx-cx
       dy=ly-cy
       # Rotate into the light's local space, matching the static masks.
