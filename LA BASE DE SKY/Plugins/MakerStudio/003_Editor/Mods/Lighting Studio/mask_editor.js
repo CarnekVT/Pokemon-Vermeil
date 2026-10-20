@@ -87,14 +87,15 @@ export function mountMaskPainter(host,opts){
  const src=getSource();
  let draft=src?cloneImage(src):caveTemplate();
  if(!src)onCreate(draft);
+ const stage=el('div','ls-mask-canvas-stage');canvasFrame.append(stage);
  const canvas=el('canvas','ls-mask-canvas');canvas.width=draft.width;canvas.height=draft.height;
- canvas.style.aspectRatio=draft.width+'/'+draft.height;
- canvasFrame.append(canvas);
+ stage.style.aspectRatio=draft.width+'/'+draft.height;
+ stage.append(canvas);
  const guide=el('img','ls-mask-reference');guide.alt='Gráfico de la cueva (referencia no exportada)';
- guide.hidden=true;canvasFrame.prepend(guide);
+ guide.hidden=true;stage.prepend(guide);
  const polyLayer=el('canvas','ls-mask-poly-preview');
  polyLayer.width=canvas.width;polyLayer.height=canvas.height;
- canvasFrame.append(polyLayer);
+ stage.append(polyLayer);
  const polyCtx=polyLayer.getContext('2d');
  const brush=canvas.getContext('2d');brush.drawImage(draft,0,0);
  const status=el('div','ls-mask-status','Pinta con el ratón y observa la forma encima del mapa.');root.append(status);
@@ -127,6 +128,22 @@ export function mountMaskPainter(host,opts){
  const slider=el('label','ls-mask-brush');slider.textContent='Pincel ';
  const range=el('input');range.type='range';range.min='2';range.max='48';range.value='10';range.oninput=()=>{radius=Number(range.value);};
  slider.append(range);toolbar.append(slider);
+ // The bitmap remains at its native resolution: zoom changes only CSS
+ // presentation, like zooming Maker Studio's tile canvas.
+ const zoomControl=el('label','ls-mask-zoom');zoomControl.textContent='Zoom de máscara ';
+ const zoomSelect=el('select','ls-input');
+ for(const [value,label] of [['fit','Ajustar'],['1','1×'],['2','2×'],['4','4×']]){
+  const option=el('option',null,label);option.value=value;zoomSelect.append(option);
+ }
+ zoomSelect.value='fit';
+ const applyZoom=()=>{
+  const scale=Number(zoomSelect.value);
+  stage.style.width=zoomSelect.value==='fit'?'100%':Math.round(canvas.width*scale)+'px';
+  stage.style.aspectRatio=canvas.width+'/'+canvas.height;
+ };
+ zoomSelect.addEventListener('change',applyZoom);
+ zoomControl.append(zoomSelect);toolbar.append(zoomControl);
+ applyZoom();
  const point=ev=>{const rect=canvas.getBoundingClientRect();return{x:(ev.clientX-rect.left)*canvas.width/rect.width,y:(ev.clientY-rect.top)*canvas.height/rect.height};};
  const stroke=(to,from)=>{
   brush.save();
@@ -143,7 +160,7 @@ export function mountMaskPainter(host,opts){
  canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);
  const actions=el('div','ls-mask-actions');root.append(actions);
  const action=(label,callback)=>{const b=el('button','ls-btn ls-small',label);b.type='button';b.onclick=callback;actions.append(b);return b;};
- const replaceWith=created=>{snapshot();draft=created;canvas.width=created.width;canvas.height=created.height;polyLayer.width=created.width;polyLayer.height=created.height;polygon=[];canvas.style.aspectRatio=created.width+'/'+created.height;canvas.getContext('2d').drawImage(created,0,0);signal();};
+ const replaceWith=created=>{snapshot();draft=created;canvas.width=created.width;canvas.height=created.height;polyLayer.width=created.width;polyLayer.height=created.height;polygon=[];stage.style.aspectRatio=created.width+'/'+created.height;applyZoom();canvas.getContext('2d').drawImage(created,0,0);signal();};
  action('➜ Salida de cueva',()=>replaceWith(caveTemplate(256,128,'right')));
  action('⬅ Cueva hacia izquierda',()=>replaceWith(caveTemplate(256,128,'left')));
  action('Lienzo vacío',()=>replaceWith(blankMask(canvas.width,canvas.height)));
