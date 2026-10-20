@@ -1,7 +1,7 @@
 {
   "id": "com.vermeil.movement-studio",
   "name": "Movement Studio",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Editor visual del movimiento de Vermeil por proyecto y por mapa.",
+  "description": "Editor visual BAS/BSS de Movement Studio: workspace con escenario, navegación, inspector, presets y ajustes por mapa.",
   "permissions": [
     "fs.project",
     "fs.write.project",
