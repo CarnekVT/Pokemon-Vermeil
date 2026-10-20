@@ -214,7 +214,7 @@ class MovementStudio {
       '<main class="vm-stage-area"><div class="vm-stage-top"><strong>VISTA DEL MOVIMIENTO</strong><span class="vm-muted">Composición y respuesta</span><div class="vm-top-spacer"></div><span class="vm-tag" data-stage-mode>'+(classic?'CLÁSICO':dirCount+' DIRECCIONES')+'</span></div>'+
       '<div class="vm-stage-viewport"><div class="vm-stage-key"><span class="vm-chip good" data-stage-flow>FLOW '+E(flow)+'</span><span class="vm-chip" data-stage-cam>CÁMARA '+E(v.camera_smoothing)+'%</span></div><div class="vm-preview" data-preview-svg>'+svgPreview(v,this.direction)+'</div></div>'+
       '<div class="vm-stage-foot"><div><strong>Dirección de vista previa</strong><div class="vm-muted">Las flechas solo cambian el esquema. No mueven al jugador ingame.</div></div><div class="vm-dpad" role="group" aria-label="Dirección de vista previa">'+
-      [7,8,9,4,5,6,1,2,3].map(n=>'<button type="button" class="vm-direction '+(n===5?'center':this.direction===n?'active':'')+'"'+(n===5?' disabled':(classic&&[1,3,7,9].includes(n))?' disabled':' data-direction="'+n+'"')+' aria-label="'+E(({7:"Arriba izquierda",8:"Arriba",9:"Arriba derecha",4:"Izquierda",5:"Centro",6:"Derecha",1:"Abajo izquierda",2:"Abajo",3:"Abajo derecha"})[n])+'">'+({7:"↖",8:"↑",9:"↗",4:"←",5:"●",6:"→",1:"↙",2:"↓",3:"↘"})[n]+'</button>').join("")+
+      [7,8,9,4,5,6,1,2,3].map(n=>'<button type="button" class="vm-direction '+(n===5?'center':this.direction===n?'active':'')+'"'+(n===5?' disabled':(Number(dirCount)===4&&[1,3,7,9].includes(n))?' disabled':' data-direction="'+n+'"')+' aria-label="'+E(({7:"Arriba izquierda",8:"Arriba",9:"Arriba derecha",4:"Izquierda",5:"Centro",6:"Derecha",1:"Abajo izquierda",2:"Abajo",3:"Abajo derecha"})[n])+'">'+({7:"↖",8:"↑",9:"↗",4:"←",5:"●",6:"→",1:"↙",2:"↓",3:"↘"})[n]+'</button>').join("")+
       '</div></div>'+
       '<div class="vm-info-strip"><div class="vm-info"><span>TIPO DE CONTROL</span><strong data-info-control>'+(classic?'Clásico Essentials':'Moderno inmediato')+'</strong></div><div class="vm-info"><span>DIRECCIONES</span><strong data-info-directions>'+dirCount+'</strong></div><div class="vm-info"><span>FLOW</span><strong data-info-flow>'+E(flow)+'</strong></div></div></main>'+
       '<aside class="vm-inspector"><div class="vm-inspector-head"><div class="vm-overline">INSPECTOR</div><strong>'+E(info.title)+'</strong><small>'+E(info.hint)+'</small></div><div class="vm-inspector-body">'+this.inspector(v)+'</div></aside>'+
@@ -253,17 +253,13 @@ class MovementStudio {
           '<div class="vm-grid"><button type="button" class="vm-btn" data-preset="classic">↩ Clásico</button><button type="button" class="vm-btn" data-preset="modern">✦ Moderno</button></div><div class="vm-field-note" style="margin-top:8px">Se aplican al ámbito actual. Puedes editar cada ajuste antes de guardar.</div>')+
         '<div class="vm-alert">Se conservan los sistemas originales de eventos, escaleras y Turbo. Esta vista representa la configuración, no una simulación del juego.</div>';
     }
-    if(this.section==="control")return
-      this.sectionCard("Movimiento del jugador","INPUT EN TIEMPO REAL",OPTIONS_BY_GROUP("control").map(k=>this.field(k)).join(""))+
+    if(this.section==="control")return this.sectionCard("Movimiento del jugador","INPUT EN TIEMPO REAL",OPTIONS_BY_GROUP("control").map(k=>this.field(k)).join(""))+
       '<div class="vm-alert '+(classic?'warn':'good')+'">'+(classic?'En Clásico se utiliza la lectura original de cuatro direcciones. Continuous Flow y los controles diagonales modernos no se aplican.':'Moderno no guarda pulsaciones antiguas ni añade retrasos. El modo de 4 direcciones también está disponible.')+'</div>';
-    if(this.section==="diagonal")return
-      this.sectionCard("Comportamiento diagonal","COLISIONES Y ORIENTACIÓN",OPTIONS_BY_GROUP("diagonal").map(k=>this.field(k)).join(""))+
+    if(this.section==="diagonal")return this.sectionCard("Comportamiento diagonal","COLISIONES Y ORIENTACIÓN",OPTIONS_BY_GROUP("diagonal").map(k=>this.field(k)).join(""))+
       '<div class="vm-alert">Estos ajustes solo afectan las diagonales del control moderno de 8 direcciones. No modifican velocidad de entrada, Turbo ni eventos del juego.</div>';
-    if(this.section==="camera")return
-      this.sectionCard("Seguimiento de cámara","COMPOSICIÓN",["camera_smoothing","camera_deadzone","camera_lookahead","camera_lead_response"].map(k=>this.field(k)).join(""))+
+    if(this.section==="camera")return this.sectionCard("Seguimiento de cámara","COMPOSICIÓN",["camera_smoothing","camera_deadzone","camera_lookahead","camera_lead_response"].map(k=>this.field(k)).join(""))+
       '<div class="vm-alert">35% de suavidad, zona muerta 0 y anticipación 0 conservan el comportamiento anterior de Vermeil. Estos controles no modifican la respuesta del jugador.</div>';
-    if(this.section==="debug")return
-      this.sectionCard("Diagnóstico visual","SOLO EN MODO DEBUG",this.field("debug_hud"))+
+    if(this.section==="debug")return this.sectionCard("Diagnóstico visual","SOLO EN MODO DEBUG",this.field("debug_hud"))+
       this.sectionCard("Pruebas recomendadas","CHECKLIST",
         '<div class="vm-stack">'+["Cambiar entre control Clásico y Moderno","Caminar y girar frente a paredes y eventos","Entrar y salir de combate con Turbo","Comprobar seguidores, hielo, escaleras y Surf","Comparar cámara y zona muerta por mapa"].map((s,i)=>'<div style="font-size:11px;color:#bfd0e9;padding:6px 3px;border-bottom:1px solid #273247">'+(i+1)+'. '+E(s)+'</div>').join("")+'</div>')+
       '<div class="vm-alert">El HUD funciona exclusivamente con la versión Debug; no se habilita en una versión publicada.</div>';
