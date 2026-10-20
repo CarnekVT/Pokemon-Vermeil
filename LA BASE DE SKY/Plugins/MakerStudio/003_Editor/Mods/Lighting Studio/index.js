@@ -338,15 +338,15 @@ const daytime=element('section','ls-section');shell.append(daytime);
 const insp=element('section','ls-section ls-inspector');shell.append(insp);
 const insHead=element('div','ls-section-heading');insHead.append(node('span','INSPECTOR DE LUZ'),element('span','ls-count',active()?.name||'Sin selección'));insp.append(insHead);
 const nav=element('div','ls-inspector-tabs');insp.append(nav);
-for(const [key,label] of [['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art']]){
+for(const [key,label] of [['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art'],['schedule','◷ Horario']]){
  nav.append(mini(label,()=>{state.inspectorTab=key;refresh();},state.inspectorTab===key));
 }
 const selected=active();
 if(!selected)insp.append(element('div','ls-empty','Selecciona una luz en el mapa o en la biblioteca.'));
 else{
 const tabs={};
-for(const id of ['shape','fade','pulse','pixel']){const panel=element('div','ls-tab-body');panel.hidden=state.inspectorTab!==id;insp.append(panel);tabs[id]=panel;}
-const shapePanel=tabs.shape,fadePanel=tabs.fade,pulsePanel=tabs.pulse,pixelPanel=tabs.pixel;
+for(const id of ['shape','fade','pulse','pixel','schedule']){const panel=element('div','ls-tab-body');panel.hidden=state.inspectorTab!==id;insp.append(panel);tabs[id]=panel;}
+const shapePanel=tabs.shape,fadePanel=tabs.fade,pulsePanel=tabs.pulse,pixelPanel=tabs.pixel,schedulePanel=tabs.schedule;
 shapePanel.append(element('div','ls-group-label','PROPIEDADES GENERALES'));
 fadePanel.append(element('p','ls-inline-note','Elige hacia qué borde se atenúa la luz. «Hacia abajo» conserva una zona luminosa arriba y la oscurece progresivamente hacia abajo.'));
 const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;});labeled(shapePanel,'Geometría',typeSelect);
@@ -389,6 +389,42 @@ if(selected.fadeMode==='custom'){
 }
 const pulse=element('div','ls-effect-group');pulsePanel.append(pulse);pulse.append(element('b',null,'Pulsación'));const on=node('input');on.type='checkbox';on.checked=selected.pulse.enabled;on.onchange=()=>change(()=>selected.pulse.enabled=on.checked);labeled(pulse,'Activar pulsación',on);slider(pulse,'Velocidad (Hz)',selected.pulse.speedHz,.05,12,.05,(v,final)=>editLightValue(()=>selected.pulse.speedHz=v,final));slider(pulse,'Oscilación intensidad',selected.pulse.intensity,0,1,.01,(v,final)=>editLightValue(()=>selected.pulse.intensity=v,final));slider(pulse,'Oscilación tamaño',selected.pulse.radius,0,.9,.01,(v,final)=>editLightValue(()=>selected.pulse.radius=v,final));
 const pixel=element('div','ls-effect-group');pixelPanel.append(pixel);pixel.append(element('b',null,'Pixel Art'));const pixelOn=node('input');pixelOn.type='checkbox';pixelOn.checked=selected.pixel.enabled;pixelOn.onchange=()=>change(()=>selected.pixel.enabled=pixelOn.checked);labeled(pixel,'Pixelar luz',pixelOn);slider(pixel,'Tamaño de píxel',selected.pixel.size,2,32,1,(v,final)=>editLightValue(()=>selected.pixel.size=Math.round(v),final));slider(pixel,'Niveles de degradado',selected.pixel.steps,2,24,1,(v,final)=>editLightValue(()=>selected.pixel.steps=Math.round(v),final));
+// SCHEDULE — time-based lamp activation (incl. cross-midnight ranges).
+schedulePanel.append(element('div','ls-group-label','HORARIO DE ACTIVACIÓN'));
+const cfg=selected.schedule||{enabled:false,startHour:19,endHour:7,fadeMinutes:20};
+const preset=node('select');preset.className='ls-input';
+const isDay=cfg.enabled&&Math.abs(cfg.startHour-7)<.001&&Math.abs(cfg.endHour-19)<.001;
+const isNight=cfg.enabled&&Math.abs(cfg.startHour-19)<.001&&Math.abs(cfg.endHour-7)<.001;
+const presetMode=!cfg.enabled?'always':isDay?'day':isNight?'night':'custom';
+for(const [value,label] of [['always','Siempre encendida'],['day','Solo día (07:00–19:00)'],['night','Solo noche (19:00–07:00)'],['custom','Personalizado']]){
+ const opt=node('option',label);opt.value=value;preset.append(opt);
+}
+preset.value=presetMode;
+preset.onchange=()=>change(()=>{
+ if(!selected.schedule)selected.schedule={enabled:false,startHour:19,endHour:7,fadeMinutes:20};
+ const v=preset.value;selected.schedule.enabled=v!=='always';
+ if(v==='day'){selected.schedule.startHour=7;selected.schedule.endHour=19;}
+ if(v==='night'){selected.schedule.startHour=19;selected.schedule.endHour=7;}
+});
+labeled(schedulePanel,'Cuándo aparece',preset);
+schedulePanel.append(element('p','ls-inline-note','Aparece y desaparece gradualmente. Puede cruzar medianoche. El reloj debe estar activado para aplicar el horario.'));
+if(cfg.enabled){
+ const row=element('div','ls-two');schedulePanel.append(row);
+ for(const [label,prop] of [['Hora de encendido','startHour'],['Hora de apagado','endHour']]){
+  const input=node('input');input.type='time';input.step=900;input.className='ls-input';
+  const hh=Math.floor(cfg[prop]),mm=Math.round((cfg[prop]-hh)*60);
+  input.value=String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  input.onchange=()=>{
+   const [hour,min]=input.value.split(':').map(Number);
+   if(!Number.isFinite(hour)||!Number.isFinite(min))return;
+   change(()=>selected.schedule[prop]=clamp(hour+min/60,0,23.999));
+  };
+  labeled(row,label,input);
+ }
+ slider(schedulePanel,'Transición (minutos del juego)',cfg.fadeMinutes??20,0,120,5,
+   (v,final)=>editLightValue(()=>selected.schedule.fadeMinutes=v,final));
+}
+schedulePanel.append(mini('Ver en ciclo día y noche',()=>{state.workspaceTab='time';state.previewDayNight=true;refresh();redraw();}));
 const coords=element('div','ls-two');shapePanel.append(coords);for(const axis of ['x','y']){const input=node('input');input.type='text';input.inputMode='decimal';input.className='ls-input';input.placeholder='Ej. 25.30';input.value=String(selected[axis]);input.onchange=()=>{const n=parseCoordinate(input.value);if(n===null){input.value=String(selected[axis]);notify('Introduce una coordenada entre -2048 y 2048, con decimales libres.','warn');return;}change(()=>selected[axis]=n);};labeled(coords,axis.toUpperCase()+' (tiles)',input);}
 const buttons=element('div','ls-inline');shapePanel.append(buttons);buttons.append(mini('⌫ Eliminar',()=>change(()=>{const map=current();map.lights=map.lights.filter(l=>l.id!==selected.id);state.selected=null;})));
 }
@@ -461,7 +497,7 @@ try{
  const map=getMap(state.data,info.mapId,false);
  paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},
   ambientOverride:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?
-    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,previewQuality:state.previewQuality,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
+    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,previewHour:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?state.previewHour:null,previewQuality:state.previewQuality,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
  if(state.diagnostic){draw.save();try{
   draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
  }finally{draw.restore();}}
