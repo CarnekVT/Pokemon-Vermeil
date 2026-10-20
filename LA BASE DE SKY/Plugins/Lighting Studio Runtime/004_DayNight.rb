@@ -259,3 +259,26 @@ end
 Object.prepend(LightingStudioVanillaDayNightGuard) unless
   Object.ancestors.include?(LightingStudioVanillaDayNightGuard)
 
+
+
+# The map can have multiple connected Spriteset_Map instances. Every base
+# spriteset updates the SAME viewport, and the vanilla update resets its tone.
+# Apply the final composed tone after all map spritesets / renderer updates.
+module LightingStudioNativeSceneTone
+  def updateSpritesets(refresh=false)
+    result=super
+    if defined?(LightingStudioDayNight) && LightingStudioDayNight.native_tone? &&
+       LightingStudioDayNight.active_on_map?(LightingStudioDayNight.current_map_data)
+      viewport=Spriteset_Map.viewport
+      if viewport && !viewport.disposed?
+        src_tone=(defined?($game_screen) && $game_screen) ? $game_screen.tone : nil
+        values=LightingStudioDayNight.tone_values
+        viewport.tone=LightingStudioDayNight.compose_tone(src_tone,values)
+      end
+    end
+    result
+  end
+end
+if defined?(Scene_Map) && !Scene_Map.ancestors.include?(LightingStudioNativeSceneTone)
+  Scene_Map.prepend(LightingStudioNativeSceneTone)
+end
