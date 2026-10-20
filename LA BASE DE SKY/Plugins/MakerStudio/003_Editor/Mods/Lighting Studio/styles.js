@@ -123,4 +123,23 @@ export const LIGHTING_WIDE_WORKSPACE_CSS = `
  .ls-workspace{padding:7px}
 }
 
+/* Workspace actions only appear within the Lights tab */
+.ls-light-quickbar{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;
+  align-items:center;margin:0 0 10px}
+.ls-light-quickbar .ls-toolbar,.ls-light-quickbar .ls-actions{padding:7px 9px;margin:0;
+  background:var(--bg-secondary,#202733);border:1px solid var(--border,#354057);
+  border-radius:8px;justify-content:flex-start;display:flex;flex-wrap:wrap}
+.ls-light-quickbar .ls-btn{flex:0 1 auto;min-height:33px}
+.ls-context-hint{margin:0 0 12px!important;padding:8px 11px!important;font-size:11px;
+  white-space:normal;border-radius:6px}
+.ls-debug-details{margin:5px 16px 12px;flex-shrink:0;border:1px solid var(--border,#303745);border-radius:7px;
+  background:var(--bg-secondary,#202733)}
+.ls-debug-details>summary{cursor:pointer;padding:8px 12px;font-size:11px;color:var(--text-secondary);
+  user-select:none}
+.ls-debug-details .ls-layer-status{border-top:1px solid var(--border,#303745);border-bottom:0}
+@container (max-width:980px){
+ .ls-light-quickbar{grid-template-columns:minmax(0,1fr)}
+ .ls-light-quickbar .ls-btn{flex:1 1 auto}
+}
+
 `;
