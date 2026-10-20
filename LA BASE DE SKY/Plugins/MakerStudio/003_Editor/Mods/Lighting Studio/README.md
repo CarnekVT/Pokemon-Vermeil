@@ -1,4 +1,4 @@
-# Lighting Studio v0.9.2 — anochecer mejorado y madrugada en el saco
+# Lighting Studio v0.9.3 — descanso con fundido negro
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -455,3 +455,13 @@ Validación: pruebas del modelo para las cinco horas, la interpolación vesperti
 - Tests Ruby actualizados para comprobar las siete opciones de una sola página; tests JS para los tonos exactos de 18:00, 19:00 y la coincidencia entre el preset del editor y el reloj del mapa 79.
 
 Para probar: alterna con el saco **17:00, 19:00 y 23:00**, además de la nueva opción **05:00**. La iluminación del mapa debería pasar de tarde a crepúsculo y a noche sin cortes de tono. Pendiente de prueba visual en Essentials.
+
+## v0.9.3 — Saco de dormir: fundido negro y 05:00 sin subtítulo
+
+- La opción del saco para madrugada se muestra exactamente **`5 a.m.`**, sin «Madrugada» ni ningún otro añadido. El mensaje tras descansar a esa hora muestra igualmente solo `5 a.m.`.
+- El saco mantiene las **siete horas** en una sola página: 5, 7, 11 a. m. y 3, 5, 7, 11 p. m.
+- **Secuencia al descansar:** fundido a negro de 10 fotogramas, espera de 10, cambio de hora con el mapa oculto, reproducción de la ME **Pokemon Healing** durante la pantalla negra, espera de 30, regreso progresivo de 10 fotogramas y espera final de 20 antes del mensaje contextual de la hora elegida.
+- Para evitar interferencias con el sistema de tonos nativo y los eventos, el negro se dibuja en un sprite temporal de pantalla completa; el bitmap, el sprite y el viewport se liberan en un bloque `ensure`.
+- Añadí pruebas a `DeveloperTests/LightingStudio/test_day_night.rb` que comprueban el negro RGBA `(0,0,0,255)`, la opacidad máxima mientras suena la curación, la actualización previa de la hora y el regreso a opacidad cero.
+
+Pendiente: comprobar que el fundido y la ME encajan visualmente con la duración del sonido en Pokémon Essentials 21.1.
