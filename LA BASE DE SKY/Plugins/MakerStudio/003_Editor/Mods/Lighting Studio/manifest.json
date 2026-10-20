@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Recarga en vivo de máscaras PNG y editor visual de siluetas para cuevas, con pintura, polígono y plantillas.",
+  "description": "Editor optimizado para zoom nativo, luces cacheadas y edición de máscaras en espacio independiente.",
   "tags": [
     "mapping",
     "lighting",
