@@ -48,9 +48,21 @@ assert.equal(evaluateTimeOfDay(toneProject.timeOfDay,12).tone.red,0);
 assert.equal(evaluateTimeOfDay(toneProject.timeOfDay,0).tone.gray,30);
 assert.ok(evaluateTimeOfDay(toneProject.timeOfDay,6).tone.red<0);
 assert.equal(defaultTimeOfDay().blendMode,'tone');
-const rgbg=evaluateTimeOfDay(defaultTimeOfDay(),19).tone;
-assert.equal(Math.round(rgbg.blue),4);
-assert.equal(Math.round(rgbg.gray),20);
+// Pokémon Fable tone anchors (Deo / Eevee Expo resource 50).
+const expectedFable=[
+  [0,[-30,-70,11,68]],
+  [5,[-20,-60,-30,17]],
+  [9,[0,0,0,0]],
+  [17,[2,-20,3,17]],
+  [21,[-30,-70,11,68]]
+];
+for(const [hour,rgba] of expectedFable){
+  const t=evaluateTimeOfDay(defaultTimeOfDay(),hour).tone;
+  assert.deepEqual([t.red,t.green,t.blue,t.gray],rgba);
+}
+const evening=evaluateTimeOfDay(defaultTimeOfDay(),19).tone;
+assert.ok(evening.green<-20 && evening.green>-70);
+assert.equal(evaluateTimeOfDay(defaultTimeOfDay(),23).tone.gray,68);
 const legacyTone=normalizeTimeOfDay({blendMode:'overlay',keyframes:[
   {hour:0,color:'#112233',darkness:0.3},{hour:12,color:'#FFFFFF',darkness:0}
 ]});
