@@ -36,3 +36,6 @@ jobs:
       - name: Test model, masks and day-night timeline
         working-directory: LA BASE DE SKY
         run: node --experimental-default-type=module "DeveloperTests/LightingStudio/test_model.mjs"
+      - name: Test mask painter cave silhouettes and PNG export
+        working-directory: LA BASE DE SKY
+        run: node --experimental-default-type=module "DeveloperTests/LightingStudio/test_mask_editor.mjs"
