@@ -58,7 +58,7 @@ export const LIGHTING_WIDE_WORKSPACE_CSS = `
 .ls-workspace-view>.ls-section{padding:17px 19px}
 .ls-workspace-view .ls-field{grid-template-columns:minmax(0,1fr) auto}
 .ls-workspace-view .ls-inline{row-gap:8px}
-.ls-workspace-view .ls-inspector-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ls-workspace-view .ls-inspector-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}
 .ls-workspace-view .ls-effect-group{max-width:100%}
 @container (max-width:780px){
  .ls-wide-light-layout{grid-template-columns:minmax(0,1fr)}
@@ -114,6 +114,7 @@ export const LIGHTING_WIDE_WORKSPACE_CSS = `
  .ls-time-settings .ls-field{margin:0;align-items:center}
  .ls-time-settings .ls-inline-note{grid-column:1/-1}
 }
+.ls-workspace-view .ls-inspector-tabs .ls-btn{font-size:10px;padding:7px 3px;min-width:0}
 @container (max-width:680px){
  .ls-time-settings{display:block}
  .ls-time-settings .ls-field{margin-bottom:10px}
