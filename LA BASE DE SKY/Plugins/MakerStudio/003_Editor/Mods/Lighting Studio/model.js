@@ -52,12 +52,17 @@ export function normalizeNormals(raw){
 export const defaultTimeOfDay=()=>({
  enabled:false,source:'real',startHour:8,minutesPerSecond:0.1,
  previewHour:12,blendMode:'tone',keyframes:[
- // Exact RGBG values from Deo's publicly shared Pokémon Fable tone preset.
- // The five anchors interpolate smoothly; the original preset uses hourly steps.
+ // Pokémon Fable's RGBG tones, with duplicated anchors to hold each
+ // time-of-day block: 00–05 night, 05–09 morning, 09–17 day,
+ // 17–21 evening and 21–24 night. Blends take 15 game minutes.
  {hour:0,color:'#4B3F69',darkness:.27,tone:{red:-30,green:-70,blue:11,gray:68}},
+ {hour:4.75,color:'#4B3F69',darkness:.27,tone:{red:-30,green:-70,blue:11,gray:68}},
  {hour:5,color:'#8C7AA0',darkness:.07,tone:{red:-20,green:-60,blue:-30,gray:17}},
+ {hour:8.75,color:'#8C7AA0',darkness:.07,tone:{red:-20,green:-60,blue:-30,gray:17}},
  {hour:9,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
+ {hour:16.75,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
  {hour:17,color:'#C7B6D8',darkness:.07,tone:{red:2,green:-20,blue:3,gray:17}},
+ {hour:20.75,color:'#C7B6D8',darkness:.07,tone:{red:2,green:-20,blue:3,gray:17}},
  {hour:21,color:'#4B3F69',darkness:.27,tone:{red:-30,green:-70,blue:11,gray:68}}
 ]});
 const TONE_CHANNELS=['red','green','blue','gray'];
