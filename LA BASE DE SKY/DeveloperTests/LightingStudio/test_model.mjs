@@ -37,6 +37,26 @@ const atNoon=evaluateTimeOfDay(timeline,12);
 assert.equal(atNoon.darkness,0);
 assert.equal(evaluateTimeOfDay(timeline,18).darkness>atNoon.darkness,true);
 assert.equal(normalizeTimeOfDay({enabled:true,source:"garbage"}).source,"real");
+
+const toneProject=normalizeProject({schema:1,
+  timeOfDay:{enabled:true,blendMode:'tone',keyframes:[
+    {hour:0,color:'#25334F',darkness:.37,tone:{red:-58,green:-58,blue:9,gray:30}},
+    {hour:12,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}}
+  ]},maps:{}});
+assert.equal(toneProject.timeOfDay.blendMode,'tone');
+assert.equal(evaluateTimeOfDay(toneProject.timeOfDay,12).tone.red,0);
+assert.equal(evaluateTimeOfDay(toneProject.timeOfDay,0).tone.gray,30);
+assert.ok(evaluateTimeOfDay(toneProject.timeOfDay,6).tone.red<0);
+assert.equal(defaultTimeOfDay().blendMode,'tone');
+const rgbg=evaluateTimeOfDay(defaultTimeOfDay(),19).tone;
+assert.equal(Math.round(rgbg.blue),4);
+assert.equal(Math.round(rgbg.gray),20);
+const legacyTone=normalizeTimeOfDay({blendMode:'overlay',keyframes:[
+  {hour:0,color:'#112233',darkness:0.3},{hour:12,color:'#FFFFFF',darkness:0}
+]});
+assert.equal(legacyTone.blendMode,'overlay');
+assert.equal(Number.isFinite(legacyTone.keyframes[0].tone.red),true);
+
 console.log("Lighting Studio model, masks and day/night tests passed");
 
 const overnight=normalizeSchedule({enabled:true,startHour:19,endHour:7,fadeMinutes:20});
