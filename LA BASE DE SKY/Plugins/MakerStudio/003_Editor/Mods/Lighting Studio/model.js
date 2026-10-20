@@ -98,10 +98,12 @@ export const defaultSchedule = () => ({
 });
 export function normalizeSchedule(raw){
  const s=raw&&typeof raw==='object'?raw:{};
- return {enabled:s.enabled===true,
-  startHour:num(s.startHour,0,23.999,19),
-  endHour:num(s.endHour,0,23.999,7),
-  fadeMinutes:num(s.fadeMinutes,0,120,20)};
+ const enabled=s.enabled===true;
+ const startHour=num(s.startHour,0,23.999,19),endHour=num(s.endHour,0,23.999,7);
+ const derived=!enabled?'always':Math.abs(startHour-7)<.001&&Math.abs(endHour-19)<.001?'day':
+   Math.abs(startHour-19)<.001&&Math.abs(endHour-7)<.001?'night':'custom';
+ return {enabled,startHour,endHour,fadeMinutes:num(s.fadeMinutes,0,120,20),
+  mode:['always','day','night','custom'].includes(s.mode)?s.mode:derived};
 }
 export function scheduleFactor(schedule,hour){
  const s=normalizeSchedule(schedule);
