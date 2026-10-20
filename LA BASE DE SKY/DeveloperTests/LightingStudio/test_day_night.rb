@@ -104,12 +104,12 @@ end
 hours=[7,11,15,17,19,23]
 hours.each_with_index do |hour,index|
   time.set_internal_time(8,0)
-  $bag_responses=index<3 ? [index] : [3,index-3]
+  $bag_responses=[index]
   before=spriteset.calls
   raise "Sleeping Bag did not change time for slot #{index}" unless time.use_sleeping_bag
   raise "Sleeping Bag hour #{index} incorrect" unless (time.current_hour-hour).abs<0.0001
-  raise "Sleeping Bag must show 3 slots plus next/previous" unless $bag_choices.length==4
-  raise "Sleeping Bag navigation missing" unless (index<3 ? $bag_choices.last=='---->' : $bag_choices.last=='<----')
+  raise "Sleeping Bag must display all six slots" unless $bag_choices.length==6
+  raise "Sleeping Bag choice order changed" unless $bag_choices==['7 a.m.','11 a.m.','3 p.m.','5 p.m.','7 p.m.','11 p.m.']
   raise "Sleeping Bag prompt differs from the reference" unless $bag_prompts[-2].include?('¿A qué hora quieres despertar?')
   raise "Sleeping Bag did not request ambient refresh" unless spriteset.calls>before
 end
@@ -132,4 +132,4 @@ raise 'Sleeping Bag forced no map refresh' unless spriteset.calls>=14
 raise 'Sleeping Bag ME did not play 6 times' unless $me_count==6
 raise 'Sleep transition did not use 80 graphics frames per skip' unless Graphics.updates==6*80
 
-puts 'Lighting Studio day/night, fixed sleeping hours and immediate refresh tests passed'
+puts 'Lighting Studio day/night, single-page sleeping bag hours and immediate refresh tests passed'
