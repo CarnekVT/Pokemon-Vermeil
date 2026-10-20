@@ -1,4 +1,4 @@
-# Lighting Studio v0.9.1 — tonos Pokémon Fable (día y noche)
+# Lighting Studio v0.9.2 — anochecer mejorado y madrugada en el saco
 
 Compatibilidad objetivo: Pokémon Essentials v21.1 · LA BASE DE SKY 1.2.1.1 · Maker Studio.
 
@@ -442,3 +442,16 @@ Se sustituyen los tonos predeterminados de `model.js` y los del `Data/LightingSt
 No se han modificado las cuatro luces del mapa 79, los horarios de las farolas, los normal maps, los tiempos del reloj ni el saco de dormir. Los mapas antiguos que ya hayan guardado otra paleta conservarán sus valores personalizados; el preset nuevo se aplica a proyectos nuevos y al `maps.json` de esta rama.
 
 Validación: pruebas del modelo para las cinco horas, la interpolación vespertina y la compatibilidad con el modo legado; pendiente comprobar tonalidad y FPS en el juego.
+
+
+## v0.9.2 — Atardecer intermedio y noche más temprana
+
+- Se conservan los tonos RGBG originales de Pokémon Fable para madrugada, mañana, día, tarde y noche. La propuesta artística añade transiciones personalizadas que NO forman parte de los valores originales del recurso.
+- **18:00:** `Tone(-8,-35,-6,28)`, un crepúsculo entre la tarde y la noche.
+- **19:00–20:45:** `Tone(-18,-52,+2,42)`, claramente más nocturno que la tarde anterior.
+- **21:00:** se alcanza el tono nocturno íntegro de Pokémon Fable: `Tone(-30,-70,+11,68)`.
+- Hay fotogramas clave a las 17:45 y 18:45 para suavizar la transición; se mantiene el día neutro y la madrugada anterior. Se actualizaron tanto el preset nuevo de Maker Studio como el perfil de `Data/LightingStudio/maps.json`, sin modificar el contenido de las luces del mapa 79 ni sus horarios.
+- **Saco de dormir:** nuevo horario de **05:00 — Madrugada** en el mismo menú de siete opciones. Mantiene el fundido blanco, la ME de curación y su texto contextual.
+- Tests Ruby actualizados para comprobar las siete opciones de una sola página; tests JS para los tonos exactos de 18:00, 19:00 y la coincidencia entre el preset del editor y el reloj del mapa 79.
+
+Para probar: alterna con el saco **17:00, 19:00 y 23:00**, además de la nueva opción **05:00**. La iluminación del mapa debería pasar de tarde a crepúsculo y a noche sin cortes de tono. Pendiente de prueba visual en Essentials.
