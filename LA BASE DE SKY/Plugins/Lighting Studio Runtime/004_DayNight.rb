@@ -29,11 +29,23 @@ module LightingStudioDayNight
     @last_tick = nil
     @cached_keyframes = nil
     @cached_tone_keys = nil
+    @active_map_id = nil
+    @active_map_data = nil
     @revision = (@revision || 0) + 1
   end
 
   def revision
     @revision ||= 0
+  end
+
+  def current_map_data
+    return nil unless defined?($game_map) && $game_map
+    id=$game_map.map_id
+    if @active_map_id!=id
+      @active_map_id=id
+      @active_map_data=LightingStudio.load_map(id)
+    end
+    @active_map_data
   end
 
   def active_on_map?(map_data)
@@ -227,3 +239,23 @@ module LightingStudioDayNight
     { :error => e.message }
   end
 end
+
+# Base de Sky has an independent vanilla PBDayNight tint on its TilemapRenderer.
+# It reads the computer's real time. While Lighting Studio owns the active
+# map's clock, neutralize only this duplicate per-tile tint: the complete map
+# is already toned by Spriteset_Map.viewport (including the player/followers).
+# When the map ignores Lighting Studio or its cycle is off, delegate to vanilla.
+module LightingStudioVanillaDayNightGuard
+  def pbDayNightTint(object)
+    if defined?(LightingStudioDayNight) &&
+       LightingStudioDayNight.native_tone? &&
+       LightingStudioDayNight.active_on_map?(LightingStudioDayNight.current_map_data)
+      object.tone.set(0,0,0,0)
+      return
+    end
+    super
+  end
+end
+Object.prepend(LightingStudioVanillaDayNightGuard) unless
+  Object.ancestors.include?(LightingStudioVanillaDayNightGuard)
+
