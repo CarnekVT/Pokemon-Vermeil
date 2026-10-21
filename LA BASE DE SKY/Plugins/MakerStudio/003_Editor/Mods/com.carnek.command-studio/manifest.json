@@ -1,7 +1,7 @@
 {
   "id": "com.carnek.command-studio",
   "name": "Command Studio",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Enciclopedia nativa de RPG Maker XP + asistentes para scripts, textos y comandos de Pokémon Essentials 21.1 en Maker Studio.",
+  "description": "Enciclopedia de scripts y comandos: documentación Wiki LBDS, comandos RMXP, escaneo completo de archivos .rb de Data/Scripts y Plugins, argumentos editables, autocompletado PBS.",
   "permissions": [
     "ui.panels",
     "ui.toasts",
