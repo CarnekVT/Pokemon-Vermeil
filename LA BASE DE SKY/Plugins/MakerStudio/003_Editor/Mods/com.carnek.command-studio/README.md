@@ -1,4 +1,4 @@
-# Command Studio 0.7.0 — pantalla completa y ayudas visuales
+# Command Studio 0.8.0 — navegación sencilla, categorías y opciones progresivas
 
 Integrado en Pokémon Vermeil, bajo `LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.carnek.command-studio`.
 
@@ -77,3 +77,29 @@ Se revisó el índice de LA BASE DE SKY y las páginas de Essentials Docs recupe
 Prueba autónoma: node tests/visual-smoke.cjs
 
 La vista es un esquema, no una simulación del motor; hace falta comprobar su comportamiento dentro de la instalación real de Maker Studio.
+
+
+## Actualización 0.8.0 · Reducir saturación
+
+- **Inicio:** solo 6 tareas frecuentes de entrada. «Explorar más tareas» despliega los otros asistentes por categorías, **10 por tanda**.
+- **Búsqueda rápida:** resultados relevantes ordenados por intención. Las estrellas añaden accesos rápidos **durante la sesión**; no se promete persistencia entre reinicios.
+- **Asistentes:** cuando hay más de 4 campos, se muestran los 3 principales y los demás bajo «Personalizar otros ajustes (opcional)» con sus valores por defecto.
+- **Paso final:** resumen explicativo y valores elegidos. Los comandos técnicos solo aparecen si se abre «Ver comandos técnicos generados».
+- **Enciclopedia:** 12 fichas por tanda, filtro de categorías, ficha contextual, lista de parámetros, notas sobre compatibilidad y enlace a fuente. Acción «Configurar esta función» independiente de la ficha.
+- **Editor de mensajes:** columnas de texto/vista previa y herramientas. Solo una herramienta visible a la vez: **Color**, **Ventana**, **Pausas**, **Más efectos**.
+  - Color: ocho muestras iniciales, más colores detrás de «Mostrar los demás», picker RGB y sombra como opción adicional.
+  - Ventana: posición con miniaturas, cambio de Windowskin a demanda.
+  - Pausas: cuatro acciones rápidas y dos deslizadores.
+  - Más efectos: búsqueda + categoría + lista de 10 por tanda; inspector de parámetros cuando se elige un control.
+  - Botones de ejemplos «Saludo», «Aviso», «Narración» bajo una sección desplegable; se añaden sin borrar lo ya escrito.
+- **Protección de cursor:** al insertar un prefijo \wu / \wm / \wd se recalcula la selección para no romper etiquetas RGB al añadir otros efectos.
+- **Modos existentes:** pantalla completa BAS/BSS, indexador de código, composición avanzada y la inserción por la API Maker Studio se mantienen.
+
+## Pruebas específicas
+
+Ejecuta:
+node tests/ux-smoke.cjs
+
+Verifica el límite inicial de tarjetas, paginación de tareas, flujo de asistente, enciclopedia paginada, selección de color, cambio de ubicación de ventana, slider de espera e integridad del mensaje.
+
+**Importante:** se hicieron pruebas con DOM y eventos simulados, no con una sesión de Maker Studio/Electron del usuario. Es necesario comprobar la visualización y el envío de eventos en una instalación real.

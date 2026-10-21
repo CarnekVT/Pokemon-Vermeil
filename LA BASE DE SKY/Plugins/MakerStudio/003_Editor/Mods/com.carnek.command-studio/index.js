@@ -39,6 +39,6 @@ export function activate(ctx) {
       }
     });
   }
-  ctx.log?.info?.("Command Studio 0.7.0: búsqueda por intención, secuencias editables e inserción directa.");
+  ctx.log?.info?.("Command Studio 0.8.0: búsqueda por intención, secuencias editables e inserción directa.");
 }
 export function deactivate() {}

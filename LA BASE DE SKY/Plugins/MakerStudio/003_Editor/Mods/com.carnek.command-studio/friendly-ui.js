@@ -7,6 +7,7 @@ import { activeMapId, eventChoices, pageChoices, applyInsertion, isCompatible } 
 import { installWorkspaceFullscreen } from "./fullscreen.js";
 import { mountVisualMessageEditor } from "./message-ui.js";
 import { EXTRA_CSS } from "./visual-style.js";
+import { UX_CSS } from "./ux-style.js";
 import { COLOR_PRESETS, colorTag, renderMessagePreview, normalizedHex, setMessagePosition, messagePosition, colorType, WINDOW_COLOR_HINTS } from "./visual-message.js";
 
 const CSS = [
@@ -52,7 +53,7 @@ function rubyCommands(code){
  return String(code).replace(/\r/g,"").split("\n").map((line,i)=>({code:i?655:355,parameters:[line],indent:0}));
 }
 export function mountFriendly(ctx,host){
- const root=el("div",null,"csb");root.tabIndex=0;root.append(el("style",CSS),el("style",EXTRA_CSS));
+ const root=el("div",null,"csb");root.tabIndex=0;root.append(el("style",CSS),el("style",EXTRA_CSS),el("style",UX_CSS));
  const head=el("header");head.append(el("div","✦","emoji"));
  const brand=el("div");brand.append(el("h2","Command Studio"),el("div","Tu asistente para crear eventos Pokémon","sub"));head.append(brand);
  head.append(el("span",null,"grow"));
@@ -63,12 +64,12 @@ export function mountFriendly(ctx,host){
  host.replaceChildren(root);
  const fullscreenDispose=installWorkspaceFullscreen(ctx,host,root,fullscreenButton);
  let mode="home",step=1,action=null,values={},query="",messageText="¡Hola, \\PN! ¿Qué tal?",group="Todas",tokenQuery="",token=null,tokenValue="";
- let catalogTab="wiki",catalogQuery="",mapId=activeMapId(ctx),eventId="",pageId=0,advCleanup=null,disposed=false,pbs=null;
+ let catalogTab="wiki",catalogQuery="",catalogGroup="Todas",catalogLimit=12,selectedReference=null,moreTasks=false,taskGroup="Todas",taskLimit=10,sessionRecent=[],favorites=new Set(),mapId=activeMapId(ctx),eventId="",pageId=0,advCleanup=null,disposed=false,pbs=null;
  if(requestedEvent&&requestedEvent.mapId===mapId){eventId=String(requestedEvent.eventId);requestedEvent=null;}
  function notice(s){foot.textContent=s;try{ctx.ui.showToast({message:s,level:"info"});}catch(_){}}
  function menu(){
-  tabs.replaceChildren();for(const [id,title]of [["home","Crear evento"],["message","Editor de mensajes"],["catalog","Enciclopedia"],["advanced","Avanzado"]]){
-   tabs.append(button(title,()=>go(id),"btn"+(mode===id?" selected":"")));
+  tabs.replaceChildren();for(const [id,title]of [["home","Inicio"],["message","Mensajes"],["catalog","Enciclopedia"],["advanced","Herramientas avanzadas"]]){
+   tabs.append(button(title,()=>go(id),"btn"+(mode===id?" selected":"")+(id==="advanced"?" csb-quiet":"")));
   }
  }
  function go(next){
@@ -131,56 +132,160 @@ export function mountFriendly(ctx,host){
   if(mode==="catalog")catalog(area);
  }
  function home(area){
-  area.append(el("h3","¿Qué quieres que pase en tu juego?"));
-  area.append(el("p","Elige una tarea. Te preguntaré lo necesario. No necesitas escribir código.","sub"));
-  const search=el("input");search.placeholder="Ej. entregar objeto, entrenador, curar Pokémon, hablar…";search.className="search";search.value=query;area.append(search);
+  const heading=el("div",null,"csb-intro");
+  heading.append(el("h3","¿Qué quieres crear hoy?"),
+    el("p","Elige una acción y Command Studio te guiará en 3 pasos. No necesitas conocer Ruby.","sub"));
+  area.append(heading);
+  const input=el("input");input.className="search";input.placeholder="Buscar: curar Pokémon, regalar objeto, entrenador, clima…";
+  input.value=query;input.setAttribute("aria-label","Buscar una acción para el evento");area.append(input);
   const results=el("div");area.append(results);
-  const pick=a=>{action=a;values=defaults(a);step=2;render();};
-  function draw(){
-   results.replaceChildren();
-   if(!query.trim()){
-    const cards=el("div",null,"tiles");for(const [id,icon,title]of TOP){
-     const a=BY_ID.get(id),b=button("",()=>pick(a),"tile");b.append(el("div",icon,"emoji"),el("strong",title),el("span",a.description,"sub"));cards.append(b);
-    }results.append(cards,el("h3","Otras tareas disponibles"));
-   }
-   const found=query.trim()?smartSearch(query).slice(0,35).map(x=>x.action):ACTIONS.filter(a=>!TOP.some(x=>x[0]===a.id));
-   const list=el("div",null,"grid");
-   for(const a of found){const b=button(a.icon+" "+a.title,()=>pick(a));list.append(b);}
-   results.append(list);
-   if(!found.length)results.append(el("div","No encontré esa tarea. Prueba términos más sencillos o abre Enciclopedia.","card"));
+  const pick=a=>{
+    if(!a)return;
+    action=a;values=defaults(a);step=2;
+    sessionRecent=[a.id,...sessionRecent.filter(id=>id!==a.id)].slice(0,5);render();
+  };
+  function taskButton(a){
+    const row=el("div",null,"csb-task-result");
+    const select=button("",()=>pick(a),"csb-task-open");
+    select.append(el("span",a.icon||"✦","csb-task-icon"));
+    const content=el("span",null,"csb-task-copy");
+    content.append(el("strong",a.title),el("small",a.description));select.append(content);
+    const fav=button(favorites.has(a.id)?"★":"☆",()=>{
+      if(favorites.has(a.id))favorites.delete(a.id);else favorites.add(a.id);
+      draw();
+    },"csb-favorite");
+    fav.setAttribute("aria-label",(favorites.has(a.id)?"Quitar de":"Añadir a")+" favoritos: "+a.title);
+    fav.title="Acceso rápido durante esta sesión";
+    row.append(select,fav);return row;
   }
-  search.oninput=()=>{query=search.value;draw();};draw();
+  function draw(){
+    results.replaceChildren();
+    if(query.trim()){
+      const found=smartSearch(query).map(r=>r.action);
+      const groupTitle=el("div",found.length+" coincidencias","sub");results.append(groupTitle);
+      const list=el("div",null,"csb-result-grid");
+      for(const a of found.slice(0,taskLimit))list.append(taskButton(a));
+      results.append(list);
+      if(found.length>taskLimit)results.append(button("Ver más resultados ("+(found.length-taskLimit)+")",()=>{taskLimit+=10;draw();},"btn"));
+      if(!found.length)results.append(el("div","No encontré esa tarea. Prueba «hablar», «regalo», «combate», «clima» o consulta la Enciclopedia.","hint"));
+      return;
+    }
+    const fastIds=[...favorites,...sessionRecent].filter((id,i,arr)=>arr.indexOf(id)===i).filter(id=>BY_ID.has(id));
+    if(fastIds.length){
+      results.append(el("h4","Tus accesos de esta sesión"));
+      const quick=el("div",null,"csb-shortcuts");
+      for(const id of fastIds.slice(0,5)){const a=BY_ID.get(id);quick.append(button((a.icon||"✦")+" "+a.title,()=>pick(a),"chip"));}
+      results.append(quick);
+    }
+    results.append(el("h4","Tareas más habituales"));
+    const tiles=el("div",null,"tiles");
+    for(const [id,icon,title] of TOP){
+      const a=BY_ID.get(id);if(!a)continue;
+      const b=button("",()=>pick(a),"tile");
+      b.append(el("div",icon,"emoji"),el("strong",title),el("span",a.description,"sub"));
+      tiles.append(b);
+    }
+    results.append(tiles);
+    const explore=el("div",null,"csb-explore");
+    const row=el("div",null,"csb-explore-head");
+    row.append(el("div",null,"csb-explore-title"));
+    row.firstChild.append(el("strong","¿Buscas otra cosa?"),el("div","Accede a las demás tareas por tema, sin listas interminables.","sub"));
+    const toggle=button(moreTasks?"− Ocultar tareas":"＋ Explorar más tareas",()=>{moreTasks=!moreTasks;draw();},"btn");
+    toggle.setAttribute("aria-expanded",String(moreTasks));row.append(toggle);explore.append(row);
+    if(moreTasks){
+      const chips=el("div",null,"chips");explore.append(chips);
+      const groups=["Todas",...new Set(ACTIONS.map(a=>a.category))];
+      for(const group of groups){
+        chips.append(button(group,()=>{taskGroup=group;taskLimit=10;draw();},"chip"+(group===taskGroup?" selected":"")));
+      }
+      const filtered=ACTIONS.filter(a=>taskGroup==="Todas"||a.category===taskGroup);
+      explore.append(el("p",filtered.length+" tareas disponibles","sub"));
+      const list=el("div",null,"csb-result-grid");
+      for(const a of filtered.slice(0,taskLimit))list.append(taskButton(a));
+      explore.append(list);
+      if(filtered.length>taskLimit)explore.append(button("Mostrar "+Math.min(10,filtered.length-taskLimit)+" más",()=>{taskLimit+=10;draw();},"btn"));
+    }
+    results.append(explore);
+    const help=el("details",null,"csb-help");
+    help.append(el("summary","¿Es tu primera vez? Así funciona"));
+    help.append(el("p","1. Selecciona una tarea.  2. Cambia los datos del evento.  3. Escoge un mapa, evento y página. Puedes deshacer la inserción desde Maker Studio.","sub"));
+    results.append(help);
+  }
+  input.oninput=()=>{query=input.value;taskLimit=10;draw();};draw();
  }
  function configure(area){
   area.className="narrow";
   if(!action){step=1;return home(area);}
-  area.append(el("div","PASO 2 DE 3 · CONFIGURA","sub"),el("h3",action.icon+" "+action.title),el("p",action.description,"sub"));
-  const form=el("div",null,"card"),grid=el("div",null,"grid");form.append(grid);
-  for(const f of action.fields){
-   const options=f.type==="boolean"?[["true","Sí"],["false","No"]]:f.type==="select"?f.options:null;
-   const input=addField(grid,f.label,values[f.key],v=>values[f.key]=v,{options,boolean:f.type==="boolean",number:f.type==="number",multiline:f.type==="code"});
-   const kind=classifySymbolHint(f.label);
-   if(kind&&pbs?.ids?.[kind]?.length){
-    const list=el("datalist");list.id="csb-pbs-"+f.key;for(const id of pbs.ids[kind]){const opt=el("option");opt.value=id;list.append(opt);}
-    grid.append(list);input.setAttribute("list",list.id);
-   }
+  const top=el("div",null,"csb-wizard-step");
+  top.append(el("span","PASO 2 DE 3","csb-step-badge"),
+    button("← Cambiar de tarea",()=>{step=1;render();},"btn csb-quiet"));
+  area.append(top,el("h3",(action.icon||"✦")+" "+action.title),el("p",action.description,"sub"));
+  const form=el("div",null,"card"),mainGrid=el("div",null,"grid");
+  form.append(el("h4","Información principal"),mainGrid);
+  function add(f,target){
+    const options=f.type==="boolean"?[["true","Sí"],["false","No"]]:f.type==="select"?f.options:null;
+    const input=addField(target,f.label,values[f.key],v=>values[f.key]=v,{
+      options,boolean:f.type==="boolean",number:f.type==="number",multiline:f.type==="code"
+    });
+    if(f.type==="symbol"){
+      const note=el("small","Usa el identificador interno de tu proyecto (PBS).","csb-field-note");
+      input.parentNode.append(note);
+    }
+    const kind=classifySymbolHint(f.label);
+    if(kind&&pbs?.ids?.[kind]?.length){
+      const list=el("datalist");list.id="csb-pbs-"+f.key;
+      for(const id of pbs.ids[kind]){const opt=el("option");opt.value=id;list.append(opt);}
+      target.append(list);input.setAttribute("list",list.id);
+    }
   }
+  const simplified=action.fields.length>4;
+  const important=simplified?action.fields.slice(0,3):action.fields;
+  for(const f of important)add(f,mainGrid);
+  if(simplified){
+    const secondary=action.fields.slice(3);
+    const details=el("details",null,"csb-more-settings");
+    details.append(el("summary","Personalizar otros "+secondary.length+" ajustes (opcional)"));
+    details.append(el("p","Puedes dejar estos valores sugeridos o modificarlos.","sub"));
+    const extraGrid=el("div",null,"grid");
+    for(const f of secondary)add(f,extraGrid);
+    details.append(extraGrid);form.append(details);
+  }
+  if(!action.fields.length)form.append(el("p","Esta tarea no necesita configuración. Puedes continuar directamente.","sub"));
   area.append(form);
-  area.append(el("div","Los términos como Especie y Objeto corresponden a IDs del proyecto. Verás el resultado antes de insertarlo.","hint"));
-  const row=el("div",null,"row");
-  row.append(button("← Atrás",()=>{step=1;render();}),button("Ver resultado →",()=>{
-   const c=validate(action,values);if(c.errors.length)return notice(c.errors[0]);step=3;render();
-  },"btn primary"));area.append(row);
+  const nav=el("div",null,"row");
+  nav.append(button("← Volver",()=>{step=1;render();}),
+   button("Ver resultado →",()=>{
+    const state=validate(action,values);
+    if(state.errors.length)return notice("Revisa los datos: "+state.errors[0]);
+    step=3;render();
+   },"btn primary"));
+  area.append(nav);
  }
  function review(area){
-  area.className="narrow";area.append(el("div","PASO 3 DE 3 · AÑADE","sub"),el("h3","Así quedará tu evento"));
-  let cmds=[];try{cmds=buildAction(action.id,values);}catch(e){notice(e.message);step=2;render();return;}
-  const preview=el("pre",null,"preview");
-  preview.textContent=cmds.map(c=>({101:"Hablar",401:"Continuación",355:"Acción Pokémon",655:"Continuación",111:"Condición",411:"Si no",412:"Fin de condición",102:"Preguntar",402:"Respuesta",404:"Fin",121:"Interruptor",122:"Variable",123:"Interruptor local",201:"Cambiar mapa",106:"Esperar"}[c.code]||"Comando")+"  "+String(c.parameters?.[0]??"")).join("\n");
-  area.append(preview);
-  const send=button("✓ Añadir al evento",()=>insert(cmds,()=>{step=1;render();}),"btn primary");
+  area.className="narrow";
+  area.append(el("span","PASO 3 DE 3","csb-step-badge"),el("h3","Comprueba y añade tu evento"));
+  let commands=[];
+  try{commands=buildAction(action.id,values);}
+  catch(e){notice(e.message);step=2;render();return;}
+  const card=el("div",null,"card");
+  card.append(el("h4",(action.icon||"✦")+" "+action.title),el("p",action.description,"sub"));
+  const summary=el("div",null,"csb-value-grid");
+  for(const f of action.fields.slice(0,6)){
+    const item=el("div",null,"csb-value");
+    item.append(el("span",f.label),el("strong",String(values[f.key]??"")));
+    summary.append(item);
+  }
+  if(summary.childNodes.length)card.append(summary);
+  card.append(el("p","Se añadirán "+commands.length+" instrucciones al evento sin borrar las anteriores.","sub"));
+  const detail=el("details",null,"csb-help");
+  detail.append(el("summary","Ver comandos técnicos generados (opcional)"));
+  const text=commands.map(c=>({101:"Mostrar mensaje",401:"Continuar mensaje",355:"Script",655:"Seguir script",111:"Condición",411:"Si no",412:"Fin",102:"Elegir",402:"Respuesta",404:"Fin",121:"Interruptor",122:"Variable",123:"Interruptor local",201:"Cambiar mapa",106:"Esperar"}[c.code]||"Instrucción")+" · "+String(c.parameters?.[0]??"")).join("\n");
+  detail.append(el("pre",text,"preview"));card.append(detail);area.append(card);
+  const send=button("✓ Añadir al evento",()=>insert(commands,()=>{step=1;render();}),"btn primary");
   destination(area,send);
-  const row=el("div",null,"row");row.append(send,button("← Editar opciones",()=>{step=2;render();}));area.append(row);
+  const nav=el("div",null,"row");
+  nav.append(send,button("← Cambiar datos",()=>{step=2;render();}));
+  area.append(nav);
  }
  function messages(area){
   mountVisualMessageEditor({
@@ -188,35 +293,95 @@ export function mountFriendly(ctx,host){
     initialText:messageText,
     onTextChange:value=>{messageText=value;},
     onInsert:commands=>insert(commands),
-    renderTarget:(target,submit)=>destination(target,submit)
+    renderTarget:(target,submit)=>destination(target,submit),
+    initialDirective:token
   });
+  token=null;
  }
  function catalog(area){
-  area.append(el("h3","Enciclopedia"),el("p","Cuando no encuentres una tarea en Crear evento, busca aquí su función concreta.","sub"));
-  const switches=el("div",null,"chips");area.append(switches);
-  for(const [key,label]of [["wiki","Funciones Essentials y Sky"],["messages","Controles de mensaje"]]){
-   switches.append(button(label,()=>{catalogTab=key;render();},"chip"+(catalogTab===key?" selected":"")));
+  area.append(el("h3","Enciclopedia de Essentials"),el("p","Busca por lo que quieres hacer. Las funciones internas y los módulos opcionales se muestran como referencias, no como acciones garantizadas.","sub"));
+  const toolbar=el("div",null,"csb-catalog-toolbar");
+  const tabs=el("div",null,"chips");
+  for(const [key,label]of [["wiki","Comandos y funciones"],["messages","Controles de texto"]]){
+    tabs.append(button(label,()=>{catalogTab=key;catalogLimit=12;selectedReference=null;render();},
+      "chip"+(catalogTab===key?" selected":"")));
   }
-  const search=el("input");search.className="search";search.placeholder="Buscar funciones o palabras…";search.value=catalogQuery;area.append(search);
-  const entries=el("div",null,"list");area.append(entries);
-  function draw(){
-   entries.replaceChildren();
-   if(catalogTab==="wiki"){
-    for(const w of WIKI.filter(x=>[x.title,x.group,x.template].join(" ").toLowerCase().includes(catalogQuery.toLowerCase()))){
-     entries.append(button(w.title+" · "+w.group,()=>{
+  toolbar.append(tabs);
+  const search=el("input");search.className="search";search.placeholder="Buscar por nombre, efecto o ejemplo…";search.value=catalogQuery;
+  search.setAttribute("aria-label","Buscar en la enciclopedia");
+  toolbar.append(search);
+  const groupSelector=el("select");groupSelector.setAttribute("aria-label","Filtrar categoría de comandos");
+  const categories=catalogTab==="wiki"?["Todas",...new Set(WIKI.map(w=>w.group))]:["Todas",...GROUPS];
+  for(const g of categories){const opt=el("option",g);opt.value=g;groupSelector.append(opt);}
+  if(categories.includes(catalogGroup))groupSelector.value=catalogGroup;else{catalogGroup="Todas";groupSelector.value="Todas";}
+  toolbar.append(groupSelector);area.append(toolbar);
+  const count=el("p","","sub");area.append(count);
+  const two=el("div",null,"csb-catalog-layout"),list=el("div",null,"csb-catalog-list"),inspector=el("aside",null,"csb-catalog-details");
+  two.append(list,inspector);area.append(two);
+  function useReference(w){
+    try{
       const data=Object.fromEntries(w.args.map(p=>[p[0],p[3]]));
-      action=BY_ID.get("custom_ruby");values={code:buildWiki(w,data)};step=2;go("home");
-     }));
-    }
-   }else for(const d of DIRECTIVES.filter(x=>[x.title,x.category,x.token,x.description].join(" ").toLowerCase().includes(catalogQuery.toLowerCase()))){
-    entries.append(button(d.title+" · "+d.token,()=>{token=d;group=d.category;go("message");}));
-   }
+      action=BY_ID.get("custom_ruby");values={code:buildWiki(w,data)};
+      sessionRecent=[action.id,...sessionRecent.filter(id=>id!==action.id)].slice(0,5);
+      step=2;go("home");
+    }catch(e){notice("La plantilla necesita revisión: "+e.message);}
   }
-  search.oninput=()=>{catalogQuery=search.value;draw();};draw();
-  const docs=el("div",null,"hint");
-  for(const [name,url]of [["Essentials Docs / Messages",SOURCES.essentials],["LA BASE DE SKY / Mensajes",SOURCES.lbds]]){
-   const a=el("a",name+" ↗");a.href=url;a.target="_blank";a.rel="noopener noreferrer";docs.append(a,el("span","   "));
-  }area.append(docs);
+  function showInfo(w){
+    inspector.replaceChildren();
+    if(!w){inspector.append(el("p","Elige una ficha para ver qué hace, de dónde viene y cómo utilizarla.","sub"));return;}
+    if(catalogTab==="messages"){
+      inspector.append(el("h4",w.title),el("p",w.description,"sub"));
+      inspector.append(el("pre",w.token,"preview"));
+      inspector.append(button("Abrir en el editor de mensajes →",()=>{
+        token=w;group=w.category;go("message");
+      },"btn primary"));
+      return;
+    }
+    inspector.append(el("span",w.group,"csb-step-badge"),el("h4",w.title));
+    inspector.append(el("p",w.note||"Referencia técnica. Revisa los parámetros y el contexto de ejecución.","sub"));
+    inspector.append(el("pre",w.template,"preview"));
+    if(w.args?.length){
+      const params=el("div",null,"csb-params");params.append(el("strong","Parámetros configurables"));
+      for(const [,label,type]of w.args){params.append(el("div",label+" · "+type,"sub"));}
+      inspector.append(params);
+    }
+    if(/opcional|verifica|no verificado|depende|plugin|código de plugin|requiere/i.test(w.note||"")){
+      inspector.append(el("p","Atención: esta receta podría requerir un plugin o configuración previa.","csb-warning"));
+    }
+    const actions=el("div",null,"csb-catalog-actions");
+    actions.append(button("Configurar esta función →",()=>useReference(w),"btn primary"));
+    if(w.source){
+      const link=el("a","Consultar documentación ↗");link.href=w.source;link.target="_blank";link.rel="noopener noreferrer";actions.append(link);
+    }
+    inspector.append(actions);
+  }
+  function draw(){
+    list.replaceChildren();
+    const term=catalogQuery.trim().toLocaleLowerCase();
+    const items=(catalogTab==="wiki"?WIKI:DIRECTIVES).filter(w=>{
+      if(catalogGroup!=="Todas"&&(catalogTab==="wiki"?w.group:w.category)!==catalogGroup)return false;
+      return !term||[w.title,w.description,w.note,w.group,w.category,w.token,w.template].filter(Boolean).join(" ").toLocaleLowerCase().includes(term);
+    });
+    count.textContent=items.length+" fichas disponibles · "+Math.min(catalogLimit,items.length)+" visibles";
+    for(const w of items.slice(0,catalogLimit)){
+      const row=button("",()=>{selectedReference=w;showInfo(w);},"csb-ref-item"+(selectedReference?.id===w.id?" active":""));
+      row.append(el("strong",w.title));
+      row.append(el("small",catalogTab==="wiki"?w.group:w.category));
+      list.append(row);
+    }
+    if(!items.length)list.append(el("p","No hay coincidencias. Prueba otro término o quita el filtro.","hint"));
+    if(items.length>catalogLimit)list.append(button("Mostrar "+Math.min(12,items.length-catalogLimit)+" fichas más",()=>{catalogLimit+=12;draw();},"btn"));
+    const selection=items.find(w=>w.id===selectedReference?.id);
+    showInfo(selection||null);
+  }
+  search.oninput=()=>{catalogQuery=search.value;catalogLimit=12;draw();};
+  groupSelector.onchange=()=>{catalogGroup=groupSelector.value;catalogLimit=12;selectedReference=null;draw();};
+  draw();
+  const sources=el("div",null,"csb-source-list");
+  for(const [name,url]of [["Essentials Docs",SOURCES.essentials],["LA BASE DE SKY",SOURCES.lbds]]){
+    const a=el("a",name+" ↗");a.href=url;a.target="_blank";a.rel="noopener noreferrer";sources.append(a);
+  }
+  area.append(sources);
  }
  (async()=>{try{pbs=await loadPBS(ctx);}catch(_){} })();
  menu();render();

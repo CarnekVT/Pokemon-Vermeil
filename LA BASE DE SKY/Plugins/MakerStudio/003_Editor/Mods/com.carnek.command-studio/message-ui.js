@@ -1,203 +1,258 @@
 import {DIRECTIVES,GROUPS,codeFor} from "./messages-catalog.js";
 import {COLOR_PRESETS,colorTag,renderMessagePreview,normalizedHex,setMessagePosition,messagePosition,colorType,WINDOW_COLOR_HINTS} from "./visual-message.js";
+
 const el=(tag,text,cls)=>{
-  const node=document.createElement(tag);
-  if(text!==undefined&&text!==null)node.textContent=String(text);
-  if(cls)node.className=cls;
-  return node;
+ const node=document.createElement(tag);if(text!==undefined&&text!==null)node.textContent=String(text);
+ if(cls)node.className=cls;return node;
 };
 const button=(text,click,cls="btn")=>{
-  const item=el("button",text,cls);item.type="button";item.onclick=click;return item;
+ const node=el("button",text,cls);node.type="button";node.onclick=click;return node;
 };
-const COMMAND_ICONS={Colores:"🎨",Ventana:"▣",Velocidad:"⏱",Sonido:"♫",Formato:"T",Variables:"ƒ",Extras:"✦",Alineación:"≡",Avanzado:"⌘"};
-const SWATCHES={Azul:"#4298EF",Rojo:"#F04E5B"};
-export function mountVisualMessageEditor(options){
- const {host,initialText,onTextChange,onInsert,renderTarget}=options;
+const TAB_OPTIONS=[
+ ["color","🎨 Color"],["window","▣ Ventana"],["timing","⏱ Pausas"],["all","⋯ Más efectos"]
+];
+export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert,renderTarget,initialDirective=null}){
  host.replaceChildren();
- const title=el("h3","Editor visual de diálogos");
- const intro=el("p","Escribe el diálogo, elige los efectos con botones y comprueba cómo quedará la ventana.","sub");
- host.append(title,intro);
+ host.append(el("h3","Mensajes sin complicaciones"),
+   el("p","Escribe, personaliza con botones y comprueba el resultado. Las opciones técnicas están en «Más efectos».","sub"));
  const columns=el("div",null,"widegrid"),left=el("section"),right=el("aside");
- host.append(columns);columns.append(left,right);
- left.append(el("h4","1 · Escribe el texto"));
- const editor=el("textarea");editor.value=String(initialText||"");
- editor.style.minHeight="156px";editor.style.width="100%";
- editor.setAttribute("aria-label","Contenido del diálogo");
- left.append(editor);
- function update(){onTextChange(editor.value);renderMessagePreview(preview,editor.value);const pos=messagePosition(editor.value);positionButtons.forEach(b=>b.classList.toggle("selected",b.dataset.pos===pos));}
- function paste(value){
-   editor.setRangeText(String(value),editor.selectionStart,editor.selectionEnd,"end");
-   editor.dispatchEvent(new Event("input"));editor.focus();
+ columns.append(left,right);host.append(columns);
+ left.append(el("h4","Tu mensaje"));
+ const editor=el("textarea");editor.style.width="100%";editor.style.minHeight="165px";
+ editor.value=String(initialText||"");editor.setAttribute("aria-label","Texto que verá el jugador");left.append(editor);
+ const quick=el("div",null,"chips");
+ for(const [name,token]of [["Nombre jugador","\\PN"],["Nueva línea","\\n"],["Esperar clic","\\!"],["Dinero","\\PM"],["Sonido","\\se[Door exit]"]])
+   quick.append(button(name,()=>paste(token),"chip"));
+ left.append(quick);
+ const examples=el("details",null,"csb-details");
+ examples.append(el("summary","¿No sabes qué escribir? Ver ejemplos"));
+ const exampleButtons=el("div",null,"csb-shortcuts");
+ for(const [name,template]of [
+  ["Saludo","¡Hola, \\PN! ¿Cómo estás?"],
+  ["Aviso","\\b¡Atención!\\! Sigue con cuidado."],
+  ["Narración","Todo parecía tranquilo…\\| hasta que se escuchó un ruido."]
+ ]){
+  const b=button(name,()=>paste(template),"chip");
+  b.title="Añadir este ejemplo en la posición del cursor";
+  exampleButtons.append(b);
  }
- function colored(hex,shadow=null){
-   try{paste(colorTag(hex,editor.value.slice(editor.selectionStart,editor.selectionEnd)||"texto",shadow));}
-   catch(e){status.textContent="Error: "+e.message;}
- }
- const actions=el("div",null,"chips");
- for(const [name,token]of [["Jugador","\\PN"],["Otra línea","\\n"],["Pausa","\\!"],["Dinero","\\PM"],["Sonido SE","\\se[Door exit]"]]){
-   actions.append(button(name,()=>paste(token),"chip"));
- }
- left.append(actions);
- left.append(el("h4","2 · Elige el color"));
- left.append(el("p","Selecciona una palabra y pulsa un color. Se insertará una etiqueta RGB que no depende del windowskin.","sub"));
- const palette=el("div",null,"color-swatches");left.append(palette);
- for(const sw of COLOR_PRESETS){
-  const b=button("",()=>colored(sw.value),"color-swatch");
-  b.title="Texto "+sw.name+" · "+sw.value;
-  const dot=el("span",null,"swatch-dot");dot.style.background=sw.value;
-  b.append(dot,el("span",sw.name));palette.append(b);
- }
- const rgb=el("div",null,"csb-color-tools"),rgbPicker=el("input"),rgbReadout=el("span","#FFCF59","sub");
- rgbPicker.type="color";rgbPicker.value="#FFCF59";rgbPicker.title="Elegir un color RGB";
- rgbPicker.oninput=()=>rgbReadout.textContent=rgbPicker.value.toUpperCase();
- rgb.append(rgbPicker,rgbReadout,button("Aplicar mi color",()=>colored(rgbPicker.value),"btn primary"));
- rgb.append(button("Color y sombra",()=>{
-   current=DIRECTIVES.find(x=>x.kind==="hex-pair");
-   parameter="FFCF59,404040";group="Colores";draw();
- },"btn"));
- left.append(rgb);
- left.append(el("h4","3 · ¿Dónde aparece el cuadro?"));
- const positionRow=el("div",null,"csb-position-controls"),positionButtons=[];
- for(const [id,label]of [["wu","Arriba"],["wm","Centro"],["wd","Abajo"]]){
-  const b=button("",()=>{
-   editor.value=setMessagePosition(editor.value,id);
-   editor.dispatchEvent(new Event("input"));editor.focus();
-  },"csb-pos");
-  b.dataset.pos=id;b.title="Colocar el diálogo "+label.toLowerCase();
-  b.append(el("span",null,"mini-screen"),el("small",label));
-  positionRow.append(b);positionButtons.push(b);
- }
- left.append(positionRow);
- left.append(el("h4","4 · Vista previa"));
+ examples.append(el("p","Se añade al cursor: tu mensaje actual no se borra.","sub"),exampleButtons);
+ left.append(examples);
+ const previewHeading=el("div",null,"csb-section-head");
+ previewHeading.append(el("h4","Vista previa"),el("span","Orientativa · No ejecuta el juego","sub"));left.append(previewHeading);
  const preview=el("div",null,"csb-preview-canvas");left.append(preview);
- left.append(el("p","Esta representación permite comprobar el texto RGB y la posición. Los colores numerados, las fuentes, las imágenes y los sonidos dependen del juego.","csb-visual-hint"));
- const insert=button("✓ Añadir mensaje al evento",()=>onInsert(editor.value.replace(/\r/g,"").split("\n").map((line,i)=>({code:i?401:101,parameters:[line],indent:0}))),"btn primary");
- if(typeof renderTarget==="function")renderTarget(left,insert);
- left.append(insert);
- const status=el("div","","sub");left.append(status);
+ const outputNote=el("p","Los colores RGB y la ubicación son aproximados; las ventanas, fuentes, rostros y sonidos dependen de Vermeil.","csb-visual-hint");left.append(outputNote);
+ const submit=button("✓ Añadir mensaje al evento",()=>{
+  onInsert(editor.value.replace(/\r/g,"").split("\n").map((line,i)=>({code:i?401:101,parameters:[line],indent:0})));
+ },"btn primary");
+ if(typeof renderTarget==="function")renderTarget(left,submit);
+ left.append(submit);
+ function update(){
+  onTextChange(editor.value);
+  renderMessagePreview(preview,editor.value);
+ }
  editor.addEventListener("input",update);update();
-
- right.append(el("h4","Más efectos visuales y de texto"));
- right.append(el("p","Elige el efecto por su nombre; no necesitas conocer la sintaxis.","sub"));
- const search=el("input");search.className="search";search.placeholder="Color, ventana, sonido, pausa…";right.append(search);
- const categories=el("div",null,"chips");right.append(categories);
- const results=el("div",null,"resultlist");right.append(results);
- const inspector=el("div",null,"card");right.append(inspector);
- let group="Todas",current=null,parameter="";
- function selectDirective(d){
-   current=d;
-   const m=d.token.match(/\[([^\]]*)\]/)||d.token.match(/=([^<>]+)/);
-   parameter=m?.[1]||"1";showInspector();
+ function paste(value){
+  editor.setRangeText(String(value),editor.selectionStart,editor.selectionEnd,"end");
+  editor.dispatchEvent(new Event("input"));editor.focus();
+ }
+ function applyColor(color,shadow=null){
+  try{paste(colorTag(color,editor.value.slice(editor.selectionStart,editor.selectionEnd)||"texto",shadow));}
+  catch(e){message.textContent=e.message;}
+ }
+ const row=el("div",null,"csb-section-head");
+ row.append(el("h4","Personalizar el mensaje"),el("span","Elige solo lo que necesitas","sub"));right.append(row);
+ const tabs=el("div",null,"csb-tools-tabs");right.append(tabs);
+ const panel=el("div",null,"csb-tool-panel");right.append(panel);
+ const message=el("p","","csb-tool-note");right.append(message);
+ let currentTab=initialDirective?"all":"color",selected=initialDirective,category=initialDirective?.category||"Todas",query="",limit=10;
+ function tabTo(value){
+  currentTab=value;message.textContent="";draw();
+ }
+ function controls(){
+  tabs.replaceChildren();
+  for(const [id,name]of TAB_OPTIONS){
+   const b=button(name,()=>tabTo(id),"csb-tool-tab"+(id===currentTab?" active":""));
+   b.setAttribute("aria-pressed",String(id===currentTab));tabs.append(b);
+  }
  }
  function draw(){
-  categories.replaceChildren();
-  for(const category of ["Todas",...GROUPS])
-   categories.append(button(category,()=>{group=category;draw();},"chip"+(group===category?" selected":"")));
-  results.replaceChildren();
-  const query=search.value.trim().toLowerCase();
-  const found=DIRECTIVES.filter(d=>(group==="Todas"||group===d.category)&&[d.title,d.description,d.token].join(" ").toLowerCase().includes(query));
-  for(const item of found){
-   const b=button("",()=>selectDirective(item));
-   const row=el("span",null,"csb-token-row");
-   let sample=SWATCHES[item.title]||((item.kind==="hex-color"||item.kind==="hex-pair")?"#FFB700":item.kind==="color-index"?"#94A9D9":null);
-   if(sample){const dot=el("span",null,"swatch-dot");dot.style.background=sample;row.append(dot);}
-   else row.append(el("span",COMMAND_ICONS[item.category]||"·"));
-   const label=el("span",null,"token-title");
-   label.append(el("strong",item.title),el("small",item.token+" · "+item.description));
-   row.append(label);b.append(row);results.append(b);
-  }
-  if(!found.length)results.append(el("div","Sin efectos coincidentes.","sub"));
-  showInspector();
+  controls();panel.replaceChildren();
+  if(currentTab==="color")drawColors();
+  else if(currentTab==="window")drawWindow();
+  else if(currentTab==="timing")drawTiming();
+  else drawAdvanced();
  }
- function showInspector(){
-  inspector.replaceChildren();
-  if(!current){
-   inspector.append(el("p","Selecciona un efecto para configurar sus opciones y añadirlo al diálogo.","sub"));return;
+ function sectionTitle(title,desc){
+  panel.append(el("h4",title),el("p",desc,"sub"));
+ }
+ function drawColors(){
+  sectionTitle("Color de las palabras","Selecciona primero un fragmento. El color se insertará en el texto automáticamente.");
+  const swatches=el("div",null,"color-swatches");
+  COLOR_PRESETS.slice(0,8).forEach(shade=>swatches.append(swatchButton(shade)));
+  panel.append(swatches);
+  const more=el("details",null,"csb-details");
+  more.append(el("summary","Mostrar los demás colores"));
+  const extra=el("div",null,"color-swatches");
+  COLOR_PRESETS.slice(8).forEach(shade=>extra.append(swatchButton(shade)));
+  more.append(extra);panel.append(more);
+  function swatchButton(shade){
+   const b=button("",()=>applyColor(shade.value),"color-swatch");
+   b.title="Color "+shade.name+" ("+shade.value+")";
+   const dot=el("span",null,"swatch-dot");dot.style.background=shade.value;
+   b.append(dot,el("span",shade.name));return b;
   }
-  inspector.append(el("strong",current.title),el("p",current.description,"sub"));
-  const type=colorType(current);
-  let input=null;
-  if(current.parameter){
-    const wrapper=el("div",null,"field");
-    wrapper.append(el("label",current.parameter));
-    input=el("input");input.value=parameter;input.style.width="100%";
-    input.oninput=()=>{parameter=input.value;refresh();};
-    wrapper.append(input);inspector.append(wrapper);
+  const custom=el("details",null,"csb-details");
+  custom.append(el("summary","Crear un color personalizado"));
+  const tools=el("div",null,"csb-color-tools"),picker=el("input"),label=el("span","#FFCF59","sub");
+  picker.type="color";picker.value="#FFCF59";picker.title="Elegir color de texto";
+  picker.oninput=()=>label.textContent=picker.value.toUpperCase();
+  tools.append(picker,label,button("Aplicar",()=>applyColor(picker.value),"btn primary"));
+  custom.append(tools);
+  const withShadow=el("div",null,"csb-color-tools"),shadow=el("input");
+  shadow.type="color";shadow.value="#283858";shadow.title="Elegir sombra de las letras";
+  withShadow.append(el("span","Sombra","sub"),shadow,button("Texto + sombra",()=>applyColor(picker.value,shadow.value),"btn"));
+  custom.append(withShadow);panel.append(custom);
+  panel.append(el("p","Si el color se inserta alrededor de «texto», reemplaza esa palabra por tu frase.","csb-visual-hint"));
+ }
+ function drawWindow(){
+  sectionTitle("Ubicación del diálogo","Pulsa una miniatura para colocar la ventana. El resultado aparece en la vista previa.");
+  const boxes=el("div",null,"csb-position-controls");
+  for(const [id,name]of [["wu","Arriba"],["wm","Centro"],["wd","Abajo"]]){
+   const b=button(" ",()=>{
+    const oldPrefix=(editor.value.match(/^\\(?:wu|wm|wd)/i)||[""])[0];
+    const oldStart=editor.selectionStart,oldEnd=editor.selectionEnd;
+    editor.value=setMessagePosition(editor.value,id);
+    const delta=3-oldPrefix.length;
+    const start=Math.max(3,oldStart+delta),end=Math.max(3,oldEnd+delta);
+    if(typeof editor.setSelectionRange==="function")editor.setSelectionRange(start,end);
+    else{editor.selectionStart=start;editor.selectionEnd=end;}
+    editor.dispatchEvent(new Event("input"));drawWindowOnly(boxes);
+   },"csb-pos"+(messagePosition(editor.value)===id?" active":""));
+   b.dataset.pos=id;b.title="Colocar la ventana "+name.toLowerCase();
+   b.append(el("span",null,"mini-screen"),el("small",name));boxes.append(b);
   }
-
-  if(current.category==="Velocidad"&&current.parameter&&["nonnegative-integer","positive-integer"].includes(current.kind)){
-    const speedBox=el("div",null,"card");
-    speedBox.append(el("label","Ajuste visual de tiempo / velocidad","sub"));
-    const slider=el("input");slider.type="range";slider.min="0";slider.max=current.token.toLowerCase().startsWith("\\ts")?"20":"200";slider.step="1";
-    slider.value=String(Math.max(0,Math.min(Number(slider.max),Number(parameter)||0)));
-    slider.style.width="100%";
-    const readout=el("div",null,"sub");
-    function sliderLabel(){
-      const count=Number(parameter)||0;
-      readout.textContent=current.token.toLowerCase().startsWith("\\ts")
-       ?"Velocidad del texto: "+count+" (mayor número = más lento)"
-       :"Duración aproximada: "+(count/20).toFixed(2)+" segundos ("+count+" unidades)";
-    }
-    slider.oninput=()=>{parameter=slider.value;if(input)input.value=parameter;sliderLabel();refresh();};
-    if(input)input.addEventListener("input",()=>{
-      slider.value=String(Math.max(0,Math.min(Number(slider.max),Number(parameter)||0)));
-      sliderLabel();
+  panel.append(boxes);
+  const theme=el("details",null,"csb-details");
+  theme.append(el("summary","Elegir otro marco (opcional)"));
+  const skin=el("input");skin.value="narration";skin.placeholder="Nombre del Windowskin";
+  skin.setAttribute("aria-label","Nombre del marco en Graphics/Windowskins");
+  const apply=button("Insertar cambio de marco",()=>{
+   const v=skin.value.trim();
+   if(!v||/[\[\]\r\n]/.test(v)){message.textContent="Escribe un nombre de Windowskin válido.";return;}
+   paste("\\w["+v+"]");message.textContent="";
+  },"btn");
+  theme.append(el("p","Escribe el nombre de un archivo de Graphics/Windowskins, sin la extensión. Esta vista no puede reproducir su imagen.","sub"),skin,apply);
+  panel.append(theme);
+  function drawWindowOnly(holder){
+   for(const b of holder.querySelectorAll("button"))b.classList.toggle("active",b.dataset.pos===messagePosition(editor.value));
+  }
+ }
+ function drawTiming(){
+  sectionTitle("Pausas y ritmo","Utiliza botones para controlar la conversación. No necesitas recordar los códigos.");
+  const presets=el("div",null,"csb-quick-grid");
+  for(const [name,token,note]of [
+   ["Esperar confirmación","\\!","El jugador pulsa un botón."],
+   ["Pausa breve","\\.","Aproximadamente 0,25 s."],
+   ["Pausa larga","\\|","Aproximadamente 1 s."],
+   ["Continuar solo","\\^","No espera al terminar."]
+  ]){
+   const b=button("",()=>paste(token),"csb-effect-card");
+   b.append(el("strong",name),el("small",note));presets.append(b);
+  }
+  panel.append(presets);
+  function rangeField(label,min,max,init,build,describe){
+   const card=el("div",null,"csb-range-card");
+   card.append(el("strong",label));
+   const r=el("input");r.type="range";r.min=String(min);r.max=String(max);r.step="1";r.value=String(init);r.style.width="100%";
+   const value=el("div","","sub");
+   function update(){value.textContent=describe(Number(r.value));}
+   r.oninput=update;update();
+   card.append(r,value,button("Insertar ajuste",()=>paste(build(Number(r.value))),"btn"));
+   panel.append(card);
+  }
+  rangeField("Esperar un tiempo",0,200,20,n=>"\\wt["+n+"]",n=>"Unidades: "+n+" · aprox. "+(n/20).toFixed(2)+" segundos");
+  rangeField("Velocidad del texto",0,20,3,n=>"\\ts["+n+"]",n=>"Velocidad "+n+" (un número mayor hace el texto más lento)");
+ }
+ function drawAdvanced(){
+  sectionTitle("Explorador de efectos","Busca un efecto específico o elige una categoría. Se muestran pocos resultados cada vez.");
+  const input=el("input");input.className="search";input.placeholder="Ej.: rostro, sonido, marco, variable…";
+  input.value=query;panel.append(input);
+  const filters=el("select");filters.setAttribute("aria-label","Tipo de efecto");
+  for(const g of ["Todas",...GROUPS]){
+   const o=el("option",g);o.value=g;filters.append(o);
+  }
+  filters.value=category;panel.append(filters);
+  const list=el("div",null,"csb-effects-list");panel.append(list);
+  const inspector=el("div",null,"csb-effect-detail");panel.append(inspector);
+  function listItems(){
+   list.replaceChildren();
+   const found=DIRECTIVES.filter(d=>(category==="Todas"||d.category===category)&&[d.title,d.description,d.token].join(" ").toLowerCase().includes(query.toLowerCase()));
+   for(const d of found.slice(0,limit)){
+    const row=button("",()=>{selected=d;showDetail();},"csb-effect-row");
+    row.append(el("strong",d.title),el("small",d.description));list.append(row);
+   }
+   if(found.length>limit)list.append(button("Mostrar "+Math.min(10,found.length-limit)+" efectos más",()=>{limit+=10;listItems();},"btn"));
+   if(!found.length)list.append(el("p","Ningún efecto coincide con la búsqueda.","sub"));
+   showDetail();
+  }
+  input.oninput=()=>{query=input.value;limit=10;listItems();};
+  filters.onchange=()=>{category=filters.value;limit=10;listItems();};
+  function showDetail(){
+   inspector.replaceChildren();
+   if(!selected){inspector.append(el("p","Selecciona un efecto para ver sus opciones.","sub"));return;}
+   inspector.append(el("strong",selected.title),el("p",selected.description,"sub"));
+   let parameter=(()=>{
+    const match=selected.token.match(/\[([^\]]*)\]/)||selected.token.match(/=([^<>]+)/);
+    return match?.[1]||"1";
+   })();
+   let textInput=null;
+   const type=colorType(selected);
+   if(selected.parameter){
+    const field=el("div",null,"field");
+    field.append(el("label",selected.parameter));textInput=el("input");textInput.value=parameter;
+    textInput.oninput=()=>{parameter=textInput.value;refresh();};
+    field.append(textInput);inspector.append(field);
+   }
+   if(type==="rgb"||type==="rgb-shadow"){
+    const chooser=el("div",null,"csb-color-tools");
+    const colors=type==="rgb"?["Color"]:["Texto","Sombra"];
+    const parts=parameter.split(",");
+    colors.forEach((label,i)=>{
+     const picker=el("input");picker.type="color";
+     try{picker.value="#"+normalizedHex(parts[i]);}catch(_){picker.value=i===0?"#FFB700":"#405070";}
+     picker.title="Seleccionar "+label.toLowerCase();
+     picker.oninput=()=>{parts[i]=picker.value.slice(1).toUpperCase();parameter=parts.join(",");if(textInput)textInput.value=parameter;refresh();};
+     chooser.append(el("span",label,"sub"),picker);
     });
-    speedBox.append(slider,readout);inspector.append(speedBox);sliderLabel();
-  }
-  const controls=el("div",null,"csb-color-tools");
-  if(type==="rgb"){
-    const pick=el("input");pick.type="color";
-    try{pick.value="#"+normalizedHex(parameter);}catch(_){pick.value="#FFB700";}
-    pick.oninput=()=>{parameter=pick.value.slice(1).toUpperCase();if(input)input.value=parameter;refresh();};
-    controls.append(pick,el("span","Color RGB exacto","sub"));
-  }else if(type==="rgb-shadow"){
-    const parts=String(parameter).split(",");
-    for(const [name,idx]of [["Texto",0],["Sombra",1]]){
-      const pick=el("input");pick.type="color";
-      try{pick.value="#"+normalizedHex(parts[idx]);}catch(_){pick.value=idx===0?"#FFB700":"#404040";}
-      pick.title="Color "+name;
-      pick.oninput=()=>{
-       parts[idx]=pick.value.slice(1).toUpperCase();parameter=parts.join(",");
-       if(input)input.value=parameter;refresh();
-      };
-      controls.append(el("span",name,"sub"),pick);
-    }
-  }else if(type==="index"){
-    controls.append(el("p","Atención: los colores numerados dependen de la ventana elegida. Estos tonos son solo una referencia.","csb-visual-hint"));
-    const swatches=el("div",null,"color-swatches");
+    inspector.append(chooser);
+   }
+   if(type==="index"){
+    inspector.append(el("p","Los índices dependen del marco del mensaje. Las muestras son aproximadas.","csb-visual-hint"));
+    const colors=el("div",null,"color-swatches");
     WINDOW_COLOR_HINTS.forEach((hex,i)=>{
-      const b=button("",()=>{parameter=String(i);if(input)input.value=parameter;refresh();},"color-swatch");
-      const dot=el("span",null,"swatch-dot");dot.style.background=hex;b.append(dot,el("span",String(i)));
-      b.title="Índice "+i+", depende del windowskin";swatches.append(b);
+     const b=button("",()=>{parameter=String(i);if(textInput)textInput.value=parameter;refresh();},"color-swatch");
+     const dot=el("span",null,"swatch-dot");dot.style.background=hex;
+     b.append(dot,el("span",String(i)));colors.append(b);
     });
-    controls.append(swatches);
-  }
-  if(controls.childNodes.length)inspector.append(controls);
-  const example=el("div","Ejemplo de texto","csb-color-example");
-  if(["rgb","rgb-shadow","index"].includes(type))inspector.append(example);
-  const code=el("pre","","preview");code.style.minHeight="28px";inspector.append(code);
-  const error=el("div","","sub");inspector.append(error);
-  const add=button("Insertar en mi mensaje",()=>{
+    inspector.append(colors);
+   }
+   const snippet=el("pre","","preview");snippet.style.minHeight="30px";inspector.append(snippet);
+   const error=el("div","","sub");inspector.append(error);
+   const add=button("Insertar este efecto",()=>{
     try{
-      const selection=editor.value.slice(editor.selectionStart,editor.selectionEnd)||"texto";
-      paste(codeFor(current,current.parameter?parameter:null,selection));
-      error.textContent="";
+     paste(codeFor(selected,selected.parameter?parameter:null,editor.value.slice(editor.selectionStart,editor.selectionEnd)||"texto"));
+     error.textContent="";
     }catch(e){error.textContent=e.message;}
-  },"btn primary");inspector.append(add);
-  function refresh(){
-    try{
-      code.textContent=codeFor(current,current.parameter?parameter:null);
-      add.disabled=false;error.textContent="";
-      let color="#FFFFFF",shadow="";
-      if(type==="rgb")color="#"+normalizedHex(parameter);
-      else if(type==="rgb-shadow"){const pair=parameter.split(",");color="#"+normalizedHex(pair[0]);shadow="#"+normalizedHex(pair[1]);}
-      else if(type==="index")color=WINDOW_COLOR_HINTS[Number(parameter)]||"#FFFFFF";
-      example.style.color=color;example.style.textShadow=shadow?"1px 1px 0 "+shadow:"none";
-    }catch(e){code.textContent="";error.textContent=e.message;add.disabled=true;}
+   },"btn primary");inspector.append(add);
+   function refresh(){
+    try{snippet.textContent=codeFor(selected,selected.parameter?parameter:null);add.disabled=false;error.textContent="";}
+    catch(e){snippet.textContent="";error.textContent=e.message;add.disabled=true;}
+   }
+   refresh();
   }
-  refresh();
+  listItems();
  }
- search.oninput=draw;draw();
- host.append(el("div","Referencia: Essentials Docs, LA BASE DE SKY y el motor de mensajes de Vermeil. Los controles no se ejecutan en la vista previa.","hint"));
+ draw();
+ host.append(el("p","Las vistas son esquemáticas; el resultado definitivo se comprueba ejecutando el evento en el juego.","csb-visual-hint"));
 }
