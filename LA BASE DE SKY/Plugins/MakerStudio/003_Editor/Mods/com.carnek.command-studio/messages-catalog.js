@@ -87,7 +87,7 @@ export function codeFor(d,value=null,selectedText="texto"){
   if(!v)throw Error("Introduce "+d.parameter+".");
   if(["positive-integer","nonnegative-integer","color-index","actor-index","opacity","font-size"].includes(d.kind)){
    if(!/^\d+$/.test(v))throw Error("Introduce un número entero.");
-   const n=Number(v),min=d.kind==="nonnegative-integer"?0:1,max=d.kind==="color-index"?12:d.kind==="actor-index"?8:d.kind==="opacity"?255:d.kind==="font-size"?99:99999;
+   const n=Number(v),min=["nonnegative-integer","color-index","opacity"].includes(d.kind)?0:1,max=d.kind==="color-index"?12:d.kind==="actor-index"?8:d.kind==="opacity"?255:d.kind==="font-size"?99:99999;
    if(n<min||n>max)throw Error("Valor fuera del rango permitido: "+min+"–"+max+".");
   }
   if(d.kind==="hex8"&&!/^[0-9a-fA-F]{8}$/.test(v))throw Error("Debe contener exactamente 8 caracteres hexadecimales.");

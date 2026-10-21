@@ -4,6 +4,10 @@ import { WIKI, buildWiki } from "./wiki-catalog.js";
 import { mount as mountAdvanced } from "./smart-ui.js";
 import { loadPBS, classifySymbolHint } from "./pbs-index.js";
 import { activeMapId, eventChoices, pageChoices, applyInsertion, isCompatible } from "./event-writer.js";
+import { installWorkspaceFullscreen } from "./fullscreen.js";
+import { mountVisualMessageEditor } from "./message-ui.js";
+import { EXTRA_CSS } from "./visual-style.js";
+import { COLOR_PRESETS, colorTag, renderMessagePreview, normalizedHex, setMessagePosition, messagePosition, colorType, WINDOW_COLOR_HINTS } from "./visual-message.js";
 
 const CSS = [
 ".csb{height:100%;min-height:0;display:flex;flex-direction:column;background:var(--bg-primary,#142033);color:var(--text-primary,#ebf2fa);font:13px/1.45 system-ui,sans-serif}",
@@ -48,13 +52,16 @@ function rubyCommands(code){
  return String(code).replace(/\r/g,"").split("\n").map((line,i)=>({code:i?655:355,parameters:[line],indent:0}));
 }
 export function mountFriendly(ctx,host){
- const root=el("div",null,"csb");root.append(el("style",CSS));
+ const root=el("div",null,"csb");root.tabIndex=0;root.append(el("style",CSS),el("style",EXTRA_CSS));
  const head=el("header");head.append(el("div","✦","emoji"));
  const brand=el("div");brand.append(el("h2","Command Studio"),el("div","Tu asistente para crear eventos Pokémon","sub"));head.append(brand);
- head.append(el("span",null,"grow"));head.append(el("span","Modo sencillo","sub"));root.append(head);
+ head.append(el("span",null,"grow"));
+ const fullscreenButton=el("button","⛶ Pantalla completa","btn");fullscreenButton.type="button";
+ head.append(fullscreenButton,el("span","Modo sencillo","sub"));root.append(head);
  const tabs=el("nav",null,"tabs");root.append(tabs);
  const stage=el("div",null,"stage"),foot=el("footer","Listo para crear.");root.append(stage,foot);
  host.replaceChildren(root);
+ const fullscreenDispose=installWorkspaceFullscreen(ctx,host,root,fullscreenButton);
  let mode="home",step=1,action=null,values={},query="",messageText="¡Hola, \\PN! ¿Qué tal?",group="Todas",tokenQuery="",token=null,tokenValue="";
  let catalogTab="wiki",catalogQuery="",mapId=activeMapId(ctx),eventId="",pageId=0,advCleanup=null,disposed=false,pbs=null;
  if(requestedEvent&&requestedEvent.mapId===mapId){eventId=String(requestedEvent.eventId);requestedEvent=null;}
@@ -176,50 +183,13 @@ export function mountFriendly(ctx,host){
   const row=el("div",null,"row");row.append(send,button("← Editar opciones",()=>{step=2;render();}));area.append(row);
  }
  function messages(area){
-  area.append(el("h3","Haz que tus personajes hablen"),el("p","Escribe el texto y pulsa los botones para añadir efectos. No necesitas conocer los códigos.","sub"));
-  const columns=el("div",null,"widegrid"),left=el("div"),right=el("div");columns.append(left,right);area.append(columns);
-  const editor=el("textarea");editor.style.width="100%";editor.style.minHeight="185px";editor.value=messageText;left.append(editor);
-  function paste(value){
-   editor.setRangeText(value,editor.selectionStart,editor.selectionEnd,"end");editor.dispatchEvent(new Event("input"));editor.focus();
-  }
-  const quick=el("div",null,"chips");for(const [label,v]of [["Nombre del jugador","\\PN"],["Salto de línea","\\n"],["Azul","\\b"],["Rojo","\\r"],["Esperar clic","\\!"],["Dinero","\\PM"]]){
-   quick.append(button(label,()=>paste(v),"chip"));
-  }left.append(quick);
-  left.append(el("h4","Vista previa orientativa"));const preview=el("div",null,"dialog");left.append(preview);
-  left.append(el("div","Esta vista no ejecuta los comandos: la posición, efectos y animaciones se ven al jugar.","sub"));
-  editor.oninput=()=>{messageText=editor.value;preview.textContent=previewPlain(messageText);};editor.oninput();
-  const post=button("✓ Añadir este mensaje al evento",()=>insert(commandsForMessage(messageText)),"btn primary");
-  destination(left,post);left.append(post);
-  right.append(el("h4","Todos los controles de texto"));
-  const search=el("input");search.placeholder="Buscar: color, ventana, sonido…";search.className="search";search.value=tokenQuery;right.append(search);
-  const chips=el("div",null,"chips");right.append(chips);const list=el("div",null,"resultlist");right.append(list);
-  const panel=el("div",null,"card");right.append(panel);
-  function draw(){
-   chips.replaceChildren();for(const g of ["Todas",...GROUPS])chips.append(button(g,()=>{group=g;draw();},"chip"+(group===g?" selected":"")));
-   list.replaceChildren();
-   for(const d of DIRECTIVES.filter(x=>(group==="Todas"||x.category===group)&&[x.title,x.description,x.token].join(" ").toLowerCase().includes(tokenQuery.toLowerCase()))){
-    const b=button(d.title+"  ·  "+d.token,()=>choose(d));list.append(b);
-   }
-   displayToken();
-  }
-  function choose(d){
-   token=d;const match=d.token.match(/\[([^\]]*)\]/)||d.token.match(/=([^<>]+)/);
-   tokenValue=match?.[1]||"1";displayToken();
-  }
-  function displayToken(){
-   panel.replaceChildren();
-   if(!token){panel.append(el("span","Selecciona un control para añadirlo.","sub"));return;}
-   panel.append(el("strong",token.title),el("p",token.description,"sub"));
-   if(token.parameter){
-    addField(panel,token.parameter,tokenValue,v=>tokenValue=v);
-   }
-   const err=el("div","","sub"),insertButton=button("Insertar código en mensaje",()=>{
-    try{paste(codeFor(token,token.parameter?tokenValue:null,editor.value.substring(editor.selectionStart,editor.selectionEnd)||"texto"));err.textContent="";}
-    catch(e){err.textContent=e.message;}
-   },"btn primary");panel.append(insertButton,err);
-  }
-  search.oninput=()=>{tokenQuery=search.value;draw();};draw();
-  area.append(el("div","Referencia: Essentials Docs / Messages, Wiki de LA BASE DE SKY y scripts de mensajes del proyecto. La documentación inglesa antigua no recibe nuevas actualizaciones.","hint"));
+  mountVisualMessageEditor({
+    host:area,
+    initialText:messageText,
+    onTextChange:value=>{messageText=value;},
+    onInsert:commands=>insert(commands),
+    renderTarget:(target,submit)=>destination(target,submit)
+  });
  }
  function catalog(area){
   area.append(el("h3","Enciclopedia"),el("p","Cuando no encuentres una tarea en Crear evento, busca aquí su función concreta.","sub"));
@@ -250,5 +220,5 @@ export function mountFriendly(ctx,host){
  }
  (async()=>{try{pbs=await loadPBS(ctx);}catch(_){} })();
  menu();render();
- return()=>{disposed=true;if(advCleanup)advCleanup();};
+ return()=>{disposed=true;if(advCleanup)advCleanup();fullscreenDispose();};
 }

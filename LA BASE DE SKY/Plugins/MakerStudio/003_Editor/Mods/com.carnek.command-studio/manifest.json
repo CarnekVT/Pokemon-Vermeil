@@ -1,7 +1,7 @@
 {
   "id": "com.carnek.command-studio",
   "name": "Command Studio",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "apiVersion": "1.0.1",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Command Studio 0.6: 39 asistentes de eventos, 134 recetas técnicas de Essentials/Sky, 65 controles de mensajes y enciclopedia con advertencias por dependencia.",
+  "description": "Command Studio 0.7: pantalla completa estilo BAS/BSS, editor visual de mensajes con paleta RGB, sombra, vista previa y control de pausas.",
   "permissions": [
     "ui.panels",
     "ui.toasts",

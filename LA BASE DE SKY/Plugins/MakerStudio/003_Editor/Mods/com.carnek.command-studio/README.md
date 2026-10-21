@@ -1,4 +1,4 @@
-# Command Studio 0.6.0 — asistente para principiantes
+# Command Studio 0.7.0 — pantalla completa y ayudas visuales
 
 Integrado en Pokémon Vermeil, bajo `LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.carnek.command-studio`.
 
@@ -52,3 +52,28 @@ Se revisó el índice de LA BASE DE SKY y las páginas de Essentials Docs recupe
 **Advertencias verificadas:** no todas las llamadas documentadas están presentes en Vermeil. Los nombres de algunos métodos de guardería de la wiki no coinciden con los del módulo DayCare de `037_Overworld/008_Overworld_DayCare.rb`; por eso no se han añadido como asistentes de un clic. Asimismo `pbStrengthBoulder` no se ha confirmado en `037_Overworld/005_Overworld_FieldMoves.rb`, que contiene `pbStrength`. Los controles de mensajes `\\1` y `\\cn` deben seguir el comportamiento real de `012_Messages.rb` (pausa y ventana de monedas respectivamente), aunque ciertas tablas LBDS los describan de otro modo. `pbGetChoiceImages` tampoco debe construirse con un ID de evento sin comprobar su firma real.
 
 **Alcance:** es una ampliación basada en las secciones consultables y el código existente, no una garantía de extracción exhaustiva del 100 % de dos wikis. Los ejemplos avanzados pueden requerir configuración de otros sistemas o comprobación de argumentos.
+
+ 
+## Pantalla completa como BAS/BSS
+
+- Pulsa **⛶ Pantalla completa** en la cabecera o **F11** con Command Studio enfocado.
+- Ocupa el espacio de trabajo de Maker Studio, sin entrar en Fullscreen API del navegador.
+- **Esc**, **F11** o **↙ Restaurar ventana** devuelven el mismo editor y su contenido al panel.
+- La sesión ampliada permite **✕ Cerrar Command Studio**, restaurando el nodo antes de cerrar.
+- El ancho del editor y las dos columnas del área de mensajes se adaptan al nuevo tamaño.
+
+## Ayudas visuales del editor de mensajes
+
+- **12 muestras de color** con clic para pintar el texto seleccionado.
+- **Selector RGB personalizado**. Produce etiquetas de Essentials de forma automática: <c=RRGGBB>texto</c>.
+- **Color de texto más sombra** con dos selectores: <c3=RRGGBB,RRGGBB>texto</c3>.
+- **13 índices de color** (0–12): son muestras orientativas; el tono real depende del Windowskin. Corregido el índice 0 en el formulario.
+- **Miniaturas de posición** arriba, centro y abajo; insertan \wu, \wm o \wd al inicio del mensaje.
+- **Vista esquemática de mensaje** sobre un entorno de mapa, con color de texto y ubicación. Señala efectos de sonido, caras, pausas y otros comandos.
+- **Deslizadores visuales** de tiempo y velocidad, con lectura de duración aproximada.
+- Los colores RGB y sus etiquetas están verificados en 011_DrawText.rb y 012_Messages.rb de Vermeil.
+- Las 39 acciones, 134 fichas técnicas y la sección avanzada se conservan.
+
+Prueba autónoma: node tests/visual-smoke.cjs
+
+La vista es un esquema, no una simulación del motor; hace falta comprobar su comportamiento dentro de la instalación real de Maker Studio.
