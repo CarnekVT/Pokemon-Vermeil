@@ -1,7 +1,7 @@
 {
   "id": "com.carnek.command-studio",
   "name": "Command Studio",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "apiVersion": "1.0.1",
   "main": "index.js",
   "authors": [
@@ -9,11 +9,12 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Editor inteligente de eventos para Essentials: acciones de alto nivel, asistente de pasos, catálogo semántico, recetas reutilizables, lectura de scripts y escritura directa deshacible mediante eventos Maker Studio.",
+  "description": "Asistente sencillo para principiantes: creación de eventos en tres pasos, editor de mensajes con comandos de Essentials Docs y LBDS, enciclopedia técnica y modo avanzado.",
   "permissions": [
     "ui.panels",
     "ui.toasts",
     "ui.dialogs",
+    "ui.contextMenus",
     "clipboard",
     "fs.project"
   ],

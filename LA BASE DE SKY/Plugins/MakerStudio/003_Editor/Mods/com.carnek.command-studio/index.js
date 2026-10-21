@@ -1,4 +1,4 @@
-import { mount, focusEvent } from "./smart-ui.js";
+import { mountFriendly as mount, focusEvent } from "./friendly-ui.js";
 import { registerPickerCommands } from "./picker-commands.js";
 
 const PANEL = "com.carnek.command-studio.panel";
@@ -39,6 +39,6 @@ export function activate(ctx) {
       }
     });
   }
-  ctx.log?.info?.("Command Studio 0.4.0: búsqueda por intención, secuencias editables e inserción directa.");
+  ctx.log?.info?.("Command Studio 0.5.0: búsqueda por intención, secuencias editables e inserción directa.");
 }
 export function deactivate() {}

@@ -78,6 +78,24 @@ WIKI.push(
  entry("Mapa y eventos","Movimiento de cámara","mapas","pbScrollMap({dir}, {distance}, {speed})",[["dir","Dirección","integer","2"],["distance","Distancia","number","5"],["speed","Velocidad","integer","4"]])
 );
 
+
+// Essentials Docs / Messages + LBDS / Mensajes – message API functions used in events.
+WIKI.push(
+ entry("Mensajes","Preguntar Sí/No","mensajes","pbConfirmMessage({question})",[["question","Pregunta","string","¿Quieres continuar?"]],"Devuelve true/false; usar como condición."),
+ entry("Mensajes","Confirmación con opción negativa primero","mensajes","pbConfirmMessageSerious({question})",[["question","Pregunta","string","¿Seguro que quieres continuar?"]],"Devuelve true cuando elige Sí."),
+ entry("Mensajes","Mostrar nombre del hablante","mensajes","NameBox.load({speaker})",[["speaker","Nombre","string","Profesor Oak"]],"Muestra una etiqueta antes del siguiente mensaje; cerrar luego con NameBox.dispose."),
+ entry("Mensajes","Cerrar caja de nombre","mensajes","NameBox.dispose",[],"Libera el nombre del hablante."),
+ entry("Mensajes","Texto largo libre","mensajes","pbMessageFreeText({prompt}, {default}, false, {max})",[
+ ["prompt","Instrucción","string","Escribe tu respuesta"],["default","Valor inicial","string",""],["max","Máximo de caracteres","integer","100"]],"Devuelve el texto. La entrada es un diálogo con teclado; no es un mensaje normal."),
+ entry("Mensajes","Elegir texto corto","mensajes","pbEnterText({prompt}, {min}, {max}, {default})",[
+ ["prompt","Instrucción","string","¿Cómo te llamas?"],["min","Mínimo","integer","0"],["max","Máximo","integer","10"],["default","Nombre inicial","string",""]],"Invoca la pantalla de entrada de nombre."),
+ entry("Mensajes","Mensaje con ayuda","mensajes","pbMessageWithHelp({text}, [{help}], [{choice}])",[
+ ["text","Mensaje","string","Elige una opción"],["help","Ayuda","string","Esta opción te ayuda"],["choice","Opción","string","Continuar"]],"Para menús con texto explicativo. Revisa que opciones y ayudas tengan la misma longitud."),
+ entry("Mensajes","Mensaje con lista y cancelación","mensajes","pbMessage({text}, [{one}, {two}], {cancel})",[
+ ["text","Pregunta","string","¿Qué prefieres?"],["one","Opción A","string","Luchar"],["two","Opción B","string","Huir"],["cancel","Índice cancelación (0=sin cancelar)","integer","-1"]],"Devuelve un índice basado en 0; puede ser -1 al cancelar."),
+ entry("Mensajes","Nombre del Pokémon del equipo elegido","manipular-pokemon","$player.party[{slot}].name",[["slot","Posición 0–5","integer","0"]],"Expresión Ruby de lectura.")
+);
+
 export const WIKI_REFERENCES=[
  ["Pokémon","manipular-pokemon"],["Movimientos","movimientos"],["Habilidades","habilidades"],["Objetos","manipular-objetos"],
  ["Combates","combate"],["Entrenadores","definir-entrenador"],["Mensajes","mensajes"],["Mapas","mapas"],

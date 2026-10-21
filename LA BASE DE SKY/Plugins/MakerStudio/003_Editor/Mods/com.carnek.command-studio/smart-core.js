@@ -115,6 +115,33 @@ export const ACTIONS=[
   keywords:"ruby script custom codigo programacion comandos manual",fields:[field("code","Código Ruby","code","pbMessage(_INTL(\"¡Hola!\"))")],
   build:v=>ruby(v.code),next:[],source:"secciones-scripts"}
 ];
+
+ACTIONS.push({
+ id:"dialogue_namebox",title:"Diálogo con nombre del personaje",category:"Diálogos",icon:"🏷️",
+ description:"Muestra el nombre de quien habla en una cajita arriba del mensaje, y después la cierra.",
+ keywords:"nombre del npc namebox dialogo personaje hablar conversacion",
+ fields:[text("name","Nombre del personaje","Profesor Oak"),text("speech","Texto del mensaje","¡Bienvenido al laboratorio!")],
+ build:v=>[...ruby("NameBox.load("+q(v.name)+")"),...message(v.speech),...ruby("NameBox.dispose")],
+ next:["talk","choices"],source:"mensajes"
+});
+ACTIONS.push({
+ id:"choices_with_item_icons",title:"Opciones con imágenes de objetos",category:"Diálogos",icon:"🖼️",
+ description:"Muestra dos respuestas con sus iconos de objeto. Exclusivo de la ampliación LBDS; los objetos deben existir en PBS.",
+ keywords:"opciones con imagenes iconos elegir item objeto visual menu choiceimage",
+ fields:[text("question","Pregunta","¿Qué objeto quieres?"),text("a","Opción 1","Poción"),
+   sym("iconA","Icono de objeto 1","POTION"),text("b","Opción 2","Superpoción"),
+   sym("iconB","Icono de objeto 2","SUPERPOTION"),
+   text("replyA","Respuesta a 1","Has elegido la poción."),
+   text("replyB","Respuesta a 2","Has elegido la superpoción.")],
+ build:v=>[...message(v.question),
+   command(108,["s:ChoiceImage: 1, item, "+symbol(v.iconA).slice(1)]),
+   command(108,["s:ChoiceImage: 2, item, "+symbol(v.iconB).slice(1)]),
+   command(102,[[v.a,v.b],0]),command(402,[0,v.a]),
+   ...message(v.replyA,1),command(402,[1,v.b]),
+   ...message(v.replyB,1),command(404)],
+ next:["talk","give_item"],source:"mensajes"
+});
+
 export const BY_ID=new Map(ACTIONS.map(x=>[x.id,x]));
 export const CATEGORIES=[...new Set(ACTIONS.map(x=>x.category))];
 export const SOURCES="https://la-base-de-sky-wiki-1070f3.gitlab.io/pages/";
