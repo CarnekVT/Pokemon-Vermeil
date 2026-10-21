@@ -142,6 +142,83 @@ ACTIONS.push({
  next:["talk","give_item"],source:"mensajes"
 });
 
+
+ACTIONS.push(
+ {id:"companion_join",title:"Añadir un compañero de aventura",category:"Entrenadores",icon:"🤝",
+  description:"Un NPC se une como entrenador aliado para batallas dobles. Debe existir en trainers.txt.",
+  keywords:"compañero acompañante cheryl aventura aliado partner registrar equipo",
+  fields:[sym("type","Tipo de entrenador del PBS","POKEMON_RANGER_F"),text("name","Nombre exacto del NPC","Cheryl"),num("version","Versión del entrenador",0,0,999),text("line","Diálogo","¡Iré contigo y combatiré a tu lado!")],
+  build:v=>[...message(v.line),...ruby("pbRegisterPartner("+symbol(v.type)+", "+q(v.name)+", "+integer(v.version,0,999)+")")],
+  next:["companion_leave","trainer"],source:"entrenador-companero"},
+ {id:"companion_leave",title:"Despedir al compañero",category:"Entrenadores",icon:"👋",
+  description:"El compañero de combate deja de viajar con el protagonista.",
+  keywords:"acompañante compañero despedir salir cancelar partner acompañamiento",
+  fields:[text("line","Diálogo de despedida","¡Gracias por la ayuda! Nos vemos.")],
+  build:v=>[...message(v.line),...ruby("pbDeregisterPartner")],next:["talk"],source:"entrenador-companero"},
+ {id:"badge_reward",title:"Conceder una medalla",category:"Lógica y progreso",icon:"🏅",
+  description:"Otorga una medalla al jugador y muestra un diálogo de felicitación.",
+  keywords:"medalla gimnasio insignia ganar progreso premio badge recompensa",
+  fields:[num("badge","Número de medalla (la primera es 1)",1,1,24),text("line","Mensaje","¡Has conseguido una nueva Medalla!")],
+  build:v=>[...ruby("$player.badges["+ (integer(v.badge,1,24)-1) +"] = true"),...message(v.line)],
+  next:["badge_gate","give_item"],source:"jugador"},
+ {id:"badge_gate",title:"Puerta según medallas",category:"Lógica y progreso",icon:"🏛️",
+  description:"Un NPC muestra mensajes diferentes según las medallas del jugador.",
+  keywords:"puerta medallas gimnasio liga necesita requisito desbloquear progreso",
+  fields:[num("badges","Medallas necesarias",4,0,24),text("yes","Cuando cumple el requisito","¡Adelante! Puedes pasar."),text("no","Si aún no lo cumple","Necesitas más medallas para entrar.")],
+  build:v=>branch("$player.badge_count >= "+integer(v.badges,0,24),message(v.yes),message(v.no)),
+  next:["transfer","talk"],source:"jugador"},
+ {id:"item_trade",title:"Intercambiar objetos con un NPC",category:"Objetos e inventario",icon:"🔄",
+  description:"El NPC revisa si tienes suficientes objetos, pide confirmación y entrega una recompensa.",
+  keywords:"trueque intercambio objetos tienda quest pociones bayas npc premio",
+  fields:[sym("take","Objeto que entrega el jugador","ORANBERRY"),num("takeQty","Cantidad necesaria",3,1,999),
+   sym("give","Objeto que recibe el jugador","RARECANDY"),num("giveQty","Cantidad recibida",1,1,999)],
+  build:v=>ruby(
+    "if $bag.has?("+symbol(v.take)+", "+integer(v.takeQty,1,999)+")\n"+
+    "  if !$bag.can_add?("+symbol(v.give)+", "+integer(v.giveQty,1,999)+")\n"+
+    "    pbMessage(_INTL(\"No tienes espacio suficiente.\"))\n"+
+    "  elsif pbConfirmMessage(_INTL(\"¿Quieres realizar el intercambio?\"))\n"+
+    "    $bag.remove("+symbol(v.take)+", "+integer(v.takeQty,1,999)+")\n"+
+    "    pbReceiveItem("+symbol(v.give)+", "+integer(v.giveQty,1,999)+")\n"+
+    "  end\n"+
+    "else\n"+
+    "  pbMessage(_INTL(\"No tienes los objetos necesarios.\"))\n"+
+    "end"
+  ),next:["give_item"],source:"manipular-objetos"},
+ {id:"weather_event",title:"Cambiar el tiempo del mapa",category:"Mapa y escenas",icon:"🌧️",
+  description:"Activa lluvia, sol, nieve u otro clima con una transición.",
+  keywords:"clima lluvia sol nieve tormenta arena niebla ruta ambiente tiempo weather",
+  fields:[sel("weather","Clima","Rain",[["Rain","Lluvia"],["Storm","Tormenta"],["Snow","Nieve"],["Sandstorm","Arena"],["Sun","Sol"],["Fog","Niebla"],["None","Despejado"]]),
+   num("intensity","Intensidad (0 a 9)",5,0,9),num("frames","Duración de cambio",20,0,9999)],
+  build:v=>ruby("$game_screen.weather("+symbol(v.weather)+", "+integer(v.intensity,0,9)+", "+integer(v.frames,0,9999)+")"),
+  next:["talk","wait"],source:"clima"},
+ {id:"weekday_npc",title:"Personaje de un día concreto",category:"Tiempo y mundo",icon:"📅",
+  description:"Un NPC dice algo diferente un día elegido de la semana.",
+  keywords:"dia semana lunes viernes domingo mercado horario fecha npc calendario",
+  fields:[sel("day","Día","5",[["0","Domingo"],["1","Lunes"],["2","Martes"],["3","Miércoles"],["4","Jueves"],["5","Viernes"],["6","Sábado"]]),
+   text("yes","Mensaje ese día","¡Hoy es mi día especial!"),text("no","Mensaje los otros días","Regresa otro día.")],
+  build:v=>branch("pbGetTimeNow.wday == "+integer(v.day,0,6),message(v.yes),message(v.no)),
+  next:["give_item","talk"],source:"eventos-temporales"},
+ {id:"give_egg",title:"Regalar un huevo Pokémon",category:"Pokémon y equipo",icon:"🥚",
+  description:"Entrega un huevo de una especie al jugador con mensaje.",
+  keywords:"huevo huevo pokemon egg criar regalo misterioso incubar",
+  fields:[sym("species","Especie del huevo","TOGEPI"),text("line","Mensaje","¡Recibiste un Huevo Pokémon!")],
+  build:v=>[...message(v.line),...ruby("pbGenerateEgg("+symbol(v.species)+")")],
+  next:["talk","selfswitch"],source:"manipular-pokemon"},
+ {id:"music_fanfare",title:"Reproducir una fanfarria",category:"Audio y presentación",icon:"🎶",
+  description:"Reproduce un efecto musical especial para conseguir objetos, medallas y eventos.",
+  keywords:"musica fanfarria jingle victoria premio me",
+  fields:[text("name","Archivo ME","Pokemon get"),num("volume","Volumen",90,0,100)],
+  build:v=>ruby("pbMEPlay("+q(v.name)+", "+integer(v.volume,0,100)+")"),
+  next:["talk","badge_reward"],source:"audio"},
+ {id:"rival_variable",title:"Rival que cambia equipo según una variable",category:"Combates",icon:"⚔️",
+  description:"Elige la versión del rival según el inicial elegido por el jugador. Requiere versiones PBS configuradas.",
+  keywords:"rival inicial variable dinamico nivel version batalla evolucion progresiva",
+  fields:[sym("type","Tipo de entrenador","RIVAL1"),text("name","Nombre del rival","Silver"),
+   num("stage","Número de encuentro (0 primero)",0,0,100),num("variable","Variable del inicial (0,1,2)",7,1,99999)],
+  build:v=>ruby("TrainerBattle.start("+symbol(v.type)+", "+q(v.name)+", "+integer(v.stage,0,100)+" * 3 + $game_variables["+integer(v.variable,1,99999)+"])"),
+  next:["give_item","badge_reward"],source:"rival"}
+);
+
 export const BY_ID=new Map(ACTIONS.map(x=>[x.id,x]));
 export const CATEGORIES=[...new Set(ACTIONS.map(x=>x.category))];
 export const SOURCES="https://la-base-de-sky-wiki-1070f3.gitlab.io/pages/";

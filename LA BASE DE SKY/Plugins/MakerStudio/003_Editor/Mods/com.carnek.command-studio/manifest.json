@@ -1,7 +1,7 @@
 {
   "id": "com.carnek.command-studio",
   "name": "Command Studio",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "apiVersion": "1.0.1",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Asistente sencillo para principiantes: creación de eventos en tres pasos, editor de mensajes con comandos de Essentials Docs y LBDS, enciclopedia técnica y modo avanzado.",
+  "description": "Command Studio 0.6: 39 asistentes de eventos, 134 recetas técnicas de Essentials/Sky, 65 controles de mensajes y enciclopedia con advertencias por dependencia.",
   "permissions": [
     "ui.panels",
     "ui.toasts",
