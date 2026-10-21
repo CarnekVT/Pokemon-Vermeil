@@ -1,18 +1,19 @@
 {
   "id": "com.carnek.command-studio",
   "name": "Command Studio",
-  "version": "0.3.0",
-  "apiVersion": "1.0.0",
+  "version": "0.4.0",
+  "apiVersion": "1.0.1",
   "main": "index.js",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Enciclopedia de scripts y comandos: documentación Wiki LBDS, comandos RMXP, escaneo completo de archivos .rb de Data/Scripts y Plugins, argumentos editables, autocompletado PBS.",
+  "description": "Editor inteligente de eventos para Essentials: acciones de alto nivel, asistente de pasos, catálogo semántico, recetas reutilizables, lectura de scripts y escritura directa deshacible mediante eventos Maker Studio.",
   "permissions": [
     "ui.panels",
     "ui.toasts",
+    "ui.dialogs",
     "clipboard",
     "fs.project"
   ],

@@ -1,44 +1,55 @@
 const fs=require("fs"),path=require("path"),assert=require("node:assert/strict");
 const root=path.resolve(__dirname,"..");
 function load(file,names){
- const code=fs.readFileSync(path.join(root,file),"utf8")
-  .replace(/^\s*import\s+.*\n/gm,"")
-  .replace(/\bexport\s+(?=(const|async function|function|class)\b)/g,"")
-  .replace(/export\s*\{[^}]*\};?/g,"");
- return new Function(code+";\nreturn {"+names.join(",")+"};")();
+ const code=fs.readFileSync(path.join(root,file),"utf8").replace(/^\s*import\s+.*\n/gm,"").replace(/\bexport\s+(?=(const|async function|function|class)\b)/g,"").replace(/export\s*\{[^}]*\};?/g,"");
+ return new Function(code+"\nreturn {"+names.join(",")+"};")();
 }
-(async function(){
- const wiki=load("wiki-catalog.js",["WIKI","buildWiki"]);
- const src=load("source-index.js",["scanProject","parseSignature","buildMethodCode","parseRubyFile"]);
- const nat=load("native-builder.js",["compileNative"]);
- const pbs=load("pbs-index.js",["classifySymbolHint"]);
- const catalog=load("catalog.js",["NATIVE"]);
- assert(wiki.WIKI.length>=60,"Faltan entradas Wiki");
- assert.equal(catalog.NATIVE.length,106);
- for(const entry of wiki.WIKI){
-  const values=Object.fromEntries(entry.args.map(x=>[x[0],x[3]]));
-  assert.ok(wiki.buildWiki(entry,values).length>0,"Plantilla vacía: "+entry.title);
+(async()=>{
+ const core=load("smart-core.js",["ACTIONS","defaults","buildAction","smartSearch","validate"]);
+ const writer=load("event-writer.js",["applyInsertion","previewInsertion","isCompatible"]);
+ const picker=load("picker-commands.js",["registerPickerCommands"]);
+ const ui=load("smart-ui.js",[]);
+ const wiki=load("wiki-catalog.js",["WIKI"]);
+ assert.ok(core.ACTIONS.length>=25);
+ assert.ok(wiki.WIKI.length>=60);
+ for(const a of core.ACTIONS){
+  const v=core.defaults(a),cmds=core.buildAction(a.id,v);
+  assert.ok(cmds.length>0,a.id);
+  assert.ok(cmds.every(c=>Number.isInteger(c.code)&&Array.isArray(c.parameters)),a.id);
  }
- assert.deepEqual(nat.compileNative(101,{text:"Hola\nAdiós"},"").map(x=>x.code),[101,401]);
- assert.deepEqual(nat.compileNative(355,{script:"pbAddPokemon(:PIKACHU,5)\npbWait(20)"},"").map(x=>x.code),[355,655]);
- assert.deepEqual(nat.compileNative(102,{options:"Sí\nNo"},"").map(x=>x.code),[102,402,402,404]);
- assert.deepEqual(nat.compileNative(111,{condition:"true"},"").map(x=>x.code),[111,411,412]);
- assert.equal(pbs.classifySymbolHint("Especie"),"pokemon");
- const parsed=src.parseSignature("species, level=5, can_run: true");
- assert.deepEqual(parsed.map(x=>x.name),["species","level","can_run"]);
- const m=src.parseRubyFile("Data/Scripts/Example.rb","def pbCustom(species, level=5)\nend");
- assert.equal(m.length,1);
- assert.equal(src.buildMethodCode(m[0],{species:{value:"PIKACHU",type:"symbol"},level:{value:"20",type:"integer",enabled:true}}),
-  "pbCustom(:PIKACHU, 20)");
- const dirs={"Data/Scripts":["001_Base"],"Data/Scripts/001_Base":["001.rb"],"Plugins":["com.plugin.one"],"Plugins/com.plugin.one":["plugin.rb"]};
- const files={"Data/Scripts/001_Base/001.rb":"def pbExample\nend","Plugins/com.plugin.one/plugin.rb":"def pbPluginTest(a, b=1)\nend"};
- const ctx={fs:{
-  listProjectDir:async p=>dirs[p]||[],
-  readProjectFile:async p=>{if(!files[p])throw Error(p);return files[p];}
+ assert.equal(core.smartSearch("curar equipo")[0].action.id,"heal");
+ assert.equal(core.smartSearch("entrenador derrotado")[0].action.id,"trainer_once");
+ const initial={id:3,name:"NPC",x:4,y:5,pages:[
+  {trigger:0, list:[{code:101,parameters:["Original"],indent:0},{code:0,parameters:[],indent:0}]},
+  {trigger:0,list:[{code:101,parameters:["Página 2"],indent:0},{code:0,parameters:[],indent:0}]}
+ ]};
+ let current=JSON.parse(JSON.stringify(initial)), updates=0;
+ const ctx={events:{
+  list:()=>[{id:3,name:"NPC",x:4,y:5,pages:2}],
+  getFull:()=>JSON.parse(JSON.stringify(current)),
+  createCommand:(code,parameters=[])=>({code,parameters,indent:0}),
+  validateEvent:ev=>({valid:ev.pages.every(p=>p.list.every(x=>x.code>=0)),errors:[]}),
+  update:(mapId,ev)=>{assert.equal(mapId,17);current=ev;updates++;}
  }};
- const res=await src.scanProject(ctx);
- assert.equal(res.report.read,2);
- assert.equal(res.report.found,2);
- assert.equal(res.report.complete,true);
- console.log("Command Studio smoke: OK — "+wiki.WIKI.length+" Wiki, "+catalog.NATIVE.length+" RMXP, 2 archivos indexados");
-})().catch(e=>{console.error(e);process.exitCode=1;});
+ assert.equal(writer.isCompatible(ctx),true);
+ const addition=core.buildAction("talk",{text:"¡Hola!\n¿Cómo estás?"});
+ const preview=writer.previewInsertion(ctx,{mapId:17,eventId:3,pageIndex:0,position:"end",commands:addition});
+ assert.equal(preview.added,2);
+ assert.equal(current.pages[0].list[0].parameters[0],"Original","La vista previa no modifica el evento");
+ writer.applyInsertion(ctx,{mapId:17,eventId:3,pageIndex:0,position:"end",commands:addition});
+ assert.equal(updates,1);
+ assert.equal(current.pages[0].list[0].parameters[0],"Original");
+ assert.equal(current.pages[0].list.at(-1).code,401);
+ assert.deepEqual(current.pages[1],initial.pages[1],"Página 2 intacta");
+ const cond=core.buildAction("gift_item_once",core.defaults(core.ACTIONS.find(x=>x.id==="gift_item_once")));
+ assert.doesNotThrow(()=>writer.previewInsertion(ctx,{mapId:17,eventId:3,pageIndex:1,position:"start",commands:cond}));
+ assert.throws(()=>writer.applyInsertion(ctx,{mapId:17,eventId:3,pageIndex:99,position:"end",commands:addition}));
+ const regs=[];
+ picker.registerPickerCommands({events:{registerCommand:def=>{regs.push(def);return{};}}});
+ assert.equal(regs.length,5);
+ for(const def of regs){const params=Object.fromEntries((def.fields||[]).map(f=>[f.key,f.default]));
+  const code=def.script(params);assert.ok(typeof code==="string"&&code.length>0);
+  assert.deepEqual(def.parse(code),params,"Round trip "+def.id);
+ }
+ console.log("Command Studio 0.4 smoke OK:",core.ACTIONS.length,"actions,",wiki.WIKI.length,"Wiki entries,",regs.length,"native picker commands; event insert validated");
+})().catch(e=>{console.error(e);process.exitCode=1});

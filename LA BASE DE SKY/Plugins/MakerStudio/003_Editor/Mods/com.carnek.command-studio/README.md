@@ -1,49 +1,47 @@
-# Command Studio 0.3.0 — Maker Studio / Pokémon Vermeil
+# Command Studio 0.4.0 · Pokémon Vermeil
+Una herramienta **de creación de eventos**, no un diccionario de código para copiar y pegar.
 
-Versión ampliada para atender el problema de cobertura de Command Studio 0.2.0.
+## Uso
 
-## Cómo abrir
+1. Actualiza `new-MK-for-2.5D-Testeo` y **reinicia Maker Studio**.
+2. Abre un mapa del proyecto.
+3. Entra en **Mods → Command Studio**.
+4. Arriba selecciona **evento** y **página**; define si deseas insertar **al principio** o **al final** (no sobreescribe los comandos previos).
+5. En **Crear evento** escribe una intención: "curar equipo", "recompensa una vez", "entrenador", "diálogo", etc.
+6. Configura sus campos. Puedes pulsar **Insertar esta acción en el evento** o **+ Añadir a secuencia** para combinar acciones.
+7. Reordena los pasos del panel Secuencia y aplica la secuencia completa. Maker Studio lo trata como una actualización **deshacible**.
+8. Usa **Guardar plantilla** y Biblioteca para reutilizar rutinas.
 
-1. Actualizar la rama **new-MK-for-2.5D-Testeo**.
-2. Cerrar y volver a abrir Maker Studio.
-3. Menú **Mods → Command Studio** (también **Tools → Command Studio**).
-4. Al abrirse, se indexan automáticamente todos los archivos `.rb` accesibles en `Data/Scripts` y `Plugins`. El botón **Reindexar scripts** fuerza una nueva lectura.
+## Estructura de la herramienta
 
-## Fuentes y cobertura
+- **27 acciones de uso real:** diálogos, opciones, regalos únicos, Pokémon, entrenadores, combates, condiciones, switches, variables, transferencias, audio, escenas, servicios.
+- **Búsqueda por intención:** sinónimos y ranking, no requiere memorizar Ruby.
+- **Compositor de eventos:** pasos configurables, ordenables, editables, plantilla personalizada por proyecto y vista previa estructurada.
+- **Inserción real y deshacible:** `ctx.events.getFull` → `createCommand` → `validateEvent` → `update`. Solo cambia la lista de comandos de la página indicada.
+- **Selector nativo de comandos:** añade una pestaña **Pokémon Essentials** con asistentes reeditables para objetos, regalos Pokémon, combates y reglas.
+- **Biblioteca avanzada:** 67 plantillas referenciales de la wiki LBDS, en un área aparte de los flujos curados.
+- **Código fuente:** indexación bajo demanda de `Data/Scripts/` y `Plugins/`, con firmas y ubicaciones. Un método indexado no es automáticamente una función válida de evento.
+- **PBS:** sugerencias para identificadores internos.
 
-- **Wiki LBDS:** 67 plantillas configurables de funciones y patrones documentados, con enlaces a los artículos originales de https://la-base-de-sky-wiki-1070f3.gitlab.io/.
-- **Eventos RMXP:** 106 códigos, incluidos los auxiliares, con formularios para los más comunes y editor de parámetros JSON para los que aún no tienen un serializador visual especializado.
-- **Código real del proyecto:** se enumeran recursivamente todos los `.rb` bajo `Data/Scripts` y `Plugins`, se extraen las declaraciones `def` y se infieren parámetros, valores por defecto y ámbitos.
-- **PBS:** autocompletado de símbolos al abrir los archivos correspondientes de `PBS` (especies, objetos, movimientos, habilidades y tipos de entrenador).
+## Qué no incluye
 
-**Importante: indexación no significa que todos los métodos Ruby sean comandos de evento.** Muchos son privados, internos, de instancia o requieren un receptor y estado concretos. El parser de Ruby es de propósito editorial, no un AST completo, y su interpretación de firmas complejas puede ser parcial. La pestaña Documentación enumera archivos no leídos, errores y estado de cobertura. No se promete el «100 %» sin comparar el índice con todas las fuentes compiladas.
+- **No promete cobertura semántica del 100 %:** el repositorio tiene código interno, callbacks y métodos que no deben ejecutarse desde eventos. La búsqueda avanzada conserva esas referencias pero la portada solo presenta acciones útiles.
+- La búsqueda por intención es local, basada en etiquetas y sinónimos; no utiliza un modelo de IA externo.
+- Los asistentes de audio generan Ruby (por ejemplo `pbSEPlay`), evitando objetos RMXP difíciles de serializar desde JavaScript.
+- Por seguridad solo inserta en la raíz de una página, al principio o al final: no rompe bucles, condicionales ni grupos de comandos existentes.
+- No crea ni cambia condiciones de páginas automáticamente (trigger, gráfico, etc.). El usuario puede editarlas con el editor nativo.
+- No modifica `.rxdata` directamente. Maker Studio debe soportar **Mod API >= 1.0.1**.
+- La validación del editor verifica los tipos de comando; no garantiza que todos los scripts Ruby funcionen correctamente en ejecución.
 
-## Editor
+## Fuente de integración
 
-- Buscar sinónimos, funciones, categorías y nombres de archivos.
-- Cambiar todos los parámetros de las 67 plantillas, incluidos símbolos, enteros, booleanos y expresiones.
-- Configurar argumentos de métodos indexados, seleccionar tipos y alternar parámetros opcionales.
-- Modificar manualmente el código generado antes de copiarlo.
-- Comandos RMXP: construir parámetros mediante formularios o editor avanzado JSON.
-- Inserciones de códigos de texto (nombre de jugador, variables, color, etc.).
-- Leer la wiki oficial desde la propia ficha.
+Maker Studio, Mod API 1.0.1: https://makerstudio.toskan.es/es/mods/api-reference/#events
+Wiki LBDS: https://la-base-de-sky-wiki-1070f3.gitlab.io/
 
-## Limitaciones actuales
+## Desarrollo
 
-- No modifica automáticamente eventos ni mapas de Maker Studio ni RPG Maker XP. Copiar texto/script pega en el editor de eventos; los objetos JSON necesitan importador, no deben pegarse en la caja de código Ruby.
-- No interpreta el `Data/Scripts.rxdata` binario ni otras fuentes que no estén extraídas como Ruby legible. Si es el único repositorio de cierto script, debe extraerse antes de indexarlo.
-- No extrae ni valida dinámicamente todas las funciones registradas mediante handlers, metaprogramación, alias o código generado.
-- No comprueba a nivel de ejecución si una función/documentación es compatible con los cambios de LA BASE DE SKY o del juego; revisar la fuente Ruby real.
-- Los errores de lectura en la indexación se muestran; una lectura completa de `.rb` no equivale a un catálogo semántico completo.
-- El autocompletado PBS se basa en IDs de secciones y formatos simples; requiere revisar los identificadores según el proyecto.
+Puedes ejecutar las pruebas automatizadas Node del mod:
 
-## Archivos
-- `index.js`: UI integrada.
-- `catalog.js`: comandos nativos.
-- `native-builder.js`: serialización RMXP de comandos habituales.
-- `wiki-catalog.js`: plantillas con fuentes.
-- `source-index.js`: indexador Ruby recursivo y constructor de argumentos.
-- `pbs-index.js`: sugerencias desde PBS.
-- `tests/smoke.cjs`: pruebas automatizadas sin depender de Maker Studio.
+`node tests/smoke.cjs`
 
-La app externa original se mantiene en `LA BASE DE SKY/DevTools/CommandStudio`.
+Se preserva la herramienta externa anterior de `DevTools/CommandStudio`, pero ya no es necesaria para insertar comandos desde Maker Studio.
