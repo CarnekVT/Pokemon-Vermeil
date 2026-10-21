@@ -67,6 +67,18 @@ export const DIRECTIVES=[
  d("Extras","Mensaje de énfasis","\\sh","Usa el marco especial de exclamación si existe.",{source:"local"}),
  d("Avanzado","Elecciones compactas","\\ch[1,-1,Sí,No]","Sintaxis avanzada de opciones embebidas en el mensaje.",{source:"local",level:"advanced",parameter:"Variable,cancelar,opciones",kind:"expression"})
 ];
+
+DIRECTIVES.push(
+ d("Formato","Barra invertida literal","\\\\","Introduce el carácter de barra invertida en lugar de iniciar un control."),
+ d("Formato","Apóstrofe HTML","&apos;","Inserta un apóstrofe en una cadena de texto."),
+ d("Formato","Menor que HTML","&lt;","Inserta el símbolo menor que."),
+ d("Formato","Mayor que HTML","&gt;","Inserta el símbolo mayor que."),
+ d("Formato","Ampersand HTML","&amp;","Inserta el símbolo &."),
+ d("Formato","Comillas HTML","&quot;","Inserta comillas dobles."),
+ d("Formato","Salto de línea HTML","<br />","Fuerza una nueva línea usando etiqueta."),
+ d("Velocidad","Pausa interactiva alternativa","\\1","Código alternativo de pausa, recogido en Essentials Docs y el preprocess del juego.",{level:"advanced",source:"local"})
+);
+
 export const GROUPS=[...new Set(DIRECTIVES.map(x=>x.category))];
 export function codeFor(d,value=null,selectedText="texto"){
  let result=d.token;

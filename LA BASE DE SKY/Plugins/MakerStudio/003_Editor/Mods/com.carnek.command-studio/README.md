@@ -9,14 +9,14 @@ Integrado en Pokémon Vermeil, bajo `LA BASE DE SKY/Plugins/MakerStudio/003_Edit
 3. Verás cuatro pestañas:
    - **Crear evento**: empezar con seis tareas habituales o escribir en lenguaje cotidiano lo que quieres hacer.
    - **Editor de mensajes**: escribir un diálogo, añadir controles desde botones y ver una aproximación legible.
-   - **Enciclopedia**: 76 fichas de funciones y 57 directivas de mensajes.
+   - **Enciclopedia**: 76 fichas de funciones y 65 directivas de mensajes.
    - **Avanzado**: conserva el compositor de secuencias y la indexación recursiva de métodos del proyecto.
 4. Elige tarea → configura opciones → selecciona evento y página → pulsa «Añadir al evento».
 5. Maker Studio aplica la edición por su API, con historial de deshacer. No sobrescribe otras páginas.
 
 ## Mensajes · Essentials Docs + LA BASE DE SKY + Vermeil
 
-El archivo `messages-catalog.js` reúne **57 directivas** ordenadas por Variables, Formato, Colores, Alineación, Ventana, Velocidad, Sonido, Extras y Avanzado, explicadas en español.
+El archivo `messages-catalog.js` reúne **65 directivas** ordenadas por Variables, Formato, Colores, Alineación, Ventana, Velocidad, Sonido, Extras y Avanzado, explicadas en español.
 
 - Editor visual con botones rápidos y cursor.
 - Control de parámetro para variables, color, sonidos, marcos y velocidades.

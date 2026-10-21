@@ -9,7 +9,7 @@ const messages=grab("messages-catalog.js",["DIRECTIVES","codeFor","previewPlain"
 const actions=grab("smart-core.js",["ACTIONS","defaults","buildAction"]);
 const wiki=grab("wiki-catalog.js",["WIKI","buildWiki"]);
 const writer=grab("event-writer.js",["applyInsertion","isCompatible"]);
-assert.equal(messages.DIRECTIVES.length,57);
+assert.equal(messages.DIRECTIVES.length,65);
 assert.ok(wiki.WIKI.length>=76);
 assert.ok(actions.ACTIONS.length>=29);
 const special=["\\PN","\\PM","\\v[1]","\\!","\\wt[20]","\\ts[3]","\\ff[Hero]","\\se[Door exit]","<c=FFB700>texto</c>"];
