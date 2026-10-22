@@ -8,7 +8,8 @@ Rect=Struct.new(:x,:y,:width,:height) do
 end
 class Bitmap
   attr_reader :width,:height
-  def initialize(w,h);@width=w;@height=h;end
+  attr_accessor :raw_data
+  def initialize(w,h);@width=w;@height=h;@raw_data=nil;end
   def disposed?;false;end
 end
 class Tone
@@ -75,6 +76,34 @@ class BattleBackdropLayersTest < Minitest::Test
     assert_operator tree.color.green,:>,0
     assert_operator bg.tone.red,:>,s.instance_variable_get(:@bss_layered_extra)[1].tone.red
     assert_operator s.instance_variable_get(:@bss_layered_extra)[0].color.alpha,:>,0
+  end
+
+  def test_real_alpha_segmentation_preserves_every_source_pixel
+    s,bg,_old=room
+    image=Bitmap.new(80,80)
+    source=Array.new(80*80*4,0)
+    80.times do |y|
+      80.times do |x|
+        rgb=y<32 ? [61,129,182] : (y<42 ? [242,182,82] : [55,137,66])
+        i=(y*80+x)*4
+        source[i,4]=rgb+[255]
+      end
+    end
+    image.raw_data=source.pack('C*')
+    bg.bitmap=image
+    s.bss_layered_split!
+    output=s.instance_variable_get(:@bss_layered_generated)
+    assert_equal 3,output.length
+    assert_same image,s.instance_variable_get(:@bss_layered_source)
+    80.times do |y|
+      80.times do |x|
+        i=(y*80+x)*4
+        count=output.count{|bmp| bmp.raw_data.getbyte(i+3)>0}
+        assert_equal 1,count,"Source pixel must belong to exactly one layer"
+      end
+    end
+    assert_equal 255,output[0].raw_data.getbyte((5*80+10)*4+3)
+    assert_equal 255,output[2].raw_data.getbyte((74*80+10)*4+3)
   end
 
   def test_disabled_indoor_and_custom_split_and_disposal
