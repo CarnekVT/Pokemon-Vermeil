@@ -121,4 +121,25 @@ export const NEXT_CSS=String.raw`
 .csb .cs4 .tip,.csb .cs4 .infobar{font-size:12px;line-height:1.55}
 @media(max-width:1050px){.csb .csb-events-layout{grid-template-columns:minmax(240px,310px) minmax(0,1fr)}.csb .cs4 .grid{grid-template-columns:minmax(235px,.75fr) minmax(420px,1.25fr)}.csb .cs4 .right{grid-column:1/-1;border-top:1px solid var(--border,#38465a);max-height:270px}.csb .cs4 .left,.csb .cs4 .center{min-height:430px}}
 @media(max-width:760px){.csb .csb-events-layout{grid-template-columns:1fr;height:auto;max-height:none}.csb .csb-event-list{max-height:320px}.csb .csb-event-details{min-height:420px;max-height:75vh}.csb .cs4 .grid{grid-template-columns:1fr}.csb .cs4 .left,.csb .cs4 .center,.csb .cs4 .right{grid-column:1/-1;min-height:250px;max-height:430px}.csb .csb-name-controls input{width:100%!important;min-width:100%}}
+
+/* 0.9: create real events without a hidden technical panel. */
+.csb .csb-event-create{border:1px solid var(--border,#38465a);border-radius:10px;padding:12px;background:var(--bg-primary,#142033);display:flex;flex-direction:column;gap:8px;flex:none}
+.csb .csb-event-create>strong{font-size:13px}
+.csb .csb-event-create>p{margin:0;font-size:11px;line-height:1.45}
+.csb .csb-event-new-form{display:flex;flex-direction:column;gap:10px}
+.csb .csb-event-new-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;font-size:11px;color:var(--text-secondary,#b1becc)}
+.csb .csb-event-new-field>input{width:100%;min-height:36px;min-width:0;box-sizing:border-box;padding:8px 9px;border-radius:7px;background:var(--bg-secondary,#203249);border:1px solid var(--border,#38465a);color:inherit;font-size:12px}
+.csb .csb-event-new-coords{display:flex;gap:9px}
+.csb .csb-event-new-actions{display:flex;flex-wrap:wrap;gap:7px}
+.csb .csb-event-new-actions>.btn{flex:1;min-width:105px;white-space:normal;min-height:36px}
+.csb .csb-event-empty{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:25px 17px;justify-content:center;min-height:200px}
+.csb .csb-event-empty>strong{font-size:17px}
+.csb .csb-event-empty>p{font-size:12px;max-width:430px}
+.csb .csb-destination-create{margin-top:12px;border:1px solid var(--border,#38465a);border-radius:9px;padding:10px 12px}
+.csb .csb-destination-create>summary{cursor:pointer;font-weight:600}
+.csb .csb-destination-newrow{display:grid;grid-template-columns:minmax(160px,1fr) 70px 70px auto;gap:8px;align-items:center;padding-top:12px}
+.csb .csb-destination-newrow>input{width:100%;min-width:0;box-sizing:border-box;padding:9px;border-radius:7px}
+.csb .csb-destination-newrow>.btn{white-space:normal;min-height:36px}
+@media(max-width:1100px){.csb .csb-destination-newrow{grid-template-columns:minmax(160px,1fr) 65px 65px}.csb .csb-destination-newrow>.btn{grid-column:1/-1}}
+@media(max-width:760px){.csb .csb-destination-newrow{grid-template-columns:minmax(0,1fr) 65px 65px}.csb .csb-event-new-actions{flex-direction:column}}
 `;
