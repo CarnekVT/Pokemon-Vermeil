@@ -5414,3 +5414,42 @@ App.prototype.hydrateEBDXStudioPreview=async function(){
     return _inputMidbattle.call(this, e);
   };
 })();
+
+/* Camera setup: one understandable EBDX authority with live edit controls. */
+const _bssCameraSettingsHTML2026=App.prototype.bss079CameraConfigHTML;
+App.prototype.bss079CameraConfigHTML=function(){
+  const previous=_bssCameraSettingsHTML2026.call(this);
+  const c=this.bss079EnsureEBDXConfig().ebdxCamera||{};
+  const values=[
+    ['idleStrength','Movimiento ambiental',0,100,'0 inmóvil · 60 recomendado · 100 movimiento EBDX'],
+    ['idleSpeed','Velocidad ambiental',1,100,'25 relajada · 50 normal · 85 rápida'],
+    ['commandStrength','Zoom de comandos',0,100,'0 sin zoom · 50 moderado'],
+    ['fightStrength','Zoom del menú de movimientos',0,100,'0 sin zoom · 65 EBDX']
+  ];
+  const panel=`<section class="bss-panel bss-camera-controls">
+    <h3>Cámara EBDX · Control práctico</h3>
+    <p class="bss-note">Se utiliza un solo vector de cámara para fondo y Pokémon. La interfaz permanece fija. El perfil Estático anula todo desplazamiento; estos controles se aplican al perfil EBDX.</p>
+    <div class="bss-camera-slider-grid">${values.map(([id,label,min,max,hint])=>`
+      <label class="bss-camera-slider"><span><b>${E(label)}</b><small>${E(hint)}</small></span>
+      <div><input type="range" min="${min}" max="${max}" step="1" value="${Math.min(max,Math.max(min,N(c[id],id==='idleStrength'?65:50)))}" data-bss-live-camera="${id}">
+      <output>${Math.min(max,Math.max(min,N(c[id],id==='idleStrength'?65:50)))}</output></div></label>`).join('')}</div>
+    <p class="bss-note">El movimiento se suspende durante animaciones que toman autoridad sobre la cámara. No se añade ningún desplazamiento sobre los controles Vanilla.</p>
+  </section>`;
+  return previous+panel;
+};
+const _bssCameraSettingsInput2026=App.prototype.onInput;
+App.prototype.onInput=function(e){
+  const t=e&&e.target;
+  if(t?.dataset?.bssLiveCamera!=null){
+    const name=S(t.dataset.bssLiveCamera);
+    if(!['idleStrength','idleSpeed','commandStrength','fightStrength'].includes(name))return;
+    const conf=this.bss079EnsureEBDXConfig().ebdxCamera;
+    conf[name]=Math.max(name==='idleSpeed'?1:0,Math.min(100,Math.round(N(t.value,50))));
+    conf.profile='ebdx';conf.preset='custom';
+    const out=t.closest('.bss-camera-slider')?.querySelector('output');
+    if(out)out.textContent=String(conf[name]);
+    this.saveSoon();
+    return;
+  }
+  return _bssCameraSettingsInput2026.call(this,e);
+};
