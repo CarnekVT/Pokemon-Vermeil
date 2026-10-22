@@ -73,66 +73,166 @@ module BSSLayeredRoomSupport
   # Ground/horizon belong to this room only. The original bitmap remains owned
   # by bg; the slice sprites must never dispose the shared bitmap.
   def bss_layered_release!
-    if @bss_layered_extra.is_a?(Array)
-      @bss_layered_extra.each do |sprite|
-        sprite.dispose if sprite && !(sprite.disposed? rescue true)
+    if @bss_layered_source && @sprites.is_a?(Hash)
+      bg=@sprites["bg"]
+      begin
+        bg.bitmap=@bss_layered_source if bg && !(bg.disposed? rescue true)
       rescue StandardError
       end
     end
+    Array(@bss_layered_extra).each do |sp|
+      sp.dispose if sp && !(sp.disposed? rescue true)
+    rescue StandardError
+    end
+    Array(@bss_layered_generated).each do |bmp|
+      bmp.dispose if bmp && !(bmp.disposed? rescue true)
+    rescue StandardError
+    end
     @bss_layered_extra=nil
-    @bss_layered_ranges=nil
+    @bss_layered_generated=nil
     @bss_layered_source=nil
+    @bss_layered_ranges=nil
     @bss_layered_last_key=nil
   end
 
+  def bss_layered_boundary(bitmap,source,w,h)
+    sky=BSSLayeredLighting.config_value(@data,"skySplitY",nil)
+    floor=BSSLayeredLighting.config_value(@data,"horizonSplitY",nil)
+    if sky && floor
+      low=BSSLayeredLighting.clamp(sky,8,h-16).round
+      high=BSSLayeredLighting.clamp(floor,low+4,h-4).round
+      return Array.new(w,low),Array.new(w,high)
+    end
+    # Detect the actual sky/terrain colour transition. Battleback PNGs are
+    # already pixel art; scan raw RGBA once rather than generating a mask per
+    # redraw. No arbitrary 30% / 43% horizontal bands.
+    y0=(h*0.23).to_i
+    y1=(h*0.62).to_i
+    step=[(w/56.0).ceil,1].max
+    best_y=(h*0.40).to_i;best=-1
+    (y0..y1).step(2) do |y|
+      score=0
+      x=0
+      while x<w
+        i=((y-3)*w+x)*4
+        j=((y+3)*w+x)*4
+        3.times do |ch|
+          score+=(source.getbyte(i+ch)-source.getbyte(j+ch)).abs
+        end
+        x+=step
+      end
+      # Prefer the skyline over noisy ground texture if gradients are close.
+      score=(score*(1.0-0.16*((y-h*0.40).abs/h.to_f))).round
+      if score>best
+        best=score;best_y=y
+      end
+    end
+    center=best_y+5
+    upper=Array.new(w)
+    lower=Array.new(w)
+    # Resolve gentle per-column variation near the global skyline. Preserve
+    # irregular distant tree/roof silhouettes rather than painting a straight
+    # rectangle over them. Bound jitter for seamless pixel edges.
+    xs=[]
+    (0...w).step(4) do |x|
+      local=center;peak=-1
+      ([center-10,y0].max..[center+10,y1].min).each do |y|
+        i=((y-2)*w+x)*4;j=((y+2)*w+x)*4
+        score=(source.getbyte(i)-source.getbyte(j)).abs+
+              (source.getbyte(i+1)-source.getbyte(j+1)).abs+
+              (source.getbyte(i+2)-source.getbyte(j+2)).abs
+        score-=((y-center).abs*1.6).to_i
+        if score>peak
+          peak=score;local=y
+        end
+      end
+      xs << local
+    end
+    w.times do |x|
+      j=x/4
+      a=xs[j] || center
+      b=xs[j+1] || a
+      edge=(a*(1-(x%4)/4.0)+b*((x%4)/4.0)).round
+      upper[x]=[edge-28,8].max
+      lower[x]=[edge+5,h-4].min
+    end
+    [upper,lower]
+  end
+
   def bss_layered_split!
-    return if !BSSLayeredLighting.outdoor?(@data)
+    return unless BSSLayeredLighting.outdoor?(@data)
     bg=@sprites.is_a?(Hash) ? @sprites["bg"] : nil
-    return if !bg || !bg.bitmap || bg.bitmap.disposed?
-    bmp=bg.bitmap
-    width=bmp.width.to_i;height=bmp.height.to_i
-    return if width<16 || height<48
-    # Optional artist-authored split coordinates (native bitmap pixels).
-    sky_end=BSSLayeredLighting.clamp(BSSLayeredLighting.config_value(@data,"skySplitY",height*0.30),8,height-16).round
-    horizon_end=BSSLayeredLighting.clamp(BSSLayeredLighting.config_value(@data,"horizonSplitY",height*0.43),sky_end+4,height-4).round
-    return unless horizon_end>sky_end
-    @bss_layered_source=bmp
-    @bss_layered_ranges=[[0,sky_end],[sky_end,horizon_end],[horizon_end,height]]
+    return unless bg && bg.bitmap && !(bg.bitmap.disposed? rescue true)
+    source_bitmap=bg.bitmap
+    w=source_bitmap.width.to_i;h=source_bitmap.height.to_i
+    return unless w>=16 && h>=48
+    source=source_bitmap.respond_to?(:raw_data) ? source_bitmap.raw_data : nil
+    if source && source.respond_to?(:getbyte) && source.bytesize>=w*h*4
+      upper,lower=bss_layered_boundary(source_bitmap,source,w,h)
+      sky="\x00".b*(w*h*4)
+      haze="\x00".b*(w*h*4)
+      terrain="\x00".b*(w*h*4)
+      h.times do |y|
+        w.times do |x|
+          pos=(y*w+x)*4
+          next if source.getbyte(pos+3)==0
+          dest=y<upper[x] ? sky : (y<lower[x] ? haze : terrain)
+          dest[pos,4]=source.byteslice(pos,4)
+        end
+      end
+      images=[sky,haze,terrain].map do |raw|
+        bmp=Bitmap.new(w,h)
+        bmp.raw_data=raw
+        bmp
+      end
+      @bss_layered_source=source_bitmap
+      @bss_layered_generated=images
+      bg.bitmap=images[0]
+      bg.src_rect.set(0,0,w,h)
+      @bss_layered_ranges=nil
+      @bss_layered_extra=[]
+      [1,2].each do |index|
+        sprite=Sprite.new(@viewport)
+        sprite.bitmap=images[index]
+        sprite.src_rect.set(0,0,w,h)
+        @bss_layered_extra << sprite
+      end
+      bss_layered_sync!
+      bss_layered_apply_tone!(true)
+      return
+    end
+    # Older RGSS builds without Bitmap#raw_data retain the safe scanline
+    # fallback rather than failing or blanking the battleback.
+    low=BSSLayeredLighting.clamp(BSSLayeredLighting.config_value(@data,"skySplitY",h*0.34),8,h-16).round
+    high=BSSLayeredLighting.clamp(BSSLayeredLighting.config_value(@data,"horizonSplitY",h*0.47),low+4,h-4).round
+    @bss_layered_source=source_bitmap
+    @bss_layered_ranges=[[0,low],[low,high],[high,h]]
     @bss_layered_extra=[]
-    # src_rect is a GPU-level crop; unlike a new bitmap it costs no pixel loops.
-    bg.src_rect.set(0,0,width,sky_end)
+    bg.src_rect.set(0,0,w,low)
     [1,2].each do |i|
       y0,y1=@bss_layered_ranges[i]
-      part=Sprite.new(@viewport)
-      part.bitmap=bmp
-      part.src_rect.set(0,y0,width,y1-y0)
-      @bss_layered_extra << part
+      sp=Sprite.new(@viewport);sp.bitmap=source_bitmap
+      sp.src_rect.set(0,y0,w,y1-y0)
+      @bss_layered_extra<<sp
     end
     bss_layered_sync!
     bss_layered_apply_tone!(true)
   rescue StandardError => e
-    BSS064.log("BSS layered split warning: #{e.class}: #{e.message}") if defined?(BSS064)
+    BSS064.log("BSS skyline separation warning: #{e.class}: #{e.message}") if defined?(BSS064)
     bss_layered_release!
-    if bg && bg.bitmap && !bg.bitmap.disposed?
-      bg.src_rect.set(0,0,bg.bitmap.width,bg.bitmap.height)
-    end
   end
 
   def bss_layered_sync!
-    return unless @bss_layered_extra && @bss_layered_ranges
+    return unless @bss_layered_extra
     bg=@sprites["bg"] rescue nil
-    return if !bg || (bg.disposed? rescue true)
+    return unless bg && !(bg.disposed? rescue true)
     @bss_layered_extra.each_with_index do |part,index|
-      next if !part || (part.disposed? rescue true)
-      y0=@bss_layered_ranges[index+1][0]
-      # src_rect origin is local to the slice, not global bitmap coordinates.
+      next unless part && !(part.disposed? rescue true)
+      origin=@bss_layered_ranges ? @bss_layered_ranges[index+1][0] : 0
       part.x=bg.x;part.y=bg.y
-      part.ox=bg.ox;part.oy=bg.oy-y0
-      part.z=bg.z
-      part.zoom_x=bg.zoom_x;part.zoom_y=bg.zoom_y
-      part.angle=bg.angle
-      part.opacity=bg.opacity
-      part.visible=bg.visible
+      part.ox=bg.ox;part.oy=bg.oy-origin
+      part.z=bg.z;part.zoom_x=bg.zoom_x;part.zoom_y=bg.zoom_y
+      part.angle=bg.angle;part.opacity=bg.opacity;part.visible=bg.visible
     end
   end
 
