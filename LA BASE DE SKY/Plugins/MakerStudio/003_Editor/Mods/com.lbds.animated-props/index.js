@@ -1742,11 +1742,19 @@ function drawOverlay(draw,info){
     return;
   }
   if(canCache){
-    const surface=document.createElement('canvas');
-    surface.width=Math.ceil(view.canvasWidth);surface.height=Math.ceil(view.canvasHeight);
+    // A changing animation frame should refresh the SAME GPU/canvas backing,
+    // not allocate a multi-megabyte bitmap every tick.
+    const width=Math.ceil(view.canvasWidth),height=Math.ceil(view.canvasHeight);
+    let surface=state.compositedOverlay?.canvas;
+    if(!surface || surface.width!==width || surface.height!==height){
+      surface=document.createElement('canvas');
+      surface.width=width;surface.height=height;
+    }
     const surfaceContext=surface.getContext('2d');
-    if(surfaceContext)draw=surfaceContext;
-    else state.compositedOverlay=null;
+    if(surfaceContext){
+      surfaceContext.clearRect(0,0,width,height);
+      draw=surfaceContext;
+    }else state.compositedOverlay=null;
   }
   draw.save();
   const primaryFrames=new Map(),secondaryFrames=new Map();
