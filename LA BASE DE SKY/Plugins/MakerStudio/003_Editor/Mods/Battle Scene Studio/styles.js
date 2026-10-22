@@ -769,3 +769,8 @@ STYLES += `
 .bss-root [data-dialogue-field="text"]{width:100%;min-height:110px}
 @media(max-width:1120px){.bss-root .bss-dialogue-grid,.bss-root .bss-dialogue-speaker-row{grid-template-columns:minmax(0,1fr)}}
 `;
+
+STYLES += `
+.bss-dialogue-workflow-note{margin:0 0 12px;padding:11px 13px;line-height:1.55;color:#d5e4f7;background:#1b2d40;border:1px solid #456684;border-radius:9px}
+.bss-dialogue-id-warning{margin:0 0 12px;padding:11px 13px;color:#ffdfae;background:#47301a;border:1px solid #b57b37;border-radius:9px;overflow-wrap:anywhere}
+`;
