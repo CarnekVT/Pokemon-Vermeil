@@ -5,6 +5,7 @@ import { mount as mountAdvanced } from "./smart-ui.js";
 import { loadPBS, classifySymbolHint } from "./pbs-index.js";
 import { activeMapId, eventChoices, pageChoices, applyInsertion, isCompatible, availableInsertionPoints, describeCommand } from "./event-writer.js";
 import { createEventBrowser } from "./event-browser.js";
+import {armPlacement,cancelPlacement} from "./placement.js";
 import { enhancePokemonActions, POKEMON_GROUPS, giftCheck } from "./pokemon-gift.js";
 import { auditProject, classifyReference } from "./function-audit.js";
 import { installWorkspaceFullscreen } from "./fullscreen.js";
@@ -78,6 +79,7 @@ export function mountFriendly(ctx,host){
   }
  }
  function go(next){
+  cancelPlacement();
   if(advCleanup){advCleanup();advCleanup=null;}
   if(eventBrowser){eventBrowser.dispose();eventBrowser=null;}
   if(messageCleanup){messageCleanup();messageCleanup=null;}
@@ -124,7 +126,17 @@ export function mountFriendly(ctx,host){
        notice("Evento #"+fresh+" creado y seleccionado. Ya puedes añadir la acción.");
      }catch(err){notice("No se creó el evento: "+String(err?.message||err));}
    },"btn primary");
-   newRow.append(newName,newX,newY,newEvent);createBox.append(newRow);
+   const chooseTile=button("📍 Marcar en el mapa",()=>{
+    const callback=selection=>{
+      if(disposed)return;
+      newX.value=String(selection.x);newY.value=String(selection.y);
+      if(selection.mapId!==mapId){mapId=selection.mapId;eventId="";refill();}
+      notice("Casilla ("+selection.x+", "+selection.y+") elegida.");
+    };
+    if(!armPlacement(ctx,callback))notice("No se pudo abrir la herramienta para marcar la casilla.");
+    else notice("Pulsa una casilla del mapa para elegir la posición del evento.");
+   },"btn");
+   newRow.append(newName,newX,newY,chooseTile,newEvent);createBox.append(newRow);
    block.append(createBox);
   function refill(){
     const active=activeMapId(ctx);
@@ -227,6 +239,7 @@ export function mountFriendly(ctx,host){
         insertionPosition=sel.position;
       },
       onError:e=>notice(e.message),
+      onNotice:message=>notice(message),
       onCreate:()=>{step=1;go("home");}
     });
   }
@@ -532,7 +545,7 @@ export function mountFriendly(ctx,host){
  window.addEventListener("focus",refreshActive);
  document.addEventListener("visibilitychange",refreshActive);
  menu();render();
- return()=>{disposed=true;if(eventBrowser)eventBrowser.dispose();if(messageCleanup)messageCleanup();
+ return()=>{disposed=true;cancelPlacement();if(eventBrowser)eventBrowser.dispose();if(messageCleanup)messageCleanup();
   subscriptions.forEach(s=>{try{s.dispose?.();}catch(_){}});
   window.removeEventListener("focus",refreshActive);
   document.removeEventListener("visibilitychange",refreshActive);
