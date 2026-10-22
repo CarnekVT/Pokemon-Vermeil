@@ -1564,7 +1564,7 @@ function refresh(){
   }
   performanceSelect.onchange=()=>{state.perfMode=performanceSelect.value;state.lastMapFrameKey=null;state.lastPreviewKey=null;
     state.lastMapTick=null;state.lastPreviewTick=null;
-    void state.ctx.storage?.set('animationPerformanceMode',state.perfMode).catch?.(problem);
+    void state.ctx.storage?.set('animationPerformanceModeEditorStaticV2',state.perfMode).catch?.(problem);
     refresh();redraw();};
   const perfCard=el('div',null,{className:'ap-perf-card'});
   perfCard.append(el('span','Reproducción',{className:'ap-perf-title'}),performanceSelect);
@@ -2139,7 +2139,7 @@ export async function activate(ctx){
     showOverlay:true,maskHigherTiles:false,isolateLayer:false,lastAction:'Selecciona un prop en la paleta y haz clic en el mapa.', canvasViews:new Map(), lastPaint:null, gridOpen:false,crops:new Map(),
     layerMasks:new Map(),layerMetaByMap:new Map(),renderIndex:new Map(),visibleCandidates:null,drawPending:false,drawRaf:null,propSelection:null,selectionContinuous:true,toolKeyCleanup:null,followNativeTools:true,propsToolArmed:false,toolMirrorLock:false,
     selectionZoom:1,selectionDrag:null,playback:{paused:false,frame:0,parallelFrame:0},animEpoch:performance.now(),miniHover:null,pointerEvents:0,overlayCalls:0,lastPointer:'',interval:null, nativeHover:null,nativeDragging:false,zoomWaiting:false,pointerOrigin:'',perfMode:'static',lastMapTick:null,lastPreviewTick:null,previewZoom:1,previewGrid:false,previewCrop:false,previewOnion:false,inspectorTab:'graphics',mapControlsOpen:false,brushMode:'brush',brushSize:1,brushShape:'square',stroke:null,lastStrokePoint:null,imageStamps:new Map(),reloadingGraphics:false,graphicsCheckTimer:null,focusListener:null,scanCursor:0,historyKeyCleanup:null};
-  try{const saved=await ctx.storage?.get('animationPerformanceMode','static');if(['full','balanced','saver','static'].includes(saved))state.perfMode=saved;}catch{}
+  try{const saved=await ctx.storage?.get('animationPerformanceModeEditorStaticV2','static');if(['full','balanced','saver','static'].includes(saved))state.perfMode=saved;}catch{}
   try{state.data=await loadData();invalidateRenderIndex();}catch(e){state.readError=String(e?.message||e);problem(e);}
   state.selected=state.data.definitions[0]?.id||'';
   ctx.ui.registerPanel({id:PANEL,title:'Objetos animados',showInMenu:false,defaultPosition:'right',defaultSize:{width:1280,height:820},
