@@ -163,6 +163,14 @@ class BSSDialogueEngine
       end
     end
 
+    # 2. Backwards-compatibility: load triggers from boss["midbattleTriggers"] if present
+    boss_cfg = (battle.respond_to?(:bss_boss_config) ? battle.bss_boss_config : {}) || {}
+    if boss_cfg["midbattleTriggers"].is_a?(Array) && @triggers.empty?
+      boss_cfg["midbattleTriggers"].each do |t|
+        norm = normalize_trigger(t, default_target: "boss")
+        @triggers << norm if norm
+      end
+    end
     # Dialogue IDs identify independent one-shot events. Imported libraries can
     # contain duplicate IDs; distinguish them without changing saved JSON.
     used_ids = {}
@@ -179,14 +187,6 @@ class BSSDialogueEngine
       used_ids[id] = true
     end
 
-    # 2. Backwards-compatibility: load triggers from boss["midbattleTriggers"] if present
-    boss_cfg = (battle.respond_to?(:bss_boss_config) ? battle.bss_boss_config : {}) || {}
-    if boss_cfg["midbattleTriggers"].is_a?(Array) && @triggers.empty?
-      boss_cfg["midbattleTriggers"].each do |t|
-        norm = normalize_trigger(t, default_target: "boss")
-        @triggers << norm if norm
-      end
-    end
   end
 
   def enabled?
