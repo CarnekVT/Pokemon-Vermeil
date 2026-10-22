@@ -169,12 +169,16 @@ end
 module BSSUnifiedCameraAuthority
   def bss_unified_camera_to(mode, idxBattler = nil)
     return unless @vector
-
+    return unless respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
+    cfg=(BSS070EBDXCore.camera_config rescue {})
+    cfg={} unless cfg.is_a?(Hash)
+    return if (cfg["profile"] || cfg["preset"]).to_s.downcase=="static"
+    main=(BSS070EBDXCore.get_vector(:MAIN,@battle) rescue [102,408,32,342,1,1])
     case mode.to_s.downcase.to_sym
     when :command
       @bss083_camera_state = :command
       @bss070_ebdx_camera_mode = :command
-      zoom = BSSUnified.zoom_level(:default)
+      zoom = 1.0 + [[(cfg['commandStrength'] || 45).to_f,0.0].max,100.0].min * 0.0025
       shot = (BSS083.camera_shot(:player, @battle) rescue nil) || (BSS070EBDXCore.get_vector(:MAIN, @battle) rescue [102, 408, 32, 342, 1, 1])
       target = shot.clone
       target[4] = zoom.to_f if target.size >= 5
@@ -184,7 +188,7 @@ module BSSUnifiedCameraAuthority
     when :fight
       @bss083_camera_state = :fight
       @bss070_ebdx_camera_mode = :fight
-      zoom = BSSUnified.zoom_level(:strong)
+      zoom = 1.0 + [[(cfg['fightStrength'] || 65).to_f,0.0].max,100.0].min * 0.003
       shot = (BSS083.camera_shot(:player, @battle) rescue nil) || (BSS070EBDXCore.get_vector(:MAIN, @battle) rescue [102, 408, 32, 342, 1, 1])
       target = shot.clone
       target[4] = zoom.to_f if target.size >= 5
