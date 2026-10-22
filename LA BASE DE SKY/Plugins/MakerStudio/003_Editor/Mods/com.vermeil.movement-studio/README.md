@@ -1,6 +1,6 @@
-# Movement Studio — Editor UI v0.6.0
+# Movement Studio — Editor UI v0.7.0
 
-Interfaz reconstruida con la organización visual de **Battle Animation Studio (BAS)** y **Battle Scene Studio (BSS)**. Esta actualización es exclusivamente del **editor de Maker Studio**. El plugin Ruby de movimiento se conserva en su versión **0.5.0**.
+Interfaz reconstruida con la organización visual de **Battle Animation Studio (BAS)** y **Battle Scene Studio (BSS)**. Esta actualización es exclusivamente del **editor de Maker Studio**. El plugin Ruby de movimiento se ha actualizado por separado a la versión **0.6.0**.
 
 ## Ventana de trabajo
 
@@ -43,3 +43,25 @@ Probado con un entorno simulado de las APIs de Maker Studio:
 5. Guardar y volver a leer conservan las opciones elegidas.
 
 Pendiente de comprobación manual en Maker Studio real: apertura desde menú Mods, tamaños acoplados y compactos, enfoque del teclado y renderizado CSS en el webview del editor.
+
+## Mejoras v0.7.0 — Primeros pasos y explicación contextual
+
+El editor inicia en **Sencillo**. Arriba puede cambiarse a **Avanzado** sin perder cambios ni modificar el juego.
+
+### Nivel sencillo
+- Pantalla inicial con tres pasos clicables: elegir movimiento, configurar diagonales y mejorar la cámara.
+- Tres estilos listos para editar: **Clásico**, **Moderno 4 direcciones** y **Moderno 8 direcciones**.
+- Los inspectores enseñan primero las opciones importantes y esconden los ajustes más técnicos (no los eliminan).
+- Opciones que no son aplicables aparecen deshabilitadas y **explican por qué**, por ejemplo las diagonales en modo Clásico o en 4 direcciones.
+- No hay esperas o búferes de teclas. Los perfiles solo escriben valores al pulsar Guardar.
+
+### Nivel avanzado
+- Conserva todos los controles anteriores (incluidos ajustes de cámara por ejes, prioridades de colisión y diagnóstico).
+- Añade **Ritmo de las diagonales**: Ágil / Uniforme y **Orientación inmediata**: Sí / No.
+- Global y mapa siguen heredándose independientemente, sin reemplazar valores ajenos.
+
+La vista previa central sigue siendo un diagrama de configuración: las flechas no cambian el input del juego real.
+
+### Comprobación
+
+Se probaron con APIs simuladas la carga de `config.ini`, las cinco secciones, la separación entre Sencillo/Avanzado, la desactivación de campos inaplicables, sobrescritura local por mapa y guardado verificado por lectura. La comprobación en Maker Studio real sigue pendiente.
