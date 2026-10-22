@@ -340,19 +340,65 @@ end
 # Only active EBDX battles move battlers/world; Vanilla preserves its HUD and
 # sprites and uses the adapter's decorative background camera.
 module BSSLayeredEBDXCamera
+  def bss_layered_camera_config
+    cfg=BSS070EBDXCore.camera_config rescue {}
+    cfg.is_a?(Hash) ? cfg : {}
+  end
+
+  def bss_layered_camera_active?
+    return false unless respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
+    return false unless @vector && @battle
+    cfg=bss_layered_camera_config
+    profile=(cfg["profile"] || cfg["preset"] || "ebdx").to_s.downcase
+    return false if profile=="static" || profile=="off"
+    return false if (@battle.respond_to?(:triplebattle?) && @battle.triplebattle?)
+    true
+  rescue StandardError
+    false
+  end
+
+  def bss_layered_next_ebdx_shot
+    cfg=bss_layered_camera_config
+    strength=BSSLayeredLighting.clamp(cfg["idleStrength"] || 65,0,100)/100.0
+    speed=BSSLayeredLighting.clamp(cfg["idleSpeed"] || 50,1,100)/100.0
+    base=BSS070EBDXCore.get_vector(:MAIN,@battle).map(&:to_f)
+    target=base.clone
+    patterns=(BSS070EBDXCore.const_get(:CAMERA_MOTION) rescue nil)
+    options=patterns.is_a?(Array) ? patterns.select{|v|v.is_a?(Array) && v.length>=5} : []
+    if options.empty?
+      phase=@bss_layered_camera_index.to_i
+      target[0]+=Math.sin(phase*1.8)*14*strength
+      target[1]+=Math.cos(phase*1.4)*8*strength
+      target[4]=base[4]*(1.0+Math.sin(phase*1.3)*0.055*strength)
+      target[5]=base[5]*(1.0+Math.sin(phase*1.3)*0.055*strength)
+    else
+      index=@bss_layered_camera_index.to_i%options.length
+      row=options[index]
+      # Source-authored EBDX vectors, blended towards the stable MAIN framing.
+      [0,1,2,3,4,5].each do |i|
+        value=(row[i] || (i==5 ? row[4] : base[i])).to_f
+        target[i]=base[i]+(value-base[i])*strength
+      end
+    end
+    @bss_layered_camera_index=@bss_layered_camera_index.to_i+1
+    @vector.inc=0.004+speed*0.018
+    @vector.set(target)
+    frames=(260-speed*160).round
+    @bss_layered_camera_due=@bss_layered_camera_tick.to_i+frames
+  end
+
   def bss070_ebdx_tick(advance_camera=true,align=true)
-    active=respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
-    if active && @vector && advance_camera && !@bss084_native_move_active &&
-       @bss070_ebdx_suspend_depth.to_i<=0 &&
-       !(defined?(BSS102) && BSS102.respond_to?(:static_camera?) && BSS102.static_camera?(self))
-      @vector.update
+    if bss_layered_camera_active? && advance_camera && !@bss084_native_move_active &&
+       !@bss083_animation_projection && @bss070_ebdx_suspend_depth.to_i<=0
       @bss_layered_camera_tick=@bss_layered_camera_tick.to_i+1
       if @bss_layered_camera_tick>=@bss_layered_camera_due.to_i &&
          !@bss_in_command_menu && !@bss_entering_fight &&
-         respond_to?(:bss102_next_ambient_target)
-        bss102_next_ambient_target
-        @bss_layered_camera_due=@bss_layered_camera_tick+150
+         !@bss102_command_overview
+        bss_layered_next_ebdx_shot
       end
+      # EBDX uses the SAME interpolated vector for the room, trainer anchors
+      # and battler world projection. Never create a second render camera.
+      @vector.update
     end
     super
   end
