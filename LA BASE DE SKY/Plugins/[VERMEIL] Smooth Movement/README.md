@@ -100,3 +100,14 @@ Movimiento sub-tile autentico requiere reescribir colisiones, disparadores, foll
 4. Caminar cerca de esquinas, eventos de contacto, hierba y seguidores. Conservar colisiones, estadísticas y encuentros.
 5. Probar Turbo y entrar/salir de varios combates, además de escaleras, hielo, Surf y bicicleta, que conservan su movimiento original.
 
+
+
+## Hotfix 0.6.1 — sprite sincronizado con el paso real
+
+Problema detectado: si se alternaban muy rápido las teclas arriba/abajo o izquierda/derecha mientras el jugador todavía avanzaba por su casilla, `vermeil_update_live_facing` cambiaba la fila gráfica antes de haber cambiado de dirección lógica. Con OWs More Frames provocaba animaciones orientadas al revés mientras el sprite seguía moviéndose físicamente hacia la dirección anterior.
+
+Corrección: durante un paso cardinal **la fila de sprite queda bloqueada a la trayectoria en curso**. Al terminar el paso, `update_command_new` inicia inmediatamente el siguiente según la tecla ACTUAL. En una diagonal solo se permite cambiar entre las dos filas cardinales que representan esa misma diagonal. Se descartan los cambios hacia el sentido opuesto al recorrido en curso. No hay cola de inputs, espera extra ni modificación de `@move_timer`, colisiones o eventos.
+
+La opción `diagonal_live_turn` se conserva por compatibilidad. Ahora se llama **Orientación durante diagonales** en Movement Studio y describe el comportamiento real. **Clásico** sigue usando Essentials sin este parche.
+
+Pruebas de regresión: alternar ↑↓, ←→ y ↗↙ rápidamente; probar cardinal→diagonal y diagonal→cardinal con Turbo, OWs More Frames y Continuous Flow activos. Se superaron once casos aislados de coherencia de orientación, pero requiere verificación ingame.
