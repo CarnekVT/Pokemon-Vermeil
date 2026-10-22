@@ -159,6 +159,33 @@ module BSSLayeredRoomSupport
     [upper,lower]
   end
 
+  # Infer the sky color along each scanline from the brightest spatial
+  # samples. Trees are not recolored as sky merely because their pixels sit
+  # above the geometric horizon. This works with legacy one-piece EBDX PNGs.
+  def bss_layered_sky_palette(raw,w,h)
+    rows=Array.new(h)
+    positions=[0.10,0.24,0.40,0.56,0.72,0.88].map{|q|[(w*q).to_i,w-1].min}
+    h.times do |y|
+      colors=positions.filter_map do |x|
+        offset=(y*w+x)*4
+        alpha=raw.getbyte(offset+3)
+        next if !alpha || alpha<128
+        r=raw.getbyte(offset).to_i
+        g=raw.getbyte(offset+1).to_i
+        b=raw.getbyte(offset+2).to_i
+        [[r,g,b],(r*0.30+g*0.52+b*0.18)]
+      end
+      # Bright sky gradients tend to be less occluded than near-black tree
+      # outlines. Consider multiple seeds rather than one center column.
+      colors.sort_by!{|entry|-entry[1]}
+      chosen=colors.first(3)
+      rows[y]=chosen.empty? ? nil : 3.times.map{|channel|
+        (chosen.sum{|entry|entry[0][channel]}/chosen.length.to_f).round
+      }
+    end
+    rows
+  end
+
   def bss_layered_split!
     return unless BSSLayeredLighting.outdoor?(@data)
     bg=@sprites.is_a?(Hash) ? @sprites["bg"] : nil
@@ -169,6 +196,7 @@ module BSSLayeredRoomSupport
     source=source_bitmap.respond_to?(:raw_data) ? source_bitmap.raw_data : nil
     if source && source.respond_to?(:getbyte) && source.bytesize>=w*h*4
       upper,lower=bss_layered_boundary(source_bitmap,source,w,h)
+      sky_palette=bss_layered_sky_palette(source,w,h)
       sky="\x00".b*(w*h*4)
       haze="\x00".b*(w*h*4)
       terrain="\x00".b*(w*h*4)
@@ -176,7 +204,23 @@ module BSSLayeredRoomSupport
         w.times do |x|
           pos=(y*w+x)*4
           next if source.getbyte(pos+3)==0
-          dest=y<upper[x] ? sky : (y<lower[x] ? haze : terrain)
+          dest=if y<upper[x]
+            sample=sky_palette[y]
+            if sample
+              distance=(source.getbyte(pos)-sample[0]).abs+
+                       (source.getbyte(pos+1)-sample[1]).abs+
+                       (source.getbyte(pos+2)-sample[2]).abs
+              # Pixel-art outlines and tree silhouettes remain on the
+              # independent foreground plane instead of darkening with sky.
+              distance>112 ? haze : sky
+            else
+              sky
+            end
+          elsif y<lower[x]
+            haze
+          else
+            terrain
+          end
           dest[pos,4]=source.byteslice(pos,4)
         end
       end
