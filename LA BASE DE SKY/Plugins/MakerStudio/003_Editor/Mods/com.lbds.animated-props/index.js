@@ -20,6 +20,17 @@ import {
 
 const TOOL = 'lbds-animated-props.brush';
 const PREVIEW_INTERVAL_MS = 33; // cheap scheduler; actual map redraw is profile-limited
+// Independent prop offsets never change after placement; memoize their phases.
+const PLACEMENT_PHASES=new Map(),PLACEMENT_PHASE_LIMIT=16000;
+function cachedPlacementPhase(id,frames){
+  const key=String(id)+'|'+String(frames);
+  const found=PLACEMENT_PHASES.get(key);
+  if(found!==undefined)return found;
+  const phase=phaseFromId(id,frames);
+  if(PLACEMENT_PHASES.size>=PLACEMENT_PHASE_LIMIT)PLACEMENT_PHASES.clear();
+  PLACEMENT_PHASES.set(key,phase);
+  return phase;
+}
 const CANVAS_SELECTOR = '[data-ms-part="canvas"]';
 const PANEL = 'lbds-animated-props.library';
 const CSS = `
@@ -361,8 +372,9 @@ async function finishEdit(){
 }
 function switchToNativeOnPaletteChange(){if(toolActive())nativeTiles();}
 
-function redraw(immediate=false) {
+function redraw(immediate=false,invalidateCache=true) {
  if(!state)return;
+ if(invalidateCache)state.compositeRevision=(state.compositeRevision||0)+1;
  if(immediate){
    // Layer switches must not wait for thumbnail/panel rebuilding.
    if(state.drawPending && state.drawRaf!=null && typeof cancelAnimationFrame==='function')cancelAnimationFrame(state.drawRaf);
@@ -432,7 +444,18 @@ function activeMapFrameSignature(visible,now){
     const primary=first>1?frameFor(d,now):-1;
     // Parallel is synchronized to the same time origin; placement-specific
     // offsets change the phase, not the moments at which a frame can advance.
-    const parallel=second>1?parallelFrame(d,now,null):-1;
+    // Independent tracks continue even while the inspector preview is paused.
+    // Use phase zero for the change clock; placed props add fixed offsets.
+    let parallel=-1;
+    if(second>1){
+      if(d.timingMode!=='independent')parallel=parallelFrame(d,now,null);
+      else {
+        const cap=getProfile(state.perfMode).mapFps;
+        const elapsed=Math.max(0,now-(state.animEpoch||0));
+        const quantized=cap>0?Math.floor(elapsed*cap/1000)/cap:0;
+        parallel=animationFrame(d.parallel,quantized,d.parallel.phase||0);
+      }
+    }
     ticks.push(d.id+':'+primary+':'+parallel);
   }
   return ticks.join('|');
@@ -445,6 +468,7 @@ function tickVisuals(){
      (state.lastMapTick==null || dueTick(now,state.lastMapTick,profile.mapFps))){
     state.lastMapTick=now;
     const info=state.lastRenderInfo?.mapId===mapId?state.lastRenderInfo:null;
+    if(!info)return; // no viewport to animate yet; never query the whole map
     const render=renderEntries(mapId),geo=viewportCacheKey(mapId,info);
     const cached=state.visibleCandidates;
     const visible=cached?.geo===geo&&cached?.render===render ?
@@ -456,7 +480,7 @@ function tickVisuals(){
       state.lastMapFrameKey=key;
       // No animated visual is visible? Never schedule a map redraw merely
       // because the animation timer is alive.
-      if(key)redraw();
+      if(key)redraw(false,false);
     }
   }
   const def=getDef();
@@ -1202,7 +1226,7 @@ function parallelFrame(def,now=performance.now(),id=null){
   const cap=getProfile(state?.perfMode||'balanced').mapFps;
   const elapsed=Math.max(0,now-(state?.animEpoch||0));
   const quantized=cap>0?Math.floor(elapsed*cap/1000)/cap:0;
-  const phase=(track.phase||0)+(id!==null&&def.timingMode==='independent'?phaseFromId(id,track.frames):0);
+  const phase=(track.phase||0)+(id!==null&&def.timingMode==='independent'?cachedPlacementPhase(id,track.frames):0);
   return animationFrame(track,quantized,phase);
 }
 function renderParallelControls(host,d){
@@ -1714,6 +1738,7 @@ function refresh(){
 }
 function drawOverlay(draw,info){
   if(!state||state.readError||!state.showOverlay||!info||!Number.isInteger(info.mapId))return;
+  const mapContext=draw;
   state.overlayCalls++;
   const render=renderEntries(info.mapId);
   const view=normalizedViewport(info);
@@ -1732,9 +1757,34 @@ function drawOverlay(draw,info){
   const mapRows=snapshot.rows;
   const tilesByLayer=snapshot.byIndex;
   const currentPaintLayer=selectedPaintLayer(info.mapId);
-  draw.save();
   const viewOptions=state.ctx.editor.viewOptions?.()||{};
   const now=performance.now();
+  // Reuse the already composited transparent prop layer when the native map
+  // redraws for lighting, autotiles, zoom/pan repaint or unrelated UI work.
+  // Like native animated autotiles, the cached surface is replaced only when
+  // the visible animation frame or an editing/view dependency changes.
+  const canCache=view.canvasWidth>0 && view.canvasHeight>0 &&
+    view.canvasWidth*view.canvasHeight<=2400000 &&
+    typeof document!=='undefined' && typeof document.createElement==='function';
+  const compositeKey=[geo,state.compositeRevision||0,state.lastMapFrameKey||'',
+    state.perfMode,viewOptions.showCollision?1:0,viewOptions.showDim?1:0,
+    state.isolateLayer?1:0,currentPaintLayer,state.selectedPlacedId||'',
+    state.maskHigherTiles?1:0,
+    state.hover?.mapId===info.mapId?state.hover.x+','+state.hover.y:'',
+    state.actionMode,state.brushMode||'',state.playback?.paused?1:0].join('|');
+  if(canCache && state.compositedOverlay?.key===compositeKey){
+    mapContext.save();mapContext.globalCompositeOperation='source-over';
+    mapContext.drawImage(state.compositedOverlay.canvas,0,0);mapContext.restore();
+    return;
+  }
+  if(canCache){
+    const surface=document.createElement('canvas');
+    surface.width=Math.ceil(view.canvasWidth);surface.height=Math.ceil(view.canvasHeight);
+    const surfaceContext=surface.getContext('2d');
+    if(surfaceContext)draw=surfaceContext;
+    else state.compositedOverlay=null;
+  }
+  draw.save();
   const primaryFrames=new Map(),secondaryFrames=new Map();
   const collisionVisible=!!viewOptions.showCollision;
   for(const {p,d} of visible){
@@ -1767,7 +1817,7 @@ function drawOverlay(draw,info){
       draw.restore();
     };
     if(c?.ok&&c.img){
-      const phase=d.timingMode==='independent'?phaseFromId(p.id,d.frames):0;
+      const phase=d.timingMode==='independent'?cachedPlacementPhase(p.id,d.frames):0;
       let baseFrame=primaryFrames.get(d.id);
       if(baseFrame==null){baseFrame=frameFor(d,now);primaryFrames.set(d.id,baseFrame);}
       const frame=d.loop?(baseFrame+phase)%d.frames:Math.min(d.frames-1,baseFrame+phase);
@@ -1878,6 +1928,11 @@ function drawOverlay(draw,info){
     }
   }
   draw.restore();
+  if(canCache && draw!==mapContext){
+    state.compositedOverlay={key:compositeKey,canvas:draw.canvas};
+    mapContext.save();mapContext.globalCompositeOperation='source-over';
+    mapContext.drawImage(draw.canvas,0,0);mapContext.restore();
+  }
 }
 function normaliseToolEvent(e){
   const mapId=Number.isInteger(e?.mapId)?e.mapId:activeMap();
