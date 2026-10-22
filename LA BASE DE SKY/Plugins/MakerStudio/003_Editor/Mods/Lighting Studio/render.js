@@ -115,22 +115,19 @@ export function pixelGridDimensions(l){
 }
 function applyOcclusionStencil(canvas,l){
   if(!l.maskEnabled || l.type==='mask' || !l.maskFile)return canvas;
-  const source=maskSources.get(l.maskFile);if(!source)return canvas;
-  // The authored PNG is an opacity STENCIL on the current lamp, not another
-  // full-screen light. White reveals/blocks depending on the selected mode.
-  const temp=newCanvas(canvas.width,canvas.height),maskCtx=temp.getContext('2d');
-  const ctx=canvas.getContext('2d');if(!maskCtx||!ctx)return canvas;
-  maskCtx.clearRect(0,0,temp.width,temp.height);
-  maskCtx.drawImage(source,0,0,temp.width,temp.height);
-  const mask=maskCtx.getImageData(0,0,temp.width,temp.height).data;
-  const target=ctx.getImageData(0,0,canvas.width,canvas.height),pixels=target.data;
-  const block=l.maskMode==='block';
-  for(let i=0;i<pixels.length;i+=4){
-    const gray=(mask[i]*54+mask[i+1]*183+mask[i+2]*19)/256;
-    const power=mask[i+3]/255*gray/255;
-    pixels[i+3]=Math.round(pixels[i+3]*(block?(1-power):power));
-  }
-  ctx.putImageData(target,0,0);return canvas;
+  const source=maskSources.get(l.maskFile);
+  if(!source)return canvas;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return canvas;
+  // A mask is a geometric alpha stencil. Do not repeatedly read back canvas
+  // pixels or multiply luminance into alpha; that makes dark PNG walls behave
+  // unpredictably and stalls the WebView/GPU with getImageData().
+  ctx.save();
+  ctx.globalCompositeOperation=l.maskMode==='block'?'destination-out':'destination-in';
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(source,0,0,canvas.width,canvas.height);
+  ctx.restore();
+  return canvas;
 }
 function createMask(l){
   if(l.type==='mask'){
