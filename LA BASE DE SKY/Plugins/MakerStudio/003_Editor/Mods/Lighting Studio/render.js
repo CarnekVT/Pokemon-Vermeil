@@ -4,6 +4,9 @@
 const MASK_LIMIT=16, MASK_MAX=128, SMOOTH_SHAPE_MAX=192, CHUNK_WORLD=256, CHUNK_PX=96, CHUNK_LIMIT=24;
 const CHUNKS_PER_PASS=2;
 const masks=new Map(),chunks=new Map(),maskSources=new Map();
+// Static preview textures are reused across repaints requested by Animated Props.
+// The cache contains light RGB only, not underlying map pixels or UI handles.
+const staticPreviewViews=new Map(), STATIC_PREVIEW_LIMIT=3;
 // Keep separate texture caches, as native animated autotiles do: a mask
 // brush edit should not discard all static illumination chunks.
 function evictMask(name){
@@ -250,7 +253,7 @@ function cachedChunk(cx,cy,lights){
   while(chunks.size>CHUNK_LIMIT)chunks.delete(chunks.keys().next().value);
   return result;
 }
-export function clearLightCache(){masks.clear();chunks.clear();cachedMapKey=null;pendingChunks=false;}
+export function clearLightCache(){masks.clear();chunks.clear();staticPreviewViews.clear();cachedMapKey=null;pendingChunks=false;}
 // Targeted invalidation: editing one light must not throw away the entire
 // scene's baked illumination. Keep all chunks unaffected by its old/new bounds.
 export function invalidateLightRegions(before,after){
@@ -266,6 +269,8 @@ export function invalidateLightRegions(before,after){
     }
   }
   if(count)pendingChunks=true;
+  // Light drag/resize changes sprites even when the map revision stays stable.
+  if(before||after)staticPreviewViews.clear();
   return count;
 }
 export function hasPendingChunks(){return pendingChunks;}
@@ -305,6 +310,24 @@ function drawUnionChunks(g,lights,project,width,height){
   }
   g.restore();
 }
+function drawCachedStaticPreview(g,lights,project,width,height,t){
+  // Screen blending is associative: building a transparent light surface once
+  // and screening it over new map frames avoids dozens of sprite stamps.
+  const size=width*height;
+  if(!size||size>3200000){for(const l of lights)stamp(g,l,project,t,'screen');return;}
+  const key=[project.mapId,project.revision,project.viewportKey,width,height].join('|');
+  let surface=staticPreviewViews.get(key);
+  if(surface){staticPreviewViews.delete(key);staticPreviewViews.set(key,surface);}
+  else {
+    surface=newCanvas(width,height);
+    const sg=surface.getContext('2d');
+    if(!sg){for(const l of lights)stamp(g,l,project,t,'screen');return;}
+    for(const l of lights)stamp(sg,l,project,t,'screen');
+    staticPreviewViews.set(key,surface);
+    while(staticPreviewViews.size>STATIC_PREVIEW_LIMIT)staticPreviewViews.delete(staticPreviewViews.keys().next().value);
+  }
+  g.save();g.globalCompositeOperation='screen';g.drawImage(surface,0,0);g.restore();
+}
 export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'){
   const visible=(lights||[]).filter(l=>l.enabled!==false);
   if(!visible.length)return;
@@ -319,7 +342,7 @@ export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'
   if(overlapMode==='fast'){
     // Editing sliders/dragging: immediate sprite preview; no world-chunk rebuild
     // until mouse release, preventing repeated 2D getImageData stalls.
-    for(const l of staticLights)stamp(g,l,project,t,'screen');
+    if(staticLights.length)drawCachedStaticPreview(g,staticLights,project,width,height,t);
   }else if(staticLights.length===1)stamp(g,staticLights[0],project,t,'screen');
   else if(staticLights.length>1)drawUnionChunks(g,staticLights,project,width,height);
   // Animated lights are sprites; rebuilding world chunks every pulse frame would
