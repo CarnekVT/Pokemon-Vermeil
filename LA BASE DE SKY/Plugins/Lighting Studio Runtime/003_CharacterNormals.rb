@@ -162,67 +162,68 @@ module LightingStudioNormals
     [cx, cy]
   end
 
-  def nearby_light(character, now = nil)
-    map = character.respond_to?(:map) ? character.map : $game_map
+  # Measure the visible body/shoulders as well as the sprite origin.
+  # This fixes grazing lights: the left/right side must light up while
+  # passing a lamp even when the origin remains outside its narrow cone.
+  def character_light_samples(character)
+    cx,cy=character_world_position(character)
+    tile_w=Game_Map::TILE_WIDTH.to_f
+    tile_h=Game_Map::TILE_HEIGHT.to_f
+    half_w=[tile_w*0.42,14.0].max
+    half_h=[tile_h*0.64,23.0].max
+    [[cx,cy,1.0],[cx-half_w,cy,0.82],[cx+half_w,cy,0.82],
+     [cx,cy-half_h,0.76],[cx,cy+tile_h*0.22,0.78],
+     [cx-half_w*0.85,cy-half_h*0.58,0.72],
+     [cx+half_w*0.85,cy-half_h*0.58,0.72]]
+  end
+
+  def light_sample_strength(type,local_x,local_y,dx,dy,radius,width,height,size,angle,mask_name)
+    progress=case type
+    when 'ellipse'
+      Math.sqrt((local_x/(width*size/2.0))**2+(local_y/(height*size/2.0))**2)
+    when 'rectangle'
+      [(local_x/(width*size/2.0)).abs,(local_y/(height*size/2.0)).abs].max
+    when 'mask'
+      return 0.0 if local_x.abs>width*size/2.0 || local_y.abs>height*size/2.0
+      return mask_power_at(mask_name,local_x,local_y,width*size,height*size)
+    when 'cone'
+      fx=-local_x;fy=-local_y
+      return 0.0 if fx<0.0
+      return 0.0 if Math.atan2(fy,fx).abs>=angle
+      Math.sqrt(fx*fx+fy*fy)/(radius*size)
+    else
+      Math.sqrt(dx*dx+dy*dy)/(radius*size)
+    end
+    smooth_edge(progress)
+  end
+
+  def nearby_light(character,now=nil)
+    map=character.respond_to?(:map) ? character.map : $game_map
     return nil unless map && map.respond_to?(:map_id)
     now ||= clock_seconds
-    cx,cy = character_world_position(character)
-    best = nil
-    score = 0.0
+    center_x,center_y=character_world_position(character)
+    samples=character_light_samples(character)
+    best=nil;score=0.0
     light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity,pulse,type,rotation,width,height,angle,mask_name,schedule|
-      size, energy = LightingStudio.pulse_values(pulse, now)
-      next if energy <= 0.0 || intensity <= 0.0
-      if defined?(LightingStudioDayNight)
-        energy *= LightingStudioDayNight.schedule_factor(schedule)
+      size,energy=LightingStudio.pulse_values(pulse,now)
+      next if energy<=0.0 || intensity<=0.0
+      energy*=LightingStudioDayNight.schedule_factor(schedule) if defined?(LightingStudioDayNight)
+      next if energy<=0.0
+      cos=Math.cos(rotation);sin=Math.sin(rotation)
+      strength=0.0
+      samples.each do |sx,sy,weight|
+        dx=lx-sx;dy=ly-sy
+        local_x=cos*dx+sin*dy
+        local_y=-sin*dx+cos*dy
+        power=light_sample_strength(type,local_x,local_y,dx,dy,radius,width,height,size,angle,mask_name)
+        strength=[strength,power*weight].max
       end
-      next if energy <= 0.0
-      dx=lx-cx
-      dy=ly-cy
-      # Rotate into the light's local space, matching the static masks.
-      cos=Math.cos(rotation)
-      sin=Math.sin(rotation)
-      local_x=cos*dx+sin*dy
-      local_y=-sin*dx+cos*dy
-      # The influence is sampled at the center of the overworld sprite.
-      # Include its visible half-width: the sprite can already be lit while its
-      # center remains just outside a narrow rectangle/ellipse boundary.
-      margin=SPRITE_INFLUENCE_MARGIN
-      progress = case type
-                 when 'ellipse'
-                   Math.sqrt((local_x/(width*size/2.0+margin))**2 +
-                             (local_y/(height*size/2.0+margin))**2)
-                 when 'rectangle'
-                   [(local_x/(width*size/2.0+margin)).abs,
-                    (local_y/(height*size/2.0+margin)).abs].max
-                 when 'mask'
-                   # Mask PNG is projected with the same world dimensions and
-                   # rotation as Lighting Studio's mask Sprite in the map.
-                   half_w=width*size/2.0;half_h=height*size/2.0
-                   next if local_x.abs>half_w || local_y.abs>half_h
-                   0.0
-                 when 'cone'
-                   # Light-to-character direction is the negative of dx/dy.
-                   fx=-local_x
-                   fy=-local_y
-                   reach=Math.sqrt(fx*fx+fy*fy)/(radius*size+margin)
-                   azimuth=Math.atan2(fy,fx).abs
-                   next if fx < -margin
-                   next if azimuth >= angle && fx > margin
-                   reach
-                 else
-                   Math.sqrt(dx*dx+dy*dy)/(radius*size+margin)
-                 end
-      next if progress >= 1.0 + OUTER_CONTACT_MARGIN
-      # No hard cutoff at the light's radius: both shape and strength taper
-      # continuously to zero. Radius AND intensity obey the pulse waveform.
-      mask_power=type=='mask' ? mask_power_at(mask_name,local_x,local_y,width*size,height*size) : 1.0
-      next if mask_power<=0.0
-      strength = [[intensity*energy*mask_power*smooth_edge(progress),0.0].max,1.0].min
-      next if strength <= score
-      score = strength
-      theta = Math.atan2(dy,dx)
-      direction_a,direction_b,mix = direction_pair(theta)
-      best = [direction_a,direction_b,mix,rgb,strength]
+      strength=[[strength*intensity*energy,0.0].max,1.0].min
+      next if strength<=score
+      theta=Math.atan2(ly-center_y,lx-center_x)
+      direction_a,direction_b,mix=direction_pair(theta)
+      score=strength
+      best=[direction_a,direction_b,mix,rgb,strength]
     end
     best
   end
@@ -354,7 +355,8 @@ module LightingStudioNormals
           ny=(raw.getbyte(src+1)/127.5)-1.0
           nz=(raw.getbyte(src+2)/127.5)-1.0
           dot=nx*lx+ny*ly+nz*lz
-          response=[[((dot-0.25)/0.75),0.0].max,1.0].min
+          # Allow grazing light to reveal side-facing normals, not just front faces.
+          response=[[((dot-0.06)/0.83),0.0].max,1.0].min
           if response>0
             dst=(yy*w+xx)*4
             result[dst]=(cr*response).round
