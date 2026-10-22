@@ -72,7 +72,7 @@ export function paint(g,info,v){
   const live=!!v.showPreview, editing=!!v.editing;
   const projection={x:x=>toScreen(x,0,info).x,y:y=>toScreen(0,y,info).y,scale:()=>screenRadius(32,info)/32,
     viewportKey:[info.mapId,info.tileSize,info.zoom,info.viewportX,info.viewportY,Number.isFinite(v.previewHour)?v.previewHour:'',v.previewQuality].join(':'),mapId:info.mapId,revision:v.revision??0,viewWidth:w,viewHeight:h,scrollX:Number(info.viewportX)||0,scrollY:Number(info.viewportY)||0,tileSize:Number(info.tileSize)||32,previewHour:Number.isFinite(v.previewHour)?v.previewHour:null};
-  const seconds=Number.isFinite(v.time)?v.time:performance.now()/1000;
+  const seconds=v.previewAnimateLights===true && Number.isFinite(v.time) ? v.time : 0;
   g.save();
   try{
     if(live&&allEnabled){
