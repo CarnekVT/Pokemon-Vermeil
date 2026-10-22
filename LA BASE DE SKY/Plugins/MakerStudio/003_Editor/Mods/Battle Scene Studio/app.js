@@ -1595,6 +1595,15 @@ App.prototype.dialoguesHTML = function(b) {
   const playerCount = allTriggers.filter(t => t.target === "player").length;
   const globalCount = allTriggers.filter(t => t.target === "global").length;
   
+  // Warn about colliding IDs before exporting: once-only activation tracks
+  // the ID, not the visible position of the dialogue card.
+  const seenDialogueIds=new Set(),duplicateDialogueIds=[];
+  for(const trigger of allTriggers){
+    const id=S(trigger.id).trim();
+    if(!id || seenDialogueIds.has(id))duplicateDialogueIds.push(id||"(sin ID)");
+    else seenDialogueIds.add(id);
+  }
+
   const displayed = allTriggers.map((t, origIdx) => ({ t, origIdx })).filter(({ t }) => {
     if (filter !== "all" && t.target !== filter)return false;
     const text=[t.id,t.event,t.target,t.speaker,t.speakerName,t.text].map(S).join(" ").toLowerCase();
@@ -1654,6 +1663,8 @@ App.prototype.dialoguesHTML = function(b) {
       <button type="button" class="bss-btn primary small" data-act="dialogue-add">＋ Añadir diálogo</button>
     </div>
 
+    <div class="bss-dialogue-workflow-note" role="note"><b>Orden de configuración:</b> 1. Elige el evento · 2. Asigna el participante · 3. Escribe el texto · 4. Configura su aparición. Un ID identifica un diálogo único dentro del combate.</div>
+    ${duplicateDialogueIds.length? `<div class="bss-dialogue-id-warning" role="alert"><b>IDs duplicados o vacíos:</b> ${E([...new Set(duplicateDialogueIds)].join(", "))}. Cada diálogo debe tener un identificador distinto.</div>`:""}
     <div class="bss-dialogue-searchbar"><label for="bss-mid-dialogue-search">Buscar eventos, oradores o textos</label><input id="bss-mid-dialogue-search" class="bss-input" type="search" data-dialogue-search placeholder="Buscar dentro de los diálogos..." value="${E(this.dialogueSearch)}"><span>${displayed.length} disparadores</span></div>
     <div class="bss-dialogue-list">
       ${displayed.length === 0 ? `
