@@ -34,15 +34,37 @@ module BSSZBoxFondosEBDXVanilla
 
         def bss_zbox_time_slot
           return nil if !defined?(BSSLightingClockBridge) || !BSSLightingClockBridge.active?
-          return :night if BSSLightingClockBridge.night?
-          return :dawn if BSSLightingClockBridge.dawn?
-          :day
+          BSSLightingClockBridge.slot(@data)
         rescue StandardError
           nil
         end
 
+        # Independent EBDX ambience camera for Vanilla battles. It animates
+        # the environment vector only; native battlers/HUD stay perfectly still.
+        # Motion is deliberately subtle and never forces an authored static shot.
+        def bss_zbox_camera_tick
+          return if !@scene || !@scene.vector
+          return if defined?(BSS102) && BSS102.respond_to?(:static_camera?) &&
+                    BSS102.static_camera?(nil)
+          vector=@scene.vector
+          @bss_zbox_camera_frames=@bss_zbox_camera_frames.to_i+1
+          if @bss_zbox_camera_frames==1 || @bss_zbox_camera_frames%180==0
+            main=BSS070EBDXCore.get_vector(:MAIN,@scene.battle).map(&:to_f)
+            phase=@bss_zbox_camera_frames.to_f/180.0
+            target=main.clone
+            target[0]+=Math.sin(phase*0.78)*2.0
+            target[1]+=Math.cos(phase*0.61)*1.0
+            target[4]=main[4]*(1.0+0.008*Math.sin(phase*0.8))
+            target[5]=main[5]*(1.0+0.008*Math.sin(phase*0.8))
+            vector.inc=0.014
+            vector.set(target)
+          end
+          vector.update
+        end
+
         def update
           return if disposed?
+          bss_zbox_camera_tick
           # A time jump may happen during battle. Rebuild only on a sky phase
           # boundary, not every frame. Ordinary animation is handled by EBDX.
           if (@data["sky"] || @data[:sky]) && @data["outdoor"] != false
