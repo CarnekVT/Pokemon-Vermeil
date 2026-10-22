@@ -1582,6 +1582,8 @@ App.prototype.dialoguesHTML = function(b) {
   }
   
   this.dialogueFilter = this.dialogueFilter || "all";
+  if(!this.dialogueExpanded)this.dialogueExpanded=new Set([0]);
+  this.dialogueSearch=this.dialogueSearch||"";
   const filter = this.dialogueFilter;
   const allTriggers = d.triggers;
   const bossCount = allTriggers.filter(t => t.target === "boss").length;
@@ -1647,6 +1649,7 @@ App.prototype.dialoguesHTML = function(b) {
       <button type="button" class="bss-btn primary small" data-act="dialogue-add">＋ Añadir diálogo</button>
     </div>
 
+    <div class="bss-dialogue-searchbar"><label for="bss-mid-dialogue-search">Buscar eventos, oradores o textos</label><input id="bss-mid-dialogue-search" class="bss-input" type="search" data-dialogue-search placeholder="Buscar dentro de los diálogos..." value="${E(this.dialogueSearch)}"><span>${displayed.length} disparadores</span></div>
     <div class="bss-dialogue-list">
       ${displayed.length === 0 ? `
         <div class="bss-note" style="padding:24px;border:1px dashed rgba(255,255,255,0.15);border-radius:8px;text-align:center;">
@@ -1655,22 +1658,24 @@ App.prototype.dialoguesHTML = function(b) {
       ` : ""}
       ${displayed.map(({ t, origIdx }) => {
         const meta = targetMeta[t.target] || targetMeta.boss;
+        const opened=this.dialogueExpanded.has(origIdx);
+        const previewLine=S(t.text).replace(/\s+/g,' ').slice(0,140);
+        const searchable=[t.id,t.event,t.target,t.speaker,t.speakerName,t.text].map(S).join(' ').toLowerCase();
         return `
-          <article class="bss-dialogue-card" style="background:rgba(18,24,38,0.7);border:1px solid ${meta.border};border-left:4px solid ${meta.color};border-radius:8px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <article class="bss-dialogue-card ${opened?'is-open':'is-collapsed'}" data-dialogue-search-index="${E(searchable)}">
             <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06);">
               <div style="display:flex;align-items:center;gap:8px;">
                 <span style="font-weight:700;font-size:12px;color:${meta.color};">#${origIdx + 1}</span>
                 <span class="bss-badge" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.border};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">
                   ${meta.label}
                 </span>
-                <span style="font-size:12px;color:#94a3b8;font-weight:500;">
-                  ${E(BSS_RICH_TRIGGER_EVENTS.find(e => e[0] === t.event)?.[1] || t.event)}
-                </span>
+                <span class="bss-dialogue-event-label">${E(BSS_RICH_TRIGGER_EVENTS.find(e => e[0] === t.event)?.[1] || t.event)}</span>
               </div>
-              <button type="button" class="bss-btn small danger" data-act="dialogue-remove" data-idx="${origIdx}" title="Eliminar este diálogo" style="padding:2px 8px;min-width:24px;">×</button>
+              <div class="bss-dialogue-head-actions"><button type="button" class="bss-btn small" data-act="dialogue-toggle" data-idx="${origIdx}" aria-expanded="${opened?'true':'false'}">${opened?'Contraer':'Editar'}</button><button type="button" class="bss-btn small danger" data-act="dialogue-remove" data-idx="${origIdx}" title="Eliminar diálogo">×</button></div>
             </header>
-
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:10px;">
+            <div class="bss-dialogue-summary"><strong>${E(t.speakerName||t.speaker||'Narrador')}</strong><span>${E(previewLine||'Sin texto todavía')}</span><small>ID: ${E(t.id||'Sin ID')} · ${N(t.turn,0)>0?'Turno '+N(t.turn,0):'Cualquier turno'}</small></div>
+            ${opened ? `
+            <div class="bss-dialogue-edit-fields" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:10px;">
               <label class="bss-field">
                 <span>Disparador / Evento</span>
                 <select class="bss-select" data-dialogue-idx="${origIdx}" data-dialogue-field="event">
@@ -1841,6 +1846,7 @@ App.prototype.dialoguesHTML = function(b) {
                 ` : ""}
               </div>
             </details>
+            ` : ''}
           </article>
         `;
       }).join("")}
@@ -5102,6 +5108,14 @@ App.prototype.hydrateEBDXStudioPreview=async function(){
         }
         return;
       }
+      if (act === "dialogue-toggle") {
+        this.dialogueExpanded=this.dialogueExpanded||new Set([0]);
+        const idx=N(t.dataset.idx,-1);
+        if(this.dialogueExpanded.has(idx))this.dialogueExpanded.delete(idx);
+        else this.dialogueExpanded.add(idx);
+        this.refreshInspector();
+        return;
+      }
       if (act === "dialogue-filter") {
         this.dialogueFilter = S(t.dataset.filter || "all");
         this.refreshInspector();
@@ -5131,6 +5145,8 @@ App.prototype.hydrateEBDXStudioPreview=async function(){
             repeat: false,
             turn: 0
           });
+          this.dialogueExpanded=this.dialogueExpanded||new Set([0]);
+          this.dialogueExpanded.add(b.dialogues.triggers.length-1);
           this.syncDialogueTriggers(b);
           this.touch();
           this.refreshInspector();
@@ -5343,6 +5359,14 @@ App.prototype.hydrateEBDXStudioPreview=async function(){
             this.touch();
             if (fld === "type") this.refreshInspector();
           }
+        }
+        return;
+      }
+      if (t.dataset.dialogueSearch != null) {
+        this.dialogueSearch=S(t.value).toLowerCase();
+        const root=this.body||this.root;
+        if(root)for(const card of root.querySelectorAll('.bss-dialogue-card')){
+          card.hidden=!card.dataset.dialogueSearchIndex?.includes(this.dialogueSearch);
         }
         return;
       }
