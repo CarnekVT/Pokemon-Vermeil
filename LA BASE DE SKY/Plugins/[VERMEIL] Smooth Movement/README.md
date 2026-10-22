@@ -1,4 +1,4 @@
-# Vermeil Movement Studio 0.5.0 — Pokémon Essentials 21.1 / Base de Sky
+# Vermeil Movement Studio — Runtime 0.6.0 / Maker Studio 0.7.0
 
 Un plugin real de movimiento para el personaje, editable desde Maker Studio.
 Archivo de configuración: `Plugins/[VERMEIL] Smooth Movement/config.ini`.
@@ -77,4 +77,26 @@ Se protege tambien la camara de eventos que usan solo un eje (X o Y). **Ninguna 
 ### Siguiente fase mayor
 
 Movimiento sub-tile autentico requiere reescribir colisiones, disparadores, followers y escaleras por separado; no debe activarse como una preferencia falsa en el panel. Despues, spritesheets opcionales de ocho orientaciones y perfiles especificos por terreno. Estas funcionalidades **no forman parte de 0.5.0**.
+
+
+## Runtime 0.6.0 — respuesta diagonal instantánea (actualización 2026-10)
+
+**Problema que corrige:** la diagonal recorría una casilla en `sqrt(2)` veces el tiempo normal, generando una sensación de retardo en el control y en los cambios de dirección. Además, Continuous Flow aplicaba erróneamente un segundo factor `sqrt(2)` al calcular el tiempo de enlace.
+
+- `diagonal_speed=quick` (predeterminado en control Moderno de 8 direcciones): cada tile diagonal dura lo mismo que un tile cardinal, para que las teclas diagonales respondan antes. **La velocidad real sobre el mapa al moverse en diagonal será aproximadamente 41 % mayor** que en un eje cardinal: es un compromiso deliberado en favor de una sensación más ágil.
+- `diagonal_speed=uniform`: preserva velocidad física constante en todas las direcciones, multiplicando la duración de una casilla diagonal por `sqrt(2)`. Es la opción para mantener proporciones de velocidad equivalentes a los movimientos cardinales.
+- `diagonal_live_turn=1` (predeterminado Moderno): cuando cambia la dirección pulsada a mitad de un paso, el sprite responde inmediatamente en sus cuatro orientaciones disponibles. **Las colisiones y el destino lógico siguen siendo los de la casilla actual hasta acabar el paso**; no se produce una nueva entrada retrasada ni se fuerzan disparadores extra de eventos.
+- Lectura directa `Input.press?` de los cuatro botones si la plataforma expone las constantes; opuestos simultáneos se cancelan. Usa `Input.dir8` cuando sea necesario; mantiene `Input.dir4` para el sistema clásico de Essentials. No almacena ni reutiliza pulsaciones antiguas.
+- `ContinuousFlow.rb` ya no duplica la normalización al llevar el tiempo sobrante a la siguiente casilla diagonal.
+- No se modifican los scripts de Turbo, seguidores, terreno especial ni cámara. Los ajustes quedan ignorados si está seleccionado Clásico.
+
+**Límite actual:** cambiar la **trayectoria física** antes de terminar la casilla exigiría un motor sub-tile con colisión y eventos adaptados. Esta versión adelanta el giro gráfico y la respuesta de cada nueva casilla, sin prometer una trayectoria que atraviese libremente los tiles.
+
+### Pruebas prioritarias 0.6.0
+
+1. Con Control Moderno de 8 direcciones: alternar recto→diagonal→recto, con y sin Flow, y comparar `quick` y `uniform`.
+2. Cambiar las teclas a mitad de una diagonal: la orientación visual debe reaccionar, sin sumar pasos adicionales.
+3. Soltar todas las teclas a mitad del paso: nunca iniciar otro paso fantasma.
+4. Caminar cerca de esquinas, eventos de contacto, hierba y seguidores. Conservar colisiones, estadísticas y encuentros.
+5. Probar Turbo y entrar/salir de varios combates, además de escaleras, hielo, Surf y bicicleta, que conservan su movimiento original.
 
