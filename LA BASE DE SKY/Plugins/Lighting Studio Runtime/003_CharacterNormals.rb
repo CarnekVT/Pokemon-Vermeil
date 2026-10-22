@@ -231,7 +231,12 @@ module LightingStudioNormals
       end
       # Multiple near-edge samples may register a grazing lamp; prevent the
       # old weighted sample from becoming imperceptible when walking sideways.
-      strength=[[strength*intensity*energy*1.20,0.0].max,1.0].min
+      # Physical side proximity produces a soft fill instead of a sudden
+      # binary centre hit. Use the best silhouette sample, not origin only.
+      min_distance=samples.map { |sx,sy,_weight| Math.hypot(lx-sx,ly-sy) }.min
+      fringe=[[1.0-min_distance.to_f/(radius*size+20.0),0.0].max,1.0].min
+      strength=[strength,fringe*0.32].max
+      strength=[[strength*intensity*energy*1.25,0.0].max,1.0].min
       next if strength<=score
       theta=Math.atan2(ly-center_y,lx-center_x)
       direction_a,direction_b,mix=direction_pair(theta)
@@ -372,7 +377,12 @@ module LightingStudioNormals
           # Side-lit surface response: preserve a narrow ambient shoulder
           # instead of extinguishing normals until the lamp faces them head-on.
           # A back-facing surface still receives no directional contribution.
-          response=[[((dot+0.18)/0.92),0.0].max,1.0].min
+          # Hemispherical fill: a grazing lamp must affect the visible side
+          # of a character even when the authored normal points away from its
+          # centre. The directional term still supplies shape/depth.
+          direct=[[((dot+0.18)/0.92),0.0].max,1.0].min
+          sideways=[[1.0-(dot.abs*0.56),0.0].max,1.0].min
+          response=[[direct*0.78+sideways*0.22,0.0].max,1.0].min
           if response>0
             dst=(yy*w+xx)*4
             result[dst]=(cr*response).round
