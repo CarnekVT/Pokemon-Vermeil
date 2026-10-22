@@ -741,3 +741,31 @@ STYLES += `
 .bss-camera-slider input[type=range]{flex:1;accent-color:#7da4ff;min-width:0}
 .bss-camera-slider output{font-weight:750;font-size:14px;color:#d9e6ff;min-width:28px;text-align:right;font-variant-numeric:tabular-nums}
 `;
+
+
+/* BSS usability pass: keep the editor legible without changing control semantics. */
+STYLES += `
+.bss-root .bss-inspector{min-width:0;scrollbar-gutter:stable;overscroll-behavior:contain}
+.bss-root .bss-inspector-inner{padding:14px 15px 32px;max-width:100%}
+.bss-root .bss-panel{border:1px solid #36485c;border-radius:12px;overflow:visible;margin-bottom:12px;background:#121d2a}
+.bss-root .bss-panel h3{padding:12px 14px;font-size:13px;letter-spacing:.015em}
+.bss-root .bss-panel-body{padding:12px 14px}
+.bss-root .bss-optiongroup{border:1px solid #32445c;border-radius:9px;margin:8px 0;background:#152131}
+.bss-root .bss-optiongroup>summary{padding:11px 12px;cursor:pointer;font-weight:650;line-height:1.4}
+.bss-root .bss-optiongroup[open]>summary{border-bottom:1px solid #30435a}
+.bss-root .bss-input,.bss-root .bss-select,.bss-root .bss-textarea{min-height:34px;border-color:#435775;background:#101a29;color:#f0f6ff}
+.bss-root .bss-input:focus-visible,.bss-root .bss-select:focus-visible,.bss-root .bss-textarea:focus-visible{outline:2px solid #7ab7e9;outline-offset:1px}
+.bss-root .bss-dialogue-list{gap:13px}
+.bss-root .bss-dialogue-card{border:1px solid #4d6381!important;border-radius:13px!important;background:#172638!important;box-shadow:none!important}
+.bss-root .bss-dialogue-card.is-open{border-color:#82b5ee!important;background:#1c2d43!important}
+.bss-root .bss-dialogue-card header{padding:12px 14px!important;gap:9px}
+.bss-root .bss-dialogue-card header button{min-height:31px}
+.bss-root .bss-dialogue-card textarea{min-height:100px;line-height:1.6;font-size:13px;resize:vertical}
+.bss-root .bss-dialogue-grid,.bss-root .bss-dialogue-speaker-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bss-root .bss-dialogue-options{gap:10px;padding:11px;border:1px solid #354a65;border-radius:9px}
+.bss-root .bss-dialogue-searchbar{position:sticky;top:0;z-index:12;box-shadow:0 6px 18px #0a101c99}
+.bss-root .bss-dialogue-event-label{max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.5}
+.bss-root .bss-dialogue-head-actions{flex-wrap:wrap;justify-content:flex-end}
+.bss-root [data-dialogue-field="text"]{width:100%;min-height:110px}
+@media(max-width:1120px){.bss-root .bss-dialogue-grid,.bss-root .bss-dialogue-speaker-row{grid-template-columns:minmax(0,1fr)}}
+`;
