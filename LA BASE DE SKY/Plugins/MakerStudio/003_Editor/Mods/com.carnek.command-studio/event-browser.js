@@ -14,27 +14,42 @@ export function createEventBrowser(ctx,host,options={}){
  const head=el("div",null,"csb-event-header");root.append(head);
  const intro=el("div",null,"csb-event-intro");
  intro.append(el("strong","Organiza los eventos del mapa"),
-   el("p","1. Elige el personaje u objeto · 2. Selecciona dónde insertar · 3. Crea tu acción.","sub"));
+   el("p","1. Crea o elige un evento · 2. Selecciona su página y posición · 3. Añade acciones.","sub"));
  root.append(intro);
- const createPanel=el("details",null,"csb-details");
- createPanel.append(el("summary","＋ Crear evento en este mapa"));
- const form=el("div",null,"csb-event-crud");
- const newName=el("input");newName.placeholder="Nombre del evento";newName.value="Nuevo evento";
+ const createPanel=el("section",null,"csb-event-create");
+ createPanel.append(el("strong","＋ Nuevo evento"),el("p","Dale un nombre y elige una casilla del mapa. Se seleccionará automáticamente para seguir editándolo.","sub"));
+ const form=el("div",null,"csb-event-new-form");
+ const newName=el("input");newName.placeholder="Ej.: Científico, Puerta, Cofre";newName.value="Nuevo evento";
+ newName.setAttribute("aria-label","Nombre del nuevo evento");
  const newX=el("input"),newY=el("input");
  newX.type="number";newY.type="number";newX.min="0";newY.min="0";
- newX.value="0";newY.value="0";
- const create=b("Crear",()=>{
+ newX.value="0";newY.value="0";newX.setAttribute("aria-label","Coordenada X");
+ newY.setAttribute("aria-label","Coordenada Y");
+ const nameField=el("label",null,"csb-event-new-field");nameField.append(el("span","Nombre"),newName);
+ const coords=el("div",null,"csb-event-new-coords");
+ const xField=el("label",null,"csb-event-new-field"),yField=el("label",null,"csb-event-new-field");
+ xField.append(el("span","Casilla X"),newX);yField.append(el("span","Casilla Y"),newY);
+ coords.append(xField,yField);
+ const buttons=el("div",null,"csb-event-new-actions");
+ function createEvent(addAction){
   if(mid==null)return options.onError?.(new Error("Abre primero un mapa."));
   const x=Number(newX.value),y=Number(newY.value);
   if(!Number.isSafeInteger(x)||!Number.isSafeInteger(y)||x<0||y<0)
-   return options.onError?.(new Error("Las coordenadas deben ser números enteros positivos."));
+   return options.onError?.(new Error("Las coordenadas X e Y deben ser enteros no negativos."));
   try{
    const made=ctx.events.create(mid,x,y,newName.value.trim()||"Nuevo evento");
    if(made==null)throw Error("Maker Studio rechazó la creación del evento");
-   id=Number(made);pid=0;pos="end";refresh(true);createPanel.open=false;
+   id=Number(made?.id??made);
+   if(!Number.isSafeInteger(id)||id<1)throw Error("Maker Studio no devolvió un ID válido.");
+   pid=0;pos="end";refresh(true);
+   if(addAction)options.onCreate?.();
   }catch(e){options.onError?.(e);}
- },"btn primary");
- form.append(newName,newX,newY,create);createPanel.append(form);root.append(createPanel);
+ }
+ const create=b("＋ Crear evento",()=>createEvent(false),"btn");
+ const createAndEdit=b("Crear y añadir acción →",()=>createEvent(true),"btn primary");
+ buttons.append(create,createAndEdit);
+ newName.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();createEvent(true);}});
+ form.append(nameField,coords,buttons);createPanel.append(form);root.append(createPanel);
  const filter=el("input");filter.className="search";filter.placeholder="Buscar evento por nombre o ID…";
  filter.oninput=()=>{query=filter.value;drawList();};root.append(filter);
  const columns=el("div",null,"csb-events-layout");
@@ -163,7 +178,7 @@ export function createEventBrowser(ctx,host,options={}){
  }
  function drawDetails(){
   details.replaceChildren();
-  if(mid==null||id==null){details.append(el("p","Selecciona un evento de la lista para ver sus páginas y comandos.","sub"));return;}
+  if(mid==null||id==null){const blank=el("div",null,"csb-event-empty");blank.append(el("strong","Comienza con un evento"),el("p","Selecciona un evento existente o crea uno nuevo usando el formulario de la izquierda.","sub"),b("＋ Crear nuevo evento",()=>{newName.focus();newName.select();},"btn primary"));details.append(blank);return;}
   let full;
   try{full=ctx.events.getFull(mid,Number(id));}catch(e){options.onError?.(e);}
   if(!full?.pages?.length){details.append(el("p","El evento dejó de existir. Actualiza el mapa.","sub"));return;}
@@ -172,7 +187,7 @@ export function createEventBrowser(ctx,host,options={}){
   heading.append(el("div",null,"csb-selected-name"));
   heading.firstChild.append(el("span","EVENTO SELECCIONADO","csb-eyebrow"),
     el("strong",full.name||"Sin nombre"),el("span","ID "+id+" · ("+full.x+", "+full.y+")","sub"));
-  heading.append(b("＋ Crear acción",()=>options.onCreate?.(),"btn primary"));
+  heading.append(b("＋ Añadir acción",()=>options.onCreate?.(),"btn primary"));
   details.append(heading);
   const tabs=el("div",null,"csb-page-tabs");
   for(let i=0;i<full.pages.length;i++){
@@ -206,7 +221,7 @@ export function createEventBrowser(ctx,host,options={}){
  edit.append(editPanel);details.append(edit);
  const page=full.pages[pid];
   const graphic=getGraphic(page);
-  const info=el("p",graphic.name?"Gráfico: "+graphic.name:graphic.tile?"Gráfico: tile #"+graphic.tile:"Sin gráfico · evento invisible","sub");
+  const info=el("p",graphic.name?"Gráfico: "+graphic.name:graphic.tile?"Gráfico: tile #"+graphic.tile:"Sin gráfico (invisible en el mapa)","sub");
   details.append(info);
   const commands=(page.list||[]).filter(c=>c.code!==0);
   const points=availableInsertionPoints(commands);
