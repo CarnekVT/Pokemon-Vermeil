@@ -12,6 +12,8 @@ module VermeilMovement
     "smooth_movement"   => "1",
     "camera_smoothing"  => "35",
     "diagonal_facing"    => "keep",
+    "diagonal_speed"     => "quick",
+    "diagonal_live_turn" => "1",
     "wall_slide_priority"=> "horizontal",
     "camera_deadzone"    => "0",
     "camera_lead_response" => "120",
@@ -27,6 +29,8 @@ module VermeilMovement
     "wall_slide"        => ["0", "1"],
     "smooth_movement"   => ["0", "1"],
     "diagonal_facing"    => ["keep", "horizontal", "vertical"],
+    "diagonal_speed"     => ["quick", "uniform"],
+    "diagonal_live_turn" => ["0", "1"],
     "wall_slide_priority" => ["horizontal", "vertical", "facing"],
     "camera_deadzone"    => ["0", "8", "16", "24", "32"],
     "camera_lead_response" => ["60", "120", "200"],
@@ -131,6 +135,12 @@ module VermeilMovement
 
   def self.diagonal_facing
     option("diagonal_facing")
+  end
+
+  # quick: un tile diagonal dura lo mismo que un tile recto;
+  # uniform: compensar sqrt(2), como antes de 0.5.
+  def self.diagonal_speed
+    option("diagonal_speed")
   end
 
   def self.wall_slide_priority
