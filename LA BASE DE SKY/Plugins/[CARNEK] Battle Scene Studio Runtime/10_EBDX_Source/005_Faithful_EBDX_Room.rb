@@ -991,8 +991,12 @@ module BSSLightingClockBridge
     return :dawn if ["dawn","evening","sunset"].include?(mode)
     return :day if mode=="day"
     if active?
-      return :night if night?
-      return :dawn if dawn?
+      # At 19:00 Lighting can already shade the overworld as night, but the
+      # Battleback sunset should still show its warm horizon. Dusk lasts until
+      # 20:00, then skyNight is selected. Explicit skyMode still wins above.
+      h=hour % 24.0
+      return :dawn if (h>=17.0 && h<20.0) || (h>=5.0 && h<7.0)
+      return :night if h>=20.0 || h<5.0
       return :day
     end
     if defined?(BSS106) && BSS106.respond_to?(:time_slot)
@@ -1384,8 +1388,9 @@ class BSS070EBDXRoom
     # drawing additional skylines
     key = "Day"
     if @data.try_key?("outdoor")
-      key = "Dawn" if BSSLightingClockBridge.evening? || BSSLightingClockBridge.morning?
-      key = "Night" if BSSLightingClockBridge.night?
+      phase=BSSLightingClockBridge.slot(@data)
+      key = "Dawn" if phase==:dawn
+      key = "Night" if phase==:night
     end
     @sprites["sky"] = BSS070EBDXSprite.new(@viewport)
     @sprites["sky"].bitmap = pbBitmap("Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/sky#{key}")
@@ -1403,11 +1408,11 @@ class BSS070EBDXRoom
       @sprites["cloud#{i}"].ex = 0
       @sprites["cloud#{i}"].ey = [98, 91, 30][i]
       @sprites["cloud#{i}"].param = 1
-      @sprites["cloud#{i}"].visible = !BSSLightingClockBridge.night? || !@data.try_key?("outdoor")
+      @sprites["cloud#{i}"].visible = BSSLightingClockBridge.slot(@data)!=:night || !@data.try_key?("outdoor")
       self.setColor(@sprites["sky"], @sprites["cloud#{i}"])
     end
     # draws the sun
-    if !(BSSLightingClockBridge.night? && @data.try_key?("outdoor"))
+    if !(BSSLightingClockBridge.slot(@data)==:night && @data.try_key?("outdoor"))
       @sprites["sun"] = BSS070EBDXSprite.new(@viewport)
       @sprites["sun"].bitmap = pbBitmap("Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/sun")
       @sprites["sun"].ox = @sprites["sun"].bitmap.width/2
@@ -1418,7 +1423,7 @@ class BSS070EBDXRoom
     end
     # loop for the stars
     for i in 0...24
-      break if !(BSSLightingClockBridge.night? && @data.try_key?("outdoor"))
+      break if !(BSSLightingClockBridge.slot(@data)==:night && @data.try_key?("outdoor"))
       @sprites["star#{i}"] = BSS070EBDXSprite.new(@viewport)
       @sprites["star#{i}"].bitmap = pbBitmap("Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/star")
       @sprites["star#{i}"].center!
@@ -1495,7 +1500,7 @@ class BSS070EBDXRoom
     minutes = BSSLightingClockBridge.hour * 60.0
     # animates twinkling stars
     for i in 0...24
-      break if !(BSSLightingClockBridge.night? && @data.try_key?("outdoor"))
+      break if !(BSSLightingClockBridge.slot(@data)==:night && @data.try_key?("outdoor"))
       next if !@sprites["star#{i}"]
       @sprites["star#{i}"].opacity += @sprites["star#{i}"].toggle * @sprites["star#{i}"].speed/self.delta
       @sprites["star#{i}"].toggle *= -1 if @sprites["star#{i}"].opacity <= 125 || @sprites["star#{i}"].opacity >= @sprites["star#{i}"].end_x
@@ -1601,7 +1606,7 @@ class BSS070EBDXRoom
     return if !data.has_key?(:elements)
     bmp = data.has_key?(:bitmap) ? data[:bitmap] : "tree"
     bmp = pbBitmap("Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/#{bmp}")
-    slot = defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : (defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && BSSLightingClockBridge.night? ? :night : :day)
+    slot = BSSLightingClockBridge.slot(@data)
     for i in 0...data[:elements]
       @sprites["tree#{i}"] = BSS070EBDXSprite.new(@viewport)
       x0 = data.has_key?(:mirror) && data[:mirror][i] ? bmp.width : 0
@@ -1627,7 +1632,7 @@ class BSS070EBDXRoom
     return if !data.has_key?(:elements)
     bmp = data.has_key?(:bitmap) ? data[:bitmap] : "tallGrass"
     bmp = pbBitmap("Graphics/BattleSceneStudio/EBDX/Battlebacks/elements/#{bmp}")
-    slot = defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : (defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && BSSLightingClockBridge.night? ? :night : :day)
+    slot = BSSLightingClockBridge.slot(@data)
     for i in 0...data[:elements]
       @sprites["grass#{i}"] = BSS070EBDXSprite.new(@viewport)
       x0 = data.has_key?(:mirror) && data[:mirror][i] ? bmp.width : 0
