@@ -1687,7 +1687,7 @@ App.prototype.dialoguesHTML = function(b) {
                 </span>
                 <span class="bss-dialogue-event-label">${E(BSS_RICH_TRIGGER_EVENTS.find(e => e[0] === t.event)?.[1] || t.event)}</span>
               </div>
-              <div class="bss-dialogue-head-actions"><button type="button" class="bss-btn small" data-act="dialogue-toggle" data-idx="${origIdx}" aria-expanded="${opened?'true':'false'}">${opened?'Contraer':'Editar'}</button><button type="button" class="bss-btn small danger" data-act="dialogue-remove" data-idx="${origIdx}" title="Eliminar diálogo">×</button></div>
+              <div class="bss-dialogue-head-actions"><button type="button" class="bss-btn small" data-act="dialogue-toggle" data-idx="${origIdx}" aria-expanded="${opened?'true':'false'}">${opened?'Contraer':'Editar'}</button><button type="button" class="bss-btn small" data-act="dialogue-duplicate" data-idx="${origIdx}" title="Crear copia independiente de este diálogo">Duplicar</button><button type="button" class="bss-btn small danger" data-act="dialogue-remove" data-idx="${origIdx}" title="Eliminar diálogo">×</button></div>
             </header>
             <div class="bss-dialogue-summary"><strong>${E(t.speakerName||t.speaker||'Narrador')}</strong><span>${E(previewLine||'Sin texto todavía')}</span><small>ID: ${E(t.id||'Sin ID')} · ${N(t.turn,0)>0?'Turno '+N(t.turn,0):'Cualquier turno'}</small></div>
             ${opened ? `
@@ -5164,6 +5164,25 @@ App.prototype.hydrateEBDXStudioPreview=async function(){
           this.dialogueExpanded=this.dialogueExpanded||new Set([0]);
           this.dialogueExpanded.add(b.dialogues.triggers.length-1);
           this.syncDialogueTriggers(b);
+          this.touch();
+          this.refreshInspector();
+        }
+        return;
+      }
+      if (act === "dialogue-duplicate") {
+        const battle=this.battle();
+        const triggers=battle?.dialogues?.triggers;
+        const idx=N(t.dataset.idx,-1);
+        if(Array.isArray(triggers) && idx>=0 && idx<triggers.length){
+          const copy=JSON.parse(JSON.stringify(triggers[idx]));
+          const used=new Set(triggers.map(v=>S(v.id)));
+          const original=S(copy.id||"dialogue");
+          let suffix=2,unique=original+"_copy";
+          while(used.has(unique))unique=original+"_copy_"+suffix++;
+          copy.id=unique;
+          triggers.splice(idx+1,0,copy);
+          this.dialogueExpanded=new Set([idx+1]);
+          this.syncDialogueTriggers(battle);
           this.touch();
           this.refreshInspector();
         }
