@@ -357,8 +357,8 @@ export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'
   const sums=visible.filter(l=>l.blendMode==='sum');
   const merged=overlapMode==='sum'?[]:union;
   const summed=overlapMode==='sum'?[...union,...sums]:sums;
-  const staticLights=merged.filter(l=>!l.pulse?.enabled&&l.type!=='mask');
-  const pulsing=merged.filter(l=>l.pulse?.enabled||l.type==='mask');
+  const staticLights=merged.filter(l=>!l.pulse?.enabled&&l.type!=='mask'&&l.maskEnabled!==true);
+  const pulsing=merged.filter(l=>l.pulse?.enabled||l.type==='mask'||l.maskEnabled===true);
   if(overlapMode==='fast'){
     // Editing sliders/dragging: immediate sprite preview; no world-chunk rebuild
     // until mouse release, preventing repeated 2D getImageData stalls.
