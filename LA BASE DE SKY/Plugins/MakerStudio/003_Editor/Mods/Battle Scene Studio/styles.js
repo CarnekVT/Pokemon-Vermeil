@@ -729,4 +729,15 @@ STYLES += `
 .bss-root .bss-ebdx-main{min-width:0}
 @media(max-width:960px){.bss-dialogue-searchbar{align-items:stretch}.bss-root .bss-dialogue-card header{align-items:flex-start}.bss-dialogue-event-label{white-space:normal}}
 @media(prefers-reduced-motion:reduce){.bss-root .bss-btn,.bss-root .bss-dialogue-card{transition:none}}
+
+.bss-camera-controls{margin-top:12px;padding:15px}
+.bss-camera-controls h3{margin:0 0 5px;font-size:15px}
+.bss-camera-slider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin:14px 0}
+.bss-camera-slider{display:flex;flex-direction:column;gap:8px;background:#111c2b;border:1px solid #364c6a;border-radius:9px;padding:12px}
+.bss-camera-slider>span{display:flex;flex-direction:column;gap:4px}
+.bss-camera-slider b{font-weight:700;font-size:12px;color:#ecf3fc}
+.bss-camera-slider small{font-size:11px;color:#aabbd2}
+.bss-camera-slider>div{display:flex;align-items:center;gap:12px}
+.bss-camera-slider input[type=range]{flex:1;accent-color:#7da4ff;min-width:0}
+.bss-camera-slider output{font-weight:750;font-size:14px;color:#d9e6ff;min-width:28px;text-align:right;font-variant-numeric:tabular-nums}
 `;
