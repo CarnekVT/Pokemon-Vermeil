@@ -801,4 +801,28 @@ STYLES += `
 .bss-root .bss-inspector-jumpbar{scrollbar-width:thin}
 .bss-root .bss-ebdx-main{scrollbar-gutter:stable}
 @media(max-width:1050px){.bss-root .bss-dialogue-summary{grid-template-columns:1fr}.bss-root .bss-inspector-inner{padding:10px}}
+
+/* BSS UI refinement: clearer dialogue hierarchy, resizable responsive fields */
+.bss-root{font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.45}
+.bss-root .bss-dialogue-list{display:grid;gap:14px;min-width:0}
+.bss-root .bss-dialogue-card{background:linear-gradient(155deg,#1c2636,#151c2a 65%);border:1px solid #34465c;border-radius:12px;box-shadow:0 3px 14px #080e1b55;min-width:0}
+.bss-root .bss-dialogue-card:hover{border-color:#6383b5}
+.bss-root .bss-dialogue-card.is-open{box-shadow:0 5px 22px #060b17a0;border-color:#7596ca}
+.bss-root .bss-dialogue-card header{min-width:0;flex-wrap:wrap}
+.bss-root .bss-dialogue-card header>div:first-child{flex-wrap:wrap;min-width:0;max-width:100%}
+.bss-root .bss-dialogue-head-actions{display:flex;gap:6px;flex-wrap:wrap}
+.bss-root .bss-dialogue-head-actions button{min-width:65px}
+.bss-root .bss-dialogue-summary{border-radius:8px;background:#0c162550;margin:0 12px 12px;gap:6px 12px}
+.bss-root .bss-dialogue-edit-fields{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))!important;gap:12px!important;padding:0 12px}
+.bss-root .bss-dialogue-edit-fields .bss-field{min-width:0}
+.bss-root .bss-dialogue-edit-fields .bss-select{width:100%;min-width:0;text-overflow:ellipsis}
+.bss-root .bss-dialogue-card textarea[data-dialogue-field="text"]{font-family:inherit;line-height:1.55;min-height:140px;background:#101827;border:1px solid #49647e}
+.bss-root .bss-dialogue-card input:focus-visible,.bss-root .bss-dialogue-card select:focus-visible,.bss-root .bss-dialogue-card textarea:focus-visible{outline:2px solid #78a8f8;outline-offset:1px}
+.bss-root .bss-dialogue-searchbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px;border-radius:10px}
+.bss-root .bss-dialogue-searchbar input{flex:1 1 220px;min-width:140px}
+.bss-root .bss-dialogue-workflow-note{line-height:1.6}
+.bss-root .bss-panel{min-width:0}
+.bss-root .bss-inspector{scrollbar-gutter:stable;min-width:0}
+.bss-root .bss-btn{transition:border-color .12s ease,background-color .12s ease}
+@media(max-width:900px){.bss-root .bss-dialogue-edit-fields{grid-template-columns:1fr!important}.bss-root .bss-dialogue-card header{align-items:flex-start!important}}
 `;
