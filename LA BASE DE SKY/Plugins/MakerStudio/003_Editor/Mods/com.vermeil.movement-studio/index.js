@@ -1,7 +1,7 @@
 import { STYLES } from "./styles.js";
 
 const PATH = "Plugins/[VERMEIL] Smooth Movement/config.ini";
-const VERSION = "0.7.0";
+const VERSION = "0.7.1";
 const DEFAULTS = {
   directions: "4", mode: "grid", subtile_divisions: "4", instant_turn: "1",
   flow_motion: "0", camera_lookahead: "0", wall_slide: "0",
@@ -21,7 +21,7 @@ const FIELDS = {
   instant_turn:{ group:"control", label:"Tipo de control", description:"Clásico conserva íntegra la respuesta original de Essentials. Moderno utiliza la dirección pulsada sin retraso artificial.", options:[["1","Moderno · respuesta inmediata"],["0","Clásico · Essentials original"]] },
   flow_motion:{ group:"control", label:"Continuous Flow", description:"Encadena pasos consecutivos con el tiempo sobrante, respetando eventos. Solo funciona con el control moderno.", options:[["0","Desactivado"],["1","Activado"]] },
   diagonal_speed:{ group:"diagonal", label:"Ritmo de las diagonales", description:"Ágil: cada diagonal tarda lo mismo que una casilla recta (avanza más rápido en distancia). Uniforme: mantiene la misma velocidad física en todas las direcciones.", options:[["quick","Ágil · responde antes"],["uniform","Uniforme · velocidad constante"]] },
-  diagonal_live_turn:{ group:"diagonal", label:"Orientación inmediata", description:"El sprite gira hacia la dirección pulsada aunque el paso actual siga terminándose. Nunca altera colisiones ni guarda teclas.", options:[["1","Sí, reflejar la tecla actual"],["0","No, esperar a terminar la casilla"]] },
+  diagonal_live_turn:{ group:"diagonal", label:"Orientación durante diagonales", description:"Si el paso actual es diagonal, permite alternar entre sus dos filas de sprite compatibles. En pasos rectos y al invertir arriba/abajo, conserva la orientación del movimiento hasta el siguiente paso. No retrasa botones.", options:[["1","Ajustar solo en diagonales compatibles"],["0","Mantener orientación durante cada paso"]] },
   wall_slide:{ group:"diagonal", label:"Deslizamiento en paredes", description:"Si una diagonal está bloqueada, intenta moverse por un eje cardinal válido.", options:[["0","Desactivado"],["1","Activado"]] },
   wall_slide_priority:{ group:"diagonal", label:"Eje preferente", description:"Orden en que se comprueban los ejes cuando una diagonal está bloqueada.", options:[["horizontal","Horizontal"],["vertical","Vertical"],["facing","Según orientación"]] },
   diagonal_facing:{ group:"diagonal", label:"Sprite durante diagonales", description:"Fila gráfica elegida para sprites tradicionales de cuatro direcciones.", options:[["keep","Mantener orientación"],["horizontal","Priorizar horizontal"],["vertical","Priorizar vertical"]] },
