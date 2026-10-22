@@ -137,9 +137,13 @@ export const NEXT_CSS=String.raw`
 .csb .csb-event-empty>p{font-size:12px;max-width:430px}
 .csb .csb-destination-create{margin-top:12px;border:1px solid var(--border,#38465a);border-radius:9px;padding:10px 12px}
 .csb .csb-destination-create>summary{cursor:pointer;font-weight:600}
-.csb .csb-destination-newrow{display:grid;grid-template-columns:minmax(160px,1fr) 70px 70px auto;gap:8px;align-items:center;padding-top:12px}
+.csb .csb-destination-newrow{display:grid;grid-template-columns:minmax(160px,1fr) 70px 70px;gap:8px;align-items:center;padding-top:12px}
 .csb .csb-destination-newrow>input{width:100%;min-width:0;box-sizing:border-box;padding:9px;border-radius:7px}
 .csb .csb-destination-newrow>.btn{white-space:normal;min-height:36px}
 @media(max-width:1100px){.csb .csb-destination-newrow{grid-template-columns:minmax(160px,1fr) 65px 65px}.csb .csb-destination-newrow>.btn{grid-column:1/-1}}
 @media(max-width:760px){.csb .csb-destination-newrow{grid-template-columns:minmax(0,1fr) 65px 65px}.csb .csb-event-new-actions{flex-direction:column}}
+
+.csb .csb-destination-actions{display:flex;gap:8px;align-items:center;justify-content:flex-start;flex-wrap:wrap;grid-column:1/-1}
+.csb .csb-destination-actions>.btn{min-height:36px;white-space:normal;flex:1 1 150px}
+.csb .csb-event-pick{flex-basis:100%!important}
 `;
