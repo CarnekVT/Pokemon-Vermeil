@@ -10,7 +10,7 @@ const staticPreviewViews=new Map(), STATIC_PREVIEW_LIMIT=3;
 // Keep separate texture caches, as native animated autotiles do: a mask
 // brush edit should not discard all static illumination chunks.
 function evictMask(name){
- for(const key of masks.keys())if(key.startsWith('mask|')&&key.endsWith('|'+name))masks.delete(key);
+ for(const key of masks.keys())if(key.split('|').slice(-3)[0]===name)masks.delete(key);
 }
 export function setMaskImage(filename,img){
  if(!filename||!img)return;
