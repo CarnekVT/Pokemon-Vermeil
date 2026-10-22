@@ -12,8 +12,12 @@ class Viewport
   def dispose; @disposed=true; end
 end
 class BSS070EBDXVector
-  def initialize(*); end
-  def snap(*); end
+  attr_accessor :inc
+  attr_reader :updates
+  def initialize(*);@updates=0;end
+  def snap(*);end
+  def set(*);end
+  def update;@updates+=1;end
 end
 class BSS070EBDXRoom
   attr_reader :data, :updates, :refreshes, :viewport
@@ -61,6 +65,7 @@ module BSSLightingClockBridge
     def active?; !@phase.nil?; end
     def night?; @phase==:night;end
     def dawn?;@phase==:dawn;end
+    def slot(_data=nil);@phase;end
   end
 end
 require_relative '../../LA BASE DE SKY/Plugins/[CARNEK] Battle Scene Studio Runtime/90_CustomRooms/038_Fondos_EBDX_Vanilla'
