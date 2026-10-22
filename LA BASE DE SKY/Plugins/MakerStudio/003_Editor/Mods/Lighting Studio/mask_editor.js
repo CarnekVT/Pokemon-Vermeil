@@ -138,6 +138,8 @@ export function mountMaskPainter(host,opts){
   toolButtons.push([id,b]);
  }
  toolButtons[0][1].classList.add('active');
+  group('✓ Cerrar contorno',()=>{if(polygon.length<3){status.textContent='Marca al menos 3 puntos para cerrar el contorno.';return;}completePolygon();});
+  group('✕ Cancelar contorno',()=>{polygon=[];renderPolygon();status.textContent='Contorno cancelado.';});
  const slider=el('label','ls-mask-brush');slider.textContent='Pincel ';
  const range=el('input');range.type='range';range.min='2';range.max='48';range.value='10';range.oninput=()=>{radius=Number(range.value);};
  slider.append(range);toolbar.append(slider);
@@ -177,7 +179,8 @@ export function mountMaskPainter(host,opts){
  action('➜ Salida de cueva',()=>replaceWith(caveTemplate(256,128,'right')));
  action('⬅ Cueva hacia izquierda',()=>replaceWith(caveTemplate(256,128,'left')));
  action('Lienzo vacío',()=>replaceWith(blankMask(canvas.width,canvas.height)));
- const guideInput=el('input');guideInput.type='file';guideInput.accept='image/png,image/jpeg,image/webp';guideInput.hidden=true;root.append(guideInput);
+ action('◩ Mostrar / ocultar máscara',()=>{canvas.style.visibility=canvas.style.visibility==='hidden'?'visible':'hidden';});
+  const guideInput=el('input');guideInput.type='file';guideInput.accept='image/png,image/jpeg,image/webp';guideInput.hidden=true;root.append(guideInput);
  action('▣ Calcar sobre imagen de cueva',()=>guideInput.click());
  guideInput.onchange=()=>{
   const file=guideInput.files?.[0];if(!file)return;
