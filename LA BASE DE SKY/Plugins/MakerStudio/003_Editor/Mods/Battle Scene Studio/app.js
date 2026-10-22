@@ -1693,6 +1693,11 @@ App.prototype.dialoguesHTML = function(b) {
             ${opened ? `
             <div class="bss-dialogue-edit-fields" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:10px;">
               <label class="bss-field">
+                <span>ID único del diálogo</span>
+                <input class="bss-input" type="text" data-dialogue-idx="${origIdx}" data-dialogue-field="id" value="${E(t.id||'')}" placeholder="Ej. boss_inicio_01" autocomplete="off">
+                <small>Este ID evita disparos duplicados. Mantén uno diferente por diálogo.</small>
+              </label>
+              <label class="bss-field">
                 <span>Disparador / Evento</span>
                 <select class="bss-select" data-dialogue-idx="${origIdx}" data-dialogue-field="event">
                   ${BSS_RICH_TRIGGER_EVENTS.map(([k, lbl]) => `
@@ -5421,6 +5426,14 @@ App.prototype.hydrateEBDXStudioPreview=async function(){
               }
             } else if (fld === "choiceResponses") {
               val = String(t.value || "").split(/\r?\n/).map(s => s.trim());
+            }
+            if(fld==="id"){
+              const wanted=String(val||"").trim().replace(/[^a-zA-Z0-9_-]/g,"_").slice(0,72);
+              if(!wanted){this.toast("El diálogo necesita un ID no vacío.",true);t.value=b.dialogues.triggers[idx].id||"";return;}
+              if(b.dialogues.triggers.some((row,j)=>j!==idx&&String(row.id)===wanted)){
+                this.toast("Ese ID ya pertenece a otro diálogo.",true);t.value=b.dialogues.triggers[idx].id||"";return;
+              }
+              val=wanted;t.value=wanted;
             }
             b.dialogues.triggers[idx][fld] = val;
             if (fld === "textboxType") {
