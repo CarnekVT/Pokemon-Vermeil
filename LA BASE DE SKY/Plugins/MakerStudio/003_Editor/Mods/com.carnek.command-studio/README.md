@@ -1,4 +1,4 @@
-# Command Studio 0.9.0 — editor de eventos y diálogos
+# Command Studio 0.9.1 — navegador de eventos, NameBox y Windowskins corregidos
 
 Integrado en Pokémon Vermeil, bajo `LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.carnek.command-studio`.
 
@@ -130,3 +130,27 @@ node tests/visual-smoke.cjs
 node tests/beginner-smoke.cjs
 
 Pruebas de lógica y DOM simulado, no una sesión real de Maker Studio. Confirmar compatibilidad y apariencia en una instalación del juego.
+## Versión 0.9.1 — Correcciones a partir de capturas reales
+
+### Eventos
+- Se evita la acumulación de códigos individuales: las continuaciones de textos y Ruby se agrupan en tarjetas con nombre claro y detalles técnicos plegables.
+- Los puntos de inserción siguen usando los índices reales y la validación de event-writer. No se modifica la semántica del evento.
+- Panel de eventos más amplio y legible: lista con búsqueda, tarjetas de sprites, evento seleccionado, páginas y botón «Crear acción aquí».
+- Desplazamiento independiente en la lista de NPC y la secuencia de comandos, conservando la posición al cambiar de evento.
+- Los controles para crear, renombrar, mover o eliminar eventos se mantienen, pero aparecen en secciones opcionales.
+- Los sprites tienen recorte inteligente por transparencia y escalado que conserva proporciones; gráficos invisibles = signo de interrogación. Los eventos con tiles muestran un marcador de tile.
+
+### Windowskins / mensajes
+- Compositor Canvas de nueve piezas basado en el código real de SpriteWindow.rb y MessageConfig.rb de Vermeil.
+- Soporta RPG Maker XP 192x128, compatibilidad VX 128x128, HGSS speech 96x48, marcos 80x48 y 80x80 y marcos compactos 48x48.
+- No muestra la hoja entera de recursos en el diálogo: usa la zona central para fondo y las piezas de bordes/esquinas para el marco.
+- Determina contraste inicial del texto según claridad del fondo, manteniendo intactos los colores explícitos del usuario.
+- NameBox visible debajo del campo de texto, con entrada directa y botones «Usar jugador» y «Sin nombre».
+- En pantalla completa queda un solo botón para restaurar, F11 alterna y Esc devuelve la ventana al panel.
+- La sección avanzada elimina la cabecera duplicada y mejora la distribución de columnas, separación y tamaño de previsualizaciones.
+
+### Verificación y limitaciones
+- Comprobación independiente de formatos de Windowskin, recorte alfa, códigos de color por defecto y agrupación de tarjetas en DOM simulado.
+- Prueba propia: node tests/v091-smoke.cjs
+- El compositor de Windowskin reproduce las piezas principales pero sigue siendo una PREVISUALIZACIÓN: no ejecuta transiciones, animaciones o fuente RGSS. Pueden existir windowskins personalizados con parámetros extra de .txt.
+- El navegador de eventos no altera el guardado ni la compatibilidad de Maker Studio; comprobarlo en una instalación real antes de usar en mapas definitivos.

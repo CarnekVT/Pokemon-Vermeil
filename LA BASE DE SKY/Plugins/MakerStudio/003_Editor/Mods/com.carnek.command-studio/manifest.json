@@ -1,7 +1,7 @@
 {
   "id": "com.carnek.command-studio",
   "name": "Command Studio",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "apiVersion": "1.0.1",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Command Studio 0.9: navegador de eventos sincronizado, inserción contextual segura, NameBox, regalos Pokémon personalizados y únicos, corrector protegido, vista de Windowskins y auditoría de funciones.",
+  "description": "Command Studio 0.9.1: eventos visuales agrupados y mejor espaciados, recorte transparente de sprites y Windowskins compuestos conforme a SpriteWindow (XP/VX/HGSS); NameBox visible.",
   "permissions": [
     "ui.panels",
     "ui.toasts",

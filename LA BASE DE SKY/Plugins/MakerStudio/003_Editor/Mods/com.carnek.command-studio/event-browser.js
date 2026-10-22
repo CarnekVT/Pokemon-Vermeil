@@ -1,4 +1,5 @@
 import {activeMapId,eventChoices,pageChoices,availableInsertionPoints,describeCommand,isCompatible} from "./event-writer.js";
+import {drawEventSprite} from "./sprite-crop.js";
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined&&text!==null)n.textContent=String(text);if(cls)n.className=cls;return n};
 const b=(name,fn,cls="btn")=>{const n=el("button",name,cls);n.type="button";n.onclick=fn;return n};
 export function getGraphic(page) {
@@ -7,10 +8,14 @@ export function getGraphic(page) {
 }
 export function createEventBrowser(ctx,host,options={}){
  let disposed=false,mid=activeMapId(ctx),id=options.eventId||null,pid=Number(options.pageIndex||0),pos=options.position??"end";
- let activeSignature="",cache=[],query="",urls=new Map(),pending=new Set(),lastSelected="";
+ let activeSignature="",cache=[],query="",urls=new Map(),pending=new Map(),lastSelected="";
  const subs=[];host.replaceChildren();
  const root=el("div",null,"csb-events-workspace");
  const head=el("div",null,"csb-event-header");root.append(head);
+ const intro=el("div",null,"csb-event-intro");
+ intro.append(el("strong","Organiza los eventos del mapa"),
+   el("p","1. Elige el personaje u objeto · 2. Selecciona dónde insertar · 3. Crea tu acción.","sub"));
+ root.append(intro);
  const createPanel=el("details",null,"csb-details");
  createPanel.append(el("summary","＋ Crear evento en este mapa"));
  const form=el("div",null,"csb-event-crud");
@@ -35,46 +40,84 @@ export function createEventBrowser(ctx,host,options={}){
  const columns=el("div",null,"csb-events-layout");
  const listing=el("section",null,"csb-event-list"),details=el("section",null,"csb-event-details");
  columns.append(listing,details);root.append(columns);host.append(root);
+ const listResults=el("div",null,"csb-event-results");listing.append(createPanel,filter,listResults);
  const notify=()=>{const key=[mid,id,pid,pos].join(":");if(key!==lastSelected){lastSelected=key;options.onSelection?.({mapId:mid,eventId:id,pageIndex:pid,position:pos});}};
  const gameRoot=()=>ctx.editor?.gameRoot?.()||null;
  const imageApi=()=>typeof window!=="undefined"?window.__TAURI__?.core?.invoke:null;
- const getImage=async name=>{
-  if(urls.has(name))return urls.get(name);
-  if(pending.has(name)||!gameRoot()||!imageApi())return null;
-  pending.add(name);
-  try{
-   const bytes=await imageApi()("get_graphic_image",{gameRoot:gameRoot(),folder:"Characters",name});
-   if(disposed)return null;
-   if(!Array.isArray(bytes)||!bytes.length)return null;
-   const blob=new Blob([new Uint8Array(bytes)],{type:"image/png"});
-   const url=URL.createObjectURL(blob);urls.set(name,url);return url;
-  }catch(_){return null;}finally{pending.delete(name);}
+ const getImage=name=>{
+  if(urls.has(name))return Promise.resolve(urls.get(name));
+  if(pending.has(name))return pending.get(name);
+  if(!gameRoot()||!imageApi())return Promise.resolve(null);
+  const task=(async()=>{
+   try{
+    const data=await imageApi()("get_graphic_image",{gameRoot:gameRoot(),folder:"Characters",name});
+    if(disposed||!Array.isArray(data)||!data.length)return null;
+    const url=URL.createObjectURL(new Blob([new Uint8Array(data)],{type:"image/png"}));
+    urls.set(name,url);return url;
+   }catch(_){return null;}finally{pending.delete(name);}
+  })();
+  pending.set(name,task);return task;
  };
  function thumbnail(parent,page){
-   const wrap=el("div","?","csb-sprite");
-   const g=getGraphic(page);
-   if(g.tile)wrap.textContent="▦";
-   if(g.name){
-     wrap.textContent="♟";wrap.title=g.name;
-     getImage(g.name).then(url=>{
-       if(disposed||!url||!wrap.isConnected)return;
-       const img=new Image();
-       img.onload=()=>{
-        if(disposed||!wrap.isConnected)return;
-        const canvas=document.createElement("canvas");canvas.width=40;canvas.height=40;
-        const p=canvas.getContext("2d");if(!p)return;
-        p.imageSmoothingEnabled=false;
-        // RMXP and Essentials character sheets: 4 frames × 4 directions;
-        // isolate one down-facing frame rather than showing the entire sheet.
-        const cols=4,rows=4,w=img.width/cols,h=img.height/rows;
-        p.clearRect(0,0,40,40);
-        p.drawImage(img,w*1,h*0,w,h,0,0,40,40);
-        wrap.replaceChildren(canvas);wrap.classList.add("has-image");
-       };
-       img.src=url;
-     });
+  const wrap=el("div","?","csb-sprite");
+  const graphic=getGraphic(page);
+  wrap.setAttribute("aria-label",graphic.name?"Gráfico "+graphic.name:graphic.tile?"Tile "+graphic.tile:"Evento sin gráfico");
+  if(graphic.tile)wrap.textContent="▦";
+  if(graphic.name){
+   wrap.textContent="…";wrap.title=graphic.name;
+   getImage(graphic.name).then(url=>{
+    if(!url||disposed||!wrap.isConnected)return;
+    const img=new Image();
+    img.onload=()=>{
+     if(disposed||!wrap.isConnected)return;
+     const canvas=document.createElement("canvas");
+     if(drawEventSprite(canvas,img,graphic.name,48)){
+      wrap.replaceChildren(canvas);wrap.classList.add("has-image");
+     }else wrap.textContent="?";
+    };
+    img.onerror=()=>wrap.textContent="?";img.src=url;
+   });
+  }
+  parent.append(wrap);
+ }
+ function summarize(command){
+   const code=Number(command.code),script=String(command.parameters?.[0]??"");
+   const groups={
+    101:["💬","Hablar","dialogue"],102:["❓","Presentar opciones","choice"],
+    111:["🔀","Comprobar una condición","logic"],112:["🔁","Repetir acciones","logic"],
+    121:["✅","Cambiar interruptor","state"],122:["🔢","Modificar variable","state"],
+    123:["🔒","Cambiar interruptor local","state"],201:["🗺️","Cambiar de mapa","world"],
+    205:["🚶","Mover personaje","world"],106:["⏳","Esperar","world"],
+    250:["🔊","Reproducir sonido","audio"],241:["🎵","Reproducir música","audio"],
+    411:["↪","Si no se cumple…","logic"],412:["✓","Termina la condición","logic"],
+    402:["↳","Al elegir una respuesta","choice"],404:["✓","Finalizar elecciones","choice"],
+    355:["⚙","Acción del juego (Ruby)","script"],
+    108:["📝","Comentario para desarrolladores","note"]
+   };
+   const info=groups[code]||["◦","Acción #"+code,"generic"];
+   let detail=script.replace(/\s+/g," ").slice(0,115);
+   if(code===355){
+    if(/pbAddPokemon|Pokemon\.new/.test(script))info[1]="Entregar o configurar Pokémon";
+    else if(/pbReceiveItem/.test(script))info[1]="Entregar objeto";
+    else if(/NameBox/.test(script))info[1]="Mostrar nombre del hablante";
+    else if(/TrainerBattle|WildBattle/.test(script))info[1]="Iniciar combate";
+    else if(/\$game_self_switches/.test(script))info[1]="Comprobar interruptor local";
    }
-   parent.append(wrap);
+   if(code===101)detail=String(command.parameters?.[0]??"").replace(/\\[a-z]+\[[^\]]*\]/gi,"").slice(0,115);
+   if(code===111)detail="El juego decidirá qué acciones ejecutar";
+   return {icon:info[0],title:info[1],kind:info[2],detail};
+ }
+ // Continuations belong to their first command. Collapse together for readability.
+ function groupCommands(commands){
+  const result=[];
+  const connected={101:401,108:408,355:655,209:509,302:605};
+  for(let i=0;i<commands.length;){
+   const first=i,cmd=commands[i],linked=connected[cmd.code];
+   i++;
+   while(linked&&i<commands.length&&commands[i].code===linked)i++;
+   result.push({start:first,end:i,cmd,children:commands.slice(first,i),...summarize(cmd)});
+  }
+  return result;
  }
  function refresh(force=false){
   if(disposed)return;
@@ -97,9 +140,13 @@ export function createEventBrowser(ctx,host,options={}){
   drawList();drawDetails();
  }
  function drawList(){
-  listing.replaceChildren();
-  if(mid==null){listing.append(el("p","Abre un mapa desde Maker Studio.","sub"));return;}
+  const previousTop=listResults.scrollTop||0;
+  listResults.replaceChildren();
+  if(mid==null){listResults.append(el("p","Abre un mapa desde Maker Studio.","sub"));return;}
   const found=cache.filter(x=>[x.id,x.name].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+  const overview=el("div",null,"csb-list-intro");
+  overview.append(el("strong","Personajes y objetos"),el("span",found.length+" de "+cache.length,"sub"));
+  listResults.append(overview);
   for(const ev of found){
    const row=b("",()=>{id=Number(ev.id);pid=0;pos="end";drawList();drawDetails();notify();},
      "csb-event-entry"+(Number(id)===Number(ev.id)?" active":""));
@@ -107,11 +154,12 @@ export function createEventBrowser(ctx,host,options={}){
    try{graphic=ctx.events.getFull(mid,ev.id)?.pages?.[0];}catch(_){}
    thumbnail(row,graphic);
    const info=el("span",null,"csb-event-entry-details");
-   info.append(el("strong","#"+ev.id+" · "+ev.name),
-               el("small","("+ev.x+", "+ev.y+") · "+ev.pages+" pág."));
-   row.append(info);listing.append(row);
+   info.append(el("strong",ev.name||"Evento sin nombre"),
+               el("small","ID "+ev.id+" · "+ev.pages+" página"+(ev.pages!==1?"s":"")+" · ("+ev.x+", "+ev.y+")"));
+   row.append(info);listResults.append(row);
   }
-  if(!found.length)listing.append(el("p","No hay eventos con ese nombre o ID.","sub"));
+  if(!found.length)listResults.append(el("p","No hay eventos con ese nombre o ID.","sub"));
+  listResults.scrollTop=previousTop;
  }
  function drawDetails(){
   details.replaceChildren();
@@ -121,7 +169,10 @@ export function createEventBrowser(ctx,host,options={}){
   if(!full?.pages?.length){details.append(el("p","El evento dejó de existir. Actualiza el mapa.","sub"));return;}
   if(pid>=full.pages.length){pid=0;pos="end";}
   const heading=el("div",null,"csb-event-detail-head");
-  heading.append(el("strong",full.name+" · Evento #"+id));
+  heading.append(el("div",null,"csb-selected-name"));
+  heading.firstChild.append(el("span","EVENTO SELECCIONADO","csb-eyebrow"),
+    el("strong",full.name||"Sin nombre"),el("span","ID "+id+" · ("+full.x+", "+full.y+")","sub"));
+  heading.append(b("＋ Crear acción",()=>options.onCreate?.(),"btn primary"));
   details.append(heading);
   const tabs=el("div",null,"csb-page-tabs");
   for(let i=0;i<full.pages.length;i++){
@@ -160,25 +211,59 @@ export function createEventBrowser(ctx,host,options={}){
   const commands=(page.list||[]).filter(c=>c.code!==0);
   const points=availableInsertionPoints(commands);
   const choices=new Map(points.map(x=>[x.index,x]));
-  details.append(el("p","Elige una línea con ＋ para insertar antes del siguiente comando.","sub"));
+  const tip=el("div",null,"csb-event-helper");
+  tip.append(el("strong","¿Dónde quieres añadir la próxima acción?"),
+    el("p","Pulsa un espacio entre acciones. Después elige «Crear acción».","sub"));
+  details.append(tip);
   const stack=el("div",null,"csb-command-list");
-  for(let i=0;i<=commands.length;i++){
-   const point=choices.get(i);
-   if(point){
-     const add=b((pos===i||((pos==="end")&&i===commands.length))?"✓ Insertar aquí":"＋ Insertar aquí",()=>{
-       pos=i;drawDetails();notify();
-     },"csb-command-slot"+((pos===i||(pos==="end"&&i===commands.length))?" active":""));
-     add.style.marginLeft=Math.min(point.indent*14,72)+"px";
-     stack.append(add);
-   }
-   if(i<commands.length){
-     const cmd=commands[i];
-     const line=el("div",describeCommand(cmd),"csb-command-entry");
-     line.style.marginLeft=Math.min((cmd.indent||0)*14,72)+"px";
-     stack.append(line);
-   }
+  const sections=groupCommands(commands);
+  let selectedSlot=null;
+  function insertion(index,indent){
+    const place=choices.get(index);
+    if(!place)return;
+    const selected=Number(pos=== "end"?commands.length:pos)===index;
+    const btnSlot=b(selected?"✓ Aquí se insertará":"＋ Insertar aquí",()=>{
+      pos=index;notify();
+      stack.querySelectorAll(".csb-command-slot").forEach(node=>{
+       node.classList.toggle("active",Number(node.dataset.index)===index);
+       node.textContent=Number(node.dataset.index)===index?"✓ Aquí se insertará":"＋ Insertar aquí";
+      });
+      selectedSlotText.textContent="Posición elegida: "+(index===0?"Inicio":index===commands.length?"Final":"Después del paso "+index);
+    },"csb-command-slot"+(selected?" active":""));
+    btnSlot.dataset.index=String(index);
+    btnSlot.style.marginLeft=Math.min(indent*12,64)+"px";
+    stack.append(btnSlot);
   }
+  const selectedSlotText=el("span","","csb-selected-insertion");
+  for(const item of sections){
+   const indent=Number(item.cmd.indent||0);
+   insertion(item.start,indent);
+   const card=el("div",null,"csb-event-command csb-kind-"+item.kind);
+   card.style.marginLeft=Math.min(indent*12,64)+"px";
+   const row=el("div",null,"csb-event-command-row");
+   row.append(el("span",item.icon,"csb-command-icon"));
+   const content=el("div",null,"csb-event-command-info");
+   content.append(el("strong",item.title));
+   if(item.detail)content.append(el("span",item.detail,"csb-command-snippet"));
+   row.append(content);
+   row.append(el("small","Paso "+(item.start+1),"csb-command-count"));
+   card.append(row);
+   if(item.kind==="script"||item.children.length>1){
+    const full=el("details",null,"csb-command-code");
+    full.append(el("summary","Ver "+item.children.length+" línea"+(item.children.length===1?"":"s")+" de detalle"));
+    const raw=item.children.map(c=>String(c.parameters?.[0]??"")).join("\n");
+    full.append(el("pre",raw,"csb-command-raw"));card.append(full);
+   }
+   stack.append(card);
+  }
+  insertion(commands.length,0);
+  if(!sections.length)stack.append(el("p","Este evento aún no tiene acciones. Puedes insertar la primera aquí.","sub"));
   details.append(stack);
+  const selectionBar=el("div",null,"csb-event-selection-bar");
+  const chosen=Number(pos==="end"?commands.length:pos);
+  selectedSlotText.textContent="Posición elegida: "+(chosen===0?"Inicio":chosen===commands.length?"Final":"Después del paso "+chosen);
+  selectionBar.append(selectedSlotText,b("＋ Crear acción aquí",()=>options.onCreate?.(),"btn primary"));
+  details.append(selectionBar);
   if(!points.some(x=>x.index===pos)&&pos!=="end"){pos="end";notify();}
   const last=el("p","La inserción se valida antes de guardar y es deshacible en Maker Studio.","sub");
   details.append(last);

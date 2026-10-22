@@ -81,7 +81,7 @@ export function mountFriendly(ctx,host){
   if(advCleanup){advCleanup();advCleanup=null;}
   if(eventBrowser){eventBrowser.dispose();eventBrowser=null;}
   if(messageCleanup){messageCleanup();messageCleanup=null;}
-  mode=next;menu();render();
+  mode=next;menu();render();stage.scrollTop=0;
  }
  function addField(target,label,value,onChange,config={}){
   const wrap=el("div",null,"field");wrap.append(el("label",label));
@@ -167,10 +167,11 @@ export function mountFriendly(ctx,host){
   const area=el("div",null,"content");stage.append(area);
   if(mode==="home")step===1?home(area):step===2?configure(area):review(area);
   if(mode==="events"){
+    area.classList.add("csb-events-content");
     const top=el("div",null,"csb-section-head");
-    top.append(el("h3","Eventos y comandos del mapa"),button("← Volver a crear",()=>go("home"),"btn primary"));
+    top.append(el("h3","Eventos del mapa"),button("＋ Crear acción",()=>{step=1;go("home");},"btn primary"));
     area.append(top);
-    area.append(el("p","Selecciona un evento, abre una página y pulsa ＋ exactamente donde quieras insertar. La selección se conservará al volver.","sub"));
+    area.append(el("p","Selecciona un evento y marca dónde quieres colocar tu acción. El orden se conserva al volver a Crear.","sub"));
     const workspace=el("div",null,"csb-event-browser-host");area.append(workspace);
     eventBrowser=createEventBrowser(ctx,workspace,{
       eventId:eventId?Number(eventId):null,pageIndex:pageId,position:insertionPosition,
@@ -180,7 +181,8 @@ export function mountFriendly(ctx,host){
         pageId=sel.pageIndex;
         insertionPosition=sel.position;
       },
-      onError:e=>notice(e.message)
+      onError:e=>notice(e.message),
+      onCreate:()=>{step=1;go("home");}
     });
   }
   if(mode==="message")messages(area);

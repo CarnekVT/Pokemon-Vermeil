@@ -24,13 +24,26 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
  editor.value=String(initialText||"");editor.spellcheck=true;editor.lang="es";
  editor.setAttribute("aria-label","Texto que verá el jugador");left.append(editor);
  let speaker=String(initialSpeaker||"");
- const nameBox=el("details",null,"csb-details");
- nameBox.open=!!speaker;
- nameBox.append(el("summary","Nombre del personaje (NameBox)"));
- const nameInput=el("input");nameInput.placeholder="Ej.: Profesora Aura o \\PN";nameInput.value=speaker;
- nameInput.setAttribute("aria-label","Nombre mostrado sobre el diálogo");
+ const nameBox=el("div",null,"csb-name-editor");
+ const nameIntro=el("div",null,"csb-name-head");
+ nameIntro.append(el("span","🏷️","csb-name-icon"));
+ const description=el("div",null,"csb-name-title");
+ description.append(el("strong","¿Quién está hablando?"),
+                    el("small","NameBox · nombre sobre la ventana"));
+ nameIntro.append(description);nameBox.append(nameIntro);
+ const nameControls=el("div",null,"csb-name-controls");
+ const nameInput=el("input");
+ nameInput.placeholder="Nombre del personaje (opcional)";
+ nameInput.value=speaker;nameInput.setAttribute("aria-label","Nombre del hablante (NameBox)");
+ const player=button("Usar jugador",()=>{
+   nameInput.value="\\PN";speaker=nameInput.value;onSpeakerChange(speaker);update();
+ },"btn");
+ const clear=button("Sin nombre",()=>{
+   nameInput.value="";speaker="";onSpeakerChange("");update();
+ },"btn csb-quiet");
  nameInput.oninput=()=>{speaker=nameInput.value;onSpeakerChange(speaker);update();};
- nameBox.append(el("p","Vacío = sin nombre. Admite nombres fijos, \\PN y \\v[n].","sub"),nameInput);
+ nameControls.append(nameInput,player,clear);nameBox.append(nameControls);
+ nameBox.append(el("p","Vacío = sin NameBox. Admite \\PN y \\v[n] para nombres dinámicos.","sub"));
  left.append(nameBox);
  const quick=el("div",null,"chips");
  for(const [name,token]of [["Nombre jugador","\\PN"],["Nueva línea","\\n"],["Esperar clic","\\!"],["Dinero","\\PM"],["Sonido","\\se[Door exit]"]])
@@ -305,6 +318,6 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
   listItems();
  }
  draw();
- host.append(el("p","Las vistas son esquemáticas; el resultado definitivo se comprueba ejecutando el evento en el juego.","csb-visual-hint"));
+ host.append(el("p","La vista previa compone los marcos de Essentials cuando están disponibles; comprueba el resultado final ejecutando el evento.","csb-visual-hint"));
  return()=>skin?.dispose?.();
 }

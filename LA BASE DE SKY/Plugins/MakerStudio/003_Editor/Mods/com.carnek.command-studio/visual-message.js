@@ -39,13 +39,13 @@ const MARKUP=/(<\/?c(?:3)?(?:=[^>]*?)?>|<br\s*\/?>|\\(?:v\[\d+\]|n\[[1-8]\]|ff?\
 export const WINDOW_COLOR_HINTS=["#FFFFFF","#7D83DA","#E4787E","#62B8D8","#80BF92","#F8BC5C","#B289CB","#DCB39A","#919FB4","#6AD0BD","#EA8BBB","#C4C4C4","#202737"];
 export function previewData(source){
  const text=String(source??""),parts=[];
- let pos=messagePosition(text),color="#FFFFFF",shadow="",screen="normal";
+ let pos=messagePosition(text),color="#FFFFFF",shadow="",screen="normal",explicit=false;
  const badges=[],unknownTokens=new Set();
  function push(value){
    if(!value)return;
    const last=parts[parts.length-1];
-   if(last&&last.color===color&&last.shadow===shadow&&last.screen===screen)last.text+=value;
-   else parts.push({text:value,color,shadow,screen});
+   if(last&&last.color===color&&last.shadow===shadow&&last.screen===screen&&last.explicit===explicit)last.text+=value;
+   else parts.push({text:value,color,shadow,screen,explicit});
  }
  const split=text.split(MARKUP);
  for(const token of split){
@@ -53,14 +53,14 @@ export function previewData(source){
    if(!/^(?:<|\\)/.test(token)){push(token);continue;}
    const lower=token.toLowerCase();
    let m=token.match(/^<c(?:=)([0-9a-f]{6,8})>$/i);
-   if(m){color="#"+m[1].slice(0,6);shadow="";continue;}
+   if(m){color="#"+m[1].slice(0,6);shadow="";explicit=true;continue;}
    m=token.match(/^<c3=([0-9a-f]{6,8}),([0-9a-f]{6,8})>$/i);
-   if(m){color="#"+m[1].slice(0,6);shadow="#"+m[2].slice(0,6);continue;}
-   if(/^<\/c(?:3)?>$/i.test(token)){color="#FFFFFF";shadow="";continue;}
+   if(m){color="#"+m[1].slice(0,6);shadow="#"+m[2].slice(0,6);explicit=true;continue;}
+   if(/^<\/c(?:3)?>$/i.test(token)){color="#FFFFFF";shadow="";explicit=false;continue;}
    m=token.match(/^\\c\[(\d+)\]$/i);
-   if(m){color=WINDOW_COLOR_HINTS[Number(m[1])%WINDOW_COLOR_HINTS.length];badges.push("Color numerado: depende del marco");continue;}
-   if(/^\\b$/i.test(token)){color="#5BA4FA";continue;}
-   if(/^\\r$/i.test(token)){color="#F16D82";continue;}
+   if(m){color=WINDOW_COLOR_HINTS[Number(m[1])%WINDOW_COLOR_HINTS.length];explicit=true;badges.push("Color numerado: depende del marco");continue;}
+   if(/^\\b$/i.test(token)){color="#5BA4FA";explicit=true;continue;}
+   if(/^\\r$/i.test(token)){color="#F16D82";explicit=true;continue;}
    if(/^\\pg$/i.test(token)||/^\\pog$/i.test(token)){color="#E28CA6";badges.push("Color según jugador");continue;}
    if(/^\\pn$/i.test(token)){push("NOMBRE");continue;}
    if(/^\\pm$/i.test(token)){push("₽ 1.000");continue;}
@@ -98,6 +98,7 @@ export function renderMessagePreview(host,text){
  for(const segment of data.parts){
    const span=document.createElement("span");span.textContent=segment.text;
    span.style.color=segment.color;
+   if(!segment.explicit)span.dataset.csbDefault="1";
    if(segment.shadow)span.style.textShadow="1px 1px 0 "+segment.shadow;
    if(segment.screen==="bold")span.style.fontWeight="bold";
    content.append(span);
