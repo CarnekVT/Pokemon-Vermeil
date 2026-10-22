@@ -220,19 +220,26 @@ module BSSLayeredRoomSupport
           pos=(y*w+x)*4
           next if source.getbyte(pos+3)==0
           sample=sky_palette[y]
-          distance=sample ? (source.getbyte(pos)-sample[0]).abs+
-                            (source.getbyte(pos+1)-sample[1]).abs+
-                            (source.getbyte(pos+2)-sample[2]).abs : 1000
-          # Test sky colors throughout BOTH upper bands. The old code copied
-          # the entire middle band unchanged, leaving a conspicuous old sky.
-          is_sky=(y<lower[x] && (distance<=112 ||
-                  (y<upper[x] && sample.nil?)))
-          dest=is_sky ? sky : (y<lower[x] ? haze : terrain)
-          if is_sky && live_sky
+          r=source.getbyte(pos);g=source.getbyte(pos+1);b=source.getbyte(pos+2)
+          brightest=[r,g,b].max
+          distance=sample ? (r-sample[0]).abs+(g-sample[1]).abs+(b-sample[2]).abs : 1000
+          # Keep foreground silhouettes, replace the blue/orange old sky through
+          # the horizon, not just the top band. Avoid the cyan residue.
+          sky_candidate=y<lower[x] && brightest>=74 &&
+            (y<upper[x]+9 || distance<188 || (b>g+10 && b>r+12))
+          dest=sky_candidate ? sky : (y<lower[x] ? haze : terrain)
+          if sky_candidate && live_sky
             sx=[(x*sky_width/w.to_f).floor,sky_width-1].min
             sy=[(y*sky_height/[lower[x],1].max.to_f).floor,sky_height-1].min
             src=(sy*sky_width+sx)*4
             dest[pos,4]=live_sky.byteslice(src,4)
+          elsif !sky_candidate && y<lower[x] && brightest<75
+            # Darkness does not mean the foliage must be featureless black.
+            lift=[(75-brightest)*0.30,18].max
+            dest.setbyte(pos,[[r+lift*0.7,28].max,255].min.to_i)
+            dest.setbyte(pos+1,[[g+lift*1.5,62].max,255].min.to_i)
+            dest.setbyte(pos+2,[[b+lift*1.3,55].max,255].min.to_i)
+            dest.setbyte(pos+3,source.getbyte(pos+3))
           else
             dest[pos,4]=source.byteslice(pos,4)
           end
@@ -353,10 +360,10 @@ module BSSLayeredRoomSupport
       # EBDX's source trees can be almost black at dusk/night; lift them into
       # blue-green instead of forcing the original solid black silhouette.
       if name =~ /\A(?:tree|grass)\d+\z/i
-        sp.tone=BSSLayeredLighting.tone(light,0.46) if sp.respond_to?(:tone=)
+        sp.tone=Tone.new(28,48,35,0) if sp.respond_to?(:tone=)
         if sp.respond_to?(:color=)
-          alpha=slot==:day ? 0 : (slot==:dawn ? 215 : 235)
-          sp.color=Color.new(73,127,124,alpha)
+          alpha=slot==:day ? 40 : (slot==:dawn ? 75 : 90)
+          sp.color=Color.new(55,117,94,alpha)
         end
       elsif name=="base" || name=="water"
         sp.tone=ground_tone if sp.respond_to?(:tone=)
@@ -459,8 +466,7 @@ module BSSLayeredEBDXCamera
     zoom=BSSLayeredLighting.clamp(cfg["zoom"] || 100,0,200)/100.0
     base=BSS070EBDXCore.get_vector(:MAIN,@battle).map(&:to_f)
     target=base.clone
-    patterns=(BSS070EBDXCore.const_get(:CAMERA_MOTION) rescue nil)
-    options=patterns.is_a?(Array) ? patterns.select{|v|v.is_a?(Array) && v.length>=5} : []
+    options=[] # One subtle ambient camera, not conflicting EBDX/BAS shot lists.
     if options.empty?
       phase=@bss_layered_camera_index.to_i
       target[0]+=Math.sin(phase*1.8)*14*strength*pan_x
@@ -490,13 +496,19 @@ module BSSLayeredEBDXCamera
     @bss_layered_camera_index=@bss_layered_camera_index.to_i+1
     @vector.inc=0.012+speed*0.022
     @vector.set(target)
-    frames=(260-speed*160).round
+    frames=(210-speed*95).round
     @bss_layered_camera_due=@bss_layered_camera_tick.to_i+frames
   end
 
   def bss070_ebdx_tick(advance_camera=true,align=true)
-    if bss_layered_camera_active? && advance_camera && !@bss084_native_move_active &&
-       !@bss083_animation_projection && @bss070_ebdx_suspend_depth.to_i<=0
+    bas_owned=(@bss070_ebdx_bas_frame || @bss084_native_move_active ||
+               @bss083_animation_projection || @bss070_ebdx_suspend_depth.to_i>0)
+    begin
+      bas_owned ||= respond_to?(:inPartyAnimation?) && inPartyAnimation?
+      bas_owned ||= @animations.respond_to?(:empty?) && !@animations.empty?
+    rescue StandardError
+    end
+    if bss_layered_camera_active? && advance_camera && !bas_owned
       @bss_layered_camera_tick=@bss_layered_camera_tick.to_i+1
       if @bss_layered_camera_tick>=@bss_layered_camera_due.to_i &&
          !@bss_in_command_menu && !@bss_entering_fight &&
