@@ -1,0 +1,92 @@
+require "minitest/autorun"
+
+# Lightweight RGSS stand-ins for the new source-preserving bitmap slices.
+Rect=Struct.new(:x,:y,:width,:height) do
+  def set(a,b,c,d)
+    self.x=a;self.y=b;self.width=c;self.height=d
+  end
+end
+class Bitmap
+  attr_reader :width,:height
+  def initialize(w,h);@width=w;@height=h;end
+  def disposed?;false;end
+end
+class Tone
+  attr_reader :red,:green,:blue,:gray
+  def initialize(r,g,b,a=0);@red=r;@green=g;@blue=b;@gray=a;end
+end
+class Color
+  attr_reader :red,:green,:blue,:alpha
+  def initialize(r,g,b,a=255);@red=r;@green=g;@blue=b;@alpha=a;end
+end
+class Sprite
+  attr_accessor :bitmap,:x,:y,:ox,:oy,:z,:zoom_x,:zoom_y,:angle,:opacity,:visible,:tone,:color
+  attr_reader :src_rect
+  def initialize(_viewport=nil)
+    @src_rect=Rect.new(0,0,0,0)
+    @x=200;@y=100;@ox=80;@oy=70;@z=0
+    @zoom_x=1.2;@zoom_y=1.2;@angle=0;@opacity=255;@visible=true
+    @disposed=false
+  end
+  def disposed?;@disposed;end
+  def dispose;@disposed=true;end
+end
+class BSS070EBDXRoom;end
+class BSS070CustomRoom < BSS070EBDXRoom;end
+class Battle; class Scene;end;end
+module BSSLightingClockBridge
+  def self.slot(_=nil);:dawn;end
+  def self.hour;19.0;end
+end
+require_relative "../../LA BASE DE SKY/Plugins/[CARNEK] Battle Scene Studio Runtime/90_CustomRooms/039_Lighting_Layered_Backdrops"
+
+class BattleBackdropLayersTest < Minitest::Test
+  def room(data={"sky"=>true})
+    s=BSS070EBDXRoom.allocate
+    original=Bitmap.new(384,308)
+    bg=Sprite.new;bg.bitmap=original
+    s.instance_variable_set(:@data,data)
+    s.instance_variable_set(:@sprites,{"bg"=>bg})
+    s.instance_variable_set(:@viewport,Object.new)
+    [s,bg,original]
+  end
+
+  def test_preserves_bitmap_and_separates_three_screen_aligned_slices
+    s,bg,bitmap=room
+    s.bss_layered_split!
+    slices=s.instance_variable_get(:@bss_layered_extra)
+    assert_equal 2,slices.length
+    assert_equal [0,92], [bg.src_rect.y,bg.src_rect.height]
+    assert_equal [92,40], [slices[0].src_rect.y,slices[0].src_rect.height]
+    assert_equal [132,176], [slices[1].src_rect.y,slices[1].src_rect.height]
+    assert_same bitmap,slices[0].bitmap
+    assert_same bitmap,slices[1].bitmap
+    assert_equal bg.y,slices[1].y
+    assert_equal bg.oy-132,slices[1].oy
+  end
+
+  def test_tree_colors_are_not_solid_black_and_dusk_horizon_is_warm
+    s,bg,_=room
+    tree=Sprite.new
+    s.instance_variable_get(:@sprites)["tree0"]=tree
+    s.bss_layered_split!
+    s.bss_layered_apply_tone!(true)
+    assert_operator tree.color.alpha,:>,0
+    assert_operator tree.color.green,:>,0
+    assert_operator bg.tone.red,:>,s.instance_variable_get(:@bss_layered_extra)[1].tone.red
+    assert_operator s.instance_variable_get(:@bss_layered_extra)[0].color.alpha,:>,0
+  end
+
+  def test_disabled_indoor_and_custom_split_and_disposal
+    s,_,_=room({"outdoor"=>false,"sky"=>true})
+    s.bss_layered_split!
+    assert_nil s.instance_variable_get(:@bss_layered_extra)
+    s,bg,_=room({"sky"=>true,"skySplitY"=>75,"horizonSplitY"=>105})
+    s.bss_layered_split!
+    assert_equal 75,bg.src_rect.height
+    slices=s.instance_variable_get(:@bss_layered_extra)
+    assert_equal 105,slices[1].src_rect.y
+    s.bss_layered_release!
+    assert slices.all?(&:disposed?)
+  end
+end
