@@ -330,23 +330,38 @@ function drawUnionChunks(g,lights,project,width,height){
   }
   g.restore();
 }
-function drawCachedStaticPreview(g,lights,project,width,height,t){
-  // Screen blending is associative: building a transparent light surface once
-  // and screening it over new map frames avoids dozens of sprite stamps.
-  const size=width*height;
-  if(!size||size>3200000){for(const l of lights)stamp(g,l,project,t,'screen');return;}
-  const key=[project.mapId,project.revision,project.viewportKey,width,height].join('|');
+function drawCachedStaticPreview(g,lights,project,width,height,t,group='all'){
+  // Tile/autotile-style world viewport cache: bucket camera scroll so a
+  // single composited texture survives many pan frames (instead of a new
+  // multi-megabyte canvas at every scroll pixel).
+  const scrollX=Number(project.scrollX)||0,scrollY=Number(project.scrollY)||0;
+  const bucket=128,anchorX=Math.floor(scrollX/bucket)*bucket,anchorY=Math.floor(scrollY/bucket)*bucket;
+  const offX=scrollX-anchorX,offY=scrollY-anchorY;
+  const useBucket=project.scrollX!=null && project.scrollY!=null;
+  const pad=useBucket?bucket:0;
+  const w=width+pad,h=height+pad;
+  if(w<=0||h<=0||w*h>3200000){for(const l of lights)stamp(g,l,project,t,'screen');return;}
+  const key=useBucket ?
+    [group,project.mapId,project.revision,anchorX,anchorY,project.tileSize,project.previewHour,width,height].join('|'):
+    [group,project.mapId,project.revision,project.viewportKey,width,height].join('|');
   let surface=staticPreviewViews.get(key);
   if(surface){staticPreviewViews.delete(key);staticPreviewViews.set(key,surface);}
-  else {
-    surface=newCanvas(width,height);
+  else{
+    surface=newCanvas(w,h);
     const sg=surface.getContext('2d');
     if(!sg){for(const l of lights)stamp(g,l,project,t,'screen');return;}
-    for(const l of lights)stamp(sg,l,project,t,'screen');
+    const shifted=useBucket?{
+      ...project,x:x=>project.x(x)+offX,y:y=>project.y(y)+offY,
+      viewWidth:w,viewHeight:h
+    }:project;
+    for(const l of lights)stamp(sg,l,shifted,t,'screen');
     staticPreviewViews.set(key,surface);
     while(staticPreviewViews.size>STATIC_PREVIEW_LIMIT)staticPreviewViews.delete(staticPreviewViews.keys().next().value);
   }
-  g.save();g.globalCompositeOperation='screen';g.drawImage(surface,0,0);g.restore();
+  g.save();g.globalCompositeOperation='screen';
+  if(useBucket)g.drawImage(surface,-offX,-offY);
+  else g.drawImage(surface,0,0);
+  g.restore();
 }
 export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'){
   const visible=(lights||[]).filter(l=>l.enabled!==false);
@@ -357,16 +372,19 @@ export function drawLights(g,lights,project,width,height,t=0,overlapMode='union'
   const sums=visible.filter(l=>l.blendMode==='sum');
   const merged=overlapMode==='sum'?[]:union;
   const summed=overlapMode==='sum'?[...union,...sums]:sums;
-  const staticLights=merged.filter(l=>!l.pulse?.enabled&&l.type!=='mask'&&l.maskEnabled!==true);
-  const pulsing=merged.filter(l=>l.pulse?.enabled||l.type==='mask'||l.maskEnabled===true);
+  const staticLights=merged.filter(l=>!l.pulse?.enabled);
+  const pulsing=merged.filter(l=>l.pulse?.enabled);
+  const chunkable=staticLights.filter(l=>l.type!=='mask'&&l.maskEnabled!==true);
+  const masked=staticLights.filter(l=>l.type==='mask'||l.maskEnabled===true);
   if(overlapMode==='fast'){
-    // Editing sliders/dragging: immediate sprite preview; no world-chunk rebuild
-    // until mouse release, preventing repeated 2D getImageData stalls.
-    if(staticLights.length)drawCachedStaticPreview(g,staticLights,project,width,height,t);
-  }else if(staticLights.length===1)stamp(g,staticLights[0],project,t,'screen');
-  else if(staticLights.length>1)drawUnionChunks(g,staticLights,project,width,height);
-  // Animated lights are sprites; rebuilding world chunks every pulse frame would
-  // cause spikes. In this prototype animated overlaps use screen blending.
+    if(staticLights.length)drawCachedStaticPreview(g,staticLights,project,width,height,t,'fast');
+  }else{
+    if(chunkable.length===1)stamp(g,chunkable[0],project,t,'screen');
+    else if(chunkable.length>1)drawUnionChunks(g,chunkable,project,width,height);
+    // Already-masked textures are cached in their own layer; world-chunk
+    // baking would otherwise ignore their alpha stencil entirely.
+    if(masked.length)drawCachedStaticPreview(g,masked,project,width,height,t,'masked');
+  }
   for(const l of pulsing)stamp(g,l,project,t,'screen');
   for(const l of summed)stamp(g,l,project,t,'lighter');
   for(const l of visible){
