@@ -131,7 +131,7 @@ module LightingStudioNormals
       angle = LightingStudio.number(src['angle'], 70, 5, 170) * Math::PI / 360.0
       @lights << [cx, cy, radius, color,
                   LightingStudio.number(src['intensity'], 0.8, 0, 1),
-                  pulse, type, rotation, width, height, angle, src['maskFile'], src['schedule']]
+                  pulse, type, rotation, width, height, angle, src['maskFile'], src['maskEnabled']==true, src['maskMode'], src['schedule']]
     end
     @lights
   rescue StandardError => e
@@ -204,7 +204,7 @@ module LightingStudioNormals
     center_x,center_y=character_world_position(character)
     samples=character_light_samples(character)
     best=nil;score=0.0
-    light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity,pulse,type,rotation,width,height,angle,mask_name,schedule|
+    light_sources(map.map_id).each do |lx,ly,radius,rgb,intensity,pulse,type,rotation,width,height,angle,mask_name,mask_enabled,mask_mode,schedule|
       size,energy=LightingStudio.pulse_values(pulse,now)
       next if energy<=0.0 || intensity<=0.0
       energy*=LightingStudioDayNight.schedule_factor(schedule) if defined?(LightingStudioDayNight)
@@ -216,6 +216,13 @@ module LightingStudioNormals
         local_x=cos*dx+sin*dy
         local_y=-sin*dx+cos*dy
         power=light_sample_strength(type,local_x,local_y,dx,dy,radius,width,height,size,angle,mask_name)
+        if power>0.0 && mask_enabled && type!='mask'
+          ow=['ellipse','rectangle'].include?(type) ? width : radius*2.0
+          oh=['ellipse','rectangle'].include?(type) ? height : radius*2.0
+          inside=local_x.abs<=ow*size/2.0 && local_y.abs<=oh*size/2.0
+          sample=inside ? mask_power_at(mask_name,local_x,local_y,ow*size,oh*size) : 0.0
+          power *= mask_mode=='block' ? (1.0-sample) : sample
+        end
         strength=[strength,power*weight].max
       end
       strength=[[strength*intensity*energy,0.0].max,1.0].min
