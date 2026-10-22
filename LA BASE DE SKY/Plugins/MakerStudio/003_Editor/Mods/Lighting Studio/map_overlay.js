@@ -71,7 +71,7 @@ export function paint(g,info,v){
   if(w<=0||h<=0)return;
   const live=!!v.showPreview, editing=!!v.editing;
   const projection={x:x=>toScreen(x,0,info).x,y:y=>toScreen(0,y,info).y,scale:()=>screenRadius(32,info)/32,
-    viewportKey:[info.mapId,info.tileSize,info.zoom,info.viewportX,info.viewportY].join(':'),mapId:info.mapId,revision:v.revision??0,viewWidth:w,viewHeight:h};
+    viewportKey:[info.mapId,info.tileSize,info.zoom,info.viewportX,info.viewportY,Number.isFinite(v.previewHour)?v.previewHour:'',v.previewQuality].join(':'),mapId:info.mapId,revision:v.revision??0,viewWidth:w,viewHeight:h};
   const seconds=Number.isFinite(v.time)?v.time:performance.now()/1000;
   g.save();
   try{
