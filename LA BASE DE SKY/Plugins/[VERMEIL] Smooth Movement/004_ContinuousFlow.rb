@@ -42,8 +42,10 @@ class Game_Player
 
     # Consumir tiempo sobrante para enlazar visualmente los tiles.
     # No completar un segundo tile en este mismo tick ni saltarse un evento.
+    # @move_time ya refleja la velocidad del tile (incluida la diagonal
+    # Uniforme). No volver a multiplicar por sqrt(2): antes duplicaba la
+    # penalizacion y empeoraba la transicion entre cardinal/diagonal.
     duration = @move_time.to_f
-    duration *= Math.sqrt(2) if @_vermeil_diagonal_active
     return unless duration > 0
     fraction = [finished[:carry] / duration, 0.80].min
     return unless fraction > 0
