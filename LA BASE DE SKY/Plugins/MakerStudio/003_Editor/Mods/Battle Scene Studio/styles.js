@@ -774,3 +774,31 @@ STYLES += `
 .bss-dialogue-workflow-note{margin:0 0 12px;padding:11px 13px;line-height:1.55;color:#d5e4f7;background:#1b2d40;border:1px solid #456684;border-radius:9px}
 .bss-dialogue-id-warning{margin:0 0 12px;padding:11px 13px;color:#ffdfae;background:#47301a;border:1px solid #b57b37;border-radius:9px;overflow-wrap:anywhere}
 `;
+
+STYLES += `
+/* BSS workspace usability: stable widths, no expensive filter/backdrop blur */
+.bss-root{--bss-accent:#85a8ff;--bss-border:#374963;--bss-surface:#172234}
+.bss-root .bss-inspector-inner{max-width:100%;min-width:0;padding:14px 17px 32px}
+.bss-root .bss-panel{min-width:0;overflow:visible;box-shadow:none}
+.bss-root .bss-panel-body{min-width:0}
+.bss-root .bss-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:normal}
+.bss-root .bss-field,.bss-root .bss-dialogue-edit-fields{min-width:0}
+.bss-root .bss-dialogue-edit-fields{grid-template-columns:repeat(auto-fit,minmax(185px,1fr))!important;gap:12px!important}
+.bss-root .bss-dialogue-card{contain:layout style;content-visibility:auto;contain-intrinsic-size:auto 128px;overflow:clip}
+.bss-root .bss-dialogue-card.is-open{content-visibility:visible;contain:none;overflow:visible}
+.bss-root .bss-dialogue-card header{padding:12px 15px;gap:12px}
+.bss-root .bss-dialogue-head-actions{margin-left:auto;flex-shrink:0}
+.bss-root .bss-dialogue-summary{padding:12px 15px;display:grid;grid-template-columns:minmax(96px,140px) minmax(0,1fr);gap:4px 10px;align-items:start}
+.bss-root .bss-dialogue-summary small{grid-column:1/-1}
+.bss-root .bss-dialogue-summary span{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.bss-root .bss-dialogue-searchbar{position:sticky;top:0;z-index:15;background:#1a2636;box-shadow:0 3px 12px #080f1960}
+.bss-root .bss-dialogue-list{gap:10px}
+.bss-root .bss-dialogue-card.is-open>details,.bss-root .bss-dialogue-card.is-open>label{max-width:100%}
+.bss-root .bss-dialogue-card textarea[data-dialogue-field="text"]{width:100%;max-width:100%;min-height:110px;font-size:14px}
+.bss-root .bss-dialogue-card input[type="number"]{min-width:52px}
+.bss-root .bss-dialogue-workflow-note{padding:10px 13px;border-radius:8px;background:#1a2939;border:1px solid #39536e;color:#d8e4f7}
+.bss-root .bss-dialogue-id-warning{padding:10px 12px;border:1px solid #a77545;border-radius:8px;background:#35271b;color:#ffdda7}
+.bss-root .bss-inspector-jumpbar{scrollbar-width:thin}
+.bss-root .bss-ebdx-main{scrollbar-gutter:stable}
+@media(max-width:1050px){.bss-root .bss-dialogue-summary{grid-template-columns:1fr}.bss-root .bss-inspector-inner{padding:10px}}
+`;
