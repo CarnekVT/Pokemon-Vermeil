@@ -231,16 +231,30 @@ class MovementStudio {
     const def=FIELDS[key],settings=this.values(),current=settings[key],local=this.scope==="map"?this.config[this.currentScope()]||{}:this.config.global||{};
     const own=Object.prototype.hasOwnProperty.call(local,key);
     const inherited=this.scope==="map"&&!own;
+    const classic=settings.instant_turn==="0";
+    const diagonalDisabled=classic||settings.directions!=="8";
+    const unavailable=(key==="directions"||key==="flow_motion")&&classic ||
+      (["diagonal_speed","diagonal_live_turn","wall_slide","wall_slide_priority","diagonal_facing"].includes(key)&&diagonalDisabled) ||
+      (key==="camera_lead_response"&&settings.camera_lookahead==="0") ||
+      (key==="wall_slide_priority"&&settings.wall_slide==="0");
+    const reason=classic&&key!=="instant_turn"&&
+      (["directions","flow_motion","diagonal_speed","diagonal_live_turn","wall_slide","wall_slide_priority","diagonal_facing"].includes(key)) ?
+      "El control Clásico utiliza el movimiento original. Cambia a Moderno para editar esto." :
+      diagonalDisabled&&["diagonal_speed","diagonal_live_turn","wall_slide","wall_slide_priority","diagonal_facing"].includes(key) ?
+      "Activa el control Moderno de 8 direcciones para usar este ajuste." :
+      key==="wall_slide_priority"&&settings.wall_slide==="0"?"Primero activa el deslizamiento en paredes." :
+      key==="camera_lead_response"&&settings.camera_lookahead==="0"?"Primero activa la anticipación visual.":"";
+    const disabled=unavailable?' disabled aria-disabled="true"':'';
     const origin=inherited?'<span class="vm-saved inherited">GLOBAL</span>':this.scope==="map"?'<span class="vm-saved">MAPA</span>':'';
     const reset=inherited?'':'<button type="button" class="vm-btn ghost small" data-inherit="'+E(key)+'" title="'+(this.scope==="map"?'Heredar del perfil global':'Restaurar valor original')+'">↶</button>';
     let control;
     if(def.options){
-      control='<select class="vm-select" data-key="'+E(key)+'" aria-label="'+E(def.label)+'">'+
+      control='<select class="vm-select" data-key="'+E(key)+'" aria-label="'+E(def.label)+'"'+disabled+'>'+
         def.options.map(opt=>optionMarkup(opt[0],opt[1],current===opt[0])).join("")+'</select>';
     }else{
       control='<div class="vm-range-wrap"><input type="range" class="vm-range" data-key="'+E(key)+'" min="'+def.min+'" max="'+def.max+'" step="'+def.step+'" value="'+E(current)+'" aria-label="'+E(def.label)+'"/><output class="vm-range-readout" data-range-readout="'+E(key)+'">'+E(current)+(def.unit||"")+'</output></div>';
     }
-    return '<div class="vm-field"><div class="vm-field-top"><span class="vm-label">'+E(def.label)+'</span><span style="display:flex;gap:4px;align-items:center">'+origin+reset+'</span></div>'+control+'<span class="vm-field-note">'+E(def.description)+'</span></div>';
+    return '<div class="vm-field '+(unavailable?'vm-field-disabled':'')+'"><div class="vm-field-top"><span class="vm-label">'+E(def.label)+'</span><span style="display:flex;gap:4px;align-items:center">'+origin+reset+'</span></div>'+control+'<span class="vm-field-note">'+E(reason||def.description)+'</span></div>';
   }
   inspector(v){
     const classic=v.instant_turn==="0";
@@ -317,12 +331,18 @@ class MovementStudio {
   }
   edit(key,value,redraw){
     if(!Object.prototype.hasOwnProperty.call(FIELDS,key))return;
+    const current=this.values(),isClassic=current.instant_turn==="0";
+    if(isClassic && ["directions","flow_motion","diagonal_speed","diagonal_live_turn","wall_slide","wall_slide_priority","diagonal_facing"].includes(key))return;
+    if((isClassic||current.directions!=="8")&&["diagonal_speed","diagonal_live_turn","wall_slide","wall_slide_priority","diagonal_facing"].includes(key))return;
+    if(key==="wall_slide_priority"&&current.wall_slide==="0")return;
+    if(key==="camera_lead_response"&&current.camera_lookahead==="0")return;
     if(FIELDS[key].options&&!FIELDS[key].options.some(row=>row[0]===value))return;
     if(!FIELDS[key].options && (!Number.isFinite(Number(value)) || Number(value)<FIELDS[key].min || Number(value)>FIELDS[key].max))return;
     const scope=this.currentScope();
     this.config[scope]||={};
     this.config[scope][key]=String(value);
     this.message="";
+    this.reloadConfirm=false;
     if(redraw)this.render();
     else {
       const el=this.root.querySelector('[data-range-readout="'+key+'"]');
