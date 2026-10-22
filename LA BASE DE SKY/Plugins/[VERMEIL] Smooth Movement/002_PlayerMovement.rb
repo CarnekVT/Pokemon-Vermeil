@@ -62,13 +62,29 @@ class Game_Player < Game_Character
     Input.dir4(@moved_last_frame)
   end
 
-  # Respuesta grafica inmediata al cambiar de eje durante un tile. La
-  # trayectoria logica no se modifica: eventos/colisiones siguen por casillas.
+  # El sprite debe corresponder al DESPLAZAMIENTO que se esta dibujando,
+  # no a una nueva tecla pulsada durante el tile previo. Por ejemplo:
+  # arriba -> abajo durante una casilla ascendente NO debe cambiar la fila
+  # grafica hasta empezar realmente el paso descendente.
+  #
+  # En un tile diagonal se puede alternar entre las dos orientaciones
+  # cardinales de esa diagonal sin contradecir su trayectoria.
+  def vermeil_facing_matches_active_step?(dir)
+    return false unless @move_initial_x && @move_initial_y
+    dx = @x - @move_initial_x
+    dy = @y - @move_initial_y
+    # En un paso cardinal la orientacion queda fijada hasta terminarlo.
+    return false if dx == 0 || dy == 0
+    (dx > 0 && dir == 6) || (dx < 0 && dir == 4) ||
+      (dy > 0 && dir == 2) || (dy < 0 && dir == 8)
+  end
+
+  # Solo ajusta la fila grafica EN la misma trayectoria diagonal.
+  # No introduce un retardo al input: Game_Player#update_command_new
+  # sigue usando inmediatamente la tecla actual al arrancar el proximo tile.
   def vermeil_update_live_facing
     return unless VermeilMovement.directions == 8 &&
                   VermeilMovement.enabled?("diagonal_live_turn") && moving?
-    # Solo procesar cambios reales de orientación. No escanear zonas del mapa
-    # cada fotograma cuando el jugador ya mira en la dirección deseada.
     dir = vermeil_live_direction
     turn_dir = case dir
                when 1, 3, 7, 9
@@ -79,6 +95,9 @@ class Game_Player < Game_Character
                else nil
                end
     return unless turn_dir && @direction != turn_dir
+    # La proteccion de coherencia va ANTES de cambiar sprites, evitando
+    # cambiar a una animacion inversa en mitad del tile anterior.
+    return unless vermeil_facing_matches_active_step?(turn_dir)
     return if @direction_fix || @through || @move_route_forcing || jumping?
     return if pbMapInterpreterRunning? || $game_temp.in_battle || $game_temp.in_menu ||
               $game_temp.message_window_showing || $game_temp.in_mini_update
@@ -86,7 +105,6 @@ class Game_Player < Game_Character
               $PokemonGlobal.ascending_waterfall || $PokemonGlobal.descending_waterfall ||
               $PokemonGlobal.surfing || $PokemonGlobal.diving || $PokemonGlobal.bicycle
     return if on_stair? || on_spiral? || $game_map.check_stair_zones(@x, @y)
-    # Cambio visual exclusivamente: ni x/y ni eventos ni colisiones.
     @direction = turn_dir
   end
 
