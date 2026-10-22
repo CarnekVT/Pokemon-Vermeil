@@ -235,7 +235,7 @@ module LightingStudioNormals
       # binary centre hit. Use the best silhouette sample, not origin only.
       min_distance=samples.map { |sx,sy,_weight| Math.hypot(lx-sx,ly-sy) }.min
       fringe=[[1.0-min_distance.to_f/(radius*size+20.0),0.0].max,1.0].min
-      strength=[strength,fringe*0.32].max
+      strength=[strength,fringe*0.32].max if ['radial','ellipse'].include?(type) && !mask_enabled
       strength=[[strength*intensity*energy*1.25,0.0].max,1.0].min
       next if strength<=score
       theta=Math.atan2(ly-center_y,lx-center_x)
