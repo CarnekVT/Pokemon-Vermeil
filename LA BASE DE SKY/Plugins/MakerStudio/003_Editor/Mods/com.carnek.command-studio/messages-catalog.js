@@ -6,7 +6,7 @@ export const SOURCES={
  lbds:"https://la-base-de-sky-wiki-1070f3.gitlab.io/pages/mensajes.html",
  local:"Data/Scripts/018_Objects and windows/012_Messages.rb"
 };
-const d=(category,title,token,description,opts={})=>({id:"msg-"+category+"-"+title.toLowerCase().replace(/\W+/g,"-"),category,title,token,description,
+const d=(category,title,token,description,opts={})=>({id:"msg-"+category+"-"+String(title??"").toLowerCase().replace(/\W+/g,"-"),category,title,token,description,
  type:"insert",level:"beginner",source:"essentials",...opts});
 export const DIRECTIVES=[
  d("Variables","Nombre del jugador","\\PN","Se sustituye por el nombre del jugador.",{level:"beginner"}),

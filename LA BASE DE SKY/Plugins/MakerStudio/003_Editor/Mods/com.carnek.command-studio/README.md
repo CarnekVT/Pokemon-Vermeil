@@ -1,4 +1,4 @@
-# Command Studio 0.9.1 — navegador de eventos, NameBox y Windowskins corregidos
+# Command Studio 0.9.2 — navegador de eventos, NameBox y Windowskins corregidos
 
 Integrado en Pokémon Vermeil, bajo `LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.carnek.command-studio`.
 
@@ -154,3 +154,11 @@ Pruebas de lógica y DOM simulado, no una sesión real de Maker Studio. Confirma
 - Prueba propia: node tests/v091-smoke.cjs
 - El compositor de Windowskin reproduce las piezas principales pero sigue siendo una PREVISUALIZACIÓN: no ejecuta transiciones, animaciones o fuente RGSS. Pueden existir windowskins personalizados con parámetros extra de .txt.
 - El navegador de eventos no altera el guardado ni la compatibilidad de Maker Studio; comprobarlo en una instalación real antes de usar en mapas definitivos.
+
+## 0.9.2 — Estabilidad frente a campos ausentes
+
+- Las búsquedas, filtros, etiquetas y el índice Ruby aceptan valores indefinidos sin invocar directamente `.toLowerCase()` sobre ellos.
+- Si falla una sección, se muestra un diagnóstico con traza y la opción «Volver al inicio» sin cerrar el panel.
+- Los fallos de inicialización muestran un diagnóstico visible y se registran con `ctx.log` y `console.error`.
+- Prueba adicional: `node tests/undefined-smoke.cjs`.
+- La ubicación original exacta del error requiere la traza de la instalación; este parche protege las conversiones vulnerables detectadas.

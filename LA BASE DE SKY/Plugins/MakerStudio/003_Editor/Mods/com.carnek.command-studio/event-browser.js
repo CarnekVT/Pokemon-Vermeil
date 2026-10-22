@@ -143,7 +143,7 @@ export function createEventBrowser(ctx,host,options={}){
   const previousTop=listResults.scrollTop||0;
   listResults.replaceChildren();
   if(mid==null){listResults.append(el("p","Abre un mapa desde Maker Studio.","sub"));return;}
-  const found=cache.filter(x=>[x.id,x.name].join(" ").toLowerCase().includes(query.trim().toLowerCase()));
+  const found=cache.filter(x=>[x.id,x.name].join(" ").toLowerCase().includes(String(query??"").trim().toLowerCase()));
   const overview=el("div",null,"csb-list-intro");
   overview.append(el("strong","Personajes y objetos"),el("span",found.length+" de "+cache.length,"sub"));
   listResults.append(overview);

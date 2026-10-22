@@ -13,8 +13,18 @@ export function activate(ctx) {
     render(host) {
       try { return mount(ctx, host); }
       catch (err) {
-        ctx.log?.error?.(err);
-        host.textContent = "Error de Command Studio: " + String(err?.message || err);
+        const detail = String(err?.stack || err?.message || err);
+        try { ctx.log?.error?.("[Command Studio] Error al iniciar: " + detail); } catch (_) {}
+        try { console.error("[Command Studio] Error al iniciar", err); } catch (_) {}
+        host.replaceChildren();
+        const heading = document.createElement("h3");
+        heading.textContent = "No se pudo iniciar Command Studio";
+        const explanation = document.createElement("p");
+        explanation.textContent = "Copia el diagnóstico para identificar qué función falló.";
+        const diagnostic = document.createElement("pre");
+        diagnostic.textContent = detail.slice(0, 1800);
+        diagnostic.style.cssText = "white-space:pre-wrap;overflow:auto;max-height:240px;padding:12px;";
+        host.append(heading, explanation, diagnostic);
         return () => {};
       }
     }
@@ -39,6 +49,6 @@ export function activate(ctx) {
       }
     });
   }
-  ctx.log?.info?.("Command Studio 0.9.1: búsqueda por intención, secuencias editables e inserción directa.");
+  ctx.log?.info?.("Command Studio 0.9.2: búsqueda por intención, secuencias editables e inserción directa.");
 }
 export function deactivate() {}

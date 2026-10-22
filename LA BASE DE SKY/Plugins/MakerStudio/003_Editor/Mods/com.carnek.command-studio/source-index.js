@@ -43,7 +43,7 @@ export function parseSignature(text){
  });
 }
 function inferType(name,defaultValue){
- const d=defaultValue.trim(),n=name.toLowerCase();
+ const d=String(defaultValue??"").trim(),n=String(name??"").toLowerCase();
  if(/^true$|^false$/.test(d))return"boolean";
  if(/^nil$/.test(d))return"expression";
  if(/^:-?[a-zA-Z_][a-zA-Z_0-9]*$/.test(d))return"symbol";

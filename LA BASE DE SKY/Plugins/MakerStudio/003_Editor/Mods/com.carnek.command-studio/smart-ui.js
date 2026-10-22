@@ -323,7 +323,7 @@ function mount(ctx,host){
   const q=el("input");q.className="search";q.placeholder="Buscar en las recetas técnicas";center.append(q);
   const list=el("div");center.append(list);
   function draw(){
-   list.replaceChildren();const matches=WIKI.filter(x=>!q.value||[x.title,x.group].join(" ").toLowerCase().includes(q.value.toLowerCase())).slice(0,80);
+   list.replaceChildren();const matches=WIKI.filter(x=>!q.value||[x.title,x.group].join(" ").toLowerCase().includes(String(q.value??"").toLowerCase())).slice(0,80);
    for(const w of matches)list.append(btn(w.title+" · "+w.group,()=>pickWiki(w),"result"));
   }
   q.oninput=draw;draw();
@@ -342,7 +342,7 @@ function mount(ctx,host){
   const input=el("input");input.className="search";input.placeholder="Buscar pbAddPokemon, métodos, clases…";input.value=advancedSearch;input.style.marginTop="12px";left.append(input);
   const matches=el("div");left.append(matches);
   function draw(){
-   matches.replaceChildren();const normalized=advancedSearch.toLowerCase();
+   matches.replaceChildren();const normalized=String(advancedSearch??"").toLowerCase();
    const data=sourceCatalog().filter(x=>!normalized||[x.title,x.sourcePath,x.signature].join(" ").toLowerCase().includes(normalized)).slice(0,150);
    for(const entry of data){
     const box=btn(entry.title+"("+entry.signature+")",()=>selectMethod(entry),"result");

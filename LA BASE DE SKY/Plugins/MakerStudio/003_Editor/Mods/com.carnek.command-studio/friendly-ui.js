@@ -154,6 +154,26 @@ export function mountFriendly(ctx,host){
   }catch(e){notice("No se insertó: "+e.message);}
  }
  function render(){
+  try{return renderContent();}
+  catch(err){
+    const diagnostic=String(err?.stack||err?.message||err).slice(0,1500);
+    try{ctx.log?.error?.("[Command Studio] "+mode+" · "+diagnostic);}catch(_){}
+    try{console.error("[Command Studio] "+mode,err);}catch(_){}
+    stage.replaceChildren();
+    const card=el("section",null,"card");
+    card.append(el("h3","No se pudo abrir esta sección"),
+      el("p","Ocurrió un error al preparar "+mode+". Las demás herramientas siguen disponibles.","sub"));
+    const pre=el("pre",diagnostic,"preview");pre.style.whiteSpace="pre-wrap";pre.style.maxHeight="180px";pre.style.overflow="auto";
+    card.append(pre);
+    card.append(button("Volver al inicio",()=>{mode="home";step=1;menu();render();},"btn primary"));
+    card.append(button("Copiar diagnóstico",()=>{
+      try{navigator.clipboard?.writeText?.(diagnostic);}
+      catch(_){}
+    },"btn"));
+    stage.append(card);notice("Error de Command Studio · consulta el diagnóstico.");
+  }
+ }
+ function renderContent(){
   if(messageCleanup){messageCleanup();messageCleanup=null;}
   destinationRefresh=null;
   if(eventBrowser){eventBrowser.dispose();eventBrowser=null;}

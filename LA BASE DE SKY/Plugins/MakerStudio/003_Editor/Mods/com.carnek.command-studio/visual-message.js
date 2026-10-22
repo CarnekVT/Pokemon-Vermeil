@@ -51,7 +51,7 @@ export function previewData(source){
  for(const token of split){
    if(!token)continue;
    if(!/^(?:<|\\)/.test(token)){push(token);continue;}
-   const lower=token.toLowerCase();
+   const lower=String(token??"").toLowerCase();
    let m=token.match(/^<c(?:=)([0-9a-f]{6,8})>$/i);
    if(m){color="#"+m[1].slice(0,6);shadow="";explicit=true;continue;}
    m=token.match(/^<c3=([0-9a-f]{6,8}),([0-9a-f]{6,8})>$/i);

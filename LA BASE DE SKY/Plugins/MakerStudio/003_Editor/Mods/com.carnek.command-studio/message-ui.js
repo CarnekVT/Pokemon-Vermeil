@@ -193,7 +193,7 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
     else{editor.selectionStart=start;editor.selectionEnd=end;}
     editor.dispatchEvent(new Event("input"));drawWindowOnly(boxes);
    },"csb-pos"+(messagePosition(editor.value)===id?" active":""));
-   b.dataset.pos=id;b.title="Colocar la ventana "+name.toLowerCase();
+   b.dataset.pos=id;b.title="Colocar la ventana "+String(name??"").toLowerCase();
    b.append(el("span",null,"mini-screen"),el("small",name));boxes.append(b);
   }
   panel.append(boxes);
@@ -251,7 +251,7 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
   const inspector=el("div",null,"csb-effect-detail");panel.append(inspector);
   function listItems(){
    list.replaceChildren();
-   const found=DIRECTIVES.filter(d=>(category==="Todas"||d.category===category)&&[d.title,d.description,d.token].join(" ").toLowerCase().includes(query.toLowerCase()));
+   const found=DIRECTIVES.filter(d=>(category==="Todas"||d.category===category)&&[d.title,d.description,d.token].join(" ").toLowerCase().includes(String(query??"").toLowerCase()));
    for(const d of found.slice(0,limit)){
     const row=button("",()=>{selected=d;showDetail();},"csb-effect-row");
     row.append(el("strong",d.title),el("small",d.description));list.append(row);
@@ -285,7 +285,7 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
     colors.forEach((label,i)=>{
      const picker=el("input");picker.type="color";
      try{picker.value="#"+normalizedHex(parts[i]);}catch(_){picker.value=i===0?"#FFB700":"#405070";}
-     picker.title="Seleccionar "+label.toLowerCase();
+     picker.title="Seleccionar "+String(label??"").toLowerCase();
      picker.oninput=()=>{parts[i]=picker.value.slice(1).toUpperCase();parameter=parts.join(",");if(textInput)textInput.value=parameter;refresh();};
      chooser.append(el("span",label,"sub"),picker);
     });
