@@ -68,12 +68,12 @@ export function mountFriendly(ctx,host){
  const stage=el("div",null,"stage"),foot=el("footer","Listo para crear.");root.append(stage,foot);
  host.replaceChildren(root);
  const fullscreenDispose=installWorkspaceFullscreen(ctx,host,root,fullscreenButton);
- let mode="home",step=1,action=null,values={},query="",messageText="¡Hola, \\PN! ¿Qué tal?",group="Todas",tokenQuery="",token=null,tokenValue="";
+ let mode="events",step=1,action=null,values={},query="",messageText="¡Hola, \\PN! ¿Qué tal?",group="Todas",tokenQuery="",token=null,tokenValue="";
  let insertionPosition="end",destinationRefresh=null,eventBrowser=null,messageCleanup=null,speakerName="",sourceAudit=null,scanning=false,subscriptions=[],catalogTab="wiki",catalogQuery="",catalogGroup="Todas",catalogLimit=12,selectedReference=null,moreTasks=false,taskGroup="Todas",taskLimit=10,sessionRecent=[],favorites=new Set(),mapId=activeMapId(ctx),eventId="",pageId=0,advCleanup=null,disposed=false,pbs=null;
  if(requestedEvent&&requestedEvent.mapId===mapId){eventId=String(requestedEvent.eventId);requestedEvent=null;}
  function notice(s){foot.textContent=s;try{ctx.ui.showToast({message:s,level:"info"});}catch(_){}}
  function menu(){
-  tabs.replaceChildren();for(const [id,title]of [["home","Crear"],["events","Eventos"],["message","Diálogos"],["catalog","Enciclopedia"],["advanced","Avanzado"]]){
+  tabs.replaceChildren();for(const [id,title]of [["home","Crear acción"],["events","Eventos y páginas"],["message","Diálogos"],["catalog","Enciclopedia"],["advanced","Avanzado"]]){
    tabs.append(button(title,()=>go(id),"btn"+(mode===id?" selected":"")+(id==="advanced"?" csb-quiet":"")));
   }
  }
@@ -101,6 +101,31 @@ export function mountFriendly(ctx,host){
   row.append(evt,pg,positions);block.append(mapCaption,row);
   const guidance=el("p","La lista se sincroniza con el mapa. Solo se ofrecen puntos seguros de inserción.","sub");
   block.append(guidance);target.append(block);
+   // Event creation is also available at the insertion step: users should not
+   // have to leave the wizard, find their map again, and restart their action.
+   const createBox=el("details",null,"csb-destination-create");createBox.open=!eventId;
+   createBox.append(el("summary","＋ Crear evento nuevo en este mapa"));
+   const newRow=el("div",null,"csb-destination-newrow");
+   const newName=el("input");newName.placeholder="Nombre (ej.: Cofre)";newName.value="Nuevo evento";
+   newName.setAttribute("aria-label","Nombre del evento");
+   const newX=el("input"),newY=el("input");
+   for(const [input,label] of [[newX,"X"],[newY,"Y"]]){input.type="number";input.min="0";input.value="0";input.placeholder=label;input.setAttribute("aria-label","Casilla "+label);}
+   const newEvent=button("Crear y seleccionar",()=>{
+     const currentMap=activeMapId(ctx),x=Number(newX.value),y=Number(newY.value);
+     if(currentMap==null)return notice("Primero abre el mapa donde crearás el evento.");
+     if(!Number.isSafeInteger(x)||!Number.isSafeInteger(y)||x<0||y<0)return notice("Introduce coordenadas X e Y válidas.");
+     if(typeof ctx.events?.create!=="function")return notice("Esta versión de Maker Studio no admite la creación de eventos.");
+     try{
+       const made=ctx.events.create(currentMap,x,y,newName.value.trim()||"Nuevo evento");
+       const fresh=Number(made?.id??made);
+       if(!Number.isSafeInteger(fresh)||fresh<1)throw Error("No se recibió el ID del evento.");
+       mapId=currentMap;eventId=String(fresh);pageId=0;insertionPosition="end";
+       refill();createBox.open=false;
+       notice("Evento #"+fresh+" creado y seleccionado. Ya puedes añadir la acción.");
+     }catch(err){notice("No se creó el evento: "+String(err?.message||err));}
+   },"btn primary");
+   newRow.append(newName,newX,newY,newEvent);createBox.append(newRow);
+   block.append(createBox);
   function refill(){
     const active=activeMapId(ctx);
     if(mapId!==active){mapId=active;eventId="";pageId=0;insertionPosition="end";}
@@ -189,7 +214,7 @@ export function mountFriendly(ctx,host){
   if(mode==="events"){
     area.classList.add("csb-events-content");
     const top=el("div",null,"csb-section-head");
-    top.append(el("h3","Eventos del mapa"),button("＋ Crear acción",()=>{step=1;go("home");},"btn primary"));
+    top.append(el("h3","Eventos del mapa"),button("＋ Nueva acción",()=>{step=1;go("home");},"btn primary"));
     area.append(top);
     area.append(el("p","Selecciona un evento y marca dónde quieres colocar tu acción. El orden se conserva al volver a Crear.","sub"));
     const workspace=el("div",null,"csb-event-browser-host");area.append(workspace);
