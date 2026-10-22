@@ -146,7 +146,7 @@ module BSS102RoomAuthoringParity
       row=@data[key] || @data[key.to_s] || @data[key.to_sym]
       sp=@sprites[key.to_s] || @sprites[key]
       if row.is_a?(Hash) && sp && !(sp.disposed? rescue true)
-        slot=defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : :day
+        slot=defined?(BSSLightingClockBridge) ? BSSLightingClockBridge.slot(@data) : :day
         prefix=(slot==:night ? 'Night' : (slot==:dawn ? 'Dawn' : 'Day'))
         color_val=row["tint#{prefix}Color"] || row["tint#{prefix}Color".to_sym] || BSS102.hget(row,:tintColor)
         alpha_val=row["tint#{prefix}Alpha"] || row["tint#{prefix}Alpha".to_sym] || BSS102.hget(row,:tintAlpha)
@@ -193,7 +193,7 @@ module BSS102RoomAuthoringParity
       if bg && @data.is_a?(Hash)
         uniform=Math.sqrt((bg.zoom_x.to_f*bg.zoom_y.to_f).abs)
         uniform=(bg.zoom_x.to_f.abs+bg.zoom_y.to_f.abs)/2.0 if uniform<=0.001
-        slot=defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : :day
+        slot=defined?(BSSLightingClockBridge) ? BSSLightingClockBridge.slot(@data) : :day
         prefix=(slot==:night ? 'Night' : (slot==:dawn ? 'Dawn' : 'Day'))
         @data.each do |raw_key,row|
           next unless raw_key.to_s =~ /^img\d+/i && row.is_a?(Hash)
