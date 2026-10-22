@@ -693,10 +693,13 @@ else if(ctx.ui.registerAdvancedOverlay){ctx.ui.registerAdvancedOverlay(item);sta
 else notify('Esta versión de Maker Studio no admite overlays de mods.','error');
 ctx.bus.on('map.loaded',event=>{if(event?.mapId)selectMap(event.mapId);redraw();});
 redraw();state.ticker=setInterval(()=>{
- if(!state)return;
+ if(!state || (typeof document!=='undefined' && document.hidden))return;
  const now=performance.now();
  if(now-(state.lastStatusAt||0)>650){state.lastStatusAt=now;updateDiagnosticStatus();}
- const wait=state.previewQuality==='full'?120:state.previewQuality==='fast'?320:210;
+ // Keep editor responsiveness ahead of high-quality background baking.
+// Full preview is explicitly requested; normal work should never exceed
+// the balanced cadence merely because another overlay repaints.
+const wait=state.previewQuality==='full'?210:state.previewQuality==='fast'?520:360;
  if(now-(state.lastTickRedraw||0)<wait)return;
  if((state.previewQuality==='full'&&!state.drag&&!state.editSnapshot&&hasPendingChunks())||
     (!state.advancedOverlay&&state.showOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))){
