@@ -445,7 +445,15 @@ if(maskSelected){
 
   const maskTitle=element('div','ls-mask-inspector-title','DIBUJAR FORMA DE LA LUZ');
   maskPanel.append(maskTitle);
-  maskPanel.append(element('p','ls-inline-note',selected.maskMode==='block'?'Pinta las paredes/obstáculos: donde pintes se bloqueará la luz. Sin pintar, la luz se mantiene.':'Pinta la abertura: solo las zonas pintadas dejan pasar luz. El resto bloquea. El zoom es independiente del mapa.'));
+  maskPanel.append(element('p','ls-inline-note',selected.maskMode==='block'?'OBSTÁCULO: el trazo opaco impide que pase la luz. La zona transparente queda iluminada.':'ABERTURA: solo el trazo opaco permite el paso de luz. La zona transparente queda oscura.'));
+  const maskQuick=element('div','ls-inline');maskPanel.append(maskQuick);
+  const enabledToggle=mini(selected.maskEnabled?'● Máscara activa · apagar':'○ Máscara apagada · activar',()=>{
+    change(()=>{selected.maskEnabled=!selected.maskEnabled;});state.inspectorTab='mask';
+  });
+  maskQuick.append(enabledToggle);
+  maskQuick.append(mini('Usar como abertura',()=>{change(()=>{selected.maskMode='reveal';selected.maskEnabled=true;});state.inspectorTab='mask';}));
+  maskQuick.append(mini('Usar como obstáculo',()=>{change(()=>{selected.maskMode='block';selected.maskEnabled=true;});state.inspectorTab='mask';}));
+  maskPanel.append(element('p','ls-inline-note','Máscara = silueta por ALFA: píxeles opacos forman la región; transparencia = ausencia. El color negro cuenta como trazo, no como vacío.'));
   const maskInput=node('input');maskInput.type='text';maskInput.className='ls-input';
   maskInput.placeholder='cueva_salida.png';maskInput.value=selected.maskFile||'';
   const lightId=selected.id;
