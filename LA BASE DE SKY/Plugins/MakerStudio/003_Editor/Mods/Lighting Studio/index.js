@@ -213,7 +213,7 @@ async function preloadMasks(){
  const owner=state;if(!owner)return;
  // Load only the current map, rather than scanning every map on each slider
  // change. Other assets are loaded when switching to their map.
- const names=[...new Set((current()?.lights||[]).filter(l=>l.type==='mask'&&
+ const names=[...new Set((current()?.lights||[]).filter(l=>(l.type==='mask'||l.maskEnabled===true)&&
    maskFilename(l.maskFile)).map(l=>l.maskFile))];
  await Promise.all(names.map(name=>loadMaskFile(name)));
 }
@@ -228,7 +228,7 @@ async function pickMaskGraphic(lightId){
  if(!name)return notify('Selecciona un PNG válido dentro de Graphics/LightingStudio/Masks.','warn');
  const light=owner.data.maps?.[String(owner.mapId)]?.lights?.find(l=>l.id===lightId);
  if(!light)return;
- change(()=>light.maskFile=name);
+ change(()=>{light.maskFile=name;light.maskEnabled=true;});
  const found=await loadMaskFile(name,{force:true});
  notify(found?'Máscara '+name+' cargada en el mapa.':'PNG no disponible; puedes crear la forma con el editor.',found?'info':'warn');
 }
@@ -413,7 +413,7 @@ const daytime=element('section','ls-section');shell.append(daytime);
 const insp=element('section','ls-section ls-inspector');shell.append(insp);
 const insHead=element('div','ls-section-heading');insHead.append(node('span','INSPECTOR DE LUZ'),element('span','ls-count',active()?.name||'Sin selección'));insp.append(insHead);
 const nav=element('div','ls-inspector-tabs');insp.append(nav);
-const maskSelected=active()?.type==='mask';
+const maskSelected=!!active()&&(active().type==='mask'||active().maskEnabled===true);
 if(!maskSelected&&state.inspectorTab==='mask')state.inspectorTab='shape';
 if(maskSelected)insp.classList.add('ls-mask-editor-active');
 const inspectorTabs=maskSelected?[['mask','✎ Dibujar máscara'],['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art'],['schedule','◷ Horario']]:
@@ -432,10 +432,20 @@ fadePanel.append(element('p','ls-inline-note','Elige hacia qué borde se atenúa
 const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;state.inspectorTab=selected.type==='mask'?'mask':'shape';});labeled(shapePanel,'Geometría',typeSelect);
 if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editLightValue(()=>selected.angle=v,final));}
 if(selected.type==='ellipse'||selected.type==='rectangle'||selected.type==='mask'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editLightValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editLightValue(()=>selected.heightPx=v,final));}
-if(selected.type==='mask'){
+const maskToggle=node('input');maskToggle.type='checkbox';maskToggle.checked=maskSelected;maskToggle.disabled=selected.type==='mask';
+maskToggle.onchange=()=>change(()=>{selected.maskEnabled=maskToggle.checked;state.inspectorTab=maskToggle.checked?'mask':'shape';});
+labeled(shapePanel,'Recortar esta luz con una máscara',maskToggle);
+shapePanel.append(element('p','ls-inline-note','La luz conserva su forma y tamaño. La máscara solo define dónde atraviesa o dónde queda bloqueada. Puedes usarla sobre cualquier tipo de luz.'));
+if(maskSelected){
+ const maskMode=node('select');maskMode.className='ls-input';
+ for(const [id,label] of [['block','Bloquear luz donde pinto (paredes)'],['reveal','Permitir luz donde pinto (ventanas)']]){const opt=node('option',label);opt.value=id;maskMode.append(opt);}
+ maskMode.value=selected.maskMode||'reveal';
+ maskMode.onchange=()=>change(()=>selected.maskMode=maskMode.value);
+ labeled(shapePanel,'Qué significa lo pintado',maskMode);
+
   const maskTitle=element('div','ls-mask-inspector-title','DIBUJAR FORMA DE LA LUZ');
   maskPanel.append(maskTitle);
-  maskPanel.append(element('p','ls-inline-note','Usa la plantilla para la salida de la cueva, pinta dónde llega la luz y borra detrás de las paredes. El zoom de aquí es independiente del mapa.'));
+  maskPanel.append(element('p','ls-inline-note',selected.maskMode==='block'?'Pinta las paredes/obstáculos: donde pintes se bloqueará la luz. Sin pintar, la luz se mantiene.':'Pinta la abertura: solo las zonas pintadas dejan pasar luz. El resto bloquea. El zoom es independiente del mapa.'));
   const maskInput=node('input');maskInput.type='text';maskInput.className='ls-input';
   maskInput.placeholder='cueva_salida.png';maskInput.value=selected.maskFile||'';
   const lightId=selected.id;
@@ -443,7 +453,7 @@ if(selected.type==='mask'){
     const name=maskFilename(maskInput.value.trim());
     if(!name){maskInput.value=selected.maskFile||'';return notify('Usa un nombre como cueva_salida.png','warn');}
     if(name===selected.maskFile)return;
-    change(()=>{selected.maskFile=name;state.inspectorTab='mask';});
+    change(()=>{selected.maskFile=name;selected.maskEnabled=true;state.inspectorTab='mask';});
     void loadMaskFile(name,{force:true}).then(ok=>{
       notify(ok?'Máscara actualizada en el mapa':'Sin PNG todavía: usa «Crear salida de cueva».',ok?'info':'warn');
     }).catch(fail);
@@ -462,7 +472,7 @@ if(selected.type==='mask'){
     const name=maskFilename(maskInput.value.trim())||'cueva_salida.png';
     // Keep a separate canvas per graphic so edits are not lost when switching
     // between inspector tabs and lighting sources.
-    const draft=caveTemplate(256,128,'right');
+    const draft=selected.maskMode==='block' ? (()=>{const c=document.createElement('canvas');c.width=256;c.height=128;return c;})() : caveTemplate(256,128,'right');
     state.maskDrafts.set(name,draft);
     setMaskImage(name,draft);
     change(()=>{selected.maskFile=name;state.inspectorTab='mask';});
@@ -474,6 +484,7 @@ if(selected.type==='mask'){
     // inspector sections. Only the active tab gets a costly canvas.
     mountMaskPainter(maskPanel,{
       filename:name,
+      maskMode:selected.maskMode||'reveal',
       getSource:()=>state.maskDrafts.get(name)||getMaskImage(name),
       onCreate:canvas=>{state.maskDrafts.set(name,canvas);setMaskImage(name,canvas);redraw();},
       onPreview:canvas=>{state.maskDrafts.set(name,canvas);setMaskImage(name,canvas);redraw();},
