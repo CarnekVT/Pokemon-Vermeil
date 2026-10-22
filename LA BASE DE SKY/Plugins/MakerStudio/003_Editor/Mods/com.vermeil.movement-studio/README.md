@@ -65,3 +65,8 @@ La vista previa central sigue siendo un diagrama de configuración: las flechas 
 ### Comprobación
 
 Se probaron con APIs simuladas la carga de `config.ini`, las cinco secciones, la separación entre Sencillo/Avanzado, la desactivación de campos inaplicables, sobrescritura local por mapa y guardado verificado por lectura. La comprobación en Maker Studio real sigue pendiente.
+
+
+## Hotfix 0.7.1 — explicación de sincronización gráfica
+
+La opción avanzada `diagonal_live_turn` ahora se presenta como **Orientación durante diagonales**. Su descripción explica que no puede invertir el sprite a mitad de un paso cardinal y que cualquier dirección nueva se aplica cuando el siguiente paso comienza. No cambia el significado de los presets ni sobreescribe `config.ini`. La corrección de runtime corresponde a Vermeil Smooth Movement 0.6.1.
