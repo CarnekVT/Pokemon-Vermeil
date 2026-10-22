@@ -376,7 +376,8 @@ module BSSLayeredEBDXCamera
     return false unless @vector && @battle
     cfg=bss_layered_camera_config
     profile=(cfg["profile"] || cfg["preset"] || "ebdx").to_s.downcase
-    return false if profile=="static" || profile=="off"
+    return false if ["static","static_gen4","off","vanilla"].include?(profile)
+    return false if BSSLayeredLighting.clamp(cfg["idleStrength"] || 40,0,100)<=0
     return false if (@battle.respond_to?(:triplebattle?) && @battle.triplebattle?)
     true
   rescue StandardError
@@ -386,17 +387,20 @@ module BSSLayeredEBDXCamera
   def bss_layered_next_ebdx_shot
     cfg=bss_layered_camera_config
     strength=BSSLayeredLighting.clamp(cfg["idleStrength"] || 40,0,100)/100.0
-    speed=BSSLayeredLighting.clamp(cfg["idleSpeed"] || 50,1,100)/100.0
+    speed=BSSLayeredLighting.clamp(cfg["idleSpeed"] || 50,1,150)/100.0
+    pan_x=BSSLayeredLighting.clamp(cfg["panX"] || 100,0,200)/100.0
+    pan_y=BSSLayeredLighting.clamp(cfg["panY"] || 100,0,200)/100.0
+    zoom=BSSLayeredLighting.clamp(cfg["zoom"] || 100,0,200)/100.0
     base=BSS070EBDXCore.get_vector(:MAIN,@battle).map(&:to_f)
     target=base.clone
     patterns=(BSS070EBDXCore.const_get(:CAMERA_MOTION) rescue nil)
     options=patterns.is_a?(Array) ? patterns.select{|v|v.is_a?(Array) && v.length>=5} : []
     if options.empty?
       phase=@bss_layered_camera_index.to_i
-      target[0]+=Math.sin(phase*1.8)*14*strength
-      target[1]+=Math.cos(phase*1.4)*8*strength
-      target[4]=base[4]*(1.0+Math.sin(phase*1.3)*0.055*strength)
-      target[5]=base[5]*(1.0+Math.sin(phase*1.3)*0.055*strength)
+      target[0]+=Math.sin(phase*1.8)*14*strength*pan_x
+      target[1]+=Math.cos(phase*1.4)*8*strength*pan_y
+      target[4]=base[4]*(1.0+Math.sin(phase*1.3)*0.055*strength*zoom)
+      target[5]=base[5]*(1.0+Math.sin(phase*1.3)*0.055*strength*zoom)
     else
       index=@bss_layered_camera_index.to_i%options.length
       row=options[index]
@@ -413,7 +417,8 @@ module BSSLayeredEBDXCamera
             when 3 then 3.0
             else 0.045
             end
-        target[i]=base[i]+BSSLayeredLighting.clamp(delta*strength,-cap,cap)
+        axis_strength= i==0 ? pan_x : (i==1 ? pan_y : (i>=4 ? zoom : 1.0))
+        target[i]=base[i]+BSSLayeredLighting.clamp(delta*strength*axis_strength,-cap*axis_strength,cap*axis_strength)
       end
     end
     @bss_layered_camera_index=@bss_layered_camera_index.to_i+1
