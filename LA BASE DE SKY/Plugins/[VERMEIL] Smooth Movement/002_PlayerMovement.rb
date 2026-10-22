@@ -40,8 +40,55 @@ class Game_Player < Game_Character
   end
 
   def vermeil_live_direction
-    return Input.dir8 if VermeilMovement.directions == 8 && Input.respond_to?(:dir8)
+    # Consultar los cuatro botones del frame ACTUAL directamente. Input.dir8
+    # de algunas implementaciones prioriza un eje o alterna al sumar teclas.
+    # No se guarda ningun input para los fotogramas siguientes.
+    if VermeilMovement.directions == 8
+      if Input.respond_to?(:press?) && [:UP, :DOWN, :LEFT, :RIGHT].all? { |key| Input.const_defined?(key) }
+        up    = Input.press?(Input::UP)
+        down  = Input.press?(Input::DOWN)
+        left  = Input.press?(Input::LEFT)
+        right = Input.press?(Input::RIGHT)
+        x = (right ? 1 : 0) - (left ? 1 : 0)
+        y = (down ? 1 : 0) - (up ? 1 : 0)
+        direct = {
+          [-1, -1] => 7, [0, -1] => 8, [1, -1] => 9,
+          [-1, 0] => 4, [1, 0] => 6,
+          [-1, 1] => 1, [0, 1] => 2, [1, 1] => 3
+        }[[x, y]]
+        return direct if direct
+        # Si dos teclas opuestas se cancelan, no generar un paso fantasma.
+        return 0 if up || down || left || right
+      end
+      return Input.dir8 if Input.respond_to?(:dir8)
+    end
     Input.dir4(@moved_last_frame)
+  end
+
+  # Respuesta grafica inmediata al cambiar de eje durante un tile. La
+  # trayectoria logica no se modifica: eventos/colisiones siguen por casillas.
+  def vermeil_update_live_facing
+    return unless VermeilMovement.directions == 8 &&
+                  VermeilMovement.enabled?("diagonal_live_turn") && moving?
+    return if @direction_fix || @through || @move_route_forcing || jumping?
+    return if pbMapInterpreterRunning? || $game_temp.in_battle || $game_temp.in_menu ||
+              $game_temp.message_window_showing || $game_temp.in_mini_update
+    return if $PokemonGlobal.forced_movement? || $PokemonGlobal.ice_sliding ||
+              $PokemonGlobal.ascending_waterfall || $PokemonGlobal.descending_waterfall ||
+              $PokemonGlobal.surfing || $PokemonGlobal.diving || $PokemonGlobal.bicycle
+    return if on_stair? || on_spiral? || $game_map.check_stair_zones(@x, @y)
+    dir = vermeil_live_direction
+    turn_dir = case dir
+               when 1, 3, 7, 9
+                 horiz = (dir == 1 || dir == 7) ? 4 : 6
+                 vert = (dir == 1 || dir == 3) ? 2 : 8
+                 vermeil_diagonal_facing_direction(horiz, vert)
+               when 2, 4, 6, 8 then dir
+               else nil
+               end
+    # Solo cambia la fila de dibujo. Evitar llamar a turn_generic para no
+    # disparar eventos/counters de cambio de direccion mientras se camina.
+    @direction = turn_dir if turn_dir && @direction != turn_dir
   end
 
   def vermeil_diagonal_eligible?
@@ -119,11 +166,12 @@ class Game_Player < Game_Character
   def set_movement_type(type)
     vermeil_movement_original_movement_type(type)
     # Conservar velocidad fisica equivalente en una diagonal (distancia sqrt(2)).
-    @move_time *= Math.sqrt(2) if @_vermeil_diagonal_active
+    @move_time *= Math.sqrt(2) if @_vermeil_diagonal_active && VermeilMovement.diagonal_speed == "uniform"
   end
 
   alias vermeil_movement_move_end update_move unless method_defined?(:vermeil_movement_move_end)
   def update_move
+    vermeil_update_live_facing if VermeilMovement.enabled?("instant_turn")
     diagonal_step = @_vermeil_diagonal_active
     vermeil_movement_move_end
     # Nunca imponer smoothstep a @real_x/@real_y por casilla: introduce
