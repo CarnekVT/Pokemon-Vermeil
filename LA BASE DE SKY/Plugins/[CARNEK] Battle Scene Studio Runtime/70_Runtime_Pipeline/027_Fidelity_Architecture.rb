@@ -173,7 +173,7 @@ module BSS098SingleFrameEnvironment
       return
     end
 
-    slot = defined?(BSS106) && BSS106.respond_to?(:time_slot) ? BSS106.time_slot(@data) : nil
+    slot = defined?(BSSLightingClockBridge) ? BSSLightingClockBridge.slot(@data) : nil
     if slot.nil?
       mode = @data.is_a?(Hash) ? (@data[:skyMode] || @data["skyMode"]).to_s.downcase : ""
       slot = if mode == "night"
@@ -345,7 +345,7 @@ module BSS098CustomSky
     begin
       mode=(@data["skyMode"] || @data[:skyMode] || "dynamic").to_s
       if mode.empty? || mode=="dynamic"
-        slot = defined?(BSS106) ? BSS106.time_slot(@data).to_s : (defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && PBDayNight.isNight? ? "night" : "day")
+        slot = defined?(BSSLightingClockBridge) ? BSSLightingClockBridge.slot(@data).to_s : (defined?(PBDayNight) && PBDayNight.respond_to?(:isNight?) && PBDayNight.isNight? ? "night" : "day")
         mode = slot
       end
       path=case mode
