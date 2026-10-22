@@ -7,6 +7,7 @@ import {occupiedPropCells,matchPropCells,changeSelection} from './prop-tools.js'
 import { isMapPointer, normalizedViewport } from './map-canvas.js';
 import { overlayCanvasRect, nativeScreenRect } from './overlay-transform.js';
 import { getProfile, dueTick, frameAt } from './performance.js';
+import { visibleFrameSignature } from './frame-clock.js';
 import { createSpatialIndex, queryVisible, viewportCacheKey } from './spatial-index.js';
 import {resolveTile} from './pointer-router.js';
 import {pickProp, movable, tileFromRenderedCanvas} from './interaction.js';
@@ -423,43 +424,6 @@ function cachedHigherMask(mapId,p,crop,layers){
  state.layerMasks.set(key,mask);
  return mask;
 }
-// The native autotile renderer redraws when its *frame set* changes, not once
-// per placed tile. A single clock controls every placement of a definition,
-// including independently phased placements. Checking those definitions rather
-// than stringifying every visible placement avoids O(visible props) hash work
-// on each 33 ms scheduler tick.
-function activeMapFrameSignature(visible,now){
-  const definitions=new Map();
-  for(const row of visible){
-    const d=row?.d;
-    if(!d || definitions.has(d.id))continue;
-    definitions.set(d.id,d);
-  }
-  const ticks=[];
-  for(const d of definitions.values()){
-    const first=Math.max(1,Math.floor(Number(d.frames)||1));
-    const second=d.parallel?.enabled && d.parallel?.sheet ?
-      Math.max(1,Math.floor(Number(d.parallel.frames)||1)) : 1;
-    if(first<=1 && second<=1)continue;
-    const primary=first>1?frameFor(d,now):-1;
-    // Parallel is synchronized to the same time origin; placement-specific
-    // offsets change the phase, not the moments at which a frame can advance.
-    // Independent tracks continue even while the inspector preview is paused.
-    // Use phase zero for the change clock; placed props add fixed offsets.
-    let parallel=-1;
-    if(second>1){
-      if(d.timingMode!=='independent')parallel=parallelFrame(d,now,null);
-      else {
-        const cap=getProfile(state.perfMode).mapFps;
-        const elapsed=Math.max(0,now-(state.animEpoch||0));
-        const quantized=cap>0?Math.floor(elapsed*cap/1000)/cap:0;
-        parallel=animationFrame(d.parallel,quantized,d.parallel.phase||0);
-      }
-    }
-    ticks.push(d.id+':'+primary+':'+parallel);
-  }
-  return ticks.join('|');
-}
 function tickVisuals(){
   if(!state || (typeof document!=='undefined' && document.hidden))return;
   const now=performance.now(), profile=getProfile(state.perfMode);
@@ -475,7 +439,7 @@ function tickVisuals(){
       cached.entries : queryVisible(render.spatial,info);
     if(!cached || cached.geo!==geo || cached.render!==render)
       state.visibleCandidates={geo,render,entries:visible};
-    const key=activeMapFrameSignature(visible,now);
+    const key=visibleFrameSignature(visible,now,{epoch:state.animEpoch||0,mode:state.perfMode,paused:!!state.playback?.paused,pausedParallelFrame:state.playback?.parallelFrame||0});
     if(key!==state.lastMapFrameKey){
       state.lastMapFrameKey=key;
       // No animated visual is visible? Never schedule a map redraw merely
