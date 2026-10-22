@@ -417,10 +417,9 @@ const insp=element('section','ls-section ls-inspector');shell.append(insp);
 const insHead=element('div','ls-section-heading');insHead.append(node('span','INSPECTOR DE LUZ'),element('span','ls-count',active()?.name||'Sin selección'));insp.append(insHead);
 const nav=element('div','ls-inspector-tabs');insp.append(nav);
 const maskSelected=!!active()&&(active().type==='mask'||active().maskEnabled===true);
-if(!maskSelected&&state.inspectorTab==='mask')state.inspectorTab='shape';
-if(maskSelected)insp.classList.add('ls-mask-editor-active');
-const inspectorTabs=maskSelected?[['mask','✎ Dibujar máscara'],['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art'],['schedule','◷ Horario']]:
- [['shape','◈ Forma'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art'],['schedule','◷ Horario']];
+// Keep mask editing accessible even when disabled.
+if(state.inspectorTab==='mask')insp.classList.add('ls-mask-editor-active');
+const inspectorTabs=[['shape','◈ Forma'],['mask','✎ Máscara / obstáculos'],['fade','◑ Difuminado'],['pulse','◷ Pulsación'],['pixel','▦ Pixel art'],['schedule','◷ Horario']];
 for(const [key,label] of inspectorTabs){
  nav.append(mini(label,()=>{state.inspectorTab=key;refresh();},state.inspectorTab===key));
 }
@@ -435,11 +434,11 @@ fadePanel.append(element('p','ls-inline-note','Elige hacia qué borde se atenúa
 const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;state.inspectorTab=selected.type==='mask'?'mask':'shape';});labeled(shapePanel,'Geometría',typeSelect);
 if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editLightValue(()=>selected.angle=v,final));}
 if(selected.type==='ellipse'||selected.type==='rectangle'||selected.type==='mask'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editLightValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editLightValue(()=>selected.heightPx=v,final));}
-const maskToggle=node('input');maskToggle.type='checkbox';maskToggle.checked=maskSelected;maskToggle.disabled=selected.type==='mask';
+const maskToggle=node('input');maskToggle.type='checkbox';maskToggle.checked=selected.maskEnabled===true || selected.type==='mask';maskToggle.disabled=selected.type==='mask';
 maskToggle.onchange=()=>change(()=>{selected.maskEnabled=maskToggle.checked;state.inspectorTab=maskToggle.checked?'mask':'shape';});
 labeled(shapePanel,'Recortar esta luz con una máscara',maskToggle);
 shapePanel.append(element('p','ls-inline-note','La luz conserva su forma y tamaño. La máscara solo define dónde atraviesa o dónde queda bloqueada. Puedes usarla sobre cualquier tipo de luz.'));
-if(maskSelected){
+{
  const maskMode=node('select');maskMode.className='ls-input';
  for(const [id,label] of [['block','Bloquear luz donde pinto (paredes)'],['reveal','Permitir luz donde pinto (ventanas)']]){const opt=node('option',label);opt.value=id;maskMode.append(opt);}
  maskMode.value=selected.maskMode||'reveal';
@@ -629,7 +628,7 @@ diagnostics.append(diagnosticsHeading,layerStatus);
 shell.append(diagnostics);
 if(state.resetWorkspaceScroll){shell.scrollTop=0;state.resetWorkspaceScroll=false;}
 const hint=element('div','ls-preview-legend','La iluminación se dibuja sobre el mapa mediante un overlay independiente de Fog, Panorama y Sombras. Prueba visual muestra una marca amarilla para comprobar si Maker Studio lo está renderizando.');shell.append(hint);
-const footer=element('div','ls-bottom');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));footer.append(mini('Guardar',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail)));if(!state.resetWorkspaceScroll && state.workspaceTab===state.lastRenderedTab)shell.scrollTop=oldScroll;
+const footer=element('div','ls-bottom ls-save-bar');shell.append(footer);const visible=node('input');visible.type='checkbox';visible.checked=state.showOverlay;visible.onchange=()=>{state.showOverlay=visible.checked;state.ctx.editor.requestRedraw?.();};const lbl=element('label','ls-checkbox');lbl.append(visible,node('span','Ver luces en mapa'));footer.append(lbl);const guides=node('input');guides.type='checkbox';guides.checked=state.showGuides;guides.onchange=()=>{state.showGuides=guides.checked;redraw();};const guidesLabel=element('label','ls-checkbox');guidesLabel.append(guides,node('span','Ver marcadores'));footer.append(guidesLabel);footer.append(element('span','ls-grow'));const saveButton=mini('💾 Guardar iluminación',()=>void persist().then(()=>notify('Iluminación guardada')).catch(fail));saveButton.classList.add('ls-save-primary');footer.append(saveButton);if(!state.resetWorkspaceScroll && state.workspaceTab===state.lastRenderedTab)shell.scrollTop=oldScroll;
 state.lastRenderedTab=state.workspaceTab;
 }
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number.isFinite(v)?v:a));
