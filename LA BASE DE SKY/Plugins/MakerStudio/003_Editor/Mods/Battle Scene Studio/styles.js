@@ -685,4 +685,48 @@ STYLES += `
 .bss-dialogue-options{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px;background:rgba(0,0,0,.18);padding:8px 10px;border-radius:8px;border:1px solid #1e2838}
 .bss-dialogue-text{width:100%;background:#0c1017;color:#e2e8f0;border:1px solid #283548;border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12px;resize:vertical;line-height:1.4}
 .bss-dialogue-text:focus{outline:none;border-color:#5d84f7}
+
+/* BSS 2026 usability pass: visual hierarchy with cheap flat CSS (no blur). */
+.bss-root{font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;font-size:13px;line-height:1.5;--panel:#171e2b;--panel2:#1e293a;--line:#344258;--muted:#a4b1c5;--accent:#6387f7}
+.bss-root h2,.bss-root h3,.bss-root h4{letter-spacing:-.018em}
+.bss-root .bss-btn{font-family:inherit;font-weight:600;transition:background-color .12s,border-color .12s,color .12s;min-height:30px}
+.bss-root .bss-btn.small{min-height:27px}
+.bss-root .bss-btn:focus-visible,.bss-root .bss-input:focus-visible,.bss-root .bss-select:focus-visible{outline:2px solid #8aacff;outline-offset:2px}
+.bss-root .bss-field{min-width:0}
+.bss-root .bss-field>span:first-child{display:block;color:#bdcce0;font-size:12px;font-weight:600;margin-bottom:5px}
+.bss-root input.bss-input,.bss-root textarea.bss-input,.bss-root .bss-select{font-family:inherit;border-color:#36465e;background:#101827;color:#ebf3ff;border-radius:7px;min-width:0}
+.bss-root input.bss-input:focus,.bss-root textarea.bss-input:focus,.bss-root .bss-select:focus{border-color:#769bfa;box-shadow:0 0 0 2px rgba(112,154,248,.12)}
+.bss-root .bss-inspector{scrollbar-gutter:stable;overscroll-behavior:contain}
+.bss-root .bss-panel{background:#171f2d;border:1px solid #344358;border-radius:11px}
+.bss-root .bss-note{line-height:1.55;color:#b2bed0}
+.bss-root .bss-optiongroup{border-radius:9px}
+.bss-root .bss-optiongroup>summary{font-weight:650;cursor:pointer;padding:5px 0}
+.bss-root .bss-bossbanner{box-shadow:inset 0 1px rgba(255,255,255,.04);border-radius:12px!important}
+.bss-root .bss-bossbanner b{font-size:15px}
+.bss-dialogue-searchbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:4px 0 13px;padding:11px 12px;background:#151e2a;border:1px solid #35445c;border-radius:10px}
+.bss-dialogue-searchbar label{font-size:12px;font-weight:700;white-space:nowrap;color:#c2d0e4}
+.bss-dialogue-searchbar input{flex:1 1 180px;max-width:100%;min-width:140px}
+.bss-dialogue-searchbar span{font-size:11px;font-weight:650;color:#9dacc6;font-variant-numeric:tabular-nums}
+.bss-dialogue-list{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;padding-bottom:10px}
+.bss-root .bss-dialogue-card{padding:0;margin:0;background:#151e2b;border:1px solid #3a4a63;border-radius:11px;box-shadow:0 2px 7px rgba(0,0,0,.15);overflow:hidden;min-width:0;transition:border-color .13s}
+.bss-root .bss-dialogue-card[hidden]{display:none}
+.bss-root .bss-dialogue-card:hover{border-color:#6785ad}
+.bss-root .bss-dialogue-card.is-open{background:#192334;border-color:#6681ac}
+.bss-root .bss-dialogue-card header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border:0;margin:0;padding:11px 13px;background:#1b2738}
+.bss-root .bss-dialogue-card header>div:first-child{min-width:0;flex:1;flex-wrap:wrap}
+.bss-dialogue-head-actions{display:flex;align-items:center;gap:6px}
+.bss-dialogue-event-label{font-size:12px;font-weight:600;color:#d7e2f2;max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bss-dialogue-summary{display:flex;flex-direction:column;gap:3px;padding:10px 13px 12px;border-top:1px solid rgba(255,255,255,.045)}
+.bss-dialogue-summary strong{color:#cedaff;font-size:12px}
+.bss-dialogue-summary span{color:#ecf2fa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bss-dialogue-summary small{color:#8fa0ba;font-size:11px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.bss-root .bss-dialogue-card.is-open .bss-dialogue-summary{background:rgba(80,116,174,.07)}
+.bss-root .bss-dialogue-card.is-open>.bss-dialogue-edit-fields{margin:14px 13px 10px!important}
+.bss-root .bss-dialogue-card.is-open>.bss-dialogue-edit-fields~div,.bss-root .bss-dialogue-card.is-open>label,.bss-root .bss-dialogue-card.is-open>details{margin-left:13px!important;margin-right:13px!important}
+.bss-root .bss-dialogue-card.is-open>details:last-child{margin-bottom:13px!important}
+.bss-root .bss-dialogue-card textarea[data-dialogue-field="text"]{min-height:100px;line-height:1.55;padding:12px;resize:vertical;font-size:13px}
+.bss-root .bss-dialogue-card label{min-width:0}
+.bss-root .bss-ebdx-main{min-width:0}
+@media(max-width:960px){.bss-dialogue-searchbar{align-items:stretch}.bss-root .bss-dialogue-card header{align-items:flex-start}.bss-dialogue-event-label{white-space:normal}}
+@media(prefers-reduced-motion:reduce){.bss-root .bss-btn,.bss-root .bss-dialogue-card{transition:none}}
 `;
