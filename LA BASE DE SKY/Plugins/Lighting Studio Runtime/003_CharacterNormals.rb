@@ -382,7 +382,12 @@ module LightingStudioNormals
           # centre. The directional term still supplies shape/depth.
           direct=[[((dot+0.18)/0.92),0.0].max,1.0].min
           sideways=[[1.0-(dot.abs*0.56),0.0].max,1.0].min
-          response=[[direct*0.78+sideways*0.22,0.0].max,1.0].min
+          # Side/rear lamps must illuminate the visible character contour even
+          # when the authored front normal points away. Keep directional shape
+          # from dot while providing a broad, physically-inspired wrap fill.
+          wrap=[[((dot+0.68)/1.68),0.0].max,1.0].min
+          rim=[[1.0-dot.abs,0.0].max,1.0].min
+          response=[[direct*0.44+wrap*0.38+rim*0.18,0.24].max,1.0].min
           if response>0
             dst=(yy*w+xx)*4
             result[dst]=(cr*response).round
