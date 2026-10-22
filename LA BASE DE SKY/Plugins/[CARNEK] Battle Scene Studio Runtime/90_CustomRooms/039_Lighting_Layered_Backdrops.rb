@@ -385,7 +385,7 @@ module BSSLayeredEBDXCamera
 
   def bss_layered_next_ebdx_shot
     cfg=bss_layered_camera_config
-    strength=BSSLayeredLighting.clamp(cfg["idleStrength"] || 65,0,100)/100.0
+    strength=BSSLayeredLighting.clamp(cfg["idleStrength"] || 40,0,100)/100.0
     speed=BSSLayeredLighting.clamp(cfg["idleSpeed"] || 50,1,100)/100.0
     base=BSS070EBDXCore.get_vector(:MAIN,@battle).map(&:to_f)
     target=base.clone
@@ -403,7 +403,17 @@ module BSSLayeredEBDXCamera
       # Source-authored EBDX vectors, blended towards the stable MAIN framing.
       [0,1,2,3,4,5].each do |i|
         value=(row[i] || (i==5 ? row[4] : base[i])).to_f
-        target[i]=base[i]+(value-base[i])*strength
+        # Preserve the established battle layout: constrain authored vectors
+        # to a usable, gentle motion range around MAIN.
+        delta=value-base[i]
+        cap=case i
+            when 0 then 12.0
+            when 1 then 7.0
+            when 2 then 1.8
+            when 3 then 3.0
+            else 0.045
+            end
+        target[i]=base[i]+BSSLayeredLighting.clamp(delta*strength,-cap,cap)
       end
     end
     @bss_layered_camera_index=@bss_layered_camera_index.to_i+1
