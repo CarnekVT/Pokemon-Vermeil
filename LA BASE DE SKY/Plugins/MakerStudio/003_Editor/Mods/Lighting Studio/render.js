@@ -15,11 +15,11 @@ function evictMask(name){
 export function setMaskImage(filename,img){
  if(!filename||!img)return;
  maskSources.set(filename,img);
- evictMask(filename);masks.clear();staticPreviewViews.clear();chunks.clear();
+ evictMask(filename);staticPreviewViews.clear(); // unrelated chunks remain cached
 }
 export function getMaskImage(filename){return maskSources.get(filename)||null;}
 export function removeMaskImage(filename){
- if(maskSources.delete(filename)){evictMask(filename);masks.clear();staticPreviewViews.clear();chunks.clear();}
+ if(maskSources.delete(filename)){evictMask(filename);staticPreviewViews.clear(); // unrelated chunks remain cached}
 }
 export function forgetMaskImages(){maskSources.clear();clearLightCache();}
 let pendingChunks=false;
