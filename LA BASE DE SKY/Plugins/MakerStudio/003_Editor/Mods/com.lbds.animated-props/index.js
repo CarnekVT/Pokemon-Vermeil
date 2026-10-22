@@ -427,6 +427,7 @@ function cachedHigherMask(mapId,p,crop,layers){
 function tickVisuals(){
   if(!state || (typeof document!=='undefined' && document.hidden))return;
   const now=performance.now(), profile=getProfile(state.perfMode);
+  if(profile.mapFps===0 && profile.previewFps===0)return;
   const mapId=activeMap();
   if(state.showOverlay && mapId!=null && profile.mapFps>0 &&
      (state.lastMapTick==null || dueTick(now,state.lastMapTick,profile.mapFps))){
@@ -2157,6 +2158,10 @@ export async function activate(ctx){
       if(!state)return;
       state.pointerEvents++;
       const tile=normaliseToolEvent(e);if(!tile)return;
+      // Maker Studio emits several pointermoves inside the same tile; only
+      // redraw when its actual prop footprint/selection changes.
+      if(!state.drag && !state.stroke && !state.domPointerHeld && state.hover &&
+         state.hover.x===tile.x && state.hover.y===tile.y && state.hover.mapId===tile.mapId)return;
       state.zoomWaiting=false;state.nativeHover={...tile,at:performance.now()};state.pointerOrigin='tool';
       state.hover=tile;state.coords={x:tile.x,y:tile.y};
       if(state.actionMode==='select'&&state.drag)updateEdit(tile.mapId,tile.x,tile.y);
