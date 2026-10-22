@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {visibleFrameSignature} from '../frame-clock.js';
+const staticDef={id:'static',frames:1};
+assert.equal(visibleFrameSignature([{d:staticDef}],2500), '');
+const d={id:'spin',frames:4,fps:4,loop:true,timingMode:'independent'};
+assert.equal(visibleFrameSignature(Array.from({length:3000},(_,i)=>({p:{id:i},d})),500),visibleFrameSignature([{p:{id:'one'},d}],500));
+assert.notEqual(visibleFrameSignature([{d}],0),visibleFrameSignature([{d}],400));
+const parallel={id:'dual',frames:1,parallel:{enabled:true,sheet:'fx',frames:3,fps:5,loop:true,phase:0},timingMode:'independent'};
+assert.notEqual(visibleFrameSignature([{d:parallel}],0,{paused:true}),visibleFrameSignature([{d:parallel}],300,{paused:true}));
+const oneShot={id:'one',frames:2,fps:2,loop:false};
+assert.equal(visibleFrameSignature([{d:oneShot}],3000),visibleFrameSignature([{d:oneShot}],4000));
+console.log('Animated Props clock tests passed');
