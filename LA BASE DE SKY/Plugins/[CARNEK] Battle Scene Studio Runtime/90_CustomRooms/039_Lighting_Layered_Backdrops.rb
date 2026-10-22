@@ -266,16 +266,18 @@ module BSSLayeredRoomSupport
     @bss_layered_last_key=key
 
     # Dim sky far less than the terrain; do not black out the sunset.
-    sky_tone=BSSLayeredLighting.tone(light,0.55)
-    horizon_tone=BSSLayeredLighting.tone(light,0.42)
-    ground_tone=BSSLayeredLighting.tone(light,1.05)
+    # The bright sky stays readable; the horizon remains warm while the
+    # terrain receives clearly stronger clock lighting.
+    sky_tone=BSSLayeredLighting.tone(light,0.36)
+    horizon_tone=BSSLayeredLighting.tone(light,0.28)
+    ground_tone=BSSLayeredLighting.tone(light,1.35)
     bg.tone=sky_tone
     if @bss_layered_extra && @bss_layered_extra.length==2
       horizon,ground=@bss_layered_extra
       horizon.tone=horizon_tone
-      horizon.color=Color.new(248,166,92,(154*warmth).round)
+      horizon.color=Color.new(255,179,100,(188*warmth).round)
       ground.tone=ground_tone
-      ground.color=Color.new(38,59,79,slot==:night ? 62 : (warmth*24).round)
+      ground.color=Color.new(40,70,97,slot==:night ? 78 : (warmth*28).round)
     else
       bg.tone=ground_tone
     end
@@ -287,7 +289,7 @@ module BSSLayeredRoomSupport
       if name =~ /\A(?:tree|grass)\d+\z/i
         sp.tone=BSSLayeredLighting.tone(light,0.46) if sp.respond_to?(:tone=)
         if sp.respond_to?(:color=)
-          alpha=slot==:day ? 0 : (slot==:dawn ? 175 : 205)
+          alpha=slot==:day ? 0 : (slot==:dawn ? 195 : 225)
           sp.color=Color.new(65,110,118,alpha)
         end
       elsif name=="base" || name=="water"
