@@ -253,4 +253,11 @@ export const LIGHTING_WIDE_WORKSPACE_CSS = `
  .ls-light-quickbar{grid-template-columns:1fr}
 }
 
+
+/* Mask editor and save actions must remain visible during long edit sessions. */
+.ls-root .ls-save-bar{position:sticky;bottom:0;z-index:40;display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-height:56px;padding:10px 14px;background:var(--bg-secondary,#202936);border-top:2px solid var(--accent,#77b9ff);box-shadow:0 -5px 19px rgba(0,0,0,.3)}
+.ls-root .ls-save-primary{background:#236db0!important;color:white!important;border:1px solid #8dc7ff!important;font-weight:800!important;font-size:13px;min-height:38px;padding:8px 18px}
+.ls-root .ls-save-primary:hover{filter:brightness(1.13)}
+.ls-root .ls-inspector-tabs .ls-btn{min-width:100px}
+.ls-root .ls-mask-load-actions{display:flex;flex-wrap:wrap;gap:10px}
 `;
