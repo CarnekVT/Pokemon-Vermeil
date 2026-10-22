@@ -90,6 +90,9 @@ module BSSLayeredRoomSupport
     end
     @bss_layered_extra=nil
     @bss_layered_generated=nil
+    if @bss_layered_source && @sprites.is_a?(Hash) && @sprites["sky"]
+      @sprites["sky"].opacity=255 rescue nil
+    end
     @bss_layered_source=nil
     @bss_layered_ranges=nil
     @bss_layered_last_key=nil
@@ -197,6 +200,16 @@ module BSSLayeredRoomSupport
     if source && source.respond_to?(:getbyte) && source.bytesize>=w*h*4
       upper,lower=bss_layered_boundary(source_bitmap,source,w,h)
       sky_palette=bss_layered_sky_palette(source,w,h)
+      # The EBDX sky sprite is shorter than many legacy battleback horizons.
+      # Compositing its actual PNG all the way to the detected skyline prevents
+      # the lower strip of the old sky from leaking beneath the dynamic one.
+      sky_sprite=@sprites.is_a?(Hash) ? @sprites["sky"] : nil
+      sky_bitmap=sky_sprite && !(sky_sprite.disposed? rescue true) ? sky_sprite.bitmap : nil
+      live_sky=(sky_bitmap && sky_bitmap.respond_to?(:raw_data)) ? sky_bitmap.raw_data : nil
+      sky_width=sky_bitmap ? sky_bitmap.width.to_i : 0
+      sky_height=sky_bitmap ? sky_bitmap.height.to_i : 0
+      live_sky=nil unless live_sky && live_sky.respond_to?(:getbyte) &&
+                          sky_width>0 && sky_height>0 && live_sky.bytesize>=sky_width*sky_height*4
       sky="\x00".b*(w*h*4)
       haze="\x00".b*(w*h*4)
       terrain="\x00".b*(w*h*4)
@@ -204,24 +217,23 @@ module BSSLayeredRoomSupport
         w.times do |x|
           pos=(y*w+x)*4
           next if source.getbyte(pos+3)==0
-          dest=if y<upper[x]
-            sample=sky_palette[y]
-            if sample
-              distance=(source.getbyte(pos)-sample[0]).abs+
-                       (source.getbyte(pos+1)-sample[1]).abs+
-                       (source.getbyte(pos+2)-sample[2]).abs
-              # Pixel-art outlines and tree silhouettes remain on the
-              # independent foreground plane instead of darkening with sky.
-              distance>112 ? haze : sky
-            else
-              sky
-            end
-          elsif y<lower[x]
-            haze
+          sample=sky_palette[y]
+          distance=sample ? (source.getbyte(pos)-sample[0]).abs+
+                            (source.getbyte(pos+1)-sample[1]).abs+
+                            (source.getbyte(pos+2)-sample[2]).abs : 1000
+          # Test sky colors throughout BOTH upper bands. The old code copied
+          # the entire middle band unchanged, leaving a conspicuous old sky.
+          is_sky=(y<lower[x] && (distance<=112 ||
+                  (y<upper[x] && sample.nil?)))
+          dest=is_sky ? sky : (y<lower[x] ? haze : terrain)
+          if is_sky && live_sky
+            sx=[(x*sky_width/w.to_f).floor,sky_width-1].min
+            sy=[(y*sky_height/[lower[x],1].max.to_f).floor,sky_height-1].min
+            src=(sy*sky_width+sx)*4
+            dest[pos,4]=live_sky.byteslice(src,4)
           else
-            terrain
+            dest[pos,4]=source.byteslice(pos,4)
           end
-          dest[pos,4]=source.byteslice(pos,4)
         end
       end
       images=[sky,haze,terrain].map do |raw|
@@ -232,6 +244,9 @@ module BSSLayeredRoomSupport
       @bss_layered_source=source_bitmap
       @bss_layered_generated=images
       bg.bitmap=images[0]
+      # Sky is baked into the independent background layer, while clouds,
+      # sun and stars remain authentic EBDX sprites. Avoid double-drawing.
+      sky_sprite.opacity=0 if live_sky && sky_sprite
       bg.src_rect.set(0,0,w,h)
       @bss_layered_ranges=nil
       @bss_layered_extra=[]
@@ -281,8 +296,10 @@ module BSSLayeredRoomSupport
       end
     rescue StandardError
     end
-    dx=BSSLayeredLighting.clamp((source_x-sx)*0.15,-4,4)
-    dy=BSSLayeredLighting.clamp((source_y-sy)*0.09,-2,2)
+    # All raster layers share one exact world transform. Even 1px of differential
+    # parallax exposes gaps along irregular tree silhouettes and the skyline.
+    dx=0.0
+    dy=0.0
     @bss_layered_extra.each_with_index do |part,index|
       next unless part && !(part.disposed? rescue true)
       origin=@bss_layered_ranges ? @bss_layered_ranges[index+1][0] : 0
@@ -316,6 +333,9 @@ module BSSLayeredRoomSupport
     horizon_tone=BSSLayeredLighting.tone(light,0.35)
     ground_tone=BSSLayeredLighting.tone(light,1.20)
     bg.tone=sky_tone
+    if @bss_layered_generated && @sprites["sky"]
+      @sprites["sky"].opacity=0
+    end
     if @bss_layered_extra && @bss_layered_extra.length==2
       horizon,ground=@bss_layered_extra
       horizon.tone=horizon_tone
