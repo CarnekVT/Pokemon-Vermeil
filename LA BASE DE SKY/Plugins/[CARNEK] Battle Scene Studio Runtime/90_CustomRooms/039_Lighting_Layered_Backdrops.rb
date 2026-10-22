@@ -203,8 +203,8 @@ module BSSLayeredRoomSupport
     end
     # Older RGSS builds without Bitmap#raw_data retain the safe scanline
     # fallback rather than failing or blanking the battleback.
-    low=BSSLayeredLighting.clamp(BSSLayeredLighting.config_value(@data,"skySplitY",h*0.34),8,h-16).round
-    high=BSSLayeredLighting.clamp(BSSLayeredLighting.config_value(@data,"horizonSplitY",h*0.47),low+4,h-4).round
+    low=BSSLayeredLighting.clamp(BSSLayeredLighting.config_value(@data,"skySplitY",h*0.30),8,h-16).round
+    high=BSSLayeredLighting.clamp(BSSLayeredLighting.config_value(@data,"horizonSplitY",h*0.43),low+4,h-4).round
     @bss_layered_source=source_bitmap
     @bss_layered_ranges=[[0,low],[low,high],[high,h]]
     @bss_layered_extra=[]
