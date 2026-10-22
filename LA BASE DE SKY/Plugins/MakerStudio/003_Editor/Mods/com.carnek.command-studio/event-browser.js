@@ -1,5 +1,6 @@
 import {activeMapId,eventChoices,pageChoices,availableInsertionPoints,describeCommand,isCompatible} from "./event-writer.js";
 import {drawEventSprite} from "./sprite-crop.js";
+import {armPlacement,cancelPlacement} from "./placement.js";
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined&&text!==null)n.textContent=String(text);if(cls)n.className=cls;return n};
 const b=(name,fn,cls="btn")=>{const n=el("button",name,cls);n.type="button";n.onclick=fn;return n};
 export function getGraphic(page) {
@@ -31,6 +32,7 @@ export function createEventBrowser(ctx,host,options={}){
  xField.append(el("span","Casilla X"),newX);yField.append(el("span","Casilla Y"),newY);
  coords.append(xField,yField);
  const buttons=el("div",null,"csb-event-new-actions");
+ let placementCallback=null;
  function createEvent(addAction){
   if(mid==null)return options.onError?.(new Error("Abre primero un mapa."));
   const x=Number(newX.value),y=Number(newY.value);
@@ -47,7 +49,20 @@ export function createEventBrowser(ctx,host,options={}){
  }
  const create=b("＋ Crear evento",()=>createEvent(false),"btn");
  const createAndEdit=b("Crear y añadir acción →",()=>createEvent(true),"btn primary");
- buttons.append(create,createAndEdit);
+ const pick=b("📍 Elegir casilla en el mapa",()=>{
+  if(placementCallback)cancelPlacement(placementCallback);
+  placementCallback=selection=>{
+    if(disposed)return;
+    if(selection.mapId!==mid){options.onError?.(new Error("Elige una casilla del mapa activo y vuelve a intentarlo."));return;}
+    newX.value=String(selection.x);newY.value=String(selection.y);
+    options.onNotice?.("Casilla ("+selection.x+", "+selection.y+") seleccionada. Pulsa Crear evento.");
+    newName.focus();
+  };
+  if(!armPlacement(ctx,placementCallback))
+    options.onError?.(new Error("No se pudo activar la herramienta de selección del mapa."));
+  else options.onNotice?.("Haz clic en una casilla del mapa para indicar dónde crear el evento.");
+ },"btn csb-event-pick");
+ buttons.append(pick,create,createAndEdit);
  newName.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();createEvent(true);}});
  form.append(nameField,coords,buttons);createPanel.append(form);root.append(createPanel);
  const filter=el("input");filter.className="search";filter.placeholder="Buscar evento por nombre o ID…";
@@ -308,6 +323,7 @@ export function createEventBrowser(ctx,host,options={}){
    },
    dispose(){
     disposed=true;
+    if(placementCallback)cancelPlacement(placementCallback);
     subs.forEach(x=>{try{x?.dispose?.()}catch(_){}});
     document.removeEventListener("visibilitychange",onFocus);
     window.removeEventListener("focus",onFocus);
