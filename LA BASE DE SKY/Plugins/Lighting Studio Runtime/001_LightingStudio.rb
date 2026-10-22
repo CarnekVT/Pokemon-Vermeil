@@ -175,6 +175,56 @@ module LightingStudio
     [Bitmap.new(1,1),1.0,1.0]
   end
 
+  # Apply a PNG as a non-destructive stencil to an existing light shape.
+  # White pixels define visible light (reveal) or obstacles (block).
+  # The stencil is projected in the lamp's local coordinates BEFORE rotation.
+  def apply_shape_stencil!(bytes,w,h,spec,orig_w,orig_h,world_w,world_h,cos,sin)
+    return bytes unless spec['maskEnabled']==true
+    name=spec['maskFile'].to_s
+    return bytes unless /\A[a-zA-Z0-9_-]{1,70}\.png\z/i.match?(name)
+    path="Graphics/LightingStudio/Masks/#{name}"
+    return bytes unless File.file?(path)
+    source=Bitmap.new(path)
+    begin
+      return bytes if source.width>512 || source.height>512
+      raw=source.raw_data
+      return bytes unless raw && raw.respond_to?(:getbyte)
+      inverse=spec['maskMode']=='block'
+      y=0
+      while y<h
+        py=((y+0.5)/h-0.5)*world_h
+        x=0
+        while x<w
+          i=(y*w+x)*4
+          if bytes[i+3]>0
+            px=((x+0.5)/w-0.5)*world_w
+            local_x=cos*px+sin*py
+            local_y=-sin*px+cos*py
+            u=local_x/orig_w+0.5
+            v=local_y/orig_h+0.5
+            power=0.0
+            if u>=0 && u<1 && v>=0 && v<1
+              ix=[(u*source.width).floor,source.width-1].min
+              iy=[(v*source.height).floor,source.height-1].min
+              k=(iy*source.width+ix)*4
+              gray=(raw.getbyte(k)*54+raw.getbyte(k+1)*183+raw.getbyte(k+2)*19)/256.0
+              power=raw.getbyte(k+3)*gray/(255.0*255.0)
+            end
+            bytes[i+3]=(bytes[i+3]*(inverse ? 1.0-power : power)).round
+          end
+          x+=1
+        end
+        y+=1
+      end
+    ensure
+      source.dispose unless source.disposed?
+    end
+    bytes
+  rescue StandardError => e
+    warn "[Lighting Studio] Light mask clip #{name}: #{e.message}"
+    bytes
+  end
+
   def shape_bitmap(spec)
     type = %w[radial cone ellipse rectangle mask].include?(spec['type']) ? spec['type'] : 'radial'
     return mask_bitmap(spec) if type == 'mask'
@@ -231,6 +281,7 @@ module LightingStudio
       end
       y+=1
     end
+    apply_shape_stencil!(bytes,w,h,spec,orig_w,orig_h,world_w,world_h,cos,sin)
     bmp=Bitmap.new(w,h)
     if bmp.respond_to?(:raw_data=)
       bmp.raw_data=bytes.pack('C*')
@@ -309,7 +360,7 @@ module LightingStudioSpriteset
         source['heightPx'], source['angle'], source['coneFeather'], source['rotation'],
         source['color'], source['softness'], source['centerStrength'],
         source['fadeMode'], source['fadeStart'], source['fadeX'], source['fadeY'],
-        source['pixel'],source['maskFile']
+        source['pixel'],source['maskFile'],source['maskEnabled'],source['maskMode']
       ].inspect
       width, height = LightingStudio.shape_dimensions(source)
       if source['type'] == 'mask'
