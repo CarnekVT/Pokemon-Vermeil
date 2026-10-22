@@ -6,7 +6,7 @@ const DEFAULTS = {
   directions: "4", mode: "grid", subtile_divisions: "4", instant_turn: "1",
   flow_motion: "0", camera_lookahead: "0", wall_slide: "0",
   smooth_movement: "1", camera_smoothing: "35",
-  diagonal_facing: "keep", diagonal_speed: "quick", diagonal_live_turn: "1", wall_slide_priority: "horizontal",
+  diagonal_facing: "keep", diagonal_speed: "uniform", diagonal_live_turn: "1", wall_slide_priority: "horizontal",
   camera_deadzone: "0", camera_lead_response: "120", debug_hud: "0"
 };
 const SECTIONS = [
@@ -20,7 +20,7 @@ const FIELDS = {
   directions:{ group:"control", label:"Direcciones", description:"Cuatro direcciones o diagonales opcionales en el control moderno.", options:[["4","4 direcciones"],["8","8 direcciones"]] },
   instant_turn:{ group:"control", label:"Tipo de control", description:"Clásico conserva íntegra la respuesta original de Essentials. Moderno utiliza la dirección pulsada sin retraso artificial.", options:[["1","Moderno · respuesta inmediata"],["0","Clásico · Essentials original"]] },
   flow_motion:{ group:"control", label:"Continuous Flow", description:"Encadena pasos consecutivos con el tiempo sobrante, respetando eventos. Solo funciona con el control moderno.", options:[["0","Desactivado"],["1","Activado"]] },
-  diagonal_speed:{ group:"diagonal", label:"Ritmo de las diagonales", description:"Ágil: cada diagonal tarda lo mismo que una casilla recta (avanza más rápido en distancia). Uniforme: mantiene la misma velocidad física en todas las direcciones.", options:[["quick","Ágil · responde antes"],["uniform","Uniforme · velocidad constante"]] },
+  diagonal_speed:{ group:"diagonal", label:"Ritmo de las diagonales", description:"La velocidad diagonal se normaliza para no recorrer más distancia por segundo.", options:[["uniform","Uniforme · velocidad constante"]] },
   diagonal_live_turn:{ group:"diagonal", label:"Orientación durante diagonales", description:"Si el paso actual es diagonal, permite alternar entre sus dos filas de sprite compatibles. En pasos rectos y al invertir arriba/abajo, conserva la orientación del movimiento hasta el siguiente paso. No retrasa botones.", options:[["1","Ajustar solo en diagonales compatibles"],["0","Mantener orientación durante cada paso"]] },
   wall_slide:{ group:"diagonal", label:"Deslizamiento en paredes", description:"Si una diagonal está bloqueada, intenta moverse por un eje cardinal válido.", options:[["0","Desactivado"],["1","Activado"]] },
   wall_slide_priority:{ group:"diagonal", label:"Eje preferente", description:"Orden en que se comprueban los ejes cuando una diagonal está bloqueada.", options:[["horizontal","Horizontal"],["vertical","Vertical"],["facing","Según orientación"]] },
@@ -378,7 +378,7 @@ class MovementStudio {
     const preset=t.getAttribute("data-preset");
     if(preset){
       const classic={directions:"4",instant_turn:"0",flow_motion:"0",wall_slide:"0",diagonal_facing:"keep",wall_slide_priority:"horizontal",camera_lookahead:"0",camera_deadzone:"0",camera_lead_response:"120",camera_smoothing:"35"};
-      const modern={directions:"8",instant_turn:"1",flow_motion:"1",wall_slide:"1",diagonal_facing:"keep",diagonal_speed:"quick",diagonal_live_turn:"1",wall_slide_priority:"facing",camera_lookahead:"16",camera_deadzone:"8",camera_lead_response:"120",camera_smoothing:"35"};
+      const modern={directions:"8",instant_turn:"1",flow_motion:"1",wall_slide:"1",diagonal_facing:"keep",diagonal_speed:"uniform",diagonal_live_turn:"1",wall_slide_priority:"facing",camera_lookahead:"16",camera_deadzone:"8",camera_lead_response:"120",camera_smoothing:"35"};
       const modern4={...modern,directions:"4",wall_slide:"0",camera_lookahead:"0",camera_deadzone:"0"};
       const k=this.currentScope();
       this.config[k]={...(this.config[k]||{}),...(preset==="classic"?classic:preset==="modern4"?modern4:modern)};
