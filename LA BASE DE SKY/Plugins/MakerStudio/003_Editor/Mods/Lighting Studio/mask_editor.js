@@ -85,7 +85,7 @@ export function mountMaskPainter(host,opts){
  const toolbar=el('div','ls-mask-tools'),canvasFrame=el('div','ls-mask-canvas-frame');
  root.append(toolbar,canvasFrame);
  const src=getSource();
- let draft=src?cloneImage(src):caveTemplate();
+ let draft=src?cloneImage(src):(opts.maskMode==='block'?blankMask():caveTemplate());
  if(!src)onCreate(draft);
  const stage=el('div','ls-mask-canvas-stage');canvasFrame.append(stage);
  const canvas=el('canvas','ls-mask-canvas');canvas.width=draft.width;canvas.height=draft.height;
@@ -98,7 +98,7 @@ export function mountMaskPainter(host,opts){
  stage.append(polyLayer);
  const polyCtx=polyLayer.getContext('2d');
  const brush=canvas.getContext('2d');brush.drawImage(draft,0,0);
- const status=el('div','ls-mask-status','Pinta con el ratón y observa la forma encima del mapa.');root.append(status);
+ const status=el('div','ls-mask-status',opts.maskMode==='block'?'Dibuja las paredes que impedirán el paso de la luz.':'Dibuja la abertura por la que debe pasar la luz.');root.append(status);
  const group=(label,callback)=>{const b=el('button','ls-btn ls-small',label);b.type='button';b.onclick=callback;toolbar.append(b);return b;};
  let mode='paint',radius=10,drag=false,last=null;
  let polygon=[];
@@ -120,7 +120,7 @@ export function mountMaskPainter(host,opts){
  const snapshot=()=>{history.push(brush.getImageData(0,0,canvas.width,canvas.height));if(history.length>15)history.shift();future.length=0;};
  const signal=()=>{onPreview(canvas);status.textContent='Vista previa actualizada · pulsa «Guardar PNG» para usarla ingame.';};
  const toolButtons=[];
- for(const [id,label] of [['paint','✎ Añadir luz'],['dim','◐ Luz tenue'],['erase','⌫ Borrar'],['polygon','⬡ Delimitar forma']]){
+ for(const [id,label] of [['paint',opts.maskMode==='block'?'✎ Pintar obstáculo':'✎ Permitir luz'],['dim','◐ Zona parcial'],['erase','⌫ Borrar trazo'],['polygon','⬡ Delimitar forma']]){
   const b=group(label,()=>{mode=id;polygon=[];renderPolygon();toolButtons.forEach(([x,v])=>v.classList.toggle('active',x===id));status.textContent=id==='polygon'?'Marca el contorno por puntos. Doble clic para rellenarlo.':'Arrastra sobre la imagen para modificar la luz.';});
   toolButtons.push([id,b]);
  }
