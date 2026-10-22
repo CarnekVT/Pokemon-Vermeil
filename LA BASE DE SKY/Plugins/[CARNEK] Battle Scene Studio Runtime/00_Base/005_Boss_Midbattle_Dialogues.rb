@@ -163,6 +163,22 @@ class BSSDialogueEngine
       end
     end
 
+    # Dialogue IDs identify independent one-shot events. Imported libraries can
+    # contain duplicate IDs; distinguish them without changing saved JSON.
+    used_ids = {}
+    @triggers.each_with_index do |trigger, index|
+      id = trigger[:id].to_s.strip
+      id = "dialogue_#{index + 1}" if id.empty?
+      base = id
+      suffix = 2
+      while used_ids[id]
+        id = "#{base}_#{suffix}"
+        suffix += 1
+      end
+      trigger[:id] = id
+      used_ids[id] = true
+    end
+
     # 2. Backwards-compatibility: load triggers from boss["midbattleTriggers"] if present
     boss_cfg = (battle.respond_to?(:bss_boss_config) ? battle.bss_boss_config : {}) || {}
     if boss_cfg["midbattleTriggers"].is_a?(Array) && @triggers.empty?
