@@ -67,13 +67,8 @@ class Game_Player < Game_Character
   def vermeil_update_live_facing
     return unless VermeilMovement.directions == 8 &&
                   VermeilMovement.enabled?("diagonal_live_turn") && moving?
-    return if @direction_fix || @through || @move_route_forcing || jumping?
-    return if pbMapInterpreterRunning? || $game_temp.in_battle || $game_temp.in_menu ||
-              $game_temp.message_window_showing || $game_temp.in_mini_update
-    return if $PokemonGlobal.forced_movement? || $PokemonGlobal.ice_sliding ||
-              $PokemonGlobal.ascending_waterfall || $PokemonGlobal.descending_waterfall ||
-              $PokemonGlobal.surfing || $PokemonGlobal.diving || $PokemonGlobal.bicycle
-    return if on_stair? || on_spiral? || $game_map.check_stair_zones(@x, @y)
+    # Solo procesar cambios reales de orientación. No escanear zonas del mapa
+    # cada fotograma cuando el jugador ya mira en la dirección deseada.
     dir = vermeil_live_direction
     turn_dir = case dir
                when 1, 3, 7, 9
@@ -83,9 +78,16 @@ class Game_Player < Game_Character
                when 2, 4, 6, 8 then dir
                else nil
                end
-    # Solo cambia la fila de dibujo. Evitar llamar a turn_generic para no
-    # disparar eventos/counters de cambio de direccion mientras se camina.
-    @direction = turn_dir if turn_dir && @direction != turn_dir
+    return unless turn_dir && @direction != turn_dir
+    return if @direction_fix || @through || @move_route_forcing || jumping?
+    return if pbMapInterpreterRunning? || $game_temp.in_battle || $game_temp.in_menu ||
+              $game_temp.message_window_showing || $game_temp.in_mini_update
+    return if $PokemonGlobal.forced_movement? || $PokemonGlobal.ice_sliding ||
+              $PokemonGlobal.ascending_waterfall || $PokemonGlobal.descending_waterfall ||
+              $PokemonGlobal.surfing || $PokemonGlobal.diving || $PokemonGlobal.bicycle
+    return if on_stair? || on_spiral? || $game_map.check_stair_zones(@x, @y)
+    # Cambio visual exclusivamente: ni x/y ni eventos ni colisiones.
+    @direction = turn_dir
   end
 
   def vermeil_diagonal_eligible?
