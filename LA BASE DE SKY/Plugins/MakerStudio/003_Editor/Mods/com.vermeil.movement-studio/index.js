@@ -244,6 +244,25 @@ class MovementStudio {
   }
   inspector(v){
     const classic=v.instant_turn==="0";
+    if(this.section==="overview" && this.experience==="simple"){
+      const steps=[
+        ["1","Elige cómo quieres moverte","Control clásico, 4 direcciones modernas u 8 direcciones.","control"],
+        ["2","Haz las diagonales más rápidas","Escoge ritmo ágil y orientación inmediata.","diagonal"],
+        ["3","Ajusta la cámara a tu gusto","Seguimiento y anticipación sin retrasar los controles.","camera"]
+      ];
+      return this.sectionCard("Primeros pasos","GUÍA SENCILLA",
+        '<div class="vm-stack">'+steps.map(s=>
+          '<button type="button" class="vm-guide-step" data-section="'+s[3]+'">'+
+          '<span class="vm-guide-number">'+s[0]+'</span><span><strong>'+E(s[1])+'</strong><small>'+E(s[2])+'</small></span><b>›</b></button>'
+        ).join("")+'</div>')+
+        this.sectionCard("¿Qué estilo quieres?","ELIGE UNO",
+          '<div class="vm-stack">'+
+          '<button type="button" class="vm-preset" data-preset="classic"><b>Clásico</b><small>Como Pokémon Essentials original. Cuatro direcciones.</small></button>'+
+          '<button type="button" class="vm-preset" data-preset="modern4"><b>Moderno · 4 direcciones</b><small>Giros inmediatos y pasos continuos, sin diagonales.</small></button>'+
+          '<button type="button" class="vm-preset" data-preset="modern"><b>Moderno · 8 direcciones</b><small>Diagonales ágiles y orientación instantánea.</small></button>'+
+          '</div><div class="vm-field-note" style="margin-top:10px">Elige el estilo, cambia lo que quieras y pulsa Guardar arriba. Ningún cambio se aplica al juego antes de guardar.</div>')+
+        '<div class="vm-alert good"><b>¿Global o mapa?</b> Global afecta todo el juego. Selecciona un mapa arriba para personalizar solamente esa zona.</div>';
+    }
     if(this.section==="overview"){
       const links=[
         ["control","Control y fluidez",classic?"Clásico Essentials":v.directions+" direcciones · Moderno"],
@@ -257,11 +276,14 @@ class MovementStudio {
           '<div class="vm-grid"><button type="button" class="vm-btn" data-preset="classic">↩ Clásico</button><button type="button" class="vm-btn" data-preset="modern">✦ Moderno</button></div><div class="vm-field-note" style="margin-top:8px">Se aplican al ámbito actual. Puedes editar cada ajuste antes de guardar.</div>')+
         '<div class="vm-alert">Se conservan los sistemas originales de eventos, escaleras y Turbo. Esta vista representa la configuración, no una simulación del juego.</div>';
     }
-    if(this.section==="control")return this.sectionCard("Movimiento del jugador","INPUT EN TIEMPO REAL",OPTIONS_BY_GROUP("control").map(k=>this.field(k)).join(""))+
+    if(this.section==="control")return this.sectionCard("Movimiento del jugador",this.experience==="simple"?"LO ESENCIAL":"INPUT EN TIEMPO REAL",
+      (this.experience==="simple"?["instant_turn","directions","flow_motion"]:OPTIONS_BY_GROUP("control")).map(k=>this.field(k)).join(""))+
       '<div class="vm-alert '+(classic?'warn':'good')+'">'+(classic?'En Clásico se utiliza la lectura original de cuatro direcciones. Continuous Flow y los controles diagonales modernos no se aplican.':'Moderno no guarda pulsaciones antiguas ni añade retrasos. El modo de 4 direcciones también está disponible.')+'</div>';
-    if(this.section==="diagonal")return this.sectionCard("Comportamiento diagonal","COLISIONES Y ORIENTACIÓN",OPTIONS_BY_GROUP("diagonal").map(k=>this.field(k)).join(""))+
+    if(this.section==="diagonal")return this.sectionCard("Comportamiento diagonal",this.experience==="simple"?"DIAGONALES SIN ESPERAS":"COLISIONES Y ORIENTACIÓN",
+      (this.experience==="simple"?["diagonal_speed","diagonal_live_turn","wall_slide"]:OPTIONS_BY_GROUP("diagonal")).map(k=>this.field(k)).join(""))+
       '<div class="vm-alert">Estos ajustes solo afectan las diagonales del control moderno de 8 direcciones. No modifican velocidad de entrada, Turbo ni eventos del juego.</div>';
-    if(this.section==="camera")return this.sectionCard("Seguimiento de cámara","COMPOSICIÓN",["camera_smoothing","camera_deadzone","camera_lookahead","camera_lead_response"].map(k=>this.field(k)).join(""))+
+    if(this.section==="camera")return this.sectionCard("Seguimiento de cámara",this.experience==="simple"?"AJUSTES BÁSICOS":"COMPOSICIÓN",
+      (this.experience==="simple"?["camera_smoothing","camera_lookahead"]:["camera_smoothing","camera_deadzone","camera_lookahead","camera_lead_response"]).map(k=>this.field(k)).join(""))+
       '<div class="vm-alert">35% de suavidad, zona muerta 0 y anticipación 0 conservan el comportamiento anterior de Vermeil. Estos controles no modifican la respuesta del jugador.</div>';
     if(this.section==="debug")return this.sectionCard("Diagnóstico visual","SOLO EN MODO DEBUG",this.field("debug_hud"))+
       this.sectionCard("Pruebas recomendadas","CHECKLIST",
@@ -312,6 +334,12 @@ class MovementStudio {
   async click(e){
     const t=e.target.closest("button");
     if(!t || !this.root.contains(t))return;
+    const experience=t.getAttribute("data-experience");
+    if(experience==="simple"||experience==="advanced"){
+      this.experience=experience;
+      if(experience==="simple"&&this.section==="debug")this.section="overview";
+      this.render();return;
+    }
     const section=t.getAttribute("data-section");
     if(section){this.section=section;this.reloadConfirm=false;this.render();return;}
     const direction=t.getAttribute("data-direction");
@@ -330,10 +358,11 @@ class MovementStudio {
     const preset=t.getAttribute("data-preset");
     if(preset){
       const classic={directions:"4",instant_turn:"0",flow_motion:"0",wall_slide:"0",diagonal_facing:"keep",wall_slide_priority:"horizontal",camera_lookahead:"0",camera_deadzone:"0",camera_lead_response:"120",camera_smoothing:"35"};
-      const modern={directions:"8",instant_turn:"1",flow_motion:"1",wall_slide:"1",diagonal_facing:"keep",wall_slide_priority:"facing",camera_lookahead:"16",camera_deadzone:"8",camera_lead_response:"120",camera_smoothing:"35"};
+      const modern={directions:"8",instant_turn:"1",flow_motion:"1",wall_slide:"1",diagonal_facing:"keep",diagonal_speed:"quick",diagonal_live_turn:"1",wall_slide_priority:"facing",camera_lookahead:"16",camera_deadzone:"8",camera_lead_response:"120",camera_smoothing:"35"};
+      const modern4={...modern,directions:"4",wall_slide:"0",camera_lookahead:"0",camera_deadzone:"0"};
       const k=this.currentScope();
-      this.config[k]={...(this.config[k]||{}),...(preset==="classic"?classic:modern)};
-      this.message="Perfil "+(preset==="classic"?"Clásico":"Moderno")+" preparado; pulsa Guardar.";
+      this.config[k]={...(this.config[k]||{}),...(preset==="classic"?classic:preset==="modern4"?modern4:modern)};
+      this.message="Perfil "+(preset==="classic"?"Clásico":preset==="modern4"?"Moderno 4 direcciones":"Moderno 8 direcciones")+" preparado; pulsa Guardar.";
       this.render();return;
     }
     const action=t.getAttribute("data-act");
