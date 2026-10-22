@@ -51,12 +51,9 @@ class Game_Player < Game_Character
         right = Input.press?(Input::RIGHT)
         x = (right ? 1 : 0) - (left ? 1 : 0)
         y = (down ? 1 : 0) - (up ? 1 : 0)
-        direct = {
-          [-1, -1] => 7, [0, -1] => 8, [1, -1] => 9,
-          [-1, 0] => 4, [1, 0] => 6,
-          [-1, 1] => 1, [0, 1] => 2, [1, 1] => 3
-        }[[x, y]]
-        return direct if direct
+        # El teclado numerico codifica las ocho direcciones. Sin Hash ni
+        # Array temporales por frame, a diferencia de una tabla de mapeo.
+        return 5 + x - (3 * y) if x != 0 || y != 0
         # Si dos teclas opuestas se cancelan, no generar un paso fantasma.
         return 0 if up || down || left || right
       end
