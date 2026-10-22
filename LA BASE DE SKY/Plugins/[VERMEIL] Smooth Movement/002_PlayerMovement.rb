@@ -183,7 +183,7 @@ class Game_Player < Game_Character
   def set_movement_type(type)
     vermeil_movement_original_movement_type(type)
     # Conservar velocidad fisica equivalente en una diagonal (distancia sqrt(2)).
-    @move_time *= Math.sqrt(2) if @_vermeil_diagonal_active && VermeilMovement.diagonal_speed == "uniform"
+    @move_time *= Math.sqrt(2) if @_vermeil_diagonal_active
   end
 
   alias vermeil_movement_move_end update_move unless method_defined?(:vermeil_movement_move_end)
