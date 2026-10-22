@@ -382,7 +382,7 @@ module LightingStudioSpriteset
       mode = 'union' if mode.empty? || mode == 'add'
 
       if mode == 'union' && entry[:pulse]['enabled'] != true &&
-         source['type'] != 'mask' && entry[:schedule]['enabled'] != true
+         source['type'] != 'mask' && source['maskEnabled'] != true && entry[:schedule]['enabled'] != true
         # Only smooth cone/ellipse sources increase chunk resolution; retain
         # the cheaper 64px chunks for pixel-art and ordinary map lighting.
         if ['cone','ellipse'].include?(source['type']) && !(source['pixel'].is_a?(Hash) && source['pixel']['enabled'] == true)
