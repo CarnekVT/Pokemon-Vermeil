@@ -171,10 +171,14 @@ module LightingStudioNormals
     tile_h=Game_Map::TILE_HEIGHT.to_f
     half_w=[tile_w*0.42,14.0].max
     half_h=[tile_h*0.64,23.0].max
-    [[cx,cy,1.0],[cx-half_w,cy,0.82],[cx+half_w,cy,0.82],
-     [cx,cy-half_h,0.76],[cx,cy+tile_h*0.22,0.78],
-     [cx-half_w*0.85,cy-half_h*0.58,0.72],
-     [cx+half_w*0.85,cy-half_h*0.58,0.72]]
+    # Include the entire visible body, not just the feet/central origin.
+    # Side grazing must have almost the same weight as a frontal hit.
+    [[cx,cy,1.0],[cx-half_w,cy,1.0],[cx+half_w,cy,1.0],
+     [cx,cy-half_h,0.92],[cx,cy+tile_h*0.22,0.90],
+     [cx-half_w,cy-half_h,0.96],
+     [cx+half_w,cy-half_h,0.96],
+     [cx-half_w,cy+tile_h*0.18,0.92],
+     [cx+half_w,cy+tile_h*0.18,0.92]]
   end
 
   def light_sample_strength(type,local_x,local_y,dx,dy,radius,width,height,size,angle,mask_name)
@@ -225,7 +229,9 @@ module LightingStudioNormals
         end
         strength=[strength,power*weight].max
       end
-      strength=[[strength*intensity*energy,0.0].max,1.0].min
+      # Multiple near-edge samples may register a grazing lamp; prevent the
+      # old weighted sample from becoming imperceptible when walking sideways.
+      strength=[[strength*intensity*energy*1.20,0.0].max,1.0].min
       next if strength<=score
       theta=Math.atan2(ly-center_y,lx-center_x)
       direction_a,direction_b,mix=direction_pair(theta)
@@ -363,7 +369,10 @@ module LightingStudioNormals
           nz=(raw.getbyte(src+2)/127.5)-1.0
           dot=nx*lx+ny*ly+nz*lz
           # Allow grazing light to reveal side-facing normals, not just front faces.
-          response=[[((dot-0.06)/0.83),0.0].max,1.0].min
+          # Side-lit surface response: preserve a narrow ambient shoulder
+          # instead of extinguishing normals until the lamp faces them head-on.
+          # A back-facing surface still receives no directional contribution.
+          response=[[((dot+0.18)/0.92),0.0].max,1.0].min
           if response>0
             dst=(yy*w+xx)*4
             result[dst]=(cr*response).round
