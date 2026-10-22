@@ -81,7 +81,7 @@ export function mountMaskPainter(host,opts){
  const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
  const root=el('div','ls-mask-workbench');host.append(root);
  root.append(el('div','ls-group-label','DIBUJAR LA ZONA ILUMINADA'));
- root.append(el('p','ls-inline-note','Pinta la luz en blanco. Borra las zonas bloqueadas por las paredes. Lo transparente NO ilumina. La plantilla crea un haz irregular que sale de la cueva.'));
+ root.append(el('p','ls-inline-note',opts.maskMode==='block'?'Dibuja los obstáculos en blanco: bloquean la luz. Transparente = luz permitida.':'Dibuja en blanco los lugares por los que puede entrar luz. Transparente = sin iluminación.'));
  const toolbar=el('div','ls-mask-tools'),canvasFrame=el('div','ls-mask-canvas-frame');
  root.append(toolbar,canvasFrame);
  const src=getSource();
@@ -170,13 +170,13 @@ export function mountMaskPainter(host,opts){
  canvas.addEventListener('pointerdown',ev=>{if(ev.button!==0)return;ev.preventDefault();
   if(mode==='polygon'){if(ev.detail>=2){completePolygon();return;}polygon.push(point(ev));renderPolygon();return;}
   snapshot();drag=true;last=point(ev);canvas.setPointerCapture?.(ev.pointerId);stroke(last,last);});
- canvas.addEventListener('pointermove',ev=>{if(!drag)return;ev.preventDefault();const p=point(ev);stroke(p,last);last=p;});
+ canvas.addEventListener('pointermove',ev=>{if(!drag)return;ev.preventDefault();const p=point(ev);stroke(p,last);last=p;signal();});
  const release=()=>{if(!drag)return;drag=false;last=null;signal();};
  canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);
  const actions=el('div','ls-mask-actions');root.append(actions);
  const action=(label,callback)=>{const b=el('button','ls-btn ls-small',label);b.type='button';b.onclick=callback;actions.append(b);return b;};
  const replaceWith=created=>{snapshot();draft=created;canvas.width=created.width;canvas.height=created.height;polyLayer.width=created.width;polyLayer.height=created.height;polygon=[];stage.style.aspectRatio=created.width+'/'+created.height;applyZoom();canvas.getContext('2d').drawImage(created,0,0);signal();};
- action('➜ Salida de cueva',()=>replaceWith(caveTemplate(256,128,'right')));
+ action('➜ Plantilla: cueva derecha',()=>replaceWith(caveTemplate(256,128,'right')));
  action('⬅ Cueva hacia izquierda',()=>replaceWith(caveTemplate(256,128,'left')));
  action('Lienzo vacío',()=>replaceWith(blankMask(canvas.width,canvas.height)));
  action('◩ Mostrar / ocultar máscara',()=>{canvas.style.visibility=canvas.style.visibility==='hidden'?'visible':'hidden';});
@@ -191,8 +191,8 @@ export function mountMaskPainter(host,opts){
   guide.src=url;
  };
  action('Mostrar / ocultar guía',()=>{if(guide.src)guide.hidden=!guide.hidden;});
- action('Deshacer trazo',()=>{if(!history.length)return;future.push(brush.getImageData(0,0,canvas.width,canvas.height));brush.putImageData(history.pop(),0,0);signal();});
- action('Rehacer trazo',()=>{if(!future.length)return;history.push(brush.getImageData(0,0,canvas.width,canvas.height));brush.putImageData(future.pop(),0,0);signal();});
+ action('Deshacer trazo',()=>{if(!history.length)return;future.push(brush.getImageData(0,0,canvas.width,canvas.height));const snap=history.pop();if(canvas.width!==snap.width||canvas.height!==snap.height){canvas.width=snap.width;canvas.height=snap.height;polyLayer.width=snap.width;polyLayer.height=snap.height;applyZoom();}brush.putImageData(snap,0,0);signal();});
+ action('Rehacer trazo',()=>{if(!future.length)return;history.push(brush.getImageData(0,0,canvas.width,canvas.height));const snap=future.pop();if(canvas.width!==snap.width||canvas.height!==snap.height){canvas.width=snap.width;canvas.height=snap.height;polyLayer.width=snap.width;polyLayer.height=snap.height;applyZoom();}brush.putImageData(snap,0,0);signal();});
  const save=action('Guardar PNG',async()=>{save.disabled=true;try{const result=await onSave(filename,canvas);status.textContent=result.saved?'Guardado en '+result.path:'PNG exportado: cópialo a '+result.path;notify(status.textContent,result.saved?'info':'warn');}catch(e){status.textContent='Error: '+e.message;notify(status.textContent,'error');}finally{save.disabled=false;}});
  return canvas;
 }
