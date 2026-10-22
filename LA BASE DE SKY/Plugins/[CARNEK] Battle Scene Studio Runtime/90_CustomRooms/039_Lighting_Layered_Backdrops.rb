@@ -90,6 +90,7 @@ module BSSLayeredRoomSupport
     end
     @bss_layered_extra=nil
     @bss_layered_generated=nil
+    @bss_layered_has_live_sky=nil
     if @bss_layered_source && @sprites.is_a?(Hash) && @sprites["sky"]
       @sprites["sky"].opacity=255 rescue nil
     end
@@ -210,6 +211,7 @@ module BSSLayeredRoomSupport
       sky_height=sky_bitmap ? sky_bitmap.height.to_i : 0
       live_sky=nil unless live_sky && live_sky.respond_to?(:getbyte) &&
                           sky_width>0 && sky_height>0 && live_sky.bytesize>=sky_width*sky_height*4
+      @bss_layered_has_live_sky=!!live_sky
       sky="\x00".b*(w*h*4)
       haze="\x00".b*(w*h*4)
       terrain="\x00".b*(w*h*4)
@@ -333,7 +335,7 @@ module BSSLayeredRoomSupport
     horizon_tone=BSSLayeredLighting.tone(light,0.35)
     ground_tone=BSSLayeredLighting.tone(light,1.20)
     bg.tone=sky_tone
-    if @bss_layered_generated && @sprites["sky"]
+    if @bss_layered_has_live_sky && @sprites["sky"]
       @sprites["sky"].opacity=0
     end
     if @bss_layered_extra && @bss_layered_extra.length==2
