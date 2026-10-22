@@ -226,14 +226,32 @@ module BSSLayeredRoomSupport
     return unless @bss_layered_extra
     bg=@sprites["bg"] rescue nil
     return unless bg && !(bg.disposed? rescue true)
+    source_x=bg.x;source_y=bg.y
+    # Source EBDX camera travels with the terrain and battlers. The sky is
+    # farther away: keep subtle independent parallax, with only 1-4 pixels of
+    # displacement to avoid exposing a seam at the automatic alpha skyline.
+    sx=source_x;sy=source_y
+    begin
+      if @scene && @scene.respond_to?(:vector) && @scene.vector && @defaultvector
+        sx,sy=@scene.vector.spoof(@defaultvector)
+      end
+    rescue StandardError
+    end
+    dx=BSSLayeredLighting.clamp((source_x-sx)*0.15,-4,4)
+    dy=BSSLayeredLighting.clamp((source_y-sy)*0.09,-2,2)
     @bss_layered_extra.each_with_index do |part,index|
       next unless part && !(part.disposed? rescue true)
       origin=@bss_layered_ranges ? @bss_layered_ranges[index+1][0] : 0
-      part.x=bg.x;part.y=bg.y
+      # Horizon half depth, ground anchored to the EBDX battle floor.
+      factor=index==0 ? 0.5 : 0.0
+      part.x=source_x-dx*factor
+      part.y=source_y-dy*factor
       part.ox=bg.ox;part.oy=bg.oy-origin
       part.z=bg.z;part.zoom_x=bg.zoom_x;part.zoom_y=bg.zoom_y
       part.angle=bg.angle;part.opacity=bg.opacity;part.visible=bg.visible
     end
+    bg.x=source_x-dx
+    bg.y=source_y-dy
   end
 
   def bss_layered_apply_tone!(force=false)
@@ -300,7 +318,7 @@ module BSSLayeredRoomSupport
 
   def update(*args,&block)
     result=super
-    bss_layered_sync!
+    # position() already synchronized the three planes once this frame.
     now=defined?(System) && System.respond_to?(:uptime) ? System.uptime : Time.now.to_f
     if !@bss_layered_next_tint || now>=@bss_layered_next_tint
       @bss_layered_next_tint=now+0.25
