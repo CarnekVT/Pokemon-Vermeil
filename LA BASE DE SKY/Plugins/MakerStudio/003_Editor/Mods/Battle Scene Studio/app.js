@@ -1167,7 +1167,7 @@ App.prototype.bss083EBDXComposite=async function(canvas,view){
     }else ctx.drawImage(bg,0,0,384,308);
   }else{ctx.fillStyle="#182331";ctx.fillRect(0,0,384,308);}
   const base=data.base?await this.bss083LoadImage(this.bss083EBDXAssetPath("base",data.base)):null;if(base){const sx=Math.max(0,Math.floor((base.width-384)/2)),sw=Math.min(384,base.width-sx);ctx.drawImage(base,sx,0,sw,base.height,0,308-base.height,384,base.height);}
-  const sky=data.sky?await this.bss083LoadImage(this.bss083EBDXAssetPath("elements","skyDay")):null;if(sky){const sx=Math.max(0,Math.floor((sky.width-384)/2)),sw=Math.min(384,sky.width-sx);ctx.drawImage(sky,sx,0,sw,sky.height,0,0,384,sky.height);}
+  const sky=data.sky?await this.bss083LoadImage(this.bss083EBDXAssetPath("elements","skyDay")):null;if(sky){const full=this.bss110ComposedSky?.(ctx,sky,data,bgName);if(full)ctx.drawImage(full,0,0);else{const sx=Math.max(0,Math.floor((sky.width-384)/2)),sw=Math.min(384,sky.width-sx);ctx.drawImage(sky,sx,0,sw,sky.height,0,0,384,sky.height);}}
   if(data.sky&&sky){for(const row of [["cloud1",98,1],["cloud2",91,-1]]){const im=await this.bss083LoadImage(this.bss083EBDXAssetPath("elements",row[0]));if(!im)continue;const sample=this.bss083SampleCanvas(ctx,0,row[1]);const tint=this.bss083CanvasTint(im,sample,255),sx=Math.max(0,Math.floor((tint.width-384)/2)),sw=Math.min(384,tint.width-sx);ctx.drawImage(tint,sx,0,sw,tint.height,0,row[1]-tint.height,384,tint.height);}}
   const drawGroup=async(groupName,defaultBitmap)=>{const g=data[groupName];if(!g||typeof g!=="object")return;const im0=await this.bss083LoadImage(this.bss083EBDXAssetPath("elements",g.bitmap||defaultBitmap));if(!im0)return;const count=Math.max(0,N(g.elements,0));for(let i=0;i<count;i++){const x=Array.isArray(g.x)?N(g.x[i],0):0,y=Array.isArray(g.y)?N(g.y[i],0):0,z=Array.isArray(g.zoom)?N(g.zoom[i],1):1,mir=Array.isArray(g.mirror)?!!g.mirror[i]:false;let im=im0;const mode=Object.prototype.hasOwnProperty.call(g,"colorize")?g.colorize:true;if(mode!==false){const sample=this.bss083SampleCanvas(ctx,x,y);im=this.bss083CanvasTint(im0,sample,S(mode)==="slight"?128:255);}this.bss083DrawAnchored(ctx,im,x,y,z,mir,null,null);}};
   await drawGroup("trees","tree");await drawGroup("tallGrass","tallGrass");
@@ -5501,3 +5501,84 @@ App.prototype.onInput=function(e){
   }
   return _bssCameraSettingsInput2026.call(this,e);
 };
+
+// ============================================================================
+// BSS preview/runtime sky parity: remove embedded old sky, never draw a short
+// replacement PNG over it. Work is cached per backdrop/time phase, not per frame.
+// ============================================================================
+(function(){
+ if(typeof App==="undefined")return;
+ App.prototype.bss110ComposedSky=function(ctx,sky,data,backdropName){
+   if(!sky||!ctx)return null;
+   const w=384,h=308,slot=S(this._bss106CurrentSlot||"day");
+   const cache=this._bss110SkyCache||(this._bss110SkyCache=new Map());
+   const key=[backdropName,S(data.base||""),N(data.skySplitY,-1),N(data.horizonSplitY,-1),
+     S(this._bss099SkyOverride||""),S(sky.src||""),sky.width,sky.height,slot].join("|");
+   if(cache.has(key))return cache.get(key);
+   try{
+     const base=ctx.getImageData(0,0,w,h);
+     const src=base.data;
+     const cv=document.createElement("canvas");cv.width=sky.width;cv.height=sky.height;
+     const g=cv.getContext("2d",{willReadFrequently:true});g.drawImage(sky,0,0);
+     const skyBytes=g.getImageData(0,0,cv.width,cv.height).data;
+     const positions=[.10,.24,.40,.56,.72,.88].map(v=>Math.min(w-1,Math.floor(w*v)));
+     const palette=Array.from({length:h},(_,y)=>{
+       const a=positions.map(x=>{const i=(y*w+x)*4;return [[src[i],src[i+1],src[i+2]],src[i]*.30+src[i+1]*.52+src[i+2]*.18];})
+         .sort((a,b)=>b[1]-a[1]).slice(0,3);
+       return [0,1,2].map(k=>Math.round(a.reduce((sum,e)=>sum+e[0][k],0)/a.length));
+     });
+     const skyY=data.skySplitY,groundY=data.horizonSplitY;
+     const lower=new Int16Array(w),upper=new Int16Array(w);
+     if(Number.isFinite(Number(skyY))&&skyY!=null&&Number.isFinite(Number(groundY))&&groundY!=null){
+       const lo=Math.max(8,Math.min(h-16,Math.round(Number(skyY))));
+       const hi=Math.max(lo+4,Math.min(h-4,Math.round(Number(groundY))));
+       upper.fill(lo);lower.fill(hi);
+     }else{
+       let best=-1,center=Math.round(h*.40);
+       const y0=Math.round(h*.23),y1=Math.round(h*.62);
+       for(let y=y0;y<=y1;y+=2){
+         let score=0;
+         for(let x=0;x<w;x+=Math.max(1,Math.ceil(w/56))){
+           const a=((y-3)*w+x)*4,b=((y+3)*w+x)*4;
+           score+=Math.abs(src[a]-src[b])+Math.abs(src[a+1]-src[b+1])+Math.abs(src[a+2]-src[b+2]);
+         }
+         score*=1-.16*Math.abs(y-h*.4)/h;
+         if(score>best){best=score;center=y;}
+       }
+       center+=5;
+       const xs=[];
+       for(let x=0;x<w;x+=4){
+         let score=-Infinity,where=center;
+         for(let y=Math.max(y0,center-10);y<=Math.min(y1,center+10);y++){
+           const a=((y-2)*w+x)*4,b=((y+2)*w+x)*4;
+           const strength=Math.abs(src[a]-src[b])+Math.abs(src[a+1]-src[b+1])+Math.abs(src[a+2]-src[b+2])-Math.abs(y-center)*1.6;
+           if(strength>score){score=strength;where=y;}
+         }
+         xs.push(where);
+       }
+       for(let x=0;x<w;x++){
+         const i=Math.floor(x/4),f=(x%4)/4,e=Math.round(xs[i]*(1-f)+(xs[i+1]??xs[i])*f);
+         upper[x]=Math.max(8,e-28);lower[x]=Math.min(h-4,e+5);
+       }
+     }
+     const sx=Math.max(0,Math.floor((sky.width-w)/2)),sw=Math.min(w,sky.width-sx);
+     for(let y=0;y<h;y++){
+       for(let x=0;x<w;x++){
+         if(y>=lower[x])continue;
+         const i=(y*w+x)*4,sample=palette[y];
+         const distance=Math.abs(src[i]-sample[0])+Math.abs(src[i+1]-sample[1])+Math.abs(src[i+2]-sample[2]);
+         if(distance>112)continue; // opaque foreground silhouettes survive
+         const px=Math.min(sky.width-1,sx+Math.floor(x*sw/w));
+         const py=Math.min(sky.height-1,Math.floor(y*sky.height/Math.max(1,lower[x])));
+         const j=(py*sky.width+px)*4;
+         src[i]=skyBytes[j];src[i+1]=skyBytes[j+1];src[i+2]=skyBytes[j+2];src[i+3]=skyBytes[j+3];
+       }
+     }
+     const result=document.createElement("canvas");result.width=w;result.height=h;
+     result.getContext("2d").putImageData(base,0,0);
+     if(cache.size>=12)cache.delete(cache.keys().next().value);
+     cache.set(key,result);
+     return result;
+   }catch(_){return null;}
+ };
+})();
