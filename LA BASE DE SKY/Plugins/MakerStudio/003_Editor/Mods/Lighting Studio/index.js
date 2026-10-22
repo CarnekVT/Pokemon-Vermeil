@@ -646,12 +646,14 @@ function editValue(fn,final,lightOnly=false){
 }
 
 function overlay(draw,info){if(!state||!draw||!info)return;
+if(!state.showOverlay&&!state.diagnostic&&state.ctx.editor.activeTool?.()!==TOOL)return;
+const editing=state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId);
 const stats=state.overlayStats;stats.calls++;stats.lastAt=Date.now();stats.lastMap=info.mapId;const renderStarted=performance.now();if(state.awaitingOverlay){stats.requestDelayMs=Math.max(0,renderStarted-state.lastRequestAt);state.awaitingOverlay=false;state.redrawDirty=false;}
 try{
  const map=getMap(state.data,info.mapId,false);
  paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},
   ambientOverride:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?
-    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,toneMode:state.data.timeOfDay.blendMode||'tone',showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,previewHour:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?state.previewHour:null,previewQuality:state.previewQuality,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides,editing:state.ctx.editor.activeTool?.()===TOOL&&Number(info.mapId)===Number(state.mapId),selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
+    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,toneMode:state.data.timeOfDay.blendMode||'tone',showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,previewHour:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?state.previewHour:null,previewQuality:state.previewQuality,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides&&editing,editing:editing,selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
  if(state.diagnostic){draw.save();try{
   draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
  }finally{draw.restore();}}
