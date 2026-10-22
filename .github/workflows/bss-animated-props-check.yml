@@ -1,0 +1,26 @@
+name: BSS and Animated Props checks
+on:
+  push:
+    branches: [new-MK-for-2.5D-Testeo]
+    paths:
+      - 'LA BASE DE SKY/Plugins/[CARNEK] Battle Scene Studio Runtime/**'
+      - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.lbds.animated-props/**'
+      - 'tests/cases/test_bss_vanilla_background.rb'
+      - '.github/workflows/bss-animated-props-check.yml'
+  workflow_dispatch:
+
+jobs:
+  syntax_and_regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Battle Scene Studio Ruby syntax
+        run: |
+          find 'LA BASE DE SKY/Plugins/[CARNEK] Battle Scene Studio Runtime' -type f -name '*.rb' -print0 | xargs -0 -n1 ruby -c
+      - name: Test Battle Scene Studio Vanilla backgrounds
+        run: ruby tests/cases/test_bss_vanilla_background.rb
+      - name: Check Animated Props JavaScript syntax
+        run: |
+          find 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.lbds.animated-props' -maxdepth 1 -type f -name '*.js' -print0 | xargs -0 -n1 node --experimental-default-type=module --check
+      - name: Test Animated Props frame clock
+        run: node --experimental-default-type=module 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.lbds.animated-props/tests/animation-clock.test.mjs'
