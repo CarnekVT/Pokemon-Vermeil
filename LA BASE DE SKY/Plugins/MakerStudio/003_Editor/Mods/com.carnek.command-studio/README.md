@@ -1,4 +1,4 @@
-# Command Studio 0.8.0 — navegación sencilla, categorías y opciones progresivas
+# Command Studio 0.9.0 — editor de eventos y diálogos
 
 Integrado en Pokémon Vermeil, bajo `LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.carnek.command-studio`.
 
@@ -103,3 +103,30 @@ node tests/ux-smoke.cjs
 Verifica el límite inicial de tarjetas, paginación de tareas, flujo de asistente, enciclopedia paginada, selección de color, cambio de ubicación de ventana, slider de espera e integridad del mensaje.
 
 **Importante:** se hicieron pruebas con DOM y eventos simulados, no con una sesión de Maker Studio/Electron del usuario. Es necesario comprobar la visualización y el envío de eventos en una instalación real.
+
+
+## 0.9 — Navegación, eventos y diálogo
+
+### Eventos
+La pestaña Eventos es un navegador del mapa activo: crear, renombrar, mover, borrar eventos, consultar páginas y comandos. Muestra miniaturas de Graphics/Characters mediante el backend Tauri get_graphic_image cuando está disponible, '?' si no hay sprite y un símbolo de tiles si usan un tile. La lista se sincroniza con map.loaded/map.unloaded/event.changed/undo/redo y al recuperar foco.
+
+Inserción: elige evento, página y posición exacta con '+' entre comandos o desde el selector. No separa los continuadores de textos/scripts; inserta con la indentación de la rama seleccionada. Valida events.validateEvent antes de actualizar. Hay estructuras muy especiales que podrían requerir revisión manual.
+
+### Pokémon personalizados
+Los asistentes para entregar Pokémon cuentan con más de 35 opciones agrupadas: especie, nivel, mote, sexo, forma, Shiny/Super Shiny, Poké Ball, naturaleza, habilidad, objeto, movimientos, IV, EV, felicidad, entrenador original, idioma, texto de obtención, cinta y Pokérus. Comprueban el máximo habitual de 510 EV.
+Construyen un objeto Pokemon.new y después usan pbAddPokemon o pbAddPokemonSilent, disponibles en Vermeil. En la entrega única, el interruptor local se activa solo si el método devuelve true; si falla, se permite reintentar. Las siguientes interacciones muestran otro mensaje.
+
+### Mensajes
+NameBox permite nombre fijo, jugador o variable. Genera NameBox.load, el mensaje y NameBox.dispose. El corrector ofrece subrayado nativo español, sugerencias locales y corrección individual o en lote; preserva secuencias Essentials y advierte etiquetas de formato sin cerrar. No es un corrector de IA ni un diccionario exhaustivo.
+Preview: permite elegir Marco del editor o Windowskin del juego. Lee Graphics/Windowskins mediante el backend gráfico cuando está disponible, con representación orientativa (no emula el renderer del juego).
+
+### Auditoría
+La enciclopedia puede analizar Scripts y Plugins para clasificar las fichas como localizadas, opcionales, pendientes o sin localizar. No considera automáticamente ausentes los métodos dinámicos.
+
+### Pruebas
+node tests/v09-smoke.cjs
+node tests/ux-smoke.cjs
+node tests/visual-smoke.cjs
+node tests/beginner-smoke.cjs
+
+Pruebas de lógica y DOM simulado, no una sesión real de Maker Studio. Confirmar compatibilidad y apariencia en una instalación del juego.

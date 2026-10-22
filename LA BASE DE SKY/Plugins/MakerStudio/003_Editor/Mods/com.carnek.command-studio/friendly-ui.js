@@ -3,11 +3,15 @@ import { DIRECTIVES, GROUPS, codeFor, previewPlain, SOURCES } from "./messages-c
 import { WIKI, buildWiki } from "./wiki-catalog.js";
 import { mount as mountAdvanced } from "./smart-ui.js";
 import { loadPBS, classifySymbolHint } from "./pbs-index.js";
-import { activeMapId, eventChoices, pageChoices, applyInsertion, isCompatible } from "./event-writer.js";
+import { activeMapId, eventChoices, pageChoices, applyInsertion, isCompatible, availableInsertionPoints, describeCommand } from "./event-writer.js";
+import { createEventBrowser } from "./event-browser.js";
+import { enhancePokemonActions, POKEMON_GROUPS, giftCheck } from "./pokemon-gift.js";
+import { auditProject, classifyReference } from "./function-audit.js";
 import { installWorkspaceFullscreen } from "./fullscreen.js";
 import { mountVisualMessageEditor } from "./message-ui.js";
 import { EXTRA_CSS } from "./visual-style.js";
 import { UX_CSS } from "./ux-style.js";
+import { NEXT_CSS } from "./next-style.js";
 import { COLOR_PRESETS, colorTag, renderMessagePreview, normalizedHex, setMessagePosition, messagePosition, colorType, WINDOW_COLOR_HINTS } from "./visual-message.js";
 
 const CSS = [
@@ -53,7 +57,8 @@ function rubyCommands(code){
  return String(code).replace(/\r/g,"").split("\n").map((line,i)=>({code:i?655:355,parameters:[line],indent:0}));
 }
 export function mountFriendly(ctx,host){
- const root=el("div",null,"csb");root.tabIndex=0;root.append(el("style",CSS),el("style",EXTRA_CSS),el("style",UX_CSS));
+ enhancePokemonActions(ACTIONS, code=>code.replace(/\r/g,"").split("\n").map((line,i)=>({code:i?655:355,indent:0,parameters:[line]})));
+ const root=el("div",null,"csb");root.tabIndex=0;root.append(el("style",CSS),el("style",EXTRA_CSS),el("style",UX_CSS),el("style",NEXT_CSS));
  const head=el("header");head.append(el("div","✦","emoji"));
  const brand=el("div");brand.append(el("h2","Command Studio"),el("div","Tu asistente para crear eventos Pokémon","sub"));head.append(brand);
  head.append(el("span",null,"grow"));
@@ -64,16 +69,18 @@ export function mountFriendly(ctx,host){
  host.replaceChildren(root);
  const fullscreenDispose=installWorkspaceFullscreen(ctx,host,root,fullscreenButton);
  let mode="home",step=1,action=null,values={},query="",messageText="¡Hola, \\PN! ¿Qué tal?",group="Todas",tokenQuery="",token=null,tokenValue="";
- let catalogTab="wiki",catalogQuery="",catalogGroup="Todas",catalogLimit=12,selectedReference=null,moreTasks=false,taskGroup="Todas",taskLimit=10,sessionRecent=[],favorites=new Set(),mapId=activeMapId(ctx),eventId="",pageId=0,advCleanup=null,disposed=false,pbs=null;
+ let insertionPosition="end",destinationRefresh=null,eventBrowser=null,messageCleanup=null,speakerName="",sourceAudit=null,scanning=false,subscriptions=[],catalogTab="wiki",catalogQuery="",catalogGroup="Todas",catalogLimit=12,selectedReference=null,moreTasks=false,taskGroup="Todas",taskLimit=10,sessionRecent=[],favorites=new Set(),mapId=activeMapId(ctx),eventId="",pageId=0,advCleanup=null,disposed=false,pbs=null;
  if(requestedEvent&&requestedEvent.mapId===mapId){eventId=String(requestedEvent.eventId);requestedEvent=null;}
  function notice(s){foot.textContent=s;try{ctx.ui.showToast({message:s,level:"info"});}catch(_){}}
  function menu(){
-  tabs.replaceChildren();for(const [id,title]of [["home","Inicio"],["message","Mensajes"],["catalog","Enciclopedia"],["advanced","Herramientas avanzadas"]]){
+  tabs.replaceChildren();for(const [id,title]of [["home","Crear"],["events","Eventos"],["message","Diálogos"],["catalog","Enciclopedia"],["advanced","Avanzado"]]){
    tabs.append(button(title,()=>go(id),"btn"+(mode===id?" selected":"")+(id==="advanced"?" csb-quiet":"")));
   }
  }
  function go(next){
   if(advCleanup){advCleanup();advCleanup=null;}
+  if(eventBrowser){eventBrowser.dispose();eventBrowser=null;}
+  if(messageCleanup){messageCleanup();messageCleanup=null;}
   mode=next;menu();render();
  }
  function addField(target,label,value,onChange,config={}){
@@ -85,40 +92,71 @@ export function mountFriendly(ctx,host){
   wrap.append(input);target.append(wrap);return input;
  }
  function destination(target,post){
-  mapId=activeMapId(ctx);
-  const block=el("div",null,"card");
-  block.append(el("strong","¿Dónde lo añadimos?"),el("div",mapId?"Mapa #"+mapId:"Abre primero un mapa","sub"));
-  const row=el("div",null,"row"),evt=el("select"),pg=el("select");
-  let events=[];if(mapId&&isCompatible(ctx))try{events=eventChoices(ctx,mapId);}catch(e){notice(e.message);}
-  const none=el("option","Selecciona un evento");none.value="";evt.append(none);
-  for(const e of events){const option=el("option",e.name+" (#"+e.id+")");option.value=e.id;evt.append(option);}
-  if(events.some(e=>String(e.id)===eventId))evt.value=eventId;else eventId="";
-  function pages(){
-   eventId=evt.value;pg.replaceChildren();
-   if(eventId&&mapId)try{
-    for(const p of pageChoices(ctx,mapId,Number(eventId))){
-     const opt=el("option","Página "+(p.index+1));opt.value=p.index;pg.append(opt);
-    }
-    pg.value=String(pageId);if(pg.selectedIndex<0)pg.selectedIndex=0;
-    pageId=Number(pg.value||0);
-   }catch(e){notice(e.message);}
-   post.disabled=!eventId||!isCompatible(ctx);
+  const block=el("div",null,"card");const heading=el("div",null,"csb-section-head");
+  heading.append(el("strong","Destino de la acción"),button("Explorar eventos y comandos ↗",()=>go("events"),"btn"));
+  block.append(heading);
+  const mapCaption=el("p","","sub"),row=el("div",null,"row"),evt=el("select"),pg=el("select"),positions=el("select");
+  evt.setAttribute("aria-label","Seleccionar evento");pg.setAttribute("aria-label","Página del evento");
+  positions.setAttribute("aria-label","Punto de inserción");
+  row.append(evt,pg,positions);block.append(mapCaption,row);
+  const guidance=el("p","La lista se sincroniza con el mapa. Solo se ofrecen puntos seguros de inserción.","sub");
+  block.append(guidance);target.append(block);
+  function refill(){
+    const active=activeMapId(ctx);
+    if(mapId!==active){mapId=active;eventId="";pageId=0;insertionPosition="end";}
+    mapCaption.textContent=mapId?"Mapa actual: #"+mapId:"Abre un mapa para elegir un evento";
+    let events=[];try{events=mapId?eventChoices(ctx,mapId):[];}catch(e){notice(e.message);}
+    evt.replaceChildren();
+    const empty=el("option","Seleccionar evento…");empty.value="";evt.append(empty);
+    for(const e of events){const option=el("option","#"+e.id+" · "+e.name+" ("+e.x+","+e.y+")");option.value=e.id;evt.append(option);}
+    if(events.some(e=>String(e.id)===String(eventId)))evt.value=String(eventId);
+    else{eventId="";evt.value="";}
+    pages();
   }
-  evt.onchange=pages;pg.onchange=()=>pageId=Number(pg.value||0);
-  row.append(evt,pg);block.append(row);
-  block.append(el("p","Se añade al final de la página sin borrar tus comandos anteriores.","sub"));
-  target.append(block);pages();
+  function pages(){
+    pg.replaceChildren();positions.replaceChildren();
+    if(!eventId||!mapId){post.disabled=true;return;}
+    let pagesList=[];try{pagesList=pageChoices(ctx,mapId,Number(eventId));}catch(e){notice(e.message);}
+    if(!pagesList.some(x=>Number(x.index)===Number(pageId)))pageId=0;
+    for(const p of pagesList){const opt=el("option","Página "+(p.index+1)+" · "+p.count+" comandos");opt.value=p.index;pg.append(opt);}
+    pg.value=String(pageId);if(pg.selectedIndex<0){pg.selectedIndex=0;pageId=Number(pg.value||0);}
+    slots();post.disabled=false;
+  }
+  function slots(){
+    positions.replaceChildren();
+    let commandList=[];
+    try{commandList=ctx.events.getFull(mapId,Number(eventId))?.pages?.[pageId]?.list||[];}
+    catch(e){notice(e.message);}
+    const slots=availableInsertionPoints(commandList);
+    for(const slot of slots){
+      const opt=el("option",(slot.index===0?"Inicio":slot.index===commandList.filter(x=>x.code!==0).length?"Final":"Tras "+describeCommand(commandList.filter(x=>x.code!==0)[slot.index-1]))+" · #"+slot.index);
+      opt.value=slot.index;positions.append(opt);
+    }
+    const last=commandList.filter(x=>x.code!==0).length;
+    const index=insertionPosition==="end"?last:insertionPosition;
+    if(slots.some(p=>p.index===Number(index)))positions.value=String(index);
+    else positions.value=String(last);
+    insertionPosition=Number(positions.value||0);
+    post.disabled=!slots.length;
+  }
+  evt.onchange=()=>{eventId=evt.value;pageId=0;insertionPosition="end";pages();};
+  pg.onchange=()=>{pageId=Number(pg.value||0);insertionPosition="end";slots();};
+  positions.onchange=()=>insertionPosition=Number(positions.value);
+  destinationRefresh=refill;refill();
  }
  function insert(commands,after){
   if(!mapId||!eventId){notice("Primero abre un mapa y selecciona un evento.");return;}
   try{
-   const options={mapId,eventId:Number(eventId),pageIndex:pageId,position:"end",commands};
+   const options={mapId,eventId:Number(eventId),pageIndex:pageId,position:insertionPosition,commands};
    const result=applyInsertion(ctx,options);
    notice("¡Añadido! "+result.inserted+" comandos. Puedes usar Deshacer en Maker Studio.");
    if(after)after();
   }catch(e){notice("No se insertó: "+e.message);}
  }
  function render(){
+  if(messageCleanup){messageCleanup();messageCleanup=null;}
+  destinationRefresh=null;
+  if(eventBrowser){eventBrowser.dispose();eventBrowser=null;}
   stage.replaceChildren();
   if(mode==="advanced"){
    const bar=el("div",null,"row");bar.append(button("← Volver al modo sencillo",()=>go("home")));stage.append(bar);
@@ -128,6 +166,23 @@ export function mountFriendly(ctx,host){
   }
   const area=el("div",null,"content");stage.append(area);
   if(mode==="home")step===1?home(area):step===2?configure(area):review(area);
+  if(mode==="events"){
+    const top=el("div",null,"csb-section-head");
+    top.append(el("h3","Eventos y comandos del mapa"),button("← Volver a crear",()=>go("home"),"btn primary"));
+    area.append(top);
+    area.append(el("p","Selecciona un evento, abre una página y pulsa ＋ exactamente donde quieras insertar. La selección se conservará al volver.","sub"));
+    const workspace=el("div",null,"csb-event-browser-host");area.append(workspace);
+    eventBrowser=createEventBrowser(ctx,workspace,{
+      eventId:eventId?Number(eventId):null,pageIndex:pageId,position:insertionPosition,
+      onSelection:sel=>{
+        if(sel.mapId!=null&&mapId!==sel.mapId){mapId=sel.mapId;}
+        eventId=sel.eventId?String(sel.eventId):"";
+        pageId=sel.pageIndex;
+        insertionPosition=sel.position;
+      },
+      onError:e=>notice(e.message)
+    });
+  }
   if(mode==="message")messages(area);
   if(mode==="catalog")catalog(area);
  }
@@ -238,17 +293,28 @@ export function mountFriendly(ctx,host){
       target.append(list);input.setAttribute("list",list.id);
     }
   }
-  const simplified=action.fields.length>4;
-  const important=simplified?action.fields.slice(0,3):action.fields;
-  for(const f of important)add(f,mainGrid);
-  if(simplified){
-    const secondary=action.fields.slice(3);
-    const details=el("details",null,"csb-more-settings");
-    details.append(el("summary","Personalizar otros "+secondary.length+" ajustes (opcional)"));
-    details.append(el("p","Puedes dejar estos valores sugeridos o modificarlos.","sub"));
-    const extraGrid=el("div",null,"grid");
-    for(const f of secondary)add(f,extraGrid);
-    details.append(extraGrid);form.append(details);
+  if(["give_pokemon","gift_pokemon_once"].includes(action.id)){
+    for(const group of POKEMON_GROUPS){
+      const relevant=action.fields.filter(f=>f.group===group);
+      const details=el("details",null,"csb-more-settings");
+      details.open=group==="Básico";
+      details.append(el("summary",group+" · "+relevant.length+" opciones"));
+      const grid=el("div",null,"grid");
+      for(const field of relevant)add(field,grid);
+      details.append(grid);form.append(details);
+    }
+  }else{
+    const simplified=action.fields.length>4;
+    const important=simplified?action.fields.slice(0,3):action.fields;
+    for(const field of important)add(field,mainGrid);
+    if(simplified){
+      const secondary=action.fields.slice(3);
+      const details=el("details",null,"csb-more-settings");
+      details.append(el("summary","Personalizar otros "+secondary.length+" ajustes (opcional)"));
+      const grid=el("div",null,"grid");
+      for(const field of secondary)add(field,grid);
+      details.append(grid);form.append(details);
+    }
   }
   if(!action.fields.length)form.append(el("p","Esta tarea no necesita configuración. Puedes continuar directamente.","sub"));
   area.append(form);
@@ -256,7 +322,8 @@ export function mountFriendly(ctx,host){
   nav.append(button("← Volver",()=>{step=1;render();}),
    button("Ver resultado →",()=>{
     const state=validate(action,values);
-    if(state.errors.length)return notice("Revisa los datos: "+state.errors[0]);
+    const extra=["give_pokemon","gift_pokemon_once"].includes(action.id)?giftCheck(values):[];
+    if(state.errors.length||extra.length)return notice("Revisa los datos: "+[...state.errors,...extra][0]);
     step=3;render();
    },"btn primary"));
   area.append(nav);
@@ -288,13 +355,16 @@ export function mountFriendly(ctx,host){
   area.append(nav);
  }
  function messages(area){
-  mountVisualMessageEditor({
+  messageCleanup=mountVisualMessageEditor({
     host:area,
     initialText:messageText,
     onTextChange:value=>{messageText=value;},
     onInsert:commands=>insert(commands),
     renderTarget:(target,submit)=>destination(target,submit),
-    initialDirective:token
+    initialDirective:token,
+    ctx,
+    initialSpeaker:speakerName,
+    onSpeakerChange:value=>speakerName=value
   });
   token=null;
  }
@@ -314,7 +384,19 @@ export function mountFriendly(ctx,host){
   const categories=catalogTab==="wiki"?["Todas",...new Set(WIKI.map(w=>w.group))]:["Todas",...GROUPS];
   for(const g of categories){const opt=el("option",g);opt.value=g;groupSelector.append(opt);}
   if(categories.includes(catalogGroup))groupSelector.value=catalogGroup;else{catalogGroup="Todas";groupSelector.value="Todas";}
-  toolbar.append(groupSelector);area.append(toolbar);
+  toolbar.append(groupSelector);
+  const auditButton=button(scanning?"Analizando…":"Comprobar funciones instaladas",async()=>{
+    if(scanning)return;
+    scanning=true;auditButton.disabled=true;auditButton.textContent="Indexando scripts…";
+    try{
+      const data=await auditProject(ctx);
+      sourceAudit=data.indexed;
+      notice(data.indexed.report.found+" métodos indexados · "+data.indexed.report.errors.length+" errores de lectura.");
+    }catch(e){notice("No se completó el análisis: "+e.message);}
+    scanning=false;auditButton.disabled=false;auditButton.textContent="Volver a analizar";
+    draw();
+  },"btn");
+  toolbar.append(auditButton);area.append(toolbar);
   const count=el("p","","sub");area.append(count);
   const two=el("div",null,"csb-catalog-layout"),list=el("div",null,"csb-catalog-list"),inspector=el("aside",null,"csb-catalog-details");
   two.append(list,inspector);area.append(two);
@@ -337,7 +419,10 @@ export function mountFriendly(ctx,host){
       },"btn primary"));
       return;
     }
+    const verdict=classifyReference(w,sourceAudit);
     inspector.append(el("span",w.group,"csb-step-badge"),el("h4",w.title));
+    const status=el("p",verdict.label+" · "+verdict.reason,"csb-audit-"+verdict.state);
+    inspector.append(status);
     inspector.append(el("p",w.note||"Referencia técnica. Revisa los parámetros y el contexto de ejecución.","sub"));
     inspector.append(el("pre",w.template,"preview"));
     if(w.args?.length){
@@ -349,7 +434,10 @@ export function mountFriendly(ctx,host){
       inspector.append(el("p","Atención: esta receta podría requerir un plugin o configuración previa.","csb-warning"));
     }
     const actions=el("div",null,"csb-catalog-actions");
-    actions.append(button("Configurar esta función →",()=>useReference(w),"btn primary"));
+    const configure=button("Configurar esta función →",()=>useReference(w),"btn primary");
+    configure.disabled=verdict.state==="missing";
+    configure.title=verdict.state==="missing"?"No localizada: comprueba primero los scripts y módulos del juego.":"Configurar receta";
+    actions.append(configure);
     if(w.source){
       const link=el("a","Consultar documentación ↗");link.href=w.source;link.target="_blank";link.rel="noopener noreferrer";actions.append(link);
     }
@@ -384,6 +472,22 @@ export function mountFriendly(ctx,host){
   area.append(sources);
  }
  (async()=>{try{pbs=await loadPBS(ctx);}catch(_){} })();
+ function refreshActive(){
+   if(disposed)return;
+   const next=activeMapId(ctx);
+   if(next!==mapId){mapId=next;eventId="";pageId=0;insertionPosition="end";}
+   destinationRefresh?.();
+   eventBrowser?.refresh?.();
+ }
+ for(const key of ["map.loaded","map.unloaded","event.changed","undo","redo"]){
+   try{const sub=ctx.bus?.on?.(key,refreshActive);if(sub)subscriptions.push(sub);}catch(_){}
+ }
+ window.addEventListener("focus",refreshActive);
+ document.addEventListener("visibilitychange",refreshActive);
  menu();render();
- return()=>{disposed=true;if(advCleanup)advCleanup();fullscreenDispose();};
+ return()=>{disposed=true;if(eventBrowser)eventBrowser.dispose();if(messageCleanup)messageCleanup();
+  subscriptions.forEach(s=>{try{s.dispose?.();}catch(_){}});
+  window.removeEventListener("focus",refreshActive);
+  document.removeEventListener("visibilitychange",refreshActive);
+  if(advCleanup)advCleanup();fullscreenDispose();};
 }

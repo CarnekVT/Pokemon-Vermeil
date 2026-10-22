@@ -9,6 +9,7 @@ function extract(file,names){return new Function(strip(read(file))+";return {"+n
 const core=extract("smart-core.js",["ACTIONS","BY_ID","defaults","buildAction","validate","smartSearch"]);
 const wiki=extract("wiki-catalog.js",["WIKI","buildWiki"]);
 const texts=extract("messages-catalog.js",["DIRECTIVES","GROUPS","codeFor","SOURCES"]);
+const gift=extract("pokemon-gift.js",["enhancePokemonActions","POKEMON_GROUPS","giftCheck"]);
 const visual=extract("visual-message.js",["COLOR_PRESETS","colorTag","renderMessagePreview","normalizedHex","setMessagePosition","messagePosition","colorType","WINDOW_COLOR_HINTS"]);
 assert.ok(core.ACTIONS.length>=39);
 assert.ok(wiki.WIKI.length>=134);
@@ -32,14 +33,15 @@ class MockNode{
  querySelectorAll(tag){return walk(this).filter(x=>x.tagName===tag);}focus(){}
 }
 function walk(node){return[node,...node.children.flatMap(walk)];}
-const doc={createElement:tag=>new MockNode(tag)};
-const props={...core,...wiki,...texts,loadPBS:async()=>({ids:{}}),classifySymbolHint:()=>"",
+const doc={createElement:tag=>new MockNode(tag),addEventListener(){},removeEventListener(){}};
+const win={addEventListener(){},removeEventListener(){}};
+const props={...core,...wiki,...texts,...gift,availableInsertionPoints:()=>[{index:0},{index:1}],describeCommand:()=>"Texto",createEventBrowser:()=>({dispose(){},refresh(){}}),classifyReference:()=>({state:"pending",label:"Pendiente",reason:""}),auditProject:async()=>({indexed:{methods:[],report:{found:0,errors:[]}}}),loadPBS:async()=>({ids:{}}),classifySymbolHint:()=>"",
  activeMapId:()=>1,isCompatible:()=>true,eventChoices:()=>[{id:2,name:"Profesor",x:2,y:5}],
  pageChoices:()=>[{index:0,count:2}],applyInsertion:()=>({inserted:1}),
  mountAdvanced:()=>()=>{},mountVisualMessageEditor:({host})=>host.append(new MockNode("fake-message")),
- installWorkspaceFullscreen:()=>()=>{},EXTRA_CSS:"",UX_CSS:""};
+ installWorkspaceFullscreen:()=>()=>{},EXTRA_CSS:"",UX_CSS:"",NEXT_CSS:""};
 const propNames=Object.keys(props);
-const beginner=new Function("document",...propNames,strip(read("friendly-ui.js"))+";return {mountFriendly};")(doc,...propNames.map(k=>props[k]));
+const beginner=new Function("document","window",...propNames,strip(read("friendly-ui.js"))+";return {mountFriendly};")(doc,win,...propNames.map(k=>props[k]));
 const host=new MockNode("host"),ctx={editor:{activeMapId:()=>1},ui:{showToast:()=>{}}};
 const clean=beginner.mountFriendly(ctx,host);
 const buttons=()=>walk(host).filter(x=>x.tagName==="button");
@@ -59,7 +61,7 @@ tap(x=>String(x.className).startsWith("csb-ref-item"));
 assert.ok(buttons().some(x=>x.textContent.includes("Configurar esta función")));
 clean();
 const messageModule=new Function("document","Event",
- [read("messages-catalog.js"),read("visual-message.js"),read("message-ui.js")].map(strip).join("\n")+
+ [read("messages-catalog.js"),read("visual-message.js"),read("text-tools.js"),read("message-ui.js")].map(strip).join("\n")+
  ";return mountVisualMessageEditor;")(doc,class Event{constructor(type){this.type=type}});
 const hostMessage=new MockNode("host");let result="",commands=null;
 messageModule({host:hostMessage,initialText:"¡Hola!",onTextChange:v=>result=v,onInsert:v=>commands=v,renderTarget:()=>{}});

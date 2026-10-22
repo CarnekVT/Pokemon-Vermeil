@@ -1,4 +1,6 @@
 import {DIRECTIVES,GROUPS,codeFor} from "./messages-catalog.js";
+import {checkText,applyCorrection,autocorrectText,lintMessage,buildMessageEventCommands} from "./text-tools.js";
+import {createSkinPreview} from "./skin-preview.js";
 import {COLOR_PRESETS,colorTag,renderMessagePreview,normalizedHex,setMessagePosition,messagePosition,colorType,WINDOW_COLOR_HINTS} from "./visual-message.js";
 
 const el=(tag,text,cls)=>{
@@ -11,7 +13,7 @@ const button=(text,click,cls="btn")=>{
 const TAB_OPTIONS=[
  ["color","🎨 Color"],["window","▣ Ventana"],["timing","⏱ Pausas"],["all","⋯ Más efectos"]
 ];
-export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert,renderTarget,initialDirective=null}){
+export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert,renderTarget,initialDirective=null,ctx=null,initialSpeaker="",onSpeakerChange=()=>{}}){
  host.replaceChildren();
  host.append(el("h3","Mensajes sin complicaciones"),
    el("p","Escribe, personaliza con botones y comprueba el resultado. Las opciones técnicas están en «Más efectos».","sub"));
@@ -19,7 +21,17 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
  columns.append(left,right);host.append(columns);
  left.append(el("h4","Tu mensaje"));
  const editor=el("textarea");editor.style.width="100%";editor.style.minHeight="165px";
- editor.value=String(initialText||"");editor.setAttribute("aria-label","Texto que verá el jugador");left.append(editor);
+ editor.value=String(initialText||"");editor.spellcheck=true;editor.lang="es";
+ editor.setAttribute("aria-label","Texto que verá el jugador");left.append(editor);
+ let speaker=String(initialSpeaker||"");
+ const nameBox=el("details",null,"csb-details");
+ nameBox.open=!!speaker;
+ nameBox.append(el("summary","Nombre del personaje (NameBox)"));
+ const nameInput=el("input");nameInput.placeholder="Ej.: Profesora Aura o \\PN";nameInput.value=speaker;
+ nameInput.setAttribute("aria-label","Nombre mostrado sobre el diálogo");
+ nameInput.oninput=()=>{speaker=nameInput.value;onSpeakerChange(speaker);update();};
+ nameBox.append(el("p","Vacío = sin nombre. Admite nombres fijos, \\PN y \\v[n].","sub"),nameInput);
+ left.append(nameBox);
  const quick=el("div",null,"chips");
  for(const [name,token]of [["Nombre jugador","\\PN"],["Nueva línea","\\n"],["Esperar clic","\\!"],["Dinero","\\PM"],["Sonido","\\se[Door exit]"]])
    quick.append(button(name,()=>paste(token),"chip"));
@@ -40,16 +52,23 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
  left.append(examples);
  const previewHeading=el("div",null,"csb-section-head");
  previewHeading.append(el("h4","Vista previa"),el("span","Orientativa · No ejecuta el juego","sub"));left.append(previewHeading);
- const preview=el("div",null,"csb-preview-canvas");left.append(preview);
+ const previewArea=el("div",null,"csb-preview-area");
+ const preview=el("div",null,"csb-preview-canvas");previewArea.append(preview);left.append(previewArea);
  const outputNote=el("p","Los colores RGB y la ubicación son aproximados; las ventanas, fuentes, rostros y sonidos dependen de Vermeil.","csb-visual-hint");left.append(outputNote);
  const submit=button("✓ Añadir mensaje al evento",()=>{
-  onInsert(editor.value.replace(/\r/g,"").split("\n").map((line,i)=>({code:i?401:101,parameters:[line],indent:0})));
+  onInsert(buildMessageEventCommands(editor.value,{speaker}));
  },"btn primary");
  if(typeof renderTarget==="function")renderTarget(left,submit);
  left.append(submit);
+ const skin=ctx?createSkinPreview(ctx,previewArea):null;
  function update(){
   onTextChange(editor.value);
   renderMessagePreview(preview,editor.value);
+  if(speaker.trim()){
+   const stage=preview.querySelector(".csb-dialog-stage");
+   if(stage){const box=el("div",speaker.replace(/\\PN/gi,"NOMBRE").replace(/\\v\\[\\d+\\]/gi,"VARIABLE"),"csb-namebox");stage.append(box);}
+  }
+  skin?.apply?.();
  }
  editor.addEventListener("input",update);update();
  function paste(value){
@@ -60,6 +79,38 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
   try{paste(colorTag(color,editor.value.slice(editor.selectionStart,editor.selectionEnd)||"texto",shadow));}
   catch(e){message.textContent=e.message;}
  }
+
+ const corrections=el("details",null,"csb-details");
+ corrections.append(el("summary","Revisar ortografía y posibles errores"));
+ const correctionPanel=el("div",null,"csb-correction-list");
+ const checkButton=button("Buscar sugerencias",()=>reviewSpelling(),"btn");
+ const applyAll=button("Aplicar correcciones sugeridas",()=>{
+  const changed=autocorrectText(editor.value);
+  if(!changed.changes.length){spellingStatus.textContent="No hay sugerencias pendientes.";return;}
+  editor.value=changed.result;
+  editor.dispatchEvent(new Event("input"));reviewSpelling();
+ },"btn");
+ const spellingStatus=el("p","","sub");
+ corrections.append(el("p","El navegador también subraya palabras según el diccionario del sistema. Los códigos Essentials no se modifican.","sub"),
+  checkButton,applyAll,spellingStatus,correctionPanel);
+ left.append(corrections);
+ function reviewSpelling(){
+  correctionPanel.replaceChildren();
+  const findings=checkText(editor.value);
+  for(const issue of findings.slice(0,20)){
+   const b=button(issue.original+" → "+issue.suggestion,()=>{
+    try{
+      editor.value=applyCorrection(editor.value,issue);
+      editor.dispatchEvent(new Event("input"));reviewSpelling();
+    }catch(e){spellingStatus.textContent=e.message;}
+   },"btn");
+   correctionPanel.append(b);
+  }
+  const syntax=lintMessage(editor.value);
+  for(const message of syntax)correctionPanel.append(el("p",message,"csb-warning"));
+  spellingStatus.textContent=findings.length+" sugerencia(s) y "+syntax.length+" advertencia(s) de formato.";
+ }
+
  const row=el("div",null,"csb-section-head");
  row.append(el("h4","Personalizar el mensaje"),el("span","Elige solo lo que necesitas","sub"));right.append(row);
  const tabs=el("div",null,"csb-tools-tabs");right.append(tabs);
@@ -255,4 +306,5 @@ export function mountVisualMessageEditor({host,initialText,onTextChange,onInsert
  }
  draw();
  host.append(el("p","Las vistas son esquemáticas; el resultado definitivo se comprueba ejecutando el evento en el juego.","csb-visual-hint"));
+ return()=>skin?.dispose?.();
 }

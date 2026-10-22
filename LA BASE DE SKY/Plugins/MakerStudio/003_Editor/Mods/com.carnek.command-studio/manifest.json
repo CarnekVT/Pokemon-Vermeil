@@ -1,7 +1,7 @@
 {
   "id": "com.carnek.command-studio",
   "name": "Command Studio",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "apiVersion": "1.0.1",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Command Studio 0.8: navegación progresiva, seis tareas principales, buscador y categorías por tandas, formularios simplificados, enciclopedia con fichas y editor de mensajes por herramientas.",
+  "description": "Command Studio 0.9: navegador de eventos sincronizado, inserción contextual segura, NameBox, regalos Pokémon personalizados y únicos, corrector protegido, vista de Windowskins y auditoría de funciones.",
   "permissions": [
     "ui.panels",
     "ui.toasts",

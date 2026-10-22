@@ -55,40 +55,75 @@ function copyPageList(page){
  if(!Array.isArray(list))throw Error("No se pudo leer la lista de comandos de la página");
  return list.slice(-1)[0]?.code===0?list.slice(0,-1):list.slice();
 }
+// Index boundaries are positions between commands without the terminal 0.
+// Conservative parsing: treat linked continuation/branch markers as indivisible.
+export function availableInsertionPoints(commands) {
+  const list=(commands||[]).filter(c=>c.code!==0);
+  const out=[];
+  const continuation=new Set([401,408,509,605,655]);
+  const headers=new Set([101,108,209,302,355]);
+  const marks=new Set([402,403,404,411,412,413]);
+  for(let i=0;i<=list.length;i++){
+    const prev=list[i-1],next=list[i];
+    if(next&&continuation.has(next.code))continue;
+    if(prev&&headers.has(prev.code)&&next&&continuation.has(next.code))continue;
+    if(next&&[402,403,404,411,412,413].includes(next.code)){
+      // If the current branch body ends here, new commands go INSIDE that branch.
+      // Some end markers may represent empty branches. Empty branch insertion
+      // is only offered if immediately preceded by its matching branch marker.
+    }
+    if(next&&next.code===509)continue;
+    if(prev&&prev.code===209&&next&&next.code===509)continue;
+    if(prev&&prev.code===102&&next&&next.code===402)continue;
+    if(prev&&prev.code===102&&next&&next.code===403)continue;
+    let indent=0;
+    if(next&&marks.has(next.code)){
+      if([404,412,413].includes(next.code))indent=Math.max(0,Number(next.indent||0)+1);
+      else if([402,403,411].includes(next.code))indent=Math.max(0,Number(next.indent||0)+1);
+    }else if(next)indent=Number(next.indent||0);
+    else if(prev){
+      indent=Number(prev.indent||0);
+      if([404,412,413].includes(prev.code))indent=Math.max(0,indent);
+    }
+    // Prevent insertion after a branch opening but before its first branch label.
+    if(prev&&[102].includes(prev.code)&&next?.code===402)continue;
+    if(!Number.isInteger(indent)||indent<0||indent>40)continue;
+    out.push({index:i,indent,after:prev?.code??null,before:next?.code??null,label:i===0?"Al principio":i===list.length?"Al final":"Tras "+describeCommand(prev)});
+  }
+  return out;
+}
+export function describeCommand(command) {
+  if(!command)return "Inicio";
+  const names={101:"Diálogo",401:"Línea de texto",102:"Opciones",402:"Respuesta",403:"Cancelar opciones",404:"Fin de opciones",111:"Condición",411:"Si no",412:"Fin de condición",112:"Bucle",413:"Fin de bucle",355:"Script",655:"Continuación de script",108:"Comentario",408:"Comentario largo",121:"Interruptor",122:"Variable",123:"Interruptor local",201:"Transferir",106:"Esperar",209:"Mover evento",509:"Movimiento"};
+  const param=String(command.parameters?.[0]??"").replace(/\s+/g," ").slice(0,42);
+  return(names[command.code]||"Comando "+command.code)+(param?" · "+param:"");
+}
 export function previewInsertion(ctx,{mapId,eventId,pageIndex=0,position="end",commands}){
- const e=requireEvents(ctx);
- if(mapId==null)throw Error("Abre un mapa.");
- if(!Number.isInteger(Number(eventId))||Number(eventId)<1)throw Error("Selecciona un evento.");
- const current=e.getFull(Number(mapId),Number(eventId));
- if(!current)throw Error("No se encuentra ese evento en el mapa actual");
- if(!Array.isArray(current.pages)||!current.pages[pageIndex])throw Error("Página no disponible");
+ const api=requireEvents(ctx);
+ const mid=Number(mapId),eid=Number(eventId),pid=Number(pageIndex);
+ if(!Number.isInteger(mid)||mid<1)throw Error("Abre un mapa válido.");
+ if(!Number.isInteger(eid)||eid<1)throw Error("Selecciona un evento válido.");
+ if(!Number.isInteger(pid)||pid<0)throw Error("Página inválida.");
+ const event=api.getFull(mid,eid);
+ if(!event?.pages?.[pid])throw Error("El evento/página ya no existe: refresca la lista.");
  validateSequence(commands);
- // Current command list only changes on selected page.
- const original=copyPageList(current.pages[pageIndex]);
- const addition=pack(ctx,commands);
- // Explicit insertion at top-level boundaries only; never inside branches
- // or after a text/script continuation for an unrelated block.
- let at=position==="start"?0:original.length;
- if(typeof position==="number"&&Number.isInteger(position)){
-  if(position<0||position>original.length)throw Error("Posición fuera de rango");
-  const next=original[position];
-  if(next&&next.indent!==0)throw Error("No se puede insertar dentro de un bloque sin conocer su indentación");
-  if(next&&[401,408,655,402,403,404,411,412,413].includes(next.code))throw Error("No se puede cortar una estructura de eventos");
-  at=position;
- }
+ const original=copyPageList(event.pages[pid]);
+ const slots=availableInsertionPoints(original);
+ const at=position==="start"?0:position==="end"?original.length:Number(position);
+ const choice=slots.find(x=>x.index===at);
+ if(!choice||!Number.isInteger(at))throw Error("Este punto separaría comandos unidos o dañaría la estructura. Elige una línea de inserción permitida.");
+ const addition=pack(ctx,commands).map(cmd=>({...cmd,indent:cmd.indent+choice.indent}));
  const merged=[...original.slice(0,at),...addition,...original.slice(at)];
- // No original terminator: ctx.events.update() re-adds code-0.
- current.pages[pageIndex].list=merged;
- const verdict=e.validateEvent(current);
- if(!verdict?.valid)throw Error("Validación fallida: "+(verdict?.errors||[]).join("; "));
- return{event:current,oldCount:original.length,added:addition.length,newCount:merged.length,at,pageIndex,mapId:Number(mapId),eventId:Number(eventId)};
+ event.pages[pid].list=merged;
+ const validity=api.validateEvent(event);
+ if(!validity?.valid)throw Error("Validación del editor: "+(validity?.errors||[]).join("; "));
+ return{event,oldCount:original.length,added:addition.length,newCount:merged.length,at,indent:choice.indent,pageIndex:pid,mapId:mid,eventId:eid};
 }
 export function applyInsertion(ctx,options){
- const preview=previewInsertion(ctx,options);
- ctx.events.update(preview.mapId,preview.event);
- return{mapId:preview.mapId,eventId:preview.eventId,pageIndex:preview.pageIndex,inserted:preview.added,after:preview.newCount};
+ const p=previewInsertion(ctx,options);
+ ctx.events.update(p.mapId,p.event);
+ return{mapId:p.mapId,eventId:p.eventId,pageIndex:p.pageIndex,inserted:p.added,after:p.newCount};
 }
-export function eventSignature(page){
- const list=page?.list||[];
- return list.filter(c=>c.code!==0).map(c=>c.code+":"+String(c.indent)).join(",");
+export function eventSignature(page) {
+ return (page?.list||[]).filter(x=>x.code!==0).map(x=>x.code+":"+x.indent).join(",");
 }
