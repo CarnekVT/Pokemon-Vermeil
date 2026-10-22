@@ -150,6 +150,9 @@ export function normalizeLight(raw={}){
     rotation:num(s.rotation,-360,360,0),angle:num(s.angle,5,170,70),
     coneFeather:num(s.coneFeather,.03,.9,.28),
     maskFile:maskFilename(s.maskFile),
+    // A mask now clips ANY lamp shape. Legacy type='mask' keeps its behavior.
+    maskEnabled:s.maskEnabled===true || s.type==='mask',
+    maskMode:s.maskMode==='block'?'block':'reveal',
     widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
     enabled:s.enabled!==false,
     schedule:normalizeSchedule(s.schedule),
