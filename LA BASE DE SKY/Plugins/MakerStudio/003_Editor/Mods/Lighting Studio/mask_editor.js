@@ -120,14 +120,17 @@ export function mountMaskPainter(host,opts){
  const snapshot=()=>{history.push(brush.getImageData(0,0,canvas.width,canvas.height));if(history.length>15)history.shift();future.length=0;};
  // The mask is a STATIC luminance texture. Do not repaint the entire
  // Maker Studio map or flush a PNG during every pointer movement.
- let previewScheduled=false;
+ let previewScheduled=false,previewTimer=null;
  const signal=()=>{
-  status.textContent='Máscara preparada · guarda el PNG para aplicarla.';
+  status.textContent='Vista previa de máscara · guarda el PNG para conservarla.';
+  // Canvas painting remains responsive at native pointer speed, but the
+  // expensive whole-map overlay is refreshed at <=8fps during a stroke.
   if(previewScheduled)return;
   previewScheduled=true;
-  const apply=()=>{previewScheduled=false;onPreview(canvas);};
-  if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
-  else apply();
+  previewTimer=setTimeout(()=>{
+    previewTimer=null;previewScheduled=false;
+    if(canvas.isConnected)onPreview(canvas);
+  },125);
  };
  const toolButtons=[];
  for(const [id,label] of [['paint',opts.maskMode==='block'?'■ Pintar pared':'☀ Zona iluminada'],['dim','◐ Luz suave'],['erase','⌫ Recortar'],['polygon','⬡ Dibujar contorno']]){
