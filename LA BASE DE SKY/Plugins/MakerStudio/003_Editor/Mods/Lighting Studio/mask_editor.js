@@ -108,6 +108,7 @@ export function mountMaskPainter(host,opts){
   polyCtx.lineWidth=2;polyCtx.strokeStyle='#F8D78A';polyCtx.setLineDash([5,4]);
   polyCtx.beginPath();polygon.forEach((p,i)=>{if(i)polyCtx.lineTo(p.x,p.y);else polyCtx.moveTo(p.x,p.y);});
   polyCtx.stroke();polyCtx.setLineDash([]);
+   const start=polygon[0];polyCtx.fillStyle='#8FE2B4';polyCtx.beginPath();polyCtx.arc(start.x,start.y,5,0,Math.PI*2);polyCtx.fill();
  };
  const completePolygon=()=>{
   if(polygon.length<3)return;
@@ -139,6 +140,7 @@ export function mountMaskPainter(host,opts){
  }
  toolButtons[0][1].classList.add('active');
   group('✓ Cerrar contorno',()=>{if(polygon.length<3){status.textContent='Marca al menos 3 puntos para cerrar el contorno.';return;}completePolygon();});
+  group('↶ Quitar último punto',()=>{polygon.pop();renderPolygon();status.textContent='Puntos: '+polygon.length;});
   group('✕ Cancelar contorno',()=>{polygon=[];renderPolygon();status.textContent='Contorno cancelado.';});
  const slider=el('label','ls-mask-brush');slider.textContent='Pincel ';
  const range=el('input');range.type='range';range.min='2';range.max='48';range.value='10';range.oninput=()=>{radius=Number(range.value);};
@@ -168,7 +170,13 @@ export function mountMaskPainter(host,opts){
   brush.beginPath();brush.moveTo(from.x,from.y);brush.lineTo(to.x,to.y);brush.stroke();brush.restore();
  };
  canvas.addEventListener('pointerdown',ev=>{if(ev.button!==0)return;ev.preventDefault();
-  if(mode==='polygon'){if(ev.detail>=2){completePolygon();return;}polygon.push(point(ev));renderPolygon();return;}
+  if(mode==='polygon'){
+     const p=point(ev),first=polygon[0];
+     // Godot-style polygon workflow: click the highlighted start point to close.
+     if(polygon.length>=3&&first&&Math.hypot(p.x-first.x,p.y-first.y)<=9){completePolygon();return;}
+     if(ev.detail>=2){completePolygon();return;}
+     polygon.push(p);renderPolygon();status.textContent='Puntos: '+polygon.length+' · clic en el punto verde para cerrar';return;
+   }
   snapshot();drag=true;last=point(ev);canvas.setPointerCapture?.(ev.pointerId);stroke(last,last);});
  canvas.addEventListener('pointermove',ev=>{if(!drag)return;ev.preventDefault();const p=point(ev);stroke(p,last);last=p;signal();});
  const release=()=>{if(!drag)return;drag=false;last=null;signal();};
@@ -179,6 +187,7 @@ export function mountMaskPainter(host,opts){
  action('➜ Plantilla: cueva derecha',()=>replaceWith(caveTemplate(256,128,'right')));
  action('⬅ Cueva hacia izquierda',()=>replaceWith(caveTemplate(256,128,'left')));
  action('Lienzo vacío',()=>replaceWith(blankMask(canvas.width,canvas.height)));
+  action('▧ Máscara completa',()=>{const c=blankMask(canvas.width,canvas.height);const g=c.getContext('2d');g.fillStyle='#FFFFFF';g.fillRect(0,0,c.width,c.height);replaceWith(c);});
  action('◩ Mostrar / ocultar máscara',()=>{canvas.style.visibility=canvas.style.visibility==='hidden'?'visible':'hidden';});
   const guideInput=el('input');guideInput.type='file';guideInput.accept='image/png,image/jpeg,image/webp';guideInput.hidden=true;root.append(guideInput);
  action('▣ Calcar sobre imagen de cueva',()=>guideInput.click());
