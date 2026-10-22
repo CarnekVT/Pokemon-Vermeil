@@ -945,6 +945,48 @@ class Battle
   end unless method_defined?(:pbMaxSize)
 end
 
+# Battle scene uses Lighting Studio's persisted internal clock, not the
+# computer clock of the original EBDX implementation.
+module BSSLightingClockBridge
+  module_function
+  def active?
+    return false unless defined?(LightingStudioDayNight)
+    LightingStudioDayNight.active_on_map?(LightingStudioDayNight.current_map_data)
+  rescue StandardError
+    false
+  end
+  def hour
+    if active?
+      LightingStudioDayNight.current_hour.to_f % 24.0
+    else
+      t=Time.now
+      t.hour+t.min/60.0+t.sec/3600.0
+    end
+  end
+  def night?
+    return PBDayNight.isNight? if !active? && defined?(PBDayNight)
+    h=hour
+    h>=19.0 || h<5.0
+  end
+  def dawn?
+    if !active? && defined?(PBDayNight)
+      return PBDayNight.isMorning? || PBDayNight.isEvening?
+    end
+    h=hour
+    (h>=5.0 && h<7.0) || (h>=17.0 && h<19.0)
+  end
+  def morning?
+    return PBDayNight.isMorning? if !active? && defined?(PBDayNight)
+    h=hour
+    h>=5.0 && h<10.0
+  end
+  def evening?
+    return PBDayNight.isEvening? if !active? && defined?(PBDayNight)
+    h=hour
+    h>=17.0 && h<20.0
+  end
+end
+
 class BSS070EBDXRoom
   attr_reader :data
   attr_accessor :dynamax
@@ -1429,7 +1471,7 @@ class BSS070EBDXRoom
   #-----------------------------------------------------------------------------
   def updateSky
     return if !@data.try_key?("sky", "outdoor")
-    minutes = Time.now.hour*60 + Time.now.min
+    minutes = BSSLightingClockBridge.hour * 60.0
     # animates twinkling stars
     for i in 0...24
       break if !(PBDayNight.isNight? && @data.try_key?("outdoor"))
