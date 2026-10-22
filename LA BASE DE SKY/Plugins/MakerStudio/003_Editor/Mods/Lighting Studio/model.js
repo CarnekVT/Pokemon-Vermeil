@@ -152,7 +152,7 @@ export function normalizeLight(raw={}){
     maskFile:maskFilename(s.maskFile),
     // A mask now clips ANY lamp shape. Legacy type='mask' keeps its behavior.
     maskEnabled:s.maskEnabled===true || s.type==='mask',
-    maskMode:s.maskMode==='block'?'block':'reveal',
+    maskMode:s.maskMode==='block'?'block':(s.maskMode==='reveal'||s.type==='mask'?'reveal':'block'),
     widthPx:num(s.widthPx,8,1024,160),heightPx:num(s.heightPx,8,1024,96),
     enabled:s.enabled!==false,
     schedule:normalizeSchedule(s.schedule),
