@@ -98,7 +98,7 @@ export function mountMaskPainter(host,opts){
  stage.append(polyLayer);
  const polyCtx=polyLayer.getContext('2d');
  const brush=canvas.getContext('2d');brush.drawImage(draft,0,0);
- const status=el('div','ls-mask-status',opts.maskMode==='block'?'Dibuja las paredes que impedirán el paso de la luz.':'Dibuja la abertura por la que debe pasar la luz.');root.append(status);
+ const status=el('div','ls-mask-status',opts.maskMode==='block'?'Pinta en blanco las paredes que bloquean luz. Negro/transparente deja pasar.':'Pinta en blanco las zonas que reciben luz. Transparente queda sin iluminar.'); //r la que debe pasar la luz.');root.append(status);
  const group=(label,callback)=>{const b=el('button','ls-btn ls-small',label);b.type='button';b.onclick=callback;toolbar.append(b);return b;};
  let mode='paint',radius=10,drag=false,last=null;
  let polygon=[];
@@ -118,9 +118,19 @@ export function mountMaskPainter(host,opts){
  };
  const history=[],future=[];
  const snapshot=()=>{history.push(brush.getImageData(0,0,canvas.width,canvas.height));if(history.length>15)history.shift();future.length=0;};
- const signal=()=>{onPreview(canvas);status.textContent='Vista previa actualizada · pulsa «Guardar PNG» para usarla ingame.';};
+ // The mask is a STATIC luminance texture. Do not repaint the entire
+ // Maker Studio map or flush a PNG during every pointer movement.
+ let previewScheduled=false;
+ const signal=()=>{
+  status.textContent='Máscara preparada · guarda el PNG para aplicarla.';
+  if(previewScheduled)return;
+  previewScheduled=true;
+  const apply=()=>{previewScheduled=false;onPreview(canvas);};
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(apply);
+  else apply();
+ };
  const toolButtons=[];
- for(const [id,label] of [['paint',opts.maskMode==='block'?'✎ Pintar obstáculo':'✎ Permitir luz'],['dim','◐ Zona parcial'],['erase','⌫ Borrar trazo'],['polygon','⬡ Delimitar forma']]){
+ for(const [id,label] of [['paint',opts.maskMode==='block'?'■ Pintar pared':'☀ Zona iluminada'],['dim','◐ Luz suave'],['erase','⌫ Recortar'],['polygon','⬡ Dibujar contorno']]){
   const b=group(label,()=>{mode=id;polygon=[];renderPolygon();toolButtons.forEach(([x,v])=>v.classList.toggle('active',x===id));status.textContent=id==='polygon'?'Marca el contorno por puntos. Doble clic para rellenarlo.':'Arrastra sobre la imagen para modificar la luz.';});
   toolButtons.push([id,b]);
  }
