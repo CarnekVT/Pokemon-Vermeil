@@ -180,9 +180,9 @@ module LightingStudioNormals
   def light_sample_strength(type,local_x,local_y,dx,dy,radius,width,height,size,angle,mask_name)
     progress=case type
     when 'ellipse'
-      Math.sqrt((local_x/(width*size/2.0))**2+(local_y/(height*size/2.0))**2)
+      Math.sqrt((local_x/(width*size/2.0+12.0))**2+(local_y/(height*size/2.0+12.0))**2)
     when 'rectangle'
-      [(local_x/(width*size/2.0)).abs,(local_y/(height*size/2.0)).abs].max
+      [(local_x/(width*size/2.0+12.0)).abs,(local_y/(height*size/2.0+12.0)).abs].max
     when 'mask'
       return 0.0 if local_x.abs>width*size/2.0 || local_y.abs>height*size/2.0
       return mask_power_at(mask_name,local_x,local_y,width*size,height*size)
@@ -192,7 +192,7 @@ module LightingStudioNormals
       return 0.0 if Math.atan2(fy,fx).abs>=angle
       Math.sqrt(fx*fx+fy*fy)/(radius*size)
     else
-      Math.sqrt(dx*dx+dy*dy)/(radius*size)
+      Math.sqrt(dx*dx+dy*dy)/(radius*size+12.0)
     end
     smooth_edge(progress)
   end
