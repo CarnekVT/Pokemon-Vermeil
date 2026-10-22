@@ -1,5 +1,6 @@
 import { mountFriendly as mount, focusEvent } from "./friendly-ui.js";
 import { registerPickerCommands } from "./picker-commands.js";
+import { registerPlacementTool } from "./placement.js";
 
 const PANEL = "com.carnek.command-studio.panel";
 
@@ -38,6 +39,7 @@ export function activate(ctx) {
   if (ctx.commands?.register)
     ctx.commands.register("com.carnek.command-studio.open", () => open(ctx));
   registerPickerCommands(ctx);
+  registerPlacementTool(ctx);
   if(ctx.ui?.registerContextMenuItem){
     ctx.ui.registerContextMenuItem({
       context: "map-event", label: "Editar con Command Studio",
