@@ -1592,8 +1592,9 @@ App.prototype.dialoguesHTML = function(b) {
   const globalCount = allTriggers.filter(t => t.target === "global").length;
   
   const displayed = allTriggers.map((t, origIdx) => ({ t, origIdx })).filter(({ t }) => {
-    if (filter === "all") return true;
-    return t.target === filter;
+    if (filter !== "all" && t.target !== filter)return false;
+    const text=[t.id,t.event,t.target,t.speaker,t.speakerName,t.text].map(S).join(" ").toLowerCase();
+    return !this.dialogueSearch||text.includes(this.dialogueSearch);
   });
   
   const targetMeta = {
