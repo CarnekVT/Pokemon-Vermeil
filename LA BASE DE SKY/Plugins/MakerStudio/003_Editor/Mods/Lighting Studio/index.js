@@ -283,6 +283,9 @@ const quality=node('select');quality.className='ls-input';
  state.previewNight=!state.previewNight;invalidate();redraw();refresh();
 },state.previewNight);
 previewOptions.append(night);
+ const animate=node('input');animate.type='checkbox';animate.checked=state.previewAnimateLights;
+ animate.onchange=()=>{state.previewAnimateLights=animate.checked;invalidate();redraw();refresh();};
+ labeled(previewOptions,'Animar luces en la preview (apagado por defecto)',animate);
 ambient.append(element('p','ls-inline-note','La vista nocturna oscurece el mapa solo en Maker Studio para distinguir las luces sobre tiles claros. No modifica los datos del juego.'));const enabled=node('input');enabled.type='checkbox';enabled.checked=scene.enabled!==false;enabled.onchange=()=>change(()=>scene.enabled=enabled.checked);labeled(ambient,'Iluminación activada para este mapa',enabled);
 const zero=element('div','ls-inline');ambient.append(zero);zero.append(mini('Quitar oscuridad',()=>change(()=>scene.ambient.darkness=0)),mini('Apagar todas las luces',()=>change(()=>{scene.lights.forEach(l=>l.enabled=false);})),mini('Encender todas',()=>change(()=>{scene.lights.forEach(l=>l.enabled=true);})));const settings=scene.ambient;
 const overlap=node('select');overlap.className='ls-input';
@@ -476,14 +479,19 @@ if(maskSelected){
       notify(ok?'PNG recargado y actualizado en el mapa.':'No se pudo leer el PNG.','warn');
     }).catch(fail);
   }));
-  maskTools.append(mini(selected.maskMode==='block'?'＋ Lienzo para obstáculos':'＋ Crear abertura luminosa',()=>{
-    const name=maskFilename(maskInput.value.trim())||'cueva_salida.png';
+  maskTools.append(mini('＋ Nueva máscara y dibujar',()=>{
+    const name=maskFilename(maskInput.value.trim())||maskFilename('mascara_'+String(lightId).replace(/[^a-z0-9_-]/gi,'_')+'.png')||'mascara_nueva.png';
     // Keep a separate canvas per graphic so edits are not lost when switching
     // between inspector tabs and lighting sources.
-    const draft=selected.maskMode==='block' ? (()=>{const c=document.createElement('canvas');c.width=256;c.height=128;return c;})() : caveTemplate(256,128,'right');
+    const draft=(()=>{const c=document.createElement('canvas');c.width=256;c.height=128;return c;})();
     state.maskDrafts.set(name,draft);
     setMaskImage(name,draft);
-    change(()=>{selected.maskFile=name;state.inspectorTab='mask';});
+    change(()=>{selected.maskFile=name;selected.maskEnabled=true;state.inspectorTab='mask';});
+  }));
+  maskTools.append(mini('◈ Plantilla de entrada de cueva',()=>{
+    const name=maskFilename(maskInput.value.trim())||maskFilename('mascara_'+String(lightId).replace(/[^a-z0-9_-]/gi,'_')+'.png')||'mascara_nueva.png';
+    const draft=caveTemplate(256,128,'right');state.maskDrafts.set(name,draft);setMaskImage(name,draft);
+    change(()=>{selected.maskFile=name;selected.maskEnabled=true;selected.maskMode='reveal';state.inspectorTab='mask';});
   }));
   const name=selected.maskFile;
   const source=maskFilename(name)?(state.maskDrafts.get(name)||getMaskImage(name)):null;
@@ -661,7 +669,7 @@ try{
  const map=getMap(state.data,info.mapId,false);
  paint(draw,info,{map:map||{enabled:true,ambient:{darkness:0,color:'#142439'},lights:[]},
   ambientOverride:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?
-    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,toneMode:state.data.timeOfDay.blendMode||'tone',showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,previewHour:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?state.previewHour:null,previewQuality:state.previewQuality,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides&&editing,editing:editing,selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
+    evaluateTimeOfDay(state.data.timeOfDay,state.previewHour):null,toneMode:state.data.timeOfDay.blendMode||'tone',showPreview:!state.readError&&state.showOverlay,previewNight:state.previewNight,previewHour:state.previewDayNight&&state.data.timeOfDay.enabled&&map?.dayNightMode!=='ignore'?state.previewHour:null,previewQuality:state.previewQuality,previewAnimateLights:state.previewAnimateLights,fastPreview:!!state.drag||!!state.editSnapshot||performance.now()<(state.fastPreviewUntil||0),showGuides:state.showGuides&&editing,editing:editing,selectedId:state.selected,hover:state.hover,hoverHit:state.hoverHit,mode:state.mode,drag:state.drag,brushRadius:state.brushRadius,brush:{type:state.newType},revision:state.revision,time:performance.now()/1000});
  if(state.diagnostic){draw.save();try{
   draw.globalAlpha=1;draw.globalCompositeOperation='source-over';draw.fillStyle='#FFDE3B';draw.fillRect(10,10,190,34);draw.strokeStyle='#121826';draw.lineWidth=2;draw.strokeRect(10,10,190,34);draw.fillStyle='#111821';draw.font='bold 13px sans-serif';draw.fillText('LIGHTING · MAPA '+info.mapId,18,32);
  }finally{draw.restore();}}
@@ -687,7 +695,7 @@ if(!d&&state.mode==='select'){
 if(d){const l=current()?.lights.find(x=>x.id===d.id);if(l){const before={...l};if(d.part==='move'){l.x=d.origin.x+pt.x-d.start.x;l.y=d.origin.y+pt.y-d.start.y;}else{const distance=Math.hypot(pt.x-l.x,pt.y-l.y)*32;l.radiusPx=clamp(distance||state.brushRadius,8,512);}invalidateLightRegions(before,l);}}
 if(d)schedulePreview();else redraw();}
 function pointerUp(){if(!state?.drag)return;const d=state.drag;state.drag=null;settleFastPreview();if(d.before){state.undo.push(d.before);if(state.undo.length>60)state.undo.shift();state.redo=[];}redraw();refresh();schedulePersist();}
-export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),maskPromises:new Map(),maskReady:new Set(),maskDrafts:new Map(),workspaceTab:'lights',previewDayNight:false,previewHour:12,previewQuality:'balanced',mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
+export async function activate(ctx){state={ctx,data:defaultProject(),maskLoading:new Set(),maskPromises:new Map(),maskReady:new Set(),maskDrafts:new Map(),workspaceTab:'lights',previewDayNight:false,previewHour:12,previewQuality:'balanced',previewAnimateLights:false,mapId:Number(ctx.editor.activeMapId?.())||1,diagnostic:false,overlayStats:{calls:0,lastAt:0,lastMap:null,errors:0,lastError:'',lastMs:0,requestDelayMs:0},statusNode:null,selected:null,mode:'select',inspectorTab:'shape',normalCategory:'characters',previewNight:false,fastPreviewUntil:0,settleTimer:null,autosaveTimer:null,revision:0,lastRedraw:0,lastRequestAt:0,awaitingOverlay:false,saving:false,saveRequested:false,showOverlay:true,showGuides:true,newType:'radial',brushRadius:96,hover:null,hoverHit:null,drag:null,clock:0,redrawPending:false,redrawDirty:false,previewScheduled:false,previewTimer:null,lastCursor:null,viewport:null,host:null,writer:Promise.resolve(),undo:[],redo:[],editSnapshot:null,readError:null};try{state.data=await load();state.previewHour=state.data.timeOfDay.previewHour??12;}catch(e){state.readError=String(e.message||e);fail(e);}
 void preloadMasks().catch(fail);
  ctx.ui.registerPanel({id:PANEL,title:'Lighting Studio',defaultPosition:'right',defaultSize:{width:1050,height:810},render(host){state.host=host;refresh();return()=>{if(state?.host===host)state.host=null;};}});
 ctx.menu.registerMenuItem({menu:'Mods',label:'Lighting Studio',icon:'sun',handler:()=>{ctx.ui.openPanel(PANEL);ctx.editor.setTool(TOOL);redraw();}});
@@ -712,7 +720,7 @@ const wait=state.previewQuality==='full'?420:state.previewQuality==='fast'?800:6
  if(now-(state.lastTickRedraw||0)<wait)return;
  if(state.editSnapshot || state.drag)return; // no background repaint competes with pointer input
  if((state.previewQuality==='full'&&!state.drag&&!state.editSnapshot&&hasPendingChunks())||
-    (!state.advancedOverlay&&state.showOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))){
+    (state.previewAnimateLights&&!state.advancedOverlay&&state.showOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))){
    state.lastTickRedraw=now;redraw();
  }
 },120);
