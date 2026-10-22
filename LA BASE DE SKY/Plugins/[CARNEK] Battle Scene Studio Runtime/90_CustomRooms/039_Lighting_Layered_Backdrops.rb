@@ -58,7 +58,7 @@ module BSSLayeredLighting
   # considers the overworld nighttime. This is color balance, not a new clock.
   def twilight_strength
     h=hour % 24.0
-    evening=clamp(1.0-(h-18.4).abs/2.1,0.0,1.0)
+    evening=clamp(1.0-(h-19.0).abs/2.4,0.0,1.0)
     morning=clamp(1.0-(h-6.0).abs/1.2,0.0,1.0)
     [evening,morning].max
   end
@@ -248,16 +248,16 @@ module BSSLayeredRoomSupport
     @bss_layered_last_key=key
 
     # Dim sky far less than the terrain; do not black out the sunset.
-    sky_tone=BSSLayeredLighting.tone(light,0.24)
-    horizon_tone=BSSLayeredLighting.tone(light,0.28)
-    ground_tone=BSSLayeredLighting.tone(light,0.68)
+    sky_tone=BSSLayeredLighting.tone(light,0.55)
+    horizon_tone=BSSLayeredLighting.tone(light,0.42)
+    ground_tone=BSSLayeredLighting.tone(light,1.05)
     bg.tone=sky_tone
     if @bss_layered_extra && @bss_layered_extra.length==2
       horizon,ground=@bss_layered_extra
       horizon.tone=horizon_tone
-      horizon.color=Color.new(238,142,83,(90*warmth).round)
+      horizon.color=Color.new(248,166,92,(154*warmth).round)
       ground.tone=ground_tone
-      ground.color=Color.new(36,62,70,slot==:night ? 26 : 0)
+      ground.color=Color.new(38,59,79,slot==:night ? 62 : (warmth*24).round)
     else
       bg.tone=ground_tone
     end
@@ -267,10 +267,10 @@ module BSSLayeredRoomSupport
       # EBDX's source trees can be almost black at dusk/night; lift them into
       # blue-green instead of forcing the original solid black silhouette.
       if name =~ /\A(?:tree|grass)\d+\z/i
-        sp.tone=BSSLayeredLighting.tone(light,0.30) if sp.respond_to?(:tone=)
+        sp.tone=BSSLayeredLighting.tone(light,0.46) if sp.respond_to?(:tone=)
         if sp.respond_to?(:color=)
-          alpha=slot==:day ? 0 : (slot==:dawn ? 106 : 140)
-          sp.color=Color.new(45,85,80,alpha)
+          alpha=slot==:day ? 0 : (slot==:dawn ? 175 : 205)
+          sp.color=Color.new(65,110,118,alpha)
         end
       elsif name=="base" || name=="water"
         sp.tone=ground_tone if sp.respond_to?(:tone=)
@@ -278,6 +278,12 @@ module BSSLayeredRoomSupport
     end
   rescue StandardError => e
     BSS064.log("BSS layered lighting warning: #{e.class}: #{e.message}") if defined?(BSS064)
+  end
+
+  def visible=(flag)
+    result=super
+    Array(@bss_layered_extra).each{|part|part.visible=flag if part && !(part.disposed? rescue true)}
+    result
   end
 
   def position(*args,&block)
