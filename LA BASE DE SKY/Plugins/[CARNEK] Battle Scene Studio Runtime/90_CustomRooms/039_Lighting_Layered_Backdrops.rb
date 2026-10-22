@@ -519,7 +519,9 @@ module BSSLayeredEBDXCamera
       # and battler world projection. Never create a second render camera.
       @vector.update
     end
-    super
+    # BAS owns battler and shadow matrices during animation. The room may
+    # animate but it must not project the world onto BAS sprites until released.
+    super(advance_camera && !bas_owned, align && !bas_owned)
   end
 end
 if defined?(Battle::Scene) && !Battle::Scene.ancestors.include?(BSSLayeredEBDXCamera)
