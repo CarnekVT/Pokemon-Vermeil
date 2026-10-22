@@ -133,25 +133,27 @@ function createMask(l){
   if(l.type==='mask'){
     const src=maskSources.get(l.maskFile);
     if(!src)return null;
-    const output=newCanvas(src.width,src.height),ctx=output.getContext('2d');
+    const scale=Math.min(1,256/Math.max(src.width,src.height));
+    const w=Math.max(1,Math.round(src.width*scale)),h=Math.max(1,Math.round(src.height*scale));
+    const output=newCanvas(w,h),ctx=output.getContext('2d');
     if(!ctx)return null;
-    ctx.drawImage(src,0,0);
-    // Legacy mask images can be very large: never read/transform more than
-    // 256x256 pixels in the editor. Reuse GPU alpha stencil compositing.
-    const factor=Math.min(1,256/Math.max(src.width,src.height));
-    const outW=Math.max(1,Math.round(src.width*factor)),outH=Math.max(1,Math.round(src.height*factor));
-    if(outW!==output.width || outH!==output.height){
-      output.width=outW;output.height=outH;
-      ctx.clearRect(0,0,outW,outH);ctx.drawImage(src,0,0,outW,outH);
-    }
-    const frame=ctx.getImageData(0,0,outW,outH),data=frame.data;
     const [r,g,b]=rgb(l.color);
-    for(let i=0;i<data.length;i+=4){const gray=(data[i]*54+data[i+1]*183+data[i+2]*19)/256;
-      // Alpha defines geometry. RGB grayscale is optional paint intensity;
-      // black ink is an opaque occluder, not an invisible hole.
-      const power=data[i+3]/255;
-      data[i]=r;data[i+1]=g;data[i+2]=b;data[i+3]=Math.round(255*(l.maskMode==='block'?(1-power):power));}
-    ctx.putImageData(frame,0,0);return output;
+    // Pure alpha stencil. No getImageData(), grayscale sampling or per-pixel
+    // JavaScript: masking happens on the Canvas compositor (GPU/WebView).
+    ctx.save();
+    if(l.maskMode==='block'){
+      ctx.fillStyle=`rgb(${r},${g},${b})`;
+      ctx.fillRect(0,0,w,h);
+      ctx.globalCompositeOperation='destination-out';
+      ctx.drawImage(src,0,0,w,h);
+    }else{
+      ctx.drawImage(src,0,0,w,h);
+      ctx.globalCompositeOperation='source-in';
+      ctx.fillStyle=`rgb(${r},${g},${b})`;
+      ctx.fillRect(0,0,w,h);
+    }
+    ctx.restore();
+    return output;
   }
   const dims=dimensions(l),p=l.pixel||{},pixelated=p.enabled===true;
   const maxSmooth=(l.type==='cone'||l.type==='ellipse')?SMOOTH_SHAPE_MAX:MASK_MAX;
