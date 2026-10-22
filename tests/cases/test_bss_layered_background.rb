@@ -106,6 +106,27 @@ class BattleBackdropLayersTest < Minitest::Test
     assert_equal 255,output[2].raw_data.getbyte((74*80+10)*4+3)
   end
 
+  def test_scanline_sky_detection_keeps_black_foreground_separate
+    s,_,_=room
+    w=16;h=12
+    raw=+"".b
+    h.times do |y|
+      w.times do |x|
+        # Bright blue gradient; an opaque tree occupies the far left.
+        rgb=x<3 ? [5,22,14] : [85+y,150+y,205+y]
+        raw << rgb.pack("C3") << [255].pack("C")
+      end
+    end
+    palette=s.bss_layered_sky_palette(raw,w,h)
+    assert_operator palette[5][2],:>,190
+    sky_at=(5*w+6)*4
+    tree_at=(5*w+1)*4
+    sky_distance=(0..2).sum{|i|(raw.getbyte(sky_at+i)-palette[5][i]).abs}
+    tree_distance=(0..2).sum{|i|(raw.getbyte(tree_at+i)-palette[5][i]).abs}
+    assert_operator sky_distance,:<,112
+    assert_operator tree_distance,:>,112
+  end
+
   def test_disabled_indoor_and_custom_split_and_disposal
     s,_,_=room({"outdoor"=>false,"sky"=>true})
     s.bss_layered_split!
