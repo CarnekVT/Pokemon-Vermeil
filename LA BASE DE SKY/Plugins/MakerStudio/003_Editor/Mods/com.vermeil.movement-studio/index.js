@@ -1,12 +1,12 @@
 import { STYLES } from "./styles.js";
 
 const PATH = "Plugins/[VERMEIL] Smooth Movement/config.ini";
-const VERSION = "0.6.0";
+const VERSION = "0.7.0";
 const DEFAULTS = {
   directions: "4", mode: "grid", subtile_divisions: "4", instant_turn: "1",
   flow_motion: "0", camera_lookahead: "0", wall_slide: "0",
   smooth_movement: "1", camera_smoothing: "35",
-  diagonal_facing: "keep", wall_slide_priority: "horizontal",
+  diagonal_facing: "keep", diagonal_speed: "quick", diagonal_live_turn: "1", wall_slide_priority: "horizontal",
   camera_deadzone: "0", camera_lead_response: "120", debug_hud: "0"
 };
 const SECTIONS = [
@@ -20,6 +20,8 @@ const FIELDS = {
   directions:{ group:"control", label:"Direcciones", description:"Cuatro direcciones o diagonales opcionales en el control moderno.", options:[["4","4 direcciones"],["8","8 direcciones"]] },
   instant_turn:{ group:"control", label:"Tipo de control", description:"Clásico conserva íntegra la respuesta original de Essentials. Moderno utiliza la dirección pulsada sin retraso artificial.", options:[["1","Moderno · respuesta inmediata"],["0","Clásico · Essentials original"]] },
   flow_motion:{ group:"control", label:"Continuous Flow", description:"Encadena pasos consecutivos con el tiempo sobrante, respetando eventos. Solo funciona con el control moderno.", options:[["0","Desactivado"],["1","Activado"]] },
+  diagonal_speed:{ group:"diagonal", label:"Ritmo de las diagonales", description:"Ágil: cada diagonal tarda lo mismo que una casilla recta (avanza más rápido en distancia). Uniforme: mantiene la misma velocidad física en todas las direcciones.", options:[["quick","Ágil · responde antes"],["uniform","Uniforme · velocidad constante"]] },
+  diagonal_live_turn:{ group:"diagonal", label:"Orientación inmediata", description:"El sprite gira hacia la dirección pulsada aunque el paso actual siga terminándose. Nunca altera colisiones ni guarda teclas.", options:[["1","Sí, reflejar la tecla actual"],["0","No, esperar a terminar la casilla"]] },
   wall_slide:{ group:"diagonal", label:"Deslizamiento en paredes", description:"Si una diagonal está bloqueada, intenta moverse por un eje cardinal válido.", options:[["0","Desactivado"],["1","Activado"]] },
   wall_slide_priority:{ group:"diagonal", label:"Eje preferente", description:"Orden en que se comprueban los ejes cuando una diagonal está bloqueada.", options:[["horizontal","Horizontal"],["vertical","Vertical"],["facing","Según orientación"]] },
   diagonal_facing:{ group:"diagonal", label:"Sprite durante diagonales", description:"Fila gráfica elegida para sprites tradicionales de cuatro direcciones.", options:[["keep","Mantener orientación"],["horizontal","Priorizar horizontal"],["vertical","Priorizar vertical"]] },
@@ -115,6 +117,7 @@ class MovementStudio {
     this.ctx=ctx;
     this.host=host;
     this.section="overview";
+    this.experience="simple";
     this.config={global:{...DEFAULTS}};
     this.loaded=false;
     this.baseline="";
@@ -192,7 +195,7 @@ class MovementStudio {
   }
   nav(){
     return '<div class="vm-overline">ÁREAS DE TRABAJO</div>'+
-      SECTIONS.map(s=>'<button type="button" class="vm-nav-btn '+(this.section===s.id?'active':'')+'" data-section="'+s.id+'" title="'+E(s.title)+'" aria-label="'+E(s.title)+'"><span aria-hidden="true">'+s.icon+'</span><span class="vm-nav-caption">'+E(s.title)+'</span></button>').join("") +
+      SECTIONS.filter(s=>this.experience==="advanced"||s.id!=="debug").map(s=>'<button type="button" class="vm-nav-btn '+(this.section===s.id?'active':'')+'" data-section="'+s.id+'" title="'+E(s.title)+'" aria-label="'+E(s.title)+'"><span aria-hidden="true">'+s.icon+'</span><span class="vm-nav-caption">'+E(s.title)+'</span></button>').join("") +
       '<div class="vm-nav-meta"><strong>Movement Studio</strong>Los controles modernos utilizan la pulsación actual. Ningún ajuste visual retiene los botones.</div>';
   }
   sectionInfo(){
@@ -206,6 +209,7 @@ class MovementStudio {
       '<header class="vm-top"><div class="vm-mark" aria-hidden="true">✥</div><div class="vm-brand"><strong>Movement Studio</strong><small>VERMEIL · v'+VERSION+' · Editor de movimiento</small></div>'+
       '<span class="vm-tag live">ESSENTIALS 21.1</span><div class="vm-top-spacer"></div>'+
       this.scopeControl()+
+      '<div class="vm-experience" role="group" aria-label="Nivel del editor"><button type="button" data-experience="simple" class="'+(this.experience==="simple"?"active":"")+'">Sencillo</button><button type="button" data-experience="advanced" class="'+(this.experience==="advanced"?"active":"")+'">Avanzado</button></div>'+
       '<span class="vm-tag '+(this.dirty()?'warn':'')+'" data-dirty-head>'+(this.dirty()?'● Cambios sin guardar':'✓ Sin cambios')+'</span>'+
       '<button type="button" class="vm-btn ghost" data-act="reload">↻ Recargar</button>'+
       '<button type="button" class="vm-btn primary" data-act="save">▣ Guardar cambios</button></header>'+
