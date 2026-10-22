@@ -468,7 +468,7 @@ if(maskSelected){
       notify(ok?'PNG recargado y actualizado en el mapa.':'No se pudo leer el PNG.','warn');
     }).catch(fail);
   }));
-  maskTools.append(mini('＋ Crear salida de cueva',()=>{
+  maskTools.append(mini(selected.maskMode==='block'?'＋ Lienzo para obstáculos':'＋ Crear abertura luminosa',()=>{
     const name=maskFilename(maskInput.value.trim())||'cueva_salida.png';
     // Keep a separate canvas per graphic so edits are not lost when switching
     // between inspector tabs and lighting sources.
