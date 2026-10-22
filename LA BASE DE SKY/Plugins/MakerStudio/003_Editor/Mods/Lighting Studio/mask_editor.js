@@ -98,7 +98,7 @@ export function mountMaskPainter(host,opts){
  stage.append(polyLayer);
  const polyCtx=polyLayer.getContext('2d');
  const brush=canvas.getContext('2d');brush.drawImage(draft,0,0);
- const status=el('div','ls-mask-status',opts.maskMode==='block'?'Pinta en blanco las paredes que bloquean luz. Negro/transparente deja pasar.':'Pinta en blanco las zonas que reciben luz. Transparente queda sin iluminar.'); //r la que debe pasar la luz.');root.append(status);
+ const status=el('div','ls-mask-status',opts.maskMode==='block'?'Pinta las paredes que bloquean la luz. Las zonas transparentes dejan pasar.':'Pinta las zonas iluminadas. Transparente significa sin iluminación.');root.append(status);
  const group=(label,callback)=>{const b=el('button','ls-btn ls-small',label);b.type='button';b.onclick=callback;toolbar.append(b);return b;};
  let mode='paint',radius=10,drag=false,last=null;
  let polygon=[];
