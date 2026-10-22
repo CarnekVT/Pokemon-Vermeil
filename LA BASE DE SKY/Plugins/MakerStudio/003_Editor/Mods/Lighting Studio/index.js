@@ -433,7 +433,20 @@ shapePanel.append(element('div','ls-group-label','PROPIEDADES GENERALES'));
 fadePanel.append(element('p','ls-inline-note','Elige hacia qué borde se atenúa la luz. «Hacia abajo» conserva una zona luminosa arriba y la oscurece progresivamente hacia abajo.'));
 const typeSelect=node('select');typeSelect.className='ls-input';for(const t of LIGHT_TYPES){const o=node('option',TYPE_NAMES[t]);o.value=t;typeSelect.append(o);}typeSelect.value=selected.type;typeSelect.onchange=()=>change(()=>{selected.type=typeSelect.value;state.inspectorTab=selected.type==='mask'?'mask':'shape';});labeled(shapePanel,'Geometría',typeSelect);
 if(selected.type==='cone'){slider(shapePanel,'Apertura (grados)',selected.angle,5,170,1,(v,final)=>editLightValue(()=>selected.angle=v,final));}
-if(selected.type==='ellipse'||selected.type==='rectangle'||selected.type==='mask'){slider(shapePanel,'Anchura (px)',selected.widthPx,8,1024,1,(v,final)=>editLightValue(()=>selected.widthPx=v,final));slider(shapePanel,'Altura (px)',selected.heightPx,8,1024,1,(v,final)=>editLightValue(()=>selected.heightPx=v,final));}
+if(selected.type==='ellipse'||selected.type==='rectangle'||selected.type==='mask'){
+ // The raster is authored in local axes then rotated for display. At 90°
+ // local width becomes SCREEN height. Map the controls to visible axes.
+ const radians=(Number(selected.rotation)||0)*Math.PI/180;
+ const quarterTurn=Math.abs(Math.sin(radians))>Math.abs(Math.cos(radians));
+ const screenWidthKey=quarterTurn?'heightPx':'widthPx';
+ const screenHeightKey=quarterTurn?'widthPx':'heightPx';
+ slider(shapePanel,'Anchura horizontal visible (px)',selected[screenWidthKey],8,1024,1,
+   (v,final)=>editLightValue(()=>selected[screenWidthKey]=v,final));
+ slider(shapePanel,'Altura vertical visible (px)',selected[screenHeightKey],8,1024,1,
+   (v,final)=>editLightValue(()=>selected[screenHeightKey]=v,final));
+ if(Math.abs(Math.sin(radians))>.15&&Math.abs(Math.cos(radians))>.15)
+   shapePanel.append(element('p','ls-inline-note','Con una luz girada en diagonal, ambas dimensiones visuales se relacionan. Puedes poner Rotación en 0° para ajustarlas sin inclinación.'));
+}
 const maskToggle=node('input');maskToggle.type='checkbox';maskToggle.checked=selected.maskEnabled===true || selected.type==='mask';maskToggle.disabled=selected.type==='mask';
 maskToggle.onchange=()=>change(()=>{selected.maskEnabled=maskToggle.checked;state.inspectorTab=maskToggle.checked?'mask':'shape';});
 labeled(shapePanel,'Recortar esta luz con una máscara',maskToggle);
