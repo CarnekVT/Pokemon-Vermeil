@@ -411,31 +411,62 @@ function cachedHigherMask(mapId,p,crop,layers){
  state.layerMasks.set(key,mask);
  return mask;
 }
+// The native autotile renderer redraws when its *frame set* changes, not once
+// per placed tile. A single clock controls every placement of a definition,
+// including independently phased placements. Checking those definitions rather
+// than stringifying every visible placement avoids O(visible props) hash work
+// on each 33 ms scheduler tick.
+function activeMapFrameSignature(visible,now){
+  const definitions=new Map();
+  for(const row of visible){
+    const d=row?.d;
+    if(!d || definitions.has(d.id))continue;
+    definitions.set(d.id,d);
+  }
+  const ticks=[];
+  for(const d of definitions.values()){
+    const first=Math.max(1,Math.floor(Number(d.frames)||1));
+    const second=d.parallel?.enabled && d.parallel?.sheet ?
+      Math.max(1,Math.floor(Number(d.parallel.frames)||1)) : 1;
+    if(first<=1 && second<=1)continue;
+    const primary=first>1?frameFor(d,now):-1;
+    // Parallel is synchronized to the same time origin; placement-specific
+    // offsets change the phase, not the moments at which a frame can advance.
+    const parallel=second>1?parallelFrame(d,now,null):-1;
+    ticks.push(d.id+':'+primary+':'+parallel);
+  }
+  return ticks.join('|');
+}
 function tickVisuals(){
-  if(!state)return;
+  if(!state || (typeof document!=='undefined' && document.hidden))return;
   const now=performance.now(), profile=getProfile(state.perfMode);
   const mapId=activeMap();
-  if(state.showOverlay && mapId!=null && (state.lastMapTick==null || dueTick(now,state.lastMapTick,profile.mapFps))){
+  if(state.showOverlay && mapId!=null && profile.mapFps>0 &&
+     (state.lastMapTick==null || dueTick(now,state.lastMapTick,profile.mapFps))){
     state.lastMapTick=now;
-    if(profile.mapFps>0){
-      const info=state.lastRenderInfo?.mapId===mapId?state.lastRenderInfo:null;
-      const render=renderEntries(mapId);
-      const geo=viewportCacheKey(mapId,info);
-      const cached=state.visibleCandidates;
-      const visible=cached?.geo===geo&&cached?.render===render ? cached.entries : queryVisible(render.spatial,info);
-      if(!cached||cached.geo!==geo||cached.render!==render)state.visibleCandidates={geo,render,entries:visible};
-      const key=visible.map(({p,d})=>{const f=frameFor(d,now);return `${p.id}:${d.timingMode==='independent'?(f+phaseFromId(p.id,d.frames))%d.frames:f}:${d.parallel?.enabled?parallelFrame(d,now,p.id):'-'}`;}).join('|');
-      if(key!==state.lastMapFrameKey){state.lastMapFrameKey=key;if(visible.length)redraw();}
+    const info=state.lastRenderInfo?.mapId===mapId?state.lastRenderInfo:null;
+    const render=renderEntries(mapId),geo=viewportCacheKey(mapId,info);
+    const cached=state.visibleCandidates;
+    const visible=cached?.geo===geo&&cached?.render===render ?
+      cached.entries : queryVisible(render.spatial,info);
+    if(!cached || cached.geo!==geo || cached.render!==render)
+      state.visibleCandidates={geo,render,entries:visible};
+    const key=activeMapFrameSignature(visible,now);
+    if(key!==state.lastMapFrameKey){
+      state.lastMapFrameKey=key;
+      // No animated visual is visible? Never schedule a map redraw merely
+      // because the animation timer is alive.
+      if(key)redraw();
     }
   }
   const def=getDef();
-  if(state.host && def && (state.lastPreviewTick==null || dueTick(now,state.lastPreviewTick,profile.previewFps))){
+  if(state.host && state.host.isConnected!==false && def &&
+     (state.lastPreviewTick==null || dueTick(now,state.lastPreviewTick,profile.previewFps))){
     state.lastPreviewTick=now;
     const key=`${def.id}:${selectedFrame(def)}:${parallelFrame(def,now)}`;
     if(key!==state.lastPreviewKey){
-      state.lastPreviewKey=key;paintPanelPreview();
-      // The selection canvas is a static SOURCE selector; refreshing its
-      // sprite each animation step makes region dragging jerky for no benefit.
+      state.lastPreviewKey=key;
+      paintPanelPreview();
     }
   }
 }
