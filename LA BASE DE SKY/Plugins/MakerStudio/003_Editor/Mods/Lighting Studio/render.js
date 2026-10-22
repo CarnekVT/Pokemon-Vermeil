@@ -15,11 +15,11 @@ function evictMask(name){
 export function setMaskImage(filename,img){
  if(!filename||!img)return;
  maskSources.set(filename,img);
- evictMask(filename);
+ evictMask(filename);masks.clear();staticPreviewViews.clear();chunks.clear();
 }
 export function getMaskImage(filename){return maskSources.get(filename)||null;}
 export function removeMaskImage(filename){
- if(maskSources.delete(filename))evictMask(filename);
+ if(maskSources.delete(filename)){evictMask(filename);masks.clear();staticPreviewViews.clear();chunks.clear();}
 }
 export function forgetMaskImages(){maskSources.clear();clearLightCache();}
 let pendingChunks=false;
@@ -102,7 +102,7 @@ function newCanvas(w,h){
 function maskKey(l){
   const p=l.pixel||{};
   return [l.type,l.radiusPx,l.widthPx,l.heightPx,l.angle,l.coneFeather,l.color,l.softness,l.centerStrength,
-    l.fadeMode,l.fadeStart,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps,l.maskFile].join('|');
+    l.fadeMode,l.fadeStart,l.fadeX,l.fadeY,p.enabled?1:0,p.size,p.steps,l.maskFile,l.maskEnabled?1:0,l.maskMode].join('|');
 }
 // A pixel-art light uses one texel per logical block. Never downscale
 // the whole shape to MASK_MAX and then quantize again: cones and ellipses lose
@@ -112,6 +112,25 @@ export function pixelGridDimensions(l){
   const limit=128;
   return {w:Math.max(2,Math.min(limit,Math.ceil(d.w/block))),
           h:Math.max(2,Math.min(limit,Math.ceil(d.h/block)))};
+}
+function applyOcclusionStencil(canvas,l){
+  if(!l.maskEnabled || l.type==='mask' || !l.maskFile)return canvas;
+  const source=maskSources.get(l.maskFile);if(!source)return canvas;
+  // The authored PNG is an opacity STENCIL on the current lamp, not another
+  // full-screen light. White reveals/blocks depending on the selected mode.
+  const temp=newCanvas(canvas.width,canvas.height),maskCtx=temp.getContext('2d');
+  const ctx=canvas.getContext('2d');if(!maskCtx||!ctx)return canvas;
+  maskCtx.clearRect(0,0,temp.width,temp.height);
+  maskCtx.drawImage(source,0,0,temp.width,temp.height);
+  const mask=maskCtx.getImageData(0,0,temp.width,temp.height).data;
+  const target=ctx.getImageData(0,0,canvas.width,canvas.height),pixels=target.data;
+  const block=l.maskMode==='block';
+  for(let i=0;i<pixels.length;i+=4){
+    const gray=(mask[i]*54+mask[i+1]*183+mask[i+2]*19)/256;
+    const power=mask[i+3]/255*gray/255;
+    pixels[i+3]=Math.round(pixels[i+3]*(block?(1-power):power));
+  }
+  ctx.putImageData(target,0,0);return canvas;
 }
 function createMask(l){
   if(l.type==='mask'){
@@ -123,7 +142,8 @@ function createMask(l){
     const frame=ctx.getImageData(0,0,src.width,src.height),data=frame.data;
     const [r,g,b]=rgb(l.color);
     for(let i=0;i<data.length;i+=4){const gray=(data[i]*54+data[i+1]*183+data[i+2]*19)/256;
-      data[i]=r;data[i+1]=g;data[i+2]=b;data[i+3]=Math.round(data[i+3]*gray/255);}
+      const power=data[i+3]/255*gray/255;
+      data[i]=r;data[i+1]=g;data[i+2]=b;data[i+3]=Math.round(255*(l.maskMode==='block'?(1-power):power));}
     ctx.putImageData(frame,0,0);return output;
   }
   const dims=dimensions(l),p=l.pixel||{},pixelated=p.enabled===true;
@@ -146,7 +166,7 @@ function createMask(l){
     data[pos+3]=Math.round(alpha*255);
   }
   ctx.putImageData(img,0,0);
-  return canvas;
+  return applyOcclusionStencil(canvas,l);
 }
 function getMask(l){
   const key=maskKey(l);
