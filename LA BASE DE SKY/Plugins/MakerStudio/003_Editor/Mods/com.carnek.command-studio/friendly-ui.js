@@ -136,7 +136,8 @@ export function mountFriendly(ctx,host){
     if(!armPlacement(ctx,callback))notice("No se pudo abrir la herramienta para marcar la casilla.");
     else notice("Pulsa una casilla del mapa para elegir la posición del evento.");
    },"btn");
-   newRow.append(newName,newX,newY,chooseTile,newEvent);createBox.append(newRow);
+   const quickActions=el("div",null,"csb-destination-actions");quickActions.append(chooseTile,newEvent);
+   newRow.append(newName,newX,newY,quickActions);createBox.append(newRow);
    block.append(createBox);
   function refill(){
     const active=activeMapId(ctx);
