@@ -136,10 +136,20 @@ function createMask(l){
     const output=newCanvas(src.width,src.height),ctx=output.getContext('2d');
     if(!ctx)return null;
     ctx.drawImage(src,0,0);
-    const frame=ctx.getImageData(0,0,src.width,src.height),data=frame.data;
+    // Legacy mask images can be very large: never read/transform more than
+    // 256x256 pixels in the editor. Reuse GPU alpha stencil compositing.
+    const factor=Math.min(1,256/Math.max(src.width,src.height));
+    const outW=Math.max(1,Math.round(src.width*factor)),outH=Math.max(1,Math.round(src.height*factor));
+    if(outW!==output.width || outH!==output.height){
+      output.width=outW;output.height=outH;
+      ctx.clearRect(0,0,outW,outH);ctx.drawImage(src,0,0,outW,outH);
+    }
+    const frame=ctx.getImageData(0,0,outW,outH),data=frame.data;
     const [r,g,b]=rgb(l.color);
     for(let i=0;i<data.length;i+=4){const gray=(data[i]*54+data[i+1]*183+data[i+2]*19)/256;
-      const power=data[i+3]/255*gray/255;
+      // Alpha defines geometry. RGB grayscale is optional paint intensity;
+      // black ink is an opaque occluder, not an invisible hole.
+      const power=data[i+3]/255;
       data[i]=r;data[i+1]=g;data[i+2]=b;data[i+3]=Math.round(255*(l.maskMode==='block'?(1-power):power));}
     ctx.putImageData(frame,0,0);return output;
   }
