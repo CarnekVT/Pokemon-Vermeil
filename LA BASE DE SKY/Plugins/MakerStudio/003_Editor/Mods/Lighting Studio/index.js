@@ -700,8 +700,9 @@ redraw();state.ticker=setInterval(()=>{
  // Keep editor responsiveness ahead of high-quality background baking.
 // Full preview is explicitly requested; normal work should never exceed
 // the balanced cadence merely because another overlay repaints.
-const wait=state.previewQuality==='full'?210:state.previewQuality==='fast'?520:360;
+const wait=state.previewQuality==='full'?420:state.previewQuality==='fast'?800:650;
  if(now-(state.lastTickRedraw||0)<wait)return;
+ if(state.editSnapshot || state.drag)return; // no background repaint competes with pointer input
  if((state.previewQuality==='full'&&!state.drag&&!state.editSnapshot&&hasPendingChunks())||
     (!state.advancedOverlay&&state.showOverlay&&current()?.lights?.some(l=>l.enabled&&l.pulse?.enabled))){
    state.lastTickRedraw=now;redraw();
