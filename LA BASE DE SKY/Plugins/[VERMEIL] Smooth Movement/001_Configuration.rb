@@ -12,7 +12,7 @@ module VermeilMovement
     "smooth_movement"   => "1",
     "camera_smoothing"  => "35",
     "diagonal_facing"    => "keep",
-    "diagonal_speed"     => "quick",
+    "diagonal_speed"     => "uniform",
     "diagonal_live_turn" => "1",
     "wall_slide_priority"=> "horizontal",
     "camera_deadzone"    => "0",
