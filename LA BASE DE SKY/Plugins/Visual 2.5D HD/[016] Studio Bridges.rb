@@ -5,20 +5,30 @@
 #===============================================================================
 module Visual25D
   module StudioOptions
-    ANIMATED_PROPS_BRIDGE = true
-    LIGHTING_STUDIO_BRIDGE = true
+    @props_enabled = true
+    @lights_enabled = true
+    class << self
+      attr_accessor :props_enabled
+      attr_accessor :lights_enabled
+      def props?
+        return @props_enabled != false
+      end
+      def lights?
+        return @lights_enabled != false
+      end
+    end
   end
 
   module AnimatedPropsBridge
     def lbds_props_update_sprites
-      mode = Visual25D.enabled? ? :projected : :normal
+      mode = (Visual25D.enabled? && Visual25D::StudioOptions.props?) ? :projected : :normal
       if @v25d_props_mode != mode
         @lbds_prop_geometry_stamp = nil
         @v25d_props_stamp = nil
         @v25d_props_mode = mode
       end
       super
-      return unless Visual25D::StudioOptions::ANIMATED_PROPS_BRIDGE
+      return unless Visual25D::StudioOptions.props?
       return unless Visual25D.enabled? && @map && @lbds_prop_sprites
       stamp = [@map.display_x, @map.display_y, Visual25D.projection_stamp,
                Visual25D.tilt, Visual25D.camera_zoom]
@@ -71,14 +81,14 @@ module Visual25D
   module LightingBridge
     def ls_world_screen(wx, wy, mx, my, zx, zy)
       original = super
-      return original unless Visual25D::StudioOptions::LIGHTING_STUDIO_BRIDGE && Visual25D.enabled?
+      return original unless Visual25D::StudioOptions.lights? && Visual25D.enabled?
       x, y = original
       return [Visual25D.project_x(x, Visual25D.width_scale_at(y)), Visual25D.project_y(y)]
     end
 
     def ls_update
       super
-      return unless Visual25D::StudioOptions::LIGHTING_STUDIO_BRIDGE && Visual25D.enabled? && @map
+      return unless Visual25D::StudioOptions.lights? && Visual25D.enabled? && @map
       return unless @ls_sprites || @ls_chunks
       my = (@map.display_y.to_f / Game_Map::Y_SUBPIXELS).round
       zy = TilemapRenderer::ZOOM_Y
@@ -119,3 +129,34 @@ if defined?(Spriteset_Map)
     Spriteset_Map.prepend(Visual25D::LightingBridge)
   end
 end
+
+# Diagnostico de rendimiento: solo habilita/deshabilita el adaptador.
+# Animated Props y Lighting Studio siguen renderizando por su cuenta.
+def pbVisual25DStudioBridgeTest
+  loop do
+    props = Visual25D::StudioOptions.props? ? _INTL("Si") : _INTL("No")
+    lights = Visual25D::StudioOptions.lights? ? _INTL("Si") : _INTL("No")
+    ch = pbMessage(_INTL("Puentes 2.5D (sin editar Studio)."),
+      [_INTL("Proyectar Animated Props: {1}", props),
+       _INTL("Proyectar Lighting Studio: {1}", lights), _INTL("Salir")], 3)
+    case ch
+    when 0
+      opt = Visual25D::StudioOptions
+      opt.props_enabled = !opt.props?
+      Visual25D.redraw_map
+    when 1
+      opt = Visual25D::StudioOptions
+      opt.lights_enabled = !opt.lights?
+      Visual25D.redraw_map
+    else
+      break
+    end
+  end
+end
+
+MenuHandlers.add(:debug_menu, :visual25d_bridges_test, {
+  "name" => _INTL("2.5D: puentes de Studio (test)"),
+  "parent" => :field_menu,
+  "description" => _INTL("Comparar FPS y posicion visual con los puentes 2.5D activos o inactivos."),
+  "effect" => proc { pbVisual25DStudioBridgeTest }
+})
