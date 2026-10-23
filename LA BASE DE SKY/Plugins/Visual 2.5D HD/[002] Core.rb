@@ -275,6 +275,7 @@ module Visual25D
 
     def projection_model=(value)
       value = (value == :camera) ? :camera : :classic
+      $PokemonSystem.visual25d_model = value if $PokemonSystem&.respond_to?(:visual25d_model=)
       return if projection_model == value
       @projection_model = value
       clear_proj_hot_cache
@@ -293,6 +294,7 @@ module Visual25D
 
     def camera_fov=(value)
       value = value.to_f.clamp(20.0, 90.0)
+      $PokemonSystem.visual25d_fov = value if $PokemonSystem&.respond_to?(:visual25d_fov=)
       return if @camera_fov && (@camera_fov - value).abs < 0.01
       @camera_fov = value
       clear_proj_hot_cache
@@ -364,6 +366,8 @@ module Visual25D
       return if !$PokemonSystem.respond_to?(:visual25d_tilt)
       @tilt = $PokemonSystem.visual25d_tilt
       @camera_zoom = $PokemonSystem.visual25d_zoom
+      @projection_model = $PokemonSystem.visual25d_model if $PokemonSystem.respond_to?(:visual25d_model)
+      @camera_fov = $PokemonSystem.visual25d_fov if $PokemonSystem.respond_to?(:visual25d_fov)
       rebuild_render_params!
       # refresh_active aplica @active / redraw
     end
@@ -438,6 +442,8 @@ module Visual25D
         $PokemonSystem.visual25d_tilt    = Config::TILT_DEGREES if $PokemonSystem.respond_to?(:visual25d_tilt=)
         $PokemonSystem.visual25d_zoom    = Config::CAMERA_ZOOM if $PokemonSystem.respond_to?(:visual25d_zoom=)
         $PokemonSystem.visual25d_enabled = Config::ENABLED if $PokemonSystem.respond_to?(:visual25d_enabled=)
+        $PokemonSystem.visual25d_model   = Config::PROJECTION_MODEL if $PokemonSystem.respond_to?(:visual25d_model=)
+        $PokemonSystem.visual25d_fov     = Config::CAMERA_FOV if $PokemonSystem.respond_to?(:visual25d_fov=)
       end
       rebuild_render_params!
       mark_save_sync_dirty!

@@ -113,8 +113,10 @@ module Visual25D
     # Es el freno de rendimiento: cerca del horizonte la perspectiva pediria
     # infinitas filas, asi que al llegar a este tope se deja de recentrar la
     # camara en el jugador antes que dejar los bordes sin dibujar.
-    MAX_MARGIN_COLUMNS = 10
-    MAX_MARGIN_ROWS = 10
+    # Preset conservador de test: menos sprites extra que el perfil amplio.
+    # Si se ven bordes vacios, restaurar a 10 (NO reducir mas sin pruebas).
+    MAX_MARGIN_COLUMNS = 8
+    MAX_MARGIN_ROWS = 8
 
     # Cuanto se levanta un bordillo por cada tile de altura, como fraccion del
     # alto de la fila en la que se apoya.

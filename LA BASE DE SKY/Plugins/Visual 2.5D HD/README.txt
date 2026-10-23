@@ -57,3 +57,13 @@ PRUEBAS RECOMENDADAS
 IMPORTANTE
 Ruby -c solo valida sintaxis; no prueba los hooks ni el ejecutable mkxp.
 La calidad de GROUND_SLICES depende de Sprite#taper (si el ejecutable lo tiene).
+
+PRUEBA DE CAMARA Y RENDIMIENTO (2026-10-23):
+- Opciones > Graficos: inclinacion, zoom, proyeccion, FOV, modo 2.5D, mundo plano.
+- Modelo / FOV se guardan en la partida; la prueba de rendimientos se hace
+  sobre el mismo mapa comparando 2D frente a 2.5D.
+- Margenes maximos de rejilla reducidos de 10 a 8 (si hay huecos,
+  restaurar a 10, valor usado antes de esta optimizacion).
+- El perfil estable recomendado para FPS usa modelo Clasica y zoom 100%.
+- Punto de reversión anterior al plugin (NO se reseteo la rama):
+  ac275cc2c52d82cad420e4751119228541f3e536
