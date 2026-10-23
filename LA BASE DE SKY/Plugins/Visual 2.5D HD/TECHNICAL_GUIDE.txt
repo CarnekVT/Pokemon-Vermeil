@@ -1,8 +1,8 @@
 ================================================================================
 VISUAL 2.5D HD — Guía para IAs y desarrolladores
 ================================================================================
-Plugin: [ROYAL] Visual 2.5D HD
-Versión: 3.3.0 | Essentials: 21.1 | Autor: Skyflyer
+Plugin: Visual 2.5D HD
+Versión: 3.3.0 | Essentials: 21.1 | Detalles de autoría en meta.txt
 
 Este documento describe la arquitectura, el flujo de datos y los puntos de
 extensión del plugin. Léelo antes de modificar cualquier archivo del plugin.
@@ -787,7 +787,7 @@ Repo: https://github.com/luka-sj/mkxp-z-ext
 Rama: feature.3d-object-support (PR #7; diverged de dev, no mergeada).
 
 Ese fork añade clase C++ Model3D (OBJ→FBO+depth→Bitmap) y CustomShader.
-Solo existe si compilas/usas ese Game.exe. MK stock de Royal NO lo tiene.
+Solo existe si compilas/usas ese Game.exe. El ejecutable estándar sin extensiones 3D no incluye esa función.
 
 Visual 2.5D HD es fake-3D Ruby (tiles + proyección por fila). Del fork solo
 se tomaron ideas baratas:

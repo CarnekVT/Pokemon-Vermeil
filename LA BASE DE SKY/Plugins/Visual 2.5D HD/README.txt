@@ -1,7 +1,7 @@
-VERMEIL 2.5D — GEN 5 CAMERA PREVIEW 01
+VISUAL 2.5D HD — CAMERA PREVIEW 01
 ======================================
-Base: Visual 2.5D HD v3.3.0 de Skyflyer (Pokemon Essentials 21.1).
-Esta es una variante inicial del plugin; mantiene atribucion y sistema original.
+Base: Visual 2.5D HD v3.3.0 (Pokemon Essentials 21.1).
+Variante inicial de cámara orientada a la quinta generación. Créditos originales en meta.txt.
 
 OBJETIVO
 - Sensacion visual proxima a la quinta generacion de Pokemon: perspectiva
@@ -31,7 +31,7 @@ SIN CAMBIOS
 - GROUND_SLICES=2, ROW_BATCH=false, BAND_BLUR=false.
 
 INSTALACION
-1. Haz copia de seguridad de tu plugin Sky y de tu partida.
+1. Haz copia de seguridad del plugin anterior y de tu partida.
 2. No instales dos copias activas del mismo plugin.
 3. Usa la carpeta del plugin (conserva meta.txt).
 4. Abre el juego y comprueba la perspectiva sobre un mapa habitual.
