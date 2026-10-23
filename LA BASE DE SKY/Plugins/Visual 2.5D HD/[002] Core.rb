@@ -307,7 +307,7 @@ module Visual25D
     # Píxeles de caída en lo alto de la pantalla. Nil = Config::HORIZON_CURVE.
     def horizon_curve_px
       return @horizon_curve.to_f unless @horizon_curve.nil?
-      return Config::HORIZON_CURVE.to_f
+      return Config::DEFAULT_HORIZON_CURVE.to_f
     end
 
     def horizon_curve=(value)
@@ -430,7 +430,7 @@ module Visual25D
       @camera_zoom       = Config::CAMERA_ZOOM
       @projection_model  = nil
       @camera_fov        = nil
-      @horizon_curve     = nil
+      @horizon_curve     = Config::DEFAULT_HORIZON_CURVE.to_f
       @band_blur         = nil
       @row_batch         = nil
       if $PokemonSystem

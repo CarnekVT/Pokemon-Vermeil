@@ -78,7 +78,10 @@ module Visual25D
 
     # Caída del horizonte, en píxeles, en el borde de arriba de la pantalla.
     # 0 = suelo como hasta 3.2. El centro (el jugador) no se mueve.
-    HORIZON_CURVE = 0
+    HORIZON_CURVE = 14
+    # Preset del proyecto: plano. El valor anterior queda disponible como
+    # opcion de comparacion para el menu de depuracion.
+    DEFAULT_HORIZON_CURVE = 0
 
     # Desenfoque de las franjas de arriba y de abajo. Apagado: sin shader
     # solo emborrona una captura vieja y mancha el suelo.
