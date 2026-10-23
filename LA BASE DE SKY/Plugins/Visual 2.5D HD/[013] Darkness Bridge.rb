@@ -7,7 +7,14 @@
 #
 # Solo carga si existe DarknessSprite (Optional en meta).
 #===============================================================================
-if defined?(DarknessSprite)
+# El nombre de la clase puede existir en otras implementaciones de oscuridad.
+# Solo envolver la API concreta de Dynamic Darkness; si no coincide, omitir
+# el bridge sin impedir que Visual 2.5D ni las luces del juego arranquen.
+if defined?(DarknessSprite) && DarknessSprite.is_a?(Class) &&
+   [:get_nearby_events, :draw_all_lights, :refresh].all? { |method_name|
+     DarknessSprite.method_defined?(method_name) ||
+       DarknessSprite.private_method_defined?(method_name)
+   }
   class DarknessSprite
     alias hd25_dd_get_nearby_events get_nearby_events unless method_defined?(:hd25_dd_get_nearby_events)
     def get_nearby_events
