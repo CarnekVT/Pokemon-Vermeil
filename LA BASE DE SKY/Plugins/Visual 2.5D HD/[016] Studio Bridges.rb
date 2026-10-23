@@ -31,7 +31,7 @@ module Visual25D
       return unless Visual25D::StudioOptions.props?
       return unless Visual25D.enabled? && @map && @lbds_prop_sprites
       stamp = [@map.display_x, @map.display_y, Visual25D.projection_stamp,
-               Visual25D.tilt, Visual25D.camera_zoom]
+               Visual25D.tilt, Visual25D.camera_zoom, @lbds_prop_sprites.length]
       return if @v25d_props_stamp == stamp
       @v25d_props_stamp = stamp
       mx = (@map.display_x.to_f / Game_Map::X_SUBPIXELS).round

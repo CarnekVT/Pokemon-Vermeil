@@ -1,1 +1,5 @@
-Verificar en Ruby del proyecto antes de afirmar sintaxis OK:\n  ruby -c Plugins/Visual\\ 2.5D\\ HD/'[016] Studio Bridges.rb'\n  ruby -c Plugins/Visual\\ 2.5D\\ HD/'[017] Priority Editor.rb'\nNo hay validacion ingame ni medicion FPS automatica.\n
+Verificación de sintaxis (pendiente de ejecutar sobre los archivos de GitHub).
+Ejemplo desde la carpeta del juego:
+  ruby -c "Plugins/Visual 2.5D HD/[016] Studio Bridges.rb"
+  ruby -c "Plugins/Visual 2.5D HD/[017] Priority Editor.rb"
+Probar también el arranque en Essentials 21.1 y los FPS dentro del juego.

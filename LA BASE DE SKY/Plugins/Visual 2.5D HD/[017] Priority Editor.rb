@@ -75,7 +75,7 @@ def pbVisual25DPriorityEditor
   end
   loop do
     choice = pbMessage(
-      _INTL("Prioridades nativas: base=1, encima=2,3...\\nTileset {1}; {2} ID(s) alterados en RAM.",
+      _INTL("Prioridades nativas: base=1, encima=2,3...\nTileset {1}; {2} ID(s) alterados en RAM.",
             $game_map.tileset_id, Visual25D::PriorityEditor.count),
       [_INTL("Prioridades de un objeto vertical"), _INTL("Prioridad de un tile"),
        _INTL("IDs cercanos al jugador"), _INTL("Restaurar originales"), _INTL("Salir")], 5)
@@ -101,7 +101,7 @@ def pbVisual25DPriorityEditor
         ids = (0..2).map { |layer| $game_map.data[xx, yy, layer].to_i }
         rows << "#{name}: #{ids.join('/')}"
       end
-      pbMessage(rows.join("\\n"))
+      pbMessage(rows.join("\n"))
     when 3
       total = Visual25D::PriorityEditor.restore
       pbMessage(_INTL("{1} prioridades originales restauradas.", total))
