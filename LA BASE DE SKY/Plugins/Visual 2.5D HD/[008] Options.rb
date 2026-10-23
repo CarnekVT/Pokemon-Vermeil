@@ -10,9 +10,6 @@ class PokemonSystem
   attr_writer :visual25d_tilt
   attr_writer :visual25d_zoom
   attr_writer :visual25d_round
-  attr_writer :visual25d_model
-  attr_writer :visual25d_fov
-  attr_writer :visual25d_margin
 
   def visual25d_enabled
     @visual25d_enabled = Visual25D::Config::ENABLED if @visual25d_enabled.nil?
@@ -29,22 +26,7 @@ class PokemonSystem
     return @visual25d_zoom
   end
 
-  def visual25d_model
-    @visual25d_model = Visual25D::Config::PROJECTION_MODEL if @visual25d_model.nil?
-    return @visual25d_model
-  end
-
-  def visual25d_fov
-    @visual25d_fov = Visual25D::Config::CAMERA_FOV if @visual25d_fov.nil?
-    return @visual25d_fov
-  end
-
-  def visual25d_margin
-    @visual25d_margin = Visual25D::Config::MAX_MARGIN_ROWS if @visual25d_margin.nil?
-    return @visual25d_margin
-  end
-
-  # Horizonte plano por defecto, con curvatura opcional.
+  # Vermeil Gen5: horizonte plano por defecto, con curvatura opcional.
   def visual25d_round
     @visual25d_round = false if @visual25d_round.nil?
     return @visual25d_round
@@ -93,79 +75,5 @@ MenuHandlers.add(:options_menu, :visual25d_world, {
     round = (value == 0)
     $PokemonSystem.visual25d_round = round if $PokemonSystem&.respond_to?(:visual25d_round=)
     Visual25D.horizon_curve = round ? Visual25D::Config::HORIZON_CURVE : 0
-  }
-})
-
-# Controles directos para el testeo. Se pueden modificar desde
-# Opciones -> Graficos sin activar el menu de depuracion.
-module Visual25DCameraOptions
-  TILTS = [0, 15, 20, 25, 27, 30, 35, 40, 45, 50]
-  ZOOMS = [75, 85, 90, 100, 110, 120, 135]
-  FOVS  = [35, 45, 55, 65, 75, 85]
-
-  def self.nearest(values, value)
-    values.each_index.min_by { |i| (values[i] - value.to_f).abs } || 0
-  end
-end
-
-MenuHandlers.add(:options_menu, :visual25d_angle, {
-  "page" => :graphics,
-  "name" => _INTL("2.5D: Inclinacion"),
-  "order" => 102,
-  "type" => :array,
-  "parameters" => proc { Visual25DCameraOptions::TILTS.map { |v| _INTL("{1} grados", v) } },
-  "description" => _INTL("Angulo de perspectiva. Valores bajos son mas ligeros."),
-  "get_proc" => proc { next Visual25DCameraOptions.nearest(Visual25DCameraOptions::TILTS, Visual25D.tilt) },
-  "set_proc" => proc { |value, _screen| Visual25D.tilt = Visual25DCameraOptions::TILTS[value] }
-})
-
-MenuHandlers.add(:options_menu, :visual25d_distance, {
-  "page" => :graphics,
-  "name" => _INTL("2.5D: Zoom"),
-  "order" => 103,
-  "type" => :array,
-  "parameters" => proc { Visual25DCameraOptions::ZOOMS.map { |v| _INTL("{1}%", v) } },
-  "description" => _INTL("A menos zoom, mas tiles visibles y mayor coste."),
-  "get_proc" => proc { next Visual25DCameraOptions.nearest(Visual25DCameraOptions::ZOOMS, Visual25D.camera_zoom) },
-  "set_proc" => proc { |value, _screen| Visual25D.camera_zoom = Visual25DCameraOptions::ZOOMS[value] }
-})
-
-MenuHandlers.add(:options_menu, :visual25d_model, {
-  "page" => :graphics,
-  "name" => _INTL("2.5D: Proyeccion"),
-  "order" => 104,
-  "type" => :array,
-  "parameters" => proc { [_INTL("Clasica (estable)"), _INTL("Camara (experimental)")] },
-  "description" => _INTL("El modelo clasico es el recomendado para el testeo."),
-  "get_proc" => proc { next Visual25D.projection_model == :camera ? 1 : 0 },
-  "set_proc" => proc { |value, _screen| Visual25D.projection_model = (value == 1 ? :camera : :classic) }
-})
-
-MenuHandlers.add(:options_menu, :visual25d_fov, {
-  "page" => :graphics,
-  "name" => _INTL("2.5D: Campo de vision"),
-  "order" => 105,
-  "type" => :array,
-  "parameters" => proc { Visual25DCameraOptions::FOVS.map { |v| _INTL("{1} grados", v) } },
-  "description" => _INTL("FOV del modelo Camara. No tiene efecto en el clasico."),
-  "get_proc" => proc { next Visual25DCameraOptions.nearest(Visual25DCameraOptions::FOVS, Visual25D.camera_fov) },
-  "set_proc" => proc { |value, _screen| Visual25D.camera_fov = Visual25DCameraOptions::FOVS[value] }
-})
-
-MenuHandlers.add(:options_menu, :visual25d_margins, {
-  "page" => :graphics,
-  "name" => _INTL("2.5D: Margen de render"),
-  "order" => 106,
-  "type" => :array,
-  "parameters" => proc {
-    [_INTL("4 tiles (FPS)"), _INTL("6 tiles (medio)"), _INTL("8 tiles (completo)")]
-  },
-  "description" => _INTL("Menos tiles extra = mas FPS; puede recortar los bordes."),
-  "get_proc" => proc {
-    value = Visual25D.render_margin_limit
-    next value <= 4 ? 0 : (value <= 6 ? 1 : 2)
-  },
-  "set_proc" => proc { |value, _screen|
-    Visual25D.render_margin_limit = [4, 6, 8][value]
   }
 })
