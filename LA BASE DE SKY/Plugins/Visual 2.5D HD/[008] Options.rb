@@ -9,7 +9,8 @@ class PokemonSystem
   attr_writer :visual25d_enabled
   attr_writer :visual25d_tilt
   attr_writer :visual25d_zoom
-  attr_writer :visual25d_round
+  attr_writer :visual25d_model
+  attr_writer :visual25d_fov
 
   def visual25d_enabled
     @visual25d_enabled = Visual25D::Config::ENABLED if @visual25d_enabled.nil?
@@ -26,10 +27,14 @@ class PokemonSystem
     return @visual25d_zoom
   end
 
-  # Vermeil Gen5: horizonte plano por defecto, con curvatura opcional.
-  def visual25d_round
-    @visual25d_round = false if @visual25d_round.nil?
-    return @visual25d_round
+  def visual25d_model
+    @visual25d_model = Visual25D::Config::PROJECTION_MODEL if @visual25d_model.nil?
+    return @visual25d_model
+  end
+
+  def visual25d_fov
+    @visual25d_fov = Visual25D::Config::CAMERA_FOV if @visual25d_fov.nil?
+    return @visual25d_fov
   end
 end
 
@@ -56,24 +61,49 @@ MenuHandlers.add(:options_menu, :visual25d_enabled, {
   }
 })
 
-MenuHandlers.add(:options_menu, :visual25d_world, {
-  "page"        => :graphics,
-  "name"        => _INTL("Mundo 2.5D"),
-  "order"       => 101,
-  "type"        => :array,
-  "parameters"  => proc { [_INTL("Redondo"), _INTL("Plano")] },
-  "description" => _INTL("Elige si el terreno se curva en el horizonte o se queda plano."),
-  "get_proc"    => proc {
-    round = if $PokemonSystem&.respond_to?(:visual25d_round)
-              $PokemonSystem.visual25d_round
-            else
-              Visual25D.horizon_curve_px > 0.5
-            end
-    next round ? 0 : 1
-  },
-  "set_proc"    => proc { |value, _screen|
-    round = (value == 0)
-    $PokemonSystem.visual25d_round = round if $PokemonSystem&.respond_to?(:visual25d_round=)
-    Visual25D.horizon_curve = round ? Visual25D::Config::HORIZON_CURVE : 0
-  }
+
+# Controles de testeo sin recurrir al menu de depuracion.
+module Visual25DCameraOptions
+  TILTS = [0, 15, 20, 25, 27, 30, 35, 40, 45, 50]
+  ZOOMS = [80, 90, 100, 110, 120]
+  FOVS = [35, 45, 55, 65, 75, 85]
+  def self.nearest(arr, value)
+    arr.each_index.min_by { |i| (arr[i] - value.to_f).abs } || 0
+  end
+end
+
+MenuHandlers.add(:options_menu, :visual25d_tilt, {
+  "page" => :graphics, "name" => _INTL("2.5D: ángulo"), "order" => 102,
+  "type" => :array,
+  "parameters" => proc { Visual25DCameraOptions::TILTS.map { |v| _INTL("{1} grados", v) } },
+  "description" => _INTL("Inclinación de la cámara; 27° es el preset de prueba."),
+  "get_proc" => proc { next Visual25DCameraOptions.nearest(Visual25DCameraOptions::TILTS, Visual25D.tilt) },
+  "set_proc" => proc { |v, _screen| Visual25D.tilt = Visual25DCameraOptions::TILTS[v] }
+})
+
+MenuHandlers.add(:options_menu, :visual25d_camzoom, {
+  "page" => :graphics, "name" => _INTL("2.5D: zoom"), "order" => 103,
+  "type" => :array,
+  "parameters" => proc { Visual25DCameraOptions::ZOOMS.map { |v| _INTL("{1}%", v) } },
+  "description" => _INTL("Zoom 100% recomendado en pruebas de rendimiento."),
+  "get_proc" => proc { next Visual25DCameraOptions.nearest(Visual25DCameraOptions::ZOOMS, Visual25D.camera_zoom) },
+  "set_proc" => proc { |v, _screen| Visual25D.camera_zoom = Visual25DCameraOptions::ZOOMS[v] }
+})
+
+MenuHandlers.add(:options_menu, :visual25d_projection, {
+  "page" => :graphics, "name" => _INTL("2.5D: proyección"), "order" => 104,
+  "type" => :array,
+  "parameters" => proc { [_INTL("Clásico"), _INTL("Cámara experimental")] },
+  "description" => _INTL("Clásico mantiene la proyección más estable de Sky."),
+  "get_proc" => proc { next Visual25D.projection_model == :camera ? 1 : 0 },
+  "set_proc" => proc { |v, _screen| Visual25D.projection_model = (v == 1 ? :camera : :classic) }
+})
+
+MenuHandlers.add(:options_menu, :visual25d_camfov, {
+  "page" => :graphics, "name" => _INTL("2.5D: FOV"), "order" => 105,
+  "type" => :array,
+  "parameters" => proc { Visual25DCameraOptions::FOVS.map { |v| _INTL("{1} grados", v) } },
+  "description" => _INTL("Solo afecta al modelo Cámara."),
+  "get_proc" => proc { next Visual25DCameraOptions.nearest(Visual25DCameraOptions::FOVS, Visual25D.camera_fov) },
+  "set_proc" => proc { |v, _screen| Visual25D.camera_fov = Visual25DCameraOptions::FOVS[v] }
 })

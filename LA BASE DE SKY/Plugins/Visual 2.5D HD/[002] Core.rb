@@ -275,6 +275,7 @@ module Visual25D
 
     def projection_model=(value)
       value = (value == :camera) ? :camera : :classic
+      $PokemonSystem.visual25d_model = value if $PokemonSystem&.respond_to?(:visual25d_model=)
       return if projection_model == value
       @projection_model = value
       clear_proj_hot_cache
@@ -293,6 +294,7 @@ module Visual25D
 
     def camera_fov=(value)
       value = value.to_f.clamp(20.0, 90.0)
+      $PokemonSystem.visual25d_fov = value if $PokemonSystem&.respond_to?(:visual25d_fov=)
       return if @camera_fov && (@camera_fov - value).abs < 0.01
       @camera_fov = value
       clear_proj_hot_cache
@@ -304,39 +306,18 @@ module Visual25D
       end
     end
 
-    # Píxeles de caída en lo alto de la pantalla. Nil = Config::HORIZON_CURVE.
+    # Vermeil: suelo ESTRICTAMENTE plano. No se ofrece modo circular.
+    # Mantener las firmas originales para no romper los otros proyectores.
     def horizon_curve_px
-      return @horizon_curve.to_f unless @horizon_curve.nil?
-      return Config::HORIZON_CURVE.to_f
+      return 0.0
     end
 
     def horizon_curve=(value)
-      value = value.to_f
-      value = 0.0 if value < 0.0
-      value = 48.0 if value > 48.0
-      return if !@horizon_curve.nil? && (@horizon_curve - value).abs < 0.01
-      @horizon_curve = value
-      clear_proj_hot_cache
-      if blending?
-        @force_reproject = true
-      else
-        redraw_map
-      end
+      @horizon_curve = 0.0
     end
 
-    # Extra de Y solo por encima del centro. t=1 en el borde superior; por
-    # encima de la pantalla se planta, para no aplastar el margen.
     def horizon_curve(y)
-      amt = horizon_curve_px
-      return 0.0 if amt == 0.0 || @perspective == 0
-      b = blend
-      return 0.0 if b <= 0.0
-      half = Graphics.height / 2.0
-      return 0.0 if half <= 0
-      t = (half - y) / half
-      return 0.0 if t <= 0.0
-      t = 1.0 if t > 1.0
-      return (amt * b) * t * t
+      return 0.0
     end
 
     # Lee partida solo si dirty (carga, F12, opciones). No cada frame.
@@ -364,6 +345,8 @@ module Visual25D
       return if !$PokemonSystem.respond_to?(:visual25d_tilt)
       @tilt = $PokemonSystem.visual25d_tilt
       @camera_zoom = $PokemonSystem.visual25d_zoom
+      @projection_model = $PokemonSystem.visual25d_model if $PokemonSystem.respond_to?(:visual25d_model)
+      @camera_fov = $PokemonSystem.visual25d_fov if $PokemonSystem.respond_to?(:visual25d_fov)
       rebuild_render_params!
       # refresh_active aplica @active / redraw
     end
@@ -438,6 +421,8 @@ module Visual25D
         $PokemonSystem.visual25d_tilt    = Config::TILT_DEGREES if $PokemonSystem.respond_to?(:visual25d_tilt=)
         $PokemonSystem.visual25d_zoom    = Config::CAMERA_ZOOM if $PokemonSystem.respond_to?(:visual25d_zoom=)
         $PokemonSystem.visual25d_enabled = Config::ENABLED if $PokemonSystem.respond_to?(:visual25d_enabled=)
+        $PokemonSystem.visual25d_model = Config::PROJECTION_MODEL if $PokemonSystem.respond_to?(:visual25d_model=)
+        $PokemonSystem.visual25d_fov = Config::CAMERA_FOV if $PokemonSystem.respond_to?(:visual25d_fov=)
       end
       rebuild_render_params!
       mark_save_sync_dirty!

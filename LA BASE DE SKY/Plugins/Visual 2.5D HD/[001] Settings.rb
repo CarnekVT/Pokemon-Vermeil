@@ -37,7 +37,7 @@ module Visual25D
     # hay perspectiva. Al inclinarla, la fila del jugador conserva su tamano y lo
     # que se reparte es el resto: el fondo se encoge (y por tanto se ve mas lejos)
     # y el primer plano se agranda.
-    TILT_DEGREES = 40
+    TILT_DEGREES = 27
     MAX_TILT_DEGREES = 50
 
     # Modelo de proyeccion del suelo (solo Ruby; sin Model3D del MK).
@@ -46,7 +46,7 @@ module Visual25D
     #              (antes tan(tilt)>1 → depth negativa → shape~6x, look roto).
     #              Probar en menú debug; default sigue classic.
     # raw_unproject dual (log + tramo lineal bajo clamp).
-    PROJECTION_MODEL = :camera
+    PROJECTION_MODEL = :classic
     # FOV vertical: suaviza la curva :camera (ancho = menos drama).
     CAMERA_FOV = 55
 
@@ -55,7 +55,7 @@ module Visual25D
     # lateralmente un elemento alto de la casilla que ocupa: a 1.0 un edificio de
     # tres pisos junto al borde de la pantalla se despega bastante de su base.
     # Entre 0.2 y 0.4 da profundidad sin que se noten esas separaciones.
-    VANISHING_STRENGTH = 0.4
+    VANISHING_STRENGTH = 0.3
 
     # El suelo es un trapecio por fila. Los vecinos encajan (misma arista),
     # pero el borde vertical es recto y la escala es curva: se ve un quiebro
@@ -66,7 +66,7 @@ module Visual25D
     # grafico con alpha) va entera en un solo trapecio. Partir solo ese
     # tile y dejar el de al lado en mitades abre un hueco negro en la junta.
     # Si el FPS baja, vuelve a 1.
-    GROUND_SLICES = 2
+    GROUND_SLICES = 1
 
     # Suelo opaco de una fila de pantalla = un trapecio, no un sprite por
     # casilla. Apagado: al ocultar el tile antes de que la fila cubra el
@@ -78,7 +78,7 @@ module Visual25D
 
     # Caída del horizonte, en píxeles, en el borde de arriba de la pantalla.
     # 0 = suelo como hasta 3.2. El centro (el jugador) no se mueve.
-    HORIZON_CURVE = 14
+    HORIZON_CURVE = 0
 
     # Desenfoque de las franjas de arriba y de abajo. Apagado: sin shader
     # solo emborrona una captura vieja y mancha el suelo.

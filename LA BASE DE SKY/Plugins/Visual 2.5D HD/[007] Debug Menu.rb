@@ -10,69 +10,36 @@
 def pbVisual25DMenu
   loop do
     state = Visual25D.enabled ? _INTL("activado") : _INTL("desactivado")
-    model = (Visual25D.projection_model == :camera) ? _INTL("cámara") : _INTL("clásico")
-    round = (Visual25D.horizon_curve_px > 0.5) ? _INTL("redondo") : _INTL("plano")
-    command = pbMessage(
-      _INTL("Cámara 2.5D ({1}).\nÁngulo {2}°, distancia {3}%, altura {4} px.\nModelo {5}, FOV {6}°, terreno {7}.",
-            state, Visual25D.tilt, Visual25D.camera_zoom, Visual25D.tile_lift,
-            model, Visual25D.camera_fov.to_i, round),
-      [_INTL("Ángulo de la cámara"),
-       _INTL("Distancia de dibujado"),
-       _INTL("Altura de los verticales"),
-       _INTL("Modelo de proyección"),
-       _INTL("FOV de cámara"),
-       _INTL("Mundo redondo ({1})", (Visual25D.horizon_curve_px > 0.5) ? _INTL("sí") : _INTL("no")),
-       _INTL("Desenfoque de bordes ({1})", Visual25D.band_blur? ? _INTL("sí") : _INTL("no")),
-       _INTL("Suelo por filas ({1})", Visual25D.row_batch? ? _INTL("sí") : _INTL("no")),
-       _INTL("Activar/desactivar"),
-       _INTL("Restaurar valores"),
-       _INTL("Salir")], 11
-    )
-    case command
+    model = Visual25D.projection_model == :camera ? _INTL("Cámara") : _INTL("Clásico")
+    choice = pbMessage(
+      _INTL("2.5D PLANO: {1}. Ángulo {2}°, Zoom {3}%, modelo {4}.\nFOV {5}° (solo cámara).",
+            state, Visual25D.tilt, Visual25D.camera_zoom, model, Visual25D.camera_fov.to_i),
+      [_INTL("Cambiar inclinación"), _INTL("Cambiar zoom"),
+       _INTL("Modelo de proyección"), _INTL("Cambiar FOV"),
+       _INTL("Altura de columnas"), _INTL("Activar/desactivar"),
+       _INTL("Restaurar Sky plano"), _INTL("Salir")], 8)
+    case choice
     when 0
-      max = Visual25D::Config::MAX_TILT_DEGREES
-      Visual25D.tilt = pbVisual25DChooseNumber(
-        _INTL("Ángulo de la cámara, en grados (de 0 a {1}).\nCuanto mayor, más lejos se ve.", max),
-        Visual25D.tilt, 0, max
-      )
+      Visual25D.tilt = pbVisual25DChooseNumber(_INTL("Ángulo (0-50 grados)."),
+                                               Visual25D.tilt, 0, Visual25D::Config::MAX_TILT_DEGREES)
     when 1
-      min = Visual25D::Config::MIN_CAMERA_ZOOM
-      max = Visual25D::Config::MAX_CAMERA_ZOOM
       Visual25D.camera_zoom = pbVisual25DChooseNumber(
-        _INTL("Distancia de dibujado, en porcentaje (de {1} a {2}).\nPor debajo de 100 la cámara se aleja y se ve más mapa.", min, max),
-        Visual25D.camera_zoom, min, max
-      )
+        _INTL("Zoom de cámara (60-250%)."), Visual25D.camera_zoom,
+        Visual25D::Config::MIN_CAMERA_ZOOM, Visual25D::Config::MAX_CAMERA_ZOOM)
     when 2
-      Visual25D.tile_lift = pbVisual25DChooseNumber(
-        _INTL("Píxeles que se levanta un tile por cada nivel de prioridad (de 0 a 24)."),
-        Visual25D.tile_lift, 0, 24
-      )
+      m = pbMessage(_INTL("Modelo de suelo."), [_INTL("Clásico"), _INTL("Cámara"), _INTL("Cancelar")], 3)
+      Visual25D.projection_model = :classic if m == 0
+      Visual25D.projection_model = :camera if m == 1
     when 3
-      # Sesión only: no PokemonSystem.
-      choice = pbMessage(
-        _INTL("Modelo de proyección del suelo.\nClásico = estable (default).\nCámara = 1/profundidad (pulido v3.0.43)."),
-        [_INTL("Clásico"), _INTL("Cámara"), _INTL("Cancelar")], 3
-      )
-      case choice
-      when 0 then Visual25D.projection_model = :classic
-      when 1 then Visual25D.projection_model = :camera
-      end
+      Visual25D.camera_fov = pbVisual25DChooseNumber(_INTL("FOV (20-90)."),
+                                                     Visual25D.camera_fov.to_i, 20, 90)
     when 4
-      Visual25D.camera_fov = pbVisual25DChooseNumber(
-        _INTL("FOV vertical en grados (de 20 a 90).\nSolo modelo Cámara. Más alto = perspectiva más suave."),
-        Visual25D.camera_fov.to_i, 20, 90
-      )
+      Visual25D.tile_lift = pbVisual25DChooseNumber(_INTL("Altura extra por prioridad (0-24)."),
+                                                    Visual25D.tile_lift, 0, 24)
     when 5
-      pbVisual25DMundoRedondo
-    when 6
-      Visual25D.band_blur = !Visual25D.band_blur?
-    when 7
-      Visual25D.row_batch = !Visual25D.row_batch?
-    when 8
-      # Fundido: salir del menú para que Scene_Map avance el blend.
       Visual25D.toggle_smooth
       break
-    when 9
+    when 6
       Visual25D.reset_to_defaults
     else
       break
@@ -86,21 +53,6 @@ def pbVisual25DChooseNumber(message, current, min, max)
   params.setInitialValue(current)
   params.setCancelValue(current)
   return pbMessageChooseNumber(message, params)
-end
-
-# Alterna terreno redondo (HORIZON_CURVE) y plano (0).
-# Al cargar no cambia nada: sigue el valor de ahora.
-# Script: pbVisual25DMundoRedondo
-# Menú: Depuración -> Campo -> Visual 2.5D HD: mundo redondo
-def pbVisual25DMundoRedondo
-  turning_on = Visual25D.horizon_curve_px <= 0.5
-  Visual25D.horizon_curve = turning_on ? Visual25D::Config::HORIZON_CURVE : 0
-  $PokemonSystem.visual25d_round = turning_on if $PokemonSystem&.respond_to?(:visual25d_round=)
-  if turning_on
-    pbMessage(_INTL("Mundo redondo."))
-  else
-    pbMessage(_INTL("Mundo plano."))
-  end
 end
 
 #===============================================================================
@@ -353,13 +305,6 @@ MenuHandlers.add(:debug_menu, :visual_25d_hd, {
   "parent"      => :field_menu,
   "description" => _INTL("Cambia el ángulo de la cámara y la distancia de dibujado del mapa."),
   "effect"      => proc { pbVisual25DMenu }
-})
-
-MenuHandlers.add(:debug_menu, :visual_25d_hd_round, {
-  "name"        => _INTL("Visual 2.5D HD: mundo redondo"),
-  "parent"      => :field_menu,
-  "description" => _INTL("Alterna el terreno redondo y el plano. Al entrar queda como ahora."),
-  "effect"      => proc { pbVisual25DMundoRedondo }
 })
 
 MenuHandlers.add(:debug_menu, :visual_25d_hd_walls, {
