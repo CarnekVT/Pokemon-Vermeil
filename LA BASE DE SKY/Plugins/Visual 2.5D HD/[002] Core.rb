@@ -852,7 +852,8 @@ module Visual25D
 
     def refresh_margins
       # 2D puro: sin margen ni shift. Si no, @pixel_offset lleva margen y la Z
-      # de MakerStudio (ms_overhead_tile_z) se desfasa del jugador.      if !enabled?
+      # de MakerStudio (ms_overhead_tile_z) se desfasa del jugador.
+      if !enabled?
         @margin_rows = 0
         @margin_columns = 0
         @y_shift = 0

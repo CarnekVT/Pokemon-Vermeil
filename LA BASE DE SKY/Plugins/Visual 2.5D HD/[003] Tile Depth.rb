@@ -847,7 +847,8 @@ module Visual25D
     def bind_tile_walls(tile, map, x, y, tile_id = nil)
       tile.hd25_proj_stamp = nil
       # Reciclo N: el sprite del primer plano (zoom_y grande) pasa al
-      # horizonte. Cortar el zoom antes de proyectar o se arrastra un frame.      bx = tile.hd25_base_zoom_x || TilemapRenderer::ZOOM_X
+      # horizonte. Cortar el zoom antes de proyectar o se arrastra un frame.
+      bx = tile.hd25_base_zoom_x || TilemapRenderer::ZOOM_X
       by = tile.hd25_base_zoom_y || TilemapRenderer::ZOOM_Y
       tile.zoom_x = bx if tile.zoom_x != bx
       tile.zoom_y = by if tile.zoom_y != by
@@ -1696,7 +1697,8 @@ module Visual25D
         tile.hd25_map_id = tile.map_id if tile.hd25_map_id.nil? && tile.respond_to?(:map_id)
       end
       if tile.hd25_walls.nil? && tile.hd25_map_id && respond_to?(:wall_field)
-        map = project_tile_map(tile.hd25_map_id)        if map
+        map = project_tile_map(tile.hd25_map_id)
+        if map
           field = wall_field(map)
           tile.hd25_walls = (field && !field.flat) ? field : nil
         end
@@ -2545,7 +2547,8 @@ module Visual25D
       release_ground_slices(tile)
       clear_wall_tile_tilt(tile)
       apply_tile_taper(tile, 1.0)
-      tile.hd25_proj_stamp = nil      if tile.hd25_zoom_x || tile.hd25_zoom_y
+      tile.hd25_proj_stamp = nil
+      if tile.hd25_zoom_x || tile.hd25_zoom_y
         tile.zoom_x = tile.hd25_base_zoom_x || TilemapRenderer::ZOOM_X
         tile.zoom_y = tile.hd25_base_zoom_y || TilemapRenderer::ZOOM_Y
         tile.hd25_zoom_x = nil
