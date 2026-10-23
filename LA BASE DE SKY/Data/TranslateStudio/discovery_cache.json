@@ -795,7 +795,7 @@
     "Data/Map079.rxdata": {
       "sig": [
         2819034,
-        1792465631,
+        1792707738,
         579,
         1792185538
       ],
@@ -41537,8 +41537,8 @@
     },
     "Plugins/LBDS Animated Props/001_Animated_Props.rb": {
       "sig": [
-        20019,
-        1792448442
+        22240,
+        1792787537
       ],
       "catalog": {
         "schema": 2,
@@ -41560,7 +41560,7 @@
     "Plugins/MakerStudio/000_Settings.rb": {
       "sig": [
         2273,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41582,7 +41582,7 @@
     "Plugins/MakerStudio/001_Core/001_DataStore.rb": {
       "sig": [
         5086,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41604,7 +41604,7 @@
     "Plugins/MakerStudio/001_Core/003_TileEffects.rb": {
       "sig": [
         18901,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41626,7 +41626,7 @@
     "Plugins/MakerStudio/002_Integration/001_Hooks.rb": {
       "sig": [
         12563,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41708,7 +41708,7 @@
     "Plugins/MakerStudio/002_Integration/002_RendererOverride.rb": {
       "sig": [
         91581,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41730,7 +41730,7 @@
     "Plugins/MakerStudio/002_Integration/003_GameMapOverride.rb": {
       "sig": [
         42191,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41752,7 +41752,7 @@
     "Plugins/MakerStudio/002_Integration/004_FogOverride.rb": {
       "sig": [
         15419,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41774,7 +41774,7 @@
     "Plugins/MakerStudio/002_Integration/005_CompilerFix.rb": {
       "sig": [
         3724,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41796,7 +41796,7 @@
     "Plugins/MakerStudio/002_Integration/006_MapVersioning.rb": {
       "sig": [
         23006,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41818,7 +41818,7 @@
     "Plugins/MakerStudio/002_Integration/007_CustomSheetGrid.rb": {
       "sig": [
         2832,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41840,7 +41840,7 @@
     "Plugins/MakerStudio/002_Integration/008_FogCommands.rb": {
       "sig": [
         20931,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41862,7 +41862,7 @@
     "Plugins/MakerStudio/002_Integration/009_FrameCommands.rb": {
       "sig": [
         5788,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41884,7 +41884,7 @@
     "Plugins/MakerStudio/002_Integration/010_MinimapOverride.rb": {
       "sig": [
         25162,
-        1792282066
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41906,7 +41906,7 @@
     "Plugins/MakerStudio/002_Integration/011_LiveReload.rb": {
       "sig": [
         3883,
-        1792282067
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41928,7 +41928,7 @@
     "Plugins/MakerStudio/002_Integration/012_WaitForMove.rb": {
       "sig": [
         3334,
-        1792282067
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41950,7 +41950,7 @@
     "Plugins/MakerStudio/002_Integration/013_EventExtensions.rb": {
       "sig": [
         5742,
-        1792282067
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41972,7 +41972,7 @@
     "Plugins/MakerStudio/002_Integration/014_GraphicRegion.rb": {
       "sig": [
         12715,
-        1792282067
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -41994,7 +41994,7 @@
     "Plugins/MakerStudio/002_Integration/015_BattleBackBases.rb": {
       "sig": [
         2962,
-        1792282067
+        1792782527
       ],
       "catalog": {
         "schema": 2,
@@ -45765,8 +45765,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/00_Base/005_Boss_Midbattle_Dialogues.rb": {
       "sig": [
-        23367,
-        1792185548
+        23869,
+        1792634700
       ],
       "catalog": {
         "schema": 2,
@@ -45787,8 +45787,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/10_EBDX_Source/005_Faithful_EBDX_Room.rb": {
       "sig": [
-        119286,
-        1792185548
+        121144,
+        1792637982
       ],
       "catalog": {
         "schema": 2,
@@ -46194,8 +46194,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/70_Runtime_Pipeline/027_Fidelity_Architecture.rb": {
       "sig": [
-        13993,
-        1792185548
+        14013,
+        1792636173
       ],
       "catalog": {
         "schema": 2,
@@ -46260,8 +46260,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/70_Runtime_Pipeline/030_Composer_Camera_Fixes.rb": {
       "sig": [
-        39678,
-        1792185548
+        39664,
+        1792636173
       ],
       "catalog": {
         "schema": 2,
@@ -46392,8 +46392,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/90_CustomRooms/037_Unified_Final_Authority.rb": {
       "sig": [
-        20697,
-        1792185548
+        21090,
+        1792645240
       ],
       "catalog": {
         "schema": 2,
@@ -46414,8 +46414,8 @@
     },
     "Plugins/[CARNEK] Battle Scene Studio Runtime/90_CustomRooms/038_Fondos_EBDX_Vanilla.rb": {
       "sig": [
-        4369,
-        1792185548
+        7470,
+        1792637982
       ],
       "catalog": {
         "schema": 2,
@@ -53037,8 +53037,8 @@
     },
     "Data/BattleSceneStudio/battles.json": {
       "sig": [
-        176967,
-        1792185538
+        170783,
+        1792711744
       ],
       "catalog": {
         "schema": 2,
@@ -53231,8 +53231,8 @@
     },
     "Plugins/Lighting Studio Runtime/001_LightingStudio.rb": {
       "sig": [
-        29389,
-        1792465485
+        33391,
+        1792787537
       ],
       "catalog": {
         "schema": 2,
@@ -53275,8 +53275,8 @@
     },
     "Plugins/[VERMEIL] Smooth Movement/001_Configuration.rb": {
       "sig": [
-        4123,
-        1792455620
+        4469,
+        1792707067
       ],
       "catalog": {
         "schema": 2,
@@ -53297,8 +53297,8 @@
     },
     "Plugins/[VERMEIL] Smooth Movement/002_PlayerMovement.rb": {
       "sig": [
-        5754,
-        1792455620
+        9202,
+        1792707067
       ],
       "catalog": {
         "schema": 2,
@@ -53341,8 +53341,8 @@
     },
     "Plugins/Lighting Studio Runtime/003_CharacterNormals.rb": {
       "sig": [
-        20479,
-        1792460546
+        22512,
+        1792692981
       ],
       "catalog": {
         "schema": 2,
@@ -53385,8 +53385,8 @@
     },
     "Plugins/Lighting Studio Runtime/005_SleepingBag.rb": {
       "sig": [
-        3820,
-        1792460546
+        3909,
+        1792509034
       ],
       "catalog": {
         "schema": 2,
@@ -53400,32 +53400,32 @@
         "plugins": {
           "la mañana": {
             "Contexts": [
-              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L22"
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L23"
             ]
           },
           "el día": {
             "Contexts": [
-              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L23"
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L24"
             ]
           },
           "el atardecer": {
             "Contexts": [
-              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L24"
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L25"
             ]
           },
           "la noche": {
             "Contexts": [
-              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L25"
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L26"
             ]
           },
           "El saco de dormir necesita un ciclo de día y noche con reloj interno.": {
             "Contexts": [
-              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L81"
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L83"
             ]
           },
           "¿A qué hora quieres despertar?": {
             "Contexts": [
-              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L86"
+              "Plugin: Lighting Studio Runtime - 005_SleepingBag.rb:L88"
             ]
           }
         },
@@ -53437,8 +53437,8 @@
     },
     "Plugins/[VERMEIL] Smooth Movement/004_ContinuousFlow.rb": {
       "sig": [
-        4663,
-        1792451171
+        4822,
+        1792636173
       ],
       "catalog": {
         "schema": 2,
@@ -53483,6 +53483,637 @@
       "sig": [
         3219,
         1792455620
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/[CARNEK] Battle Scene Studio Runtime/90_CustomRooms/039_Lighting_Layered_Backdrops.rb": {
+      "sig": [
+        20689,
+        1792711593
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[001] Settings.rb": {
+      "sig": [
+        19928,
+        1792787537
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[002] Core.rb": {
+      "sig": [
+        62371,
+        1792787537
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[003] Tile Depth.rb": {
+      "sig": [
+        100409,
+        1792783028
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[004] Character Depth.rb": {
+      "sig": [
+        9091,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[006] Atmosphere.rb": {
+      "sig": [
+        15203,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+          "Modo 2.5D": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [006] Atmosphere.rb:L172"
+            ]
+          },
+          "Modo 2D": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [006] Atmosphere.rb:L172"
+            ]
+          }
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[007] Debug Menu.rb": {
+      "sig": [
+        17969,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+          "activado": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L12",
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L386"
+            ]
+          },
+          "desactivado": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L12",
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L386"
+            ]
+          },
+          "cámara": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L13"
+            ]
+          },
+          "clásico": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L13"
+            ]
+          },
+          "redondo": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L14"
+            ]
+          },
+          "plano": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L14"
+            ]
+          },
+          "Cámara 2.5D ({1}).\nÁngulo {2}°, distancia {3}%, altura {4} px.\nModelo {5}, FOV {6}°, terreno {7}.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L16"
+            ]
+          },
+          "Ángulo de la cámara": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L19"
+            ]
+          },
+          "Distancia de dibujado": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L20"
+            ]
+          },
+          "Altura de los verticales": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L21"
+            ]
+          },
+          "Modelo de proyección": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L22"
+            ]
+          },
+          "FOV de cámara": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L23"
+            ]
+          },
+          "Mundo redondo ({1})": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L24"
+            ]
+          },
+          "sí": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L24",
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L25",
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L26"
+            ]
+          },
+          "no": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L24",
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L25",
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L26"
+            ]
+          },
+          "Desenfoque de bordes ({1})": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L25"
+            ]
+          },
+          "Suelo por filas ({1})": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L26"
+            ]
+          },
+          "Activar/desactivar": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L27"
+            ]
+          },
+          "Restaurar valores": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L28"
+            ]
+          },
+          "Salir": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L29"
+            ]
+          },
+          "Ángulo de la cámara, en grados (de 0 a {1}).\nCuanto mayor, más lejos se ve.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L35"
+            ]
+          },
+          "Distancia de dibujado, en porcentaje (de {1} a {2}).\nPor debajo de 100 la cámara se aleja y se ve más mapa.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L42"
+            ]
+          },
+          "Píxeles que se levanta un tile por cada nivel de prioridad (de 0 a 24).": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L47"
+            ]
+          },
+          "Modelo de proyección del suelo.\nClásico = estable (default).\nCámara = 1/profundidad (pulido v3.0.43).": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L53"
+            ]
+          },
+          "Clásico": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L54"
+            ]
+          },
+          "Cámara": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L54"
+            ]
+          },
+          "Cancelar": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L54"
+            ]
+          },
+          "FOV vertical en grados (de 20 a 90).\nSolo modelo Cámara. Más alto = perspectiva más suave.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L62"
+            ]
+          },
+          "Mundo redondo.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L100"
+            ]
+          },
+          "Mundo plano.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L102"
+            ]
+          },
+          "Este mapa no tiene ningún tile marcado como pared frontal.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L166"
+            ]
+          },
+          "Mapa de paredes volcado en la consola.\nRoturas de run: {1}. Dentados: {2}.\nRoturas arista: {3}.\nBugs geom: {4}.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L263"
+            ]
+          },
+          "Huecos entre tiles: {1}.\nCasillas sin pintar: {2}.\nDentados laterales: {3}.\nInteriorWall: {4}.\nDetalle en la consola.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L340"
+            ]
+          },
+          "Visual 2.5D HD: buscar huecos": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L345"
+            ]
+          },
+          "Busca huecos entre tiles y casillas sin pintar en lo que hay en pantalla.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L347"
+            ]
+          },
+          "Visual 2.5D HD": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L352"
+            ]
+          },
+          "Cambia el ángulo de la cámara y la distancia de dibujado del mapa.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L354"
+            ]
+          },
+          "Visual 2.5D HD: mundo redondo": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L359"
+            ]
+          },
+          "Alterna el terreno redondo y el plano. Al entrar queda como ahora.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L361"
+            ]
+          },
+          "Visual 2.5D HD: mapa de paredes": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L366"
+            ]
+          },
+          "Vuelca a la consola qué tiles se levantan como pared alrededor del jugador.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L368"
+            ]
+          },
+          "Visual 2.5D HD: diagnóstico de Z": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L373"
+            ]
+          },
+          "Vuelca la Z del jugador y la de los tiles que tiene encima.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L375"
+            ]
+          },
+          "Probe de rendimiento 2.5D: {1}.\nMira la consola / mkxp.log (1 línea por segundo, echoln).": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L387"
+            ]
+          },
+          "Perfil del mapa volcado a consola / mkxp.log (echoln).": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L392"
+            ]
+          },
+          "Visual 2.5D HD: probe FPS": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L396"
+            ]
+          },
+          "Activa o desactiva el muestreo de rendimiento (1 línea/seg en consola).": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L398"
+            ]
+          },
+          "Visual 2.5D HD: dump perfil mapa": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L403"
+            ]
+          },
+          "Vuelca a consola el perfil MS/capas del mapa actual (echoln).": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [007] Debug Menu.rb:L405"
+            ]
+          }
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[008] Options.rb": {
+      "sig": [
+        2927,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+          "Modo 2.5D": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [008] Options.rb:L38"
+            ]
+          },
+          "Sí": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [008] Options.rb:L41"
+            ]
+          },
+          "No": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [008] Options.rb:L41"
+            ]
+          },
+          "Activa o desactiva el modo visual 2.5D.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [008] Options.rb:L42"
+            ]
+          },
+          "Mundo 2.5D": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [008] Options.rb:L61"
+            ]
+          },
+          "Redondo": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [008] Options.rb:L64"
+            ]
+          },
+          "Plano": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [008] Options.rb:L64"
+            ]
+          },
+          "Elige si el terreno se curva en el horizonte o se queda plano.": {
+            "Contexts": [
+              "Plugin: Visual 2.5D HD - [008] Options.rb:L65"
+            ]
+          }
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[009] Auxiliary Sprites.rb": {
+      "sig": [
+        13190,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[010] Front Walls.rb": {
+      "sig": [
+        15567,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[011] Interior Walls.rb": {
+      "sig": [
+        23773,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[012] MakerStudio Bridge.rb": {
+      "sig": [
+        32424,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[013] Darkness Bridge.rb": {
+      "sig": [
+        5429,
+        1792783213
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[014] Shelf Tiles.rb": {
+      "sig": [
+        621,
+        1792782468
+      ],
+      "catalog": {
+        "schema": 2,
+        "generatedBy": "Translate Studio 1.4.1",
+        "general": {
+        },
+        "events": {
+        },
+        "scripts": {
+        },
+        "plugins": {
+        },
+        "bss": {
+        },
+        "sds": {
+        }
+      }
+    },
+    "Plugins/Visual 2.5D HD/[015] Diorama.rb": {
+      "sig": [
+        14812,
+        1792782468
       ],
       "catalog": {
         "schema": 2,

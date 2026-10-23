@@ -388,13 +388,7 @@
               "feather": 18
             }
           ],
-          "blur": 0,
-          "runtimeRaster": {
-            "bitmap": "Graphics/BattleSceneStudio/EBDX/Generated/scene_custom_img009.png",
-            "ox": 1516,
-            "oy": 215,
-            "fingerprint": "104|scene_custom|img009|Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/desert_front_dunes.png|null|null|[{\"mode\":\"band_bottom\",\"style\":\"high\",\"x\":0,\"y\":-42,\"radius\":48,\"strength\":4,\"feather\":18}]|-9999|-9999"
-          }
+          "blur": 0
         },
         "img001": {
           "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",

@@ -2988,8 +2988,8 @@
       "particles": true
     },
     "ebdxCamera": {
-      "preset": "ebdx",
-      "idleStrength": 10,
+      "preset": "custom",
+      "idleStrength": 40,
       "commandStrength": 18,
       "fightStrength": 28,
       "panX": 75,
@@ -3009,7 +3009,7 @@
       "battlerInfluence": 100,
       "shadowInfluence": 100,
       "overscan": 24,
-      "profile": "static",
+      "profile": "ebdx",
       "contexts": {
         "command": {
           "enabled": false,
@@ -3092,7 +3092,7 @@
       },
       "cameraSchemaVersion": 2,
       "commandOverviewEnabled": true,
-      "commandOverviewZoomOut": 12,
+      "commandOverviewZoomOut": 30,
       "commandOverviewLift": 22,
       "commandOverviewFrames": 24
     },
@@ -3504,13 +3504,7 @@
                 "feather": 18
               }
             ],
-            "blur": 0,
-            "runtimeRaster": {
-              "bitmap": "Graphics/BattleSceneStudio/EBDX/Generated/scene_custom_img009.png",
-              "ox": 1516,
-              "oy": 215,
-              "fingerprint": "104|scene_custom|img009|Graphics/BattleSceneStudio/EBDX/SceneAssets/Terrain/desert_front_dunes.png|null|null|[{\"mode\":\"band_bottom\",\"style\":\"high\",\"x\":0,\"y\":-42,\"radius\":48,\"strength\":4,\"feather\":18}]|-9999|-9999"
-            }
+            "blur": 0
           },
           "img001": {
             "bitmap": "Graphics/Tilesets/001-NewBarkTown.png",
@@ -5729,5 +5723,5 @@
     "ebdxMapBackdropsText": "",
     "ebdxEncounterMetadata": []
   },
-  "_bssSavedAt": 1789880802548
+  "_bssSavedAt": 1792711744205
 }
