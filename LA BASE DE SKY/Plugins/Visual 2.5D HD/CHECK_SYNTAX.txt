@@ -1,12 +1,1 @@
-Estado de verificacion
------------------------
-Este archivo registra solo la revision del plugin de testeo.
-No sustituye una ejecucion real de Pokemon Essentials 21.1.
-Comprobar los archivos modificados con Ruby 3.3:
-  ruby -c "[001] Settings.rb"
-  ruby -c "[002] Core.rb"
-  ruby -c "[003] Tile Depth.rb"
-  ruby -c "[008] Options.rb"
-  ruby -c "[012] MakerStudio Bridge.rb"
-  ruby -c "[016] Priority Test.rb"
-Revisar los demas scripts al desplegar y medir FPS en el juego.
+Verificar en Ruby del proyecto antes de afirmar sintaxis OK:\n  ruby -c Plugins/Visual\\ 2.5D\\ HD/'[016] Studio Bridges.rb'\n  ruby -c Plugins/Visual\\ 2.5D\\ HD/'[017] Priority Editor.rb'\nNo hay validacion ingame ni medicion FPS automatica.\n

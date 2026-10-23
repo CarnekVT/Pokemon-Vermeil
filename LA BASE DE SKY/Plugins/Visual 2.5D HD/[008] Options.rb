@@ -94,7 +94,7 @@ MenuHandlers.add(:options_menu, :visual25d_projection, {
   "page" => :graphics, "name" => _INTL("2.5D: proyección"), "order" => 104,
   "type" => :array,
   "parameters" => proc { [_INTL("Clásico"), _INTL("Cámara experimental")] },
-  "description" => _INTL("Clásico mantiene la proyección más estable de Sky."),
+  "description" => _INTL("Clásico conserva la proyección original estable."),
   "get_proc" => proc { next Visual25D.projection_model == :camera ? 1 : 0 },
   "set_proc" => proc { |v, _screen| Visual25D.projection_model = (v == 1 ? :camera : :classic) }
 })

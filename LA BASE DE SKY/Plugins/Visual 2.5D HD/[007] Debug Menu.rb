@@ -17,7 +17,7 @@ def pbVisual25DMenu
       [_INTL("Cambiar inclinación"), _INTL("Cambiar zoom"),
        _INTL("Modelo de proyección"), _INTL("Cambiar FOV"),
        _INTL("Altura de columnas"), _INTL("Activar/desactivar"),
-       _INTL("Restaurar Sky plano"), _INTL("Salir")], 8)
+       _INTL("Restaurar configuración base"), _INTL("Salir")], 8)
     case choice
     when 0
       Visual25D.tilt = pbVisual25DChooseNumber(_INTL("Ángulo (0-50 grados)."),

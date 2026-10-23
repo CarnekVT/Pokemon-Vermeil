@@ -1,6 +1,6 @@
 #===============================================================================
 # Visual 2.5D HD - Prioridades nativas para testeo (solo en memoria).
-# Base = 1, segunda fila = 2, tercera = 3, siguiendo el criterio de Sky.
+# Base = 1, segunda fila = 2, tercera = 3, para la geometría 2.5D.
 # No se modifica Data/Tilesets.rxdata ni se guardan cambios en partidas.
 #===============================================================================
 module Visual25D
@@ -17,8 +17,9 @@ module Visual25D
         return false unless ts && ts.priorities
         tid = tile_id.to_i
         return false if tid < 384
+        return false if ts.priorities.respond_to?(:xsize) && tid >= ts.priorities.xsize
         p = priority.to_i.clamp(0, 5)
-        key = [ts.id, tid]
+        key = [$game_map.tileset_id, tid]
         @original[key] = ts.priorities[tid] unless @original.key?(key)
         ts.priorities[tid] = p
         return true
@@ -26,7 +27,8 @@ module Visual25D
 
       def set_vertical_stack(bottom_tile_id, width, height)
         bottom = bottom_tile_id.to_i
-        w = width.to_i.clamp(1, 8)
+        # Evitar que un objeto de varias columnas invada la fila de al lado.
+        w = width.to_i.clamp(1, 8 - (bottom % 8))
         h = height.to_i.clamp(1, 5)
         changed = 0
         h.times do |up|
@@ -73,7 +75,7 @@ def pbVisual25DPriorityEditor
   end
   loop do
     choice = pbMessage(
-      _INTL("Prioridades de Sky. Base=1, encima=2,3...\\nTileset {1}; {2} ID(s) alterados en RAM.",
+      _INTL("Prioridades nativas: base=1, encima=2,3...\\nTileset {1}; {2} ID(s) alterados en RAM.",
             $game_map.tileset_id, Visual25D::PriorityEditor.count),
       [_INTL("Prioridades de un objeto vertical"), _INTL("Prioridad de un tile"),
        _INTL("IDs cercanos al jugador"), _INTL("Restaurar originales"), _INTL("Salir")], 5)
