@@ -38,6 +38,18 @@ module Visual25D
     attr_reader :tile_lift
     attr_reader :tilt
     attr_reader :camera_zoom
+    # Margen adicional del renderer. Limitarlo permite comparar calidad/FPS.
+    def render_margin_limit
+      return @render_margin_limit || Config::MAX_MARGIN_ROWS
+    end
+
+    def render_margin_limit=(value)
+      v = value.to_i.clamp(4, Config::MAX_MARGIN_ROWS)
+      $PokemonSystem.visual25d_margin = v if $PokemonSystem&.respond_to?(:visual25d_margin=)
+      return if render_margin_limit == v
+      @render_margin_limit = v
+      redraw_map
+    end
     attr_reader :perspective
     attr_reader :row_offset
     attr_accessor :haze_opacity
@@ -368,6 +380,7 @@ module Visual25D
       @camera_zoom = $PokemonSystem.visual25d_zoom
       @projection_model = $PokemonSystem.visual25d_model if $PokemonSystem.respond_to?(:visual25d_model)
       @camera_fov = $PokemonSystem.visual25d_fov if $PokemonSystem.respond_to?(:visual25d_fov)
+      @render_margin_limit = $PokemonSystem.visual25d_margin if $PokemonSystem.respond_to?(:visual25d_margin)
       rebuild_render_params!
       # refresh_active aplica @active / redraw
     end
@@ -432,6 +445,7 @@ module Visual25D
       @vignette_opacity  = Config::VIGNETTE_OPACITY
       @tilt              = Config::TILT_DEGREES
       @camera_zoom       = Config::CAMERA_ZOOM
+      @render_margin_limit = Config::MAX_MARGIN_ROWS
       @projection_model  = nil
       @camera_fov        = nil
       @horizon_curve     = Config::DEFAULT_HORIZON_CURVE.to_f
@@ -444,6 +458,7 @@ module Visual25D
         $PokemonSystem.visual25d_enabled = Config::ENABLED if $PokemonSystem.respond_to?(:visual25d_enabled=)
         $PokemonSystem.visual25d_model   = Config::PROJECTION_MODEL if $PokemonSystem.respond_to?(:visual25d_model=)
         $PokemonSystem.visual25d_fov     = Config::CAMERA_FOV if $PokemonSystem.respond_to?(:visual25d_fov=)
+        $PokemonSystem.visual25d_margin  = Config::MAX_MARGIN_ROWS if $PokemonSystem.respond_to?(:visual25d_margin=)
       end
       rebuild_render_params!
       mark_save_sync_dirty!
@@ -875,7 +890,7 @@ module Visual25D
       base_rows = (Graphics.height.to_f / tile_h).ceil + 1
       below = ((bottom.to_f / tile_h).ceil + 1) - base_rows
       @margin_rows = [[above, below].max + 1, 1].max
-      @margin_rows = Config::MAX_MARGIN_ROWS if @margin_rows > Config::MAX_MARGIN_ROWS
+      @margin_rows = render_margin_limit if @margin_rows > render_margin_limit
       # Si la rejilla no llega a donde pide la proyeccion, se corre hacia abajo
       # para que el borde de arriba siga cubierto: el jugador deja de estar
       # exactamente centrado, pero no aparece vacio.
@@ -885,7 +900,7 @@ module Visual25D
       half = Graphics.width / 2.0
       extra = (half / width_scale_at(unprojected_edge(0))) - half
       @margin_columns = (extra <= 0) ? 1 : (extra / tile_w).ceil + 1
-      @margin_columns = Config::MAX_MARGIN_COLUMNS if @margin_columns > Config::MAX_MARGIN_COLUMNS
+      @margin_columns = render_margin_limit if @margin_columns > render_margin_limit
       # Fundido: no encoger bajo el pico (rejilla ya expandida al arrancar).
       if @blend_margin_min_cols
         @margin_columns = @blend_margin_min_cols if @margin_columns < @blend_margin_min_cols
@@ -1052,7 +1067,7 @@ module Visual25D
     def min_width_scale
       return @proj_min_width if @proj_min_width
       half = Graphics.width / 2.0
-      return half / (half + ((Config::MAX_MARGIN_COLUMNS - 1) * TilemapRenderer::DISPLAY_TILE_WIDTH))
+      return half / (half + ((render_margin_limit - 1) * TilemapRenderer::DISPLAY_TILE_WIDTH))
     end
 
     # Integral de scale_at: dos filas contiguas comparten borde exactamente.
@@ -1373,7 +1388,7 @@ module Visual25D
       @proj_tilt_normal = (@perspective == 0) ? 1.0 : (1.0 + (@perspective / 2.0))
       @proj_min_width = begin
         half = Graphics.width / 2.0
-        half / (half + ((Config::MAX_MARGIN_COLUMNS - 1) * TilemapRenderer::DISPLAY_TILE_WIDTH))
+        half / (half + ((render_margin_limit - 1) * TilemapRenderer::DISPLAY_TILE_WIDTH))
       end
       @proj_y_shift = y_shift
       # Fundido: vertical_gain sigue el tilt * blend (no el tilt guardado a tope).

@@ -1,78 +1,63 @@
-VISUAL 2.5D HD — CAMERA PREVIEW 01
-======================================
-Base: Visual 2.5D HD v3.3.0 (Pokemon Essentials 21.1).
-Variante inicial de cámara orientada a la quinta generación. Créditos originales en meta.txt.
+VISUAL 2.5D HD — PREVIEW DE TESTEO (CAMARA / RENDIMIENTO)
+================================================================
+Base funcional: Visual 2.5D HD v3.3.0. Essentials 21.1.
+Objetivo visual: profundidad estilo quinta generación con horizonte plano.
+No modifica mapas 2D ni sustituye el motor por un renderer 3D real.
 
-OBJETIVO
-- Sensacion visual proxima a la quinta generacion de Pokemon: perspectiva
-  lineal, fondo con profundidad, personajes con sprites y sin horizonte curvado.
-- No es un motor 3D ni reproduce la camara 3D original de Nintendo DS.
-- No se ha validado dentro del juego. Es una primera calibracion para pruebas.
+AJUSTES DE CAMARA (SE PUEDEN CAMBIAR SIN EDITAR SCRIPTS)
+  Opciones > Graficos:
+    Modo 2.5D       : activa / desactiva
+    Mundo 2.5D      : plano / redondo (recomendado: plano)
+    2.5D Inclinacion: 0, 15, 20, 25, 27, 30, 35, 40, 45, 50 grados
+    2.5D Zoom       : 75, 85, 90, 100, 110, 120, 135%
+    2.5D Proyeccion : clasica / camara experimental
+    2.5D Campo vision: 35, 45, 55, 65, 75, 85 (solo modelo Camara)
+    2.5D Margen de render:
+      4 tiles (FPS)   : reduce trabajo; puede mostrar bordes vacios
+      6 tiles (medio) : equilibrio visual y rendimiento
+      8 tiles         : máxima cobertura de este perfil de prueba
+  Los valores de camara y margen se guardan en la partida.
+  En depuracion tambien sigue disponible pbVisual25DMenu.
+  Cambios guardados anteriormente se respetan; usar Restaurar valores
+  desde pbVisual25DMenu para volver a valores por defecto.
 
-CAMBIOS
-[001] Settings.rb:
-  TILT_DEGREES = 40 (antes 50)
-  PROJECTION_MODEL = :camera (antes :classic)
-  CAMERA_FOV = 55 (antes 45)
-  VANISHING_STRENGTH = 0.4 (antes 0.3)
-  VERTICAL_GAIN = 0.5 (antes 0.4)
-  HAZE, NEAR_HAZE, VIGNETTE = false (antes true)
-  MODE_LABEL = false (antes true)
-  HOTKEY = nil (antes Q)
-[006] Atmosphere.rb: no interviene en las teclas de turbo del proyecto.
-[008] Options.rb: en partidas nuevas, mundo plano por defecto.
-[002] Core.rb: 'Restaurar valores' recupera horizonte plano.
+PERFIL POR DEFECTO
+  Inclinacion 27; zoom 100%; proyeccion Clasica; FOV 55;
+  convergencia lateral 0.25; horizonte plano; GROUND_SLICES 1;
+  neblina y vigneta apagadas; maximo de margen 8.
+  HOTKEY deshabilitada: no secuestrar Q ni el turbo.
 
-SIN CAMBIOS
-- Motor de proyeccion y funciones matematicas originales.
-- Optimizaciones, caches, culling, capas MakerStudio y tags 19/20/21.
-- HORIZON_CURVE sigue 14 si activas manualmente el modo 'Redondo'; asi se
-  puede comparar la version plana con el efecto original.
-- GROUND_SLICES=2, ROW_BATCH=false, BAND_BLUR=false.
+PRIORIDADES DE TILES (PRUEBA TEMPORAL)
+  Depuracion > Campo > 2.5D: prioridad de tiles (PRUEBA)
+  Elige un ID de tile y prioridad visual entre 0 y 12.
+  El cambio afecta SOLO al renderer 2.5D en el mapa activo.
+  No reescribe prioridades de tilesets, PBS, colisiones ni pasabilidad.
+  No persiste en la partida. Se puede borrar desde el mismo menu o
+  reiniciando el juego.
 
-INSTALACION
-1. Haz copia de seguridad del plugin anterior y de tu partida.
-2. No instales dos copias activas del mismo plugin.
-3. Usa la carpeta del plugin (conserva meta.txt).
-4. Abre el juego y comprueba la perspectiva sobre un mapa habitual.
-5. Los parametros zoom/tilt/mundo estan guardados en cada partida: en una
-   partida existente usa 'Restaurar valores' desde pbVisual25DMenu, o ejecuta:
-      Visual25D.projection_model = :camera
-      Visual25D.camera_fov = 55
-      Visual25D.tilt = 40
-      Visual25D.camera_zoom = 100
-      $PokemonSystem.visual25d_round = false
-      Visual25D.horizon_curve = 0
-   Guarda la partida despues si deseas mantener los valores persistentes.
-6. Q deja de estar asignada al modo 2.5D. El turbo original no se modifica.
-   El 2.5D se puede cambiar desde opciones/depuracion.
+DIAGNOSTICO DE FPS
+  Comparar el mismo mapa en 2D y 2.5D, con idéntica iluminación y props.
+  Probar 2.5D: Margen de render 8 y 6, luego 4 para identificar cuellos.
+  Si el margen 4 produce huecos en pantalla, volver a 6 u 8.
+  Depuracion > Campo > Visual 2.5D HD: probe FPS:
+  vuelca contadores a la consola / mkxp.log para estudiar rendimiento.
+  No se garantiza recuperar los FPS originales sin test ingame.
 
-PRUEBAS RECOMENDADAS
-- Caminata 8 direcciones, turbo, transicion combates, mapas conectados.
-- Enfoques frontal y lateral de edificios grandes; bordes de tiles y arboles.
-- Cliff 19, InteriorWall 20, Shelf 21, mapas con MakerStudio extendido.
-- Zoom 80, 100 y 120; angulo 35, 40, 45; FOV 50, 55 y 60.
-- Evaluar sobre capturas comparativas de rutas y ciudades Gen5.
+CAMBIOS DE ESTA RAMA
+  Visual 2.5D HD mantiene la logica de alturas, cliffs, caps, aristas
+  compartidas, tilemap expandido y puente con MakerStudio.
+  Animated Props y Lighting Studio tienen adaptaciones de proyeccion.
+  No eliminar ni duplicar el plugin: conservar su carpeta y meta.txt.
 
-IMPORTANTE
-Ruby -c solo valida sintaxis; no prueba los hooks ni el ejecutable mkxp.
-La calidad de GROUND_SLICES depende de Sprite#taper (si el ejecutable lo tiene).
+HISTORIAL Y RECUPERACION
+  Branch de respaldo anterior a incorporar 2.5D:
+    backup/pre-visual25d-20261023
+  Commit de referencia:
+    ac275cc2c52d82cad420e4751119228541f3e536
+  NO regresar toda la rama con reset --hard salvo que tambien se
+  quieran revertir los cambios no relacionados introducidos despues.
 
-PRUEBA DE CAMARA Y RENDIMIENTO (2026-10-23):
-- Opciones > Graficos: inclinacion, zoom, proyeccion, FOV, modo 2.5D, mundo plano.
-- Modelo / FOV se guardan en la partida; la prueba de rendimientos se hace
-  sobre el mismo mapa comparando 2D frente a 2.5D.
-- Margenes maximos de rejilla reducidos de 10 a 8 (si hay huecos,
-  restaurar a 10, valor usado antes de esta optimizacion).
-- El perfil estable recomendado para FPS usa modelo Clasica y zoom 100%.
-- Punto de reversión anterior al plugin (NO se reseteo la rama):
-  ac275cc2c52d82cad420e4751119228541f3e536
-
-PRIORIDADES TEMPORALES DEL RENDERER (SOLO TESTEO):
-- Menu Depuracion > Campo > 2.5D: prioridad de tiles (PRUEBA).
-- Introducir ID del tile y prioridad 0..12; se aplica a los sprites nativos
-  y extendidos con ese ID en el mapa activo mientras se usa 2.5D.
-- NO cambia los datos de los tilesets, PBS, pasabilidad, Game_Map ni las
-  prioridades del modo 2D. Tampoco se guarda en las partidas: basta
-  reiniciar el juego o usar 'Borrar todas las pruebas'.
-- El renderizador lee esta prioridad visual para ancho, altura y orden Z.
+NOTA
+  No hay verificacion ingame del perfil actual. Ejecutar pruebas
+  de camara, prioridad y rendimiento en el motor real.
+  Sprite#taper requiere un ejecutable que incluya dicha extension.

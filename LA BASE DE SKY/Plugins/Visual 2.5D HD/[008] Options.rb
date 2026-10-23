@@ -12,6 +12,7 @@ class PokemonSystem
   attr_writer :visual25d_round
   attr_writer :visual25d_model
   attr_writer :visual25d_fov
+  attr_writer :visual25d_margin
 
   def visual25d_enabled
     @visual25d_enabled = Visual25D::Config::ENABLED if @visual25d_enabled.nil?
@@ -36,6 +37,11 @@ class PokemonSystem
   def visual25d_fov
     @visual25d_fov = Visual25D::Config::CAMERA_FOV if @visual25d_fov.nil?
     return @visual25d_fov
+  end
+
+  def visual25d_margin
+    @visual25d_margin = Visual25D::Config::MAX_MARGIN_ROWS if @visual25d_margin.nil?
+    return @visual25d_margin
   end
 
   # Horizonte plano por defecto, con curvatura opcional.
@@ -144,4 +150,22 @@ MenuHandlers.add(:options_menu, :visual25d_fov, {
   "description" => _INTL("FOV del modelo Camara. No tiene efecto en el clasico."),
   "get_proc" => proc { next Visual25DCameraOptions.nearest(Visual25DCameraOptions::FOVS, Visual25D.camera_fov) },
   "set_proc" => proc { |value, _screen| Visual25D.camera_fov = Visual25DCameraOptions::FOVS[value] }
+})
+
+MenuHandlers.add(:options_menu, :visual25d_margins, {
+  "page" => :graphics,
+  "name" => _INTL("2.5D: Margen de render"),
+  "order" => 106,
+  "type" => :array,
+  "parameters" => proc {
+    [_INTL("4 tiles (FPS)"), _INTL("6 tiles (medio)"), _INTL("8 tiles (completo)")]
+  },
+  "description" => _INTL("Menos tiles extra = mas FPS; puede recortar los bordes."),
+  "get_proc" => proc {
+    value = Visual25D.render_margin_limit
+    next value <= 4 ? 0 : (value <= 6 ? 1 : 2)
+  },
+  "set_proc" => proc { |value, _screen|
+    Visual25D.render_margin_limit = [4, 6, 8][value]
+  }
 })
