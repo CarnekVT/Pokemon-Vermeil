@@ -54,6 +54,7 @@ if defined?(MakerStudio) && TilemapRenderer.method_defined?(:update_extended_poo
       sprite.hd25_grid_row = nil
       Visual25D.annotate_wall_seal_skip!(sprite, map)
       ext_tid = tile_data ? tile_data["tile_id"] : (sprite.respond_to?(:tile_id) ? sprite.tile_id : nil)
+      sprite.hd25_test_tile_id = ext_tid
       Visual25D.annotate_surf_graphic!(sprite, map, ext_tid)
       Visual25D.annotate_interior_flat!(sprite, map)
       Visual25D.annotate_shelf_flat!(sprite, map, ext_tid, tile_data)

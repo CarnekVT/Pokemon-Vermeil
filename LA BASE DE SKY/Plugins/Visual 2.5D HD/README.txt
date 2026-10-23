@@ -67,3 +67,12 @@ PRUEBA DE CAMARA Y RENDIMIENTO (2026-10-23):
 - El perfil estable recomendado para FPS usa modelo Clasica y zoom 100%.
 - Punto de reversión anterior al plugin (NO se reseteo la rama):
   ac275cc2c52d82cad420e4751119228541f3e536
+
+PRIORIDADES TEMPORALES DEL RENDERER (SOLO TESTEO):
+- Menu Depuracion > Campo > 2.5D: prioridad de tiles (PRUEBA).
+- Introducir ID del tile y prioridad 0..12; se aplica a los sprites nativos
+  y extendidos con ese ID en el mapa activo mientras se usa 2.5D.
+- NO cambia los datos de los tilesets, PBS, pasabilidad, Game_Map ni las
+  prioridades del modo 2D. Tampoco se guarda en las partidas: basta
+  reiniciar el juego o usar 'Borrar todas las pruebas'.
+- El renderizador lee esta prioridad visual para ancho, altura y orden Z.

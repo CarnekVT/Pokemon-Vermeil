@@ -53,6 +53,7 @@ class TilemapRenderer
     attr_accessor :hd25_grid_row
     # Prioridad pintada propia (geometria). Independiente de cell_band (solo Z).
     attr_accessor :hd25_geom_priority
+    attr_accessor :hd25_test_tile_id
     # Copia estable de la prioridad pintada (pool extended recicla sprites).
     attr_accessor :hd25_painted_priority
     # true si este frame aplicamos angle/ox/oy de rampa (WallField tilt).
@@ -854,6 +855,7 @@ module Visual25D
       tile.zoom_y = by if tile.zoom_y != by
       invalidate_tile_zoom!(tile)
       tile.hd25_map_id = map.map_id
+      tile.hd25_test_tile_id = tile_id
       # No asignar geom aqui: tile.priority aun es del sprite reciclado.
       # refresh_tile_bitmap / MS lo escriben despues; geom_priority cae a eso.
       # Siempre anotar casilla: al activar 2.5D en un mapa entrado en 2D hace
