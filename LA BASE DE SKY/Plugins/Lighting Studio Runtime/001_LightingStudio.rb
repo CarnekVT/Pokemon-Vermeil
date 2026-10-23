@@ -318,6 +318,8 @@ module LightingStudioSpriteset
     @ls_chunk_resolution = LightingStudio::CHUNK_PX
     @ls_chunks = {}
     @ls_chunk_tick = 0
+    @ls_chunk_camera_signature = nil
+    @ls_chunk_camera_complete = false
     @ls_ambient_sprite = nil
     @ls_initial_pass = true
     ls_setup
@@ -325,6 +327,8 @@ module LightingStudioSpriteset
   end
 
   def ls_setup
+    @ls_chunk_camera_signature = nil
+    @ls_chunk_camera_complete = false
     return unless @map && @map.respond_to?(:map_id)
     LightingStudio.normal_reset_cache if LightingStudio.respond_to?(:normal_reset_cache)
     LightingStudioDayNight.reset_cache if defined?(LightingStudioDayNight)
@@ -616,6 +620,13 @@ module LightingStudioSpriteset
 
   def ls_update_chunks(mx, my, zx, zy)
     return if @ls_union_sources.empty?
+    visual25d = defined?(Visual25D) && Visual25D.enabled?
+    depth_stamp = visual25d ? Visual25D.projection_stamp : nil
+    signature = [mx, my, zx, zy, Graphics.width, Graphics.height, visual25d, depth_stamp]
+    # Las uniones estaticas no necesitan reposicionarse mientras la camara
+    # permanece quieta. No bloquear los builds iniciales pendientes.
+    return if @ls_chunk_camera_complete && @ls_chunk_camera_signature == signature
+    @ls_chunk_camera_signature = signature
     @ls_masks_built_this_frame = 0
     @ls_chunk_tick += 1
     needed = ls_visible_keys(mx, my, zx, zy)
@@ -662,6 +673,7 @@ module LightingStudioSpriteset
       entry[:sprite].visible = true
     end
 
+    @ls_chunk_camera_complete = pending.empty?
     if @ls_chunks.length > LightingStudio::MAX_CHUNKS
       candidates = @ls_chunks.keys.reject { |key| visible.key?(key) }
       candidates.sort_by! { |key| @ls_chunks[key][:tick] }
