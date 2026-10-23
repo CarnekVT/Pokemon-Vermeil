@@ -384,7 +384,10 @@ module LBDSAnimatedPropsSpriteset
     zy = TilemapRenderer::ZOOM_Y
     lbds_props_sync_visible(mx, my, zx, zy)
     return if @lbds_prop_sprites.empty?
-    stamp = [mx, my, zx, zy, Graphics.width, Graphics.height]
+    visual25d = defined?(Visual25D) && Visual25D.enabled?
+    depth_stamp = visual25d ? Visual25D.projection_stamp : nil
+    # Al cambiar de proyeccion no conservar coordenadas 2D cacheadas.
+    stamp = [mx, my, zx, zy, Graphics.width, Graphics.height, visual25d, depth_stamp]
     geometry_changed = @lbds_prop_geometry_stamp != stamp
     @lbds_prop_geometry_stamp = stamp
     now = System.uptime
@@ -430,15 +433,55 @@ module LBDSAnimatedPropsSpriteset
       end
       sx = origin[0] + cx * Game_Map::TILE_WIDTH * zx
       sy = origin[1] + cy * Game_Map::TILE_HEIGHT * zy
-      sprite.x = sx.round
-      sprite.y = sy.round
-      sprite.zoom_x = zx
-      sprite.zoom_y = zy
-      sprite.z = (priority == 0 ? 0 : sy.round + Game_Map::TILE_HEIGHT * (priority + 1) + 1) +
-                 [p[:layer], 5].min + (track == :parallel ? 1 : 0)
-      sprite.visible = (sx + run * Game_Map::TILE_WIDTH * zx > 0 &&
-                        sy + Game_Map::TILE_HEIGHT * zy > 0 &&
-                        sx < Graphics.width && sy < Graphics.height)
+      if visual25d
+        cell_y = p[:y] + cy
+        row = Visual25D.grid_row_for_map_cell(@map, cell_y)
+        if priority == 0
+          top = Visual25D.row_top_any(row)
+          bottom = Visual25D.row_top_any(row + 1)
+          scale = Visual25D.row_width_scale_any(row + 1)
+          taper = Visual25D.row_taper(row)
+        else
+          # Misma base de columna y profundidad Z que un tile raised.
+          base_row = row + priority - 1
+          feet = Visual25D.row_top_any(base_row + 1)
+          unit = Visual25D.row_unit(base_row)
+          unit = Visual25D.vertical_unit_at(sy + priority * Game_Map::TILE_HEIGHT) if unit <= 0
+          top = (feet - priority * unit).round
+          bottom = (feet - (priority - 1) * unit).round
+          scale = Visual25D.row_width_scale_any(base_row)
+          taper = 1.0
+        end
+        sprite.x = Visual25D.project_x(sx, scale)
+        sprite.y = top
+        new_zx = zx * scale
+        new_zy = [bottom - top, 1].max.to_f / 32.0
+        sprite.zoom_x = new_zx if (sprite.zoom_x - new_zx).abs > 0.001
+        sprite.zoom_y = new_zy if (sprite.zoom_y - new_zy).abs > 0.001
+        if sprite.respond_to?(:taper=) && sprite.respond_to?(:taper)
+          sprite.taper = taper if (sprite.taper.to_f - taper).abs > 0.001
+        end
+        base_z = ((row + priority + 1) * TilemapRenderer::DISPLAY_TILE_HEIGHT) -
+                 (Visual25D.row_offset || 0) + 1 + priority
+        sprite.z = (priority == 0 ? 0 : Visual25D.raised_tile_z(base_z)) +
+                   [p[:layer], 5].min + (track == :parallel ? 1 : 0)
+        sprite.visible = (sprite.x + run * 32 * new_zx > 0 &&
+                          sprite.y + 32 * new_zy > 0 &&
+                          sprite.x < Graphics.width && sprite.y < Graphics.height)
+      else
+        if sprite.respond_to?(:taper=) && sprite.respond_to?(:taper)
+          sprite.taper = 1.0 if (sprite.taper.to_f - 1.0).abs > 0.001
+        end
+        sprite.x = sx.round
+        sprite.y = sy.round
+        sprite.zoom_x = zx
+        sprite.zoom_y = zy
+        sprite.z = (priority == 0 ? 0 : sy.round + Game_Map::TILE_HEIGHT * (priority + 1) + 1) +
+                   [p[:layer], 5].min + (track == :parallel ? 1 : 0)
+        sprite.visible = (sx + run * Game_Map::TILE_WIDTH * zx > 0 &&
+                          sy + Game_Map::TILE_HEIGHT * zy > 0 &&
+                          sx < Graphics.width && sy < Graphics.height)
+      end
     end
   end
 

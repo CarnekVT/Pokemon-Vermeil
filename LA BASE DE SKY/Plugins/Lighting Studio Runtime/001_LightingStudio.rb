@@ -422,7 +422,22 @@ module LightingStudioSpriteset
     if zy != 1
       sy = (sy - Graphics.height / 2) * zy + Graphics.height / 2
     end
+    if defined?(Visual25D) && Visual25D.enabled?
+      scale = Visual25D.width_scale_at(sy)
+      return [Visual25D.project_x(sx, scale), Visual25D.project_y(sy)]
+    end
     [sx.round, sy.round]
+  end
+
+  # Retorna escalas de suelo X/Y para ajustar tanto luz circular como bloque.
+  # No altera la oscuridad ambiental de pantalla completa.
+  def ls_v25d_scales(raw_y, height=0)
+    return [1.0, 1.0] unless defined?(Visual25D) && Visual25D.enabled?
+    mid_y = raw_y + height / 2.0
+    sx = Visual25D.width_scale_at(mid_y)
+    sy = height > 0 ? (Visual25D.project_y(raw_y + height) - Visual25D.project_y(raw_y)) / height.to_f :
+                      Visual25D.scale_at(mid_y)
+    return [sx, sy]
   end
 
   def ls_visible_keys(mx, my, zx, zy)
@@ -614,8 +629,11 @@ module LightingStudioSpriteset
         sx, sy = ls_world_screen(world_x, world_y, mx, my, zx, zy)
         entry[:sprite].x = sx
         entry[:sprite].y = sy
-        entry[:sprite].zoom_x = zx * LightingStudio::CHUNK_WORLD / entry[:bitmap].width.to_f
-        entry[:sprite].zoom_y = zy * LightingStudio::CHUNK_WORLD / entry[:bitmap].height.to_f
+        raw_y = world_y - my
+        raw_y = (raw_y - Graphics.height / 2.0) * zy + Graphics.height / 2.0 if zy != 1
+        sx_scale, sy_scale = ls_v25d_scales(raw_y, zy * LightingStudio::CHUNK_WORLD)
+        entry[:sprite].zoom_x = zx * sx_scale * LightingStudio::CHUNK_WORLD / entry[:bitmap].width.to_f
+        entry[:sprite].zoom_y = zy * sy_scale * LightingStudio::CHUNK_WORLD / entry[:bitmap].height.to_f
         entry[:sprite].visible = true
         entry[:tick] = @ls_chunk_tick
       else
@@ -636,8 +654,11 @@ module LightingStudioSpriteset
       sx, sy = ls_world_screen(world_x, world_y, mx, my, zx, zy)
       entry[:sprite].x = sx
       entry[:sprite].y = sy
-      entry[:sprite].zoom_x = zx * LightingStudio::CHUNK_WORLD / entry[:bitmap].width.to_f
-      entry[:sprite].zoom_y = zy * LightingStudio::CHUNK_WORLD / entry[:bitmap].height.to_f
+      raw_y = world_y - my
+      raw_y = (raw_y - Graphics.height / 2.0) * zy + Graphics.height / 2.0 if zy != 1
+      sx_scale, sy_scale = ls_v25d_scales(raw_y, zy * LightingStudio::CHUNK_WORLD)
+      entry[:sprite].zoom_x = zx * sx_scale * LightingStudio::CHUNK_WORLD / entry[:bitmap].width.to_f
+      entry[:sprite].zoom_y = zy * sy_scale * LightingStudio::CHUNK_WORLD / entry[:bitmap].height.to_f
       entry[:sprite].visible = true
     end
 
@@ -725,8 +746,11 @@ module LightingStudioSpriteset
     @ls_sprites.each do |sprite, entry|
       size, energy = LightingStudio.pulse_values(entry[:pulse], now)
       sx, sy = ls_world_screen(entry[:cx], entry[:cy], mx, my, zx, zy)
-      sprite.zoom_x = zx * size * entry[:w] / sprite.bitmap.width.to_f
-      sprite.zoom_y = zy * size * entry[:h] / sprite.bitmap.height.to_f
+      raw_y = entry[:cy] - my
+      raw_y = (raw_y - Graphics.height / 2.0) * zy + Graphics.height / 2.0 if zy != 1
+      sx_scale, sy_scale = ls_v25d_scales(raw_y)
+      sprite.zoom_x = zx * sx_scale * size * entry[:w] / sprite.bitmap.width.to_f
+      sprite.zoom_y = zy * sy_scale * size * entry[:h] / sprite.bitmap.height.to_f
       scheduled = defined?(LightingStudioDayNight) ?
         LightingStudioDayNight.schedule_factor(entry[:schedule]) : 1.0
       if entry[:schedule]['enabled']==true

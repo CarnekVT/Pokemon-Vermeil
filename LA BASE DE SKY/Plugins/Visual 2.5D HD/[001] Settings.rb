@@ -37,16 +37,16 @@ module Visual25D
     # hay perspectiva. Al inclinarla, la fila del jugador conserva su tamano y lo
     # que se reparte es el resto: el fondo se encoge (y por tanto se ve mas lejos)
     # y el primer plano se agranda.
-    TILT_DEGREES = 40
+    TILT_DEGREES = 27
     MAX_TILT_DEGREES = 50
 
     # Modelo de proyeccion del suelo (solo Ruby; sin Model3D del MK).
-    #   :classic — perfil lineal (DEFAULT; look estable 3.0.x).
+    #   :classic — perfil conservador y economico, preset compatible 2.5D.
     #   :camera  — escala ~ 1/profundidad + FOV. v3.0.43: pitch soft-saturado
     #              (antes tan(tilt)>1 → depth negativa → shape~6x, look roto).
     #              Probar en menú debug; default sigue classic.
     # raw_unproject dual (log + tramo lineal bajo clamp).
-    PROJECTION_MODEL = :camera
+    PROJECTION_MODEL = :classic
     # FOV vertical: suaviza la curva :camera (ancho = menos drama).
     CAMERA_FOV = 55
 
@@ -55,7 +55,7 @@ module Visual25D
     # lateralmente un elemento alto de la casilla que ocupa: a 1.0 un edificio de
     # tres pisos junto al borde de la pantalla se despega bastante de su base.
     # Entre 0.2 y 0.4 da profundidad sin que se noten esas separaciones.
-    VANISHING_STRENGTH = 0.4
+    VANISHING_STRENGTH = 0.25
 
     # El suelo es un trapecio por fila. Los vecinos encajan (misma arista),
     # pero el borde vertical es recto y la escala es curva: se ve un quiebro
@@ -66,7 +66,7 @@ module Visual25D
     # grafico con alpha) va entera en un solo trapecio. Partir solo ese
     # tile y dejar el de al lado en mitades abre un hueco negro en la junta.
     # Si el FPS baja, vuelve a 1.
-    GROUND_SLICES = 2
+    GROUND_SLICES = 1
 
     # Suelo opaco de una fila de pantalla = un trapecio, no un sprite por
     # casilla. Apagado: al ocultar el tile antes de que la fila cubra el
@@ -78,7 +78,7 @@ module Visual25D
 
     # Caída del horizonte, en píxeles, en el borde de arriba de la pantalla.
     # 0 = suelo como hasta 3.2. El centro (el jugador) no se mueve.
-    HORIZON_CURVE = 14
+    HORIZON_CURVE = 0
 
     # Desenfoque de las franjas de arriba y de abajo. Apagado: sin shader
     # solo emborrona una captura vieja y mancha el suelo.
@@ -110,8 +110,8 @@ module Visual25D
     # Es el freno de rendimiento: cerca del horizonte la perspectiva pediria
     # infinitas filas, asi que al llegar a este tope se deja de recentrar la
     # camara en el jugador antes que dejar los bordes sin dibujar.
-    MAX_MARGIN_COLUMNS = 12
-    MAX_MARGIN_ROWS = 12
+    MAX_MARGIN_COLUMNS = 10
+    MAX_MARGIN_ROWS = 10
 
     # Cuanto se levanta un bordillo por cada tile de altura, como fraccion del
     # alto de la fila en la que se apoya.
@@ -161,7 +161,7 @@ module Visual25D
     # alto se ve. A 0 se quedan tumbados sobre el suelo como hasta ahora, a 1 se
     # levantan del todo (1/cos del angulo, un 56% mas altos a 50 grados).
     # 0.4: paredes/arboles dejan de verse planos a TILT_DEGREES 50.
-    VERTICAL_GAIN = 0.5
+    VERTICAL_GAIN = 0.35
 
     # Pixeles que se levanta un tile por cada nivel de prioridad. Es la
     # exageracion de altura, aparte de lo que ya sube por el angulo. A 0 los
