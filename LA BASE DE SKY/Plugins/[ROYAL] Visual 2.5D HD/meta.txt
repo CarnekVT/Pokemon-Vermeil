@@ -1,0 +1,6 @@
+name: "Visual 2.5D HD"
+version: "3.3.0"
+essentials: ["21.1"]
+credits: ["Skyflyer"]
+last: "true"
+dependencies: [[:optional, "MakerStudio", "1.0"], [:optional, "Caruban's Dynamic Darkness", "1.0"]]

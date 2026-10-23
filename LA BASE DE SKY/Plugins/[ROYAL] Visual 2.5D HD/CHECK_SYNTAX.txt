@@ -1,0 +1,2 @@
+ruby -c: sintaxis OK en los 14 archivos Ruby.
+Sin validacion ingame ni pruebas de FPS.
