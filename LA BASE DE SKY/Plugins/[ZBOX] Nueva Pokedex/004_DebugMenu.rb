@@ -19,22 +19,22 @@ MenuHandlers.add(:debug_menu, :new_pokedex_hub, {
       break if choice < 0
       case choice
       when 0
-        pbOpenNewPokedex(0)
+        pbOpenNewPokedex
       when 1
         NewPokedex.reload_data!
         pbMessage(_INTL("¡Datos de Dex JSONs recargados con éxito!"))
       when 2
         if $player && $player.pokedex
-          num = defined?(Settings::DEXES_COUNT) ? Settings::DEXES_COUNT : 4
-          (0...num).each { |i| $player.pokedex.unlock(i) rescue nil }
+          NuevaPokedex.enabled_dexes.each { |i| $player.pokedex.unlock(i) }
           pbMessage(_INTL("Todas las dexes regionales han sido desbloqueadas."))
         end
       when 3
         if $player && $player.pokedex
           species_list = NewPokedex.enabled_species_list
           species_list.each do |sp|
-            $player.pokedex.set_seen(sp) rescue nil
-            $player.pokedex.set_owned(sp) rescue nil
+            base, form = NuevaPokedex.entry_base_and_form(sp)
+            $player.pokedex.register(base, 0, form, false, false)
+            $player.pokedex.set_owned(base, false)
           end
           pbMessage(_INTL("¡Se han registrado {1} especies como vistas y atrapadas!", species_list.length))
         end
