@@ -28,24 +28,13 @@ module NewPokedexConfig
     :color_text_muted => Color.new(170, 175, 185),
     :color_seen => Color.new(120, 180, 255),
     :color_owned => Color.new(80, 230, 120),
-    # New optional features
-    # New optional features
+    # Opciones visuales
     :show_search_bar => false,   # toggle quick‑search input in the header
     :show_form_names => true,   # display form name instead of F-label
     :use_shiny_toggle => true,   # enable per‑Pokémon shiny toggle
     :use_supershiny_toggle => true,   # enable supershiny toggle
     :forms_visual_only => false,   # when true, form selection is preview only
     :enable_back_sprite_button => true,   # enable back‑sprite button in forms/shiny view
-    :background_image => nil,    # path to optional background PNG relative to Graphics/UI
-    :use_placeholder_bg => true,
-    :use_placeholder_header => true,
-    :use_placeholder_list_bg => true,
-    :use_placeholder_scrollbar => true,
-    :use_placeholder_sprite_bg => true,
-    :hide_location_sprite => false,   # hide Pokémon sprite in location view
-    :show_form_names => true,   # display form name instead of F-label
-    :use_shiny_toggle => true,   # enable per‑Pokémon shiny toggle
-    :use_supershiny_toggle => true,   # enable supershiny toggle
     :background_image => nil,    # path to optional background PNG relative to Graphics/UI
     :use_placeholder_bg => true,
     :use_placeholder_header => true,
@@ -72,10 +61,6 @@ DEX_JSON_DIR     = CONFIG[:dex_json_dir]
 
   
   
-  COLOR_TEXT_MAIN   = CONFIG[:color_text_main]
-  COLOR_TEXT_MUTED  = CONFIG[:color_text_muted]
-  COLOR_SEEN        = CONFIG[:color_seen]
-  COLOR_OWNED       = CONFIG[:color_owned]
 
   # Helper to fetch Dex name with fallback
   def self.dex_name(dex_id)
