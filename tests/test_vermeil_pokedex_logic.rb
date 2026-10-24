@@ -29,6 +29,12 @@ module GameData
     def self.each_species
       [:BULBASAUR,:RATTATA,:RATICATE].each{|id|yield try_get(id)}
     end
+    def self.each_form_for_species(id)
+      if id == :RATTATA
+        yield get_species_form(id, 1)
+        yield get_species_form(id, 2)
+      end
+    end
   end
 end
 require_relative "../LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/000_Config"
@@ -62,7 +68,7 @@ Dir.chdir(File.expand_path("../LA BASE DE SKY",__dir__)) do
     def initialize;@seen_forms=false;end
     def seen?(base);base==:RATTATA;end
     def owned?(base);base==:RATTATA;end
-    def seen_form?(base,gender,form);base==:RATTATA && gender==0 && form==1 && @seen_forms;end
+    def seen_form?(base,gender,form);base==:RATTATA && gender==0 && form==2 || (base==:RATTATA && gender==0 && form==1 && @seen_forms);end
   end
   class DemoPlayer
     attr_reader :pokedex
@@ -72,5 +78,39 @@ Dir.chdir(File.expand_path("../LA BASE DE SKY",__dir__)) do
   check(!NuevaPokedex.slot_seen?(:RATTATA_1),"La forma no se filtra como vista por ver solo la base")
   $player.pokedex.seen_forms=true
   check(NuevaPokedex.slot_seen?(:RATTATA_1),"Se registra forma vista con Essentials")
+  scene=PokemonPokedexNueva_Scene.new(9)
+  scene.instance_variable_set(:@current_index,idx)
+  check(scene.collect_form_list==[1],"Un slot propio de forma no abre selector de formas")
+  base_index=(0...model.species_count).find{|i|model.species_at(i)==:RATTATA}
+  check(!base_index.nil?,"El catálogo tiene la especie base")
+  scene.instance_variable_set(:@current_index,base_index)
+  check(scene.collect_form_list==[0,2],"El selector excluye formas que poseen slot propio")
+  base_entry=scene.instance_variable_get(:@model).data_for(base_index)
+  scene.store_display_form(base_entry,2)
+  check(scene.selected_display_form(base_entry)==2,"Forma elegida persiste en la lista")
+  changed=scene.effective_entry(base_entry)
+  check(changed[:types]==[:DARK] && changed[:number]==base_entry[:number],
+        "Forma elegida actualiza ficha sin alterar el número regional")
+
+  module GameData
+    class Encounter
+      def self.each_with_species(species, version)
+        yield Struct.new(:map).new(14) if species == :RATTATA
+      end
+    end
+    class MapMetadata
+      def self.try_get(id)
+        return nil unless id == 14
+        obj = Struct.new(:name) do
+          def has_flag?(_flag);false;end
+        end
+        obj.new("Ruta de prueba")
+      end
+    end
+  end
+  check(scene.locations_for_species(:RATTATA)==["Ruta de prueba"],
+        "Ubicaciones desde los encuentros reales")
+  check(scene.locations_for_species(:BULBASAUR)==[],
+        "Especies sin ubicación devuelven lista vacía para mostrar Desconocida")
 end
 puts "Pokédex logic: OK"
