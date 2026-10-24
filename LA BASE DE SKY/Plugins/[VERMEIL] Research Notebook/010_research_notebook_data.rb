@@ -965,7 +965,7 @@ module ResearchNotebook
       when 0.75 then "3/4"
       else drain.to_s
       end
-      return _INTL("Pierde {1} de sus PS máximos al final de cada turno.", fraction)
+      return ResearchNotebook.t("Pierde {1} de sus PS máximos al final de cada turno.", fraction)
     end
 
     def golden_power_raw(species)
