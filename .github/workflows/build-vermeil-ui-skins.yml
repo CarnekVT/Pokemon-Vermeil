@@ -1,0 +1,71 @@
+name: Build Vermeil UI skin assets
+on:
+  push:
+    branches:
+      - new-MK-for-2.5D-Testeo
+    paths:
+      - DevTools/UI_Skins/generar_plantillas_ui.py
+      - .github/workflows/build-vermeil-ui-skins.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          ref: new-MK-for-2.5D-Testeo
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Generate the original editable skin kit
+        run: python DevTools/UI_Skins/generar_plantillas_ui.py
+      - name: Copy in-game PNGs and editable templates into repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          kit="DevTools/UI_Skins/Vermeil_UI_Skin_Kit"
+          mkdir -p "LA BASE DE SKY/Graphics/UI/Vermeil"
+          cp -a "$kit/Graphics/UI/Vermeil/." "LA BASE DE SKY/Graphics/UI/Vermeil/"
+          mkdir -p "DevTools/UI_Skins/Plantillas_con_guias" "DevTools/UI_Skins/Vista_previa"
+          cp -a "$kit/Plantillas_con_guias/." "DevTools/UI_Skins/Plantillas_con_guias/"
+          cp -a "$kit/Vista_previa/." "DevTools/UI_Skins/Vista_previa/"
+          cp "$kit/LEEME_EDITAR.md" "DevTools/UI_Skins/LEEME_EDITAR.md"
+          cp "$kit/MEDIDAS_Y_CAPAS.json" "DevTools/UI_Skins/MEDIDAS_Y_CAPAS.json"
+      - name: Verify native resolutions and asset count
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import json
+          metadata=json.loads(Path('DevTools/UI_Skins/MEDIDAS_Y_CAPAS.json').read_text(encoding='utf-8'))
+          for group in ('NewPokedex','ResearchNotebook'):
+              for name, definition in metadata[group].items():
+                  path=Path('LA BASE DE SKY/Graphics/UI/Vermeil')/group/(name+'.png')
+                  assert path.is_file(), f'Missing {path}'
+                  with Image.open(path) as im:
+                      assert im.size == (definition['width'],definition['height']), f'Invalid {path}: {im.size}'
+          assert len(list(Path('LA BASE DE SKY/Graphics/UI/Vermeil').rglob('*.png'))) >= 21
+          print('21 in-game PNGs and metadata verified.')
+          PY
+      - name: Commit PNGs and design templates to current branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "LA BASE DE SKY/Graphics/UI/Vermeil/" "DevTools/UI_Skins/Plantillas_con_guias/" "DevTools/UI_Skins/Vista_previa/" "DevTools/UI_Skins/LEEME_EDITAR.md" "DevTools/UI_Skins/MEDIDAS_Y_CAPAS.json"
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(ui): add 21 editable New Pokedex and Research Notebook PNGs [skip ci]"
+            git push origin HEAD:refs/heads/new-MK-for-2.5D-Testeo
+          else
+            echo "All graphics already in repository."
+          fi
