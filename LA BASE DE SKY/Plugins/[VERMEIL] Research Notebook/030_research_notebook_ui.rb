@@ -505,9 +505,10 @@ module ResearchNotebook
     end
 
     def species_identity_known?(entry)
-      # Un slot de forma alternativa no se revela por avistar solamente su base.
+      base, form = ResearchNotebook::Repository.species_base_and_form(entry)
       if defined?(NuevaPokedex) && NuevaPokedex.respond_to?(:slot_seen?)
         return true if NuevaPokedex.slot_seen?(catalog_slot_id(entry))
+        return false if form.to_i > 0
       end
       return entry_known?(entry)
     end
@@ -685,6 +686,12 @@ module ResearchNotebook
         draw_arcane_focus_info(bmp, base)
       else
         draw_golden_focus_info(bmp, entry)
+        if ResearchNotebook::Repository.golden_form_configured?(entry) &&
+           ResearchNotebook::Repository.golden_form_index(entry).nil? &&
+           species_identity_known?(entry)
+          draw_text(bmp, FOCUS_X + 50, FOCUS_Y + 228, FOCUS_W - 100, 17,
+                    _INTL("FORMA SIN DESTINO"), 10, RED, 1, true)
+        end
       end
     end
 
@@ -711,7 +718,7 @@ module ResearchNotebook
       form_seen = ResearchNotebook.progress.golden_form_seen?(base)
       form_used = ResearchNotebook.progress.golden_form_used?(base)
       draw_text(bmp, FOCUS_X + 18, y, FOCUS_W - 36, 16, _INTL("AFINIDAD ÁUREA"), 10, GOLDEN_2, 0, true)
-      gtype = ResearchNotebook::Repository.golden_type(base)
+      gtype = ResearchNotebook::Repository.golden_type(entry)
       if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
         draw_type_icons(bmp, [gtype], FOCUS_X + 18, y + 19, 68, 23)
       else
