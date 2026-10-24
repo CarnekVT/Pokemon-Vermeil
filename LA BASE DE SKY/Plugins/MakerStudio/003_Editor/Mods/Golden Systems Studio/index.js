@@ -1,6 +1,8 @@
 const PANEL_ID='golden-systems-studio';
 const SPECIES_PATH='Data/GoldenSystem/species.json';
 const MOVES_PATH='Data/GoldenSystem/golden_moves.json';
+const FORMS_PBS_PATH='PBS/golden_forms.txt';
+const MOVES_PBS_PATH='PBS/golden_moves.txt';
 const SETTINGS_PATH='Data/GoldenSystem/settings.json';
 const TRAINERS_PATH='Data/GoldenSystem/trainers.json';
 const ITEMS_PBS_PATH='PBS/items_golden_system.txt';
@@ -49,6 +51,60 @@ function parseSections(path,text){const lines=String(text??'').replace(/\r/g,'')
 async function readMaybe(ctx,path,fallback=''){try{return await ctx.fs.readProjectFile(path);}catch(_){return fallback;}}
 async function readJSON(ctx,path,fallback){try{const d=JSON.parse(await ctx.fs.readProjectFile(path));return d&&typeof d==='object'&&!Array.isArray(d)?d:fallback;}catch(_){return fallback;}}
 async function writeJSON(ctx,path,obj){await ctx.fs.writeProjectFile(path,JSON.stringify(obj,null,2)+'\n');}
+
+function goldenPBSSections(text){
+ const out={};let key=null;
+ for(const raw of String(text||'').split(/\r?\n/)){
+  const line=raw.trim();if(!line||line.startsWith('#')||line.startsWith(';'))continue;
+  const h=line.match(/^\[([^\]]+)\]$/);
+  if(h){key=h[1].trim().toUpperCase();out[key]??={};continue;}
+  if(key&&line.includes('=')){const pos=line.indexOf('=');out[key][line.slice(0,pos).trim().toLowerCase()]=line.slice(pos+1).trim();}
+ }
+ return out;
+}
+function goldenPBSEscape(value){return String(value??'').replace(/[\r\n]+/g,' ').trim();}
+const GOLD_STAT_ORDER=['HP','ATTACK','DEFENSE','SPECIAL_ATTACK','SPECIAL_DEFENSE','SPEED'];
+function overlayGoldenForms(doc,raw){
+ for(const [key,row] of Object.entries(goldenPBSSections(raw))){
+  const base=doc.species[key]??{};const gf={};
+  if(/^\d+$/.test(row.number||''))gf.number=Number(row.number);
+  if(row.name)gf.name=row.name;if(row.ability)gf.ability=row.ability;
+  if(row.types)gf.types=row.types.split(',').map(x=>x.trim()).filter(Boolean);
+  if(row.basestats){const vals=row.basestats.split(',');gf.baseStats={};GOLD_STAT_ORDER.forEach((k,i)=>{if(/^\d+$/.test((vals[i]||'').trim()))gf.baseStats[k]=Number(vals[i]);});}
+  if(Object.keys(gf).length)base.goldenForm={...(base.goldenForm||{}),...gf};
+  doc.species[key]=base;
+ }return doc;
+}
+function overlayGoldenMoves(doc,raw){
+ for(const [key,row] of Object.entries(goldenPBSSections(raw))){
+  if(key.split('|').length<2)continue;
+  const data={...(doc.moves[key]||{})};
+  for(const [k,v] of Object.entries(row)){
+   const dest={form:'form',name:'name',type:'type',power:'power',accuracy:'accuracy',functioncode:'functionCode',description:'description',effect:'effect'}[k];
+   if(!dest)continue;data[dest]=['form','power','accuracy'].includes(dest)?Number(v):v;
+  }doc.moves[key]=data;
+ }return doc;
+}
+function emitGoldenForms(doc){
+ const lines=['# Golden Forms — editables desde Golden Systems Studio o a mano',
+ '# [ESPECIE] / [ESPECIE,FORMA_ORIGEN]; Number = forma transformada'];
+ for(const [key,cfg] of Object.entries(doc.species||{}).sort(([a],[b])=>a.localeCompare(b))){
+  const gf=cfg?.goldenForm;if(!gf||typeof gf!=='object'||!Object.keys(gf).length)continue;
+  lines.push('','['+key+']');
+  for(const [k,label] of [['number','Number'],['name','Name'],['ability','Ability']])if(gf[k]!==undefined&&gf[k]!==null&&gf[k]!=='')lines.push(label+' = '+goldenPBSEscape(gf[k]));
+  if(gf.types?.length)lines.push('Types = '+gf.types.map(goldenPBSEscape).join(','));
+  if(gf.baseStats&&Object.keys(gf.baseStats).length)lines.push('BaseStats = '+GOLD_STAT_ORDER.map(k=>gf.baseStats[k]??'').join(','));
+ }return lines.join('\n')+'\n';
+}
+function emitGoldenMoves(doc){
+ const lines=['# Golden Moves — editables desde Golden Systems Studio o a mano',
+ '# [ESPECIE|MOVIMIENTO] o [ESPECIE|MOVIMIENTO|FORMA_ORIGEN]'];
+ const keys={form:'Form',name:'Name',type:'Type',power:'Power',accuracy:'Accuracy',functionCode:'FunctionCode',description:'Description',effect:'Effect'};
+ for(const [key,row] of Object.entries(doc.moves||{}).sort(([a],[b])=>a.localeCompare(b))){
+  lines.push('','['+key+']');for(const [k,label] of Object.entries(keys))if(row[k]!==undefined&&row[k]!==null&&row[k]!=='')lines.push(label+' = '+goldenPBSEscape(row[k]));
+ }return lines.join('\n')+'\n';
+}
+
 function normCD(doc){if(!doc||typeof doc!=='object'||Array.isArray(doc))doc={};if(!doc.species||typeof doc.species!=='object'||Array.isArray(doc.species))doc.species={};if(!doc.moves||typeof doc.moves!=='object'||Array.isArray(doc.moves))doc.moves={};if(!doc.abilities||typeof doc.abilities!=='object'||Array.isArray(doc.abilities))doc.abilities={};return doc;}
 function normSpeciesDoc(doc){if(!doc||typeof doc!=='object'||Array.isArray(doc))doc={};doc.schema=1;if(!doc.species||typeof doc.species!=='object'||Array.isArray(doc.species))doc.species={};return doc;}
 function normMovesDoc(doc){if(!doc||typeof doc!=='object'||Array.isArray(doc))doc={};doc.schema=1;if(!doc.moves||typeof doc.moves!=='object'||Array.isArray(doc.moves))doc.moves={};return doc;}
@@ -249,8 +305,14 @@ async function render(ctx,host){
   async function previewPaths(e,female){const variants=[];for(const n of [e.id,lower(e.id)]){if(e.form>0){if(female)variants.push(`${n}_${e.form}_female`,`${n}_female_${e.form}`);variants.push(`${n}_${e.form}`);}if(female)variants.push(`${n}_female`);variants.push(n);}const base=[],ico=[];variants.forEach(v=>{base.push(`Graphics/Pokemon/Front/${v}.png`,`Graphics/Pokemon/${v}.png`,`Graphics/Battlers/${v}.png`);ico.push(`Graphics/Pokemon/Icons/${v}.png`,`Graphics/Icons/${v}.png`);});const gold=[];const num=targetForm(e);for(const n of [e.id,lower(e.id)]){if(num>0){if(female)gold.push(`Graphics/Pokemon/Front/${n}_${num}_female.png`,`Graphics/Pokemon/Front/${n}_female_${num}.png`,`Graphics/Pokemon/${n}_${num}_female.png`);gold.push(`Graphics/Pokemon/Front/${n}_${num}.png`,`Graphics/Pokemon/${n}_${num}.png`,`Graphics/Battlers/${n}_${num}.png`);}}return{base:await firstPath(ctx,base),gold:await firstPath(ctx,gold),icon:await firstPath(ctx,ico)};}
   async function updatePreview(){for(const u of Object.values(st.preview)){if(u)try{URL.revokeObjectURL(u);}catch(_){}}st.preview={base:null,gold:null,icon:null};if(!st.selected)return;const p=await previewPaths(st.selected,st.female);st.preview.base=await loadImage(ctx,p.base);st.preview.gold=await loadImage(ctx,p.gold);st.preview.icon=await loadImage(ctx,p.icon);}
   async function select(e,opts={}){if(!e)return;captureCurrentDraft();st.selected=e;st.selectedMove=opts.keepMove?st.selectedMove:null;st.scrollSelectedIntoView=opts.scroll!==false;if(autoFemale(e))st.female=true;await updatePreview();await draw();body.scrollTop=0;if(st.scrollSelectedIntoView){setTimeout(()=>{list.querySelector('.gss-row.active')?.scrollIntoView?.({block:'nearest'});st.scrollSelectedIntoView=false;},0);}}
-  async function persistSpecies(){await writeJSON(ctx,SPECIES_PATH,st.speciesDoc);}
-  async function persistMoves(){await writeJSON(ctx,MOVES_PATH,st.movesDoc);}
+  async function persistSpecies(){
+    await ctx.fs.writeProjectFile(FORMS_PBS_PATH,emitGoldenForms(st.speciesDoc));
+    await writeJSON(ctx,SPECIES_PATH,st.speciesDoc);
+  }
+  async function persistMoves(){
+    await ctx.fs.writeProjectFile(MOVES_PBS_PATH,emitGoldenMoves(st.movesDoc));
+    await writeJSON(ctx,MOVES_PATH,st.movesDoc);
+  }
   function moveKey(e,m){return`${e.id}|${m}${e.form>0?'|'+e.form:''}`;}
   function baseMoveKey(e,m){return`${e.id}|${m}`;}
   function moveEntry(e,m){return st.movesDoc.moves[moveKey(e,m)]||st.movesDoc.moves[baseMoveKey(e,m)]||null;}
@@ -389,6 +451,6 @@ setTimeout(()=>body.querySelector('.gss-move-row.active')?.scrollIntoView?.({blo
   document.addEventListener('keydown',ev=>{if(ev.key==='F11'){ev.preventDefault();setFull(!st.fullscreen);}else if(ev.key==='Escape'&&!tutorialModal.hidden){ev.preventDefault();closeTutorial();}else if(ev.key==='Escape'&&st.fullscreen){ev.preventDefault();setFull(false);}else if((ev.key==='ArrowDown'||ev.key==='ArrowUp')&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName)){ev.preventDefault();cycle(ev.key==='ArrowDown'?1:-1);}});
   async function migrate(){let ns=0,nm=0;for(const e of st.entries){if(st.speciesDoc.species[keyFor(e)])continue;const x={};if(e.legacy.goldenType)x.goldenType=upper(e.legacy.goldenType);if(e.legacy.goldenTypeReplace)x.goldenTypeReplace=upper(e.legacy.goldenTypeReplace);if(Number(e.legacy.goldenForm)>0)x.goldenForm={number:Number(e.legacy.goldenForm)};if(Object.keys(x).length){st.speciesDoc.species[keyFor(e)]=x;ns++;}}const legacyMoves=await readMaybe(ctx,'PBS/golden_moves.txt','');let current=null;for(const raw of legacyMoves.replace(/\r/g,'').split('\n')){const line=raw.replace(/\s*#.*/,'').trim();if(!line)continue;const h=line.match(/^\[([^\]]+)\]$/);if(h){const parts=h[1].split(',').map(x=>x.trim());current=parts.length>=2?`${upper(parts[0])}|${upper(parts[1])}${parts[2]?`|${Number(parts[2])||0}`:''}`:null;if(current&&!st.movesDoc.moves[current])st.movesDoc.moves[current]={};continue;}if(!current||!line.includes('='))continue;const pos=line.indexOf('='),k=lower(line.slice(0,pos).trim()),v=line.slice(pos+1).trim(),row=st.movesDoc.moves[current];if(k==='form')row.form=Number(v)||0;else if(k==='name')row.name=v;else if(k==='type')row.type=upper(v);else if(k==='power')row.power=Number(v)||0;else if(k==='accuracy')row.accuracy=Number(v)||0;else if(k==='description')row.description=v;else if(k==='effect')row.effect=v;nm++;}await persistSpecies();await persistMoves();ctx.ui.showToast(ns||nm?`Migración JSON: ${ns} perfiles, ${nm} campos de moves`:'No había datos legacy que migrar',ns||nm?'success':'info');await load();}
   tutorialBtn.onclick=()=>openTutorial();host.querySelector('[data-tutorial-close]').onclick=closeTutorial;tutorialModal.onclick=ev=>{if(ev.target===tutorialModal)closeTutorial();};host.querySelectorAll('[data-tab]').forEach(b=>b.onclick=async()=>{captureCurrentDraft();st.tab=b.dataset.tab;if(st.tab==='moves'&&!st.effectsPluginScanned){st.effects=await scanEffectCatalog(ctx,st.moves,true);st.effectsLoaded=true;st.effectsPluginScanned=true;}draw();body.scrollTop=0;});host.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{st.filter=b.dataset.filter;host.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));drawList();});sortSel.onchange=()=>{st.sort=sortSel.value||'pbs';drawList();};search.oninput=drawList;full.onclick=()=>setFull(!st.fullscreen);host.querySelector('[data-reload]').onclick=()=>{captureCurrentDraft();load();};host.querySelector('[data-migrate]').onclick=migrate;
-  async function load(){const keep=st.selected?keyFor(st.selected):null,cd=normCD(await readJSON(ctx,CHANGEDEX_PATH,{}));st.types=await scanTypes(ctx);st.entries=await scanSpecies(ctx,cd);st.family=buildFamily(st.entries);st.moves=await scanMoves(ctx,cd);st.abilities=await scanAbilities(ctx,cd);if(!st.effectsLoaded){st.effects=await scanEffectCatalog(ctx,st.moves,false);st.effectsLoaded=true;}st.trainerTypes=await scanTrainerTypes(ctx);st.items=await scanItems(ctx);st.speciesDoc=normSpeciesDoc(await readJSON(ctx,SPECIES_PATH,{}));for(const k of Object.keys(st.drafts.species||{})){if(sameSpeciesPayload(st.drafts.species[k],st.speciesDoc.species[k]||{}))delete st.drafts.species[k];}saveDrafts();st.movesDoc=normMovesDoc(await readJSON(ctx,MOVES_PATH,{}));st.settingsDoc=normSettingsDoc(await readJSON(ctx,SETTINGS_PATH,{schema:1,settings:{defaultActivationLimit:1,requireGoldenRing:false,powerBoost:3,powerPenalty:2,sameTypeMultiplier:1.2,formHPDrain:0.25}}));st.trainersDoc=normTrainersDoc(await readJSON(ctx,TRAINERS_PATH,{schema:2,trainers:{}}));st.selected=(keep&&st.entries.find(e=>keyFor(e)===keep))||st.entries[0]||null;if(st.selected&&autoFemale(st.selected))st.female=true;await updatePreview();await draw();}
+  async function load(){const keep=st.selected?keyFor(st.selected):null,cd=normCD(await readJSON(ctx,CHANGEDEX_PATH,{}));st.types=await scanTypes(ctx);st.entries=await scanSpecies(ctx,cd);st.family=buildFamily(st.entries);st.moves=await scanMoves(ctx,cd);st.abilities=await scanAbilities(ctx,cd);if(!st.effectsLoaded){st.effects=await scanEffectCatalog(ctx,st.moves,false);st.effectsLoaded=true;}st.trainerTypes=await scanTrainerTypes(ctx);st.items=await scanItems(ctx);st.speciesDoc=normSpeciesDoc(await readJSON(ctx,SPECIES_PATH,{}));st.speciesDoc=overlayGoldenForms(st.speciesDoc,await readMaybe(ctx,FORMS_PBS_PATH,''));for(const k of Object.keys(st.drafts.species||{})){if(sameSpeciesPayload(st.drafts.species[k],st.speciesDoc.species[k]||{}))delete st.drafts.species[k];}saveDrafts();st.movesDoc=normMovesDoc(await readJSON(ctx,MOVES_PATH,{}));st.movesDoc=overlayGoldenMoves(st.movesDoc,await readMaybe(ctx,MOVES_PBS_PATH,''));st.settingsDoc=normSettingsDoc(await readJSON(ctx,SETTINGS_PATH,{schema:1,settings:{defaultActivationLimit:1,requireGoldenRing:false,powerBoost:3,powerPenalty:2,sameTypeMultiplier:1.2,formHPDrain:0.25}}));st.trainersDoc=normTrainersDoc(await readJSON(ctx,TRAINERS_PATH,{schema:2,trainers:{}}));st.selected=(keep&&st.entries.find(e=>keyFor(e)===keep))||st.entries[0]||null;if(st.selected&&autoFemale(st.selected))st.female=true;await updatePreview();await draw();}
   await load();
 }
