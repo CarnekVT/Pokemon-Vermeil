@@ -32,7 +32,7 @@ module CarnekTranslateStudio
   def self.language_code=(code); @locale_for_qa = code; end
 end
 def _INTL(template, *args)
-  template.to_s.gsub(/\\{(\\d+)\\}/) { |token| args[$1.to_i - 1] || token }.to_s
+  template.to_s.gsub(/\{(\d+)\}/) { |token| args[$1.to_i - 1] || token }.to_s
 end
 
 Dir.chdir(File.expand_path("../LA BASE DE SKY", __dir__)) do
