@@ -19,10 +19,9 @@ module GoldenSystem
       return {} unless File.file?(path)
       result = {}
       name = nil
-      File.open(path, "rb") do |file|
+      File.open(path, "r:bom|utf-8") do |file|
         file.each_line.with_index(1) do |raw, line_number|
           line = raw.strip
-          line = line.sub(/\A\xEF\xBB\xBF/, "")
           next if line.empty? || line.start_with?("#", ";")
           if line =~ /\A\[([^\]]+)\]\z/
             name = $1.strip.upcase
