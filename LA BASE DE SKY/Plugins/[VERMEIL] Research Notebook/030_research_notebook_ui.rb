@@ -74,6 +74,7 @@ module ResearchNotebook
       @order_map = {}
       @display_number = {}
       @grid_signature = nil
+      @pending_grid_icons = []
       @species_generation = 0
       @focus_signature = nil
       @icon_base_zoom = {}
@@ -97,6 +98,7 @@ module ResearchNotebook
         focus = @sprites["pokemon"]
         focus.update if focus && focus.visible && focus.respond_to?(:update)
         update_gamefeel
+        render_next_grid_icons(2)
         break if update_input
       end
       close_animation if ResearchNotebook::Settings::ENABLE_OPEN_ANIMATION
@@ -160,7 +162,8 @@ module ResearchNotebook
       ResearchNotebook::Repository.arcane_data
       ResearchNotebook.progress.sync_party_unlocks!
 
-      resolve_type_sheet
+      # Los badges de tipos se dibujan como texto legible; no abrir
+      # spritesheets enormes antes de mostrar la Libreta.
       build_order_maps
       rebuild_sections
       rebuild_species
@@ -206,7 +209,9 @@ module ResearchNotebook
       end
 
       if @detail_open
-        if current_section == :golden
+        if Input.repeat?(Input::UP) || Input.repeat?(Input::DOWN)
+          move_detail_species(Input.repeat?(Input::UP) ? -1 : 1)
+        elsif current_section == :golden
           if Input.trigger?(Input::LEFT)
             change_detail_page(-1)
           elsif Input.trigger?(Input::RIGHT)
@@ -237,6 +242,17 @@ module ResearchNotebook
         cycle_sort
       end
       return false
+    end
+
+    def move_detail_species(direction)
+      return if @species.empty?
+      next_index = @index + direction
+      return unless next_index.between?(0, @species.length - 1)
+      @index = next_index
+      @detail_page = 0
+      pbPlayCursorSE if defined?(pbPlayCursorSE)
+      # No cerrar la ficha para cambiar de especie.
+      refresh
     end
 
     def current_section
@@ -610,7 +626,7 @@ module ResearchNotebook
         tab_drawn = (@sections.length == 2 && @skin && @skin.draw(bmp, tab_key, xx, 8))
         bmp.fill_rect(xx, 8, w - 4, 37, active ? color : Color.new(87, 70, 55)) if !tab_drawn
         bmp.fill_rect(xx, 42, w - 4, 3, color) if active
-        draw_text(bmp, xx + 4, 13, w - 12, 26, label, 12, active ? INK : WHITE, 1, true)
+        draw_text(bmp, xx + 4, 17, w - 12, 22, label, 12, WHITE, 1, true)
       end
       subtitle = current_section == :arcane ? _INTL("Notas sobre energía arcana") : _INTL("Notas sobre energía áurea")
       draw_text(bmp, 20, 38, 132, 15, subtitle, 10, Color.new(218, 205, 184), 0, false)
@@ -735,7 +751,8 @@ module ResearchNotebook
       else
         draw_text(bmp, FOCUS_X + 18, y + 19, 74, 23, "????", 15, MUTED, 0, true)
       end
-      draw_text(bmp, FOCUS_X + 18, y + 58, 116, 15, _INTL("FORMA DORADA"), 9, MUTED, 0, true)
+      draw_text(bmp, FOCUS_X + 18, y + 54, 138, 15, _INTL("AFINIDAD ÁUREA"), 9, MUTED, 0, true)
+      draw_text(bmp, FOCUS_X + 170, y + 54, 102, 15, _INTL("ESTADO"), 9, MUTED, 0, true)
       form_text = if !ResearchNotebook::Repository.golden_form_configured?(entry)
                     _INTL("NO POSEE")
                   elsif form_used
@@ -747,7 +764,7 @@ module ResearchNotebook
                   else
                     _INTL("SIN OBSERVAR")
                   end
-      draw_status_chip(bmp, FOCUS_X + 166, y + 54, 104, 23, form_text, GOLDEN)
+      draw_status_chip(bmp, FOCUS_X + 166, y + 72, 104, 23, form_text, GOLDEN)
     end
 
     def draw_grid_panel(bmp)
@@ -933,7 +950,7 @@ module ResearchNotebook
       draw_text(bmp, x, y, w, 25, _INTL("Forma Dorada"), 18, GOLDEN_2, 0, true)
       state = used ? _INTL("UTILIZADA") : (seen ? _INTL("OBSERVADA") : _INTL("POR VER"))
       draw_status_chip(bmp, x + w - 104, y + 2, 104, 21, state, GOLDEN)
-      draw_text(bmp, x, y + 34, w, 16, _INTL("TIPOS"), 10, MUTED, 0, true)
+      draw_text(bmp, x, y + 34, w, 16, _INTL("TIPOS DE LA FORMA DORADA"), 10, MUTED, 0, true)
       if reveal_details
         draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry), x, y + 51, 68, 23)
       else
@@ -1056,28 +1073,28 @@ module ResearchNotebook
       canvas = @sprites["grid_icons"]
       canvas.bitmap.clear if canvas && canvas.respond_to?(:bitmap) && canvas.bitmap
       @grid_signature = nil
+      @pending_grid_icons = []
     end
 
-    def grid_icon_filename(pkmn, species, form = 0)
-      # Priorizar el archivo de la forma concreta. Resolver el gráfico desde
-      # los mismos directorios que el juego, no desde un ID "BASE_1".
+    # Las variantes tienen iconos individuales, p. ej. RATTATA_1.png.
+    # Evitamos la resolución de Essentials que a veces retorna la forma base
+    # incluso si el icono alterno es distinto.
+    def grid_icon_filename(_pkmn, species, form = 0)
+      paths = []
       if form.to_i > 0
-        candidate = "Graphics/Pokemon/Icons/#{species}_#{form.to_i}"
-        file = pbResolveBitmap(candidate) if defined?(pbResolveBitmap)
-        return file if file
+        paths << "Graphics/Pokemon/Icons/#{species}_#{form.to_i}"
+        paths << "Graphics/Pokemon/Icons/#{species.to_s.downcase}_#{form.to_i}"
+      else
+        paths << "Graphics/Pokemon/Icons/#{species}"
+        paths << "Graphics/Pokemon/Icons/#{species.to_s.downcase}"
       end
-      if defined?(GameData::Species)
-        begin
-          file = GameData::Species.icon_filename(species, form.to_i, 0, false, false)
-          return file if file && (!defined?(pbResolveBitmap) || pbResolveBitmap(file))
-        rescue StandardError
-        end
-        begin
-          file = GameData::Species.icon_filename_from_pokemon(pkmn) if GameData::Species.respond_to?(:icon_filename_from_pokemon)
-          return file if file
-        rescue StandardError
-        end
+      paths.each do |path|
+        resolved = (pbResolveBitmap(path) rescue nil) if defined?(pbResolveBitmap)
+        return resolved if resolved
       end
+      return nil if form.to_i > 0   # Jamás sustituir forma regional por icono base
+      return GameData::Species.icon_filename(species, 0, 0, false, false) if
+        defined?(GameData::Species) && GameData::Species.respond_to?(:icon_filename)
       nil
     end
 
@@ -1086,74 +1103,39 @@ module ResearchNotebook
       row = slot / COLS
       cell_x = GRID_X + 5 + col * (CELL_W + GRID_GAP_X)
       cell_y = GRID_Y + row * (CELL_H + GRID_GAP_Y)
-      known = species_identity_known?(species)
-      if !known
-        # Una marca neutra cuesta casi nada y evita cargar sprites de especies
-        # cuya identidad todavía no corresponde mostrar.
-        draw_text(canvas, cell_x + 7, cell_y + 17, CELL_W - 14, 31, "?", 24, Color.new(120, 112, 98), 1, true)
+      unless species_identity_known?(species)
+        draw_text(canvas, cell_x + 9, cell_y + 19, CELL_W - 18, 30, "?", 20, MUTED, 1, true)
         return
       end
-
-      base_species, form = split_species_form(species, 0)
-      pkmn = Pokemon.new(base_species, 5)
-      if pkmn.respond_to?(:form_simple=)
-        pkmn.form_simple = form
-      elsif pkmn.respond_to?(:form=)
-        pkmn.form = form
+      base, form = split_species_form(species, 0)
+      if current_section == :golden && form.to_i <= 0 &&
+         (ResearchNotebook.progress.golden_form_seen?(base) ||
+          ResearchNotebook.progress.golden_form_used?(base))
+        form = ResearchNotebook::Repository.golden_form_index(species) || form
       end
-      filename = grid_icon_filename(pkmn, base_species, form)
-      if filename
-        anim = nil
-        begin
-          anim = AnimatedBitmap.new(filename)
-          source = anim.bitmap
-          if source && source.width > 0 && source.height > 0
-            frame_h = source.height
-            frame_w = source.width >= frame_h * 2 ? frame_h : source.width
-            src = Rect.new(0, 0, frame_w, frame_h)
-            max_w = 48.0
-            max_h = 45.0
-            scale = [max_w / frame_w.to_f, max_h / frame_h.to_f, 1.0].min
-            dw = [1, (frame_w * scale).round].max
-            dh = [1, (frame_h * scale).round].max
-            dx = cell_x + (CELL_W - dw) / 2
-            dy = cell_y + 15 + (45 - dh) / 2
-            canvas.stretch_blt(Rect.new(dx, dy, dw, dh), source, src)
-            return
-          end
-        rescue => e
-          ResearchNotebook::Repository.log("Icono rasterizado #{species}: #{e.message}")
-        ensure
-          begin
-            anim.dispose if anim && anim.respond_to?(:dispose)
-          rescue
-          end
-        end
+      filename = grid_icon_filename(nil, base, form)
+      unless filename
+        draw_text(canvas, cell_x + 9, cell_y + 20, CELL_W - 18, 27, "?", 18, MUTED, 1, true)
+        return
       end
-
-      # Fallback compatible con proyectos que reemplazan la resolución de iconos.
-      temp = nil
+      icon = nil
       begin
-        temp = PokemonIconSprite.new(pkmn, @viewport) if defined?(PokemonIconSprite)
-        if temp && temp.bitmap
-          src = temp.src_rect
-          src = Rect.new(0, 0, temp.bitmap.width, temp.bitmap.height) if !src || src.width <= 0 || src.height <= 0
-          max_w = 48.0
-          max_h = 45.0
-          scale = [max_w / src.width.to_f, max_h / src.height.to_f, 1.0].min
-          dw = [1, (src.width * scale).round].max
-          dh = [1, (src.height * scale).round].max
-          dx = cell_x + (CELL_W - dw) / 2
-          dy = cell_y + 15 + (45 - dh) / 2
-          canvas.stretch_blt(Rect.new(dx, dy, dw, dh), temp.bitmap, src)
+        icon = Bitmap.new(filename)
+        if icon && icon.width > 0 && icon.height > 0
+          # Los iconos de Essentials son spritesheets horizontales de 2 frames.
+          frame_w = (icon.width >= icon.height * 2) ? icon.width / 2 : icon.width
+          frame_h = icon.height
+          scale = [48.0 / frame_w, 43.0 / frame_h, 1.0].min
+          dw = [(frame_w * scale).round, 1].max
+          dh = [(frame_h * scale).round, 1].max
+          dest = Rect.new(cell_x + (CELL_W - dw) / 2,
+                          cell_y + 15 + (43 - dh) / 2, dw, dh)
+          canvas.stretch_blt(dest, icon, Rect.new(0, 0, frame_w, frame_h))
         end
-      rescue => e
-        ResearchNotebook::Repository.log("Fallback de icono #{species}: #{e.message}")
+      rescue StandardError => e
+        ResearchNotebook::Repository.log("Icono #{species}: #{e.message}")
       ensure
-        begin
-          temp.dispose if temp && !temp.disposed?
-        rescue
-        end
+        icon.dispose if icon && !icon.disposed?
       end
     end
 
@@ -1162,15 +1144,25 @@ module ResearchNotebook
       signature = [current_section, @sort_mode, current_page_start, @species_generation]
       return if @grid_signature == signature
       canvas_sprite = @sprites["grid_icons"]
-      return if !canvas_sprite || !canvas_sprite.bitmap
-      canvas = canvas_sprite.bitmap
-      canvas.clear
+      return unless canvas_sprite && canvas_sprite.bitmap
+      canvas_sprite.bitmap.clear
       @grid_signature = signature
+      @pending_grid_icons = []
       page_start = current_page_start
       PAGE_SIZE.times do |slot|
-        idx = page_start + slot
-        next if idx >= @species.length
-        draw_species_icon_to_grid(canvas, @species[idx], slot)
+        index = page_start + slot
+        @pending_grid_icons << [@species[index], slot] if index < @species.length
+      end
+    end
+
+    def render_next_grid_icons(count = 2)
+      return if @detail_open || !@pending_grid_icons || @pending_grid_icons.empty?
+      canvas_sprite = @sprites["grid_icons"]
+      return unless canvas_sprite && canvas_sprite.bitmap
+      count.times do
+        item = @pending_grid_icons.shift
+        break unless item
+        draw_species_icon_to_grid(canvas_sprite.bitmap, item[0], item[1])
       end
     end
 
@@ -1240,30 +1232,20 @@ module ResearchNotebook
     end
 
     def draw_type_icons(bmp, types, x, y, target_w = 68, target_h = 25)
-      types = Array(types).compact.first(2)
-      return draw_text(bmp, x, y, target_w, target_h, "—", 12, MUTED, 1, false) if types.empty?
-      resolve_type_sheet
-      gap = 4
-      types.each_with_index do |type_id, i|
-        xx = x + i * (target_w + gap)
-        drawn = false
-        if @type_sheet && @type_sheet.bitmap && @type_frame_h
-          begin
-            data = GameData::Type.try_get(type_id)
-            if data && data.respond_to?(:icon_position)
-              src = Rect.new(0, data.icon_position.to_i * @type_frame_h, @type_sheet.bitmap.width, @type_frame_h)
-              dest = Rect.new(xx, y, target_w, target_h)
-              bmp.stretch_blt(dest, @type_sheet.bitmap, src)
-              drawn = true
-            end
-          rescue
-          end
-        end
-        if !drawn
-          bmp.fill_rect(xx, y, target_w, target_h, current_section == :arcane ? ARCANE_2 : GOLDEN_2)
-          draw_text(bmp, xx + 2, y + 2, target_w - 4, target_h - 4,
-            ResearchNotebook::Repository.type_name(type_id).upcase, 9, WHITE, 1, true)
-        end
+      values = Array(types).compact.first(2)
+      if values.empty?
+        draw_text(bmp, x, y, target_w, target_h, "—", 12, MUTED, 1, false)
+        return
+      end
+      values.each_with_index do |type, i|
+        xx = x + i * (target_w + 5)
+        # No reducir un spritesheet de pictogramas 96x32 a símbolos minúsculos:
+        # el nombre del tipo debe ser comprensible a resolución 640x480.
+        bg = Color.new(96, 80, 55)
+        bmp.fill_rect(xx, y, target_w, target_h, bg)
+        bmp.fill_rect(xx, y + target_h - 2, target_w, 2, section_color)
+        name = ResearchNotebook::Repository.type_name(type).to_s.upcase
+        draw_text(bmp, xx + 3, y + 2, target_w - 6, target_h - 4, name, 11, WHITE, 1, true)
       end
     end
 
@@ -1659,11 +1641,11 @@ module ResearchNotebook
       if @sections.empty?
         text = _INTL("Atrás · Cerrar")
       elsif @detail_open
-        text = current_section == :golden && detail_page_count > 1 ? _INTL("← / → Cambiar página     C / X Volver") : _INTL("C / X Volver")
+        text = current_section == :golden && detail_page_count > 1 ? _INTL("↑↓ Pokémon     ←→ Página     C/X Volver") : _INTL("↑↓ Pokémon     C/X Volver")
       else
         text = _INTL("Flechas Mover   C Ficha   Z Sección   D Ordenar   X Cerrar")
       end
-      draw_text(bmp, 12, FOOTER_Y + 6, WIDTH - 24, 23, text, 10, WHITE, 1, false)
+      draw_text(bmp, 12, FOOTER_Y + 6, WIDTH - 24, 23, text, 12, WHITE, 1, false)
     end
 
     def draw_text(bmp, x, y, w, h, string, size = 18, color = INK, align = 0, bold = false)
