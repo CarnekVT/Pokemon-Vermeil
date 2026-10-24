@@ -25,10 +25,37 @@ class TestSprite
   def initialize; @bitmap = TestCanvas.new; end
 end
 
+# Se prueban ambos idiomas sin cargar la ventana de Translate Studio.
+module CarnekTranslateStudio
+  @locale_for_qa = "es"
+  def self.language_code; @locale_for_qa; end
+  def self.language_code=(code); @locale_for_qa = code; end
+end
+def _INTL(template, *args)
+  template.to_s.gsub(/\\{(\\d+)\\}/) { |token| args[$1.to_i - 1] || token }.to_s
+end
+
 Dir.chdir(File.expand_path("../LA BASE DE SKY", __dir__)) do
   def pbResolveBitmap(candidate)
     File.file?(candidate + ".png") ? candidate + ".png" : nil
   end
+  CarnekTranslateStudio.language_code = "en"
+  check(ResearchNotebook.t("Habilidades Arcanas") == "Arcane Abilities",
+        "La pestaña de habilidades responde al idioma inglés")
+  check(ResearchNotebook.t("Especies: {1}", 66) == "Species: 66",
+        "Los mensajes dinámicos también se traducen")
+  check(ResearchNotebook.t("Libreta de Investigación") == "Research Notebook",
+        "El título del menú de la libreta se traduce")
+  CarnekTranslateStudio.language_code = "es"
+  check(ResearchNotebook.t("Habilidades Arcanas") == "Habilidades Arcanas",
+        "El regreso a español no mantiene textos ingleses")
+  png = File.binread("Graphics/UI/types.png")
+  width, height = png.byteslice(16, 8).unpack("N2")
+  check(width == 64 && height >= 28 && (height % 28).zero?,
+        "La hoja compartida types.png tiene tiles de 64x28")
+  check(ResearchNotebook::Settings::TYPE_SHEET_CANDIDATES == ["Graphics/UI/types"],
+        "La Libreta no selecciona un atlas de tipos antiguo")
+
   notebook = ResearchNotebook::Scene.allocate
   check(notebook.split_species_form(:FARFETCHD_1) == [:FARFETCHD, 1],
         "El parser distingue los slots con guion bajo")
