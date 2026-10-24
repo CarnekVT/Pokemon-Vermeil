@@ -1291,15 +1291,17 @@ end
         map_bmp = nil
       end
     end
-    if mapdata
+    # Mostrar siempre un estado de localización, incluso si el Pokémon no
+    # está en encuentros salvajes o el proyecto no tiene mapa regional.
+    names = locations_for_species(entry[:base_species])
+    if mapdata && map_bmp
       points = encounter_points_on_map(mapdata, entry[:base_species])
-      if map_bmp
-        draw_area_map(bmp, mapdata, map_bmp, points, entry)
-      else
-        draw_area_text(bmp, points, locations_for_species(entry[:base_species]))
+      draw_area_map(bmp, mapdata, map_bmp, points, entry)
+      if !points.any? { |v| v } && names.empty?
+        draw_area_unknown(bmp)
       end
     else
-      draw_area_text(bmp, [], locations_for_species(entry[:base_species]))
+      draw_area_text(bmp, [], names)
     end
   ensure
     map_asset.dispose if map_asset && map_asset.respond_to?(:dispose)
@@ -1336,13 +1338,12 @@ end
       bmp.fill_rect(px + sz, py, 2, sz, point_hl) if (j + 1) % town_map_width == 0 || !points[j + 1]
     end
     names = locations_for_species(entry[:base_species])
-    draw_area_footer(bmp, mapdata.name, names, points.length > 0)
+    draw_area_footer(bmp, mapdata.name, names, points.any? { |point| point })
   end
 
   def draw_area_text(bmp, _points, names)
     if names.empty?
-      pbDrawShadowText(bmp, 24, 120, 580, 22, _INTL("No se encuentra en estado salvaje."),
-                       NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
+      draw_area_unknown(bmp)
     else
       y = 60
       names.each do |loc|
@@ -1355,6 +1356,14 @@ end
     draw_area_footer(bmp, nil, names, false)
   end
 
+  def draw_area_unknown(bmp)
+    draw_panel(bmp, 172, 196, 296, 72)
+    pbDrawShadowText(bmp, 184, 210, 272, 30, _INTL("Área desconocida"),
+                     NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
+    pbDrawShadowText(bmp, 184, 244, 272, 18, _INTL("Sin ubicaciones registradas"),
+                     NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
+  end
+
   def draw_area_footer(bmp, map_name, names, has_points)
     footer_y = NuevaPokedex::SCREEN_HEIGHT - 40
     bmp.fill_rect(0, footer_y, NuevaPokedex::SCREEN_WIDTH, 40, NuevaPokedex::COLOR_PANEL_DARK)
@@ -1362,10 +1371,8 @@ end
     if has_points
       text = names.empty? ? map_name.to_s : names.join(" · ")
       text = _INTL("Localizaciones: {1}", text)
-    elsif map_name && !map_name.to_s.empty?
-      text = map_name.to_s
     elsif names.empty?
-      text = _INTL("Sin mapa de la región")
+      text = _INTL("Ubicación: desconocida")
     else
       text = _INTL("Localizaciones: {1}", names.join(" · "))
     end
@@ -1379,13 +1386,19 @@ end
 
   def locations_for_species(species)
     locations = []
-    version = $PokemonGlobal.encounter_version || 0
+    version = ($PokemonGlobal && $PokemonGlobal.encounter_version) || 0
     GameData::Encounter.each_with_species(species, version) do |data|
-      loc = GameData::MapMetadata.try_get(data.map)&.name
-      next if !loc
-      locations << loc
+      meta = GameData::MapMetadata.try_get(data.map)
+      next if meta && meta.has_flag?("HideEncountersInPokedex")
+      loc = meta && meta.name
+      loc ||= pbGetMapNameFromId(data.map) if defined?(pbGetMapNameFromId)
+      next if !loc || loc.to_s.empty?
+      locations << loc.to_s
     end
-    return locations.uniq
+    locations.uniq
+  rescue StandardError => e
+    echoln("[Nueva Pokédex] Área #{species}: #{e.message}") if defined?(echoln)
+    []
   end
 
   # Puntos del Town Map donde la especie aparece (misma lógica que
@@ -1394,11 +1407,12 @@ end
     visible_points = []
     (mapdata.point || []).each do |loc|
       next if loc[7] && !$game_switches[loc[7]]
-      visible_points.push([loc[1], loc[2]])
+      visible_points.push([loc[0], loc[1]])
     end
     town_map_width = 1 + PokemonRegionMap_Scene::RIGHT - PokemonRegionMap_Scene::LEFT
     ret = []
-    GameData::Encounter.each_of_version($PokemonGlobal.encounter_version) do |enc_data|
+    version = ($PokemonGlobal && $PokemonGlobal.encounter_version) || 0
+    GameData::Encounter.each_of_version(version) do |enc_data|
       next if !encounter_has_species?(enc_data.types, species)
       map_metadata = GameData::MapMetadata.try_get(enc_data.map)
       next if !map_metadata || map_metadata.has_flag?("HideEncountersInPokedex")
@@ -1423,6 +1437,9 @@ end
       end
     end
     return ret
+  rescue StandardError => e
+    echoln("[Nueva Pokédex] Posiciones del mapa: #{e.message}") if defined?(echoln)
+    []
   end
 
   def encounter_has_species?(enc_types, species)
