@@ -626,7 +626,7 @@ module ResearchNotebook
         tab_drawn = (@sections.length == 2 && @skin && @skin.draw(bmp, tab_key, xx, 8))
         bmp.fill_rect(xx, 8, w - 4, 37, active ? color : Color.new(87, 70, 55)) if !tab_drawn
         bmp.fill_rect(xx, 42, w - 4, 3, color) if active
-        draw_text(bmp, xx + 4, 17, w - 12, 22, label, 12, WHITE, 1, true)
+        draw_text(bmp, xx + 4, 24, w - 12, 17, label, 12, WHITE, 1, true)
       end
       subtitle = current_section == :arcane ? _INTL("Notas sobre energía arcana") : _INTL("Notas sobre energía áurea")
       draw_text(bmp, 20, 38, 132, 15, subtitle, 10, Color.new(218, 205, 184), 0, false)
@@ -1530,7 +1530,7 @@ module ResearchNotebook
 
     def draw_status_chip(bmp, x, y, w, h, text, color)
       bmp.fill_rect(x, y, w, h, color)
-      draw_text(bmp, x + 3, y + 4, w - 6, h - 8, text, 11, INK, 1, true)
+      draw_text(bmp, x + 3, y + 12, w - 6, h - 13, text, 10, INK, 1, true)
     end
 
     def draw_progress_dots(bmp, x, y, total, active, color)
@@ -1564,8 +1564,8 @@ module ResearchNotebook
       half = (w - 6) / 2
       draw_card(bmp, x, y, half, 31, PAPER)
       draw_card(bmp, x + half + 6, y, half, 31, PAPER)
-      draw_text(bmp, x + 5, y + 5, half - 10, 20, ResearchNotebook::Repository.item_name(first_id), 10, INK, 1, true)
-      draw_text(bmp, x + half + 11, y + 5, half - 10, 20, ResearchNotebook::Repository.item_name(second_id), 10, INK, 1, true)
+      draw_text(bmp, x + 5, y + 12, half - 10, 17, ResearchNotebook::Repository.item_name(first_id), 10, INK, 1, true)
+      draw_text(bmp, x + half + 11, y + 12, half - 10, 17, ResearchNotebook::Repository.item_name(second_id), 10, INK, 1, true)
     end
 
     def draw_stat_panel(bmp, x, y, w, h, stats, base, color)
@@ -1654,7 +1654,7 @@ module ResearchNotebook
       else
         text = _INTL("Flechas Mover   C Ficha   Z Sección   D Ordenar   X Cerrar")
       end
-      draw_text(bmp, 12, FOOTER_Y + 6, WIDTH - 24, 23, text, 12, WHITE, 1, false)
+      draw_text(bmp, 12, FOOTER_Y + 13, WIDTH - 24, 18, text, 12, WHITE, 1, false)
     end
 
     def draw_text(bmp, x, y, w, h, string, size = 18, color = INK, align = 0, bold = false)
