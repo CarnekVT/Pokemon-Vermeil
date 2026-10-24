@@ -719,6 +719,7 @@ class PokemonPokedexNueva_Scene
     @model = NuevaPokedexData.new(region)
     @current_index = 0
     @current_form = 0
+    @selected_forms = {}
     @scroll_offset = 0.0
     @target_scroll = 0.0
     @shiny_mode = 0
@@ -985,29 +986,71 @@ end
 
   def collect_form_list
     entry = @model.data_for(@current_index)
-    return [0] if !entry
+    return [] unless entry
+    # Si la entrada tiene un slot independiente en esta Pokédex, sus formas
+    # NO son un selector: se gestionan exclusivamente mediante su propio slot.
+    return [entry[:form]] if entry[:form].to_i > 0 &&
+                             @model.slot_number_for(entry[:base_species], entry[:form])
     base = entry[:base_species]
-    forms = [0]
-    GameData::Species.each_form_for_species(base) do |form_sp|
-      next if form_sp.form <= 0
-      next if form_sp.has_flag?("HideFromPokedex")
-      shown = NuevaPokedex.form_shown?(base, form_sp.form)
-      own_slot = NuevaPokedex.form_has_own_slot?(@model.region, "#{base}_#{form_sp.form}".to_sym)
-      next if !shown && !own_slot
-      forms << form_sp.form
-    end
-    # Algunas Formas Doradas viven solo en PBS/golden_forms.txt y son
-    # proxies dinámicos, sin GameData::Species form compilada.
-    if defined?(GoldenSystem::Data)
-      form_id = GoldenSystem::Data.form_number(base, 0)
-      if form_id && form_id > 0
-        own_slot = NuevaPokedex.form_has_own_slot?(@model.region, "#{base}_#{form_id}".to_sym)
-        shown = NuevaPokedex.form_shown?(base, form_id)
-        shown &&= GoldenSystem::Data.visible_form?(base, form_id)
-        forms << form_id if (shown || own_slot) && !forms.include?(form_id)
+    forms = [entry[:form].to_i]
+    if GameData::Species.respond_to?(:each_form_for_species)
+      GameData::Species.each_form_for_species(base) do |form_sp|
+        next if form_sp.form.to_i <= 0
+        next if form_sp.has_flag?("HideFromPokedex")
+        next if @model.slot_number_for(base, form_sp.form)
+        next unless NuevaPokedex.form_shown?(base, form_sp.form)
+        forms << form_sp.form.to_i
       end
     end
-    return forms
+    if defined?(GoldenSystem::Data)
+      form_id = GoldenSystem::Data.form_number(base, entry[:form])
+      if form_id && form_id > 0 && !@model.slot_number_for(base, form_id) &&
+         GoldenSystem::Data.visible_form?(base, form_id) &&
+         NuevaPokedex.form_shown?(base, form_id)
+        forms << form_id
+      end
+    end
+    forms.uniq
+  end
+
+  # Elección de forma visual por slot, sin alterar el número regional, los
+  # avistamientos o las entradas de la base de datos del jugador.
+  def selected_display_form(entry = nil)
+    entry ||= @model.data_for(@current_index)
+    return 0 unless entry
+    return entry[:form].to_i if entry[:form].to_i > 0 &&
+                                 @model.slot_number_for(entry[:base_species], entry[:form])
+    form = (@selected_forms || {})[entry[:species]]
+    form ||= entry[:form].to_i
+    valid = form.to_i == entry[:form].to_i ||
+            (form.to_i > 0 && NuevaPokedex.form_seen?(entry[:base_species], form))
+    valid ? form.to_i : entry[:form].to_i
+  end
+
+  def store_display_form(entry, form)
+    return unless entry
+    return if entry[:form].to_i > 0 && @model.slot_number_for(entry[:base_species], entry[:form])
+    return unless form.to_i == entry[:form].to_i ||
+                  NuevaPokedex.form_seen?(entry[:base_species], form)
+    @selected_forms ||= {}
+    @selected_forms[entry[:species]] = form.to_i
+  end
+
+  def effective_entry(entry)
+    return nil unless entry
+    form = selected_display_form(entry)
+    return entry if form == entry[:form].to_i
+    sp = NuevaPokedex.dex_form_data(entry[:base_species], form)
+    return entry unless sp
+    ret = entry.dup
+    ret[:form] = form
+    ret[:form_name] = sp.form_name if sp.respond_to?(:form_name)
+    ret[:types] = sp.types
+    ret[:height] = sp.height
+    ret[:weight] = sp.weight
+    ret[:category] = sp.category
+    ret[:description] = sp.pokedex_entry
+    ret
   end
 
   def update_sprite_icon
@@ -1022,7 +1065,7 @@ end
         shiny = @shiny_mode > 0
       else
         show_species = entry[:base_species]
-        show_form = entry[:form]
+        show_form = selected_display_form(entry)
         shiny = false
       end
       @view.sprites["icon"].setSpeciesBitmap(show_species, 0, show_form,
@@ -1030,7 +1073,7 @@ end
       @view.sprites["icon"].visible = true
       @view.sprites["icon"].opacity = 255
       @view.sprites["icon"].zoom_y = @bounce_scale_y
-      type1 = @state == NuevaPokedex::STATE_FORMS ? current_form_types(entry) : entry[:types]
+      type1 = current_form_types(entry, show_form)
       @view.set_sprite_color(type1[0] || :NORMAL)
     else
       @view.sprites["icon"].visible = false
@@ -1038,14 +1081,11 @@ end
     end
   end
 
-  def current_form_types(entry)
-    return entry[:types] if @current_form.nil? || @current_form <= 0
-    begin
-      form_sp = NuevaPokedex.dex_form_data(entry[:base_species], @current_form)
-      return form_sp.types if form_sp
-    rescue StandardError
-    end
-    return entry[:types]
+  def current_form_types(entry, form = nil)
+    form = (@state == NuevaPokedex::STATE_FORMS ? @current_form : selected_display_form(entry)) if form.nil?
+    return entry[:types] if form.nil? || form.to_i == entry[:form].to_i
+    sp = NuevaPokedex.dex_form_data(entry[:base_species], form)
+    sp ? sp.types : entry[:types]
   end
 
   def pbRefresh
@@ -1063,7 +1103,7 @@ end
   def draw_info
     bmp = @view.bitmaps["overlay"]
     bmp.clear
-    entry = @model.data_for(@current_index)
+    entry = effective_entry(@model.data_for(@current_index))
     return if !entry
     # Página completa a parte: fondo opaco salvo el hueco del sprite del Pokémon
     bg = Color.new(20, 20, 30, 255)
@@ -1637,14 +1677,15 @@ end
     pbSEPlay("GUI pokedex open")
     @state = NuevaPokedex::STATE_AREA
     @view.clear_bitmap("overlay")
+    @view.sprites["icon"].visible = false if @view && @view.sprites["icon"]
     draw_area
     start_crossfade
   end
 
   def enter_forms_state
     entry = @model.data_for(@current_index)
-    return enter_area_state if !entry
-    @current_form = entry[:form]
+    return enter_area_state if !entry || collect_form_list.length <= 1
+    @current_form = selected_display_form(entry)
     pbSEPlay("GUI pokedex open")
     @state = NuevaPokedex::STATE_FORMS
     @view.clear_bitmap("overlay")
@@ -1654,6 +1695,9 @@ end
   end
 
   def back_to_info_state
+    if @state == NuevaPokedex::STATE_FORMS
+      store_display_form(@model.data_for(@current_index), @current_form)
+    end
     pbSEPlay("GUI pokedex cancel")
     @state = NuevaPokedex::STATE_INFO
     @view.clear_bitmap("overlay")
@@ -1706,6 +1750,7 @@ end
     if Input.trigger?(Input::BACK) || Input.trigger?(Input::USE)
       back_to_info_state
     elsif Input.trigger?(Input::LEFT)
+      store_display_form(@model.data_for(@current_index), @current_form)
       enter_area_state
     elsif Input.trigger?(Input::RIGHT)
       back_to_info_state
@@ -1713,6 +1758,7 @@ end
       forms = collect_form_list
       return if forms.empty?
       @current_form = forms[((forms.index(@current_form) || 0) - 1) % forms.length]
+      store_display_form(@model.data_for(@current_index), @current_form)
       pbPlayCursorSE if defined?(pbPlayCursorSE)
       draw_forms
       update_sprite_icon
@@ -1720,6 +1766,7 @@ end
       forms = collect_form_list
       return if forms.empty?
       @current_form = forms[((forms.index(@current_form) || -1) + 1) % forms.length]
+      store_display_form(@model.data_for(@current_index), @current_form)
       pbPlayCursorSE if defined?(pbPlayCursorSE)
       draw_forms
       update_sprite_icon
@@ -1738,11 +1785,8 @@ end
     entry = @model.data_for(@current_index)
     return if !entry
     begin
-      if @state == NuevaPokedex::STATE_FORMS
-        Pokemon.play_cry(entry[:base_species], @current_form)
-      else
-        Pokemon.play_cry(entry[:species])
-      end
+      form = @state == NuevaPokedex::STATE_FORMS ? @current_form : selected_display_form(entry)
+      Pokemon.play_cry(entry[:base_species], form)
     rescue StandardError
     end
     wave = @view.sprites["audio_wave"]
@@ -1784,7 +1828,7 @@ end
     return if cmd < 0
     @model.sort = sorts[cmd]
     @current_index = 0
-    @current_form = 0
+    @current_form = selected_display_form(@model.data_for(@current_index))
     @page = 0
     @scroll_offset = 0.0
     @target_scroll = 0.0
