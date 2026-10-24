@@ -1060,7 +1060,7 @@ module VermeilChangeDex
   @custom_move_ids = nil
   @custom_ability_ids = nil
   @detect_cache = nil
-  DETECT_CACHE_VERSION = 32
+  DETECT_CACHE_VERSION = 33
   CANON_CACHE_VERSION = 3
   BASELINE_CACHE_PATH = "Data/ChangeDex/baseline_pbs_base.cache"
   RUNTIME_DETECT_CACHE_PATH = "Data/ChangeDex/runtime_detect.cache"
@@ -2198,6 +2198,7 @@ module VermeilChangeDex
         species = parts[0].to_s.strip.upcase.to_sym
         form = parts[1] ? parts[1].to_i : 0
         next if species.to_s.empty?
+        next unless change_dex_pokedex_set[[species, form]]
         functional_fields = fields.keys.reject { |f| f.to_s.start_with?("_") }
         next if functional_fields.empty?
         next if excluded_from_pokemon_changes?(species, form)
@@ -2229,9 +2230,14 @@ module VermeilChangeDex
 
     def detect_changes
       CarnekChangeData.ensure_applied
+      # El catálogo activo es parte de la identidad de la caché, no solo el PBS.
+      @change_dex_catalog_entity_sets = nil
+      dex_set = change_dex_pokedex_set
+      catalog_signature = change_dex_catalog_signature
       VermeilChangeDex.load_persistent_detect_cache!
       cached = VermeilChangeDex.detect_cache
-      if cached && cached[:version] == VermeilChangeDex::DETECT_CACHE_VERSION && cached[:entries].is_a?(Array)
+      if cached && cached[:version] == VermeilChangeDex::DETECT_CACHE_VERSION &&
+         cached[:catalog_signature] == catalog_signature && cached[:entries].is_a?(Array)
         @species_move_delta = cached[:species_move_delta].transform_values do |v|
           { :added => (v[:added] || []).clone, :removed => (v[:removed] || []).clone,
             :added_tutor => (v[:added_tutor] || []).clone, :removed_tutor => (v[:removed_tutor] || []).clone,
@@ -2270,16 +2276,16 @@ module VermeilChangeDex
       @dex_order = {}
       @entries = []
 
-      dex_idx = 0
-      GameData::Species.each_species do |base_species|
-        dex_idx += 1
-        @dex_order[base_species.species] = dex_idx
+      # El orden regional oficial procede de New Pokédex, no de la Nacional.
+      dex_set.each_key do |key|
+        @dex_order[key[0]] ||= @dex_order.length + 1
       end
 
       # Project-only species/forms from pokemon_vermeil, pokemon_balance and
       # any other custom pokemon_*.txt remain valid context for New Moves/Abilities.
       GameData::Species.each do |s_data|
         key = [s_data.species, s_data.form]
+        next unless dex_set[key]
         @noncanon_species_entries[key] = true if !VermeilChangeDex.canon_species_form_defined?(s_data.species, s_data.form)
       end
 
@@ -2307,6 +2313,7 @@ module VermeilChangeDex
         next if minior_core_form?(species, form) && form > 1
 
         key = [species, form]
+        next unless dex_set[key]
         canon = VermeilChangeDex.get_canon_info(species, form)
         canon ||= VermeilChangeDex.get_canon_info(species, 0) if form > 0 && force_visible_hidden_variant?(species, form)
         functional_fields = fields.keys.reject { |f| f.to_s.start_with?("_") }
@@ -2374,6 +2381,7 @@ module VermeilChangeDex
 
       VermeilChangeDex.detect_cache = {
         :version => VermeilChangeDex::DETECT_CACHE_VERSION,
+        :catalog_signature => catalog_signature,
         :species_move_delta => @species_move_delta.transform_values do |v|
           { :added => (v[:added] || []).clone, :removed => (v[:removed] || []).clone,
             :added_tutor => (v[:added_tutor] || []).clone, :removed_tutor => (v[:removed_tutor] || []).clone,
@@ -2443,6 +2451,7 @@ module VermeilChangeDex
     end
 
     def build_non_pokemon_indexes
+      dex_set = change_dex_pokedex_set
       @canon_known_moves = VermeilChangeDex.canon_known_moves
       @canon_known_abilities = VermeilChangeDex.canon_known_abilities
       @custom_move_ids = VermeilChangeDex.custom_move_ids
@@ -2456,6 +2465,7 @@ module VermeilChangeDex
       # carrier lists are resolved only when the user opens one entry.
       move_added = {}; move_removed = {}; ability_added = {}; ability_removed = {}
       (@species_move_delta || {}).each do |key, d|
+        next unless dex_set[key]
         next if excluded_from_move_categories?(key[0], key[1])
         ((d[:added] || []) + (d[:added_tutor] || []) + (d[:added_egg] || [])).compact.uniq.each do |mid|
           (move_added[mid] ||= []) << key unless (move_added[mid] || []).include?(key)
@@ -2465,6 +2475,7 @@ module VermeilChangeDex
         end
       end
       (@species_ability_delta || {}).each do |key, d|
+        next unless dex_set[key]
         next if excluded_from_ability_categories?(key[0], key[1])
         (d[:added] || []).compact.uniq.each { |aid| (ability_added[aid] ||= []) << key unless (ability_added[aid] || []).include?(key) }
         (d[:removed] || []).compact.uniq.each { |aid| (ability_removed[aid] ||= []) << key unless (ability_removed[aid] || []).include?(key) }
@@ -2477,6 +2488,7 @@ module VermeilChangeDex
       if !custom_moves_lookup.empty? || !custom_abilities_lookup.empty?
         GameData::Species.each do |s_data|
           key = [s_data.species, s_data.form]
+          next unless dex_set[key]
           next if !(@noncanon_species_entries && @noncanon_species_entries[key])
           if !custom_abilities_lookup.empty? && !excluded_from_ability_categories?(key[0], key[1])
             abs = ((s_data.abilities || []) + (s_data.hidden_abilities || [])).compact.reject { |a| a == :NONE }.uniq rescue []
@@ -2507,7 +2519,9 @@ module VermeilChangeDex
       move_ids.uniq!
       ability_ids.uniq!
       sorter = proc { |k| [@dex_order[k[0]] || 999_999, k[1]] }
+      catalog_entities = change_dex_catalog_entity_sets
       move_ids.uniq.each do |move_id|
+        next unless catalog_entities[:moves][move_id]
         next if ChangeDexConfig.hidden_move?(move_id)
         m_data = GameData::Move.try_get(move_id)
         next if !m_data
@@ -2525,6 +2539,7 @@ module VermeilChangeDex
         @move_entries_all << entry
       end
       ability_ids.uniq.each do |ability_id|
+        next unless catalog_entities[:abilities][ability_id]
         next if ChangeDexConfig.hidden_ability?(ability_id)
         a_data = GameData::Ability.try_get(ability_id)
         next if !a_data
@@ -2556,11 +2571,15 @@ module VermeilChangeDex
 
     def entry_all_users(entry)
       return [] if !entry
-      return entry[:all_users] if entry.key?(:all_users) && !entry[:all_users].nil?
+      if entry.key?(:all_users) && !entry[:all_users].nil?
+        return change_dex_catalog_users(entry[:all_users])
+      end
+      dex_set = change_dex_pokedex_set
       users = []
       is_ability = (@category == :ability_changes || @category == :new_abilities)
       GameData::Species.each do |s|
         key = [s.species, s.form]
+        next unless dex_set[key]
         if is_ability
           next if excluded_from_ability_categories?(s.species, s.form)
           list = (s.abilities + s.hidden_abilities).compact.reject { |a| a == :NONE }.uniq
@@ -2594,6 +2613,7 @@ module VermeilChangeDex
     end
 
     def precompute_all_carriers!
+      dex_set = change_dex_pokedex_set
       move_entries = (@move_entries_all || [])
       ability_entries = (@ability_entries_all || [])
       move_lookup = {}; ability_lookup = {}
@@ -2604,6 +2624,7 @@ module VermeilChangeDex
       return if move_lookup.empty? && ability_lookup.empty?
       GameData::Species.each do |sp_data|
         key = [sp_data.species, sp_data.form]
+        next unless dex_set[key]
         if !move_lookup.empty? && !excluded_from_move_categories?(sp_data.species, sp_data.form)
           list = (@species_learnset_cache && @species_learnset_cache[key]) || species_all_learnable_moves(sp_data)
           list.compact.uniq.each do |mid|
@@ -2639,9 +2660,11 @@ module VermeilChangeDex
     def canon_user_count_for(entry)
       return 0 if !entry
       return entry[:canon_user_count].to_i if !entry[:canon_user_count].nil?
+      dex_set = change_dex_pokedex_set
       count = 0
       is_ability = (@category == :ability_changes || @category == :new_abilities)
       GameData::Species.each do |s|
+        next unless dex_set[[s.species, s.form]]
         next if is_ability ? excluded_from_ability_categories?(s.species, s.form) : excluded_from_move_categories?(s.species, s.form)
         canon = VermeilChangeDex.get_canon_info(s.species, s.form)
         canon = VermeilChangeDex.get_canon_info(s.species, 0) if canon.nil? && s.species == :UNOWN && s.form > 0
@@ -2897,7 +2920,7 @@ module VermeilChangeDex
         GameData::Species.each do |s_data|
           sp = s_data.species
           f = s_data.form
-          next if dex_set && !dex_set[[sp, f]]
+          next unless dex_set[[sp, f]]
           next if s_data.has_flag?("HideFromPokedex")
           if f > 0
             next if s_data.real_pokedex_entry.nil? || s_data.real_pokedex_entry.to_s == "???"
@@ -2915,7 +2938,7 @@ module VermeilChangeDex
         # en :json (default) solo se muestran cambios de especies que son slots
         # de una dex habilitada, nunca de todo el PBS.
         dex_set = change_dex_pokedex_set
-        list.select! { |sp, f| dex_set[[sp, f]] } if dex_set
+        list.select! { |sp, f| dex_set[[sp, f]] }
         list.reject! { |sp, f| locked_new_mega?(sp, f) }
         list.reject! { |sp, f| excluded_from_pokemon_changes?(sp, f) }
       end
@@ -2986,6 +3009,20 @@ module VermeilChangeDex
       when :new_moves       then (@new_move_entries_all || []).clone
       when :new_abilities   then (@new_ability_entries_all || []).clone
       else []
+      end
+      # Una ficha de movimiento o habilidad existe solo si un Pokémon de la
+      # New Pokédex puede usarla/tenerla, independientemente de los PBS globales.
+      entity_scope = change_dex_catalog_entity_sets
+      allowed_entities = (@category == :ability_changes || @category == :new_abilities) ?
+                           entity_scope[:abilities] : entity_scope[:moves]
+      list.select! { |e| allowed_entities[e[:id]] }
+      list = clone_entry_list(list)
+      list.each do |e|
+        [:added_users, :added_users_comparable, :removed_users].each do |bucket|
+          e[bucket] = change_dex_catalog_users(e[bucket])
+        end
+        e[:all_users] = change_dex_catalog_users(e[:all_users]) unless e[:all_users].nil?
+        e[:canon_user_count] = nil  # Conteo canónico condicionado a la Pokédex activa.
       end
       # Hidden lists are configuration, not part of the heavy data cache. Apply
       # them every time so cleaning up accidental imports is immediate even if
@@ -3129,29 +3166,56 @@ module VermeilChangeDex
     end
 
     def quick_category_count(category)
+      # Los recuentos antes de cargar la caché respetan la Pokédex habilitada.
       doc = CarnekChangeData.document rescue {}
+      scope = change_dex_catalog_entity_sets
       case category
       when :pokemon_changes
         rows = doc["species"] rescue nil
-        return rows.is_a?(Hash) ? rows.keys.count { |h| begin; sp, f = h.to_s.split(",", 2); !ChangeDexConfig.hidden_form?(sp.to_s.upcase.to_sym, f.to_i); rescue StandardError; true; end } : 0
-      when :move_changes
+        return 0 unless rows.is_a?(Hash)
+        dex_set = change_dex_pokedex_set
+        return rows.count do |header, fields|
+          next false unless fields.is_a?(Hash)
+          species, form = header.to_s.split(",", 2)
+          sp = species.to_s.strip.upcase.to_sym
+          f = form.to_i
+          dex_set[[sp, f]] && !excluded_from_pokemon_changes?(sp, f) &&
+            fields.keys.any? { |field| !field.to_s.start_with?("_") }
+        end
+      when :move_changes, :new_moves
         rows = doc["moves"] rescue nil
-        return 0 if !rows.is_a?(Hash)
-        return rows.count { |id, v| !ChangeDexConfig.hidden_move?(id) && v.is_a?(Hash) && v["_new"] != true && !v.keys.reject { |k| k.to_s == "Name" || k.to_s == "Description" }.empty? }
-      when :ability_changes
+        return 0 unless rows.is_a?(Hash)
+        new_only = (category == :new_moves)
+        return rows.count do |id, fields|
+          next false unless scope[:moves][id.to_s.upcase.to_sym]
+          next false if ChangeDexConfig.hidden_move?(id)
+          next false unless fields.is_a?(Hash)
+          if new_only
+            fields["_new"] == true
+          else
+            fields["_new"] != true &&
+              !fields.keys.reject { |k| k.to_s == "Name" || k.to_s == "Description" }.empty?
+          end
+        end
+      when :ability_changes, :new_abilities
         rows = doc["abilities"] rescue nil
-        return 0 if !rows.is_a?(Hash)
-        return rows.count { |id, v| !ChangeDexConfig.hidden_ability?(id) && v.is_a?(Hash) && v["_new"] != true && !v.keys.reject { |k| k.to_s == "Name" || k.to_s == "Description" }.empty? }
-      when :new_moves
-        rows = doc["moves"] rescue nil
-        return rows.is_a?(Hash) ? rows.count { |id, v| !ChangeDexConfig.hidden_move?(id) && v.is_a?(Hash) && v["_new"] == true } : 0
-      when :new_abilities
-        rows = doc["abilities"] rescue nil
-        return rows.is_a?(Hash) ? rows.count { |id, v| !ChangeDexConfig.hidden_ability?(id) && v.is_a?(Hash) && v["_new"] == true } : 0
+        return 0 unless rows.is_a?(Hash)
+        new_only = (category == :new_abilities)
+        return rows.count do |id, fields|
+          next false unless scope[:abilities][id.to_s.upcase.to_sym]
+          next false if ChangeDexConfig.hidden_ability?(id)
+          next false unless fields.is_a?(Hash)
+          if new_only
+            fields["_new"] == true
+          else
+            fields["_new"] != true &&
+              !fields.keys.reject { |k| k.to_s == "Name" || k.to_s == "Description" }.empty?
+          end
+        end
       end
-      return 0
+      0
     rescue StandardError
-      return 0
+      0
     end
 
     def hydrate_prebuilt_cache_only
@@ -3186,18 +3250,38 @@ module VermeilChangeDex
     end
 
     def category_count(category)
-      return quick_category_count(category) if !@data_ready
+      return quick_category_count(category) unless @data_ready
+      dex_set = change_dex_pokedex_set
+      scope = change_dex_catalog_entity_sets
       case category
-      when :pokemon_changes then return (@pokemon_entries || []).length
+      when :pokemon_changes
+        return (@pokemon_entries || []).count { |k| dex_set[k] }
       when :move_changes
-        return (@move_entries_all || []).count { |e| !ChangeDexConfig.hidden_move?(e[:id]) && !e[:is_new] && (e[:data_changed] || !(e[:added_users_comparable] || []).empty? || !(e[:removed_users] || []).empty?) }
+        return (@move_entries_all || []).count do |e|
+          scope[:moves][e[:id]] && !ChangeDexConfig.hidden_move?(e[:id]) &&
+            !e[:is_new] && (e[:data_changed] ||
+            !change_dex_catalog_users(e[:added_users_comparable]).empty? ||
+            !change_dex_catalog_users(e[:removed_users]).empty?)
+        end
       when :ability_changes
-        return (@ability_entries_all || []).count { |e| !ChangeDexConfig.hidden_ability?(e[:id]) && !e[:is_new] && (e[:data_changed] || !(e[:added_users_comparable] || []).empty? || !(e[:removed_users] || []).empty?) }
-      when :new_moves then return (@new_move_entries_all || []).count { |e| !ChangeDexConfig.hidden_move?(e[:id]) }
-      when :new_abilities then return (@new_ability_entries_all || []).count { |e| !ChangeDexConfig.hidden_ability?(e[:id]) }
-      when :__mode_toggle__ then return (@pokedex_mode == :all) ? (@pokemon_entries || []).length : pokedex_all_count
+        return (@ability_entries_all || []).count do |e|
+          scope[:abilities][e[:id]] && !ChangeDexConfig.hidden_ability?(e[:id]) &&
+            !e[:is_new] && (e[:data_changed] ||
+            !change_dex_catalog_users(e[:added_users_comparable]).empty? ||
+            !change_dex_catalog_users(e[:removed_users]).empty?)
+        end
+      when :new_moves
+        return (@new_move_entries_all || []).count do |e|
+          scope[:moves][e[:id]] && !ChangeDexConfig.hidden_move?(e[:id])
+        end
+      when :new_abilities
+        return (@new_ability_entries_all || []).count do |e|
+          scope[:abilities][e[:id]] && !ChangeDexConfig.hidden_ability?(e[:id])
+        end
+      when :__mode_toggle__
+        return (@pokedex_mode == :all) ? (@pokemon_entries || []).count { |k| dex_set[k] } : pokedex_all_count
       end
-      return 0
+      0
     end
 
     def pokedex_all_count
@@ -3218,28 +3302,62 @@ module VermeilChangeDex
       return n
     end
 
+    # Fuente única para todas las categorías: los slots habilitados por
+    # Data/SpeciesDex/config.json a través de la API de NuevaPokedex.
+    # Si el catálogo falta o está deshabilitado, nunca se vuelve al PBS completo.
     def change_dex_pokedex_set
       return @change_dex_pokedex_set if @change_dex_pokedex_set_built
       @change_dex_pokedex_set_built = true
-      if !defined?(NuevaPokedex) || !NuevaPokedex.respond_to?(:accessible_regions)
-        @change_dex_pokedex_set = nil
-        return nil
-      end
-      # Set de slots EXACTOS de la Pokédex real: [base, form] por slot del
-      # Data/SpeciesDex/config.json. Una forma alternativa solo entra si tiene
-      # slot propio (RATTATA_1) o es la forma base; las formas ocultas quedan fuera.
       set = {}
-      (NuevaPokedex.accessible_regions || []).each do |r|
-        NuevaPokedex.regional_species(r).each do |entry|
-          begin
-            base, form = NuevaPokedex.entry_base_and_form(entry)
-            set[[base, form]] = true
-          rescue StandardError
+      if defined?(NuevaPokedex) && NuevaPokedex.respond_to?(:accessible_regions)
+        (NuevaPokedex.accessible_regions || []).each do |region|
+          NuevaPokedex.regional_species(region).each do |slot|
+            base, form = NuevaPokedex.entry_base_and_form(slot)
+            set[[base.to_sym, form.to_i]] = true
           end
         end
       end
       @change_dex_pokedex_set = set
-      return set
+      set
+    end
+
+    def change_dex_catalog_signature
+      change_dex_pokedex_set.keys.map { |base, form| "#{base},#{form}" }.join("|")
+    end
+
+    def change_dex_catalog_users(users)
+      allowed = change_dex_pokedex_set
+      (users || []).select do |pair|
+        pair.is_a?(Array) && allowed[[pair[0].to_sym, pair[1].to_i]]
+      end
+    end
+
+    def change_dex_catalog_entity_sets
+      return @change_dex_catalog_entity_sets if @change_dex_catalog_entity_sets
+      allowed = change_dex_pokedex_set
+      move_ids = {}
+      ability_ids = {}
+      GameData::Species.each do |data|
+        key = [data.species, data.form.to_i]
+        next unless allowed[key]
+        unless excluded_from_move_categories?(key[0], key[1])
+          species_all_learnable_moves(data).each { |id| move_ids[id] = true }
+          delta = (@species_move_delta || {})[key] || {}
+          [:added, :removed, :added_tutor, :removed_tutor, :added_egg, :removed_egg].each do |kind|
+            (delta[kind] || []).each { |id| move_ids[id] = true }
+          end
+        end
+        unless excluded_from_ability_categories?(key[0], key[1])
+          ((data.abilities || []) + (data.hidden_abilities || [])).compact.each do |id|
+            ability_ids[id] = true if id != :NONE
+          end
+          delta = (@species_ability_delta || {})[key] || {}
+          [:added, :removed].each do |kind|
+            (delta[kind] || []).each { |id| ability_ids[id] = true }
+          end
+        end
+      end
+      @change_dex_catalog_entity_sets = { :moves => move_ids, :abilities => ability_ids }
     end
 
     def draw_category_panel
@@ -6523,7 +6641,9 @@ module VermeilChangeDex
       return false if registry_count <= 0
       load_persistent_detect_cache!
       cached = detect_cache
-      if cached && cached[:version] == DETECT_CACHE_VERSION && cached[:non_pokemon_indexes_ready]
+      if cached && cached[:version] == DETECT_CACHE_VERSION &&
+         cached[:catalog_signature] == Scene.allocate.send(:change_dex_catalog_signature) &&
+         cached[:non_pokemon_indexes_ready]
         # Category lists/counts are ready. Full carrier lists are intentionally
         # lazy now so boot/compilation never scans every species just to fill a
         # popup the player may never open.
