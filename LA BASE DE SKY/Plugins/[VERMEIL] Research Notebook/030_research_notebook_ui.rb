@@ -669,12 +669,23 @@ module ResearchNotebook
         end
       end
       # Una forma áurea pendiente debe mostrar su propia silueta, nunca la forma base.
-      custom_golden = current_section == :golden && silhouette &&
+      custom_golden = current_section == :golden &&
                       ResearchNotebook::Repository.golden_form_sprite_path(entry)
       if custom_golden
-        show_custom_golden_silhouette(base, custom_golden, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 161, 214, 200)
+        show_custom_golden_silhouette(base, custom_golden, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 161, 214, 200, silhouette)
       else
         show_pokemon(base, display_form, silhouette, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 161, 214, 200)
+      end
+      if current_section == :golden && display_form.to_i > 0 &&
+         ResearchNotebook::Repository.golden_form_index(entry) == display_form.to_i &&
+         !custom_golden && !silhouette
+        asset = "Graphics/Pokemon/Front/#{base}_#{display_form}"
+        found = (pbResolveBitmap(asset) rescue nil) if defined?(pbResolveBitmap)
+        if !found
+          @sprites["pokemon"].color = Color.new(215, 172, 52, 70) if @sprites["pokemon"]
+          draw_text(bmp, FOCUS_X + 16, FOCUS_Y + 222, FOCUS_W - 32, 16,
+                    _INTL("Arte de forma pendiente"), 10, RED, 1, true)
+        end
       end
 
       # Suelo/halo bajo el Pokémon, más cercano al tratamiento de MegaDex.
@@ -986,7 +997,7 @@ module ResearchNotebook
       end
     end
 
-    def show_custom_golden_silhouette(species, path, x, y, max_w, max_h)
+    def show_custom_golden_silhouette(species, path, x, y, max_w, max_h, silhouette = true)
       sprite = @sprites["pokemon"]
       return show_pokemon(species, ResearchNotebook::Repository.golden_form_index(species) || 0, true, x, y, max_w, max_h) if !sprite
       begin
@@ -1009,10 +1020,10 @@ module ResearchNotebook
         scale = [max_w.to_f / frame_w, max_h.to_f / frame_h, 1.0].min
         sprite.zoom_x = scale
         sprite.zoom_y = scale
-        sprite.color = Color.new(0, 0, 0, 255)
+        sprite.color = silhouette ? Color.new(0, 0, 0, 255) : Color.new(0, 0, 0, 0)
         @pokemon_base_zoom_x = scale
         @pokemon_base_zoom_y = scale
-        @focus_signature = [species, :custom_golden, path, x, y, max_w, max_h]
+        @focus_signature = [species, :custom_golden, path, silhouette, x, y, max_w, max_h]
       rescue => e
         ResearchNotebook::Repository.log("Silueta áurea custom #{species}: #{e.message}")
         show_pokemon(species, ResearchNotebook::Repository.golden_form_index(species) || 0, true, x, y, max_w, max_h)
