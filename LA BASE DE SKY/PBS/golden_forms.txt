@@ -1,0 +1,37 @@
+# Golden Forms — Pokémon Vermeil
+# [ESPECIE] o [ESPECIE,FORMA_ORIGEN]. Number es la FORMA DESTINO.
+# Un bloque sin Number es un borrador (no activa una transformación).
+# Este PBS tiene prioridad sobre GoldenSystem/species.json exclusivamente para goldenForm.
+# goldenType / goldenTypeReplace continúan en species.json.
+
+[HERACROSS]
+Number = 2
+Ability = UNSTOPPABLECHARGE
+Types = BUG,FIGHTING
+BaseStats = 80,160,65,30,75,115
+
+[CHARIZARD,1]
+Types = FIRE,FLYING
+BaseStats = 78,84,78,109,85,100
+
+[CHARIZARD,2]
+Types = FIRE,FLYING
+BaseStats = 78,84,78,109,85,100
+
+[CHARIZARD,3]
+Types = FIRE,FLYING
+BaseStats = 78,84,78,109,85,100
+
+[PINSIR]
+Number = 2
+Name = Forma Dorada
+Ability = DEADLYGRIP
+Types = BUG,GROUND
+BaseStats = 65,150,140,30,45,95
+
+[HELIOLISK]
+Number = 1
+Name = Forma Dorada
+Types = ELECTRIC,FIRE
+BaseStats = 62,35,42,145,77,145
+
