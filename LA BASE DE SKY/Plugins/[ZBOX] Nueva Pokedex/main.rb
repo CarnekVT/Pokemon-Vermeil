@@ -194,6 +194,18 @@ module NuevaPokedex
     false
   end
 
+  def dex_form_data(base, form)
+    if defined?(GoldenSystem::Data) && form.to_i > 0
+      definition = GoldenSystem::Data.form_definition(base, 0)
+      if definition && definition["number"].to_i == form.to_i
+        return GoldenSystem::Data.build_form_proxy(base, 0, form, definition)
+      end
+    end
+    GameData::Species.get_species_form(base, form.to_i)
+  rescue StandardError
+    GameData::Species.try_get(base)
+  end
+
   def form_seen?(base, form)
     return false unless $player && $player.pokedex
     return $player.pokedex.seen?(base) if form.to_i <= 0
@@ -984,6 +996,17 @@ end
       next if !shown && !own_slot
       forms << form_sp.form
     end
+    # Algunas Formas Doradas viven solo en PBS/golden_forms.txt y son
+    # proxies dinámicos, sin GameData::Species form compilada.
+    if defined?(GoldenSystem::Data)
+      form_id = GoldenSystem::Data.form_number(base, 0)
+      if form_id && form_id > 0
+        own_slot = NuevaPokedex.form_has_own_slot?(@model.region, "#{base}_#{form_id}".to_sym)
+        shown = NuevaPokedex.form_shown?(base, form_id)
+        shown &&= GoldenSystem::Data.visible_form?(base, form_id)
+        forms << form_id if (shown || own_slot) && !forms.include?(form_id)
+      end
+    end
     return forms
   end
 
@@ -1018,7 +1041,7 @@ end
   def current_form_types(entry)
     return entry[:types] if @current_form.nil? || @current_form <= 0
     begin
-      form_sp = GameData::Species.get_species_form(entry[:base_species], @current_form)
+      form_sp = NuevaPokedex.dex_form_data(entry[:base_species], @current_form)
       return form_sp.types if form_sp
     rescue StandardError
     end
@@ -1405,7 +1428,7 @@ end
     selected_pos = form_ids.index(@current_form) || 0
     page_start = (selected_pos / 7) * 7
     form_ids[page_start, 7].each_with_index do |form_id, i|
-      form_sp = (GameData::Species.get_species_form(base, form_id) rescue nil)
+      form_sp = NuevaPokedex.dex_form_data(base, form_id)
       next unless form_sp
       form_known = NuevaPokedex.form_seen?(base, form_id)
       selected = (@current_form == form_id)
@@ -1444,7 +1467,7 @@ end
   def draw_forms_detail(bmp, entry, form_ids)
     form_id = @current_form
     return if !form_ids.include?(form_id)
-    form_sp = GameData::Species.get_species_form(entry[:base_species], form_id) rescue nil
+    form_sp = NuevaPokedex.dex_form_data(entry[:base_species], form_id)
     return if !form_sp
     return unless NuevaPokedex.form_seen?(entry[:base_species], form_id)
     px = 24
