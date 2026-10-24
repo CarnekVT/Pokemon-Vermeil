@@ -1195,10 +1195,13 @@ end
     map_region = NuevaPokedex.dex_region_for(@region)
     mapdata = map_region ? GameData::TownMap.try_get(map_region) : nil
     map_bmp = nil
+    map_asset = nil
     if mapdata && mapdata.filename
       begin
-        map_bmp = AnimatedBitmap.new(_INTL("Graphics/UI/Town Map/{1}", mapdata.filename)).bitmap
-      rescue StandardError
+        map_asset = AnimatedBitmap.new(_INTL("Graphics/UI/Town Map/{1}", mapdata.filename))
+        map_bmp = map_asset.bitmap
+      rescue StandardError => e
+        echoln("[Nueva Pokédex] Town Map: #{e.message}") if defined?(echoln)
         map_bmp = nil
       end
     end
@@ -1212,6 +1215,8 @@ end
     else
       draw_area_text(bmp, [], locations_for_species(entry[:base_species]))
     end
+  ensure
+    map_asset.dispose if map_asset && map_asset.respond_to?(:dispose)
   end
 
   # Dibuja el Town Map de la región (lógica canónica de 048_UI/005 drawPageArea):
