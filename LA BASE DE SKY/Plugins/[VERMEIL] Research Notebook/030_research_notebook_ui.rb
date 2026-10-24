@@ -982,12 +982,11 @@ module ResearchNotebook
     # Sprites de Pokémon / cuadrícula
     #===========================================================================
     def split_species_form(value, fallback_form = 0)
-      raw = value.respond_to?(:id) ? value.id.to_s : value.to_s
-      parts = raw.split(",", 2)
-      base = ResearchNotebook::Repository.normalize_species_id(parts[0])
-      parsed_form = parts[1].to_i if parts.length > 1 && parts[1].to_s.strip =~ /\A-?\d+\z/
-      return [base || parts[0].to_s.strip.to_sym, parsed_form.nil? ? fallback_form.to_i : parsed_form]
-    rescue
+      # Compartir el mismo parser de slots con la Pokédex y el repositorio:
+      # RATTATA_1, RATTATA,1 y formas base deben producir el mismo par.
+      base, form = ResearchNotebook::Repository.species_base_and_form(value)
+      return [base, (form.to_i > 0 ? form.to_i : fallback_form.to_i)]
+    rescue StandardError
       return [value, fallback_form.to_i]
     end
 
