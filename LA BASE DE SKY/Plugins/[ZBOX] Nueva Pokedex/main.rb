@@ -80,6 +80,68 @@ module NuevaPokedex
 
   module_function
 
+  # Localización por idioma del juego sin duplicar gráficos ni registros.
+  POKEDEX_EN = {
+    "Pokédex Nacional" => "National Pokédex",
+    "Región {1}" => "Region {1}",
+    "No se pudo guardar la config de la Pokédex." => "Could not save the Pokédex configuration.",
+    "{1} (Forma {2})" => "{1} (Form {2})",
+    "{1} [mostrar]" => "{1} [show]",
+    "GUARDAR" => "SAVE",
+    "Config guardada." => "Configuration saved.",
+    "Ocultar forma" => "Hide form",
+    "Mostrar forma" => "Show form",
+    "Quitar slot propio" => "Remove separate slot",
+    "Dar slot propio" => "Add separate slot",
+    "Buscar..." => "Search…",
+    "Flechas: explorar  ·  C: ficha  ·  D: ordenar  ·  Z: buscar  ·  X: salir" => "Arrows: Browse · C: Info · D: Sort · Z: Search · X: Exit",
+    "VISTOS: {1}/{2}" => "SEEN: {1}/{2}",
+    "OBTENIDOS: {1}/{2}" => "CAUGHT: {1}/{2}",
+    "POKÉDEX · {1}" => "POKÉDEX · {1}",
+    "Super Shiny" => "Super Shiny",
+    "Normal" => "Normal",
+    "Color: {1}" => "Color: {1}",
+    "Nº {1}" => "No. {1}",
+    "OBTENIDO" => "CAUGHT",
+    "VISTO" => "SEEN",
+    "NO VISTO" => "NOT SEEN",
+    "Categoría: {1}" => "Species: {1}",
+    "Altura: {1} m" => "Height: {1} m",
+    "Peso: {1} kg" => "Weight: {1} kg",
+    "POKÉDEX" => "POKÉDEX",
+    "D: cambiar color" => "D: Change color",
+    "Zona · {1}" => "Area · {1}",
+    "Área desconocida" => "Area unknown",
+    "Localizaciones: {1}" => "Locations: {1}",
+    "Ubicación: desconocida" => "Location: unknown",
+    "Formas de {1}" => "Forms of {1}",
+    "Forma base" => "Base form",
+    "Forma {1}" => "Form {1}",
+    "Color: {1} · Z: cambiar" => "Color: {1} · Z: Change",
+    "{1} ({2})" => "{1} ({2})",
+    "Forma" => "Form",
+    "Buscar Pokémon visto:" => "Search seen Pokémon:",
+    "No hay coincidencias entre tus Pokémon vistos." => "No matches among your seen Pokémon.",
+    "Orden numérico" => "Numerical",
+    "Nombre A-Z" => "Name A–Z",
+    "Más pesado" => "Heaviest",
+    "Más liviano" => "Lightest",
+    "Más alto" => "Tallest",
+    "Más bajo" => "Shortest",
+    "Pokédex N" => "Pokédex",
+    "← Área     → Formas" => "← Area     → Forms"
+  }.freeze
+
+  def t(source, *args)
+    language = if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:language_code)
+                 CarnekTranslateStudio.language_code
+               else
+                 "es"
+               end
+    text = language.to_s == "en" ? (POKEDEX_EN[source.to_s] || source) : source
+    _INTL(text, *args)
+  end
+
   def config
     @config_stamp = nil if !defined?(@config_stamp)
     @config = nil if !defined?(@config)
@@ -133,8 +195,8 @@ module NuevaPokedex
       val = names[region.to_s] || names[region]
       return val if val.is_a?(String) && !val.empty?
     end
-    return _INTL("Pokédex Nacional") if region < 0
-    return _INTL("Región {1}", region + 1)
+    return NuevaPokedex.t("Pokédex Nacional") if region < 0
+    return NuevaPokedex.t("Región {1}", region + 1)
   end
 
   def normalize_entry(entry)
@@ -308,7 +370,7 @@ module NuevaPokedex
       true
     rescue StandardError => e
       echoln("[Nueva Pokédex] No se guardó JSON: #{e.message}") if defined?(echoln)
-      pbMessage(_INTL("No se pudo guardar la config de la Pokédex.")) if defined?(pbMessage)
+      pbMessage(NuevaPokedex.t("No se pudo guardar la config de la Pokédex.")) if defined?(pbMessage)
       false
     ensure
       File.delete(temp) if File.file?(temp)
@@ -332,12 +394,9 @@ module NuevaPokedex
     return @type_icons
   end
 
-  # Hoja canónica de tipos de Pokédex (Graphics/UI/Pokedex/icon_types, tiles
-  # 96x32): la usa 048_UI y la página Data de MUI. Referencia para fichas.
+  # Compatibilidad: esta UI no necesita el atlas duplicado de Pokedex.
   def pokedex_type_icons
-    return @pokedex_type_icons if @pokedex_type_icons
-    @pokedex_type_icons = AnimatedBitmap.new(_INTL("Graphics/UI/Pokedex/icon_types"))
-    return @pokedex_type_icons
+    type_icons
   end
 
   # --- Editor debug de Pokédex (formas visibles / slots) ---
@@ -351,24 +410,24 @@ module NuevaPokedex
     cmds = species_list.map do |entry|
       base, form = entry_base_and_form(entry)
       label = base.to_s
-      label = _INTL("{1} (Forma {2})", base.to_s, form) if form > 0
-      _INTL("{1} [mostrar]", label)
+      label = NuevaPokedex.t("{1} (Forma {2})", base.to_s, form) if form > 0
+      NuevaPokedex.t("{1} [mostrar]", label)
     end
-    cmds << _INTL("GUARDAR")
+    cmds << NuevaPokedex.t("GUARDAR")
     loop do
       cmd = pbShowCommands(nil, cmds, 0)
       break if cmd < 0
       if cmd == cmds.length - 1
         save_config
-        pbMessage(_INTL("Config guardada."))
+        pbMessage(NuevaPokedex.t("Config guardada."))
         break
       end
       entry = species_list[cmd]
       base, form = entry_base_and_form(entry)
       visible = form_shown?(base, form)
-      options = [visible ? _INTL("Ocultar forma") : _INTL("Mostrar forma")]
+      options = [visible ? NuevaPokedex.t("Ocultar forma") : NuevaPokedex.t("Mostrar forma")]
       if form > 0
-        options << (form_has_own_slot?(region, entry) ? _INTL("Quitar slot propio") : _INTL("Dar slot propio"))
+        options << (form_has_own_slot?(region, entry) ? NuevaPokedex.t("Quitar slot propio") : NuevaPokedex.t("Dar slot propio"))
       end
       choice = pbShowCommands(nil, options, -1)
       next if choice < 0
@@ -382,10 +441,10 @@ module NuevaPokedex
       cmds = species_list.map do |e|
         b, f = entry_base_and_form(e)
         l = b.to_s
-        l = _INTL("{1} (Forma {2})", b.to_s, f) if f > 0
-        _INTL("{1} [mostrar]", l)
+        l = NuevaPokedex.t("{1} (Forma {2})", b.to_s, f) if f > 0
+        NuevaPokedex.t("{1} [mostrar]", l)
       end
-      cmds << _INTL("GUARDAR")
+      cmds << NuevaPokedex.t("GUARDAR")
     end
   end
 
@@ -662,7 +721,7 @@ class NuevaPokedexView
     bar_h = 24
     bmp.fill_rect(bar_x, bar_y, bar_w, bar_h, Color.new(30, 30, 40, 200))
     pbDrawShadowText(bmp, bar_x + 8, bar_y + 4, bar_w - 16, bar_h,
-      _INTL("Buscar..."), Color.new(200, 200, 210), Color.new(0, 0, 0))
+      NuevaPokedex.t("Buscar..."), Color.new(200, 200, 210), Color.new(0, 0, 0))
   end
 
 
@@ -847,7 +906,7 @@ end
     draw_counters
     # Leyenda dinámica fuera del panel de la lista: no se hornea en el PNG.
     pbDrawShadowText(bmp, 24, 453, 592, 18,
-      _INTL("Flechas: explorar  ·  C: ficha  ·  D: ordenar  ·  Z: buscar  ·  X: salir"),
+      NuevaPokedex.t("Flechas: explorar  ·  C: ficha  ·  D: ordenar  ·  Z: buscar  ·  X: salir"),
       NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
 
@@ -868,10 +927,10 @@ end
       owned += 1 if NuevaPokedex.slot_owned?(sp)
     end
     pbDrawShadowText(cnt_bmp, NuevaPokedex::COUNT_X + 8, NuevaPokedex::COUNT_Y + 4, 240, 18,
-                     _INTL("VISTOS: {1}/{2}", seen, total),
+                     NuevaPokedex.t("VISTOS: {1}/{2}", seen, total),
                      NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
     pbDrawShadowText(cnt_bmp, NuevaPokedex::COUNT_X + 8, NuevaPokedex::COUNT_Y + 24, 240, 18,
-                     _INTL("OBTENIDOS: {1}/{2}", owned, total),
+                     NuevaPokedex.t("OBTENIDOS: {1}/{2}", owned, total),
                      NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
   end
 
@@ -888,7 +947,7 @@ end
     y_offset = 20
     # Cabecera: total de la dex
     list_bmp.fill_rect(0, 0, NuevaPokedex::LIST_WINDOW_W, 16, NuevaPokedex::COLOR_PANEL)
-    pbDrawShadowText(list_bmp, 6, 0, 320, 16, _INTL("POKÉDEX · {1}", total),
+    pbDrawShadowText(list_bmp, 6, 0, 320, 16, NuevaPokedex.t("POKÉDEX · {1}", total),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     (top...bottom).each_with_index do |i, row|
       entry = @model.data_for(i)
@@ -926,7 +985,7 @@ end
       if form_name && !form_name.empty?
         display_name = "#{entry[:name]} (#{form_name})"
       else
-        display_name = "#{entry[:name]} (Form #{entry[:form]})"
+        display_name = NuevaPokedex.t("{1} (Forma {2})", entry[:name], entry[:form])
       end
     end
     # Nombre a ancho completo (sin tipos en la lista, como la Pokédex canónica)
@@ -1073,11 +1132,11 @@ end
     entry = @model.data_for(@current_index)
     return unless entry && NuevaPokedex.slot_seen?(entry[:species])
     label = case shiny_mode_for(entry)
-            when 1 then _INTL("Shiny")
-            when 2 then _INTL("Super Shiny")
-            else _INTL("Normal")
+            when 1 then NuevaPokedex.t("Shiny")
+            when 2 then NuevaPokedex.t("Super Shiny")
+            else NuevaPokedex.t("Normal")
             end
-    pbDrawShadowText(bmp, x, y, 140, 19, _INTL("Color: {1}", label),
+    pbDrawShadowText(bmp, x, y, 140, 19, NuevaPokedex.t("Color: {1}", label),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
 
@@ -1151,7 +1210,7 @@ end
     # Barra superior: Nº + nombre (+ forma al lado)
     bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, 56, NuevaPokedex::COLOR_PANEL)
     bmp.fill_rect(0, 54, NuevaPokedex::SCREEN_WIDTH, 2, NuevaPokedex::COLOR_ACCENT)
-    pbDrawShadowText(bmp, 20, 3, 160, 16, _INTL("Nº {1}", sprintf("%03d", entry[:number])),
+    pbDrawShadowText(bmp, 20, 3, 160, 16, NuevaPokedex.t("Nº {1}", sprintf("%03d", entry[:number])),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     name_w = bmp.text_size(entry[:name]).width
     pbDrawShadowText(bmp, 20, 20, name_w + 8, 32, entry[:name],
@@ -1173,22 +1232,22 @@ end
     draw_ball(bmp, 604, 30, 10, owned, seen)
     # Columna derecha de datos
     status_color = owned ? Color.new(150, 220, 150, 255) : (seen ? NuevaPokedex::COLOR_ACCENT : NuevaPokedex::COLOR_TEXT_DIM)
-    status_text = owned ? _INTL("OBTENIDO") : (seen ? _INTL("VISTO") : _INTL("NO VISTO"))
+    status_text = owned ? NuevaPokedex.t("OBTENIDO") : (seen ? NuevaPokedex.t("VISTO") : NuevaPokedex.t("NO VISTO"))
     pbDrawShadowText(bmp, 304, 70, 300, 20, status_text, status_color, Color.new(0, 0, 0))
-    pbDrawShadowText(bmp, 304, 100, 300, 20, _INTL("Categoría: {1}", entry[:category]),
+    pbDrawShadowText(bmp, 304, 100, 300, 20, NuevaPokedex.t("Categoría: {1}", entry[:category]),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     draw_entry_types(bmp, entry[:types], 304, 132)
-    pbDrawShadowText(bmp, 304, 178, 200, 20, _INTL("Altura: {1} m", entry[:height] / 10.0),
+    pbDrawShadowText(bmp, 304, 178, 200, 20, NuevaPokedex.t("Altura: {1} m", entry[:height] / 10.0),
                      NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
-    pbDrawShadowText(bmp, 304, 202, 200, 20, _INTL("Peso: {1} kg", entry[:weight] / 10.0),
+    pbDrawShadowText(bmp, 304, 202, 200, 20, NuevaPokedex.t("Peso: {1} kg", entry[:weight] / 10.0),
                      NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
     # Ficha de descripción (ancho completo)
 
-    pbDrawShadowText(bmp, 24, NuevaPokedex::ENTRY_DESC_Y - 22, 120, 18, _INTL("POKÉDEX"),
+    pbDrawShadowText(bmp, 24, NuevaPokedex::ENTRY_DESC_Y - 22, 120, 18, NuevaPokedex.t("POKÉDEX"),
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     draw_entry_description(bmp, entry[:description])
     draw_shiny_status(bmp, 461, 33)
-    pbDrawShadowText(bmp, 462, 280, 150, 19, _INTL("D: cambiar color"),
+    pbDrawShadowText(bmp, 462, 280, 150, 19, NuevaPokedex.t("D: cambiar color"),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
 
@@ -1234,25 +1293,18 @@ end
       begin
         type_number = GameData::Type.get(tid).icon_position
         src = Rect.new(0, type_number * NuevaPokedex::TYPE_ICON_H, NuevaPokedex::TYPE_ICON_W, NuevaPokedex::TYPE_ICON_H)
-        bmp.stretch_blt(Rect.new(x + i * (w + gap), y, w, h), NuevaPokedex.type_icons.bitmap, src)
+        sheet = NuevaPokedex.type_icons.bitmap
+        raise "Missing type badge" if sheet.width < 64 || sheet.height < (type_number + 1) * 28
+        bmp.stretch_blt(Rect.new(x + i * (w + gap), y, w, h), sheet, src)
       rescue StandardError
         draw_type_rect(bmp, tid, x + i * (w + gap), y, w, h)
       end
     end
   end
 
-  # Tipos en la ficha de datos: hoja canónica 96x32 (Graphics/UI/Pokedex/icon_types).
+  # Mismo Graphics/UI/types.png que la Libreta, también en las fichas.
   def draw_entry_types(bmp, types, x, y)
-    return if types.nil? || types.empty?
-    types[0, 2].each_with_index do |tid, i|
-      begin
-        type_number = GameData::Type.get(tid).icon_position
-        src = Rect.new(0, type_number * 32, 96, 32)
-        bmp.blt(x + i * 104, y, NuevaPokedex.pokedex_type_icons.bitmap, src)
-      rescue StandardError
-        draw_type_rect(bmp, tid, x + i * 104, y, 96, 32)
-      end
-    end
+    draw_type_icons(bmp, types, x, y, 80, 35, 8)
   end
 
   def draw_panel(bmp, x, y, w, h)
@@ -1285,7 +1337,7 @@ end
                        NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
     end
     if total_pages > 1
-      pg = _INTL("{1}/{2}", @page + 1, total_pages)
+      pg = NuevaPokedex.t("{1}/{2}", @page + 1, total_pages)
       pbDrawShadowText(bmp, 24 + 8, NuevaPokedex::ENTRY_DESC_Y + NuevaPokedex::ENTRY_DESC_H - 16,
                        200, 16, pg, NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     end
@@ -1303,7 +1355,7 @@ end
     # ubicaciones o contengan textos en inglés. El área ya tiene su cabecera.
     entry = @model.data_for(@current_index)
     return if !entry
-    pbDrawShadowText(bmp, 20, 12, 400, 22, _INTL("Zona · {1}", entry[:name]),
+    pbDrawShadowText(bmp, 20, 12, 400, 22, NuevaPokedex.t("Zona · {1}", entry[:name]),
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     map_region = NuevaPokedex.dex_region_for(@region)
     mapdata = map_region ? GameData::TownMap.try_get(map_region) : nil
@@ -1385,7 +1437,7 @@ end
 
   def draw_area_unknown(bmp)
     # Mensaje sin ventana negra encima del mapa.
-    pbDrawShadowText(bmp, 210, 217, 280, 24, _INTL("Área desconocida"),
+    pbDrawShadowText(bmp, 210, 217, 280, 24, NuevaPokedex.t("Área desconocida"),
                      NuevaPokedex::COLOR_TEXT, Color.new(20, 25, 34))
   end
 
@@ -1395,11 +1447,11 @@ end
     bmp.fill_rect(0, footer_y, NuevaPokedex::SCREEN_WIDTH, 2, NuevaPokedex::COLOR_ACCENT)
     if has_points
       text = names.empty? ? map_name.to_s : names.join(" · ")
-      text = _INTL("Localizaciones: {1}", text)
+      text = NuevaPokedex.t("Localizaciones: {1}", text)
     elsif names.empty?
-      text = _INTL("Ubicación: desconocida")
+      text = NuevaPokedex.t("Ubicación: desconocida")
     else
-      text = _INTL("Localizaciones: {1}", names.join(" · "))
+      text = NuevaPokedex.t("Localizaciones: {1}", names.join(" · "))
     end
     pbDrawShadowText(bmp, 16, footer_y + 10, NuevaPokedex::SCREEN_WIDTH - 32, 20, text,
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
@@ -1505,7 +1557,7 @@ end
     draw_panel(bmp, 318, 24, 310, 400)
     x = 330
     y = 46
-    pbDrawShadowText(bmp, x, y - 24, 290, 18, _INTL("Formas de {1}", entry[:name]),
+    pbDrawShadowText(bmp, x, y - 24, 290, 18, NuevaPokedex.t("Formas de {1}", entry[:name]),
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     selected_pos = form_ids.index(@current_form) || 0
     page_start = (selected_pos / 7) * 7
@@ -1518,24 +1570,24 @@ end
       col = selected ? Color.new(255, 255, 255, 40) : NuevaPokedex::COLOR_PANEL
       bmp.fill_rect(x, row_y, 290, 36, col)
       bmp.fill_rect(x, row_y, 4, 36, NuevaPokedex::COLOR_ACCENT) if selected
-      form_name = form_id == 0 ? _INTL("Forma base") : form_sp.form_name.to_s
-      form_name = _INTL("Forma {1}", form_id) if form_name.nil? || form_name.empty?
+      form_name = form_id == 0 ? NuevaPokedex.t("Forma base") : form_sp.form_name.to_s
+      form_name = NuevaPokedex.t("Forma {1}", form_id) if form_name.nil? || form_name.empty?
       name_c = selected ? NuevaPokedex::COLOR_TEXT : Color.new(190, 190, 190)
       pbDrawShadowText(bmp, x + 12, row_y + 8, 170, 20, form_name, name_c, Color.new(0, 0, 0))
       slot_no = @model.slot_number_for(base, form_id)
       if slot_no
-        pbDrawShadowText(bmp, x + 12, row_y + 26, 90, 11, _INTL("Nº {1}", sprintf("%02d", slot_no)),
+        pbDrawShadowText(bmp, x + 12, row_y + 26, 90, 11, NuevaPokedex.t("Nº {1}", sprintf("%02d", slot_no)),
                          NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
       end
       draw_form_types(bmp, form_sp.types, x + 190, row_y + 6) if form_known
     end
     shiny_label = case shiny_mode_for(entry)
-                  when 0 then _INTL("Normal")
-                  when 1 then _INTL("Shiny")
-                  else        _INTL("Super Shiny")
+                  when 0 then NuevaPokedex.t("Normal")
+                  when 1 then NuevaPokedex.t("Shiny")
+                  else        NuevaPokedex.t("Super Shiny")
                   end
     pbDrawShadowText(bmp, x, y + 7 * 44 + 6, 290, 20,
-                     _INTL("Color: {1} · Z: cambiar", shiny_label),
+                     NuevaPokedex.t("Color: {1} · Z: cambiar", shiny_label),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     if form_ids.length > 7
       pbDrawShadowText(bmp, x + 220, y - 24, 70, 18,
@@ -1561,24 +1613,24 @@ end
     name_txt = form_sp.name.to_s
     if form_id.to_i > 0
       fname = form_sp.form_name.to_s
-      fname = _INTL("Forma {1}", form_id) if fname.empty?
-      name_txt = _INTL("{1} ({2})", name_txt, fname)
+      fname = NuevaPokedex.t("Forma {1}", form_id) if fname.empty?
+      name_txt = NuevaPokedex.t("{1} ({2})", name_txt, fname)
     end
     pbDrawShadowText(bmp, px + 10, py + 6, pw - 92, 18, name_txt,
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     if slot_no
-      pbDrawShadowText(bmp, px + pw - 78, py + 6, 68, 18, _INTL("Nº {1}", sprintf("%03d", slot_no)),
+      pbDrawShadowText(bmp, px + pw - 78, py + 6, 68, 18, NuevaPokedex.t("Nº {1}", sprintf("%03d", slot_no)),
                        NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     else
-      pbDrawShadowText(bmp, px + pw - 78, py + 6, 68, 18, _INTL("Forma"),
+      pbDrawShadowText(bmp, px + pw - 78, py + 6, 68, 18, NuevaPokedex.t("Forma"),
                        NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     end
     draw_type_icons(bmp, form_sp.types, px + 10, py + 28, 52, 22, 6)
-    pbDrawShadowText(bmp, px + 10, py + 56, pw - 20, 16, _INTL("Categoría: {1}", form_sp.category),
+    pbDrawShadowText(bmp, px + 10, py + 56, pw - 20, 16, NuevaPokedex.t("Categoría: {1}", form_sp.category),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     pbDrawShadowText(bmp, px + 10, py + 76, pw - 20, 16,
-                     _INTL("Altura: {1} m", form_sp.height / 10.0) + "   " +
-                     _INTL("Peso: {1} kg", form_sp.weight / 10.0),
+                     NuevaPokedex.t("Altura: {1} m", form_sp.height / 10.0) + "   " +
+                     NuevaPokedex.t("Peso: {1} kg", form_sp.weight / 10.0),
                      NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
     text_w = pw - 20
     tmp = Bitmap.new(text_w, 18)
@@ -1838,7 +1890,7 @@ end
   def search_species
     # Respetar el descubrimiento. No se puede localizar por nombre una entrada
     # todavía oculta, aunque figure en el JSON.
-    query = pbEnterText(_INTL("Buscar Pokémon visto:"), 1, 22, "").to_s.strip.downcase
+    query = pbEnterText(NuevaPokedex.t("Buscar Pokémon visto:"), 1, 22, "").to_s.strip.downcase
     return if query.empty?
     matches = (0...@model.species_count).select do |index|
       slot = @model.species_at(index)
@@ -1847,7 +1899,7 @@ end
       info && info[:name].to_s.downcase.include?(query)
     end
     if matches.empty?
-      pbMessage(_INTL("No hay coincidencias entre tus Pokémon vistos."))
+      pbMessage(NuevaPokedex.t("No hay coincidencias entre tus Pokémon vistos."))
       return
     end
     target = matches.first
@@ -1860,9 +1912,9 @@ end
 
   def pbDexSearchMode
     # SORT real: reordena la lista del modelo (el "search" de la libreta no era útil)
-    commands = [_INTL("Orden numérico"), _INTL("Nombre A-Z"),
-                _INTL("Más pesado"), _INTL("Más liviano"),
-                _INTL("Más alto"), _INTL("Más bajo")]
+    commands = [NuevaPokedex.t("Orden numérico"), NuevaPokedex.t("Nombre A-Z"),
+                NuevaPokedex.t("Más pesado"), NuevaPokedex.t("Más liviano"),
+                NuevaPokedex.t("Más alto"), NuevaPokedex.t("Más bajo")]
     sorts = [:NUM, :NAME, :WEIGHT_DESC, :WEIGHT_ASC, :HEIGHT_DESC, :HEIGHT_ASC]
     cmd = pbShowCommands(nil, commands, 0)
     return if cmd < 0
@@ -1895,7 +1947,7 @@ end
 if defined?(MenuHandlers)
   MenuHandlers.remove(:pause_menu, :nueva_pokedex) rescue false
   MenuHandlers.add(:pause_menu, :nueva_pokedex, {
-    "name"      => _INTL("Pokédex N"),
+    "name"      => NuevaPokedex.t("Pokédex N"),
     "order"     => 10,
     "condition" => proc {
       next false if !NuevaPokedex.enabled?
