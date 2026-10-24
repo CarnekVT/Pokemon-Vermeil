@@ -1,11 +1,12 @@
 # frozen_string_literal: true
-# BAS visual camera defaults for BSS-managed battles.
+# BAS visual camera defaults for exported moves (BSS and Vanilla battles).
 # BAS is the ONLY author of attack-shot choreography. BSS provides the existing
 # camera's world transform; BAS applies a render-only relative shot to that world.
 # Custom camera keyframes ALWAYS take priority over these automatic defaults.
 
 module BASVisibleAttackCameraSettings
   ENABLED = true
+  AUTO_WITHOUT_BSS = true # BAS remains the attack-camera author in Vanilla too.
   USER_ZOOM   = 1.095
   TARGET_ZOOM = 1.135
   WIDE_ZOOM   = 1.055
@@ -40,7 +41,7 @@ module BASVisibleAttackCamera
 
   def bas_visible_auto_camera?
     return false unless BASVisibleAttackCameraSettings::ENABLED
-    return false unless @bas_bss_camera_scene # Without BSS, BAS behaves as before.
+    return false if !@bas_bss_camera_scene && !BASVisibleAttackCameraSettings::AUTO_WITHOUT_BSS
     return false unless @data.is_a?(Hash)
     source = @data["source"].is_a?(Hash) ? @data["source"] : {}
     # No auto camera on common/status/intro/custom animations.
