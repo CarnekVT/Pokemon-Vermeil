@@ -388,11 +388,12 @@ module ResearchNotebook
             dex_list.concat(NuevaPokedex.regional_species(region))
           end
           dex_list.uniq.each_with_index do |slot, i|
-            base, = ResearchNotebook::Repository.species_base_and_form(slot)
-            id = ResearchNotebook::Repository.normalize_species_id(base)
-            next if !id
+            id = catalog_slot_id(slot)
             @order_map[id] = i
             @display_number[id] = i + 1
+            base = base_species(slot)
+            @order_map[base] ||= i
+            @display_number[base] ||= i + 1
           end
         end
       end
@@ -412,7 +413,7 @@ module ResearchNotebook
 
     def dex_number(entry)
       base = ResearchNotebook::Repository.species_base_and_form(entry)[0]
-      return (@display_number[base] || national_number(base)).to_i
+      return (@display_number[catalog_slot_id(entry)] || @display_number[base] || national_number(base)).to_i
     end
 
     def source_species
@@ -478,7 +479,7 @@ module ResearchNotebook
         return [-entry_completion(base), @order_map[base] || 999_999, base.to_s, form.to_i]
       else
         # :DEX - ordenar por número de Pokédex, luego por forma
-        return [@order_map[base] || 999_999, national_number(base), base.to_s, form.to_i]
+        return [@order_map[catalog_slot_id(entry)] || @order_map[base] || 999_999, national_number(base), base.to_s, form.to_i]
       end
     end
 
