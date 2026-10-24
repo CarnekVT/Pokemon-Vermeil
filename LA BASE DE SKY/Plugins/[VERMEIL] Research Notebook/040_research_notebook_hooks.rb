@@ -202,7 +202,7 @@ end
 if defined?(MenuHandlers)
   MenuHandlers.remove(:pause_menu, :research_notebook) if MenuHandlers.respond_to?(:remove)
   MenuHandlers.add(:pause_menu, :research_notebook, {
-    "name"      => _INTL(ResearchNotebook::Settings::MENU_NAME),
+    "name"      => ResearchNotebook.t(ResearchNotebook::Settings::MENU_NAME),
     "order"     => ResearchNotebook::Settings::MENU_ORDER,
     "condition" => proc {
       next false if !ResearchNotebook::Settings::SHOW_IN_PAUSE_MENU
@@ -228,33 +228,33 @@ if defined?(MenuHandlers) && ResearchNotebook::Settings::SHOW_IN_DEBUG_MENU
   end
 
   MenuHandlers.add(:debug_menu, :research_notebook_open, {
-    "name"        => _INTL("Libreta de Investigación"),
+    "name"        => ResearchNotebook.t("Libreta de Investigación"),
     "parent"      => :main,
-    "description" => _INTL("Abre la Libreta de Investigación."),
+    "description" => ResearchNotebook.t("Abre la Libreta de Investigación."),
     "effect"      => proc { pbOpenResearchNotebook }
   })
 
   MenuHandlers.add(:debug_menu, :research_notebook_unlock_test, {
-    "name"        => _INTL("Libreta: desbloquear secciones"),
+    "name"        => ResearchNotebook.t("Libreta: desbloquear secciones"),
     "parent"      => :main,
-    "description" => _INTL("Desbloquea ambas pestañas para pruebas."),
+    "description" => ResearchNotebook.t("Desbloquea ambas pestañas para pruebas."),
     "effect"      => proc {
       pbUnlockResearchNotebook
       pbUnlockArcaneNotebook
       pbUnlockGoldenNotebook
       ResearchNotebook.progress.sync_party_unlocks!
-      pbMessage(_INTL("Pestañas de la Libreta desbloqueadas."))
+      pbMessage(ResearchNotebook.t("Pestañas de la Libreta desbloqueadas."))
     }
   })
 
   MenuHandlers.add(:debug_menu, :research_notebook_resync, {
-    "name"        => _INTL("Libreta: recargar y sincronizar"),
+    "name"        => ResearchNotebook.t("Libreta: recargar y sincronizar"),
     "parent"      => :main,
-    "description" => _INTL("Recarga los datos y revisa equipo y cajas."),
+    "description" => ResearchNotebook.t("Recarga los datos y revisa equipo y cajas."),
     "effect"      => proc {
       ResearchNotebook::Repository.reload!
       ResearchNotebook.progress.sync_unlocks!
-      pbMessage(_INTL("Libreta sincronizada."))
+      pbMessage(ResearchNotebook.t("Libreta sincronizada."))
     }
   })
 end
