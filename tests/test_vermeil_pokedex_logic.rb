@@ -86,7 +86,7 @@ Dir.chdir(File.expand_path("../LA BASE DE SKY",__dir__)) do
   scene.instance_variable_set(:@current_index,base_index)
   check(scene.collect_form_list==[0,2],"El selector excluye formas que poseen slot propio")
   base_entry=scene.instance_variable_get(:@model).data_for(base_index)
-  $PokemonGlobal = Object.new
+  $PokemonGlobal = Struct.new(:encounter_version).new(0)
   scene.store_display_form(base_entry,2)
   check(scene.selected_display_form(base_entry)==2,"Forma elegida persiste en la lista")
   second_scene = PokemonPokedexNueva_Scene.new(9)
