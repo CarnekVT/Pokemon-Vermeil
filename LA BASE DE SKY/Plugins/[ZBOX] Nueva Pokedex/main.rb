@@ -1118,7 +1118,7 @@ end
     draw_scrollbar
     draw_counters
     update_sprite_icon
-    draw_shiny_status(@view.bitmaps["master"], 33, 286)
+    draw_shiny_status(@view.bitmaps["sprite_bg"], 14, 226)
   end
 
   # === INFO STATE ===
@@ -1187,7 +1187,7 @@ end
     pbDrawShadowText(bmp, 24, NuevaPokedex::ENTRY_DESC_Y - 22, 120, 18, _INTL("POKÉDEX"),
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     draw_entry_description(bmp, entry[:description])
-    draw_shiny_status(bmp, 484, 7)
+    draw_shiny_status(bmp, 461, 33)
     pbDrawShadowText(bmp, 462, 280, 150, 19, _INTL("D: cambiar color"),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
@@ -1299,7 +1299,8 @@ end
     # Fondo opaco completo: nada del master (header "Pokédex Payu", lista) se transparenta
     bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT,
                   Color.new(20, 20, 30, 255))
-    @view.skin.draw(bmp, :area_page, 0, 0)
+    # El mapa debe permanecer libre de marcos/bocetos de la skin que tapen
+    # ubicaciones o contengan textos en inglés. El área ya tiene su cabecera.
     entry = @model.data_for(@current_index)
     return if !entry
     pbDrawShadowText(bmp, 20, 12, 400, 22, _INTL("Zona · {1}", entry[:name]),
@@ -1721,6 +1722,7 @@ end
     @state = NuevaPokedex::STATE_AREA
     @view.clear_bitmap("overlay")
     @view.sprites["icon"].visible = false if @view && @view.sprites["icon"]
+    @view.sprites["sprite_bg"].visible = false if @view && @view.sprites["sprite_bg"]
     draw_area
     start_crossfade
   end
@@ -1743,6 +1745,7 @@ end
     end
     pbSEPlay("GUI pokedex cancel")
     @state = NuevaPokedex::STATE_INFO
+    @view.sprites["sprite_bg"].visible = true if @view && @view.sprites["sprite_bg"]
     @view.clear_bitmap("overlay")
     draw_info
     update_sprite_icon if @state == NuevaPokedex::STATE_INFO
