@@ -833,7 +833,7 @@ module ResearchNotebook
       name = unlocked ? ResearchNotebook::Repository.ability_name(ability) : "????"
       draw_text(bmp, FOCUS_X + 18, y + 17, FOCUS_W - 36, 26, name, 17, INK, 0, true)
       draw_text(bmp, FOCUS_X + 18, y + 54, 70, 15, ResearchNotebook.t("TIPOS"), 9, MUTED, 0, true)
-      draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), FOCUS_X + 18, y + 71, 68, 23)
+      draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), FOCUS_X + 18, y + 71, 64, 28)
       status = used ? ResearchNotebook.t("PROBADA") : (unlocked ? ResearchNotebook.t("DESPERTADA") : (potential ? ResearchNotebook.t("POR DESPERTAR") : ResearchNotebook.t("SIN OBSERVAR")))
       draw_text(bmp, FOCUS_X + 166, y + 54, 104, 15, ResearchNotebook.t("ESTADO"), 9, MUTED, 0, true)
       draw_status_chip(bmp, FOCUS_X + 166, y + 71, 104, 23, status, ARCANE)
@@ -851,7 +851,7 @@ module ResearchNotebook
                 ResearchNotebook.t("TIPOS · FORMA DORADA"), 10, GOLDEN_2, 0, true)
       if form_known && ResearchNotebook::Repository.golden_form_configured?(entry)
         draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry),
-                        FOCUS_X + 18, y + 19, 77, 23)
+                        FOCUS_X + 18, y + 19, 64, 28)
       else
         draw_text(bmp, FOCUS_X + 18, y + 19, 145, 23, "????", 14, MUTED, 0, true)
       end
@@ -859,7 +859,7 @@ module ResearchNotebook
       draw_text(bmp, FOCUS_X + 18, y + 55, 140, 15, ResearchNotebook.t("AFINIDAD ÁUREA"), 9, MUTED, 0, true)
       gtype = ResearchNotebook::Repository.golden_type(entry)
       if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
-        draw_type_icons(bmp, [gtype], FOCUS_X + 18, y + 72, 78, 23)
+        draw_type_icons(bmp, [gtype], FOCUS_X + 18, y + 72, 64, 28)
       else
         draw_text(bmp, FOCUS_X + 18, y + 72, 74, 23, "????", 13, MUTED, 0, true)
       end
@@ -1031,11 +1031,11 @@ module ResearchNotebook
       state = power_used ? ResearchNotebook.t("UTILIZADO") : (potential ? ResearchNotebook.t("IDENTIFICADO") : ResearchNotebook.t("SIN OBSERVAR"))
       draw_status_chip(bmp, x + w - 108, y + 2, 108, 21, state, GOLDEN)
       draw_text(bmp, x, y + 34, w, 16, ResearchNotebook.t("TIPOS NATURALES"), 10, MUTED, 0, true)
-      draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), x, y + 51, 68, 23)
+      draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), x, y + 51, 64, 28)
       draw_text(bmp, x, y + 81, w, 16, ResearchNotebook.t("AFINIDAD ÁUREA"), 10, GOLDEN_2, 0, true)
       gtype = ResearchNotebook::Repository.golden_type(base)
       if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
-        draw_type_icons(bmp, [gtype], x, y + 98, 68, 23)
+        draw_type_icons(bmp, [gtype], x, y + 98, 64, 28)
       else
         draw_text(bmp, x, y + 98, 74, 23, "????", 16, MUTED, 0, true)
       end
@@ -1063,7 +1063,7 @@ module ResearchNotebook
       draw_status_chip(bmp, x + w - 104, y + 2, 104, 21, state, GOLDEN)
       draw_text(bmp, x, y + 34, w, 16, ResearchNotebook.t("TIPOS DE LA FORMA DORADA"), 10, MUTED, 0, true)
       if reveal_details
-        draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry), x, y + 51, 68, 23)
+        draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry), x, y + 51, 64, 28)
       else
         draw_text(bmp, x, y + 51, 138, 23, "????", 16, MUTED, 0, true)
       end
