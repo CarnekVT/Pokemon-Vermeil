@@ -189,6 +189,13 @@ class Battle
     return false if !pbCanUseGoldenMechanic?(idxBattler,:POWER,assignment)
     battler.pokemon.activateGoldenPower
     pbConsumeGoldenUse(idxBattler,:POWER)
+    if defined?(pbResearchGoldenPowerActivated)
+      begin
+        pbResearchGoldenPowerActivated(battler, pbOwnedByPlayer?(idxBattler))
+      rescue StandardError => e
+        echoln("[Golden Notebook] Poder: #{e.message}") if defined?(echoln)
+      end
+    end
     pbDisplay(_INTL("¡{1} rebosa de Poder Dorado!",battler.pbThis))
     battler.pbApplyGoldenVane(true)
     return true
