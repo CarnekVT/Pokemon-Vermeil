@@ -45,7 +45,30 @@ def check(value,message)
   puts "OK #{message}"
 end
 
+# Localización ES/EN acoplada a Translate Studio, sin arrancar mkxp.
+module CarnekTranslateStudio
+  @locale_for_qa = "es"
+  def self.language_code; @locale_for_qa; end
+  def self.language_code=(code); @locale_for_qa = code; end
+end
+def _INTL(template, *args)
+  template.to_s.gsub(/\\{(\\d+)\\}/) { |token| args[$1.to_i - 1] || token }.to_s
+end
+
 Dir.chdir(File.expand_path("../LA BASE DE SKY",__dir__)) do
+  CarnekTranslateStudio.language_code = "en"
+  check(NuevaPokedex.t("VISTOS: {1}/{2}", 8, 66) == "SEEN: 8/66",
+        "Las cifras de New Pokédex se muestran en inglés")
+  check(NuevaPokedex.t("Formas de {1}", "Rattata") == "Forms of Rattata",
+        "La vista de formas respeta el selector de idioma")
+  CarnekTranslateStudio.language_code = "es"
+  check(NuevaPokedex.t("Formas de {1}", "Rattata") == "Formas de Rattata",
+        "La vista de formas vuelve al español")
+  check(NewPokedexConfig::CONFIG[:use_custom_ui] == false,
+        "La skin clásica revisada es el aspecto inicial")
+  ui_source = File.read("Plugins/[ZBOX] Nueva Pokedex/main.rb")
+  check(ui_source.include?("draw_type_icons(bmp, types, x, y, 80, 35, 8)"),
+        "La ficha de New Pokédex emplea el atlas types.png")
   regions=NuevaPokedex.enabled_dexes
   check(regions==[9],"La región 9 está habilitada y no se inventan regiones")
   slots=NuevaPokedex.regional_species(9)
