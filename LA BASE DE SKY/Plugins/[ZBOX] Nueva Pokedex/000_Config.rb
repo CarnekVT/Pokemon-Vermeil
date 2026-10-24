@@ -11,8 +11,8 @@ module NewPokedexConfig
       2 => "Pokédex Especial"
     },
     # Paths to Dex JSON data
-    :dex_json_path => "Data/Pokedex/dexes.json",
-    :dex_json_dir  => "Data/Pokedex",
+    :dex_json_path => "Data/SpeciesDex/config.json",
+    :dex_json_dir  => "Data/SpeciesDex",
     # Audio / Gamefeel options
     :play_cursor_se   => true,
     :play_decision_se => true,
