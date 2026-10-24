@@ -60,6 +60,7 @@ module ResearchNotebook
 
     def initialize
       @sprites = {}
+      @skin = ResearchNotebook::Skin.new(ResearchNotebook::Settings::USE_CUSTOM_UI)
       @viewport = nil
       @sections = []
       @section_index = 0
@@ -175,6 +176,7 @@ module ResearchNotebook
     end
 
     def dispose
+      @skin.dispose if @skin
       dispose_grid_icons
       begin
         @type_sheet.dispose if @type_sheet && @type_sheet.respond_to?(:dispose)
@@ -549,6 +551,8 @@ module ResearchNotebook
       end
       bmp.fill_rect(0, 0, WIDTH, HEADER_H, COVER)
       bmp.fill_rect(0, FOOTER_Y, WIDTH, HEIGHT - FOOTER_Y, COVER)
+      # Arte de cuaderno editable: 640x480, detrás de todos los datos.
+      @skin.draw(bmp, :background, 0, 0) if @skin
       draw_text(bmp, 18, 10, 286, 30, _INTL("LIBRETA DE INVESTIGACIÓN"), 19, WHITE, 0, true)
     end
 
@@ -591,7 +595,10 @@ module ResearchNotebook
         xx = x + i * w
         active = (i == @section_index)
         color = entry[0] == :arcane ? ARCANE : GOLDEN
-        bmp.fill_rect(xx, 8, w - 4, 37, active ? color : Color.new(87, 70, 55))
+        tab_key = entry[0] == :arcane ? :tab_arcane : :tab_golden
+        tab_drawn = (@sections.length == 2 && @skin && @skin.draw(bmp, tab_key, xx, 8))
+        bmp.fill_rect(xx, 8, w - 4, 37, active ? color : Color.new(87, 70, 55)) if !tab_drawn
+        bmp.fill_rect(xx, 42, w - 4, 3, color) if active
         draw_text(bmp, xx + 4, 13, w - 12, 26, label, 12, active ? INK : WHITE, 1, true)
       end
       subtitle = current_section == :arcane ? _INTL("Notas sobre energía arcana") : _INTL("Notas sobre energía áurea")
@@ -629,8 +636,9 @@ module ResearchNotebook
       known = species_identity_known?(entry)
       color = section_color
       draw_card(bmp, FOCUS_X, FOCUS_Y, FOCUS_W, FOCUS_H, PAPER_2)
+      @skin.draw(bmp, :focus_panel, FOCUS_X, FOCUS_Y) if @skin
 
-      num = dex_number(base)
+      num = dex_number(entry)
       number = num > 0 ? format("#%03d", num) : "#---"
       name = known ? ResearchNotebook::Repository.species_name(entry) : "???"
       draw_text(bmp, FOCUS_X + 14, FOCUS_Y + 10, 62, 20, number, 12, MUTED, 0, true)
@@ -716,6 +724,7 @@ module ResearchNotebook
 
     def draw_grid_panel(bmp)
       color = section_color
+      @skin.draw(bmp, :grid_panel, GRID_X, GRID_Y) if @skin
       bmp.fill_rect(GRID_X, 59, GRID_W, 1, Color.new(255, 255, 255, 45))
       draw_text(bmp, GRID_X + 3, 59, 134, 18, _INTL("Especies: {1}", @species.length), 11, MUTED, 0, false)
       draw_text(bmp, GRID_X + 138, 59, 103, 18, _INTL("Orden: {1}", _INTL(SORT_LABELS[@sort_mode] || @sort_mode.to_s)), 11, INK, 1, true)
@@ -742,8 +751,11 @@ module ResearchNotebook
       species = @species[idx]
       known = species_identity_known?(species)
       fill = selected ? Color.new(section_color.red, section_color.green, section_color.blue, 70) : PAPER_2
-      bmp.fill_rect(x, y, CELL_W, CELL_H, Color.new(154, 135, 103, 110))
-      bmp.fill_rect(x + 1, y + 1, CELL_W - 2, CELL_H - 2, fill)
+      asset = selected ? :grid_cell_selected : :grid_cell
+      unless @skin && @skin.draw(bmp, asset, x, y)
+        bmp.fill_rect(x, y, CELL_W, CELL_H, Color.new(154, 135, 103, 110))
+        bmp.fill_rect(x + 1, y + 1, CELL_W - 2, CELL_H - 2, fill)
+      end
       num = dex_number(species)
       label = known ? (num > 0 ? format("%03d", num) : "---") : "???"
       draw_text(bmp, x + 3, y + 2, CELL_W - 6, 14, label, 8, known ? MUTED : Color.new(150, 142, 127), 0, true)
@@ -764,8 +776,9 @@ module ResearchNotebook
       w = GRID_W
       h = 365
       draw_card(bmp, x, y, w, h, PAPER_2)
+      @skin.draw(bmp, :detail_panel, x, y) if @skin
       color = section_color
-      bmp.fill_rect(x, y, 6, h, color)
+      bmp.fill_rect(x, y, 4, h, color)
       entry = selected_species
       base, form = ResearchNotebook::Repository.species_base_and_form(entry)
       if current_section == :arcane
@@ -1225,6 +1238,7 @@ module ResearchNotebook
       spine = 307
       pages.bitmap.fill_rect(spine, 4, 2, BOOK_H - 8, Color.new(145, 124, 92, 150))
       pages.bitmap.fill_rect(spine + 2, 5, 2, BOOK_H - 10, Color.new(255, 255, 255, 60))
+      @skin.draw(pages.bitmap, :pages, 0, 0) if @skin
       4.times { |i| pages.bitmap.fill_rect(BOOK_W - 10 + i * 2, 8, 1, BOOK_H - 16, Color.new(170, 150, 118, 100)) }
 
       @sprites["front_cover"] = BitmapSprite.new(BOOK_W, BOOK_H, @viewport)
@@ -1244,6 +1258,7 @@ module ResearchNotebook
       label_x = (BOOK_W - label_w) / 2
       bmp.fill_rect(label_x, 94, label_w, 122, Color.new(50, 36, 28))
       bmp.fill_rect(label_x + 6, 100, label_w - 12, 110, Color.new(91, 66, 43))
+      @skin.draw(bmp, :cover, 0, 0) if @skin
       draw_text(bmp, label_x + 16, 118, label_w - 32, 34, _INTL("LIBRETA"), 25, WHITE, 1, true)
       draw_text(bmp, label_x + 16, 153, label_w - 32, 28, _INTL("DE INVESTIGACIÓN"), 15, WHITE, 1, true)
       draw_ring(bmp, BOOK_W / 2, 265, 54, Color.new(216, 190, 126, 125))
