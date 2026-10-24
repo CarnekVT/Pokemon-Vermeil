@@ -284,8 +284,21 @@ module ResearchNotebook
     end
 
     def detail_page_count
-      return 2 if current_section == :golden && ResearchNotebook::Repository.golden_form_configured?(selected_species)
-      return 1
+      return 1 unless current_section == :golden
+      return 1 unless ResearchNotebook::Repository.golden_form_configured?(selected_species)
+      moves = golden_move_records(selected_species)
+      moves.empty? ? 2 : 3
+    end
+
+    def golden_move_records(entry)
+      return [] unless defined?(GoldenSystem::GoldenMoves)
+      base, source_form = ResearchNotebook::Repository.species_base_and_form(entry)
+      target = ResearchNotebook::Repository.golden_form_index(entry)
+      return [] unless target
+      GoldenSystem::GoldenMoves.all.values.select do |item|
+        item[:species] == base && item[:form].to_i == target &&
+          (item[:source_form].nil? || item[:source_form].to_i == source_form)
+      end.sort_by { |item| item[:name].to_s }
     end
 
     def open_detail
@@ -419,15 +432,10 @@ module ResearchNotebook
     end
 
     def source_species
-      list = []
-      if current_section == :arcane
-        list.concat(ResearchNotebook::Repository.arcane_entries_with_forms)
-      elsif current_section == :golden
-        list.concat(ResearchNotebook::Repository.golden_entries_with_forms)
-      end
-      list = list.compact.uniq
-      admitted = catalog_admission_set
-      return list.select { |entry| admitted.key?(catalog_slot_id(entry)) }
+      # El catálogo de la región habilitada ES la lista completa de la Libreta.
+      # Las habilidades y formas especiales son atributos del slot, no filtros
+      # que hagan desaparecer Pokémon del libro.
+      catalog_admission_set.keys
     end
 
     # Admisiones de la Pokédex activa: slots del Data/SpeciesDex/config.json de
@@ -454,7 +462,7 @@ module ResearchNotebook
     def rebuild_species(preferred = nil)
       list = source_species
       if !ResearchNotebook::Settings::SHOW_UNOWNED_ENTRIES
-        list.select! { |sp| entry_known?(sp) }
+        list.select! { |sp| species_identity_known?(sp) }
       end
       list.sort_by! { |sp| sort_key(sp) }
       @species = list
@@ -476,9 +484,9 @@ module ResearchNotebook
         name = known ? ResearchNotebook::Repository.species_name(entry).downcase : "zzz"
         # Las formas van después de la especie base
         form_sort = form.to_i
-        return [known ? 0 : 1, name, dex_number(base), form_sort]
+        return [known ? 0 : 1, name, dex_number(entry), form_sort]
       when :STATUS
-        return [-entry_completion(base), @order_map[base] || 999_999, base.to_s, form.to_i]
+        return [-entry_completion(entry), @order_map[catalog_slot_id(entry)] || 999_999, base.to_s, form.to_i]
       else
         # :DEX - ordenar por número de Pokédex, luego por forma
         return [@order_map[catalog_slot_id(entry)] || @order_map[base] || 999_999, national_number(base), base.to_s, form.to_i]
@@ -497,8 +505,10 @@ module ResearchNotebook
     end
 
     def species_identity_known?(entry)
-      base = base_species(entry)
-      return true if ResearchNotebook.progress.owned?(base)
+      # Un slot de forma alternativa no se revela por avistar solamente su base.
+      if defined?(NuevaPokedex) && NuevaPokedex.respond_to?(:slot_seen?)
+        return true if NuevaPokedex.slot_seen?(catalog_slot_id(entry))
+      end
       return entry_known?(entry)
     end
 
@@ -647,20 +657,19 @@ module ResearchNotebook
       # Determinar la forma a mostrar
       display_form = form
       silhouette = !known
-      if current_section == :golden && ResearchNotebook::Repository.golden_form_configured?(base)
-        golden_form_idx = ResearchNotebook::Repository.golden_form_index(base) || 0
-        if display_form == 0
+      if current_section == :golden && ResearchNotebook::Repository.golden_form_configured?(entry)
+        golden_form_idx = ResearchNotebook::Repository.golden_form_index(entry)
+        if golden_form_idx
           display_form = golden_form_idx
-        end
-        if ResearchNotebook.progress.golden_form_seen?(base) || ResearchNotebook.progress.golden_form_used?(base)
-          silhouette = false
-        elsif ResearchNotebook.progress.golden_potential_known?(base)
-          silhouette = true
+          # Las formas descubiertas se revelan; no las formas secretas.
+          revealed = ResearchNotebook.progress.golden_form_seen?(base) ||
+                     ResearchNotebook.progress.golden_form_used?(base)
+          silhouette = !revealed
         end
       end
       # Una forma áurea pendiente debe mostrar su propia silueta, nunca la forma base.
       custom_golden = current_section == :golden && silhouette &&
-                      ResearchNotebook::Repository.golden_form_sprite_path(base)
+                      ResearchNotebook::Repository.golden_form_sprite_path(entry)
       if custom_golden
         show_custom_golden_silhouette(base, custom_golden, FOCUS_X + FOCUS_W / 2, FOCUS_Y + 161, 214, 200)
       else
@@ -675,7 +684,7 @@ module ResearchNotebook
       if current_section == :arcane
         draw_arcane_focus_info(bmp, base)
       else
-        draw_golden_focus_info(bmp, base)
+        draw_golden_focus_info(bmp, entry)
       end
     end
 
@@ -695,7 +704,8 @@ module ResearchNotebook
       draw_status_chip(bmp, FOCUS_X + 166, y + 71, 104, 23, status, ARCANE)
     end
 
-    def draw_golden_focus_info(bmp, base)
+    def draw_golden_focus_info(bmp, entry)
+      base = base_species(entry)
       y = FOCUS_Y + 268
       potential = ResearchNotebook.progress.golden_potential_known?(base)
       form_seen = ResearchNotebook.progress.golden_form_seen?(base)
@@ -708,7 +718,7 @@ module ResearchNotebook
         draw_text(bmp, FOCUS_X + 18, y + 19, 74, 23, "????", 15, MUTED, 0, true)
       end
       draw_text(bmp, FOCUS_X + 18, y + 58, 116, 15, _INTL("FORMA DORADA"), 9, MUTED, 0, true)
-      form_text = if !ResearchNotebook::Repository.golden_form_configured?(base)
+      form_text = if !ResearchNotebook::Repository.golden_form_configured?(entry)
                     _INTL("NO POSEE")
                   elsif form_used
                     _INTL("UTILIZADA")
@@ -822,10 +832,34 @@ module ResearchNotebook
     end
 
     def draw_golden_detail(bmp, base, x, y, w, h)
-      if @detail_page == 0 || !ResearchNotebook::Repository.golden_form_configured?(base)
+      entry = selected_species
+      if @detail_page == 0 || !ResearchNotebook::Repository.golden_form_configured?(entry)
         draw_golden_power_detail(bmp, base, x, y, w, h)
+      elsif @detail_page == 1
+        draw_golden_form_detail(bmp, entry, x, y, w, h)
       else
-        draw_golden_form_detail(bmp, base, x, y, w, h)
+        draw_golden_moves_detail(bmp, entry, x, y, w, h)
+      end
+    end
+
+    def draw_golden_moves_detail(bmp, entry, x, y, w, h)
+      base = base_species(entry)
+      used = ResearchNotebook.progress.golden_form_used?(base)
+      draw_text(bmp, x, y, w, 25, _INTL("Técnicas doradas"), 18, GOLDEN_2, 0, true)
+      moves = golden_move_records(entry)
+      if !used
+        draw_wrapped(bmp, x, y + 45, w,
+          _INTL("Los movimientos de esta forma se registrarán después de utilizarla en combate."),
+          13, MUTED, 21, 5)
+        return
+      end
+      moves.first(6).each_with_index do |move, i|
+        yy = y + 35 + i * 49
+        draw_card(bmp, x, yy, w, 46, PAPER)
+        draw_text(bmp, x + 8, yy + 3, w - 16, 20, move[:name] || move[:move].to_s, 13, INK, 0, true)
+        info = [move[:type], move[:power] ? "POT #{move[:power]}" : nil,
+                move[:accuracy] ? "PREC #{move[:accuracy]}" : nil].compact.join("  ·  ")
+        draw_text(bmp, x + 8, yy + 23, w - 16, 18, info, 10, GOLDEN_2, 0, false)
       end
     end
 
@@ -853,12 +887,13 @@ module ResearchNotebook
       draw_wrapped(bmp, x + 10, y + 160, w - 20, desc, 13, potential ? INK : MUTED, 18, 4)
       draw_text(bmp, x, y + 252, w, 16, _INTL("CATALIZADOR"), 10, GOLDEN_2, 0, true)
       draw_item_card(bmp, x, y + 270, w, 43, ResearchNotebook::Settings::GOLDEN_FRAGMENT_ITEM, GOLDEN, _INTL("Fragmento Dorado"))
-      if ResearchNotebook::Repository.golden_form_configured?(base)
+      if ResearchNotebook::Repository.golden_form_configured?(selected_species)
         draw_text(bmp, x, y + 321, w, 17, _INTL("← Poder        Forma →"), 10, GOLDEN_2, 1, true)
       end
     end
 
-    def draw_golden_form_detail(bmp, base, x, y, w, h)
+    def draw_golden_form_detail(bmp, entry, x, y, w, h)
+      base = base_species(entry)
       seen = ResearchNotebook.progress.golden_form_seen?(base)
       used = ResearchNotebook.progress.golden_form_used?(base)
       reveal_details = used || !ResearchNotebook::Settings::GOLDEN_DETAILS_REQUIRE_USE
@@ -867,17 +902,17 @@ module ResearchNotebook
       draw_status_chip(bmp, x + w - 104, y + 2, 104, 21, state, GOLDEN)
       draw_text(bmp, x, y + 34, w, 16, _INTL("TIPOS"), 10, MUTED, 0, true)
       if reveal_details
-        draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(base), x, y + 51, 68, 23)
+        draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry), x, y + 51, 68, 23)
       else
         draw_text(bmp, x, y + 51, 138, 23, "????", 16, MUTED, 0, true)
       end
       draw_text(bmp, x, y + 81, w, 16, _INTL("HABILIDAD"), 10, MUTED, 0, true)
-      ability = reveal_details ? ResearchNotebook::Repository.golden_ability(base) : nil
+      ability = reveal_details ? ResearchNotebook::Repository.golden_ability(entry) : nil
       draw_text(bmp, x, y + 97, w, 25, reveal_details ? ResearchNotebook::Repository.ability_name(ability) : "????", 16, INK, 0, true)
       draw_text(bmp, x, y + 128, w, 16, _INTL("ESTADÍSTICAS"), 10, GOLDEN_2, 0, true)
       if reveal_details
-        stats = ResearchNotebook::Repository.golden_stats(base)
-        form_index = ResearchNotebook::Repository.golden_form_index(base) || 0
+        stats = ResearchNotebook::Repository.golden_stats(entry)
+        form_index = ResearchNotebook::Repository.golden_form_index(entry) || 0
         stats ||= ResearchNotebook::Repository.base_stats(base, form_index)
         base_stats = ResearchNotebook::Repository.base_stats(base, 0)
         draw_stat_panel(bmp, x, y + 145, w, 92, stats, base_stats, GOLDEN)
