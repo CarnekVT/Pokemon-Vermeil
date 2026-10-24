@@ -86,8 +86,12 @@ Dir.chdir(File.expand_path("../LA BASE DE SKY",__dir__)) do
   scene.instance_variable_set(:@current_index,base_index)
   check(scene.collect_form_list==[0,2],"El selector excluye formas que poseen slot propio")
   base_entry=scene.instance_variable_get(:@model).data_for(base_index)
+  $PokemonGlobal = Object.new
   scene.store_display_form(base_entry,2)
   check(scene.selected_display_form(base_entry)==2,"Forma elegida persiste en la lista")
+  second_scene = PokemonPokedexNueva_Scene.new(9)
+  check(second_scene.selected_display_form(base_entry)==2,
+        "Forma elegida permanece después de cerrar y reabrir la Pokédex")
   changed=scene.effective_entry(base_entry)
   check(changed[:types]==[:DARK] && changed[:number]==base_entry[:number],
         "Forma elegida actualiza ficha sin alterar el número regional")
