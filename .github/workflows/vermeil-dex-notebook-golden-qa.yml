@@ -1,0 +1,41 @@
+name: Vermeil Pokedex Notebook Golden QA
+on:
+  push:
+    branches: [new-MK-for-2.5D-Testeo]
+    paths:
+      - 'LA BASE DE SKY/PBS/golden_forms.txt'
+      - 'LA BASE DE SKY/PBS/golden_moves.txt'
+      - 'LA BASE DE SKY/Plugins/[Balance] Golden Power/**'
+      - 'LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/**'
+      - 'LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/**'
+      - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Golden Systems Studio/index.js'
+      - 'tests/test_vermeil_notebook_pokedex_golden.rb'
+      - '.github/workflows/vermeil-dex-notebook-golden-qa.yml'
+  workflow_dispatch:
+
+jobs:
+  lint-and-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Ruby syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -c "LA BASE DE SKY/Plugins/[Balance] Golden Power/00_PBS_Source.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[Balance] Golden Power/00_DataStore.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[Balance] Golden Power/04_Golden_Moves.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/015_catalog_and_golden_pbs.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/030_research_notebook_ui.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/main.rb"
+          ruby -c "tests/test_vermeil_notebook_pokedex_golden.rb"
+      - name: Golden Studio syntax
+        run: node --check "LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Golden Systems Studio/index.js"
+      - name: PBS golden form and move validation
+        run: ruby tests/test_vermeil_notebook_pokedex_golden.rb
