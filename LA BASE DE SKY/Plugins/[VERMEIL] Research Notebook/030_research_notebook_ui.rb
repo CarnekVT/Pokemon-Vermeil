@@ -744,27 +744,37 @@ module ResearchNotebook
       potential = ResearchNotebook.progress.golden_potential_known?(base)
       form_seen = ResearchNotebook.progress.golden_form_seen?(base)
       form_used = ResearchNotebook.progress.golden_form_used?(base)
-      draw_text(bmp, FOCUS_X + 18, y, FOCUS_W - 36, 16, _INTL("AFINIDAD ÁUREA"), 10, GOLDEN_2, 0, true)
+      form_known = form_seen || form_used
+      # Primera fila: los tipos REALES de la forma, no el tipo de su Poder Dorado.
+      draw_text(bmp, FOCUS_X + 18, y, FOCUS_W - 36, 16,
+                _INTL("TIPOS · FORMA DORADA"), 10, GOLDEN_2, 0, true)
+      if form_known && ResearchNotebook::Repository.golden_form_configured?(entry)
+        draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry),
+                        FOCUS_X + 18, y + 19, 77, 23)
+      else
+        draw_text(bmp, FOCUS_X + 18, y + 19, 145, 23, "????", 14, MUTED, 0, true)
+      end
+      # Segunda fila: la afinidad es una propiedad distinta de la forma.
+      draw_text(bmp, FOCUS_X + 18, y + 55, 140, 15, _INTL("AFINIDAD ÁUREA"), 9, MUTED, 0, true)
       gtype = ResearchNotebook::Repository.golden_type(entry)
       if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
-        draw_type_icons(bmp, [gtype], FOCUS_X + 18, y + 19, 68, 23)
+        draw_type_icons(bmp, [gtype], FOCUS_X + 18, y + 72, 78, 23)
       else
-        draw_text(bmp, FOCUS_X + 18, y + 19, 74, 23, "????", 15, MUTED, 0, true)
+        draw_text(bmp, FOCUS_X + 18, y + 72, 74, 23, "????", 13, MUTED, 0, true)
       end
-      draw_text(bmp, FOCUS_X + 18, y + 54, 138, 15, _INTL("AFINIDAD ÁUREA"), 9, MUTED, 0, true)
-      draw_text(bmp, FOCUS_X + 170, y + 54, 102, 15, _INTL("ESTADO"), 9, MUTED, 0, true)
-      form_text = if !ResearchNotebook::Repository.golden_form_configured?(entry)
-                    _INTL("NO POSEE")
-                  elsif form_used
-                    _INTL("UTILIZADA")
-                  elsif form_seen
-                    _INTL("OBSERVADA")
-                  elsif potential
-                    _INTL("POR VER")
-                  else
-                    _INTL("SIN OBSERVAR")
-                  end
-      draw_status_chip(bmp, FOCUS_X + 166, y + 72, 104, 23, form_text, GOLDEN)
+      draw_text(bmp, FOCUS_X + 170, y + 55, 104, 15, _INTL("ESTADO FORMA"), 9, MUTED, 0, true)
+      status = if !ResearchNotebook::Repository.golden_form_configured?(entry)
+                 _INTL("NO POSEE")
+               elsif form_used
+                 _INTL("UTILIZADA")
+               elsif form_seen
+                 _INTL("OBSERVADA")
+               elsif potential
+                 _INTL("POR VER")
+               else
+                 _INTL("SIN OBSERVAR")
+               end
+      draw_status_chip(bmp, FOCUS_X + 166, y + 72, 104, 23, status, GOLDEN)
     end
 
     def draw_grid_panel(bmp)
@@ -903,9 +913,9 @@ module ResearchNotebook
         required = move_data && move_data.respond_to?(:name) ? move_data.name : move[:move].to_s
         result = move[:name].to_s.empty? ? required : move[:name]
         draw_text(bmp, x + 8, yy + 4, w - 16, 17,
-                  _INTL("REQUIERE · {1}", required), 11, MUTED, 0, false)
+                  _INTL("MOVIMIENTO BASE: {1}", required), 11, MUTED, 0, false)
         draw_text(bmp, x + 8, yy + 22, w - 16, 23,
-                  _INTL("→ {1}", result), 14, INK, 0, true)
+                  _INTL("RESULTANTE: {1}", result), 14, INK, 0, true)
         type = move[:type] && (GameData::Type.get(move[:type]).name rescue move[:type].to_s)
         info = [type, move[:power] ? _INTL("Pot. {1}", move[:power]) : nil,
                 move[:accuracy] ? _INTL("Prec. {1}", move[:accuracy]) : nil].compact.join("  ·  ")
@@ -1520,7 +1530,7 @@ module ResearchNotebook
 
     def draw_status_chip(bmp, x, y, w, h, text, color)
       bmp.fill_rect(x, y, w, h, color)
-      draw_text(bmp, x + 3, y + 1, w - 6, h - 2, text, 9, INK, 1, true)
+      draw_text(bmp, x + 3, y + 4, w - 6, h - 8, text, 11, INK, 1, true)
     end
 
     def draw_progress_dots(bmp, x, y, total, active, color)
@@ -1640,7 +1650,7 @@ module ResearchNotebook
       if @sections.empty?
         text = _INTL("Atrás · Cerrar")
       elsif @detail_open
-        text = current_section == :golden && detail_page_count > 1 ? _INTL("↑↓ Pokémon     ←→ Página     C/X Volver") : _INTL("↑↓ Pokémon     C/X Volver")
+        text = current_section == :golden && detail_page_count > 1 ? _INTL("Arr/Abj: Pokémon    Izq/Der: Página    C/X: Volver") : _INTL("Arr/Abj: Pokémon    C/X: Volver")
       else
         text = _INTL("Flechas Mover   C Ficha   Z Sección   D Ordenar   X Cerrar")
       end
