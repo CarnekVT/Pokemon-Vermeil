@@ -1457,7 +1457,7 @@ end
 
   def draw_area_footer(bmp, map_name, names, has_points)
     footer_y = NuevaPokedex::SCREEN_HEIGHT - 40
-    bmp.fill_rect(0, footer_y, NuevaPokedex::SCREEN_WIDTH, 40, NuevaPokedex::COLOR_PANEL_DARK)
+    bmp.fill_rect(0, footer_y, NuevaPokedex::SCREEN_WIDTH, 40, NuevaPokedex::COLOR_PANEL)
     bmp.fill_rect(0, footer_y, NuevaPokedex::SCREEN_WIDTH, 2, NuevaPokedex::COLOR_ACCENT)
     if has_points
       text = names.empty? ? map_name.to_s : names.join(" · ")
