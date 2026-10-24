@@ -238,7 +238,7 @@ module ResearchNotebook
 
     def file_stamp(path)
       return nil if !File.exist?(path)
-      return [File.mtime(path).to_i, File.size(path)]
+      return [File.mtime(path).to_f, File.size(path)]
     rescue
       return nil
     end
