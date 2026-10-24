@@ -1246,11 +1246,23 @@ module ResearchNotebook
         draw_text(bmp, x, y, target_w, target_h, "—", 12, MUTED, 1, false)
         return
       end
+      palette = {
+        :NORMAL => [120, 115, 105], :FIGHTING => [168, 57, 47],
+        :FLYING => [110, 110, 167], :POISON => [133, 65, 143],
+        :GROUND => [147, 109, 54], :ROCK => [130, 107, 53],
+        :BUG => [101, 137, 36], :GHOST => [95, 74, 135],
+        :STEEL => [105, 112, 137], :FIRE => [184, 83, 37],
+        :WATER => [57, 104, 172], :GRASS => [73, 137, 64],
+        :ELECTRIC => [162, 121, 23], :PSYCHIC => [177, 68, 110],
+        :ICE => [67, 135, 148], :DRAGON => [95, 67, 165],
+        :DARK => [97, 76, 66], :FAIRY => [161, 93, 131]
+      }
       values.each_with_index do |type, i|
         xx = x + i * (target_w + 5)
-        # No reducir un spritesheet de pictogramas 96x32 a símbolos minúsculos:
-        # el nombre del tipo debe ser comprensible a resolución 640x480.
-        bg = Color.new(96, 80, 55)
+        # Badges legibles con nombre y color de tipo, no iconos reducidos.
+        id = type.respond_to?(:id) ? type.id : type.to_s.upcase.to_sym
+        rgb = palette[id] || [96, 80, 55]
+        bg = Color.new(*rgb)
         bmp.fill_rect(xx, y, target_w, target_h, bg)
         bmp.fill_rect(xx, y + target_h - 2, target_w, 2, section_color)
         name = ResearchNotebook::Repository.type_name(type).to_s.upcase
