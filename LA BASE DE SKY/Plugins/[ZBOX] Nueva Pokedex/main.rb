@@ -83,7 +83,9 @@ module NuevaPokedex
   def config
     @config_stamp = nil if !defined?(@config_stamp)
     @config = nil if !defined?(@config)
-    return @config if defined?(@config) && @config_stamp == (File.mtime("Data/SpeciesDex/config.json") rescue nil)
+    stamp = (File.file?("Data/SpeciesDex/config.json") ?
+             [File.mtime("Data/SpeciesDex/config.json").to_f, File.size("Data/SpeciesDex/config.json")] : nil)
+    return @config if @config && @config_stamp == stamp
     path = "Data/SpeciesDex/config.json"
     if !File.file?(path)
       @config = {}
@@ -92,12 +94,22 @@ module NuevaPokedex
     end
     raw = File.open(path, "rb") { |f| f.read }
     begin
-      require "json" if !defined?(::JSON)
-      @config = ::JSON.parse(raw)
-    rescue StandardError
+      if defined?(::JSON) && ::JSON.respond_to?(:parse)
+        @config = ::JSON.parse(raw)
+      elsif defined?(CarnekStandaloneJSON)
+        @config = CarnekStandaloneJSON.parse(CarnekStandaloneJSON.utf8(raw))
+      elsif defined?(ResearchNotebook::MiniJSON)
+        @config = ResearchNotebook::MiniJSON.parse(raw)
+      else
+        require "json"
+        @config = ::JSON.parse(raw)
+      end
+      raise "La raíz del JSON no es un objeto" unless @config.is_a?(Hash)
+    rescue StandardError => e
+      echoln("[Nueva Pokédex] Error de configuración: #{e.message}") if defined?(echoln)
       @config = {}
     end
-    @config_stamp = File.mtime(path) rescue nil
+    @config_stamp = stamp
     return @config
   end
 
@@ -963,7 +975,7 @@ end
         show_form = @current_form
         shiny = @shiny_mode > 0
       else
-        show_species = entry[:species]
+        show_species = entry[:base_species]
         show_form = entry[:form]
         shiny = false
       end
@@ -1601,8 +1613,12 @@ end
 
   def change_entry(dir)
     max_index = @model.species_count - 1
-    next_index = (@current_index + dir).clamp(0, max_index)
-    return if next_index == @current_index || !NuevaPokedex.slot_seen?(@model.species_at(next_index))
+    next_index = @current_index
+    loop do
+      next_index += dir
+      return if next_index < 0 || next_index > max_index
+      break if NuevaPokedex.slot_seen?(@model.species_at(next_index))
+    end
     @current_index = next_index
     @page = 0
     pbRefresh
