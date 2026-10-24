@@ -15,6 +15,17 @@ module ResearchNotebook
       [base || raw.to_sym, 0]
     end
 
+    def species_name(species)
+      base, form = species_base_and_form(species)
+      data = GameData::Species.try_get(base) if defined?(GameData::Species)
+      return species.to_s unless data
+      return data.name if form.to_i <= 0
+      form_data = (GameData::Species.get_species_form(base, form) rescue nil)
+      form_name = form_data.form_name.to_s if form_data && form_data.respond_to?(:form_name)
+      form_name = "Forma #{form}" if !form_name || form_name.empty?
+      "#{data.name} (#{form_name})"
+    end
+
     def golden_entry(species)
       base, form = species_base_and_form(species)
       first = entry_for(golden_data, base)
