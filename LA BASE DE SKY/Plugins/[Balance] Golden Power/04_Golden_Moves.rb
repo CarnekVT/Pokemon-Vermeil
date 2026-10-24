@@ -4,7 +4,7 @@
 module GoldenSystem
   module GoldenMoves
     @cache=nil
-    def self.reload!; @cache=nil; CarnekStandaloneJSON.invalidate(GoldenSystem::MOVES_JSON); end
+    def self.reload!; @cache=nil; CarnekStandaloneJSON.invalidate(GoldenSystem::MOVES_JSON); GoldenSystem::PBS.reload! if defined?(GoldenSystem::PBS); end
     def self.all
       return @cache if @cache
       @cache={}
@@ -29,6 +29,8 @@ module GoldenSystem
         data[:effect]=value["effect"].to_s if value["effect"]
         @cache[[species,move,source_form]]=data
       end
+      # Los PBS tienen prioridad por combinación especie/movimiento/forma.
+      @cache.merge!(GoldenSystem::PBS.move_entries) if defined?(GoldenSystem::PBS)
       @cache
     end
     def self.get(species,move,source_form=nil)
