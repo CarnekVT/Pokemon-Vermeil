@@ -80,11 +80,7 @@ module ResearchNotebook
 
     # Usa el spritesheet de tipos del propio proyecto. No se incluyen gráficos
     # duplicados en este plugin. `Graphics/UI/types` es la ruta principal de v21.1.
-    TYPE_SHEET_CANDIDATES = [
-      "Graphics/UI/types",
-      "Graphics/UI/Pokedex/types",
-      "Graphics/UI/Pokedex/icon_types"
-    ]
+    TYPE_SHEET_CANDIDATES = ["Graphics/UI/types"].freeze
 
 # ChangeDex: ocultar formas listadas en config.json (megas, etc.).
     USE_CHANGEDEX_HIDDEN_FORMS = true
