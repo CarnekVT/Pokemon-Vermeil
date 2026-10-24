@@ -1588,7 +1588,7 @@ module ResearchNotebook
         col = i / 3
         line = i % 3
         xx = x + 8 + col * (w / 2)
-        yy = y + 4 + line * 23
+        yy = y + 2 + line * 24
         value = stats[row[0]].to_i
         old = base && base[row[0]] ? base[row[0]].to_i : nil
         delta = old ? value - old : 0
@@ -1601,7 +1601,7 @@ module ResearchNotebook
         bmp.fill_rect(bar_x, yy + 6, fill, 6, color) if fill > 0
         if old && delta != 0
           sign = delta > 0 ? "+" : ""
-          draw_text(bmp, xx + 30, yy + 12, 34, 13, "#{sign}#{delta}", 7, delta > 0 ? GREEN : RED, 2, true)
+          draw_text(bmp, xx + 30, yy + 12, 34, 10, "#{sign}#{delta}", 7, delta > 0 ? GREEN : RED, 2, true)
         end
       end
       bst = [:HP, :ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].inject(0) { |sum, k| sum + stats[k].to_i }
@@ -1667,17 +1667,25 @@ module ResearchNotebook
     end
 
     def draw_text(bmp, x, y, w, h, string, size = 18, color = INK, align = 0, bold = false)
-      return if string.nil?
+      return if string.nil? || w.to_i <= 0 || h.to_i <= 0
       old_size = bmp.font.size
       old_color = bmp.font.color
       old_bold = bmp.font.bold
       bmp.font.size = size
       bmp.font.color = color
       bmp.font.bold = bold
+      # Las especies y traducciones tienen longitudes distintas. Adaptar el
+      # texto al ancho de su componente evita invadir iconos o fichas vecinas.
+      while bmp.font.size > 9 && bmp.text_size(string.to_s).width > w - 3
+        bmp.font.size -= 1
+      end
       bmp.draw_text(x, y, w, h, string.to_s, align)
-      bmp.font.size = old_size
-      bmp.font.color = old_color
-      bmp.font.bold = old_bold
+    ensure
+      if bmp && bmp.respond_to?(:font) && bmp.font && old_size
+        bmp.font.size = old_size
+        bmp.font.color = old_color
+        bmp.font.bold = old_bold
+      end
     end
 
     def draw_wrapped(bmp, x, y, width, string, size = 17, color = INK, line_h = 23, max_lines = 5)
