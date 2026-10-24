@@ -1,62 +1,48 @@
-VISUAL 2.5D HD — PRUEBA DE PERSPECTIVA PLANA (2026-10-23)
-========================================================
-Base funcional: Visual 2.5D HD v3.3.0 para Essentials 21.1.
-Esta revisión parte otra vez del renderizador original, no de la
-Preview de camara :camera / efecto maqueta.
+VISUAL 2.5D HD — PERSPECTIVA PLANA / PRIORIDADES PERSISTENTES
+================================================================
+Motor base Visual 2.5D HD v3.3.0 para Pokémon Essentials 21.1.
 
-CAMARA
-- SOLO terreno plano; no existe opcion 'mundo redondo' en menus.
-- Perfil recomendado: inclinacion 27 grados, zoom 100, proyeccion
-  Clasica, convergencia 0.3, sin neblina ni vineteado.
-- GROUND_SLICES = 1 para medir el rendimiento sin franjas extra.
-- Maximo de margen = 12, igual que el renderizador base. Ajuste
-  automatico con zoom / inclinacion para evitar bordes vacios.
-- Menu normal: Opciones > Graficos > 2.5D (activar, angulo, zoom,
-  proyeccion, FOV).
-- Menu debug: Depuracion > Campo > Visual 2.5D HD.
-- Las partidas anteriores pueden mantener inclinacion y zoom antiguos:
-  utilizar "Restaurar configuracion base" en el menu debug.
+CONFIGURACIÓN FUERA DE OPCIONES
+- Depuración > Campo > Visual 2.5D HD
+- Script alternativo: pbVisual25DMenu
+- Inclinación, zoom, modelo, FOV y altura vertical.
+- No añade ajustes al menú de Opciones del juego.
+- Preset plano: clásico, inclinación 27°, zoom 100%, horizonte 0;
+  GROUND_SLICES=1, sin neblina/viñeta.
+- Las partidas previas pueden mantener otros valores de cámara.
+  Usar Restaurar configuración base en el menú exclusivo.
 
-PRIORIDADES NATIVAS PARA PRUEBAS
-- Depuracion > Campo > "2.5D: prioridades nativas (test)".
-- Al introducir ID del tile inferior, ancho y alto del objeto, el
-  programa modifica RPG::Tileset#priorities en memoria.
-- Para un arbol de 3 tiles de alto, prioridad 1 en base, 2 en medio
-  y 3 en copa. Para un objeto de 2 filas: base 1 y superior 2.
-- El tileset usa 8 columnas: el editor asciende hacia la fila
-  superior restando 8 al ID por nivel y sin desbordar columnas.
-- Afecta temporalmente la interpretacion nativa del motor, y podria
-  influir en pasabilidad/capas mientras dure la sesion.
-- No reescribe Data/Tilesets.rxdata ni las partidas guardadas.
-- Se revierte con "Restaurar originales" o al reiniciar el juego.
-- El ID exacto de los arboles/tejados del mapa capturado no se pudo
-  verificar desde el PNG; hay que seleccionarlo en el juego.
-- La herramienta puede mostrar IDs nativos en la casilla del jugador
-  y en las cuatro casillas vecinas para localizar las piezas.
+EDICIONES REALES DE PRIORIDADES
+- Data/Tilesets.rxdata, tileset ID 1 (NewBarkTown):
+    ID 507-509: 4
+    ID 515-517: 3 (era 1)
+    ID 523-525: 2 (era 0)
+    ID 531-533: 1 (era 0)
+- Data/Map077.rxdata (Test 2.5d): 132 colocaciones actualizadas
+  con priority en @extended_layers/nativeProperties de Maker Studio.
+- Estos datos están guardados persistentemente en GitHub.
+  Las prioridades del tileset pueden repercutir en otros mapas con
+  el mismo tileset y en la pasabilidad; probar antes de fusionar.
+- No se editó el binario Map079.rxdata (>1 MB) ni IDs no comprobados.
+- Se eliminó el antiguo editor de prioridades solo en RAM.
 
-COMPATIBILIDAD SIN MODIFICAR OTROS PLUGINS
-- LBDS Animated Props y Lighting Studio Runtime estan restaurados
-  a sus archivos anteriores al 2.5D, sin cambios propios.
-- Las adaptaciones opcionales viven UNICAMENTE en
-  [016] Studio Bridges.rb.
-- Depuracion > Campo > "2.5D: puentes de Studio (test)" permite
-  comparar con o sin adaptaciones sin apagar los Studio.
-- Si un puente provoca deformaciones, desactivarlo desde este menu.
-  Esto solo cambia la proyeccion; el plugin externo sigue funcionando.
+INTEGRACIÓN AISLADA
+- [016] Studio Bridges.rb se encarga de proyectar Animated Props
+  y Lighting Studio cuando están instalados y el 2.5D está activo.
+- No se modificaron los scripts de Animated Props ni Lighting Studio.
+- Recalcula desde coordenadas del mapa y evita proyectar sobre
+  posiciones ya proyectadas; usa caché para iluminación estática.
+- Depuración > Campo > 2.5D: adaptadores externos permite
+  aislar visualización y coste de cada integración.
 
-DIAGNOSTICO
-- Comparar el MISMO mapa en 2D y 2.5D con iluminacion y props iguales.
-- Usar la sonda de rendimiento: Depuracion > Campo > Visual 2.5D HD
-  probe FPS. Tambien esta disponible pbVisual25DPerfDump.
-- Esta revision no ha sido probada en el ejecutable del proyecto:
-  se requiere validar imagen y FPS reales.
+RENDIMIENTO
+- Comparar el MISMO mapa en: 2D, 2.5D sin adaptadores,
+  2.5D+Props, 2.5D+Lighting y 2.5D+ambos.
+- pbVisual25DPerfProbe y pbVisual25DPerfDump siguen disponibles.
+- La expansión de la rejilla de tiles puede seguir costando FPS.
+  No reducir márgenes sin comprobar huecos y límites del mapa.
+- Código cargado desde GitHub; falta validar el juego y FPS reales.
 
-RESPALDOS GITHUB
-- Antes de incluir el 2.5D:
-  backup/pre-visual25d-20261023
-  ac275cc2c52d82cad420e4751119228541f3e536
-- Antes de reiniciar la prueba y revertir los cambios de Studio:
-  backup/visual25d-before-sky-reset-20261023
-  bfbfc4bf55af7a3303ff5ca1e6b45b58b272f100
-Ambas ramas son puntos de referencia; no restaurar toda la rama
-de trabajo sin considerar cambios posteriores no relacionados.
+RESPALDOS
+- backup/pre-visual25d-20261023: estado anterior al plugin.
+- backup/visual25d-before-sky-reset-20261023: iteración previa.
