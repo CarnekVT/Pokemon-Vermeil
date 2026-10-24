@@ -257,6 +257,8 @@ module GoldenSystem
       p=base.dup
       p.instance_variable_set(:@form,target_form.to_i)
       name=definition["name"] || definition["formName"]
+      name=base.form_name if (name.nil? || name.to_s.strip.empty?) && base.respond_to?(:form_name)
+      name="Forma Dorada" if name.nil? || name.to_s.strip.empty?
       if name && !name.to_s.empty?
         p.instance_variable_set(:@real_form_name,name.to_s)
         p.instance_variable_set(:@form_name,name.to_s)
