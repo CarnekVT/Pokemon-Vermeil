@@ -18,6 +18,10 @@ module NewPokedexConfig
     :play_decision_se => true,
     :play_cancel_se   => true,
     :play_cry_on_action => true,
+    # Gráficos editables: Graphics/UI/Vermeil/NewPokedex/*.png
+    # true = cargar cada componente si existe; los faltantes usan dibujo por código.
+    # false = utilizar únicamente la interfaz dibujada por código.
+    :use_custom_ui => true,
     # UI colors
     :color_highlight => Color.new(235, 75, 75),
     :color_text_main => Color.new(245, 245, 245),
