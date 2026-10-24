@@ -4,9 +4,11 @@
 module GoldenSystem
   module GoldenMoves
     @cache=nil
-    def self.reload!; @cache=nil; CarnekStandaloneJSON.invalidate(GoldenSystem::MOVES_JSON); GoldenSystem::PBS.reload! if defined?(GoldenSystem::PBS); end
+    def self.reload!; @cache=nil; @pbs_stamp=nil; CarnekStandaloneJSON.invalidate(GoldenSystem::MOVES_JSON); GoldenSystem::PBS.reload! if defined?(GoldenSystem::PBS); end
     def self.all
-      return @cache if @cache
+      pbs_stamp = (GoldenSystem::PBS.signature(GoldenSystem::PBS::MOVES_PATH) if defined?(GoldenSystem::PBS))
+      return @cache if @cache && @pbs_stamp == pbs_stamp
+      @pbs_stamp = pbs_stamp
       @cache={}
       doc=CarnekStandaloneJSON.load(GoldenSystem::MOVES_JSON,{"schema"=>1,"moves"=>{}})
       rows=doc["moves"].is_a?(Hash) ? doc["moves"] : {}
