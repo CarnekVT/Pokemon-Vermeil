@@ -1,6 +1,6 @@
 # encoding: UTF-8
 #===============================================================================
-# [CARNKEVT] Translate Studio v1.4.1
+# [CARNKEVT] Translate Studio v1.5.0
 # Direct contextual localization runtime for Pokémon Essentials v21.1.
 #
 # - Español / English selector with first-boot gamefeel.
@@ -26,7 +26,7 @@ rescue LoadError
 end
 
 module CarnekTranslateStudio
-  VERSION = "1.4.1"
+  VERSION = "1.5.0"
   DATA_PATH = "Data/TranslateStudio/translations.json"
   CONFIG_PATH = "Data/TranslateStudio/config.json"
   PREF_PATH = "Data/TranslateStudio/language.json"
@@ -90,6 +90,8 @@ module CarnekTranslateStudio
   @reverse_index = nil
   @reverse_signature = nil
   @session_language = nil
+  @sky_current_fragment = nil
+  @sky_sync_ready = false
   @text_indexes = {}
   @context_fast_cache = {}
   @direct_pack_cache = {}
@@ -166,9 +168,8 @@ module CarnekTranslateStudio
       (DATA_BUCKETS + TEXT_BUCKETS + REFERENCE_BUCKETS).each do |bucket|
         @doc["languages"][lang][bucket] = {} if !@doc["languages"][lang][bucket].is_a?(Hash)
       end
-      # Legacy flat-string buckets are intentionally ignored. v0.7 uses
-      # project-scoped contextual buckets plus canonical structured data.
-      @doc["languages"][lang].delete("strings")
+      # Keep all legacy and unknown keys: a scan must never remove existing
+      # custom translations just because the runtime does not use their bucket.
     end
     @doc
   end
@@ -203,7 +204,10 @@ module CarnekTranslateStudio
     @base_reference_index = nil
     @reference_autofill_pending = nil
     @reference_autofill_collisions = nil
+    @sky_sync_ready = false
+    @sky_current_fragment = nil
     @language_revision = @language_revision.to_i + 1
+    sync_sky_pack!(language_code)
     true
   end
 
@@ -353,13 +357,52 @@ module CarnekTranslateStudio
     @language_revision.to_i
   end
 
+  # Sky/Essentials owns compiled packs; the existing translations.json remains
+  # a non-destructive, higher-priority custom overlay.
+  def self.sky_fragment_for(code)
+    info = LANGUAGE_INFO[code.to_s.downcase]
+    return nil if !info
+    candidates = []
+    idx = native_index_for(code)
+    if !idx.nil? && defined?(Settings::LANGUAGES)
+      entry = Settings::LANGUAGES[idx]
+      candidates << entry[1].to_s if entry.is_a?(Array) && entry[1]
+    end
+    candidates.concat(Array(info["nativeFragments"]))
+    candidates.uniq.each do |fragment|
+      next if fragment.empty? || fragment.include?("/") || fragment.include?("\\")
+      core = "Data/messages_#{fragment}_core.dat"
+      game = "Data/messages_#{fragment}_game.dat"
+      return fragment if File.file?(core) || File.file?(game)
+    end
+    nil
+  rescue StandardError
+    nil
+  end
+
+  def self.sync_sky_pack!(code = language_code)
+    return false if !defined?(MessageTypes) || !MessageTypes.respond_to?(:load_message_files)
+    fragment = sky_fragment_for(code)
+    token = fragment || :source_language
+    return true if @sky_sync_ready && @sky_current_fragment == token
+    # Clear any previous compiled language when there is no matching pack.
+    # Never change Sky's base messages_*.dat or custom JSON files here.
+    MessageTypes.load_message_files(fragment || "__translate_studio_no_pack__")
+    @sky_current_fragment = token
+    @sky_sync_ready = true
+    true
+  rescue StandardError => e
+    echoln("[Translate Studio] Sky language sync failed: #{e.message}") rescue nil
+    false
+  end
+
   def self.apply_native_language_hint!(code)
     idx = native_index_for(code)
-    return false if idx.nil? || !defined?($PokemonSystem) || !$PokemonSystem
-    # Do not call PokemonSystem#language=. Native Essentials can try to load a
-    # compiled language pack; Translate Studio intentionally does not need one.
-    $PokemonSystem.instance_variable_set(:@language, idx)
-    true
+    if !idx.nil? && defined?($PokemonSystem) && $PokemonSystem
+      # Avoid recursively triggering the native setter: sync_sky_pack! loads it.
+      $PokemonSystem.instance_variable_set(:@language, idx)
+    end
+    sync_sky_pack!(code)
   rescue StandardError
     false
   end
@@ -929,6 +972,34 @@ module CarnekTranslateStudio
 
   def self.event_text(source, _map_id = nil)
     contextual_text(source, "events")
+  end
+
+  # Resolve through the shared Sky MessageTypes API whenever no custom entry
+  # exists. Preserve authored BSS/SDS, script, event and contextual overrides.
+  def self.sky_script_text(source)
+    raw = source.to_s
+    custom = contextual_text(raw)
+    return custom if custom != raw
+    if defined?(MessageTypes) && MessageTypes.const_defined?(:SCRIPT_TEXTS)
+      native = MessageTypes.getFromHash(MessageTypes::SCRIPT_TEXTS, raw)
+      return native.to_s if native && !native.to_s.empty?
+    end
+    raw
+  rescue StandardError
+    source.to_s
+  end
+
+  def self.sky_event_text(source, map_id)
+    raw = source.to_s
+    custom = event_text(raw, map_id)
+    return custom if custom != raw
+    if defined?(MessageTypes)
+      native = MessageTypes.getFromMapHash(map_id, raw)
+      return native.to_s if native && !native.to_s.empty?
+    end
+    raw
+  rescue StandardError
+    source.to_s
   end
 
   def self.caller_kind(depth = 2)
@@ -2803,16 +2874,7 @@ end
 
 def _INTL(*args)
   return "" if args.empty?
-  source = args[0].to_s
-  translated = CarnekTranslateStudio.contextual_text(source)
-  if translated == source && defined?(carnek_translate_original_INTL)
-    begin
-      native = carnek_translate_original_INTL(*args)
-      translated = CarnekTranslateStudio.contextual_text(native) if native
-    rescue StandardError
-    end
-  end
-  result = translated.to_s.dup
+  result = CarnekTranslateStudio.sky_script_text(args[0]).to_s.dup
   (1...args.length).each { |i| result.gsub!(/\{#{i}\}/) { args[i].to_s } }
   result
 end
@@ -2823,16 +2885,7 @@ end
 
 def _MAPINTL(map_id, *args)
   return "" if args.empty?
-  source = args[0].to_s
-  translated = CarnekTranslateStudio.event_text(source, map_id)
-  if translated == source && defined?(carnek_translate_original_MAPINTL)
-    begin
-      native = carnek_translate_original_MAPINTL(map_id, *args)
-      translated = CarnekTranslateStudio.event_text(native, map_id) if native
-    rescue StandardError
-    end
-  end
-  result = translated.to_s.dup
+  result = CarnekTranslateStudio.sky_event_text(args[0], map_id).to_s.dup
   (1...args.length).each { |i| result.gsub!(/\{#{i}\}/) { args[i].to_s } }
   result
 end
@@ -2843,16 +2896,7 @@ end
 
 def _ISPRINTF(*args)
   return "" if args.empty?
-  source = args[0].to_s
-  translated = CarnekTranslateStudio.contextual_text(source)
-  if translated == source && defined?(carnek_translate_original_ISPRINTF)
-    begin
-      native = carnek_translate_original_ISPRINTF(*args)
-      translated = CarnekTranslateStudio.contextual_text(native) if native
-    rescue StandardError
-    end
-  end
-  result = translated.to_s.dup
+  result = CarnekTranslateStudio.sky_script_text(args[0]).to_s.dup
   (1...args.length).each do |i|
     result.gsub!(/\{#{i}\:([^\}]+?)\}/) do
       begin
