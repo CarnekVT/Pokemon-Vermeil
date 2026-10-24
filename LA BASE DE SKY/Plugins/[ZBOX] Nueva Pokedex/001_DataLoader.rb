@@ -28,17 +28,13 @@ module NewPokedex
 
   def enabled_species_list(dex_id = nil)
     return [] unless defined?(NuevaPokedex)
-    return species_in_dex(dex_id) if dex_id && dex_id.to_i >= 0
+    return species_in_dex(dex_id) unless dex_id.nil?
     enabled_dex_list.flat_map { |id| species_in_dex(id) }.uniq
   end
 
   def species_in_dex(dex_id)
     return [] unless defined?(NuevaPokedex)
     id = dex_id.to_i
-    if id == -1
-      return [] unless NuevaPokedex.config["nationalAvailable"]
-      return NuevaPokedex.enabled_dexes.flat_map { |d| NuevaPokedex.regional_species(d) }.uniq
-    end
     NuevaPokedex.regional_species(id).dup
   end
 
