@@ -35,6 +35,7 @@ jobs:
           ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/015_catalog_and_golden_pbs.rb"
           ruby -c "LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/030_research_notebook_ui.rb"
           ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/main.rb"
+          ruby -c "LA BASE DE SKY/Plugins/[CARNKEVT] ChangeDex/001_ChangeDex.rb"
           ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/001_DataLoader.rb"
           ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/002_Scene.rb"
           ruby -c "tests/test_vermeil_notebook_pokedex_golden.rb"
