@@ -24,6 +24,15 @@ class Battle
     end
     battler.form=battler.pokemon.form
     battler.pbUpdate(true)
+    # Registrar la forma verdaderamente observada sin tocar el progreso de captura.
+    # El proxy de GameData mantiene su nombre aunque no exista PBS species_X.
+    if defined?($player) && $player && $player.pokedex
+      begin
+        $player.pokedex.register(battler.pokemon)
+      rescue StandardError => e
+        echoln("[Golden Dex] Registro visual: #{e.message}") if defined?(echoln)
+      end
+    end
     # Refresh battle typing and contextual Golden Move names before the next
     # command is selected; some battle UIs cache both values.
     battler.pbSyncGoldenMoveDisplayNames if battler.respond_to?(:pbSyncGoldenMoveDisplayNames)
