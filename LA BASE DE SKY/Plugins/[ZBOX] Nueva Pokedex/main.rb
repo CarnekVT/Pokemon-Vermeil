@@ -114,7 +114,15 @@ module NuevaPokedex
   end
 
   def enabled_dexes
-    return Array(config["enabledDexes"]).map { |v| v.to_i }.compact
+    lists = config["dexes"]
+    return [] unless lists.is_a?(Array)
+    Array(config["enabledDexes"]).filter_map do |value|
+      raw = value.to_s
+      next unless raw =~ /\A\d+\z/
+      number = raw.to_i
+      next if number >= lists.length || !lists[number].is_a?(Array)
+      number
+    end.uniq
   end
 
   def dex_name_for(region)
@@ -149,10 +157,17 @@ module NuevaPokedex
   end
 
   def regional_species(region)
+    if region.to_i == -1
+      return [] unless config["nationalAvailable"]
+      species = []
+      GameData::Species.each_species { |data| species << data.species }
+      return species.uniq
+    end
     lists = config["dexes"]
-    return [] if !lists.is_a?(Array)
+    return [] unless lists.is_a?(Array)
+    return [] unless region.is_a?(Integer) && region >= 0 && region < lists.length
     list = lists[region]
-    return [] if !list
+    return [] unless list.is_a?(Array)
     result = []
     Array(list).each do |entry|
       ent = normalize_entry(entry)
@@ -164,7 +179,7 @@ module NuevaPokedex
       next if !GameData::Species.try_get(base)
       result.push(ent)
     end
-    return result
+    return result.uniq
   end
 
   # Slots alternos de la JSON pueden requerir descubrimiento propio.
@@ -271,12 +286,20 @@ module NuevaPokedex
   def save_config
     cfg = config
     path = "Data/SpeciesDex/config.json"
+    temp = path + ".tmp"
     begin
       require "json" if !defined?(::JSON)
-      File.open(path, "wb") { |f| f.write(::JSON.pretty_generate(cfg)) }
+      serialized = ::JSON.pretty_generate(cfg) + "\n"
+      File.open(temp, "wb") { |f| f.write(serialized); f.flush; f.fsync rescue nil }
+      File.rename(temp, path)
       @config_stamp = nil
-    rescue StandardError
+      true
+    rescue StandardError => e
+      echoln("[Nueva Pokédex] No se guardó JSON: #{e.message}") if defined?(echoln)
       pbMessage(_INTL("No se pudo guardar la config de la Pokédex.")) if defined?(pbMessage)
+      false
+    ensure
+      File.delete(temp) if File.file?(temp)
     end
   end
 
