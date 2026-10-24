@@ -287,7 +287,7 @@ module ResearchNotebook
       return 1 unless current_section == :golden
       return 1 unless ResearchNotebook::Repository.golden_form_configured?(selected_species)
       moves = golden_move_records(selected_species)
-      moves.empty? ? 2 : 3
+      moves.empty? ? 2 : 2 + (moves.length.to_f / 4).ceil
     end
 
     def golden_move_records(entry)
@@ -863,21 +863,36 @@ module ResearchNotebook
     def draw_golden_moves_detail(bmp, entry, x, y, w, h)
       base = base_species(entry)
       used = ResearchNotebook.progress.golden_form_used?(base)
-      draw_text(bmp, x, y, w, 25, _INTL("Técnicas doradas"), 18, GOLDEN_2, 0, true)
       moves = golden_move_records(entry)
-      if !used
-        draw_wrapped(bmp, x, y + 45, w,
-          _INTL("Los movimientos de esta forma se registrarán después de utilizarla en combate."),
-          13, MUTED, 21, 5)
+      page = [@detail_page - 2, 0].max
+      total = [(moves.length.to_f / 4).ceil, 1].max
+      draw_text(bmp, x, y, w - 72, 24, _INTL("Técnicas doradas"), 17, GOLDEN_2, 0, true)
+      draw_text(bmp, x + w - 66, y + 3, 66, 18,
+                _INTL("{1}/{2}", page + 1, total), 11, MUTED, 2, true)
+      unless used
+        draw_wrapped(bmp, x + 3, y + 43, w - 6,
+          _INTL("Registra la Forma Dorada en combate para identificar los movimientos requeridos y sus versiones resultantes."),
+          12, MUTED, 20, 6)
         return
       end
-      moves.first(6).each_with_index do |move, i|
-        yy = y + 35 + i * 49
-        draw_card(bmp, x, yy, w, 46, PAPER)
-        draw_text(bmp, x + 8, yy + 3, w - 16, 20, move[:name] || move[:move].to_s, 13, INK, 0, true)
-        info = [move[:type], move[:power] ? "POT #{move[:power]}" : nil,
-                move[:accuracy] ? "PREC #{move[:accuracy]}" : nil].compact.join("  ·  ")
-        draw_text(bmp, x + 8, yy + 23, w - 16, 18, info, 10, GOLDEN_2, 0, false)
+      moves[page * 4, 4].to_a.each_with_index do |move, i|
+        yy = y + 40 + i * 72
+        draw_card(bmp, x, yy, w, 68, PAPER)
+        move_data = nil
+        begin
+          move_data = GameData::Move.try_get(move[:move]) if defined?(GameData::Move)
+        rescue StandardError
+        end
+        required = move_data && move_data.respond_to?(:name) ? move_data.name : move[:move].to_s
+        result = move[:name].to_s.empty? ? required : move[:name]
+        draw_text(bmp, x + 8, yy + 4, w - 16, 17,
+                  _INTL("REQUIERE · {1}", required), 11, MUTED, 0, false)
+        draw_text(bmp, x + 8, yy + 22, w - 16, 23,
+                  _INTL("→ {1}", result), 14, INK, 0, true)
+        type = move[:type] && (GameData::Type.get(move[:type]).name rescue move[:type].to_s)
+        info = [type, move[:power] ? _INTL("Pot. {1}", move[:power]) : nil,
+                move[:accuracy] ? _INTL("Prec. {1}", move[:accuracy]) : nil].compact.join("  ·  ")
+        draw_text(bmp, x + 8, yy + 46, w - 16, 16, info, 10, GOLDEN_2, 0, false)
       end
     end
 
@@ -927,7 +942,7 @@ module ResearchNotebook
       draw_text(bmp, x, y + 81, w, 16, _INTL("HABILIDAD"), 10, MUTED, 0, true)
       ability = reveal_details ? ResearchNotebook::Repository.golden_ability(entry) : nil
       draw_text(bmp, x, y + 97, w, 25, reveal_details ? ResearchNotebook::Repository.ability_name(ability) : "????", 16, INK, 0, true)
-      draw_text(bmp, x, y + 128, w, 16, _INTL("ESTADÍSTICAS"), 10, GOLDEN_2, 0, true)
+      draw_text(bmp, x, y + 128, w, 16, _INTL("ESTADÍSTICAS · BASE / DORADA"), 10, GOLDEN_2, 0, true)
       if reveal_details
         stats = ResearchNotebook::Repository.golden_stats(entry)
         form_index = ResearchNotebook::Repository.golden_form_index(entry) || 0
@@ -1043,18 +1058,27 @@ module ResearchNotebook
       @grid_signature = nil
     end
 
-    def grid_icon_filename(pkmn, species)
+    def grid_icon_filename(pkmn, species, form = 0)
+      # Priorizar el archivo de la forma concreta. Resolver el gráfico desde
+      # los mismos directorios que el juego, no desde un ID "BASE_1".
+      if form.to_i > 0
+        candidate = "Graphics/Pokemon/Icons/#{species}_#{form.to_i}"
+        file = pbResolveBitmap(candidate) if defined?(pbResolveBitmap)
+        return file if file
+      end
       if defined?(GameData::Species)
         begin
-          return GameData::Species.icon_filename_from_pokemon(pkmn) if GameData::Species.respond_to?(:icon_filename_from_pokemon)
-        rescue
+          file = GameData::Species.icon_filename(species, form.to_i, 0, false, false)
+          return file if file && (!defined?(pbResolveBitmap) || pbResolveBitmap(file))
+        rescue StandardError
         end
         begin
-          return GameData::Species.icon_filename(species, 0, 0, false, false) if GameData::Species.respond_to?(:icon_filename)
-        rescue
+          file = GameData::Species.icon_filename_from_pokemon(pkmn) if GameData::Species.respond_to?(:icon_filename_from_pokemon)
+          return file if file
+        rescue StandardError
         end
       end
-      return nil
+      nil
     end
 
     def draw_species_icon_to_grid(canvas, species, slot)
@@ -1077,7 +1101,7 @@ module ResearchNotebook
       elsif pkmn.respond_to?(:form=)
         pkmn.form = form
       end
-      filename = grid_icon_filename(pkmn, base_species)
+      filename = grid_icon_filename(pkmn, base_species, form)
       if filename
         anim = nil
         begin
@@ -1564,7 +1588,7 @@ module ResearchNotebook
         col = i / 3
         line = i % 3
         xx = x + 8 + col * (w / 2)
-        yy = y + 8 + line * 28
+        yy = y + 4 + line * 23
         value = stats[row[0]].to_i
         old = base && base[row[0]] ? base[row[0]].to_i : nil
         delta = old ? value - old : 0
@@ -1581,7 +1605,7 @@ module ResearchNotebook
         end
       end
       bst = [:HP, :ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].inject(0) { |sum, k| sum + stats[k].to_i }
-      draw_text(bmp, x + w - 88, y + h - 21, 78, 16, _INTL("BST {1}", bst), 9, INK, 2, true)
+      draw_text(bmp, x + w - 98, y + h - 17, 88, 14, _INTL("BST {1}", bst), 9, INK, 2, true)
     end
 
     def draw_ring(bmp, cx, cy, radius, color)
@@ -1635,9 +1659,9 @@ module ResearchNotebook
       if @sections.empty?
         text = _INTL("Atrás · Cerrar")
       elsif @detail_open
-        text = current_section == :golden && detail_page_count > 1 ? _INTL("← → · Cambiar hoja      Confirmar / Atrás · Volver") : _INTL("Confirmar / Atrás · Volver")
+        text = current_section == :golden && detail_page_count > 1 ? _INTL("← / → Cambiar página     C / X Volver") : _INTL("C / X Volver")
       else
-        text = _INTL("Flechas · Mover    Confirmar · Abrir ficha    Acción · Sección    Especial · Ordenar    L/R · Modo    Atrás · Cerrar")
+        text = _INTL("Flechas Mover   C Ficha   Z Sección   D Ordenar   X Cerrar")
       end
       draw_text(bmp, 12, FOOTER_Y + 6, WIDTH - 24, 23, text, 10, WHITE, 1, false)
     end
