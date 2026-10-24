@@ -1,0 +1,163 @@
+{
+  "canvas": {
+    "width": 640,
+    "height": 480,
+    "scale": "1:1",
+    "unit": "px"
+  },
+  "NewPokedex": {
+    "background": {
+      "width": 640,
+      "height": 480,
+      "x": 0,
+      "y": 0,
+      "file": "Graphics/UI/Vermeil/NewPokedex/background.png"
+    },
+    "header": {
+      "width": 256,
+      "height": 44,
+      "x": 24,
+      "y": 12,
+      "file": "Graphics/UI/Vermeil/NewPokedex/header.png"
+    },
+    "list_panel": {
+      "width": 326,
+      "height": 420,
+      "x": 286,
+      "y": 24,
+      "file": "Graphics/UI/Vermeil/NewPokedex/list_panel.png"
+    },
+    "portrait_panel": {
+      "width": 256,
+      "height": 256,
+      "x": 24,
+      "y": 56,
+      "file": "Graphics/UI/Vermeil/NewPokedex/portrait_panel.png"
+    },
+    "counter_panel": {
+      "width": 256,
+      "height": 48,
+      "x": 24,
+      "y": 320,
+      "file": "Graphics/UI/Vermeil/NewPokedex/counter_panel.png"
+    },
+    "list_row": {
+      "width": 326,
+      "height": 36,
+      "x": 286,
+      "y": 44,
+      "file": "Graphics/UI/Vermeil/NewPokedex/list_row.png"
+    },
+    "list_row_selected": {
+      "width": 326,
+      "height": 36,
+      "x": 286,
+      "y": 44,
+      "file": "Graphics/UI/Vermeil/NewPokedex/list_row_selected.png"
+    },
+    "scrollbar_track": {
+      "width": 6,
+      "height": 420,
+      "x": 615,
+      "y": 32,
+      "file": "Graphics/UI/Vermeil/NewPokedex/scrollbar_track.png"
+    },
+    "entry_page": {
+      "width": 640,
+      "height": 480,
+      "x": 0,
+      "y": 0,
+      "file": "Graphics/UI/Vermeil/NewPokedex/entry_page.png"
+    },
+    "area_page": {
+      "width": 640,
+      "height": 480,
+      "x": 0,
+      "y": 0,
+      "file": "Graphics/UI/Vermeil/NewPokedex/area_page.png"
+    },
+    "forms_page": {
+      "width": 640,
+      "height": 480,
+      "x": 0,
+      "y": 0,
+      "file": "Graphics/UI/Vermeil/NewPokedex/forms_page.png"
+    }
+  },
+  "ResearchNotebook": {
+    "background": {
+      "width": 640,
+      "height": 480,
+      "x": 0,
+      "y": 0,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/background.png"
+    },
+    "focus_panel": {
+      "width": 294,
+      "height": 368,
+      "x": 14,
+      "y": 62,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/focus_panel.png"
+    },
+    "grid_panel": {
+      "width": 306,
+      "height": 348,
+      "x": 320,
+      "y": 76,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/grid_panel.png"
+    },
+    "detail_panel": {
+      "width": 306,
+      "height": 365,
+      "x": 320,
+      "y": 61,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/detail_panel.png"
+    },
+    "grid_cell": {
+      "width": 58,
+      "height": 63,
+      "x": 325,
+      "y": 76,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/grid_cell.png"
+    },
+    "grid_cell_selected": {
+      "width": 58,
+      "height": 63,
+      "x": 325,
+      "y": 76,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/grid_cell_selected.png"
+    },
+    "cover": {
+      "width": 628,
+      "height": 387,
+      "x": 6,
+      "y": 55,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/cover.png"
+    },
+    "pages": {
+      "width": 628,
+      "height": 387,
+      "x": 6,
+      "y": 55,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/pages.png"
+    },
+    "tab_arcane": {
+      "width": 149,
+      "height": 37,
+      "x": 318,
+      "y": 8,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/tab_arcane.png"
+    },
+    "tab_golden": {
+      "width": 149,
+      "height": 37,
+      "x": 471,
+      "y": 8,
+      "file": "Graphics/UI/Vermeil/ResearchNotebook/tab_golden.png"
+    }
+  },
+  "guidance": {
+    "NewPokedex": "entry_page y forms_page dejan el retrato x=24..279, y=56..311 transparente. No hornear nombres, especies, mapas ni contadores.",
+    "ResearchNotebook": "El texto se dibuja en el juego. grid_cell* debe conservar área central legible. cover y pages son hojas de 628x387."
+  }
+}
