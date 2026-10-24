@@ -32,16 +32,16 @@ module NuevaPokedex
   COLOR_SELECT      = Color.new(255, 255, 255, 30)   # unchanged opacity
 
   # Layout — Lista (lado izquierdo + lista a la derecha)
-  LIST_WINDOW_X  = 290
+  LIST_WINDOW_X  = 286
   LIST_WINDOW_Y  = 24
-  LIST_WINDOW_W  = 380
+  LIST_WINDOW_W  = 326
   LIST_WINDOW_H  = 420
   SLOT_HEIGHT    = 36
   SLOT_SPACING   = 4
   VISIBLE_SLOTS  = 10
-  SCROLLBAR_X    = 674
+  SCROLLBAR_X    = 615
   SCROLLBAR_Y    = 32
-  SCROLLBAR_W    = 4
+  SCROLLBAR_W    = 6
   SCROLLBAR_H    = 420
 
   # Layout — Sprite Viewer (lado izquierdo)
@@ -85,7 +85,11 @@ module NuevaPokedex
     @config = nil if !defined?(@config)
     return @config if defined?(@config) && @config_stamp == (File.mtime("Data/SpeciesDex/config.json") rescue nil)
     path = "Data/SpeciesDex/config.json"
-    return @config = {} if !File.file?(path)
+    if !File.file?(path)
+      @config = {}
+      @config_stamp = nil
+      return @config
+    end
     raw = File.open(path, "rb") { |f| f.read }
     begin
       require "json" if !defined?(::JSON)
@@ -149,6 +153,29 @@ module NuevaPokedex
       result.push(ent)
     end
     return result
+  end
+
+  # Slots alternos de la JSON pueden requerir descubrimiento propio.
+  # Nunca revelar una forma solamente porque se avistó la especie base.
+  def slot_seen?(slot)
+    return false unless defined?($player) && $player && $player.pokedex
+    base, form = entry_base_and_form(slot)
+    return $player.pokedex.seen?(base) if form.to_i <= 0
+    return false unless $player.pokedex.seen?(base)
+    (0..1).any? { |gender| $player.pokedex.seen_form?(base, gender, form) }
+  rescue StandardError
+    false
+  end
+
+  def slot_owned?(slot)
+    return false unless defined?($player) && $player && $player.pokedex
+    base, form = entry_base_and_form(slot)
+    return $player.pokedex.owned?(base) if form.to_i <= 0
+    # Essentials no almacena capturas por forma. Exigir propiedad de la especie
+    # y registro de la forma vista, sin inventar propiedad específica.
+    $player.pokedex.owned?(base) && slot_seen?(slot)
+  rescue StandardError
+    false
   end
 
   def accessible_regions
@@ -223,7 +250,6 @@ module NuevaPokedex
 
   def save_config
     cfg = config
-    cfg.delete_if { |key, val| val.nil? || (val.is_a?(Array) && val.empty?) }
     path = "Data/SpeciesDex/config.json"
     begin
       require "json" if !defined?(::JSON)
@@ -386,7 +412,6 @@ class NuevaPokedexData
     sd = GameData::Species.try_get(base_species) if !sd && form > 0
     if !sd
       # ponytail: slash sin dato en GameData se iguala al de su especie base; nunca se descarta del listado
-      return data_for([index - 1, 0].max) if index > 0
       return nil
     end
     entry = {
@@ -409,7 +434,10 @@ class NuevaPokedexData
   def sort=(sort_mode)
     return if !SORTS.keys.include?(sort_mode)
     @cache.clear
-    return if sort_mode == :NUM
+    if sort_mode == :NUM
+      @species_list = @assigned_list.dup
+      return
+    end
     @species_list = @species_list.sort_by do |sp|
       base_species, form = NuevaPokedex.entry_base_and_form(sp)
       sd = GameData::Species.try_get(base_species) || GameData::Species.try_get(sp)
@@ -539,7 +567,6 @@ class NuevaPokedexView
 
     # Pokémon icon sprite
     @sprites["icon"] = PokemonSprite.new(@viewport)
-    @sprites["icon"].bitmap = Bitmap.new(NuevaPokedex::SPRITE_W, NuevaPokedex::SPRITE_H) rescue nil
     @sprites["icon"].x = NuevaPokedex::SPRITE_X
     @sprites["icon"].y = NuevaPokedex::SPRITE_Y
     @sprites["icon"].z = 3
@@ -548,13 +575,13 @@ class NuevaPokedexView
     @sprites["sprite_bg"] = Sprite.new(@viewport)
     @bitmaps["sprite_bg"] = Bitmap.new(NuevaPokedex::SPRITE_BG_W, NuevaPokedex::SPRITE_BG_H)
     @sprites["sprite_bg"].bitmap = @bitmaps["sprite_bg"]
-    @sprites["sprite_bg"].x = NuevaPokedex::SPRITE_X
-    @sprites["sprite_bg"].y = NuevaPokedex::SPRITE_Y
+    @sprites["sprite_bg"].x = NuevaPokedex::SPRITE_BG_X
+    @sprites["sprite_bg"].y = NuevaPokedex::SPRITE_BG_Y
     @sprites["sprite_bg"].z = 2
 
     # Audio wave visualizer
     @sprites["audio_wave"] = Sprite.new(@viewport)
-    @bitmaps["audio_wave"] = Bitmap.new(800, 40)
+    @bitmaps["audio_wave"] = Bitmap.new(NuevaPokedex::SCREEN_WIDTH, 40)
     @sprites["audio_wave"].bitmap = @bitmaps["audio_wave"]
     @sprites["audio_wave"].x = 0
     @sprites["audio_wave"].y = 0
@@ -635,7 +662,7 @@ class PokemonPokedexNueva_Scene
     @scroll_offset = 0.0
     @target_scroll = 0.0
     @shiny_mode = 0
-    @last_encounter_version = $PokemonGlobal.encounter_version || 0
+    @last_encounter_version = ($PokemonGlobal && $PokemonGlobal.encounter_version) || 0
     @anim_timer = 0
     @bounce_scale_y = 1.0
     @panel_alpha = 255
@@ -691,9 +718,9 @@ class PokemonPokedexNueva_Scene
     return if !wave || !wave.visible
     wave.bitmap.clear
     alpha = 255 * (@anim_timer / 30.0).clamp(0, 1)
-    [120, 80, 60, 40].each_with_index do |w, i|
+    [90, 70, 50, 30].each_with_index do |w, i|
       h = 8 - i * 2
-      wave.bitmap.fill_rect(120 + i * 140, 20, w, h, Color.new(120, 200, 255, alpha.to_i))
+      wave.bitmap.fill_rect(70 + i * 120, 20, w, h, Color.new(120, 200, 255, alpha.to_i))
     end
   end
 
@@ -776,8 +803,8 @@ end
     owned = 0
     total.times do |i|
       sp = @model.species_at(i)
-      seen += 1 if $player.seen?(sp)
-      owned += 1 if $player.owned?(sp)
+      seen += 1 if NuevaPokedex.slot_seen?(sp)
+      owned += 1 if NuevaPokedex.slot_owned?(sp)
     end
     pbDrawShadowText(cnt_bmp, NuevaPokedex::COUNT_X + 8, NuevaPokedex::COUNT_Y + 4, 240, 18,
                      _INTL("VISTOS: {1}/{2}", seen, total),
@@ -819,9 +846,9 @@ end
   end
 
   def draw_slot(bmp, entry, index, y, height)
-    if $player.owned?(entry[:species])
+    if NuevaPokedex.slot_owned?(entry[:species])
       color = NuevaPokedex::COLOR_OWNED
-    elsif $player.seen?(entry[:species])
+    elsif NuevaPokedex.slot_seen?(entry[:species])
       color = NuevaPokedex::COLOR_SEEN
     else
       color = NuevaPokedex::COLOR_UNSEEN
@@ -830,9 +857,10 @@ end
     num_text = sprintf("#%03d", entry[:number])
     pbDrawShadowText(bmp, 28, y + 4, 30, height, num_text,
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
-    name_color = $player.seen?(entry[:species]) ? NuevaPokedex::COLOR_TEXT : NuevaPokedex::COLOR_TEXT_DIM
-    display_name = entry[:name]
-    if entry[:form] > 0 && NewPokedexConfig::CONFIG[:show_form_names]
+    known = NuevaPokedex.slot_seen?(entry[:species])
+    name_color = known ? NuevaPokedex::COLOR_TEXT : NuevaPokedex::COLOR_TEXT_DIM
+    display_name = known ? entry[:name] : "----------"
+    if known && entry[:form] > 0 && NewPokedexConfig::CONFIG[:show_form_names]
       # Show form name if available; fallback to form number
       form_name = GameData::Species.get_species_form(entry[:base_species], entry[:form])&.form_name rescue nil
       if form_name && !form_name.empty?
@@ -893,7 +921,7 @@ end
   def update_sprite_icon
     entry = @model.data_for(@current_index)
     return if !entry
-    if $player.seen?(entry[:species])
+    if NuevaPokedex.slot_seen?(entry[:species])
       if @state == NuevaPokedex::STATE_FORMS
         show_species = entry[:base_species]
         show_form = @current_form
@@ -944,7 +972,7 @@ end
     entry = @model.data_for(@current_index)
     return if !entry
     # Página completa a parte: fondo opaco salvo el hueco del sprite del Pokémon
-    bg = Color.new(20, 20, 30, 0)  # transparent background for description area
+    bg = Color.new(20, 20, 30, 255)
     sx = NuevaPokedex::ENTRY_SPRITE_X
     sy = NuevaPokedex::ENTRY_SPRITE_Y
     sw = NuevaPokedex::ENTRY_SPRITE_W
@@ -982,8 +1010,8 @@ end
       end
     end
     # Bola de captura (arriba a la derecha)
-    owned = $player.owned?(entry[:species])
-    seen = !owned && $player.seen?(entry[:species])
+    owned = NuevaPokedex.slot_owned?(entry[:species])
+    seen = !owned && NuevaPokedex.slot_seen?(entry[:species])
     draw_ball(bmp, 604, 30, 10, owned, seen)
     # Columna derecha de datos
     status_color = owned ? Color.new(150, 220, 150, 255) : (seen ? NuevaPokedex::COLOR_ACCENT : NuevaPokedex::COLOR_TEXT_DIM)
@@ -1434,7 +1462,7 @@ end
       pbSEPlay("GUI pokedex cancel")
       return :exit
     elsif Input.trigger?(Input::USE)
-      if $player.seen?(@model.species_at(@current_index))
+      if NuevaPokedex.slot_seen?(@model.species_at(@current_index))
         pbSEPlay("GUI pokedex open")
         @state = NuevaPokedex::STATE_INFO
         @page = 0
@@ -1521,7 +1549,9 @@ end
 
   def change_entry(dir)
     max_index = @model.species_count - 1
-    @current_index = (@current_index + dir).clamp(0, max_index)
+    next_index = (@current_index + dir).clamp(0, max_index)
+    return if next_index == @current_index || !NuevaPokedex.slot_seen?(@model.species_at(next_index))
+    @current_index = next_index
     @page = 0
     pbRefresh
     draw_info
@@ -1563,7 +1593,7 @@ end
     elsif Input.repeat?(Input::UP)
       forms = collect_form_list
       return if forms.empty?
-      @current_form = forms[(forms.index(@current_form) || 0) - 1] % forms.length
+      @current_form = forms[((forms.index(@current_form) || 0) - 1) % forms.length]
       pbPlayCursorSE if defined?(pbPlayCursorSE)
       draw_forms
       update_sprite_icon
