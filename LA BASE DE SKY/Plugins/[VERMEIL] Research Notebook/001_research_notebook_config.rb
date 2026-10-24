@@ -8,6 +8,11 @@ module ResearchNotebook
     SCREEN_WIDTH  = 640
     SCREEN_HEIGHT = 480
 
+    # Capas editables: Graphics/UI/Vermeil/ResearchNotebook/*.png
+    # Cada imagen es opcional, se valida por resolución nativa y se cachea
+    # mientras la escena esté abierta. No afecta a los registros de investigación.
+    USE_CUSTOM_UI = true
+
     # Orden del catálogo.
     # :GAME     -> usa la Pokédex regional/del juego indicada abajo.
     # :NATIONAL -> usa el número Nacional.
