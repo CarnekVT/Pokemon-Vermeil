@@ -20,16 +20,16 @@ module NuevaPokedex
   STATE_FORMS = 3
 
   # Colors (updated to match ChangeDex palette)
-  COLOR_BG          = Color.new(20, 25, 35, 255)   # colorBackground "#141923"
-  COLOR_PANEL       = Color.new(28, 36, 50, 220)   # colorPanelFill "#1c2432"
-  COLOR_PANEL_DARK  = Color.new(62, 78, 104, 240) # colorPanelEdge "#3e4e68"
-  COLOR_TEXT        = Color.new(245, 245, 245, 255) # colorText "#f5f5f5"
-  COLOR_TEXT_DIM    = Color.new(180, 180, 180, 255) # colorMuted "#b4b4b4"
-  COLOR_ACCENT      = Color.new(220, 60, 60, 255)   # colorHighlight "#dc3c3c"
-  COLOR_SEEN        = Color.new(255, 157, 92, 255)  # colorResult "#ff9d5c"
-  COLOR_OWNED       = Color.new(100, 255, 120, 255) # colorNew "#64ff78"
-  COLOR_UNSEEN      = Color.new(255, 215, 0, 255)   # colorDifference "#ffd700"
-  COLOR_SELECT      = Color.new(255, 255, 255, 30)   # unchanged opacity
+  COLOR_BG          = Color.new(44, 65, 88, 255)   # colorBackground "#141923"
+  COLOR_PANEL       = Color.new(33, 52, 74, 244)   # colorPanelFill "#1c2432"
+  COLOR_PANEL_DARK  = Color.new(22, 39, 61, 245) # colorPanelEdge "#3e4e68"
+  COLOR_TEXT        = Color.new(247, 250, 252, 255) # colorText "#f5f5f5"
+  COLOR_TEXT_DIM    = Color.new(182, 205, 223, 255) # colorMuted "#b4b4b4"
+  COLOR_ACCENT      = Color.new(132, 205, 244, 255)   # colorHighlight "#dc3c3c"
+  COLOR_SEEN        = Color.new(237, 190, 100, 255)  # colorResult "#ff9d5c"
+  COLOR_OWNED       = Color.new(136, 222, 170, 255) # colorNew "#64ff78"
+  COLOR_UNSEEN      = Color.new(142, 159, 176, 255)   # colorDifference "#ffd700"
+  COLOR_SELECT      = Color.new(91, 153, 204, 120)   # unchanged opacity
 
   # Layout — Lista (lado izquierdo + lista a la derecha)
   LIST_WINDOW_X  = 286
@@ -129,6 +129,7 @@ module NuevaPokedex
     "Más alto" => "Tallest",
     "Más bajo" => "Shortest",
     "Pokédex N" => "Pokédex",
+    "C: Ficha  ·  D: Orden  ·  Z: Buscar  ·  X: Salir" => "C: Info  ·  D: Sort  ·  Z: Search  ·  X: Exit",
     "← Área     → Formas" => "← Area     → Forms"
   }.freeze
 
@@ -746,10 +747,10 @@ class NuevaPokedexView
     type_color = NuevaPokedexTypeColors.color_for(type1)
     bg = @bitmaps["sprite_bg"]
     bg.clear
-    bg.fill_rect(0, 0, NuevaPokedex::SPRITE_BG_W, NuevaPokedex::SPRITE_BG_H, type_color)
-    inner = Color.new(type_color.red, type_color.green, type_color.blue, 40)
+    bg.fill_rect(0, 0, NuevaPokedex::SPRITE_BG_W, NuevaPokedex::SPRITE_BG_H, NuevaPokedex::COLOR_PANEL)
+    inner = Color.new(type_color.red, type_color.green, type_color.blue, 42)
     bg.fill_rect(8, 8, NuevaPokedex::SPRITE_BG_W - 16, NuevaPokedex::SPRITE_BG_H - 16, inner)
-    border = Color.new(type_color.red, type_color.green, type_color.blue, 200)
+    border = Color.new(type_color.red, type_color.green, type_color.blue, 145)
     bg.fill_rect(0, 0, NuevaPokedex::SPRITE_BG_W, 4, border)
     bg.fill_rect(0, NuevaPokedex::SPRITE_BG_H - 4, NuevaPokedex::SPRITE_BG_W, 4, border)
     bg.fill_rect(0, 0, 4, NuevaPokedex::SPRITE_BG_H, border)
@@ -860,7 +861,7 @@ class PokemonPokedexNueva_Scene
     @view.draw_background(bmp)
     # Fondo degradado vertical
     top_c = NuevaPokedex::COLOR_BG
-    bottom_c = Color.new(16, 16, 24, 255)
+    bottom_c = Color.new(29, 47, 70, 255)
     24.times do |seg|
       t = seg / 24.0
       r = (top_c.red + (bottom_c.red - top_c.red) * t).to_i
@@ -872,8 +873,8 @@ class PokemonPokedexNueva_Scene
     end
     # La ilustración opcional sustituye el fondo, sin cubrir textos ni sprites.
     @view.skin.draw(bmp, :background, 0, 0)
-    # Acentos
-    bmp.fill_rect(0, 0, 4, NuevaPokedex::SCREEN_HEIGHT, NuevaPokedex::COLOR_ACCENT)
+    # Banda superior clásica, sin marco rojo lateral.
+    bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, 5, NuevaPokedex::COLOR_PANEL_DARK)
     bmp.fill_rect(0, NuevaPokedex::SCREEN_HEIGHT - 4, NuevaPokedex::SCREEN_WIDTH, 4, NuevaPokedex::COLOR_PANEL_DARK)
 
 # Header panel (top-left) - use placeholder if enabled
@@ -905,8 +906,8 @@ end
     bmp.fill_rect(NuevaPokedex::SCROLLBAR_X, NuevaPokedex::SCROLLBAR_Y, NuevaPokedex::SCROLLBAR_W, NuevaPokedex::SCROLLBAR_H, Color.new(50, 50, 60, 160))
     draw_counters
     # Leyenda dinámica fuera del panel de la lista: no se hornea en el PNG.
-    pbDrawShadowText(bmp, 24, 453, 592, 18,
-      NuevaPokedex.t("Flechas: explorar  ·  C: ficha  ·  D: ordenar  ·  Z: buscar  ·  X: salir"),
+    pbDrawShadowText(bmp, 24, 450, 592, 20,
+      NuevaPokedex.t("C: Ficha  ·  D: Orden  ·  Z: Buscar  ·  X: Salir"),
       NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
 
@@ -956,7 +957,7 @@ end
       selected = (i == @current_index)
       key = selected ? :list_row_selected : :list_row
       unless @view.skin.draw(list_bmp, key, 0, y)
-        color = selected ? NuevaPokedex::COLOR_SELECT : Color.new(14, 22, 34, row.even? ? 95 : 50)
+        color = selected ? NuevaPokedex::COLOR_SELECT : Color.new(43, 68, 94, row.even? ? 160 : 102)
         list_bmp.fill_rect(0, y, NuevaPokedex::LIST_WINDOW_W, slot_h, color)
         list_bmp.fill_rect(0, y, 3, slot_h, NuevaPokedex::COLOR_ACCENT) if selected
       end
@@ -972,7 +973,7 @@ end
     else
       color = NuevaPokedex::COLOR_UNSEEN
     end
-    bmp.fill_rect(8, y + 4, 16, 16, color)
+    draw_ball(bmp, 17, y + 18, 8, NuevaPokedex.slot_owned?(entry[:species]), NuevaPokedex.slot_seen?(entry[:species]))
     num_text = sprintf("#%03d", entry[:number])
     pbDrawShadowText(bmp, 29, y + 4, 49, height, num_text,
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
@@ -1188,7 +1189,7 @@ end
     entry = effective_entry(@model.data_for(@current_index))
     return if !entry
     # Página completa a parte: fondo opaco salvo el hueco del sprite del Pokémon
-    bg = Color.new(20, 20, 30, 255)
+    bg = NuevaPokedex::COLOR_BG
     sx = NuevaPokedex::ENTRY_SPRITE_X
     sy = NuevaPokedex::ENTRY_SPRITE_Y
     sw = NuevaPokedex::ENTRY_SPRITE_W
@@ -1198,7 +1199,7 @@ end
     bmp.fill_rect(0, sy, sx, sh, bg)
     bmp.fill_rect(sx + sw, sy, NuevaPokedex::SCREEN_WIDTH - sx - sw, sh, bg)
     @view.skin.draw(bmp, :entry_page, 0, 0)
-    border_c = Color.new(20, 20, 30, 255)
+    border_c = NuevaPokedex::COLOR_PANEL_DARK
     # Marco del hueco del sprite (deja el interior transparente)
     bmp.fill_rect(NuevaPokedex::ENTRY_SPRITE_X - 4, NuevaPokedex::ENTRY_SPRITE_Y - 4,
                   NuevaPokedex::ENTRY_SPRITE_W + 8, 3, NuevaPokedex::COLOR_ACCENT)
@@ -1210,6 +1211,8 @@ end
     # Barra superior: Nº + nombre (+ forma al lado)
     bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, 56, NuevaPokedex::COLOR_PANEL)
     bmp.fill_rect(0, 54, NuevaPokedex::SCREEN_WIDTH, 2, NuevaPokedex::COLOR_ACCENT)
+    bmp.fill_rect(295, 69, 2, 236, NuevaPokedex::COLOR_PANEL_DARK)
+    bmp.fill_rect(304, 255, 304, 2, NuevaPokedex::COLOR_PANEL_DARK)
     pbDrawShadowText(bmp, 20, 3, 160, 16, NuevaPokedex.t("Nº {1}", sprintf("%03d", entry[:number])),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     name_w = bmp.text_size(entry[:name]).width
@@ -1247,7 +1250,7 @@ end
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     draw_entry_description(bmp, entry[:description])
     draw_shiny_status(bmp, 461, 33)
-    pbDrawShadowText(bmp, 462, 280, 150, 19, NuevaPokedex.t("D: cambiar color"),
+    pbDrawShadowText(bmp, 304, 280, 300, 19, NuevaPokedex.t("← Área     → Formas"),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
 
@@ -1350,7 +1353,7 @@ end
     bmp.clear
     # Fondo opaco completo: nada del master (header "Pokédex Payu", lista) se transparenta
     bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT,
-                  Color.new(20, 20, 30, 255))
+                  NuevaPokedex::COLOR_BG)
     # El mapa debe permanecer libre de marcos/bocetos de la skin que tapen
     # ubicaciones o contengan textos en inglés. El área ya tiene su cabecera.
     entry = @model.data_for(@current_index)
@@ -1543,7 +1546,7 @@ end
     sy = NuevaPokedex::ENTRY_SPRITE_Y
     sw = NuevaPokedex::ENTRY_SPRITE_W
     sh = NuevaPokedex::ENTRY_SPRITE_H
-    bg = Color.new(20, 20, 30, 255)
+    bg = NuevaPokedex::COLOR_BG
     bmp.fill_rect(0, 0, NuevaPokedex::SCREEN_WIDTH, sy, bg)
     bmp.fill_rect(0, sy + sh, NuevaPokedex::SCREEN_WIDTH, NuevaPokedex::SCREEN_HEIGHT - sy - sh, bg)
     bmp.fill_rect(0, sy, sx, sh, bg)
