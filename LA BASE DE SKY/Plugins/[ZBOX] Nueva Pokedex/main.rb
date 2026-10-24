@@ -636,14 +636,7 @@ class NuevaPokedexView
     @sprites["sprite_bg"].y = NuevaPokedex::SPRITE_BG_Y
     @sprites["sprite_bg"].z = 2
 
-    # Audio wave visualizer
-    @sprites["audio_wave"] = Sprite.new(@viewport)
-    @bitmaps["audio_wave"] = Bitmap.new(NuevaPokedex::SCREEN_WIDTH, 40)
-    @sprites["audio_wave"].bitmap = @bitmaps["audio_wave"]
-    @sprites["audio_wave"].x = 0
-    @sprites["audio_wave"].y = 429
-    @sprites["audio_wave"].z = 4
-    @sprites["audio_wave"].visible = false
+
   end
 
   def draw_background(bmp)
@@ -724,7 +717,7 @@ class PokemonPokedexNueva_Scene
                       persisted[@region].dup : {}
     @scroll_offset = 0.0
     @target_scroll = 0.0
-    @shiny_mode = 0
+    @shiny_modes = {}   # solo por slot de la Pokédex
     @last_encounter_version = ($PokemonGlobal && $PokemonGlobal.encounter_version) || 0
     @anim_timer = 0
     @bounce_scale_y = 1.0
@@ -736,7 +729,6 @@ class PokemonPokedexNueva_Scene
   def pbUpdate
     @view&.pbUpdate
     update_animation
-    update_audio_wave
   end
 
   def update_animation
@@ -776,20 +768,6 @@ class PokemonPokedexNueva_Scene
     @anim_timer -= 1 if @anim_timer > 0
   end
 
-  def update_audio_wave
-    wave = @view&.sprites["audio_wave"]
-    return if !wave || !wave.visible
-    if @anim_timer <= 0
-      wave.visible = false
-      return
-    end
-    wave.bitmap.clear
-    alpha = 255 * (@anim_timer / 30.0).clamp(0, 1)
-    [90, 70, 50, 30].each_with_index do |w, i|
-      h = 8 - i * 2
-      wave.bitmap.fill_rect(70 + i * 120, 20, w, h, Color.new(120, 200, 255, alpha.to_i))
-    end
-  end
 
   def start_bounce
     @bounce_scale_y = 0.7
@@ -1012,7 +990,8 @@ end
         forms << form_id
       end
     end
-    forms.uniq
+    # Mostrar solo las variantes descubiertas, no placeholders incomprensibles.
+    forms.uniq.select { |f| f == entry[:form].to_i || NuevaPokedex.form_seen?(base, f) }
   end
 
   # Elección de forma visual por slot, sin alterar el número regional, los
@@ -1066,23 +1045,53 @@ end
     ret
   end
 
+  def shiny_mode_for(entry = nil)
+    entry ||= @model.data_for(@current_index)
+    return 0 unless entry
+    (@shiny_modes || {})[entry[:species]] || 0
+  end
+
+  def cycle_selected_shiny
+    entry = @model.data_for(@current_index)
+    return unless entry && NuevaPokedex.slot_seen?(entry[:species])
+    maximum = if NewPokedexConfig::CONFIG[:use_supershiny_toggle]
+                3
+              elsif NewPokedexConfig::CONFIG[:use_shiny_toggle]
+                2
+              else
+                1
+              end
+    @shiny_modes[entry[:species]] = (shiny_mode_for(entry) + 1) % maximum
+    pbPlayCursorSE if defined?(pbPlayCursorSE)
+    update_sprite_icon
+    draw_forms if @state == NuevaPokedex::STATE_FORMS
+    draw_info if @state == NuevaPokedex::STATE_INFO
+    pbRefresh if @state == NuevaPokedex::STATE_LIST
+  end
+
+  def draw_shiny_status(bmp, x, y)
+    entry = @model.data_for(@current_index)
+    return unless entry && NuevaPokedex.slot_seen?(entry[:species])
+    label = case shiny_mode_for(entry)
+            when 1 then _INTL("Shiny")
+            when 2 then _INTL("Super Shiny")
+            else _INTL("Normal")
+            end
+    pbDrawShadowText(bmp, x, y, 140, 19, _INTL("Color: {1}", label),
+                     NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
+  end
+
   def update_sprite_icon
     entry = @model.data_for(@current_index)
     return if !entry
     form_visible = (@state != NuevaPokedex::STATE_FORMS || @current_form.to_i <= 0 ||
                      NuevaPokedex.form_seen?(entry[:base_species], @current_form))
     if NuevaPokedex.slot_seen?(entry[:species]) && form_visible
-      if @state == NuevaPokedex::STATE_FORMS
-        show_species = entry[:base_species]
-        show_form = @current_form
-        shiny = @shiny_mode > 0
-      else
-        show_species = entry[:base_species]
-        show_form = selected_display_form(entry)
-        shiny = false
-      end
+      show_species = entry[:base_species]
+      show_form = @state == NuevaPokedex::STATE_FORMS ? @current_form : selected_display_form(entry)
+      shiny_mode = shiny_mode_for(entry)
       @view.sprites["icon"].setSpeciesBitmap(show_species, 0, show_form,
-                                             shiny, false, false, false, @shiny_mode > 1)
+                                             shiny_mode > 0, false, false, false, shiny_mode > 1)
       @view.sprites["icon"].visible = true
       @view.sprites["icon"].opacity = 255
       @view.sprites["icon"].zoom_y = @bounce_scale_y
@@ -1109,6 +1118,7 @@ end
     draw_scrollbar
     draw_counters
     update_sprite_icon
+    draw_shiny_status(@view.bitmaps["master"], 33, 286)
   end
 
   # === INFO STATE ===
@@ -1177,6 +1187,9 @@ end
     pbDrawShadowText(bmp, 24, NuevaPokedex::ENTRY_DESC_Y - 22, 120, 18, _INTL("POKÉDEX"),
                      NuevaPokedex::COLOR_ACCENT, Color.new(0, 0, 0))
     draw_entry_description(bmp, entry[:description])
+    draw_shiny_status(bmp, 484, 7)
+    pbDrawShadowText(bmp, 462, 280, 150, 19, _INTL("D: cambiar color"),
+                     NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
 
   def draw_ball(bmp, cx, cy, r, owned, seen)
@@ -1370,11 +1383,9 @@ end
   end
 
   def draw_area_unknown(bmp)
-    draw_panel(bmp, 172, 196, 296, 72)
-    pbDrawShadowText(bmp, 184, 210, 272, 30, _INTL("Área desconocida"),
-                     NuevaPokedex::COLOR_TEXT, Color.new(0, 0, 0))
-    pbDrawShadowText(bmp, 184, 244, 272, 18, _INTL("Sin ubicaciones registradas"),
-                     NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
+    # Mensaje sin ventana negra encima del mapa.
+    pbDrawShadowText(bmp, 210, 217, 280, 24, _INTL("Área desconocida"),
+                     NuevaPokedex::COLOR_TEXT, Color.new(20, 25, 34))
   end
 
   def draw_area_footer(bmp, map_name, names, has_points)
@@ -1506,7 +1517,7 @@ end
       col = selected ? Color.new(255, 255, 255, 40) : NuevaPokedex::COLOR_PANEL
       bmp.fill_rect(x, row_y, 290, 36, col)
       bmp.fill_rect(x, row_y, 4, 36, NuevaPokedex::COLOR_ACCENT) if selected
-      form_name = !form_known ? _INTL("Forma sin descubrir") : (form_id == 0 ? _INTL("Forma base") : form_sp.form_name.to_s)
+      form_name = form_id == 0 ? _INTL("Forma base") : form_sp.form_name.to_s
       form_name = _INTL("Forma {1}", form_id) if form_name.nil? || form_name.empty?
       name_c = selected ? NuevaPokedex::COLOR_TEXT : Color.new(190, 190, 190)
       pbDrawShadowText(bmp, x + 12, row_y + 8, 170, 20, form_name, name_c, Color.new(0, 0, 0))
@@ -1517,13 +1528,13 @@ end
       end
       draw_form_types(bmp, form_sp.types, x + 190, row_y + 6) if form_known
     end
-    shiny_label = case @shiny_mode
+    shiny_label = case shiny_mode_for(entry)
                   when 0 then _INTL("Normal")
                   when 1 then _INTL("Shiny")
                   else        _INTL("Super Shiny")
                   end
     pbDrawShadowText(bmp, x, y + 7 * 44 + 6, 290, 20,
-                     _INTL("Estado visual: {1}", shiny_label),
+                     _INTL("Color: {1} · Z: cambiar", shiny_label),
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     if form_ids.length > 7
       pbDrawShadowText(bmp, x + 220, y - 24, 70, 18,
@@ -1613,6 +1624,8 @@ end
         @view.sprites["master"].visible = in_list
         @view.sprites["list"].visible = in_list
         @view.sprites["scrollbar"].visible = in_list
+        @view.sprites["sprite_bg"].visible = (@state != NuevaPokedex::STATE_AREA)
+        @view.sprites["icon"].visible = false if @state == NuevaPokedex::STATE_AREA
       end
     end
   end
@@ -1699,7 +1712,7 @@ end
     elsif Input.trigger?(Input::ACTION)
       play_cry
     elsif Input.trigger?(Input::SPECIAL)
-      enter_area_state
+      cycle_selected_shiny
     end
   end
 
@@ -1801,10 +1814,7 @@ end
       draw_forms
       update_sprite_icon
     elsif Input.trigger?(Input::ACTION)
-      @shiny_mode = (@shiny_mode + 1) % 3
-      pbSEPlay("GUI pokedex open")
-      draw_forms
-      update_sprite_icon
+      cycle_selected_shiny
       start_bounce
     elsif Input.trigger?(Input::SPECIAL)
       play_cry
@@ -1819,10 +1829,7 @@ end
       Pokemon.play_cry(entry[:base_species], form)
     rescue StandardError
     end
-    wave = @view.sprites["audio_wave"]
-    wave.visible = true
-    wave.bitmap.clear
-    @anim_timer = 30
+    # Sin efecto visual rectangular al reproducir el grito.
   end
 
   def search_species
