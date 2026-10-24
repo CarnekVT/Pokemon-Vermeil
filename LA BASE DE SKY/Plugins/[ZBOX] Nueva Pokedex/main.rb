@@ -719,7 +719,9 @@ class PokemonPokedexNueva_Scene
     @model = NuevaPokedexData.new(region)
     @current_index = 0
     @current_form = 0
-    @selected_forms = {}
+    persisted = ($PokemonGlobal.instance_variable_get(:@vermeil_pokedex_forms) rescue nil)
+    @selected_forms = persisted.is_a?(Hash) && persisted[@region].is_a?(Hash) ?
+                      persisted[@region].dup : {}
     @scroll_offset = 0.0
     @target_scroll = 0.0
     @shiny_mode = 0
@@ -1023,7 +1025,9 @@ end
     form = (@selected_forms || {})[entry[:species]]
     form ||= entry[:form].to_i
     valid = form.to_i == entry[:form].to_i ||
-            (form.to_i > 0 && NuevaPokedex.form_seen?(entry[:base_species], form))
+            (form.to_i > 0 &&
+             !@model.slot_number_for(entry[:base_species], form) &&
+             NuevaPokedex.form_seen?(entry[:base_species], form))
     valid ? form.to_i : entry[:form].to_i
   end
 
@@ -1031,9 +1035,18 @@ end
     return unless entry
     return if entry[:form].to_i > 0 && @model.slot_number_for(entry[:base_species], entry[:form])
     return unless form.to_i == entry[:form].to_i ||
-                  NuevaPokedex.form_seen?(entry[:base_species], form)
+                  (!@model.slot_number_for(entry[:base_species], form) &&
+                   NuevaPokedex.form_seen?(entry[:base_species], form))
     @selected_forms ||= {}
     @selected_forms[entry[:species]] = form.to_i
+    # Preferencia de presentación guardada en la partida; no modifica la
+    # Pokédex oficial ni los datos de avistamiento/propiedad del Pokémon.
+    if defined?($PokemonGlobal) && $PokemonGlobal
+      saved = $PokemonGlobal.instance_variable_get(:@vermeil_pokedex_forms)
+      saved = {} unless saved.is_a?(Hash)
+      saved[@region] = @selected_forms.dup
+      $PokemonGlobal.instance_variable_set(:@vermeil_pokedex_forms, saved)
+    end
   end
 
   def effective_entry(entry)
