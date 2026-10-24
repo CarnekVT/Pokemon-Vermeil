@@ -219,7 +219,8 @@ module GoldenSystem
       id=v.to_s.upcase.to_sym; GameData::Type.exists?(id) ? id : nil
     end
     def self.form_definition(species,source_form=0)
-      raw=entry(species,source_form)["goldenForm"]
+      raw = (defined?(GoldenSystem::PBS) ? GoldenSystem::PBS.form_payload(species,source_form) : nil)
+      raw ||= entry(species,source_form)["goldenForm"]
       return nil if raw.nil?
       raw={"number"=>raw} if raw.is_a?(Numeric) || raw.is_a?(String)
       return nil unless raw.is_a?(Hash)
@@ -311,6 +312,7 @@ module GoldenSystem
       p
     end
     def self.reload!
+      GoldenSystem::PBS.reload! if defined?(GoldenSystem::PBS)
       CarnekStandaloneJSON.invalidate(GoldenSystem::SPECIES_JSON)
       CarnekStandaloneJSON.invalidate(GoldenSystem::MOVES_JSON)
       CarnekStandaloneJSON.invalidate(GoldenSystem::SETTINGS_JSON)
