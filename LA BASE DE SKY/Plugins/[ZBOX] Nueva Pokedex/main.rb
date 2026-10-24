@@ -585,8 +585,9 @@ class NuevaPokedexView
     @bitmaps["audio_wave"] = Bitmap.new(NuevaPokedex::SCREEN_WIDTH, 40)
     @sprites["audio_wave"].bitmap = @bitmaps["audio_wave"]
     @sprites["audio_wave"].x = 0
-    @sprites["audio_wave"].y = 0
+    @sprites["audio_wave"].y = 429
     @sprites["audio_wave"].z = 4
+    @sprites["audio_wave"].visible = false
   end
 
   def draw_background(bmp)
@@ -719,6 +720,10 @@ class PokemonPokedexNueva_Scene
   def update_audio_wave
     wave = @view&.sprites["audio_wave"]
     return if !wave || !wave.visible
+    if @anim_timer <= 0
+      wave.visible = false
+      return
+    end
     wave.bitmap.clear
     alpha = 255 * (@anim_timer / 30.0).clamp(0, 1)
     [90, 70, 50, 30].each_with_index do |w, i|
@@ -803,6 +808,10 @@ end
     # Scrollbar track
     bmp.fill_rect(NuevaPokedex::SCROLLBAR_X, NuevaPokedex::SCROLLBAR_Y, NuevaPokedex::SCROLLBAR_W, NuevaPokedex::SCROLLBAR_H, Color.new(50, 50, 60, 160))
     draw_counters
+    # Leyenda dinámica fuera del panel de la lista: no se hornea en el PNG.
+    pbDrawShadowText(bmp, 24, 453, 592, 18,
+      _INTL("Flechas: explorar     C: ficha     D: ordenar     X: salir"),
+      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
 
   def draw_counters
