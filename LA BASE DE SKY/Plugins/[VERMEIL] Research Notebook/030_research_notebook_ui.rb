@@ -8,6 +8,16 @@ module ResearchNotebook
   # Traducción contextual ES/EN. Translate Studio controla el idioma en tiempo
   # real; las cadenas que no pertenecen a esta UI siguen pasando por _INTL.
   NOTEBOOK_EN = {
+    "Libreta" => "Notebook",
+    "Libreta de Investigación" => "Research Notebook",
+    "Abre la Libreta de Investigación." => "Open the Research Notebook.",
+    "Libreta: desbloquear secciones" => "Notebook: Unlock sections",
+    "Desbloquea ambas pestañas para pruebas." => "Unlock both tabs for testing.",
+    "Pestañas de la Libreta desbloqueadas." => "Notebook tabs unlocked.",
+    "Libreta: recargar y sincronizar" => "Notebook: Reload and sync",
+    "Recarga los datos y revisa equipo y cajas." => "Reload data and check party and storage boxes.",
+    "Libreta sincronizada." => "Notebook synchronized.",
+    "Pierde {1} de sus PS máximos al final de cada turno." => "Loses {1} of its maximum HP at the end of each turn.",
     "Habilidades Arcanas" => "Arcane Abilities",
     "Áureo" => "Golden",
     "Número" => "Number",
