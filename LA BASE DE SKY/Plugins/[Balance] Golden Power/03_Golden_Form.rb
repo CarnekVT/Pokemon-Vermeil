@@ -15,6 +15,13 @@ class Battle
     return false if !battler.pokemon.makeGolden
 
     pbConsumeGoldenUse(idxBattler,:FORM)
+    if defined?(pbResearchGoldenFormActivated)
+      begin
+        pbResearchGoldenFormActivated(battler, pbOwnedByPlayer?(idxBattler))
+      rescue StandardError => e
+        echoln("[Golden Notebook] Forma: #{e.message}") if defined?(echoln)
+      end
+    end
     battler.form=battler.pokemon.form
     battler.pbUpdate(true)
     # Refresh battle typing and contextual Golden Move names before the next
