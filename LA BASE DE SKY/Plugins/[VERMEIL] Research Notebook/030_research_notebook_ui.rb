@@ -5,6 +5,97 @@
 # Interfaz propia. NO modifica Summary.
 #===============================================================================
 module ResearchNotebook
+  # Traducción contextual ES/EN. Translate Studio controla el idioma en tiempo
+  # real; las cadenas que no pertenecen a esta UI siguen pasando por _INTL.
+  NOTEBOOK_EN = {
+    "Habilidades Arcanas" => "Arcane Abilities",
+    "Áureo" => "Golden",
+    "Número" => "Number",
+    "Nombre" => "Name",
+    "Estado" => "Status",
+    "LIBRETA DE INVESTIGACIÓN" => "RESEARCH NOTEBOOK",
+    "Notas sobre energía arcana" => "Arcane energy notes",
+    "Notas sobre energía áurea" => "Golden energy notes",
+    "Estas páginas todavía están cerradas." => "These pages are not unlocked yet.",
+    "Cuando descubras algo relacionado con estas energías, habrá un lugar para anotarlo aquí." => "As you discover more about these energies, your findings will be recorded here.",
+    "Sin apuntes arcanos" => "No arcane notes",
+    "Sin apuntes áureos" => "No golden notes",
+    "Aún no hay observaciones suficientes para llenar estas páginas." => "There are not enough observations to fill these pages yet.",
+    "Quedan páginas por llenar…" => "More pages to complete…",
+    "Arte de forma pendiente" => "Form artwork pending",
+    "FORMA SIN DESTINO" => "FORM NOT AVAILABLE",
+    "HABILIDAD ARCANA" => "ARCANE ABILITY",
+    "TIPOS" => "TYPES",
+    "PROBADA" => "TESTED",
+    "DESPERTADA" => "AWAKENED",
+    "POR DESPERTAR" => "NOT YET AWAKENED",
+    "SIN OBSERVAR" => "NOT OBSERVED",
+    "ESTADO" => "STATUS",
+    "TIPOS · FORMA DORADA" => "TYPES · GOLDEN FORM",
+    "AFINIDAD ÁUREA" => "GOLDEN AFFINITY",
+    "ESTADO FORMA" => "FORM STATUS",
+    "NO POSEE" => "NONE",
+    "UTILIZADA" => "USED",
+    "OBSERVADA" => "OBSERVED",
+    "POR VER" => "UNDISCOVERED",
+    "Especies: {1}" => "Species: {1}",
+    "Orden: {1}" => "Sort: {1}",
+    "Habilidad Arcana" => "Arcane Ability",
+    "BLOQUEADA" => "LOCKED",
+    "HABILIDAD" => "ABILITY",
+    "APUNTE" => "NOTES",
+    "Aún me falta describir con precisión cómo se manifiesta esta habilidad." => "I still need to describe exactly how this ability manifests.",
+    "He detectado una resonancia arcana en esta especie, pero todavía no he logrado despertar ni identificar su habilidad." => "I have detected arcane resonance in this species, but have yet to awaken or identify its ability.",
+    "No he observado todavía ninguna manifestación arcana en esta especie." => "I have not observed any arcane manifestation in this species yet.",
+    "DESPERTAR" => "AWAKENING",
+    "Identificada" => "Identified",
+    "Pendiente" => "Pending",
+    "Probada" => "Tested",
+    "Sin probar" => "Not tested",
+    "CATALIZADOR" => "CATALYST",
+    "Té Arcano" => "Arcane Tea",
+    "Técnicas doradas" => "Golden Moves",
+    "Registra la Forma Dorada en combate para identificar los movimientos requeridos y sus versiones resultantes." => "Register the Golden Form in battle to identify the required moves and their resulting versions.",
+    "MOVIMIENTO BASE: {1}" => "BASE MOVE: {1}",
+    "RESULTANTE: {1}" => "RESULT: {1}",
+    "Pot. {1}" => "Power {1}",
+    "Prec. {1}" => "Acc. {1}",
+    "Poder Dorado" => "Golden Power",
+    "UTILIZADO" => "USED",
+    "IDENTIFICADO" => "IDENTIFIED",
+    "TIPOS NATURALES" => "NATURAL TYPES",
+    "El Fragmento Dorado reacciona con esta afinidad y permite manifestarla durante el combate sin alterar la forma del Pokémon." => "The Golden Fragment reacts to this affinity and manifests it in battle without altering the Pokémon's form.",
+    "Todavía no he logrado identificar la afinidad áurea de esta especie." => "I have not identified this species' golden affinity yet.",
+    "Fragmento Dorado" => "Golden Fragment",
+    "← Poder        Forma →" => "← Power        Form →",
+    "Forma Dorada" => "Golden Form",
+    "TIPOS DE LA FORMA DORADA" => "GOLDEN FORM TYPES",
+    "ESTADÍSTICAS · BASE / DORADA" => "STATS · BASE / GOLDEN",
+    "He observado esta Forma Dorada, pero aún necesito verla en acción para completar sus características." => "I have seen this Golden Form but need to observe it in battle to complete its record.",
+    "Sé que esta forma puede manifestarse, pero todavía no he logrado observarla directamente." => "I know this form can manifest, but I have yet to see it firsthand.",
+    "COSTE" => "COST",
+    "CATALIZADORES" => "CATALYSTS",
+    "LIBRETA" => "RESEARCH",
+    "DE INVESTIGACIÓN" => "NOTEBOOK",
+    "{1}/{2} registrado" => "{1}/{2} registered",
+    "Estadísticas sin registrar" => "Stats not recorded",
+    "NOTA: ChangeDex oculta formas de esta especie." => "NOTE: ChangeDex hides some forms of this species.",
+    "Atrás · Cerrar" => "Back · Close",
+    "Arr/Abj: Pokémon    Izq/Der: Página    C/X: Volver" => "Up/Down: Pokémon   Left/Right: Page   C/X: Back",
+    "Arr/Abj: Pokémon    C/X: Volver" => "Up/Down: Pokémon   C/X: Back",
+    "Flechas Mover   C Ficha   Z Sección   D Ordenar   X Cerrar" => "Arrows Move   C Details   Z Section   D Sort   X Close"
+  }.freeze
+
+  def self.t(source, *args)
+    language = if defined?(CarnekTranslateStudio) && CarnekTranslateStudio.respond_to?(:language_code)
+                 CarnekTranslateStudio.language_code
+               else
+                 "es"
+               end
+    text = language.to_s == "en" ? (NOTEBOOK_EN[source.to_s] || source) : source
+    _INTL(text, *args)
+  end
+
   class Scene
     WIDTH  = 640
     HEIGHT = 480
@@ -262,10 +353,10 @@ module ResearchNotebook
     def rebuild_sections
       @sections = []
       if ResearchNotebook.progress.arcane_section_unlocked
-        @sections << [:arcane, _INTL("Habilidades Arcanas")]
+        @sections << [:arcane, ResearchNotebook.t("Habilidades Arcanas")]
       end
       if ResearchNotebook.progress.golden_section_unlocked
-        @sections << [:golden, _INTL("Áureo")]
+        @sections << [:golden, ResearchNotebook.t("Áureo")]
       end
       @section_index = [[@section_index, 0].max, [@sections.length - 1, 0].max].min
     end
@@ -580,7 +671,7 @@ module ResearchNotebook
       bmp.fill_rect(0, FOOTER_Y, WIDTH, HEIGHT - FOOTER_Y, COVER)
       # Arte de cuaderno editable: 640x480, detrás de todos los datos.
       @skin.draw(bmp, :background, 0, 0) if @skin
-      draw_text(bmp, 18, 10, 286, 30, _INTL("LIBRETA DE INVESTIGACIÓN"), 19, WHITE, 0, true)
+      draw_text(bmp, 18, 10, 286, 30, ResearchNotebook.t("LIBRETA DE INVESTIGACIÓN"), 19, WHITE, 0, true)
     end
 
     def refresh
@@ -628,7 +719,7 @@ module ResearchNotebook
         bmp.fill_rect(xx, 42, w - 4, 3, color) if active
         draw_text(bmp, xx + 4, 24, w - 12, 17, label, 12, WHITE, 1, true)
       end
-      subtitle = current_section == :arcane ? _INTL("Notas sobre energía arcana") : _INTL("Notas sobre energía áurea")
+      subtitle = current_section == :arcane ? ResearchNotebook.t("Notas sobre energía arcana") : ResearchNotebook.t("Notas sobre energía áurea")
       draw_text(bmp, 20, 38, 132, 15, subtitle, 10, Color.new(218, 205, 184), 0, false)
     end
 
@@ -638,9 +729,9 @@ module ResearchNotebook
       bmp.clear
       hide_pokemon_sprite
       dispose_grid_icons
-      draw_text(bmp, 60, 180, WIDTH - 120, 30, _INTL("Estas páginas todavía están cerradas."), 19, INK, 1, true)
+      draw_text(bmp, 60, 180, WIDTH - 120, 30, ResearchNotebook.t("Estas páginas todavía están cerradas."), 19, INK, 1, true)
       draw_wrapped(bmp, 100, 220, WIDTH - 200,
-        _INTL("Cuando descubras algo relacionado con estas energías, habrá un lugar para anotarlo aquí."),
+        ResearchNotebook.t("Cuando descubras algo relacionado con estas energías, habrá un lugar para anotarlo aquí."),
         14, MUTED, 20, 4)
       draw_footer(bmp)
       @sprites["cursor"].visible = false
@@ -649,12 +740,12 @@ module ResearchNotebook
     def draw_no_entries(bmp)
       @sprites["cursor"].visible = false
       color = section_color
-      title = current_section == :arcane ? _INTL("Sin apuntes arcanos") : _INTL("Sin apuntes áureos")
+      title = current_section == :arcane ? ResearchNotebook.t("Sin apuntes arcanos") : ResearchNotebook.t("Sin apuntes áureos")
       draw_text(bmp, 34, 142, 245, 28, title, 20, INK, 1, true)
       draw_wrapped(bmp, 42, 188, 228,
-        _INTL("Aún no hay observaciones suficientes para llenar estas páginas."), 14, MUTED, 21, 4)
+        ResearchNotebook.t("Aún no hay observaciones suficientes para llenar estas páginas."), 14, MUTED, 21, 4)
       bmp.fill_rect(GRID_X + 14, GRID_Y + 50, GRID_W - 28, 118, PAPER_2)
-      draw_text(bmp, GRID_X + 24, GRID_Y + 78, GRID_W - 48, 25, _INTL("Quedan páginas por llenar…"), 16, color, 1, true)
+      draw_text(bmp, GRID_X + 24, GRID_Y + 78, GRID_W - 48, 25, ResearchNotebook.t("Quedan páginas por llenar…"), 16, color, 1, true)
     end
 
     def draw_focus_panel(bmp)
@@ -700,7 +791,7 @@ module ResearchNotebook
         if !found
           @sprites["pokemon"].color = Color.new(215, 172, 52, 70) if @sprites["pokemon"]
           draw_text(bmp, FOCUS_X + 16, FOCUS_Y + 222, FOCUS_W - 32, 16,
-                    _INTL("Arte de forma pendiente"), 10, RED, 1, true)
+                    ResearchNotebook.t("Arte de forma pendiente"), 10, RED, 1, true)
         end
       end
 
@@ -717,7 +808,7 @@ module ResearchNotebook
            ResearchNotebook::Repository.golden_form_index(entry).nil? &&
            species_identity_known?(entry)
           draw_text(bmp, FOCUS_X + 50, FOCUS_Y + 228, FOCUS_W - 100, 17,
-                    _INTL("FORMA SIN DESTINO"), 10, RED, 1, true)
+                    ResearchNotebook.t("FORMA SIN DESTINO"), 10, RED, 1, true)
         end
       end
     end
@@ -728,13 +819,13 @@ module ResearchNotebook
       used = ResearchNotebook.progress.arcane_used?(base)
       potential = ResearchNotebook.progress.arcane_potential_known?(base)
       ability = notebook_arcane_ability(base)
-      draw_text(bmp, FOCUS_X + 18, y, FOCUS_W - 36, 16, _INTL("HABILIDAD ARCANA"), 10, ARCANE_2, 0, true)
+      draw_text(bmp, FOCUS_X + 18, y, FOCUS_W - 36, 16, ResearchNotebook.t("HABILIDAD ARCANA"), 10, ARCANE_2, 0, true)
       name = unlocked ? ResearchNotebook::Repository.ability_name(ability) : "????"
       draw_text(bmp, FOCUS_X + 18, y + 17, FOCUS_W - 36, 26, name, 17, INK, 0, true)
-      draw_text(bmp, FOCUS_X + 18, y + 54, 70, 15, _INTL("TIPOS"), 9, MUTED, 0, true)
+      draw_text(bmp, FOCUS_X + 18, y + 54, 70, 15, ResearchNotebook.t("TIPOS"), 9, MUTED, 0, true)
       draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), FOCUS_X + 18, y + 71, 68, 23)
-      status = used ? _INTL("PROBADA") : (unlocked ? _INTL("DESPERTADA") : (potential ? _INTL("POR DESPERTAR") : _INTL("SIN OBSERVAR")))
-      draw_text(bmp, FOCUS_X + 166, y + 54, 104, 15, _INTL("ESTADO"), 9, MUTED, 0, true)
+      status = used ? ResearchNotebook.t("PROBADA") : (unlocked ? ResearchNotebook.t("DESPERTADA") : (potential ? ResearchNotebook.t("POR DESPERTAR") : ResearchNotebook.t("SIN OBSERVAR")))
+      draw_text(bmp, FOCUS_X + 166, y + 54, 104, 15, ResearchNotebook.t("ESTADO"), 9, MUTED, 0, true)
       draw_status_chip(bmp, FOCUS_X + 166, y + 71, 104, 23, status, ARCANE)
     end
 
@@ -747,7 +838,7 @@ module ResearchNotebook
       form_known = form_seen || form_used
       # Primera fila: los tipos REALES de la forma, no el tipo de su Poder Dorado.
       draw_text(bmp, FOCUS_X + 18, y, FOCUS_W - 36, 16,
-                _INTL("TIPOS · FORMA DORADA"), 10, GOLDEN_2, 0, true)
+                ResearchNotebook.t("TIPOS · FORMA DORADA"), 10, GOLDEN_2, 0, true)
       if form_known && ResearchNotebook::Repository.golden_form_configured?(entry)
         draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry),
                         FOCUS_X + 18, y + 19, 77, 23)
@@ -755,24 +846,24 @@ module ResearchNotebook
         draw_text(bmp, FOCUS_X + 18, y + 19, 145, 23, "????", 14, MUTED, 0, true)
       end
       # Segunda fila: la afinidad es una propiedad distinta de la forma.
-      draw_text(bmp, FOCUS_X + 18, y + 55, 140, 15, _INTL("AFINIDAD ÁUREA"), 9, MUTED, 0, true)
+      draw_text(bmp, FOCUS_X + 18, y + 55, 140, 15, ResearchNotebook.t("AFINIDAD ÁUREA"), 9, MUTED, 0, true)
       gtype = ResearchNotebook::Repository.golden_type(entry)
       if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
         draw_type_icons(bmp, [gtype], FOCUS_X + 18, y + 72, 78, 23)
       else
         draw_text(bmp, FOCUS_X + 18, y + 72, 74, 23, "????", 13, MUTED, 0, true)
       end
-      draw_text(bmp, FOCUS_X + 170, y + 55, 104, 15, _INTL("ESTADO FORMA"), 9, MUTED, 0, true)
+      draw_text(bmp, FOCUS_X + 170, y + 55, 104, 15, ResearchNotebook.t("ESTADO FORMA"), 9, MUTED, 0, true)
       status = if !ResearchNotebook::Repository.golden_form_configured?(entry)
-                 _INTL("NO POSEE")
+                 ResearchNotebook.t("NO POSEE")
                elsif form_used
-                 _INTL("UTILIZADA")
+                 ResearchNotebook.t("UTILIZADA")
                elsif form_seen
-                 _INTL("OBSERVADA")
+                 ResearchNotebook.t("OBSERVADA")
                elsif potential
-                 _INTL("POR VER")
+                 ResearchNotebook.t("POR VER")
                else
-                 _INTL("SIN OBSERVAR")
+                 ResearchNotebook.t("SIN OBSERVAR")
                end
       draw_status_chip(bmp, FOCUS_X + 166, y + 72, 104, 23, status, GOLDEN)
     end
@@ -781,9 +872,9 @@ module ResearchNotebook
       color = section_color
       @skin.draw(bmp, :grid_panel, GRID_X, GRID_Y) if @skin
       bmp.fill_rect(GRID_X, 59, GRID_W, 1, Color.new(255, 255, 255, 45))
-      draw_text(bmp, GRID_X + 3, 59, 134, 18, _INTL("Especies: {1}", @species.length), 11, MUTED, 0, false)
-      draw_text(bmp, GRID_X + 138, 59, 103, 18, _INTL("Orden: {1}", _INTL(SORT_LABELS[@sort_mode] || @sort_mode.to_s)), 11, INK, 1, true)
-      draw_text(bmp, GRID_X + 242, 59, 62, 18, _INTL("{1}/{2}", current_page_number, total_pages), 11, color, 2, true)
+      draw_text(bmp, GRID_X + 3, 59, 134, 18, ResearchNotebook.t("Especies: {1}", @species.length), 11, MUTED, 0, false)
+      draw_text(bmp, GRID_X + 138, 59, 103, 18, ResearchNotebook.t("Orden: {1}", ResearchNotebook.t(SORT_LABELS[@sort_mode] || @sort_mode.to_s)), 11, INK, 1, true)
+      draw_text(bmp, GRID_X + 242, 59, 62, 18, ResearchNotebook.t("{1}/{2}", current_page_number, total_pages), 11, color, 2, true)
 
       page_start = current_page_start
       PAGE_SIZE.times do |slot|
@@ -848,31 +939,31 @@ module ResearchNotebook
       used = ResearchNotebook.progress.arcane_used?(base)
       potential = ResearchNotebook.progress.arcane_potential_known?(base)
       ability = notebook_arcane_ability(base)
-      draw_text(bmp, x, y, w, 25, _INTL("Habilidad Arcana"), 18, ARCANE_2, 0, true)
-      state = used ? _INTL("PROBADA") : (unlocked ? _INTL("DESPERTADA") : _INTL("BLOQUEADA"))
+      draw_text(bmp, x, y, w, 25, ResearchNotebook.t("Habilidad Arcana"), 18, ARCANE_2, 0, true)
+      state = used ? ResearchNotebook.t("PROBADA") : (unlocked ? ResearchNotebook.t("DESPERTADA") : ResearchNotebook.t("BLOQUEADA"))
       draw_status_chip(bmp, x + w - 106, y + 2, 106, 21, state, ARCANE)
-      draw_text(bmp, x, y + 34, w, 17, _INTL("HABILIDAD"), 10, MUTED, 0, true)
+      draw_text(bmp, x, y + 34, w, 17, ResearchNotebook.t("HABILIDAD"), 10, MUTED, 0, true)
       name = unlocked ? ResearchNotebook::Repository.ability_name(ability) : "????"
       draw_text(bmp, x, y + 50, w, 27, name, 18, INK, 0, true)
-      draw_text(bmp, x, y + 84, w, 16, _INTL("APUNTE"), 10, ARCANE_2, 0, true)
+      draw_text(bmp, x, y + 84, w, 16, ResearchNotebook.t("APUNTE"), 10, ARCANE_2, 0, true)
       draw_card(bmp, x, y + 101, w, 104, PAPER)
       if unlocked
         desc = ResearchNotebook::Repository.ability_description(ability).to_s
-        desc = _INTL("Aún me falta describir con precisión cómo se manifiesta esta habilidad.") if desc.empty?
+        desc = ResearchNotebook.t("Aún me falta describir con precisión cómo se manifiesta esta habilidad.") if desc.empty?
       elsif potential
-        desc = _INTL("He detectado una resonancia arcana en esta especie, pero todavía no he logrado despertar ni identificar su habilidad.")
+        desc = ResearchNotebook.t("He detectado una resonancia arcana en esta especie, pero todavía no he logrado despertar ni identificar su habilidad.")
       else
-        desc = _INTL("No he observado todavía ninguna manifestación arcana en esta especie.")
+        desc = ResearchNotebook.t("No he observado todavía ninguna manifestación arcana en esta especie.")
       end
       draw_wrapped(bmp, x + 10, y + 113, w - 20, desc, 13, unlocked ? INK : MUTED, 18, 4)
-      draw_text(bmp, x, y + 218, w, 16, _INTL("DESPERTAR"), 10, ARCANE_2, 0, true)
+      draw_text(bmp, x, y + 218, w, 16, ResearchNotebook.t("DESPERTAR"), 10, ARCANE_2, 0, true)
       half = (w - 7) / 2
       draw_card(bmp, x, y + 236, half, 33, PAPER)
       draw_card(bmp, x + half + 7, y + 236, half, 33, PAPER)
-      draw_text(bmp, x + 5, y + 243, half - 10, 19, unlocked ? _INTL("Identificada") : _INTL("Pendiente"), 10, unlocked ? INK : MUTED, 1, true)
-      draw_text(bmp, x + half + 12, y + 243, half - 10, 19, used ? _INTL("Probada") : _INTL("Sin probar"), 10, used ? INK : MUTED, 1, true)
-      draw_text(bmp, x, y + 281, w, 16, _INTL("CATALIZADOR"), 10, ARCANE_2, 0, true)
-      draw_item_card(bmp, x, y + 299, w, 40, ResearchNotebook::Settings::ARCANE_TEA_ITEM, ARCANE, _INTL("Té Arcano"))
+      draw_text(bmp, x + 5, y + 243, half - 10, 19, unlocked ? ResearchNotebook.t("Identificada") : ResearchNotebook.t("Pendiente"), 10, unlocked ? INK : MUTED, 1, true)
+      draw_text(bmp, x + half + 12, y + 243, half - 10, 19, used ? ResearchNotebook.t("Probada") : ResearchNotebook.t("Sin probar"), 10, used ? INK : MUTED, 1, true)
+      draw_text(bmp, x, y + 281, w, 16, ResearchNotebook.t("CATALIZADOR"), 10, ARCANE_2, 0, true)
+      draw_item_card(bmp, x, y + 299, w, 40, ResearchNotebook::Settings::ARCANE_TEA_ITEM, ARCANE, ResearchNotebook.t("Té Arcano"))
       draw_changedex_note(bmp, base, x, y + 348, w)
     end
 
@@ -893,12 +984,12 @@ module ResearchNotebook
       moves = golden_move_records(entry)
       page = [@detail_page - 2, 0].max
       total = [(moves.length.to_f / 4).ceil, 1].max
-      draw_text(bmp, x, y, w - 72, 24, _INTL("Técnicas doradas"), 17, GOLDEN_2, 0, true)
+      draw_text(bmp, x, y, w - 72, 24, ResearchNotebook.t("Técnicas doradas"), 17, GOLDEN_2, 0, true)
       draw_text(bmp, x + w - 66, y + 3, 66, 18,
-                _INTL("{1}/{2}", page + 1, total), 11, MUTED, 2, true)
+                ResearchNotebook.t("{1}/{2}", page + 1, total), 11, MUTED, 2, true)
       unless used
         draw_wrapped(bmp, x + 3, y + 43, w - 6,
-          _INTL("Registra la Forma Dorada en combate para identificar los movimientos requeridos y sus versiones resultantes."),
+          ResearchNotebook.t("Registra la Forma Dorada en combate para identificar los movimientos requeridos y sus versiones resultantes."),
           12, MUTED, 20, 6)
         return
       end
@@ -913,12 +1004,12 @@ module ResearchNotebook
         required = move_data && move_data.respond_to?(:name) ? move_data.name : move[:move].to_s
         result = move[:name].to_s.empty? ? required : move[:name]
         draw_text(bmp, x + 8, yy + 4, w - 16, 17,
-                  _INTL("MOVIMIENTO BASE: {1}", required), 11, MUTED, 0, false)
+                  ResearchNotebook.t("MOVIMIENTO BASE: {1}", required), 11, MUTED, 0, false)
         draw_text(bmp, x + 8, yy + 22, w - 16, 23,
-                  _INTL("RESULTANTE: {1}", result), 14, INK, 0, true)
+                  ResearchNotebook.t("RESULTANTE: {1}", result), 14, INK, 0, true)
         type = move[:type] && (GameData::Type.get(move[:type]).name rescue move[:type].to_s)
-        info = [type, move[:power] ? _INTL("Pot. {1}", move[:power]) : nil,
-                move[:accuracy] ? _INTL("Prec. {1}", move[:accuracy]) : nil].compact.join("  ·  ")
+        info = [type, move[:power] ? ResearchNotebook.t("Pot. {1}", move[:power]) : nil,
+                move[:accuracy] ? ResearchNotebook.t("Prec. {1}", move[:accuracy]) : nil].compact.join("  ·  ")
         draw_text(bmp, x + 8, yy + 46, w - 16, 16, info, 10, GOLDEN_2, 0, false)
       end
     end
@@ -926,29 +1017,29 @@ module ResearchNotebook
     def draw_golden_power_detail(bmp, base, x, y, w, h)
       potential = ResearchNotebook.progress.golden_potential_known?(base)
       power_used = ResearchNotebook.progress.golden_power_used?(base)
-      draw_text(bmp, x, y, w, 25, _INTL("Poder Dorado"), 18, GOLDEN_2, 0, true)
-      state = power_used ? _INTL("UTILIZADO") : (potential ? _INTL("IDENTIFICADO") : _INTL("SIN OBSERVAR"))
+      draw_text(bmp, x, y, w, 25, ResearchNotebook.t("Poder Dorado"), 18, GOLDEN_2, 0, true)
+      state = power_used ? ResearchNotebook.t("UTILIZADO") : (potential ? ResearchNotebook.t("IDENTIFICADO") : ResearchNotebook.t("SIN OBSERVAR"))
       draw_status_chip(bmp, x + w - 108, y + 2, 108, 21, state, GOLDEN)
-      draw_text(bmp, x, y + 34, w, 16, _INTL("TIPOS NATURALES"), 10, MUTED, 0, true)
+      draw_text(bmp, x, y + 34, w, 16, ResearchNotebook.t("TIPOS NATURALES"), 10, MUTED, 0, true)
       draw_type_icons(bmp, ResearchNotebook::Repository.normal_types(base), x, y + 51, 68, 23)
-      draw_text(bmp, x, y + 81, w, 16, _INTL("AFINIDAD ÁUREA"), 10, GOLDEN_2, 0, true)
+      draw_text(bmp, x, y + 81, w, 16, ResearchNotebook.t("AFINIDAD ÁUREA"), 10, GOLDEN_2, 0, true)
       gtype = ResearchNotebook::Repository.golden_type(base)
       if potential && ResearchNotebook.progress.golden_type_known?(base) && gtype
         draw_type_icons(bmp, [gtype], x, y + 98, 68, 23)
       else
         draw_text(bmp, x, y + 98, 74, 23, "????", 16, MUTED, 0, true)
       end
-      draw_text(bmp, x, y + 132, w, 16, _INTL("APUNTE"), 10, GOLDEN_2, 0, true)
+      draw_text(bmp, x, y + 132, w, 16, ResearchNotebook.t("APUNTE"), 10, GOLDEN_2, 0, true)
       draw_card(bmp, x, y + 149, w, 92, PAPER)
       desc = ResearchNotebook::Repository.golden_power_description(base).to_s
       if desc.empty?
-        desc = potential ? _INTL("El Fragmento Dorado reacciona con esta afinidad y permite manifestarla durante el combate sin alterar la forma del Pokémon.") : _INTL("Todavía no he logrado identificar la afinidad áurea de esta especie.")
+        desc = potential ? ResearchNotebook.t("El Fragmento Dorado reacciona con esta afinidad y permite manifestarla durante el combate sin alterar la forma del Pokémon.") : ResearchNotebook.t("Todavía no he logrado identificar la afinidad áurea de esta especie.")
       end
       draw_wrapped(bmp, x + 10, y + 160, w - 20, desc, 13, potential ? INK : MUTED, 18, 4)
-      draw_text(bmp, x, y + 252, w, 16, _INTL("CATALIZADOR"), 10, GOLDEN_2, 0, true)
-      draw_item_card(bmp, x, y + 270, w, 43, ResearchNotebook::Settings::GOLDEN_FRAGMENT_ITEM, GOLDEN, _INTL("Fragmento Dorado"))
+      draw_text(bmp, x, y + 252, w, 16, ResearchNotebook.t("CATALIZADOR"), 10, GOLDEN_2, 0, true)
+      draw_item_card(bmp, x, y + 270, w, 43, ResearchNotebook::Settings::GOLDEN_FRAGMENT_ITEM, GOLDEN, ResearchNotebook.t("Fragmento Dorado"))
       if ResearchNotebook::Repository.golden_form_configured?(selected_species)
-        draw_text(bmp, x, y + 321, w, 17, _INTL("← Poder        Forma →"), 10, GOLDEN_2, 1, true)
+        draw_text(bmp, x, y + 321, w, 17, ResearchNotebook.t("← Poder        Forma →"), 10, GOLDEN_2, 1, true)
       end
     end
 
@@ -957,19 +1048,19 @@ module ResearchNotebook
       seen = ResearchNotebook.progress.golden_form_seen?(base)
       used = ResearchNotebook.progress.golden_form_used?(base)
       reveal_details = used || !ResearchNotebook::Settings::GOLDEN_DETAILS_REQUIRE_USE
-      draw_text(bmp, x, y, w, 25, _INTL("Forma Dorada"), 18, GOLDEN_2, 0, true)
-      state = used ? _INTL("UTILIZADA") : (seen ? _INTL("OBSERVADA") : _INTL("POR VER"))
+      draw_text(bmp, x, y, w, 25, ResearchNotebook.t("Forma Dorada"), 18, GOLDEN_2, 0, true)
+      state = used ? ResearchNotebook.t("UTILIZADA") : (seen ? ResearchNotebook.t("OBSERVADA") : ResearchNotebook.t("POR VER"))
       draw_status_chip(bmp, x + w - 104, y + 2, 104, 21, state, GOLDEN)
-      draw_text(bmp, x, y + 34, w, 16, _INTL("TIPOS DE LA FORMA DORADA"), 10, MUTED, 0, true)
+      draw_text(bmp, x, y + 34, w, 16, ResearchNotebook.t("TIPOS DE LA FORMA DORADA"), 10, MUTED, 0, true)
       if reveal_details
         draw_type_icons(bmp, ResearchNotebook::Repository.golden_form_types(entry), x, y + 51, 68, 23)
       else
         draw_text(bmp, x, y + 51, 138, 23, "????", 16, MUTED, 0, true)
       end
-      draw_text(bmp, x, y + 81, w, 16, _INTL("HABILIDAD"), 10, MUTED, 0, true)
+      draw_text(bmp, x, y + 81, w, 16, ResearchNotebook.t("HABILIDAD"), 10, MUTED, 0, true)
       ability = reveal_details ? ResearchNotebook::Repository.golden_ability(entry) : nil
       draw_text(bmp, x, y + 97, w, 25, reveal_details ? ResearchNotebook::Repository.ability_name(ability) : "????", 16, INK, 0, true)
-      draw_text(bmp, x, y + 128, w, 16, _INTL("ESTADÍSTICAS · BASE / DORADA"), 10, GOLDEN_2, 0, true)
+      draw_text(bmp, x, y + 128, w, 16, ResearchNotebook.t("ESTADÍSTICAS · BASE / DORADA"), 10, GOLDEN_2, 0, true)
       if reveal_details
         stats = ResearchNotebook::Repository.golden_stats(entry)
         form_index = ResearchNotebook::Repository.golden_form_index(entry) || 0
@@ -978,13 +1069,13 @@ module ResearchNotebook
         draw_stat_panel(bmp, x, y + 145, w, 92, stats, base_stats, GOLDEN)
       else
         draw_card(bmp, x, y + 145, w, 92, PAPER)
-        draw_text(bmp, x + 10, y + 154, w - 20, 15, _INTL("APUNTE"), 9, GOLDEN_2, 0, true)
-        text = seen ? _INTL("He observado esta Forma Dorada, pero aún necesito verla en acción para completar sus características.") : _INTL("Sé que esta forma puede manifestarse, pero todavía no he logrado observarla directamente.")
+        draw_text(bmp, x + 10, y + 154, w - 20, 15, ResearchNotebook.t("APUNTE"), 9, GOLDEN_2, 0, true)
+        text = seen ? ResearchNotebook.t("He observado esta Forma Dorada, pero aún necesito verla en acción para completar sus características.") : ResearchNotebook.t("Sé que esta forma puede manifestarse, pero todavía no he logrado observarla directamente.")
         draw_wrapped(bmp, x + 10, y + 174, w - 20, text, 13, MUTED, 18, 3)
       end
-      draw_text(bmp, x, y + 247, w, 15, _INTL("COSTE"), 10, RED, 0, true)
+      draw_text(bmp, x, y + 247, w, 15, ResearchNotebook.t("COSTE"), 10, RED, 0, true)
       draw_wrapped(bmp, x, y + 264, w, ResearchNotebook::Repository.golden_form_drain_text, 10, RED, 16, 2)
-      draw_text(bmp, x, y + 300, w, 15, _INTL("CATALIZADORES"), 10, GOLDEN_2, 0, true)
+      draw_text(bmp, x, y + 300, w, 15, ResearchNotebook.t("CATALIZADORES"), 10, GOLDEN_2, 0, true)
       draw_item_pair(bmp, x, y + 317, w, ResearchNotebook::Settings::GOLDEN_STONE_ITEM, ResearchNotebook::Settings::GOLDEN_RING_ITEM)
     end
 
@@ -1202,71 +1293,43 @@ module ResearchNotebook
     end
 
     #===========================================================================
-    # Tipos: usa Graphics/UI/types del proyecto
+    # Los dos sistemas usan exactamente Graphics/UI/types.png (64x28 por tipo).
+    # Sin rectángulos artificiales ni atlas de la Pokédex antigua.
     #===========================================================================
     def resolve_type_sheet
       return if @type_sheet
-      ResearchNotebook::Settings::TYPE_SHEET_CANDIDATES.each do |candidate|
-        path = nil
-        begin
-          path = pbResolveBitmap(candidate) if defined?(pbResolveBitmap)
-        rescue
-        end
-        next if !path
-        begin
-          @type_sheet = AnimatedBitmap.new(candidate)
-          @type_sheet_path = candidate
-          break
-        rescue
-          @type_sheet = nil
-        end
-      end
-      calculate_type_sheet_metrics
+      candidate = "Graphics/UI/types"
+      return if defined?(pbResolveBitmap) && !pbResolveBitmap(candidate)
+      @type_sheet = AnimatedBitmap.new(candidate)
+      @type_sheet_path = candidate
+      @type_frame_h = 28
+    rescue StandardError
+      @type_sheet = nil
     end
 
-    def calculate_type_sheet_metrics
-      return if !@type_sheet || !@type_sheet.bitmap
-      max_pos = -1
-      begin
-        GameData::Type.each do |type|
-          next if !type.respond_to?(:icon_position)
-          max_pos = [max_pos, type.icon_position.to_i].max
-        end
-      rescue
-      end
-      @type_icon_count = [max_pos + 1, 1].max
-      h = @type_sheet.bitmap.height
-      @type_frame_h = h / @type_icon_count
-      @type_frame_h = 28 if @type_frame_h <= 0
-    end
-
-    def draw_type_icons(bmp, types, x, y, target_w = 68, target_h = 25)
+    def draw_type_icons(bmp, types, x, y, target_w = 64, target_h = 28)
       values = Array(types).compact.first(2)
-      if values.empty?
-        draw_text(bmp, x, y, target_w, target_h, "—", 12, MUTED, 1, false)
-        return
-      end
-      palette = {
-        :NORMAL => [120, 115, 105], :FIGHTING => [168, 57, 47],
-        :FLYING => [110, 110, 167], :POISON => [133, 65, 143],
-        :GROUND => [147, 109, 54], :ROCK => [130, 107, 53],
-        :BUG => [101, 137, 36], :GHOST => [95, 74, 135],
-        :STEEL => [105, 112, 137], :FIRE => [184, 83, 37],
-        :WATER => [57, 104, 172], :GRASS => [73, 137, 64],
-        :ELECTRIC => [162, 121, 23], :PSYCHIC => [177, 68, 110],
-        :ICE => [67, 135, 148], :DRAGON => [95, 67, 165],
-        :DARK => [97, 76, 66], :FAIRY => [161, 93, 131]
-      }
+      return if values.empty?
+      resolve_type_sheet
+      sheet = @type_sheet && @type_sheet.bitmap
       values.each_with_index do |type, i|
         xx = x + i * (target_w + 5)
-        # Badges legibles con nombre y color de tipo, no iconos reducidos.
+        begin
+          id = type.respond_to?(:id) ? type.id : type.to_s.upcase.to_sym
+          position = GameData::Type.get(id).icon_position.to_i
+          if sheet && sheet.width >= 64 && sheet.height >= (position + 1) * 28
+            src = Rect.new(0, position * 28, 64, 28)
+            bmp.stretch_blt(Rect.new(xx, y, target_w, target_h), sheet, src)
+            next
+          end
+        rescue StandardError
+        end
+        # No abrir páginas en blanco si falta el recurso de un tipo custom.
         id = type.respond_to?(:id) ? type.id : type.to_s.upcase.to_sym
-        rgb = palette[id] || [96, 80, 55]
-        bg = Color.new(*rgb)
-        bmp.fill_rect(xx, y, target_w, target_h, bg)
-        bmp.fill_rect(xx, y + target_h - 2, target_w, 2, section_color)
-        name = ResearchNotebook::Repository.type_name(type).to_s.upcase
-        draw_text(bmp, xx + 3, y + 2, target_w - 6, target_h - 4, name, 11, WHITE, 1, true)
+        color = section_color
+        bmp.fill_rect(xx, y, target_w, target_h, color)
+        draw_text(bmp, xx + 2, y + 2, target_w - 4, target_h - 3,
+                  ResearchNotebook::Repository.type_name(id).to_s, 10, WHITE, 1, true)
       end
     end
 
@@ -1339,11 +1402,11 @@ module ResearchNotebook
       bmp.fill_rect(label_x, 94, label_w, 122, Color.new(50, 36, 28))
       bmp.fill_rect(label_x + 6, 100, label_w - 12, 110, Color.new(91, 66, 43))
       @skin.draw(bmp, :cover, 0, 0) if @skin
-      draw_text(bmp, label_x + 16, 118, label_w - 32, 34, _INTL("LIBRETA"), 25, WHITE, 1, true)
-      draw_text(bmp, label_x + 16, 153, label_w - 32, 28, _INTL("DE INVESTIGACIÓN"), 15, WHITE, 1, true)
+      draw_text(bmp, label_x + 16, 118, label_w - 32, 34, ResearchNotebook.t("LIBRETA"), 25, WHITE, 1, true)
+      draw_text(bmp, label_x + 16, 153, label_w - 32, 28, ResearchNotebook.t("DE INVESTIGACIÓN"), 15, WHITE, 1, true)
       draw_ring(bmp, BOOK_W / 2, 265, 54, Color.new(216, 190, 126, 125))
       draw_ring(bmp, BOOK_W / 2, 265, 36, Color.new(216, 190, 126, 80))
-      draw_text(bmp, label_x + 16, BOOK_H - 56, label_w - 32, 20, _INTL("VERMEIL"), 10, Color.new(213, 194, 158), 1, true)
+      draw_text(bmp, label_x + 16, BOOK_H - 56, label_w - 32, 20, ResearchNotebook.t("VERMEIL"), 10, Color.new(213, 194, 158), 1, true)
       pages.visible = false
       cover.visible = true
       shadow.visible = true
@@ -1550,7 +1613,7 @@ module ResearchNotebook
         xx = x + i * 28
         bmp.fill_rect(xx, y, 18, 6, i < active ? color : Color.new(184, 170, 141))
       end
-      draw_text(bmp, x + total * 28 + 2, y - 6, 120, 18, _INTL("{1}/{2} registrado", active, total), 9, MUTED, 0, false)
+      draw_text(bmp, x + total * 28 + 2, y - 6, 120, 18, ResearchNotebook.t("{1}/{2} registrado", active, total), 9, MUTED, 0, false)
     end
 
     def draw_progress_track(bmp, x, y, w, steps, color)
@@ -1583,7 +1646,7 @@ module ResearchNotebook
     def draw_stat_panel(bmp, x, y, w, h, stats, base, color)
       draw_card(bmp, x, y, w, h, PAPER)
       if !stats || stats.empty?
-        draw_text(bmp, x + 8, y + 45, w - 16, 22, _INTL("Estadísticas sin registrar"), 12, MUTED, 1, false)
+        draw_text(bmp, x + 8, y + 45, w - 16, 22, ResearchNotebook.t("Estadísticas sin registrar"), 12, MUTED, 1, false)
         return
       end
       rows = [[:HP, "PS"], [:ATTACK, "ATQ"], [:DEFENSE, "DEF"], [:SPECIAL_ATTACK, "A.E"], [:SPECIAL_DEFENSE, "D.E"], [:SPEED, "VEL"]]
@@ -1608,7 +1671,7 @@ module ResearchNotebook
         end
       end
       bst = [:HP, :ATTACK, :DEFENSE, :SPECIAL_ATTACK, :SPECIAL_DEFENSE, :SPEED].inject(0) { |sum, k| sum + stats[k].to_i }
-      draw_text(bmp, x + w - 98, y + h - 17, 88, 14, _INTL("BST {1}", bst), 9, INK, 2, true)
+      draw_text(bmp, x + w - 98, y + h - 17, 88, 14, ResearchNotebook.t("BST {1}", bst), 9, INK, 2, true)
     end
 
     def draw_ring(bmp, cx, cy, radius, color)
@@ -1634,7 +1697,7 @@ module ResearchNotebook
                    hidden_keys.keys.any? { |k| k.start_with?(species_key + ",") }
       return if !has_hidden
       
-      draw_text(bmp, x, y, w, 16, _INTL("NOTA: ChangeDex oculta formas de esta especie."), 10, MUTED, 0, true)
+      draw_text(bmp, x, y, w, 16, ResearchNotebook.t("NOTA: ChangeDex oculta formas de esta especie."), 10, MUTED, 0, true)
     end
 
     def draw_line(bmp, x0, y0, x1, y1, color)
@@ -1660,11 +1723,11 @@ module ResearchNotebook
 
     def draw_footer(bmp)
       if @sections.empty?
-        text = _INTL("Atrás · Cerrar")
+        text = ResearchNotebook.t("Atrás · Cerrar")
       elsif @detail_open
-        text = current_section == :golden && detail_page_count > 1 ? _INTL("Arr/Abj: Pokémon    Izq/Der: Página    C/X: Volver") : _INTL("Arr/Abj: Pokémon    C/X: Volver")
+        text = current_section == :golden && detail_page_count > 1 ? ResearchNotebook.t("Arr/Abj: Pokémon    Izq/Der: Página    C/X: Volver") : ResearchNotebook.t("Arr/Abj: Pokémon    C/X: Volver")
       else
-        text = _INTL("Flechas Mover   C Ficha   Z Sección   D Ordenar   X Cerrar")
+        text = ResearchNotebook.t("Flechas Mover   C Ficha   Z Sección   D Ordenar   X Cerrar")
       end
       draw_text(bmp, 12, FOOTER_Y + 13, WIDTH - 24, 18, text, 12, WHITE, 1, false)
     end
