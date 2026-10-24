@@ -236,7 +236,7 @@ module NuevaPokedex
     return if !lists.is_a?(Array)
     list = lists[region]
     return if !list.is_a?(Array)
-    raw = entry.to_s.sub(/_(\\d+)\\z/, ',\\1')
+    raw = entry.to_s.sub(/_(\d+)\z/, ',\1')
     if present
       entry_normalized = normalize_entry(raw)
       already = list.any? { |e| normalize_entry(e) == entry_normalized }
