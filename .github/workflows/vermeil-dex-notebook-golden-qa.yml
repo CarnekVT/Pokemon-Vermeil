@@ -8,6 +8,7 @@ on:
       - 'LA BASE DE SKY/Plugins/**'
       - 'tests/test_vermeil_notebook_pokedex_golden.rb'
       - 'tests/test_vermeil_pokedex_logic.rb'
+      - 'tests/test_vermeil_notebook_ui_logic.rb'
       - '.github/workflows/vermeil-dex-notebook-golden-qa.yml'
   workflow_dispatch:
 
@@ -38,9 +39,12 @@ jobs:
           ruby -c "LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/002_Scene.rb"
           ruby -c "tests/test_vermeil_notebook_pokedex_golden.rb"
           ruby -c "tests/test_vermeil_pokedex_logic.rb"
+          ruby -c "tests/test_vermeil_notebook_ui_logic.rb"
       - name: Golden Studio syntax
         run: node --check "LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Golden Systems Studio/index.js"
       - name: PBS golden form and move validation
         run: ruby tests/test_vermeil_notebook_pokedex_golden.rb
       - name: Regional Pokedex behavior regressions
         run: ruby tests/test_vermeil_pokedex_logic.rb
+      - name: Notebook rendering and navigation regressions
+        run: ruby tests/test_vermeil_notebook_ui_logic.rb
