@@ -1,0 +1,82 @@
+# Golden Moves — Pokémon Vermeil
+# [ESPECIE|MOVIMIENTO_BASE] o [ESPECIE|MOVIMIENTO_BASE|FORMA_ORIGEN]
+# Form = forma dorada destino; los valores editan solo la variante áurea.
+# Tiene prioridad sobre golden_moves.json, que permanece como respaldo.
+
+[HERACROSS|MEGAHORN]
+Form = 2
+Name = Cuerno Astral
+Type = DRAGON
+Power = 120
+Accuracy = 85
+Description = Violenta embestida con cuernos imponentes usando energía dracónica.
+
+[HERACROSS|REVENGE]
+Form = 2
+Name = Cornada Implacable
+Type = DRAGON
+Power = 80
+Accuracy = 100
+Description = Asesta un golpe con el poder de sus antepasados. Produce el doble de daño si el usuario es herido en el mismo turno.
+
+[HERACROSS|ARMTHRUST]
+Form = 2
+Name = Metralla Áurea
+Type = DRAGON
+Power = 25
+Description = Cornadas directas que golpean de dos a cinco veces seguidas.
+
+[PINSIR|STORMTHROW]
+Form = 2
+Name = Pinza Terracota
+Type = GROUND
+Power = 70
+Accuracy = 100
+FunctionCode = AlwaysCriticalHit
+Description = Lanza un golpe fulminante usando sus pinzas. Siempre resulta en un golpe crítico.
+
+[PINSIR|BIND]
+Form = 2
+Name = Agarre Sísmico
+Type = GROUND
+Power = 60
+Accuracy = 100
+FunctionCode = BindTarget
+Description = Ata y oprime con sus pinzas de cuatro a cinco turnos.
+
+[PINSIR|THROATCHOP]
+Form = 2
+Name = Tenaza Gaia
+Type = GROUND
+Power = 80
+Accuracy = 100
+FunctionCode = SpikyGrasp
+Description = Inflige al rival un dolor abrumador con sus tenazas. Golpea supereficaz al tipo Volador.
+
+[HELIOLISK|WEATHERBALL]
+Form = 1
+Name = Llama Solar
+Type = FIRE
+Power = 80
+Accuracy = 100
+FunctionCode = RaiseUserSpAtk1
+Description = Lanza un proyectil formado por la energía del sol para atacar al objetivo. También puede aumentar el Ataque Especial del usuario.
+
+[HELIOLISK|PARABOLICCHARGE]
+Form = 1
+Name = Carga Supernova
+Type = FIRE
+Power = 95
+Accuracy = 100
+FunctionCode = HealUserByHalfOfDamageDone
+Description = El usuario ataca a todo lo que le rodea con llamas solares. Los PS del usuario se restaura en la mitad del daño infligido.
+
+[HELIOLISK|QUICKATTACK]
+Form = 1
+Name = Destello Ígneo
+Type = FIRE
+Power = 55
+Accuracy = 100
+FunctionCode = None
+Description = Destello rápido y cegador que golpea al objetivo a una Velocidad imparable. Este movimiento siempre golpea primero.
+
