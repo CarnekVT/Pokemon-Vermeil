@@ -236,7 +236,7 @@ module NuevaPokedex
     return if !lists.is_a?(Array)
     list = lists[region]
     return if !list.is_a?(Array)
-    raw = entry.to_s.sub("_", ",")
+    raw = entry.to_s.sub(/_(\\d+)\\z/, ',\\1')
     if present
       entry_normalized = normalize_entry(raw)
       already = list.any? { |e| normalize_entry(e) == entry_normalized }
@@ -869,7 +869,7 @@ end
     end
     bmp.fill_rect(8, y + 4, 16, 16, color)
     num_text = sprintf("#%03d", entry[:number])
-    pbDrawShadowText(bmp, 28, y + 4, 30, height, num_text,
+    pbDrawShadowText(bmp, 29, y + 4, 49, height, num_text,
                      NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
     known = NuevaPokedex.slot_seen?(entry[:species])
     name_color = known ? NuevaPokedex::COLOR_TEXT : NuevaPokedex::COLOR_TEXT_DIM
@@ -884,7 +884,7 @@ end
       end
     end
     # Nombre a ancho completo (sin tipos en la lista, como la Pokédex canónica)
-    name_w = NuevaPokedex::LIST_WINDOW_W - 68
+    name_w = NuevaPokedex::LIST_WINDOW_W - 91
     if bmp.text_size(display_name).width > name_w
       short = display_name
       while short.length > 1 && bmp.text_size(short + "…").width > name_w
@@ -892,7 +892,7 @@ end
       end
       display_name = short + "…"
     end
-    pbDrawShadowText(bmp, 64, y + 4, name_w, height, display_name,
+    pbDrawShadowText(bmp, 82, y + 4, name_w, height, display_name,
                      name_color, Color.new(0, 0, 0))
   end
 
@@ -915,7 +915,7 @@ end
     unless @view.skin.draw(sb, :scrollbar_track, 0, 0)
       sb.fill_rect(0, 0, NuevaPokedex::SCROLLBAR_W, track_h, Color.new(50, 50, 60, 160))
     end
-    sb.fill_rect(0, thumb_y, NuevaPokedex::SCROLLBAR_W, thumb_h, Color.new(120, 126, 140, 200))
+    sb.fill_rect(0, thumb_y.round, NuevaPokedex::SCROLLBAR_W, thumb_h.round, Color.new(120, 126, 140, 200))
   end
 
   def collect_form_list
@@ -1316,7 +1316,6 @@ end
   def draw_forms
     bmp = @view.bitmaps["overlay"]
     bmp.clear
-    draw_static_ui
     entry = @model.data_for(@current_index)
     return if !entry
     form_ids = collect_form_list
