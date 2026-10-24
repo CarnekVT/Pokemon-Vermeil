@@ -5,10 +5,7 @@ on:
     paths:
       - 'LA BASE DE SKY/PBS/golden_forms.txt'
       - 'LA BASE DE SKY/PBS/golden_moves.txt'
-      - 'LA BASE DE SKY/Plugins/[Balance] Golden Power/**'
-      - 'LA BASE DE SKY/Plugins/[VERMEIL] Research Notebook/**'
-      - 'LA BASE DE SKY/Plugins/[ZBOX] Nueva Pokedex/**'
-      - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/Golden Systems Studio/index.js'
+      - 'LA BASE DE SKY/Plugins/**'
       - 'tests/test_vermeil_notebook_pokedex_golden.rb'
       - '.github/workflows/vermeil-dex-notebook-golden-qa.yml'
   workflow_dispatch:
