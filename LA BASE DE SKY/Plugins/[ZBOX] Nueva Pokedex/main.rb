@@ -167,6 +167,14 @@ module NuevaPokedex
     false
   end
 
+  def form_seen?(base, form)
+    return false unless $player && $player.pokedex
+    return $player.pokedex.seen?(base) if form.to_i <= 0
+    (0..1).any? { |gender| $player.pokedex.seen_form?(base, gender, form.to_i) }
+  rescue StandardError
+    false
+  end
+
   def slot_owned?(slot)
     return false unless defined?($player) && $player && $player.pokedex
     base, form = entry_base_and_form(slot)
@@ -370,7 +378,9 @@ class NuevaPokedexData
     # Roster del juego: SOLO la dex habilitada (p.ej. la de Payu).
     # La decisión de incluir todo el PBS es de los mods de Maker Studio
     # (Dex Catalog Studio), nunca algo de gameplay.
-    @species_list = @assigned_list
+    @species_list = @assigned_list.dup
+    @dex_slot_numbers = {}
+    @assigned_list.each_with_index { |slot, i| @dex_slot_numbers[slot] = i + 1 }
     @cache = {}
   end
 
@@ -380,9 +390,7 @@ class NuevaPokedexData
 
   def slot_number_for(base_species, form)
     sym = form.to_i > 0 ? "#{base_species}_#{form}".to_sym : base_species.to_sym
-    idx = @species_list.index(sym)
-    return nil if !idx
-    return idx + 1
+    @dex_slot_numbers[sym]
   end
 
   def species_count
@@ -408,8 +416,8 @@ class NuevaPokedexData
     return @cache[index] if @cache[index]
     species = @species_list[index]
     base_species, form = NuevaPokedex.entry_base_and_form(species)
-    sd = GameData::Species.try_get(species)
-    sd = GameData::Species.try_get(base_species) if !sd && form > 0
+    sd = (GameData::Species.get_species_form(base_species, form) rescue nil)
+    sd ||= GameData::Species.try_get(base_species)
     if !sd
       # ponytail: slash sin dato en GameData se iguala al de su especie base; nunca se descarta del listado
       return nil
@@ -419,7 +427,7 @@ class NuevaPokedexData
       base_species: base_species,
       form:         form,
       form_name:    (sd.form_name if form > 0 && sd.respond_to?(:form_name)),
-      number:       index + 1,
+      number:       @dex_slot_numbers[species] || index + 1,
       name:         sd.name,
       category:     sd.category,
       height:       sd.height,
@@ -438,9 +446,10 @@ class NuevaPokedexData
       @species_list = @assigned_list.dup
       return
     end
-    @species_list = @species_list.sort_by do |sp|
+    @species_list = @assigned_list.sort_by do |sp|
       base_species, form = NuevaPokedex.entry_base_and_form(sp)
-      sd = GameData::Species.try_get(base_species) || GameData::Species.try_get(sp)
+      sd = (GameData::Species.get_species_form(base_species, form) rescue nil)
+      sd ||= GameData::Species.try_get(base_species)
       case sort_mode
       when :NAME
         [sd ? sd.name.downcase : sp.to_s.downcase, form]
@@ -810,7 +819,7 @@ end
     draw_counters
     # Leyenda dinámica fuera del panel de la lista: no se hornea en el PNG.
     pbDrawShadowText(bmp, 24, 453, 592, 18,
-      _INTL("Flechas: explorar     C: ficha     D: ordenar     X: salir"),
+      _INTL("Flechas: explorar  ·  C: ficha  ·  D: ordenar  ·  Z: buscar  ·  X: salir"),
       NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
   end
 
@@ -946,7 +955,9 @@ end
   def update_sprite_icon
     entry = @model.data_for(@current_index)
     return if !entry
-    if NuevaPokedex.slot_seen?(entry[:species])
+    form_visible = (@state != NuevaPokedex::STATE_FORMS || @current_form.to_i <= 0 ||
+                     NuevaPokedex.form_seen?(entry[:base_species], @current_form))
+    if NuevaPokedex.slot_seen?(entry[:species]) && form_visible
       if @state == NuevaPokedex::STATE_FORMS
         show_species = entry[:base_species]
         show_form = @current_form
@@ -1354,13 +1365,15 @@ end
     selected_pos = form_ids.index(@current_form) || 0
     page_start = (selected_pos / 7) * 7
     form_ids[page_start, 7].each_with_index do |form_id, i|
-      form_sp = GameData::Species.get_species_form(base, form_id)
+      form_sp = (GameData::Species.get_species_form(base, form_id) rescue nil)
+      next unless form_sp
+      form_known = NuevaPokedex.form_seen?(base, form_id)
       selected = (@current_form == form_id)
       row_y = y + i * (36 + 8)
       col = selected ? Color.new(255, 255, 255, 40) : NuevaPokedex::COLOR_PANEL
       bmp.fill_rect(x, row_y, 290, 36, col)
       bmp.fill_rect(x, row_y, 4, 36, NuevaPokedex::COLOR_ACCENT) if selected
-      form_name = (form_id == 0) ? _INTL("Forma base") : form_sp.form_name.to_s
+      form_name = !form_known ? _INTL("Forma sin descubrir") : (form_id == 0 ? _INTL("Forma base") : form_sp.form_name.to_s)
       form_name = _INTL("Forma {1}", form_id) if form_name.nil? || form_name.empty?
       name_c = selected ? NuevaPokedex::COLOR_TEXT : Color.new(190, 190, 190)
       pbDrawShadowText(bmp, x + 12, row_y + 8, 170, 20, form_name, name_c, Color.new(0, 0, 0))
@@ -1369,7 +1382,7 @@ end
         pbDrawShadowText(bmp, x + 12, row_y + 26, 90, 11, _INTL("Nº {1}", sprintf("%02d", slot_no)),
                          NuevaPokedex::COLOR_TEXT_DIM, Color.new(0, 0, 0))
       end
-      draw_form_types(bmp, form_sp.types, x + 190, row_y + 6)
+      draw_form_types(bmp, form_sp.types, x + 190, row_y + 6) if form_known
     end
     shiny_label = case @shiny_mode
                   when 0 then _INTL("Normal")
@@ -1393,6 +1406,7 @@ end
     return if !form_ids.include?(form_id)
     form_sp = GameData::Species.get_species_form(entry[:base_species], form_id) rescue nil
     return if !form_sp
+    return unless NuevaPokedex.form_seen?(entry[:base_species], form_id)
     px = 24
     py = 318
     pw = 262
@@ -1472,7 +1486,10 @@ end
 
   def handle_list_input
     max_index = @model.species_count - 1
-    return :exit if max_index < 0
+    if max_index < 0
+      return :exit if Input.trigger?(Input::BACK)
+      return :continue
+    end
     old_index = @current_index
     if Input.repeat?(Input::DOWN)
       @current_index = (@current_index + 1).clamp(0, max_index)
@@ -1506,6 +1523,8 @@ end
       end
     elsif Input.trigger?(Input::SPECIAL)
       pbDexSearchMode
+    elsif Input.trigger?(Input::ACTION)
+      search_species
     end
     return :continue
   end
@@ -1663,6 +1682,29 @@ end
     wave.visible = true
     wave.bitmap.clear
     @anim_timer = 30
+  end
+
+  def search_species
+    # Respetar el descubrimiento. No se puede localizar por nombre una entrada
+    # todavía oculta, aunque figure en el JSON.
+    query = pbEnterText(_INTL("Buscar Pokémon visto:"), 1, 22, "").to_s.strip.downcase
+    return if query.empty?
+    matches = (0...@model.species_count).select do |index|
+      slot = @model.species_at(index)
+      next false unless NuevaPokedex.slot_seen?(slot)
+      info = @model.data_for(index)
+      info && info[:name].to_s.downcase.include?(query)
+    end
+    if matches.empty?
+      pbMessage(_INTL("No hay coincidencias entre tus Pokémon vistos."))
+      return
+    end
+    target = matches.first
+    @current_index = target
+    @page = 0
+    @scroll_offset = (@current_index - NuevaPokedex::VISIBLE_SLOTS / 2).clamp(0, [@model.species_count - NuevaPokedex::VISIBLE_SLOTS, 0].max)
+    @target_scroll = @scroll_offset
+    pbRefresh
   end
 
   def pbDexSearchMode
