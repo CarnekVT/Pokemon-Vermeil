@@ -5,7 +5,7 @@
 # Custom camera keyframes ALWAYS take priority over these automatic defaults.
 
 module BASVisibleAttackCameraSettings
-  ENABLED = true
+  ENABLED = false # No synthetic attack pans: only authored BAS camera keys run.
   AUTO_WITHOUT_BSS = true # BAS remains the attack-camera author in Vanilla too.
   USER_ZOOM   = 1.095
   TARGET_ZOOM = 1.135
