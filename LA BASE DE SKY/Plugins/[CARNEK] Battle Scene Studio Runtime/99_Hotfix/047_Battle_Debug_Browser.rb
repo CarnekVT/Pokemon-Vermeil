@@ -64,8 +64,7 @@ module BSSDebugBattles
       qa, other=rows.partition { |bp| bp.is_a?(Hash) && bp["groupId"].to_s=="bss_qa_suite" }
       (qa+other).each do |bp|
         next unless bp.is_a?(Hash) && !bp["key"].to_s.empty?
-        label=(bp["groupId"].to_s=="bss_qa_suite" ? "QA · " : "BSS · ")
-        items << [label+bp["name"].to_s, bp["key"].to_s]
+        items << [bp["groupId"].to_s=="bss_qa_suite" ? bp["name"].to_s : "BSS · #{bp["name"]}", bp["key"].to_s]
       end
     end
     examples.each do |name,title,*other|
