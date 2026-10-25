@@ -52,22 +52,22 @@ export function normalizeNormals(raw){
 export const defaultTimeOfDay=()=>({
  enabled:false,source:'real',startHour:8,minutesPerSecond:0.1,
  previewHour:12,blendMode:'tone',keyframes:[
- // Pokémon Fable anchors with additional dusk phases: 18:00 is
+ // Vermeil: lower grayscale at night to preserve warm light contrast. 18:00 is
  // twilight, 19:00 reads as early night, 21:00 reaches full Fable night.
  // Existing daytime and dawn anchors remain unchanged.
- {hour:0,color:'#4B3F69',darkness:.27,tone:{red:-30,green:-70,blue:11,gray:68}},
- {hour:4.75,color:'#4B3F69',darkness:.27,tone:{red:-30,green:-70,blue:11,gray:68}},
- {hour:5,color:'#8C7AA0',darkness:.07,tone:{red:-20,green:-60,blue:-30,gray:17}},
- {hour:8.75,color:'#8C7AA0',darkness:.07,tone:{red:-20,green:-60,blue:-30,gray:17}},
+ {hour:0,color:'#4B3F69',darkness:.27,tone:{red:-54,green:-70,blue:-31,gray:10}},
+ {hour:4.75,color:'#4B3F69',darkness:.27,tone:{red:-54,green:-70,blue:-31,gray:10}},
+ {hour:5,color:'#8C7AA0',darkness:.07,tone:{red:-22,green:-43,blue:-19,gray:8}},
+ {hour:8.75,color:'#8C7AA0',darkness:.07,tone:{red:-22,green:-43,blue:-19,gray:8}},
  {hour:9,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
  {hour:16.75,color:'#FFFFFF',darkness:0,tone:{red:0,green:0,blue:0,gray:0}},
- {hour:17,color:'#C7B6D8',darkness:.07,tone:{red:2,green:-20,blue:3,gray:17}},
- {hour:17.75,color:'#B39EC8',darkness:.11,tone:{red:-3,green:-28,blue:-1,gray:22}},
- {hour:18,color:'#927DAE',darkness:.15,tone:{red:-8,green:-35,blue:-6,gray:28}},
- {hour:18.75,color:'#6E618A',darkness:.20,tone:{red:-14,green:-45,blue:-1,gray:35}},
- {hour:19,color:'#5C527B',darkness:.23,tone:{red:-18,green:-52,blue:2,gray:42}},
- {hour:20.75,color:'#5C527B',darkness:.23,tone:{red:-18,green:-52,blue:2,gray:42}},
- {hour:21,color:'#4B3F69',darkness:.27,tone:{red:-30,green:-70,blue:11,gray:68}}
+ {hour:17,color:'#C7B6D8',darkness:.07,tone:{red:-4,green:-22,blue:-7,gray:4}},
+ {hour:17.75,color:'#B39EC8',darkness:.11,tone:{red:-13,green:-30,blue:-12,gray:6}},
+ {hour:18,color:'#927DAE',darkness:.15,tone:{red:-22,green:-40,blue:-16,gray:8}},
+ {hour:18.75,color:'#6E618A',darkness:.20,tone:{red:-34,green:-50,blue:-21,gray:10}},
+ {hour:19,color:'#5C527B',darkness:.23,tone:{red:-43,green:-59,blue:-25,gray:10}},
+ {hour:20.75,color:'#5C527B',darkness:.23,tone:{red:-43,green:-59,blue:-25,gray:10}},
+ {hour:21,color:'#4B3F69',darkness:.27,tone:{red:-54,green:-70,blue:-31,gray:10}}
 ]});
 const TONE_CHANNELS=['red','green','blue','gray'];
 export function normalizeTone(t,legacy){
