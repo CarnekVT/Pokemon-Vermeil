@@ -398,6 +398,14 @@ module BSS070EBDXCore
       if !custom.empty? && custom =~ /\AGraphics\/.+\.(?:png|gif|jpg|jpeg|webp|bmp)\z/i
         data["backdrop"]=custom
       end
+      # Per-blueprint visual QA override. This belongs to the room data, not
+      # the global clock; it never changes Lighting Studio or another battle.
+      sky_mode=env["skyMode"].to_s.downcase.strip
+      if ["day","dawn","evening","sunset","night"].include?(sky_mode)
+        data["skyMode"]=sky_mode
+        data["outdoor"]=true unless data["outdoor"]==false || data[:outdoor]==false
+        data["sky"]=true unless data["sky"]==false || data[:sky]==false
+      end
       data
     rescue => e
       BSS064.log("EBDX environment resolve warning: #{e.class}: #{e.message}") if defined?(BSS064)
