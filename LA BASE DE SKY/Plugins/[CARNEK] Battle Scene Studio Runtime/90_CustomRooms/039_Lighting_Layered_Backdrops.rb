@@ -331,6 +331,17 @@ module BSSLayeredRoomSupport
     light=BSSLayeredLighting.ambient_tone
     warmth=BSSLayeredLighting.twilight_strength
     slot=BSSLayeredLighting.slot(@data)
+    # QA Blueprints may preview day, twilight and night regardless of the
+    # actual Lighting Studio clock. Affect only the temporary battle room;
+    # all normal battles continue to use the shared clock and its tones.
+    qa_bp=(@scene && @scene.battle && @scene.battle.respond_to?(:bss_blueprint)) ? @scene.battle.bss_blueprint : nil
+    if qa_bp.is_a?(Hash) && qa_bp["key"].to_s.start_with?("bss_qa_")
+      case slot
+      when :night then light=[-78.0,-79.0,-63.0,0.0];warmth=0.0
+      when :dawn  then light=[-28.0,-33.0,-27.0,0.0];warmth=0.9
+      else light=[0.0,0.0,0.0,0.0];warmth=0.0
+      end
+    end
     key=[light.map{|x|x.round(1)},(warmth*24).round,slot].join(":")
     return if !force && @bss_layered_last_key==key
     @bss_layered_last_key=key
