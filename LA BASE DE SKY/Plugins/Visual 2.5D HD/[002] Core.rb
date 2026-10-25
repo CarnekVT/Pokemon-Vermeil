@@ -274,7 +274,7 @@ module Visual25D
     end
 
     def projection_model=(value)
-      value = (value == :camera) ? :camera : :classic
+      value = [:gen5, :camera, :classic].include?(value) ? value : :gen5
       $PokemonSystem.visual25d_model = value if $PokemonSystem&.respond_to?(:visual25d_model=)
       return if projection_model == value
       @projection_model = value
@@ -683,6 +683,12 @@ module Visual25D
       @shelf_lift_stamp = nil
     end
 
+    # :gen5 = plano proyectado SIN escala variable por fila (billboards rectos).
+    # Los modos :camera/:classic son legados experimentales.
+    def gen5_projection?
+      return projection_model == :gen5
+    end
+
     # :camera = escala 1/profundidad (FOV); :classic = perfil lineal.
     def camera_projection?
       return projection_model == :camera
@@ -884,6 +890,9 @@ module Visual25D
 
     # Inversa de raw_project_y (classic cuadrática / camera log-depth).
     def raw_unproject(raw_value)
+      if gen5_projection?
+        return raw_value / gen5_ground_scale
+      end
       return raw_value / @zoom if @perspective == 0
       if camera_projection?
         return camera_raw_unproject(raw_value)
@@ -1000,7 +1009,7 @@ module Visual25D
     # la pantalla, que es donde esta el jugador. Normalizado para que inclinar la
     # camara reparta tamano entre el fondo y el primer plano en vez de acercar.
     def shape_at(y)
-      return 1.0 if @perspective == 0
+      return 1.0 if gen5_projection? || @perspective == 0
       if camera_projection?
         # shape = d0/depth → 1 en el centro; fondo mas pequeño, primer plano mayor.
         d = camera_depth_at(y)
@@ -1014,7 +1023,15 @@ module Visual25D
     # Escala en profundidad: gobierna el alto de las filas y el tamano de lo que
     # esta de pie sobre ellas.
     def scale_at(y)
+      return gen5_ground_scale if gen5_projection?
       return @zoom * shape_at(y)
+    end
+
+    # Una transformacion afin del suelo: todo el mapa comparte el MISMO plano.
+    # Sin deformaciones laterales segun distancia, bandas curvas ni efecto
+    # miniatura. El angulo comprime la profundidad de modo uniforme.
+    def gen5_ground_scale
+      return @zoom * (1.0 - ((1.0 - Math.cos(tilt.to_f * blend * Math::PI / 180.0)) * 0.65))
     end
 
     # Escala en anchura. Converge menos que la de profundidad, como en una camara
@@ -1022,6 +1039,7 @@ module Visual25D
     # freno es ademas lo que evita que un elemento alto se despegue lateralmente
     # de la casilla que ocupa.
     def width_scale_at(y)
+      return @zoom if gen5_projection?
       value = @zoom * (1.0 + ((shape_at(y) - 1.0) * Config::VANISHING_STRENGTH))
       floor = min_width_scale
       return (value < floor) ? floor : value
@@ -1037,6 +1055,7 @@ module Visual25D
 
     # Integral de scale_at: dos filas contiguas comparten borde exactamente.
     def raw_project_y(y)
+      return gen5_ground_scale * y if gen5_projection?
       return @zoom * y if @perspective == 0
       if camera_projection?
         return @zoom * camera_shape_integral(y)
@@ -1387,7 +1406,7 @@ module Visual25D
         top = (row * tile_height) - pixel_offset_y
         @row_top[row] = (raw_project_y(top) + horizon_curve(top) - ys).round
         y_mid = top + half_h
-        if persp == 0
+        if gen5_projection? || persp == 0
           wscale = zoom
         elsif use_cam
           d = cam_d0 + (cam_slope * (cam_half - y_mid))
