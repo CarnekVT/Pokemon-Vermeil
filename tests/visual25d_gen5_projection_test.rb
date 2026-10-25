@@ -33,7 +33,7 @@ class Gen5ProjectionTest < Minitest::Test
     Visual25D.instance_variable_set(:@active, true)
     Visual25D.instance_variable_set(:@wanted, true)
     Visual25D.instance_variable_set(:@blend, 1.0)
-    Visual25D.instance_variable_set(:@tilt, 32)
+    Visual25D.instance_variable_set(:@tilt, Visual25D::Config::TILT_DEGREES)
     Visual25D.instance_variable_set(:@camera_zoom, 100)
     Visual25D.instance_variable_set(:@tile_lift, 0)
     Visual25D.instance_variable_set(:@projection_model, :gen5)
@@ -51,6 +51,18 @@ class Gen5ProjectionTest < Minitest::Test
     assert_equal 1.0, near
     assert_equal Visual25D.project_x(100, near), Visual25D.project_x(100, far)
   end
+  def test_actual_cosine_angle_and_previous_default_migration
+    assert_equal 45, Visual25D::Config::TILT_DEGREES
+    assert_in_delta Math.cos(45 * Math::PI / 180.0),
+                    Visual25D.gen5_ground_scale, 0.00001
+    previous = PokemonSystem.new
+    previous.visual25d_tilt = 32
+    previous.visual25d_model = :camera
+    previous.visual25d_upgrade_legacy_profile!
+    assert_equal 45, previous.visual25d_tilt
+    assert_equal :gen5, previous.visual25d_model
+  end
+
   def test_ground_rows_share_one_uniform_affine_plane
     ys = [-192, -32, 64, 160, 320, 480, 672]
     scale = Visual25D.gen5_ground_scale
@@ -64,7 +76,7 @@ class Gen5ProjectionTest < Minitest::Test
   end
   def test_fast_camera_avoids_large_margin_grid
     assert_operator Visual25D.margin_columns, :<=, 1
-    assert_operator Visual25D.margin_rows, :<=, 5
+    assert_operator Visual25D.margin_rows, :<=, 8
   end
   def test_projection_calculations_do_not_rebuild_when_unchanged
     Visual25D.update_projection(65)
