@@ -77,6 +77,30 @@ export class SceneDirectorEditor{
   shortcuts(){this.ctx.ui.showCustomDialog({title:"Atajos · Scene Director",width:"620px",height:"430px",render:body=>{body.innerHTML=`<div class="sd-dialog-stack"><h2>Comandos y atajos</h2><div class="sd-source-grid"><div class="sd-source-card"><b>Ctrl+S</b><small>Guardar</small></div><div class="sd-source-card"><b>Ctrl+Z / Ctrl+Y</b><small>Deshacer / Rehacer</small></div><div class="sd-source-card"><b>Space</b><small>Play o continuar diálogo</small></div><div class="sd-source-card"><b>Delete</b><small>Borrar comando</small></div><div class="sd-source-card"><b>Ctrl+D</b><small>Duplicar comando</small></div><div class="sd-source-card"><b>Drag</b><small>Reordenar bloques</small></div></div></div>`}})}
   async sceneProps(){const s=this.scene();if(!s)return;const name=await this.input("Propiedades de escena","Nombre",s.name);if(name&&name!==s.name){this.snapshot();s.name=name;s.key=slug(name)||s.key;this.mark();this.renderAll()}}
   async input(title,message,value=""){try{return await this.ctx.ui.showInputDialog({title,message,defaultValue:value})}catch{return prompt(message,value)}}
-  async confirm(title,message){try{return !!(await this.ctx.ui.showConfirmDialog({title,message}))}catch{return confirm(message)}}
+  async confirm(title,message){
+    // In-mod confirmation: Maker Studio's Tauri ACL can deny plugin:dialog|confirm.
+    // Avoid both ctx.ui.showConfirmDialog and browser confirm in editor plugins.
+    return new Promise(resolve=>{
+      const overlay=document.createElement("div");
+      overlay.style.cssText="position:fixed;inset:0;z-index:2147483000;display:flex;justify-content:center;align-items:center;background:rgba(6,12,22,.8)";
+      const panel=document.createElement("div");
+      panel.setAttribute("role","alertdialog");
+      panel.setAttribute("aria-modal","true");
+      panel.style.cssText="width:min(420px,calc(100vw - 40px));padding:24px;border-radius:12px;background:#1c2938;color:#eef2f7;border:1px solid #64748b;box-shadow:0 16px 55px rgba(0,0,0,.48)";
+      const heading=document.createElement("h3");heading.textContent=String(title||"Confirmar");heading.style.cssText="margin:0 0 10px;font-size:17px";
+      const body=document.createElement("p");body.textContent=String(message||"");body.style.cssText="white-space:pre-wrap;line-height:1.5;margin:0 0 20px";
+      const actions=document.createElement("div");actions.style.cssText="display:flex;justify-content:flex-end;gap:10px";
+      const no=document.createElement("button");no.className="sd-button";no.textContent="Cancelar";
+      const yes=document.createElement("button");yes.className="sd-button primary";yes.textContent="Confirmar";
+      actions.append(no,yes);panel.append(heading,body,actions);overlay.appendChild(panel);
+      let done=false;
+      const finish=ok=>{if(done)return;done=true;overlay.remove();resolve(!!ok)};
+      no.onclick=e=>{e.stopPropagation();finish(false)};
+      yes.onclick=e=>{e.stopPropagation();finish(true)};
+      overlay.onclick=e=>{if(e.target===overlay)finish(false)};
+      overlay.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();e.preventDefault();finish(false)}},true);
+      this.root.appendChild(overlay);no.focus();
+    });
+  }
   destroy(){window.removeEventListener("keydown",this.keydown,true);this.preview?.destroy();this.host.innerHTML=""}
 }
