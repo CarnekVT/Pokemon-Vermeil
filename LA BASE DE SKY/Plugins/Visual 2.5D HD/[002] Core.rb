@@ -568,6 +568,10 @@ module Visual25D
       @perf_ext_proj = 0
       @perf_ext_idle = 0
       @perf_ext_fast = 0
+      @perf_props_passes = 0
+      @perf_props_sprites = 0
+      @perf_props_ms = 0.0
+      @perf_tilemap_ms = 0.0
       @perf_frames = 0
     end
 
@@ -588,6 +592,21 @@ module Visual25D
       when :ext_idle then @perf_ext_idle += 1
       when :ext_fast then @perf_ext_fast += 1
       end
+    end
+
+    # Costes acumulados por sistema, exclusivamente cuando el probe esta ON.
+    # La ruta de juego normal no hace lecturas de tiempo por sprite.
+    def perf_record_props!(sprite_count, millis)
+      return unless @perf_enabled
+      @perf_props_passes += 1
+      @perf_props_sprites += sprite_count.to_i
+      @perf_props_active = sprite_count.to_i
+      @perf_props_ms += millis.to_f
+    end
+
+    def perf_record_tilemap_ms!(millis)
+      return unless @perf_enabled
+      @perf_tilemap_ms += millis.to_f
     end
 
     # Perfil del mapa actual (MS layers). Solo echoln.
@@ -653,7 +672,8 @@ module Visual25D
       echoln(format(
         "[V25D perf] map=%s %.0ffps~ frames=%d grid=%dx%dx3(%d) marg=%dx%d extN=%d " \
         "full/f=%.0f yFlat/f=%.0f xHit/f=%.0f xMiss/f=%.0f z/f=%.0f zRaised/f=%.0f " \
-        "blank/f=%.0f cull/f=%.0f rebuild/f=%.1f extRe/f=%.0f extPr/f=%.0f extIdle/f=%.0f extFast/f=%.0f tilt=%d zoom=%d",
+        "blank/f=%.0f cull/f=%.0f rebuild/f=%.1f extRe/f=%.0f extPr/f=%.0f extIdle/f=%.0f extFast/f=%.0f tilt=%d zoom=%d " \
+        "propGeom/f=%.1f propN=%d propMs/f=%.3f tilemapMs/f=%.3f model=%s",
         mid.inspect, f / elapsed, f, cols, rows, slots, margin_columns, margin_rows, ext_n,
         @perf_full.to_f / f, @perf_yflat.to_f / f,
         @perf_xhit.to_f / f, @perf_xmiss.to_f / f,
@@ -662,7 +682,10 @@ module Visual25D
         @perf_proj_rebuild.to_f / f,
         @perf_ext_reapply.to_f / f, @perf_ext_proj.to_f / f,
         @perf_ext_idle.to_f / f, @perf_ext_fast.to_f / f,
-        tilt.to_i, camera_zoom.to_i
+        tilt.to_i, camera_zoom.to_i,
+        @perf_props_passes.to_f / f, (@perf_props_active || 0),
+        @perf_props_ms.to_f / f, @perf_tilemap_ms.to_f / f,
+        projection_model.to_s
       ))
       perf_reset_counters
     end
