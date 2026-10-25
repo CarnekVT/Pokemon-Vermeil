@@ -90,9 +90,12 @@ module LBDSAnimatedProps
                     opacity: [[parallel.fetch('opacity', 100).to_i, 0].max, 100].min,
                     phase: [[parallel.fetch('phase', 0).to_i, 0].max, 63].min }
                 end
+      identifier = p['id'] || definition['id']
       { x: p['x'], y: p['y'], width: sw, height: sh, frames: f, fps: fps,
         source_x: sx, source_y: sy, frame_width: w,
-        sheet: definition['sheet'], cells: sliced, id: p['id'] || definition['id'],
+        sheet: definition['sheet'], cells: sliced, id: identifier,
+        independent_phase_base: phase_from_id(identifier, f),
+        independent_phase_parallel: phase_from_id(identifier, parallel_frames),
         timing_mode: definition['timingMode'] == 'independent' ? 'independent' : 'synchronized',
         parallel: overlay,
         # Optional; only interpreted by Visual 2.5D when installed.
@@ -429,17 +432,20 @@ module LBDSAnimatedPropsSpriteset
     pause_anim = $PokemonSystem && $PokemonSystem.respond_to?(:autotile_animations) &&
                  $PokemonSystem.autotile_animations == 1
     frame_cache = {}
-    anchor_cache = {}
+    # The 2.5D geometry pass owns its own anchors; no unused Hash per frame.
+    anchor_cache = active_25d ? nil : {}
     @lbds_prop_sprites.each do |entry|
       sprite, p, cx, cy, run, priority, old_frame, track = entry
       id = p.object_id
-      key = [id, track]
+      # Integer cache key: no new [object_id, track] Array per sprite.
+      key = (id << 1) | (track == :parallel ? 1 : 0)
       frame = frame_cache[key]
       unless frame
         config = track == :parallel ? p[:parallel] : p
         phase = track == :parallel ? config[:phase] : 0
         if p[:timing_mode] == 'independent'
-          phase += LBDSAnimatedProps.phase_from_id(p[:id], config[:frames])
+          cached_phase = (track == :parallel) ? p[:independent_phase_parallel] : p[:independent_phase_base]
+          phase += cached_phase.nil? ? LBDSAnimatedProps.phase_from_id(p[:id], config[:frames]) : cached_phase
         end
         elapsed_frames = (time * config[:fps]).floor + phase
         frame = pause_anim ? 0 : (config[:loop] ? elapsed_frames % config[:frames] : [elapsed_frames, config[:frames] - 1].min)
