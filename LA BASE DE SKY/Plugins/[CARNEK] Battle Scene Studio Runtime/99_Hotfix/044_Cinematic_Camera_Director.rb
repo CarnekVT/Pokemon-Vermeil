@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.2.1"
+  VERSION = "2.3.0"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -51,7 +51,15 @@ module VermeilBSSCinemaScene
     VermeilBSSCinema.enabled?(self)
   end
 
+  def vermeil_cinema_script_locked?
+    return true if @bss_nds_intro_active
+    return true if @vermeil_cinema_script_depth.to_i > 0
+    return true if @vermeil_cinema_trainer_intro_depth.to_i > 0
+    return false
+  end
+
   def vermeil_cinema_locked?
+    return true if vermeil_cinema_script_locked?
     return true if respond_to?(:bss_shared_camera_leased?) && bss_shared_camera_leased?
     return true if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i > 0
     return true if @vermeil_cinema_native_move_depth.to_i > 0
@@ -148,6 +156,9 @@ module VermeilBSSCinemaScene
   end
 
   def bss070_ebdx_apply_world_alignment(*args, &block)
+    # During scripted dialogue/intro the scene already has a stable framing.
+    # Do NOT ask EBDX metric anchors to reposition animated trainer sprites.
+    return nil if vermeil_cinema_script_locked?
     ret = super
     return ret unless vermeil_cinema_active? && !vermeil_cinema_locked?
     return ret unless @battle && @sprites && @battle.respond_to?(:battlers)
@@ -182,6 +193,9 @@ module VermeilBSSCinemaScene
   # update the room, but receive advance_camera=false (no competing retarget).
   def bss070_ebdx_tick(advance_camera = true, align = true)
     return super unless vermeil_cinema_active?
+    # Do not modify the vector or recalibrate battlers/trainers during scripted
+    # dialogue, DBK speech, trainer animation, or the NDS overlay handoff.
+    return super(false, false) if vermeil_cinema_script_locked?
     # The authored encounter/foe-intro camera owns the world until the first
     # command selection. Do not clear its tweens or move toward an idle target.
     return super(false, align) unless @vermeil_cinema_first_command_reached
