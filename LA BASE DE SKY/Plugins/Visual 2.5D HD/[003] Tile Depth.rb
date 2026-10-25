@@ -216,6 +216,7 @@ class TilemapRenderer
       return
     end
     @hd25_in_update = true
+    prof_t0 = Visual25D.perf_now if Visual25D.perf_enabled?
     hd25_sync_grid
     begin
       Visual25D.shift_maps_for_render
@@ -227,6 +228,7 @@ class TilemapRenderer
       # Dentro del ensure: si se corta entre correr el encuadre y restaurarlo, los
       # mapas se quedan desplazados para siempre y todo se dibuja movido.
       Visual25D.restore_maps_after_render
+      Visual25D.perf_record_tilemap_ms!((Visual25D.perf_now - prof_t0) * 1000.0) if prof_t0
       Visual25D.perf_frame_end(self)
       @hd25_in_update = false
     end
