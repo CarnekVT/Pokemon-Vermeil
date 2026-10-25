@@ -410,6 +410,14 @@ module LBDSAnimatedPropsSpriteset
     end
     mx = (@map.display_x.to_f / Game_Map::X_SUBPIXELS).round
     my = (@map.display_y.to_f / Game_Map::Y_SUBPIXELS).round
+    # During TilemapRenderer's temporary enlarged-grid shift, use ORIGINAL
+    # map scroll for the prop camera. Otherwise a call in that render phase
+    # displaces all props by the artificial grid margin.
+    if active_25d && Visual25D.respond_to?(:shifted_for_render?) &&
+       Visual25D.shifted_for_render?
+      mx += Visual25D.margin_columns * Game_Map::TILE_WIDTH
+      my += Visual25D.margin_rows * Game_Map::TILE_HEIGHT
+    end
     zx = TilemapRenderer::ZOOM_X
     zy = TilemapRenderer::ZOOM_Y
     lbds_props_sync_visible(mx, my, zx, zy)
