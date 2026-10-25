@@ -2,7 +2,7 @@ import {DATA_PATH,defaultProject,normalizeProject,getMap,makeLight,deepCopy,pars
 import {STYLES,LIGHTING_EXTRA_CSS,LIGHTING_LAYER_DIAGNOSTIC_CSS,LIGHTING_WORKSPACE_CSS,LIGHTING_WIDE_WORKSPACE_CSS} from './styles.js';
 import {point as pointerPoint, hitTest, paint} from './map_overlay.js';
 import {cacheSize,clearLightCache,hasPendingChunks,invalidateLightRegions,setMaskImage,getMaskImage,removeMaskImage,forgetMaskImages} from './render.js';
-import {mountMaskPainter,saveMaskPng,caveTemplate} from './mask_editor.js';
+import {mountMaskPainter,saveMaskPng,caveTemplate,upperEntranceTemplate} from './mask_editor.js';
 const PANEL='lighting-studio.main', TOOL='lighting-studio.place';
 let state=null;
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=String(text);return e;};
@@ -499,6 +499,18 @@ shapePanel.append(element('p','ls-inline-note','La luz conserva su forma y tama�
     state.maskDrafts.set(name,draft);
     setMaskImage(name,draft);
     change(()=>{selected.maskFile=name;selected.maskEnabled=true;state.inspectorTab='mask';});
+  }));
+  maskTools.append(mini('⇩ Entrada superior / tronco',()=>{
+    const name=maskFilename(maskInput.value.trim())||maskFilename('mascara_'+String(lightId).replace(/[^a-z0-9_-]/gi,'_')+'.png')||'mascara_nueva.png';
+    const draft=upperEntranceTemplate(256,128);
+    state.maskDrafts.set(name,draft);setMaskImage(name,draft);
+    change(()=>{
+      selected.maskFile=name;selected.maskEnabled=true;selected.maskMode='reveal';
+      selected.type='rectangle';selected.widthPx=128;selected.heightPx=96;
+      selected.rotation=0;selected.fadeMode='center';
+      state.inspectorTab='mask';
+    });
+    notify('Plantilla creada. Centra la luz justo debajo de la abertura y ajusta tamaño y posición en Forma.','info');
   }));
   maskTools.append(mini('◈ Plantilla de entrada de cueva',()=>{
     const name=maskFilename(maskInput.value.trim())||maskFilename('mascara_'+String(lightId).replace(/[^a-z0-9_-]/gi,'_')+'.png')||'mascara_nueva.png';
