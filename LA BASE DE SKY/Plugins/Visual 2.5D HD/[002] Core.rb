@@ -598,15 +598,15 @@ module Visual25D
     # La ruta de juego normal no hace lecturas de tiempo por sprite.
     def perf_record_props!(sprite_count, millis)
       return unless @perf_enabled
-      @perf_props_passes += 1
-      @perf_props_sprites += sprite_count.to_i
+      @perf_props_passes = (@perf_props_passes || 0) + 1
+      @perf_props_sprites = (@perf_props_sprites || 0) + sprite_count.to_i
       @perf_props_active = sprite_count.to_i
-      @perf_props_ms += millis.to_f
+      @perf_props_ms = (@perf_props_ms || 0.0) + millis.to_f
     end
 
     def perf_record_tilemap_ms!(millis)
       return unless @perf_enabled
-      @perf_tilemap_ms += millis.to_f
+      @perf_tilemap_ms = (@perf_tilemap_ms || 0.0) + millis.to_f
     end
 
     # Perfil del mapa actual (MS layers). Solo echoln.
@@ -683,8 +683,8 @@ module Visual25D
         @perf_ext_reapply.to_f / f, @perf_ext_proj.to_f / f,
         @perf_ext_idle.to_f / f, @perf_ext_fast.to_f / f,
         tilt.to_i, camera_zoom.to_i,
-        @perf_props_passes.to_f / f, (@perf_props_active || 0),
-        @perf_props_ms.to_f / f, @perf_tilemap_ms.to_f / f,
+        (@perf_props_passes || 0).to_f / f, (@perf_props_active || 0),
+        (@perf_props_ms || 0.0).to_f / f, (@perf_tilemap_ms || 0.0).to_f / f,
         projection_model.to_s
       ))
       perf_reset_counters
