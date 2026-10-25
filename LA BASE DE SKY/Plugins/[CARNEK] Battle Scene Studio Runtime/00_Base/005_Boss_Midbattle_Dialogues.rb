@@ -416,18 +416,23 @@ class BSSDialogueEngine
     end
 
     # 5. Presentation mode
-    is_cinematic = (t[:style] == "cinematic" || t[:textboxType] == "cinematic")
+    # DBK's pbProcessText indexes @battle.battlers[idxBattler], so global
+    # events with no battler need a valid display anchor.
+    display_idx = idxBattler
+    if display_idx.nil? || !(@battle.battlers[display_idx] rescue nil)
+      display_idx = (@battle.battlers[1] ? 1 : 0) rescue 0
+    end
+    is_cinematic = (t[:style] == "cinematic" || t[:textboxType] == "cinematic" ||
+                    t[:textboxType] == "speech")
     is_clean = (t[:textboxType] == "clean")
     show_name = t[:showNamebox] != false
 
     speaker_label = if show_name
                       case t[:speaker]
-                      when "boss"
-                        battler_name
-                      when "sos"
-                        battler_name
+                      when "boss", "sos"
+                        battler_name == "el Pokémon" ? (@battle.battlers[display_idx].name rescue battler_name) : battler_name
                       when "trainer"
-                        (@battle.pbGetOwnerName(idxBattler || 1) rescue "Entrenador")
+                        (@battle.pbGetOwnerName(display_idx) rescue "Entrenador")
                       when "custom"
                         t[:speakerName].empty? ? battler_name : t[:speakerName]
                       else
@@ -437,55 +442,42 @@ class BSSDialogueEngine
                       nil
                     end
 
-    if is_cinematic
-      if @battle.scene && @battle.scene.respond_to?(:pbProcessText)
+    scene = @battle.scene
+    name_window = scene_sprites.is_a?(Hash) ? scene_sprites["nameWindow"] : nil
+    if is_cinematic && scene && scene.respond_to?(:pbProcessText)
+      begin
+        # setSpeaker expects a trainer/species asset ID, NOT a string label.
+        # Opening speech explicitly and updating only the name plate avoids
+        # invalid sprites and namebox leaks when the custom speaker is text.
+        scene.pbStartSpeech(display_idx) if scene.respond_to?(:pbStartSpeech)
         if speaker_label && !speaker_label.empty?
-          MidbattleHandlers.trigger(:midbattle_triggers, "setSpeaker", @battle, idxBattler, idxTarget, speaker_label) rescue nil
-        elsif !show_name && scene_sprites.is_a?(Hash) && scene_sprites["nameWindow"]
-          scene_sprites["nameWindow"].visible = false
+          scene.pbUpdateSpeakerWindows(speaker_label) if scene.respond_to?(:pbUpdateSpeakerWindows)
+          name_window.visible = true if name_window
+        elsif name_window
+          name_window.visible = false
         end
-        if scene_sprites.is_a?(Hash) && scene_sprites["nameWindow"] && scene_sprites["messageWindow"]
-          nw = scene_sprites["nameWindow"]
-          mw = scene_sprites["messageWindow"]
-          nw.y = mw.y - nw.height + 4
-          nw.x = [mw.x + 8, 16].max
-        end
-        @battle.scene.pbProcessText(idxBattler, idxTarget, true, formatted_lines) unless formatted_lines.empty?
-        if !show_name && scene_sprites.is_a?(Hash) && scene_sprites["nameWindow"]
-          scene_sprites["nameWindow"].visible = false
-        end
-        @battle.scene.pbForceEndSpeech rescue nil
-      else
-        formatted_lines.each do |fl|
-          msg = speaker_label && !speaker_label.empty? ? "#{speaker_label}: #{fl}" : fl
-          @battle.pbDisplayPaused(msg)
-        end
+        scene.pbProcessText(display_idx, idxTarget, true, formatted_lines) unless formatted_lines.empty?
+      ensure
+        scene.pbForceEndSpeech if scene.respond_to?(:pbForceEndSpeech)
       end
     elsif is_clean
-      orig_opacity = scene_sprites.is_a?(Hash) && scene_sprites["messageWindow"] ? scene_sprites["messageWindow"].opacity : 255
-      scene_sprites["messageWindow"].opacity = 0 if scene_sprites.is_a?(Hash) && scene_sprites["messageWindow"]
-      formatted_lines.each do |fl|
-        msg = speaker_label && !speaker_label.empty? ? "#{speaker_label}: #{fl}" : fl
-        @battle.pbDisplayPaused(msg)
-      end
-      scene_sprites["messageWindow"].opacity = orig_opacity if scene_sprites.is_a?(Hash) && scene_sprites["messageWindow"]
-    else
-      if @battle.scene && @battle.scene.respond_to?(:pbProcessText)
-        if speaker_label && !speaker_label.empty?
-          MidbattleHandlers.trigger(:midbattle_triggers, "setSpeaker", @battle, idxBattler, idxTarget, speaker_label) rescue nil
-        end
-        if scene_sprites.is_a?(Hash) && scene_sprites["nameWindow"] && scene_sprites["messageWindow"]
-          nw = scene_sprites["nameWindow"]
-          mw = scene_sprites["messageWindow"]
-          nw.y = mw.y - nw.height + 4
-          nw.x = [mw.x + 8, 16].max
-        end
-        @battle.scene.pbProcessText(idxBattler, idxTarget, false, formatted_lines) unless formatted_lines.empty?
-      else
-        formatted_lines.each do |fl|
-          msg = speaker_label && !speaker_label.empty? ? "#{speaker_label}: #{fl}" : fl
+      message_window = scene_sprites.is_a?(Hash) ? scene_sprites["messageWindow"] : nil
+      orig_opacity = message_window ? message_window.opacity : 255
+      begin
+        message_window.opacity = 0 if message_window
+        formatted_lines.each do |line|
+          msg = speaker_label && !speaker_label.empty? ? "#{speaker_label}: #{line}" : line
           @battle.pbDisplayPaused(msg)
         end
+      ensure
+        message_window.opacity = orig_opacity if message_window
+      end
+    else
+      # Narrative mode uses the standard battle message box. It must NOT call
+      # DBK's setSpeaker (which opens cinematic bars) or leave the namebox up.
+      formatted_lines.each do |line|
+        msg = speaker_label && !speaker_label.empty? ? "#{speaker_label}: #{line}" : line
+        @battle.pbDisplayPaused(msg)
       end
     end
 
