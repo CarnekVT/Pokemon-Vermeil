@@ -81,8 +81,25 @@ module BSSDebugBattles
     names=items.map(&:first) + [_INTL("Cancelar")]
     index=pbMessage(_INTL("Selecciona un combate BSS para probar."),names,names.length-1)
     return if !index || index<0 || index>=items.length
-    # Use editor's sandbox mode so testPlayer is honored and party is restored.
-    BSS064.run_blueprint(items[index][1],true)
+    key=items[index][1]
+    bp=BSS064.find(key)
+    test_rows=(bp.is_a?(Hash) && bp["teams"].is_a?(Hash)) ? bp["teams"]["testPlayer"] : []
+    test_rows=[] unless test_rows.is_a?(Array)
+    test_summary=test_rows.map { |row| row.is_a?(Hash) ? row["species"].to_s : nil }.compact.reject(&:empty?).first(6).join(", ")
+    test_summary="Equipo del Blueprint" if test_summary.empty?
+    # Prompt in the game's own message UI. Test mode isolates either party
+    # from permanent changes, and does not touch normal pbBSSBattle events.
+    mode=pbMessage(
+      _INTL("¿Con qué equipo quieres probar el combate?"),
+      [
+        _INTL("Equipo de prueba ({1})",test_summary),
+        _INTL("Mi equipo actual ({1} Pokémon)",($player.party.length rescue 0)),
+        _INTL("Cancelar")
+      ],2
+    )
+    return if mode.nil? || mode<0 || mode>=2
+    return pbMessage(_INTL("Este Blueprint no tiene equipo de prueba configurado.")) if mode==0 && test_rows.empty?
+    BSS064.run_blueprint(key,true,(mode==1 ? "ingame" : "test"))
   end
 end
 
