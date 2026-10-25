@@ -83,22 +83,28 @@ assert('initial phase idle',s.vermeil_cinema_phase==:idle)
 ref=BSS070EBDXCore.get_vector(:MAIN)
 80.times{s.bss070_ebdx_tick}
 v=s.vector.get
-assert('idle zoom actually moves',v[4]>1.015)
+assert('idle has smooth camera pan',v[0]>ref[0]+0.25)
+assert('idle zoom stays authored',v[4]==ref[4] && v[5]==ref[5])
+assert('idle perspective stays authored',v[2]==ref[2] && v[3]==ref[3])
 assert('environment tick delegated with no competing old advance',s.instance_variable_get(:@steps).all?{|row|row[0]==false})
-assert('battler anchored with same zoom',s.sprites['pokemon_0'].zoom_x>1.015)
-assert('shadow follows same absolute framing',s.sprites['shadow_0'].zoom_x>1.015)
+assert('battler retains native size',s.sprites['pokemon_0'].zoom_x==1.0 && s.sprites['pokemon_0'].zoom_y==1.0)
+assert('shadow retains native size',s.sprites['shadow_0'].zoom_x==1.0 && s.sprites['shadow_0'].zoom_y==0.25)
+assert('battler follows pan without scaling',s.sprites['pokemon_0'].x>160.0)
 old=[s.sprites['pokemon_0'].x,s.sprites['pokemon_0'].y,s.sprites['pokemon_0'].zoom_x]
 s.bss070_ebdx_apply_world_alignment
 newp=[s.sprites['pokemon_0'].x,s.sprites['pokemon_0'].y,s.sprites['pokemon_0'].zoom_x]
 assert('idempotent alignment',old==newp)
-idle_zoom=s.vector.get[4]
+idle_x=s.vector.get[0]
 s.pbCommandMenu
 cmd=s.vector.get
-assert('command zoom stronger',cmd[4]>idle_zoom)
+assert('command camera moves toward player',cmd[0]>idle_x)
+assert('command sprite size unchanged',s.sprites['pokemon_0'].zoom_x==1.0)
 assert('command returns idle',s.vermeil_cinema_phase==:idle)
 s.pbFightMenu
 fight=s.vector.get
-assert('fight zoom stronger',fight[4]>cmd[4])
+assert('fight camera moves beyond command focus',fight[0]>cmd[0])
+assert('fight sprite size unchanged',s.sprites['pokemon_0'].zoom_x==1.0)
+assert('fight preserves projection axes',fight[2,4]==ref[2,4])
 assert('fight returns idle',s.vermeil_cinema_phase==:idle)
 freeze=s.vector.get
 s.instance_variable_set(:@bss_shared_camera_depth,1)
@@ -116,4 +122,4 @@ assert('static legacy dispatcher used',s.bss096_camera_to_main==:old)
 BSS070EBDXCore.set_config({'preset'=>'gen5_plus','cinematicCamera'=>false})
 assert('explicit disable respected',!s.vermeil_cinema_active?)
 BSS070EBDXCore.set_config({})
-puts 'CAMERA V2 TESTS PASS: 16 camera/ownership/compatibility assertions'
+puts 'CAMERA V2.1 TESTS PASS: stable sprites, pan, perspective and ownership'
