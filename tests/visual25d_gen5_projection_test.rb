@@ -28,6 +28,10 @@ load File.expand_path("../LA BASE DE SKY/Plugins/Visual 2.5D HD/[008] Options.rb
 module Visual25D
   def self.build_row_slices(*); end
 end
+def echoln(message)
+  $v25d_perf_line = message
+end
+
 class Gen5ProjectionTest < Minitest::Test
   def setup
     Visual25D.instance_variable_set(:@active, true)
@@ -86,6 +90,22 @@ class Gen5ProjectionTest < Minitest::Test
     Visual25D.update_projection(66)
     assert_equal stamp + 1, Visual25D.projection_stamp
   end
+  def test_profiler_reports_real_tilemap_and_props_cpu_cost
+    Visual25D.perf_reset_counters
+    Visual25D.instance_variable_set(:@perf_enabled, true)
+    Visual25D.perf_record_props!(15, 1.25)
+    Visual25D.perf_record_tilemap_ms!(8.75)
+    Visual25D.instance_variable_set(:@perf_last_dump, Visual25D.perf_now - 1.1)
+    Visual25D.perf_frame_end
+    assert_includes $v25d_perf_line, "propN=15"
+    assert_includes $v25d_perf_line, "propMs/f=1.250"
+    assert_includes $v25d_perf_line, "tilemapMs/f=8.750"
+    assert_includes $v25d_perf_line, "model=gen5"
+  ensure
+    Visual25D.instance_variable_set(:@perf_enabled, false)
+    Visual25D.perf_reset_counters
+  end
+
   def test_saved_legacy_mode_switches_to_gen5_without_resetting_zoom
     system = PokemonSystem.new
     system.visual25d_model = :camera
