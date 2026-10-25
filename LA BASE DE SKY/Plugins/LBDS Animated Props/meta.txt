@@ -1,5 +1,5 @@
 Name = LBDS Animated Props
-Version = 0.6.5
+Version = 0.6.6
 Essentials = 21.1
 Website = https://gitlab.com/la-base-de-sky/La-Base-de-Sky
 Credits = LBDS Animated Props prototype
