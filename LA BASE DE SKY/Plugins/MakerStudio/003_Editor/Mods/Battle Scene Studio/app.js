@@ -433,7 +433,55 @@ if(chosen===recovery&&recoveryAt>mainAt)setTimeout(()=>this.toast("BSS recuperó
   resolveCatalogSpecies(raw){const wanted=U(raw),source=A(this.source.species);let exact=source.find(x=>U(x.species)===wanted&&N(x.form)===0)||source.find(x=>U(x.species)===wanted);if(!exact){const compact=C(wanted);exact=source.find(x=>C(x.species)===compact&&N(x.form)===0)||source.find(x=>C(x.species)===compact);}if(exact)return {species:U(exact.species),form:N(exact.form)};const regional=[["ALOLA_","alola"],["GALAR_","galar"],["HISUI_","hisui"],["PALDEA_","paldea"]];for(const pair of regional){const pre=pair[0],tag=pair[1];if(wanted.startsWith(pre))return this.resolveCatalogEntity({species:wanted.slice(pre.length),formTag:tag});}const aliases={NIDORAN_F:"NIDORANFE",NIDORAN_M:"NIDORANMA",BATTLE_BOND_GRENINJA:"GRENINJA",BLOODMOON_URSALUNA:"URSALUNA",ETERNAL_FLOETTE:"FLOETTE"};const alias=aliases[wanted];if(alias){exact=source.find(x=>U(x.species)===alias);if(exact)return {species:U(exact.species),form:N(exact.form)};}return null;}
   importSOSExampleToAssignments(id){const ex=A(this.sosCatalog&&this.sosCatalog.examples).find(x=>S(x.id)===S(id));if(!ex)return;const source=A(this.source.species),available=new Map(source.map(x=>[`${U(x.species)}:${N(x.form)}`,x])),speciesAvailable=new Set(source.map(x=>U(x.species))),callerRaw=U(ex.caller&&ex.caller.species),resolvedCaller=this.resolveCatalogEntity(ex.caller||{species:callerRaw});if(!resolvedCaller){this.toast(`No se puede asignar ${callerRaw}: la especie/forma no existe en este proyecto.`,true);return;}const callerSp=resolvedCaller.species,callerForm=resolvedCaller.form,p=this.ensureProfile(callerSp,callerForm);p.callRate=Math.max(0,Math.min(100,N(ex.callRate,100)));p.answerRate=Math.max(0,Math.min(100,N(ex.answerRate,100)));p.requirements=A(ex.requirements).map(r=>Object.assign({},r));p.pool=A(ex.pool).map((raw,i)=>{const x=typeof raw==="string"?{species:U(raw),form:0,weight:A(ex.weights)[i]||100,requirements:[]}:raw,res=this.resolveCatalogEntity(x);if(!res)return null;return {species:res.species,form:res.form,weight:Math.max(0,N(x.weight,100)),requirements:A(x.requirements).map(r=>Object.assign({},r))};}).filter(Boolean);if(!p.pool.length)p.pool=[{species:p.species,form:p.form,weight:100,requirements:[]}];this.sosSelected.clear();this.sosSelected.add(`${p.species}:${N(p.form)}`);this.saveSOSConfigSoon();this.renderSOSStudio();this.toast(`Asignado al juego: ${p.species}${p.form?` · Forma ${p.form}`:""} (${this.sosCatalog.name||"plantilla"})`);}
   importSOSExample(id){const ex=A(this.sosCatalog&&this.sosCatalog.examples).find(x=>S(x.id)===S(id));if(!ex)return;const sourceSpecies=A(this.source.species),available=new Set(sourceSpecies.map(x=>U(x.species))),fallback=sourceSpecies[0],resolvedCaller=this.resolveCatalogEntity(ex.caller);let caller=resolvedCaller?resolvedCaller.species:(fallback&&U(fallback.species)||"PIKACHU"),callerForm=resolvedCaller?resolvedCaller.form:0;let pool=A(ex.pool).map((x,i)=>{const raw=typeof x==="string"?{species:U(x),form:0,weight:A(ex.weights)[i]||100,requirements:[]}:x,res=this.resolveCatalogEntity(raw);if(!res)return null;return {species:res.species,form:res.form,weight:N(raw.weight,100),requirements:A(raw.requirements)};}).filter(Boolean);if(!pool.length)pool=[{species:caller,form:callerForm,weight:100,requirements:[]}];const b=makeBlueprint(ex.name||`${this.sosCatalog.name||"SOS"} Example`);b.key=this.uniqueKey(b.name,b.id);b.groupId=this.activeGroup||"wild_main";b.category="Ejemplo SOS";b.setup.kind="wild";b.setup.formation="1v1";b.teams.foes=[Object.assign(makePokemon(caller,N(ex.caller&&ex.caller.level,30)),{form:callerForm})];const test=available.has("EEVEE")?"EEVEE":(fallback&&U(fallback.species)||"PIKACHU");b.teams.testPlayer=[makePokemon(test,55)];b.sos.enabled=true;b.sos.initialCall=ex.initialCall!==false;b.sos.automaticCalls=false;b.sos.allowAdditionalCalls=false;b.sos.allowRecursiveCalls=false;b.sos.maxSimultaneousSOS=1;b.sos.summonsPerCall=1;b.sos.allySelectionMode="random";b.sos.callRound=1;b.sos.callRate=Math.max(1,Math.min(100,N(ex.callRate,100)));b.sos.answerRate=Math.max(0,Math.min(100,N(ex.answerRate,100)));b.sos.levelMode="fixed";b.sos.levelFixed=Math.max(1,Math.min(100,N(ex.caller&&ex.caller.level,30)));b.sos.levelMin=null;b.sos.levelMax=null;b.sos.pool=pool;this.studio.blueprints.push(b);this.activeId=b.id;this.screen="editor";this.section="sos";this.touch();this.render();this.toast(`Importado: ${b.name}`);}
-  async testBattle(id){const b=this.studio.blueprints.find(x=>x.id===id);if(!b)return;this.lastTestKey=b.key;await this.save(true);try{await this.ctx.fs.projectMkdir(DATA_DIR);await this.ctx.fs.writeProjectFile(CONTROL_FILE,JSON.stringify({action:"test",key:b.key,requestedAt:Date.now()},null,2));this.toast("Test queued. Open the game if it is not running.");}catch(e){this.toast("Could not queue test: "+S(e&&e.message||e),true);}}
+  // ACL-safe selector shown for ALL Test game launch buttons, in the battle
+  // library and inside any Blueprint. No native Tauri dialog permissions needed.
+  chooseTestParty(b){
+    if(this.root.querySelector('[data-bss-test-party-selector]'))return Promise.resolve(null);
+    return new Promise(resolve=>{
+      const modal=document.createElement("div");
+      modal.className="bss-modalback";
+      modal.dataset.bssTestPartySelector="1";
+      modal.style.cssText="z-index:2147483000;display:flex;align-items:center;justify-content:center;";
+      const configured=A(b.teams&&b.teams.testPlayer),preview=configured.map(p=>S(p&&p.species||"?")+(" Nv."+N(p&&p.level,1))).join(" · ");
+      modal.innerHTML=`<div class="bss-modal" role="dialog" aria-modal="true" aria-label="Elegir equipo para testear" style="max-width:580px;width:calc(100% - 24px);">
+        <div class="bss-modalhead"><div><b>Probar combate · ${E(b.name)}</b><small class="bss-note">Elige qué Pokémon utilizará el jugador en esta prueba.</small></div></div>
+        <div class="bss-modalbody" style="display:grid;gap:12px;padding:20px;">
+          <button class="bss-btn" data-bss-test-party="test" style="text-align:left;display:block;padding:14px 16px;white-space:normal;">
+            <b>Equipo de prueba (Blueprint)</b><span style="display:block;margin-top:6px;opacity:.8;line-height:1.45;">${E(preview||"Sin Pokémon de prueba configurados")}</span>
+          </button>
+          <button class="bss-btn" data-bss-test-party="ingame" style="text-align:left;display:block;padding:14px 16px;white-space:normal;">
+            <b>Mi equipo actual del juego</b><span style="display:block;margin-top:6px;opacity:.8;line-height:1.45;">Usar una copia temporal de los Pokémon de la partida cargada, sin alterar sus PS, PP, EXP ni estado al terminar.</span>
+          </button>
+          <div style="display:flex;justify-content:flex-end;"><button class="bss-btn" data-bss-test-party="cancel">Cancelar</button></div>
+        </div>
+      </div>`;
+      let finished=false;
+      const finish=value=>{if(finished)return;finished=true;modal.remove();resolve(value);};
+      modal.addEventListener("click",e=>{
+        e.stopPropagation();
+        const btn=e.target&&e.target.closest?e.target.closest("[data-bss-test-party]"):null;
+        if(btn){finish(btn.dataset.bssTestParty==="cancel"?null:btn.dataset.bssTestParty);}
+        else if(e.target===modal){finish(null);}
+      });
+      modal.addEventListener("keydown",e=>{if(e.key==="Escape"){e.preventDefault();e.stopPropagation();finish(null);}});
+      this.root.appendChild(modal);
+      const focus=modal.querySelector('[data-bss-test-party="test"]');if(focus)focus.focus();
+    });
+  }
+  async testBattle(id){
+    const b=this.studio.blueprints.find(x=>x.id===id);if(!b)return;
+    const partyMode=await this.chooseTestParty(b);
+    if(partyMode!=="test"&&partyMode!=="ingame")return;
+    if(partyMode==="test"&&!A(b.teams&&b.teams.testPlayer).length){this.toast("El Blueprint no tiene equipo de prueba configurado.",true);return;}
+    this.lastTestKey=b.key;
+    const saved=await this.save(true);
+    if(saved===false){this.toast("No se pudo guardar el Blueprint; evita iniciar una prueba desactualizada.",true);return;}
+    try{
+      await this.ctx.fs.projectMkdir(DATA_DIR);
+      await this.ctx.fs.writeProjectFile(CONTROL_FILE,JSON.stringify({action:"test",key:b.key,partyMode,requestedAt:Date.now()},null,2));
+      this.toast(partyMode==="ingame"?"Test enviado · equipo actual del juego (copia temporal).":"Test enviado · equipo de prueba del Blueprint.");
+    }catch(e){this.toast("No se pudo iniciar la prueba: "+S(e&&e.message||e),true);}
+  }
   updateFullscreenUi(){if(!this.root)return;this.root.querySelectorAll('[data-act="fullscreen"]').forEach(b=>{b.classList.toggle("active",this.fullscreenActive);b.setAttribute("aria-pressed",this.fullscreenActive?"true":"false");b.textContent=this.fullscreenActive?"↙ Exit fullscreen":"⛶ Fullscreen";b.title=this.fullscreenActive?"Exit fullscreen · F11 / Esc":"Fullscreen · F11";});}
   refreshAfterFullscreenChange(){requestAnimationFrame(()=>{this.render();requestAnimationFrame(()=>{try{this.preview&&this.preview.draw();}catch(_){}});});}
   enterFullscreenMode(){if(this.fullscreenActive||!this.root||!document.body)return false;this.fullscreenPreviousScroll={x:Number(window.scrollX||0),y:Number(window.scrollY||0)};this.fullscreenPlaceholder=document.createComment("Battle Scene Studio fullscreen home");if(this.root.parentNode)this.root.parentNode.insertBefore(this.fullscreenPlaceholder,this.root);document.body.appendChild(this.root);this.fullscreenActive=true;this.root.classList.add("bss-fullscreen-active");document.body.classList.add("bss-fullscreen-lock");this.updateFullscreenUi();this.refreshAfterFullscreenChange();try{this.root.focus({preventScroll:true});}catch(_){}this.toast("Vista ampliada estilo BAS · F11 o Esc para salir");return true;}
