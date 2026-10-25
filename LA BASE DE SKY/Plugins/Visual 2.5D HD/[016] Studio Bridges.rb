@@ -60,10 +60,12 @@ module Visual25D
              when "surface", "ground", "floor" then true
              when "billboard", "upright", "vertical" then false
              else
-               # A purely ground-priority graphic (e.g. animated water) belongs
-               # on the terrain mesh. Anything raised is a rigid sprite plane.
+               # Una animacion de varias filas es normalmente un objeto
+               # vertical, aunque el usuario no haya asignado prioridades.
+               # Solo las tiras de una fila sin prioridad son suelo por defecto.
                cells = obj[:cells] || []
-               !cells.any? { |cell| cell && cell.fetch("priority", 0).to_i > 0 }
+               obj[:height].to_i <= 1 &&
+                 !cells.any? { |cell| cell && cell.fetch("priority", 0).to_i > 0 }
              end
       modes[id] = mode
       return mode
@@ -164,7 +166,9 @@ module Visual25D
             scale = Visual25D.width_scale_at(foot_y)
             px = Visual25D.project_x(flat_x, scale)
             py = Visual25D.project_y(foot_y)
-            unit = Visual25D.vertical_unit_at(foot_y) * zy
+            # vertical_unit_at ya esta expresado en pixeles de DISPLAY tile;
+            # multiplicar por ZOOM_Y otra vez duplicaba la escala al moverse.
+            unit = Visual25D.vertical_unit_at(foot_y)
             anchor = [px, py, scale, unit]
             anchors[obj.object_id] = anchor
           end
