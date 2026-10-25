@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'LA BASE DE SKY/Plugins/Visual 2.5D HD/**'
+      - 'LA BASE DE SKY/Plugins/LBDS Animated Props/**'
       - 'tests/visual25d_animated_props_plane_test.rb'
       - 'tests/visual25d_animated_props_runtime_test.rb'
       - 'tests/visual25d_gen5_projection_test.rb'
@@ -10,6 +11,7 @@ on:
   pull_request:
     paths:
       - 'LA BASE DE SKY/Plugins/Visual 2.5D HD/**'
+      - 'LA BASE DE SKY/Plugins/LBDS Animated Props/**'
       - 'tests/visual25d_animated_props_plane_test.rb'
       - 'tests/visual25d_animated_props_runtime_test.rb'
       - 'tests/visual25d_gen5_projection_test.rb'
@@ -23,7 +25,7 @@ jobs:
           ruby-version: '3.3'
       - name: Ruby syntax
         run: |
-          for file in "LA BASE DE SKY/Plugins/Visual 2.5D HD/"*.rb; do
+          for file in "LA BASE DE SKY/Plugins/Visual 2.5D HD/"*.rb "LA BASE DE SKY/Plugins/LBDS Animated Props/"*.rb; do
             ruby -c "$file"
           done
       - name: Camera / animated prop geometry regression
