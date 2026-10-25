@@ -6,14 +6,14 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.2.0"
+  VERSION = "2.2.1"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
     "cinematicCommandZoom" => 1.0,
     "cinematicFightZoom" => 1.0,
     "cinematicSmooth" => 0.115,
-    "cinematicIdlePan" => 8.0,
+    "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
   }
 
@@ -92,6 +92,9 @@ module VermeilBSSCinemaScene
     pan_y = VermeilBSSCinema.clamp(cfg["panY"] || 100, 0, 200) / 100.0
     phase = vermeil_cinema_phase
     tick = @vermeil_cinema_ticks.to_i
+    # First 100 active frames ramp in from the finished intro composition.
+    fade_in = VermeilBSSCinema.clamp(tick.to_f / 100.0, 0.0, 1.0)
+    fade_in = fade_in * fade_in * (3.0 - 2.0 * fade_in)
     speed = VermeilBSSCinema.clamp(cfg["idleSpeed"] || 50, 1, 150) / 50.0
     # Three perceptible camera beats per 8-11 seconds instead of a near
     # motionless idle oscillation. The second harmonic avoids robotic loops.
@@ -99,24 +102,24 @@ module VermeilBSSCinemaScene
     amplitude = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 20)
     amplitude = [amplitude, 6.0].max if strength > 0.05
     motion = (0.30 + strength * 0.70)
-    drift_x = (16.0 + amplitude) * motion * Math.sin(cycle)
-    drift_x += 5.0 * motion * Math.sin(cycle * 0.46 + 0.8)
-    drift_y = (4.0 + amplitude * 0.38) * motion * Math.sin(cycle * 0.63 + 1.0)
+    drift_x = (7.0 + amplitude * 0.8) * motion * Math.sin(cycle)
+    drift_x += 2.0 * motion * Math.sin(cycle * 0.46 + 0.8)
+    drift_y = (2.0 + amplitude * 0.20) * motion * Math.sin(cycle * 0.63 + 1.0)
     # Menus get distinct eyelines so switching Command -> Fight reads as
     # actual shot composition. BAS takes over entirely when an attack begins.
     case phase
     when :command
       control = VermeilBSSCinema.clamp(cfg["commandStrength"] || 45, 0, 100) / 45.0
-      drift_x = 24.0 * control + drift_x * 0.30
-      drift_y = -4.0 * control + drift_y * 0.25
+      drift_x = 11.0 * control + drift_x * 0.25
+      drift_y = -2.0 * control + drift_y * 0.20
     when :fight
       control = VermeilBSSCinema.clamp(cfg["fightStrength"] || 65, 0, 100) / 65.0
-      drift_x = -25.0 * control + drift_x * 0.24
-      drift_y = 7.0 * control + drift_y * 0.20
+      drift_x = -11.0 * control + drift_x * 0.20
+      drift_y = 3.0 * control + drift_y * 0.20
     end
     target = main.clone
-    target[0] += VermeilBSSCinema.clamp(drift_x * pan_x, -42.0, 42.0)
-    target[1] += VermeilBSSCinema.clamp(drift_y * pan_y, -16.0, 16.0)
+    target[0] += VermeilBSSCinema.clamp(drift_x * pan_x * fade_in, -19.0, 19.0)
+    target[1] += VermeilBSSCinema.clamp(drift_y * pan_y * fade_in, -8.0, 8.0)
     # Perspective, physical scale and native battler sizes remain unchanged.
     target
   rescue StandardError => e
@@ -179,6 +182,9 @@ module VermeilBSSCinemaScene
   # update the room, but receive advance_camera=false (no competing retarget).
   def bss070_ebdx_tick(advance_camera = true, align = true)
     return super unless vermeil_cinema_active?
+    # The authored encounter/foe-intro camera owns the world until the first
+    # command selection. Do not clear its tweens or move toward an idle target.
+    return super(false, align) unless @vermeil_cinema_first_command_reached
     owned = vermeil_cinema_locked?
     # Old BSS087 tweens can snap the vector even when advance_camera=false.
     # They are not allowed to outlive the new presentation director.
@@ -202,6 +208,7 @@ module VermeilBSSCinemaScene
 
   def pbInitSprites(*args, &block)
     @vermeil_cinema_ticks = 0
+    @vermeil_cinema_first_command_reached = false
     @vermeil_cinema_command_depth = 0
     @vermeil_cinema_fight_depth = 0
     @vermeil_cinema_logged = false
@@ -210,6 +217,7 @@ module VermeilBSSCinemaScene
 
   def pbCommandMenu(*args, &block)
     return super unless vermeil_cinema_active?
+    @vermeil_cinema_first_command_reached = true
     @vermeil_cinema_command_depth = @vermeil_cinema_command_depth.to_i + 1
     super
   ensure
