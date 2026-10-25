@@ -348,9 +348,18 @@ module BSSLayeredRoomSupport
     if @bss_layered_extra && @bss_layered_extra.length==2
       horizon,ground=@bss_layered_extra
       horizon.tone=horizon_tone
-      horizon.color=Color.new(255,165,89,(225*warmth).round)
+      # Sunset horizon is orange-peach, but translucent enough to keep texture.
+      horizon.color=Color.new(244,157,107,(145*warmth).round)
       ground.tone=ground_tone
-      ground.color=Color.new(28,70,92,slot==:night ? 94 : (warmth*40).round)
+      # Warm terrain at dusk; blue-gray belongs exclusively to night.
+      # The former cyan overlay made 17:00-19:59 look prematurely nocturnal.
+      if slot==:night
+        ground.color=Color.new(51,77,113,95)
+      elsif slot==:dawn
+        ground.color=Color.new(194,115,95,(55*warmth).round)
+      else
+        ground.color=Color.new(0,0,0,0)
+      end
     else
       bg.tone=ground_tone
     end
