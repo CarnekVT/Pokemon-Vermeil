@@ -220,6 +220,7 @@ module Visual25D
       @perspective = Math.tan(degrees * Math::PI / 180.0)
       target_z = (@camera_zoom || 100) / 100.0
       @zoom = 1.0 + ((target_z - 1.0) * b)
+      @gen5_ground_factor = @zoom * (1.0 - ((1.0 - Math.cos(degrees * Math::PI / 180.0)) * 0.65))
       @projection_dirty = true
       @margin_columns = nil
       @margin_rows = nil
@@ -1031,7 +1032,7 @@ module Visual25D
     # Sin deformaciones laterales segun distancia, bandas curvas ni efecto
     # miniatura. El angulo comprime la profundidad de modo uniforme.
     def gen5_ground_scale
-      return @zoom * (1.0 - ((1.0 - Math.cos(tilt.to_f * blend * Math::PI / 180.0)) * 0.65))
+      return @gen5_ground_factor || (@zoom || 1.0)
     end
 
     # Escala en anchura. Converge menos que la de profundidad, como en una camara
