@@ -71,44 +71,12 @@ module Visual25D
       return mode
     end
 
-    def lbds_props_update_sprites
-      active = Visual25D.enabled? && Visual25D::StudioOptions.props?
-      if active != @v25_props_active
-        @lbds_prop_geometry_stamp = nil
-        @lbds_prop_active_bounds = nil
-        @v25_props_camera = nil
-        @v25_prop_modes = {}
-        @v25_prop_mode_list = nil
-        # Sprites are reused when switching to vanilla 2D. A ground taper
-        # must not leak into the original LBDS renderer after toggling OFF.
-        if !active && @lbds_prop_sprites && Sprite.method_defined?(:taper=)
-          @lbds_prop_sprites.each do |entry|
-            spr = entry[0]
-            spr.taper = 1.0 if spr && !spr.disposed?
-          end
-        end
-        @v25_props_active = active
-      end
-
-      previous_slot = @lbds_prop_frame_slot
-      previous_geometry = @lbds_prop_geometry_stamp
-      previous_sprites = @lbds_prop_sprites ? @lbds_prop_sprites.object_id : nil
-      super
-      return unless active && @map && @lbds_prop_sprites && !@lbds_prop_sprites.empty?
-
-      # Original LBDS overwrites x/y/zoom on every animation sample, including
-      # a stationary camera. Never skip projection for a newly sampled frame.
-      source_changed = previous_slot != @lbds_prop_frame_slot ||
-                       previous_geometry != @lbds_prop_geometry_stamp ||
-                       previous_sprites != @lbds_prop_sprites.object_id ||
-                       LBDSAnimatedProps::DISPLAY_FPS_CAP.to_i <= 0
-      Visual25D.sync_projection_from_map!(@map)
-      signature = [@map.map_id, @map.display_x, @map.display_y,
-                   Visual25D.projection_stamp, Visual25D.tilt,
-                   Visual25D.camera_zoom, Graphics.width, Graphics.height,
-                   @lbds_prop_sprites.object_id]
-      return if !source_changed && @v25_props_camera == signature
-      @v25_props_camera = signature
+    # Invocado desde LBDS Animated Props solo cuando cambia la camara o
+    # cuando se crean sprites visibles. El runtime base muestrea fotogramas y
+    # NO toca sus posiciones en el modo 2.5D: solo existe una ruta geometrica.
+    def v25_props_apply_geometry(mx, my, zx, zy)
+      return unless @map && @lbds_prop_sprites && !@lbds_prop_sprites.empty?
+      return unless Visual25D.enabled? && Visual25D::StudioOptions.props?
 
       if @v25_prop_mode_list != @lbds_prop_placements.object_id
         @v25_prop_modes = {}
@@ -122,8 +90,10 @@ module Visual25D
       src_width = LBDSAnimatedProps::CELL_SIZE.to_f
       src_height = LBDSAnimatedProps::CELL_SIZE.to_f
       pixel_offset_y = Visual25D.display_pixel_offset_y(@map)
-      field = Visual25D.wall_field(@map)
-      field = nil if field && field.flat
+      # Los billboards verticales no necesitan escanear WallField.
+      # Leer el terreno solo si hay una superficie animada.
+      field = nil
+      field_ready = false
       # One projected anchor per placement. Fragments with different priorities
       # MUST share this anchor and the same scaling to prevent visible tears.
       anchors = {}
@@ -139,6 +109,11 @@ module Visual25D
         row = Visual25D.grid_row_for_map_cell(@map, cell_y)
 
         if v25_prop_surface?(obj)
+          if !field_ready
+            field = Visual25D.wall_field(@map)
+            field = nil if field && field.flat
+            field_ready = true
+          end
           # Terrain planes: same Y edges, row width and taper as native tiles.
           flat_x, _flat_y = Visual25D::StudioTransform.flat(
             cell_x * tw, cell_y * th, @map, zx, zy)
@@ -184,24 +159,28 @@ module Visual25D
 
         right = left + 1 if right <= left
         bottom = top + 1 if bottom <= top
-        spr.x = left.round
-        spr.y = top.round
+        target_x = left.round
+        target_y = top.round
+        spr.x = target_x if spr.x != target_x
+        spr.y = target_y if spr.y != target_y
         new_zx = (right - left).to_f / (span * src_width)
         new_zy = (bottom - top).to_f / src_height
         spr.zoom_x = new_zx if (spr.zoom_x - new_zx).abs > 0.002
         spr.zoom_y = new_zy if (spr.zoom_y - new_zy).abs > 0.002
-        spr.taper = taper if spr.respond_to?(:taper=)
+        spr.taper = taper if spr.respond_to?(:taper=) && spr.taper != taper
 
         if priority > 0
           depth = ((row + priority + 1) * TilemapRenderer::DISPLAY_TILE_HEIGHT) -
                   pixel_offset_y + 1 + priority
-          spr.z = Visual25D.raised_tile_z(depth.round) +
-                  [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
+          target_z = Visual25D.raised_tile_z(depth.round) +
+                     [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
         else
-          spr.z = [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
+          target_z = [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
         end
-        spr.visible = left < Graphics.width && right > 0 &&
-                      top < Graphics.height && bottom > 0
+        spr.z = target_z if spr.z != target_z
+        shown = left < Graphics.width && right > 0 &&
+                top < Graphics.height && bottom > 0
+        spr.visible = shown if spr.visible != shown
       end
     end
   end
