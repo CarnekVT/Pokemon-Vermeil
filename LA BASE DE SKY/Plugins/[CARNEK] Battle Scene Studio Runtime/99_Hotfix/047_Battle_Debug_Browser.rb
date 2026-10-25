@@ -59,12 +59,17 @@ module BSSDebugBattles
   def choices
     BSS064.clear_cache
     rows=BSS064.data["blueprints"]
-    items=examples.map { |e| [e[1],e[0]] }
+    items=[]
     if rows.is_a?(Array)
-      rows.each do |bp|
+      qa, other=rows.partition { |bp| bp.is_a?(Hash) && bp["groupId"].to_s=="bss_qa_suite" }
+      (qa+other).each do |bp|
         next unless bp.is_a?(Hash) && !bp["key"].to_s.empty?
-        items << ["BSS · #{bp["name"] || bp["key"]}", bp["key"].to_s]
+        label=(bp["groupId"].to_s=="bss_qa_suite" ? "QA · " : "BSS · ")
+        items << [label+bp["name"].to_s, bp["key"].to_s]
       end
+    end
+    examples.each do |name,title,*other|
+      items << [title,name] unless items.any? { |item| item[1]==name }
     end
     items
   end
@@ -84,7 +89,9 @@ end
 
 module BSSDebugBattleLookup
   def find(key)
-    BSSDebugBattles.test_blueprint(key) || super
+    # Saved BSS editor Blueprints always win; only older installs without the
+    # QA library use the dynamic fallback.
+    super || BSSDebugBattles.test_blueprint(key)
   end
 end
 if defined?(BSS064) && !BSS064.singleton_class.ancestors.include?(BSSDebugBattleLookup)
