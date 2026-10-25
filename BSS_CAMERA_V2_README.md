@@ -31,10 +31,10 @@ El perfil **static / static_gen4** continúa siendo estático de forma intencion
 
 ## Correcciones de atardecer y cámara de ataques (24/10/2026)
 
-- \`99_Hotfix/045_Sunset_Sky_and_Clouds.rb\` elimina el tinte cian de la franja del horizonte y del cielo en el horario \`:dawn\` (mañana/atardecer), conservando el sol, los árboles y el terreno. Los sprites de nubes reciben un tono cálido, y el original se recupera al cambiar de horario.
+- `99_Hotfix/045_Sunset_Sky_and_Clouds.rb` elimina el tinte cian de la franja del horizonte y del cielo en el horario `:dawn` (mañana/atardecer), conservando el sol, los árboles y el terreno. Los sprites de nubes reciben un tono cálido, y el original se recupera al cambiar de horario.
 - No se alteran los archivos PNG originales ni la geometría del escenario. La conversión del cielo se ejecuta al dividir/recrear el fondo o cambiar el tramo horario, no en cada fotograma.
-- \`044_Cinematic_Camera_Director.rb\` mantiene bloqueado el encuadre base de BSS durante animaciones nativas de movimientos y efectos comunes. **Las cámaras de ataques provienen únicamente de las secuencias creadas en BAS.**
-- \`Battle Animation Studio Runtime/003_Visible_Attack_Camera.rb\` tiene \`ENABLED = false\`: BAS ya no inventa zooms o movimientos automáticos cuando una animación carece de claves de cámara. Las animaciones con cámara configurada manualmente en BAS siguen funcionando.
+- `044_Cinematic_Camera_Director.rb` mantiene bloqueado el encuadre base de BSS durante animaciones nativas de movimientos y efectos comunes. **Las cámaras de ataques provienen únicamente de las secuencias creadas en BAS.**
+- `Battle Animation Studio Runtime/003_Visible_Attack_Camera.rb` tiene `ENABLED = false`: BAS ya no inventa zooms o movimientos automáticos cuando una animación carece de claves de cámara. Las animaciones con cámara configurada manualmente en BAS siguen funcionando.
 
 Comprobación específica: reproducir una batalla al atardecer con cielo EBDX, observar que desaparecen la franja cian y las nubes azules, usar un movimiento **sin** cámara BAS (BSS debe mantener el mismo encuadre) y otro **con** cámara BAS (solo BAS debe moverla).
 
