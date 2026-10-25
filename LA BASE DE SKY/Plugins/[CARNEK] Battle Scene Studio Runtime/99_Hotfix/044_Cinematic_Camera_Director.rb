@@ -6,14 +6,14 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.0.0"
+  VERSION = "2.1.0"
   DEFAULTS = {
     "cinematicCamera" => true,
-    "cinematicIdleZoom" => 1.045,
-    "cinematicCommandZoom" => 1.105,
-    "cinematicFightZoom" => 1.145,
-    "cinematicSmooth" => 0.090,
-    "cinematicIdlePan" => 8.0,
+    "cinematicIdleZoom" => 1.0,
+    "cinematicCommandZoom" => 1.0,
+    "cinematicFightZoom" => 1.0,
+    "cinematicSmooth" => 0.085,
+    "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
   }
 
@@ -75,79 +75,50 @@ module VermeilBSSCinemaScene
     VermeilBSSCinema.config(self)
   end
 
+  # Preserve the scene's authored horizon, angle, perspective and scale. The
+  # presentation director only pans the existing world; changing [2..5] every
+  # menu frame inflated Pokemon sprites and warped the EBDX background.
   def vermeil_cinema_vector
     main = BSS070EBDXCore.get_vector(:MAIN, @battle)
-    return nil unless main && main.length >= 6
+    return nil unless main.is_a?(Array) && main.length >= 6
     main = main[0, 6].map { |v| v.to_f }
     cfg = vermeil_cinema_config
     phase = vermeil_cinema_phase
-    strength = VermeilBSSCinema.clamp(cfg["idleStrength"] || 28, 0.0, 100.0) / 100.0
-    pan_x = VermeilBSSCinema.clamp(cfg["panX"] || 100, 0.0, 200.0) / 100.0
-    pan_y = VermeilBSSCinema.clamp(cfg["panY"] || 100, 0.0, 200.0) / 100.0
-    pan_scale = phase == :idle ? (0.35 + 0.65 * strength) : 1.0
-    # The existing BSS Studio camera sliders must keep affecting this new
-    # director; otherwise the camera would look detached from the editor.
-    command_weight = VermeilBSSCinema.clamp(cfg["commandStrength"] || 45, 0, 100) / 45.0
-    fight_weight = VermeilBSSCinema.clamp(cfg["fightStrength"] || 65, 0, 100) / 65.0
-    # No random cuts: coherent composition based on the camera's phase.
+    strength = VermeilBSSCinema.clamp(cfg["idleStrength"] || 28, 0, 100) / 100.0
+    pan_x = VermeilBSSCinema.clamp(cfg["panX"] || 100, 0, 200) / 100.0
+    pan_y = VermeilBSSCinema.clamp(cfg["panY"] || 100, 0, 200) / 100.0
+    # The target is deterministic and frame-rate independent; the EBDX vector
+    # performs smoothing once. The camera never changes the native Pokemon zoom.
     tick = @vermeil_cinema_ticks.to_i
-    breath = Math.sin(tick * 0.011)
-    sway = Math.sin(tick * 0.007 + 1.0)
-    zoom = case phase
-           when :command then VermeilBSSCinema.clamp(cfg["cinematicCommandZoom"], 1.0, 1.20)
-           when :fight then VermeilBSSCinema.clamp(cfg["cinematicFightZoom"], 1.0, 1.22)
-           else VermeilBSSCinema.clamp(cfg["cinematicIdleZoom"], 1.0, 1.14)
-           end
-    # Respect original scene scale, using the EBDX vector as world authority.
     target = main.clone
-    if phase == :command
-      target[0] -= 17.0 * pan_x
-      target[1] -= 5.0 * pan_y
-      target[2] += 0.65
-      target[3] -= 2.0
-    elsif phase == :fight
-      target[0] -= 27.0 * pan_x
-      target[1] -= 8.0 * pan_y
-      target[2] += 1.05
-      target[3] -= 4.0
+    case phase
+    when :command
+      influence = VermeilBSSCinema.clamp(cfg["commandStrength"] || 45, 0, 100) / 45.0
+      target[0] += 12.0 * pan_x * influence
+      target[1] += 2.5 * pan_y * influence
+    when :fight
+      influence = VermeilBSSCinema.clamp(cfg["fightStrength"] || 65, 0, 100) / 65.0
+      target[0] += 19.0 * pan_x * influence
+      target[1] += 4.0 * pan_y * influence
     else
-      amplitude = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 20)
-      target[0] += amplitude * breath * pan_x * pan_scale
-      target[1] += 3.0 * sway * pan_y * pan_scale
-      zoom += 0.010 * breath * strength
+      amplitude = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 10)
+      target[0] += amplitude * (0.20 + strength * 0.80) * pan_x * Math.sin(tick * 0.008)
+      target[1] += 1.1 * strength * pan_y * Math.sin(tick * 0.006 + 0.8)
     end
-    if phase == :command
-      target[0] = main[0] + (target[0] - main[0]) * command_weight
-      target[1] = main[1] + (target[1] - main[1]) * command_weight
-      target[2] = main[2] + (target[2] - main[2]) * command_weight
-      target[3] = main[3] + (target[3] - main[3]) * command_weight
-      zoom = 1.0 + (zoom - 1.0) * command_weight
-    elsif phase == :fight
-      target[0] = main[0] + (target[0] - main[0]) * fight_weight
-      target[1] = main[1] + (target[1] - main[1]) * fight_weight
-      target[2] = main[2] + (target[2] - main[2]) * fight_weight
-      target[3] = main[3] + (target[3] - main[3]) * fight_weight
-      zoom = 1.0 + (zoom - 1.0) * fight_weight
-    end
-    zoom = VermeilBSSCinema.clamp(zoom, 1.0, 1.23)
-    # Keep two zoom components equal; the prior stack sometimes stretched
-    # the field vertically by modifying only one of them.
-    target[4] = main[4] * zoom
-    target[5] = main[5] * zoom
+    # EBDX zoom1/zoom2, depth and angle stay at the original MAIN values.
+    # BAS can still apply its own temporary cinematic zoom during an attack.
     target
   rescue StandardError => e
     BSS064.log("Cinema target: #{e.class}: #{e.message}") if defined?(BSS064)
     nil
   end
 
-  # All camera states are absolute, based on the native battle scene frame:
-  # calling alignment twice in one render frame cannot compound the transform.
-  def vermeil_cinema_project_point(x, y, vector, main, scale, weight = 1.0)
-    cx = (Graphics.width.to_f rescue 640.0) / 2.0
-    cy = (Graphics.height.to_f rescue 480.0) / 2.0
-    dx = (vector[0] - main[0]) * 0.65 * weight
-    dy = (vector[1] - main[1]) * 0.45 * weight
-    [cx + ((x.to_f - cx) * scale) + dx, cy + ((y.to_f - cy) * scale) + dy]
+  # An absolute pan, not a scale animation. Base battler coordinates and
+  # zooms come from the native Essentials/DBK formation every frame.
+  def vermeil_cinema_project_point(x, y, vector, main, _scale, weight = 1.0)
+    dx = (vector[0].to_f - main[0].to_f) * 0.65 * weight.to_f
+    dy = (vector[1].to_f - main[1].to_f) * 0.45 * weight.to_f
+    [x.to_f + dx, y.to_f + dy]
   end
 
   def vermeil_cinema_align_sprite(sprite, native, vector, main, scale, weight)
@@ -156,8 +127,10 @@ module VermeilBSSCinemaScene
     x, y = vermeil_cinema_project_point(native[0], native[1], vector, main, scale, weight)
     sprite.x = x if sprite.respond_to?(:x=)
     sprite.y = y if sprite.respond_to?(:y=)
-    sprite.zoom_x = native[3].to_f * scale if sprite.respond_to?(:zoom_x=)
-    sprite.zoom_y = native[4].to_f * scale if sprite.respond_to?(:zoom_y=)
+    # Never multiply these by the world zoom. Zoom belongs to BAS only during
+    # attacks; normal BSS camera movement may not change Pokemon/shadow sizes.
+    sprite.zoom_x = native[3].to_f if sprite.respond_to?(:zoom_x=)
+    sprite.zoom_y = native[4].to_f if sprite.respond_to?(:zoom_y=)
   end
 
   def bss070_ebdx_apply_world_alignment(*args, &block)
@@ -168,13 +141,9 @@ module VermeilBSSCinemaScene
     main = BSS070EBDXCore.get_vector(:MAIN, @battle)
     vector = @vector.get
     return ret unless vector && main && main.length >= 6
-    raw_scale = vector[4].to_f / (main[4].to_f.abs < 0.001 ? 1.0 : main[4].to_f)
     cfg = vermeil_cinema_config
     weight = VermeilBSSCinema.clamp(cfg["cinematicBattlerFollow"], 0, 100) / 100.0
-    scale = 1.0 + (VermeilBSSCinema.clamp(raw_scale, 0.85, 1.25) - 1.0) * weight
-    # Keep normal double/triple formations legible at any zoom.
-    count = @battle.battlers.compact.length
-    scale = 1.0 + (scale - 1.0) * 0.60 if count > 2
+    scale = 1.0  # Deliberately fixed: avoid changing native sprite size.
     @battle.battlers.each_index do |i|
       next unless @battle.battlers[i]
       sp = bss070_ebdx_native_sprite(i) rescue nil
@@ -293,6 +262,7 @@ module VermeilBSSCinemaScene
       :version => VermeilBSSCinema::VERSION,
       :active => vermeil_cinema_active?,
       :phase => vermeil_cinema_phase,
+      :stable_sprite_size => true,
       :bas_owner => (respond_to?(:bss_shared_camera_leased?) && bss_shared_camera_leased?),
       :vector => (@vector.get rescue nil)
     }
