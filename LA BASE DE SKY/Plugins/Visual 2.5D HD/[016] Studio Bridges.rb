@@ -93,7 +93,12 @@ module Visual25D
           scale = Visual25D.width_scale_at(y + th * zy / 2.0)
           top = Visual25D.project_y(y)
           height = [Visual25D.project_y(y + th * zy) - top, 1].max
-          # Para prioridad cero se conserva el z del renderer original.
+          # Los props del suelo retienen su propia banda y capa, sin Z_LIFT.
+        end
+        # Los valores provienen de p[:cells][cy*width+cx] y se conservan
+        # también entre cambios de frame. No reutilizar la Z de otro sprite.
+        if priority <= 0
+          spr.z = [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
         end
         sx = Visual25D.project_x(x, scale)
         xzoom = zx * scale
