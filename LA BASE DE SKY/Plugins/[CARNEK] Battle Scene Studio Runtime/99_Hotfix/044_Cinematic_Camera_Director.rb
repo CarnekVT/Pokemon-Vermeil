@@ -54,6 +54,7 @@ module VermeilBSSCinemaScene
   def vermeil_cinema_locked?
     return true if respond_to?(:bss_shared_camera_leased?) && bss_shared_camera_leased?
     return true if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i > 0
+    return true if @vermeil_cinema_native_move_depth.to_i > 0
     return true if @bss083_camera_freeze.to_i > 0 || @bss070_ebdx_suspend_depth.to_i > 0
     return true if @bss098_native_move_active || @bss096_move_projection_active
     return true if @bss087_native_move_active || @bss084_native_move_active
@@ -255,6 +256,34 @@ module VermeilBSSCinemaScene
     super
   end
 
+  # Native Essentials/PBS moves may animate sprites but NEVER direct the
+  # persistent BSS camera. BAS clips already own their camera in the separate
+  # playback path; these wrappers isolate all other move/common animations.
+  def vermeil_cinema_hold_native_move_camera
+    return yield unless vermeil_cinema_active? && @vector
+    outer = @vermeil_cinema_native_move_depth.to_i == 0
+    saved = (@vector.get.clone rescue nil) if outer
+    @vermeil_cinema_native_move_depth = @vermeil_cinema_native_move_depth.to_i + 1
+    yield
+  ensure
+    if @vermeil_cinema_native_move_depth.to_i > 0
+      @vermeil_cinema_native_move_depth -= 1
+      if outer && saved && @vector && @vector.respond_to?(:get) && @vector.respond_to?(:snap)
+        # Restore ONLY if a legacy wrapper overwrote the base vector. No
+        # camera transition is issued at the end of the move.
+        @vector.snap(saved) if @vector.get != saved
+      end
+    end
+  end
+
+  def pbAnimation(*args, &block)
+    vermeil_cinema_hold_native_move_camera { super }
+  end
+
+  def pbCommonAnimation(*args, &block)
+    vermeil_cinema_hold_native_move_camera { super }
+  end
+
   # Simple runtime proof that the new camera is active and BAS is not being
   # overwritten. Available through scene.vermeil_cinema_status when debugging.
   def vermeil_cinema_status
@@ -263,6 +292,7 @@ module VermeilBSSCinemaScene
       :active => vermeil_cinema_active?,
       :phase => vermeil_cinema_phase,
       :stable_sprite_size => true,
+      :native_move_camera_frozen => @vermeil_cinema_native_move_depth.to_i > 0,
       :bas_owner => (respond_to?(:bss_shared_camera_leased?) && bss_shared_camera_leased?),
       :vector => (@vector.get rescue nil)
     }
