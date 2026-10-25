@@ -342,6 +342,7 @@ module Visual25D
           @horizon_curve = curve
         end
       end
+      $PokemonSystem.visual25d_upgrade_legacy_profile! if $PokemonSystem.respond_to?(:visual25d_upgrade_legacy_profile!)
       return if !$PokemonSystem.respond_to?(:visual25d_tilt)
       @tilt = $PokemonSystem.visual25d_tilt
       @camera_zoom = $PokemonSystem.visual25d_zoom
