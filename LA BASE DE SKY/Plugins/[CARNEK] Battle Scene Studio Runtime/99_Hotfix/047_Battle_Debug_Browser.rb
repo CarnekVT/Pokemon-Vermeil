@@ -92,8 +92,8 @@ module BSSDebugBattles
     mode=pbMessage(
       _INTL("¿Con qué equipo quieres probar el combate?"),
       [
-        _INTL("Equipo de prueba ({1})",test_summary),
-        _INTL("Mi equipo actual ({1} Pokémon)",($player.party.length rescue 0)),
+        _INTL("Equipo de prueba ({1})".dup,test_summary),
+        _INTL("Mi equipo actual ({1} Pokémon)".dup,($player.party.length rescue 0)),
         _INTL("Cancelar")
       ],2
     )
