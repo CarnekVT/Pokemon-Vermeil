@@ -40,6 +40,7 @@ module Visual25D
   class << self
     attr_accessor :test_enabled, :projection_stamp
     def enabled? = @test_enabled
+    def perf_enabled? = false
     def tilt = 32
     def camera_zoom = 100
     def sync_projection_from_map!(_) = nil
