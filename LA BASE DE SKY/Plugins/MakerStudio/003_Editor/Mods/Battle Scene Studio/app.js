@@ -900,7 +900,8 @@ App.prototype.bss653BlueprintSections=function(){return [
   ["scene","Escena y audio","Battleback, bases y música"],
   ["boss","Boss / Totem","Jefe, resistencia, HUD, escudos y captura"],
   ["aura","Aura","Presentación y perfil de aura del Boss"],
-  ["sos","SOS","Invocaciones, pool y reglas del combate"]
+  ["sos","SOS","Invocaciones, pool y reglas del combate"],
+  ["dialogues","Guionización","Diálogos, elecciones, namebox y eventos de combate"]
 ];};
 App.prototype.bss653BlueprintMeta=function(section){return this.bss653BlueprintSections().find(x=>x[0]===S(section))||this.bss653BlueprintSections()[0];};
 App.prototype.renderEditor=function(){
@@ -1589,7 +1590,12 @@ const BSS_RICH_TRIGGER_EVENTS = [
   ["BeforeStatusMove", "Antes de usar un movimiento de estado"],
   ["AfterMove", "Tras ejecutar un movimiento"],
   ["ShieldBreak", "Al romperse la barrera / escudo (BSS)"],
+  ["SOSCall", "Cuando un rival solicita ayuda SOS"],
   ["SOSSuccess", "Al invocar con éxito a un aliado SOS (BSS)"],
+  ["SOSFail", "Cuando falla la llamada de ayuda SOS"],
+  ["Choice_1", "Respuesta a la opción 1 del diálogo"],
+  ["Choice_2", "Respuesta a la opción 2 del diálogo"],
+  ["Choice_3", "Respuesta a la opción 3 del diálogo"],
   ["BattlerFainted", "Al ser derrotado / debilitado"],
   ["TurnEnd", "Al finalizar cada turno"],
   ["BattleEndWin", "Victoria del jugador"],
