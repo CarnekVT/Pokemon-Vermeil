@@ -12,6 +12,9 @@ module Graphics
   def self.height = 480
 end
 class Scene_Map; end
+module EventHandlers
+  def self.add(*); end
+end
 class TilemapRenderer
   DISPLAY_TILE_WIDTH = 32
   DISPLAY_TILE_HEIGHT = 32
