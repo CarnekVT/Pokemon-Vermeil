@@ -376,15 +376,44 @@ module LBDSAnimatedPropsSpriteset
     true
   end
 
+  # Explicit optional integration: if Visual 2.5D is installed AND active,
+  # its bridge owns geometry. Do not do vanilla positioning and then overwrite
+  # it a second time. Projects without Visual25D use the original 2D path.
+  def lbds_props_visual25d_active?
+    defined?(Visual25D) && Visual25D.respond_to?(:enabled?) &&
+      Visual25D.enabled? && respond_to?(:v25_props_apply_geometry) &&
+      (!defined?(Visual25D::StudioOptions) || Visual25D::StudioOptions.props?)
+  end
+
   def lbds_props_update_sprites
     return unless @map && @lbds_prop_sprites
+    active_25d = lbds_props_visual25d_active?
+    if @lbds_props_25d_last != active_25d
+      @lbds_props_25d_last = active_25d
+      @lbds_prop_geometry_stamp = nil
+      @lbds_prop_active_bounds = nil
+      @lbds_prop_projection_stamp = nil
+      # A ground trapezoid may have applied a GPU taper. Never leak it into
+      # vanilla sprites after switching 2.5D off.
+      if !active_25d && @lbds_prop_sprites && Sprite.method_defined?(:taper=)
+        @lbds_prop_sprites.each do |entry|
+          sprite = entry[0]
+          sprite.taper = 1.0 if sprite && !sprite.disposed? && sprite.taper != 1.0
+        end
+      end
+    end
     mx = (@map.display_x.to_f / Game_Map::X_SUBPIXELS).round
     my = (@map.display_y.to_f / Game_Map::Y_SUBPIXELS).round
     zx = TilemapRenderer::ZOOM_X
     zy = TilemapRenderer::ZOOM_Y
     lbds_props_sync_visible(mx, my, zx, zy)
     return if @lbds_prop_sprites.empty?
-    stamp = [mx, my, zx, zy, Graphics.width, Graphics.height]
+    # The projected row table must be synchronized BEFORE computing the
+    # geometry signature. Camera scroll must not generate a second pass.
+    Visual25D.sync_projection_from_map!(@map) if active_25d
+    projection_stamp = active_25d ? Visual25D.projection_stamp : nil
+    stamp = [mx, my, zx, zy, Graphics.width, Graphics.height,
+             active_25d, projection_stamp]
     geometry_changed = @lbds_prop_geometry_stamp != stamp
     @lbds_prop_geometry_stamp = stamp
     now = System.uptime
@@ -418,7 +447,9 @@ module LBDSAnimatedPropsSpriteset
                             (p[:source_y] + cy) * 32, run * 32, 32)
         entry[6] = frame
       end
-      next unless geometry_changed
+      # Only frame sampling above runs every animation tick. Position/zoom is
+      # computed once by the optional 2.5D bridge below, never twice.
+      next if active_25d || !geometry_changed
       origin = anchor_cache[id]
       unless origin
         sx = p[:x] * Game_Map::TILE_WIDTH - mx
@@ -440,6 +471,8 @@ module LBDSAnimatedPropsSpriteset
                         sy + Game_Map::TILE_HEIGHT * zy > 0 &&
                         sx < Graphics.width && sy < Graphics.height)
     end
+    # One projection pass per camera change; none on animation-only frames.
+    v25_props_apply_geometry(mx, my, zx, zy) if active_25d && geometry_changed
   end
 
   def update
