@@ -24,6 +24,10 @@ end
 load File.expand_path("../LA BASE DE SKY/Plugins/Visual 2.5D HD/[001] Settings.rb", __dir__)
 load File.expand_path("../LA BASE DE SKY/Plugins/Visual 2.5D HD/[002] Core.rb", __dir__)
 load File.expand_path("../LA BASE DE SKY/Plugins/Visual 2.5D HD/[008] Options.rb", __dir__)
+# The strip renderer is defined in Tile Depth; this suite tests the Core only.
+module Visual25D
+  def self.build_row_slices(*); end
+end
 class Gen5ProjectionTest < Minitest::Test
   def setup
     Visual25D.instance_variable_set(:@active, true)
