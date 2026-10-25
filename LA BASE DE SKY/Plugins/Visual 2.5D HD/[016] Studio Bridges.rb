@@ -57,8 +57,11 @@ module Visual25D
                 @lbds_prop_sprites.object_id]
       return if @v25_props_camera == camera
       @v25_props_camera = camera
+      # Coordinar el mismo frame de proyeccion y desplazamiento de tiles.
+      Visual25D.sync_projection_from_map!(@map)
       zx = TilemapRenderer::ZOOM_X
       zy = TilemapRenderer::ZOOM_Y
+      pixel_offset_y = Visual25D.display_pixel_offset_y(@map)
       tw = Game_Map::TILE_WIDTH
       th = Game_Map::TILE_HEIGHT
       @lbds_prop_sprites.each do |entry|
@@ -73,8 +76,18 @@ module Visual25D
           unit = [Visual25D.vertical_unit_at(feet_y), 1.0].max
           top = Visual25D.project_y(feet_y) - priority * unit
           height = unit
-          original_z = (y + (priority + 1) * th * zy).round + 1
-          spr.z = Visual25D.raised_tile_z(original_z) +
+          # Igual que Tile Depth#project_tile_z: fila de rejilla + prioridad
+          # pintada por cada celda, sin perder capas de Animated Props.
+          cell_y = obj[:y].to_i + cy
+          row = Visual25D.grid_row_for_map_cell_id(@map.map_id, cell_y)
+          if row
+            original_z = ((row + priority + 1) *
+                           TilemapRenderer::DISPLAY_TILE_HEIGHT) -
+                         pixel_offset_y + 1 + priority
+          else
+            original_z = (y + (priority + 1) * th * zy).round + 1 + priority
+          end
+          spr.z = Visual25D.raised_tile_z(original_z.round) +
                   [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
         else
           scale = Visual25D.width_scale_at(y + th * zy / 2.0)
