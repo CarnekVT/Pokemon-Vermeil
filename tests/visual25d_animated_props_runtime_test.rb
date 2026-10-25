@@ -65,8 +65,11 @@ module Visual25D
   end
   TAPER_SUPPORTED = true
   class << self
-    attr_accessor :enabled_for_test
+    attr_accessor :enabled_for_test, :shift_for_test
     def enabled? = @enabled_for_test
+    def shifted_for_render? = !!@shift_for_test
+    def margin_columns = 2
+    def margin_rows = 3
     def perf_enabled? = false
     def tilt = 45
     def camera_zoom = 100
@@ -93,6 +96,7 @@ class LBDSVisual25DRealIntegrationTest < Minitest::Test
   def setup
     System.clock = 0.0
     Visual25D.enabled_for_test = true
+    Visual25D.shift_for_test = false
     @map = Game_Map.new
     @obj = {
       x: 2, y: 3, width: 1, height: 2, layer: 0, id: "p",
@@ -131,6 +135,19 @@ class LBDSVisual25DRealIntegrationTest < Minitest::Test
     @renderer.lbds_props_update_sprites
     assert_equal 89, @sprite.y
     assert_operator @sprite.geometry_writes - first, :<=, 4
+  end
+
+  def test_transient_tilemap_grid_shift_does_not_move_props
+    @renderer.lbds_props_update_sprites
+    original = [@sprite.x, @sprite.y]
+    Visual25D.shift_for_test = true
+    @map.display_x = -(2 * Game_Map::TILE_WIDTH * Game_Map::X_SUBPIXELS)
+    @map.display_y = -(3 * Game_Map::TILE_HEIGHT * Game_Map::Y_SUBPIXELS)
+    @renderer.instance_variable_set(:@lbds_prop_geometry_stamp, nil)
+    @renderer.lbds_props_update_sprites
+    assert_equal original, [@sprite.x, @sprite.y]
+  ensure
+    Visual25D.shift_for_test = false
   end
 
   def test_2d_mode_keeps_vanilla_coordinates_and_unsets_taper
