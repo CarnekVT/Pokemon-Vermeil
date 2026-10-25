@@ -4,11 +4,13 @@ on:
     paths:
       - 'LA BASE DE SKY/Plugins/Visual 2.5D HD/**'
       - 'tests/visual25d_animated_props_plane_test.rb'
+      - 'tests/visual25d_gen5_projection_test.rb'
       - '.github/workflows/visual25d-props-plane-check.yml'
   pull_request:
     paths:
       - 'LA BASE DE SKY/Plugins/Visual 2.5D HD/**'
       - 'tests/visual25d_animated_props_plane_test.rb'
+      - 'tests/visual25d_gen5_projection_test.rb'
 jobs:
   animated-props:
     runs-on: ubuntu-latest
@@ -24,3 +26,5 @@ jobs:
           done
       - name: Camera / animated prop geometry regression
         run: ruby tests/visual25d_animated_props_plane_test.rb
+      - name: Gen5 planar camera and low-grid-margin regression
+        run: ruby tests/visual25d_gen5_projection_test.rb
