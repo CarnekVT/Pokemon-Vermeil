@@ -78,6 +78,7 @@ module Visual25D
     def v25_props_apply_geometry(mx, my, zx, zy)
       return unless @map && @lbds_prop_sprites && !@lbds_prop_sprites.empty?
       return unless Visual25D.enabled? && Visual25D::StudioOptions.props?
+      prof_t0 = Visual25D.perf_now if Visual25D.perf_enabled?
 
       if @v25_prop_mode_list != @lbds_prop_placements.object_id
         @v25_prop_modes = {}
@@ -182,6 +183,10 @@ module Visual25D
         shown = left < Graphics.width && right > 0 &&
                 top < Graphics.height && bottom > 0
         spr.visible = shown if spr.visible != shown
+      end
+      if prof_t0
+        Visual25D.perf_record_props!(@lbds_prop_sprites.length,
+          (Visual25D.perf_now - prof_t0) * 1000.0)
       end
     end
   end
