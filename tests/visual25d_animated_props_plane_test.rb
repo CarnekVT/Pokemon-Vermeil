@@ -67,11 +67,17 @@ class Spriteset_Map
   def lbds_props_update_sprites
     @lbds_prop_frame_slot = (@lbds_prop_frame_slot || 0) + 1
     @lbds_prop_geometry_stamp = [@map.display_x, @map.display_y]
-    @lbds_prop_sprites.each do |entry|
-      spr = entry[0]
-      spr.x = -100
-      spr.y = -100
-      spr.zoom_x = spr.zoom_y = 1.0
+    if Visual25D.enabled?
+      # Same single-owner path as the runtime plugin: never write 2D geometry.
+      v25_props_apply_geometry(0, 0, 1.0, 1.0)
+    else
+      @lbds_prop_sprites.each do |entry|
+        spr = entry[0]
+        spr.x = -100
+        spr.y = -100
+        spr.zoom_x = spr.zoom_y = 1.0
+        spr.taper = 1.0
+      end
     end
   end
 end
@@ -128,6 +134,12 @@ class PropsPlaneTest < Minitest::Test
     a, b = entries.map(&:first)
     assert_equal 40, b.y - a.y
     assert_equal a.zoom_y, b.zoom_y
+  end
+
+  def test_bridge_does_not_override_base_frame_update
+    # The adapter no longer wraps lbds_props_update_sprites with super.
+    assert !Visual25D::Props.instance_methods(false).include?(:lbds_props_update_sprites)
+    assert Visual25D::Props.instance_methods(false).include?(:v25_props_apply_geometry)
   end
 
   def test_turning_off_projection_restores_original_renderer_and_taper
