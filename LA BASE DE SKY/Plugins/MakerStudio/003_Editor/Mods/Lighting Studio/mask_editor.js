@@ -25,6 +25,24 @@ export function caveTemplate(width=256,height=128,direction='right'){
  ctx.putImageData(img,0,0);
  return c;
 }
+// An aperture above the object casting an outward glow. Its interior stays
+// transparent: the light begins at the lip and extends down onto the ground.
+export function upperEntranceTemplate(width=256,height=128){
+ const c=document.createElement('canvas');c.width=width;c.height=height;
+ const g=c.getContext('2d'),img=g.createImageData(width,height),p=img.data;
+ const smooth=v=>{const t=clamp(v,0,1);return t*t*(3-2*t);};
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const u=(x+.5)/width,v=(y+.5)/height;
+  const spread=.15+.33*smooth((v-.11)/.75);
+  const lateral=1-smooth((Math.abs(u-.5)-spread*.70)/(spread*.30));
+  const top=smooth((v-.14)/.08);
+  const bottom=1-smooth((v-.67)/.30);
+  const a=clamp(lateral*top*bottom,0,1);
+  const i=(y*width+x)*4;
+  p[i]=p[i+1]=p[i+2]=255;p[i+3]=Math.round(a*255);
+ }
+ g.putImageData(img,0,0);return c;
+}
 export function blankMask(width=256,height=128){
  const c=document.createElement('canvas');c.width=width;c.height=height;return c;
 }
@@ -80,8 +98,8 @@ export function mountMaskPainter(host,opts){
  const {filename,getSource,onPreview,onSave,onCreate,notify}=opts;
  const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
  const root=el('div','ls-mask-workbench');host.append(root);
- root.append(el('div','ls-group-label','DIBUJAR LA ZONA ILUMINADA'));
- root.append(el('p','ls-inline-note',opts.maskMode==='block'?'Dibuja los obstáculos en blanco: bloquean la luz. Transparente = luz permitida.':'Dibuja en blanco los lugares por los que puede entrar luz. Transparente = sin iluminación.'));
+ root.append(el('div','ls-group-label','PINTAR MÁSCARA · BLANCO = ZONA ACTIVA'));
+ root.append(el('p','ls-inline-note',opts.maskMode==='block'?'MODO BLOQUEO: el blanco anula la iluminación; transparente conserva la luz.':'MODO ABERTURA: pinta únicamente el exterior que recibirá luz. Transparente queda oscuro.'));
  const toolbar=el('div','ls-mask-tools'),canvasFrame=el('div','ls-mask-canvas-frame');
  root.append(toolbar,canvasFrame);
  const src=getSource();
@@ -184,6 +202,7 @@ export function mountMaskPainter(host,opts){
  const actions=el('div','ls-mask-actions');root.append(actions);
  const action=(label,callback)=>{const b=el('button','ls-btn ls-small',label);b.type='button';b.onclick=callback;actions.append(b);return b;};
  const replaceWith=created=>{snapshot();draft=created;canvas.width=created.width;canvas.height=created.height;polyLayer.width=created.width;polyLayer.height=created.height;polygon=[];stage.style.aspectRatio=created.width+'/'+created.height;applyZoom();canvas.getContext('2d').drawImage(created,0,0);signal();};
+ action('⇩ Entrada superior / tronco',()=>replaceWith(upperEntranceTemplate(256,128)));
  action('➜ Plantilla: cueva derecha',()=>replaceWith(caveTemplate(256,128,'right')));
  action('⬅ Cueva hacia izquierda',()=>replaceWith(caveTemplate(256,128,'left')));
  action('Lienzo vacío',()=>replaceWith(blankMask(canvas.width,canvas.height)));
