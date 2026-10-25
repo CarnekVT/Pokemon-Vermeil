@@ -17,7 +17,8 @@ def pbVisual25DMenu
       [_INTL("Cambiar inclinación"), _INTL("Cambiar zoom"),
        _INTL("Modelo de proyección"), _INTL("Cambiar FOV"),
        _INTL("Altura de columnas"), _INTL("Activar/desactivar"),
-       _INTL("Restaurar configuración base"), _INTL("Salir")], 8)
+       _INTL("Aplicar perspectiva Gen 5"),
+        _INTL("Restaurar configuración base"), _INTL("Salir")], 9)
     case choice
     when 0
       Visual25D.tilt = pbVisual25DChooseNumber(_INTL("Ángulo (0-50 grados)."),
@@ -40,11 +41,21 @@ def pbVisual25DMenu
       Visual25D.toggle_smooth
       break
     when 6
+      pbVisual25DGen5Preset
+    when 7
       Visual25D.reset_to_defaults
     else
       break
     end
   end
+end
+
+# Perfil de quinta generación sin borrar parámetros de juego ajenos.
+def pbVisual25DGen5Preset
+  Visual25D.projection_model = Visual25D::Config::PROJECTION_MODEL
+  Visual25D.camera_fov = Visual25D::Config::CAMERA_FOV
+  Visual25D.tilt = Visual25D::Config::TILT_DEGREES
+  Visual25D.camera_zoom = Visual25D::Config::CAMERA_ZOOM
 end
 
 def pbVisual25DChooseNumber(message, current, min, max)
