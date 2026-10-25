@@ -110,6 +110,7 @@ class PropsPlaneTest < Minitest::Test
   end
   def test_ground_only_animations_follow_floor_rows
     obj = { x: 2, y: 4, width: 1, height: 2, layer: 0,
+            projection_mode: :surface,
             cells: [{ "priority" => 0 }, { "priority" => 0 }] }
     entries = [make_entry(obj, 0, 0, 1, 0), make_entry(obj, 0, 1, 1, 0)]
     renderer = Spriteset_Map.new(@map, [obj], entries)
@@ -118,6 +119,17 @@ class PropsPlaneTest < Minitest::Test
     assert_equal 32, b.y - a.y
     assert_equal 1.0, a.zoom_y
   end
+  def test_unmarked_multirow_prop_uses_one_upright_plane
+    obj = { x: 4, y: 3, width: 1, height: 2, layer: 0,
+            cells: [{ "priority" => 0 }, { "priority" => 0 }] }
+    entries = [make_entry(obj, 0, 0, 1, 0), make_entry(obj, 0, 1, 1, 0)]
+    renderer = Spriteset_Map.new(@map, [obj], entries)
+    renderer.lbds_props_update_sprites
+    a, b = entries.map(&:first)
+    assert_equal 40, b.y - a.y
+    assert_equal a.zoom_y, b.zoom_y
+  end
+
   def test_turning_off_projection_restores_original_renderer_and_taper
     obj = { x: 0, y: 0, width: 1, height: 1, layer: 0,
             cells: [{ "priority" => 0 }] }
