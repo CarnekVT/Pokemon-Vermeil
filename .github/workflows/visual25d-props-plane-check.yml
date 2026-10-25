@@ -1,0 +1,26 @@
+name: Visual 2.5D animated props plane checks
+on:
+  push:
+    paths:
+      - 'LA BASE DE SKY/Plugins/Visual 2.5D HD/**'
+      - 'tests/visual25d_animated_props_plane_test.rb'
+      - '.github/workflows/visual25d-props-plane-check.yml'
+  pull_request:
+    paths:
+      - 'LA BASE DE SKY/Plugins/Visual 2.5D HD/**'
+      - 'tests/visual25d_animated_props_plane_test.rb'
+jobs:
+  animated-props:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Ruby syntax
+        run: |
+          for file in "LA BASE DE SKY/Plugins/Visual 2.5D HD/"*.rb; do
+            ruby -c "$file"
+          done
+      - name: Camera / animated prop geometry regression
+        run: ruby tests/visual25d_animated_props_plane_test.rb
