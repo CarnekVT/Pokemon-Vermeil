@@ -4,7 +4,7 @@
 # BSS Blueprints have their own dialogue engine, so dispatch independently
 # without assigning a duplicate DBK script or changing ordinary encounters.
 module BSSBlueprintDialogueDispatch
-  BSS_EVENTS = /\A(?:RoundStartCommand|RoundStartAttack|BattleStart|BeforeMove|BeforeDamagingMove|BeforePhysicalMove|BeforeSpecialMove|BeforeStatusMove|AfterMove|TargetHP75|TargetHPHalf|TargetHPLow|ShieldBreak|SOSCall|SOSSuccess|SOSFail|BattlerFainted|TurnEnd|BattleEnd(?:Win|Loss|Capture|Draw|Run|Fled|Forfeit)?)\z/i
+  BSS_EVENTS = /\A(?:RoundStartCommand|RoundStartAttack|BattleStart|BeforeMove|BeforeDamagingMove|BeforePhysicalMove|BeforeSpecialMove|BeforeStatusMove|AfterMove|TargetHP75|TargetHPHalf|TargetHPLow|ShieldBreak|SOSCall|SOSSuccess|SOSFail|BeforeLastSwitchIn|AfterLastSendOut|BattlerFainted|TurnEnd|BattleEnd(?:Win|Loss|Capture|Draw|Run|Fled|Forfeit)?)\z/i
 
   def pbDeluxeTriggers(idxBattler, idxTarget, *triggers)
     result = super
