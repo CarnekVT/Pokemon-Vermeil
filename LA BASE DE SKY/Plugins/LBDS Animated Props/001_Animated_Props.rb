@@ -95,6 +95,9 @@ module LBDSAnimatedProps
         sheet: definition['sheet'], cells: sliced, id: p['id'] || definition['id'],
         timing_mode: definition['timingMode'] == 'independent' ? 'independent' : 'synchronized',
         parallel: overlay,
+        # Optional; only interpreted by Visual 2.5D when installed.
+        # "surface" = terrain plane, "billboard" = vertical plane, else auto.
+        projection_mode: (p['visual25dMode'] || definition['visual25dMode'] || 'auto'),
         layer: [[p.fetch('layer', 0).to_i, 0].max, 99].min,
         loop: definition['loop'] != false }
     end
