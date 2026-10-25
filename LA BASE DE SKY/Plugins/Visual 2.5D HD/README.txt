@@ -2,7 +2,8 @@ VISUAL 2.5D HD — MAPA DE PRUEBA Y ADAPTADORES
 
 Configuración: Depuración > Campo > Visual 2.5D HD, o pbVisual25DMenu.
 No se muestran ajustes 2.5D en Opciones del juego.
-Perspectiva: clásica, inclinación 27 grados, zoom 100%, horizonte plano.
+Perspectiva predeterminada: Gen 5 (plano afín sin deformación por fila),
+inclinación 45 grados (compresión coseno real), zoom 100%, horizonte plano.
 
 Prioridades persistentes editadas manualmente:
 Data/Tilesets.rxdata, tileset 1 (NewBarkTown):
@@ -12,13 +13,17 @@ Data/Map077.rxdata: 132 colocaciones registradas en Maker Studio
 No se modificaron otros tilesets ni mapas.
 
 Compatibilidad opcional: [016] Studio Bridges.rb.
-Animated Props y Lighting Studio siguen siendo independientes: no se
-modificaron sus scripts. Puentes con proyección absoluta y caché para
-luces estáticas. Se puede desactivar cada adaptador desde Depuración >
+Animated Props detecta Visual25D en tiempo de ejecución: cuando está activo,
+el plugin principal deja a Visual25D calcular la posición UNA sola vez, sin
+pasar antes por coordenadas 2D. Si está ausente o desactivado, utiliza 2D
+vanilla. Lighting Studio no se ha modificado. El puente mantiene proyección
+absoluta y caché para luces estáticas. Se puede desactivar cada adaptador desde Depuración >
 Campo > 2.5D: adaptadores externos, para comparar imagen y rendimiento.
 
-Para medir FPS: 2D / 2.5D sin adaptadores / con props / con luces /
-ambos; mismo mapa, mismo reloj y misma cámara.
+Para medir FPS: activar la sonda de rendimiento desde Depuración > Campo.
+El registro ahora muestra tilemapMs/f, propMs/f, propGeom/f y propN
+además de la rejilla y capas MakerStudio. Comparar 2D, 2.5D con y sin
+adaptadores en el mismo mapa y con el mismo reloj.
 El resultado aún requiere pruebas visuales y de FPS dentro del juego.
 
 Puntos de recuperación:
@@ -47,7 +52,18 @@ REFERENCIA VISUAL SKY / REVISION MANUAL DE TILESETS (2026-10-25)
 - El juego y Maker Studio leen el archivo persistente editado al abrirse.
 - Los datos guardados por mapa también pueden incluir nativeProperties,
   y su valor pintado puede prevalecer para ciertas capas.
-- Los scripts originales de Animated Props y Lighting Studio siguen intactos;
-  las adaptaciones de Z / coordenadas viven dentro del Visual 2.5D.
+- Actualización 2026-10-25: LBDS Animated Props sí incorpora la detección
+  condicional para evitar doble posicionamiento y doble coste de geometría.
+  Lighting Studio se conserva intacto. La geometría opcional del 2.5D
+  continúa en [016] Studio Bridges.rb.
 - Copia previa preservada en backup/tileset-priorities-before-sky-reference-20261025.
 - Sintaxis y FPS en la versión del usuario: todavía no ensayados ingame.
+
+CONDICIONAL DE ANIMATED PROPS / POSICIONAMIENTO (ACTUAL)
+Un placement puede usar visual25dMode: "surface" para animaciones del suelo,
+"billboard" para objetos verticales, o "auto" (predeterminado) en su JSON.
+El adaptador no modifica x/y del placement, colisiones ni datos persistentes.
+La transición 2D/2.5D restaura zoom y taper del sprite. Las animaciones solo
+actualizan src_rect si la cámara no ha cambiado.
+El FPS real de 110 → 30/40 comunicado por el usuario aún necesita medición
+ingame; los tests Ruby validan geometría y cambios de modo, no tiempos de GPU.
