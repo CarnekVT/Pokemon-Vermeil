@@ -28,10 +28,10 @@
         "color": "#4B3F69",
         "darkness": 0.27,
         "tone": {
-          "red": -30,
+          "red": -54,
           "green": -70,
-          "blue": 11,
-          "gray": 68
+          "blue": -31,
+          "gray": 10
         }
       },
       {
@@ -39,10 +39,10 @@
         "color": "#4B3F69",
         "darkness": 0.27,
         "tone": {
-          "red": -30,
+          "red": -54,
           "green": -70,
-          "blue": 11,
-          "gray": 68
+          "blue": -31,
+          "gray": 10
         }
       },
       {
@@ -50,10 +50,10 @@
         "color": "#8C7AA0",
         "darkness": 0.07,
         "tone": {
-          "red": -20,
-          "green": -60,
-          "blue": -30,
-          "gray": 17
+          "red": -22,
+          "green": -43,
+          "blue": -19,
+          "gray": 8
         }
       },
       {
@@ -61,10 +61,10 @@
         "color": "#8C7AA0",
         "darkness": 0.07,
         "tone": {
-          "red": -20,
-          "green": -60,
-          "blue": -30,
-          "gray": 17
+          "red": -22,
+          "green": -43,
+          "blue": -19,
+          "gray": 8
         }
       },
       {
@@ -94,10 +94,10 @@
         "color": "#C7B6D8",
         "darkness": 0.07,
         "tone": {
-          "red": 2,
-          "green": -20,
-          "blue": 3,
-          "gray": 17
+          "red": -4,
+          "green": -22,
+          "blue": -7,
+          "gray": 4
         }
       },
       {
@@ -105,10 +105,10 @@
         "color": "#B39EC8",
         "darkness": 0.11,
         "tone": {
-          "red": -3,
-          "green": -28,
-          "blue": -1,
-          "gray": 22
+          "red": -13,
+          "green": -30,
+          "blue": -12,
+          "gray": 6
         }
       },
       {
@@ -116,10 +116,10 @@
         "color": "#927DAE",
         "darkness": 0.15,
         "tone": {
-          "red": -8,
-          "green": -35,
-          "blue": -6,
-          "gray": 28
+          "red": -22,
+          "green": -40,
+          "blue": -16,
+          "gray": 8
         }
       },
       {
@@ -127,10 +127,10 @@
         "color": "#6E618A",
         "darkness": 0.2,
         "tone": {
-          "red": -14,
-          "green": -45,
-          "blue": -1,
-          "gray": 35
+          "red": -34,
+          "green": -50,
+          "blue": -21,
+          "gray": 10
         }
       },
       {
@@ -138,10 +138,10 @@
         "color": "#5C527B",
         "darkness": 0.23,
         "tone": {
-          "red": -18,
-          "green": -52,
-          "blue": 2,
-          "gray": 42
+          "red": -43,
+          "green": -59,
+          "blue": -25,
+          "gray": 10
         }
       },
       {
@@ -149,10 +149,10 @@
         "color": "#5C527B",
         "darkness": 0.23,
         "tone": {
-          "red": -18,
-          "green": -52,
-          "blue": 2,
-          "gray": 42
+          "red": -43,
+          "green": -59,
+          "blue": -25,
+          "gray": 10
         }
       },
       {
@@ -160,10 +160,10 @@
         "color": "#4B3F69",
         "darkness": 0.27,
         "tone": {
-          "red": -30,
+          "red": -54,
           "green": -70,
-          "blue": 11,
-          "gray": 68
+          "blue": -31,
+          "gray": 10
         }
       }
     ]
