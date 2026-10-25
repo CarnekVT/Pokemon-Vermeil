@@ -214,6 +214,23 @@ module BSS064
       if recovery && recovery_at>main_at
         log("Using battles.recovery.json because battles.json is older/locked")
         @cache=recovery
+        # Shipping-only QA examples are additive. Recovery always wins for
+        # all user edits, including any QA Blueprint already edited by the user.
+        qa_rows=(main["blueprints"].is_a?(Array) ? main["blueprints"] : [])
+        qa_rows=qa_rows.select { |bp| bp.is_a?(Hash) && bp["groupId"].to_s=="bss_qa_suite" }
+        if !qa_rows.empty?
+          @cache["groups"]=[] unless @cache["groups"].is_a?(Array)
+          @cache["blueprints"]=[] unless @cache["blueprints"].is_a?(Array)
+          main_groups=main["groups"].is_a?(Array) ? main["groups"] : []
+          qa_group=main_groups.find { |g| g.is_a?(Hash) && g["id"]=="bss_qa_suite" }
+          if qa_group && !@cache["groups"].any? { |g| g.is_a?(Hash) && g["id"]==qa_group["id"] }
+            @cache["groups"] << qa_group
+          end
+          qa_rows.each do |bp|
+            next if @cache["blueprints"].any? { |row| row.is_a?(Hash) && row["key"]==bp["key"] }
+            @cache["blueprints"] << bp
+          end
+        end
       else
         @cache=main
       end
