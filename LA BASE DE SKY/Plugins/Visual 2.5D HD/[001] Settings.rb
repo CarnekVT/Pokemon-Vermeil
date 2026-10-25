@@ -38,20 +38,20 @@ module Visual25D
     #---------------------------------------------------------------------------
     # CAMARA
     #---------------------------------------------------------------------------
-    # Inclinacion de la camara, en grados. A 0 se mira desde arriba del todo y no
-    # hay perspectiva. Al inclinarla, la fila del jugador conserva su tamano y lo
-    # que se reparte es el resto: el fondo se encoge (y por tanto se ve mas lejos)
-    # y el primer plano se agranda.
+    # Inclinacion del plano del suelo. En :gen5 se comprime uniformemente
+    # el eje Y; el fondo y el primer plano NO varian de ancho al caminar.
     TILT_DEGREES = 32
     MAX_TILT_DEGREES = 50
 
     # Modelo de proyeccion del suelo (solo Ruby; sin Model3D del MK).
-    #   :classic — perfil lineal (DEFAULT; look estable 3.0.x).
+    #   :gen5    — UN SOLO PLANO afin sin escala por fila, sin convergencia
+    #               ni deformacion de escenario al caminar (predeterminado).
+    #   :classic — modelo experimental legado, perspectiva deformada.
     #   :camera  — escala ~ 1/profundidad + FOV. v3.0.43: pitch soft-saturado
     #              (antes tan(tilt)>1 → depth negativa → shape~6x, look roto).
-    #              Probar en menú debug; default sigue classic.
+    #              Se mantiene solo para comparar con el modo legado.
     # raw_unproject dual (log + tramo lineal bajo clamp).
-    PROJECTION_MODEL = :camera
+    PROJECTION_MODEL = :gen5
     # FOV vertical: suaviza la curva :camera (ancho = menos drama).
     CAMERA_FOV = 60
 
