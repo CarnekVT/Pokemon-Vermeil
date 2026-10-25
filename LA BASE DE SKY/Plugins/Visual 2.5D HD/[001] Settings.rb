@@ -30,6 +30,11 @@ module Visual25D
     # Alternar desde menu de opciones/debug o asignar manualmente una tecla libre.
     HOTKEY = nil
 
+    # Perfil de escena inspirado en BW/B2W2: camara perspectiva sobre
+    # terreno PLANO con billboards rigidos. No existe curvatura de horizonte,
+    # tilt-shift, ni redondeo de terreno estilo Animal Crossing. La aproximacion
+    # visual se hace con tiles de RMXP; no sustituye una malla 3D real.
+    # Los 8 valores de camara/pared de este archivo forman la nueva base.
     #---------------------------------------------------------------------------
     # CAMARA
     #---------------------------------------------------------------------------
@@ -37,7 +42,7 @@ module Visual25D
     # hay perspectiva. Al inclinarla, la fila del jugador conserva su tamano y lo
     # que se reparte es el resto: el fondo se encoge (y por tanto se ve mas lejos)
     # y el primer plano se agranda.
-    TILT_DEGREES = 27
+    TILT_DEGREES = 32
     MAX_TILT_DEGREES = 50
 
     # Modelo de proyeccion del suelo (solo Ruby; sin Model3D del MK).
@@ -46,16 +51,16 @@ module Visual25D
     #              (antes tan(tilt)>1 → depth negativa → shape~6x, look roto).
     #              Probar en menú debug; default sigue classic.
     # raw_unproject dual (log + tramo lineal bajo clamp).
-    PROJECTION_MODEL = :classic
+    PROJECTION_MODEL = :camera
     # FOV vertical: suaviza la curva :camera (ancho = menos drama).
-    CAMERA_FOV = 55
+    CAMERA_FOV = 60
 
     # Cuanto converge el mapa a lo ancho, respecto a lo que se acorta en
     # profundidad. Es lo que marca el punto de fuga, pero tambien lo que separa
     # lateralmente un elemento alto de la casilla que ocupa: a 1.0 un edificio de
     # tres pisos junto al borde de la pantalla se despega bastante de su base.
     # Entre 0.2 y 0.4 da profundidad sin que se noten esas separaciones.
-    VANISHING_STRENGTH = 0.3
+    VANISHING_STRENGTH = 0.18
 
     # El suelo es un trapecio por fila. Los vecinos encajan (misma arista),
     # pero el borde vertical es recto y la escala es curva: se ve un quiebro
@@ -161,7 +166,7 @@ module Visual25D
     # alto se ve. A 0 se quedan tumbados sobre el suelo como hasta ahora, a 1 se
     # levantan del todo (1/cos del angulo, un 56% mas altos a 50 grados).
     # 0.4: paredes/arboles dejan de verse planos a TILT_DEGREES 50.
-    VERTICAL_GAIN = 0.5
+    VERTICAL_GAIN = 0.7
 
     # Pixeles que se levanta un tile por cada nivel de prioridad. Es la
     # exageracion de altura, aparte de lo que ya sube por el angulo. A 0 los
@@ -174,7 +179,7 @@ module Visual25D
     # paredes. Conviene dejarlo por debajo de 1: si un personaje creciera igual
     # que un edificio, su cabeza se meteria en la fila de arriba y los tiles con
     # prioridad de esa fila lo taparian. A 0 no se estiran nada.
-    CHARACTER_GAIN = 0.4
+    CHARACTER_GAIN = 0.65
 
     # Cuanto se inclina una columna hacia el punto de fuga. A 0 toda la columna
     # usa la escala de su base y sale recta, que es lo que evita que se despegue
@@ -215,10 +220,10 @@ module Visual25D
     # escalera, y lo que la funde con el suelo de al lado en sus extremos. Cada
     # pasada lo reparte una casilla mas a cada lado. A 0 no hay suavizado y la
     # pared se levanta de golpe.
-    WALL_SMOOTHING = 5
+    WALL_SMOOTHING = 0
     # Suavizado N-S (ademas del E-O). Rampa hacia el Cliff menos a escalones.
     # No usa angle ni media de vertices (eso rompia esquinas).
-    WALL_SMOOTH_VERTICAL = true
+    WALL_SMOOTH_VERTICAL = false
     # Cuanto del lift se reparte hacia arriba (meseta). El desnivel lo absorbe
     # el terreno de encima encogiendose en pantalla (aristas compartidas).
     WALL_RISE = 0.78
