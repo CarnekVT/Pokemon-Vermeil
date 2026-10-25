@@ -19,9 +19,11 @@ module Visual25D
   end
 
   module StudioTransform
-    def self.flat(wx, wy, map, zx, zy)
-      mx = (map.display_x.to_f / Game_Map::X_SUBPIXELS).round
-      my = (map.display_y.to_f / Game_Map::Y_SUBPIXELS).round
+    def self.flat(wx, wy, map, zx, zy, mx = nil, my = nil)
+      # Prefer caller's unshifted camera position; it is shared by ALL props
+      # for this frame, so no redundant map->pixel conversions per fragment.
+      mx = (map.display_x.to_f / Game_Map::X_SUBPIXELS).round if mx.nil?
+      my = (map.display_y.to_f / Game_Map::Y_SUBPIXELS).round if my.nil?
       x = wx - mx
       y = wy - my
       x = (x - Graphics.width / 2.0) * zx + Graphics.width / 2.0 if zx != 1
@@ -118,7 +120,7 @@ module Visual25D
           end
           # Terrain planes: same Y edges, row width and taper as native tiles.
           flat_x, _flat_y = Visual25D::StudioTransform.flat(
-            cell_x * tw, cell_y * th, @map, zx, zy)
+            cell_x * tw, cell_y * th, @map, zx, zy, mx, my)
           scale = Visual25D.row_width_scale_any(row)
           taper = 1.0
           if Visual25D::TAPER_SUPPORTED
@@ -139,7 +141,7 @@ module Visual25D
             flat_x, foot_y = Visual25D::StudioTransform.flat(
               obj[:x].to_i * tw,
               (obj[:y].to_i + obj[:height].to_i) * th,
-              @map, zx, zy)
+              @map, zx, zy, mx, my)
             scale = Visual25D.width_scale_at(foot_y)
             px = Visual25D.project_x(flat_x, scale)
             py = Visual25D.project_y(foot_y)
