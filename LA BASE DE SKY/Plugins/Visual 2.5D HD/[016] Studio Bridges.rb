@@ -35,11 +35,14 @@ module Visual25D
   end
 
   module Props
+    # El runtime original conserva las posiciones en casillas reales; este puente
+    # solo transforma el dibujo, nunca los datos, la colision ni los placements.
+    # El modelo es el de los PLANOS del TilemapRenderer, no una camara cilindrica.
+
     def lbds_props_view_bounds(mx, my, zx, zy)
-      result = super
-      return result unless Visual25D.enabled? && Visual25D::StudioOptions.props?
-      # Amplía un poco el culling 2D para objetos visibles tras proyectar.
-      [result[0] - 2, result[1] - 2, result[2] + 2, result[3] + 2]
+      bounds = super
+      return bounds unless Visual25D.enabled? && Visual25D::StudioOptions.props?
+      [bounds[0] - 2, bounds[1] - 2, bounds[2] + 2, bounds[3] + 2]
     end
 
     def lbds_props_update_sprites
@@ -50,65 +53,100 @@ module Visual25D
         @v25_props_camera = nil
         @v25_props_active = active
       end
+
+      # Animated Props escribe coordenadas 2D y zoom cada vez que avanza un
+      # fotograma de animacion (aunque la camara este quieta). Guardar el estado
+      # ANTES de super permite saber si se han reseteado los sprites y volver
+      # a proyectarlos sin exigir movimiento de camara.
+      previous_slot = @lbds_prop_frame_slot
+      previous_geometry = @lbds_prop_geometry_stamp
+      previous_sprites = @lbds_prop_sprites ? @lbds_prop_sprites.object_id : nil
       super
-      return unless active && @map && @lbds_prop_sprites
-      camera = [@map.map_id, @map.display_x, @map.display_y, Visual25D.projection_stamp,
-                Visual25D.tilt, Visual25D.camera_zoom, Graphics.width, Graphics.height,
-                @lbds_prop_sprites.object_id]
-      return if @v25_props_camera == camera
-      @v25_props_camera = camera
-      # Coordinar el mismo frame de proyeccion y desplazamiento de tiles.
+      return unless active && @map && @lbds_prop_sprites && !@lbds_prop_sprites.empty?
+
+      # Mismo sistema de filas/scroll que tiles nativos y MakerStudio.
+      # Primero sincronizar el terreno; no reproyectar una imagen ya proyectada.
       Visual25D.sync_projection_from_map!(@map)
+      camera = [@map.map_id, @map.display_x, @map.display_y,
+                Visual25D.projection_stamp, Visual25D.tilt,
+                Visual25D.camera_zoom, Graphics.width, Graphics.height,
+                @lbds_prop_sprites.object_id]
+      source_changed = (previous_slot != @lbds_prop_frame_slot ||
+                        previous_geometry != @lbds_prop_geometry_stamp ||
+                        previous_sprites != @lbds_prop_sprites.object_id)
+      return if !source_changed && @v25_props_camera == camera
+      @v25_props_camera = camera
+
       zx = TilemapRenderer::ZOOM_X
       zy = TilemapRenderer::ZOOM_Y
-      pixel_offset_y = Visual25D.display_pixel_offset_y(@map)
       tw = Game_Map::TILE_WIDTH
       th = Game_Map::TILE_HEIGHT
+      src_h = TilemapRenderer::SOURCE_TILE_HEIGHT.to_f
+      pixel_offset_y = Visual25D.display_pixel_offset_y(@map)
+      field = Visual25D.wall_field(@map)
+      field = nil if field && field.flat
+
       @lbds_prop_sprites.each do |entry|
         spr, obj, cx, cy, span, pri, _frame, track = entry
-        next if !spr || spr.disposed? || !spr.bitmap
-        x, y = Visual25D::StudioTransform.flat((obj[:x] + cx) * tw,
-                                                (obj[:y] + cy) * th, @map, zx, zy)
+        next unless spr && !spr.disposed? && spr.bitmap
+        cell_x = obj[:x].to_i + cx
+        cell_y = obj[:y].to_i + cy
         priority = pri.to_i
+        priority = 0 if priority < 0
+        priority = Visual25D::Config::MAX_PRIORITY if priority > Visual25D::Config::MAX_PRIORITY
+
+        # Origen X de la MISMA casilla, antes de proyectarla. La Y de cada
+        # franja viene de las aristas del tilemap, no de mover el sprite N
+        # casillas hacia abajo cuando su prioridad es N.
+        flat_x, _flat_y = Visual25D::StudioTransform.flat(
+          cell_x * tw, cell_y * th, @map, zx, zy)
+        row = Visual25D.grid_row_for_map_cell(@map, cell_y)
+
         if priority > 0
-          feet_y = y + priority * th * zy
-          scale = Visual25D.width_scale_at(feet_y)
-          unit = [Visual25D.vertical_unit_at(feet_y), 1.0].max
-          top = Visual25D.project_y(feet_y) - priority * unit
-          height = unit
-          # Igual que Tile Depth#project_tile_z: fila de rejilla + prioridad
-          # pintada por cada celda, sin perder capas de Animated Props.
-          cell_y = obj[:y].to_i + cy
-          row = Visual25D.grid_row_for_map_cell_id(@map.map_id, cell_y)
-          if row
-            original_z = ((row + priority + 1) *
-                           TilemapRenderer::DISPLAY_TILE_HEIGHT) -
-                         pixel_offset_y + 1 + priority
-          else
-            original_z = (y + (priority + 1) * th * zy).round + 1 + priority
-          end
-          spr.z = Visual25D.raised_tile_z(original_z.round) +
+          # Comparte exactamente el plano vertical de los tiles con prioridad.
+          # Dos franjas de la misma columna encajan en la misma arista.
+          geom = Visual25D.column_stack_geom(
+            field, cell_x, cell_y, row, priority, @map.map_id)
+          scale = geom[2]
+          edges = geom[4]
+          top = edges[priority]
+          bottom = edges[priority - 1]
+          bottom += Visual25D::COLUMN_BAND_OVERLAP if priority >= 2
+          taper = 1.0
+          z_raw = ((row + priority + 1) * TilemapRenderer::DISPLAY_TILE_HEIGHT) -
+                  pixel_offset_y + 1 + priority
+          spr.z = Visual25D.raised_tile_z(z_raw.round) +
                   [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
         else
-          scale = Visual25D.width_scale_at(y + th * zy / 2.0)
-          top = Visual25D.project_y(y)
-          height = [Visual25D.project_y(y + th * zy) - top, 1].max
-          # Los props del suelo retienen su propia banda y capa, sin Z_LIFT.
-        end
-        # Los valores provienen de p[:cells][cy*width+cx] y se conservan
-        # también entre cambios de frame. No reutilizar la Z de otro sprite.
-        if priority <= 0
+          # El suelo sigue las aristas del plano, incluidos desniveles Cliff.
+          # La anchura toma la arista inferior igual que Tile Depth.
+          scale = Visual25D.row_width_scale_any(row)
+          taper = 1.0
+          if Visual25D::TAPER_SUPPORTED
+            near_scale = Visual25D.row_width_scale_any(row + 1)
+            if near_scale && near_scale > 0
+              scale = near_scale
+              taper = Visual25D.row_taper(row)
+            end
+          end
+          top, bottom = Visual25D.wall_cell_bounds(field, cell_x, cell_y, row)
           spr.z = [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
         end
-        sx = Visual25D.project_x(x, scale)
+
+        height = bottom - top
+        height = 1 if height < 1
+        sx = Visual25D.project_x(flat_x, scale)
         xzoom = zx * scale
-        yzoom = height / 32.0
+        yzoom = height / src_h
         spr.x = sx.round
         spr.y = top.round
         spr.zoom_x = xzoom if (spr.zoom_x - xzoom).abs > 0.002
         spr.zoom_y = yzoom if (spr.zoom_y - yzoom).abs > 0.002
+        # Algunos runtimes MK admiten taper en Sprite: mantener la misma
+        # arista del suelo sin tocar los fotogramas ni generar bitmaps nuevos.
+        spr.taper = taper if spr.respond_to?(:taper=)
         spr.visible = sx < Graphics.width && top < Graphics.height &&
-                      sx + span * tw * xzoom > 0 && top + height > 0
+                      sx + span * tw * xzoom > 0 && bottom > 0
       end
     end
   end
