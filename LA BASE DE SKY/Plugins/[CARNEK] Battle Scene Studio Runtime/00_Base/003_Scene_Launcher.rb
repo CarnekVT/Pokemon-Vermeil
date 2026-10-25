@@ -624,8 +624,8 @@ module BSS064
       nil
     end
 
-    def write_active_battle(key,live_test,token=nil)
-      payload={"key"=>key.to_s,"liveTest"=>(live_test==true),"pid"=>(Process.pid rescue 0),"token"=>(token||"bss_#{Time.now.to_i}_#{rand(1000000)}").to_s,"bssStartedAt"=>Time.now.to_i}
+    def write_active_battle(key,live_test,token=nil,party_mode="test")
+      payload={"key"=>key.to_s,"liveTest"=>(live_test==true),"partyMode"=>(party_mode.to_s=="ingame" ? "ingame" : "test"),"pid"=>(Process.pid rescue 0),"token"=>(token||"bss_#{Time.now.to_i}_#{rand(1000000)}").to_s,"bssStartedAt"=>Time.now.to_i}
       Dir.mkdir("Data/BattleSceneStudio") if !Dir.exist?("Data/BattleSceneStudio") rescue nil
       File.open(ACTIVE_BATTLE_FILE,"wb"){|f|f.write(json_generate(payload))}
       payload
@@ -676,7 +676,7 @@ module BSS064
       # second half of the protocol anymore, so refreshing/reopening BSS cannot
       # "undo" the test or strand it at resume_needed.
       @pending_f12_resume={
-        "key"=>key, "token"=>token, "armedAt"=>Time.now.to_f, "readyFrames"=>0
+        "key"=>key, "token"=>token, "partyMode"=>(raw["partyMode"]=="ingame" ? "ingame" : "test"), "armedAt"=>Time.now.to_f, "readyFrames"=>0
       }
       write_status("f12_resuming",{
         "key"=>key, "resumeToken"=>token,
@@ -714,7 +714,7 @@ module BSS064
       # Keep runtime_active_battle.json alive while starting the replacement
       # battle. If the map is still transient and launch fails, retry instead of
       # deleting the only information needed to recover the BSS test.
-      result=run_blueprint(key,true)
+      result=run_blueprint(key,true,req["partyMode"])
       if result==false
         req["readyFrames"]=0
         req["armedAt"]=Time.now.to_f
@@ -743,7 +743,12 @@ module BSS064
       schedule_active_battle_resume
     end
 
-    def run_blueprint(key,live_test=false)
+    # party_mode applies only to Test game/Debug; regular event-command
+    # battles always use the real player's party, as before.
+    # A test using the current party deep-copies it so experience, HP,
+    # friendship, PP and held items on the save's original party are untouched.
+    def run_blueprint(key,live_test=false,party_mode=nil)
+      party_mode=(live_test && party_mode.to_s=="ingame") ? "ingame" : "test"
       clear_cache
       install_general_runtime_hooks! if respond_to?(:install_general_runtime_hooks!)
       bp=find(key)
@@ -772,7 +777,20 @@ module BSS064
       apply_native_boss_party_attributes(foe_party,bp) if respond_to?(:apply_native_boss_party_attributes)
 
       original_party=(defined?($player) && $player ? $player.party : nil)
-      if live_test
+      if live_test && party_mode=="ingame"
+        if !original_party || original_party.empty?
+          write_status("error",{"key"=>key.to_s,"message"=>"No hay equipo actual disponible en la partida."})
+          return false
+        end
+        begin
+          # Essentials saves Pokemon via Marshal; clone the entire graph, not
+          # Pokemon#clone, which can share nested arrays and mutable moves.
+          player_party=Marshal.load(Marshal.dump(original_party))
+        rescue => e
+          write_status("error",{"key"=>key.to_s,"message"=>"No se pudo aislar el equipo ingame: #{e.class}: #{e.message}"})
+          return false
+        end
+      elsif live_test
         rows=hget(bp,"teams","testPlayer"); rows=[] if !rows.is_a?(Array)
         player_party=rows.map { |row| build_pokemon(row) }.compact
       else
@@ -820,7 +838,7 @@ module BSS064
 
       # Only an explicit editor Test game session gets an F12 resume marker.
       # Event-command battles (pbBSSBattle) and ordinary gameplay never do.
-      write_status("running",{"key"=>bp["key"],"name"=>bp["name"],"formation"=>mode,"sos"=>sos_enabled,"boss"=>(hget(bp,"boss","enabled")==true)})
+      write_status("running",{"key"=>bp["key"],"name"=>bp["name"],"formation"=>mode,"sos"=>sos_enabled,"boss"=>(hget(bp,"boss","enabled")==true),"partyMode"=>(live_test ? party_mode : "ingame")})
       bgm_name=normalize_bgm_name(hget(bp,"environment","bgm"))
       victory_bgm_name=normalize_bgm_name(hget(bp,"environment","victoryBgm"))
       if !victory_bgm_name.empty? && defined?($PokemonGlobal) && $PokemonGlobal
@@ -840,7 +858,7 @@ module BSS064
       # battle. F12 raises Reset (outside StandardError), so that marker survives
       # the interrupted call and the freshly reloaded BSS runtime can ask Studio
       # to requeue the exact same test through the normal control bridge.
-      write_active_battle(bp["key"],true) if live_test
+      write_active_battle(bp["key"],true,nil,party_mode) if live_test
       pbBattleAnimation(bgm,anim_type,subject) do
         begin
           pbSceneStandby { outcome=battle.pbStartBattle }
@@ -894,7 +912,7 @@ module BSS064
         write_status("error",{"key"=>key.to_s,"message"=>"#{battle_error.class}: #{battle_error.message}","backtrace"=>(battle_error.backtrace||[])[0,16]})
         return false
       end
-      write_status("finished",{"key"=>bp["key"],"decision"=>outcome})
+      write_status("finished",{"key"=>bp["key"],"decision"=>outcome,"partyMode"=>(live_test ? party_mode : "ingame")})
       outcome
     rescue SystemStackError => e
       clear_active_battle if live_test
@@ -966,7 +984,7 @@ module BSS064
         reset_at=raw["resetDetectedAt"].to_i
         reset_age=reset_at>0 ? ((Time.now.to_f*1000).to_i-reset_at) : 999999
         if raw["resumeAfterReset"]==true && reset_age>=0 && reset_age<=120000
-          @pending_f12_resume={"key"=>raw["key"].to_s,"token"=>raw["token"].to_s,"armedAt"=>Time.now.to_f,"readyFrames"=>0}
+          @pending_f12_resume={"key"=>raw["key"].to_s,"token"=>raw["token"].to_s,"partyMode"=>(raw["partyMode"]=="ingame" ? "ingame" : "test"),"armedAt"=>Time.now.to_f,"readyFrames"=>0}
           @f12_resume_armed=true
           return true
         end
@@ -1042,7 +1060,8 @@ module BSS064
       @pending_f12_resume=nil
       @f12_resume_armed=false
       clear_active_battle
-      run_blueprint(req["key"].to_s,true); true
+      party_mode=(req["partyMode"].to_s=="ingame" ? "ingame" : "test")
+      run_blueprint(req["key"].to_s,true,party_mode); true
     rescue SystemStackError => e
       recover_live_test_error(e,(req && req["key"]))
     rescue => e
