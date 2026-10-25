@@ -38,9 +38,9 @@ module Visual25D
     #---------------------------------------------------------------------------
     # CAMARA
     #---------------------------------------------------------------------------
-    # Inclinacion del plano del suelo. En :gen5 se comprime uniformemente
-    # el eje Y; el fondo y el primer plano NO varian de ancho al caminar.
-    TILT_DEGREES = 32
+    # Camara oblicua estilo rutas de Gen 5. Los 45 grados se traducen en
+    # un coseno real sobre el plano Y. Sin zoom por distancia ni curvatura.
+    TILT_DEGREES = 45
     MAX_TILT_DEGREES = 50
 
     # Modelo de proyeccion del suelo (solo Ruby; sin Model3D del MK).
