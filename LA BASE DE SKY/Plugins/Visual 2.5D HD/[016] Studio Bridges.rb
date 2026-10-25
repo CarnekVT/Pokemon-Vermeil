@@ -44,9 +44,10 @@ module Visual25D
     def lbds_props_view_bounds(mx, my, zx, zy)
       bounds = super
       return bounds unless Visual25D.enabled? && Visual25D::StudioOptions.props?
-      # The top of a vertical billboard can project into the camera even when
-      # its bottom is just outside the ordinary tile bounds.
-      [bounds[0] - 4, bounds[1] - 6, bounds[2] + 4, bounds[3] + 6]
+      # LBDS already keeps 3 tile margins. Adding 4x6 MORE tiles in both
+      # directions kept hundreds of invisible sprites alive during movement.
+      # Upright sprites need only a small extra SOUTH margin for tall tops.
+      [bounds[0] - 1, bounds[1], bounds[2] + 1, bounds[3] + 2]
     end
 
     def v25_prop_surface?(obj)
