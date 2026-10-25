@@ -220,7 +220,9 @@ module Visual25D
       @perspective = Math.tan(degrees * Math::PI / 180.0)
       target_z = (@camera_zoom || 100) / 100.0
       @zoom = 1.0 + ((target_z - 1.0) * b)
-      @gen5_ground_factor = @zoom * (1.0 - ((1.0 - Math.cos(degrees * Math::PI / 180.0)) * 0.65))
+      # Proyeccion ortografica oblicua: pitch REAL en Y, no reduccion
+      # artificial al 65% que dejaba casi plana la vista.
+      @gen5_ground_factor = @zoom * Math.cos(degrees * Math::PI / 180.0)
       @projection_dirty = true
       @margin_columns = nil
       @margin_rows = nil
