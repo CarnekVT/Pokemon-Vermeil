@@ -287,15 +287,18 @@ class BSSDialogueEngine
     return false if idxBattler.nil?
 
     boss = (@battle.bss_find_boss_battler_any rescue nil)
-    is_boss = boss && boss.index == idxBattler
+    # The "boss" editor target also means the opponent in ordinary trainer
+    # tests; these Battles do not instantiate a BSS Totem boss object.
+    foe = (@battle.opposes?(idxBattler) rescue idxBattler.to_i.odd?)
+    is_boss = boss ? boss.index == idxBattler : foe
 
     case target_type
     when "boss"
       is_boss
     when "sos"
-      !is_boss && (@battle.opposes?(idxBattler) rescue false)
+      boss && !is_boss && foe
     when "player"
-      (@battle.pbOwnedByPlayer?(idxBattler) rescue false)
+      (@battle.pbOwnedByPlayer?(idxBattler) rescue idxBattler.to_i.even?)
     else
       true
     end
@@ -490,7 +493,7 @@ class BSSDialogueEngine
     if t[:choices] && !t[:choices].empty? && @battle.scene && @battle.scene.respond_to?(:pbShowCommands)
       prompt = formatted_lines.last || "Elige una opción:"
       cmd = @battle.scene.pbShowCommands(prompt, t[:choices], -1)
-      if cmd >= 0
+      if cmd.is_a?(Integer) && cmd >= 0 && cmd < t[:choices].length
         if t[:choiceResponses] && t[:choiceResponses][cmd] && !t[:choiceResponses][cmd].empty?
           resp = t[:choiceResponses][cmd].dup
           resp.gsub!("{1}", battler_name)
