@@ -6,14 +6,14 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.1.0"
+  VERSION = "2.2.0"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
     "cinematicCommandZoom" => 1.0,
     "cinematicFightZoom" => 1.0,
-    "cinematicSmooth" => 0.085,
-    "cinematicIdlePan" => 5.0,
+    "cinematicSmooth" => 0.115,
+    "cinematicIdlePan" => 8.0,
     "cinematicBattlerFollow" => 100.0
   }
 
@@ -79,35 +79,45 @@ module VermeilBSSCinemaScene
   # Preserve the scene's authored horizon, angle, perspective and scale. The
   # presentation director only pans the existing world; changing [2..5] every
   # menu frame inflated Pokemon sprites and warped the EBDX background.
+  # EBDX remains the only world-vector writer. Animate the composition with
+  # bounded pans; moving zoom1/zoom2 here would resize the backdrop without
+  # resizing Essentials/DBK battlers and produce the old warped-camera bug.
   def vermeil_cinema_vector
     main = BSS070EBDXCore.get_vector(:MAIN, @battle)
     return nil unless main.is_a?(Array) && main.length >= 6
     main = main[0, 6].map { |v| v.to_f }
     cfg = vermeil_cinema_config
-    phase = vermeil_cinema_phase
-    strength = VermeilBSSCinema.clamp(cfg["idleStrength"] || 28, 0, 100) / 100.0
+    strength = VermeilBSSCinema.clamp(cfg["idleStrength"] || 40, 0, 100) / 100.0
     pan_x = VermeilBSSCinema.clamp(cfg["panX"] || 100, 0, 200) / 100.0
     pan_y = VermeilBSSCinema.clamp(cfg["panY"] || 100, 0, 200) / 100.0
-    # The target is deterministic and frame-rate independent; the EBDX vector
-    # performs smoothing once. The camera never changes the native Pokemon zoom.
+    phase = vermeil_cinema_phase
     tick = @vermeil_cinema_ticks.to_i
-    target = main.clone
+    speed = VermeilBSSCinema.clamp(cfg["idleSpeed"] || 50, 1, 150) / 50.0
+    # Three perceptible camera beats per 8-11 seconds instead of a near
+    # motionless idle oscillation. The second harmonic avoids robotic loops.
+    cycle = tick * (0.011 + speed * 0.004)
+    amplitude = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 20)
+    amplitude = [amplitude, 6.0].max if strength > 0.05
+    motion = (0.30 + strength * 0.70)
+    drift_x = (16.0 + amplitude) * motion * Math.sin(cycle)
+    drift_x += 5.0 * motion * Math.sin(cycle * 0.46 + 0.8)
+    drift_y = (4.0 + amplitude * 0.38) * motion * Math.sin(cycle * 0.63 + 1.0)
+    # Menus get distinct eyelines so switching Command -> Fight reads as
+    # actual shot composition. BAS takes over entirely when an attack begins.
     case phase
     when :command
-      influence = VermeilBSSCinema.clamp(cfg["commandStrength"] || 45, 0, 100) / 45.0
-      target[0] += 12.0 * pan_x * influence
-      target[1] += 2.5 * pan_y * influence
+      control = VermeilBSSCinema.clamp(cfg["commandStrength"] || 45, 0, 100) / 45.0
+      drift_x = 24.0 * control + drift_x * 0.30
+      drift_y = -4.0 * control + drift_y * 0.25
     when :fight
-      influence = VermeilBSSCinema.clamp(cfg["fightStrength"] || 65, 0, 100) / 65.0
-      target[0] += 19.0 * pan_x * influence
-      target[1] += 4.0 * pan_y * influence
-    else
-      amplitude = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 10)
-      target[0] += amplitude * (0.20 + strength * 0.80) * pan_x * Math.sin(tick * 0.008)
-      target[1] += 1.1 * strength * pan_y * Math.sin(tick * 0.006 + 0.8)
+      control = VermeilBSSCinema.clamp(cfg["fightStrength"] || 65, 0, 100) / 65.0
+      drift_x = -25.0 * control + drift_x * 0.24
+      drift_y = 7.0 * control + drift_y * 0.20
     end
-    # EBDX zoom1/zoom2, depth and angle stay at the original MAIN values.
-    # BAS can still apply its own temporary cinematic zoom during an attack.
+    target = main.clone
+    target[0] += VermeilBSSCinema.clamp(drift_x * pan_x, -42.0, 42.0)
+    target[1] += VermeilBSSCinema.clamp(drift_y * pan_y, -16.0, 16.0)
+    # Perspective, physical scale and native battler sizes remain unchanged.
     target
   rescue StandardError => e
     BSS064.log("Cinema target: #{e.class}: #{e.message}") if defined?(BSS064)
