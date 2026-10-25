@@ -1111,6 +1111,7 @@ class Battle
     end
     @bss_last_call_answered=false
     pbDisplay(bss_sos_message("fail","¡La ayuda no apareció!",caller.pbThis))
+    pbDeluxeTriggers(caller.index, nil, "SOSFail") if respond_to?(:pbDeluxeTriggers)
     begin
       @scene.pbAnimateSubstitute(caller,:show) if show_intro && @scene.respond_to?(:pbAnimateSubstitute)
     rescue
