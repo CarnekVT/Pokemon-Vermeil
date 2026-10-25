@@ -67,6 +67,7 @@ module Visual25D
   class << self
     attr_accessor :enabled_for_test
     def enabled? = @enabled_for_test
+    def perf_enabled? = false
     def tilt = 45
     def camera_zoom = 100
     def projection_stamp = 1
