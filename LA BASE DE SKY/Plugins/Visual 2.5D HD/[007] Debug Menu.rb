@@ -10,7 +10,11 @@
 def pbVisual25DMenu
   loop do
     state = Visual25D.enabled ? _INTL("activado") : _INTL("desactivado")
-    model = Visual25D.projection_model == :camera ? _INTL("Cámara") : _INTL("Clásico")
+    model = case Visual25D.projection_model
+            when :gen5 then _INTL("Gen 5 (plano estable)")
+            when :camera then _INTL("Cámara antigua")
+            else _INTL("Clásico antiguo")
+            end
     choice = pbMessage(
       _INTL("2.5D PLANO: {1}. Ángulo {2}°, Zoom {3}%, modelo {4}.\nFOV {5}° (solo cámara).",
             state, Visual25D.tilt, Visual25D.camera_zoom, model, Visual25D.camera_fov.to_i),
@@ -28,9 +32,13 @@ def pbVisual25DMenu
         _INTL("Zoom de cámara (60-250%)."), Visual25D.camera_zoom,
         Visual25D::Config::MIN_CAMERA_ZOOM, Visual25D::Config::MAX_CAMERA_ZOOM)
     when 2
-      m = pbMessage(_INTL("Modelo de suelo."), [_INTL("Clásico"), _INTL("Cámara"), _INTL("Cancelar")], 3)
-      Visual25D.projection_model = :classic if m == 0
+      m = pbMessage(_INTL("Modelo de proyección."), [
+        _INTL("Gen 5: plano estable (recomendado)"),
+        _INTL("Cámara antigua (deforma por distancia)"),
+        _INTL("Clásico antiguo (deforma por fila)"), _INTL("Cancelar")], 4)
+      Visual25D.projection_model = :gen5 if m == 0
       Visual25D.projection_model = :camera if m == 1
+      Visual25D.projection_model = :classic if m == 2
     when 3
       Visual25D.camera_fov = pbVisual25DChooseNumber(_INTL("FOV (20-90)."),
                                                      Visual25D.camera_fov.to_i, 20, 90)
