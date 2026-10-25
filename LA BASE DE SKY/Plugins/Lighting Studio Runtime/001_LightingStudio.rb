@@ -1,5 +1,5 @@
 # encoding: UTF-8
-# Lighting Studio Runtime 0.9.0 for Pokemon Essentials 21.1 / mkxp.
+# Lighting Studio Runtime 0.11.0 for Pokemon Essentials 21.1 / mkxp.
 # Shared additive lightmap: merge sources normally, add a single sprite to the map.
 # No shaders required; uses Bitmap#stretch_blt for camera/animation updates.
 module LightingStudio
@@ -319,6 +319,7 @@ module LightingStudioSpriteset
     @ls_chunks = {}
     @ls_chunk_tick = 0
     @ls_ambient_sprite = nil
+    @ls_light_viewport = nil
     @ls_initial_pass = true
     ls_setup
     @ls_initial_pass = false
@@ -337,6 +338,16 @@ module LightingStudioSpriteset
     darkness = LightingStudio.number(ambient['darkness'], 0, 0, 1)
     dynamic_day = defined?(LightingStudioDayNight) && LightingStudioDayNight.active_on_map?(data)
     native_tone = dynamic_day && LightingStudioDayNight.native_tone?
+    # RGSS tones on Spriteset_Map.viewport affect every child, including
+    # additive light sprites. Keep the light on a separate transparent viewport
+    # above the shaded map, so warm glows retain saturation at night.
+    if native_tone && data['lights'].is_a?(Array) && !data['lights'].empty?
+      base_viewport = Spriteset_Map.viewport
+      if base_viewport && !base_viewport.disposed?
+        @ls_light_viewport = Viewport.new(0, 0, Graphics.width, Graphics.height)
+        @ls_light_viewport.z = base_viewport.z + 1
+      end
+    end
     if !native_tone && (darkness > 0 || dynamic_day)
       @ls_ambient_sprite = Sprite.new(Spriteset_Map.viewport)
       @ls_ambient_sprite.bitmap = Bitmap.new(1, 1)
@@ -398,7 +409,7 @@ module LightingStudioSpriteset
           @ls_bitmaps << image[0]
         end
         entry[:bitmap] = image[0]
-        sprite = Sprite.new(Spriteset_Map.viewport)
+        sprite = Sprite.new(@ls_light_viewport || Spriteset_Map.viewport)
         sprite.bitmap = image[0]
         sprite.ox = image[0].width / 2
         sprite.oy = image[0].height / 2
@@ -582,7 +593,7 @@ module LightingStudioSpriteset
     return if bmp == :pending
     sprite = nil
     if bmp
-      sprite = Sprite.new(Spriteset_Map.viewport)
+      sprite = Sprite.new(@ls_light_viewport || Spriteset_Map.viewport)
       sprite.bitmap = bmp
       sprite.ox = 0
       sprite.oy = 0
@@ -769,6 +780,10 @@ module LightingStudioSpriteset
     @ls_bitmaps&.each { |bitmap| bitmap.dispose unless bitmap.disposed? }
     @ls_bitmaps = nil
     @ls_mask_cache = nil
+    if @ls_light_viewport && !@ls_light_viewport.disposed?
+      @ls_light_viewport.dispose
+    end
+    @ls_light_viewport = nil
     super
   end
 end
