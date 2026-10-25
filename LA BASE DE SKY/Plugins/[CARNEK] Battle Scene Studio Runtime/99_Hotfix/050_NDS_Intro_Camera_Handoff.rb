@@ -149,8 +149,14 @@ module VermeilBSSNDSIntroScene
         p=[[p,0.0].max,1.0].min
         zoom=VermeilBSSNDSHandoff.interpolate(VermeilBSSNDSHandoff::START_ZOOM,1.0,p)
         scene_copy.zoom_x=zoom;scene_copy.zoom_y=zoom
-        scene_copy.x=c_x+(c_x-fx)*(zoom-1.0)
-        scene_copy.y=c_y+(c_y-fy)*(zoom-1.0)
+        sx=c_x+(c_x-fx)*(zoom-1.0)
+        sy=c_y+(c_y-fy)*(zoom-1.0)
+        # Clamp the zoomed screenshot so no empty margins are exposed at
+        # battle-scene edges, even with far-off custom trainer coordinates.
+        x_spare=[(screenshot.width*zoom-Graphics.width)/2.0,0.0].max
+        y_spare=[(screenshot.height*zoom-Graphics.height)/2.0,0.0].max
+        scene_copy.x=[[sx,c_x-x_spare].max,c_x+x_spare].min
+        scene_copy.y=[[sy,c_y-y_spare].max,c_y+y_spare].min
         strip.x=(drift[0]*[frame,hold].min) + (drift[0]*move*VermeilBSSNDSHandoff::REVEAL_SPEED*p).round
         strip.y=(drift[1]*move*VermeilBSSNDSHandoff::REVEAL_SPEED*p).round
         strip.opacity=(255*(1.0-[p/0.70,1.0].min)).round
@@ -170,7 +176,7 @@ module VermeilBSSNDSIntroScene
           bmp=sp.bitmap
           sp.bitmap=nil
           sp.dispose unless sp.disposed?
-          bmp.dispose if bmp && bmp!=strip&.bitmap && bmp!=screenshot && (sp==dark || sp==flash)
+          bmp.dispose if bmp && (sp==dark || sp==flash) && !(bmp.disposed? rescue true)
         rescue StandardError
         end
       end
@@ -181,7 +187,9 @@ module VermeilBSSNDSIntroScene
   end
 
   def pbBattleIntroAnimation(*args, &block)
+    engaged=false
     return super unless bss_nds_intro_active?
+    engaged=true
     @bss_nds_intro_played=true
     @vermeil_cinema_trainer_intro_depth=@vermeil_cinema_trainer_intro_depth.to_i+1
     bss_nds_prelude
@@ -189,7 +197,7 @@ module VermeilBSSNDSIntroScene
     # intro animation (or the native Wild reveal) instead of replacing it.
     super
   ensure
-    if @vermeil_cinema_trainer_intro_depth.to_i>0
+    if engaged && @vermeil_cinema_trainer_intro_depth.to_i>0
       @vermeil_cinema_trainer_intro_depth-=1
     end
   end
