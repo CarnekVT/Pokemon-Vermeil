@@ -1293,12 +1293,11 @@ class BSS070EBDXRoom
   def clamp_camera_to_viewport!
     bg=@sprites["bg"]; return if !bg || !bg.bitmap
     cfg=(BSS070EBDXCore.camera_config rescue {})
-    margin=(cfg["overscan"] || 24).to_f
-    # BAS applies its camera after the room update for the rendered frame. Reserve
-    # extra real pixels while that external camera owns the shot so an EBDX-center
-    # Aura/BAS pan cannot uncover the authored 384x308 boundary.
-    bas_active=(@scene.instance_variable_get(:@bss070_ebdx_bas_frame) rescue false)
-    margin += [64.0, @viewport.width*0.10].max if bas_active
+    # Overscan is constant across ALL camera owners. The old BAS-only
+    # +64px margin enlarged/recentered the backing image on the first attack
+    # frame, producing a sky jump and moving every world-space battler.
+    # The layered overscan backplate now covers extreme BAS/Totem zoom-out.
+    margin=[(cfg["overscan"] || 24).to_f,44.0].max
     # A position clamp alone cannot cover both sides when a zoom-out makes the
     # backdrop narrower than the viewport. Increase both axes by one uniform
     # factor, preserving EBDX's perspective ratio rather than stretching X/Y.
