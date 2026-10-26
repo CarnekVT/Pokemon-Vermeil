@@ -367,8 +367,11 @@ module BSSLayeredRoomSupport
     # Dim sky far less than the terrain; do not black out the sunset.
     # The bright sky stays readable; the horizon remains warm while the
     # terrain receives clearly stronger clock lighting.
-    sky_tone=BSSLayeredLighting.tone(light,0.22)
-    horizon_tone=BSSLayeredLighting.tone(light,0.35)
+    # Cinematic darkening must reach the sky/horizon too. Keeping the old
+    # 0.22 sky weighting during dialogue left the upper half vivid while the
+    # foreground darkened; a balanced per-layer shade avoids that split.
+    sky_tone=BSSLayeredLighting.tone(light,cinematic ? 0.72 : 0.22)
+    horizon_tone=BSSLayeredLighting.tone(light,cinematic ? 0.76 : 0.35)
     ground_tone=BSSLayeredLighting.tone(light,1.20)
     bg.tone=sky_tone
     if @bss_layered_has_live_sky && @sprites["sky"]
