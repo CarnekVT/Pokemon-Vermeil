@@ -106,6 +106,11 @@ module VermeilBSSNDSIntroScene
     # encounters should never acquire an extra independent battle intro.
     return false unless respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
     return false if @bss_nds_intro_played || @bss_nds_intro_active
+    # The overlay is transparent above the biome; it must only render on a
+    # fully initialized BSS/EBDX stage, never over vanilla battle_bg.
+    bss070_ebdx_ensure_core if respond_to?(:bss070_ebdx_ensure_core)
+    room=@bss070_ebdx_room
+    return false unless room && !(room.disposed? rescue true)
     # Use one prelude for either encounter type. The native intro STILL runs
     # afterwards and remains the source of truth for trainer send-outs.
     true
@@ -134,6 +139,10 @@ module VermeilBSSNDSIntroScene
     # capture/zoom/background nor a full black frame between transitions.
     # The NDS strip is RGBA with transparent sky and an opaque patterned floor.
     begin
+      bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
+      room=@bss070_ebdx_room
+      room.position if room && room.respond_to?(:position)
+      room.update if room && room.respond_to?(:update)
       viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
       strip=Sprite.new(viewport)
