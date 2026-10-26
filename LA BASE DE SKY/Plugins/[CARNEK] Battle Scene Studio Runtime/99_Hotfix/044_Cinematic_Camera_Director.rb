@@ -64,14 +64,13 @@ module VermeilBSSCinemaScene
     # Attack owns the entire turn, not just the frames when BAS is playing.
     # Commands, text, damage effects and common animations may not retarget.
     return true if @bss_camera_attack_phase_depth.to_i > 0
-    return true if @bss_target_select_depth.to_i > 0 && @bss_target_transition_lock
     return true if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i > 0
     return true if @vermeil_cinema_native_move_depth.to_i > 0
     # EBS-like priority arbiter: a command/fight menu has no native move
     # playing. Legacy 'camera freeze' counters can survive earlier sendouts,
     # leaving the presentation permanently static. Explicit BAS/attack/script
     # leases above still win; do not let stale ambient locks veto a menu shot.
-    menu_phase = [:command, :fight].include?(vermeil_cinema_phase)
+    menu_phase = [:command, :fight, :target].include?(vermeil_cinema_phase)
     unless menu_phase
       return true if @bss083_camera_freeze.to_i > 0 || @bss070_ebdx_suspend_depth.to_i > 0
       return true if @bss098_native_move_active || @bss096_move_projection_active
@@ -239,7 +238,7 @@ module VermeilBSSCinemaScene
     phase = vermeil_cinema_phase
     # Drop stale, pre-director tweens only when the presentation owns the shot.
     @bss087_camera_tween = nil unless @bss087_end_battle_lock
-    if advance_camera && (phase == :command || phase == :fight)
+    if advance_camera && (phase == :command || phase == :fight || phase == :target)
       @vermeil_cinema_ticks = @vermeil_cinema_ticks.to_i + 1
       @vermeil_cinema_ambient_due=@vermeil_cinema_ambient_due.to_i-1
       changed=@vermeil_cinema_last_shot != phase
