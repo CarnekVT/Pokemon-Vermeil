@@ -6,13 +6,13 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.8.2"
+  VERSION = "2.9.0"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
     "cinematicCommandZoom" => 1.0,
     "cinematicFightZoom" => 1.0,
-    "cinematicSmooth" => 0.115,
+    "cinematicSmooth" => 0.065,
     "cinematicIdlePan" => 5.0,
     "cinematicBattlerFollow" => 100.0
   }
@@ -159,7 +159,7 @@ module VermeilBSSCinemaScene
     pos=(sprite.x rescue nil)
     return nil unless pos
     # Keep active battlers inside the viewport without extreme tracking.
-    dx=VermeilBSSCinema.clamp((Graphics.width.to_f*0.48-pos.to_f)*0.18,-28.0,28.0)
+    dx=VermeilBSSCinema.clamp((Graphics.width.to_f*0.48-pos.to_f)*0.13,-17.0,17.0)
     main[0]+=dx
     main
   rescue StandardError
@@ -168,7 +168,7 @@ module VermeilBSSCinemaScene
 
   def vermeil_cinema_acquire_shot(shot)
     return unless vermeil_cinema_active? && @vector && !vermeil_cinema_locked?
-    @vector.inc=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicSmooth"],0.04,0.16)
+    @vector.inc=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicSmooth"],0.035,0.085)
     @vector.set(shot) if shot
     @vermeil_cinema_ambient_due=120
   end
@@ -176,26 +176,22 @@ module VermeilBSSCinemaScene
   def vermeil_cinema_return_main(frames=9)
     return unless vermeil_cinema_active? && @vector
     main=BSS070EBDXCore.get_vector(:MAIN,@battle)
-    @vector.inc=0.16
-    @vector.set(main)
-    frames.times do
-      @vector.update
+    # Ease the SINGLE shared world vector instead of using a too-fast fixed
+    # @vector.inc and snapping 8%-20% of the remaining distance at the end.
+    # A true ease-out reaches MAIN exactly without an abrupt last frame.
+    initial=(@vector.get.clone rescue main.clone)
+    duration=[[frames.to_i,12].max,26].min
+    duration.times do |i|
+      t=(i+1).to_f/duration
+      eased=t*t*(3.0-2.0*t)
+      vector=6.times.map{|k| initial[k].to_f+(main[k].to_f-initial[k].to_f)*eased}
+      @vector.snap(vector) if @vector.respond_to?(:snap)
       @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
-      # Force one coherent terrain + battler + shadow projection at each
-      # transition frame. Legacy camera locks may be stale when an attack
-      # begins, so dispatch directly to the known world-space projector.
       if defined?(BSS103WorldSpaceBattlers)
         BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
-      elsif respond_to?(:bss070_ebdx_apply_world_alignment)
-        bss070_ebdx_apply_world_alignment
       end
       Graphics.update
       Input.update if defined?(Input)
-    end
-    @vector.snap(main) if @vector.respond_to?(:snap)
-    @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
-    if defined?(BSS103WorldSpaceBattlers)
-      BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
     end
     @vermeil_cinema_last_shot=nil
   rescue StandardError => e
@@ -266,7 +262,7 @@ module VermeilBSSCinemaScene
         target = vermeil_cinema_vector
         if target
           cfg = vermeil_cinema_config
-          @vector.inc = VermeilBSSCinema.clamp(cfg["cinematicSmooth"], 0.025, 0.18)
+          @vector.inc = VermeilBSSCinema.clamp(cfg["cinematicSmooth"], 0.035, 0.085)
           @vector.set(target)
           @vermeil_cinema_last_shot = phase
           BSS064.log("[Camera v2.5] #{phase} shot, BAS owns moves") if defined?(BSS064)
