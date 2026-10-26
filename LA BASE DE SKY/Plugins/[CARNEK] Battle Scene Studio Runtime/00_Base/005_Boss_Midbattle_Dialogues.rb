@@ -548,9 +548,10 @@ class BSSDialogueEngine
         labels={"ATTACK"=>"Ataque","DEFENSE"=>"Defensa","SPECIAL_ATTACK"=>"Ataque Especial",
                 "SPECIAL_DEFENSE"=>"Defensa Especial","SPEED"=>"Velocidad"}
         name=labels[stat.upcase] || stat
+        article=["ATTACK","SPECIAL_ATTACK"].include?(stat.upcase) ? "El" : "La"
         battler=((@battle.battlers[0] rescue nil))
         who=battler ? battler.name : "tu Pokémon"
-        @battle.pbDisplayPaused("¡La #{name} de #{who} ha aumentado!") if @battle.respond_to?(:pbDisplayPaused)
+        @battle.pbDisplayPaused("¡#{article} #{name} de #{who} ha aumentado!") if @battle.respond_to?(:pbDisplayPaused)
       end
     end
   end
