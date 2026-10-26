@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.5.0"
+  VERSION = "2.6.0"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -66,12 +66,19 @@ module VermeilBSSCinemaScene
     return true if @bss_camera_attack_phase_depth.to_i > 0
     return true if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i > 0
     return true if @vermeil_cinema_native_move_depth.to_i > 0
-    return true if @bss083_camera_freeze.to_i > 0 || @bss070_ebdx_suspend_depth.to_i > 0
-    return true if @bss098_native_move_active || @bss096_move_projection_active
-    return true if @bss087_native_move_active || @bss084_native_move_active
-    return true if @bss096_native_formation_depth.to_i > 0 || @bss096_battler_anim_depth.to_i > 0
+    # EBS-like priority arbiter: a command/fight menu has no native move
+    # playing. Legacy 'camera freeze' counters can survive earlier sendouts,
+    # leaving the presentation permanently static. Explicit BAS/attack/script
+    # leases above still win; do not let stale ambient locks veto a menu shot.
+    menu_phase = [:command, :fight].include?(vermeil_cinema_phase)
+    unless menu_phase
+      return true if @bss083_camera_freeze.to_i > 0 || @bss070_ebdx_suspend_depth.to_i > 0
+      return true if @bss098_native_move_active || @bss096_move_projection_active
+      return true if @bss087_native_move_active || @bss084_native_move_active
+      return true if @bss096_native_formation_depth.to_i > 0 || @bss096_battler_anim_depth.to_i > 0
+      return true if (respond_to?(:inPartyAnimation?) && inPartyAnimation?)
+    end
     return true if @bss087_end_battle_lock
-    return true if (respond_to?(:inPartyAnimation?) && inPartyAnimation?)
     false
   rescue StandardError
     true
@@ -106,12 +113,13 @@ module VermeilBSSCinemaScene
     # Do not animate sine waves every frame: this created visible meandering,
     # and fight->attack->text flickered between unrelated camera positions.
     cfg_strength = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 20)
-    strength = 0.40 + cfg_strength / 25.0
-    phase_pan_x = (phase == :command ? 11.0 : (phase == :fight ? -11.0 : 0.0))
-    phase_pan_y = (phase == :command ? -2.0 : (phase == :fight ? 3.0 : 0.0))
+    strength = 0.85 + cfg_strength / 40.0
+    # Noticeably different eyelines without overshooting the EBDX overscan.
+    phase_pan_x = (phase == :command ? 18.0 : (phase == :fight ? -18.0 : 0.0))
+    phase_pan_y = (phase == :command ? -3.0 : (phase == :fight ? 4.0 : 0.0))
     target = main.clone
-    target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -18.0, 18.0)
-    target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -7.0, 7.0)
+    target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -20.0, 20.0)
+    target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -6.0, 6.0)
     # Perspective, physical scale and native battler sizes remain unchanged.
     target
   rescue StandardError => e
@@ -224,6 +232,7 @@ module VermeilBSSCinemaScene
   def pbCommandMenu(*args, &block)
     return super unless vermeil_cinema_active?
     @vermeil_cinema_first_command_reached = true
+    @vermeil_cinema_last_shot = nil  # new turn / reacquire Command
     @vermeil_cinema_command_depth = @vermeil_cinema_command_depth.to_i + 1
     super
   ensure
@@ -232,6 +241,7 @@ module VermeilBSSCinemaScene
 
   def pbFightMenu(*args, &block)
     return super unless vermeil_cinema_active?
+    @vermeil_cinema_last_shot = nil  # reacquire Fight from Command
     @vermeil_cinema_fight_depth = @vermeil_cinema_fight_depth.to_i + 1
     super
   ensure
