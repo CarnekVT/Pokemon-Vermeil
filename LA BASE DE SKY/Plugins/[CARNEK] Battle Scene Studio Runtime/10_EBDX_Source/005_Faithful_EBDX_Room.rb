@@ -872,7 +872,7 @@ module BSS070EnvironmentEBDX
         :mirror => [false,false,true,true,false,false,true,false,false,false,false,false],
         :zoom => [1,1,1,1,1,1,1,1,1,1,1,0.7],
         :z => [2,2,2,2,2,2,2,2,2,2,2,2],
-      }, "sky" => true, "noshadow" => true, "img001" => {
+      }, "sky" => true, "noshadow" => false, "img001" => {
         :scrolling => true, :speed => 0.5,
         :bitmap => "base001c",
         :oy => 0, :y => 122, :z => 3, :flat => true
