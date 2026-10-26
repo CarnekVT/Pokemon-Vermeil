@@ -64,8 +64,13 @@ module BSSCameraTrainerDepth
 
   def pbUpdate(*args, &block)
     result = super
-    bss_camera_relayer_trainers if respond_to?(:bss070_ebdx_active?) &&
-                                    (bss070_ebdx_active? rescue false)
+    if respond_to?(:bss070_ebdx_active?) && (bss070_ebdx_active? rescue false)
+      # Native DBK darken/revert clips sometimes make Essentials' battle_bg
+      # visible for one frame. The EBDX room is the single background:
+      # re-hide native fallback planes at the end of each update.
+      bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
+      bss_camera_relayer_trainers
+    end
     result
   end
 
