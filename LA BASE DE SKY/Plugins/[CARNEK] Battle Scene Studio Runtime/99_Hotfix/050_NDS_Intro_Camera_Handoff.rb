@@ -90,6 +90,9 @@ module VermeilBSSNDSIntroScene
   def bss_nds_intro_active?
     return false unless @battle && @sprites
     return false unless (@battle.wildBattle? || @battle.trainerBattle?)
+    # Only BSS/EBDX Blueprints own this transition. Ordinary Essentials
+    # encounters should never acquire an extra independent battle intro.
+    return false unless respond_to?(:bss070_ebdx_active?) && bss070_ebdx_active?
     return false if @bss_nds_intro_played || @bss_nds_intro_active
     # Use one prelude for either encounter type. The native intro STILL runs
     # afterwards and remains the source of truth for trainer send-outs.
@@ -103,85 +106,52 @@ module VermeilBSSNDSIntroScene
     path=VermeilBSSNDSHandoff.asset(@battle,tag)
     return false unless path
     @bss_nds_intro_active=true
-    viewport=nil; screenshot=nil; scene_copy=nil; strip=nil; dark=nil; flash=nil
-    hidden=[]
+    viewport=nil
+    strip=nil
+    # Keep the real EBDX battle world underneath: there must not be a second
+    # capture/zoom/background nor a full black frame between transitions.
+    # The NDS strip is RGBA with transparent sky and an opaque patterned floor.
     begin
-      # The transition's snapshot must not leak a trainer/Pokemon before their
-      # native DBK/Essentials reveal. Capture scenery only, restore immediately.
-      @sprites.each do |key,sprite|
-        next unless key.to_s =~ /\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i
-        next unless sprite && sprite.respond_to?(:visible) && sprite.respond_to?(:visible=)
-        hidden << [sprite,sprite.visible]
-        sprite.visible=false
-      rescue StandardError
-      end
-      Graphics.update
-      screenshot=Graphics.snap_to_bitmap
-      hidden.each { |sp,vis| begin;sp.visible=vis if sp && !(sp.disposed? rescue false);rescue StandardError;end }
-      hidden.clear
-
       viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
-      scene_copy=Sprite.new(viewport)
-      scene_copy.bitmap=screenshot
-      scene_copy.ox=screenshot.width/2
-      scene_copy.oy=screenshot.height/2
-      scene_copy.z=0
       strip=Sprite.new(viewport)
       strip.bitmap=pbBitmap(path)
+      return false unless strip.bitmap
       strip.z=1
-      scale=Graphics.height.to_f/[strip.bitmap.height,1].max
-      strip.zoom_x=scale
-      strip.zoom_y=scale
-      dark=VermeilBSSNDSHandoff.full_screen_sprite(viewport,[0,0,0]);dark.z=2
-      flash=VermeilBSSNDSHandoff.full_screen_sprite(viewport,[255,255,255]);flash.z=3
-      duration=VermeilBSSNDSHandoff::HOLD+VermeilBSSNDSHandoff::MOVE
-      c_x=Graphics.width/2.0; c_y=Graphics.height/2.0
-      focus=(@sprites["trainer_1"] || @sprites["base_1"] || @sprites["pokemon_1"]) rescue nil
-      fx=focus ? focus.x.to_f : c_x
-      fy=focus ? focus.y.to_f : c_y
-      drift=(VermeilBSSNDSHandoff::TAGS[tag] || VermeilBSSNDSHandoff::TAGS[:grass])[2]
+      strip.zoom_y=Graphics.height.to_f/[strip.bitmap.height,1].max
+      strip.zoom_x=strip.zoom_y
+      # Start at the leftmost section; strips are authored at 2044x480
+      # and can move across the screen without wrapping or black seams.
+      max_travel=[strip.bitmap.width*strip.zoom_x-Graphics.width,0.0].max
+      travel=[Graphics.width.to_f*0.36,max_travel].min
+      strip.x=0
+      strip.y=0
+      strip.opacity=255
       VermeilBSSNDSHandoff.play_sound(tag)
+      hold=VermeilBSSNDSHandoff::HOLD
+      move=[VermeilBSSNDSHandoff::MOVE*2,18].max
+      duration=hold+move
       duration.times do |frame|
-        hold=VermeilBSSNDSHandoff::HOLD
-        move=VermeilBSSNDSHandoff::MOVE
-        p=(frame-hold+1).to_f/move
-        p=[[p,0.0].max,1.0].min
-        zoom=VermeilBSSNDSHandoff.interpolate(VermeilBSSNDSHandoff::START_ZOOM,1.0,p)
-        scene_copy.zoom_x=zoom;scene_copy.zoom_y=zoom
-        sx=c_x+(c_x-fx)*(zoom-1.0)
-        sy=c_y+(c_y-fy)*(zoom-1.0)
-        # Clamp the zoomed screenshot so no empty margins are exposed at
-        # battle-scene edges, even with far-off custom trainer coordinates.
-        x_spare=[(screenshot.width*zoom-Graphics.width)/2.0,0.0].max
-        y_spare=[(screenshot.height*zoom-Graphics.height)/2.0,0.0].max
-        scene_copy.x=[[sx,c_x-x_spare].max,c_x+x_spare].min
-        scene_copy.y=[[sy,c_y-y_spare].max,c_y+y_spare].min
-        strip.x=(drift[0]*[frame,hold].min) + (drift[0]*move*VermeilBSSNDSHandoff::REVEAL_SPEED*p).round
-        strip.y=(drift[1]*move*VermeilBSSNDSHandoff::REVEAL_SPEED*p).round
-        strip.opacity=(255*(1.0-[p/0.70,1.0].min)).round
-        dark.opacity=(220*(1.0-[frame/8.0,1.0].min)).round
-        flash.opacity=(frame>=duration-2 ? ((frame-duration+3)*48) : 0)
+        p=[[((frame-hold).to_f/[move,1].max),0.0].max,1.0].min
+        eased=p*p*(3.0-2.0*p)
+        strip.x=-(travel*eased).round
+        # Tiny vertical parallax, never enough to expose the bottom edge.
+        strip.y=0
+        fade=[[((p-0.44)/0.56),0.0].max,1.0].min
+        strip.opacity=(255*(1.0-fade)).round
         Graphics.update
         Input.update if defined?(Input)
       end
       true
     rescue StandardError => e
-      BSS064.log("NDS prelude warning: #{e.class}: #{e.message}") if defined?(BSS064)
+      BSS064.log("NDS overlay prelude: #{e.class}: #{e.message}") if defined?(BSS064)
       false
     ensure
-      hidden.each { |sp,vis| begin;sp.visible=vis if sp && !(sp.disposed? rescue false);rescue StandardError;end }
-      [scene_copy,strip,dark,flash].compact.each do |sp|
-        begin
-          bmp=sp.bitmap
-          sp.bitmap=nil
-          sp.dispose unless sp.disposed?
-          bmp.dispose if bmp && (sp==dark || sp==flash) && !(bmp.disposed? rescue true)
-        rescue StandardError
-        end
+      if strip
+        # pbBitmap is a game-owned cached bitmap, not ours to dispose.
+        begin;strip.bitmap=nil;strip.dispose unless strip.disposed?;rescue StandardError;end
       end
-      screenshot.dispose if screenshot && !(screenshot.disposed? rescue true)
-      viewport.dispose if viewport && !(viewport.disposed? rescue true)
+      begin;viewport.dispose if viewport && !(viewport.disposed? rescue true);rescue StandardError;end
       @bss_nds_intro_active=false
     end
   end
