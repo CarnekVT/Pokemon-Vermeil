@@ -873,7 +873,8 @@ module BSSCinematicSceneFix
     end
     if @sprites["bottomBar"] && @sprites["bottomBar"].bitmap
       @sprites["bottomBar"].zoom_x = Graphics.width.to_f / @sprites["bottomBar"].bitmap.width.to_f
-      @sprites["bottomBar"].y = Graphics.height
+      # Do not reset Y whenever DBK toggles cinematic speech. Resetting it
+      # after the exit animation started caused a visible bar pop.
       @sprites["bottomBar"].z = 99990
     end
     if @sprites["nameWindow"]
@@ -914,9 +915,13 @@ module BSSCinematicToggleBlackBarsAnimFix
   def createProcesses
     # Smooth, symmetric bar slide/fade. These animations run only when entering
     # or leaving cinematic speech; "hold" sequences reuse visible bars.
-    delay = 3
-    slide_frames = 10
-    fade_frames = 9
+    # Editable global speed in Maker Studio -> BSS Global Settings.
+    # Faster defaults avoid a sluggish overlay. All frames are RGSS ticks.
+    frame_cfg=(BSS064.data.dig("global","blackBarFrames") rescue nil)
+    slide_frames=[[frame_cfg.to_i,3].max,18].min
+    slide_frames=5 if frame_cfg.nil?
+    fade_frames=[(slide_frames*0.75).round,3].max
+    delay=1
     topBar = addSprite(@sprites["topBar"], PictureOrigin::TOP_LEFT)
     topBar.setZ(0, 99990)
     bottomBar = addSprite(@sprites["bottomBar"], PictureOrigin::BOTTOM_RIGHT)
