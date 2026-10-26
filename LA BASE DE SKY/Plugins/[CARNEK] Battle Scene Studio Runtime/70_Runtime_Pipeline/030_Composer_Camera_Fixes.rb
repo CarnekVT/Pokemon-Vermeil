@@ -912,7 +912,11 @@ end
 
 module BSSCinematicToggleBlackBarsAnimFix
   def createProcesses
-    delay = 5
+    # Smooth, symmetric bar slide/fade. These animations run only when entering
+    # or leaving cinematic speech; "hold" sequences reuse visible bars.
+    delay = 3
+    slide_frames = 10
+    fade_frames = 9
     topBar = addSprite(@sprites["topBar"], PictureOrigin::TOP_LEFT)
     topBar.setZ(0, 99990)
     bottomBar = addSprite(@sprites["bottomBar"], PictureOrigin::BOTTOM_RIGHT)
@@ -931,13 +935,13 @@ module BSSCinematicToggleBlackBarsAnimFix
       bottomBar.setOpacity(0, 255)
       topBar.setXY(0, Graphics.width, 0)
       bottomBar.setXY(0, 0, Graphics.height)
-      topBar.moveXY(delay, 5, 0, 0)
-      bottomBar.moveXY(delay, 5, toMoveBottom, Graphics.height)
+      topBar.moveXY(delay, slide_frames, 0, 0)
+      bottomBar.moveXY(delay, slide_frames, toMoveBottom, Graphics.height)
     else
-      topBar.moveOpacity(delay, 4, 0)
-      bottomBar.moveOpacity(delay, 4, 0)
-      topBar.setXY(delay + 5, Graphics.width, 0)
-      bottomBar.setXY(delay + 5, 0, Graphics.height)
+      topBar.moveOpacity(delay, fade_frames, 0)
+      bottomBar.moveOpacity(delay, fade_frames, 0)
+      topBar.setXY(delay + slide_frames, Graphics.width, 0)
+      bottomBar.setXY(delay + slide_frames, 0, Graphics.height)
     end
   end
 end
