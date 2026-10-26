@@ -25,6 +25,23 @@ module BSS103
 end
 
 module BSS103WorldSpaceBattlers
+  def bss103_formation_spacing_x(index)
+    return 0.0 unless @battle && @battle.respond_to?(:pbSideSize)
+    side_size=(@battle.pbSideSize(index) rescue 1).to_i
+    return 0.0 if side_size<=1
+    slot=index.to_i/2
+    # Additional horizontal room beyond Essentials' native slot positions,
+    # using more breadth on the player's near plane. All offsets are in
+    # screen pixels after EBDX projection and mirrored for the shadow.
+    if index.to_i.even?
+      side_size==2 ? [-10.0,20.0][slot].to_f : [-14.0,7.0,29.0][slot].to_f
+    else
+      side_size==2 ? [-6.0,12.0][slot].to_f : [-8.0,3.0,14.0][slot].to_f
+    end
+  rescue StandardError
+    0.0
+  end
+
   def bss070_ebdx_apply_world_alignment
     return if @bss070_ebdx_suspend_depth.to_i>0 || @bss070_ebdx_bas_frame
     return if @bss096_battler_anim_depth.to_i>0 || @bss087_native_move_active || @bss084_native_move_active
@@ -42,7 +59,8 @@ module BSS103WorldSpaceBattlers
 
       # The invisible EBDX metric anchor is authored from Essentials' real
       # pbBattlerPosition and projected by the same room matrix as scenery.
-      sp.x=anchor.x if sp.respond_to?(:x=)
+      offset_x=bss103_formation_spacing_x(i)
+      sp.x=anchor.x+offset_x if sp.respond_to?(:x=)
       locked_y=(sp.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
       if locked_y
         sp.y=locked_y if sp.respond_to?(:y=)
@@ -63,7 +81,7 @@ module BSS103WorldSpaceBattlers
         else
           sa=(@bss070_ebdx_room.shadow(i) rescue nil)
           if sa && !(sa.disposed? rescue false)
-            sh.x=sa.x if sh.respond_to?(:x=)
+            sh.x=sa.x+offset_x if sh.respond_to?(:x=)
             locked_sha_y=(sh.instance_variable_get(:@bss_caller_locked_baseline_y) rescue nil)
             if locked_sha_y
               sh.y=locked_sha_y if sh.respond_to?(:y=)
