@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.8.0"
+  VERSION = "2.8.1"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -242,7 +242,10 @@ module VermeilBSSCinemaScene
       @vermeil_cinema_ticks = @vermeil_cinema_ticks.to_i + 1
       @vermeil_cinema_ambient_due=@vermeil_cinema_ambient_due.to_i-1
       changed=@vermeil_cinema_last_shot != phase
-      if changed || @vermeil_cinema_ambient_due<=0
+      # Lock fight/target focus until actor/cursor changes. Recalculating
+      # these shots every 2 seconds used the ALREADY MOVED sprite coordinates
+      # and caused focus to hunt/oscillate around the selected Pokemon.
+      if changed || (@vermeil_cinema_ambient_due<=0 && phase==:command)
         @vermeil_cinema_ambient_step=@vermeil_cinema_ambient_step.to_i+1 unless changed
         cfg=vermeil_cinema_config
         speed=VermeilBSSCinema.clamp(cfg["idleSpeed"] || 50,1,150)
