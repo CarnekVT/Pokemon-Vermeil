@@ -1666,6 +1666,7 @@ App.prototype.dialoguesHTML = function(b) {
       style: x.style || "cinematic",
       textboxType: x.textboxType || (x.style === "narrative" ? "default" : "cinematic"),
       showNamebox: x.showNamebox !== false,
+      barTransition: x.barTransition === "hold" ? "hold" : "reenter",
       choices: Array.isArray(x.choices) ? x.choices : (typeof x.choices === "string" ? x.choices.split(/[,\n]/).map(s=>s.trim()).filter(Boolean) : []),
       choiceResponses: Array.isArray(x.choiceResponses) ? x.choiceResponses : (typeof x.choiceResponses === "string" ? x.choiceResponses.split("\n").map(s=>s.trim()) : []),
       choiceEffects: Array.isArray(x.choiceEffects) ? x.choiceEffects : [],
@@ -1836,6 +1837,13 @@ App.prototype.dialoguesHTML = function(b) {
               <label class="bss-check compact" style="margin:0;">
                 <input type="checkbox" data-dialogue-idx="${origIdx}" data-dialogue-field="showNamebox" ${t.showNamebox !== false ? "checked" : ""}>
                 🏷️ Mostrar Namebox
+              </label>
+              <label class="bss-field" style="display:flex;align-items:center;gap:6px;margin:0;">
+                <span>Entre diálogos con barras:</span>
+                <select class="bss-select" data-dialogue-idx="${origIdx}" data-dialogue-field="barTransition" style="min-width:168px;">
+                  <option value="reenter" ${t.barTransition !== "hold" ? "selected" : ""}>Cerrar y reabrir (animación)</option>
+                  <option value="hold" ${t.barTransition === "hold" ? "selected" : ""}>Continuar sin cerrar barras</option>
+                </select>
               </label>
               <label class="bss-check compact" style="margin:0;">
                 <input type="checkbox" data-dialogue-idx="${origIdx}" data-dialogue-field="playCry" ${t.playCry ? "checked" : ""}>
@@ -5249,6 +5257,7 @@ App.prototype.hydrateEBDXStudioPreview=async function(){
             style: "cinematic",
             textboxType: "cinematic",
             showNamebox: true,
+            barTransition: "reenter",
             choices: [],
             choiceResponses: [],
             choiceEffects: [],
@@ -5446,6 +5455,7 @@ App.prototype.hydrateEBDXStudioPreview=async function(){
         style: t.style,
         textboxType: t.textboxType || "cinematic",
         showNamebox: t.showNamebox !== false,
+        barTransition: t.barTransition === "hold" ? "hold" : "reenter",
         choices: Array.isArray(t.choices) ? t.choices : [],
         choiceResponses: Array.isArray(t.choiceResponses) ? t.choiceResponses : [],
         choiceEffects: Array.isArray(t.choiceEffects) ? t.choiceEffects : [],
