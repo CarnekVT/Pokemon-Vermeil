@@ -162,6 +162,11 @@ module VermeilBSSNDSIntroScene
       strip.bitmap=pbBitmap(path)
       return false unless strip.bitmap
       strip.z=1
+      # The shipped 2044x480 biome images contain a large opaque solid-colour
+      # lower half. Never stretch that half across the battle: it hid the
+      # rendered EBDX terrain under a flat green/blue/brown slab.
+      foliage_height=(strip.bitmap.height*0.52).round
+      strip.src_rect.set(0,0,strip.bitmap.width,foliage_height)
       base_scale=Graphics.height.to_f/[strip.bitmap.height,1].max
       strip.zoom_y=base_scale*1.12
       strip.zoom_x=base_scale*1.12
@@ -182,7 +187,8 @@ module VermeilBSSNDSIntroScene
         strip.zoom_x=base_scale*(1.12-0.12*eased)
         strip.zoom_y=base_scale*(1.12-0.12*eased)
         strip.x=-(travel*eased).round
-        strip.y=0
+        # Anchor the cropped grass/waves/cave silhouettes at the bottom.
+        strip.y=(Graphics.height-strip.src_rect.height*strip.zoom_y).round
         # The actual room also zooms back to MAIN under the strip.
         if saved_main && @vector && @vector.respond_to?(:snap)
           v=6.times.map{|i| start[i].to_f+(saved_main[i].to_f-start[i].to_f)*eased}
