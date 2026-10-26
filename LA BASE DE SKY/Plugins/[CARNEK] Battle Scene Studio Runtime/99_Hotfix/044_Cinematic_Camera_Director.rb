@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.7.0"
+  VERSION = "2.8.0"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -64,6 +64,7 @@ module VermeilBSSCinemaScene
     # Attack owns the entire turn, not just the frames when BAS is playing.
     # Commands, text, damage effects and common animations may not retarget.
     return true if @bss_camera_attack_phase_depth.to_i > 0
+    return true if @bss_target_select_depth.to_i > 0 && @bss_target_transition_lock
     return true if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i > 0
     return true if @vermeil_cinema_native_move_depth.to_i > 0
     # EBS-like priority arbiter: a command/fight menu has no native move
@@ -85,6 +86,7 @@ module VermeilBSSCinemaScene
   end
 
   def vermeil_cinema_phase
+    return :target if @bss_target_select_depth.to_i > 0
     return :fight if @vermeil_cinema_fight_depth.to_i > 0
     return :command if @vermeil_cinema_command_depth.to_i > 0
     :idle
@@ -115,11 +117,22 @@ module VermeilBSSCinemaScene
     cfg_strength = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 20)
     strength = 0.85 + cfg_strength / 40.0
     # Noticeably different eyelines without overshooting the EBDX overscan.
-    phase_pan_x = (phase == :command ? 18.0 : (phase == :fight ? -18.0 : 0.0))
-    phase_pan_y = (phase == :command ? -3.0 : (phase == :fight ? 4.0 : 0.0))
+    phase_pan_x = (phase == :command ? 9.0 : (phase == :fight ? 0.0 : 0.0))
+    phase_pan_y = (phase == :command ? -2.0 : (phase == :fight ? 0.0 : 0.0))
     target = main.clone
     target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -20.0, 20.0)
     target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -6.0, 6.0)
+    # During move selection focus the actual active USER of that move,
+    # not the first opponent nor a fixed right-side pan.
+    if phase == :fight && @bss_fight_actor_index.is_a?(Integer)
+      shot = vermeil_cinema_focus_vector(@bss_fight_actor_index)
+      return shot if shot
+    end
+    # During multi-target choice focus the currently highlighted battler.
+    if @bss_selected_target_index.is_a?(Integer)
+      shot = vermeil_cinema_focus_vector(@bss_selected_target_index)
+      return shot if shot
+    end
     # Slow bounded GEN5 ambient eyeline changes while a menu is OPEN.
     # A step target every ~2 seconds is perceptible but never drifts or
     # triggers a second-camera transition during BAS or dialogue frames.
@@ -134,6 +147,49 @@ module VermeilBSSCinemaScene
   rescue StandardError => e
     BSS064.log("Cinema target: #{e.class}: #{e.message}") if defined?(BSS064)
     nil
+  end
+
+  # Focus is derived from the actual projected battler location, not
+  # world-vector presets. These bounded deltas travel the SAME EBDX matrix
+  # that BSS103 uses for scenery, Pokemon and their shadows.
+  def vermeil_cinema_focus_vector(index)
+    sprite=@sprites.is_a?(Hash) ? @sprites["pokemon_#{index}"] : nil
+    return nil unless sprite && !(sprite.disposed? rescue true)
+    return nil unless (sprite.visible rescue false)
+    main=BSS070EBDXCore.get_vector(:MAIN,@battle).clone.map{|v|v.to_f}
+    pos=(sprite.x rescue nil)
+    return nil unless pos
+    # Keep active battlers inside the viewport without extreme tracking.
+    dx=VermeilBSSCinema.clamp((Graphics.width.to_f*0.48-pos.to_f)*0.18,-28.0,28.0)
+    main[0]+=dx
+    main
+  rescue StandardError
+    nil
+  end
+
+  def vermeil_cinema_acquire_shot(shot)
+    return unless vermeil_cinema_active? && @vector && !vermeil_cinema_locked?
+    @vector.inc=VermeilBSSCinema.clamp(vermeil_cinema_config["cinematicSmooth"],0.04,0.16)
+    @vector.set(shot) if shot
+    @vermeil_cinema_ambient_due=120
+  end
+
+  def vermeil_cinema_return_main(frames=9)
+    return unless vermeil_cinema_active? && @vector
+    main=BSS070EBDXCore.get_vector(:MAIN,@battle)
+    @vector.inc=0.16
+    @vector.set(main)
+    frames.times do
+      @vector.update
+      @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
+      bss070_ebdx_apply_world_alignment if respond_to?(:bss070_ebdx_apply_world_alignment)
+      Graphics.update
+      Input.update if defined?(Input)
+    end
+    @vector.snap(main) if @vector.respond_to?(:snap)
+    @vermeil_cinema_last_shot=nil
+  rescue StandardError => e
+    BSS064.log("BSS camera main: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 
   # An absolute pan, not a scale animation. Base battler coordinates and
@@ -217,6 +273,9 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_last_shot = nil
     @vermeil_cinema_ambient_due = 0
     @vermeil_cinema_ambient_step = 0
+    @bss_fight_actor_index=nil
+    @bss_selected_target_index=nil
+    @bss_target_select_depth=0
     super
   end
 
@@ -233,10 +292,12 @@ module VermeilBSSCinemaScene
   def pbFightMenu(*args, &block)
     return super unless vermeil_cinema_active?
     @vermeil_cinema_last_shot = nil  # reacquire Fight from Command
+    @bss_fight_actor_index=args[0] if args[0].is_a?(Integer)
     @vermeil_cinema_fight_depth = @vermeil_cinema_fight_depth.to_i + 1
     super
   ensure
     @vermeil_cinema_fight_depth = [@vermeil_cinema_fight_depth.to_i - 1, 0].max if @vermeil_cinema_fight_depth
+    @bss_fight_actor_index=nil if @vermeil_cinema_fight_depth.to_i<=0
   end
 
   # Legacy callbacks attempted to return to MAIN or choose random EBDX shots.
