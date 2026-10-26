@@ -444,11 +444,18 @@ class BSSDialogueEngine
 
     scene = @battle.scene
     name_window = scene_sprites.is_a?(Hash) ? scene_sprites["nameWindow"] : nil
-    if is_cinematic && scene && scene.respond_to?(:pbProcessText)
-      begin
-        # setSpeaker expects a trainer/species asset ID, NOT a string label.
-        # Opening speech explicitly and updating only the name plate avoids
-        # invalid sprites and namebox leaks when the custom speaker is text.
+    has_choices = t[:choices].is_a?(Array) && !t[:choices].empty?
+    # pbShowCommands displays its prompt. It MUST NOT be shown beforehand by
+    # pbProcessText or pbDisplayPaused (otherwise it appears twice).
+    introduction = has_choices ? formatted_lines[0...-1] : formatted_lines
+    prompt = has_choices ? (formatted_lines.last || "Elige una opción:") : nil
+    cinematic_owner = false
+    begin
+      if is_cinematic && scene && scene.respond_to?(:pbProcessText)
+        # A nested Choice_1/Choice_2 branch inherits the parent's cinematic
+        # bars. Only the outermost dialogue may close them.
+        already_speaking = scene.respond_to?(:pbInCinematicSpeech?) && scene.pbInCinematicSpeech?
+        cinematic_owner = !already_speaking
         scene.pbStartSpeech(display_idx) if scene.respond_to?(:pbStartSpeech)
         if speaker_label && !speaker_label.empty?
           scene.pbUpdateSpeakerWindows(speaker_label) if scene.respond_to?(:pbUpdateSpeakerWindows)
@@ -456,50 +463,52 @@ class BSSDialogueEngine
         elsif name_window
           name_window.visible = false
         end
-        scene.pbProcessText(display_idx, idxTarget, true, formatted_lines) unless formatted_lines.empty?
-      ensure
-        scene.pbForceEndSpeech if scene.respond_to?(:pbForceEndSpeech)
-      end
-    elsif is_clean
-      message_window = scene_sprites.is_a?(Hash) ? scene_sprites["messageWindow"] : nil
-      orig_opacity = message_window ? message_window.opacity : 255
-      begin
-        message_window.opacity = 0 if message_window
-        formatted_lines.each do |line|
+        scene.pbProcessText(display_idx, idxTarget, true, introduction) unless introduction.empty?
+      elsif is_clean
+        message_window = scene_sprites.is_a?(Hash) ? scene_sprites["messageWindow"] : nil
+        orig_opacity = message_window ? message_window.opacity : 255
+        begin
+          message_window.opacity = 0 if message_window
+          introduction.each do |line|
+            msg = speaker_label && !speaker_label.empty? ? "#{speaker_label}: #{line}" : line
+            @battle.pbDisplayPaused(msg)
+          end
+        ensure
+          message_window.opacity = orig_opacity if message_window
+        end
+      else
+        introduction.each do |line|
           msg = speaker_label && !speaker_label.empty? ? "#{speaker_label}: #{line}" : line
           @battle.pbDisplayPaused(msg)
         end
-      ensure
-        message_window.opacity = orig_opacity if message_window
       end
-    else
-      # Narrative mode uses the standard battle message box. It must NOT call
-      # DBK's setSpeaker (which opens cinematic bars) or leave the namebox up.
-      formatted_lines.each do |line|
-        msg = speaker_label && !speaker_label.empty? ? "#{speaker_label}: #{line}" : line
-        @battle.pbDisplayPaused(msg)
-      end
-    end
 
-    # 6. Interactive Player Choices (if configured)
-    if t[:choices] && !t[:choices].empty? && @battle.scene && @battle.scene.respond_to?(:pbShowCommands)
-      prompt = formatted_lines.last || "Elige una opción:"
-      cmd = @battle.scene.pbShowCommands(prompt, t[:choices], -1)
-      if cmd.is_a?(Integer) && cmd >= 0 && cmd < t[:choices].length
-        if t[:choiceResponses] && t[:choiceResponses][cmd] && !t[:choiceResponses][cmd].empty?
-          resp = t[:choiceResponses][cmd].dup
-          resp.gsub!("{1}", battler_name)
-          resp.gsub!("{2}", target_name)
-          @battle.pbDisplayPaused(resp)
+      if has_choices && scene && scene.respond_to?(:pbShowCommands)
+        # Cinematic speech is deliberately NOT ended before opening choices.
+        # This keeps black bars, speaker sprite, and namebox visible.
+        cmd = scene.pbShowCommands(prompt, t[:choices], -1)
+        if cmd.is_a?(Integer) && cmd >= 0 && cmd < t[:choices].length
+          if t[:choiceResponses] && t[:choiceResponses][cmd] && !t[:choiceResponses][cmd].empty?
+            resp = t[:choiceResponses][cmd].dup
+            resp.gsub!("{1}", battler_name)
+            resp.gsub!("{2}", target_name)
+            if is_cinematic && scene.respond_to?(:pbProcessText)
+              scene.pbProcessText(display_idx,idxTarget,true,[resp])
+            else
+              @battle.pbDisplayPaused(resp)
+            end
+          end
+          if t[:choiceEffects] && t[:choiceEffects][cmd]
+            apply_choice_consequence(t[:choiceEffects][cmd],idxBattler,idxTarget)
+          end
+          # One canonical dispatch. The old second suffixed dispatch could
+          # retrigger branches marked repeat=true in the same selection.
+          process_event("Choice_#{cmd + 1}",idxBattler,idxTarget)
         end
-        # Apply mechanical consequences (stat boosts/drops, heal, damage, status)
-        if t[:choiceEffects] && t[:choiceEffects][cmd]
-          apply_choice_consequence(t[:choiceEffects][cmd], idxBattler, idxTarget)
-        end
-        # Fire reaction triggers for branching dialogue scripts
-        process_event("Choice_#{cmd + 1}", idxBattler, idxTarget)
-        process_event("Choice_#{cmd + 1}_#{t[:target]}", idxBattler, idxTarget)
       end
+    ensure
+      # Restore UI exactly once, *after* the chosen response/branch has played.
+      scene.pbForceEndSpeech if cinematic_owner && scene && scene.respond_to?(:pbForceEndSpeech)
     end
   end
 
