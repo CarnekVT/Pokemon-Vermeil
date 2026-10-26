@@ -2246,12 +2246,18 @@ module BSS070EBDXSceneBridge
 
   def bss070_ebdx_sprite_loaded?(sprite)
     return false if !sprite || (sprite.disposed? rescue true)
-    if sprite.respond_to?(:iconBitmap)
-      return false if sprite.iconBitmap.nil?
-    end
-    return false if sprite.respond_to?(:bitmap) && sprite.bitmap.nil?
+    # AnimatedPokemonSprite has different bitmap providers. Require ANY one
+    # usable source, not both iconBitmap and bitmap; a newly sent-out second
+    # battler often has iconBitmap but an empty wrapper bitmap for several
+    # frames. The old AND logic never recalibrated its metrics/shadow.
+    sources=[]
+    sources << sprite.iconBitmap if sprite.respond_to?(:iconBitmap)
+    sources << sprite.bitmap if sprite.respond_to?(:bitmap)
+    sources << sprite.animatedBitmap if sprite.respond_to?(:animatedBitmap)
+    return true if sources.any? { |bmp| bmp && !(bmp.disposed? rescue false) }
+    return false unless sources.empty?
     true
-  rescue
+  rescue StandardError
     false
   end
 
