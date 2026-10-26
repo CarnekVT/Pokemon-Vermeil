@@ -161,9 +161,12 @@ module VermeilBSSCinemaScene
   def bss070_ebdx_apply_world_alignment(*args, &block)
     # During scripted dialogue/intro the scene already has a stable framing.
     # Do NOT ask EBDX metric anchors to reposition animated trainer sprites.
-    return nil if vermeil_cinema_script_locked?
+    # Essential during BAS and native attacks: the old implementation called
+    # super FIRST, letting BSS103 move animated battlers/trainers in the same
+    # frame that BAS was applying its own camera transform.
+    return nil if vermeil_cinema_active? && vermeil_cinema_locked?
     ret = super
-    return ret unless vermeil_cinema_active? && !vermeil_cinema_locked?
+    return ret unless vermeil_cinema_active?
     return ret unless @battle && @sprites && @battle.respond_to?(:battlers)
     return ret unless respond_to?(:bss096_native_position)
     main = BSS070EBDXCore.get_vector(:MAIN, @battle)
