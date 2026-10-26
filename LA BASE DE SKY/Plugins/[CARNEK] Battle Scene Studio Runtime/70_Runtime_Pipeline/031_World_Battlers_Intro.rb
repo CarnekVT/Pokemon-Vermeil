@@ -102,21 +102,17 @@ end
 module BSS103NativeWildIntro
   def pbBattleIntroAnimation(*args,&block)
     wild=(@battle && @battle.respond_to?(:wildBattle?) && @battle.wildBattle?) rescue false
-    ret = nil
-    if wild
-      # BSS096 already knows how to walk past every BSS intro prepend and reach
-      # the real project/Essentials implementation. Use it while custom Wild
-      # Intro authoring is intentionally suspended.
-      if respond_to?(:bss096_native_wild_intro)
-        begin
-          ret = bss096_native_wild_intro
-        rescue => e
-          BSS064.log("BSS103 native wild intro fallback warning: #{e.class}: #{e.message}") if defined?(BSS064)
-        end
+    if wild && respond_to?(:bss096_native_wild_intro)
+      begin
+        # Essentials intro methods typically return nil. That means SUCCESS,
+        # not failure: the old code called super again and doubled the reveal.
+        return bss096_native_wild_intro
+      rescue StandardError => e
+        BSS064.log("BSS103 native wild intro fallback warning: #{e.class}: #{e.message}") if defined?(BSS064)
+        # Only failures may fall back, not a normal nil return.
       end
     end
-    ret = super(*args,&block) if ret.nil?
-    ret
+    super(*args,&block)
   end
 end
 
