@@ -15,25 +15,16 @@ module BSSCameraPhaseAuthority
     outer = scene.instance_variable_get(:@bss_camera_attack_phase_depth).to_i == 0
     scene.instance_variable_set(:@bss_camera_attack_phase_depth,
       scene.instance_variable_get(:@bss_camera_attack_phase_depth).to_i + 1)
-    room = nil
-    room_held = false
-    if outer
-      room = scene.instance_variable_get(:@bss070_ebdx_room)
-      if room && !(room.disposed? rescue true) && room.respond_to?(:bss106_push_behind!)
-        # Previous code moved the whole background by -10_000 Z on each
-        # individual move and returned it after each move: visible blinking.
-        # Keep that exact render band for the complete attack phase.
-        room_held = (room.bss106_push_behind! == true)
-      end
-    end
+    # Do not temporarily alter all backdrop sprite Z values. Earlier builds
+    # shifted the entire EBDX room by -10_000 when an attack phase started,
+    # then shifted it back: the day/night sky and terrain flashed or vanished.
+    # Ownership is represented by the phase counter only.
     super
   ensure
     if scene_active && scene
       current = scene.instance_variable_get(:@bss_camera_attack_phase_depth).to_i
       scene.instance_variable_set(:@bss_camera_attack_phase_depth,[current-1,0].max)
-      if outer && room_held && room && !(room.disposed? rescue true)
-        room.bss106_pop_behind! if room.respond_to?(:bss106_pop_behind!)
-      end
+      # No backdrop-depth restoration: nothing was displaced.
       # Leave the camera where BAS ended: only a future menu may request
       # another shot; never snap to a stale intro/attack camera.
     end
@@ -68,7 +59,9 @@ module BSSCameraTrainerDepth
       # Native DBK darken/revert clips sometimes make Essentials' battle_bg
       # visible for one frame. The EBDX room is the single background:
       # re-hide native fallback planes at the end of each update.
-      bss070_ebdx_hide_native_backdrops if respond_to?(:bss070_ebdx_hide_native_backdrops)
+      # The EBDX room compositor already handles native backdrop visibility.
+      # Do not forcibly set native background opacity to zero a second time
+      # after every animation tick (this broke fade/reveal composition).
       bss_camera_relayer_trainers
     end
     result
