@@ -335,14 +335,32 @@ module BSSLayeredRoomSupport
     # actual Lighting Studio clock. Affect only the temporary battle room;
     # all normal battles continue to use the shared clock and its tones.
     qa_bp=(@scene && @scene.battle && @scene.battle.respond_to?(:bss_blueprint)) ? @scene.battle.bss_blueprint : nil
-    if qa_bp.is_a?(Hash) && qa_bp["key"].to_s.start_with?("bss_qa_")
-      case slot
-      when :night then light=[-78.0,-79.0,-63.0,0.0];warmth=0.0
-      when :dawn  then light=[-28.0,-33.0,-27.0,0.0];warmth=0.9
-      else light=[0.0,0.0,0.0,0.0];warmth=0.0
+    # Only an explicitly requested QA skyMode replaces the Lighting Studio
+    # clock. The five scripted QA scenarios without skyMode must use the real
+    # in-game clock, never the old daytime fallback.
+    preview=qa_bp.is_a?(Hash) ? (qa_bp["environment"] || {}) : {}
+    preview=preview.is_a?(Hash) ? preview["skyMode"].to_s.downcase : ""
+    if qa_bp.is_a?(Hash) && qa_bp["key"].to_s.start_with?("bss_qa_") && !preview.empty?
+      if preview=="night"
+        slot=:night;light=[-120.0,-128.0,-116.0,0.0];warmth=0.0
+      elsif ["dawn","evening","sunset"].include?(preview)
+        slot=:dawn;light=[-45.0,-50.0,-50.0,0.0];warmth=0.9
+      elsif ["day","noon"].include?(preview)
+        slot=:day;light=[0.0,0.0,0.0,0.0];warmth=0.0
       end
     end
-    key=[light.map{|x|x.round(1)},(warmth*24).round,slot].join(":")
+    # At night, a weak -70 EBDX tint leaves grass fluorescent green.
+    # Preserve EBDX's texture detail, but cap floor brightness consistently.
+    if slot==:night
+      light=[[-125.0,light[0].to_f].min,[-136.0,light[1].to_f].min,
+             [-125.0,light[2].to_f].min,0.0]
+      warmth=0.0
+    end
+    cinematic = !!(@scene && @scene.instance_variable_get(:@bss_dialogue_cinema_active))
+    if cinematic
+      light=[light[0].to_f-36.0,light[1].to_f-40.0,light[2].to_f-39.0,0.0]
+    end
+    key=[light.map{|x|x.round(1)},(warmth*24).round,slot,cinematic].join(":")
     return if !force && @bss_layered_last_key==key
     @bss_layered_last_key=key
 
@@ -365,9 +383,9 @@ module BSSLayeredRoomSupport
       # Warm terrain at dusk; blue-gray belongs exclusively to night.
       # The former cyan overlay made 17:00-19:59 look prematurely nocturnal.
       if slot==:night
-        ground.color=Color.new(51,77,113,95)
+        ground.color=Color.new(13,23,49,118)
       elsif slot==:dawn
-        ground.color=Color.new(194,115,95,(55*warmth).round)
+        ground.color=Color.new(194,115,95,(46*warmth).round)
       else
         ground.color=Color.new(0,0,0,0)
       end
@@ -382,8 +400,11 @@ module BSSLayeredRoomSupport
       if name =~ /\A(?:tree|grass)\d+\z/i
         sp.tone=Tone.new(28,48,35,0) if sp.respond_to?(:tone=)
         if sp.respond_to?(:color=)
-          alpha=slot==:day ? 40 : (slot==:dawn ? 75 : 90)
-          sp.color=Color.new(55,117,94,alpha)
+          alpha=slot==:day ? 30 : (slot==:dawn ? 55 : 74)
+          sp.color=Color.new(36,82,78,alpha)
+          if cinematic && sp.respond_to?(:tone=)
+            sp.tone=Tone.new(-22,-20,-19,0)
+          end
         end
       elsif name=="base" || name=="water"
         sp.tone=ground_tone if sp.respond_to?(:tone=)
