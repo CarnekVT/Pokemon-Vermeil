@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.3.0"
+  VERSION = "2.4.0"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -61,6 +61,9 @@ module VermeilBSSCinemaScene
   def vermeil_cinema_locked?
     return true if vermeil_cinema_script_locked?
     return true if respond_to?(:bss_shared_camera_leased?) && bss_shared_camera_leased?
+    # Attack owns the entire turn, not just the frames when BAS is playing.
+    # Commands, text, damage effects and common animations may not retarget.
+    return true if @bss_camera_attack_phase_depth.to_i > 0
     return true if @bss070_ebdx_bas_frame || @bas_runtime_playback_depth.to_i > 0
     return true if @vermeil_cinema_native_move_depth.to_i > 0
     return true if @bss083_camera_freeze.to_i > 0 || @bss070_ebdx_suspend_depth.to_i > 0
@@ -196,14 +199,16 @@ module VermeilBSSCinemaScene
     # Do not modify the vector or recalibrate battlers/trainers during scripted
     # dialogue, DBK speech, trainer animation, or the NDS overlay handoff.
     return super(false, false) if vermeil_cinema_script_locked?
-    # The authored encounter/foe-intro camera owns the world until the first
-    # command selection. Do not clear its tweens or move toward an idle target.
+    # Ownership: intro > speech/forced > BAS/native attack phase > menu > idle.
+    # Always render the room, but only command/fight menus can write a new
+    # presentation camera target. This prevents vector drift between moves.
     return super(false, align) unless @vermeil_cinema_first_command_reached
     owned = vermeil_cinema_locked?
-    # Old BSS087 tweens can snap the vector even when advance_camera=false.
-    # They are not allowed to outlive the new presentation director.
+    return super(false, false) if owned
+    phase = vermeil_cinema_phase
+    # Drop stale, pre-director tweens only when the presentation owns the shot.
     @bss087_camera_tween = nil unless @bss087_end_battle_lock
-    if advance_camera && !owned
+    if advance_camera && (phase == :command || phase == :fight)
       @vermeil_cinema_ticks = @vermeil_cinema_ticks.to_i + 1
       target = vermeil_cinema_vector
       if target
@@ -293,18 +298,13 @@ module VermeilBSSCinemaScene
   # playback path; these wrappers isolate all other move/common animations.
   def vermeil_cinema_hold_native_move_camera
     return yield unless vermeil_cinema_active? && @vector
-    outer = @vermeil_cinema_native_move_depth.to_i == 0
-    saved = (@vector.get.clone rescue nil) if outer
     @vermeil_cinema_native_move_depth = @vermeil_cinema_native_move_depth.to_i + 1
     yield
   ensure
     if @vermeil_cinema_native_move_depth.to_i > 0
       @vermeil_cinema_native_move_depth -= 1
-      if outer && saved && @vector && @vector.respond_to?(:get) && @vector.respond_to?(:snap)
-        # Restore ONLY if a legacy wrapper overwrote the base vector. No
-        # camera transition is issued at the end of the move.
-        @vector.snap(saved) if @vector.get != saved
-      end
+      # No forced snap to a saved camera at attack end. BAS releases its
+      # render-only camera; the BSS world vector never needs rolling back.
     end
   end
 
