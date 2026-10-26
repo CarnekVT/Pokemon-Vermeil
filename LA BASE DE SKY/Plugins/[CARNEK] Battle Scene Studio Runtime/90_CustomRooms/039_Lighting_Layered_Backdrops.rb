@@ -356,11 +356,14 @@ module BSSLayeredRoomSupport
              [-125.0,light[2].to_f].min,0.0]
       warmth=0.0
     end
-    cinematic = !!(@scene && @scene.instance_variable_get(:@bss_dialogue_cinema_active))
-    if cinematic
-      light=[light[0].to_f-36.0,light[1].to_f-40.0,light[2].to_f-39.0,0.0]
-    end
-    key=[light.map{|x|x.round(1)},(warmth*24).round,slot,cinematic].join(":")
+    # Smooth cinematic overlay strength; never instantly switch the terrain
+    # tone just because a black bar changed opacity.
+    cinematic_alpha=(@scene && @scene.instance_variable_get(:@bss_dialogue_dim_alpha)).to_f
+    cinematic_alpha=[[cinematic_alpha,0.0].max,1.0].min
+    light=[light[0].to_f-36.0*cinematic_alpha,
+           light[1].to_f-40.0*cinematic_alpha,
+           light[2].to_f-39.0*cinematic_alpha,0.0] if cinematic_alpha>0.001
+    key=[light.map{|x|x.round(1)},(warmth*24).round,slot,(cinematic_alpha*32).round].join(":")
     return if !force && @bss_layered_last_key==key
     @bss_layered_last_key=key
 
@@ -370,8 +373,8 @@ module BSSLayeredRoomSupport
     # Cinematic darkening must reach the sky/horizon too. Keeping the old
     # 0.22 sky weighting during dialogue left the upper half vivid while the
     # foreground darkened; a balanced per-layer shade avoids that split.
-    sky_tone=BSSLayeredLighting.tone(light,cinematic ? 0.72 : 0.22)
-    horizon_tone=BSSLayeredLighting.tone(light,cinematic ? 0.76 : 0.35)
+    sky_tone=BSSLayeredLighting.tone(light,0.22+0.50*cinematic_alpha)
+    horizon_tone=BSSLayeredLighting.tone(light,0.35+0.41*cinematic_alpha)
     ground_tone=BSSLayeredLighting.tone(light,1.20)
     bg.tone=sky_tone
     if @bss_layered_has_live_sky && @sprites["sky"]
@@ -405,8 +408,8 @@ module BSSLayeredRoomSupport
         if sp.respond_to?(:color=)
           alpha=slot==:day ? 30 : (slot==:dawn ? 55 : 74)
           sp.color=Color.new(36,82,78,alpha)
-          if cinematic && sp.respond_to?(:tone=)
-            sp.tone=Tone.new(-22,-20,-19,0)
+          if cinematic_alpha>0.001 && sp.respond_to?(:tone=)
+            sp.tone=Tone.new((-22*cinematic_alpha).round,(-20*cinematic_alpha).round,(-19*cinematic_alpha).round,0)
           end
         end
       elsif name=="base" || name=="water"
