@@ -12,7 +12,6 @@ module BSSTargetMenuCamera
     result=super
     if result.is_a?(Integer) && result>=0
       # The move should start from default MAIN, not the target preview.
-      @bss_target_transition_lock=true
       vermeil_cinema_return_main(9) if respond_to?(:vermeil_cinema_return_main)
     end
     result
@@ -20,7 +19,6 @@ module BSSTargetMenuCamera
     if @bss_target_select_depth.to_i>0
       @bss_target_select_depth-=1
       @bss_selected_target_index=nil
-      @bss_target_transition_lock=false
       @vermeil_cinema_last_shot=nil
     end
   end
