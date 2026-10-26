@@ -55,10 +55,9 @@ module BSSSceneVisibilityAndHud
   end
 
   def pbChangePokemon(*args,&block)
-    result=super
-    idx=args[0].respond_to?(:index) ? args[0].index : args[0]
-    @bss_pending_visibility_restore=[idx] if idx.is_a?(Integer)
-    result
+    # Sprite swap is NOT a sendout. Leave it invisible until the native
+    # Poké Ball animation completes; pbSendOutBattlers performs recovery.
+    super
   end
 
   def pbCommandMenu(*args,&block)
@@ -91,8 +90,18 @@ module BSSSceneVisibilityAndHud
     saved.each do |key,was_visible|
       sp=@sprites[key]
       next unless sp && !(sp.disposed? rescue true)
-      sp.visible=was_visible if sp.respond_to?(:visible=)
-      sp.request_visibility(was_visible,0.17) if sp.respond_to?(:request_visibility)
+      show=was_visible
+      if key.to_s =~ /\AdataBox_(\d+)\z/
+        idx=$1.to_i
+        battler=(@battle.battlers[idx] rescue nil)
+        boss_idx=(@bss_boss_hud_index rescue nil)
+        show=!!(battler && !(battler.fainted? rescue true) && boss_idx!=idx)
+      elsif key.to_s=="bss_boss_hud"
+        battler=(@battle.battlers[@bss_boss_hud_index] rescue nil)
+        show=!!(battler && !(battler.fainted? rescue true))
+      end
+      sp.visible=show if sp.respond_to?(:visible=)
+      sp.request_visibility(show,0.17) if sp.respond_to?(:request_visibility)
     end
   end
 
@@ -157,6 +166,15 @@ module BSSSceneVisibilityAndHud
 
   def pbUpdate(*args,&block)
     result=super
+    if bss_visibility_active?
+      want=@bss_dialogue_cinema_active ? 1.0 : 0.0
+      have=@bss_dialogue_dim_alpha.to_f
+      if (want-have).abs>0.002
+        step=1.0/13.0
+        @bss_dialogue_dim_alpha= want>have ? [have+step,want].min : [have-step,want].max
+        bss_cinematic_tone_refresh!
+      end
+    end
     if @bss_pending_visibility_restore && !@bss070_ebdx_bas_frame &&
        @bss_camera_attack_phase_depth.to_i==0 && !@bss_nds_intro_active
       indices=@bss_pending_visibility_restore==:all ? nil : @bss_pending_visibility_restore
