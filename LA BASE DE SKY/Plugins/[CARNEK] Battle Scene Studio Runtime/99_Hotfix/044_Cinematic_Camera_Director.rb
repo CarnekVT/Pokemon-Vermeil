@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.6.1"
+  VERSION = "2.7.0"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -120,6 +120,15 @@ module VermeilBSSCinemaScene
     target = main.clone
     target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -20.0, 20.0)
     target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -6.0, 6.0)
+    # Slow bounded GEN5 ambient eyeline changes while a menu is OPEN.
+    # A step target every ~2 seconds is perceptible but never drifts or
+    # triggers a second-camera transition during BAS or dialogue frames.
+    ambient=VermeilBSSCinema.clamp(cfg["idleStrength"] || 40,0,100)/100.0
+    if phase==:command || phase==:fight
+      direction=@vermeil_cinema_ambient_step.to_i.even? ? 1.0 : -1.0
+      target[0] += direction * 5.0 * ambient * pan_x
+      target[1] += direction * 1.8 * ambient * pan_y
+    end
     # Perspective, physical scale and native battler sizes remain unchanged.
     target
   rescue StandardError => e
@@ -176,9 +185,15 @@ module VermeilBSSCinemaScene
     @bss087_camera_tween = nil unless @bss087_end_battle_lock
     if advance_camera && (phase == :command || phase == :fight)
       @vermeil_cinema_ticks = @vermeil_cinema_ticks.to_i + 1
-      # Acquire a new shot only when the menu context changes. Keep updating
-      # the current interpolation, not recreating its target every frame.
-      if @vermeil_cinema_last_shot != phase
+      @vermeil_cinema_ambient_due=@vermeil_cinema_ambient_due.to_i-1
+      changed=@vermeil_cinema_last_shot != phase
+      if changed || @vermeil_cinema_ambient_due<=0
+        @vermeil_cinema_ambient_step=@vermeil_cinema_ambient_step.to_i+1 unless changed
+        cfg=vermeil_cinema_config
+        speed=VermeilBSSCinema.clamp(cfg["idleSpeed"] || 50,1,150)
+        @vermeil_cinema_ambient_due=(175.0-speed*0.55).round
+        # Acquire a deterministic new composition at a small interval instead
+        # of recomputing random/oscillating camera coordinates every frame.
         target = vermeil_cinema_vector
         if target
           cfg = vermeil_cinema_config
@@ -200,6 +215,8 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_fight_depth = 0
     @vermeil_cinema_logged = false
     @vermeil_cinema_last_shot = nil
+    @vermeil_cinema_ambient_due = 0
+    @vermeil_cinema_ambient_step = 0
     super
   end
 
