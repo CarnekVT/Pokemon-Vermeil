@@ -51,6 +51,9 @@ module BSSSceneVisibilityAndHud
     # The DynamicPokemonSprite can load one frame after the sendout method.
     # Perform a single second recovery on the next scene update.
     @bss_pending_visibility_restore=indices || :all
+    # Dynamic spritesheets can resolve after the sendout scene has returned.
+    # Retry briefly instead of attempting a single premature visible=true.
+    @bss_pending_visibility_frames=12
     result
   end
 
@@ -96,6 +99,7 @@ module BSSSceneVisibilityAndHud
   def bss_cinematic_hud_release!
     saved=@bss_cinematic_hud_saved
     @bss_cinematic_hud_saved=nil
+    @bss_cinematic_hud_fade ||= {}
     @bss_cinematic_hud_requested=nil
     return unless saved && @sprites.is_a?(Hash)
     saved.each do |key,was_visible|
@@ -112,7 +116,15 @@ module BSSSceneVisibilityAndHud
         show=!!(battler && !(battler.fainted? rescue true))
       end
       sp.visible=show if sp.respond_to?(:visible=)
-      sp.request_visibility(show,0.17) if sp.respond_to?(:request_visibility)
+      if sp.respond_to?(:request_visibility)
+        sp.request_visibility(show,0.14)
+      elsif show && key.to_s.start_with?("dataBox_") && sp.respond_to?(:opacity=)
+        # DBK may leave its native databox at opacity=0 after speech. Fade
+        # back in once rather than making the HUD appear instantly.
+        final=255
+        sp.opacity=0
+        @bss_cinematic_hud_fade[key]=[0,final,7]
+      end
     end
   end
 
@@ -189,10 +201,28 @@ module BSSSceneVisibilityAndHud
     if @bss_pending_visibility_restore && !@bss070_ebdx_bas_frame &&
        @bss_camera_attack_phase_depth.to_i==0 && !@bss_nds_intro_active
       indices=@bss_pending_visibility_restore==:all ? nil : @bss_pending_visibility_restore
-      @bss_pending_visibility_restore=nil
       bss_recover_active_battlers_after_sendout(indices)
+      @bss_pending_visibility_frames=@bss_pending_visibility_frames.to_i-1
+      if @bss_pending_visibility_frames<=0
+        @bss_pending_visibility_restore=nil
+        @bss_pending_visibility_frames=0
+      end
     end
     bss_cinematic_hud_hide! if @bss_dialogue_cinema_active
+    if !@bss_dialogue_cinema_active && @bss_cinematic_hud_fade && @sprites
+      @bss_cinematic_hud_fade.keys.each do |key|
+        sp=@sprites[key]
+        row=@bss_cinematic_hud_fade[key]
+        if !sp || (sp.disposed? rescue true) || !row
+          @bss_cinematic_hud_fade.delete(key)
+          next
+        end
+        row[0]+=1
+        t=[[row[0].to_f/[row[2],1].max,1.0].min,0.0].max
+        sp.opacity=(row[1]*t*t*(3.0-2.0*t)).round if sp.respond_to?(:opacity=)
+        @bss_cinematic_hud_fade.delete(key) if row[0]>=row[2]
+      end
+    end
     result
   end
 end
