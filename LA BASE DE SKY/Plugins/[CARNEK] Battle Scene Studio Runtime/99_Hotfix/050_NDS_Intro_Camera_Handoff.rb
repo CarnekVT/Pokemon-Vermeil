@@ -108,6 +108,16 @@ module VermeilBSSNDSIntroScene
     @bss_nds_intro_active=true
     viewport=nil
     strip=nil
+    hidden=[]
+    # Trainers/battlers remain hidden until their native reveal, *after* the
+    # NDS terrain strip. Otherwise transparent sky exposes the trainer early.
+    (@sprites || {}).each do |key,sp|
+      next unless key.to_s.match?(/\A(?:trainer_|player_|pokemon_|shadow_|dataBox_|party)/i)
+      next unless sp && sp.respond_to?(:visible) && sp.respond_to?(:visible=)
+      hidden << [sp,sp.visible]
+      sp.visible=false
+    rescue StandardError
+    end
     # Keep the real EBDX battle world underneath: there must not be a second
     # capture/zoom/background nor a full black frame between transitions.
     # The NDS strip is RGBA with transparent sky and an opaque patterned floor.
@@ -147,6 +157,12 @@ module VermeilBSSNDSIntroScene
       BSS064.log("NDS overlay prelude: #{e.class}: #{e.message}") if defined?(BSS064)
       false
     ensure
+      hidden.each do |sp,was_visible|
+        begin
+          sp.visible=was_visible if sp && !(sp.disposed? rescue false)
+        rescue StandardError
+        end
+      end
       if strip
         # pbBitmap is a game-owned cached bitmap, not ours to dispose.
         begin;strip.bitmap=nil;strip.dispose unless strip.disposed?;rescue StandardError;end
