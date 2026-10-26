@@ -75,17 +75,28 @@ module BSSSceneVisibilityAndHud
   def bss_cinematic_hud_hide!
     return unless @bss_dialogue_cinema_active && @sprites.is_a?(Hash)
     @bss_cinematic_hud_saved ||= {}
+    @bss_cinematic_hud_requested ||= {}
     @sprites.each do |key,sp|
       next unless bss_cinematic_hud_sprite?(key)
       next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:visible)
       @bss_cinematic_hud_saved[key]=sp.visible unless @bss_cinematic_hud_saved.key?(key)
-      sp.visible=false if sp.respond_to?(:visible=)
+      if sp.respond_to?(:request_visibility)
+        # BossHUD already has a dedicated short easing animation. Do not set
+        # facade.visible=false or repeatedly restart its tween every frame.
+        unless @bss_cinematic_hud_requested[key]
+          sp.request_visibility(false,0.17)
+          @bss_cinematic_hud_requested[key]=true
+        end
+      elsif sp.respond_to?(:visible=)
+        sp.visible=false
+      end
     end
   end
 
   def bss_cinematic_hud_release!
     saved=@bss_cinematic_hud_saved
     @bss_cinematic_hud_saved=nil
+    @bss_cinematic_hud_requested=nil
     return unless saved && @sprites.is_a?(Hash)
     saved.each do |key,was_visible|
       sp=@sprites[key]
