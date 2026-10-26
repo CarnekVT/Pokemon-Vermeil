@@ -212,6 +212,10 @@ module BSSLayeredRoomSupport
       live_sky=nil unless live_sky && live_sky.respond_to?(:getbyte) &&
                           sky_width>0 && sky_height>0 && live_sky.bytesize>=sky_width*sky_height*4
       @bss_layered_has_live_sky=!!live_sky
+      # Dark blue remnants of the vanilla horizon were being categorized as
+      # foreground haze rather than sky. This is especially obvious at dusk.
+      twilight=BSSLayeredLighting.slot(@data)==:dawn
+      twilight_mix=BSSLayeredLighting.twilight_strength.to_f
       sky="\x00".b*(w*h*4)
       haze="\x00".b*(w*h*4)
       terrain="\x00".b*(w*h*4)
@@ -225,14 +229,34 @@ module BSSLayeredRoomSupport
           distance=sample ? (r-sample[0]).abs+(g-sample[1]).abs+(b-sample[2]).abs : 1000
           # Keep foreground silhouettes, replace the blue/orange old sky through
           # the horizon, not just the top band. Avoid the cyan residue.
-          sky_candidate=y<lower[x] && brightest>=74 &&
-            (y<upper[x]+9 || distance<188 || (b>g+10 && b>r+12))
+          blue_residue=(b>g+8 && b>r+11 && b>=44)
+          sky_candidate=y<lower[x] &&
+            ((brightest>=74 && (y<upper[x]+9 || distance<188 || blue_residue)) ||
+             blue_residue)
           dest=sky_candidate ? sky : (y<lower[x] ? haze : terrain)
           if sky_candidate && live_sky
             sx=[(x*sky_width/w.to_f).floor,sky_width-1].min
             sy=[(y*sky_height/[lower[x],1].max.to_f).floor,sky_height-1].min
             src=(sy*sky_width+sx)*4
-            dest[pos,4]=live_sky.byteslice(src,4)
+            if twilight && twilight_mix>0.01
+              pixel=live_sky.byteslice(src,4)
+              height_ratio=y.to_f/[lower[x],1].max
+              blend=BSSLayeredLighting.clamp((height_ratio-0.28)*1.35,0.0,0.62)*twilight_mix
+              if blend>0.0 && pixel
+                rr=pixel.getbyte(0);gg=pixel.getbyte(1);bb=pixel.getbyte(2)
+                # Keep the atmospheric sky gradient, warm only the residual
+                # blue horizon at the bottom of the visible skyline.
+                if bb>rr || bb>gg
+                  rr=(rr*(1-blend)+220*blend).round
+                  gg=(gg*(1-blend)+155*blend).round
+                  bb=(bb*(1-blend)+110*blend).round
+                  pixel=[rr,gg,bb,pixel.getbyte(3)].pack("C4")
+                end
+              end
+              dest[pos,4]=pixel
+            else
+              dest[pos,4]=live_sky.byteslice(src,4)
+            end
           elsif !sky_candidate && y<lower[x] && brightest<75
             # Darkness does not mean the foliage must be featureless black.
             lift=[(75-brightest)*0.30,18].max
