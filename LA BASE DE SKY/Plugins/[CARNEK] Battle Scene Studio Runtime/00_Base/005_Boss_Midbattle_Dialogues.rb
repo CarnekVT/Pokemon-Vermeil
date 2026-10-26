@@ -276,6 +276,7 @@ class BSSDialogueEngine
       choiceEffects: choice_effects,
       playCry: t["playCry"] == true || t[:playCry] == true,
       screenShake: t["screenShake"] == true || t[:screenShake] == true,
+      barTransition: (t["barTransition"] || t[:barTransition] || "reenter").to_s == "hold" ? "hold" : "reenter",
       repeat: t["repeat"] == true || t[:repeat] == true,
       turn: (t["turn"] || t[:turn]).to_i,
       lines: lines
@@ -347,10 +348,29 @@ class BSSDialogueEngine
 
     return false if matched.empty?
 
-    matched.each do |t|
-      execute_trigger(t, idxBattler, idxTarget)
+    @bss_dialogue_event_depth = @bss_dialogue_event_depth.to_i + 1
+    matched.each_with_index do |t,i|
+      nxt=matched[i+1]
+      cinematic_next=nxt && (nxt[:style]=="cinematic" || ["cinematic","speech"].include?(nxt[:textboxType]))
+      t[:_keep_cinematic_to_next] = t[:barTransition]=="hold" && cinematic_next
+      execute_trigger(t,idxBattler,idxTarget)
     end
     true
+  ensure
+    @bss_dialogue_event_depth = [@bss_dialogue_event_depth.to_i-1,0].max if @bss_dialogue_event_depth
+    # Choice_N events can recursively invoke process_event; only the outer
+    # event may finish a BSS-owned black-bar session.
+    bss_close_owned_speech if @bss_dialogue_event_depth.to_i==0 && @bss_bars_owned
+  end
+
+  def bss_close_owned_speech
+    return unless @bss_bars_owned
+    scene=(@battle.scene rescue nil)
+    @bss_bars_owned=false
+    scene.pbForceEndSpeech if scene && scene.respond_to?(:pbForceEndSpeech)
+    scene.instance_variable_set(:@bss_dialogue_cinema_active,false) if scene
+  rescue StandardError => e
+    BSS064.log("BSS cinematic close: #{e.class}: #{e.message}") if defined?(BSS064)
   end
 
   def execute_trigger(t, idxBattler, idxTarget)
@@ -450,13 +470,17 @@ class BSSDialogueEngine
     introduction = has_choices ? formatted_lines[0...-1] : formatted_lines
     prompt = has_choices ? (formatted_lines.last || "Elige una opción:") : nil
     cinematic_owner = false
+    pending_effect = nil
+    pending_effect_recipient = nil
     begin
       if is_cinematic && scene && scene.respond_to?(:pbProcessText)
         # A nested Choice_1/Choice_2 branch inherits the parent's cinematic
         # bars. Only the outermost dialogue may close them.
         already_speaking = scene.respond_to?(:pbInCinematicSpeech?) && scene.pbInCinematicSpeech?
         cinematic_owner = !already_speaking
-        scene.pbStartSpeech(display_idx) if scene.respond_to?(:pbStartSpeech)
+        @bss_bars_owned=true if cinematic_owner
+        scene.instance_variable_set(:@bss_dialogue_cinema_active,true)
+        scene.pbStartSpeech(display_idx) if scene.respond_to?(:pbStartSpeech) && !already_speaking
         if speaker_label && !speaker_label.empty?
           scene.pbUpdateSpeakerWindows(speaker_label) if scene.respond_to?(:pbUpdateSpeakerWindows)
           name_window.visible = true if name_window
@@ -498,17 +522,36 @@ class BSSDialogueEngine
               @battle.pbDisplayPaused(resp)
             end
           end
-          if t[:choiceEffects] && t[:choiceEffects][cmd]
-            apply_choice_consequence(t[:choiceEffects][cmd],idxBattler,idxTarget)
-          end
+          # Apply boosts AFTER restoring the standard battle textbox and HUD.
+          # Otherwise the stat animation/message is clipped beneath black bars.
+          pending_effect=t[:choiceEffects][cmd] if t[:choiceEffects] && t[:choiceEffects][cmd]
           # One canonical dispatch. The old second suffixed dispatch could
           # retrigger branches marked repeat=true in the same selection.
           process_event("Choice_#{cmd + 1}",idxBattler,idxTarget)
         end
       end
     ensure
-      # Restore UI exactly once, *after* the chosen response/branch has played.
-      scene.pbForceEndSpeech if cinematic_owner && scene && scene.respond_to?(:pbForceEndSpeech)
+      # A dialogue may keep its bars seamlessly when the next trigger requests
+      # Hold; Re-enter closes here, allowing the native 5-frame exit animation.
+      if @bss_dialogue_event_depth.to_i <= 1 && !t[:_keep_cinematic_to_next]
+        bss_close_owned_speech
+      end
+    end
+    if pending_effect
+      begin
+        scene.pbShowWindow(Battle::Scene::MESSAGE_BOX) if scene && scene.respond_to?(:pbShowWindow)
+      rescue StandardError
+      end
+      apply_choice_consequence(pending_effect,idxBattler,idxTarget)
+      stat=(pending_effect[:stat] || "ATTACK").to_s
+      if pending_effect[:type].to_s == "stat_boost"
+        labels={"ATTACK"=>"Ataque","DEFENSE"=>"Defensa","SPECIAL_ATTACK"=>"Ataque Especial",
+                "SPECIAL_DEFENSE"=>"Defensa Especial","SPEED"=>"Velocidad"}
+        name=labels[stat.upcase] || stat
+        battler=((@battle.battlers[0] rescue nil))
+        who=battler ? battler.name : "tu Pokémon"
+        @battle.pbDisplayPaused("¡La #{name} de #{who} ha aumentado!") if @battle.respond_to?(:pbDisplayPaused)
+      end
     end
   end
 
