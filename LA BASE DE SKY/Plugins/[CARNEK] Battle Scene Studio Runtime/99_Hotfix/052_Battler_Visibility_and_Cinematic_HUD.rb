@@ -93,6 +93,16 @@ module BSSSceneVisibilityAndHud
         @bss_cinematic_trainer_home[name]=[sp.x,sp.y] if sp.respond_to?(:x) && sp.respond_to?(:y)
       end
     end
+    # Snapshot the HUD BEFORE DBK toggles its databoxes. Otherwise the
+    # snapshot captures the hidden state and restores invisible HUD forever.
+    if bss && @sprites.is_a?(Hash)
+      @bss_cinematic_hud_saved ||= {}
+      @sprites.each do |key,sp|
+        next unless bss_cinematic_hud_sprite?(key)
+        next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:visible)
+        @bss_cinematic_hud_saved[key]=sp.visible unless @bss_cinematic_hud_saved.key?(key)
+      end
+    end
     result=super
     if bss
       bss_cinematic_hud_hide!
