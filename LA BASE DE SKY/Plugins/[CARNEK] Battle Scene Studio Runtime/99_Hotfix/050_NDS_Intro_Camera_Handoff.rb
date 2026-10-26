@@ -125,7 +125,6 @@ module VermeilBSSNDSIntroScene
     @bss_nds_intro_active=true
     viewport=nil
     strip=nil
-    held=false
     saved_main=nil
     hidden=[]
     # Trainers/battlers remain hidden until their native reveal, *after* the
@@ -150,9 +149,9 @@ module VermeilBSSNDSIntroScene
         start=saved_main.clone
         # A real, restrained EBDX room zoom before native trainer sendout.
         # All battlers are hidden, and MAIN is restored at the handoff.
-        start[0]+=10.0;start[1]-=5.0
-        start[4]=start[4].to_f*1.12
-        start[5]=start[5].to_f*1.12
+        # Only translate by a tiny amount; scaling the scene vector causes
+        # EBDX cropped sky/terrain layers to expose gaps at the horizon.
+        start[0]+=6.0;start[1]-=3.0
         @vector.snap(start)
         room.update if room
       end
@@ -196,16 +195,13 @@ module VermeilBSSNDSIntroScene
           room.update if room
         end
         fade=[[((p-0.32)/0.68),0.0].max,1.0].min
-        strip.opacity=(245-205*fade).round
+        strip.opacity=(255*(1.0-fade)).round
         Graphics.update
         Input.update if defined?(Input)
       end
-      # Leave a faint seamless strip until the first native sendout completes
-      # (including the Pokemon cry). Do not end the entire intro abruptly.
-      @bss_nds_held_strip=strip
-      @bss_nds_held_viewport=viewport
-      strip.opacity=40
-      held=true
+      # Every NDS overlay ends here. The trainer/Pokémon intro continues via
+      # native super(), which already owns its sendout and cry.
+      strip.opacity=0
       true
     rescue StandardError => e
       BSS064.log("NDS overlay prelude: #{e.class}: #{e.message}") if defined?(BSS064)
@@ -221,43 +217,12 @@ module VermeilBSSNDSIntroScene
         rescue StandardError
         end
       end
-      unless held
-        if strip
-          begin;strip.bitmap=nil;strip.dispose unless strip.disposed?;rescue StandardError;end
-        end
-        begin;viewport.dispose if viewport && !(viewport.disposed? rescue true);rescue StandardError;end
+      if strip
+        begin;strip.bitmap=nil;strip.dispose unless strip.disposed?;rescue StandardError;end
       end
+      begin;viewport.dispose if viewport && !(viewport.disposed? rescue true);rescue StandardError;end
       @bss_nds_intro_active=false
     end
-  end
-
-  def bss_nds_release_overlay(frames=9)
-    strip=@bss_nds_held_strip
-    viewport=@bss_nds_held_viewport
-    @bss_nds_held_strip=nil
-    @bss_nds_held_viewport=nil
-    return unless strip
-    start_opacity=strip.opacity.to_i
-    frames.times do |i|
-      t=(i+1).to_f/frames
-      strip.opacity=(start_opacity*(1.0-t*t*(3.0-2.0*t))).round
-      Graphics.update
-      Input.update if defined?(Input)
-    end
-  ensure
-    begin;strip.bitmap=nil;strip.dispose if strip && !(strip.disposed? rescue true);rescue StandardError;end
-    begin;viewport.dispose if viewport && !(viewport.disposed? rescue true);rescue StandardError;end
-  end
-
-  def pbSendOutBattlers(*args,&block)
-    result=super
-    bss_nds_release_overlay if @bss_nds_held_strip
-    result
-  end
-
-  def pbDisposeSprites(*args,&block)
-    bss_nds_release_overlay(1) if @bss_nds_held_strip
-    super
   end
 
   def pbBattleIntroAnimation(*args, &block)
