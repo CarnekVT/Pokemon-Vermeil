@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.8.1"
+  VERSION = "2.8.2"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -181,11 +181,22 @@ module VermeilBSSCinemaScene
     frames.times do
       @vector.update
       @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
-      bss070_ebdx_apply_world_alignment if respond_to?(:bss070_ebdx_apply_world_alignment)
+      # Force one coherent terrain + battler + shadow projection at each
+      # transition frame. Legacy camera locks may be stale when an attack
+      # begins, so dispatch directly to the known world-space projector.
+      if defined?(BSS103WorldSpaceBattlers)
+        BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
+      elsif respond_to?(:bss070_ebdx_apply_world_alignment)
+        bss070_ebdx_apply_world_alignment
+      end
       Graphics.update
       Input.update if defined?(Input)
     end
     @vector.snap(main) if @vector.respond_to?(:snap)
+    @bss070_ebdx_room.update if @bss070_ebdx_room && !(@bss070_ebdx_room.disposed? rescue true)
+    if defined?(BSS103WorldSpaceBattlers)
+      BSS103WorldSpaceBattlers.instance_method(:bss070_ebdx_apply_world_alignment).bind(self).call
+    end
     @vermeil_cinema_last_shot=nil
   rescue StandardError => e
     BSS064.log("BSS camera main: #{e.class}: #{e.message}") if defined?(BSS064)
