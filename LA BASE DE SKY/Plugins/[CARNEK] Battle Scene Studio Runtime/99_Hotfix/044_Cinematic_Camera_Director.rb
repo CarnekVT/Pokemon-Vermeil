@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.6.0"
+  VERSION = "2.6.1"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -148,39 +148,13 @@ module VermeilBSSCinemaScene
   end
 
   def bss070_ebdx_apply_world_alignment(*args, &block)
-    # During scripted dialogue/intro the scene already has a stable framing.
-    # Do NOT ask EBDX metric anchors to reposition animated trainer sprites.
-    # Essential during BAS and native attacks: the old implementation called
-    # super FIRST, letting BSS103 move animated battlers/trainers in the same
-    # frame that BAS was applying its own camera transform.
+    # ONE alignment authority. BSS103 already projects battlers/shadows from
+    # the EBDX room matrix. The old v2.x code ran super and then immediately
+    # wrote native screen coordinates to the SAME sprites, causing wandering
+    # battlers, disappearing actors and inconsistent floor/shadow placement.
+    # BAS/native animated moves retain the current visuals without writes.
     return nil if vermeil_cinema_active? && vermeil_cinema_locked?
-    ret = super
-    return ret unless vermeil_cinema_active?
-    return ret unless @battle && @sprites && @battle.respond_to?(:battlers)
-    return ret unless respond_to?(:bss096_native_position)
-    main = BSS070EBDXCore.get_vector(:MAIN, @battle)
-    vector = @vector.get
-    return ret unless vector && main && main.length >= 6
-    cfg = vermeil_cinema_config
-    weight = VermeilBSSCinema.clamp(cfg["cinematicBattlerFollow"], 0, 100) / 100.0
-    scale = 1.0  # Deliberately fixed: avoid changing native sprite size.
-    @battle.battlers.each_index do |i|
-      next unless @battle.battlers[i]
-      sp = bss070_ebdx_native_sprite(i) rescue nil
-      if sp && (!respond_to?(:bss070_ebdx_sprite_loaded?) || bss070_ebdx_sprite_loaded?(sp))
-        vermeil_cinema_align_sprite(sp, bss096_native_position(i), vector, main, scale, weight)
-      end
-      sh = bss070_ebdx_native_shadow_sprite(i) rescue nil
-      if sh && (!respond_to?(:bss070_ebdx_sprite_loaded?) || bss070_ebdx_sprite_loaded?(sh))
-        if !@bss070_ebdx_room || !@bss070_ebdx_room.respond_to?(:shadows_enabled?) || @bss070_ebdx_room.shadows_enabled?
-          vermeil_cinema_align_sprite(sh, bss096_native_shadow_position(i), vector, main, scale, weight)
-        end
-      end
-    end
-    ret
-  rescue StandardError => e
-    BSS064.log("Cinema battler alignment: #{e.class}: #{e.message}") if defined?(BSS064)
-    ret
+    super
   end
 
   # This supersedes the 0.8.36 ambient scheduler. It is the ONLY writer of the
