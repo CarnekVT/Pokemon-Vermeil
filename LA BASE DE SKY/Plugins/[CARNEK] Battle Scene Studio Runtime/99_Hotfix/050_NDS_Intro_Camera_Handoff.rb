@@ -125,6 +125,8 @@ module VermeilBSSNDSIntroScene
     @bss_nds_intro_active=true
     viewport=nil
     strip=nil
+    held=false
+    saved_main=nil
     hidden=[]
     # Trainers/battlers remain hidden until their native reveal, *after* the
     # NDS terrain strip. Otherwise transparent sky exposes the trainer early.
@@ -143,18 +145,30 @@ module VermeilBSSNDSIntroScene
       room=@bss070_ebdx_room
       room.position if room && room.respond_to?(:position)
       room.update if room && room.respond_to?(:update)
+      saved_main=(BSS070EBDXCore.get_vector(:MAIN,@battle).clone rescue nil)
+      if @vector && saved_main && @vector.respond_to?(:snap)
+        start=saved_main.clone
+        # A real, restrained EBDX room zoom before native trainer sendout.
+        # All battlers are hidden, and MAIN is restored at the handoff.
+        start[0]+=10.0;start[1]-=5.0
+        start[4]=start[4].to_f*1.12
+        start[5]=start[5].to_f*1.12
+        @vector.snap(start)
+        room.update if room
+      end
       viewport=Viewport.new(0,0,Graphics.width,Graphics.height)
       viewport.z=999_900
       strip=Sprite.new(viewport)
       strip.bitmap=pbBitmap(path)
       return false unless strip.bitmap
       strip.z=1
-      strip.zoom_y=Graphics.height.to_f/[strip.bitmap.height,1].max
-      strip.zoom_x=strip.zoom_y
+      base_scale=Graphics.height.to_f/[strip.bitmap.height,1].max
+      strip.zoom_y=base_scale*1.12
+      strip.zoom_x=base_scale*1.12
       # Start at the leftmost section; strips are authored at 2044x480
       # and can move across the screen without wrapping or black seams.
-      max_travel=[strip.bitmap.width*strip.zoom_x-Graphics.width,0.0].max
-      travel=[Graphics.width.to_f*0.36,max_travel].min
+      max_travel=[strip.bitmap.width*base_scale-Graphics.width,0.0].max
+      travel=[Graphics.width.to_f*0.28,max_travel].min
       strip.x=0
       strip.y=0
       strip.opacity=255
@@ -165,32 +179,79 @@ module VermeilBSSNDSIntroScene
       duration.times do |frame|
         p=[[((frame-hold).to_f/[move,1].max),0.0].max,1.0].min
         eased=p*p*(3.0-2.0*p)
+        strip.zoom_x=base_scale*(1.12-0.12*eased)
+        strip.zoom_y=base_scale*(1.12-0.12*eased)
         strip.x=-(travel*eased).round
-        # Tiny vertical parallax, never enough to expose the bottom edge.
         strip.y=0
-        fade=[[((p-0.44)/0.56),0.0].max,1.0].min
-        strip.opacity=(255*(1.0-fade)).round
+        # The actual room also zooms back to MAIN under the strip.
+        if saved_main && @vector && @vector.respond_to?(:snap)
+          v=6.times.map{|i| start[i].to_f+(saved_main[i].to_f-start[i].to_f)*eased}
+          @vector.snap(v)
+          room.update if room
+        end
+        fade=[[((p-0.32)/0.68),0.0].max,1.0].min
+        strip.opacity=(245-205*fade).round
         Graphics.update
         Input.update if defined?(Input)
       end
+      # Leave a faint seamless strip until the first native sendout completes
+      # (including the Pokemon cry). Do not end the entire intro abruptly.
+      @bss_nds_held_strip=strip
+      @bss_nds_held_viewport=viewport
+      strip.opacity=40
+      held=true
       true
     rescue StandardError => e
       BSS064.log("NDS overlay prelude: #{e.class}: #{e.message}") if defined?(BSS064)
       false
     ensure
+      if saved_main && @vector && @vector.respond_to?(:snap)
+        @vector.snap(saved_main)
+        room.update if room
+      end
       hidden.each do |sp,was_visible|
         begin
           sp.visible=was_visible if sp && !(sp.disposed? rescue false)
         rescue StandardError
         end
       end
-      if strip
-        # pbBitmap is a game-owned cached bitmap, not ours to dispose.
-        begin;strip.bitmap=nil;strip.dispose unless strip.disposed?;rescue StandardError;end
+      unless held
+        if strip
+          begin;strip.bitmap=nil;strip.dispose unless strip.disposed?;rescue StandardError;end
+        end
+        begin;viewport.dispose if viewport && !(viewport.disposed? rescue true);rescue StandardError;end
       end
-      begin;viewport.dispose if viewport && !(viewport.disposed? rescue true);rescue StandardError;end
       @bss_nds_intro_active=false
     end
+  end
+
+  def bss_nds_release_overlay(frames=9)
+    strip=@bss_nds_held_strip
+    viewport=@bss_nds_held_viewport
+    @bss_nds_held_strip=nil
+    @bss_nds_held_viewport=nil
+    return unless strip
+    start_opacity=strip.opacity.to_i
+    frames.times do |i|
+      t=(i+1).to_f/frames
+      strip.opacity=(start_opacity*(1.0-t*t*(3.0-2.0*t))).round
+      Graphics.update
+      Input.update if defined?(Input)
+    end
+  ensure
+    begin;strip.bitmap=nil;strip.dispose if strip && !(strip.disposed? rescue true);rescue StandardError;end
+    begin;viewport.dispose if viewport && !(viewport.disposed? rescue true);rescue StandardError;end
+  end
+
+  def pbSendOutBattlers(*args,&block)
+    result=super
+    bss_nds_release_overlay if @bss_nds_held_strip
+    result
+  end
+
+  def pbDisposeSprites(*args,&block)
+    bss_nds_release_overlay(1) if @bss_nds_held_strip
+    super
   end
 
   def pbBattleIntroAnimation(*args, &block)
