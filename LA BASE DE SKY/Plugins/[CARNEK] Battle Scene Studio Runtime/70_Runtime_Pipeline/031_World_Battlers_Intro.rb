@@ -81,18 +81,11 @@ module BSS103WorldSpaceBattlers
       end
     end
 
-    # Trainers use the same world projection while they are present.
-    if @battle.opponent
-      @battle.opponent.each_index do |t|
-        # Native/DBK trainer sprites are 1-based, metric anchors remain 0-based.
-        sp=(@sprites["trainer_#{t + 1}"] rescue nil)
-        next if !sp || (sp.disposed? rescue true)
-        a=(@bss070_ebdx_room.trainer(t*2+1) rescue nil)
-        next if !a || (a.disposed? rescue false)
-        sp.x=a.x if sp.respond_to?(:x=)
-        sp.y=a.y if sp.respond_to?(:y=)
-      end
-    end
+    # Animated Trainer Intros/DBK own real trainer sprite XY for the entire
+    # sendout, speech and midbattle dialogue lifecycle. BSS only positions
+    # its invisible trainer metric anchors, NEVER trainer_1/etc themselves.
+    # This fixes trainers drifting upwards after the NDS handoff and
+    # stops world recalibration undoing authored presentation keyframes.
     true
   rescue => e
     BSS064.log("BSS103 world battler alignment warning: #{e.class}: #{e.message}") if defined?(BSS064)
