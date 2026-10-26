@@ -4399,7 +4399,8 @@
             "playCry": false,
             "screenShake": false,
             "repeat": false,
-            "turn": 1
+            "turn": 1,
+            "barTransition": "hold"
           },
           {
             "id": "qa_dir_rival",
@@ -4418,7 +4419,8 @@
             "playCry": false,
             "screenShake": false,
             "repeat": false,
-            "turn": 1
+            "turn": 1,
+            "barTransition": "reenter"
           },
           {
             "id": "qa_dir_clean",
@@ -4520,7 +4522,7 @@
       "layout": {
         "battlers": {}
       },
-      "notes": "Prueba guionizada: 7 eventos, dos interlocutores con namebox, cinemática, modo limpio, cambio final y cierre. En BSS abre la pestaña Guionización.",
+      "notes": "Prueba guionizada: los dos textos cinemáticos consecutivos del turno 1 mantienen las mismas barras; sus otros diálogos vuelven a la interfaz estándar. Configurable en Guionización > Entre diálogos con barras.",
       "updatedAt": 1792961091745
     },
     {
