@@ -26,6 +26,18 @@ module VermeilBSSNDSHandoff
     return 2 if sky=="night"
     return 1 if ["dawn","sunset","evening","eve"].include?(sky)
     return 0 if ["day","noon"].include?(sky)
+    # The EBDX sunset horizon is deliberately warmer than the strict clock
+    # classification. Use that SAME twilight factor for the entry strip:
+    # otherwise a blue night grass texture flashes before an orange sky.
+    if defined?(BSSLayeredLighting)
+      begin
+        return 1 if BSSLayeredLighting.twilight_strength.to_f >= 0.20
+        current=BSSLayeredLighting.slot
+        return 2 if current==:night
+        return 1 if current==:dawn
+      rescue StandardError
+      end
+    end
     t=(battle.time rescue 0)
     (t==1 || t==2) ? t : 0
   end
