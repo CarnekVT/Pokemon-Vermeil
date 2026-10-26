@@ -428,21 +428,34 @@ module BSSLayeredRoomSupport
   end
 end
 
+# BSS070CustomRoom < BSS070EBDXRoom. Both refresh prepends run for a
+# custom room, and the old implementation split the PNG TWICE. The second
+# pass treated the generated sky-only bitmap as the source and deleted terrain
+# texture detail, leaving flat green/blue stripes in cinematic dialogue.
+# One transaction owns the original source and the split regardless of nesting.
 module BSSLayeredBaseRefresh
   def refresh(*args,&block)
-    bss_layered_release!
+    depth=@bss_layered_refresh_depth.to_i
+    @bss_layered_refresh_depth=depth+1
+    bss_layered_release! if depth==0
     result=super
-    bss_layered_split! if args[0].is_a?(Hash)
+    bss_layered_split! if depth==0 && args[0].is_a?(Hash)
     result
+  ensure
+    @bss_layered_refresh_depth=depth if defined?(depth) && !depth.nil?
   end
 end
 
 module BSSLayeredCustomRefresh
   def refresh(*args,&block)
-    bss_layered_release!
+    depth=@bss_layered_refresh_depth.to_i
+    @bss_layered_refresh_depth=depth+1
+    bss_layered_release! if depth==0
     result=super
-    bss_layered_split! if args[0].is_a?(Hash)
+    bss_layered_split! if depth==0 && args[0].is_a?(Hash)
     result
+  ensure
+    @bss_layered_refresh_depth=depth if defined?(depth) && !depth.nil?
   end
 end
 
