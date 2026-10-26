@@ -358,7 +358,7 @@ module BSSLayeredRoomSupport
     end
     # Smooth cinematic overlay strength; never instantly switch the terrain
     # tone just because a black bar changed opacity.
-    cinematic_alpha=(@scene && @scene.instance_variable_get(:@bss_dialogue_dim_alpha)).to_f
+    cinematic_alpha=((@scene && @scene.instance_variable_get(:@bss_dialogue_dim_alpha)) || 0.0).to_f
     cinematic_alpha=[[cinematic_alpha,0.0].max,1.0].min
     light=[light[0].to_f-36.0*cinematic_alpha,
            light[1].to_f-40.0*cinematic_alpha,
