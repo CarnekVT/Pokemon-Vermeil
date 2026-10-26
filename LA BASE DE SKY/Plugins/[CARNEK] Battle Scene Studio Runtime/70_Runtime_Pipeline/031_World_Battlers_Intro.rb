@@ -84,7 +84,8 @@ module BSS103WorldSpaceBattlers
     # Trainers use the same world projection while they are present.
     if @battle.opponent
       @battle.opponent.each_index do |t|
-        sp=(@sprites["trainer_#{t}"] rescue nil)
+        # Native/DBK trainer sprites are 1-based, metric anchors remain 0-based.
+        sp=(@sprites["trainer_#{t + 1}"] rescue nil)
         next if !sp || (sp.disposed? rescue true)
         a=(@bss070_ebdx_room.trainer(t*2+1) rescue nil)
         next if !a || (a.disposed? rescue false)
