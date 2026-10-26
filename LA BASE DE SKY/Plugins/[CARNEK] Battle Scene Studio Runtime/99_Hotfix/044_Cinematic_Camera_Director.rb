@@ -6,7 +6,7 @@
 # It does not import EBS scripts and leaves BAS animation timelines untouched.
 
 module VermeilBSSCinema
-  VERSION = "2.4.0"
+  VERSION = "2.5.0"
   DEFAULTS = {
     "cinematicCamera" => true,
     "cinematicIdleZoom" => 1.0,
@@ -102,35 +102,16 @@ module VermeilBSSCinemaScene
     pan_x = VermeilBSSCinema.clamp(cfg["panX"] || 100, 0, 200) / 100.0
     pan_y = VermeilBSSCinema.clamp(cfg["panY"] || 100, 0, 200) / 100.0
     phase = vermeil_cinema_phase
-    tick = @vermeil_cinema_ticks.to_i
-    # First 100 active frames ramp in from the finished intro composition.
-    fade_in = VermeilBSSCinema.clamp(tick.to_f / 100.0, 0.0, 1.0)
-    fade_in = fade_in * fade_in * (3.0 - 2.0 * fade_in)
-    speed = VermeilBSSCinema.clamp(cfg["idleSpeed"] || 50, 1, 150) / 50.0
-    # Three perceptible camera beats per 8-11 seconds instead of a near
-    # motionless idle oscillation. The second harmonic avoids robotic loops.
-    cycle = tick * (0.011 + speed * 0.004)
-    amplitude = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 20)
-    amplitude = [amplitude, 6.0].max if strength > 0.05
-    motion = (0.30 + strength * 0.70)
-    drift_x = (7.0 + amplitude * 0.8) * motion * Math.sin(cycle)
-    drift_x += 2.0 * motion * Math.sin(cycle * 0.46 + 0.8)
-    drift_y = (2.0 + amplitude * 0.20) * motion * Math.sin(cycle * 0.63 + 1.0)
-    # Menus get distinct eyelines so switching Command -> Fight reads as
-    # actual shot composition. BAS takes over entirely when an attack begins.
-    case phase
-    when :command
-      control = VermeilBSSCinema.clamp(cfg["commandStrength"] || 45, 0, 100) / 45.0
-      drift_x = 11.0 * control + drift_x * 0.25
-      drift_y = -2.0 * control + drift_y * 0.20
-    when :fight
-      control = VermeilBSSCinema.clamp(cfg["fightStrength"] || 65, 0, 100) / 65.0
-      drift_x = -11.0 * control + drift_x * 0.20
-      drift_y = 3.0 * control + drift_y * 0.20
-    end
+    # EBS-style priority discipline: deterministic target for EACH menu phase.
+    # Do not animate sine waves every frame: this created visible meandering,
+    # and fight->attack->text flickered between unrelated camera positions.
+    cfg_strength = VermeilBSSCinema.clamp(cfg["cinematicIdlePan"], 0, 20)
+    strength = 0.40 + cfg_strength / 25.0
+    phase_pan_x = (phase == :command ? 11.0 : (phase == :fight ? -11.0 : 0.0))
+    phase_pan_y = (phase == :command ? -2.0 : (phase == :fight ? 3.0 : 0.0))
     target = main.clone
-    target[0] += VermeilBSSCinema.clamp(drift_x * pan_x * fade_in, -19.0, 19.0)
-    target[1] += VermeilBSSCinema.clamp(drift_y * pan_y * fade_in, -8.0, 8.0)
+    target[0] += VermeilBSSCinema.clamp(phase_pan_x * pan_x * strength, -18.0, 18.0)
+    target[1] += VermeilBSSCinema.clamp(phase_pan_y * pan_y * strength, -7.0, 7.0)
     # Perspective, physical scale and native battler sizes remain unchanged.
     target
   rescue StandardError => e
@@ -213,17 +194,19 @@ module VermeilBSSCinemaScene
     @bss087_camera_tween = nil unless @bss087_end_battle_lock
     if advance_camera && (phase == :command || phase == :fight)
       @vermeil_cinema_ticks = @vermeil_cinema_ticks.to_i + 1
-      target = vermeil_cinema_vector
-      if target
-        cfg = vermeil_cinema_config
-        @vector.inc = VermeilBSSCinema.clamp(cfg["cinematicSmooth"], 0.025, 0.18)
-        @vector.set(target)
-        @vector.update
-        unless @vermeil_cinema_logged
-          @vermeil_cinema_logged = true
-          BSS064.log("[Camera v2] active: BSS scene owns world; BAS owns attacks") if defined?(BSS064)
+      # Acquire a new shot only when the menu context changes. Keep updating
+      # the current interpolation, not recreating its target every frame.
+      if @vermeil_cinema_last_shot != phase
+        target = vermeil_cinema_vector
+        if target
+          cfg = vermeil_cinema_config
+          @vector.inc = VermeilBSSCinema.clamp(cfg["cinematicSmooth"], 0.025, 0.18)
+          @vector.set(target)
+          @vermeil_cinema_last_shot = phase
+          BSS064.log("[Camera v2.5] #{phase} shot, BAS owns moves") if defined?(BSS064)
         end
       end
+      @vector.update
     end
     super(false, align && !owned)
   end
@@ -234,6 +217,7 @@ module VermeilBSSCinemaScene
     @vermeil_cinema_command_depth = 0
     @vermeil_cinema_fight_depth = 0
     @vermeil_cinema_logged = false
+    @vermeil_cinema_last_shot = nil
     super
   end
 
