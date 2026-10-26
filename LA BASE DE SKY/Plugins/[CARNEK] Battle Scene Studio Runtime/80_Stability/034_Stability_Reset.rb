@@ -186,54 +186,29 @@ end
 # BAS Z layout. While an animation owns the scene, put EVERY room sprite into a
 # dedicated deep-background band and restore the exact Zs afterwards.
 module BSS106RoomPriority
+  # Steady-state compositor: the EBDX room is the persistent stage. Moving
+  # EVERY one of its sprites by -100/-10_000 Z for each DBK animation yielded
+  # missing sky/ground slices on return. Native/DBK animation sprites already
+  # use their own foreground Z. Keep this room's authored layer ordering.
   def bss106_push_behind!
-    @bss106_priority_depth=@bss106_priority_depth.to_i+1
-    return true if @bss106_priority_depth>1
-    @bss106_saved_z={}
-    (@sprites || {}).each do |k,sp|
-      next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:z) && sp.respond_to?(:z=)
-      @bss106_saved_z[k]=sp.z.to_i
-      sp.z=sp.z.to_i-10_000
-    end
-    @bss106_force_behind=true
+    @bss106_priority_depth = @bss106_priority_depth.to_i + 1
+    @bss106_force_behind = false
     true
-  rescue
-    false
   end
 
   def bss106_pop_behind!
-    @bss106_priority_depth=[@bss106_priority_depth.to_i-1,0].max
-    return true if @bss106_priority_depth>0
-    saved=@bss106_saved_z || {}
-    (@sprites || {}).each do |k,sp|
-      next unless sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
-      sp.z=saved[k] if saved.key?(k)
-    end
-    if @bss093_warp_layers.is_a?(Hash)
-      @bss093_warp_layers.each_value do |row|
-        root=row[:root]
-        root_z=(root && root.respond_to?(:z)) ? root.z.to_i : 0
-        (row[:tiles] || []).each do |entry|
-          sp=entry[:sprite] rescue nil
-          sp.z=root_z if sp && !(sp.disposed? rescue true) && sp.respond_to?(:z=)
-        end
-      end
-    end
-    @bss106_saved_z=nil
-    @bss106_force_behind=false
+    @bss106_priority_depth = [@bss106_priority_depth.to_i - 1, 0].max
+    @bss106_force_behind = false
     true
-  rescue
-    false
   end
 
   def defocus
-    return if @bss106_force_behind
-    super
+    # Background layer Z is constant through every move/field animation.
+    nil
   end
 
   def focus
-    return if @bss106_force_behind
-    super
+    nil
   end
 
   def drawWater
