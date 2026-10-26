@@ -13,6 +13,22 @@ module BSSCameraPhaseAuthority
                    (scene.bss070_ebdx_active? rescue false)
     return super unless scene_active
     outer = scene.instance_variable_get(:@bss_camera_attack_phase_depth).to_i == 0
+    # A move without an explicit target menu also returns to MAIN before BAS
+    # starts. Do this BEFORE claiming attack ownership so the EBDX room and
+    # animated battler anchors interpolate together.
+    if outer && scene.respond_to?(:vermeil_cinema_return_main) &&
+       scene.instance_variable_get(:@vector)
+      begin
+        vector=scene.instance_variable_get(:@vector)
+        main=BSS070EBDXCore.get_vector(:MAIN,self)
+        current=vector.get
+        delta=(current[0].to_f-main[0].to_f).abs+
+              (current[1].to_f-main[1].to_f).abs
+        scene.vermeil_cinema_return_main(7) if delta>1.0
+      rescue StandardError => e
+        BSS064.log("Attack camera handoff: #{e.class}: #{e.message}") if defined?(BSS064)
+      end
+    end
     scene.instance_variable_set(:@bss_camera_attack_phase_depth,
       scene.instance_variable_get(:@bss_camera_attack_phase_depth).to_i + 1)
     # Do not temporarily alter all backdrop sprite Z values. Earlier builds
