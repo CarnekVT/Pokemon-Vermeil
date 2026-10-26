@@ -88,6 +88,16 @@ module BSSLayeredRoomSupport
       bmp.dispose if bmp && !(bmp.disposed? rescue true)
     rescue StandardError
     end
+    begin
+      @bss_layered_overscan.dispose if @bss_layered_overscan && !(@bss_layered_overscan.disposed? rescue true)
+    rescue StandardError
+    end
+    begin
+      @bss_layered_overscan_bitmap.dispose if @bss_layered_overscan_bitmap && !(@bss_layered_overscan_bitmap.disposed? rescue true)
+    rescue StandardError
+    end
+    @bss_layered_overscan=nil
+    @bss_layered_overscan_bitmap=nil
     @bss_layered_extra=nil
     @bss_layered_generated=nil
     @bss_layered_has_live_sky=nil
@@ -283,6 +293,28 @@ module BSSLayeredRoomSupport
       bg.src_rect.set(0,0,w,h)
       @bss_layered_ranges=nil
       @bss_layered_extra=[]
+      # BAS / Totem can zoom the camera OUT beyond the backing bitmap's
+      # coverage. Retain a viewport-sized composited overscan underneath the
+      # authored EBDX layers so screen edges never show vanilla blue/black.
+      # This underlay is NOT reprojected by camera zoom; normal layers still
+      # share exactly one world transform and draw above it.
+      begin
+        overscan_bitmap=Bitmap.new(w,h)
+        images.each do |piece|
+          overscan_bitmap.blt(0,0,piece,Rect.new(0,0,w,h))
+        end
+        cover=Sprite.new(@viewport)
+        cover.bitmap=overscan_bitmap
+        cover.ox=w/2;cover.oy=h/2
+        cover.x=Graphics.width/2;cover.y=Graphics.height/2
+        cover_scale=[Graphics.width.to_f/w,Graphics.height.to_f/h].max*1.35
+        cover.zoom_x=cover_scale;cover.zoom_y=cover_scale
+        cover.z=bg.z.to_i-1
+        @bss_layered_overscan=cover
+        @bss_layered_overscan_bitmap=overscan_bitmap
+      rescue StandardError => e
+        BSS064.log("BSS overscan fallback: #{e.class}: #{e.message}") if defined?(BSS064)
+      end
       [1,2].each do |index|
         sprite=Sprite.new(@viewport)
         sprite.bitmap=images[index]
@@ -346,6 +378,11 @@ module BSSLayeredRoomSupport
     end
     bg.x=source_x-dx
     bg.y=source_y-dy
+    if @bss_layered_overscan && !(@bss_layered_overscan.disposed? rescue true)
+      @bss_layered_overscan.z=bg.z.to_i-1
+      @bss_layered_overscan.visible=bg.visible
+      @bss_layered_overscan.opacity=bg.opacity
+    end
   end
 
   def bss_layered_apply_tone!(force=false)
@@ -400,6 +437,9 @@ module BSSLayeredRoomSupport
     sky_tone=BSSLayeredLighting.tone(light,0.22+0.50*cinematic_alpha)
     horizon_tone=BSSLayeredLighting.tone(light,0.35+0.41*cinematic_alpha)
     ground_tone=BSSLayeredLighting.tone(light,1.20)
+    if @bss_layered_overscan && !(@bss_layered_overscan.disposed? rescue true)
+      @bss_layered_overscan.tone=BSSLayeredLighting.tone(light,0.64)
+    end
     bg.tone=sky_tone
     if @bss_layered_has_live_sky && @sprites["sky"]
       @sprites["sky"].opacity=0
