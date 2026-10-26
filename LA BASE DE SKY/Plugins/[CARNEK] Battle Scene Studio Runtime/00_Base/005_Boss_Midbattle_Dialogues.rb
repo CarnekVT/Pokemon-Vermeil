@@ -533,7 +533,7 @@ class BSSDialogueEngine
     ensure
       # A dialogue may keep its bars seamlessly when the next trigger requests
       # Hold; Re-enter closes here, allowing the native 5-frame exit animation.
-      if @bss_dialogue_event_depth.to_i <= 1 && !t[:_keep_cinematic_to_next]
+      if @bss_dialogue_event_depth.to_i <= 1 && (!t[:_keep_cinematic_to_next] || pending_effect)
         bss_close_owned_speech
       end
     end
