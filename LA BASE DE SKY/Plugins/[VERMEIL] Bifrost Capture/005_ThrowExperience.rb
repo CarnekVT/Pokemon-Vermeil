@@ -115,17 +115,47 @@ module BifrostCapture
     end
   end
 
+  # Leer el rectángulo de Sprite_Character renderizado por mkxp y Visual 2.5D,
+  # no el centro de una casilla sin transformar. Fallback para mapas sin spriteset.
+  def self.target_screen_rect(event)
+    if defined?($scene) && $scene.is_a?(Scene_Map) && $scene.respond_to?(:spriteset)
+      spriteset = $scene.spriteset(event.map_id)
+      sprites = spriteset && spriteset.instance_variable_get(:@character_sprites)
+      sprite = sprites && sprites.find { |sp| sp && sp.character.equal?(event) }
+      if sprite && !sprite.disposed? && sprite.visible && sprite.src_rect
+        w = [sprite.src_rect.width * sprite.zoom_x.abs, 8].max
+        h = [sprite.src_rect.height * sprite.zoom_y.abs, 8].max
+        left = sprite.x - sprite.ox * sprite.zoom_x
+        top = sprite.y - sprite.oy * sprite.zoom_y
+        return [left.to_f, top.to_f, w.to_f, h.to_f]
+      end
+    end
+    width, height = event.respond_to?(:sprite_size) ? event.sprite_size : [32,32]
+    width = [width.to_f, 24].max
+    height = [height.to_f, 24].max
+    [event.screen_x - width/2.0, event.screen_y - height,
+     width, height]
+  end
+
   def self.screen_position(event)
-    [event.screen_x, event.screen_y - 16]
+    x, y, w, h = target_screen_rect(event)
+    [x + w/2, y + h*0.56]
+  end
+
+  def self.pointer_distance_squared(x, y, rect)
+    left, top, width, height = rect
+    dx = [[left-x, 0].max, x-(left+width)].max
+    dy = [[top-y, 0].max, y-(top+height)].max
+    dx*dx + dy*dy
   end
 
   def self.visible_target_events
     return [] unless $game_map
     $game_map.events.values.select do |event|
       next false unless valid_target?(event)
-      sx, sy = screen_position(event)
-      sx.between?(-48, Graphics.width + 48) &&
-        sy.between?(-48, Graphics.height + 48)
+      x, y, w, h = target_screen_rect(event)
+      x < Graphics.width+16 && x+w > -16 &&
+        y < Graphics.height+16 && y+h > -16
     end
   end
 
@@ -133,41 +163,46 @@ module BifrostCapture
     return false unless event && valid_target?(event)
     spec = event_spec(event)
     local = options($game_map.map_id, spec[0], event.id)
-    geo = shot_geometry($game_player.x, $game_player.y, event.x, event.y, local)
-    geo[:in_range] && (local["line_of_sight"] != "1" ||
-      line_clear?($game_player.x, $game_player.y, event.x, event.y))
+    geom = shot_geometry($game_player.x, $game_player.y,
+                         event.x, event.y, local)
+    geom[:in_range] && (local["line_of_sight"] != "1" ||
+                        line_clear?($game_player.x,$game_player.y,event.x,event.y))
   end
 
   def self.nearest_aimable_target(cfg)
-    visible_target_events.select { |event| target_ready?(event, cfg) }
+    visible_target_events.select { |e| target_ready?(e, cfg) }
       .min_by do |e|
         ($game_player.x-e.x).abs + ($game_player.y-e.y).abs
       end
   end
 
-  # La posición es siempre una retícula visible en PÍXELES. Con ratón o
-  # flechas, si apunta cerca del sprite, se engancha al evento real.
-  # Devuelve el mismo evento para la vista y para el disparo.
   def self.current_focus(pointer, cfg)
-    return [nil, nil, nil] if !pointer
+    return [nil,nil,nil] unless pointer
     mx, my = pointer
-    r = [cfg["aim_target_radius"].to_i, 10].max
-    choices = visible_target_events.map do |e|
-      sx, sy = screen_position(e)
-      [e, (sx-mx)**2 + (sy-my)**2]
+    radius = cfg["aim_target_radius"].to_i.clamp(4,100)
+    best = visible_target_events.map do |e|
+      [e, pointer_distance_squared(mx,my,target_screen_rect(e))]
+    end.min_by { |item| item[1] }
+    return [nil,mx,my] unless best && best[1] <= radius*radius
+    [best[0], *screen_position(best[0])]
+  end
+
+  def self.uncapturable_event_at(pointer)
+    return nil if !pointer || !$game_map
+    mx, my = pointer
+    $game_map.events.values.find do |event|
+      next false if valid_target?(event) || event.character_name.to_s.empty?
+      rect = target_screen_rect(event)
+      pointer_distance_squared(mx,my,rect) < 16*16
     end
-    best = choices.min_by { |entry| entry[1] }
-    return [nil, mx, my] if !best || best[1] > r*r
-    event = best[0]
-    [event, *screen_position(event)]
   end
 
   def self.initial_aim_pointer(cfg)
-    focus = nearest_aimable_target(cfg)
-    return screen_position(focus).map(&:to_f) if focus
+    target = nearest_aimable_target(cfg)
+    return screen_position(target).map(&:to_f) if target
     fx, fy = DIR[$game_player.direction] || [0,-1]
-    [($game_player.screen_x + fx * 96).to_f,
-     ($game_player.screen_y - 30 + fy * 72).to_f]
+    [($game_player.screen_x+fx*64).to_f,
+     ($game_player.screen_y-24+fy*52).to_f]
   end
 
   def self.map_preview_update
