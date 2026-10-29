@@ -5,17 +5,18 @@ const ROSTER_PATH="Plugins/[VERMEIL] Bifrost Capture/roster.ini";
 const POKEDEX_FILES=["PBS/pokemon.txt","PBS/pokemon_Vermeil.txt"];
 const OFFICIAL="RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT LANDORUS THUNDURUS TORNADUS ETERNATUS TAPUKOKO TAPULELE TAPUBULU TAPUFINI".split(" ");
 const DEFS={
- profile:"bifrost",enabled:"1",access_mode:"event",hotkey:"aux2",
+ profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"aux2",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",
  range:"7",width:"7",optimal_range:"4",alert_distance:"3",
- hit_near:"96",hit_far:"60",capture_floor:"10",back_multiplier:"175",
+ hit_near:"100",hit_far:"60",capture_floor:"10",back_multiplier:"175",
  critical_front:"3",critical_back:"35",critical_multiplier:"250",
  line_of_sight:"1",reaction:"flee",consume_on_miss:"1",impact_frames:"3",
  encounter_mode:"classic",spawn_chance:"24",spawn_min_distance:"3",
  spawn_max_distance:"6",spawn_limit:"4",spawn_lifetime:"40",
  spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
  ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100",
- aim_mouse:"1",aim_target_radius:"36",throw_frames:"18",throw_arc:"42",aim_chain:"1"
+ aim_mouse:"1",aim_target_radius:"36",throw_frames:"18",throw_arc:"42",aim_chain:"1",
+ aim_keyboard:"1",aim_speed:"5"
 };
 const PRESETS={
  bifrost:{...DEFS},
@@ -36,8 +37,8 @@ const PROFILE_INFO={
 const FIELDS={
  profile:["Perfil activo","system","select",Object.keys(PRESETS),"La configuración Bifröst conserva sus reglas originales salvo cambios expresos."],
  enabled:["Motor de captura","system","bool",null,"Activa o desactiva completamente Bifröst."],
- access_mode:["Disponibilidad de lanzamiento","system","select",["event","always","nearby"],"Siempre disponible: R/L abre apuntado incluso sin Pokémon delante."],
- hotkey:["Atajo de apuntado","system","select",["aux2","aux1","none"],"Aux2 es R y Aux1 es L en Vermeil. No sobrescribe el menú Ready."],
+ access_mode:["Disponibilidad de lanzamiento","system","select",["event","always","nearby"],"Siempre disponible: usa la acción AUX2 (W en la captura de Key bindings) para apuntar en el mapa."],
+ hotkey:["Atajo de apuntado","system","select",["aux2","aux1","none"],"AUX2 es W y AUX1 es Q en los controles que mostraste; si los reasignas en Key bindings, Bifröst los seguirá."],
  capture_enabled:["Captura en el mapa","system","bool",null,"Permite usar Balls fuera del combate."],
  battle_enabled:["Desafiar con Pokémon","system","bool",null,"Habilita enviar Pokémon para iniciar combate tradicional."],
  restricted_species:["Restringir a catálogo Bifröst","system","bool",null,"Si está activo, solo se aceptan especies marcadas en Catálogo."],
@@ -60,7 +61,9 @@ const FIELDS={
  hit_near:["Precisión cercana (%)","aim","int",[0,100],"Probabilidad de que la Ball acierte al Pokémon en distancia óptima."],
  hit_far:["Precisión lejana (%)","aim","int",[0,100],"Precisión en el extremo del alcance."],
  line_of_sight:["Obstáculos bloquean","aim","bool",null,"Comprobación parcial de eventos intermedios; faltan muros 2.5D."],
- aim_mouse:["Apuntar con el ratón","aim","bool",null,"Usa una retícula contextual sobre el mapa. Clic izquierdo para lanzar."],
+ aim_mouse:["Apuntar con el ratón","aim","bool",null,"Mouse opcional: apunta al Pokémon bajo el cursor y puede lanzar con clic."],
+ aim_keyboard:["Apuntar con teclado o mando","aim","bool",null,"Flechas del juego mueven la retícula incluso sin ratón; C (Use) lanza."],
+ aim_speed:["Velocidad de la retícula","aim","int",[1,16],"Píxeles por fotograma al mover la retícula con las flechas; Shift/Z acelera."],
  aim_target_radius:["Radio de enfoque visual (px)","aim","int",[10,96],"Distancia en pantalla para fijar un Pokémon cercano al cursor."],
  throw_frames:["Duración del vuelo (fotogramas)","aim","int",[8,48],"Velocidad del proyectil. No altera la tasa de captura."],
  throw_arc:["Altura del arco (px)","aim","int",[0,110],"Elevación visual del lanzamiento sobre el mundo 2.5D."],
@@ -143,7 +146,7 @@ function parseSpeciesPBS(text){
 }
 const LABELS={
  "1":"Activado","0":"Desactivado",event:"Solo desde evento",always:"En todo momento",nearby:"Con OW cercano",
- aux2:"R · Aux2",aux1:"L · Aux1",none:"Sin atajo",
+ aux2:"W · Aux2",aux1:"Q · Aux1",none:"Sin atajo",
  classic:"Encuentros clásicos",hybrid:"Mixto · aleatorio + OW",
  overworld:"OW completo · sin combate aleatorio",all:"Todas las especies del encuentro",
  allowlist:"Solo lista autorizada",flee:"Huir",attack:"Atacar",ignore:"Ignorar",
@@ -223,7 +226,7 @@ class CaptureStudio{
    profiles:["profile","access_mode","restricted_species"],
    species:["ow_form","ow_min_level","ow_max_level","ow_spawn_probability","reaction","alert_distance","capture_floor","restricted_species","spawn_filter"],
    spawns:["encounter_mode","spawn_chance","spawn_min_distance","spawn_max_distance","spawn_limit","spawn_lifetime","spawn_grass_only","spawn_filter"],
-   aim:["aim_mouse","aim_target_radius","throw_frames","throw_arc","aim_chain","range","width","optimal_range","hit_near","hit_far","line_of_sight"],
+   aim:["aim_keyboard","aim_speed","aim_mouse","aim_target_radius","throw_frames","throw_arc","aim_chain","range","width","optimal_range","hit_near","hit_far","line_of_sight"],
    capture:["capture_floor","back_multiplier","critical_front","critical_back","critical_multiplier","consume_on_miss"],
    behavior:["reaction","alert_distance","impact_frames"],
    scopes:["enabled","access_mode","encounter_mode","restricted_species"],
@@ -372,7 +375,7 @@ class CaptureStudio{
    '<div class="bf-stat"><span>OW SIMULTÁNEOS</span><strong>'+E(v.spawn_limit)+'</strong><small>Máximo de eventos generados</small></div></div>';
  }
  aimPanel(v){
-  return '<div class="bf-kicker">APUNTADO Y DISTANCIA</div><h1 class="bf-headline">Zona de lanzamiento</h1><p class="bf-sub">En el juego desaparece la cuadrícula: el jugador apunta con el ratón a un OW visible o cambia de objetivo con las flechas. La Ball describe una trayectoria animada y el HUD permanece discreto.</p>'+
+  return '<div class="bf-kicker">APUNTADO Y DISTANCIA</div><h1 class="bf-headline">Zona de lanzamiento</h1><p class="bf-sub">En el juego desaparece la cuadrícula: puedes mover libremente la retícula con flechas o ratón y fijarla a un OW alcanzable con la acción Shift/Z. La Ball describe una trayectoria animada y el HUD permanece discreto.</p>'+
     this.panel("Límites de alcance (solo vista del editor)",this.preview(v))+
     this.panel("Reglas de precisión y distancia",'<div class="bf-help">Alcance: '+E(v.range)+' filas · Anchura: '+E(v.width)+' columnas · Zona óptima: '+E(v.optimal_range)+' filas. En el perfil Bifröst, la octava fila falla. La vista anterior enseña las primeras 7 filas, aunque el alcance de otros proyectos puede ser mayor.</div>');
  }
@@ -410,7 +413,7 @@ class CaptureStudio{
   return '<div class="bf-kicker">ESTADO DE INTEGRACIÓN</div><h1 class="bf-headline">Lo integrado no equivale a probado.</h1>'+
     this.panel("Pruebas prioritarias",'<div class="bf-help">'+[
      "Cargar el editor sin errores y guardar/releer config.ini + roster.ini.",
-     "Habilitar always y confirmar apertura R/L sin conflicto con menús.",
+     "Habilitar always y confirmar apertura AUX2/W o AUX1/Q sin conflicto con menús.",
      "Probar modo overworld en un mapa con hierba y tablas PBS.",
      "Comprobar sprite, colisión, caducidad y límite de OW temporales.",
      "Captura correcta: Ball, Pokédex, caja/PC, guardado y recarga.",
