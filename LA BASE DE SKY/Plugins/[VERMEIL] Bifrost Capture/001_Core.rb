@@ -20,7 +20,10 @@ module BifrostCapture
     "ow_spawn_probability"=>"100",
     "aim_mouse"=>"1", "aim_target_radius"=>"36",
     "throw_frames"=>"18", "throw_arc"=>"42", "aim_chain"=>"1",
-    "aim_keyboard"=>"1", "aim_speed"=>"5"
+    "aim_keyboard"=>"1", "aim_speed"=>"5",
+    "flee_steps"=>"5", "flee_speed"=>"4",
+    "flee_disappear_distance"=>"9", "flee_stuck_frames"=>"90",
+    "alert_on_miss"=>"1", "allow_empty_throw"=>"0"
   }.freeze
   ROAMERS = %w[RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES
                MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT
@@ -263,14 +266,36 @@ module BifrostCapture
   end
 
   def self.event_spec(event)
-    # Evento: [OWCAP:RAIKOU:50] o [OWDECOR] o [OWCAP:ARTICUNO:70:1]
+    # Solo OW declarados explicitamente. El decorado no se convierte en salvaje.
     return nil unless event && event.respond_to?(:name)
     return nil if event.name =~ /\[OWDECOR\]/i
+    spec = event.instance_variable_get(:@bifrost_capture_spec)
+    if spec.is_a?(Array) && spec.length >= 2
+      species = spec[0].to_s.upcase.to_sym
+      return [species, spec[1].to_i, spec[2].to_i] if GameData::Species.exists?(species)
+    end
     match = /\[OWCAP:([A-Z0-9_]+):(\d+)(?::(\d+))?\]/i.match(event.name)
     return nil unless match
     species = match[1].upcase.to_sym
     return nil unless GameData::Species.exists?(species)
     [species, match[2].to_i, (match[3] || "0").to_i]
+  end
+
+  # API segura para integrar OW creados por otros sistemas sin renombrarlos.
+  # No se autodetectan NPCs, tejados, arboles ni Followers decorativos.
+  def self.register_ow(event, species, level, form = 0)
+    return false unless event && event.respond_to?(:name)
+    return false if event.name =~ /\[OWDECOR\]/i
+    id = species.to_s.upcase.to_sym
+    return false unless GameData::Species.exists?(id)
+    event.instance_variable_set(:@bifrost_capture_spec,
+                                [id, [level.to_i,1].max, form.to_i])
+    true
+  end
+
+  def self.unregister_ow(event)
+    event.remove_instance_variable(:@bifrost_capture_spec) if event &&
+      event.instance_variable_defined?(:@bifrost_capture_spec)
   end
 
   def self.removed?(event)
@@ -288,7 +313,7 @@ module BifrostCapture
 
   def self.valid_target?(event)
     spec = event_spec(event)
-    return false if !spec || removed?(event) || event.instance_variable_get(:@erased)
+    return false if !spec || removed?(event) || event.instance_variable_get(:@erased) || event.character_name.to_s.empty?
     cfg = options($game_map.map_id,spec[0],event.id)
     cfg["enabled"] == "1" && allow_species?(spec[0],cfg)
   end
