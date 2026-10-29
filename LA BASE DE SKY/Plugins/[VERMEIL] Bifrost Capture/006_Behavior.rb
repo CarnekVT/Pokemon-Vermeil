@@ -164,6 +164,7 @@ module BifrostCapture
     # Per-frame solo se actualizan las criaturas que REALMENTE están huyendo.
     # Los OW en reposo se revisan cada 12 fotogramas o al caminar el jugador.
     (@fleeing_events || {}).values.dup.each do |event|
+      next if event.instance_variable_get(:@bifrost_capture_locked)
       if !valid_target?(event) || !$game_map.events[event.id].equal?(event)
         @fleeing_events.delete(event.object_id)
         next
