@@ -26,10 +26,11 @@ class PokemonSystem
     return @visual25d_zoom
   end
 
-  # true = redondo (el terreno de ahora). false = plano.
+  # Compatibilidad con guardados antiguos: desactivar permanentemente
+  # la curvatura. No altera la inclinacion personal de la camara.
   def visual25d_round
-    @visual25d_round = true if @visual25d_round.nil?
-    return @visual25d_round
+    @visual25d_round = false
+    return false
   end
 end
 
@@ -56,24 +57,3 @@ MenuHandlers.add(:options_menu, :visual25d_enabled, {
   }
 })
 
-MenuHandlers.add(:options_menu, :visual25d_world, {
-  "page"        => :graphics,
-  "name"        => _INTL("Mundo 2.5D"),
-  "order"       => 101,
-  "type"        => :array,
-  "parameters"  => proc { [_INTL("Redondo"), _INTL("Plano")] },
-  "description" => _INTL("Elige si el terreno se curva en el horizonte o se queda plano."),
-  "get_proc"    => proc {
-    round = if $PokemonSystem&.respond_to?(:visual25d_round)
-              $PokemonSystem.visual25d_round
-            else
-              Visual25D.horizon_curve_px > 0.5
-            end
-    next round ? 0 : 1
-  },
-  "set_proc"    => proc { |value, _screen|
-    round = (value == 0)
-    $PokemonSystem.visual25d_round = round if $PokemonSystem&.respond_to?(:visual25d_round=)
-    Visual25D.horizon_curve = round ? Visual25D::Config::HORIZON_CURVE : 0
-  }
-})
