@@ -1,4 +1,4 @@
-# Bifröst Capture · seguimiento 0.2.0
+# Bifröst Capture · seguimiento 0.3.0
 
 Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 **Criterio de estado:** «Código integrado» = publicado en GitHub, NO significa probado dentro del juego.
@@ -17,7 +17,7 @@ Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 | Configuración por especie | Código integrado | Niveles, forma Galar, probabilidad individual, alarma, comportamiento y captura. |
 | Ámbitos global / mapa / especie / evento | Código integrado | Sobrescrituras vía INI. |
 | Editor de encuentros / densidad | Código integrado | Clásico, híbrido y OW completo, filtros, distancias y límite. |
-| Simulador de alcance | Parcial | Parrilla interactiva esquemática; no renderiza el mapa real. |
+| Simulador de alcance (solo Maker Studio) | Parcial | Visualiza reglas y rango; en juego ya no existe la cuadrícula de selección. |
 | Verificación de guardado de INI y roster | Código integrado | Guarda y vuelve a leer ambos archivos; falta prueba en Maker Studio real. |
 | Previsualización de modelos/sprites, mapa real y trayectoria | Pendiente | Requiere un visor compatible con mapas y geometría. |
 
@@ -30,7 +30,7 @@ Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 | Cambiar el tipo de encuentro desde el juego | Código integrado | Menú opcional permite clásico, mixto u OW completo y restricción de especies, por partida. |
 | Captura y combate OW solo de legendarios Bifröst | Código integrado | Catálogo inicial editable en `roster.ini`. |
 | Exclusión de Pokémon decorativos | Código integrado | Etiquetas OWCAP / OWDECOR; no captura NPC sin marcar. |
-| Área frontal 7×7; distancia óptima 4; octava fuera | Código integrado | Interfaz inicial sin puntería perspectiva real. |
+| Área frontal 7×7; distancia óptima 4; octava fuera | Código integrado | Regla de alcance interna; no se dibuja una cuadrícula sobre el mapa. |
 | Precisión menor a mayor distancia | Código integrado | Cálculo inicial configurable. |
 | Captura crítica y bonificación trasera | Código integrado | Cálculo inicial sin animación física. |
 | Alerta a 3 casillas, huida/ataque/ignorar | Parcial | Reacciones simplificadas, falta IA/animaciones reales. |
@@ -46,14 +46,19 @@ Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 | Formas Galar en combate OW | Código integrado | Pokémon previo al combate con forma del evento; falta prueba. |
 | Preservar encuentros de Surf, pesca y por script | Código integrado | No se modifica su activación habitual. |
 | Sincronizar estado con sistema de errantes Essentials | Pendiente | Necesario para desaparición, captura y persistencia global. |
-| Puntería 2.5D con proyectil en mapa real | Pendiente | Requiere composición con Visual 2.5D HD. |
-| Animación de lanzamiento, rebote, shakes y captura crítica | Pendiente | Solo flash de impacto inicial. |
+| Puntería contextual sobre sprites del mapa | Código integrado; requiere prueba | El retículo utiliza screen_x/screen_y, ratón y elección por teclado. Falta probar Visual 2.5D HD. |
+| Vuelo animado de Poké Ball y efecto de contacto | Código integrado; requiere prueba | Usa íconos originales de Items, arco y giro en pantalla, destello localizado y pausa de impacto. No es física 3D. |
+| Animación del brazo del jugador, rebotes y shakes de captura | Pendiente | Requiere sprites/animaciones propias y sincronización con resultados de captura. |
 | Colisiones completas de paredes y altura | Pendiente | Versión actual comprueba tiles y eventos, no todas las geometrías. |
 | Fórmulas completas de cada Poké Ball | Pendiente | Multiplicadores iniciales simplificados. |
 | IA avanzada de huida, persecución y visión | Pendiente | El sistema actual tiene reacción básica. |
 | Compatibilidad real con BSS/BAS, Turbo y Smooth Movement | Pendiente | Requiere sesión de juego y depuración. |
 
 ## Pruebas
+
+- **CI GitHub Actions superada:** sintaxis Ruby de los scripts, sintaxis JavaScript del editor y pruebas de geometría/perfiles. Última ejecución funcional comprobada: 29-10-2026.
+- **Nuevo modo de lanzamiento:** retícula sobre los OW del mapa, clic/C para lanzar, cambio rápido de Ball, R/Esc salir, modo Pokémon, proyectil visual animado y HUD inferior derecho.
+- **Control configurable:** `aim_mouse`, `aim_target_radius`, `throw_frames`, `throw_arc`, `aim_chain`.
 
 - **Verificación JavaScript realizada:** sintaxis compilable y renderizado aislado de las 9 secciones del editor.
 - **Verificación de consistencia realizada:** los 35 parámetros del editor coinciden con los 35 parámetros del runtime.
@@ -66,5 +71,5 @@ Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 2. Activar perfil Full OW, probar hierba en mapa real: spawn, sprite, eventos y no encuentros aleatorios.
 3. Probar captura completa en combate/directa, Pokédex, PC, forma de Galar y guardar/cargar.
 4. Vincular estados del sistema de legendarios errantes con la fauna OW.
-5. Mejorar el render del apuntado sobre el mapa y la animación de Poké Ball.
+5. Validar y pulir el nuevo render de la retícula contextual y vuelo de la Poké Ball; completar animación del entrenador, rebotes y sacudidas.
 6. Desarrollar IA de persecución/huida y colisiones 2.5D, compatibilidad Turbo y cámaras.
