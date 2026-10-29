@@ -27,17 +27,21 @@ module Visual25D
       @near_haze = Sprite.new(@viewport)
       @near_haze.bitmap = Visual25D.haze_bitmap(:bottom)
       @near_haze.z = 0
+      # No crear sprites ni bitmaps de oscurecimiento de bordes cuando
+      # el filtro esta desactivado. Evita ademas trabajo de renderizado.
       @vignette = {}
-      size = Visual25D.vignette_size
-      [:top, :bottom, :left, :right].each do |edge|
-        sprite = Sprite.new(@viewport)
-        sprite.bitmap = Visual25D.vignette_bitmap(edge)
-        sprite.z = 1
-        case edge
-        when :bottom then sprite.y = Graphics.height - size
-        when :right  then sprite.x = Graphics.width - size
+      if Config::VIGNETTE
+        size = Visual25D.vignette_size
+        [:top, :bottom, :left, :right].each do |edge|
+          sprite = Sprite.new(@viewport)
+          sprite.bitmap = Visual25D.vignette_bitmap(edge)
+          sprite.z = 1
+          case edge
+          when :bottom then sprite.y = Graphics.height - size
+          when :right  then sprite.x = Graphics.width - size
+          end
+          @vignette[edge] = sprite
         end
-        @vignette[edge] = sprite
       end
       @mode_label = Sprite.new(@viewport)
       @mode_label.z = 10
