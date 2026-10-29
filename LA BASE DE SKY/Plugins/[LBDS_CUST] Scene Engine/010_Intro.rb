@@ -15,7 +15,7 @@ def pbIntroVermeil
                            z: SceneEngine::Settings::LAYER_IMG + 70
     fade_from_black 30
 
-    text_inline "El equilibrio es una línea muy fina.\nUna línea que los humanos rompieron con el peso de su propia codicia.",
+    text_inline "Hubo un tiempo en que este mundo conoció el equilibrio.\nPero los humanos tomaron más de lo que necesitaban... y la armonía comenzó a quebrarse.",
                 speaker: "???", speed: :slow
     hide_textbox(10)
 
@@ -45,7 +45,7 @@ def pbIntroVermeil
       update
     end
 
-    text_inline "Antes de apartarme de este mundo, asqueado por su egoísmo, enfrenté una oscuridad que no vino de los cielos ni de la tierra... sino de mi propia sangre.",
+    text_inline "Me aparté de la humanidad, convencido de que su ambición no tenía remedio.\nSin embargo, la peor traición no vino de ellos... sino de mi propia sangre.",
                 speaker: "???", speed: :slow
     hide_textbox(10)
     fade_out_sprites([golden[:sprite], elder[:sprite]], 15)
@@ -57,7 +57,7 @@ def pbIntroVermeil
     show "Graphics/Scenes/Intro/FennaSupay", 0, 8, fade: 30
     show_floating "Graphics/Scenes/Intro/SupayorusEnergy", 255, 90, amplitude: 8, speed: 0.04, fade: 20
 
-    text_inline "El Guía de los Caídos.\nSu deber era noble: llevar a las almas al descanso eterno. Pero la misma avaricia que a veces ciega a los nuestros, lo alcanzó a él en el abismo.",
+    text_inline "El Guía de los Caídos. Antes ayudaba a las almas a encontrar descanso.\nY no, no siempre fue una amenaza. Pero empezó a verlas como una fuente de poder... y ahí se torció todo.",
                 speaker: "Mujer Misteriosa"
     hide_textbox(10)
 
@@ -72,9 +72,9 @@ def pbIntroVermeil
     hide_all
     show "Graphics/Scenes/Intro/int5", 0, 0, fade: 30
 
-    text_inline "Comenzó a devorar las almas que juró proteger. Acumuló poder en las sombras, deseando derrocarme.",
+    text_inline "Consumió las almas que había jurado proteger. Con cada una, aumentaba su poder... hasta que decidió desafiarme.",
                 speaker: "Gran Espíritu"
-    text_inline "Junto a mis otros hijos, las Fuerzas de la Naturaleza, logramos doblegarlo. Lo despojamos de su poder, reduciéndolo a un simple susurro en la oscuridad.",
+    text_inline "Mis otros hijos, las Fuerzas de la Naturaleza, lucharon a mi lado.\nLogramos arrebatarle su poder, mas no pudimos extinguir su rencor.",
                 speaker: "Gran Espíritu"
     hide_textbox(10)
 
@@ -82,11 +82,11 @@ def pbIntroVermeil
 
     show "Graphics/Scenes/Intro/int9", 0, 0, fade: 25
 
-    text_inline "Y tras esa batalla, viendo que la codicia persistía, nos diste la espalda, Gran Espíritu.",
+    text_inline "Y después de aquello, nos diste la espalda. A todos.\nNo precisamente tu mejor decisión, Gran Espíritu.",
                 speaker: "Mujer Misteriosa"
-    text_inline "Pero te equivocaste al juzgarnos a todos. Aún hay quienes sacrificaríamos nuestra humanidad entera solo para ver a nuestras familias y a nuestra gente vivir en paz.",
+    text_inline "Sí, hay personas capaces de hacer cosas terribles. Pero también las hay que darían cuanto tienen por ver a los suyos vivir en paz.\nNo me digas que eso no cuenta.",
                 speaker: "Mujer Misteriosa"
-    text_inline "Aun así... los ecos en la tierra no mienten. El Guía está recuperando su fuerza. Si resurge, sumirá a nuestra región... y pronto al mundo entero... en un caos sin retorno.",
+    text_inline "Y por mucho que quiera seguir discutiéndotelo, tenemos un problema mayor.\nEl Guía vuelve a reunir fuerzas. Si regresa, nuestra región será la primera en sufrirlo... pero no la última.",
                 speaker: "Mujer Misteriosa"
     hide_textbox(10)
 
@@ -113,7 +113,7 @@ def pbIntroVermeil
       update
     end
 
-    text_inline "Por eso te hemos invocado a ti, Ente Dorado.\nUn alma forastera de este mundo e inmune a su hambre devoradora. Pero no puedes caminar sobre la tierra sin un receptáculo.",
+    text_inline "Por eso te hemos llamado, Ente Dorado.\nVienes de otra realidad y su hambre no puede alcanzarte. Pero, sin un cuerpo que te acoja, no podrás actuar en este mundo.",
                 speaker: "Gran Espíritu"
     hide_textbox(10)
 
@@ -129,18 +129,18 @@ def pbIntroVermeil
                  end_y: 160, speed: 0.7, fps: 6, fade: 25, glow: true, ghost_interval: 2, bg: true
     wait 400
 
-    text_inline "Observa a Solen. Tiene un corazón mortal... y una determinación que no se encuentra todos los días.",
+    text_inline "Mira, ahí está Solen. Créeme, no es fácil encontrar a alguien con tanta determinación.\nY menos aún con ganas de meterse en algo tan grande.",
                 speaker: "Mujer Misteriosa"
-    text_inline "Mira qué tranquilidad. ¡Quién pudiera dormir así con todo lo que está pasando! Pero sí, Solen sabe lo que está en juego.",
+    text_inline "Aunque, viendo lo bien que duerme, cualquiera diría que no pasa nada...\nEn fin. Solen conoce los riesgos y ha aceptado ayudarte.",
                 speaker: "Mujer Misteriosa"
     hide_textbox(10)
-    text_inline "Solen ha abierto las puertas de su alma sin resistencia. El vínculo os unirá, y juntos enfrentaréis la catástrofe.",
+    text_inline "Solen ha consentido este vínculo. Su cuerpo te permitirá caminar entre los vivos, y tu fuerza será la respuesta a la oscuridad que se aproxima.",
                 speaker: "Gran Espíritu"
     hide_textbox(10)
 
     # ══════════ FASE 7: EL PACTO Y NOMBRAMIENTO ══════════
 
-    text_inline "Una cosa antes de seguir. Solen será tu nueva identidad en este mundo... pero ¿cómo quieres que se refieran a ti?",
+    text_inline "Ah, espera. Antes de sellar el pacto, nos falta un detalle.\nCuando hablen de ti en este mundo, ¿cómo prefieres que se refieran a ti?",
                 speaker: "Mujer Misteriosa"
 
     hide_textbox(10)
@@ -152,12 +152,12 @@ def pbIntroVermeil
     treatment_input(default: :neutro)
     fade_from_black 15
     treatment_text(
-      masculino: "Perfecto, compañero. Ya casi estamos.",
-      femenino: "Perfecto, compañera. Ya casi estamos.",
-      neutro: "Perfecto, Solen. Ya casi estamos.",
+      masculino: "Entendido, compañero. Así será.",
+      femenino: "Entendido, compañera. Así será.",
+      neutro: "Entendido. Lo tendremos en cuenta.",
       speaker: "Mujer Misteriosa"
     )
-    text_inline "¡Perfecto! Y ahora, ¿mantendrás el nombre Solen o prefieres otro?",
+    text_inline "¡Listo! Y otra cosa: Solen es el nombre que recibió al nacer.\n¿Quieres conservarlo o prefieres que te llamemos de otra manera?",
                 speaker: "Mujer Misteriosa"
     hide_textbox(10)
     fade_to_black 15
@@ -177,9 +177,9 @@ def pbIntroVermeil
     start_aura "Graphics/Scenes/Intro/AuraParticle", 12, 12, count: 12, range_x: 35, range_y: 70, duration: 90
     fade_from_black 25
 
-    text_inline "El pacto está forjado en la quietud de la noche. Mi hijo renegado aguarda en las sombras, reuniendo almas para su venganza. Demuéstrame, {1}, que mi desprecio por la humanidad fue un error.",
+    text_inline "El pacto queda sellado, {1}. Mi hijo renegado continúa reuniendo fuerzas en las sombras.\nTal vez aún podamos evitar su regreso... y tal vez tú me demuestres que juzgué a la humanidad demasiado pronto.",
                 speaker: "Gran Espíritu", format_args: [player_name]
-    text_inline "Bueno, {1}, parece que ya es hora. ¡Que tengas un buen viaje! Y procura no meterte en demasiados problemas...",
+    text_inline "Bueno, {1}, ¡ya está! Ahora te toca a ti.\nCuídate ahí abajo, ¿sí? Y no te preocupes si el camino se complica. Las mejores aventuras nunca siguen el plan.",
                 speaker: "Mujer Misteriosa", format_args: [player_name]
 
     # ══════════ FASE 9: LA FUSIÓN Y DESPERTAR ══════════
