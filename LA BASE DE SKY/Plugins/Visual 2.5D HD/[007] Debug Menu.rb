@@ -87,7 +87,8 @@ VISUAL25D_GEOMETRY_DEFAULTS = {
   :VANISHING_STRENGTH => 0.3, :VERTICAL_GAIN => 0.4,
   :COLUMN_LEAN => 0.0, :WALL_SMOOTHING => 0,
   :WALL_SMOOTH_VERTICAL => false, :WALL_EDGE_SEAL => 2,
-  :GROUND_SLICES => 1
+  :GROUND_SLICES => 1, :AUTO_COLUMN_PRIORITY => true,
+  :TIGHT_GRID => true
 }
 def pbVisual25DGeometrySet(name, value)
   return unless $DEBUG
@@ -124,8 +125,10 @@ def pbVisual25DGeometryMenu
         _INTL("Solape de bordes: {1} px", cfg::WALL_EDGE_SEAL),
         _INTL("Solape de tiles: {1} px", Visual25D.column_band_overlap),
         _INTL("Franjas de suelo: {1}", cfg::GROUND_SLICES),
+        _INTL("Unir columnas del tileset: {1}", cfg::AUTO_COLUMN_PRIORITY ? _INTL("Sí") : _INTL("No")),
+        _INTL("Rejilla optimizada: {1}", cfg::TIGHT_GRID ? _INTL("Sí") : _INTL("No")),
         _INTL("Restaurar geometría"), _INTL("Volver")
-      ], 10)
+      ], 12)
     case cmd
     when 0
       n = pbVisual25DChooseNumber(_INTL("Convergencia horizontal, 0–60%."), (cfg::VANISHING_STRENGTH * 100).round, 0, 60)
@@ -157,6 +160,10 @@ def pbVisual25DGeometryMenu
       n = pbVisual25DChooseNumber(_INTL("Franjas de suelo. 1 es la opción más rápida."), cfg::GROUND_SLICES, 1, 4)
       pbVisual25DGeometrySet(:GROUND_SLICES, n == 3 ? 2 : n)
     when 8
+      pbVisual25DGeometrySet(:AUTO_COLUMN_PRIORITY, !cfg::AUTO_COLUMN_PRIORITY)
+    when 9
+      pbVisual25DGeometrySet(:TIGHT_GRID, !cfg::TIGHT_GRID)
+    when 10
       pbVisual25DResetTuning
       Visual25D.rebuild_render_params!
       Visual25D.redraw_map
