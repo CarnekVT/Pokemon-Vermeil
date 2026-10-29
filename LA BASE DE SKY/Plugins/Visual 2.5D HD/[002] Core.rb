@@ -848,10 +848,14 @@ module Visual25D
       top    = unprojected_edge(0)
       bottom = unprojected_edge(Graphics.height)
       # Filas que hacen falta por encima de la primera y por debajo de la ultima.
-      above = (top < 0) ? (-top.to_f / tile_h).ceil : 0
+      # Base renderer already allocates an extra trailing cell. When the
+      # frustum is calculated exactly, another whole row on every side is
+      # redundant. Keep 1 projected pixel as raster-rounding insurance.
+      guard = Config::TIGHT_GRID ? 1 : 0
+      above = (top < 0) ? ((-top.to_f + guard) / tile_h).ceil : 0
       base_rows = (Graphics.height.to_f / tile_h).ceil + 1
-      below = ((bottom.to_f / tile_h).ceil + 1) - base_rows
-      @margin_rows = [[above, below].max + 1, 1].max
+      below = (((bottom.to_f + guard) / tile_h).ceil + 1) - base_rows
+      @margin_rows = [[above, below].max + (Config::TIGHT_GRID ? 0 : 1), 1].max
       @margin_rows = Config::MAX_MARGIN_ROWS if @margin_rows > Config::MAX_MARGIN_ROWS
       # Si la rejilla no llega a donde pide la proyeccion, se corre hacia abajo
       # para que el borde de arriba siga cubierto: el jugador deja de estar
@@ -861,7 +865,13 @@ module Visual25D
       # dos bordes de la pantalla.
       half = Graphics.width / 2.0
       extra = (half / width_scale_at(unprojected_edge(0))) - half
-      @margin_columns = (extra <= 0) ? 1 : (extra / tile_w).ceil + 1
+      @margin_columns = if extra <= 0
+                          1
+                        elsif Config::TIGHT_GRID
+                          [((extra + 1.0) / tile_w).ceil, 1].max
+                        else
+                          (extra / tile_w).ceil + 1
+                        end
       @margin_columns = Config::MAX_MARGIN_COLUMNS if @margin_columns > Config::MAX_MARGIN_COLUMNS
       # Fundido: no encoger bajo el pico (rejilla ya expandida al arrancar).
       if @blend_margin_min_cols
