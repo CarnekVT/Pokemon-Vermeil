@@ -137,7 +137,10 @@ module BifrostCapture
       spec = event_spec(event)
       return false unless spec
       pbMessage(_INTL("¡El Pokémon se ha abalanzado sobre ti!"))
-      WildBattle.start(spec[0],spec[1])
+      wild = pbGenerateWildPokemon(spec[0],spec[1])
+      wild.form = spec[2] if spec[2] > 0
+      result = WildBattle.start(wild)
+      remove_event(event) if result
     when "flee"
       pbMessage(_INTL("¡El Pokémon ha huido!"))
       remove_event(event)
@@ -153,11 +156,14 @@ module BifrostCapture
     width = [cfg["width"].to_i,1].max
     valid_tile = forward.between?(1,range) && side.abs <= width/2
     visible = cfg["line_of_sight"] != "1" || line_clear?(px,py,tx,ty)
-    if mode == :ball && cfg["consume_on_miss"] == "1"
+    hit = !!event && valid_tile && visible &&
+          rand < hit_chance(forward,cfg)
+    # Al impactar se consume siempre una Ball. Si falla por apuntado,
+    # consume_on_miss decide si el lanzamiento gasta el item.
+    if mode == :ball && (hit || cfg["consume_on_miss"] == "1")
       return false unless $bag.remove(payload,1)
     end
-    if !valid_tile || !visible || !event ||
-       rand >= hit_chance(forward,cfg)
+    if !hit
       pbMessage(_INTL("¡El lanzamiento ha fallado!"))
       react(event,cfg) if event
       return false
@@ -165,8 +171,24 @@ module BifrostCapture
     spec=event_spec(event)
     if mode == :battle
       pbMessage(_INTL("¡Adelante, {1}!",payload.name))
-      # Battle.start conserva al equipo original; no crea ni consume un Pokémon.
-      WildBattle.start(spec[0],spec[1])
+      wild = pbGenerateWildPokemon(spec[0],spec[1])
+      wild.form = spec[2] if spec[2] > 0
+      # El Pokémon elegido encabeza temporalmente el equipo al iniciar combate.
+      party = $player.party
+      original_order = party.dup
+      index = party.index(payload)
+      if index && index > 0
+        party.delete_at(index)
+        party.unshift(payload)
+      end
+      begin
+        result = WildBattle.start(wild)
+        remove_event(event) if result
+      ensure
+        # Preservar capturas u otros cambios reales en el equipo.
+        party.replace(original_order.select { |p| party.include?(p) } +
+                      party.reject { |p| original_order.include?(p) })
+      end
       return true
     end
     behind=behind?(px,py,event)
