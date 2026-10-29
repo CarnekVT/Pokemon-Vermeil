@@ -223,3 +223,9 @@ end
 EventHandlers.add(:on_player_step_taken,:bifrost_capture_alert,
   proc { BifrostCapture.on_step }
 )
+
+# No modifica Scene_Map#update_input ni el menu Ready: usa el handler
+# oficial de fotogramas de Essentials y solo actua con access_mode adecuado.
+EventHandlers.add(:on_frame_update, :bifrost_capture_access,
+  proc { BifrostCapture.update_access }
+)
