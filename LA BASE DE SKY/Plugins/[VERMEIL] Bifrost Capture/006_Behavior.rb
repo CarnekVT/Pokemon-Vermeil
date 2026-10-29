@@ -173,6 +173,7 @@ module BifrostCapture
     end
     return unless force || @behavior_frame % 12 == 0
     $game_map.events.values.each do |event|
+      next if event.instance_variable_get(:@bifrost_capture_locked)
       next unless valid_target?(event) && !fleeing?(event)
       cooldown = event.instance_variable_get(:@bifrost_alert_cooldown).to_i
       if cooldown > 0
