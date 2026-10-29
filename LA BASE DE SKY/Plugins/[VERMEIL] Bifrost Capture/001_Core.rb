@@ -15,7 +15,9 @@ module BifrostCapture
     "encounter_mode"=>"classic", "spawn_chance"=>"24",
     "spawn_min_distance"=>"3", "spawn_max_distance"=>"6",
     "spawn_limit"=>"4", "spawn_lifetime"=>"40", "spawn_filter"=>"all",
-    "spawn_grass_only"=>"1", "spawn_allow_fishing"=>"0"
+    "spawn_grass_only"=>"1", "spawn_allow_fishing"=>"0",
+    "ow_form"=>"0", "ow_min_level"=>"0", "ow_max_level"=>"0",
+    "ow_spawn_probability"=>"100"
   }.freeze
   ROAMERS = %w[RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES
                MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT
