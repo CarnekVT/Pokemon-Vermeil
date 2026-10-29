@@ -1,0 +1,30 @@
+name: Bifrost Capture studio checks
+on:
+  push:
+    branches: [feature/bifrost-overworld-capture-studio]
+    paths:
+      - 'LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/**'
+      - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.vermeil.bifrost-capture/**'
+      - 'tests/bifrost_capture_core_test.rb'
+      - '.github/workflows/bifrost-capture-check.yml'
+  workflow_dispatch:
+
+jobs:
+  syntax_and_core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Ruby Essentials plugin syntax
+        working-directory: LA BASE DE SKY
+        run: |
+          for f in 'Plugins/[VERMEIL] Bifrost Capture/'*.rb; do
+            ruby -c "$f"
+          done
+      - name: Check Maker Studio JavaScript syntax
+        working-directory: LA BASE DE SKY
+        run: |
+          for f in Plugins/MakerStudio/003_Editor/Mods/com.vermeil.bifrost-capture/*.js; do
+            node --experimental-default-type=module --check "$f"
+          done
+      - name: Run geometry and profiles tests
+        run: ruby tests/bifrost_capture_core_test.rb
