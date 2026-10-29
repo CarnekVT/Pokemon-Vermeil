@@ -13,7 +13,8 @@ const DEFS={
  line_of_sight:"1",reaction:"flee",consume_on_miss:"1",impact_frames:"3",
  encounter_mode:"classic",spawn_chance:"24",spawn_min_distance:"3",
  spawn_max_distance:"6",spawn_limit:"4",spawn_lifetime:"40",
- spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0"
+ spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
+ ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100"
 };
 const PRESETS={
  bifrost:{...DEFS},
@@ -48,6 +49,10 @@ const FIELDS={
  spawn_filter:["Filtro de especies para apariciones","spawns","select",["all","allowlist"],"Todas las especies de las tablas del mapa o solo las marcadas en Catálogo."],
  spawn_grass_only:["Solo casillas de hierba","spawns","bool",null,"Sin esta regla permite otros tiles transitables de encuentros terrestres."],
  spawn_allow_fishing:["Incluir encuentros de pesca","spawns","bool",null,"Reservado para fase posterior. Actualmente no modifica la pesca."],
+ ow_form:["Forma OW (0 = normal)","species","int",[0,100],"Forma 1 de Articuno, Zapdos y Moltres: Galar. Solo afecta a spawns automáticos."],
+ ow_min_level:["Nivel mínimo OW (0 = tabla PBS)","species","int",[0,100],"Nivel para generados en la hierba. Con 0 se utiliza el encuentro original."],
+ ow_max_level:["Nivel máximo OW (0 = tabla PBS)","species","int",[0,100],"Permite escoger un nivel aleatorio en el rango definido."],
+ ow_spawn_probability:["Probabilidad de spawn de especie (%)","species","int",[0,100],"Filtro individual después de elegir la especie de la tabla del mapa."],
  range:["Alcance de lanzamiento (filas)","aim","int",[1,20],"Máximo alcance en línea frontal; fuera de este rango la Ball falla."],
  width:["Anchura de lanzamiento (columnas)","aim","odd",[1,19],"Número impar de columnas centradas respecto a la dirección."],
  optimal_range:["Distancia óptima","aim","int",[1,20],"Máximo acierto antes de penalización por distancia."],
@@ -210,7 +215,7 @@ class CaptureStudio{
   const explicit={
    overview:["enabled","access_mode","hotkey","capture_enabled","battle_enabled"],
    profiles:["profile","access_mode","restricted_species"],
-   species:["restricted_species","spawn_filter"],
+   species:["ow_form","ow_min_level","ow_max_level","ow_spawn_probability","reaction","alert_distance","capture_floor","restricted_species","spawn_filter"],
    spawns:["encounter_mode","spawn_chance","spawn_min_distance","spawn_max_distance","spawn_limit","spawn_lifetime","spawn_grass_only","spawn_filter"],
    aim:["range","width","optimal_range","hit_near","hit_far","line_of_sight"],
    capture:["capture_floor","back_multiplier","critical_front","critical_back","critical_multiplier","consume_on_miss"],
@@ -325,7 +330,7 @@ class CaptureStudio{
      '<div class="bf-roster-col"><input type="checkbox" aria-label="Generar '+E(n)+'" data-roster="spawn" data-species="'+E(n)+'" '+(this.roster.spawn[n]?"checked":"")+'></div>'+
      '<button class="bf-mini-btn" title="Configuración específica de '+E(n)+'" data-edit-species="'+E(n)+'">↗</button></div>').join("")+'</div>'+
     (total>150?'<div class="bf-help" style="margin-top:10px">Se muestran los primeros 150 resultados. Filtra para localizar una especie concreta.</div>':"")+
-    '<div class="bf-help" style="margin-top:12px">El perfil Full OW utiliza todas las especies de las tablas del mapa si spawn_filter=all. Si eliges allowlist, solo las marcadas en APARICIÓN. Para bloquear una especie por completo, usa la opción de abajo.</div>'+
+    '<div class="bf-help" style="margin-top:12px">El perfil Full OW utiliza todas las especies de las tablas del mapa si spawn_filter=all. Si eliges allowlist, solo las marcadas en APARICIÓN. En el inspector puedes definir nivel, forma regional, frecuencia y reacción por especie. Para las aves de Galar, usa forma 1 en la especie base. Para bloquear una especie por completo, usa la opción de abajo.</div>'+
     '<div class="bf-actions"><input class="bf-input" data-block-species placeholder="ID que no debe aparecer" style="max-width:190px"><button class="bf-btn" data-action="toggle-block">Alternar bloqueo</button></div>');
  }
  spawnsPanel(v){
@@ -490,7 +495,7 @@ class CaptureStudio{
   const mode=t.getAttribute("data-mode");
   if(mode){this.set("encounter_mode",mode);return;}
   const species=t.getAttribute("data-edit-species");
-  if(species){this.scope="species:"+species.toLowerCase();this.config[this.scope]??={};this.section="capture";this.render();return;}
+  if(species){this.scope="species:"+species.toLowerCase();this.config[this.scope]??={};this.section="species";this.search=species;this.status="Editando ajustes de "+species;this.render();return;}
   const scope=t.getAttribute("data-scope-button");
   if(scope){this.scope=scope;this.render();return;}
   const remove=t.getAttribute("data-remove-scope");
