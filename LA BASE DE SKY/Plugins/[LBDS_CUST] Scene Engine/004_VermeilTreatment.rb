@@ -212,9 +212,9 @@ class SceneEngine::Player
   end
 
   def treatment_portrait_y(sprite)
-    return 102 unless sprite.bitmap
-    ((Graphics.height - 480) / 2 + 102 +
-     (320 - sprite.src_rect.height * sprite.zoom_y) / 2).round
+    return 150 unless sprite.bitmap
+    ((Graphics.height - 480) / 2 + 150 +
+     (244 - sprite.src_rect.height * sprite.zoom_y) / 2).round
   end
 
   # Compatible con el editor: un solo comando con tres variantes narrativas.
@@ -262,7 +262,7 @@ class SceneEngine::Player
     return unless bitmap
     rect = treatment_visible_rect(bitmap)
     sprite.src_rect.set(rect.x, rect.y, rect.width, rect.height)
-    scale = [304.0 / rect.width, 320.0 / rect.height, 1.0].min
+    scale = [274.0 / rect.width, 244.0 / rect.height, 1.0].min
     sprite.zoom_x = sprite.zoom_y = scale
     sprite.x = ((Graphics.width - rect.width * scale) / 2).round +
                VermeilTreatment::PORTRAIT_X_OFFSET.fetch(option, 0)
@@ -302,7 +302,7 @@ class SceneEngine::Player
                        Color.new(a[0], a[1], a[2], selected ? 255 : 90))
     end
     if confirm
-      bitmap.fill_rect(ox + 50, oy + 104, 540, 302,
+      bitmap.fill_rect(ox + 50, oy + 145, 540, 250,
                        Color.new(a[0], a[1], a[2], 55))
     end
   end
