@@ -612,6 +612,13 @@ module LightingStudioSpriteset
 
   def ls_update_chunks(mx, my, zx, zy)
     return if @ls_union_sources.empty?
+    # Static chunk masks do not animate. If the camera is unchanged AND
+    # all visible chunks exist, leave their sprites untouched instead of
+    # rebuilding/sorting and writing dozens of GPU transforms every frame.
+    if @ls_chunks_ready && @ls_chunk_last_mx == mx && @ls_chunk_last_my == my &&
+       @ls_chunk_last_zx == zx && @ls_chunk_last_zy == zy
+      return
+    end
     @ls_masks_built_this_frame = 0
     @ls_chunk_tick += 1
     needed = ls_visible_keys(mx, my, zx, zy)
@@ -623,11 +630,19 @@ module LightingStudioSpriteset
         world_x = key[0] * LightingStudio::CHUNK_WORLD
         world_y = key[1] * LightingStudio::CHUNK_WORLD
         sx, sy = ls_world_screen(world_x, world_y, mx, my, zx, zy)
-        entry[:sprite].x = sx
-        entry[:sprite].y = sy
-        entry[:sprite].zoom_x = zx * LightingStudio::CHUNK_WORLD / entry[:bitmap].width.to_f
-        entry[:sprite].zoom_y = zy * LightingStudio::CHUNK_WORLD / entry[:bitmap].height.to_f
-        entry[:sprite].visible = true
+        # Shared endpoint coordinates close 1px gaps between independently
+        # rounded chunks at noninteger zoom. Right edge == next chunk's left.
+        ex, ey = ls_world_screen(world_x + LightingStudio::CHUNK_WORLD,
+                                 world_y + LightingStudio::CHUNK_WORLD,
+                                 mx, my, zx, zy)
+        sprite = entry[:sprite]
+        sprite.x = sx if sprite.x != sx
+        sprite.y = sy if sprite.y != sy
+        scx = (ex - sx).to_f / entry[:bitmap].width
+        scy = (ey - sy).to_f / entry[:bitmap].height
+        sprite.zoom_x = scx if (sprite.zoom_x - scx).abs > 0.0001
+        sprite.zoom_y = scy if (sprite.zoom_y - scy).abs > 0.0001
+        sprite.visible = true if !sprite.visible
         entry[:tick] = @ls_chunk_tick
       else
         entry[:sprite].visible = false
@@ -645,12 +660,22 @@ module LightingStudioSpriteset
       world_x = key[0] * LightingStudio::CHUNK_WORLD
       world_y = key[1] * LightingStudio::CHUNK_WORLD
       sx, sy = ls_world_screen(world_x, world_y, mx, my, zx, zy)
+      ex, ey = ls_world_screen(world_x + LightingStudio::CHUNK_WORLD,
+                               world_y + LightingStudio::CHUNK_WORLD,
+                               mx, my, zx, zy)
       entry[:sprite].x = sx
       entry[:sprite].y = sy
-      entry[:sprite].zoom_x = zx * LightingStudio::CHUNK_WORLD / entry[:bitmap].width.to_f
-      entry[:sprite].zoom_y = zy * LightingStudio::CHUNK_WORLD / entry[:bitmap].height.to_f
+      entry[:sprite].zoom_x = (ex - sx).to_f / entry[:bitmap].width
+      entry[:sprite].zoom_y = (ey - sy).to_f / entry[:bitmap].height
       entry[:sprite].visible = true
     end
+
+    @ls_chunk_last_mx = mx
+    @ls_chunk_last_my = my
+    @ls_chunk_last_zx = zx
+    @ls_chunk_last_zy = zy
+    # Empty-but-valid chunks are recorded with :sprite=nil; key? is enough.
+    @ls_chunks_ready = needed.all? { |key| @ls_chunks.key?(key) }
 
     if @ls_chunks.length > LightingStudio::MAX_CHUNKS
       candidates = @ls_chunks.keys.reject { |key| visible.key?(key) }
@@ -659,6 +684,7 @@ module LightingStudioSpriteset
         key = candidates.shift
         ls_chunk_dispose(@ls_chunks.delete(key))
       end
+      @ls_chunks_ready = false if @ls_chunks.length > LightingStudio::MAX_CHUNKS
     end
   end
 
