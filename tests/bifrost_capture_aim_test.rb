@@ -176,6 +176,7 @@ class BifrostCaptureAimTest < Minitest::Test
     refute event.erased?
     6.times { BifrostCapture.tick_flee(event,cfg) }
     assert event.erased?
+    assert_empty($PokemonGlobal.bifrost_removed_events || {})
   end
 
   def test_aim_locked_on_same_event_at_different_tile
