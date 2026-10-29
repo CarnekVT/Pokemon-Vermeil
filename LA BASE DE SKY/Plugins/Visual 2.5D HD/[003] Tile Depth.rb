@@ -1864,8 +1864,10 @@ module Visual25D
       # Bosque/plano pri0: sin geom_priority ni wall_cell_bounds (mismo look).
       if !field && !tile.shows_reflection && !tile.bridge
         pri = tile.hd25_geom_priority
+        auto = tile.hd25_auto_priority
         painted = tile.hd25_painted_priority
-        if (pri.nil? || pri.to_i <= 0) &&
+        if (auto.nil? || auto <= 0) &&
+           (pri.nil? || pri.to_i <= 0) &&
            (painted.nil? || painted.to_i <= 0) &&
            tile.priority.to_i <= 0
           if ground_slice_count > 1 && place_ground_strips(tile, cell_row, tile.x)
