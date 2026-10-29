@@ -4,6 +4,7 @@ module BifrostCapture
   PLAYER_OPTIONS = {
     "capture_enabled"=>"Captura directa",
     "battle_enabled"=>"Iniciar combates desde OW",
+    "restricted_species"=>"Solo especies catálogo Bifröst",
     "line_of_sight"=>"Obstáculos bloquean lanzamientos",
     "consume_on_miss"=>"Consumir Balls falladas"
   }.freeze
@@ -11,6 +12,11 @@ module BifrostCapture
     "event"=>"Solo por evento",
     "always"=>"Siempre disponible",
     "nearby"=>"Con OW elegible cerca"
+  }.freeze
+  ENCOUNTER_LABELS = {
+    "classic"=>"Hierba clásica",
+    "hybrid"=>"Encuentros mixtos",
+    "overworld"=>"OW completo"
   }.freeze
   KEY_LABELS = {
     "aux2"=>"R (Aux2)",
@@ -28,6 +34,7 @@ module BifrostCapture
       end
       choices << _INTL("Acceso: {1}", ACCESS_LABELS[settings["access_mode"]] || "Solo por evento")
       choices << _INTL("Atajo: {1}", KEY_LABELS[settings["hotkey"]] || "Sin atajo")
+      choices << _INTL("Encuentros: {1}", ENCOUNTER_LABELS[settings["encounter_mode"]] || "Hierba clásica")
       choices << _INTL("Restaurar reglas del proyecto")
       choices << _INTL("Salir")
       idx = pbMessage(_INTL("Reglas de lanzamiento"),choices,choices.length-1)
@@ -47,6 +54,12 @@ module BifrostCapture
         current = modes.index(settings["hotkey"]) || 0
         selected = pbMessage(_INTL("¿Qué tecla abre el apuntado?"), labels + [_INTL("Cancelar")], labels.length, nil, current)
         set_rule("hotkey", modes[selected]) if selected >= 0 && selected < modes.length
+      elsif idx == keys.length+2
+        modes = ENCOUNTER_LABELS.keys
+        labels = ENCOUNTER_LABELS.values
+        current = modes.index(settings["encounter_mode"]) || 0
+        selected = pbMessage(_INTL("¿Cómo aparecen los Pokémon?"), labels + [_INTL("Cancelar")], labels.length, nil, current)
+        set_rule("encounter_mode",modes[selected]) if selected >= 0 && selected < modes.length
       else
         $PokemonGlobal.bifrost_overrides = {}
         pbMessage(_INTL("Restauradas las reglas del proyecto."))

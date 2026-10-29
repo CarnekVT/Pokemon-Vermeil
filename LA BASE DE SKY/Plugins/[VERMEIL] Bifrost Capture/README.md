@@ -156,7 +156,7 @@ Para abrir la interfaz desde un evento de mapa / controlador de captura, utiliza
 pbBifrostAim
 ```
 
-Puedes enlazarlo a un objeto clave o comando de un menú mediante ese mismo método. La versión 0.1 no registra una tecla global predeterminada para evitar conflictos con Movimiento, Maker Studio y otros plugins. Para abrir las opciones en una zona de juego:
+Puedes enlazarlo a un objeto clave o comando de un menú mediante ese mismo método. Bifröst empieza con `access_mode=event`, sin atajo activo. Al configurar `access_mode=always` o `nearby`, la tecla R/L habilitada abre el apuntado sin necesitar un evento de mapa. Para abrir las opciones en una zona de juego:
 
 ```ruby
 pbBifrostRulesMenu
@@ -193,5 +193,9 @@ Menú **Mods → Bifröst Capture Studio**. Tiene controles de reglas, previsual
 - `001_Core.rb`: INI + perfiles + cálculos + eventos + persistencia.
 - `002_Runtime.rb`: selección de bolas/Pokémon, apuntado y resolución.
 - `003_RulesMenu.rb`: ajustes opcionales ingame.
+- `004_OverworldEncounters.rb`: fauna visible temporal basada en las tablas de encuentros, con modo completo o mixto.
+- `roster.ini`: catálogo Bifröst editable y filtros de fauna por especie.
 - `config.ini`: reglas oficiales Bifröst, incluyendo `access_mode` y `hotkey`.
-- `Plugins/MakerStudio/003_Editor/Mods/com.vermeil.bifrost-capture`: editor gráfico.
+- `Plugins/MakerStudio/003_Editor/Mods/com.vermeil.bifrost-capture`: editor de tres paneles estilo BAS/BSS, módulos, comparador de perfiles y catálogo.
+- `ROADMAP.md`: seguimiento de funciones, límites y pruebas.
+- `tests/bifrost_capture_core_test.rb` (raíz del repositorio): pruebas básicas Ruby.
