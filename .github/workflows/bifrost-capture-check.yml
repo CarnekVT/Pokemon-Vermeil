@@ -5,7 +5,7 @@ on:
     paths:
       - 'LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/**'
       - 'LA BASE DE SKY/Plugins/MakerStudio/003_Editor/Mods/com.vermeil.bifrost-capture/**'
-      - 'tests/bifrost_capture_core_test.rb'
+      - 'tests/bifrost_capture_*_test.rb'
       - '.github/workflows/bifrost-capture-check.yml'
   workflow_dispatch:
 
