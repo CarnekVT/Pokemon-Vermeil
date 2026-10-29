@@ -9,27 +9,7 @@ class PokemonSystem
   attr_writer :visual25d_enabled
   attr_writer :visual25d_tilt
   attr_writer :visual25d_zoom
-  attr_writer :visual25d_model
-  attr_writer :visual25d_fov
-
-  # El modo viejo :classic/:camera sigue deformando el mapa si el save
-  # conserva el modelo anterior. Se cambia SOLO el modelo, no los ajustes
-  # personales de inclinacion, zoom ni FOV.
-  def visual25d_upgrade_legacy_profile!
-    # Para un ajuste guardado en perfiles por defecto antiguos (27/32),
-    # aplicar una sola vez la inclinacion nueva. Preservar angulos propios.
-    if !@visual25d_pitch45_migrated
-      @visual25d_pitch45_migrated = true
-      if @visual25d_tilt && [27.0, 32.0].include?(@visual25d_tilt.to_f)
-        @visual25d_tilt = Visual25D::Config::TILT_DEGREES
-      end
-    end
-    return if @visual25d_gen5_flat_migrated
-    @visual25d_gen5_flat_migrated = true
-    @visual25d_model = :gen5 if @visual25d_model.nil? ||
-                               @visual25d_model == :classic ||
-                               @visual25d_model == :camera
-  end
+  attr_writer :visual25d_round
 
   def visual25d_enabled
     @visual25d_enabled = Visual25D::Config::ENABLED if @visual25d_enabled.nil?
@@ -46,16 +26,54 @@ class PokemonSystem
     return @visual25d_zoom
   end
 
-  def visual25d_model
-    @visual25d_model = Visual25D::Config::PROJECTION_MODEL if @visual25d_model.nil?
-    return @visual25d_model
-  end
-
-  def visual25d_fov
-    @visual25d_fov = Visual25D::Config::CAMERA_FOV if @visual25d_fov.nil?
-    return @visual25d_fov
+  # true = redondo (el terreno de ahora). false = plano.
+  def visual25d_round
+    @visual25d_round = true if @visual25d_round.nil?
+    return @visual25d_round
   end
 end
 
-# Visual 2.5D se configura fuera de Opciones.
-# Usar Depuración > Campo > Visual 2.5D HD o pbVisual25DMenu.
+MenuHandlers.add(:options_menu, :visual25d_enabled, {
+  "page"        => :graphics,
+  "name"        => _INTL("Modo 2.5D"),
+  "order"       => 100,
+  "type"        => :toggle,
+  "parameters"  => proc { [_INTL("Sí"), _INTL("No")] },
+  "description" => _INTL("Activa o desactiva el modo visual 2.5D."),
+  "get_proc"    => proc {
+    enabled = if $PokemonSystem&.respond_to?(:visual25d_enabled)
+                $PokemonSystem.visual25d_enabled
+              else
+                Visual25D.enabled
+              end
+    next enabled ? 0 : 1
+  },
+  "set_proc"    => proc { |value, _screen|
+    enabled = (value == 0)
+    # Sin mark_save_sync_dirty: el sync del frame siguiente cancelaria el fundido.
+    $PokemonSystem.visual25d_enabled = enabled if $PokemonSystem&.respond_to?(:visual25d_enabled=)
+    pbVisual25DSetSmooth(enabled)
+  }
+})
+
+MenuHandlers.add(:options_menu, :visual25d_world, {
+  "page"        => :graphics,
+  "name"        => _INTL("Mundo 2.5D"),
+  "order"       => 101,
+  "type"        => :array,
+  "parameters"  => proc { [_INTL("Redondo"), _INTL("Plano")] },
+  "description" => _INTL("Elige si el terreno se curva en el horizonte o se queda plano."),
+  "get_proc"    => proc {
+    round = if $PokemonSystem&.respond_to?(:visual25d_round)
+              $PokemonSystem.visual25d_round
+            else
+              Visual25D.horizon_curve_px > 0.5
+            end
+    next round ? 0 : 1
+  },
+  "set_proc"    => proc { |value, _screen|
+    round = (value == 0)
+    $PokemonSystem.visual25d_round = round if $PokemonSystem&.respond_to?(:visual25d_round=)
+    Visual25D.horizon_curve = round ? Visual25D::Config::HORIZON_CURVE : 0
+  }
+})

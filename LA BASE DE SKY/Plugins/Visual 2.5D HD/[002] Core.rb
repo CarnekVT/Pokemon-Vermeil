@@ -220,9 +220,6 @@ module Visual25D
       @perspective = Math.tan(degrees * Math::PI / 180.0)
       target_z = (@camera_zoom || 100) / 100.0
       @zoom = 1.0 + ((target_z - 1.0) * b)
-      # Proyeccion ortografica oblicua: pitch REAL en Y, no reduccion
-      # artificial al 65% que dejaba casi plana la vista.
-      @gen5_ground_factor = @zoom * Math.cos(degrees * Math::PI / 180.0)
       @projection_dirty = true
       @margin_columns = nil
       @margin_rows = nil
@@ -277,8 +274,7 @@ module Visual25D
     end
 
     def projection_model=(value)
-      value = [:gen5, :camera, :classic].include?(value) ? value : :gen5
-      $PokemonSystem.visual25d_model = value if $PokemonSystem&.respond_to?(:visual25d_model=)
+      value = (value == :camera) ? :camera : :classic
       return if projection_model == value
       @projection_model = value
       clear_proj_hot_cache
@@ -297,7 +293,6 @@ module Visual25D
 
     def camera_fov=(value)
       value = value.to_f.clamp(20.0, 90.0)
-      $PokemonSystem.visual25d_fov = value if $PokemonSystem&.respond_to?(:visual25d_fov=)
       return if @camera_fov && (@camera_fov - value).abs < 0.01
       @camera_fov = value
       clear_proj_hot_cache
@@ -309,18 +304,39 @@ module Visual25D
       end
     end
 
-    # Vermeil: suelo ESTRICTAMENTE plano. No se ofrece modo circular.
-    # Mantener las firmas originales para no romper los otros proyectores.
+    # Píxeles de caída en lo alto de la pantalla. Nil = Config::HORIZON_CURVE.
     def horizon_curve_px
-      return 0.0
+      return @horizon_curve.to_f unless @horizon_curve.nil?
+      return Config::HORIZON_CURVE.to_f
     end
 
     def horizon_curve=(value)
-      @horizon_curve = 0.0
+      value = value.to_f
+      value = 0.0 if value < 0.0
+      value = 48.0 if value > 48.0
+      return if !@horizon_curve.nil? && (@horizon_curve - value).abs < 0.01
+      @horizon_curve = value
+      clear_proj_hot_cache
+      if blending?
+        @force_reproject = true
+      else
+        redraw_map
+      end
     end
 
+    # Extra de Y solo por encima del centro. t=1 en el borde superior; por
+    # encima de la pantalla se planta, para no aplastar el margen.
     def horizon_curve(y)
-      return 0.0
+      amt = horizon_curve_px
+      return 0.0 if amt == 0.0 || @perspective == 0
+      b = blend
+      return 0.0 if b <= 0.0
+      half = Graphics.height / 2.0
+      return 0.0 if half <= 0
+      t = (half - y) / half
+      return 0.0 if t <= 0.0
+      t = 1.0 if t > 1.0
+      return (amt * b) * t * t
     end
 
     # Lee partida solo si dirty (carga, F12, opciones). No cada frame.
@@ -345,12 +361,9 @@ module Visual25D
           @horizon_curve = curve
         end
       end
-      $PokemonSystem.visual25d_upgrade_legacy_profile! if $PokemonSystem.respond_to?(:visual25d_upgrade_legacy_profile!)
       return if !$PokemonSystem.respond_to?(:visual25d_tilt)
       @tilt = $PokemonSystem.visual25d_tilt
       @camera_zoom = $PokemonSystem.visual25d_zoom
-      @projection_model = $PokemonSystem.visual25d_model if $PokemonSystem.respond_to?(:visual25d_model)
-      @camera_fov = $PokemonSystem.visual25d_fov if $PokemonSystem.respond_to?(:visual25d_fov)
       rebuild_render_params!
       # refresh_active aplica @active / redraw
     end
@@ -420,14 +433,7 @@ module Visual25D
       @horizon_curve     = nil
       @band_blur         = nil
       @row_batch         = nil
-      if $PokemonSystem
-        $PokemonSystem.visual25d_round   = false if $PokemonSystem.respond_to?(:visual25d_round=)
-        $PokemonSystem.visual25d_tilt    = Config::TILT_DEGREES if $PokemonSystem.respond_to?(:visual25d_tilt=)
-        $PokemonSystem.visual25d_zoom    = Config::CAMERA_ZOOM if $PokemonSystem.respond_to?(:visual25d_zoom=)
-        $PokemonSystem.visual25d_enabled = Config::ENABLED if $PokemonSystem.respond_to?(:visual25d_enabled=)
-        $PokemonSystem.visual25d_model = Config::PROJECTION_MODEL if $PokemonSystem.respond_to?(:visual25d_model=)
-        $PokemonSystem.visual25d_fov = Config::CAMERA_FOV if $PokemonSystem.respond_to?(:visual25d_fov=)
-      end
+      $PokemonSystem.visual25d_round = true if $PokemonSystem&.respond_to?(:visual25d_round=)
       rebuild_render_params!
       mark_save_sync_dirty!
       redraw_map
@@ -568,10 +574,6 @@ module Visual25D
       @perf_ext_proj = 0
       @perf_ext_idle = 0
       @perf_ext_fast = 0
-      @perf_props_passes = 0
-      @perf_props_sprites = 0
-      @perf_props_ms = 0.0
-      @perf_tilemap_ms = 0.0
       @perf_frames = 0
     end
 
@@ -592,21 +594,6 @@ module Visual25D
       when :ext_idle then @perf_ext_idle += 1
       when :ext_fast then @perf_ext_fast += 1
       end
-    end
-
-    # Costes acumulados por sistema, exclusivamente cuando el probe esta ON.
-    # La ruta de juego normal no hace lecturas de tiempo por sprite.
-    def perf_record_props!(sprite_count, millis)
-      return unless @perf_enabled
-      @perf_props_passes = (@perf_props_passes || 0) + 1
-      @perf_props_sprites = (@perf_props_sprites || 0) + sprite_count.to_i
-      @perf_props_active = sprite_count.to_i
-      @perf_props_ms = (@perf_props_ms || 0.0) + millis.to_f
-    end
-
-    def perf_record_tilemap_ms!(millis)
-      return unless @perf_enabled
-      @perf_tilemap_ms = (@perf_tilemap_ms || 0.0) + millis.to_f
     end
 
     # Perfil del mapa actual (MS layers). Solo echoln.
@@ -672,8 +659,7 @@ module Visual25D
       echoln(format(
         "[V25D perf] map=%s %.0ffps~ frames=%d grid=%dx%dx3(%d) marg=%dx%d extN=%d " \
         "full/f=%.0f yFlat/f=%.0f xHit/f=%.0f xMiss/f=%.0f z/f=%.0f zRaised/f=%.0f " \
-        "blank/f=%.0f cull/f=%.0f rebuild/f=%.1f extRe/f=%.0f extPr/f=%.0f extIdle/f=%.0f extFast/f=%.0f tilt=%d zoom=%d " \
-        "propGeom/f=%.1f propN=%d propMs/f=%.3f tilemapMs/f=%.3f model=%s",
+        "blank/f=%.0f cull/f=%.0f rebuild/f=%.1f extRe/f=%.0f extPr/f=%.0f extIdle/f=%.0f extFast/f=%.0f tilt=%d zoom=%d",
         mid.inspect, f / elapsed, f, cols, rows, slots, margin_columns, margin_rows, ext_n,
         @perf_full.to_f / f, @perf_yflat.to_f / f,
         @perf_xhit.to_f / f, @perf_xmiss.to_f / f,
@@ -682,10 +668,7 @@ module Visual25D
         @perf_proj_rebuild.to_f / f,
         @perf_ext_reapply.to_f / f, @perf_ext_proj.to_f / f,
         @perf_ext_idle.to_f / f, @perf_ext_fast.to_f / f,
-        tilt.to_i, camera_zoom.to_i,
-        (@perf_props_passes || 0).to_f / f, (@perf_props_active || 0),
-        (@perf_props_ms || 0.0).to_f / f, (@perf_tilemap_ms || 0.0).to_f / f,
-        projection_model.to_s
+        tilt.to_i, camera_zoom.to_i
       ))
       perf_reset_counters
     end
@@ -707,12 +690,6 @@ module Visual25D
       @cam_shape_floor = nil
       @shelf_lift_cache = nil
       @shelf_lift_stamp = nil
-    end
-
-    # :gen5 = plano proyectado SIN escala variable por fila (billboards rectos).
-    # Los modos :camera/:classic son legados experimentales.
-    def gen5_projection?
-      return projection_model == :gen5
     end
 
     # :camera = escala 1/profundidad (FOV); :classic = perfil lineal.
@@ -916,9 +893,6 @@ module Visual25D
 
     # Inversa de raw_project_y (classic cuadrática / camera log-depth).
     def raw_unproject(raw_value)
-      if gen5_projection?
-        return raw_value / gen5_ground_scale
-      end
       return raw_value / @zoom if @perspective == 0
       if camera_projection?
         return camera_raw_unproject(raw_value)
@@ -1035,7 +1009,7 @@ module Visual25D
     # la pantalla, que es donde esta el jugador. Normalizado para que inclinar la
     # camara reparta tamano entre el fondo y el primer plano en vez de acercar.
     def shape_at(y)
-      return 1.0 if gen5_projection? || @perspective == 0
+      return 1.0 if @perspective == 0
       if camera_projection?
         # shape = d0/depth → 1 en el centro; fondo mas pequeño, primer plano mayor.
         d = camera_depth_at(y)
@@ -1049,15 +1023,7 @@ module Visual25D
     # Escala en profundidad: gobierna el alto de las filas y el tamano de lo que
     # esta de pie sobre ellas.
     def scale_at(y)
-      return gen5_ground_scale if gen5_projection?
       return @zoom * shape_at(y)
-    end
-
-    # Una transformacion afin del suelo: todo el mapa comparte el MISMO plano.
-    # Sin deformaciones laterales segun distancia, bandas curvas ni efecto
-    # miniatura. El angulo comprime la profundidad de modo uniforme.
-    def gen5_ground_scale
-      return @gen5_ground_factor || (@zoom || 1.0)
     end
 
     # Escala en anchura. Converge menos que la de profundidad, como en una camara
@@ -1065,7 +1031,6 @@ module Visual25D
     # freno es ademas lo que evita que un elemento alto se despegue lateralmente
     # de la casilla que ocupa.
     def width_scale_at(y)
-      return @zoom if gen5_projection?
       value = @zoom * (1.0 + ((shape_at(y) - 1.0) * Config::VANISHING_STRENGTH))
       floor = min_width_scale
       return (value < floor) ? floor : value
@@ -1081,7 +1046,6 @@ module Visual25D
 
     # Integral de scale_at: dos filas contiguas comparten borde exactamente.
     def raw_project_y(y)
-      return gen5_ground_scale * y if gen5_projection?
       return @zoom * y if @perspective == 0
       if camera_projection?
         return @zoom * camera_shape_integral(y)
@@ -1432,7 +1396,7 @@ module Visual25D
         top = (row * tile_height) - pixel_offset_y
         @row_top[row] = (raw_project_y(top) + horizon_curve(top) - ys).round
         y_mid = top + half_h
-        if gen5_projection? || persp == 0
+        if persp == 0
           wscale = zoom
         elsif use_cam
           d = cam_d0 + (cam_slope * (cam_half - y_mid))

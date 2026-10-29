@@ -354,8 +354,11 @@ end
 # La capa vive en Scene_Map y no en Spriteset_Map, porque Essentials crea un
 # Spriteset_Map por cada mapa conectado y la neblina se acumularia.
 #===============================================================================
-# Vermeil: no sobrescribir las teclas de TurboConfig.
-# El hotkey 2.5D se configura desde Settings.rb; por defecto deshabilitado.
+# Q era Turbo (AUX1). Solo ALT queda para turbo; Q = fundido 2.5D en OW.
+if defined?(TurboConfig) && TurboConfig.const_defined?(:TOGGLE_KEYS)
+  TurboConfig.send(:remove_const, :TOGGLE_KEYS)
+  TurboConfig.const_set(:TOGGLE_KEYS, [Input::ALT])
+end
 
 module Visual25D
   class << self
