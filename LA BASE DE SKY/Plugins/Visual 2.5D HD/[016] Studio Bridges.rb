@@ -62,8 +62,8 @@ module Visual25D
              else
                cells = obj[:cells] || []
                has_height = obj[:height].to_i > 1
-               has_priority = cells.any? { |c| c && c.fetch("priority", 0).to_i > 0 }
-               has_height && !has_priority ? :billboard : :native
+               priorities = cells.map { |c| c.fetch("priority", 0).to_i }
+               has_height && priorities.uniq.length == 1 ? :billboard : :native
              end
       @v25_props_modes[key] = mode
     end
