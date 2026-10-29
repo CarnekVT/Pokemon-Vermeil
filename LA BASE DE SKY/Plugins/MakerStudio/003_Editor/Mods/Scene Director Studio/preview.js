@@ -32,7 +32,7 @@ export class ScenePreview{
   fit(){const r=this.host.getBoundingClientRect(),z=Math.min((r.width-24)/this.w,(r.height-24)/this.h,2);this.setZoom(Math.max(.25,z||1),false);}
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${this.w*this.zoom}px`;this.canvas.style.height=`${this.h*this.zoom}px`;if(manual)this.host.dataset.manualZoom="1";}
   resetState(){
-    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null};
+    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null,confirm:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path);if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
@@ -113,6 +113,7 @@ export class ScenePreview{
       const u=s.treatment,opt=u.option,t=s.frame;
       const accent=opt==="femenino"?"#dd4e9f":opt==="masculino"?"#896db0":"#5daaa8";
       g.save();g.globalAlpha=clamp(u.alpha??1,0,1);
+      if(u.ui){g.drawImage(u.ui,0,0,this.w,this.h)}else{
       g.fillStyle="#35282a";g.fillRect(0,0,this.w,this.h);
       g.fillStyle="#6f4030";g.fillRect(18,14,604,452);
       g.fillStyle="#fcf6da";g.fillRect(23,19,594,442);
@@ -125,8 +126,10 @@ export class ScenePreview{
       g.fillStyle="#fbf7e6";g.fillRect(143,127,354,260);
       g.fillStyle="#6f4030";g.fillRect(34,410,572,43);
       g.fillStyle="#b0643b";g.fillRect(40,415,560,33);
-      this.gameFont(35);g.fillStyle="#412c26";g.textAlign="center";
-      g.fillText(opt.toUpperCase(),this.w/2,43);
+      }
+      this.gameFont(29);g.fillStyle="#412c26";g.textAlign="center";
+      g.fillText(opt.toUpperCase(),this.w/2,39);
+      this.gameFont(18);g.fillStyle="#fff4da";g.fillText("Izq. / Der. elegir      Enter confirmar",this.w/2,108);
       const arrow=(img,x,sign)=>{
         if(img){const fw=img.width,fh=fw===40&&img.height===224?32:Math.min(fw,img.height),sc=Math.min(29/Math.max(fw,fh),2);g.drawImage(img,0,0,fw,fh,x-fw*sc/2,264-fh*sc/2,fw*sc,fh*sc)}
         else{g.fillStyle=accent;g.beginPath();g.moveTo(x+sign*16,243);g.lineTo(x-sign*16,264);g.lineTo(x+sign*16,285);g.closePath();g.fill()}
@@ -153,7 +156,7 @@ export class ScenePreview{
       g.globalAlpha=(u.alpha??1);
       if(!u.image){this.gameFont(19);g.fillStyle="#252a3b";g.textAlign="center";g.fillText("PNG: solen_"+opt+".png",this.w/2,270)}
       g.font="18px Arial";g.textAlign="center";g.fillStyle="#fcf6da";
-      g.fillText("Izq. / Der.  Elegir       Enter  Confirmar",this.w/2,421);
+      if(!u.ui)g.fillText("Izq. / Der.  Elegir       Enter  Confirmar",this.w/2,421);
       g.restore();
       if((u.alpha??1)<1){g.fillStyle="rgba(0,0,0,"+(1-(u.alpha??1))+")";g.fillRect(0,0,this.w,this.h)}
     })}
@@ -162,6 +165,7 @@ export class ScenePreview{
       const u=s.naming,t=s.frame;
       g.save();g.globalAlpha=clamp(u.alpha??1,0,1);
       const rect=(x,y,w,h,color)=>{g.fillStyle=color;g.fillRect(x,y,w,h)};
+      if(u.ui){g.drawImage(u.ui,0,0,this.w,this.h)}else{
       rect(0,0,this.w,this.h,"#372729");
       rect(16,16,608,448,"#67382d");
       rect(22,22,596,436,"#fcf6db");
@@ -177,22 +181,31 @@ export class ScenePreview{
       rect(279,231,301,73,"#f4e4bd");
       rect(34,409,572,43,"#67382d");
       rect(40,415,560,31,"#ae633a");
+      }
       g.fillStyle="#402a29";g.textAlign="center";this.gameFont(31);
-      g.fillText("ELIGE TU NOMBRE",320,44);
-      g.textAlign="left";this.gameFont(20);g.fillText("Nombre del protagonista",277,148);
+      g.fillText("TU NOMBRE",402,44);
+      g.textAlign="left";this.gameFont(20);
       if(u.portrait){
         const im=u.portrait,box=this.visibleBox(im),sc=Math.min(168/box.w,236/box.h,1);
         g.drawImage(im,box.x,box.y,box.w,box.h,139-box.w*sc/2,140+(236-box.h*sc)/2,box.w*sc,box.h*sc);
       }
       this.gameFont(29);
-      g.fillText((u.text||"")+((Math.floor(t/22)%2)?"":"|"),292,243);
+      g.fillText((u.text||""),292,233);
       this.gameFont(18);
-      g.fillText((u.text||"").length+" / "+u.max+" caracteres",275,325);
+      g.fillText((u.text||"").length+" / "+u.max,286,311);
       this.gameFont(17);g.fillStyle="#fcf6db";g.textAlign="center";
-      g.fillText("Escribir  ·  Retroceso: borrar  ·  Enter: confirmar",320,420);
+      if(!u.ui)g.fillText("Escribir  ·  Retroceso: borrar  ·  Enter: confirmar",320,420);
       g.restore();
       if((u.alpha??1)<1){g.fillStyle="rgba(0,0,0,"+(1-(u.alpha??1))+")";g.fillRect(0,0,this.w,this.h)}
     })}
+    if(s.confirm)push(9020,()=>{
+      const q=s.confirm;g.save();g.fillStyle="rgba(35,23,33,.94)";g.fillRect(62,321,516,121);
+      g.fillStyle="#f5e0b9";g.fillRect(67,326,506,111);g.fillStyle="#fff5d7";g.fillRect(72,331,496,101);
+      this.gameFont(24);g.fillStyle="#462933";g.textAlign="center";g.fillText(q.text,320,340);
+      this.gameFont(22);
+      for(let i=0;i<2;i++){const x=138+225*i;if(i===q.selected){g.fillStyle="#9b4c68";g.fillRect(x,381,170,37);g.fillStyle="#fff5da"}else{g.fillStyle="#462933"}g.fillText(i===0?"Confirmar":"Cambiar",x+85,385)}
+      g.restore();
+    });
     if(s.centered)push(9010,()=>{this.gameFont();g.textAlign="center";g.textBaseline="middle";const text=String(s.centered.text||"").slice(0,Math.floor(s.centered.revealed??0));g.fillStyle=s.centered.color||"#000";g.fillText(text,this.w/2,this.h/2-16);g.textAlign="left";g.textBaseline="top"});
 
     queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();
@@ -236,18 +249,31 @@ export class ScenePreview{
 
   async changeTreatment(delta){const t=this.state.treatment;if(!t)return;const options=["femenino","neutro","masculino"];const i=options.indexOf(t.option);t.transition={image:t.image,begin:this.state.frame,direction:delta};t.option=options[(i+delta+options.length)%options.length];t.image=t.portraits?.[options.indexOf(t.option)]||await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+t.option);}
   nameKey(key){
+    if(this.state.confirm){
+      if(key==="ArrowLeft"||key==="ArrowRight"){this.selectConfirmation(1);return true;}
+      if(key==="Escape"){this.state.confirm=null;return true;}
+      if(key==="Enter"){this.continue();return true;}
+      return true;
+    }
     const n=this.state.naming;
     if(!n)return false;
     if(key==="Backspace"){n.text=n.text.slice(0,-1);return true;}
-    if(key==="Enter"){if(n.text.trim().length>=n.min)this.continue();return true;}
-    if(typeof key==="string"&&key.length===1&&!/[\x00-\x1f]/.test(key)&&n.text.length<n.max){
-      n.text+=key;return true;
-    }
+    if(key==="Enter"){if(n.text.trim().length>=n.min)this.state.confirm={text:"¿Usar el nombre "+n.text.trim()+"?",selected:0};return true;}
+    if(typeof key==="string"&&key.length===1&&n.text.length<n.max){n.text+=key;return true}
     return false;
   }
+  selectConfirmation(delta){
+    if(!this.state.confirm)return false;
+    this.state.confirm.selected=(this.state.confirm.selected+delta+2)%2;
+    return true;
+  }
   continue(){
-    if(this.state.naming&&this.state.naming.text.trim().length<this.state.naming.min)return;
-    if(this.state.treatment?.option)this.state.vars.set("treatment",this.state.treatment.option);
+    const c=this.state.confirm;
+    if(c){this.state.confirm=null;if(c.selected===0){if(this.state.treatment)this.state.vars.set("treatment",this.state.treatment.option);this.inputSerial++;}return;}
+    const n=this.state.naming;
+    if(n){if(n.text.trim().length>=n.min)this.state.confirm={text:"¿Usar el nombre "+n.text.trim()+"?",selected:0};return;}
+    const t=this.state.treatment;
+    if(t){this.state.confirm={text:"¿Usar "+t.option+"?",selected:0};return;}
     this.inputSerial++;
   }
   async waitInput(token,serial){while(token===this.playToken&&this.inputSerial===serial)await sleep(1000/60);return this.inputSerial;}
@@ -346,7 +372,7 @@ export class ScenePreview{
         const opt=opts[index];
         const portraits=await Promise.all(opts.map(x=>this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+x)));
         s.treatment={option:opt,image:portraits[index],portraits,alpha:skip?1:0,
-          left:await this.image("Graphics/UI/left_arrow"),right:await this.image("Graphics/UI/right_arrow"),transition:null};
+          left:await this.image("Graphics/UI/left_arrow"),right:await this.image("Graphics/UI/right_arrow"),ui:await this.image("Graphics/Scenes/Intro/UI/treatment"),transition:null};
         if(!skip){
           await this.frames(22,p=>s.treatment.alpha=1-Math.pow(1-p,3),false,token);
           this.onWaiting?.(true);
@@ -364,7 +390,7 @@ export class ScenePreview{
         const txt=String(c.default||"Solen").slice(0,Number(c.max)||12);
         const chosen=s.vars.get("treatment")||"neutro";
         s.naming={text:txt,max:Number(c.max)||12,min:Number(c.min)||1,alpha:skip?1:0,
-          portrait:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+chosen)};
+          portrait:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+chosen),ui:await this.image("Graphics/Scenes/Intro/UI/name")};
         if(!skip){
           await this.frames(16,p=>s.naming.alpha=p,false,token);
           this.onWaiting?.(true);
