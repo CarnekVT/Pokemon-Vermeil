@@ -225,39 +225,78 @@ module BifrostCapture
     bitmap
   end
 
-  def self.fly_ball(item, end_x, end_y, distance, cfg)
-    view = Viewport.new(0, 0, Graphics.width, Graphics.height)
-    view.z = 999999
+  def self.ball_shadow_bitmap
+    bitmap = Bitmap.new(44,16)
+    16.times do |y|
+      44.times do |x|
+        dx = (x-22.0)/22.0
+        dy = (y-8.0)/8.0
+        d = dx*dx + dy*dy
+        next if d >= 1.0
+        bitmap.fill_rect(x,y,1,1,Color.new(9,15,22,(65*(1.0-d)).to_i))
+      end
+    end
+    bitmap
+  end
+
+  # Un mismo evento se sigue durante TODO el vuelo. La sombra se mantiene
+  # sobre el suelo y la Ball traza un arco hasta la posición renderizada actual.
+  def self.fly_ball(item, event, pointer, cfg)
+    view = Viewport.new(0,0,Graphics.width,Graphics.height)
+    view.z = 999995
+    shadow = Sprite.new(view)
+    shadow.bitmap = ball_shadow_bitmap
+    shadow.ox = shadow.bitmap.width/2
+    shadow.oy = shadow.bitmap.height/2
     ball = Sprite.new(view)
     ball.bitmap = ball_sprite_bitmap(item)
-    ball.ox = ball.bitmap.width / 2
-    ball.oy = ball.bitmap.height / 2
-    # Usar los sprites de las Balls que ya incluye Vermeil.
-    z = [24.0 / [ball.bitmap.width,ball.bitmap.height].max, 1.0].min
-    ball.zoom_x = z
-    ball.zoom_y = z
-    start_x = $game_player.screen_x + 4
-    start_y = $game_player.screen_y - 22
+    ball.ox = ball.bitmap.width/2
+    ball.oy = ball.bitmap.height/2
+    factor = [24.0/[ball.bitmap.width,ball.bitmap.height].max,1.0].min
+    ball.zoom_x = factor
+    ball.zoom_y = factor
+    start_x = $game_player.screen_x+7
+    start_ground = $game_player.screen_y
+    start_y = start_ground-24
+    last_x, last_y = pointer || [start_x,start_y-65]
     frames = cfg["throw_frames"].to_i.clamp(8,48)
     arc = cfg["throw_arc"].to_i.clamp(0,110)
     begin
       frames.times do |i|
-        t = (i+1).to_f / frames
+        t = (i+1).to_f/frames
         smooth = t*t*(3-2*t)
-        ball.x = start_x + (end_x-start_x)*smooth
-        ball.y = start_y + (end_y-start_y)*smooth -
+        if event && valid_target?(event)
+          last_x, last_y = screen_position(event)
+          rect = target_screen_rect(event)
+          end_ground = rect[1]+rect[3]
+        else
+          end_ground = last_y+20
+        end
+        ball.x = start_x+(last_x-start_x)*smooth
+        ground_y = start_ground+(end_ground-start_ground)*smooth
+        ball.y = start_y+(last_y-start_y)*smooth -
                  Math.sin(Math::PI*t)*arc
-        ball.angle = (t*520).to_i % 360
+        ball.angle = (t*490).to_i%360
+        shadow.x = ball.x
+        shadow.y = ground_y-3
+        shadow.zoom_x = 0.7+0.3*t
+        shadow.zoom_y = 0.7+0.3*t
         Graphics.update
         Input.update
-        $scene.updateSpritesets if $scene.is_a?(Scene_Map)
+        if $scene.is_a?(Scene_Map)
+          $scene.updateMaps
+          $scene.updateSpritesets
+        end
       end
     ensure
-      bitmap = ball.bitmap
-      ball.dispose unless ball.disposed?
-      bitmap.dispose if bitmap && !bitmap.disposed?
+      [ball,shadow].each do |sprite|
+        bitmap = sprite.bitmap
+        sprite.dispose unless sprite.disposed?
+        bitmap.dispose if bitmap && !bitmap.disposed?
+      end
       view.dispose unless view.disposed?
     end
+    [last_x,last_y]
   end
 
   def self.contact_fx(event)
@@ -299,24 +338,35 @@ module BifrostCapture
     end
   end
 
-  # Sobrescribir únicamente la presentación: conserva las probabilidades,
-  # inventario, formas de Galar y flujo de combate del runtime anterior.
-  class << self
-    alias bifrost_original_throw_at throw_at
+  # API pública para lanzamientos directos; el argumento es el Game_Event,
+  # no coordenadas que el OW puede abandonar mientras se anima la Ball.
+  def self.perform_throw(event, mode, payload, config, pointer = nil)
+    cfg = if event && valid_target?(event)
+      spec = event_spec(event)
+      options($game_map.map_id,spec[0],event.id)
+    else
+      config
+    end
+    if !event && cfg["allow_empty_throw"] != "1"
+      if pointer && uncapturable_event_at(pointer)
+        notice(_INTL("Este evento no está habilitado como Pokémon capturable."))
+      else
+        notice(_INTL("No hay un Pokémon capturable bajo la retícula."))
+      end
+      return false
+    end
+    behind = event && behind?($game_player.x,$game_player.y,event)
+    item = mode == :ball ? payload : :POKEBALL
+    fly_ball(item,event,pointer,cfg)
+    resolve_throw(event,mode,payload,cfg,behind)
   end
 
-  def self.throw_at(tx, ty, forward, side, mode, payload, cfg)
+  # Conservar la API antigua de los eventos ya creados en otros mapas.
+  def self.throw_at(tx,ty,_forward,_side,mode,payload,cfg)
     event = $game_map.events.values.find do |e|
-      e.x == tx && e.y == ty && valid_target?(e)
+      valid_target?(e) && e.x == tx && e.y == ty
     end
-    destination = if event
-      screen_position(event)
-    else
-      @aim_pointer || [$game_player.screen_x, $game_player.screen_y-64]
-    end
-    item = mode == :ball ? payload : :POKEBALL
-    fly_ball(item, destination[0], destination[1], forward, cfg)
-    bifrost_original_throw_at(tx, ty, forward, side, mode, payload, cfg)
+    perform_throw(event,mode,payload,cfg,@aim_pointer)
   end
 
   def self.aim
