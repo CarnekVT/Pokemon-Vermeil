@@ -21,12 +21,11 @@ def pbVisual25DMenu
        _INTL("Altura de los verticales"),
        _INTL("Modelo de proyección"),
        _INTL("FOV de cámara"),
-       _INTL("Mundo redondo ({1})", (Visual25D.horizon_curve_px > 0.5) ? _INTL("sí") : _INTL("no")),
        _INTL("Desenfoque de bordes ({1})", Visual25D.band_blur? ? _INTL("sí") : _INTL("no")),
        _INTL("Suelo por filas ({1})", Visual25D.row_batch? ? _INTL("sí") : _INTL("no")),
        _INTL("Activar/desactivar"),
        _INTL("Restaurar valores"),
-       _INTL("Salir")], 11
+       _INTL("Salir")], 10
     )
     case command
     when 0
@@ -63,16 +62,13 @@ def pbVisual25DMenu
         Visual25D.camera_fov.to_i, 20, 90
       )
     when 5
-      pbVisual25DMundoRedondo
-    when 6
       Visual25D.band_blur = !Visual25D.band_blur?
-    when 7
+    when 6
       Visual25D.row_batch = !Visual25D.row_batch?
-    when 8
-      # Fundido: salir del menú para que Scene_Map avance el blend.
+    when 7
       Visual25D.toggle_smooth
       break
-    when 9
+    when 8
       Visual25D.reset_to_defaults
     else
       break
@@ -88,19 +84,10 @@ def pbVisual25DChooseNumber(message, current, min, max)
   return pbMessageChooseNumber(message, params)
 end
 
-# Alterna terreno redondo (HORIZON_CURVE) y plano (0).
-# Al cargar no cambia nada: sigue el valor de ahora.
-# Script: pbVisual25DMundoRedondo
-# Menú: Depuración -> Campo -> Visual 2.5D HD: mundo redondo
+# Compatibilidad con eventos antiguos; el horizonte permanece recto.
 def pbVisual25DMundoRedondo
-  turning_on = Visual25D.horizon_curve_px <= 0.5
-  Visual25D.horizon_curve = turning_on ? Visual25D::Config::HORIZON_CURVE : 0
-  $PokemonSystem.visual25d_round = turning_on if $PokemonSystem&.respond_to?(:visual25d_round=)
-  if turning_on
-    pbMessage(_INTL("Mundo redondo."))
-  else
-    pbMessage(_INTL("Mundo plano."))
-  end
+  Visual25D.horizon_curve = 0
+  $PokemonSystem.visual25d_round = false if $PokemonSystem&.respond_to?(:visual25d_round=)
 end
 
 #===============================================================================
@@ -353,13 +340,6 @@ MenuHandlers.add(:debug_menu, :visual_25d_hd, {
   "parent"      => :field_menu,
   "description" => _INTL("Cambia el ángulo de la cámara y la distancia de dibujado del mapa."),
   "effect"      => proc { pbVisual25DMenu }
-})
-
-MenuHandlers.add(:debug_menu, :visual_25d_hd_round, {
-  "name"        => _INTL("Visual 2.5D HD: mundo redondo"),
-  "parent"      => :field_menu,
-  "description" => _INTL("Alterna el terreno redondo y el plano. Al entrar queda como ahora."),
-  "effect"      => proc { pbVisual25DMundoRedondo }
 })
 
 MenuHandlers.add(:debug_menu, :visual_25d_hd_walls, {
