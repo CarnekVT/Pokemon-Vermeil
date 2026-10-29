@@ -6,7 +6,7 @@ const LEGEND="RAIKOU ENTEI SUICUNE LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES UXIE ME
 const D={
  profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"aux2",control_mode:"toggle",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
- spawn_chance:"100",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
+ spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
  spawn_lifetime:"45",spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
  ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100",
  range:"7",width:"7",optimal_range:"4",alert_distance:"3",hit_near:"100",hit_far:"60",
