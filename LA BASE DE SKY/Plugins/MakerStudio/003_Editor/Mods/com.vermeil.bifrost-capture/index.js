@@ -279,7 +279,9 @@ class CaptureStudio{
    ].map(x=>'<div class="bf-stat"><span>'+E(x[0])+'</span><strong>'+E(x[1])+'</strong><small>'+E(x[2])+'</small></div>').join("")+'</div>');
  }
  preview(v){
-  const rows=7,cols=7,half=3,range=Math.max(1,Number(v.range)||7),opt=Number(v.optimal_range)||4;
+  const range=Math.max(1,Number(v.range)||7),opt=Number(v.optimal_range)||4;
+  const cols=Math.min(15,Math.max(1,Number(v.width)||7));
+  const rows=Math.min(range+1,12),half=Math.floor(cols/2);
   let tiles="";
   for(let f=1;f<=rows;f++){
    for(let s=-half;s<=half;s++){
@@ -291,14 +293,14 @@ class CaptureStudio{
   const dist=Math.min(this.aimF,range),near=Number(v.hit_near)||0,far=Number(v.hit_far)||0;
   const t=Math.max(0,dist-opt)/Math.max(1,range-opt);
   const hit=this.aimF>range?0:Math.round(near+(far-near)*t);
-  return '<div class="bf-preview-wrap"><div class="bf-grid">'+tiles+'</div>'+
+  return '<div class="bf-preview-wrap"><div class="bf-grid" style="grid-template-columns:repeat('+cols+',minmax(0,1fr))">'+tiles+'</div>'+
    '<div class="bf-preview-info"><strong>Simulación de apuntado</strong>'+
    '<div>Fila <b>'+this.aimF+'</b> · Desplazamiento <b>'+this.aimS+'</b></div>'+
    '<div><span class="bf-swatch" style="background:#6d977d"></span>Zona óptima</div>'+
    '<div><span class="bf-swatch" style="background:#526580"></span>Zona lejana</div>'+
    '<div><span class="bf-swatch" style="background:#7c5059"></span>Fuera de alcance</div>'+
    '<div class="bf-divider"></div><strong>'+hit+'% precisión</strong>'+
-   '<span class="bf-help">Previsualización de cálculos. El juego comprueba además objetivo válido y obstáculos.</span>'+
+   '<span class="bf-help">Parrilla: '+cols+' columnas · '+rows+' filas visibles; la última representa fallo fuera de alcance. El juego comprueba además objetivo y obstáculos.</span>'+
    '<div class="bf-tag">Haz clic en una casilla</div></div></div>';
  }
  profiles(){
