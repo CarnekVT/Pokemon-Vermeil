@@ -52,6 +52,12 @@ module BifrostCapture
     state = event.instance_variable_get(:@bifrost_flee_state)
     return unless state
     state[:elapsed] += 1
+    steps = cfg["flee_steps"].to_i.clamp(1, 30)
+    distance = cfg["flee_disappear_distance"].to_i.clamp(4, 30)
+    if state[:steps] >= steps || distance_to_player(event) >= distance
+      finish_flee(event, cfg) unless event.moving?
+      return
+    end
     if !event.moving? && !event.move_route_forcing
       ox, oy = event.x, event.y
       event.move_away_from_player
@@ -62,11 +68,7 @@ module BifrostCapture
         state[:stuck] += 1
       end
     end
-    steps = cfg["flee_steps"].to_i.clamp(1, 30)
-    distance = cfg["flee_disappear_distance"].to_i.clamp(4, 30)
-    if state[:steps] >= steps || distance_to_player(event) >= distance
-      finish_flee(event, cfg) unless event.moving?
-    elsif state[:stuck] >= cfg["flee_stuck_frames"].to_i.clamp(15, 600)
+    if state[:stuck] >= cfg["flee_stuck_frames"].to_i.clamp(15, 600)
       # Never teleport or erase an OW that is physically trapped.
       restore_wander(event, state)
       event.instance_variable_set(:@bifrost_alert_cooldown, 90)
@@ -91,6 +93,7 @@ module BifrostCapture
     when "flee"
       begin_flee(event, cfg)
     when "attack"
+      event.instance_variable_set(:@bifrost_alert_cooldown, 180)
       if @aim_running || @aim_opening
         @pending_attack ||= event
         @aim_interrupted = true
