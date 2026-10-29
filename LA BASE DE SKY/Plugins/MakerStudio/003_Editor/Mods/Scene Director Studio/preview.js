@@ -7,7 +7,7 @@ export class ScenePreview{
   constructor(ctx,host,getEngine){
     this.ctx=ctx;this.host=host;this.getEngine=getEngine;this.w=640;this.h=480;this.zoom=1;
     this.canvas=document.createElement("canvas");this.canvas.className="sd-canvas";this.host.appendChild(this.canvas);this.g=this.canvas.getContext("2d");
-    this.cache=new Map();this.urls=[];this.playToken=0;this.onCommand=null;this.onWaiting=null;this.autoAdvance=false;this.audio={bgm:null,bgs:null,ses:new Set()};this.textBoxImg=null;this.gameFontFace=null;this.gameFontFamily='"Power Green", "Arial Narrow", Arial, sans-serif';this.whiteCache=new WeakMap();
+    this.cache=new Map();this.urls=[];this.playToken=0;this.onCommand=null;this.onWaiting=null;this.autoAdvance=false;this.audio={bgm:null,bgs:null,ses:new Set()};this.textBoxImg=null;this.gameFontFace=null;this.gameFontFamily='"Power Green", "Arial Narrow", Arial, sans-serif';this.whiteCache=new WeakMap();this.portraitBoundsCache=new WeakMap();
     this.inputSerial=0;this.resetState();this.resize(640,480);this.last=performance.now();this.raf=requestAnimationFrame(()=>this.tick());this.refreshEngineAssets();
   }
   resize(w,h){this.w=w;this.h=h;this.canvas.width=w;this.canvas.height=h;this.fit();}
@@ -53,6 +53,24 @@ export class ScenePreview{
   whiteFrame(img,sx,sy,sw,sh){
     let byImg=this.whiteCache.get(img);if(!byImg){byImg=new Map();this.whiteCache.set(img,byImg)}const key=`${sx},${sy},${sw},${sh}`;if(byImg.has(key))return byImg.get(key);
     const c=document.createElement("canvas");c.width=sw;c.height=sh;const x=c.getContext("2d");x.drawImage(img,sx,sy,sw,sh,0,0,sw,sh);x.globalCompositeOperation="source-in";x.fillStyle="#fff";x.fillRect(0,0,sw,sh);x.globalCompositeOperation="source-over";byImg.set(key,c);return c;
+  }
+  visibleBox(img){
+    if(!img)return null;
+    const saved=this.portraitBoundsCache.get(img);
+    if(saved)return saved;
+    const c=document.createElement("canvas");c.width=img.width;c.height=img.height;
+    const cx=c.getContext("2d",{willReadFrequently:true});
+    cx.drawImage(img,0,0);
+    const px=cx.getImageData(0,0,img.width,img.height).data;
+    let minX=img.width,minY=img.height,maxX=-1,maxY=-1;
+    for(let y=0;y<img.height;y+=3)for(let x=0;x<img.width;x+=3){
+      if(px[(y*img.width+x)*4+3]<32)continue;
+      minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
+    }
+    const box=maxX<0?{x:0,y:0,w:img.width,h:img.height}:{x:Math.max(0,minX-4),y:Math.max(0,minY-4),
+      w:Math.min(img.width,maxX+7)-Math.max(0,minX-4),h:Math.min(img.height,maxY+7)-Math.max(0,minY-4)};
+    this.portraitBoundsCache.set(img,box);
+    return box;
   }
   drawFrame(img,frame,fw,fh,x,y,{alpha=1,zoom=1,white=false,additive=false}={}){
     if(!img||alpha<=0)return;const g=this.g,sx=Math.max(0,frame|0)*fw,src=white?this.whiteFrame(img,sx,0,fw,fh):img;g.save();g.globalAlpha=clamp(alpha,0,1);if(additive)g.globalCompositeOperation="lighter";
@@ -106,7 +124,7 @@ export class ScenePreview{
       this.gameFont(35);g.fillStyle="#252a3b";g.textAlign="center";
       g.fillText(opt.toUpperCase(),this.w/2,43);
       const arrow=(img,x,sign)=>{
-        if(img){const sc=Math.min(36/Math.max(img.width,img.height),2);g.drawImage(img,x-img.width*sc/2,264-img.height*sc/2,img.width*sc,img.height*sc)}
+        if(img){const fw=img.width,fh=Math.min(fw,img.height),sc=Math.min(29/Math.max(fw,fh),2);g.drawImage(img,0,0,fw,fh,x-fw*sc/2,264-fh*sc/2,fw*sc,fh*sc)}
         else{g.fillStyle=accent;g.beginPath();g.moveTo(x+sign*16,243);g.lineTo(x-sign*16,264);g.lineTo(x+sign*16,285);g.closePath();g.fill()}
       };
       arrow(u.left,84,-1);arrow(u.right,556,1);
@@ -117,20 +135,21 @@ export class ScenePreview{
       g.globalAlpha=(u.alpha??1);
       const opts=["femenino","neutro","masculino"];
       for(let i=0;i<3;i++){g.globalAlpha=(u.alpha??1)*(i===opts.indexOf(opt)?1:.36);
-        g.fillRect(293+i*22,416,i===opts.indexOf(opt)?12:7,5)}
+        g.fillRect(293+i*22,399,i===opts.indexOf(opt)?12:7,5)}
       g.globalAlpha=(u.alpha??1);
       const portrait=(im,alpha,offset)=>{
-        if(!im)return;const scale=Math.min(304/im.width,320/im.height,1);
+        if(!im)return;const box=this.visibleBox(im),scale=Math.min(304/box.w,320/box.h,1);
         g.globalAlpha=(u.alpha??1)*alpha;
-        g.drawImage(im,(this.w-im.width*scale)/2+offset,105+Math.sin(t/20)*2,im.width*scale,im.height*scale);
+        g.drawImage(im,box.x,box.y,box.w,box.h,(this.w-box.w*scale)/2+offset,
+          102+(320-box.h*scale)/2+Math.sin(t/20)*2,box.w*scale,box.h*scale);
       };
-      const tr=u.transition,blend=tr?clamp((t-tr.begin)/12,0,1):1;
+      const tr=u.transition,blend=tr?clamp((t-tr.begin)/8,0,1):1;
       if(tr&&blend<1)portrait(tr.image,1-blend,-tr.direction*18*blend);
       portrait(u.image,blend,tr?tr.direction*18*(1-blend):0);
       g.globalAlpha=(u.alpha??1);
       if(!u.image){this.gameFont(19);g.fillStyle="#252a3b";g.textAlign="center";g.fillText("PNG: solen_"+opt+".png",this.w/2,270)}
-      g.font="20px Arial";g.textAlign="center";g.fillStyle="#252a3b";
-      g.fillText("← → Cambiar        C / Enter Confirmar",this.w/2,this.h-24);
+      g.font="17px Arial";g.textAlign="center";g.fillStyle="#252a3b";
+      g.fillText("← → Cambiar       Enter Confirmar",this.w/2,415);
       g.restore();
       if((u.alpha??1)<1){g.fillStyle="rgba(0,0,0,"+(1-(u.alpha??1))+")";g.fillRect(0,0,this.w,this.h)}
     })}
@@ -204,7 +223,7 @@ export class ScenePreview{
 
   async centeredText(obj,skip,token){
     const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),cpf=e.speeds?.[obj.speed||"normal"]??1.5,color=`rgb(${(obj.color||[0,0,0]).slice(0,3).join(",")})`;this.state.centered={text,revealed:skip?text.length:0,color};if(skip)return;
-    let serial=this.inputSerial;while(this.state.centered.revealed<text.length&&token===this.playToken){const slowDots=text.slice(Math.floor(this.state.centered.revealed),Math.floor(this.state.centered.revealed)+3)==="..."||text.slice(Math.floor(this.state.centered.revealed)-2,Math.floor(this.state.centered.revealed)+1)==="...";this.state.centered.revealed=Math.min(text.length,this.state.centered.revealed+cpf*(slowDots?.4:1));await this.frames(1,null,false,token);if(this.inputSerial!==serial){this.state.centered.revealed=text.length;serial=this.inputSerial;}}if(text.includes("...")&&token===this.playToken)await this.frames(42,null,false,token);
+    let serial=this.inputSerial;while(this.state.centered.revealed<text.length&&token===this.playToken){const slowDots=text.slice(Math.floor(this.state.centered.revealed),Math.floor(this.state.centered.revealed)+3)==="..."||text.slice(Math.floor(this.state.centered.revealed)-2,Math.floor(this.state.centered.revealed)+1)==="...";this.state.centered.revealed=Math.min(text.length,this.state.centered.revealed+cpf*(slowDots?.4:1));await this.frames(1,null,false,token);if(this.inputSerial!==serial){this.state.centered.revealed=text.length;serial=this.inputSerial;}}if(text.includes("...")&&token===this.playToken)await this.frames(14,null,false,token);
   }
 
   resolveSpriteTargets(expr){
@@ -276,14 +295,14 @@ export class ScenePreview{
         s.treatment={option:opt,image:portraits[index],portraits,alpha:skip?1:0,
           left:await this.image("Graphics/UI/left_arrow"),right:await this.image("Graphics/UI/right_arrow"),transition:null};
         if(!skip){
-          await this.frames(36,p=>s.treatment.alpha=1-Math.pow(1-p,3),false,token);
+          await this.frames(22,p=>s.treatment.alpha=1-Math.pow(1-p,3),false,token);
           this.onWaiting?.(true);
           const start=this.inputSerial;
           while(this.inputSerial===start&&token===this.playToken)await sleep(16);
           this.onWaiting?.(false);
           if(token!==this.playToken)return;
-          await this.frames(16,null,false,token);
-          await this.frames(32,p=>s.treatment.alpha=1-p*p*(3-2*p),false,token);
+          await this.frames(8,null,false,token);
+          await this.frames(18,p=>s.treatment.alpha=1-p*p*(3-2*p),false,token);
         }
         if(c.store)s.vars.set(c.store,s.treatment?.option||opt);
         s.treatment=null;break;
