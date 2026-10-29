@@ -98,16 +98,18 @@ class SceneEngine::Player
     update_aura_particles
     update_scrolling
     update_floating
-    rate = Graphics.respond_to?(:frame_rate) ? Graphics.frame_rate.to_f : 60.0
-    rate = 60.0 if rate <= 0
+    # Graphics.frame_rate no siempre representa los FPS reales de mkxp-z.
+    # mkxp.json fija 120; los guiones se escriben a 60 pasos/segundo.
     @scene_frame_remainder ||= 0.0
     @scene_logic_frame ||= 0
     @scene_logic_frame += 1
-    @scene_frame_remainder += rate / 60.0
+    fps = SceneEngine::Settings::CINEMATIC_RENDER_FPS.to_f
+    logic = SceneEngine::Settings::CINEMATIC_LOGIC_FPS.to_f
+    ratio = (fps > 0 && logic > 0) ? fps / logic : 1.0
+    @scene_frame_remainder += ratio
     ticks = @scene_frame_remainder.floor
     @scene_frame_remainder -= ticks
-    ticks = 1 if ticks < 1
-    ticks = 4 if ticks > 4
+    ticks = [[ticks, 1].max, 4].min
     ticks.times { Graphics.update }
     Input.update
   end
