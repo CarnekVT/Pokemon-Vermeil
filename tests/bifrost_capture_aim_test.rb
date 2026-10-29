@@ -55,6 +55,9 @@ require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/005_ThrowE
 module BifrostCapture
   class << self
     attr_accessor :test_hits, :test_notices, :test_stored
+    def generated?(event)
+      false
+    end
     def contact_fx(event)
       self.test_hits ||= []
       self.test_hits << event
