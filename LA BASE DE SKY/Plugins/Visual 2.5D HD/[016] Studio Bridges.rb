@@ -91,7 +91,8 @@ module Visual25D
       upright = {}
       map_id = @map.map_id
       @lbds_prop_sprites.each do |entry|
-        spr, obj, cx, cy, span, priority, _frame, track = entry
+        spr, obj, cx, cy, span, priority, _frame, track, row_span = entry
+        row_span ||= 1
         next if !spr || spr.disposed? || !spr.bitmap
         mode = v25_props_mode(obj)
         cell_x = obj[:x].to_i + cx
@@ -126,10 +127,10 @@ module Visual25D
           feet, unit, scale, foot_row = info
           remaining = obj[:height].to_i - cy
           top = (feet - remaining * unit).round
-          bottom = (feet - (remaining - 1) * unit).round
-          # Even upright props use separate 32px source cells. Seal the
-          # inter-cell edge by the SAME amount as Sky native columns.
-          bottom += Visual25D.column_band_overlap if remaining > 1
+          bottom = (feet - (remaining - row_span) * unit).round
+          # When an entire billboard is one sprite there is no internal seam.
+          # Multi-part billboards use the shared Sky seam at row boundaries.
+          bottom += Visual25D.column_band_overlap if row_span == 1 && remaining > 1
           z_row = foot_row
           use_raised_z = true
         elsif mode == :native && pri > 0
@@ -164,7 +165,7 @@ module Visual25D
         bottom = top + 1 if bottom <= top
         finish_x = start_x + 1 if finish_x <= start_x
         dest_zoom_x = (finish_x - start_x).to_f / (span * sw)
-        dest_zoom_y = (bottom - top).to_f / sh
+        dest_zoom_y = (bottom - top).to_f / (sh * row_span)
         spr.x = start_x if spr.x != start_x
         spr.y = top if spr.y != top
         spr.zoom_x = dest_zoom_x if (spr.zoom_x - dest_zoom_x).abs > 0.002
