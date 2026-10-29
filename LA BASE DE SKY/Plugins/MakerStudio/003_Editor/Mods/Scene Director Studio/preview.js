@@ -191,6 +191,11 @@ export class ScenePreview{
       }
       this.gameFont(29);
       g.fillText((u.text||""),292,233);
+      // Línea fija para localizar la entrada sin cursor invasivo.
+      g.fillStyle="#9e654a";g.fillRect(297,278,264,2);
+      g.fillStyle="#ebc991";g.fillRect(297,280,264,1);
+      if(!u.text){this.gameFont(19);g.fillStyle="#8f7364";g.fillText("Escribe aquí",297,247);}
+      g.fillStyle="#402a29";
       this.gameFont(18);
       g.fillText((u.text||"").length+" / "+u.max,286,311);
       this.gameFont(17);g.fillStyle="#fcf6db";g.textAlign="center";
