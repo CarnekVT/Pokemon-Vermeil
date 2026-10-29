@@ -217,3 +217,46 @@ confirmar con Enter. Reimporta `010_Intro.rb` y vuelve a guardar
 - Comprobar sincronía de `Despierta...` con su secuencia de despertar.
 
 No se han ejecutado aún estas pruebas de integración dentro del juego.
+
+
+## Integración real de fondos y confirmaciones (29/10/2026)
+
+Esta sección **reemplaza las indicaciones antiguas** que señalaban que los marcos
+solo se dibujaban por código. Ahora ambos menús cargan sus fondos PNG desde:
+
+- `LA BASE DE SKY/Graphics/Scenes/Intro/UI/treatment.png` — selector de
+  tratamiento, 640×480, sin texto ni mugshots incrustados.
+- `LA BASE DE SKY/Graphics/Scenes/Intro/UI/name.png` — entrada del nombre,
+  640×480, sin texto ni mugshots incrustados.
+
+Los PNG son **reemplazables** con los mismos nombres y resolución; el programa
+dibuja las opciones, ayuda, retrato y nombre encima. Si falta un recurso, el
+plugin conserva el diseño anterior como respaldo. Las capas de retrato no son
+parte del fondo y se siguen cargando desde `GenderSelect/solen_*.png`.
+
+**Alineación del selector:** se ha reservado el área superior para los
+controles y reducido la altura máxima del retrato a 244 px. La indicación de
+teclas ya no queda detrás de la imagen de Solen.
+
+**Confirmación del tratamiento:** tras seleccionar una opción, aparece un
+cuadro que permite **Confirmar** o **Cambiar**. La preferencia se guarda solo
+después de confirmar.
+
+**Confirmación del nombre:** Enter abre «¿Usar el nombre X?» con las opciones
+**Confirmar** y **Cambiar**. Volver no borra lo escrito y no actualiza
+`$player.name` hasta aceptar. El texto no incluye un cursor animado visible;
+la ventana de teclado de Essentials se mantiene oculta, y su cursor interno se
+coloca al final para una escritura más sencilla.
+
+**Diálogos:** se compactaron frases susceptibles a cortes y se eliminó la
+introducción redundante previa a la pantalla de nombre. La secuencia de
+«Despierta...» usa `:slow` y permanece 70 pasos tras terminar de mostrarse.
+
+**Scene Director Studio:** la vista previa carga los mismos dos fondos PNG,
+las confirmaciones se pueden manejar mediante teclado o clic, y el editor
+conserva la integración de `treatment_input` y `custom_name_input`.
+
+**Verificación:** cabeceras y estructura de ambos PNG, 640×480; sintaxis JS
+de model/importer/editor/preview. Sin prueba real de partida ni del teclado
+mkxp-z en esta sesión. Volver a importar y guardar la escena local del Studio
+para aplicar las modificaciones de guion.
