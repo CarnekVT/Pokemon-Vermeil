@@ -320,6 +320,25 @@ module LBDSAnimatedPropsSpriteset
     return group unless base
     parallel = p[:parallel]
     overlay = parallel && lbds_props_bitmap(parallel[:sheet], p, parallel[:frames])
+    # A multirow 2.5D billboard is one sprite, NOT independent 32px
+    # fragments. This prevents seams, layered-alpha double painting and
+    # reduces per-frame drawing work. Native priority cells remain separate.
+    if lbds_props_visual25d_active? && p[:height] > 1 &&
+       p[:projection_mode].to_s !~ /surface|ground|floor|native/i &&
+       p[:cells].all? { |c| c && c.fetch('priority', 0).to_i == 0 }
+      [[:base, base], [:parallel, overlay]].each do |track, bitmap|
+        next unless bitmap
+        sprite = Sprite.new(Spriteset_Map.viewport)
+        sprite.bitmap = bitmap
+        sprite.src_rect.set(p[:source_x] * 32, p[:source_y] * 32,
+                            p[:width] * 32, p[:height] * 32)
+        sprite.zoom_x = TilemapRenderer::ZOOM_X
+        sprite.zoom_y = TilemapRenderer::ZOOM_Y
+        sprite.opacity = (parallel[:opacity] * 255 / 100) if track == :parallel
+        group << [sprite, p, 0, 0, p[:width], 0, -1, track, p[:height]]
+      end
+      return group
+    end
     p[:height].times do |cy|
       cx = 0
       while cx < p[:width]
@@ -396,6 +415,18 @@ module LBDSAnimatedPropsSpriteset
     active_25d = lbds_props_visual25d_active?
     if @lbds_props_25d_last != active_25d
       @lbds_props_25d_last = active_25d
+      # Groups differ between 2D row slices and 2.5D tall billboards.
+      # Rebuild only on mode change, never for ordinary camera movement.
+      if @lbds_prop_groups
+        @lbds_prop_groups.each_value do |entries|
+          entries.each do |entry|
+            spr = entry[0]
+            spr.dispose if spr && !spr.disposed?
+          end
+        end
+        @lbds_prop_groups.clear
+        @lbds_prop_sprites = []
+      end
       @lbds_prop_geometry_stamp = nil
       @lbds_prop_active_bounds = nil
       @lbds_prop_projection_stamp = nil
@@ -443,7 +474,8 @@ module LBDSAnimatedPropsSpriteset
     # The 2.5D geometry pass owns its own anchors; no unused Hash per frame.
     anchor_cache = active_25d ? nil : {}
     @lbds_prop_sprites.each do |entry|
-      sprite, p, cx, cy, run, priority, old_frame, track = entry
+      sprite, p, cx, cy, run, priority, old_frame, track, rows = entry
+      rows ||= 1
       id = p.object_id
       # Integer cache key: no new [object_id, track] Array per sprite.
       key = (id << 1) | (track == :parallel ? 1 : 0)
@@ -461,7 +493,7 @@ module LBDSAnimatedPropsSpriteset
       end
       if frame != old_frame
         sprite.src_rect.set((frame * p[:frame_width] + p[:source_x] + cx) * 32,
-                            (p[:source_y] + cy) * 32, run * 32, 32)
+                            (p[:source_y] + cy) * 32, run * 32, rows * 32)
         entry[6] = frame
       end
       # Only frame sampling above runs every animation tick. Position/zoom is
