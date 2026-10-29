@@ -119,7 +119,8 @@ module BifrostCapture
   # no el centro de una casilla sin transformar. Fallback para mapas sin spriteset.
   def self.target_screen_rect(event)
     if defined?($scene) && $scene.is_a?(Scene_Map) && $scene.respond_to?(:spriteset)
-      spriteset = $scene.spriteset(event.map_id)
+      map_id = event.respond_to?(:map_id) ? event.map_id : $game_map.map_id
+      spriteset = $scene.spriteset(map_id)
       sprites = spriteset && spriteset.instance_variable_get(:@character_sprites)
       sprite = sprites && sprites.find { |sp| sp && sp.character.equal?(event) }
       if sprite && !sprite.disposed? && sprite.visible && sprite.src_rect
@@ -255,9 +256,10 @@ module BifrostCapture
     factor = [24.0/[ball.bitmap.width,ball.bitmap.height].max,1.0].min
     ball.zoom_x = factor
     ball.zoom_y = factor
-    start_x = $game_player.screen_x+7
-    start_ground = $game_player.screen_y
-    start_y = start_ground-24
+    actor_rect = target_screen_rect($game_player)
+    start_x = actor_rect[0]+actor_rect[2]*0.70
+    start_ground = actor_rect[1]+actor_rect[3]
+    start_y = start_ground-actor_rect[3]*0.55
     last_x, last_y = pointer || [start_x,start_y-65]
     frames = cfg["throw_frames"].to_i.clamp(8,48)
     arc = cfg["throw_arc"].to_i.clamp(0,110)
