@@ -723,7 +723,7 @@ module Visual25D
     # sin Cliff. La geometría es EXACTAMENTE la de project_tile, pero evita
     # pruebas de agua, capas, WallField y obtención de celdas cada píxel N/S.
     def tile_can_raised_fast?(tile)
-      return false if tile.hd25_walls || tile.hd25_shelf_flat || tile.hd25_interior_flat
+      return false if tile.hd25_shelf_flat || tile.hd25_interior_flat
       return false if tile.shows_reflection || tile.bridge || tile.hd25_tilting
       return false if tile.hd25_cell_x.nil? || tile.hd25_cell_y.nil? || tile.hd25_map_id.nil?
       return false if Config::COLUMN_LEAN > 0
@@ -736,8 +736,10 @@ module Visual25D
       pri = tile.hd25_geom_priority.to_i
       cell_row = grid_row_for_map_cell_id(tile.hd25_map_id, tile.hd25_cell_y)
       cell_row = row if cell_row.nil?
-      geom = column_stack_geom(nil, tile.hd25_cell_x, tile.hd25_cell_y,
-                               cell_row, pri, tile.hd25_map_id)
+      field = tile.hd25_walls
+      cx = tile.hd25_cell_x
+      cy = tile.hd25_cell_y
+      geom = column_stack_geom(field, cx, cy, cell_row, pri, tile.hd25_map_id)
       scale = geom[2]
       edges = geom[4]
       top = edges[pri]
@@ -746,6 +748,19 @@ module Visual25D
       left = tile.x
       start = project_x(left, scale)
       finish = project_x(left + TilemapRenderer::DISPLAY_TILE_WIDTH, scale)
+      side = 0
+      if field
+        if !geom[5].nil?
+          side = geom[5]
+        else
+          side = wall_side_seal_px(field, cx, cy + pri - 1, tile.hd25_skip_wall_seal)
+          geom[5] = side
+        end
+        if side > 0
+          start -= side
+          finish += side
+        end
+      end
       apply_tile_taper(tile, 1.0)
       tile.x = start
       tile.y = top
@@ -758,7 +773,7 @@ module Visual25D
       tile.hd25_proj_scale = scale
       tile.hd25_proj_y = top
       tile.hd25_proj_zy = zoom_y
-      tile.hd25_proj_side = 0
+      tile.hd25_proj_side = side
       tile.hd25_proj_wpx = wpx
     end
 
