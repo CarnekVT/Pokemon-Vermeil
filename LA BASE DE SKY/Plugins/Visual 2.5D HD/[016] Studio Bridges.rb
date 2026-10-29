@@ -101,7 +101,8 @@ module Visual25D
         next if row.nil?
         pri = priority.to_i.clamp(0, Visual25D::Config::MAX_PRIORITY)
 
-        if !field_ready && (mode == :surface || mode == :native)
+        if !field_ready && (mode == :surface || mode == :native ||
+                            (mode == :billboard && pri > 0))
           field = Visual25D.wall_field(@map)
           field = nil if field && field.flat
           field_ready = true
@@ -117,11 +118,21 @@ module Visual25D
           if !info
             last_y = obj[:y].to_i + obj[:height].to_i - 1
             base_row = Visual25D.grid_row_for_map_cell(@map, last_y)
-            base_y = Visual25D.row_top_any(base_row + 1)
-            unit = Visual25D.row_unit(base_row)
-            unit = Visual25D.vertical_unit_at(base_y) if !unit || unit <= 0
-            scale = Visual25D.row_width_scale_any(base_row)
-            info = [base_y, unit, scale, base_row]
+            if pri > 0
+              # Raised billboards use the exact supporting band of Sky's
+              # native priority tile, including Cliff terrain displacement.
+              column = Visual25D.column_stack_geom(
+                field, cell_x, last_y, base_row, pri, map_id)
+              base_y = column[4][pri - 1]
+              unit = column[1]
+              scale = column[2]
+            else
+              base_y = Visual25D.row_top_any(base_row + 1)
+              unit = Visual25D.row_unit(base_row)
+              unit = Visual25D.vertical_unit_at(base_y) if !unit || unit <= 0
+              scale = Visual25D.row_width_scale_any(base_row)
+            end
+            info = [base_y, unit, scale, base_row + pri]
             upright[obj.object_id] = info
           end
           feet, unit, scale, foot_row = info
