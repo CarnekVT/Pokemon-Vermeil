@@ -35,6 +35,11 @@ access_mode=always
 hotkey=aux2
 ```
 
+Además, desde el juego se pueden cambiar **Acceso** y **Atajo**
+mediante `pbBifrostRulesMenu`. Estos cambios se guardan con la partida y
+prevalecen sobre el archivo INI hasta seleccionar "Restaurar reglas del
+proyecto". Por defecto, Bifröst sigue siendo "Solo por evento".
+
 Desde Maker Studio se cambian estos mismos parámetros con **Disponibilidad
 de lanzamiento** y **Tecla de apuntado**. Si se elige `always`, pulsar R
 abre la selección de Poké Ball/Pokémon y el apuntado sin necesidad de tocar
