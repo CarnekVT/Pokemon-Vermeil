@@ -50,6 +50,7 @@ class FakeBifrostMap
   end
   def map_id; 10; end
   def valid?(x,y); x.between?(0,30) && y.between?(0,30); end
+  def passable?(*); true; end
 end
 
 class FakeBifrostBag
