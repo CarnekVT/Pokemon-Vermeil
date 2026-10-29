@@ -10,7 +10,7 @@ module VermeilTreatment
   }.freeze
   ASSET_DIR = "Graphics/Scenes/Intro/GenderSelect"
   # Ajuste artístico por pose: el brazo extendido no define el eje del torso.
-  PORTRAIT_X_OFFSET = { femenino: 0, neutro: -24, masculino: -14 }.freeze
+  PORTRAIT_X_OFFSET = { femenino: 0, neutro: -21, masculino: 30 }.freeze
 
   def self.normalize(value)
     key = value.to_s.downcase.to_sym
