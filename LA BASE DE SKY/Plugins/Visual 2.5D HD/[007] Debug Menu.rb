@@ -8,6 +8,7 @@
 # confirmarlo el mapa se recoloca al instante. Todo queda guardado en la partida.
 #===============================================================================
 def pbVisual25DMenu
+  return if !$DEBUG
   loop do
     state = Visual25D.enabled ? _INTL("activado") : _INTL("desactivado")
     model = (Visual25D.projection_model == :camera) ? _INTL("cámara") : _INTL("clásico")
@@ -24,8 +25,9 @@ def pbVisual25DMenu
        _INTL("Desenfoque de bordes ({1})", Visual25D.band_blur? ? _INTL("sí") : _INTL("no")),
        _INTL("Suelo por filas ({1})", Visual25D.row_batch? ? _INTL("sí") : _INTL("no")),
        _INTL("Activar/desactivar"),
+       _INTL("Ajustes avanzados de geometría"),
        _INTL("Restaurar valores"),
-       _INTL("Salir")], 10
+       _INTL("Salir")], 11
     )
     case command
     when 0
@@ -69,7 +71,95 @@ def pbVisual25DMenu
       Visual25D.toggle_smooth
       break
     when 8
+      pbVisual25DGeometryMenu
+    when 9
+      pbVisual25DResetTuning
       Visual25D.reset_to_defaults
+    else
+      break
+    end
+  end
+end
+
+# Controles de geometria de esta sesion. Solo en Depuracion: no afectan
+# al jugador ni crean archivos o preferencias persistentes.
+VISUAL25D_GEOMETRY_DEFAULTS = {
+  :VANISHING_STRENGTH => 0.3, :VERTICAL_GAIN => 0.5,
+  :COLUMN_LEAN => 0.0, :WALL_SMOOTHING => 0,
+  :WALL_SMOOTH_VERTICAL => false, :WALL_EDGE_SEAL => 2,
+  :GROUND_SLICES => 1
+}
+def pbVisual25DGeometrySet(name, value)
+  return unless $DEBUG
+  cfg = Visual25D::Config
+  return if cfg.const_get(name) == value
+  cfg.send(:remove_const, name)
+  cfg.const_set(name, value)
+  Visual25D.rebuild_render_params!
+  Visual25D.clear_column_stack_cache! if Visual25D.respond_to?(:clear_column_stack_cache!)
+  Visual25D.redraw_map
+end
+def pbVisual25DResetTuning
+  return unless $DEBUG
+  VISUAL25D_GEOMETRY_DEFAULTS.each do |name, val|
+    cfg = Visual25D::Config
+    cfg.send(:remove_const, name)
+    cfg.const_set(name, val)
+  end
+  eigen = Visual25D.singleton_class
+  eigen.send(:remove_const, :COLUMN_BAND_OVERLAP) if eigen.const_defined?(:COLUMN_BAND_OVERLAP, false)
+  eigen.const_set(:COLUMN_BAND_OVERLAP, 2)
+end
+def pbVisual25DGeometryMenu
+  return unless $DEBUG
+  cfg = Visual25D::Config
+  loop do
+    cmd = pbMessage(_INTL("Geometría 2.5D (solo debug). Los cambios no se guardan."),
+      [
+        _INTL("Convergencia horizontal: {1}%", (cfg::VANISHING_STRENGTH * 100).round),
+        _INTL("Altura vertical: {1}%", (cfg::VERTICAL_GAIN * 100).round),
+        _INTL("Inclinación de columnas: {1}%", (cfg::COLUMN_LEAN * 100).round),
+        _INTL("Suavizado de montaña: {1}", cfg::WALL_SMOOTHING),
+        _INTL("Suavizado vertical: {1}", cfg::WALL_SMOOTH_VERTICAL ? _INTL("Sí") : _INTL("No")),
+        _INTL("Solape de bordes: {1} px", cfg::WALL_EDGE_SEAL),
+        _INTL("Solape de tiles: {1} px", Visual25D.column_band_overlap),
+        _INTL("Franjas de suelo: {1}", cfg::GROUND_SLICES),
+        _INTL("Restaurar geometría"), _INTL("Volver")
+      ], 10)
+    case cmd
+    when 0
+      n = pbVisual25DChooseNumber(_INTL("Convergencia horizontal, 0–60%."), (cfg::VANISHING_STRENGTH * 100).round, 0, 60)
+      pbVisual25DGeometrySet(:VANISHING_STRENGTH, n / 100.0)
+    when 1
+      n = pbVisual25DChooseNumber(_INTL("Altura de árboles, edificios y columnas, 0–100%."), (cfg::VERTICAL_GAIN * 100).round, 0, 100)
+      pbVisual25DGeometrySet(:VERTICAL_GAIN, n / 100.0)
+    when 2
+      n = pbVisual25DChooseNumber(_INTL("Inclinación lateral de las columnas, 0–50%."), (cfg::COLUMN_LEAN * 100).round, 0, 50)
+      pbVisual25DGeometrySet(:COLUMN_LEAN, n / 100.0)
+    when 3
+      n = pbVisual25DChooseNumber(_INTL("Suavizado de montaña, 0–5 pasadas."), cfg::WALL_SMOOTHING, 0, 5)
+      pbVisual25DGeometrySet(:WALL_SMOOTHING, n)
+    when 4
+      pbVisual25DGeometrySet(:WALL_SMOOTH_VERTICAL, !cfg::WALL_SMOOTH_VERTICAL)
+    when 5
+      n = pbVisual25DChooseNumber(_INTL("Solape de bordes, 0–4 píxeles."), cfg::WALL_EDGE_SEAL, 0, 4)
+      pbVisual25DGeometrySet(:WALL_EDGE_SEAL, n)
+    when 6
+      eigen = Visual25D.singleton_class
+      n = pbVisual25DChooseNumber(_INTL("Solape entre tiles verticales, 0–4 píxeles."), Visual25D.column_band_overlap, 0, 4)
+      if n != Visual25D.column_band_overlap
+        eigen.send(:remove_const, :COLUMN_BAND_OVERLAP)
+        eigen.const_set(:COLUMN_BAND_OVERLAP, n)
+        Visual25D.clear_column_stack_cache!
+        Visual25D.redraw_map
+      end
+    when 7
+      n = pbVisual25DChooseNumber(_INTL("Franjas de suelo. 1 es la opción más rápida."), cfg::GROUND_SLICES, 1, 4)
+      pbVisual25DGeometrySet(:GROUND_SLICES, n == 3 ? 2 : n)
+    when 8
+      pbVisual25DResetTuning
+      Visual25D.rebuild_render_params!
+      Visual25D.redraw_map
     else
       break
     end
