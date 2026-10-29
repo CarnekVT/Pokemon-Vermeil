@@ -547,6 +547,8 @@ class SceneEngine::Player
     selected = 0
     ox = ((Graphics.width - 640) / 2).round
     oy = ((Graphics.height - 480) / 2).round
+    was_text_input = Input.text_input
+    Input.text_input = false
     update
     loop do
       bmp = box.bitmap
@@ -581,6 +583,7 @@ class SceneEngine::Player
       end
     end
   ensure
+    Input.text_input = was_text_input unless was_text_input.nil?
     box.dispose if box && !box.disposed?
   end
 
