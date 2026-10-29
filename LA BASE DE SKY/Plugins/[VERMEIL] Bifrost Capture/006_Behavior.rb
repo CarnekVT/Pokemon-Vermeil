@@ -116,6 +116,32 @@ module BifrostCapture
     perform_attack(target) if target
   end
 
+  def self.perform_pending_send
+    pending = @pending_send
+    @pending_send = nil
+    return false unless pending
+    event, payload = pending
+    return false unless valid_target?(event)
+    spec = event_spec(event)
+    wild = pbGenerateWildPokemon(spec[0],spec[1])
+    wild.form = spec[2] if spec[2] > 0
+    party = $player.party
+    original = party.dup
+    index = party.index(payload)
+    if index && index > 0
+      party.delete_at(index)
+      party.unshift(payload)
+    end
+    begin
+      result = WildBattle.start(wild)
+      remove_event(event) if result
+    ensure
+      party.replace(original.select { |p| party.include?(p) } +
+                    party.reject { |p| original.include?(p) })
+    end
+    true
+  end
+
   def self.update_behavior(force = false)
     return if !defined?($scene) || !$scene.is_a?(Scene_Map)
     return if !$game_map || !$game_player || !$player
@@ -150,6 +176,7 @@ module BifrostCapture
   def self.clear_behavior
     @behavior_frame = 0
     @pending_attack = nil
+    @pending_send = nil
     @aim_interrupted = false
   end
 end
