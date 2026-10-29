@@ -24,7 +24,7 @@ jobs:
         working-directory: LA BASE DE SKY
         run: |
           for f in Plugins/MakerStudio/003_Editor/Mods/com.vermeil.bifrost-capture/*.js; do
-            node --experimental-default-type=module --check "$f"
+            node --input-type=module --check < "$f"
           done
       - name: Run geometry and profiles tests
         run: ruby tests/bifrost_capture_core_test.rb
