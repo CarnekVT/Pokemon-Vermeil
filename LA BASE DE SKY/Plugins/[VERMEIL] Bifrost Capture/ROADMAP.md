@@ -69,7 +69,8 @@ Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 | Coincidencia entre retícula y cálculo de impacto | Código integrado; pruebas añadidas | Se recalcula el objetivo en el disparo y la geometría se comparte entre controles. La cuarta casilla alineada tiene 100% de contacto, no de captura. |
 | Diagnóstico de fallo en el HUD | Código integrado | Sin objetivo / fuera de alcance / obstáculos / tiro desviado. |
 | Vuelo animado de Poké Ball y efecto de contacto | Código integrado; requiere prueba | Usa íconos originales de Items, arco y giro en pantalla, destello localizado y pausa de impacto. No es física 3D. |
-| Animación del brazo del jugador, rebotes y shakes de captura | Pendiente | Requiere sprites/animaciones propias y sincronización con resultados de captura. |
+| Animación del brazo del jugador y rebotes físicos | Pendiente | Requiere sprites/animaciones propias y sincronización con resultado de captura. |
+| Captura: Ball se sacude y Pokémon desaparece/reaparece | Código integrado, falta prueba | Con pausa de IA mientras se reproduce; número/duración de sacudidas editables. |
 | Colisiones completas de paredes y altura | Pendiente | Versión actual comprueba tiles y eventos, no todas las geometrías. |
 | Fórmulas completas de cada Poké Ball | Pendiente | Multiplicadores iniciales simplificados. |
 | IA avanzada de huida, persecución y visión | Pendiente | El sistema actual tiene reacción básica. |
