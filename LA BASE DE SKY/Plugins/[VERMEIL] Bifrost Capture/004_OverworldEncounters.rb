@@ -13,6 +13,13 @@ module BifrostCapture
     @spawned ||= {}
     @spawned.delete([event.map_id, event.id])
     event.erase
+    if defined?($scene) && $scene.is_a?(Scene_Map)
+      spriteset = $scene.spriteset(event.map_id)
+      spriteset.bifrost_remove_character(event) if spriteset
+    end
+    # No registrar eventos temporales como capturados de forma persistente.
+    # El mapa se restablece al volver a entrar.
+    $game_map.events.delete(event.id) if $game_map && $game_map.map_id == event.map_id
     true
   end
 
@@ -143,6 +150,15 @@ class Spriteset_Map
     @character_sprites ||= []
     @character_sprites.push(Sprite_Character.new(self.class.viewport,event))
   end
+
+  def bifrost_remove_character(event)
+    @character_sprites ||= []
+    @character_sprites.delete_if do |sprite|
+      next false if !sprite || sprite.character != event
+      sprite.dispose if !sprite.disposed?
+      true
+    end
+  end
 end
 
 class PokemonEncounters
@@ -156,7 +172,9 @@ class PokemonEncounters
       kind = GameData::EncounterType.get(enc_type).type
       # Solo los encuentros espontaneos de terreno. Pesca, Surf, uso de objetos
       # y los combates por script mantienen el sistema original.
-      return false if triggered_by_step && [:land, :cave].include?(kind)
+      return false if triggered_by_step &&
+                      BifrostCapture.options["encounter_mode"] == "overworld" &&
+                      [:land, :cave].include?(kind)
     end
     bifrost_original_encounter_triggered?(enc_type,repel_active,triggered_by_step)
   end
