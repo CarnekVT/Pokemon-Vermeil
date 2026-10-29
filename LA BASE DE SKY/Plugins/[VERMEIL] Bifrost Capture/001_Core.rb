@@ -323,18 +323,41 @@ module BifrostCapture
     $game_map.events.values.find { |e| valid_target?(e) }
   end
 
+  # Evitar atravesar obstáculos reales del mapa. El target final se ignora
+  # como bloqueador porque su propio evento puede tener through=false.
+  def self.passable_segment?(x0,y0,x1,y1)
+    dx = x1-x0
+    dy = y1-y0
+    if dx != 0 && dy != 0
+      h = dx > 0 ? 6 : 4
+      v = dy > 0 ? 2 : 8
+      return ($game_map.passable?(x0,y0,h) &&
+              $game_map.passable?(x0+dx,y0,v)) ||
+             ($game_map.passable?(x0,y0,v) &&
+              $game_map.passable?(x0,y0+dy,h))
+    end
+    dir = dx > 0 ? 6 : dx < 0 ? 4 : dy > 0 ? 2 : 8
+    $game_map.passable?(x0,y0,dir)
+  end
+
   def self.line_clear?(px,py,tx,ty)
-    # Bresenham y bloqueo por eventos solidos entre origen y objetivo.
     dx=(tx-px).abs; dy=(ty-py).abs
     sx=px<tx ? 1 : -1; sy=py<ty ? 1 : -1
     err=dx-dy; x=px; y=py
     until x==tx && y==ty
+      ox,oy = x,y
       e2=2*err
       if e2 > -dy then err-=dy; x+=sx end
       if e2 < dx then err+=dx; y+=sy end
-      break if x==tx && y==ty
       return false unless $game_map.valid?(x,y)
-      return false if $game_map.events.values.any? { |e| e.x==x && e.y==y && !e.through && !removed?(e) }
+      # El último paso toca el propio OW; no comprobar colisión del evento
+      # objetivo aquí, pero sí obstáculos en las casillas interiores.
+      break if x==tx && y==ty
+      return false unless passable_segment?(ox,oy,x,y)
+      return false if $game_map.events.values.any? do |event|
+        event.x==x && event.y==y && !event.through &&
+          !event.instance_variable_get(:@erased)
+      end
     end
     true
   end
