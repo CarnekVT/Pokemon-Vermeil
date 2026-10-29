@@ -110,6 +110,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
       "encounter_mode"=>"overworld","restricted_species"=>"0"
     }
     $bag=FakeBag.new
+    $PokemonEncounters=PokemonEncounters.new
     BifrostCapture.captures=[]
     BifrostCapture.contacts=0
     BifrostCapture.reset_wild_events
