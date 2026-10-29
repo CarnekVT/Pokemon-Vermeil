@@ -119,7 +119,7 @@ module BifrostCapture
   # "always": tecla disponible en cualquier mapa jugable, con o sin objetivo.
   # "nearby": tecla disponible solo al haber un objetivo OW en la zona frontal.
   def self.overworld_encounters?(cfg = options)
-    cfg["enabled"] == "1" && cfg["encounter_mode"] == "overworld"
+    cfg["enabled"] == "1" && ["overworld", "hybrid"].include?(cfg["encounter_mode"])
   end
 
   def self.hotkey_code(name)
@@ -240,6 +240,7 @@ module BifrostCapture
   end
 
   def self.remove_event(event)
+    return discard_generated(event) if generated?(event)
     $PokemonGlobal.bifrost_removed_events ||= {}
     $PokemonGlobal.bifrost_removed_events[[$game_map.map_id,event.id]] = true
     event.erase
@@ -247,7 +248,7 @@ module BifrostCapture
 
   def self.valid_target?(event)
     spec = event_spec(event)
-    return false if !spec || removed?(event)
+    return false if !spec || removed?(event) || event.instance_variable_get(:@erased)
     cfg = options($game_map.map_id,spec[0],event.id)
     cfg["enabled"] == "1" && allow_species?(spec[0],cfg)
   end
