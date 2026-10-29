@@ -6,7 +6,7 @@ on:
       - 'LA BASE DE SKY/Plugins/LBDS Animated Props/**'
       - 'tests/visual25d_animated_props_plane_test.rb'
       - 'tests/visual25d_animated_props_runtime_test.rb'
-      - 'tests/visual25d_gen5_projection_test.rb'
+      - 'tests/visual25d_sky_v330_projection_test.rb'
       - '.github/workflows/visual25d-props-plane-check.yml'
   pull_request:
     paths:
@@ -14,7 +14,7 @@ on:
       - 'LA BASE DE SKY/Plugins/LBDS Animated Props/**'
       - 'tests/visual25d_animated_props_plane_test.rb'
       - 'tests/visual25d_animated_props_runtime_test.rb'
-      - 'tests/visual25d_gen5_projection_test.rb'
+      - 'tests/visual25d_sky_v330_projection_test.rb'
 jobs:
   animated-props:
     runs-on: ubuntu-latest
@@ -32,5 +32,5 @@ jobs:
         run: ruby tests/visual25d_animated_props_plane_test.rb
       - name: Real LBDS runtime 2.5D single-pass and vanilla fallback
         run: ruby tests/visual25d_animated_props_runtime_test.rb
-      - name: Gen5 planar camera and low-grid-margin regression
-        run: ruby tests/visual25d_gen5_projection_test.rb
+      - name: Skyflyer v3.3.0 perspective, 22 degree profile and idle cache regression
+        run: ruby tests/visual25d_sky_v330_projection_test.rb
