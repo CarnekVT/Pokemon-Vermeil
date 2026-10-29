@@ -27,6 +27,8 @@ module BifrostCapture
       speed: event.move_speed
     }
     event.instance_variable_set(:@bifrost_flee_state, state)
+    @fleeing_events ||= {}
+    @fleeing_events[event.object_id] = event
     event.instance_variable_set(:@move_type, 0) # Stop random routes while fleeing.
     event.move_speed = cfg["flee_speed"].to_i.clamp(1, 6)
     notice(_INTL("¡El Pokémon intenta escapar!"))
@@ -44,6 +46,7 @@ module BifrostCapture
     state = event.instance_variable_get(:@bifrost_flee_state)
     return unless state
     restore_wander(event, state)
+    @fleeing_events.delete(event.object_id) if @fleeing_events
     notice(_INTL("¡El Pokémon escapó!"))
     remove_event(event)
   end
@@ -71,6 +74,7 @@ module BifrostCapture
     if state[:stuck] >= cfg["flee_stuck_frames"].to_i.clamp(15, 600)
       # Never teleport or erase an OW that is physically trapped.
       restore_wander(event, state)
+      @fleeing_events.delete(event.object_id) if @fleeing_events
       event.instance_variable_set(:@bifrost_alert_cooldown, 90)
     end
   end
@@ -151,32 +155,39 @@ module BifrostCapture
     return if $game_temp && ($game_temp.in_battle || $game_temp.in_menu ||
                               $game_temp.message_window_showing)
     @behavior_frame = (@behavior_frame || 0) + 1
-    # Track escape every frame. Evaluate new alerts only every 10 frames,
-    # except immediately after a player step.
-    scan = force || @behavior_frame % 10 == 0
-    $game_map.events.values.dup.each do |event|
-      next unless valid_target?(event)
-      spec = event_spec(event)
-      cfg = options($game_map.map_id, spec[0], event.id)
-      if fleeing?(event)
-        tick_flee(event, cfg)
+    # Per-frame solo se actualizan las criaturas que REALMENTE están huyendo.
+    # Los OW en reposo se revisan cada 12 fotogramas o al caminar el jugador.
+    (@fleeing_events || {}).values.dup.each do |event|
+      if !valid_target?(event) || !$game_map.events[event.id].equal?(event)
+        @fleeing_events.delete(event.object_id)
         next
       end
-      next unless scan
+      spec = event_spec(event)
+      tick_flee(event, options($game_map.map_id, spec[0], event.id))
+    end
+    return unless force || @behavior_frame % 12 == 0
+    $game_map.events.values.each do |event|
+      next unless valid_target?(event) && !fleeing?(event)
       cooldown = event.instance_variable_get(:@bifrost_alert_cooldown).to_i
       if cooldown > 0
-        event.instance_variable_set(:@bifrost_alert_cooldown, [0,cooldown-10].max)
+        event.instance_variable_set(:@bifrost_alert_cooldown, [0,cooldown-12].max)
         next
       end
+      spec = event_spec(event)
+      cfg = options($game_map.map_id, spec[0], event.id)
       radius = cfg["alert_distance"].to_i
       next if radius <= 0 || distance_to_player(event) > radius
-      # No duplicate attacks when the same target remains in proximity.
       next if @pending_attack.equal?(event)
       react(event, cfg, :proximity)
     end
   end
 
   def self.clear_behavior
+    (@fleeing_events || {}).values.each do |event|
+      state = event.instance_variable_get(:@bifrost_flee_state)
+      restore_wander(event, state) if state
+    end
+    @fleeing_events = {}
     @behavior_frame = 0
     @pending_attack = nil
     @pending_send = nil
