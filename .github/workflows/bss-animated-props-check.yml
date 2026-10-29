@@ -18,6 +18,9 @@ jobs:
       - name: Check Battle Scene Studio Ruby syntax
         run: |
           find 'LA BASE DE SKY/Plugins/[CARNEK] Battle Scene Studio Runtime' -type f -name '*.rb' -print0 | xargs -0 -n1 ruby -c
+      - name: Check Visual 2.5D and LBDS Animated Props Ruby syntax
+        run: |
+          find 'LA BASE DE SKY/Plugins/Visual 2.5D HD' 'LA BASE DE SKY/Plugins/LBDS Animated Props' -type f -name '*.rb' -print0 | xargs -0 -n1 ruby -c
       - name: Test Battle Scene Studio Vanilla backgrounds
         run: ruby tests/cases/test_bss_vanilla_background.rb
       - name: Test layered backgrounds and Lighting tint
