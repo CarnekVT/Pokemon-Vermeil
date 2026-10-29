@@ -125,3 +125,44 @@ recompilar la versión visual a partir de los últimos diálogos.
 **Estado:** scripts actualizados en la rama. JS verificado por análisis
 sintáctico e importador real probado. Requiere prueba ingame para validar
 el comportamiento de Ruby/mkxp y las transiciones con los PNG definitivos.
+
+
+## Revisión a partir de capturas, 29/10/2026 — tercera pasada
+
+- Diálogos simplificados y sin suspensivos decorativos. Solo se conserva
+  `Despierta...`; la pausa dramática global ahora es de 14 pasos.
+- Despedida con un **único salto narrativo antes de «Cuídate»**. El cierre de
+  la frase se acorta para evitar una línea aislada.
+- Descenso de Solen: velocidad 0.78, fade 28, espera 355 + 18 pasos
+  (comparar en la ejecución real; el periodo de caída se calcula tras el fade).
+- Texto centrado `Despierta...`: velocidad normal + pausa de 14 pasos
+  y 24 pasos de permanencia final, evitando desincronización con el despertar.
+- Selector: entrada 22 pasos, cruce de retratos 8, confirmación 8,
+  salida 18. No se repinta una flecha completa: `src_rect` recorta
+  únicamente el primer fotograma de cada tira `Graphics/UI/left_arrow`
+  y `Graphics/UI/right_arrow`.
+- Mugshots: centrar según contorno alfa de cada PNG, en lugar de
+  centrar el lienzo con márgenes transparentes desiguales. El Studio
+  usa el mismo criterio mediante lectura de alfa de cada imagen.
+- Pie de controles desplazado a y=414, separado del marco inferior
+  para que no aparezca cortado.
+
+### Avisos de sombras tras el teletransporte
+La consola reporta búsquedas de `Graphics/Shadows/042_1`,
+`042_4`, `042_5`, `042_6` en
+`[MakerStudio] 002_RendererOverride.rb:1278`.
+
+El directorio versionado `Graphics/Shadows/` contiene únicamente
+`079_1.png`; no hay ninguno de los cuatro `042_*.png` solicitados.
+El archivo `002_RendererOverride.rb` tampoco está versionado bajo la
+carpeta `Plugins/MakerStudio` en la rama consultada. Por ello **no se ha
+parcheado el renderer externo** ni se han creado PNG vacíos que oculten
+sombras previstas. Corregir en el editor la referencia a sombras del
+mapa 042, o restaurar sus gráficos reales, resolverá los recursos
+ausentes. Si se requieren ajustes al loader, debe incorporarse el
+archivo fuente exacto del renderer.
+
+### Estado de pruebas
+Los JS del Studio se han comprobado por sintaxis y la importación
+de la intro reconoce las nueve fases y el selector; aún falta
+la prueba visual ingame y reexportar la escena local desde el Studio.
