@@ -37,18 +37,6 @@ module BifrostCapture
     usable[idx][0]
   end
 
-  def self.impact(frames)
-    return if frames <= 0
-    view = Viewport.new(0,0,Graphics.width,Graphics.height)
-    view.z = 999999
-    view.color = Color.new(255,255,255,95)
-    begin
-      frames.times { Graphics.update }
-    ensure
-      view.dispose
-    end
-  end
-
   def self.react(event, cfg)
     case cfg["reaction"]
     when "attack"
