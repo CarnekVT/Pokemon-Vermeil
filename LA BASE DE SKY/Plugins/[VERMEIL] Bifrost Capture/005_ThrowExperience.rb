@@ -127,7 +127,7 @@ module BifrostCapture
   def self.current_focus(mouse_pos, selection, cfg)
     range = [cfg["range"].to_i, 1].max
     events = $game_map.events.values.select { |e| valid_target?(e) }
-    return [nil, nil, nil] if events.empty?
+    return mouse_pos ? [nil, mouse_pos[0], mouse_pos[1]] : [nil, nil, nil] if events.empty?
     if mouse_pos && cfg["aim_mouse"] == "1"
       mx, my = mouse_pos
       radius = [cfg["aim_target_radius"].to_i, 10].max
