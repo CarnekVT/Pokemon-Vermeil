@@ -14,7 +14,7 @@ module BifrostCapture
     "profile"=>"bifrost", "enabled"=>"1",
     "access_mode"=>"always", "hotkey"=>"aux2", "control_mode"=>"toggle",
     "capture_enabled"=>"1", "battle_enabled"=>"1", "restricted_species"=>"1",
-    "encounter_mode"=>"classic", "spawn_chance"=>"100",
+    "encounter_mode"=>"classic", "spawn_chance"=>"50",
     "spawn_min_distance"=>"3", "spawn_max_distance"=>"6", "spawn_limit"=>"5",
     "spawn_lifetime"=>"45", "spawn_filter"=>"all", "spawn_grass_only"=>"1",
     "spawn_allow_fishing"=>"0", "ow_form"=>"0", "ow_min_level"=>"0",
