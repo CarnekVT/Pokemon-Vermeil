@@ -58,7 +58,7 @@ def pbIntroVermeil
     show_floating "Graphics/Scenes/Intro/SupayorusEnergy", 255, 90, amplitude: 8, speed: 0.04, fade: 20
 
     text_inline "El Guía de los Caídos llevaba las almas a su descanso. Luego empezó a verlas como una fuente de poder... y lo arruinó todo.",
-                speaker: "Mujer Misteriosa"
+                speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
 
     # ══════════ FASE 4: EL RELATO DEL ENFRENTAMIENTO ══════════
@@ -73,9 +73,9 @@ def pbIntroVermeil
     show "Graphics/Scenes/Intro/int5", 0, 0, fade: 30
 
     text_inline "Consumió las almas que había jurado proteger. Con cada una, aumentaba su poder... hasta que decidió desafiarme.",
-                speaker: "Gran Espíritu"
+                speaker: "Gran Espíritu", speed: :slow
     text_inline "Las Fuerzas de la Naturaleza, mis otros hijos, lucharon a mi lado. Le arrebatamos su poder, mas no extinguimos su rencor.",
-                speaker: "Gran Espíritu"
+                speaker: "Gran Espíritu", speed: :slow
     hide_textbox(10)
 
     # ══════════ FASE 5: LA DEFENSA DE LA TRADICIÓN ══════════
@@ -83,11 +83,11 @@ def pbIntroVermeil
     show "Graphics/Scenes/Intro/int9", 0, 0, fade: 25
 
     text_inline "Y después de aquello, nos diste la espalda. A todos. No precisamente tu mejor decisión, Gran Espíritu.",
-                speaker: "Mujer Misteriosa"
+                speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Hay gente capaz de horrores, sí. Pero también quien lo daría todo por ver a los suyos en paz. Eso también cuenta.",
-                speaker: "Mujer Misteriosa"
+                speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y hablando de problemas... el Guía está recuperando fuerzas. Si vuelve, nuestra región será la primera en sufrirlo.",
-                speaker: "Mujer Misteriosa"
+                speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
 
     # ══════════ FASE 6: LA REVELACIÓN DEL RECEPTÁCULO ══════════
@@ -114,7 +114,7 @@ def pbIntroVermeil
     end
 
     text_inline "Por eso te hemos llamado, Ente Dorado. No perteneces a este mundo y su hambre no puede alcanzarte, pero necesitas un cuerpo.",
-                speaker: "Gran Espíritu"
+                speaker: "Gran Espíritu", speed: :slow
     hide_textbox(10)
 
     fade_out_sprites([golden6[:sprite], elder6[:sprite],
@@ -130,18 +130,18 @@ def pbIntroVermeil
     wait 400
 
     text_inline "Mira, ahí está Solen. Tiene una determinación difícil de encontrar... y aceptó meterse en este lío.",
-                speaker: "Mujer Misteriosa"
+                speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y mira qué bien duerme, como si aquí no pasara nada... En fin. Solen conoce los riesgos y ha aceptado ayudarte.",
-                speaker: "Mujer Misteriosa"
+                speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
     text_inline "Solen aceptó este vínculo. Su cuerpo te permitirá actuar entre los vivos; tu fuerza ayudará a enfrentar la oscuridad.",
-                speaker: "Gran Espíritu"
+                speaker: "Gran Espíritu", speed: :slow
     hide_textbox(10)
 
     # ══════════ FASE 7: EL PACTO Y NOMBRAMIENTO ══════════
 
     text_inline "Ah, espera. Nos falta un detalle: cuando hablen de ti en este mundo, ¿cómo prefieres que se refieran a ti?",
-                speaker: "Mujer Misteriosa"
+                speaker: "Mujer Misteriosa", speed: :slow
 
     hide_textbox(10)
     fade_to_black 15
@@ -155,10 +155,10 @@ def pbIntroVermeil
       masculino: "Entendido, compañero. Así será.",
       femenino: "Entendido, compañera. Así será.",
       neutro: "Entendido. Lo tendremos en cuenta.",
-      speaker: "Mujer Misteriosa"
+      speaker: "Mujer Misteriosa", speed: :slow
     )
     text_inline "¡Listo! Solen es el nombre que recibió al nacer. ¿Quieres conservarlo o prefieres que te llamemos de otra forma?",
-                speaker: "Mujer Misteriosa"
+                speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
     fade_to_black 15
     player_name = name_input(default: "Solen", min: 1, max: 12)
@@ -178,9 +178,9 @@ def pbIntroVermeil
     fade_from_black 25
 
     text_inline "El pacto está sellado, {1}. Mi hijo sigue reuniendo fuerzas. Quizá me demuestres que juzgué a la humanidad demasiado pronto.",
-                speaker: "Gran Espíritu", format_args: [player_name]
+                speaker: "Gran Espíritu", speed: :slow, format_args: [player_name]
     text_inline "Bueno, {1}, ¡ya está! Ahora te toca a ti. Cuídate y recuerda: las mejores aventuras nunca siguen el plan.",
-                speaker: "Mujer Misteriosa", format_args: [player_name]
+                speaker: "Mujer Misteriosa", speed: :slow, format_args: [player_name]
 
     # ══════════ FASE 9: LA FUSIÓN Y DESPERTAR ══════════
 
