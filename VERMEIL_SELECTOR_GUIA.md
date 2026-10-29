@@ -197,7 +197,7 @@ la entrada de nombre original como último recurso.
 - Panel central, cabecera y pie rediseñados en crema/cobre para
   mantener continuidad con la UI de nombre.
 - Retratos centrados por contorno opaco y ajustes artísticos de pose:
-  femenino 0, neutro -24, masculino -14 píxeles.
+  femenino 0, neutro -21, masculino +30 píxeles.
 - Las transiciones existentes de entrada, cruce y salida se conservan
   en las duraciones cortas ya ajustadas.
 
