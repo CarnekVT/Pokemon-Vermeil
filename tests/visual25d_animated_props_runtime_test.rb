@@ -64,6 +64,7 @@ module Visual25D
     MAX_PRIORITY = 12
   end
   TAPER_SUPPORTED = true
+  COLUMN_BAND_OVERLAP = 1
   class << self
     attr_accessor :enabled_for_test, :shift_for_test
     def enabled? = @enabled_for_test
@@ -77,10 +78,21 @@ module Visual25D
     def width_scale_at(_) = 1.0
     def vertical_unit_at(_) = 40.0
     def row_width_scale_any(_) = 1.0
+    def row_top_any(row) = (row * 32 + 10).round
+    def row_unit(_) = 40.0
+    def column_stack_geom(_field, _cx, _cy, row, pri, _map_id)
+      feet = row_top_any(row + pri)
+      [feet, 40.0, 1.0, row + pri - 1,
+       (0..12).map { |h| feet - h * 40 }, nil]
+    end
     def row_taper(_) = 1.0
     def project_x(x, scale) = (x * scale).round
     def project_y(y) = y.round + 10
-    def grid_row_for_map_cell(_, cell_y) = cell_y
+    def grid_row_for_map_cell(map, cell_y)
+      scrolled = map.display_y.to_f / Game_Map::Y_SUBPIXELS / Game_Map::TILE_HEIGHT
+      shifted = shifted_for_render? ? margin_rows : 0
+      cell_y - scrolled - shifted
+    end
     def wall_field(_) = nil
     def wall_cell_bounds(_, _, _, row) = [(row * 32) + 10, ((row + 1) * 32) + 10]
     def sync_projection_from_map!(_) = nil
@@ -122,7 +134,7 @@ class LBDSVisual25DRealIntegrationTest < Minitest::Test
     @renderer.lbds_props_update_sprites
     assert_equal 1, @entry[6] + 1 # first frame 0
     assert_equal 64, @sprite.x
-    assert_equal 90, @sprite.y
+    assert_equal 98, @sprite.y
     first = @sprite.geometry_writes
     assert_operator first, :>, 0
     # Source frame advances, but the camera has not moved: zero geometry writes.
@@ -133,7 +145,7 @@ class LBDSVisual25DRealIntegrationTest < Minitest::Test
     # Camera moves one pixel: one projected change, no 2D intermediate writes.
     @map.display_y += 128
     @renderer.lbds_props_update_sprites
-    assert_equal 89, @sprite.y
+    assert_equal 97, @sprite.y
     assert_operator @sprite.geometry_writes - first, :<=, 4
   end
 
