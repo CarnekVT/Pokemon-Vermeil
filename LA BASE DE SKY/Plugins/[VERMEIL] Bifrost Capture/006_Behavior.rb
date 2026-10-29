@@ -48,7 +48,13 @@ module BifrostCapture
     restore_wander(event, state)
     @fleeing_events.delete(event.object_id) if @fleeing_events
     notice(_INTL("¡El Pokémon escapó!"))
-    remove_event(event)
+    # Huir NO es ser capturado: no guardar la bandera persistente de captura.
+    # Un errante puede reaparecer en otra visita o al reactivarse su evento.
+    if generated?(event)
+      discard_generated(event)
+    else
+      event.erase
+    end
   end
 
   def self.tick_flee(event, cfg)
