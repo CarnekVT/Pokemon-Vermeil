@@ -1,4 +1,4 @@
-# Bifröst Capture — prototipo experimental 0.3.1
+# Bifröst Capture — prototipo experimental 0.4.0
 
 Compatible con la estructura de Pokémon Essentials 21.1 del repositorio. Integrado como plugin separado y editor de Maker Studio. **Requiere pruebas dentro de mkxp/Essentials.** No se modifican scripts de cámara BSS/BAS, 2.5D ni movimiento.
 
@@ -12,6 +12,77 @@ Compatible con la estructura de Pokémon Essentials 21.1 del repositorio. Integr
 - La captura directa usa probabilidad propia del mod basada en el ratio de captura de la especie y modificadores simples de Ball, NO reproduce toda la fórmula de combate de Essentials. Sin presión de captura, estado alterado ni aturdimiento en la versión inicial.
 - Los encuentros originales en hierba alta permanecen intactos.
 - Las opciones para otras experiencias: perfiles **Classic**, **Adventure**, **Safari** o **Custom**, además de ajustes globales, por mapa, especie y evento.
+
+## Correcciones 0.4: videos de referencia y huida real
+
+El objetivo de esta revisión es reparar la lógica de disparo y recuperar el
+comportamiento de los Pokémon salvajes, no solo cambiar el HUD.
+
+- La retícula consulta el **sprite renderizado real** en `Spriteset_Map`,
+  incluyendo zoom y desplazamientos de cámara; la casilla sola ya no define
+  el punto de interacción. Se compara contra el rectángulo completo del sprite.
+- Cada lanzamiento retiene la **identidad del Game_Event**, sigue su posición
+  visible durante el vuelo y solo entonces resuelve el impacto.
+- Si la retícula apunta a un sprite sin datos de OW capturable, el HUD explica
+  que no está habilitado. **No consume Poké Balls** por defecto. La opción
+  `allow_empty_throw=1` recupera los lanzamientos a vacío como mecánica
+  opcional para otros proyectos.
+- La huida `reaction=flee` mueve al Pokémon varias casillas mediante
+  `Game_Character#move_away_from_player`, a velocidad configurable. Solo
+  desaparece tras correr lo suficiente o alejarse del entrenador; si queda
+  atrapado vuelve a su rutina sin teletransportarse.
+- **Escapar no equivale a capturar:** huir no marca la bandera persistente de
+  captura. Los eventos que escapan pueden reaparecer al recargar el mapa.
+- Los ataques OW durante el apuntado se posponen hasta que la interfaz se
+  cierra, para evitar un combate debajo del HUD.
+- Cambiar entre Balls y el Pokémon activo no abre diálogos en cada acción:
+  D alterna tipo y Q recorre las alternativas.
+- La Poké Ball usa arco, giro, sombra sobre el suelo y objetivo móvil.
+  No es una simulación balística física; requiere pruebas en el juego.
+
+### Identificar los OW sin afectar al decorado
+
+Bifröst jamás debe convertir automáticamente cualquier sprite en capturable.
+Para un evento creado en RPG Maker se puede usar su nombre:
+
+```text
+[OWCAP:RAIKOU:50]
+[OWCAP:ARTICUNO:70:1]
+[OWDECOR]
+```
+
+Si un plugin externo genera el evento, en el momento de crearlo se permite
+registrarlo de forma segura sin cambiarle su nombre:
+
+```ruby
+BifrostCapture.register_ow($game_map.events[17], :RAIKOU, 50, 0)
+```
+
+El ID 17 es **solo un ejemplo**. En un proyecto distinto puedes reemplazar
+`:RAIKOU` por otra especie si desactivas `restricted_species`.
+El registro se aplica a ese objeto OW mientras existe; los eventos creados
+de nuevo deben registrarse de nuevo. No marca eventos de ciudad, árboles,
+casas o Pokémon decorativos por accidente.
+
+### Parámetros nuevos
+
+```ini
+[global]
+reaction=flee
+alert_distance=3
+alert_on_miss=1
+flee_steps=5
+flee_speed=4
+flee_disappear_distance=9
+flee_stuck_frames=90
+allow_empty_throw=0
+```
+
+Los seis controles nuevos se editan en Maker Studio:
+**Comportamiento** (huida y alerta) y **Lanzamiento** (tiros a vacío).
+La detección solo recorre los eventos quietos cada 12 fotogramas y
+actualiza continuamente únicamente los Pokémon que estén huyendo, para
+reducir carga en mapas con muchos eventos.
 
 ## Lanzamiento sobre el mapa · nueva experiencia (video-referencia)
 
