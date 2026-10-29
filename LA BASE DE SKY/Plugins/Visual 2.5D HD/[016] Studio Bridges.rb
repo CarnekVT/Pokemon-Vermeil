@@ -127,6 +127,9 @@ module Visual25D
           remaining = obj[:height].to_i - cy
           top = (feet - remaining * unit).round
           bottom = (feet - (remaining - 1) * unit).round
+          # Even upright props use separate 32px source cells. Seal the
+          # inter-cell edge by the SAME amount as Sky native columns.
+          bottom += Visual25D.column_band_overlap if remaining > 1
           z_row = foot_row
           use_raised_z = true
         elsif mode == :native && pri > 0
