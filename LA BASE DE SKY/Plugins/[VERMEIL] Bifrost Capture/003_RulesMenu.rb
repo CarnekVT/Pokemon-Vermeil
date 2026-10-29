@@ -19,8 +19,8 @@ module BifrostCapture
     "overworld"=>"OW completo"
   }.freeze
   KEY_LABELS = {
-    "aux2"=>"R (Aux2)",
-    "aux1"=>"L (Aux1)",
+    "aux2"=>"W (Aux2)",
+    "aux1"=>"Q (Aux1)",
     "none"=>"Sin atajo"
   }.freeze
 
