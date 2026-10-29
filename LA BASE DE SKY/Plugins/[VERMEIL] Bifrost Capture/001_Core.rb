@@ -354,10 +354,10 @@ module BifrostCapture
       # objetivo aquí, pero sí obstáculos en las casillas interiores.
       break if x==tx && y==ty
       return false unless passable_segment?(ox,oy,x,y)
-      return false if $game_map.events.values.any? do |event|
+      return false if $game_map.events.values.any? { |event|
         event.x==x && event.y==y && !event.through &&
           !event.instance_variable_get(:@erased)
-      end
+      }
     end
     true
   end
