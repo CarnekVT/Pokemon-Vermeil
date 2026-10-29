@@ -549,6 +549,7 @@ module Visual25D
     def perf_reset_counters
       @perf_full = 0
       @perf_yflat = 0
+      @perf_raised_fast = 0
       @perf_xhit = 0
       @perf_xmiss = 0
       @perf_z = 0
@@ -568,6 +569,7 @@ module Visual25D
       case key
       when :full then @perf_full += 1
       when :yflat then @perf_yflat += 1
+      when :raised_fast then @perf_raised_fast += 1
       when :xhit then @perf_xhit += 1
       when :xmiss then @perf_xmiss += 1
       when :z then @perf_z += 1
@@ -644,10 +646,10 @@ module Visual25D
       mid = $game_map&.map_id
       echoln(format(
         "[V25D perf] map=%s %.0ffps~ frames=%d grid=%dx%dx3(%d) marg=%dx%d extN=%d " \
-        "full/f=%.0f yFlat/f=%.0f xHit/f=%.0f xMiss/f=%.0f z/f=%.0f zRaised/f=%.0f " \
+        "full/f=%.0f yFlat/f=%.0f raisedFast/f=%.0f xHit/f=%.0f xMiss/f=%.0f z/f=%.0f zRaised/f=%.0f " \
         "blank/f=%.0f cull/f=%.0f rebuild/f=%.1f extRe/f=%.0f extPr/f=%.0f extIdle/f=%.0f extFast/f=%.0f tilt=%d zoom=%d",
         mid.inspect, f / elapsed, f, cols, rows, slots, margin_columns, margin_rows, ext_n,
-        @perf_full.to_f / f, @perf_yflat.to_f / f,
+        @perf_full.to_f / f, @perf_yflat.to_f / f, @perf_raised_fast.to_f / f,
         @perf_xhit.to_f / f, @perf_xmiss.to_f / f,
         @perf_z.to_f / f, @perf_z_raised.to_f / f, @perf_blank.to_f / f,
         @perf_cull.to_f / f,
