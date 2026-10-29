@@ -37,7 +37,7 @@ module Visual25D
     # hay perspectiva. Al inclinarla, la fila del jugador conserva su tamano y lo
     # que se reparte es el resto: el fondo se encoge (y por tanto se ve mas lejos)
     # y el primer plano se agranda.
-    TILT_DEGREES = 50
+    TILT_DEGREES = 22
     MAX_TILT_DEGREES = 50
 
     # Modelo de proyeccion del suelo (solo Ruby; sin Model3D del MK).
@@ -76,9 +76,9 @@ module Visual25D
     end
     ROW_BATCH = false
 
-    # Caída del horizonte, en píxeles, en el borde de arriba de la pantalla.
-    # 0 = suelo como hasta 3.2. El centro (el jugador) no se mueve.
-    HORIZON_CURVE = 14
+    # Plano inclinado sin curvatura artificial del horizonte.
+    # El ángulo se aplica con la perspectiva original de Skyflyer.
+    HORIZON_CURVE = 0
 
     # Desenfoque de las franjas de arriba y de abajo. Apagado: sin shader
     # solo emborrona una captura vieja y mancha el suelo.
@@ -321,10 +321,10 @@ module Visual25D
     # Mas alto = franja mas corta/dura; 1.2-1.6 deja banda central limpia.
     NEAR_HAZE_FALLOFF = 1.4
 
-    # Oscurecido suave de los bordes de la pantalla.
-    VIGNETTE = true
+    # Desactivado: sin filtro oscuro ni degradado sobre los cuatro bordes.
+    VIGNETTE = false
     VIGNETTE_COLOR = Color.new(0, 0, 0)
-    VIGNETTE_OPACITY = 70
+    VIGNETTE_OPACITY = 0
     # Grosor del degradado respecto al lado corto de la pantalla.
     VIGNETTE_SIZE = 0.3
     # Curva del vineteado (antes fijo 2.0). Mas alto = borde mas duro.
