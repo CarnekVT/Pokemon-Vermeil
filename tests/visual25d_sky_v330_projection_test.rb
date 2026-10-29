@@ -19,6 +19,7 @@ end
 module MenuHandlers
   def self.add(*); end
 end
+def _INTL(message, *) = message
 class TilemapRenderer
   DISPLAY_TILE_WIDTH = 32
   DISPLAY_TILE_HEIGHT = 32
