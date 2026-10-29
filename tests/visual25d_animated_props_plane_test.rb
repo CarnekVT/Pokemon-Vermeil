@@ -49,6 +49,13 @@ module Visual25D
     def project_x(x, scale) = (x * scale).round
     def project_y(y) = y + 10
     def row_width_scale_any(_) = 1.25
+    def row_top_any(row) = 10 + row * 32
+    def row_unit(_) = 40.0
+    def column_stack_geom(_field, _cx, _cy, row, pri, _map_id)
+      feet = row_top_any(row + pri)
+      edges = (0..12).map { |height| (feet - height * 40).round }
+      [feet, 40.0, 1.25, row + pri - 1, edges, nil]
+    end
     def row_taper(_) = 1.0
     def grid_row_for_map_cell(_, cy) = cy
     def wall_field(_) = nil
@@ -95,26 +102,31 @@ class PropsPlaneTest < Minitest::Test
   def make_entry(prop, cx, cy, span, priority)
     [Sprite.new, prop, cx, cy, span, priority, -1, :base]
   end
-  def test_upright_fragments_share_position_scale_regardless_of_priority
-    obj = { x: 3, y: 2, width: 2, height: 3, layer: 0,
+  def test_native_sky_priorities_share_column_edges
+    obj = { x: 3, y: 2, width: 2, height: 4, layer: 0,
             cells: [{ "priority" => 3 }, { "priority" => 3 },
+                    { "priority" => 2 }, { "priority" => 2 },
                     { "priority" => 1 }, { "priority" => 1 },
                     { "priority" => 0 }, { "priority" => 0 }] }
     entries = [make_entry(obj, 0, 0, 1, 3), make_entry(obj, 1, 0, 1, 3),
-               make_entry(obj, 0, 1, 2, 1), make_entry(obj, 0, 2, 2, 0)]
+               make_entry(obj, 0, 1, 2, 2),
+               make_entry(obj, 0, 2, 2, 1),
+               make_entry(obj, 0, 3, 2, 0)]
     renderer = Spriteset_Map.new(@map, [obj], entries)
     renderer.lbds_props_update_sprites
-    a, b, c, d = entries.map(&:first)
+    a, b, c, d, e = entries.map(&:first)
     assert_equal a.x + (a.zoom_x * 32).round, b.x
-    assert_equal a.y + (a.zoom_y * 32).round, c.y
-    assert_equal c.y + (c.zoom_y * 32).round, d.y
-    assert_equal a.zoom_y, d.zoom_y
+    # Raised Sky tiles have a one-pixel overlap to conceal seams.
+    assert_in_delta a.y + (a.zoom_y * 32), c.y, 1
+    assert_in_delta c.y + (c.zoom_y * 32), d.y, 1
+    assert_equal d.y + (d.zoom_y * 32).round, e.y
     assert_operator a.z, :>, 10000
-    assert_equal 0, d.z
-    before = entries.map { |e| [e[0].x, e[0].y, e[0].zoom_x, e[0].zoom_y] }
+    assert_equal 0, e.z
+    before = entries.map { |entry| [entry[0].x, entry[0].y, entry[0].zoom_x, entry[0].zoom_y] }
     renderer.lbds_props_update_sprites
-    assert_equal before, entries.map { |e| [e[0].x, e[0].y, e[0].zoom_x, e[0].zoom_y] }
+    assert_equal before, entries.map { |entry| [entry[0].x, entry[0].y, entry[0].zoom_x, entry[0].zoom_y] }
   end
+
   def test_ground_only_animations_follow_floor_rows
     obj = { x: 2, y: 4, width: 1, height: 2, layer: 0,
             projection_mode: :surface,
