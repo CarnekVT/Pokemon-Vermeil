@@ -301,6 +301,60 @@ module BifrostCapture
     [last_x,last_y]
   end
 
+  # La fase que faltaba en la captura: el Pokémon entra en la Ball, esta
+  # se sacude y luego revela el resultado. No altera el ratio de captura.
+  def self.capture_sequence(event, item, caught, critical, cfg)
+    return unless event
+    x, y = screen_position(event)
+    view = Viewport.new(0,0,Graphics.width,Graphics.height)
+    view.z = 999997
+    ball = Sprite.new(view)
+    ball.bitmap = ball_sprite_bitmap(item)
+    ball.ox = ball.bitmap.width/2
+    ball.oy = ball.bitmap.height/2
+    scale = [28.0/[ball.bitmap.width,ball.bitmap.height].max,1.0].min
+    ball.zoom_x = ball.zoom_y = scale
+    ball.x = x
+    ball.y = y+12
+    old_move_type = event.instance_variable_get(:@move_type)
+    old_transparent = event.transparent
+    event.instance_variable_set(:@bifrost_capture_locked,true)
+    event.instance_variable_set(:@move_type,0)
+    event.transparent = true
+    shake_count = critical ? 1 : cfg["capture_shakes"].to_i.clamp(1,5)
+    shake_frames = cfg["capture_shake_frames"].to_i.clamp(4,20)
+    begin
+      shake_count.times do
+        shake_frames.times do |i|
+          phase = i.to_f/[shake_frames-1,1].max
+          ball.angle = Math.sin(phase*Math::PI*2)*13
+          ball.y = y+12-Math.sin(phase*Math::PI)*3
+          Graphics.update
+          Input.update
+          if $scene.is_a?(Scene_Map)
+            $scene.updateMaps
+            $scene.updateSpritesets
+          end
+        end
+      end
+      8.times do |i|
+        ball.opacity = caught ? [255-32*i,0].max : 255
+        ball.zoom_x = ball.zoom_y = scale*(caught ? 1.0+i*0.10 : 1.0)
+        Graphics.update
+        Input.update
+        $scene.updateSpritesets if $scene.is_a?(Scene_Map)
+      end
+    ensure
+      event.transparent = old_transparent
+      event.instance_variable_set(:@move_type,old_move_type)
+      event.instance_variable_set(:@bifrost_capture_locked,false)
+      bitmap = ball.bitmap
+      ball.dispose unless ball.disposed?
+      bitmap.dispose if bitmap && !bitmap.disposed?
+      view.dispose unless view.disposed?
+    end
+  end
+
   def self.contact_fx(event)
     return unless event
     view = Viewport.new(0, 0, Graphics.width, Graphics.height)
