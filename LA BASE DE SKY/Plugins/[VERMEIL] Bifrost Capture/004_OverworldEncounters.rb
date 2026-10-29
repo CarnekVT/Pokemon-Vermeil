@@ -19,7 +19,10 @@ module BifrostCapture
     end
     # No registrar eventos temporales como capturados de forma persistente.
     # El mapa se restablece al volver a entrar.
-    $game_map.events.delete(event.id) if $game_map && $game_map.map_id == event.map_id
+    source_map = event.respond_to?(:map) ? event.map : nil
+    if source_map && source_map.events[event.id].equal?(event)
+      source_map.events.delete(event.id)
+    end
     true
   end
 
@@ -34,6 +37,9 @@ module BifrostCapture
   end
 
   def self.reset_spawns
+    (@spawned || {}).values.dup.each do |event|
+      discard_generated(event) if generated?(event)
+    end
     @spawned = {}
   end
 
