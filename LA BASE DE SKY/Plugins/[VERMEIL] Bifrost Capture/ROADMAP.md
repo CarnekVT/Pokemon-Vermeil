@@ -1,4 +1,4 @@
-# Bifröst Capture · seguimiento 0.3.0
+# Bifröst Capture · seguimiento 0.3.1
 
 Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 **Criterio de estado:** «Código integrado» = publicado en GitHub, NO significa probado dentro del juego.
@@ -46,7 +46,10 @@ Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 | Formas Galar en combate OW | Código integrado | Pokémon previo al combate con forma del evento; falta prueba. |
 | Preservar encuentros de Surf, pesca y por script | Código integrado | No se modifica su activación habitual. |
 | Sincronizar estado con sistema de errantes Essentials | Pendiente | Necesario para desaparición, captura y persistencia global. |
-| Puntería contextual sobre sprites del mapa | Código integrado; requiere prueba | El retículo utiliza screen_x/screen_y, ratón y elección por teclado. Falta probar Visual 2.5D HD. |
+| Puntería contextual sobre sprites del mapa | Código integrado; requiere prueba | Ahora permite flechas en movimiento continuo, fijación de objetivo mediante ACTION y ratón opcional. Falta probar Visual 2.5D HD. |
+| Entrada adaptada a los Key bindings reales | Código integrado; requiere prueba | AUX2=W abre; flechas apuntan; USE=C/Espacio/Enter lanza; AUX1=Q cambia Ball; SPECIAL=D cambia modo; BACK=X/Esc cancela; ACTION=Shift/Z fija. |
+| Coincidencia entre retícula y cálculo de impacto | Código integrado; pruebas añadidas | Se recalcula el objetivo en el disparo y la geometría se comparte entre controles. La cuarta casilla alineada tiene 100% de contacto, no de captura. |
+| Diagnóstico de fallo en el HUD | Código integrado | Sin objetivo / fuera de alcance / obstáculos / tiro desviado. |
 | Vuelo animado de Poké Ball y efecto de contacto | Código integrado; requiere prueba | Usa íconos originales de Items, arco y giro en pantalla, destello localizado y pausa de impacto. No es física 3D. |
 | Animación del brazo del jugador, rebotes y shakes de captura | Pendiente | Requiere sprites/animaciones propias y sincronización con resultados de captura. |
 | Colisiones completas de paredes y altura | Pendiente | Versión actual comprueba tiles y eventos, no todas las geometrías. |
@@ -56,9 +59,9 @@ Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 
 ## Pruebas
 
-- **CI GitHub Actions superada:** sintaxis Ruby de los scripts, sintaxis JavaScript del editor y pruebas de geometría/perfiles. Última ejecución funcional comprobada: 29-10-2026.
-- **Nuevo modo de lanzamiento:** retícula sobre los OW del mapa, clic/C para lanzar, cambio rápido de Ball, R/Esc salir, modo Pokémon, proyectil visual animado y HUD inferior derecho.
-- **Control configurable:** `aim_mouse`, `aim_target_radius`, `throw_frames`, `throw_arc`, `aim_chain`.
+- **CI GitHub Actions superada:** sintaxis Ruby de los scripts, sintaxis JavaScript del editor y pruebas de geometría/perfiles. Una nueva prueba `tests/bifrost_capture_aim_test.rb` valida la selección de objetivos y el impacto a 4 casillas sin mkxp. Revisar la ejecución de GitHub Actions más reciente.
+- **Lanzamiento revisado:** retícula en mapa controlada con flechas o ratón; W/AUX2 apunta; USE/C/Espacio/Enter lanza; Q/AUX1 cambia Ball; D/SPECIAL cambia modo; X/BACK sale; Shift/Z/ACTION fija al objetivo elegible más cercano.
+- **Control configurable:** `aim_keyboard`, `aim_speed`, `aim_mouse`, `aim_target_radius`, `throw_frames`, `throw_arc`, `aim_chain`.
 
 - **Verificación JavaScript realizada:** sintaxis compilable y renderizado aislado de las 9 secciones del editor.
 - **Verificación de consistencia realizada:** los 35 parámetros del editor coinciden con los 35 parámetros del runtime.
