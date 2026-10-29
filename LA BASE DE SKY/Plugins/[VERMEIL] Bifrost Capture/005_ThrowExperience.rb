@@ -85,7 +85,9 @@ module BifrostCapture
       end
       b.font.size = 11
       b.font.color = Color.new(179, 197, 220)
-      b.draw_text(12, 61, 292, 18, "Flechas: apuntar  C: lanzar  Q: Ball  D: modo  X: salir")
+      cycle_label = cfg["hotkey"] == "aux1" ? "Z: Ball" : "Q: Ball"
+      b.draw_text(12, 61, 292, 18,
+                  "Flechas: mira  C: lanza  #{cycle_label}  D: modo")
       if notice && !notice.empty?
         b.font.color = Color.new(246, 219, 152)
         b.draw_text(12, 44, 285, 18, notice)
@@ -337,13 +339,16 @@ module BifrostCapture
 
         # Input::UP/DOWN/LEFT/RIGHT son las acciones de movimiento reales
         # (teclas, gamepad y remapeos). Mientras apunta no se mueve el jugador.
-        speed = Input.press?(Input::ACTION) ? 10.0 : 5.0
+        speed = cfg["aim_speed"].to_i.clamp(1, 16).to_f
+        speed *= 1.8 if Input.press?(Input::ACTION)
         dx = 0
         dy = 0
-        dx -= 1 if Input.press?(Input::LEFT)
-        dx += 1 if Input.press?(Input::RIGHT)
-        dy -= 1 if Input.press?(Input::UP)
-        dy += 1 if Input.press?(Input::DOWN)
+        if cfg["aim_keyboard"] != "0"
+          dx -= 1 if Input.press?(Input::LEFT)
+          dx += 1 if Input.press?(Input::RIGHT)
+          dy -= 1 if Input.press?(Input::UP)
+          dy += 1 if Input.press?(Input::DOWN)
+        end
         if dx != 0 || dy != 0
           pointer_mode = :keyboard
           px = (px + dx * speed).clamp(12, Graphics.width - 12)
@@ -352,7 +357,8 @@ module BifrostCapture
 
         # ACTION (Shift/Z en la captura de Key bindings) salta a un
         # Pokémon válido solo al PRESIONARLA, sin disparos automáticos.
-        if cfg["hotkey"] != "aux1" && Input.trigger?(Input::ACTION)
+        if cfg["aim_keyboard"] != "0" && cfg["hotkey"] != "aux1" &&
+           Input.trigger?(Input::ACTION)
           target = nearest_aimable_target(cfg)
           if target
             px, py = screen_position(target)
