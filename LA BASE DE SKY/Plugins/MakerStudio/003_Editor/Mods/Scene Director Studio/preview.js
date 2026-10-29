@@ -32,7 +32,7 @@ export class ScenePreview{
   fit(){const r=this.host.getBoundingClientRect(),z=Math.min((r.width-24)/this.w,(r.height-24)/this.h,2);this.setZoom(Math.max(.25,z||1),false);}
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${this.w*this.zoom}px`;this.canvas.style.height=`${this.h*this.zoom}px`;if(manual)this.host.dataset.manualZoom="1";}
   resetState(){
-    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,text:null,centered:null,indicator:false,vars:new Map()};
+    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,text:null,centered:null,indicator:false,vars:new Map(),treatment:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path);if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
@@ -91,6 +91,7 @@ export class ScenePreview{
 
     if(s.black>0)push(9000,()=>{g.fillStyle=`rgba(0,0,0,${clamp(s.black/255,0,1)})`;g.fillRect(0,0,this.w,this.h)});
     if(s.white>0)push(9001,()=>{g.fillStyle=`rgba(255,255,255,${clamp(s.white/255,0,1)})`;g.fillRect(0,0,this.w,this.h)});
+    if(s.treatment){push(9012,()=>{const opt=s.treatment.option;g.fillStyle="#eee9e9";g.fillRect(0,0,this.w,this.h);g.fillStyle="#8b4d75";g.fillRect(20,20,this.w-40,75);g.fillStyle="#fff7ed";g.fillRect(26,26,this.w-52,63);this.gameFont(35);g.fillStyle="#252a3b";g.textAlign="center";g.fillText(opt.toUpperCase(),this.w/2,38);g.font="bold 60px Arial";g.fillStyle="#af6290";g.fillText("◀",85,this.h/2);g.fillText("▶",this.w-85,this.h/2);g.textAlign="left";if(s.treatment.image){const im=s.treatment.image,scale=Math.min(304/im.width,320/im.height,1);g.drawImage(im,(this.w-im.width*scale)/2,105,im.width*scale,im.height*scale)}else{this.gameFont(20);g.fillStyle="#252a3b";g.textAlign="center";g.fillText("PNG: solen_"+opt+".png",this.w/2,270);g.textAlign="left";}g.font="20px Arial";g.textAlign="center";g.fillStyle="#252a3b";g.fillText("← / → Cambiar       Z / Enter Confirmar",this.w/2,this.h-24);g.textAlign="left"})}
     if(s.centered)push(9010,()=>{this.gameFont();g.textAlign="center";g.textBaseline="middle";const text=String(s.centered.text||"").slice(0,Math.floor(s.centered.revealed??0));g.fillStyle=s.centered.color||"#000";g.fillText(text,this.w/2,this.h/2-16);g.textAlign="left";g.textBaseline="top"});
 
     queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();
@@ -111,7 +112,7 @@ export class ScenePreview{
   async reset(){this.stop();this.resetState();this.draw();}
   async play(scene,{from=0}={}){this.stop();const token=++this.playToken;this.resetState();for(let i=0;i<(scene.commands||[]).length;i++){if(token!==this.playToken)return;if(i<from){await this.apply(scene.commands[i],true,token);continue}this.onCommand?.(i,scene.commands[i]);await this.apply(scene.commands[i],false,token);}}
   async runTo(scene,index){this.stop();const token=++this.playToken;this.resetState();for(let i=0;i<=index&&i<(scene.commands||[]).length;i++){if(token!==this.playToken)return;await this.apply(scene.commands[i],true,token);}this.draw();}
-  async frames(n,fn,skip,token){n=Math.max(1,Math.round(Number(n)||1));if(skip){this.state.frame+=n;fn?.(1);return}for(let i=0;i<n;i++){if(token!==this.playToken)return;fn?.((i+1)/n);await sleep(1000/60);}}
+  async frames(n,fn,skip,token){n=Math.max(0,Math.round(Number(n)||0));if(skip){this.state.frame+=n;fn?.(1);return}if(!n){fn?.(1);return}const start=this.state.frame;while(this.state.frame-start<n){if(token!==this.playToken)return;fn?.(Math.min(1,(this.state.frame-start)/n));await new Promise(resolve=>requestAnimationFrame(resolve));}fn?.(1);}
 
   async playAudio(kind,name){
     if(!name)return;let p=`Audio/${kind}/${name}`;if(!/\.[a-z0-9]+$/i.test(p))p+=".ogg";let url=await loadProjectBlobUrl(this.ctx,p,mimeFor(p));
@@ -212,6 +213,7 @@ export class ScenePreview{
       case"hide_centered_text":s.centered=null;break;
       case"show_textbox":await this.showTextboxFade(skip,token,c.duration);break;
       case"hide_textbox":await this.hideTextboxFade(skip,token,c.duration);break;
+      case"treatment_input":{const opts=["femenino","neutro","masculino"];let index=opts.indexOf(c.default||"neutro");if(index<0)index=1;let opt=opts[index];s.treatment={option:opt,image:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+opt)};if(!skip){const old=this.onWaiting;this.onWaiting?.(true);const start=this.inputSerial;while(this.inputSerial===start&&token===this.playToken)await sleep(16);this.onWaiting?.(false);}if(c.store)s.vars.set(c.store,opt);s.treatment=null;break;}
       case"name_input":if(c.store)s.vars.set(c.store,c.default||"Solen");break;
       case"show_floating":{
         const im=await this.image(c.filename);if(im){const it={img:im,x:this.num(c.x,0),y:this.num(c.y,0),baseY:this.num(c.y,0),amplitude:this.num(c.amplitude,8),speed:this.num(c.speed,.05),zoom:this.num(c.zoom,1),opacity:c.fade>0?0:this.num(c.opacity,255),z:this.num(c.z,260),startFrame:s.frame,visible:true,varName:c.store||""};s.floating.push(it);if(c.store)s.refs.set(c.store,it);if(c.fade>0)await this.frames(c.fade,p=>it.opacity=this.num(c.opacity,255)*p,skip,token);it.opacity=this.num(c.opacity,255);}break;}
