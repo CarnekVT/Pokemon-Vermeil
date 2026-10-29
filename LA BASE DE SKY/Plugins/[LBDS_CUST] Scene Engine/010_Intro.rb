@@ -84,7 +84,7 @@ def pbIntroVermeil
 
     text_inline "Y después de eso les diste la espalda a todos. No fue precisamente tu mejor decisión, Gran Espíritu.",
                 speaker: "Mujer Misteriosa", speed: :slow
-    text_inline "Hay gente capaz de hacer daño, sí. Pero también hay quienes darían todo por los suyos. Eso también importa.",
+    text_inline "Hay personas que solo buscan hacer daño. Otras lo darían todo por proteger a su gente.",
                 speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y el Guía está recuperando fuerzas. Si regresa, nuestra región será la primera en sufrirlo.",
                 speaker: "Mujer Misteriosa", speed: :slow
@@ -130,7 +130,7 @@ def pbIntroVermeil
     wait 355
     wait 18
 
-    text_inline "Mira, ahí está Solen. Tiene mucha determinación y aceptó ayudar.",
+    text_inline "Mira, ahí está Solen. Aceptó ayudarnos y sabe a lo que se enfrenta.",
                 speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y mira qué bien duerme, como si aquí no pasara nada. En fin, Solen sabe lo que le espera.",
                 speaker: "Mujer Misteriosa", speed: :slow
@@ -163,7 +163,7 @@ def pbIntroVermeil
       speaker: "Mujer Misteriosa", speed: :slow
     )
     wait 12
-    text_inline "¡Listo! Solen es el nombre que recibió al nacer. ¿Quieres conservarlo o prefieres que te llamemos de otra forma?",
+    text_inline "Este cuerpo tiene un nombre: Solen. ¿Quieres conservarlo?",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
     wait 12
@@ -186,7 +186,7 @@ def pbIntroVermeil
 
     text_inline "El pacto está sellado, {1}. Mi hijo sigue reuniendo fuerzas. Demuéstrame que aún puedo confiar en la humanidad.",
                 speaker: "Gran Espíritu", speed: :slow, format_args: [player_name]
-    text_inline "Bueno, {1}, ya está. Ahora te toca a ti.\nCuídate. Las mejores aventuras no siempre siguen el plan.",
+    text_inline "Bueno, {1}, ha llegado el momento. Te toca continuar.\nCuídate. Las mejores aventuras rara vez salen como esperas.",
                 speaker: "Mujer Misteriosa", speed: :slow, format_args: [player_name]
 
     # ══════════ FASE 9: LA FUSIÓN Y DESPERTAR ══════════
@@ -206,7 +206,7 @@ def pbIntroVermeil
     wait 20
     show_centered_text "Despierta...", speed: :slow, color: Color.new(0,0,0)
 
-    wait 34
+    wait 70
     hide_centered_text
 
     show "Graphics/Scenes/Intro/BGWakeUp", 0, 0, fade: 0
