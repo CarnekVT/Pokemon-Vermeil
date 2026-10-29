@@ -113,6 +113,10 @@ module Visual25D
     # camara en el jugador antes que dejar los bordes sin dibujar.
     MAX_MARGIN_COLUMNS = 12
     MAX_MARGIN_ROWS = 12
+    # Calcula el margen extra necesario mediante techo exacto + 1px de
+    # seguridad, sin reservar una fila/columna completa innecesaria en todos
+    # los lados. Se puede revertir desde Depuración si el MK necesita más.
+    TIGHT_GRID = true
 
     # Cuanto se levanta un bordillo por cada tile de altura, como fraccion del
     # alto de la fila en la que se apoya.
