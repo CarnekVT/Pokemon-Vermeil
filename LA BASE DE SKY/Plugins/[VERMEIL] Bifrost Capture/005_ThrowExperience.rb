@@ -18,6 +18,8 @@ module BifrostCapture
       @hud.x = [Graphics.width - 315, 4].max
       @hud.y = [Graphics.height - 94, 4].max
       @last_color = nil
+      @cached_item = nil
+      @cached_icon = nil
     end
 
     def circle(bitmap, radius, color, thickness = 1)
@@ -60,7 +62,19 @@ module BifrostCapture
       b.font.color = Color.new(239, 244, 250)
       b.font.size = 17
       label = mode == :ball ? (item ? GameData::Item.get(item).name : "Sin Poké Balls") : (item ? item.name : "Sin Pokémon")
-      b.draw_text(12, 6, 270, 22, label + (mode == :ball ? "  x#{quantity}" : ""))
+      if mode == :ball && item
+        if @cached_item != item
+          @cached_icon.dispose if @cached_icon && !@cached_icon.disposed?
+          @cached_item = item
+          source = pbResolveBitmap("Graphics/Items/#{item}")
+          @cached_icon = source ? Bitmap.new(source) : nil
+        end
+        if @cached_icon && !@cached_icon.disposed?
+          b.stretch_blt(Rect.new(9, 9, 37, 37), @cached_icon,
+                        Rect.new(0, 0, @cached_icon.width, @cached_icon.height))
+        end
+      end
+      b.draw_text(55, 6, 241, 22, label + (mode == :ball ? "  x#{quantity}" : ""))
       b.font.size = 13
       if focus
         spec = BifrostCapture.event_spec(focus)
@@ -85,6 +99,7 @@ module BifrostCapture
         sprite.dispose unless sprite.disposed?
         bitmap.dispose if bitmap && !bitmap.disposed?
       end
+      @cached_icon.dispose if @cached_icon && !@cached_icon.disposed?
       @viewport.dispose if @viewport && !@viewport.disposed?
     end
   end
@@ -359,6 +374,9 @@ module BifrostCapture
                      Input.trigger?(Input::MOUSELEFT)
         next unless frame_count > 6 &&
                     (Input.trigger?(Input::USE) || left_click)
+        if left_click && last_mouse
+          focus, x, y = current_focus(last_mouse, selection, cfg)
+        end
         payload = mode == :ball ? current_ball : party_pokemon
         next if !payload
         @aim_pointer = [x,y]
