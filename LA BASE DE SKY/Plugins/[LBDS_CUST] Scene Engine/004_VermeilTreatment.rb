@@ -85,10 +85,14 @@ class SceneEngine::Player
         arrow = Sprite.new(vp)
         arrow.bitmap = bitmap
         arrow.z = 4
-        zoom = [[36.0 / [bitmap.width, bitmap.height].max, 2.0].min, 0.5].max
+        # Recursos UI: las flechas son tiras verticales. Solo primer frame.
+        frame_w = bitmap.width
+        frame_h = [bitmap.width, bitmap.height].min
+        arrow.src_rect.set(0, 0, frame_w, frame_h)
+        zoom = [[29.0 / [frame_w, frame_h].max, 2.0].min, 1.0].max
         arrow.zoom_x = arrow.zoom_y = zoom
-        arrow.x = (Graphics.width - 640) / 2 + (i == 0 ? 84 : 556) - bitmap.width * zoom / 2
-        arrow.y = (Graphics.height - 480) / 2 + 264 - bitmap.height * zoom / 2
+        arrow.x = (Graphics.width - 640) / 2 + (i == 0 ? 84 : 556) - frame_w * zoom / 2
+        arrow.y = (Graphics.height - 480) / 2 + 264 - frame_h * zoom / 2
         arrows << [arrow, bitmap, arrow.x]
       end
 
@@ -99,8 +103,8 @@ class SceneEngine::Player
 
       # Entrada suave desde negro, con anticipación y aterrizaje ease-out.
       backdrop.opacity = 0
-      36.times do |i|
-        t = (i + 1) / 36.0
+      22.times do |i|
+        t = (i + 1) / 22.0
         eased = 1.0 - (1.0 - t) ** 3
         backdrop.opacity = (255 * eased).round
         backdrop.y = (14 * (1.0 - eased)).round
@@ -131,6 +135,8 @@ class SceneEngine::Player
         direction = 1 if Input.trigger?(Input::RIGHT)
         if direction != 0
           previous.bitmap = portrait.bitmap
+          previous.src_rect.set(portrait.src_rect.x, portrait.src_rect.y,
+                                portrait.src_rect.width, portrait.src_rect.height)
           previous.zoom_x = portrait.zoom_x
           previous.zoom_y = portrait.zoom_y
           previous.x = portrait.x
@@ -144,8 +150,8 @@ class SceneEngine::Player
           refresh_treatment_portrait(portrait, pictures, current)
           target_x = portrait.x
           pbSEPlay("GUI sel cursor") rescue nil
-          12.times do |frame|
-            t = (frame + 1) / 12.0
+          8.times do |frame|
+            t = (frame + 1) / 8.0
             eased = 1.0 - (1.0 - t) ** 3
             previous.opacity = (255 * (1.0 - eased)).round
             previous.x = previous.x - (direction * 2) if frame < 8
@@ -162,12 +168,12 @@ class SceneEngine::Player
           chosen = VermeilTreatment.set(current)
           pbSEPlay("GUI sel decision") rescue nil
           # Breve confirmación visual, luego salida gradual a negro.
-          16.times do |i|
+          8.times do |i|
             draw_treatment_effects(effects.bitmap, current, tick + i, true)
             update
           end
-          32.times do |i|
-            t = (i + 1) / 32.0
+          18.times do |i|
+            t = (i + 1) / 18.0
             eased = t * t * (3.0 - 2.0 * t)
             blackout.opacity = (255 * eased).round
             portrait.opacity = (255 * (1.0 - eased * 0.4)).round
@@ -195,7 +201,7 @@ class SceneEngine::Player
   def treatment_portrait_y(sprite)
     return 102 unless sprite.bitmap
     ((Graphics.height - 480) / 2 + 102 +
-     (320 - sprite.bitmap.height * sprite.zoom_y) / 2).round
+     (320 - sprite.src_rect.height * sprite.zoom_y) / 2).round
   end
 
   # Compatible con el editor: un solo comando con tres variantes narrativas.
@@ -207,16 +213,46 @@ class SceneEngine::Player
     text_inline(text, speaker: speaker, speed: speed)
   end
 
+  # Los PNG no comparten necesariamente el mismo margen transparente.
+  # Centrar por los píxeles visibles, no por el tamaño del lienzo.
+  def treatment_visible_rect(bitmap)
+    @treatment_visible_bounds ||= {}
+    return @treatment_visible_bounds[bitmap.object_id] if @treatment_visible_bounds.key?(bitmap.object_id)
+    left = bitmap.width
+    top = bitmap.height
+    right = -1
+    bottom = -1
+    (0...bitmap.height).step(3) do |y|
+      (0...bitmap.width).step(3) do |x|
+        next if bitmap.get_pixel(x, y).alpha < 32
+        left = x if x < left
+        top = y if y < top
+        right = x if x > right
+        bottom = y if y > bottom
+      end
+    end
+    rect = if right < left
+             Rect.new(0, 0, bitmap.width, bitmap.height)
+           else
+             x = [left - 4, 0].max
+             y = [top - 4, 0].max
+             Rect.new(x, y, [[right + 7, bitmap.width].min - x, 1].max,
+                      [[bottom + 7, bitmap.height].min - y, 1].max)
+           end
+    @treatment_visible_bounds[bitmap.object_id] = rect
+  end
+
   def refresh_treatment_portrait(sprite, portraits, option)
     bitmap = portraits[option]
     sprite.bitmap = bitmap
     sprite.visible = !bitmap.nil?
-    return if !bitmap
-    scale = [304.0 / bitmap.width, 320.0 / bitmap.height, 1.0].min
-    sprite.zoom_x = scale
-    sprite.zoom_y = scale
-    sprite.x = ((Graphics.width - bitmap.width * scale) / 2).round
-    sprite.y = (102 + (320 - bitmap.height * scale) / 2).round
+    return unless bitmap
+    rect = treatment_visible_rect(bitmap)
+    sprite.src_rect.set(rect.x, rect.y, rect.width, rect.height)
+    scale = [304.0 / rect.width, 320.0 / rect.height, 1.0].min
+    sprite.zoom_x = sprite.zoom_y = scale
+    sprite.x = ((Graphics.width - rect.width * scale) / 2).round
+    sprite.y = treatment_portrait_y(sprite)
   end
 
   # Efectos en capa separada; nunca pinta sobre el PNG del personaje.
@@ -248,7 +284,7 @@ class SceneEngine::Player
     VermeilTreatment::OPTIONS.each_with_index do |candidate, i|
       x = ox + 293 + i * 22
       selected = candidate == option
-      bitmap.fill_rect(x, oy + 416, selected ? 12 : 7, 5,
+      bitmap.fill_rect(x, oy + 399, selected ? 12 : 7, 5,
                        Color.new(a[0], a[1], a[2], selected ? 255 : 90))
     end
     if confirm
@@ -285,8 +321,9 @@ class SceneEngine::Player
     bitmap.font.size = 33
     bitmap.font.color = outer
     bitmap.draw_text(ox + 90, oy + 42, 460, 42, VermeilTreatment::LABELS[option], 1)
-    bitmap.font.size = 20
-    bitmap.draw_text(ox + 53, oy + 433, 534, 23, "← →  Cambiar      C / Enter  Confirmar", 1)
+    bitmap.font.size = 17
+    bitmap.draw_text(ox + 53, oy + 414, 534, 23,
+                     "← → Cambiar        Enter Confirmar", 1)
 
     if !has_art
       bitmap.font.size = 18
