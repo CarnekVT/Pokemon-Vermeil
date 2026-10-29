@@ -150,9 +150,17 @@ def pbIntroVermeil
     @sprites[:float_bg]&.dispose
     @sprites[:float_bg] = nil
     treatment_input(default: :neutro)
+    fade_from_black 15
+    treatment_text(
+      masculino: "Perfecto, compañero. Ya casi estamos.",
+      femenino: "Perfecto, compañera. Ya casi estamos.",
+      neutro: "Perfecto, Solen. Ya casi estamos.",
+      speaker: "Mujer Misteriosa"
+    )
     text_inline "¡Perfecto! Y ahora, ¿mantendrás el nombre Solen o prefieres otro?",
                 speaker: "Mujer Misteriosa"
     hide_textbox(10)
+    fade_to_black 15
     player_name = name_input(default: "Solen", min: 1, max: 12)
     @float_anim[:sprite].visible = true if @float_anim
     @float_anim[:glow].visible = true if @float_anim && @float_anim[:glow]
