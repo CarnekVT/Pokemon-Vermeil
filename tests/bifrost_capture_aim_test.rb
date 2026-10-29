@@ -2,6 +2,11 @@
 # Pure Ruby integration stub: load the real plugin files without mkxp scenes.
 require "minitest/autorun"
 
+module Graphics
+  def self.width; 480; end
+  def self.height; 320; end
+end
+
 module EventHandlers
   def self.add(*); end
 end
