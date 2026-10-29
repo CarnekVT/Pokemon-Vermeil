@@ -80,22 +80,22 @@ verificado de forma estática/importación los archivos de la rama.
 ## Revisión de game feel y lectura (29/10/2026, segunda pasada)
 
 ### Timing en RPG Maker / mkxp-z
-\`LA BASE DE SKY/mkxp.json\` establece \`fixedFramerate: 120\`.
+`LA BASE DE SKY/mkxp.json` establece `fixedFramerate: 120`.
 Los scripts de Scene Engine están diseñados a 60 pasos lógicos/s.
-Ahora \`000_Settings.rb\` expone:
-- \`CINEMATIC_RENDER_FPS = 120.0\`
-- \`CINEMATIC_LOGIC_FPS = 60.0\`
-- \`ELLIPSIS_HOLD_FRAMES = 42\`
+Ahora `000_Settings.rb` expone:
+- `CINEMATIC_RENDER_FPS = 120.0`
+- `CINEMATIC_LOGIC_FPS = 60.0`
+- `ELLIPSIS_HOLD_FRAMES = 42`
 
-\`003_ScenePlayer.rb#update\` no depende de \`Graphics.frame_rate\`,
+`003_ScenePlayer.rb#update` no depende de `Graphics.frame_rate`,
 que puede devolver la tasa lógica de RGSS y no la física de mkxp-z.
 Si se cambia la tasa de mkxp.json, actualizar también
-\`CINEMATIC_RENDER_FPS\` para mantener la paridad temporal.
+`CINEMATIC_RENDER_FPS` para mantener la paridad temporal.
 
 ### Selección visual 640×480
-Los tres PNG transparentes siguen en \`Graphics/Scenes/Intro/GenderSelect/\`.
-Las flechas se cargan del juego en \`Graphics/UI/left_arrow.png\` y
-\`Graphics/UI/right_arrow.png\`, sin añadir nuevas imágenes obligatorias.
+Los tres PNG transparentes siguen en `Graphics/Scenes/Intro/GenderSelect/`.
+Las flechas se cargan del juego en `Graphics/UI/left_arrow.png` y
+`Graphics/UI/right_arrow.png`, sin añadir nuevas imágenes obligatorias.
 Capas: fondo/placa, partículas, retrato anterior, retrato actual, flechas,
 fundido negro. Efectos en runtime:
 - Entrada: 36 pasos, ease-out desde negro.
@@ -105,21 +105,21 @@ fundido negro. Efectos en runtime:
 - Se espera indefinidamente al usuario sin confirmar automáticamente.
 
 ### Ritmo de la intro
-- Descenso de Solen: \`speed: 0.45\`, \`fade: 42\`, \`wait 645\`.
+- Descenso de Solen: `speed: 0.45`, `fade: 42`, `wait 645`.
 - Pausas adicionales entre preguntas, confirmación del tratamiento y nombre.
 - La respuesta al tratamiento neutro es amistosa, no impersonal.
 - El Gran Espíritu ya no termina el diálogo con una línea residual
   «demasiado pronto.».
-- \`Despierta...\` se revela con puntos suspensivos ralentizados y espera 114
+- `Despierta...` se revela con puntos suspensivos ralentizados y espera 114
   pasos antes de desvanecer el texto.
 - Los saltos de párrafo explícitos continúan disponibles para otras escenas.
 
 ### Scene Director Studio
 La previsualización incorpora flechas del mismo juego, entrada/salida con
 curvas y retratos precargados. También incorpora la pausa de puntos
-suspensivos, mejora el timeline para scripts \`N.times do\` y acepta
+suspensivos, mejora el timeline para scripts `N.times do` y acepta
 Enter/C además de espacio. **No se ha podido acceder al JSON local del
-proyecto**; importar de nuevo \`010_Intro.rb\` y guardar en Studio para
+proyecto**; importar de nuevo `010_Intro.rb` y guardar en Studio para
 recompilar la versión visual a partir de los últimos diálogos.
 
 **Estado:** scripts actualizados en la rama. JS verificado por análisis
