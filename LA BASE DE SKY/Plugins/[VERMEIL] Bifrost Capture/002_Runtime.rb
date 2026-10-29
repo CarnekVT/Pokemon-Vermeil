@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# Lanzamiento: cursor frontal, 7 columnas x 7 filas + 8a fila de fallo.
+# Inventario, resolucion de impacto, captura y encuentros; la presentacion se maneja en 005.
 module BifrostCapture
   def self.ball_choices
     items = []
@@ -37,88 +37,6 @@ module BifrostCapture
     usable[idx][0]
   end
 
-  def self.aim
-    return false if !$game_player || !$game_map || !$player
-    cfg = options
-    return false if cfg["enabled"] != "1"
-    commands = []
-    commands << _INTL("Lanzar Poké Ball") if cfg["capture_enabled"] == "1"
-    commands << _INTL("Enviar Pokémon") if cfg["battle_enabled"] == "1"
-    commands << _INTL("Salir")
-    selection = pbMessage(_INTL("¿Qué deseas lanzar?"), commands, commands.length-1)
-    return false if selection < 0 || selection == commands.length-1
-    mode = commands[selection] == _INTL("Lanzar Poké Ball") ? :ball : :battle
-    payload = mode == :ball ? choose_ball : choose_pokemon
-    return false if !payload
-    return show_aim_cursor(mode,payload,cfg)
-  end
-
-  def self.show_aim_cursor(mode,payload,cfg)
-    px,py = $game_player.x,$game_player.y
-    facing = $game_player.direction
-    side,forward = 0, [cfg["optimal_range"].to_i,1].max
-    maxrange = [cfg["range"].to_i,1].max
-    width = [cfg["width"].to_i,1].max
-    width += 1 if width.even?
-    forward = [forward,maxrange].min
-    half = width/2
-    # Se usa una superposicion ligera sobre el mapa, sin cambiar la camara 2.5D.
-    viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
-    viewport.z = 999999
-    sprite = Sprite.new(viewport)
-    sprite.bitmap = Bitmap.new(Graphics.width,Graphics.height)
-    begin
-      loop do
-        bitmap = sprite.bitmap
-        bitmap.clear
-        header = _INTL("APUNTAR  |  ↑↓ distancia  ←→ lateral  C lanzar  B cancelar")
-        bitmap.draw_text(0,8,Graphics.width,32,header,1)
-        bitmap.draw_text(0,42,Graphics.width,26,
-          _INTL("Fila {1}/{2} | Columna {3}/{4}",forward,maxrange,side+half+1,width),1)
-        # Grilla compacta 7x7 (+8a casilla si el autor configura 8+).
-        cell = [27, 180/[maxrange,7].max].min
-        origin_x = Graphics.width/2 - width*cell/2
-        origin_y = 85
-        (1..[maxrange+1,8].max).each do |f|
-          next if f > 12
-          (-half..half).each do |s|
-            x=origin_x+(s+half)*cell
-            y=origin_y+(f-1)*cell
-            color = f>maxrange ? Color.new(130,50,50,150) :
-              Color.new(38,62,96,140)
-            bitmap.fill_rect(x+1,y+1,cell-2,cell-2,color)
-            if f==forward && s==side
-              bitmap.fill_rect(x+4,y+4,cell-8,cell-8,Color.new(255,218,95,220))
-            end
-          end
-        end
-        tx,ty=offset(px,py,facing,forward,side)
-        target = $game_map.events.values.find { |e| e.x==tx && e.y==ty && valid_target?(e) }
-        bitmap.draw_text(0,Graphics.height-50,Graphics.width,35,
-          target ? _INTL("Objetivo: {1}",event_spec(target)[0]) :
-          _INTL("Casilla sin objetivo"),1)
-        Graphics.update
-        Input.update
-        return false if Input.trigger?(Input::BACK)
-        if Input.trigger?(Input::UP)
-          forward = [forward-1,1].max
-        elsif Input.trigger?(Input::DOWN)
-          forward = [forward+1,maxrange+1].min
-        elsif Input.trigger?(Input::LEFT)
-          side = [side-1,-half].max
-        elsif Input.trigger?(Input::RIGHT)
-          side = [side+1,half].min
-        elsif Input.trigger?(Input::USE)
-          return throw_at(tx,ty,forward,side,mode,payload,cfg)
-        end
-      end
-    ensure
-      sprite.bitmap.dispose if sprite.bitmap && !sprite.bitmap.disposed?
-      sprite.dispose if !sprite.disposed?
-      viewport.dispose if !viewport.disposed?
-    end
-  end
-
   def self.impact(frames)
     return if frames <= 0
     view = Viewport.new(0,0,Graphics.width,Graphics.height)
@@ -142,7 +60,7 @@ module BifrostCapture
       result = WildBattle.start(wild)
       remove_event(event) if result
     when "flee"
-      pbMessage(_INTL("¡El Pokémon ha huido!"))
+      notice(_INTL("¡El Pokémon ha huido!"))
       remove_event(event)
     end
     true
@@ -164,7 +82,7 @@ module BifrostCapture
       return false unless $bag.remove(payload,1)
     end
     if !hit
-      pbMessage(_INTL("¡El lanzamiento ha fallado!"))
+      notice(_INTL("¡Lanzamiento fallido!"))
       react(event,cfg) if event
       return false
     end
@@ -200,13 +118,13 @@ module BifrostCapture
     chance=catch_chance(spec[0],payload,forward,behind,critical,cfg)
     if rand < chance
       pkmn.poke_ball=payload if pkmn.respond_to?(:poke_ball=)
-      pbMessage(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
+      notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
       # El motor decide equipo/cajas y registra Pokédex normalmente.
       pbAddPokemon(pkmn)
       remove_event(event)
       return true
     end
-    pbMessage(_INTL("¡Se ha liberado!"))
+    notice(_INTL("¡El Pokémon se ha liberado!"))
     react(event,cfg)
     false
   end
