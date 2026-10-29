@@ -14,7 +14,8 @@ const DEFS={
  encounter_mode:"classic",spawn_chance:"24",spawn_min_distance:"3",
  spawn_max_distance:"6",spawn_limit:"4",spawn_lifetime:"40",
  spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
- ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100"
+ ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100",
+ aim_mouse:"1",aim_target_radius:"36",throw_frames:"18",throw_arc:"42",aim_chain:"1"
 };
 const PRESETS={
  bifrost:{...DEFS},
@@ -59,6 +60,11 @@ const FIELDS={
  hit_near:["Precisión cercana (%)","aim","int",[0,100],"Probabilidad de que la Ball acierte al Pokémon en distancia óptima."],
  hit_far:["Precisión lejana (%)","aim","int",[0,100],"Precisión en el extremo del alcance."],
  line_of_sight:["Obstáculos bloquean","aim","bool",null,"Comprobación parcial de eventos intermedios; faltan muros 2.5D."],
+ aim_mouse:["Apuntar con el ratón","aim","bool",null,"Usa una retícula contextual sobre el mapa. Clic izquierdo para lanzar."],
+ aim_target_radius:["Radio de enfoque visual (px)","aim","int",[10,96],"Distancia en pantalla para fijar un Pokémon cercano al cursor."],
+ throw_frames:["Duración del vuelo (fotogramas)","aim","int",[8,48],"Velocidad del proyectil. No altera la tasa de captura."],
+ throw_arc:["Altura del arco (px)","aim","int",[0,110],"Elevación visual del lanzamiento sobre el mundo 2.5D."],
+ aim_chain:["Mantener apuntado tras lanzar","aim","bool",null,"Permite realizar varios lanzamientos sin reabrir el modo de puntería."],
  capture_floor:["Captura base mínima (%)","capture","int",[0,100],"Valor de captura inicial mínimo; debe equilibrarse con las tasas de especie."],
  back_multiplier:["Multiplicador por espalda (%)","capture","int",[100,500],"175 significa un factor 1,75 sobre el cálculo básico."],
  critical_front:["Crítica frontal (%)","capture","int",[0,100],"Probabilidad de marcar una captura crítica al frente."],
@@ -217,7 +223,7 @@ class CaptureStudio{
    profiles:["profile","access_mode","restricted_species"],
    species:["ow_form","ow_min_level","ow_max_level","ow_spawn_probability","reaction","alert_distance","capture_floor","restricted_species","spawn_filter"],
    spawns:["encounter_mode","spawn_chance","spawn_min_distance","spawn_max_distance","spawn_limit","spawn_lifetime","spawn_grass_only","spawn_filter"],
-   aim:["range","width","optimal_range","hit_near","hit_far","line_of_sight"],
+   aim:["aim_mouse","aim_target_radius","throw_frames","throw_arc","aim_chain","range","width","optimal_range","hit_near","hit_far","line_of_sight"],
    capture:["capture_floor","back_multiplier","critical_front","critical_back","critical_multiplier","consume_on_miss"],
    behavior:["reaction","alert_distance","impact_frames"],
    scopes:["enabled","access_mode","encounter_mode","restricted_species"],
@@ -366,9 +372,9 @@ class CaptureStudio{
    '<div class="bf-stat"><span>OW SIMULTÁNEOS</span><strong>'+E(v.spawn_limit)+'</strong><small>Máximo de eventos generados</small></div></div>';
  }
  aimPanel(v){
-  return '<div class="bf-kicker">APUNTADO Y DISTANCIA</div><h1 class="bf-headline">Zona de lanzamiento</h1><p class="bf-sub">Las filas están orientadas hacia delante del jugador y la anchura cubre los laterales. Distancia óptima y precisión cambian el resultado.</p>'+
-    this.panel("Previsualización interactiva · 7×7",this.preview(v))+
-    this.panel("Reglas espaciales",'<div class="bf-help">Alcance: '+E(v.range)+' filas · Anchura: '+E(v.width)+' columnas · Zona óptima: '+E(v.optimal_range)+' filas. En el perfil Bifröst, la octava fila falla. La vista anterior enseña las primeras 7 filas, aunque el alcance de otros proyectos puede ser mayor.</div>');
+  return '<div class="bf-kicker">APUNTADO Y DISTANCIA</div><h1 class="bf-headline">Zona de lanzamiento</h1><p class="bf-sub">En el juego desaparece la cuadrícula: el jugador apunta con el ratón a un OW visible o cambia de objetivo con las flechas. La Ball describe una trayectoria animada y el HUD permanece discreto.</p>'+
+    this.panel("Límites de alcance (solo vista del editor)",this.preview(v))+
+    this.panel("Reglas de precisión y distancia",'<div class="bf-help">Alcance: '+E(v.range)+' filas · Anchura: '+E(v.width)+' columnas · Zona óptima: '+E(v.optimal_range)+' filas. En el perfil Bifröst, la octava fila falla. La vista anterior enseña las primeras 7 filas, aunque el alcance de otros proyectos puede ser mayor.</div>');
  }
  capturePanel(v){
   return '<div class="bf-kicker">PROBABILIDADES</div><h1 class="bf-headline">Balance de la captura</h1>'+
