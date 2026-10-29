@@ -10,7 +10,8 @@ module BifrostCapture
     "back_multiplier"=>"175", "critical_front"=>"3",
     "critical_back"=>"35", "critical_multiplier"=>"250",
     "line_of_sight"=>"1", "reaction"=>"flee", "consume_on_miss"=>"1",
-    "impact_frames"=>"3"
+    "impact_frames"=>"3",
+    "access_mode"=>"event", "hotkey"=>"aux2"
   }.freeze
   ROAMERS = %w[RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES
                MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT
@@ -71,6 +72,61 @@ module BifrostCapture
       result.merge!($PokemonGlobal.bifrost_overrides)
     end
     result
+  end
+
+  # "event": apertura mediante pbBifrostAim desde un evento u objeto.
+  # "always": tecla disponible en cualquier mapa jugable, con o sin objetivo.
+  # "nearby": tecla disponible solo al haber un objetivo OW en la zona frontal.
+  def self.hotkey_code(name)
+    case name
+    when "aux1" then Input::AUX1 if defined?(Input::AUX1)
+    when "aux2" then Input::AUX2 if defined?(Input::AUX2)
+    else nil
+    end
+  end
+
+  def self.can_open_from_map?(cfg)
+    return false if !defined?($scene) || !$scene.is_a?(Scene_Map)
+    return false if !$game_temp || !$game_player || !$game_map || !$player
+    return false if cfg["enabled"] != "1"
+    return false if cfg["capture_enabled"] != "1" && cfg["battle_enabled"] != "1"
+    return false if $game_temp.in_menu || $game_temp.in_battle ||
+                    $game_temp.message_window_showing ||
+                    $game_temp.player_transferring ||
+                    $game_temp.transition_processing
+    return false if $game_player.moving? || $game_player.move_route_forcing
+    return false if $PokemonGlobal && $PokemonGlobal.forced_movement?
+    return false if pbMapInterpreterRunning?
+    true
+  end
+
+  def self.target_in_aim_area?(cfg)
+    range = [cfg["range"].to_i, 1].max
+    width = [cfg["width"].to_i, 1].max
+    half = width / 2
+    $game_map.events.values.any? do |event|
+      next false unless valid_target?(event)
+      forward, lateral = relative($game_player.x, $game_player.y,
+                                  $game_player.direction, event.x, event.y)
+      forward.between?(1, range) && lateral.abs <= half
+    end
+  end
+
+  def self.update_access
+    return if @aim_opening
+    cfg = options
+    mode = cfg["access_mode"]
+    return if mode != "always" && mode != "nearby"
+    return unless can_open_from_map?(cfg)
+    key = hotkey_code(cfg["hotkey"])
+    return if !key || !Input.trigger?(key)
+    return if mode == "nearby" && !target_in_aim_area?(cfg)
+    begin
+      @aim_opening = true
+      aim
+    ensure
+      @aim_opening = false
+    end
   end
 
   def self.allow_species?(species, cfg)
