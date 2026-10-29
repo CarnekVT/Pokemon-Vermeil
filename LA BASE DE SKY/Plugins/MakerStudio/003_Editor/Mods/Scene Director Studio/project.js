@@ -20,7 +20,7 @@ export async function copyExternalFileToProject(ctx,file,destDir){
   const dest=norm(`${destDir}/${safe}`); const bytes=new Uint8Array(await file.arrayBuffer()); await writeBinaryAbsolute(`${root}/${dest}`,bytes); return dest;
 }
 export async function detectSceneEngine(ctx){
-  const result={found:false,name:"Scene Engine",version:"?",folder:"",settings:{scenesDir:"Graphics/Scenes",textBoxFile:"txt",textBoxY:286,textBoxH:178,textPadX:48,textPadYTop:42,textLineH:32,textMaxLines:4,textColor:[248,248,248],textShadow:[72,72,72],speakerColor:[248,208,48],speakerShadow:[120,96,16],speakerColorMap:{},speeds:{instant:999,fast:4.4,normal:1.5,slow:.7,very_slow:.15},fontName:"Power Green",fontSize:29,fontFile:""},methods:[]};
+  const result={found:false,name:"Scene Engine",version:"?",folder:"",settings:{scenesDir:"Graphics/Scenes",textBoxFile:"txt",textBoxY:286,textBoxH:178,textPadX:48,textPadYTop:42,textLineH:32,textMaxLines:4,textColor:[248,248,248],textShadow:[72,72,72],speakerColor:[248,208,48],speakerShadow:[120,96,16],speakerColorMap:{},speeds:{instant:999,fast:4.4,normal:1.5,slow:.7,very_slow:.15,crawl:.16},fontName:"Power Green",fontSize:29,fontFile:""},methods:[]};
   const metas=await listRecursive(ctx,"Plugins",{extensions:["txt"],max:2500});
   for(const p of metas.filter(x=>/meta\.txt$/i.test(x))){let t="";try{t=String(await ctx.fs.readProjectFile(p)||"")}catch{};if(/^Name\s*=\s*Scene Engine\s*$/mi.test(t)){result.found=true;result.folder=p.replace(/\/meta\.txt$/i,"");result.version=(t.match(/^Version\s*=\s*(.+)$/mi)||[])[1]?.trim()||"?";break}}
   if(!result.found)return result;
@@ -29,7 +29,7 @@ export async function detectSceneEngine(ctx){
     const parseColor=(name,fallback)=>{const m=s.match(new RegExp(`${name}\\s*=\\s*Color\\.new\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)`));return m?[Number(m[1]),Number(m[2]),Number(m[3])]:fallback};
     result.settings.textColor=parseColor("TEXT_COLOR",result.settings.textColor);result.settings.textShadow=parseColor("TEXT_SHADOW",result.settings.textShadow);result.settings.speakerColor=parseColor("SPEAKER_COLOR",result.settings.speakerColor);result.settings.speakerShadow=parseColor("SPEAKER_SHADOW",result.settings.speakerShadow);
     const cmap={};for(const m of s.matchAll(/["']([^"']+)["']\s*=>\s*\[\s*Color\.new\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*,\s*Color\.new\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/g)){cmap[m[1]]=[[Number(m[2]),Number(m[3]),Number(m[4])],[Number(m[5]),Number(m[6]),Number(m[7])]]}result.settings.speakerColorMap=cmap;
-    for(const [k,K] of [["instant","INSTANT"],["fast","FAST"],["normal","NORMAL"],["slow","SLOW"],["very_slow","VERY_SLOW"]]){const m=s.match(new RegExp(`SPEED_${K}\\s*=\\s*([0-9.]+)`));if(m)result.settings.speeds[k]=Number(m[1])}
+    for(const [k,K] of [["instant","INSTANT"],["fast","FAST"],["normal","NORMAL"],["slow","SLOW"],["very_slow","VERY_SLOW"],["crawl","CRAWL"]]){const m=s.match(new RegExp(`SPEED_${K}\\s*=\\s*([0-9.]+)`));if(m)result.settings.speeds[k]=Number(m[1])}
   }catch{}
   try{const r=String(await ctx.fs.readProjectFile(`${result.folder}/003_ScenePlayer.rb`)||"");result.methods=[...r.matchAll(/^\s*def\s+([a-zA-Z_]\w*[!?=]?)/gm)].map(m=>m[1])}catch{}
   // pbSetSystemFont de Essentials suele usar Power Green. Si el proyecto incluye
