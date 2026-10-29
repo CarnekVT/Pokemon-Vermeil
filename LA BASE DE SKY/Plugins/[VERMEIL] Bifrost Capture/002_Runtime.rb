@@ -87,21 +87,21 @@ module BifrostCapture
     impact(cfg["impact_frames"].to_i) if from_behind
     probability = catch_chance(spec[0], payload, geometry[:forward],
                                from_behind, critical, cfg)
-    if rand < probability
+    caught = rand < probability
+    if caught
       pkmn = pbGenerateWildPokemon(spec[0], spec[1])
       pkmn.form = spec[2] if spec[2] > 0
       pkmn.poke_ball = payload if pkmn.respond_to?(:poke_ball=)
-      stored = pbAddPokemon(pkmn)
-      if stored
-        notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
-        remove_event(event)
-        return true
-      end
-      notice(_INTL("La captura no se pudo guardar."))
-      return false
+      caught = !!pbAddPokemon(pkmn)
+    end
+    capture_sequence(event, payload, caught, critical, cfg)
+    if caught
+      notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
+      remove_event(event)
+      return true
     end
     notice(_INTL("¡El Pokémon se ha liberado!"))
-    react(event, cfg, :breakout)
+    react(event,cfg,:breakout)
     false
   end
 
