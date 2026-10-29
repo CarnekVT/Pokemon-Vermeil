@@ -487,6 +487,7 @@ class SceneEngine::Player
 
   def speed_to_chars(speed)
     case speed
+    when :crawl then SceneEngine::Settings::SPEED_CRAWL
     when :very_slow then SceneEngine::Settings::SPEED_VERY_SLOW
     when :slow then SceneEngine::Settings::SPEED_SLOW
     when :fast then SceneEngine::Settings::SPEED_FAST
