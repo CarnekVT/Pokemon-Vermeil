@@ -11,10 +11,10 @@ module BifrostCapture
 
   def self.wild_events
     @wild_events ||= {}
-    @wild_events.values.select! do |event|
-      event && $game_map && event.map_id == $game_map.map_id &&
-        $game_map.events[event.id].equal?(event) &&
-        !event.instance_variable_get(:@erased)
+    @wild_events.delete_if do |_key,event|
+      !event || !$game_map || event.map_id != $game_map.map_id ||
+        !$game_map.events[event.id].equal?(event) ||
+        event.instance_variable_get(:@erased)
     end
     @wild_events.values
   end
