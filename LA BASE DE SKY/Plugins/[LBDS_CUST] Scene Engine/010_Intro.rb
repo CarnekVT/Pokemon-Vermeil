@@ -72,7 +72,7 @@ def pbIntroVermeil
     hide_all
     show "Graphics/Scenes/Intro/int5", 0, 0, fade: 30
 
-    text_inline "Traicionó su juramento. Consumió las almas que debía proteger y reunió poder suficiente para desafiarme.",
+    text_inline "Traicionó su juramento. Consumió las almas que debía proteger. Así obtuvo el poder para desafiarme.",
                 speaker: "Gran Espíritu", speed: :slow
     text_inline "Las Fuerzas de la Naturaleza, mis otros hijos, lucharon a mi lado. Le arrebatamos su poder, mas no extinguimos su rencor.",
                 speaker: "Gran Espíritu", speed: :slow
@@ -82,9 +82,9 @@ def pbIntroVermeil
 
     show "Graphics/Scenes/Intro/int9", 0, 0, fade: 25
 
-    text_inline "Y después de aquello, nos diste la espalda. A todos. No precisamente tu mejor decisión, Gran Espíritu.",
+    text_inline "Y después de eso les diste la espalda a todos. No fue precisamente tu mejor decisión, Gran Espíritu.",
                 speaker: "Mujer Misteriosa", speed: :slow
-    text_inline "Hay gente capaz de hacer daño, claro. Pero también quien lo daría todo por los suyos. Eso también cuenta.",
+    text_inline "Hay gente capaz de hacer daño, sí. Pero también hay quienes darían todo por los suyos. Eso también importa.",
                 speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y el Guía está recuperando fuerzas. Si regresa, nuestra región será la primera en sufrirlo.",
                 speaker: "Mujer Misteriosa", speed: :slow
@@ -130,7 +130,7 @@ def pbIntroVermeil
     wait 355
     wait 18
 
-    text_inline "Mira, ahí está Solen. Tiene una determinación increíble y aceptó meterse en este lío.",
+    text_inline "Mira, ahí está Solen. Tiene mucha determinación y aceptó ayudar.",
                 speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y mira qué bien duerme, como si aquí no pasara nada. En fin, Solen sabe lo que le espera.",
                 speaker: "Mujer Misteriosa", speed: :slow
@@ -168,7 +168,7 @@ def pbIntroVermeil
     hide_textbox(10)
     wait 12
     fade_to_black 20
-    player_name = name_input(default: "Solen", min: 1, max: 12)
+    player_name = custom_name_input(default: "Solen", min: 1, max: 12)
     @float_anim[:sprite].visible = true if @float_anim
     @float_anim[:glow].visible = true if @float_anim && @float_anim[:glow]
     wait 25
@@ -186,7 +186,7 @@ def pbIntroVermeil
 
     text_inline "El pacto está sellado, {1}. Mi hijo sigue reuniendo fuerzas. Demuéstrame que aún puedo confiar en la humanidad.",
                 speaker: "Gran Espíritu", speed: :slow, format_args: [player_name]
-    text_inline "Bueno, {1}, ¡ya está! Ahora te toca a ti.\nCuídate. ¡Las aventuras nunca siguen el plan!",
+    text_inline "Bueno, {1}, ya está. Ahora te toca a ti.\nCuídate. Las mejores aventuras no siempre siguen el plan.",
                 speaker: "Mujer Misteriosa", speed: :slow, format_args: [player_name]
 
     # ══════════ FASE 9: LA FUSIÓN Y DESPERTAR ══════════
@@ -203,10 +203,10 @@ def pbIntroVermeil
     stop_bgm(1.5)
     wait 5
     se "Exit sound effect - IntroWakeUp.wav"
-    wait 14
-    show_centered_text "Despierta...", speed: :normal, color: Color.new(0,0,0)
+    wait 20
+    show_centered_text "Despierta...", speed: :slow, color: Color.new(0,0,0)
 
-    wait 24
+    wait 34
     hide_centered_text
 
     show "Graphics/Scenes/Intro/BGWakeUp", 0, 0, fade: 0
