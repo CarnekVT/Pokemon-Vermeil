@@ -152,7 +152,9 @@ module BifrostCapture
     end
     level = level.clamp(1,GameData::GrowthRate.max_level)
     form = [local["ow_form"].to_i,0].max
-    tile = choose_spawn_tile(cfg)
+    # Cuevas: no exigir un tag de hierba inexistente.
+    spawn_tile_rules = kind == :cave ? cfg.merge("spawn_grass_only"=>"0") : cfg
+    tile = choose_spawn_tile(spawn_tile_rules)
     return unless tile
     sprite_name = existing_sprite(species,form)
     return unless sprite_name # Sin gráfico jamás generar un OW invisible.
