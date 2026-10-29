@@ -109,7 +109,7 @@ def pbVisual25DResetTuning
   end
   eigen = Visual25D.singleton_class
   eigen.send(:remove_const, :COLUMN_BAND_OVERLAP) if eigen.const_defined?(:COLUMN_BAND_OVERLAP, false)
-  eigen.const_set(:COLUMN_BAND_OVERLAP, 2)
+  eigen.const_set(:COLUMN_BAND_OVERLAP, 1)
 end
 def pbVisual25DGeometryMenu
   return unless $DEBUG
