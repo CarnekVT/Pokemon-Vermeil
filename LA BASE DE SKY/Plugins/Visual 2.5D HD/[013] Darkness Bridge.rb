@@ -5,9 +5,16 @@
 # proyectados via Sprite_Character. Sin este puente, luces/linternas quedan en
 # coords 2D y no siguen el 2.5D.
 #
-# Solo carga si existe DarknessSprite (Optional en meta).
+# Solo se acopla a la API de Caruban. Otras versiones o plugins pueden
+# definir DarknessSprite sin ofrecer get_nearby_events/draw_all_lights/refresh.
+# Un simple defined?(DarknessSprite) NO comprueba esos metodos y el alias
+# lanzaba NameError durante la carga. No interferir con esa implementacion.
 #===============================================================================
-if defined?(DarknessSprite)
+if defined?(DarknessSprite) && DarknessSprite.is_a?(Class) &&
+   [:get_nearby_events, :draw_all_lights, :refresh].all? { |name|
+     DarknessSprite.method_defined?(name) ||
+       DarknessSprite.private_method_defined?(name)
+   }
   class DarknessSprite
     alias hd25_dd_get_nearby_events get_nearby_events unless method_defined?(:hd25_dd_get_nearby_events)
     def get_nearby_events
