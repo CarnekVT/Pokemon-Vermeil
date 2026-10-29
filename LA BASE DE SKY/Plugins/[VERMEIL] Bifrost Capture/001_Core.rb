@@ -11,7 +11,11 @@ module BifrostCapture
     "critical_back"=>"35", "critical_multiplier"=>"250",
     "line_of_sight"=>"1", "reaction"=>"flee", "consume_on_miss"=>"1",
     "impact_frames"=>"3",
-    "access_mode"=>"event", "hotkey"=>"aux2"
+    "access_mode"=>"event", "hotkey"=>"aux2",
+    "encounter_mode"=>"classic", "spawn_chance"=>"24",
+    "spawn_min_distance"=>"3", "spawn_max_distance"=>"6",
+    "spawn_limit"=>"4", "spawn_lifetime"=>"40", "spawn_filter"=>"all",
+    "spawn_grass_only"=>"1", "spawn_allow_fishing"=>"0"
   }.freeze
   ROAMERS = %w[RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES
                MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT
@@ -22,13 +26,50 @@ module BifrostCapture
     "bifrost"=>{}, "classic"=>{"capture_enabled"=>"0", "battle_enabled"=>"1"},
     "adventure"=>{"restricted_species"=>"0", "reaction"=>"attack"},
     "safari"=>{"restricted_species"=>"0", "battle_enabled"=>"0",
-               "reaction"=>"flee"}, "custom"=>{}
+               "reaction"=>"flee"},
+    "full_ow"=>{"restricted_species"=>"0", "access_mode"=>"always",
+               "encounter_mode"=>"overworld", "spawn_filter"=>"all"},
+    "custom"=>{}
   }.freeze
+
+  ROSTER_PATH = "Plugins/[VERMEIL] Bifrost Capture/roster.ini"
 
   def self.reload!
     @sections = nil
     @mtime = nil
+    @roster = nil
+    @roster_mtime = nil
   end
+
+  def self.roster
+    stamp = begin File.mtime(ROSTER_PATH) rescue nil end
+    return @roster if @roster && @roster_mtime == stamp
+    sections = {"bifrost" => {}, "spawn" => {}, "blocked" => {}}
+    section = "bifrost"
+    begin
+      File.foreach(ROSTER_PATH) do |raw|
+        line = raw.sub(/[;#].*$/, "").strip
+        next if line.empty?
+        if line =~ /\A\[(bifrost|spawn|blocked)\]\z/i
+          section = $1.downcase
+        elsif line =~ /\A([A-Za-z0-9_]+)\s*=\s*([01])\z/
+          sections[section][$1.upcase] = ($2 == "1")
+        end
+      end
+    rescue Errno::ENOENT, Errno::EACCES
+      ROAMERS.each { |species| sections["bifrost"][species] = true }
+    end
+    @roster_mtime = stamp
+    @roster = sections
+  end
+
+  def self.spawn_species?(species, config)
+    name = species.to_s.upcase
+    return false if roster["blocked"][name]
+    return true if config["spawn_filter"] != "allowlist"
+    roster["spawn"][name] == true
+  end
+
 
   def self.sections
     stamp = begin File.mtime(PATH) rescue nil end
@@ -77,6 +118,10 @@ module BifrostCapture
   # "event": apertura mediante pbBifrostAim desde un evento u objeto.
   # "always": tecla disponible en cualquier mapa jugable, con o sin objetivo.
   # "nearby": tecla disponible solo al haber un objetivo OW en la zona frontal.
+  def self.overworld_encounters?(cfg = options)
+    cfg["enabled"] == "1" && cfg["encounter_mode"] == "overworld"
+  end
+
   def self.hotkey_code(name)
     case name
     when "aux1" then Input::AUX1 if defined?(Input::AUX1)
@@ -130,7 +175,7 @@ module BifrostCapture
   end
 
   def self.allow_species?(species, cfg)
-    cfg["restricted_species"] != "1" || ROAMERS.include?(species.to_s.upcase)
+    cfg["restricted_species"] != "1" || roster["bifrost"][species.to_s.upcase] == true
   end
 
   def self.offset(px, py, facing, forward, side)
