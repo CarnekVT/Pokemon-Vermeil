@@ -2544,7 +2544,12 @@ module Visual25D
       # The cached hd25_taper is not proof that the GPU still uses that value.
       cached = tile.hd25_taper
       if cached && (cached - value).abs <= ZOOM_EPS
-        return if !tile.respond_to?(:taper) || (tile.taper - value).abs <= ZOOM_EPS
+        if tile.respond_to?(:taper)
+          actual = tile.taper
+          return if actual && (actual - value).abs <= ZOOM_EPS
+        else
+          return
+        end
       end
       tile.taper = value
       tile.hd25_taper = value
