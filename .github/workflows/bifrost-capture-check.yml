@@ -28,3 +28,5 @@ jobs:
           done
       - name: Run geometry and profiles tests
         run: ruby tests/bifrost_capture_core_test.rb
+      - name: Validate aiming and hitting without mkxp
+        run: ruby tests/bifrost_capture_aim_test.rb
