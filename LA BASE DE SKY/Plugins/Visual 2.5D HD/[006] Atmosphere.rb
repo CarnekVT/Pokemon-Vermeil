@@ -383,9 +383,11 @@ module Visual25D
     end
 
     def try_hotkey_toggle!
-      key = Config::HOTKEY
-      return if !key
-      return if !Input.triggerex?(key)
+      # Exclusivo del juego en modo debug. AUX1 es un input logico
+      # de Essentials, no una letra fisica ni una tecla configurable.
+      return if !$DEBUG
+      return if !defined?(Input::AUX1)
+      return if !Input.trigger?(Input::AUX1)
       return if !player_can_toggle_hotkey?
       cambiar_modo_suave
     end
