@@ -117,36 +117,55 @@ module BifrostCapture
     [event.screen_x, event.screen_y - 16]
   end
 
-  def self.aim_direction(event)
-    dx = event.x - $game_player.x
-    dy = event.y - $game_player.y
-    return dx < 0 ? 4 : 6 if dx.abs > dy.abs
-    dy < 0 ? 8 : 2
+  def self.visible_target_events
+    return [] unless $game_map
+    $game_map.events.values.select do |event|
+      next false unless valid_target?(event)
+      sx, sy = screen_position(event)
+      sx.between?(-48, Graphics.width + 48) &&
+        sy.between?(-48, Graphics.height + 48)
+    end
   end
 
-  def self.current_focus(mouse_pos, selection, cfg)
-    range = [cfg["range"].to_i, 1].max
-    events = $game_map.events.values.select { |e| valid_target?(e) }
-    return mouse_pos ? [nil, mouse_pos[0], mouse_pos[1]] : [nil, nil, nil] if events.empty?
-    if mouse_pos && cfg["aim_mouse"] == "1"
-      mx, my = mouse_pos
-      radius = [cfg["aim_target_radius"].to_i, 10].max
-      choices = events.map do |e|
-        sx, sy = screen_position(e)
-        [e, (sx-mx)**2 + (sy-my)**2]
+  def self.target_ready?(event, cfg)
+    return false unless event && valid_target?(event)
+    spec = event_spec(event)
+    local = options($game_map.map_id, spec[0], event.id)
+    geo = shot_geometry($game_player.x, $game_player.y, event.x, event.y, local)
+    geo[:in_range] && (local["line_of_sight"] != "1" ||
+      line_clear?($game_player.x, $game_player.y, event.x, event.y))
+  end
+
+  def self.nearest_aimable_target(cfg)
+    visible_target_events.select { |event| target_ready?(event, cfg) }
+      .min_by do |e|
+        ($game_player.x-e.x).abs + ($game_player.y-e.y).abs
       end
-      best = choices.min_by { |entry| entry[1] }
-      if best && best[1] <= radius**2
-        return [best[0], mx, my]
-      end
-      return [nil, mx, my]
+  end
+
+  # La posición es siempre una retícula visible en PÍXELES. Con ratón o
+  # flechas, si apunta cerca del sprite, se engancha al evento real.
+  # Devuelve el mismo evento para la vista y para el disparo.
+  def self.current_focus(pointer, cfg)
+    return [nil, nil, nil] if !pointer
+    mx, my = pointer
+    r = [cfg["aim_target_radius"].to_i, 10].max
+    choices = visible_target_events.map do |e|
+      sx, sy = screen_position(e)
+      [e, (sx-mx)**2 + (sy-my)**2]
     end
-    # Teclado: el objetivo más cercano; flechas izquierda/derecha rotan la lista.
-    sorted = events.sort_by do |e|
-      [($game_player.x-e.x).abs + ($game_player.y-e.y).abs, e.id]
-    end
-    focus = sorted[selection % sorted.length]
-    return [focus, *screen_position(focus)]
+    best = choices.min_by { |entry| entry[1] }
+    return [nil, mx, my] if !best || best[1] > r*r
+    event = best[0]
+    [event, *screen_position(event)]
+  end
+
+  def self.initial_aim_pointer(cfg)
+    focus = nearest_aimable_target(cfg)
+    return screen_position(focus).map(&:to_f) if focus
+    fx, fy = DIR[$game_player.direction] || [0,-1]
+    [($game_player.screen_x + fx * 96).to_f,
+     ($game_player.screen_y - 30 + fy * 72).to_f]
   end
 
   def self.map_preview_update
@@ -274,34 +293,34 @@ module BifrostCapture
     @aim_running = true
     @aim_notice = nil
     @aim_notice_frames = 0
-    balls = ball_choices
-    ball_index = 0
-    party_pokemon = $player.party.find { |p| p && p.able? }
-    mode = cfg["capture_enabled"] == "1" && !balls.empty? ? :ball : :battle
-    if mode == :battle && (!party_pokemon || cfg["battle_enabled"] != "1")
-      @aim_running = false
-      @aim_opening = previous_guard
-      pbMessage(_INTL("No tienes nada que lanzar."))
-      return false
-    end
-    overlay = AimOverlay.new
-    selection = 0
-    last_mouse = nil
-    mouse_enabled = false
-    frame_count = 0
+    overlay = nil
     begin
+      balls = ball_choices
+      ball_index = 0
+      party_pokemon = $player.party.find { |p| p && p.able? }
+      mode = cfg["capture_enabled"] == "1" && !balls.empty? ? :ball : :battle
+      if mode == :battle && (!party_pokemon || cfg["battle_enabled"] != "1")
+        pbMessage(_INTL("No tienes nada que lanzar."))
+        return false
+      end
+      overlay = AimOverlay.new
+      px, py = initial_aim_pointer(cfg)
+      pointer_mode = :keyboard
+      last_mouse = nil
+      elapsed = 0
+      mode_shortcut = hotkey_code(cfg["hotkey"])
+      # Si AUX1 es el acceso configurado, el cambio de Ball usa ACTION.
+      cycle_key = cfg["hotkey"] == "aux1" ? Input::ACTION : Input::AUX1
       loop do
         Graphics.update
         Input.update
         map_preview_update
-        frame_count += 1
+        elapsed += 1
 
-        return false if Input.trigger?(Input::BACK)
-        key = hotkey_code(cfg["hotkey"])
-        return false if key && Input.trigger?(key) && frame_count > 8
+        return false if input_action?(:cancel)
+        return false if mode_shortcut && Input.trigger?(mode_shortcut) && elapsed > 8
 
-        # Cambiar tipo de objeto sin reabrir un menú antes de cada lanzamiento.
-        if Input.trigger?(Input::SPECIAL)
+        if input_action?(:mode)
           if mode == :ball && cfg["battle_enabled"] == "1" && party_pokemon
             chosen = choose_pokemon
             if chosen
@@ -312,89 +331,115 @@ module BifrostCapture
             mode = :ball
           end
         end
-        if mode == :ball && !balls.empty?
-          if Input.trigger?(Input::UP)
-            ball_index = (ball_index-1) % balls.length
-          elsif Input.trigger?(Input::DOWN)
-            ball_index = (ball_index+1) % balls.length
+        if mode == :ball && balls.length > 1 && Input.trigger?(cycle_key)
+          ball_index = (ball_index + 1) % balls.length
+        end
+
+        # Input::UP/DOWN/LEFT/RIGHT son las acciones de movimiento reales
+        # (teclas, gamepad y remapeos). Mientras apunta no se mueve el jugador.
+        speed = Input.press?(Input::ACTION) ? 10.0 : 5.0
+        dx = 0
+        dy = 0
+        dx -= 1 if Input.press?(Input::LEFT)
+        dx += 1 if Input.press?(Input::RIGHT)
+        dy -= 1 if Input.press?(Input::UP)
+        dy += 1 if Input.press?(Input::DOWN)
+        if dx != 0 || dy != 0
+          pointer_mode = :keyboard
+          px = (px + dx * speed).clamp(12, Graphics.width - 12)
+          py = (py + dy * speed).clamp(12, Graphics.height - 12)
+        end
+
+        # ACTION (Shift/Z en la captura de Key bindings) salta a un
+        # Pokémon válido solo al PRESIONARLA, sin disparos automáticos.
+        if cfg["hotkey"] != "aux1" && Input.trigger?(Input::ACTION)
+          target = nearest_aimable_target(cfg)
+          if target
+            px, py = screen_position(target)
+            pointer_mode = :keyboard
+          else
+            notice(_INTL("No hay un objetivo al alcance."))
           end
         end
-        if Input.trigger?(Input::LEFT)
-          selection -= 1
-          mouse_enabled = false
-        elsif Input.trigger?(Input::RIGHT)
-          selection += 1
-          mouse_enabled = false
-        end
+
         if cfg["aim_mouse"] == "1" && defined?(Mouse)
-          pos = Mouse.getMousePos
-          if pos && last_mouse &&
-             ((pos[0]-last_mouse[0]).abs+(pos[1]-last_mouse[1]).abs) >= 2
-            mouse_enabled = true
+          mouse = Mouse.getMousePos
+          if mouse && last_mouse &&
+             (mouse[0]-last_mouse[0]).abs + (mouse[1]-last_mouse[1]).abs >= 4
+            pointer_mode = :mouse
           end
-          last_mouse = pos if pos
+          last_mouse = mouse if mouse
+          if pointer_mode == :mouse && mouse
+            px, py = mouse
+          end
         end
-        focus, x, y = current_focus(mouse_enabled ? last_mouse : nil, selection, cfg)
-        if !focus && !mouse_enabled
-          fx, fy = DIR[$game_player.direction] || [0,-1]
-          x = $game_player.screen_x + fx * 70
-          y = $game_player.screen_y - 25 + fy * 70
-        end
-        forward = [cfg["range"].to_i+1, 8].max
-        lateral = 0
-        status = :free
+
+        focus, ret_x, ret_y = current_focus([px, py], cfg)
+        state = :free
+        hint = nil
         if focus
-          facing = aim_direction(focus)
-          forward, lateral = relative($game_player.x,$game_player.y,
-                                      facing,focus.x,focus.y)
-          valid = forward.between?(1,cfg["range"].to_i) &&
-                  lateral.abs <= cfg["width"].to_i/2
-          status = valid ? :locked : :far
+          spec = event_spec(focus)
+          local_cfg = options($game_map.map_id, spec[0], focus.id)
+          geom = shot_geometry($game_player.x, $game_player.y,
+                               focus.x, focus.y, local_cfg)
+          blocked = local_cfg["line_of_sight"] == "1" &&
+            !line_clear?($game_player.x, $game_player.y, focus.x, focus.y)
+          state = geom[:in_range] && !blocked ? :locked : :far
+          hint = !geom[:in_range] ? _INTL("Fuera de alcance") :
+                 (blocked ? _INTL("Obstáculo en trayectoria") :
+                 _INTL("Objetivo alineado"))
         end
-        overlay.update_reticle(x,y,status)
         if @aim_notice_frames > 0
           @aim_notice_frames -= 1
         else
           @aim_notice = nil
         end
+        overlay.update_reticle(ret_x, ret_y, state)
         current_ball = balls[ball_index] && balls[ball_index][0]
-        current_qty = current_ball ? $bag.quantity(current_ball) : 0
-        if mode == :ball && current_qty <= 0
+        if mode == :ball && (!current_ball || $bag.quantity(current_ball) <= 0)
           balls = ball_choices
           ball_index = 0
           current_ball = balls[0] && balls[0][0]
-          current_qty = current_ball ? $bag.quantity(current_ball) : 0
           if !current_ball && cfg["battle_enabled"] == "1" && party_pokemon
             mode = :battle
           end
         end
-        overlay.update_hud(mode,mode == :ball ? current_ball : party_pokemon,
-                           current_qty,focus,cfg,@aim_notice)
+        current_qty = current_ball ? $bag.quantity(current_ball) : 0
+        overlay.update_hud(mode, mode == :ball ? current_ball : party_pokemon,
+                           current_qty, focus, cfg, @aim_notice || hint)
+
+        # USE siempre lanza con teclado/mando. El clic izquierdo es opcional.
         left_click = cfg["aim_mouse"] == "1" && defined?(Input::MOUSELEFT) &&
                      Input.trigger?(Input::MOUSELEFT)
-        next unless frame_count > 6 &&
-                    (Input.trigger?(Input::USE) || left_click)
+        next unless elapsed > 6 && (input_action?(:throw) || left_click)
         if left_click && last_mouse
-          focus, x, y = current_focus(last_mouse, selection, cfg)
+          px, py = last_mouse
+          focus, ret_x, ret_y = current_focus([px, py], cfg)
         end
         payload = mode == :ball ? current_ball : party_pokemon
         next if !payload
-        @aim_pointer = [x,y]
+        @aim_pointer = [ret_x, ret_y]
         if focus
-          facing = aim_direction(focus)
-          # Solo cambia el facing visual. Evita el evento de encuentro
-          # aleatorio que se ejecutaría mediante turn_up/left/right.
-          $game_player.instance_variable_set(:@direction,facing)
-          throw_at(focus.x,focus.y,forward,lateral,mode,payload,cfg)
+          # Calcular la geometría NUEVAMENTE al disparar; nunca reutilizar
+          # distancias calculadas para otro objetivo o fotograma.
+          spec = event_spec(focus)
+          local_cfg = options($game_map.map_id, spec[0], focus.id)
+          geom = shot_geometry($game_player.x, $game_player.y,
+                               focus.x, focus.y, local_cfg)
+          $game_player.instance_variable_set(:@direction,geom[:facing])
+          throw_at(focus.x, focus.y, geom[:forward], geom[:side],
+                   mode, payload, local_cfg)
         else
-          # El lanzamiento vacío no inventa un objetivo: siempre falla.
-          fx, fy = DIR[$game_player.direction] || [0,-1]
-          tx = $game_player.x + fx * forward
-          ty = $game_player.y + fy * forward
-          throw_at(tx,ty,forward,0,mode,payload,cfg)
+          # Disparo a terreno vacío: animación, pero no captura falsa.
+          facing = $game_player.direction
+          fx, fy = DIR[facing] || [0,-1]
+          missed_distance = [cfg["range"].to_i + 1, 8].max
+          throw_at($game_player.x + fx * missed_distance,
+                   $game_player.y + fy * missed_distance,
+                   missed_distance, 0, mode, payload, cfg)
         end
         break if mode == :battle || cfg["aim_chain"] == "0"
-        balls = ball_choices if mode == :ball
+        balls = ball_choices
         ball_index = 0 if ball_index >= balls.length
       end
     ensure
