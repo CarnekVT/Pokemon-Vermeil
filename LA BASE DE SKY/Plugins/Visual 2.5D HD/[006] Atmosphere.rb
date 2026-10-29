@@ -426,11 +426,25 @@ class Scene_Map
 
   alias hd25_updateSpritesets updateSpritesets unless method_defined?(:hd25_updateSpritesets)
   def updateSpritesets(refresh = false)
-    # Hotkey ANTES del tilemap: prepare + sync grid + dibujo el mismo frame
-    # (en update_input iba despues → 1 frame sin capas MS/paredes).
+    # AUX1 mode selection precedes the map update. Apply all dependent
+    # lighting to the SAME finished 2D/2.5D frame; never leave ambient
+    # reconstitution to the 0.2s clock update budget.
     Visual25D.try_hotkey_toggle!
     Visual25D.refresh_active
+    mode = Visual25D.enabled?
+    changed = !@hd25_last_mode.nil? && @hd25_last_mode != mode
+    @hd25_last_mode = mode
     hd25_updateSpritesets(refresh)
+    if changed && @spritesets && defined?(LightingStudioDayNight)
+      sprites = @spritesets.respond_to?(:each_value) ? @spritesets.values : @spritesets
+      sprites.each do |set|
+        next unless set && set.respond_to?(:ls_update_day_night)
+        map = set.instance_variable_get(:@map)
+        next unless map && $game_map && map.map_id == $game_map.map_id
+        set.ls_update_day_night(true)
+        set.ls_apply_native_day_night if set.respond_to?(:ls_apply_native_day_night)
+      end
+    end
     @hd25_atmosphere&.update
   end
 end
