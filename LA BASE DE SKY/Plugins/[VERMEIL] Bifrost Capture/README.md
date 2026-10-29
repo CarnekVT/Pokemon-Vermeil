@@ -23,25 +23,39 @@ mantener el mapa visible, elegir una Poké Ball desde un HUD discreto, apuntar
 al Pokémon real y ver un proyectil que viaja hasta él, con efecto local al
 impactar. Se usa el icono de la Ball existente en `Graphics/Items`.
 
-**Controles previstos** al abrir el sistema:
-- `R` (o atajo elegido) entra/sale del modo de lanzamiento, si se habilitó
-  `access_mode=always` o `nearby`. `Esc` cancela.
-- Ratón: mover el cursor cerca de un OW válido coloca la retícula; clic
-  izquierdo lanza. Clic sin objetivo genera fallo.
-- Teclado: `izquierda/derecha` recorre objetivos próximos, `C/Enter`
-  lanza y `arriba/abajo` cambia de tipo de Ball disponible.
-- `Input::SPECIAL` cambia entre lanzar Ball y enviar un Pokémon
-  (abre la selección de Pokémon una vez al cambiar).
-- Tras lanzar una Ball el apuntado se mantiene abierto por defecto; el
-  combate cierra el modo.
-- No se dibuja la malla de casillas ingame. Las reglas espaciales 7×7
-  se calculan internamente, incluida la octava casilla como fallo.
+**Controles basados en acciones de Essentials**, según la ventana de Key bindings:
+- **W (AUX2)** abre/cierra el apuntado si `access_mode=always` o
+  `nearby`. Con `access_mode=event` solo se abre por `pbBifrostAim`.
+- **Flechas de movimiento** desplazan la retícula libremente en el mapa,
+  sin mover al personaje, incluso cuando el ratón está desconectado.
+- **C / Espacio / Enter (USE)** lanza la Poké Ball al Pokémon enfocado.
+- **Q (AUX1)** cambia de Ball. Si la tecla de apertura se configura como AUX1,
+  el cambio de Ball utiliza la acción ACTION.
+- **Shift / Z (ACTION)** fija la retícula al Pokémon válido más cercano;
+  mantenerla pulsada acelera el movimiento de retícula.
+- **D (SPECIAL)** alterna Poké Ball y Pokémon para iniciar combate.
+- **X / Esc (BACK)** sale del apuntado sin lanzar.
+- **Ratón opcional:** desplazarlo cerca de un Pokémon coloca la retícula;
+  clic izquierdo lanza si el motor expone `Input::MOUSELEFT`.
+  El botón USE funciona sin ratón.
+
+AUX1, AUX2, USE, BACK, SPECIAL y ACTION son acciones de Essentials.
+Si reasignas las teclas en Key bindings, el plugin sigue esas acciones.
+La retícula es verde cuando hay un objetivo dentro del alcance y con
+trayectoria libre; roja cuando el objetivo está fuera o hay obstáculos.
+El cálculo de impacto es idéntico para ratón y teclado, con geometría
+recalculada al lanzar. En la configuración base, el contacto en la cuarta
+casilla alineada tiene **100 % de precisión**, pero **capturar** al Pokémon
+sigue siendo probabilístico. El HUD explica los fallos y la proximidad
+de tres casillas continúa pudiendo provocar la reacción del Pokémon.
 
 Opciones nuevas en Maker Studio → Lanzamiento:
 
 ```ini
 [global]
 aim_mouse=1
+aim_keyboard=1
+aim_speed=5
 aim_target_radius=36
 throw_frames=18
 throw_arc=42
@@ -62,8 +76,9 @@ con Turbo/Visual 2.5D siguen pendientes de pruebas en el juego.
 
 ## Activación en cualquier momento (nuevo)
 
-Bifröst mantiene la apertura por evento de forma predeterminada para que no
-cambie el flujo del proyecto sin autorización. También se puede habilitar el
+En la configuración Bifröst revisada el lanzamiento está disponible en el mapa
+con `access_mode=always` por defecto; otros proyectos pueden elegir `event`
+o `nearby` desde el editor. También se puede habilitar el
 apuntado en todos los mapas jugables, aunque en ese momento no haya un Pokémon
 delante. Esta opción **no** hace capturables a los Pokémon decorativos ni
 elimina la lista de especies admitidas. Para permitir otras especies además
@@ -78,7 +93,7 @@ En `config.ini` dentro de `[global]` (o en un `[map:ID]`), configura:
 ; nearby: acceso solo cuando existe un OW elegible en el area de apuntado
 access_mode=always
 
-; aux2: tecla R / aux1: tecla L / none: no registrar atajo
+; aux2: W / aux1: Q / none: sin atajo (según Key bindings)
 hotkey=aux2
 ```
 
@@ -88,7 +103,7 @@ prevalecen sobre el archivo INI hasta seleccionar "Restaurar reglas del
 proyecto". Por defecto, Bifröst sigue siendo "Solo por evento".
 
 Desde Maker Studio se cambian estos mismos parámetros con **Disponibilidad
-de lanzamiento** y **Tecla de apuntado**. Si se elige `always`, pulsar R
+de lanzamiento** y **Tecla de apuntado**. Si se elige `always`, pulsar W (AUX2)
 abre la selección de Poké Ball/Pokémon y el apuntado sin necesidad de tocar
 un evento. `none` desactiva solamente el atajo; los scripts continúan
 funcionando con `pbBifrostAim`.
@@ -96,7 +111,7 @@ funcionando con `pbBifrostAim`.
 La apertura automática se bloquea durante combates, mensajes, menús,
 transferencias, movimientos forzados, movimiento en curso e intérpretes de
 eventos, para evitar interrupciones de escenas y de los controles del mapa.
-Al seleccionar una casilla sin Pokémon elegible, un lanzamiento puede fallar
+Al lanzar sin seleccionar un Pokémon elegible, un lanzamiento puede fallar
 y consumir una Ball según `consume_on_miss`.
 
 ## Maker Studio 0.2 · rediseño BAS/BSS
@@ -203,7 +218,7 @@ Para abrir la interfaz desde un evento de mapa / controlador de captura, utiliza
 pbBifrostAim
 ```
 
-Puedes enlazarlo a un objeto clave o comando de un menú mediante ese mismo método. Bifröst empieza con `access_mode=event`, sin atajo activo. Al configurar `access_mode=always` o `nearby`, la tecla R/L habilitada abre el apuntado sin necesitar un evento de mapa. Para abrir las opciones en una zona de juego:
+Puedes enlazarlo a un objeto clave o comando de un menú mediante ese mismo método. Bifröst empieza con `access_mode=always` y atajo AUX2. Al configurar `access_mode=always` o `nearby`, la acción AUX2 (W) o AUX1 (Q) habilitada abre el apuntado sin necesitar un evento de mapa. Para abrir las opciones en una zona de juego:
 
 ```ruby
 pbBifrostRulesMenu
