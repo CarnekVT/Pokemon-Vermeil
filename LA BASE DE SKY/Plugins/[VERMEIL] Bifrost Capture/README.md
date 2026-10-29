@@ -1,4 +1,4 @@
-# Bifröst Capture — prototipo funcional 0.1.0
+# Bifröst Capture — prototipo experimental 0.2.0
 
 Compatible con la estructura de Pokémon Essentials 21.1 del repositorio. Integrado como plugin separado y editor de Maker Studio. **Requiere pruebas dentro de mkxp/Essentials.** No se modifican scripts de cámara BSS/BAS, 2.5D ni movimiento.
 
@@ -51,6 +51,94 @@ transferencias, movimientos forzados, movimiento en curso e intérpretes de
 eventos, para evitar interrupciones de escenas y de los controles del mapa.
 Al seleccionar una casilla sin Pokémon elegible, un lanzamiento puede fallar
 y consumir una Ball según `consume_on_miss`.
+
+## Maker Studio 0.2 · rediseño BAS/BSS
+
+El panel se ha reconstruido con la organización de BAS y BSS:
+**navegación de módulos (izquierda), escenario/previsualización (centro)
+e inspector contextual (derecha)**, barra de herramientas, estado de cambios
+y guardado explícito. Sus módulos son Vista general, Perfiles, Catálogo
+Pokémon, Encuentros OW, Lanzamiento, Captura, Comportamiento, Ámbitos y
+Diagnóstico.
+
+En **Perfiles** se puede seleccionar Bifröst, Classic, Adventure, Safari,
+OW completo o Custom, inspeccionar una tabla de diferencias (valor actual
+frente a propuesto) y **Aplicar perfil**. Seleccionar una tarjeta no cambia
+los datos. Aplicar no borra las sobrescrituras por mapa/especie/evento y hay
+que guardar después.
+
+El nuevo **Catálogo Pokémon** se guarda en `roster.ini` junto al INI de
+reglas. Carga especies de `PBS/pokemon.txt` y
+`PBS/pokemon_Vermeil.txt` cuando están disponibles, con búsqueda y
+casillas para:
+- Elegibilidad en la lista exclusiva Bifröst.
+- Especies seleccionadas para aparición cuando `spawn_filter=allowlist`.
+- Bloqueo de spawns de especies concretas.
+
+**Editar** una especie abre el ámbito `species:ID`. Se pueden cambiar
+forma OW (0 por defecto; 1 para las aves de Galar), niveles mínimos/máximos,
+probabilidad individual de aparición, reacción, radio de alerta y captura.
+El nivel y forma de eventos OW **ya colocados manualmente** siguen
+definiéndose en su etiqueta. Las opciones por especie en el inspector
+afectan en primer lugar a los OWs generados automáticamente.
+
+## Encuentros: clásico, mixto y OW completo
+
+En **Encuentros OW → Sistema de encuentros**:
+
+- **classic** — encuentros originales de hierba y cuevas; no genera fauna OW.
+- **hybrid** — conserva los encuentros aleatorios y también puede crear
+  Pokémon visibles desde las tablas del mapa.
+- **overworld** — reemplaza los encuentros espontáneos terrestres/cueva por
+  apariciones visibles en casillas elegibles. El jugador puede abrir el
+  apuntado o aproximarse al Pokémon para interactuar.
+
+El perfil **full_ow** configura `encounter_mode=overworld`,
+`access_mode=always`, `restricted_species=0`. Esta última configuración
+permite capturar especies de las tablas de encuentros aunque no pertenezcan
+al catálogo legendario Bifröst, pero los Pokémon decorativos originales siguen
+sin ser capturables si no llevan su etiqueta.
+
+Ejemplo:
+
+```ini
+[global]
+profile=full_ow
+encounter_mode=overworld
+access_mode=always
+restricted_species=0
+spawn_chance=24
+spawn_min_distance=3
+spawn_max_distance=6
+spawn_limit=4
+spawn_lifetime=40
+spawn_filter=all
+spawn_grass_only=1
+
+[species:ARTICUNO]
+ow_form=1
+ow_min_level=65
+ow_max_level=70
+ow_spawn_probability=60
+reaction=attack
+```
+
+`spawn_chance` significa el porcentaje de **intento por paso** en terreno
+elegible (24 no significa que solo el 24% de los encuentros serán OW). En
+modo `overworld`, el **100% de los encuentros terrestres gestionados por
+este sistema se realiza mediante OW**, pero no se fuerza una aparición en
+cada paso; depende de la frecuencia configurada y de encontrar un tile válido.
+
+Los OW autogenerados aprovechan los sprites de
+`Graphics/Characters/Followers/ESPECIE[_FORMA].png`. Si falta sprite,
+no se crea un OW invisible. Los eventos son temporales, con límite de cantidad
+y duración, y usan las tablas PBS existentes del mapa. No sobrescriben ni
+reescriben los mapas, encuentros PBS, BSS, BAS, Smooth Movement o Visual 2.5D.
+**Pesca, Surf y encuentros guionizados conservan el comportamiento original.**
+
+**Advertencia:** el generador de eventos es nuevo, y todavía debe probarse
+en el ejecutable mkxp para verificar aparición, colisión, sprite y guardado.
+No se considera listo para distribución.
 
 ## Preparar los eventos
 
