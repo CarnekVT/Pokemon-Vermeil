@@ -304,18 +304,15 @@ module Visual25D
       end
     end
 
-    # Píxeles de caída en lo alto de la pantalla. Nil = Config::HORIZON_CURVE.
+    # El terreno conserva la inclinación/perspectiva de Skyflyer.
+    # No se añade curvatura de horizonte (ni desde partidas antiguas).
     def horizon_curve_px
-      return @horizon_curve.to_f unless @horizon_curve.nil?
-      return Config::HORIZON_CURVE.to_f
+      return 0.0
     end
 
     def horizon_curve=(value)
-      value = value.to_f
-      value = 0.0 if value < 0.0
-      value = 48.0 if value > 48.0
-      return if !@horizon_curve.nil? && (@horizon_curve - value).abs < 0.01
-      @horizon_curve = value
+      return if @horizon_curve == 0.0
+      @horizon_curve = 0.0
       clear_proj_hot_cache
       if blending?
         @force_reproject = true
@@ -324,19 +321,8 @@ module Visual25D
       end
     end
 
-    # Extra de Y solo por encima del centro. t=1 en el borde superior; por
-    # encima de la pantalla se planta, para no aplastar el margen.
     def horizon_curve(y)
-      amt = horizon_curve_px
-      return 0.0 if amt == 0.0 || @perspective == 0
-      b = blend
-      return 0.0 if b <= 0.0
-      half = Graphics.height / 2.0
-      return 0.0 if half <= 0
-      t = (half - y) / half
-      return 0.0 if t <= 0.0
-      t = 1.0 if t > 1.0
-      return (amt * b) * t * t
+      return 0.0
     end
 
     # Lee partida solo si dirty (carga, F12, opciones). No cada frame.
@@ -433,7 +419,7 @@ module Visual25D
       @horizon_curve     = nil
       @band_blur         = nil
       @row_batch         = nil
-      $PokemonSystem.visual25d_round = true if $PokemonSystem&.respond_to?(:visual25d_round=)
+      $PokemonSystem.visual25d_round = false if $PokemonSystem&.respond_to?(:visual25d_round=)
       rebuild_render_params!
       mark_save_sync_dirty!
       redraw_map
