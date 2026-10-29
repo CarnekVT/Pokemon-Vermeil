@@ -39,7 +39,7 @@ export function defaultsFor(type){
     case "hide_centered_text": return {};
     case "show_textbox": case "hide_textbox": return {duration:10};
     case "transfer_player": return {mapId:1,x:0,y:0,direction:2};
-    case "name_input": return {default:"Solen",min:1,max:12,store:"player_name"};
+    case "name_input": case "custom_name_input": return {default:"Solen",min:1,max:12,store:"player_name"};
     case "treatment_input": return {default:"neutro",store:"treatment"};
     case "treatment_text": return {masculino:"",femenino:"",neutro:"",speaker:"",speed:"normal"};
     case "show_floating": return {filename:"",x:0,y:0,amplitude:8,speed:0.05,z:null,zoom:1,opacity:255,fade:0,store:""};
@@ -105,7 +105,7 @@ export function commandToRuby(c){
     case "transfer_player": return `transfer_player ${n(c.mapId)}, ${n(c.x)}, ${n(c.y)}, ${n(c.direction)}`;
     case "treatment_input": return `treatment_input(default: ${sym(c.default||"neutro")})`;
     case "treatment_text": return `treatment_text(masculino: ${q(c.masculino||"")}, femenino: ${q(c.femenino||"")}, neutro: ${q(c.neutro||"")}, speaker: ${q(c.speaker||"")}, speed: ${sym(c.speed||"normal")})`;
-    case "name_input": return `${pre||((c.store&&/^[a-z_]\w*$/i.test(c.store))?`${c.store} = `:"")}name_input(default: ${q(c.default)}, min: ${n(c.min)}, max: ${n(c.max)})`;
+    case "name_input": case "custom_name_input": return `${pre||((c.store&&/^[a-z_]\w*$/i.test(c.store))?`${c.store} = `:"")}${c.type}(default: ${q(c.default)}, min: ${n(c.min)}, max: ${n(c.max)})`;
     case "show_floating": {const o=[`amplitude: ${n(c.amplitude)}`,`speed: ${n(c.speed)}`,`zoom: ${n(c.zoom)}`,`opacity: ${n(c.opacity)}`,`fade: ${n(c.fade)}`];if(c.z!==null&&c.z!==undefined&&c.z!=="")o.push(`z: ${n(c.z)}`);return `${pre}show_floating ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${o.join(", ")}`;}
     case "hide_floating": return `hide_floating`;
     case "float_sprite": return `float_sprite ${q(c.filename)}, ${n(c.frameWidth)}, ${n(c.frameHeight)}, ${n(c.frames)}, ${n(c.x)}, ${n(c.y)}, end_y: ${n(c.endY)}, speed: ${n(c.speed)}, fps: ${n(c.fps)}, ghost_interval: ${n(c.ghostInterval)}, bg: ${!!c.bg}, glow: ${!!c.glow}, fade: ${n(c.fade)}`;
@@ -126,7 +126,7 @@ export function compileScene(scene){ return (scene.commands||[]).map(commandToRu
 export function compileProject(project){ const p=clone(project); p.scenes.forEach(s=>s.compiledRuby=compileScene(s)); return p; }
 
 export const COMMAND_GROUPS=[
-  {id:"basic",label:"Flujo",items:[["section","§ Sección"],["wait","⏱ Esperar"],["script","</> Ruby avanzado"],["name_input","⌨ Pedir nombre"],["treatment_input","◀ Seleccionar tratamiento"],["transfer_player","↪ Transferir jugador"]]},
+  {id:"basic",label:"Flujo",items:[["section","§ Sección"],["wait","⏱ Esperar"],["script","</> Ruby avanzado"],["name_input","⌨ Nombre vanilla"],["custom_name_input","✦ Nombre Vermeil"],["treatment_input","◀ Seleccionar tratamiento"],["transfer_player","↪ Transferir jugador"]]},
   {id:"visual",label:"Imágenes",items:[["show","▣ Mostrar imagen"],["hide","◫ Ocultar imagen"],["hide_all","◫ Ocultar todas"],["show_floating","↕ Imagen flotante"],["hide_floating","↕ Detener flotantes"],["float_sprite","▤ Spritesheet flotante"],["change_float_bitmap","▤ Cambiar spritesheet"]]},
   {id:"screen",label:"Pantalla",items:[["fade_from_black","◐ Desde negro"],["fade_to_black","◑ A negro"],["to_white","◻ A blanco"],["from_white","◻ Desde blanco"]]},
   {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["treatment_text","💬 Diálogo por tratamiento"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["show_textbox","▭ Mostrar caja"],["hide_textbox","▭ Ocultar caja"]]},
