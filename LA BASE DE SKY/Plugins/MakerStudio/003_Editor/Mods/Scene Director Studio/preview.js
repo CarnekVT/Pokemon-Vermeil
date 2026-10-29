@@ -32,7 +32,7 @@ export class ScenePreview{
   fit(){const r=this.host.getBoundingClientRect(),z=Math.min((r.width-24)/this.w,(r.height-24)/this.h,2);this.setZoom(Math.max(.25,z||1),false);}
   setZoom(z,manual=true){this.zoom=clamp(z,.2,4);this.canvas.style.width=`${this.w*this.zoom}px`;this.canvas.style.height=`${this.h*this.zoom}px`;if(manual)this.host.dataset.manualZoom="1";}
   resetState(){
-    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,text:null,centered:null,indicator:false,vars:new Map(),treatment:null};
+    this.state={frame:0,images:new Map(),floating:[],refs:new Map(),aliases:new Map(),scrolling:[],float:null,aura:[],black:255,white:0,textbox:0,text:null,centered:null,indicator:false,vars:new Map(),treatment:null,naming:null};
   }
   async image(path){
     if(!path)return null;if(this.cache.has(path))return this.cache.get(path);let p=String(path);if(!/\.[a-z0-9]+$/i.test(p))p+=".png";
@@ -154,6 +154,41 @@ export class ScenePreview{
       if((u.alpha??1)<1){g.fillStyle="rgba(0,0,0,"+(1-(u.alpha??1))+")";g.fillRect(0,0,this.w,this.h)}
     })}
 
+    if(s.naming){push(9015,()=>{
+      const u=s.naming,t=s.frame;
+      g.save();g.globalAlpha=clamp(u.alpha??1,0,1);
+      const rect=(x,y,w,h,color)=>{g.fillStyle=color;g.fillRect(x,y,w,h)};
+      rect(0,0,this.w,this.h,"#372729");
+      rect(16,16,608,448,"#67382d");
+      rect(22,22,596,436,"#fcf6db");
+      rect(34,32,572,77,"#ae633a");
+      rect(41,38,558,62,"#f4e4bd");
+      rect(50,42,6,52,"#994c66");
+      rect(584,42,6,52,"#994c66");
+      rect(34,119,211,280,"#67382d");
+      rect(40,125,199,268,"#f4e4bd");
+      rect(253,119,353,280,"#67382d");
+      rect(259,125,341,268,"#fcf6db");
+      rect(272,225,315,85,"#ae633a");
+      rect(279,231,301,73,"#f4e4bd");
+      rect(34,409,572,43,"#67382d");
+      rect(40,415,560,31,"#ae633a");
+      g.fillStyle="#402a29";g.textAlign="center";this.gameFont(31);
+      g.fillText("ELIGE TU NOMBRE",320,44);
+      g.textAlign="left";this.gameFont(20);g.fillText("Nombre del protagonista",277,148);
+      if(u.portrait){
+        const im=u.portrait,box=this.visibleBox(im),sc=Math.min(168/box.w,236/box.h,1);
+        g.drawImage(im,box.x,box.y,box.w,box.h,139-box.w*sc/2,140+(236-box.h*sc)/2,box.w*sc,box.h*sc);
+      }
+      this.gameFont(29);
+      g.fillText((u.text||"")+((Math.floor(t/22)%2)?"":"|"),292,243);
+      this.gameFont(18);
+      g.fillText((u.text||"").length+" / "+u.max+" caracteres",275,325);
+      this.gameFont(17);g.fillStyle="#fcf6db";g.textAlign="center";
+      g.fillText("Escribir  ·  Retroceso: borrar  ·  Enter: confirmar",320,420);
+      g.restore();
+      if((u.alpha??1)<1){g.fillStyle="rgba(0,0,0,"+(1-(u.alpha??1))+")";g.fillRect(0,0,this.w,this.h)}
+    })}
     if(s.centered)push(9010,()=>{this.gameFont();g.textAlign="center";g.textBaseline="middle";const text=String(s.centered.text||"").slice(0,Math.floor(s.centered.revealed??0));g.fillStyle=s.centered.color||"#000";g.fillText(text,this.w/2,this.h/2-16);g.textAlign="left";g.textBaseline="top"});
 
     queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();
@@ -196,7 +231,21 @@ export class ScenePreview{
   stopAudio(){for(const a of [this.audio.bgm,this.audio.bgs])try{a?.pause()}catch{};this.audio.bgm=this.audio.bgs=null;for(const a of this.audio.ses)try{a.pause()}catch{};this.audio.ses.clear();}
 
   async changeTreatment(delta){const t=this.state.treatment;if(!t)return;const options=["femenino","neutro","masculino"];const i=options.indexOf(t.option);t.transition={image:t.image,begin:this.state.frame,direction:delta};t.option=options[(i+delta+options.length)%options.length];t.image=t.portraits?.[options.indexOf(t.option)]||await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+t.option);}
-  continue(){if(this.state.treatment?.option)this.state.vars.set("treatment",this.state.treatment.option);this.inputSerial++;}
+  nameKey(key){
+    const n=this.state.naming;
+    if(!n)return false;
+    if(key==="Backspace"){n.text=n.text.slice(0,-1);return true;}
+    if(key==="Enter"){if(n.text.trim().length>=n.min)this.continue();return true;}
+    if(typeof key==="string"&&key.length===1&&!/[\\x00-\\x1f]/.test(key)&&n.text.length<n.max){
+      n.text+=key;return true;
+    }
+    return false;
+  }
+  continue(){
+    if(this.state.naming&&this.state.naming.text.trim().length<this.state.naming.min)return;
+    if(this.state.treatment?.option)this.state.vars.set("treatment",this.state.treatment.option);
+    this.inputSerial++;
+  }
   async waitInput(token,serial){while(token===this.playToken&&this.inputSerial===serial)await sleep(1000/60);return this.inputSerial;}
   async showTextboxFade(skip,token,frames=10){if(this.state.textbox>=1)return;if(skip){this.state.textbox=1;return}const from=this.state.textbox;await this.frames(frames,p=>this.state.textbox=from+(1-from)*p,false,token);this.state.textbox=1;}
   async hideTextboxFade(skip,token,frames=10){if(this.state.textbox<=0)return;if(skip){this.state.textbox=0;this.state.indicator=false;return}const from=this.state.textbox;this.state.indicator=false;await this.frames(frames,p=>this.state.textbox=from*(1-p),false,token);this.state.textbox=0;}
@@ -306,6 +355,23 @@ export class ScenePreview{
         }
         if(c.store)s.vars.set(c.store,s.treatment?.option||opt);
         s.treatment=null;break;
+      }
+      case"custom_name_input":{
+        const txt=String(c.default||"Solen").slice(0,Number(c.max)||12);
+        const chosen=s.vars.get("treatment")||"neutro";
+        s.naming={text:txt,max:Number(c.max)||12,min:Number(c.min)||1,alpha:skip?1:0,
+          portrait:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+chosen)};
+        if(!skip){
+          await this.frames(16,p=>s.naming.alpha=p,false,token);
+          this.onWaiting?.(true);
+          const serial=this.inputSerial;
+          while(serial===this.inputSerial&&token===this.playToken)await sleep(16);
+          this.onWaiting?.(false);
+          if(token!==this.playToken)return;
+          await this.frames(15,p=>s.naming.alpha=1-p,false,token);
+        }
+        if(c.store)s.vars.set(c.store,s.naming.text.trim());
+        s.naming=null;break;
       }
       case"name_input":if(c.store)s.vars.set(c.store,c.default||"Solen");break;
       case"show_floating":{
