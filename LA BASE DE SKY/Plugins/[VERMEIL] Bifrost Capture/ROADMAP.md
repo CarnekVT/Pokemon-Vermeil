@@ -1,8 +1,26 @@
-# Bifröst Capture · seguimiento 0.3.1
+# Bifröst Capture · seguimiento 0.4.0
 
 Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 **Criterio de estado:** «Código integrado» = publicado en GitHub, NO significa probado dentro del juego.
 «Parcial» = primera versión sin completar o confirmar. «Pendiente» = no desarrollado.
+
+## Revisión basada en los tres videos — 0.4.0
+
+| Objetivo | Estado actual |
+|---|---|
+| No consumir Balls al apuntar a un sprite no autorizado | Implementado; `allow_empty_throw=0` por defecto |
+| Reconocer el sprite real, incluso con zoom/cámara 2.5D | Implementado con `Sprite_Character`; comprobar en partida |
+| Mantener la identidad del Pokémon durante el vuelo | Implementado; la Ball sigue su posición y resuelve contra el mismo evento |
+| Sombra en el suelo, arco y rotación | Implementado; pendiente de pulido visual in-game |
+| Recuperar huida con desplazamiento visible | Implementado con pasos/velocidad/distancia configurables |
+| Evitar eliminar permanentemente Pokémon que huyeron | Implementado; solo captura aplica marca persistente |
+| Evitar combates iniciados debajo del HUD | Implementado; ataque y envío de Pokémon diferidos hasta cerrar el apuntado |
+| Sacudidas de la Ball, aparición al fallar y desaparición al capturar | Implementado; aún requiere prueba real en mkxp |
+| Casos en los que un OW externo no lleva etiqueta `[OWCAP]` | Disponible `BifrostCapture.register_ow(event,species,level,form)` y aviso en HUD |
+| Verificación automatizada | Tests Ruby/JS integrados en GitHub Actions |
+| Validación y equilibrio en juego | Pendiente: precisión visual, 2.5D, Turbo, rendimiento, ritmo y audio |
+| Animación corporal de lanzamiento y sonido según videos | Pendiente |
+| Sincronización del estado global de errantes Essentials | Pendiente |
 
 ## Editor Maker Studio
 
