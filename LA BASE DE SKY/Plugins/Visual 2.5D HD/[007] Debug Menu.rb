@@ -84,7 +84,7 @@ end
 # Controles de geometria de esta sesion. Solo en Depuracion: no afectan
 # al jugador ni crean archivos o preferencias persistentes.
 VISUAL25D_GEOMETRY_DEFAULTS = {
-  :VANISHING_STRENGTH => 0.3, :VERTICAL_GAIN => 0.5,
+  :VANISHING_STRENGTH => 0.3, :VERTICAL_GAIN => 0.4,
   :COLUMN_LEAN => 0.0, :WALL_SMOOTHING => 0,
   :WALL_SMOOTH_VERTICAL => false, :WALL_EDGE_SEAL => 2,
   :GROUND_SLICES => 1
