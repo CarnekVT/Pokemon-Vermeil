@@ -85,7 +85,7 @@ module BifrostCapture
       end
       b.font.size = 11
       b.font.color = Color.new(179, 197, 220)
-      b.draw_text(12, 61, 292, 18, "C / clic: lanzar    ↑↓: Balls    Z: modo    Esc: salir")
+      b.draw_text(12, 61, 292, 18, "Flechas: apuntar  C: lanzar  Q: Ball  D: modo  X: salir")
       if notice && !notice.empty?
         b.font.color = Color.new(246, 219, 152)
         b.draw_text(12, 44, 285, 18, notice)
