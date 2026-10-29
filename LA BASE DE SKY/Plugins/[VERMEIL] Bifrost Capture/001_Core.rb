@@ -11,7 +11,7 @@ module BifrostCapture
     "critical_back"=>"35", "critical_multiplier"=>"250",
     "line_of_sight"=>"1", "reaction"=>"flee", "consume_on_miss"=>"1",
     "impact_frames"=>"3",
-    "access_mode"=>"event", "hotkey"=>"aux2",
+    "access_mode"=>"always", "hotkey"=>"aux2",
     "encounter_mode"=>"classic", "spawn_chance"=>"24",
     "spawn_min_distance"=>"3", "spawn_max_distance"=>"6",
     "spawn_limit"=>"4", "spawn_lifetime"=>"40", "spawn_filter"=>"all",
@@ -126,11 +126,25 @@ module BifrostCapture
     cfg["enabled"] == "1" && ["overworld", "hybrid"].include?(cfg["encounter_mode"])
   end
 
+  # Essentials abstrae los botones. La captura de Key bindings del proyecto
+  # vincula AUX1=Q, AUX2=W, USE=C/Espacio/Enter, BACK=X/Esc y SPECIAL=D,
+  # pero el usuario puede reasignarlos. Nunca comparar letras directas.
   def self.hotkey_code(name)
     case name
-    when "aux1" then Input::AUX1 if defined?(Input::AUX1)
-    when "aux2" then Input::AUX2 if defined?(Input::AUX2)
+    when "aux1" then Input::AUX1
+    when "aux2" then Input::AUX2
     else nil
+    end
+  end
+
+  def self.input_action?(action)
+    return false unless defined?(Input)
+    case action
+    when :throw then Input.trigger?(Input::USE)
+    when :cancel then Input.trigger?(Input::BACK)
+    when :mode then Input.trigger?(Input::SPECIAL)
+    when :cycle then Input.trigger?(Input::AUX1)
+    else false
     end
   end
 
