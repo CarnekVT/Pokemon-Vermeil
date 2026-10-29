@@ -129,18 +129,18 @@ def pbIntroVermeil
                  end_y: 160, speed: 0.7, fps: 6, fade: 25, glow: true, ghost_interval: 2, bg: true
     wait 400
 
-    text_inline "Observa a este muchacho. Un corazón mortal, pero forjado con una determinación inusual frente a la oscuridad que se avecina.",
+    text_inline "Observa a Solen. Tiene un corazón mortal... y una determinación que no se encuentra todos los días.",
                 speaker: "Mujer Misteriosa"
-    text_inline "Él entiende lo que está en juego. En su sueño profundo, su mente aguarda en perfecta calma, lista para recibirte.",
+    text_inline "Mira qué tranquilidad. ¡Quién pudiera dormir así con todo lo que está pasando! Pero sí, Solen sabe lo que está en juego.",
                 speaker: "Mujer Misteriosa"
     hide_textbox(10)
-    text_inline "Al abrir las puertas de su alma sin resistencia, el vínculo será perfecto. Él te cederá su cuerpo material, y tú serás la fuerza que lo impulse frente a la catástrofe.",
+    text_inline "Solen ha abierto las puertas de su alma sin resistencia. El vínculo os unirá, y juntos enfrentaréis la catástrofe.",
                 speaker: "Gran Espíritu"
     hide_textbox(10)
 
     # ══════════ FASE 7: EL PACTO Y NOMBRAMIENTO ══════════
 
-    text_inline "Su nombre es Solen.\nDime, ente que observas desde más allá del velo... ¿Deseas mantener el nombre que su familia le dio, o le otorgarás uno nuevo para sellar este pacto?",
+    text_inline "Una cosa antes de seguir. Solen será tu nueva identidad en este mundo... pero ¿cómo quieres que se refieran a ti?",
                 speaker: "Mujer Misteriosa"
 
     hide_textbox(10)
@@ -149,6 +149,10 @@ def pbIntroVermeil
     @float_anim[:glow].visible = false if @float_anim && @float_anim[:glow]
     @sprites[:float_bg]&.dispose
     @sprites[:float_bg] = nil
+    treatment_input(default: :neutro)
+    text_inline "¡Perfecto! Y ahora, ¿mantendrás el nombre Solen o prefieres otro?",
+                speaker: "Mujer Misteriosa"
+    hide_textbox(10)
     player_name = name_input(default: "Solen", min: 1, max: 12)
     @float_anim[:sprite].visible = true if @float_anim
     @float_anim[:glow].visible = true if @float_anim && @float_anim[:glow]
@@ -167,7 +171,7 @@ def pbIntroVermeil
 
     text_inline "El pacto está forjado en la quietud de la noche. Mi hijo renegado aguarda en las sombras, reuniendo almas para su venganza. Demuéstrame, {1}, que mi desprecio por la humanidad fue un error.",
                 speaker: "Gran Espíritu", format_args: [player_name]
-    text_inline "Que la vida vuelva a florecer bajo tus pasos. Desciende, {1}. Entra en su sueño.",
+    text_inline "Bueno, {1}, parece que ya es hora. ¡Que tengas un buen viaje! Y procura no meterte en demasiados problemas...",
                 speaker: "Mujer Misteriosa", format_args: [player_name]
 
     # ══════════ FASE 9: LA FUSIÓN Y DESPERTAR ══════════
