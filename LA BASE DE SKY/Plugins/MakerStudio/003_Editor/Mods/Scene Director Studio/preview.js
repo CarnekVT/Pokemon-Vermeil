@@ -142,10 +142,10 @@ export class ScenePreview{
         g.fillRect(293+i*22,399,i===opts.indexOf(opt)?12:7,5)}
       g.globalAlpha=(u.alpha??1);
       const portrait=(im,alpha,offset)=>{
-        if(!im)return;const box=this.visibleBox(im),scale=Math.min(304/box.w,320/box.h,1);
+        if(!im)return;const box=this.visibleBox(im),scale=Math.min(274/box.w,244/box.h,1);
         g.globalAlpha=(u.alpha??1)*alpha;
         g.drawImage(im,box.x,box.y,box.w,box.h,(this.w-box.w*scale)/2+offset+(opt==="neutro"?-21:opt==="masculino"?30:0),
-          102+(320-box.h*scale)/2+Math.sin(t/20)*2,box.w*scale,box.h*scale);
+          150+(244-box.h*scale)/2+Math.sin(t/20)*2,box.w*scale,box.h*scale);
       };
       const tr=u.transition,blend=tr?clamp((t-tr.begin)/8,0,1):1;
       if(tr&&blend<1)portrait(tr.image,1-blend,-tr.direction*18*blend);
