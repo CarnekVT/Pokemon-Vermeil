@@ -1,4 +1,4 @@
-# Bifröst Capture — prototipo experimental 0.3.0
+# Bifröst Capture — prototipo experimental 0.3.1
 
 Compatible con la estructura de Pokémon Essentials 21.1 del repositorio. Integrado como plugin separado y editor de Maker Studio. **Requiere pruebas dentro de mkxp/Essentials.** No se modifican scripts de cámara BSS/BAS, 2.5D ni movimiento.
 
