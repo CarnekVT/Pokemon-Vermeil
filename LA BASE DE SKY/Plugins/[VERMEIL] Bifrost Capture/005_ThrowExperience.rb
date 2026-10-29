@@ -384,7 +384,9 @@ module BifrostCapture
     begin
       balls = ball_choices
       ball_index = 0
-      party_pokemon = $player.party.find { |p| p && p.able? }
+      usable_party = $player.party.select { |p| p && p.able? }
+      pokemon_index = 0
+      party_pokemon = usable_party[0]
       mode = cfg["capture_enabled"] == "1" && !balls.empty? ? :ball : :battle
       if mode == :battle && (!party_pokemon || cfg["battle_enabled"] != "1")
         pbMessage(_INTL("No tienes nada que lanzar."))
@@ -395,6 +397,7 @@ module BifrostCapture
       pointer_mode = :keyboard
       last_mouse = nil
       elapsed = 0
+      cancelled = false
       mode_shortcut = hotkey_code(cfg["hotkey"])
       # Si AUX1 es el acceso configurado, el cambio de Ball usa ACTION.
       cycle_key = cfg["hotkey"] == "aux1" ? Input::ACTION : Input::AUX1
@@ -404,22 +407,27 @@ module BifrostCapture
         map_preview_update
         elapsed += 1
 
-        return false if input_action?(:cancel)
-        return false if mode_shortcut && Input.trigger?(mode_shortcut) && elapsed > 8
+        if input_action?(:cancel) ||
+           (mode_shortcut && Input.trigger?(mode_shortcut) && elapsed > 8)
+          cancelled = true
+          break
+        end
+        break if respond_to?(:aim_interrupted?) && aim_interrupted?
 
         if input_action?(:mode)
           if mode == :ball && cfg["battle_enabled"] == "1" && party_pokemon
-            chosen = choose_pokemon
-            if chosen
-              party_pokemon = chosen
-              mode = :battle
-            end
+            mode = :battle
           elsif mode == :battle && cfg["capture_enabled"] == "1" && !balls.empty?
             mode = :ball
           end
         end
-        if mode == :ball && balls.length > 1 && Input.trigger?(cycle_key)
-          ball_index = (ball_index + 1) % balls.length
+        if Input.trigger?(cycle_key)
+          if mode == :ball && balls.length > 1
+            ball_index = (ball_index+1) % balls.length
+          elsif mode == :battle && usable_party.length > 1
+            pokemon_index = (pokemon_index+1) % usable_party.length
+            party_pokemon = usable_party[pokemon_index]
+          end
         end
 
         # Input::UP/DOWN/LEFT/RIGHT son las acciones de movimiento reales
@@ -468,6 +476,14 @@ module BifrostCapture
         focus, ret_x, ret_y = current_focus([px, py], cfg)
         state = :free
         hint = nil
+        if !focus
+          if uncapturable_event_at([px,py])
+            state = :far
+            hint = _INTL("Este evento no es un OW capturable.")
+          else
+            hint = _INTL("Busca un Pokémon OW habilitado.")
+          end
+        end
         if focus
           spec = event_spec(focus)
           local_cfg = options($game_map.map_id, spec[0], focus.id)
@@ -509,25 +525,16 @@ module BifrostCapture
         end
         payload = mode == :ball ? current_ball : party_pokemon
         next if !payload
-        @aim_pointer = [ret_x, ret_y]
+        @aim_pointer = [ret_x,ret_y]
         if focus
-          # Calcular la geometría NUEVAMENTE al disparar; nunca reutilizar
-          # distancias calculadas para otro objetivo o fotograma.
           spec = event_spec(focus)
-          local_cfg = options($game_map.map_id, spec[0], focus.id)
-          geom = shot_geometry($game_player.x, $game_player.y,
-                               focus.x, focus.y, local_cfg)
-          $game_player.instance_variable_set(:@direction,geom[:facing])
-          throw_at(focus.x, focus.y, geom[:forward], geom[:side],
-                   mode, payload, local_cfg)
+          local_cfg = options($game_map.map_id,spec[0],focus.id)
+          geo = shot_geometry($game_player.x,$game_player.y,
+                              focus.x,focus.y,local_cfg)
+          $game_player.direction = geo[:facing]
+          perform_throw(focus,mode,payload,local_cfg,[ret_x,ret_y])
         else
-          # Disparo a terreno vacío: animación, pero no captura falsa.
-          facing = $game_player.direction
-          fx, fy = DIR[facing] || [0,-1]
-          missed_distance = [cfg["range"].to_i + 1, 8].max
-          throw_at($game_player.x + fx * missed_distance,
-                   $game_player.y + fy * missed_distance,
-                   missed_distance, 0, mode, payload, cfg)
+          perform_throw(nil,mode,payload,cfg,[px,py])
         end
         break if mode == :battle || cfg["aim_chain"] == "0"
         balls = ball_choices
@@ -539,6 +546,8 @@ module BifrostCapture
       @aim_running = false
       @aim_opening = previous_guard
     end
-    true
+    perform_pending_send if respond_to?(:perform_pending_send)
+    perform_pending_attack if respond_to?(:perform_pending_attack)
+    !cancelled
   end
 end
