@@ -163,7 +163,13 @@ module BifrostCapture
     return false if event.respond_to?(:character_name) &&
                     event.character_name.to_s.empty?
     cfg = options($game_map.map_id,spec[0],event.id)
-    cfg["enabled"] == "1" && allow_species?(spec[0],cfg)
+    return false if cfg["enabled"] != "1"
+    # All naturally-generated OWs are capturable in full OW mode, even when
+    # the project also restricts manual legendary encounters to its roster.
+    return true if event.instance_variable_get(:@bifrost_generated) &&
+                   cfg["encounter_mode"] == "overworld" &&
+                   spawn_species?(spec[0],cfg)
+    allow_species?(spec[0],cfg)
   end
 
   def self.offset(px,py,dir,forward,side)
