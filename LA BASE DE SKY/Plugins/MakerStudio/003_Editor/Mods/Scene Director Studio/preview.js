@@ -176,7 +176,7 @@ export class ScenePreview{
   }
   stopAudio(){for(const a of [this.audio.bgm,this.audio.bgs])try{a?.pause()}catch{};this.audio.bgm=this.audio.bgs=null;for(const a of this.audio.ses)try{a.pause()}catch{};this.audio.ses.clear();}
 
-  async changeTreatment(delta){const t=this.state.treatment;if(!t)return;const options=["femenino","neutro","masculino"];const i=options.indexOf(t.option);t.transition={image:t.image,begin:this.state.frame,direction:delta};t.option=options[(i+delta+options.length)%options.length];t.image=await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+t.option);}
+  async changeTreatment(delta){const t=this.state.treatment;if(!t)return;const options=["femenino","neutro","masculino"];const i=options.indexOf(t.option);t.transition={image:t.image,begin:this.state.frame,direction:delta};t.option=options[(i+delta+options.length)%options.length];t.image=t.portraits?.[options.indexOf(t.option)]||await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+t.option);}
   continue(){if(this.state.treatment?.option)this.state.vars.set("treatment",this.state.treatment.option);this.inputSerial++;}
   async waitInput(token,serial){while(token===this.playToken&&this.inputSerial===serial)await sleep(1000/60);return this.inputSerial;}
   async showTextboxFade(skip,token,frames=10){if(this.state.textbox>=1)return;if(skip){this.state.textbox=1;return}const from=this.state.textbox;await this.frames(frames,p=>this.state.textbox=from+(1-from)*p,false,token);this.state.textbox=1;}
@@ -204,7 +204,7 @@ export class ScenePreview{
 
   async centeredText(obj,skip,token){
     const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),cpf=e.speeds?.[obj.speed||"normal"]??1.5,color=`rgb(${(obj.color||[0,0,0]).slice(0,3).join(",")})`;this.state.centered={text,revealed:skip?text.length:0,color};if(skip)return;
-    let serial=this.inputSerial;while(this.state.centered.revealed<text.length&&token===this.playToken){const slowDots=text.slice(Math.floor(this.state.centered.revealed),Math.floor(this.state.centered.revealed)+3)==="..."||text.slice(Math.floor(this.state.centered.revealed)-2,Math.floor(this.state.centered.revealed)+1)==="...";this.state.centered.revealed=Math.min(text.length,this.state.centered.revealed+cpf*(slowDots?.4:1));await this.frames(1,null,false,token);if(this.inputSerial!==serial){this.state.centered.revealed=text.length;serial=this.inputSerial;}}
+    let serial=this.inputSerial;while(this.state.centered.revealed<text.length&&token===this.playToken){const slowDots=text.slice(Math.floor(this.state.centered.revealed),Math.floor(this.state.centered.revealed)+3)==="..."||text.slice(Math.floor(this.state.centered.revealed)-2,Math.floor(this.state.centered.revealed)+1)==="...";this.state.centered.revealed=Math.min(text.length,this.state.centered.revealed+cpf*(slowDots?.4:1));await this.frames(1,null,false,token);if(this.inputSerial!==serial){this.state.centered.revealed=text.length;serial=this.inputSerial;}}if(text.includes("...")&&token===this.playToken)await this.frames(42,null,false,token);
   }
 
   resolveSpriteTargets(expr){
@@ -272,7 +272,8 @@ export class ScenePreview{
         const opts=["femenino","neutro","masculino"];
         let index=opts.indexOf(c.default||"neutro");if(index<0)index=1;
         const opt=opts[index];
-        s.treatment={option:opt,image:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+opt),alpha:skip?1:0,
+        const portraits=await Promise.all(opts.map(x=>this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+x)));
+        s.treatment={option:opt,image:portraits[index],portraits,alpha:skip?1:0,
           left:await this.image("Graphics/UI/left_arrow"),right:await this.image("Graphics/UI/right_arrow"),transition:null};
         if(!skip){
           await this.frames(36,p=>s.treatment.alpha=1-Math.pow(1-p,3),false,token);
