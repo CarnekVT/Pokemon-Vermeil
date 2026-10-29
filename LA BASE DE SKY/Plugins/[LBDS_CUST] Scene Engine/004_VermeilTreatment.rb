@@ -9,6 +9,8 @@ module VermeilTreatment
     masculino: "MASCULINO"
   }.freeze
   ASSET_DIR = "Graphics/Scenes/Intro/GenderSelect"
+  # Ajuste artístico por pose: el brazo extendido no define el eje del torso.
+  PORTRAIT_X_OFFSET = { femenino: 0, neutro: -24, masculino: -14 }.freeze
 
   def self.normalize(value)
     key = value.to_s.downcase.to_sym
@@ -87,7 +89,14 @@ class SceneEngine::Player
         arrow.z = 4
         # Recursos UI: las flechas son tiras verticales. Solo primer frame.
         frame_w = bitmap.width
-        frame_h = [bitmap.width, bitmap.height].min
+        # Los assets nativos miden 40x224: 7 cuadros verticales de 40x32.
+        frame_h = if bitmap.width == 40 && bitmap.height == 224
+                    32
+                  elsif bitmap.height > bitmap.width * 4 && bitmap.height % 7 == 0
+                    bitmap.height / 7
+                  else
+                    [bitmap.width, bitmap.height].min
+                  end
         arrow.src_rect.set(0, 0, frame_w, frame_h)
         zoom = [[29.0 / [frame_w, frame_h].max, 2.0].min, 1.0].max
         arrow.zoom_x = arrow.zoom_y = zoom
@@ -251,7 +260,8 @@ class SceneEngine::Player
     sprite.src_rect.set(rect.x, rect.y, rect.width, rect.height)
     scale = [304.0 / rect.width, 320.0 / rect.height, 1.0].min
     sprite.zoom_x = sprite.zoom_y = scale
-    sprite.x = ((Graphics.width - rect.width * scale) / 2).round
+    sprite.x = ((Graphics.width - rect.width * scale) / 2).round +
+               VermeilTreatment::PORTRAIT_X_OFFSET.fetch(option, 0)
     sprite.y = treatment_portrait_y(sprite)
   end
 
@@ -293,41 +303,192 @@ class SceneEngine::Player
     end
   end
 
+  # Gama crema/cobre inspirada en los menús del juego; sin PNG extra.
   def draw_treatment_ui(bitmap, option, has_art)
-    w = Graphics.width
-    h = Graphics.height
-    ox = ((w - 640) / 2.0).round
-    oy = ((h - 480) / 2.0).round
-    c = proc { |r, g, b| Color.new(r, g, b) }
-    outer = c.call(38, 45, 63)
-    purple = c.call(133, 63, 103)
-    magenta = c.call(195, 100, 149)
-    cream = c.call(249, 245, 229)
-    pale = c.call(230, 224, 226)
+    ox = ((Graphics.width - 640) / 2.0).round
+    oy = ((Graphics.height - 480) / 2.0).round
+    ink = Color.new(65, 44, 38)
+    cream = Color.new(252, 246, 218)
+    paper = Color.new(244, 231, 193)
+    copper = Color.new(176, 100, 59)
+    dark = Color.new(111, 64, 48)
+    magenta = Color.new(154, 75, 108)
     bitmap.clear
-    bitmap.fill_rect(0, 0, w, h, c.call(219, 222, 225))
-    bitmap.fill_rect(ox + 24, oy + 18, 592, 444, outer)
-    bitmap.fill_rect(ox + 29, oy + 23, 582, 434, cream)
-    bitmap.fill_rect(ox + 41, oy + 109, 558, 321, pale)
-    bitmap.fill_rect(ox + 45, oy + 113, 550, 313, c.call(245, 242, 237))
-    bitmap.fill_rect(ox + 41, oy + 30, 558, 68, purple)
-    bitmap.fill_rect(ox + 46, oy + 35, 548, 58, cream)
-    bitmap.fill_rect(ox + 53, oy + 39, 7, 50, magenta)
-    bitmap.fill_rect(ox + 580, oy + 39, 7, 50, magenta)
-    bitmap.fill_rect(ox + 132, oy + 125, 376, 289, c.call(233, 229, 230))
-    bitmap.fill_rect(ox + 138, oy + 131, 364, 277, c.call(247, 244, 240))
-    bitmap.fill_rect(ox + 35, oy + 438, 570, 17, outer)
+    bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(53, 40, 42))
+    bitmap.fill_rect(ox + 18, oy + 14, 604, 452, dark)
+    bitmap.fill_rect(ox + 23, oy + 19, 594, 442, cream)
+    bitmap.fill_rect(ox + 34, oy + 30, 572, 75, copper)
+    bitmap.fill_rect(ox + 40, oy + 35, 560, 64, paper)
+    bitmap.fill_rect(ox + 49, oy + 42, 5, 50, magenta)
+    bitmap.fill_rect(ox + 586, oy + 42, 5, 50, magenta)
+    bitmap.fill_rect(ox + 34, oy + 111, 572, 290, Color.new(223, 197, 148))
+    bitmap.fill_rect(ox + 39, oy + 116, 562, 280, cream)
+    bitmap.fill_rect(ox + 138, oy + 122, 364, 270, Color.new(232, 217, 189))
+    bitmap.fill_rect(ox + 143, oy + 127, 354, 260, Color.new(251, 247, 230))
+    # Franja inferior independiente: no tapa las instrucciones.
+    bitmap.fill_rect(ox + 34, oy + 410, 572, 43, dark)
+    bitmap.fill_rect(ox + 40, oy + 415, 560, 33, copper)
     pbSetSystemFont(bitmap)
-    bitmap.font.size = 33
-    bitmap.font.color = outer
-    bitmap.draw_text(ox + 90, oy + 42, 460, 42, VermeilTreatment::LABELS[option], 1)
-    bitmap.font.size = 17
-    bitmap.draw_text(ox + 53, oy + 414, 534, 23,
-                     "← → Cambiar        Enter Confirmar", 1)
-
+    bitmap.font.color = ink
+    bitmap.font.size = 32
+    bitmap.draw_text(ox + 95, oy + 44, 450, 43, VermeilTreatment::LABELS[option], 1)
+    bitmap.font.color = cream
+    bitmap.font.size = 18
+    bitmap.draw_text(ox + 54, oy + 421, 532, 23,
+                     "Izq. / Der.  Elegir       Enter  Confirmar", 1)
     if !has_art
+      bitmap.font.color = ink
       bitmap.font.size = 18
-      bitmap.draw_text(ox + 153, oy + 316, 335, 50, "Añade los PNG del personaje", 1)
+      bitmap.draw_text(ox + 149, oy + 298, 340, 34, "Faltan los PNG de Solen", 1)
     end
   end
+
+  # Pantalla exclusiva de Vermeil; el control de teclado es el propio de
+  # Essentials, pero su ventana es invisible y toda la UI se dibuja aquí.
+  def custom_name_input(default: "Solen", min: 1, max: 12)
+    return name_input(default: default, min: min, max: max) unless defined?(Window_TextEntry_Keyboard)
+    max = [[max.to_i, 1].max, 20].min
+    min = [[min.to_i, 1].max, max].min
+    vp = Viewport.new(0, 0, Graphics.width, Graphics.height)
+    vp.z = 100_020
+    ui = BitmapSprite.new(Graphics.width, Graphics.height, vp)
+    preview = nil
+    preview_bmp = nil
+    entry = nil
+    blackout_bmp = Bitmap.new(Graphics.width, Graphics.height)
+    blackout_bmp.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
+    blackout = Sprite.new(vp)
+    blackout.bitmap = blackout_bmp
+    blackout.z = 100
+    blackout.opacity = 255
+    ox = ((Graphics.width - 640) / 2.0).round
+    oy = ((Graphics.height - 480) / 2.0).round
+    name = default.to_s[0, max]
+
+    begin
+      chosen = VermeilTreatment.current
+      image_path = "#{VermeilTreatment::ASSET_DIR}/solen_#{chosen}"
+      if pbResolveBitmap(image_path)
+        preview_bmp = AnimatedBitmap.new(image_path).deanimate
+        preview = Sprite.new(vp)
+        preview.bitmap = preview_bmp
+        preview.z = 2
+        rect = treatment_visible_rect(preview_bmp)
+        preview.src_rect.set(rect.x, rect.y, rect.width, rect.height)
+        scale = [168.0 / rect.width, 236.0 / rect.height, 1.0].min
+        preview.zoom_x = preview.zoom_y = scale
+        preview.x = ox + 139 - (rect.width * scale / 2).round
+        preview.y = oy + 140 + (236 - rect.height * scale) / 2
+      end
+
+      # Misma captura de texto que la UI original. Sin teclado casero.
+      entry = Window_TextEntry_Keyboard.new(
+        name, ox + 258, oy + 217, 304, 80, "", true
+      )
+      entry.viewport = vp
+      entry.maxlength = max
+      entry.opacity = 0
+      entry.back_opacity = 0
+      entry.contents_opacity = 0
+      entry.visible = true
+      Input.text_input = true
+
+      draw_vermeil_name_ui(ui.bitmap, name, max, true)
+      16.times do |i|
+        t = (i + 1) / 16.0
+        blackout.opacity = (255 * (1.0 - t) ** 2).round
+        update
+      end
+
+      tick = 0
+      previous = nil
+      blink = nil
+      loop do
+        update
+        entry.update
+        tick += 1
+        name = entry.text.to_s[0, max]
+        show_cursor = (tick % 44) < 25
+        if name != previous || show_cursor != blink
+          draw_vermeil_name_ui(ui.bitmap, name, max, show_cursor)
+          previous = name.dup
+          blink = show_cursor
+        end
+        if Input.triggerex?(:RETURN) || Input.trigger?(Input::USE)
+          if name.strip.length >= min
+            pbSEPlay("GUI sel decision") rescue nil
+            break
+          end
+          pbPlayBuzzerSE rescue nil
+        end
+      end
+      15.times do |i|
+        t = (i + 1) / 15.0
+        blackout.opacity = (255 * t * t).round
+        update
+      end
+      name = name.strip
+      if $player
+        $player.name = name
+      elsif $Trainer
+        $Trainer.name = name
+      end
+      name
+    ensure
+      Input.text_input = false
+      entry.dispose if entry && !entry.disposed?
+      preview.dispose if preview && !preview.disposed?
+      preview_bmp.dispose if preview_bmp && !preview_bmp.disposed?
+      blackout.dispose if blackout && !blackout.disposed?
+      blackout_bmp.dispose if blackout_bmp && !blackout_bmp.disposed?
+      ui.dispose if ui && !ui.disposed?
+      vp.dispose if vp && !vp.disposed?
+    end
+  end
+
+  def draw_vermeil_name_ui(bitmap, name, max, show_cursor)
+    ox = ((Graphics.width - 640) / 2.0).round
+    oy = ((Graphics.height - 480) / 2.0).round
+    bg = Color.new(55, 39, 41)
+    border = Color.new(103, 56, 45)
+    wood = Color.new(174, 99, 58)
+    light = Color.new(205, 137, 75)
+    cream = Color.new(252, 246, 219)
+    parchment = Color.new(244, 228, 189)
+    ink = Color.new(64, 42, 41)
+    magenta = Color.new(153, 76, 102)
+    bitmap.clear
+    bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, bg)
+    bitmap.fill_rect(ox + 16, oy + 16, 608, 448, border)
+    bitmap.fill_rect(ox + 22, oy + 22, 596, 436, cream)
+    bitmap.fill_rect(ox + 34, oy + 32, 572, 77, wood)
+    bitmap.fill_rect(ox + 41, oy + 38, 558, 62, parchment)
+    bitmap.fill_rect(ox + 50, oy + 42, 6, 52, magenta)
+    bitmap.fill_rect(ox + 584, oy + 42, 6, 52, magenta)
+    bitmap.fill_rect(ox + 34, oy + 119, 211, 280, border)
+    bitmap.fill_rect(ox + 40, oy + 125, 199, 268, parchment)
+    bitmap.fill_rect(ox + 253, oy + 119, 353, 280, border)
+    bitmap.fill_rect(ox + 259, oy + 125, 341, 268, cream)
+    bitmap.fill_rect(ox + 272, oy + 225, 315, 85, wood)
+    bitmap.fill_rect(ox + 279, oy + 231, 301, 73, parchment)
+    bitmap.fill_rect(ox + 34, oy + 409, 572, 43, border)
+    bitmap.fill_rect(ox + 40, oy + 415, 560, 31, wood)
+    pbSetSystemFont(bitmap)
+    bitmap.font.color = ink
+    bitmap.font.size = 31
+    bitmap.draw_text(ox + 110, oy + 44, 420, 43, "ELIGE TU NOMBRE", 1)
+    bitmap.font.size = 20
+    bitmap.draw_text(ox + 277, oy + 148, 308, 32, "Nombre del protagonista", 1)
+    bitmap.font.size = 29
+    bitmap.draw_text(ox + 292, oy + 243, 276, 39,
+                     name.to_s + (show_cursor ? "|" : ""), 1)
+    bitmap.font.size = 18
+    bitmap.draw_text(ox + 275, oy + 325, 305, 27,
+                     "#{name.length} / #{max} caracteres", 1)
+    bitmap.font.size = 17
+    bitmap.font.color = cream
+    bitmap.draw_text(ox + 57, oy + 420, 526, 23,
+                     "Escribir  ·  Retroceso: borrar  ·  Enter: confirmar", 1)
+  end
+
 end
