@@ -65,8 +65,9 @@ module Visual25D
     # Una fila con un tile transparente (agua, cristal, o el cuerpo del
     # grafico con alpha) va entera en un solo trapecio. Partir solo ese
     # tile y dejar el de al lado en mitades abre un hueco negro en la junta.
-    # Si el FPS baja, vuelve a 1.
-    GROUND_SLICES = 2
+    # Una sola franja: sin sprites extra por tile, evita caidas al caminar.
+    # Los trapezoides siguen compartiendo aristas por fila.
+    GROUND_SLICES = 1
 
     # Suelo opaco de una fila de pantalla = un trapecio, no un sprite por
     # casilla. Apagado: al ocultar el tile antes de que la fila cubra el
