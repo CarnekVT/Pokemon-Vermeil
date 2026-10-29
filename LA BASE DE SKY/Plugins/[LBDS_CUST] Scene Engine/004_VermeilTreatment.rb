@@ -45,72 +45,157 @@ class SceneEngine::Player
   # Graphics/Scenes/Intro/GenderSelect/solen_neutro.png
   # Graphics/Scenes/Intro/GenderSelect/solen_masculino.png
   def treatment_input(default: :neutro)
-    default = VermeilTreatment.normalize(default)
-    index = VermeilTreatment::OPTIONS.index(default) || 1
+    index = VermeilTreatment::OPTIONS.index(VermeilTreatment.normalize(default)) || 1
     vp = Viewport.new(0, 0, Graphics.width, Graphics.height)
     vp.z = 100_010
     backdrop = BitmapSprite.new(Graphics.width, Graphics.height, vp)
     backdrop.z = 0
     effects = BitmapSprite.new(Graphics.width, Graphics.height, vp)
     effects.z = 1
+    previous = Sprite.new(vp)
+    previous.z = 2
+    previous.visible = false
     portrait = Sprite.new(vp)
-    portrait.z = 2
-    portraits = {}
+    portrait.z = 3
+    arrows = []
+    pictures = {}
     tick = 0
+
+    blackout_bmp = Bitmap.new(Graphics.width, Graphics.height)
+    blackout_bmp.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
+    blackout = Sprite.new(vp)
+    blackout.bitmap = blackout_bmp
+    blackout.z = 10
+    blackout.opacity = 255
 
     begin
       VermeilTreatment::OPTIONS.each do |option|
         path = "#{VermeilTreatment::ASSET_DIR}/solen_#{option}"
         next unless pbResolveBitmap(path)
-        portraits[option] = AnimatedBitmap.new(path).deanimate
+        pictures[option] = AnimatedBitmap.new(path).deanimate
       rescue => e
         echoln("[VermeilTreatment] Error cargando #{path}: #{e.message}") rescue nil
       end
 
-      draw_treatment_ui(backdrop.bitmap, VermeilTreatment::OPTIONS[index], !portraits.empty?)
-      refresh_treatment_portrait(portrait, portraits, VermeilTreatment::OPTIONS[index])
-      # Entrada suave, destellos ambientales y respuesta animada al cambiar.
+      # Los dos triángulos son gráficos del juego, no formas improvisadas.
+      ["left_arrow", "right_arrow"].each_with_index do |name, i|
+        path = "Graphics/UI/#{name}"
+        next unless pbResolveBitmap(path)
+        bitmap = AnimatedBitmap.new(path).deanimate
+        arrow = Sprite.new(vp)
+        arrow.bitmap = bitmap
+        arrow.z = 4
+        zoom = [[36.0 / [bitmap.width, bitmap.height].max, 2.0].min, 0.5].max
+        arrow.zoom_x = arrow.zoom_y = zoom
+        arrow.x = (Graphics.width - 640) / 2 + (i == 0 ? 84 : 556) - bitmap.width * zoom / 2
+        arrow.y = (Graphics.height - 480) / 2 + 264 - bitmap.height * zoom / 2
+        arrows << [arrow, bitmap, arrow.x]
+      end
+
+      current = VermeilTreatment::OPTIONS[index]
+      draw_treatment_ui(backdrop.bitmap, current, !pictures.empty?)
+      refresh_treatment_portrait(portrait, pictures, current)
       portrait.opacity = 0
-      update  # Evita arrastrar la confirmación del diálogo anterior.
+
+      # Entrada suave desde negro, con anticipación y aterrizaje ease-out.
+      backdrop.opacity = 0
+      36.times do |i|
+        t = (i + 1) / 36.0
+        eased = 1.0 - (1.0 - t) ** 3
+        backdrop.opacity = (255 * eased).round
+        backdrop.y = (14 * (1.0 - eased)).round
+        portrait.opacity = (255 * eased).round
+        portrait.y = treatment_portrait_y(portrait) + (12 * (1.0 - eased)).round
+        blackout.opacity = (255 * (1.0 - eased)).round
+        draw_treatment_effects(effects.bitmap, current, tick)
+        tick += 1
+        update
+      end
+      backdrop.y = 0
+      blackout.opacity = 0
+
+      # La elección no tiene un temporizador: el jugador marca el ritmo.
       loop do
         update
         tick += 1
-        option = VermeilTreatment::OPTIONS[index]
-        draw_treatment_effects(effects.bitmap, option, tick)
-        portrait.opacity = [portrait.opacity + 24, 255].min
-        if portrait.bitmap
-          portrait.y = 102 + ((320 - portrait.bitmap.height * portrait.zoom_y) / 2).round +
-                       (Math.sin(tick / 18.0) * 3).round
+        current = VermeilTreatment::OPTIONS[index]
+        draw_treatment_effects(effects.bitmap, current, tick)
+        portrait.y = treatment_portrait_y(portrait) + (Math.sin(tick / 20.0) * 2).round
+        arrows.each_with_index do |(arrow, _bitmap, base_x), i|
+          arrow.x = base_x + ((i == 0 ? -1 : 1) * Math.sin(tick / 16.0) * 3).round
+          arrow.opacity = 205 + (Math.sin(tick / 12.0) * 45).round
         end
 
-        change = 0
-        change = -1 if Input.trigger?(Input::LEFT)
-        change = 1 if Input.trigger?(Input::RIGHT)
-        if change != 0
-          index = (index + change) % VermeilTreatment::OPTIONS.length
-          option = VermeilTreatment::OPTIONS[index]
-          draw_treatment_ui(backdrop.bitmap, option, !portraits.empty?)
-          refresh_treatment_portrait(portrait, portraits, option)
-          portrait.opacity = 0
+        direction = 0
+        direction = -1 if Input.trigger?(Input::LEFT)
+        direction = 1 if Input.trigger?(Input::RIGHT)
+        if direction != 0
+          previous.bitmap = portrait.bitmap
+          previous.zoom_x = portrait.zoom_x
+          previous.zoom_y = portrait.zoom_y
+          previous.x = portrait.x
+          previous.y = portrait.y
+          previous.opacity = 255
+          previous.visible = !previous.bitmap.nil?
+
+          index = (index + direction) % VermeilTreatment::OPTIONS.length
+          current = VermeilTreatment::OPTIONS[index]
+          draw_treatment_ui(backdrop.bitmap, current, !pictures.empty?)
+          refresh_treatment_portrait(portrait, pictures, current)
+          target_x = portrait.x
           pbSEPlay("GUI sel cursor") rescue nil
-        elsif Input.trigger?(Input::USE) || Input.trigger?(Input::C)
-          selection = VermeilTreatment.set(option)
-          pbSEPlay("GUI sel decision") rescue nil
-          10.times do |i|
-            draw_treatment_effects(effects.bitmap, option, tick + i, true)
-            portrait.opacity = [255 - i * 16, 0].max
+          12.times do |frame|
+            t = (frame + 1) / 12.0
+            eased = 1.0 - (1.0 - t) ** 3
+            previous.opacity = (255 * (1.0 - eased)).round
+            previous.x = previous.x - (direction * 2) if frame < 8
+            portrait.opacity = (255 * eased).round
+            portrait.x = target_x + (direction * 18 * (1.0 - eased)).round
+            portrait.y = treatment_portrait_y(portrait) - (4 * (1.0 - eased)).round
+            draw_treatment_effects(effects.bitmap, current, tick + frame)
             update
           end
-          return selection
+          previous.visible = false
+          portrait.x = target_x
+          portrait.opacity = 255
+        elsif Input.trigger?(Input::USE) || Input.trigger?(Input::C)
+          chosen = VermeilTreatment.set(current)
+          pbSEPlay("GUI sel decision") rescue nil
+          # Breve confirmación visual, luego salida gradual a negro.
+          16.times do |i|
+            draw_treatment_effects(effects.bitmap, current, tick + i, true)
+            update
+          end
+          32.times do |i|
+            t = (i + 1) / 32.0
+            eased = t * t * (3.0 - 2.0 * t)
+            blackout.opacity = (255 * eased).round
+            portrait.opacity = (255 * (1.0 - eased * 0.4)).round
+            update
+          end
+          return chosen
         end
       end
     ensure
+      blackout.dispose if blackout && !blackout.disposed?
+      blackout_bmp.dispose if blackout_bmp && !blackout_bmp.disposed?
+      arrows.each do |arrow, bitmap, _x|
+        arrow.dispose if arrow && !arrow.disposed?
+        bitmap.dispose if bitmap && !bitmap.disposed?
+      end
+      previous.dispose if previous && !previous.disposed?
       portrait.dispose if portrait && !portrait.disposed?
-      portraits.each_value { |bmp| bmp.dispose if bmp && !bmp.disposed? }
+      pictures.each_value { |bmp| bmp.dispose if bmp && !bmp.disposed? }
       effects.dispose if effects && !effects.disposed?
       backdrop.dispose if backdrop && !backdrop.disposed?
       vp.dispose if vp && !vp.disposed?
     end
+  end
+
+  def treatment_portrait_y(sprite)
+    return 102 unless sprite.bitmap
+    ((Graphics.height - 480) / 2 + 102 +
+     (320 - sprite.bitmap.height * sprite.zoom_y) / 2).round
   end
 
   # Compatible con el editor: un solo comando con tres variantes narrativas.
@@ -201,19 +286,7 @@ class SceneEngine::Player
     bitmap.font.color = outer
     bitmap.draw_text(ox + 90, oy + 42, 460, 42, VermeilTreatment::LABELS[option], 1)
     bitmap.font.size = 20
-    bitmap.draw_text(ox + 53, oy + 433, 534, 23, "← / → Cambiar     Z / Intro Confirmar", 1)
-
-    # Flechas pixeladas, en bitmap independiente del retrato.
-    [false, true].each do |right|
-      cx = ox + (right ? 557 : 83)
-      cy = oy + 260
-      9.times do |i|
-        span = (8 - (i - 4).abs) * 4
-        x = right ? cx - (8 - i) * 3 : cx + (8 - i) * 3
-        bitmap.fill_rect(x, cy - span / 2, 4, span, outer)
-        bitmap.fill_rect(x + 1, cy - span / 2 + 2, 2, [span - 4, 1].max, magenta)
-      end
-    end
+    bitmap.draw_text(ox + 53, oy + 433, 534, 23, "← →  Cambiar      C / Enter  Confirmar", 1)
 
     if !has_art
       bitmap.font.size = 18
