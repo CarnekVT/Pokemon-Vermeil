@@ -896,7 +896,7 @@ module Visual25D
     # Tag :Shelf = tapa tumbada. El 21 solo marca "plano" y solo ESA capa.
     # Prioridad P = base de esa altura (donde iria el canto bajo del tile
     # vertical). P=1 → ras de suelo. P=5 → cierra con el vertical pri 4.
-    SHELF_JOIN_OVERLAP = 1
+    SHELF_JOIN_OVERLAP = 2
 
     def terrain_tag_of_tile(map, tile_id, tile_data = nil)
       if tile_data
@@ -1596,7 +1596,12 @@ module Visual25D
     # mismo (feet, unit, scale, edges). La junta X↔X+1 es edges[X] al pixel.
     # Clave = (mapa, cx, fila de apoyo), no cy: el primero que proyecta fija
     # el plano y el siguiente se pega, aunque su cy/lift discrepe un poco.
-    COLUMN_BAND_OVERLAP = 1
+    COLUMN_BAND_OVERLAP = 2
+
+    # Comparten la misma tolerancia de uniones el tilemap y Animated Props.
+    def column_band_overlap
+      return COLUMN_BAND_OVERLAP
+    end
 
     def clear_column_stack_cache!
       if @col_stack
