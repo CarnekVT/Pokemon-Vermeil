@@ -370,8 +370,10 @@ class TilemapRenderer
     tile.hd25_painted_priority = nil if tile.respond_to?(:hd25_painted_priority=)
     Visual25D.bind_tile_walls(tile, map, x, y, tile_id)
     if Visual25D.enabled? && !Visual25D.flat_cap?(tile)
+      # Here x/y are local map cells. hd25_cell_x/y already include the
+      # connection offset, and must not be used to index map.data.
       tile.hd25_auto_priority = Visual25D.atlas_column_priority(
-        map, tile.hd25_cell_x, tile.hd25_cell_y, layer, tile_id)
+        map, x, y, layer, tile_id)
     end
     # Engine: coords luego Z. Evita project_tile_z duplicado en coords.
     Visual25D.skip_coords_z = true
@@ -493,43 +495,67 @@ module Visual25D
     # Solo en rebind de casillas nativas, nunca en cada píxel de scroll.
     def atlas_column_priority(map, cx, cy, layer, tile_id)
       return nil unless Config::AUTO_COLUMN_PRIORITY
-      return nil if !map || !map.data || !map.priorities
+      return nil unless map && map.data && map.priorities
       return nil if cx.nil? || cy.nil? || layer.nil?
       return nil unless (0..2).cover?(layer.to_i)
       return nil if cx < 0 || cy < 0 || cx >= map.width || cy >= map.height
       id = tile_id.to_i
       return nil if id < 384 || map.data[cx, cy, layer].to_i != id
-      original = (map.priorities[id] || 0).to_i
+
+      # Static map geometry: store once per (map, cell, tile, layer), not
+      # per scroll frame or reused Sprite. Bounded so long sessions do not
+      # accumulate a cache across an unbounded number of connected maps.
+      @atlas_priority_cache ||= {}
+      if @atlas_priority_cache.length > 8192
+        @atlas_priority_cache.clear
+      end
+      key = [map.object_id, cx, cy, layer, id]
+      return @atlas_priority_cache[key] if @atlas_priority_cache.key?(key)
+
+      # The original implementation required every vertical tile to stay
+      # on one RPG Maker layer. Real houses and treetops commonly use two.
+      # Only accept the exact +/-8 IDs (the atlas' 8-column pitch), never
+      # arbitrary adjacent tiles or matching colors.
+      find_id = proc do |yy, wanted|
+        found = false
+        3.times do |z|
+          if map.data[cx, yy, z].to_i == wanted
+            found = true
+            break
+          end
+        end
+        found
+      end
       base_y = cy
       base_id = id
       count = 0
       while base_y + 1 < map.height && count < Config::MAX_PRIORITY
-        next_id = map.data[cx, base_y + 1, layer].to_i
-        break if next_id < 384 || next_id != base_id + 8
+        next_id = base_id + 8
+        break unless find_id.call(base_y + 1, next_id)
         base_y += 1
         base_id = next_id
         count += 1
       end
-      # La base del grupo debe ser realmente suelo, no una columna pintada
-      # explícitamente con prioridad; en ese caso manda siempre el editor.
-      return nil unless (map.priorities[base_id] || 0).to_i == 0
-      # Exigir una pieza elevada estrictamente contigua encima de la base.
-      # Nunca inferir árboles simplemente porque un tile tenga prioridad 0.
-      elevated = false
-      row_y = base_y - 1
-      scan_id = base_id - 8
-      while row_y >= 0 && row_y >= base_y - Config::MAX_PRIORITY
-        actual_id = map.data[cx, row_y, layer].to_i
-        break if actual_id != scan_id || actual_id < 384
-        elevated ||= (map.priorities[actual_id] || 0).to_i > 0
-        row_y -= 1
-        scan_id -= 8
+      result = nil
+      if (map.priorities[base_id] || 0).to_i == 0
+        elevated = false
+        scan_y = base_y - 1
+        scan_id = base_id - 8
+        while scan_y >= 0 && scan_y >= base_y - Config::MAX_PRIORITY
+          break unless find_id.call(scan_y, scan_id)
+          elevated ||= (map.priorities[scan_id] || 0).to_i > 0
+          scan_y -= 1
+          scan_id -= 8
+        end
+        raised = base_y - cy + 1
+        original = (map.priorities[id] || 0).to_i
+        if elevated && raised >= 1 && raised <= Config::MAX_PRIORITY &&
+           original <= raised
+          result = raised
+        end
       end
-      return nil unless elevated
-      corrected = base_y - cy + 1
-      return nil if corrected < 1 || corrected > Config::MAX_PRIORITY
-      return nil if original > corrected
-      return corrected
+      @atlas_priority_cache[key] = result
+      result
     end
 
     # Gate barato (sin geom_priority completa).
