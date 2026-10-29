@@ -13,6 +13,40 @@ Compatible con la estructura de Pokémon Essentials 21.1 del repositorio. Integr
 - Los encuentros originales en hierba alta permanecen intactos.
 - Las opciones para otras experiencias: perfiles **Classic**, **Adventure**, **Safari** o **Custom**, además de ajustes globales, por mapa, especie y evento.
 
+## Activación en cualquier momento (nuevo)
+
+Bifröst mantiene la apertura por evento de forma predeterminada para que no
+cambie el flujo del proyecto sin autorización. También se puede habilitar el
+apuntado en todos los mapas jugables, aunque en ese momento no haya un Pokémon
+delante. Esta opción **no** hace capturables a los Pokémon decorativos ni
+elimina la lista de especies admitidas. Para permitir otras especies además
+de los legendarios, hay que desactivar `restricted_species` y etiquetar los
+OWs correspondientes.
+
+En `config.ini` dentro de `[global]` (o en un `[map:ID]`), configura:
+
+```ini
+; event: solo a traves de pbBifrostAim (por defecto)
+; always: apuntado disponible en cualquier mapa jugable
+; nearby: acceso solo cuando existe un OW elegible en el area de apuntado
+access_mode=always
+
+; aux2: tecla R / aux1: tecla L / none: no registrar atajo
+hotkey=aux2
+```
+
+Desde Maker Studio se cambian estos mismos parámetros con **Disponibilidad
+de lanzamiento** y **Tecla de apuntado**. Si se elige `always`, pulsar R
+abre la selección de Poké Ball/Pokémon y el apuntado sin necesidad de tocar
+un evento. `none` desactiva solamente el atajo; los scripts continúan
+funcionando con `pbBifrostAim`.
+
+La apertura automática se bloquea durante combates, mensajes, menús,
+transferencias, movimientos forzados, movimiento en curso e intérpretes de
+eventos, para evitar interrupciones de escenas y de los controles del mapa.
+Al seleccionar una casilla sin Pokémon elegible, un lanzamiento puede fallar
+y consumir una Ball según `consume_on_miss`.
+
 ## Preparar los eventos
 
 En el nombre del evento, coloca:
@@ -59,11 +93,12 @@ Menú **Mods → Bifröst Capture Studio**. Tiene controles de reglas, previsual
 6. Los errantes que usan la mecánica de Roaming de Essentials no se vinculan automáticamente al estado del evento `OWCAP`. La aparición y desaparición de OWs, la sincronización de su captura con el sistema de errantes y la persistencia de individuos requieren integración adicional.
 7. `WildBattle.start` inicia el combate normal, pero la versión inicial no bloquea automáticamente el lanzamiento de Balls durante ese combate; si el diseño lo requiere se integrará una regla de batalla aparte.
 8. Las opciones in-game son un menú opcional invocado por script, no una entrada añadida al menú de pausa por defecto.
+9. El atajo configurable depende del mapeo de `Input::AUX1` y `Input::AUX2` de Vermeil. Comprobar conflictos con otros plugins y testear su respuesta junto a Turbo y Movimiento. La apertura en `always` se añade como código, pero aún no se ha validado ingame.
 
 ## Archivos
 
 - `001_Core.rb`: INI + perfiles + cálculos + eventos + persistencia.
 - `002_Runtime.rb`: selección de bolas/Pokémon, apuntado y resolución.
 - `003_RulesMenu.rb`: ajustes opcionales ingame.
-- `config.ini`: reglas oficiales Bifröst.
+- `config.ini`: reglas oficiales Bifröst, incluyendo `access_mode` y `hotkey`.
 - `Plugins/MakerStudio/003_Editor/Mods/com.vermeil.bifrost-capture`: editor gráfico.
