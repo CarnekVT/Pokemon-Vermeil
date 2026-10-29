@@ -138,7 +138,7 @@ module Visual25D
           edges = geom[4]
           top = edges[pri]
           bottom = edges[pri - 1]
-          bottom += 1 if pri >= 2
+          bottom += Visual25D.column_band_overlap if pri >= 2
           z_row = row + pri
           use_raised_z = true
         else
