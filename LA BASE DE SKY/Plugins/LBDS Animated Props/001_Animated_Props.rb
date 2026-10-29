@@ -323,9 +323,12 @@ module LBDSAnimatedPropsSpriteset
     # A multirow 2.5D billboard is one sprite, NOT independent 32px
     # fragments. This prevents seams, layered-alpha double painting and
     # reduces per-frame drawing work. Native priority cells remain separate.
+    priorities = p[:cells].map { |cell| cell.fetch('priority', 0).to_i }
+    # A single visual plane also works when every row has the SAME priority.
+    # Do not group separately prioritized stair-steps; they need native Z.
     if lbds_props_visual25d_active? && p[:height] > 1 &&
        p[:projection_mode].to_s !~ /surface|ground|floor|native/i &&
-       p[:cells].all? { |c| c && c.fetch('priority', 0).to_i == 0 }
+       priorities.uniq.length == 1
       [[:base, base], [:parallel, overlay]].each do |track, bitmap|
         next unless bitmap
         sprite = Sprite.new(Spriteset_Map.viewport)
@@ -335,7 +338,7 @@ module LBDSAnimatedPropsSpriteset
         sprite.zoom_x = TilemapRenderer::ZOOM_X
         sprite.zoom_y = TilemapRenderer::ZOOM_Y
         sprite.opacity = (parallel[:opacity] * 255 / 100) if track == :parallel
-        group << [sprite, p, 0, 0, p[:width], 0, -1, track, p[:height]]
+        group << [sprite, p, 0, 0, p[:width], priorities[0], -1, track, p[:height]]
       end
       return group
     end
