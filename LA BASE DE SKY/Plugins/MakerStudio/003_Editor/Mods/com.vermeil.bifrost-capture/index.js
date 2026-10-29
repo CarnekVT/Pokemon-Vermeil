@@ -5,19 +5,19 @@ const ROSTER_PATH="Plugins/[VERMEIL] Bifrost Capture/roster.ini";
 const POKEDEX_FILES=["PBS/pokemon.txt","PBS/pokemon_Vermeil.txt"];
 const OFFICIAL="RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT LANDORUS THUNDURUS TORNADUS ETERNATUS TAPUKOKO TAPULELE TAPUBULU TAPUFINI".split(" ");
 const DEFS={
- profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"aux2",
+ profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"aux2",control_mode:"toggle",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",
  range:"7",width:"7",optimal_range:"4",alert_distance:"3",
  hit_near:"100",hit_far:"60",capture_floor:"10",back_multiplier:"175",
  critical_front:"3",critical_back:"35",critical_multiplier:"250",
  line_of_sight:"1",reaction:"flee",consume_on_miss:"1",impact_frames:"3",
- encounter_mode:"classic",spawn_chance:"24",spawn_min_distance:"3",
- spawn_max_distance:"6",spawn_limit:"4",spawn_lifetime:"40",
+ encounter_mode:"classic",spawn_chance:"100",spawn_min_distance:"3",
+ spawn_max_distance:"6",spawn_limit:"5",spawn_lifetime:"45",
  spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
  ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100",
- aim_mouse:"1",aim_target_radius:"36",throw_frames:"18",throw_arc:"42",aim_chain:"1",
+ aim_mouse:"1",aim_target_radius:"30",throw_frames:"18",throw_arc:"36",aim_chain:"1",
  aim_keyboard:"1",aim_speed:"5",flee_steps:"5",flee_speed:"4",
- flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",allow_empty_throw:"0",capture_shakes:"3",capture_shake_frames:"10"
+ flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",allow_empty_throw:"0",capture_shakes:"3",capture_shake_frames:"10",attempt_limit:"0",instant_modifier:"100"
 };
 const PRESETS={
  bifrost:{...DEFS},
@@ -39,12 +39,13 @@ const FIELDS={
  profile:["Perfil activo","system","select",Object.keys(PRESETS),"La configuración Bifröst conserva sus reglas originales salvo cambios expresos."],
  enabled:["Motor de captura","system","bool",null,"Activa o desactiva completamente Bifröst."],
  access_mode:["Disponibilidad de lanzamiento","system","select",["event","always","nearby"],"Siempre disponible: usa la acción AUX2 (W en la captura de Key bindings) para apuntar en el mapa."],
+ control_mode:["Modo de control","system","select",["toggle","hold"],"Toggle: W entra y C lanza; Hold: mantener W y soltar para lanzar."],
  hotkey:["Atajo de apuntado","system","select",["aux2","aux1","none"],"AUX2 es W y AUX1 es Q en los controles que mostraste; si los reasignas en Key bindings, Bifröst los seguirá."],
  capture_enabled:["Captura en el mapa","system","bool",null,"Permite usar Balls fuera del combate."],
  battle_enabled:["Desafiar con Pokémon","system","bool",null,"Habilita enviar Pokémon para iniciar combate tradicional."],
  restricted_species:["Restringir a catálogo Bifröst","system","bool",null,"Si está activo, solo se aceptan especies marcadas en Catálogo."],
  encounter_mode:["Sistema de encuentros","spawns","select",["classic","hybrid","overworld"],"Clásico: encuentros al azar. Mixto: OW + clásicos. Completo: solo OW en terreno."],
- spawn_chance:["Probabilidad de aparición por paso (%)","spawns","int",[0,100],"Intentos de aparición por paso elegible, no tasa de captura."],
+ spawn_chance:["Porcentaje OW en modo mixto","spawns","int",[0,100],"Porcentaje de encuentros naturales que se convierten en Pokémon visibles. OW completo convierte todos."],
  spawn_min_distance:["Distancia mínima de aparición","spawns","int",[1,12],"Distancia Manhattan respecto al jugador."],
  spawn_max_distance:["Distancia máxima de aparición","spawns","int",[1,16],"El encuentro sale de una casilla de terreno permitida."],
  spawn_limit:["Límite de OW simultáneos","spawns","int",[1,20],"Evita poblar demasiados eventos nuevos."],
@@ -75,7 +76,9 @@ const FIELDS={
  critical_front:["Crítica frontal (%)","capture","int",[0,100],"Probabilidad de marcar una captura crítica al frente."],
  critical_back:["Crítica por espalda (%)","capture","int",[0,100],"Mayor cuando el objetivo mira hacia otro lado."],
  critical_multiplier:["Multiplicador crítico (%)","capture","int",[100,600],"Bonificación a la tasa cuando el resultado es crítico."],
- consume_on_miss:["Consumir Balls fallidas","capture","bool",null,"Se aplica al fallar un lanzamiento con la configuración inicial."],
+ consume_on_miss:["Consumir Balls fallidas","capture","bool",null,"Se aplica solo a un lanzamiento real que falla; no se consume al seleccionar un OW inválido."],
+ attempt_limit:["Intentos de captura directa","capture","int",[0,20],"0 no limita intentos; más de 0 bloquea nuevos intentos con ese individuo."],
+ instant_modifier:["Multiplicador de captura directa (%)","capture","int",[1,300],"100 es base; 80 equivale a una penalización del 20 %."],
  reaction:["Comportamiento de alerta","behavior","select",["flee","attack","ignore"],"Huir, atacar iniciando combate o ignorar."],
  alert_distance:["Radio de alarma (casillas)","behavior","int",[0,20],"A 3 casillas o menos el OW reacciona; 0 desactiva alarma."],
  flee_steps:["Pasos de huida","behavior","int",[1,30],"El Pokémon corre de verdad estos pasos antes de desaparecer."],
@@ -231,12 +234,12 @@ class CaptureStudio{
  }
  fieldsFor(section){
   const explicit={
-   overview:["enabled","access_mode","hotkey","capture_enabled","battle_enabled"],
+   overview:["enabled","access_mode","hotkey","control_mode","capture_enabled","battle_enabled"],
    profiles:["profile","access_mode","restricted_species"],
    species:["ow_form","ow_min_level","ow_max_level","ow_spawn_probability","reaction","alert_distance","capture_floor","restricted_species","spawn_filter"],
    spawns:["encounter_mode","spawn_chance","spawn_min_distance","spawn_max_distance","spawn_limit","spawn_lifetime","spawn_grass_only","spawn_filter"],
    aim:["aim_keyboard","aim_speed","aim_mouse","aim_target_radius","allow_empty_throw","throw_frames","throw_arc","aim_chain","range","width","optimal_range","hit_near","hit_far","line_of_sight"],
-   capture:["capture_floor","back_multiplier","critical_front","critical_back","critical_multiplier","capture_shakes","capture_shake_frames","consume_on_miss"],
+   capture:["capture_floor","back_multiplier","critical_front","critical_back","critical_multiplier","instant_modifier","attempt_limit","capture_shakes","capture_shake_frames","consume_on_miss"],
    behavior:["reaction","alert_distance","flee_steps","flee_speed","flee_disappear_distance","flee_stuck_frames","alert_on_miss","impact_frames"],
    scopes:["enabled","access_mode","encounter_mode","restricted_species"],
    tests:["access_mode","hotkey","encounter_mode"]
