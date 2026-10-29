@@ -37,126 +37,101 @@ module BifrostCapture
     usable[idx][0]
   end
 
-  def self.react(event, cfg)
-    case cfg["reaction"]
-    when "attack"
-      spec = event_spec(event)
-      return false unless spec
-      pbMessage(_INTL("¡El Pokémon se ha abalanzado sobre ti!"))
-      wild = pbGenerateWildPokemon(spec[0],spec[1])
-      wild.form = spec[2] if spec[2] > 0
-      result = WildBattle.start(wild)
-      remove_event(event) if result
-    when "flee"
-      notice(_INTL("¡El Pokémon ha huido!"))
-      remove_event(event)
-    end
-    true
-  end
-
-  def self.throw_at(tx,ty,forward,side,mode,payload,base)
-    px,py = $game_player.x,$game_player.y
-    event = $game_map.events.values.find { |e| e.x==tx && e.y==ty && valid_target?(e) }
-    cfg = event ? options($game_map.map_id,event_spec(event)[0],event.id) : base
-    range = [cfg["range"].to_i,1].max
-    width = [cfg["width"].to_i,1].max
-    if event
-      geom = shot_geometry(px, py, event.x, event.y, cfg)
-      forward, side = geom[:forward], geom[:side]
-      valid_tile = geom[:in_range]
-    else
-      valid_tile = false
-    end
-    visible = !event || cfg["line_of_sight"] != "1" ||
-              line_clear?(px,py,tx,ty)
-    accuracy = valid_tile ? hit_chance(forward,cfg) : 0.0
-    hit = !!event && valid_tile && visible && rand < accuracy
-    # Al impactar se consume siempre una Ball. Si falla por apuntado,
-    # consume_on_miss decide si el lanzamiento gasta el item.
-    if mode == :ball && (hit || cfg["consume_on_miss"] == "1")
-      return false unless $bag.remove(payload,1)
-    end
-    if !hit
-      reason = if !event
-                 _INTL("No hay un Pokémon en la trayectoria.")
-               elsif !valid_tile
-                 _INTL("El objetivo está fuera de alcance.")
-               elsif !visible
-                 _INTL("Un obstáculo bloquea el lanzamiento.")
-               else
-                 _INTL("La Poké Ball se ha desviado.")
-               end
-      notice(reason)
-      react(event,cfg) if event && valid_tile && visible
+  # No resolver un disparo mediante coordenadas antiguas: conservar el
+  # objeto Game_Event que estuvo bajo la retícula durante el lanzamiento.
+  def self.resolve_throw(event, mode, payload, config, behind_at_release = nil)
+    if !event || !valid_target?(event)
+      notice(_INTL("El Pokémon ya no está en la trayectoria."))
       return false
     end
+    spec = event_spec(event)
+    cfg = options($game_map.map_id, spec[0], event.id)
+    px, py = $game_player.x, $game_player.y
+    geometry = shot_geometry(px, py, event.x, event.y, cfg)
+    blocked = cfg["line_of_sight"] == "1" &&
+              !line_clear?(px, py, event.x, event.y)
+    chance = geometry[:in_range] && !blocked ?
+             hit_chance(geometry[:forward], cfg) : 0.0
+    hit = geometry[:in_range] && !blocked && rand < chance
+    if mode == :ball && (hit || cfg["consume_on_miss"] == "1")
+      if !$bag.remove(payload, 1)
+        notice(_INTL("Ya no quedan Poké Balls de ese tipo."))
+        return false
+      end
+    end
+    if !hit
+      message = if !geometry[:in_range]
+                  _INTL("¡El Pokémon está fuera de alcance!")
+                elsif blocked
+                  _INTL("¡Hay un obstáculo en la trayectoria!")
+                else
+                  _INTL("¡La Poké Ball se ha desviado!")
+                end
+      notice(message)
+      react(event, cfg, :miss) if cfg["alert_on_miss"] != "0"
+      return false
+    end
+
     contact_fx(event)
-    spec=event_spec(event)
     if mode == :battle
-      pbMessage(_INTL("¡Adelante, {1}!",payload.name))
-      wild = pbGenerateWildPokemon(spec[0],spec[1])
+      # Mantener el Pokémon que se eligió, sin alterar permanentemente el orden
+      # del equipo ni generar otra copia de la criatura salvaje.
+      wild = pbGenerateWildPokemon(spec[0], spec[1])
       wild.form = spec[2] if spec[2] > 0
-      # El Pokémon elegido encabeza temporalmente el equipo al iniciar combate.
       party = $player.party
-      original_order = party.dup
-      index = party.index(payload)
-      if index && index > 0
-        party.delete_at(index)
+      original = party.dup
+      i = party.index(payload)
+      if i && i > 0
+        party.delete_at(i)
         party.unshift(payload)
       end
       begin
         result = WildBattle.start(wild)
         remove_event(event) if result
       ensure
-        # Preservar capturas u otros cambios reales en el equipo.
-        party.replace(original_order.select { |p| party.include?(p) } +
-                      party.reject { |p| original_order.include?(p) })
+        party.replace(original.select { |p| party.include?(p) } +
+                      party.reject { |p| original.include?(p) })
       end
       return true
     end
-    behind=behind?(px,py,event)
-    critical=rand < (behind ? cfg["critical_back"].to_f :
-                                cfg["critical_front"].to_f)/100.0
-    impact(cfg["impact_frames"].to_i) if behind
-    pkmn=pbGenerateWildPokemon(spec[0],spec[1])
-    pkmn.form=spec[2] if spec[2] > 0
-    chance=catch_chance(spec[0],payload,forward,behind,critical,cfg)
-    if rand < chance
-      pkmn.poke_ball=payload if pkmn.respond_to?(:poke_ball=)
-      notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
-      # El motor decide equipo/cajas y registra Pokédex normalmente.
-      pbAddPokemon(pkmn)
-      remove_event(event)
-      return true
+
+    from_behind = behind_at_release.nil? ?
+                  behind?(px, py, event) : behind_at_release
+    critical_rate = from_behind ? cfg["critical_back"] : cfg["critical_front"]
+    critical = rand < critical_rate.to_f / 100.0
+    impact(cfg["impact_frames"].to_i) if from_behind
+    probability = catch_chance(spec[0], payload, geometry[:forward],
+                               from_behind, critical, cfg)
+    if rand < probability
+      pkmn = pbGenerateWildPokemon(spec[0], spec[1])
+      pkmn.form = spec[2] if spec[2] > 0
+      pkmn.poke_ball = payload if pkmn.respond_to?(:poke_ball=)
+      stored = pbAddPokemon(pkmn)
+      if stored
+        notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
+        remove_event(event)
+        return true
+      end
+      notice(_INTL("La captura no se pudo guardar."))
+      return false
     end
     notice(_INTL("¡El Pokémon se ha liberado!"))
-    react(event,cfg)
+    react(event, cfg, :breakout)
     false
   end
 
+  # Compatibilidad con los eventos de scripts existentes y los tests antiguos.
+  def self.throw_at(tx, ty, _forward, _side, mode, payload, cfg)
+    event = $game_map.events.values.find do |e|
+      e.x == tx && e.y == ty && valid_target?(e)
+    end
+    resolve_throw(event, mode, payload, cfg)
+  end
+
+  # La detección real y el movimiento continuo se gestionan en 006_Behavior.
+  # Este hook solo enlaza los pasos con el mismo sistema de estados.
   def self.on_step
-    return if !$game_map || !$game_player
-    $game_map.events.values.each do |event|
-      next unless valid_target?(event)
-      spec=event_spec(event)
-      cfg=options($game_map.map_id,spec[0],event.id)
-      next unless cfg["alert_distance"].to_i > 0
-      dist = ($game_player.x-event.x).abs + ($game_player.y-event.y).abs
-      next unless dist <= cfg["alert_distance"].to_i
-      # Una sola reaccion por evento. Al alejarse se permite otra.
-      @alerted ||= {}
-      id=[$game_map.map_id,event.id]
-      next if @alerted[id]
-      @alerted[id]=true
-      react(event,cfg)
-    end
-    @alerted ||= {}
-    @alerted.delete_if do |id,_|
-      next true if id[0] != $game_map.map_id
-      event = $game_map.events[id[1]]
-      !event || ($game_player.x-event.x).abs +
-        ($game_player.y-event.y).abs > 4
-    end
+    update_behavior(true) if respond_to?(:update_behavior)
   end
 end
 
