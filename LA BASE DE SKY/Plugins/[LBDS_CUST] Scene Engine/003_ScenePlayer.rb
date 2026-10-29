@@ -101,6 +101,8 @@ class SceneEngine::Player
     rate = Graphics.respond_to?(:frame_rate) ? Graphics.frame_rate.to_f : 60.0
     rate = 60.0 if rate <= 0
     @scene_frame_remainder ||= 0.0
+    @scene_logic_frame ||= 0
+    @scene_logic_frame += 1
     @scene_frame_remainder += rate / 60.0
     ticks = @scene_frame_remainder.floor
     @scene_frame_remainder -= ticks
@@ -373,7 +375,7 @@ class SceneEngine::Player
         end
 
         if revealed >= page_len
-          @sprites[:indicator].opacity = (Graphics.frame_count % 40 < 20) ? 255 : 0
+          @sprites[:indicator].opacity = (@scene_logic_frame % 40 < 20) ? 255 : 0
         else
           @sprites[:indicator].opacity = 0
         end
@@ -498,9 +500,9 @@ class SceneEngine::Player
     bmp = @sprites[:text].bitmap
     lines = []
     safe_width = max_width - 12 
-    # Los saltos manuales se reservan para párrafos explícitos. El flujo
-    # de texto normal evita convertir un salto innecesario en una página.
-    text.to_s.gsub(/\s*\n\s*/, " ").split("\n").each do |para|
+    # Respeta los saltos manuales cuando una escena los necesita.
+    # La intro elimina los saltos forzados redundantes.
+    text.to_s.split("\n").each do |para|
       words = para.split(' ')
       current = ""
       words.each do |word|
