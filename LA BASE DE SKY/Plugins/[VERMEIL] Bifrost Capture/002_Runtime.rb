@@ -86,6 +86,7 @@ module BifrostCapture
       react(event,cfg) if event
       return false
     end
+    contact_fx(event)
     spec=event_spec(event)
     if mode == :battle
       pbMessage(_INTL("¡Adelante, {1}!",payload.name))
