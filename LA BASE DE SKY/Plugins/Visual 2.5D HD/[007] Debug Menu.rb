@@ -68,7 +68,7 @@ def pbVisual25DMenu
     when 6
       Visual25D.row_batch = !Visual25D.row_batch?
     when 7
-      Visual25D.toggle_smooth
+      Visual25D.enabled = !Visual25D.enabled
       break
     when 8
       pbVisual25DGeometryMenu
