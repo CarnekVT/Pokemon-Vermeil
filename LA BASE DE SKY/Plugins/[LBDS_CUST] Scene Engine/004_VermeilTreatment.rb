@@ -9,6 +9,7 @@ module VermeilTreatment
     masculino: "MASCULINO"
   }.freeze
   ASSET_DIR = "Graphics/Scenes/Intro/GenderSelect"
+  UI_DIR = "Graphics/Scenes/Intro/UI"
   # Ajuste artístico por pose: el brazo extendido no define el eje del torso.
   PORTRAIT_X_OFFSET = { femenino: 0, neutro: -21, masculino: 30 }.freeze
 
@@ -61,6 +62,7 @@ class SceneEngine::Player
     portrait.z = 3
     arrows = []
     pictures = {}
+    ui_art = vermeil_ui_bitmap("treatment")
     tick = 0
 
     blackout_bmp = Bitmap.new(Graphics.width, Graphics.height)
@@ -106,7 +108,7 @@ class SceneEngine::Player
       end
 
       current = VermeilTreatment::OPTIONS[index]
-      draw_treatment_ui(backdrop.bitmap, current, !pictures.empty?)
+      draw_treatment_ui(backdrop.bitmap, current, !pictures.empty?, ui_art)
       refresh_treatment_portrait(portrait, pictures, current)
       portrait.opacity = 0
 
@@ -155,7 +157,7 @@ class SceneEngine::Player
 
           index = (index + direction) % VermeilTreatment::OPTIONS.length
           current = VermeilTreatment::OPTIONS[index]
-          draw_treatment_ui(backdrop.bitmap, current, !pictures.empty?)
+          draw_treatment_ui(backdrop.bitmap, current, !pictures.empty?, ui_art)
           refresh_treatment_portrait(portrait, pictures, current)
           target_x = portrait.x
           pbSEPlay("GUI sel cursor") rescue nil
@@ -174,6 +176,7 @@ class SceneEngine::Player
           portrait.x = target_x
           portrait.opacity = 255
         elsif Input.trigger?(Input::USE) || Input.trigger?(Input::C)
+          next unless vermeil_confirm_selection(vp, "¿Usar #{VermeilTreatment::LABELS[current].downcase}?")
           chosen = VermeilTreatment.set(current)
           pbSEPlay("GUI sel decision") rescue nil
           # Breve confirmación visual, luego salida gradual a negro.
@@ -203,6 +206,7 @@ class SceneEngine::Player
       pictures.each_value { |bmp| bmp.dispose if bmp && !bmp.disposed? }
       effects.dispose if effects && !effects.disposed?
       backdrop.dispose if backdrop && !backdrop.disposed?
+      ui_art.dispose if ui_art && !ui_art.disposed?
       vp.dispose if vp && !vp.disposed?
     end
   end
@@ -304,7 +308,7 @@ class SceneEngine::Player
   end
 
   # Gama crema/cobre inspirada en los menús del juego; sin PNG extra.
-  def draw_treatment_ui(bitmap, option, has_art)
+  def draw_treatment_ui(bitmap, option, has_art, ui_art = nil)
     ox = ((Graphics.width - 640) / 2.0).round
     oy = ((Graphics.height - 480) / 2.0).round
     ink = Color.new(65, 44, 38)
@@ -314,6 +318,17 @@ class SceneEngine::Player
     dark = Color.new(111, 64, 48)
     magenta = Color.new(154, 75, 108)
     bitmap.clear
+    if ui_art
+      bitmap.blt(ox, oy, ui_art, Rect.new(0, 0, ui_art.width, ui_art.height))
+      pbSetSystemFont(bitmap)
+      bitmap.font.color = ink
+      bitmap.font.size = 28
+      bitmap.draw_text(ox + 170, oy + 39, 300, 34, VermeilTreatment::LABELS[option], 1)
+      bitmap.font.size = 18
+      bitmap.font.color = cream
+      bitmap.draw_text(ox + 80, oy + 108, 480, 28, "Izq. / Der. elegir      Enter confirmar", 1)
+      return
+    end
     bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(53, 40, 42))
     bitmap.fill_rect(ox + 18, oy + 14, 604, 452, dark)
     bitmap.fill_rect(ox + 23, oy + 19, 594, 442, cream)
@@ -355,6 +370,7 @@ class SceneEngine::Player
     preview = nil
     preview_bmp = nil
     entry = nil
+    ui_art = vermeil_ui_bitmap("name")
     blackout_bmp = Bitmap.new(Graphics.width, Graphics.height)
     blackout_bmp.fill_rect(0, 0, Graphics.width, Graphics.height, Color.new(0, 0, 0))
     blackout = Sprite.new(vp)
@@ -393,7 +409,7 @@ class SceneEngine::Player
       entry.visible = true
       Input.text_input = true
 
-      draw_vermeil_name_ui(ui.bitmap, name, max, true)
+      draw_vermeil_name_ui(ui.bitmap, name, max, false, ui_art)
       16.times do |i|
         t = (i + 1) / 16.0
         blackout.opacity = (255 * (1.0 - t) ** 2).round
@@ -406,18 +422,27 @@ class SceneEngine::Player
       loop do
         update
         entry.update
+        helper = entry.instance_variable_get(:@helper)
+        if helper && helper.respond_to?(:cursor=)
+          helper.cursor = entry.text.to_s.length
+        end
         tick += 1
         name = entry.text.to_s[0, max]
-        show_cursor = (tick % 44) < 25
+        show_cursor = false
         if name != previous || show_cursor != blink
-          draw_vermeil_name_ui(ui.bitmap, name, max, show_cursor)
+          draw_vermeil_name_ui(ui.bitmap, name, max, show_cursor, ui_art)
           previous = name.dup
           blink = show_cursor
         end
         if Input.triggerex?(:RETURN) || Input.trigger?(Input::USE)
           if name.strip.length >= min
-            pbSEPlay("GUI sel decision") rescue nil
-            break
+            if vermeil_confirm_selection(vp, "¿Usar el nombre #{name.strip}?")
+              pbSEPlay("GUI sel decision") rescue nil
+              break
+            end
+            # No reiniciar el texto ni el cursor al regresar.
+            Input.text_input = true
+            next
           end
           pbPlayBuzzerSE rescue nil
         end
@@ -442,11 +467,12 @@ class SceneEngine::Player
       blackout.dispose if blackout && !blackout.disposed?
       blackout_bmp.dispose if blackout_bmp && !blackout_bmp.disposed?
       ui.dispose if ui && !ui.disposed?
+      ui_art.dispose if ui_art && !ui_art.disposed?
       vp.dispose if vp && !vp.disposed?
     end
   end
 
-  def draw_vermeil_name_ui(bitmap, name, max, show_cursor)
+  def draw_vermeil_name_ui(bitmap, name, max, show_cursor, ui_art = nil)
     ox = ((Graphics.width - 640) / 2.0).round
     oy = ((Graphics.height - 480) / 2.0).round
     bg = Color.new(55, 39, 41)
@@ -458,6 +484,18 @@ class SceneEngine::Player
     ink = Color.new(64, 42, 41)
     magenta = Color.new(153, 76, 102)
     bitmap.clear
+    if ui_art
+      bitmap.blt(ox, oy, ui_art, Rect.new(0, 0, ui_art.width, ui_art.height))
+      pbSetSystemFont(bitmap)
+      bitmap.font.color = ink
+      bitmap.font.size = 31
+      bitmap.draw_text(ox + 222, oy + 42, 360, 44, "TU NOMBRE", 1)
+      bitmap.font.size = 28
+      bitmap.draw_text(ox + 290, oy + 223, 283, 47, name.to_s, 1)
+      bitmap.font.size = 18
+      bitmap.draw_text(ox + 286, oy + 311, 277, 24, "#{name.length} / #{max}", 1)
+      return
+    end
     bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, bg)
     bitmap.fill_rect(ox + 16, oy + 16, 608, 448, border)
     bitmap.fill_rect(ox + 22, oy + 22, 596, 436, cream)
@@ -481,7 +519,7 @@ class SceneEngine::Player
     bitmap.draw_text(ox + 277, oy + 148, 308, 32, "Nombre del protagonista", 1)
     bitmap.font.size = 29
     bitmap.draw_text(ox + 292, oy + 243, 276, 39,
-                     name.to_s + (show_cursor ? "|" : ""), 1)
+                     name.to_s, 1)
     bitmap.font.size = 18
     bitmap.draw_text(ox + 275, oy + 325, 305, 27,
                      "#{name.length} / #{max} caracteres", 1)
@@ -489,6 +527,61 @@ class SceneEngine::Player
     bitmap.font.color = cream
     bitmap.draw_text(ox + 57, oy + 420, 526, 23,
                      "Escribir  ·  Retroceso: borrar  ·  Enter: confirmar", 1)
+  end
+
+  # Fondo PNG intercambiable. El código sigue funcionando si no hay archivo.
+  def vermeil_ui_bitmap(name)
+    path = "#{VermeilTreatment::UI_DIR}/#{name}"
+    return nil unless pbResolveBitmap(path)
+    AnimatedBitmap.new(path).deanimate
+  rescue => e
+    echoln("[Vermeil UI] #{e.message}") rescue nil
+    nil
+  end
+
+  # Confirmación reversible para ambas pantallas; el texto es una capa
+  # propia y nunca está incrustado en los fondos PNG.
+  def vermeil_confirm_selection(viewport, question)
+    box = BitmapSprite.new(Graphics.width, Graphics.height, viewport)
+    box.z = 8
+    selected = 0
+    ox = ((Graphics.width - 640) / 2).round
+    oy = ((Graphics.height - 480) / 2).round
+    update
+    loop do
+      bmp = box.bitmap
+      bmp.clear
+      bmp.fill_rect(ox + 62, oy + 321, 516, 121, Color.new(51, 35, 50, 242))
+      bmp.fill_rect(ox + 67, oy + 326, 506, 111, Color.new(245, 224, 185))
+      bmp.fill_rect(ox + 72, oy + 331, 496, 101, Color.new(255, 245, 215))
+      pbSetSystemFont(bmp)
+      bmp.font.size = 24
+      bmp.font.color = Color.new(70, 41, 51)
+      bmp.draw_text(ox + 78, oy + 340, 484, 35, question, 1)
+      bmp.font.size = 22
+      ["Confirmar", "Cambiar"].each_with_index do |label, i|
+        x = ox + 138 + i * 225
+        if selected == i
+          bmp.fill_rect(x, oy + 381, 170, 37, Color.new(155, 76, 104))
+          bmp.font.color = Color.new(255, 246, 225)
+        else
+          bmp.font.color = Color.new(70, 41, 51)
+        end
+        bmp.draw_text(x, oy + 385, 170, 30, label, 1)
+      end
+      update
+      if Input.trigger?(Input::LEFT) || Input.trigger?(Input::RIGHT)
+        selected = 1 - selected
+        pbSEPlay("GUI sel cursor") rescue nil
+      elsif Input.trigger?(Input::BACK)
+        return false
+      elsif Input.trigger?(Input::USE) || Input.trigger?(Input::C) ||
+            Input.triggerex?(:RETURN)
+        return selected == 0
+      end
+    end
+  ensure
+    box.dispose if box && !box.disposed?
   end
 
 end
