@@ -217,7 +217,15 @@ module Visual25D
   end
 
   module Lighting
+    # Lighting Studio's union lightmap uses tiled 256px bitmaps. They must
+    # share EXACT x/y edges. Applying a separate perspective scale to each
+    # chunk breaks those edges (especially while blend changes each frame).
+    #
+    # Keep STATIC lightmap chunks in one coherent 2D screen-space projection.
+    # Local/pulsing light sprites still follow the Visual25D world projection.
+    # This never touches the global day/night viewport tone.
     def ls_world_screen(wx, wy, mx, my, zx, zy)
+      return super if @v25_ls_flat_chunks
       return super unless Visual25D.enabled? && Visual25D::StudioOptions.lights?
       x = wx - mx
       y = wy - my
@@ -227,48 +235,29 @@ module Visual25D
     end
 
     def ls_update_chunks(mx, my, zx, zy)
-      active = Visual25D.enabled? && Visual25D::StudioOptions.lights?
-      sig = [@map&.map_id, mx, my, zx, zy, Visual25D.projection_stamp,
-             @ls_chunks&.object_id, Graphics.width, Graphics.height]
-      # Los chunks no tienen pulsación: mantener los ya proyectados mientras
-      # cámara/luces estáticas no cambien. No repetir miles de asignaciones.
-      return if active && @v25_chunks_complete && @v25_chunk_sig == sig
+      # Use the original Lighting Studio pipeline. It already caches all
+      # bitmaps and updates sprite edges consistently. The old bridge ran it
+      # AND then stretched each chunk independently, introducing seams.
+      @v25_ls_flat_chunks = true
       super
-      if !active
-        @v25_chunk_sig = nil
-        @v25_chunks_complete = false
-        return
-      end
-      return if !@ls_chunks || !defined?(LightingStudio::CHUNK_WORLD)
-      @v25_chunk_sig = sig
-      size = LightingStudio::CHUNK_WORLD.to_f
-      @ls_chunks.each do |key, entry|
-        spr, bmp = entry[:sprite], entry[:bitmap]
-        next if !spr || spr.disposed? || !spr.visible || !bmp
-        y = key[1] * size - my
-        y = (y - Graphics.height / 2.0) * zy + Graphics.height / 2.0 if zy != 1
-        h = size * zy
-        next if h <= 0
-        scale = Visual25D.width_scale_at(y + h / 2.0)
-        ph = [Visual25D.project_y(y + h) - Visual25D.project_y(y), 1].max
-        sx = zx * scale * size / bmp.width.to_f
-        sy = ph.to_f / bmp.height.to_f
-        spr.zoom_x = sx if (spr.zoom_x - sx).abs > 0.002
-        spr.zoom_y = sy if (spr.zoom_y - sy).abs > 0.002
-      end
-      # No marcar completo mientras queden bloques por construir.
-      visible = ls_visible_keys(mx, my, zx, zy)
-      @v25_chunks_complete = visible.all? { |key| @ls_chunks.key?(key) }
+    ensure
+      @v25_ls_flat_chunks = false
     end
 
     def ls_update
       active = Visual25D.enabled? && Visual25D::StudioOptions.lights?
-      if active != @v25_lights_active
-        @v25_lights_active = active
-        @v25_chunks_complete = false
-        @v25_chunk_sig = nil
-      end
+      @v25_lights_active = active if active != @v25_lights_active
       super
+      # Ambient darkness and the time-of-day tint are SCREEN layers. Never
+      # adjust their position, zoom or opacity with perspective; in particular,
+      # do not let old transitions leave a partially sized ambient rectangle.
+      if @ls_ambient_sprite && !@ls_ambient_sprite.disposed?
+        ambient = @ls_ambient_sprite
+        ambient.x = 0 if ambient.x != 0
+        ambient.y = 0 if ambient.y != 0
+        ambient.zoom_x = Graphics.width if ambient.zoom_x != Graphics.width
+        ambient.zoom_y = Graphics.height if ambient.zoom_y != Graphics.height
+      end
       return if !active || !@map || !@ls_sprites
       my = (@map.display_y.to_f / Game_Map::Y_SUBPIXELS).round
       zy = TilemapRenderer::ZOOM_Y
