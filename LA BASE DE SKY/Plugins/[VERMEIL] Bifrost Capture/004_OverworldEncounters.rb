@@ -65,8 +65,11 @@ module BifrostCapture
     candidates.sample
   end
 
-  def self.existing_sprite(species)
-    candidates = ["Followers/#{species}", "Followers/#{species}_0"]
+  def self.existing_sprite(species, form = 0)
+    candidates = []
+    candidates << "Followers/#{species}_#{form}" if form > 0
+    candidates << "Followers/#{species}"
+    candidates << "Followers/#{species}_0"
     candidates.each do |name|
       return name if pbResolveBitmap("Graphics/Characters/#{name}")
     end
@@ -151,7 +154,7 @@ module BifrostCapture
     form = [local["ow_form"].to_i,0].max
     tile = choose_spawn_tile(cfg)
     return unless tile
-    sprite_name = existing_sprite(species)
+    sprite_name = existing_sprite(species,form)
     return unless sprite_name # Sin gráfico jamás generar un OW invisible.
     construct_ow_event(species,level,tile,sprite_name,form)
   end
