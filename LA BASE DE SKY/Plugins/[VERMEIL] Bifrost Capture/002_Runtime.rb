@@ -3,9 +3,13 @@
 module BifrostCapture
   def self.ball_choices
     items = []
-    $bag.each do |item, qty|
-      data = GameData::Item.try_get(item)
-      items << [item, qty] if qty > 0 && data && data.is_poke_ball?
+    $bag.pockets.each do |pocket|
+      pocket.each do |entry|
+        next if !entry
+        item, qty = entry[0], entry[1]
+        data = GameData::Item.try_get(item)
+        items << [item, qty] if qty > 0 && data && data.is_poke_ball?
+      end
     end
     items
   end
