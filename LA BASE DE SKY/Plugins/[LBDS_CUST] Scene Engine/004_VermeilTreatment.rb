@@ -434,7 +434,8 @@ class SceneEngine::Player
           previous = name.dup
           blink = show_cursor
         end
-        if Input.triggerex?(:RETURN) || Input.trigger?(Input::USE)
+        # USE incluye la tecla C: debe poder escribirse como carácter.
+        if Input.triggerex?(:RETURN)
           if name.strip.length >= min
             if vermeil_confirm_selection(vp, "¿Usar el nombre #{name.strip}?")
               pbSEPlay("GUI sel decision") rescue nil
@@ -492,6 +493,15 @@ class SceneEngine::Player
       bitmap.draw_text(ox + 222, oy + 42, 360, 44, "TU NOMBRE", 1)
       bitmap.font.size = 28
       bitmap.draw_text(ox + 290, oy + 223, 283, 47, name.to_s, 1)
+      # Guía fija dentro del campo; no se desplaza con el cursor de Essentials.
+      bitmap.fill_rect(ox + 297, oy + 278, 264, 2, Color.new(158, 101, 74))
+      bitmap.fill_rect(ox + 297, oy + 280, 264, 1, Color.new(235, 201, 145))
+      if name.to_s.empty?
+        bitmap.font.color = Color.new(143, 115, 100)
+        bitmap.font.size = 19
+        bitmap.draw_text(ox + 297, oy + 247, 260, 26, "Escribe aquí", 1)
+        bitmap.font.color = ink
+      end
       bitmap.font.size = 18
       bitmap.draw_text(ox + 286, oy + 311, 277, 24, "#{name.length} / #{max}", 1)
       return
@@ -520,6 +530,7 @@ class SceneEngine::Player
     bitmap.font.size = 29
     bitmap.draw_text(ox + 292, oy + 243, 276, 39,
                      name.to_s, 1)
+    bitmap.fill_rect(ox + 297, oy + 280, 264, 2, Color.new(158, 101, 74))
     bitmap.font.size = 18
     bitmap.draw_text(ox + 275, oy + 325, 305, 27,
                      "#{name.length} / #{max} caracteres", 1)
