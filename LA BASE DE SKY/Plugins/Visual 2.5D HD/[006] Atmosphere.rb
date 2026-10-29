@@ -424,6 +424,33 @@ class Scene_Map
     @hd25_atmosphere = nil
   end
 
+  # A connected map can own a different TilemapRenderer. Refreshing only
+  # Scene_Map#map_renderer leaves neighboring maps half 2D/half 2.5D until
+  # the scrolling grid recycles their sprites. Refresh ALL cached tilemaps
+  # once at the state boundary, before drawing this frame.
+  def hd25_refresh_connected_renderers!
+    return unless @spritesets
+    list = @spritesets.respond_to?(:each_value) ? @spritesets.values : @spritesets
+    seen = {}
+    list.each do |set|
+      next unless set
+      renderer = if set.respond_to?(:map_renderer)
+                   set.map_renderer
+                 elsif set.respond_to?(:tilemap)
+                   set.tilemap
+                 else
+                   set.instance_variable_get(:@tilemap) ||
+                     set.instance_variable_get(:@map_renderer)
+                 end
+      next unless renderer && renderer.respond_to?(:refresh)
+      next if renderer.respond_to?(:disposed?) && renderer.disposed?
+      id = renderer.object_id
+      next if seen[id]
+      seen[id] = true
+      renderer.refresh
+    end
+  end
+
   alias hd25_updateSpritesets updateSpritesets unless method_defined?(:hd25_updateSpritesets)
   def updateSpritesets(refresh = false)
     # AUX1 mode selection precedes the map update. Apply all dependent
@@ -434,6 +461,7 @@ class Scene_Map
     mode = Visual25D.enabled?
     changed = !@hd25_last_mode.nil? && @hd25_last_mode != mode
     @hd25_last_mode = mode
+    hd25_refresh_connected_renderers! if changed
     hd25_updateSpritesets(refresh)
     if changed && @spritesets && defined?(LightingStudioDayNight)
       sprites = @spritesets.respond_to?(:each_value) ? @spritesets.values : @spritesets
