@@ -59,7 +59,7 @@ module BifrostCapture
       b.fill_rect(0, 0, 3, 84, Color.new(148, 182, 239, 220))
       b.font.color = Color.new(239, 244, 250)
       b.font.size = 17
-      label = mode == :ball ? GameData::Item.get(item).name : item.name
+      label = mode == :ball ? (item ? GameData::Item.get(item).name : "Sin Poké Balls") : (item ? item.name : "Sin Pokémon")
       b.draw_text(12, 6, 270, 22, label + (mode == :ball ? "  x#{quantity}" : ""))
       b.font.size = 13
       if focus
@@ -225,7 +225,9 @@ module BifrostCapture
     party_pokemon = $player.party.find { |p| p && p.able? }
     mode = cfg["capture_enabled"] == "1" && !balls.empty? ? :ball : :battle
     if mode == :battle && (!party_pokemon || cfg["battle_enabled"] != "1")
-      notice(_INTL("No tienes nada que lanzar."))
+      @aim_running = false
+      @aim_opening = previous_guard
+      pbMessage(_INTL("No tienes nada que lanzar."))
       return false
     end
     overlay = AimOverlay.new
@@ -314,7 +316,7 @@ module BifrostCapture
         end
         overlay.update_hud(mode,mode == :ball ? current_ball : party_pokemon,
                            current_qty,focus,cfg,@aim_notice)
-        left_click = defined?(Input::MOUSELEFT) &&
+        left_click = cfg["aim_mouse"] == "1" && defined?(Input::MOUSELEFT) &&
                      Input.trigger?(Input::MOUSELEFT)
         next unless frame_count > 6 &&
                     (Input.trigger?(Input::USE) || left_click)
