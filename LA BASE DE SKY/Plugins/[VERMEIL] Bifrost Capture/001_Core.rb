@@ -23,7 +23,8 @@ module BifrostCapture
     "aim_keyboard"=>"1", "aim_speed"=>"5",
     "flee_steps"=>"5", "flee_speed"=>"4",
     "flee_disappear_distance"=>"9", "flee_stuck_frames"=>"90",
-    "alert_on_miss"=>"1", "allow_empty_throw"=>"0"
+    "alert_on_miss"=>"1", "allow_empty_throw"=>"0",
+    "capture_shakes"=>"3", "capture_shake_frames"=>"10"
   }.freeze
   ROAMERS = %w[RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES
                MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT
