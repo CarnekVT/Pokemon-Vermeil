@@ -1302,6 +1302,15 @@ module Visual25D
       left = tile.x
       start = project_x(left, scale)
       finish = project_x(left + TilemapRenderer::DISPLAY_TILE_WIDTH, scale)
+      if priority > 0 && side <= 0
+        # Raised roofs/trees are separate camera-facing sprites. Their
+        # rounded per-tile horizontal edges can leave a 1px background slit.
+        # Keep this single-pixel overlap in hd25_proj_side as well so the
+        # E/W cached scroll path produces EXACTLY the same geometry.
+        side = 1
+        start -= 1
+        finish += 1
+      end
       clear_wall_tile_tilt(tile)
       apply_tile_taper(tile, taper)
       zoom_y = height / TilemapRenderer::SOURCE_TILE_HEIGHT.to_f
