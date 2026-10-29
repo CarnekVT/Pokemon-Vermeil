@@ -84,6 +84,7 @@ module BifrostCapture
       self.test_notices << message
     end
     def impact(*); end
+    def capture_sequence(*); end
     def catch_chance(*); 1.0; end
   end
 end
