@@ -389,7 +389,9 @@ module Visual25D
       return if !defined?(Input::AUX1)
       return if !Input.trigger?(Input::AUX1)
       return if !player_can_toggle_hotkey?
-      cambiar_modo_suave
+      # Immediate atomic switch avoids drawing partially reprojected lighting
+      # while the blend is between 0 and 1 (the debug toggle is diagnostic).
+      self.enabled = !enabled
     end
   end
 end
