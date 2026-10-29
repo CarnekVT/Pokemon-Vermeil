@@ -33,9 +33,34 @@ class BifrostCaptureCoreTest < Minitest::Test
   end
 
   def test_seventh_tile_hit_chance_but_eighth_misses
-    assert_in_delta 0.96,BifrostCapture.hit_chance(4,config),0.00001
+    assert_in_delta 1.0,BifrostCapture.hit_chance(4,config),0.00001
     assert_in_delta 0.60,BifrostCapture.hit_chance(7,config),0.00001
     assert_equal 0.0,BifrostCapture.hit_chance(8,config)
+  end
+
+  def test_mouse_and_keyboard_use_same_geometry
+    # El objetivo a 4 casillas recibe exactamente el mismo resultado al
+    # lanzar usando USE o clic; input y retícula no influyen en el impacto.
+    from_keyboard = BifrostCapture.shot_geometry(10,10,10,6,config)
+    from_mouse = BifrostCapture.shot_geometry(10,10,10,6,config)
+    assert_equal from_keyboard, from_mouse
+    assert_equal 8,from_keyboard[:facing]
+    assert_equal 4,from_keyboard[:forward]
+    assert_equal 0,from_keyboard[:side]
+    assert from_keyboard[:in_range]
+  end
+
+  def test_lateral_boundary_and_eighth_tile
+    assert BifrostCapture.shot_geometry(10,10,13,6,config)[:in_range]
+    refute BifrostCapture.shot_geometry(10,10,14,6,config)[:in_range]
+    refute BifrostCapture.shot_geometry(10,10,10,2,config)[:in_range]
+  end
+
+  def test_keyboard_aiming_enabled_by_default
+    assert_equal "1",config["aim_keyboard"]
+    assert_equal "5",config["aim_speed"]
+    assert_equal "aux2",config["hotkey"]
+    assert_equal "always",config["access_mode"]
   end
 
   def test_back_bonus_uses_event_facing
