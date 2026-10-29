@@ -2,6 +2,8 @@ const PATH = "Plugins/[VERMEIL] Bifrost Capture/config.ini";
 const FIELDS = {
   profile:["Perfil",["bifrost","classic","adventure","safari","custom"]],
   enabled:["Sistema activo",["1","0"]],
+  access_mode:["Disponibilidad de lanzamiento",["event","always","nearby"]],
+  hotkey:["Tecla de apuntado",["aux2","aux1","none"]],
   capture_enabled:["Captura OW",["1","0"]],
   battle_enabled:["Iniciar combate OW",["1","0"]],
   restricted_species:["Solo legendarios Bifröst",["1","0"]],
@@ -22,7 +24,7 @@ const FIELDS = {
   impact_frames:["Fotogramas de impacto",0,12]
 };
 const DEFAULTS = {
- profile:"bifrost",enabled:"1",capture_enabled:"1",battle_enabled:"1",
+ profile:"bifrost",enabled:"1",access_mode:"event",hotkey:"aux2",capture_enabled:"1",battle_enabled:"1",
  restricted_species:"1",range:"7",width:"7",optimal_range:"4",
  alert_distance:"3",hit_near:"96",hit_far:"60",capture_floor:"10",
  back_multiplier:"175",critical_front:"3",critical_back:"35",
@@ -117,6 +119,7 @@ class Studio {
    '<aside class="panel"><h2>Simulación de alcance</h2><p>7 columnas · fila 8 en rojo (fuera de alcance con Bifröst).</p>'+
    '<div class="preview">'+cells+'</div><p class="notes">Verde: dentro de distancia óptima.<br>Azul: lanzamiento más difícil.<br>Rojo: fuera de alcance.<br><br>'+
    'Bifröst: solo legendarios indicados. Classic: sin captura fuera de combate. Adventure: cualquier especie etiquetada. Safari: captura sin iniciar combates.</p>'+
+   '<p class="notes"><b>Disponibilidad:</b> event = solo desde evento/objeto; always = abrir apuntado en todo mapa jugable, incluso sin Pokémon cercano; nearby = abrir solo si hay un OW elegible delante. Con la tecla Aux2 (R) o Aux1 (L). none desactiva el atajo sin bloquear pbBifrostAim.</p>'+
    '<p class="notes">El mapa y los eventos se configuran por etiquetas [OWCAP:ESPECIE:NIVEL]. Los Pokémon [OWDECOR] son decorativos.</p></aside></main>'+
    '<footer class="status">'+esc(this.dirty?"● Cambios sin guardar · ":"✓ ")+esc(this.status)+' · '+esc(PATH)+'</footer>';
  }
