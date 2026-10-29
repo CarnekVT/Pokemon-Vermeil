@@ -73,12 +73,12 @@ module BifrostCapture
     nil
   end
 
-  def self.construct_ow_event(species, level, tile, sprite_name)
+  def self.construct_ow_event(species, level, tile, sprite_name, form = 0)
     id = ($game_map.events.keys.max || 0) + 1
     # Ids never reuse a previous id while the map is loaded.
     data = RPG::Event.new(tile[0],tile[1])
     data.id = id
-    data.name = "[OWCAP:#{species}:#{level}]"
+    data.name = "[OWCAP:#{species}:#{level}:#{form}]"
     page = RPG::Event::Page.new
     page.graphic.character_name = sprite_name
     page.graphic.direction = 2
@@ -136,12 +136,24 @@ module BifrostCapture
     return unless wild && wild[0] && wild[1]
     species, level = wild[0].to_sym, wild[1].to_i
     return unless GameData::Species.exists?(species)
-    return unless spawn_species?(species,cfg)
+    local = options($game_map.map_id,species)
+    return unless spawn_species?(species,local)
+    probability = local["ow_spawn_probability"].to_i.clamp(0,100)
+    return if rand(100) >= probability
+    level_min = local["ow_min_level"].to_i
+    level_max = local["ow_max_level"].to_i
+    if level_min > 0 && level_max >= level_min
+      level = rand(level_min..level_max)
+    elsif level_min > 0
+      level = level_min
+    end
+    level = level.clamp(1,GameData::GrowthRate.max_level)
+    form = [local["ow_form"].to_i,0].max
     tile = choose_spawn_tile(cfg)
     return unless tile
     sprite_name = existing_sprite(species)
     return unless sprite_name # Sin gráfico jamás generar un OW invisible.
-    construct_ow_event(species,level,tile,sprite_name)
+    construct_ow_event(species,level,tile,sprite_name,form)
   end
 end
 
