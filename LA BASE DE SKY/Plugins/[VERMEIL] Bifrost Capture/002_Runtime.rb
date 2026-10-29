@@ -41,7 +41,8 @@ module BifrostCapture
   # objeto Game_Event que estuvo bajo la retícula durante el lanzamiento.
   def self.resolve_throw(event, mode, payload, config, behind_at_release = nil)
     if !event || !valid_target?(event)
-      notice(_INTL("El Pokémon ya no está en la trayectoria."))
+      $bag.remove(payload,1) if mode == :ball && config["consume_on_miss"] == "1"
+      notice(_INTL("¡El Pokémon escapó antes del impacto!"))
       return false
     end
     spec = event_spec(event)
@@ -74,24 +75,8 @@ module BifrostCapture
 
     contact_fx(event)
     if mode == :battle
-      # Mantener el Pokémon que se eligió, sin alterar permanentemente el orden
-      # del equipo ni generar otra copia de la criatura salvaje.
-      wild = pbGenerateWildPokemon(spec[0], spec[1])
-      wild.form = spec[2] if spec[2] > 0
-      party = $player.party
-      original = party.dup
-      i = party.index(payload)
-      if i && i > 0
-        party.delete_at(i)
-        party.unshift(payload)
-      end
-      begin
-        result = WildBattle.start(wild)
-        remove_event(event) if result
-      ensure
-        party.replace(original.select { |p| party.include?(p) } +
-                      party.reject { |p| original.include?(p) })
-      end
+      # Salir de la postura de lanzamiento ANTES de iniciar la batalla.
+      @pending_send = [event, payload]
       return true
     end
 
