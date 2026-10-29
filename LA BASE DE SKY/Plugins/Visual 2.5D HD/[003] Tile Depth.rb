@@ -53,6 +53,7 @@ class TilemapRenderer
     attr_accessor :hd25_grid_row
     # Prioridad pintada propia (geometria). Independiente de cell_band (solo Z).
     attr_accessor :hd25_geom_priority
+    attr_accessor :hd25_auto_priority
     # Copia estable de la prioridad pintada (pool extended recicla sprites).
     attr_accessor :hd25_painted_priority
     # true si este frame aplicamos angle/ox/oy de rampa (WallField tilt).
@@ -365,8 +366,13 @@ class TilemapRenderer
     tile.hd25_layer = layer
     # Casilla nueva: tirar geom vieja del sprite reciclado.
     tile.hd25_geom_priority = nil if tile.respond_to?(:hd25_geom_priority=)
+    tile.hd25_auto_priority = nil
     tile.hd25_painted_priority = nil if tile.respond_to?(:hd25_painted_priority=)
     Visual25D.bind_tile_walls(tile, map, x, y, tile_id)
+    if Visual25D.enabled? && !Visual25D.flat_cap?(tile)
+      tile.hd25_auto_priority = Visual25D.atlas_column_priority(
+        map, tile.hd25_cell_x, tile.hd25_cell_y, layer, tile_id)
+    end
     # Engine: coords luego Z. Evita project_tile_z duplicado en coords.
     Visual25D.skip_coords_z = true
     begin
@@ -458,8 +464,10 @@ module Visual25D
       end
       # Gate barato: sin geom_priority completa en el caso comun (suelo sano).
       pri = tile.hd25_geom_priority
+      auto_pri = tile.hd25_auto_priority
       painted = tile.hd25_painted_priority
-      if (pri.nil? || pri.to_i <= 0) &&
+      if (auto_pri.nil? || auto_pri <= 0) &&
+         (pri.nil? || pri.to_i <= 0) &&
          (painted.nil? || painted.to_i <= 0) &&
          tile.priority.to_i <= 0
         demote_stale_ground_z(tile)
@@ -477,10 +485,59 @@ module Visual25D
       return false
     end
 
+    # RPG Maker XP dibuja por separado los 32px de un árbol o un tejado.
+    # Si la base tiene prioridad 0 pero sus secciones superiores son tiles
+    # contiguos del mismo atlas con prioridad positiva, Sky veía la base como
+    # suelo y la copa como pared: de ahí el corte horizontal. Corregir la
+    # prioridad geométrica sin tocar datos, colisiones ni prioridad de juego.
+    # Solo en rebind de casillas nativas, nunca en cada píxel de scroll.
+    def atlas_column_priority(map, cx, cy, layer, tile_id)
+      return nil unless Config::AUTO_COLUMN_PRIORITY
+      return nil if !map || !map.data || !map.priorities
+      return nil if cx.nil? || cy.nil? || layer.nil?
+      return nil unless (0..2).cover?(layer.to_i)
+      return nil if cx < 0 || cy < 0 || cx >= map.width || cy >= map.height
+      id = tile_id.to_i
+      return nil if id < 384 || map.data[cx, cy, layer].to_i != id
+      original = (map.priorities[id] || 0).to_i
+      base_y = cy
+      base_id = id
+      count = 0
+      while base_y + 1 < map.height && count < Config::MAX_PRIORITY
+        next_id = map.data[cx, base_y + 1, layer].to_i
+        break if next_id < 384 || next_id != base_id + 8
+        base_y += 1
+        base_id = next_id
+        count += 1
+      end
+      # La base del grupo debe ser realmente suelo, no una columna pintada
+      # explícitamente con prioridad; en ese caso manda siempre el editor.
+      return nil unless (map.priorities[base_id] || 0).to_i == 0
+      # Exigir una pieza elevada estrictamente contigua encima de la base.
+      # Nunca inferir árboles simplemente porque un tile tenga prioridad 0.
+      elevated = false
+      row_y = base_y - 1
+      scan_id = base_id - 8
+      while row_y >= 0 && row_y >= base_y - Config::MAX_PRIORITY
+        actual_id = map.data[cx, row_y, layer].to_i
+        break if actual_id != scan_id || actual_id < 384
+        elevated ||= (map.priorities[actual_id] || 0).to_i > 0
+        row_y -= 1
+        scan_id -= 8
+      end
+      return nil unless elevated
+      corrected = base_y - cy + 1
+      return nil if corrected < 1 || corrected > Config::MAX_PRIORITY
+      return nil if original > corrected
+      return corrected
+    end
+
     # Gate barato (sin geom_priority completa).
     def tile_maybe_raised?(tile)
       return false if !tile || tile.shows_reflection || tile.bridge
       return false if flat_cap?(tile) && Visual25D.enabled?
+      pri = tile.hd25_auto_priority
+      return true if pri && pri > 0
       pri = tile.hd25_geom_priority
       return true if pri && pri.to_i > 0
       painted = tile.hd25_painted_priority
@@ -543,7 +600,7 @@ module Visual25D
         return h
       end
       return Config::MAX_PRIORITY if tile.hd25_interior_flat
-      pri = tile.hd25_geom_priority
+      pri = tile.hd25_auto_priority || tile.hd25_geom_priority
       pri = tile.hd25_painted_priority if pri.nil?
       pri = tile.priority if pri.nil?
       pri = pri.to_i
@@ -727,13 +784,14 @@ module Visual25D
       return false if tile.shows_reflection || tile.bridge || tile.hd25_tilting
       return false if tile.hd25_cell_x.nil? || tile.hd25_cell_y.nil? || tile.hd25_map_id.nil?
       return false if Config::COLUMN_LEAN > 0
-      pri = tile.hd25_geom_priority
+      pri = tile.hd25_auto_priority
+      pri = tile.hd25_geom_priority if pri.nil?
       return !pri.nil? && pri > 0
     end
 
     def project_tile_scroll_y_raised_fast(tile, row)
       perf_tick(:raised_fast)
-      pri = tile.hd25_geom_priority.to_i
+      pri = geom_priority(tile)
       cell_row = grid_row_for_map_cell_id(tile.hd25_map_id, tile.hd25_cell_y)
       cell_row = row if cell_row.nil?
       field = tile.hd25_walls
@@ -859,6 +917,7 @@ module Visual25D
       # columna frontal.
       return 0 if flat_cap?(tile) && Visual25D.enabled?
       priority = tile.hd25_geom_priority
+      automatic = tile.hd25_auto_priority
       painted = tile.hd25_painted_priority
       priority = painted if priority.nil?
       priority = tile.priority if priority.nil?
@@ -870,6 +929,7 @@ module Visual25D
       end
       tp = tile.priority.to_i
       priority = tp if tp > priority
+      priority = automatic if automatic && automatic > priority
       priority = Config::MAX_PRIORITY if priority > Config::MAX_PRIORITY
       return priority
     end
