@@ -163,7 +163,7 @@ def pbIntroVermeil
       speaker: "Mujer Misteriosa", speed: :slow
     )
     wait 12
-    text_inline "Este cuerpo tiene un nombre: Solen. ¿Quieres conservarlo?",
+    text_inline "¿Mantendrás el nombre Solen?",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
     wait 12
@@ -186,7 +186,7 @@ def pbIntroVermeil
 
     text_inline "El pacto está sellado, {1}. Mi hijo sigue reuniendo fuerzas. Demuéstrame que aún puedo confiar en la humanidad.",
                 speaker: "Gran Espíritu", speed: :slow, format_args: [player_name]
-    text_inline "Bueno, {1}, ha llegado el momento. Te toca continuar.\nCuídate. Las mejores aventuras rara vez salen como esperas.",
+    text_inline "Bueno, {1}, llegó la hora. ¡Cuídate y disfruta del viaje!",
                 speaker: "Mujer Misteriosa", speed: :slow, format_args: [player_name]
 
     # ══════════ FASE 9: LA FUSIÓN Y DESPERTAR ══════════
@@ -204,9 +204,10 @@ def pbIntroVermeil
     wait 5
     se "Exit sound effect - IntroWakeUp.wav"
     wait 20
-    show_centered_text "Despierta...", speed: :slow, color: Color.new(0,0,0)
+    show_centered_text "Despierta...", speed: :crawl, color: Color.new(0,0,0)
 
-    wait 70
+    # El texto centrado ya incorpora la pausa final del suspenso.
+    # Continuar apenas termine de escribirse, sin espera extra.
     hide_centered_text
 
     show "Graphics/Scenes/Intro/BGWakeUp", 0, 0, fade: 0
