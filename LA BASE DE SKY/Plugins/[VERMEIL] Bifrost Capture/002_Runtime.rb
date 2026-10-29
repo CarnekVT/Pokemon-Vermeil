@@ -1,136 +1,175 @@
 # frozen_string_literal: true
-# Inventario, resolucion de impacto, captura y encuentros; la presentacion se maneja en 005.
+# Bifrost Capture - inventory, real resolution, storage. No UI or event spawn.
 module BifrostCapture
+  @aim_open = false
+  @pending_battle = nil
+
   def self.ball_choices
-    items = []
+    out = []
+    return out unless $bag
     $bag.pockets.each do |pocket|
       pocket.each do |entry|
-        next if !entry
-        item, qty = entry[0], entry[1]
-        data = GameData::Item.try_get(item)
-        items << [item, qty] if qty > 0 && data && data.is_poke_ball?
+        next unless entry && entry[1].to_i > 0
+        data = GameData::Item.try_get(entry[0])
+        out << [entry[0],entry[1]] if data && data.is_poke_ball?
       end
     end
-    items
+    out
   end
 
-  def self.choose_ball
-    balls = ball_choices
-    if balls.empty?
-      pbMessage(_INTL("No tienes Poké Balls."))
-      return nil
-    end
-    commands = balls.map { |item,qty| _INTL("{1} x{2}", GameData::Item.get(item).name, qty) }
-    commands << _INTL("Cancelar")
-    idx = pbMessage(_INTL("Selecciona una Poké Ball."),commands,commands.length-1)
-    return nil if idx < 0 || idx >= balls.length
-    balls[idx][0]
+  def self.aim_allowed?
+    cfg = options
+    return false unless cfg["enabled"] == "1"
+    return false if cfg["capture_enabled"] != "1" && cfg["battle_enabled"] != "1"
+    return false unless $player && $game_player && $game_map
+    return false unless defined?($scene) && $scene.is_a?(Scene_Map)
+    return false if $game_temp.in_menu || $game_temp.in_battle ||
+                    $game_temp.message_window_showing ||
+                    $game_temp.player_transferring ||
+                    $game_temp.transition_processing ||
+                    $game_player.moving? ||
+                    $game_player.move_route_forcing
+    return false if pbMapInterpreterRunning?
+    true
   end
 
-  def self.choose_pokemon
-    usable = $player.party.each_with_index.select { |p,i| p && p.able? }
-    return nil if usable.empty?
-    commands = usable.map { |p,i| _INTL("{1} (Nv. {2})",p.name,p.level) }
-    commands << _INTL("Cancelar")
-    idx = pbMessage(_INTL("¿A quién enviarás?"),commands,commands.length-1)
-    return nil if idx < 0 || idx >= usable.length
-    usable[idx][0]
+  def self.catch_chance(species,ball,distance,back,critical,cfg)
+    rate = GameData::Species.get(species).catch_rate.to_f
+    bonus = {
+      :MASTERBALL=>1000.0, :ULTRABALL=>2.0, :GREATBALL=>1.5,
+      :NETBALL=>1.5, :DUSKBALL=>1.5, :QUICKBALL=>1.5,
+      :BEASTBALL=>0.1
+    }[ball] || 1.0
+    optimal = [cfg["optimal_range"].to_i,1].max
+    limit = [cfg["range"].to_i,optimal].max
+    dist_bonus = distance <= optimal ? (1.0+(optimal-distance)*0.15) :
+      (1.0-(distance-optimal)*0.5/[limit-optimal,1].max)
+    base = [rate/765.0, cfg["capture_floor"].to_f/100.0].max
+    back_mult = back ? cfg["back_multiplier"].to_f/100.0 : 1.0
+    crit_mult = critical ? cfg["critical_multiplier"].to_f/100.0 : 1.0
+    instant = cfg["instant_modifier"].to_f/100.0
+    (base*bonus*dist_bonus*back_mult*crit_mult*instant).clamp(0.0,1.0)
   end
 
-  # No resolver un disparo mediante coordenadas antiguas: conservar el
-  # objeto Game_Event que estuvo bajo la retícula durante el lanzamiento.
-  def self.resolve_throw(event, mode, payload, config, behind_at_release = nil)
-    if !event || !valid_target?(event)
-      $bag.remove(payload,1) if mode == :ball && config["consume_on_miss"] == "1"
-      notice(_INTL("¡El Pokémon escapó antes del impacto!"))
+  def self.attempts(event)
+    event.instance_variable_get(:@bifrost_attempts).to_i
+  end
+
+  def self.eligible_event?(event)
+    valid_target?(event) && !removed?(event)
+  end
+
+  def self.resolve_throw(event,mode,payload,cfg,back_at_release=nil)
+    if !event || !eligible_event?(event)
+      notice(_INTL("No hay un Pokémon salvaje capturable en la trayectoria."))
       return false
     end
     spec = event_spec(event)
-    cfg = options($game_map.map_id, spec[0], event.id)
-    px, py = $game_player.x, $game_player.y
-    geometry = shot_geometry(px, py, event.x, event.y, cfg)
-    blocked = cfg["line_of_sight"] == "1" &&
-              !line_clear?(px, py, event.x, event.y)
-    chance = geometry[:in_range] && !blocked ?
-             hit_chance(geometry[:forward], cfg) : 0.0
-    hit = geometry[:in_range] && !blocked && rand < chance
-    if mode == :ball && (hit || cfg["consume_on_miss"] == "1")
-      if !$bag.remove(payload, 1)
-        notice(_INTL("Ya no quedan Poké Balls de ese tipo."))
-        return false
-      end
-    end
-    if !hit
-      message = if !geometry[:in_range]
-                  _INTL("¡El Pokémon está fuera de alcance!")
-                elsif blocked
-                  _INTL("¡Hay un obstáculo en la trayectoria!")
-                else
-                  _INTL("¡La Poké Ball se ha desviado!")
-                end
-      notice(message)
-      react(event, cfg, :miss) if cfg["alert_on_miss"] != "0"
+    local = options($game_map.map_id,spec[0],event.id)
+    geo = geometry($game_player.x,$game_player.y,event.x,event.y,local)
+    blocked = local["line_of_sight"] == "1" &&
+              !line_clear?($game_player.x,$game_player.y,event.x,event.y)
+    if !geo[:in_range] || blocked
+      notice(blocked ? _INTL("Hay un obstáculo entre ambos.") :
+             _INTL("El Pokémon está fuera del alcance."))
       return false
     end
-
-    contact_fx(event)
     if mode == :battle
-      # Salir de la postura de lanzamiento ANTES de iniciar la batalla.
-      @pending_send = [event, payload]
+      @pending_battle = [event,payload]
       return true
     end
-
-    from_behind = behind_at_release.nil? ?
-                  behind?(px, py, event) : behind_at_release
-    critical_rate = from_behind ? cfg["critical_back"] : cfg["critical_front"]
-    critical = rand < critical_rate.to_f / 100.0
-    impact(cfg["impact_frames"].to_i) if from_behind
-    probability = catch_chance(spec[0], payload, geometry[:forward],
-                               from_behind, critical, cfg)
+    limit = local["attempt_limit"].to_i
+    if limit > 0 && attempts(event) >= limit
+      notice(_INTL("Este Pokémon ya no acepta más lanzamientos directos."))
+      return false
+    end
+    unless $bag.quantity(payload).to_i > 0
+      notice(_INTL("No quedan Poké Balls."))
+      return false
+    end
+    hit = rand < hit_chance(geo[:front],local)
+    if !hit
+      $bag.remove(payload,1) if local["consume_on_miss"] == "1"
+      notice(_INTL("¡El lanzamiento se desvió!"))
+      react(event,local,:miss) if local["alert_on_miss"] == "1"
+      return false
+    end
+    return false unless $bag.remove(payload,1)
+    event.instance_variable_set(:@bifrost_attempts,attempts(event)+1)
+    contact_fx(event) if respond_to?(:contact_fx)
+    behind = back_at_release.nil? ?
+      behind?($game_player.x,$game_player.y,event) : back_at_release
+    crit_rate = behind ? local["critical_back"] : local["critical_front"]
+    critical = rand < crit_rate.to_f/100.0
+    probability = catch_chance(spec[0],payload,geo[:front],behind,critical,local)
     caught = rand < probability
+    pkmn = nil
     if caught
-      pkmn = pbGenerateWildPokemon(spec[0], spec[1])
+      pkmn = pbGenerateWildPokemon(spec[0],spec[1])
       pkmn.form = spec[2] if spec[2] > 0
       pkmn.poke_ball = payload if pkmn.respond_to?(:poke_ball=)
       caught = !!pbAddPokemon(pkmn)
     end
-    capture_sequence(event, payload, caught, critical, cfg)
+    animate_catch(event,payload,caught,critical,local) if respond_to?(:animate_catch)
     if caught
-      notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
+      notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Pokémon capturado!"))
       remove_event(event)
       return true
     end
-    notice(_INTL("¡El Pokémon se ha liberado!"))
-    react(event,cfg,:breakout)
+    notice(_INTL("¡El Pokémon se liberó!"))
+    react(event,local,:breakout)
     false
   end
 
-  # Compatibilidad con los eventos de scripts existentes y los tests antiguos.
-  def self.throw_at(tx, ty, _forward, _side, mode, payload, cfg)
-    event = $game_map.events.values.find do |e|
-      e.x == tx && e.y == ty && valid_target?(e)
+  def self.dispatch_battle
+    request = @pending_battle
+    @pending_battle = nil
+    return false unless request
+    event,chosen = request
+    return false unless eligible_event?(event)
+    spec = event_spec(event)
+    wild = pbGenerateWildPokemon(spec[0],spec[1])
+    wild.form = spec[2] if spec[2] > 0
+    party = $player.party
+    original = party.dup
+    index = party.index(chosen)
+    if index && index > 0
+      party.delete_at(index)
+      party.unshift(chosen)
     end
-    resolve_throw(event, mode, payload, cfg)
+    begin
+      outcome = WildBattle.start(wild)
+      remove_event(event) if outcome
+    ensure
+      party.replace(original.select { |p| party.include?(p) } +
+                    party.reject { |p| original.include?(p) })
+    end
+    true
   end
 
-  # La detección real y el movimiento continuo se gestionan en 006_Behavior.
-  # Este hook solo enlaza los pasos con el mismo sistema de estados.
-  def self.on_step
-    update_behavior(true) if respond_to?(:update_behavior)
+  def self.throw_at(tx,ty,_forward,_side,mode,item,cfg)
+    event = $game_map.events.values.find { |e|
+      e.x==tx && e.y==ty && eligible_event?(e)
+    }
+    resolve_throw(event,mode,item,cfg)
+  end
+
+  def self.set_rule(key,value)
+    return false unless DEFAULTS.key?(key) && $PokemonGlobal
+    $PokemonGlobal.bifrost_overrides ||= {}
+    $PokemonGlobal.bifrost_overrides[key] = value.to_s
+    true
+  end
+
+  def self.reset_rules
+    $PokemonGlobal.bifrost_overrides = {} if $PokemonGlobal
   end
 end
 
-# Llamar pbBifrostAim desde un evento, un objeto o un control personalizado.
 def pbBifrostAim
   BifrostCapture.aim
 end
 
-EventHandlers.add(:on_player_step_taken,:bifrost_capture_alert,
-  proc { BifrostCapture.on_step }
-)
-
-# No modifica Scene_Map#update_input ni el menu Ready: usa el handler
-# oficial de fotogramas de Essentials y solo actua con access_mode adecuado.
-EventHandlers.add(:on_frame_update, :bifrost_capture_access,
-  proc { BifrostCapture.update_access }
+EventHandlers.add(:on_frame_update,:bifrost_aim_button,
+  proc { BifrostCapture.update_input }
 )
