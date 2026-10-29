@@ -325,6 +325,8 @@ class TilemapRenderer
     elsif @screen_moved_vertically
       if Visual25D.tile_can_yflat?(tile)
         Visual25D.project_tile_scroll_y_flat(tile, y)
+      elsif Visual25D.tile_can_raised_fast?(tile)
+        Visual25D.project_tile_scroll_y_raised_fast(tile, y)
       else
         Visual25D.project_tile(tile, y)
       end
@@ -713,6 +715,49 @@ module Visual25D
       tile.hd25_proj_scale = scale
       tile.hd25_proj_y = top
       tile.hd25_proj_zy = height / sh
+      tile.hd25_proj_side = 0
+      tile.hd25_proj_wpx = wpx
+    end
+
+    # Camino corto para árboles, tejados y paredes con prioridad en campos
+    # sin Cliff. La geometría es EXACTAMENTE la de project_tile, pero evita
+    # pruebas de agua, capas, WallField y obtención de celdas cada píxel N/S.
+    def tile_can_raised_fast?(tile)
+      return false if tile.hd25_walls || tile.hd25_shelf_flat || tile.hd25_interior_flat
+      return false if tile.shows_reflection || tile.bridge || tile.hd25_tilting
+      return false if tile.hd25_cell_x.nil? || tile.hd25_cell_y.nil? || tile.hd25_map_id.nil?
+      return false if Config::COLUMN_LEAN > 0
+      pri = tile.hd25_geom_priority
+      return !pri.nil? && pri > 0
+    end
+
+    def project_tile_scroll_y_raised_fast(tile, row)
+      perf_tick(:raised_fast)
+      pri = tile.hd25_geom_priority.to_i
+      cell_row = grid_row_for_map_cell_id(tile.hd25_map_id, tile.hd25_cell_y)
+      cell_row = row if cell_row.nil?
+      geom = column_stack_geom(nil, tile.hd25_cell_x, tile.hd25_cell_y,
+                               cell_row, pri, tile.hd25_map_id)
+      scale = geom[2]
+      edges = geom[4]
+      top = edges[pri]
+      bottom = edges[pri - 1] + (pri >= 2 ? COLUMN_BAND_OVERLAP : 0)
+      height = [bottom - top, 1].max
+      left = tile.x
+      start = project_x(left, scale)
+      finish = project_x(left + TilemapRenderer::DISPLAY_TILE_WIDTH, scale)
+      apply_tile_taper(tile, 1.0)
+      tile.x = start
+      tile.y = top
+      wpx = finish - start
+      zoom_y = height / TilemapRenderer::SOURCE_TILE_HEIGHT.to_f
+      apply_tile_zoom(tile, wpx / TilemapRenderer::SOURCE_TILE_WIDTH.to_f, zoom_y)
+      tile.hd25_grid_row = cell_row
+      tile.hd25_proj_stamp = @projection_stamp || 0
+      tile.hd25_proj_row = cell_row
+      tile.hd25_proj_scale = scale
+      tile.hd25_proj_y = top
+      tile.hd25_proj_zy = zoom_y
       tile.hd25_proj_side = 0
       tile.hd25_proj_wpx = wpx
     end
