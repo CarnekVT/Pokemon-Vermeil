@@ -91,7 +91,50 @@ export class ScenePreview{
 
     if(s.black>0)push(9000,()=>{g.fillStyle=`rgba(0,0,0,${clamp(s.black/255,0,1)})`;g.fillRect(0,0,this.w,this.h)});
     if(s.white>0)push(9001,()=>{g.fillStyle=`rgba(255,255,255,${clamp(s.white/255,0,1)})`;g.fillRect(0,0,this.w,this.h)});
-    if(s.treatment){push(9012,()=>{const opt=s.treatment.option,t=s.frame,accent=opt==="femenino"?"#dd4e9f":opt==="masculino"?"#896db0":"#5daaa8";g.fillStyle="#eee9e9";g.fillRect(0,0,this.w,this.h);g.fillStyle="#262e40";g.fillRect(24,18,this.w-48,this.h-36);g.fillStyle="#f6f1e8";g.fillRect(30,24,this.w-60,this.h-48);g.fillStyle="#8b4d75";g.fillRect(41,30,this.w-82,68);g.fillStyle="#fff7ed";g.fillRect(46,35,this.w-92,58);g.fillStyle="#f6f1f0";g.fillRect(46,109,this.w-92,319);g.fillStyle="#ebe4e7";g.fillRect(138,131,364,277);g.fillStyle="#f7f4f0";g.fillRect(142,135,356,269);this.gameFont(35);g.fillStyle="#252a3b";g.textAlign="center";g.fillText(opt.toUpperCase(),this.w/2,43);g.fillStyle=accent;g.font="bold 50px Arial";g.fillText("◀",84,this.h/2+15);g.fillText("▶",556,this.h/2+15);for(let i=0;i<16;i++){const a=i*Math.PI/8+t*.012,x=320+Math.cos(a)*173,y=267+Math.sin(a)*126;g.globalAlpha=.3+.25*Math.sin(t*.045+i);g.fillRect(x,y,i%4===0?5:3,i%4===0?5:3)}g.globalAlpha=1;for(let i=0;i<3;i++){g.globalAlpha=i===(["femenino","neutro","masculino"].indexOf(opt))?1:.36;g.fillRect(293+i*22,416,i===(["femenino","neutro","masculino"].indexOf(opt))?12:7,5)}g.globalAlpha=1;g.textAlign="left";if(s.treatment.image){const im=s.treatment.image,scale=Math.min(304/im.width,320/im.height,1);g.drawImage(im,(this.w-im.width*scale)/2,105+Math.sin(t/18)*3,im.width*scale,im.height*scale)}else{this.gameFont(20);g.fillStyle="#252a3b";g.textAlign="center";g.fillText("PNG: solen_"+opt+".png",this.w/2,270)}g.font="20px Arial";g.textAlign="center";g.fillStyle="#252a3b";g.fillText("← / → Cambiar       Z / Enter Confirmar",this.w/2,this.h-24);g.textAlign="left"})}
+    if(s.treatment){push(9012,()=>{
+      const u=s.treatment,opt=u.option,t=s.frame;
+      const accent=opt==="femenino"?"#dd4e9f":opt==="masculino"?"#896db0":"#5daaa8";
+      g.save();g.globalAlpha=clamp(u.alpha??1,0,1);
+      g.fillStyle="#eee9e9";g.fillRect(0,0,this.w,this.h);
+      g.fillStyle="#262e40";g.fillRect(24,18,this.w-48,this.h-36);
+      g.fillStyle="#f6f1e8";g.fillRect(30,24,this.w-60,this.h-48);
+      g.fillStyle="#8b4d75";g.fillRect(41,30,this.w-82,68);
+      g.fillStyle="#fff7ed";g.fillRect(46,35,this.w-92,58);
+      g.fillStyle="#f6f1f0";g.fillRect(46,109,this.w-92,319);
+      g.fillStyle="#ebe4e7";g.fillRect(138,131,364,277);
+      g.fillStyle="#f7f4f0";g.fillRect(142,135,356,269);
+      this.gameFont(35);g.fillStyle="#252a3b";g.textAlign="center";
+      g.fillText(opt.toUpperCase(),this.w/2,43);
+      const arrow=(img,x,sign)=>{
+        if(img){const sc=Math.min(36/Math.max(img.width,img.height),2);g.drawImage(img,x-img.width*sc/2,264-img.height*sc/2,img.width*sc,img.height*sc)}
+        else{g.fillStyle=accent;g.beginPath();g.moveTo(x+sign*16,243);g.lineTo(x-sign*16,264);g.lineTo(x+sign*16,285);g.closePath();g.fill()}
+      };
+      arrow(u.left,84,-1);arrow(u.right,556,1);
+      g.fillStyle=accent;
+      for(let i=0;i<16;i++){const a=i*Math.PI/8+t*.012,x=320+Math.cos(a)*173,y=267+Math.sin(a)*126;
+        g.globalAlpha=(u.alpha??1)*(.3+.25*Math.sin(t*.045+i));
+        g.fillRect(x,y,i%4===0?5:3,i%4===0?5:3)}
+      g.globalAlpha=(u.alpha??1);
+      const opts=["femenino","neutro","masculino"];
+      for(let i=0;i<3;i++){g.globalAlpha=(u.alpha??1)*(i===opts.indexOf(opt)?1:.36);
+        g.fillRect(293+i*22,416,i===opts.indexOf(opt)?12:7,5)}
+      g.globalAlpha=(u.alpha??1);
+      const portrait=(im,alpha,offset)=>{
+        if(!im)return;const scale=Math.min(304/im.width,320/im.height,1);
+        g.globalAlpha=(u.alpha??1)*alpha;
+        g.drawImage(im,(this.w-im.width*scale)/2+offset,105+Math.sin(t/20)*2,im.width*scale,im.height*scale);
+      };
+      const tr=u.transition,blend=tr?clamp((t-tr.begin)/12,0,1):1;
+      if(tr&&blend<1)portrait(tr.image,1-blend,-tr.direction*18*blend);
+      portrait(u.image,blend,tr?tr.direction*18*(1-blend):0);
+      g.globalAlpha=(u.alpha??1);
+      if(!u.image){this.gameFont(19);g.fillStyle="#252a3b";g.textAlign="center";g.fillText("PNG: solen_"+opt+".png",this.w/2,270)}
+      g.font="20px Arial";g.textAlign="center";g.fillStyle="#252a3b";
+      g.fillText("← → Cambiar        C / Enter Confirmar",this.w/2,this.h-24);
+      g.restore();
+      if((u.alpha??1)<1){g.fillStyle="rgba(0,0,0,"+(1-(u.alpha??1))+")";g.fillRect(0,0,this.w,this.h)}
+    })}
+
     if(s.centered)push(9010,()=>{this.gameFont();g.textAlign="center";g.textBaseline="middle";const text=String(s.centered.text||"").slice(0,Math.floor(s.centered.revealed??0));g.fillStyle=s.centered.color||"#000";g.fillText(text,this.w/2,this.h/2-16);g.textAlign="left";g.textBaseline="top"});
 
     queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();
@@ -133,7 +176,7 @@ export class ScenePreview{
   }
   stopAudio(){for(const a of [this.audio.bgm,this.audio.bgs])try{a?.pause()}catch{};this.audio.bgm=this.audio.bgs=null;for(const a of this.audio.ses)try{a.pause()}catch{};this.audio.ses.clear();}
 
-  async changeTreatment(delta){const t=this.state.treatment;if(!t)return;const options=["femenino","neutro","masculino"];const i=options.indexOf(t.option);t.option=options[(i+delta+options.length)%options.length];t.image=await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+t.option);}
+  async changeTreatment(delta){const t=this.state.treatment;if(!t)return;const options=["femenino","neutro","masculino"];const i=options.indexOf(t.option);t.transition={image:t.image,begin:this.state.frame,direction:delta};t.option=options[(i+delta+options.length)%options.length];t.image=await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+t.option);}
   continue(){if(this.state.treatment?.option)this.state.vars.set("treatment",this.state.treatment.option);this.inputSerial++;}
   async waitInput(token,serial){while(token===this.playToken&&this.inputSerial===serial)await sleep(1000/60);return this.inputSerial;}
   async showTextboxFade(skip,token,frames=10){if(this.state.textbox>=1)return;if(skip){this.state.textbox=1;return}const from=this.state.textbox;await this.frames(frames,p=>this.state.textbox=from+(1-from)*p,false,token);this.state.textbox=1;}
@@ -146,11 +189,11 @@ export class ScenePreview{
     if(skip){target.page=pages.length-1;target.pageLines=pages[target.page];target.revealed=target.pageLines.join("\n").length;return;}
     const cpf=e.speeds?.[obj.speed||"normal"]??1.5;
     for(let page=0;page<pages.length;page++){
-      target.page=page;target.pageLines=pages[page];target.revealed=0;const pageText=target.pageLines.join("\n"),len=pageText.length,ellipsis=[];
-      for(let i=0;i<len;){if(pageText.slice(i,i+3)==="..."){ellipsis.push(i,i+1,i+2);i+=3}else i++;}
-      let serial=this.inputSerial;
-      while(target.revealed<len&&token===this.playToken){
-        let eff=cpf;if(ellipsis.includes(Math.floor(target.revealed)))eff*=.1;target.revealed=Math.min(len,target.revealed+eff);await this.frames(1,null,false,token);
+      target.page=page;target.pageLines=pages[page];target.revealed=0;const pageText=target.pageLines.join("\n"),len=pageText.length,ellipsis=[],ellipsisEnds=[];
+      for(let i=0;i<len;){if(pageText.slice(i,i+3)==="..."){ellipsis.push(i,i+1,i+2);ellipsisEnds.push(i+3);i+=3}else i++;}
+      let serial=this.inputSerial,hold=0;
+      while((target.revealed<len||hold>0)&&token===this.playToken){
+        if(hold>0){hold--;}else if(target.revealed<len){const prev=target.revealed;let eff=cpf;if(ellipsis.includes(Math.floor(target.revealed)))eff*=.1;target.revealed=Math.min(len,target.revealed+eff);if(ellipsisEnds.some(p=>prev<p&&target.revealed>=p))hold=42;}await this.frames(1,null,false,token);
         if(this.inputSerial!==serial){target.revealed=len;serial=this.inputSerial;}
       }
       if(token!==this.playToken)return;target.revealed=len;this.state.indicator=true;this.onWaiting?.(true);
@@ -161,7 +204,7 @@ export class ScenePreview{
 
   async centeredText(obj,skip,token){
     const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),cpf=e.speeds?.[obj.speed||"normal"]??1.5,color=`rgb(${(obj.color||[0,0,0]).slice(0,3).join(",")})`;this.state.centered={text,revealed:skip?text.length:0,color};if(skip)return;
-    let serial=this.inputSerial;while(this.state.centered.revealed<text.length&&token===this.playToken){this.state.centered.revealed=Math.min(text.length,this.state.centered.revealed+cpf);await this.frames(1,null,false,token);if(this.inputSerial!==serial){this.state.centered.revealed=text.length;serial=this.inputSerial;}}
+    let serial=this.inputSerial;while(this.state.centered.revealed<text.length&&token===this.playToken){const slowDots=text.slice(Math.floor(this.state.centered.revealed),Math.floor(this.state.centered.revealed)+3)==="..."||text.slice(Math.floor(this.state.centered.revealed)-2,Math.floor(this.state.centered.revealed)+1)==="...";this.state.centered.revealed=Math.min(text.length,this.state.centered.revealed+cpf*(slowDots?.4:1));await this.frames(1,null,false,token);if(this.inputSerial!==serial){this.state.centered.revealed=text.length;serial=this.inputSerial;}}
   }
 
   resolveSpriteTargets(expr){
@@ -225,7 +268,25 @@ export class ScenePreview{
       case"hide_centered_text":s.centered=null;break;
       case"show_textbox":await this.showTextboxFade(skip,token,c.duration);break;
       case"hide_textbox":await this.hideTextboxFade(skip,token,c.duration);break;
-      case"treatment_input":{const opts=["femenino","neutro","masculino"];let index=opts.indexOf(c.default||"neutro");if(index<0)index=1;let opt=opts[index];s.treatment={option:opt,image:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+opt)};if(!skip){this.onWaiting?.(true);const start=this.inputSerial;while(this.inputSerial===start&&token===this.playToken)await sleep(16);this.onWaiting?.(false);}if(c.store)s.vars.set(c.store,s.treatment?.option||opt);s.treatment=null;break;}
+      case"treatment_input":{
+        const opts=["femenino","neutro","masculino"];
+        let index=opts.indexOf(c.default||"neutro");if(index<0)index=1;
+        const opt=opts[index];
+        s.treatment={option:opt,image:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+opt),alpha:skip?1:0,
+          left:await this.image("Graphics/UI/left_arrow"),right:await this.image("Graphics/UI/right_arrow"),transition:null};
+        if(!skip){
+          await this.frames(36,p=>s.treatment.alpha=1-Math.pow(1-p,3),false,token);
+          this.onWaiting?.(true);
+          const start=this.inputSerial;
+          while(this.inputSerial===start&&token===this.playToken)await sleep(16);
+          this.onWaiting?.(false);
+          if(token!==this.playToken)return;
+          await this.frames(16,null,false,token);
+          await this.frames(32,p=>s.treatment.alpha=1-p*p*(3-2*p),false,token);
+        }
+        if(c.store)s.vars.set(c.store,s.treatment?.option||opt);
+        s.treatment=null;break;
+      }
       case"name_input":if(c.store)s.vars.set(c.store,c.default||"Solen");break;
       case"show_floating":{
         const im=await this.image(c.filename);if(im){const it={img:im,x:this.num(c.x,0),y:this.num(c.y,0),baseY:this.num(c.y,0),amplitude:this.num(c.amplitude,8),speed:this.num(c.speed,.05),zoom:this.num(c.zoom,1),opacity:c.fade>0?0:this.num(c.opacity,255),z:this.num(c.z,260),startFrame:s.frame,visible:true,varName:c.store||""};s.floating.push(it);if(c.store)s.refs.set(c.store,it);if(c.fade>0)await this.frames(c.fade,p=>it.opacity=this.num(c.opacity,255)*p,skip,token);it.opacity=this.num(c.opacity,255);}break;}
