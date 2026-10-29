@@ -122,7 +122,8 @@ export class ScenePreview{
   }
   stopAudio(){for(const a of [this.audio.bgm,this.audio.bgs])try{a?.pause()}catch{};this.audio.bgm=this.audio.bgs=null;for(const a of this.audio.ses)try{a.pause()}catch{};this.audio.ses.clear();}
 
-  continue(){this.inputSerial++;}
+  async changeTreatment(delta){const t=this.state.treatment;if(!t)return;const options=["femenino","neutro","masculino"];const i=options.indexOf(t.option);t.option=options[(i+delta+options.length)%options.length];t.image=await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+t.option);}
+  continue(){if(this.state.treatment?.option)this.state.vars.set("treatment",this.state.treatment.option);this.inputSerial++;}
   async waitInput(token,serial){while(token===this.playToken&&this.inputSerial===serial)await sleep(1000/60);return this.inputSerial;}
   async showTextboxFade(skip,token,frames=10){if(this.state.textbox>=1)return;if(skip){this.state.textbox=1;return}const from=this.state.textbox;await this.frames(frames,p=>this.state.textbox=from+(1-from)*p,false,token);this.state.textbox=1;}
   async hideTextboxFade(skip,token,frames=10){if(this.state.textbox<=0)return;if(skip){this.state.textbox=0;this.state.indicator=false;return}const from=this.state.textbox;this.state.indicator=false;await this.frames(frames,p=>this.state.textbox=from*(1-p),false,token);this.state.textbox=0;}
@@ -213,7 +214,7 @@ export class ScenePreview{
       case"hide_centered_text":s.centered=null;break;
       case"show_textbox":await this.showTextboxFade(skip,token,c.duration);break;
       case"hide_textbox":await this.hideTextboxFade(skip,token,c.duration);break;
-      case"treatment_input":{const opts=["femenino","neutro","masculino"];let index=opts.indexOf(c.default||"neutro");if(index<0)index=1;let opt=opts[index];s.treatment={option:opt,image:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+opt)};if(!skip){const old=this.onWaiting;this.onWaiting?.(true);const start=this.inputSerial;while(this.inputSerial===start&&token===this.playToken)await sleep(16);this.onWaiting?.(false);}if(c.store)s.vars.set(c.store,opt);s.treatment=null;break;}
+      case"treatment_input":{const opts=["femenino","neutro","masculino"];let index=opts.indexOf(c.default||"neutro");if(index<0)index=1;let opt=opts[index];s.treatment={option:opt,image:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+opt)};if(!skip){this.onWaiting?.(true);const start=this.inputSerial;while(this.inputSerial===start&&token===this.playToken)await sleep(16);this.onWaiting?.(false);}if(c.store)s.vars.set(c.store,opt);s.treatment=null;break;}
       case"name_input":if(c.store)s.vars.set(c.store,c.default||"Solen");break;
       case"show_floating":{
         const im=await this.image(c.filename);if(im){const it={img:im,x:this.num(c.x,0),y:this.num(c.y,0),baseY:this.num(c.y,0),amplitude:this.num(c.amplitude,8),speed:this.num(c.speed,.05),zoom:this.num(c.zoom,1),opacity:c.fade>0?0:this.num(c.opacity,255),z:this.num(c.z,260),startFrame:s.frame,visible:true,varName:c.store||""};s.floating.push(it);if(c.store)s.refs.set(c.store,it);if(c.fade>0)await this.frames(c.fade,p=>it.opacity=this.num(c.opacity,255)*p,skip,token);it.opacity=this.num(c.opacity,255);}break;}
