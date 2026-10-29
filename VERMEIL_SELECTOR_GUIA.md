@@ -166,3 +166,54 @@ archivo fuente exacto del renderer.
 Los JS del Studio se han comprobado por sintaxis y la importación
 de la intro reconoce las nueve fases y el selector; aún falta
 la prueba visual ingame y reexportar la escena local desde el Studio.
+
+
+## Selección de nombre y UI unificada (29/10/2026)
+
+### Intro
+El guion usa `custom_name_input(default: "Solen", min: 1, max: 12)`
+después del tratamiento y antes del pacto. Los cinco diálogos revisados
+priorizan castellano natural de alcance general. La despedida tiene un
+único salto de párrafo antes de «Cuídate». `Despierta...` usa `:slow`
+con una pausa final breve para no desincronizar el despertar.
+
+### Nueva UI de nombre: 640 × 480
+Se implementa en `[LBDS_CUST] Scene Engine/004_VermeilTreatment.rb`.
+El marco, el panel del nombre y la barra inferior se dibujan por código,
+con paleta crema/cobre/ciruela. A la izquierda aparece el retrato según
+el tratamiento seleccionado. Se usa `Window_TextEntry_Keyboard` de
+Essentials para manejar el texto (acentos, teclado, retroceso) con su
+ventana de dibujo oculta. Así se evita la pantalla de nombre vanilla,
+sin crear un editor de texto inseguro ni romper la entrada habitual.
+Enter confirma si el nombre satisface el mínimo; no hay límite de
+tiempo para escribir. Se conserva la actualización de `$player.name`.
+Si una distribución no incluye `Window_TextEntry_Keyboard`, se utiliza
+la entrada de nombre original como último recurso.
+
+### Selector retocado
+- Flechas nativas `Graphics/UI/left_arrow.png` y `right_arrow.png`.
+- Estos PNG tienen **40 × 224**, con siete fotogramas de **40 × 32**;
+  se muestra solo el primero mediante `src_rect`.
+- Panel central, cabecera y pie rediseñados en crema/cobre para
+  mantener continuidad con la UI de nombre.
+- Retratos centrados por contorno opaco y ajustes artísticos de pose:
+  femenino 0, neutro -24, masculino -14 píxeles.
+- Las transiciones existentes de entrada, cruce y salida se conservan
+  en las duraciones cortas ya ajustadas.
+
+### Scene Director Studio
+`custom_name_input` está reconocido por el modelo, el importador,
+el inspector, la compilación Ruby y la previsualización 640 × 480.
+La preview deja escribir caracteres, borrar con retroceso y
+confirmar con Enter. Reimporta `010_Intro.rb` y vuelve a guardar
+`Data/SceneDirector/scenes.json` para actualizar escenas antiguas.
+
+### Pruebas pendientes en mkxp-z
+- Verificar el teclado real, incluidas teclas de borrar y acentos,
+  en `Window_TextEntry_Keyboard` con la ventana invisible.
+- Revisar recorte y posición del retrato de las tres variantes.
+- Verificar escritura/persistencia del nombre y restauración de
+  `Input.text_input` tras confirmar.
+- Comprobar sincronía de `Despierta...` con su secuencia de despertar.
+
+No se han ejecutado aún estas pruebas de integración dentro del juego.
