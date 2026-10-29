@@ -13,6 +13,53 @@ Compatible con la estructura de Pokémon Essentials 21.1 del repositorio. Integr
 - Los encuentros originales en hierba alta permanecen intactos.
 - Las opciones para otras experiencias: perfiles **Classic**, **Adventure**, **Safari** o **Custom**, además de ajustes globales, por mapa, especie y evento.
 
+## Lanzamiento sobre el mapa · nueva experiencia (video-referencia)
+
+La versión actual dejó de utilizar una cuadrícula dibujada en toda la pantalla.
+Su lanzamiento utiliza una retícula contextual que sigue la posición en pantalla
+de los eventos Pokémon y se apoya en `screen_x/screen_y`, de modo que no
+reescribe la cámara de Visual 2.5D HD. La referencia de los dos videos es:
+mantener el mapa visible, elegir una Poké Ball desde un HUD discreto, apuntar
+al Pokémon real y ver un proyectil que viaja hasta él, con efecto local al
+impactar. Se usa el icono de la Ball existente en `Graphics/Items`.
+
+**Controles previstos** al abrir el sistema:
+- `R` (o atajo elegido) entra/sale del modo de lanzamiento, si se habilitó
+  `access_mode=always` o `nearby`. `Esc` cancela.
+- Ratón: mover el cursor cerca de un OW válido coloca la retícula; clic
+  izquierdo lanza. Clic sin objetivo genera fallo.
+- Teclado: `izquierda/derecha` recorre objetivos próximos, `C/Enter`
+  lanza y `arriba/abajo` cambia de tipo de Ball disponible.
+- `Input::SPECIAL` cambia entre lanzar Ball y enviar un Pokémon
+  (abre la selección de Pokémon una vez al cambiar).
+- Tras lanzar una Ball el apuntado se mantiene abierto por defecto; el
+  combate cierra el modo.
+- No se dibuja la malla de casillas ingame. Las reglas espaciales 7×7
+  se calculan internamente, incluida la octava casilla como fallo.
+
+Opciones nuevas en Maker Studio → Lanzamiento:
+
+```ini
+[global]
+aim_mouse=1
+aim_target_radius=36
+throw_frames=18
+throw_arc=42
+aim_chain=1
+```
+
+`aim_mouse` activa retícula bajo el ratón;
+`aim_target_radius` ajusta el radio de enfoque (en píxeles);
+`throw_frames` regula cuánto dura el vuelo y `throw_arc` su elevación
+aparente; `aim_chain` permite lanzar de nuevo sin reabrir menús.
+La trayectoria es una interpolación en pantalla, con arco visual, giro de la
+Ball y destello de contacto. **No es una simulación balística con alturas
+físicas ni un modelo 3D real.**
+
+**Estado de validación:** el código está publicado; las animaciones, ratón,
+transiciones, versión exacta de mkxp, modalidades de control y compatibilidad
+con Turbo/Visual 2.5D siguen pendientes de pruebas en el juego.
+
 ## Activación en cualquier momento (nuevo)
 
 Bifröst mantiene la apertura por evento de forma predeterminada para que no
@@ -182,7 +229,7 @@ Menú **Mods → Bifröst Capture Studio**. Tiene controles de reglas, previsual
 2. Validar nombres de eventos, obtención/consumo de Balls, captura y almacenamiento en PC, registro de Pokédex, formularios regionales y reacción de huida.
 3. Validar que el evento no reaparece tras salvar y recargar, y restauración por script.
 4. Probar los cuatro sentidos, los límites laterales, obstáculos, casilla 8, distancia 3, Turbo y mapas 2.5D.
-5. La trayectoria de proyectil, sprite de Ball, sonido, sacudidas, animación física de lanzador y efectos estéticos avanzados de los videos **no están implementados todavía**. El apuntado actual es una cuadrícula dibujada y el impacto es un flash corto.
+5. Se ha implementado una **primera trayectoria animada en pantalla**, icono real de Ball, retícula contextual y destello local. Falta validarla ingame y completar lanzamiento del personaje, sonidos, shakes de captura y efectos de vuelo/rebote; todavía no es física balística real.
 6. Los errantes que usan la mecánica de Roaming de Essentials no se vinculan automáticamente al estado del evento `OWCAP`. La aparición y desaparición de OWs, la sincronización de su captura con el sistema de errantes y la persistencia de individuos requieren integración adicional.
 7. `WildBattle.start` inicia el combate normal, pero la versión inicial no bloquea automáticamente el lanzamiento de Balls durante ese combate; si el diseño lo requiere se integrará una regla de batalla aparte.
 8. Las opciones in-game son un menú opcional invocado por script, no una entrada añadida al menú de pausa por defecto.
