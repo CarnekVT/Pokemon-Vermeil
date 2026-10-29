@@ -156,6 +156,11 @@ module Visual25D
     # el plugin situa la copa dos filas mas abajo de donde se apoya y queda
     # flotando. Se numera la base con 1 y se arregla.
     #---------------------------------------------------------------------------
+    # Repara SOLO columnas de tileset que son contiguas en el atlas (ID +/- 8),
+    # con base de prioridad 0 y alguna sección superior de prioridad positiva.
+    # Detectado al cargar una casilla; no se escanea el mapa cada frame.
+    AUTO_COLUMN_PRIORITY = true
+
     # Cuanto se "ponen de pie" los elementos verticales al inclinar la camara.
     # El suelo se acorta con la inclinacion, pero un elemento vertical esta de
     # cara a la camara y no deberia acortarse: cuanto mas baja la camara, mas
