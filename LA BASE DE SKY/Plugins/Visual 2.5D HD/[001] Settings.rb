@@ -26,9 +26,9 @@ module Visual25D
     # Duracion por defecto (segundos) del fundido al encender/apagar con
     # pbVisual25DToggleSmooth / cambiar_modo_suave.
     TRANSITION_SECONDS = 1.0
-    # Tecla fisica (Input.triggerex?) para toggle suave en el overworld.
-    # Tambien con un mensaje de personaje abierto. Sustituye el uso previo de Q (Turbo AUX1).
-    HOTKEY = :Q
+    # AUX1 se gestiona como input logico, solo con $DEBUG, en Atmosphere.
+    # No se reserva Q ni otra tecla fisica en partidas normales.
+    HOTKEY = nil
 
     #---------------------------------------------------------------------------
     # CAMARA
@@ -216,10 +216,10 @@ module Visual25D
     # escalera, y lo que la funde con el suelo de al lado en sus extremos. Cada
     # pasada lo reparte una casilla mas a cada lado. A 0 no hay suavizado y la
     # pared se levanta de golpe.
-    WALL_SMOOTHING = 5
+    WALL_SMOOTHING = 0
     # Suavizado N-S (ademas del E-O). Rampa hacia el Cliff menos a escalones.
     # No usa angle ni media de vertices (eso rompia esquinas).
-    WALL_SMOOTH_VERTICAL = true
+    WALL_SMOOTH_VERTICAL = false
     # Cuanto del lift se reparte hacia arriba (meseta). El desnivel lo absorbe
     # el terreno de encima encogiendose en pantalla (aristas compartidas).
     WALL_RISE = 0.78
