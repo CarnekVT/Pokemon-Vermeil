@@ -207,6 +207,27 @@ module BifrostCapture
     [dx * x + dy * y, -dx * y + dy * x]
   end
 
+  # Una sola geometría para previsualizar Y resolver el disparo, tanto por
+  # ratón como por teclado. No se usan coordenadas de pantalla para impactar.
+  def self.shot_geometry(px, py, tx, ty, cfg)
+    dx = tx - px
+    dy = ty - py
+    facing = if dx.abs > dy.abs
+      dx < 0 ? 4 : 6
+    else
+      dy < 0 ? 8 : 2
+    end
+    forward, side = relative(px, py, facing, tx, ty)
+    max_range = [cfg["range"].to_i, 1].max
+    half_width = [cfg["width"].to_i, 1].max / 2
+    {
+      facing: facing,
+      forward: forward,
+      side: side,
+      in_range: forward.between?(1, max_range) && side.abs <= half_width
+    }
+  end
+
   def self.behind?(px, py, target)
     x, y = DIR[target.direction] || [0,0]
     (px - target.x) * x + (py - target.y) * y < 0
