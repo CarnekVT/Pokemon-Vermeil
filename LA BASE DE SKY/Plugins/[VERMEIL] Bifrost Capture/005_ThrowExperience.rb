@@ -189,6 +189,45 @@ module BifrostCapture
     end
   end
 
+  def self.contact_fx(event)
+    return unless event
+    view = Viewport.new(0, 0, Graphics.width, Graphics.height)
+    view.z = 999999
+    sprite = Sprite.new(view)
+    sprite.bitmap = Bitmap.new(52, 52)
+    sprite.ox = 26
+    sprite.oy = 26
+    bitmap = sprite.bitmap
+    72.times do |i|
+      theta = i * Math::PI * 2 / 72
+      x = 26 + Math.cos(theta) * 17
+      y = 26 + Math.sin(theta) * 17
+      bitmap.fill_rect(x.to_i, y.to_i, 2, 2, Color.new(240, 250, 255))
+    end
+    begin
+      8.times do |i|
+        sprite.x, sprite.y = screen_position(event)
+        sprite.zoom_x = sprite.zoom_y = 0.55 + 0.065 * i
+        sprite.opacity = 255 - 31 * i
+        Graphics.update
+        Input.update
+        $scene.updateSpritesets if $scene.is_a?(Scene_Map)
+      end
+    ensure
+      sprite.dispose unless sprite.disposed?
+      bitmap.dispose unless bitmap.disposed?
+      view.dispose unless view.disposed?
+    end
+  end
+
+  # Impact frame localizado, sin el destello blanco de pantalla completa.
+  def self.impact(frames)
+    [[frames.to_i,0].max,5].min.times do
+      Graphics.update
+      Input.update
+    end
+  end
+
   # Sobrescribir únicamente la presentación: conserva las probabilidades,
   # inventario, formas de Galar y flujo de combate del runtime anterior.
   class << self
