@@ -40,6 +40,7 @@ export function defaultsFor(type){
     case "show_textbox": case "hide_textbox": return {duration:10};
     case "transfer_player": return {mapId:1,x:0,y:0,direction:2};
     case "name_input": return {default:"Solen",min:1,max:12,store:"player_name"};
+    case "treatment_input": return {default:"neutro",store:"treatment"};
     case "show_floating": return {filename:"",x:0,y:0,amplitude:8,speed:0.05,z:null,zoom:1,opacity:255,fade:0,store:""};
     case "hide_floating": return {};
     case "float_sprite": return {filename:"",frameWidth:96,frameHeight:96,frames:6,x:0,y:0,endY:160,speed:0.7,fps:6,ghostInterval:1,bg:false,glow:false,fade:20};
@@ -101,6 +102,7 @@ export function commandToRuby(c){
     case "show_centered_text": return `show_centered_text ${q(c.text)}, speed: ${sym(c.speed)}, color: ${rubyColor(c.color)}`;
     case "hide_centered_text": return `hide_centered_text`;
     case "transfer_player": return `transfer_player ${n(c.mapId)}, ${n(c.x)}, ${n(c.y)}, ${n(c.direction)}`;
+    case "treatment_input": return `treatment_input(default: ${sym(c.default||"neutro")})`;
     case "name_input": return `${pre||((c.store&&/^[a-z_]\w*$/i.test(c.store))?`${c.store} = `:"")}name_input(default: ${q(c.default)}, min: ${n(c.min)}, max: ${n(c.max)})`;
     case "show_floating": {const o=[`amplitude: ${n(c.amplitude)}`,`speed: ${n(c.speed)}`,`zoom: ${n(c.zoom)}`,`opacity: ${n(c.opacity)}`,`fade: ${n(c.fade)}`];if(c.z!==null&&c.z!==undefined&&c.z!=="")o.push(`z: ${n(c.z)}`);return `${pre}show_floating ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${o.join(", ")}`;}
     case "hide_floating": return `hide_floating`;
@@ -122,7 +124,7 @@ export function compileScene(scene){ return (scene.commands||[]).map(commandToRu
 export function compileProject(project){ const p=clone(project); p.scenes.forEach(s=>s.compiledRuby=compileScene(s)); return p; }
 
 export const COMMAND_GROUPS=[
-  {id:"basic",label:"Flujo",items:[["section","§ Sección"],["wait","⏱ Esperar"],["script","</> Ruby avanzado"],["name_input","⌨ Pedir nombre"],["transfer_player","↪ Transferir jugador"]]},
+  {id:"basic",label:"Flujo",items:[["section","§ Sección"],["wait","⏱ Esperar"],["script","</> Ruby avanzado"],["name_input","⌨ Pedir nombre"],["treatment_input","◀ Seleccionar tratamiento"],["transfer_player","↪ Transferir jugador"]]},
   {id:"visual",label:"Imágenes",items:[["show","▣ Mostrar imagen"],["hide","◫ Ocultar imagen"],["hide_all","◫ Ocultar todas"],["show_floating","↕ Imagen flotante"],["hide_floating","↕ Detener flotantes"],["float_sprite","▤ Spritesheet flotante"],["change_float_bitmap","▤ Cambiar spritesheet"]]},
   {id:"screen",label:"Pantalla",items:[["fade_from_black","◐ Desde negro"],["fade_to_black","◑ A negro"],["to_white","◻ A blanco"],["from_white","◻ Desde blanco"]]},
   {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["show_textbox","▭ Mostrar caja"],["hide_textbox","▭ Ocultar caja"]]},
