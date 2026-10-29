@@ -37,158 +37,151 @@ module Visual25D
   end
 
   module Props
-    # Generation V-like representation:
-    # - upright Animated Props form ONE camera-facing visual plane per placement
-    # - ground-only animated placements follow the tilemap's terrain plane
-    # - priority changes depth ordering, never the authored X/Y coordinates
-    # All placement data/collision remains owned by LBDS Animated Props.
+    # Skyflyer 3.3.0 is the source of truth for the 2.5D tile geometry.
+    # LBDS owns animation frames and persistent world coordinates.
+    # This optional adapter positions the existing LBDS sprites using Sky's
+    # OWN row and column edges. It never creates another camera model.
 
     def lbds_props_view_bounds(mx, my, zx, zy)
       bounds = super
       return bounds unless Visual25D.enabled? && Visual25D::StudioOptions.props?
-      # LBDS already keeps 3 tile margins. Adding 4x6 MORE tiles in both
-      # directions kept hundreds of invisible sprites alive during movement.
-      # Upright sprites need only a small extra SOUTH margin for tall tops.
-      [bounds[0] - 1, bounds[1], bounds[2] + 1, bounds[3] + 2]
+      # Keep LBDS spatial buckets; just enough padding for raised bands.
+      [bounds[0] - 1, bounds[1] - 2, bounds[2] + 1, bounds[3] + 1]
     end
 
-    def v25_prop_surface?(obj)
-      # Overrides may be supplied by a future authoring/editor bridge without
-      # modifying LBDS Animated Props' data schema.
-      modes = (@v25_prop_modes ||= {})
-      id = obj.object_id
-      return modes[id] if modes.key?(id)
-      specified = (obj[:visual25d_mode] || obj[:projection_mode]).to_s.downcase
-      mode = case specified
-             when "surface", "ground", "floor" then true
-             when "billboard", "upright", "vertical" then false
+    # All-zero multirow images are upright sprites unless the author marks
+    # them surface/ground/floor. Mixed priorities are native Sky tile bands.
+    def v25_props_mode(obj)
+      @v25_props_modes ||= {}
+      key = obj.object_id
+      return @v25_props_modes[key] if @v25_props_modes.key?(key)
+      label = (obj[:projection_mode] || obj[:visual25d_mode]).to_s.downcase
+      mode = case label
+             when "surface", "ground", "floor" then :surface
+             when "billboard", "upright", "vertical" then :billboard
              else
-               # Una animacion de varias filas es normalmente un objeto
-               # vertical, aunque el usuario no haya asignado prioridades.
-               # Solo las tiras de una fila sin prioridad son suelo por defecto.
                cells = obj[:cells] || []
-               obj[:height].to_i <= 1 &&
-                 !cells.any? { |cell| cell && cell.fetch("priority", 0).to_i > 0 }
+               has_height = obj[:height].to_i > 1
+               has_priority = cells.any? { |c| c && c.fetch("priority", 0).to_i > 0 }
+               has_height && !has_priority ? :billboard : :native
              end
-      modes[id] = mode
-      return mode
+      @v25_props_modes[key] = mode
     end
 
-    # Invocado desde LBDS Animated Props solo cuando cambia la camara o
-    # cuando se crean sprites visibles. El runtime base muestrea fotogramas y
-    # NO toca sus posiciones en el modo 2.5D: solo existe una ruta geometrica.
+    # Called only by LBDSAnimatedPropsSpriteset when camera geometry changes.
+    # Do NOT prepend/wrap lbds_props_update_sprites: doing so writes each
+    # sprite in 2D and then again in 2.5D, causing FPS loss and jumps.
     def v25_props_apply_geometry(mx, my, zx, zy)
       return unless @map && @lbds_prop_sprites && !@lbds_prop_sprites.empty?
       return unless Visual25D.enabled? && Visual25D::StudioOptions.props?
-      prof_t0 = Visual25D.perf_now if Visual25D.perf_enabled?
+      profile = Visual25D.perf_enabled? if Visual25D.respond_to?(:perf_enabled?)
+      started = Visual25D.perf_now if profile
 
-      if @v25_prop_mode_list != @lbds_prop_placements.object_id
-        @v25_prop_modes = {}
-        @v25_prop_mode_list = @lbds_prop_placements.object_id
+      if @v25_props_placements != @lbds_prop_placements.object_id
+        @v25_props_placements = @lbds_prop_placements.object_id
+        @v25_props_modes = {}
       end
-
       tw = Game_Map::TILE_WIDTH
       th = Game_Map::TILE_HEIGHT
-      zx = TilemapRenderer::ZOOM_X
-      zy = TilemapRenderer::ZOOM_Y
-      src_width = LBDSAnimatedProps::CELL_SIZE.to_f
-      src_height = LBDSAnimatedProps::CELL_SIZE.to_f
-      pixel_offset_y = Visual25D.display_pixel_offset_y(@map)
-      # Los billboards verticales no necesitan escanear WallField.
-      # Leer el terreno solo si hay una superficie animada.
+      sw = LBDSAnimatedProps::CELL_SIZE.to_f
+      sh = sw
+      offset_y = Visual25D.display_pixel_offset_y(@map)
       field = nil
       field_ready = false
-      # One projected anchor per placement. Fragments with different priorities
-      # MUST share this anchor and the same scaling to prevent visible tears.
-      anchors = {}
-
+      upright = {}
+      map_id = @map.map_id
       @lbds_prop_sprites.each do |entry|
-        spr, obj, cx, cy, span, pri, _frame, track = entry
+        spr, obj, cx, cy, span, priority, _frame, track = entry
         next if !spr || spr.disposed? || !spr.bitmap
-        priority = pri.to_i
-        priority = 0 if priority < 0
-        priority = Visual25D::Config::MAX_PRIORITY if priority > Visual25D::Config::MAX_PRIORITY
+        mode = v25_props_mode(obj)
         cell_x = obj[:x].to_i + cx
         cell_y = obj[:y].to_i + cy
         row = Visual25D.grid_row_for_map_cell(@map, cell_y)
+        next if row.nil?
+        pri = priority.to_i.clamp(0, Visual25D::Config::MAX_PRIORITY)
 
-        if v25_prop_surface?(obj)
-          if !field_ready
-            field = Visual25D.wall_field(@map)
-            field = nil if field && field.flat
-            field_ready = true
+        if !field_ready && (mode == :surface || mode == :native)
+          field = Visual25D.wall_field(@map)
+          field = nil if field && field.flat
+          field_ready = true
+        end
+
+        # 2D source, calculated from MAP coordinates once: NEVER a value
+        # read back from an already projected Sprite.
+        flat_x, _flat_y = Visual25D::StudioTransform.flat(
+          cell_x * tw, cell_y * th, @map, zx, zy, mx, my)
+        taper = 1.0
+        if mode == :billboard
+          info = upright[obj.object_id]
+          if !info
+            last_y = obj[:y].to_i + obj[:height].to_i - 1
+            base_row = Visual25D.grid_row_for_map_cell(@map, last_y)
+            base_y = Visual25D.row_top_any(base_row + 1)
+            unit = Visual25D.row_unit(base_row)
+            unit = Visual25D.vertical_unit_at(base_y) if !unit || unit <= 0
+            scale = Visual25D.row_width_scale_any(base_row)
+            info = [base_y, unit, scale, base_row]
+            upright[obj.object_id] = info
           end
-          # Terrain planes: same Y edges, row width and taper as native tiles.
-          flat_x, _flat_y = Visual25D::StudioTransform.flat(
-            cell_x * tw, cell_y * th, @map, zx, zy, mx, my)
+          feet, unit, scale, foot_row = info
+          remaining = obj[:height].to_i - cy
+          top = (feet - remaining * unit).round
+          bottom = (feet - (remaining - 1) * unit).round
+          z_row = foot_row
+          use_raised_z = true
+        elsif mode == :native && pri > 0
+          # Exact same shared column stack as Sky native tiles:
+          # p1/p2/p3 meet at edges[] even with nonuniform perspective.
+          geom = Visual25D.column_stack_geom(field, cell_x, cell_y,
+                                               row, pri, map_id)
+          scale = geom[2]
+          edges = geom[4]
+          top = edges[pri]
+          bottom = edges[pri - 1]
+          bottom += 1 if pri >= 2
+          z_row = row + pri
+          use_raised_z = true
+        else
+          # Ground: project the SAME near/far edges and taper as Tile Depth.
           scale = Visual25D.row_width_scale_any(row)
-          taper = 1.0
-          if Visual25D::TAPER_SUPPORTED
-            near_scale = Visual25D.row_width_scale_any(row + 1)
-            if near_scale && near_scale > 0
-              scale = near_scale
+          if Sprite.method_defined?(:taper=)
+            near = Visual25D.row_width_scale_any(row + 1)
+            if near && near > 0
+              scale = near
               taper = Visual25D.row_taper(row)
             end
           end
-          left = Visual25D.project_x(flat_x, scale)
-          right = Visual25D.project_x(flat_x + span * tw * zx, scale)
           top, bottom = Visual25D.wall_cell_bounds(field, cell_x, cell_y, row)
-        else
-          anchor = anchors[obj.object_id]
-          if !anchor
-            # World-space contact point at the SOUTH edge of the placement,
-            # not at y+priority (a priority is not a world-space coordinate).
-            flat_x, foot_y = Visual25D::StudioTransform.flat(
-              obj[:x].to_i * tw,
-              (obj[:y].to_i + obj[:height].to_i) * th,
-              @map, zx, zy, mx, my)
-            scale = Visual25D.width_scale_at(foot_y)
-            px = Visual25D.project_x(flat_x, scale)
-            py = Visual25D.project_y(foot_y)
-            # vertical_unit_at ya esta expresado en pixeles de DISPLAY tile;
-            # multiplicar por ZOOM_Y otra vez duplicaba la escala al moverse.
-            unit = Visual25D.vertical_unit_at(foot_y)
-            anchor = [px, py, scale, unit]
-            anchors[obj.object_id] = anchor
-          end
-          px, py, scale, unit = anchor
-          left = px + (cx * tw * zx * scale).round
-          right = px + ((cx + span) * tw * zx * scale).round
-          # Compute both edges from ONE unrounded baseline. Independently
-          # rounded per-band positions created gaps while scrolling vertically.
-          top = (py - ((obj[:height] - cy) * unit)).round
-          bottom = (py - ((obj[:height] - cy - 1) * unit)).round
-          taper = 1.0
+          z_row = row
+          use_raised_z = false
         end
 
-        right = left + 1 if right <= left
+        start_x = Visual25D.project_x(flat_x, scale)
+        finish_x = Visual25D.project_x(flat_x + span * tw * zx, scale)
         bottom = top + 1 if bottom <= top
-        target_x = left.round
-        target_y = top.round
-        spr.x = target_x if spr.x != target_x
-        spr.y = target_y if spr.y != target_y
-        new_zx = (right - left).to_f / (span * src_width)
-        new_zy = (bottom - top).to_f / src_height
-        spr.zoom_x = new_zx if (spr.zoom_x - new_zx).abs > 0.002
-        spr.zoom_y = new_zy if (spr.zoom_y - new_zy).abs > 0.002
-        spr.taper = taper if spr.respond_to?(:taper=) && spr.taper != taper
-
-        if priority > 0
-          depth = ((row + priority + 1) * TilemapRenderer::DISPLAY_TILE_HEIGHT) -
-                  pixel_offset_y + 1 + priority
-          target_z = Visual25D.raised_tile_z(depth.round) +
-                     [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
-        else
-          target_z = [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
+        finish_x = start_x + 1 if finish_x <= start_x
+        dest_zoom_x = (finish_x - start_x).to_f / (span * sw)
+        dest_zoom_y = (bottom - top).to_f / sh
+        spr.x = start_x if spr.x != start_x
+        spr.y = top if spr.y != top
+        spr.zoom_x = dest_zoom_x if (spr.zoom_x - dest_zoom_x).abs > 0.002
+        spr.zoom_y = dest_zoom_y if (spr.zoom_y - dest_zoom_y).abs > 0.002
+        if spr.respond_to?(:taper=) && spr.taper != taper
+          spr.taper = taper
         end
+        depth = ((z_row + 1) * TilemapRenderer::DISPLAY_TILE_HEIGHT) -
+                offset_y + 1
+        depth_z = Visual25D.raised_tile_z(depth.round) if use_raised_z
+        target_z = (use_raised_z ? depth_z : 0) +
+                   [obj[:layer].to_i, 5].min + (track == :parallel ? 1 : 0)
         spr.z = target_z if spr.z != target_z
-        shown = left < Graphics.width && right > 0 &&
-                top < Graphics.height && bottom > 0
-        spr.visible = shown if spr.visible != shown
+        visible = start_x < Graphics.width && finish_x > 0 &&
+                  top < Graphics.height && bottom > 0
+        spr.visible = visible if spr.visible != visible
       end
-      if prof_t0
+      if profile
         Visual25D.perf_record_props!(@lbds_prop_sprites.length,
-          (Visual25D.perf_now - prof_t0) * 1000.0)
+          (Visual25D.perf_now - started) * 1000.0) if Visual25D.respond_to?(:perf_record_props!)
       end
     end
   end
@@ -270,8 +263,11 @@ end
 
 # Solo enganchar si los plugins existen. Orden original/carga independiente.
 if defined?(Spriteset_Map)
-  if defined?(LBDSAnimatedProps) && Spriteset_Map.method_defined?(:lbds_props_update_sprites) &&
-     !Spriteset_Map.ancestors.include?(Visual25D::Props)
+  # Load-order independent: Sky can compile before LBDS Animated Props.
+  # No update hook is installed by this module, so an absent LBDS adds
+  # NO runtime work. LBDS itself tests respond_to?(:v25_props_apply_geometry).
+  unless Spriteset_Map.ancestors.any? { |ancestor| ancestor.equal?(Visual25D::Props) ||
+                                              ancestor.name == "Visual25D::Props" }
     Spriteset_Map.prepend(Visual25D::Props)
   end
   if defined?(LightingStudio) && Spriteset_Map.method_defined?(:ls_update) &&

@@ -91,12 +91,26 @@ class SceneEngine::Player
     @viewport.dispose
   rescue; end
 
+  # El juego puede renderizar a 120 FPS. El guion, textos y efectos
+  # trabajan a 60 pasos lógicos por segundo, sin depender del refresco.
   def update
     update_float
     update_aura_particles
     update_scrolling
     update_floating
-    Graphics.update
+    # Graphics.frame_rate no siempre representa los FPS reales de mkxp-z.
+    # mkxp.json fija 120; los guiones se escriben a 60 pasos/segundo.
+    @scene_frame_remainder ||= 0.0
+    @scene_logic_frame ||= 0
+    @scene_logic_frame += 1
+    fps = SceneEngine::Settings::CINEMATIC_RENDER_FPS.to_f
+    logic = SceneEngine::Settings::CINEMATIC_LOGIC_FPS.to_f
+    ratio = (fps > 0 && logic > 0) ? fps / logic : 1.0
+    @scene_frame_remainder += ratio
+    ticks = @scene_frame_remainder.floor
+    @scene_frame_remainder -= ticks
+    ticks = [[ticks, 1].max, 4].min
+    ticks.times { Graphics.update }
     Input.update
   end
 
@@ -327,12 +341,12 @@ class SceneEngine::Player
     show_textbox(10) # Fade in suave
 
     all_lines = word_wrap_all(text, bmp.width)
-    total_pages = (all_lines.length.to_f / max_lines).ceil
-    total_pages = 1 if total_pages < 1
+    pages = paginate_scene_lines(all_lines, max_lines)
+    total_pages = pages.length
     page = 0
 
     loop do
-      page_lines = all_lines[page * max_lines, max_lines]
+      page_lines = pages[page]
       page_text = page_lines.join("\n")
       page_len = page_text.length
       revealed = 0.0
@@ -363,7 +377,7 @@ class SceneEngine::Player
         end
 
         if revealed >= page_len
-          @sprites[:indicator].opacity = (Graphics.frame_count % 40 < 20) ? 255 : 0
+          @sprites[:indicator].opacity = (@scene_logic_frame % 40 < 20) ? 255 : 0
         else
           @sprites[:indicator].opacity = 0
         end
@@ -488,7 +502,9 @@ class SceneEngine::Player
     bmp = @sprites[:text].bitmap
     lines = []
     safe_width = max_width - 12 
-    text.split("\n").each do |para|
+    # Respeta los saltos manuales cuando una escena los necesita.
+    # La intro elimina los saltos forzados redundantes.
+    text.to_s.split("\n").each do |para|
       words = para.split(' ')
       current = ""
       words.each do |word|
@@ -502,7 +518,30 @@ class SceneEngine::Player
       end
       lines << current unless current.empty?
     end
+    # Evitar la típica última línea con una palabra como "todo.".
+    if lines.length > 1 && lines[-1].split(" ").length < 3
+      tail = lines[-1].split(" ")
+      prev = lines[-2].split(" ")
+      while tail.length < 4 && prev.length > 2
+        candidate = ([prev[-1]] + tail).join(" ")
+        break if bmp.text_size(candidate).width > safe_width
+        tail.unshift(prev.pop)
+      end
+      lines[-2] = prev.join(" ")
+      lines[-1] = tail.join(" ")
+    end
     lines
+  end
+
+  # Equilibra las páginas, evitando que un solo renglón quede aislado.
+  def paginate_scene_lines(lines, max_lines)
+    max_lines = [max_lines.to_i, 1].max
+    pages = lines.each_slice(max_lines).to_a
+    pages = [[""]] if pages.empty?
+    if pages.length > 1 && pages[-1].length == 1 && pages[-2].length > 2
+      pages[-1].unshift(pages[-2].pop)
+    end
+    pages
   end
 
   def apply_format(text, args)

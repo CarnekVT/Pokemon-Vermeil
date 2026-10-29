@@ -1,4 +1,8 @@
-Name       = Visual 2.5D HD
-Version    = 1.1
+Name = Visual 2.5D HD
+Version = 3.3.0
 Essentials = 21.1
-Credits    = Carnek
+Credits = Skyflyer
+Optional = MakerStudio,1.0
+Optional = Caruban's Dynamic Darkness,1.0
+# Restored from the user's Skyflyer v3.3.0 snapshot.
+# Original "last=true" metadata is implemented via explicit load dependencies.

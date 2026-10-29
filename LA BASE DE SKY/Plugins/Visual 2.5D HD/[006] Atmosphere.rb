@@ -27,17 +27,21 @@ module Visual25D
       @near_haze = Sprite.new(@viewport)
       @near_haze.bitmap = Visual25D.haze_bitmap(:bottom)
       @near_haze.z = 0
+      # No crear sprites ni bitmaps de oscurecimiento de bordes cuando
+      # el filtro esta desactivado. Evita ademas trabajo de renderizado.
       @vignette = {}
-      size = Visual25D.vignette_size
-      [:top, :bottom, :left, :right].each do |edge|
-        sprite = Sprite.new(@viewport)
-        sprite.bitmap = Visual25D.vignette_bitmap(edge)
-        sprite.z = 1
-        case edge
-        when :bottom then sprite.y = Graphics.height - size
-        when :right  then sprite.x = Graphics.width - size
+      if Config::VIGNETTE
+        size = Visual25D.vignette_size
+        [:top, :bottom, :left, :right].each do |edge|
+          sprite = Sprite.new(@viewport)
+          sprite.bitmap = Visual25D.vignette_bitmap(edge)
+          sprite.z = 1
+          case edge
+          when :bottom then sprite.y = Graphics.height - size
+          when :right  then sprite.x = Graphics.width - size
+          end
+          @vignette[edge] = sprite
         end
-        @vignette[edge] = sprite
       end
       @mode_label = Sprite.new(@viewport)
       @mode_label.z = 10
@@ -354,8 +358,11 @@ end
 # La capa vive en Scene_Map y no en Spriteset_Map, porque Essentials crea un
 # Spriteset_Map por cada mapa conectado y la neblina se acumularia.
 #===============================================================================
-# Vermeil: no sobrescribir las teclas de TurboConfig.
-# El hotkey 2.5D se configura desde Settings.rb; por defecto deshabilitado.
+# Q era Turbo (AUX1). Solo ALT queda para turbo; Q = fundido 2.5D en OW.
+if defined?(TurboConfig) && TurboConfig.const_defined?(:TOGGLE_KEYS)
+  TurboConfig.send(:remove_const, :TOGGLE_KEYS)
+  TurboConfig.const_set(:TOGGLE_KEYS, [Input::ALT])
+end
 
 module Visual25D
   class << self

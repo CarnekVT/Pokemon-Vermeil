@@ -91,7 +91,7 @@ export class ScenePreview{
 
     if(s.black>0)push(9000,()=>{g.fillStyle=`rgba(0,0,0,${clamp(s.black/255,0,1)})`;g.fillRect(0,0,this.w,this.h)});
     if(s.white>0)push(9001,()=>{g.fillStyle=`rgba(255,255,255,${clamp(s.white/255,0,1)})`;g.fillRect(0,0,this.w,this.h)});
-    if(s.treatment){push(9012,()=>{const opt=s.treatment.option;g.fillStyle="#eee9e9";g.fillRect(0,0,this.w,this.h);g.fillStyle="#8b4d75";g.fillRect(20,20,this.w-40,75);g.fillStyle="#fff7ed";g.fillRect(26,26,this.w-52,63);this.gameFont(35);g.fillStyle="#252a3b";g.textAlign="center";g.fillText(opt.toUpperCase(),this.w/2,38);g.font="bold 60px Arial";g.fillStyle="#af6290";g.fillText("◀",85,this.h/2);g.fillText("▶",this.w-85,this.h/2);g.textAlign="left";if(s.treatment.image){const im=s.treatment.image,scale=Math.min(304/im.width,320/im.height,1);g.drawImage(im,(this.w-im.width*scale)/2,105,im.width*scale,im.height*scale)}else{this.gameFont(20);g.fillStyle="#252a3b";g.textAlign="center";g.fillText("PNG: solen_"+opt+".png",this.w/2,270);g.textAlign="left";}g.font="20px Arial";g.textAlign="center";g.fillStyle="#252a3b";g.fillText("← / → Cambiar       Z / Enter Confirmar",this.w/2,this.h-24);g.textAlign="left"})}
+    if(s.treatment){push(9012,()=>{const opt=s.treatment.option,t=s.frame,accent=opt==="femenino"?"#dd4e9f":opt==="masculino"?"#896db0":"#5daaa8";g.fillStyle="#eee9e9";g.fillRect(0,0,this.w,this.h);g.fillStyle="#262e40";g.fillRect(24,18,this.w-48,this.h-36);g.fillStyle="#f6f1e8";g.fillRect(30,24,this.w-60,this.h-48);g.fillStyle="#8b4d75";g.fillRect(41,30,this.w-82,68);g.fillStyle="#fff7ed";g.fillRect(46,35,this.w-92,58);g.fillStyle="#f6f1f0";g.fillRect(46,109,this.w-92,319);g.fillStyle="#ebe4e7";g.fillRect(138,131,364,277);g.fillStyle="#f7f4f0";g.fillRect(142,135,356,269);this.gameFont(35);g.fillStyle="#252a3b";g.textAlign="center";g.fillText(opt.toUpperCase(),this.w/2,43);g.fillStyle=accent;g.font="bold 50px Arial";g.fillText("◀",84,this.h/2+15);g.fillText("▶",556,this.h/2+15);for(let i=0;i<16;i++){const a=i*Math.PI/8+t*.012,x=320+Math.cos(a)*173,y=267+Math.sin(a)*126;g.globalAlpha=.3+.25*Math.sin(t*.045+i);g.fillRect(x,y,i%4===0?5:3,i%4===0?5:3)}g.globalAlpha=1;for(let i=0;i<3;i++){g.globalAlpha=i===(["femenino","neutro","masculino"].indexOf(opt))?1:.36;g.fillRect(293+i*22,416,i===(["femenino","neutro","masculino"].indexOf(opt))?12:7,5)}g.globalAlpha=1;g.textAlign="left";if(s.treatment.image){const im=s.treatment.image,scale=Math.min(304/im.width,320/im.height,1);g.drawImage(im,(this.w-im.width*scale)/2,105+Math.sin(t/18)*3,im.width*scale,im.height*scale)}else{this.gameFont(20);g.fillStyle="#252a3b";g.textAlign="center";g.fillText("PNG: solen_"+opt+".png",this.w/2,270)}g.font="20px Arial";g.textAlign="center";g.fillStyle="#252a3b";g.fillText("← / → Cambiar       Z / Enter Confirmar",this.w/2,this.h-24);g.textAlign="left"})}
     if(s.centered)push(9010,()=>{this.gameFont();g.textAlign="center";g.textBaseline="middle";const text=String(s.centered.text||"").slice(0,Math.floor(s.centered.revealed??0));g.fillStyle=s.centered.color||"#000";g.fillText(text,this.w/2,this.h/2-16);g.textAlign="left";g.textBaseline="top"});
 
     queue.sort((a,b)=>a.z-b.z||a.seq-b.seq);for(const it of queue)it.fn();g.restore();
@@ -104,7 +104,18 @@ export class ScenePreview{
       for(const word of words){const test=current?current+" "+word:word;if(g.measureText(test).width>safe&&current){out.push(current);current=word}else current=test;}
       if(current)out.push(current);
     }
+    if(out.length>1 && out[out.length-1].trim().split(/\s+/).length<3){
+      const tail=out.pop().trim().split(/\s+/),prev=out.pop().trim().split(/\s+/);
+      while(tail.length<4&&prev.length>2&&g.measureText(prev[prev.length-1]+" "+tail.join(" ")).width<=safe)tail.unshift(prev.pop());
+      out.push(prev.join(" "),tail.join(" "));
+    }
     return out;
+  }
+  paginateLines(lines,max){
+    const pages=[];for(let i=0;i<lines.length;i+=max)pages.push(lines.slice(i,i+max));
+    if(!pages.length)pages.push([""]);
+    if(pages.length>1&&pages[pages.length-1].length===1&&pages[pages.length-2].length>2)pages[pages.length-1].unshift(pages[pages.length-2].pop());
+    return pages;
   }
   formatText(text,args){let out=String(text||"");(args||[]).forEach((arg,i)=>{let v=arg;if(v&&typeof v==="object"&&v.kind==="var")v=this.state.vars.get(v.value)??`{${v.value}}`;else if(v&&typeof v==="object"&&v.kind==="ruby")v=this.state.vars.get(v.value)??v.value;out=out.split(`{${i+1}}`).join(String(v??""));});return out;}
 
@@ -129,8 +140,7 @@ export class ScenePreview{
   async hideTextboxFade(skip,token,frames=10){if(this.state.textbox<=0)return;if(skip){this.state.textbox=0;this.state.indicator=false;return}const from=this.state.textbox;this.state.indicator=false;await this.frames(frames,p=>this.state.textbox=from*(1-p),false,token);this.state.textbox=0;}
 
   async pageText(obj,skip,token){
-    const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),lines=this.wordWrapAll(text,this.w-(e.textPadX??48)*2),max=Math.max(1,e.textMaxLines||4),pages=[];
-    for(let i=0;i<Math.max(1,Math.ceil(lines.length/max));i++)pages.push(lines.slice(i*max,i*max+max));if(!pages.length)pages.push([""]);
+    const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),lines=this.wordWrapAll(text,this.w-(e.textPadX??48)*2),max=Math.max(1,e.textMaxLines||4),pages=this.paginateLines(lines,max);
     const target={speaker:obj.speaker||"",pageLines:pages[0],revealed:0,page:0};this.state.text=target;
     await this.showTextboxFade(skip,token,10);
     if(skip){target.page=pages.length-1;target.pageLines=pages[target.page];target.revealed=target.pageLines.join("\n").length;return;}
@@ -140,7 +150,7 @@ export class ScenePreview{
       for(let i=0;i<len;){if(pageText.slice(i,i+3)==="..."){ellipsis.push(i,i+1,i+2);i+=3}else i++;}
       let serial=this.inputSerial;
       while(target.revealed<len&&token===this.playToken){
-        let eff=cpf;if(ellipsis.includes(Math.floor(target.revealed)))eff*=.1;target.revealed=Math.min(len,target.revealed+eff);await sleep(1000/60);
+        let eff=cpf;if(ellipsis.includes(Math.floor(target.revealed)))eff*=.1;target.revealed=Math.min(len,target.revealed+eff);await this.frames(1,null,false,token);
         if(this.inputSerial!==serial){target.revealed=len;serial=this.inputSerial;}
       }
       if(token!==this.playToken)return;target.revealed=len;this.state.indicator=true;this.onWaiting?.(true);
@@ -151,7 +161,7 @@ export class ScenePreview{
 
   async centeredText(obj,skip,token){
     const e=this.settings(),text=this.formatText(obj.text,obj.formatArgs),cpf=e.speeds?.[obj.speed||"normal"]??1.5,color=`rgb(${(obj.color||[0,0,0]).slice(0,3).join(",")})`;this.state.centered={text,revealed:skip?text.length:0,color};if(skip)return;
-    let serial=this.inputSerial;while(this.state.centered.revealed<text.length&&token===this.playToken){this.state.centered.revealed=Math.min(text.length,this.state.centered.revealed+cpf);await sleep(1000/60);if(this.inputSerial!==serial){this.state.centered.revealed=text.length;serial=this.inputSerial;}}
+    let serial=this.inputSerial;while(this.state.centered.revealed<text.length&&token===this.playToken){this.state.centered.revealed=Math.min(text.length,this.state.centered.revealed+cpf);await this.frames(1,null,false,token);if(this.inputSerial!==serial){this.state.centered.revealed=text.length;serial=this.inputSerial;}}
   }
 
   resolveSpriteTargets(expr){
@@ -210,11 +220,12 @@ export class ScenePreview{
       case"hide":{const a=c.filename?[s.images.get(c.filename)]:[...s.images.values()];const targets=a.filter(Boolean);if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(x=>x.opacity=255*(1-p)),skip,token);targets.forEach(x=>x.visible=false);break;}
       case"hide_all":{const targets=[...s.images.values()];if(c.fade>0)await this.frames(c.fade,p=>targets.forEach(x=>x.opacity=255*(1-p)),skip,token);targets.forEach(x=>x.visible=false);break;}
       case"text_inline":await this.pageText(c,skip,token);break;
+      case"treatment_text":{const option=s.vars.get("treatment")||"neutro";await this.pageText({text:c[option]||c.neutro||"",speaker:c.speaker||"",speed:c.speed||"normal"},skip,token);break;}
       case"show_centered_text":await this.centeredText(c,skip,token);break;
       case"hide_centered_text":s.centered=null;break;
       case"show_textbox":await this.showTextboxFade(skip,token,c.duration);break;
       case"hide_textbox":await this.hideTextboxFade(skip,token,c.duration);break;
-      case"treatment_input":{const opts=["femenino","neutro","masculino"];let index=opts.indexOf(c.default||"neutro");if(index<0)index=1;let opt=opts[index];s.treatment={option:opt,image:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+opt)};if(!skip){this.onWaiting?.(true);const start=this.inputSerial;while(this.inputSerial===start&&token===this.playToken)await sleep(16);this.onWaiting?.(false);}if(c.store)s.vars.set(c.store,opt);s.treatment=null;break;}
+      case"treatment_input":{const opts=["femenino","neutro","masculino"];let index=opts.indexOf(c.default||"neutro");if(index<0)index=1;let opt=opts[index];s.treatment={option:opt,image:await this.image("Graphics/Scenes/Intro/GenderSelect/solen_"+opt)};if(!skip){this.onWaiting?.(true);const start=this.inputSerial;while(this.inputSerial===start&&token===this.playToken)await sleep(16);this.onWaiting?.(false);}if(c.store)s.vars.set(c.store,s.treatment?.option||opt);s.treatment=null;break;}
       case"name_input":if(c.store)s.vars.set(c.store,c.default||"Solen");break;
       case"show_floating":{
         const im=await this.image(c.filename);if(im){const it={img:im,x:this.num(c.x,0),y:this.num(c.y,0),baseY:this.num(c.y,0),amplitude:this.num(c.amplitude,8),speed:this.num(c.speed,.05),zoom:this.num(c.zoom,1),opacity:c.fade>0?0:this.num(c.opacity,255),z:this.num(c.z,260),startFrame:s.frame,visible:true,varName:c.store||""};s.floating.push(it);if(c.store)s.refs.set(c.store,it);if(c.fade>0)await this.frames(c.fade,p=>it.opacity=this.num(c.opacity,255)*p,skip,token);it.opacity=this.num(c.opacity,255);}break;}

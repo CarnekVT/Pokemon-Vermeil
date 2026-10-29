@@ -216,7 +216,6 @@ class TilemapRenderer
       return
     end
     @hd25_in_update = true
-    prof_t0 = Visual25D.perf_now if Visual25D.perf_enabled?
     hd25_sync_grid
     begin
       Visual25D.shift_maps_for_render
@@ -228,7 +227,6 @@ class TilemapRenderer
       # Dentro del ensure: si se corta entre correr el encuadre y restaurarlo, los
       # mapas se quedan desplazados para siempre y todo se dibuja movido.
       Visual25D.restore_maps_after_render
-      Visual25D.perf_record_tilemap_ms!((Visual25D.perf_now - prof_t0) * 1000.0) if prof_t0
       Visual25D.perf_frame_end(self)
       @hd25_in_update = false
     end
@@ -1707,44 +1705,6 @@ module Visual25D
       end
     end
 
-    # Camino Gen 5: proyeccion afin de un unico plano sin WallField.
-    # Evita column_stack_geom/cache de columnas y el proyector de trapecios
-    # en cada pixel de scroll. Mantiene TODAS las coordenadas del tilemap.
-    # No se usa con Cliff/Shelf/InteriorWall ni con franjas configurables.
-    def project_gen5_simple_tile(tile, cell_row, priority)
-      scale = row_width_scale_any(cell_row + [priority - 1, 0].max)
-      if priority > 0
-        # Todas las bandas de una misma columna usan un mismo pie/ancho/unit.
-        foot = row_top_any(cell_row + priority)
-        unit = vertical_unit_at(0)
-        top = (foot - (priority * unit)).round
-        bottom = (foot - ((priority - 1) * unit)).round
-        bottom += COLUMN_BAND_OVERLAP if priority >= 2
-      else
-        top = row_top_any(cell_row)
-        bottom = row_top_any(cell_row + 1)
-      end
-      bottom = top + 1 if bottom <= top
-      left = tile.x
-      start = project_x(left, scale)
-      finish = project_x(left + TilemapRenderer::DISPLAY_TILE_WIDTH, scale)
-      wpx = finish - start
-      zoom_y = (bottom - top).to_f / TilemapRenderer::SOURCE_TILE_HEIGHT
-      clear_wall_tile_tilt(tile)
-      apply_tile_taper(tile, 1.0)
-      tile.x = start
-      tile.y = top
-      apply_tile_zoom(tile, wpx.to_f / TilemapRenderer::SOURCE_TILE_WIDTH, zoom_y)
-      tile.hd25_proj_stamp = @projection_stamp || 0
-      tile.hd25_proj_row = cell_row
-      tile.hd25_proj_scale = scale
-      tile.hd25_proj_y = top
-      tile.hd25_proj_zy = zoom_y
-      tile.hd25_proj_side = 0
-      tile.hd25_proj_wpx = wpx
-      return
-    end
-
     def project_tile(tile, row)
       return if tile_blank?(tile)
       perf_tick(:full)
@@ -1767,15 +1727,6 @@ module Visual25D
       derived = grid_row_for_map_cell_id(tile.hd25_map_id, tile.hd25_cell_y)
       cell_row = derived if !derived.nil?
       tile.hd25_grid_row = cell_row
-      if gen5_projection? && !field && !flat_cap?(tile) &&
-         !tile.shows_reflection && !tile.bridge &&
-         Config::GROUND_SLICES.to_i <= 1
-        priority = geom_priority(tile)
-        if priority >= 0
-          project_gen5_simple_tile(tile, cell_row, priority)
-          return
-        end
-      end
       # Bosque/plano pri0: sin geom_priority ni wall_cell_bounds (mismo look).
       if !field && !tile.shows_reflection && !tile.bridge
         pri = tile.hd25_geom_priority

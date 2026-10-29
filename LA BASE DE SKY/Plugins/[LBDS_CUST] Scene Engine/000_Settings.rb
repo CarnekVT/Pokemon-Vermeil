@@ -26,6 +26,12 @@ module SceneEngine
 
     SPEED_INSTANT = 999
     SPEED_FAST = 4.4
+    # Cinemáticas: 60 pasos lógicos a 120 Hz de renderizado (mkxp.json).
+    # Usa la tasa fija del juego y no Graphics.frame_rate (puede informar 40 en RGSS).
+    CINEMATIC_LOGIC_FPS  = 60.0
+    CINEMATIC_RENDER_FPS = 120.0
+    ELLIPSIS_DOT_FRAMES  = 11
+    ELLIPSIS_HOLD_FRAMES = 42
     SPEED_NORMAL = 1.5
     SPEED_SLOW = 0.7
     SPEED_VERY_SLOW = 0.15

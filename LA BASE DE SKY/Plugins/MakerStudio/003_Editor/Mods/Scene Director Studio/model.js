@@ -41,6 +41,7 @@ export function defaultsFor(type){
     case "transfer_player": return {mapId:1,x:0,y:0,direction:2};
     case "name_input": return {default:"Solen",min:1,max:12,store:"player_name"};
     case "treatment_input": return {default:"neutro",store:"treatment"};
+    case "treatment_text": return {masculino:"",femenino:"",neutro:"",speaker:"",speed:"normal"};
     case "show_floating": return {filename:"",x:0,y:0,amplitude:8,speed:0.05,z:null,zoom:1,opacity:255,fade:0,store:""};
     case "hide_floating": return {};
     case "float_sprite": return {filename:"",frameWidth:96,frameHeight:96,frames:6,x:0,y:0,endY:160,speed:0.7,fps:6,ghostInterval:1,bg:false,glow:false,fade:20};
@@ -103,6 +104,7 @@ export function commandToRuby(c){
     case "hide_centered_text": return `hide_centered_text`;
     case "transfer_player": return `transfer_player ${n(c.mapId)}, ${n(c.x)}, ${n(c.y)}, ${n(c.direction)}`;
     case "treatment_input": return `treatment_input(default: ${sym(c.default||"neutro")})`;
+    case "treatment_text": return `treatment_text(masculino: ${q(c.masculino||"")}, femenino: ${q(c.femenino||"")}, neutro: ${q(c.neutro||"")}, speaker: ${q(c.speaker||"")}, speed: ${sym(c.speed||"normal")})`;
     case "name_input": return `${pre||((c.store&&/^[a-z_]\w*$/i.test(c.store))?`${c.store} = `:"")}name_input(default: ${q(c.default)}, min: ${n(c.min)}, max: ${n(c.max)})`;
     case "show_floating": {const o=[`amplitude: ${n(c.amplitude)}`,`speed: ${n(c.speed)}`,`zoom: ${n(c.zoom)}`,`opacity: ${n(c.opacity)}`,`fade: ${n(c.fade)}`];if(c.z!==null&&c.z!==undefined&&c.z!=="")o.push(`z: ${n(c.z)}`);return `${pre}show_floating ${q(c.filename)}, ${n(c.x)}, ${n(c.y)}, ${o.join(", ")}`;}
     case "hide_floating": return `hide_floating`;
@@ -127,7 +129,7 @@ export const COMMAND_GROUPS=[
   {id:"basic",label:"Flujo",items:[["section","§ Sección"],["wait","⏱ Esperar"],["script","</> Ruby avanzado"],["name_input","⌨ Pedir nombre"],["treatment_input","◀ Seleccionar tratamiento"],["transfer_player","↪ Transferir jugador"]]},
   {id:"visual",label:"Imágenes",items:[["show","▣ Mostrar imagen"],["hide","◫ Ocultar imagen"],["hide_all","◫ Ocultar todas"],["show_floating","↕ Imagen flotante"],["hide_floating","↕ Detener flotantes"],["float_sprite","▤ Spritesheet flotante"],["change_float_bitmap","▤ Cambiar spritesheet"]]},
   {id:"screen",label:"Pantalla",items:[["fade_from_black","◐ Desde negro"],["fade_to_black","◑ A negro"],["to_white","◻ A blanco"],["from_white","◻ Desde blanco"]]},
-  {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["show_textbox","▭ Mostrar caja"],["hide_textbox","▭ Ocultar caja"]]},
+  {id:"dialog",label:"Texto",items:[["text_inline","💬 Diálogo"],["treatment_text","💬 Diálogo por tratamiento"],["show_centered_text","T Texto centrado"],["hide_centered_text","T Ocultar centrado"],["show_textbox","▭ Mostrar caja"],["hide_textbox","▭ Ocultar caja"]]},
   {id:"motion",label:"FX",items:[["start_scrolling","⇢ Scroll"],["stop_scrolling","■ Detener scroll"],["start_aura","✦ Aura"],["stop_aura","✦ Detener aura"],["fade_in_scrolling","⇢ Fade in scroll"],["fade_out_scrolling","⇢ Fade out scroll"],["fade_out_floating","↕ Fade out flotantes"],["fade_out_images","▣ Fade out imágenes"],["fade_out_sprites","◫ Fade refs Ruby"]]},
   {id:"audio",label:"Audio",items:[["bgm","♫ BGM"],["bgs","≈ BGS"],["se","♪ SE"],["stop_bgm","♫ Detener BGM"],["stop_bgs","≈ Detener BGS"]]}
 ];

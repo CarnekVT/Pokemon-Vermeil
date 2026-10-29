@@ -4,7 +4,7 @@ const KNOWN=new Set([
   "bgm","bgs","se","stop_bgm","stop_bgs",
   "fade_from_black","fade_to_black","to_white","from_white",
   "show_textbox","hide_textbox","show","hide","hide_all","wait",
-  "text_inline","show_centered_text","hide_centered_text","transfer_player","name_input","treatment_input",
+  "text_inline","treatment_text","show_centered_text","hide_centered_text","transfer_player","name_input","treatment_input",
   "float_sprite","stop_float","start_aura","stop_aura","change_float_bitmap",
   "start_scrolling","stop_scrolling","show_floating","hide_floating",
   "fade_out_images","fade_out_floating","fade_out_scrolling","fade_in_scrolling","fade_out_sprites"
@@ -70,6 +70,7 @@ function parseCall(src){
     case"hide":c.filename=pos[0]??"";c.fade=kw.fade??0;break;
     case"hide_all":c.fade=kw.fade??0;break;
     case"text_inline":c.text=pos[0]??"";c.speaker=kw.speaker??"";c.speed=kw.speed??"normal";c.formatArgs=kw.format_args??[];break;
+    case"treatment_text":c.masculino=kw.masculino??"";c.femenino=kw.femenino??"";c.neutro=kw.neutro??"";c.speaker=kw.speaker??"";c.speed=kw.speed??"normal";break;
     case"show_centered_text":c.text=pos[0]??"";c.speed=kw.speed??"normal";c.color=kw.color??[0,0,0];break;
     case"transfer_player":c.mapId=pos[0]??1;c.x=pos[1]??0;c.y=pos[2]??0;c.direction=pos[3]??2;break;
     case"treatment_input":c.default=kw.default??"neutro";break;
