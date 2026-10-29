@@ -4,7 +4,7 @@ const KNOWN=new Set([
   "bgm","bgs","se","stop_bgm","stop_bgs",
   "fade_from_black","fade_to_black","to_white","from_white",
   "show_textbox","hide_textbox","show","hide","hide_all","wait",
-  "text_inline","show_centered_text","hide_centered_text","transfer_player","name_input",
+  "text_inline","show_centered_text","hide_centered_text","transfer_player","name_input","treatment_input",
   "float_sprite","stop_float","start_aura","stop_aura","change_float_bitmap",
   "start_scrolling","stop_scrolling","show_floating","hide_floating",
   "fade_out_images","fade_out_floating","fade_out_scrolling","fade_in_scrolling","fade_out_sprites"
@@ -72,6 +72,7 @@ function parseCall(src){
     case"text_inline":c.text=pos[0]??"";c.speaker=kw.speaker??"";c.speed=kw.speed??"normal";c.formatArgs=kw.format_args??[];break;
     case"show_centered_text":c.text=pos[0]??"";c.speed=kw.speed??"normal";c.color=kw.color??[0,0,0];break;
     case"transfer_player":c.mapId=pos[0]??1;c.x=pos[1]??0;c.y=pos[2]??0;c.direction=pos[3]??2;break;
+    case"treatment_input":c.default=kw.default??"neutro";break;
     case"name_input":c.default=kw.default??"Solen";c.min=kw.min??1;c.max=kw.max??12;break;
     case"show_floating":c.filename=pos[0]??"";c.x=pos[1]??0;c.y=pos[2]??0;c.amplitude=kw.amplitude??8;c.speed=kw.speed??.05;c.z=kw.z??null;c.zoom=kw.zoom??1;c.opacity=kw.opacity??255;c.fade=kw.fade??0;break;
     case"float_sprite":c.filename=pos[0]??"";c.frameWidth=pos[1]??96;c.frameHeight=pos[2]??96;c.frames=pos[3]??6;c.x=pos[4]??0;c.y=pos[5]??0;c.endY=kw.end_y??160;c.speed=kw.speed??1;c.fps=kw.fps??6;c.ghostInterval=kw.ghost_interval??1;c.bg=kw.bg??false;c.glow=kw.glow??false;c.fade=kw.fade??20;break;
