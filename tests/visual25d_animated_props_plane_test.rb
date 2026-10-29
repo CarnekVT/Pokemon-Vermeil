@@ -37,6 +37,7 @@ module Visual25D
     MAX_PRIORITY = 12
   end
   TAPER_SUPPORTED = true
+  COLUMN_BAND_OVERLAP = 1
   class << self
     attr_accessor :test_enabled, :projection_stamp
     def enabled? = @test_enabled
