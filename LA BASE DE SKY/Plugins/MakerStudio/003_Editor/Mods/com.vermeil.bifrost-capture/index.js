@@ -16,7 +16,8 @@ const DEFS={
  spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
  ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100",
  aim_mouse:"1",aim_target_radius:"36",throw_frames:"18",throw_arc:"42",aim_chain:"1",
- aim_keyboard:"1",aim_speed:"5"
+ aim_keyboard:"1",aim_speed:"5",flee_steps:"5",flee_speed:"4",
+ flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",allow_empty_throw:"0"
 };
 const PRESETS={
  bifrost:{...DEFS},
@@ -64,6 +65,7 @@ const FIELDS={
  aim_mouse:["Apuntar con el ratón","aim","bool",null,"Mouse opcional: apunta al Pokémon bajo el cursor y puede lanzar con clic."],
  aim_keyboard:["Apuntar con teclado o mando","aim","bool",null,"Flechas del juego mueven la retícula incluso sin ratón; C (Use) lanza."],
  aim_speed:["Velocidad de la retícula","aim","int",[1,16],"Píxeles por fotograma al mover la retícula con las flechas; Shift/Z acelera."],
+ allow_empty_throw:["Permitir lanzar sin objetivo","aim","bool",null,"Apagado por defecto: un sprite sin etiqueta OWCAP no consume Balls ni dispara."],
  aim_target_radius:["Radio de enfoque visual (px)","aim","int",[10,96],"Distancia en pantalla para fijar un Pokémon cercano al cursor."],
  throw_frames:["Duración del vuelo (fotogramas)","aim","int",[8,48],"Velocidad del proyectil. No altera la tasa de captura."],
  throw_arc:["Altura del arco (px)","aim","int",[0,110],"Elevación visual del lanzamiento sobre el mundo 2.5D."],
@@ -76,6 +78,11 @@ const FIELDS={
  consume_on_miss:["Consumir Balls fallidas","capture","bool",null,"Se aplica al fallar un lanzamiento con la configuración inicial."],
  reaction:["Comportamiento de alerta","behavior","select",["flee","attack","ignore"],"Huir, atacar iniciando combate o ignorar."],
  alert_distance:["Radio de alarma (casillas)","behavior","int",[0,20],"A 3 casillas o menos el OW reacciona; 0 desactiva alarma."],
+ flee_steps:["Pasos de huida","behavior","int",[1,30],"El Pokémon corre de verdad estos pasos antes de desaparecer."],
+ flee_speed:["Velocidad de huida","behavior","int",[1,6],"Velocidad de movimiento del evento durante su huida."],
+ flee_disappear_distance:["Distancia para escapar","behavior","int",[4,30],"Desaparece si consigue alejarse estas casillas del entrenador."],
+ flee_stuck_frames:["Bloqueo máximo de huida","behavior","int",[15,600],"Si no encuentra camino, vuelve a patrullar en lugar de desaparecer al instante."],
+ alert_on_miss:["Reaccionar si la Ball falla","behavior","bool",null,"Una Ball desviada cerca del objetivo puede alertarlo."],
  impact_frames:["Flash de impacto (fotogramas)","behavior","int",[0,12],"Efecto básico de impacto por espalda; falta proyectil real."]
 };
 const SECTIONS=[
@@ -226,9 +233,9 @@ class CaptureStudio{
    profiles:["profile","access_mode","restricted_species"],
    species:["ow_form","ow_min_level","ow_max_level","ow_spawn_probability","reaction","alert_distance","capture_floor","restricted_species","spawn_filter"],
    spawns:["encounter_mode","spawn_chance","spawn_min_distance","spawn_max_distance","spawn_limit","spawn_lifetime","spawn_grass_only","spawn_filter"],
-   aim:["aim_keyboard","aim_speed","aim_mouse","aim_target_radius","throw_frames","throw_arc","aim_chain","range","width","optimal_range","hit_near","hit_far","line_of_sight"],
+   aim:["aim_keyboard","aim_speed","aim_mouse","aim_target_radius","allow_empty_throw","throw_frames","throw_arc","aim_chain","range","width","optimal_range","hit_near","hit_far","line_of_sight"],
    capture:["capture_floor","back_multiplier","critical_front","critical_back","critical_multiplier","consume_on_miss"],
-   behavior:["reaction","alert_distance","impact_frames"],
+   behavior:["reaction","alert_distance","flee_steps","flee_speed","flee_disappear_distance","flee_stuck_frames","alert_on_miss","impact_frames"],
    scopes:["enabled","access_mode","encounter_mode","restricted_species"],
    tests:["access_mode","hotkey","encounter_mode"]
   };
@@ -398,7 +405,7 @@ class CaptureStudio{
     ["02 · COMPORTAMIENTO",label(v.reaction),"Flee / Attack / Ignore"],
     ["03 · RESOLUCIÓN","Huir o combatir","El evento conserva sus reglas"]
    ].map(x=>'<div class="bf-stat"><span>'+E(x[0])+'</span><strong>'+E(x[1])+'</strong><small>'+E(x[2])+'</small></div>').join("")+'</div>'+
-   '<div class="bf-help">El movimiento continuo de huida, persecución, visión de obstáculos, tipos de agresividad y reacciones visuales avanzadas siguen pendientes.</div>');
+   '<div class="bf-help">La huida ahora hace desplazamientos visibles antes de desaparecer, usando velocidad, pasos y distancia configurables. Persecuciones complejas y animaciones específicas de cada especie siguen pendientes.</div>');
  }
  scopesPanel(){
   return '<div class="bf-kicker">CONFIGURACIÓN EN CAPAS</div><h1 class="bf-headline">Reglas donde las necesitas.</h1>'+
