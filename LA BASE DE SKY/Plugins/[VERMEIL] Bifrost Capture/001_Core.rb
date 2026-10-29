@@ -17,7 +17,9 @@ module BifrostCapture
     "spawn_limit"=>"4", "spawn_lifetime"=>"40", "spawn_filter"=>"all",
     "spawn_grass_only"=>"1", "spawn_allow_fishing"=>"0",
     "ow_form"=>"0", "ow_min_level"=>"0", "ow_max_level"=>"0",
-    "ow_spawn_probability"=>"100"
+    "ow_spawn_probability"=>"100",
+    "aim_mouse"=>"1", "aim_target_radius"=>"36",
+    "throw_frames"=>"18", "throw_arc"=>"42", "aim_chain"=>"1"
   }.freeze
   ROAMERS = %w[RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES
                MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT
