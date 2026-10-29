@@ -1,7 +1,7 @@
 {
   "id": "com.vermeil.bifrost-capture",
   "name": "Bifröst Capture Studio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "authors": [
@@ -9,7 +9,7 @@
       "name": "CarnekVT"
     }
   ],
-  "description": "Editor de perfiles y reglas de captura OW para Essentials 21.1; global/mapa/especie/evento.",
+  "description": "Editor de tres paneles estilo BAS/BSS: perfiles comparables, catálogo Pokémon, fauna OW completa y configuración por ámbito",
   "permissions": [
     "fs.project",
     "fs.write.project",
