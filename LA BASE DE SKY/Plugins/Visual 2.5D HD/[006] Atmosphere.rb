@@ -431,7 +431,9 @@ class Scene_Map
   def hd25_refresh_connected_renderers!
     return unless @spritesets
     list = @spritesets.respond_to?(:each_value) ? @spritesets.values : @spritesets
-    seen = {}
+    # Core#redraw_map already refreshed the central renderer.
+    main = respond_to?(:map_renderer) ? map_renderer : nil
+    seen = main ? { main.object_id => true } : {}
     list.each do |set|
       next unless set
       renderer = if set.respond_to?(:map_renderer)
