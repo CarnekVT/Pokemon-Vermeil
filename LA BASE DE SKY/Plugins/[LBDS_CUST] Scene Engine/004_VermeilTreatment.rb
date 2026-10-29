@@ -50,9 +50,13 @@ class SceneEngine::Player
     vp = Viewport.new(0, 0, Graphics.width, Graphics.height)
     vp.z = 100_010
     backdrop = BitmapSprite.new(Graphics.width, Graphics.height, vp)
+    backdrop.z = 0
+    effects = BitmapSprite.new(Graphics.width, Graphics.height, vp)
+    effects.z = 1
     portrait = Sprite.new(vp)
     portrait.z = 2
     portraits = {}
+    tick = 0
 
     begin
       VermeilTreatment::OPTIONS.each do |option|
@@ -65,10 +69,20 @@ class SceneEngine::Player
 
       draw_treatment_ui(backdrop.bitmap, VermeilTreatment::OPTIONS[index], !portraits.empty?)
       refresh_treatment_portrait(portrait, portraits, VermeilTreatment::OPTIONS[index])
-      # Consumir pulsación anterior: no confirmar la pantalla involuntariamente.
-      update
+      # Entrada suave, destellos ambientales y respuesta animada al cambiar.
+      portrait.opacity = 0
+      update  # Evita arrastrar la confirmación del diálogo anterior.
       loop do
         update
+        tick += 1
+        option = VermeilTreatment::OPTIONS[index]
+        draw_treatment_effects(effects.bitmap, option, tick)
+        portrait.opacity = [portrait.opacity + 24, 255].min
+        if portrait.bitmap
+          portrait.y = 102 + ((320 - portrait.bitmap.height * portrait.zoom_y) / 2).round +
+                       (Math.sin(tick / 18.0) * 3).round
+        end
+
         change = 0
         change = -1 if Input.trigger?(Input::LEFT)
         change = 1 if Input.trigger?(Input::RIGHT)
@@ -77,16 +91,23 @@ class SceneEngine::Player
           option = VermeilTreatment::OPTIONS[index]
           draw_treatment_ui(backdrop.bitmap, option, !portraits.empty?)
           refresh_treatment_portrait(portrait, portraits, option)
+          portrait.opacity = 0
           pbSEPlay("GUI sel cursor") rescue nil
         elsif Input.trigger?(Input::USE) || Input.trigger?(Input::C)
-          selection = VermeilTreatment.set(VermeilTreatment::OPTIONS[index])
+          selection = VermeilTreatment.set(option)
           pbSEPlay("GUI sel decision") rescue nil
+          10.times do |i|
+            draw_treatment_effects(effects.bitmap, option, tick + i, true)
+            portrait.opacity = [255 - i * 16, 0].max
+            update
+          end
           return selection
         end
       end
     ensure
       portrait.dispose if portrait && !portrait.disposed?
       portraits.each_value { |bmp| bmp.dispose if bmp && !bmp.disposed? }
+      effects.dispose if effects && !effects.disposed?
       backdrop.dispose if backdrop && !backdrop.disposed?
       vp.dispose if vp && !vp.disposed?
     end
@@ -111,6 +132,44 @@ class SceneEngine::Player
     sprite.zoom_y = scale
     sprite.x = ((Graphics.width - bitmap.width * scale) / 2).round
     sprite.y = (102 + (320 - bitmap.height * scale) / 2).round
+  end
+
+  # Efectos en capa separada; nunca pinta sobre el PNG del personaje.
+  # Partículas orbitales, brillo de selección y guías luminosas de navegación.
+  def draw_treatment_effects(bitmap, option, tick, confirm = false)
+    bitmap.clear
+    ox = ((Graphics.width - 640) / 2.0).round
+    oy = ((Graphics.height - 480) / 2.0).round
+    accent = case option
+             when :femenino then [221, 78, 159]
+             when :masculino then [137, 109, 176]
+             else [93, 170, 168]
+             end
+    a = accent
+    16.times do |i|
+      angle = (i * Math::PI / 8.0) + (tick * 0.012)
+      x = ox + 320 + (Math.cos(angle) * 173).round
+      y = oy + 267 + (Math.sin(angle) * 126).round
+      size = (i % 4 == 0) ? 5 : 3
+      alpha = 70 + (Math.sin(tick * 0.045 + i) * 45).round
+      bitmap.fill_rect(x, y, size, size, Color.new(a[0], a[1], a[2], alpha))
+    end
+    pulse = 120 + (Math.sin(tick * 0.11) * 75).round
+    [ox + 72, ox + 547].each do |x|
+      bitmap.fill_rect(x, oy + 231, 3, 55,
+                       Color.new(a[0], a[1], a[2], pulse))
+    end
+    # Indicador de tres opciones, sincronizado con el orden real.
+    VermeilTreatment::OPTIONS.each_with_index do |candidate, i|
+      x = ox + 293 + i * 22
+      selected = candidate == option
+      bitmap.fill_rect(x, oy + 416, selected ? 12 : 7, 5,
+                       Color.new(a[0], a[1], a[2], selected ? 255 : 90))
+    end
+    if confirm
+      bitmap.fill_rect(ox + 50, oy + 104, 540, 302,
+                       Color.new(a[0], a[1], a[2], 55))
+    end
   end
 
   def draw_treatment_ui(bitmap, option, has_art)
