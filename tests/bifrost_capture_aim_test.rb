@@ -148,6 +148,26 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert_empty $game_map.events
     assert_empty($PokemonGlobal.bifrost_removed_events || {})
   end
+  def test_full_ow_generated_stays_capturable_with_legendary_only_roster
+    # Original regression: full OW spawns a regular wild, but Bifrost
+    # exclusive catalog prevented aiming/capturing it.
+    BifrostCapture.spawn_wild(:Land)
+    $PokemonGlobal.bifrost_overrides["restricted_species"]="1"
+    event=$game_map.events.values.first
+    assert_equal :PIKACHU,BifrostCapture.event_spec(event)[0]
+    assert BifrostCapture.valid_target?(event)
+    assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,
+                                         BifrostCapture.options)
+    assert_equal 1,BifrostCapture.captures.length
+  end
+
+  def test_decorative_event_never_becomes_wild
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    event.instance_variable_set(:@name,"[OWDECOR]")
+    refute BifrostCapture.valid_target?(event)
+  end
+
   def test_eighth_tile_stays_outside_capture_range
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
