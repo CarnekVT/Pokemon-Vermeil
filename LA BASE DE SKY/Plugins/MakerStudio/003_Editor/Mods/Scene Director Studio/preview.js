@@ -99,7 +99,7 @@ export class ScenePreview{
 
   wordWrapAll(text,maxWidth){
     const g=this.g;this.gameFont();const safe=maxWidth-12,out=[];
-    for(const para of String(text||"").replace(/\s*\n\s*/g," ").split("\n")){
+    for(const para of String(text||"").split("\n")){
       const words=para.split(" ");let current="";
       for(const word of words){const test=current?current+" "+word:word;if(g.measureText(test).width>safe&&current){out.push(current);current=word}else current=test;}
       if(current)out.push(current);
