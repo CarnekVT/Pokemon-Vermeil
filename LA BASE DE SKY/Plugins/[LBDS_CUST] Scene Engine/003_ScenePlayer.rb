@@ -352,28 +352,36 @@ class SceneEngine::Player
       revealed = 0.0
 
       ellipsis_pos = []
+      ellipsis_ends = []
       i = 0
       while i < page_len
         if page_text[i, 3] == "..."
           ellipsis_pos.concat([i, i + 1, i + 2])
+          ellipsis_ends << i + 3
           i += 3
         else
           i += 1
         end
       end
+      suspense_remaining = 0
 
       loop do
         update
         input = Input.trigger?(Input::USE) || Input.trigger?(Input::C) || Input.trigger?(Input::ACTION)
 
         if revealed < page_len
-          effective_cpf = cpf
-          if ellipsis_pos.include?(revealed.floor)
-            effective_cpf *= 0.1
+          if suspense_remaining > 0
+            suspense_remaining -= 1
+          else
+            before = revealed
+            effective_cpf = cpf
+            effective_cpf *= 0.1 if ellipsis_pos.include?(revealed.floor)
+            revealed = [revealed + effective_cpf, page_len.to_f].min
+            if ellipsis_ends.any? { |ending| before < ending && revealed >= ending }
+              suspense_remaining = SceneEngine::Settings::ELLIPSIS_HOLD_FRAMES
+            end
+            redraw_text(page_lines, revealed.floor)
           end
-          revealed += effective_cpf
-          revealed = page_len.to_f if revealed > page_len
-          redraw_text(page_lines, revealed.floor)
         end
 
         if revealed >= page_len
