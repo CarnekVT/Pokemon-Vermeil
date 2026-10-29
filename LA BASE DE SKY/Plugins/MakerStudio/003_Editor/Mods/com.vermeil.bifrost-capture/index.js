@@ -17,7 +17,7 @@ const DEFS={
  ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100",
  aim_mouse:"1",aim_target_radius:"36",throw_frames:"18",throw_arc:"42",aim_chain:"1",
  aim_keyboard:"1",aim_speed:"5",flee_steps:"5",flee_speed:"4",
- flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",allow_empty_throw:"0"
+ flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",allow_empty_throw:"0",capture_shakes:"3",capture_shake_frames:"10"
 };
 const PRESETS={
  bifrost:{...DEFS},
@@ -83,6 +83,8 @@ const FIELDS={
  flee_disappear_distance:["Distancia para escapar","behavior","int",[4,30],"Desaparece si consigue alejarse estas casillas del entrenador."],
  flee_stuck_frames:["Bloqueo máximo de huida","behavior","int",[15,600],"Si no encuentra camino, vuelve a patrullar en lugar de desaparecer al instante."],
  alert_on_miss:["Reaccionar si la Ball falla","behavior","bool",null,"Una Ball desviada cerca del objetivo puede alertarlo."],
+ capture_shakes:["Sacudidas de la Ball","capture","int",[1,5],"Intentos visuales tras el impacto; una captura crítica usa solo una sacudida."],
+ capture_shake_frames:["Duración de cada sacudida","capture","int",[4,20],"Fotogramas de cada sacudida de captura."],
  impact_frames:["Flash de impacto (fotogramas)","behavior","int",[0,12],"Efecto básico de impacto por espalda; falta proyectil real."]
 };
 const SECTIONS=[
@@ -234,7 +236,7 @@ class CaptureStudio{
    species:["ow_form","ow_min_level","ow_max_level","ow_spawn_probability","reaction","alert_distance","capture_floor","restricted_species","spawn_filter"],
    spawns:["encounter_mode","spawn_chance","spawn_min_distance","spawn_max_distance","spawn_limit","spawn_lifetime","spawn_grass_only","spawn_filter"],
    aim:["aim_keyboard","aim_speed","aim_mouse","aim_target_radius","allow_empty_throw","throw_frames","throw_arc","aim_chain","range","width","optimal_range","hit_near","hit_far","line_of_sight"],
-   capture:["capture_floor","back_multiplier","critical_front","critical_back","critical_multiplier","consume_on_miss"],
+   capture:["capture_floor","back_multiplier","critical_front","critical_back","critical_multiplier","capture_shakes","capture_shake_frames","consume_on_miss"],
    behavior:["reaction","alert_distance","flee_steps","flee_speed","flee_disappear_distance","flee_stuck_frames","alert_on_miss","impact_frames"],
    scopes:["enabled","access_mode","encounter_mode","restricted_species"],
    tests:["access_mode","hotkey","encounter_mode"]
