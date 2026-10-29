@@ -60,18 +60,34 @@ module BifrostCapture
     cfg = event ? options($game_map.map_id,event_spec(event)[0],event.id) : base
     range = [cfg["range"].to_i,1].max
     width = [cfg["width"].to_i,1].max
-    valid_tile = forward.between?(1,range) && side.abs <= width/2
-    visible = cfg["line_of_sight"] != "1" || line_clear?(px,py,tx,ty)
-    hit = !!event && valid_tile && visible &&
-          rand < hit_chance(forward,cfg)
+    if event
+      geom = shot_geometry(px, py, event.x, event.y, cfg)
+      forward, side = geom[:forward], geom[:side]
+      valid_tile = geom[:in_range]
+    else
+      valid_tile = false
+    end
+    visible = !event || cfg["line_of_sight"] != "1" ||
+              line_clear?(px,py,tx,ty)
+    accuracy = valid_tile ? hit_chance(forward,cfg) : 0.0
+    hit = !!event && valid_tile && visible && rand < accuracy
     # Al impactar se consume siempre una Ball. Si falla por apuntado,
     # consume_on_miss decide si el lanzamiento gasta el item.
     if mode == :ball && (hit || cfg["consume_on_miss"] == "1")
       return false unless $bag.remove(payload,1)
     end
     if !hit
-      notice(_INTL("¡Lanzamiento fallido!"))
-      react(event,cfg) if event
+      reason = if !event
+                 _INTL("No hay un Pokémon en la trayectoria.")
+               elsif !valid_tile
+                 _INTL("El objetivo está fuera de alcance.")
+               elsif !visible
+                 _INTL("Un obstáculo bloquea el lanzamiento.")
+               else
+                 _INTL("La Poké Ball se ha desviado.")
+               end
+      notice(reason)
+      react(event,cfg) if event && valid_tile && visible
       return false
     end
     contact_fx(event)
