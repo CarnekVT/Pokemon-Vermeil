@@ -325,7 +325,7 @@ class CaptureStudio{
      '<div class="bf-roster-col"><input type="checkbox" aria-label="Generar '+E(n)+'" data-roster="spawn" data-species="'+E(n)+'" '+(this.roster.spawn[n]?"checked":"")+'></div>'+
      '<button class="bf-mini-btn" title="Configuración específica de '+E(n)+'" data-edit-species="'+E(n)+'">↗</button></div>').join("")+'</div>'+
     (total>150?'<div class="bf-help" style="margin-top:10px">Se muestran los primeros 150 resultados. Filtra para localizar una especie concreta.</div>':"")+
-    '<div class="bf-help" style="margin-top:12px">El perfil Full OW utiliza todas las especies de las tablas del mapa si spawn_filter=all. Si eliges allowlist, solo las marcadas en APARICIÓN. Para bloquear una especie por completo, usa la opción de abajo.</div>')+
+    '<div class="bf-help" style="margin-top:12px">El perfil Full OW utiliza todas las especies de las tablas del mapa si spawn_filter=all. Si eliges allowlist, solo las marcadas en APARICIÓN. Para bloquear una especie por completo, usa la opción de abajo.</div>'+
     '<div class="bf-actions"><input class="bf-input" data-block-species placeholder="ID que no debe aparecer" style="max-width:190px"><button class="bf-btn" data-action="toggle-block">Alternar bloqueo</button></div>');
  }
  spawnsPanel(v){
@@ -381,7 +381,7 @@ class CaptureStudio{
     ["01 · DETECCIÓN","≤ "+v.alert_distance+" casillas","Jugador dentro de alarma"],
     ["02 · COMPORTAMIENTO",label(v.reaction),"Flee / Attack / Ignore"],
     ["03 · RESOLUCIÓN","Huir o combatir","El evento conserva sus reglas"]
-   ].map(x=>'<div class="bf-stat"><span>'+E(x[0])+'</span><strong>'+E(x[1])+'</strong><small>'+E(x[2])+'</small></div>').join("")+'</div>')+
+   ].map(x=>'<div class="bf-stat"><span>'+E(x[0])+'</span><strong>'+E(x[1])+'</strong><small>'+E(x[2])+'</small></div>').join("")+'</div>'+
    '<div class="bf-help">El movimiento continuo de huida, persecución, visión de obstáculos, tipos de agresividad y reacciones visuales avanzadas siguen pendientes.</div>');
  }
  scopesPanel(){
