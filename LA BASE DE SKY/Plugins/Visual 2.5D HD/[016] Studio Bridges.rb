@@ -138,13 +138,13 @@ module Visual25D
           edges = geom[4]
           top = edges[pri]
           bottom = edges[pri - 1]
-          bottom += Visual25D::COLUMN_BAND_OVERLAP if pri >= 2
+          bottom += 1 if pri >= 2
           z_row = row + pri
           use_raised_z = true
         else
           # Ground: project the SAME near/far edges and taper as Tile Depth.
           scale = Visual25D.row_width_scale_any(row)
-          if Visual25D::TAPER_SUPPORTED
+          if Sprite.method_defined?(:taper=)
             near = Visual25D.row_width_scale_any(row + 1)
             if near && near > 0
               scale = near
