@@ -492,16 +492,13 @@ if defined?(MakerStudio) && TilemapRenderer.method_defined?(:update_extended_poo
             end
           end
         end
-        # Zoom BASE siempre: si se deja el proyectado, unprojected_origin /
-        # ox en pri>0 arrastra al correr N/S.
-        bx = sprite.hd25_base_zoom_x || TilemapRenderer::ZOOM_X
-        by = sprite.hd25_base_zoom_y || TilemapRenderer::ZOOM_Y
-        sprite.zoom_x = bx
-        sprite.zoom_y = by
-        Visual25D.invalidate_tile_zoom!(sprite)
+        # Reconstruct the flat origin in the *current* Sprite zoom space.
+        # project_ext_sprite/unprojected_origin subtract the same ox/oy,
+        # so the origin is exact without resetting zoom twice per frame.
+        # This also keeps the live taper/zoom stable on horizontal scroll.
         if sprite.ox != 0 || sprite.oy != 0
-          sprite.x = flat_x + (sprite.ox * bx.abs).round
-          sprite.y = flat_y + (sprite.oy * by.abs).round
+          sprite.x = flat_x + (sprite.ox * sprite.zoom_x.abs).round
+          sprite.y = flat_y + (sprite.oy * sprite.zoom_y.abs).round
         else
           sprite.x = flat_x
           sprite.y = flat_y
