@@ -263,8 +263,11 @@ end
 
 # Solo enganchar si los plugins existen. Orden original/carga independiente.
 if defined?(Spriteset_Map)
-  if defined?(LBDSAnimatedProps) && Spriteset_Map.method_defined?(:lbds_props_update_sprites) &&
-     !Spriteset_Map.ancestors.include?(Visual25D::Props)
+  # Load-order independent: Sky can compile before LBDS Animated Props.
+  # No update hook is installed by this module, so an absent LBDS adds
+  # NO runtime work. LBDS itself tests respond_to?(:v25_props_apply_geometry).
+  unless Spriteset_Map.ancestors.any? { |ancestor| ancestor.equal?(Visual25D::Props) ||
+                                              ancestor.name == "Visual25D::Props" }
     Spriteset_Map.prepend(Visual25D::Props)
   end
   if defined?(LightingStudio) && Spriteset_Map.method_defined?(:ls_update) &&
