@@ -2531,7 +2531,12 @@ module Visual25D
     def apply_tile_taper(tile, value)
       return if !TAPER_SUPPORTED
       value = 1.0 if !value || value <= 0
-      return if tile.hd25_taper && (tile.hd25_taper - value).abs <= ZOOM_EPS
+      # MakerStudio/the tile pool can reset the REAL Sprite taper on recycle.
+      # The cached hd25_taper is not proof that the GPU still uses that value.
+      cached = tile.hd25_taper
+      if cached && (cached - value).abs <= ZOOM_EPS
+        return if !tile.respond_to?(:taper) || (tile.taper - value).abs <= ZOOM_EPS
+      end
       tile.taper = value
       tile.hd25_taper = value
     end
