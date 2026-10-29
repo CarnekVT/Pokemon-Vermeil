@@ -63,7 +63,20 @@ module Visual25D
                cells = obj[:cells] || []
                has_height = obj[:height].to_i > 1
                priorities = cells.map { |c| c.fetch("priority", 0).to_i }
-               has_height && priorities.uniq.length == 1 ? :billboard : :native
+               if has_height && priorities.uniq.length == 1
+                 :billboard
+               elsif has_height && obj[:width].to_i > 0 && cells.length == obj[:width].to_i * obj[:height].to_i &&
+                     cells.each_with_index.all? { |cell, index|
+                       cell && cell.fetch("priority", 0).to_i == (obj[:height].to_i - 1 - index / obj[:width].to_i)
+                     }
+                 # 3,2,1,0 or 2,1,0: native priority 0 bottom is a ground
+                 # tile but the rows above form an upright column. Raise the
+                 # VISUAL priority of all bands by one so every row shares the
+                 # same foot. Source priorities remain unchanged.
+                 :native_zero_base
+               else
+                 :native
+               end
              end
       @v25_props_modes[key] = mode
     end
@@ -100,8 +113,10 @@ module Visual25D
         row = Visual25D.grid_row_for_map_cell(@map, cell_y)
         next if row.nil?
         pri = priority.to_i.clamp(0, Visual25D::Config::MAX_PRIORITY)
+        pri = [pri + 1, Visual25D::Config::MAX_PRIORITY].min if mode == :native_zero_base
 
         if !field_ready && (mode == :surface || mode == :native ||
+                            mode == :native_zero_base ||
                             (mode == :billboard && pri > 0))
           field = Visual25D.wall_field(@map)
           field = nil if field && field.flat
@@ -144,7 +159,7 @@ module Visual25D
           bottom += Visual25D.column_band_overlap if row_span == 1 && remaining > 1
           z_row = foot_row
           use_raised_z = true
-        elsif mode == :native && pri > 0
+        elsif (mode == :native || mode == :native_zero_base) && pri > 0
           # Exact same shared column stack as Sky native tiles:
           # p1/p2/p3 meet at edges[] even with nonuniform perspective.
           geom = Visual25D.column_stack_geom(field, cell_x, cell_y,
