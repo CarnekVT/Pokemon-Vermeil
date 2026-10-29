@@ -34,26 +34,4 @@ class PokemonSystem
   end
 end
 
-MenuHandlers.add(:options_menu, :visual25d_enabled, {
-  "page"        => :graphics,
-  "name"        => _INTL("Modo 2.5D"),
-  "order"       => 100,
-  "type"        => :toggle,
-  "parameters"  => proc { [_INTL("Sí"), _INTL("No")] },
-  "description" => _INTL("Activa o desactiva el modo visual 2.5D."),
-  "get_proc"    => proc {
-    enabled = if $PokemonSystem&.respond_to?(:visual25d_enabled)
-                $PokemonSystem.visual25d_enabled
-              else
-                Visual25D.enabled
-              end
-    next enabled ? 0 : 1
-  },
-  "set_proc"    => proc { |value, _screen|
-    enabled = (value == 0)
-    # Sin mark_save_sync_dirty: el sync del frame siguiente cancelaria el fundido.
-    $PokemonSystem.visual25d_enabled = enabled if $PokemonSystem&.respond_to?(:visual25d_enabled=)
-    pbVisual25DSetSmooth(enabled)
-  }
-})
-
+# El modo 2.5D no se cambia desde Opciones. Ajustes exclusivos de debug.
