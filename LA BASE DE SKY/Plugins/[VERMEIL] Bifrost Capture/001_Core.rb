@@ -6,7 +6,7 @@ module BifrostCapture
     "profile"=>"bifrost", "enabled"=>"1", "capture_enabled"=>"1",
     "battle_enabled"=>"1", "restricted_species"=>"1", "range"=>"7",
     "width"=>"7", "optimal_range"=>"4", "alert_distance"=>"3",
-    "hit_near"=>"96", "hit_far"=>"60", "capture_floor"=>"10",
+    "hit_near"=>"100", "hit_far"=>"60", "capture_floor"=>"10",
     "back_multiplier"=>"175", "critical_front"=>"3",
     "critical_back"=>"35", "critical_multiplier"=>"250",
     "line_of_sight"=>"1", "reaction"=>"flee", "consume_on_miss"=>"1",
@@ -19,7 +19,8 @@ module BifrostCapture
     "ow_form"=>"0", "ow_min_level"=>"0", "ow_max_level"=>"0",
     "ow_spawn_probability"=>"100",
     "aim_mouse"=>"1", "aim_target_radius"=>"36",
-    "throw_frames"=>"18", "throw_arc"=>"42", "aim_chain"=>"1"
+    "throw_frames"=>"18", "throw_arc"=>"42", "aim_chain"=>"1",
+    "aim_keyboard"=>"1", "aim_speed"=>"5"
   }.freeze
   ROAMERS = %w[RAIKOU SUICUNE ENTEI LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES
                MESPRIT UXIE AZELF COBALION VIRIZION TERRAKION GENESECT
