@@ -260,3 +260,32 @@ conserva la integración de `treatment_input` y `custom_name_input`.
 de model/importer/editor/preview. Sin prueba real de partida ni del teclado
 mkxp-z en esta sesión. Volver a importar y guardar la escena local del Studio
 para aplicar las modificaciones de guion.
+
+
+## Corrección de nombre y despertar: última revisión
+
+- **Escritura del nombre:** la confirmación del editor de texto escucha
+  exclusivamente `Input.triggerex?(:RETURN)`. Ya no usa `Input::USE`,
+  pues en los controles de Vermeil esa acción también se activa con la tecla
+  C. La confirmación posterior («Confirmar / Cambiar») sigue siendo navegable
+  con los botones habituales.
+- **Campo de nombre:** línea guía fija y aviso «Escribe aquí» cuando está
+  vacío. Se dibuja tanto sobre `Graphics/Scenes/Intro/UI/name.png` como
+  en el respaldo gráfico generado por Ruby. La vista previa de Scene Director
+  reproduce el mismo indicador, sin cursor oscilante.
+- **Diálogos:** «¿Mantendrás el nombre Solen?» y una despedida compacta
+  («Bueno, {1}, llegó la hora. ¡Cuídate y disfruta del viaje!»), evitando
+  saltos forzados o páginas con una palabra aislada.
+- **Despierta...:** nuevo ajuste exclusivo de escritura `:crawl`,
+  `SPEED_CRAWL = 0.16` caracteres por paso lógico. El texto centrado conserva
+  su tratamiento de puntos suspensivos y **ya no añade una espera posterior
+  de 70 frames**. Después de revelarse completamente se oculta y la escena
+  continúa de manera automática.
+- **Scene Director:** `:crawl` se reconoce al importar, exportar,
+  previsualizar y editar desde su inspector, y también en la estimación
+  temporal de la línea de tiempo.
+
+Verificación estática: 5 archivos JS sin errores sintácticos; el importador
+mantiene 9 fases y 127 comandos, incluyendo `custom_name_input`,
+`treatment_input` y `show_centered_text` con `:crawl`.
+Prueba en mkxp-z aún pendiente.
