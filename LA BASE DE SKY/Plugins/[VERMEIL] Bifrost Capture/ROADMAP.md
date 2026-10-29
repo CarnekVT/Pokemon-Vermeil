@@ -27,6 +27,7 @@ Actualización: 29-10-2026, rama `feature/bifrost-overworld-capture-studio`.
 |---|---|---|
 | Acceso por evento, cercano y permanente | Código integrado | Disponible en config, editor y menú de juego. |
 | Atajos R / L / ninguno | Código integrado | No modifica el input original de Scene_Map. |
+| Cambiar el tipo de encuentro desde el juego | Código integrado | Menú opcional permite clásico, mixto u OW completo y restricción de especies, por partida. |
 | Captura y combate OW solo de legendarios Bifröst | Código integrado | Catálogo inicial editable en `roster.ini`. |
 | Exclusión de Pokémon decorativos | Código integrado | Etiquetas OWCAP / OWDECOR; no captura NPC sin marcar. |
 | Área frontal 7×7; distancia óptima 4; octava fuera | Código integrado | Interfaz inicial sin puntería perspectiva real. |
