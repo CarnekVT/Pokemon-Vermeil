@@ -381,10 +381,22 @@ En `Plugins/[VERMEIL] Bifrost Capture/config.ini`, dentro de `[global]`:
 debug_force_shiny=1
 ```
 
-Inicia Pokémon Vermeil **con `$DEBUG == true`**. También puedes activar
-`DEBUG: siguientes OW shiny` desde el menú `pbBifrostRulesMenu`, siempre
-que estés en modo debug. Este ajuste solo afecta **nuevos encuentros OW**;
-no modifica encuentros tradicionales ni Pokémon ya existentes.
+El interruptor de pruebas es explícito y **ya no depende de `$DEBUG`**.
+También puedes activar `PRUEBAS: forzar shiny OW` desde el menú
+`pbBifrostRulesMenu`, incluso en un ejecutable abierto sin modo debug. Este ajuste solo afecta **nuevos encuentros OW**;
+no modifica encuentros tradicionales. El menú del juego también puede
+aplicar el color shiny inmediatamente a los OW actuales.
+
+Para probarlo desde un evento (Comando de script) o la consola:
+
+```ruby
+pbBifrostShinyTest(true)   # Activa y recolorea OW actuales
+pbBifrostShinyTest(false)  # Desactiva para próximos OW
+```
+
+La opción sigue en `0` por defecto. Los cambios desde el menú del juego se
+guardan en la partida y pueden prevalecer sobre `config.ini`. Usa el comando
+de arriba para cambiar el estado efectivo directamente en esa partida.
 Para regresar a las probabilidades naturales, utiliza `debug_force_shiny=0`.
 
 - Se crea el Pokémon **al aparecer**, antes de dibujar su sprite. Si es shiny
