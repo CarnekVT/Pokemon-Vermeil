@@ -421,14 +421,19 @@ class SceneEngine::Player
       blink = nil
       loop do
         update
-        entry.update
+        # Evitar que las flechas de navegación dejen el punto de inserción
+        # lejos del final. La línea visible se dibuja por separado.
         helper = entry.instance_variable_get(:@helper)
+        if helper && helper.respond_to?(:cursor=)
+          helper.cursor = entry.text.to_s.length
+        end
+        entry.update
         if helper && helper.respond_to?(:cursor=)
           helper.cursor = entry.text.to_s.length
         end
         tick += 1
         name = entry.text.to_s[0, max]
-        show_cursor = false
+        show_cursor = (tick % 42) < 28
         if name != previous || show_cursor != blink
           draw_vermeil_name_ui(ui.bitmap, name, max, show_cursor, ui_art)
           previous = name.dup
@@ -493,7 +498,8 @@ class SceneEngine::Player
       bitmap.draw_text(ox + 222, oy + 42, 360, 44, "TU NOMBRE", 1)
       bitmap.font.size = 28
       bitmap.draw_text(ox + 290, oy + 238, 283, 47, name.to_s, 1)
-      # Guía fija dentro del campo; no se desplaza con el cursor de Essentials.
+      draw_vermeil_name_caret(bitmap, name, ox + 290, oy + 238, 283, show_cursor)
+      # Subrayado fijo, mientras el cursor vertical indica dónde se escribe.
       bitmap.fill_rect(ox + 297, oy + 293, 264, 2, Color.new(158, 101, 74))
       bitmap.fill_rect(ox + 297, oy + 295, 264, 1, Color.new(235, 201, 145))
       if name.to_s.empty?
@@ -530,6 +536,7 @@ class SceneEngine::Player
     bitmap.font.size = 29
     bitmap.draw_text(ox + 292, oy + 243, 276, 39,
                      name.to_s, 1)
+    draw_vermeil_name_caret(bitmap, name, ox + 292, oy + 243, 276, show_cursor)
     bitmap.fill_rect(ox + 297, oy + 280, 264, 2, Color.new(158, 101, 74))
     bitmap.font.size = 18
     bitmap.draw_text(ox + 275, oy + 325, 305, 27,
@@ -538,6 +545,16 @@ class SceneEngine::Player
     bitmap.font.color = cream
     bitmap.draw_text(ox + 57, oy + 420, 526, 23,
                      "Escribir  ·  Retroceso: borrar  ·  Enter: confirmar", 1)
+  end
+
+  # Cursor vertical, parpadeante y pegado al final del texto.
+  # No depende de la posición fluctuante de la ventana de Essentials.
+  def draw_vermeil_name_caret(bitmap, name, x, y, width, visible)
+    return unless visible
+    text_width = bitmap.text_size(name.to_s).width
+    caret_x = x + ((width + text_width) / 2.0).round + 3
+    caret_x = [[caret_x, x + 7].max, x + width - 8].min
+    bitmap.fill_rect(caret_x, y + 10, 2, 27, Color.new(147, 66, 105))
   end
 
   # Fondo PNG intercambiable. El código sigue funcionando si no hay archivo.
