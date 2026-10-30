@@ -85,9 +85,9 @@ def pbIntroVermeil
 
     show "Graphics/Scenes/Intro/int9", 0, 0, fade: 25
 
-    text_inline "Por aquella disputa nos diste la espalda a todos. No fue precisamente justo, Gran Espíritu.",
+    text_inline "Nos diste la espalda por aquella disputa. Pero hasta tu propio hijo cedió a la codicia. ¿Por qué culparnos a todos?",
                 speaker: "Mujer Misteriosa", speed: :slow
-    text_inline "Hay personas que solo buscan hacer daño. Otras lo darían todo por proteger a su gente.",
+    text_inline "Hay quienes darían todo por cuidar de los suyos. Eso también debería contar.",
                 speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y el Guía está recuperando fuerzas. Si regresa, nuestra región será la primera en sufrirlo.",
                 speaker: "Mujer Misteriosa", speed: :slow
