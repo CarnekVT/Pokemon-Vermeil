@@ -8,7 +8,7 @@ const D={
  profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"jumpup",control_mode:"hold",
  ball_key:"jumpdown",target_key:"none",mode_key:"none",debug_input_guard:"1",
  contextual_mode_toggle:"0",mode_double_tap_frames:"0",mouse_wheel_select:"1",mouse_right_mode:"1",remember_selection:"1",
- allow_shared_bindings:"0",keyboard_target_key:"tab",keyboard_mode_key:"e",
+ allow_shared_bindings:"0",keyboard_target_key:"tab",keyboard_mode_key:"e",keyboard_bait_key:"r",
  hud_controls:"auto",hud_controls_intro_frames:"150",
  hud_position:"bottom_right",hud_scale:"100",hud_opacity:"94",
  hud_offset_x:"0",hud_offset_y:"0",
@@ -42,7 +42,7 @@ const D={
  escape_reaction_recovery:"180",escape_reaction_range:"4",
  feedback_enabled:"1",feedback_frames:"150",feedback_sfx:"1",capture_fx:"1",
  feedback_enter_frames:"12",feedback_hold_frames:"72",feedback_exit_frames:"16",
- feedback_queue_limit:"5",
+ feedback_queue_limit:"5",feedback_stack_count:"3",
  audio_profile:"za_like",sfx_aim:"none",sfx_switch:"none",sfx_lock:"none",
  sfx_mode:"none",sfx_party:"none",
  sfx_throw:"none",sfx_hit:"none",sfx_shake:"none",sfx_caught:"none",
@@ -76,7 +76,8 @@ const CHOICES={
  reaction:["flee","attack","ignore"],temperament:["mixed","neutral","timid","aggressive"],
  audio_profile:["pla_like","za_like","vanilla","original","muted"],
  keyboard_target_key:["tab","e","r","f","t","g","none"],
- keyboard_mode_key:["e","tab","r","f","t","g","none"],hud_controls:["auto","always","off"],
+ keyboard_mode_key:["e","tab","r","f","t","g","none"],
+  keyboard_bait_key:["r","f","t","g","none"],hud_controls:["auto","always","off"],
  hud_position:["bottom_right","bottom_left","top_right","top_left"]
 };
 const V={ "1":"Sí","0":"No",aux1:"AUX1 (Q)",aux2:"AUX2 (W)",none:"Ninguno",jumpup:"JUMPUP (A)",jumpdown:"JUMPDOWN (S)",
