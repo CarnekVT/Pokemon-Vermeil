@@ -342,3 +342,41 @@ plugin Ruby Interfaces. No requiere migración ni recompilar al editar un diseñ
 La edición y el runtime siguen utilizando el esquema original de SoySandi.
 La previsualización visual y los diálogos necesitan una comprobación interactiva
 en Maker Studio. No se afirma que esta comprobación ya haya ocurrido.
+
+## UX 2.2.0 — prioridad al lienzo y a la claridad
+
+Este rediseño conserva **íntegramente** el modelo y las funciones del editor
+`com.soysandi.interfaces`, incluidos los ocho tipos de elemento, animaciones,
+selección múltiple, condiciones, enlaces, ventanas del juego y los formatos de
+almacenamiento `UI/*.json`. No cambia el runtime Ruby ni migra pantallas.
+
+- **Encabezado único:** Diseño, Archivo, + Elemento, Editar, Lienzo, Herramientas,
+  Llamada y Guardar. No hay una segunda barra grande de botones.
+- **Lienzo desplegable:** los presets, ancho/alto, anchors y modos de escalado
+  permanecen en el mismo componente Resolución, pero aparecen dentro de un
+  panel compacto cuando se necesitan, sin consumir filas permanentemente.
+- **Canvas más grande:** al abrir un diseño, Encajar calcula un zoom fino de
+  acuerdo con el espacio real disponible, en lugar de saltos rígidos como
+  50/75/100%. El zoom manual y el Ctrl+rueda siguen disponibles.
+- **Inspector con pestañas:** sin selección, General / Apertura / Listas.
+  Con un elemento, Diseño / Lógica / Animación. Todos los métodos originales
+  siguen ejecutándose desde sus respectivas pestañas.
+- **Línea de tiempo recogida por defecto:** conserva Play, reiniciar y scrub
+  en una banda fina. «Línea de tiempo» (F7) abre pistas, propiedades y claves.
+  La pestaña Animación del inspector también permite abrirla directamente.
+- **Zoom y Encajar sin duplicados:** se reubican los controles originales
+  en la barra de vista; las guías y la selección simulada siguen junto al canvas.
+- **Laterales ajustables:** Capas/Propiedades pueden ocultarse o cambiar de tamaño;
+  «Solo lienzo» (F6) centra el trabajo sin usar fullscreen del navegador,
+  para no bloquear diálogos del mod.
+
+Cuando cambies el tamaño del canvas en el panel Lienzo, «Aplicar» mantiene
+la estrategia que elijas; el tamaño lógico del JSON no cambia solo por
+modificar el zoom de vista.
+
+### Verificación
+
+Se revisó la sintaxis JavaScript y los puntos estáticos de compatibilidad,
+incluidos el modelo original, el archivo JSON y los controles de animación.
+No se ha confirmado aún mediante una sesión interactiva real de Maker Studio;
+la composición y el render del canvas deben comprobarse en esa aplicación.
