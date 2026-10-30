@@ -61,7 +61,8 @@ class FakeMap
     Struct.new(:ice,:waterfall,:waterfall_crest,:land_wild_encounters).
       new(false,false,false,true)
   end
-  def unregister_event(event); end
+  def register_event(event); event.active=true; end
+  def unregister_event(event); event.active=false; end
 end
 class FakeBag
   attr_reader :used
@@ -123,6 +124,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     refute_nil event
     assert_equal [:PIKACHU,6,0],BifrostCapture.event_spec(event)
     assert BifrostCapture.valid_target?(event)
+    assert event.active, "generated OW must be registered for Game_Map updates"
     assert_equal 1,BifrostCapture.wild_events.length
   end
   def test_spawned_ow_can_be_captured_and_stored
