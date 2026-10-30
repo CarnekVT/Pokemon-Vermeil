@@ -24,7 +24,7 @@ El identificador es `scene.key`; no es el nombre visible de la escena ni su `id`
 
 En RPG Maker se coloca en un comando **Script** dentro de un evento, o se invoca desde un plugin Ruby. Necesita **[CARNEK] Scene Director Runtime** y el archivo `scenes.json` guardado. **¿Cómo usar ingame?** abre una guía que permite guardar y copiar la llamada.
 
-El menú **Archivo → Ver Ruby generado** muestra el código equivalente, distinto de la llamada al runtime. Los bloques Ruby importados sin modificaciones conservan su fuente.
+El menú **Archivo → Ver Ruby generado** muestra el código equivalente, distinto de la llamada al runtime. Ahora permite **Copiar Ruby** y **Exportar .rb**, además de copiar la llamada `SceneDirector.play(...)`. La exportación .rb no reemplaza los archivos existentes del proyecto y conserva literalmente los bloques Ruby importados sin modificaciones; revisa el nombre del método antes de usar el archivo exportado en el juego.
 
 ## Modos de pantalla
 
