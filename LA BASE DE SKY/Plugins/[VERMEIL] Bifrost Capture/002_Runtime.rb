@@ -150,18 +150,29 @@ module BifrostCapture
       pkmn.poke_ball = payload if pkmn.respond_to?(:poke_ball=)
       caught,destination = store_captured_pokemon(pkmn)
     end
-    animate_catch(event,payload,caught,critical,local) if respond_to?(:animate_catch)
+    # The result is stored, but the OW remains locked/visible to the capture
+    # state machine until its animation finishes. This never blocks Scene_Map.
+    if defined?(Motion) && Motion.respond_to?(:start_capture)
+      if Motion.start_capture(event,payload,caught,critical,local,
+                              spec[0],destination)
+        return caught
+      end
+    end
+    # Compatibility path for headless tests / reduced runtimes without sprites.
+    finish_capture_result(event,caught,critical,spec[0],destination,local)
+    caught
+  end
+
+  def self.finish_capture_result(event,caught,critical,species,destination,cfg)
     if caught
       remove_event(event)
       notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
-      capture_result(critical ? :critical : :caught,
-                     spec[0],destination,local)
-      return true
+      capture_result(critical ? :critical : :caught,species,destination,cfg)
+    else
+      notice(_INTL("¡El Pokémon se liberó!"))
+      capture_result(:breakout,species,_INTL("¡Sigue libre!"),cfg)
+      react(event,cfg,:breakout)
     end
-    notice(_INTL("¡El Pokémon se liberó!"))
-    capture_result(:breakout,spec[0],_INTL("¡Sigue libre!"),local)
-    react(event,local,:breakout)
-    false
   end
 
   def self.dispatch_battle
