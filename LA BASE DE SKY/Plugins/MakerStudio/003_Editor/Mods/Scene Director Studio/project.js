@@ -20,7 +20,7 @@ export async function copyExternalFileToProject(ctx,file,destDir){
   const dest=norm(`${destDir}/${safe}`); const bytes=new Uint8Array(await file.arrayBuffer()); await writeBinaryAbsolute(`${root}/${dest}`,bytes); return dest;
 }
 export async function detectSceneEngine(ctx){
-  const result={found:false,name:"Scene Engine",version:"?",folder:"",settings:{scenesDir:"Graphics/Scenes",textBoxFile:"txt",textBoxY:286,textBoxH:178,textPadX:48,textPadYTop:42,textLineH:32,textMaxLines:4,textColor:[248,248,248],textShadow:[72,72,72],speakerColor:[248,208,48],speakerShadow:[120,96,16],speakerColorMap:{},speeds:{instant:999,fast:4.4,normal:1.5,slow:.7,very_slow:.15,crawl:.16},fontName:"Power Green",fontSize:29,fontFile:""},methods:[]};
+  const result={found:false,name:"Scene Engine",version:"?",folder:"",settings:{scenesDir:"Graphics/Scenes",textBoxFile:"txt",textBoxY:286,textBoxH:178,textPadX:48,textPadYTop:42,textLineH:32,textMaxLines:4,textColor:[248,248,248],textShadow:[72,72,72],speakerColor:[248,208,48],speakerShadow:[120,96,16],speakerColorMap:{},speeds:{instant:999,fast:4.4,normal:1.5,slow:.7,very_slow:.15,crawl:.20},fontName:"Power Green",fontSize:29,fontFile:""},methods:[]};
   const metas=await listRecursive(ctx,"Plugins",{extensions:["txt"],max:2500});
   for(const p of metas.filter(x=>/meta\.txt$/i.test(x))){let t="";try{t=String(await ctx.fs.readProjectFile(p)||"")}catch{};if(/^Name\s*=\s*Scene Engine\s*$/mi.test(t)){result.found=true;result.folder=p.replace(/\/meta\.txt$/i,"");result.version=(t.match(/^Version\s*=\s*(.+)$/mi)||[])[1]?.trim()||"?";break}}
   if(!result.found)return result;
