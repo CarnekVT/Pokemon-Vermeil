@@ -348,6 +348,27 @@ module BifrostCapture
     wild
   end
 
+  # Talking to a generated OW Pokémon starts the ordinary wild battle.
+  # Do not run it while an animated throw is still resolving.
+  def self.interact_battle(event)
+    return false unless event && eligible_event?(event)
+    return false if event.instance_variable_get(:@bifrost_capture_lock) ||
+                    event.instance_variable_get(:@bifrost_projectile_lock)
+    return false if defined?(Motion) && Motion.busy?
+    return false if $game_temp && ($game_temp.in_battle || $game_temp.in_menu)
+    wild = battle_wild_for(event)
+    return false unless wild
+    BifrostCapture::LiveAim.close if defined?(BifrostCapture::LiveAim) &&
+      BifrostCapture::LiveAim.active?
+    BifrostCapture::Feedback.reset if defined?(BifrostCapture::Feedback)
+    outcome = WildBattle.start(wild)
+    if outcome
+      Pressure.clear_success(event) if defined?(Pressure)
+      remove_event(event)
+    end
+    true
+  end
+
   def self.dispatch_attack
     event = @pending_attack
     @pending_attack = nil
