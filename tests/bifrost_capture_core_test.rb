@@ -53,11 +53,27 @@ class BifrostCoreTest < Minitest::Test
                     cfg.merge("sfx_throw"=>"../unsafe_file"))
   end
 
+  def test_za_default_creates_original_audible_cue_without_shipped_audio
+    require "tmpdir"
+    Dir.mktmpdir("bifrost-sfx") do |dir|
+      Dir.chdir(dir) do
+        $bifrost_audio_played = nil
+        assert BifrostCapture::Audio.play(:switch,BifrostCapture::DEFAULTS)
+        assert_equal "Bifrost/za_switch",$bifrost_audio_played
+        wav = File.binread("Audio/SE/Bifrost/za_switch.wav")
+        assert_equal "RIFF",wav.byteslice(0,4)
+        assert_equal "WAVE",wav.byteslice(8,4)
+        assert_operator wav.bytesize,:>,1024
+      end
+    end
+  end
+
   def test_reserved_actions_never_leak_into_capture_by_default
     cfg=BifrostCapture::DEFAULTS
     assert_equal "none",cfg["target_key"]
-    assert_equal "aux2",cfg["mode_key"]
-    assert_equal :aux2,BifrostCapture.capture_action(cfg,"mode_key")
+    assert_equal "none",cfg["mode_key"]
+    assert_nil BifrostCapture.capture_action(cfg,"mode_key")
+    assert_equal "za_like",cfg["audio_profile"]
     assert_equal :jumpup,BifrostCapture.capture_action(cfg,"hotkey")
     assert_equal :jumpdown,BifrostCapture.capture_action(cfg,"ball_key")
     %w[action special aux1 aux2 use back].each do |reserved|
