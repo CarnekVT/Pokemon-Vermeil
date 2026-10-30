@@ -31,6 +31,17 @@ class BifrostCoreTest < Minitest::Test
     end
   end
 
+  def test_new_capture_pacing_and_personalizable_hud_defaults
+    cfg = BifrostCapture::DEFAULTS
+    assert_equal "17",cfg["throw_cooldown_frames"]
+    assert_equal "25",cfg["escape_reaction_chance"]
+    assert_equal "8",cfg["escape_reaction_hp_percent"]
+    assert_equal "bottom_right",cfg["hud_position"]
+    assert_equal "100",cfg["hud_scale"]
+    assert_equal "1",cfg["temperament_indicators"]
+    assert_equal "3",cfg["aggressive_lunge_distance"]
+  end
+
   def test_three_temperaments_are_stable_and_selectable
     %w[neutral timid aggressive].each do |choice|
       event=Object.new

@@ -9,6 +9,8 @@ const D={
  contextual_mode_toggle:"0",mode_double_tap_frames:"0",mouse_wheel_select:"1",mouse_right_mode:"1",remember_selection:"1",
  allow_shared_bindings:"0",keyboard_target_key:"tab",keyboard_mode_key:"e",
  hud_controls:"auto",hud_controls_intro_frames:"150",
+ hud_position:"bottom_right",hud_scale:"100",hud_opacity:"94",
+ temperament_indicators:"1",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
  spawn_lifetime:"45",spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
@@ -19,14 +21,19 @@ const D={
  critical_multiplier:"250",line_of_sight:"1",reaction:"flee",consume_on_miss:"1",
  allow_empty_throw:"0",impact_frames:"3",capture_shakes:"3",capture_shake_frames:"10",
  aim_keyboard:"1",aim_speed:"5",aim_mouse:"1",aim_target_radius:"30",
- throw_frames:"18",throw_arc:"36",aim_chain:"1",max_flights:"3",spawn_intro_frames:"26",
+ throw_frames:"18",throw_arc:"36",aim_chain:"1",max_flights:"3",throw_cooldown_frames:"17",
+ spawn_intro_frames:"26",
  aggressive_notice_frames:"25",aggressive_step_pause:"12",aggressive_attack_windup:"24",
+ aggressive_lunge_distance:"3",aggressive_lunge_speed:"4",aggressive_charge_steps:"2",
  flee_steps:"5",flee_speed:"4",
  flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",
  attempt_limit:"0",instant_modifier:"100",
  temperament:"mixed",neutral_weight:"50",timid_weight:"30",aggressive_weight:"20",
  timid_alert_distance:"4",aggressive_alert_distance:"5",aggressive_attack_distance:"1",
  aggressive_chase_speed:"3",aggressive_level_bonus:"2",
+ escape_reaction_enabled:"1",escape_reaction_chance:"25",
+ escape_reaction_hp_percent:"8",escape_reaction_windup:"30",
+ escape_reaction_recovery:"180",escape_reaction_range:"4",
  feedback_enabled:"1",feedback_frames:"150",feedback_sfx:"1",capture_fx:"1",
  feedback_enter_frames:"12",feedback_hold_frames:"72",feedback_exit_frames:"16",
  feedback_queue_limit:"5",
@@ -63,7 +70,8 @@ const CHOICES={
  reaction:["flee","attack","ignore"],temperament:["mixed","neutral","timid","aggressive"],
  audio_profile:["pla_like","za_like","vanilla","original","muted"],
  keyboard_target_key:["tab","e","r","f","t","g","none"],
- keyboard_mode_key:["e","tab","r","f","t","g","none"],hud_controls:["auto","always","off"]
+ keyboard_mode_key:["e","tab","r","f","t","g","none"],hud_controls:["auto","always","off"],
+ hud_position:["bottom_right","bottom_left","top_right","top_left"]
 };
 const V={ "1":"Sí","0":"No",aux1:"AUX1 (Q)",aux2:"AUX2 (W)",none:"Ninguno",jumpup:"JUMPUP (A)",jumpdown:"JUMPDOWN (S)",
  action:"ACTION (Shift/Z)",special:"SPECIAL (D)",
@@ -73,7 +81,9 @@ const V={ "1":"Sí","0":"No",aux1:"AUX1 (Q)",aux2:"AUX2 (W)",none:"Ninguno",jump
  flee:"Huir",attack:"Atacar",ignore:"Ignorar",all:"Todos",allowlist:"Solo catálogo",
  mixed:"Mixto (probabilidades)",neutral:"Neutro",timid:"Miedoso",aggressive:"Agresivo",
  vanilla:"Sonidos de Essentials",original:"Solo archivos propios",muted:"Silenciado",
- pla_like:"Leyendas: Arceus (archivos propios)",za_like:"Leyendas: Z-A (archivos propios)" };
+ pla_like:"Leyendas: Arceus (archivos propios)",za_like:"Leyendas: Z-A (archivos propios)",
+ bottom_right:"Inferior derecha",bottom_left:"Inferior izquierda",
+ top_right:"Superior derecha",top_left:"Superior izquierda" };
 const T=(v)=>V[v]??v;
 const F=[
  ["SISTEMA","general"],
@@ -90,6 +100,10 @@ const F=[
  ["Alternar Ball/Team teclado","keyboard_mode_key"],
  ["Guía de controles HUD","hud_controls"],
  ["Duración de guía (frames)","hud_controls_intro_frames",30,360],
+ ["Posición HUD","hud_position"],
+ ["Tamaño HUD (%)","hud_scale",70,140],
+ ["Opacidad HUD (%)","hud_opacity",30,100],
+ ["Señales visibles de temperamento","temperament_indicators"],
  ["Proteger combos debug CTRL","debug_input_guard"],
  ["Permitir atajos compartidos (avanzado)","allow_shared_bindings"],
  ["Captura directa","capture_enabled"],["Enviar Pokémon","battle_enabled"],
@@ -117,6 +131,7 @@ const F=[
  ["Permitir tiro a vacío","allow_empty_throw"],
  ["Duración del vuelo","throw_frames",8,48],["Altura del arco","throw_arc",0,110],
  ["Lanzamientos consecutivos","aim_chain"],["Balls simultáneas en vuelo","max_flights",1,6],
+ ["Espera entre lanzamientos (frames)","throw_cooldown_frames",0,90],
  ["Efectos de captura dinámicos","capture_fx"],
  ["CAPTURA","capture"],["Captura mínima (%)","capture_floor",0,100],
  ["Multiplicador espalda (%)","back_multiplier",100,500],
@@ -142,10 +157,19 @@ const F=[
  ["Alerta agresivo (casillas)","aggressive_alert_distance",1,20],
  ["Contacto agresivo (casillas)","aggressive_attack_distance",1,6],
  ["Velocidad de persecución","aggressive_chase_speed",1,6],
- ["BONO niveles agresivo","aggressive_level_bonus",0,20],
+ ["VENTAJA EN COMBATE: +niveles al Pokémon agresivo","aggressive_level_bonus",0,20],
+ ["Radio de embestida agresiva (casillas)","aggressive_lunge_distance",1,20],
+ ["Velocidad de embestida","aggressive_lunge_speed",1,5],
+ ["Pasos rápidos iniciales","aggressive_charge_steps",1,5],
  ["Preparación persecución (frames)","aggressive_notice_frames",0,90],
  ["Intervalo entre pasos (frames)","aggressive_step_pause",0,60],
  ["Aviso antes de combatir (frames)","aggressive_attack_windup",0,90],
+ ["Reacción tras escapar de Ball","escape_reaction_enabled"],
+ ["Probabilidad de reacción (%)","escape_reaction_chance",0,100],
+ ["Coste al equipo: % PS máx. (sin KO)","escape_reaction_hp_percent",0,30],
+ ["Tiempo para esquivar (frames)","escape_reaction_windup",8,120],
+ ["Espera global entre reacciones (frames)","escape_reaction_recovery",0,600],
+ ["Alcance de reacción (casillas)","escape_reaction_range",1,12],
  ["Radio de alerta","alert_distance",0,20],["Huida en pasos","flee_steps",1,30],
  ["Velocidad de huida","flee_speed",1,6],
  ["Distancia para escapar","flee_disappear_distance",4,30],
@@ -407,10 +431,10 @@ class Studio{
     this.panel("Comportamiento y lectura visual",'<div class="bf-cards">'+[
       ["NEUTRO","Observa, puede alejarse brevemente después de una Ball fallida y vuelve a su rutina."],
       ["MIEDOSO","Detecta antes y huye por las casillas del mapa antes de desaparecer."],
-      ["AGRESIVO","Persigue al entrenador y puede iniciar un combate con bonificación configurable."]
+      ["AGRESIVO","Detecta, se prepara y embiste solo dentro de su segundo radio; en combate recibe +"+c.aggressive_level_bonus+" niveles."]
     ].map((item,i)=>'<div class="bf-stat bf-mood-'+i+'"><span>'+item[0]+
       '</span><strong>'+item[1]+'</strong></div>').join("")+'</div>'+
-      '<p class="bf-help">Los pesos de cada temperamento se normalizan automáticamente; no necesitan sumar 100. Los ajustes locales de especie prevalecen sobre los del mapa y el perfil.</p>');
+      '<p class="bf-help"><b>¿Qué recibe el Pokémon agresivo en combate?</b> +<b>'+esc(c.aggressive_level_bonus)+'</b> niveles sobre su nivel de aparición (máximo Nv. 100). Se aplica solo al Pokémon salvaje cuando Bifröst inicia el combate tradicional; no se trata de experiencia o recompensa del jugador. Configura también la alerta y la reacción de escape (avisa antes y puede esquivarse). Los ajustes locales de especie prevalecen sobre los generales.</p>');
   if(this.section==="audio")return '<h1 class="bf-headline">Audio de captura y comportamiento</h1>'+
     '<p class="bf-sub">Perfiles PLA-like y Z-A-like con archivos propios, reemplazables. Si faltan, se usa Essentials; no se distribuye audio extraído de otros juegos.</p>'+
     this.panel("Pistas de diseño",'<div class="bf-cards">'+[

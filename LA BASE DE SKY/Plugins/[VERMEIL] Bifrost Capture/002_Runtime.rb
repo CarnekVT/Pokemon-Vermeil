@@ -174,7 +174,9 @@ module BifrostCapture
       notice(_INTL("¡El Pokémon se liberó!"))
       capture_result(:breakout,species,_INTL("¡Sigue libre!"),cfg)
       BifrostCapture::Audio.play(:breakout,cfg) if defined?(BifrostCapture::Audio)
-      react(event,cfg,:breakout)
+      angry = respond_to?(:trigger_escape_reaction) &&
+              trigger_escape_reaction(event,cfg)
+      react(event,cfg,:breakout) unless angry
     end
   end
 

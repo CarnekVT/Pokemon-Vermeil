@@ -214,6 +214,7 @@ module BifrostCapture
       end
 
       def update
+        @throw_cooldown = [@throw_cooldown.to_i-1,0].max
         BifrostCapture::Motion.update
         if !active?
           cfg = BifrostCapture.options
@@ -309,6 +310,8 @@ module BifrostCapture
         focus = s[:target]
         status = :free
         hint = BifrostCapture.take_notice
+        hint ||= _INTL("Preparando otra Poké Ball") if
+          @throw_cooldown.to_i > 0 && s[:mode] == :ball
         if focus
           spec = BifrostCapture.event_spec(focus)
           local = BifrostCapture.options($game_map.map_id,spec[0],focus.id)
@@ -361,6 +364,7 @@ module BifrostCapture
       def fire
         s = @session
         return false unless s
+        return false if @throw_cooldown.to_i > 0
         target = s[:target]
         if s[:mouse_active]
           target = BifrostCapture.focus_at([s[:x],s[:y]],s[:config])
@@ -401,6 +405,7 @@ module BifrostCapture
         launched = BifrostCapture::Motion.launch(target,item,s[:mode],local)
         if launched
           s[:shot_during_hold] = true
+          @throw_cooldown = local["throw_cooldown_frames"].to_i.clamp(0,90)
           s[:target] = BifrostCapture.closest_target
           s[:mouse_active] = false
           remember_selection(s)

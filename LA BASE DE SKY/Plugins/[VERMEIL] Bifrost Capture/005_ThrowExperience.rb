@@ -17,9 +17,8 @@ module BifrostCapture
       @aim.bitmap = Bitmap.new(64,64)
       @aim.ox = @aim.oy = 32
       @panel = Sprite.new(@vp)
-      @panel.bitmap = Bitmap.new(278,90)
-      @panel.x = [Graphics.width-286,4].max
-      @panel.y = [Graphics.height-98,4].max
+      @panel.bitmap = Bitmap.new([[Graphics.width-16,392].min,278].max,116)
+      position_panel(BifrostCapture.options)
       @last_status = nil
       @pulse = 0
       @icons = {}
@@ -29,6 +28,19 @@ module BifrostCapture
       @selection_frame = 0
       @help_age = 0
       @help_signature = nil
+    end
+
+    def position_panel(cfg)
+      scale = cfg["hud_scale"].to_i.clamp(70,140)/100.0
+      scale = [scale,(Graphics.width-12).to_f/@panel.bitmap.width,
+                     (Graphics.height-12).to_f/@panel.bitmap.height].min
+      @panel.zoom_x = @panel.zoom_y = scale
+      @panel.opacity = (255*cfg["hud_opacity"].to_i.clamp(30,100)/100.0).round
+      width = (@panel.bitmap.width*scale).round
+      height = (@panel.bitmap.height*scale).round
+      where = cfg["hud_position"].to_s
+      @panel.x = where.end_with?("_left") ? 8 : Graphics.width-width-8
+      @panel.y = where.start_with?("top_") ? 8 : Graphics.height-height-8
     end
 
     def equip(list,selected)
@@ -137,22 +149,22 @@ module BifrostCapture
     def draw_prompt_row(bmp,y,entries)
       x = 11
       right = bmp.width-9
-      bmp.font.size = 9
+      bmp.font.size = 12
       bmp.font.bold = false
       entries.each do |entry|
         key,label = entry
         next if key.nil? || key.to_s.empty? || key.to_s == "--"
         key = key.to_s
-        key_width = bmp.text_size(key).width.ceil+9
-        label_width = bmp.text_size(label).width.ceil+2
-        total = key_width+label_width+7
+        key_width = bmp.text_size(key).width.ceil+10
+        label_width = bmp.text_size(label).width.ceil+4
+        total = key_width+label_width+9
         next if x+total > right
-        bmp.fill_rect(x,y+1,key_width,12,Color.new(65,92,107,192))
+        bmp.fill_rect(x,y+1,key_width,17,Color.new(65,92,107,192))
         bmp.fill_rect(x,y+1,key_width,1,Color.new(139,190,203,184))
         bmp.font.color = Color.new(245,249,255)
-        bmp.draw_text(x+4,y,key_width-6,13,key)
+        bmp.draw_text(x+4,y,key_width-6,18,key)
         bmp.font.color = Color.new(178,206,217)
-        bmp.draw_text(x+key_width+3,y,label_width,13,label)
+        bmp.draw_text(x+key_width+3,y,label_width,18,label)
         x += total
       end
     end
@@ -162,9 +174,9 @@ module BifrostCapture
     def draw_context_controls(bmp,cfg,mode,notice)
       if cfg["hud_controls"] == "off"
         bmp.font.bold = false
-        bmp.font.size = 11
+        bmp.font.size = 13
         bmp.font.color = Color.new(241,216,171)
-        bmp.draw_text(11,65,bmp.width-22,14,notice.to_s)
+        bmp.draw_text(11,79,bmp.width-22,20,notice.to_s)
         return
       end
       controls = prompt_entries(cfg,mode)
@@ -182,22 +194,24 @@ module BifrostCapture
 
       bmp.fill_rect(9,74,bmp.width-17,1,Color.new(92,121,139,120))
       if expanded
-        draw_prompt_row(bmp,62,[:target,:select,:mode].map { |key| controls[key] })
-        draw_prompt_row(bmp,76,[:throw,:cancel,:aim].map { |key| controls[key] })
+        draw_prompt_row(bmp,78,[:target,:select,:mode].map { |key| controls[key] })
+        draw_prompt_row(bmp,97,[:throw,:cancel,:aim].map { |key| controls[key] })
       else
         bmp.font.bold = false
-        bmp.font.size = 11
+        bmp.font.size = 13
         bmp.font.color = Color.new(241,216,171)
-        bmp.draw_text(11,62,bmp.width-22,13,notice.to_s)
-        draw_prompt_row(bmp,76,[:target,:select,:mode,:throw].map { |key| controls[key] })
+        bmp.draw_text(11,77,bmp.width-22,18,notice.to_s)
+        draw_prompt_row(bmp,97,[:target,:select,:mode,:throw].map { |key| controls[key] })
       end
     end
 
     def draw(mode,item,count,focus,notice,party=nil,party_index=0)
+      cfg = BifrostCapture.options
+      position_panel(cfg)
       bmp = @panel.bitmap
       bmp.clear
-      bmp.fill_rect(0,0,278,90,Color.new(13,21,32,205))
-      bmp.fill_rect(0,0,3,90,Color.new(139,199,221))
+      bmp.fill_rect(0,0,bmp.width,bmp.height,Color.new(13,21,32,205))
+      bmp.fill_rect(0,0,3,bmp.height,Color.new(139,199,221))
       bmp.font.size = 11
       bmp.font.bold = false
       bmp.font.color = Color.new(190,205,222)
@@ -207,7 +221,7 @@ module BifrostCapture
         @selection_frame = 0
       end
       @selection_frame = [@selection_frame+1,9].min
-      bmp.draw_text(11,2,175,17,mode == :ball ? "BALL EQUIPADA" : "EQUIPO POKÉMON")
+      bmp.draw_text(11,2,190,19,mode == :ball ? "BALL EQUIPADA" : "EQUIPO POKÉMON")
       if mode == :ball
         [-1,0,1].each_with_index do |offset,i|
           next if @ball_list.empty?
@@ -244,7 +258,7 @@ module BifrostCapture
             bmp.fill_rect(19,29,23,23,Color.new(119,180,220))
           end
           bmp.font.color = Color.new(245,249,255)
-          bmp.font.size = 13
+          bmp.font.size = 15
           bmp.font.bold = true
           bmp.draw_text(53,25,92,19,item.name.to_s)
           bmp.font.bold = false
@@ -267,23 +281,28 @@ module BifrostCapture
         mood = BifrostCapture.temperament_for(focus)
         hue = TEMPERAMENT_COLORS[mood] || TEMPERAMENT_COLORS[:neutral]
         state = focus.instance_variable_get(:@bifrost_mood_state)
-        state_label = state == :chase ? "¡PERSIGUE!" :
-                      state == :flee ? "¡HUYE!" :
-                      BifrostCapture.temperament_label(mood)
-        bmp.fill_rect(157,18,114,43,Color.new(26,38,50,215))
-        bmp.fill_rect(157,18,3,43,hue)
+        state_label = case state
+        when :alert then "¡ALERTA!"
+        when :charge then "¡EMBISTE!"
+        when :chase then "¡PERSIGUE!"
+        when :threat then "¡PREPARA ATAQUE!"
+        when :flee then "¡HUYE!"
+        else BifrostCapture.temperament_label(mood)
+        end
+        bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,215))
+        bmp.fill_rect(157,18,3,47,hue)
         bmp.font.color = hue
         bmp.font.size = 12
-        bmp.draw_text(165,20,104,19,state_label)
+        bmp.draw_text(165,20,bmp.width-174,22,state_label)
         bmp.font.color = Color.new(235,241,250)
-        bmp.draw_text(165,38,104,18,"#{spec[0]}  Nv.#{spec[1]}")
+        bmp.draw_text(165,41,bmp.width-174,20,"#{spec[0]}  Nv.#{spec[1]}")
       else
-        bmp.fill_rect(157,18,114,43,Color.new(26,38,50,190))
+        bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,190))
         bmp.font.color = Color.new(191,200,214)
         bmp.font.size = 12
-        bmp.draw_text(166,29,99,20,"Sin objetivo")
+        bmp.draw_text(166,29,bmp.width-174,22,"Sin objetivo")
       end
-      draw_context_controls(bmp,BifrostCapture.options,mode,notice)
+      draw_context_controls(bmp,cfg,mode,notice)
     end
 
     def dispose

@@ -1,4 +1,4 @@
-# Bifröst Capture 1.0 — gamefeel de capturas OW encadenadas
+# Bifröst Capture 1.1 — controles fluidos, fauna expresiva y HUD configurable
 
 **Pokémon Vermeil · Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -86,6 +86,59 @@ hud_controls_intro_frames=150
 No se crean nuevos `Viewport` ni se interceptan acciones; se dibuja
 dentro del bitmap del HUD ya existente y desaparece al cerrar el apuntado.
 La duración son fotogramas de juego, no segundos fijos.
+
+## Gamefeel 1.1: riesgo, fauna expresiva y HUD personalizable
+
+**Cooldown de lanzamientos:** `throw_cooldown_frames=17` evita el
+spam de pulsaciones sin bloquear la exploración ni las animaciones de otras
+Poké Balls. Se mantiene el límite de hasta tres vuelos en paralelo y se
+comprueba la cantidad de Balls disponible. El contador continúa entre
+sesiones de apuntado para que no se eluda cerrando y abriendo el HUD.
+
+**Reacción al liberarse:** cada Ball fallida tiene una probabilidad
+configurable (`escape_reaction_chance=25`) de provocar una respuesta.
+La criatura avisa durante `escape_reaction_windup=30` fotogramas y
+solo afecta al equipo cuando el jugador todavía se encuentra en su
+radio (`escape_reaction_range=4`). Se puede evitar alejándose o
+interrumpiendo la preparación mediante otro lanzamiento. Si alcanza,
+resta `escape_reaction_hp_percent=8` % de PS máximos a un Pokémon
+disponible del equipo, sin dejarlo a 0 PS. La reacción tiene un
+enfriamiento global (`escape_reaction_recovery=180`) para evitar
+castigos superpuestos. Desactivar con `escape_reaction_enabled=0`.
+La finalidad es dar un coste jugable y evitable a capturas repetidas,
+no sustituir el combate tradicional.
+
+**Agresivos:** detectan a distancia, se preparan con señal visual y
+solo comienzan una embestida dentro de su radio interno
+(`aggressive_lunge_distance=3`), a velocidad y duración configurables
+(`aggressive_lunge_speed=4`, `aggressive_charge_steps=2`).
+Después reducen la velocidad y hacen pausas; no aparecen corriendo
+directamente contra el jugador desde la distancia de detección.
+La bonificación real al entrar en combate tradicional es
+`aggressive_level_bonus`: **+2 niveles al Pokémon salvaje**
+(por defecto), sin superar nivel 100. El editor lo muestra en
+**Comportamiento → VENTAJA EN COMBATE** para no confundirlo con una
+recompensa para el entrenador.
+
+**Señales visuales por temperamento:** sobre cada Pokémon visible
+aparece un marcador discreto: neutro verde, tímido azul con interrogante,
+agresivo naranja con exclamación. Durante alerta/embestida/amenaza
+cambia de color y énfasis. Los indicadores usan
+`Spriteset_Map.viewport`, siguen la posición y profundidad de los
+sprites en 2.5D y se eliminan al abandonar el mapa o entrar en combate.
+Se pueden ocultar con `temperament_indicators=0`.
+
+**Personalización del HUD:** `hud_position` admite `bottom_right`,
+`bottom_left`, `top_right` o `top_left`; `hud_scale`
+admite 70–140 % y `hud_opacity` 30–100 %. Se mantiene
+`hud_controls=auto/always/off`. Las opciones también están en
+Bifröst Capture Studio; posición, escala, visibilidad y opacidad
+pueden ajustarse desde el menú de reglas durante la partida.
+Las etiquetas siguen los keybindings detectables por el motor.
+
+**Pruebas necesarias:** ejecutar mkxp-z para verificar que la señal de
+temperamento no tapa eventos, el zoom de Visual 2.5D respeta el
+encuadre, el HUD cabe en 640×480 y no se pierden PS en cambios de escena.
 
 ## Gamefeel de exploración (revisión 1.0)
 

@@ -269,6 +269,20 @@ class BifrostLiveTest < Minitest::Test
     BifrostCapture::Motion.cancel
   end
 
+  def test_throw_cooldown_counts_down_without_blocking_aim
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    aim = BifrostCapture::LiveAim
+    aim.instance_variable_set(:@throw_cooldown,4)
+    assert aim.active?
+    refute aim.fire
+    3.times { Input.configure({Input::JUMPUP=>true},{}); aim.update }
+    refute aim.fire
+    aim.update
+    assert_equal 0,aim.instance_variable_get(:@throw_cooldown)
+    assert aim.active?
+  end
+
   def test_mouse_wheel_changes_ball_in_both_directions
     Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update

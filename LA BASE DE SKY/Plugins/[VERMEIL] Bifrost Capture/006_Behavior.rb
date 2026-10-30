@@ -98,7 +98,7 @@ module BifrostCapture
       :original_type=>event.instance_variable_get(:@move_type),
       :stuck=>0, :phase=>:notice,
       :notice=>cfg["aggressive_notice_frames"].to_i.clamp(0,90),
-      :rest=>0, :attack=>0
+      :rest=>0, :attack=>0, :charge_steps=>0
     }
     event.instance_variable_set(:@bifrost_chase_state,state)
     event.instance_variable_set(:@bifrost_mood_state,:alert)
@@ -144,8 +144,21 @@ module BifrostCapture
     if state[:phase] == :notice
       state[:notice] -= 1
       return if state[:notice] > 0
-      state[:phase] = :chase
-      event.instance_variable_set(:@bifrost_mood_state,:chase)
+      state[:phase] = :watch
+      event.instance_variable_set(:@bifrost_mood_state,:alert)
+    end
+    # The outer sensing radius only warns. Actual pursuit starts within
+    # a separate inner radius, after the preparation completes.
+    if state[:phase] == :watch
+      event.turn_toward_player if event.respond_to?(:turn_toward_player) &&
+                                  !event.moving?
+      return if dist > cfg["aggressive_lunge_distance"].to_i.clamp(1,20)
+      state[:phase] = :charge
+      state[:charge_steps] = cfg["aggressive_charge_steps"].to_i.clamp(1,5)
+      state[:rest] = 0
+      event.move_speed = cfg["aggressive_lunge_speed"].to_i.clamp(1,5)
+      event.instance_variable_set(:@bifrost_mood_state,:charge)
+      BifrostCapture::Audio.play(:alert,cfg) if defined?(BifrostCapture::Audio)
     end
     if dist <= cfg["aggressive_attack_distance"].to_i.clamp(1,6)
       event.instance_variable_set(:@bifrost_mood_state,:threat)
@@ -161,7 +174,8 @@ module BifrostCapture
       return
     end
     state[:attack] = 0
-    event.instance_variable_set(:@bifrost_mood_state,:chase)
+    event.instance_variable_set(:@bifrost_mood_state,
+      state[:phase] == :charge ? :charge : :chase)
     return if event.moving? || event.move_route_forcing
     state[:rest] -= 1 if state[:rest] > 0
     return if state[:rest] > 0
@@ -177,6 +191,14 @@ module BifrostCapture
       end
     else
       state[:stuck] = 0
+      if state[:phase] == :charge
+        state[:charge_steps] -= 1
+        if state[:charge_steps] <= 0
+          state[:phase] = :chase
+          event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(1,5)
+          event.instance_variable_set(:@bifrost_mood_state,:chase)
+        end
+      end
     end
   end
 
@@ -201,6 +223,81 @@ module BifrostCapture
       event.instance_variable_set(:@bifrost_mood_state,:curious)
       event.instance_variable_set(:@bifrost_alert_cooldown,120)
       true
+    end
+  end
+
+  # Optional escape backlash: the player can retreat before the tell ends.
+  # Apply modest, non-fainting HP pressure to the first available party member.
+  def self.trigger_escape_reaction(event,cfg)
+    return false unless cfg["escape_reaction_enabled"] == "1"
+    return false unless eligible_event?(event)
+    return false if @escape_reaction_recovery.to_i > 0
+    return false if rand(100) >= cfg["escape_reaction_chance"].to_i.clamp(0,100)
+    return false if event.instance_variable_get(:@bifrost_escape_reaction)
+    state = {
+      :frames=>cfg["escape_reaction_windup"].to_i.clamp(8,120),
+      :range=>cfg["escape_reaction_range"].to_i.clamp(1,12),
+      :hp=>cfg["escape_reaction_hp_percent"].to_i.clamp(0,30),
+      :recovery=>cfg["escape_reaction_recovery"].to_i.clamp(0,600),
+      :previous=>event.instance_variable_get(:@bifrost_mood_state)
+    }
+    stop_chase(event) if chasing?(event)
+    event.turn_toward_player if event.respond_to?(:turn_toward_player)
+    event.instance_variable_set(:@bifrost_escape_reaction,state)
+    event.instance_variable_set(:@bifrost_mood_state,:threat)
+    @escape_reactions ||= {}
+    @escape_reactions[event.object_id] = event
+    notice(_INTL("¡El Pokémon se enfadó! Aléjate de su alcance."))
+    BifrostCapture::Audio.play(:alert,cfg) if defined?(BifrostCapture::Audio)
+    true
+  end
+
+  def self.cancel_escape_reaction(event)
+    return unless event
+    state = event.instance_variable_get(:@bifrost_escape_reaction)
+    return unless state
+    event.remove_instance_variable(:@bifrost_escape_reaction)
+    event.instance_variable_set(:@bifrost_mood_state,nil)
+    event.instance_variable_set(:@bifrost_alert_cooldown,90)
+    (@escape_reactions || {}).delete(event.object_id)
+  end
+
+  def self.update_escape_reactions
+    @escape_reaction_recovery = [@escape_reaction_recovery.to_i-1,0].max
+    (@escape_reactions || {}).values.dup.each do |event|
+      state = event.instance_variable_get(:@bifrost_escape_reaction)
+      unless state && eligible_event?(event) &&
+             $game_map.events[event.id].equal?(event)
+        cancel_escape_reaction(event)
+        next
+      end
+      # A new capture attempt interrupts the telegraphed counteraction.
+      next if event.instance_variable_get(:@bifrost_projectile_lock) ||
+              event.instance_variable_get(:@bifrost_capture_lock)
+      state[:frames] -= 1
+      next if state[:frames] > 0
+      inside = distance(event) <= state[:range]
+      if inside && state[:hp] > 0 && $player.respond_to?(:party)
+        pokemon = $player.party.find do |pkmn|
+          pkmn && pkmn.respond_to?(:able?) && pkmn.able? &&
+            pkmn.respond_to?(:hp=) && pkmn.respond_to?(:totalhp)
+        end
+        if pokemon
+          max = pokemon.totalhp.to_i
+          amount = [(max*state[:hp]/100.0).round,1].max
+          pokemon.hp = [pokemon.hp.to_i-amount,1].max if max > 1
+          notice(_INTL("¡{1} recibió el impacto!".dup,pokemon.name.to_s))
+          if defined?(Feedback)
+            spec = event_spec(event)
+            Feedback.publish(:counter,spec && spec[0],
+              _INTL("El equipo resiste el contraataque"))
+          end
+        end
+      else
+        notice(_INTL("¡Esquivaste la reacción del Pokémon!"))
+      end
+      cancel_escape_reaction(event)
+      @escape_reaction_recovery = state[:recovery]
     end
   end
 
@@ -239,6 +336,7 @@ module BifrostCapture
     return if $game_temp.in_menu || $game_temp.in_battle ||
               $game_temp.message_window_showing
     @ai_frame = (@ai_frame || 0) + 1
+    update_escape_reactions
     (@fleeing || {}).values.dup.each do |event|
       if !eligible_event?(event) || !$game_map.events[event.id].equal?(event)
         (@fleeing || {}).delete(event.object_id)
@@ -266,6 +364,7 @@ module BifrostCapture
       next unless eligible_event?(event)
       next if respond_to?(:emerging?) && emerging?(event)
       next if fleeing?(event) || chasing?(event) ||
+              event.instance_variable_get(:@bifrost_escape_reaction) ||
               event.instance_variable_get(:@bifrost_capture_lock)
       cd = event.instance_variable_get(:@bifrost_alert_cooldown).to_i
       if cd > 0
@@ -293,6 +392,9 @@ module BifrostCapture
     (@chasing || {}).values.dup.each { |event| stop_chase(event) }
     @fleeing = {}
     @chasing = {}
+    (@escape_reactions || {}).values.dup.each { |event| cancel_escape_reaction(event) }
+    @escape_reactions = {}
+    @escape_reaction_recovery = 0
     @pending_attack = nil
     @aim_interrupted = false
     @ai_frame = 0

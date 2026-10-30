@@ -180,8 +180,15 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     event.instance_variable_set(:@x,14)
     event.instance_variable_set(:@y,10)
     assert BifrostCapture.start_chase(event,cfg)
+    # The outer radius warns first: the creature must not instantly
+    # fly toward the player from its sensing distance.
+    25.times { BifrostCapture.chase_tick(event,cfg) }
+    assert_equal 14,event.x
+    assert_equal :alert,event.instance_variable_get(:@bifrost_mood_state)
+    event.instance_variable_set(:@x,13)
     BifrostCapture.chase_tick(event,cfg)
-    assert_equal 13,event.x
+    assert_equal 12,event.x
+    assert_equal :charge,event.instance_variable_get(:@bifrost_mood_state)
     assert_equal 9,BifrostCapture.battle_wild_for(event).level
   end
 
@@ -263,6 +270,49 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     ensure
       BifrostCapture.singleton_class.send(:define_method,:catch_chance,original)
     end
+  end
+
+  def test_escaped_pokemon_can_telegraph_a_dodgeable_party_pressure
+    BifrostCapture.spawn_wild(:Land)
+    event = $game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,9)
+    mon = Struct.new(:hp,:totalhp,:name) do
+      def able?; hp > 0; end
+    end.new(100,100,"Primero")
+    $player.party << mon
+    cfg = BifrostCapture.options.merge(
+      "escape_reaction_enabled"=>"1","escape_reaction_chance"=>"100",
+      "escape_reaction_hp_percent"=>"10","escape_reaction_windup"=>"8",
+      "escape_reaction_recovery"=>"0","escape_reaction_range"=>"4")
+    assert BifrostCapture.trigger_escape_reaction(event,cfg)
+    assert_equal 100,mon.hp
+    8.times { BifrostCapture.update_escape_reactions }
+    assert_equal 90,mon.hp
+    refute event.instance_variable_get(:@bifrost_escape_reaction)
+    assert BifrostCapture.trigger_escape_reaction(event,cfg)
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,1)
+    8.times { BifrostCapture.update_escape_reactions }
+    assert_equal 90,mon.hp
+  end
+
+  def test_escape_pressure_cannot_defeat_last_available_pokemon
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,9)
+    mon=Struct.new(:hp,:totalhp,:name) do
+      def able?; hp > 0; end
+    end.new(2,100,"Primero")
+    $player.party << mon
+    cfg=BifrostCapture.options.merge(
+      "escape_reaction_enabled"=>"1","escape_reaction_chance"=>"100",
+      "escape_reaction_hp_percent"=>"30","escape_reaction_windup"=>"8",
+      "escape_reaction_recovery"=>"0","escape_reaction_range"=>"4")
+    assert BifrostCapture.trigger_escape_reaction(event,cfg)
+    8.times { BifrostCapture.update_escape_reactions }
+    assert_equal 1,mon.hp
   end
 
   def test_no_ow_does_not_consume_ball

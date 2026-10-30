@@ -9,12 +9,14 @@ module BifrostCapture
       :breakout => [Color.new(86,42,48), Color.new(255,156,153)],
       :miss     => [Color.new(89,68,40), Color.new(255,216,151)],
       :blocked  => [Color.new(60,64,75), Color.new(202,210,222)],
-      :escape   => [Color.new(73,54,90), Color.new(218,178,255)]
+      :escape   => [Color.new(73,54,90), Color.new(218,178,255)],
+      :counter  => [Color.new(100,49,32), Color.new(255,184,133)]
     }.freeze
     TITLES = {
       :caught=>"¡ATRAPADO!", :critical=>"¡CAPTURA CRÍTICA!",
       :breakout=>"¡SE LIBERÓ!", :miss=>"¡LANZAMIENTO FALLIDO!",
-      :blocked=>"NO SE PUEDE LANZAR", :escape=>"¡ESCAPÓ!"
+      :blocked=>"NO SE PUEDE LANZAR", :escape=>"¡ESCAPÓ!",
+      :counter=>"¡CONTRAATAQUE!"
     }.freeze
 
     class << self
