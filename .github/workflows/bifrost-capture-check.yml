@@ -34,5 +34,7 @@ jobs:
         run: ruby tests/bifrost_capture_aim_test.rb
       - name: Verify free movement while aiming
         run: ruby tests/bifrost_capture_live_test.rb
+      - name: Verify Legends-style left slide and result queue
+        run: ruby tests/bifrost_capture_feedback_test.rb
       - name: Verify battle frame-update alias chaining is safe
         run: ruby tests/bifrost_capture_battle_patch_test.rb
