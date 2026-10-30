@@ -163,7 +163,7 @@ def pbIntroVermeil
       speaker: "Mujer Misteriosa", speed: :slow
     )
     wait 12
-    text_inline "Solen es el nombre de este cuerpo. Si quieres, podemos conservarlo.",
+    text_inline "Solen es el nombre de este cuerpo. Puedes conservarlo o elegir otro.",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
     wait 12
@@ -233,7 +233,8 @@ def pbIntroVermeil
 
     to_white 20
     stop_scrolling
-    wait 100
+    # Pantallazo blanco breve; no retener 100 frames antes del traslado.
+    wait 16
 
     Graphics.freeze
     $game_temp.player_new_map_id    = 42
