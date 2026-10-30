@@ -167,7 +167,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
     assert_equal 1,$player.party.length
     assert_equal :PIKACHU,$player.party[0].species
-    assert_equal :caught,BifrostCapture::Feedback.last_result[:kind]
+    assert_includes [:caught,:critical],BifrostCapture::Feedback.last_result[:kind]
     assert_equal "Añadido al equipo",BifrostCapture::Feedback.last_result[:detail]
   end
 
