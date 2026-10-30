@@ -10,10 +10,24 @@ module BifrostCapture
         !!@session
       end
 
+      def binding(cfg,field,fallback)
+        if BifrostCapture.respond_to?(:input_action)
+          result = BifrostCapture.input_action(cfg[field])
+          return result if result
+        end
+        Input.const_defined?(fallback) ? Input.const_get(fallback) : nil
+      end
+
+      def debug_reserved?(cfg)
+        BifrostCapture.respond_to?(:debug_input_blocked?) &&
+          BifrostCapture.debug_input_blocked?(cfg)
+      end
+
       def start
         return false if active? || !BifrostCapture.aim_allowed?
         return false if BifrostCapture::Motion.busy?
         cfg = BifrostCapture.options
+        return false if debug_reserved?(cfg)
         balls = BifrostCapture.ball_choices
         party = $player.party.select { |pkmn| pkmn && pkmn.able? }
         can_ball = cfg["capture_enabled"] == "1" && !balls.empty?
@@ -92,6 +106,7 @@ module BifrostCapture
         BifrostCapture::Motion.update
         if !active?
           cfg = BifrostCapture.options
+          return if debug_reserved?(cfg)
           key = BifrostCapture.hotkey
           return if !key || !Input.trigger?(key)
           return unless ["always","nearby"].include?(cfg["access_mode"])
@@ -107,6 +122,7 @@ module BifrostCapture
         end
         s = @session
         cfg = s[:config]
+        return if debug_reserved?(cfg)
         s[:frames] += 1
         key = BifrostCapture.hotkey
         if Input.trigger?(Input::BACK)
@@ -117,22 +133,25 @@ module BifrostCapture
           close
           return
         end
-        if Input.trigger?(Input::SPECIAL)
+        mode_key = binding(cfg,"mode_key",:SPECIAL)
+        if mode_key && Input.trigger?(mode_key)
           candidate = s[:mode] == :ball ? :battle : :ball
           enabled = candidate == :battle ?
             (cfg["battle_enabled"] == "1" && !s[:party].empty?) :
             (cfg["capture_enabled"] == "1" && !s[:balls].empty?)
           s[:mode] = candidate if enabled
         end
-        cycle = key == Input::AUX1 ? Input::ACTION : Input::AUX1
-        if Input.trigger?(cycle)
+        ball_key = binding(cfg,"ball_key",:JUMPDOWN)
+        target_key = binding(cfg,"target_key",:ACTION)
+        if ball_key && Input.trigger?(ball_key)
           if s[:mode] == :ball && !s[:balls].empty?
             s[:ball_index] = (s[:ball_index]+1)%s[:balls].length
           elsif s[:mode] == :battle && !s[:party].empty?
             s[:party_index] = (s[:party_index]+1)%s[:party].length
           end
         end
-        cycle_target if Input.trigger?(Input::ACTION) && cycle != Input::ACTION
+        cycle_target if target_key && target_key != ball_key &&
+                        Input.trigger?(target_key)
 
         # Movement arrows remain owned by Game_Player. They are NEVER
         # consumed by the aim interface. Keyboard switches locked targets
