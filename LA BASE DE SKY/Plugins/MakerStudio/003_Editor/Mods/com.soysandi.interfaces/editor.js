@@ -149,6 +149,8 @@ export class EditorInterfaces {
 
     this.inspector = new Inspector(this.ctx, {
       antesDeCambiar,
+      alDeseleccionar: () => this.seleccionar(null),
+      abrirAnimaciones: () => this.espacio?.showTimeline(),
       alCambiar: () => { this.marcarSucio(); this.lienzo.repintar(); this.capas.refrescar(); this.tiempo.recalcularDuracion(); },
       listaInterfaces: () => this.disponibles.filter(n => n !== this.nombre),
       interruptoresConocidos: () => this.interruptoresConocidos(),
