@@ -125,6 +125,7 @@ module BifrostCapture
       end
 
       def play_sfx(kind, cfg)
+        return if defined?(BifrostCapture::Audio) # centralized event audio
         return if cfg["feedback_sfx"] == "0"
         return unless defined?(pbSEPlay)
         name = case kind
