@@ -1,4 +1,4 @@
-# Bifröst Capture — seguimiento 0.8.0 (reconstrucción completa de código)
+# Bifröst Capture — seguimiento 0.8.1 (reconstrucción completa de código)
 
 Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 
@@ -6,7 +6,10 @@ Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 
 | Área | Estado | Verificación / siguiente tarea |
 |---|---|---|
-| Entradas configurables y control debug | Código integrado; validar en juego | Cambian cuatro acciones independientemente, A/S por defecto, CTRL protegido |
+| Entradas sin conflictos por defecto | Código integrado; tests | A prepara; S corto cambia Ball y S largo cambia modo. D/Q/Shift conservan sus funciones. |
+| Migración de keybindings anteriores | Código integrado; falta probar Studio | Valores D/Q/Shift heredados se sustituyen en el editor con cambios pendientes de guardar |
+| Interacción contextual C/X sin doble acción | Código integrado; tests | Protección del mapa incluso si Bifröst cierra antes del update de Scene_Map |
+| Auditoría de inputs en Vermeil | Revisados los módulos relevantes | D Ready Menu, Q Turbo, Shift/Z carrera, F9 debug, flechas movimiento; falta prueba de terceros en mkxp |
 | Tasa OW adicional separada | Código integrado; test automatizado | 12 % extra por paso en Vermeil, enfriamiento de 7 pasos, sin alterar batalla vanilla |
 | Temperamentos neutro/miedoso/agresivo | Código integrado; tests de IA | Personalidad individual estable, huida, persecución y combate agresivo |
 | HUD de temperamentos y objetivos | Código integrado; validar visuales | Retícula con pulso, tres colores, estados persigue y huye |
@@ -18,14 +21,14 @@ Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 | 004: Integración de encuentros de hierba desde cero | Integrado | Test: tirada nativa crea OW válido |
 | 005: Apuntado, HUD y lanzamiento desde cero | Parcial | Selector de tres Balls, imán de objetivo, estela y fallo visual coherente; validar con cámara 2.5D |
 | 006: Huida/ataque visible desde cero | Integrado | Test de huida sin marca de captura |
-| 008: apuntado y vuelo no bloqueantes | Código integrado y tests de input | Se camina con flechas mientras W prepara el lanzamiento |
+| 008: apuntado y vuelo no bloqueantes | Código integrado y tests de input | Se camina con flechas mientras A prepara el lanzamiento |
 | Origen del tiro estable mientras el jugador se desplaza | Código integrado y test | El contacto toma como origen la casilla al soltar W |
 | Secuencia de captura en estados por fotograma | Código integrado; validar mkxp | Sin bucles manuales de Graphics/Input, reacción diferida |
 | Traducciones con placeholders | Código corregido y test | Evita FrozenError al usar .dup con _INTL y placeholders |
 | Cambio de mapa durante la captura | Código integrado; validar mkxp | Limpieza y prevención de Pokémon OW duplicado |
 | 007: Notificaciones persistentes y captura animada | Código integrado; requiere prueba | Toast independiente con capturado/crítico/liberado/miss/escapó y equipo/caja; absorción y sacudidas |
 | Almacenamiento sin mensajes modales | Código integrado; tests aislados | Inserta en equipo o caja y notifica sin abrir cuadro tradicional |
-| Modo mantener/soltar en una sola acción | Código integrado; requiere prueba | W mantiene apuntado, soltar lanza; C sigue funcionando |
+| Modo mantener/soltar en una sola acción | Código integrado; requiere prueba | A mantiene apuntado, soltar lanza; C sigue funcionando |
 | Estela y desviación visual | Código integrado; requiere prueba | La misma tirada decide si la Ball se desvía y si el impacto falla |
 | Maker Studio: nueva UI y lógica de edición | Integrado | Inspector ampliado con feedback, FX y control rápido; claves sincronizadas con runtime |
 | Perfil exclusivo Bifröst | Integrado | Manuales limitados a catálogo |
