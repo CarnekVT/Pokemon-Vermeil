@@ -5,7 +5,8 @@ const POKEMON_FILES=["PBS/pokemon.txt","PBS/pokemon_Vermeil.txt"];
 const LEGEND="RAIKOU ENTEI SUICUNE LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES UXIE MESPRIT AZELF COBALION TERRAKION VIRIZION GENESECT LANDORUS TORNADUS THUNDURUS ETERNATUS TAPUKOKO TAPULELE TAPUBULU TAPUFINI".split(" ");
 const D={
  profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"jumpup",control_mode:"hold",
- ball_key:"jumpdown",target_key:"none",mode_key:"none",debug_input_guard:"1",
+ ball_key:"jumpdown",target_key:"none",mode_key:"aux2",debug_input_guard:"1",
+ contextual_mode_toggle:"1",mouse_wheel_select:"1",mouse_right_mode:"1",remember_selection:"1",
  allow_shared_bindings:"0",ball_hold_mode_frames:"22",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
@@ -24,7 +25,10 @@ const D={
  timid_alert_distance:"4",aggressive_alert_distance:"5",aggressive_attack_distance:"1",
  aggressive_chase_speed:"4",aggressive_level_bonus:"2",
  feedback_enabled:"1",feedback_frames:"150",feedback_sfx:"1",capture_fx:"1",
- audio_profile:"vanilla",sfx_aim:"none",sfx_switch:"none",sfx_lock:"none",
+ feedback_enter_frames:"12",feedback_hold_frames:"72",feedback_exit_frames:"16",
+ feedback_queue_limit:"5",
+ audio_profile:"pla_like",sfx_aim:"none",sfx_switch:"none",sfx_lock:"none",
+ sfx_mode:"none",sfx_party:"none",
  sfx_throw:"none",sfx_hit:"none",sfx_shake:"none",sfx_caught:"none",
  sfx_breakout:"none",sfx_flee:"none",sfx_alert:"none"
 };
@@ -53,7 +57,7 @@ const CHOICES={
  control_mode:["toggle","hold"],
  encounter_mode:["classic","hybrid","overworld"],spawn_filter:["all","allowlist"],
  reaction:["flee","attack","ignore"],temperament:["mixed","neutral","timid","aggressive"],
- audio_profile:["vanilla","original","muted"]
+ audio_profile:["pla_like","za_like","vanilla","original","muted"]
 };
 const V={ "1":"Sí","0":"No",aux1:"AUX1 (Q)",aux2:"AUX2 (W)",none:"Ninguno",jumpup:"JUMPUP (A)",jumpdown:"JUMPDOWN (S)",
  action:"ACTION (Shift/Z)",special:"SPECIAL (D)",
@@ -62,14 +66,19 @@ const V={ "1":"Sí","0":"No",aux1:"AUX1 (Q)",aux2:"AUX2 (W)",none:"Ninguno",jump
  classic:"Encuentros tradicionales",hybrid:"Mixto",overworld:"OW completo",
  flee:"Huir",attack:"Atacar",ignore:"Ignorar",all:"Todos",allowlist:"Solo catálogo",
  mixed:"Mixto (probabilidades)",neutral:"Neutro",timid:"Miedoso",aggressive:"Agresivo",
- vanilla:"Sonidos de Essentials",original:"Solo archivos propios",muted:"Silenciado" };
+ vanilla:"Sonidos de Essentials",original:"Solo archivos propios",muted:"Silenciado",
+ pla_like:"Leyendas: Arceus (archivos propios)",za_like:"Leyendas: Z-A (archivos propios)" };
 const T=(v)=>V[v]??v;
 const F=[
  ["SISTEMA","general"],
  ["Perfil del proyecto","profile"],["Motor activo","enabled"],["Acceso al apuntado","access_mode"],
  ["Tecla de apertura","hotkey"],["Modalidad de control","control_mode"],
  ["Cambiar Poké Ball","ball_key"],["Objetivo opcional","target_key"],
- ["Alternar modo (opcional)","mode_key"],
+ ["Alternar Ball/Team (durante apuntado)","mode_key"],
+ ["Permitir W contextual","contextual_mode_toggle"],
+ ["Selección con rueda del ratón","mouse_wheel_select"],
+ ["Clic derecho cambia modo","mouse_right_mode"],
+ ["Recordar Ball / Team / modo","remember_selection"],
  ["Mantener Ball para alternar modo (frames)","ball_hold_mode_frames",0,60],
  ["Proteger combos debug CTRL","debug_input_guard"],
  ["Permitir atajos compartidos (avanzado)","allow_shared_bindings"],
@@ -106,7 +115,11 @@ const F=[
  ["Límite de intentos (0 = libre)","attempt_limit",0,20],
  ["Consumir Ball al desviarse","consume_on_miss"],
  ["Notificación persistente","feedback_enabled"],
- ["Duración del resultado (frames)","feedback_frames",45,300],
+ ["Duración antigua (compatibilidad)","feedback_frames",45,300],
+ ["Frames de entrada lateral","feedback_enter_frames",6,30],
+ ["Frames de permanencia","feedback_hold_frames",25,180],
+ ["Frames de salida lateral","feedback_exit_frames",6,30],
+ ["Notificaciones en cola","feedback_queue_limit",1,8],
  ["Sonidos de lanzamiento/captura","feedback_sfx"],
  ["Sacudidas de Ball","capture_shakes",1,5],["Fotogramas por sacudida","capture_shake_frames",4,20],
  ["COMPORTAMIENTO","behavior"],["Reacción anterior (compatibilidad)","reaction"],
@@ -128,7 +141,9 @@ const F=[
  ["AUDIO","audio"],
  ["Modo de audio","audio_profile"],
  ["Apuntar: SFX propio","sfx_aim"],["Cambiar Ball: SFX propio","sfx_switch"],
- ["Fijar objetivo: SFX propio","sfx_lock"],["Lanzar: SFX propio","sfx_throw"],
+ ["Fijar objetivo: SFX propio","sfx_lock"],
+ ["Cambio Ball/Team: SFX propio","sfx_mode"],
+ ["Cambiar Pokémon: SFX propio","sfx_party"],["Lanzar: SFX propio","sfx_throw"],
  ["Impacto: SFX propio","sfx_hit"],["Sacudida: SFX propio","sfx_shake"],
  ["Captura: SFX propio","sfx_caught"],["Liberación: SFX propio","sfx_breakout"],
  ["Huida: SFX propio","sfx_flee"],["Alerta: SFX propio","sfx_alert"]
@@ -211,7 +226,9 @@ class Studio{
     if((rules.allow_shared_bindings??this.cfg.global.allow_shared_bindings)!=="1"){
      for(const field of ["hotkey","ball_key","target_key","mode_key"]){
       const value=rules[field];
-      if(["aux1","aux2","action","special","use","back"].includes(value)){
+      if(["aux1","aux2","action","special","use","back"].includes(value) &&
+         !(field==="mode_key" && value==="aux2" &&
+           (rules.contextual_mode_toggle??this.cfg.global.contextual_mode_toggle)==="1")){
        rules[field]=field==="hotkey"?"jumpup":"none";
        fixed++;
       }
@@ -261,7 +278,9 @@ class Studio{
   let input="";
   if(CHOICES[key]||bool){
    const opts=isBind&&this.value().allow_shared_bindings!=="1"?
-     ["jumpup","jumpdown","none"]:(CHOICES[key]||["1","0"]);
+     (key==="mode_key" && this.value().contextual_mode_toggle==="1" ?
+      ["aux2","jumpup","jumpdown","none"] :
+      ["jumpup","jumpdown","none"]):(CHOICES[key]||["1","0"]);
    input='<select class="bf-select" data-field="'+key+'">'+opts.map(x=>
     '<option value="'+x+'"'+(val===x?' selected':'')+'>'+esc(T(x))+'</option>').join("")+'</select>';
   }else if(key.startsWith("sfx_")){
@@ -338,20 +357,23 @@ class Studio{
   if(this.section==="species")return this.speciesPanel();
   if(this.section==="scopes")return this.scopesPanel();
   if(this.section==="aim")return '<h1 class="bf-headline">Apuntar sin detener la exploración</h1>'+
-    '<p class="bf-sub">A/JUMPUP apunta y S/JUMPDOWN cambia Ball o modo por duración. C y X solo se comparten cuando ya estás apuntando, sin bloquear el movimiento.</p>'+
+    '<p class="bf-sub">A mantiene apuntado; S cambia la Ball o el Pokémon al instante; W o clic derecho alterna Ball/Team. La rueda permite desplazarse en ambos sentidos sin detener la exploración.</p>'+
     this.panel("Control dinámico",'<div class="bf-cards">'+[
     ["A / JUMPUP","Mantener para apuntar; soltar para lanzar"],
     ["Flechas / Pad","Caminar normalmente, también al apuntar"],
     ["Objetivo","Se fija automáticamente o selecciona con ratón"],
     ["Ratón","Apuntado libre sobre sprites en movimiento"],
-    ["S / JUMPDOWN","Pulsar: Ball · mantener: modo Ball/Pokémon"],
+    ["S / JUMPDOWN","Cambiar Ball o Pokémon seleccionado"],
+    ["W / AUX2","Alternar Ball / Team solo al apuntar"],
+    ["Rueda del ratón","Anterior o siguiente Ball/Pokémon"],
+    ["Clic derecho","Alternar Ball / Team"],
     ["C / USE","Lanzar directamente"],
     ["D / SPECIAL","Menú de accesos rápidos: reservado"],
     ["Shift / Z","Correr: reservado"],
     ["Q / AUX1","Turbo: reservado"],
     ["X / BACK","Cancelar sin lanzar"]].map(x=>'<div class="bf-stat"><span>'+
     esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join("")+
-    '</div><p class="bf-help">Las teclas se interpretan como acciones de Essentials y respetan las reasignaciones. D, Q, Shift/Z y F9 no se utilizan para capturar. Si activas atajos compartidos bajo tu responsabilidad, podrán producir conflictos.</p>')+
+    '</div><p class="bf-help">El selector recuerda el último objeto, Pokémon y modo en la partida. W queda contextual, nunca abre apuntado y se ignora con debug CTRL. D, Q, Shift/Z y F9 mantienen sus funciones originales.</p>')+
     this.panel("Rango y dirección",this.aimPreview());
   if(this.section==="spawns")return '<h1 class="bf-headline">Encuentros naturales OW</h1>'+
     '<p class="bf-sub">En modo completo, cada tirada natural terrestre intenta crear un Pokémon visible y capturable. El modo mixto convierte solo el porcentaje indicado.</p>'+
@@ -376,7 +398,7 @@ class Studio{
       '</span><strong>'+item[1]+'</strong></div>').join("")+'</div>'+
       '<p class="bf-help">Los pesos de cada temperamento se normalizan automáticamente; no necesitan sumar 100. Los ajustes locales de especie prevalecen sobre los del mapa y el perfil.</p>');
   if(this.section==="audio")return '<h1 class="bf-headline">Audio de captura y comportamiento</h1>'+
-    '<p class="bf-sub">Cada evento dispone de un SFX propio y reemplazable, sin detener la exploración.</p>'+
+    '<p class="bf-sub">Perfiles PLA-like y Z-A-like con archivos propios, reemplazables. Si faltan, se usa Essentials; no se distribuye audio extraído de otros juegos.</p>'+
     this.panel("Pistas de diseño",'<div class="bf-cards">'+[
       ["PREPARACIÓN","Apuntar, cambiar Ball, fijar objetivo"],
       ["LANZAMIENTO","Salida, impacto y sacudidas"],
@@ -398,7 +420,7 @@ class Studio{
  render(){
   const dirty=this.dirty();
   this.root.innerHTML='<header class="bf-top"><div class="bf-logo">◈</div>'+
-   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Bifröst 0.8.1</small></div>'+
+   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Bifröst 0.9</small></div>'+
    '<div class="bf-spacer"></div><select class="bf-scope" data-scope>'+
    Object.keys(this.cfg).sort().map(k=>'<option value="'+esc(k)+'"'+
    (k===this.scope?" selected":"")+'>'+esc(k)+'</option>').join("")+'</select>'+
@@ -448,7 +470,9 @@ class Studio{
    this.cfg[this.scope]??={};this.cfg[this.scope][key]=n.value;
    if(key==="allow_shared_bindings"&&n.value==="0"){
     for(const k of ["hotkey","ball_key","target_key","mode_key"]){
-     if(["aux1","aux2","action","special","use","back"].includes(this.value()[k]))
+     if(["aux1","aux2","action","special","use","back"].includes(this.value()[k]) &&
+        !(k==="mode_key" && this.value()[k]==="aux2" &&
+          this.value().contextual_mode_toggle==="1"))
        this.cfg[this.scope][k]=k==="hotkey"?"jumpup":"none";
     }
    }
