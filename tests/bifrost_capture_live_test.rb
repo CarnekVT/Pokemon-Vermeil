@@ -139,6 +139,26 @@ class BifrostLiveTest < Minitest::Test
     assert_nil $scene.map_input_count
   end
 
+  def test_use_remains_consumed_even_when_aim_closes_before_scene_update
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{Input::USE=>true})
+    BifrostCapture::LiveAim.update
+    refute BifrostCapture::LiveAim.active?
+    $scene.update_input
+    assert_nil $scene.map_input_count
+  end
+
+  def test_back_remains_consumed_even_when_aim_closes_before_scene_update
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{Input::BACK=>true})
+    BifrostCapture::LiveAim.update
+    refute BifrostCapture::LiveAim.active?
+    $scene.update_input
+    assert_nil $scene.map_input_count
+  end
+
   def test_capture_animations_do_not_own_graphics_or_input_update_loops
     root=File.expand_path(
       "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture",__dir__)
