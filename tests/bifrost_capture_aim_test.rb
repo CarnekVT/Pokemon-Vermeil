@@ -28,7 +28,8 @@ module RPG
     def initialize(x,y); @x,@y=x,y; end
   end
   class EventCommand
-    def initialize(*args); end
+    attr_reader :parameters
+    def initialize(_code,_indent,parameters); @parameters=parameters; end
   end
   class Event::Page
     attr_accessor :graphic,:move_type,:move_speed,:move_frequency,:through,:trigger,:list
@@ -42,6 +43,7 @@ class Game_Event
   attr_accessor :transparent,:through,:move_speed,:active
   def initialize(map_id,data,map)
     @map_id,@id,@name,@x,@y,@map=map_id,data.id,data.name,data.x,data.y,map
+    @source_data=data
     @direction=2;@character_name=data.pages[0].graphic.character_name
     @transparent=false;@through=false;@erased=false;@active=false
     @move_speed=3;@screen_x=150;@screen_y=110
@@ -201,6 +203,8 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert BifrostCapture.valid_target?(event)
     assert event.active, "generated OW must be registered for Game_Map updates"
     assert_equal 1,BifrostCapture.wild_events.length
+    script=event.instance_variable_get(:@source_data).pages[0].list.first.parameters.first
+    assert_match(/BifrostCapture\\.interact_battle/,script)
   end
   def test_spawned_ow_can_be_captured_and_stored
     BifrostCapture.spawn_wild(:Land)
