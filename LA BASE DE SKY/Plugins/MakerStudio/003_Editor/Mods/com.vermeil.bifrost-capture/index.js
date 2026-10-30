@@ -4,7 +4,7 @@ const ROSTER="Plugins/[VERMEIL] Bifrost Capture/roster.ini";
 const POKEMON_FILES=["PBS/pokemon.txt","PBS/pokemon_Vermeil.txt"];
 const LEGEND="RAIKOU ENTEI SUICUNE LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES UXIE MESPRIT AZELF COBALION TERRAKION VIRIZION GENESECT LANDORUS TORNADUS THUNDURUS ETERNATUS TAPUKOKO TAPULELE TAPUBULU TAPUFINI".split(" ");
 const D={
- profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"aux2",control_mode:"toggle",
+ profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"aux2",control_mode:"hold",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
  spawn_lifetime:"45",spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
@@ -14,9 +14,10 @@ const D={
  critical_multiplier:"250",line_of_sight:"1",reaction:"flee",consume_on_miss:"1",
  allow_empty_throw:"0",impact_frames:"3",capture_shakes:"3",capture_shake_frames:"10",
  aim_keyboard:"1",aim_speed:"5",aim_mouse:"1",aim_target_radius:"30",
- throw_frames:"18",throw_arc:"36",aim_chain:"1",flee_steps:"5",flee_speed:"4",
+ throw_frames:"18",throw_arc:"36",aim_chain:"0",flee_steps:"5",flee_speed:"4",
  flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",
- attempt_limit:"0",instant_modifier:"100"
+ attempt_limit:"0",instant_modifier:"100",
+ feedback_enabled:"1",feedback_frames:"150",feedback_sfx:"1",capture_fx:"1"
 };
 const PRESETS={
  bifrost:{...D},
@@ -72,6 +73,7 @@ const F=[
  ["Permitir tiro a vacío","allow_empty_throw"],
  ["Duración del vuelo","throw_frames",8,48],["Altura del arco","throw_arc",0,110],
  ["Lanzamientos consecutivos","aim_chain"],
+ ["Efectos de captura dinámicos","capture_fx"],
  ["CAPTURA","capture"],["Captura mínima (%)","capture_floor",0,100],
  ["Multiplicador espalda (%)","back_multiplier",100,500],
  ["Crítica frontal (%)","critical_front",0,100],["Crítica por espalda (%)","critical_back",0,100],
@@ -79,6 +81,9 @@ const F=[
  ["Modificador instantáneo (%)","instant_modifier",1,300],
  ["Límite de intentos (0 = libre)","attempt_limit",0,20],
  ["Consumir Ball al desviarse","consume_on_miss"],
+ ["Notificación persistente","feedback_enabled"],
+ ["Duración del resultado (frames)","feedback_frames",45,300],
+ ["Sonidos de lanzamiento/captura","feedback_sfx"],
  ["Sacudidas de Ball","capture_shakes",1,5],["Fotogramas por sacudida","capture_shake_frames",4,20],
  ["COMPORTAMIENTO","behavior"],["Reacción al alertarse","reaction"],
  ["Radio de alerta","alert_distance",0,20],["Huida en pasos","flee_steps",1,30],
