@@ -22,6 +22,11 @@ export class Capas {
     this.diseno = null;
     this.seleccion = null;
 
+    this.buscar = h("input", { className: "ui-txt ui-layer-search", type: "search",
+      placeholder: "Buscar capa por ID o tipo...", title: "Filtra las capas sin alterar el diseño" });
+    this.buscar.setAttribute("aria-label", "Buscar capas");
+    this.buscar.addEventListener("input", () => this.refrescar());
+    this.contador = h("div", { className: "ui-layer-counter", textContent: "0 capas" });
     this.lista = h("div", { className: "ui-capas" });
     this.el = h("div", { className: "ui-panel-izq" },
       h("div", { className: "ui-cabecera-panel" },
@@ -29,6 +34,8 @@ export class Capas {
         h("span", { className: "ui-barra-hueco" }),
         h("span", { className: "ui-capa-tipo", textContent: "arriba = delante" })
       ),
+      this.buscar,
+      this.contador,
       this.lista
     );
   }
@@ -51,10 +58,14 @@ export class Capas {
 
   refrescar() {
     this.lista.innerHTML = "";
-    const els = this.ordenados();
+    const total = this.ordenados();
+    const q = this.buscar.value.trim().toLocaleLowerCase("es");
+    const els = q ? total.filter(el =>
+      (String(el.id)+" "+String(el.tipo)+" "+String(el.texto||"")).toLocaleLowerCase("es").includes(q)) : total;
+    this.contador.textContent = els.length===total.length ? total.length+" capas" : els.length+" de "+total.length+" capas";
     if (!els.length) {
       this.lista.appendChild(h("div", { className: "ui-ayuda", style: { padding: "10px" },
-        textContent: "Todavia no hay nada. Añade algo con los botones de arriba." }));
+        textContent: q ? "Ninguna capa coincide. Borra el filtro para verlas todas." : "Todavia no hay nada. Añade algo con los botones de arriba." }));
       return;
     }
     els.forEach((el) => this.lista.appendChild(this.filaCapa(el)));
