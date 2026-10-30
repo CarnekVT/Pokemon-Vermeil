@@ -105,7 +105,7 @@ require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/006_Behavi
 require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/007_CaptureFeedback"
 module BifrostCapture::Feedback
   class << self
-    def redraw; end
+    def redraw(*); end
     def play_sfx(*args); end
   end
 end
@@ -273,6 +273,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
   end
 
   def test_escaped_pokemon_can_telegraph_a_dodgeable_party_pressure
+    $player=FakePlayer.new
     BifrostCapture.spawn_wild(:Land)
     event = $game_map.events.values.first
     event.instance_variable_set(:@x,10)
@@ -288,16 +289,19 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert BifrostCapture.trigger_escape_reaction(event,cfg)
     assert_equal 100,mon.hp
     8.times { BifrostCapture.update_escape_reactions }
+    assert_equal 100,mon.hp, "The visible lunge must happen before taking damage"
+    14.times { BifrostCapture.update_escape_reactions }
     assert_equal 90,mon.hp
     refute event.instance_variable_get(:@bifrost_escape_reaction)
     assert BifrostCapture.trigger_escape_reaction(event,cfg)
     event.instance_variable_set(:@x,10)
     event.instance_variable_set(:@y,1)
-    8.times { BifrostCapture.update_escape_reactions }
+    22.times { BifrostCapture.update_escape_reactions }
     assert_equal 90,mon.hp
   end
 
   def test_escape_pressure_cannot_defeat_last_available_pokemon
+    $player=FakePlayer.new
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
     event.instance_variable_set(:@x,10)
@@ -311,7 +315,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
       "escape_reaction_hp_percent"=>"30","escape_reaction_windup"=>"8",
       "escape_reaction_recovery"=>"0","escape_reaction_range"=>"4")
     assert BifrostCapture.trigger_escape_reaction(event,cfg)
-    8.times { BifrostCapture.update_escape_reactions }
+    22.times { BifrostCapture.update_escape_reactions }
     assert_equal 1,mon.hp
   end
 
@@ -323,9 +327,12 @@ class BifrostCaptureIntegrationTest < Minitest::Test
   def test_flee_moves_before_disappearing_and_does_not_mark_caught
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
-    assert BifrostCapture.start_flee(event,BifrostCapture.options)
+    cfg=BifrostCapture.options.merge("timid_reaction_frames"=>"3")
+    assert BifrostCapture.start_flee(event,cfg)
     refute_empty $game_map.events
-    9.times { BifrostCapture.flee_tick(event,BifrostCapture.options) }
+    3.times { BifrostCapture.flee_tick(event,cfg) }
+    assert_equal 6,event.y, "Fearful Pokémon should telegraph before fleeing"
+    9.times { BifrostCapture.flee_tick(event,cfg) }
     assert_empty $game_map.events
     assert_empty($PokemonGlobal.bifrost_removed_events || {})
   end
