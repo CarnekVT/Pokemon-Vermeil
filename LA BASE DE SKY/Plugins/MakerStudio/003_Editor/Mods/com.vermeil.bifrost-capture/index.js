@@ -5,8 +5,8 @@ const POKEMON_FILES=["PBS/pokemon.txt","PBS/pokemon_Vermeil.txt"];
 const LEGEND="RAIKOU ENTEI SUICUNE LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES UXIE MESPRIT AZELF COBALION TERRAKION VIRIZION GENESECT LANDORUS TORNADUS THUNDURUS ETERNATUS TAPUKOKO TAPULELE TAPUBULU TAPUFINI".split(" ");
 const D={
  profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"jumpup",control_mode:"hold",
- ball_key:"jumpdown",target_key:"none",mode_key:"aux2",debug_input_guard:"1",
- contextual_mode_toggle:"1",mouse_wheel_select:"1",mouse_right_mode:"1",remember_selection:"1",
+ ball_key:"jumpdown",target_key:"none",mode_key:"none",debug_input_guard:"1",
+ contextual_mode_toggle:"0",mode_double_tap_frames:"16",mouse_wheel_select:"1",mouse_right_mode:"1",remember_selection:"1",
  allow_shared_bindings:"0",ball_hold_mode_frames:"22",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
@@ -27,7 +27,7 @@ const D={
  feedback_enabled:"1",feedback_frames:"150",feedback_sfx:"1",capture_fx:"1",
  feedback_enter_frames:"12",feedback_hold_frames:"72",feedback_exit_frames:"16",
  feedback_queue_limit:"5",
- audio_profile:"pla_like",sfx_aim:"none",sfx_switch:"none",sfx_lock:"none",
+ audio_profile:"za_like",sfx_aim:"none",sfx_switch:"none",sfx_lock:"none",
  sfx_mode:"none",sfx_party:"none",
  sfx_throw:"none",sfx_hit:"none",sfx_shake:"none",sfx_caught:"none",
  sfx_breakout:"none",sfx_flee:"none",sfx_alert:"none"
@@ -75,7 +75,8 @@ const F=[
  ["Tecla de apertura","hotkey"],["Modalidad de control","control_mode"],
  ["Cambiar Poké Ball","ball_key"],["Objetivo opcional","target_key"],
  ["Alternar Ball/Team (durante apuntado)","mode_key"],
- ["Permitir W contextual","contextual_mode_toggle"],
+ ["Permitir W contextual (avanzado; colisiona con debug)","contextual_mode_toggle"],
+ ["Doble toque S para alternar modo (frames)","mode_double_tap_frames",0,30],
  ["Selección con rueda del ratón","mouse_wheel_select"],
  ["Clic derecho cambia modo","mouse_right_mode"],
  ["Recordar Ball / Team / modo","remember_selection"],
@@ -357,14 +358,14 @@ class Studio{
   if(this.section==="species")return this.speciesPanel();
   if(this.section==="scopes")return this.scopesPanel();
   if(this.section==="aim")return '<h1 class="bf-headline">Apuntar sin detener la exploración</h1>'+
-    '<p class="bf-sub">A mantiene apuntado; S cambia la Ball o el Pokémon al instante; W o clic derecho alterna Ball/Team. La rueda permite desplazarse en ambos sentidos sin detener la exploración.</p>'+
+    '<p class="bf-sub">A mantiene apuntado, S cambia selección, doble toque S o clic derecho alterna Ball/Team. W está reservado al debug de pasabilidades.</p>'+
     this.panel("Control dinámico",'<div class="bf-cards">'+[
     ["A / JUMPUP","Mantener para apuntar; soltar para lanzar"],
     ["Flechas / Pad","Caminar normalmente, también al apuntar"],
     ["Objetivo","Se fija automáticamente o selecciona con ratón"],
     ["Ratón","Apuntado libre sobre sprites en movimiento"],
     ["S / JUMPDOWN","Cambiar Ball o Pokémon seleccionado"],
-    ["W / AUX2","Alternar Ball / Team solo al apuntar"],
+    ["Doble toque S","Alternar Ball / Team en teclado"],
     ["Rueda del ratón","Anterior o siguiente Ball/Pokémon"],
     ["Clic derecho","Alternar Ball / Team"],
     ["C / USE","Lanzar directamente"],
@@ -373,7 +374,7 @@ class Studio{
     ["Q / AUX1","Turbo: reservado"],
     ["X / BACK","Cancelar sin lanzar"]].map(x=>'<div class="bf-stat"><span>'+
     esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join("")+
-    '</div><p class="bf-help">El selector recuerda el último objeto, Pokémon y modo en la partida. W queda contextual, nunca abre apuntado y se ignora con debug CTRL. D, Q, Shift/Z y F9 mantienen sus funciones originales.</p>')+
+    '</div><p class="bf-help">El selector recuerda Ball, Team y modo. W vuelve a ser exclusivo del debug de pasabilidad; D, Q, Shift/Z y F9 conservan sus funciones.</p>')+
     this.panel("Rango y dirección",this.aimPreview());
   if(this.section==="spawns")return '<h1 class="bf-headline">Encuentros naturales OW</h1>'+
     '<p class="bf-sub">En modo completo, cada tirada natural terrestre intenta crear un Pokémon visible y capturable. El modo mixto convierte solo el porcentaje indicado.</p>'+
