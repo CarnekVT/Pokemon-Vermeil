@@ -82,6 +82,16 @@ class BifrostLiveTest < Minitest::Test
     assert_equal :blocked,BifrostCapture.result[0]
     assert $game_player.moving?
   end
+  def test_capture_animations_do_not_own_graphics_or_input_update_loops
+    root=File.expand_path(
+      "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture",__dir__)
+    %w[005_ThrowExperience.rb 007_CaptureFeedback.rb 008_LiveGamefeel.rb].each do |name|
+      code=File.read(File.join(root,name))
+      refute_match(/^\s*Graphics\.update\b/,code,"blocking graphics loop in #{name}")
+      refute_match(/^\s*Input\.update\b/,code,"blocking input loop in #{name}")
+    end
+  end
+
   def test_cancel_aim_is_immediate
     Input.configure({Input::AUX2=>true},{Input::AUX2=>true})
     BifrostCapture::LiveAim.update
