@@ -420,7 +420,7 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
 .ui-inspector-context{display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:6px 3px 11px;min-width:0;color:var(--text-primary)}
 .ui-inspector-context strong{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ui-inspector-back{font:11px inherit;background:transparent;border:0;color:var(--accent);
+.ui-inspector-back{font-size:11px;font-family:inherit;background:transparent;border:0;color:var(--accent);
   cursor:pointer;padding:6px 2px;white-space:nowrap}
 .ui-inspector-back:hover{text-decoration:underline}
 .ui-inspector-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;
