@@ -86,12 +86,32 @@ module BifrostCapture
     nil
   end
 
-  def self.character_for(species,form=0)
-    names = []
-    names << "Followers/#{species}_#{form}" if form.to_i > 0
-    names << "Followers/#{species}"
-    names << "Followers/#{species}_0"
-    names.find { |name| pbResolveBitmap("Graphics/Characters/#{name}") }
+  def self.character_for(species,form=0,shiny=false)
+    # Real shiny overworld sheets exist in "Followers shiny".
+    folders = shiny ? ["Followers shiny","Followers"] : ["Followers"]
+    folders.each do |folder|
+      names = []
+      names << "#{folder}/#{species}_#{form}" if form.to_i > 0
+      names << "#{folder}/#{species}"
+      names << "#{folder}/#{species}_0"
+      file = names.find { |name| pbResolveBitmap("Graphics/Characters/#{name}") }
+      return file if file
+    end
+    nil
+  end
+
+  def self.refresh_ow_shiny_sprite(event,pkmn)
+    return unless event && pkmn && pkmn.respond_to?(:shiny?) &&
+                  pkmn.shiny? && event.respond_to?(:character_name) &&
+                  event.respond_to?(:character_name=)
+    # Preserve maps that use custom event graphics unrelated to follower sheets.
+    current = event.character_name.to_s
+    return unless current.start_with?("Followers/")
+    spec = event_spec(event)
+    return unless spec
+    filename = character_for(spec[0],spec[2],true)
+    event.character_name = filename if filename &&
+      filename.start_with?("Followers shiny/")
   end
 
   def self.spawn_wild(enc_type, extra: false)
@@ -115,7 +135,12 @@ module BifrostCapture
     end
     level = level.clamp(1,100)
     form = [local["ow_form"].to_i,0].max
-    sprite_name = character_for(species,form)
+    # Generate at spawn, not when throwing a Ball. A natural shiny stays shiny.
+    pkmn = pbGenerateWildPokemon(species,level)
+    pkmn.form = form if form > 0 && pkmn.respond_to?(:form=)
+    pkmn.shiny = true if debug_force_shiny?(local) && pkmn.respond_to?(:shiny=)
+    shiny = pkmn.respond_to?(:shiny?) && pkmn.shiny?
+    sprite_name = character_for(species,form,shiny)
     return :missing_sprite unless sprite_name
     @spawn_sequence = (@spawn_sequence || 0) + 1
     id = ($game_map.events.keys.max || 0) + 1
@@ -137,6 +162,7 @@ module BifrostCapture
     event_data.pages = [page]
     event = Game_Event.new($game_map.map_id,event_data,$game_map)
     event.instance_variable_set(:@bifrost_generated,true)
+    event.instance_variable_set(:@bifrost_wild_pokemon,pkmn)
     event.instance_variable_set(:@bifrost_extra_spawn,extra)
     event.instance_variable_set(:@bifrost_remaining_steps,
                                cfg["spawn_lifetime"].to_i)
