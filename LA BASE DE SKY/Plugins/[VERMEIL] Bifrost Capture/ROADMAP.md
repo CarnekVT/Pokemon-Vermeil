@@ -1,4 +1,4 @@
-# Bifröst Capture — seguimiento 0.6.0 (reconstrucción completa de código)
+# Bifröst Capture — seguimiento 0.7.0 (reconstrucción completa de código)
 
 Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
 
@@ -12,6 +12,11 @@ Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
 | 004: Integración de encuentros de hierba desde cero | Integrado | Test: tirada nativa crea OW válido |
 | 005: Apuntado, HUD y lanzamiento desde cero | Parcial | Selector de tres Balls, imán de objetivo, estela y fallo visual coherente; validar con cámara 2.5D |
 | 006: Huida/ataque visible desde cero | Integrado | Test de huida sin marca de captura |
+| 008: apuntado y vuelo no bloqueantes | Código integrado y tests de input | Se camina con flechas mientras W prepara el lanzamiento |
+| Origen del tiro estable mientras el jugador se desplaza | Código integrado y test | El contacto toma como origen la casilla al soltar W |
+| Secuencia de captura en estados por fotograma | Código integrado; validar mkxp | Sin bucles manuales de Graphics/Input, reacción diferida |
+| Traducciones con placeholders | Código corregido y test | Evita FrozenError al usar .dup con _INTL y placeholders |
+| Cambio de mapa durante la captura | Código integrado; validar mkxp | Limpieza y prevención de Pokémon OW duplicado |
 | 007: Notificaciones persistentes y captura animada | Código integrado; requiere prueba | Toast independiente con capturado/crítico/liberado/miss/escapó y equipo/caja; absorción y sacudidas |
 | Almacenamiento sin mensajes modales | Código integrado; tests aislados | Inserta en equipo o caja y notifica sin abrir cuadro tradicional |
 | Modo mantener/soltar en una sola acción | Código integrado; requiere prueba | W mantiene apuntado, soltar lanza; C sigue funcionando |
