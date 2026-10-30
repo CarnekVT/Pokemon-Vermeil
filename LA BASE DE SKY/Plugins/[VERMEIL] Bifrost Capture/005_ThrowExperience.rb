@@ -185,7 +185,7 @@ module BifrostCapture
       aim = BifrostCapture.binding_name(cfg,"hotkey")
       ball = BifrostCapture.binding_name(cfg,"ball_key")
       bmp.draw_text(11,78,256,12,
-        "#{aim} apuntar · #{ball} x2 modo · rueda / clic der.")
+        "#{aim} apuntar · #{ball} mant. modo · rueda / clic der.")
     end
 
     def dispose
