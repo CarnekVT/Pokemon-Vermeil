@@ -80,7 +80,8 @@ module BifrostCapture
           :x=>point[0].to_f, :y=>point[1].to_f,
           :target=>target, :mouse_last=>nil, :mouse_active=>false,
           :held=>!!(key && Input.press?(key)), :frames=>0,
-          :last_select_frame=>nil, :last_select_index=>nil
+          :select_held=>false,:select_frames=>0,
+          :select_switched=>false,:select_prior_index=>nil
         }
         @hud = BifrostCapture::ThrowHUD.new
         BifrostCapture::Audio.play(:aim,cfg) if defined?(BifrostCapture::Audio)
@@ -226,30 +227,35 @@ module BifrostCapture
                      Input.const_defined?(:MOUSERIGHT) &&
                      Input.trigger?(Input::MOUSERIGHT)
         toggle_mode(s,cfg) if (mode_key && Input.trigger?(mode_key)) || mouse_mode
-        if ball_key && Input.trigger?(ball_key)
-          window = cfg["mode_double_tap_frames"].to_i.clamp(0,30)
-          previous = s[:last_select_frame]
-          if window > 0 && previous && s[:frames]-previous <= window
-            if s[:last_select_index]
-              field = s[:mode] == :ball ? :ball_index : :party_index
-              s[field] = s[:last_select_index]
-            end
-            toggle_mode(s,cfg)
-            s[:last_select_frame] = nil
-            s[:last_select_index] = nil
-          else
+        # Short press: cycle instantly. Hold ~10 frames: switch modes.
+        # This avoids mistaking fast repeated S taps for a mode change.
+        pressed = ball_key && (Input.press?(ball_key) ||
+                               Input.trigger?(ball_key))
+        if pressed
+          unless s[:select_held]
+            s[:select_held] = true
+            s[:select_frames] = 0
+            s[:select_switched] = false
             field = s[:mode] == :ball ? :ball_index : :party_index
-            s[:last_select_index] = s[field]
+            s[:select_prior_index] = s[field]
             cycle_equipped(s,cfg)
-            s[:last_select_frame] = s[:frames]
           end
+          s[:select_frames] += 1
+          threshold = cfg["ball_hold_mode_frames"].to_i.clamp(6,60)
+          if s[:select_frames] >= threshold && !s[:select_switched]
+            field = s[:mode] == :ball ? :ball_index : :party_index
+            s[field] = s[:select_prior_index] unless s[:select_prior_index].nil?
+            toggle_mode(s,cfg)
+            s[:select_switched] = true
+          end
+        elsif s[:select_held]
+          s[:select_held] = false
+          s[:select_frames] = 0
+          s[:select_switched] = false
         end
         if cfg["mouse_wheel_select"] == "1"
           delta = mouse_wheel_delta
-          if delta != 0
-            cycle_equipped(s,cfg,delta > 0 ? -1 : 1)
-            s[:last_select_frame] = nil
-          end
+          cycle_equipped(s,cfg,delta > 0 ? -1 : 1) if delta != 0
         end
         if target_key && target_key != ball_key &&
            target_key != mode_key && Input.trigger?(target_key)
