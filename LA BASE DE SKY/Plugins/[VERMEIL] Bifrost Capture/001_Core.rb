@@ -12,7 +12,7 @@ module BifrostCapture
   ].freeze
   DEFAULTS = {
     "profile"=>"bifrost", "enabled"=>"1",
-    "access_mode"=>"always", "hotkey"=>"aux2", "control_mode"=>"toggle",
+    "access_mode"=>"always", "hotkey"=>"aux2", "control_mode"=>"hold",
     "capture_enabled"=>"1", "battle_enabled"=>"1", "restricted_species"=>"1",
     "encounter_mode"=>"classic", "spawn_chance"=>"50",
     "spawn_min_distance"=>"3", "spawn_max_distance"=>"6", "spawn_limit"=>"5",
@@ -27,10 +27,12 @@ module BifrostCapture
     "impact_frames"=>"3", "capture_shakes"=>"3", "capture_shake_frames"=>"10",
     "aim_keyboard"=>"1", "aim_speed"=>"5", "aim_mouse"=>"1",
     "aim_target_radius"=>"30", "throw_frames"=>"18", "throw_arc"=>"36",
-    "aim_chain"=>"1", "flee_steps"=>"5", "flee_speed"=>"4",
+    "aim_chain"=>"0", "flee_steps"=>"5", "flee_speed"=>"4",
     "flee_disappear_distance"=>"9", "flee_stuck_frames"=>"90",
     "alert_on_miss"=>"1", "attempt_limit"=>"0",
-    "instant_modifier"=>"100"
+    "instant_modifier"=>"100",
+    "feedback_enabled"=>"1", "feedback_frames"=>"150",
+    "feedback_sfx"=>"1", "capture_fx"=>"1"
   }.freeze
   PROFILES = {
     "bifrost"=>{},
