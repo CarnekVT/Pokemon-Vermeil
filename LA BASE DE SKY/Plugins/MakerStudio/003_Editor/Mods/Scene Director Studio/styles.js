@@ -69,4 +69,8 @@ body.sd-fullscreen-lock{overflow:hidden!important;overscroll-behavior:none!impor
 .sd-use-panel code{user-select:text}
 .sd-use-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .sd-use-top h2{font-size:17px;margin:0}
+
+.sd-local-toast{position:absolute;right:18px;bottom:18px;z-index:1100;max-width:min(460px,calc(100% - 36px));padding:11px 15px;border:1px solid #4e65a2;border-radius:9px;background:#1d2c4c;color:#f3f6ff;font:12px/1.45 system-ui,sans-serif;box-shadow:0 12px 32px rgba(0,0,0,.4);pointer-events:none}
+.sd-local-toast.warning{background:#4d3922;border-color:#d1a45e;color:#fff5df}
+.sd-local-toast.error{background:#54252b;border-color:#e27983;color:#fff0f0}
 `;
