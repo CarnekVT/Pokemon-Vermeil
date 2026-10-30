@@ -203,7 +203,7 @@ module BifrostCapture
     bmp
   end
 
-  def self.projectile(item,event,point,cfg)
+  def self.projectile(item,event,point,cfg,hit_roll=nil)
     vp = Viewport.new(0,0,Graphics.width,Graphics.height)
     vp.z = 999996
     sprite = Sprite.new(vp)
@@ -217,6 +217,17 @@ module BifrostCapture
     shadow.bitmap.fill_rect(2,2,30,6,Color.new(10,15,20,74))
     shadow.ox = 17
     shadow.oy = 5
+    trail_bmp = Bitmap.new(12,12)
+    trail_bmp.fill_rect(5,1,2,10,Color.new(225,240,255))
+    trail_bmp.fill_rect(1,5,10,2,Color.new(225,240,255))
+    trails = Array.new(4) do
+      t = Sprite.new(vp)
+      t.bitmap = trail_bmp
+      t.ox = t.oy = 6
+      t.visible = false
+      t
+    end
+    positions = []
     x,y,w,h = target_rect($game_player)
     begin
       pbSEPlay("Battle throw") if cfg["feedback_sfx"] != "0" &&
@@ -229,6 +240,16 @@ module BifrostCapture
     ground_end = ey+20
     frames = cfg["throw_frames"].to_i.clamp(8,48)
     arc = cfg["throw_arc"].to_i.clamp(0,110)
+    will_miss = false
+    if event && hit_roll
+      spec = event_spec(event)
+      if spec
+        local = options($game_map.map_id,spec[0],event.id)
+        geo = geometry($game_player.x,$game_player.y,event.x,event.y,local)
+        will_miss = geo[:in_range] &&
+          hit_roll >= hit_chance(geo[:front],local)
+      end
+    end
     begin
       frames.times do |i|
         t = (i+1).to_f/frames
@@ -240,7 +261,24 @@ module BifrostCapture
         end
         sprite.x = sx+(ex-sx)*k
         sprite.y = sy+(ey-sy)*k-Math.sin(Math::PI*t)*arc
+        # Deviation is the SAME pre-rolled hit check used by resolve_throw.
+        # It starts late in the arc so the throw remains readable.
+        if will_miss
+          drift = [((k-0.55)/0.45),0.0].max
+          sprite.x += drift*35
+          sprite.y -= drift*12
+        end
         sprite.angle = (480*t).to_i
+        positions.unshift([sprite.x,sprite.y])
+        positions = positions.first(5)
+        trails.each_with_index do |tr,j|
+          point = positions[j+1]
+          tr.visible = !!point
+          next unless point
+          tr.x,tr.y = point
+          tr.opacity = 190-j*43
+          tr.zoom_x = tr.zoom_y = 0.75-j*0.12
+        end
         shadow.x = sprite.x
         shadow.y = ground_start+(ground_end-ground_start)*k
         shadow.opacity = (110-70*Math.sin(Math::PI*t)).to_i
@@ -249,6 +287,8 @@ module BifrostCapture
         update_frame
       end
     ensure
+      trails.each { |t| t.dispose unless t.disposed? }
+      trail_bmp.dispose unless trail_bmp.disposed?
       [sprite,shadow].each do |s|
         bmp = s.bitmap
         s.dispose unless s.disposed?
@@ -470,12 +510,13 @@ module BifrostCapture
         spec = event_spec(target)
         local = options($game_map.map_id,spec[0],target.id)
         behind = behind?($game_player.x,$game_player.y,target)
+        hit_roll = mode == :ball ? rand : nil
         facing = geometry($game_player.x,$game_player.y,
                           target.x,target.y,local)[:direction]
         $game_player.instance_variable_set(:@direction,facing)
         projectile(mode == :ball ? item : :POKEBALL,target,
-                   screen_position(target),local)
-        resolve_throw(target,mode,item,local,behind)
+                   screen_position(target),local,hit_roll)
+        resolve_throw(target,mode,item,local,behind,hit_roll)
         balls = ball_choices
         selected = 0 if selected >= balls.length
         break if mode == :battle || release || cfg["aim_chain"] == "0"
