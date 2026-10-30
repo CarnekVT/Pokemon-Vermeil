@@ -8,6 +8,9 @@ module Graphics
   def self.width; 640; end
   def self.height; 480; end
 end
+class Color
+  def initialize(*_args); end
+end
 class Scene_Map; end
 module GameData
   module Species
@@ -80,6 +83,13 @@ require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/002_Runtim
 require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/004_OverworldEncounters"
 require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/005_ThrowExperience"
 require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/006_Behavior"
+require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/007_CaptureFeedback"
+module BifrostCapture::Feedback
+  class << self
+    def redraw; end
+    def play_sfx(*args); end
+  end
+end
 module BifrostCapture
   class << self
     attr_accessor :captures,:contacts
@@ -116,6 +126,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     BifrostCapture.contacts=0
     BifrostCapture.reset_wild_events
     BifrostCapture.reset_behavior
+    BifrostCapture::Feedback.reset
   end
   def test_native_grass_roll_creates_capturable_ow
     result=PokemonEncounters.new.encounter_triggered?(:Land)
@@ -137,10 +148,30 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert_equal 1,$bag.used
     assert_equal 1,BifrostCapture.captures.length
     assert_equal :PIKACHU,BifrostCapture.captures[0].species
+    assert_equal :caught,BifrostCapture::Feedback.last_result[:kind]
+    assert_equal :PIKACHU,BifrostCapture::Feedback.last_result[:species]
     assert_empty $game_map.events
   end
+  def test_release_has_explicit_distinct_feedback
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,6)
+    original=BifrostCapture.method(:catch_chance)
+    BifrostCapture.singleton_class.send(:define_method,:catch_chance) { |*| 0.0 }
+    begin
+      refute BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
+      assert_equal :breakout,BifrostCapture::Feedback.last_result[:kind]
+      assert_equal 1,$bag.used
+      assert_equal 0,BifrostCapture.captures.length
+    ensure
+      BifrostCapture.singleton_class.send(:define_method,:catch_chance,original)
+    end
+  end
+
   def test_no_ow_does_not_consume_ball
     refute BifrostCapture.resolve_throw(nil,:ball,:POKEBALL,BifrostCapture.options)
+    assert_equal :blocked,BifrostCapture::Feedback.last_result[:kind]
     assert_equal 0,$bag.used
   end
   def test_flee_moves_before_disappearing_and_does_not_mark_caught
