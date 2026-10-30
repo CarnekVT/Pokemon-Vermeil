@@ -72,7 +72,19 @@ export class SceneDirectorEditor{
   mark(){this.updateDirty()}
   async load(){try{if(await this.ctx.fs.projectExists(SAVE_FILE)){this.project=normalizeProject(JSON.parse(String(await this.ctx.fs.readProjectFile(SAVE_FILE)||"{}")))}else this.project=createProject()}catch(e){this.ctx.log.error(e);this.toast("No pude leer scenes.json. Abrí una biblioteca vacía.","warning");this.project=createProject()}this.activeSceneId=this.project.editor?.lastSceneId&&this.project.scenes.some(s=>s.id===this.project.editor.lastSceneId)?this.project.editor.lastSceneId:this.project.scenes[0]?.id||null;this.savedSig=deepSig(this.project)}
   async save(){try{await this.ctx.fs.projectMkdir(SAVE_DIR);this.project.editor.lastSceneId=this.activeSceneId;const compiled=compileProject(this.project);await this.ctx.fs.writeProjectFile(SAVE_FILE,JSON.stringify(compiled,null,2));this.project=normalizeProject(compiled);this.savedSig=deepSig(this.project);this.updateDirty();this.toast(`Guardado: ${SAVE_FILE}`);return true}catch(e){this.ctx.log.error(e);this.toast(`No se pudo guardar: ${e.message||e}`,"error");return false}}
-  toast(m,type="info"){try{this.ctx.ui.showToast({message:m,type})}catch{try{this.ctx.ui.showToast(m)}catch{}}}
+  toast(m,type="info"){
+    // Los toasts del host pueden quedar detrás de un workspace ampliado.
+    if(this.fullscreenActive&&this.nativeDialogDepth===0&&this.root?.isConnected){
+      const note=document.createElement("div");
+      note.className="sd-local-toast"+(type==="error"?" error":type==="warning"?" warning":"");
+      note.setAttribute("role",type==="error"?"alert":"status");
+      note.textContent=String(m??"");
+      this.root.appendChild(note);
+      setTimeout(()=>note.remove(),3600);
+      return;
+    }
+    try{this.ctx.ui.showToast({message:m,type})}catch{try{this.ctx.ui.showToast(m)}catch{}}
+  }
   renderAll(){this.updateBadges();if(this.view==="library")this.showLibrary();else this.showEditor();}
   showLibrary(){this.view="library";this.library.classList.remove("hidden");this.editor.classList.add("hidden");this.preview?.stop();this.renderLibrary()}
   showEditor(){if(!this.scene()){this.showLibrary();return}this.view="editor";this.library.classList.add("hidden");this.editor.classList.remove("hidden");this.renderCommandList();this.renderInspector();this.renderTimeline();this.updateBadges();this.updateFullscreenUi()}
