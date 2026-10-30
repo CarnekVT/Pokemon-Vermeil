@@ -10,13 +10,19 @@ module BifrostCapture
       :miss     => [Color.new(89,68,40), Color.new(255,216,151)],
       :blocked  => [Color.new(60,64,75), Color.new(202,210,222)],
       :escape   => [Color.new(73,54,90), Color.new(218,178,255)],
-      :counter  => [Color.new(100,49,32), Color.new(255,184,133)]
+      :counter  => [Color.new(100,49,32), Color.new(255,184,133)],
+      :backstrike=>[Color.new(85,66,30),Color.new(255,216,105)],
+      :pressure=>[Color.new(92,51,36),Color.new(255,188,105)],
+      :retreat=>[Color.new(79,50,50),Color.new(255,169,154)],
+      :party_hit=>[Color.new(103,51,53),Color.new(255,176,181)]
     }.freeze
     TITLES = {
       :caught=>"¡ATRAPADO!", :critical=>"¡CAPTURA CRÍTICA!",
       :breakout=>"¡SE LIBERÓ!", :miss=>"¡LANZAMIENTO FALLIDO!",
       :blocked=>"NO SE PUEDE LANZAR", :escape=>"¡ESCAPÓ!",
-      :counter=>"¡CONTRAATAQUE!"
+      :counter=>"¡CONTRAATAQUE!", :backstrike=>"¡POR LA ESPALDA!",
+      :pressure=>"¡POKÉMON ALERTADO!", :retreat=>"¡HUIDA ARRIESGADA!",
+      :party_hit=>"¡POKÉMON DAÑADO!"
     }.freeze
 
     class << self
@@ -28,7 +34,7 @@ module BifrostCapture
         incoming = {
           :kind=>kind, :species=>species, :detail=>detail.to_s,
           :enter=>cfg["feedback_enter_frames"].to_i.clamp(6,30),
-          :hold=>cfg["feedback_hold_frames"].to_i.clamp(25,180),
+          :hold=>kind == :backstrike ? 28 : cfg["feedback_hold_frames"].to_i.clamp(25,180),
           :exit=>cfg["feedback_exit_frames"].to_i.clamp(6,30),
           :frames=>0
         }
@@ -105,13 +111,18 @@ module BifrostCapture
         bmp.fill_rect(4,0,w-4,2,fill)
         bmp.fill_rect(4,62,w-4,2,Color.new(73,95,112,130))
         bmp.fill_rect(12,10,46,46,fill)
-        icon = species_icon(state[:species])
+        icon = state[:kind] == :blocked ? nil : species_icon(state[:species])
         if icon && icon.width > 0 && icon.height > 0
           source_width = icon.width > icon.height ? icon.width/2 : icon.width
           bmp.stretch_blt(Rect.new(14,12,42,42),icon,
             Rect.new(0,0,source_width,icon.height))
         else
           bmp.fill_rect(21,19,27,27,accent)
+          if state[:kind] == :blocked
+            bmp.fill_rect(22,31,26,4,Color.new(24,35,46))
+            bmp.fill_rect(32,28,8,10,Color.new(24,35,46))
+            22.times { |i| bmp.fill_rect(23+i,43-i,2,2,Color.new(255,120,120)) }
+          end
           if [:caught,:critical].include?(state[:kind])
             bmp.fill_rect(26,32,7,3,Color.new(25,56,48))
             bmp.fill_rect(31,36,5,3,Color.new(25,56,48))
