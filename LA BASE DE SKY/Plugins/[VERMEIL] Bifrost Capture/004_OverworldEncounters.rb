@@ -136,6 +136,9 @@ module BifrostCapture
     event.instance_variable_set(:@bifrost_remaining_steps,
                                cfg["spawn_lifetime"].to_i)
     $game_map.events[id] = event
+    # Game_Map updates only registered/active events. Inserting into @events
+    # alone leaves a static or invisible Pokémon until the map refreshes.
+    $game_map.register_event(event)
     register_ow(event,species,level,form)
     if $scene.is_a?(Scene_Map)
       spriteset = $scene.spriteset($game_map.map_id)
