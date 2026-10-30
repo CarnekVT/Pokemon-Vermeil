@@ -128,6 +128,8 @@ class BifrostCaptureIntegrationTest < Minitest::Test
   def test_spawned_ow_can_be_captured_and_stored
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,6)
     result=BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
     assert result
     assert_equal 1,$bag.used
@@ -154,6 +156,8 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     BifrostCapture.spawn_wild(:Land)
     $PokemonGlobal.bifrost_overrides["restricted_species"]="1"
     event=$game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,6)
     assert_equal :PIKACHU,BifrostCapture.event_spec(event)[0]
     assert BifrostCapture.valid_target?(event)
     assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,
