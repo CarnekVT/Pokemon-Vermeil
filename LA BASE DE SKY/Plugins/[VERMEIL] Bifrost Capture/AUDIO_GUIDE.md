@@ -26,6 +26,9 @@ La selección sonora es **inspiración para diseño original**, no una instrucci
 | `sfx_flee` | Pokémon escapa | Movimiento corto y evasivo |
 | `sfx_alert` | Agresivo detecta | Aviso seco y urgente |
 | `sfx_critical` | Ball con captura crítica al salir de la mano | Confirmación especial ascendente |
+| `sfx_shiny` | OW shiny aparece | Campanilla brillante reconocible, diferenciada de la captura |
+| `sfx_backstrike` | Impacto por la espalda | Un impacto brillante más firme que el frontal |
+| `sfx_calmed` | Baya/cebo tranquiliza | Confirmación amable, diferente de atrapado |
 
 ## Predeterminado en Vermeil: audio grabado real
 
@@ -47,7 +50,7 @@ Para audios legítimos de procedencia verificada, puedes reemplazar los
 
 ## Presets tipo Legends (sin audio incluido)
 
-`audio_profile=pla_like` busca efectos propios llamados `pla_aim.ogg`, `pla_switch.ogg`, `pla_mode.ogg`, `pla_party.ogg`, `pla_lock.ogg`, `pla_throw.ogg`, `pla_hit.ogg`, `pla_shake.ogg`, `pla_caught.ogg`, `pla_breakout.ogg`, `pla_flee.ogg` y `pla_alert.ogg`. Para `za_like` se cambia el prefijo por `za_`. Si no existen, el perfil ZA utiliza los 12 WAV reales CC0 instalados; PLA recurre a Essentials.
+`audio_profile=pla_like` busca efectos propios llamados `pla_aim.ogg`, `pla_switch.ogg`, `pla_mode.ogg`, `pla_party.ogg`, `pla_lock.ogg`, `pla_throw.ogg`, `pla_hit.ogg`, `pla_shake.ogg`, `pla_caught.ogg`, `pla_breakout.ogg`, `pla_flee.ogg` y `pla_alert.ogg`. Para `za_like` se cambia el prefijo por `za_`. Si no existen, el perfil ZA reutiliza WAV CC0 instalados; PLA recurre a Essentials.
 
 Son **nombres de archivos configurables**, no archivos comerciales incluidos. El audio que quieras usar debe estar autorizado para su inclusión en el proyecto.
 
