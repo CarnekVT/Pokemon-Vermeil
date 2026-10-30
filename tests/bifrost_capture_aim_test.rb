@@ -171,6 +171,19 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert_equal "Añadido al equipo",BifrostCapture::Feedback.last_result[:detail]
   end
 
+  def test_precomputed_hit_roll_controls_visible_miss_and_result
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,6)
+    $PokemonGlobal.bifrost_overrides["hit_near"]="25"
+    refute BifrostCapture.resolve_throw(event,:ball,:POKEBALL,
+                                      BifrostCapture.options,nil,0.9)
+    assert_equal :miss,BifrostCapture::Feedback.last_result[:kind]
+    assert_equal 1,$bag.used
+    assert_equal 0,BifrostCapture.captures.length
+  end
+
   def test_release_has_explicit_distinct_feedback
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
