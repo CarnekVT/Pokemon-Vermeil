@@ -5,7 +5,8 @@ const POKEMON_FILES=["PBS/pokemon.txt","PBS/pokemon_Vermeil.txt"];
 const LEGEND="RAIKOU ENTEI SUICUNE LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES UXIE MESPRIT AZELF COBALION TERRAKION VIRIZION GENESECT LANDORUS TORNADUS THUNDURUS ETERNATUS TAPUKOKO TAPULELE TAPUBULU TAPUFINI".split(" ");
 const D={
  profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"jumpup",control_mode:"hold",
- ball_key:"jumpdown",target_key:"action",mode_key:"special",debug_input_guard:"1",
+ ball_key:"jumpdown",target_key:"none",mode_key:"none",debug_input_guard:"1",
+ allow_shared_bindings:"0",ball_hold_mode_frames:"22",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
  spawn_lifetime:"45",spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
@@ -67,8 +68,11 @@ const F=[
  ["SISTEMA","general"],
  ["Perfil del proyecto","profile"],["Motor activo","enabled"],["Acceso al apuntado","access_mode"],
  ["Tecla de apertura","hotkey"],["Modalidad de control","control_mode"],
- ["Cambiar Poké Ball","ball_key"],["Cambiar objetivo","target_key"],
- ["Alternar lanzamiento/combate","mode_key"],["Proteger combos debug CTRL","debug_input_guard"],
+ ["Cambiar Poké Ball","ball_key"],["Objetivo opcional","target_key"],
+ ["Alternar modo (opcional)","mode_key"],
+ ["Mantener Ball para alternar modo (frames)","ball_hold_mode_frames",0,60],
+ ["Proteger combos debug CTRL","debug_input_guard"],
+ ["Permitir atajos compartidos (avanzado)","allow_shared_bindings"],
  ["Captura directa","capture_enabled"],["Enviar Pokémon","battle_enabled"],
  ["Exclusividad del catálogo Bifröst","restricted_species"],
  ["ENCUENTROS NATURALES","spawns"],
@@ -237,9 +241,11 @@ class Studio{
  field(key){
   const meta=META[key];if(!meta)return "";
   const val=this.value()[key],label=meta[0],bool=["0","1"].includes(D[key]);
+  const isBind=["hotkey","ball_key","target_key","mode_key"].includes(key);
   let input="";
   if(CHOICES[key]||bool){
-   const opts=CHOICES[key]||["1","0"];
+   const opts=isBind&&this.value().allow_shared_bindings!=="1"?
+     ["jumpup","jumpdown","none"]:(CHOICES[key]||["1","0"]);
    input='<select class="bf-select" data-field="'+key+'">'+opts.map(x=>
     '<option value="'+x+'"'+(val===x?' selected':'')+'>'+esc(T(x))+'</option>').join("")+'</select>';
   }else if(key.startsWith("sfx_")){
@@ -316,18 +322,20 @@ class Studio{
   if(this.section==="species")return this.speciesPanel();
   if(this.section==="scopes")return this.scopesPanel();
   if(this.section==="aim")return '<h1 class="bf-headline">Apuntar sin detener la exploración</h1>'+
-    '<p class="bf-sub">El jugador puede caminar durante la preparación, el vuelo y la captura. No existe una escena de apuntado que congele el mapa.</p>'+
+    '<p class="bf-sub">A/JUMPUP apunta y S/JUMPDOWN cambia Ball o modo por duración. C y X solo se comparten cuando ya estás apuntando, sin bloquear el movimiento.</p>'+
     this.panel("Control dinámico",'<div class="bf-cards">'+[
     ["A / JUMPUP","Mantener para apuntar; soltar para lanzar"],
     ["Flechas / Pad","Caminar normalmente, también al apuntar"],
-    ["Shift / Z (ACTION)","Cambiar Pokémon fijado"],
+    ["Objetivo","Se fija automáticamente o selecciona con ratón"],
     ["Ratón","Apuntado libre sobre sprites en movimiento"],
-    ["S / JUMPDOWN","Cambiar Poké Ball"],
+    ["S / JUMPDOWN","Pulsar: Ball · mantener: modo Ball/Pokémon"],
     ["C / USE","Lanzar directamente"],
-    ["D / SPECIAL","Cambiar Ball y Pokémon"],
+    ["D / SPECIAL","Menú de accesos rápidos: reservado"],
+    ["Shift / Z","Correr: reservado"],
+    ["Q / AUX1","Turbo: reservado"],
     ["X / BACK","Cancelar sin lanzar"]].map(x=>'<div class="bf-stat"><span>'+
     esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join("")+
-    '</div><p class="bf-help">La retícula sigue a un OW válido y no consume las flechas; el modo toggle es opcional. La Ball y la captura se animan por fotograma, sin Graphics.update manuales.</p>')+
+    '</div><p class="bf-help">Las teclas se interpretan como acciones de Essentials y respetan las reasignaciones. D, Q, Shift/Z y F9 no se utilizan para capturar. Si activas atajos compartidos bajo tu responsabilidad, podrán producir conflictos.</p>')+
     this.panel("Rango y dirección",this.aimPreview());
   if(this.section==="spawns")return '<h1 class="bf-headline">Encuentros naturales OW</h1>'+
     '<p class="bf-sub">En modo completo, cada tirada natural terrestre intenta crear un Pokémon visible y capturable. El modo mixto convierte solo el porcentaje indicado.</p>'+
@@ -412,7 +420,17 @@ class Studio{
     const x=Number(n.value),min=META[key][2],max=META[key][3];
     if(!Number.isInteger(x)||x<min||x>max){this.message="Valor fuera de rango: "+key;this.render();return;}
    }
-   this.cfg[this.scope]??={};this.cfg[this.scope][key]=n.value;this.render();return;
+   if(["hotkey","ball_key","target_key","mode_key"].includes(key) &&
+      n.value!=="none"){
+    const current=this.value();
+    if(["hotkey","ball_key","target_key","mode_key"].some(k=>
+      k!==key&&current[k]===n.value)){
+      this.message="La acción ya se utiliza dentro de Bifröst. Escoge otra.";
+      this.render();return;
+    }
+   }
+   this.cfg[this.scope]??={};this.cfg[this.scope][key]=n.value;
+   this.render();return;
   }
   const cat=n.getAttribute("data-roster"),species=n.getAttribute("data-species");
   if(cat&&species){this.roster[cat][species]=!!n.checked;this.render();}
