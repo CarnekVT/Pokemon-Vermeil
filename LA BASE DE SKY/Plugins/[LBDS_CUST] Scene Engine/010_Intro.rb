@@ -15,7 +15,7 @@ def pbIntroVermeil
                            z: SceneEngine::Settings::LAYER_IMG + 70
     fade_from_black 30
 
-    text_inline "El mundo conoció el equilibrio. Pero la ambición humana terminó por quebrarlo.",
+    text_inline "Mi poder mantenía el equilibrio y daba sustento a estas tierras. Pero algunos quisieron poseerlo.",
                 speaker: "???", speed: :slow
     hide_textbox(10)
 
@@ -45,7 +45,10 @@ def pbIntroVermeil
       update
     end
 
-    text_inline "Me aparté de la humanidad. Creí que no podía cambiar. Pero la peor traición vino de mi propia sangre.",
+    text_inline "Los paldeanos no buscaban oro, sino mi poder. Su disputa con los pueblos de esta región me apartó de la humanidad.",
+                speaker: "???", speed: :slow
+    # Otro conflicto: la caída del Guía no fue provocada por los paldeanos.
+    text_inline "Pero también hubo una traición entre los míos, ajena a aquel conflicto.",
                 speaker: "???", speed: :slow
     hide_textbox(10)
     fade_out_sprites([golden[:sprite], elder[:sprite]], 15)
@@ -82,7 +85,7 @@ def pbIntroVermeil
 
     show "Graphics/Scenes/Intro/int9", 0, 0, fade: 25
 
-    text_inline "Y después de eso les diste la espalda a todos. No fue precisamente tu mejor decisión, Gran Espíritu.",
+    text_inline "Por aquella disputa nos diste la espalda a todos. No fue precisamente justo, Gran Espíritu.",
                 speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Hay personas que solo buscan hacer daño. Otras lo darían todo por proteger a su gente.",
                 speaker: "Mujer Misteriosa", speed: :slow
@@ -132,10 +135,10 @@ def pbIntroVermeil
 
     text_inline "Mira, ahí está Solen. Aceptó ayudarnos y sabe a lo que se enfrenta.",
                 speaker: "Mujer Misteriosa", speed: :slow
-    text_inline "Y mira qué bien duerme, como si aquí no pasara nada. En fin, Solen sabe lo que le espera.",
+    text_inline "Y qué tranquilidad. Cualquiera diría que nada de esto está pasando.",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
-    text_inline "Solen aceptó este vínculo. Su cuerpo te permitirá actuar entre los vivos; tu fuerza ayudará a enfrentar la oscuridad.",
+    text_inline "Este vínculo cuenta con su consentimiento. Podrás actuar entre los vivos y hacer frente a la oscuridad.",
                 speaker: "Gran Espíritu", speed: :slow
     hide_textbox(10)
 
@@ -184,10 +187,10 @@ def pbIntroVermeil
     start_aura "Graphics/Scenes/Intro/AuraParticle", 12, 12, count: 12, range_x: 35, range_y: 70, duration: 90
     fade_from_black 25
 
-    text_inline "El pacto está sellado, {1}. Mi hijo sigue reuniendo fuerzas. Demuéstrame que aún puedo confiar en la humanidad.",
-                speaker: "Gran Espíritu", speed: :slow, format_args: [player_name]
-    text_inline "Bueno, {1}, llegó la hora. ¡Cuídate y disfruta del viaje!",
-                speaker: "Mujer Misteriosa", speed: :slow, format_args: [player_name]
+    text_inline "El pacto está sellado. Mi hijo sigue reuniendo fuerzas. Demuéstrame que aún puedo confiar en la humanidad.",
+                speaker: "Gran Espíritu", speed: :slow
+    text_inline "Bueno, llegó la hora. ¡Cuídate y disfruta del viaje!",
+                speaker: "Mujer Misteriosa", speed: :slow
 
     # ══════════ FASE 9: LA FUSIÓN Y DESPERTAR ══════════
 
