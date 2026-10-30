@@ -117,6 +117,10 @@ module BifrostCapture
       @pending_battle = [event,payload]
       return true
     end
+    if defined?(Pressure) && Pressure.locked?(event,local)
+      capture_result(:blocked,spec[0],_INTL("Demasiado alerta: entra en combate"),local)
+      return false
+    end
     limit = local["attempt_limit"].to_i
     if limit > 0 && attempts(event) >= limit
       notice(_INTL("Este Pokémon ya no acepta más lanzamientos directos."))
@@ -132,6 +136,7 @@ module BifrostCapture
       $bag.remove(payload,1) if local["consume_on_miss"] == "1"
       notice(_INTL("¡El lanzamiento se desvió!"))
       capture_result(:miss,spec[0],_INTL("La Ball no acertó"),local)
+      Pressure.add(event,:miss,local) if defined?(Pressure)
       react(event,local,:miss) if local["alert_on_miss"] == "1"
       return false
     end
@@ -143,6 +148,7 @@ module BifrostCapture
     crit_rate = behind ? local["critical_back"] : local["critical_front"]
     critical = critical_override.nil? ? rand < crit_rate.to_f/100.0 : critical_override
     probability = catch_chance(spec[0],payload,geo[:front],behind,critical,local)
+    probability *= Pressure.capture_modifier(event,local) if defined?(Pressure)
     caught = rand < probability
     destination = nil
     if caught
@@ -166,6 +172,7 @@ module BifrostCapture
 
   def self.finish_capture_result(event,caught,critical,species,destination,cfg)
     if caught
+      Pressure.clear_success(event) if defined?(Pressure)
       remove_event(event)
       notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
       capture_result(critical ? :critical : :caught,species,destination,cfg)
@@ -173,6 +180,7 @@ module BifrostCapture
     else
       notice(_INTL("¡El Pokémon se liberó!"))
       capture_result(:breakout,species,_INTL("¡Sigue libre!"),cfg)
+      Pressure.add(event,:breakout,cfg) if defined?(Pressure)
       BifrostCapture::Audio.play(:breakout,cfg) if defined?(BifrostCapture::Audio)
       angry = respond_to?(:trigger_escape_reaction) &&
               trigger_escape_reaction(event,cfg)
@@ -198,7 +206,10 @@ module BifrostCapture
     begin
       BifrostCapture::Feedback.reset if defined?(BifrostCapture::Feedback)
       outcome = WildBattle.start(wild)
-      remove_event(event) if outcome
+      if outcome
+        Pressure.clear_success(event) if defined?(Pressure)
+        remove_event(event)
+      end
     ensure
       party.replace(original.select { |p| party.include?(p) } +
                     party.reject { |p| original.include?(p) })
