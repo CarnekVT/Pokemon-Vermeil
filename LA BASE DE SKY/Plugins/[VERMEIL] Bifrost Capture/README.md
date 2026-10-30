@@ -1,22 +1,37 @@
-# Bifröst Capture 0.8.0 — encuentros, temperamentos y audio
+# Bifröst Capture 0.8.1 — controles sin colisiones de mapa
 
 **Pokémon Vermeil · Pokémon Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
-Los archivos Ruby 001–007 y el editor Maker Studio se sustituyeron por implementaciones nuevas. No se añadió el plugin chino ICS ni se copiaron sus scripts; se tomó como referencia su separación de componentes, su HUD compacto y los modos de pulsación. El recurso original de ZIJUK está diseñado para trabajar junto con **Visible Overworld Wild Encounters (VOWE)**; esta reconstrucción tiene su propia integración con las tablas de encuentros de Essentials y no necesita VOWE instalado.
+Los módulos Ruby 001–010 y el editor Maker Studio se sustituyeron por implementaciones nuevas. No se añadió el plugin chino ICS ni se copiaron sus scripts; se tomó como referencia su separación de componentes, su HUD compacto y los modos de pulsación. El recurso original de ZIJUK está diseñado para trabajar junto con **Visible Overworld Wild Encounters (VOWE)**; esta reconstrucción tiene su propia integración con las tablas de encuentros de Essentials y no necesita VOWE instalado.
 
 ## Versión 0.8.0 — apariciones OW, temperamentos, audio y accesos
 
-**Controles predeterminados compatibles con las acciones mostradas por Essentials:**
-mantener **JUMPUP (A)** para apuntar y soltar para lanzar,
-**JUMPDOWN (S)** para cambiar la Poké Ball,
-**ACTION (Shift/Z)** para cambiar el Pokémon fijado,
-**SPECIAL (D)** para alternar entre Poké Ball y combate,
-**USE (C)** para lanzar y **BACK (X)** para cancelar.
-La configuración de las cuatro primeras acciones es independiente desde Maker Studio;
-`none` permite desactivar cada función opcional. El bloqueo `CTRL` cuando
-está activo el debug evita interceptar combinaciones de desarrollo.
-Los atajos siguen siendo personalizables y necesitan una prueba final con los
-demás plugins que puedan utilizar A/S/Q/W.
+**Controles por defecto tras auditar los usos de Input en Essentials y
+los plugins de exploración consultados:**
+- **JUMPUP (A)**: mantener para apuntar y soltar para lanzar.
+- **JUMPDOWN (S)**: pulsación corta cambia Ball; mantener durante 22 frames
+  alterna entre lanzar Ball y enviar un Pokémon.
+- **USE (C)**: lanza solo mientras Bifröst está apuntando.
+- **BACK (X/Esc)**: cancela solo mientras está apuntando.
+- **Ratón**: apuntado libre; si no se mueve, selección automática del objetivo
+  válido más cercano.
+
+**Acciones reservadas:** SPECIAL (D) conserva el Ready Menu de objetos y
+movimientos registrados, AUX1 (Q) conserva Turbo, ACTION (Shift/Z) conserva
+la carrera, F9 sigue siendo debug, las flechas siguen moviendo al jugador y
+AUX2 (W) queda libre para otros sistemas. La protección 010_MapInputGuard
+evita que C interactúe o X abra el menú a la vez que se usa Bifröst, incluso
+cuando el apuntado se cierra en el mismo fotograma. D y F9 pasan siempre a
+sus acciones originales.
+
+No se modifica el archivo de keybindings del usuario ni se fijan teclas
+físicas; el HUD consulta KeybindingReader para mostrar las teclas realmente
+asignadas a JUMPUP y JUMPDOWN. En Maker Studio, los atajos de otras funciones
+quedan bloqueados por defecto y se migran los valores heredados peligrosos.
+`allow_shared_bindings=1` es una excepción explícita para proyectos que
+quieran compartir entradas; puede causar conflictos y no se recomienda
+en Vermeil. El control requiere comprobación final en el ejecutable mkxp,
+especialmente con plugins externos no revisados.
 
 **Ratio de aparición alternativo:** `ow_extra_spawn_chance=12` permite una
 tirada adicional por paso válido, independientemente del encuentro natural.
@@ -104,7 +119,7 @@ no se han copiado ni integrado sus scripts o su dependencia VOWE.
   `aim_chain=1` desde Maker Studio.
 - **Selector de Balls:** HUD pequeño con tres iconos reales de `Graphics/Items`,
   Ball central equipada, unidades restantes y nivel de objetivo.
-  **Q (AUX1)** alterna Balls, **D (SPECIAL)** alterna Pokémon/Ball,
+  **S (JUMPDOWN)** alterna Balls, mantener **S** alterna Pokémon/Ball,
   flechas/ratón orientan; **Z/Shift (ACTION)** fija el Pokémon más cercano.
 - **Lanzamiento:** giro, estela luminosa de cuatro partículas, sombra de
   suelo, apuntado magnético a Pokémon que se mueven, mismo roll para trayectoria
