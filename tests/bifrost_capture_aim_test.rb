@@ -123,9 +123,11 @@ def pbAddPokemon(pkmn)
   true
 end
 def _INTL(s,*args)
-  args.each_with_index.reduce(s) { |out,(value,index)|
-    out.gsub("{#{index+1}}",value.to_s)
-  }
+  # Mimic Essentials' in-place placeholder replacement to catch FrozenError.
+  args.each_with_index do |value,index|
+    s.sub!("{#{index+1}}",value.to_s)
+  end
+  s
 end
 class BifrostCaptureIntegrationTest < Minitest::Test
   def setup
