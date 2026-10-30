@@ -27,7 +27,6 @@ module BifrostCapture
                     $game_temp.message_window_showing ||
                     $game_temp.player_transferring ||
                     $game_temp.transition_processing ||
-                    $game_player.moving? ||
                     $game_player.move_route_forcing
     return false if pbMapInterpreterRunning?
     true
@@ -70,7 +69,7 @@ module BifrostCapture
           index = $PokemonStorage.pbStoreCaught(pokemon)
           return [false,nil] if !index || index < 0
           box = begin $PokemonStorage[index].name rescue _INTL("una caja") end
-          location = _INTL("Enviado a {1}", box)
+          location = _INTL("Enviado a {1}".dup, box)
         else
           return [false,nil]
         end
