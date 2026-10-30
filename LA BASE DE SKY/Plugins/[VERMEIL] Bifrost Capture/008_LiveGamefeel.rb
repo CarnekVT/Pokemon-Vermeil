@@ -406,7 +406,7 @@ module BifrostCapture
         elsif use || click
           claim_map_input("use") if use
           success = fire
-          close if success && cfg["aim_chain"] == "0"
+          close if cfg["aim_chain"] == "0" && (success || use)
         elsif cfg["control_mode"] != "hold" && key &&
               s[:frames] > 5 && Input.trigger?(key)
           close
