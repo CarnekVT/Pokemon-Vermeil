@@ -257,12 +257,31 @@ module BifrostCapture
     return false unless DEFAULTS.key?(key) && $PokemonGlobal
     $PokemonGlobal.bifrost_overrides ||= {}
     $PokemonGlobal.bifrost_overrides[key] = value.to_s
+    if key == "debug_force_shiny" && value.to_s == "1" &&
+       respond_to?(:force_shiny_visible_ow)
+      force_shiny_visible_ow
+    end
+    true
+  end
+
+  # Event script / debug console: pbBifrostShinyTest(true)
+  # false turns the testing switch off for future OW Pokémon.
+  def self.shiny_test(value=true)
+    enabled = value == true || value.to_s == "1"
+    return false unless set_rule("debug_force_shiny",enabled ? "1" : "0")
+    notice(enabled ?
+      _INTL("Bifröst: prueba shiny activada (OW)") :
+      _INTL("Bifröst: shinies naturales restaurados"))
     true
   end
 
   def self.reset_rules
     $PokemonGlobal.bifrost_overrides = {} if $PokemonGlobal
   end
+end
+
+def pbBifrostShinyTest(enabled=true)
+  BifrostCapture.shiny_test(enabled)
 end
 
 def pbBifrostAim
