@@ -49,6 +49,7 @@ const D={
  sfx_throw:"none",sfx_hit:"none",sfx_shake:"none",sfx_caught:"none",
  sfx_breakout:"none",sfx_flee:"none",sfx_alert:"none",
  sfx_critical:"none",sfx_shiny:"none",
+ sfx_backstrike:"none",sfx_calmed:"none",
  shiny_fx_enabled:"1",shiny_fx_intensity:"2",shiny_pulse_frames:"150",
  shiny_sound_enabled:"1",shiny_sound_volume:"85",shiny_sound_pitch:"112",
  shiny_repeat_sound:"0"
@@ -223,7 +224,9 @@ const F=[
  ["Captura: SFX propio","sfx_caught"],["Liberación: SFX propio","sfx_breakout"],
  ["Huida: SFX propio","sfx_flee"],["Alerta: SFX propio","sfx_alert"],
  ["Lanzamiento crítico: SFX propio","sfx_critical"],
- ["Shiny: SFX propio (pla_shiny / za_shiny)","sfx_shiny"]
+ ["Shiny: SFX propio (pla_shiny / za_shiny)","sfx_shiny"],
+ ["Espalda: SFX propio","sfx_backstrike"],
+ ["Baya tranquilizadora: SFX propio","sfx_calmed"]
 ];
 const GROUPS={};let section="";
 for(const row of F){if(row.length===2&&Object.values(D).indexOf(row[1])===-1&&
