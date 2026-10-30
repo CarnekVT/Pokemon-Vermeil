@@ -34,7 +34,7 @@ module BifrostCapture
   @result=nil
   @aim_open=false
   class << self
-    attr_accessor :result,:test_options
+    attr_accessor :result,:test_options,:test_balls
     def options(*)
       {"access_mode"=>"always","control_mode"=>"hold","aim_chain"=>"0",
        "aim_mouse"=>"0","capture_enabled"=>"1","battle_enabled"=>"1",
@@ -54,7 +54,7 @@ module BifrostCapture
        "aux2"=>Input::AUX2}[cfg[field]]
     end
     def aim_allowed?; true; end
-    def ball_choices; [[:POKEBALL,10],[:GREATBALL,7]]; end
+    def ball_choices; @test_balls || [[:POKEBALL,10],[:GREATBALL,7]]; end
     def closest_target; nil; end
     def take_notice; nil; end
     def capture_result(*args); self.result=args; end
@@ -80,6 +80,7 @@ class BifrostLiveTest < Minitest::Test
     Input.configure
     BifrostCapture.result=nil
     BifrostCapture.test_options=nil
+    BifrostCapture.test_balls=nil
     $PokemonGlobal=Struct.new(:bifrost_last_ball,
       :bifrost_last_party_index,:bifrost_last_mode).new
   end
@@ -156,6 +157,18 @@ class BifrostLiveTest < Minitest::Test
     Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
     assert_equal 1,BifrostCapture::LiveAim.session[:ball_index]
+  end
+
+  def test_missing_last_ball_falls_back_to_available_choice
+    $PokemonGlobal.bifrost_last_ball=:GREATBALL
+    BifrostCapture.test_balls=[[:POKEBALL,4]]
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal 0,BifrostCapture::LiveAim.session[:ball_index]
+    assert_equal :POKEBALL,
+      BifrostCapture::LiveAim.session[:balls][0][0]
+    BifrostCapture::LiveAim.close
+    assert_equal :POKEBALL,$PokemonGlobal.bifrost_last_ball
   end
 
   def test_party_mode_and_member_survive_reopening
