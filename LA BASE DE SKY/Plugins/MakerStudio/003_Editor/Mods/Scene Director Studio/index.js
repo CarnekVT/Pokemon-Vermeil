@@ -3,7 +3,7 @@ import { SceneDirectorEditor } from "./editor.js";
 const PANEL_ID = "scene-director-studio.main";
 
 export function activate(ctx) {
-  ctx.log.info("Scene Director Studio v0.4.0 activated");
+  ctx.log.info("Scene Director Studio v0.4.1 activated");
   ctx.ui.registerPanel({
     id: PANEL_ID,
     title: "Scene Director Studio",
