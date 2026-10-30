@@ -557,8 +557,8 @@ module BifrostCapture
         (catches + [@catch].compact).each do |a|
           event = a[:event]
           if event && !event.instance_variable_get(:@erased)
-            event.opacity = a[:opacity]
-            event.transparent = a[:transparent]
+            event.opacity = a[:opacity] if event.respond_to?(:opacity=)
+            event.transparent = a[:transparent] if event.respond_to?(:transparent=)
             event.instance_variable_set(:@move_type,a[:move_type])
             event.instance_variable_set(:@bifrost_capture_lock,false)
             if a[:caught]
