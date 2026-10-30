@@ -4,7 +4,7 @@
 module BifrostCapture
   module Audio
     EVENTS = %w[aim switch mode party lock throw hit shake caught
-                breakout flee alert critical].freeze
+                breakout flee alert critical shiny].freeze
     VANILLA = {
       "aim"=>"GUI sel cursor", "switch"=>"GUI sel cursor",
       "mode"=>"GUI sel decision", "party"=>"GUI sel cursor",
@@ -12,7 +12,7 @@ module BifrostCapture
       "hit"=>"Battle ball drop", "shake"=>"Battle ball shake",
       "caught"=>"Battle catch click", "breakout"=>"Battle ball shake",
       "flee"=>"Battle flee", "alert"=>"Exclaim",
-      "critical"=>"Battle critical catch throw"
+      "critical"=>"Battle critical catch throw", "shiny"=>"GUI sel decision"
     }.freeze
     PRESETS = {
       "pla_like" => {
@@ -20,20 +20,22 @@ module BifrostCapture
         "party"=>"pla_party", "lock"=>"pla_lock", "throw"=>"pla_throw",
         "hit"=>"pla_hit", "shake"=>"pla_shake", "caught"=>"pla_caught",
         "breakout"=>"pla_breakout", "flee"=>"pla_flee", "alert"=>"pla_alert",
-        "critical"=>"pla_critical"
+        "critical"=>"pla_critical", "shiny"=>"pla_shiny"
       },
       "za_like" => {
         "aim"=>"za_aim", "switch"=>"za_switch", "mode"=>"za_mode",
         "party"=>"za_party", "lock"=>"za_lock", "throw"=>"za_throw",
         "hit"=>"za_hit", "shake"=>"za_shake", "caught"=>"za_caught",
         "breakout"=>"za_breakout", "flee"=>"za_flee", "alert"=>"za_alert",
-        "critical"=>"za_critical"
+        "critical"=>"za_critical", "shiny"=>"za_shiny"
       }
     }.freeze
     EXTENSIONS = %w[.ogg .wav .mp3].freeze
     # Real, redistributable CC0 recordings from Kenney's Interface Sounds.
     # These are NOT samples from Pokémon Legends: Z-A.
-    REAL_FALLBACK = EVENTS.to_h { |event| [event,"real_#{event}"] }.freeze
+    REAL_FALLBACK = EVENTS.to_h { |event|
+      [event,event == "shiny" ? "real_critical" : "real_#{event}"]
+    }.freeze
 
     # Earlier versions wrote synthetic ZA-named PCM WAVs on first launch.
     # Ignore only their recognizable WAV format/duration so they cannot
@@ -92,9 +94,9 @@ module BifrostCapture
 
     # A failed asset must not cause dozens of ENOENT exceptions per session.
     # Restarting the game clears this cache after fixing the audio files.
-    def self.safe_play(file)
+    def self.safe_play(file,volume=100,pitch=100)
       return false if @failed_files && @failed_files[file]
-      pbSEPlay(file)
+      pbSEPlay(file,volume,pitch)
       true
     rescue StandardError
       @failed_files ||= {}
@@ -106,6 +108,7 @@ module BifrostCapture
       cfg ||= BifrostCapture.options
       profile = cfg["audio_profile"].to_s
       return false if cfg["feedback_sfx"] == "0" || profile == "muted"
+      return false if event.to_s == "shiny" && cfg["shiny_sound_enabled"] == "0"
       name = event.to_s
       return false unless EVENTS.include?(name)
       assigned = cfg["sfx_#{name}"].to_s
@@ -124,11 +127,13 @@ module BifrostCapture
         end
       end
 
-      return true if file && safe_play(file)
+      volume = name == "shiny" ? cfg["shiny_sound_volume"].to_i.clamp(0,100) : 100
+      pitch = name == "shiny" ? cfg["shiny_sound_pitch"].to_i.clamp(80,140) : 100
+      return true if file && safe_play(file,volume,pitch)
       return false if profile == "original"
       fallback = vanilla_file(name)
       return false unless fallback && fallback != file
-      safe_play(fallback)
+      safe_play(fallback,volume,pitch)
     rescue StandardError
       false # Optional sound must never interrupt overworld capture.
     end
