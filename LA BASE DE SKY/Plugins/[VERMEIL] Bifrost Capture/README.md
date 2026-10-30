@@ -371,3 +371,33 @@ Consultar [ROADMAP.md](ROADMAP.md) para seguimiento pendiente.
 - Los tests de integración comprueban presión persistente, consumo de bayas,
   agrupación de notificaciones, anticipación de miedosos y contraataques.
 
+
+
+## Prueba de Pokémon shiny en overworld (modo debug)
+
+En `Plugins/[VERMEIL] Bifrost Capture/config.ini`, dentro de `[global]`:
+
+```ini
+debug_force_shiny=1
+```
+
+Inicia Pokémon Vermeil **con `$DEBUG == true`**. También puedes activar
+`DEBUG: siguientes OW shiny` desde el menú `pbBifrostRulesMenu`, siempre
+que estés en modo debug. Este ajuste solo afecta **nuevos encuentros OW**;
+no modifica encuentros tradicionales ni Pokémon ya existentes.
+Para regresar a las probabilidades naturales, utiliza `debug_force_shiny=0`.
+
+- Se crea el Pokémon **al aparecer**, antes de dibujar su sprite. Si es shiny
+  (natural o forzado), se busca `Graphics/Characters/Followers shiny/ESPECIE`
+  y, si existe la forma, `ESPECIE_FORMA`; sin hoja alternativa se usa el
+  sprite normal como fallback, pero el Pokémon conserva su estado shiny.
+- El mismo Pokémon permanece en memoria para captura directa, encuentro por
+  interacción y entrada en combate. Los agresivos conservan el modificador
+  de nivel solo en una copia de combate; el original del overworld no cambia.
+- Para eventos manuales `[OWCAP:ESPECIE:NIVEL]`, al registrarse el individuo
+  se actualiza el gráfico si usa una hoja `Followers/` convencional. Los
+  gráficos personalizados de eventos se dejan intactos.
+- Prueba recomendada: activa la opción, genera un Pikachu en el OW, verifica
+  que su hoja cambia a la shiny, entra en combate y comprueba sus colores.
+  Después genera otro y captúralo directamente; verifica `shiny?` en el
+  equipo o caja. Desactiva la opción tras la prueba.
