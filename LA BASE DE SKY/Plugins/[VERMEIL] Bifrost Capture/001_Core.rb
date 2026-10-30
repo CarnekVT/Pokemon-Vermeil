@@ -13,8 +13,9 @@ module BifrostCapture
   DEFAULTS = {
     "profile"=>"bifrost", "enabled"=>"1",
     "access_mode"=>"always", "hotkey"=>"jumpup", "control_mode"=>"hold",
-    "ball_key"=>"jumpdown", "target_key"=>"action", "mode_key"=>"special",
-    "debug_input_guard"=>"1",
+    "ball_key"=>"jumpdown", "target_key"=>"none", "mode_key"=>"none",
+    "debug_input_guard"=>"1", "allow_shared_bindings"=>"0",
+    "ball_hold_mode_frames"=>"22",
     "capture_enabled"=>"1", "battle_enabled"=>"1", "restricted_species"=>"1",
     "encounter_mode"=>"classic", "spawn_chance"=>"50",
     "spawn_min_distance"=>"3", "spawn_max_distance"=>"6", "spawn_limit"=>"5",
@@ -258,8 +259,35 @@ module BifrostCapture
     Input.const_get(method_name)
   end
 
+  # Map audit for Vermeil: SPECIAL is Ready Menu, AUX1 is Turbo,
+  # ACTION is running, USE is interaction, BACK is pause and F9 is debug.
+  # These cannot be capture shortcuts unless deliberately opted in.
+  SAFE_MAP_ACTIONS = %w[jumpup jumpdown].freeze
+  RESERVED_MAP_ACTIONS = %w[aux1 aux2 action special use back].freeze
+
+  def self.capture_action(cfg,field)
+    name = cfg[field].to_s.downcase
+    return nil if name == "none" || name.empty?
+    return nil unless INPUT_ACTIONS.key?(name)
+    return nil if RESERVED_MAP_ACTIONS.include?(name) &&
+                  cfg["allow_shared_bindings"] != "1"
+    return nil if field != "hotkey" && name == cfg["hotkey"]
+    input_action(name)
+  end
+
   def self.hotkey
-    input_action(options["hotkey"])
+    capture_action(options,"hotkey")
+  end
+
+  def self.binding_name(cfg,field)
+    name = cfg[field]
+    return "--" if name.to_s == "none"
+    action = capture_action(cfg,field)
+    return "--" unless action
+    if defined?(KeybindingReader)
+      return KeybindingReader.key_name(action)
+    end
+    { "jumpup"=>"A", "jumpdown"=>"S" }[name] || name.to_s.upcase
   end
 
   # Developer commands frequently use CTRL + actions on map. In debug,
