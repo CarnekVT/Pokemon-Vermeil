@@ -15,7 +15,7 @@ def pbIntroVermeil
                            z: SceneEngine::Settings::LAYER_IMG + 70
     fade_from_black 30
 
-    text_inline "Mi poder mantenía el equilibrio y daba sustento a estas tierras. Pero algunos quisieron poseerlo.",
+    text_inline "Mi presencia daba alimento, abundancia y fuerza a estas tierras. Pero algunos confundieron aquel don con algo que podían poseer.",
                 speaker: "???", speed: :slow
     hide_textbox(10)
 
@@ -133,7 +133,7 @@ def pbIntroVermeil
     wait 355
     wait 18
 
-    text_inline "Mira, ahí está Solen. Aceptó ayudarnos y sabe a lo que se enfrenta.",
+    text_inline "Mira, ahí está. Sabe lo que nos espera y aun así aceptó ayudar.",
                 speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y qué tranquilidad. Cualquiera diría que nada de esto está pasando.",
                 speaker: "Mujer Misteriosa", speed: :slow
