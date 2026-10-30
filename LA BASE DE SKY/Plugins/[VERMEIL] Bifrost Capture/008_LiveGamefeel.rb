@@ -2,6 +2,15 @@
 # Bifröst live capture: no manual Graphics.update/Input.update loops.
 # Map movement and its shared 2.5D camera continue to run normally.
 module BifrostCapture
+  UI_FLAGS = [:in_battle, :in_menu, :message_window_showing,
+              :player_transferring, :transition_processing,
+              :menu_calling, :ready_menu_calling, :debug_calling].freeze
+  def self.ui_busy?
+    return false unless $game_temp
+    UI_FLAGS.any? { |flag| $game_temp.respond_to?(flag) &&
+                            $game_temp.public_send(flag) }
+  end
+
   module LiveAim
     class << self
       attr_reader :session
@@ -101,12 +110,9 @@ module BifrostCapture
         return false if !$game_map || !defined?($scene) ||
                         !$scene.is_a?(Scene_Map)
         return false if $game_map.map_id != @session[:map]
-        return false if $game_temp.in_battle || $game_temp.in_menu ||
-                        $game_temp.message_window_showing ||
-                        $game_temp.player_transferring ||
-                        $game_temp.transition_processing ||
-                        $game_temp.menu_calling || $game_temp.ready_menu_calling ||
-                        $game_temp.debug_calling || $game_temp.interact_calling
+        return false if BifrostCapture.ui_busy?
+        return false if $game_temp.respond_to?(:interact_calling) &&
+                        $game_temp.interact_calling
         true
       end
 
@@ -514,13 +520,7 @@ module BifrostCapture
       end
 
       def update
-        menu_block = $game_temp && (
-          $game_temp.in_battle || $game_temp.in_menu ||
-          $game_temp.message_window_showing ||
-          $game_temp.player_transferring ||
-          $game_temp.transition_processing ||
-          $game_temp.menu_calling || $game_temp.ready_menu_calling ||
-          $game_temp.debug_calling)
+        menu_block = BifrostCapture.ui_busy?
         if !defined?($scene) || !$scene.is_a?(Scene_Map) ||
            !$game_map || menu_block
           cancel if @flight || @catch
