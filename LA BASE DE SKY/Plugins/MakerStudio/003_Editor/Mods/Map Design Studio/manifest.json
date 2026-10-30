@@ -1,0 +1,24 @@
+{
+  "id": "com.carnekvt.map-design-studio",
+  "name": "Map Design Studio",
+  "version": "0.1.0",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Planificador espacial y constructor no destructivo de regiones de tiles, con contexto de Environment Design Studio y asistente por reglas.",
+  "tags": [
+    "mapping",
+    "level-design",
+    "construction"
+  ],
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.dialogs",
+    "ui.toasts"
+  ]
+}
