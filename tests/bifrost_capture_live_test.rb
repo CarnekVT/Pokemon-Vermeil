@@ -69,6 +69,7 @@ module BifrostCapture
     def ball_choices; @test_balls || [[:POKEBALL,10],[:GREATBALL,7]]; end
     def closest_target; nil; end
     def take_notice; nil; end
+    def notice(*); end
     def capture_result(*args); self.result=args; end
   end
 end
