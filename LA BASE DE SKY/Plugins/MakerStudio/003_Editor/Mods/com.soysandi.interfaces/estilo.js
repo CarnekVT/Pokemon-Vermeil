@@ -228,4 +228,97 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
   justify-content: center; gap: 10px; color: var(--text-tertiary);
   text-align: center; padding: 24px;
 }
+
+/* Interface Studio 2.1 · Visual workspace inspirado en BAS/BSS.
+   Mantiene todos los controles originales; cambia su composición visual. */
+.ui-raiz {
+  --ui-ux-panel: var(--bg-secondary, #192331);
+  --ui-ux-line: var(--border, #344153);
+  font-family: system-ui, "Segoe UI", sans-serif;
+  font-size: 12px;
+  background: var(--bg-primary, #101722);
+  min-width: 0;
+}
+.ui-raiz button,.ui-raiz input,.ui-raiz select { font-family: inherit; }
+.ui-raiz button:focus-visible,
+.ui-raiz input:focus-visible,
+.ui-raiz select:focus-visible,
+.ui-workspace-menu summary:focus-visible {
+  outline: 2px solid var(--accent, #619fee);outline-offset: 2px;
+}
+.ui-barra {gap:8px;padding:8px 12px;min-height:44px}
+.ui-barra:first-of-type {min-height:54px}
+.ui-barra .ui-btn {min-height:29px}
+.ui-workspace-brand {display:grid;gap:0;margin-right:10px;padding-right:15px;border-right:1px solid var(--ui-ux-line);line-height:1.3;white-space:nowrap}
+.ui-workspace-brand strong {font-size:14px;letter-spacing:.2px;color:var(--text-primary)}
+.ui-workspace-brand small {font-size:10px;letter-spacing:.2px;color:var(--text-tertiary)}
+.ui-btn {border-radius:7px;min-height:27px;transition:background-color .12s,border-color .12s}
+.ui-btn:hover {border-color:var(--accent,var(--border))}
+.ui-sel,.ui-txt,.ui-num {border-radius:6px;min-height:28px}
+.ui-sel:focus,.ui-txt:focus,.ui-num:focus {border-color:var(--accent)}
+.ui-panel-izq,.ui-panel-der {background:var(--ui-ux-panel);min-height:0}
+.ui-panel-izq {width:240px;max-width:480px}
+.ui-panel-der {width:340px;max-width:640px}
+.ui-cabecera-panel {min-height:35px;font-size:11px;letter-spacing:.07em}
+.ui-capa {min-height:34px;padding:8px 9px;border-radius:4px;border-bottom-color:color-mix(in srgb,var(--ui-ux-line) 50%,transparent)}
+.ui-capa.elegida {background:color-mix(in srgb,var(--accent) 28%,var(--bg-primary));color:var(--text-primary);box-shadow:inset 3px 0 0 var(--accent)}
+.ui-capa.elegida .ui-capa-tipo {color:var(--text-secondary)}
+.ui-capa-id {font-weight:500}
+.ui-inspector {padding:12px}
+.ui-titulillo {font-size:11px;margin-top:17px;margin-bottom:9px;padding-bottom:6px;letter-spacing:.05em}
+.ui-fila {gap:10px;margin-bottom:9px;align-items:center}
+.ui-etiqueta {width:102px;font-size:11px}
+.ui-ayuda {line-height:1.55}
+.ui-centro {min-width:0}
+.ui-lienzo-zona {padding:28px;background:radial-gradient(ellipse at center,rgba(96,132,179,.10),transparent 72%),repeating-conic-gradient(var(--bg-secondary) 0% 25%,var(--bg-primary) 0% 50%) 50% / 16px 16px}
+.ui-lienzo-marco {box-shadow:0 0 0 1px var(--border),0 14px 36px rgba(0,0,0,.35)}
+.ui-pie-lienzo {padding:8px 12px;gap:9px}
+.ui-resolucion {padding:7px 12px;gap:9px}
+.ui-tiempo {height:176px}
+.ui-tiempo-barra {padding:8px 11px;gap:9px}
+.ui-workspace-menu {position:relative;flex:0 0 auto}
+.ui-workspace-menu>summary {list-style:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;background:var(--bg-primary);color:var(--text-primary);cursor:pointer;white-space:nowrap}
+.ui-workspace-menu>summary::-webkit-details-marker {display:none}
+.ui-workspace-menu>summary:hover,.ui-workspace-menu[open]>summary {border-color:var(--accent);background:var(--bg-hover,var(--bg-secondary))}
+.ui-workspace-dropdown {position:absolute;z-index:80;left:0;top:calc(100% + 6px);min-width:220px;max-height:min(460px,65vh);overflow-y:auto;display:grid;gap:5px;padding:10px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:9px;box-shadow:0 12px 32px rgba(0,0,0,.37)}
+.ui-workspace-dropdown .ui-btn {width:100%;text-align:left;padding:9px 10px}
+.ui-workspace-dropdown .ui-btn.peligro {border-color:rgba(220,92,92,.4)}
+.ui-workspace-dropdown .ui-txt {width:100%}
+.ui-workspace-choices {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;min-width:300px}
+.ui-workspace-choices .ui-btn {white-space:normal;min-height:40px}
+.ui-workspace-option[hidden] {display:none!important}
+.ui-workspace-bar {display:flex;align-items:center;gap:7px;padding:7px 12px;background:var(--bg-secondary);border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0;min-height:43px}
+.ui-workspace-caption {display:grid;line-height:1.2;margin-right:4px}
+.ui-workspace-caption b {font-size:10px;letter-spacing:.08em}
+.ui-workspace-caption span {font-size:10px;color:var(--text-tertiary)}
+.ui-workspace-divider {width:1px;height:22px;background:var(--border);margin:0 4px}
+.ui-workspace-btn {padding:6px 9px!important;font-size:11px;min-height:29px}
+.ui-workspace-selected {background:color-mix(in srgb,var(--accent) 18%,var(--bg-primary));border-color:var(--accent)!important}
+.ui-workspace-resizer {width:6px;flex:0 0 6px;cursor:col-resize;position:relative;background:var(--bg-primary);border-left:1px solid var(--border);border-right:1px solid var(--border)}
+.ui-workspace-resizer:hover,.ui-workspace-resizer:active {background:var(--accent)}
+.ui-workspace-status {height:26px;padding:5px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;border-top:1px solid var(--border);color:var(--text-tertiary);font:11px/1.2 ui-monospace,Consolas,monospace}
+.ui-workspace-status span {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ui-workspace-hide-layers .ui-panel-izq,.ui-workspace-hide-layers .ui-workspace-resizer.left {display:none!important}
+.ui-workspace-hide-inspector .ui-panel-der,.ui-workspace-hide-inspector .ui-workspace-resizer.right {display:none!important}
+.ui-workspace-hide-timeline .ui-tiempo {height:auto;min-height:42px}
+.ui-workspace-hide-timeline .ui-tiempo .ui-pistas {display:none}
+.ui-workspace-focus .ui-barra:nth-of-type(2),.ui-workspace-focus .ui-resolucion {display:none}
+.ui-workspace-focus .ui-lienzo-zona {padding:12px}
+.ui-layer-search {margin:7px 8px 4px!important;width:calc(100% - 16px);min-height:30px}
+.ui-layer-counter {font-size:10px;color:var(--text-tertiary);padding:4px 10px 6px;border-bottom:1px solid var(--border)}
+.ui-layer-empty {padding:12px;color:var(--text-tertiary);font-size:11px}
+@media(max-width:1080px){
+  .ui-workspace-brand small,.ui-workspace-caption span {display:none}
+  .ui-workspace-brand {padding-right:8px;margin-right:3px}
+  .ui-panel-izq {width:200px}.ui-panel-der {width:280px}
+  .ui-workspace-bar {gap:4px}
+  .ui-workspace-btn {padding:5px 6px!important}
+}
+@media(max-width:800px){
+  .ui-workspace-caption {display:none}
+  .ui-barra {gap:5px}
+  .ui-resolucion {max-height:98px;overflow-y:auto}
+  .ui-panel-izq {width:170px;min-width:150px}
+  .ui-panel-der {width:240px;min-width:210px}
+}
 `;
