@@ -28,7 +28,7 @@ module BifrostCapture
                     $game_temp.player_transferring ||
                     $game_temp.transition_processing ||
                     $game_player.move_route_forcing
-    return false if pbMapInterpreterRunning?
+    return false if pbMapInterpreterRunning? && cfg["access_mode"] != "event"
     true
   end
 
@@ -94,7 +94,7 @@ module BifrostCapture
     end
   end
 
-  def self.resolve_throw(event,mode,payload,cfg,back_at_release=nil,hit_roll=nil)
+  def self.resolve_throw(event,mode,payload,cfg,back_at_release=nil,hit_roll=nil,origin=nil)
     if !event || !eligible_event?(event)
       notice(_INTL("No hay un Pokémon salvaje capturable en la trayectoria."))
       capture_result(:blocked,nil,_INTL("Acércate a un Pokémon visible."),cfg)
@@ -102,9 +102,10 @@ module BifrostCapture
     end
     spec = event_spec(event)
     local = options($game_map.map_id,spec[0],event.id)
-    geo = geometry($game_player.x,$game_player.y,event.x,event.y,local)
+    px,py = origin || [$game_player.x,$game_player.y]
+    geo = geometry(px,py,event.x,event.y,local)
     blocked = local["line_of_sight"] == "1" &&
-              !line_clear?($game_player.x,$game_player.y,event.x,event.y)
+              !line_clear?(px,py,event.x,event.y)
     if !geo[:in_range] || blocked
       reason = blocked ? _INTL("Trayectoria bloqueada") :
               _INTL("Fuera de alcance")
