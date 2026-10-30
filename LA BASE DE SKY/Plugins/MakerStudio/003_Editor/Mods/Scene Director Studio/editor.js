@@ -44,7 +44,7 @@ function duration(c){
 }
 
 export class SceneDirectorEditor{
-  constructor(ctx,host){this.ctx=ctx;this.host=host;this.project=createProject();this.engine={found:false,settings:{}};this.resolution={width:640,height:480};this.activeSceneId=null;this.selectedCmdId=null;this.view="library";this.undo=[];this.redo=[];this.savedSig="";this.fileCache={ruby:null,images:null,audio:{}};this.dragCmdId=null;this.fullscreenActive=false;this.fullscreenPlaceholder=null;this.paletteOverlay=null;this.helpOverlay=null;this.timelineCollapsed=false;this.build();this.preview=new ScenePreview(ctx,this.previewZone,()=>this.engine);this.preview.onCommand=(i,c)=>{this.selectedCmdId=c.id;this.renderTimeline();this.renderInspector();this.setStatus(`Reproduciendo · ${i+1}/${this.scene()?.commands.length||0}`)};this.preview.onWaiting=w=>{this._waiting=!!w;this.setStatus(w?"Esperando input · Space/clic para continuar":"Preview")};this.preview.canvas.addEventListener("click",e=>{if(this.preview.state.confirm){const r=this.preview.canvas.getBoundingClientRect();this.preview.state.confirm.selected=(e.clientX-r.left)/r.width<.5?0:1;this.preview.continue();return}if(this.preview.state.treatment){const r=this.preview.canvas.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(x<.27){this.preview.changeTreatment(-1);return}if(x>.73){this.preview.changeTreatment(1);return}}this.preview.continue()});this.keydown=e=>this.onKey(e);window.addEventListener("keydown",this.keydown,true);this.init();}
+  constructor(ctx,host){this.ctx=ctx;this.host=host;this.project=createProject();this.engine={found:false,settings:{}};this.resolution={width:640,height:480};this.activeSceneId=null;this.selectedCmdId=null;this.view="library";this.undo=[];this.redo=[];this.savedSig="";this.fileCache={ruby:null,images:null,audio:{}};this.dragCmdId=null;this.fullscreenActive=false;this.fullscreenPlaceholder=null;this.paletteOverlay=null;this.helpOverlay=null;this.codeOverlay=null;this.manualCopyOverlay=null;this.timelineCollapsed=false;this.build();this.preview=new ScenePreview(ctx,this.previewZone,()=>this.engine);this.preview.onCommand=(i,c)=>{this.selectedCmdId=c.id;this.renderTimeline();this.renderInspector();this.setStatus(`Reproduciendo · ${i+1}/${this.scene()?.commands.length||0}`)};this.preview.onWaiting=w=>{this._waiting=!!w;this.setStatus(w?"Esperando input · Space/clic para continuar":"Preview")};this.preview.canvas.addEventListener("click",e=>{if(this.preview.state.confirm){const r=this.preview.canvas.getBoundingClientRect();this.preview.state.confirm.selected=(e.clientX-r.left)/r.width<.5?0:1;this.preview.continue();return}if(this.preview.state.treatment){const r=this.preview.canvas.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(x<.27){this.preview.changeTreatment(-1);return}if(x>.73){this.preview.changeTreatment(1);return}}this.preview.continue()});this.keydown=e=>this.onKey(e);window.addEventListener("keydown",this.keydown,true);this.init();}
   build(){const st=document.createElement("style");st.textContent=STYLES;this.root=document.createElement("div");this.root.className="sd-shell";this.host.appendChild(this.root);this.root.innerHTML=`<div data-view="library" class="sd-library"></div><div data-view="editor" class="sd-root hidden"></div>`;this.root.prepend(st);this.library=this.root.querySelector('[data-view="library"]');this.editor=this.root.querySelector('[data-view="editor"]');this.editor.innerHTML=this.editorHtml();this.previewZone=this.editor.querySelector('[data-role="preview-zone"]');}
   editorHtml(){return `<header class="sd-toolbar"><button class="sd-button" data-a="library">← Biblioteca</button><button class="sd-button primary" data-a="save" title="Guardar las escenas y compilar el Ruby · Ctrl+S">Guardar</button><button class="sd-button" data-a="copy-invoke" title="Copiar SceneDirector.play(...) para usar en eventos Ruby">⎘ Copiar llamada</button><button class="sd-button icon" data-a="play">▶</button><button class="sd-button icon" data-a="undo">↶</button><button class="sd-button icon" data-a="redo">↷</button>
     <details class="sd-menu"><summary>Archivo</summary><div class="sd-menu-pop"><button data-a="import-ruby">Importar Ruby…</button><button data-a="import-json">Importar Scene Director JSON…</button><div class="sd-menu-sep"></div><button data-a="show-code">Ver Ruby generado…</button><button data-a="invoke-help">Cómo ejecutar la escena…</button></div></details>
@@ -100,7 +100,10 @@ export class SceneDirectorEditor{
   duplicateCmd(){const s=this.scene(),i=s.commands.findIndex(c=>c.id===this.selectedCmdId);if(i<0)return;this.snapshot();const n=clone(s.commands[i]);n.id=`cmd_${Math.random().toString(36).slice(2,10)}`;s.commands.splice(i+1,0,n);this.selectedCmdId=n.id;this.mark();this.renderCommandList();this.renderInspector();this.renderTimeline()}
   onKey(e){
     if(!this.root.isConnected)return;
+    if(!this.fullscreenActive&&this.host?.getClientRects&&this.host.getClientRects().length===0)return;
     if(e.key==="F11"){e.preventDefault();e.stopPropagation();this.toggleFullscreen();return}
+    if(this.manualCopyOverlay){if(e.key==="Escape"){e.preventDefault();this.manualCopyOverlay.remove();this.manualCopyOverlay=null}return}
+    if(this.codeOverlay){if(e.key==="Escape"){e.preventDefault();this.codeOverlay.remove();this.codeOverlay=null}return}
     if(this.helpOverlay){if(e.key==="Escape"){e.preventDefault();this.closeInvocationHelp()}return}
     if(this.paletteOverlay){if(e.key==="Escape"){e.preventDefault();this.closeCommandPalette()}return}
     if(this.fullscreenActive&&e.key==="Escape"){e.preventDefault();e.stopPropagation();this.exitFullscreen();return}
@@ -135,15 +138,45 @@ export class SceneDirectorEditor{
     return true;
   }
   async importJsonExternal(){const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.onchange=async()=>{const f=input.files?.[0];if(!f)return;try{const p=JSON.parse(await f.text());const scenes=Array.isArray(p.scenes)?p.scenes:(p.commands?[p]:[]);if(!scenes.length)throw new Error('No contiene escenas');this.snapshot();for(const raw of scenes){const s=normalizeProject({scenes:[raw]}).scenes[0];s.id=`scene_${Math.random().toString(36).slice(2,10)}`;this.project.scenes.push(s);this.activeSceneId=s.id}this.mark();this.renderAll();this.toast(`${scenes.length} escena(s) importadas`)}catch(e){this.toast(`JSON inválido: ${e.message||e}`,"error")}};input.click()}
-  async showCode(){const s=this.scene();if(!s)return;const method=s.importInfo?.sourceMethod||`pbSceneDirector_${s.key}`;const code=`def ${method}\n  SceneEngine.play do\n${compileProject({scenes:[s]}).scenes[0].compiledRuby.split('\n').map(x=>'    '+x).join('\n')}\n  end\nend`;this.ctx.ui.showCustomDialog({title:`Ruby generado · ${s.name}`,width:"880px",height:"700px",render:body=>{body.innerHTML=`<div class="sd-dialog-stack"><p class="sd-help">Este es el equivalente código puro. Scene Director Runtime ejecuta el mismo cuerpo desde JSON.</p><textarea class="sd-textarea" style="height:570px;font-family:ui-monospace,monospace" readonly>${esc(code)}</textarea></div>`}})}
 
+  async showCode(){
+    const scene=this.scene();if(!scene)return;
+    const method=scene.importInfo?.sourceMethod||`pbSceneDirector_${scene.key}`;
+    const code=`def ${method}\n  SceneEngine.play do\n${compileProject({scenes:[scene]}).scenes[0].compiledRuby.split("\\n").map(x=>"    "+x).join("\\n")}\n  end\nend`;
+    if(this.codeOverlay)this.codeOverlay.remove();
+    const overlay=document.createElement("div");overlay.className="sd-use-overlay";overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");
+    overlay.innerHTML=`<div class="sd-use-panel"><div class="sd-dialog-stack"><div class="sd-use-top"><h2>Ruby generado · ${esc(scene.name)}</h2><button class="sd-button" data-code-close>✕ Cerrar</button></div><p class="sd-help">Código completo de la escena. Guardar sigue usando scenes.json; exportar .rb crea una copia independiente para trabajar en scripts.</p><textarea class="sd-textarea sd-export-code" readonly spellcheck="false">${esc(code)}</textarea><div class="sd-inline"><button class="sd-button primary" data-code-copy>⎘ Copiar Ruby</button><button class="sd-button" data-code-download>Exportar .rb</button><button class="sd-button" data-code-invoke>⎘ Copiar llamada al Runtime</button></div></div></div>`;
+    this.codeOverlay=overlay;this.root.appendChild(overlay);
+    const close=()=>{overlay.remove();if(this.codeOverlay===overlay)this.codeOverlay=null};
+    overlay.querySelector("[data-code-close]").onclick=close;overlay.onclick=e=>{if(e.target===overlay)close()};
+    overlay.querySelector("[data-code-copy]").onclick=()=>this.copyText(code,"Ruby completo");
+    overlay.querySelector("[data-code-invoke]").onclick=()=>this.copyInvocation(scene);
+    overlay.querySelector("[data-code-download]").onclick=()=>{
+      try{
+        const name=String(scene.key||"scene").replace(/[^a-zA-Z0-9_-]/g,"_");
+        const url=URL.createObjectURL(new Blob([code+"\n"],{type:"text/plain;charset=utf-8"}));
+        const a=document.createElement("a");a.href=url;a.download=name+".rb";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+        this.toast("Exportación Ruby preparada: "+name+".rb");
+      }catch(e){this.toast("No se pudo descargar .rb: "+String(e.message||e),"error")}
+    };
+    overlay.querySelector("[data-code-close]").focus();
+  }
   // El Runtime lee escenas.json y ejecuta por clave, no por nombre de método.
   async copyText(value,label="Texto"){
     const content=String(value||"");let copied=false;
     try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(content);copied=true}}catch(_){}
     if(!copied){const field=document.createElement("textarea");field.value=content;field.readOnly=true;field.style.cssText="position:fixed;top:-1000px;left:-1000px;opacity:0";document.body.appendChild(field);field.select();try{copied=!!document.execCommand("copy")}catch(_){}field.remove()}
     if(copied){this.toast(`${label} copiado`);return true}
-    this.ctx.ui.showCustomDialog({title:"Copiar manualmente",width:"660px",height:"240px",render:body=>{body.innerHTML=`<div class="sd-dialog-stack"><p>Selecciona este texto y cópialo con Ctrl+C:</p><textarea class="sd-textarea" data-copy readonly>${esc(content)}</textarea></div>`;const field=body.querySelector("[data-copy]");field.focus();field.select()}});return false;
+    this.showManualCopy(content);return false;
+  }
+  showManualCopy(content){
+    this.manualCopyOverlay?.remove();
+    const overlay=document.createElement("div");overlay.className="sd-use-overlay";overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");
+    overlay.innerHTML=`<div class="sd-use-panel"><div class="sd-dialog-stack"><div class="sd-use-top"><h2>Copiar manualmente</h2><button class="sd-button" data-copy-close>✕ Cerrar</button></div><p>El portapapeles está restringido. Selecciona este texto y pulsa Ctrl+C:</p><textarea class="sd-textarea sd-export-code" data-copy readonly>${esc(content)}</textarea></div></div>`;
+    this.manualCopyOverlay=overlay;this.root.appendChild(overlay);
+    const close=()=>{overlay.remove();if(this.manualCopyOverlay===overlay)this.manualCopyOverlay=null};
+    overlay.querySelector("[data-copy-close]").onclick=close;overlay.onclick=e=>{if(e.target===overlay)close()};
+    const field=overlay.querySelector("[data-copy]");field.focus();field.select();
   }
   copyInvocation(scene=this.scene()){
     if(!scene){this.toast("Selecciona una escena antes de copiar el comando.","warning");return}
@@ -232,5 +265,5 @@ export class SceneDirectorEditor{
       this.root.appendChild(overlay);no.focus();
     });
   }
-  destroy(){this.closeCommandPalette();this.closeInvocationHelp();if(this.fullscreenActive)this.exitFullscreen(true);window.removeEventListener("keydown",this.keydown,true);this.preview?.destroy();this.host.innerHTML=""}
+  destroy(){this.closeCommandPalette();this.closeInvocationHelp();this.codeOverlay?.remove();this.manualCopyOverlay?.remove();if(this.fullscreenActive)this.exitFullscreen(true);window.removeEventListener("keydown",this.keydown,true);this.preview?.destroy();this.host.innerHTML=""}
 }
