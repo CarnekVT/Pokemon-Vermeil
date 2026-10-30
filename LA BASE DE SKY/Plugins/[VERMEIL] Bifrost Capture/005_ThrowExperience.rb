@@ -104,7 +104,7 @@ module BifrostCapture
       @last_status = stamp
       bmp = @aim.bitmap
       bmp.clear
-      color = status == :blocked ? Color.new(255,134,135) :
+      color = [:blocked,:max_alert].include?(status) ? Color.new(255,134,135) :
               status == :backstrike ? Color.new(255,216,105) :
               status == :ready ? (TEMPERAMENT_COLORS[mood] ||
                                     TEMPERAMENT_COLORS[:neutral]) :
@@ -318,8 +318,9 @@ module BifrostCapture
         mood = BifrostCapture.temperament_for(focus)
         hue = TEMPERAMENT_COLORS[mood] || TEMPERAMENT_COLORS[:neutral]
         state = focus.instance_variable_get(:@bifrost_mood_state)
+        local = BifrostCapture.options($game_map.map_id,spec[0],focus.id)
         state_label = if defined?(BifrostCapture::Pressure) &&
-          BifrostCapture::Pressure.locked?(focus,cfg)
+          BifrostCapture::Pressure.locked?(focus,local)
           "¡ALERTA MÁXIMA!"
         else
           case state
