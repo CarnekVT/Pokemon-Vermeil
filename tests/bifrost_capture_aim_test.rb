@@ -204,7 +204,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert event.active, "generated OW must be registered for Game_Map updates"
     assert_equal 1,BifrostCapture.wild_events.length
     script=event.instance_variable_get(:@source_data).pages[0].list.first.parameters.first
-    assert_match(/BifrostCapture\\.interact_battle/,script)
+    assert_match(/BifrostCapture\.interact_battle/,script)
   end
   def test_spawned_ow_can_be_captured_and_stored
     BifrostCapture.spawn_wild(:Land)
