@@ -182,9 +182,8 @@ module BifrostCapture
     return false unless request
     event,chosen = request
     return false unless eligible_event?(event)
-    spec = event_spec(event)
-    wild = pbGenerateWildPokemon(spec[0],spec[1])
-    wild.form = spec[2] if spec[2] > 0
+    wild = battle_wild_for(event)
+    return false unless wild
     party = $player.party
     original = party.dup
     index = party.index(chosen)
