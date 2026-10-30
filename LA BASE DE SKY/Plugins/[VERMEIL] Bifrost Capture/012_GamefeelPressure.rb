@@ -92,6 +92,7 @@ module BifrostCapture
           BifrostCapture.respond_to?(:cancel_pending_attack)
         event.instance_variable_set(:@bifrost_alert_cooldown,180)
         event.instance_variable_set(:@bifrost_mood_state,:curious)
+        BifrostCapture::Audio.play(:calmed,cfg) if defined?(BifrostCapture::Audio)
         spec = BifrostCapture.event_spec(event)
         if defined?(BifrostCapture::Feedback)
           BifrostCapture::Feedback.publish(:calmed,spec && spec[0],
