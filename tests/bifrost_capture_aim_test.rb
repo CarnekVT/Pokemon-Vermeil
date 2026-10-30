@@ -53,6 +53,10 @@ class Game_Event
   def move_away_from_player
     @y += (@y < $game_player.y ? -1 : 1)
   end
+  def move_toward_player
+    @x += (@x < $game_player.x ? 1 : -1) if @x != $game_player.x
+  end
+  def turn_toward_player; end
 end
 class FakeMap
   attr_accessor :events
@@ -90,6 +94,8 @@ class PokemonGlobalMetadata; end
 class PokemonEncounters
   def encounter_triggered?(*args); true; end
   def choose_wild_pokemon(*args); [:PIKACHU,6]; end
+  def encounter_possible_here?; true; end
+  def encounter_type; :Land; end
 end
 require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/001_Core"
 require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/002_Runtime"
@@ -149,6 +155,36 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     BifrostCapture.reset_behavior
     BifrostCapture::Feedback.reset
   end
+  def test_extra_ow_appearance_uses_separate_roll_and_cooldown
+    $player=FakePlayer.new
+    $game_temp=Struct.new(:in_battle,:in_menu,:message_window_showing).
+      new(false,false,false)
+    $PokemonGlobal.bifrost_overrides.merge!(
+      "encounter_mode"=>"classic","restricted_species"=>"1",
+      "ow_extra_spawn_chance"=>"100","ow_extra_spawn_cooldown"=>"4")
+    assert_equal :spawned,BifrostCapture.try_extra_spawn
+    event=$game_map.events.values.first
+    assert event.instance_variable_get(:@bifrost_extra_spawn)
+    assert BifrostCapture.eligible_event?(event),
+           "regular Pokémon from extra OW roll must be capturable"
+    assert_equal :cooldown,BifrostCapture.try_extra_spawn
+    assert_equal 1,$game_map.events.length
+  end
+
+  def test_aggressive_chases_and_receives_ow_battle_bonus
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    $PokemonGlobal.bifrost_overrides["aggressive_level_bonus"]="3"
+    cfg=BifrostCapture.options.merge("temperament"=>"aggressive")
+    event.instance_variable_set(:@bifrost_temperament,:aggressive)
+    event.instance_variable_set(:@x,14)
+    event.instance_variable_set(:@y,10)
+    assert BifrostCapture.start_chase(event,cfg)
+    BifrostCapture.chase_tick(event,cfg)
+    assert_equal 13,event.x
+    assert_equal 9,BifrostCapture.battle_wild_for(event).level
+  end
+
   def test_native_grass_roll_creates_capturable_ow
     result=PokemonEncounters.new.encounter_triggered?(:Land)
     refute result
