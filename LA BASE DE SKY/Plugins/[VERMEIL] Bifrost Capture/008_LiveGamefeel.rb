@@ -325,7 +325,14 @@ module BifrostCapture
                   BifrostCapture.line_clear?($game_player.x,$game_player.y,
                                              focus.x,focus.y)
           status = geom[:in_range] && clear ? :ready : :blocked
-          hint ||= status == :ready ? _INTL("Listo para lanzar") :
+          if status == :ready && s[:mode] == :ball && defined?(Pressure) &&
+             Pressure.locked?(focus,local)
+            status = :blocked
+          elsif status == :ready && BifrostCapture.behind?($game_player.x,$game_player.y,focus)
+            status = :backstrike
+          end
+          hint ||= status == :backstrike ? _INTL("¡Captura por sorpresa!") :
+                    status == :ready ? _INTL("Listo para lanzar") :
                     _INTL("Acércate o cambia el ángulo")
         end
         mood = focus && BifrostCapture.respond_to?(:temperament_for) ?
@@ -392,6 +399,11 @@ module BifrostCapture
                                             target.x,target.y))
           BifrostCapture.capture_result(:blocked,spec[0],
             _INTL("Objetivo fuera de alcance"),local)
+          return false
+        end
+        if s[:mode] == :ball && defined?(Pressure) && Pressure.locked?(target,local)
+          BifrostCapture.capture_result(:blocked,spec[0],
+            _INTL("¡Alerta máxima! Usa el combate tradicional"),local)
           return false
         end
         item = s[:mode] == :ball ?
@@ -673,6 +685,16 @@ module BifrostCapture
         flights.delete(a)
         event.instance_variable_set(:@bifrost_projectile_lock,false) if event
         release_resources(a)
+        if !a[:miss] && a[:mode] == :ball && a[:back] &&
+           BifrostCapture.eligible_event?(event)
+          if defined?(BifrostCapture::Feedback)
+            spec = BifrostCapture.event_spec(event)
+            BifrostCapture::Feedback.publish(:backstrike,spec && spec[0],
+              _INTL("Impacto por sorpresa"),a[:config])
+          end
+          event.jump(0,0) if event.respond_to?(:jump) &&
+            (!event.respond_to?(:jumping?) || !event.jumping?)
+        end
         BifrostCapture::Audio.play(:hit,a[:config]) if
           !a[:miss] && defined?(BifrostCapture::Audio)
         BifrostCapture.resolve_throw(event,a[:mode],a[:item],
