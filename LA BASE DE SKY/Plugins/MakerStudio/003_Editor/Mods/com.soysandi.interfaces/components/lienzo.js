@@ -144,12 +144,13 @@ export class Lienzo {
   }
 
   encajar() {
-    const aw = Math.max(80, this.el.clientWidth - 40);
-    const ah = Math.max(80, this.el.clientHeight - 40);
-    const maximo = Math.min(aw / this.ancho, ah / this.alto, 6);
-    const niveles = [0.1, 0.125, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5, 6];
-    let z = niveles[0];
-    for (const n of niveles) if (n <= maximo + 0.001) z = n;
+    // Ajuste fino al espacio REAL disponible. Antes los pasos fijos (.5/.75/1)
+    // dejaban grandes márgenes incluso cuando había sitio para el canvas.
+    // Se usa el scrollport y no el tamaño lógico de la ventana de Maker Studio.
+    const aw = Math.max(80, this.el.clientWidth - 36);
+    const ah = Math.max(80, this.el.clientHeight - 36);
+    const ideal = Math.min(aw / this.ancho, ah / this.alto, 6);
+    const z = Math.max(0.1, Math.min(6, Math.floor(ideal * 100) / 100));
     this.fijarZoom(z);
     this.op.alCambiarZoom?.(z);
     return z;
