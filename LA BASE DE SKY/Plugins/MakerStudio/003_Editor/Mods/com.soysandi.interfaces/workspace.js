@@ -27,6 +27,7 @@ export function montarEspacio(editor, M) {
     const body=node("div","ui-workspace-dropdown");
     d.append(summary,body);
     contents.forEach(c=>body.append(c));
+    body.addEventListener("click",ev=>{if(ev.target.closest("button"))d.open=false;});
     summary.addEventListener("click",()=>closeMenus(d));
     d.addEventListener("toggle",()=>{if(d.open)closeMenus(d);});
     return { d, body };
