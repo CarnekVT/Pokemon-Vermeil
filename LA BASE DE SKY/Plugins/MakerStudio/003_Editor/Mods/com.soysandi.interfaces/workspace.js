@@ -3,7 +3,7 @@
 export function montarEspacio(editor, M) {
   const root = editor.raiz;
   const disposers = [];
-  const state = { focus:false, layers:true, inspector:true, timeline:true };
+  const state = { focus:false, layers:true, inspector:true, timeline:false };
   const node = (tag, cls, text) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -83,7 +83,9 @@ export function montarEspacio(editor, M) {
   };
   const empty=node("p","ui-ayuda","No se encontraron componentes.");
   empty.hidden=true;
-  const palette=menu("＋ Añadir elemento ▾",[search,choices,empty]);
+  const background=action("▧ Fondo de pantalla",()=>{editor.anadirFondo();palette.d.open=false;},"Crear una imagen detrás de todos los elementos, ajustada al lienzo");
+  choices.append(background);
+  const palette=menu("＋ Elemento ▾",[search,choices,empty]);
   const addLabel=editor.barraAnadir.querySelector(".ui-capa-tipo");
   editor.barraAnadir.classList.add("ui-add-toolbar");
   editor.barraAnadir.insertBefore(palette.d,addLabel||editor.barraAnadir.firstChild);
@@ -97,13 +99,53 @@ export function montarEspacio(editor, M) {
       if(first){first.click();ev.preventDefault();}
     }
   });
-  editor.barraAnadir.insertBefore(action("▣ Fondo completo",()=>editor.anadirFondo()),palette.d.nextSibling);
+  // Un solo encabezado: el toolbar original se conserva a nivel de handlers,
+  // pero sus acciones pasan a la barra principal.
+  editor.barra.insertBefore(palette.d,fileMenu.d.nextSibling);
+  const editButtons=Array.from(editor.barraAnadir.querySelectorAll("button"))
+    .filter(b=>!choices.contains(b));
+  const editMenu=menu("Editar ▾",editButtons);
+  editor.barra.insertBefore(editMenu.d,palette.d.nextSibling);
+  editor.barraAnadir.remove();
+  // El bloque de resolución sigue siendo el componente original (instancia
+  // Resolucion); se muestra como panel emergente en vez de ocho filas.
+  const res=editor.resolucion;
+  const layout=res.el;
+  const group=(title,children)=>{
+    const section=node("section","ui-resolution-group");
+    section.append(node("h4",null,title));
+    children.forEach(n=>section.append(n));
+    return section;
+  };
+  const sizeInputs=node("div","ui-resolution-sizes");
+  sizeInputs.append(res.ancho,node("span",null,"×"),res.alto,res.info);
+  const strategyRow=node("div","ui-resolution-action");
+  strategyRow.append(res.estrategia,res.btnAplicar);
+  const checkRow=node("div","ui-resolution-checks");
+  checkRow.append(res.pixel,res.entera,res.segura,res.bloqueo);
+  layout.replaceChildren(
+    group("Tamaño lógico del juego",[res.preset,sizeInputs]),
+    group("Al cambiar el tamaño",[strategyRow]),
+    group("Presentación",[res.modo,checkRow])
+  );
+  const canvasMenu=menu("▣ Lienzo ▾",[layout]);
+  canvasMenu.d.classList.add("ui-canvas-menu");
+  editor.barra.insertBefore(canvasMenu.d,editMenu.d.nextSibling);
+  editor.barra.insertBefore(copy,editor.btnGuardar);
+  const copyLabel=copy.textContent;
+  copy.textContent="⎘ Llamada";
+  copy.title=copyLabel+" · "+copy.title;
+  const canvasTitle=canvasMenu.d.querySelector("summary");
+  const resLabel=()=>{
+    const l=editor.diseno?.lienzo;
+    canvasTitle.textContent=l?"▣ Lienzo "+l.ancho+"×"+l.alto+" ▾":"▣ Lienzo ▾";
+  };
 
   // Herramientas para el workspace estilo BAS/BSS. No superpone una ventana a
   // los diálogos del editor: maximizar aquí es concentrar el espacio útil.
   const bar=node("div","ui-workspace-bar");
   const section=node("div","ui-workspace-caption");
-  section.append(node("b",null,"ESPACIO DE TRABAJO"),node("span",null,"Biblioteca · Canvas · Inspector"));
+  section.append(node("b",null,"VISTA"),node("span",null,"Ajusta el espacio"));
   bar.append(section);
   const divider=node("div","ui-workspace-divider");
   bar.append(divider);
@@ -125,12 +167,14 @@ export function montarEspacio(editor, M) {
     else if(key==="focus" && !state.focus){state.layers=true;state.inspector=true;}
     if((key==="layers"||key==="inspector")&&state.focus&&state.layers&&state.inspector)state.focus=false;
     drawState();
+    // Ajustar después del reflow, no antes de cambiar las dimensiones reales.
+    requestAnimationFrame(()=>{if(root.isConnected&&editor.diseno)editor.lienzo.encajar();});
   };
   for(const [key,label,title] of [
     ["layers","Capas","Mostrar u ocultar la lista de capas"],
-    ["inspector","Inspector","Mostrar u ocultar el inspector de propiedades"],
-    ["timeline","Animaciones","Mostrar u ocultar la línea de tiempo"],
-    ["focus","Lienzo amplio","Más área para diseñar sin bloquear ventanas emergentes · F6"]
+    ["inspector","Propiedades","Mostrar u ocultar las propiedades"],
+    ["timeline","Línea de tiempo","Mostrar u ocultar el editor de animaciones · F7"],
+    ["focus","Solo lienzo","Concentrarse en el dibujo sin cerrar cuadros de diálogo · F6"]
   ]){
     const b=action(label,()=>toggle(key),title);toggles[key]=b;bar.append(b);
   }
@@ -165,6 +209,7 @@ export function montarEspacio(editor, M) {
   status.append(statusLeft,statusRight);
   root.insertBefore(status,editor.tiempo.el);
   const update=()=>{
+    resLabel();
     const d=editor.diseno,els=d?.elementos||[],selected=editor.extra?.size||0;
     statusLeft.textContent=(editor.nombre||"Sin guardar")+" · "+els.length+" elementos"+(selected?" · "+selected+" seleccionados":"");
     statusRight.textContent=d?.lienzo?d.lienzo.ancho+"×"+d.lienzo.alto+" · "+(editor.sucio?"Cambios pendientes":"Guardado"):"Configura un diseño";
@@ -206,8 +251,11 @@ export function montarEspacio(editor, M) {
   document.addEventListener("pointerdown",outside,true);
   disposers.push(()=>document.removeEventListener("pointerdown",outside,true));
   drawState();update();
+  const fitOnOpen=()=>requestAnimationFrame(()=>{
+    if(root.isConnected&&editor.diseno)editor.lienzo.encajar();
+  });
   return {
-    update,
+    update,fitOnOpen,
     openPalette(){palette.d.open=true;search.focus();},
     toggleFocus(){toggle("focus");},
     toggleTimeline(){toggle("timeline");},
