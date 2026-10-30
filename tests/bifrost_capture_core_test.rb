@@ -7,6 +7,16 @@ class BifrostCoreTest < Minitest::Test
     BifrostCapture.reload!
   end
 
+  def test_translation_placeholders_always_receive_mutable_strings
+    root=File.expand_path(
+      "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture",__dir__)
+    Dir.glob(File.join(root,"*.rb")).each do |path|
+      source=File.read(path)
+      unsafe=source.scan(/_INTL\("[^"]*\{\d+\}[^"]*"\s*,/)
+      assert_empty unsafe, "FrozenError risk in #{File.basename(path)}: #{unsafe.inspect}"
+    end
+  end
+
   def test_project_defaults_keep_exclusive_bifrost
     cfg = BifrostCapture::DEFAULTS
     assert_equal "bifrost",cfg["profile"]
