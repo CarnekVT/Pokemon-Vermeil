@@ -179,8 +179,16 @@ export function montarEspacio(editor, M) {
     const b=action(label,()=>toggle(key),title);toggles[key]=b;bar.append(b);
   }
   bar.append(node("span","ui-barra-hueco"));
-  const fit=action("⤢ Encajar",()=>editor.lienzo.encajar(),"Ajustar resolución lógica al espacio disponible");
-  bar.append(fit);
+  // Reubicar el control real de zoom y el botón original "Encajar" evita
+  // duplicados entre el pie de canvas y la barra de vista.
+  const zoomLabel=editor.selZoom.previousElementSibling;
+  if(zoomLabel?.textContent?.trim()==="Zoom")zoomLabel.remove();
+  const fit=Array.from(editor.pie.querySelectorAll("button"))
+    .find(b=>b.textContent.trim()==="Encajar");
+  bar.append(node("span","ui-workspace-zoom-label","Zoom"),editor.selZoom);
+  if(fit){fit.classList.add("ui-workspace-btn");bar.append(fit);}
+  else bar.append(action("⤢ Encajar",()=>editor.lienzo.encajar(),
+    "Ajustar el canvas sin modificar su resolución"));
   const help=action("Atajos ?",async()=>{
     const content=[
       "Ctrl+K: buscar y añadir elemento.  F6: lienzo amplio.  F7: mostrar/ocultar animaciones.",
