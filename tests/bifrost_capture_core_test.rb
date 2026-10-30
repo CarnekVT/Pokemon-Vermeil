@@ -56,7 +56,8 @@ class BifrostCoreTest < Minitest::Test
   def test_reserved_actions_never_leak_into_capture_by_default
     cfg=BifrostCapture::DEFAULTS
     assert_equal "none",cfg["target_key"]
-    assert_equal "none",cfg["mode_key"]
+    assert_equal "aux2",cfg["mode_key"]
+    assert_equal :aux2,BifrostCapture.capture_action(cfg,"mode_key")
     assert_equal :jumpup,BifrostCapture.capture_action(cfg,"hotkey")
     assert_equal :jumpdown,BifrostCapture.capture_action(cfg,"ball_key")
     %w[action special aux1 aux2 use back].each do |reserved|
