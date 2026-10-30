@@ -1,13 +1,13 @@
 {
   "id": "com.soysandi.interfaces",
   "name": "Editor de Interfaces",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "authors": [
     {
       "name": "SoySandi"
     }
   ],
-  "description": "Editor de interfaces original de SoySandi conservado: ocho componentes, timeline, condiciones, vínculos y resolución adaptable; nueva organización de workspace BAS/BSS, paleta buscable, búsqueda de capas y comando de eventos.",
+  "description": "Editor visual original de Interfaces (SoySandi), conservando todos los componentes, runtime JSON, condiciones, timeline, GIF, barras y Pokémon; UI 2.2 con lienzo prioritario, ajustes de canvas compactos e inspector contextual.",
   "homepage": "https://github.com/yobrantoro/ms-interfaces",
   "tags": [
     "essentials",
