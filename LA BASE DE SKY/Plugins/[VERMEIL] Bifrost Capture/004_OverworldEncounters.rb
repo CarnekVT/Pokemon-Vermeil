@@ -63,7 +63,24 @@ module BifrostCapture
         candidates << [x,y] if valid_spawn_tile?(x,y,cfg,cave)
       end
     end
-    candidates.sample
+    return candidates.sample if !candidates.empty?
+    # Many narrow grass routes have no free tile at the preferred distance.
+    # A nearby walkable tile is preferable to spawning nothing or launching a
+    # battle in an explicit OW-only profile.
+    return nil unless cfg["encounter_mode"] == "overworld"
+    (1..[high+3,12].min).each do |dist|
+      nearby = []
+      (-dist..dist).each do |dx|
+        dy_abs = dist - dx.abs
+        [-dy_abs,dy_abs].uniq.each do |dy|
+          x,y = $game_player.x+dx,$game_player.y+dy
+          next unless valid_spawn_tile?(x,y,cfg,true)
+          nearby << [x,y]
+        end
+      end
+      return nearby.sample if !nearby.empty?
+    end
+    nil
   end
 
   def self.character_for(species,form=0)
@@ -190,10 +207,17 @@ class PokemonEncounters
       return triggered
     end
     outcome = BifrostCapture.spawn_wild(enc_type)
-    # Full mode never silently replaces an eligible encounter with nothing.
-    # Missing graphics/room fall back to a vanilla battle.
+    if cfg["encounter_mode"] == "overworld"
+      # Never force the battle renderer from the OW-only mode. In particular,
+      # the previous fallback exposed unrelated Battle::Scene alias recursion.
+      # Keep a meaningful diagnosis for missing assets or map capacity.
+      BifrostCapture.notice(_INTL("Bifröst OW: {1}",outcome.to_s)) if
+        outcome != :spawned && outcome != :full && outcome != :filtered
+      return false
+    end
+    # Hybrid may leave the normal battle intact if an OW cannot be created.
     return triggered if [:missing_sprite,:no_tile,:not_available].include?(outcome)
-    return false # spawned / full / intentionally filtered
+    false
   end
 end
 
