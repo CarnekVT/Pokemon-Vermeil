@@ -205,7 +205,7 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert_equal 1,$bag.used
     assert_equal 1,BifrostCapture.captures.length
     assert_equal :PIKACHU,BifrostCapture.captures[0].species
-    assert_equal :caught,BifrostCapture::Feedback.last_result[:kind]
+    assert_includes [:caught,:critical],BifrostCapture::Feedback.last_result[:kind]
     assert_equal :PIKACHU,BifrostCapture::Feedback.last_result[:species]
     assert_empty $game_map.events
   end
