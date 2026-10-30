@@ -214,7 +214,7 @@ class PokemonEncounters
       # Never force the battle renderer from the OW-only mode. In particular,
       # the previous fallback exposed unrelated Battle::Scene alias recursion.
       # Keep a meaningful diagnosis for missing assets or map capacity.
-      BifrostCapture.notice(_INTL("Bifröst OW: {1}",outcome.to_s)) if
+      BifrostCapture.notice(_INTL("Bifröst OW: {1}".dup,outcome.to_s)) if
         outcome != :spawned && outcome != :full && outcome != :filtered
       return false
     end
