@@ -7,7 +7,7 @@ Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 | Área | Estado | Verificación / siguiente tarea |
 |---|---|---|
 | Selección inmediata y bidireccional | Código integrado y tests | S y rueda cambian Ball o Team en ambos sentidos sin esperar |
-| Doble toque S / clic derecho cambia Ball/Team | Código integrado; validar mkxp | W queda reservado al debug de pasabilidades, no abre controles Bifröst |
+| Mantener S brevemente / clic derecho cambia Ball/Team | Código integrado; tests | W sigue reservado al debug; varios toques de S solo cambian la Ball |
 | Recordar Ball/Team/modo en guardado | Código integrado y tests | Persistencia en PokemonGlobalMetadata; Ball por ID, miembro por índice |
 | Profundidad real de Ball vs tiles/animated props | Código integrado; validar en mkxp | Sprites usan viewport del mapa y Z según screen_z, sin capas 999996/999997 |
 | Giro de captura desde la base | Código integrado; validar en mkxp | Anclaje inferior, sin flotación durante absorción y sacudidas |
