@@ -193,7 +193,9 @@ module BifrostCapture
           hint ||= status == :ready ? _INTL("Listo para lanzar") :
                     _INTL("Acércate o cambia el ángulo")
         end
-        @hud.reticle(point[0],point[1],status)
+        mood = focus && BifrostCapture.respond_to?(:temperament_for) ?
+          BifrostCapture.temperament_for(focus) : :neutral
+        @hud.reticle(point[0],point[1],status,mood)
         if s[:mode] == :ball
           s[:balls] = BifrostCapture.ball_choices
           s[:ball_index] = 0 if s[:ball_index] >= s[:balls].length
