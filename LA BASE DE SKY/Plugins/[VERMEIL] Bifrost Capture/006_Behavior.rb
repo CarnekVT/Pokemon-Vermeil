@@ -337,8 +337,10 @@ module BifrostCapture
   def self.battle_wild_for(event)
     spec = event_spec(event)
     return nil unless spec
-    wild = pbGenerateWildPokemon(spec[0],spec[1])
-    wild.form = spec[2] if spec[2] > 0
+    original = ow_pokemon_for(event)
+    return nil unless original
+    # Aggressive battle bonus must not mutate the original OW target.
+    wild = original.dup
     cfg = options($game_map.map_id,spec[0],event.id)
     if temperament_for(event,cfg) == :aggressive && wild.respond_to?(:level=)
       extra = cfg["aggressive_level_bonus"].to_i.clamp(0,20)
@@ -426,6 +428,8 @@ module BifrostCapture
     return unless @ai_frame % 12 == 0
     $game_map.events.values.each do |event|
       next unless eligible_event?(event)
+      # Also register placed OWCAP events, not only naturally generated spawns.
+      ow_pokemon_for(event) unless event.instance_variable_get(:@bifrost_wild_pokemon)
       next if respond_to?(:emerging?) && emerging?(event)
       next if fleeing?(event) || chasing?(event) ||
               event.instance_variable_get(:@bifrost_escape_reaction) ||
