@@ -21,6 +21,7 @@ module BifrostCapture
 
   def self.erase_wild(event)
     return false unless generated?(event)
+    stop_spawn_intro(event)
     @wild_events.delete(event.object_id)
     map = event.map
     if defined?($scene) && $scene.is_a?(Scene_Map)
@@ -36,6 +37,7 @@ module BifrostCapture
   def self.reset_wild_events
     (@wild_events || {}).values.dup.each { |event| erase_wild(event) }
     @wild_events = {}
+    reset_spawn_intros
     @extra_cooldown = 0
   end
 
@@ -150,6 +152,7 @@ module BifrostCapture
       spriteset.bifrost_add_character(event) if spriteset
     end
     @wild_events[event.object_id] = event
+    spawn_intro(event,local)
     :spawned
   end
 
@@ -213,6 +216,95 @@ module BifrostCapture
     return false unless $PokemonGlobal && event
     ($PokemonGlobal.bifrost_removed_events || {})[[$game_map.map_id,event.id]] == true
   end
+  # Soft materialization in its natural habitat: fade the OW sprite in
+  # while a restrained dust/grass ring expands at ground level. Uses the
+  # shared map viewport so Visual 2.5D/tile priorities remain intact.
+  @spawn_intros = {}
+  def self.spawn_intro(event,cfg)
+    return unless event && event.respond_to?(:opacity=) && event.respond_to?(:opacity)
+    @spawn_intros ||= {}
+    stop_spawn_intro(event)
+    duration = cfg["spawn_intro_frames"].to_i.clamp(6,60)
+    state = { :event=>event, :frame=>0, :duration=>duration,
+              :opacity=>event.opacity, :ring=>nil }
+    event.opacity = 0
+    if defined?($scene) && $scene.is_a?(Scene_Map) &&
+       defined?(Spriteset_Map) && Spriteset_Map.respond_to?(:viewport)
+      vp = Spriteset_Map.viewport
+      if vp && !vp.disposed?
+        ring = Sprite.new(vp)
+        ring.bitmap = Bitmap.new(48,20)
+        ring.ox = 24;ring.oy = 10
+        tint = Color.new(176,201,163,168)
+        48.times do |i|
+          theta = i*2.0*Math::PI/48
+          xx = (24+20*Math.cos(theta)).to_i
+          yy = (10+6*Math.sin(theta)).to_i
+          ring.bitmap.fill_rect(xx,yy,2,2,tint)
+        end
+        ring.opacity = 0
+        state[:ring] = ring
+      end
+    end
+    @spawn_intros[event.object_id] = state
+  rescue StandardError
+    event.opacity = 255 if event && event.respond_to?(:opacity=)
+  end
+
+  def self.emerging?(event)
+    !!(@spawn_intros && event && @spawn_intros[event.object_id])
+  end
+
+  def self.stop_spawn_intro(event,restore=false)
+    return unless @spawn_intros
+    state = @spawn_intros.delete(event.object_id)
+    return unless state
+    event.opacity = state[:opacity] if restore && event.respond_to?(:opacity=)
+    ring = state[:ring]
+    if ring && !ring.disposed?
+      bitmap = ring.bitmap
+      ring.dispose
+      bitmap.dispose if bitmap && !bitmap.disposed?
+    end
+  end
+
+  def self.reset_spawn_intros
+    (@spawn_intros || {}).values.dup.each do |state|
+      stop_spawn_intro(state[:event],true)
+    end
+    @spawn_intros = {}
+  end
+
+  def self.update_spawn_intros
+    return unless @spawn_intros && !@spawn_intros.empty?
+    unless $game_map && defined?($scene) && $scene.is_a?(Scene_Map) &&
+           (!defined?($game_temp) || !$game_temp || !$game_temp.in_battle)
+      reset_spawn_intros
+      return
+    end
+    @spawn_intros.values.dup.each do |state|
+      event = state[:event]
+      unless $game_map.events[event.id].equal?(event) &&
+             !event.instance_variable_get(:@erased)
+        stop_spawn_intro(event)
+        next
+      end
+      state[:frame] += 1
+      t = [state[:frame].to_f/state[:duration],1.0].min
+      ease = t*t*(3-2*t)
+      event.opacity = (state[:opacity]*ease).round
+      ring = state[:ring]
+      if ring && !ring.disposed?
+        rect = target_rect(event)
+        ring.x = rect[0]+rect[2]/2
+        ring.y = rect[1]+rect[3]
+        ring.z = event.respond_to?(:screen_z) ? event.screen_z-1 : 0
+        ring.zoom_x = ring.zoom_y = 0.65+0.75*t
+        ring.opacity = (200*Math.sin(Math::PI*t)).round
+      end
+      stop_spawn_intro(event,true) if state[:frame] >= state[:duration]
+    end
+  end
 end
 
 class Spriteset_Map
@@ -269,4 +361,8 @@ EventHandlers.add(:on_player_step_taken,:bifrost_ow_expiry,
 )
 EventHandlers.add(:on_enter_map,:bifrost_ow_reset,
   proc { |_old| BifrostCapture.reset_wild_events }
+)
+
+EventHandlers.add(:on_frame_update,:bifrost_spawn_emergence,
+  proc { BifrostCapture.update_spawn_intros }
 )

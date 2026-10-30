@@ -178,3 +178,6 @@ EventHandlers.add(:on_frame_update,:bifrost_capture_results,
 EventHandlers.add(:on_enter_map,:bifrost_result_map_change,
   proc { |_old| BifrostCapture::Feedback.reset }
 )
+EventHandlers.add(:on_start_battle,:bifrost_result_enter_battle,
+  proc { |_battle| BifrostCapture::Feedback.reset }
+)

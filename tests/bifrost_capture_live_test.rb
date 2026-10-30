@@ -65,6 +65,7 @@ module BifrostCapture
        "aux2"=>Input::AUX2}[cfg[field]]
     end
     def aim_allowed?; true; end
+    def eligible_event?(event); !event.nil?; end
     def ball_choices; @test_balls || [[:POKEBALL,10],[:GREATBALL,7]]; end
     def closest_target; nil; end
     def take_notice; nil; end
@@ -222,6 +223,50 @@ class BifrostLiveTest < Minitest::Test
     BifrostCapture::LiveAim.update
     assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
     assert_equal 1,BifrostCapture::LiveAim.session[:ball_index]
+  end
+
+  def test_multiple_ball_flights_are_reserved_per_item_and_target
+    first=Object.new; second=Object.new; third=Object.new; fourth=Object.new
+    cfg=BifrostCapture.options.merge("max_flights"=>"3")
+    flight={:event=>first,:item=>:POKEBALL,:mode=>:ball,:sprites=>[]}
+    BifrostCapture::Motion.flights << flight
+    first.instance_variable_set(:@bifrost_projectile_lock,true)
+    refute BifrostCapture::Motion.can_launch?(first,:POKEBALL,:ball,cfg)
+    assert BifrostCapture::Motion.can_launch?(second,:POKEBALL,:ball,cfg)
+    BifrostCapture::Motion.flights << {:event=>second,:item=>:POKEBALL,:mode=>:ball,:sprites=>[]}
+    assert BifrostCapture::Motion.can_launch?(third,:POKEBALL,:ball,cfg)
+    BifrostCapture::Motion.flights << {:event=>third,:item=>:GREATBALL,:mode=>:ball,:sprites=>[]}
+    refute BifrostCapture::Motion.can_launch?(fourth,:POKEBALL,:ball,cfg)
+    BifrostCapture::Motion.cancel
+    refute BifrostCapture::Motion.busy?
+    refute first.instance_variable_get(:@bifrost_projectile_lock)
+  end
+
+  def test_no_ball_can_launch_when_all_copies_reserved_in_air
+    cfg=BifrostCapture.options.merge("max_flights"=>"3")
+    old_bag=$bag
+    $bag=Struct.new(:_x) do
+      def quantity(*); 1; end
+    end.new
+    begin
+      BifrostCapture::Motion.flights << {
+        :event=>Object.new,:item=>:POKEBALL,:mode=>:ball,:sprites=>[]
+      }
+      refute BifrostCapture::Motion.can_launch?(Object.new,:POKEBALL,:ball,cfg)
+      assert BifrostCapture::Motion.can_launch?(Object.new,:GREATBALL,:ball,cfg)
+    ensure
+      BifrostCapture::Motion.cancel
+      $bag=old_bag
+    end
+  end
+
+  def test_cannot_send_team_while_balls_are_still_animating
+    cfg=BifrostCapture.options.merge("max_flights"=>"3")
+    BifrostCapture::Motion.catches << {
+      :event=>Object.new,:caught=>false,:sprites=>[]
+    }
+    refute BifrostCapture::Motion.can_launch?(Object.new,Object.new,:battle,cfg)
+    BifrostCapture::Motion.cancel
   end
 
   def test_mouse_wheel_changes_ball_in_both_directions

@@ -91,15 +91,20 @@ module BifrostCapture
   def self.start_chase(event,cfg)
     return false unless eligible_event?(event)
     return false if fleeing?(event) || chasing?(event)
+    # First notice the player, face them, then pursue in short bursts.
+    # A nearby wild Pokémon should not accelerate like a projectile.
     state = {
       :original_speed=>event.move_speed,
       :original_type=>event.instance_variable_get(:@move_type),
-      :stuck=>0
+      :stuck=>0, :phase=>:notice,
+      :notice=>cfg["aggressive_notice_frames"].to_i.clamp(0,90),
+      :rest=>0, :attack=>0
     }
     event.instance_variable_set(:@bifrost_chase_state,state)
-    event.instance_variable_set(:@bifrost_mood_state,:chase)
+    event.instance_variable_set(:@bifrost_mood_state,:alert)
     event.instance_variable_set(:@move_type,0)
     event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(1,6)
+    event.turn_toward_player if event.respond_to?(:turn_toward_player)
     @chasing ||= {}
     @chasing[event.object_id] = event
     BifrostCapture::Audio.play(:alert,cfg) if defined?(BifrostCapture::Audio)
@@ -125,23 +130,45 @@ module BifrostCapture
 
   def self.chase_tick(event,cfg)
     return unless chasing?(event)
-    return if event.instance_variable_get(:@bifrost_capture_lock)
+    return if event.instance_variable_get(:@bifrost_capture_lock) ||
+              event.instance_variable_get(:@bifrost_projectile_lock)
+    state = event.instance_variable_get(:@bifrost_chase_state)
+    return unless state
     dist = distance(event)
     alert_dist = cfg["aggressive_alert_distance"].to_i.clamp(1,20)
-    if dist > alert_dist+2
+    if dist > alert_dist+3
       stop_chase(event)
       event.instance_variable_set(:@bifrost_alert_cooldown,90)
       return
     end
-    return if event.moving? || event.move_route_forcing
+    if state[:phase] == :notice
+      state[:notice] -= 1
+      return if state[:notice] > 0
+      state[:phase] = :chase
+      event.instance_variable_set(:@bifrost_mood_state,:chase)
+    end
     if dist <= cfg["aggressive_attack_distance"].to_i.clamp(1,6)
-      stop_chase(event)
-      schedule_attack(event)
+      event.instance_variable_set(:@bifrost_mood_state,:threat)
+      event.turn_toward_player if event.respond_to?(:turn_toward_player) &&
+                                  !event.moving?
+      state[:attack] += 1
+      if state[:attack] >=
+         cfg["aggressive_attack_windup"].to_i.clamp(0,90) &&
+         !event.moving?
+        stop_chase(event)
+        schedule_attack(event)
+      end
       return
     end
+    state[:attack] = 0
+    event.instance_variable_set(:@bifrost_mood_state,:chase)
+    return if event.moving? || event.move_route_forcing
+    state[:rest] -= 1 if state[:rest] > 0
+    return if state[:rest] > 0
     before = [event.x,event.y]
     event.move_toward_player if event.respond_to?(:move_toward_player)
-    state = event.instance_variable_get(:@bifrost_chase_state)
+    # Keep a small breathing interval after each discrete tile movement.
+    state[:rest] = cfg["aggressive_step_pause"].to_i.clamp(0,60)
     if before == [event.x,event.y]
       state[:stuck] += 1
       if state[:stuck] >= 45
@@ -184,7 +211,7 @@ module BifrostCapture
     wild.form = spec[2] if spec[2] > 0
     cfg = options($game_map.map_id,spec[0],event.id)
     if temperament_for(event,cfg) == :aggressive && wild.respond_to?(:level=)
-      extra = cfg["aggressive_level_bonus"].to_i.clamp(0,10)
+      extra = cfg["aggressive_level_bonus"].to_i.clamp(0,20)
       wild.level = [wild.level.to_i + extra,100].min if extra > 0
       wild.calc_stats if extra > 0 && wild.respond_to?(:calc_stats)
     end
@@ -198,13 +225,15 @@ module BifrostCapture
     return false unless event && eligible_event?(event)
     wild = battle_wild_for(event)
     return false unless wild
+    BifrostCapture::Feedback.reset if defined?(BifrostCapture::Feedback)
     result = WildBattle.start(wild)
     remove_event(event) if result
     true
   end
 
   def self.update_behavior
-    return if @capture_busy || (defined?(Motion) && Motion.busy?)
+    # Other wild Pokémon keep moving while a Ball is in the air. Per-event
+    # capture/projectile locks prevent simultaneous interactions on one target.
     return if !$game_map || !$game_player || !$player
     return if !defined?($scene) || !$scene.is_a?(Scene_Map)
     return if $game_temp.in_menu || $game_temp.in_battle ||
@@ -227,13 +256,15 @@ module BifrostCapture
       chase_tick(event,options($game_map.map_id,spec[0],event.id))
     end
     # The aggro encounter is delayed until the aiming interface closes.
-    if @pending_attack && !@aim_open
+    if @pending_attack && !@aim_open &&
+       !(defined?(Motion) && Motion.busy?)
       dispatch_attack
       return
     end
     return unless @ai_frame % 12 == 0
     $game_map.events.values.each do |event|
       next unless eligible_event?(event)
+      next if respond_to?(:emerging?) && emerging?(event)
       next if fleeing?(event) || chasing?(event) ||
               event.instance_variable_get(:@bifrost_capture_lock)
       cd = event.instance_variable_get(:@bifrost_alert_cooldown).to_i

@@ -11,6 +11,11 @@ module BifrostCapture
     "reaction" => ["Reacción",["flee","attack","ignore"]],
     "aim_keyboard" => ["Apuntado con teclado",["0","1"]],
     "aim_mouse" => ["Apuntado con ratón",["0","1"]],
+    "aggressive_level_bonus" => ["Bono de niveles agresivos",(0..20).map(&:to_s)],
+    "aggressive_chase_speed" => ["Velocidad agresivos",(1..6).map(&:to_s)],
+    "aggressive_notice_frames" => ["Preparación antes de perseguir",(0..60).step(5).map(&:to_s)],
+    "aggressive_step_pause" => ["Pausa entre pasos",(0..30).step(2).map(&:to_s)],
+    "aggressive_attack_windup" => ["Preparación antes del combate",(0..60).step(5).map(&:to_s)],
     "hotkey" => ["Abrir apuntado",["aux1","aux2","none"]]
   }.freeze
 

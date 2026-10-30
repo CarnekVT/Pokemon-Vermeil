@@ -94,7 +94,7 @@ module BifrostCapture
     end
   end
 
-  def self.resolve_throw(event,mode,payload,cfg,back_at_release=nil,hit_roll=nil,origin=nil)
+  def self.resolve_throw(event,mode,payload,cfg,back_at_release=nil,hit_roll=nil,origin=nil,critical_override=nil)
     if !event || !eligible_event?(event)
       notice(_INTL("No hay un Pokémon salvaje capturable en la trayectoria."))
       capture_result(:blocked,nil,_INTL("Acércate a un Pokémon visible."),cfg)
@@ -141,7 +141,7 @@ module BifrostCapture
     behind = back_at_release.nil? ?
       behind?($game_player.x,$game_player.y,event) : back_at_release
     crit_rate = behind ? local["critical_back"] : local["critical_front"]
-    critical = rand < crit_rate.to_f/100.0
+    critical = critical_override.nil? ? rand < crit_rate.to_f/100.0 : critical_override
     probability = catch_chance(spec[0],payload,geo[:front],behind,critical,local)
     caught = rand < probability
     destination = nil
@@ -194,6 +194,7 @@ module BifrostCapture
       party.unshift(chosen)
     end
     begin
+      BifrostCapture::Feedback.reset if defined?(BifrostCapture::Feedback)
       outcome = WildBattle.start(wild)
       remove_event(event) if outcome
     ensure

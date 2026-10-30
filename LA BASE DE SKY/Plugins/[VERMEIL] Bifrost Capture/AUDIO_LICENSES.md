@@ -25,6 +25,7 @@ de Pokémon Legends: Z-A ni de Pokémon Legends: Arceus.
 | Liberación | `real_breakout.wav` | `error_002.wav` |
 | Huida | `real_flee.wav` | `minimize_002.wav` |
 | Alerta | `real_alert.wav` | `error_001.wav` |
+| Lanzamiento crítico | `real_critical.wav` | `confirmation_004.wav` |
 
 Se conservaron los audios WAV de origen, renombrados sin recomprimir.
 El perfil Z-A consulta primero `za_*` originales añadidos por el

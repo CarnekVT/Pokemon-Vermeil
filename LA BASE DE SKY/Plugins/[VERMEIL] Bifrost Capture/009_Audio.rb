@@ -4,27 +4,30 @@
 module BifrostCapture
   module Audio
     EVENTS = %w[aim switch mode party lock throw hit shake caught
-                breakout flee alert].freeze
+                breakout flee alert critical].freeze
     VANILLA = {
       "aim"=>"GUI sel cursor", "switch"=>"GUI sel cursor",
       "mode"=>"GUI sel decision", "party"=>"GUI sel cursor",
       "lock"=>"GUI sel decision", "throw"=>"Battle throw",
       "hit"=>"Battle ball drop", "shake"=>"Battle ball shake",
       "caught"=>"Battle catch click", "breakout"=>"Battle ball shake",
-      "flee"=>"Battle flee", "alert"=>"Exclaim"
+      "flee"=>"Battle flee", "alert"=>"Exclaim",
+      "critical"=>"Battle critical catch throw"
     }.freeze
     PRESETS = {
       "pla_like" => {
         "aim"=>"pla_aim", "switch"=>"pla_switch", "mode"=>"pla_mode",
         "party"=>"pla_party", "lock"=>"pla_lock", "throw"=>"pla_throw",
         "hit"=>"pla_hit", "shake"=>"pla_shake", "caught"=>"pla_caught",
-        "breakout"=>"pla_breakout", "flee"=>"pla_flee", "alert"=>"pla_alert"
+        "breakout"=>"pla_breakout", "flee"=>"pla_flee", "alert"=>"pla_alert",
+        "critical"=>"pla_critical"
       },
       "za_like" => {
         "aim"=>"za_aim", "switch"=>"za_switch", "mode"=>"za_mode",
         "party"=>"za_party", "lock"=>"za_lock", "throw"=>"za_throw",
         "hit"=>"za_hit", "shake"=>"za_shake", "caught"=>"za_caught",
-        "breakout"=>"za_breakout", "flee"=>"za_flee", "alert"=>"za_alert"
+        "breakout"=>"za_breakout", "flee"=>"za_flee", "alert"=>"za_alert",
+        "critical"=>"za_critical"
       }
     }.freeze
     EXTENSIONS = %w[.ogg .wav .mp3].freeze

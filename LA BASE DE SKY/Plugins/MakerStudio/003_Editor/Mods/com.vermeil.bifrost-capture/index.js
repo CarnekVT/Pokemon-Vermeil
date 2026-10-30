@@ -7,7 +7,8 @@ const D={
  profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"jumpup",control_mode:"hold",
  ball_key:"jumpdown",target_key:"none",mode_key:"none",debug_input_guard:"1",
  contextual_mode_toggle:"0",mode_double_tap_frames:"0",mouse_wheel_select:"1",mouse_right_mode:"1",remember_selection:"1",
- allow_shared_bindings:"0",ball_hold_mode_frames:"10",
+ allow_shared_bindings:"0",keyboard_target_key:"tab",keyboard_mode_key:"e",
+ hud_controls:"auto",hud_controls_intro_frames:"150",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
  spawn_lifetime:"45",spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
@@ -18,19 +19,22 @@ const D={
  critical_multiplier:"250",line_of_sight:"1",reaction:"flee",consume_on_miss:"1",
  allow_empty_throw:"0",impact_frames:"3",capture_shakes:"3",capture_shake_frames:"10",
  aim_keyboard:"1",aim_speed:"5",aim_mouse:"1",aim_target_radius:"30",
- throw_frames:"18",throw_arc:"36",aim_chain:"0",flee_steps:"5",flee_speed:"4",
+ throw_frames:"18",throw_arc:"36",aim_chain:"1",max_flights:"3",spawn_intro_frames:"26",
+ aggressive_notice_frames:"25",aggressive_step_pause:"12",aggressive_attack_windup:"24",
+ flee_steps:"5",flee_speed:"4",
  flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",
  attempt_limit:"0",instant_modifier:"100",
  temperament:"mixed",neutral_weight:"50",timid_weight:"30",aggressive_weight:"20",
  timid_alert_distance:"4",aggressive_alert_distance:"5",aggressive_attack_distance:"1",
- aggressive_chase_speed:"4",aggressive_level_bonus:"2",
+ aggressive_chase_speed:"3",aggressive_level_bonus:"2",
  feedback_enabled:"1",feedback_frames:"150",feedback_sfx:"1",capture_fx:"1",
  feedback_enter_frames:"12",feedback_hold_frames:"72",feedback_exit_frames:"16",
  feedback_queue_limit:"5",
  audio_profile:"za_like",sfx_aim:"none",sfx_switch:"none",sfx_lock:"none",
  sfx_mode:"none",sfx_party:"none",
  sfx_throw:"none",sfx_hit:"none",sfx_shake:"none",sfx_caught:"none",
- sfx_breakout:"none",sfx_flee:"none",sfx_alert:"none"
+ sfx_breakout:"none",sfx_flee:"none",sfx_alert:"none",
+ sfx_critical:"none"
 };
 const PRESETS={
  bifrost:{...D},
@@ -57,7 +61,9 @@ const CHOICES={
  control_mode:["toggle","hold"],
  encounter_mode:["classic","hybrid","overworld"],spawn_filter:["all","allowlist"],
  reaction:["flee","attack","ignore"],temperament:["mixed","neutral","timid","aggressive"],
- audio_profile:["pla_like","za_like","vanilla","original","muted"]
+ audio_profile:["pla_like","za_like","vanilla","original","muted"],
+ keyboard_target_key:["tab","e","r","f","t","g","none"],
+ keyboard_mode_key:["e","tab","r","f","t","g","none"],hud_controls:["auto","always","off"]
 };
 const V={ "1":"Sí","0":"No",aux1:"AUX1 (Q)",aux2:"AUX2 (W)",none:"Ninguno",jumpup:"JUMPUP (A)",jumpdown:"JUMPDOWN (S)",
  action:"ACTION (Shift/Z)",special:"SPECIAL (D)",
@@ -80,7 +86,10 @@ const F=[
  ["Selección con rueda del ratón","mouse_wheel_select"],
  ["Clic derecho cambia modo","mouse_right_mode"],
  ["Recordar Ball / Team / modo","remember_selection"],
- ["Mantener Ball para alternar modo (frames)","ball_hold_mode_frames",0,60],
+ ["Objetivo con teclado","keyboard_target_key"],
+ ["Alternar Ball/Team teclado","keyboard_mode_key"],
+ ["Guía de controles HUD","hud_controls"],
+ ["Duración de guía (frames)","hud_controls_intro_frames",30,360],
  ["Proteger combos debug CTRL","debug_input_guard"],
  ["Permitir atajos compartidos (avanzado)","allow_shared_bindings"],
  ["Captura directa","capture_enabled"],["Enviar Pokémon","battle_enabled"],
@@ -90,6 +99,7 @@ const F=[
  ["Distancia mínima de aparición","spawn_min_distance",1,12],
  ["Distancia máxima de aparición","spawn_max_distance",1,16],
  ["OW simultáneos","spawn_limit",1,16],["Duración (pasos)","spawn_lifetime",0,999],
+ ["Entrada de Pokémon (frames)","spawn_intro_frames",6,60],
  ["Ratio OW independiente / paso (%)","ow_extra_spawn_chance",0,100],
  ["Espera tras aparición extra (pasos)","ow_extra_spawn_cooldown",0,250],
  ["Especies generadas","spawn_filter"],["Generar en hierba","spawn_grass_only"],
@@ -106,7 +116,7 @@ const F=[
  ["Radio de selección visual","aim_target_radius",4,120],
  ["Permitir tiro a vacío","allow_empty_throw"],
  ["Duración del vuelo","throw_frames",8,48],["Altura del arco","throw_arc",0,110],
- ["Lanzamientos consecutivos","aim_chain"],
+ ["Lanzamientos consecutivos","aim_chain"],["Balls simultáneas en vuelo","max_flights",1,6],
  ["Efectos de captura dinámicos","capture_fx"],
  ["CAPTURA","capture"],["Captura mínima (%)","capture_floor",0,100],
  ["Multiplicador espalda (%)","back_multiplier",100,500],
@@ -132,7 +142,10 @@ const F=[
  ["Alerta agresivo (casillas)","aggressive_alert_distance",1,20],
  ["Contacto agresivo (casillas)","aggressive_attack_distance",1,6],
  ["Velocidad de persecución","aggressive_chase_speed",1,6],
- ["Nivel extra en batalla agresiva","aggressive_level_bonus",0,10],
+ ["BONO niveles agresivo","aggressive_level_bonus",0,20],
+ ["Preparación persecución (frames)","aggressive_notice_frames",0,90],
+ ["Intervalo entre pasos (frames)","aggressive_step_pause",0,60],
+ ["Aviso antes de combatir (frames)","aggressive_attack_windup",0,90],
  ["Radio de alerta","alert_distance",0,20],["Huida en pasos","flee_steps",1,30],
  ["Velocidad de huida","flee_speed",1,6],
  ["Distancia para escapar","flee_disappear_distance",4,30],
@@ -147,7 +160,8 @@ const F=[
  ["Cambiar Pokémon: SFX propio","sfx_party"],["Lanzar: SFX propio","sfx_throw"],
  ["Impacto: SFX propio","sfx_hit"],["Sacudida: SFX propio","sfx_shake"],
  ["Captura: SFX propio","sfx_caught"],["Liberación: SFX propio","sfx_breakout"],
- ["Huida: SFX propio","sfx_flee"],["Alerta: SFX propio","sfx_alert"]
+ ["Huida: SFX propio","sfx_flee"],["Alerta: SFX propio","sfx_alert"],
+ ["Lanzamiento crítico: SFX propio","sfx_critical"]
 ];
 const GROUPS={};let section="";
 for(const row of F){if(row.length===2&&Object.values(D).indexOf(row[1])===-1&&
@@ -356,14 +370,15 @@ class Studio{
   if(this.section==="species")return this.speciesPanel();
   if(this.section==="scopes")return this.scopesPanel();
   if(this.section==="aim")return '<h1 class="bf-headline">Apuntar sin detener la exploración</h1>'+
-    '<p class="bf-sub">A mantiene apuntado, S cambia selección, mantener S brevemente o clic derecho alterna Ball/Team. W está reservado al debug de pasabilidades.</p>'+
+    '<p class="bf-sub">Apunta con A, cambia con S, alterna con E y lanza varias Balls mediante C sin detenerte. W conserva su depuración.</p>'+
     this.panel("Control dinámico",'<div class="bf-cards">'+[
     ["A / JUMPUP","Mantener para apuntar; soltar para lanzar"],
     ["Flechas / Pad","Caminar normalmente, también al apuntar"],
     ["Objetivo","Se fija automáticamente o selecciona con ratón"],
     ["Ratón","Apuntado libre sobre sprites en movimiento"],
     ["S / JUMPDOWN","Cambiar Ball o Pokémon seleccionado"],
-    ["Mantener S brevemente","Alternar Ball / Team en teclado"],
+    ["E (configurable)","Alternar Ball / Team"],
+     ["Tab (configurable)","Recorrer Pokémon objetivo"],
     ["Rueda del ratón","Anterior o siguiente Ball/Pokémon"],
     ["Clic derecho","Alternar Ball / Team"],
     ["C / USE","Lanzar directamente"],
@@ -388,7 +403,7 @@ class Studio{
     ].map(x=>'<div class="bf-stat"><span>'+x[0]+'</span><strong>'+
       x[1]+'</strong></div>').join("")+'</div><p class="bf-help">El ratio adicional se evalúa aparte del encuentro tradicional. Usa las tablas PBS y solo genera OW con sprite, casilla libre y espacio en el mapa. En OW completo nunca fuerza un combate por falta de recursos.</p>');
   if(this.section==="behavior")return '<h1 class="bf-headline">Temperamentos OW</h1>'+
-    '<p class="bf-sub">Cada individuo mantiene su temperamento desde que aparece. En Catálogo → Editar puedes definir una personalidad para toda una especie.</p>'+
+    '<p class="bf-sub">Cada individuo mantiene su temperamento desde que aparece. En Comportamiento puedes editar el bono de niveles del agresivo (0 a 20), su reacción y pausas. En Catálogo → Editar puedes ajustar cada especie.</p>'+
     this.panel("Comportamiento y lectura visual",'<div class="bf-cards">'+[
       ["NEUTRO","Observa, puede alejarse brevemente después de una Ball fallida y vuelve a su rutina."],
       ["MIEDOSO","Detecta antes y huye por las casillas del mapa antes de desaparecer."],
@@ -419,7 +434,7 @@ class Studio{
  render(){
   const dirty=this.dirty();
   this.root.innerHTML='<header class="bf-top"><div class="bf-logo">◈</div>'+
-   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Bifröst 0.9.1</small></div>'+
+   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Bifröst 1.0</small></div>'+
    '<div class="bf-spacer"></div><select class="bf-scope" data-scope>'+
    Object.keys(this.cfg).sort().map(k=>'<option value="'+esc(k)+'"'+
    (k===this.scope?" selected":"")+'>'+esc(k)+'</option>').join("")+'</select>'+

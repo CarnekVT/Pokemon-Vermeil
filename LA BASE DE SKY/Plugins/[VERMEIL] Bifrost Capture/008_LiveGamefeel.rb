@@ -44,7 +44,6 @@ module BifrostCapture
 
       def start
         return false if active? || !BifrostCapture.aim_allowed?
-        return false if BifrostCapture::Motion.busy?
         cfg = BifrostCapture.options
         return false if debug_reserved?(cfg)
         balls = BifrostCapture.ball_choices
@@ -79,7 +78,8 @@ module BifrostCapture
           :mode=>mode,
           :x=>point[0].to_f, :y=>point[1].to_f,
           :target=>target, :mouse_last=>nil, :mouse_active=>false,
-          :held=>!!(key && Input.press?(key)), :frames=>0
+          :held=>!!(key && Input.press?(key)), :frames=>0,
+          :shot_during_hold=>false
         }
         @hud = BifrostCapture::ThrowHUD.new
         BifrostCapture::Audio.play(:aim,cfg) if defined?(BifrostCapture::Audio)
@@ -345,10 +345,13 @@ module BifrostCapture
         release = cfg["control_mode"] == "hold" && key &&
                   s[:held] && s[:frames] > 1 && !Input.press?(key)
         use = Input.trigger?(Input::USE)
-        if use || click || release
+        if release
+          fire unless s[:shot_during_hold]
+          close
+        elsif use || click
           claim_map_input("use") if use
-          fire
-          close if release || cfg["aim_chain"] == "0"
+          success = fire
+          close if success && cfg["aim_chain"] == "0"
         elsif cfg["control_mode"] != "hold" && key &&
               s[:frames] > 5 && Input.trigger?(key)
           close
@@ -357,7 +360,7 @@ module BifrostCapture
 
       def fire
         s = @session
-        return false unless s && !BifrostCapture::Motion.busy?
+        return false unless s
         target = s[:target]
         if s[:mouse_active]
           target = BifrostCapture.focus_at([s[:x],s[:y]],s[:config])
@@ -389,17 +392,52 @@ module BifrostCapture
                                         _INTL("No quedan Poké Balls"),local)
           return false
         end
+        unless BifrostCapture::Motion.can_launch?(target,item,s[:mode],local)
+          BifrostCapture.notice(_INTL("Espera un instante o cambia de objetivo"))
+          return false
+        end
         # Direction follows the locked target without interrupting walking.
         $game_player.direction = geom[:direction]
-        BifrostCapture::Motion.launch(target,item,s[:mode],local)
+        launched = BifrostCapture::Motion.launch(target,item,s[:mode],local)
+        if launched
+          s[:shot_during_hold] = true
+          s[:target] = BifrostCapture.closest_target
+          s[:mouse_active] = false
+          remember_selection(s)
+        end
+        launched
       end
     end
   end
 
   module Motion
     class << self
+      def flights
+        @flights ||= []
+      end
+
+      def catches
+        @catches ||= []
+      end
+
       def busy?
-        !!@flight || !!@catch
+        !flights.empty? || !catches.empty? || !!@flight || !!@catch
+      end
+
+      def can_launch?(event,item,mode,cfg)
+        return false unless event && BifrostCapture.eligible_event?(event)
+        return false if event.instance_variable_get(:@bifrost_projectile_lock) ||
+                        event.instance_variable_get(:@bifrost_capture_lock)
+        return false if mode == :battle && busy?
+        return false if flights.any? { |a| a[:mode] == :battle }
+        return false if flights.length >= cfg["max_flights"].to_i.clamp(1,6)
+        if mode == :ball
+          reserved = flights.count { |a|
+            a[:mode] == :ball && a[:item] == item
+          }
+          return false if !$bag || $bag.quantity(item).to_i <= reserved
+        end
+        true
       end
 
       # Share the world viewport with tilemap, character sprites and
@@ -435,35 +473,40 @@ module BifrostCapture
         viewport.dispose if obj[:owns_vp] && viewport && !viewport.disposed?
       end
 
+      # Cancel every visual effect when a scene changes. Captured entities
+      # were committed to storage at impact: never restore duplicates.
       def cancel
-        if @catch
-          event = @catch[:event]
+        (flights + [@flight].compact).each do |a|
+          event = a[:event]
+          event.instance_variable_set(:@bifrost_projectile_lock,false) if event
+          release_resources(a)
+        end
+        (catches + [@catch].compact).each do |a|
+          event = a[:event]
           if event && !event.instance_variable_get(:@erased)
-            event.opacity = @catch[:opacity]
-            event.transparent = @catch[:transparent]
-            event.instance_variable_set(:@move_type,@catch[:move_type])
+            event.opacity = a[:opacity]
+            event.transparent = a[:transparent]
+            event.instance_variable_set(:@move_type,a[:move_type])
             event.instance_variable_set(:@bifrost_capture_lock,false)
-            # Captured Pokemon was already stored when animation began.
-            # If a map transfer interrupts it, remove its OW to avoid a
-            # duplicate encounter on the next visit.
-            if @catch[:caught]
+            if a[:caught]
               if BifrostCapture.generated?(event)
                 BifrostCapture.erase_wild(event)
               else
-                event.erase
+                BifrostCapture.remove_event(event)
               end
             end
           end
+          release_resources(a)
         end
-        release_resources(@flight)
-        release_resources(@catch)
+        @flights = []
+        @catches = []
         @flight = @catch = nil
         BifrostCapture.instance_variable_set(:@capture_busy,false)
         BifrostCapture::LiveAim.close if BifrostCapture::LiveAim.active?
       end
 
       def launch(event,item,mode,cfg)
-        return false if busy? || !BifrostCapture.eligible_event?(event)
+        return false unless can_launch?(event,item,mode,cfg)
         vp,owns_vp = map_viewport
         ball = Sprite.new(vp)
         ball.bitmap = BifrostCapture.ball_bitmap(mode == :ball ? item : :POKEBALL)
@@ -480,9 +523,17 @@ module BifrostCapture
                                        event.x,event.y,cfg)
         roll = mode == :ball ? rand : nil
         miss = roll && roll >= BifrostCapture.hit_chance(geom[:front],cfg)
+        back = BifrostCapture.behind?($game_player.x,$game_player.y,event)
+        critical = false
+        if mode == :ball
+          rate = back ? cfg["critical_back"] : cfg["critical_front"]
+          critical = !miss && rand < rate.to_f/100.0
+        end
         trail_bmp = Bitmap.new(8,8)
-        trail_bmp.fill_rect(3,0,2,8,Color.new(220,244,255,190))
-        trail_bmp.fill_rect(0,3,8,2,Color.new(220,244,255,190))
+        trail_color = critical ? Color.new(154,250,255,230) :
+                                 Color.new(220,244,255,190)
+        trail_bmp.fill_rect(3,0,2,8,trail_color)
+        trail_bmp.fill_rect(0,3,8,2,trail_color)
         trails = Array.new(3) { |i|
           sp = Sprite.new(vp)
           sp.bitmap = trail_bmp
@@ -490,12 +541,17 @@ module BifrostCapture
           sp.visible = false
           sp
         }
-        BifrostCapture::Audio.play(:throw,cfg) if defined?(BifrostCapture::Audio)
-        @flight = {
+        if defined?(BifrostCapture::Audio)
+          BifrostCapture::Audio.play(:throw,cfg)
+          BifrostCapture::Audio.play(:critical,cfg) if critical
+        end
+        ball.color = Color.new(126,246,255,75) if critical
+        event.instance_variable_set(:@bifrost_projectile_lock,true)
+        a = {
           :vp=>vp,:owns_vp=>owns_vp, :sprites=>[ball,shadow,*trails],
           :shared_bitmaps=>[trail_bmp],
           :event=>event,:item=>item,:mode=>mode,:config=>cfg,
-          :back=>BifrostCapture.behind?($game_player.x,$game_player.y,event),
+          :back=>back, :critical=>critical,
           :origin=>[$game_player.x,$game_player.y],
           :roll=>roll,:miss=>miss,
           :frame=>0,:frames=>cfg["throw_frames"].to_i.clamp(8,48),
@@ -504,11 +560,12 @@ module BifrostCapture
           :last=>BifrostCapture.screen_position(event),
           :positions=>[]
         }
+        flights << a
         true
       end
 
       def start_capture(event,item,caught,critical,cfg,species,destination)
-        return false if @catch
+        return false if catches.any? { |a| a[:event].equal?(event) }
         vp,owns_vp = map_viewport
         ball = Sprite.new(vp)
         ball.bitmap = BifrostCapture.ball_bitmap(item)
@@ -519,7 +576,8 @@ module BifrostCapture
         ring = Sprite.new(vp)
         ring.bitmap = Bitmap.new(64,64)
         ring.ox = ring.oy = 32
-        color = caught ? Color.new(151,252,205) : Color.new(255,161,151)
+        color = critical ? Color.new(138,247,255) :
+                caught ? Color.new(151,252,205) : Color.new(255,161,151)
         64.times do |i|
           angle = i*2*Math::PI/64
           ring.bitmap.fill_rect((32+Math.cos(angle)*23).round,
@@ -527,7 +585,7 @@ module BifrostCapture
         end
         ring.visible = false
         event.instance_variable_set(:@bifrost_capture_lock,true)
-        @catch = {
+        a = {
           :vp=>vp,:owns_vp=>owns_vp,:sprites=>[ball,ring],
           :event=>event,:item=>item,
           :species=>species,:destination=>destination,
@@ -539,7 +597,11 @@ module BifrostCapture
           :phase_frames=>cfg["capture_shake_frames"].to_i.clamp(6,24)
         }
         event.instance_variable_set(:@move_type,0)
+        catches << a
         BifrostCapture.instance_variable_set(:@capture_busy,true)
+        if critical && defined?(BifrostCapture::Audio)
+          BifrostCapture::Audio.play(:lock,cfg)
+        end
         true
       end
 
@@ -547,16 +609,15 @@ module BifrostCapture
         menu_block = BifrostCapture.ui_busy?
         if !defined?($scene) || !$scene.is_a?(Scene_Map) ||
            !$game_map || menu_block
-          cancel if @flight || @catch
+          cancel if busy?
           return
         end
-        update_flight if @flight
-        update_catch if @catch
+        flights.dup.each { |a| update_flight(a) }
+        catches.dup.each { |a| update_catch(a) }
       end
 
-      def update_flight
-        a = @flight
-        return unless a
+      def update_flight(a)
+        return unless flights.include?(a)
         event = a[:event]
         a[:frame] += 1
         t = [a[:frame].to_f/a[:frames],1.0].min
@@ -595,12 +656,14 @@ module BifrostCapture
           sp.opacity = 185-i*52
         end
         return if a[:frame] < a[:frames]
-        @flight = nil
+        flights.delete(a)
+        event.instance_variable_set(:@bifrost_projectile_lock,false) if event
         release_resources(a)
         BifrostCapture::Audio.play(:hit,a[:config]) if
           !a[:miss] && defined?(BifrostCapture::Audio)
         BifrostCapture.resolve_throw(event,a[:mode],a[:item],
-                                      a[:config],a[:back],a[:roll],a[:origin])
+                                      a[:config],a[:back],a[:roll],a[:origin],
+                                      a[:critical])
         # A Pokémon battle is launched only after UI and animation are gone.
         if a[:mode] == :battle
           BifrostCapture::LiveAim.close if BifrostCapture::LiveAim.active?
@@ -608,9 +671,8 @@ module BifrostCapture
         end
       end
 
-      def update_catch
-        a = @catch
-        return unless a
+      def update_catch(a)
+        return unless catches.include?(a)
         a[:frame] += 1
         frame = a[:frame]
         event = a[:event]
@@ -622,14 +684,21 @@ module BifrostCapture
         # Depth is anchored at the Pokémon's feet, not an overlay z.
         ball.z = depth_for(event) + 1
         ring.z = ball.z + 1
-        absorb = a[:config]["capture_fx"] == "0" ? 1 : 10
+        absorb = a[:config]["capture_fx"] == "0" ? 1 : (a[:critical] ? 16 : 10)
         shake_end = absorb+6+a[:shakes]*(a[:phase_frames]+4)
         if frame <= absorb
+          if a[:critical]
+            ring.visible = true
+            ring.x = x;ring.y = ground-8
+            ring.zoom_x = ring.zoom_y = 0.65+1.2*frame.to_f/absorb
+            ring.opacity = (220*(1.0-frame.to_f/absorb)).to_i
+          end
           event.opacity = [a[:opacity] * (1-frame.to_f/absorb),0].max.to_i
           ball.zoom_x = ball.zoom_y = a[:zoom]*(0.7+0.3*frame.to_f/absorb)
           # The ball remains planted at the bottom, even during absorption.
           ball.y = ground
         elsif frame <= shake_end
+          ring.visible = false
           event.transparent = true
           phase = (frame-absorb-7) % (a[:phase_frames]+4)
           if phase == 0 && defined?(BifrostCapture::Audio)
@@ -651,13 +720,13 @@ module BifrostCapture
           ball.opacity = [255-18*f,0].max
         end
         return unless frame >= shake_end+14
-        @catch = nil
+        catches.delete(a)
         release_resources(a)
         event.opacity = a[:opacity]
         event.transparent = a[:transparent]
         event.instance_variable_set(:@move_type,a[:move_type])
         event.instance_variable_set(:@bifrost_capture_lock,false)
-        BifrostCapture.instance_variable_set(:@capture_busy,false)
+        BifrostCapture.instance_variable_set(:@capture_busy,!catches.empty?)
         BifrostCapture.finish_capture_result(event,a[:caught],a[:critical],
           a[:species],a[:destination],a[:config])
       end

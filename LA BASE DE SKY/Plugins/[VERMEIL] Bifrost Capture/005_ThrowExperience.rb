@@ -334,6 +334,9 @@ module BifrostCapture
     return [] unless $game_map
     $game_map.events.values.select do |event|
       next false unless eligible_event?(event)
+      next false if event.instance_variable_get(:@bifrost_projectile_lock) ||
+                    event.instance_variable_get(:@bifrost_capture_lock)
+      next false if respond_to?(:emerging?) && emerging?(event)
       x,y,w,h = target_rect(event)
       x < Graphics.width && y < Graphics.height && x+w > 0 && y+h > 0
     end

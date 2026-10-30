@@ -36,14 +36,17 @@ module BifrostCapture
     "impact_frames"=>"3", "capture_shakes"=>"3", "capture_shake_frames"=>"10",
     "aim_keyboard"=>"1", "aim_speed"=>"5", "aim_mouse"=>"1",
     "aim_target_radius"=>"30", "throw_frames"=>"18", "throw_arc"=>"36",
-    "aim_chain"=>"0", "flee_steps"=>"5", "flee_speed"=>"4",
+    "aim_chain"=>"1", "max_flights"=>"3",
+    "spawn_intro_frames"=>"26", "aggressive_notice_frames"=>"25",
+    "aggressive_step_pause"=>"12", "aggressive_attack_windup"=>"24",
+    "flee_steps"=>"5", "flee_speed"=>"4",
     "flee_disappear_distance"=>"9", "flee_stuck_frames"=>"90",
     "alert_on_miss"=>"1", "attempt_limit"=>"0",
     "instant_modifier"=>"100",
     "temperament"=>"mixed", "neutral_weight"=>"50", "timid_weight"=>"30",
     "aggressive_weight"=>"20", "timid_alert_distance"=>"4",
     "aggressive_alert_distance"=>"5", "aggressive_attack_distance"=>"1",
-    "aggressive_chase_speed"=>"4", "aggressive_level_bonus"=>"2",
+    "aggressive_chase_speed"=>"3", "aggressive_level_bonus"=>"2",
     "feedback_enabled"=>"1", "feedback_frames"=>"150",
     "feedback_enter_frames"=>"12", "feedback_hold_frames"=>"72",
     "feedback_exit_frames"=>"16", "feedback_queue_limit"=>"5",
@@ -52,7 +55,8 @@ module BifrostCapture
     "sfx_mode"=>"none", "sfx_party"=>"none",
     "sfx_lock"=>"none", "sfx_throw"=>"none", "sfx_hit"=>"none",
     "sfx_shake"=>"none", "sfx_caught"=>"none", "sfx_breakout"=>"none",
-    "sfx_flee"=>"none", "sfx_alert"=>"none"
+    "sfx_flee"=>"none", "sfx_alert"=>"none",
+    "sfx_critical"=>"none"
   }.freeze
   PROFILES = {
     "bifrost"=>{},

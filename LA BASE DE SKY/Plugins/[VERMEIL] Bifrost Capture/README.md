@@ -1,4 +1,4 @@
-# Bifröst Capture 0.9.5 — selección Ball/Team sin cambios de modo accidentales
+# Bifröst Capture 1.0 — gamefeel de capturas OW encadenadas
 
 **Pokémon Vermeil · Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -86,6 +86,40 @@ hud_controls_intro_frames=150
 No se crean nuevos `Viewport` ni se interceptan acciones; se dibuja
 dentro del bitmap del HUD ya existente y desaparece al cerrar el apuntado.
 La duración son fotogramas de juego, no segundos fijos.
+
+## Gamefeel de exploración (revisión 1.0)
+
+- **Lanzamientos encadenados:** con `aim_chain=1`, se puede mantener A,
+  lanzar mediante C y seguir apuntando a otros Pokémon. Cada Pokémon tiene
+  un bloqueo individual; no es posible duplicar capturas del mismo individuo.
+  `max_flights=3` limita los proyectiles a la vez y reserva la cantidad
+  de cada tipo de Ball antes de que impacte. Soltar A después de lanzar con C
+  cierra la mira sin lanzar otra Ball accidentalmente.
+- **Múltiples capturas:** los vuelos y las sacudidas se actualizan por separado
+  en la misma escena, sin detener el mapa ni las demás criaturas. El Team
+  no se lanza mientras hay capturas sin resolver, para no interrumpir un
+  combate pendiente.
+- **Aparición ambiental:** las criaturas generadas en el mapa se funden
+  progresivamente durante `spawn_intro_frames=26` y dejan una onda suave a
+  nivel del suelo, en el mismo viewport del mapa para respetar el 2.5D.
+- **Agresivos:** primero detectan al jugador, lo miran, avanzan por pasos
+  separados y avisan antes de iniciar el combate. Parámetros:
+  `aggressive_notice_frames`, `aggressive_step_pause`,
+  `aggressive_attack_windup` y `aggressive_chase_speed`.
+  El nivel adicional (`aggressive_level_bonus`, 0–20) se puede editar
+  desde Maker Studio y desde `pbBifrostRulesMenu`.
+- **Capturas críticas:** el vuelo luce una estela cian y reproduce una
+  señal especial al lanzar; el impacto tiene una fase de absorción más
+  marcada, una onda brillante y una sola sacudida. El cue propio es
+  `sfx_critical=none`, con fallback CC0 `real_critical.wav`.
+  Es una interpretación original del gamefeel Legends, no su audio comercial.
+- **Notificaciones:** se limpian al cambiar de escena o iniciar un combate.
+- **HUD:** el panel Ball/Team ahora mide hasta 392×116 píxeles, permanece
+  abajo a la derecha y utiliza indicaciones de teclas más grandes.
+
+La experiencia debe verificarse en mkxp-z con movimiento, 2.5D,
+prioridades de tiles, audio y accesibilidad. Los tests automáticos
+no sustituyen ese test visual.
 
 ## Memoria de selección
 

@@ -45,26 +45,42 @@ class BifrostCoreTest < Minitest::Test
     $bifrost_audio_played=nil
     cfg=BifrostCapture::DEFAULTS.merge("audio_profile"=>"original",
           "sfx_throw"=>"custom_throw")
-    assert BifrostCapture::Audio.play(:throw,cfg)
-    assert_equal "Bifrost/custom_throw",$bifrost_audio_played
+    require "tmpdir"
+    Dir.mktmpdir("bifrost-custom") do |dir|
+      Dir.chdir(dir) do
+        Dir.mkdir("Audio")
+        Dir.mkdir("Audio/SE")
+        Dir.mkdir("Audio/SE/Bifrost")
+        File.binwrite("Audio/SE/Bifrost/custom_throw.wav","RIFFtest")
+        assert BifrostCapture::Audio.play(:throw,cfg)
+        assert_equal "Bifrost/custom_throw.wav",$bifrost_audio_played
+      end
+    end
     assert_equal false,BifrostCapture::Audio.play(:throw,
                     cfg.merge("audio_profile"=>"muted"))
     refute BifrostCapture::Audio.play(:throw,
                     cfg.merge("sfx_throw"=>"../unsafe_file"))
   end
 
-  def test_za_default_creates_original_audible_cue_without_shipped_audio
-    require "tmpdir"
-    Dir.mktmpdir("bifrost-sfx") do |dir|
-      Dir.chdir(dir) do
-        $bifrost_audio_played = nil
-        assert BifrostCapture::Audio.play(:switch,BifrostCapture::DEFAULTS)
-        assert_equal "Bifrost/za_switch",$bifrost_audio_played
-        wav = File.binread("Audio/SE/Bifrost/za_switch.wav")
-        assert_equal "RIFF",wav.byteslice(0,4)
-        assert_equal "WAVE",wav.byteslice(8,4)
-        assert_operator wav.bytesize,:>,1024
-      end
+  def test_za_default_plays_real_cc0_wav_and_no_synthetic_generated
+    root=File.expand_path("../LA BASE DE SKY",__dir__)
+    Dir.chdir(root) do
+      $bifrost_audio_played=nil
+      assert BifrostCapture::Audio.play(:switch,BifrostCapture::DEFAULTS)
+      assert_equal "Bifrost/real_switch.wav",$bifrost_audio_played
+      wav = File.binread("Audio/SE/Bifrost/real_switch.wav")
+      assert_equal "RIFF",wav.byteslice(0,4)
+      assert_equal "WAVE",wav.byteslice(8,4)
+      assert_operator wav.bytesize,:>,1024
+      refute BifrostCapture::Audio.respond_to?(:create_original_cue)
+    end
+  end
+
+  def test_critical_throw_has_own_real_audio
+    root=File.expand_path("../LA BASE DE SKY",__dir__)
+    Dir.chdir(root) do
+      assert BifrostCapture::Audio.play(:critical,BifrostCapture::DEFAULTS)
+      assert_equal "Bifrost/real_critical.wav",$bifrost_audio_played
     end
   end
 
