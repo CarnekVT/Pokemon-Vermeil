@@ -26,6 +26,16 @@ La selección sonora es **inspiración para diseño original**, no una instrucci
 | `sfx_flee` | Pokémon escapa | Movimiento corto y evasivo |
 | `sfx_alert` | Agresivo detecta | Aviso seco y urgente |
 
+## Predeterminado en Vermeil
+
+El perfil `za_like` se carga por defecto. Como alternativa a distribuir
+archivos comerciales extraídos, Bifröst crea una vez los doce SFX **originales**
+en `Audio/SE/Bifrost/za_*.wav` en el primer uso de cada evento. Son señales
+sintetizadas breves, no grabaciones de Pokémon Legends: Z-A. Si la carpeta
+es de solo lectura, se intenta reproducir el efecto de Essentials.
+Los archivos autorizados que añada el creador siguen pudiendo sustituir
+estas señales. Se recomienda revisar volumen y mezcla en el ejecutable.
+
 ## Presets tipo Legends (sin audio incluido)
 
 `audio_profile=pla_like` busca efectos propios llamados `pla_aim.ogg`, `pla_switch.ogg`, `pla_mode.ogg`, `pla_party.ogg`, `pla_lock.ogg`, `pla_throw.ogg`, `pla_hit.ogg`, `pla_shake.ogg`, `pla_caught.ogg`, `pla_breakout.ogg`, `pla_flee.ogg` y `pla_alert.ogg`. Para `za_like` se cambia el prefijo por `za_`. Si no existen, se recurre a los SFX vanilla cuando haya uno asociado.
