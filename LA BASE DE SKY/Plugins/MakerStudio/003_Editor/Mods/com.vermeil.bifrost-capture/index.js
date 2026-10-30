@@ -227,10 +227,10 @@ class Studio{
     if((rules.allow_shared_bindings??this.cfg.global.allow_shared_bindings)!=="1"){
      for(const field of ["hotkey","ball_key","target_key","mode_key"]){
       const value=rules[field];
-      if(["aux1","aux2","action","special","use","back"].includes(value) &&
-         !(field==="mode_key" && value==="aux2" &&
-           (rules.contextual_mode_toggle??this.cfg.global.contextual_mode_toggle)==="1")){
+      if(["aux1","aux2","action","special","use","back"].includes(value)){
        rules[field]=field==="hotkey"?"jumpup":"none";
+       if(field==="mode_key" && value==="aux2")
+         rules.contextual_mode_toggle="0";
        fixed++;
       }
      }
