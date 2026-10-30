@@ -73,6 +73,9 @@ class BifrostCoreTest < Minitest::Test
     assert_equal "none",cfg["target_key"]
     assert_equal "none",cfg["mode_key"]
     assert_nil BifrostCapture.capture_action(cfg,"mode_key")
+    assert_nil BifrostCapture.capture_action(
+      cfg.merge("mode_key"=>"aux2","contextual_mode_toggle"=>"1"),"mode_key"),
+      "legacy saves must not re-enable W passability debug key"
     assert_equal "za_like",cfg["audio_profile"]
     assert_equal :jumpup,BifrostCapture.capture_action(cfg,"hotkey")
     assert_equal :jumpdown,BifrostCapture.capture_action(cfg,"ball_key")
