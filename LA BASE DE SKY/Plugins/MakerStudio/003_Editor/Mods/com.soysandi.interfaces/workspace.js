@@ -118,6 +118,10 @@ export function montarEspacio(editor, M) {
     return section;
   };
   const sizeInputs=node("div","ui-resolution-sizes");
+  res.ancho.setAttribute("aria-label","Ancho del lienzo en píxeles");
+  res.alto.setAttribute("aria-label","Alto del lienzo en píxeles");
+  res.estrategia.setAttribute("aria-label","Cómo adaptar los elementos al cambiar la resolución");
+  res.modo.setAttribute("aria-label","Modo de escalado del lienzo");
   sizeInputs.append(res.ancho,node("span",null,"×"),res.alto,res.info);
   const strategyRow=node("div","ui-resolution-action");
   strategyRow.append(res.estrategia,res.btnAplicar);
@@ -125,8 +129,9 @@ export function montarEspacio(editor, M) {
   checkRow.append(res.pixel,res.entera,res.segura,res.bloqueo);
   layout.replaceChildren(
     group("Tamaño lógico del juego",[res.preset,sizeInputs]),
-    group("Al cambiar el tamaño",[strategyRow]),
-    group("Presentación",[res.modo,checkRow])
+    group("Al cambiar el tamaño",[strategyRow,
+      node("p","ui-resolution-note","El tamaño solo cambia al pulsar Aplicar; la vista previa mantiene sus píxeles lógicos.")]),
+    group("Presentación",[node("span","ui-resolution-label","Modo de escalado"),res.modo,checkRow])
   );
   const canvasMenu=menu("▣ Lienzo ▾",[layout]);
   canvasMenu.d.classList.add("ui-canvas-menu");
@@ -241,6 +246,7 @@ export function montarEspacio(editor, M) {
         pane.style.width=Math.max(min,Math.min(max,start+delta))+"px";
       };
       const up=()=>{
+        requestAnimationFrame(()=>{if(root.isConnected&&editor.diseno)editor.lienzo.encajar();});
         handle.removeEventListener("pointermove",move);
         handle.removeEventListener("pointerup",up);
         handle.removeEventListener("pointercancel",up);
