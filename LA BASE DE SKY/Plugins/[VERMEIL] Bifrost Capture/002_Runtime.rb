@@ -150,6 +150,7 @@ module BifrostCapture
     probability = catch_chance(spec[0],payload,geo[:front],behind,critical,local)
     probability *= Pressure.capture_modifier(event,local) if defined?(Pressure)
     caught = rand < probability
+    Pressure.add(event,behind ? :back : :front,local) if !caught && defined?(Pressure)
     destination = nil
     if caught
       pkmn = pbGenerateWildPokemon(spec[0],spec[1])
