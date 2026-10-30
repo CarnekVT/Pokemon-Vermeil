@@ -46,7 +46,7 @@ module BifrostCapture
     "feedback_enter_frames"=>"12", "feedback_hold_frames"=>"72",
     "feedback_exit_frames"=>"16", "feedback_queue_limit"=>"5",
     "feedback_sfx"=>"1", "capture_fx"=>"1",
-    "audio_profile"=>"pla_like", "sfx_aim"=>"none", "sfx_switch"=>"none",
+    "audio_profile"=>"za_like", "sfx_aim"=>"none", "sfx_switch"=>"none",
     "sfx_mode"=>"none", "sfx_party"=>"none",
     "sfx_lock"=>"none", "sfx_throw"=>"none", "sfx_hit"=>"none",
     "sfx_shake"=>"none", "sfx_caught"=>"none", "sfx_breakout"=>"none",
