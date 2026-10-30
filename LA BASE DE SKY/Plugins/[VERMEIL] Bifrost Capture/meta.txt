@@ -1,5 +1,5 @@
 Name = Bifrost Capture
-Version = 0.5.1
+Version = 0.6.0
 Essentials = 21.1
 Credits = CarnekVT
 Last = true
