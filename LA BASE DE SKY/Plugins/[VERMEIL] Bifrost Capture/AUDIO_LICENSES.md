@@ -1,4 +1,4 @@
-# Bifröst Capture — procedencia de los 12 audios reales
+# Bifröst Capture — procedencia de los audios reales
 
 Los archivos `Audio/SE/Bifrost/real_*.wav` son efectos de sonido
 **reales** seleccionados de Kenney — Interface Sounds, no clips
