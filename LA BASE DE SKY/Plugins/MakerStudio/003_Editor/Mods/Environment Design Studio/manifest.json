@@ -1,0 +1,24 @@
+{
+  "id": "com.carnekvt.environment-design-studio",
+  "name": "Environment Design Studio",
+  "version": "0.1.0",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Planificacion de contextos, ambientes, narrativa, moodboards y asistencia por reglas con busqueda web opcional.",
+  "tags": [
+    "mapping",
+    "worldbuilding",
+    "environment"
+  ],
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.dialogs",
+    "ui.toasts"
+  ]
+}
