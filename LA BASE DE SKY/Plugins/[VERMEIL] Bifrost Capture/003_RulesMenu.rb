@@ -20,6 +20,7 @@ module BifrostCapture
     "escape_reaction_enabled" => ["Contraataque al liberarse",%w[0 1]],
     "feedback_stack_count" => ["Avisos simultáneos",%w[1 2 3]],
     "keyboard_bait_key" => ["Tecla para cebos",%w[r f t g none]],
+    "debug_force_shiny" => ["DEBUG: siguientes OW shiny (solo $DEBUG)",%w[0 1]],
     "pressure_enabled" => ["Presión por fallos",%w[0 1]],
     "pressure_alert_threshold" => ["Umbral de alerta",%w[20 30 35 45 60]],
     "pressure_block_threshold" => ["Bloqueo captura directa",%w[60 70 80 90 100]],
