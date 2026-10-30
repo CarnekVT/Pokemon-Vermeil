@@ -75,7 +75,7 @@ const F=[
  ["Tecla de apertura","hotkey"],["Modalidad de control","control_mode"],
  ["Cambiar Poké Ball","ball_key"],["Objetivo opcional","target_key"],
  ["Alternar Ball/Team (durante apuntado)","mode_key"],
- ["Permitir W contextual (avanzado; colisiona con debug)","contextual_mode_toggle"],
+ ["Compatibilidad W anterior (inactiva sin atajos compartidos)","contextual_mode_toggle"],
  ["Doble toque S (legado/inactivo)","mode_double_tap_frames",0,30],
  ["Selección con rueda del ratón","mouse_wheel_select"],
  ["Clic derecho cambia modo","mouse_right_mode"],
@@ -279,9 +279,7 @@ class Studio{
   let input="";
   if(CHOICES[key]||bool){
    const opts=isBind&&this.value().allow_shared_bindings!=="1"?
-     (key==="mode_key" && this.value().contextual_mode_toggle==="1" ?
-      ["aux2","jumpup","jumpdown","none"] :
-      ["jumpup","jumpdown","none"]):(CHOICES[key]||["1","0"]);
+     ["jumpup","jumpdown","none"]:(CHOICES[key]||["1","0"]);
    input='<select class="bf-select" data-field="'+key+'">'+opts.map(x=>
     '<option value="'+x+'"'+(val===x?' selected':'')+'>'+esc(T(x))+'</option>').join("")+'</select>';
   }else if(key.startsWith("sfx_")){
