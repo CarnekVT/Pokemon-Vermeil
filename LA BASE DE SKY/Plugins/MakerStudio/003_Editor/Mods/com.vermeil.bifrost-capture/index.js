@@ -48,7 +48,10 @@ const D={
  sfx_mode:"none",sfx_party:"none",
  sfx_throw:"none",sfx_hit:"none",sfx_shake:"none",sfx_caught:"none",
  sfx_breakout:"none",sfx_flee:"none",sfx_alert:"none",
- sfx_critical:"none"
+ sfx_critical:"none",sfx_shiny:"none",
+ shiny_fx_enabled:"1",shiny_fx_intensity:"2",shiny_pulse_frames:"150",
+ shiny_sound_enabled:"1",shiny_sound_volume:"85",shiny_sound_pitch:"112",
+ shiny_repeat_sound:"0"
 };
 const PRESETS={
  bifrost:{...D},
@@ -145,6 +148,14 @@ const F=[
  ["Lanzamientos consecutivos","aim_chain"],["Balls simultáneas en vuelo","max_flights",1,6],
  ["Espera entre lanzamientos (frames)","throw_cooldown_frames",0,90],
  ["Efectos de captura dinámicos","capture_fx"],
+ ["SHINY EN OW","shiny"],
+ ["Destellos visibles de shiny","shiny_fx_enabled"],
+ ["Cantidad de destellos","shiny_fx_intensity",1,3],
+ ["Intervalo de destellos (frames)","shiny_pulse_frames",80,360],
+ ["Sonido shiny al aparecer","shiny_sound_enabled"],
+ ["Volumen de sonido shiny","shiny_sound_volume",0,100],
+ ["Tono de sonido shiny","shiny_sound_pitch",80,140],
+ ["Repetir sonido cada 12 segundos","shiny_repeat_sound"],
  ["CAPTURA","capture"],["Captura mínima (%)","capture_floor",0,100],
  ["Multiplicador espalda (%)","back_multiplier",100,500],
  ["Crítica frontal (%)","critical_front",0,100],["Crítica por espalda (%)","critical_back",0,100],
@@ -211,18 +222,20 @@ const F=[
  ["Impacto: SFX propio","sfx_hit"],["Sacudida: SFX propio","sfx_shake"],
  ["Captura: SFX propio","sfx_caught"],["Liberación: SFX propio","sfx_breakout"],
  ["Huida: SFX propio","sfx_flee"],["Alerta: SFX propio","sfx_alert"],
- ["Lanzamiento crítico: SFX propio","sfx_critical"]
+ ["Lanzamiento crítico: SFX propio","sfx_critical"],
+ ["Shiny: SFX propio (pla_shiny / za_shiny)","sfx_shiny"]
 ];
 const GROUPS={};let section="";
 for(const row of F){if(row.length===2&&Object.values(D).indexOf(row[1])===-1&&
-  ["general","spawns","species","aim","capture","behavior","audio"].includes(row[1])){
+  ["general","spawns","species","aim","capture","behavior","audio","shiny"].includes(row[1])){
  section=row[1];GROUPS[section]??=[];continue;
 }if(D[row[1]]!==undefined)GROUPS[section].push(row[1]);}
 const META=Object.fromEntries(F.filter(r=>D[r[1]]!==undefined).map(r=>[r[1],r]));
 const NAV=[
  ["overview","◈","Resumen"],["art","▣","UI Art Studio"],["profiles","▤","Perfiles"],["spawns","☷","Encuentros OW"],
  ["species","◇","Catálogo"],["aim","⊕","Lanzamiento"],
- ["capture","◉","Captura"],["behavior","⚑","Comportamiento"],["audio","♫","Audio"],
+ ["capture","◉","Captura"],["behavior","⚑","Comportamiento"],
+  ["shiny","✧","Shiny OW"],["audio","♫","Audio"],
  ["scopes","▦","Ámbitos"],["tests","⌁","Validación"]
 ];
 const esc=(s)=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -547,6 +560,14 @@ class Studio{
     ].map((item,i)=>'<div class="bf-stat bf-mood-'+i+'"><span>'+item[0]+
       '</span><strong>'+item[1]+'</strong></div>').join("")+'</div>'+
       '<p class="bf-help"><b>¿Qué recibe el Pokémon agresivo en combate?</b> +<b>'+esc(c.aggressive_level_bonus)+'</b> niveles sobre su nivel de aparición (máximo Nv. 100). Se aplica solo al Pokémon salvaje cuando Bifröst inicia el combate tradicional; no se trata de experiencia o recompensa del jugador. Configura también la alerta y la reacción de escape (avisa antes y puede esquivarse). Los ajustes locales de especie prevalecen sobre los generales.</p>');
+  if(this.section==="shiny")return '<h1 class="bf-headline">Shiny en el overworld</h1>'+
+    '<p class="bf-sub">Brillo inicial dorado y cian, pequeñas estrellas intermitentes y señal sonora independiente. Los efectos siguen el sprite real, sin tapar tiles ni la cámara 2.5D.</p>'+
+    this.panel("Aparición y sonido",'<div class="bf-cards">'+[
+     ["APARICIÓN","Estallido de estrellas y halo suave, sincronizados con la aparición."],
+     ["EXPLORACIÓN","Destellos discretos alrededor del Pokémon, sin bloquear capturas."],
+     ["AUDIO","Timbre shiny; archivo propio si está disponible, fallback CC0 si no."]
+    ].map(item=>'<div class="bf-stat"><span>'+item[0]+'</span><strong>'+item[1]+'</strong></div>').join("")+
+    '</div><p class="bf-help">En el inspector puedes ajustar intensidad, intervalo y volumen. El archivo opcional Audio/SE/Bifrost/za_shiny.ogg (o pla_shiny.ogg) reemplaza el aviso CC0. No se incluyen grabaciones comerciales.</p>');
   if(this.section==="audio")return '<h1 class="bf-headline">Audio de captura y comportamiento</h1>'+
     '<p class="bf-sub">Perfiles PLA-like y Z-A-like con archivos propios, reemplazables. Si faltan, se usa Essentials; no se distribuye audio extraído de otros juegos.</p>'+
     this.panel("Pistas de diseño",'<div class="bf-cards">'+[
