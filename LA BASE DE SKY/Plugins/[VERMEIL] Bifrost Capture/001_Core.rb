@@ -72,7 +72,11 @@ module BifrostCapture
     "sfx_lock"=>"none", "sfx_throw"=>"none", "sfx_hit"=>"none",
     "sfx_shake"=>"none", "sfx_caught"=>"none", "sfx_breakout"=>"none",
     "sfx_flee"=>"none", "sfx_alert"=>"none",
-    "sfx_critical"=>"none"
+    "sfx_critical"=>"none", "sfx_shiny"=>"none",
+    "shiny_fx_enabled"=>"1", "shiny_fx_intensity"=>"2",
+    "shiny_pulse_frames"=>"150", "shiny_sound_enabled"=>"1",
+    "shiny_sound_volume"=>"85", "shiny_sound_pitch"=>"112",
+    "shiny_repeat_sound"=>"0"
   }.freeze
   PROFILES = {
     "bifrost"=>{},
