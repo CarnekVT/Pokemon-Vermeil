@@ -25,6 +25,10 @@ module BifrostCapture
       end
 
       def kind_for(event)
+        cfg = BifrostCapture.options($game_map.map_id,
+          BifrostCapture.event_spec(event)[0],event.id)
+        return :max_alert if defined?(BifrostCapture::Pressure) &&
+          BifrostCapture::Pressure.locked?(event,cfg)
         state = event.instance_variable_get(:@bifrost_mood_state)
         return :danger if [:threat,:charge,:chase].include?(state)
         return :alert if state == :alert
@@ -45,7 +49,8 @@ module BifrostCapture
           :timid=>[Color.new(41,78,127,188),Color.new(161,214,255),"?"],
           :aggressive=>[Color.new(115,63,48,187),Color.new(255,190,142),"!"],
           :alert=>[Color.new(130,97,37,195),Color.new(255,220,125),"!"],
-          :danger=>[Color.new(142,47,47,219),Color.new(255,231,221),"!!"]
+          :danger=>[Color.new(142,47,47,219),Color.new(255,231,221),"!!"],
+          :max_alert=>[Color.new(145,37,37,230),Color.new(255,209,103),"!!"]
         }
         back,front,mark = palette[kind] || palette[:neutral]
         bmp = Bitmap.new(30,26)
