@@ -250,6 +250,11 @@ export function montarEspacio(editor, M) {
   const outside=ev=>{if(!root.contains(ev.target))closeMenus();};
   document.addEventListener("pointerdown",outside,true);
   disposers.push(()=>document.removeEventListener("pointerdown",outside,true));
+  // El timeline permanece disponible como transporte compacto mientras
+  // sus pistas de animación están cerradas. Sus controles avanzados no ocupan
+  // una segunda o tercera fila hasta que el usuario quiera animar.
+  editor.tiempo.selPropiedad.classList.add("ui-timeline-advanced");
+  editor.tiempo.btnAnadir.classList.add("ui-timeline-advanced");
   drawState();update();
   const fitOnOpen=()=>requestAnimationFrame(()=>{
     if(root.isConnected&&editor.diseno)editor.lienzo.encajar();
