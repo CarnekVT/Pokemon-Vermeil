@@ -1,13 +1,13 @@
 {
   "id": "scene-director-studio",
   "name": "Scene Director Studio",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "authors": [
     {
       "name": "CarnekVT"
     }
   ],
-  "description": "Editor visual independiente para Scene Engine: biblioteca, preview fiel al runtime, paginado/texto del Scene Engine, importación Ruby round-trip segura, timeline, audio y exportación no destructiva.",
+  "description": "Editor visual para Scene Engine: búsqueda de comandos por categorías, inspector contextual, pantalla completa estilo BAS/BSS, copiar llamada Ruby ingame, importación de escenas y preview.",
   "apiVersion": "1.0.0",
   "main": "index.js",
   "permissions": [
