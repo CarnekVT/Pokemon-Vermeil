@@ -39,7 +39,11 @@ module BifrostCapture
     "aggressive_alert_distance"=>"5", "aggressive_attack_distance"=>"1",
     "aggressive_chase_speed"=>"4", "aggressive_level_bonus"=>"2",
     "feedback_enabled"=>"1", "feedback_frames"=>"150",
-    "feedback_sfx"=>"1", "capture_fx"=>"1"
+    "feedback_sfx"=>"1", "capture_fx"=>"1",
+    "audio_profile"=>"vanilla", "sfx_aim"=>"none", "sfx_switch"=>"none",
+    "sfx_lock"=>"none", "sfx_throw"=>"none", "sfx_hit"=>"none",
+    "sfx_shake"=>"none", "sfx_caught"=>"none", "sfx_breakout"=>"none",
+    "sfx_flee"=>"none", "sfx_alert"=>"none"
   }.freeze
   PROFILES = {
     "bifrost"=>{},
@@ -176,7 +180,8 @@ module BifrostCapture
     # All naturally-generated OWs are capturable in full OW mode, even when
     # the project also restricts manual legendary encounters to its roster.
     return true if event.instance_variable_get(:@bifrost_generated) &&
-                   cfg["encounter_mode"] == "overworld" &&
+                   (cfg["encounter_mode"] == "overworld" ||
+                    event.instance_variable_get(:@bifrost_extra_spawn)) &&
                    spawn_species?(spec[0],cfg)
     allow_species?(spec[0],cfg)
   end
