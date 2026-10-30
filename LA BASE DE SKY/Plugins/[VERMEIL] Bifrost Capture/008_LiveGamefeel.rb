@@ -748,8 +748,10 @@ module BifrostCapture
           event.jump(0,0) if event.respond_to?(:jump) &&
             (!event.respond_to?(:jumping?) || !event.jumping?)
         end
-        BifrostCapture::Audio.play(:hit,a[:config]) if
-          !a[:miss] && defined?(BifrostCapture::Audio)
+        if !a[:miss] && defined?(BifrostCapture::Audio)
+          cue = a[:mode] == :ball && a[:back] ? :backstrike : :hit
+          BifrostCapture::Audio.play(cue,a[:config])
+        end
         if a[:mode] == :bait
           BifrostCapture.resolve_bait(event,a[:item],a[:config]) if
             BifrostCapture.respond_to?(:resolve_bait)
@@ -781,11 +783,12 @@ module BifrostCapture
         absorb = a[:config]["capture_fx"] == "0" ? 1 : (a[:critical] ? 16 : 10)
         shake_end = absorb+6+a[:shakes]*(a[:phase_frames]+4)
         if frame <= absorb
-          if a[:critical]
+          if a[:config]["capture_fx"] != "0"
             ring.visible = true
             ring.x = x;ring.y = ground-8
-            ring.zoom_x = ring.zoom_y = 0.65+1.2*frame.to_f/absorb
-            ring.opacity = (220*(1.0-frame.to_f/absorb)).to_i
+            ring.zoom_x = ring.zoom_y = 0.54+1.05*frame.to_f/absorb
+            ring.opacity = ((a[:critical] ? 220 : 150)*
+               (1.0-frame.to_f/absorb)).to_i
           end
           event.opacity = [a[:opacity] * (1-frame.to_f/absorb),0].max.to_i
           ball.zoom_x = ball.zoom_y = a[:zoom]*(0.7+0.3*frame.to_f/absorb)
