@@ -146,6 +146,9 @@ module BifrostCapture
           return physical == "tab" ? "Tab" : physical.upcase
         end
         BifrostCapture.binding_name(cfg,"mode_key")
+      when :bait
+        physical = cfg["keyboard_bait_key"].to_s.downcase
+        %w[r f t g].include?(physical) ? physical.upcase : nil
       when :aim
         BifrostCapture.binding_name(cfg,"hotkey")
       when :throw
@@ -156,11 +159,12 @@ module BifrostCapture
     end
 
     def prompt_entries(cfg,mode)
-      label = mode == :ball ? "Ball" : "Equipo"
+      label = mode == :ball ? "Ball" : (mode == :bait ? "Baya" : "Equipo")
       {
         :target=>[hint_key(cfg,:target),"Objet."],
         :select=>[hint_key(cfg,:select),label],
         :mode=>[hint_key(cfg,:mode),"Modo"],
+        :bait=>[hint_key(cfg,:bait),"Cebo"],
         :throw=>[hint_key(cfg,:throw),"Lanzar"],
         :cancel=>[hint_key(cfg,:cancel),"Salir"],
         :aim=>[hint_key(cfg,:aim),"Apuntar"]
@@ -221,13 +225,13 @@ module BifrostCapture
       bmp.fill_rect(9,74,bmp.width-17,1,Color.new(92,121,139,120))
       if expanded
         draw_prompt_row(bmp,78,[:target,:select,:mode].map { |key| controls[key] })
-        draw_prompt_row(bmp,97,[:throw,:cancel,:aim].map { |key| controls[key] })
+        draw_prompt_row(bmp,97,[:throw,:cancel,:bait].map { |key| controls[key] })
       else
         bmp.font.bold = false
         bmp.font.size = 13
         bmp.font.color = Color.new(241,216,171)
         bmp.draw_text(11,77,bmp.width-22,18,notice.to_s)
-        draw_prompt_row(bmp,97,[:target,:select,:mode,:throw].map { |key| controls[key] })
+        draw_prompt_row(bmp,97,[:target,:mode,:bait,:throw].map { |key| controls[key] })
       end
     end
 
@@ -243,14 +247,16 @@ module BifrostCapture
       bmp.font.size = 11
       bmp.font.bold = false
       bmp.font.color = Color.new(190,205,222)
-      selection_key = mode == :ball ? [:ball,item] : [:battle,item && item.object_id]
+      selection_key = [:ball,:bait].include?(mode) ? [mode,item] :
+        [:battle,item && item.object_id]
       if @selection_key != selection_key
         @selection_key = selection_key
         @selection_frame = 0
       end
       @selection_frame = [@selection_frame+1,9].min
-      bmp.draw_text(11,2,190,19,mode == :ball ? "BALL EQUIPADA" : "EQUIPO POKÉMON")
-      if mode == :ball
+      bmp.draw_text(11,2,190,19,mode == :ball ? "BALL EQUIPADA" :
+        (mode == :bait ? "CEBO / BAYA" : "EQUIPO POKÉMON"))
+      if [:ball,:bait].include?(mode)
         [-1,0,1].each_with_index do |offset,i|
           next if @ball_list.empty?
           idx = (@selected+offset) % @ball_list.length
@@ -312,13 +318,18 @@ module BifrostCapture
         mood = BifrostCapture.temperament_for(focus)
         hue = TEMPERAMENT_COLORS[mood] || TEMPERAMENT_COLORS[:neutral]
         state = focus.instance_variable_get(:@bifrost_mood_state)
-        state_label = case state
+        state_label = if defined?(BifrostCapture::Pressure) &&
+          BifrostCapture::Pressure.locked?(focus,cfg)
+          "¡ALERTA MÁXIMA!"
+        else
+          case state
         when :alert then "¡ALERTA!"
         when :charge then "¡EMBISTE!"
         when :chase then "¡PERSIGUE!"
         when :threat then "¡PREPARA ATAQUE!"
         when :flee then "¡HUYE!"
-        else BifrostCapture.temperament_label(mood)
+          else BifrostCapture.temperament_label(mood)
+          end
         end
         skin_draw(bmp,"target",157,18,bmp.width-164,47) ||
           bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,215))
@@ -336,7 +347,7 @@ module BifrostCapture
         bmp.draw_text(166,29,bmp.width-174,22,"Sin objetivo")
       end
       # The launch cadence is shown on the HUD, not just enforced in code.
-      if mode == :ball
+      if [:ball,:bait].include?(mode)
         remaining = defined?(BifrostCapture::LiveAim) ?
           BifrostCapture::LiveAim.cooldown_remaining.to_i : 0
         total = [cfg["throw_cooldown_frames"].to_i,1].max
@@ -350,7 +361,8 @@ module BifrostCapture
         bmp.font.bold = true
         bmp.font.color = color
         bmp.draw_text(bmp.width-127,2,116,16,
-          remaining > 0 ? "RECARGA #{remaining}f" : "BALL LISTA",2)
+          remaining > 0 ? "RECARGA #{remaining}f" :
+            (mode == :bait ? "CEBO LISTO" : "BALL LISTA"),2)
         bmp.font.bold = false
       end
       draw_context_controls(bmp,cfg,mode,notice)
