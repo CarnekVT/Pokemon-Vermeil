@@ -16,6 +16,8 @@ La selección sonora es **inspiración para diseño original**, no una instrucci
 | `sfx_aim` | Inicia apuntado | Textura breve y discreta |
 | `sfx_switch` | Cambia Ball | Clic suave, inequívoco |
 | `sfx_lock` | Cambia objetivo | Confirmación pequeña |
+| `sfx_mode` | Alterna Ball/Team | Cambio de equipo reconocible |
+| `sfx_party` | Cambia Pokémon | Selección del icono de equipo |
 | `sfx_throw` | Sale la Ball | Golpe inicial + desplazamiento aéreo |
 | `sfx_hit` | Impacta | Respuesta fuerte pero breve |
 | `sfx_shake` | Cada sacudida | Ritmo reconocible y creciente |
@@ -23,6 +25,12 @@ La selección sonora es **inspiración para diseño original**, no una instrucci
 | `sfx_breakout` | Se libera | Nota descendente + ruptura |
 | `sfx_flee` | Pokémon escapa | Movimiento corto y evasivo |
 | `sfx_alert` | Agresivo detecta | Aviso seco y urgente |
+
+## Presets tipo Legends (sin audio incluido)
+
+`audio_profile=pla_like` busca efectos propios llamados `pla_aim.ogg`, `pla_switch.ogg`, `pla_mode.ogg`, `pla_party.ogg`, `pla_lock.ogg`, `pla_throw.ogg`, `pla_hit.ogg`, `pla_shake.ogg`, `pla_caught.ogg`, `pla_breakout.ogg`, `pla_flee.ogg` y `pla_alert.ogg`. Para `za_like` se cambia el prefijo por `za_`. Si no existen, se recurre a los SFX vanilla cuando haya uno asociado.
+
+Son **nombres de archivos configurables**, no archivos comerciales incluidos. El audio que quieras usar debe estar autorizado para su inclusión en el proyecto.
 
 ## Uso
 
