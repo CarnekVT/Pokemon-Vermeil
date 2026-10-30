@@ -1,4 +1,4 @@
-# Bifröst Capture 0.9.0 — apuntado, selección y feedback tipo Legends
+# Bifröst Capture 0.9.1 — profundidad, menús y audio Z-A por defecto
 
 **Pokémon Vermeil · Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -13,7 +13,7 @@ todavía no validada dentro de mkxp con Visual 2.5D HD.
 |---|---|---|
 | Apuntar/lanzar | **A / JUMPUP** | Mantener para apuntar, soltar para lanzar |
 | Cambiar selección | **S / JUMPDOWN** | Ciclo inmediato de Ball o Pokémon |
-| Alternar Ball/Team | **W / AUX2** | Solo si Bifröst está apuntando |
+| Alternar Ball/Team | **S dos veces** | Doble pulsación rápida durante apuntado |
 | Ciclo bidireccional | **Rueda del ratón** | Anterior o siguiente Ball/Pokémon |
 | Alternar con ratón | **Clic derecho** | Cambiar modo Ball/Team |
 | Lanzamiento directo | **C / USE** | Lanzar sin esperar a soltar A |
@@ -22,10 +22,10 @@ todavía no validada dentro de mkxp con Visual 2.5D HD.
 
 Los controles utilizan **acciones configurables de Essentials**, no códigos
 físicos de teclado. **D / SPECIAL** sigue abriendo accesos rápidos,
-**Q / AUX1** conserva Turbo, **Shift/Z** la carrera, **F9** el debug y
-las flechas el movimiento. W solo se interpreta como cambio de modo durante
-apuntado; con CTRL en debug no se intercepta. Estas asociaciones se pueden
-ajustar en Maker Studio.
+**Q / AUX1** conserva Turbo, **W / AUX2** el debug de pasabilidades, **Shift/Z** la carrera, **F9** el debug y
+las flechas el movimiento. W no se intercepta. El doble toque de S se ajusta
+mediante `mode_double_tap_frames=16` y el clic derecho sigue disponible.
+La selección y las asociaciones se pueden ajustar en Maker Studio.
 
 La rueda usa `Input.scroll_v` únicamente si está disponible en mkxp-z.
 En runtimes sin esta extensión, el sistema sigue funcionando con S.
@@ -93,15 +93,38 @@ BifrostCapture.register_ow($game_map.events[17], :RAIKOU, 50, 0)
 
 ## Audio
 
-`audio_profile=pla_like` y `audio_profile=za_like` asignan **nombres
+`audio_profile=za_like` es el **predeterminado**, mientras `pla_like` y otros
+perfiles siguen disponibles para reutilizar el sistema. Estos perfiles asignan **nombres
 de recursos opcionales** para 12 eventos: apuntar, cambiar Ball, cambiar
 modo, cambiar miembro del equipo, fijar objetivo, lanzar, impactar,
 sacudir, atrapar, liberarse, huir y alertar.
 
-Los recursos se colocan en `Audio/SE/Bifrost/`. Si el archivo
-del perfil no existe, se intenta usar un SFX de Essentials.
-No se incluye audio comercial extraído de Arceus, Z-A o Tetris 99.
+Los recursos se colocan en `Audio/SE/Bifrost/`. Para que el perfil Z-A no
+quede silencioso, `009_Audio.rb` genera automáticamente **efectos WAV originales**
+en esa carpeta cuando faltan. Si no puede escribir allí, utiliza el SFX de
+Essentials correspondiente. No son grabaciones ni copias de efectos oficiales
+de Arceus, Z-A o Tetris 99.
 Ver [AUDIO_GUIDE.md](AUDIO_GUIDE.md) para nombres y referencias.
+
+
+## Correcciones 0.9.1 de composición y menús
+
+El vuelo, la sombra, la estela y la Ball de captura ya no usan viewports
+de dibujo forzados por encima de todo el mapa. Comparten el viewport mundial
+de `Spriteset_Map` y emplean Z derivada de `screen_z` de jugador y objetivo,
+incluyendo la transformación de Visual 2.5D. Esto permite que los tiles y
+animated props con prioridad mayor oculten correctamente la Ball.
+
+El centro de rotación de la Ball de captura se fija en su **base** (`oy`
+en la parte inferior), con `y` alineada a los pies del OW. Se elimina el
+deslizamiento hacia abajo al absorber: las sacudidas no deben pivotar desde
+arriba del sprite.
+
+Al abrir Mochila, menú de registrados, debug o cambiar de mapa,
+`010_MapInputGuard.rb` cierra el apuntado y limpia las animaciones de
+mundo. No se consumen Balls hasta resolver realmente el impacto y los
+Pokémon ya almacenados se eliminan del OW al abortar efectos.
+Queda pendiente la prueba visual real con todas las transiciones de escenas.
 
 ## Editor, ajustes y verificación
 
