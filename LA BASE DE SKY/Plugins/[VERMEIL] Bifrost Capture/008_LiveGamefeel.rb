@@ -416,7 +416,7 @@ module BifrostCapture
       def fire
         s = @session
         return false unless s
-        if s[:mode] == :ball && @throw_cooldown.to_i > 0
+        if [:ball,:bait].include?(s[:mode]) && @throw_cooldown.to_i > 0
           BifrostCapture.notice(_INTL("La Poké Ball se está preparando")) if
             @throw_cooldown.to_i == 1
           return false
