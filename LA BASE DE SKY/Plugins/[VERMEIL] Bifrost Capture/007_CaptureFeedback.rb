@@ -124,6 +124,8 @@ module BifrostCapture
       def ensure_sprite(state)
         sprite = state[:sprite]
         return if sprite && !sprite.disposed?
+        # Headless checks have no graphics runtime: preserve result state.
+        return unless defined?(Sprite) && defined?(Viewport) && defined?(Bitmap)
         @viewport ||= Viewport.new(0,0,Graphics.width,Graphics.height)
         @viewport.z = 999999
         sprite = Sprite.new(@viewport)
@@ -137,6 +139,7 @@ module BifrostCapture
       def redraw(state=@active)
         return unless state
         ensure_sprite(state)
+        return unless state[:sprite]
         bmp = state[:sprite].bitmap
         bmp.clear
         fill,accent = COLORS[state[:kind]] || COLORS[:blocked]
