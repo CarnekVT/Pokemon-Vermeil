@@ -1,8 +1,51 @@
-# Bifröst Capture 0.7.0 — lanzamiento fluido con movimiento libre
+# Bifröst Capture 0.8.0 — encuentros, temperamentos y audio
 
 **Pokémon Vermeil · Pokémon Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
 Los archivos Ruby 001–007 y el editor Maker Studio se sustituyeron por implementaciones nuevas. No se añadió el plugin chino ICS ni se copiaron sus scripts; se tomó como referencia su separación de componentes, su HUD compacto y los modos de pulsación. El recurso original de ZIJUK está diseñado para trabajar junto con **Visible Overworld Wild Encounters (VOWE)**; esta reconstrucción tiene su propia integración con las tablas de encuentros de Essentials y no necesita VOWE instalado.
+
+## Versión 0.8.0 — apariciones OW, temperamentos, audio y accesos
+
+**Controles predeterminados compatibles con las acciones mostradas por Essentials:**
+mantener **JUMPUP (A)** para apuntar y soltar para lanzar,
+**JUMPDOWN (S)** para cambiar la Poké Ball,
+**ACTION (Shift/Z)** para cambiar el Pokémon fijado,
+**SPECIAL (D)** para alternar entre Poké Ball y combate,
+**USE (C)** para lanzar y **BACK (X)** para cancelar.
+La configuración de las cuatro primeras acciones es independiente desde Maker Studio;
+`none` permite desactivar cada función opcional. El bloqueo `CTRL` cuando
+está activo el debug evita interceptar combinaciones de desarrollo.
+Los atajos siguen siendo personalizables y necesitan una prueba final con los
+demás plugins que puedan utilizar A/S/Q/W.
+
+**Ratio de aparición alternativo:** `ow_extra_spawn_chance=12` permite una
+tirada adicional por paso válido, independientemente del encuentro natural.
+`ow_extra_spawn_cooldown=7` establece los pasos posteriores a una
+aparición que se omiten. No sustituye la probabilidad original de batallas;
+usa las mismas tablas PBS, respeta terreno, gráficos, capacidad del mapa
+y las especies excluidas. En la configuración por defecto de biblioteca
+el ratio extra está desactivado; en Vermeil se prueba con 12 %.
+
+**Temperamento individual:** `temperament=mixed` sortea un temperamento
+estable por Pokémon con pesos configurables (50 neutral, 30 tímido, 20 agresivo).
+Los ajustes por especie, mapa o evento tienen prioridad sobre el valor global.
+El neutro observa, el tímido huye al detectar al jugador y el agresivo lo
+persigue hasta iniciar combate. `aggressive_level_bonus=2` incrementa
+su nivel de combate sin alterar su nivel original de captura directa.
+
+**HUD:** cartela compacta, retícula con pulso y colores para
+neutral/miedoso/agresivo, además de indicadores de persecución y huida.
+
+**Audio:** el archivo `009_Audio.rb` conecta diez eventos distintos
+(apuntar, cambiar, fijar, lanzar, impactar, sacudir, capturar, liberarse,
+huir y alertar) con `Audio/SE/Bifrost/`. Consulta [AUDIO_GUIDE.md](AUDIO_GUIDE.md)
+para fuentes de referencia verificadas de Tetris 99 (tema Arceus),
+Legends: Arceus y Legends: Z-A. No se han incluido sonidos extraídos de
+ninguno de estos juegos; el usuario puede colocar efectos originales o autorizados.
+
+**Limitaciones:** hay pruebas Ruby de reglas, aparición y captura,
+pero aún falta probar el comportamiento y la mezcla sonora en mkxp,
+el uso de mando, la coexistencia con debug y la cámara Visual 2.5D HD.
 
 ## Nueva experiencia 0.7.0 — moverse, apuntar y capturar simultáneamente
 
