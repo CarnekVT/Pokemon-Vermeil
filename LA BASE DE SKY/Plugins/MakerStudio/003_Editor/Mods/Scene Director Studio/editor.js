@@ -142,7 +142,7 @@ export class SceneDirectorEditor{
   async showCode(){
     const scene=this.scene();if(!scene)return;
     const method=scene.importInfo?.sourceMethod||`pbSceneDirector_${scene.key}`;
-    const code=`def ${method}\n  SceneEngine.play do\n${compileProject({scenes:[scene]}).scenes[0].compiledRuby.split("\\n").map(x=>"    "+x).join("\\n")}\n  end\nend`;
+    const code=`def ${method}\n  SceneEngine.play do\n${compileProject({scenes:[scene]}).scenes[0].compiledRuby.split("\n").map(x=>"    "+x).join("\n")}\n  end\nend`;
     if(this.codeOverlay)this.codeOverlay.remove();
     const overlay=document.createElement("div");overlay.className="sd-use-overlay";overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");
     overlay.innerHTML=`<div class="sd-use-panel"><div class="sd-dialog-stack"><div class="sd-use-top"><h2>Ruby generado · ${esc(scene.name)}</h2><button class="sd-button" data-code-close>✕ Cerrar</button></div><p class="sd-help">Código completo de la escena. Guardar sigue usando scenes.json; exportar .rb crea una copia independiente para trabajar en scripts.</p><textarea class="sd-textarea sd-export-code" readonly spellcheck="false">${esc(code)}</textarea><div class="sd-inline"><button class="sd-button primary" data-code-copy>⎘ Copiar Ruby</button><button class="sd-button" data-code-download>Exportar .rb</button><button class="sd-button" data-code-invoke>⎘ Copiar llamada al Runtime</button></div></div></div>`;
