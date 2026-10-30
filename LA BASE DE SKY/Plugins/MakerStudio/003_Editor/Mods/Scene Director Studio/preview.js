@@ -190,8 +190,14 @@ export class ScenePreview{
         g.drawImage(im,box.x,box.y,box.w,box.h,139-box.w*sc/2,152+(236-box.h*sc)/2,box.w*sc,box.h*sc);
       }
       this.gameFont(29);
-      g.fillText((u.text||""),292,248);
-      // Línea fija para localizar la entrada sin cursor invasivo.
+      const currentName=u.text||"";
+      g.fillText(currentName,292,248);
+      // Cursor vertical: indica el final del nombre, sin desplazamientos falsos.
+      if(Math.floor(t/21)%2===0){
+        const caretX=Math.min(292+(283+g.measureText(currentName).width)/2+3,567);
+        g.fillStyle="#934269";g.fillRect(caretX,258,2,27);
+      }
+      // Subrayado fijo como segunda referencia visual.
       g.fillStyle="#9e654a";g.fillRect(297,293,264,2);
       g.fillStyle="#ebc991";g.fillRect(297,295,264,1);
       if(!u.text){this.gameFont(19);g.fillStyle="#8f7364";g.fillText("Escribe aquí",297,262);}
