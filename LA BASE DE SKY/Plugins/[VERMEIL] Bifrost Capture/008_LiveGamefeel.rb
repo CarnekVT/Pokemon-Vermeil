@@ -10,6 +10,19 @@ module BifrostCapture
         !!@session
       end
 
+      def claim_map_input(key)
+        @claimed_map_input = key
+      end
+
+      def consume_claimed_map_input?
+        claimed = @claimed_map_input
+        @claimed_map_input = nil
+        return false unless claimed
+        input = BifrostCapture.input_action(claimed) if
+          BifrostCapture.respond_to?(:input_action)
+        !!(input && Input.trigger?(input))
+      end
+
       def binding(cfg,field,_fallback=nil)
         return nil unless BifrostCapture.respond_to?(:capture_action)
         BifrostCapture.capture_action(cfg,field)
@@ -174,6 +187,7 @@ module BifrostCapture
         s[:frames] += 1
         key = BifrostCapture.hotkey
         if Input.trigger?(Input::BACK)
+          claim_map_input("back")
           close
           return
         end
@@ -253,6 +267,7 @@ module BifrostCapture
                   s[:held] && s[:frames] > 1 && !Input.press?(key)
         use = Input.trigger?(Input::USE)
         if use || click || release
+          claim_map_input("use") if use
           fire
           close if release || cfg["aim_chain"] == "0"
         elsif cfg["control_mode"] != "hold" && key &&
