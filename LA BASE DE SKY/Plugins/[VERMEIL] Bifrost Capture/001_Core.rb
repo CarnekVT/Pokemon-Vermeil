@@ -12,11 +12,14 @@ module BifrostCapture
   ].freeze
   DEFAULTS = {
     "profile"=>"bifrost", "enabled"=>"1",
-    "access_mode"=>"always", "hotkey"=>"aux2", "control_mode"=>"hold",
+    "access_mode"=>"always", "hotkey"=>"jumpup", "control_mode"=>"hold",
+    "ball_key"=>"jumpdown", "target_key"=>"action", "mode_key"=>"special",
+    "debug_input_guard"=>"1",
     "capture_enabled"=>"1", "battle_enabled"=>"1", "restricted_species"=>"1",
     "encounter_mode"=>"classic", "spawn_chance"=>"50",
     "spawn_min_distance"=>"3", "spawn_max_distance"=>"6", "spawn_limit"=>"5",
     "spawn_lifetime"=>"45", "spawn_filter"=>"all", "spawn_grass_only"=>"1",
+    "ow_extra_spawn_chance"=>"0", "ow_extra_spawn_cooldown"=>"7",
     "spawn_allow_fishing"=>"0", "ow_form"=>"0", "ow_min_level"=>"0",
     "ow_max_level"=>"0", "ow_spawn_probability"=>"100",
     "range"=>"7", "width"=>"7", "optimal_range"=>"4", "alert_distance"=>"3",
@@ -31,6 +34,10 @@ module BifrostCapture
     "flee_disappear_distance"=>"9", "flee_stuck_frames"=>"90",
     "alert_on_miss"=>"1", "attempt_limit"=>"0",
     "instant_modifier"=>"100",
+    "temperament"=>"mixed", "neutral_weight"=>"50", "timid_weight"=>"30",
+    "aggressive_weight"=>"20", "timid_alert_distance"=>"4",
+    "aggressive_alert_distance"=>"5", "aggressive_attack_distance"=>"1",
+    "aggressive_chase_speed"=>"4", "aggressive_level_bonus"=>"2",
     "feedback_enabled"=>"1", "feedback_frames"=>"150",
     "feedback_sfx"=>"1", "capture_fx"=>"1"
   }.freeze
@@ -234,11 +241,54 @@ module BifrostCapture
     true
   end
 
+  INPUT_ACTIONS = {
+    "aux1"=>:AUX1, "aux2"=>:AUX2, "jumpup"=>:JUMPUP,
+    "jumpdown"=>:JUMPDOWN, "action"=>:ACTION, "special"=>:SPECIAL,
+    "use"=>:USE, "back"=>:BACK
+  }.freeze
+
+  def self.input_action(name)
+    method_name = INPUT_ACTIONS[name.to_s]
+    return nil unless method_name && Input.const_defined?(method_name)
+    Input.const_get(method_name)
+  end
+
   def self.hotkey
-    case options["hotkey"]
-    when "aux1" then Input::AUX1
-    when "aux2" then Input::AUX2
+    input_action(options["hotkey"])
+  end
+
+  # Developer commands frequently use CTRL + actions on map. In debug,
+  # never intercept a control chord reserved for developer tools.
+  def self.debug_input_blocked?(cfg=options)
+    cfg["debug_input_guard"] == "1" && defined?($DEBUG) && $DEBUG &&
+      Input.const_defined?(:CTRL) && Input.press?(Input::CTRL)
+  end
+
+  def self.temperament_for(event,cfg=nil)
+    return :neutral unless event
+    preset = event.instance_variable_get(:@bifrost_temperament)
+    return preset if [:neutral,:timid,:aggressive].include?(preset)
+    spec = event_spec(event)
+    cfg ||= options($game_map.map_id,spec && spec[0],event.id)
+    kind = cfg["temperament"].to_s
+    if ["neutral","timid","aggressive"].include?(kind)
+      chosen = kind.to_sym
+    else
+      neutral = cfg["neutral_weight"].to_i.clamp(0,100)
+      timid = cfg["timid_weight"].to_i.clamp(0,100)
+      aggressive = cfg["aggressive_weight"].to_i.clamp(0,100)
+      total = neutral+timid+aggressive
+      roll = total > 0 ? rand(total) : 0
+      chosen = total == 0 || roll < neutral ? :neutral :
+               roll < neutral+timid ? :timid : :aggressive
     end
+    event.instance_variable_set(:@bifrost_temperament,chosen)
+    chosen
+  end
+
+  def self.temperament_label(kind)
+    { :neutral=>"NEUTRO", :timid=>"MIEDOSO",
+      :aggressive=>"AGRESIVO" }[kind] || "NEUTRO"
   end
 
   def self.notice(message)
