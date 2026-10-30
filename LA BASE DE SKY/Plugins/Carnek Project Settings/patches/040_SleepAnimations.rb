@@ -50,12 +50,9 @@ class Battle::Scene
     sendOuts.each { |b| _carnek_sleep_precache(b[0]) }
   end
 
-  alias _carnek_sleep_orig_pbFrameUpdate pbFrameUpdate
-  def pbFrameUpdate(cw = nil)
-    _carnek_sleep_orig_pbFrameUpdate(cw)
-    _carnek_sleep_ensure_bitmaps
-    @_carnek_sleep_data&.each_value { |sd| sd[:bitmap]&.update }
-  end
+  # Frame update is installed via prepend below. Never alias a method
+  # belonging to a prepended module: the alias could call back into this
+  # class and loop forever when another plugin also wraps pbFrameUpdate.
 
   def _carnek_sleep_create_data(idx)
     b = @battle.battlers[idx]
@@ -228,3 +225,16 @@ module Graphics
     end
   end
 end
+
+# Compose with UmbraVeil/BAS/BSS via Ruby's true method lookup chain.
+# Replaces the legacy flat alias that could capture UmbraVeil::SceneHooks.
+module CarnekSleepFrameUpdate
+  def pbFrameUpdate(*args)
+    result = super
+    _carnek_sleep_ensure_bitmaps
+    @_carnek_sleep_data&.each_value { |sd| sd[:bitmap]&.update }
+    result
+  end
+end
+Battle::Scene.prepend(CarnekSleepFrameUpdate) unless
+  Battle::Scene.ancestors.include?(CarnekSleepFrameUpdate)
