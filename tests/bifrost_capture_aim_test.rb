@@ -39,7 +39,8 @@ module RPG
   end
 end
 class Game_Event
-  attr_reader :id,:map_id,:name,:x,:y,:direction,:map,:character_name,:screen_x,:screen_y
+  attr_reader :id,:map_id,:name,:x,:y,:direction,:map,:screen_x,:screen_y
+  attr_accessor :character_name
   attr_accessor :transparent,:through,:move_speed,:active
   def initialize(map_id,data,map)
     @map_id,@id,@name,@x,@y,@map=map_id,data.id,data.name,data.x,data.y,map
@@ -239,18 +240,35 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     end
   end
 
-  def test_forced_shiny_is_ignored_in_non_debug_mode
+  def test_explicit_shiny_test_option_also_works_without_debug_launcher
     original_debug=$DEBUG
     begin
       $DEBUG=false
       $PokemonGlobal.bifrost_overrides["debug_force_shiny"]="1"
       assert_equal :spawned,BifrostCapture.spawn_wild(:Land)
       event=$game_map.events.values.first
-      refute event.instance_variable_get(:@bifrost_wild_pokemon).shiny?
-      assert_equal "Followers/PIKACHU",event.character_name
+      assert event.instance_variable_get(:@bifrost_wild_pokemon).shiny?
+      assert_equal "Followers shiny/PIKACHU",event.character_name
     ensure
       $DEBUG=original_debug
     end
+  end
+
+  def test_shiny_test_switch_updates_existing_ow_and_keeps_capture_identity
+    $DEBUG=false
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    assert_equal "Followers/PIKACHU",event.character_name
+    original=event.instance_variable_get(:@bifrost_wild_pokemon)
+    refute original.shiny?
+    assert pbBifrostShinyTest(true)
+    assert_equal "1",BifrostCapture.options["debug_force_shiny"]
+    assert_same original,event.instance_variable_get(:@bifrost_wild_pokemon)
+    assert original.shiny?
+    assert_equal "Followers shiny/PIKACHU",event.character_name
+    assert pbBifrostShinyTest(false)
+    assert_equal "0",BifrostCapture.options["debug_force_shiny"]
+    assert original.shiny?, "Disabling test mode must not rewrite existing shinies"
   end
 
   def test_ow_shiny_manual_event_updates_follower_graphic
