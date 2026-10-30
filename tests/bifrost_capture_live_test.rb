@@ -8,6 +8,14 @@ end
 class Scene_Map
   attr_reader :map_input_count
   def update_input; @map_input_count=(@map_input_count || 0)+1; end
+  attr_reader :menu_opened
+  def call_menu; @menu_opened=true; end
+end
+class FakeWorldViewport
+  def disposed?; false; end
+end
+module Spriteset_Map
+  def self.viewport; @world ||= FakeWorldViewport.new; end
 end
 module Input
   AUX2=:aux2; AUX1=:aux1; ACTION=:action; SPECIAL=:special
@@ -245,6 +253,32 @@ class BifrostLiveTest < Minitest::Test
       refute_match(/^\s*Graphics\.update\b/,code,"blocking graphics loop in #{name}")
       refute_match(/^\s*Input\.update\b/,code,"blocking input loop in #{name}")
     end
+  end
+
+  def test_projectile_uses_world_viewport_with_character_depth
+    vp,owned=BifrostCapture::Motion.map_viewport
+    assert_same Spriteset_Map.viewport,vp
+    refute owned
+    actor=Struct.new(:screen_z).new(288)
+    assert_equal 288,BifrostCapture::Motion.depth_for(actor)
+    path=File.expand_path(
+      "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/008_LiveGamefeel.rb",__dir__)
+    source=File.read(path)
+    refute_match(/vp\.z\s*=\s*99999\d/,source)
+    assert_includes source,"ball.oy = ball.bitmap.height"
+  end
+
+  def test_opening_bag_clears_aim_and_inflight_world_sprites
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    assert BifrostCapture::LiveAim.active?
+    BifrostCapture::Motion.instance_variable_set(:@flight,
+      { :sprites=>[], :vp=>nil, :owns_vp=>false })
+    assert BifrostCapture::Motion.busy?
+    $scene.call_menu
+    assert $scene.menu_opened
+    refute BifrostCapture::LiveAim.active?
+    refute BifrostCapture::Motion.busy?
   end
 
   def test_cancel_aim_is_immediate
