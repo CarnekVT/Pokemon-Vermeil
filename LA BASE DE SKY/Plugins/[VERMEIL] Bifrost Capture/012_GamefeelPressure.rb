@@ -9,8 +9,9 @@ module BifrostCapture
       end
 
       def locked?(event,cfg)
-        cfg["pressure_enabled"] == "1" &&
-          value(event) >= cfg["pressure_block_threshold"].to_i.clamp(1,100)
+        return false unless event && cfg["pressure_enabled"] == "1"
+        return true if event.instance_variable_get(:@bifrost_max_alert)
+        value(event) >= cfg["pressure_block_threshold"].to_i.clamp(1,100)
       end
 
       def add(event,reason,cfg)
@@ -23,7 +24,18 @@ module BifrostCapture
         event.instance_variable_set(:@bifrost_pressure_attempt_frame,@frame.to_i)
         old = value(event)
         updated = (old+gain.clamp(0,100)).clamp(0,100)
+        was_locked = locked?(event,cfg)
         event.instance_variable_set(:@bifrost_pressure,updated)
+        if updated >= cfg["pressure_block_threshold"].to_i.clamp(1,100)
+          event.instance_variable_set(:@bifrost_max_alert,true)
+          unless was_locked
+            spec = BifrostCapture.event_spec(event)
+            if defined?(BifrostCapture::Feedback)
+              BifrostCapture::Feedback.publish(:max_alert,spec && spec[0],
+                _INTL("Solo combate o usar un cebo/baya"),cfg)
+            end
+          end
+        end
         alert = cfg["pressure_alert_threshold"].to_i.clamp(1,100)
         if old < alert && updated >= alert
           spec = BifrostCapture.event_spec(event)
@@ -62,8 +74,33 @@ module BifrostCapture
         end
       end
 
+      def calm_with_bait(event,item,cfg)
+        return false unless event && item && $bag &&
+          $bag.quantity(item).to_i > 0 && BifrostCapture.eligible_event?(event)
+        return false unless BifrostCapture.bait_item?(item)
+        return false unless $bag.remove(item,1)
+        event.instance_variable_set(:@bifrost_pressure,0)
+        event.instance_variable_set(:@bifrost_max_alert,false)
+        event.instance_variable_set(:@bifrost_pressure_attempt_frame,nil)
+        BifrostCapture.stop_chase(event) if BifrostCapture.respond_to?(:chasing?) &&
+          BifrostCapture.chasing?(event)
+        BifrostCapture.restore_wander(event) if BifrostCapture.respond_to?(:fleeing?) &&
+          BifrostCapture.fleeing?(event)
+        BifrostCapture.cancel_escape_reaction(event) if
+          BifrostCapture.respond_to?(:cancel_escape_reaction)
+        event.instance_variable_set(:@bifrost_alert_cooldown,180)
+        event.instance_variable_set(:@bifrost_mood_state,:curious)
+        spec = BifrostCapture.event_spec(event)
+        if defined?(BifrostCapture::Feedback)
+          BifrostCapture::Feedback.publish(:calmed,spec && spec[0],
+            _INTL("Aceptó el alimento y bajó la guardia"),cfg)
+        end
+        true
+      end
+
       def clear_success(event)
         if event
+          event.instance_variable_set(:@bifrost_max_alert,false)
           event.instance_variable_set(:@bifrost_pressure,0)
           event.instance_variable_set(:@bifrost_pressure_attempt_frame,nil)
         end
@@ -81,6 +118,7 @@ module BifrostCapture
         return unless @frame % interval == 0
         $game_map.events.values.each do |event|
           next unless BifrostCapture.eligible_event?(event)
+          next if locked?(event,cfg)
           n = value(event)
           event.instance_variable_set(:@bifrost_pressure,n-1) if n > 0
         end
