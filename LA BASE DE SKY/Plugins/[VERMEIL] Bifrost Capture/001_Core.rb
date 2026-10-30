@@ -13,7 +13,9 @@ module BifrostCapture
   DEFAULTS = {
     "profile"=>"bifrost", "enabled"=>"1",
     "access_mode"=>"always", "hotkey"=>"jumpup", "control_mode"=>"hold",
-    "ball_key"=>"jumpdown", "target_key"=>"none", "mode_key"=>"none",
+    "ball_key"=>"jumpdown", "target_key"=>"none", "mode_key"=>"aux2",
+    "contextual_mode_toggle"=>"1", "mouse_wheel_select"=>"1",
+    "mouse_right_mode"=>"1", "remember_selection"=>"1",
     "debug_input_guard"=>"1", "allow_shared_bindings"=>"0",
     "ball_hold_mode_frames"=>"22",
     "capture_enabled"=>"1", "battle_enabled"=>"1", "restricted_species"=>"1",
@@ -40,8 +42,11 @@ module BifrostCapture
     "aggressive_alert_distance"=>"5", "aggressive_attack_distance"=>"1",
     "aggressive_chase_speed"=>"4", "aggressive_level_bonus"=>"2",
     "feedback_enabled"=>"1", "feedback_frames"=>"150",
+    "feedback_enter_frames"=>"12", "feedback_hold_frames"=>"72",
+    "feedback_exit_frames"=>"16", "feedback_queue_limit"=>"5",
     "feedback_sfx"=>"1", "capture_fx"=>"1",
-    "audio_profile"=>"vanilla", "sfx_aim"=>"none", "sfx_switch"=>"none",
+    "audio_profile"=>"pla_like", "sfx_aim"=>"none", "sfx_switch"=>"none",
+    "sfx_mode"=>"none", "sfx_party"=>"none",
     "sfx_lock"=>"none", "sfx_throw"=>"none", "sfx_hit"=>"none",
     "sfx_shake"=>"none", "sfx_caught"=>"none", "sfx_breakout"=>"none",
     "sfx_flee"=>"none", "sfx_alert"=>"none"
@@ -269,7 +274,10 @@ module BifrostCapture
     name = cfg[field].to_s.downcase
     return nil if name == "none" || name.empty?
     return nil unless INPUT_ACTIONS.key?(name)
-    return nil if RESERVED_MAP_ACTIONS.include?(name) &&
+    reserved = RESERVED_MAP_ACTIONS.include?(name)
+    contextual = field == "mode_key" && name == "aux2" &&
+                 cfg["contextual_mode_toggle"] == "1"
+    return nil if reserved && !contextual &&
                   cfg["allow_shared_bindings"] != "1"
     return nil if field != "hotkey" && name == cfg["hotkey"]
     input_action(name)
@@ -341,4 +349,5 @@ end
 
 class PokemonGlobalMetadata
   attr_accessor :bifrost_overrides, :bifrost_removed_events
+  attr_accessor :bifrost_last_ball, :bifrost_last_party_index, :bifrost_last_mode
 end
