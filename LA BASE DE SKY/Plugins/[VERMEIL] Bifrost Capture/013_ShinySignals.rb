@@ -161,7 +161,8 @@ module BifrostCapture
         z = event.respond_to?(:screen_z) ? event.screen_z+2 : 2
         period = cfg["shiny_pulse_frames"].to_i.clamp(80,360)
         anchors = [[-0.31,0.30],[0.34,0.14],[-0.06,-0.05],[0.21,0.58]]
-        state[:sprites].each_with_index do |sprite,index|
+        state[:sprites][count..-1].to_a.each { |sp| sp.visible = false }
+        state[:sprites].first(count).each_with_index do |sprite,index|
           t = (age+index*(period/count)) % period
           burst = state[:burst] > 0
           # Short fading twinkles instead of a permanent obstructing halo.
