@@ -1,4 +1,4 @@
-# Bifröst Capture — seguimiento 0.8.1 (reconstrucción completa de código)
+# Bifröst Capture — seguimiento 0.9.0 (reconstrucción completa de código)
 
 Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 
@@ -6,7 +6,12 @@ Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 
 | Área | Estado | Verificación / siguiente tarea |
 |---|---|---|
-| Entradas sin conflictos por defecto | Código integrado; tests | A prepara; S corto cambia Ball y S largo cambia modo. D/Q/Shift conservan sus funciones. |
+| Selección inmediata y bidireccional | Código integrado y tests | S y rueda cambian Ball o Team en ambos sentidos sin esperar |
+| Cambio Ball/Team con W contextual | Código integrado y tests | W solo se usa dentro del apuntado; clic derecho como alternativa |
+| Recordar Ball/Team/modo en guardado | Código integrado y tests | Persistencia en PokemonGlobalMetadata; Ball por ID, miembro por índice |
+| HUD Team con icono y nombre | Código integrado; falta validación visual | Icono real de Pokémon, nombre, nivel, PS y transición rápida |
+| Notificación lateral izquierda animada | Código integrado y tests | Entrada, hold, salida, cola y resultados diferenciados |
+| Perfiles PLA-like y Z-A-like | Router implementado; assets opcionales | Hasta 12 eventos; reutiliza sonidos vanilla si faltan recursos autorizados |
 | Migración de keybindings anteriores | Código integrado; falta probar Studio | Valores D/Q/Shift heredados se sustituyen en el editor con cambios pendientes de guardar |
 | Interacción contextual C/X sin doble acción | Código integrado; tests | Protección del mapa incluso si Bifröst cierra antes del update de Scene_Map |
 | Auditoría de inputs en Vermeil | Revisados los módulos relevantes | D Ready Menu, Q Turbo, Shift/Z carrera, F9 debug, flechas movimiento; falta prueba de terceros en mkxp |
@@ -22,7 +27,7 @@ Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 | 005: Apuntado, HUD y lanzamiento desde cero | Parcial | Selector de tres Balls, imán de objetivo, estela y fallo visual coherente; validar con cámara 2.5D |
 | 006: Huida/ataque visible desde cero | Integrado | Test de huida sin marca de captura |
 | 008: apuntado y vuelo no bloqueantes | Código integrado y tests de input | Se camina con flechas mientras A prepara el lanzamiento |
-| Origen del tiro estable mientras el jugador se desplaza | Código integrado y test | El contacto toma como origen la casilla al soltar W |
+| Origen del tiro estable mientras el jugador se desplaza | Código integrado y test | El contacto toma como origen la casilla al soltar A |
 | Secuencia de captura en estados por fotograma | Código integrado; validar mkxp | Sin bucles manuales de Graphics/Input, reacción diferida |
 | Traducciones con placeholders | Código corregido y test | Evita FrozenError al usar .dup con _INTL y placeholders |
 | Cambio de mapa durante la captura | Código integrado; validar mkxp | Limpieza y prevención de Pokémon OW duplicado |
@@ -59,7 +64,7 @@ Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 
 1. Activar perfil `full_ow` desde Studio, **Aplicar perfil**, **Guardar**.
 2. Entrar en hierba con tabla de encuentros: el resultado de una tirada natural se convierte en evento OW con sprite Followers.
-3. Abrir con W (AUX2), seleccionar sprite con flechas o ratón, lanzar con C (USE). Verificar consumo de 1 Ball al impacto y almacenamiento en equipo/cajas.
+3. Mantener A para apuntar. S o rueda cicla Ball/Team; W o clic derecho cambia modo. Soltar A o pulsar C lanza. Verificar equipo/caja.
 4. Probar que un Pokémon generado sigue siendo capturable si el catálogo manual Bifröst está restringido.
 5. A 3 casillas, reacción de huida. Comprobar movimiento por pasos y desaparición sin marca de captura.
 6. Probar disparos a 4, 7 y 8 casillas; objetos sólidos intermedios y captura por espalda.
