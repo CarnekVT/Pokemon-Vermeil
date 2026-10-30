@@ -135,6 +135,7 @@ module BifrostCapture
     event_data.pages = [page]
     event = Game_Event.new($game_map.map_id,event_data,$game_map)
     event.instance_variable_set(:@bifrost_generated,true)
+    event.instance_variable_set(:@bifrost_extra_spawn,extra)
     event.instance_variable_set(:@bifrost_remaining_steps,
                                cfg["spawn_lifetime"].to_i)
     $game_map.events[id] = event
