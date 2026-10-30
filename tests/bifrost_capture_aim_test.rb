@@ -122,7 +122,11 @@ def pbAddPokemon(pkmn)
   BifrostCapture.captures << pkmn
   true
 end
-def _INTL(s,*args); s; end
+def _INTL(s,*args)
+  args.each_with_index.reduce(s) { |out,(value,index)|
+    out.gsub("{#{index+1}}",value.to_s)
+  }
+end
 class BifrostCaptureIntegrationTest < Minitest::Test
   def setup
     $player=nil
