@@ -369,6 +369,13 @@ module BifrostCapture
     true
   end
 
+  def self.cancel_pending_attack(event)
+    if @pending_attack && @pending_attack.equal?(event)
+      @pending_attack = nil
+      @aim_interrupted = false
+    end
+  end
+
   def self.dispatch_attack
     event = @pending_attack
     @pending_attack = nil
