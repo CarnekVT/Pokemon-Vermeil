@@ -129,11 +129,11 @@ const F=[
  ["Espera tras aparición extra (pasos)","ow_extra_spawn_cooldown",0,250],
  ["Especies generadas","spawn_filter"],["Generar en hierba","spawn_grass_only"],
  ["Pesca: reservado, no activo","spawn_allow_fishing"],
+ ["PRUEBAS: forzar shiny OW (sin requerir $DEBUG)","debug_force_shiny"],
  ["ESPECIE OW","species"],
  ["Forma regional","ow_form",0,100],["Nivel mínimo (0 = tabla)","ow_min_level",0,100],
  ["Nivel máximo (0 = tabla)","ow_max_level",0,100],
  ["Probabilidad individual (%)","ow_spawn_probability",0,100],
-  ["PRUEBAS: forzar shiny OW (sin requerir $DEBUG)","debug_force_shiny"],
  ["APUNTADO","aim"],["Alcance en casillas","range",1,20],
  ["Ancho frontal","width",1,19],["Distancia óptima","optimal_range",1,20],
  ["Precisión cercana (%)","hit_near",0,100],["Precisión lejana (%)","hit_far",0,100],
@@ -523,6 +523,15 @@ class Studio{
     '" data-mode="'+k+'"><strong>'+esc(T(k))+'</strong><small>'+
     (k==="overworld"?"Convierte la hierba en fauna visible":"Mantiene la ruta original")+
     '</small></button>').join("")+'</div>'+
+    this.panel("Prueba shiny OW",
+      '<p class="bf-help">Forzar shiny en OW para probar sprite, captura y combate. Funciona sin $DEBUG y se guarda en el proyecto.</p>'+
+      '<div class="bf-actions"><button class="bf-btn '+(this.cfg.global.debug_force_shiny==="1"?"":"primary")+
+      '" data-action="shiny-test-toggle">'+
+      (this.cfg.global.debug_force_shiny==="1"?"Desactivar prueba shiny":"Activar shiny 100% para probar")+
+      '</button><span class="bf-tag">'+
+      (this.cfg.global.debug_force_shiny==="1"?"PRUEBA ACTIVA":"PRUEBA DESACTIVADA")+
+      '</span></div>'+
+      '<p class="bf-help">Una partida con preferencias anteriores puede requerir <code>pbBifrostShinyTest(true)</code> en un evento de prueba.</p>')+
     this.panel("Ritmo de apariciones",'<div class="bf-cards">'+[
       ["OW adicional / paso",c.ow_extra_spawn_chance+"%"],
       ["Enfriamiento",c.ow_extra_spawn_cooldown+" pasos"],
@@ -671,6 +680,14 @@ class Studio{
   const edit=node.getAttribute("data-edit");
   if(edit){this.scope="species:"+edit.toLowerCase();this.cfg[this.scope]??={};this.section="spawns";this.render();return;}
   const action=node.getAttribute("data-action");
+  if(action==="shiny-test-toggle"){
+   this.scope="global";
+   this.cfg.global.debug_force_shiny=
+     this.cfg.global.debug_force_shiny==="1"?"0":"1";
+   this.message="Guardando ajuste shiny en config.ini...";
+   this.save();
+   return;
+  }
   if(action==="save"){this.save();return;}
   if(action==="focus"){this.root.classList.toggle("bf-focus");this.render();return;}
   if(action==="reload"){if(this.dirty()&&!this.confirmReload){this.confirmReload=true;this.message="Pulsa Recargar otra vez para descartar cambios.";this.render();return;}this.confirmReload=false;this.load();return;}
