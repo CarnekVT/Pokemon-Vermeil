@@ -341,3 +341,33 @@ con el juego ejecutado. Validar la nueva versión en mkxp con
 Visual 2.5D HD, Turbo, BAS/BSS, guardados, transferencias y mando.
 
 Consultar [ROADMAP.md](ROADMAP.md) para seguimiento pendiente.
+
+
+## Gamefeel — notificaciones, interacción y alerta máxima
+
+- Las notificaciones ahora admiten **1 a 3 avisos simultáneos** desde el lado
+  izquierdo. Cada uno tiene entrada, permanencia y salida independientes.
+  El cuarto aviso se mantiene en cola hasta que haya hueco. Ajustable con
+  `feedback_stack_count` (por defecto `3`).
+- Interactuar normalmente (botón de acción del mapa) con un Pokémon **generado
+  por encuentros de hierba/cueva** inicia el combate salvaje tradicional.
+  Para eventos OWCAP colocados a mano se puede emplear en la página del evento:
+  `BifrostCapture.interact_battle($game_map.events[ID])`, sustituyendo ID
+  por el ID numérico del propio evento.
+- La presión por fallos activa un estado de **alerta máxima irreversible por
+  mero paso del tiempo**: las Poké Balls no se pueden lanzar contra ese objetivo.
+  El indicador sobre el Pokémon y la retícula muestran el bloqueo.
+  El combate tradicional sigue disponible; capturar/derrotar retira el encuentro.
+- Mientras se apunta, `R` alterna temporalmente al modo **cebo/baya** (tecla
+  personalizable `keyboard_bait_key`). `S` selecciona entre las bayas presentes
+  en la mochila y **Miel** (`HONEY`, si existe en la base de datos). La acción
+  habitual de lanzamiento arroja el alimento al objetivo, consume una unidad
+  y, si conecta, elimina su alerta máxima y restaura la captura directa.
+  `R` vuelve al modo anterior. `E` sigue cambiando exclusivamente Ball/Equipo.
+- El modo cebo/baya no concede capturas gratis: exige conservar o conseguir
+  consumibles. La alerta máxima NO se quita automáticamente al alejarse,
+  cerrar el menú o esperar. Las opciones también están disponibles desde
+  Maker Studio y el menú de reglas.
+- Los tests de integración comprueban presión persistente, consumo de bayas,
+  agrupación de notificaciones, anticipación de miedosos y contraataques.
+
