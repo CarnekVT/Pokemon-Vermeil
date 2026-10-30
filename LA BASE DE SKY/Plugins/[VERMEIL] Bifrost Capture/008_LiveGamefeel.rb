@@ -313,6 +313,7 @@ module BifrostCapture
           :shared_bitmaps=>[trail_bmp],
           :event=>event,:item=>item,:mode=>mode,:config=>cfg,
           :back=>BifrostCapture.behind?($game_player.x,$game_player.y,event),
+          :origin=>[$game_player.x,$game_player.y],
           :roll=>roll,:miss=>miss,
           :frame=>0,:frames=>cfg["throw_frames"].to_i.clamp(8,48),
           :start=>[x+w*0.72,y+h*0.50],:ground=>y+h,
@@ -406,7 +407,7 @@ module BifrostCapture
         @flight = nil
         release_resources(a)
         BifrostCapture.resolve_throw(event,a[:mode],a[:item],
-                                      a[:config],a[:back],a[:roll])
+                                      a[:config],a[:back],a[:roll],a[:origin])
         # A Pokémon battle is launched only after UI and animation are gone.
         if a[:mode] == :battle
           BifrostCapture::LiveAim.close if BifrostCapture::LiveAim.active?
