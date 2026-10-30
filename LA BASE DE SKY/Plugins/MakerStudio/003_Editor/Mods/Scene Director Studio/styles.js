@@ -12,8 +12,11 @@ export const STYLES = `
 
 /* v0.4 · BAS/BSS-style document workspace (not browser/OS fullscreen) */
 body.sd-fullscreen-lock{overflow:hidden!important;overscroll-behavior:none!important}
-.sd-shell{position:relative}.sd-shell.sd-fullscreen-active{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-height:none!important;max-width:none!important;z-index:2147483000!important;margin:0!important;border:0!important;border-radius:0!important;background:var(--bg-primary,#11131a)}
+.sd-shell{position:relative}.sd-shell.sd-fullscreen-active{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-height:none!important;max-width:none!important;z-index:5000!important;margin:0!important;border:0!important;border-radius:0!important;background:var(--bg-primary,#11131a)}
 @supports(height:100dvh){.sd-shell.sd-fullscreen-active{height:100dvh!important}}
+/* The MakerStudio dialog portal lives outside the detached fullscreen root.
+   Yield stacking priority whenever a host-owned picker/dialog is open. */
+.sd-shell.sd-fullscreen-active.sd-native-dialog-active{z-index:1!important}
 .sd-shell.sd-fullscreen-active .sd-root{height:100%!important;min-width:0!important}
 .sd-shell.sd-fullscreen-active .sd-library{height:100%!important}
 .sd-fullscreen-button[aria-pressed="true"]{border-color:var(--accent,#7d85ff)!important;background:rgba(111,118,232,.2)!important}
