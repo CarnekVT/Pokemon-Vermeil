@@ -103,7 +103,7 @@ module BifrostCapture
     event.instance_variable_set(:@bifrost_chase_state,state)
     event.instance_variable_set(:@bifrost_mood_state,:alert)
     event.instance_variable_set(:@move_type,0)
-    event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(4,6)
+    event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(5,6)
     event.turn_toward_player if event.respond_to?(:turn_toward_player)
     @chasing ||= {}
     @chasing[event.object_id] = event
@@ -196,7 +196,7 @@ module BifrostCapture
         state[:charge_steps] -= 1
         if state[:charge_steps] <= 0
           state[:phase] = :chase
-          event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(4,6)
+          event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(5,6)
           event.instance_variable_set(:@bifrost_mood_state,:chase)
         end
       end

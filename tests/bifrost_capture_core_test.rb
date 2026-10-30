@@ -66,7 +66,7 @@ class BifrostCoreTest < Minitest::Test
     assert_equal "100",cfg["hud_scale"]
     assert_equal "1",cfg["temperament_indicators"]
     assert_equal "3",cfg["aggressive_lunge_distance"]
-    assert_equal "4",cfg["aggressive_chase_speed"]
+    assert_equal "5",cfg["aggressive_chase_speed"]
     assert_equal "5",cfg["aggressive_lunge_speed"]
     assert_equal "0",cfg["hud_offset_x"]
     assert_equal "0",cfg["hud_offset_y"]

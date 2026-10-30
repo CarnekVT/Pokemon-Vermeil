@@ -135,8 +135,10 @@ Interacción` y `Lanzamiento`.
 
 **Persecución:** un agresivo prepara la acción, hace una embestida
 breve a velocidad 5 (configurable de 4 a 6) y mantiene una persecución
-activa a velocidad 4–6. Durante la embestida no se introduce una pausa
-entre casillas. Ya no usa velocidad de paseo 3 como predeterminada.
+activa a velocidad 5–6, con pausas cortas de 3 fotogramas por defecto
+entre pasos. Durante la embestida no se introduce ninguna pausa entre
+casillas. Los valores anteriores de velocidad de paseo se elevan
+automáticamente al mínimo de persecución 5.
 
 ## Gamefeel 1.1: riesgo, fauna expresiva y HUD personalizable
 
