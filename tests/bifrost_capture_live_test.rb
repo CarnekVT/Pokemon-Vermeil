@@ -47,8 +47,9 @@ module BifrostCapture
       {"access_mode"=>"always","control_mode"=>"hold","aim_chain"=>"0",
        "aim_mouse"=>"0","capture_enabled"=>"1","battle_enabled"=>"1",
        "hotkey"=>"jumpup","ball_key"=>"jumpdown",
-       "mode_key"=>"aux2","target_key"=>"none",
-       "contextual_mode_toggle"=>"1","mouse_wheel_select"=>"1",
+       "mode_key"=>"none","target_key"=>"none",
+       "contextual_mode_toggle"=>"0","mode_double_tap_frames"=>"16",
+       "mouse_wheel_select"=>"1",
        "mouse_right_mode"=>"1","remember_selection"=>"1",
        "line_of_sight"=>"0"}.merge(@test_options || {})
     end
