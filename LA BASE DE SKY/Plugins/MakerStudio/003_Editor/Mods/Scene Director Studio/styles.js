@@ -61,6 +61,8 @@ body.sd-fullscreen-lock{overflow:hidden!important;overscroll-behavior:none!impor
 .sd-use-overlay{position:absolute;inset:0;z-index:1020;display:flex;align-items:center;justify-content:center;background:rgba(5,8,16,.87);padding:16px}
 .sd-use-panel{width:min(760px,100%);max-height:94%;overflow:auto;border:1px solid var(--border,#505770);border-radius:12px;padding:20px;background:var(--bg-secondary,#202635);box-shadow:0 24px 65px rgba(0,0,0,.55)}
 .sd-use-panel>.sd-dialog-stack{font-size:12px}
+.sd-export-code{height:min(52vh,450px);min-height:220px;max-height:60vh;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;resize:vertical}
+.sd-use-panel .sd-inline{flex-wrap:wrap}
 .sd-use-panel code{user-select:text}
 .sd-use-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .sd-use-top h2{font-size:17px;margin:0}
