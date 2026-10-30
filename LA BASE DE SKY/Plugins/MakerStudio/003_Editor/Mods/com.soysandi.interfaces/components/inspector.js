@@ -24,6 +24,7 @@ export class Inspector {
     this.op = opciones;              // {alCambiar, avisar, listaInterfaces}
     this.diseno = null;
     this.seleccion = null;
+    this._panelMode = "pantalla";
 
     this.cuerpo = h("div", { className: "ui-inspector" });
     this.el = h("div", { className: "ui-panel-der" },
@@ -33,7 +34,10 @@ export class Inspector {
   }
 
   fijarDiseno(d) { this.diseno = d; this.refrescar(); }
-  fijarSeleccion(id) { this.seleccion = id; this.refrescar(); }
+  fijarSeleccion(id) {
+    if(this.seleccion!==id)this._panelMode=id?"diseno":"pantalla";
+    this.seleccion=id;this.refrescar();
+  }
 
   elegido() {
     if (!this.diseno || !this.seleccion) return null;
@@ -58,34 +62,88 @@ export class Inspector {
     this.op.alCambiar?.();
   }
 
+  // Navegación contextual: no se eliminan controles, simplemente se muestran
+  // por su tarea (estilo BAS/BSS) en lugar de apilar más de 25 campos seguidos.
+  pintarPestanas(opciones) {
+    const barra = h("div", { className: "ui-inspector-tabs", role: "tablist" });
+    for (const [id, nombre] of opciones) {
+      const boton = h("button", {
+        type: "button",
+        className: "ui-inspector-tab" + (this._panelMode === id ? " activo" : ""),
+        textContent: nombre,
+        title: "Mostrar " + nombre.toLowerCase(),
+        onClick: () => {
+          if (id === this._panelMode) return;
+          this._panelMode = id;
+          this.refrescar();
+        }
+      });
+      boton.setAttribute("role","tab");
+      boton.setAttribute("aria-selected",String(this._panelMode === id));
+      barra.appendChild(boton);
+    }
+    this.cuerpo.appendChild(barra);
+  }
+
   refrescar() {
     this.cuerpo.innerHTML = "";
     const el = this.elegido();
     if (!el) { this.pintarSinSeleccion(); return; }
-
-    this.pintarGenerales(el);
-    this.pintarPosicion(el);
-    this.pintarPorTipo(el);
-    this.pintarRepeticion(el);
-    this.pintarHueco(el);
-    this.pintarCondicion(el);
-    this.pintarAspecto(el);
-    this.pintarEntrada(el);
+    if (!["diseno","logica","animacion"].includes(this._panelMode)) this._panelMode="diseno";
+    const cabecera=h("div",{className:"ui-inspector-context"},
+      h("strong",{textContent:el.id}),
+      h("button",{
+        type:"button",className:"ui-inspector-back",
+        textContent:"← Pantalla",title:"Volver a editar las opciones de la pantalla",
+        onClick:()=>this.op.alDeseleccionar?.()
+      })
+    );
+    this.cuerpo.appendChild(cabecera);
+    this.pintarPestanas([
+      ["diseno","Diseño"],["logica","Lógica"],["animacion","Animación"]
+    ]);
+    if(this._panelMode==="diseno"){
+      this.pintarGenerales(el);
+      this.pintarPosicion(el);
+      this.pintarPorTipo(el);
+      this.pintarAspecto(el);
+    } else if(this._panelMode==="logica"){
+      this.cuerpo.appendChild(h("div",{className:"ui-inspector-note",
+        textContent:"Controla repeticiones, colocación, visibilidad y disponibilidad de este elemento."}));
+      this.pintarRepeticion(el);
+      this.pintarHueco(el);
+      this.pintarCondicion(el);
+    } else {
+      this.cuerpo.appendChild(h("div",{className:"ui-inspector-note",
+        textContent:"Configura la aparición y edita fotogramas clave desde la línea de tiempo."}));
+      this.pintarEntrada(el);
+      this.cuerpo.appendChild(h("button",{className:"ui-btn ui-inspector-open-timeline",
+        textContent:"↗ Mostrar línea de tiempo",
+        onClick:()=>this.op.abrirAnimaciones?.()}));
+    }
   }
 
   pintarSinSeleccion() {
-    this.pintarPantalla();
-    this.pintarRepeticiones();
-    this.pintarHuecos();
-    this.pintarAperturas();
-    this.cuerpo.appendChild(separador());
-    this.cuerpo.appendChild(h("div", { className: "ui-ayuda" },
-      h("p", { textContent: "Pulsa un elemento en el lienzo o en la lista de capas para ver sus propiedades." }),
-      // Las tres de abajo se hacen desde el elemento, no desde aqui, y por eso se
-      // dice DONDE estan: son justo las que no se encontraban.
-      h("p", { textContent: "Pincha un boton y abajo del todo tienes: \"Mostrar solo si\" (y ahi, \"Añadir otra condicion\" para pedir varias a la vez), \"Se puede pulsar si\" para que salga apagado y no se pueda usar, y \"Se coloca en\" para que los desbloqueados se pongan en orden sin dejar huecos." }),
-      h("p", { textContent: "Atajos: flechas para mover 1 pixel, Shift+flechas para saltar de rejilla, Alt mientras arrastras para no imantar, Supr para borrar, Ctrl+D para duplicar. Ctrl+rueda amplia hacia donde apuntas, y con el boton central o con espacio se arrastra el lienzo." })
-    ));
+    if(!["pantalla","aperturas","listas"].includes(this._panelMode))this._panelMode="pantalla";
+    this.cuerpo.appendChild(h("div",{className:"ui-inspector-context"},
+      h("strong",{textContent:"Configuración de la pantalla"})));
+    this.pintarPestanas([
+      ["pantalla","General"],["aperturas","Apertura"],["listas","Listas"]
+    ]);
+    if(this._panelMode==="pantalla"){
+      this.pintarPantalla();
+      this.cuerpo.appendChild(h("div",{className:"ui-inspector-note",
+        textContent:"Selecciona una capa o haz clic en un objeto del lienzo para editarlo."}));
+    }else if(this._panelMode==="aperturas"){
+      this.cuerpo.appendChild(h("div",{className:"ui-inspector-note",
+        textContent:"Elige cómo se abre esta interfaz en el juego, desde eventos, teclas o menú."}));
+      this.pintarAperturas();
+    }else{
+      this.cuerpo.appendChild(h("div",{className:"ui-inspector-note",
+        textContent:"Configura grupos repetidos y huecos dinámicos para listas automáticas."}));
+      this.pintarRepeticiones();
+      this.pintarHuecos();
+    }
   }
 
   // Propiedades de la pantalla entera, cuando no hay nada elegido.
