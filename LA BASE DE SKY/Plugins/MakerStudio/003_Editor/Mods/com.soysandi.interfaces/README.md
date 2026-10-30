@@ -311,3 +311,34 @@ El bloque `lienzo` tambien guarda `scale_mode`, `pixel_perfect`, `integer_scalin
 y `safe_area`. `safe_area` es solo una guia del editor; no altera posiciones.
 Tambien se puede bloquear la proporcion al escribir una resolucion personalizada y usar
 **Encajar** para que el canvas grande entre en el espacio disponible sin cambiar sus pixeles logicos.
+
+## Espacio de trabajo 2.1.0 — conservación total de funciones
+
+Esta actualización mejora **el editor original** sin reemplazarlo. Conserva todas
+las capacidades de 2.0.1 y el formato de datos UI/<nombre>.json, leído por el
+plugin Ruby Interfaces. No requiere migración ni recompilar al editar un diseño.
+
+### Organización
+
+- **Archivo:** Nuevo, Duplicar y Borrar; Mapa de aperturas sigue en Herramientas.
+- **Añadir elemento:** paleta buscable con los ocho tipos originales.
+- **Fondo completo:** usa la resolución lógica actual, no un tamaño fijo.
+- **Capas:** búsqueda por ID, tipo y contenido; orden y bloqueo originales intactos.
+- **Capas / Inspector / Animaciones:** visibilidad configurable y laterales redimensionables.
+- **Lienzo amplio:** expande la zona central dentro del diálogo, sin bloquear modales.
+- **Copiar llamada:** copia pbInterfaz("nombre") para eventos; ofrece respaldo manual.
+- **Encajar:** ajusta el zoom de vista sin alterar la resolución lógica.
+- Barra de estado: diseño, selección, elementos y cambios pendientes.
+
+### Atajos nuevos
+
+- Ctrl+K: abrir paleta. F6: lienzo amplio. F7: pistas de animación.
+- Se mantienen Ctrl+S, Ctrl+D, Ctrl+Z, Ctrl+Shift+Z, teclado, grupo, zoom,
+  paneo, arrastre, giro y los controles de la línea de tiempo.
+- Los atajos del editor dejan de capturar teclas de otros diálogos.
+
+### Compatibilidad
+
+La edición y el runtime siguen utilizando el esquema original de SoySandi.
+La previsualización visual y los diálogos necesitan una comprobación interactiva
+en Maker Studio. No se afirma que esta comprobación ya haya ocurrido.
