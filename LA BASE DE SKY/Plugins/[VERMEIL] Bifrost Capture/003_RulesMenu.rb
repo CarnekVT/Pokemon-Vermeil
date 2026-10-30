@@ -21,7 +21,7 @@ module BifrostCapture
       keys = RULE_CHOICES.keys
       labels = keys.map do |key|
         text, _values = RULE_CHOICES[key]
-        _INTL("{1}: {2}",text,cfg[key])
+        _INTL("{1}: {2}".dup,text,cfg[key])
       end
       labels << _INTL("Restaurar configuración del proyecto")
       labels << _INTL("Salir")
