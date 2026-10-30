@@ -59,9 +59,46 @@ module BifrostCapture
     valid_target?(event) && !removed?(event)
   end
 
+  # Non-modal storage. Avoid pbAddPokemon's blocking text boxes during capture.
+  # Fallback retains compatibility with games using a custom storage pipeline.
+  def self.store_captured_pokemon(pokemon)
+    if $player && $player.respond_to?(:party_full?) &&
+       $player.respond_to?(:party)
+      if $player.party_full?
+        if defined?($PokemonStorage) && $PokemonStorage &&
+           $PokemonStorage.respond_to?(:pbStoreCaught)
+          index = $PokemonStorage.pbStoreCaught(pokemon)
+          return [false,nil] if !index || index < 0
+          box = begin $PokemonStorage[index].name rescue _INTL("una caja") end
+          location = _INTL("Enviado a {1}", box)
+        else
+          return [false,nil]
+        end
+      else
+        $player.party << pokemon
+        location = _INTL("Añadido al equipo")
+      end
+      if $player.respond_to?(:pokedex) && $player.pokedex
+        $player.pokedex.register(pokemon) if $player.pokedex.respond_to?(:register)
+        $player.pokedex.set_owned(pokemon.species) if
+          $player.pokedex.respond_to?(:set_owned)
+      end
+      return [true,location]
+    end
+    # Test harness and projects without the standard storage interface.
+    return [!!pbAddPokemon(pokemon),_INTL("Captura registrada")]
+  end
+
+  def self.capture_result(kind,species=nil,detail=nil,cfg=nil)
+    if defined?(BifrostCapture::Feedback)
+      BifrostCapture::Feedback.publish(kind,species,detail,cfg)
+    end
+  end
+
   def self.resolve_throw(event,mode,payload,cfg,back_at_release=nil)
     if !event || !eligible_event?(event)
       notice(_INTL("No hay un Pokémon salvaje capturable en la trayectoria."))
+      capture_result(:blocked,nil,_INTL("Acércate a un Pokémon visible."),cfg)
       return false
     end
     spec = event_spec(event)
@@ -70,8 +107,10 @@ module BifrostCapture
     blocked = local["line_of_sight"] == "1" &&
               !line_clear?($game_player.x,$game_player.y,event.x,event.y)
     if !geo[:in_range] || blocked
-      notice(blocked ? _INTL("Hay un obstáculo entre ambos.") :
-             _INTL("El Pokémon está fuera del alcance."))
+      reason = blocked ? _INTL("Trayectoria bloqueada") :
+              _INTL("Fuera de alcance")
+      notice(reason)
+      capture_result(:blocked,spec[0],reason,local)
       return false
     end
     if mode == :battle
@@ -81,6 +120,7 @@ module BifrostCapture
     limit = local["attempt_limit"].to_i
     if limit > 0 && attempts(event) >= limit
       notice(_INTL("Este Pokémon ya no acepta más lanzamientos directos."))
+      capture_result(:blocked,spec[0],_INTL("Resiste la captura directa"),local)
       return false
     end
     unless $bag.quantity(payload).to_i > 0
@@ -91,6 +131,7 @@ module BifrostCapture
     if !hit
       $bag.remove(payload,1) if local["consume_on_miss"] == "1"
       notice(_INTL("¡El lanzamiento se desvió!"))
+      capture_result(:miss,spec[0],_INTL("La Ball no acertó"),local)
       react(event,local,:miss) if local["alert_on_miss"] == "1"
       return false
     end
@@ -103,20 +144,23 @@ module BifrostCapture
     critical = rand < crit_rate.to_f/100.0
     probability = catch_chance(spec[0],payload,geo[:front],behind,critical,local)
     caught = rand < probability
-    pkmn = nil
+    destination = nil
     if caught
       pkmn = pbGenerateWildPokemon(spec[0],spec[1])
       pkmn.form = spec[2] if spec[2] > 0
       pkmn.poke_ball = payload if pkmn.respond_to?(:poke_ball=)
-      caught = !!pbAddPokemon(pkmn)
+      caught,destination = store_captured_pokemon(pkmn)
     end
     animate_catch(event,payload,caught,critical,local) if respond_to?(:animate_catch)
     if caught
-      notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Pokémon capturado!"))
       remove_event(event)
+      notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
+      capture_result(critical ? :critical : :caught,
+                     spec[0],destination,local)
       return true
     end
     notice(_INTL("¡El Pokémon se liberó!"))
+    capture_result(:breakout,spec[0],_INTL("¡Sigue libre!"),local)
     react(event,local,:breakout)
     false
   end
