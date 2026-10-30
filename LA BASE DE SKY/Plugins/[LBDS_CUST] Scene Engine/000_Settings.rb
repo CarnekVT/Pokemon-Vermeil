@@ -35,7 +35,7 @@ module SceneEngine
     SPEED_NORMAL = 1.5
     SPEED_SLOW = 0.7
     SPEED_VERY_SLOW = 0.15
-    SPEED_CRAWL = 0.16   # Solo revelación cinematográfica deliberada
+    SPEED_CRAWL = 0.20   # Solo revelación cinematográfica deliberada
 
     FADE_DEFAULT = 20
     LAYER_BG = 100
