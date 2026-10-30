@@ -10,13 +10,9 @@ module BifrostCapture
         !!@session
       end
 
-      def binding(cfg,field,fallback)
-        return nil if cfg[field] == "none"
-        if BifrostCapture.respond_to?(:input_action)
-          result = BifrostCapture.input_action(cfg[field])
-          return result if result
-        end
-        Input.const_defined?(fallback) ? Input.const_get(fallback) : nil
+      def binding(cfg,field,_fallback=nil)
+        return nil unless BifrostCapture.respond_to?(:capture_action)
+        BifrostCapture.capture_action(cfg,field)
       end
 
       def debug_reserved?(cfg)
@@ -47,7 +43,8 @@ module BifrostCapture
           :mode=>(can_ball ? :ball : :battle),
           :x=>point[0].to_f, :y=>point[1].to_f,
           :target=>target, :mouse_last=>nil, :mouse_active=>false,
-          :held=>!!(key && Input.press?(key)), :frames=>0
+          :held=>!!(key && Input.press?(key)), :frames=>0,
+          :ball_held=>false, :ball_frames=>0, :ball_long_done=>false
         }
         @hud = BifrostCapture::ThrowHUD.new
         BifrostCapture::Audio.play(:aim,cfg) if defined?(BifrostCapture::Audio)
@@ -71,6 +68,55 @@ module BifrostCapture
                         $game_temp.player_transferring ||
                         $game_temp.transition_processing
         true
+      end
+
+      def toggle_mode(s,cfg)
+        candidate = s[:mode] == :ball ? :battle : :ball
+        enabled = candidate == :battle ?
+          (cfg["battle_enabled"] == "1" && !s[:party].empty?) :
+          (cfg["capture_enabled"] == "1" && !s[:balls].empty?)
+        if enabled
+          s[:mode] = candidate
+          BifrostCapture::Audio.play(:switch,cfg) if defined?(BifrostCapture::Audio)
+          return true
+        end
+        false
+      end
+
+      def cycle_equipped(s,cfg)
+        if s[:mode] == :ball && s[:balls].length > 1
+          s[:ball_index] = (s[:ball_index]+1) % s[:balls].length
+        elsif s[:mode] == :battle && s[:party].length > 1
+          s[:party_index] = (s[:party_index]+1) % s[:party].length
+        else
+          return false
+        end
+        BifrostCapture::Audio.play(:switch,cfg) if defined?(BifrostCapture::Audio)
+        true
+      end
+
+      # A short S press cycles the equipped item; holding S switches between
+      # Balls and Pokémon. This uses no third key and preserves D's Ready Menu.
+      def update_equipped_input(s,cfg,key)
+        return unless key
+        if Input.press?(key)
+          unless s[:ball_held]
+            s[:ball_held] = true
+            s[:ball_frames] = 0
+            s[:ball_long_done] = false
+          end
+          s[:ball_frames] += 1
+          threshold = cfg["ball_hold_mode_frames"].to_i
+          if threshold > 0 && s[:ball_frames] >= threshold &&
+             !s[:ball_long_done]
+            s[:ball_long_done] = toggle_mode(s,cfg)
+          end
+        elsif s[:ball_held]
+          cycle_equipped(s,cfg) unless s[:ball_long_done]
+          s[:ball_held] = false
+          s[:ball_frames] = 0
+          s[:ball_long_done] = false
+        end
       end
 
       def cycle_target
@@ -135,32 +181,20 @@ module BifrostCapture
           close
           return
         end
-        mode_key = binding(cfg,"mode_key",:SPECIAL)
-        if mode_key && Input.trigger?(mode_key)
-          candidate = s[:mode] == :ball ? :battle : :ball
-          enabled = candidate == :battle ?
-            (cfg["battle_enabled"] == "1" && !s[:party].empty?) :
-            (cfg["capture_enabled"] == "1" && !s[:balls].empty?)
-          s[:mode] = candidate if enabled
-        end
-        ball_key = binding(cfg,"ball_key",:JUMPDOWN)
-        target_key = binding(cfg,"target_key",:ACTION)
-        if ball_key && Input.trigger?(ball_key)
-          BifrostCapture::Audio.play(:switch,cfg) if defined?(BifrostCapture::Audio)
-          if s[:mode] == :ball && !s[:balls].empty?
-            s[:ball_index] = (s[:ball_index]+1)%s[:balls].length
-          elsif s[:mode] == :battle && !s[:party].empty?
-            s[:party_index] = (s[:party_index]+1)%s[:party].length
-          end
-        end
-        if target_key && target_key != ball_key && Input.trigger?(target_key)
+        mode_key = binding(cfg,"mode_key")
+        ball_key = binding(cfg,"ball_key")
+        target_key = binding(cfg,"target_key")
+        toggle_mode(s,cfg) if mode_key && Input.trigger?(mode_key)
+        update_equipped_input(s,cfg,ball_key)
+        if target_key && target_key != ball_key &&
+           target_key != mode_key && Input.trigger?(target_key)
           cycle_target
           BifrostCapture::Audio.play(:lock,cfg) if defined?(BifrostCapture::Audio)
         end
 
         # Movement arrows remain owned by Game_Player. They are NEVER
         # consumed by the aim interface. Keyboard switches locked targets
-        # with ACTION, while the mouse can free-aim independently.
+        # via an optional unique input, while mouse free-aim remains available.
         if cfg["aim_mouse"] == "1" && defined?(Mouse)
           mouse = Mouse.getMousePos
           if mouse
