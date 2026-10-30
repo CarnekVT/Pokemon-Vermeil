@@ -67,6 +67,11 @@ class FakeMap
   def register_event(event); event.active=true; end
   def unregister_event(event); event.active=false; end
 end
+class FakePlayer
+  attr_reader :party, :pokedex
+  def initialize; @party=[]; @pokedex=nil; end
+  def party_full?; false; end
+end
 class FakeBag
   attr_reader :used
   def initialize; @used=0; end
@@ -112,6 +117,7 @@ end
 def _INTL(s,*args); s; end
 class BifrostCaptureIntegrationTest < Minitest::Test
   def setup
+    $player=nil
     $scene=Object.new
     $game_map=FakeMap.new
     $game_player=Struct.new(:x,:y,:direction,:screen_x,:screen_y).
@@ -152,6 +158,19 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert_equal :PIKACHU,BifrostCapture::Feedback.last_result[:species]
     assert_empty $game_map.events
   end
+  def test_success_adds_directly_to_team_without_blocking_message
+    $player=FakePlayer.new
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,6)
+    assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
+    assert_equal 1,$player.party.length
+    assert_equal :PIKACHU,$player.party[0].species
+    assert_equal :caught,BifrostCapture::Feedback.last_result[:kind]
+    assert_equal "Añadido al equipo",BifrostCapture::Feedback.last_result[:detail]
+  end
+
   def test_release_has_explicit_distinct_feedback
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
