@@ -17,6 +17,34 @@ module BifrostCapture
     out
   end
 
+  # Natural berries, plus Honey as an overworld lure; no invented items.
+  def self.bait_item?(item)
+    data = GameData::Item.try_get(item)
+    return false unless data
+    return true if data.respond_to?(:is_berry?) && data.is_berry?
+    item.to_s.upcase == "HONEY"
+  end
+
+  def self.bait_choices
+    return [] unless $bag
+    choices = []
+    $bag.pockets.each do |pocket|
+      pocket.each do |entry|
+        next unless entry && entry[1].to_i > 0
+        choices << [entry[0],entry[1]] if bait_item?(entry[0])
+      end
+    end
+    choices
+  end
+
+  def self.resolve_bait(event,item,cfg)
+    return false unless eligible_event?(event)
+    spec = event_spec(event)
+    local = options($game_map.map_id,spec[0],event.id)
+    return false unless defined?(Pressure)
+    Pressure.calm_with_bait(event,item,local)
+  end
+
   def self.aim_allowed?
     cfg = options
     return false unless cfg["enabled"] == "1"
