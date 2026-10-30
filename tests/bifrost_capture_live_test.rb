@@ -128,7 +128,7 @@ class BifrostLiveTest < Minitest::Test
     assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
   end
 
-  def test_double_tap_s_switches_mode_and_w_is_reserved_for_debug
+  def test_short_s_hold_switches_mode_without_stealing_w_debug
     able_mon=Object.new
     def able_mon.able?; true; end
     $player.party=[able_mon]
@@ -137,18 +137,30 @@ class BifrostLiveTest < Minitest::Test
     Input.configure({Input::JUMPUP=>true},{Input::AUX2=>true})
     BifrostCapture::LiveAim.update
     assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
-    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
-    BifrostCapture::LiveAim.update
-    Input.configure({Input::JUMPUP=>true},{})
-    BifrostCapture::LiveAim.update
-    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
-    BifrostCapture::LiveAim.update
+    12.times do |i|
+      Input.configure({Input::JUMPUP=>true,Input::JUMPDOWN=>true},
+        i == 0 ? {Input::JUMPDOWN=>true} : {})
+      BifrostCapture::LiveAim.update
+    end
     assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
     Input.configure({Input::JUMPUP=>true},{Input::SPECIAL=>true})
     BifrostCapture::LiveAim.update
     $scene.update_input
     assert_equal 1,$scene.map_input_count
     refute BifrostCapture::LiveAim.active?
+  end
+
+  def test_fast_repeated_s_taps_only_cycle_selection
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    4.times do
+      Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
+      BifrostCapture::LiveAim.update
+      Input.configure({Input::JUMPUP=>true},{})
+      BifrostCapture::LiveAim.update
+    end
+    assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
+    assert_equal 0,BifrostCapture::LiveAim.session[:ball_index]
   end
 
   def test_mouse_wheel_changes_ball_in_both_directions
@@ -195,12 +207,11 @@ class BifrostLiveTest < Minitest::Test
     $player.party=party
     Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
-    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
-    BifrostCapture::LiveAim.update
-    Input.configure({Input::JUMPUP=>true},{})
-    BifrostCapture::LiveAim.update
-    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
-    BifrostCapture::LiveAim.update
+    12.times do |i|
+      Input.configure({Input::JUMPUP=>true,Input::JUMPDOWN=>true},
+        i == 0 ? {Input::JUMPDOWN=>true} : {})
+      BifrostCapture::LiveAim.update
+    end
     assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
     Input.configure({Input::JUMPUP=>true},{})
     BifrostCapture::LiveAim.update
