@@ -97,7 +97,7 @@ module BifrostCapture
       @aim.x = x.to_i
       @aim.y = y.to_i
       @pulse = (@pulse + 1) % 48
-      zoom = status == :ready ? 1.0+Math.sin(@pulse*Math::PI/24)*0.035 : 1.0
+      zoom = [:ready,:backstrike].include?(status) ? 1.0+Math.sin(@pulse*Math::PI/24)*0.035 : 1.0
       @aim.zoom_x = @aim.zoom_y = zoom
       stamp = [status,mood]
       return if stamp == @last_status
@@ -105,6 +105,7 @@ module BifrostCapture
       bmp = @aim.bitmap
       bmp.clear
       color = status == :blocked ? Color.new(255,134,135) :
+              status == :backstrike ? Color.new(255,216,105) :
               status == :ready ? (TEMPERAMENT_COLORS[mood] ||
                                     TEMPERAMENT_COLORS[:neutral]) :
               Color.new(218,230,240)
