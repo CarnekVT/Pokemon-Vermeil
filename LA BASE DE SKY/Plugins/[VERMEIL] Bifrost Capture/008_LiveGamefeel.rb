@@ -76,7 +76,7 @@ module BifrostCapture
                elsif old_mode == "ball" && can_ball
                  :ball
                else
-                 can_ball ? :ball : :battle
+                 can_ball ? :ball : (can_battle ? :battle : :bait)
                end
         @session = {
           :map=>$game_map.map_id, :config=>cfg, :balls=>balls,
