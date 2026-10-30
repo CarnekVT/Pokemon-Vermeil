@@ -48,6 +48,11 @@ module BifrostCapture
       event.erase
     end
     notice(_INTL("¡El Pokémon escapó!"))
+    if defined?(BifrostCapture::Feedback)
+      species = event_spec(event)
+      BifrostCapture::Feedback.publish(:escape,
+        species && species[0],_INTL("Se alejó de la zona"))
+    end
   end
 
   def self.flee_tick(event,cfg)
@@ -107,6 +112,7 @@ module BifrostCapture
   end
 
   def self.update_behavior
+    return if @capture_busy
     return if !$game_map || !$game_player || !$player
     return if !defined?($scene) || !$scene.is_a?(Scene_Map)
     return if $game_temp.in_menu || $game_temp.in_battle ||
