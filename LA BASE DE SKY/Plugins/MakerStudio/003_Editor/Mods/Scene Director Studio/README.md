@@ -1,4 +1,4 @@
-# Scene Director Studio v0.4.0 — guía rápida
+# Scene Director Studio v0.4.1 — guía rápida
 
 Editor visual de escenas de Pokémon Vermeil para MakerStudio. Utiliza el mismo runtime de Scene Engine; no sustituye scripts Ruby ni reescribe el juego original.
 
@@ -52,3 +52,11 @@ El menú **Archivo → Ver Ruby generado** muestra el código equivalente, disti
 - El guardado conserva el formato `formatVersion=1`; **no** migra ni reestructura escenas existentes automáticamente.
 - La vista previa interpreta los comandos conocidos; el Ruby arbitrario importado puede contener lógica que no sea reproducible en Studio pero sí en el juego.
 - El modo pantalla completa y el flujo del portapapeles requieren una comprobación visual final dentro de MakerStudio. Si el acceso al portapapeles está bloqueado, la aplicación muestra el comando en un campo seleccionable para copiarlo manualmente.
+
+## v0.4.1 · Compatibilidad de ventanas emergentes en pantalla completa
+
+El workspace usa el mismo nivel base de BAS y BSS (`z-index: 5000`, en vez del anterior valor extremo). Mientras un diálogo nativo del editor está abierto (seleccionar archivos, imágenes, audio, importar Ruby, plantillas o introducir un nombre), Scene Director cede temporalmente su capa para mostrarlo por encima. Recupera el nivel normal al cerrarse y evita secuestrar las teclas del diálogo.
+
+Las notificaciones del Studio aparecen dentro del espacio ampliado para que no queden ocultas. El editor sigue siendo utilizable en pantalla normal y el fullscreen no necesita la Fullscreen API del navegador.
+
+**Validación:** sintaxis estática y prueba aislada del cambio de capa y restauración. Pendiente contrastar con una sesión real de MakerStudio.
