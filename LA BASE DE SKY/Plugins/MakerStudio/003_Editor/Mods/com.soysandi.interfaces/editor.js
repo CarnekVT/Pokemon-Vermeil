@@ -21,6 +21,7 @@ import { Capas } from "./components/capas.js";
 import { Inspector } from "./components/inspector.js";
 import { Tiempo } from "./components/tiempo.js";
 import { Resolucion } from "./components/resolucion.js";
+import { montarEspacio } from "./workspace.js";
 
 const CARPETA = "UI";
 // El nombre TAL CUAL aparece en el campo Name del meta.txt del plugin. Si se
@@ -210,6 +211,7 @@ export class EditorInterfaces {
 
     this.raiz = h("div", { className: "ui-raiz" }, this.barra, this.barraAnadir, this.resolucion.el, this.barraGrupo, this.cuerpo, this.tiempo.el);
     this.host.appendChild(this.raiz);
+    this.espacio = montarEspacio(this, M);
   }
 
   //---------------------------------------------------------------------------
@@ -410,6 +412,7 @@ export class EditorInterfaces {
     this.pintarAvisos();
     this.pintarGrupo();
     this.pintarElegidos();
+    this.espacio?.update();
   }
 
   //---------------------------------------------------------------------------
@@ -525,6 +528,7 @@ export class EditorInterfaces {
     this.inspector.fijarSeleccion(id);
     this.tiempo.fijarSeleccion(id);
     this.pintarGrupo();
+    this.espacio?.update();
   }
 
   alinear(como) {
@@ -631,8 +635,10 @@ export class EditorInterfaces {
     // En el centro, desplazado un poco por cada uno que ya haya, para que dos
     // elementos nuevos no queden uno tapando al otro.
     const n = this.diseno.elementos.length;
-    const x = Math.round(M.LIENZO_ANCHO / 2) - 60 + (n % 6) * 8;
-    const y = Math.round(M.LIENZO_ALTO / 2) - 20 + (n % 6) * 8;
+    const ancho = M.num(this.diseno.lienzo?.ancho, M.LIENZO_ANCHO);
+    const alto = M.num(this.diseno.lienzo?.alto, M.LIENZO_ALTO);
+    const x = Math.round(ancho / 2) - 60 + (n % 6) * 8;
+    const y = Math.round(alto / 2) - 20 + (n % 6) * 8;
     const el = M.elementoNuevo(tipo, id, x, y);
     const maxCapa = this.diseno.elementos.reduce((m, e) => Math.max(m, M.num(e.capa, 0)), 0);
     el.capa = maxCapa + 10;
@@ -650,6 +656,8 @@ export class EditorInterfaces {
     this.apuntarDeshacer();
     const id = M.idLibre(this.diseno, "fondo");
     const el = M.elementoNuevo("imagen", id, 0, 0);
+    el.ancho = M.num(this.diseno.lienzo?.ancho, M.LIENZO_ANCHO);
+    el.alto = M.num(this.diseno.lienzo?.alto, M.LIENZO_ALTO);
     // Por debajo de lo que ya hubiera, para que no tape nada.
     const minCapa = this.diseno.elementos.reduce((m, e) => Math.min(m, M.num(e.capa, 0)), 0);
     el.capa = minCapa - 10;
@@ -657,7 +665,7 @@ export class EditorInterfaces {
     this.marcarSucio();
     this.seleccion = id;
     this.refrescarTodo();
-    this.toast(`Elige la imagen en "Fichero". Tiene que medir ${M.LIENZO_ANCHO}x${M.LIENZO_ALTO} para cubrir la pantalla entera.`, "info");
+    this.toast(`Elige la imagen en "Fichero". El fondo ocupa ${el.ancho}×${el.alto} y puedes ajustarlo desde el Inspector.`, "info");
   }
 
   // Duplica todo el grupo, y las copias quedan marcadas: asi se puede duplicar
@@ -762,6 +770,7 @@ export class EditorInterfaces {
 
   pintarSucio() {
     this.etiquetaSucio.textContent = this.sucio ? "· sin guardar" : "";
+    this.espacio?.update();
   }
 
   pintarAvisos() {
@@ -861,11 +870,16 @@ export class EditorInterfaces {
     this._teclas = (e) => {
       if (!this.raiz.isConnected) return;
       const t = e.target;
-      // Si se esta escribiendo en un campo, el teclado es del campo.
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
-
+      // Los atajos son locales a este editor; no interceptar otros modales.
+      if (!this.raiz.contains(t) && !this.raiz.contains(document.activeElement)) return;
       const ctrl = e.ctrlKey || e.metaKey;
       if (ctrl && e.key.toLowerCase() === "s") { e.preventDefault(); this.guardar(); return; }
+      // La escritura tiene prioridad: preservar los atajos nativos de los campos.
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" ||
+                t.tagName === "SELECT" || t.isContentEditable)) return;
+      if (ctrl && e.key.toLowerCase() === "k") { e.preventDefault(); this.espacio?.openPalette(); return; }
+      if (e.key === "F6") { e.preventDefault(); this.espacio?.toggleFocus(); return; }
+      if (e.key === "F7") { e.preventDefault(); this.espacio?.toggleTimeline(); return; }
       if (ctrl && e.key.toLowerCase() === "d") { e.preventDefault(); this.duplicarElemento(); return; }
       if (ctrl && e.key.toLowerCase() === "z") { e.preventDefault(); e.shiftKey ? this.rehacer() : this.deshacer(); return; }
       if (ctrl && e.key.toLowerCase() === "y") { e.preventDefault(); this.rehacer(); return; }
@@ -886,6 +900,7 @@ export class EditorInterfaces {
   }
 
   destruir() {
+    this.espacio?.destroy();
     document.removeEventListener("keydown", this._teclas, true);
     this.tiempo.parar();
     this.lienzo.desconectar();
