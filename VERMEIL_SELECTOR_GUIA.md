@@ -289,3 +289,10 @@ Verificación estática: 5 archivos JS sin errores sintácticos; el importador
 mantiene 9 fases y 127 comandos, incluyendo `custom_name_input`,
 `treatment_input` y `show_centered_text` con `:crawl`.
 Prueba en mkxp-z aún pendiente.
+
+## Ajuste fino del selector de nombre (30/10/2026)
+
+- La Mujer Misteriosa pregunta: «Solen es el nombre de este cuerpo. Si quieres, podemos conservarlo.»
+- El retrato del menú de nombre baja 12 píxeles; el nombre, la línea guía, el texto de ayuda y el contador bajan 15 píxeles. Misma posición en runtime y preview.
+- La escritura cinematográfica «Despierta...» se ajusta de `SPEED_CRAWL = 0.16` a `0.20`, sin cambiar los otros ritmos. Studio usa también `crawl: 0.20` para preview y timeline.
+- Verificados cinco archivos JavaScript y la importación del guion (9 fases, 127 comandos). Sin reproducción ingame verificada.
