@@ -32,6 +32,7 @@ module BifrostCapture
     "ow_extra_spawn_chance"=>"0", "ow_extra_spawn_cooldown"=>"7",
     "spawn_allow_fishing"=>"0", "ow_form"=>"0", "ow_min_level"=>"0",
     "ow_max_level"=>"0", "ow_spawn_probability"=>"100",
+    "debug_force_shiny"=>"0",
     "range"=>"7", "width"=>"7", "optimal_range"=>"4", "alert_distance"=>"3",
     "hit_near"=>"100", "hit_far"=>"60", "capture_floor"=>"10",
     "back_multiplier"=>"175", "critical_front"=>"3", "critical_back"=>"35",
@@ -195,6 +196,26 @@ module BifrostCapture
     event.instance_variable_set(:@bifrost_capture_spec,
       [species.to_sym, [level.to_i,1].max,form.to_i])
     true
+  end
+
+  # Create exactly one Pokémon per OW event. This retains shininess, form,
+  # personality, IVs and other traits through both battle and direct capture.
+  def self.debug_force_shiny?(cfg = options)
+    defined?($DEBUG) && $DEBUG && cfg["debug_force_shiny"] == "1"
+  end
+
+  def self.ow_pokemon_for(event,cfg=nil)
+    spec = event_spec(event)
+    return nil unless spec
+    current = event.instance_variable_get(:@bifrost_wild_pokemon)
+    return current if current
+    cfg ||= options($game_map.map_id,spec[0],event.id)
+    pkmn = pbGenerateWildPokemon(spec[0],spec[1])
+    pkmn.form = spec[2] if spec[2] > 0 && pkmn.respond_to?(:form=)
+    pkmn.shiny = true if debug_force_shiny?(cfg) && pkmn.respond_to?(:shiny=)
+    event.instance_variable_set(:@bifrost_wild_pokemon,pkmn)
+    refresh_ow_shiny_sprite(event,pkmn) if respond_to?(:refresh_ow_shiny_sprite)
+    pkmn
   end
 
   def self.valid_target?(event)
