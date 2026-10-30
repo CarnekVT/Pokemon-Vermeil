@@ -169,9 +169,11 @@ module BifrostCapture
       remove_event(event)
       notice(critical ? _INTL("¡Captura crítica!") : _INTL("¡Capturado!"))
       capture_result(critical ? :critical : :caught,species,destination,cfg)
+      BifrostCapture::Audio.play(:caught,cfg) if defined?(BifrostCapture::Audio)
     else
       notice(_INTL("¡El Pokémon se liberó!"))
       capture_result(:breakout,species,_INTL("¡Sigue libre!"),cfg)
+      BifrostCapture::Audio.play(:breakout,cfg) if defined?(BifrostCapture::Audio)
       react(event,cfg,:breakout)
     end
   end
