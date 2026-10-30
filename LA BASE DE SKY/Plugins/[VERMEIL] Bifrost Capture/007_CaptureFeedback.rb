@@ -14,7 +14,9 @@ module BifrostCapture
       :backstrike=>[Color.new(85,66,30),Color.new(255,216,105)],
       :pressure=>[Color.new(92,51,36),Color.new(255,188,105)],
       :retreat=>[Color.new(79,50,50),Color.new(255,169,154)],
-      :party_hit=>[Color.new(103,51,53),Color.new(255,176,181)]
+      :party_hit=>[Color.new(103,51,53),Color.new(255,176,181)],
+      :max_alert=>[Color.new(142,41,41),Color.new(255,204,106)],
+      :calmed=>[Color.new(35,89,65),Color.new(156,247,190)]
     }.freeze
     TITLES = {
       :caught=>"¡ATRAPADO!", :critical=>"¡CAPTURA CRÍTICA!",
@@ -22,7 +24,8 @@ module BifrostCapture
       :blocked=>"NO SE PUEDE LANZAR", :escape=>"¡ESCAPÓ!",
       :counter=>"¡CONTRAATAQUE!", :backstrike=>"¡POR LA ESPALDA!",
       :pressure=>"¡POKÉMON ALERTADO!", :retreat=>"¡HUIDA ARRIESGADA!",
-      :party_hit=>"¡POKÉMON DAÑADO!"
+      :party_hit=>"¡POKÉMON DAÑADO!", :max_alert=>"¡ALERTA MÁXIMA!",
+      :calmed=>"¡POKÉMON TRANQUILO!"
     }.freeze
 
     class << self
