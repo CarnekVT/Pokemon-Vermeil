@@ -1,4 +1,4 @@
-# Bifröst Capture 0.9.1 — profundidad, menús y audio Z-A por defecto
+# Bifröst Capture 0.9.2 — audio real CC0 y prioridad Z-A
 
 **Pokémon Vermeil · Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -91,21 +91,24 @@ BifrostCapture.register_ow($game_map.events[17], :RAIKOU, 50, 0)
 
 `[OWDECOR]` excluye expresamente a los Pokémon decorativos.
 
-## Audio
+## Audio real incorporado (CC0)
 
-`audio_profile=za_like` es el **predeterminado**, mientras `pla_like` y otros
-perfiles siguen disponibles para reutilizar el sistema. Estos perfiles asignan **nombres
-de recursos opcionales** para 12 eventos: apuntar, cambiar Ball, cambiar
-modo, cambiar miembro del equipo, fijar objetivo, lanzar, impactar,
-sacudir, atrapar, liberarse, huir y alertar.
+El perfil `audio_profile=za_like` **continúa seleccionado por defecto**. Bifröst
+prioriza los 12 archivos personalizados `za_*.ogg/.wav/.mp3` que proporcione
+el autor; cuando no se dispone de ellos, reproduce 12 sonidos **reales**
+`real_*.wav` ya incluidos en `Audio/SE/Bifrost/`.
 
-Los recursos se colocan en `Audio/SE/Bifrost/`. Para que el perfil Z-A no
-quede silencioso, `009_Audio.rb` genera automáticamente **efectos WAV originales**
-en esa carpeta cuando faltan. Si no puede escribir allí, utiliza el SFX de
-Essentials correspondiente. No son grabaciones ni copias de efectos oficiales
-de Arceus, Z-A o Tetris 99.
-Ver [AUDIO_GUIDE.md](AUDIO_GUIDE.md) para nombres y referencias.
+Los archivos `real_*` proceden de **Kenney — Interface Sounds (CC0)**:
+no pertenecen a Pokémon Legends: Z-A ni son muestras oficiales. Se ha
+retirado la generación de tonos sintéticos. Los antiguos `za_*.wav`
+generados por versiones anteriores se ignoran si conservan su formato y
+duración original; es recomendable eliminarlos del disco local para
+evitar confusión. El fallback Essentials solo se utiliza si faltan
+también los archivos CC0.
 
+Ver [AUDIO_GUIDE.md](AUDIO_GUIDE.md) y
+[AUDIO_LICENSES.md](AUDIO_LICENSES.md) para la asignación de eventos,
+su procedencia, licencia y las instrucciones para sustituir archivos.
 
 ## Correcciones 0.9.1 de composición y menús
 

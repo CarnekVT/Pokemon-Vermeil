@@ -26,19 +26,27 @@ La selección sonora es **inspiración para diseño original**, no una instrucci
 | `sfx_flee` | Pokémon escapa | Movimiento corto y evasivo |
 | `sfx_alert` | Agresivo detecta | Aviso seco y urgente |
 
-## Predeterminado en Vermeil
+## Predeterminado en Vermeil: audio grabado real
 
-El perfil `za_like` se carga por defecto. Como alternativa a distribuir
-archivos comerciales extraídos, Bifröst crea una vez los doce SFX **originales**
-en `Audio/SE/Bifrost/za_*.wav` en el primer uso de cada evento. Son señales
-sintetizadas breves, no grabaciones de Pokémon Legends: Z-A. Si la carpeta
-es de solo lectura, se intenta reproducir el efecto de Essentials.
-Los archivos autorizados que añada el creador siguen pudiendo sustituir
-estas señales. Se recomienda revisar volumen y mezcla en el ejecutable.
+`audio_profile=za_like` sigue siendo la configuración por defecto.
+El motor da prioridad a los recursos `za_*.ogg/.wav/.mp3` que el autor
+haya colocado explícitamente en `Audio/SE/Bifrost`. Si faltan, se
+reproducen los 12 efectos reales `real_*.wav` incluidos en el proyecto,
+bajo licencia CC0. **No son sonidos del juego Pokémon Legends: Z-A**;
+son sustitutos de Kenney y no se deben promocionar como sonidos oficiales.
+
+La antigua generación de WAV sintéticos fue retirada. El motor
+reconoce e ignora sus WAV heredados por formato/duración. Para limpiar
+tu copia de desarrollo, elimina `Audio/SE/Bifrost/za_*.wav` únicamente
+si son los tonos generados por versiones previas, no archivos propios.
+
+Para audios legítimos de procedencia verificada, puedes reemplazar los
+`za_*` o configurar los `sfx_*` específicos. Consulta
+[AUDIO_LICENSES.md](AUDIO_LICENSES.md) para una matriz exhaustiva.
 
 ## Presets tipo Legends (sin audio incluido)
 
-`audio_profile=pla_like` busca efectos propios llamados `pla_aim.ogg`, `pla_switch.ogg`, `pla_mode.ogg`, `pla_party.ogg`, `pla_lock.ogg`, `pla_throw.ogg`, `pla_hit.ogg`, `pla_shake.ogg`, `pla_caught.ogg`, `pla_breakout.ogg`, `pla_flee.ogg` y `pla_alert.ogg`. Para `za_like` se cambia el prefijo por `za_`. Si no existen, se recurre a los SFX vanilla cuando haya uno asociado.
+`audio_profile=pla_like` busca efectos propios llamados `pla_aim.ogg`, `pla_switch.ogg`, `pla_mode.ogg`, `pla_party.ogg`, `pla_lock.ogg`, `pla_throw.ogg`, `pla_hit.ogg`, `pla_shake.ogg`, `pla_caught.ogg`, `pla_breakout.ogg`, `pla_flee.ogg` y `pla_alert.ogg`. Para `za_like` se cambia el prefijo por `za_`. Si no existen, el perfil ZA utiliza los 12 WAV reales CC0 instalados; PLA recurre a Essentials.
 
 Son **nombres de archivos configurables**, no archivos comerciales incluidos. El audio que quieras usar debe estar autorizado para su inclusión en el proyecto.
 
