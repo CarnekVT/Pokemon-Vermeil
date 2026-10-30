@@ -345,8 +345,8 @@ module BifrostCapture
         focus = s[:target]
         status = :free
         hint = BifrostCapture.take_notice
-        hint ||= _INTL("Preparando otra Poké Ball") if
-          @throw_cooldown.to_i > 0 && s[:mode] == :ball
+        hint ||= _INTL("Preparando el lanzamiento") if
+          @throw_cooldown.to_i > 0 && [:ball,:bait].include?(s[:mode])
         if focus
           spec = BifrostCapture.event_spec(focus)
           local = BifrostCapture.options($game_map.map_id,spec[0],focus.id)
@@ -456,7 +456,9 @@ module BifrostCapture
         remember_selection(s)
         if [:ball,:bait].include?(s[:mode]) && $bag.quantity(item).to_i <= 0
           BifrostCapture.capture_result(:blocked,spec[0],
-                                        _INTL("No quedan Poké Balls"),local)
+                                        _INTL(s[:mode] == :bait ?
+                                          "No quedan cebos o bayas" :
+                                          "No quedan Poké Balls"),local)
           return false
         end
         unless BifrostCapture::Motion.can_launch?(target,item,s[:mode],local)
