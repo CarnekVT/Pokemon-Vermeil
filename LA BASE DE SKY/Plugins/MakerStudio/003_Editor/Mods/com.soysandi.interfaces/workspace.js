@@ -272,6 +272,10 @@ export function montarEspacio(editor, M) {
     openPalette(){palette.d.open=true;search.focus();},
     toggleFocus(){toggle("focus");},
     toggleTimeline(){toggle("timeline");},
+    showTimeline(){
+      if(!state.timeline){state.timeline=true;drawState();
+        requestAnimationFrame(()=>{if(root.isConnected&&editor.diseno)editor.lienzo.encajar();});}
+    },
     destroy(){disposers.forEach(fn=>fn());closeMenus();}
   };
 }
