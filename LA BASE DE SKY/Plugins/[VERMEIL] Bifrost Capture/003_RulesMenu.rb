@@ -18,6 +18,8 @@ module BifrostCapture
     "hud_controls" => ["Ayudas de controles",%w[auto always off]],
     "throw_cooldown_frames" => ["Cooldown entre Balls (frames)",%w[0 8 12 17 24 36]],
     "escape_reaction_enabled" => ["Contraataque al liberarse",%w[0 1]],
+    "feedback_stack_count" => ["Avisos simultáneos",%w[1 2 3]],
+    "keyboard_bait_key" => ["Tecla para cebos",%w[r f t g none]],
     "pressure_enabled" => ["Presión por fallos",%w[0 1]],
     "pressure_alert_threshold" => ["Umbral de alerta",%w[20 30 35 45 60]],
     "pressure_block_threshold" => ["Bloqueo captura directa",%w[60 70 80 90 100]],
