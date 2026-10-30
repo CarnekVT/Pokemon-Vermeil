@@ -398,7 +398,7 @@ class Studio{
  render(){
   const dirty=this.dirty();
   this.root.innerHTML='<header class="bf-top"><div class="bf-logo">◈</div>'+
-   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Bifröst 0.8</small></div>'+
+   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Bifröst 0.8.1</small></div>'+
    '<div class="bf-spacer"></div><select class="bf-scope" data-scope>'+
    Object.keys(this.cfg).sort().map(k=>'<option value="'+esc(k)+'"'+
    (k===this.scope?" selected":"")+'>'+esc(k)+'</option>').join("")+'</select>'+
