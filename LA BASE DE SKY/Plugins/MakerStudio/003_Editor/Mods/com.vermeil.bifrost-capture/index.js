@@ -133,7 +133,7 @@ const F=[
  ["Forma regional","ow_form",0,100],["Nivel mínimo (0 = tabla)","ow_min_level",0,100],
  ["Nivel máximo (0 = tabla)","ow_max_level",0,100],
  ["Probabilidad individual (%)","ow_spawn_probability",0,100],
-  ["DEBUG: forzar shiny nuevos OW (requiere $DEBUG)","debug_force_shiny"],
+  ["PRUEBAS: forzar shiny OW (sin requerir $DEBUG)","debug_force_shiny"],
  ["APUNTADO","aim"],["Alcance en casillas","range",1,20],
  ["Ancho frontal","width",1,19],["Distancia óptima","optimal_range",1,20],
  ["Precisión cercana (%)","hit_near",0,100],["Precisión lejana (%)","hit_far",0,100],
