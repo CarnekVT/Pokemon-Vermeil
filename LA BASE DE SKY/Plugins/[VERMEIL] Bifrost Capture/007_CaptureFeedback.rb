@@ -75,17 +75,23 @@ module BifrostCapture
         bmp.fill_rect(0, 0, bmp.width, 68, Color.new(12, 18, 29, 226))
         bmp.fill_rect(0, 0, 5, 68, accent)
         bmp.fill_rect(6, 0, bmp.width-6, 2, bg)
-        bmp.fill_rect(16, 14, 34, 34, bg)
-        bmp.fill_rect(21, 19, 24, 24, accent)
-        if [:caught,:critical].include?(result[:kind])
-          bmp.fill_rect(25, 30, 6, 3, Color.new(20,40,39))
-          bmp.fill_rect(30, 35, 4, 3, Color.new(20,40,39))
-          bmp.fill_rect(34, 28, 4, 10, Color.new(20,40,39))
-        elsif result[:kind] == :breakout || result[:kind] == :miss
-          bmp.fill_rect(27, 23, 5, 12, Color.new(50,29,29))
-          bmp.fill_rect(27, 38, 5, 4, Color.new(50,29,29))
+        bmp.fill_rect(14, 11, 42, 42, bg)
+        # Use existing Pokémon icon sheets from Vermeil, not synthetic art.
+        icon = species_icon(result[:species])
+        if icon
+          source_width = icon.width > icon.height ? icon.width / 2 : icon.width
+          bmp.stretch_blt(Rect.new(15,11,40,40),icon,
+            Rect.new(0,0,source_width,icon.height))
         else
-          bmp.fill_rect(26, 26, 13, 3, Color.new(30,40,48))
+          bmp.fill_rect(21, 19, 24, 24, accent)
+          if [:caught,:critical].include?(result[:kind])
+            bmp.fill_rect(25,30,6,3,Color.new(20,40,39))
+            bmp.fill_rect(30,35,4,3,Color.new(20,40,39))
+            bmp.fill_rect(34,28,4,10,Color.new(20,40,39))
+          elsif result[:kind] == :breakout || result[:kind] == :miss
+            bmp.fill_rect(27,23,5,12,Color.new(50,29,29))
+            bmp.fill_rect(27,38,5,4,Color.new(50,29,29))
+          end
         end
         bmp.font.size = 20
         bmp.font.bold = true
@@ -100,6 +106,22 @@ module BifrostCapture
         end
         summary = [name, result[:detail]].reject { |s| s.nil? || s.empty? }.join("  ·  ")
         bmp.draw_text(60, 37, bmp.width-68, 22, summary)
+      end
+
+      def species_icon(species)
+        return nil unless species
+        return @icon_bitmap if @icon_species == species && @icon_bitmap &&
+                               !@icon_bitmap.disposed?
+        if @icon_bitmap && !@icon_bitmap.disposed?
+          @icon_bitmap.dispose
+        end
+        @icon_bitmap = nil
+        @icon_species = species
+        file = pbResolveBitmap("Graphics/Pokemon/Icons/#{species}")
+        @icon_bitmap = Bitmap.new(file) if file
+        @icon_bitmap
+      rescue StandardError
+        nil
       end
 
       def play_sfx(kind, cfg)
@@ -117,6 +139,9 @@ module BifrostCapture
       end
 
       def dispose
+        @icon_bitmap.dispose if @icon_bitmap && !@icon_bitmap.disposed?
+        @icon_bitmap = nil
+        @icon_species = nil
         if @toast && !@toast.disposed?
           bitmap = @toast.bitmap
           @toast.dispose
