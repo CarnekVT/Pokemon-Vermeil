@@ -163,7 +163,7 @@ def pbIntroVermeil
       speaker: "Mujer Misteriosa", speed: :slow
     )
     wait 12
-    text_inline "¿Mantendrás el nombre Solen?",
+    text_inline "Solen es el nombre de este cuerpo. Si quieres, podemos conservarlo.",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
     wait 12
