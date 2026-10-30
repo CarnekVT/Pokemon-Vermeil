@@ -71,7 +71,7 @@ module BifrostCapture
           :x=>point[0].to_f, :y=>point[1].to_f,
           :target=>target, :mouse_last=>nil, :mouse_active=>false,
           :held=>!!(key && Input.press?(key)), :frames=>0,
-          :ball_held=>false, :ball_frames=>0, :ball_long_done=>false
+          :last_select_frame=>nil, :last_select_index=>nil
         }
         @hud = BifrostCapture::ThrowHUD.new
         BifrostCapture::Audio.play(:aim,cfg) if defined?(BifrostCapture::Audio)
@@ -104,7 +104,9 @@ module BifrostCapture
         return false if $game_temp.in_battle || $game_temp.in_menu ||
                         $game_temp.message_window_showing ||
                         $game_temp.player_transferring ||
-                        $game_temp.transition_processing
+                        $game_temp.transition_processing ||
+                        $game_temp.menu_calling || $game_temp.ready_menu_calling ||
+                        $game_temp.debug_calling || $game_temp.interact_calling
         true
       end
 
@@ -218,10 +220,30 @@ module BifrostCapture
                      Input.const_defined?(:MOUSERIGHT) &&
                      Input.trigger?(Input::MOUSERIGHT)
         toggle_mode(s,cfg) if (mode_key && Input.trigger?(mode_key)) || mouse_mode
-        cycle_equipped(s,cfg) if ball_key && Input.trigger?(ball_key)
+        if ball_key && Input.trigger?(ball_key)
+          window = cfg["mode_double_tap_frames"].to_i.clamp(0,30)
+          previous = s[:last_select_frame]
+          if window > 0 && previous && s[:frames]-previous <= window
+            if s[:last_select_index]
+              field = s[:mode] == :ball ? :ball_index : :party_index
+              s[field] = s[:last_select_index]
+            end
+            toggle_mode(s,cfg)
+            s[:last_select_frame] = nil
+            s[:last_select_index] = nil
+          else
+            field = s[:mode] == :ball ? :ball_index : :party_index
+            s[:last_select_index] = s[field]
+            cycle_equipped(s,cfg)
+            s[:last_select_frame] = s[:frames]
+          end
+        end
         if cfg["mouse_wheel_select"] == "1"
           delta = mouse_wheel_delta
-          cycle_equipped(s,cfg,delta > 0 ? -1 : 1) if delta != 0
+          if delta != 0
+            cycle_equipped(s,cfg,delta > 0 ? -1 : 1)
+            s[:last_select_frame] = nil
+          end
         end
         if target_key && target_key != ball_key &&
            target_key != mode_key && Input.trigger?(target_key)
@@ -350,6 +372,23 @@ module BifrostCapture
         !!@flight || !!@catch
       end
 
+      # Share the world viewport with tilemap, character sprites and
+      # Visual 2.5D. Independent always-on-top viewports ignore tile priority.
+      def map_viewport
+        if defined?(Spriteset_Map) && Spriteset_Map.respond_to?(:viewport)
+          vp = Spriteset_Map.viewport
+          return [vp,false] if vp && !vp.disposed?
+        end
+        [Viewport.new(0,0,Graphics.width,Graphics.height),true]
+      end
+
+      def depth_for(character)
+        return 0 unless character && character.respond_to?(:screen_z)
+        character.screen_z
+      rescue StandardError
+        0
+      end
+
       def release_resources(obj)
         return unless obj
         (obj[:sprites] || []).each do |sprite|
@@ -363,7 +402,7 @@ module BifrostCapture
           bmp.dispose unless bmp.disposed?
         end
         viewport = obj[:vp]
-        viewport.dispose if viewport && !viewport.disposed?
+        viewport.dispose if obj[:owns_vp] && viewport && !viewport.disposed?
       end
 
       def cancel
@@ -395,8 +434,7 @@ module BifrostCapture
 
       def launch(event,item,mode,cfg)
         return false if busy? || !BifrostCapture.eligible_event?(event)
-        vp = Viewport.new(0,0,Graphics.width,Graphics.height)
-        vp.z = 999996
+        vp,owns_vp = map_viewport
         ball = Sprite.new(vp)
         ball.bitmap = BifrostCapture.ball_bitmap(mode == :ball ? item : :POKEBALL)
         ball.ox = ball.bitmap.width/2
@@ -424,7 +462,7 @@ module BifrostCapture
         }
         BifrostCapture::Audio.play(:throw,cfg) if defined?(BifrostCapture::Audio)
         @flight = {
-          :vp=>vp, :sprites=>[ball,shadow,*trails],
+          :vp=>vp,:owns_vp=>owns_vp, :sprites=>[ball,shadow,*trails],
           :shared_bitmaps=>[trail_bmp],
           :event=>event,:item=>item,:mode=>mode,:config=>cfg,
           :back=>BifrostCapture.behind?($game_player.x,$game_player.y,event),
@@ -432,6 +470,7 @@ module BifrostCapture
           :roll=>roll,:miss=>miss,
           :frame=>0,:frames=>cfg["throw_frames"].to_i.clamp(8,48),
           :start=>[x+w*0.72,y+h*0.50],:ground=>y+h,
+          :start_depth=>depth_for($game_player),
           :last=>BifrostCapture.screen_position(event),
           :positions=>[]
         }
@@ -440,11 +479,11 @@ module BifrostCapture
 
       def start_capture(event,item,caught,critical,cfg,species,destination)
         return false if @catch
-        vp = Viewport.new(0,0,Graphics.width,Graphics.height)
-        vp.z = 999997
+        vp,owns_vp = map_viewport
         ball = Sprite.new(vp)
         ball.bitmap = BifrostCapture.ball_bitmap(item)
-        ball.ox = ball.bitmap.width/2; ball.oy = ball.bitmap.height/2
+        # Pivot is the BOTTOM of the ball for rocking on the ground.
+        ball.ox = ball.bitmap.width/2; ball.oy = ball.bitmap.height
         z = [27.0/[ball.bitmap.width,ball.bitmap.height].max,1.0].min
         ball.zoom_x = ball.zoom_y = z
         ring = Sprite.new(vp)
@@ -459,7 +498,8 @@ module BifrostCapture
         ring.visible = false
         event.instance_variable_set(:@bifrost_capture_lock,true)
         @catch = {
-          :vp=>vp,:sprites=>[ball,ring],:event=>event,:item=>item,
+          :vp=>vp,:owns_vp=>owns_vp,:sprites=>[ball,ring],
+          :event=>event,:item=>item,
           :species=>species,:destination=>destination,
           :caught=>caught,:critical=>critical,:config=>cfg,
           :opacity=>event.opacity,:transparent=>event.transparent,
@@ -474,8 +514,15 @@ module BifrostCapture
       end
 
       def update
+        menu_block = $game_temp && (
+          $game_temp.in_battle || $game_temp.in_menu ||
+          $game_temp.message_window_showing ||
+          $game_temp.player_transferring ||
+          $game_temp.transition_processing ||
+          $game_temp.menu_calling || $game_temp.ready_menu_calling ||
+          $game_temp.debug_calling)
         if !defined?($scene) || !$scene.is_a?(Scene_Map) ||
-           !$game_map || ($game_temp && $game_temp.in_battle)
+           !$game_map || menu_block
           cancel if @flight || @catch
           return
         end
@@ -505,10 +552,14 @@ module BifrostCapture
         end
         ball,shadow,*trails = a[:sprites]
         ball.x = bx;ball.y = by;ball.angle = (t*470).to_i
+        origin_z = a[:start_depth]
+        target_z = depth_for(event)
+        ball.z = (origin_z+(target_z-origin_z)*k).to_i + 1
         rect = BifrostCapture.target_rect(event)
         shadow.x = bx
         shadow.y = a[:ground] + ((rect[1]+rect[3])-a[:ground])*k
         shadow.opacity = (120-55*Math.sin(Math::PI*t)).to_i
+        shadow.z = ball.z - 2
         a[:positions].unshift([bx,by])
         a[:positions] = a[:positions].first(4)
         trails.each_with_index do |sp,i|
@@ -516,6 +567,7 @@ module BifrostCapture
           sp.visible = !!pt
           next unless pt
           sp.x,sp.y = pt
+          sp.z = ball.z - 1
           sp.opacity = 185-i*52
         end
         return if a[:frame] < a[:frames]
@@ -541,14 +593,18 @@ module BifrostCapture
         ball,ring = a[:sprites]
         x,y = BifrostCapture.screen_position(event)
         rect = BifrostCapture.target_rect(event)
-        ground = rect[1]+rect[3] - 9
+        ground = rect[1]+rect[3]
         ball.x = x;ball.y = ground
+        # Depth is anchored at the Pokémon's feet, not an overlay z.
+        ball.z = depth_for(event) + 1
+        ring.z = ball.z + 1
         absorb = a[:config]["capture_fx"] == "0" ? 1 : 10
         shake_end = absorb+6+a[:shakes]*(a[:phase_frames]+4)
         if frame <= absorb
           event.opacity = [a[:opacity] * (1-frame.to_f/absorb),0].max.to_i
           ball.zoom_x = ball.zoom_y = a[:zoom]*(0.7+0.3*frame.to_f/absorb)
-          ball.y = ground-12*(1-frame.to_f/absorb)
+          # The ball remains planted at the bottom, even during absorption.
+          ball.y = ground
         elsif frame <= shake_end
           event.transparent = true
           phase = (frame-absorb-7) % (a[:phase_frames]+4)
