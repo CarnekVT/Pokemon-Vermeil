@@ -55,6 +55,7 @@ module BifrostCapture
       event.erase
     end
     notice(_INTL("¡El Pokémon escapó!"))
+    BifrostCapture::Audio.play(:flee) if defined?(BifrostCapture::Audio)
     if defined?(BifrostCapture::Feedback)
       species = event_spec(event)
       BifrostCapture::Feedback.publish(:escape,
@@ -101,6 +102,7 @@ module BifrostCapture
     event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(1,6)
     @chasing ||= {}
     @chasing[event.object_id] = event
+    BifrostCapture::Audio.play(:alert,cfg) if defined?(BifrostCapture::Audio)
     true
   end
 
