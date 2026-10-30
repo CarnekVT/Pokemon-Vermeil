@@ -131,7 +131,7 @@ module BifrostCapture
     page.through = false
     page.trigger = 0
     page.list = [
-      RPG::EventCommand.new(355,0,["pbBifrostAim"]),
+      RPG::EventCommand.new(355,0,["BifrostCapture.interact_battle($game_map.events[#{id}])"]),
       RPG::EventCommand.new(0,0,[])
     ]
     event_data.pages = [page]
