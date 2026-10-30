@@ -1,8 +1,53 @@
-# Bifröst Capture 0.6.0 — lanzamiento dinámico y confirmación de captura
+# Bifröst Capture 0.7.0 — lanzamiento fluido con movimiento libre
 
 **Pokémon Vermeil · Pokémon Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
 Los archivos Ruby 001–007 y el editor Maker Studio se sustituyeron por implementaciones nuevas. No se añadió el plugin chino ICS ni se copiaron sus scripts; se tomó como referencia su separación de componentes, su HUD compacto y los modos de pulsación. El recurso original de ZIJUK está diseñado para trabajar junto con **Visible Overworld Wild Encounters (VOWE)**; esta reconstrucción tiene su propia integración con las tablas de encuentros de Essentials y no necesita VOWE instalado.
+
+## Nueva experiencia 0.7.0 — moverse, apuntar y capturar simultáneamente
+
+La versión anterior utilizaba bucles propios de `Graphics.update` e
+`Input.update` durante el apuntado, el vuelo y las sacudidas. Mientras estos
+bucles estaban activos, el movimiento normal del jugador y la cámara del mapa
+se detenían. **Esos bucles se han retirado**.
+
+Ahora `008_LiveGamefeel.rb` mantiene tres estados independientes:
+preparación con `LiveAim`, proyectil animado y secuencia de captura.
+Todos avanzan con el mismo ciclo de fotogramas de `Scene_Map`, por lo que
+el jugador conserva el control de las flechas mientras apunta, la cámara
+sigue los movimientos normales y el lanzamiento no necesita abrir otra escena.
+
+- **Mantener W (AUX2)** prepara el lanzamiento; **soltar W** lanza.
+  **C (USE)** también lanza directamente; **X (BACK)** cancela.
+- **Flechas**: mueven al entrenador, NO a la retícula. Con teclado,
+  **Shift/Z (ACTION)** pasa al siguiente Pokémon válido en alcance.
+- **Ratón opcional**: al mover el cursor, cambia a puntería libre y permite
+  seleccionar otro Pokémon. Sin ratón, la retícula sigue al Pokémon fijado
+  mientras éste camina y el entrenador se desplaza.
+- **Q (AUX1)** cambia la Ball equipada y **D (SPECIAL)** alterna
+  Ball/Pokémon. No se abren menús durante cada lanzamiento.
+- El proyectil se actualiza sin congelar la escena. El cálculo de alcance
+  conserva la posición **del jugador al soltar la Ball** incluso si éste sigue
+  corriendo durante su vuelo.
+- El resultado de captura queda diferido hasta terminar las fases de
+  absorción y sacudidas. Se impide que el evento escape o se elimine antes.
+- En caso de transferencia de mapa durante la animación, se limpian recursos
+  y los Pokémon ya almacenados no quedan duplicados como OW activos.
+- Se han corregido los `FrozenError` de traducción en el envío a cajas,
+  las opciones dentro del juego y los avisos de aparición OW.
+
+**No se han modificado los controles de movimiento originales de Essentials.**
+El modo `toggle` y las reglas por mapa/especie siguen disponibles para otros
+proyectos. Los eventos decorativos no se vuelven capturables.
+
+Pruebas automáticas añadidas: desplazamiento conservado en modo apuntado,
+liberación de W, cancelación, ausencia de bucles de actualización manuales,
+tiro cuya posición de origen se conserva y detección de traducciones
+parametrizadas con cadenas congeladas.
+
+**Aún pendiente:** verificar en el ejecutable mkxp la interpolación con Visual
+2.5D HD, los cambios de mapa, FPS, audio y la sensación del control durante
+una sesión real. Las pruebas automatizadas no sustituyen esa validación.
 
 ## Captura rápida y resultados visibles (0.6.0)
 
@@ -81,8 +126,8 @@ En modo completo, **todos los Pokémon naturales generados son capturables** inc
 | USE | **C, Espacio, Enter** | Lanzar |
 | BACK | **X, Esc** | Cancelar |
 | SPECIAL | **D** | Alternar Ball / Pokémon |
-| ACTION | **Z, Shift** | Enfoque rápido al OW más cercano |
-| Direcciones | Flechas | Mover la retícula |
+| ACTION | **Z, Shift** | Alternar entre Pokémon OW alcanzables |
+| Direcciones | Flechas | Mover al jugador incluso mientras apunta |
 | Ratón | Movimiento/clic | Apuntar y lanzar (si mkxp expone la entrada) |
 
 **Predeterminado: `control_mode=hold`**; mantener W prepara y soltar lanza. **Opcional: `control_mode=toggle`**; W abre y USE lanza. Todos los controles se interpretan mediante las acciones de Essentials, no mediante caracteres del teclado.
@@ -117,11 +162,11 @@ El ID es ilustrativo. Se registra cuando el evento se crea. Un sprite sin etique
 
 ## Configuración y editor
 
-`config.ini` guarda los **53 parámetros** del motor y permite `[global]`, `[map:ID]`, `[species:SPECIES]` y `[event:MAP:ID]`.
+`config.ini` guarda los **57 parámetros** del motor y permite `[global]`, `[map:ID]`, `[species:SPECIES]` y `[event:MAP:ID]`.
 
 `roster.ini` guarda el listado Bifröst exclusivo, lista permitida de apariciones (para `spawn_filter=allowlist`) y especies bloqueadas.
 
-Maker Studio 0.5 se rehizo con navegación por módulos, escenario, inspector contextual, comparación de perfiles y catálogo editable. Al guardar, vuelve a leer `config.ini` y `roster.ini` para confirmar la escritura. Si se edita el INI fuera de Maker Studio, usar **Recargar** en el editor y reiniciar el juego para reabrir las opciones de ejecución.
+Maker Studio 0.7 se rehizo con navegación por módulos, escenario, inspector contextual, comparación de perfiles y catálogo editable. Al guardar, vuelve a leer `config.ini` y `roster.ini` para confirmar la escritura. Si se edita el INI fuera de Maker Studio, usar **Recargar** en el editor y reiniciar el juego para reabrir las opciones de ejecución.
 
 El menú opcional dentro de la partida está disponible por `pbBifrostRulesMenu` y conserva sobrescrituras únicamente en el guardado de la partida.
 
