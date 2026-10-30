@@ -14,7 +14,7 @@ function duration(c){
   if(c.type==="treatment_input")return 68; // entrada/salida, sin contabilizar la espera del usuario
   if(c.type==="script"){const loops=[...String(c.code||"").matchAll(/(\d+)\.times\s+do/g)];return loops.length?loops.reduce((n,m)=>n+Number(m[1]),0):6;}
   if(["text_inline","treatment_text","show_centered_text"].includes(c.type)){
-    const speed={instant:999,fast:4.4,normal:1.5,slow:.7,very_slow:.15,crawl:.16}[c.speed||"normal"]||1.5;
+    const speed={instant:999,fast:4.4,normal:1.5,slow:.7,very_slow:.15,crawl:.20}[c.speed||"normal"]||1.5;
     const txt=c.type==="treatment_text"?(c.neutro||c.masculino||c.femenino||""):String(c.text||"");
     return Math.max(1,Math.ceil(txt.length/speed)+((txt.match(/\.\.\./g)||[]).length*42)+10);
   }
