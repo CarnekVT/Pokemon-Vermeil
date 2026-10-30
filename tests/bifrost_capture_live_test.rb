@@ -5,9 +5,13 @@ def _INTL(string,*args); string.dup; end
 module EventHandlers
   def self.add(*); end
 end
-class Scene_Map; end
+class Scene_Map
+  attr_reader :map_input_count
+  def update_input; @map_input_count=(@map_input_count || 0)+1; end
+end
 module Input
   AUX2=:aux2; AUX1=:aux1; ACTION=:action; SPECIAL=:special
+  JUMPUP=:jumpup; JUMPDOWN=:jumpdown; F9=:f9
   BACK=:back; USE=:use; MOUSELEFT=:mouseleft
   @pressed={};@triggered={}
   def self.press?(key); !!@pressed[key]; end
@@ -32,12 +36,17 @@ module BifrostCapture
     attr_accessor :result
     def options(*)
       {"access_mode"=>"always","control_mode"=>"hold","aim_chain"=>"0",
-       "aim_mouse"=>"0","capture_enabled"=>"1","battle_enabled"=>"0",
-       "line_of_sight"=>"0"}
+       "aim_mouse"=>"0","capture_enabled"=>"1","battle_enabled"=>"1",
+       "hotkey"=>"jumpup","ball_key"=>"jumpdown",
+       "mode_key"=>"none","target_key"=>"none",
+       "ball_hold_mode_frames"=>"3","line_of_sight"=>"0"}
     end
-    def hotkey; Input::AUX2; end
+    def hotkey; Input::JUMPUP; end
+    def capture_action(cfg,field)
+      {"jumpup"=>Input::JUMPUP,"jumpdown"=>Input::JUMPDOWN}[cfg[field]]
+    end
     def aim_allowed?; true; end
-    def ball_choices; [[:POKEBALL,10]]; end
+    def ball_choices; [[:POKEBALL,10],[:GREATBALL,7]]; end
     def closest_target; nil; end
     def take_notice; nil; end
     def capture_result(*args); self.result=args; end
@@ -54,6 +63,7 @@ $bag=Struct.new(:_n) do
   def quantity(*); 10; end
 end.new(10)
 require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/008_LiveGamefeel"
+require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/010_MapInputGuard"
 class BifrostLiveTest < Minitest::Test
   def setup
     BifrostCapture::Motion.cancel
@@ -64,16 +74,16 @@ class BifrostLiveTest < Minitest::Test
     BifrostCapture::Motion.cancel
   end
   def test_w_opens_without_stopping_player_movement
-    Input.configure({Input::AUX2=>true},{Input::AUX2=>true})
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
     assert BifrostCapture::LiveAim.active?
     assert $game_player.moving?
-    Input.configure({Input::AUX2=>true},{})
+    Input.configure({Input::JUMPUP=>true},{})
     BifrostCapture::LiveAim.update
     assert BifrostCapture::LiveAim.active?
   end
   def test_releasing_w_without_target_reports_blocked_without_locking_map
-    Input.configure({Input::AUX2=>true},{Input::AUX2=>true})
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
     Input.configure({}, {})
     BifrostCapture::LiveAim.update
@@ -83,6 +93,48 @@ class BifrostLiveTest < Minitest::Test
     assert_equal :blocked,BifrostCapture.result[0]
     assert $game_player.moving?
   end
+  def test_s_short_tap_cycles_ball_without_using_d
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true,Input::JUMPDOWN=>true},
+                    {Input::JUMPDOWN=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{})
+    BifrostCapture::LiveAim.update
+    assert_equal 1,BifrostCapture::LiveAim.session[:ball_index]
+    assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
+  end
+
+  def test_s_long_hold_switches_pokemon_mode_and_preserves_d_ready_menu
+    able_mon=Object.new
+    def able_mon.able?; true; end
+    $player.party=[able_mon]
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    4.times do
+      Input.configure({Input::JUMPUP=>true,Input::JUMPDOWN=>true},{})
+      BifrostCapture::LiveAim.update
+    end
+    assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
+    Input.configure({Input::JUMPUP=>true},{Input::SPECIAL=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
+    $scene.update_input
+    assert_equal 1,$scene.map_input_count
+    refute BifrostCapture::LiveAim.active?
+  end
+
+  def test_c_and_x_are_contextual_and_do_not_activate_vanilla_map_actions
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{Input::USE=>true})
+    $scene.update_input
+    assert_nil $scene.map_input_count
+    Input.configure({Input::JUMPUP=>true},{Input::BACK=>true})
+    $scene.update_input
+    assert_nil $scene.map_input_count
+  end
+
   def test_capture_animations_do_not_own_graphics_or_input_update_loops
     root=File.expand_path(
       "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture",__dir__)
@@ -94,9 +146,9 @@ class BifrostLiveTest < Minitest::Test
   end
 
   def test_cancel_aim_is_immediate
-    Input.configure({Input::AUX2=>true},{Input::AUX2=>true})
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
-    Input.configure({Input::AUX2=>true},{Input::BACK=>true})
+    Input.configure({Input::JUMPUP=>true},{Input::BACK=>true})
     BifrostCapture::LiveAim.update
     refute BifrostCapture::LiveAim.active?
   end
