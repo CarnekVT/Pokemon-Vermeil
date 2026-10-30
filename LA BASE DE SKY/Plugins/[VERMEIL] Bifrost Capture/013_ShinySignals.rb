@@ -154,7 +154,6 @@ module BifrostCapture
         event = state[:event]
         count = cfg["shiny_fx_intensity"].to_i.clamp(1,3)+1
         ensure_sprites(state,vp,count)
-        state[:age] += 1
         age = state[:age]
         state[:burst] = [state[:burst]-1,0].max
         x,y,w,h = BifrostCapture.target_rect(event)
@@ -220,6 +219,7 @@ module BifrostCapture
           state = state_for(event)
           onscreen[event.object_id] = true
           notify_if_needed(state,cfg)
+          state[:age] += 1
           if cfg["shiny_fx_enabled"] == "1"
             render_state(state,cfg,vp)
           else
@@ -229,7 +229,8 @@ module BifrostCapture
              state[:age] - state[:last_repeat] >= 720
             state[:last_repeat] = state[:age]
             if @last_sound_frame.nil? || @frame-@last_sound_frame >= 90
-              BifrostCapture::Audio.play(:shiny,cfg) if defined?(BifrostCapture::Audio)
+              BifrostCapture::Audio.play(:shiny,cfg) if defined?(BifrostCapture::Audio) &&
+                cfg["shiny_sound_enabled"] != "0"
               @last_sound_frame = @frame
             end
           end
