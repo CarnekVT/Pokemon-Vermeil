@@ -394,7 +394,7 @@ class SceneEngine::Player
         scale = [168.0 / rect.width, 236.0 / rect.height, 1.0].min
         preview.zoom_x = preview.zoom_y = scale
         preview.x = ox + 139 - (rect.width * scale / 2).round
-        preview.y = oy + 140 + (236 - rect.height * scale) / 2
+        preview.y = oy + 152 + (236 - rect.height * scale) / 2
       end
 
       # Misma captura de texto que la UI original. Sin teclado casero.
@@ -492,18 +492,18 @@ class SceneEngine::Player
       bitmap.font.size = 31
       bitmap.draw_text(ox + 222, oy + 42, 360, 44, "TU NOMBRE", 1)
       bitmap.font.size = 28
-      bitmap.draw_text(ox + 290, oy + 223, 283, 47, name.to_s, 1)
+      bitmap.draw_text(ox + 290, oy + 238, 283, 47, name.to_s, 1)
       # Guía fija dentro del campo; no se desplaza con el cursor de Essentials.
-      bitmap.fill_rect(ox + 297, oy + 278, 264, 2, Color.new(158, 101, 74))
-      bitmap.fill_rect(ox + 297, oy + 280, 264, 1, Color.new(235, 201, 145))
+      bitmap.fill_rect(ox + 297, oy + 293, 264, 2, Color.new(158, 101, 74))
+      bitmap.fill_rect(ox + 297, oy + 295, 264, 1, Color.new(235, 201, 145))
       if name.to_s.empty?
         bitmap.font.color = Color.new(143, 115, 100)
         bitmap.font.size = 19
-        bitmap.draw_text(ox + 297, oy + 247, 260, 26, "Escribe aquí", 1)
+        bitmap.draw_text(ox + 297, oy + 262, 260, 26, "Escribe aquí", 1)
         bitmap.font.color = ink
       end
       bitmap.font.size = 18
-      bitmap.draw_text(ox + 286, oy + 311, 277, 24, "#{name.length} / #{max}", 1)
+      bitmap.draw_text(ox + 286, oy + 326, 277, 24, "#{name.length} / #{max}", 1)
       return
     end
     bitmap.fill_rect(0, 0, Graphics.width, Graphics.height, bg)
