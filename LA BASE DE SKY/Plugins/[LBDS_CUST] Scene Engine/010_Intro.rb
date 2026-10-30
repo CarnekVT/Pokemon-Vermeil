@@ -138,7 +138,7 @@ def pbIntroVermeil
     text_inline "Y qué tranquilidad. Cualquiera diría que nada de esto está pasando.",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
-    text_inline "Solen ha elegido compartir este camino contigo. Su voluntad contará tanto como la tuya al enfrentar la oscuridad.",
+    text_inline "Ha elegido compartir este camino contigo. Su voluntad contará tanto como la tuya al enfrentar la oscuridad.",
                 speaker: "Gran Espíritu", speed: :slow
     hide_textbox(10)
 
