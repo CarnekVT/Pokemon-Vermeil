@@ -187,17 +187,17 @@ export class ScenePreview{
       g.textAlign="left";this.gameFont(20);
       if(u.portrait){
         const im=u.portrait,box=this.visibleBox(im),sc=Math.min(168/box.w,236/box.h,1);
-        g.drawImage(im,box.x,box.y,box.w,box.h,139-box.w*sc/2,140+(236-box.h*sc)/2,box.w*sc,box.h*sc);
+        g.drawImage(im,box.x,box.y,box.w,box.h,139-box.w*sc/2,152+(236-box.h*sc)/2,box.w*sc,box.h*sc);
       }
       this.gameFont(29);
-      g.fillText((u.text||""),292,233);
+      g.fillText((u.text||""),292,248);
       // Línea fija para localizar la entrada sin cursor invasivo.
-      g.fillStyle="#9e654a";g.fillRect(297,278,264,2);
-      g.fillStyle="#ebc991";g.fillRect(297,280,264,1);
-      if(!u.text){this.gameFont(19);g.fillStyle="#8f7364";g.fillText("Escribe aquí",297,247);}
+      g.fillStyle="#9e654a";g.fillRect(297,293,264,2);
+      g.fillStyle="#ebc991";g.fillRect(297,295,264,1);
+      if(!u.text){this.gameFont(19);g.fillStyle="#8f7364";g.fillText("Escribe aquí",297,262);}
       g.fillStyle="#402a29";
       this.gameFont(18);
-      g.fillText((u.text||"").length+" / "+u.max,286,311);
+      g.fillText((u.text||"").length+" / "+u.max,286,326);
       this.gameFont(17);g.fillStyle="#fcf6db";g.textAlign="center";
       if(!u.ui)g.fillText("Escribir  ·  Retroceso: borrar  ·  Enter: confirmar",320,420);
       g.restore();
