@@ -871,7 +871,7 @@ export class EditorInterfaces {
       if (!this.raiz.isConnected) return;
       const t = e.target;
       // Los atajos son locales a este editor; no interceptar otros modales.
-      if (!this.raiz.contains(t) && !this.raiz.contains(document.activeElement)) return;
+      if (!this.raiz.contains(t)) return;
       const ctrl = e.ctrlKey || e.metaKey;
       if (ctrl && e.key.toLowerCase() === "s") { e.preventDefault(); this.guardar(); return; }
       // La escritura tiene prioridad: preservar los atajos nativos de los campos.
