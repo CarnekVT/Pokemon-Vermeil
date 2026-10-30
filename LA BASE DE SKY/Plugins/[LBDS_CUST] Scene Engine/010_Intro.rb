@@ -45,10 +45,10 @@ def pbIntroVermeil
       update
     end
 
-    text_inline "Los paldeanos no buscaban oro, sino mi poder. Su disputa con los pueblos de esta región me apartó de la humanidad.",
+    text_inline "Los paldeanos buscaban mi poder, no oro. Algunos habitantes de Payu también quisieron apropiárselo.",
                 speaker: "???", speed: :slow
     # Otro conflicto: la caída del Guía no fue provocada por los paldeanos.
-    text_inline "Pero también hubo una traición entre los míos, ajena a aquel conflicto.",
+    text_inline "Vi la misma codicia a ambos lados y me aparté. Pero aquella no fue la única traición que conocí.",
                 speaker: "???", speed: :slow
     hide_textbox(10)
     fade_out_sprites([golden[:sprite], elder[:sprite]], 15)
@@ -60,7 +60,7 @@ def pbIntroVermeil
     show "Graphics/Scenes/Intro/FennaSupay", 0, 8, fade: 30
     show_floating "Graphics/Scenes/Intro/SupayorusEnergy", 255, 90, amplitude: 8, speed: 0.04, fade: 20
 
-    text_inline "El Guía de los Caídos debía guiar las almas a su descanso. Pero quiso aprovecharse de ellas. Y todo cambió.",
+    text_inline "El Guía de los Caídos debía conducir las almas a su descanso. Pero acabó buscando poder a costa de ellas.",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
 
@@ -93,7 +93,7 @@ def pbIntroVermeil
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
 
-    # ══════════ FASE 6: LA REVELACIÓN DEL RECEPTÁCULO ══════════
+    # ══════════ FASE 6: LA REVELACIÓN DEL VÍNCULO ══════════
 
     @image_sprites["Graphics/Scenes/Intro/int5"]&.visible = false
     fade_out_sprites([@image_sprites["Graphics/Scenes/Intro/int9"]], 20)
@@ -116,7 +116,7 @@ def pbIntroVermeil
       update
     end
 
-    text_inline "Por eso te hemos llamado, Ente Dorado. No perteneces a este mundo y su hambre no puede alcanzarte, pero necesitas un cuerpo.",
+    text_inline "Por eso te hemos llamado, Ente Dorado. Tu origen te protege de su hambre, pero aquí necesitarás un vínculo aceptado por ambas partes.",
                 speaker: "Gran Espíritu", speed: :slow
     hide_textbox(10)
 
@@ -133,12 +133,12 @@ def pbIntroVermeil
     wait 355
     wait 18
 
-    text_inline "Mira, ahí está. Sabe lo que nos espera y aun así aceptó ayudar.",
+    text_inline "Mira, ahí está Solen. Conoce los riesgos y aun así decidió ayudarnos.",
                 speaker: "Mujer Misteriosa", speed: :slow
     text_inline "Y qué tranquilidad. Cualquiera diría que nada de esto está pasando.",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
-    text_inline "Este vínculo cuenta con su consentimiento. Podrás actuar entre los vivos y hacer frente a la oscuridad.",
+    text_inline "Solen ha elegido compartir este camino contigo. Su voluntad contará tanto como la tuya al enfrentar la oscuridad.",
                 speaker: "Gran Espíritu", speed: :slow
     hide_textbox(10)
 
@@ -166,7 +166,7 @@ def pbIntroVermeil
       speaker: "Mujer Misteriosa", speed: :slow
     )
     wait 12
-    text_inline "Solen es el nombre de este cuerpo. Puedes conservarlo o elegir otro.",
+    text_inline "Y sobre el nombre, ¿prefieres conservar el que ha llevado hasta ahora o elegir otro?",
                 speaker: "Mujer Misteriosa", speed: :slow
     hide_textbox(10)
     wait 12
@@ -187,8 +187,8 @@ def pbIntroVermeil
     start_aura "Graphics/Scenes/Intro/AuraParticle", 12, 12, count: 12, range_x: 35, range_y: 70, duration: 90
     fade_from_black 25
 
-    text_inline "El pacto está sellado. Mi hijo sigue reuniendo fuerzas. Demuéstrame que aún puedo confiar en la humanidad.",
-                speaker: "Gran Espíritu", speed: :slow
+    text_inline "El pacto está sellado, {1}. Mi hijo sigue reuniendo fuerzas. Demuéstrame que aún puedo confiar en la humanidad.",
+                speaker: "Gran Espíritu", speed: :slow, format_args: [player_name]
     text_inline "Bueno, llegó la hora. ¡Cuídate y disfruta del viaje!",
                 speaker: "Mujer Misteriosa", speed: :slow
 
