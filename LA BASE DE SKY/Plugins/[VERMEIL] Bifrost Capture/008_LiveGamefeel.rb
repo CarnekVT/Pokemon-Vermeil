@@ -51,10 +51,12 @@ module BifrostCapture
         cfg = BifrostCapture.options
         return false if debug_reserved?(cfg)
         balls = BifrostCapture.ball_choices
+        baits = BifrostCapture.respond_to?(:bait_choices) ?
+          BifrostCapture.bait_choices : []
         party = $player.party.select { |pkmn| pkmn && pkmn.able? }
         can_ball = cfg["capture_enabled"] == "1" && !balls.empty?
         can_battle = cfg["battle_enabled"] == "1" && !party.empty?
-        if !can_ball && !can_battle
+        if !can_ball && !can_battle && baits.empty?
           BifrostCapture.notice(_INTL("No hay Pokémon ni Poké Balls disponibles."))
           return false
         end
@@ -78,6 +80,7 @@ module BifrostCapture
                end
         @session = {
           :map=>$game_map.map_id, :config=>cfg, :balls=>balls,
+          :baits=>baits, :bait_index=>0, :return_mode=>:ball,
           :party=>party, :ball_index=>ball_index, :party_index=>party_index,
           :mode=>mode,
           :x=>point[0].to_f, :y=>point[1].to_f,
@@ -98,7 +101,8 @@ module BifrostCapture
         ball = s[:balls][index] if s[:balls]
         $PokemonGlobal.bifrost_last_ball = ball[0] if ball
         $PokemonGlobal.bifrost_last_party_index = s[:party_index].to_i
-        $PokemonGlobal.bifrost_last_mode = s[:mode].to_s
+        $PokemonGlobal.bifrost_last_mode =
+          (s[:mode] == :bait ? (s[:return_mode] || :ball) : s[:mode]).to_s
       end
 
       def close
@@ -120,7 +124,8 @@ module BifrostCapture
       end
 
       def toggle_mode(s,cfg)
-        candidate = s[:mode] == :ball ? :battle : :ball
+        candidate = s[:mode] == :bait ? (s[:return_mode] || :ball) :
+          (s[:mode] == :ball ? :battle : :ball)
         enabled = candidate == :battle ?
           (cfg["battle_enabled"] == "1" && !s[:party].empty?) :
           (cfg["capture_enabled"] == "1" && !s[:balls].empty?)
@@ -131,8 +136,29 @@ module BifrostCapture
         true
       end
 
+      def toggle_bait(s,cfg)
+        if s[:mode] == :bait
+          s[:mode] = s[:return_mode] || :ball
+        else
+          s[:baits] = BifrostCapture.respond_to?(:bait_choices) ?
+            BifrostCapture.bait_choices : []
+          if s[:baits].empty?
+            BifrostCapture.notice(_INTL("No tienes bayas ni cebos en la mochila"))
+            return false
+          end
+          s[:return_mode] = s[:mode]
+          s[:mode] = :bait
+        end
+        BifrostCapture::Audio.play(:mode,cfg) if defined?(BifrostCapture::Audio)
+        true
+      end
+
       def cycle_equipped(s,cfg,step=1)
-        if s[:mode] == :ball
+        if s[:mode] == :bait
+          return false if s[:baits].empty?
+          s[:bait_index] = (s[:bait_index]+step) % s[:baits].length
+          BifrostCapture::Audio.play(:switch,cfg) if defined?(BifrostCapture::Audio)
+        elsif s[:mode] == :ball
           return false if s[:balls].empty?
           s[:ball_index] = (s[:ball_index]+step) % s[:balls].length
           equipped = s[:balls][s[:ball_index]][0]
@@ -265,6 +291,11 @@ module BifrostCapture
         logical_mode = mode_key && mode_key != ball_key &&
                        Input.trigger?(mode_key)
         toggle_mode(s,cfg) if logical_mode || mouse_mode || keyboard_mode
+        bait_shortcut = keyboard_safe &&
+                        cfg["keyboard_bait_key"] != cfg["keyboard_mode_key"] &&
+                        cfg["keyboard_bait_key"] != cfg["keyboard_target_key"] &&
+                        physical_key_trigger?(cfg,"keyboard_bait_key")
+        toggle_bait(s,cfg) if bait_shortcut
         # One item per new press, regardless of how long the key is held.
         # Shift reverses the cycling direction. E or right click toggles mode.
         if ball_key && Input.trigger?(ball_key)
@@ -327,11 +358,13 @@ module BifrostCapture
           status = geom[:in_range] && clear ? :ready : :blocked
           if status == :ready && s[:mode] == :ball && defined?(Pressure) &&
              Pressure.locked?(focus,local)
-            status = :blocked
-          elsif status == :ready && BifrostCapture.behind?($game_player.x,$game_player.y,focus)
+            status = :max_alert
+          elsif status == :ready && s[:mode] == :ball &&
+                BifrostCapture.behind?($game_player.x,$game_player.y,focus)
             status = :backstrike
           end
-          hint ||= status == :backstrike ? _INTL("¡Captura por sorpresa!") :
+          hint ||= status == :max_alert ? _INTL("¡ALERTA MÁXIMA! Combate o usa R: cebo") :
+                    status == :backstrike ? _INTL("¡Captura por sorpresa!") :
                     status == :ready ? _INTL("Listo para lanzar") :
                     _INTL("Acércate o cambia el ángulo")
         end
@@ -345,11 +378,19 @@ module BifrostCapture
             remember_selection(s)
           end
         end
-        item = s[:mode] == :ball ?
-          (s[:balls][s[:ball_index]] && s[:balls][s[:ball_index]][0]) :
-          s[:party][s[:party_index]]
-        amount = s[:mode] == :ball && item ? $bag.quantity(item) : 0
-        @hud.equip(s[:balls],s[:ball_index])
+        if s[:mode] == :bait
+          s[:baits] = BifrostCapture.respond_to?(:bait_choices) ?
+            BifrostCapture.bait_choices : []
+          s[:bait_index] = 0 if s[:bait_index] >= s[:baits].length
+        end
+        item = case s[:mode]
+        when :ball then s[:balls][s[:ball_index]] && s[:balls][s[:ball_index]][0]
+        when :bait then s[:baits][s[:bait_index]] && s[:baits][s[:bait_index]][0]
+        else s[:party][s[:party_index]]
+        end
+        amount = [:ball,:bait].include?(s[:mode]) && item ? $bag.quantity(item) : 0
+        @hud.equip(s[:mode] == :bait ? s[:baits] : s[:balls],
+          s[:mode] == :bait ? s[:bait_index] : s[:ball_index])
         @hud.draw(s[:mode],item,amount,focus,hint,
                   s[:party],s[:party_index])
 
@@ -406,12 +447,14 @@ module BifrostCapture
             _INTL("¡Alerta máxima! Usa el combate tradicional"),local)
           return false
         end
-        item = s[:mode] == :ball ?
-          (s[:balls][s[:ball_index]] && s[:balls][s[:ball_index]][0]) :
-          s[:party][s[:party_index]]
+        item = case s[:mode]
+        when :ball then s[:balls][s[:ball_index]] && s[:balls][s[:ball_index]][0]
+        when :bait then s[:baits][s[:bait_index]] && s[:baits][s[:bait_index]][0]
+        else s[:party][s[:party_index]]
+        end
         return false unless item
         remember_selection(s)
-        if s[:mode] == :ball && $bag.quantity(item).to_i <= 0
+        if [:ball,:bait].include?(s[:mode]) && $bag.quantity(item).to_i <= 0
           BifrostCapture.capture_result(:blocked,spec[0],
                                         _INTL("No quedan Poké Balls"),local)
           return false
@@ -426,7 +469,7 @@ module BifrostCapture
         if launched
           s[:shot_during_hold] = true
           @throw_cooldown = local["throw_cooldown_frames"].to_i.clamp(0,90) if
-            s[:mode] == :ball
+            [:ball,:bait].include?(s[:mode])
           s[:target] = BifrostCapture.closest_target
           s[:mouse_active] = false
           remember_selection(s)
@@ -454,12 +497,14 @@ module BifrostCapture
         return false unless event && BifrostCapture.eligible_event?(event)
         return false if event.instance_variable_get(:@bifrost_projectile_lock) ||
                         event.instance_variable_get(:@bifrost_capture_lock)
+        return false if mode == :ball && defined?(BifrostCapture::Pressure) &&
+          BifrostCapture::Pressure.locked?(event,cfg)
         return false if mode == :battle && busy?
         return false if flights.any? { |a| a[:mode] == :battle }
         return false if flights.length >= cfg["max_flights"].to_i.clamp(1,6)
-        if mode == :ball
+        if [:ball,:bait].include?(mode)
           reserved = flights.count { |a|
-            a[:mode] == :ball && a[:item] == item
+            a[:mode] == mode && a[:item] == item
           }
           return false if !$bag || $bag.quantity(item).to_i <= reserved
         end
@@ -535,7 +580,13 @@ module BifrostCapture
         return false unless can_launch?(event,item,mode,cfg)
         vp,owns_vp = map_viewport
         ball = Sprite.new(vp)
-        ball.bitmap = BifrostCapture.ball_bitmap(mode == :ball ? item : :POKEBALL)
+        if mode == :bait
+          filename = pbResolveBitmap("Graphics/Items/#{item}")
+          ball.bitmap = filename ? Bitmap.new(filename) :
+            BifrostCapture.ball_bitmap(:POKEBALL)
+        else
+          ball.bitmap = BifrostCapture.ball_bitmap(mode == :ball ? item : :POKEBALL)
+        end
         ball.ox = ball.bitmap.width/2
         ball.oy = ball.bitmap.height/2
         scale = [26.0/[ball.bitmap.width,ball.bitmap.height].max,1.0].min
@@ -697,9 +748,14 @@ module BifrostCapture
         end
         BifrostCapture::Audio.play(:hit,a[:config]) if
           !a[:miss] && defined?(BifrostCapture::Audio)
-        BifrostCapture.resolve_throw(event,a[:mode],a[:item],
-                                      a[:config],a[:back],a[:roll],a[:origin],
-                                      a[:critical])
+        if a[:mode] == :bait
+          BifrostCapture.resolve_bait(event,a[:item],a[:config]) if
+            BifrostCapture.respond_to?(:resolve_bait)
+        else
+          BifrostCapture.resolve_throw(event,a[:mode],a[:item],
+                                        a[:config],a[:back],a[:roll],a[:origin],
+                                        a[:critical])
+        end
         # A Pokémon battle is launched only after UI and animation are gone.
         if a[:mode] == :battle
           BifrostCapture::LiveAim.close if BifrostCapture::LiveAim.active?
