@@ -2,7 +2,14 @@
 # Bifrost Capture - map-space aim, real Sprite_Character bounds, projectile/HUD.
 module BifrostCapture
   # Compact 3-slot ball wheel; aiming feedback is separate from capture result.
+  # Map-space HUD. One restrained strip; no opaque window over the trainer.
   class ThrowHUD
+    TEMPERAMENT_COLORS = {
+      :neutral=>Color.new(158,224,191),
+      :timid=>Color.new(126,191,248),
+      :aggressive=>Color.new(247,154,122)
+    }.freeze
+
     def initialize
       @vp = Viewport.new(0,0,Graphics.width,Graphics.height)
       @vp.z = 999992
@@ -10,10 +17,11 @@ module BifrostCapture
       @aim.bitmap = Bitmap.new(64,64)
       @aim.ox = @aim.oy = 32
       @panel = Sprite.new(@vp)
-      @panel.bitmap = Bitmap.new(316,104)
-      @panel.x = [Graphics.width-323,4].max
-      @panel.y = [Graphics.height-111,4].max
+      @panel.bitmap = Bitmap.new(278,90)
+      @panel.x = [Graphics.width-286,4].max
+      @panel.y = [Graphics.height-98,4].max
       @last_status = nil
+      @pulse = 0
       @icons = {}
       @ball_list = []
       @selected = 0
@@ -25,89 +33,110 @@ module BifrostCapture
     end
 
     def icon(item)
-      return nil if !item
+      return nil unless item
       return @icons[item] if @icons.key?(item)
       filename = pbResolveBitmap("Graphics/Items/#{item}")
       @icons[item] = filename ? Bitmap.new(filename) : nil
     end
 
-    def reticle(x,y,status)
+    def reticle(x,y,status,mood=:neutral)
       @aim.x = x.to_i
       @aim.y = y.to_i
-      @aim.visible = true
-      return if status == @last_status
-      @last_status = status
+      @pulse = (@pulse + 1) % 48
+      zoom = status == :ready ? 1.0+Math.sin(@pulse*Math::PI/24)*0.035 : 1.0
+      @aim.zoom_x = @aim.zoom_y = zoom
+      stamp = [status,mood]
+      return if stamp == @last_status
+      @last_status = stamp
       bmp = @aim.bitmap
       bmp.clear
-      color = case status
-              when :ready then Color.new(136,249,188)
-              when :blocked then Color.new(249,146,142)
-              else Color.new(224,231,241)
-              end
-      72.times do |i|
-        theta = i*2*Math::PI/72
-        px=(32+Math.cos(theta)*19).round
-        py=(32+Math.sin(theta)*19).round
+      color = status == :blocked ? Color.new(255,134,135) :
+              status == :ready ? (TEMPERAMENT_COLORS[mood] ||
+                                    TEMPERAMENT_COLORS[:neutral]) :
+              Color.new(218,230,240)
+      # Four separated arcs plus crossbars: readable against long grass.
+      80.times do |i|
+        next if (i / 10).odd? && i % 10 >= 5
+        theta = i*2*Math::PI/80
+        px = (32+Math.cos(theta)*19).round
+        py = (32+Math.sin(theta)*19).round
         bmp.fill_rect(px,py,2,2,color)
       end
-      # Four small breaks make the cursor readable over grass and foliage.
-      bmp.fill_rect(31,2,2,10,color)
-      bmp.fill_rect(31,52,2,10,color)
-      bmp.fill_rect(2,31,10,2,color)
-      bmp.fill_rect(52,31,10,2,color)
+      bmp.fill_rect(31,5,2,8,color)
+      bmp.fill_rect(31,51,2,8,color)
+      bmp.fill_rect(5,31,8,2,color)
+      bmp.fill_rect(51,31,8,2,color)
       bmp.fill_rect(30,30,4,4,color)
     end
 
     def draw(mode,item,count,focus,notice)
       bmp = @panel.bitmap
       bmp.clear
-      bmp.fill_rect(0,0,316,104,Color.new(13,19,31,223))
-      bmp.fill_rect(0,0,3,104,Color.new(174,195,227))
-      bmp.font.size = 12
-      bmp.font.color = Color.new(169,187,212)
-      bmp.draw_text(12,4,280,16,mode == :ball ? "POKÉ BALL EQUIPADA" : "POKÉMON PREPARADO")
+      bmp.fill_rect(0,0,278,90,Color.new(13,21,32,205))
+      bmp.fill_rect(0,0,3,90,Color.new(139,199,221))
+      bmp.font.size = 11
+      bmp.font.bold = false
+      bmp.font.color = Color.new(190,205,222)
+      bmp.draw_text(11,2,175,17,mode == :ball ? "BALL EQUIPADA" : "POKÉMON LISTO")
       if mode == :ball
-        # Three-slot strip; middle slot is the item being thrown.
         [-1,0,1].each_with_index do |offset,i|
           next if @ball_list.empty?
           idx = (@selected+offset) % @ball_list.length
           selected_ball = @ball_list[idx][0]
-          left = 14+i*54
-          bmp.fill_rect(left,24,49,43,
-            Color.new(44,64,85, i==1 ? 228 : 138))
-          bmp.fill_rect(left,64,49,2,i==1 ?
-            Color.new(146,231,194) : Color.new(83,107,130))
+          left = 10+i*47
+          bmp.fill_rect(left,19,44,41,
+            Color.new(43,66,78,i==1 ? 218 : 112))
+          bmp.fill_rect(left,58,44,2,i==1 ?
+            Color.new(146,234,189) : Color.new(77,102,118))
           source = icon(selected_ball)
           if source && source.width > 0 && source.height > 0
-            bmp.stretch_blt(Rect.new(left+10,28,29,29), source,
-                            Rect.new(0,0,source.width,source.height))
+            bmp.stretch_blt(Rect.new(left+10,23,24,26),source,
+              Rect.new(0,0,source.width,source.height))
           else
-            bmp.fill_rect(left+18,37,13,13,Color.new(211,223,244))
+            bmp.fill_rect(left+17,30,11,11,Color.new(218,232,240))
           end
-          bmp.font.color = i==1 ? Color.new(243,247,255) :
-                          Color.new(178,195,214)
-          bmp.draw_text(left,52,49,13,"x#{$bag.quantity(selected_ball)}",1)
+          bmp.font.color = Color.new(238,244,249)
+          bmp.draw_text(left+2,47,40,13,"x#{$bag.quantity(selected_ball)}",1)
         end
       else
-        bmp.fill_rect(15,28,153,42,Color.new(43,61,79,204))
-        bmp.font.size = 17
-        bmp.font.color = Color.new(235,243,253)
-        bmp.draw_text(23,36,143,25,item ? item.name : "-")
+        bmp.fill_rect(12,22,136,37,Color.new(40,62,83,200))
+        bmp.font.size = 15
+        bmp.font.color = Color.new(237,244,251)
+        bmp.draw_text(17,27,127,24,item ? item.name : "-")
       end
-      bmp.fill_rect(182,24,123,43,Color.new(28,37,53,216))
       spec = focus && BifrostCapture.event_spec(focus)
+      if spec
+        mood = BifrostCapture.temperament_for(focus)
+        hue = TEMPERAMENT_COLORS[mood] || TEMPERAMENT_COLORS[:neutral]
+        state = focus.instance_variable_get(:@bifrost_mood_state)
+        state_label = state == :chase ? "¡PERSIGUE!" :
+                      state == :flee ? "¡HUYE!" :
+                      BifrostCapture.temperament_label(mood)
+        bmp.fill_rect(157,18,114,43,Color.new(26,38,50,215))
+        bmp.fill_rect(157,18,3,43,hue)
+        bmp.font.color = hue
+        bmp.font.size = 12
+        bmp.draw_text(165,20,104,19,state_label)
+        bmp.font.color = Color.new(235,241,250)
+        bmp.draw_text(165,38,104,18,"#{spec[0]}  Nv.#{spec[1]}")
+      else
+        bmp.fill_rect(157,18,114,43,Color.new(26,38,50,190))
+        bmp.font.color = Color.new(191,200,214)
+        bmp.font.size = 12
+        bmp.draw_text(166,29,99,20,"Sin objetivo")
+      end
       bmp.font.size = 12
-      bmp.font.color = spec ? Color.new(175,243,200) :
-                        Color.new(235,174,161)
-      bmp.draw_text(189,25,109,19,spec ? spec[0].to_s : "SIN OBJETIVO")
-      bmp.font.color = Color.new(227,234,244)
-      bmp.draw_text(189,46,109,18,spec ? "Nv. #{spec[1]}" : "Busca un OW")
-      bmp.font.size = 12
-      bmp.font.color = Color.new(248,214,157)
-      bmp.draw_text(13,71,293,17,notice.to_s)
-      bmp.font.size = 10
-      bmp.font.color = Color.new(176,193,216)
-      bmp.draw_text(13,90,294,13,"W apuntar/soltar · Q cambiar · C lanzar · D modo")
+      bmp.font.color = Color.new(240,219,173)
+      bmp.draw_text(11,64,256,15,notice.to_s)
+      bmp.font.size = 9
+      bmp.font.color = Color.new(172,194,211)
+      cfg = BifrostCapture.options
+      key = { "jumpup"=>"A", "jumpdown"=>"S", "aux1"=>"Q",
+              "aux2"=>"W", "action"=>"Z", "special"=>"D" }
+      aim = key[cfg["hotkey"]] || cfg["hotkey"].to_s.upcase
+      ball = key[cfg["ball_key"]] || cfg["ball_key"].to_s.upcase
+      bmp.draw_text(11,78,256,12,
+        "#{aim} apuntar · #{ball} Ball · C lanzar · X salir")
     end
 
     def dispose
