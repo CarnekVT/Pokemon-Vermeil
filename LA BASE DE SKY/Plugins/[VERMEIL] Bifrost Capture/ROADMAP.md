@@ -1,4 +1,4 @@
-# Bifröst Capture — seguimiento 0.5.0 (reconstrucción completa de código)
+# Bifröst Capture — seguimiento 0.5.1 (reconstrucción completa de código)
 
 Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
 
@@ -23,8 +23,8 @@ Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
 | Consumo de Ball correcto | Integrado | No gastar por puntería sin OW |
 | Eventos OW decorativos | Integrado | No registrar sin etiqueta/llamada explícita |
 | Especies/niveles/formas por mapa/especie | Integrado | Probabilidades y encuentros PBS |
-| Generación de sprites Followers | Parcial | Falta sprite para especies no incluidas en recursos |
-| Respaldo cuando falta sprite/tile | Integrado | Se conserva encuentro normal, no se crea OW invisible |
+| Generación de sprites Followers | Parcial | Se registran inmediatamente en el conjunto de eventos activos de Game_Map; falta prueba en mkxp. |
+| Recursos faltantes / mapa sin espacio | Integrado | OW completo nunca inicia batalla normal; omite el spawn y comunica diagnóstico. Mixto conserva fallback clásico. |
 | Gestión de objetos y sprites temporales | Integrado | Limpieza al escapar/capturar/transferir |
 | Reacción a distancia y al fallar | Integrado | AI con escaneo espaciado |
 | Captura y depósito en equipo/PC | Parcial | Ruta pbAddPokemon; probar en partida y guardado |
@@ -32,6 +32,7 @@ Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
 | Animación de absorción/captura y sacudidas | Parcial | Falta verificar ritmo/resultado |
 | Audio y animación corporal del entrenador | Pendiente | Crear/reutilizar assets |
 | Sincronización con legendarios errantes vanilla | Pendiente | Aparece/desaparece conforme a roaming global |
+| Recursión Battle::Scene#pbFrameUpdate entre SleepAnimations y UmbraVeil | Código corregido; test aprobado | Reemplazado alias plano por prepend/super para evitar SystemStackError. |
 | Compatibilidad con Visual 2.5D HD/Turbo/BSS/BAS | Pendiente | Prueba real de FPS/inputs y transiciones |
 | Guardado/carga con OW activos | Pendiente | Simular transferencias/partidas reales |
 | Tests automáticos de FPS y mapas completos | Pendiente | Requiere runner de juego/mkxp |
