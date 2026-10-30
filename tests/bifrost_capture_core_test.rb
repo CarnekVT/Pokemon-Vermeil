@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 require "minitest/autorun"
 require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/001_Core"
+require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/009_Audio"
+
+def pbSEPlay(name); $bifrost_audio_played=name; end
 
 class BifrostCoreTest < Minitest::Test
   def setup
@@ -15,6 +18,28 @@ class BifrostCoreTest < Minitest::Test
       unsafe=source.scan(/_INTL\("[^"]*\{\d+\}[^"]*"\s*,/)
       assert_empty unsafe, "FrozenError risk in #{File.basename(path)}: #{unsafe.inspect}"
     end
+  end
+
+  def test_three_temperaments_are_stable_and_selectable
+    %w[neutral timid aggressive].each do |choice|
+      event=Object.new
+      cfg=BifrostCapture::DEFAULTS.merge("temperament"=>choice)
+      assert_equal choice.to_sym,BifrostCapture.temperament_for(event,cfg)
+      assert_equal choice.to_sym,BifrostCapture.temperament_for(event,
+                          cfg.merge("temperament"=>"mixed"))
+    end
+  end
+
+  def test_sound_events_can_be_replaced_or_muted
+    $bifrost_audio_played=nil
+    cfg=BifrostCapture::DEFAULTS.merge("audio_profile"=>"original",
+          "sfx_throw"=>"custom_throw")
+    assert BifrostCapture::Audio.play(:throw,cfg)
+    assert_equal "Bifrost/custom_throw",$bifrost_audio_played
+    assert_equal false,BifrostCapture::Audio.play(:throw,
+                    cfg.merge("audio_profile"=>"muted"))
+    refute BifrostCapture::Audio.play(:throw,
+                    cfg.merge("sfx_throw"=>"../unsafe_file"))
   end
 
   def test_project_defaults_keep_exclusive_bifrost
