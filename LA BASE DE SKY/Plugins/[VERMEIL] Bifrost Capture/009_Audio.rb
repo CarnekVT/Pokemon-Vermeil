@@ -96,7 +96,12 @@ module BifrostCapture
     # Restarting the game clears this cache after fixing the audio files.
     def self.safe_play(file,volume=100,pitch=100)
       return false if @failed_files && @failed_files[file]
-      pbSEPlay(file,volume,pitch)
+      begin
+        pbSEPlay(file,volume,pitch)
+      rescue ArgumentError
+        # Compatibility with older wrappers exposing only pbSEPlay(filename).
+        pbSEPlay(file)
+      end
       true
     rescue StandardError
       @failed_files ||= {}
