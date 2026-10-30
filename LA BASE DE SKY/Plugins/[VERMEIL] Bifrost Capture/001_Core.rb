@@ -73,6 +73,7 @@ module BifrostCapture
     "sfx_shake"=>"none", "sfx_caught"=>"none", "sfx_breakout"=>"none",
     "sfx_flee"=>"none", "sfx_alert"=>"none",
     "sfx_critical"=>"none", "sfx_shiny"=>"none",
+    "sfx_backstrike"=>"none", "sfx_calmed"=>"none",
     "shiny_fx_enabled"=>"1", "shiny_fx_intensity"=>"2",
     "shiny_pulse_frames"=>"150", "shiny_sound_enabled"=>"1",
     "shiny_sound_volume"=>"85", "shiny_sound_pitch"=>"112",
