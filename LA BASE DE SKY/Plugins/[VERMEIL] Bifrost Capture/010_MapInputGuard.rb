@@ -4,6 +4,10 @@
 module BifrostCapture
   module MapInputGuard
     def update_input(*args)
+      if defined?(BifrostCapture::LiveAim) &&
+         BifrostCapture::LiveAim.consume_claimed_map_input?
+        return
+      end
       if defined?(BifrostCapture::LiveAim) && BifrostCapture::LiveAim.active?
         # D opens the registered-items Ready Menu, and F9 is debug. Exit aim
         # before delegating; never steal these actions for Bifröst.
