@@ -1,4 +1,4 @@
-# Bifröst Capture 0.9.3 — controles independientes de ratón y audio real CC0
+# Bifröst Capture 0.9.4 — guía contextual dinámica y controles sin mouse
 
 **Pokémon Vermeil · Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -48,6 +48,41 @@ El nuevo control no consume las direcciones, no introduce
 Mayús+S nunca se interpreta como una pulsación prolongada para alternar.
 El mouse continúa siendo opcional.
 
+
+## Guía de controles contextual
+
+La franja inferior del **HUD Ball/Team existente** actúa como guía.
+No aparece ninguna ventana adicional que tape el mapa. Al empezar
+a apuntar se muestran hasta seis acciones relevantes en dos líneas;
+tras unos instantes, la guía se compacta automáticamente en una sola.
+Los avisos importantes (p. ej. objetivo bloqueado) tienen prioridad
+sobre la expansión. La guía reaparece al cambiar de Ball/Team o si
+cambian las etiquetas efectivas de las teclas.
+
+Los valores proceden directamente de las acciones lógicas actuales
+del juego y de `config.ini`. Para acciones reasignadas mediante F1,
+se consulta `KeybindingReader.key_name` cuando está presente o el
+lector de nombres que exponga `Input`. Si ninguno está disponible, se
+muestra el nombre de la **acción lógica** en vez de inventar una tecla
+física. Los atajos directos Tab/E reflejan la configuración Bifröst y
+se omiten si mkxp no admite `triggerex?`. Se muestran controles del
+modo activo: Ball o Pokémon.
+
+Ajustes:
+
+```ini
+hud_controls=auto
+hud_controls_intro_frames=150
+```
+
+- `auto`: guía de bienvenida y después recordatorios compactos.
+- `always`: guía desplegada siempre que no tape avisos importantes.
+- `off`: ocultar indicaciones de teclas sin desactivar el HUD normal.
+- `hud_controls_intro_frames`: duración de la guía inicial (30–360 frames).
+
+No se crean nuevos `Viewport` ni se interceptan acciones; se dibuja
+dentro del bitmap del HUD ya existente y desaparece al cerrar el apuntado.
+La duración son fotogramas de juego, no segundos fijos.
 
 ## Memoria de selección
 

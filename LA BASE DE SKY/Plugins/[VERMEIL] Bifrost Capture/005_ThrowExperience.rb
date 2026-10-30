@@ -27,6 +27,8 @@ module BifrostCapture
       @selected = 0
       @selection_key = nil
       @selection_frame = 0
+      @help_age = 0
+      @help_signature = nil
     end
 
     def equip(list,selected)
@@ -84,6 +86,111 @@ module BifrostCapture
       bmp.fill_rect(5,31,8,2,color)
       bmp.fill_rect(51,31,8,2,color)
       bmp.fill_rect(30,30,4,4,color)
+    end
+
+    # Keys shown here are the keys which are ACTUALLY accepted by Bifröst:
+    # F1-mapped actions resolve through the project's runtime key reader,
+    # while direct Tab/E shortcuts resolve from Bifröst's live configuration.
+    def hint_key(cfg,role)
+      case role
+      when :target
+        physical = cfg["keyboard_target_key"].to_s.downcase
+        if physical != "none" && cfg["keyboard_target_key"] !=
+           cfg["keyboard_mode_key"] && Input.respond_to?(:triggerex?) &&
+           %w[tab e r f t g].include?(physical)
+          return physical == "tab" ? "Tab" : physical.upcase
+        end
+        BifrostCapture.binding_name(cfg,"target_key")
+      when :select
+        BifrostCapture.binding_name(cfg,"ball_key")
+      when :mode
+        physical = cfg["keyboard_mode_key"].to_s.downcase
+        if Input.respond_to?(:triggerex?) &&
+           %w[tab e r f t g].include?(physical)
+          return physical == "tab" ? "Tab" : physical.upcase
+        end
+        BifrostCapture.binding_name(cfg,"mode_key")
+      when :aim
+        BifrostCapture.binding_name(cfg,"hotkey")
+      when :throw
+        BifrostCapture.hud_action_key("throw")
+      when :cancel
+        BifrostCapture.hud_action_key("cancel")
+      end
+    end
+
+    def prompt_entries(cfg,mode)
+      label = mode == :ball ? "Ball" : "Equipo"
+      {
+        :target=>[hint_key(cfg,:target),"Objet."],
+        :select=>[hint_key(cfg,:select),label],
+        :mode=>[hint_key(cfg,:mode),"Modo"],
+        :throw=>[hint_key(cfg,:throw),"Lanzar"],
+        :cancel=>[hint_key(cfg,:cancel),"Salir"],
+        :aim=>[hint_key(cfg,:aim),"Apuntar"]
+      }
+    end
+
+    # In a 278px panel, measure each keycap and its caption rather than
+    # clipping long remapped key names. Less important prompts are omitted
+    # from one row when the available width is exhausted.
+    def draw_prompt_row(bmp,y,entries)
+      x = 11
+      right = bmp.width-9
+      bmp.font.size = 9
+      bmp.font.bold = false
+      entries.each do |entry|
+        key,label = entry
+        next if key.nil? || key.to_s.empty? || key.to_s == "--"
+        key = key.to_s
+        key_width = bmp.text_size(key).width.ceil+9
+        label_width = bmp.text_size(label).width.ceil+2
+        total = key_width+label_width+7
+        next if x+total > right
+        bmp.fill_rect(x,y+1,key_width,12,Color.new(65,92,107,192))
+        bmp.fill_rect(x,y+1,key_width,1,Color.new(139,190,203,184))
+        bmp.font.color = Color.new(245,249,255)
+        bmp.draw_text(x+4,y,key_width-6,13,key)
+        bmp.font.color = Color.new(178,206,217)
+        bmp.draw_text(x+key_width+3,y,label_width,13,label)
+        x += total
+      end
+    end
+
+    # Transient two-line guide, compact single-line reminders afterward.
+    # Everything remains within the EXISTING inventory/party panel.
+    def draw_context_controls(bmp,cfg,mode,notice)
+      if cfg["hud_controls"] == "off"
+        bmp.font.bold = false
+        bmp.font.size = 11
+        bmp.font.color = Color.new(241,216,171)
+        bmp.draw_text(11,65,bmp.width-22,14,notice.to_s)
+        return
+      end
+      controls = prompt_entries(cfg,mode)
+      signature = [mode,controls.values].inspect
+      if signature != @help_signature
+        @help_signature = signature
+        @help_age = 0
+      end
+      @help_age += 1
+      duration = cfg["hud_controls_intro_frames"].to_i.clamp(30,360)
+      generic_notice = notice.nil? || notice.to_s.empty? ||
+                       notice.to_s == _INTL("Listo para lanzar")
+      expanded = (cfg["hud_controls"] == "always" ||
+                 @help_age <= duration) && generic_notice
+
+      bmp.fill_rect(9,74,bmp.width-17,1,Color.new(92,121,139,120))
+      if expanded
+        draw_prompt_row(bmp,62,[:target,:select,:mode].map { |key| controls[key] })
+        draw_prompt_row(bmp,76,[:throw,:cancel,:aim].map { |key| controls[key] })
+      else
+        bmp.font.bold = false
+        bmp.font.size = 11
+        bmp.font.color = Color.new(241,216,171)
+        bmp.draw_text(11,62,bmp.width-22,13,notice.to_s)
+        draw_prompt_row(bmp,76,[:target,:select,:mode,:throw].map { |key| controls[key] })
+      end
     end
 
     def draw(mode,item,count,focus,notice,party=nil,party_index=0)
@@ -176,22 +283,7 @@ module BifrostCapture
         bmp.font.size = 12
         bmp.draw_text(166,29,99,20,"Sin objetivo")
       end
-      bmp.font.size = 12
-      bmp.font.color = Color.new(240,219,173)
-      bmp.draw_text(11,64,256,15,notice.to_s)
-      bmp.font.size = 9
-      bmp.font.color = Color.new(172,194,211)
-      cfg = BifrostCapture.options
-      aim = BifrostCapture.binding_name(cfg,"hotkey")
-      ball = BifrostCapture.binding_name(cfg,"ball_key")
-      target_key = cfg["keyboard_target_key"].to_s.upcase
-      mode_key = cfg["keyboard_mode_key"].to_s.upcase
-      help = if target_key != "NONE" && mode_key != "NONE"
-               "#{target_key} obj. · #{mode_key} modo · #{ball}/Mayús+#{ball} sel."
-             else
-               "#{aim} apuntar · #{ball} cambiar/mantener modo"
-             end
-      bmp.draw_text(11,78,256,12,help)
+      draw_context_controls(bmp,BifrostCapture.options,mode,notice)
     end
 
     def dispose

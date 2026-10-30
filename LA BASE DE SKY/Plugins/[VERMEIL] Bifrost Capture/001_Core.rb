@@ -20,6 +20,7 @@ module BifrostCapture
     "mouse_right_mode"=>"1", "remember_selection"=>"1",
     "debug_input_guard"=>"1", "allow_shared_bindings"=>"0",
     "ball_hold_mode_frames"=>"10",
+    "hud_controls"=>"auto", "hud_controls_intro_frames"=>"150",
     "capture_enabled"=>"1", "battle_enabled"=>"1", "restricted_species"=>"1",
     "encounter_mode"=>"classic", "spawn_chance"=>"50",
     "spawn_min_distance"=>"3", "spawn_max_distance"=>"6", "spawn_limit"=>"5",
@@ -288,15 +289,40 @@ module BifrostCapture
     capture_action(options,"hotkey")
   end
 
+  # Resolve the current physical label on demand, not at HUD initialization.
+  # F1 mappings can change while the game is running. Do not display a
+  # guessed physical key if the runtime doesn't expose its bindings.
+  def self.action_key_name(action)
+    return nil if action.nil?
+    if defined?(KeybindingReader) &&
+       KeybindingReader.respond_to?(:key_name)
+      value = KeybindingReader.key_name(action)
+      return value.to_s.strip unless value.nil? || value.to_s.strip.empty?
+    end
+    if Input.respond_to?(:key_name)
+      value = Input.key_name(action)
+      return value.to_s.strip unless value.nil? || value.to_s.strip.empty?
+    end
+    nil
+  rescue StandardError
+    nil
+  end
+
   def self.binding_name(cfg,field)
-    name = cfg[field]
-    return "--" if name.to_s == "none"
+    name = cfg[field].to_s.downcase
+    return "--" if name == "none" || name.empty?
     action = capture_action(cfg,field)
     return "--" unless action
-    if defined?(KeybindingReader)
-      return KeybindingReader.key_name(action)
-    end
-    { "jumpup"=>"A", "jumpdown"=>"S" }[name] || name.to_s.upcase
+    # Logical action name, not a potentially outdated physical letter.
+    action_key_name(action) || name.upcase
+  end
+
+  def self.hud_action_key(name)
+    const = { "throw"=>:USE, "cancel"=>:BACK }[name.to_s]
+    return nil unless const && Input.const_defined?(const)
+    action_key_name(Input.const_get(const)) || const.to_s
+  rescue StandardError
+    nil
   end
 
   # Developer commands frequently use CTRL + actions on map. In debug,
