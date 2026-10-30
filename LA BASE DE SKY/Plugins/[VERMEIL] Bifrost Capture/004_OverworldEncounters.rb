@@ -22,6 +22,7 @@ module BifrostCapture
   def self.erase_wild(event)
     return false unless generated?(event)
     stop_spawn_intro(event)
+    BifrostCapture::ShinySignals.forget(event) if defined?(BifrostCapture::ShinySignals)
     @wild_events.delete(event.object_id)
     map = event.map
     if defined?($scene) && $scene.is_a?(Scene_Map)
@@ -179,6 +180,8 @@ module BifrostCapture
     end
     @wild_events[event.object_id] = event
     spawn_intro(event,local)
+    BifrostCapture::ShinySignals.on_spawn(event,local) if
+      defined?(BifrostCapture::ShinySignals) && shiny
     :spawned
   end
 
