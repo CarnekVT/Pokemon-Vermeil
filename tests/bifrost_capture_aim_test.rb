@@ -72,6 +72,14 @@ class FakePlayer
   def initialize; @party=[]; @pokedex=nil; end
   def party_full?; false; end
 end
+class FakeFullPlayer < FakePlayer
+  def party_full?; true; end
+end
+class FakeStorage
+  attr_reader :stored
+  def pbStoreCaught(pokemon); @stored=pokemon; 0; end
+  def [](index); Struct.new(:name).new("Caja 1"); end
+end
 class FakeBag
   attr_reader :used
   def initialize; @used=0; end
@@ -118,6 +126,7 @@ def _INTL(s,*args); s; end
 class BifrostCaptureIntegrationTest < Minitest::Test
   def setup
     $player=nil
+    $PokemonStorage=nil
     $scene=Object.new
     $game_map=FakeMap.new
     $game_player=Struct.new(:x,:y,:direction,:screen_x,:screen_y).
@@ -182,6 +191,19 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     assert_equal :miss,BifrostCapture::Feedback.last_result[:kind]
     assert_equal 1,$bag.used
     assert_equal 0,BifrostCapture.captures.length
+  end
+
+  def test_full_team_stores_to_box_and_identifies_destination
+    $player=FakeFullPlayer.new
+    $PokemonStorage=FakeStorage.new
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,6)
+    assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,BifrostCapture.options)
+    assert_equal :PIKACHU,$PokemonStorage.stored.species
+    assert_includes [:caught,:critical],BifrostCapture::Feedback.last_result[:kind]
+    assert_equal "Enviado a Caja 1",BifrostCapture::Feedback.last_result[:detail]
   end
 
   def test_release_has_explicit_distinct_feedback
