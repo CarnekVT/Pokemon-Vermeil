@@ -32,6 +32,8 @@ jobs:
         run: ruby tests/bifrost_capture_core_test.rb
       - name: Validate aiming and hitting without mkxp
         run: ruby tests/bifrost_capture_aim_test.rb
+      - name: Verify persistent maximum alert and berry recovery
+        run: ruby tests/bifrost_capture_pressure_test.rb
       - name: Verify free movement while aiming
         run: ruby tests/bifrost_capture_live_test.rb
       - name: Verify Legends-style left slide and result queue
