@@ -60,7 +60,10 @@ export function renderArtStudio(s){
  return '<div class="bf-art-header"><div><div class="bf-kicker">BIFRÖST / ART STUDIO</div><h1 class="bf-headline">Interfaz de captura</h1>'+
    '<p class="bf-sub">Diseña con capas PNG reales. Arrastra el HUD sobre la vista previa y ajusta sus propiedades a la derecha. Los iconos proceden del juego.</p></div>'+
    '<div class="bf-art-toggles">'+opts+'</div></div>'+
-   '<div class="bf-art-toolbar"><span class="bf-tag">Vista 640 × 480</span><span class="bf-tag">No sustituye la prueba en mkxp-z</span>'+
+   '<div class="bf-art-toolbar"><span class="bf-tag">Vista 640 × 480</span>'+
+   '<span class="bf-tag">Cooldown: '+esc(c.throw_cooldown_frames)+' frames</span>'+
+   '<button class="bf-btn" data-art-charge="25">Simular recarga</button>'+
+   '<button class="bf-btn" data-art-charge="100">Ball lista</button>'+
    '<button class="bf-btn" data-art-reload>Recargar PNG del juego</button></div>'+
    '<div class="bf-art-stage"><div class="bf-sim-board" data-art-board>'+
     '<div class="bf-sim-land"><div class="bf-sim-target-dot"></div><div class="bf-sim-grass"></div>'+

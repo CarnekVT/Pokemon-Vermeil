@@ -46,6 +46,17 @@ class BifrostCoreTest < Minitest::Test
     end
   end
 
+  def test_negative_hud_offsets_survive_ini_parsing
+    require "tmpdir"
+    Dir.mktmpdir("bifrost-offsets") do |dir|
+      path=File.join(dir,"settings.ini")
+      File.write(path,"[global]\nhud_offset_x=-72\nhud_offset_y=35\n")
+      data=BifrostCapture.read_ini(path,["global"])
+      assert_equal "-72",data["global"]["hud_offset_x"]
+      assert_equal "35",data["global"]["hud_offset_y"]
+    end
+  end
+
   def test_new_capture_pacing_and_personalizable_hud_defaults
     cfg = BifrostCapture::DEFAULTS
     assert_equal "17",cfg["throw_cooldown_frames"]

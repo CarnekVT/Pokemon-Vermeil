@@ -90,7 +90,7 @@ module BifrostCapture
           section = candidate if allowed_sections.include?(candidate) ||
             candidate =~ /\A(map:\d+|species:[a-z0-9_]+|event:\d+:\d+)\z/
           sections[section] ||= {}
-        elsif line =~ /\A([a-z0-9_]+)\s*=\s*([a-z0-9_]+)\z/i
+        elsif line =~ /\A([a-z0-9_]+)\s*=\s*(-?[a-z0-9_]+)\z/i
           sections[section][$1.downcase] = $2.downcase
         end
       end

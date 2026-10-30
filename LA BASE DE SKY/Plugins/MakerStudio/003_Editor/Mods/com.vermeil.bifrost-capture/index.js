@@ -210,7 +210,7 @@ function parseCfg(raw){
   const line=row.replace(/[;#].*$/,"").trim();
   const h=/^\[(global|map:\d+|species:[a-z0-9_]+|event:\d+:\d+)\]$/i.exec(line);
   if(h){section=h[1].toLowerCase();out[section]??={};continue;}
-  const kv=/^([a-z_]+)\s*=\s*([a-z0-9_]+)$/i.exec(line);
+  const kv=/^([a-z_]+)\s*=\s*(-?[a-z0-9_]+)$/i.exec(line);
   if(kv&&D[kv[1].toLowerCase()]!==undefined)out[section][kv[1].toLowerCase()]=kv[2].toLowerCase();
  }
  return out;
@@ -625,6 +625,8 @@ class Studio{
   const artSelect=node.getAttribute("data-art-select");
   if(artSelect){this.artSelected=artSelect;this.render();return;}
   if(node.hasAttribute("data-art-reload")){this.reloadArt();return;}
+  const charge=node.getAttribute("data-art-charge");
+  if(charge!==null){this.demoCharge=Math.max(0,Math.min(100,Number(charge)||0));this.render();return;}
   if(node.hasAttribute("data-art-import")){
     this.artImportId=node.getAttribute("data-art-import");
     const upload=this.root.querySelector("[data-art-file-input]");
