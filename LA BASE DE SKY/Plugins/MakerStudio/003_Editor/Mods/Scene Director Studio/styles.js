@@ -12,13 +12,14 @@ export const STYLES = `
 
 /* v0.4 · BAS/BSS-style document workspace (not browser/OS fullscreen) */
 body.sd-fullscreen-lock{overflow:hidden!important;overscroll-behavior:none!important}
-.sd-shell.sd-fullscreen-active{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-height:none!important;max-width:none!important;z-index:2147483000!important;margin:0!important;border:0!important;border-radius:0!important;background:var(--bg-primary,#11131a)}
+.sd-shell{position:relative}.sd-shell.sd-fullscreen-active{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-height:none!important;max-width:none!important;z-index:2147483000!important;margin:0!important;border:0!important;border-radius:0!important;background:var(--bg-primary,#11131a)}
 @supports(height:100dvh){.sd-shell.sd-fullscreen-active{height:100dvh!important}}
 .sd-shell.sd-fullscreen-active .sd-root{height:100%!important;min-width:0!important}
 .sd-shell.sd-fullscreen-active .sd-library{height:100%!important}
 .sd-fullscreen-button[aria-pressed="true"]{border-color:var(--accent,#7d85ff)!important;background:rgba(111,118,232,.2)!important}
-.sd-root.sd-timeline-hidden{grid-template-rows:48px minmax(260px,1fr) 0!important}
-.sd-root.sd-timeline-hidden>.sd-timeline{display:none!important}
+.sd-root.sd-timeline-hidden{grid-template-rows:48px minmax(260px,1fr) 40px!important}
+.sd-root.sd-timeline-hidden>.sd-timeline{grid-template-rows:40px 0!important}
+.sd-root.sd-timeline-hidden .sd-timeline-scroll{display:none!important}
 .sd-side-head h3{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .sd-add-main{width:100%;margin-top:8px;text-align:center;font-weight:750}
 .sd-context-tip{font-size:11px;color:var(--text-secondary,#c2c5d2);line-height:1.55;margin:0 0 12px;border-left:3px solid rgba(111,118,232,.65);padding:4px 8px;background:rgba(127,127,127,.05)}
@@ -56,4 +57,11 @@ body.sd-fullscreen-lock{overflow:hidden!important;overscroll-behavior:none!impor
 .sd-work{min-width:0}
 @media(max-width:1100px){.sd-toolbar{gap:4px}.sd-toolbar .sd-status[data-role="engine"]{display:none}.sd-work{grid-template-columns:minmax(190px,23%) minmax(250px,1fr) minmax(220px,26%)}.sd-preview-foot>span:first-child{display:none}}
 @media(max-width:800px){.sd-work{grid-template-columns:minmax(175px,31%) minmax(260px,1fr)}.sd-side.right{display:none}.sd-toolbar{overflow-x:auto;scrollbar-width:thin}.sd-command-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
+
+.sd-use-overlay{position:absolute;inset:0;z-index:1020;display:flex;align-items:center;justify-content:center;background:rgba(5,8,16,.87);padding:16px}
+.sd-use-panel{width:min(760px,100%);max-height:94%;overflow:auto;border:1px solid var(--border,#505770);border-radius:12px;padding:20px;background:var(--bg-secondary,#202635);box-shadow:0 24px 65px rgba(0,0,0,.55)}
+.sd-use-panel>.sd-dialog-stack{font-size:12px}
+.sd-use-panel code{user-select:text}
+.sd-use-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sd-use-top h2{font-size:17px;margin:0}
 `;
