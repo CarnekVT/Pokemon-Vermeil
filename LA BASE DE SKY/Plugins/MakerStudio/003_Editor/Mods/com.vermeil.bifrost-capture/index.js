@@ -4,10 +4,12 @@ const ROSTER="Plugins/[VERMEIL] Bifrost Capture/roster.ini";
 const POKEMON_FILES=["PBS/pokemon.txt","PBS/pokemon_Vermeil.txt"];
 const LEGEND="RAIKOU ENTEI SUICUNE LATIAS LATIOS ARTICUNO ZAPDOS MOLTRES UXIE MESPRIT AZELF COBALION TERRAKION VIRIZION GENESECT LANDORUS TORNADUS THUNDURUS ETERNATUS TAPUKOKO TAPULELE TAPUBULU TAPUFINI".split(" ");
 const D={
- profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"aux2",control_mode:"hold",
+ profile:"bifrost",enabled:"1",access_mode:"always",hotkey:"jumpup",control_mode:"hold",
+ ball_key:"jumpdown",target_key:"action",mode_key:"special",debug_input_guard:"1",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
  spawn_lifetime:"45",spawn_filter:"all",spawn_grass_only:"1",spawn_allow_fishing:"0",
+ ow_extra_spawn_chance:"0",ow_extra_spawn_cooldown:"7",
  ow_form:"0",ow_min_level:"0",ow_max_level:"0",ow_spawn_probability:"100",
  range:"7",width:"7",optimal_range:"4",alert_distance:"3",hit_near:"100",hit_far:"60",
  capture_floor:"10",back_multiplier:"175",critical_front:"3",critical_back:"35",
@@ -17,7 +19,13 @@ const D={
  throw_frames:"18",throw_arc:"36",aim_chain:"0",flee_steps:"5",flee_speed:"4",
  flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",
  attempt_limit:"0",instant_modifier:"100",
- feedback_enabled:"1",feedback_frames:"150",feedback_sfx:"1",capture_fx:"1"
+ temperament:"mixed",neutral_weight:"50",timid_weight:"30",aggressive_weight:"20",
+ timid_alert_distance:"4",aggressive_alert_distance:"5",aggressive_attack_distance:"1",
+ aggressive_chase_speed:"4",aggressive_level_bonus:"2",
+ feedback_enabled:"1",feedback_frames:"150",feedback_sfx:"1",capture_fx:"1",
+ audio_profile:"vanilla",sfx_aim:"none",sfx_switch:"none",sfx_lock:"none",
+ sfx_throw:"none",sfx_hit:"none",sfx_shake:"none",sfx_caught:"none",
+ sfx_breakout:"none",sfx_flee:"none",sfx_alert:"none"
 };
 const PRESETS={
  bifrost:{...D},
@@ -37,20 +45,30 @@ const PRESET_HELP={
 };
 const CHOICES={
  profile:Object.keys(PRESETS),access_mode:["always","nearby","event"],
- hotkey:["aux2","aux1","none"],control_mode:["toggle","hold"],
+ hotkey:["jumpup","jumpdown","aux1","aux2","action","special","none"],
+ ball_key:["jumpup","jumpdown","aux1","aux2","action","special","none"],
+ target_key:["jumpup","jumpdown","aux1","aux2","action","special","none"],
+ mode_key:["jumpup","jumpdown","aux1","aux2","action","special","none"],
+ control_mode:["toggle","hold"],
  encounter_mode:["classic","hybrid","overworld"],spawn_filter:["all","allowlist"],
- reaction:["flee","attack","ignore"]
+ reaction:["flee","attack","ignore"],temperament:["mixed","neutral","timid","aggressive"],
+ audio_profile:["vanilla","original","muted"]
 };
-const V={ "1":"Sí","0":"No",aux1:"AUX1 (Q)",aux2:"AUX2 (W)",none:"Sin tecla",
+const V={ "1":"Sí","0":"No",aux1:"AUX1 (Q)",aux2:"AUX2 (W)",none:"Ninguno",jumpup:"JUMPUP (A)",jumpdown:"JUMPDOWN (S)",
+ action:"ACTION (Shift/Z)",special:"SPECIAL (D)",
  event:"Solo evento",always:"Siempre",nearby:"Con OW cercano",
  toggle:"Pulsar / lanzar con USE",hold:"Mantener / soltar",
  classic:"Encuentros tradicionales",hybrid:"Mixto",overworld:"OW completo",
- flee:"Huir",attack:"Atacar",ignore:"Ignorar",all:"Todos",allowlist:"Solo catálogo" };
+ flee:"Huir",attack:"Atacar",ignore:"Ignorar",all:"Todos",allowlist:"Solo catálogo",
+ mixed:"Mixto (probabilidades)",neutral:"Neutro",timid:"Miedoso",aggressive:"Agresivo",
+ vanilla:"Sonidos de Essentials",original:"Solo archivos propios",muted:"Silenciado" };
 const T=(v)=>V[v]??v;
 const F=[
  ["SISTEMA","general"],
  ["Perfil del proyecto","profile"],["Motor activo","enabled"],["Acceso al apuntado","access_mode"],
  ["Tecla de apertura","hotkey"],["Modalidad de control","control_mode"],
+ ["Cambiar Poké Ball","ball_key"],["Cambiar objetivo","target_key"],
+ ["Alternar lanzamiento/combate","mode_key"],["Proteger combos debug CTRL","debug_input_guard"],
  ["Captura directa","capture_enabled"],["Enviar Pokémon","battle_enabled"],
  ["Exclusividad del catálogo Bifröst","restricted_species"],
  ["ENCUENTROS NATURALES","spawns"],
@@ -58,6 +76,8 @@ const F=[
  ["Distancia mínima de aparición","spawn_min_distance",1,12],
  ["Distancia máxima de aparición","spawn_max_distance",1,16],
  ["OW simultáneos","spawn_limit",1,16],["Duración (pasos)","spawn_lifetime",0,999],
+ ["Ratio OW independiente / paso (%)","ow_extra_spawn_chance",0,100],
+ ["Espera tras aparición extra (pasos)","ow_extra_spawn_cooldown",0,250],
  ["Especies generadas","spawn_filter"],["Generar en hierba","spawn_grass_only"],
  ["Pesca: reservado, no activo","spawn_allow_fishing"],
  ["ESPECIE OW","species"],
@@ -85,24 +105,40 @@ const F=[
  ["Duración del resultado (frames)","feedback_frames",45,300],
  ["Sonidos de lanzamiento/captura","feedback_sfx"],
  ["Sacudidas de Ball","capture_shakes",1,5],["Fotogramas por sacudida","capture_shake_frames",4,20],
- ["COMPORTAMIENTO","behavior"],["Reacción al alertarse","reaction"],
+ ["COMPORTAMIENTO","behavior"],["Reacción anterior (compatibilidad)","reaction"],
+ ["Temperamento de esta especie","temperament"],
+ ["Probabilidad: neutro","neutral_weight",0,100],
+ ["Probabilidad: miedoso","timid_weight",0,100],
+ ["Probabilidad: agresivo","aggressive_weight",0,100],
+ ["Alerta miedoso (casillas)","timid_alert_distance",0,20],
+ ["Alerta agresivo (casillas)","aggressive_alert_distance",1,20],
+ ["Contacto agresivo (casillas)","aggressive_attack_distance",1,6],
+ ["Velocidad de persecución","aggressive_chase_speed",1,6],
+ ["Nivel extra en batalla agresiva","aggressive_level_bonus",0,10],
  ["Radio de alerta","alert_distance",0,20],["Huida en pasos","flee_steps",1,30],
  ["Velocidad de huida","flee_speed",1,6],
  ["Distancia para escapar","flee_disappear_distance",4,30],
  ["Máximo de bloqueo","flee_stuck_frames",15,600],
  ["Reaccionar ante Ball fallida","alert_on_miss"],
- ["Impact frame","impact_frames",0,12]
+ ["Impact frame","impact_frames",0,12],
+ ["AUDIO","audio"],
+ ["Modo de audio","audio_profile"],
+ ["Apuntar: SFX propio","sfx_aim"],["Cambiar Ball: SFX propio","sfx_switch"],
+ ["Fijar objetivo: SFX propio","sfx_lock"],["Lanzar: SFX propio","sfx_throw"],
+ ["Impacto: SFX propio","sfx_hit"],["Sacudida: SFX propio","sfx_shake"],
+ ["Captura: SFX propio","sfx_caught"],["Liberación: SFX propio","sfx_breakout"],
+ ["Huida: SFX propio","sfx_flee"],["Alerta: SFX propio","sfx_alert"]
 ];
 const GROUPS={};let section="";
 for(const row of F){if(row.length===2&&Object.values(D).indexOf(row[1])===-1&&
-  ["general","spawns","species","aim","capture","behavior"].includes(row[1])){
+  ["general","spawns","species","aim","capture","behavior","audio"].includes(row[1])){
  section=row[1];GROUPS[section]??=[];continue;
 }if(D[row[1]]!==undefined)GROUPS[section].push(row[1]);}
 const META=Object.fromEntries(F.filter(r=>D[r[1]]!==undefined).map(r=>[r[1],r]));
 const NAV=[
  ["overview","◈","Resumen"],["profiles","▤","Perfiles"],["spawns","☷","Encuentros OW"],
  ["species","◇","Catálogo"],["aim","⊕","Lanzamiento"],
- ["capture","◉","Captura"],["behavior","⚑","Comportamiento"],
+ ["capture","◉","Captura"],["behavior","⚑","Comportamiento"],["audio","♫","Audio"],
  ["scopes","▦","Ámbitos"],["tests","⌁","Validación"]
 ];
 const esc=(s)=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
