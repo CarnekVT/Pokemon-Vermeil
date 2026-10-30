@@ -50,10 +50,24 @@ module BifrostCapture
         point = target ? BifrostCapture.screen_position(target) :
           [$game_player.screen_x, $game_player.screen_y-56]
         key = BifrostCapture.hotkey
+        remembered = cfg["remember_selection"] == "1" &&
+                     defined?($PokemonGlobal) && $PokemonGlobal
+        last_ball = remembered ? $PokemonGlobal.bifrost_last_ball : nil
+        ball_index = balls.index { |entry| entry[0].to_s == last_ball.to_s } || 0
+        party_index = remembered ? $PokemonGlobal.bifrost_last_party_index.to_i : 0
+        party_index = party_index.clamp(0,[party.length-1,0].max)
+        old_mode = remembered ? $PokemonGlobal.bifrost_last_mode.to_s : ""
+        mode = if old_mode == "battle" && can_battle
+                 :battle
+               elsif old_mode == "ball" && can_ball
+                 :ball
+               else
+                 can_ball ? :ball : :battle
+               end
         @session = {
           :map=>$game_map.map_id, :config=>cfg, :balls=>balls,
-          :party=>party, :ball_index=>0, :party_index=>0,
-          :mode=>(can_ball ? :ball : :battle),
+          :party=>party, :ball_index=>ball_index, :party_index=>party_index,
+          :mode=>mode,
           :x=>point[0].to_f, :y=>point[1].to_f,
           :target=>target, :mouse_last=>nil, :mouse_active=>false,
           :held=>!!(key && Input.press?(key)), :frames=>0,
@@ -65,7 +79,18 @@ module BifrostCapture
         true
       end
 
+      def remember_selection(s)
+        return unless s && s[:config]["remember_selection"] == "1"
+        return unless defined?($PokemonGlobal) && $PokemonGlobal
+        index = s[:ball_index].to_i
+        ball = s[:balls][index] if s[:balls]
+        $PokemonGlobal.bifrost_last_ball = ball[0] if ball
+        $PokemonGlobal.bifrost_last_party_index = s[:party_index].to_i
+        $PokemonGlobal.bifrost_last_mode = s[:mode].to_s
+      end
+
       def close
+        remember_selection(@session)
         @hud.dispose if @hud
         @hud = nil
         @session = nil
@@ -88,48 +113,38 @@ module BifrostCapture
         enabled = candidate == :battle ?
           (cfg["battle_enabled"] == "1" && !s[:party].empty?) :
           (cfg["capture_enabled"] == "1" && !s[:balls].empty?)
-        if enabled
-          s[:mode] = candidate
-          BifrostCapture::Audio.play(:switch,cfg) if defined?(BifrostCapture::Audio)
-          return true
-        end
-        false
-      end
-
-      def cycle_equipped(s,cfg)
-        if s[:mode] == :ball && s[:balls].length > 1
-          s[:ball_index] = (s[:ball_index]+1) % s[:balls].length
-        elsif s[:mode] == :battle && s[:party].length > 1
-          s[:party_index] = (s[:party_index]+1) % s[:party].length
-        else
-          return false
-        end
-        BifrostCapture::Audio.play(:switch,cfg) if defined?(BifrostCapture::Audio)
+        return false unless enabled
+        s[:mode] = candidate
+        remember_selection(s)
+        BifrostCapture::Audio.play(:mode,cfg) if defined?(BifrostCapture::Audio)
         true
       end
 
-      # A short S press cycles the equipped item; holding S switches between
-      # Balls and Pokémon. This uses no third key and preserves D's Ready Menu.
-      def update_equipped_input(s,cfg,key)
-        return unless key
-        if Input.press?(key)
-          unless s[:ball_held]
-            s[:ball_held] = true
-            s[:ball_frames] = 0
-            s[:ball_long_done] = false
-          end
-          s[:ball_frames] += 1
-          threshold = cfg["ball_hold_mode_frames"].to_i
-          if threshold > 0 && s[:ball_frames] >= threshold &&
-             !s[:ball_long_done]
-            s[:ball_long_done] = toggle_mode(s,cfg)
-          end
-        elsif s[:ball_held]
-          cycle_equipped(s,cfg) unless s[:ball_long_done]
-          s[:ball_held] = false
-          s[:ball_frames] = 0
-          s[:ball_long_done] = false
+      def cycle_equipped(s,cfg,step=1)
+        if s[:mode] == :ball
+          return false if s[:balls].empty?
+          s[:ball_index] = (s[:ball_index]+step) % s[:balls].length
+          equipped = s[:balls][s[:ball_index]][0]
+          $PokemonGlobal.bifrost_last_ball = equipped if
+            cfg["remember_selection"] == "1" &&
+            defined?($PokemonGlobal) && $PokemonGlobal
+          BifrostCapture::Audio.play(:switch,cfg) if defined?(BifrostCapture::Audio)
+        else
+          return false if s[:party].empty?
+          s[:party_index] = (s[:party_index]+step) % s[:party].length
+          remember_selection(s)
+          BifrostCapture::Audio.play(:party,cfg) if defined?(BifrostCapture::Audio)
         end
+        true
+      end
+
+      def mouse_wheel_delta
+        return 0 unless Input.respond_to?(:scroll_v)
+        amount = Input.scroll_v
+        return 0 unless amount.is_a?(Numeric)
+        amount <=> 0
+      rescue StandardError
+        0
       end
 
       def cycle_target
@@ -198,8 +213,16 @@ module BifrostCapture
         mode_key = binding(cfg,"mode_key")
         ball_key = binding(cfg,"ball_key")
         target_key = binding(cfg,"target_key")
-        toggle_mode(s,cfg) if mode_key && Input.trigger?(mode_key)
-        update_equipped_input(s,cfg,ball_key)
+        mouse_mode = cfg["aim_mouse"] == "1" &&
+                     cfg["mouse_right_mode"] == "1" &&
+                     Input.const_defined?(:MOUSERIGHT) &&
+                     Input.trigger?(Input::MOUSERIGHT)
+        toggle_mode(s,cfg) if (mode_key && Input.trigger?(mode_key)) || mouse_mode
+        cycle_equipped(s,cfg) if ball_key && Input.trigger?(ball_key)
+        if cfg["mouse_wheel_select"] == "1"
+          delta = mouse_wheel_delta
+          cycle_equipped(s,cfg,delta > 0 ? -1 : 1) if delta != 0
+        end
         if target_key && target_key != ball_key &&
            target_key != mode_key && Input.trigger?(target_key)
           cycle_target
@@ -251,14 +274,18 @@ module BifrostCapture
         @hud.reticle(point[0],point[1],status,mood)
         if s[:mode] == :ball
           s[:balls] = BifrostCapture.ball_choices
-          s[:ball_index] = 0 if s[:ball_index] >= s[:balls].length
+          if s[:ball_index] >= s[:balls].length
+            s[:ball_index] = 0
+            remember_selection(s)
+          end
         end
         item = s[:mode] == :ball ?
           (s[:balls][s[:ball_index]] && s[:balls][s[:ball_index]][0]) :
           s[:party][s[:party_index]]
         amount = s[:mode] == :ball && item ? $bag.quantity(item) : 0
         @hud.equip(s[:balls],s[:ball_index])
-        @hud.draw(s[:mode],item,amount,focus,hint)
+        @hud.draw(s[:mode],item,amount,focus,hint,
+                  s[:party],s[:party_index])
 
         s[:held] = true if key && Input.press?(key)
         click = cfg["aim_mouse"] == "1" && defined?(Input::MOUSELEFT) &&
@@ -304,6 +331,7 @@ module BifrostCapture
           (s[:balls][s[:ball_index]] && s[:balls][s[:ball_index]][0]) :
           s[:party][s[:party_index]]
         return false unless item
+        remember_selection(s)
         if s[:mode] == :ball && $bag.quantity(item).to_i <= 0
           BifrostCapture.capture_result(:blocked,spec[0],
                                         _INTL("No quedan Poké Balls"),local)
