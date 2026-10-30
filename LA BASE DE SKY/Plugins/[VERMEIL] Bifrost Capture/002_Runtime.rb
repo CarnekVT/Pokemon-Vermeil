@@ -181,8 +181,8 @@ module BifrostCapture
     Pressure.add(event,behind ? :back : :front,local) if !caught && defined?(Pressure)
     destination = nil
     if caught
-      pkmn = pbGenerateWildPokemon(spec[0],spec[1])
-      pkmn.form = spec[2] if spec[2] > 0
+      pkmn = ow_pokemon_for(event,local)
+      return false unless pkmn
       pkmn.poke_ball = payload if pkmn.respond_to?(:poke_ball=)
       caught,destination = store_captured_pokemon(pkmn)
     end
