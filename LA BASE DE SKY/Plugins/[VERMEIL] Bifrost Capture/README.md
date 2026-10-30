@@ -13,7 +13,7 @@ todavía no validada dentro de mkxp con Visual 2.5D HD.
 |---|---|---|
 | Apuntar/lanzar | **A / JUMPUP** | Mantener para apuntar, soltar para lanzar |
 | Cambiar selección | **S / JUMPDOWN** | Ciclo inmediato de Ball o Pokémon |
-| Alternar Ball/Team | **S dos veces** | Doble pulsación rápida durante apuntado |
+| Alternar Ball/Team | **Mantener S brevemente** | Unos 10 fotogramas durante el apuntado |
 | Ciclo bidireccional | **Rueda del ratón** | Anterior o siguiente Ball/Pokémon |
 | Alternar con ratón | **Clic derecho** | Cambiar modo Ball/Team |
 | Lanzamiento directo | **C / USE** | Lanzar sin esperar a soltar A |
@@ -23,8 +23,8 @@ todavía no validada dentro de mkxp con Visual 2.5D HD.
 Los controles utilizan **acciones configurables de Essentials**, no códigos
 físicos de teclado. **D / SPECIAL** sigue abriendo accesos rápidos,
 **Q / AUX1** conserva Turbo, **W / AUX2** el debug de pasabilidades, **Shift/Z** la carrera, **F9** el debug y
-las flechas el movimiento. W no se intercepta. El doble toque de S se ajusta
-mediante `mode_double_tap_frames=16` y el clic derecho sigue disponible.
+las flechas el movimiento. W no se intercepta. La duración de S se ajusta con `ball_hold_mode_frames=10` y el clic derecho
+sigue disponible. Pulsaciones repetidas y rápidas de S solo cambian la Ball.
 La selección y las asociaciones se pueden ajustar en Maker Studio.
 
 La rueda usa `Input.scroll_v` únicamente si está disponible en mkxp-z.
