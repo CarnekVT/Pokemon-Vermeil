@@ -203,7 +203,21 @@ class Studio{
    const fs=this.ctx.fs;
    const cfg=await fs.projectExists(CFG)?await fs.readProjectFile(CFG):"";
    const roster=await fs.projectExists(ROSTER)?await fs.readProjectFile(ROSTER):"";
+   const original=parseCfg(cfg);
    this.cfg=parseCfg(cfg);this.roster=parseRoster(roster);
+   let fixed=0;
+   for(const scope of Object.keys(this.cfg)){
+    const rules=this.cfg[scope];
+    if((rules.allow_shared_bindings??this.cfg.global.allow_shared_bindings)!=="1"){
+     for(const field of ["hotkey","ball_key","target_key","mode_key"]){
+      const value=rules[field];
+      if(["aux1","aux2","action","special","use","back"].includes(value)){
+       rules[field]=field==="hotkey"?"jumpup":"none";
+       fixed++;
+      }
+     }
+    }
+   }
    const species=new Set([...LEGEND,...Object.keys(this.roster.bifrost),
     ...Object.keys(this.roster.spawn),...Object.keys(this.roster.blocked)]);
    for(const path of POKEMON_FILES){
@@ -215,8 +229,10 @@ class Studio{
    }
    this.species=[...species].sort();
    this.profile=this.cfg.global.profile||"bifrost";
-   this.cleanConfig=encodeCfg(this.cfg);this.cleanRoster=encodeRoster(this.roster);
-   this.message="Archivos cargados. Cambios sin guardar: 0";
+   this.cleanConfig=encodeCfg(original);this.cleanRoster=encodeRoster(this.roster);
+   this.message=fixed?
+    "Detectadas "+fixed+" teclas ocupadas. Sustituidas por controles seguros; pulsa Guardar.":
+    "Archivos cargados. Cambios sin guardar: 0";
   }catch(e){this.message="Error de lectura: "+(e.message||e);}
   this.render();
  }
@@ -430,6 +446,12 @@ class Studio{
     }
    }
    this.cfg[this.scope]??={};this.cfg[this.scope][key]=n.value;
+   if(key==="allow_shared_bindings"&&n.value==="0"){
+    for(const k of ["hotkey","ball_key","target_key","mode_key"]){
+     if(["aux1","aux2","action","special","use","back"].includes(this.value()[k]))
+       this.cfg[this.scope][k]=k==="hotkey"?"jumpup":"none";
+    }
+   }
    this.render();return;
   }
   const cat=n.getAttribute("data-roster"),species=n.getAttribute("data-species");
