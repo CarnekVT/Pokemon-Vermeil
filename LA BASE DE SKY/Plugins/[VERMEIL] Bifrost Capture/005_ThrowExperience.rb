@@ -131,12 +131,10 @@ module BifrostCapture
       bmp.font.size = 9
       bmp.font.color = Color.new(172,194,211)
       cfg = BifrostCapture.options
-      key = { "jumpup"=>"A", "jumpdown"=>"S", "aux1"=>"Q",
-              "aux2"=>"W", "action"=>"Z", "special"=>"D" }
-      aim = key[cfg["hotkey"]] || cfg["hotkey"].to_s.upcase
-      ball = key[cfg["ball_key"]] || cfg["ball_key"].to_s.upcase
+      aim = BifrostCapture.binding_name(cfg,"hotkey")
+      ball = BifrostCapture.binding_name(cfg,"ball_key")
       bmp.draw_text(11,78,256,12,
-        "#{aim} apuntar · #{ball} Ball · C lanzar · X salir")
+        "#{aim} apuntar · #{ball} Ball / mant.: modo")
     end
 
     def dispose
