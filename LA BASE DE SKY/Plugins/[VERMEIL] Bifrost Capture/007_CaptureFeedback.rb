@@ -156,7 +156,9 @@ module BifrostCapture
     end
   end
 
-  # The capture FX state machine lives in 008_LiveGamefeel.rb and is updated
+end
+
+# The capture FX state machine lives in 008_LiveGamefeel.rb and is updated
 # by the existing map frame hook. No extra frame loop may be introduced here.
 
 EventHandlers.add(:on_frame_update,:bifrost_capture_results,
