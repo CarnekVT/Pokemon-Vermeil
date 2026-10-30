@@ -11,6 +11,7 @@ module BifrostCapture
       end
 
       def binding(cfg,field,fallback)
+        return nil if cfg[field] == "none"
         if BifrostCapture.respond_to?(:input_action)
           result = BifrostCapture.input_action(cfg[field])
           return result if result
