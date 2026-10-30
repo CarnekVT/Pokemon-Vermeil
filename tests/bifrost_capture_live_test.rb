@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 # Headless input regression. Normal map updates must never be blocked by aim.
 require "minitest/autorun"
+def _INTL(string,*args); string.dup; end
 module EventHandlers
   def self.add(*); end
 end
