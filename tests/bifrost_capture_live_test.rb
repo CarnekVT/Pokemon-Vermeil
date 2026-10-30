@@ -42,6 +42,10 @@ module BifrostCapture
        "ball_hold_mode_frames"=>"3","line_of_sight"=>"0"}
     end
     def hotkey; Input::JUMPUP; end
+    def input_action(name)
+      {"use"=>Input::USE,"back"=>Input::BACK,
+       "jumpup"=>Input::JUMPUP,"jumpdown"=>Input::JUMPDOWN}[name]
+    end
     def capture_action(cfg,field)
       {"jumpup"=>Input::JUMPUP,"jumpdown"=>Input::JUMPDOWN}[cfg[field]]
     end
