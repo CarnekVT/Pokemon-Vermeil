@@ -296,6 +296,18 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     end
   end
 
+  def test_throw_uses_release_tile_not_trainer_position_after_moving
+    BifrostCapture.spawn_wild(:Land)
+    event=$game_map.events.values.first
+    event.instance_variable_set(:@x,10)
+    event.instance_variable_set(:@y,6)
+    # Player has continued walking during the Ball's flight.
+    $game_player.y=18
+    assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,
+             BifrostCapture.options,nil,0.0,[10,10])
+    assert_equal 1,BifrostCapture.captures.length
+  end
+
   def test_eighth_tile_stays_outside_capture_range
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
