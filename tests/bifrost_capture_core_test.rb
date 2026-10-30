@@ -31,6 +31,21 @@ class BifrostCoreTest < Minitest::Test
     end
   end
 
+  def test_all_editable_png_layers_and_vector_sources_are_in_project
+    root=File.expand_path("../LA BASE DE SKY/Graphics/UI/Bifrost",__dir__)
+    { "panel"=>[392,116],"slot"=>[46,42],
+      "slot_selected"=>[46,42],"target"=>[228,48],
+      "keycap"=>[74,22] }.each do |name,(width,height)|
+      path=File.join(root,"#{name}.png")
+      assert File.file?(path),"Missing game PNG: #{path}"
+      png=File.binread(path,24)
+      assert_equal "\x89PNG\r\n\x1a\n".b,png.byteslice(0,8)
+      assert_equal [width,height],png.byteslice(16,8).unpack("NN")
+      svg=File.join(root,"_source","#{name}.svg")
+      assert File.file?(svg),"Missing editable SVG: #{svg}"
+    end
+  end
+
   def test_new_capture_pacing_and_personalizable_hud_defaults
     cfg = BifrostCapture::DEFAULTS
     assert_equal "17",cfg["throw_cooldown_frames"]
@@ -40,6 +55,10 @@ class BifrostCoreTest < Minitest::Test
     assert_equal "100",cfg["hud_scale"]
     assert_equal "1",cfg["temperament_indicators"]
     assert_equal "3",cfg["aggressive_lunge_distance"]
+    assert_equal "4",cfg["aggressive_chase_speed"]
+    assert_equal "5",cfg["aggressive_lunge_speed"]
+    assert_equal "0",cfg["hud_offset_x"]
+    assert_equal "0",cfg["hud_offset_y"]
   end
 
   def test_three_temperaments_are_stable_and_selectable

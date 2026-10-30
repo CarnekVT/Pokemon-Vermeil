@@ -103,7 +103,7 @@ module BifrostCapture
     event.instance_variable_set(:@bifrost_chase_state,state)
     event.instance_variable_set(:@bifrost_mood_state,:alert)
     event.instance_variable_set(:@move_type,0)
-    event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(1,6)
+    event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(4,6)
     event.turn_toward_player if event.respond_to?(:turn_toward_player)
     @chasing ||= {}
     @chasing[event.object_id] = event
@@ -156,7 +156,7 @@ module BifrostCapture
       state[:phase] = :charge
       state[:charge_steps] = cfg["aggressive_charge_steps"].to_i.clamp(1,5)
       state[:rest] = 0
-      event.move_speed = cfg["aggressive_lunge_speed"].to_i.clamp(1,5)
+      event.move_speed = cfg["aggressive_lunge_speed"].to_i.clamp(5,6)
       event.instance_variable_set(:@bifrost_mood_state,:charge)
       BifrostCapture::Audio.play(:alert,cfg) if defined?(BifrostCapture::Audio)
     end
@@ -182,7 +182,8 @@ module BifrostCapture
     before = [event.x,event.y]
     event.move_toward_player if event.respond_to?(:move_toward_player)
     # Keep a small breathing interval after each discrete tile movement.
-    state[:rest] = cfg["aggressive_step_pause"].to_i.clamp(0,60)
+    state[:rest] = state[:phase] == :charge ? 0 :
+      cfg["aggressive_step_pause"].to_i.clamp(0,60)
     if before == [event.x,event.y]
       state[:stuck] += 1
       if state[:stuck] >= 45
@@ -195,7 +196,7 @@ module BifrostCapture
         state[:charge_steps] -= 1
         if state[:charge_steps] <= 0
           state[:phase] = :chase
-          event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(1,5)
+          event.move_speed = cfg["aggressive_chase_speed"].to_i.clamp(4,6)
           event.instance_variable_set(:@bifrost_mood_state,:chase)
         end
       end

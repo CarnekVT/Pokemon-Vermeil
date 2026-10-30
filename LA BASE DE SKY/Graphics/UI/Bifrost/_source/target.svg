@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="228" height="48" viewBox="0 0 228 48">
+<title>Bifröst UI editable target.svg</title>
+<g id="focus-card"><rect x="1" y="1" width="226" height="46" rx="6" fill="#315463" opacity=".88"/><rect x="3" y="3" width="222" height="42" rx="5" fill="#0d1929"/><path d="M6 7V41" stroke="#75c4c6" stroke-width="3"/><path d="M12 41H214" stroke="#659dad" opacity=".5"/></g><g id="status-details" fill="#7eb0ba" opacity=".5"><rect x="190" y="9" width="3" height="3"/><rect x="197" y="9" width="3" height="3"/><rect x="204" y="9" width="3" height="3"/></g>
+</svg>

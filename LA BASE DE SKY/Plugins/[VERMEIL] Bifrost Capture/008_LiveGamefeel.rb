@@ -19,6 +19,10 @@ module BifrostCapture
         !!@session
       end
 
+      def cooldown_remaining
+        @throw_cooldown.to_i
+      end
+
       def claim_map_input(key)
         @claimed_map_input = key
       end
@@ -364,7 +368,11 @@ module BifrostCapture
       def fire
         s = @session
         return false unless s
-        return false if @throw_cooldown.to_i > 0
+        if s[:mode] == :ball && @throw_cooldown.to_i > 0
+          BifrostCapture.notice(_INTL("La Poké Ball se está preparando")) if
+            @throw_cooldown.to_i == 1
+          return false
+        end
         target = s[:target]
         if s[:mouse_active]
           target = BifrostCapture.focus_at([s[:x],s[:y]],s[:config])
@@ -405,7 +413,8 @@ module BifrostCapture
         launched = BifrostCapture::Motion.launch(target,item,s[:mode],local)
         if launched
           s[:shot_during_hold] = true
-          @throw_cooldown = local["throw_cooldown_frames"].to_i.clamp(0,90)
+          @throw_cooldown = local["throw_cooldown_frames"].to_i.clamp(0,90) if
+            s[:mode] == :ball
           s[:target] = BifrostCapture.closest_target
           s[:mouse_active] = false
           remember_selection(s)

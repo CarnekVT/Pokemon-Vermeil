@@ -19,6 +19,7 @@ module BifrostCapture
       @panel = Sprite.new(@vp)
       @panel.bitmap = Bitmap.new([[Graphics.width-16,392].min,278].max,116)
       position_panel(BifrostCapture.options)
+      @skin = {}
       @last_status = nil
       @pulse = 0
       @icons = {}
@@ -30,6 +31,24 @@ module BifrostCapture
       @help_signature = nil
     end
 
+    # Real PNG layers in Graphics/UI/Bifrost (also supplied as editable SVGs).
+    # Missing assets safely fall back to the original procedural shapes.
+    def skin(name)
+      return @skin[name] if @skin.key?(name)
+      path = pbResolveBitmap("Graphics/UI/Bifrost/#{name}")
+      @skin[name] = path ? Bitmap.new(path) : nil
+    rescue StandardError
+      @skin[name] = nil
+    end
+
+    def skin_draw(bmp,name,x,y,w,h)
+      image = skin(name)
+      return false if !image || image.disposed?
+      bmp.stretch_blt(Rect.new(x,y,w,h),image,
+        Rect.new(0,0,image.width,image.height))
+      true
+    end
+
     def position_panel(cfg)
       scale = cfg["hud_scale"].to_i.clamp(70,140)/100.0
       scale = [scale,(Graphics.width-12).to_f/@panel.bitmap.width,
@@ -39,8 +58,12 @@ module BifrostCapture
       width = (@panel.bitmap.width*scale).round
       height = (@panel.bitmap.height*scale).round
       where = cfg["hud_position"].to_s
-      @panel.x = where.end_with?("_left") ? 8 : Graphics.width-width-8
-      @panel.y = where.start_with?("top_") ? 8 : Graphics.height-height-8
+      x = where.end_with?("_left") ? 8 : Graphics.width-width-8
+      y = where.start_with?("top_") ? 8 : Graphics.height-height-8
+      x += cfg["hud_offset_x"].to_i.clamp(-240,240)
+      y += cfg["hud_offset_y"].to_i.clamp(-180,180)
+      @panel.x = x.clamp(2,[Graphics.width-width-2,2].max)
+      @panel.y = y.clamp(2,[Graphics.height-height-2,2].max)
     end
 
     def equip(list,selected)
@@ -159,8 +182,10 @@ module BifrostCapture
         label_width = bmp.text_size(label).width.ceil+4
         total = key_width+label_width+9
         next if x+total > right
-        bmp.fill_rect(x,y+1,key_width,17,Color.new(65,92,107,192))
-        bmp.fill_rect(x,y+1,key_width,1,Color.new(139,190,203,184))
+        unless skin_draw(bmp,"keycap",x,y+1,key_width,17)
+          bmp.fill_rect(x,y+1,key_width,17,Color.new(65,92,107,192))
+          bmp.fill_rect(x,y+1,key_width,1,Color.new(139,190,203,184))
+        end
         bmp.font.color = Color.new(245,249,255)
         bmp.draw_text(x+4,y,key_width-6,18,key)
         bmp.font.color = Color.new(178,206,217)
@@ -210,8 +235,10 @@ module BifrostCapture
       position_panel(cfg)
       bmp = @panel.bitmap
       bmp.clear
-      bmp.fill_rect(0,0,bmp.width,bmp.height,Color.new(13,21,32,205))
-      bmp.fill_rect(0,0,3,bmp.height,Color.new(139,199,221))
+      unless skin_draw(bmp,"panel",0,0,bmp.width,bmp.height)
+        bmp.fill_rect(0,0,bmp.width,bmp.height,Color.new(13,21,32,205))
+        bmp.fill_rect(0,0,3,bmp.height,Color.new(139,199,221))
+      end
       bmp.font.size = 11
       bmp.font.bold = false
       bmp.font.color = Color.new(190,205,222)
@@ -228,10 +255,13 @@ module BifrostCapture
           idx = (@selected+offset) % @ball_list.length
           selected_ball = @ball_list[idx][0]
           left = 10+i*47
-          bmp.fill_rect(left,19,44,41,
-            Color.new(43,66,78,i==1 ? 218 : 112))
-          bmp.fill_rect(left,58,44,2,i==1 ?
-            Color.new(146,234,189) : Color.new(77,102,118))
+          slot = i == 1 ? "slot_selected" : "slot"
+          unless skin_draw(bmp,slot,left,19,44,41)
+            bmp.fill_rect(left,19,44,41,
+              Color.new(43,66,78,i==1 ? 218 : 112))
+            bmp.fill_rect(left,58,44,2,i==1 ?
+              Color.new(146,234,189) : Color.new(77,102,118))
+          end
           source = icon(selected_ball)
           if source && source.width > 0 && source.height > 0
             bmp.stretch_blt(Rect.new(left+10,23,24,26),source,
@@ -289,7 +319,8 @@ module BifrostCapture
         when :flee then "¡HUYE!"
         else BifrostCapture.temperament_label(mood)
         end
-        bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,215))
+        skin_draw(bmp,"target",157,18,bmp.width-164,47) ||
+          bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,215))
         bmp.fill_rect(157,18,3,47,hue)
         bmp.font.color = hue
         bmp.font.size = 12
@@ -297,15 +328,37 @@ module BifrostCapture
         bmp.font.color = Color.new(235,241,250)
         bmp.draw_text(165,41,bmp.width-174,20,"#{spec[0]}  Nv.#{spec[1]}")
       else
-        bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,190))
+        skin_draw(bmp,"target",157,18,bmp.width-164,47) ||
+          bmp.fill_rect(157,18,bmp.width-164,47,Color.new(26,38,50,190))
         bmp.font.color = Color.new(191,200,214)
         bmp.font.size = 12
         bmp.draw_text(166,29,bmp.width-174,22,"Sin objetivo")
+      end
+      # The launch cadence is shown on the HUD, not just enforced in code.
+      if mode == :ball
+        remaining = defined?(BifrostCapture::LiveAim) ?
+          BifrostCapture::LiveAim.cooldown_remaining.to_i : 0
+        total = [cfg["throw_cooldown_frames"].to_i,1].max
+        x = 13; y = 66; width = 134
+        bmp.fill_rect(x,y,width,5,Color.new(11,24,36,200))
+        color = remaining > 0 ? Color.new(245,186,102) :
+                                Color.new(136,221,177)
+        bmp.fill_rect(x,y,(width*(1.0-remaining.to_f/total)).clamp(0,width).round,
+                      5,color)
+        bmp.font.size = 11
+        bmp.font.bold = true
+        bmp.font.color = color
+        bmp.draw_text(bmp.width-127,2,116,16,
+          remaining > 0 ? "RECARGA #{remaining}f" : "BALL LISTA",2)
+        bmp.font.bold = false
       end
       draw_context_controls(bmp,cfg,mode,notice)
     end
 
     def dispose
+      (@skin || {}).each_value { |bmp|
+        bmp.dispose if bmp && !bmp.disposed?
+      }
       @icons.each_value do |bitmap|
         bitmap.dispose if bitmap && !bitmap.disposed?
       end

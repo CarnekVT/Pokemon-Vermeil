@@ -1,4 +1,4 @@
-# Bifröst Capture 1.1 — controles fluidos, fauna expresiva y HUD configurable
+# Bifröst Capture 1.2 — UI con arte editable, cooldown visible y persecución reactiva
 
 **Pokémon Vermeil · Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -86,6 +86,57 @@ hud_controls_intro_frames=150
 No se crean nuevos `Viewport` ni se interceptan acciones; se dibuja
 dentro del bitmap del HUD ya existente y desaparece al cerrar el apuntado.
 La duración son fotogramas de juego, no segundos fijos.
+
+## Bifröst UI Art Studio: cinco capas gráficas reales
+
+La interfaz del mapa ya no depende solo de rectángulos dibujados con Ruby:
+el juego carga las siguientes capas **PNG con transparencia**, de
+`Graphics/UI/Bifrost/`, con alternativas procedurales si faltan.
+
+| PNG | Uso en el juego | Fuente editable |
+|---|---|---|
+| `panel.png` | HUD general 392×116 | `_source/panel.svg` |
+| `slot.png` | Icono de Ball inactiva | `_source/slot.svg` |
+| `slot_selected.png` | Ball seleccionada | `_source/slot_selected.svg` |
+| `target.png` | Estado y especie apuntada | `_source/target.svg` |
+| `keycap.png` | Teclas contextualizadas | `_source/keycap.svg` |
+
+Los SVG se entregan como **fuentes editables por capas** para Inkscape,
+Illustrator y otras aplicaciones, y los PNG se pueden modificar en
+Aseprite, GIMP, Photoshop o Krita. Si se edita un SVG, exporta su resultado
+con el mismo nombre y dimensiones del PNG correspondiente.
+No se necesita IA para ajustar la presentación.
+
+**Reutilización del juego:** los sprites de Balls y el inventario provienen
+de `Graphics/Items/<ITEM>.png`, y los Pokémon del equipo se dibujan
+desde `Graphics/Pokemon/Icons`. Las cinco capas nuevas son fondos,
+marcos y controles; **no sustituyen** los sprites del juego.
+
+**Desde Maker Studio:** entra en `Bifröst Capture Studio → UI Art Studio`.
+Hay una vista previa de 640×480 con modos Ball y Team, biblioteca de
+recursos, selección de capas, controles de tamaño/posición/opacidad y
+reubicación del HUD arrastrando. Pulsa `Importar PNG` para incorporar
+un archivo desde tu equipo: el editor escribe el archivo binario en la
+ruta del proyecto y lo vuelve a leer para comprobarlo; `Recargar PNG`
+refresca la vista al modificarlo externamente. Los recursos originales
+de Pokémon se muestran como referencias de solo lectura.
+La vista previa utiliza la misma imagen que el juego, pero **no ejecuta**
+el renderer mkxp ni es un sustituto de las pruebas visuales.
+
+El editor mantiene guardado explícito de reglas; solo la operación
+`Importar PNG` sobrescribe inmediatamente la capa seleccionada.
+Los cambios de posición y de cooldown requieren pulsar **Guardar**.
+
+**Cooldown visible:** en modo Ball aparece la barra `BALL LISTA` o
+`RECARGA Nf`. `throw_cooldown_frames=17` limita solo Poké Balls,
+no el cambio a Team. El contador continúa después de cerrar la mira.
+Los ajustes de enfriamiento también figuran en `UI Art Studio →
+Interacción` y `Lanzamiento`.
+
+**Persecución:** un agresivo prepara la acción, hace una embestida
+breve a velocidad 5 (configurable de 4 a 6) y mantiene una persecución
+activa a velocidad 4–6. Durante la embestida no se introduce una pausa
+entre casillas. Ya no usa velocidad de paseo 3 como predeterminada.
 
 ## Gamefeel 1.1: riesgo, fauna expresiva y HUD personalizable
 

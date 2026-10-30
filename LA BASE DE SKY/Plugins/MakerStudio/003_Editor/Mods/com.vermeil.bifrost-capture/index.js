@@ -1,4 +1,5 @@
 import { STYLES } from "./styles.js";
+import { ART_ASSETS, renderArtStudio, loadArtAssets, releaseArtAssets } from "./art_studio.js";
 const CFG="Plugins/[VERMEIL] Bifrost Capture/config.ini";
 const ROSTER="Plugins/[VERMEIL] Bifrost Capture/roster.ini";
 const POKEMON_FILES=["PBS/pokemon.txt","PBS/pokemon_Vermeil.txt"];
@@ -10,6 +11,7 @@ const D={
  allow_shared_bindings:"0",keyboard_target_key:"tab",keyboard_mode_key:"e",
  hud_controls:"auto",hud_controls_intro_frames:"150",
  hud_position:"bottom_right",hud_scale:"100",hud_opacity:"94",
+ hud_offset_x:"0",hud_offset_y:"0",
  temperament_indicators:"1",
  capture_enabled:"1",battle_enabled:"1",restricted_species:"1",encounter_mode:"classic",
  spawn_chance:"50",spawn_min_distance:"3",spawn_max_distance:"6",spawn_limit:"5",
@@ -24,13 +26,13 @@ const D={
  throw_frames:"18",throw_arc:"36",aim_chain:"1",max_flights:"3",throw_cooldown_frames:"17",
  spawn_intro_frames:"26",
  aggressive_notice_frames:"25",aggressive_step_pause:"12",aggressive_attack_windup:"24",
- aggressive_lunge_distance:"3",aggressive_lunge_speed:"4",aggressive_charge_steps:"2",
+ aggressive_lunge_distance:"3",aggressive_lunge_speed:"5",aggressive_charge_steps:"2",
  flee_steps:"5",flee_speed:"4",
  flee_disappear_distance:"9",flee_stuck_frames:"90",alert_on_miss:"1",
  attempt_limit:"0",instant_modifier:"100",
  temperament:"mixed",neutral_weight:"50",timid_weight:"30",aggressive_weight:"20",
  timid_alert_distance:"4",aggressive_alert_distance:"5",aggressive_attack_distance:"1",
- aggressive_chase_speed:"3",aggressive_level_bonus:"2",
+ aggressive_chase_speed:"4",aggressive_level_bonus:"2",
  escape_reaction_enabled:"1",escape_reaction_chance:"25",
  escape_reaction_hp_percent:"8",escape_reaction_windup:"30",
  escape_reaction_recovery:"180",escape_reaction_range:"4",
@@ -101,6 +103,8 @@ const F=[
  ["Guía de controles HUD","hud_controls"],
  ["Duración de guía (frames)","hud_controls_intro_frames",30,360],
  ["Posición HUD","hud_position"],
+ ["Posición X (px)","hud_offset_x",-240,240],
+ ["Posición Y (px)","hud_offset_y",-180,180],
  ["Tamaño HUD (%)","hud_scale",70,140],
  ["Opacidad HUD (%)","hud_opacity",30,100],
  ["Señales visibles de temperamento","temperament_indicators"],
@@ -156,10 +160,10 @@ const F=[
  ["Alerta miedoso (casillas)","timid_alert_distance",0,20],
  ["Alerta agresivo (casillas)","aggressive_alert_distance",1,20],
  ["Contacto agresivo (casillas)","aggressive_attack_distance",1,6],
- ["Velocidad de persecución","aggressive_chase_speed",1,6],
+ ["Velocidad de persecución","aggressive_chase_speed",4,6],
  ["VENTAJA EN COMBATE: +niveles al Pokémon agresivo","aggressive_level_bonus",0,20],
  ["Radio de embestida agresiva (casillas)","aggressive_lunge_distance",1,20],
- ["Velocidad de embestida","aggressive_lunge_speed",1,5],
+ ["Velocidad de embestida","aggressive_lunge_speed",4,6],
  ["Pasos rápidos iniciales","aggressive_charge_steps",1,5],
  ["Preparación persecución (frames)","aggressive_notice_frames",0,90],
  ["Intervalo entre pasos (frames)","aggressive_step_pause",0,60],
@@ -194,7 +198,7 @@ for(const row of F){if(row.length===2&&Object.values(D).indexOf(row[1])===-1&&
 }if(D[row[1]]!==undefined)GROUPS[section].push(row[1]);}
 const META=Object.fromEntries(F.filter(r=>D[r[1]]!==undefined).map(r=>[r[1],r]));
 const NAV=[
- ["overview","◈","Resumen"],["profiles","▤","Perfiles"],["spawns","☷","Encuentros OW"],
+ ["overview","◈","Resumen"],["art","▣","UI Art Studio"],["profiles","▤","Perfiles"],["spawns","☷","Encuentros OW"],
  ["species","◇","Catálogo"],["aim","⊕","Lanzamiento"],
  ["capture","◉","Captura"],["behavior","⚑","Comportamiento"],["audio","♫","Audio"],
  ["scopes","▦","Ámbitos"],["tests","⌁","Validación"]
@@ -244,9 +248,15 @@ class Studio{
   this.cfg={global:{...D}};this.roster=parseRoster("");
   this.species=[...LEGEND];this.cleanConfig="";this.cleanRoster="";
   this.message="Leyendo configuración";this.saving=false;
+  this.artUrls={};this.artMode="ball";this.artSelected="panel";this.demoCharge=100;
+  this.artDrag=null;this.artLoading=false;
   this.root.addEventListener("click",e=>this.click(e));
   this.root.addEventListener("change",e=>this.change(e));
   this.root.addEventListener("input",e=>this.input(e));
+  this.root.addEventListener("pointerdown",e=>this.startArtDrag(e));
+  this.root.addEventListener("pointermove",e=>this.moveArtDrag(e));
+  this.root.addEventListener("pointerup",e=>this.endArtDrag(e));
+  this.root.addEventListener("pointercancel",e=>this.endArtDrag(e));
   this.render();this.load();
  }
  value(){return {...D,...this.cfg.global,...(this.cfg[this.scope]||{})};}
@@ -291,6 +301,71 @@ class Studio{
     "Archivos cargados. Cambios sin guardar: 0";
   }catch(e){this.message="Error de lectura: "+(e.message||e);}
   this.render();
+  this.reloadArt();
+ }
+ async reloadArt(){
+  if(this.artLoading)return;
+  this.artLoading=true;
+  const urls=await loadArtAssets(this.ctx);
+  releaseArtAssets(this.artUrls);
+  this.artUrls=urls;
+  this.artLoading=false;
+  if(this.section==="art")this.render();
+ }
+ async importArtPNG(file){
+  const asset=ART_ASSETS.find(a=>a.id===this.artImportId&&!a.readOnly);
+  if(!asset||!file)return;
+  try{
+   if(file.size>5*1024*1024||file.size<24)throw Error("El PNG debe pesar entre 24 B y 5 MB.");
+   const bytes=new Uint8Array(await file.arrayBuffer());
+   if([137,80,78,71,13,10,26,10].some((x,i)=>bytes[i]!==x))
+     throw Error("El archivo no es un PNG válido.");
+   const size=(i)=>((bytes[i]<<24)|(bytes[i+1]<<16)|(bytes[i+2]<<8)|bytes[i+3])>>>0;
+   if(size(16)>4096||size(20)>4096||!size(16)||!size(20))
+     throw Error("Dimensiones PNG fuera de rango.");
+   const tauri=window.__TAURI__;
+   const invoke=tauri?.core?.invoke||tauri?.tauri?.invoke;
+   const root=this.ctx?.editor?.gameRoot?.();
+   if(!invoke||!root)throw Error("Esta versión de Maker Studio no permite escritura binaria.");
+   const path=String(root).replace(/\\/g,"/").replace(/\/$/,"")+"/"+asset.path;
+   await invoke("write_binary_file",{path,data:Array.from(bytes)});
+   const verified=new Uint8Array(await invoke("read_binary_file",{path}));
+   if(verified.length!==bytes.length||verified.some((x,i)=>x!==bytes[i]))
+     throw Error("El archivo escrito no coincide con el seleccionado.");
+   this.message="PNG importado y verificado: "+asset.path;
+   await this.reloadArt();
+  }catch(err){this.message="No se importó el PNG: "+(err.message||err);}
+  this.render();
+ }
+ startArtDrag(e){
+  if(this.section!=="art")return;
+  const hud=e.target.closest("[data-art-hud]");
+  const board=e.target.closest("[data-art-board]");
+  if(!hud||!board)return;
+  const rect=board.getBoundingClientRect();
+  this.artDrag={startX:e.clientX,startY:e.clientY,
+    baseX:Number(this.value().hud_offset_x)||0,baseY:Number(this.value().hud_offset_y)||0,
+    rect,el:hud,left:parseFloat(hud.style.left)||0,top:parseFloat(hud.style.top)||0};
+  hud.setPointerCapture?.(e.pointerId);
+  e.preventDefault();
+ }
+ moveArtDrag(e){
+  const d=this.artDrag;if(!d)return;
+  const dx=e.clientX-d.startX,dy=e.clientY-d.startY;
+  const px=dx/Math.max(1,d.rect.width)*100,py=dy/Math.max(1,d.rect.height)*100;
+  d.el.style.left=Math.max(0,Math.min(100-(parseFloat(d.el.style.width)||0),d.left+px))+"%";
+  d.el.style.top=Math.max(0,Math.min(100-(parseFloat(d.el.style.height)||0),d.top+py))+"%";
+ }
+ endArtDrag(e){
+  const d=this.artDrag;if(!d)return;
+  this.artDrag=null;
+  const dx=(e.clientX-d.startX)*640/Math.max(1,d.rect.width);
+  const dy=(e.clientY-d.startY)*480/Math.max(1,d.rect.height);
+  this.cfg[this.scope]??={};
+  this.cfg[this.scope].hud_offset_x=String(Math.max(-240,Math.min(240,Math.round(d.baseX+dx))));
+  this.cfg[this.scope].hud_offset_y=String(Math.max(-180,Math.min(180,Math.round(d.baseY+dy))));
+  this.message="HUD reposicionado. Guarda para aplicarlo al juego.";
+  this.render();
  }
  async save(){
   if(this.saving)return;
@@ -332,6 +407,11 @@ class Studio{
    '</span>'+input+'</label>';
  }
  inspector(){
+  if(this.section==="art")return '<div class="bf-section-title">Composición</div>'+
+    ["hud_position","hud_scale","hud_opacity","hud_offset_x","hud_offset_y"].map(x=>this.field(x)).join("")+
+    '<div class="bf-section-title">Interacción</div>'+
+    ["hud_controls","hud_controls_intro_frames","throw_cooldown_frames"].map(x=>this.field(x)).join("")+
+    '<p class="bf-help">Edita los PNG en Graphics/UI/Bifrost/ y pulsa Recargar PNG. Posiciones y parámetros se guardan en config.ini.</p>';
   const section=this.section==="overview"?"general":this.section==="profiles"?"general":
     this.section==="tests"?"general":this.section==="scopes"?"general":this.section;
   return '<div class="bf-section-title">Parámetros de '+esc(section)+'</div>'+
@@ -390,6 +470,7 @@ class Studio{
  }
  stage(){
   const c=this.value();
+  if(this.section==="art")return renderArtStudio(this);
   if(this.section==="profiles")return this.profiles();
   if(this.section==="species")return this.speciesPanel();
   if(this.section==="scopes")return this.scopesPanel();
@@ -458,13 +539,18 @@ class Studio{
  render(){
   const dirty=this.dirty();
   this.root.innerHTML='<header class="bf-top"><div class="bf-logo">◈</div>'+
-   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Bifröst 1.0</small></div>'+
+   '<div class="bf-brand"><strong>Bifröst Capture Studio</strong><small>Essentials 21.1 · Visual Editor 1.2</small></div>'+
+   '<div class="bf-studio-tabs"><button class="bf-tab '+(this.section==="art"?"active":"")+'" data-section="art">Arte y HUD</button>'+
+   '<button class="bf-tab '+(this.section==="aim"?"active":"")+'" data-section="aim">Lanzamiento</button>'+
+   '<button class="bf-tab '+(this.section==="behavior"?"active":"")+'" data-section="behavior">Comportamiento</button></div>'+
    '<div class="bf-spacer"></div><select class="bf-scope" data-scope>'+
    Object.keys(this.cfg).sort().map(k=>'<option value="'+esc(k)+'"'+
    (k===this.scope?" selected":"")+'>'+esc(k)+'</option>').join("")+'</select>'+
    '<button class="bf-btn" data-action="scopes">+ Ámbito</button>'+
    '<span class="bf-pill '+(dirty?"dirty":"on")+'">'+
    (dirty?"● Sin guardar":"✓ Guardado")+'</span>'+
+   '<button class="bf-btn" data-action="focus" title="Ampliar el editor sin bloquear ventanas">'+
+   (this.root.classList.contains("bf-focus")?"Mostrar paneles":"Vista amplia")+'</button>'+
    '<button class="bf-btn" data-action="reload">Recargar</button>'+
    '<button class="bf-btn primary" data-action="save"'+
    (this.saving?" disabled":"")+'>Guardar cambios</button></header>'+
@@ -485,6 +571,11 @@ class Studio{
  }
  change(e){
   const n=e.target;
+  if(n.matches("[data-art-file-input]")){
+   const file=n.files?.[0];
+   if(file)this.importArtPNG(file);
+   return;
+  }
   if(n.matches("[data-scope]")){this.scope=n.value;this.render();return;}
   const key=n.getAttribute("data-field");
   if(key&&META[key]){
@@ -529,6 +620,20 @@ class Studio{
  }
  click(e){
   const node=e.target.closest("button");if(!node)return;
+  const artMode=node.getAttribute("data-art-mode");
+  if(artMode){this.artMode=artMode;this.render();return;}
+  const artSelect=node.getAttribute("data-art-select");
+  if(artSelect){this.artSelected=artSelect;this.render();return;}
+  if(node.hasAttribute("data-art-reload")){this.reloadArt();return;}
+  if(node.hasAttribute("data-art-import")){
+    this.artImportId=node.getAttribute("data-art-import");
+    const upload=this.root.querySelector("[data-art-file-input]");
+    if(upload){upload.value="";upload.click();}
+    return;
+  }
+  const copy=node.getAttribute("data-copy-path");
+  if(copy){navigator.clipboard?.writeText?.(copy).catch(()=>{});
+    this.message="Ruta: "+copy;this.render();return;}
   const nav=node.getAttribute("data-section");
   if(nav){this.section=nav;this.render();return;}
   const profile=node.getAttribute("data-profile");
@@ -543,6 +648,7 @@ class Studio{
   if(edit){this.scope="species:"+edit.toLowerCase();this.cfg[this.scope]??={};this.section="spawns";this.render();return;}
   const action=node.getAttribute("data-action");
   if(action==="save"){this.save();return;}
+  if(action==="focus"){this.root.classList.toggle("bf-focus");this.render();return;}
   if(action==="reload"){if(this.dirty()&&!this.confirmReload){this.confirmReload=true;this.message="Pulsa Recargar otra vez para descartar cambios.";this.render();return;}this.confirmReload=false;this.load();return;}
   if(action==="apply"){this.cfg.global={...PRESETS[this.profile]};this.scope="global";this.message="Perfil aplicado localmente; guarda los cambios.";this.render();return;}
   if(action==="scopes"){this.section="scopes";this.render();return;}
