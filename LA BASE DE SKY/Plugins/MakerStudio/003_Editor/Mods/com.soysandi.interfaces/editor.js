@@ -388,6 +388,7 @@ export class EditorInterfaces {
     if (nombre) this.selDiseno.value = nombre;
     this.refrescarTodo();
     this.tiempo.fijarTiempo(0);
+    this.espacio?.fitOnOpen();
   }
 
   refrescarTodo() {
