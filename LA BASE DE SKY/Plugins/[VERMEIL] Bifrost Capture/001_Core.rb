@@ -275,10 +275,9 @@ module BifrostCapture
     name = cfg[field].to_s.downcase
     return nil if name == "none" || name.empty?
     return nil unless INPUT_ACTIONS.key?(name)
-    reserved = RESERVED_MAP_ACTIONS.include?(name)
-    contextual = field == "mode_key" && name == "aux2" &&
-                 cfg["contextual_mode_toggle"] == "1"
-    return nil if reserved && !contextual &&
+    # A legacy 0.9 save may still contain W/AUX2. Never react to W
+    # unless the developer explicitly opted into shared bindings.
+    return nil if RESERVED_MAP_ACTIONS.include?(name) &&
                   cfg["allow_shared_bindings"] != "1"
     return nil if field != "hotkey" && name == cfg["hotkey"]
     input_action(name)
