@@ -360,6 +360,8 @@ module BifrostCapture
       px,py = focus ? screen_position(focus) :
         [$game_player.screen_x,$game_player.screen_y-65]
       mouse_mode = false
+      dx = 0
+      dy = 0
       old_mouse = nil
       frames = 0
       key = hotkey
