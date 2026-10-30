@@ -84,6 +84,7 @@ export function montarEspacio(editor, M) {
   empty.hidden=true;
   const palette=menu("＋ Añadir elemento ▾",[search,choices,empty]);
   const addLabel=editor.barraAnadir.querySelector(".ui-capa-tipo");
+  editor.barraAnadir.classList.add("ui-add-toolbar");
   editor.barraAnadir.insertBefore(palette.d,addLabel||editor.barraAnadir.firstChild);
   if(addLabel)addLabel.remove();
   palette.d.addEventListener("toggle",()=>{if(palette.d.open){search.value="";filter();search.focus();}});
