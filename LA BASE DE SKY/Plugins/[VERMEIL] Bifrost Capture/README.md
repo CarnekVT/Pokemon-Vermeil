@@ -1,4 +1,4 @@
-# Bifröst Capture 0.9.2 — audio real CC0 y prioridad Z-A
+# Bifröst Capture 0.9.3 — controles independientes de ratón y audio real CC0
 
 **Pokémon Vermeil · Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -9,27 +9,45 @@ todavía no validada dentro de mkxp con Visual 2.5D HD.
 
 ## Controles de exploración
 
-| Acción | Tecla según el keybinding compartido | Comportamiento |
+| Acción | Teclado predeterminado | Comportamiento |
 |---|---|---|
-| Apuntar/lanzar | **A / JUMPUP** | Mantener para apuntar, soltar para lanzar |
-| Cambiar selección | **S / JUMPDOWN** | Ciclo inmediato de Ball o Pokémon |
-| Alternar Ball/Team | **Mantener S brevemente** | Unos 10 fotogramas durante el apuntado |
-| Ciclo bidireccional | **Rueda del ratón** | Anterior o siguiente Ball/Pokémon |
-| Alternar con ratón | **Clic derecho** | Cambiar modo Ball/Team |
-| Lanzamiento directo | **C / USE** | Lanzar sin esperar a soltar A |
-| Cancelar | **X / BACK** | Cierra apuntado sin lanzar |
-| Objetivos | Ratón o autoapuntado | Selecciona OW válido en movimiento |
+| Apuntar/lanzar | **A / JUMPUP** | Mantener para apuntar; soltar para lanzar |
+| Cambiar objetivo | **Tab** | Siguiente Pokémon visible en el mapa |
+| Objetivo anterior | **Mayús + Tab** | Recorrer Pokémon visibles en sentido inverso |
+| Alternar Ball/Team | **E** | Cambio inmediato sin mantener otra tecla |
+| Siguiente Ball/Pokémon | **S / JUMPDOWN** | Recorre el inventario o equipo seleccionado |
+| Anterior Ball/Pokémon | **Mayús + S** | Selección inversa sin activar cambio de modo |
+| Alternar modo alternativo | **Mantener S** | Cambio de modo después de 10 fotogramas |
+| Ciclo con mouse | **Rueda** | Selección anterior/siguiente |
+| Alternar con mouse | **Clic derecho** | Cambiar Ball/Team |
+| Lanzamiento directo | **C / USE** | Lanzar sin soltar A |
+| Cancelar | **X / BACK** | Salir de apuntado |
 
-Los controles utilizan **acciones configurables de Essentials**, no códigos
-físicos de teclado. **D / SPECIAL** sigue abriendo accesos rápidos,
-**Q / AUX1** conserva Turbo, **W / AUX2** el debug de pasabilidades, **Shift/Z** la carrera, **F9** el debug y
-las flechas el movimiento. W no se intercepta. La duración de S se ajusta con `ball_hold_mode_frames=10` y el clic derecho
-sigue disponible. Pulsaciones repetidas y rápidas de S solo cambian la Ball.
-La selección y las asociaciones se pueden ajustar en Maker Studio.
+**Teclado sin ratón:** mantener A, alternar Pokémon visibles con Tab,
+cambiar Ball/Team con E, escoger con S (Mayús+S para retroceder),
+y soltar A o pulsar C para lanzar. Cuando se selecciona un objetivo
+bloqueado o fuera de rango, la mira lo indica; no se ignora en silencio.
+El autoapuntado inicial conserva prioridad de objetivos alcanzables.
 
-La rueda usa `Input.scroll_v` únicamente si está disponible en mkxp-z.
-En runtimes sin esta extensión, el sistema sigue funcionando con S.
-`control_mode=toggle` permite pulsar para entrar y USE para lanzar.
+El HUD muestra los atajos de teclado compactos. Tab/E solo se procesan
+durante el apuntado y jamás cambian de modo fuera de esa interfaz. Los
+atajos físicos usan `Input.triggerex?` de mkxp-z; se configuran en
+`config.ini` como `keyboard_target_key=tab` y `keyboard_mode_key=e`.
+Se admiten `tab/e/r/f/t/g/none`; `none` desactiva el atajo.
+Estos dos atajos son físicos, **no se reasignan desde F1**, a diferencia de
+las acciones lógicas A/S/C/X, que respetan los keybindings del usuario.
+Si el usuario asigna una tecla física de Bifröst a una acción reservada,
+el menú/acción original prevalece.
+
+**Sin colisiones:** D / SPECIAL sigue abriendo accesos rápidos,
+Q / AUX1 conserva Turbo, W / AUX2 el debug de pasabilidades,
+Shift/Z la carrera, F9 el debug y las flechas el movimiento.
+El nuevo control no consume las direcciones, no introduce
+`Graphics.update` ni `Input.update` adicionales y es compatible con
+`aim_mouse=0`. El sistema anterior de mantener S se conserva;
+Mayús+S nunca se interpreta como una pulsación prolongada para alternar.
+El mouse continúa siendo opcional.
+
 
 ## Memoria de selección
 

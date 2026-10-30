@@ -184,8 +184,14 @@ module BifrostCapture
       cfg = BifrostCapture.options
       aim = BifrostCapture.binding_name(cfg,"hotkey")
       ball = BifrostCapture.binding_name(cfg,"ball_key")
-      bmp.draw_text(11,78,256,12,
-        "#{aim} apuntar · #{ball} mant. modo · rueda / clic der.")
+      target_key = cfg["keyboard_target_key"].to_s.upcase
+      mode_key = cfg["keyboard_mode_key"].to_s.upcase
+      help = if target_key != "NONE" && mode_key != "NONE"
+               "#{target_key} obj. · #{mode_key} modo · #{ball}/Mayús+#{ball} sel."
+             else
+               "#{aim} apuntar · #{ball} cambiar/mantener modo"
+             end
+      bmp.draw_text(11,78,256,12,help)
     end
 
     def dispose

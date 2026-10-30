@@ -156,25 +156,53 @@ module BifrostCapture
         0
       end
 
-      def cycle_target
+      # Physical keyboard shortcuts are supplementary to F1-remappable
+      # logical actions. They never intercept ordinary map movement.
+      # mkxp-z supports triggerex? with SDL scancode symbols.
+      def physical_key_trigger?(cfg,field)
+        key = cfg[field].to_s.downcase
+        return false unless %w[tab e r f t g].include?(key)
+        return false unless Input.respond_to?(:triggerex?)
+        Input.triggerex?(key.upcase.to_sym)
+      rescue StandardError
+        false
+      end
+
+      def reverse_modifier?
+        return Input.press?(Input::SHIFT) if Input.const_defined?(:SHIFT)
+        return false unless Input.respond_to?(:pressex?)
+        Input.pressex?(:LSHIFT) || Input.pressex?(:RSHIFT)
+      rescue StandardError
+        false
+      end
+
+      # Prevent a keyboard shortcut from also opening menus or
+      # running the player's registered/debug actions if F1 remapped it.
+      def keyboard_shortcut_reserved?(aim_key,ball_key)
+        keys = [:SPECIAL,:AUX1,:AUX2,:USE,:BACK]
+        keys.map! { |key| Input.const_get(key) if Input.const_defined?(key) }
+        keys += [aim_key,ball_key]
+        keys.compact.any? { |key| Input.trigger?(key) }
+      end
+
+      def cycle_target(step=1)
         s = @session
-        return unless s
-        candidates = BifrostCapture.visible_targets.select do |e|
-          spec = BifrostCapture.event_spec(e)
-          cfg = BifrostCapture.options($game_map.map_id,spec[0],e.id)
-          geo = BifrostCapture.geometry($game_player.x,$game_player.y,e.x,e.y,cfg)
-          geo[:in_range] &&
-            (cfg["line_of_sight"] != "1" ||
-            BifrostCapture.line_clear?($game_player.x,$game_player.y,e.x,e.y))
-        end
+        return false unless s
+        # Include visible-but-blocked targets: show a blocked reticle rather
+        # than silently skipping a Pokémon that the player can see.
+        candidates = BifrostCapture.visible_targets
         candidates.sort_by! { |e|
           [($game_player.x-e.x).abs+($game_player.y-e.y).abs,e.id]
         }
-        return if candidates.empty?
-        index = candidates.index(s[:target]) || -1
-        s[:target] = candidates[(index+1)%candidates.length]
+        return false if candidates.empty?
+        index = candidates.index(s[:target])
+        index = step < 0 ? 0 : -1 if index.nil?
+        next_target = candidates[(index+step)%candidates.length]
+        changed = !s[:target].equal?(next_target)
+        s[:target] = next_target
         s[:mouse_active] = false
-        s[:x],s[:y] = BifrostCapture.screen_position(s[:target])
+        s[:x],s[:y] = BifrostCapture.screen_position(next_target)
+        changed
       end
 
       def pointer
@@ -226,7 +254,11 @@ module BifrostCapture
                      cfg["mouse_right_mode"] == "1" &&
                      Input.const_defined?(:MOUSERIGHT) &&
                      Input.trigger?(Input::MOUSERIGHT)
-        toggle_mode(s,cfg) if (mode_key && Input.trigger?(mode_key)) || mouse_mode
+        keyboard_safe = !keyboard_shortcut_reserved?(key,ball_key)
+        keyboard_mode = keyboard_safe &&
+                        physical_key_trigger?(cfg,"keyboard_mode_key")
+        toggle_mode(s,cfg) if (mode_key && Input.trigger?(mode_key)) ||
+                              mouse_mode || keyboard_mode
         # Short press: cycle instantly. Hold ~10 frames: switch modes.
         # This avoids mistaking fast repeated S taps for a mode change.
         pressed = ball_key && (Input.press?(ball_key) ||
@@ -235,10 +267,12 @@ module BifrostCapture
           unless s[:select_held]
             s[:select_held] = true
             s[:select_frames] = 0
-            s[:select_switched] = false
+            reverse = reverse_modifier?
+            # Shift+S moves backwards and must never activate hold-to-mode.
+            s[:select_switched] = reverse
             field = s[:mode] == :ball ? :ball_index : :party_index
             s[:select_prior_index] = s[field]
-            cycle_equipped(s,cfg)
+            cycle_equipped(s,cfg,reverse ? -1 : 1)
           end
           s[:select_frames] += 1
           threshold = cfg["ball_hold_mode_frames"].to_i.clamp(6,60)
@@ -257,15 +291,21 @@ module BifrostCapture
           delta = mouse_wheel_delta
           cycle_equipped(s,cfg,delta > 0 ? -1 : 1) if delta != 0
         end
-        if target_key && target_key != ball_key &&
-           target_key != mode_key && Input.trigger?(target_key)
-          cycle_target
-          BifrostCapture::Audio.play(:lock,cfg) if defined?(BifrostCapture::Audio)
+        keyboard_target = keyboard_safe &&
+                          cfg["keyboard_target_key"] != cfg["keyboard_mode_key"] &&
+                          physical_key_trigger?(cfg,"keyboard_target_key")
+        logical_target = target_key && target_key != ball_key &&
+                         target_key != mode_key && Input.trigger?(target_key)
+        if keyboard_target || logical_target
+          changed = cycle_target(reverse_modifier? ? -1 : 1)
+          if changed && defined?(BifrostCapture::Audio)
+            BifrostCapture::Audio.play(:lock,cfg)
+          end
         end
 
         # Movement arrows remain owned by Game_Player. They are NEVER
-        # consumed by the aim interface. Keyboard switches locked targets
-        # via an optional unique input, while mouse free-aim remains available.
+        # consumed by the aim interface. Tab changes targets; E changes
+        # Ball/Team, both only while aiming. Mouse free-aim stays optional.
         if cfg["aim_mouse"] == "1" && defined?(Mouse)
           mouse = Mouse.getMousePos
           if mouse

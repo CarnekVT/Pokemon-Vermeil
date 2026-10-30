@@ -14,6 +14,7 @@ module BifrostCapture
     "profile"=>"bifrost", "enabled"=>"1",
     "access_mode"=>"always", "hotkey"=>"jumpup", "control_mode"=>"hold",
     "ball_key"=>"jumpdown", "target_key"=>"none", "mode_key"=>"none",
+    "keyboard_target_key"=>"tab", "keyboard_mode_key"=>"e",
     "contextual_mode_toggle"=>"0", "mode_double_tap_frames"=>"0",
     "mouse_wheel_select"=>"1",
     "mouse_right_mode"=>"1", "remember_selection"=>"1",
