@@ -278,9 +278,9 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     event = $game_map.events.values.first
     event.instance_variable_set(:@x,10)
     event.instance_variable_set(:@y,9)
-    mon = Struct.new(:hp,:totalhp,:name) do
+    mon = Struct.new(:hp,:totalhp,:name,:species) do
       def able?; hp > 0; end
-    end.new(100,100,"Primero")
+    end.new(100,100,"Primero",:PIKACHU)
     $player.party << mon
     cfg = BifrostCapture.options.merge(
       "escape_reaction_enabled"=>"1","escape_reaction_chance"=>"100",
@@ -306,9 +306,9 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     event=$game_map.events.values.first
     event.instance_variable_set(:@x,10)
     event.instance_variable_set(:@y,9)
-    mon=Struct.new(:hp,:totalhp,:name) do
+    mon=Struct.new(:hp,:totalhp,:name,:species) do
       def able?; hp > 0; end
-    end.new(2,100,"Primero")
+    end.new(2,100,"Primero",:PIKACHU)
     $player.party << mon
     cfg=BifrostCapture.options.merge(
       "escape_reaction_enabled"=>"1","escape_reaction_chance"=>"100",
@@ -327,11 +327,12 @@ class BifrostCaptureIntegrationTest < Minitest::Test
   def test_flee_moves_before_disappearing_and_does_not_mark_caught
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
+    initial_y = event.y
     cfg=BifrostCapture.options.merge("timid_reaction_frames"=>"3")
     assert BifrostCapture.start_flee(event,cfg)
     refute_empty $game_map.events
     3.times { BifrostCapture.flee_tick(event,cfg) }
-    assert_equal 6,event.y, "Fearful Pokémon should telegraph before fleeing"
+    assert_equal initial_y,event.y, "Fearful Pokémon should telegraph before fleeing"
     9.times { BifrostCapture.flee_tick(event,cfg) }
     assert_empty $game_map.events
     assert_empty($PokemonGlobal.bifrost_removed_events || {})
