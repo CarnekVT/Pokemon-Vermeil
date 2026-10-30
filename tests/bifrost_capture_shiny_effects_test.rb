@@ -129,6 +129,18 @@ class ShinySignalsTest < Minitest::Test
     assert_empty shiny.instance_variable_get(:@states)
   end
 
+  def test_lower_intensity_hides_unused_sparkle_sprites
+    shiny=BifrostCapture::ShinySignals
+    @cfg["shiny_fx_intensity"]="3"
+    shiny.update
+    state=shiny.instance_variable_get(:@states)[@event.object_id]
+    assert_equal 4,state[:sprites].length
+    @cfg["shiny_fx_intensity"]="1"
+    shiny.update
+    assert_equal 4,state[:sprites].length, "Keep the allocation for reuse"
+    assert state[:sprites].drop(2).all? { |sp| !sp.visible }
+  end
+
   def test_non_shiny_creates_no_effects
     @event.instance_variable_set(:@bifrost_wild_pokemon,Struct.new(:shiny?).new(false))
     before=Sprite.created
