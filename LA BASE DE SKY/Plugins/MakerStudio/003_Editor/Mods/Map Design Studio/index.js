@@ -44,7 +44,7 @@ function renderZones(host){
 function builderChanges(b){
  const s=state,sz=size(),err=[];
  if(!sz.w||!sz.h)err.push("Dimensiones del mapa no disponibles.");
- if(!Number.isInteger(b.layer)||b.layer<0||b.layer>=s.ctx.map.layers(s.id).length)err.push("Capa inexistente.");
+ if(!Number.isInteger(b.layer)||b.layer<0||b.layer>=(Array.isArray(s.ctx.map.layers(s.id))?s.ctx.map.layers(s.id).length:Number(s.ctx.map.layers(s.id))))err.push("Capa inexistente.");
  if(!Number.isInteger(b.tile)||b.tile<=0)err.push("Elige un tile ID mayor que cero.");
  if(b.w<1||b.h<1||b.w*b.h>12000)err.push("Area invalida o superior a 12000 tiles.");
  if(b.x<0||b.y<0||b.x+b.w>sz.w||b.y+b.h>sz.h)err.push("El rectangulo supera los limites del mapa.");
@@ -113,7 +113,7 @@ function renderSources(host){
  if(!refs.length)host.append(el("p","Añade bibliografia y enlaces en Environment Design Studio para consultarlos aqui.","mds-muted"));
 }
 function overlay(g,info){
- const s=state;if(!s||s.id!==info.mapId)return;
+ const s=state;if(!s||Number(s.id)!==Number(info.mapId))return;
  const scale=info.tileSize*info.zoom;if(!Number.isFinite(scale)||scale<=0)return;
  for(const z of s.data.zones){
   const x=(z.x*info.tileSize-info.viewportX)*info.zoom,y=(z.y*info.tileSize-info.viewportY)*info.zoom;
@@ -161,7 +161,7 @@ async function open(ctx,point){
 }
 export function activate(ctx){
  ctx.menu.registerMenuItem({menu:"Mods",label:"Map Design Studio",icon:"map",handler:()=>open(ctx)});
- ctx.ui.registerContextMenuItem({context:"map-tile",label:"Map Design Studio: planificar aqui",handler:info=>open(ctx,{x:info.tileX,y:info.tileY})});
- ctx.ui.registerOverlay({id:"com.carnekvt.map-design-studio.zones",zOrder:21,render:overlay});
+ if(typeof ctx.ui.registerContextMenuItem==="function")ctx.ui.registerContextMenuItem({context:"map-tile",label:"Map Design Studio: planificar aqui",handler:info=>open(ctx,{x:info.tileX,y:info.tileY})});
+ if(typeof ctx.ui.registerOverlay==="function")ctx.ui.registerOverlay({id:"com.carnekvt.map-design-studio.zones",zOrder:21,render:overlay});
 }
 export function deactivate(){if(state){try{state.dialog?.close();}catch(_){}state=null;}}
