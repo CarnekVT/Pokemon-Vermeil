@@ -1,0 +1,19 @@
+{
+  "id": "com.vermeil.interface-studio",
+  "name": "Interface Studio",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "CarnekVT"
+    }
+  ],
+  "description": "Editor visual de interfaces: biblioteca de pantallas y recursos, canvas escalable, capas, inspector, historial y exportacion Ruby para Essentials.",
+  "apiVersion": "1.0.0",
+  "main": "index.js",
+  "permissions": [
+    "fs.project",
+    "fs.write.project",
+    "ui.dialogs",
+    "ui.toasts"
+  ]
+}
