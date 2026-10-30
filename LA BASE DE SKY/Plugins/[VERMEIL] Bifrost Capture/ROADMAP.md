@@ -1,11 +1,17 @@
-# Bifröst Capture — seguimiento 0.7.0 (reconstrucción completa de código)
+# Bifröst Capture — seguimiento 0.8.0 (reconstrucción completa de código)
 
-Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
+Actualizado 2026-10-30 · rama `feature/bifrost-overworld-capture-studio`.
 
 **Estados:** «Integrado» significa código subido al repositorio y comprobado por pruebas aisladas, **no** funcionamiento confirmado dentro de mkxp. «Parcial» significa solución inicial sujeta a casos reales. «Pendiente» significa funcionalidad todavía por construir.
 
 | Área | Estado | Verificación / siguiente tarea |
 |---|---|---|
+| Entradas configurables y control debug | Código integrado; validar en juego | Cambian cuatro acciones independientemente, A/S por defecto, CTRL protegido |
+| Tasa OW adicional separada | Código integrado; test automatizado | 12 % extra por paso en Vermeil, enfriamiento de 7 pasos, sin alterar batalla vanilla |
+| Temperamentos neutro/miedoso/agresivo | Código integrado; tests de IA | Personalidad individual estable, huida, persecución y combate agresivo |
+| HUD de temperamentos y objetivos | Código integrado; validar visuales | Retícula con pulso, tres colores, estados persigue y huye |
+| Audio 009 y diez eventos | Código integrado; tests del router | Vanilla/original/muted, efectos autorizados en Audio/SE/Bifrost |
+| Referencias Arceus, Z-A y Tetris 99 | Documentado | AUDIO_GUIDE.md; no se incluyen archivos comerciales |
 | 001: Reglas, perfiles y catálogo desde cero | Integrado | Configuración global, mapa, especie y evento |
 | 002: Resolución de impacto/captura desde cero | Integrado | Test de capturar y almacenar al OW creado |
 | 003: Opciones dentro del juego desde cero | Integrado | Falta revisar menú en mkxp |
