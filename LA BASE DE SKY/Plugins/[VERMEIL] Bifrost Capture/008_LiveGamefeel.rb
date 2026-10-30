@@ -12,6 +12,7 @@ module BifrostCapture
 
       def start
         return false if active? || !BifrostCapture.aim_allowed?
+        return false if BifrostCapture::Motion.busy?
         cfg = BifrostCapture.options
         balls = BifrostCapture.ball_choices
         party = $player.party.select { |pkmn| pkmn && pkmn.able? }
@@ -270,6 +271,16 @@ module BifrostCapture
             event.transparent = @catch[:transparent]
             event.instance_variable_set(:@move_type,@catch[:move_type])
             event.instance_variable_set(:@bifrost_capture_lock,false)
+            # Captured Pokemon was already stored when animation began.
+            # If a map transfer interrupts it, remove its OW to avoid a
+            # duplicate encounter on the next visit.
+            if @catch[:caught]
+              if BifrostCapture.generated?(event)
+                BifrostCapture.erase_wild(event)
+              else
+                event.erase
+              end
+            end
           end
         end
         release_resources(@flight)
