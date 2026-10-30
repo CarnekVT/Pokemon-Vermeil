@@ -277,8 +277,19 @@ class Studio{
   if(this.section==="profiles")return this.profiles();
   if(this.section==="species")return this.speciesPanel();
   if(this.section==="scopes")return this.scopesPanel();
-  if(this.section==="aim")return '<h1 class="bf-headline">Apuntado integrado en el mapa</h1>'+
-    '<p class="bf-sub">Los proyectiles utilizan el evento OW seleccionado. No se disparan Balls sobre eventos decorativos por error.</p>'+
+  if(this.section==="aim")return '<h1 class="bf-headline">Apuntar sin detener la exploración</h1>'+
+    '<p class="bf-sub">El jugador puede caminar durante la preparación, el vuelo y la captura. No existe una escena de apuntado que congele el mapa.</p>'+
+    this.panel("Control dinámico",'<div class="bf-cards">'+[
+    ["W / AUX2","Mantener para apuntar; soltar para lanzar"],
+    ["Flechas / Pad","Caminar normalmente, también al apuntar"],
+    ["Shift / Z (ACTION)","Cambiar Pokémon fijado"],
+    ["Ratón","Apuntado libre sobre sprites en movimiento"],
+    ["Q / AUX1","Cambiar Poké Ball"],
+    ["C / USE","Lanzar directamente"],
+    ["D / SPECIAL","Cambiar Ball y Pokémon"],
+    ["X / BACK","Cancelar sin lanzar"]].map(x=>'<div class="bf-stat"><span>'+
+    esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join("")+
+    '</div><p class="bf-help">La retícula sigue a un OW válido y no consume las flechas; el modo toggle es opcional. La Ball y la captura se animan por fotograma, sin Graphics.update manuales.</p>')+
     this.panel("Rango y dirección",this.aimPreview());
   if(this.section==="spawns")return '<h1 class="bf-headline">Encuentros naturales OW</h1>'+
     '<p class="bf-sub">En modo completo, cada tirada natural terrestre intenta crear un Pokémon visible y capturable. El modo mixto convierte solo el porcentaje indicado.</p>'+
