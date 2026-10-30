@@ -95,7 +95,7 @@ module BifrostCapture
     end
   end
 
-  def self.resolve_throw(event,mode,payload,cfg,back_at_release=nil)
+  def self.resolve_throw(event,mode,payload,cfg,back_at_release=nil,hit_roll=nil)
     if !event || !eligible_event?(event)
       notice(_INTL("No hay un Pokémon salvaje capturable en la trayectoria."))
       capture_result(:blocked,nil,_INTL("Acércate a un Pokémon visible."),cfg)
@@ -127,7 +127,7 @@ module BifrostCapture
       notice(_INTL("No quedan Poké Balls."))
       return false
     end
-    hit = rand < hit_chance(geo[:front],local)
+    hit = (hit_roll.nil? ? rand : hit_roll) < hit_chance(geo[:front],local)
     if !hit
       $bag.remove(payload,1) if local["consume_on_miss"] == "1"
       notice(_INTL("¡El lanzamiento se desvió!"))
