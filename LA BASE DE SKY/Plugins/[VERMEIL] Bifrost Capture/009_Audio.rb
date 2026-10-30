@@ -6,11 +6,12 @@ module BifrostCapture
     EVENTS = %w[aim switch mode party lock throw hit shake caught
                 breakout flee alert].freeze
     VANILLA = {
-      "switch"=>"GUI sel cursor", "mode"=>"GUI sel decision",
-      "party"=>"GUI sel cursor", "lock"=>"GUI sel decision",
-      "throw"=>"Battle throw", "hit"=>"Battle ball drop",
-      "shake"=>"Battle ball shake", "caught"=>"Battle capture success",
-      "breakout"=>"Battle ball shake"
+      "aim"=>"GUI sel cursor", "switch"=>"GUI sel cursor",
+      "mode"=>"GUI sel decision", "party"=>"GUI sel cursor",
+      "lock"=>"GUI sel decision", "throw"=>"Battle throw",
+      "hit"=>"Battle ball drop", "shake"=>"Battle ball shake",
+      "caught"=>"Battle catch click", "breakout"=>"Battle ball shake",
+      "flee"=>"Battle flee", "alert"=>"Exclaim"
     }.freeze
     PRESETS = {
       "pla_like" => {
@@ -82,11 +83,42 @@ module BifrostCapture
       false
     end
 
-    def self.has_file?(basename)
-      EXTENSIONS.any? { |ext|
-        File.file?("Audio/SE/Bifrost/#{basename}#{ext}")
-      }
+    # Return a real filename INCLUDING its extension. mkxp's Audio.se_play
+    # cannot reliably resolve freshly generated WAVs from extensionless names,
+    # even when FileTest.audio_exist? reports that a WAV exists.
+    # Prefer supplied OGGs over generated WAVs of the same basename.
+    def self.existing_file(basename)
+      return nil unless basename.to_s =~ /\A[a-z0-9_]+\z/i
+      EXTENSIONS.each do |ext|
+        path = "Audio/SE/Bifrost/#{basename}#{ext}"
+        return "Bifrost/#{basename}#{ext}" if File.file?(path)
+      end
+      nil
     rescue StandardError
+      nil
+    end
+
+    def self.has_file?(basename)
+      !!existing_file(basename)
+    end
+
+    def self.vanilla_file(event)
+      name = VANILLA[event]
+      return nil unless name && FileTest.audio_exist?("Audio/SE/#{name}")
+      name
+    rescue StandardError
+      nil
+    end
+
+    # A failed asset must not cause dozens of ENOENT exceptions per session.
+    # Restarting the game clears this cache after fixing the audio files.
+    def self.safe_play(file)
+      return false if @failed_files && @failed_files[file]
+      pbSEPlay(file)
+      true
+    rescue StandardError
+      @failed_files ||= {}
+      @failed_files[file] = true
       false
     end
 
@@ -98,25 +130,28 @@ module BifrostCapture
       return false unless EVENTS.include?(name)
       assigned = cfg["sfx_#{name}"].to_s
       return false unless assigned =~ /\A[a-z0-9_]+\z/i
+      return false unless defined?(pbSEPlay)
+
+      file = nil
       if assigned != "none"
-        file = "Bifrost/#{assigned}"
+        file = existing_file(assigned)
       elsif PRESETS.key?(profile)
         basename = PRESETS[profile][name]
-        # Custom PLA/ZA-inspired filenames are optional. If they do not exist,
-        # the game still plays its original sound instead of falling silent.
-        if basename && !has_file?(basename) && profile == "za_like"
+        file = existing_file(basename)
+        if !file && profile == "za_like" && basename
           create_original_cue(name,basename)
+          file = existing_file(basename)
         end
-        file = basename && has_file?(basename) ? "Bifrost/#{basename}" :
-               VANILLA[name]
-      else
-        file = profile == "original" ? nil : VANILLA[name]
       end
-      return false unless file && defined?(pbSEPlay)
-      pbSEPlay(file)
-      true
+
+      return true if file && safe_play(file)
+      return false if profile == "original"
+      fallback = vanilla_file(name)
+      return false unless fallback && fallback != file
+      safe_play(fallback)
     rescue StandardError
-      false # Missing optional audio should not interrupt capture.
+      false # Optional sound must never interrupt overworld capture.
     end
+
   end
 end
