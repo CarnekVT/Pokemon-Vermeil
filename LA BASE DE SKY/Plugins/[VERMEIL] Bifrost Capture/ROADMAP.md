@@ -1,4 +1,4 @@
-# Bifröst Capture — seguimiento 0.5.1 (reconstrucción completa de código)
+# Bifröst Capture — seguimiento 0.6.0 (reconstrucción completa de código)
 
 Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
 
@@ -10,9 +10,13 @@ Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
 | 002: Resolución de impacto/captura desde cero | Integrado | Test de capturar y almacenar al OW creado |
 | 003: Opciones dentro del juego desde cero | Integrado | Falta revisar menú en mkxp |
 | 004: Integración de encuentros de hierba desde cero | Integrado | Test: tirada nativa crea OW válido |
-| 005: Apuntado, HUD y lanzamiento desde cero | Parcial | Cámara y visuales reales requieren prueba |
+| 005: Apuntado, HUD y lanzamiento desde cero | Parcial | Selector de tres Balls, imán de objetivo, estela y fallo visual coherente; validar con cámara 2.5D |
 | 006: Huida/ataque visible desde cero | Integrado | Test de huida sin marca de captura |
-| Maker Studio: nueva UI y lógica de edición | Integrado | 53 claves coinciden con runtime, guarda y recarga |
+| 007: Notificaciones persistentes y captura animada | Código integrado; requiere prueba | Toast independiente con capturado/crítico/liberado/miss/escapó y equipo/caja; absorción y sacudidas |
+| Almacenamiento sin mensajes modales | Código integrado; tests aislados | Inserta en equipo o caja y notifica sin abrir cuadro tradicional |
+| Modo mantener/soltar en una sola acción | Código integrado; requiere prueba | W mantiene apuntado, soltar lanza; C sigue funcionando |
+| Estela y desviación visual | Código integrado; requiere prueba | La misma tirada decide si la Ball se desvía y si el impacto falla |
+| Maker Studio: nueva UI y lógica de edición | Integrado | Inspector ampliado con feedback, FX y control rápido; claves sincronizadas con runtime |
 | Perfil exclusivo Bifröst | Integrado | Manuales limitados a catálogo |
 | Perfil OW completo | Integrado | Generados naturales capturables aunque haya restricción heredada |
 | Perfil mixto | Integrado | Por defecto 50 % de encuentros elegibles pasan a OW |
@@ -52,4 +56,4 @@ Actualizado 2026-10-29 · rama `feature/bifrost-overworld-capture-studio`.
 - Videos del usuario: lanzamiento sobre mapa, sombra del proyectil, HUD pequeño, especies en movimiento, captura con notificación.
 - ZIJUK Instant Capture System (ICS) para Pokémon Essentials 21.1: idea de estructura modular, selección rápida de Balls y controles Hold/Toggle. **No se incorporó el código externo ni la dependencia obligatoria VOWE**.
 
-La rama sigue siendo una **implementación experimental**. Los resultados de GitHub Actions prueban la lógica aislada, no la experiencia visual en juego.
+La rama sigue siendo una **implementación experimental**. Los resultados de GitHub Actions prueban la lógica aislada, no la experiencia visual en juego. El material de ZIJUK y los videos se han usado para definir la experiencia, sin integrar automáticamente su plugin.
