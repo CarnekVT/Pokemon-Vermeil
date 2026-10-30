@@ -240,6 +240,7 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
   min-width: 0;
 }
 .ui-raiz button,.ui-raiz input,.ui-raiz select { font-family: inherit; }
+.ui-raiz:focus {outline:none}
 .ui-raiz button:focus-visible,
 .ui-raiz input:focus-visible,
 .ui-raiz select:focus-visible,
