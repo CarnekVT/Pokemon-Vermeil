@@ -120,10 +120,18 @@ module BifrostCapture
   end
 end
 def pbResolveBitmap(name)
-  name == "Graphics/Characters/Followers/PIKACHU" ? name : nil
+  ["Graphics/Characters/Followers/PIKACHU",
+   "Graphics/Characters/Followers shiny/PIKACHU"].include?(name) ? name : nil
+end
+class FakeWildPokemon
+  attr_accessor :species, :level, :form, :poke_ball, :shiny
+  def initialize(species,level)
+    @species,@level,@form,@poke_ball,@shiny=species,level,0,nil,false
+  end
+  def shiny?; !!@shiny; end
 end
 def pbGenerateWildPokemon(species,level)
-  Struct.new(:species,:level,:form,:poke_ball).new(species,level,0,nil)
+  FakeWildPokemon.new(species,level)
 end
 def pbAddPokemon(pkmn)
   BifrostCapture.captures ||= []
@@ -206,6 +214,70 @@ class BifrostCaptureIntegrationTest < Minitest::Test
     script=event.instance_variable_get(:@source_data).pages[0].list.first.parameters.first
     assert_match(/BifrostCapture\.interact_battle/,script)
   end
+  def test_debug_shiny_ow_is_visibly_shiny_and_same_individual_when_caught
+    original_debug=$DEBUG
+    begin
+      $DEBUG=true
+      $PokemonGlobal.bifrost_overrides["debug_force_shiny"]="1"
+      assert_equal :spawned,BifrostCapture.spawn_wild(:Land)
+      event=$game_map.events.values.first
+      pkmn=event.instance_variable_get(:@bifrost_wild_pokemon)
+      assert pkmn.shiny?
+      assert_equal "Followers shiny/PIKACHU",event.character_name
+      assert_same pkmn,BifrostCapture.ow_pokemon_for(event)
+      assert BifrostCapture.battle_wild_for(event).shiny?,
+        "Battle must keep the individual's shiny status"
+      event.instance_variable_set(:@x,10)
+      event.instance_variable_set(:@y,6)
+      assert BifrostCapture.resolve_throw(event,:ball,:POKEBALL,
+                                            BifrostCapture.options)
+      assert_same pkmn,BifrostCapture.captures.last
+      assert BifrostCapture.captures.last.shiny?,
+        "Direct OW capture must keep the same shiny Pokémon"
+    ensure
+      $DEBUG=original_debug
+    end
+  end
+
+  def test_forced_shiny_is_ignored_in_non_debug_mode
+    original_debug=$DEBUG
+    begin
+      $DEBUG=false
+      $PokemonGlobal.bifrost_overrides["debug_force_shiny"]="1"
+      assert_equal :spawned,BifrostCapture.spawn_wild(:Land)
+      event=$game_map.events.values.first
+      refute event.instance_variable_get(:@bifrost_wild_pokemon).shiny?
+      assert_equal "Followers/PIKACHU",event.character_name
+    ensure
+      $DEBUG=original_debug
+    end
+  end
+
+  def test_ow_shiny_manual_event_updates_follower_graphic
+    original_debug=$DEBUG
+    begin
+      $DEBUG=true
+      $PokemonGlobal.bifrost_overrides["debug_force_shiny"]="1"
+      data=RPG::Event.new(11,10)
+      data.id=34
+      data.name="[OWCAP:PIKACHU:8]"
+      page=RPG::Event::Page.new
+      page.graphic.character_name="Followers/PIKACHU"
+      data.pages=[page]
+      event=Game_Event.new($game_map.map_id,data,$game_map)
+      event.define_singleton_method(:character_name=) { |name|
+        @character_name=name
+      }
+      $game_map.events[event.id]=event
+      pokemon=BifrostCapture.ow_pokemon_for(event)
+      assert pokemon.shiny?
+      assert_equal "Followers shiny/PIKACHU",event.character_name
+      assert_same pokemon,BifrostCapture.ow_pokemon_for(event)
+    ensure
+      $DEBUG=original_debug
+    end
+  end
+
   def test_spawned_ow_can_be_captured_and_stored
     BifrostCapture.spawn_wild(:Land)
     event=$game_map.events.values.first
