@@ -302,7 +302,7 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
 .ui-workspace-hide-inspector .ui-panel-der,.ui-workspace-hide-inspector .ui-workspace-resizer.right {display:none!important}
 .ui-workspace-hide-timeline .ui-tiempo {height:auto;min-height:42px}
 .ui-workspace-hide-timeline .ui-tiempo .ui-pistas {display:none}
-.ui-workspace-focus .ui-barra:nth-of-type(2),.ui-workspace-focus .ui-resolucion {display:none}
+.ui-workspace-focus .ui-add-toolbar,.ui-workspace-focus .ui-resolucion {display:none}
 .ui-workspace-focus .ui-lienzo-zona {padding:12px}
 .ui-layer-search {margin:7px 8px 4px!important;width:calc(100% - 16px);min-height:30px}
 .ui-layer-counter {font-size:10px;color:var(--text-tertiary);padding:4px 10px 6px;border-bottom:1px solid var(--border)}
