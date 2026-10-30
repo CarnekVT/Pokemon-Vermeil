@@ -71,6 +71,8 @@ require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/010_MapInp
 class BifrostLiveTest < Minitest::Test
   def setup
     BifrostCapture::Motion.cancel
+    $scene=Scene_Map.new
+    $player.party=[]
     Input.configure
     BifrostCapture.result=nil
   end
