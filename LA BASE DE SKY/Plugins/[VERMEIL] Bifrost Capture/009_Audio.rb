@@ -4,7 +4,7 @@
 module BifrostCapture
   module Audio
     EVENTS = %w[aim switch mode party lock throw hit shake caught
-                breakout flee alert critical shiny].freeze
+                breakout flee alert critical shiny backstrike calmed].freeze
     VANILLA = {
       "aim"=>"GUI sel cursor", "switch"=>"GUI sel cursor",
       "mode"=>"GUI sel decision", "party"=>"GUI sel cursor",
@@ -12,7 +12,8 @@ module BifrostCapture
       "hit"=>"Battle ball drop", "shake"=>"Battle ball shake",
       "caught"=>"Battle catch click", "breakout"=>"Battle ball shake",
       "flee"=>"Battle flee", "alert"=>"Exclaim",
-      "critical"=>"Battle critical catch throw", "shiny"=>"GUI sel decision"
+      "critical"=>"Battle critical catch throw", "shiny"=>"GUI sel decision",
+       "backstrike"=>"Battle critical catch throw", "calmed"=>"GUI sel decision"
     }.freeze
     PRESETS = {
       "pla_like" => {
@@ -20,21 +21,27 @@ module BifrostCapture
         "party"=>"pla_party", "lock"=>"pla_lock", "throw"=>"pla_throw",
         "hit"=>"pla_hit", "shake"=>"pla_shake", "caught"=>"pla_caught",
         "breakout"=>"pla_breakout", "flee"=>"pla_flee", "alert"=>"pla_alert",
-        "critical"=>"pla_critical", "shiny"=>"pla_shiny"
+        "critical"=>"pla_critical", "shiny"=>"pla_shiny",
+         "backstrike"=>"pla_backstrike", "calmed"=>"pla_calmed"
       },
       "za_like" => {
         "aim"=>"za_aim", "switch"=>"za_switch", "mode"=>"za_mode",
         "party"=>"za_party", "lock"=>"za_lock", "throw"=>"za_throw",
         "hit"=>"za_hit", "shake"=>"za_shake", "caught"=>"za_caught",
         "breakout"=>"za_breakout", "flee"=>"za_flee", "alert"=>"za_alert",
-        "critical"=>"za_critical", "shiny"=>"za_shiny"
+        "critical"=>"za_critical", "shiny"=>"za_shiny",
+         "backstrike"=>"za_backstrike", "calmed"=>"za_calmed"
       }
     }.freeze
     EXTENSIONS = %w[.ogg .wav .mp3].freeze
     # Real, redistributable CC0 recordings from Kenney's Interface Sounds.
     # These are NOT samples from Pokémon Legends: Z-A.
     REAL_FALLBACK = EVENTS.to_h { |event|
-      [event,event == "shiny" ? "real_critical" : "real_#{event}"]
+      [event, case event
+        when "shiny", "backstrike" then "real_critical"
+        when "calmed" then "real_party"
+        else "real_#{event}"
+        end]
     }.freeze
 
     # Earlier versions wrote synthetic ZA-named PCM WAVs on first launch.
