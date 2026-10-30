@@ -351,6 +351,8 @@ canvas.ui-lienzo-capa { position: absolute; left: 0; top: 0; pointer-events: non
 .ui-resolution-group{min-width:0;padding:14px 16px;border-bottom:1px solid var(--border);display:grid;gap:9px}
 .ui-resolution-group:last-child{border-bottom:0}
 .ui-resolution-group h4{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary);margin:0;font-weight:700}
+.ui-resolution-note{font-size:11px;line-height:1.45;color:var(--text-tertiary);margin:0}
+.ui-resolution-label{font-size:11px;color:var(--text-secondary,var(--text-tertiary))}
 .ui-canvas-menu .ui-res-preset{width:100%;min-width:0;max-width:100%;flex:auto}
 .ui-canvas-menu .ui-resolucion .ui-sel{height:34px;min-width:0;width:100%;max-width:none;padding:7px 9px;border-radius:6px}
 .ui-resolution-sizes {display:flex;align-items:center;gap:9px;min-width:0}
