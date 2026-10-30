@@ -1,4 +1,4 @@
-# Input Studio 1.0 · Pokémon Vermeil
+# Input Studio 1.0.1 · Pokémon Vermeil
 
 ## Qué aporta
 - Teclado y mando gestionados por acciones lógicas independientes de los ocho botones RGSS.
@@ -46,3 +46,13 @@ Para una escena Bifröst persistente, puede ofrecer `InputStudio.context = ...` 
 5. Cambiar de tamaño de ventana/alt-enter, abrir F1 y confirmar que no hay interferencia con la ventana del juego.
 6. En Maker Studio, editar action.json, guardar, reabrir: lectura idéntica.
 7. Verificar que F8 continúa haciendo capturas y F9 mantiene debug.
+
+## Correcciones 1.0.1 (30-10-2026)
+- `Input.dir4` vuelve a aceptar el argumento opcional `@moved_last_frame` que envía Game_Player y Vermeil Smooth Movement. `Input.dir8` también admite argumentos sin romper la API antigua.
+- Los controles de F1 pueden reasignar una tecla previamente ocupada: se muestra el conflicto y el jugador confirma con Enter/A o cancela con Esc/B. La confirmación libera esa tecla de las otras acciones en contextos compartidos; ningún override se elimina sin confirmación.
+- Captura SDL por cambios físicos de estado, con alternativa mediante `triggerex?` si `raw_key_states` o `raw_button_states` no están expuestas en el build utilizado.
+- Selector de categorías dinámico para no mostrar categorías vacías.
+- Guardado con mecanismo de respaldo en Windows, y recuperación de perfil en memoria si falla el guardado.
+- Comprobaciones lógicas aisladas de runtime y ventana en `DeveloperTests/input_studio_regression.rb`.
+
+**Nota:** estas verificaciones no son una prueba del motor gráfico ni de todos los plugins. Antes de publicar, probar movimiento, captura, carga y restauración de keybindings, F1 y tránsito mapa/menú/combate dentro de Game.exe.

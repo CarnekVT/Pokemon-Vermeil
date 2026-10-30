@@ -5,7 +5,7 @@ require "json"
 require "fileutils"
 
 module InputStudio
-  VERSION = "1.0.0"
+  VERSION = "1.0.1"
   ROOT = "Plugins/[VERMEIL] Input Studio"
   CONFIG = ROOT + "/actions.json"
   CONTEXTS = %w[global map menu battle bifrost]
@@ -138,31 +138,67 @@ module InputStudio
         bindings(other["id"], device).include?(key)
       end.map { |other| other["label"] }
     end
-    def assign(id, device, key, slot = 0)
-      return false unless definitions[id.to_s] && %w[keyboard gamepad].include?(device)
+    def conflicting_ids(id, device, key)
+      item = definitions[id.to_s]
+      return [] unless item
+      definitions.values.select do |other|
+        next false if other["id"] == id.to_s
+        next false unless other["context"] == item["context"] ||
+                          other["context"] == "global" || item["context"] == "global"
+        bindings(other["id"], device).include?(key)
+      end.map { |other| other["id"] }
+    end
+
+    # If force is true, remove the same physical key from other actions in the
+    # shared context. The overlay requests explicit confirmation first.
+    def assign(id, device, key, slot = 0, force = false)
+      id = id.to_s
+      return false unless definitions[id] && %w[keyboard gamepad].include?(device)
       return false unless valid_keys([key], device).include?(key)
-      return false unless conflicts(id, device, key).empty?
+      collisions = conflicting_ids(id, device, key)
+      if !collisions.empty? && !force
+        @status = "Conflicto: #{collisions.map { |other| definitions[other]['label'] }.join(', ')}"
+        return false
+      end
+      old = Marshal.load(Marshal.dump(profile))
+      collisions.each do |other|
+        profile[other] ||= {}
+        profile[other][device] = bindings(other, device).reject { |value| value == key }
+      end
       slot = slot.to_i.clamp(0, 3)
       current = bindings(id, device).dup
       current.delete(key)
       current[slot] = key
-      profile[id.to_s] ||= {}
-      profile[id.to_s][device] = current.compact.uniq
-      persist!
+      profile[id] ||= {}
+      profile[id][device] = current.compact.uniq.take(4)
+      return true if persist!
+      @profile = old
+      false
+    rescue StandardError => e
+      @profile = old if defined?(old) && old
+      @status = "No se pudo reasignar: #{e.message}"
+      false
     end
+
     def clear(id, device)
       return false unless definitions[id.to_s] && %w[keyboard gamepad].include?(device)
+      old = Marshal.load(Marshal.dump(profile))
       profile[id.to_s] ||= {}
       profile[id.to_s][device] = []
-      persist!
+      return true if persist!
+      @profile = old
+      false
     end
     def reset(id = nil)
+      old = Marshal.load(Marshal.dump(profile))
       if id
         profile.delete(id.to_s)
       else
         @profile = {}
       end
-      persist!
+      return true if persist!
+      @profile = old
+      false
     end
     def persist!
       FileUtils.mkdir_p(directory)
@@ -173,7 +209,22 @@ module InputStudio
         f.flush
         f.fsync
       end
-      File.rename(temp, target)
+      # The player profile can already exist on Windows. Preserve a backup if
+      # the platform does not allow rename() to replace the destination.
+      begin
+        File.rename(temp, target)
+      rescue Errno::EEXIST, Errno::EACCES
+        backup = target + ".bak"
+        File.delete(backup) if File.file?(backup)
+        File.rename(target, backup) if File.file?(target)
+        begin
+          File.rename(temp, target)
+          File.delete(backup) if File.file?(backup)
+        rescue StandardError
+          File.rename(backup, target) if File.file?(backup) && !File.file?(target)
+          raise
+        end
+      end
       @status = "Guardado en #{target}"
       true
     rescue StandardError => e
@@ -185,7 +236,13 @@ module InputStudio
       return @context_override if @context_override
       klass = (defined?($scene) && $scene) ? $scene.class.name.to_s : ""
       return "battle" if klass.match?(/battle/i)
-      return "map" if klass == "Scene_Map"
+      if klass == "Scene_Map"
+        if defined?($game_temp) && $game_temp &&
+           ($game_temp.in_menu || $game_temp.message_window_showing)
+          return "menu"
+        end
+        return "map"
+      end
       "menu"
     end
     def with_context(value)
@@ -257,7 +314,7 @@ module InputStudio
       y = ay if y == 0
       5 - 3 * y + x # RPG Maker keypad: 1..9, 5 means idle
     end
-    def dir4
+    def dir4(_moved_last_frame = nil)
       n = direction
       return 0 if n == 5
       return 4 if [1,4,7].include?(n)
@@ -265,7 +322,7 @@ module InputStudio
       return 8 if n == 8
       2
     end
-    def dir8
+    def dir8(*_args)
       n = direction
       n == 5 ? 0 : n
     end
@@ -308,8 +365,23 @@ module Input
       id = LEGACY_STUDIO_ACTIONS[button]
       id && InputStudio.active?(id) ? InputStudio.release?(id) : input_studio_native_release?(button)
     end
-    def dir4; InputStudio.context == "map" ? InputStudio.dir4 : input_studio_native_dir4; end
-    def dir8; InputStudio.context == "map" ? InputStudio.dir8 : input_studio_native_dir8; end
+    # Essentials' Game_Player and Smooth Movement pass @moved_last_frame to
+    # dir4, while the native mkxp API often receives zero arguments.
+    # Accept either form; route the optional value to the map controller.
+    def dir4(*args)
+      if InputStudio.context == "map"
+        InputStudio.dir4(*args)
+      else
+        input_studio_native_dir4(*args)
+      end
+    end
+    def dir8(*args)
+      if InputStudio.context == "map"
+        InputStudio.dir8(*args)
+      else
+        input_studio_native_dir8(*args)
+      end
+    end
     def update
       input_studio_native_update
       InputStudio.enqueue_overlay if !InputStudio.modal? && InputStudio.key_query("F1", :triggerex?)

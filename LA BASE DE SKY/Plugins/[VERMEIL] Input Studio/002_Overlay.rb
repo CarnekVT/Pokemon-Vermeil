@@ -13,6 +13,7 @@ module InputStudio
       @row = 0
       @offset = 0
       @capture = nil
+      @pending = nil
       @previous = []
       @message = "Flechas: navegar | Enter: cambiar | 2: segunda tecla"
       @open = true
@@ -34,6 +35,9 @@ module InputStudio
     end
     def rect(x, y, w, h, color)
       @sprite.bitmap.fill_rect(x.to_i, y.to_i, [w.to_i,1].max, [h.to_i,1].max, color)
+    end
+    def categories
+      ["Todos"] + InputStudio.definitions.values.map { |r| r["category"] }.uniq
     end
     def rows
       rows = InputStudio.definitions.values
@@ -66,7 +70,7 @@ module InputStudio
       draw_text(24, 70, w - 45, "Editor de controles  -  F1 para cerrar", 14, MUTED)
       left = [150, (w * 0.27).to_i].min
       rect(18, 99, left - 9, h - 166, Color.new(19, 29, 45))
-      CATEGORIES.each_with_index do |cat, index|
+      categories.each_with_index do |cat, index|
         y = 105 + index * 32
         next if y > h - 100
         if @category == cat
@@ -98,6 +102,9 @@ module InputStudio
         label = @capture[:slot] == 0 ? "PRINCIPAL" : "SECUNDARIA"
         draw_text(28, h - 57, w - 56, "Pulsa una tecla / botón para #{label} · Esc cancela", 14, ACCENT)
         draw_text(28, h - 33, w - 56, @message, 12, MUTED)
+      elsif @pending
+        draw_text(28, h - 57, w - 56, "¿Mover asignación? Enter/A: confirmar · Esc/B: cancelar", 13, ACCENT)
+        draw_text(28, h - 33, w - 56, @message, 11, MUTED)
       else
         draw_text(28, h - 57, w - 56, @message, 13, TEXT)
         draw_text(28, h - 33, w - 56, "Tab: dispositivo   |   Supr: quitar   |   R: restaurar   |   F1: cerrar", 11, MUTED)
@@ -115,31 +122,60 @@ module InputStudio
     def capture_start(slot)
       return unless current
       @capture = { :id=>current["id"], :slot=>slot }
-      @previous = raw
-      @message = "Esperando entrada..."
+      @pending = nil
+      @previous = raw.dup
+      @message = "Esperando entrada física; pulsa una tecla o botón nuevo."
     end
     def capture_tick
       states = raw
       indexed = @device == "keyboard" ? InputStudio::SCAN : InputStudio::PAD.each_with_index.to_h
-      # SDL controller raw positions are indexed in the same order as PAD.
-      discovered = indexed.find do |name, number|
+      # Read physical SDL state transitions, independent of the RGSS aliases.
+      discovered = indexed.find do |_name, number|
         states[number] && !@previous[number]
       end
-      @previous = states
+      # Some mkxp builds do not expose raw_*_states. In that case, use the
+      # physical extended trigger API instead of leaving capture nonfunctional.
+      if !discovered && states.empty?
+        discovered = indexed.find do |name, _number|
+          @device == "keyboard" ? trigger_key(name) : pad_trigger(name)
+        end
+      end
+      @previous = states.dup
       return unless discovered
       key = discovered[0]
-      if key == "ESCAPE" || key == "F1"
+      if key == "ESCAPE" || key == "F1" || (key == "BACK" && @device == "gamepad")
         @capture = nil
         @message = "Captura cancelada"
         return
       end
-      if InputStudio.assign(@capture[:id], @device, key, @capture[:slot])
+      id = @capture[:id]
+      slot = @capture[:slot]
+      @capture = nil
+      conflicts = InputStudio.conflicts(id, @device, key)
+      unless conflicts.empty?
+        @pending = { :id=>id, :device=>@device, :key=>key, :slot=>slot }
+        @message = "#{key} está en: #{conflicts.join(', ')}"
+        return
+      end
+      if InputStudio.assign(id, @device, key, slot)
         @message = "#{key} asignada y guardada"
-        @capture = nil
       else
-        conflicts = InputStudio.conflicts(@capture[:id], @device, key)
-        @message = conflicts.empty? ? InputStudio.status.to_s : "Conflicto: " + conflicts.first.to_s
-        @capture = nil
+        @message = InputStudio.status.to_s
+      end
+    end
+    def pending_tick
+      if trigger_key("ESCAPE") || trigger_key("F1") || pad_trigger("B") || pad_trigger("BACK")
+        @pending = nil
+        @message = "Reasignación cancelada"
+        return
+      end
+      return unless trigger_key("RETURN") || pad_trigger("A")
+      item = @pending
+      @pending = nil
+      if InputStudio.assign(item[:id], item[:device], item[:key], item[:slot], true)
+        @message = "#{item[:key]} reasignada; conflicto resuelto y perfil guardado"
+      else
+        @message = InputStudio.status.to_s
       end
     end
     def trigger_key(key)
@@ -153,8 +189,8 @@ module InputStudio
       clamp
     end
     def choose_category(delta)
-      index = CATEGORIES.index(@category) || 0
-      @category = CATEGORIES[(index + delta) % CATEGORIES.length]
+      index = categories.index(@category) || 0
+      @category = categories[(index + delta) % categories.length]
       @row = 0
       @offset = 0
       clamp
@@ -167,13 +203,13 @@ module InputStudio
       left = [150, (@width * 0.27).to_i].min
       if mx >= 23 && mx < left && my >= 105
         index = (my - 105) / 32
-        if index >= 0 && index < CATEGORIES.size
-          @category = CATEGORIES[index]
+        if index >= 0 && index < categories.size
+          @category = categories[index]
           @row = 0
           @offset = 0
           clamp
         end
-      elsif mx > left && my >= 128
+      elsif mx > left && my >= 128 && my < [@height - 99, 128 + available * 33].min
         index = (my - 128) / 33 + @offset
         if index >= 0 && index < rows.size
           @row = index
@@ -182,6 +218,7 @@ module InputStudio
       end
     end
     def normal_tick
+      return pending_tick if @pending
       if trigger_key("F1") || trigger_key("ESCAPE") || pad_trigger("BACK")
         @open = false
         return
