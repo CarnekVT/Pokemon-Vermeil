@@ -19,7 +19,7 @@ module BifrostCapture
     "mouse_wheel_select"=>"1",
     "mouse_right_mode"=>"1", "remember_selection"=>"1",
     "debug_input_guard"=>"1", "allow_shared_bindings"=>"0",
-    "ball_hold_mode_frames"=>"10",
+    # Mode change uses an independent key; holding selection never toggles.
     "hud_controls"=>"auto", "hud_controls_intro_frames"=>"150",
     "capture_enabled"=>"1", "battle_enabled"=>"1", "restricted_species"=>"1",
     "encounter_mode"=>"classic", "spawn_chance"=>"50",

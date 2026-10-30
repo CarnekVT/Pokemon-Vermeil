@@ -1,4 +1,4 @@
-# Bifröst Capture 0.9.4 — guía contextual dinámica y controles sin mouse
+# Bifröst Capture 0.9.5 — selección Ball/Team sin cambios de modo accidentales
 
 **Pokémon Vermeil · Essentials 21.1 · rama `feature/bifrost-overworld-capture-studio`**
 
@@ -17,7 +17,6 @@ todavía no validada dentro de mkxp con Visual 2.5D HD.
 | Alternar Ball/Team | **E** | Cambio inmediato sin mantener otra tecla |
 | Siguiente Ball/Pokémon | **S / JUMPDOWN** | Recorre el inventario o equipo seleccionado |
 | Anterior Ball/Pokémon | **Mayús + S** | Selección inversa sin activar cambio de modo |
-| Alternar modo alternativo | **Mantener S** | Cambio de modo después de 10 fotogramas |
 | Ciclo con mouse | **Rueda** | Selección anterior/siguiente |
 | Alternar con mouse | **Clic derecho** | Cambiar Ball/Team |
 | Lanzamiento directo | **C / USE** | Lanzar sin soltar A |
@@ -25,7 +24,8 @@ todavía no validada dentro de mkxp con Visual 2.5D HD.
 
 **Teclado sin ratón:** mantener A, alternar Pokémon visibles con Tab,
 cambiar Ball/Team con E, escoger con S (Mayús+S para retroceder),
-y soltar A o pulsar C para lanzar. Cuando se selecciona un objetivo
+y soltar A o pulsar C para lanzar. Mantener S no cambia el modo,
+incluso si se deja pulsada durante varios segundos. Cuando se selecciona un objetivo
 bloqueado o fuera de rango, la mira lo indica; no se ignora en silencio.
 El autoapuntado inicial conserva prioridad de objetivos alcanzables.
 
@@ -44,8 +44,11 @@ Q / AUX1 conserva Turbo, W / AUX2 el debug de pasabilidades,
 Shift/Z la carrera, F9 el debug y las flechas el movimiento.
 El nuevo control no consume las direcciones, no introduce
 `Graphics.update` ni `Input.update` adicionales y es compatible con
-`aim_mouse=0`. El sistema anterior de mantener S se conserva;
-Mayús+S nunca se interpreta como una pulsación prolongada para alternar.
+`aim_mouse=0`. Mantener S nunca alterna Ball/Team; cada pulsación de S avanza una
+selección, y Mayús+S retrocede. E (o clic derecho) es el único
+cambio de modo predeterminado. El antiguo parámetro
+`ball_hold_mode_frames` deja de ser un ajuste editable y, si permanece
+en archivos INI heredados, no afecta a los controles.
 El mouse continúa siendo opcional.
 
 

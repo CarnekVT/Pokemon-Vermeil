@@ -19,14 +19,15 @@ module Spriteset_Map
 end
 module Input
   AUX2=:aux2; AUX1=:aux1; ACTION=:action; SPECIAL=:special
-  JUMPUP=:jumpup; JUMPDOWN=:jumpdown; F9=:f9
+  JUMPUP=:jumpup; JUMPDOWN=:jumpdown; F9=:f9; SHIFT=:shift
   BACK=:back; USE=:use; MOUSELEFT=:mouseleft; MOUSERIGHT=:mouseright
-  @pressed={};@triggered={}
+  @pressed={};@triggered={};@physical={}
   def self.press?(key); !!@pressed[key]; end
   def self.trigger?(key); !!@triggered[key]; end
+  def self.triggerex?(key); !!@physical[key]; end
   def self.scroll_v; @scroll || 0; end
-  def self.configure(pressed={},triggered={},scroll=0)
-    @pressed=pressed;@triggered=triggered;@scroll=scroll
+  def self.configure(pressed={},triggered={},scroll=0,physical={})
+    @pressed=pressed;@triggered=triggered;@scroll=scroll;@physical=physical
   end
 end
 class FakeHUD
@@ -48,6 +49,7 @@ module BifrostCapture
        "aim_mouse"=>"0","capture_enabled"=>"1","battle_enabled"=>"1",
        "hotkey"=>"jumpup","ball_key"=>"jumpdown",
        "mode_key"=>"none","target_key"=>"none",
+       "keyboard_mode_key"=>"e","keyboard_target_key"=>"tab",
        "contextual_mode_toggle"=>"0","mode_double_tap_frames"=>"16",
        "mouse_wheel_select"=>"1",
        "mouse_right_mode"=>"1","remember_selection"=>"1",
@@ -128,7 +130,7 @@ class BifrostLiveTest < Minitest::Test
     assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
   end
 
-  def test_short_s_hold_switches_mode_without_stealing_w_debug
+  def test_holding_s_for_many_frames_keeps_ball_mode_and_debug_unchanged
     able_mon=Object.new
     def able_mon.able?; true; end
     $player.party=[able_mon]
@@ -137,12 +139,19 @@ class BifrostLiveTest < Minitest::Test
     Input.configure({Input::JUMPUP=>true},{Input::AUX2=>true})
     BifrostCapture::LiveAim.update
     assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
-    12.times do |i|
+    90.times do |i|
       Input.configure({Input::JUMPUP=>true,Input::JUMPDOWN=>true},
         i == 0 ? {Input::JUMPDOWN=>true} : {})
       BifrostCapture::LiveAim.update
     end
-    assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
+    assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
+    assert_equal 1,BifrostCapture::LiveAim.session[:ball_index]
+    Input.configure({Input::JUMPUP=>true},{})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
+    assert_equal 0,BifrostCapture::LiveAim.session[:ball_index]
     Input.configure({Input::JUMPUP=>true},{Input::SPECIAL=>true})
     BifrostCapture::LiveAim.update
     $scene.update_input
@@ -161,6 +170,58 @@ class BifrostLiveTest < Minitest::Test
     end
     assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
     assert_equal 0,BifrostCapture::LiveAim.session[:ball_index]
+  end
+
+  def test_shift_s_cycles_backward_without_toggling_mode
+    able_mon=Object.new
+    def able_mon.able?; true; end
+    $player.party=[able_mon]
+    BifrostCapture.test_balls=[
+      [:POKEBALL,10],[:GREATBALL,10],[:ULTRABALL,10]]
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true,Input::SHIFT=>true},
+                    {Input::JUMPDOWN=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal 2,BifrostCapture::LiveAim.session[:ball_index]
+    assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
+  end
+
+  def test_e_changes_ball_team_without_mouse_and_s_only_changes_member
+    party=Array.new(2) do
+      mon=Object.new
+      def mon.able?; true; end
+      mon
+    end
+    $player.party=party
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{},0,{:E=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
+    45.times do |i|
+      Input.configure({Input::JUMPUP=>true,Input::JUMPDOWN=>true},
+                      i==0 ? {Input::JUMPDOWN=>true} : {})
+      BifrostCapture::LiveAim.update
+    end
+    assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
+    assert_equal 1,BifrostCapture::LiveAim.session[:party_index]
+    Input.configure({Input::JUMPUP=>true},{},0,{:E=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
+  end
+
+  def test_legacy_duplicate_s_mode_binding_cannot_toggle_mode
+    able_mon=Object.new
+    def able_mon.able?; true; end
+    $player.party=[able_mon]
+    BifrostCapture.test_options={"mode_key"=>"jumpdown"}
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
+    BifrostCapture::LiveAim.update
+    Input.configure({Input::JUMPUP=>true},{Input::JUMPDOWN=>true})
+    BifrostCapture::LiveAim.update
+    assert_equal :ball,BifrostCapture::LiveAim.session[:mode]
+    assert_equal 1,BifrostCapture::LiveAim.session[:ball_index]
   end
 
   def test_mouse_wheel_changes_ball_in_both_directions
@@ -207,11 +268,8 @@ class BifrostLiveTest < Minitest::Test
     $player.party=party
     Input.configure({Input::JUMPUP=>true},{Input::JUMPUP=>true})
     BifrostCapture::LiveAim.update
-    12.times do |i|
-      Input.configure({Input::JUMPUP=>true,Input::JUMPDOWN=>true},
-        i == 0 ? {Input::JUMPDOWN=>true} : {})
-      BifrostCapture::LiveAim.update
-    end
+    Input.configure({Input::JUMPUP=>true},{},0,{:E=>true})
+    BifrostCapture::LiveAim.update
     assert_equal :battle,BifrostCapture::LiveAim.session[:mode]
     Input.configure({Input::JUMPUP=>true},{})
     BifrostCapture::LiveAim.update
