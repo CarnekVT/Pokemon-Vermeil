@@ -5,6 +5,17 @@ require_relative "../LA BASE DE SKY/Plugins/[VERMEIL] Bifrost Capture/009_Audio"
 
 def pbSEPlay(name); $bifrost_audio_played=name; end
 
+module Input
+  JUMPUP = :jumpup
+  JUMPDOWN = :jumpdown
+  SPECIAL = :special
+  ACTION = :action
+  AUX1 = :aux1
+  AUX2 = :aux2
+  USE = :use
+  BACK = :back
+end
+
 class BifrostCoreTest < Minitest::Test
   def setup
     BifrostCapture.reload!
@@ -40,6 +51,21 @@ class BifrostCoreTest < Minitest::Test
                     cfg.merge("audio_profile"=>"muted"))
     refute BifrostCapture::Audio.play(:throw,
                     cfg.merge("sfx_throw"=>"../unsafe_file"))
+  end
+
+  def test_reserved_actions_never_leak_into_capture_by_default
+    cfg=BifrostCapture::DEFAULTS
+    assert_equal "none",cfg["target_key"]
+    assert_equal "none",cfg["mode_key"]
+    assert_equal :jumpup,BifrostCapture.capture_action(cfg,"hotkey")
+    assert_equal :jumpdown,BifrostCapture.capture_action(cfg,"ball_key")
+    %w[action special aux1 aux2 use back].each do |reserved|
+      candidate=cfg.merge("target_key"=>reserved)
+      assert_nil BifrostCapture.capture_action(candidate,"target_key"),
+        "Capture must not hijack built-in map action #{reserved}"
+    end
+    assert_nil BifrostCapture.capture_action(cfg.merge("ball_key"=>"jumpup"),
+                                               "ball_key")
   end
 
   def test_project_defaults_keep_exclusive_bifrost
